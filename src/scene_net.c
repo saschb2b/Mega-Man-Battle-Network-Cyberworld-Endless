@@ -11,13 +11,14 @@
 #include "gfx.h"
 #include "loot.h"
 #include "net.h"
+#include "net_floor.h"
 #include "platform.h"
 #include "run.h"
 #include "save.h"
 #include "ui.h"
 
-#define TILE_W 32
-#define TILE_H 16
+#define TILE_W 64   /* the original's panels */
+#define TILE_H 32
 #define SLAB 6
 #define MM_SPRITE 55    /* overworld MegaMan in the NPC sprite list */
 
@@ -1003,21 +1004,34 @@ static void draw_world(void) {
 		tile_tex[layer.biome][0] = build_tile(layer.biome, false);
 		tile_tex[layer.biome][1] = build_tile(layer.biome, true);
 	}
-	/* Tiles back to front along the diagonals. */
+	/* Panels back to front along the diagonals. */
+	bool learned = floor_ready(layer.biome);
 	for (int s = 0; s < MAP_W + MAP_H; ++s) {
 		for (int y = 0; y < MAP_H; ++y) {
 			int x = s - y;
 			if (x < 0 || x >= MAP_W || layer.cell[y][x] != C_PATH) continue;
 			int sx, sy;
-			iso((float)x, (float)y, &sx, &sy);
-			if (sx < -TILE_W || sx > P.w + TILE_W || sy < -TILE_H * 2 || sy > P.h + TILE_H) continue;
-			/* iso() of a cell's origin is the diamond's top corner */
-			SDL_Rect d = { sx - TILE_W / 2, sy, TILE_W, TILE_H + SLAB };
-			SDL_Texture *t = tile_tex[layer.biome][layer.corrupt[y][x] ? 1 : 0];
+			iso((float)x + 0.5f, (float)y + 0.5f, &sx, &sy);
+			if (sx < -80 || sx > P.w + 80 || sy < -64 || sy > P.h + 80) continue;
+			SDL_Color mod = WHITE;
 			if (layer.corrupt[y][x]) {
 				int pulse = 200 + (int)(55 * sinf((float)N.tick * 0.08f + (float)(x + y)));
-				SDL_SetTextureColorMod(t, 255, (Uint8)pulse, (Uint8)pulse);
+				mod = rgba(255, pulse, pulse, 255);
 			}
+			if (learned) {
+				/* neighbours in NB_* order: the cell grid's axes run down-right (x) and down-left (y) */
+				static const int off[8][2] = { { -1, 0 }, { -1, -1 }, { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 1 } };
+				unsigned nb = 0;
+				for (int k = 0; k < 8; ++k) {
+					int nx = x + off[k][0], ny = y + off[k][1];
+					if (nx >= 0 && ny >= 0 && nx < MAP_W && ny < MAP_H && layer.cell[ny][nx] == C_PATH) nb |= 1u << k;
+				}
+				floor_draw(layer.biome, sx, sy, nb, mod);
+				continue;
+			}
+			SDL_Rect d = { sx - TILE_W / 2, sy - TILE_H / 2, TILE_W, TILE_H + SLAB };
+			SDL_Texture *t = tile_tex[layer.biome][layer.corrupt[y][x] ? 1 : 0];
+			SDL_SetTextureColorMod(t, mod.r, mod.g, mod.b);
 			SDL_RenderCopy(P.renderer, t, NULL, &d);
 		}
 	}
