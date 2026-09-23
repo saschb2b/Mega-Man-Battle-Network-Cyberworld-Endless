@@ -3,6 +3,7 @@
 #define AUDIO_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef enum {
 	SFX_CURSOR, SFX_SELECT, SFX_CONFIRM, SFX_CANCEL, SFX_ERROR,
@@ -20,6 +21,10 @@ typedef enum {
 typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_COUNT } Music;
 
 bool audio_init(void);
+/* Replaces the engine's own sound with another source (48 kHz stereo frames);
+ * NULL returns to it. */
+typedef int (*AudioSource)(int16_t *out, int frames);
+void audio_external(AudioSource src);
 /* Without a device but with CYBERWORLD_AUDIO_DUMP, renders one frame of sound. */
 void audio_frame(void);
 bool audio_offline(void);

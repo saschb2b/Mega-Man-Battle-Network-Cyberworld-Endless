@@ -22,6 +22,7 @@ extern const Scene scene_gallery;
 extern const Scene scene_battle;
 extern const Scene scene_net;
 extern const Scene scene_gameover;
+extern const Scene scene_emu;     /* the game itself, on the embedded core */
 
 void net_reset(void);
 /* Resume the saved layer instead of generating the next one. */

@@ -144,7 +144,7 @@ void debug_rewards(int busting, RewardOption *opts, int *n) {
 }
 
 static const Scene *scene_by_name(const char *n) {
-	const Scene *all[] = { &scene_title, &scene_gallery, &scene_net, &scene_gameover };
+	const Scene *all[] = { &scene_title, &scene_gallery, &scene_net, &scene_gameover, &scene_emu };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
 	return NULL;

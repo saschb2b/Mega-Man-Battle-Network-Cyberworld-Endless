@@ -17,7 +17,11 @@ SRCS := $(wildcard src/*/*.c)
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 CFLAGS += -std=c11 -O2 -g -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(shell $(PKGCONF) --cflags sdl2)
-LDLIBS += $(shell $(PKGCONF) --libs sdl2) -lm
+# the embedded GBA core, built into the image by docker/mgba.sh
+MGBA_TARGET := $(if $(filter aarch64,$(TARGET)),aarch64,host)
+MGBA := /opt/mgba/$(MGBA_TARGET)
+CFLAGS += -I$(MGBA)/include
+LDLIBS += $(shell $(PKGCONF) --libs sdl2) $(MGBA)/lib/libmgba.a -lpthread -lm
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 LDLIBS += -fsanitize=address,undefined

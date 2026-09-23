@@ -494,9 +494,18 @@ static void render(int16_t *o, int frames) {
 static FILE *dump; /* CYBERWORLD_AUDIO_DUMP: raw 48 kHz s16 stereo of everything played */
 static bool offline; /* no device: audio_frame() renders the dump a frame at a time */
 
+static AudioSource external; /* the embedded game, when it plays */
+
+void audio_external(AudioSource src) { external = src; }
+
+static void mix_out(int16_t *out, int frames) {
+	if (external) external(out, frames);
+	else render(out, frames);
+}
+
 static void callback(void *ud, Uint8 *stream, int len) {
 	(void)ud;
-	render((int16_t *)stream, len / 4);
+	mix_out((int16_t *)stream, len / 4);
 	if (dump) fwrite(stream, 1, (size_t)len, dump);
 }
 
@@ -550,7 +559,7 @@ bool audio_offline(void) { return offline; }
 void audio_frame(void) {
 	if (!offline) return;
 	static int16_t buf[OUT_RATE / 60 * 2];
-	render(buf, OUT_RATE / 60);
+	mix_out(buf, OUT_RATE / 60);
 	fwrite(buf, sizeof buf, 1, dump);
 }
 
