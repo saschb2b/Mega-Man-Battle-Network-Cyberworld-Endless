@@ -15,54 +15,19 @@ static const RomLayout layouts[] = {
 		.sprite_lists = 0x031CC4,
 		.chip_data = 0x021DA8,
 		.chip_names = { 0x6E88D0, 0x6E92D8 },
-		.enemy_names = 0x6EE400,
-		.navi_names = 0x7F1D8C,
 		.enemy_ids = 0x0182C4,
-		.enemy_stats = 0x00F260,
-		.panel_tiles = 0x6DBB24,
-		.panel_pals = { 0x6DE87C, 0x6DE8FC, 0x6DE65C, 0x6DE45C, 0x6DE95C, 0x6DE8DC, 0x6DE71C, 0x6DE51C },
-		.battle_bg_table = 0x082058,
-		.battle_bg_anims = 0x0822E0,
-		.chip_icon_pal = 0x6E3880,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x6BCBCC, 0x02F5F0, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
-		.net_maps = 0x0329C4,
 		.net_area = {
-			{ 0x90, 0, 62, 1, 0x0018, 0x072B34, 0x072A90, 1 },  /* Central Area 1 */
-			{ 0x91, 0, 1, 6, 0x0040, 0x0766D0, 0x076628, 1 },   /* Seaside Area 1 */
-			{ 0x94, 1, 38, 7, 0x1000, 0x07BBE4, 0x07BB10, 1 },  /* Sky Area 2 */
-			{ 0x92, 0, 1, 1, 0x0010, 0x078FD4, 0x078F34, 1 },   /* Green Area 1 */
-			{ 0x96, 1, 26, 5, 0x1000, 0x07FF0C, 0x07FE68, 2 },  /* Graveyard */
-			{ 0x95, 0, 52, 5, 0x0001, 0x07E11C, 0x07E020, 0, true },  /* Undernet 1 */
-			{ 0x95, 1, 26, 5, 0x1000, 0x07E11C, 0x07E050, 0, true },  /* Undernet Zero */
-			{ 0x93, 1, 58, 8, 0x0004, 0x07A5B8, 0x07A538, 0, true },  /* Underground 2 */
+			{ 0x90, 0, 0x0018 },        /* Central Area 1 */
+			{ 0x91, 0, 0x0040 },        /* Seaside Area 1 */
+			{ 0x94, 1, 0x1000 },        /* Sky Area 2 */
+			{ 0x92, 0, 0x0010 },        /* Green Area 1 */
+			{ 0x96, 1, 0x1000 },        /* Graveyard */
+			{ 0x95, 0, 0x0001, true },  /* Undernet 1 */
+			{ 0x95, 1, 0x1000, true },  /* Undernet Zero */
+			{ 0x93, 1, 0x0004, true },  /* Underground 2 */
 		},
 		.song_table = 0x159F48,
-		.chip_desc = { 0x6E983C, 0 },
-		.ui = {
-			.hp_digits = 0x6DF5BC, .hp_pal = 0x6DFBFC,
-			.gauge = 0x6E2820, .gauge_pal = 0x6DFBFC,
-			.window_pal = 0x6E3800,
-			.code_letters = 0x6E0E1C, .grid_letters = 0x6E38A0,
-			.power_digits = 0x6E20A0,
-			.elem_icons = 0x6E151C,
-			.icon_pal = 0x72AF30, .icon_dim_pal = 0x72AEF0, .icon_obj_pal = 0x72AF10,
-			.icon_elem_colors = 0x6E1A9C,
-			.enemy_hp_digits = 0x6DEA3C, .enemy_hp_pal = 0x6A3C8C,
-			.emotion = 0x72B750, .emotion_face = 0x72AF50, .emotion_pal = 0x72D050,
-			.cursor = 0x6E3540, .cursor_pal = 0x6E3680, .emblem = 0x6F3770,
-			.result_digits = 0x7307B0, .result_pal = 0x730750,
-			.chat_font = 0x6A3CAC, .chat_pal = 0x6A3C8C, .next_arrow = 0x6A278C,
-			.card_sprite = 7,
-			.list_elem_icons = 0x6E1B20, .list_elem_pal = 0x6E2360, .list_code_pal = 0x6C7AA0, .list_icon_pal = 0x72AED0,
-			.list_arrow = 0x82000084, .list_arrow_pal = 0x6C7CB8,
-			.hp_hurt_pal = 0x6DFC3C, .panel_warn_pal = 0x6DE5BC, .cursor_wide = 0x6E3560,
-			.ok_art = 0x7204F0, .ok_art_pal = 0x723730, .press_a = 0x730AF0,
-			.box_corner = 0x6BCB4C, .box_edge = 0x6BCAAC, .box_side = 0x6BCB6C, .box_side_top = 0x6BCBAC,
-			.box_fill = 0x02A6FC, .box_pal = 0x6BCBCC, .box_arrow = 0x6A270C,
-			.delete_sprite = 155, .zenny_art = 0x730D90, .zenny_pal = 0x7312D0, .name_tab = 0x6E4020,
-			.charge_sprite = 162, .charge_full_pal = 0x3AB1B0, .pause_text = 0x6E40A0,
-			.buster_sprite = 30,
-		},
 	},
 };
 
@@ -163,29 +128,6 @@ void rom_text(uint32_t archive, int index, char *out, size_t outlen) {
 		const char *g = glyph(c);
 		for (; *g && o + 1 < outlen; ++g) out[o++] = *g;
 	}
-	out[o] = 0;
-}
-
-void rom_script_text(uint32_t archive, int index, char *out, size_t outlen) {
-	uint32_t p = archive + rom_u16(archive + 2 * index);
-	size_t o = 0;
-	for (int i = 0; i < 160 && o + 1 < outlen; ++i) {
-		uint8_t c = R.data[p];
-		if (c == 0xE6) break;
-		if (c == 0xE9) { out[o++] = '\n'; ++p; continue; }
-		if (c >= 0xE7) {
-			/* script commands and their argument bytes */
-			static const uint8_t args[] = { [0xE7 - 0xE7] = 1, [0xE8 - 0xE7] = 3, [0xEA - 0xE7] = 3, [0xEB - 0xE7] = 0,
-				[0xEC - 0xE7] = 2, [0xED - 0xE7] = 2, [0xEE - 0xE7] = 3, [0xF0 - 0xE7] = 2, [0xF1 - 0xE7] = 2 };
-			p += 1 + (c - 0xE7 < (int)sizeof args ? args[c - 0xE7] : 0);
-			continue;
-		}
-		const char *g = glyph(c);
-		for (; *g && o + 1 < outlen; ++g) out[o++] = *g;
-		++p;
-	}
-	/* trim leading/trailing breaks */
-	while (o && out[o - 1] == '\n') --o;
 	out[o] = 0;
 }
 

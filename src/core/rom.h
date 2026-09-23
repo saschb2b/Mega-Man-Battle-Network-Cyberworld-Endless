@@ -18,15 +18,7 @@ typedef struct {
 	uint32_t sprite_lists;    /* SpritePointersList: 10 category tables */
 	uint32_t chip_data;       /* 0x2C-byte chip records */
 	uint32_t chip_names[2];   /* text archives: ids 0-255, 256+ */
-	uint32_t enemy_names;     /* text archive indexed by enemy id */
-	uint32_t navi_names;      /* text archive indexed by navi */
 	uint32_t enemy_ids;       /* (version, actor type, ai) triples */
-	uint32_t enemy_stats;     /* per actor type -> per ai -> 6-byte records */
-	uint32_t panel_tiles;     /* LZ77 battle panel tileset */
-	uint32_t panel_pals[8];
-	uint32_t battle_bg_table; /* BGAnimData pointer per battle background id */
-	uint32_t battle_bg_anims; /* GFX animation list pointer per id */
-	uint32_t chip_icon_pal;
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */
@@ -39,50 +31,12 @@ typedef struct {
 		uint32_t copy_pal;
 		uint32_t arrow, arrow_pal; /* menu cursor: 3 frames of 16x16 */
 	} title;
-	uint32_t net_maps;        /* internet map descriptors per group (group 0x80 first) */
 	struct {                  /* the original area each net biome borrows (docs/ROM_DATA.md) */
 		uint8_t group, number;   /* map whose floor panels are learned */
-		uint8_t ox, oy;          /* a panel centre in the rendered map: the 64x32 lattice */
 		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn */
-		uint32_t bg, bg_anims;   /* BGAnimData record and GFX animation list of its background */
-		int8_t scroll;           /* 0 still, 1 right 1/2 and down 1/4, 2 left 1/16 (pixels a frame) */
 		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
 	} net_area[8];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
-	uint32_t chip_desc[2];     /* description archives, 3 short lines each */
-	struct {                    /* battle UI tiles and palettes */
-		uint32_t hp_digits, hp_pal;          /* 8x16 digits, 10 = blank, 11 = box edge */
-		uint32_t gauge, gauge_pal;           /* caps, body, label and 1-pixel fill steps */
-		uint32_t window_pal;                 /* Custom window text */
-		uint32_t code_letters, grid_letters; /* 8x16 and 16x8, A-Z then '*', 27 = blank */
-		uint32_t power_digits;
-		uint32_t elem_icons;                 /* 16x16 per chip element */
-		uint32_t icon_pal, icon_dim_pal, icon_obj_pal;
-		uint32_t icon_elem_colors;           /* colours 10-12 of the icon palette */
-		uint32_t enemy_hp_digits, enemy_hp_pal;
-		uint32_t emotion, emotion_face, emotion_pal;
-		uint32_t cursor, cursor_pal;
-		uint32_t emblem;                     /* 16x16 above the picked column, cursor palette */
-		uint32_t result_digits, result_pal;  /* 8x16, 11 = S rank */
-		uint32_t chat_font, chat_pal;        /* 8x16 linear 4bpp cells by character code */
-		uint32_t next_arrow;                 /* 16x16, chat palette */
-		uint32_t card_sprite;                /* GUI sprite index of the chip card */
-		uint32_t list_elem_icons, list_elem_pal, list_code_pal, list_icon_pal;
-		uint32_t list_arrow, list_arrow_pal;  /* arrow tiles: LZ block ref (see hud_layout.inc) */
-		/* battle flow (docs/BATTLE_FLOW.md) */
-		uint32_t hp_hurt_pal;                /* HP box while MegaMan takes damage */
-		uint32_t panel_warn_pal;             /* panel an attack is about to hit */
-		uint32_t cursor_wide;                /* second frame of the pulsing Custom cursor */
-		uint32_t ok_art, ok_art_pal;         /* 56x48 "CHIP DATA TRANSMISSION" shown on OK */
-		uint32_t press_a;                    /* 10 tiles "PRESS A BUTTON", result palette */
-		uint32_t box_corner, box_edge, box_side, box_side_top, box_fill, box_pal, box_arrow;
-		uint32_t delete_sprite;              /* GUI sprite of the deletion explosion */
-		uint32_t zenny_art, zenny_pal;       /* 56x48 reward picture for Zenny */
-		uint32_t name_tab;                   /* enemy name tab: end cap, then fill (2 tiles each) */
-		uint32_t charge_sprite, charge_full_pal; /* buster charge lines (GUI sprite) and their charged palette */
-		uint32_t pause_text;                 /* PAUSE: 4x2 tiles then a 1x2 column, enemy HP palette */
-		uint32_t buster_sprite;              /* GUI sprite of the arm buster drawn over MegaMan's shooting pose */
-	} ui;
 } RomLayout;
 
 typedef struct {
@@ -110,8 +64,6 @@ uint8_t *lz77_decompress(const uint8_t *src, size_t avail, size_t *out_len);
 
 /* Decode a text-archive entry into ASCII using the game's character table. */
 void rom_text(uint32_t archive, int index, char *out, size_t outlen);
-/* Like rom_text, but keeps line breaks as '\n' and skips script commands. */
-void rom_script_text(uint32_t archive, int index, char *out, size_t outlen);
 
 void sha1_hex(const uint8_t *data, size_t len, char out[41]);
 

@@ -563,12 +563,6 @@ void audio_frame(void) {
 	fwrite(buf, sizeof buf, 1, dump);
 }
 
-void audio_shutdown(void) {
-	if (dump) fflush(dump);
-	if (dev) SDL_CloseAudioDevice(dev);
-	dev = 0;
-}
-
 static void lock(void) { if (dev) SDL_LockAudioDevice(dev); }
 static void unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
 

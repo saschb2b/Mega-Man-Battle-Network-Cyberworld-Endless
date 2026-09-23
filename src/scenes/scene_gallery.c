@@ -41,10 +41,7 @@ static void update(void) {
 }
 
 static void draw(void) {
-	battle_bg_draw(0x07, (int)P.frame);
-	for (int x = 0; x < 6; ++x)
-		for (int y = 0; y < 3; ++y)
-			panel_draw(2, y, x >= 3, P.core_x + x * 40, P.core_y + 72 + y * 24);
+	fill_rect(0, 0, P.w, P.h, rgba(40, 40, 60, 255));
 	anim_draw(&a, P.core_x + 120, P.core_y + 120, false, pal, 0);
 	text_drawf(4, 2, WHITE, TEXT_LEFT, "cat %d  sprite %d  anim %d/%d  pal %d", cat, idx, anim,
 		sprite_anim_count(a.spr), pal);

@@ -28,7 +28,6 @@ void audio_external(AudioSource src);
 /* Without a device but with CYBERWORLD_AUDIO_DUMP, renders one frame of sound. */
 void audio_frame(void);
 bool audio_offline(void);
-void audio_shutdown(void);
 void audio_sfx(Sfx s);
 void audio_music(Music m);
 void audio_set_volume(int music, int sfx); /* 0-10 */
