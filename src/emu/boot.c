@@ -49,8 +49,8 @@ void emu_warp(int group, int number, int x, int y, int facing) {
 	put32(stub + 40, BN6_WARP);
 	put32(stub + 44, BN6_ENTER_MAP_ON_WARP);
 	emu_write(WARP_STUB, stub, sizeof stub);
-	/* borrow the overworld hook until the stub has run (the game skips it
-	 * on some frames): ldr r0,[pc]; bx r0; .word stub+1 */
+	/* borrow the game-state update until the stub has run: ldr r0,[pc];
+	 * bx r0; .word stub+1 */
 	uint8_t saved[8], jump[8] = { 0x00, 0x48, 0x00, 0x47 };
 	put32(jump + 4, WARP_STUB + 1);
 	for (int i = 0; i < 8; ++i) saved[i] = emu_read8(BN6_OW_HOOK + (uint32_t)i);

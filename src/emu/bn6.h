@@ -31,7 +31,7 @@
 
 /* ROM code */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */
-#define BN6_OW_HOOK           0x08005A8Cu /* a per-frame overworld routine the engine borrows for a frame */
+#define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: the engine borrows it for a frame */
 
 
 /* Main modes (main_subsystemJumpTable) and game-state sub-modes */
