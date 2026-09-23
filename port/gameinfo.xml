@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<gameList>
+  <game>
+    <path>./Cyberworld Endless.sh</path>
+    <name>Mega Man Battle Network: Cyberworld Endless</name>
+    <desc>A roguelike built on Mega Man Battle Network 6. Jack into an endlessly generated net, battle viruses in real-time grid combat, and face a Navi every third area. Requires your own Mega Man Battle Network 6: Cybeast Gregar (USA) ROM in ports/cyberworld/rom.</desc>
+    <genre>Action RPG</genre>
+    <players>1</players>
+  </game>
+</gameList>
