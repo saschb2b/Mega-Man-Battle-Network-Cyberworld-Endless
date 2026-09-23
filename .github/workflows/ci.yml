@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t cyberworld-build docker
+      - name: Unit tests
+        run: docker run --rm -v "$PWD:/src" -w /src cyberworld-build make test
+      - name: Host build
+        run: docker run --rm -v "$PWD:/src" -w /src cyberworld-build make TARGET=host -j4
+      - name: Device build
+        run: docker run --rm -v "$PWD:/src" -w /src cyberworld-build make TARGET=aarch64 -j4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-aarch64
+          path: build/aarch64/cyberworld.aarch64

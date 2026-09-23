@@ -1,0 +1,15 @@
+# Build output and local caches
+/build/
+/.build/
+__pycache__/
+*.pyc
+tools/romlab/romlab.bin
+
+# Never commit game data or saves
+*.gba
+*.sav
+*.srm
+*.ss
+*.dat
+rom/
+savedata/
