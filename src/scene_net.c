@@ -785,7 +785,7 @@ static int pause_item;
 
 static void pause_open(void) {
 	PetInfo info = { run.hp, run.max_hp, run.zenny, run.bugfrags, "" };
-	snprintf(info.place, sizeof info.place, "%.31s", N.banner_text);
+	snprintf(info.place, sizeof info.place, "%.24s B%d", N.banner_text, run.depth);
 	ui_pet(&info, pause_item, pause_done);
 }
 
@@ -1089,28 +1089,22 @@ static void draw_map(void) {
 	text_draw(P.w / 2, 0, N.banner_text, WHITE, TEXT_CENTER);
 }
 
+/* The original's net HUD: the HP box at the top left and the area's name
+ * at the bottom right in the battle font ("CentralArea1"). */
 static void draw_hud(void) {
 	int x = P.core_x, y = P.core_y;
-	fill_rect(x + 2, y + 2, 62, 14, rgba(24, 40, 72, 230));
-	draw_rect(x + 2, y + 2, 62, 14, rgba(160, 200, 255, 255));
-	text_drawf(x + 5, y + 1, run.hp * 4 < run.max_hp ? rgba(255, 120, 90, 255) : WHITE, TEXT_LEFT, "%d/%d", run.hp, run.max_hp);
-	char z[24];
-	snprintf(z, sizeof z, "%dz", run.zenny);
-	int zw = text_width(z) + 8;
-	fill_rect(x + CORE_W - zw - 2, y + 2, zw, 14, rgba(24, 40, 72, 230));
-	text_draw(x + CORE_W - 6, y + 1, z, rgba(255, 230, 90, 255), TEXT_RIGHT);
-	/* Virus signal: how close the next encounter feels. */
-	int cx = (int)N.px, cy = (int)N.py;
-	int danger = encounter_chance(layer.corrupt[cy][cx]) * 2;
-	if (danger > 60) danger = 60;
-	SDL_Color dc = danger < 12 ? rgba(80, 220, 120, 255) : danger < 30 ? rgba(255, 210, 60, 255) : rgba(255, 70, 70, 255);
-	fill_rect(x + 2, y + 17, 62, 3, rgba(0, 0, 0, 160));
-	fill_rect(x + 2, y + 17, 2 + danger, 3, dc);
-	text_drawf(x + 4, y + CORE_H - 14, rgba(200, 220, 255, 255), TEXT_LEFT, "%s", N.banner_text);
-	char depth[16];
-	snprintf(depth, sizeof depth, "B%d", run.depth);
-	text_draw(x + CORE_W - 4, y + CORE_H - 14, depth, rgba(200, 220, 255, 255), TEXT_RIGHT);
-	if (run.fragments > 0 && !run.secret_cleared) text_drawf(x + CORE_W - 4, y + 18, rgba(220, 150, 255, 255), TEXT_RIGHT, "Frag %d/3", run.fragments);
+	battle_hp_box(x, y, run.hp);
+	char name[40];
+	int n = 0;
+	size_t len = strlen(N.banner_text);
+	for (size_t i = 0; i < len && n < 39; ++i) {
+		char c = N.banner_text[i];
+		/* the number follows the name; long names lose their spaces */
+		if (c == ' ' && (len > 13 || (i + 1 < len && N.banner_text[i + 1] >= '0' && N.banner_text[i + 1] <= '9'))) continue;
+		name[n++] = c;
+	}
+	name[n] = 0;
+	battle_area_name(x + CORE_W - 8 * n, y + CORE_H - 16, name);
 }
 
 static void draw(void) {
@@ -1119,11 +1113,6 @@ static void draw(void) {
 	draw_background();
 	draw_world();
 	if (!ui_fullscreen()) draw_hud();
-	if (N.banner > 0 && N.banner < 140 && !ui_fullscreen()) {
-		int a = N.banner > 30 ? 255 : N.banner * 8;
-		fill_rect(0, P.core_y + 44, P.w, 20, rgba(10, 20, 60, a * 3 / 4));
-		text_draw(P.w / 2, P.core_y + 46, N.banner_text, rgba(255, 255, 255, a), TEXT_CENTER);
-	}
 	if (N.map_open) draw_map();
 	ui_draw();
 	if (N.flash > 0 && N.flash < 16) {

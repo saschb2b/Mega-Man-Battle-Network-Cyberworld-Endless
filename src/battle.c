@@ -2129,6 +2129,10 @@ static void draw_hp_box(int x, int y, int hp, bool hurt) {
 	rom_tile(UI.hp_digits + 11 * 0x40 + 0x20, pal, x + 40, y + 8, 1);
 }
 
+void battle_hp_box(int x, int y, int hp) { draw_hp_box(x, y, hp, false); }
+
+void battle_area_name(int x, int y, const char *s) { text_draw_cells(x, y, s, UI.hp_pal); }
+
 static bool player_hp_hurt(void) { return B.hp_hurt > 0 || PLAYER->shown_hp != PLAYER->hp; }
 
 static void draw_gauge(int x, int y, int value, int full, int full_t) {

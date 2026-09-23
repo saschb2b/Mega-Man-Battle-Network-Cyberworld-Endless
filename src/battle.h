@@ -45,4 +45,8 @@ typedef void (*RewardMaker)(int busting, RewardOption *opts, int *n);
 void battle_begin(const Encounter *e, void (*done)(const BattleResult *r));
 void battle_set_rewards(RewardMaker make);
 
+/* The HP box and the 8x16 battle font, which the net's HUD shares. */
+void battle_hp_box(int x, int y, int hp);
+void battle_area_name(int x, int y, const char *s);
+
 #endif
