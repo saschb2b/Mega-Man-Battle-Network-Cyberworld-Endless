@@ -75,7 +75,10 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 typedef struct { int x, y, cat, sprite, script, gone_flag; } Talker;
 
 /* Overworld sprites (list 6) of the Navis Gregar has on the net, by navi
- * index; the Falzar Navis' entries are placeholders. */
+ * index; the others (Falzar's Navis are placeholders here) take the shape of
+ * a HeelNavi. */
+#define SPR_HEEL_NAVI 0x43
+
 static int navi_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
@@ -83,7 +86,7 @@ static int navi_sprite(int navi) {
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
-	return -1;
+	return SPR_HEEL_NAVI;
 }
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {
@@ -114,6 +117,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_RETURN: {
 			int pad = o->type == OBJ_EXIT ? SPR_EXIT_PAD : SPR_RETURN_PAD;
 			out->exit_x = wx; out->exit_y = wy;
+			/* the game's own warp pad: trigger cells taking warp 1 */
+			CoordPad exit = { wx, wy, 1 };
+			netmap_set_pads(&exit, 1);
 			need_sprite(&npcs, 7, pad);
 			if (npcs.n < 32) npcs.script[npcs.n++] = npc_prop(7, pad, wx, wy, 0, 0);
 			break;
@@ -156,10 +162,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; break;
 		case OBJ_BOSS:
-			/* a Navi with an overworld sprite waits before the exit; the
-			 * others meet MegaMan at the exit pad itself */
+			/* the guardian waits before the exit pad, which stays shut */
 			tk.sprite = navi_sprite(o->param);
-			if (tk.sprite < 0) break;
 			asks = true;
 			tk.gone_flag = out->boss_gone_flag = LAYER_BOSS_GONE_FLAG;
 			flag_clear(LAYER_BOSS_GONE_FLAG);

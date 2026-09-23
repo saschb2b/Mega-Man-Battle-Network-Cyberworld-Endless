@@ -30,10 +30,15 @@ typedef struct {
  * Mystery Data, and installs the layer's. */
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd);
 
+/* Where the layer's exit pad (warp 1) leads: world (x, y) of map (group,
+ * number), facing `facing`. */
+void mapslot_exit_to(int group, int number, int x, int y, int facing);
+
 /* The map's theme: every chapter's map music list plays `song` there. */
 bool mapslot_music(int group, int number, int song);
 
-/* Space in the free ROM for NPC scripts; returns the bus address. */
+/* Space in the free ROM for NPC scripts; returns the bus address. A reset
+ * starts the next layer in the other half of the space. */
 uint32_t mapslot_alloc(const void *bytes, int len);
 void mapslot_reset(void);
 

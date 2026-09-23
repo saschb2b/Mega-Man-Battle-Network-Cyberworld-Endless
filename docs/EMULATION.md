@@ -24,9 +24,10 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x0100` | Warp stub (sets `BN6_ENGINE_MARK`, calls map_triggerEnterMapOnWarp) | `boot.c` |
 | `+0x0180` | Encounter roll wrapper and trampoline | `encounter.c` |
 | `+0x0200` | BattleSettings, `+0x0220` its entity list | `encounter.c` |
-| `+0x3000`-`+0x10000` | Layer data: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
+| `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
+| `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
-| `+0x60000` | Generated coordinate data (walls) | `netmap.c` |
+| `+0x60000` | Generated coordinate data (walls, the exit pad's trigger) | `coords.c` |
 
 The engine also rewrites the stock of the game's shops 0 and 1 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags
@@ -46,8 +47,13 @@ jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState
    at them.
 4. `boot.c` warps MegaMan in with the game's own warp.
 
-`director.c` then watches the game: MegaMan on the exit pad (the next layer,
-or the boss battle on boss layers), choices made in text (event flags set by
+The exit pad is the game's own warp pad: trigger cells that take warp 1 of
+the map's warp list. When MegaMan steps on it, the game starts its jack-out;
+the director builds the next layer meanwhile and points warp 1 at its start,
+so the game jacks him in there. A guardian Navi keeps the pad shut (flag
+`0x16F1`) until he is beaten.
+
+`director.c` then watches the game: the exit pad's warp, choices made in text (event flags set by
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER
 (the run ends), MegaMan on any other map for 90 frames (warped back to
 the layer's start), and a checkpoint shortly after each arrival (`run.sav` plus

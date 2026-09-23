@@ -34,7 +34,7 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 		for (int k = 0; k < 4; ++k) {
 			int ax = x + d[k][0], ay = y + d[k][1];
-			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || blocked(ax, ay)) continue;
+			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || (blocked(ax, ay) && (ax != tx || ay != ty))) continue;
 			prev[ay][ax] = (int16_t)c;
 			q[t++] = (int16_t)(ay * MAP_W + ax);
 		}
@@ -63,7 +63,8 @@ uint32_t autopilot_keys(void) {
 	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	int cx, cy, ex, ey, nx, ny;
-	if (!netmap_panel(px, py, &cx, &cy) || !director_exit_panel(&ex, &ey)) return 0;
+	bool talk;
+	if (!netmap_panel(px, py, &cx, &cy) || !director_goal_panel(&ex, &ey, &talk)) return 0;
 	if (cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || !next_panel(cx, cy, ex, ey, &nx, &ny)) { nx = ex; ny = ey; }
 	int wx, wy;
 	netmap_world(nx, ny, &wx, &wy);
@@ -73,15 +74,25 @@ uint32_t autopilot_keys(void) {
 		{ 7, -7, KEY_UP }, { 10, 0, KEY_UP | KEY_RIGHT }, { 7, 7, KEY_RIGHT }, { 0, 10, KEY_DOWN | KEY_RIGHT },
 		{ -7, 7, KEY_DOWN }, { -10, 0, KEY_DOWN | KEY_LEFT }, { -7, -7, KEY_LEFT }, { 0, -10, KEY_UP | KEY_LEFT },
 	};
-	/* stuck on something (a Mystery Data, an NPC): take it or step aside */
-	static int last_x, last_y, still, unstick;
+	/* beside the guardian: face him and talk (A also answers Yes) */
+	if (talk) {
+		int gx, gy;
+		netmap_world(ex, ey, &gx, &gy);
+		if (abs(gx - px) + abs(gy - py) < 40) {
+			if (frame % 8 < 2) return KEY_A;
+			wx = gx; wy = gy;   /* walk into him: MegaMan faces him */
+		}
+	}
+	/* stuck on something (a Mystery Data, an NPC, a corner): take it, then
+	 * try each direction in turn */
+	static int last_x, last_y, still, unstick, tries;
 	still = px == last_x && py == last_y ? still + 1 : 0;
 	last_x = px; last_y = py;
-	if (still > 45) { still = 0; unstick = 30; }
+	if (still > 45) { still = 0; unstick = 30; ++tries; }
 	if (unstick > 0) {
 		--unstick;
 		if (unstick > 24) return unstick & 1 ? KEY_A : 0;
-		return dirs[(frame / 256 + (unsigned)px) % 8].k;
+		return dirs[tries % 8].k;
 	}
 	int dx = wx - px, dy = wy - py;
 	if (abs(dx) + abs(dy) < 3) return 0;

@@ -16,9 +16,9 @@ use.
 | Dialogue | Original text engine | Lines written by the engine in the game's text script language |
 | Shops, Chip Trader, BugFrag Trader, healing | Original | The game's screens and commands; stock chosen by the engine |
 | Battles, rewards, Busting Level | Original | Encounters chosen by the engine (enemies, background, music) |
-| Boss navis | Original sprites and battles | HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan, ProtoMan, DiveMan and JudgeMan wait before the exit and ask to fight; the others meet MegaMan at the exit pad |
+| Boss navis | Original sprites and battles | HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan, ProtoMan, DiveMan and JudgeMan wait before the exit and ask to fight; Navis Gregar has no overworld sprite for appear as a HeelNavi |
 | Choices (challenge, Undernet, Secret Area) | Original text and flags | Yes sets an event flag the engine acts on |
-| Layer changes | Original warp | The engine adds no fade of its own |
+| Layer changes | Original warp pads | The game's jack-out and jack-in, with the next layer built while MegaMan jacks out |
 | Screen | Adapted | 240x160 at a whole-number scale with black borders |
 
 ## Known gaps

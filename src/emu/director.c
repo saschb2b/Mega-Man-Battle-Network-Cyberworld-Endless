@@ -30,13 +30,11 @@
 
 int director_debug_biome = -1;
 
-#define EXIT_REACH 10      /* world units from the exit pad's centre */
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
 
 static struct {
 	bool active;
 	int group, number;
-	int exit_x, exit_y;
 	int frame;
 	int leaving;           /* frames until the next layer is built */
 	bool checkpoint;       /* save once MegaMan has arrived */
@@ -49,6 +47,7 @@ static struct {
 	bool in_battle;        /* a battle is on */
 	int foes;              /* viruses in the battle the game will start next */
 	int astray;            /* frames MegaMan has spent on another map */
+	bool warping;          /* the exit pad's warp is under way */
 } D;
 
 /* The next battle's enemies, for the game's encounter roll. */
@@ -98,14 +97,14 @@ static bool build_layer(void) {
 	D.number = a->number;
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, a->song);
-	D.exit_x = D.objs.exit_x;
-	D.exit_y = D.objs.exit_y;
 	D.chosen = 0;
 
 	Encounter e = make_encounter(run.depth, biome, false);
 	set_encounter(&e, false);
 	D.start_x = D.objs.start_x;
 	D.start_y = D.objs.start_y;
+	/* until MegaMan takes it, the exit pad leads back to the layer's start */
+	mapslot_exit_to(D.group, D.number, D.start_x, D.start_y, 4);
 	D.active = true;
 	D.leaving = 0;
 	D.frame = 0;
@@ -121,10 +120,19 @@ bool director_start_layer(void) {
 	return true;
 }
 
-bool director_exit_panel(int *x, int *y) {
+bool director_goal_panel(int *x, int *y, bool *talk) {
 	if (!D.active) return false;
-	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].type == OBJ_EXIT || layer.obj[i].type == OBJ_RETURN) { *x = (int)layer.obj[i].x; *y = (int)layer.obj[i].y; return true; }
+	/* the guardian while he stands, then the exit pad */
+	int want = layer.boss_layer && !layer.boss_beaten ? OBJ_BOSS : -1;
+	*talk = want == OBJ_BOSS;
+	for (int i = 0; i < layer.nobj; ++i) {
+		int t = layer.obj[i].type;
+		if (want == OBJ_BOSS ? t == OBJ_BOSS : (t == OBJ_EXIT || t == OBJ_RETURN)) {
+			*x = (int)layer.obj[i].x;
+			*y = (int)layer.obj[i].y;
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -190,6 +198,27 @@ static bool act_on_choices(void) {
 	return false;
 }
 
+/* MegaMan stepped on the exit pad: the game plays its warp (jack out, fade,
+ * jack in) to warp 1. While it jacks out, the next layer is built and warp 1
+ * pointed at its start; nothing else happens until MegaMan has arrived. */
+static bool follow_exit_warp(void) {
+	int pending = emu_read8(BN6_WARP + 0x10);
+	if (D.warping) {
+		bool arrived = pending == 0 && on_map() &&
+			emu_read8(BN6_GAMESTATE + 4) == D.group && emu_read8(BN6_GAMESTATE + 5) == D.number;
+		if (arrived) D.warping = false;
+		return !arrived;
+	}
+	if (pending != 1 || emu_read8(BN6_WARP + 0x11) != 1) return false;
+	/* a side layer's exit leads one area deeper too */
+	run.depth++;
+	run.side_kind = LAYER_NORMAL;
+	if (!build_layer()) return false;
+	D.warping = true;
+	D.checkpoint = true;
+	return true;
+}
+
 static void end_run(void) {
 	profile_record_run();
 	save_delete();
@@ -209,6 +238,7 @@ void director_update(void) {
 		if (mode == BN6_MODE_START_SCREEN) end_run();
 		return;
 	}
+	if (follow_exit_warp()) return;
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
 		if (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE) {
@@ -240,6 +270,10 @@ void director_update(void) {
 		set_encounter(&e, false);
 	}
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
+	/* a guardian keeps the exit pad shut (the game clears the map's warp
+	 * flags when it enters a map) */
+	if (layer.boss_layer && !layer.boss_beaten) flag_set(BN6_FLAG_WARP_OFF + 1);
+	else flag_clear(BN6_FLAG_WARP_OFF + 1);
 	if (act_on_choices()) return;
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
 		D.checkpoint = false;
@@ -261,19 +295,6 @@ void director_update(void) {
 		return;
 	}
 	D.astray = 0;
-	int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-	if (abs(x - D.exit_x) <= EXIT_REACH && abs(y - D.exit_y) <= EXIT_REACH) {
-		/* a boss layer's navi guards the exit: the game's own navi battle */
-		if (layer.boss_layer && !layer.boss_beaten) {
-			start_boss();
-			return;
-		}
-		/* a side layer's exit leads one area deeper too */
-		run.depth++;
-		run.side_kind = LAYER_NORMAL;
-		D.leaving = 1;
-		return;
-	}
 	if (D.frame % REROLL_FRAMES == 0) {
 		Encounter e = make_encounter(run.depth, run.biome, false);
 		set_encounter(&e, false);

@@ -10,8 +10,9 @@ bool director_start_layer(void);
 bool director_resume(void);
 /* Once a frame, after the game's frame: exits and encounters. */
 void director_update(void);
-/* The layer's exit (grid panel), for the test autopilot. */
-bool director_exit_panel(int *x, int *y);
+/* Where the test autopilot heads (grid panel): the guardian, to talk to
+ * (*talk), or the exit pad. */
+bool director_goal_panel(int *x, int *y, bool *talk);
 /* Test hook (--net-biome): every layer in this biome. */
 extern int director_debug_biome;
 

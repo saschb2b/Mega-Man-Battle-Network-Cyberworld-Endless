@@ -16,16 +16,25 @@
 #include "emu.h"
 #include "flags.h"
 
-#define SCRATCH     (EMU_FREE + 0x3000)  /* bump allocator for layer data */
-#define SCRATCH_END (EMU_FREE + 0x10000)
+/* Layer data comes from a bump allocator over two halves, one per layer in
+ * turn: the map being left keeps running its NPC scripts while the next
+ * layer is built during its warp. */
+#define SCRATCH      (EMU_FREE + 0x3000)
+#define SCRATCH_HALF 0x6800
+#define WARP_LIST    (EMU_FREE + 0x2F00)  /* the layer map's warps: entry 1 is the exit */
 
-static uint32_t next = SCRATCH;
+static int half;
+static uint32_t next = SCRATCH, end = SCRATCH + SCRATCH_HALF;
 
-void mapslot_reset(void) { next = SCRATCH; }
+void mapslot_reset(void) {
+	half ^= 1;
+	next = SCRATCH + (uint32_t)half * SCRATCH_HALF;
+	end = next + SCRATCH_HALF;
+}
 
 uint32_t mapslot_alloc(const void *bytes, int len) {
 	uint32_t at = next;
-	if (at + (uint32_t)len > SCRATCH_END) return 0;
+	if (at + (uint32_t)len > end) return 0;
 	emu_write(at, bytes, (size_t)len);
 	next = (at + (uint32_t)len + 3) & ~3u;
 	return at;
@@ -54,6 +63,26 @@ static uint32_t sprite_table(int group) {
 			return emu_read32(((pc + 2 + 4) & ~3u) + (uint32_t)(op & 0xFF) * 4);
 	}
 	return 0;
+}
+
+/* The per-map warp lists a group's loader hands the game: the literal of its
+ * first "ldr r0, [pc]". */
+static uint32_t warp_table(int group) {
+	uint32_t fn = emu_read32(BN6_ENTER_GROUP + (uint32_t)(group - 0x80) * 4) & ~1u;
+	if (fn < 0x08000000u) return 0;
+	for (uint32_t pc = fn; pc < fn + 16; pc += 2) {
+		uint16_t op = emu_read16(pc);
+		if ((op & 0xF800) == 0x4800) return emu_read32(((pc + 4) & ~3u) + (uint32_t)(op & 0xFF) * 4);
+	}
+	return 0;
+}
+
+void mapslot_exit_to(int group, int number, int x, int y, int facing) {
+	/* WarpData: group, number, departure (8: jack out, fade, jack in), facing, x, y, z (16.16) */
+	uint8_t e[16] = { (uint8_t)group, (uint8_t)number, 0x08, (uint8_t)facing };
+	put32(e + 4, (uint32_t)x << 16);
+	put32(e + 8, (uint32_t)y << 16);
+	emu_write(WARP_LIST, e, sizeof e);
 }
 
 /* The map's list in the Mystery Data table. */
@@ -96,6 +125,9 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 		uint32_t scripts = emu_read32(BN6_MAP_SCRIPTS + g * 8 + (uint32_t)k * 4);
 		if (scripts >= 0x08000000u) emu_write32(scripts + (uint32_t)number * 4, end_at);
 	}
+	/* warps: the fixed list whose entry 1 the exit pad takes */
+	uint32_t warps = warp_table(group);
+	if (warps >= 0x08000000u) emu_write32(warps + (uint32_t)number * 4, WARP_LIST);
 	/* objects: none */
 	uint32_t objs = object_table(group);
 	static const uint8_t no_objects[4] = { 0xFF };
