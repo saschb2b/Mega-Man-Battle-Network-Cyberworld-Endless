@@ -59,6 +59,7 @@ typedef struct {
 	Anim anim;
 	int pal;
 	int state, timer, sub, tcol, trow, count;
+	int ticket;    /* Mettaurs: turn order, the lowest holds the turn */
 	int home_col, home_row;
 	int flash, invuln, stun, flinch;
 	int barrier;
@@ -143,6 +144,7 @@ static struct {
 	int full_t;       /* frames the gauge has been full (its animation runs on in a pause) */
 	Anim charge_fx;   /* charge lines, then the charged glow */
 	bool shot_charged; /* the buster shot waiting to leave */
+	int tickets;       /* Mettaur turn tickets handed out */
 	int bust_t, bust_row, bust_dmg; /* a shot on its way: it lands after bust_t frames */
 	bool bust_charged;
 	int emblem_t;     /* frames since a chip was picked (the emblem spins) */
@@ -444,6 +446,7 @@ static void spawn_foe(const Foe *f) {
 	Ent *e = spawn(kind, SIDE_ENEMY, f->col, f->row);
 	if (!e) return;
 	e->fam = f->family;
+	e->ticket = ++B.tickets;
 	e->ver = f->version;
 	e->enemy_id = enemy_id(kind == K_NAVI ? 1 : 0, f->family, f->version);
 	if (e->enemy_id < 0) e->enemy_id = enemy_id(kind == K_NAVI ? 1 : 0, f->family, 0);
@@ -1217,6 +1220,69 @@ static int speed_scale(Ent *e) {
 	return 100 - e->ver * 12;
 }
 
+/* Mettaurs take turns (ForMettaur_8109EF4 in the disassembly): only the one
+ * holding the turn acts. It waits 30 frames, steps a row at a time toward
+ * MegaMan (a step every 30, 24, 18, 12, 18, 12 frames by version), then
+ * raises its pickaxe (sound 0x183) and sends the shockwave 50 frames later;
+ * the turn then passes on. From V2 on the others follow MegaMan's row. */
+static bool mettaur_turn(const Ent *e) {
+	for (int i = 1; i < MAX_ENTS; ++i) {
+		const Ent *o = &B.ent[i];
+		if (o != e && o->on && !o->dying && o->vd && o->vd->ai == AI_METTAUR && o->side == e->side && o->ticket < e->ticket) return false;
+	}
+	return true;
+}
+
+static void ai_mettaur(Ent *e, Ent *pl, int sp) {
+	static const int step_delay[6] = { 30, 24, 18, 12, 18, 12 };
+	const VirusDef *d = e->vd;
+	int v = e->ver < 0 ? 0 : e->ver > 5 ? 5 : e->ver;
+	switch (e->state) {
+	case 0: /* waiting for the turn */
+		if (mettaur_turn(e)) { e->state = 1; e->timer = 30; break; }
+		if (e->ver > 0 && e->row != pl->row) { e->state = 4; e->timer = step_delay[v] * sp / 100; }
+		break;
+	case 1: /* its turn: a pause, then row by row toward MegaMan */
+		if (--e->timer > 0) break;
+		if (e->row != pl->row) {
+			if (step_toward_row(e, pl->row)) ent_anim(e, d->anim_move);
+			e->timer = step_delay[v] * sp / 100;
+			break;
+		}
+		e->state = 2;
+		e->timer = 50 * sp / 100;
+		ent_anim(e, d->anim_attack);
+		audio_sfx(SFX_PICKAXE);
+		break;
+	case 2: /* pickaxe raised */
+		if (--e->timer > 0) break;
+		{
+			/* The original's shockwave (effect sprite 3): 22 frames a panel
+			 * for a Mettaur, with faster animations for higher versions. */
+			static const int step[3] = { 22, 15, 10 };
+			int w = e->ver > 2 ? 2 : e->ver;
+			Spell *s = spell_new(SP_WAVE, e->side, e->col - 1, e->row);
+			if (s) { s->dmg = e->atk; s->elem = e->elem; s->param = step[w]; s->flags = HF_FLINCH; spell_sprite(s, SPR_EFFECT, 3, w, true); }
+			e->count = s ? (int)(s - B.sp) : -1;
+		}
+		e->state = 3;
+		e->timer = 20;
+		break;
+	case 3: /* the turn passes on once its shockwave has run out */
+		if (e->timer > 0 && --e->timer == 0) ent_anim(e, d->anim_idle);
+		if (e->count >= 0 && B.sp[e->count].on && B.sp[e->count].type == SP_WAVE) break;
+		if (e->timer > 0) break;
+		e->ticket = ++B.tickets;
+		e->state = 0;
+		break;
+	case 4: /* V2 and up without the turn: follow MegaMan's row */
+		if (--e->timer > 0) break;
+		if (step_toward_row(e, pl->row)) ent_anim(e, d->anim_move);
+		e->state = 0;
+		break;
+	}
+}
+
 static void ai_virus(Ent *e) {
 	const VirusDef *d = e->vd;
 	Ent *pl = player_target();
@@ -1225,6 +1291,8 @@ static void ai_virus(Ent *e) {
 	int sp = speed_scale(e);
 	switch (d->ai) {
 	case AI_METTAUR:
+		ai_mettaur(e, pl, sp);
+		break;
 	case AI_SHOOTER:
 		/* state 0: wander toward the row; 1: wind up; 2: recover */
 		if (e->state == 0) {
@@ -1233,26 +1301,15 @@ static void ai_virus(Ent *e) {
 				if (step_toward_row(e, pl->row)) ent_anim(e, d->anim_move);
 				e->timer = 40 * sp / 100;
 			} else {
-				/* a Mettaur raises its pickaxe for 50 frames before the wave */
 				e->state = 1;
-				e->timer = d->ai == AI_METTAUR ? 50 * sp / 100 : 24;
+				e->timer = 24;
 				ent_anim(e, d->anim_attack);
-				if (d->ai == AI_METTAUR) audio_sfx(SFX_PICKAXE);
 			}
 		} else if (e->state == 1) {
 			if (--e->timer > 0) break;
-			if (d->ai == AI_METTAUR) {
-				/* The original's shockwave (effect sprite 3): 22 frames a panel
-				 * for a Mettaur, with faster animations for higher versions. */
-				static const int step[3] = { 22, 15, 10 };
-				int v = e->ver > 2 ? 2 : e->ver;
-				Spell *s = spell_new(SP_WAVE, e->side, e->col - 1, e->row);
-				if (s) { s->dmg = e->atk; s->elem = e->elem; s->param = step[v]; s->flags = HF_FLINCH; spell_sprite(s, SPR_EFFECT, 3, v, true); }
-			} else {
-				Spell *s = enemy_projectile(e, 3 + e->ver);
-				if (s) spell_sprite(s, d->fx_cat, d->fx_idx, d->fx_anim, true);
-				audio_sfx(SFX_BUSTER);
-			}
+			Spell *s = enemy_projectile(e, 3 + e->ver);
+			if (s) spell_sprite(s, d->fx_cat, d->fx_idx, d->fx_anim, true);
+			audio_sfx(SFX_BUSTER);
 			e->state = 2;
 			e->timer = 50 * sp / 100;
 		} else {
