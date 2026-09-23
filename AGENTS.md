@@ -26,17 +26,13 @@ states or disassembly files. `.gitignore` covers the usual names; check
 
 | Path | Contents |
 | --- | --- |
-| `src/platform.*` | Window, logical canvas, input, frame timing |
-| `src/rom.*` | ROM discovery and SHA-1 check, `RomLayout` offsets, LZ77, text decoding |
-| `src/gfx.*`, `src/panel_layout.inc` | Sprite decoding and animation, panels, chip art, font, primitives |
-| `src/audio.*` | MP2K sequencer and mixer playing the ROM's songs |
-| `src/battle.*` | Grid battle, chips, virus and navi AI, Custom screen, crosses |
-| `src/net_gen.c`, `src/net.h` | Layer generation |
-| `src/scene_net.c` | Overworld: movement, encounters, shops, traders, rewards |
-| `src/net_floor.*` | Net floors learned from the original maps' panels |
-| `src/data.*`, `src/loot.*` | Chip/virus/navi definitions, encounter and reward tables |
-| `src/run.*`, `src/save.*` | Run state, checkpoints, profile |
-| `src/ui.*` | Messages, menus, chip cards |
+| `src/core/` | Entry point, platform (window, canvas, input, timing), ROM access and `RomLayout`, game data, run state and saves |
+| `src/gfx/` | Sprite decoding and animation, panels, chip art, fonts, backgrounds, HUD layouts |
+| `src/audio/` | MP2K sequencer and mixer playing the ROM's songs |
+| `src/battle/` | Grid battle, chips, virus and navi AI, Custom screen, crosses |
+| `src/net/` | Layer generation, floors learned from the original maps, the overworld scene |
+| `src/scenes/` | Title, gallery, game over, messages and menus |
+| `src/emu/` | The embedded mGBA core running the game's own code (`docs/EMULATION.md`) |
 | `tests/test_core.c` | ROM-free unit tests |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |

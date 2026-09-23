@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../src/game.h"
-#include "../src/net.h"
-#include "../src/rom.h"
-#include "../src/run.h"
+#include "game.h"
+#include "net.h"
+#include "rom.h"
+#include "run.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)

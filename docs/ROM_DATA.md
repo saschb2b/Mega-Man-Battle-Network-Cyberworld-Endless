@@ -2,7 +2,7 @@
 
 All offsets are for Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1
 `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`, and live in `RomLayout` in
-`src/rom.c`. The [bn6f disassembly](https://github.com/dism-exe/bn6f)
+`src/core/rom.c`. The [bn6f disassembly](https://github.com/dism-exe/bn6f)
 targets Cybeast Falzar; most code-region tables sit at the same addresses in
 Gregar, and the rest were found by searching the Gregar ROM for the
 structures the disassembly describes. `tools/romlab` runs the ROM in libmgba
@@ -21,7 +21,7 @@ to confirm findings against real frames and VRAM.
 | Enemy stats | `0x00F260` | `enemy_getStruct2` tables: HP and element in one halfword, attack after. |
 | Battle panel tiles | `0x6DBB24` (LZ77) | Traced from BG2 tiles in a battle VRAM capture. |
 | Panel palettes | `0x6DE45C`-`0x6DE95C` | Matched from the same capture. |
-| Panel tile layouts | `src/panel_layout.inc` | Recorded by writing each panel type into `ePanelData` in a running battle and reading back the tilemap. |
+| Panel tile layouts | `src/gfx/panel_layout.inc` | Recorded by writing each panel type into `ePanelData` in a running battle and reading back the tilemap. |
 | Battle font | `0x6B5A2C` | 8x16 glyphs indexed by character code; traced from the enemy-name layer. |
 | Battle backgrounds | `0x082058` (records), `0x0822E0` (animations) | One pointer per background id 0x00-0x15 (the BattleSettings background byte). A record is the disassembly's `BGAnimData`: tiles (word count, then an offset to LZ77 data), a 32x32 tilemap (LZ77 at +12), a palette (after a 4-byte size). The animation list holds `GFXAnimData` scripts: tile copies (source tiles, VRAM destination, tile count, then index lists with delays) and palette copies. Found by setting the background byte of a forced battle to every value and matching VRAM and palette RAM; scroll speeds were measured from BG1's offset registers. |
 | Title screen | `RomLayout.title`; load table at `0x02FCD8` | The game's own load list (source, VRAM or palette-buffer destination, size) gives the LZ77 blocks: the 256-colour picture's tiles `0x7F3040` (to 0x06000000), PRESS START / NEW GAME / CONTINUE `0x7F1EBC` (OBJ tile 1 on) with palettes `0x7F216C` and `0x7F218C`, and the copyright line `0x7F21EC` (8 OBJs of 32x32, palette `0x7F2C20`). The picture's 32x20 map sits at `0x7F7CFC`, its palette at `0x7F2E40` (banks 0-13, bank 15 the text box's `0x6BCBCC`), and the logo's glow is six palette scripts listed at `0x02F5F0`. The menu arrow is 3 frames at `0x6A280C` (palette `0x6A344C`). Positions and timing came from recorded OAM and palette RAM: PRESS START blinks 32/32, START (sound 0x67) dims every colour by 4 then 2 a frame to 16 and the menu follows 84 frames later; NEW GAME plays 0x9D, CONTINUE 0x9C, and the music stops. |

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate src/hud_layout.inc from romlab captures of the original battle UI.
+"""Generate src/gfx/hud_layout.inc from romlab captures of the original battle UI.
 
 Every cell is recorded as the ROM offset of its 8x8 tile plus a palette taken
 from the ROM, so the table holds numbers only. Cells that the game fills per
@@ -23,7 +23,7 @@ import sys
 
 LAB = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser('~/.cache/mmbn-ref/lab')
 ROM = open(sys.argv[2] if len(sys.argv) > 2 else os.path.expanduser('~/.cache/mmbn-ref/roms/bn6g.gba'), 'rb').read()
-OUT = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'hud_layout.inc')
+OUT = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'gfx', 'hud_layout.inc')
 
 
 # LZ77 blocks that hold UI tiles the game decompresses into VRAM (found with

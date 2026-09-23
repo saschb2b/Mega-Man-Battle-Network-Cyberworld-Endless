@@ -11,7 +11,7 @@ copy at runtime, as before.
 
 | Layer | Owner |
 | --- | --- |
-| CPU, video, sound, input | mGBA core (`src/emu.*`), presented through SDL |
+| CPU, video, sound, input | mGBA core (`src/emu/`), presented through SDL |
 | Battles, net movement, menus, messages | The game's code |
 | Run structure, map generation, rewards, saves | Cyberworld Endless |
 

@@ -12,10 +12,11 @@ BIN_aarch64 := $(OUT)/cyberworld.aarch64
 BIN_asan := $(OUT)/cyberworld
 BIN := $(BIN_$(TARGET))
 
-SRCS := $(wildcard src/*.c)
+SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
+SRCS := $(wildcard src/*/*.c)
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 CFLAGS += -std=c11 -O2 -g -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-          -D_DEFAULT_SOURCE -MMD -MP $(shell $(PKGCONF) --cflags sdl2)
+          -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(shell $(PKGCONF) --cflags sdl2)
 LDLIBS += $(shell $(PKGCONF) --libs sdl2) -lm
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
@@ -38,10 +39,10 @@ clean:
 .PHONY: all clean
 
 # ROM-free unit tests (host only)
-TEST_SRCS := tests/test_core.c src/rom.c src/net_gen.c
-build/host/test_core: $(TEST_SRCS) src/*.h
+TEST_SRCS := tests/test_core.c src/core/rom.c src/net/net_gen.c
+build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g -Wall -Wextra -Wno-unused-parameter -D_DEFAULT_SOURCE -o $@ $(TEST_SRCS)
+	$(CC_host) -std=c11 -O1 -g -Wall -Wextra -Wno-unused-parameter -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS)
 
 test: build/host/test_core
 	build/host/test_core

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Walk MP2K tracks the way src/audio.c does and report each track's length
+"""Walk MP2K tracks the way src/audio/audio.c does and report each track's length
 in ticks up to its loop jump. Tracks of one song must agree."""
 import struct, sys
 rom = open(sys.argv[1], 'rb').read()
