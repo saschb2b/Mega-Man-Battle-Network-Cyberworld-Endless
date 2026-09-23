@@ -9,6 +9,7 @@
  * A generated layer is then drawn from those pieces. */
 #include "net_floor.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -251,7 +252,9 @@ bool floor_ready(int area) {
 	Floor *f = &floors[area];
 	if (!f->tried) {
 		f->tried = true;
+		Uint32 t0 = SDL_GetTicks();
 		f->ok = learn(area, f);
+		printf("net floor %d: %s in %u ms\n", area, f->ok ? "learned" : "failed", SDL_GetTicks() - t0);
 	}
 	return f->ok;
 }
