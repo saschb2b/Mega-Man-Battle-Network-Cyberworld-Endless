@@ -27,14 +27,16 @@
 #define COORD_AT    (EMU_FREE + 0x60000) /* generated coordinate data */
 #define MAX_TILE_BYTES 0x14000           /* the game's tile map buffer */
 
+#define LEVELS 5                         /* class fallback levels, see level_mask */
+
 typedef struct { uint32_t key; uint16_t e0, e1; } Sample;
 typedef struct { uint32_t key; uint16_t e0, e1; } Best;
 
 typedef struct {
 	bool tried, ok;
 	int ex, ey, tw, th;
-	Best *best[3];       /* per fallback level, sorted by key */
-	int nbest[3];
+	Best *best[2 * LEVELS];   /* per fallback level, sorted by key; then from the mirrored map */
+	int nbest[2 * LEVELS];
 	uint32_t desc, coord_slot;
 } Learned;
 
@@ -90,9 +92,20 @@ static void tile_class(int tw, int th, int ex, int ey, int tx, int ty, int *phas
 	*phase = (fx / 4) * 8 + fy / 4;
 }
 
-static const uint16_t level_mask[3] = { 0x1FF, 0x0BA, 0x010 }; /* all 9, centre + axes, centre */
+/* Neighbours a class keeps per fallback level: all 9; the centre and its
+ * four sides; the centre and the three panels nearest the tile; the centre
+ * and the two nearest sides; the centre. Bit k is the panel at
+ * (A + k % 3 - 1, B + k / 3 - 1). */
+static unsigned level_mask(int phase, int level) {
+	static const uint16_t fixed[LEVELS] = { 0x1FF, 0x0BA, 0, 0, 0x010 };
+	if (level < 2 || level > 3) return fixed[level];
+	int fx = (phase / 8) * 4, fy = (phase % 8) * 4;
+	int da = fx < 16 ? 0 : 2, db = fy < 16 ? 0 : 6;   /* the near column and row */
+	unsigned m = 0x010 | 1u << (da + 3) | 1u << (1 + db);
+	return level == 2 ? m | 1u << (da + db) : m;
+}
 
-static uint32_t make_key(int phase, unsigned occ, int level) { return (uint32_t)phase << 9 | (occ & level_mask[level]); }
+static uint32_t make_key(int phase, unsigned occ, int level) { return (uint32_t)phase << 9 | (occ & level_mask(phase, level)); }
 
 static int cmp_sample(const void *a, const void *b) {
 	const Sample *x = a, *y = b;
@@ -101,34 +114,41 @@ static int cmp_sample(const void *a, const void *b) {
 	return (x->e1 > y->e1) - (x->e1 < y->e1);
 }
 
-static bool learn(int area, Learned *L) {
-	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
-	AreaSrc a;
-	if (!area_src_load(na->group, na->number, &a)) return false;
-	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
-	L->desc = a.desc; L->coord_slot = a.coord_slot;
-	size_t cells = (size_t)a.tw * a.th;
-	Sample *s = malloc(cells * sizeof *s);
-	for (int level = 0; level < 3; ++level) {
+/* An opaque tile of one colour: filler the original hides under floor */
+static bool flat_tile(const AreaSrc *a, int tx, int ty) {
+	int W = a->tw * 8;
+	uint32_t c = a->px[(size_t)(ty * 8) * W + tx * 8];
+	if (!(c >> 24)) return false;
+	for (int y = 0; y < 8; ++y)
+		for (int x = 0; x < 8; ++x)
+			if (a->px[(size_t)(ty * 8 + y) * W + tx * 8 + x] != c) return false;
+	return true;
+}
+
+/* The most common pair per key of one source map, at every level. */
+static void learn_from(const AreaSrc *a, uint16_t styles, bool bg_in_map, Best **best, int *nbest) {
+	Sample *s = malloc((size_t)a->tw * a->th * sizeof *s);
+	for (int level = 0; level < LEVELS; ++level) {
 		size_t n = 0;
-		for (int ty = 0; ty < a.th; ++ty)
-			for (int tx = 0; tx < a.tw; ++tx) {
+		for (int ty = 0; ty < a->th; ++ty)
+			for (int tx = 0; tx < a->tw; ++tx) {
 				int phase, A, B;
-				tile_class(a.tw, a.th, a.ex, a.ey, tx, ty, &phase, &A, &B);
+				tile_class(a->tw, a->th, a->ex, a->ey, tx, ty, &phase, &A, &B);
 				unsigned occ = 0;
 				bool mixed = false;
 				for (int k = 0; k < 9; ++k) {
-					int st = src_panel(&a, A + k % 3 - 1, B + k / 3 - 1, na->styles, na->bg_in_map);
+					int st = src_panel(a, A + k % 3 - 1, B + k / 3 - 1, styles, bg_in_map);
 					if (st == 1) mixed = true;
 					if (st) occ |= 1u << k;
 				}
 				if (mixed || !occ) continue;
-				size_t i = (size_t)ty * a.tw + tx;
-				s[n++] = (Sample){ make_key(phase, occ, level), a.tile[0][i], a.layers > 1 ? a.tile[1][i] : 0 };
+				/* off the floor, filler would show as a hole */
+				if (!(occ & 0x10) && flat_tile(a, tx, ty)) continue;
+				size_t i = (size_t)ty * a->tw + tx;
+				s[n++] = (Sample){ make_key(phase, occ, level), a->tile[0][i], a->layers > 1 ? a->tile[1][i] : 0 };
 			}
 		qsort(s, n, sizeof *s, cmp_sample);
-		/* keep the most common pair per key */
-		L->best[level] = malloc((n + 1) * sizeof(Best));
+		best[level] = malloc((n + 1) * sizeof(Best));
 		int nb = 0;
 		for (size_t i = 0; i < n;) {
 			size_t j = i, best_at = i, best_run = 0;
@@ -138,12 +158,25 @@ static bool learn(int area, Learned *L) {
 				if (k - j > best_run) { best_run = k - j; best_at = j; }
 				j = k;
 			}
-			L->best[level][nb++] = (Best){ s[best_at].key, s[best_at].e0, s[best_at].e1 };
+			best[level][nb++] = (Best){ s[best_at].key, s[best_at].e0, s[best_at].e1 };
 			i = j;
 		}
-		L->nbest[level] = nb;
+		nbest[level] = nb;
 	}
 	free(s);
+}
+
+static bool learn(int area, Learned *L) {
+	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
+	AreaSrc a, m;
+	if (!area_src_load(na->group, na->number, &a)) return false;
+	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
+	L->desc = a.desc; L->coord_slot = a.coord_slot;
+	learn_from(&a, na->styles, na->bg_in_map, L->best, L->nbest);
+	/* the map mirrored, for edges the original only has on its other side */
+	area_src_mirror(&a, &m);
+	learn_from(&m, na->styles, na->bg_in_map, L->best + LEVELS, L->nbest + LEVELS);
+	area_src_free(&m);
 	area_src_free(&a);
 	return true;
 }
@@ -227,7 +260,8 @@ static bool write_tilemap(const Learned *L) {
 				if (floor_at(A + k % 3 - 1, B + k / 3 - 1)) occ |= 1u << k;
 			if (!occ) continue;
 			const Best *b = NULL;
-			for (int level = 0; level < 3 && !b; ++level) b = lookup(L, level, make_key(phase, occ, level));
+			/* each level from the map, then from its mirror image */
+			for (int k = 0; k < 2 * LEVELS && !b; ++k) b = lookup(L, k / 2 + (k & 1) * LEVELS, make_key(phase, occ, k / 2));
 			if (!b) continue;
 			map[(size_t)ty * tw + tx] = b->e0;
 			map[cells + (size_t)ty * tw + tx] = b->e1;

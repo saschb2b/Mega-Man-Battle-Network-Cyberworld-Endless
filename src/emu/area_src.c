@@ -114,3 +114,26 @@ void area_src_free(AreaSrc *a) {
 	free(a->front);
 	memset(a, 0, sizeof *a);
 }
+
+void area_src_mirror(const AreaSrc *a, AreaSrc *m) {
+	*m = *a;
+	int W = a->tw * 8, H = a->th * 8;
+	size_t cells = (size_t)a->tw * a->th;
+	for (int l = 0; l < 2; ++l) {
+		m->tile[l] = NULL;
+		if (!a->tile[l]) continue;
+		m->tile[l] = malloc(cells * 2);
+		for (int ty = 0; ty < a->th; ++ty)
+			for (int tx = 0; tx < a->tw; ++tx)
+				m->tile[l][ty * a->tw + (a->tw - 1 - tx)] = a->tile[l][ty * a->tw + tx] ^ 0x400;
+	}
+	m->px = malloc((size_t)W * H * 4);
+	m->front = malloc((size_t)W * H);
+	for (int y = 0; y < H; ++y)
+		for (int x = 0; x < W; ++x) {
+			m->px[(size_t)y * W + (W - 1 - x)] = a->px[(size_t)y * W + x];
+			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
+		}
+	m->ex = (32 - a->ey) & 31;
+	m->ey = (32 - a->ex) & 31;
+}

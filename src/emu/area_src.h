@@ -20,6 +20,8 @@ typedef struct {
 
 bool area_src_load(int group, int number, AreaSrc *a);
 void area_src_free(AreaSrc *a);
+/* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip. */
+void area_src_mirror(const AreaSrc *a, AreaSrc *m);
 
 /* World <-> map pixel, as the game's camera routine maps them. */
 static inline int area_px(int tw, int x, int y) { return x + y + tw * 4; }
