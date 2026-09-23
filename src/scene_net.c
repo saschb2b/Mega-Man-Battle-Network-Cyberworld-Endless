@@ -1067,16 +1067,7 @@ static void draw_world(void) {
 		else {
 			int sx, sy;
 			iso(N.px, N.py, &sx, &sy);
-			fill_rect(sx - 5, sy + 7, 10, 2, rgba(0, 0, 0, 90));
 			anim_draw(&N.mm, sx, sy + 8, false, 0, 0);
-		}
-	}
-	if (!ui_active()) {
-		NetObj *o = nearby_object();
-		if (o) {
-			int sx, sy;
-			iso(o->x, o->y, &sx, &sy);
-			if ((N.tick / 16) & 1) text_draw(sx, sy - 40, "A", rgba(255, 240, 120, 255), TEXT_CENTER);
 		}
 	}
 }
