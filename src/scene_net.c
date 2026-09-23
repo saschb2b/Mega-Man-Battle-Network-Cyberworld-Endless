@@ -953,6 +953,10 @@ static void draw_background(void) {
 
 typedef struct { int y, kind, idx; } Drawable;
 
+static bool obj_flat(const NetObj *o) {
+	return o->type == OBJ_WARP_IN || o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_UNDERNET || o->type == OBJ_SECRET_GATE;
+}
+
 static void draw_obj(NetObj *o) {
 	int sx, sy;
 	iso(o->x, o->y, &sx, &sy);
@@ -1031,7 +1035,11 @@ static void draw_world(void) {
 	/* Sprites sorted by depth. */
 	Drawable list[MAX_OBJS + 1];
 	int n = 0;
-	for (int i = 0; i < layer.nobj; ++i) list[n++] = (Drawable){ (int)((layer.obj[i].x + layer.obj[i].y) * 100), 0, i };
+	/* Warp pads lie on the floor: under everything that stands on it. */
+	for (int i = 0; i < layer.nobj; ++i)
+		if (obj_flat(&layer.obj[i])) draw_obj(&layer.obj[i]);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (!obj_flat(&layer.obj[i])) list[n++] = (Drawable){ (int)((layer.obj[i].x + layer.obj[i].y) * 100), 0, i };
 	list[n++] = (Drawable){ (int)((N.px + N.py) * 100), 1, 0 };
 	for (int i = 1; i < n; ++i) {
 		Drawable t = list[i];
