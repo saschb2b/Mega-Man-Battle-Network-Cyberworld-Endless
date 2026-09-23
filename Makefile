@@ -27,7 +27,12 @@ CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 LDLIBS += -fsanitize=address,undefined
 endif
 
-all: $(BIN)
+all: $(BIN) $(OUT)/licenses/mGBA.txt
+
+# mGBA is MPL-2.0; its license ships with the port (source: github.com/mgba-emu/mgba, tag 0.10.5)
+$(OUT)/licenses/mGBA.txt: /opt/mgba/LICENSE
+	@mkdir -p $(dir $@)
+	cp $< $@
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $^ $(LDLIBS)

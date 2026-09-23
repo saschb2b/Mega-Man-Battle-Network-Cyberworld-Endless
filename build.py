@@ -61,6 +61,7 @@ def package():
     shutil.copy2(os.path.join(ROOT, 'port', 'gameinfo.xml'), game)
     shutil.copy2(os.path.join(ROOT, 'port', 'port.json'), game)
     shutil.copy2(os.path.join(ROOT, 'LICENSE'), game)
+    shutil.copytree(os.path.join(ROOT, 'build', 'aarch64', 'licenses'), os.path.join(game, 'licenses'))
     with open(os.path.join(game, 'rom', 'PUT_YOUR_ROM_HERE.txt'), 'w') as f:
         f.write('Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba file into this folder.\n')
     shutil.copy2(os.path.join(ROOT, 'port', 'Cyberworld Endless.sh'), out)

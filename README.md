@@ -117,4 +117,6 @@ tests. See [AGENTS.md](AGENTS.md) for the development workflow and
 Mega Man Battle Network is © Capcom. This project is not affiliated with or
 endorsed by Capcom. The code is MIT-licensed. The
 [bn6f disassembly](https://github.com/dism-exe/bn6f) was an invaluable map of
-the game's data; none of its files are included here.
+the game's data; none of its files are included here. The game's own code
+runs on an embedded [mGBA](https://github.com/mgba-emu/mgba) core (0.10.5,
+MPL-2.0; its license ships in `licenses/`).
