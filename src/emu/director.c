@@ -21,6 +21,7 @@
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
+#include "powers.h"
 #include "netmap.h"
 #include "rom.h"
 #include "run.h"
@@ -215,6 +216,7 @@ void director_update(void) {
 		if (emu_read8(BN6_BATTLE_RESULT) == 1) {
 			layer.boss_beaten = true;
 			run.bosses_beaten++;
+			powers_after_boss(layer.boss_navi, run.biome);
 			if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
 		}
 	}

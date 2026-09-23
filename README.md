@@ -57,6 +57,13 @@ buster; L and R open the Custom screen; Start opens the PET.
   the title screen returns there. When MegaMan is deleted the run ends, and
   the title shows how deep you went.
 
+### Powers
+
+Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan gives MegaMan
+their Cross for the rest of the run, picked in the Custom screen as in BN6.
+The Graveyard's guardian wakes the Cybeast: Beast Out joins the Custom
+screen.
+
 ### Places to find
 
 | Place | What it does |

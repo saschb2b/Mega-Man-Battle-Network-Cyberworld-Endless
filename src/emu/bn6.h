@@ -23,6 +23,13 @@
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
 
+#define BN6_FLAG_BEAST_OUT    0x00E0      /* Beast Out in the Custom screen (unless 0x163 is set) */
+#define BN6_FLAG_HEAT_CROSS   0x00E2      /* CROSSSELECT entries, Gregar's five */
+#define BN6_FLAG_ELEC_CROSS   0x00E3
+#define BN6_FLAG_SLASH_CROSS  0x00E4
+#define BN6_FLAG_ERASE_CROSS  0x00E5
+#define BN6_FLAG_CHARGE_CROSS 0x00E6
+
 /* Per internet group tables (index group - 0x80) */
 #define BN6_NPC_LISTS         0x080347E0u /* NPCList_maps80: per-map lists of NPC script pointers */
 #define BN6_MAP_SCRIPTS       0x08034670u /* (on enter, continuous) per-map map script lists */
