@@ -38,6 +38,7 @@ to confirm findings against real frames and VRAM.
 | Text box tiles | `0x6BCB4C` corner, `0x6BCAAC` edge, `0x6BCB6C` side, `0x6BCBAC` side by the arrow, palette `0x6BCBCC` | The chip description box; the arrow is `0x6A270C` in the chat palette. |
 | Enemy name tab | `0x6E4020` | End cap then fill, two tiles each, HP palette. |
 | PAUSE | `0x6E40A0` | 4x2 tiles then a 1x2 column, enemy HP palette. |
+| Arm buster | GUI sprite 30 (`ui.buster_sprite`) | Drawn over MegaMan's shooting pose (battle anim 9) with the same frame; anims 1-3 are the crosses' arms. Found by matching the OBJ at the buster in a recorded shot to sprite tiles (`labtrace.which_frame`). Muzzle flash: attack sprite 6, anim 0. |
 | Charge glow palette | `0x3AB1B0` | The charge lines (GUI sprite 162) once charged. |
 | GAME OVER | LZ77 `0x6C211C`, palette `0x6C25AC` | Both BG layers traced from a capture of the screen into `hud_layout.inc`. |
 | Deletion explosion | GUI sprite 155 | Matched to OAM tiles of a deleted Mettaur and rendered with `--sheet`. |

@@ -89,11 +89,16 @@ box's yellow digits (glyphs 12-21).
   at half it does not; the engine beeps from a quarter down.
 - Hits: 0x6D on an enemy, 0x6B on MegaMan. MegaMan blinks 2 frames on,
   2 off while invulnerable.
-- Buster: the shot leaves 4 frames after B is released (sound 0x6A, spark
-  hit sprite 5). Charge (level 1): lines (GUI sprite 162) and sound 0x71 11
-  frames into the hold, charged at 101 with 0x72 and the pink palette
-  0x3AB1B0; each level takes 12 frames off. A charged shot leaves 8 frames
-  after release, MegaMan raising the buster at 7, and bursts in hit sprite 4.
+- Buster: MegaMan takes the shooting pose (anim 9) 3 frames after B is
+  released, wearing the arm buster (GUI sprite 30, frame for frame with the
+  pose). The next frame the shot leaves with sound 0x6A and the muzzle flash
+  (attack sprite 6: two blank frames, then the flash shrinking); it lands 3
+  frames later with 0x6D. The enemy is a white silhouette for that one frame
+  while its HP starts rolling, and the spark (hit sprite 5) starts the frame
+  after. Charge (level 1): lines (GUI sprite 162) and sound 0x71 11 frames
+  into the hold, charged at 101 with 0x72 and the pink palette 0x3AB1B0; each
+  level takes 12 frames off. A charged shot leaves 8 frames after release,
+  MegaMan raising the buster at 7, and bursts in hit sprite 4.
 - Mettaur: sound 0x183 as it raises its pickaxe, the shockwave (effect
   sprite 3) 50 frames later, one panel every 22 frames with 0xA6 each step.
   The panel under the wave turns solid yellow (colour 14 of 0x6DE5BC) unless
