@@ -140,3 +140,14 @@ int ta_bug_trader(TextArchive *t) {
 	ta_end(t);
 	return i;
 }
+
+int ta_shop(TextArchive *t, int shop, const char *greeting) {
+	int i = ta_script(t);
+	uint8_t open[] = { 0xFB, 0x05, (uint8_t)shop };               /* ts_start_shop */
+	ta_open(t);
+	ta_text(t, greeting);
+	ta_wait(t);
+	ta_bytes(t, open, sizeof open);
+	ta_end(t);
+	return i;
+}

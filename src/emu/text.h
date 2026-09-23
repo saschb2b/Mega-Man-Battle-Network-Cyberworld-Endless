@@ -32,6 +32,8 @@ int ta_say(TextArchive *t, int mugshot, const char *s);
 int ta_heal(TextArchive *t);
 int ta_chip_trader(TextArchive *t);
 int ta_bug_trader(TextArchive *t);
+/* A shopkeeper: `greeting`, then shop `shop`'s screen. */
+int ta_shop(TextArchive *t, int shop, const char *greeting);
 /* Writes the archive (u16 offsets, then the scripts); bus address or 0. */
 uint32_t ta_commit(TextArchive *t);
 

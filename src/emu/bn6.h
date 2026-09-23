@@ -5,6 +5,7 @@
 
 /* EWRAM */
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
+#define BN6_TOOLKIT_SHOP_DATA 0x54        /* eToolkit ShopDataPtr: 8-byte stock entries of every shop */
 #define BN6_GAMESTATE         0x02001B80u /* eGameState: +0 sub-mode (4 on the map, 8/0xC battle), +4 map group, +5 map number */
 #define BN6_EVENT_FLAGS       0x02001C88u /* eEventFlags: flag n is bit 0x80 >> (n & 7) of byte n / 8 */
 #define BN6_CHATBOX           0x02009CD0u /* eChatbox: +0 Visible, +4 script state */
@@ -23,6 +24,10 @@
 #define BN6_OBJ_SPAWNERS      0x0803483Cu /* InternetSpawnMapObjectJumptable: per-group spawn routines */
 #define BN6_MYSTERY_DATA      0x080A484Cu /* InternetMysteryDataMapGroupEntries: (group, per-map lists), ends with 1 */
 #define BN6_MYSTERY_PICKS     0x02004348u /* per flag 0x1400+n: chosen placement and content */
+
+/* Shops */
+#define BN6_SHOP_DESCS        0x08046B68u /* per shop: currency (0 zenny, 1 BugFrags, 2 Chip Order), text, data offset, entries */
+#define BN6_SHOP_INIT         0x08047D70u /* the shop data a new game copies to ShopDataPtr */
 
 /* ROM code */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */

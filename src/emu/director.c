@@ -26,6 +26,7 @@
 #include "rom.h"
 #include "run.h"
 #include "save.h"
+#include "shop.h"
 
 #define EXIT_REACH 10      /* world units from the exit pad's centre */
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
@@ -129,6 +130,8 @@ static bool build_layer(void) {
 		case OBJ_HEAL:
 		case OBJ_TRADER:
 		case OBJ_BUGTRADER:
+		case OBJ_SHOP:
+		case OBJ_PROGRAMS:
 			if (ntalk < 16) {
 				/* Normal Navis and pink navis; Mr. Prog runs services; the
 				 * Chip Trader is its machine (overworld objects 0x5C) */
@@ -137,6 +140,8 @@ static bool build_layer(void) {
 				if (o->type == OBJ_NPC) { sprite = navis[o->param % 6]; script = ta_say(&text, -1, npc_line(o->npc_line)); }
 				else if (o->type == OBJ_HEAL) script = ta_heal(&text);
 				else if (o->type == OBJ_TRADER) { cat = 7; sprite = 0x5C; script = ta_chip_trader(&text); }
+				else if (o->type == OBJ_SHOP) script = ta_shop(&text, SHOP_DEALER, "Welcome to the\nNet Dealer!");
+				else if (o->type == OBJ_PROGRAMS) { sprite = 93; script = ta_shop(&text, SHOP_PROGRAMS, "NaviCust programs\nfor sale!"); }
 				else script = ta_bug_trader(&text);
 				talkers[ntalk].x = wx;
 				talkers[ntalk].y = wy;
@@ -150,6 +155,10 @@ static bool build_layer(void) {
 			break;
 		}
 	}
+	/* the shops' stock, in the game's shop data */
+	ShopItem stock[SHOP_MAX_ITEMS];
+	shop_install(SHOP_DEALER, stock, shop_dealer_stock(run.depth, stock));
+	shop_install(SHOP_PROGRAMS, stock, shop_program_stock(run.depth, stock));
 	/* object sprites are compressed: the map loads them on entry */
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7 && npcs.nsprites < 8) {
