@@ -65,19 +65,15 @@ static uint32_t mystery_slot(int group, int number) {
 
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd) {
 	uint32_t g = (uint32_t)(group - 0x80);
-	/* sprites to decompress for the map: the original's, then the layer's */
+	/* sprites to decompress for the map: the layer's (the original's objects
+	 * are gone, and their sprites would fill the buffer) */
 	uint32_t sprites = sprite_table(group);
 	if (sprites >= 0x08000000u && npcs) {
-		uint8_t list[64];
+		uint8_t list[2 * 8 + 2];
 		int n = 0;
-		uint32_t orig = emu_read32(sprites + (uint32_t)number * 4);
-		for (; orig >= 0x08000000u && n < 40 && emu_read16(orig) != 0xFFFF; orig += 2, n += 2) {
-			list[n] = emu_read8(orig);
-			list[n + 1] = emu_read8(orig + 1);
-		}
-		for (int i = 0; i < npcs->nsprites && n < 60; ++i, n += 2) {
-			list[n] = npcs->sprite_cat[i];
-			list[n + 1] = npcs->sprite_idx[i];
+		for (int i = 0; i < npcs->nsprites && i < 8; ++i) {
+			list[n++] = npcs->sprite_cat[i];
+			list[n++] = npcs->sprite_idx[i];
 		}
 		list[n++] = 0xFF;
 		list[n++] = 0xFF;
@@ -117,7 +113,7 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 		uint32_t pa = mapslot_alloc(place, 16), ca = mapslot_alloc(content, 16);
 		uint16_t flag = (uint16_t)(MAPSLOT_MD_FLAG + i);
 		uint8_t *e = entries + i * 12;
-		e[0] = 5; e[1] = 0; e[2] = (uint8_t)flag; e[3] = (uint8_t)(flag >> 8);   /* green */
+		e[0] = (uint8_t)md[i].type; e[1] = 0; e[2] = (uint8_t)flag; e[3] = (uint8_t)(flag >> 8);
 		put32(e + 4, pa);
 		put32(e + 8, ca);
 		emu_write8(BN6_MYSTERY_PICKS + (uint32_t)i * 2, 0);

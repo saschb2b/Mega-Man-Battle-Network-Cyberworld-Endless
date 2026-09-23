@@ -27,13 +27,6 @@ void ta_end(TextArchive *t);             /* E6 */
 void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
 /* A whole message: open, text, wait, end. */
 int ta_say(TextArchive *t, int mugshot, const char *s);
-/* Service NPCs on the game's own commands: heal to full HP, the Chip Trader
- * (3 chips) and the BugFrag trader. */
-int ta_heal(TextArchive *t);
-int ta_chip_trader(TextArchive *t);
-int ta_bug_trader(TextArchive *t);
-/* A shopkeeper: `greeting`, then shop `shop`'s screen. */
-int ta_shop(TextArchive *t, int shop, const char *greeting);
 /* Writes the archive (u16 offsets, then the scripts); bus address or 0. */
 uint32_t ta_commit(TextArchive *t);
 

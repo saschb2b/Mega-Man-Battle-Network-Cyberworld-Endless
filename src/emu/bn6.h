@@ -5,6 +5,7 @@
 
 /* EWRAM */
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
+#define BN6_TOOLKIT_KEY_ITEMS 0x50        /* eToolkit KeyItemsPtr: a count per key item */
 #define BN6_TOOLKIT_SHOP_DATA 0x54        /* eToolkit ShopDataPtr: 8-byte stock entries of every shop */
 #define BN6_GAMESTATE         0x02001B80u /* eGameState: +0 sub-mode (4 on the map, 8/0xC battle), +4 map group, +5 map number */
 #define BN6_EVENT_FLAGS       0x02001C88u /* eEventFlags: flag n is bit 0x80 >> (n & 7) of byte n / 8 */

@@ -16,17 +16,14 @@
 #include "emu.h"
 #include "encounter.h"
 #include "game.h"
+#include "layer_objs.h"
 #include "loot.h"
-#include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
-#include "npc.h"
-#include "npc_lines.h"
-#include "text.h"
 #include "rom.h"
 #include "run.h"
 #include "save.h"
-#include "shop.h"
+#include "scripts.h"
 
 #define EXIT_REACH 10      /* world units from the exit pad's centre */
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
@@ -41,6 +38,9 @@ static struct {
 	bool gameover;         /* the game's GAME OVER is playing */
 	bool boss_pending;     /* the boss battle was started from the exit */
 	int start_x, start_y;
+	LayerObjs objs;
+	unsigned chosen;       /* choices already acted on (bit per choice) */
+	bool challenge;        /* a challenge battle was started */
 } D;
 
 #define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
@@ -49,39 +49,18 @@ static int main_mode(void) { return emu_read8(emu_read32(BN6_TOOLKIT)); }
 /* walking the net: the game mode on its map sub-mode (not a battle or menu) */
 static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_GAMESTATE) == BN6_SUB_MAP; }
 
+static bool flag_set(int flag) { return emu_read8(BN6_EVENT_FLAGS + (uint32_t)flag / 8u) & (0x80u >> (flag & 7)); }
+static int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }
+
 static void state_path(char *out, size_t n) { snprintf(out, n, "%s/run.state", g_data_dir); }
 
 static const __typeof__(R.layout->net_area[0]) *area(int biome) {
 	return &R.layout->net_area[biome < 0 || biome >= 8 ? 0 : biome];
 }
 
-/* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
- * 5 BugFrags (tested in the game; see docs/ROM_DATA.md). */
-static void mystery_content(const NetObj *o, uint8_t out[8]) {
-	int roll = rng_range(0, 99);
-	char code = '*';
-	int kind = 3, value = 100;
-	if (o->param == 0) {
-		if (roll < 50) { kind = 1; value = roll_chip(run.depth, 0, &code); }
-		else if (roll < 85) value = (100 + rng_range(0, 8) * 50) * (1 + run.depth / 6);
-		else { kind = 5; value = rng_range(3, 8); }
-	} else if (o->param == 1) {
-		if (roll < 60) { kind = 1; value = roll_chip(run.depth, 1, &code); }
-		else value = 800 + run.depth * 60;
-	} else {
-		kind = 1;
-		value = roll_chip(run.depth, 3, &code);
-	}
-	out[0] = (uint8_t)kind;
-	out[1] = 0x20;
-	out[2] = 0xFF;
-	out[3] = (uint8_t)(kind == 1 ? (code == '*' ? 26 : code - 'A') : 0xFF);
-	out[4] = (uint8_t)value;
-	out[5] = (uint8_t)(value >> 8);
-	out[6] = out[7] = 0;
-}
-
 static int layer_biome(void) {
+	extern int net_debug_biome;   /* test hook: --net-biome */
+	if (net_debug_biome >= 0 && net_debug_biome < BIOME_COUNT) return net_debug_biome;
 	if (run.side_kind == LAYER_UNDERNET) return BIOME_UNDERNET;
 	if (run.side_kind == LAYER_SECRET) return BIOME_SECRET;
 	return biome_for_depth(run.depth);
@@ -95,89 +74,18 @@ static bool build_layer(void) {
 	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0] };
 	if (!netmap_build(biome, &lay)) return false;
 
-	mapslot_reset();
-	NpcList npcs = { { 0 }, 0 };
-	static TextArchive text;
-	ta_begin(&text);
-	struct { int x, y, cat, sprite, script; } talkers[16];
-	int ntalk = 0;
-	MysteryData md[16];
-	int nmd = 0;
-	int start_x = 0, start_y = 0;
-	for (int i = 0; i < layer.nobj; ++i) {
-		const NetObj *o = &layer.obj[i];
-		int wx, wy;
-		netmap_world((int)o->x, (int)o->y, &wx, &wy);
-		switch (o->type) {
-		case OBJ_WARP_IN:
-			start_x = wx; start_y = wy;
-			break;
-		case OBJ_EXIT:
-		case OBJ_RETURN:
-			D.exit_x = wx; D.exit_y = wy;
-			if (npcs.n < 32) npcs.script[npcs.n++] = npc_prop(7, 0x22, wx, wy, 0, 0);
-			break;
-		case OBJ_MYSTERY:
-			if (nmd < 16 && npcs.n < 32) {
-				md[nmd].x = wx;
-				md[nmd].y = wy;
-				mystery_content(o, md[nmd].content);
-				npcs.script[npcs.n++] = npc_mystery(nmd);
-				++nmd;
-			}
-			break;
-		case OBJ_NPC:
-		case OBJ_HEAL:
-		case OBJ_TRADER:
-		case OBJ_BUGTRADER:
-		case OBJ_SHOP:
-		case OBJ_PROGRAMS:
-			if (ntalk < 16) {
-				/* Normal Navis and pink navis; Mr. Prog runs services; the
-				 * Chip Trader is its machine (overworld objects 0x5C) */
-				static const int navis[6] = { 62, 64, 65, 66, 69, 87 };
-				int cat = 6, sprite = 60, script;
-				if (o->type == OBJ_NPC) { sprite = navis[o->param % 6]; script = ta_say(&text, -1, npc_line(o->npc_line)); }
-				else if (o->type == OBJ_HEAL) script = ta_heal(&text);
-				else if (o->type == OBJ_TRADER) { cat = 7; sprite = 0x5C; script = ta_chip_trader(&text); }
-				else if (o->type == OBJ_SHOP) script = ta_shop(&text, SHOP_DEALER, "Welcome to the\nNet Dealer!");
-				else if (o->type == OBJ_PROGRAMS) { sprite = 93; script = ta_shop(&text, SHOP_PROGRAMS, "NaviCust programs\nfor sale!"); }
-				else script = ta_bug_trader(&text);
-				talkers[ntalk].x = wx;
-				talkers[ntalk].y = wy;
-				talkers[ntalk].cat = cat;
-				talkers[ntalk].sprite = sprite;
-				talkers[ntalk].script = script;
-				++ntalk;
-			}
-			break;
-		default:
-			break;
-		}
-	}
-	/* the shops' stock, in the game's shop data */
-	ShopItem stock[SHOP_MAX_ITEMS];
-	shop_install(SHOP_DEALER, stock, shop_dealer_stock(run.depth, stock));
-	shop_install(SHOP_PROGRAMS, stock, shop_program_stock(run.depth, stock));
-	/* object sprites are compressed: the map loads them on entry */
-	for (int i = 0; i < ntalk; ++i)
-		if (talkers[i].cat == 7 && npcs.nsprites < 8) {
-			npcs.sprite_cat[npcs.nsprites] = 7 * 4;
-			npcs.sprite_idx[npcs.nsprites++] = (uint8_t)talkers[i].sprite;
-			break;
-		}
-	uint32_t archive = text.n ? ta_commit(&text) : 0;
-	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
-		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, 0, talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script);
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	D.group = a->group;
 	D.number = a->number;
-	if (!mapslot_install(D.group, D.number, &npcs, md, nmd)) return false;
+	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
+	D.exit_x = D.objs.exit_x;
+	D.exit_y = D.objs.exit_y;
+	D.chosen = 0;
 
 	Encounter e = make_encounter(run.depth, biome, false, false);
 	emu_encounter_set(&e);
-	D.start_x = start_x;
-	D.start_y = start_y;
+	D.start_x = D.objs.start_x;
+	D.start_y = D.objs.start_y;
 	D.active = true;
 	D.leaving = 0;
 	D.frame = 0;
@@ -204,11 +112,44 @@ bool director_resume(void) {
 	if (!build_layer()) return false;
 	char path[600];
 	state_path(path, sizeof path);
-	if (emu_load_state(path)) return true;
+	if (emu_load_state(path)) {
+		/* choices made before the checkpoint stay made */
+		for (int i = 0; i < D.objs.nchoices; ++i)
+			if (flag_set(D.objs.choice[i].flag)) D.chosen |= 1u << i;
+		return true;
+	}
 	/* no state (a run from before the game engine): enter the layer fresh */
 	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
 	D.checkpoint = true;
 	return true;
+}
+
+/* A Yes in a layer's choice: a challenge battle, or into a side layer. */
+static bool act_on_choices(void) {
+	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
+	for (int i = 0; i < D.objs.nchoices; ++i) {
+		if ((D.chosen & (1u << i)) || !flag_set(D.objs.choice[i].flag)) continue;
+		D.chosen |= 1u << i;
+		switch (D.objs.choice[i].type) {
+		case OBJ_CHALLENGE: {
+			Encounter e = make_encounter(run.depth + 3, run.biome, true, true);
+			emu_battle_force(&e);
+			D.challenge = true;
+			return true;
+		}
+		case OBJ_UNDERNET:
+			run.side_kind = LAYER_UNDERNET;
+			D.leaving = 1;
+			return true;
+		case OBJ_SECRET_GATE:
+			run.side_kind = LAYER_SECRET;
+			D.leaving = 1;
+			return true;
+		default:
+			break;
+		}
+	}
+	return false;
 }
 
 static void end_run(void) {
@@ -243,8 +184,17 @@ void director_update(void) {
 		if (emu_read8(BN6_BATTLE_RESULT) == 1) {
 			layer.boss_beaten = true;
 			run.bosses_beaten++;
+			if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
 		}
 	}
+	if (D.challenge && !emu_battle_forcing()) {
+		/* back from the challenge (the game gave its reward): random battles again */
+		D.challenge = false;
+		Encounter e = make_encounter(run.depth, run.biome, false, false);
+		emu_encounter_set(&e);
+	}
+	run.fragments = key_item(SCRIPTS_SECRET_DATA);
+	if (act_on_choices()) return;
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
 		D.checkpoint = false;
 		char path[600];
@@ -269,8 +219,9 @@ void director_update(void) {
 			}
 			return;
 		}
-		if (run.side_kind == LAYER_NORMAL) run.depth++;
-		else run.side_kind = LAYER_NORMAL;
+		/* a side layer's exit leads one area deeper too */
+		run.depth++;
+		run.side_kind = LAYER_NORMAL;
 		D.leaving = 1;
 		return;
 	}
