@@ -46,6 +46,7 @@ typedef struct {
 	int steal;     /* frames until a stolen panel returns */
 	uint8_t home;  /* original side */
 	int warn;      /* frames of danger highlight */
+	int blink;     /* >0: the highlight blinks 4 frames on, 4 off (frames lit so far) */
 } Panel;
 
 typedef struct {
@@ -1283,6 +1284,65 @@ static void ai_mettaur(Ent *e, Ent *pl, int sp) {
 	}
 }
 
+/* Swordy (recorded, V1): it follows MegaMan's row a panel at a time inside
+ * its own area and steps up to the front, then lights the two panels ahead,
+ * blinking, for 58 frames and swings the long sword (sound 0xB0); the cut
+ * lands 5 frames later. A swing comes every 168 frames while MegaMan stays
+ * in reach. No warping. */
+static void ai_swordy(Ent *e, Ent *pl, int sp) {
+	const VirusDef *d = e->vd;
+	switch (e->state) {
+	case 0:
+		if (--e->timer > 0) break;
+		e->timer = 40 * sp / 100;
+		if (e->row != pl->row) { if (step_toward_row(e, pl->row)) ent_anim(e, d->anim_move); break; }
+		if (e->col > 0 && walkable(e->col - 1, e->row, e->side, false) && B.field[e->row][e->col - 1].side == e->side) {
+			e->col--;
+			ent_anim(e, d->anim_move);
+			break;
+		}
+		e->state = 1;
+		e->timer = 58;
+		ent_anim(e, 4); /* ready (the game adds the raised sword, anim 7, as a second layer) */
+		for (int c = e->col - 1; c >= e->col - 2 && c >= 0; --c) { B.field[e->row][c].warn = 58; B.field[e->row][c].blink = 1; }
+		break;
+	case 1:
+		if (--e->timer > 0) break;
+		audio_sfx(SFX_SWORD);
+		ent_anim(e, d->anim_attack); /* the swing */
+		e->state = 2;
+		e->timer = 4;
+		break;
+	case 2: /* the crescent (the LongSword effect) 4 frames on */
+		if (--e->timer > 0) break;
+		{
+			Spell *s = spell_new(SP_FX, e->side, e->col - 1, e->row);
+			if (s) {
+				s->x = (float)(foot_x(e->col - 1) - 2);
+				s->y = (float)(foot_y(e->row) - 11);
+				spell_sprite(s, SPR_ATTACK, 0x14, 1, false);
+				s->life = 60;
+				s->flip = true;
+			}
+		}
+		e->state = 3;
+		e->timer = 1;
+		break;
+	case 3: /* the cut lands 5 frames after the sound */
+		if (--e->timer > 0) break;
+		for (int c = e->col - 1; c >= e->col - 2 && c >= 0; --c) strike(e->side, c, e->row, e->atk, e->elem, HF_FLINCH);
+		e->state = 4;
+		e->timer = 168 - 58 - 5 - 40;
+		break;
+	default:
+		if (--e->timer > 0) break;
+		ent_anim(e, d->anim_idle);
+		e->state = 0;
+		e->timer = 40 * sp / 100;
+		break;
+	}
+}
+
 static void ai_virus(Ent *e) {
 	const VirusDef *d = e->vd;
 	Ent *pl = player_target();
@@ -1320,6 +1380,8 @@ static void ai_virus(Ent *e) {
 		}
 		break;
 	case AI_SWORDY:
+		ai_swordy(e, pl, sp);
+		break;
 	case AI_PUNCHER:
 		if (e->state == 0) {
 			if (--e->timer > 0) break;
@@ -1338,17 +1400,9 @@ static void ai_virus(Ent *e) {
 		} else if (e->state == 1) {
 			if (--e->timer == 8) ent_anim(e, d->anim_attack);
 			if (e->timer > 0) break;
-			if (d->ai == AI_SWORDY) {
-				int span = e->ver >= 1 ? 1 : 0;
-				for (int dy = -span; dy <= span; ++dy) strike(e->side, e->col - 1, e->row + dy, e->atk, e->elem, HF_FLINCH);
-				Spell *s = spell_new(SP_FX, e->side, e->col - 1, e->row);
-				if (s) { spell_sprite(s, d->fx_cat, d->fx_idx, d->fx_anim, false); s->life = 30; s->x += 10; s->y -= 14; }
-				audio_sfx(SFX_SWORD);
-			} else {
-				strike(e->side, e->col - 1, e->row, e->atk, ELEM_FIRE, HF_FLINCH);
-				fx(SPR_HIT, 1, 0, foot_x(e->col - 1), foot_y(e->row) - 16);
-				audio_sfx(SFX_HIT);
-			}
+			strike(e->side, e->col - 1, e->row, e->atk, ELEM_FIRE, HF_FLINCH);
+			fx(SPR_HIT, 1, 0, foot_x(e->col - 1), foot_y(e->row) - 16);
+			audio_sfx(SFX_HIT);
 			e->state = 2;
 			e->timer = 30;
 		} else {
@@ -1821,7 +1875,7 @@ static void update_panels(void) {
 	for (int r = 0; r < ROWS; ++r)
 		for (int c = 0; c < COLS; ++c) {
 			Panel *p = &B.field[r][c];
-			if (p->warn > 0) --p->warn;
+			if (p->warn > 0) { --p->warn; if (p->blink) ++p->blink; } else p->blink = 0;
 			if (p->type == PT_BROKEN && p->restore > 0 && --p->restore == 0) p->type = PT_NORMAL;
 			if (p->steal > 0 && --p->steal == 0 && !ent_at(c, r)) p->side = p->home;
 		}
@@ -2319,7 +2373,7 @@ static void draw_field(void) {
 		for (int c = 0; c < COLS; ++c) {
 			Panel *p = &B.field[r][c];
 			int x = field_x() + c * PANEL_W + sx, y = field_y() + r * PANEL_H;
-			if (p->warn > 0) panel_draw_warn(p->type, r, p->side, x, y);
+			if (p->warn > 0 && !(p->blink && ((p->blink - 1) / 4) & 1)) panel_draw_warn(p->type, r, p->side, x, y);
 			else panel_draw(p->type, r, p->side, x, y);
 		}
 	for (int c = 0; c < COLS; ++c) panel_edge_draw(B.field[ROWS - 1][c].side, field_x() + c * PANEL_W + sx, field_y() + ROWS * PANEL_H);

@@ -33,7 +33,8 @@ still an approximation that should be replaced by the original.
 | Cannon, MiniBomb, swords | Original | Sprites, arcs and timing recorded |
 | Other chips | Engine-made where noted in `src/data.c` | Each needs its recorded animation and timing |
 | Mettaur | Original behaviour | Turn-taking and step delays from the disassembly (`ForMettaur_8109EF4`) |
-| Other viruses | Engine-made | Behaviour approximated; the disassembly (`asm31.s`) has each AI |
+| Swordy | Original timing (V1) | Recorded: follows MegaMan's row in its own area, blinking warning on the two panels ahead for 58 frames, swing with sound 0xB0, the LongSword crescent 4 frames later and the cut at 5, every 168 frames; no warping. Still missing: the sword drawn as a second sprite layer in its own palette, and V2/V3's own patterns |
+| Other viruses | Engine-made | Behaviour approximated; the disassembly (`asm31.s`) has each AI (table `off_8109050`, 4 bytes per family) |
 | Navis | Engine-made | Attack patterns invented around their sprites |
 | KillerEye beam, row and column blasts, fallback projectiles | Engine-made | Drawn as rectangles |
 | Crosses and Beast Out | Engine-made | A text banner and a hit effect; the original transformation needs recording |
@@ -57,5 +58,5 @@ Named in the disassembly but not yet tied to a recorded moment: jack-in
 
 Guessed, to be checked against recordings: error 0x69 (the disassembly calls
 it `SOUND_CANT_JACK_IN`), guard 0xBA, recover 0xC7, wave 0x97, flame 0xE5,
-thunder 0xF8, wind 0xFC, grab 0x10E, dash 0xE6, item 0x73, step 0x98 and a
-virus warping 0x76 (`SOUND_LOG_OUT`).
+thunder 0xF8, wind 0xFC, grab 0x10E, dash 0xE6, item 0x73, step 0x98 and
+Champy's warp 0x76 (`SOUND_LOG_OUT`; Swordy no longer warps).
