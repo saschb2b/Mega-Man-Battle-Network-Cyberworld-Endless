@@ -27,6 +27,18 @@ typedef struct {
 	uint32_t battle_bg_table; /* BGAnimData pointer per battle background id */
 	uint32_t battle_bg_anims; /* GFX animation list pointer per id */
 	uint32_t chip_icon_pal;
+	struct {                  /* the title screen (docs/ROM_DATA.md) */
+		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
+		uint32_t bg_map;         /* 32x20 map entries */
+		uint32_t bg_pal;         /* banks 0-13; bank 15 is the text box palette */
+		uint32_t bg_pal15;
+		uint32_t bg_anims;       /* palette animation scripts (the logo's glow) */
+		uint32_t text_tiles;     /* LZ77: PRESS START, NEW GAME, CONTINUE (OBJ tile 1 first) */
+		uint32_t text_pal, menu_pal;
+		uint32_t copy_tiles;     /* LZ77: the copyright line, 8 OBJs of 32x32 */
+		uint32_t copy_pal;
+		uint32_t arrow, arrow_pal; /* menu cursor: 3 frames of 16x16 */
+	} title;
 	uint32_t net_maps;        /* internet map descriptors per group (group 0x80 first) */
 	struct {                  /* the original area each net biome borrows (docs/ROM_DATA.md) */
 		uint8_t group, number;   /* map whose floor panels are learned */

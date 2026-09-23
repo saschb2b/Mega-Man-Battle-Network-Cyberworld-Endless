@@ -79,6 +79,9 @@ SDL_Texture *zenny_image(void);
  * Returns a handle usable wherever a ROM palette offset is expected. */
 uint32_t gfx_palette(const uint16_t colors[16]);
 /* One 8x8 ROM tile with a ROM palette. flip: bit 0 horizontal, bit 1 vertical. */
+/* A tile reference for LZ77 block `lz` (add the offset into its data,
+ * which starts with the game's 4-byte size word) for rom_tile(s). */
+uint32_t gfx_lz_ref(uint32_t lz);
 void rom_tile(uint32_t tile, uint32_t pal, int x, int y, int flip);
 /* A block of consecutive tiles (w x h tiles, row-major, as sprites use). */
 void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int flip);

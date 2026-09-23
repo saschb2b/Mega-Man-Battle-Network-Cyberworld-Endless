@@ -341,14 +341,29 @@ void panel_edge_draw(int side, int x, int y) {
 
 /* A tile is a ROM offset, or 0x80000000 | block << 24 | offset into one of
  * the LZ77 blocks the game decompresses for its UI. */
+static uint32_t extra_lz[8]; /* blocks registered with gfx_lz_ref */
+static int extra_n;
+#define HUD_LZ_N ((int)(sizeof hud_lz_blocks / sizeof *hud_lz_blocks))
+
+uint32_t gfx_lz_ref(uint32_t lz) {
+	int i = 0;
+	while (i < extra_n && extra_lz[i] != lz) ++i;
+	if (i == extra_n) {
+		if (extra_n >= 8) return 0;
+		extra_lz[extra_n++] = lz;
+	}
+	return 0x80000000u | (uint32_t)(HUD_LZ_N + i) << 24;
+}
+
 static const uint8_t *tile_data(uint32_t tile) {
-	static uint8_t *blocks[8];
-	static size_t block_len[8];
+	static uint8_t *blocks[16];
+	static size_t block_len[16];
 	if (!(tile & 0x80000000u)) return tile + 32 <= ROM_SIZE ? R.data + tile : NULL;
-	unsigned b = (tile >> 24) & 0x7F;
+	int b = (int)((tile >> 24) & 0x7F);
 	uint32_t off = tile & 0xFFFFFF;
-	if (b >= sizeof hud_lz_blocks / sizeof *hud_lz_blocks) return NULL;
-	if (!blocks[b]) blocks[b] = lz77_decompress(R.data + hud_lz_blocks[b], ROM_SIZE - hud_lz_blocks[b], &block_len[b]);
+	if (b >= HUD_LZ_N + extra_n || b >= 16) return NULL;
+	uint32_t src = b < HUD_LZ_N ? hud_lz_blocks[b] : extra_lz[b - HUD_LZ_N];
+	if (!blocks[b]) blocks[b] = lz77_decompress(R.data + src, ROM_SIZE - src, &block_len[b]);
 	return blocks[b] && off + 32 <= block_len[b] ? blocks[b] + off : NULL;
 }
 

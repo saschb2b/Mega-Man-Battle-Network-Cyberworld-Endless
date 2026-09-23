@@ -24,6 +24,7 @@ static const RomLayout layouts[] = {
 		.battle_bg_table = 0x082058,
 		.battle_bg_anims = 0x0822E0,
 		.chip_icon_pal = 0x6E3880,
+		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x6BCBCC, 0x02F5F0, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_maps = 0x0329C4,
 		.net_area = {
 			{ 0x90, 0, 62, 1, 0x0018, 0x072B34, 0x072A90, 1 },  /* Central Area 1 */
