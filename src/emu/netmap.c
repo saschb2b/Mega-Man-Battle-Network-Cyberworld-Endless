@@ -25,7 +25,6 @@
 
 #define TILEMAP_AT  (EMU_FREE + 0x10000) /* generated tile map (LZ77) */
 #define COORD_AT    (EMU_FREE + 0x60000) /* generated coordinate data */
-#define OBJECTS_AT  (EMU_FREE + 0x3000)  /* the layer's object list */
 #define MAX_TILE_BYTES 0x14000           /* the game's tile map buffer */
 
 typedef struct { uint32_t key; uint16_t e0, e1; } Sample;
@@ -351,11 +350,5 @@ bool netmap_build(int area, const NetLayout *lay) {
 	place.ex = L->ex;
 	place.ey = L->ey;
 	if (!write_tilemap(L) || !write_walls(L)) return false;
-	/* none of the original map's objects */
-	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
-	if (na->objects) {
-		emu_write8(OBJECTS_AT, 0xFF);
-		emu_write32(0x08000000u + na->objects + (uint32_t)na->number * 4, OBJECTS_AT);
-	}
 	return true;
 }

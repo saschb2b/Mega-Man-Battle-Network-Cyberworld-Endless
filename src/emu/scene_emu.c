@@ -8,6 +8,7 @@
 #include "encounter.h"
 #include "loot.h"
 #include "net.h"
+#include "mapslot.h"
 #include "netmap.h"
 #include "run.h"
 #include "emu.h"
@@ -39,7 +40,7 @@ static void enter(void) {
 	/* a generated layer in Central Area 1's place */
 	layer_generate(run.seed ? run.seed : 5, 1, BIOME_CENTRAL, LAYER_NORMAL);
 	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0] };
-	if (netmap_build(BIOME_CENTRAL, &lay)) {
+	if (netmap_build(BIOME_CENTRAL, &lay) && mapslot_install(0x90, 0, NULL, NULL, 0)) {
 		int wx, wy;
 		netmap_world((int)layer.obj[0].x, (int)layer.obj[0].y, &wx, &wy);
 		emu_warp(0x90, 0, wx, wy, 4);
