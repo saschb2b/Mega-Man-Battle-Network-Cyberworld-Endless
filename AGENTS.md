@@ -19,6 +19,7 @@ states or disassembly files. `.gitignore` covers the usual names; check
 | Player experience, controls, install | [README.md](README.md) |
 | Where ROM data lives and how it was found | [docs/ROM_DATA.md](docs/ROM_DATA.md) |
 | Battle timings measured from the original | [docs/BATTLE_FLOW.md](docs/BATTLE_FLOW.md) |
+| What is original, adapted or still engine-made | [docs/FIDELITY.md](docs/FIDELITY.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout
