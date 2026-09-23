@@ -19,6 +19,7 @@
 /* Per internet group tables (index group - 0x80) */
 #define BN6_NPC_LISTS         0x080347E0u /* NPCList_maps80: per-map lists of NPC script pointers */
 #define BN6_MAP_SCRIPTS       0x08034670u /* (on enter, continuous) per-map map script lists */
+#define BN6_ENTER_GROUP       0x0803093Cu /* EnterMap_InternetMapGroupJumptable: per-group map loaders */
 #define BN6_OBJ_SPAWNERS      0x0803483Cu /* InternetSpawnMapObjectJumptable: per-group spawn routines */
 #define BN6_MYSTERY_DATA      0x080A484Cu /* InternetMysteryDataMapGroupEntries: (group, per-map lists), ends with 1 */
 #define BN6_MYSTERY_PICKS     0x02004348u /* per flag 0x1400+n: chosen placement and content */

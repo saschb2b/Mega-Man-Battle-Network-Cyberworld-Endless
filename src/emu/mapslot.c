@@ -43,6 +43,19 @@ static uint32_t object_table(int group) {
 	return 0;
 }
 
+/* The per-map sprite load lists a group's loader passes to uncompSprite:
+ * the literal of "lsl r1,r1,#2; ldr r0,[pc,#n]; ldr r0,[r0,r1]". */
+static uint32_t sprite_table(int group) {
+	uint32_t fn = emu_read32(BN6_ENTER_GROUP + (uint32_t)(group - 0x80) * 4) & ~1u;
+	if (fn < 0x08000000u) return 0;
+	for (uint32_t pc = fn; pc < fn + 160; pc += 2) {
+		uint16_t op = emu_read16(pc + 2);
+		if (emu_read16(pc) == 0x0089 && (op & 0xFF00) == 0x4800 && emu_read16(pc + 4) == 0x5840)
+			return emu_read32(((pc + 2 + 4) & ~3u) + (uint32_t)(op & 0xFF) * 4);
+	}
+	return 0;
+}
+
 /* The map's list in the Mystery Data table. */
 static uint32_t mystery_slot(int group, int number) {
 	for (uint32_t a = BN6_MYSTERY_DATA; emu_read32(a) != 1; a += 8)
@@ -52,6 +65,25 @@ static uint32_t mystery_slot(int group, int number) {
 
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd) {
 	uint32_t g = (uint32_t)(group - 0x80);
+	/* sprites to decompress for the map: the original's, then the layer's */
+	uint32_t sprites = sprite_table(group);
+	if (sprites >= 0x08000000u && npcs) {
+		uint8_t list[64];
+		int n = 0;
+		uint32_t orig = emu_read32(sprites + (uint32_t)number * 4);
+		for (; orig >= 0x08000000u && n < 40 && emu_read16(orig) != 0xFFFF; orig += 2, n += 2) {
+			list[n] = emu_read8(orig);
+			list[n + 1] = emu_read8(orig + 1);
+		}
+		for (int i = 0; i < npcs->nsprites && n < 60; ++i, n += 2) {
+			list[n] = npcs->sprite_cat[i];
+			list[n + 1] = npcs->sprite_idx[i];
+		}
+		list[n++] = 0xFF;
+		list[n++] = 0xFF;
+		uint32_t at = mapslot_alloc(list, n);
+		if (at) emu_write32(sprites + (uint32_t)number * 4, at);
+	}
 	/* NPCs */
 	uint8_t list[33 * 4];
 	int n = npcs ? npcs->n : 0;

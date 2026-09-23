@@ -21,6 +21,8 @@
 #include "net.h"
 #include "netmap.h"
 #include "npc.h"
+#include "npc_lines.h"
+#include "text.h"
 #include "rom.h"
 #include "run.h"
 #include "save.h"
@@ -94,6 +96,10 @@ static bool build_layer(void) {
 
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0 };
+	static TextArchive text;
+	ta_begin(&text);
+	struct { int x, y, cat, sprite, script; } talkers[16];
+	int ntalk = 0;
 	MysteryData md[16];
 	int nmd = 0;
 	int start_x = 0, start_y = 0;
@@ -119,10 +125,41 @@ static bool build_layer(void) {
 				++nmd;
 			}
 			break;
+		case OBJ_NPC:
+		case OBJ_HEAL:
+		case OBJ_TRADER:
+		case OBJ_BUGTRADER:
+			if (ntalk < 16) {
+				/* Normal Navis and pink navis; Mr. Prog runs services; the
+				 * Chip Trader is its machine (overworld objects 0x5C) */
+				static const int navis[6] = { 62, 64, 65, 66, 69, 87 };
+				int cat = 6, sprite = 60, script;
+				if (o->type == OBJ_NPC) { sprite = navis[o->param % 6]; script = ta_say(&text, -1, npc_line(o->npc_line)); }
+				else if (o->type == OBJ_HEAL) script = ta_heal(&text);
+				else if (o->type == OBJ_TRADER) { cat = 7; sprite = 0x5C; script = ta_chip_trader(&text); }
+				else script = ta_bug_trader(&text);
+				talkers[ntalk].x = wx;
+				talkers[ntalk].y = wy;
+				talkers[ntalk].cat = cat;
+				talkers[ntalk].sprite = sprite;
+				talkers[ntalk].script = script;
+				++ntalk;
+			}
+			break;
 		default:
 			break;
 		}
 	}
+	/* object sprites are compressed: the map loads them on entry */
+	for (int i = 0; i < ntalk; ++i)
+		if (talkers[i].cat == 7 && npcs.nsprites < 8) {
+			npcs.sprite_cat[npcs.nsprites] = 7 * 4;
+			npcs.sprite_idx[npcs.nsprites++] = (uint8_t)talkers[i].sprite;
+			break;
+		}
+	uint32_t archive = text.n ? ta_commit(&text) : 0;
+	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
+		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, 0, talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script);
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	D.group = a->group;
 	D.number = a->number;

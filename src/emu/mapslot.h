@@ -10,6 +10,9 @@
 typedef struct {
 	uint32_t script[32];
 	int n;
+	/* compressed sprites the NPCs use (list byte offset, index), loaded with the map */
+	uint8_t sprite_cat[8], sprite_idx[8];
+	int nsprites;
 } NpcList;
 
 /* One Mystery Data: flag 0x1400 + index, where, and what it holds (the
