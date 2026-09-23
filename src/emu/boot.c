@@ -12,14 +12,13 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bytes.h"
 #include "emu.h"
 #include "game.h"
 
 /* Engine hooks in the free ROM space */
 #define WARP_DATA (EMU_FREE + 0x000)
 #define WARP_STUB (EMU_FREE + 0x100)
-
-static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 
 static void run(int frames, uint32_t keys) {
 	for (int i = 0; i < frames; ++i) emu_frame(keys);

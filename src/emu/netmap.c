@@ -20,11 +20,14 @@
 #include <string.h>
 
 #include "area_src.h"
+#include "bytes.h"
+#include "coords.h"
+#include "bytes.h"
 #include "emu.h"
+#include "lz.h"
 #include "rom.h"
 
 #define TILEMAP_AT  (EMU_FREE + 0x10000) /* generated tile map (LZ77) */
-#define COORD_AT    (EMU_FREE + 0x60000) /* generated coordinate data */
 #define MAX_TILE_BYTES 0x14000           /* the game's tile map buffer */
 
 #define LEVELS 5                         /* class fallback levels, see level_mask */
@@ -212,26 +215,13 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 }
 
 static const NetLayout *cur;
+static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 static bool floor_at(int A, int B) {
 	int x = B + place.gx0, y = -A + place.gy0;
 	return x >= 0 && y >= 0 && x < cur->gw && y < cur->gh && cur->cell[y * cur->gw + x];
 }
 
 /* ---- output ---- */
-
-static size_t lz_literal(const uint8_t *src, size_t n, uint8_t *out) {
-	/* GBA LZ77 (type 0x10) made of literal blocks only */
-	size_t o = 0;
-	out[o++] = 0x10; out[o++] = (uint8_t)n; out[o++] = (uint8_t)(n >> 8); out[o++] = (uint8_t)(n >> 16);
-	for (size_t i = 0; i < n; i += 8) {
-		out[o++] = 0;
-		for (size_t k = 0; k < 8; ++k) out[o++] = i + k < n ? src[i + k] : 0;
-	}
-	while (o & 3) out[o++] = 0;
-	return o;
-}
-
-static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 
 static bool write_tilemap(const Learned *L) {
 	/* extent of the floor around the world origin */
@@ -283,13 +273,7 @@ static bool write_tilemap(const Learned *L) {
 	return true;
 }
 
-typedef struct { uint16_t key, type; } Wall;
-static int cmp_wall(const void *a, const void *b) {
-	const Wall *x = a, *y = b;
-	return x->key != y->key ? (x->key < y->key ? -1 : 1) : (x->type - y->type);
-}
-
-static bool floor_cell(int cx, int cy) {
+bool netmap_floor_cell(int cx, int cy) {
 	/* the cell centre, relative to the panel edges */
 	int X = cx * 8 + 4 - place.ex, Y = cy * 8 + 4 - place.ey;
 	int A = floordiv(X, 32), B = floordiv(Y, 32);
@@ -298,69 +282,6 @@ static bool floor_cell(int cx, int cy) {
 	if (onx && !floor_at(A - 1, B)) return false;
 	if (ony && !floor_at(A, B - 1)) return false;
 	if (onx && ony && !floor_at(A - 1, B - 1)) return false;
-	return true;
-}
-
-static bool write_walls(const Learned *L) {
-	int cap = 8192, n = 0;
-	Wall *w = malloc((size_t)cap * sizeof *w);
-	for (int cy = -126; cy < 126; ++cy)
-		for (int cx = -126; cx < 126; ++cx) {
-			if (floor_cell(cx, cy)) continue;
-			bool mx = floor_cell(cx - 1, cy), px = floor_cell(cx + 1, cy), my = floor_cell(cx, cy - 1), py = floor_cell(cx, cy + 1);
-			int types[4], nt = 0;
-			if (mx) types[nt++] = 1;
-			if (px) types[nt++] = 2;
-			if (my) types[nt++] = 3;
-			if (py) types[nt++] = 4;
-			if (!nt) {
-				if (floor_cell(cx - 1, cy + 1)) types[nt++] = 7;
-				else if (floor_cell(cx - 1, cy - 1)) types[nt++] = 5;
-				else if (floor_cell(cx + 1, cy - 1)) types[nt++] = 6;
-				else if (floor_cell(cx + 1, cy + 1)) types[nt++] = 8;
-			}
-			for (int k = 0; k < nt && n < cap; ++k) w[n++] = (Wall){ (uint16_t)((cy + 127) * 254 + (cx + 127)), (uint16_t)types[k] };
-		}
-	qsort(w, (size_t)n, sizeof *w, cmp_wall);
-	if (getenv("CYBERWORLD_EMU_DEBUG")) {
-		for (int cy = -20; cy < 36; ++cy) {
-			char line[80];
-			for (int cx = -20; cx < 36; ++cx) {
-				char c = floor_cell(cx, cy) ? '.' : ' ';
-				for (int i = 0; i < n; ++i) if (w[i].key == (cy + 127) * 254 + (cx + 127)) c = (char)('0' + w[i].type);
-				line[cx + 20] = c;
-			}
-			line[56] = 0;
-			fprintf(stderr, "%4d %s\n", cy * 8, line);
-		}
-	}
-	/* section 0: count, (key, offset) entries, then one shape per type */
-	size_t s0 = 4 + (size_t)n * 4 + 8 * 4;
-	size_t total = s0 + 12;
-	uint8_t *d = calloc(total, 1);
-	put32(d, (uint32_t)n);
-	uint16_t shape_off = (uint16_t)(n * 4); /* relative to d + 4 */
-	for (int i = 0; i < n; ++i) {
-		uint16_t off = (uint16_t)(shape_off + (w[i].type - 1) * 4);
-		d[4 + i * 4] = (uint8_t)w[i].key; d[5 + i * 4] = (uint8_t)(w[i].key >> 8);
-		d[6 + i * 4] = (uint8_t)off; d[7 + i * 4] = (uint8_t)(off >> 8);
-	}
-	for (int t = 1; t <= 8; ++t) {
-		uint8_t *sh = d + 4 + shape_off + (t - 1) * 4;
-		sh[0] = 0; sh[1] = 0; sh[2] = 8; sh[3] = (uint8_t)t;   /* z 0, no flag, height 8 */
-	}
-	/* sections 1-3 (height changes, layer priorities, triggers) stay empty */
-	uint8_t *out = malloc(16 + total + total / 8 + 16);
-	put32(out, 0);
-	put32(out + 4, (uint32_t)s0);
-	put32(out + 8, (uint32_t)(s0 + 4));
-	put32(out + 12, (uint32_t)(s0 + 8));
-	size_t lz = lz_literal(d, total, out + 16);
-	emu_write(COORD_AT, out, 16 + lz);
-	emu_write32(0x08000000u + L->coord_slot, COORD_AT);
-	free(out);
-	free(d);
-	free(w);
 	return true;
 }
 
@@ -385,6 +306,8 @@ bool netmap_build(int area, const NetLayout *lay) {
 	place.gy0 = (y0 + y1) / 2;
 	place.ex = L->ex;
 	place.ey = L->ey;
-	if (!write_tilemap(L) || !write_walls(L)) return false;
-	return true;
+	coord_slot = L->coord_slot;
+	return write_tilemap(L) && coords_write(coord_slot, NULL, 0);
 }
+
+bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n); }

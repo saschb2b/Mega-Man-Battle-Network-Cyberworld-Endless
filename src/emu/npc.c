@@ -7,6 +7,7 @@
  * address), 0x44 text script (index, archive). */
 #include "npc.h"
 
+#include "bytes.h"
 #include "emu.h"
 #include "mapslot.h"
 
@@ -35,8 +36,6 @@ uint32_t npc_prop(int category, int index, int x, int y, int z, int anim) {
 	};
 	return mapslot_alloc(s, sizeof s);
 }
-
-static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 
 uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag) {
 	uint8_t s[40] = {

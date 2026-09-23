@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "bytes.h"
 #include "data.h"
 #include "emu.h"
 #include "run.h"
@@ -16,8 +17,6 @@
 #define ROLL        0x080ABD30u        /* the encounter roll (returns BattleSettings*) */
 #define SETTINGS    (EMU_FREE + 0x200)
 #define ENTITIES    (EMU_FREE + 0x220)
-
-static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 
 /* The roll keeps its own chance: its first 12 bytes (position independent)
  * move into a trampoline that jumps back into it, and a wrapper swaps a

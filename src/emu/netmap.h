@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "coords.h"
+
 /* A layer: panels on a gw x gh grid (1 = floor). Grid x runs down-right on
  * screen, y down-left, as in the layer generator. */
 typedef struct {
@@ -21,5 +23,9 @@ bool netmap_build(int area, const NetLayout *lay);
 void netmap_world(int x, int y, int *wx, int *wy);
 /* The grid panel under world (wx, wy), or false outside the grid. */
 bool netmap_panel(int wx, int wy, int *x, int *y);
+/* Whether wall cell (cx, cy) (8x8 world units) lies on the last layer's floor. */
+bool netmap_floor_cell(int cx, int cy);
+/* The layer's warp pads (the walls are written again with them). */
+bool netmap_set_pads(const CoordPad *pads, int n);
 
 #endif

@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bytes.h"
 #include "emu.h"
 #include "flags.h"
 
@@ -19,8 +20,6 @@
 #define SCRATCH_END (EMU_FREE + 0x10000)
 
 static uint32_t next = SCRATCH;
-
-static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 
 void mapslot_reset(void) { next = SCRATCH; }
 
