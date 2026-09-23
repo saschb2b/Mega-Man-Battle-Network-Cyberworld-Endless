@@ -15,6 +15,7 @@
 #include "boot.h"
 #include "emu.h"
 #include "encounter.h"
+#include "flags.h"
 #include "game.h"
 #include "layer_objs.h"
 #include "mapslot.h"
@@ -46,6 +47,7 @@ static struct {
 	bool challenge;        /* a challenge battle was started */
 	bool in_battle;        /* a battle is on */
 	int foes;              /* viruses in the battle the game will start next */
+	int astray;            /* frames MegaMan has spent on another map */
 } D;
 
 /* The next battle's enemies, for the game's encounter roll. */
@@ -56,12 +58,12 @@ static void set_encounter(const Encounter *e, bool force) {
 }
 
 #define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
+#define ASTRAY_FRAMES     90     /* on another map this long: warp back */
 
 static int main_mode(void) { return emu_read8(emu_read32(BN6_TOOLKIT)); }
 /* walking the net: the game mode on its map sub-mode (not a battle or menu) */
 static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_GAMESTATE) == BN6_SUB_MAP; }
 
-static bool flag_set(int flag) { return emu_read8(BN6_EVENT_FLAGS + (uint32_t)flag / 8u) & (0x80u >> (flag & 7)); }
 static int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }
 
 static const __typeof__(R.layout->net_area[0]) *area(int biome) {
@@ -73,6 +75,13 @@ static int layer_biome(void) {
 	if (run.side_kind == LAYER_UNDERNET) return BIOME_UNDERNET;
 	if (run.side_kind == LAYER_SECRET) return BIOME_SECRET;
 	return biome_for_depth(run.depth);
+}
+
+/* MegaMan stays in the run: no jacking out, and no PET save to the game's
+ * own flash (the run keeps its checkpoints). */
+static void lock_run(void) {
+	flag_set(BN6_FLAG_NO_JACK);
+	flag_set(BN6_FLAG_NO_PET_SAVE);
 }
 
 static bool build_layer(void) {
@@ -105,6 +114,7 @@ static bool build_layer(void) {
 
 bool director_start_layer(void) {
 	if (!build_layer()) return false;
+	lock_run();
 	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
 	D.checkpoint = true;
 	return true;
@@ -123,9 +133,10 @@ bool director_resume(void) {
 	char path[600];
 	save_state_path(path, sizeof path);
 	if (emu_load_state(path)) {
+		lock_run();
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
-			if (flag_set(D.objs.choice[i].flag)) D.chosen |= 1u << i;
+			if (flag_get(D.objs.choice[i].flag)) D.chosen |= 1u << i;
 		/* enter the map again where MegaMan stood: the game reloads its NPCs
 		 * and tiles from this build's tables, which a state does not hold */
 		int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
@@ -142,7 +153,7 @@ bool director_resume(void) {
 static bool act_on_choices(void) {
 	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
 	for (int i = 0; i < D.objs.nchoices; ++i) {
-		if ((D.chosen & (1u << i)) || !flag_set(D.objs.choice[i].flag)) continue;
+		if ((D.chosen & (1u << i)) || !flag_get(D.objs.choice[i].flag)) continue;
 		D.chosen |= 1u << i;
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
@@ -226,8 +237,15 @@ void director_update(void) {
 		if (--D.leaving == 0) director_start_layer();
 		return;
 	}
-	/* in the net (not in a battle or menu): the player object is on this map */
-	if (emu_read8(BN6_GAMESTATE + 4) != D.group || emu_read8(BN6_GAMESTATE + 5) != D.number) return;
+	/* on another map (a story warp the run does not use): back to the layer */
+	if (emu_read8(BN6_GAMESTATE + 4) != D.group || emu_read8(BN6_GAMESTATE + 5) != D.number) {
+		if (++D.astray > ASTRAY_FRAMES) {
+			D.astray = 0;
+			emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+		}
+		return;
+	}
+	D.astray = 0;
 	int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	if (abs(x - D.exit_x) <= EXIT_REACH && abs(y - D.exit_y) <= EXIT_REACH) {
 		/* a boss layer's navi guards the exit: the game's own navi battle */

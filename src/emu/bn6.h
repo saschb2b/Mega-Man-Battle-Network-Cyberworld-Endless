@@ -19,6 +19,10 @@
 
 #define BN6_ENGINE_MARK       0x0203FFF0u /* past everything the game uses: the engine's stubs signal here */
 
+/* Event flags */
+#define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
+#define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
+
 /* Per internet group tables (index group - 0x80) */
 #define BN6_NPC_LISTS         0x080347E0u /* NPCList_maps80: per-map lists of NPC script pointers */
 #define BN6_MAP_SCRIPTS       0x08034670u /* (on enter, continuous) per-map map script lists */

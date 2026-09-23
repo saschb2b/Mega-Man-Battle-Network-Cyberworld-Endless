@@ -30,7 +30,8 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 
 The engine also rewrites the stock of the game's shops 0 and 1 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags
-(`0x1400`+) and choice flags (`0x1440`+) it uses, and borrows cbGameState
+(`0x1400`+) and choice flags (`0x1440`+) it uses, sets the flags that stop
+jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState
 (`0x080050EC`) for one frame to warp.
 
 ## A layer
@@ -48,7 +49,8 @@ in the initial table in ROM, `shop.c`), clears the Mystery Data flags
 `director.c` then watches the game: MegaMan on the exit pad (the next layer,
 or the boss battle on boss layers), choices made in text (event flags set by
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER
-(the run ends), and a checkpoint shortly after each arrival (`run.sav` plus
+(the run ends), MegaMan on any other map for 90 frames (warped back to
+the layer's start), and a checkpoint shortly after each arrival (`run.sav` plus
 the core's `run.state`). CONTINUE loads the state and enters the map again,
 so the game reloads it from the current build's tables.
 

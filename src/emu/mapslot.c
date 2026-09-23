@@ -13,6 +13,7 @@
 
 #include "bn6.h"
 #include "emu.h"
+#include "flags.h"
 
 #define SCRATCH     (EMU_FREE + 0x3000)  /* bump allocator for layer data */
 #define SCRATCH_END (EMU_FREE + 0x10000)
@@ -119,8 +120,7 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 		emu_write8(BN6_MYSTERY_PICKS + (uint32_t)i * 2, 0);
 		emu_write8(BN6_MYSTERY_PICKS + (uint32_t)i * 2 + 1, 0);
 		/* not taken yet */
-		uint32_t fb = BN6_EVENT_FLAGS + flag / 8u;
-		emu_write8(fb, (uint8_t)(emu_read8(fb) & ~(0x80u >> (flag & 7))));
+		flag_clear(flag);
 	}
 	memset(entries + nmd * 12, 0, 12);
 	uint32_t md_at = mapslot_alloc(entries, (nmd + 1) * 12);

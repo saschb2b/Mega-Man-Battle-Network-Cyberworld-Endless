@@ -3,6 +3,7 @@
 
 #include "bn6.h"
 #include "emu.h"
+#include "flags.h"
 #include "game.h"
 #include "loot.h"
 #include "mapslot.h"
@@ -151,8 +152,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.script = o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
 				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag) : ta_secret_gate(&text, flag);
 			/* not chosen yet */
-			uint32_t fb = BN6_EVENT_FLAGS + (uint32_t)flag / 8u;
-			emu_write8(fb, (uint8_t)(emu_read8(fb) & ~(0x80u >> (flag & 7))));
+			flag_clear(flag);
 		}
 		if (tk.script >= 0 && ntalk < 16) talkers[ntalk++] = tk;
 	}
