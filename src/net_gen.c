@@ -19,8 +19,11 @@ bool is_boss_depth(int depth) {
 	return p % 3 == 2 || p == 18;
 }
 
+/* Rooms keep to the top-left GEN_SIZE cells: a cell is a 64x32 panel. */
+#define GEN_SIZE 40
+
 static bool room_fits(const Room *r) {
-	if (r->x < 2 || r->y < 2 || r->x + r->w > MAP_W - 2 || r->y + r->h > MAP_H - 2) return false;
+	if (r->x < 2 || r->y < 2 || r->x + r->w > GEN_SIZE - 2 || r->y + r->h > GEN_SIZE - 2) return false;
 	for (int i = 0; i < layer.nrooms; ++i) {
 		const Room *o = &layer.rooms[i];
 		if (r->x < o->x + o->w + 3 && o->x < r->x + r->w + 3 && r->y < o->y + o->h + 3 && o->y < r->y + r->h + 3) return false;
@@ -120,10 +123,10 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 	if (want > MAX_ROOMS) want = MAX_ROOMS;
 	for (int tries = 0; tries < 400 && layer.nrooms < want; ++tries) {
 		Room r;
-		r.w = rng_range(4, 8);
-		r.h = rng_range(4, 8);
-		r.x = rng_range(2, MAP_W - r.w - 2);
-		r.y = rng_range(2, MAP_H - r.h - 2);
+		r.w = rng_range(3, 5);
+		r.h = rng_range(3, 5);
+		r.x = rng_range(2, GEN_SIZE - r.w - 2);
+		r.y = rng_range(2, GEN_SIZE - r.h - 2);
 		r.corrupt = false;
 		if (!room_fits(&r)) continue;
 		layer.rooms[layer.nrooms++] = r;
@@ -150,7 +153,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 		int ax, ay, bx, by;
 		room_center(&layer.rooms[ba], &ax, &ay);
 		room_center(&layer.rooms[bb], &bx, &by);
-		corridor(ax, ay, bx, by, rng_range(0, 3) == 0 ? 3 : 2);
+		corridor(ax, ay, bx, by, rng_range(0, 2) == 0 ? 1 : 2);
 	}
 	for (int k = 0; k < 2 && layer.nrooms > 3; ++k) {
 		int a = rng_range(0, layer.nrooms - 1), b = rng_range(0, layer.nrooms - 1);
@@ -158,7 +161,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 		int ax, ay, bx, by;
 		room_center(&layer.rooms[a], &ax, &ay);
 		room_center(&layer.rooms[b], &bx, &by);
-		if (abs(ax - bx) + abs(ay - by) < 28) corridor(ax, ay, bx, by, 2);
+		if (abs(ax - bx) + abs(ay - by) < 18) corridor(ax, ay, bx, by, 1);
 	}
 
 	layer.start_room = 0;
