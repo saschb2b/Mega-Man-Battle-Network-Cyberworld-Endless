@@ -52,7 +52,22 @@ static bool read_blob(const char *name, uint32_t magic, void *data, size_t n) {
 	return ok;
 }
 
+void save_state_path(char *out, size_t n) { path(out, n, "run.state"); }
+
 void save_init(void) {
+	/* the game's state for the run's checkpoint lived beside the game before */
+	char old[600], cur[600];
+	snprintf(old, sizeof old, "%s/run.state", g_data_dir);
+	save_state_path(cur, sizeof cur);
+	FILE *f = fopen(cur, "rb");
+	if (f) fclose(f);
+	else if ((f = fopen(old, "rb")) != NULL) {
+		fclose(f);
+		char dir[600];
+		snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
+		mkdir(dir, 0755);
+		rename(old, cur);
+	}
 	if (!read_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
 	if (!profile.music_volume) profile.music_volume = 9;
 	if (!profile.sfx_volume) profile.sfx_volume = 9;
@@ -79,6 +94,8 @@ bool load_run(void) {
 void save_delete(void) {
 	char file[600];
 	path(file, sizeof file, "run.sav");
+	remove(file);
+	save_state_path(file, sizeof file);
 	remove(file);
 }
 

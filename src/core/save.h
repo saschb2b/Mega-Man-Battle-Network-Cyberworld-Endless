@@ -3,6 +3,7 @@
 #define SAVE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef struct {
 	int runs;
@@ -23,7 +24,10 @@ void save_init(void);
 bool save_exists(void);
 bool save_run(void);
 bool load_run(void);
+/* Deletes the run's save and its game state. */
 void save_delete(void);
+/* Where the run's checkpoint keeps the game's state. */
+void save_state_path(char *out, size_t n);
 void profile_save(void);
 void profile_record_run(void);
 

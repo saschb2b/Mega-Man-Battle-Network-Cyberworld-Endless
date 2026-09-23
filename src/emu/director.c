@@ -63,8 +63,6 @@ static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_
 static bool flag_set(int flag) { return emu_read8(BN6_EVENT_FLAGS + (uint32_t)flag / 8u) & (0x80u >> (flag & 7)); }
 static int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }
 
-static void state_path(char *out, size_t n) { snprintf(out, n, "%s/run.state", g_data_dir); }
-
 static const __typeof__(R.layout->net_area[0]) *area(int biome) {
 	return &R.layout->net_area[biome < 0 || biome >= 8 ? 0 : biome];
 }
@@ -121,7 +119,7 @@ bool director_resume(void) {
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!build_layer()) return false;
 	char path[600];
-	state_path(path, sizeof path);
+	save_state_path(path, sizeof path);
 	if (emu_load_state(path)) {
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
@@ -167,9 +165,6 @@ static bool act_on_choices(void) {
 }
 
 static void end_run(void) {
-	char path[600];
-	state_path(path, sizeof path);
-	remove(path);
 	profile_record_run();
 	save_delete();
 	run.active = false;
@@ -221,7 +216,7 @@ void director_update(void) {
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
 		D.checkpoint = false;
 		char path[600];
-		state_path(path, sizeof path);
+		save_state_path(path, sizeof path);
 		save_run();
 		emu_save_state(path);
 	}

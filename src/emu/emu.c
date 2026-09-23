@@ -119,10 +119,15 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 
 bool emu_save_state(const char *path) {
 	if (!core) return false;
-	struct VFile *vf = VFileOpen(path, O_CREAT | O_TRUNC | O_RDWR);
+	/* written beside, then renamed over: a power cut keeps the old state */
+	char tmp[640];
+	snprintf(tmp, sizeof tmp, "%s.tmp", path);
+	struct VFile *vf = VFileOpen(tmp, O_CREAT | O_TRUNC | O_RDWR);
 	if (!vf) return false;
 	bool ok = mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
 	vf->close(vf);
+	if (ok) ok = rename(tmp, path) == 0;
+	else remove(tmp);
 	return ok;
 }
 
