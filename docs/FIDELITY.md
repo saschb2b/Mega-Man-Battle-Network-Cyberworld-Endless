@@ -16,7 +16,7 @@ use.
 | Dialogue | Original text engine | Lines written by the engine in the game's text script language |
 | Shops, Chip Trader, BugFrag Trader, healing | Original | The game's screens and commands; stock chosen by the engine |
 | Battles, rewards, Busting Level | Original | Encounters chosen by the engine (enemies, background, music) |
-| Boss navis | Original battles | Started when MegaMan reaches a boss layer's exit; not shown on the net |
+| Boss navis | Original sprites and battles | HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan, ProtoMan, DiveMan and JudgeMan wait before the exit and ask to fight; the others meet MegaMan at the exit pad |
 | Choices (challenge, Undernet, Secret Area) | Original text and flags | Yes sets an event flag the engine acts on |
 | Layer changes | Original warp | The engine adds no fade of its own |
 | Screen | Adapted | 240x160 at a whole-number scale with black borders |
@@ -24,7 +24,6 @@ use.
 ## Known gaps
 
 - Area names show the game's padding as `___` before some names.
-- Boss navis could stand on the net and talk before their battle.
 - Generated layers do not use the game's layer-priority or Z-modifier
   sections, so there are no ramps or raised platforms.
 - Talking to a pad (the Secret Area gate) needs a press of A beside it;

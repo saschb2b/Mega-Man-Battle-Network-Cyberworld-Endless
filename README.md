@@ -44,7 +44,8 @@ buster; L and R open the Custom screen; Start opens the PET.
 
 - **Layers.** Each layer is a new layout of rooms and walkways built from one
   of the game's areas. The exit pad leads one layer deeper. Every third
-  layer, a Navi guards the exit in the game's own navi battle.
+  layer, a Navi guards the exit and fights MegaMan in the game's own navi
+  battle.
 - **Areas.** The first four acts visit Central, Seaside, Sky and Green Area in
   a random order, then the Graveyard and the Undernet. Layer 19 is the
   Underground. After that the cycle starts again, harder each time.

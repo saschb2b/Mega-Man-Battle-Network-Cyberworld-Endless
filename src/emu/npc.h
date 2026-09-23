@@ -12,7 +12,8 @@ uint32_t npc_mystery(int index);
  * category is the sprite list (7 overworld objects), index its sprite. */
 uint32_t npc_prop(int category, int index, int x, int y, int z, int anim);
 
-/* A standing NPC that talks with `script` of the text archive at `archive`. */
-uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script);
+/* A standing NPC that talks with `script` of the text archive at `archive`,
+ * and leaves once event flag `gone_flag` is set (-1: never). */
+uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag);
 
 #endif

@@ -115,3 +115,16 @@ int ta_secret_gate(TextArchive *t, int flag) {
 	ta_end(t);
 	return i;
 }
+
+int ta_boss(TextArchive *t, int flag) {
+	int no = closing(t);
+	int i = ta_script(t);
+	ta_open(t);
+	ta_text(t, "So you made it\nthis far.");
+	ta_wait(t);
+	ta_clear(t);
+	ask(t, "The way on is\nthrough me. Fight?\n", no);
+	flag_set(t, flag);
+	ta_end(t);
+	return i;
+}

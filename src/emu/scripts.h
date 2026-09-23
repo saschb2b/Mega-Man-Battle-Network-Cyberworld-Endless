@@ -20,5 +20,7 @@ int ta_shop(TextArchive *t, int shop, const char *greeting);
 int ta_challenge(TextArchive *t, int flag);
 int ta_undernet(TextArchive *t, int flag);
 int ta_secret_gate(TextArchive *t, int flag);
+/* The layer's guardian Navi: Yes starts its battle. */
+int ta_boss(TextArchive *t, int flag);
 
 #endif

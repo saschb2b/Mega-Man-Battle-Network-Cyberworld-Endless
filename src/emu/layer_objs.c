@@ -72,7 +72,19 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
 }
 
-typedef struct { int x, y, cat, sprite, script; } Talker;
+typedef struct { int x, y, cat, sprite, script, gone_flag; } Talker;
+
+/* Overworld sprites (list 6) of the Navis Gregar has on the net, by navi
+ * index; the Falzar Navis' entries are placeholders. */
+static int navi_sprite(int navi) {
+	static const struct { uint8_t navi, sprite; } sprites[] = {
+		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
+		{ 11, 0x3B }, { 13, 0x52 }, { 15, 0x55 },                          /* Proto, Dive, Judge */
+	};
+	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
+		if (sprites[i].navi == navi) return sprites[i].sprite;
+	return -1;
+}
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
@@ -84,6 +96,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	MysteryData md[16];
 	int nmd = 0;
 	out->nchoices = 0;
+	out->boss_gone_flag = -1;
 	/* ScrtData lie in deep layers until three are out there */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
@@ -91,8 +104,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		const NetObj *o = &layer.obj[i];
 		int wx, wy;
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
-		Talker tk = { wx, wy, 6, SPR_PROG, -1 };
-		int choice = -1;
+		Talker tk = { wx, wy, 6, SPR_PROG, -1, -1 };
+		bool asks = false;   /* a Yes/No the director acts on */
 		switch (o->type) {
 		case OBJ_WARP_IN:
 			out->start_x = wx; out->start_y = wy;
@@ -139,18 +152,28 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.sprite = SPR_PROG_BLUE;
 			tk.script = ta_shop(&text, SHOP_PROGRAMS, "NaviCust programs\nfor sale!");
 			break;
-		case OBJ_CHALLENGE: choice = 1; tk.cat = 7; tk.sprite = SPR_SERVER; break;
-		case OBJ_UNDERNET: choice = 1; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
-		case OBJ_SECRET_GATE: choice = 1; tk.cat = 7; tk.sprite = SPR_GATE; break;
+		case OBJ_CHALLENGE: asks = true; tk.cat = 7; tk.sprite = SPR_SERVER; break;
+		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
+		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; break;
+		case OBJ_BOSS:
+			/* a Navi with an overworld sprite waits before the exit; the
+			 * others meet MegaMan at the exit pad itself */
+			tk.sprite = navi_sprite(o->param);
+			if (tk.sprite < 0) break;
+			asks = true;
+			tk.gone_flag = out->boss_gone_flag = LAYER_BOSS_GONE_FLAG;
+			flag_clear(LAYER_BOSS_GONE_FLAG);
+			break;
 		default:
 			break;
 		}
-		if (choice >= 0 && out->nchoices < LAYER_MAX_CHOICES) {
+		if (asks && out->nchoices < LAYER_MAX_CHOICES) {
 			int flag = LAYER_FLAG_BASE + out->nchoices;
 			out->choice[out->nchoices].type = o->type;
 			out->choice[out->nchoices++].flag = flag;
 			tk.script = o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
-				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag) : ta_secret_gate(&text, flag);
+				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag)
+				: o->type == OBJ_BOSS ? ta_boss(&text, flag) : ta_secret_gate(&text, flag);
 			/* not chosen yet */
 			flag_clear(flag);
 		}
@@ -165,6 +188,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
 		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, 0,
-			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script);
+			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script, talkers[i].gone_flag);
 	return mapslot_install(group, number, &npcs, md, nmd);
 }

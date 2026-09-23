@@ -150,7 +150,16 @@ bool director_resume(void) {
 	return true;
 }
 
-/* A Yes in a layer's choice: a challenge battle, or into a side layer. */
+/* The layer's guardian: the game's own navi battle. */
+static void start_boss(void) {
+	if (D.boss_pending) return;
+	Encounter e = make_boss(run.depth, run.biome, layer.boss_navi);
+	set_encounter(&e, true);
+	D.boss_pending = true;
+}
+
+/* A Yes in a layer's choice: a challenge or guardian battle, or into a side
+ * layer. */
 static bool act_on_choices(void) {
 	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
 	for (int i = 0; i < D.objs.nchoices; ++i) {
@@ -163,6 +172,9 @@ static bool act_on_choices(void) {
 			D.challenge = true;
 			return true;
 		}
+		case OBJ_BOSS:
+			start_boss();
+			return true;
 		case OBJ_UNDERNET:
 			run.side_kind = LAYER_UNDERNET;
 			D.leaving = 1;
@@ -217,6 +229,7 @@ void director_update(void) {
 			layer.boss_beaten = true;
 			run.bosses_beaten++;
 			powers_after_boss(layer.boss_navi, run.biome);
+			if (D.objs.boss_gone_flag >= 0) flag_set(D.objs.boss_gone_flag);
 			if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
 		}
 	}
@@ -252,11 +265,7 @@ void director_update(void) {
 	if (abs(x - D.exit_x) <= EXIT_REACH && abs(y - D.exit_y) <= EXIT_REACH) {
 		/* a boss layer's navi guards the exit: the game's own navi battle */
 		if (layer.boss_layer && !layer.boss_beaten) {
-			if (!D.boss_pending) {
-				Encounter e = make_boss(run.depth, run.biome, layer.boss_navi);
-				set_encounter(&e, true);
-				D.boss_pending = true;
-			}
+			start_boss();
 			return;
 		}
 		/* a side layer's exit leads one area deeper too */
