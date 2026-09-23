@@ -2,7 +2,6 @@
 #include "emu.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <SDL.h>
@@ -13,6 +12,11 @@
 #include <mgba-util/vfs.h>
 
 #define RING 16384 /* stereo frames of buffered sound */
+/* The GBA runs at 59.73 Hz and frames are paced at 60, so the core makes a
+ * little more sound than is played: keep the buffer near LAT_TARGET frames
+ * (about 32 ms) by nudging the output rate, and drop sound past LAT_MAX. */
+#define LAT_TARGET 1536
+#define LAT_MAX    6144
 
 static struct mCore *core;
 static uint32_t video[EMU_W * EMU_H];
@@ -82,6 +86,15 @@ static void pull_audio(void) {
 		}
 		SDL_UnlockMutex(ring_lock);
 	}
+	SDL_LockMutex(ring_lock);
+	int fill = (ring_w - ring_r + RING) % RING;
+	if (fill > LAT_MAX) { ring_r = (ring_w - LAT_TARGET + RING) % RING; fill = LAT_TARGET; }
+	SDL_UnlockMutex(ring_lock);
+	double adj = 1.0 - 0.02 * (fill - LAT_TARGET) / LAT_TARGET;
+	if (adj < 0.97) adj = 0.97;
+	if (adj > 1.03) adj = 1.03;
+	blip_set_rates(l, core->frequency(core), out_rate * adj);
+	blip_set_rates(r, core->frequency(core), out_rate * adj);
 }
 
 void emu_frame(uint32_t keys) {
