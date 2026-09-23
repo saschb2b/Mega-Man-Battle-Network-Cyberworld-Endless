@@ -27,7 +27,7 @@ static int field_for(int biome) {
 	}
 }
 
-Encounter make_encounter(int depth, int biome, bool corrupt, bool challenge) {
+Encounter make_encounter(int depth, int biome, bool challenge) {
 	Encounter e = { 0 };
 	e.biome = biome;
 	e.field = field_for(biome);
@@ -37,7 +37,7 @@ Encounter make_encounter(int depth, int biome, bool corrupt, bool challenge) {
 		if ((virus_defs[i].biome_mask >> biome) & 1 && virus_defs[i].first_depth <= p) pool[n++] = virus_defs[i].family;
 	if (!n) pool[n++] = 1;
 	int count = depth <= 1 ? rng_range(1, 2) : rng_range(2, 3);
-	if (corrupt || challenge) ++count;
+	if (challenge) ++count;
 	if (count > 4) count = 4;
 	bool used[3][3] = { { false } };
 	for (int i = 0; i < count; ++i) {

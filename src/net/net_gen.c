@@ -127,7 +127,6 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 		r.h = rng_range(3, 5);
 		r.x = rng_range(2, GEN_SIZE - r.w - 2);
 		r.y = rng_range(2, GEN_SIZE - r.h - 2);
-		r.corrupt = false;
 		if (!room_fits(&r)) continue;
 		layer.rooms[layer.nrooms++] = r;
 		for (int y = r.y; y < r.y + r.h; ++y)
@@ -164,7 +163,6 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 		if (abs(ax - bx) + abs(ay - by) < 18) corridor(ax, ay, bx, by, 1);
 	}
 
-	layer.start_room = 0;
 	layer.exit_room = bfs_far(0);
 	int cx, cy;
 	room_center(&layer.rooms[0], &cx, &cy);
@@ -198,7 +196,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 	bool secret = kind == LAYER_UNDERNET && !run.secret_cleared;
 
 	int order[MAX_ROOMS], n = 0;
-	for (int i = 0; i < layer.nrooms; ++i) if (i != layer.start_room && i != layer.exit_room) order[n++] = i;
+	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
 	for (int i = n - 1; i > 0; --i) { int j = rng_range(0, i); int t = order[i]; order[i] = order[j]; order[j] = t; }
 	int next = 0;
 	int x, y;
@@ -211,13 +209,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 	if (challenge) { PLACE(OBJ_CHALLENGE); ++next; }
 	if (undernet) { PLACE(OBJ_UNDERNET); ++next; }
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
-	/* Virus-infested rooms: more encounters, better data. */
-	int corrupt = 1 + (depth > 6) + (kind == LAYER_UNDERNET);
-	for (int k = 0; k < corrupt && next < n; ++k, ++next) {
-		Room *r = &layer.rooms[order[next]];
-		r->corrupt = true;
-		for (int yy = r->y; yy < r->y + r->h; ++yy)
-			for (int xx = r->x; xx < r->x + r->w; ++xx) layer.corrupt[yy][xx] = 1;
+	/* Rooms holding better data, more of them deeper and in the Undernet. */
+	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET);
+	for (int k = 0; k < rich && next < n; ++k, ++next) {
 		NetObj *o = PLACE(OBJ_MYSTERY);
 		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
 	}

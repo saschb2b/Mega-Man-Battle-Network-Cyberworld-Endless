@@ -102,7 +102,7 @@ static bool build_layer(void) {
 	D.exit_y = D.objs.exit_y;
 	D.chosen = 0;
 
-	Encounter e = make_encounter(run.depth, biome, false, false);
+	Encounter e = make_encounter(run.depth, biome, false);
 	set_encounter(&e, false);
 	D.start_x = D.objs.start_x;
 	D.start_y = D.objs.start_y;
@@ -158,7 +158,7 @@ static bool act_on_choices(void) {
 		D.chosen |= 1u << i;
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
-			Encounter e = make_encounter(run.depth + 3, run.biome, true, true);
+			Encounter e = make_encounter(run.depth + 3, run.biome, true);
 			set_encounter(&e, true);
 			D.challenge = true;
 			return true;
@@ -223,7 +223,7 @@ void director_update(void) {
 	if (D.challenge && !emu_battle_forcing()) {
 		/* back from the challenge (the game gave its reward): random battles again */
 		D.challenge = false;
-		Encounter e = make_encounter(run.depth, run.biome, false, false);
+		Encounter e = make_encounter(run.depth, run.biome, false);
 		set_encounter(&e, false);
 	}
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
@@ -266,7 +266,7 @@ void director_update(void) {
 		return;
 	}
 	if (D.frame % REROLL_FRAMES == 0) {
-		Encounter e = make_encounter(run.depth, run.biome, false, false);
+		Encounter e = make_encounter(run.depth, run.biome, false);
 		set_encounter(&e, false);
 	}
 }

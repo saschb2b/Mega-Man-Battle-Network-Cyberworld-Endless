@@ -15,12 +15,12 @@ enum { C_VOID = 0, C_PATH = 1 };
 typedef enum {
 	OBJ_WARP_IN,
 	OBJ_EXIT,
-	OBJ_MYSTERY,     /* param: 0 green, 1 blue, 2 purple */
+	OBJ_MYSTERY,     /* param: content quality 0-2 */
 	OBJ_SHOP,
 	OBJ_HEAL,
 	OBJ_TRADER,
 	OBJ_BUGTRADER,
-	OBJ_BOSS,
+	OBJ_BOSS,        /* the layer's guardian, before the exit; param: navi */
 	OBJ_UNDERNET,    /* warp to an Undernet layer */
 	OBJ_SECRET_GATE, /* needs three secret fragments */
 	OBJ_NPC,
@@ -32,23 +32,19 @@ typedef enum {
 typedef struct {
 	int type;
 	float x, y;
-	int param, param2;
-	bool used;
+	int param;
 	bool solid;
 	int npc_line;
 } NetObj;
 
 typedef struct {
 	int x, y, w, h;
-	bool corrupt;
 } Room;
 
 enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET };
 
 typedef struct {
 	uint8_t cell[MAP_H][MAP_W];
-	uint8_t corrupt[MAP_H][MAP_W];
-	uint8_t seen[MAP_H][MAP_W];
 	Room rooms[MAX_ROOMS];
 	int nrooms;
 	NetObj obj[MAX_OBJS];
@@ -58,7 +54,7 @@ typedef struct {
 	bool boss_layer;
 	bool boss_beaten;
 	int boss_navi;
-	int start_room, exit_room;
+	int exit_room;
 } Layer;
 
 extern Layer layer;
