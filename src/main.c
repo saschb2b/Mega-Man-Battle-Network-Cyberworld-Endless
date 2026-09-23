@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
 			pending = NULL;
 			if (current->enter) current->enter();
 		}
-		if (!headless || getenv("CYBERWORLD_AUDIO_DUMP")) {
+		if (!headless || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
 			uint64_t now = SDL_GetPerformanceCounter();
 			acc += (now - last) / freq;
 			last = now;
@@ -289,6 +289,7 @@ int main(int argc, char **argv) {
 		script_tick();
 		platform_poll();
 		if (current && current->update) current->update();
+		audio_frame();
 		platform_begin_frame();
 		if (current && current->draw) current->draw();
 		platform_apply_effects();

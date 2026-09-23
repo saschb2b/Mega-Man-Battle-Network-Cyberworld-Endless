@@ -202,6 +202,7 @@ void platform_end_frame(void) {
 	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
 	SDL_RenderPresent(P.renderer);
 	++P.frame;
+	{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
 }
 
 bool platform_save_canvas(const char *path) {

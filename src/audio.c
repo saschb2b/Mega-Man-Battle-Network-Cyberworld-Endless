@@ -492,6 +492,7 @@ static void render(int16_t *o, int frames) {
 }
 
 static FILE *dump; /* CYBERWORLD_AUDIO_DUMP: raw 48 kHz s16 stereo of everything played */
+static bool offline; /* no device: audio_frame() renders the dump a frame at a time */
 
 static void callback(void *ud, Uint8 *stream, int len) {
 	(void)ud;
@@ -531,14 +532,30 @@ bool audio_init(void) {
 	want.callback = callback;
 	const char *dp = getenv("CYBERWORLD_AUDIO_DUMP");
 	if (dp) dump = fopen(dp, "wb");
+	/* frame-exact dumps for comparisons: no device, one frame of sound per frame */
+	if (dump && getenv("CYBERWORLD_AUDIO_OFFLINE")) { offline = true; return true; }
 	dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
-	if (!dev) { fprintf(stderr, "audio: %s\n", SDL_GetError()); return false; }
+	if (!dev) {
+		fprintf(stderr, "audio: %s\n", SDL_GetError());
+		offline = dump != NULL;
+		return offline;
+	}
 	SDL_PauseAudioDevice(dev, 0);
 	printf("audio %d Hz, %d channels, %d-sample buffer\n", have.freq, have.channels, have.samples);
 	return true;
 }
 
+bool audio_offline(void) { return offline; }
+
+void audio_frame(void) {
+	if (!offline) return;
+	static int16_t buf[OUT_RATE / 60 * 2];
+	render(buf, OUT_RATE / 60);
+	fwrite(buf, sizeof buf, 1, dump);
+}
+
 void audio_shutdown(void) {
+	if (dump) fflush(dump);
 	if (dev) SDL_CloseAudioDevice(dev);
 	dev = 0;
 }
@@ -565,12 +582,19 @@ void audio_play_song(int id, bool music) {
 }
 
 void audio_sfx(Sfx s) {
-	if (!dev || s >= SFX_COUNT || !sfx_ids[s]) return;
+	if (s < SFX_COUNT && getenv("CYBERWORLD_SFX_LOG")) {
+		extern uint64_t audio_log_frame;
+		fprintf(stderr, "sfx %llu %#x\n", (unsigned long long)audio_log_frame, sfx_ids[s]);
+	}
+	if ((!dev && !offline) || s >= SFX_COUNT || !sfx_ids[s]) return;
 	audio_play_song(sfx_ids[s], false);
 }
 
+uint64_t audio_log_frame; /* frame number for CYBERWORLD_SFX_LOG, set by the main loop */
+
 void audio_music_id(int id) {
-	if (!dev) return;
+	if (getenv("CYBERWORLD_SFX_LOG")) fprintf(stderr, "music %llu %#x\n", (unsigned long long)audio_log_frame, id);
+	if (!dev && !offline) return;
 	if (id == current_music && players[0].on) return;
 	if (id == 0) {
 		lock();

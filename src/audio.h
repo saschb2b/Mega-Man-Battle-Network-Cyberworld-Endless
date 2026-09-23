@@ -20,6 +20,9 @@ typedef enum {
 typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_COUNT } Music;
 
 bool audio_init(void);
+/* Without a device but with CYBERWORLD_AUDIO_DUMP, renders one frame of sound. */
+void audio_frame(void);
+bool audio_offline(void);
 void audio_shutdown(void);
 void audio_sfx(Sfx s);
 void audio_music(Music m);
