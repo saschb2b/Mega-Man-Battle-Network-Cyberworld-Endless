@@ -243,3 +243,33 @@ def owner(tiles):
         if d.find(blob) >= 0 and struct.unpack_from('<I', ROM, 0x031CC4 + k[0] * 4)[0]:
             return k + ('lz',)
     return None
+
+
+def sprite_frames(cat, idx):
+    """[(anim, frame, tile bytes)] of a sprite, walking its animation table."""
+    d = sprites().get((cat, idx))
+    if d is None:
+        return []
+    base = 8 if struct.unpack_from('<I', ROM, 0x031CC4 + cat * 4)[0] and d[:4] != ROM[:4] else 4
+    # LZ sprites keep a 4-byte size prefix before the header; raw ones start with it
+    p = struct.unpack_from('<I', ROM, struct.unpack_from('<I', ROM, 0x031CC4 + cat * 4)[0] - 0x08000000 + idx * 4)[0]
+    base = 8 if p & 0x80000000 else 4
+    b = d[base:]
+    out = []
+    n = struct.unpack_from('<I', b, 0)[0] // 4
+    for a in range(min(n, 256)):
+        f = struct.unpack_from('<I', b, a * 4)[0]
+        for k in range(256):
+            rec = b[f + 20 * k:f + 20 * k + 20]
+            t = struct.unpack_from('<I', rec, 0)[0]
+            ln = struct.unpack_from('<I', b, t)[0]
+            out.append((a, k, b[t + 4:t + 4 + ln]))
+            if rec[18] & 0x80:
+                break
+    return out
+
+
+def which_frame(cat, idx, tiles):
+    """(anim, frame) of sprite (cat, idx) whose tiles contain all these OBJ tiles."""
+    want = [t for t in tiles if t != bytes(32)]
+    return [(a, k) for a, k, data in sprite_frames(cat, idx) if want and all(data.find(t) >= 0 for t in want)]
