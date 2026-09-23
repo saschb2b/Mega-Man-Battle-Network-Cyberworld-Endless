@@ -6,6 +6,9 @@
  * 4-byte entries (kind, panel y<<4|x, id) ending with 0xF0. */
 #include "encounter.h"
 
+#include <stdbool.h>
+#include <string.h>
+
 #include "data.h"
 #include "emu.h"
 #include "run.h"
@@ -16,11 +19,32 @@
 
 static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 
+/* The roll keeps its own chance: its first 12 bytes (position independent)
+ * move into a trampoline that jumps back into it, and a wrapper swaps a
+ * non-NULL result for the engine's record. */
+#define WRAPPER (EMU_FREE + 0x180)
+#define TRAMP   (WRAPPER + 20)
+
 void emu_encounters_install(void) {
-	/* ldr r0,[pc,#4]; tst r0,r0; bx lr; nop; .word SETTINGS */
-	uint8_t stub[12] = { 0x01, 0x48, 0x00, 0x42, 0x70, 0x47, 0xC0, 0x46 };
-	put32(stub + 8, SETTINGS);
-	emu_write(ROLL, stub, sizeof stub);
+	static bool done;
+	if (done) return;
+	done = true;
+	uint8_t orig[12];
+	for (int i = 0; i < 12; ++i) orig[i] = emu_read8(ROLL + (uint32_t)i);
+	/* wrapper: push {lr}; bl tramp; cmp r0,#0; beq 1f; ldr r0,=SETTINGS; 1: pop {pc} */
+	uint8_t w[20] = { 0x00, 0xB5, 0x00, 0xF0, 0x07, 0xF8, 0x00, 0x28, 0x00, 0xD0, 0x01, 0x48, 0x00, 0xBD, 0xC0, 0x46 };
+	put32(w + 16, SETTINGS);
+	/* trampoline: the roll's first 12 bytes, then ldr r3,[pc]; bx r3 back into it */
+	uint8_t t[20];
+	memcpy(t, orig, 12);
+	t[12] = 0x00; t[13] = 0x4B; t[14] = 0x18; t[15] = 0x47;
+	put32(t + 16, ROLL + 12 + 1);
+	/* the roll itself: ldr r3,[pc,#4]; bx r3; nop; nop; .word wrapper */
+	uint8_t hook[12] = { 0x01, 0x4B, 0x18, 0x47, 0xC0, 0x46, 0xC0, 0x46 };
+	put32(hook + 8, WRAPPER + 1);
+	emu_write(WRAPPER, w, sizeof w);
+	emu_write(TRAMP, t, sizeof t);
+	emu_write(ROLL, hook, sizeof hook);
 }
 
 void emu_encounter_set(const Encounter *e) {
