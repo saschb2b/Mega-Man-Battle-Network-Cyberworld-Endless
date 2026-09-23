@@ -26,6 +26,9 @@ static void run(int frames, uint32_t keys) {
 }
 
 void emu_warp(int group, int number, int x, int y, int facing) {
+	/* the game starts a map's song only when it is not the one it last
+	 * started: after the intro, or a state whose song had stopped, forget it */
+	if (emu_read32(BN6_MUSIC_PLAYER + 4) & 0x80000000u) emu_write8(BN6_GAMESTATE + 0x0F, 0xFF);
 	/* the warp record the routine copies to Warp2011bb0, then a warp list
 	 * (index 1) pointing back at it */
 	uint8_t data[32] = { (uint8_t)group, (uint8_t)number, 0, (uint8_t)facing };

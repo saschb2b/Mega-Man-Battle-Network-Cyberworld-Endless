@@ -7,11 +7,12 @@
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
 #define BN6_TOOLKIT_KEY_ITEMS 0x50        /* eToolkit KeyItemsPtr: a count per key item */
 #define BN6_TOOLKIT_SHOP_DATA 0x54        /* eToolkit ShopDataPtr: 8-byte stock entries of every shop */
-#define BN6_GAMESTATE         0x02001B80u /* eGameState: +0 sub-mode (4 on the map, 8/0xC battle), +4 map group, +5 map number */
+#define BN6_GAMESTATE         0x02001B80u /* eGameState: +0 sub-mode (4 on the map, 8/0xC battle), +4 map group, +5 map number, +0xF song playing (BGMusicIndicator) */
 #define BN6_EVENT_FLAGS       0x02001C88u /* eEventFlags: flag n is bit 0x80 >> (n & 7) of byte n / 8 */
 #define BN6_CHATBOX           0x02009CD0u /* eChatbox: +0 Visible, +4 script state */
 #define BN6_CHATBOX_FLAGS     0x02009F38u /* eFlags2009F38 */
 #define BN6_PLAYER            0x02009F40u /* overworld player object: +0x1C X, +0x20 Y (16.16) */
+#define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31): +4 status, bit 31 stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data */
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
@@ -23,6 +24,8 @@
 #define BN6_MAP_SCRIPTS       0x08034670u /* (on enter, continuous) per-map map script lists */
 #define BN6_ENTER_GROUP       0x0803093Cu /* EnterMap_InternetMapGroupJumptable: per-group map loaders */
 #define BN6_OBJ_SPAWNERS      0x0803483Cu /* InternetSpawnMapObjectJumptable: per-group spawn routines */
+#define BN6_MAP_MUSIC         0x080360E4u /* per chapter (GameState+7): (group, per-map song bytes) entries of 8 bytes, ending 0xFF */
+#define BN6_MAP_MUSIC_LISTS   3
 #define BN6_MYSTERY_DATA      0x080A484Cu /* InternetMysteryDataMapGroupEntries: (group, per-map lists), ends with 1 */
 #define BN6_MYSTERY_PICKS     0x02004348u /* per flag 0x1400+n: chosen placement and content */
 

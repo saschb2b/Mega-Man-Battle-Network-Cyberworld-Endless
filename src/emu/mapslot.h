@@ -30,6 +30,9 @@ typedef struct {
  * Mystery Data, and installs the layer's. */
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd);
 
+/* The map's theme: every chapter's map music list plays `song` there. */
+bool mapslot_music(int group, int number, int song);
+
 /* Space in the free ROM for NPC scripts; returns the bus address. */
 uint32_t mapslot_alloc(const void *bytes, int len);
 void mapslot_reset(void);

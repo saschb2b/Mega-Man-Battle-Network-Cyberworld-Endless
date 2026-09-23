@@ -128,3 +128,19 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	if (slot) emu_write32(slot, md_at);
 	return true;
 }
+
+bool mapslot_music(int group, int number, int song) {
+	/* the song per map of the group, then a list holding only that group */
+	uint8_t songs[16];
+	memset(songs, 0x63, sizeof songs);          /* 0x63: no song */
+	if (number < 0 || number >= 16) return false;
+	songs[number] = (uint8_t)song;
+	uint32_t at = mapslot_alloc(songs, sizeof songs);
+	uint8_t list[16] = { (uint8_t)group };
+	put32(list + 4, at);
+	list[8] = 0xFF;
+	uint32_t list_at = mapslot_alloc(list, sizeof list);
+	if (!at || !list_at) return false;
+	for (int i = 0; i < BN6_MAP_MUSIC_LISTS; ++i) emu_write32(BN6_MAP_MUSIC + (uint32_t)i * 4, list_at);
+	return true;
+}

@@ -55,6 +55,7 @@ static void update(void) {
 			(emu_read8(0x02001C88 + 0x1400 / 8) & 0x80) != 0, emu_read32(0x02001B80 + 0x74), (int)emu_read32(0x02009F40 + 0x1C) >> 16,
 			(int)emu_read32(0x02009F40 + 0x20) >> 16, (int)emu_read32(0x02009F40 + 0x24) >> 16, emu_read16(0x02011D14), emu_read32(0x02011D10),
 			emu_read8(0x02001B80 + 4), emu_read8(0x02001B80 + 5));
+	if (getenv("CYBERWORLD_EMU_DEBUG") && t % 60 == 0) fprintf(stderr, "music t%d depth %d sub %02x song %08x status %08x\n", t, run.depth, emu_read8(0x02001B80), emu_read32(0x02010890), emu_read32(0x02010894));
 	if (getenv("CYBERWORLD_EMU_DEBUG") && t == 150) {
 		FILE *f = fopen("/src/.build/vram.bin", "wb");
 		for (uint32_t a = 0; a < 0x18000; ++a) fputc(emu_read8(0x06000000 + a), f);

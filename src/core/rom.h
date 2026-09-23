@@ -35,6 +35,7 @@ typedef struct {
 		uint8_t group, number;   /* map whose floor panels are learned */
 		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn */
 		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
+		uint8_t song;            /* the area's theme (MP2K song) */
 	} net_area[8];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 } RomLayout;

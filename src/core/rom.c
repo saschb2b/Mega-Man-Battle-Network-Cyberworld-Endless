@@ -18,14 +18,14 @@ static const RomLayout layouts[] = {
 		.enemy_ids = 0x0182C4,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x6BCBCC, 0x02F5F0, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {
-			{ 0x90, 0, 0x0018 },        /* Central Area 1 */
-			{ 0x91, 0, 0x0040 },        /* Seaside Area 1 */
-			{ 0x94, 1, 0x1000 },        /* Sky Area 2 */
-			{ 0x92, 0, 0x0010 },        /* Green Area 1 */
-			{ 0x96, 1, 0x1000 },        /* Graveyard */
-			{ 0x95, 0, 0x0001, true },  /* Undernet 1 */
-			{ 0x95, 1, 0x1000, true },  /* Undernet Zero */
-			{ 0x93, 1, 0x0004, true },  /* Underground 2 */
+			{ 0x90, 0, 0x0018, false, 0x13 },     /* Central Area 1 */
+			{ 0x91, 0, 0x0040, false, 0x11 },     /* Seaside Area 1 */
+			{ 0x94, 1, 0x1000, false, 0x0A },     /* Sky Area 2 */
+			{ 0x92, 0, 0x0010, false, 0x12 },     /* Green Area 1 */
+			{ 0x96, 1, 0x1000, false, 0x09 },     /* Graveyard */
+			{ 0x95, 0, 0x0001, true, 0x14 },      /* Undernet 1 */
+			{ 0x95, 1, 0x1000, true, 0x20 },      /* Undernet Zero */
+			{ 0x93, 1, 0x0004, true, 0x21 },      /* Underground 2 */
 		},
 		.song_table = 0x159F48,
 	},

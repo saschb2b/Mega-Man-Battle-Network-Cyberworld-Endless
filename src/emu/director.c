@@ -17,6 +17,7 @@
 #include "encounter.h"
 #include "game.h"
 #include "layer_objs.h"
+#include "mapslot.h"
 #include "loot.h"
 #include "net.h"
 #include "netmap.h"
@@ -86,6 +87,7 @@ static bool build_layer(void) {
 	D.group = a->group;
 	D.number = a->number;
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
+	mapslot_music(D.group, D.number, a->song);
 	D.exit_x = D.objs.exit_x;
 	D.exit_y = D.objs.exit_y;
 	D.chosen = 0;
