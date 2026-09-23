@@ -34,24 +34,29 @@ void emu_warp(int group, int number, int x, int y, int facing) {
 	data[17] = 1;
 	put32(data + 20, WARP_DATA);
 	emu_write(WARP_DATA, data, sizeof data);
-	/* push {r4-r7,lr}; ldr r0,src; ldr r1,dst; ldmia/stmia 32 bytes;
-	 * ldr r3,routine; bl (bx r3); pop {r4-r7,pc}; bx r3 */
+	/* push {r4-r7,lr}; ldr r2,=mark; mov r3,#1; strb r3,[r2]; ldr r0,=src;
+	 * ldr r1,=dst; ldmia/stmia 32 bytes; ldr r3,=routine; bl 1f;
+	 * pop {r4-r7,pc}; 1: bx r3 */
 	static const uint8_t code[] = {
-		0xF0, 0xB5, 0x05, 0x48, 0x05, 0x49, 0x3C, 0xC8, 0x3C, 0xC1, 0x3C, 0xC8, 0x3C, 0xC1,
-		0x04, 0x4B, 0x00, 0xF0, 0x01, 0xF8, 0xF0, 0xBD, 0x18, 0x47,
+		0xF0, 0xB5, 0x07, 0x4A, 0x01, 0x23, 0x13, 0x70, 0x06, 0x48, 0x07, 0x49,
+		0x3C, 0xC8, 0x3C, 0xC1, 0x3C, 0xC8, 0x3C, 0xC1, 0x05, 0x4B, 0x00, 0xF0,
+		0x01, 0xF8, 0xF0, 0xBD, 0x18, 0x47, 0x00, 0x00,
 	};
-	uint8_t stub[36];
+	uint8_t stub[48];
 	memcpy(stub, code, sizeof code);
-	put32(stub + 24, WARP_DATA);
-	put32(stub + 28, BN6_WARP);
-	put32(stub + 32, BN6_ENTER_MAP_ON_WARP);
+	put32(stub + 32, BN6_ENGINE_MARK);
+	put32(stub + 36, WARP_DATA);
+	put32(stub + 40, BN6_WARP);
+	put32(stub + 44, BN6_ENTER_MAP_ON_WARP);
 	emu_write(WARP_STUB, stub, sizeof stub);
-	/* borrow the overworld hook for one frame: ldr r0,[pc]; bx r0; .word stub+1 */
+	/* borrow the overworld hook until the stub has run (the game skips it
+	 * on some frames): ldr r0,[pc]; bx r0; .word stub+1 */
 	uint8_t saved[8], jump[8] = { 0x00, 0x48, 0x00, 0x47 };
 	put32(jump + 4, WARP_STUB + 1);
 	for (int i = 0; i < 8; ++i) saved[i] = emu_read8(BN6_OW_HOOK + (uint32_t)i);
+	emu_write8(BN6_ENGINE_MARK, 0);
 	emu_write(BN6_OW_HOOK, jump, sizeof jump);
-	run(1, 0);
+	for (int i = 0; i < 120 && !emu_read8(BN6_ENGINE_MARK); ++i) run(1, 0);
 	emu_write(BN6_OW_HOOK, saved, sizeof saved);
 }
 

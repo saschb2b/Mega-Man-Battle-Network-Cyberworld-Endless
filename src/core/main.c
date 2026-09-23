@@ -264,6 +264,7 @@ int main(int argc, char **argv) {
 		}
 		if (!battle_spec) {
 			if (s == &scene_net) { run_new(seed ? seed : 1); net_reset(); }
+			if (s == &scene_emu) run_new(seed ? seed : 1);
 			scene_set(s ? s : &scene_title);
 		}
 	}
