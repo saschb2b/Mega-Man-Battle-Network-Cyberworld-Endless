@@ -20,6 +20,7 @@
 #define TILE_W 64   /* the original's panels */
 #define TILE_H 32
 #define SLAB 6
+#define STEP_PX 14.0f  /* screen pixels walked per encounter step */
 #define MM_SPRITE 55    /* overworld MegaMan in the NPC sprite list */
 
 static struct {
@@ -138,14 +139,14 @@ static bool walkable(float x, float y) {
 }
 
 static bool blocked(float x, float y) {
-	const float r = 0.28f;
+	const float r = 0.2f;
 	if (!walkable(x - r, y - r) || !walkable(x + r, y - r) || !walkable(x - r, y + r) || !walkable(x + r, y + r)) return true;
 	for (int i = 0; i < layer.nobj; ++i) {
 		NetObj *o = &layer.obj[i];
 		if (!o->solid || (o->type == OBJ_MYSTERY && o->used)) continue;
 		if (o->type == OBJ_BOSS && layer.boss_beaten) continue;
 		float dx = o->x - x, dy = o->y - y;
-		if (dx * dx + dy * dy < 0.45f * 0.45f) return true;
+		if (dx * dx + dy * dy < 0.3f * 0.3f) return true;
 	}
 	return false;
 }
@@ -220,7 +221,7 @@ static void start_layer(void) {
 		profile.seen_intro = true;
 		profile_save();
 		ui_message("Jack-in complete! Find the green warp pad to go deeper. Every third area, a Navi guards it.", -1);
-		ui_message("D-pad walks (Up goes up-right). Hold B to run. A talks and opens Mystery Data. Start opens the menu, Select the map.", -1);
+		ui_message("D-pad walks. Hold B to run. A talks and opens Mystery Data. Start opens the menu, Select the map.", -1);
 		ui_message("In battle: A uses a chip, B fires the buster (hold to charge). When the Custom gauge fills, press L or R for new chips.", -1);
 	}
 }
@@ -839,19 +840,9 @@ static void pause_done(int choice) {
 /* ------------------------------------------------------------------ */
 /* Update */
 
-static int dir_from(float dx, float dy) {
-	/* World delta -> the sprite's 8 screen directions (0 = up, clockwise). */
-	float sx = dx - dy, sy = (dx + dy) * 0.5f;
-	float a = atan2f(sy, sx);
-	int oct = (int)floorf((a + (float)M_PI / 8) / ((float)M_PI / 4));
-	oct = ((oct % 8) + 8) % 8; /* 0 = right, 2 = down */
-	static const int map[8] = { 2, 3, 4, 5, 6, 7, 0, 1 };
-	return map[oct];
-}
-
 static NetObj *nearby_object(void) {
 	NetObj *best = NULL;
-	float bd = 1.15f;
+	float bd = 0.85f;
 	for (int i = 0; i < layer.nobj; ++i) {
 		NetObj *o = &layer.obj[i];
 		if (o->type == OBJ_WARP_IN) continue;
@@ -904,29 +895,31 @@ static void update(void) {
 	if (btn_pressed(BTN_START)) { pause_open(); return; }
 	if (btn_pressed(BTN_SELECT)) { N.map_open = 1; return; }
 
-	/* The pad follows the isometric axes like the original games:
-	 * Up = up-right, Right = down-right; diagonals move along the screen. */
-	float ix = 0, iy = 0;
-	if (btn_held(BTN_UP)) iy -= 1;
-	if (btn_held(BTN_DOWN)) iy += 1;
-	if (btn_held(BTN_LEFT)) ix -= 1;
-	if (btn_held(BTN_RIGHT)) ix += 1;
+	/* As in the original the pad moves along the screen: one pixel a frame
+	 * (two running with B), the diagonals along the panel edges. */
+	int ux = btn_held(BTN_RIGHT) - btn_held(BTN_LEFT), uy = btn_held(BTN_DOWN) - btn_held(BTN_UP);
 	bool running = btn_held(BTN_B);
-	N.moving = ix != 0 || iy != 0;
+	N.moving = ux != 0 || uy != 0;
 	if (N.moving) {
-		float len = sqrtf(ix * ix + iy * iy);
-		float spd = running ? 0.105f : 0.07f;
-		float dx = ix / len * spd, dy = iy / len * spd;
-		N.dir = dir_from(dx, dy);
+		static const int dirs[3][3] = { { 7, 0, 1 }, { 6, 4, 2 }, { 5, 4, 3 } };
+		N.dir = dirs[uy + 1][ux + 1];
+		float spd = running ? 2.0f : 1.0f;
+		float vx = (float)ux * spd, vy = (float)uy * spd * (ux ? 0.5f : 1.0f);
+		/* screen pixels -> cells: sx = (x - y) * 32, sy = (x + y) * 16 */
+		float dx = (vx / (TILE_W / 2) + vy / (TILE_H / 2)) / 2, dy = (vy / (TILE_H / 2) - vx / (TILE_W / 2)) / 2;
 		float ox = N.px, oy = N.py;
-		if (!blocked(N.px + dx, N.py)) N.px += dx;
-		if (!blocked(N.px, N.py + dy)) N.py += dy;
-		N.walked += fabsf(N.px - ox) + fabsf(N.py - oy);
+		if (!blocked(N.px + dx, N.py + dy)) { N.px += dx; N.py += dy; }
+		else {
+			if (!blocked(N.px + dx, N.py)) N.px += dx;
+			if (!blocked(N.px, N.py + dy)) N.py += dy;
+		}
+		float mx = (N.px - ox - (N.py - oy)) * (TILE_W / 2), my = (N.px - ox + N.py - oy) * (TILE_H / 2);
+		N.walked += sqrtf(mx * mx + my * my);
 		int want = (running ? 16 : 8) + N.dir;
 		if (N.mm.anim != want) anim_play(&N.mm, N.mm.spr, want);
 		/* Random encounters, like the original's step counter. */
-		if (N.walked >= 1.0f) {
-			N.walked -= 1.0f;
+		if (N.walked >= STEP_PX) {
+			N.walked -= STEP_PX;
 			N.since_battle++;
 			int cx = (int)N.px, cy = (int)N.py;
 			bool corrupt = layer.corrupt[cy][cx];
