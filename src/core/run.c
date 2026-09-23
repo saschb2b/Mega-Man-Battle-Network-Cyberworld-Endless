@@ -2,42 +2,15 @@
 
 #include <string.h>
 
-#include "data.h"
 #include "game.h"
-#include "rom.h"
 
 Run run;
-
-void folder_add(int id, char code) {
-	if (run.folder_n >= FOLDER_MAX) return;
-	run.folder[run.folder_n].id = (uint16_t)id;
-	run.folder[run.folder_n].code = code;
-	run.folder_n++;
-}
 
 void run_new(uint32_t seed) {
 	memset(&run, 0, sizeof run);
 	run.active = true;
 	run.seed = seed;
-	run.hp = run.max_hp = 200;
-	run.atk = 1;
-	run.rapid = 1;
-	run.charge = 1;
-	run.custom_size = 5;
 	run.depth = 1;
-	run.zenny = 300;
-	/* A starter folder in the spirit of the games' default folders. */
-	static const struct { int id; char code; } start[] = {
-		{ 1, 'A' }, { 1, 'A' }, { 1, 'B' }, { 1, 'B' },  /* Cannon */
-		{ 4, '*' }, { 4, '*' },                          /* AirShot */
-		{ 71, 'A' }, { 71, 'A' }, { 72, 'H' },           /* Sword, WideSwrd */
-		{ 5, 'H' }, { 5, 'H' },                          /* Vulcan1 */
-		{ 54, 'A' }, { 54, 'G' },                        /* MiniBomb */
-		{ 154, 'A' }, { 155, 'A' },                      /* Recov10, Recov30 */
-		{ 162, '*' },                                    /* PanlGrab */
-		{ 40, 'E' }, { 9, 'B' },                         /* RlngLog1, Spreadr1 */
-	};
-	for (size_t i = 0; i < sizeof start / sizeof *start; ++i) folder_add(start[i].id, start[i].code);
 	rng_seed(seed);
 	/* Acts 1-4 visit the four surface areas in a random order. */
 	uint8_t surface[4] = { BIOME_CENTRAL, BIOME_SEASIDE, BIOME_SKY, BIOME_GREEN };

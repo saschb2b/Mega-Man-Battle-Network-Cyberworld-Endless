@@ -8,7 +8,7 @@
 typedef struct {
 	int runs;
 	int best_depth;
-	int best_score;
+	int best_score;   /* unused; kept for the file layout */
 	int bosses;
 	int viruses;
 	int secret_clears;

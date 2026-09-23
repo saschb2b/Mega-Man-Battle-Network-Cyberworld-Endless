@@ -8,13 +8,14 @@
 #include "audio.h"
 #include "game.h"
 #include "run.h"
+#include "save_blob.h"
 
-#define RUN_MAGIC 0x43574531u /* "CWE1" */
+#define RUN_MAGIC 0x43574532u /* "CWE2" */
 #define PROFILE_MAGIC 0x43575032u
 
 Profile profile;
 
-static void path(char *out, size_t n, const char *name) {
+void save_path(char *out, size_t n, const char *name) {
 	snprintf(out, n, "%s/savedata/%s", g_data_dir, name);
 }
 
@@ -25,11 +26,11 @@ static uint32_t checksum(const void *p, size_t n) {
 	return h;
 }
 
-static bool write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
+bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
 	char dir[600], file[600], tmp[620];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
 	mkdir(dir, 0755);
-	path(file, sizeof file, name);
+	save_path(file, sizeof file, name);
 	snprintf(tmp, sizeof tmp, "%s.tmp", file);
 	FILE *f = fopen(tmp, "wb");
 	if (!f) return false;
@@ -41,9 +42,9 @@ static bool write_blob(const char *name, uint32_t magic, const void *data, size_
 	return ok && rename(tmp, file) == 0;
 }
 
-static bool read_blob(const char *name, uint32_t magic, void *data, size_t n) {
+bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
 	char file[600];
-	path(file, sizeof file, name);
+	save_path(file, sizeof file, name);
 	FILE *f = fopen(file, "rb");
 	if (!f) return false;
 	uint32_t hdr[3];
@@ -52,23 +53,11 @@ static bool read_blob(const char *name, uint32_t magic, void *data, size_t n) {
 	return ok;
 }
 
-void save_state_path(char *out, size_t n) { path(out, n, "run.state"); }
+void save_state_path(char *out, size_t n) { save_path(out, n, "run.state"); }
 
 void save_init(void) {
-	/* the game's state for the run's checkpoint lived beside the game before */
-	char old[600], cur[600];
-	snprintf(old, sizeof old, "%s/run.state", g_data_dir);
-	save_state_path(cur, sizeof cur);
-	FILE *f = fopen(cur, "rb");
-	if (f) fclose(f);
-	else if ((f = fopen(old, "rb")) != NULL) {
-		fclose(f);
-		char dir[600];
-		snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
-		mkdir(dir, 0755);
-		rename(old, cur);
-	}
-	if (!read_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
+	legacy_move_state();
+	if (!save_read_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
 	if (!profile.music_volume) profile.music_volume = 9;
 	if (!profile.sfx_volume) profile.sfx_volume = 9;
 	audio_set_volume(profile.music_volume - 1, profile.sfx_volume - 1);
@@ -76,35 +65,37 @@ void save_init(void) {
 
 bool save_exists(void) {
 	Run tmp;
-	return read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active;
+	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) return true;
+	Run keep = run;
+	bool old = legacy_load_run();
+	run = keep;
+	return old;
 }
 
 bool save_run(void) {
 	if (!run.active) return false;
-	return write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
+	return save_write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
 }
 
 bool load_run(void) {
 	Run tmp;
-	if (!read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) || !tmp.active) return false;
-	run = tmp;
-	return true;
+	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; return true; }
+	return legacy_load_run();
 }
 
 void save_delete(void) {
 	char file[600];
-	path(file, sizeof file, "run.sav");
+	save_path(file, sizeof file, "run.sav");
 	remove(file);
 	save_state_path(file, sizeof file);
 	remove(file);
 }
 
-void profile_save(void) { write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }
+void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }
 
 void profile_record_run(void) {
 	profile.runs++;
 	if (run.depth > profile.best_depth) profile.best_depth = run.depth;
-	if (run.score > profile.best_score) profile.best_score = run.score;
 	profile.bosses += run.bosses_beaten;
 	profile.viruses += run.viruses_deleted;
 	if (run.secret_cleared) profile.secret_clears++;
