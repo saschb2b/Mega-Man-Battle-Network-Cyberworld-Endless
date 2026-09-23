@@ -184,11 +184,18 @@ void anim_play(Anim *a, Sprite *s, int anim) {
 	a->anim = anim;
 	a->frame = 0;
 	a->done = false;
+	a->fresh = false;
 	const uint8_t *f = frame_ptr(s, anim, 0);
 	a->timer = f ? f[16] : 1;
 }
 
+void anim_start(Anim *a, Sprite *s, int anim) {
+	anim_play(a, s, anim);
+	a->fresh = true;
+}
+
 void anim_update(Anim *a) {
+	if (a->fresh) { a->fresh = false; return; }
 	const uint8_t *f = frame_ptr(a->spr, a->anim, a->frame);
 	if (!f) return;
 	if (--a->timer > 0) return;

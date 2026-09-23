@@ -143,6 +143,8 @@ static struct {
 	int full_t;       /* frames the gauge has been full (its animation runs on in a pause) */
 	Anim charge_fx;   /* charge lines, then the charged glow */
 	bool shot_charged; /* the buster shot waiting to leave */
+	int bust_t, bust_row, bust_dmg; /* a shot on its way: it lands after bust_t frames */
+	bool bust_charged;
 	int emblem_t;     /* frames since a chip was picked (the emblem spins) */
 	bool gauge_was_full;
 	int hp_hurt;      /* frames the HP box stays in its damage colour */
@@ -225,7 +227,7 @@ static Spell *spell_new(int type, int side, int col, int row) {
 static void spell_sprite(Spell *s, int cat, int idx, int anim, bool loop) {
 	if (cat < 0 || idx < 0) return;
 	s->spr = sprite_get(cat, idx);
-	if (s->spr) anim_play(&s->anim, s->spr, anim < sprite_anim_count(s->spr) ? anim : 0);
+	if (s->spr) anim_start(&s->anim, s->spr, anim < sprite_anim_count(s->spr) ? anim : 0);
 	s->loop = loop;
 }
 
@@ -256,6 +258,8 @@ static void set_banner(const char *t, int frames) {
 
 static void player_flinch(void);
 
+static void roll_hp(Ent *e);
+
 static int damage_ent(Ent *e, int dmg, int elem, int flags) {
 	if (!e->on || e->dying) return 0;
 	if (e->kind == K_PLAYER && (e->invuln > 0 || e->invis > 0) && !(flags & HF_BREAK)) return 0;
@@ -281,7 +285,8 @@ static int damage_ent(Ent *e, int dmg, int elem, int flags) {
 		B.undershirt_used = true;
 	}
 	e->hp -= dmg;
-	e->flash = 6;
+	e->flash = 1; /* white for the frame of the hit only, as recorded */
+	roll_hp(e);   /* the counter starts rolling on the hit frame */
 	if (flags & HF_STUN) e->stun = 90;
 	if (e->kind == K_PLAYER) {
 		B.hits_taken++;
@@ -421,6 +426,7 @@ static Ent *spawn(int kind, int side, int col, int row) {
 static void ent_anim(Ent *e, int anim) {
 	if (!e->spr || anim < 0) return;
 	if (anim >= sprite_anim_count(e->spr)) anim = 0;
+	/* entity animations update before the logic, so a new one keeps its first frame whole */
 	anim_play(&e->anim, e->spr, anim);
 }
 
@@ -731,20 +737,39 @@ static void player_shoot(bool charged) {
 	player_shoot_normal(charged);
 }
 
+/* The muzzle flash (attack sprite 6) leaves the buster with the sound; the
+ * shot lands 3 frames later, as recorded. */
+#define BUST_FLASH_X 40
+#define BUST_FLASH_Y (-27)
 static void player_shoot_normal(bool charged) {
 	Ent *p = PLAYER;
-	int col;
-	Ent *e = first_in_row(SIDE_PLAYER, p->col, p->row, &col);
 	int dmg = charged ? run.atk * 10 : run.atk;
 	if (charged && (run.perks & PERK_ATTACK_MAX)) dmg = dmg * 3 / 2;
-	if (e) {
-		damage_ent(e, dmg, ELEM_NULL, charged ? HF_FLINCH : HF_NOINV);
-		fx(SPR_HIT, charged ? 4 : 5, 0, foot_x(col), foot_y(p->row) - 16);
-	}
+	B.bust_t = 4; /* counted down this frame too: lands 3 frames on */
+	B.bust_row = p->row;
+	B.bust_dmg = dmg;
+	B.bust_charged = charged;
+	fx(SPR_ATTACK, 6, 0, foot_x(p->col) + BUST_FLASH_X, foot_y(p->row) + BUST_FLASH_Y);
 	audio_sfx(charged ? SFX_CHARGE_SHOT : SFX_BUSTER);
-	ent_anim(p, 9);
 	B.act = charged ? ACT_CHARGED : ACT_BUSTER;
 	B.act_timer = charged ? 16 : 10 - run.rapid;
+}
+
+static void update_buster_shot(void) {
+	if (B.bust_t <= 0 || --B.bust_t > 0) return;
+	Ent *p = PLAYER;
+	int col;
+	Ent *e = first_in_row(SIDE_PLAYER, p->col, B.bust_row, &col);
+	if (!e) return;
+	damage_ent(e, B.bust_dmg, ELEM_NULL, B.bust_charged ? HF_FLINCH : HF_NOINV);
+	/* the spark starts the frame after the hit's white flash */
+	Spell *s = spell_new(SP_FX, 0, 0, 0);
+	if (!s) return;
+	s->x = (float)foot_x(col);
+	s->y = (float)(foot_y(B.bust_row) - 16);
+	spell_sprite(s, SPR_HIT, B.bust_charged ? 4 : 5, 0, false);
+	s->life = 90;
+	s->timer = -1;
 }
 
 /* Charge 1 takes 101 frames (the original's first level); the charge
@@ -766,7 +791,8 @@ static void update_player(void) {
 	if (B.act != ACT_NONE) {
 		if (--B.act_timer > 0) {
 			if (B.act == ACT_CHIP) start_chip();
-			if (B.act == ACT_SHOT_WAIT && B.shot_charged && B.act_timer == 1) ent_anim(p, 9);
+			/* MegaMan raises the buster the frame before the shot */
+			if (B.act == ACT_SHOT_WAIT && B.act_timer == 1) ent_anim(p, 9);
 			return;
 		}
 		switch (B.act) {
@@ -852,7 +878,6 @@ static void update_player(void) {
 		B.shot_charged = B.charge >= charge_time();
 		B.act = ACT_SHOT_WAIT;
 		B.act_timer = B.shot_charged ? 8 : 4;
-		if (!B.shot_charged) ent_anim(p, 9);
 		B.charge = 0;
 	}
 }
@@ -1557,6 +1582,7 @@ static void spell_hit_row_entity(Spell *s, int c, int r) {
 }
 
 static void update_spell(Spell *s) {
+	if (s->type == SP_FX && s->timer < 0) { ++s->timer; return; }
 	if (s->spr) {
 		anim_update(&s->anim);
 		if (s->anim.done && s->loop) anim_play(&s->anim, s->spr, s->anim.anim);
@@ -2053,6 +2079,7 @@ static void update(void) {
 	}
 	update_panels();
 	update_player();
+	update_buster_shot();
 	for (int i = 1; i < MAX_ENTS; ++i) {
 		Ent *e = &B.ent[i];
 		if (!e->on) continue;
@@ -2194,7 +2221,7 @@ static void draw_entity(Ent *e) {
 	/* hit and deletion flashes are plain white silhouettes */
 	if (e->dying && e->kind != K_PLAYER && !(((DIE_FRAMES - e->die_timer) / 2) & 1)) pal = SPRITE_WHITE;
 	if (e->dying && e->kind == K_PLAYER) pal = SPRITE_WHITE;
-	if (e->flash > 0 && (e->flash & 2)) pal = SPRITE_WHITE;
+	if (e->flash > 0) pal = SPRITE_WHITE;
 	if (e->kind == K_PLAYER) {
 		if (e->invuln > 0 && !e->dying && (B.scroll & 2)) return;
 		if (e->invis > 0) fx_flags |= FX_GHOST;
@@ -2215,6 +2242,12 @@ static void draw_entity(Ent *e) {
 		gfx_obj_mosaic = 17 - e->appear;
 	}
 	anim_draw(&e->anim, x, y, flip, pal, fx_flags);
+	/* the shooting pose (anim 9) wears the arm buster, a sprite of its own
+	 * following the pose frame by frame */
+	if (e->kind == K_PLAYER && !B.cross && e->anim.anim == 9) {
+		Sprite *bs = sprite_get(SPR_GUI, (int)UI.buster_sprite);
+		if (bs) sprite_draw_frame(bs, 0, e->anim.frame, x, y, false, pal, fx_flags);
+	}
 	gfx_obj_alpha = 255;
 	gfx_obj_mosaic = 0;
 	if (e->barrier > 0) {
@@ -2470,6 +2503,7 @@ static void draw(void) {
 		Spell *s = &B.sp[i];
 		if (!s->on) continue;
 		if (s->type == SP_METEOR && s->timer > 0) continue;
+		if (s->type == SP_FX && s->timer < 0) continue; /* waiting to appear */
 		if (s->type == SP_BOMB) {
 			/* flight: x from 13 px ahead of MegaMan to 4 short of the target,
 			 * height 58 + 16t/15 - t^2/15 above the row (measured) */

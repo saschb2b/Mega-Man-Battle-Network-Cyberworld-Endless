@@ -68,6 +68,7 @@ typedef struct {
 		uint32_t name_tab;                   /* enemy name tab: end cap, then fill (2 tiles each) */
 		uint32_t charge_sprite, charge_full_pal; /* buster charge lines (GUI sprite) and their charged palette */
 		uint32_t pause_text;                 /* PAUSE: 4x2 tiles then a 1x2 column, enemy HP palette */
+		uint32_t buster_sprite;              /* GUI sprite of the arm buster drawn over MegaMan's shooting pose */
 	} ui;
 } RomLayout;
 

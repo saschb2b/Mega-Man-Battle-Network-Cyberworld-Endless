@@ -60,6 +60,7 @@ static const RomLayout layouts[] = {
 			.box_fill = 0x02A6FC, .box_pal = 0x6BCBCC, .box_arrow = 0x6A270C,
 			.delete_sprite = 155, .zenny_art = 0x730D90, .zenny_pal = 0x7312D0, .name_tab = 0x6E4020,
 			.charge_sprite = 162, .charge_full_pal = 0x3AB1B0, .pause_text = 0x6E40A0,
+			.buster_sprite = 30,
 		},
 	},
 };

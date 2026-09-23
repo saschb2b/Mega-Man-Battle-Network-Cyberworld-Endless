@@ -26,6 +26,7 @@ typedef struct {
 	int anim, frame;
 	int timer;
 	bool done;       /* reached the last frame of a non-looping animation */
+	bool fresh;      /* started this frame: the next update leaves it alone */
 } Anim;
 
 enum {
@@ -41,6 +42,9 @@ int sprite_frame_count(const Sprite *s, int anim);
 
 void anim_play(Anim *a, Sprite *s, int anim);
 void anim_update(Anim *a);
+/* anim_play for an animation started by game logic before this frame's
+ * anim_update: its first frame then lasts its full delay, as on the GBA. */
+void anim_start(Anim *a, Sprite *s, int anim);
 /* Draws with the sprite origin at (x, y). pal selects a palette bank
  * (virus versions use banks 1-5). */
 void anim_draw(const Anim *a, int x, int y, bool flip, int pal, int fx);
