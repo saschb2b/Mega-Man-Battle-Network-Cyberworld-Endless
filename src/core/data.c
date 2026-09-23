@@ -95,20 +95,6 @@ const ChipDef chip_defs[] = {
 };
 const int chip_def_count = sizeof chip_defs / sizeof *chip_defs;
 
-/* Three chips picked in order become one Program Advance. mode 0: the same
- * chip with consecutive codes (A, B, C); mode 1: the listed chips sharing a
- * code (wildcards allowed). */
-const ProgramAdvance program_advances[] = {
-	{ 320, 0, { 1, 1, 1 } },
-	{ 321, 0, { 2, 2, 2 } },
-	{ 322, 0, { 3, 3, 3 } },
-	{ 339, 1, { 71, 72, 73 } },
-	{ 323, 1, { 20, 21, 22 } },
-	{ 338, 1, { 9, 10, 11 } },
-	{ 329, 1, { 40, 41, 42 } },
-};
-const int program_advance_count = sizeof program_advances / sizeof *program_advances;
-
 const ChipDef *chip_def(int rom_id) {
 	for (int i = 0; i < chip_def_count; ++i)
 		if (chip_defs[i].rom_id == rom_id) return &chip_defs[i];
@@ -134,55 +120,20 @@ void chip_info(int rom_id, ChipInfo *out) {
 	if (d->kind == CK_RECOVER) out->power = d->param;
 }
 
-void chip_desc(int rom_id, char *out, int len) {
-	out[0] = 0;
-	if (rom_id < 256 && R.layout->chip_desc[0]) rom_script_text(R.layout->chip_desc[0], rom_id, out, (size_t)len);
-	else if (rom_id >= 256 && R.layout->chip_desc[1]) rom_script_text(R.layout->chip_desc[1], rom_id - 256, out, (size_t)len);
-	if (!out[0] && chip_def(rom_id)->kind == CK_NAVI) {
-		ChipInfo ci;
-		chip_info(rom_id, &ci);
-		snprintf(out, (size_t)len, "Summons\n%s\nto attack!", ci.name);
-	}
-}
-
-/* ai index, behaviour, idle/move/attack/hit anims, effect sprite, biomes, first depth.
- * Biomes: bit 0 Central, 1 Seaside, 2 Sky, 3 Green, 4 Graveyard, 5 Undernet, 6 Secret, 7 Nest. */
+/* family, biomes, first depth. Biomes: bit 0 Central, 1 Seaside, 2 Sky,
+ * 3 Green, 4 Graveyard, 5 Undernet, 6 Secret, 7 Nest. */
 const VirusDef virus_defs[] = {
-	{ 1, AI_METTAUR, 0, 4, 1, -1, -1, -1, -1, 0x2B, 0 },   /* Mettaur: wave drawn procedurally */
-	{ 2, AI_SHOOTER, 0, 1, 3, -1, 1, 2, 7, 0x62, 0 },      /* Piranha: torpedo */
-	{ 4, AI_SWORDY, 0, -1, 3, -1, 1, 4, 10, 0xF5, 1 },     /* Swordy */
-	{ 5, AI_BEAM, 0, -1, 1, -1, -1, -1, -1, 0xB6, 2 },     /* KillerEye */
-	{ 8, AI_PUNCHER, 0, -1, 2, -1, -1, -1, -1, 0xA9, 2 },  /* Champy */
-	{ 14, AI_SHOOTER, 0, 1, 3, -1, 3, 0x20, 0, 0x26, 1 },  /* Puffy: bubble */
-	{ 20, AI_LOBBER, 0, -1, 4, -1, 3, 0x24, 0, 0x78, 1 },  /* BombCorn */
-	{ 23, AI_GUNNER, 0, -1, 2, -1, 1, 2, 8, 0xF5, 2 },     /* Gunner */
-	{ 27, AI_ROLLER, 0, 1, 3, -1, -1, -1, -1, 0xF8, 3 },   /* Armadill */
+	{ 1, 0x2B, 0 },    /* Mettaur */
+	{ 2, 0x62, 0 },    /* Piranha */
+	{ 4, 0xF5, 1 },    /* Swordy */
+	{ 5, 0xB6, 2 },    /* KillerEye */
+	{ 8, 0xA9, 2 },    /* Champy */
+	{ 14, 0x26, 1 },   /* Puffy */
+	{ 20, 0x78, 1 },   /* BombCorn */
+	{ 23, 0xF5, 2 },   /* Gunner */
+	{ 27, 0xF8, 3 },   /* Armadill */
 };
 const int virus_def_count = sizeof virus_defs / sizeof *virus_defs;
-
-/* navi, idle/move/hit, three attacks (anim, kind, effect sprite), reward chip, cross name */
-const NaviDef navi_defs[] = {
-	{ 1, 0, 4, 1, { 8, 5, 14 }, { NA_ROWBLAST, NA_TARGET, NA_SHOT }, { 4, 3, 3 }, { 0x02, 0x24, 0x0E }, { 0, 0, 0 }, 227, "Heat" },
-	{ 2, 0, 4, 1, { 18, 14, 19 }, { NA_COLUMN, NA_SHOT, NA_TARGET }, { 4, 3, 4 }, { 0x32, 0x13, 0x32 }, { 0, 0, 0 }, 230, "Elec" },
-	{ 3, 0, 4, 1, { 17, 6, 19 }, { NA_DASH, NA_COLUMN, NA_DASH }, { -1, 3, -1 }, { -1, 0x14, -1 }, { -1, 0, -1 }, 233, "Slash" },
-	{ 5, 0, 4, 1, { 6, 5, 8 }, { NA_DASH, NA_TARGET, NA_SHOT }, { -1, 3, 3 }, { -1, 0x24, 0x0E }, { -1, 0, 0 }, 239, "Charge" },
-	{ 7, 0, 4, 1, { 6, 5, 8 }, { NA_WAVE, NA_TARGET, NA_DASH }, { -1, 3, -1 }, { -1, 0x24, -1 }, { -1, 0, -1 }, 245, NULL },
-	{ 12, 0, 4, 1, { 5, 7, 8 }, { NA_TARGET, NA_DASH, NA_SHOT }, { 2, -1, 2 }, { 12, -1, 12 }, { 18, -1, 17 }, 257, NULL },
-	{ 13, 0, 4, 1, { 8, 5, 14 }, { NA_WAVE, NA_TARGET, NA_SHOT }, { -1, 3, 3 }, { -1, 0x20, 0x20 }, { -1, 0, 0 }, 260, NULL },
-	{ 15, 0, 4, 1, { 5, 8, 14 }, { NA_TARGET, NA_ROWBLAST, NA_SHOT }, { 5, 5, 3 }, { 0x14, 0x14, 0x13 }, { 0, 0, 0 }, 266, NULL },
-	{ 16, 0, 4, 1, { 5, 8, 14 }, { NA_TARGET, NA_COLUMN, NA_SHOT }, { 3, 4, 3 }, { 0x24, 0x09, 0x0E }, { 0, 0, 0 }, 269, NULL },
-	{ 11, 0, 4, 1, { 6, 6, 9 }, { NA_DASH, NA_COLUMN, NA_SHOT }, { -1, 3, 3 }, { -1, 0x15, 0x02 }, { -1, 0, 0 }, 224, NULL },
-	{ 4, 0, 4, 1, { 6, 5, 14 }, { NA_COLUMN, NA_TARGET, NA_SHOT }, { 3, 3, 3 }, { 0x14, 0x24, 0x13 }, { 0, 0, 0 }, 236, "Erase" },
-	{ 9, 0, 4, 1, { 8, 5, 6 }, { NA_WAVE, NA_TARGET, NA_DASH }, { -1, 3, -1 }, { -1, 0x24, -1 }, { -1, 0, -1 }, 251, NULL },
-	{ 10, 0, 4, 1, { 8, 5, 14 }, { NA_ROWBLAST, NA_TARGET, NA_SHOT }, { 4, 3, 3 }, { 0x2E, 0x24, 0x0E }, { 0, 0, 0 }, 254, NULL },
-};
-const int navi_def_count = sizeof navi_defs / sizeof *navi_defs;
-
-const NaviDef *navi_def(int ai_index) {
-	for (int i = 0; i < navi_def_count; ++i)
-		if (navi_defs[i].ai_index == ai_index) return &navi_defs[i];
-	return &navi_defs[0];
-}
 
 /* ---- ROM enemy table ---- */
 int enemy_id(int actor_type, int family, int version) {
@@ -194,33 +145,3 @@ int enemy_id(int actor_type, int family, int version) {
 	return -1;
 }
 
-static const uint8_t *enemy_stats(int id) {
-	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
-	uint32_t by_type = rom_off(rom_u32(R.layout->enemy_stats + e[1] * 4));
-	uint32_t by_ai = rom_off(rom_u32(by_type + e[2] * 4));
-	return R.data + by_ai + e[0] * 6;
-}
-
-int enemy_hp(int id) {
-	const uint8_t *s = enemy_stats(id);
-	return (s[0] | s[1] << 8) & 0xFFF;
-}
-
-int enemy_element(int id) {
-	const uint8_t *s = enemy_stats(id);
-	return ((s[0] | s[1] << 8) >> 12) & 7;
-}
-
-int enemy_attack(int id) {
-	const uint8_t *s = enemy_stats(id);
-	return (s[4] | s[5] << 8) & 0xFFF;
-}
-
-void enemy_name(int id, char *out, int len) {
-	if (id >= 0 && id < 235) rom_text(R.layout->enemy_names, id, out, (size_t)len);
-	else snprintf(out, (size_t)len, "???");
-}
-
-void navi_name(int navi, char *out, int len) {
-	rom_text(R.layout->navi_names, navi, out, (size_t)len);
-}

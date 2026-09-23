@@ -65,8 +65,6 @@ extern Run run;
 
 void run_new(uint32_t seed);
 void folder_add(int id, char code);
-const char *biome_name(int b);
 int biome_bg(int b);
-int biome_song(int b);
 
 #endif

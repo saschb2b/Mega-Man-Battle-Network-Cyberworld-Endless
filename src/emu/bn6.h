@@ -40,5 +40,7 @@
 #define BN6_MODE_GAME         0x04
 #define BN6_MODE_GAME_OVER    0x14
 #define BN6_SUB_MAP           0x04
+#define BN6_SUB_BATTLE_INIT   0x08
+#define BN6_SUB_BATTLE        0x0C
 
 #endif

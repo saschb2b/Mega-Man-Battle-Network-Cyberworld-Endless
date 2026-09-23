@@ -8,19 +8,17 @@
 #include "rom.h"
 #include "save.h"
 #include "run.h"
-#include "battle.h"
 #include "audio.h"
+#include "director.h"
 
 char g_data_dir[512] = ".";
 
 static const Scene *current, *pending;
 
 void scene_set(const Scene *s) { pending = s; }
-const Scene *scene_current(void) { return current; }
 
 static uint32_t rng_s = 0x9E3779B9u;
 void rng_seed(uint32_t s) { rng_s = s ? s : 0x9E3779B9u; }
-uint32_t rng_state(void) { return rng_s; }
 uint32_t rng_next(void) {
 	uint32_t x = rng_s;
 	x ^= x << 13; x ^= x >> 17; x ^= x << 5;
@@ -135,16 +133,8 @@ static void parse_shots(const char *spec) {
 	free(copy);
 }
 
-void debug_rewards(int busting, RewardOption *opts, int *n) {
-	(void)busting;
-	opts[0] = (RewardOption){ 1, 'A', 0 };
-	opts[1] = (RewardOption){ 72, '*', 0 };
-	opts[2] = (RewardOption){ -1, 0, 800 };
-	*n = 3;
-}
-
 static const Scene *scene_by_name(const char *n) {
-	const Scene *all[] = { &scene_title, &scene_gallery, &scene_net, &scene_gameover, &scene_emu };
+	const Scene *all[] = { &scene_title, &scene_gallery, &scene_emu };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
 	return NULL;
@@ -159,7 +149,6 @@ int main(int argc, char **argv) {
 	uint64_t max_frames = 0;
 	uint32_t seed = 0;
 	const char *render_spec = NULL;
-	const char *battle_spec = NULL;
 	const char *sheet_spec = NULL;
 	for (int i = 1; i < argc; ++i) {
 		const char *a = argv[i];
@@ -178,11 +167,10 @@ int main(int argc, char **argv) {
 		}
 		else if (!strcmp(a, "--scene") && v) { start_scene = v; ++i; }
 		else if (!strcmp(a, "--seed") && v) { seed = (uint32_t)strtoul(v, NULL, 0); ++i; }
-		else if (!strcmp(a, "--battle") && v) { battle_spec = v; ++i; }
 		else if (!strcmp(a, "--render-song") && v) { render_spec = v; ++i; }
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
-		else if (!strcmp(a, "--net-biome") && v) { extern int net_debug_biome; net_debug_biome = atoi(v); ++i; }
+		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
 	}
@@ -248,44 +236,8 @@ int main(int argc, char **argv) {
 		}
 		audio_init();
 		const Scene *s = scene_by_name(start_scene);
-		if (battle_spec) {
-			/* --battle v:FAMILY:VER,n:NAVI:VER,...  start a test battle directly
-			 * (x:CROSS, f:CHIP:CODE, r empty folder, k foes at 1 HP, h:HP MegaMan's HP) */
-			run_new(seed ? seed : 1);
-			Encounter e = { 0 };
-			e.biome = BIOME_CENTRAL;
-			char *copy = strdup(battle_spec);
-			char *save = NULL;
-			for (char *tok = strtok_r(copy, ",", &save); tok && e.nfoes < 4; tok = strtok_r(NULL, ",", &save)) {
-				char kind = 'v';
-				int fam = 1, ver = 0;
-				sscanf(tok, "%c:%i:%d", &kind, &fam, &ver);
-				if (kind == 'x') { if (fam == 99) run.beast_out = true; else run.crosses |= 1u << fam; continue; }
-				if (kind == 'f') { folder_add(fam, (char)('A' + ver)); continue; }
-				if (kind == 'r') { run.folder_n = 0; continue; }
-				if (kind == 'k') { extern bool battle_debug_one_hp; battle_debug_one_hp = true; continue; }
-				if (kind == 'h') { run.hp = fam; continue; }
-				if (kind == 'g') { extern int battle_debug_bg; battle_debug_bg = fam; continue; }
-				Foe *f = &e.foes[e.nfoes];
-				f->kind = kind == 'n' ? FOE_NAVI : FOE_VIRUS;
-				f->family = fam;
-				f->version = ver;
-				f->col = kind == 'n' ? 4 : 3 + e.nfoes % 3;
-				f->row = kind == 'n' ? 1 : e.nfoes % 3;
-				e.boss |= kind == 'n';
-				e.nfoes++;
-			}
-			free(copy);
-			extern void debug_rewards(int, RewardOption *, int *);
-			battle_set_rewards(debug_rewards);
-			battle_begin(&e, NULL);
-			s = NULL;
-		}
-		if (!battle_spec) {
-			if (s == &scene_net) { run_new(seed ? seed : 1); net_reset(); }
-			if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
-			scene_set(s ? s : &scene_title);
-		}
+		if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
+		scene_set(s ? s : &scene_title);
 	}
 
 	uint64_t last = SDL_GetPerformanceCounter();

@@ -17,12 +17,16 @@
 #define BLINK 32        /* PRESS START: 32 frames on, 32 off */
 #define MENU_AFTER 84   /* frames from START to the menu */
 #define LEAVE_FRAMES 16
+#define SUMMARY_MIN 60   /* frames before the summary can be closed */
 
 typedef struct { uint32_t dest, count; int nsteps, total; uint32_t step[16]; int delay[16]; bool loop; } PalAnim;
+
+bool title_summary;
 
 static struct {
 	int t, pressed, menu, leaving, cursor, choice;
 	bool has_save;
+	bool summary;         /* the finished run's summary over the dimmed picture */
 	uint8_t *tiles;       /* 8bpp BG tiles */
 	size_t tiles_len;
 	uint8_t pal[512];     /* BG palette RAM */
@@ -65,6 +69,7 @@ static int anim_step(const PalAnim *an, int frame) {
 /* START dims the picture: every colour, the logo's animated ones included,
  * down 4 levels a channel, then 2 a frame to 16. */
 static int dim_level(void) {
+	if (S.summary) return 16;
 	if (!S.pressed) return 0;
 	int k = S.t - S.pressed;
 	return k < 0 ? 0 : k >= 6 ? 16 : 4 + 2 * k;
@@ -110,11 +115,22 @@ static void enter(void) {
 	for (int i = 0; i < 8; ++i) S.key[i] = -1;
 	S.has_save = save_exists();
 	S.cursor = S.has_save ? 1 : 0; /* CONTINUE when there is one */
+	S.summary = title_summary;
+	title_summary = false;
 	audio_music(MUS_TITLE);
 }
 
 static void update(void) {
 	++S.t;
+	if (S.summary) {
+		/* the picture brightens again for PRESS START */
+		if (S.t > SUMMARY_MIN && (btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
+			S.summary = false;
+			S.t = 0;
+			for (int i = 0; i < 8; ++i) S.key[i] = -1;
+		}
+		return;
+	}
 	if (S.leaving) {
 		if (++S.leaving > LEAVE_FRAMES) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
@@ -145,7 +161,9 @@ static void update(void) {
 
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, BLACK);
-	bool dirty = !S.tex || (S.pressed && S.t - S.pressed <= 6);
+	static bool was_summary;
+	bool dirty = !S.tex || (S.pressed && S.t - S.pressed <= 6) || was_summary != S.summary;
+	was_summary = S.summary;
 	for (int i = 0; i < S.nanim; ++i) {
 		int st = anim_step(&S.anim[i], S.t);
 		if (st != S.key[i]) {
@@ -162,6 +180,16 @@ static void draw(void) {
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
 	for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
+
+	if (S.summary) {
+		int x = x0 + CORE_W / 2, y = y0 + 24;
+		text_draw(x, y, "MegaMan was deleted", rgba(255, 120, 120, 255), TEXT_CENTER);
+		text_drawf(x, y + 24, WHITE, TEXT_CENTER, "Reached B%d", run.depth);
+		text_drawf(x, y + 40, WHITE, TEXT_CENTER, "Viruses deleted  %d", run.viruses_deleted);
+		text_drawf(x, y + 56, WHITE, TEXT_CENTER, "Navis deleted  %d", run.bosses_beaten);
+		text_drawf(x, y + 80, rgba(255, 230, 90, 255), TEXT_CENTER, "Best  B%d", profile.best_depth);
+		return;
+	}
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks from the start; after START it finishes its lit phase */

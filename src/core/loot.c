@@ -34,7 +34,7 @@ Encounter make_encounter(int depth, int biome, bool corrupt, bool challenge) {
 	int pool[16], n = 0;
 	int p = (depth - 1) % CYCLE_LAYERS + (depth > CYCLE_LAYERS ? 12 : 0);
 	for (int i = 0; i < virus_def_count; ++i)
-		if ((virus_defs[i].biome_mask >> biome) & 1 && virus_defs[i].first_depth <= p) pool[n++] = virus_defs[i].ai_index;
+		if ((virus_defs[i].biome_mask >> biome) & 1 && virus_defs[i].first_depth <= p) pool[n++] = virus_defs[i].family;
 	if (!n) pool[n++] = 1;
 	int count = depth <= 1 ? rng_range(1, 2) : rng_range(2, 3);
 	if (corrupt || challenge) ++count;

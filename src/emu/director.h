@@ -12,5 +12,7 @@ bool director_resume(void);
 void director_update(void);
 /* The layer's exit (grid panel), for the test autopilot. */
 bool director_exit_panel(int *x, int *y);
+/* Test hook (--net-biome): every layer in this biome. */
+extern int director_debug_biome;
 
 #endif

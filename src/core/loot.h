@@ -2,7 +2,7 @@
 #ifndef LOOT_H
 #define LOOT_H
 
-#include "battle.h"
+#include "foes.h"
 
 Encounter make_encounter(int depth, int biome, bool corrupt, bool challenge);
 Encounter make_boss(int depth, int biome, int navi);

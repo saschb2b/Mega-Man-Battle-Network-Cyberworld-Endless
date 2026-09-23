@@ -59,22 +59,9 @@ void run_new(uint32_t seed) {
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = pools[b][rng_range(0, 2)];
 }
 
-const char *biome_name(int b) {
-	static const char *names[BIOME_COUNT] = {
-		"Central Area", "Seaside Area", "Sky Area", "Green Area",
-		"Graveyard", "Undernet", "Secret Area", "Cybeast Nest",
-	};
-	return b >= 0 && b < BIOME_COUNT ? names[b] : "?";
-}
-
 int biome_bg(int b) {
 	/* the game's own battle backgrounds (docs/BATTLE_FLOW.md) */
 	static const int bg[BIOME_COUNT] = { 0x07, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 };
 	return b >= 0 && b < BIOME_COUNT ? bg[b] : 0;
 }
 
-/* Net-area themes from the game's own soundtrack. */
-int biome_song(int b) {
-	static const int songs[BIOME_COUNT] = { 0x13, 0x11, 0x0A, 0x12, 0x09, 0x14, 0x20, 0x21 };
-	return b >= 0 && b < BIOME_COUNT ? songs[b] : 0x13;
-}

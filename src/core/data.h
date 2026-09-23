@@ -58,36 +58,11 @@ extern const ChipDef chip_defs[];
 extern const int chip_def_count;
 const ChipDef *chip_def(int rom_id);
 
-typedef struct {
-	uint16_t result;
-	uint8_t mode;
-	uint16_t parts[3];
-} ProgramAdvance;
-extern const ProgramAdvance program_advances[];
-extern const int program_advance_count;
 void chip_info(int rom_id, ChipInfo *out);
-/* The game's own three-line description, lines separated by '\n'. */
-void chip_desc(int rom_id, char *out, int len);
 
-/* Virus families and navis. */
-typedef enum {
-	AI_METTAUR,   /* follow row, send a shockwave */
-	AI_SHOOTER,   /* follow row, fire a projectile */
-	AI_SWORDY,    /* warp in front of MegaMan and slash */
-	AI_BEAM,      /* wait until aligned, beam the whole row */
-	AI_PUNCHER,   /* warp adjacent and punch */
-	AI_LOBBER,    /* lob a shell at MegaMan's panel */
-	AI_GUNNER,    /* crosshair tracks MegaMan, then rapid fire */
-	AI_ROLLER,    /* roll across the row */
-	AI_QUAKER,    /* jump and shake the field, cracking panels */
-	AI_NAVI,      /* boss pattern, see battle.c */
-} AiKind;
-
+/* Virus families the encounters draw from. */
 typedef struct {
-	uint8_t ai_index;   /* ROM virus family = battle sprite index */
-	uint8_t ai;
-	int8_t anim_idle, anim_move, anim_attack, anim_hit;
-	int8_t fx_cat, fx_idx, fx_anim; /* projectile or effect sprite */
+	uint8_t family;     /* ROM virus family */
 	uint8_t biome_mask; /* biomes where the family appears */
 	uint8_t first_depth;
 } VirusDef;
@@ -95,28 +70,7 @@ typedef struct {
 extern const VirusDef virus_defs[];
 extern const int virus_def_count;
 
-typedef struct {
-	uint8_t ai_index;   /* navi index = sprite index = name index */
-	int8_t anim_idle, anim_move, anim_hit;
-	int8_t attack_anim[3];
-	uint8_t attack_kind[3];
-	int8_t fx_cat[3], fx_idx[3], fx_anim[3];
-	uint16_t chip_reward;
-	const char *cross;  /* style gained for the run, or NULL */
-} NaviDef;
-
-enum { NA_SHOT, NA_TARGET, NA_DASH, NA_COLUMN, NA_WAVE, NA_SUMMON, NA_ROWBLAST };
-
-extern const NaviDef navi_defs[];
-extern const int navi_def_count;
-const NaviDef *navi_def(int ai_index);
-
 /* ROM enemy table: enemy id for (actor type, family, version). */
 int enemy_id(int actor_type, int family, int version);
-int enemy_hp(int id);
-int enemy_element(int id);
-int enemy_attack(int id);
-void enemy_name(int id, char *out, int len);
-void navi_name(int navi, char *out, int len);
 
 #endif

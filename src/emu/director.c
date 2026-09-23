@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "battle.h"
+#include "foes.h"
 #include "bn6.h"
 #include "boot.h"
 #include "emu.h"
@@ -24,6 +24,8 @@
 #include "run.h"
 #include "save.h"
 #include "scripts.h"
+
+int director_debug_biome = -1;
 
 #define EXIT_REACH 10      /* world units from the exit pad's centre */
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
@@ -41,7 +43,16 @@ static struct {
 	LayerObjs objs;
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
+	bool in_battle;        /* a battle is on */
+	int foes;              /* viruses in the battle the game will start next */
 } D;
+
+/* The next battle's enemies, for the game's encounter roll. */
+static void set_encounter(const Encounter *e, bool force) {
+	D.foes = e->nfoes;
+	if (force) emu_battle_force(e);
+	else emu_encounter_set(e);
+}
 
 #define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
 
@@ -59,8 +70,7 @@ static const __typeof__(R.layout->net_area[0]) *area(int biome) {
 }
 
 static int layer_biome(void) {
-	extern int net_debug_biome;   /* test hook: --net-biome */
-	if (net_debug_biome >= 0 && net_debug_biome < BIOME_COUNT) return net_debug_biome;
+	if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT) return director_debug_biome;
 	if (run.side_kind == LAYER_UNDERNET) return BIOME_UNDERNET;
 	if (run.side_kind == LAYER_SECRET) return BIOME_SECRET;
 	return biome_for_depth(run.depth);
@@ -83,7 +93,7 @@ static bool build_layer(void) {
 	D.chosen = 0;
 
 	Encounter e = make_encounter(run.depth, biome, false, false);
-	emu_encounter_set(&e);
+	set_encounter(&e, false);
 	D.start_x = D.objs.start_x;
 	D.start_y = D.objs.start_y;
 	D.active = true;
@@ -116,6 +126,10 @@ bool director_resume(void) {
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_set(D.objs.choice[i].flag)) D.chosen |= 1u << i;
+		/* enter the map again where MegaMan stood: the game reloads its NPCs
+		 * and tiles from this build's tables, which a state does not hold */
+		int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		emu_warp(D.group, D.number, x, y, 4);
 		return true;
 	}
 	/* no state (a run from before the game engine): enter the layer fresh */
@@ -133,7 +147,7 @@ static bool act_on_choices(void) {
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
 			Encounter e = make_encounter(run.depth + 3, run.biome, true, true);
-			emu_battle_force(&e);
+			set_encounter(&e, true);
 			D.challenge = true;
 			return true;
 		}
@@ -160,8 +174,8 @@ static void end_run(void) {
 	save_delete();
 	run.active = false;
 	D.active = false;
-	gameover_summary_only = true;
-	scene_set(&scene_gameover);
+	title_summary = true;
+	scene_set(&scene_title);
 }
 
 void director_update(void) {
@@ -175,8 +189,17 @@ void director_update(void) {
 		return;
 	}
 	if (!on_map()) {
-		if (emu_read8(BN6_GAMESTATE) != BN6_SUB_MAP) emu_battle_release();   /* the forced battle has begun */
+		int sub = emu_read8(BN6_GAMESTATE);
+		if (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE) {
+			emu_battle_release();   /* the forced battle has begun */
+			D.in_battle = true;
+		}
 		return;
+	}
+	if (D.in_battle) {
+		/* back from a battle: count the deleted viruses (a navi counts below) */
+		D.in_battle = false;
+		if (emu_read8(BN6_BATTLE_RESULT) == 1 && !D.boss_pending) run.viruses_deleted += D.foes;
 	}
 	if (D.boss_pending && !emu_battle_forcing()) {
 		/* back from the boss battle */
@@ -191,7 +214,7 @@ void director_update(void) {
 		/* back from the challenge (the game gave its reward): random battles again */
 		D.challenge = false;
 		Encounter e = make_encounter(run.depth, run.biome, false, false);
-		emu_encounter_set(&e);
+		set_encounter(&e, false);
 	}
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	if (act_on_choices()) return;
@@ -214,7 +237,7 @@ void director_update(void) {
 		if (layer.boss_layer && !layer.boss_beaten) {
 			if (!D.boss_pending) {
 				Encounter e = make_boss(run.depth, run.biome, layer.boss_navi);
-				emu_battle_force(&e);
+				set_encounter(&e, true);
 				D.boss_pending = true;
 			}
 			return;
@@ -227,6 +250,6 @@ void director_update(void) {
 	}
 	if (D.frame % REROLL_FRAMES == 0) {
 		Encounter e = make_encounter(run.depth, run.biome, false, false);
-		emu_encounter_set(&e);
+		set_encounter(&e, false);
 	}
 }

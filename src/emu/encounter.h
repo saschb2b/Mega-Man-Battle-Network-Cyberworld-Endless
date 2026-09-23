@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 
-#include "battle.h"
+#include "foes.h"
 
 /* Makes the game's encounter roll return the engine's battle settings. */
 void emu_encounters_install(void);

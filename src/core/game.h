@@ -14,21 +14,14 @@ typedef struct {
 } Scene;
 
 void scene_set(const Scene *s);
-const Scene *scene_current(void);
 
 extern const Scene scene_error;
 extern const Scene scene_title;
 extern const Scene scene_gallery;
-extern const Scene scene_battle;
-extern const Scene scene_net;
-extern const Scene scene_gameover;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
-extern bool gameover_summary_only; /* scene_gameover shows only the run summary */
+extern bool title_summary;          /* the title opens on the finished run's summary */
 
-void net_reset(void);
-/* Resume the saved layer instead of generating the next one. */
-void net_resume(void);
 
 void error_show(const char *msg);
 
@@ -36,7 +29,6 @@ void error_show(const char *msg);
 uint32_t rng_next(void);
 int rng_range(int lo, int hi); /* inclusive */
 void rng_seed(uint32_t s);
-uint32_t rng_state(void);
 
 extern char g_data_dir[512];
 
