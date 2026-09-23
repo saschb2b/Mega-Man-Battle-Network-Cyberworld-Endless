@@ -5,11 +5,12 @@
 
 /* EWRAM */
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
-#define BN6_GAMESTATE         0x02001B80u /* eGameState: +4 map group, +5 map number */
+#define BN6_GAMESTATE         0x02001B80u /* eGameState: +0 sub-mode (4 on the map, 8/0xC battle), +4 map group, +5 map number */
 #define BN6_EVENT_FLAGS       0x02001C88u /* eEventFlags: flag n is bit 0x80 >> (n & 7) of byte n / 8 */
 #define BN6_CHATBOX           0x02009CD0u /* eChatbox: +0 Visible, +4 script state */
 #define BN6_CHATBOX_FLAGS     0x02009F38u /* eFlags2009F38 */
 #define BN6_PLAYER            0x02009F40u /* overworld player object: +0x1C X, +0x20 Y (16.16) */
+#define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data */
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
 
@@ -25,5 +26,12 @@
 /* ROM code */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */
 #define BN6_OW_HOOK           0x08005A8Cu /* a per-frame overworld routine the engine borrows for a frame */
+
+
+/* Main modes (main_subsystemJumpTable) and game-state sub-modes */
+#define BN6_MODE_START_SCREEN 0x00
+#define BN6_MODE_GAME         0x04
+#define BN6_MODE_GAME_OVER    0x14
+#define BN6_SUB_MAP           0x04
 
 #endif

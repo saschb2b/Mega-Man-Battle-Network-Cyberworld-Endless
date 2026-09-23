@@ -47,6 +47,36 @@ void emu_encounters_install(void) {
 	emu_write(ROLL, hook, sizeof hook);
 }
 
+/* A battle right now: the roll returns the record unconditionally and the
+ * overworld's encounter check branches straight to it (0x05A98: b to the
+ * roll), until emu_battle_release once the battle has begun. */
+#define CHECK 0x08005A98u
+static uint8_t saved_roll[12], saved_check[2];
+static bool forcing;
+
+void emu_battle_force(const Encounter *e) {
+	emu_encounter_set(e);
+	if (forcing) return;
+	for (int i = 0; i < 12; ++i) saved_roll[i] = emu_read8(ROLL + (uint32_t)i);
+	for (int i = 0; i < 2; ++i) saved_check[i] = emu_read8(CHECK + (uint32_t)i);
+	/* ldr r0,[pc,#4]; tst r0,r0; bx lr; nop; .word SETTINGS */
+	uint8_t stub[12] = { 0x01, 0x48, 0x00, 0x42, 0x70, 0x47, 0xC0, 0x46 };
+	put32(stub + 8, SETTINGS);
+	emu_write(ROLL, stub, sizeof stub);
+	static const uint8_t branch[2] = { 0x21, 0xE0 };
+	emu_write(CHECK, branch, 2);
+	forcing = true;
+}
+
+void emu_battle_release(void) {
+	if (!forcing) return;
+	emu_write(ROLL, saved_roll, sizeof saved_roll);
+	emu_write(CHECK, saved_check, sizeof saved_check);
+	forcing = false;
+}
+
+bool emu_battle_forcing(void) { return forcing; }
+
 void emu_encounter_set(const Encounter *e) {
 	uint8_t list[4 * 6 + 1], *p = list;
 	*p++ = 0x00; *p++ = 0x22; *p++ = 0; *p++ = 0;          /* MegaMan, column 2 row 2 */

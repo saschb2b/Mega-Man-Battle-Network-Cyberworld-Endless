@@ -29,7 +29,7 @@ def docker(*cmd, mounts=()):
     args += ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
     for host, guest in mounts:
         args += ['-v', f'{host}:{guest}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_AUTOPILOT'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [IMAGE, *cmd]

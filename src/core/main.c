@@ -153,6 +153,7 @@ static const Scene *scene_by_name(const char *n) {
 int main(int argc, char **argv) {
 	const char *rom_dir = "rom";
 	const char *start_scene = "title";
+	int run_depth = 0;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
 	uint64_t max_frames = 0;
@@ -180,6 +181,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--battle") && v) { battle_spec = v; ++i; }
 		else if (!strcmp(a, "--render-song") && v) { render_spec = v; ++i; }
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
+		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { extern int net_debug_biome; net_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
@@ -206,6 +208,23 @@ int main(int argc, char **argv) {
 			printf("rendered song %d (%ds) to %s: %s\n", song, secs, out, ok ? "ok" : "failed");
 			platform_shutdown();
 			return ok ? 0 : 1;
+		}
+		if (sheet_spec && sheet_spec[0] == '@') {
+			/* --sheet @CAT:FIRST:COUNT:PATH  frame 0 of anim 0 of many sprites, 48x64 cells */
+			int cat = 0, first = 0, count = 64;
+			char out[256] = "sprites.bmp";
+			sscanf(sheet_spec + 1, "%i:%i:%i:%255s", &cat, &first, &count, out);
+			platform_begin_frame();
+			fill_rect(0, 0, P.w, P.h, rgba(96, 96, 96, 255));
+			for (int i = 0; i < count; ++i) {
+				int cx = (i % 8) * 32, cy = (i / 8) * 48;
+				Sprite *spr = sprite_get(cat, first + i);
+				fill_rect(cx + 1, cy + 1, 30, 46, rgba(40, 40, 60, 255));
+				if (spr) sprite_draw_frame(spr, 0, 0, cx + 16, cy + 40, false, 0, 0);
+			}
+			platform_save_canvas(out);
+			platform_shutdown();
+			return 0;
 		}
 		if (sheet_spec) {
 			/* --sheet CAT:IDX:ANIM[:PAL]:PATH  every frame of one animation, 64x64 cells */
@@ -264,7 +283,7 @@ int main(int argc, char **argv) {
 		}
 		if (!battle_spec) {
 			if (s == &scene_net) { run_new(seed ? seed : 1); net_reset(); }
-			if (s == &scene_emu) run_new(seed ? seed : 1);
+			if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
 			scene_set(s ? s : &scene_title);
 		}
 	}

@@ -5,6 +5,7 @@
 
 #include "audio.h"
 #include "boot.h"
+#include "autopilot.h"
 #include "director.h"
 #include "encounter.h"
 #include "emu.h"
@@ -45,11 +46,11 @@ static void enter(void) {
 static void leave(void) { audio_external(NULL); }
 
 static void update(void) {
-	emu_frame(keys_from_buttons());
+	emu_frame(autopilot_on() ? autopilot_keys() : keys_from_buttons());
 	director_update();
 	static int t;
 	if (getenv("CYBERWORLD_EMU_DEBUG") && ++t % 30 == 0)
-		fprintf(stderr, "t%d chat %d flag1400 %d zenny %u pos %d %d z %d walls %u at %08x map %02x:%02x\n", t, emu_read8(0x02009CD0),
+		fprintf(stderr, "t%d mode %02x chat %d flag1400 %d zenny %u pos %d %d z %d walls %u at %08x map %02x:%02x\n", t, emu_read8(emu_read32(0x020093B0)), emu_read8(0x02009CD0),
 			(emu_read8(0x02001C88 + 0x1400 / 8) & 0x80) != 0, emu_read32(0x02001B80 + 0x74), (int)emu_read32(0x02009F40 + 0x1C) >> 16,
 			(int)emu_read32(0x02009F40 + 0x20) >> 16, (int)emu_read32(0x02009F40 + 0x24) >> 16, emu_read16(0x02011D14), emu_read32(0x02011D10),
 			emu_read8(0x02001B80 + 4), emu_read8(0x02001B80 + 5));

@@ -36,14 +36,15 @@ static struct {
 	int leaving;           /* frames until the next layer is built */
 	bool checkpoint;       /* save once MegaMan has arrived */
 	bool gameover;         /* the game's GAME OVER is playing */
+	bool boss_pending;     /* the boss battle was started from the exit */
 	int start_x, start_y;
 } D;
 
-#define MODE_START_SCREEN 0x00
-#define MODE_GAME_OVER    0x14   /* main_subsystemJumpTable: cb_803FB3C */
 #define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
 
 static int main_mode(void) { return emu_read8(emu_read32(BN6_TOOLKIT)); }
+/* walking the net: the game mode on its map sub-mode (not a battle or menu) */
+static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_GAMESTATE) == BN6_SUB_MAP; }
 
 static void state_path(char *out, size_t n) { snprintf(out, n, "%s/run.state", g_data_dir); }
 
@@ -145,6 +146,13 @@ bool director_start_layer(void) {
 	return true;
 }
 
+bool director_exit_panel(int *x, int *y) {
+	if (!D.active) return false;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_EXIT || layer.obj[i].type == OBJ_RETURN) { *x = (int)layer.obj[i].x; *y = (int)layer.obj[i].y; return true; }
+	return false;
+}
+
 bool director_resume(void) {
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!build_layer()) return false;
@@ -174,10 +182,22 @@ void director_update(void) {
 	++D.frame;
 	/* MegaMan deleted: the game plays its GAME OVER, then the run ends */
 	int mode = main_mode();
-	if (mode == MODE_GAME_OVER) D.gameover = true;
+	if (mode == BN6_MODE_GAME_OVER) D.gameover = true;
 	if (D.gameover) {
-		if (mode == MODE_START_SCREEN) end_run();
+		if (mode == BN6_MODE_START_SCREEN) end_run();
 		return;
+	}
+	if (!on_map()) {
+		if (emu_read8(BN6_GAMESTATE) != BN6_SUB_MAP) emu_battle_release();   /* the forced battle has begun */
+		return;
+	}
+	if (D.boss_pending && !emu_battle_forcing()) {
+		/* back from the boss battle */
+		D.boss_pending = false;
+		if (emu_read8(BN6_BATTLE_RESULT) == 1) {
+			layer.boss_beaten = true;
+			run.bosses_beaten++;
+		}
 	}
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
 		D.checkpoint = false;
@@ -194,6 +214,15 @@ void director_update(void) {
 	if (emu_read8(BN6_GAMESTATE + 4) != D.group || emu_read8(BN6_GAMESTATE + 5) != D.number) return;
 	int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	if (abs(x - D.exit_x) <= EXIT_REACH && abs(y - D.exit_y) <= EXIT_REACH) {
+		/* a boss layer's navi guards the exit: the game's own navi battle */
+		if (layer.boss_layer && !layer.boss_beaten) {
+			if (!D.boss_pending) {
+				Encounter e = make_boss(run.depth, run.biome, layer.boss_navi);
+				emu_battle_force(&e);
+				D.boss_pending = true;
+			}
+			return;
+		}
 		if (run.side_kind == LAYER_NORMAL) run.depth++;
 		else run.side_kind = LAYER_NORMAL;
 		D.leaving = 1;
