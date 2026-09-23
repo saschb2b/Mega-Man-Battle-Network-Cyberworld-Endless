@@ -60,7 +60,7 @@ void run_new(uint32_t seed) {
 }
 
 int biome_bg(int b) {
-	/* the game's own battle backgrounds (docs/BATTLE_FLOW.md) */
+	/* the BattleSettings background byte (0x00-0x15) for each biome's battles */
 	static const int bg[BIOME_COUNT] = { 0x07, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 };
 	return b >= 0 && b < BIOME_COUNT ? bg[b] : 0;
 }

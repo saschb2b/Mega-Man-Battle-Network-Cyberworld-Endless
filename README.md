@@ -1,19 +1,21 @@
 # Mega Man Battle Network: Cyberworld Endless
 
 A roguelike built on Mega Man Battle Network 6. Each run jacks MegaMan into a
-freshly generated net. Every third area ends at a Navi guarding the exit, and
-the net changes character as you go deeper: from the surface areas down
-through the Graveyard and the Undernet to the Cybeast's nest, and then on
-without end.
+freshly generated net, played on the game's own engine. Every third layer
+ends at a Navi guarding the exit, and the net changes character as you go
+deeper: from the surface areas down through the Graveyard and the Undernet
+to the Underground, and then on without end.
 
 It runs as a port on ROCKNIX handhelds through PortMaster, and was made for
 the Retroid Nova (4:3) and the Retroid Pocket Flip 2 (16:9).
 
 ## Bring your own ROM
 
-The download contains no Capcom data. Sprites, chip art, the font, battle
-panels, enemy stats and music are all read from your own copy of the game
-when it starts.
+The download contains no Capcom data. The game itself runs from your own copy
+of the ROM on an embedded Game Boy Advance core: its battles, its net, its
+menus, shops and music. Cyberworld Endless builds each layer in the game's
+own map formats, places its Mystery Data, shopkeepers and exits, and keeps
+the run going.
 
 You need **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an
 unmodified `.gba` file (SHA-1 `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`).
@@ -29,68 +31,50 @@ supported yet.
 3. Put your ROM in `ports/cyberworld/rom/`.
 4. Refresh the game list and start **Cyberworld Endless**.
 
-Saves live in `ports/cyberworld/savedata/`.
+Saves live in `ports/cyberworld/savedata/`. The first start also records the
+game's boot as `boot-3.state` beside them, which takes a few seconds.
 
 ## Controls
 
-| Button | On the net | In battle |
-| --- | --- | --- |
-| D-pad | Walk; diagonals follow the panel edges | Move one panel |
-| A | Talk, open data, confirm | Use the next chip |
-| B | Hold to run, back | Buster; hold to charge |
-| L / R | | Open the Custom screen when the gauge is full |
-| Start | Menu | Custom screen: jump to OK |
-| Select | Map | Custom screen: change style |
-
-In the Custom screen, pick chips that share a code (`*` matches any code) or
-the same chip several times. Hold R to read a chip's description.
+The handheld's buttons are the Game Boy Advance's: the game plays exactly as
+BN6 does. A talks, opens Mystery Data and uses chips; B runs and fires the
+buster; L and R open the Custom screen; Start opens the PET.
 
 ## A run
 
-- **Layers.** Each area is a new layout of rooms and walkways. Warp pads lead
-  one layer deeper. Every third layer, a Navi blocks the exit.
+- **Layers.** Each layer is a new layout of rooms and walkways built from one
+  of the game's areas. The exit pad leads one layer deeper. Every third
+  layer, a Navi guards the exit in the game's own navi battle.
 - **Areas.** The first four acts visit Central, Seaside, Sky and Green Area in
   a random order, then the Graveyard and the Undernet. Layer 19 is the
-  Cybeast Nest. After that the cycle starts again, harder each time.
-- **Battles.** Real-time 6x3 grid battles with the game's viruses and Navis.
-  Viruses gain versions (V2, V3, SP and rare variants) as you go deeper.
-  Faster and cleaner wins earn a higher Busting Level and better rewards.
-- **Rewards.** After each battle, pick one of three chips or take the zenny.
-  The folder holds 30 chips; a full folder asks which chip to replace.
-- **Mystery Data.** Green data holds chips and zenny, blue data HP Memory,
-  Unlockers and programs. Purple data stays locked without an Unlocker.
-- **Red panels.** Virus-infested rooms: more battles, better data.
+  Underground. After that the cycle starts again, harder each time.
+- **Battles.** The game's own battles: random encounters on the net pick
+  viruses and versions (V2, V3, SP) that grow with depth, and rewards follow
+  the Busting Level as in BN6.
+- **Mystery Data.** Green data holds chips, zenny and BugFrags. In deep
+  layers a blue one may hold ScrtData.
+- **Checkpoints.** The run is saved when you arrive on a layer; CONTINUE on
+  the title screen returns there. When MegaMan is deleted the run ends, and
+  the title shows how deep you went.
 
 ### Places to find
 
 | Place | What it does |
 | --- | --- |
-| Net Dealer (Mr. Prog) | Chips, HP Memory and buster upgrades |
-| NaviCust vendor | Programs that last the whole run, such as SuperArmor, UnderShirt, AirShoes and Collect |
-| Chip Trader | Three chips in, one better chip out |
-| BugFrag Trader | Spend BugFrags on rare chips, Unlockers or HP Memory |
-| Recovery program | Restores HP once |
-| Strong virus signal | An optional hard battle with a better reward |
-| Dark warp | Enters the Undernet: tougher viruses, better loot, and an exit one layer deeper |
-| Sealed gate | In the Undernet. Three Secret Data fragments open the Secret Area |
-
-### Powers
-
-- **Program Advances.** GigaCan (three Cannons with consecutive codes),
-  LifeSrd (Sword, WideSwrd and LongSwrd with one code), WideBrn, H-Burst and
-  PwrWave.
-- **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
-  gives MegaMan that Cross for the rest of the run. Each changes the charged
-  shot. A hit from the element it is weak to breaks it.
-- **Beast Out.** The Graveyard's guardian awakens Gregar's power: three turns
-  of stronger chips and a lock-on charged attack.
+| Net Dealer (Mr. Prog) | The game's shop: chips, an HP Memory and SubChips |
+| Program vendor (Mr. Prog) | NaviCust programs from the game's own shops |
+| Chip Trader | Three chips in, one out |
+| BugFrag Trader | The game's BugFrag trades |
+| Recovery Mr. Prog | Restores HP |
+| Server | A strong virus signal: an optional hard battle |
+| Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
+| Golden gate | Three ScrtData open the Secret Area in Undernet Zero |
 
 ## Screens
 
-The battle keeps the Game Boy Advance's 240x160 view at a whole-number scale:
-5x on the Nova's 1280x960 screen and 6x on the Flip 2's 1920x1080 screen. The
-net and the battle background fill the rest of the screen; on 16:9 the sides
-show your hand and depth during battle.
+The game's 240x160 picture is shown at a whole-number scale: 5x on the
+Nova's 1280x960 screen and 6x on the Flip 2's 1920x1080 screen, with black
+borders around it.
 
 ## Building
 
