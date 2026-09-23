@@ -38,8 +38,13 @@ static void draw(void) {
 	if (!tex) {
 		tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, EMU_W, EMU_H);
 		SDL_SetTextureScaleMode(tex, SDL_ScaleModeNearest);
+		SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE);
 	}
-	SDL_UpdateTexture(tex, NULL, emu_video(), EMU_W * 4);
+	/* mGBA keeps layer flags in the top byte; GL renderers read it as alpha */
+	static uint32_t px[EMU_W * EMU_H];
+	const uint32_t *v = emu_video();
+	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = v[i] | 0xFF000000u;
+	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
 	SDL_Rect dst = { P.core_x, P.core_y, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 }
