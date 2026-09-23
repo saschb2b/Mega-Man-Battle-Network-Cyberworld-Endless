@@ -4,6 +4,7 @@
 #define CW_BN6_H
 
 /* EWRAM */
+#define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
 #define BN6_GAMESTATE         0x02001B80u /* eGameState: +4 map group, +5 map number */
 #define BN6_EVENT_FLAGS       0x02001C88u /* eEventFlags: flag n is bit 0x80 >> (n & 7) of byte n / 8 */
 #define BN6_CHATBOX           0x02009CD0u /* eChatbox: +0 Visible, +4 script state */

@@ -6,6 +6,7 @@
 #include "save.h"
 
 static int t;
+bool gameover_summary_only; /* the game already played its own GAME OVER */
 
 /* The original GAME OVER screen runs 224 frames (fading in over 10, its
  * music from 6, the streaked grid racing right 16 pixels a frame, fading
@@ -13,7 +14,8 @@ static int t;
 #define GO_FRAMES 224
 
 static void enter(void) {
-	t = 0;
+	t = gameover_summary_only ? GO_FRAMES : 0;
+	gameover_summary_only = false;
 	run.active = false;
 }
 

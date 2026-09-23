@@ -7,6 +7,7 @@
  * random battle's enemies in step with the depth. */
 #include "director.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "battle.h"
@@ -22,6 +23,7 @@
 #include "npc.h"
 #include "rom.h"
 #include "run.h"
+#include "save.h"
 
 #define EXIT_REACH 10      /* world units from the exit pad's centre */
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
@@ -32,7 +34,18 @@ static struct {
 	int exit_x, exit_y;
 	int frame;
 	int leaving;           /* frames until the next layer is built */
+	bool checkpoint;       /* save once MegaMan has arrived */
+	bool gameover;         /* the game's GAME OVER is playing */
+	int start_x, start_y;
 } D;
+
+#define MODE_START_SCREEN 0x00
+#define MODE_GAME_OVER    0x14   /* main_subsystemJumpTable: cb_803FB3C */
+#define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
+
+static int main_mode(void) { return emu_read8(emu_read32(BN6_TOOLKIT)); }
+
+static void state_path(char *out, size_t n) { snprintf(out, n, "%s/run.state", g_data_dir); }
 
 static const __typeof__(R.layout->net_area[0]) *area(int biome) {
 	return &R.layout->net_area[biome < 0 || biome >= 8 ? 0 : biome];
@@ -70,7 +83,7 @@ static int layer_biome(void) {
 	return biome_for_depth(run.depth);
 }
 
-bool director_start_layer(void) {
+static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
@@ -116,16 +129,63 @@ bool director_start_layer(void) {
 
 	Encounter e = make_encounter(run.depth, biome, false, false);
 	emu_encounter_set(&e);
-	emu_warp(D.group, D.number, start_x, start_y, 4);
+	D.start_x = start_x;
+	D.start_y = start_y;
 	D.active = true;
 	D.leaving = 0;
 	D.frame = 0;
+	D.gameover = false;
 	return true;
+}
+
+bool director_start_layer(void) {
+	if (!build_layer()) return false;
+	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	D.checkpoint = true;
+	return true;
+}
+
+bool director_resume(void) {
+	/* the layer's tables live in the ROM copy, which a state does not hold */
+	if (!build_layer()) return false;
+	char path[600];
+	state_path(path, sizeof path);
+	if (emu_load_state(path)) return true;
+	/* no state (a run from before the game engine): enter the layer fresh */
+	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	D.checkpoint = true;
+	return true;
+}
+
+static void end_run(void) {
+	char path[600];
+	state_path(path, sizeof path);
+	remove(path);
+	profile_record_run();
+	save_delete();
+	run.active = false;
+	D.active = false;
+	gameover_summary_only = true;
+	scene_set(&scene_gameover);
 }
 
 void director_update(void) {
 	if (!D.active) return;
 	++D.frame;
+	/* MegaMan deleted: the game plays its GAME OVER, then the run ends */
+	int mode = main_mode();
+	if (mode == MODE_GAME_OVER) D.gameover = true;
+	if (D.gameover) {
+		if (mode == MODE_START_SCREEN) end_run();
+		return;
+	}
+	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
+		D.checkpoint = false;
+		char path[600];
+		state_path(path, sizeof path);
+		save_run();
+		emu_save_state(path);
+	}
 	if (D.leaving > 0) {
 		if (--D.leaving == 0) director_start_layer();
 		return;

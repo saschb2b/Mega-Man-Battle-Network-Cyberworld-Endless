@@ -23,6 +23,8 @@ extern const Scene scene_battle;
 extern const Scene scene_net;
 extern const Scene scene_gameover;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
+extern bool emu_resume_requested; /* scene_emu continues the saved run */
+extern bool gameover_summary_only; /* scene_gameover shows only the run summary */
 
 void net_reset(void);
 /* Resume the saved layer instead of generating the next one. */

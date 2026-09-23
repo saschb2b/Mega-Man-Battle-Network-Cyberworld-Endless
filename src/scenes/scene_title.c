@@ -117,12 +117,9 @@ static void update(void) {
 	++S.t;
 	if (S.leaving) {
 		if (++S.leaving > LEAVE_FRAMES) {
-			if (S.choice == 1 && load_run()) net_resume();
-			else {
-				run_new(rng_next() ^ (uint32_t)SDL_GetTicks());
-				net_reset();
-			}
-			scene_set(&scene_net);
+			if (S.choice == 1 && load_run()) emu_resume_requested = true;
+			else run_new(rng_next() ^ (uint32_t)SDL_GetTicks());
+			scene_set(&scene_emu);
 		}
 		return;
 	}

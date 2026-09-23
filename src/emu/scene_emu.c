@@ -14,6 +14,7 @@
 #include "rom.h"
 
 static SDL_Texture *tex;
+bool emu_resume_requested;
 
 static uint32_t keys_from_buttons(void) {
 	static const struct { int btn; uint32_t key; } map[] = {
@@ -29,9 +30,15 @@ static uint32_t keys_from_buttons(void) {
 
 static void enter(void) {
 	if (!emu_init(R.data, ROM_SIZE)) return;
-	emu_boot();
-	emu_encounters_install();
-	director_start_layer();
+	if (emu_resume_requested) {
+		emu_resume_requested = false;
+		emu_encounters_install();
+		director_resume();
+	} else {
+		emu_boot();
+		emu_encounters_install();
+		director_start_layer();
+	}
 	audio_external(emu_audio_read);
 }
 
