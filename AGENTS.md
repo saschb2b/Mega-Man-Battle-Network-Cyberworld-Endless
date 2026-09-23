@@ -32,6 +32,7 @@ states or disassembly files. `.gitignore` covers the usual names; check
 | `src/battle.*` | Grid battle, chips, virus and navi AI, Custom screen, crosses |
 | `src/net_gen.c`, `src/net.h` | Layer generation |
 | `src/scene_net.c` | Overworld: movement, encounters, shops, traders, rewards |
+| `src/net_floor.*` | Net floors learned from the original maps' panels |
 | `src/data.*`, `src/loot.*` | Chip/virus/navi definitions, encounter and reward tables |
 | `src/run.*`, `src/save.*` | Run state, checkpoints, profile |
 | `src/ui.*` | Messages, menus, chip cards |

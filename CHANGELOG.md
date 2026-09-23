@@ -23,6 +23,10 @@ First playable version.
 - Cannon, MiniBomb, swords and the charged buster use the original sprites,
   arcs and timings.
 - Each area fights on one of the game's own animated battle backgrounds.
+- The net looks and moves like the original: floors built from each area's
+  own 64x32 panels, learned from the ROM's maps at load, the area's animated
+  background, MegaMan walking a pixel a frame along the screen (two running),
+  and the HP box and area name as the only HUD.
 - Checkpoint saves at every layer and a profile with best depth.
 - PortMaster launcher for ROCKNIX; tested on the Retroid Nova and the
   Retroid Pocket Flip 2.

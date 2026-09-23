@@ -35,7 +35,7 @@ Saves live in `ports/cyberworld/savedata/`.
 
 | Button | On the net | In battle |
 | --- | --- | --- |
-| D-pad | Walk. Up moves up-right, as in the original games | Move one panel |
+| D-pad | Walk; diagonals follow the panel edges | Move one panel |
 | A | Talk, open data, confirm | Use the next chip |
 | B | Hold to run, back | Buster; hold to charge |
 | L / R | | Open the Custom screen when the gauge is full |
