@@ -1,9 +1,14 @@
 /* The running game in the window: the core's frame in the 240x160 view,
  * its sound on the audio device and the port's buttons as GBA keys. */
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "audio.h"
 #include "boot.h"
 #include "encounter.h"
 #include "loot.h"
+#include "net.h"
+#include "netmap.h"
 #include "run.h"
 #include "emu.h"
 #include "game.h"
@@ -31,12 +36,38 @@ static void enter(void) {
 	emu_encounters_install();
 	Encounter e = make_encounter(run.depth ? run.depth : 1, BIOME_CENTRAL, false, false);
 	emu_encounter_set(&e);
+	/* a generated layer in Central Area 1's place */
+	layer_generate(run.seed ? run.seed : 5, 1, BIOME_CENTRAL, LAYER_NORMAL);
+	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0] };
+	if (netmap_build(BIOME_CENTRAL, &lay)) {
+		int wx, wy;
+		netmap_world((int)layer.obj[0].x, (int)layer.obj[0].y, &wx, &wy);
+		emu_warp(0x90, 0, wx, wy, 4);
+	}
 	audio_external(emu_audio_read);
 }
 
 static void leave(void) { audio_external(NULL); }
 
-static void update(void) { emu_frame(keys_from_buttons()); }
+static void update(void) {
+	emu_frame(keys_from_buttons());
+	static int t;
+	if (getenv("CYBERWORLD_EMU_DEBUG") && ++t % 30 == 0)
+		fprintf(stderr, "t%d pos %d %d z %d walls %u at %08x map %02x:%02x\n", t, (int)emu_read32(0x02009F40 + 0x1C) >> 16,
+			(int)emu_read32(0x02009F40 + 0x20) >> 16, (int)emu_read32(0x02009F40 + 0x24) >> 16, emu_read16(0x02011D14), emu_read32(0x02011D10),
+			emu_read8(0x02001B80 + 4), emu_read8(0x02001B80 + 5));
+	if (getenv("CYBERWORLD_EMU_DEBUG") && t == 150) {
+		FILE *f = fopen("/src/.build/vram.bin", "wb");
+		for (uint32_t a = 0; a < 0x18000; ++a) fputc(emu_read8(0x06000000 + a), f);
+		for (uint32_t a = 0; a < 0x400; ++a) fputc(emu_read8(0x05000000 + a), f);
+		for (uint32_t a = 0; a < 0x60; ++a) fputc(emu_read8(0x04000000 + a), f);
+		fclose(f);
+	}
+	if (getenv("CYBERWORLD_EMU_DEBUG") && t % 90 == 0)
+		fprintf(stderr, "  dma %04x %04x %04x %04x dispcnt %04x bg0 %04x bg1 %04x bg2 %04x bg3 %04x win %04x bld %04x\n", emu_read16(0x040000BA), emu_read16(0x040000C6),
+			emu_read16(0x040000D2), emu_read16(0x040000DE), emu_read16(0x04000000), emu_read16(0x04000008), emu_read16(0x0400000A), emu_read16(0x0400000C),
+			emu_read16(0x0400000E), emu_read16(0x04000048), emu_read16(0x04000050));
+}
 
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, BLACK);

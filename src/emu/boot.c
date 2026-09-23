@@ -56,7 +56,7 @@ void emu_warp(int group, int number, int x, int y, int facing) {
 }
 
 /* bump the number when the boot sequence changes */
-static void state_path(char *out, size_t n) { snprintf(out, n, "%s/boot-1.state", g_data_dir); }
+static void state_path(char *out, size_t n) { snprintf(out, n, "%s/boot-3.state", g_data_dir); }
 
 bool emu_boot(void) {
 	char path[600];
@@ -68,7 +68,7 @@ bool emu_boot(void) {
 	run(100, 0);
 	run(4, KEY_A);             /* NEW GAME */
 	run(200, 0);
-	emu_warp(0x90, 0, 84, -148, 5);
+	emu_warp(0x91, 0, 0, 0, 5);  /* Seaside Area 1: a layer loads as a new area group */
 	run(120, 0);
 	/* end the intro: no cutscene script, chat box closed (chatbox_E6_end) */
 	emu_write32(BN6_CUTSCENE + 0x1C, 0);

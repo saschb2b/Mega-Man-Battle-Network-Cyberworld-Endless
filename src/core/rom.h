@@ -46,6 +46,7 @@ typedef struct {
 		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn */
 		uint32_t bg, bg_anims;   /* BGAnimData record and GFX animation list of its background */
 		int8_t scroll;           /* 0 still, 1 right 1/2 and down 1/4, 2 left 1/16 (pixels a frame) */
+		uint32_t objects;        /* the group's per-map object spawn lists (MapObjectSpawnData pointers) */
 	} net_area[8];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t chip_desc[2];     /* description archives, 3 short lines each */

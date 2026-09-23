@@ -20,7 +20,7 @@ bool is_boss_depth(int depth) {
 }
 
 /* Rooms keep to the top-left GEN_SIZE cells: a cell is a 64x32 panel. */
-#define GEN_SIZE 40
+#define GEN_SIZE 20
 
 static bool room_fits(const Room *r) {
 	if (r->x < 2 || r->y < 2 || r->x + r->w > GEN_SIZE - 2 || r->y + r->h > GEN_SIZE - 2) return false;
