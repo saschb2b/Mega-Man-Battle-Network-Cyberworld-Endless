@@ -10,6 +10,7 @@
 #include "net.h"
 #include "mapslot.h"
 #include "netmap.h"
+#include "npc.h"
 #include "run.h"
 #include "emu.h"
 #include "game.h"
@@ -40,9 +41,17 @@ static void enter(void) {
 	/* a generated layer in Central Area 1's place */
 	layer_generate(run.seed ? run.seed : 5, 1, BIOME_CENTRAL, LAYER_NORMAL);
 	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0] };
-	if (netmap_build(BIOME_CENTRAL, &lay) && mapslot_install(0x90, 0, NULL, NULL, 0)) {
+	if (netmap_build(BIOME_CENTRAL, &lay)) {
 		int wx, wy;
 		netmap_world((int)layer.obj[0].x, (int)layer.obj[0].y, &wx, &wy);
+		/* test: a Mystery Data with 100 zenny one panel on, and a warp pad */
+		mapslot_reset();
+		MysteryData md = { wx + 32, wy, { 3, 0x20, 0xFF, 0xFF, 100, 0, 0, 0 } };
+		NpcList npcs = { { 0 }, 0 };
+		npcs.script[npcs.n++] = npc_mystery(0);
+		npcs.script[npcs.n++] = npc_prop(7, 0x06, wx, wy + 32, 0, 0);
+		npcs.script[npcs.n++] = npc_prop(7, 0x22, wx - 32, wy, 0, 0);
+		mapslot_install(0x90, 0, &npcs, &md, 1);
 		emu_warp(0x90, 0, wx, wy, 4);
 	}
 	audio_external(emu_audio_read);
@@ -54,7 +63,8 @@ static void update(void) {
 	emu_frame(keys_from_buttons());
 	static int t;
 	if (getenv("CYBERWORLD_EMU_DEBUG") && ++t % 30 == 0)
-		fprintf(stderr, "t%d pos %d %d z %d walls %u at %08x map %02x:%02x\n", t, (int)emu_read32(0x02009F40 + 0x1C) >> 16,
+		fprintf(stderr, "t%d chat %d flag1400 %d zenny %u pos %d %d z %d walls %u at %08x map %02x:%02x\n", t, emu_read8(0x02009CD0),
+			(emu_read8(0x02001C88 + 0x1400 / 8) & 0x80) != 0, emu_read32(0x02001B80 + 0x74), (int)emu_read32(0x02009F40 + 0x1C) >> 16,
 			(int)emu_read32(0x02009F40 + 0x20) >> 16, (int)emu_read32(0x02009F40 + 0x24) >> 16, emu_read16(0x02011D14), emu_read32(0x02011D10),
 			emu_read8(0x02001B80 + 4), emu_read8(0x02001B80 + 5));
 	if (getenv("CYBERWORLD_EMU_DEBUG") && t == 150) {
