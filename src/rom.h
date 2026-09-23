@@ -27,6 +27,14 @@ typedef struct {
 	uint32_t battle_bg_table; /* BGAnimData pointer per battle background id */
 	uint32_t battle_bg_anims; /* GFX animation list pointer per id */
 	uint32_t chip_icon_pal;
+	uint32_t net_maps;        /* internet map descriptors per group (group 0x80 first) */
+	struct {                  /* the original area each net biome borrows (docs/ROM_DATA.md) */
+		uint8_t group, number;   /* map whose floor panels are learned */
+		uint8_t ox, oy;          /* a panel centre in the rendered map: the 64x32 lattice */
+		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn */
+		uint32_t bg, bg_anims;   /* BGAnimData record and GFX animation list of its background */
+		int8_t scroll;           /* 0 still, 1 right 1/2 and down 1/4, 2 left 1/16 (pixels a frame) */
+	} net_area[8];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t chip_desc[2];     /* description archives, 3 short lines each */
 	struct {                    /* battle UI tiles and palettes */

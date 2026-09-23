@@ -583,7 +583,7 @@ SDL_Texture *chip_icon(int chip) {
  * function of the frame count, so drawing changes no state but a cache. */
 
 #define BG_IDS 0x16
-#define BG_ANIMS 4
+#define BG_ANIMS 12
 #define BG_STEPS 48
 
 typedef struct {
@@ -612,9 +612,10 @@ static BattleBg bgs[BG_IDS];
 
 static bool rom_ptr_ok(uint32_t v) { return rom_is_ptr(v); }
 
-static void bg_load(int id, BattleBg *b) {
+/* rec: BGAnimData pointer; list: GFX animation list pointer; vbase: the
+ * address of the background's tile block (tile 0) in VRAM. */
+static void bg_load_rec(BattleBg *b, uint32_t rec, uint32_t list, uint32_t vbase) {
 	b->loaded = true;
-	uint32_t rec = rom_u32(R.layout->battle_bg_table + (uint32_t)id * 4);
 	if (!rom_ptr_ok(rec)) return;
 	uint32_t r = rom_off(rec);
 	uint32_t gfx = rom_u32(r), gdest = rom_u32(r + 4), map = rom_u32(r + 8), pal = rom_u32(r + 16), pdest = rom_u32(r + 20), psize = rom_u32(r + 24);
@@ -622,7 +623,7 @@ static void bg_load(int id, BattleBg *b) {
 	size_t n = 0;
 	uint32_t g = rom_off(gfx);
 	uint8_t *t = lz77_decompress(R.data + g + rom_u32(g + 4), ROM_SIZE - (g + rom_u32(g + 4)), &n);
-	uint32_t at = gdest - 0x06000000u;
+	uint32_t at = gdest - vbase;
 	if (t && at < sizeof b->vram) memcpy(b->vram + at, t, n < sizeof b->vram - at ? n : sizeof b->vram - at);
 	free(t);
 	uint32_t m = rom_off(map);
@@ -636,7 +637,6 @@ static void bg_load(int id, BattleBg *b) {
 	}
 	if (rom_ptr_ok(pal) && pdest >= 0x03001960u && pdest - 0x03001960u + psize <= sizeof b->pal)
 		memcpy(b->pal + (pdest - 0x03001960u), R.data + rom_off(pal) + 4, psize);
-	uint32_t list = rom_u32(R.layout->battle_bg_anims + (uint32_t)id * 4);
 	if (rom_ptr_ok(list)) {
 		for (uint32_t a = rom_off(list); b->nanim < BG_ANIMS && rom_u32(a) != 0xFFFFFFFFu; a += 4) {
 			uint32_t d = rom_u32(a);
@@ -646,12 +646,15 @@ static void bg_load(int id, BattleBg *b) {
 			an->cmd = R.data[d + 8];
 			if (an->cmd == 4) {
 				an->src = rom_off(rom_u32(d));
-				an->dest = rom_u32(d + 4) - 0x06000000u;
+				an->dest = rom_u32(d + 4) - vbase;
 				an->count = R.data[d + 10];
+				/* the net's lists also animate the floor, elsewhere in VRAM */
+				if (an->dest >= sizeof b->vram) continue;
 			} else if (an->cmd == 0) {
 				an->dest = rom_u32(d) - 0x03001960u;
 				an->count = (int)rom_u32(d + 4);
 			} else continue;
+			an->nsteps = an->total = 0;
 			for (uint32_t q = d + 12; an->nsteps < BG_STEPS; q += 8) {
 				uint32_t nx = rom_u32(q);
 				if (nx <= 1) { an->loop = nx == 1; break; }
@@ -664,6 +667,10 @@ static void bg_load(int id, BattleBg *b) {
 		}
 	}
 	b->ok = true;
+}
+
+static void bg_load(int id, BattleBg *b) {
+	bg_load_rec(b, rom_u32(R.layout->battle_bg_table + (uint32_t)id * 4), rom_u32(R.layout->battle_bg_anims + (uint32_t)id * 4), 0x06000000u);
 }
 
 static int bg_anim_step(const BgAnim *an, int frame) {
@@ -727,11 +734,7 @@ static void bg_scroll(int id, int frame, int *sx, int *sy) {
 	*sx = dx; *sy = dy;
 }
 
-void battle_bg_draw(int id, int frame) {
-	if (id < 0 || id >= BG_IDS) id = 7;
-	BattleBg *b = &bgs[id];
-	if (!b->loaded) bg_load(id, b);
-	if (!b->ok) { b = &bgs[7]; id = 7; if (!b->loaded) bg_load(7, b); if (!b->ok) return; }
+static void bg_show(BattleBg *b, int frame, int sx, int sy) {
 	bool dirty = !b->tex;
 	for (int i = 0; i < b->nanim; ++i) {
 		int st = bg_anim_step(&b->anim[i], frame);
@@ -741,14 +744,39 @@ void battle_bg_draw(int id, int frame) {
 		for (int i = 0; i < b->nanim; ++i) bg_apply(b, &b->anim[i], b->key[i]);
 		bg_render(b);
 	}
-	int sx, sy;
-	bg_scroll(id, frame, &sx, &sy);
 	int ox = ((P.core_x + sx) % 256 + 256) % 256 - 256, oy = ((P.core_y + sy) % 256 + 256) % 256 - 256;
 	for (int y = oy; y < P.h; y += 256)
 		for (int x = ox; x < P.w; x += 256) {
 			SDL_Rect dst = { x, y, 256, 256 };
 			SDL_RenderCopy(P.renderer, b->tex, NULL, &dst);
 		}
+}
+
+void battle_bg_draw(int id, int frame) {
+	if (id < 0 || id >= BG_IDS) id = 7;
+	BattleBg *b = &bgs[id];
+	if (!b->loaded) bg_load(id, b);
+	if (!b->ok) { b = &bgs[7]; id = 7; if (!b->loaded) bg_load(7, b); if (!b->ok) return; }
+	int sx, sy;
+	bg_scroll(id, frame, &sx, &sy);
+	bg_show(b, frame, sx, sy);
+}
+
+/* The net areas load their background into BG3 with tiles at 0x06008000;
+ * the scroll callbacks move it by counters (BGScrollCB_BG3Diagonal3to2Scroll:
+ * right 8/16 and down 4/16 of a pixel a frame; BG3SlowRightScroll: offset
+ * +1/16, the picture drifting left). */
+void area_bg_draw(int area, int frame) {
+	static BattleBg areas[8];
+	if (area < 0 || area >= 8) return;
+	BattleBg *b = &areas[area];
+	const __typeof__(R.layout->net_area[0]) *a = &R.layout->net_area[area];
+	if (!b->loaded) bg_load_rec(b, a->bg + 0x08000000u, a->bg_anims ? a->bg_anims + 0x08000000u : 0, 0x06008000u);
+	if (!b->ok) { battle_bg_draw(7, frame); return; }
+	int sx = 0, sy = 0;
+	if (a->scroll == 1) { sx = frame / 2; sy = frame / 4; }
+	else if (a->scroll == 2) sx = -(frame / 16);
+	bg_show(b, frame, sx, sy);
 }
 
 /* ------------------------------------------------------------------ */

@@ -180,6 +180,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--battle") && v) { battle_spec = v; ++i; }
 		else if (!strcmp(a, "--render-song") && v) { render_spec = v; ++i; }
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
+		else if (!strcmp(a, "--net-biome") && v) { extern int net_debug_biome; net_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
 	}

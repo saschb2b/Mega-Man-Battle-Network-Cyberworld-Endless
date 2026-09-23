@@ -183,8 +183,11 @@ static void checkpoint(void) {
 	save_run();
 }
 
+int net_debug_biome = -1; /* test hook: --net-biome */
+
 static void start_layer(void) {
 	int biome = run.side_kind == LAYER_UNDERNET ? BIOME_UNDERNET : run.side_kind == LAYER_SECRET ? BIOME_SECRET : biome_for_depth(run.depth);
+	if (net_debug_biome >= 0 && net_debug_biome < BIOME_COUNT) biome = net_debug_biome;
 	run.biome = biome;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind);
@@ -950,22 +953,8 @@ static void update(void) {
 /* Drawing */
 
 static void draw_background(void) {
-	const BiomeLook *L = &looks[layer.biome];
-	for (int y = 0; y < P.h; y += 4) {
-		int t = y * 255 / P.h;
-		fill_rect(0, y, P.w, 4, rgba((L->bg0[0] * (255 - t) + L->bg1[0] * t) / 255, (L->bg0[1] * (255 - t) + L->bg1[1] * t) / 255,
-			(L->bg0[2] * (255 - t) + L->bg1[2] * t) / 255, 255));
-	}
-	SDL_Color g = rgba(L->grid[0], L->grid[1], L->grid[2], 50);
-	int off = (int)(N.tick / 2) % 32;
-	int ox = ((int)cam_x / 3) % 32, oy = ((int)cam_y / 3) % 32;
-	for (int x = -32 + off - ox; x < P.w + 32; x += 32) fill_rect(x, 0, 1, P.h, g);
-	for (int y = -32 + off / 2 - oy; y < P.h + 32; y += 32) fill_rect(0, y, P.w, 1, g);
-	for (int i = 0; i < 24; ++i) {
-		int x = (int)((uint32_t)(i * 97) + N.tick / 3 * (uint32_t)(1 + i % 3)) % (P.w + 20) - 10;
-		int y = (i * 53 + i * i * 7) % P.h;
-		fill_rect(x, y, 2, 2, rgba(L->grid[0], L->grid[1], L->grid[2], 120));
-	}
+	/* the original area's own background, still relative to the screen */
+	area_bg_draw(layer.biome, (int)N.tick);
 }
 
 typedef struct { int y, kind, idx; } Drawable;

@@ -24,6 +24,17 @@ static const RomLayout layouts[] = {
 		.battle_bg_table = 0x082058,
 		.battle_bg_anims = 0x0822E0,
 		.chip_icon_pal = 0x6E3880,
+		.net_maps = 0x0329C4,
+		.net_area = {
+			{ 0x90, 0, 62, 1, 0x0018, 0x072B34, 0x072A90, 1 },  /* Central Area 1 */
+			{ 0x91, 0, 1, 6, 0x0040, 0x0766D0, 0x076628, 1 },   /* Seaside Area 1 */
+			{ 0x94, 1, 38, 7, 0x1000, 0x07BBE4, 0x07BB10, 1 },  /* Sky Area 2 */
+			{ 0x92, 0, 1, 1, 0x0010, 0x078FD4, 0x078F34, 1 },   /* Green Area 1 */
+			{ 0x96, 1, 26, 5, 0x1000, 0x07FF0C, 0x07FE68, 2 },  /* Graveyard */
+			{ 0x95, 0, 52, 5, 0x0800, 0x07E11C, 0x07E020, 0 },  /* Undernet 1 */
+			{ 0x95, 2, 26, 5, 0x0800, 0x07E11C, 0x07E050, 0 },  /* Undernet 3 */
+			{ 0x93, 1, 58, 8, 0x0200, 0x07A5B8, 0x07A538, 0 },  /* Underground 2 */
+		},
 		.song_table = 0x159F48,
 		.chip_desc = { 0x6E983C, 0 },
 		.ui = {

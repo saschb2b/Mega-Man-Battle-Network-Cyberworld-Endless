@@ -91,6 +91,8 @@ void hud_pet_menu(int x, int y, int selected);
 /* The game's battle background `id` (0x00-0x15) at `frame` frames into the
  * battle: animated and scrolled as the original. */
 void battle_bg_draw(int id, int frame);
+/* The background of net area `area` (0-7, R.layout->net_area). */
+void area_bg_draw(int area, int frame);
 
 /* Text in the game's bold battle font. Height 12 on screen. */
 enum { TEXT_LEFT = 0, TEXT_CENTER = 1, TEXT_RIGHT = 2 };
