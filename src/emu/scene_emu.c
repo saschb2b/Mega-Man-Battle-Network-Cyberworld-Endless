@@ -1,6 +1,7 @@
 /* The running game in the window: the core's frame in the 240x160 view,
  * its sound on the audio device and the port's buttons as GBA keys. */
 #include "audio.h"
+#include "boot.h"
 #include "emu.h"
 #include "game.h"
 #include "gfx.h"
@@ -23,6 +24,7 @@ static uint32_t keys_from_buttons(void) {
 
 static void enter(void) {
 	if (!emu_init(R.data, ROM_SIZE)) return;
+	emu_boot();
 	audio_external(emu_audio_read);
 }
 

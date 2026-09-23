@@ -8,6 +8,8 @@
 
 #define EMU_W 240
 #define EMU_H 160
+#define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space */
+#define EMU_FREE 0x08800000u      /* first free bus address past an 8 MB game */
 
 /* GBA key bits */
 enum {

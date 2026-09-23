@@ -30,7 +30,15 @@ static struct mLogger logger = { .log = quiet };
 bool emu_init(const uint8_t *rom, size_t len) {
 	if (core) return true;
 	mLogSetDefaultLogger(&logger);
-	struct VFile *vf = VFileMemChunk(rom, len);
+	/* the copy is padded to EMU_ROM_SIZE: the space past the game is free for
+	 * the engine's hooks and generated data (EMU_FREE) */
+	if (len > EMU_ROM_SIZE) return false;
+	uint8_t *copy = malloc(EMU_ROM_SIZE);
+	if (!copy) return false;
+	memcpy(copy, rom, len);
+	memset(copy + len, 0xFF, EMU_ROM_SIZE - len);
+	struct VFile *vf = VFileMemChunk(copy, EMU_ROM_SIZE);
+	free(copy);
 	if (!vf) return false;
 	core = mCoreFindVF(vf);
 	if (!core || !core->init(core)) { vf->close(vf); core = NULL; return false; }
