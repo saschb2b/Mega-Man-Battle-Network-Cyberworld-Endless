@@ -12,6 +12,7 @@ typedef struct {
 	int layers;
 	uint16_t *tile[2];     /* map entries, row-major, per layer */
 	uint32_t *px;          /* the map drawn (ARGB, alpha 0 where empty) */
+	uint8_t *front;        /* 1 where the front layer (0) is drawn */
 	int ex, ey;            /* panel edges in world units: X = ex, Y = ey (mod 32) */
 	uint32_t desc;         /* ROM offset of its MapBGDescriptor */
 	uint32_t coord_slot;   /* ROM offset of its coordinate-data pointer */

@@ -69,11 +69,13 @@ static int style_at(const AreaSrc *a, int cx, int cy) {
 }
 
 /* Panel state in the source map: 0 empty, 1 floor of another style, 2 good floor */
-static int src_panel(const AreaSrc *a, int A, int B, uint16_t styles) {
+static int src_panel(const AreaSrc *a, int A, int B, uint16_t styles, bool bg_in_map) {
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	int px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
 	int W = a->tw * 8, H = a->th * 8;
 	if (px < 0 || py < 0 || px >= W || py >= H || !(a->px[(size_t)py * W + px] >> 24)) return 0;
+	/* where the background is part of the map, floor is what the front layer draws */
+	if (bg_in_map && !a->front[(size_t)py * W + px]) return 0;
 	return (styles >> style_at(a, px, py) & 1) ? 2 : 1;
 }
 
@@ -116,7 +118,7 @@ static bool learn(int area, Learned *L) {
 				unsigned occ = 0;
 				bool mixed = false;
 				for (int k = 0; k < 9; ++k) {
-					int st = src_panel(&a, A + k % 3 - 1, B + k / 3 - 1, na->styles);
+					int st = src_panel(&a, A + k % 3 - 1, B + k / 3 - 1, na->styles, na->bg_in_map);
 					if (st == 1) mixed = true;
 					if (st) occ |= 1u << k;
 				}

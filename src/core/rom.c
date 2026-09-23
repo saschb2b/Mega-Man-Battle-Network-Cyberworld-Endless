@@ -32,9 +32,9 @@ static const RomLayout layouts[] = {
 			{ 0x94, 1, 38, 7, 0x1000, 0x07BBE4, 0x07BB10, 1 },  /* Sky Area 2 */
 			{ 0x92, 0, 1, 1, 0x0010, 0x078FD4, 0x078F34, 1 },   /* Green Area 1 */
 			{ 0x96, 1, 26, 5, 0x1000, 0x07FF0C, 0x07FE68, 2 },  /* Graveyard */
-			{ 0x95, 0, 52, 5, 0x0800, 0x07E11C, 0x07E020, 0 },  /* Undernet 1 */
-			{ 0x95, 2, 26, 5, 0x0800, 0x07E11C, 0x07E050, 0 },  /* Undernet 3 */
-			{ 0x93, 1, 58, 8, 0x0200, 0x07A5B8, 0x07A538, 0 },  /* Underground 2 */
+			{ 0x95, 0, 52, 5, 0x0001, 0x07E11C, 0x07E020, 0, true },  /* Undernet 1 */
+			{ 0x95, 1, 26, 5, 0x1000, 0x07E11C, 0x07E050, 0, true },  /* Undernet Zero */
+			{ 0x93, 1, 58, 8, 0x0004, 0x07A5B8, 0x07A538, 0, true },  /* Underground 2 */
 		},
 		.song_table = 0x159F48,
 		.chip_desc = { 0x6E983C, 0 },

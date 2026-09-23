@@ -47,6 +47,7 @@ static bool decode_tiles(AreaSrc *a) {
 	uint32_t colors[256];
 	for (int i = 0; i < 256; ++i) colors[i] = bgr555(rom_u16(pal + (uint32_t)i * 2));
 	a->px = calloc(cells * 64, 4);
+	a->front = calloc(cells * 64, 1);
 	int W = a->tw * 8;
 	for (int l = a->layers - 1; l >= 0; --l)
 		for (int ty = 0; ty < a->th; ++ty)
@@ -61,6 +62,7 @@ static bool decode_tiles(AreaSrc *a) {
 						if (!ci) continue;
 						int X = (e & 0x400) ? 7 - x : x, Y = (e & 0x800) ? 7 - y : y;
 						a->px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[(e >> 12) * 16 + ci];
+						if (l == 0) a->front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
 					}
 			}
 	free(vram);
@@ -109,5 +111,6 @@ bool area_src_load(int group, int number, AreaSrc *a) {
 void area_src_free(AreaSrc *a) {
 	for (int l = 0; l < 2; ++l) free(a->tile[l]);
 	free(a->px);
+	free(a->front);
 	memset(a, 0, sizeof *a);
 }
