@@ -138,8 +138,9 @@ static bool walkable(float x, float y) {
 	return layer.cell[cy][cx] == C_PATH;
 }
 
+/* The original keeps MegaMan 4 of a panel's 32 world units inside its edges. */
 static bool blocked(float x, float y) {
-	const float r = 0.2f;
+	const float r = 4.0f / 32;
 	if (!walkable(x - r, y - r) || !walkable(x + r, y - r) || !walkable(x - r, y + r) || !walkable(x + r, y + r)) return true;
 	for (int i = 0; i < layer.nobj; ++i) {
 		NetObj *o = &layer.obj[i];
@@ -149,6 +150,17 @@ static bool blocked(float x, float y) {
 		if (dx * dx + dy * dy < 0.3f * 0.3f) return true;
 	}
 	return false;
+}
+
+/* Move along one axis by d cells; at an edge the move stops at the last
+ * quarter world unit that fits, as the original's does. */
+static float move_axis(bool along_x, float d) {
+	const float q = 1.0f / 128;
+	for (float step = d; fabsf(step) > q / 2; step -= step > 0 ? q : -q) {
+		float nx = N.px + (along_x ? step : 0), ny = N.py + (along_x ? 0 : step);
+		if (!blocked(nx, ny)) { N.px = nx; N.py = ny; return step; }
+	}
+	return 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -908,13 +920,16 @@ static void update(void) {
 		/* screen pixels -> cells: sx = (x - y) * 32, sy = (x + y) * 16 */
 		float dx = (vx / (TILE_W / 2) + vy / (TILE_H / 2)) / 2, dy = (vy / (TILE_H / 2) - vx / (TILE_W / 2)) / 2;
 		float ox = N.px, oy = N.py;
-		if (!blocked(N.px + dx, N.py + dy)) { N.px += dx; N.py += dy; }
-		else {
-			if (!blocked(N.px + dx, N.py)) N.px += dx;
-			if (!blocked(N.px, N.py + dy)) N.py += dy;
+		float mx = move_axis(true, dx), my = move_axis(false, dy);
+		/* Against an edge MegaMan slides along it at the full speed of one
+		 * axis (a world unit a frame walking, two running), like the original. */
+		float full = spd / 32.0f;
+		if (dx != 0 && dy != 0) {
+			if (fabsf(my) < fabsf(dy) && fabsf(mx) < full) move_axis(true, (dx > 0 ? full : -full) - mx);
+			else if (fabsf(mx) < fabsf(dx) && fabsf(my) < full) move_axis(false, (dy > 0 ? full : -full) - my);
 		}
-		float mx = (N.px - ox - (N.py - oy)) * (TILE_W / 2), my = (N.px - ox + N.py - oy) * (TILE_H / 2);
-		N.walked += sqrtf(mx * mx + my * my);
+		float wx = (N.px - ox - (N.py - oy)) * (TILE_W / 2), wy = (N.px - ox + N.py - oy) * (TILE_H / 2);
+		N.walked += sqrtf(wx * wx + wy * wy);
 		int want = (running ? 16 : 8) + N.dir;
 		if (N.mm.anim != want) anim_play(&N.mm, N.mm.spr, want);
 		/* Random encounters, like the original's step counter. */
