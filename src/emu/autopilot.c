@@ -14,6 +14,13 @@
 
 bool autopilot_on(void) { return getenv("CYBERWORLD_AUTOPILOT") != NULL; }
 
+/* a solid object (a talker) stands on the panel */
+static bool blocked(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].solid && (int)layer.obj[i].x == x && (int)layer.obj[i].y == y) return true;
+	return false;
+}
+
 static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 	static int16_t prev[MAP_H][MAP_W];
 	static int16_t q[MAP_W * MAP_H];
@@ -27,7 +34,7 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 		for (int k = 0; k < 4; ++k) {
 			int ax = x + d[k][0], ay = y + d[k][1];
-			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH) continue;
+			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || blocked(ax, ay)) continue;
 			prev[ay][ax] = (int16_t)c;
 			q[t++] = (int16_t)(ay * MAP_W + ax);
 		}
@@ -66,6 +73,16 @@ uint32_t autopilot_keys(void) {
 		{ 7, -7, KEY_UP }, { 10, 0, KEY_UP | KEY_RIGHT }, { 7, 7, KEY_RIGHT }, { 0, 10, KEY_DOWN | KEY_RIGHT },
 		{ -7, 7, KEY_DOWN }, { -10, 0, KEY_DOWN | KEY_LEFT }, { -7, -7, KEY_LEFT }, { 0, -10, KEY_UP | KEY_LEFT },
 	};
+	/* stuck on something (a Mystery Data, an NPC): take it or step aside */
+	static int last_x, last_y, still, unstick;
+	still = px == last_x && py == last_y ? still + 1 : 0;
+	last_x = px; last_y = py;
+	if (still > 45) { still = 0; unstick = 30; }
+	if (unstick > 0) {
+		--unstick;
+		if (unstick > 24) return unstick & 1 ? KEY_A : 0;
+		return dirs[(frame / 256 + (unsigned)px) % 8].k;
+	}
 	int dx = wx - px, dy = wy - py;
 	if (abs(dx) + abs(dy) < 3) return 0;
 	uint32_t k = 0;
