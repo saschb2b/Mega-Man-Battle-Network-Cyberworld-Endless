@@ -22,5 +22,5 @@ First playable version.
   a run summary after the game's GAME OVER.
 - Checkpoints on arrival at each layer; CONTINUE returns there. A profile
   keeps the best depth.
-- PortMaster launcher for ROCKNIX; tested on the Retroid Nova and the
-  Retroid Pocket Flip 2.
+- PortMaster launcher for ROCKNIX, made for the Retroid Nova and the Retroid
+  Pocket Flip 2.
