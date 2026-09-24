@@ -8,6 +8,9 @@ which matches the glibc and SDL2 that current ROCKNIX ships.
   python3 build.py host         host binary only
   python3 build.py device       aarch64 binary only
   python3 build.py shot ...     run the host binary headlessly (options below)
+  python3 build.py tour [BIOMES] the game itself warped through every room of
+                                each area's layer, one sheet per area in
+                                .build/tour (docs/DEVTOOLS.md)
   python3 build.py atlas [BIOMES] [SEEDS]
                                 every area's layers drawn, one sheet per area
                                 in .build/atlas (docs/DEVTOOLS.md)
@@ -115,6 +118,37 @@ def atlas(biomes='all', seeds='1'):
     return 0
 
 
+def tour(biomes='all'):
+    """The game warped through every room of each area's layer, one sheet per area."""
+    out = os.path.join(ROOT, '.build', 'tour')
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+    code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                  '--tour', f'/src/.build/tour:{biomes}', '--seed', '5', '--frames', '200000', mounts=[(rom_dir, '/rom:ro')])
+    if code:
+        return code
+    from PIL import Image
+    import collections
+    import glob
+    import re
+    rooms = collections.defaultdict(list)
+    for path in sorted(glob.glob(os.path.join(out, 'tour_b*.bmp'))):
+        rooms[int(re.match(r'tour_b(\d+)_', os.path.basename(path)).group(1))].append(path)
+    for biome, paths in rooms.items():
+        cols = 4
+        sheet = Image.new('RGB', (cols * 480, ((len(paths) + cols - 1) // cols) * 320))
+        for i, path in enumerate(paths):
+            im = Image.open(path).convert('RGB')
+            w, h = im.size   # the canvas: the game's 240 x 160 in the middle
+            im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)).resize((480, 320), Image.NEAREST)
+            sheet.paste(im, ((i % cols) * 480, (i // cols) * 320))
+            os.remove(path)
+        sheet.save(os.path.join(out, f'tour_b{biome:02d}.png'))
+    print(f'{len(rooms)} sheets in .build/tour')
+    return 0
+
+
 def densest(im, w, h):
     """The w x h window with the most floor in it."""
     px = im.load()
@@ -130,7 +164,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean', 'atlas'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -139,6 +173,9 @@ def main():
     if a.action == 'test':
         ensure_image()
         sys.exit(docker('make', 'test'))
+    if a.action == 'tour':
+        build('host')
+        sys.exit(tour(*a.rest[:1]))
     if a.action == 'atlas':
         build('host')
         sys.exit(atlas(*a.rest[:2]))
