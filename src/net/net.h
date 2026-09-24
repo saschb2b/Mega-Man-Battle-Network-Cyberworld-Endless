@@ -8,7 +8,7 @@
 #define MAP_W 64
 #define MAP_H 64
 #define MAX_OBJS 64
-#define MAX_ROOMS 14
+#define MAX_ROOMS 24
 #define MAX_STAIRS 4
 
 enum { C_VOID = 0, C_PATH = 1 };
@@ -38,8 +38,14 @@ typedef struct {
 	int npc_line;
 } NetObj;
 
+/* Room kinds: where points of interest go (docs/LEVEL_DESIGN.md). */
+enum { ROOM_PLATFORM, ROOM_PAD, ROOM_FIELD };
+
+/* A platform or pad: its box, a floor cell in it (ax, ay) and its kind. */
 typedef struct {
 	int x, y, w, h;
+	int ax, ay;
+	int kind;
 } Room;
 
 enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET };
@@ -66,6 +72,7 @@ typedef struct {
 	bool boss_beaten;
 	int boss_navi;
 	int exit_room;
+	int layout;                    /* LAYOUT_* (net_layouts.h) */
 } Layer;
 
 extern Layer layer;

@@ -31,6 +31,8 @@ static bool single_entry(const Room *r, int side, int *ex, int *ey) {
 			if (corner) continue;
 			bool on_side = side == 0 ? x == r->x + r->w : y == r->y + r->h;
 			if (!on_side) return false;
+			/* a second entry only right beside the first: one corridor two wide */
+			if (n && abs(x - *ex) + abs(y - *ey) != 1) return false;
 			if (!n++) { *ex = x; *ey = y; }
 		}
 	return n >= 1 && n <= 2;

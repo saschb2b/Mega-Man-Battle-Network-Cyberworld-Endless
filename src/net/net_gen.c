@@ -1,9 +1,12 @@
-/* Layer generation: rooms joined by walkways, then points of interest. */
+/* Layer generation: a layout after the area's own maps (net_layouts.c),
+ * then points of interest (docs/LEVEL_DESIGN.md). */
 #include <stdlib.h>
 #include <string.h>
 
 #include "game.h"
 #include "net.h"
+#include "net_layouts.h"
+#include "net_shapes.h"
 #include "run.h"
 
 Layer layer;
@@ -19,39 +22,6 @@ bool is_boss_depth(int depth) {
 	return p % 3 == 2 || p == 18;
 }
 
-/* Rooms keep to the top-left GEN_SIZE cells: a cell is a 64x32 panel. */
-#define GEN_SIZE 20
-
-static bool room_fits(const Room *r) {
-	if (r->x < 2 || r->y < 2 || r->x + r->w > GEN_SIZE - 2 || r->y + r->h > GEN_SIZE - 2) return false;
-	for (int i = 0; i < layer.nrooms; ++i) {
-		const Room *o = &layer.rooms[i];
-		if (r->x < o->x + o->w + 3 && o->x < r->x + r->w + 3 && r->y < o->y + o->h + 3 && o->y < r->y + r->h + 3) return false;
-	}
-	return true;
-}
-
-static void carve(int x, int y) {
-	if (x >= 1 && y >= 1 && x < MAP_W - 1 && y < MAP_H - 1) layer.cell[y][x] = C_PATH;
-}
-
-static void corridor(int ax, int ay, int bx, int by, int width) {
-	/* L-shaped walkway; the bend order alternates for variety. */
-	bool xfirst = rng_range(0, 1);
-	int x = ax, y = ay;
-	while (x != bx || y != by) {
-		for (int k = 0; k < width; ++k) carve(xfirst ? x : x + k, xfirst ? y + k : y);
-		if (xfirst) { if (x != bx) x += x < bx ? 1 : -1; else y += y < by ? 1 : -1; }
-		else { if (y != by) y += y < by ? 1 : -1; else x += x < bx ? 1 : -1; }
-	}
-	carve(bx, by);
-}
-
-static void room_center(const Room *r, int *cx, int *cy) {
-	*cx = r->x + r->w / 2;
-	*cy = r->y + r->h / 2;
-}
-
 static NetObj *add_obj(int type, int x, int y) {
 	if (layer.nobj >= MAX_OBJS) return NULL;
 	NetObj *o = &layer.obj[layer.nobj++];
@@ -65,18 +35,18 @@ static NetObj *add_obj(int type, int x, int y) {
 
 static bool cell_free(int x, int y) {
 	if (layer.cell[y][x] != C_PATH) return false;
+	for (int i = 0; i < layer.nstairs; ++i)
+		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if ((int)layer.obj[i].x == x && (int)layer.obj[i].y == y) return false;
 	return true;
 }
 
-/* A free cell inside a room, preferring its edges so paths stay clear. */
+/* A free cell inside a room, off its middle so paths stay clear. */
 static bool room_spot(const Room *r, int *ox, int *oy) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
-		int cx, cy;
-		room_center(r, &cx, &cy);
-		if (tries < 30 && x == cx && y == cy) continue;
+		if (tries < 30 && x == r->ax && y == r->ay) continue;
 		if (cell_free(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;
@@ -87,11 +57,9 @@ static int bfs_far(int from) {
 	static int16_t dist[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
 	memset(dist, -1, sizeof dist);
-	int cx, cy;
-	room_center(&layer.rooms[from], &cx, &cy);
 	int h = 0, t = 0;
-	qx[t] = (int16_t)cx; qy[t++] = (int16_t)cy;
-	dist[cy][cx] = 0;
+	qx[t] = (int16_t)layer.rooms[from].ax; qy[t++] = (int16_t)layer.rooms[from].ay;
+	dist[qy[0]][qx[0]] = 0;
 	while (h < t) {
 		int x = qx[h], y = qy[h++];
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
@@ -104,10 +72,65 @@ static int bfs_far(int from) {
 	}
 	int best = from, bd = -1;
 	for (int i = 0; i < layer.nrooms; ++i) {
-		room_center(&layer.rooms[i], &cx, &cy);
-		if (dist[cy][cx] > bd) { bd = dist[cy][cx]; best = i; }
+		int d = dist[layer.rooms[i].ay][layer.rooms[i].ax];
+		if (d > bd) { bd = d; best = i; }
 	}
 	return best;
+}
+
+#define MIN_FLOOR 120   /* panels a layer has at least */
+
+static int floor_cells(void) {
+	int n = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) n += layer.cell[y][x] == C_PATH;
+	return n;
+}
+
+/* Whether the layer's tile map fits the game's 0x14000-byte buffer, as
+ * netmap centres and sizes it (panel edges up to 28 units off, `rise` for a
+ * raised floor). */
+static bool fits(int rise) {
+	int u0 = 1 << 30, u1 = -(1 << 30), v0 = 1 << 30, v1 = -(1 << 30);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (layer.cell[y][x] != C_PATH) continue;
+			if (x - y < u0) u0 = x - y;
+			if (x - y > u1) u1 = x - y;
+			if (x + y < v0) v0 = x + y;
+			if (x + y > v1) v1 = x + y;
+		}
+	int uh = (u1 - u0) / 2 + 2, vh = (v1 - v0) / 2 + 2;   /* half extents, rounding and centring slack */
+	int tw = 2 * ((32 * uh + 88 + 64 + 7) / 8) + 1, th = 2 * ((16 * vh + 14 + 48 + rise + 7) / 8) + 1;
+	return tw <= 255 && th <= 255 && tw * th * 4 <= 0x14000;
+}
+
+/* MegaMan arrives at the pad nearest the top of the screen (least x + y),
+ * which becomes room 0. */
+static void choose_arrival(void) {
+	int best = 0, bv = 1 << 30;
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		int v = r->ax + r->ay - (r->kind == ROOM_PAD ? 6 : 0);
+		if (v < bv) { bv = v; best = i; }
+	}
+	Room t = layer.rooms[0];
+	layer.rooms[0] = layer.rooms[best];
+	layer.rooms[best] = t;
+}
+
+/* Object `type` in the next room of `order`; once each has one, again in
+ * the big ones (fields and platforms of 16 cells or more). */
+static NetObj *place(int type, const int *order, int n, int next, int *x, int *y) {
+	int r = -1;
+	if (next < n) r = order[next];
+	else {
+		int big[MAX_ROOMS], nb = 0;
+		for (int i = 0; i < n; ++i)
+			if (layer.rooms[order[i]].w * layer.rooms[order[i]].h >= 16) big[nb++] = order[i];
+		if (nb) r = big[rng_range(0, nb - 1)];
+	}
+	return r >= 0 && room_spot(&layer.rooms[r], x, y) ? add_obj(type, *x, *y) : NULL;
 }
 
 void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stair_dirs, int rise) {
@@ -118,57 +141,32 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	layer.boss_layer = kind == LAYER_NORMAL && is_boss_depth(depth);
 	if (kind == LAYER_SECRET) layer.boss_layer = !run.secret_cleared;
 
-	int want = 6 + depth / 4;
-	if (kind != LAYER_NORMAL) want = 8;
-	if (want > MAX_ROOMS) want = MAX_ROOMS;
-	for (int tries = 0; tries < 400 && layer.nrooms < want; ++tries) {
-		Room r;
-		r.w = rng_range(3, 5);
-		r.h = rng_range(3, 5);
-		r.x = rng_range(2, GEN_SIZE - r.w - 2);
-		r.y = rng_range(2, GEN_SIZE - r.h - 2);
-		if (!room_fits(&r)) continue;
-		layer.rooms[layer.nrooms++] = r;
-		for (int y = r.y; y < r.y + r.h; ++y)
-			for (int x = r.x; x < r.x + r.w; ++x) layer.cell[y][x] = C_PATH;
-	}
-	/* Connect with a minimum spanning tree, plus a couple of loops. */
-	bool in_tree[MAX_ROOMS] = { true };
-	for (int n = 1; n < layer.nrooms; ++n) {
-		int ba = -1, bb = -1, bd = 1 << 30;
-		for (int a = 0; a < layer.nrooms; ++a) {
-			if (!in_tree[a]) continue;
-			for (int b = 0; b < layer.nrooms; ++b) {
-				if (in_tree[b]) continue;
-				int ax, ay, bx, by;
-				room_center(&layer.rooms[a], &ax, &ay);
-				room_center(&layer.rooms[b], &bx, &by);
-				int d = abs(ax - bx) + abs(ay - by);
-				if (d < bd) { bd = d; ba = a; bb = b; }
-			}
-		}
-		if (bb < 0) break;
-		in_tree[bb] = true;
-		int ax, ay, bx, by;
-		room_center(&layer.rooms[ba], &ax, &ay);
-		room_center(&layer.rooms[bb], &bx, &by);
-		corridor(ax, ay, bx, by, rng_range(0, 2) == 0 ? 1 : 2);
-	}
-	for (int k = 0; k < 2 && layer.nrooms > 3; ++k) {
-		int a = rng_range(0, layer.nrooms - 1), b = rng_range(0, layer.nrooms - 1);
-		if (a == b) continue;
-		int ax, ay, bx, by;
-		room_center(&layer.rooms[a], &ax, &ay);
-		room_center(&layer.rooms[b], &bx, &by);
-		if (abs(ax - bx) + abs(ay - by) < 18) corridor(ax, ay, bx, by, 1);
+	/* bigger layouts deeper into a cycle */
+	int p = (depth - 1) % CYCLE_LAYERS;
+	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
+	/* an act's three layers each in another of the area's layouts */
+	int planned = kind == LAYER_NORMAL
+		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / 3 + 1) * 0x9E3779B9u, (depth - 1) % 3)
+		: layout_pick(biome);
+	for (int attempt = 0; attempt < 12; ++attempt) {
+		memset(layer.cell, 0, sizeof layer.cell);
+		layer.nrooms = 0;
+		/* the planned layout, then any of the area's, last the plainest at its smallest */
+		bool last = attempt == 11;
+		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
+		layout_build(layer.layout, biome, last ? 0 : size);
+		if (layer.nrooms < 3) continue;
+		choose_arrival();
+		connect_all();
+		if (floor_cells() >= MIN_FLOOR && fits(rise)) break;
 	}
 
 	layer.exit_room = bfs_far(0);
 	layer_raise_rooms(seed, stair_dirs, rise);
-	int cx, cy;
-	room_center(&layer.rooms[0], &cx, &cy);
+	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
 	add_obj(OBJ_WARP_IN, cx, cy);
-	room_center(&layer.rooms[layer.exit_room], &cx, &cy);
+	cx = layer.rooms[layer.exit_room].ax;
+	cy = layer.rooms[layer.exit_room].ay;
 	NetObj *exit = add_obj(kind == LAYER_NORMAL ? OBJ_EXIT : OBJ_RETURN, cx, cy);
 	if (layer.boss_layer && exit) {
 		/* The boss guards the exit, one cell in front of it. */
@@ -200,9 +198,12 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	int order[MAX_ROOMS], n = 0;
 	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
 	for (int i = n - 1; i > 0; --i) { int j = rng_range(0, i); int t = order[i]; order[i] = order[j]; order[j] = t; }
+	/* services on the bigger platforms, the pads left for the better data */
+	for (int i = 0, k = 0; i < n; ++i)
+		if (layer.rooms[order[i]].kind != ROOM_PAD) { int t = order[k]; order[k++] = order[i]; order[i] = t; }
 	int next = 0;
 	int x, y;
-#define PLACE(t) (next < n && room_spot(&layer.rooms[order[next]], &x, &y) ? add_obj((t), x, y) : NULL)
+#define PLACE(t) place((t), order, n, next, &x, &y)
 	if (shop) { PLACE(OBJ_SHOP); ++next; }
 	if (heal) { PLACE(OBJ_HEAL); ++next; }
 	if (trader) { PLACE(OBJ_TRADER); ++next; }
@@ -213,15 +214,25 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
 	/* Rooms holding better data, more of them deeper and in the Undernet. */
 	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET);
-	for (int k = 0; k < rich && next < n; ++k, ++next) {
+	for (int k = 0; k < rich; ++k, ++next) {
 		NetObj *o = PLACE(OBJ_MYSTERY);
 		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
 	}
-	/* Mystery data scattered through the rest. */
-	int md = 3 + rng_range(0, 2);
+	/* Mystery data scattered through the rest, most at dead ends: the side
+	 * ways BN6 rewards exploring */
+	static int dx[256], dy[256];
+	int nde = dead_ends(dx, dy, 256), di = 0;
+	for (int i = nde - 1; i > 0; --i) {
+		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
+		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
+	}
+	int md = 3 + rng_range(0, 2) + size;
 	for (int k = 0; k < md; ++k) {
-		Room *r = &layer.rooms[order[n ? rng_range(0, n - 1) : 0]];
-		if (!n || !room_spot(r, &x, &y)) continue;
+		bool got = false;
+		if (rng_range(0, 99) < 70)
+			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y); }
+		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
+		if (!got) continue;
 		NetObj *o = add_obj(OBJ_MYSTERY, x, y);
 		if (!o) break;
 		int roll = rng_range(0, 99);
