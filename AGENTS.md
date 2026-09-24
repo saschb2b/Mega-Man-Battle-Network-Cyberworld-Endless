@@ -12,7 +12,9 @@ devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 
 Never commit or publish ROMs, save files, extracted assets, emulator save
 states or disassembly files. `.gitignore` covers the usual names; check
-`git status` before committing anything.
+`git status` before committing anything. Screenshots of the game running
+are the one exception: `docs/screenshots/`, made by `build.py screenshots`,
+for the README and the site.
 
 ## Read before changing
 
@@ -42,7 +44,8 @@ states or disassembly files. `.gitignore` covers the usual names; check
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `port/` | PortMaster launcher and metadata |
 | `linux/` | The Linux desktop release's README and menu installer |
-| `web/` | The browser build's page: ROM check and storage, scaling (`app.js`) |
+| `web/` | The project site on GitHub Pages: the home page (`index.html`, `assets/`) in Battle Network's own interface (text boxes, menus, act cards, ChipFolder, Net Dealer, E-Mail), and the player in `play/` (ROM check and storage, scaling) |
+| `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
 | `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.web` (Emscripten, mGBA without threads) |
 | `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot |
 
@@ -50,8 +53,11 @@ states or disassembly files. `.gitignore` covers the usual names; check
 
 - Read data from the ROM through `RomLayout` offsets or the addresses in
   `src/emu/bn6.h`. Do not embed or generate files containing Capcom
-  graphics, text, samples or sequences; tables the engine derives are
-  numbers only.
+  graphics, text, samples or sequences (sprites, tiles, palettes, fonts,
+  text dumps, music); tables the engine derives are numbers only.
+  Screenshots of whole frames of the game running, for the README and the
+  site, are allowed; crops that isolate a sprite, a logo or a mugshot as an
+  asset are not.
 - Patch only the core's in-memory ROM copy, and put new data in the free
   space map in `docs/EMULATION.md`. Never write the player's ROM file.
 - A new ROM offset needs a note in `docs/ROM_DATA.md` saying how it was
@@ -76,7 +82,8 @@ python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.b
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/
 python3 build.py run        # the Linux desktop build, played here in a window
-python3 build.py serve      # the browser build on http://localhost:8080
+python3 build.py serve      # the site and the browser build on http://localhost:8080
+python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless runs
 python3 build.py release    # build/release/: the PortMaster zip, the Linux tar.gz, the site zip
 ```
 
@@ -121,6 +128,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band), an autopilot run |
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |
 | Browser page or platform code | `build.py serve` and a run in a browser: ROM choice, a new game, CONTINUE after a reload |
+| The site | `build.py serve` at desktop and phone widths; `build.py screenshots` again when what they show changed |
 | Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux archive started from a fresh unpack; tag `vX.Y.Z` on `main` |
 
 ## Device testing

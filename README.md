@@ -1,7 +1,16 @@
 # Mega Man Battle Network: Cyberworld Endless
 
 [![CI](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml/badge.svg)](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml)
-**[Play in the browser](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/)** · [Downloads](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
+**[Play in the browser](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** · [Project page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/) · [Downloads](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
+
+<p>
+<img src="docs/screenshots/title.png" width="360" alt="The title screen: the Battle Network logo with an infinity mark and the plate Cyberworld Endless">
+<img src="docs/screenshots/act-card.png" width="360" alt="Act 1: RoboDog Comp, its guardian BlastMan">
+<img src="docs/screenshots/battle.png" width="360" alt="BATTLE START against a Gunner and a FgtrPlne">
+<img src="docs/screenshots/guardian.png" width="360" alt="The guardian of Sky HP: DiveMan, Terror of the Deep">
+<img src="docs/screenshots/undernet.png" width="360" alt="A generated layer of the Undernet">
+<img src="docs/screenshots/reward.png" width="360" alt="MegaMan got DiveMan D!">
+</p>
 
 A roguelike for Mega Man Battle Network 6. Every run jacks MegaMan into a
 freshly generated net and sends him down, layer by layer, for as long as he
@@ -60,7 +69,7 @@ The archive's own `README.md` has the keyboard keys.
 
 ### In a browser
 
-Open **[the game's page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/)** and choose your ROM file, or drop it on
+Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** and choose your ROM file, or drop it on
 the page. The page checks it and keeps it, with your saves, in the
 browser's own storage (IndexedDB); it is never uploaded. Next time **Play**
 starts straight away. **Forget ROM and saves** removes both. It needs a
@@ -190,8 +199,10 @@ python3 build.py run
 
 `run` builds the Linux desktop binary and plays it on this machine in a
 window, with the ROM from `~/.cache/mmbn-ref/roms` (or `CYBERWORLD_ROM_DIR`)
-and saves in `.build/desktop`. `python3 build.py serve` builds the browser
-version and serves it on `http://localhost:8080`. `python3 build.py release`
+and saves in `.build/desktop`. `python3 build.py serve` builds the project
+site and the browser version and serves them on `http://localhost:8080`;
+`python3 build.py screenshots` retakes the screenshots in
+`docs/screenshots` from scripted headless runs. `python3 build.py release`
 writes the three release archives to `build/release/`: `cyberworld.zip` for
 PortMaster, `cyberworld-endless-linux-x86_64.tar.gz` and
 `cyberworld-endless-web.zip`. Each target builds in its own Docker image
