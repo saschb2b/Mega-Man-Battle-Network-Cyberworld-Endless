@@ -11,7 +11,7 @@ to confirm findings against real frames and VRAM.
 | Data | Offset | How it was found / verified |
 | --- | --- | --- |
 | Sprite pointer lists | `0x031CC4` | Ten pointers, the first pointing just past the list (`SpritePointersList`). Every category renders correctly. |
-| Chip records (0x2C bytes) | `0x021DA8` | Same address as Falzar's `ChipDataArr`. Cannon = 40 power, codes A B C *. Codes at 0, rarity 0-4 at 5, library type at 7 (0 standard, 1 Mega, 2 Giga, 3 secret, 4 Program Advance), library number at 0x15, library flags at 0x16 (bit 0: the other version's Navi chips and Otenko; 0x30: unused arm and dark chips; 0x10 alone: the Beast chips). A run can find or buy 283 of them (`src/core/chip_pool.c`): standard 1-202, the Megas 221-277 but Falzar's Navis, the ten Gigas 301-310. Records 203-220 are blank, 315 on pseudo-chips. |
+| Chip records (0x2C bytes) | `0x021DA8` | Same address as Falzar's `ChipDataArr`. Cannon = 40 power, codes A B C *. Codes at 0, rarity 0-4 at 5, library type at 7 (0 standard, 1 Mega, 2 Giga, 3 secret, 4 Program Advance), library number at 0x15, library flags at 0x16 (bit 0: the other version's Navi chips and Otenko; 0x30: unused arm and dark chips; 0x10 alone: the Beast chips). A run can find or buy 252 of them (`src/core/chip_pool.c`): standard 1-202, the Megas 221-277 but Falzar's Navis, the ten Gigas 301-310. Records 203-220 are blank, 315 on pseudo-chips. |
 | Chip names | `0x6E88D0`, `0x6E92D8` | Text archives found by encoding "Cannon" with the game's character table; pointers in code reference both. |
 | Enemy id table | `0x0182C4` | `GetVerActorTyAndAIIdx`: (version, actor type, AI index) triples. |
 | Font | `0x6B5A2C` | 8x16 glyphs indexed by character code (the battle font); the run summary uses it. |
