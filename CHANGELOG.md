@@ -29,7 +29,8 @@ First playable version.
   fields and platforms have floor to copy; holes that faces hang over are
   told from floor by the walls around them. The originals' free-standing
   scenery (the Aquarium's coral, shells and starfish) stands beside the
-  floor. Runs saved before carry over.
+  floor, and pads take the look of the original's pads (the Aquarium's
+  yellow frames on legs). Runs saved before carry over.
 - Three more areas for the first four acts, built from the game's computers
   and homepages: a comp in orange and green, a homepage in pink and teal and
   a comp in blue and pink, each with its own battles, background and
