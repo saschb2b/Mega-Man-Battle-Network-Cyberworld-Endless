@@ -52,7 +52,7 @@ static bool learn(int area, Learned *L) {
 	if (!area_src_load(na->group, na->number, &a)) return false;
 	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
 	L->desc = a.desc; L->coord_slot = a.coord_slot;
-	tiles_learn(&a, na->styles, na->bg_in_map, &L->book[0]);
+	tiles_learn(&a, na->styles, na->walk_styles, na->bg_in_map, &L->book[0]);
 	stairs_learn(&a, L->stairs);
 	if (emu_debug_on()) {
 		fprintf(stderr, "tiles area %d floor %d px down, faces %d px\n", area, L->book[0].dv, L->book[0].face);
@@ -62,7 +62,7 @@ static bool learn(int area, Learned *L) {
 	}
 	/* the map mirrored, for edges the original only has on its other side */
 	area_src_mirror(&a, &m);
-	tiles_learn(&m, na->styles, na->bg_in_map, &L->book[1]);
+	tiles_learn(&m, na->styles, na->walk_styles, na->bg_in_map, &L->book[1]);
 	area_src_free(&m);
 	area_src_free(&a);
 	return true;
@@ -102,15 +102,28 @@ static int kind(int x, int y) {
 
 static int kind_at(int A, int B) { return kind(B + place.gx0, -A + place.gy0); }
 
-/* Floor as the screen shows it: ground panels where they are, raised ones
- * where a flat panel `rise` world units up the screen would be (stairs are
- * drawn from their own pieces). */
-static bool floor_at(int A, int B) {
-	int k = cur->rise / 32;
-	return kind_at(A, B) == K_FLOOR || (k && kind_at(A - k, B + k) == K_RAISED);
+
+/* A walkway: a floor cell in no 2x2 block of floor, as the original areas
+ * draw their 1-wide paths in their second floor. */
+static bool walkway(int x, int y) {
+	for (int dy = -1; dy <= 0; ++dy)
+		for (int dx = -1; dx <= 0; ++dx)
+			if (kind(x + dx, y + dy) && kind(x + dx + 1, y + dy) && kind(x + dx, y + dy + 1) && kind(x + dx + 1, y + dy + 1)) return false;
+	return true;
 }
 
-static bool floor_cb(int A, int B, const void *ctx) { (void)ctx; return floor_at(A, B); }
+/* The floor's material as the screen shows it: ground panels where they
+ * are, raised ones where a flat panel `rise` world units up the screen
+ * would be (stairs are drawn from their own pieces). */
+static int floor_cb(int A, int B, const void *ctx) {
+	(void)ctx;
+	int k = cur->rise / 32, x = B + place.gx0, y = -A + place.gy0;
+	if (kind(x, y) != K_FLOOR && k) {
+		x += k; y += k;   /* a raised panel drawn here */
+		if (kind(x, y) != K_RAISED) return TILE_VOID;
+	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
+	return walkway(x, y) ? TILE_B : TILE_A;
+}
 
 int netmap_rise(void) { return cur ? cur->rise : 0; }
 

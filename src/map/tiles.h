@@ -11,7 +11,11 @@
 
 #define TILE_PLAIN 4   /* plain floor looks kept per phase */
 
-/* One pair of layer entries seen for a class (phase << 9 | neighbours), how
+/* Floor materials: the area's platform floor and its walkway floor. */
+enum { TILE_VOID, TILE_A, TILE_B };
+
+/* One pair of layer entries seen for a class (phase, then the platform and
+ * walkway panels around), how
  * often, which of its 64 pixels are drawn (bit y * 8 + x) and their
  * colours (BGR555). */
 typedef struct {
@@ -27,7 +31,7 @@ typedef struct {
 	TileCand *cand;
 	int n;
 	int dv, face;                       /* how the floor is drawn, see TileGrid */
-	int plain[64][TILE_PLAIN], nplain[64];   /* per phase: the floor's usual looks inside a room */
+	int plain[2][64][TILE_PLAIN], nplain[2][64];   /* per material and phase: the floor's usual looks */
 } TileBook;
 
 /* A tile map's size, where its panel edges fall (world units mod 32), how
@@ -35,10 +39,12 @@ typedef struct {
  * under its bottom edges are (from TileBook). */
 typedef struct { int tw, th, ex, ey, dv, face; } TileGrid;
 
-/* Whether world panel (A, B) is floor. */
-typedef bool (*TileFloor)(int A, int B, const void *ctx);
+/* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B. */
+typedef int (*TileFloor)(int A, int B, const void *ctx);
 
-void tiles_learn(const AreaSrc *a, uint16_t styles, bool bg_in_map, TileBook *out);
+/* Learns the tiles of the map's panels whose middle has a hue in `styles`
+ * (platforms) or `walk_styles` (walkways; 0 for none). */
+void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 
 /* The class of tile (tx, ty): its phase and the panel it lies in. */
