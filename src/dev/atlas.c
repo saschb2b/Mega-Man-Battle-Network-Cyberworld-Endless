@@ -20,6 +20,7 @@
 #include "tiles.h"
 
 #define VOID_ARGB 0xFF282830u
+#define SEAM_ARGB 0xFFFF2040u
 
 static uint32_t marker(int type) {
 	switch (type) {
@@ -72,6 +73,16 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	if (!px) return;
 	int W = tw * 8, H = th * 8;
 	for (int i = 0; i < W * H; ++i) if (!(px[i] >> 24)) px[i] = VOID_ARGB;
+	/* seams, marked in a copy */
+	uint32_t *sp = malloc((size_t)W * H * 4);
+	memcpy(sp, px, (size_t)W * H * 4);
+	const uint8_t *seams = netmap_last_seams();
+	for (int ty = 0; ty < th; ++ty)
+		for (int tx = 0; tx < tw; ++tx)
+			for (int k = 0; k < 8; ++k) {
+				if (seams[ty * tw + tx] & 1 && tx + 1 < tw) sp[(size_t)(ty * 8 + k) * W + tx * 8 + 7] = sp[(size_t)(ty * 8 + k) * W + tx * 8 + 8] = SEAM_ARGB;
+				if (seams[ty * tw + tx] & 2 && ty + 1 < th) sp[(size_t)(ty * 8 + 7) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 8) * W + tx * 8 + k] = SEAM_ARGB;
+			}
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int X, Y;
@@ -82,13 +93,16 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	char path[600];
 	snprintf(path, sizeof path, "%s/b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
 	save_bmp(path, px, W, H);
+	snprintf(path, sizeof path, "%s/seams_b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
+	save_bmp(path, sp, W, H);
+	free(sp);
 	free(px);
 	int floor = 0;
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) floor += layer.cell[y][x] == C_PATH;
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1;
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, scenery %d, arena %s, stairs %d\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, scenery %d, arena %s, stairs %d\n",
 		biome, layer.layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
-		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, netmap_scenery,
+		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, netmap_scenery,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs);
 }
 

@@ -97,6 +97,7 @@ def atlas(biomes='all', seeds='1'):
             im = Image.open(path).convert('RGB')
             box = im.getbbox() or (0, 0, im.width, im.height)
             im = im.crop(box)
+            im.save(path[:-4] + '.png')   # kept whole, for zooming in
             thumb = im.copy()
             thumb.thumbnail((400, 400))
             whole.append(thumb)
@@ -108,6 +109,10 @@ def atlas(biomes='all', seeds='1'):
         sheet.save(os.path.join(out, f'sheet_b{biome:02d}.png'))
         for path in paths:
             os.remove(path)
+    for path in glob.glob(os.path.join(out, 'seams_*.bmp')):   # the same, seams marked
+        im = Image.open(path).convert('RGB')
+        im.crop(im.getbbox()).save(path[:-4] + '.png')
+        os.remove(path)
     report = open(os.path.join(out, 'report.txt')).read()
     print(report, end='')
     flagged = [l for l in report.splitlines() if 'NOT BUILT' in l or 'arena NO' in l or

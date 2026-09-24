@@ -12,15 +12,20 @@ python3 build.py atlas [BIOMES] [SEEDS]
 
 Builds each area's layers without running the game (`src/dev/atlas.c`): every
 layout the area uses at depth 2, plus its guardian's layer at depth 3, drawn
-with the area's own tiles and palettes. All 19 areas take about 30 seconds.
+with the area's own tiles and palettes. All 19 areas take about 35 seconds.
 
 Output in `.build/atlas`:
 
 - `sheet_bXX.png`: one sheet per area, each layer small next to a 2x crop of
   its densest part.
+- `bXX_lL_dD_sS.png`: each layer whole, at 1x, for zooming in.
+- `seams_bXX_...png`: the same with the seams marked in red: tile edges
+  where two tiles meet as no original map shows them, or where one draws
+  floor up to its own edge above or below an empty tile (the steps along a
+  platform's lower edges).
 - `report.txt`: a line per layer with its panels, rooms, how many tile picks
-  were near misses or fallbacks, the scenery placed, whether a guardian layer
-  has its arena, and its stairs.
+  were near misses or fallbacks, how many seams are left, the scenery
+  placed, whether a guardian layer has its arena, and its stairs.
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the
