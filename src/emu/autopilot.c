@@ -78,13 +78,27 @@ static uint32_t toward_enemy_row(void) {
 	return theirs < mine ? KEY_UP : KEY_DOWN;
 }
 
-static void weaken_enemies(void) {
+/* Enemies at 1 HP, MegaMan topped up when low (HP +0x24, MaxHP +0x26, Alliance
+ * +0x16), and enemies it has not hit after WEAK_FRAMES at none: what
+ * follows a battle gets tested even where the autopilot fights badly
+ * (planes out of its row, StarFish under water, Nightmares). */
+#define WEAK_FRAMES 1200
+
+static uint32_t battle_frames;   /* off the map in a row */
+
+static void weaken_enemies(bool finish) {
 	for (uint32_t i = 0; i < T1_COUNT; ++i) {
 		uint32_t o = T1_OBJECTS + i * T1_SIZE;
-		if (emu_read8(o + 0x16) == 1 && emu_read16(o + 0x24) > 1) {   /* Alliance enemy, HP */
-			uint8_t one[2] = { 1, 0 };
-			emu_write(o + 0x24, one, 2);
+		if (!(emu_read8(o) & 1)) continue;
+		int alliance = emu_read8(o + 0x16), hp = emu_read16(o + 0x24), max = emu_read16(o + 0x26);
+		uint8_t v[2] = { 1, 0 };
+		if (alliance == 0 && hp > 0 && hp < 60) {
+			int full = max > hp ? max : 100;
+			v[0] = (uint8_t)full; v[1] = (uint8_t)(full >> 8);
+			emu_write(o + 0x24, v, 2);
 		}
+		if (alliance == 1 && finish) { v[0] = 0; emu_write(o + 0x24, v, 2); }
+		else if (alliance == 1 && hp > 1) emu_write(o + 0x24, v, 2);
 	}
 }
 
@@ -94,7 +108,7 @@ uint32_t autopilot_keys(void) {
 	int mode = emu_read8(emu_read32(BN6_TOOLKIT));
 	if (mode != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_MAP) {
 		const char *how = getenv("CYBERWORLD_AUTOPILOT");
-		if (how && !strcmp(how, "weak")) weaken_enemies();
+		if (how && !strcmp(how, "weak")) weaken_enemies(++battle_frames > WEAK_FRAMES);
 		/* battles and screens: a 480-frame rhythm of picking chips, OK and the buster */
 		uint32_t t = frame % 480;
 		if (t < 48) return (t % 12) < 4 ? KEY_A : 0;          /* pick chips */
@@ -105,6 +119,7 @@ uint32_t autopilot_keys(void) {
 		if (row) return (t % 8) < 2 ? row : 0;
 		return (t % 12) < 4 ? KEY_B : 0;
 	}
+	battle_frames = 0;
 	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	int cx, cy, ex, ey, nx, ny;
