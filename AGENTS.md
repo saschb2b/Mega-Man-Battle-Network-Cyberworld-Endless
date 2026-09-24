@@ -32,7 +32,10 @@ states or disassembly files. `.gitignore` covers the usual names; check
 | `src/audio/` | MP2K sequencer and mixer (title music and sounds); the core's sound during play |
 | `src/net/` | Layer generation (rooms, walkways, objects) |
 | `src/scenes/` | Title (with the run summary) and the sprite gallery |
-| `src/emu/` | The mGBA core, boot and warps, generated maps, layer objects, scripts, shops and the director (`docs/EMULATION.md`) |
+| `src/emu/` | The mGBA core, calls into the game (warps, chat), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`) |
+| `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
+| `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
+| `src/director/` | The run on the game: layers, warps, encounters, bosses, checkpoints, powers |
 | `tests/test_core.c` | ROM-free unit tests |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
