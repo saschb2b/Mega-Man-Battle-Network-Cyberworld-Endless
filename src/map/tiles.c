@@ -62,9 +62,15 @@ static int measure_panel(const Src *s, int A, int B) {
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	int px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
 	int W = a->tw * 8, H = a->th * 8;
-	if (px < 0 || py < 0 || px >= W || py >= H || !(a->px[(size_t)py * W + px] >> 24)) return 0;
-	/* where the background is part of the map, floor is what the front layer draws */
-	if (s->bg_in_map && !a->front[(size_t)py * W + px]) return 0;
+	/* its middle and four points around it drawn: a panel, not the legs a
+	 * computer's platforms hang into the gaps (where the background is part
+	 * of the map, floor is what the front layer draws) */
+	static const int probe[5][2] = { { 0, 0 }, { -12, 0 }, { 12, 0 }, { 0, -6 }, { 0, 6 } };
+	for (int k = 0; k < 5; ++k) {
+		int x = px + probe[k][0], y = py + probe[k][1];
+		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px[(size_t)y * W + x] >> 24)) return 0;
+		if (s->bg_in_map && !a->front[(size_t)y * W + x]) return 0;
+	}
 	int st = style_at(a, px, py);
 	return s->styles >> st & 1 ? TILE_A : s->walk_styles >> st & 1 ? TILE_B : OTHER;
 }
