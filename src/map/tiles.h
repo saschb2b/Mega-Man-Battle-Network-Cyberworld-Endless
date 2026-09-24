@@ -30,15 +30,16 @@ typedef struct {
 typedef struct {
 	TileCand *cand;
 	int n;
-	int dv, face;                       /* how the floor is drawn, see TileGrid */
+	int dv, face, hang;                 /* how the floor is drawn, see TileGrid */
 	int joins;                          /* pairs where the two floors meet */
 	int plain[2][64][TILE_PLAIN], nplain[2][64];   /* per material and phase: the floor's usual looks */
 } TileBook;
 
 /* A tile map's size, where its panel edges fall (world units mod 32), how
- * many pixels below them the floor is drawn and how tall the side faces
- * under its bottom edges are (from TileBook). */
-typedef struct { int tw, th, ex, ey, dv, face; } TileGrid;
+ * many pixels below them the floor is drawn, how tall the side faces under
+ * its bottom edges are and how far below those edges things may hang, such
+ * as the pedestals under a homepage's panels (from TileBook). */
+typedef struct { int tw, th, ex, ey, dv, face, hang; } TileGrid;
 
 /* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B. */
 typedef int (*TileFloor)(int A, int B, const void *ctx);

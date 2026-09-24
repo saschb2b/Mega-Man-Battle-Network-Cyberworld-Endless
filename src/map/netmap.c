@@ -55,7 +55,7 @@ static bool learn(int area, Learned *L) {
 	tiles_learn(&a, na->styles, na->walk_styles, na->bg_in_map, &L->book[0]);
 	stairs_learn(&a, L->stairs);
 	if (emu_debug_on()) {
-		fprintf(stderr, "tiles area %d floor %d px down, faces %d px\n", area, L->book[0].dv, L->book[0].face);
+		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang);
 		for (int d = 0; d < STAIR_DIRS; ++d)
 			fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
 				L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
@@ -173,7 +173,7 @@ static bool write_tilemap(const Learned *L) {
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > MAX_TILE_BYTES) return false;
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
-	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face };
+	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang };
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
 			uint16_t e0, e1;

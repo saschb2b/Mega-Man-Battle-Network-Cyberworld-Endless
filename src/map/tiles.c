@@ -159,7 +159,7 @@ static void expect(const TileGrid *g, int tx, int ty, TileFloor floor, const voi
 			/* under a bottom edge: its side face, then nothing */
 			bool face = false;
 			for (int k = 1; !in && !face && k <= g->face - 2; ++k) face = floor_px(g, floor, ctx, px, py - k) != 0;
-			for (int k = OUT / 2 + 1; !near && k <= g->face + OUT; ++k) near = floor_px(g, floor, ctx, px, py - k) != 0;
+			for (int k = OUT / 2 + 1; !near && k <= g->hang + OUT; ++k) near = floor_px(g, floor, ctx, px, py - k) != 0;
 			uint64_t bit = 1ull << (y * 8 + x);
 			if (inner || face) *must |= bit;
 			else if (!near) *never |= bit;
@@ -202,11 +202,12 @@ static uint64_t drawn(const AreaSrc *a, bool bg_in_map, int tx, int ty, uint16_t
 
 /* How the map draws its floor: how far below the panels' top edges it
  * starts (the most common distance to the first drawn pixel under an edge)
- * and how tall the side face under a bottom edge is (the most common run of
- * drawn pixels there). */
+ * how tall the side face under a bottom edge is (the most common run of
+ * drawn pixels there) and how far below it the map still draws often (legs
+ * and pedestals: the longest run seen at least a quarter as often). */
 static void calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
 	int top[9] = { 0 }, face[25] = { 0 }, W = a->tw * 8, H = a->th * 8;
-	g->dv = g->face = 0;
+	g->dv = g->face = g->hang = 0;
 	for (int x = 0; x < W; ++x)
 		for (int y = 1; y + 8 < H; ++y) {
 			bool above = floor_px(g, src_floor, src, x, y - 1), here = floor_px(g, src_floor, src, x, y);
@@ -220,9 +221,11 @@ static void calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
 			}
 		}
 	for (int d = 1; d <= 8; ++d) if (top[d] > top[g->dv]) g->dv = d;
-	int run = 0;
+	int run = 0, deep = 0;
 	for (int d = 1; d < 24; ++d) if (face[d] > face[run]) run = d;
+	for (int d = 1; d < 24; ++d) if (4 * face[d] >= face[run]) deep = d;
 	g->face = run > g->dv ? run - g->dv : 0;
+	g->hang = deep > g->dv ? deep - g->dv : 0;
 }
 
 static int cmp_cand(const void *a, const void *b) {
@@ -257,10 +260,11 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 	memset(out, 0, sizeof *out);
 	Src src = { a, styles, walk_styles, bg_in_map, malloc(SPAN * SPAN) };
 	memset(src.state, -1, SPAN * SPAN);
-	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0 };
+	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0 };
 	calibrate(a, &src, &g);
 	out->dv = g.dv;
 	out->face = g.face;
+	out->hang = g.hang;
 	TileCand *c = malloc(((size_t)a->tw * a->th + 1) * sizeof *c);
 	size_t n = 0;
 	for (int ty = 0; ty < a->th; ++ty)
