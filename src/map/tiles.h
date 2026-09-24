@@ -77,7 +77,8 @@ extern TileStats tiles_stats;
 typedef struct { uint32_t look[4]; uint64_t mask[4]; } TileNeighbours;
 
 /* How badly a tile that looks like `look` and draws `mask` meets them:
- * SEAM_COST for each neighbour no original map sets beside it, and a point
+ * SEAM_COST for each neighbour no original map sets beside it (where
+ * either is not drawn whole: at the floor's edges), and a point
  * for each pixel along its top and bottom where it draws and the tile over
  * or under it does not (or the other way round), past the few a diagonal
  * edge crossing there leaves: a floor that stops on a tile's edge instead

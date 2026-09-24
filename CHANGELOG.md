@@ -75,7 +75,7 @@ First playable version.
 - PortMaster launcher for ROCKNIX, made for the Retroid Nova and the Retroid
   Pocket Flip 2.
 - Floor edges no longer step: every tile is tested against the layer's own
-  floor and faces (Sky's raised maps measured theirs higher), and a tile map
+  floor (Sky's raised maps measured theirs higher), and a tile map
   avoids tiles that the original maps never set side by side, or whose floor
   stops on a tile's edge. Central Area's corners, Sky HP's faces and the Sky
   arena's lower edges were the worst. Where a catwalk meets a platform some

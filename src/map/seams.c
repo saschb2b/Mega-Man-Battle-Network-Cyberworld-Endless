@@ -71,8 +71,3 @@ bool seams_seen(const TileSeams *s, uint32_t first, uint32_t second, bool vertic
 		if (s->slot[i] == h) return true;
 	return false;
 }
-
-int seams_unseen(const TileSeams *s, uint32_t look, const uint32_t nb[4]) {
-	return !seams_seen(s, nb[0], look, false) + !seams_seen(s, nb[1], look, true) +
-		!seams_seen(s, look, nb[2], false) + !seams_seen(s, look, nb[3], true);
-}

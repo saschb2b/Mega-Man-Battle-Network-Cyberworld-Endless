@@ -24,8 +24,5 @@ void seams_add(TileSeams *s, const AreaSrc *a, bool bg_in_map);
 void seams_free(TileSeams *s);
 /* Whether `first` (left, or above with `vertical`) was seen beside `second`. */
 bool seams_seen(const TileSeams *s, uint32_t first, uint32_t second, bool vertical);
-/* The unseen pairs among the four neighbours of a tile: nb[] left, above,
- * right, below. */
-int seams_unseen(const TileSeams *s, uint32_t look, const uint32_t nb[4]);
 
 #endif

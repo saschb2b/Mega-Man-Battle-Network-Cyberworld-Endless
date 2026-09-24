@@ -474,7 +474,14 @@ static int cut(uint64_t upper, uint64_t lower) {
 }
 
 int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNeighbours *n) {
-	int t = SEAM_COST * seams_unseen(s, look, n->look);
+	int t = 0;
+	/* (inside the floor, where both tiles are drawn whole, the classes keep
+	 * the look: pairs the originals happen not to show there are no seam) */
+	for (int k = 0; k < 4; ++k) {
+		if (mask == ~0ull && n->mask[k] == ~0ull) continue;
+		uint32_t first = k < 2 ? n->look[k] : look, second = k < 2 ? look : n->look[k];
+		if (!seams_seen(s, first, second, k & 1)) t += SEAM_COST;
+	}
 	if (n->look[1] != SEAM_ANY) t += cut(n->mask[1], mask);
 	if (n->look[3] != SEAM_ANY) t += cut(mask, n->mask[3]);
 	return t;
@@ -489,17 +496,24 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	unsigned oa, unsigned ob, bool pad, TileFloor floor, const void *ctx, bool single,
 	const TileSeams *seams, const TileNeighbours *n) {
 	int cm = ob & 0x10 ? TILE_B : TILE_A;   /* the centre panel's material */
-	/* every book's tiles as this map draws its floor, faces and legs: one
-	 * taken from a map that draws them higher or taller than the others
-	 * would step out of the edge beside it */
-	uint64_t must, never, deep;
-	expect(g, tx, ty, floor, ctx, cm, &must, &never, &deep);
-	int allowed = __builtin_popcountll(deep) / 8;
+	/* each book's tiles with the faces and legs its own map draws (a
+	 * walkway's may be thinner than a platform's), but the floor where this
+	 * map draws it: a tile from a map measured to draw it higher would step
+	 * out of the edge beside it */
+	uint64_t must = 0, never = 0, deep = 0;
+	int allowed = 0;
+	TileGrid gk = *g;
+	gk.face = -1;
 	const TileCand *fit = NULL, *same = NULL, *any = NULL;
 	int fit_d = INT_MAX, same_d = INT_MAX, any_score = INT_MAX, fit_k = -1, same_k = -1;
 	unsigned near = nearest(phase, true);
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
+		if (b->face != gk.face || b->hang != gk.hang) {
+			gk.face = b->face; gk.hang = b->hang;
+			expect(&gk, tx, ty, floor, ctx, cm, &must, &never, &deep);
+			allowed = __builtin_popcountll(deep) / 8;
+		}
 		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
 			const TileCand *c = &b->cand[i];
 			if (single && c->e1) continue;

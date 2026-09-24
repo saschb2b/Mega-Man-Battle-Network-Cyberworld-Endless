@@ -20,7 +20,8 @@ Output in `.build/atlas`:
   its densest part.
 - `bXX_lL_dD_sS.png`: each layer whole, at 1x, for zooming in.
 - `seams_bXX_...png`: the same with the seams marked in red: tile edges
-  where two tiles meet as no original map shows them, or where one draws
+  along the floor's edges where two tiles meet as no original map shows
+  them, or where one draws
   floor up to its own edge above or below an empty tile (the steps along a
   platform's lower edges).
 - `report.txt`: a line per layer with its panels, rooms, how many tile picks
