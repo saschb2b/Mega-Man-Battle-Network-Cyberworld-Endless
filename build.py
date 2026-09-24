@@ -31,6 +31,8 @@ glibc runs on more distributions.
   python3 build.py pacing       every act's battles and guardians against
                                 their bands, in .build/pacing.txt
                                 (docs/DEVTOOLS.md)
+  python3 build.py screenshots  the game captured headlessly for the site and
+                                the README, into docs/screenshots
   python3 build.py test         ROM-free unit tests
   python3 build.py package      assemble build/port/ for PortMaster
 """
@@ -122,15 +124,15 @@ def linux_release():
 
 
 def site():
-    """build/site: the browser build and its page, as GitHub Pages serves it."""
+    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it."""
     out = os.path.join(ROOT, 'build', 'site')
     shutil.rmtree(out, ignore_errors=True)
-    os.makedirs(os.path.join(out, 'licenses'))
-    for name in ('index.html', 'app.js', 'style.css'):
-        shutil.copy2(os.path.join(ROOT, 'web', name), out)
+    shutil.copytree(os.path.join(ROOT, 'web'), out)
+    shutil.copytree(os.path.join(ROOT, 'docs', 'screenshots'), os.path.join(out, 'shots'))
     for name in ('cyberworld.js', 'cyberworld.wasm'):
-        shutil.copy2(os.path.join(ROOT, 'build', 'web', name), out)
+        shutil.copy2(os.path.join(ROOT, 'build', 'web', name), os.path.join(out, 'play'))
     shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(out, 'LICENSE.txt'))
+    os.makedirs(os.path.join(out, 'licenses'))
     shutil.copy2(os.path.join(ROOT, 'build', 'web', 'licenses', 'mGBA.txt'), os.path.join(out, 'licenses'))
     open(os.path.join(out, '.nojekyll'), 'w').close()
     print('site in', out)
@@ -321,6 +323,57 @@ def tour(biomes='all'):
     return 0
 
 
+# Screenshots of the running game for the site and the README
+# (docs/screenshots): name, game options, (frame, shot name) pairs, env.
+# Screenshots are fine to publish; files extracted from the ROM are not.
+SCREENSHOTS = [
+    ('title', ['--scene', 'title'], [(80, 'title')], {}),
+    ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7'],
+     [(240, 'net'), (870, 'custom'), (1140, 'battle'), (1455, 'result'), (2220, 'guardian'),
+      (2380, 'guardian-talk'), (2580, 'boss-custom'), (3852, 'reward'), (3872, 'restored')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    ('act', ['--scene', 'emu', '--seed', '11', '--dev', 'quiet'], [(120, 'act-card')], {}),
+    ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
+    ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'seaside')], {}),
+    ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),
+    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], [(130, 'undernet')], {}),
+    ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '17', '--seed', '3', '--dev', 'quiet'], [(130, 'graveyard')], {}),
+    ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(420, 'nest')], {}),
+]
+
+
+def screenshots(only=None):
+    """docs/screenshots/NAME.png: the 240x160 picture of chosen frames."""
+    from PIL import Image
+    out = os.path.join(ROOT, 'docs', 'screenshots')
+    tmp = os.path.join(ROOT, '.build', 'screenshots')
+    os.makedirs(out, exist_ok=True)
+    for name, args, frames, env in SCREENSHOTS:
+        if only and name not in only:
+            continue
+        shutil.rmtree(tmp, ignore_errors=True)
+        os.makedirs(os.path.join(tmp, 'data'))
+        shots = ','.join(f'{f}:/src/.build/screenshots/{n}.bmp' for f, n in frames)
+        saved = {k: os.environ.get(k) for k in env}
+        os.environ.update(env)
+        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
+                      *args, '--frames', str(max(f for f, _ in frames) + 1), '--shot', shots,
+                      mounts=[(default_rom_dir(), '/rom:ro')])
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        if code:
+            return code
+        for _, n in frames:
+            im = Image.open(os.path.join(tmp, f'{n}.bmp')).convert('RGB')
+            w, h = im.size   # the canvas: the game's 240 x 160 in the middle
+            im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)).save(
+                os.path.join(out, f'{n}.png'), optimize=True)
+            print('screenshot', n)
+    return 0
+
+
 def densest(im, w, h):
     """The w x h window with the most floor in it."""
     px = im.load()
@@ -336,7 +389,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -379,6 +432,9 @@ def main():
         linux_release()
         web_release()
         return
+    if a.action == 'screenshots':
+        build('host')
+        sys.exit(screenshots(a.rest or None))
     if a.action == 'pacing':
         build('host')
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))

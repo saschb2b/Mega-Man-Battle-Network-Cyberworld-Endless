@@ -3,62 +3,345 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cyberworld Endless</title>
-<meta name="description" content="A roguelike built on Mega Man Battle Network 6, in the browser. Bring your own ROM: it stays on your device.">
-<link rel="stylesheet" href="style.css">
+<title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike</title>
+<meta name="description" content="Jack MegaMan into a net that never ends: a roguelike on Mega Man Battle Network 6's own engine. Play in the browser, on Linux or on a ROCKNIX handheld, with your own ROM.">
+<meta property="og:title" content="Cyberworld Endless">
+<meta property="og:description" content="A roguelike on Mega Man Battle Network 6's own engine: generated net layers, the game's own battles, a Navi guarding every third layer.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="shots/title.png">
+<meta name="theme-color" content="#101c5c">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/home.css">
 </head>
 <body>
-<header>
-	<h1>Cyberworld Endless</h1>
-	<p class="tag">A roguelike built on Mega Man Battle Network 6</p>
+
+<header class="nav">
+	<div class="wrap">
+		<a class="brand" href="./"><img src="assets/mark.svg" alt=""><span>Cyberworld Endless</span></a>
+		<nav aria-label="Sections">
+			<a class="opt" href="#run">Run</a>
+			<a class="opt" href="#folder">Folder</a>
+			<a class="opt" href="#net">Net</a>
+			<a href="#downloads">Shop</a>
+			<a href="play/">Jack in</a>
+		</nav>
+	</div>
 </header>
 
 <main>
-	<div id="stage">
-		<canvas id="screen" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
-
-		<section id="gate" aria-live="polite">
-			<h2>Bring your own ROM</h2>
-			<p>The game runs from your copy of <strong>Mega Man Battle Network 6: Cybeast Gregar (USA)</strong>,
-				an unmodified <code>.gba</code> file. It stays in this browser and is never uploaded;
-				nothing from the game is on this site.</p>
-			<p id="status">Loading the engine…</p>
-			<div class="actions">
-				<button id="play" type="button" hidden>Play</button>
-				<label id="pick" class="button" hidden>
-					<input id="rom" type="file" accept=".gba,application/octet-stream">
-					<span id="pick-label">Choose ROM file</span>
-				</label>
+	<!-- the title screen, and its menu -->
+	<section class="hero">
+		<div class="wrap hero-grid">
+			<figure class="hero-screen">
+				<img class="screen x3" src="shots/title.png" width="240" height="160"
+					alt="The title screen: the Mega Man Battle Network logo with an infinity mark and the plate Cyberworld Endless, PRESS START below">
+			</figure>
+			<div class="hero-side">
+				<p class="kicker">A Mega Man Battle Network 6 roguelike</p>
+				<ul class="menu" aria-label="Start">
+					<li class="on"><a href="play/">Play in browser<small>Jack in now, with your own ROM</small></a></li>
+					<li><a href="#downloads">Downloads<small>ROCKNIX handheld · Linux · web</small></a></li>
+					<li><a href="#folder">Screenshots<small>Open the ChipFolder</small></a></li>
+					<li><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source<small>MIT-licensed, on GitHub</small></a></li>
+				</ul>
+				<div class="textbox next">
+					<p>The net goes on forever. Every run builds it anew, one layer deeper each time, until MegaMan is
+						deleted. How deep can you go?</p>
+				</div>
 			</div>
-			<p class="small">or drop the file anywhere on this page</p>
-		</section>
-	</div>
+		</div>
 
-	<div class="bar">
-		<button id="fullscreen" type="button">Fullscreen</button>
-		<button id="forget" type="button" class="quiet">Forget ROM and saves</button>
-	</div>
+		<div class="wrap">
+			<div class="win result">
+				<span class="tab">Result</span>
+				<div class="inner stats">
+					<div><span>Layers a cycle</span><b>19</b></div>
+					<div><span>Net areas</span><b>19</b></div>
+					<div><span>Guardian Navis</span><b>17</b></div>
+					<div><span>Acts, then the Nest</span><b>6+1</b></div>
+					<div><span>Deepest layer</span><b>∞</b></div>
+				</div>
+				<div class="getdata">
+					<span class="label">Get data</span>
+					<b>Nothing from Capcom: bring your own ROM</b>
+				</div>
+			</div>
+		</div>
+	</section>
 
-	<section class="help">
-		<h2>Controls</h2>
-		<table>
-			<tr><th>Game Boy Advance</th><th>Keyboard</th><th>Controller</th></tr>
-			<tr><td>D-Pad</td><td>Arrow keys</td><td>D-Pad or left stick</td></tr>
-			<tr><td>A</td><td>X or Space</td><td>A</td></tr>
-			<tr><td>B</td><td>Z or Backspace</td><td>B</td></tr>
-			<tr><td>L / R</td><td>A or Q / S or W</td><td>Shoulders</td></tr>
-			<tr><td>Start / Select</td><td>Enter / Tab</td><td>Start / Back</td></tr>
-		</table>
-		<p>Runs are saved in this browser each time MegaMan reaches a new layer. The same game
-			runs on ROCKNIX handhelds and on Linux:
-			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">source and downloads</a>.</p>
-		<p class="small">Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by Capcom.
-			The code is <a href="LICENSE.txt">MIT-licensed</a>; it embeds <a href="https://mgba.io">mGBA</a>
-			(<a href="licenses/mGBA.txt">MPL-2.0</a>) and <a href="https://libsdl.org">SDL2</a> (zlib).</p>
+	<!-- act 1: the run -->
+	<section id="run">
+		<div class="card">
+			<span class="small-line">Act 1</span>
+			<h2>The Run</h2>
+			<span class="motto">Layer by layer, act by act</span>
+		</div>
+		<div class="wrap grid-3 moments">
+			<div>
+				<figure class="shot"><img class="screen" src="shots/act-card.png" width="240" height="160" loading="lazy"
+					alt="An act's card over the net: Act 1, RoboDog Comp, Circuits of a home comp, Guardian: BlastMan"></figure>
+				<div class="textbox"><p><span class="who">An act begins</span>Three layers in one of the game's areas.
+					Its card names the guardian waiting at the end, so you can set your folder for it.</p></div>
+			</div>
+			<div>
+				<figure class="shot"><img class="screen" src="shots/net.png" width="240" height="160" loading="lazy"
+					alt="MegaMan on a generated layer in the Sky HP's blue panels, among clouds"></figure>
+				<div class="textbox"><p><span class="who">A new net each time</span>Platforms and walkways laid out after the
+					area's own maps, Mystery Data at the dead ends, shops and traders. Find the exit pad.</p></div>
+			</div>
+			<div>
+				<figure class="shot"><img class="screen" src="shots/guardian.png" width="240" height="160" loading="lazy"
+					alt="A guardian's title card: Guardian of Sky HP, DiveMan, Terror of the Deep"></figure>
+				<div class="textbox"><p><span class="who">A Navi holds the exit</span>Every third layer ends in an arena.
+					The guardian logs in, remembers your last battle, and fights the game's own boss battle.</p></div>
+			</div>
+		</div>
+		<div class="wrap">
+			<div class="textbox next wide"><p>…then the next area, one act deeper. After the Undernet, the Graveyard and the
+				Cybeast Nest at layer 19 the cycle starts over, harder. The run is saved on every new layer; when
+				MegaMan is deleted, it's over.</p></div>
+		</div>
+	</section>
+
+	<!-- the chip folder: screenshots -->
+	<section id="folder" class="band">
+		<div class="card">
+			<span class="small-line">Folder</span>
+			<h2>ChipFolder</h2>
+			<span class="motto">Screenshots of the game running</span>
+		</div>
+		<div class="wrap folder">
+			<div class="win list">
+				<span class="tab">Folder</span>
+				<ol id="chips">
+					<li><button type="button" data-shot="title" data-code="T" data-text="The title screen: Battle Network's logo from your ROM, with the infinity mark and the plate the engine draws in its colours. Behind it the areas' battle backgrounds take turns.">Title</button></li>
+					<li><button type="button" data-shot="act-card" data-code="A" data-text="An act begins with its card: the area, its motto, and the guardian at the end of it.">ActCard</button></li>
+					<li><button type="button" data-shot="net" data-code="N" data-text="A generated layer in the Sky HP's panels. Every layer is new; the floors are the area's own tiles.">NetLayer</button></li>
+					<li><button type="button" data-shot="custom" data-code="C" data-text="The Custom screen: the game's own battles, chips and folder. Viruses come at the version the depth allows.">Custom</button></li>
+					<li><button type="button" data-shot="battle" data-code="B" data-text="BATTLE START! A Gunner and a FgtrPlne, the Sky HP's own formation, sized to MegaMan's HP at this depth.">Battle</button></li>
+					<li><button type="button" data-shot="result" data-code="R" data-text="The result: Busting Level and the game's own rewards.">Result</button></li>
+					<li><button type="button" data-shot="guardian" data-code="G" data-text="Every third layer a guardian logs in over the boss prelude, with its title card.">Guardian</button></li>
+					<li><button type="button" data-shot="guardian-talk" data-code="D" data-text="It speaks before the battle, and remembers how your last one went.">DiveMan</button></li>
+					<li><button type="button" data-shot="boss-custom" data-code="X" data-text="The game's own navi battle, against the version whose HP suits the act.">NaviBtl</button></li>
+					<li><button type="button" data-shot="reward" data-code="D" data-text="Its Guardian Data: five HPMemory and the Navi's own chip.">NaviChip</button></li>
+					<li><button type="button" data-shot="restored" data-code="H" data-text="…and a full heal before the next area.">Recover</button></li>
+				</ol>
+			</div>
+			<div class="win viewer">
+				<span class="tab">Battle chip</span>
+				<div class="chipname"><b id="chip-name">Title</b><span id="chip-code" class="code">T</span></div>
+				<img id="chip-shot" class="screen x3" src="shots/title.png" width="240" height="160" alt="">
+				<div class="textbox" aria-live="polite"><p id="chip-text">The title screen: Battle Network's logo from your ROM,
+					with the infinity mark and the plate the engine draws in its colours. Behind it the areas' battle
+					backgrounds take turns.</p></div>
+			</div>
+		</div>
+	</section>
+
+	<!-- act 2: battles -->
+	<section id="battles">
+		<div class="card">
+			<span class="small-line">Act 2</span>
+			<h2>Battles</h2>
+			<span class="motto">The game's own, sized to the depth</span>
+		</div>
+		<div class="wrap grid-2">
+			<div class="pair">
+				<img class="screen x2" src="shots/custom.png" width="240" height="160" loading="lazy" alt="The Custom screen with WideSwrd S selected, a Gunner and a FgtrPlne across the field">
+				<img class="screen x2" src="shots/result.png" width="240" height="160" loading="lazy" alt="The RESULT window: DeleteTime 0:01:25, Busting Level 9, 200 zenny">
+			</div>
+			<div class="textbox">
+				<p><span class="who">How deep, how hard</span>Random battles are BN6's own formations from the area's maps:
+					the same viruses, where they stand, the rocks and broken panels.</p>
+				<p>Depth decides how hard they are, not the area: each battle is weighed by its viruses' HP and hardest
+					hit against the MegaMan you should have by then, and fought at the highest version that fits.
+					V1, V2, V3, SP.</p>
+				<p>The first battles of a run and after each guardian are gentler. A Server offers a harder one that
+					pays a better chip. Crosses and Beast Out join the Custom screen as in BN6.</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- act 3: guardians -->
+	<section id="guardians" class="band">
+		<div class="card">
+			<span class="small-line">Act 3</span>
+			<h2>Guardians</h2>
+			<span class="motto">Seventeen Navis hold the exits</span>
+		</div>
+		<div class="wrap grid-2">
+			<div class="textbox">
+				<p><span class="who">Step into the arena</span>The music falls away, the guardian logs in and speaks. It
+					remembers whether it won or lost last time. Then the game's own navi battle, at the version whose HP
+					suits the act: BlastMan, DiveMan or SpoutMan first, Colonel from the fourth act.</p>
+				<p>Delete it for its Guardian Data: five HPMemory, its own Navi chip and a full heal. HeatMan, ElecMan,
+					SlashMan, EraseMan and ChargeMan also leave their Cross; the Graveyard's guardian wakes the
+					Cybeast.</p>
+				<ul class="plates navi">
+					<li>BlastMan</li><li>DiveMan</li><li>SpoutMan</li><li>HeatMan</li><li>CircusMan</li><li>SlashMan</li><li>EraseMan</li><li>TenguMan</li><li>JudgeMan</li><li>ElecMan</li><li>DustMan</li><li>ElementMan</li><li>ChargeMan</li><li>TomahawkMan</li><li>GroundMan</li><li>Colonel</li><li>ProtoMan</li>
+				</ul>
+			</div>
+			<div class="pair">
+				<img class="screen x2" src="shots/guardian-talk.png" width="240" height="160" loading="lazy" alt="DiveMan speaks in the arena: Torpedoes ready! Fire!">
+				<img class="screen x2" src="shots/reward.png" width="240" height="160" loading="lazy" alt="MegaMan got DiveMan D!">
+			</div>
+		</div>
+	</section>
+
+	<!-- act 4: the net -->
+	<section id="net">
+		<div class="card">
+			<span class="small-line">Act 4</span>
+			<h2>The Net</h2>
+			<span class="motto">Nineteen areas, the gentle ones first</span>
+		</div>
+		<div class="wrap">
+			<div class="areas">
+				<img class="screen x2" src="shots/central.png" width="240" height="160" loading="lazy" alt="A generated layer of Central Area 1: green panels over dark blue rings">
+				<img class="screen x2" src="shots/seaside.png" width="240" height="160" loading="lazy" alt="A generated layer of Seaside Area 1: glass-blue panels and boardwalks">
+				<img class="screen x2" src="shots/green.png" width="240" height="160" loading="lazy" alt="A generated layer of Green Area 1: bright green panels and a red pad">
+				<img class="screen x2" src="shots/undernet.png" width="240" height="160" loading="lazy" alt="A generated layer of the Undernet: red panels over static">
+				<img class="screen x2" src="shots/graveyard.png" width="240" height="160" loading="lazy" alt="A generated layer of the Graveyard: grey slabs under dark clouds">
+				<img class="screen x2" src="shots/nest.png" width="240" height="160" loading="lazy" alt="A generated layer of the Underground, the Cybeast Nest: purple panels">
+			</div>
+			<div class="grid-2 tiers">
+				<div class="textbox">
+					<p><span class="who">The first four acts</span>draw four of these, easier first:</p>
+					<ul class="plates"><li>Central Area</li><li>Robot Control Comp</li><li>Aquarium Comp</li><li>Sky HP</li><li>RoboDog Comp</li>
+						<li>Seaside Area</li><li>Judge Tree Comp</li><li>Green Area</li><li>Green HP</li><li>Homepages</li><li>Lab Comps</li>
+						<li>Sky Area</li><li>Mr. Weather Comp</li><li>ACDC HP</li><li>CopyBot's Comp</li></ul>
+				</div>
+				<div class="textbox">
+					<p><span class="who">Then deeper</span>the Undernet and the Graveyard, the Cybeast Nest at layer 19, and a
+						Secret Area behind a gate three ScrtData open.</p>
+					<ul class="plates deep"><li>Undernet</li><li>Graveyard</li><li>Cybeast Nest</li><li>Secret Area</li></ul>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- jack in -->
+	<section id="play" class="band">
+		<div class="card">
+			<span class="small-line">Jack in</span>
+			<h2>Play it now</h2>
+			<span class="motto">In your browser, with your own ROM</span>
+		</div>
+		<div class="wrap grid-2">
+			<div class="textbox next">
+				<p><span class="who">You need</span>Mega Man Battle Network 6: Cybeast Gregar (USA), an unmodified
+					<code>.gba</code> dumped from your own cartridge.</p>
+				<p>SHA-1 <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code></p>
+				<p>The player checks it and keeps it with your saves in your browser's own storage. It is never
+					uploaded. Next time, Play starts straight away.</p>
+			</div>
+			<div class="win pet">
+				<span class="tab">PET</span>
+				<ul class="menu">
+					<li class="on"><a href="play/">Jack in<small>Opens the player</small></a></li>
+				</ul>
+				<div class="keys">
+					<span><kbd>←↑↓→</kbd> move</span><span><kbd>X</kbd> A</span><span><kbd>Z</kbd> B</span>
+					<span><kbd>A</kbd><kbd>S</kbd> L R</span><span><kbd>Enter</kbd> Start</span>
+				</div>
+				<p class="small muted">A controller works too. Desktop browsers only for now; touch screens are not
+					supported yet.</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- net dealer: downloads -->
+	<section id="downloads">
+		<div class="card">
+			<span class="small-line">Net Dealer</span>
+			<h2>Downloads</h2>
+			<span class="motto">Everything here costs 0 zenny</span>
+		</div>
+		<div class="wrap">
+			<div class="win shop">
+				<span class="tab">Net Dealer</span>
+				<p class="release" id="release-line">The latest release. Put your own ROM beside it.</p>
+				<ol class="items">
+					<li>
+						<span class="icon handheld" aria-hidden="true"></span>
+						<div><b>PortMaster port</b><span>ROCKNIX handhelds: made for the Retroid Nova and the Retroid Pocket Flip 2.
+							Unpack into <code>ports/</code>, ROM into <code>ports/cyberworld/rom/</code>.</span></div>
+						<span class="price">0z</span>
+						<a class="btn small" data-asset="cyberworld.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest">Buy</a>
+					</li>
+					<li>
+						<span class="icon linux" aria-hidden="true"></span>
+						<div><b>Linux desktop</b><span>x86-64, glibc 2.34 or newer (Ubuntu 22.04, Debian 12, Fedora 35 and
+							later). A window at a sharp scale, SDL2 included.</span></div>
+						<span class="price">0z</span>
+						<a class="btn small" data-asset="cyberworld-endless-linux-x86_64.tar.gz" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest">Buy</a>
+					</li>
+					<li>
+						<span class="icon web" aria-hidden="true"></span>
+						<div><b>Browser build</b><span>This site's player as static files, for your own web server or
+							offline play from <code>localhost</code>.</span></div>
+						<span class="price">0z</span>
+						<a class="btn small" data-asset="cyberworld-endless-web.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest">Buy</a>
+					</li>
+					<li>
+						<span class="icon source" aria-hidden="true"></span>
+						<div><b>Source code</b><span>C11, SDL2 and the mGBA core. <code>python3 build.py release</code> builds
+							every one of these in Docker.</span></div>
+						<span class="price">0z</span>
+						<a class="btn small blue" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">View</a>
+					</li>
+				</ol>
+				<div class="textbox next"><p><span class="who">Mr. Prog</span>Welcome to the Net Dealer! No game data in any of
+					these; the game runs from your own ROM. Every release lists its SHA-256 checksums.</p></div>
+			</div>
+		</div>
+	</section>
+
+	<!-- e-mail: how it works -->
+	<section id="mail" class="band">
+		<div class="card">
+			<span class="small-line">E-Mail</span>
+			<h2>How it works</h2>
+			<span class="motto">Notes from the workshop</span>
+		</div>
+		<div class="wrap grid-2">
+			<div class="textbox">
+				<p><span class="who">Inside</span>Cyberworld Endless is written in C with SDL2 and embeds the mGBA core. It boots
+					your ROM and takes over the net: each layer is generated, written into the game's own map, tile and
+					collision formats in memory, and entered through the game's own warp.</p>
+				<p>The game runs everything MegaMan does. The engine watches where he goes, decides the next battle,
+					places what stands on the layer and keeps the run.</p>
+			</div>
+			<div class="win mail">
+				<span class="tab">E-Mail</span>
+				<ul>
+					<li><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md"><b>How the engine drives the game</b><span>docs/EMULATION.md</span></a></li>
+					<li><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/LEVEL_DESIGN.md"><b>Layers after BN6's maps</b><span>docs/LEVEL_DESIGN.md</span></a></li>
+					<li><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/PROGRESSION.md"><b>A fair difficulty curve</b><span>docs/PROGRESSION.md</span></a></li>
+					<li><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md"><b>Original, generated, adapted</b><span>docs/FIDELITY.md</span></a></li>
+					<li><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/CHANGELOG.md"><b>What's new</b><span>CHANGELOG.md</span></a></li>
+				</ul>
+			</div>
+		</div>
 	</section>
 </main>
 
-<script src="app.js"></script>
-<script src="cyberworld.js" async></script>
+<footer class="site">
+	<div class="wrap">
+		<div><img src="assets/mark.svg" alt="" width="40" height="20"> <strong>Cyberworld Endless</strong> ·
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">source on GitHub</a> ·
+			<a href="LICENSE.txt">MIT license</a></div>
+		<div>Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by Capcom and ships
+			none of its data; the screenshots show the game running from a player's own ROM. The player embeds
+			<a href="https://mgba.io">mGBA</a> (<a href="licenses/mGBA.txt">MPL-2.0</a>) and
+			<a href="https://libsdl.org">SDL2</a> (zlib); the fonts are Pixelify Sans and Silkscreen
+			(<a href="assets/fonts/OFL-PixelifySans.txt">OFL</a>).</div>
+	</div>
+</footer>
+
+<script src="assets/home.js"></script>
 </body>
 </html>

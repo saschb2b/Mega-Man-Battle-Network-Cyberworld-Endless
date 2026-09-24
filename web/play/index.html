@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play · Cyberworld Endless</title>
+<meta name="description" content="Play Cyberworld Endless, a Mega Man Battle Network 6 roguelike, in the browser. Bring your own ROM: it stays on your device.">
+<meta name="theme-color" content="#06103a">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="play.css">
+</head>
+<body>
+
+<header class="nav">
+	<div class="wrap">
+		<a class="brand" href="../"><img src="../assets/mark.svg" alt="">Cyberworld Endless</a>
+		<nav aria-label="Site">
+			<a class="opt" href="../#run">Run</a>
+			<a class="opt" href="../#folder">Folder</a>
+			<a href="../#downloads">Shop</a>
+			<a href="./" aria-current="page">Jack in</a>
+		</nav>
+	</div>
+</header>
+
+<main class="wrap">
+	<div class="win player">
+		<span class="tab">Jack in</span>
+		<div id="stage">
+			<canvas id="screen" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
+
+			<section id="gate" aria-live="polite">
+				<h2>Bring your own ROM</h2>
+				<p>The game runs from your copy of <strong>Mega Man Battle Network 6: Cybeast Gregar (USA)</strong>,
+					an unmodified <code>.gba</code> file. It stays in this browser and is never uploaded;
+					nothing from the game is on this site.</p>
+				<p id="status">Loading the engine…</p>
+				<div class="actions">
+					<button id="play" class="btn" type="button" hidden>Play</button>
+					<label id="pick" class="btn blue" hidden>
+						<input id="rom" type="file" accept=".gba,application/octet-stream">
+						<span id="pick-label">Choose ROM file</span>
+					</label>
+				</div>
+				<p class="small muted">or drop the file anywhere on this page</p>
+			</section>
+		</div>
+		<div class="bar">
+			<button id="fullscreen" class="btn small" type="button">Fullscreen</button>
+			<button id="forget" class="btn small quiet" type="button">Forget ROM and saves</button>
+		</div>
+	</div>
+
+	<section class="help grid-2">
+		<div class="textbox">
+			<p class="who">Controls</p>
+			<table>
+				<tr><th>Game Boy Advance</th><th>Keyboard</th><th>Controller</th></tr>
+				<tr><td>D-Pad</td><td>Arrow keys</td><td>D-Pad or left stick</td></tr>
+				<tr><td>A</td><td><kbd>X</kbd> or <kbd>Space</kbd></td><td>A</td></tr>
+				<tr><td>B</td><td><kbd>Z</kbd> or <kbd>Backspace</kbd></td><td>B</td></tr>
+				<tr><td>L / R</td><td><kbd>A</kbd> or <kbd>Q</kbd> / <kbd>S</kbd> or <kbd>W</kbd></td><td>Shoulders</td></tr>
+				<tr><td>Start / Select</td><td><kbd>Enter</kbd> / <kbd>Tab</kbd></td><td>Start / Back</td></tr>
+			</table>
+		</div>
+		<div class="textbox">
+			<p class="who">Your run</p>
+			<p>It is saved in this browser each time MegaMan reaches a new layer; CONTINUE on the
+				title brings you back there. Clearing the site's data or <em>Forget ROM and saves</em> removes
+				it. The same game runs on ROCKNIX handhelds and on Linux:
+				<a href="../#downloads">downloads</a>.</p>
+			<p class="small">Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by
+				Capcom. The code is <a href="../LICENSE.txt">MIT-licensed</a>; it embeds <a href="https://mgba.io">mGBA</a>
+				(<a href="../licenses/mGBA.txt">MPL-2.0</a>) and <a href="https://libsdl.org">SDL2</a> (zlib).</p>
+		</div>
+	</section>
+</main>
+
+<script src="app.js"></script>
+<script src="cyberworld.js" async></script>
+</body>
+</html>
