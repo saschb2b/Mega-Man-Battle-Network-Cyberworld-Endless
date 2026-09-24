@@ -27,6 +27,10 @@ void ta_end(TextArchive *t);             /* E6 */
 void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
 /* A whole message: open, text, wait, end. */
 int ta_say(TextArchive *t, int mugshot, const char *s);
+/* A conversation: chat boxes split by '|', each shown with the next of
+ * `mugshots` (-1: none), its words wrapped anew (a '\n' counts as a space)
+ * and waiting for A. */
+int ta_talk(TextArchive *t, const char *boxes, const int *mugshots);
 /* Writes the archive (u16 offsets, then the scripts); bus address or 0. */
 uint32_t ta_commit(TextArchive *t);
 

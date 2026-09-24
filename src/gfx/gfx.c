@@ -429,20 +429,22 @@ int text_width(const char *s) {
 	return w;
 }
 
-void text_draw(int x, int y, const char *s, SDL_Color c, int align) {
-	if (align == TEXT_CENTER) x -= text_width(s) / 2;
-	else if (align == TEXT_RIGHT) x -= text_width(s);
+void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int scale) {
+	if (align == TEXT_CENTER) x -= text_width(s) * scale / 2;
+	else if (align == TEXT_RIGHT) x -= text_width(s) * scale;
 	SDL_SetTextureColorMod(font_tex, c.r, c.g, c.b);
 	SDL_SetTextureAlphaMod(font_tex, c.a);
 	for (; *s; ++s) {
 		unsigned char ch = (unsigned char)*s;
 		if ((ch < 32 && ch > 5) || ch >= 128) continue;
 		SDL_Rect src = { ch * 16, 0, 16, 16 };
-		SDL_Rect dst = { x, y, 16, 16 };
+		SDL_Rect dst = { x, y, 16 * scale, 16 * scale };
 		SDL_RenderCopy(P.renderer, font_tex, &src, &dst);
-		x += font_w[ch];
+		x += font_w[ch] * scale;
 	}
 }
+
+void text_draw(int x, int y, const char *s, SDL_Color c, int align) { text_draw_scaled(x, y, s, c, align, 1); }
 
 void text_drawf(int x, int y, SDL_Color c, int align, const char *fmt, ...) {
 	char buf[256];

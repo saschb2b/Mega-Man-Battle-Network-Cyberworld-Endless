@@ -54,10 +54,8 @@ void ta_mugshot(TextArchive *t, int m) { uint8_t b[] = { 0xF5, 0x00, (uint8_t)m 
 /* Word wrap to the chat box: 16 characters a line, three lines a page. */
 #define LINE_CHARS 16
 
-int ta_say(TextArchive *t, int mugshot, const char *s) {
-	int i = ta_script(t);
-	if (mugshot >= 0) ta_mugshot(t, mugshot);
-	ta_open(t);
+/* `s` word-wrapped into the open box, a new page every three lines. */
+static void wrap(TextArchive *t, const char *s) {
 	int lines = 0;
 	char line[LINE_CHARS + 1];
 	int n = 0;
@@ -86,7 +84,38 @@ int ta_say(TextArchive *t, int mugshot, const char *s) {
 		if (!*p) break;
 		if (*p == '\n') ++p;
 	}
+}
+
+int ta_say(TextArchive *t, int mugshot, const char *s) {
+	int i = ta_script(t);
+	if (mugshot >= 0) ta_mugshot(t, mugshot);
+	ta_open(t);
+	wrap(t, s);
 	ta_wait(t);
+	ta_end(t);
+	return i;
+}
+
+int ta_talk(TextArchive *t, const char *boxes, const int *mugshots) {
+	int i = ta_script(t);
+	char box[160];
+	int k = 0;
+	bool first = true;
+	for (const char *p = boxes;; ++p) {
+		/* the box wraps its words itself */
+		if (*p && *p != '|') { if (k < (int)sizeof box - 1) box[k++] = *p == '\n' ? ' ' : *p; continue; }
+		box[k] = 0;
+		k = 0;
+		static const uint8_t hide[] = { 0xF5, 0x01 };
+		if (*mugshots >= 0) ta_mugshot(t, *mugshots);
+		else ta_bytes(t, hide, sizeof hide);
+		++mugshots;
+		if (first) ta_open(t); else ta_clear(t);
+		first = false;
+		wrap(t, box);
+		ta_wait(t);
+		if (!*p) break;
+	}
 	ta_end(t);
 	return i;
 }

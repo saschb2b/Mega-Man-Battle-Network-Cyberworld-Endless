@@ -68,6 +68,8 @@ enum { TEXT_LEFT = 0, TEXT_CENTER = 1, TEXT_RIGHT = 2 };
 int text_width(const char *s);
 void text_draw(int x, int y, const char *s, SDL_Color c, int align);
 void text_drawf(int x, int y, SDL_Color c, int align, const char *fmt, ...);
+/* The same font `scale` times as large, for title cards. */
+void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int scale);
 #define TEXT_H 12
 
 /* Primitives. */
