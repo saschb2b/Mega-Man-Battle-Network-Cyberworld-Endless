@@ -231,6 +231,11 @@ bool director_resume(void) {
 		/* enter the map again where MegaMan stood: the game reloads its NPCs
 		 * and tiles from this build's tables, which a state does not hold */
 		int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		/* (a build that lays the layer out otherwise may have no floor there
+		 * any more: then its arrival) */
+		int cx, cy;
+		if (!netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || layer.cell[cy][cx] != C_PATH)
+			x = D.start_x, y = D.start_y;
 		emu_warp(D.group, D.number, x, y, 4);
 		return true;
 	}
