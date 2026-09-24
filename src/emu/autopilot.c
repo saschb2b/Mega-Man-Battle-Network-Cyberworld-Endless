@@ -56,9 +56,9 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 
 /* CYBERWORLD_AUTOPILOT=weak: enemies keep 1 HP, so every battle is won and
  * what follows a win (a guardian's reward, the exit opening) can be tested. */
-#define T1_OBJECTS 0x0203A9B0u   /* eT1BattleObject0: viruses and navis */
-#define T1_SIZE    0xD8
-#define T1_COUNT   16
+#define T1_OBJECTS BN6_T1_OBJECTS
+#define T1_SIZE    BN6_T1_SIZE
+#define T1_COUNT   BN6_T1_COUNT
 
 /* A battle object that is in play: flag bit 0 of its header, HP left. */
 static bool alive(uint32_t o) { return (emu_read8(o) & 1) && emu_read16(o + 0x24) > 0; }
