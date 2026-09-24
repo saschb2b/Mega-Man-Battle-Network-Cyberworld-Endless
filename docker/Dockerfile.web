@@ -1,0 +1,14 @@
+# Build image for the browser build (WebAssembly), published on GitHub Pages.
+FROM emscripten/emsdk:6.0.10
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends make curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+# SDL2's Emscripten port and the system libraries, built once here; the cache
+# stays writable for builds that run as the caller's user (build.py)
+RUN embuilder build sdl2 \
+ && printf 'int main(void) { return 0; }\n' > /tmp/t.c \
+ && emcc /tmp/t.c -O2 -sUSE_SDL=2 -lidbfs.js -sALLOW_MEMORY_GROWTH=1 -o /tmp/t.js \
+ && rm -f /tmp/t.* && chmod -R a+rwX /emsdk/upstream/emscripten/cache
+# The embedded GBA core (docs/EMULATION.md), without threads
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh web && chmod -R a+rwX /emsdk/upstream/emscripten/cache

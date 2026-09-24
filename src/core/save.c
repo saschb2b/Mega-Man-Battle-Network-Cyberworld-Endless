@@ -7,6 +7,7 @@
 
 #include "audio.h"
 #include "game.h"
+#include "platform.h"
 #include "run.h"
 #include "save_blob.h"
 
@@ -39,7 +40,9 @@ bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t 
 	ok = fflush(f) == 0 && ok;
 	fclose(f);
 	/* Atomic replace so a power cut never leaves a half-written save. */
-	return ok && rename(tmp, file) == 0;
+	ok = ok && rename(tmp, file) == 0;
+	platform_persist();
+	return ok;
 }
 
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {

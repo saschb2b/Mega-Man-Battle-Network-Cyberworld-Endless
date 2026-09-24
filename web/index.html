@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cyberworld Endless</title>
+<meta name="description" content="A roguelike built on Mega Man Battle Network 6, in the browser. Bring your own ROM: it stays on your device.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+	<h1>Cyberworld Endless</h1>
+	<p class="tag">A roguelike built on Mega Man Battle Network 6</p>
+</header>
+
+<main>
+	<div id="stage">
+		<canvas id="screen" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
+
+		<section id="gate" aria-live="polite">
+			<h2>Bring your own ROM</h2>
+			<p>The game runs from your copy of <strong>Mega Man Battle Network 6: Cybeast Gregar (USA)</strong>,
+				an unmodified <code>.gba</code> file. It stays in this browser and is never uploaded;
+				nothing from the game is on this site.</p>
+			<p id="status">Loading the engine…</p>
+			<div class="actions">
+				<button id="play" type="button" hidden>Play</button>
+				<label id="pick" class="button" hidden>
+					<input id="rom" type="file" accept=".gba,application/octet-stream">
+					<span id="pick-label">Choose ROM file</span>
+				</label>
+			</div>
+			<p class="small">or drop the file anywhere on this page</p>
+		</section>
+	</div>
+
+	<div class="bar">
+		<button id="fullscreen" type="button">Fullscreen</button>
+		<button id="forget" type="button" class="quiet">Forget ROM and saves</button>
+	</div>
+
+	<section class="help">
+		<h2>Controls</h2>
+		<table>
+			<tr><th>Game Boy Advance</th><th>Keyboard</th><th>Controller</th></tr>
+			<tr><td>D-Pad</td><td>Arrow keys</td><td>D-Pad or left stick</td></tr>
+			<tr><td>A</td><td>X or Space</td><td>A</td></tr>
+			<tr><td>B</td><td>Z or Backspace</td><td>B</td></tr>
+			<tr><td>L / R</td><td>A or Q / S or W</td><td>Shoulders</td></tr>
+			<tr><td>Start / Select</td><td>Enter / Tab</td><td>Start / Back</td></tr>
+		</table>
+		<p>Runs are saved in this browser each time MegaMan reaches a new layer. The same game
+			runs on ROCKNIX handhelds and on Linux:
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">source and downloads</a>.</p>
+		<p class="small">Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by Capcom.
+			The code is <a href="LICENSE.txt">MIT-licensed</a>; it embeds <a href="https://mgba.io">mGBA</a>
+			(<a href="licenses/mGBA.txt">MPL-2.0</a>) and <a href="https://libsdl.org">SDL2</a> (zlib).</p>
+	</section>
+</main>
+
+<script src="app.js"></script>
+<script src="cyberworld.js" async></script>
+</body>
+</html>

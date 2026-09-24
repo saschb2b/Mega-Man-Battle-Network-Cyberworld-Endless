@@ -1,5 +1,6 @@
 /* mGBA core host: runs the player's ROM, exposes its frame, sound and memory. */
 #include "emu.h"
+#include "platform.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -141,6 +142,7 @@ bool emu_save_state(const char *path) {
 	vf->close(vf);
 	if (ok) ok = rename(tmp, path) == 0;
 	else remove(tmp);
+	platform_persist();
 	return ok;
 }
 

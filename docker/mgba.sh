@@ -1,7 +1,9 @@
 #!/bin/sh
 # Builds a minimal static libmgba (GBA core only, no frontends, scripting,
 # debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba;
-# with arguments, for those targets only (host, aarch64).
+# with arguments, for those targets only (host, aarch64, web). The web build
+# (WebAssembly, in the Emscripten image) runs without threads: a page served
+# without cross-origin isolation cannot share memory between them.
 # mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
 set -e
 VER=0.10.5
@@ -21,6 +23,12 @@ build() { # $1 name, $2 extra cmake args
 }
 TARGETS=${*:-host aarch64}
 case " $TARGETS " in *" host "*) build host "" ;; esac
+case " $TARGETS " in *" web "*)
+	emcmake cmake -S mgba-$VER -B build-web $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/web \
+	 -DCMAKE_C_FLAGS="-DDISABLE_THREADING -D_GNU_SOURCE" -DHAVE_PTHREAD_H=OFF
+	cmake --build build-web -j"$(nproc)"
+	cmake --install build-web ;;
+esac
 case " $TARGETS " in *" aarch64 "*)
 cat > aarch64.cmake <<'T'
 set(CMAKE_SYSTEM_NAME Linux)

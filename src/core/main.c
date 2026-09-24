@@ -3,6 +3,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include "game.h"
 #include "gfx.h"
@@ -196,6 +199,75 @@ static const Scene *scene_by_name(const char *n) {
 	return NULL;
 }
 
+/* ---- the frame loop ---- */
+
+static struct {
+	bool headless;
+	uint64_t max_frames;
+	uint64_t last;
+	double acc;
+} loop;
+
+/* One game frame: scenes, input, update, sound, drawing. False once the
+ * frame budget of a headless run is spent. */
+static bool game_frame(void) {
+	if (pending) {
+		if (current && current->leave) current->leave();
+		current = pending;
+		pending = NULL;
+		if (current->enter) current->enter();
+	}
+	script_tick();
+	platform_poll();
+	if (current && current->update) current->update();
+	audio_frame();
+	platform_begin_frame();
+	if (current && current->draw) current->draw();
+	platform_apply_effects();
+	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
+	for (int i = 0; i < shot_count; ++i)
+		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
+	if (P.frame >= range_a && P.frame <= range_b) {
+		char path[256];
+		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
+		platform_save_canvas(path);
+	}
+	platform_end_frame();
+	return !(loop.max_frames && P.frame >= loop.max_frames);
+}
+
+/* Seconds since the last call, from the performance counter. */
+static double elapsed(void) {
+	uint64_t now = SDL_GetPerformanceCounter();
+	double dt = (double)(now - loop.last) / (double)SDL_GetPerformanceFrequency();
+	loop.last = now;
+	return dt;
+}
+
+#ifndef __EMSCRIPTEN__
+/* The native loop: 60 game frames a second (as fast as it can headless). */
+static bool step(void) {
+	if (!loop.headless || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
+		loop.acc += elapsed();
+		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
+		loop.acc -= 1.0 / 60.0;
+		if (loop.acc > 0.1) loop.acc = 0;
+	}
+	return game_frame();
+}
+#else
+/* The browser's frame (60, 120 or 144 a second): as many game frames as
+ * 1/60 s steps have passed, at most two, so the game keeps the GBA's pace. */
+static void web_frame(void) {
+	loop.acc += elapsed();
+	if (loop.acc > 0.1) loop.acc = 1.0 / 60.0;
+	for (int n = 0; n < 2 && loop.acc >= 1.0 / 60.0 - 0.002; ++n) {
+		loop.acc -= 1.0 / 60.0;
+		if (!game_frame() || P.quit) { emscripten_cancel_main_loop(); platform_shutdown(); return; }
+	}
+}
+#endif
+
 int main(int argc, char **argv) {
 	const char *rom_dir = NULL;
 	bool fullscreen = !DESKTOP, data_dir_given = false;
@@ -325,42 +397,15 @@ int main(int argc, char **argv) {
 		scene_set(s ? s : &scene_title);
 	}
 
-	uint64_t last = SDL_GetPerformanceCounter();
-	const double freq = (double)SDL_GetPerformanceFrequency();
-	double acc = 0;
-	while (!P.quit) {
-		if (pending) {
-			if (current && current->leave) current->leave();
-			current = pending;
-			pending = NULL;
-			if (current->enter) current->enter();
-		}
-		if (!headless || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
-			uint64_t now = SDL_GetPerformanceCounter();
-			acc += (now - last) / freq;
-			last = now;
-			if (acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); continue; }
-			acc -= 1.0 / 60.0;
-			if (acc > 0.1) acc = 0;
-		}
-		script_tick();
-		platform_poll();
-		if (current && current->update) current->update();
-		audio_frame();
-		platform_begin_frame();
-		if (current && current->draw) current->draw();
-		platform_apply_effects();
-		if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
-		for (int i = 0; i < shot_count; ++i)
-			if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
-		if (P.frame >= range_a && P.frame <= range_b) {
-			char path[256];
-			snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
-			platform_save_canvas(path);
-		}
-		platform_end_frame();
-		if (max_frames && P.frame >= max_frames) break;
-	}
+	loop.headless = headless;
+	loop.max_frames = max_frames;
+	loop.last = SDL_GetPerformanceCounter();
+#ifdef __EMSCRIPTEN__
+	/* the browser calls in once per display frame */
+	emscripten_set_main_loop(web_frame, 0, 1);
+#else
+	while (!P.quit && step()) {}
+#endif
 	platform_shutdown();
 	return 0;
 }

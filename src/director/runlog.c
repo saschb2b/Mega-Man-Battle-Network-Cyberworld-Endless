@@ -9,6 +9,7 @@
 #include "data.h"
 #include "emu.h"
 #include "game.h"
+#include "platform.h"
 #include "run.h"
 
 #define LOG_LIMIT (512 * 1024)
@@ -30,6 +31,7 @@ static void append(const char *line) {
 	fprintf(f, "%s\n", line);
 	long size = ftell(f);
 	fclose(f);
+	platform_persist();
 	if (size > LOG_LIMIT) {
 		snprintf(old, sizeof old, "%s/runlog.old", g_data_dir);
 		remove(old);

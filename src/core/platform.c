@@ -2,12 +2,16 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 Platform P;
 
 static SDL_GameController *pads[4];
 static uint32_t injected;
 static uint32_t pad_bits, key_bits;
+static uint32_t tapped;   /* pressed since the last poll: a tap released in the same frame still counts */
 
 static void open_pads(void) {
 	for (int i = 0; i < SDL_NumJoysticks() && i < 4; ++i) {
@@ -41,12 +45,14 @@ static void resized(void) {
 	layout_canvas();
 }
 
+#ifndef __EMSCRIPTEN__
 static void set_fullscreen(bool on) {
 	P.fullscreen = on;
 	SDL_SetWindowFullscreen(P.window, on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 	SDL_ShowCursor(on ? SDL_DISABLE : SDL_ENABLE);
 	resized();
 }
+#endif
 
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
@@ -162,26 +168,35 @@ void platform_poll(void) {
 		switch (e.type) {
 		case SDL_QUIT: P.quit = true; break;
 		case SDL_KEYDOWN:
-			if (!e.key.repeat) { key_bits |= key_button(e.key.keysym.sym); P.keyboard_last = true; }
+			if (!e.key.repeat) { key_bits |= key_button(e.key.keysym.sym); tapped |= key_button(e.key.keysym.sym); P.keyboard_last = true; }
+#ifndef __EMSCRIPTEN__
+			/* (in a browser the page keeps Escape and fullscreen) */
 			if (e.key.keysym.sym == SDLK_ESCAPE) P.quit = true;
 			/* F11 or Alt+Enter: fullscreen and back */
 			if (!e.key.repeat && !P.headless && (e.key.keysym.sym == SDLK_F11 ||
 				(e.key.keysym.sym == SDLK_RETURN && (e.key.keysym.mod & KMOD_ALT)))) {
 				key_bits &= ~BTN_START;
+				tapped &= ~BTN_START;
 				set_fullscreen(!P.fullscreen);
 			}
+#endif
 			break;
 		case SDL_WINDOWEVENT:
 			if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
 			break;
 		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.sym); break;
-		case SDL_CONTROLLERBUTTONDOWN: pad_bits |= pad_button(e.cbutton.button); P.keyboard_last = false; break;
+		case SDL_CONTROLLERBUTTONDOWN:
+			pad_bits |= pad_button(e.cbutton.button);
+			tapped |= pad_button(e.cbutton.button);
+			P.keyboard_last = false;
+			break;
 		case SDL_CONTROLLERBUTTONUP: pad_bits &= ~pad_button(e.cbutton.button); break;
 		case SDL_CONTROLLERDEVICEADDED: open_pads(); break;
 		default: break;
 		}
 	}
-	uint32_t now = key_bits | pad_bits | stick_bits() | injected;
+	uint32_t now = key_bits | pad_bits | stick_bits() | injected | tapped;
+	tapped = 0;
 	P.pressed = now & ~P.held;
 	P.released = P.held & ~now;
 	P.held = now;
@@ -237,6 +252,13 @@ void platform_end_frame(void) {
 	SDL_RenderPresent(P.renderer);
 	++P.frame;
 	{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
+}
+
+void platform_persist(void) {
+#ifdef __EMSCRIPTEN__
+	/* the browser's files live in memory until they are synced to IndexedDB */
+	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
+#endif
 }
 
 bool platform_save_canvas(const char *path) {

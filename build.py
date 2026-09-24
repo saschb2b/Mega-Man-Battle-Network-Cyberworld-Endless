@@ -13,8 +13,12 @@ glibc runs on more distributions.
                                 release archive in build/release
   python3 build.py run ...      build the Linux desktop binary and play it here
                                 in a window (game options may follow)
-  python3 build.py release      both release archives in build/release: the
-                                PortMaster port and the Linux desktop build
+  python3 build.py web          the browser build, assembled as a site in
+                                build/site (published on GitHub Pages)
+  python3 build.py serve [PORT] build the site and serve it on localhost
+  python3 build.py release      the release archives in build/release: the
+                                PortMaster port, the Linux desktop build and
+                                the browser site
   python3 build.py shot ...     run the host binary headlessly (options below)
   python3 build.py tour [BIOMES] the game itself warped through every room of
                                 each area's layer, one sheet per area in
@@ -39,6 +43,8 @@ import sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 IMAGE = 'cyberworld-build'
 LINUX_IMAGE = 'cyberworld-linux'   # docker/Dockerfile.linux
+WEB_IMAGE = 'cyberworld-web'       # docker/Dockerfile.web
+IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web'}
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
@@ -63,7 +69,7 @@ def docker(*cmd, mounts=(), image=IMAGE):
 
 
 def ensure_image(image=IMAGE):
-    dockerfile = 'Dockerfile.linux' if image == LINUX_IMAGE else 'Dockerfile'
+    dockerfile = IMAGES[image]
     probe = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['image', 'inspect', image]
     if subprocess.call(probe, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0:
         build = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['build', '-t', image, '-f',
@@ -73,7 +79,7 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = LINUX_IMAGE if target == 'linux' else IMAGE
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     if docker('make', f'TARGET={target}', f'-j{os.cpu_count() or 4}', image=image) != 0:
         sys.exit(f'{target} build failed')
@@ -83,6 +89,12 @@ def build(target):
                   'cp -L /opt/sdl2/lib/libSDL2-2.0.so.0 build/linux/lib/ && '
                   'cp /opt/sdl2/LICENSE.txt build/linux/licenses/SDL2.txt', image=image) != 0:
             sys.exit('copying SDL2 failed')
+
+
+def web_release():
+    """build/release/cyberworld-endless-web.zip: the site, to serve anywhere."""
+    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld-endless-web'), 'zip', site())
+    print('released', archive)
 
 
 def linux_release():
@@ -106,6 +118,48 @@ def linux_release():
         tar.add(stage, arcname=LINUX_NAME)
     shutil.rmtree(stage)
     print('released', archive)
+
+
+def site():
+    """build/site: the browser build and its page, as GitHub Pages serves it."""
+    out = os.path.join(ROOT, 'build', 'site')
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(os.path.join(out, 'licenses'))
+    for name in ('index.html', 'app.js', 'style.css'):
+        shutil.copy2(os.path.join(ROOT, 'web', name), out)
+    for name in ('cyberworld.js', 'cyberworld.wasm'):
+        shutil.copy2(os.path.join(ROOT, 'build', 'web', name), out)
+    shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(out, 'LICENSE.txt'))
+    shutil.copy2(os.path.join(ROOT, 'build', 'web', 'licenses', 'mGBA.txt'), os.path.join(out, 'licenses'))
+    open(os.path.join(out, '.nojekyll'), 'w').close()
+    print('site in', out)
+    return out
+
+
+def serve(port=8080):
+    """The site on http://localhost:PORT; the developer's ROM also at /.dev/rom.gba for tests."""
+    import http.server
+    import functools
+    out = site()
+    rom = next((os.path.join(default_rom_dir(), n) for n in sorted(os.listdir(default_rom_dir()))
+                if n.lower().endswith('.gba')), None) if os.path.isdir(default_rom_dir()) else None
+
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == '/.dev/rom.gba' and rom:
+                with open(rom, 'rb') as f:
+                    data = f.read()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/octet-stream')
+                self.send_header('Content-Length', str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+                return
+            super().do_GET()
+
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', int(port)), functools.partial(Handler, directory=out))
+    print(f'serving {out} on http://localhost:{port}/')
+    server.serve_forever()
 
 
 def port_release():
@@ -281,7 +335,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -307,12 +361,22 @@ def main():
         if '--rom-dir' not in a.rest and os.path.isdir(default_rom_dir()):
             extra += ['--rom-dir', default_rom_dir()]
         sys.exit(subprocess.call([os.path.join(ROOT, 'build', 'linux', 'cyberworld'), *extra, *a.rest]))
+    if a.action == 'web':
+        build('web')
+        site()
+        return
+    if a.action == 'serve':
+        build('web')
+        serve(*a.rest[:1])
+        return
     if a.action == 'release':
         build('aarch64')
         build('linux')
+        build('web')
         os.makedirs(RELEASE, exist_ok=True)
         port_release()
         linux_release()
+        web_release()
         return
     if a.action == 'pacing':
         build('host')

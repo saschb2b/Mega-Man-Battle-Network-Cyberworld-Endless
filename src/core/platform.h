@@ -62,6 +62,8 @@ void platform_end_frame(void);
 /* Apply fx_mosaic and fx_fade to the canvas (called once the scene has drawn). */
 void platform_apply_effects(void);
 bool platform_save_canvas(const char *path);
+/* Files were written: in a browser, keep them (IndexedDB); elsewhere nothing. */
+void platform_persist(void);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 
