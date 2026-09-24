@@ -300,6 +300,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 	out->cand = c;
 	out->n = nu;
 	find_plain(out);
+	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
 	free(src.state);
 }
 
@@ -351,25 +352,22 @@ static int unplain(const TileBook *b, int m, int phase, const TileCand *c, uint6
 	return best;
 }
 
-const TileCand *tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
-	TileFloor floor, const void *ctx) {
-	int phase, A, B;
-	tile_class(g, tx, ty, &phase, &A, &B);
-	unsigned oa, ob;
-	occupancy(floor, ctx, A, B, &oa, &ob);
-	if (!(oa | ob)) return NULL;
+/* The best pair of `books` for a tile of class (phase, oa, ob) at (tx, ty):
+ * the nearest neighbourhood seen whose tile fits there, most common first;
+ * failing that, the least bad. Only pairs without a back tile when `single`. */
+static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty, int phase,
+	unsigned oa, unsigned ob, TileFloor floor, const void *ctx, bool single) {
 	int cm = ob & 0x10 ? TILE_B : TILE_A;   /* the centre panel's material */
 	uint64_t must, never, deep;
 	expect(g, tx, ty, floor, ctx, cm, &must, &never, &deep);
 	int allowed = __builtin_popcountll(deep) / 8;
-	/* the nearest neighbourhood seen whose tile fits here, most common
-	 * first; failing that, the least bad */
 	const TileCand *fit = NULL, *any = NULL;
 	int fit_d = INT_MAX, any_score = INT_MAX;
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
 		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
 			const TileCand *c = &b->cand[i];
+			if (single && c->e1) continue;
 			int d = distance(phase, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			int u = unplain(b, cm - 1, phase, c, deep);
 			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && c->count > fit->count))) { fit = c; fit_d = d; }
@@ -377,4 +375,44 @@ const TileCand *tiles_pick(const TileBook *books, int nbooks, const TileGrid *g,
 		}
 	}
 	return fit ? fit : any;
+}
+
+/* One material of a floor, the other taken for void. */
+typedef struct { TileFloor floor; const void *ctx; int keep; } Only;
+
+static int only(int A, int B, const void *ctx) {
+	const Only *o = ctx;
+	int m = o->floor(A, B, o->ctx);
+	return m == o->keep ? m : TILE_VOID;
+}
+
+bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
+	TileFloor floor, const void *ctx, uint16_t *e0, uint16_t *e1) {
+	int phase, A, B;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	unsigned oa, ob;
+	occupancy(floor, ctx, A, B, &oa, &ob);
+	if (!(oa | ob)) return false;
+	int joins = 0;
+	for (int k = 0; k < nbooks; ++k) joins += books[k].joins;
+	if (oa && ob && !joins) {
+		/* the original never joins its two floors (Green's planks reach its
+		 * raised grass by ramps): the walkway's end over the platform's edge,
+		 * each drawn as if the other were not there, on the two layers */
+		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
+		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, only, &oa_only, true);
+		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, only, &ob_only, true);
+		if (pb && !pb->mask) pb = NULL;
+		if (pa && !pa->mask) pa = NULL;
+		if (pa || pb) {
+			*e0 = pb ? pb->e0 : pa->e0;
+			*e1 = pb && pa ? pa->e0 : 0;
+			return true;
+		}
+	}
+	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, floor, ctx, false);
+	if (!c) return false;
+	*e0 = c->e0;
+	*e1 = c->e1;
+	return true;
 }

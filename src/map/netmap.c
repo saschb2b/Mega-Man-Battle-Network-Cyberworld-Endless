@@ -176,10 +176,10 @@ static bool write_tilemap(const Learned *L) {
 	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face };
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
-			const TileCand *b = tiles_pick(L->book, 2, &grid, tx, ty, floor_cb, NULL);
-			if (!b) continue;
-			map[(size_t)ty * tw + tx] = b->e0;
-			map[cells + (size_t)ty * tw + tx] = b->e1;
+			uint16_t e0, e1;
+			if (!tiles_pick(L->book, 2, &grid, tx, ty, floor_cb, NULL, &e0, &e1)) continue;
+			map[(size_t)ty * tw + tx] = e0;
+			map[cells + (size_t)ty * tw + tx] = e1;
 		}
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);

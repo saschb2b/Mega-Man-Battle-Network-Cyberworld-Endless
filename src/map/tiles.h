@@ -31,6 +31,7 @@ typedef struct {
 	TileCand *cand;
 	int n;
 	int dv, face;                       /* how the floor is drawn, see TileGrid */
+	int joins;                          /* pairs where the two floors meet */
 	int plain[2][64][TILE_PLAIN], nplain[2][64];   /* per material and phase: the floor's usual looks */
 } TileBook;
 
@@ -50,11 +51,12 @@ void tiles_free(TileBook *b);
 /* The class of tile (tx, ty): its phase and the panel it lies in. */
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
 
-/* The best pair for tile (tx, ty) of a map whose floor is `floor`: of those
- * whose pixels cover the floor there, do not reach beyond it and look like
- * plain floor well inside it, the one seen with the nearest neighbours;
- * NULL off the floor. */
-const TileCand *tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
-	TileFloor floor, const void *ctx);
+/* The layer entries for tile (tx, ty) of a map whose floor is `floor`: of
+ * the pairs whose pixels cover the floor there, do not reach beyond it and
+ * look like plain floor well inside it, the one seen with the nearest
+ * neighbours. Where the two floors meet and the original never joins them,
+ * the walkway's tile over the platform's. False off the floor. */
+bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
+	TileFloor floor, const void *ctx, uint16_t *e0, uint16_t *e1);
 
 #endif
