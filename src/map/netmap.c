@@ -152,6 +152,7 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 
 static const NetLayout *cur;
 static bool one_floor;        /* the area has no walkway floor: all is platform */
+static bool by_shape;         /* its floors are told by shape: an arena is platform */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR };
@@ -179,6 +180,14 @@ static bool walkway(int x, int y) {
 /* The floor's material as the screen shows it: ground panels where they
  * are, raised ones where a flat panel `rise` world units up the screen
  * would be (stairs are drawn from their own pieces). */
+/* A floor cell beside the void (8 ways): a platform's rim. */
+static bool edge(int x, int y) {
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx)
+			if (kind(x + dx, y + dy) == K_VOID) return true;
+	return false;
+}
+
 static int floor_cb(int A, int B, const void *ctx) {
 	(void)ctx;
 	int k = cur->rise / 32, x = B + place.gx0, y = -A + place.gy0;
@@ -188,7 +197,9 @@ static int floor_cb(int A, int B, const void *ctx) {
 	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
 	int pad = cur->pad && cur->pad[y * cur->gw + x] ? TILE_PAD : 0;
 	if (one_floor) return TILE_A | pad;
-	if (x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B;
+	/* by shape: walkways and platforms' rims one floor, their middles the other */
+	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
+	if (!by_shape && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B | pad;
 	return (walkway(x, y) ? TILE_B : TILE_A) | pad;
 }
 
@@ -240,7 +251,7 @@ static bool write_tilemap(const Learned *L) {
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > MAX_TILE_BYTES) return false;
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
-	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang };
+	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape };
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
 			uint16_t e0, e1;
@@ -339,6 +350,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (!L->ok) return false;
 	cur = lay;
 	one_floor = !R.layout->net_area[area].walk_styles;
+	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
 	/* centre the floor on the world origin, across (x - y) and up and down
 	 * (x + y) the screen */
 	int u0 = 1 << 30, u1 = -(1 << 30), v0 = 1 << 30, v1 = -(1 << 30);
