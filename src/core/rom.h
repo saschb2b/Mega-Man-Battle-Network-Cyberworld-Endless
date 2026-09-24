@@ -26,9 +26,7 @@ typedef struct {
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */
-		uint32_t bg_pal;         /* banks 0-13; bank 15 is the text box palette */
-		uint32_t bg_pal15;
-		uint32_t bg_anims;       /* palette animation scripts (the logo's glow) */
+		uint32_t bg_pal;         /* banks 0-13: the logo in 0-4 */
 		uint32_t text_tiles;     /* LZ77: PRESS START, NEW GAME, CONTINUE (OBJ tile 1 first) */
 		uint32_t text_pal, menu_pal;
 		uint32_t copy_tiles;     /* LZ77: the copyright line, 8 OBJs of 32x32 */
@@ -46,6 +44,8 @@ typedef struct {
 		uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads (the Aquarium's glass pads; 0: none) */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
+	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */
+	uint32_t battle_bg_anims;  /* their tile and palette animation scripts */
 } RomLayout;
 
 typedef struct {

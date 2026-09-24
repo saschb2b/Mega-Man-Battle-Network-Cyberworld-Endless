@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "run.h"
+
 typedef struct {
 	int runs;
 	int best_depth;
@@ -24,6 +26,8 @@ void save_init(void);
 bool save_exists(void);
 bool save_run(void);
 bool load_run(void);
+/* The saved run without loading it (none from before the current save format). */
+bool peek_run(Run *out);
 /* Deletes the run's save and its game state. */
 void save_delete(void);
 /* Where the run's checkpoint keeps the game's state. */

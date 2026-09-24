@@ -77,6 +77,8 @@ bool save_run(void) {
 	return save_write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
 }
 
+bool peek_run(Run *out) { return save_read_blob("run.sav", RUN_MAGIC, out, sizeof *out) && out->active; }
+
 bool load_run(void) {
 	Run tmp;
 	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; return true; }

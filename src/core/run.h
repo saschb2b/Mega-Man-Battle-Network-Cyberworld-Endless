@@ -40,5 +40,7 @@ extern Run run;
 
 void run_new(uint32_t seed);
 int biome_bg(int b);
+/* The area's first battle background, without a roll (the title's backdrop). */
+int biome_backdrop(int b);
 
 #endif

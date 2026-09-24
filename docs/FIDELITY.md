@@ -7,8 +7,8 @@ use.
 
 | Element | Status | Notes |
 | --- | --- | --- |
-| Title screen | Original data, engine-drawn | Picture, logo glow, copyright, PRESS START, NEW GAME / CONTINUE, timings and sounds recorded from the game (`docs/ROM_DATA.md`) |
-| Run summary | Adapted | Drawn text over the dimmed title picture after the game's GAME OVER |
+| Title screen | Original logo and backgrounds, generated mark and subtitle | The logo (emblem, MEGAMAN, BATTLE NETWORK) cut from the game's title picture, copyright, PRESS START, NEW GAME / CONTINUE, cursor and sounds are the game's (`docs/ROM_DATA.md`). The infinity mark in the 6's place and the CYBERWORLD ENDLESS subtitle are drawn by the engine in the 6's and the plate's palette colours; behind them the battle backgrounds of the run's areas take turns, with the game's animations and scroll. The best depth and the saved run's depth are drawn text |
+| Run summary | Adapted | Drawn text over the darkened battle background of the area where MegaMan was deleted, after the game's GAME OVER |
 | Net movement, collision, camera, HUD | Original | The game's overworld code on generated maps |
 | Net floors | Generated | Tiles learned from one original map per area, platforms and walkways in its two floors, each checked against where the floor and its side faces are drawn and, inside the floor, against the area's usual panels; a few inner corners the original never shows still take the nearest shape |
 | Net walls | Generated | Wall cells in the game's coordinate-data format, shapes as the original maps use them |

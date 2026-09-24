@@ -68,8 +68,13 @@ First playable version.
   any other map sends him back to the layer.
 - Choices on the game's text boxes: a strong virus signal, a dark flame into
   the Undernet, and a gate that three ScrtData open into the Secret Area.
-- The original title screen, rebuilt from the ROM, with NEW GAME, CONTINUE and
-  a run summary after the game's GAME OVER.
+- A title screen of its own in the game's style: the Battle Network logo from
+  the ROM with an infinity mark where the 6 stood and a CYBERWORLD ENDLESS
+  plate, over the battle backgrounds of the net's areas in turn (Central to
+  the Cybeast Nest), animated and scrolling as in battle. CONTINUE shows the
+  saved run's depth, the corner the best one; choosing either jacks in with
+  the net rushing past into white. After the game's GAME OVER a run summary
+  shows over the area where MegaMan was deleted.
 - Checkpoints on arrival at each layer; CONTINUE returns there. A profile
   keeps the best depth. Run saves from before this version are converted.
 - PortMaster launcher for ROCKNIX, made for the Retroid Nova and the Retroid
