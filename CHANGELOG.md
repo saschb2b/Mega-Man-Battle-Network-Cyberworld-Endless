@@ -68,6 +68,12 @@ First playable version.
   any other map sends him back to the layer.
 - Choices on the game's text boxes: a strong virus signal, a dark flame into
   the Undernet, and a gate that three ScrtData open into the Secret Area.
+- A Linux desktop build: the game in a resizable window at a whole-number
+  scale, F11 or Alt+Enter for fullscreen, keyboard and controllers, saves
+  and the ROM in `~/.local/share/cyberworld-endless`. It is built on Debian
+  bookworm with its own SDL2 (backends loaded at run time), so it runs on
+  glibc 2.34 and newer. `build.py run` plays it here; `build.py release`
+  writes the PortMaster zip and the Linux archive.
 - A fair difficulty curve (docs/PROGRESSION.md). Depth, not the area, sets
   how hard a battle is: every random battle is sized from the ROM's virus HP
   and damage to its act's limits, at the highest version that fits, and the

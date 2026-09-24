@@ -6,8 +6,8 @@ Cyberworld Endless is a roguelike that runs Mega Man Battle Network 6:
 Cybeast Gregar (USA) from the player's own ROM on an embedded mGBA core and
 directs it: generated layers in the game's map formats, the run's structure,
 loot and saves. It is written in C11 with SDL2 and ships as a PortMaster port
-for ROCKNIX. Reference devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2
-(1920x1080).
+for ROCKNIX, the primary target, and as a Linux desktop build. Reference
+devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 
 Never commit or publish ROMs, save files, extracted assets, emulator save
 states or disassembly files. `.gitignore` covers the usual names; check
@@ -40,6 +40,8 @@ states or disassembly files. `.gitignore` covers the usual names; check
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `port/` | PortMaster launcher and metadata |
+| `linux/` | The Linux desktop release's README and menu installer |
+| `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source) |
 
 ## Rules
 
@@ -70,7 +72,15 @@ python3 build.py test       # ROM-free unit tests
 python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.build/a.bmp"
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/
+python3 build.py run        # the Linux desktop build, played here in a window
+python3 build.py release    # build/release/: cyberworld.zip and the Linux tar.gz
 ```
+
+The host and Linux builds are desktop builds (`CW_DESKTOP`): a resizable
+window, saves in `~/.local/share/cyberworld-endless`, the ROM looked for
+there, beside the binary and in `./rom`. The ROCKNIX build fills the screen
+and takes both folders from its launcher. `build.py run` is the quickest way
+to play a change; the headless `shot` stays the way to capture one.
 
 `shot` runs headless in the build image with the repository at `/src` and
 `~/.cache/mmbn-ref/roms` (override with `CYBERWORLD_ROM_DIR`) mounted
@@ -94,7 +104,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input |
 | Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band), an autopilot run |
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |
-| Release | Device run on the Nova and the Flip 2 |
+| Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux archive started from a fresh unpack |
 
 ## Device testing
 

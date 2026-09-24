@@ -33,7 +33,22 @@ static void layout_canvas(void) {
 	SDL_SetTextureScaleMode(P.fx_copy, SDL_ScaleModeNearest);
 }
 
-bool platform_init(int force_w, int force_h, bool headless) {
+/* The window's new size (resized, or in or out of fullscreen): the canvas
+ * follows at the largest whole scale. */
+static void resized(void) {
+	if (P.forced) return;
+	SDL_GetRendererOutputSize(P.renderer, &P.screen_w, &P.screen_h);
+	layout_canvas();
+}
+
+static void set_fullscreen(bool on) {
+	P.fullscreen = on;
+	SDL_SetWindowFullscreen(P.window, on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	SDL_ShowCursor(on ? SDL_DISABLE : SDL_ENABLE);
+	resized();
+}
+
+bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
 	if (headless) {
 		SDL_SetHint(SDL_HINT_VIDEODRIVER, "dummy");
@@ -48,12 +63,22 @@ bool platform_init(int force_w, int force_h, bool headless) {
 	}
 	Uint32 flags = SDL_WINDOW_SHOWN;
 	int ww = force_w, wh = force_h;
-	if (!ww || !wh) {
+	P.forced = force_w && force_h;
+	if (!P.forced) {
 		SDL_DisplayMode dm;
-		if (SDL_GetDesktopDisplayMode(0, &dm) == 0) { ww = dm.w; wh = dm.h; }
-		else { ww = CORE_W * 4; wh = CORE_H * 4; }
-		if (!headless) flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		if (SDL_GetDesktopDisplayMode(0, &dm) != 0) { dm.w = CORE_W * 4; dm.h = CORE_H * 4; }
+		if (fullscreen && !headless) {
+			ww = dm.w; wh = dm.h;
+			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		} else {
+			/* a window at the largest whole scale that leaves room around it */
+			int sx = dm.w * 85 / 100 / CORE_W, sy = dm.h * 85 / 100 / CORE_H, s = sx < sy ? sx : sy;
+			if (s < 1) s = 1;
+			ww = CORE_W * s; wh = CORE_H * s;
+			if (!headless) flags |= SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+		}
 	}
+	P.fullscreen = fullscreen && !headless;
 	P.window = SDL_CreateWindow("Mega Man Battle Network: Cyberworld Endless",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, flags);
 	if (!P.window) { fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
@@ -64,7 +89,7 @@ bool platform_init(int force_w, int force_h, bool headless) {
 	SDL_GetRendererOutputSize(P.renderer, &P.screen_w, &P.screen_h);
 	if (force_w && force_h) { P.screen_w = force_w; P.screen_h = force_h; }
 	layout_canvas();
-	SDL_ShowCursor(SDL_DISABLE);
+	SDL_ShowCursor(P.fullscreen || headless ? SDL_DISABLE : SDL_ENABLE);
 	open_pads();
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(P.renderer, &info);
@@ -139,6 +164,15 @@ void platform_poll(void) {
 		case SDL_KEYDOWN:
 			if (!e.key.repeat) { key_bits |= key_button(e.key.keysym.sym); P.keyboard_last = true; }
 			if (e.key.keysym.sym == SDLK_ESCAPE) P.quit = true;
+			/* F11 or Alt+Enter: fullscreen and back */
+			if (!e.key.repeat && !P.headless && (e.key.keysym.sym == SDLK_F11 ||
+				(e.key.keysym.sym == SDLK_RETURN && (e.key.keysym.mod & KMOD_ALT)))) {
+				key_bits &= ~BTN_START;
+				set_fullscreen(!P.fullscreen);
+			}
+			break;
+		case SDL_WINDOWEVENT:
+			if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
 			break;
 		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.sym); break;
 		case SDL_CONTROLLERBUTTONDOWN: pad_bits |= pad_button(e.cbutton.button); P.keyboard_last = false; break;

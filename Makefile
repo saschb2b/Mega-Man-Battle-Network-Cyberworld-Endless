@@ -3,13 +3,16 @@ TARGET ?= host
 CC_host := gcc
 CC_aarch64 := aarch64-linux-gnu-gcc
 CC_asan := gcc
+CC_linux := gcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
+PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 CC := $(CC_$(TARGET))
 PKGCONF := $(PKG_$(TARGET)) pkg-config
 OUT := build/$(TARGET)
 BIN_host := $(OUT)/cyberworld
 BIN_aarch64 := $(OUT)/cyberworld.aarch64
 BIN_asan := $(OUT)/cyberworld
+BIN_linux := $(OUT)/cyberworld
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -22,6 +25,15 @@ MGBA_TARGET := $(if $(filter aarch64,$(TARGET)),aarch64,host)
 MGBA := /opt/mgba/$(MGBA_TARGET)
 CFLAGS += -I$(MGBA)/include
 LDLIBS += $(shell $(PKGCONF) --libs sdl2) $(MGBA)/lib/libmgba.a -lpthread -lm
+# the desktop builds: a window, the user's data folder (src/core/main.c)
+ifneq ($(TARGET),aarch64)
+CFLAGS += -DCW_DESKTOP
+endif
+# the Linux release: built on an older glibc (docker/Dockerfile.linux), SDL2
+# carried in lib/ beside the binary
+ifeq ($(TARGET),linux)
+LDLIBS += -Wl,-rpath,'$$ORIGIN/lib'
+endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 LDLIBS += -fsanitize=address,undefined

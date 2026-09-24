@@ -1,6 +1,7 @@
 #!/bin/sh
 # Builds a minimal static libmgba (GBA core only, no frontends, scripting,
-# debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba.
+# debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba;
+# with arguments, for those targets only (host, aarch64).
 # mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
 set -e
 VER=0.10.5
@@ -18,13 +19,16 @@ build() { # $1 name, $2 extra cmake args
 	cmake --build build-$1 -j"$(nproc)"
 	cmake --install build-$1
 }
-build host ""
+TARGETS=${*:-host aarch64}
+case " $TARGETS " in *" host "*) build host "" ;; esac
+case " $TARGETS " in *" aarch64 "*)
 cat > aarch64.cmake <<'T'
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
 set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
 set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
 T
-build aarch64 "-DCMAKE_TOOLCHAIN_FILE=/tmp/aarch64.cmake"
+build aarch64 "-DCMAKE_TOOLCHAIN_FILE=/tmp/aarch64.cmake" ;;
+esac
 cp mgba-$VER/LICENSE /opt/mgba/LICENSE
 rm -rf /tmp/mgba* /tmp/build-* /tmp/aarch64.cmake

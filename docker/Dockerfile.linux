@@ -1,0 +1,17 @@
+# Build image for the Linux desktop release (x86-64). Debian bookworm's glibc
+# lets the binary run on most distributions of the last years; SDL2, built
+# here with its backends loaded at run time, travels with the release
+# (build.py linux).
+FROM debian:bookworm
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    build-essential make pkg-config ca-certificates file cmake curl \
+    libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev \
+    libxkbcommon-dev libwayland-dev wayland-protocols libdecor-0-dev libegl-dev libgles-dev libgl-dev \
+    libdrm-dev libgbm-dev libasound2-dev libpulse-dev libpipewire-0.3-dev libudev-dev libdbus-1-dev \
+ && rm -rf /var/lib/apt/lists/*
+COPY sdl2.sh /tmp/sdl2.sh
+RUN sh /tmp/sdl2.sh
+# The embedded GBA core (docs/EMULATION.md), for this machine only
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh host

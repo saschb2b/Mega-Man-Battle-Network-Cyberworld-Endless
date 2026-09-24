@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "game.h"
 #include "gfx.h"
@@ -17,6 +19,54 @@
 #include "net_layouts.h"
 
 char g_data_dir[512] = ".";
+
+/* The desktop builds (host, linux) open a window and keep their files in
+ * the user's data folder; the handheld port fills the screen and keeps them
+ * beside itself (its launcher passes --data-dir and --rom-dir). */
+#ifdef CW_DESKTOP
+#define DESKTOP true
+#else
+#define DESKTOP false
+#endif
+
+/* mkdir -p */
+static void make_dirs(const char *path) {
+	char p[600];
+	snprintf(p, sizeof p, "%s", path);
+	for (char *c = p + 1; *c; ++c)
+		if (*c == '/') { *c = 0; mkdir(p, 0755); *c = '/'; }
+	mkdir(p, 0755);
+}
+
+/* $XDG_DATA_HOME/cyberworld-endless, or ~/.local/share/cyberworld-endless */
+static void desktop_data_dir(char *out, size_t n) {
+	const char *xdg = getenv("XDG_DATA_HOME"), *home = getenv("HOME");
+	if (xdg && *xdg == '/') snprintf(out, n, "%s/cyberworld-endless", xdg);
+	else if (home && *home) snprintf(out, n, "%s/.local/share/cyberworld-endless", home);
+	else snprintf(out, n, ".");
+}
+
+/* The ROM: in the data folder's rom/, beside the binary, or in ./rom. */
+static bool desktop_rom(char *msg, size_t msglen) {
+	char dirs[3][600], exe[512];
+	int n = 0;
+	snprintf(dirs[n++], sizeof dirs[0], "%s/rom", g_data_dir);
+	ssize_t len = readlink("/proc/self/exe", exe, sizeof exe - 1);
+	if (len > 0) {
+		exe[len] = 0;
+		char *slash = strrchr(exe, '/');
+		if (slash) { *slash = 0; snprintf(dirs[n++], sizeof dirs[0], "%s/rom", exe); }
+	}
+	snprintf(dirs[n++], sizeof dirs[0], "rom");
+	char first[512] = "";
+	for (int i = 0; i < n; ++i) {
+		if (rom_find(dirs[i], msg, msglen)) return true;
+		/* a .gba that is not the right one says so; else the data folder is the place */
+		if (!first[0] || strncmp(msg, "Put your", 8)) snprintf(first, sizeof first, "%s", msg);
+	}
+	snprintf(msg, msglen, "%s", first);
+	return false;
+}
 
 static const Scene *current, *pending;
 
@@ -147,7 +197,8 @@ static const Scene *scene_by_name(const char *n) {
 }
 
 int main(int argc, char **argv) {
-	const char *rom_dir = "rom";
+	const char *rom_dir = NULL;
+	bool fullscreen = !DESKTOP, data_dir_given = false;
 	const char *start_scene = "title";
 	int run_depth = 0;
 	int force_w = 0, force_h = 0;
@@ -163,7 +214,9 @@ int main(int argc, char **argv) {
 		const char *v = i + 1 < argc ? argv[i + 1] : NULL;
 		if (!strcmp(a, "--headless")) headless = true;
 		else if (!strcmp(a, "--rom-dir") && v) { rom_dir = v; ++i; }
-		else if (!strcmp(a, "--data-dir") && v) { snprintf(g_data_dir, sizeof g_data_dir, "%s", v); ++i; }
+		else if (!strcmp(a, "--data-dir") && v) { snprintf(g_data_dir, sizeof g_data_dir, "%s", v); data_dir_given = true; ++i; }
+		else if (!strcmp(a, "--fullscreen")) fullscreen = true;
+		else if (!strcmp(a, "--window")) fullscreen = false;
 		else if (!strcmp(a, "--size") && v) { sscanf(v, "%dx%d", &force_w, &force_h); ++i; }
 		else if (!strcmp(a, "--frames") && v) { max_frames = strtoull(v, NULL, 10); ++i; }
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
@@ -189,12 +242,21 @@ int main(int argc, char **argv) {
 	}
 	setvbuf(stdout, NULL, _IOLBF, 0);
 	if (headless && !force_w) { force_w = 1280; force_h = 960; }
-	if (!platform_init(force_w, force_h, headless)) return 1;
+	if (DESKTOP && !data_dir_given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
+	if (DESKTOP) { char rom[600]; snprintf(rom, sizeof rom, "%s/rom", g_data_dir); make_dirs(rom); }
+	if (!platform_init(force_w, force_h, headless, fullscreen)) return 1;
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
 
 	char msg[512];
-	if (!rom_find(rom_dir, msg, sizeof msg)) {
+	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
+	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);
+		if (DESKTOP && !headless) {
+			/* no ROM, no font: say it in a box of the desktop's own */
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cyberworld Endless", msg, P.window);
+			platform_shutdown();
+			return 1;
+		}
 		error_show(msg);
 	} else if (!gfx_init()) {
 		error_show("The ROM could not be decoded.");

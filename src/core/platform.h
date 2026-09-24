@@ -37,6 +37,8 @@ typedef struct {
 	int repeat_timer[16];
 	bool quit;
 	bool headless;
+	bool forced;       /* a fixed size (--size, headless): the window never relays out */
+	bool fullscreen;
 	uint64_t frame;
 	bool keyboard_last; /* last input came from the keyboard */
 	/* Full-screen effects, set by the scene each frame while drawing and
@@ -50,7 +52,9 @@ typedef struct {
 
 extern Platform P;
 
-bool platform_init(int force_w, int force_h, bool headless);
+/* A fullscreen window at the desktop's size, or a resizable one at the
+ * largest whole scale that fits; F11 or Alt+Enter switch between them. */
+bool platform_init(int force_w, int force_h, bool headless, bool fullscreen);
 void platform_shutdown(void);
 void platform_poll(void);
 void platform_begin_frame(void);

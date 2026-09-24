@@ -2,11 +2,19 @@
 """Build, test and package Cyberworld Endless.
 
 Compilation runs inside the `cyberworld-build` Docker image (Debian trixie),
-which matches the glibc and SDL2 that current ROCKNIX ships.
+which matches the glibc and SDL2 that current ROCKNIX ships; the Linux
+desktop release builds in `cyberworld-linux` (Debian bookworm), whose older
+glibc runs on more distributions.
 
   python3 build.py              host and device binaries
   python3 build.py host         host binary only
   python3 build.py device       aarch64 binary only
+  python3 build.py linux        Linux desktop binary (build/linux) and its
+                                release archive in build/release
+  python3 build.py run ...      build the Linux desktop binary and play it here
+                                in a window (game options may follow)
+  python3 build.py release      both release archives in build/release: the
+                                PortMaster port and the Linux desktop build
   python3 build.py shot ...     run the host binary headlessly (options below)
   python3 build.py tour [BIOMES] the game itself warped through every room of
                                 each area's layer, one sheet per area in
@@ -30,10 +38,17 @@ import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 IMAGE = 'cyberworld-build'
+LINUX_IMAGE = 'cyberworld-linux'   # docker/Dockerfile.linux
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
+RELEASE = os.path.join(ROOT, 'build', 'release')
+LINUX_NAME = 'cyberworld-endless-linux-x86_64'
 
 
-def docker(*cmd, mounts=()):
+def default_rom_dir():
+    return os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+
+
+def docker(*cmd, mounts=(), image=IMAGE):
     args = ['docker']
     if CONTEXT:
         args += ['--context', CONTEXT]
@@ -43,22 +58,61 @@ def docker(*cmd, mounts=()):
     for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_AUTOPILOT'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
-    args += [IMAGE, *cmd]
+    args += [image, *cmd]
     return subprocess.call(args)
 
 
-def ensure_image():
-    probe = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['image', 'inspect', IMAGE]
+def ensure_image(image=IMAGE):
+    dockerfile = 'Dockerfile.linux' if image == LINUX_IMAGE else 'Dockerfile'
+    probe = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['image', 'inspect', image]
     if subprocess.call(probe, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0:
-        build = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['build', '-t', IMAGE, os.path.join(ROOT, 'docker')]
+        build = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['build', '-t', image, '-f',
+                 os.path.join(ROOT, 'docker', dockerfile), os.path.join(ROOT, 'docker')]
         if subprocess.call(build) != 0:
             sys.exit('docker build failed')
 
 
 def build(target):
-    ensure_image()
-    if docker('make', f'TARGET={target}', f'-j{os.cpu_count() or 4}') != 0:
+    image = LINUX_IMAGE if target == 'linux' else IMAGE
+    ensure_image(image)
+    if docker('make', f'TARGET={target}', f'-j{os.cpu_count() or 4}', image=image) != 0:
         sys.exit(f'{target} build failed')
+    if target == 'linux':
+        # SDL2 travels with the binary (its rpath is $ORIGIN/lib), with its license
+        if docker('sh', '-c', 'mkdir -p build/linux/lib build/linux/licenses && '
+                  'cp -L /opt/sdl2/lib/libSDL2-2.0.so.0 build/linux/lib/ && '
+                  'cp /opt/sdl2/LICENSE.txt build/linux/licenses/SDL2.txt', image=image) != 0:
+            sys.exit('copying SDL2 failed')
+
+
+def linux_release():
+    """build/release/cyberworld-endless-linux-x86_64.tar.gz: the desktop build, SDL2 and the notes."""
+    import tarfile
+    src = os.path.join(ROOT, 'build', 'linux')
+    stage = os.path.join(RELEASE, LINUX_NAME)
+    shutil.rmtree(stage, ignore_errors=True)
+    os.makedirs(os.path.join(stage, 'rom'))
+    shutil.copy2(os.path.join(src, 'cyberworld'), os.path.join(stage, 'cyberworld-endless'))
+    shutil.copytree(os.path.join(src, 'lib'), os.path.join(stage, 'lib'))
+    shutil.copytree(os.path.join(src, 'licenses'), os.path.join(stage, 'licenses'))
+    shutil.copy2(os.path.join(ROOT, 'LICENSE'), stage)
+    shutil.copy2(os.path.join(ROOT, 'linux', 'README.md'), stage)
+    shutil.copy2(os.path.join(ROOT, 'linux', 'install.sh'), stage)
+    with open(os.path.join(stage, 'rom', 'PUT_YOUR_ROM_HERE.txt'), 'w') as f:
+        f.write('Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba file into this folder,\n'
+                'or into ~/.local/share/cyberworld-endless/rom/.\n')
+    archive = os.path.join(RELEASE, LINUX_NAME + '.tar.gz')
+    with tarfile.open(archive, 'w:gz') as tar:
+        tar.add(stage, arcname=LINUX_NAME)
+    shutil.rmtree(stage)
+    print('released', archive)
+
+
+def port_release():
+    """build/release/cyberworld.zip: the PortMaster port, as port.json names it."""
+    package()
+    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld'), 'zip', os.path.join(ROOT, 'build', 'port'))
+    print('released', archive)
 
 
 def package():
@@ -227,7 +281,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -239,6 +293,27 @@ def main():
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))
+    if a.action == 'linux':
+        build('linux')
+        os.makedirs(RELEASE, exist_ok=True)
+        linux_release()
+        return
+    if a.action == 'run':
+        # the desktop build on this machine, its saves apart from a player's
+        build('linux')
+        data = os.path.join(ROOT, '.build', 'desktop')
+        os.makedirs(data, exist_ok=True)
+        extra = [] if '--data-dir' in a.rest else ['--data-dir', data]
+        if '--rom-dir' not in a.rest and os.path.isdir(default_rom_dir()):
+            extra += ['--rom-dir', default_rom_dir()]
+        sys.exit(subprocess.call([os.path.join(ROOT, 'build', 'linux', 'cyberworld'), *extra, *a.rest]))
+    if a.action == 'release':
+        build('aarch64')
+        build('linux')
+        os.makedirs(RELEASE, exist_ok=True)
+        port_release()
+        linux_release()
+        return
     if a.action == 'pacing':
         build('host')
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))

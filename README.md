@@ -12,11 +12,13 @@ battles, chips, PET, shops and music. Cyberworld Endless builds the layers,
 places the Mystery Data and shopkeepers, and keeps the run going.
 
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
-Nova (4:3) and the Retroid Pocket Flip 2 (16:9).
+Nova (4:3) and the Retroid Pocket Flip 2 (16:9). A Linux desktop build plays
+the same game in a window on a PC.
 
 ## What you need
 
-- A handheld running ROCKNIX with PortMaster installed.
+- A handheld running ROCKNIX with PortMaster installed, or an x86-64 Linux
+  PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35 and later).
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -38,13 +40,27 @@ The port contains no Capcom data. Without the ROM there is no game.
 The first start records the game's boot once, which takes a few seconds.
 After that the title screen appears straight away.
 
+### On a Linux PC
+
+1. Get `cyberworld-endless-linux-x86_64.tar.gz` (built with
+   `python3 build.py linux` into `build/release/`) and unpack it anywhere.
+2. Copy your ROM into `~/.local/share/cyberworld-endless/rom/` or the
+   `rom/` folder next to `cyberworld-endless`.
+3. Run `./cyberworld-endless`. `./install.sh` adds it to the application
+   menu.
+
+It opens in a window at the largest whole scale that fits; F11 or Alt+Enter
+switches to fullscreen. Saves live in `~/.local/share/cyberworld-endless/`.
+The archive's own `README.md` has the keyboard keys.
+
 ## Playing
 
 On the title screen, press Start and choose **NEW GAME** or **CONTINUE**.
 CONTINUE shows how deep your saved run is; the corner shows your best depth.
 
 In the net, the buttons are the Game Boy Advance's and BN6 plays as it always
-has:
+has. On a PC keyboard the arrows move, X is A, Z is B, A and S are L and R,
+Enter is Start.
 
 | Button | In the net | In battle |
 | --- | --- | --- |
@@ -124,7 +140,8 @@ it out, delete `savedata/run.sav`; your best depth is kept in `profile.sav`.
 
 The game's 240x160 picture is scaled by a whole number so it stays sharp: 5x
 on the Nova's 1280x960 screen and 6x on the Flip 2's 1920x1080 screen, with
-black borders around it.
+black borders around it. On a PC the window keeps the same rule as it is
+resized.
 
 ## Troubleshooting
 
@@ -153,6 +170,18 @@ python3 build.py test
 ```bash
 python3 build.py package
 ```
+
+```bash
+python3 build.py run
+```
+
+`run` builds the Linux desktop binary and plays it on this machine in a
+window, with the ROM from `~/.cache/mmbn-ref/roms` (or `CYBERWORLD_ROM_DIR`)
+and saves in `.build/desktop`. `python3 build.py release` writes both
+release archives to `build/release/`: `cyberworld.zip` for PortMaster and
+`cyberworld-endless-linux-x86_64.tar.gz`. The Linux build compiles in its
+own image on Debian bookworm, with SDL2 built so that it loads X11, Wayland
+and the sound servers at run time.
 
 `build.py shot` runs the game headlessly for scripted screenshots and soak
 tests, `build.py atlas` draws every area's layers and `build.py tour` has the
