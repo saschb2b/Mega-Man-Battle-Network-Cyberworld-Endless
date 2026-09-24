@@ -16,7 +16,10 @@ First playable version.
   area's own map.
 - Each layer places the game's own exit pads, Mystery Data, Normal Navis,
   Mr. Progs, the Net Dealer, the program vendor, the Chip Trader and the
-  BugFrag Trader, all running on the game's NPC and text scripts.
+  BugFrag Trader, all running on the game's NPC and text scripts. Chip
+  Traders speak the game's own lines and hand out chips from its own prize
+  pools, stronger with depth; deeper layers can hold a Chip Trader Special
+  (10 chips for 1).
 - Random encounters from the game's own roll, with viruses and versions that
   grow with depth. A guardian Navi stands before every third layer's exit
   pad, which stays shut until he is beaten.

@@ -15,7 +15,7 @@ use.
 | Raised rooms | Original stairs, generated floor | A stair's tiles, ramp, and side walls cut whole from Sky Area 2 or Undernet 1; the raised floor's heights and walls in the same format |
 | NPCs, Mystery Data, exit pads | Original sprites and scripts | Placed by the engine in the game's NPC bytecode |
 | Dialogue | Original text engine | Lines written by the engine in the game's text script language |
-| Shops, Chip Trader, BugFrag Trader, healing | Original | The game's screens and commands; stock chosen by the engine |
+| Shops, Chip Trader, BugFrag Trader, healing | Original | The game's screens and commands; stock chosen by the engine. Chip Traders are the game's machine and dialogue, with the original prize pools picked by depth; deeper layers can hold a Chip Trader Special |
 | Battles, rewards, Busting Level | Original | Encounters chosen by the engine (enemies, background, music) |
 | Boss navis | Original sprites and battles | HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan, ProtoMan, DiveMan and JudgeMan wait before the exit and ask to fight; Navis Gregar has no overworld sprite for appear as a HeelNavi |
 | Choices (challenge, Undernet, Secret Area) | Original text and flags | Yes sets an event flag the engine acts on |
