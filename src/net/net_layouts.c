@@ -27,7 +27,7 @@ static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
 	[BIOME_COMP]      = { 30, 40, 0, 0, 0, 0, 30, 0 },
 	[BIOME_HOMEPAGE]  = { 30, 0, 0, 40, 0, 0, 30, 0 },
 	[BIOME_COMP_B]    = { 30, 0, 0, 0, 0, 30, 40, 0 },
-	[BIOME_ROBOT_COMP]    = { 40, 0, 0, 35, 0, 0, 25, 0 },
+	[BIOME_ROBOT_COMP]    = { 70, 0, 0, 0, 0, 0, 30, 0 },
 	[BIOME_AQUARIUM_COMP] = { 0, 0, 0, 0, 0, 0, 0, 100 },
 	[BIOME_JUDGE_COMP]    = { 0, 0, 0, 0, 0, 0, 0, 100 },
 	[BIOME_WEATHER_COMP]  = { 0, 100, 0, 0, 0, 0, 0, 0 },
@@ -173,6 +173,12 @@ static void route(int biome, int size, bool slabs) {
 			if (abs(nx - ny) > WIN_U - 3) continue;
 			int w, h, shape;
 			if (slabs) { w = 7 + 2 * rng_range(0, size > 0); h = 7 + 2 * rng_range(0, 1); shape = SHAPE_HOLED; }
+			else if (biome == BIOME_ROBOT_COMP) {
+				/* Robot Control's long white slabs */
+				int along = rng_range(6, 8 + size), across = rng_range(2, 3);
+				bool wide = rng_range(0, 1);
+				w = wide ? along : across; h = wide ? across : along; shape = SHAPE_RECT;
+			}
 			else { w = rng_range(3, 5 + size); h = rng_range(3, 5 + size); shape = route_shape(biome); }
 			made = platform(nx, ny, w, h, shape, ROOM_PLATFORM);
 			if (made >= 0) { x = nx; y = ny; }

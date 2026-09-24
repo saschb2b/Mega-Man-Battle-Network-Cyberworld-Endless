@@ -88,6 +88,8 @@ First playable version.
   Aquarium is a maze of water channels between rimmed glass pads (its
   platforms drawn as pads, none wider than one), and Mr. Weather's comp one
   great slab with rooms reached by its conveyor belts, now its walkways.
+- Robot Control Comp's platforms are its long white slabs joined by circuit
+  walkways, as in the original, instead of wide octagons around a hub.
 - Dev tools (docs/DEVTOOLS.md): Select+R opens a dev menu for test runs (no
   random battles, can't die, one-hit enemies, up to 8x speed, win the battle,
   heal, zenny, the next layer or guardian, a chosen area). `build.py atlas`
