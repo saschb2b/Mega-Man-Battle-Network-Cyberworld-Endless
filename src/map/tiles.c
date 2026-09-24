@@ -1,0 +1,348 @@
+/* Every tile of an original map is classified by where its centre falls
+ * inside a panel (in 4-unit steps) and which of the 3x3 panels around it are
+ * floor, keeping only panels of the area's chosen style. A generated map
+ * takes, tile by tile, a pair seen with the same or the nearest neighbours.
+ *
+ * Classes alone let through pieces made for one place in the original: a
+ * corner cut for a bridge, decoration hanging off an edge, a hole where
+ * another layer covered it. So each tile also has a pixel test: where the
+ * floor and the side faces under it are, it must be drawn; away from them,
+ * it must be empty; and well inside the floor it must look like one of the
+ * area's usual floor panels. Tiles of the original that fail the first two
+ * in their own place are not learned. */
+#include "tiles.h"
+
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define IN    2    /* pixels inside the floor's edge that must be drawn */
+#define OUT   3    /* pixels beyond it that may be */
+#define SLACK 2    /* stray pixels a tile may have */
+#define DEEP  10   /* pixels inside the floor's edge where it must look plain */
+#define PLAIN_SHARE 8   /* a plain look is seen at least 1/8 as often as the most common */
+
+static int floordiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
+
+/* ---- the source's panels ---- */
+
+static int style_at(const AreaSrc *a, int cx, int cy) {
+	long r = 0, g = 0, b = 0, n = 0;
+	int W = a->tw * 8, H = a->th * 8;
+	for (int y = cy - 4; y < cy + 4; ++y)
+		for (int x = cx - 8; x < cx + 8; ++x) {
+			if (x < 0 || y < 0 || x >= W || y >= H) continue;
+			uint32_t c = a->px[(size_t)y * W + x];
+			r += (c >> 16) & 255; g += (c >> 8) & 255; b += c & 255; ++n;
+		}
+	if (!n) return 12;
+	float fr = (float)r / n, fg = (float)g / n, fb = (float)b / n;
+	float mx = fr > fg ? (fr > fb ? fr : fb) : (fg > fb ? fg : fb);
+	float mn = fr < fg ? (fr < fb ? fr : fb) : (fg < fb ? fg : fb);
+	if (mx <= 0 || (mx - mn) / mx <= 0.25f) return 12;
+	float d = mx - mn, hue = mx == fr ? (fg - fb) / d : mx == fg ? 2 + (fb - fr) / d : 4 + (fr - fg) / d;
+	hue /= 6;
+	if (hue < 0) hue += 1;
+	int k = (int)(hue * 12);
+	return k > 11 ? 11 : k;
+}
+
+#define SPAN 128   /* panels cached per axis, centred on the world origin */
+
+typedef struct {
+	const AreaSrc *a;
+	uint16_t styles;
+	bool bg_in_map;
+	int8_t *state;   /* SPAN x SPAN panel states, -1 until measured */
+} Src;
+
+static int measure_panel(const Src *s, int A, int B) {
+	const AreaSrc *a = s->a;
+	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	int px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
+	int W = a->tw * 8, H = a->th * 8;
+	if (px < 0 || py < 0 || px >= W || py >= H || !(a->px[(size_t)py * W + px] >> 24)) return 0;
+	/* where the background is part of the map, floor is what the front layer draws */
+	if (s->bg_in_map && !a->front[(size_t)py * W + px]) return 0;
+	return (s->styles >> style_at(a, px, py) & 1) ? 2 : 1;
+}
+
+/* Panel state in the source map: 0 empty, 1 floor of another style, 2 good floor */
+static int src_panel(const Src *s, int A, int B) {
+	int i = A + SPAN / 2, j = B + SPAN / 2;
+	if (i < 0 || j < 0 || i >= SPAN || j >= SPAN) return measure_panel(s, A, B);
+	int8_t *st = &s->state[j * SPAN + i];
+	if (*st < 0) *st = (int8_t)measure_panel(s, A, B);
+	return *st;
+}
+
+static bool src_floor(int A, int B, const void *ctx) { return src_panel(ctx, A, B) != 0; }
+
+/* ---- classes ---- */
+
+void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B) {
+	int u = tx * 8 + 4 - g->tw * 4, v = ty * 8 + 4 - g->th * 4;
+	int X = (u - 2 * v) / 2, Y = (u + 2 * v) / 2;
+	*A = floordiv(X - g->ex, 32);
+	*B = floordiv(Y - g->ey, 32);
+	int fx = X - g->ex - 32 * *A, fy = Y - g->ey - 32 * *B;
+	*phase = (fx / 4) * 8 + fy / 4;
+}
+
+/* The panels nearest a tile at `phase`: the centre and the two nearest
+ * sides, and with `corner` the nearest diagonal too. Bit k is the panel at
+ * (A + k % 3 - 1, B + k / 3 - 1). */
+static unsigned nearest(int phase, bool corner) {
+	int fx = (phase / 8) * 4, fy = (phase % 8) * 4;
+	int da = fx < 16 ? 0 : 2, db = fy < 16 ? 0 : 6;   /* the near column and row */
+	unsigned m = 0x010 | 1u << (da + 3) | 1u << (1 + db);
+	return corner ? m | 1u << (da + db) : m;
+}
+
+static unsigned occupancy(TileFloor floor, const void *ctx, int A, int B) {
+	unsigned occ = 0;
+	for (int k = 0; k < 9; ++k)
+		if (floor(A + k % 3 - 1, B + k / 3 - 1, ctx)) occ |= 1u << k;
+	return occ;
+}
+
+/* ---- the pixel test ---- */
+
+/* Whether map pixel (px, py) shows floor at z 0: the world point under its
+ * centre, in quarter units (X = (u - 2v) / 2, Y = (u + 2v) / 2), with the
+ * floor drawn dv pixels below it. */
+static bool floor_px(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py) {
+	int u2 = 2 * px + 1 - g->tw * 8, v2 = 2 * (py - g->dv) + 1 - g->th * 8;
+	int X4 = u2 - 2 * v2, Y4 = u2 + 2 * v2;
+	return floor(floordiv(X4 - 4 * g->ex, 128), floordiv(Y4 - 4 * g->ey, 128), ctx);
+}
+
+/* The pixels of tile (tx, ty) that must be drawn (inside the floor and on
+ * the side faces under it), those that must not (off both) and those well
+ * inside the floor. */
+static void expect(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, uint64_t *must, uint64_t *never, uint64_t *deep) {
+	*must = *never = *deep = 0;
+	for (int y = 0; y < 8; ++y)
+		for (int x = 0; x < 8; ++x) {
+			int px = tx * 8 + x, py = ty * 8 + y;
+			bool in = floor_px(g, floor, ctx, px, py);
+			bool inner = in, near = in;
+			for (int k = 0; k < 8; ++k) {
+				static const int off[8][2] = { { -IN, 0 }, { IN, 0 }, { 0, -IN / 2 }, { 0, IN / 2 },
+					{ -OUT, 0 }, { OUT, 0 }, { 0, -OUT / 2 }, { 0, OUT / 2 } };
+				bool f = floor_px(g, floor, ctx, px + off[k][0], py + off[k][1]);
+				if (k < 4) inner &= f; else near |= f;
+			}
+			/* under a bottom edge: its side face, then nothing */
+			bool face = false;
+			for (int k = 1; !in && !face && k <= g->face - 2; ++k) face = floor_px(g, floor, ctx, px, py - k);
+			for (int k = OUT / 2 + 1; !near && k <= g->face + OUT; ++k) near = floor_px(g, floor, ctx, px, py - k);
+			uint64_t bit = 1ull << (y * 8 + x);
+			if (inner || face) *must |= bit;
+			else if (!near) *never |= bit;
+			if (inner && floor_px(g, floor, ctx, px - DEEP, py) && floor_px(g, floor, ctx, px + DEEP, py) &&
+				floor_px(g, floor, ctx, px, py - DEEP / 2) && floor_px(g, floor, ctx, px, py + DEEP / 2)) *deep |= bit;
+		}
+}
+
+static int misses(uint64_t mask, uint64_t must, uint64_t never) {
+	return __builtin_popcountll(must & ~mask) + __builtin_popcountll(never & mask);
+}
+
+/* ---- learning ---- */
+
+/* An opaque tile of one colour: filler the original hides under floor */
+static bool flat_tile(const AreaSrc *a, int tx, int ty) {
+	int W = a->tw * 8;
+	uint32_t c = a->px[(size_t)(ty * 8) * W + tx * 8];
+	if (!(c >> 24)) return false;
+	for (int y = 0; y < 8; ++y)
+		for (int x = 0; x < 8; ++x)
+			if (a->px[(size_t)(ty * 8 + y) * W + tx * 8 + x] != c) return false;
+	return true;
+}
+
+/* the pixels tile (tx, ty) draws: its front layer where the map holds the
+ * background too */
+static uint64_t drawn(const AreaSrc *a, bool bg_in_map, int tx, int ty, uint16_t px[64]) {
+	int W = a->tw * 8;
+	uint64_t m = 0;
+	for (int y = 0; y < 8; ++y)
+		for (int x = 0; x < 8; ++x) {
+			size_t i = (size_t)(ty * 8 + y) * W + tx * 8 + x;
+			uint32_t c = a->px[i];
+			px[y * 8 + x] = (uint16_t)((c >> 19 & 31) | (c >> 11 & 31) << 5 | (c >> 3 & 31) << 10);
+			if (bg_in_map ? a->front[i] : c >> 24) m |= 1ull << (y * 8 + x);
+		}
+	return m;
+}
+
+/* How the map draws its floor: how far below the panels' top edges it
+ * starts (the most common distance to the first drawn pixel under an edge)
+ * and how tall the side face under a bottom edge is (the most common run of
+ * drawn pixels there). */
+static void calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
+	int top[9] = { 0 }, face[25] = { 0 }, W = a->tw * 8, H = a->th * 8;
+	g->dv = g->face = 0;
+	for (int x = 0; x < W; ++x)
+		for (int y = 1; y + 8 < H; ++y) {
+			bool above = floor_px(g, src_floor, src, x, y - 1), here = floor_px(g, src_floor, src, x, y);
+			if (!above && here && !(a->px[(size_t)(y - 1) * W + x] >> 24))
+				for (int d = 0; d <= 8; ++d)
+					if (a->px[(size_t)(y + d) * W + x] >> 24) { top[d]++; break; }
+			if (above && !here) {
+				int d = 0;
+				while (d < 24 && y + d < H && a->px[(size_t)(y + d) * W + x] >> 24) ++d;
+				face[d]++;
+			}
+		}
+	for (int d = 1; d <= 8; ++d) if (top[d] > top[g->dv]) g->dv = d;
+	int run = 0;
+	for (int d = 1; d < 24; ++d) if (face[d] > face[run]) run = d;
+	g->face = run > g->dv ? run - g->dv : 0;
+}
+
+static int cmp_cand(const void *a, const void *b) {
+	const TileCand *x = a, *y = b;
+	if (x->key != y->key) return x->key < y->key ? -1 : 1;
+	if (x->e0 != y->e0) return x->e0 < y->e0 ? -1 : 1;
+	return (x->e1 > y->e1) - (x->e1 < y->e1);
+}
+
+static int cmp_count(const void *a, const void *b) {
+	const TileCand *x = a, *y = b;
+	if (x->key != y->key) return x->key < y->key ? -1 : 1;
+	return (x->count < y->count) - (x->count > y->count);
+}
+
+/* Per phase, the looks of floor with floor all around, common enough. */
+static void find_plain(TileBook *b) {
+	memset(b->nplain, 0, sizeof b->nplain);
+	for (int i = 0; i < b->n; ++i) {
+		const TileCand *c = &b->cand[i];
+		if ((c->key & 0x1FF) != 0x1FF) continue;
+		int phase = (int)(c->key >> 9), *np = &b->nplain[phase];
+		/* candidates come most common first */
+		if (*np < TILE_PLAIN && (!*np || c->count * PLAIN_SHARE >= b->cand[b->plain[phase][0]].count))
+			b->plain[phase][(*np)++] = i;
+	}
+}
+
+void tiles_learn(const AreaSrc *a, uint16_t styles, bool bg_in_map, TileBook *out) {
+	memset(out, 0, sizeof *out);
+	Src src = { a, styles, bg_in_map, malloc(SPAN * SPAN) };
+	memset(src.state, -1, SPAN * SPAN);
+	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0 };
+	calibrate(a, &src, &g);
+	out->dv = g.dv;
+	out->face = g.face;
+	TileCand *c = malloc(((size_t)a->tw * a->th + 1) * sizeof *c);
+	size_t n = 0;
+	for (int ty = 0; ty < a->th; ++ty)
+		for (int tx = 0; tx < a->tw; ++tx) {
+			int phase, A, B;
+			tile_class(&g, tx, ty, &phase, &A, &B);
+			unsigned occ = 0;
+			bool mixed = false;
+			for (int k = 0; k < 9; ++k) {
+				int st = src_panel(&src, A + k % 3 - 1, B + k / 3 - 1);
+				if (st == 1) mixed = true;
+				if (st) occ |= 1u << k;
+			}
+			if (mixed || !occ) continue;
+			/* off the floor, filler would show as a hole */
+			if (!(occ & 0x10) && flat_tile(a, tx, ty)) continue;
+			TileCand *t = &c[n];
+			uint64_t must, never, deep;
+			t->mask = drawn(a, bg_in_map, tx, ty, t->px);
+			expect(&g, tx, ty, src_floor, &src, &must, &never, &deep);
+			if (misses(t->mask, must, never) > SLACK) continue;   /* made for something else here */
+			size_t i = (size_t)ty * a->tw + tx;
+			t->key = (uint32_t)phase << 9 | occ;
+			t->e0 = a->tile[0][i];
+			/* where the map holds the background, its back layer is that
+			 * background's pieces, not floor */
+			t->e1 = a->layers > 1 && !bg_in_map ? a->tile[1][i] : 0;
+			t->count = 1;
+			++n;
+		}
+	/* one entry per pair, counted */
+	qsort(c, n, sizeof *c, cmp_cand);
+	int nu = 0;
+	for (size_t i = 0; i < n;) {
+		size_t j = i;
+		while (j < n && c[j].key == c[i].key && c[j].e0 == c[i].e0 && c[j].e1 == c[i].e1) ++j;
+		c[nu] = c[i];
+		c[nu++].count = (uint32_t)(j - i);
+		i = j;
+	}
+	qsort(c, (size_t)nu, sizeof *c, cmp_count);
+	out->cand = c;
+	out->n = nu;
+	find_plain(out);
+	free(src.state);
+}
+
+void tiles_free(TileBook *b) {
+	free(b->cand);
+	memset(b, 0, sizeof *b);
+}
+
+/* ---- picking ---- */
+
+static int first_of(const TileBook *b, uint32_t key) {
+	int lo = 0, hi = b->n;
+	while (lo < hi) {
+		int mid = (lo + hi) / 2;
+		if (b->cand[mid].key < key) lo = mid + 1; else hi = mid;
+	}
+	return lo;
+}
+
+/* How different two neighbourhoods are around a tile at `phase`: the centre
+ * and the sides nearest the tile count most, then the nearest corner. */
+static int distance(int phase, unsigned a, unsigned b) {
+	unsigned diff = a ^ b, near = nearest(phase, false), corner = nearest(phase, true) & ~near;
+	return 4 * __builtin_popcount(diff & near) + 2 * __builtin_popcount(diff & corner) +
+		__builtin_popcount(diff & ~(near | corner) & 0x1FF);
+}
+
+/* Pixels well inside the floor where `c` looks like none of the plain looks. */
+static int unplain(const TileBook *b, int phase, const TileCand *c, uint64_t deep) {
+	if (!deep || !b->nplain[phase]) return 0;
+	int best = 64;
+	for (int k = 0; k < b->nplain[phase]; ++k) {
+		const TileCand *p = &b->cand[b->plain[phase][k]];
+		int n = 0;
+		for (int i = 0; i < 64; ++i)
+			if (deep >> i & 1 && c->px[i] != p->px[i]) ++n;
+		if (n < best) best = n;
+	}
+	return best;
+}
+
+const TileCand *tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
+	TileFloor floor, const void *ctx) {
+	int phase, A, B;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	unsigned occ = occupancy(floor, ctx, A, B);
+	if (!occ) return NULL;
+	uint64_t must, never, deep;
+	expect(g, tx, ty, floor, ctx, &must, &never, &deep);
+	int allowed = __builtin_popcountll(deep) / 8;
+	/* the nearest neighbourhood seen whose tile fits here, most common
+	 * first; failing that, the least bad */
+	const TileCand *fit = NULL, *any = NULL;
+	int fit_d = INT_MAX, any_score = INT_MAX;
+	for (int k = 0; k < nbooks; ++k) {
+		const TileBook *b = &books[k];
+		for (int i = first_of(b, (uint32_t)phase << 9); i < b->n && b->cand[i].key >> 9 == (uint32_t)phase; ++i) {
+			const TileCand *c = &b->cand[i];
+			int d = distance(phase, occ, c->key & 0x1FF), m = misses(c->mask, must, never);
+			int u = unplain(b, phase, c, deep);
+			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && c->count > fit->count))) { fit = c; fit_d = d; }
+			if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; }
+		}
+	}
+	return fit ? fit : any;
+}
