@@ -73,7 +73,7 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
 }
 
-typedef struct { int x, y, cat, sprite, script, gone_flag; bool floor; } Talker;
+typedef struct { int x, y, z, cat, sprite, script, gone_flag; bool floor; } Talker;
 
 /* Overworld sprites (list 6) of the Navis Gregar has on the net, by navi
  * index; the others (Falzar's Navis are placeholders here) take the shape of
@@ -109,7 +109,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		const NetObj *o = &layer.obj[i];
 		int wx, wy;
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
-		Talker tk = { wx, wy, 6, SPR_PROG, -1, -1, false };
+		/* in a raised room, on its floor */
+		int wz = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
+		Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false };
 		bool asks = false;   /* a Yes/No the director acts on */
 		switch (o->type) {
 		case OBJ_WARP_IN:
@@ -123,13 +125,14 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			CoordPad exit = { wx, wy, 1 };
 			netmap_set_pads(&exit, 1);
 			need_sprite(&npcs, 7, pad);
-			if (npcs.n < 32) npcs.script[npcs.n++] = npc_prop(7, pad, wx, wy, 0, 0);
+			if (npcs.n < 32) npcs.script[npcs.n++] = npc_prop(7, pad, wx, wy, wz, 0);
 			break;
 		}
 		case OBJ_MYSTERY:
 			if (nmd < 16 && npcs.n < 32) {
 				md[nmd].x = wx;
 				md[nmd].y = wy;
+				md[nmd].z = wz;
 				md[nmd].type = MYSTERY_GREEN;
 				if (fragment) {
 					fragment = false;
@@ -196,7 +199,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	out->archive = archive;
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
-		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, 0,
+		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, talkers[i].z,
 			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script, talkers[i].gone_flag, talkers[i].floor);
 	return mapslot_install(group, number, &npcs, md, nmd);
 }

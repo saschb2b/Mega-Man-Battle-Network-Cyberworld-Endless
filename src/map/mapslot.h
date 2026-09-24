@@ -18,7 +18,7 @@ typedef struct {
 /* One Mystery Data: flag 0x1400 + index, its color, where, and what it
  * holds (the game's 8-byte content record). */
 typedef struct {
-	int x, y;
+	int x, y, z;
 	int type;
 	uint8_t content[8];
 } MysteryData;

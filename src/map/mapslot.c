@@ -139,6 +139,7 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 		uint8_t place[16] = { 1, 0x20 };
 		place[2] = (uint8_t)md[i].x; place[3] = (uint8_t)(md[i].x >> 8);
 		place[4] = (uint8_t)md[i].y; place[5] = (uint8_t)(md[i].y >> 8);
+		place[6] = (uint8_t)md[i].z; place[7] = (uint8_t)(md[i].z >> 8);
 		uint8_t content[16];
 		memcpy(content, md[i].content, 8);
 		memset(content + 8, 0, 8);
