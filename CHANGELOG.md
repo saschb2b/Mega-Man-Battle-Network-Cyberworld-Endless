@@ -74,3 +74,8 @@ First playable version.
   keeps the best depth. Run saves from before this version are converted.
 - PortMaster launcher for ROCKNIX, made for the Retroid Nova and the Retroid
   Pocket Flip 2.
+- Dev tools (docs/DEVTOOLS.md): Select+R opens a dev menu for test runs (no
+  random battles, can't die, one-hit enemies, up to 8x speed, win the battle,
+  heal, zenny, the next layer or guardian, a chosen area). `build.py atlas`
+  draws every area's layers with a report on their tiles; `build.py tour` has
+  the game show every room of each area.

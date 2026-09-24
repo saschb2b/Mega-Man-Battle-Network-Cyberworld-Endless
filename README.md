@@ -110,7 +110,10 @@ python3 build.py package
 ```
 
 `build.py shot` runs the game headlessly for scripted screenshots and soak
-tests. See [AGENTS.md](AGENTS.md) for the development workflow and
+tests. `build.py atlas` draws every area's layers and `build.py tour` has the
+game show every room of them; in the game, Select+R opens a dev menu (no
+random battles, can't die, one-hit enemies, speed, skip to the next layer or
+guardian). See [docs/DEVTOOLS.md](docs/DEVTOOLS.md). See [AGENTS.md](AGENTS.md) for the development workflow and
 [docs/ROM_DATA.md](docs/ROM_DATA.md) for how the ROM data is located.
 
 ## Credits
