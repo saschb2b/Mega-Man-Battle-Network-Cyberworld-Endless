@@ -32,6 +32,9 @@ bool netmap_build_layer(int area, uint32_t seed);
 extern int netmap_scenery;
 /* The last tile map written: tw x th entries of layer 0, then layer 1. */
 const uint16_t *netmap_last_tiles(int *tw, int *th);
+/* ... and where its tiles meet as no original map shows (per tile: bit 0
+ * with the one to the right, bit 1 with the one below). */
+const uint8_t *netmap_last_seams(void);
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 unsigned netmap_stair_dirs(int area, int *rise);
 

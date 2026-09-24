@@ -74,6 +74,12 @@ First playable version.
   keeps the best depth. Run saves from before this version are converted.
 - PortMaster launcher for ROCKNIX, made for the Retroid Nova and the Retroid
   Pocket Flip 2.
+- Floor edges no longer step: every tile is tested against the layer's own
+  floor and faces (Sky's raised maps measured theirs higher), and a tile map
+  avoids tiles that the original maps never set side by side, or whose floor
+  stops on a tile's edge. Central Area's corners, Sky HP's faces and the Sky
+  arena's lower edges were the worst. Where a catwalk meets a platform some
+  joins still show.
 - Dev tools (docs/DEVTOOLS.md): Select+R opens a dev menu for test runs (no
   random battles, can't die, one-hit enemies, up to 8x speed, win the battle,
   heal, zenny, the next layer or guardian, a chosen area). `build.py atlas`

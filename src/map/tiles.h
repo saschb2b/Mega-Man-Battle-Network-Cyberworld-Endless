@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "area_src.h"
+#include "seams.h"
 
 #define TILE_PLAIN 4   /* plain floor looks kept per phase */
 
@@ -65,17 +66,35 @@ void tiles_free(TileBook *b);
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
 
 /* How the picks went since the last reset (the dev atlas reads them): each
- * tile matched exactly, near (the nearest neighbourhood seen) or by falling
- * back on the least bad tile. */
-typedef struct { int picks, near, fallbacks; } TileStats;
+ * tile matched exactly, near (the nearest neighbourhood seen, or meeting a
+ * neighbour badly) or by falling back on the least bad tile; and the pairs
+ * of neighbouring tiles left meeting badly (netmap counts them). */
+typedef struct { int picks, near, fallbacks, seams; } TileStats;
 extern TileStats tiles_stats;
+
+/* The tiles beside one (left, above, right, below) as far as they are
+ * picked: how they look to the seams (SEAM_ANY: not yet) and what they draw. */
+typedef struct { uint32_t look[4]; uint64_t mask[4]; } TileNeighbours;
+
+/* How badly a tile that looks like `look` and draws `mask` meets them:
+ * SEAM_COST for each neighbour no original map sets beside it, and a point
+ * for each pixel along its top and bottom where it draws and the tile over
+ * or under it does not (or the other way round), past the few a diagonal
+ * edge crossing there leaves: a floor that stops on a tile's edge instead
+ * of its own shows as steps. */
+#define SEAM_COST 3
+#define CUT_EDGE 3
+int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNeighbours *n);
 
 /* The layer entries for tile (tx, ty) of a map whose floor is `floor`: of
  * the pairs whose pixels cover the floor there, do not reach beyond it and
  * look like plain floor well inside it, the one seen with the nearest
  * neighbours. Where the two floors meet and the original never joins them,
- * the walkway's tile over the platform's. False off the floor. */
+ * the walkway's tile over the platform's. False off the floor.
+ * With `seams`, each pair also costs its trouble with neighbours `n`
+ * (tilemap.c); *look and *mask: the tile picked, as tiles_trouble takes it. */
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
-	TileFloor floor, const void *ctx, uint16_t *e0, uint16_t *e1);
+	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
+	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask);
 
 #endif

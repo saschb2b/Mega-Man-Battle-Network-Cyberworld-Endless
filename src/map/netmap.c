@@ -24,6 +24,7 @@
 #include "emu.h"
 #include "lz.h"
 #include "stairs.h"
+#include "tilemap.h"
 #include "tiles.h"
 #include "rom.h"
 
@@ -37,6 +38,7 @@ typedef struct {
 	int ex, ey, tw, th;
 	TileBook book[MAX_BOOKS]; /* each source map, then its mirror image */
 	int nbooks;
+	TileSeams seams;          /* the tiles the maps set side by side */
 	DecorBook decor;          /* the scenery of the area's maps */
 	uint32_t desc, coord_slot;
 	StairTemplate stairs[STAIR_DIRS];
@@ -47,7 +49,7 @@ static Learned learned[NET_AREAS];
 int netmap_scenery;
 
 /* the last tile map written, both layers (for the dev tools) */
-static struct { uint16_t *map; int tw, th; } last;
+static struct { uint16_t *map; uint8_t *seams; int tw, th; } last;   /* seams: bit 0 right, bit 1 below */
 
 /* the current layer's placement */
 static struct { int gx0, gy0, ex, ey; } place;
@@ -81,12 +83,16 @@ static bool aligned(const AreaSrc *a, const AreaSrc *b) {
  * line up with the layer's grid (`grid_of`). */
 static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
-	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src))
+	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
 		tiles_learn(src, na->styles, na->walk_styles, na->bg_in_map, &L->book[L->nbooks++]);
+		seams_add(&L->seams, src, na->bg_in_map);
+	}
 	AreaSrc m;
 	area_src_mirror(src, &m);
-	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m))
+	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
 		tiles_learn(&m, na->styles, na->walk_styles, na->bg_in_map, &L->book[L->nbooks++]);
+		seams_add(&L->seams, &m, na->bg_in_map);
+	}
 	area_src_free(&m);
 }
 
@@ -257,13 +263,10 @@ static bool write_tilemap(const Learned *L) {
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
 	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape };
-	for (int ty = 0; ty < th; ++ty)
-		for (int tx = 0; tx < tw; ++tx) {
-			uint16_t e0, e1;
-			if (!tiles_pick(L->book, L->nbooks, &grid, tx, ty, floor_cb, NULL, &e0, &e1)) continue;
-			map[(size_t)ty * tw + tx] = e0;
-			map[cells + (size_t)ty * tw + tx] = e1;
-		}
+	free(last.seams);
+	last.seams = calloc(cells, 1);
+	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
+	for (size_t i = 0; i < cells; ++i) tiles_stats.seams += (last.seams[i] & 1) + (last.seams[i] >> 1);
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
@@ -418,3 +421,5 @@ const uint16_t *netmap_last_tiles(int *tw, int *th) {
 	*th = last.th;
 	return last.map;
 }
+
+const uint8_t *netmap_last_seams(void) { return last.seams; }

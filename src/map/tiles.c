@@ -463,38 +463,56 @@ static int unplain(const TileBook *b, int m, int phase, const TileCand *c, uint6
 	return best;
 }
 
+/* A pair as its neighbours see it. */
+static uint32_t look_of(const TileCand *c) { return c->mask ? c->e0 : SEAM_VOID; }
+
+/* pixels along one horizontal tile edge drawn on one side only, past a
+ * diagonal's */
+static int cut(uint64_t upper, uint64_t lower) {
+	int n = __builtin_popcountll(((upper >> 56) ^ lower) & 0xFF) - CUT_EDGE;
+	return n > 0 ? n : 0;
+}
+
+int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNeighbours *n) {
+	int t = SEAM_COST * seams_unseen(s, look, n->look);
+	if (n->look[1] != SEAM_ANY) t += cut(n->mask[1], mask);
+	if (n->look[3] != SEAM_ANY) t += cut(mask, n->mask[3]);
+	return t;
+}
+
 /* The best pair of `books` for a tile of class (phase, oa, ob) at (tx, ty):
- * the nearest neighbourhood seen whose tile fits there, most common first,
- * preferring those with the same floors on the panels nearest the tile;
- * failing that, the least bad. Only pairs without a back tile when `single`. */
+ * the nearest neighbourhood seen whose tile fits there and meets its
+ * neighbours as the originals do, most common first, preferring those with
+ * the same floors on the panels nearest the tile; failing that, the least
+ * bad. Only pairs without a back tile when `single`. */
 static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty, int phase,
-	unsigned oa, unsigned ob, bool pad, TileFloor floor, const void *ctx, bool single) {
+	unsigned oa, unsigned ob, bool pad, TileFloor floor, const void *ctx, bool single,
+	const TileSeams *seams, const TileNeighbours *n) {
 	int cm = ob & 0x10 ? TILE_B : TILE_A;   /* the centre panel's material */
-	uint64_t must = 0, never = 0, deep = 0;
-	int allowed = 0;
-	TileGrid gk = *g;
-	gk.dv = -1;
+	/* every book's tiles as this map draws its floor, faces and legs: one
+	 * taken from a map that draws them higher or taller than the others
+	 * would step out of the edge beside it */
+	uint64_t must, never, deep;
+	expect(g, tx, ty, floor, ctx, cm, &must, &never, &deep);
+	int allowed = __builtin_popcountll(deep) / 8;
 	const TileCand *fit = NULL, *same = NULL, *any = NULL;
 	int fit_d = INT_MAX, same_d = INT_MAX, any_score = INT_MAX, fit_k = -1, same_k = -1;
 	unsigned near = nearest(phase, true);
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
-		/* each book's tiles as its own map draws floor, faces and legs (a
-		 * floor raised in the original may stand on taller sides) */
-		if (b->dv != gk.dv || b->face != gk.face || b->hang != gk.hang) {
-			gk.dv = b->dv; gk.face = b->face; gk.hang = b->hang;
-			expect(&gk, tx, ty, floor, ctx, cm, &must, &never, &deep);
-			allowed = __builtin_popcountll(deep) / 8;
-		}
 		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
 			const TileCand *c = &b->cand[i];
 			if (single && c->e1) continue;
 			int d = distance(phase, b->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			/* a pad in the pads' look, other floor not */
 			if (c->pad != pad) d += PAD_LOOK;
+			/* (what follows only adds: a pair that cannot win is left) */
+			if (!(m <= SLACK && (d <= fit_d || d <= same_d)) && m + 4 * d >= any_score) continue;
 			/* (a pad's middle is not the usual floor: it has its own look; nor
 			 * is a rimmed floor's edge) */
 			int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain(b, cm - 1, phase, c, deep);
+			/* a neighbour it never meets in the originals: a seam */
+			if (seams) d += tiles_trouble(seams, look_of(c), c->mask, n);
 			/* ties go to the first book with the class (the area's own map
 			 * before its others), so a floor keeps one look */
 			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; }
@@ -521,7 +539,8 @@ static int only(int A, int B, const void *ctx) {
 }
 
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
-	TileFloor floor, const void *ctx, uint16_t *e0, uint16_t *e1) {
+	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
+	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask) {
 	int phase, A, B;
 	tile_class(g, tx, ty, &phase, &A, &B);
 	unsigned oa, ob;
@@ -535,19 +554,23 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 		 * raised grass by ramps): the walkway's end over the platform's edge,
 		 * each drawn as if the other were not there, on the two layers */
 		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
-		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true);
-		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, pad, only, &ob_only, true);
+		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true, NULL, n);
+		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, pad, only, &ob_only, true, NULL, n);
 		if (pb && !pb->mask) pb = NULL;
 		if (pa && !pa->mask) pa = NULL;
 		if (pa || pb) {
 			*e0 = pb ? pb->e0 : pa->e0;
 			*e1 = pb && pa ? pa->e0 : 0;
+			*look = SEAM_ANY;   /* two tiles over each other: no original to compare */
+			*mask = (pa ? pa->mask : 0) | (pb ? pb->mask : 0);
 			return true;
 		}
 	}
-	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false);
+	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n);
 	if (!c) return false;
 	*e0 = c->e0;
 	*e1 = c->e1;
+	*look = look_of(c);
+	*mask = c->mask;
 	return true;
 }
