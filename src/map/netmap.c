@@ -29,10 +29,13 @@
 #define TILEMAP_AT  (EMU_FREE + 0x10000) /* generated tile map (LZ77) */
 #define MAX_TILE_BYTES 0x14000           /* the game's tile map buffer */
 
+#define MAX_BOOKS (4 * (1 + NET_MORE_MAPS))   /* maps, their mirrors, two heights each */
+
 typedef struct {
 	bool tried, ok;
 	int ex, ey, tw, th;
-	TileBook book[2];         /* the map, then its mirror image */
+	TileBook book[MAX_BOOKS]; /* each source map, then its mirror image */
+	int nbooks;
 	uint32_t desc, coord_slot;
 	StairTemplate stairs[STAIR_DIRS];
 } Learned;
@@ -46,24 +49,80 @@ static struct { int gx0, gy0, ex, ey; } place;
 
 static int floordiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 
+/* Where map a's tiles fall in its panels (world units mod 32, of tile 0's
+ * centre). */
+static void lattice(const AreaSrc *a, int *fx, int *fy) {
+	int u = 4 - a->tw * 4, v = 4 - a->th * 4;
+	*fx = ((u - 2 * v) / 2 - a->ex) & 31;
+	*fy = ((u + 2 * v) / 2 - a->ey) & 31;
+}
+
+/* Whether map b's tiles lie where map a's do in their panels: then a tile
+ * of b drawn in a layer made on a's grid shows as it did in b. Tiles step
+ * by (4, 4) and (-8, 8) world units. */
+static bool aligned(const AreaSrc *a, const AreaSrc *b) {
+	int ax, ay, bx, by;
+	lattice(a, &ax, &ay);
+	lattice(b, &bx, &by);
+	for (int i = 0; i < 8; ++i)
+		for (int j = 0; j < 4; ++j)
+			if (((ax + 4 * i - 8 * j - bx) & 31) == 0 && ((ay + 4 * i + 8 * j - by) & 31) == 0) return true;
+	return false;
+}
+
+/* Learns the tiles of map `src` and its mirror image, where their tiles
+ * line up with the layer's grid (`grid_of`). */
+static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
+	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
+	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src))
+		tiles_learn(src, na->styles, na->walk_styles, na->bg_in_map, &L->book[L->nbooks++]);
+	AreaSrc m;
+	area_src_mirror(src, &m);
+	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m))
+		tiles_learn(&m, na->styles, na->walk_styles, na->bg_in_map, &L->book[L->nbooks++]);
+	area_src_free(&m);
+}
+
+#define LEVEL_MIN_CELLS 144   /* nine panels of floor at a height to learn it */
+
+/* ... at each of its floor heights: raised floors are drawn higher, so each
+ * is learned in a view that brings it down to the ground. */
+static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
+	int count[256] = { 0 };
+	for (int i = 0; src->hz && i < src->hw * src->hh; ++i) count[src->hz[i]]++;
+	learn_view(src, grid_of, area, L);
+	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
+		if (count[z] < LEVEL_MIN_CELLS) continue;
+		AreaSrc r;
+		area_src_raise(src, z, &r);
+		learn_view(&r, grid_of, area, L);
+		area_src_free(&r);
+	}
+}
+
 static bool learn(int area, Learned *L) {
 	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
-	AreaSrc a, m;
+	AreaSrc a;
 	if (!area_src_load(na->group, na->number, &a)) return false;
 	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
 	L->desc = a.desc; L->coord_slot = a.coord_slot;
-	tiles_learn(&a, na->styles, na->walk_styles, na->bg_in_map, &L->book[0]);
+	L->nbooks = 0;
+	learn_map(&a, &a, area, L);
 	stairs_learn(&a, L->stairs);
+	/* the area's other maps in the same tiles and colours, for the places
+	 * this one never shows */
+	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
+		AreaSrc b;
+		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
+		learn_map(&b, &a, area, L);
+		area_src_free(&b);
+	}
 	if (emu_debug_on()) {
-		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang);
+		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks);
 		for (int d = 0; d < STAIR_DIRS; ++d)
 			fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
 				L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
 	}
-	/* the map mirrored, for edges the original only has on its other side */
-	area_src_mirror(&a, &m);
-	tiles_learn(&m, na->styles, na->walk_styles, na->bg_in_map, &L->book[1]);
-	area_src_free(&m);
 	area_src_free(&a);
 	return true;
 }
@@ -178,7 +237,7 @@ static bool write_tilemap(const Learned *L) {
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
 			uint16_t e0, e1;
-			if (!tiles_pick(L->book, 2, &grid, tx, ty, floor_cb, NULL, &e0, &e1)) continue;
+			if (!tiles_pick(L->book, L->nbooks, &grid, tx, ty, floor_cb, NULL, &e0, &e1)) continue;
 			map[(size_t)ty * tw + tx] = e0;
 			map[cells + (size_t)ty * tw + tx] = e1;
 		}

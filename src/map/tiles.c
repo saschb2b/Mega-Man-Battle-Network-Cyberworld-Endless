@@ -20,6 +20,8 @@
 #define OUT   3    /* pixels beyond it that may be */
 #define SLACK 2    /* stray pixels a tile may have */
 #define DEEP  10   /* pixels inside the floor's edge where it must look plain */
+#define HANG_BELOW_FACE 12   /* how far past a face legs may hang */
+#define FACE_MAX 64     /* the tallest side face measured (the story comps' run to 30 and more) */
 #define PLAIN_SHARE 8   /* a plain look is seen at least 1/8 as often as the most common */
 
 static int floordiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
@@ -60,6 +62,10 @@ typedef struct {
 static int measure_panel(const Src *s, int A, int B) {
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	/* floor of another height is drawn elsewhere: learned in its own view */
+	if (a->hz && area_src_height(a, X, Y) != a->level) return 0;
+	/* nor is a hole in it, however much of the faces around hangs over it */
+	if (!area_src_walled_floor(a, X, Y)) return 0;
 	int px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
 	int W = a->tw * 8, H = a->th * 8;
 	/* its middle and four points around it drawn: a panel, not the legs a
@@ -206,7 +212,7 @@ static uint64_t drawn(const AreaSrc *a, bool bg_in_map, int tx, int ty, uint16_t
  * drawn pixels there) and how far below it the map still draws often (legs
  * and pedestals: the longest run seen at least a quarter as often). */
 static void calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
-	int top[9] = { 0 }, face[25] = { 0 }, W = a->tw * 8, H = a->th * 8;
+	int top[9] = { 0 }, face[FACE_MAX + 1] = { 0 }, W = a->tw * 8, H = a->th * 8;
 	g->dv = g->face = g->hang = 0;
 	for (int x = 0; x < W; ++x)
 		for (int y = 1; y + 8 < H; ++y) {
@@ -216,16 +222,20 @@ static void calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
 					if (a->px[(size_t)(y + d) * W + x] >> 24) { top[d]++; break; }
 			if (above && !here) {
 				int d = 0;
-				while (d < 24 && y + d < H && a->px[(size_t)(y + d) * W + x] >> 24) ++d;
+				while (d < FACE_MAX && y + d < H && a->px[(size_t)(y + d) * W + x] >> 24) ++d;
 				face[d]++;
 			}
 		}
 	for (int d = 1; d <= 8; ++d) if (top[d] > top[g->dv]) g->dv = d;
-	int run = 0, deep = 0;
-	for (int d = 1; d < 24; ++d) if (face[d] > face[run]) run = d;
-	for (int d = 1; d < 24; ++d) if (4 * face[d] >= face[run]) deep = d;
+	/* (edges with nothing drawn under them, beside panels of other styles,
+	 * say nothing of the faces) */
+	int run = g->dv + 1, deep = 0;
+	for (int d = g->dv + 1; d < FACE_MAX; ++d) if (face[d] > face[run]) run = d;
+	for (int d = g->dv + 1; d < FACE_MAX; ++d) if (4 * face[d] >= face[run]) deep = d;
 	g->face = run > g->dv ? run - g->dv : 0;
 	g->hang = deep > g->dv ? deep - g->dv : 0;
+	/* legs and pedestals, not the faces of floors raised far above */
+	if (g->hang > g->face + HANG_BELOW_FACE) g->hang = g->face + HANG_BELOW_FACE;
 }
 
 static int cmp_cand(const void *a, const void *b) {
@@ -373,7 +383,7 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	expect(g, tx, ty, floor, ctx, cm, &must, &never, &deep);
 	int allowed = __builtin_popcountll(deep) / 8;
 	const TileCand *fit = NULL, *same = NULL, *any = NULL;
-	int fit_d = INT_MAX, same_d = INT_MAX, any_score = INT_MAX;
+	int fit_d = INT_MAX, same_d = INT_MAX, any_score = INT_MAX, fit_k = -1, same_k = -1;
 	unsigned near = nearest(phase, true);
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
@@ -382,10 +392,12 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 			if (single && c->e1) continue;
 			int d = distance(phase, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			int u = unplain(b, cm - 1, phase, c, deep);
-			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && c->count > fit->count))) { fit = c; fit_d = d; }
+			/* ties go to the first book with the class (the area's own map
+			 * before its others), so a floor keeps one look */
+			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; }
 			/* the other floor's edge must not come along where only one is */
 			bool alike = !((oa ^ KEY_A(c->key)) & (oa | ob) & (KEY_A(c->key) | KEY_B(c->key)) & near);
-			if (alike && m <= SLACK && u <= allowed && (d < same_d || (d == same_d && c->count > same->count))) { same = c; same_d = d; }
+			if (alike && m <= SLACK && u <= allowed && (d < same_d || (d == same_d && k == same_k && c->count > same->count))) { same = c; same_d = d; same_k = k; }
 			if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; }
 		}
 	}

@@ -26,12 +26,30 @@ typedef struct {
 	uint32_t coord_slot;   /* ROM offset of its coordinate-data pointer */
 	CoordCell *sec[4];     /* walls, floor heights, layer priorities, triggers */
 	int nsec[4];
+	/* floor heights by wall cell (section 1), and the one this view shows */
+	uint8_t *hz;           /* HEIGHT_UNEVEN on ramps */
+	int hx0, hy0, hw, hh;  /* the cells hz covers */
+	int level;
+	/* inside how many rings of walls each wall cell lies, odd on floor */
+	uint8_t *rings;
+	int rx0, ry0, rw, rh;
 } AreaSrc;
+
+#define HEIGHT_UNEVEN 255
 
 bool area_src_load(int group, int number, AreaSrc *a);
 void area_src_free(AreaSrc *a);
 /* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip. */
 void area_src_mirror(const AreaSrc *a, AreaSrc *m);
+/* The map drawn `z` pixels lower (a multiple of 8), so that its floor at
+ * height z lies where ground floor would: a view of that level. */
+void area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
+/* Floor height at world (X, Y): 0 where section 1 says nothing. */
+int area_src_height(const AreaSrc *a, int X, int Y);
+/* Whether the walls put world (X, Y) on floor (1), off it (0) or cannot
+ * tell (-1): floor lies inside an odd number of rings of walls, since the
+ * walls ring each floor and again each hole in it. */
+int area_src_walled_floor(const AreaSrc *a, int X, int Y);
 
 /* World <-> map pixel, as the game's camera routine maps them. */
 static inline int area_px(int tw, int x, int y) { return x + y + tw * 4; }
