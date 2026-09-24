@@ -10,7 +10,8 @@ First playable version.
 - Generated net layers in the game's own map formats: floors learned from one
   of the game's maps per area (Central, Seaside, Sky, Green, Graveyard,
   Undernet, Undernet Zero, Underground), with walls the game's collision
-  reads.
+  reads. Sky and Undernet layers can raise a dead-end room onto a stair taken
+  from the area's own map.
 - Each layer places the game's own exit pads, Mystery Data, Normal Navis,
   Mr. Progs, the Net Dealer, the program vendor, the Chip Trader and the
   BugFrag Trader, all running on the game's NPC and text scripts.

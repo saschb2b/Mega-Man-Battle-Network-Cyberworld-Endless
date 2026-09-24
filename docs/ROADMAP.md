@@ -21,18 +21,13 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
   and leaves once beaten.
 - **Testing.** `CYBERWORLD_AUTOPILOT=weak` clears a whole cycle (depth 2 to
   19) headless; `tools/device_run.py` runs builds on the Nova from `/tmp`.
+- **Height.** Dead-end rooms in Sky and Undernet layers can stand one level
+  up, reached by a stair cut whole from the area's own map (tiles, ramp and
+  side walls); the raised floor gets its heights and walls in the game's
+  format, and whatever stands there is placed on it.
 
 ## Next
 
-- **Height.** Ramps and raised platforms from the Z-modifier and
-  layer-priority sections (coordinate data sections 1 and 2), with tiles
-  learned from the source maps' own slopes. Both sections use the walls'
-  key/shape lists. In Sky Area 2, section 1 raises whole cells (type 0x11)
-  to z 32, 64 or 120 and slopes them with type 0x14 cells (value 1, height
-  32 down to 20 in steps of 4); section 2 marks cells of each level (type
-  0x11, height 8) for sprite priority. The generator would need room levels
-  and ramps, and the tile classes a level per panel. Sky Area 2 joins its
-  levels (z 0, 32, 64) with long staircase pieces spanning several panels
-  and draws the raised floors' side faces below them; per-tile learning
-  cannot assemble those, so height needs staircase and side-face pieces
-  taken whole from the source maps.
+- **More stairs.** Other areas' slopes are longer than two panels or not
+  aligned to them (Seaside's rises 16 over five cells); taking those needs
+  stairs of other lengths and a raised floor at their height.

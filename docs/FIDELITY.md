@@ -12,6 +12,7 @@ use.
 | Net movement, collision, camera, HUD | Original | The game's overworld code on generated maps |
 | Net floors | Generated | Tiles learned from one original map per area; rare edge shapes may take tiles from décor |
 | Net walls | Generated | Wall cells in the game's coordinate-data format, shapes as the original maps use them |
+| Raised rooms | Original stairs, generated floor | A stair's tiles, ramp, and side walls cut whole from Sky Area 2 or Undernet 1; the raised floor's heights and walls in the same format |
 | NPCs, Mystery Data, exit pads | Original sprites and scripts | Placed by the engine in the game's NPC bytecode |
 | Dialogue | Original text engine | Lines written by the engine in the game's text script language |
 | Shops, Chip Trader, BugFrag Trader, healing | Original | The game's screens and commands; stock chosen by the engine |
@@ -25,7 +26,9 @@ use.
 
 - Area names show the padding the ROM stores before shorter names (`0xB2`,
   drawn as `_`); the game's own code draws them.
-- Generated layers do not use the game's layer-priority or Z-modifier
-  sections, so there are no ramps or raised platforms.
+- Only Sky and Undernet layers raise rooms: their maps are the only ones
+  with a stair two panels square. Raised rooms are one level high and
+  never overlap other floor on screen, so layer priorities (section 2) are
+  not generated.
 - Talking to a pad (the Secret Area gate) needs a press of A beside it;
   pads cannot be stepped on.
