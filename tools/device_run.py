@@ -32,6 +32,7 @@ def main():
     ap.add_argument('--shots', default='', help='seconds after start, comma separated')
     ap.add_argument('--env', action='append', default=[], help='NAME=VALUE for the game')
     ap.add_argument('--out', default=os.path.join(ROOT, '.build', 'device'))
+    ap.add_argument('--with-saves', action='store_true', help='start from a copy of the installed saves')
     argv = sys.argv[1:]
     cut = argv.index('--') if '--' in argv else len(argv)
     a = ap.parse_args(argv[:cut])
@@ -47,7 +48,8 @@ def main():
     binary = os.path.join(ROOT, 'build', 'aarch64', 'cyberworld.aarch64')
     with open(binary, 'rb') as f:
         subprocess.run(ssh + [f'rm -rf {TEST}; mkdir -p {TEST}/data; cat > {TEST}/cyberworld.aarch64; '
-                              f'chmod +x {TEST}/cyberworld.aarch64; cp {GAME}/boot-3.state {TEST}/data/ 2>/dev/null'],
+                              f'chmod +x {TEST}/cyberworld.aarch64; cp {GAME}/boot-3.state {TEST}/data/ 2>/dev/null'
+                              + (f'; cp -a {GAME}/savedata {TEST}/data/; cp {GAME}/run.state {TEST}/data/ 2>/dev/null' if a.with_saves else '')],
                        stdin=f, check=True)
     env = ' '.join(a.env)
     run = (f'date +%s > {TEST}/t0; {env} {TEST}/cyberworld.aarch64 --rom-dir "$GAMEDIR/rom" '
