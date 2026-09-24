@@ -91,7 +91,7 @@ static bool build_layer(void) {
 	int rise;
 	unsigned stairs = netmap_stair_dirs(biome, &rise);
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, stairs, rise);
-	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d stairs %d rise %d\n", run.depth, biome, layer.nstairs, layer.rise);
+	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
 	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs };
 	if (!netmap_build(biome, &lay)) return false;
 

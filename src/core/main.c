@@ -10,6 +10,7 @@
 #include "run.h"
 #include "audio.h"
 #include "director.h"
+#include "net_layouts.h"
 
 char g_data_dir[512] = ".";
 
@@ -171,6 +172,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
+		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
 	}

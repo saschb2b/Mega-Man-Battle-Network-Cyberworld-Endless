@@ -76,4 +76,5 @@ enemies at 1 HP, so what follows a won guardian battle can be tested.
 `tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position and
 map every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.
-`--net-biome N` puts every layer in one area.
+`--net-biome N` puts every layer in one area, `--net-layout N` builds every
+layer in one layout (`LAYOUT_*` in `src/net/net_layouts.h`).
