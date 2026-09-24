@@ -73,7 +73,7 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
 }
 
-typedef struct { int x, y, cat, sprite, script, gone_flag; } Talker;
+typedef struct { int x, y, cat, sprite, script, gone_flag; bool floor; } Talker;
 
 /* Overworld sprites (list 6) of the Navis Gregar has on the net, by navi
  * index; the others (Falzar's Navis are placeholders here) take the shape of
@@ -109,7 +109,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		const NetObj *o = &layer.obj[i];
 		int wx, wy;
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
-		Talker tk = { wx, wy, 6, SPR_PROG, -1, -1 };
+		Talker tk = { wx, wy, 6, SPR_PROG, -1, -1, false };
 		bool asks = false;   /* a Yes/No the director acts on */
 		switch (o->type) {
 		case OBJ_WARP_IN:
@@ -162,7 +162,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		case OBJ_CHALLENGE: asks = true; tk.cat = 7; tk.sprite = SPR_SERVER; break;
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
-		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; break;
+		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
 		case OBJ_BOSS:
 			/* the guardian waits before the exit pad, which stays shut */
 			tk.sprite = navi_sprite(o->param);
@@ -197,6 +197,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->archive = archive;
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
 		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, 0,
-			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script, talkers[i].gone_flag);
+			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script, talkers[i].gone_flag, talkers[i].floor);
 	return mapslot_install(group, number, &npcs, md, nmd);
 }
