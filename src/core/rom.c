@@ -34,7 +34,7 @@ static const RomLayout layouts[] = {
 			{ 0x81, 2, 0x00C0, 0x0000, false, 0x11, 0x81, 0, 3, { { 0x81, 0 }, { 0x81, 1 }, { 0x85, 0 } } },     /* Aquarium Comp 3 (water; its mazes are water too, its yellow fish two panels long) */
 			{ 0x82, 2, 0x0003, 0x0000, false, 0x12, 0x82, 0, 3, { { 0x82, 0 }, { 0x82, 1 }, { 0x85, 1 } } },     /* Judge Tree Comp 3 (brick) */
 			{ 0x83, 2, 0x0180, 0x0000, true, 0x0A, 0x83, 0, 3, { { 0x83, 0 }, { 0x83, 1 }, { 0x85, 2 } } },     /* Mr. Weather Comp 3 (lavender; snow and clouds on the back layer, its drifts too ragged for walkways) */
-			{ 0x85, 4, 0x0100, 0x0001, false, 0x20, 0x85, 0, 5 },     /* CopyBot Comp (purple, pink walkways); the Pavilion comps' battles */
+			{ 0x85, 4, 0x0100, 0x0000, false, 0x20, 0x85, 0, 5 },     /* CopyBot Comp (purple; its one map has too few of its pink walkways to copy); the Pavilion comps' battles */
 			{ 0x88, 1, 0x0003, 0x1000, false, 0x13, 0x88, 1, 1 },     /* ACDC HP (yellow, grey) */
 			{ 0x88, 5, 0x0002, 0x0008, false, 0x13, 0x88, 5, 1 },     /* Green HP (brown, green) */
 			{ 0x88, 6, 0x0100, 0x00C0, false, 0x13, 0x88, 6, 1 },     /* Sky HP (purple, cyan) */
