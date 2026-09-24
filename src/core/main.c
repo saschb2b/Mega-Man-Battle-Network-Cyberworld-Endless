@@ -10,6 +10,8 @@
 #include "run.h"
 #include "audio.h"
 #include "atlas.h"
+#include "devtools.h"
+#include "tour.h"
 #include "director.h"
 #include "net_layouts.h"
 
@@ -177,6 +179,8 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
 		else if (!strcmp(a, "--atlas") && v) { atlas_spec = v; ++i; }
+		else if (!strcmp(a, "--dev") && v) { devtools_parse(v); ++i; }
+		else if (!strcmp(a, "--tour") && v) { tour_parse(v); start_scene = "emu"; ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
 	}
@@ -276,6 +280,7 @@ int main(int argc, char **argv) {
 		platform_begin_frame();
 		if (current && current->draw) current->draw();
 		platform_apply_effects();
+		if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 		for (int i = 0; i < shot_count; ++i)
 			if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
 		if (P.frame >= range_a && P.frame <= range_b) {

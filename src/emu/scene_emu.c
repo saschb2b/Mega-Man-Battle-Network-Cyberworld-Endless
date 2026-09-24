@@ -5,6 +5,7 @@
 #include "cinema.h"
 #include "autopilot.h"
 #include "debug.h"
+#include "devtools.h"
 #include "director.h"
 #include "encounter.h"
 #include "emu.h"
@@ -12,6 +13,7 @@
 #include "gfx.h"
 #include "platform.h"
 #include "rom.h"
+#include "tour.h"
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
@@ -46,10 +48,17 @@ static void enter(void) {
 static void leave(void) { audio_external(NULL); }
 
 static void update(void) {
-	emu_frame(cinema_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons()));
-	director_update();
-	cinema_update();
-	emu_debug_frame();
+	uint32_t keys = devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+	if (devtools_open()) return;   /* the game holds still under the dev menu */
+	/* (fast-forwarded: several game frames to one shown) */
+	for (int i = 0; i < dev.speed; ++i) {
+		emu_frame(cinema_keys(keys));
+		director_update();
+		devtools_update();
+		tour_update();
+		cinema_update();
+		emu_debug_frame();
+	}
 }
 
 static void draw(void) {
@@ -70,6 +79,7 @@ static void draw(void) {
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	cinema_draw();
+	devtools_draw();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };
