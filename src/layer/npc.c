@@ -4,7 +4,8 @@
  * 0x1F disable collision, 0x1B layer priority 3, 0x25 sprite with
  * category, 0x29 init Mystery Data (flag), 0x45 wait until taken (flag),
  * 0x10 pause (frames), 0x02 jump (address), 0x04 jump if flag set (flag,
- * address), 0x44 text script (index, archive), 0x0C shift centre (x, y, z
+ * address), 0x44 text script (index, archive), 0x13 do not face the player
+ * when spoken to, 0x0C shift centre (x, y, z
  * signed bytes: where collision and talking are measured from).
  *
  * Floor sprites: between sprites the GBA draws the one earlier in OAM,
@@ -78,6 +79,9 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 		memcpy(s + n, c, sizeof c);
 		n += (int)sizeof c;
 	}
+	/* an object (sprite list 7) has no frames facing MegaMan: turning to
+	 * him when spoken to would hide it for the whole conversation */
+	if (category == 7) s[n++] = 0x13;
 	int loop = n, gone_jump = -1;
 	/* idle: leave once gone_flag is set, else pause a frame and look again */
 	if (gone_flag >= 0) {
