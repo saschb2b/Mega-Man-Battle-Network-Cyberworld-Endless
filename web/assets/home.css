@@ -103,6 +103,7 @@
 .viewer .screen { margin: 0 auto; }
 
 /* the PET */
+.pet .clip { margin: 0 auto 14px; }
 .pet p.small { font: 500 1rem/1.45 var(--pixel); }
 .pet .keys { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 16px 0 10px; font: 600 1rem/1.4 var(--pixel); color: #dfe8ff; }
 kbd {

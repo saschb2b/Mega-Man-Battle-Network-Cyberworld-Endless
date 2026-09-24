@@ -35,6 +35,24 @@
 	if (chips.length) pick(chips[0]);
 })();
 
+// ---- the clips: they play while on screen, and not at all for visitors
+// who asked for less motion (they get the controls instead) ----
+
+(() => {
+	const clips = [...document.querySelectorAll('video.clip')];
+	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+		for (const v of clips) v.controls = true;
+		return;
+	}
+	const seen = new IntersectionObserver((entries) => {
+		for (const e of entries) {
+			if (e.isIntersecting) { e.target.preload = 'auto'; e.target.play().catch(() => { e.target.controls = true; }); }
+			else e.target.pause();
+		}
+	}, { threshold: 0.25 });
+	for (const v of clips) seen.observe(v);
+})();
+
 // ---- the Net Dealer ----
 
 (async () => {

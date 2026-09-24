@@ -73,7 +73,9 @@ First playable version.
   screenshots, the Net Dealer for downloads (the latest release, 0 zenny)
   and the PET's E-Mail for the docs. The player moved to /play/. Screenshots
   of the running game (`build.py screenshots`) now appear in the README and
-  on the site; extracted assets stay out of the repository.
+  on the site, and short videos (`build.py clips`: the title, the net, a
+  battle, a guardian logging in, the Undernet, jacking in) play on the site
+  while they are on screen; extracted assets stay out of the repository.
 - A browser build on GitHub Pages (https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/): the same
   game in WebAssembly. The player chooses their ROM, which the page checks
   and keeps with the saves in the browser's IndexedDB, never uploaded.

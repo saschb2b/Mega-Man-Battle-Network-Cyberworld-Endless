@@ -202,7 +202,8 @@ window, with the ROM from `~/.cache/mmbn-ref/roms` (or `CYBERWORLD_ROM_DIR`)
 and saves in `.build/desktop`. `python3 build.py serve` builds the project
 site and the browser version and serves them on `http://localhost:8080`;
 `python3 build.py screenshots` retakes the screenshots in
-`docs/screenshots` from scripted headless runs. `python3 build.py release`
+`docs/screenshots` from scripted headless runs, and `python3 build.py clips`
+records the site's short videos (WebM and MP4, `docs/clips`) the same way. `python3 build.py release`
 writes the three release archives to `build/release/`: `cyberworld.zip` for
 PortMaster, `cyberworld-endless-linux-x86_64.tar.gz` and
 `cyberworld-endless-web.zip`. Each target builds in its own Docker image

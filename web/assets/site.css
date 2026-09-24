@@ -78,6 +78,7 @@ img { max-width: 100%; }
 	box-shadow: 0 0 0 3px var(--box-edge), 0 14px 40px rgba(0, 0, 0, 0.5);
 	background: #000;
 }
+video.screen { object-fit: cover; }
 /* whole-number scales where the layout has room: every game pixel the same size */
 .screen.x2 { width: 480px; max-width: 100%; }
 .screen.x3 { width: 720px; max-width: 100%; }

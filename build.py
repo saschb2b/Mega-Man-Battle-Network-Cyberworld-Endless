@@ -33,6 +33,8 @@ glibc runs on more distributions.
                                 (docs/DEVTOOLS.md)
   python3 build.py screenshots  the game captured headlessly for the site and
                                 the README, into docs/screenshots
+  python3 build.py clips [NAMES] short videos of the game for the site
+                                (WebM, MP4 and a poster), into docs/clips
   python3 build.py test         ROM-free unit tests
   python3 build.py package      assemble build/port/ for PortMaster
 """
@@ -129,6 +131,8 @@ def site():
     shutil.rmtree(out, ignore_errors=True)
     shutil.copytree(os.path.join(ROOT, 'web'), out)
     shutil.copytree(os.path.join(ROOT, 'docs', 'screenshots'), os.path.join(out, 'shots'))
+    if os.path.isdir(os.path.join(ROOT, 'docs', 'clips')):
+        shutil.copytree(os.path.join(ROOT, 'docs', 'clips'), os.path.join(out, 'clips'))
     for name in ('cyberworld.js', 'cyberworld.wasm'):
         shutil.copy2(os.path.join(ROOT, 'build', 'web', name), os.path.join(out, 'play'))
     shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(out, 'LICENSE.txt'))
@@ -374,6 +378,71 @@ def screenshots(only=None):
     return 0
 
 
+# Short videos of the game for the site (docs/clips): name, game options,
+# env, scripted input, first and last frame. Every second frame, at 30 fps.
+FFMPEG_IMAGE = 'linuxserver/ffmpeg:9.0-cli-ls82'
+RUN_7 = ['--scene', 'emu', '--run-depth', '3', '--seed', '7']
+CLIPS = [
+    ('title', ['--scene', 'title'], {}, None, 300, 780),
+    ('net', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 150, 600),
+    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1040, 1470),
+    ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 2110, 2380),
+    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], {},
+     '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
+    ('jackin', ['--scene', 'title'], {}, '120:,4:START,60:,4:A,200:', 110, 222),
+]
+
+
+def clips(only=None):
+    """docs/clips/NAME.webm, .mp4 and .png: frames of scripted runs, 4x, 30 fps."""
+    from PIL import Image
+    out = os.path.join(ROOT, 'docs', 'clips')
+    tmp = os.path.join(ROOT, '.build', 'clips')
+    os.makedirs(out, exist_ok=True)
+    for name, args, env, script, first, last in CLIPS:
+        if only and name not in only:
+            continue
+        shutil.rmtree(tmp, ignore_errors=True)
+        os.makedirs(os.path.join(tmp, 'data'))
+        os.makedirs(os.path.join(tmp, 'png'))
+        saved = {k: os.environ.get(k) for k in env}
+        os.environ.update(env)
+        extra = ['--input', script] if script else []
+        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
+                      *args, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f',
+                      mounts=[(default_rom_dir(), '/rom:ro')])
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        if code:
+            return code
+        n = 0
+        for f in range(first, last + 1, 2):
+            im = Image.open(os.path.join(tmp, f'f{f:05d}.bmp')).convert('RGB')
+            w, h = im.size   # the canvas: the game's 240 x 160 in the middle
+            im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+            if n == 0:
+                im.save(os.path.join(out, f'{name}.png'), optimize=True)
+            im.save(os.path.join(tmp, 'png', f'{n:05d}.png'))
+            n += 1
+        # 4x with whole pixels (and the colour planes' 2x2 blocks inside them)
+        common = ['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png',
+                  '-vf', 'scale=960:640:flags=neighbor', '-an']
+        for enc in (['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-pix_fmt', 'yuv420p', f'/out/{name}.webm'],
+                    ['-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+                     f'/out/{name}.mp4']):
+            cmd = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + [
+                'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',
+                FFMPEG_IMAGE, *common, *enc]
+            if subprocess.call(cmd):
+                return 1
+        sizes = ', '.join(f'{ext} {os.path.getsize(os.path.join(out, name + "." + ext)) // 1024} KB' for ext in ('webm', 'mp4'))
+        print(f'clip {name}: {n} frames, {sizes}')
+    return 0
+
+
 def densest(im, w, h):
     """The w x h window with the most floor in it."""
     px = im.load()
@@ -389,7 +458,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots', 'clips'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -432,6 +501,9 @@ def main():
         linux_release()
         web_release()
         return
+    if a.action == 'clips':
+        build('host')
+        sys.exit(clips(a.rest or None))
     if a.action == 'screenshots':
         build('host')
         sys.exit(screenshots(a.rest or None))
