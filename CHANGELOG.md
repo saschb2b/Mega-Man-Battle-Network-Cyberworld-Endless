@@ -22,6 +22,12 @@ First playable version.
   area's own map.
 - Mystery Data, shops and traders draw from the whole chip library: every
   standard chip, the Megas and, deep in a run, the Gigas, by rarity.
+- Three more areas for the first four acts, built from the game's computers
+  and homepages: a comp in orange and green, a homepage in pink and teal and
+  a comp in blue and pink, each with its own battles, background and
+  guardians (CircusMan, Colonel, BlastMan, ElementMan, JudgeMan, DiveMan).
+  Every guardian leaves three HPMemory. Runs saved before this version carry
+  over.
 - Each layer places the game's own exit pads, Mystery Data, Normal Navis,
   Mr. Progs, the Net Dealer, the program vendor, the Chip Trader and the
   BugFrag Trader, all running on the game's NPC and text scripts. Chip
@@ -31,7 +37,8 @@ First playable version.
 - Random encounters from the game's own roll and its own formations: each
   area fights the battles of its original maps, 28 of the 29 virus families
   (all but WindBox) where Capcom put them, on their battlefields (grass, ice,
-  holes, poison), with versions that grow with depth. A guardian Navi stands
+  holes, poison), with versions that grow with depth; viruses the story
+  meets late (the dragons, Nightmare) wait for the later acts. A guardian Navi stands
   before every third layer's exit pad, which stays shut until he is beaten.
 - Exits are the game's own warp pads: MegaMan jacks out and into the next
   layer, built while he jacks out. The Undernet and the Secret Area are

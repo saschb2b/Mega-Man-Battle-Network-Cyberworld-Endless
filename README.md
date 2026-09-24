@@ -42,16 +42,21 @@ buster; L and R open the Custom screen; Start opens the PET.
 
 ## A run
 
-- **Layers.** Each layer is a new layout of rooms and walkways built from one
-  of the game's areas. The exit pad leads one layer deeper. Every third
+- **Layers.** Each layer is a new layout of platforms and walkways in the
+  style of one of the game's areas (docs/LEVEL_DESIGN.md). The exit pad leads one layer deeper. Every third
   layer, a Navi guards the exit and fights MegaMan in the game's own navi
   battle.
-- **Areas.** The first four acts visit Central, Seaside, Sky and Green Area in
-  a random order, then the Graveyard and the Undernet. Layer 19 is the
-  Underground. After that the cycle starts again, harder each time.
-- **Battles.** The game's own battles: random encounters on the net pick
-  viruses and versions (V2, V3, SP) that grow with depth, and rewards follow
+- **Areas.** The first four acts visit four of Central, Seaside, Sky and
+  Green Area, two computers and a homepage, in a random order, then the
+  Graveyard and the Undernet. Layer 19 is the Underground. After that the
+  cycle starts again, harder each time.
+- **Battles.** The game's own battles: each area fights the random battles
+  of its original maps (the viruses, where they stand, the battlefield's
+  panels), in versions (V2, V3, SP) that grow with depth, and rewards follow
   the Busting Level as in BN6.
+- **Growing stronger.** Every guardian leaves three HPMemory (+60 max HP).
+  Mystery Data, shops and traders offer the whole chip library by rarity,
+  Megas deeper and, rarely, a Giga.
 - **Mystery Data.** Green data holds chips, zenny and BugFrags. In deep
   layers a blue one may hold ScrtData.
 - **Checkpoints.** The run is saved when you arrive on a layer; CONTINUE on

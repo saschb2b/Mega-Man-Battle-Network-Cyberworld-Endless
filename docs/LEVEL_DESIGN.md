@@ -78,13 +78,13 @@ order, so an area does not repeat one while it has others.
 
 | Layout | Areas (weight) | Built from |
 | --- | --- | --- |
-| Route | Central 35, Seaside 40, Sky 45, Green 45, Secret 25 | a winding chain of platforms on bridges, pad spurs, stubs, a shortcut |
-| Field | Central 35 (around a crater), Seaside 60 (ragged) | one big field, comb boardwalks with teeth on two or three sides, pads |
+| Route | Central 35, Seaside 40, Sky 45, Green 45, Secret 25, the comps and homepage 30 | a winding chain of platforms on bridges, pad spurs, stubs, a shortcut |
+| Field | Central 35 (around a crater), Seaside 60 (ragged), Comp 40 | one big field, comb boardwalks with teeth on two or three sides, pads |
 | Ladder | Green 55 | four or five parallel planks joined by rungs, teeth on the outer ones, grass blocks at the ends |
-| Hub | Sky 55, Secret 25 | an octagon centre, four mirrored spokes to pods, a ring between them |
+| Hub | Sky 55, Secret 25, Homepage 40 | an octagon centre, four mirrored spokes to pods, a ring between them |
 | Slabs | Graveyard 65, Nest 40 | a chain of big slabs with punched holes, long bridges between |
-| Web | Graveyard 35, Undernet 45, Secret 50 | plateaus kept far apart, bridges crossing between them, many stubs |
-| Crosses | Undernet 25, Nest 60 | plus-shaped platforms grown over a lattice from a big middle block |
+| Web | Graveyard 35, Undernet 45, Secret 50, second Comp 30 | plateaus kept far apart, bridges crossing between them, many stubs |
+| Crosses | Undernet 25, Nest 60, Comp 30, Homepage 30, second Comp 40 | plus-shaped platforms grown over a lattice from a big middle block |
 | Catwalks | Central 30, Undernet 30 | a maze of 1-wide turns with some walls knocked through, plazas at its ends |
 
 MegaMan arrives on the pad nearest the top of the screen; the exit is the
