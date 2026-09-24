@@ -9,6 +9,7 @@
 #include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
+#include "powers.h"
 #include "npc.h"
 #include "npc_lines.h"
 #include "rom.h"
@@ -100,6 +101,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int nmd = 0;
 	out->nchoices = 0;
 	out->boss_gone_flag = -1;
+	out->reward_script = -1;
 	/* ScrtData lie in deep layers until three are out there */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
@@ -165,6 +167,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* the guardian waits before the exit pad, which stays shut */
 			tk.sprite = navi_sprite(o->param);
 			asks = true;
+			const char *reward = powers_reward_text(o->param, layer.biome);
+			if (reward) out->reward_script = ta_say(&text, -1, reward);
 			tk.gone_flag = out->boss_gone_flag = LAYER_BOSS_GONE_FLAG;
 			flag_clear(LAYER_BOSS_GONE_FLAG);
 			break;
@@ -190,6 +194,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
+	out->archive = archive;
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
 		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, 0,
 			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script, talkers[i].gone_flag);

@@ -5,5 +5,7 @@
 
 /* After a won boss battle against `navi` (navi index) in `biome`. */
 void powers_after_boss(int navi, int biome);
+/* What the player is told after that battle, or NULL. */
+const char *powers_reward_text(int navi, int biome);
 
 #endif

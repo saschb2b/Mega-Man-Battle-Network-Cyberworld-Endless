@@ -263,6 +263,7 @@ void director_update(void) {
 			layer.boss_beaten = true;
 			run.bosses_beaten++;
 			powers_after_boss(layer.boss_navi, run.biome);
+			if (D.objs.reward_script >= 0) game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)D.objs.reward_script);
 			if (D.objs.boss_gone_flag >= 0) flag_set(D.objs.boss_gone_flag);
 			if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
 		}
