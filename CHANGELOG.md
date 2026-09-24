@@ -28,10 +28,9 @@ First playable version.
   (10 chips for 1).
 - Random encounters from the game's own roll and its own formations: each
   area fights the battles of its original maps, 28 of the 29 virus families
-  (all but WindBox) where
-  Capcom put them, on their battlefields (grass, ice, holes, poison), with
-  versions that grow with depth. A guardian Navi stands before every third layer's exit
-  pad, which stays shut until he is beaten.
+  (all but WindBox) where Capcom put them, on their battlefields (grass, ice,
+  holes, poison), with versions that grow with depth. A guardian Navi stands
+  before every third layer's exit pad, which stays shut until he is beaten.
 - Exits are the game's own warp pads: MegaMan jacks out and into the next
   layer, built while he jacks out. The Undernet and the Secret Area are
   entered the same way.
