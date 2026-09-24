@@ -18,6 +18,7 @@
 #define MENU_AFTER 84   /* frames from START to the menu */
 #define LEAVE_FRAMES 16
 #define SUMMARY_MIN 60   /* frames before the summary can be closed */
+#define SUMMARY_DIM 26   /* the picture behind the summary, darker than the menu's 16 */
 
 typedef struct { uint32_t dest, count; int nsteps, total; uint32_t step[16]; int delay[16]; bool loop; } PalAnim;
 
@@ -69,7 +70,7 @@ static int anim_step(const PalAnim *an, int frame) {
 /* START dims the picture: every colour, the logo's animated ones included,
  * down 4 levels a channel, then 2 a frame to 16. */
 static int dim_level(void) {
-	if (S.summary) return 16;
+	if (S.summary) return SUMMARY_DIM;
 	if (!S.pressed) return 0;
 	int k = S.t - S.pressed;
 	return k < 0 ? 0 : k >= 6 ? 16 : 4 + 2 * k;
