@@ -23,7 +23,8 @@ use.
 
 ## Known gaps
 
-- Area names show the game's padding as `___` before some names.
+- Area names show the padding the ROM stores before shorter names (`0xB2`,
+  drawn as `_`); the game's own code draws them.
 - Generated layers do not use the game's layer-priority or Z-modifier
   sections, so there are no ramps or raised platforms.
 - Talking to a pad (the Secret Area gate) needs a press of A beside it;

@@ -31,6 +31,8 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
   to z 32, 64 or 120 and slopes them with type 0x14 cells (value 1, height
   32 down to 20 in steps of 4); section 2 marks cells of each level (type
   0x11, height 8) for sprite priority. The generator would need room levels
-  and ramps, and the tile classes a level per panel.
-- **Area names.** Some show the game's padding as `___`; check against a
-  recording of the original whether the name box should hide it.
+  and ramps, and the tile classes a level per panel. Sky Area 2 joins its
+  levels (z 0, 32, 64) with long staircase pieces spanning several panels
+  and draws the raised floors' side faces below them; per-tile learning
+  cannot assemble those, so height needs staircase and side-face pieces
+  taken whole from the source maps.
