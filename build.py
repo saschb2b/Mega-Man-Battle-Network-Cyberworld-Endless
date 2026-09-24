@@ -11,9 +11,11 @@ which matches the glibc and SDL2 that current ROCKNIX ships.
   python3 build.py tour [BIOMES] the game itself warped through every room of
                                 each area's layer, one sheet per area in
                                 .build/tour (docs/DEVTOOLS.md)
-  python3 build.py atlas [BIOMES] [SEEDS]
+  python3 build.py atlas [BIOMES] [SEEDS] [--baseline]
                                 every area's layers drawn, one sheet per area
-                                in .build/atlas (docs/DEVTOOLS.md)
+                                in .build/atlas, compared with (or written to,
+                                --baseline) tests/atlas_baseline.txt
+                                (docs/DEVTOOLS.md)
   python3 build.py test         ROM-free unit tests
   python3 build.py package      assemble build/port/ for PortMaster
 """
@@ -74,7 +76,7 @@ def package():
     print('packaged', out)
 
 
-def atlas(biomes='all', seeds='1'):
+def atlas(biomes='all', seeds='1', baseline=False):
     """Every area's generated layers, drawn headless, one PNG sheet per area."""
     out = os.path.join(ROOT, '.build', 'atlas')
     shutil.rmtree(out, ignore_errors=True)
@@ -120,7 +122,60 @@ def atlas(biomes='all', seeds='1'):
     print(f'{len(layers)} sheets in .build/atlas; {len(flagged)} layers flagged')
     for l in flagged:
         print('  !', l)
-    return 0
+    return compare_baseline(report, write=baseline)
+
+
+BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
+# how much worse a layer may get than the baseline before the atlas fails
+TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10}
+
+
+def atlas_metrics(report):
+    """Per layer (biome, layout, depth, seed): its near and fallback shares, seams and inexact panels."""
+    import re
+    out = {}
+    for l in report.splitlines():
+        m = re.match(r'biome +(\d+) layout (-?\d+) \(\w+\) depth (\d+) seed (\d+):', l)
+        if not m or 'NOT BUILT' in l:
+            continue
+        get = lambda k: float(re.search(k + r' ([\d.]+)', l).group(1))
+        out[m.groups()] = {'near': get('near'), 'fallback': get('fallback'), 'seams': get('seams'),
+                           'inexact': get('not exact')}
+    return out
+
+
+def compare_baseline(report, write=False):
+    """The atlas against tests/atlas_baseline.txt: nonzero if a layer drew worse."""
+    now = atlas_metrics(report)
+    if write:
+        old = atlas_metrics(open(BASELINE).read()) if os.path.exists(BASELINE) else {}
+        old.update(now)
+        with open(BASELINE, 'w') as f:
+            f.write('# build.py atlas --baseline: per layer (biome layout depth seed) its near and\n'
+                    '# fallback shares (%), seams and panels not exact; the atlas fails when one gets worse\n')
+            for k in sorted(old, key=lambda k: tuple(int(v) for v in k)):
+                v = old[k]
+                f.write(f'biome {k[0]} layout {k[1]} (x) depth {k[2]} seed {k[3]}: near {v["near"]}, '
+                        f'fallback {v["fallback"]}, seams {v["seams"]:.0f}, not exact {v["inexact"]:.0f}\n')
+        print(f'baseline: {len(now)} layers written to tests/atlas_baseline.txt')
+        return 0
+    if not os.path.exists(BASELINE):
+        return 0
+    base = atlas_metrics(open(BASELINE).read())
+    worse = []
+    for k, v in now.items():
+        b = base.get(k)
+        if not b:
+            continue
+        for name, tol in TOLERANCE.items():
+            limit = b[name] + tol if name in ('near', 'fallback') else max(b[name] * tol, b[name] + 3)
+            if v[name] > limit:
+                worse.append(f'biome {k[0]} layout {k[1]} depth {k[2]} seed {k[3]}: {name} {b[name]:g} -> {v[name]:g}')
+    compared = sum(1 for k in now if k in base)
+    print(f'baseline: {compared} layers compared, {len(worse)} worse')
+    for w in worse:
+        print('  worse:', w)
+    return 1 if worse else 0
 
 
 def tour(biomes='all'):
@@ -183,7 +238,8 @@ def main():
         sys.exit(tour(*a.rest[:1]))
     if a.action == 'atlas':
         build('host')
-        sys.exit(atlas(*a.rest[:2]))
+        rest = [r for r in a.rest if r != '--baseline']
+        sys.exit(atlas(*rest[:2], baseline='--baseline' in a.rest))
     if a.action in ('all', 'host', 'shot'):
         build('host')
     if a.action == 'asan':

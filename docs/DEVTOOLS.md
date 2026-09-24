@@ -38,6 +38,15 @@ traders, pink the heal pad, white Mystery Data.
 `BIOMES` is `all` or a comma list of area numbers (`0,5,13`); `SEEDS` the
 number of seeds per layout (default 1).
 
+The atlas is also the tiles' regression check: each layer's near misses,
+fallbacks, seams and inexact panels are compared with
+`tests/atlas_baseline.txt`, and the build fails (exit 1) listing every
+layer that got worse than it by more than a little (2 points of near
+misses, 0.15 of fallbacks, a tenth more seams or inexact panels). After a
+change that improves the tiles, `python3 build.py atlas --baseline` writes
+the new numbers; commit them with the change. The baseline holds counts
+only, nothing from the ROM.
+
 ## Tour: the game shows every room
 
 ```bash
