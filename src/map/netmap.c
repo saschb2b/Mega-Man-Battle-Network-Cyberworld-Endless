@@ -147,6 +147,7 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 }
 
 static const NetLayout *cur;
+static bool one_floor;        /* the area has no walkway floor: all is platform */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR };
@@ -181,6 +182,7 @@ static int floor_cb(int A, int B, const void *ctx) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (kind(x, y) != K_RAISED) return TILE_VOID;
 	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
+	if (one_floor) return TILE_A;
 	if (x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B;
 	return walkway(x, y) ? TILE_B : TILE_A;
 }
@@ -330,6 +332,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
 	if (!L->ok) return false;
 	cur = lay;
+	one_floor = !R.layout->net_area[area].walk_styles;
 	/* centre the floor on the world origin, across (x - y) and up and down
 	 * (x + y) the screen */
 	int u0 = 1 << 30, u1 = -(1 << 30), v0 = 1 << 30, v1 = -(1 << 30);

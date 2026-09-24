@@ -344,8 +344,14 @@ static int first_of(const TileBook *b, uint32_t key) {
  * against no floor counts most at the centre and the sides nearest the
  * tile, then the nearest corner; the other material half as much, except
  * at the centre, which should keep its own. */
-static int distance(int phase, unsigned a1, unsigned b1, unsigned a2, unsigned b2) {
+/* The panel straight above on screen (A + 1, B - 1): where side faces are
+ * taller than half a panel, its face hangs over this one's top. */
+#define ABOVE_BIT (1u << 2)
+#define TALL_FACE 16
+
+static int distance(int phase, bool tall, unsigned a1, unsigned b1, unsigned a2, unsigned b2) {
 	unsigned near = nearest(phase, false), corner = nearest(phase, true) & ~near;
+	if (tall) near |= ABOVE_BIT;
 	int d = 0;
 	for (int k = 0; k < 9; ++k) {
 		unsigned bit = 1u << k;
@@ -390,7 +396,7 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
 			const TileCand *c = &b->cand[i];
 			if (single && c->e1) continue;
-			int d = distance(phase, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
+			int d = distance(phase, g->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			int u = unplain(b, cm - 1, phase, c, deep);
 			/* ties go to the first book with the class (the area's own map
 			 * before its others), so a floor keeps one look */
