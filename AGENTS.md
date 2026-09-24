@@ -96,7 +96,8 @@ tiles, palettes and OBJs back to ROM offsets.
 
 Use an existing SSH control socket; do not store device credentials here.
 Confirm the device is idle (`curl -s localhost:1234/runningGame`) before
-launching. Test builds run from a temporary launcher beside the real one
+launching. `tools/device_run.py HOST --control-path SOCK --shots 10,30 --
+--scene emu` does all of the following. Test builds run from a temporary launcher beside the real one
 (`ports/zz-cwtest.sh`, reloaded with `GET localhost:1234/reloadgames` and
 started with `POST localhost:1234/launch`) that passes `--data-dir` to a
 throwaway directory; remove it and reload the games afterwards. Drive the

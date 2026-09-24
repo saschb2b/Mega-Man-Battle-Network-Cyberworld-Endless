@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "bn6.h"
 #include "director.h"
@@ -21,7 +22,7 @@ static bool blocked(int x, int y) {
 	return false;
 }
 
-static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
+static int search(int sx, int sy, int tx, int ty, bool avoid, int *nx, int *ny) {
 	static int16_t prev[MAP_H][MAP_W];
 	static int16_t q[MAP_W * MAP_H];
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) prev[y][x] = -1;
@@ -34,7 +35,7 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 		for (int k = 0; k < 4; ++k) {
 			int ax = x + d[k][0], ay = y + d[k][1];
-			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || (blocked(ax, ay) && (ax != tx || ay != ty))) continue;
+			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || (avoid && blocked(ax, ay) && (ax != tx || ay != ty))) continue;
 			prev[ay][ax] = (int16_t)c;
 			q[t++] = (int16_t)(ay * MAP_W + ax);
 		}
@@ -47,11 +48,35 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 	return 1;
 }
 
+/* The next panel towards (tx, ty): around talkers when possible, else past
+ * them (MegaMan fits beside one on a panel). */
+static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
+	return search(sx, sy, tx, ty, true, nx, ny) || search(sx, sy, tx, ty, false, nx, ny);
+}
+
+/* CYBERWORLD_AUTOPILOT=weak: enemies keep 1 HP, so every battle is won and
+ * what follows a win (a guardian's reward, the exit opening) can be tested. */
+#define T1_OBJECTS 0x0203A9B0u   /* eT1BattleObject0: viruses and navis */
+#define T1_SIZE    0xD8
+#define T1_COUNT   16
+
+static void weaken_enemies(void) {
+	for (uint32_t i = 0; i < T1_COUNT; ++i) {
+		uint32_t o = T1_OBJECTS + i * T1_SIZE;
+		if (emu_read8(o + 0x16) == 1 && emu_read16(o + 0x24) > 1) {   /* Alliance enemy, HP */
+			uint8_t one[2] = { 1, 0 };
+			emu_write(o + 0x24, one, 2);
+		}
+	}
+}
+
 uint32_t autopilot_keys(void) {
 	static uint32_t frame;
 	++frame;
 	int mode = emu_read8(emu_read32(BN6_TOOLKIT));
 	if (mode != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_MAP) {
+		const char *how = getenv("CYBERWORLD_AUTOPILOT");
+		if (how && !strcmp(how, "weak")) weaken_enemies();
 		/* battles and screens: a 480-frame rhythm of picking chips, OK and the buster */
 		uint32_t t = frame % 480;
 		if (t < 48) return (t % 12) < 4 ? KEY_A : 0;          /* pick chips */
