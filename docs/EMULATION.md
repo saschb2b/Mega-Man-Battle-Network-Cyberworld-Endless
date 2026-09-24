@@ -20,8 +20,8 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 
 | Offset | Contents | Code |
 | --- | --- | --- |
-| `+0x0000` | Warp record and warp list | `boot.c` |
-| `+0x0100` | Warp stub (sets `BN6_ENGINE_MARK`, calls map_triggerEnterMapOnWarp) | `boot.c` |
+| `+0x0000` | Warp record and warp list for direct warps | `gamecall.c` |
+| `+0x0100` | Call stub: runs one game routine with r0, r1 and sets `BN6_ENGINE_MARK` | `gamecall.c` |
 | `+0x0180` | Encounter roll wrapper and trampoline | `encounter.c` |
 | `+0x0200` | BattleSettings, `+0x0220` its entity list | `encounter.c` |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
@@ -45,13 +45,14 @@ jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState
    (`text.c`, `scripts.c`), Mystery Data and shop stock, and `mapslot.c`
    points the map's NPC list, scripts, objects, Mystery Data and sprite list
    at them.
-4. `boot.c` warps MegaMan in with the game's own warp.
+4. `gamecall.c` warps MegaMan in with the game's own warp routine.
 
 The exit pad is the game's own warp pad: trigger cells that take warp 1 of
 the map's warp list. When MegaMan steps on it, the game starts its jack-out;
 the director builds the next layer meanwhile and points warp 1 at its start,
 so the game jacks him in there. A guardian Navi keeps the pad shut (flag
-`0x16F1`) until he is beaten.
+`0x16F1`) until he is beaten. A Yes to the Undernet or the Secret Area
+starts the same departure (`0x080059B5`) to a side layer built at once.
 
 `director.c` then watches the game: the exit pad's warp, choices made in text (event flags set by
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER

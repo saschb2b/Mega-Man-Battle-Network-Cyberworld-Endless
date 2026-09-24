@@ -12,11 +12,11 @@
 
 #include "foes.h"
 #include "bn6.h"
-#include "boot.h"
 #include "emu.h"
 #include "encounter.h"
 #include "flags.h"
 #include "game.h"
+#include "gamecall.h"
 #include "layer_objs.h"
 #include "mapslot.h"
 #include "loot.h"
@@ -36,7 +36,6 @@ static struct {
 	bool active;
 	int group, number;
 	int frame;
-	int leaving;           /* frames until the next layer is built */
 	bool checkpoint;       /* save once MegaMan has arrived */
 	bool gameover;         /* the game's GAME OVER is playing */
 	bool boss_pending;     /* the boss battle was started from the exit */
@@ -106,7 +105,6 @@ static bool build_layer(void) {
 	/* until MegaMan takes it, the exit pad leads back to the layer's start */
 	mapslot_exit_to(D.group, D.number, D.start_x, D.start_y, 4);
 	D.active = true;
-	D.leaving = 0;
 	D.frame = 0;
 	D.gameover = false;
 	return true;
@@ -158,6 +156,15 @@ bool director_resume(void) {
 	return true;
 }
 
+/* Into the Undernet or the Secret Area: MegaMan jacks out as on a warp pad,
+ * and into the side layer built meanwhile. */
+static void enter_side_layer(void) {
+	if (!build_layer()) return;
+	D.warping = true;
+	D.checkpoint = true;
+	emu_warp_out();
+}
+
 /* The layer's guardian: the game's own navi battle. */
 static void start_boss(void) {
 	if (D.boss_pending) return;
@@ -184,12 +191,9 @@ static bool act_on_choices(void) {
 			start_boss();
 			return true;
 		case OBJ_UNDERNET:
-			run.side_kind = LAYER_UNDERNET;
-			D.leaving = 1;
-			return true;
 		case OBJ_SECRET_GATE:
-			run.side_kind = LAYER_SECRET;
-			D.leaving = 1;
+			run.side_kind = D.objs.choice[i].type == OBJ_UNDERNET ? LAYER_UNDERNET : LAYER_SECRET;
+			enter_side_layer();
 			return true;
 		default:
 			break;
@@ -281,10 +285,6 @@ void director_update(void) {
 		save_state_path(path, sizeof path);
 		save_run();
 		emu_save_state(path);
-	}
-	if (D.leaving > 0) {
-		if (--D.leaving == 0) director_start_layer();
-		return;
 	}
 	/* on another map (a story warp the run does not use): back to the layer */
 	if (emu_read8(BN6_GAMESTATE + 4) != D.group || emu_read8(BN6_GAMESTATE + 5) != D.number) {
