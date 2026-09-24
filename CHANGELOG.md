@@ -68,6 +68,14 @@ First playable version.
   any other map sends him back to the layer.
 - Choices on the game's text boxes: a strong virus signal, a dark flame into
   the Undernet, and a gate that three ScrtData open into the Secret Area.
+- A browser build on GitHub Pages (https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/): the same
+  game in WebAssembly. The player chooses their ROM, which the page checks
+  and keeps with the saves in the browser's IndexedDB, never uploaded.
+- CI on every push and pull request: every target built with -Werror, the
+  unit tests under AddressSanitizer and UBSan, script and workflow linting.
+  A push to main publishes the browser build; a v* tag publishes a release
+  with the PortMaster zip, the Linux archive and the site.
+- A key or button press shorter than a frame now counts.
 - A Linux desktop build: the game in a resizable window at a whole-number
   scale, F11 or Alt+Enter for fullscreen, keyboard and controllers, saves
   and the ROM in `~/.local/share/cyberworld-endless`. It is built on Debian

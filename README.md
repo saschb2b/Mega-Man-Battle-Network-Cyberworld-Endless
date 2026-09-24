@@ -1,5 +1,8 @@
 # Mega Man Battle Network: Cyberworld Endless
 
+[![CI](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml/badge.svg)](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml)
+**[Play in the browser](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/)** · [Downloads](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
+
 A roguelike for Mega Man Battle Network 6. Every run jacks MegaMan into a
 freshly generated net and sends him down, layer by layer, for as long as he
 lasts. The net changes as you go deeper: from the surface areas and the
@@ -12,25 +15,27 @@ battles, chips, PET, shops and music. Cyberworld Endless builds the layers,
 places the Mystery Data and shopkeepers, and keeps the run going.
 
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
-Nova (4:3) and the Retroid Pocket Flip 2 (16:9). A Linux desktop build plays
-the same game in a window on a PC.
+Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays in a
+window on a Linux PC and in a desktop browser at
+[saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/).
 
 ## What you need
 
-- A handheld running ROCKNIX with PortMaster installed, or an x86-64 Linux
-  PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35 and later).
+- A handheld running ROCKNIX with PortMaster installed, an x86-64 Linux PC
+  (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35 and later), or a
+  current desktop browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
   and the Legacy Collection version do not work yet.
 
-The port contains no Capcom data. Without the ROM there is no game.
+No download and no page contains Capcom data. Without the ROM there is no
+game.
 
 ## Install
 
-1. Get the port folder. There is no release download yet; build it with
-   `python3 build.py package` (see [Building](#building)), which puts it in
-   `build/port/`.
+1. Download `cyberworld.zip` from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it (or
+   build it with `python3 build.py package`, see [Building](#building)).
 2. Copy `cyberworld/` and `Cyberworld Endless.sh` into the handheld's
    `ports` folder (on ROCKNIX: `/storage/roms/ports/`).
 3. Copy your ROM into `ports/cyberworld/rom/`. The file name does not matter;
@@ -42,8 +47,8 @@ After that the title screen appears straight away.
 
 ### On a Linux PC
 
-1. Get `cyberworld-endless-linux-x86_64.tar.gz` (built with
-   `python3 build.py linux` into `build/release/`) and unpack it anywhere.
+1. Download `cyberworld-endless-linux-x86_64.tar.gz` from the
+   [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it anywhere.
 2. Copy your ROM into `~/.local/share/cyberworld-endless/rom/` or the
    `rom/` folder next to `cyberworld-endless`.
 3. Run `./cyberworld-endless`. `./install.sh` adds it to the application
@@ -52,6 +57,14 @@ After that the title screen appears straight away.
 It opens in a window at the largest whole scale that fits; F11 or Alt+Enter
 switches to fullscreen. Saves live in `~/.local/share/cyberworld-endless/`.
 The archive's own `README.md` has the keyboard keys.
+
+### In a browser
+
+Open **[the game's page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/)** and choose your ROM file, or drop it on
+the page. The page checks it and keeps it, with your saves, in the
+browser's own storage (IndexedDB); it is never uploaded. Next time **Play**
+starts straight away. **Forget ROM and saves** removes both. It needs a
+keyboard or a controller; phones and touch screens are not supported yet.
 
 ## Playing
 
@@ -177,11 +190,19 @@ python3 build.py run
 
 `run` builds the Linux desktop binary and plays it on this machine in a
 window, with the ROM from `~/.cache/mmbn-ref/roms` (or `CYBERWORLD_ROM_DIR`)
-and saves in `.build/desktop`. `python3 build.py release` writes both
-release archives to `build/release/`: `cyberworld.zip` for PortMaster and
-`cyberworld-endless-linux-x86_64.tar.gz`. The Linux build compiles in its
-own image on Debian bookworm, with SDL2 built so that it loads X11, Wayland
-and the sound servers at run time.
+and saves in `.build/desktop`. `python3 build.py serve` builds the browser
+version and serves it on `http://localhost:8080`. `python3 build.py release`
+writes the three release archives to `build/release/`: `cyberworld.zip` for
+PortMaster, `cyberworld-endless-linux-x86_64.tar.gz` and
+`cyberworld-endless-web.zip`. Each target builds in its own Docker image
+(`docker/`): the handheld on Debian trixie as ROCKNIX, the Linux desktop on
+bookworm with SDL2 built to load X11, Wayland and the sound servers at run
+time, the browser with Emscripten.
+
+GitHub Actions (`.github/workflows/`) builds every target on each push and
+pull request, runs the ROM-free tests under the sanitizers and lints the
+scripts. A push to `main` publishes the browser build on GitHub Pages; a
+tag such as `v1.0.0` publishes a release with all three archives.
 
 `build.py shot` runs the game headlessly for scripted screenshots and soak
 tests, `build.py atlas` draws every area's layers and `build.py tour` has the
