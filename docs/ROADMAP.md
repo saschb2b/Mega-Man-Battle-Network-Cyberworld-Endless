@@ -19,6 +19,8 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
 - **Guardians on the net.** Every guardian Navi waits before the sealed exit
   pad and asks to fight (HeelNavi for those without an overworld sprite),
   and leaves once beaten.
+- **Testing.** `CYBERWORLD_AUTOPILOT=weak` clears a whole cycle (depth 2 to
+  19) headless; `tools/device_run.py` runs builds on the Nova from `/tmp`.
 
 ## Next
 
@@ -32,5 +34,3 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
   and ramps, and the tile classes a level per panel.
 - **Area names.** Some show the game's padding as `___`; check against a
   recording of the original whether the name box should hide it.
-- **Autopilot battles.** Its chip and buster rhythm cannot finish some
-  battles even against 1-HP enemies; target the enemy's row.
