@@ -28,29 +28,42 @@ static int cmp_cell(const void *a, const void *b) {
 
 static uint16_t key_of(int cx, int cy) { return (uint16_t)((cy + 127) * 254 + (cx + 127)); }
 
-static Cell cell(int cx, int cy, int value, int type) {
-	Cell c = { key_of(cx, cy), { 0, (uint8_t)value, 8, (uint8_t)type } };   /* z 0, height 8 */
+static Cell cell(int cx, int cy, int z, int value, int height, int type) {
+	Cell c = { key_of(cx, cy), { (uint8_t)z, (uint8_t)value, (uint8_t)height, (uint8_t)type } };
 	return c;
 }
 
-/* The wall cells around the floor. */
-static int walls(Cell *w, int cap) {
+static Cell from(const CoordCell *c) {
+	Cell o = { key_of(c->x >> 3, c->y >> 3), { (uint8_t)c->z, c->value, c->height, c->type } };
+	return o;
+}
+
+/* The wall cells around the floor of `level`, 8 high from z. Walls beside
+ * a stair rise with it from the ground (the original's are 10 higher than
+ * the climb), and the ground has none where a stair's top meets the raised
+ * floor. */
+static int walls(Cell *w, int cap, int level, int z, int rise) {
+	/* edges (types 1-4), else the first outer corner (7, 5, 6, 8) */
+	static const int dir[8][3] = {
+		{ -1, 0, 1 }, { 1, 0, 2 }, { 0, -1, 3 }, { 0, 1, 4 },
+		{ -1, 1, 7 }, { -1, -1, 5 }, { 1, -1, 6 }, { 1, 1, 8 },
+	};
 	int n = 0;
 	for (int cy = -126; cy < 126; ++cy)
 		for (int cx = -126; cx < 126; ++cx) {
-			if (netmap_floor_cell(cx, cy)) continue;
-			int types[4], nt = 0;
-			if (netmap_floor_cell(cx - 1, cy)) types[nt++] = 1;
-			if (netmap_floor_cell(cx + 1, cy)) types[nt++] = 2;
-			if (netmap_floor_cell(cx, cy - 1)) types[nt++] = 3;
-			if (netmap_floor_cell(cx, cy + 1)) types[nt++] = 4;
-			if (!nt) {
-				if (netmap_floor_cell(cx - 1, cy + 1)) types[nt++] = 7;
-				else if (netmap_floor_cell(cx - 1, cy - 1)) types[nt++] = 5;
-				else if (netmap_floor_cell(cx + 1, cy - 1)) types[nt++] = 6;
-				else if (netmap_floor_cell(cx + 1, cy + 1)) types[nt++] = 8;
+			if (netmap_floor_cell(cx, cy, level)) continue;
+			if (!level && rise && netmap_floor_cell(cx, cy, 1)) continue;
+			bool edge = false;
+			for (int k = 0; k < 8 && n < cap; ++k) {
+				if (k >= 4 && edge) break;
+				int nx = cx + dir[k][0], ny = cy + dir[k][1];
+				if (!netmap_floor_cell(nx, ny, level)) continue;
+				if (k < 4) edge = true;
+				bool by_stair = rise && netmap_stair_cell(nx, ny);
+				if (by_stair && level) { if (k >= 4) break; continue; }   /* the ground's wall covers it */
+				w[n++] = by_stair ? cell(cx, cy, 0, 0, rise + 10, dir[k][2]) : cell(cx, cy, z, 0, 8, dir[k][2]);
+				if (k >= 4) break;
 			}
-			for (int k = 0; k < nt && n < cap; ++k) w[n++] = cell(cx, cy, 0, types[k]);
 		}
 	return n;
 }
@@ -60,7 +73,7 @@ static int pad(Cell *t, const CoordPad *p) {
 	static const int corner[3][3] = { { 0x09, 0x11, 0x0A }, { 0x11, 0x11, 0x11 }, { 0x0B, 0x11, 0x0C } };
 	int cx = p->x >> 3, cy = p->y >> 3, n = 0;   /* arithmetic shift: floor */
 	for (int dy = -1; dy <= 1; ++dy)
-		for (int dx = -1; dx <= 1; ++dx) t[n++] = cell(cx + dx, cy + dy, p->index, corner[dy + 1][dx + 1]);
+		for (int dx = -1; dx <= 1; ++dx) t[n++] = cell(cx + dx, cy + dy, 0, p->index, 8, corner[dy + 1][dx + 1]);
 	return n;
 }
 
@@ -81,7 +94,7 @@ static void debug_print(const Cell *w, int n) {
 	for (int cy = -20; cy < 36; ++cy) {
 		char line[57];
 		for (int cx = -20; cx < 36; ++cx) {
-			char c = netmap_floor_cell(cx, cy) ? '.' : ' ';
+			char c = netmap_floor_cell(cx, cy, 0) ? '.' : netmap_floor_cell(cx, cy, 1) ? ':' : ' ';
 			for (int i = 0; i < n; ++i) if (w[i].key == key_of(cx, cy)) c = (char)('0' + w[i].shape[3]);
 			line[cx + 20] = c;
 		}
@@ -90,28 +103,31 @@ static void debug_print(const Cell *w, int n) {
 	}
 }
 
-bool coords_write(uint32_t slot, const CoordPad *pads, int npads) {
-	enum { WALLS_MAX = 8192, TRIGGERS_MAX = 9 * 16 };
-	Cell *w = malloc(WALLS_MAX * sizeof *w), t[TRIGGERS_MAX];
-	int nw = walls(w, WALLS_MAX), nt = 0;
-	for (int i = 0; i < npads && nt + 9 <= TRIGGERS_MAX; ++i) nt += pad(t + nt, &pads[i]);
-	if (emu_debug_on()) debug_print(w, nw);
-	/* sections 1 (height changes) and 2 (layer priorities) stay empty */
-	size_t cap = 16 + (size_t)(nw + nt) * 8;
+bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
+	enum { WALLS_MAX = 16384, TRIGGERS_MAX = 9 * 16 };
+	static Cell sec[4][WALLS_MAX];
+	int n[4] = { 0 };
+	int rise = netmap_rise();
+	n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
+	if (rise) n[0] += walls(sec[0] + n[0], WALLS_MAX - n[0], 1, rise, rise);
+	for (int i = 0; i < npads && n[3] + 9 <= TRIGGERS_MAX; ++i) n[3] += pad(sec[3] + n[3], &pads[i]);
+	/* raised floor heights, stairs' ramps, walls and layer priorities */
+	for (int s = 0; extra && s < 4; ++s)
+		for (int i = 0; i < extra->n[s] && n[s] < WALLS_MAX; ++i) sec[s][n[s]++] = from(&extra->cells[s][i]);
+	if (emu_debug_on()) debug_print(sec[0], n[0]);
+	size_t cap = 32 + (size_t)(n[0] + n[1] + n[2] + n[3]) * 8;
 	uint8_t *d = calloc(cap, 1);
-	size_t s0 = section(d, w, nw);
-	size_t s3 = s0 + 8;
-	size_t total = s3 + section(d + s3, t, nt);
-	uint8_t *out = malloc(16 + total + total / 8 + 16);
-	put32(out, 0);
-	put32(out + 4, (uint32_t)s0);
-	put32(out + 8, (uint32_t)(s0 + 4));
-	put32(out + 12, (uint32_t)s3);
-	size_t lz = lz_literal(d, total, out + 16);
+	size_t at[4], len = 0;
+	for (int s = 0; s < 4; ++s) {
+		at[s] = len;
+		len += section(d + len, sec[s], n[s]);
+	}
+	uint8_t *out = malloc(16 + len + len / 8 + 16);
+	for (int s = 0; s < 4; ++s) put32(out + s * 4, (uint32_t)at[s]);
+	size_t lz = lz_literal(d, len, out + 16);
 	emu_write(COORD_AT, out, 16 + lz);
 	emu_write32(0x08000000u + slot, COORD_AT);
 	free(out);
 	free(d);
-	free(w);
 	return true;
 }

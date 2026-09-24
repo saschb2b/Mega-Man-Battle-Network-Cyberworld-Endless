@@ -14,6 +14,7 @@
 #include "bn6.h"
 #include "emu.h"
 #include "encounter.h"
+#include "debug.h"
 #include "flags.h"
 #include "game.h"
 #include "gamecall.h"
@@ -87,8 +88,11 @@ static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
-	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, 0u, 0);
-	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0] };
+	int rise;
+	unsigned stairs = netmap_stair_dirs(biome, &rise);
+	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, stairs, rise);
+	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d stairs %d rise %d\n", run.depth, biome, layer.nstairs, layer.rise);
+	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs };
 	if (!netmap_build(biome, &lay)) return false;
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
