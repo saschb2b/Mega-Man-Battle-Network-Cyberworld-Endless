@@ -10,6 +10,7 @@
 #include "run.h"
 #include "audio.h"
 #include "atlas.h"
+#include "pacing_report.h"
 #include "devtools.h"
 #include "tour.h"
 #include "director.h"
@@ -156,6 +157,7 @@ int main(int argc, char **argv) {
 	const char *render_spec = NULL;
 	const char *sheet_spec = NULL;
 	const char *atlas_spec = NULL;
+	const char *pacing_spec = NULL;
 	for (int i = 1; i < argc; ++i) {
 		const char *a = argv[i];
 		const char *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -179,6 +181,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
 		else if (!strcmp(a, "--atlas") && v) { atlas_spec = v; ++i; }
+		else if (!strcmp(a, "--pacing") && v) { pacing_spec = v; ++i; }
 		else if (!strcmp(a, "--dev") && v) { devtools_parse(v); ++i; }
 		else if (!strcmp(a, "--tour") && v) { tour_parse(v); start_scene = "emu"; ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
@@ -200,6 +203,11 @@ int main(int argc, char **argv) {
 		save_init();
 		if (atlas_spec) {
 			int r = atlas_run(atlas_spec);
+			platform_shutdown();
+			return r;
+		}
+		if (pacing_spec) {
+			int r = pacing_report_run(pacing_spec);
 			platform_shutdown();
 			return r;
 		}

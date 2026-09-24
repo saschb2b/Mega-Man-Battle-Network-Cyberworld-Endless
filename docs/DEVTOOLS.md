@@ -1,8 +1,9 @@
 # Dev tools
 
-Three tools for checking generated layers and testing a run without playing
-it out: the atlas and the tour look over every area at once, and the dev
-menu shortens a run on the handheld.
+Tools for checking generated layers and a run's difficulty without playing
+it out: the atlas and the tour look over every area at once, the pacing
+report checks every act's battles and guardians, the run log records real
+runs, and the dev menu shortens a run on the handheld.
 
 ## Atlas: every layer drawn
 
@@ -48,6 +49,36 @@ misses, 0.15 of fallbacks, a tenth more seams or inexact panels). After a
 change that improves the tiles, `python3 build.py atlas --baseline` writes
 the new numbers; commit them with the change. The baseline holds counts
 only, nothing from the ROM.
+
+## Pacing report: every act's battles and guardians
+
+```bash
+python3 build.py pacing
+```
+
+Rolls the random battles of every area in every act it can visit, on the
+first two cycles, without running the game (`src/dev/pacing_report.c`):
+300 rolls per layer, the run's opening battles and a Server challenge. For
+each it prints the act's band (docs/PROGRESSION.md), the viruses' HP
+together (lowest, median, highest), the strongest hit and how many battles
+reached each version, and marks OVER where a battle lies past the band or
+its damage cap. A challenge that meets an SP Navi is counted apart. Then it
+draws 500 runs and lists the guardian each act met, with version and HP,
+marked OUTSIDE when one lies past the act's band. The whole report takes
+about a minute.
+
+Output: `.build/pacing.txt`. It needs the ROM, and prints how many
+battles and guardians were past their band; after a change to the bands,
+the areas or the encounter code, that number should stay 0.
+
+## Run log
+
+Every battle and every finished run is appended to `runlog.txt` in the data
+folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
+area, what kind of battle, MegaMan's HP and max HP before, each foe as
+family.version, the foes' HP together, and MegaMan's HP after (or
+"deleted"). A last line gives where the run ended. Past 512 KB the log moves
+to `runlog.old`. Collected from real runs, it shows where runs are lost.
 
 ## Tour: the game shows every room
 

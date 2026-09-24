@@ -92,6 +92,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Engine code | `build.py test`, a headless capture of the affected screen, an autopilot run |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), captures of every area (`--net-biome 0`-`7`) |
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input |
+| Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band), an autopilot run |
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |
 | Release | Device run on the Nova and the Flip 2 |
 

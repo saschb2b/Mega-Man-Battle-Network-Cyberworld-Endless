@@ -10,7 +10,7 @@
 typedef struct {
 	int runs;
 	int best_depth;
-	int best_score;   /* unused; kept for the file layout */
+	int last_depth;   /* where the last run ended (was an unused score) */
 	int bosses;
 	int viruses;
 	int secret_clears;

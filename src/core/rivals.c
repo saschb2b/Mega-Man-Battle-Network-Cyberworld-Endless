@@ -9,12 +9,15 @@
 static Rival rivals[RIVAL_NAVIS];
 static bool loaded;
 
+static void store(void) { save_write_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals); }
+
 void rivals_load(void) {
 	if (!save_read_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals)) memset(rivals, 0, sizeof rivals);
 	loaded = true;
+	/* Colonel was kept as navi 17, the enemy table's unnamed navi, before
+	 * this version: his record moves to 18 */
+	if (rivals[17].met && !rivals[18].met) { rivals[18] = rivals[17]; memset(&rivals[17], 0, sizeof rivals[17]); store(); }
 }
-
-static void store(void) { save_write_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals); }
 
 const Rival *rival(int navi) {
 	static const Rival blank;

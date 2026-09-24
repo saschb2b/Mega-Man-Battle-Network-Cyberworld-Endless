@@ -40,6 +40,8 @@ extern Run run;
 
 void run_new(uint32_t seed);
 int biome_bg(int b);
+/* A navi's HP at a version (0 V1, 1 EX, 2 SP) from the ROM; -1 unknown. */
+int navi_hp(int navi, int version);
 /* The area's first battle background, without a roll (the title's backdrop). */
 int biome_backdrop(int b);
 

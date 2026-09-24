@@ -3,9 +3,9 @@
 A roguelike for Mega Man Battle Network 6. Every run jacks MegaMan into a
 freshly generated net and sends him down, layer by layer, for as long as he
 lasts. The net changes as you go deeper: from the surface areas and the
-story's comps down through the Graveyard and the Undernet to the Underground,
-and then around again, harder each time. Every third layer ends at a Navi
-guarding the exit.
+story's comps down through the Undernet and the Graveyard to the
+Underground, and then around again, harder each time. Every third layer
+ends at a Navi guarding the exit.
 
 Everything you see and hear is BN6 itself, running from your own ROM: its
 battles, chips, PET, shops and music. Cyberworld Endless builds the layers,
@@ -57,25 +57,36 @@ has:
 
 Each layer is a new layout of platforms and walkways in the style of one of
 the game's areas. Find the exit pad to go one layer deeper. On the way, the
-game's own random battles come up, with the viruses of that area, and grow
-stronger (V2, V3, SP) the deeper you are. Rewards follow the Busting Level
-as in BN6.
+game's own random battles come up, with the viruses of that area. How hard
+a battle is depends on how deep you are, not on the area: the viruses grow
+stronger (V2, V3, SP) act by act, and a battle never holds more than MegaMan
+can be expected to handle at that point. The first battles of a run, and
+the first after each guardian, are gentler. Rewards follow the Busting
+Level as in BN6.
 
-Every third layer ends in a guardian's arena. The room before it always has
-a place to heal and the Net Dealer, so you can prepare. Step into the
-arena and the Navi logs in for the game's own boss battle. Guardians
-remember how your earlier battles went.
+Three layers make an act. The second layer of every act always has the Net
+Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and
+the room before it again has a heal and the Net Dealer. The card at the
+start of each act names the guardian waiting at its end, so you can set
+your folder for it. Step into the arena and the Navi logs in for the game's
+own boss battle. Guardians remember how your earlier battles went.
 
 The first four acts visit four of Central, Seaside, Sky and Green Area, the
 Robot Control, Aquarium, Judge Tree, Mr. Weather and CopyBot comps, two home
-computers and the Aquarium, ACDC, Green and Sky homepages, in a random order.
-Then come the Graveyard and the Undernet, and layer 19 is the Underground.
-After that the cycle starts again.
+computers and the Aquarium, ACDC, Green and Sky homepages. The order is
+random, but the gentler areas come first (Central, Robot Control, the
+Aquarium, Sky HP, a home computer) and the hardest last (Sky, Mr. Weather,
+ACDC HP, CopyBot's comp). Then come the Undernet and the Graveyard, and
+layer 19 is the Underground. After that the cycle starts again, harder.
 
 ### Getting stronger
 
-- **Guardian Data.** Every guardian leaves three HPMemory (+60 max HP), and
-  its Cross where it has one.
+- **A gift to start.** On the first layer a Mr. Prog lets you pick one: two
+  HPMemory, a ★3 chip or a NaviCust program. If your last run ended before
+  its first guardian, he adds an HPMemory.
+- **Guardian Data.** Every guardian leaves five HPMemory (+100 max HP), its
+  own Navi chip at the version you beat, and its Cross where it has one.
+  Taking it also restores MegaMan's HP.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.
@@ -95,7 +106,7 @@ After that the cycle starts again.
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |
-| Server | A strong virus signal: an optional hard battle |
+| Server | A strong virus signal: an optional harder battle that pays a better chip. From the fourth act it may hold an SP Navi. Never on the first layer |
 | Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero |
 

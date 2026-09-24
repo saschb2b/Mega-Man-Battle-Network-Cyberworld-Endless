@@ -22,6 +22,7 @@ typedef struct {
 	uint32_t chip_data;       /* 0x2C-byte chip records */
 	uint32_t chip_names[2];   /* text archives: ids 0-255, 256+ */
 	uint32_t enemy_ids;       /* (version, actor type, ai) triples */
+	uint32_t enemy_stats;     /* per actor type, per ai: 6-byte records per version (HP, damage) */
 	uint32_t encounters;      /* random battles: 4 story stages x (real world, internet) -> group -> map -> BattleSettings */
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */

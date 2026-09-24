@@ -21,7 +21,6 @@ typedef struct {
 	int nfoes;
 	int biome;
 	bool boss;
-	bool no_escape;
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 } Encounter;
 

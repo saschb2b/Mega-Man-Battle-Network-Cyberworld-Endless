@@ -68,6 +68,20 @@ First playable version.
   any other map sends him back to the layer.
 - Choices on the game's text boxes: a strong virus signal, a dark flame into
   the Undernet, and a gate that three ScrtData open into the Secret Area.
+- A fair difficulty curve (docs/PROGRESSION.md). Depth, not the area, sets
+  how hard a battle is: every random battle is sized from the ROM's virus HP
+  and damage to its act's limits, at the highest version that fits, and the
+  first battles of a run and after each guardian are gentler. The first act
+  visits one of the gentler areas and the hardest come fourth; the Undernet
+  now comes before the Graveyard. Guardians are chosen by HP for their act
+  (BlastMan, DiveMan or SpoutMan first; Colonel from act 4), and the act's
+  card names its guardian. Every act's second layer has a heal and the Net
+  Dealer. A guardian leaves five HPMemory, its own Navi chip and a full
+  heal; a Mr. Prog on the first layer offers a gift; rich Mystery Data may
+  hold an HPMemory; a won Server challenge pays a chip. `build.py pacing`
+  checks every act against its limits, and `runlog.txt` records each battle.
+- Colonel fought as the enemy table's unnamed navi 17 (4000 HP at V1); he is
+  navi 18, and saved runs move over.
 - A title screen of its own in the game's style: the Battle Network logo from
   the ROM with an infinity mark where the 6 stood and a CYBERWORLD ENDLESS
   plate, over the battle backgrounds of the net's areas in turn (Central to

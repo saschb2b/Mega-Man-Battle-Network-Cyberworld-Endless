@@ -72,5 +72,10 @@ extern const int virus_def_count;
 
 /* ROM enemy table: enemy id for (actor type, family, version). */
 int enemy_id(int actor_type, int family, int version);
+/* A navi's chip at a version (0 V1, 1 EX, 2 SP); 0 for none. */
+int navi_chip(int navi, int version);
+/* The ROM's HP and attack damage of enemy `id` (bn6f enemy_getStruct2);
+ * false when unknown. */
+bool enemy_stats(int id, int *hp, int *damage);
 
 #endif

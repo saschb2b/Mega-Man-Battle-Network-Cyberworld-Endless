@@ -11,6 +11,7 @@
 #include "emu.h"
 #include "game.h"
 #include "loot.h"
+#include "pacing.h"
 
 #define ORDER_SHOP 18   /* the Chip Order list: one entry per chip */
 
@@ -76,9 +77,9 @@ int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		it.price = (uint16_t)(chip_price(it.id) / 100);
 		if (!listed(out, n, &it)) out[n++] = it;
 	}
-	/* one HPMemory, dearer the deeper the layer */
+	/* one HPMemory, dearer act by act (1200 zenny in the first) */
 	ShopItem hp = { 1, 1, 0x70, 0xFF, 0 };
-	hp.price = (uint16_t)(10 + depth * 2);
+	hp.price = (uint16_t)(12 + 6 * (pacing_act(depth) + 7 * pacing_loop(depth)));
 	out[n++] = hp;
 	for (int i = 0; i < 2; ++i) {
 		ShopItem it;
@@ -86,6 +87,8 @@ int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	}
 	return n;
 }
+
+bool shop_pick_program(ShopItem *out) { return pick(3, 0, out); }
 
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;

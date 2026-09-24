@@ -2,13 +2,15 @@
 #ifndef CW_SCRIPTS_H
 #define CW_SCRIPTS_H
 
+#include <stdbool.h>
+
 #include "text.h"
 
 /* The ScrtData key item: three open the Secret Area's gate. */
 #define SCRIPTS_SECRET_DATA 0x31
 /* HPMemory, and how many a beaten guardian leaves */
 #define SCRIPTS_HP_MEMORY 0x70
-#define SCRIPTS_BOSS_HP_MEMORIES 3
+#define SCRIPTS_BOSS_HP_MEMORIES 5
 
 /* Service NPCs on the game's own commands: heal to full HP. (Chip Traders
  * speak the game's own lines, see trader.h.) */
@@ -27,7 +29,15 @@ int ta_secret_gate(TextArchive *t, int flag);
 int ta_music(TextArchive *t, int song);
 /* A guardian's Guardian Data, checked: `power` (a Cross, Beast Out; NULL
  * for none), then HPMemory through the game's own item (+20 max HP each),
- * then event flag `taken_flag`. */
-int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int taken_flag);
+ * its navi chip (`chip` 0 for none; `code` A=0 .. *=26), a full heal, then
+ * event flag `taken_flag`. */
+int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
+                       int taken_flag);
+/* A won challenge's own reward: a chip. */
+int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
+/* The run's first layer: a Mr. Prog offers one of two HPMemory, a chip or
+ * a NaviCust program (`program` in `color`), once (event flag `flag`);
+ * with `comfort`, after a run lost early, an HPMemory more first. */
+int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int code, int program, int color);
 
 #endif

@@ -26,5 +26,7 @@ bool shop_install(int shop, const ShopItem *items, int n);
 /* A layer's stock at `depth` (the rng decides the picks). */
 int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
+/* One NaviCust program (id, color in `code`) from the game's shops. */
+bool shop_pick_program(ShopItem *out);
 
 #endif

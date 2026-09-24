@@ -16,6 +16,9 @@ which matches the glibc and SDL2 that current ROCKNIX ships.
                                 in .build/atlas, compared with (or written to,
                                 --baseline) tests/atlas_baseline.txt
                                 (docs/DEVTOOLS.md)
+  python3 build.py pacing       every act's battles and guardians against
+                                their bands, in .build/pacing.txt
+                                (docs/DEVTOOLS.md)
   python3 build.py test         ROM-free unit tests
   python3 build.py package      assemble build/port/ for PortMaster
 """
@@ -224,7 +227,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -236,6 +239,12 @@ def main():
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))
+    if a.action == 'pacing':
+        build('host')
+        rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+        os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
+        sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                        '--pacing', '/src/.build/pacing.txt', mounts=[(rom_dir, '/rom:ro')]))
     if a.action == 'atlas':
         build('host')
         rest = [r for r in a.rest if r != '--baseline']

@@ -79,10 +79,18 @@ bool save_run(void) {
 
 bool peek_run(Run *out) { return save_read_blob("run.sav", RUN_MAGIC, out, sizeof *out) && out->active; }
 
+/* Colonel was navi 17 before this version (the enemy table's unnamed
+ * navi); he is 18. */
+static void upgrade_run(void) {
+	for (int b = 0; b < MAX_BIOMES; ++b) if (run.boss_order[b] == 17) run.boss_order[b] = 18;
+}
+
 bool load_run(void) {
 	Run tmp;
-	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; return true; }
-	return legacy_load_run();
+	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); return true; }
+	if (!legacy_load_run()) return false;
+	upgrade_run();
+	return true;
 }
 
 void save_delete(void) {
@@ -97,6 +105,7 @@ void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile
 
 void profile_record_run(void) {
 	profile.runs++;
+	profile.last_depth = run.depth;
 	if (run.depth > profile.best_depth) profile.best_depth = run.depth;
 	profile.bosses += run.bosses_beaten;
 	profile.viruses += run.viruses_deleted;

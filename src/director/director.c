@@ -30,6 +30,7 @@
 #include "netmap.h"
 #include "rom.h"
 #include "run.h"
+#include "runlog.h"
 #include "save.h"
 #include "scripts.h"
 
@@ -49,6 +50,8 @@ static struct {
 	bool challenge;        /* a challenge battle was started */
 	bool in_battle;        /* a battle is on */
 	int foes;              /* viruses in the battle the game will start next */
+	Encounter next;        /* that battle */
+	int battles;           /* random battles fought on this layer */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -77,7 +80,11 @@ static void area_card(void) {
 	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "The sealed gate opens");
 	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "Journey's end");
 	else snprintf(act, sizeof act, "Act %d", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1 + 7 * ((run.depth - 1) / CYCLE_LAYERS));
-	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), NULL, rgba(120, 200, 248, 255), 200);
+	/* the guardian ahead, named from the start, so the folder can be set
+	 * for it (as Slay the Spire shows each act's boss) */
+	char ahead[48] = "";
+	if (run.side_kind == LAYER_NORMAL) snprintf(ahead, sizeof ahead, "Guardian: %s", guardian(run.boss_order[biome])->name);
+	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), ahead[0] ? ahead : NULL, rgba(120, 200, 248, 255), 200);
 }
 
 /* Leaving an area past its beaten guardian. */
@@ -92,6 +99,7 @@ static void clear_card(void) {
 /* The next battle's enemies, for the game's encounter roll. */
 static void set_encounter(const Encounter *e, bool force) {
 	D.foes = e->nfoes;
+	D.next = *e;
 	if (emu_debug_on()) {
 		fprintf(stderr, "encounter field %02x:", e->field);
 		for (int i = 0; i < e->nfoes; ++i) fprintf(stderr, " %d/%d/%d@%d,%d", e->foes[i].kind, e->foes[i].family, e->foes[i].version, e->foes[i].col, e->foes[i].row);
@@ -128,6 +136,15 @@ static void lock_run(void) {
 	flag_set(BN6_FLAG_NO_PET_SAVE);
 }
 
+/* The next random battle: the run's first two and the first after each
+ * guardian from the lower half of the act's band (docs/PROGRESSION.md). */
+static void roll_encounter(void) {
+	bool opening = run.side_kind == LAYER_NORMAL && (run.depth - 1) % 3 == 0 &&
+		(run.depth == 1 ? D.battles < 2 : D.battles < 1);
+	Encounter e = make_encounter(run.depth, run.biome, opening ? ENC_EASY : ENC_NORMAL);
+	set_encounter(&e, false);
+}
+
 static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
@@ -146,8 +163,8 @@ static bool build_layer(void) {
 	D.chosen = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 
-	Encounter e = make_encounter(run.depth, biome, false);
-	set_encounter(&e, false);
+	D.battles = 0;
+	roll_encounter();
 	D.start_x = D.objs.start_x;
 	D.start_y = D.objs.start_y;
 	/* until MegaMan takes it, the exit pad leads back to the layer's start */
@@ -262,7 +279,7 @@ static bool act_on_choices(void) {
 		D.chosen |= 1u << i;
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
-			Encounter e = make_encounter(run.depth + 3, run.biome, true);
+			Encounter e = make_encounter(run.depth, run.biome, ENC_CHALLENGE);
 			set_encounter(&e, true);
 			D.challenge = true;
 			return true;
@@ -302,6 +319,7 @@ static bool follow_exit_warp(void) {
 }
 
 static void end_run(void) {
+	runlog_run_end();
 	profile_record_run();
 	save_delete();
 	run.active = false;
@@ -330,6 +348,11 @@ void director_update(void) {
 		int sub = emu_read8(BN6_GAMESTATE);
 		if (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE) {
 			emu_battle_release();   /* the forced battle has begun */
+			if (!D.in_battle) {
+				bool guardian = boss_fighting();
+				if (!guardian && !D.challenge) ++D.battles;
+				runlog_battle_start(guardian ? NULL : &D.next, guardian ? "guardian" : D.challenge ? "challenge" : "battle");
+			}
 			D.in_battle = true;
 		}
 		return;
@@ -337,15 +360,20 @@ void director_update(void) {
 	if (D.in_battle) {
 		/* back from a battle: count the deleted viruses (a navi counts below) */
 		D.in_battle = false;
-		if (emu_read8(BN6_BATTLE_RESULT) == 1 && !boss_fighting()) run.viruses_deleted += D.foes;
+		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
+		runlog_battle_end(won);
+		if (won && !boss_fighting()) run.viruses_deleted += D.foes;
+		if (!D.challenge && !boss_fighting()) roll_encounter();
 	}
 	/* back from the guardian's battle */
 	if (boss_fighting() && !emu_battle_forcing()) boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
 	if (D.challenge && !emu_battle_forcing()) {
-		/* back from the challenge (the game gave its reward): random battles again */
+		/* back from the challenge (the game gave its reward, the signal
+		 * gives its own for a win): random battles again */
 		D.challenge = false;
-		Encounter e = make_encounter(run.depth, run.biome, false);
-		set_encounter(&e, false);
+		if (emu_read8(BN6_BATTLE_RESULT) == 1 && D.objs.challenge_reward >= 0)
+			game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)D.objs.challenge_reward);
+		roll_encounter();
 	}
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	/* a guardian keeps the exit pad shut (the game clears the map's warp
@@ -376,8 +404,5 @@ void director_update(void) {
 	}
 	D.astray = 0;
 	/* (not over a battle that is about to start) */
-	if (D.frame % REROLL_FRAMES == 0 && !emu_battle_forcing()) {
-		Encounter e = make_encounter(run.depth, run.biome, false);
-		set_encounter(&e, false);
-	}
+	if (D.frame % REROLL_FRAMES == 0 && !emu_battle_forcing()) roll_encounter();
 }

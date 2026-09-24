@@ -2,6 +2,7 @@
  * layer's text archive, then its actors once the archive has an address. */
 #include "guardian_objs.h"
 
+#include "data.h"
 #include "flags.h"
 #include "guardians.h"
 #include "loot.h"
@@ -40,7 +41,14 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	g->intro = ta_talk(text, in.boxes, mugs);
 	mugs[0] = gd->mugshot;
 	g->defeat = ta_talk(text, out.boxes, mugs);
-	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome), LAYER_REWARD_TAKEN_FLAG);
+	int chip = navi_chip(g->navi, g->version), code = 26;
+	ChipInfo ci = { 0 };
+	if (chip > 0) {
+		chip_info(chip, &ci);
+		if (ci.ncodes) code = ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A';
+	}
+	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome), chip, ci.name, code,
+		LAYER_REWARD_TAKEN_FLAG);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);

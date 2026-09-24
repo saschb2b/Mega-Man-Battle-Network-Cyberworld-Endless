@@ -8,6 +8,7 @@
 #include "net_arena.h"
 #include "net_layouts.h"
 #include "net_shapes.h"
+#include "pacing.h"
 #include "run.h"
 
 Layer layer;
@@ -200,14 +201,16 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	}
 
 	/* Points of interest in the other rooms. */
+	/* each act's middle layer has the Net Dealer and a heal; its first often
+	 * a shop (docs/PROGRESSION.md) */
 	int biome_layer = (depth - 1) % 3;
-	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || rng_range(0, 99) < 25);
-	bool heal = rng_range(0, 99) < (layer.boss_layer ? 70 : 30);
+	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
+	bool heal = rng_range(0, 99) < (layer.boss_layer ? 70 : 30) || (kind == LAYER_NORMAL && pacing_heal_certain(depth));
 	bool trader = rng_range(0, 99) < 25;
 	bool programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
 	bool bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	trader &= !bugtrader;   /* the trade screen serves one trader per map */
-	bool challenge = rng_range(0, 99) < 20 + depth;
+	bool challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
 	bool undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
 		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
 	bool secret = kind == LAYER_UNDERNET && !run.secret_cleared;
@@ -228,6 +231,8 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 		if (kind == LAYER_NORMAL && room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_SHOP, x, y);
 		shop = heal = false;
 	}
+	/* a Mr. Prog with a gift by the run's start */
+	if (depth == 1 && kind == LAYER_NORMAL && room_spot(&layer.rooms[0], &x, &y)) add_obj(OBJ_GIFT, x, y);
 	if (shop) { PLACE(OBJ_SHOP); ++next; }
 	if (heal) { PLACE(OBJ_HEAL); ++next; }
 	if (trader) { PLACE(OBJ_TRADER); ++next; }

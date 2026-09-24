@@ -5,6 +5,7 @@
 
 #include "game.h"
 #include "net.h"
+#include "pacing.h"
 #include "rom.h"
 #include "run.h"
 
@@ -184,12 +185,81 @@ static void test_depth_plan(void) {
 	CHECK(biome_for_depth(20) == run.biome_order[0], "the cycle restarts after the Nest");
 }
 
+
+/* HP by navi and version (V1, EX, SP) as the ROM has them, for the checks */
+static int fake_navi_hp(int navi, int version) {
+	static const int hp[19][3] = {
+		[1] = { 700, 1500, 1900 }, [2] = { 900, 1400, 1800 }, [3] = { 800, 1200, 1500 }, [4] = { 800, 1200, 1600 },
+		[5] = { 1000, 1500, 2000 }, [6] = { 600, 1300, 1700 }, [7] = { 1000, 1500, 2000 }, [8] = { 800, 1200, 1500 },
+		[9] = { 1000, 1500, 2000 }, [10] = { 900, 1300, 1800 }, [11] = { 1800, 2000, 2000 }, [12] = { 400, 800, 1400 },
+		[13] = { 500, 1000, 1500 }, [14] = { 700, 1200, 1600 }, [15] = { 800, 1100, 1600 }, [16] = { 900, 1300, 1700 },
+		[18] = { 1200, 1600, 2000 },
+	};
+	return navi > 0 && navi < 19 && version >= 0 && version < 3 && hp[navi][0] ? hp[navi][version] : -1;
+}
+
+static void test_pacing(void) {
+	/* acts and cycles */
+	CHECK(pacing_act(1) == 0 && pacing_act(3) == 0 && pacing_act(4) == 1 && pacing_act(18) == 5 && pacing_act(19) == 6,
+		"acts of three layers, then the Nest");
+	CHECK(pacing_act(20) == 0 && pacing_loop(20) == 1 && pacing_loop(19) == 0, "the second cycle begins at 20");
+	/* bands rise with the acts and the cycles; an easy battle stays below */
+	for (int d = 1; d < 19; ++d) {
+		PacingBand a = pacing_band(d, false, false), b = pacing_band(d + 1, false, false), e = pacing_band(d, false, true);
+		CHECK(b.hi >= a.hi && b.cap >= a.cap, "the band never falls from depth %d to %d", d, d + 1);
+		CHECK(e.hi <= a.hi && e.hi >= a.lo, "the easy band at depth %d lies in the lower half", d);
+		CHECK(pacing_band(d, true, false).hi >= a.hi, "a challenge at depth %d is at least as hard", d);
+		CHECK(pacing_band(d + CYCLE_LAYERS, false, false).hi > a.hi, "the next cycle is harder at depth %d", d);
+	}
+	CHECK(pacing_band(1, false, false).cap <= 50, "the first act keeps hits to half of 100 HP");
+	/* versions: V1 through two acts, never above SP, no rares early */
+	for (int i = 0; i < 200; ++i) {
+		CHECK(pacing_virus_version(1 + i % 6, false) == 0, "V1 in the first two acts");
+		int v = pacing_virus_version(1 + i % 60, i & 1);
+		CHECK(v >= 0 && v <= 3, "a version from V1 to SP");
+	}
+	for (int roll = 0; roll < 100; ++roll) CHECK(!pacing_rare(1 + roll % 6, roll), "no rare virus in the first two acts");
+	/* areas: easy first, late last, none twice */
+	static const int opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_SKY_HP, BIOME_COMP };
+	static const int late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
+	for (uint32_t seed = 1; seed <= 300; ++seed) {
+		rng_seed(seed);
+		uint8_t o[4];
+		pacing_area_order(o);
+		bool first = false, last = false;
+		for (int i = 0; i < 5; ++i) first |= o[0] == opening[i];
+		for (int i = 0; i < 4; ++i) last |= o[3] == late[i];
+		CHECK(first, "seed %u: act 1 in an opening area (%d)", seed, o[0]);
+		CHECK(last, "seed %u: act 4 in a late area (%d)", seed, o[3]);
+		for (int i = 0; i < 4; ++i)
+			for (int j = i + 1; j < 4; ++j) CHECK(o[i] != o[j], "seed %u: an area twice", seed);
+	}
+	/* guardians: the first act meets a light navi even from a heavy pool */
+	static const uint8_t others[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
+	static const uint8_t heavy[4] = { 18, 15, 12, 18 }, sky_hp[4] = { 4, 10, 16, 4 };
+	for (uint32_t seed = 1; seed <= 100; ++seed) {
+		rng_seed(seed);
+		int g = pacing_guardian_pick(heavy, others, (int)sizeof others, 0, 0, false, fake_navi_hp);
+		CHECK(g == 12, "the lab comps' first-act guardian is BlastMan, got %d", g);
+		g = pacing_guardian_pick(sky_hp, others, (int)sizeof others, 0, 0, false, fake_navi_hp);
+		CHECK(fake_navi_hp(g, 0) <= 600, "a first-act guardian of 600 HP at most, got %d", g);
+	}
+	CHECK(pacing_guardian_version(18, 3, 0, false, fake_navi_hp) == 0, "Colonel V1 in the fourth act");
+	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
+	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
+	/* heals: the middle layer of each act on the first two cycles */
+	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && !pacing_heal_certain(1) && !pacing_heal_certain(19),
+		"a heal on each act's middle layer");
+	CHECK(pacing_heal_certain(2 + CYCLE_LAYERS) && !pacing_heal_certain(2 + 2 * CYCLE_LAYERS), "the third cycle drops it");
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
 	test_stairs();
 	test_depth_plan();
+	test_pacing();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

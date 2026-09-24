@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "bn6.h"
+#include "chip_pool.h"
 #include "data.h"
 #include "debug.h"
 #include "emu.h"
@@ -18,6 +19,7 @@
 #include "npc_lines.h"
 #include "rom.h"
 #include "run.h"
+#include "save.h"
 #include "scripts.h"
 #include "shop.h"
 #include "trader.h"
@@ -37,12 +39,20 @@
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
 #define SPECIAL_CHANCE  40   /* % of those */
 
+#define HP_MEMORY_CHANCE 15   /* % of the rich Mystery Data from the second act on */
+
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
- * 4 key item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md). */
-static void mystery_content(const NetObj *o, uint8_t out[8]) {
+ * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md). True for
+ * an HPMemory, which the game keeps in blue Mystery Data. */
+static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 	int roll = rng_range(0, 99);
 	char code = '*';
 	int kind = 3, value = 100;
+	if (o->param == 2 && run.depth >= 4 && rng_range(0, 99) < HP_MEMORY_CHANCE) {
+		const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_HP_MEMORY, 0, 0, 0 };
+		for (int i = 0; i < 8; ++i) out[i] = c[i];
+		return true;
+	}
 	if (o->param == 0) {
 		if (roll < 50) { kind = 1; value = roll_chip(run.depth, 0, &code); }
 		else if (roll < 85) value = (100 + rng_range(0, 8) * 50) * (1 + run.depth / 6);
@@ -61,6 +71,7 @@ static void mystery_content(const NetObj *o, uint8_t out[8]) {
 	out[4] = (uint8_t)value;
 	out[5] = (uint8_t)(value >> 8);
 	out[6] = out[7] = 0;
+	return false;
 }
 
 /* A ScrtData, as the game's key item Mystery Data hold one. */
@@ -95,7 +106,7 @@ static int navi_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
 		{ 11, 0x3B }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 },            /* Proto, Dive, Circus, Judge */
-		{ 17, 0x53 },                                                        /* Colonel */
+		{ 18, 0x53 },                                                        /* Colonel */
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
@@ -113,6 +124,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int nmd = 0;
 	out->nchoices = 0;
 	out->guardian.navi = 0;
+	out->challenge_reward = -1;
 	/* ScrtData lie in deep layers until three are out there */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
@@ -152,8 +164,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					fragment = false;
 					md[nmd].type = MYSTERY_BLUE;
 					fragment_content(md[nmd].content);
-				} else {
-					mystery_content(o, md[nmd].content);
+				} else if (mystery_content(o, md[nmd].content)) {
+					md[nmd].type = MYSTERY_BLUE;
 				}
 				npcs.script[npcs.n++] = npc_mystery(nmd);
 				++nmd;
@@ -183,7 +195,31 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.sprite = SPR_PROG_BLUE;
 			tk.script = ta_shop(&text, SHOP_PROGRAMS, "NaviCust programs\nfor sale!");
 			break;
-		case OBJ_CHALLENGE: asks = true; tk.cat = 7; tk.sprite = SPR_SERVER; break;
+		case OBJ_CHALLENGE: {
+			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;
+			/* a win pays with a chip a tier better than Mystery Data */
+			char code = '*';
+			ChipInfo ci;
+			int chip = roll_chip(run.depth, 3, &code);
+			chip_info(chip, &ci);
+			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');
+			break;
+		}
+		case OBJ_GIFT: {
+			char code = '*';
+			ChipInfo ci;
+			int chip = chip_pool_pick(2);
+			if (chip <= 0) chip = roll_chip(run.depth, 3, &code);
+			chip_info(chip, &ci);
+			code = ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*';
+			ShopItem program = { 3, 1, 0, 0, 0 };
+			shop_pick_program(&program);
+			/* a run lost before its first guardian earns a little more */
+			bool comfort = profile.last_depth >= 1 && profile.last_depth <= 3;
+			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, chip, ci.name, code == '*' ? 26 : code - 'A', program.id, program.code);
+			flag_clear(LAYER_GIFT_FLAG);
+			break;
+		}
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
 		case OBJ_BOSS:

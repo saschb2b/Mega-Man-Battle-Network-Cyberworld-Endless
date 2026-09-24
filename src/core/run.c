@@ -2,7 +2,9 @@
 
 #include <string.h>
 
+#include "data.h"
 #include "game.h"
+#include "pacing.h"
 
 Run run;
 
@@ -12,18 +14,13 @@ void run_new(uint32_t seed) {
 	run.seed = seed;
 	run.depth = 1;
 	rng_seed(seed);
-	/* Acts 1-4 visit four of the surface areas, in a random order. */
-	uint8_t surface[] = {
-		BIOME_CENTRAL, BIOME_SEASIDE, BIOME_SKY, BIOME_GREEN, BIOME_COMP, BIOME_HOMEPAGE, BIOME_COMP_B,
-		BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_JUDGE_COMP, BIOME_WEATHER_COMP, BIOME_COPYBOT_COMP,
-		BIOME_ACDC_HP, BIOME_GREEN_HP, BIOME_SKY_HP,
-	};
-	enum { NSURFACE = sizeof surface };
-	for (int i = NSURFACE - 1; i > 0; --i) { int j = rng_range(0, i); uint8_t t = surface[i]; surface[i] = surface[j]; surface[j] = t; }
-	for (int i = 0; i < 4; ++i) run.biome_order[i] = surface[i];
-	run.biome_order[4] = BIOME_GRAVEYARD;
-	run.biome_order[5] = BIOME_UNDERNET;
-	/* Each area's guardian, drawn from navis that suit it. */
+	/* Acts 1-4 visit four of the surface areas, easier ones first; then the
+	 * Undernet and the Graveyard, which BN6 keeps for after its story. */
+	pacing_area_order(run.biome_order);
+	run.biome_order[4] = BIOME_UNDERNET;
+	run.biome_order[5] = BIOME_GRAVEYARD;
+	/* Each area's guardian, drawn from navis that suit it; in the areas the
+	 * run visits, from those whose HP suits the act. */
 	static const uint8_t pools[BIOME_COUNT][4] = {
 		{ 12, 2, 5, 12 },   /* Central: BlastMan, ElecMan, ChargeMan */
 		{ 13, 6, 2, 1 },    /* Seaside: DiveMan, SpoutMan, ElecMan, HeatMan */
@@ -33,19 +30,29 @@ void run_new(uint32_t seed) {
 		{ 11, 3, 1, 11 },   /* Undernet: ProtoMan, SlashMan, HeatMan */
 		{ 11, 11, 11, 11 }, /* Secret Area: ProtoMan SP */
 		{ 3, 4, 11, 3 },    /* Cybeast Nest */
-		{ 14, 12, 17, 14 }, /* Comp: CircusMan, BlastMan, Colonel */
+		{ 14, 12, 18, 14 }, /* Comp: CircusMan, BlastMan, Colonel */
 		{ 14, 16, 13, 16 }, /* Homepage: CircusMan, ElementMan, DiveMan */
-		{ 17, 15, 12, 17 }, /* Comp (second): Colonel, JudgeMan, BlastMan */
+		{ 18, 15, 12, 18 }, /* Comp (second): Colonel, JudgeMan, BlastMan */
 		{ 1, 12, 5, 1 },    /* Robot Control Comp: HeatMan, BlastMan, ChargeMan */
 		{ 2, 6, 13, 2 },    /* Aquarium Comp: ElecMan, SpoutMan, DiveMan */
 		{ 3, 7, 15, 3 },    /* Judge Tree Comp: SlashMan, TomahawkMan, JudgeMan */
 		{ 4, 8, 16, 4 },    /* Mr. Weather Comp: EraseMan, TenguMan, ElementMan */
-		{ 17, 14, 11, 17 }, /* CopyBot's comp: Colonel, CircusMan, ProtoMan */
+		{ 18, 14, 11, 18 }, /* CopyBot's comp: Colonel, CircusMan, ProtoMan */
 		{ 1, 5, 12, 1 },    /* ACDC HP: HeatMan, ChargeMan, BlastMan */
 		{ 3, 9, 7, 3 },     /* Green HP: SlashMan, GroundMan, TomahawkMan */
 		{ 4, 10, 16, 4 },   /* Sky HP: EraseMan, DustMan, ElementMan */
 	};
+	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = pools[b][rng_range(0, 3)];
+	for (int act = 0; act < 6; ++act) {
+		int b = run.biome_order[act];
+		run.boss_order[b] = (uint8_t)pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
+	}
+}
+
+int navi_hp(int navi, int version) {
+	int hp, damage, id = enemy_id(1, navi, version);
+	return id >= 0 && enemy_stats(id, &hp, &damage) ? hp : -1;
 }
 
 /* the BattleSettings background (0x00-0x15) of each area's battles, two

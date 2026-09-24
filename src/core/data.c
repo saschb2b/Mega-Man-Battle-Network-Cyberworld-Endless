@@ -84,6 +84,7 @@ const ChipDef chip_defs[] = {
 	{ 263, CK_NAVI, 14, 4, 0 },     /* CrcusMan */
 	{ 266, CK_NAVI, 15, 4, 0 },     /* JudgeMan */
 	{ 269, CK_NAVI, 16, 4, 0 },     /* ElmntMan */
+	{ 272, CK_NAVI, 18, 4, 0 },     /* Colonel */
 	/* Program Advances: formed in the Custom screen, never dropped (tier 5) */
 	{ 320, CK_CANNON, 0, 5, 0 },    /* GigaCan1 */
 	{ 321, CK_CANNON, 0, 5, 0 },    /* GigaCan2 */
@@ -143,5 +144,29 @@ int enemy_id(int actor_type, int family, int version) {
 		if (e[0] == version && e[1] == actor_type && e[2] == family) return id;
 	}
 	return -1;
+}
+
+int navi_chip(int navi, int version) {
+	/* each navi's chips come in threes: V1, EX, SP */
+	for (int i = 0; i < chip_def_count; ++i)
+		if (chip_defs[i].kind == CK_NAVI && chip_defs[i].param == navi) return chip_defs[i].rom_id + (version < 0 ? 0 : version > 2 ? 2 : version);
+	return 0;
+}
+
+bool enemy_stats(int id, int *hp, int *damage) {
+	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return false;
+	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
+	if (e[1] > 2) return false;
+	/* a table per actor type, a pointer per ai, a record per version:
+	 * u16 element << 12 | HP, version, flags, u16 element << 12 | damage */
+	uint32_t types = rom_u32(R.layout->enemy_stats + (uint32_t)e[1] * 4);
+	if (!rom_is_ptr(types)) return false;
+	uint32_t recs = rom_u32(rom_off(types) + (uint32_t)e[2] * 4);
+	if (!rom_is_ptr(recs)) return false;
+	uint32_t r = rom_off(recs) + (uint32_t)e[0] * 6;
+	if (r + 6 > ROM_SIZE) return false;
+	*hp = rom_u16(r) & 0xFFF;
+	*damage = rom_u16(r + 4) & 0xFFF;
+	return true;
 }
 

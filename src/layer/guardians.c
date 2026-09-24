@@ -25,7 +25,7 @@ static const Guardian guardians[] = {
 	[14] = { "CircusMan", "Ringmaster of Fear", 0x54, -1, 232, 64, 96 },
 	[15] = { "JudgeMan", "Voice of Verdict", 0x55, -1, 88, 104, 216 },
 	[16] = { "ElementMan", "Lord of Elements", 0x56, -1, 176, 136, 232 },
-	[17] = { "Colonel", "The Iron Strategist", 0x53, -1, 120, 168, 136 },
+	[18] = { "Colonel", "The Iron Strategist", 0x53, -1, 120, 168, 136 },
 };
 #define NGUARDIANS ((int)(sizeof guardians / sizeof *guardians))
 
@@ -117,7 +117,7 @@ static const struct { const char *first, *rematch, *revenge, *stronger, *defeat;
 		"The elements\nrejected you.\nThey still do.",
 		"I have mastered\nevery element!",
 		"The elements...\nabandon me..." },
-	[17] = { "Soldier. This\nposition is held\nby me.|Your advance\nstops here!",
+	[18] = { "Soldier. This\nposition is held\nby me.|Your advance\nstops here!",
 		"You took this\nposition once. I\nhave re-planned.",
 		"The last campaign\nwas mine. So is\nthis one.",
 		"My forces have\ndoubled. Your\nodds have not.",

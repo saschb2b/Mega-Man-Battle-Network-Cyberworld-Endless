@@ -16,7 +16,7 @@ or drawn over its frame by `src/director/cinema.c`.
 | The boss's name and epithet on its health bar | A title card: the area it guards, its name large (with EX or SP for stronger versions), its epithet; the game's own battle shows its name too |
 | No question before the fight | The battle starts after the last line |
 | A defeat line, a flash, the boss leaves | A last word, a white flash, and the guardian logs out, fading away |
-| A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (three HPMemory, its Cross or Beast Out); taking it makes the exit pad appear |
+| A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (its Cross or Beast Out, five HPMemory, its own Navi chip at the version fought, a full heal); taking it makes the exit pad appear |
 | Stairs into the next region, its name on screen | An area-clear card (guardian, viruses, time) over the jack-out, then the next area's title card |
 | Bosses remember runs | `rivals.sav` counts meetings and who won each battle, per Navi |
 
@@ -51,3 +51,14 @@ ElementMan 0x56, ProtoMan 0x3B, MegaMan 0x37. Gregar has neither for
 Falzar's Navis (SpoutMan, TomahawkMan, TenguMan, GroundMan, DustMan), who
 speak without one and stand as a HeelNavi on the net, as do BlastMan and
 ElementMan (no overworld sprite).
+
+A guardian's navi index is its ai in the enemy table: HeatMan 1 .. ElementMan
+16, and Colonel 18. Index 17 (and 0, 22) is an unnamed navi with 4000 HP at
+V1, which the Graveyard's SP battle uses; runs saved before Colonel moved
+to 18 have their 17 changed on loading, and his rival record follows.
+
+Which guardian an area gets depends on its act (docs/PROGRESSION.md): from
+the area's pool the Navis whose HP at the act's version lies in the act's
+band (400-600 in act 1 up to 1200-2000 in act 6), else another Navi in the
+band, else the pool's nearest. Acts 1-3 fight V1, acts 4-6 EX where it
+fits, the Nest, the Secret Area and later cycles SP.

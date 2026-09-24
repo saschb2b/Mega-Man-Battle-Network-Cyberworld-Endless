@@ -16,6 +16,7 @@ static const RomLayout layouts[] = {
 		.chip_data = 0x021DA8,
 		.chip_names = { 0x6E88D0, 0x6E92D8 },
 		.enemy_ids = 0x0182C4,
+		.enemy_stats = 0x00F260,
 		.encounters = 0x020170,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {

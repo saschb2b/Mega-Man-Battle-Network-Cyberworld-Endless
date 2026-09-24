@@ -28,6 +28,7 @@ typedef enum {
 	OBJ_CHALLENGE,   /* optional hard battle */
 	OBJ_PROGRAMS,    /* NaviCust program vendor */
 	OBJ_RETURN,      /* leave a side layer */
+	OBJ_GIFT,        /* the run's first layer: a gift to choose */
 } ObjType;
 
 typedef struct {

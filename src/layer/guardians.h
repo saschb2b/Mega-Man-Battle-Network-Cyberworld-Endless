@@ -17,7 +17,7 @@ typedef struct {
 	unsigned char r, g, b;  /* the title card's accent */
 } Guardian;
 
-/* navi index as in the battle's enemy table (1 HeatMan .. 17 Colonel) */
+/* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel) */
 const Guardian *guardian(int navi);
 
 /* A line is one or more chat boxes split by '|', each up to three lines

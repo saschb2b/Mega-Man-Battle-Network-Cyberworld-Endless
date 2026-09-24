@@ -11,6 +11,8 @@
 /* Event flags the layer's choices set (Yes), one per choice. */
 #define LAYER_FLAG_BASE 0x1440
 #define LAYER_MAX_CHOICES 8
+/* The first layer's gift was chosen. */
+#define LAYER_GIFT_FLAG 0x144D
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -19,6 +21,7 @@ typedef struct {
 	GuardianStage guardian;    /* the layer's guardian and its sequence */
 	int nchoices;
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
+	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 } LayerObjs;
 
 /* Installs the current layer's objects in map (group, number). */
