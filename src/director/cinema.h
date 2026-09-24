@@ -23,6 +23,8 @@ void cinema_offset(int *dx, int *dy);
 void cinema_draw(void);
 /* The GBA keys that reach the game. */
 uint32_t cinema_keys(uint32_t keys);
+/* Off the map (a battle, a menu) the player always plays. */
+void cinema_on_map(bool on_map);
 
 void cinema_input(int mode);
 /* The keys MegaMan walks by this frame, in CINEMA_WALK. */

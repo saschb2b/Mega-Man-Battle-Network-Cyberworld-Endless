@@ -15,6 +15,7 @@
 enum { CARD_NONE, CARD_TITLE, CARD_AREA };
 
 static struct {
+	bool off_map;
 	int input;
 	uint32_t walk;
 	bool bars;
@@ -54,7 +55,10 @@ void cinema_card(const char *small, const char *big, const char *line1, const ch
 	card(CARD_AREA, small, big, line1, line2, accent, frames);
 }
 
+void cinema_on_map(bool on_map) { C.off_map = !on_map; }
+
 uint32_t cinema_keys(uint32_t keys) {
+	if (C.off_map) return keys;
 	if (C.input == CINEMA_HOLD) return 0;
 	if (C.input == CINEMA_TALK) return keys & (KEY_A | KEY_B);
 	if (C.input == CINEMA_WALK) return C.walk;

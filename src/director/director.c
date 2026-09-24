@@ -291,6 +291,7 @@ void director_update(void) {
 		return;
 	}
 	if (follow_exit_warp()) return;
+	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
 		if (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE) {
