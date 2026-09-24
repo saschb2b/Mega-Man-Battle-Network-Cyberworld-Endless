@@ -69,10 +69,9 @@ static bool decode_tiles(AreaSrc *a) {
 	return true;
 }
 
-/* The most common edge position (mod 32) of the NE (type 1) and NW (type 4)
- * walls: a wall cell's centre lies on the panel edge. */
-static void decode_edges(AreaSrc *a) {
-	a->ex = 4; a->ey = 4;
+/* The coordinate data's four sections, each a count, (key, offset)
+ * entries and 4-byte shapes (see coords.c). */
+static void decode_coords(AreaSrc *a) {
 	uint32_t list = rom_u32(COORD_TABLE + (uint32_t)(a->group - 0x80) * 4);
 	if (!rom_is_ptr(list)) return;
 	a->coord_slot = rom_off(list) + (uint32_t)a->number * 4;
@@ -81,18 +80,38 @@ static void decode_edges(AreaSrc *a) {
 	c = rom_off(c);
 	size_t n = 0;
 	uint8_t *d = lz77_decompress(R.data + c + 16, ROM_SIZE - (c + 16), &n);
-	if (!d || n < 4) { free(d); return; }
-	uint32_t count = (uint32_t)(d[0] | d[1] << 8 | d[2] << 16 | d[3] << 24);
-	int hx[4] = { 0 }, hy[4] = { 0 };
-	for (uint32_t i = 0; i < count && 4 + i * 4 + 4 <= n; ++i) {
-		int key = d[4 + i * 4] | d[5 + i * 4] << 8, off = d[6 + i * 4] | d[7 + i * 4] << 8;
-		if ((size_t)(4 + off + 4) > n) continue;
-		int type = d[4 + off + 3];
-		int x = key % 254 - 127, y = key / 254 - 127;
-		if (type == 1) hx[((x * 8 + 4) & 31) / 8]++;
-		if (type == 4) hy[((y * 8 + 4) & 31) / 8]++;
+	if (!d) return;
+	for (int s = 0; s < 4; ++s) {
+		uint32_t at = rom_u32(c + (uint32_t)s * 4);
+		if (at + 4 > n) continue;
+		uint32_t count = (uint32_t)(d[at] | d[at + 1] << 8 | d[at + 2] << 16 | d[at + 3] << 24);
+		a->sec[s] = calloc(count + 1, sizeof(CoordCell));
+		for (uint32_t i = 0; i < count && at + 8 + i * 4 <= n; ++i) {
+			uint32_t e = at + 4 + i * 4;
+			int key = d[e] | d[e + 1] << 8, off = d[e + 2] | d[e + 3] << 8;
+			if ((size_t)(at + 4 + off + 4) > n) continue;
+			const uint8_t *sh = d + at + 4 + off;
+			CoordCell *cc = &a->sec[s][a->nsec[s]++];
+			cc->x = (int16_t)((key % 254 - 127) * 8);
+			cc->y = (int16_t)((key / 254 - 127) * 8);
+			cc->z = (int8_t)sh[0];
+			cc->value = sh[1];
+			cc->height = sh[2];
+			cc->type = sh[3];
+		}
 	}
 	free(d);
+}
+
+/* The most common edge position (mod 32) of the NE (type 1) and NW (type 4)
+ * walls: a wall cell's centre lies on the panel edge. */
+static void decode_edges(AreaSrc *a) {
+	int hx[4] = { 0 }, hy[4] = { 0 };
+	for (int i = 0; i < a->nsec[0]; ++i) {
+		const CoordCell *c = &a->sec[0][i];
+		if (c->type == 1) hx[((c->x + 4) & 31) / 8]++;
+		if (c->type == 4) hy[((c->y + 4) & 31) / 8]++;
+	}
 	int bx = 0, by = 0;
 	for (int k = 1; k < 4; ++k) { if (hx[k] > hx[bx]) bx = k; if (hy[k] > hy[by]) by = k; }
 	a->ex = bx * 8 + 4;
@@ -104,6 +123,7 @@ bool area_src_load(int group, int number, AreaSrc *a) {
 	a->group = group;
 	a->number = number;
 	if (!decode_tiles(a)) { area_src_free(a); return false; }
+	decode_coords(a);
 	decode_edges(a);
 	return true;
 }
@@ -112,6 +132,7 @@ void area_src_free(AreaSrc *a) {
 	for (int l = 0; l < 2; ++l) free(a->tile[l]);
 	free(a->px);
 	free(a->front);
+	for (int k = 0; k < 4; ++k) free(a->sec[k]);
 	memset(a, 0, sizeof *a);
 }
 
@@ -134,6 +155,7 @@ void area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 			m->px[(size_t)y * W + (W - 1 - x)] = a->px[(size_t)y * W + x];
 			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
 		}
+	for (int k = 0; k < 4; ++k) { m->sec[k] = NULL; m->nsec[k] = 0; }   /* the mirror is for tiles only */
 	m->ex = (32 - a->ey) & 31;
 	m->ey = (32 - a->ex) & 31;
 }
