@@ -1,12 +1,13 @@
 // The page around the browser build (cyberworld.js, from `build.py web`).
-// The player's ROM and the game's saves live in IndexedDB under /data: the
-// ROM file is read here, checked, written there and never leaves the
-// browser.
+// The player's ROM and the game's saves live in IndexedDB under
+// /cyberworld-endless (its own name: every project page of a github.io user
+// shares one origin): the ROM file is read here, checked, written there and
+// never leaves the browser.
 'use strict';
 
 const ROM_SIZE = 8 * 1024 * 1024;
 const ROM_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6';   // BN6 Cybeast Gregar (USA)
-const DATA = '/data', ROM_DIR = '/data/rom';
+const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('screen'), stage = $('stage'), gate = $('gate'), statusLine = $('status');
