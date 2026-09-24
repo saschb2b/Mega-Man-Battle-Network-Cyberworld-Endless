@@ -122,6 +122,7 @@ static int floor_cb(int A, int B, const void *ctx) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (kind(x, y) != K_RAISED) return TILE_VOID;
 	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
+	if (x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B;
 	return walkway(x, y) ? TILE_B : TILE_A;
 }
 

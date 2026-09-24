@@ -21,7 +21,7 @@ typedef enum {
 	OBJ_HEAL,
 	OBJ_TRADER,
 	OBJ_BUGTRADER,
-	OBJ_BOSS,        /* the layer's guardian, before the exit; param: navi */
+	OBJ_BOSS,        /* the layer's guardian, in its arena; param: navi */
 	OBJ_UNDERNET,    /* warp to an Undernet layer */
 	OBJ_SECRET_GATE, /* needs three secret fragments */
 	OBJ_NPC,
@@ -72,6 +72,8 @@ typedef struct {
 	bool boss_beaten;
 	int boss_navi;
 	int exit_room;
+	int arena;                     /* the guardian's arena room, -1 for none */
+	int ante;                      /* the room before it, with the last services */
 	int layout;                    /* LAYOUT_* (net_layouts.h) */
 } Layer;
 

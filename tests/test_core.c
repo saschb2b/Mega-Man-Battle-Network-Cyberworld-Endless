@@ -63,8 +63,31 @@ static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
 	return n;
 }
 
+/* A guardian's arena: one way in, the guardian in its middle, the exit
+ * inside it, and nothing else there. */
+static void check_arena(uint32_t seed) {
+	const Room *a = &layer.rooms[layer.arena];
+	int ways = 0;
+	for (int y = a->y - 1; y <= a->y + a->h; ++y)
+		for (int x = a->x - 1; x <= a->x + a->w; ++x) {
+			bool inside = x >= a->x && x < a->x + a->w && y >= a->y && y < a->y + a->h;
+			bool corner = (x < a->x || x >= a->x + a->w) && (y < a->y || y >= a->y + a->h);
+			if (!inside && !corner && layer.cell[y][x] == C_PATH) ++ways;
+		}
+	CHECK(ways == 1, "seed %u: the arena has %d ways in", seed, ways);
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		bool inside = (int)o->x >= a->x && (int)o->x < a->x + a->w && (int)o->y >= a->y && (int)o->y < a->y + a->h;
+		if (o->type == OBJ_BOSS) CHECK((int)o->x == a->ax && (int)o->y == a->ay, "seed %u: the guardian is off the arena's middle", seed);
+		else if (o->type == OBJ_EXIT || o->type == OBJ_RETURN) CHECK(inside, "seed %u: the exit is outside the arena", seed);
+		else CHECK(!inside, "seed %u: object type %d in the arena", seed, o->type);
+	}
+	CHECK(layer.ante >= 0 && layer.ante != layer.arena, "seed %u: no antechamber", seed);
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
+	int boss_layers = 0, arenas = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -95,8 +118,11 @@ static void test_generation(void) {
 			bool boss = false;
 			for (int i = 0; i < layer.nobj; ++i) boss |= layer.obj[i].type == OBJ_BOSS;
 			CHECK(boss, "seed %u: boss layer without a boss", seed);
+			boss_layers++;
+			if (layer.arena >= 0) { arenas++; check_arena(seed); }
 		}
 	}
+	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
 	/* Determinism: the same seed builds the same layer. */
 	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
 	static Layer a;

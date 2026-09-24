@@ -5,6 +5,7 @@
 
 #include "game.h"
 #include "net.h"
+#include "net_arena.h"
 #include "net_layouts.h"
 #include "net_shapes.h"
 #include "run.h"
@@ -79,6 +80,7 @@ static int bfs_far(int from) {
 }
 
 #define MIN_FLOOR 120   /* panels a layer has at least */
+#define ARENA_SIZE 5    /* the guardian's arena, panels a side */
 
 static int floor_cells(void) {
 	int n = 0;
@@ -140,6 +142,8 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	layer.kind = kind;
 	layer.boss_layer = kind == LAYER_NORMAL && is_boss_depth(depth);
 	if (kind == LAYER_SECRET) layer.boss_layer = !run.secret_cleared;
+	layer.arena = layer.ante = -1;
+	ArenaInfo arena = { -1, -1, 0, 0, 0 };
 
 	/* bigger layouts deeper into a cycle */
 	int p = (depth - 1) % CYCLE_LAYERS;
@@ -151,6 +155,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	for (int attempt = 0; attempt < 12; ++attempt) {
 		memset(layer.cell, 0, sizeof layer.cell);
 		layer.nrooms = 0;
+		arena.room = -1;
 		/* the planned layout, then any of the area's, last the plainest at its smallest */
 		bool last = attempt == 11;
 		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
@@ -158,22 +163,33 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 		if (layer.nrooms < 3) continue;
 		choose_arrival();
 		connect_all();
-		if (floor_cells() >= MIN_FLOOR && fits(rise)) break;
+		if (floor_cells() < MIN_FLOOR || !fits(rise)) continue;
+		/* a guardian waits in an arena of its own at the far end */
+		if (!layer.boss_layer || last) break;
+		if (arena_attach(ARENA_SIZE, &arena) >= 0 && fits(rise)) break;
 	}
 
-	layer.exit_room = bfs_far(0);
+	if (layer.arena < 0 && layer.boss_layer && arena.room >= 0 && arena.room < layer.nrooms) {
+		layer.arena = arena.room;
+		layer.ante = arena.ante;
+	}
+	layer.exit_room = layer.arena >= 0 ? layer.arena : bfs_far(0);
 	layer_raise_rooms(seed, stair_dirs, rise);
 	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
 	add_obj(OBJ_WARP_IN, cx, cy);
 	cx = layer.rooms[layer.exit_room].ax;
 	cy = layer.rooms[layer.exit_room].ay;
+	/* in an arena the exit waits behind the guardian, who holds the middle */
+	int bx = cx, by = cy;
+	if (layer.arena >= 0) { cx = arena.exit_x; cy = arena.exit_y; }
 	NetObj *exit = add_obj(kind == LAYER_NORMAL ? OBJ_EXIT : OBJ_RETURN, cx, cy);
 	if (layer.boss_layer && exit) {
-		/* The boss guards the exit, one cell in front of it. */
-		int bx = cx, by = cy;
-		for (int d = 0; d < 4; ++d) {
-			static const int off[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
-			if (layer.cell[cy + off[d][1]][cx + off[d][0]] == C_PATH) { bx = cx + off[d][0]; by = cy + off[d][1]; break; }
+		if (layer.arena < 0) {
+			/* no room for an arena: the guardian stands before the exit */
+			for (int d = 0; d < 4; ++d) {
+				static const int off[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+				if (layer.cell[cy + off[d][1]][cx + off[d][0]] == C_PATH) { bx = cx + off[d][0]; by = cy + off[d][1]; break; }
+			}
 		}
 		NetObj *b = add_obj(OBJ_BOSS, bx, by);
 		if (b) {
@@ -204,6 +220,13 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	int next = 0;
 	int x, y;
 #define PLACE(t) place((t), order, n, next, &x, &y)
+	if (layer.arena >= 0) {
+		/* the last stop before the arena: a heal and the Net Dealer, as the
+		 * rooms before Hades' guardians hold a fountain and Charon */
+		if (room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
+		if (kind == LAYER_NORMAL && room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_SHOP, x, y);
+		shop = heal = false;
+	}
 	if (shop) { PLACE(OBJ_SHOP); ++next; }
 	if (heal) { PLACE(OBJ_HEAL); ++next; }
 	if (trader) { PLACE(OBJ_TRADER); ++next; }

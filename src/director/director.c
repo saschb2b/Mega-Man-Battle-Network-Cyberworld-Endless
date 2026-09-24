@@ -97,7 +97,11 @@ static bool build_layer(void) {
 	unsigned stairs = netmap_stair_dirs(biome, &rise);
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, stairs, rise);
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
-	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs };
+	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0 };
+	if (layer.arena >= 0) {
+		const Room *a = &layer.rooms[layer.arena];
+		lay.ax = a->x; lay.ay = a->y; lay.aw = a->w; lay.ah = a->h;
+	}
 	if (!netmap_build(biome, &lay)) return false;
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
