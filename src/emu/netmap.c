@@ -22,6 +22,7 @@
 #include "area_src.h"
 #include "bytes.h"
 #include "coords.h"
+#include "debug.h"
 #include "bytes.h"
 #include "emu.h"
 #include "lz.h"
@@ -263,8 +264,8 @@ static bool write_tilemap(const Learned *L) {
 	put32(out + 4, 12);
 	put32(out + 8, (uint32_t)(12 + cells * 2)); /* the second layer, in the decompressed buffer */
 	emu_write(TILEMAP_AT, out, 12 + lz);
-	if (getenv("CYBERWORLD_EMU_DEBUG")) {
-		FILE *f = fopen("/src/.build/gen_tilemap.bin", "wb");
+	if (emu_debug_on()) {
+		FILE *f = emu_debug_file("gen_tilemap.bin");
 		if (f) { fwrite(out, 1, 12, f); fwrite(map, 2, cells * 2, f); fclose(f); }
 	}
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "bytes.h"
+#include "debug.h"
 #include "emu.h"
 #include "lz.h"
 #include "netmap.h"
@@ -94,7 +95,7 @@ bool coords_write(uint32_t slot, const CoordPad *pads, int npads) {
 	Cell *w = malloc(WALLS_MAX * sizeof *w), t[TRIGGERS_MAX];
 	int nw = walls(w, WALLS_MAX), nt = 0;
 	for (int i = 0; i < npads && nt + 9 <= TRIGGERS_MAX; ++i) nt += pad(t + nt, &pads[i]);
-	if (getenv("CYBERWORLD_EMU_DEBUG")) debug_print(w, nw);
+	if (emu_debug_on()) debug_print(w, nw);
 	/* sections 1 (height changes) and 2 (layer priorities) stay empty */
 	size_t cap = 16 + (size_t)(nw + nt) * 8;
 	uint8_t *d = calloc(cap, 1);
