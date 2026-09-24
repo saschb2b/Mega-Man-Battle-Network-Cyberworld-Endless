@@ -10,7 +10,7 @@ use.
 | Title screen | Original data, engine-drawn | Picture, logo glow, copyright, PRESS START, NEW GAME / CONTINUE, timings and sounds recorded from the game (`docs/ROM_DATA.md`) |
 | Run summary | Adapted | Drawn text over the dimmed title picture after the game's GAME OVER |
 | Net movement, collision, camera, HUD | Original | The game's overworld code on generated maps |
-| Net floors | Generated | Tiles learned from one original map per area, each checked against where the floor and its side faces are drawn and, inside the floor, against the area's usual panels; a few inner corners the original never shows still take the nearest shape |
+| Net floors | Generated | Tiles learned from one original map per area, platforms and walkways in its two floors, each checked against where the floor and its side faces are drawn and, inside the floor, against the area's usual panels; a few inner corners the original never shows still take the nearest shape |
 | Net walls | Generated | Wall cells in the game's coordinate-data format, shapes as the original maps use them |
 | Raised rooms | Original stairs, generated floor | A stair's tiles, ramp, and side walls cut whole from Sky Area 2 or Undernet 1; the raised floor's heights and walls in the same format |
 | NPCs, Mystery Data, exit pads | Original sprites and scripts | Placed by the engine in the game's NPC bytecode |

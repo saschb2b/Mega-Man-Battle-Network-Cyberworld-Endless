@@ -95,6 +95,11 @@ window of 29 x 53 panels along the grid's diagonals, the screen rectangle
 the game's 0x14000-byte tile map buffer holds; `netmap.c` centres it on that
 rectangle.
 
-Not yet done: the second material. Generated layers draw every panel with
-the area's one learned floor; walkways in their own colour need the tile
-learner to handle two styles and the joins between them.
+Walkways, the floor panels in no 2x2 block of floor, are drawn in the
+area's second floor, learned from the same source map by its hue
+(`walk_styles` in `src/core/rom.c`): Central's blue catwalks, Seaside's
+yellow boardwalks, Sky's darker glass, Green's orange planks, Graveyard's
+purple bridges and the Undernet's red striped bridges. The tile classes
+tell platform, walkway and void apart, so the joins between the two floors
+come from the places the original maps join them. The Nest's source map
+(Underground 2) has no second floor.

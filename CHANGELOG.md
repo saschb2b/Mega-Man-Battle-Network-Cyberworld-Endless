@@ -14,8 +14,9 @@ First playable version.
   maps are laid out (docs/LEVEL_DESIGN.md): Central's routes, crater fields
   and catwalk mazes, Seaside's fields framed by comb boardwalks, Sky's
   mirrored hubs, Green's plank ladders, Graveyard's holed slabs, the
-  Undernet's webs of long bridges and lattices of crosses. Pads on spurs and
-  dead ends hide most of the Mystery Data. Tiles made for one place in the original (bridges, cut corners,
+  Undernet's webs of long bridges and lattices of crosses. Walkways wear the
+  area's second floor (blue catwalks, yellow boardwalks, orange planks). Pads
+  on spurs and dead ends hide most of the Mystery Data. Tiles made for one place in the original (bridges, cut corners,
   decoration hanging off an edge) are not used on plain walkways. Sky and
   Undernet layers can raise a dead-end room onto a stair taken from the
   area's own map.
