@@ -19,9 +19,44 @@ int virus_version(int depth, bool hard) {
 
 #define NAVI_CHALLENGE 40   /* % of deep challenges against one of the area's SP navis */
 
-static int weight_of(const Formation *list, int n, bool navi) {
+/* When a virus family first meets MegaMan on the net: 0 the surface
+ * areas, 1 the Undernet, 2 the Graveyard and the Underground (3 never). The
+ * comps and homepages hold families of every stage and keep to the ones the
+ * run has reached. */
+static int family_stage(int family) {
+	static int8_t stage[32];
+	static bool known;
+	if (!known) {
+		known = true;
+		for (int f = 0; f < 32; ++f) stage[f] = 3;
+		static const struct { int biome, stage; } areas[] = {
+			{ BIOME_CENTRAL, 0 }, { BIOME_SEASIDE, 0 }, { BIOME_SKY, 0 }, { BIOME_GREEN, 0 },
+			{ BIOME_UNDERNET, 1 }, { BIOME_GRAVEYARD, 2 }, { BIOME_NEST, 2 },
+		};
+		for (unsigned a = 0; a < sizeof areas / sizeof *areas; ++a) {
+			const Formation *list;
+			int n = formations_of(areas[a].biome, &list);
+			for (int i = 0; i < n; ++i)
+				for (int k = 0; k < list[i].n; ++k) {
+					const uint8_t *row = R.data + R.layout->enemy_ids + list[i].ent[k].id * 3;
+					if (row[1] == 0 && row[2] < 32 && stage[row[2]] > areas[a].stage) stage[row[2]] = (int8_t)areas[a].stage;
+				}
+		}
+	}
+	return family >= 0 && family < 32 ? stage[family] : 3;
+}
+
+static bool reached(const Formation *f, int allowed) {
+	for (int k = 0; k < f->n; ++k) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		if (row[1] == 0 && row[2] >= 1 && row[2] <= 29 && family_stage(row[2]) > allowed) return false;
+	}
+	return true;
+}
+
+static int weight_of(const Formation *list, int n, bool navi, int allowed) {
 	int total = 0;
-	for (int i = 0; i < n; ++i) total += list[i].navi == navi ? list[i].weight : 0;
+	for (int i = 0; i < n; ++i) total += list[i].navi == navi && reached(&list[i], allowed) ? list[i].weight : 0;
 	return total;
 }
 
@@ -33,12 +68,14 @@ static bool original_encounter(int depth, int biome, bool challenge, Encounter *
 	if (!n) return false;
 	/* deep challenges may meet a navi, everything else the viruses */
 	bool navi = challenge && depth >= 8 && rng_range(0, 99) < NAVI_CHALLENGE;
-	int total = weight_of(list, n, navi);
-	if (!total && navi) total = weight_of(list, n, navi = false);
+	int p = (depth - 1) % CYCLE_LAYERS, allowed = depth > CYCLE_LAYERS ? 2 : p < 6 ? 0 : p < 12 ? 1 : 2;
+	int total = weight_of(list, n, navi, allowed);
+	if (!total && navi) total = weight_of(list, n, navi = false, allowed);
+	if (!total) total = weight_of(list, n, navi, allowed = 3);   /* an area of late viruses only */
 	if (!total) return false;
 	int roll = rng_range(0, total - 1), pick = 0;
 	for (int i = 0; i < n; ++i) {
-		if (list[i].navi != navi) continue;
+		if (list[i].navi != navi || !reached(&list[i], allowed)) continue;
 		if (roll < list[i].weight) { pick = i; break; }
 		roll -= list[i].weight;
 	}
@@ -61,8 +98,11 @@ static bool original_encounter(int depth, int biome, bool challenge, Encounter *
 		else { o->kind = FOE_ROCK; continue; }
 		if (o->kind != FOE_VIRUS || o->version > 3) continue;
 		/* the depth's version, up or down (the originals are paced for the
-		 * story), one rare at most */
+		 * story), one rare at most; the late story's heavy families (the
+		 * dragons, Nightmare), met in packs, at their first version on the
+		 * first cycle */
 		int want = target > 3 ? (rare_done ? 3 : target) : target;
+		if (depth <= CYCLE_LAYERS && family_stage(o->family) >= 2) want = 0;
 		if (want == o->version) continue;
 		int id = enemy_id(0, o->family, want);
 		if (id < 0) continue;
