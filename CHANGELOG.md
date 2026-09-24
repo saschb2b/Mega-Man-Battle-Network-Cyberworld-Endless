@@ -22,15 +22,17 @@ First playable version.
   area's own map.
 - Mystery Data, shops and traders draw from the whole chip library: every
   standard chip, the Megas and, deep in a run, the Gigas, by rarity.
-- The story's Robot Control, Aquarium, Judge Tree and Mr. Weather comps and
-  the ACDC, Green and Sky homepages join the first four acts, with their own battles, music,
+- The story's Robot Control, Aquarium, Judge Tree, Mr. Weather and CopyBot
+  comps and the ACDC, Green and Sky homepages join the first four acts, with their own battles, music,
   backgrounds and guardians. Every area now learns its floors from all of
   its maps in the same tiles and at each of their heights, so raised pools,
   fields and platforms have floor to copy; holes that faces hang over are
   told from floor by the walls around them. The originals' free-standing
   scenery (the Aquarium's coral, shells and starfish) stands beside the
   floor, and pads take the look of the original's pads (the Aquarium's
-  yellow frames on legs). Runs saved before carry over.
+  yellow frames on legs). CopyBot's comp, whose floors no colour tells
+  apart, learns them by shape: purple plateaus in stone rims with pods
+  beneath, pink and white walkways with teal discs, magenta octagon pads. Runs saved before carry over.
 - Three more areas for the first four acts, built from the game's computers
   and homepages: a comp in orange and green, a homepage in pink and teal and
   a comp in blue and pink, each with its own battles, background and
