@@ -60,6 +60,24 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 #define T1_SIZE    0xD8
 #define T1_COUNT   16
 
+/* A battle object that is in play: flag bit 0 of its header, HP left. */
+static bool alive(uint32_t o) { return (emu_read8(o) & 1) && emu_read16(o + 0x24) > 0; }
+
+/* Up or down to MegaMan's row towards the nearest enemy's, 0 when aligned
+ * (PanelY at +0x13, Alliance at +0x16). */
+static uint32_t toward_enemy_row(void) {
+	int mine = -1, theirs = -1;
+	for (uint32_t i = 0; i < T1_COUNT; ++i) {
+		uint32_t o = T1_OBJECTS + i * T1_SIZE;
+		if (!alive(o)) continue;
+		int row = emu_read8(o + 0x13);
+		if (emu_read8(o + 0x16) == 0) { if (mine < 0) mine = row; }
+		else if (theirs < 0 || abs(row - mine) < abs(theirs - mine)) theirs = row;
+	}
+	if (mine < 0 || theirs < 0 || mine == theirs) return 0;
+	return theirs < mine ? KEY_UP : KEY_DOWN;
+}
+
 static void weaken_enemies(void) {
 	for (uint32_t i = 0; i < T1_COUNT; ++i) {
 		uint32_t o = T1_OBJECTS + i * T1_SIZE;
@@ -83,7 +101,9 @@ uint32_t autopilot_keys(void) {
 		if (t < 60) return t < 52 ? KEY_START : 0;            /* to OK */
 		if (t < 72) return t < 64 ? KEY_A : 0;                /* send */
 		if (t % 40 < 6) return KEY_A;                          /* use a chip / advance text */
-		return (t % 12) < 4 ? KEY_B : 0;                       /* buster */
+		uint32_t row = toward_enemy_row();                     /* line up, then the buster */
+		if (row) return (t % 8) < 2 ? row : 0;
+		return (t % 12) < 4 ? KEY_B : 0;
 	}
 	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
