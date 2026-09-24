@@ -53,6 +53,11 @@ static struct {
 /* The next battle's enemies, for the game's encounter roll. */
 static void set_encounter(const Encounter *e, bool force) {
 	D.foes = e->nfoes;
+	if (emu_debug_on()) {
+		fprintf(stderr, "encounter field %02x:", e->field);
+		for (int i = 0; i < e->nfoes; ++i) fprintf(stderr, " %d/%d/%d@%d,%d", e->foes[i].kind, e->foes[i].family, e->foes[i].version, e->foes[i].col, e->foes[i].row);
+		fprintf(stderr, "\n");
+	}
 	if (force) emu_battle_force(e);
 	else emu_encounter_set(e);
 }

@@ -19,6 +19,7 @@ typedef struct {
 	uint32_t chip_data;       /* 0x2C-byte chip records */
 	uint32_t chip_names[2];   /* text archives: ids 0-255, 256+ */
 	uint32_t enemy_ids;       /* (version, actor type, ai) triples */
+	uint32_t encounters;      /* random battles: 4 story stages x (real world, internet) -> group -> map -> BattleSettings */
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */
@@ -37,6 +38,7 @@ typedef struct {
 		uint16_t walk_styles;    /* hue buckets of its walkways, drawn on 1-wide paths (0: none) */
 		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
 		uint8_t song;            /* the area's theme (MP2K song) */
+		uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
 	} net_area[8];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 } RomLayout;

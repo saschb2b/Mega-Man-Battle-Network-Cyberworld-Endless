@@ -11,15 +11,18 @@ typedef struct {
 	int family;  /* virus family / navi index */
 	int version; /* 0 V1, 1 V2, 2 V3, 3 SP, 4-5 rare */
 	int col, row;
+	int id;      /* the ROM's enemy id when known (rocks and cubes too), else -1 */
 } Foe;
 
+#define MAX_FOES 6
+
 typedef struct {
-	Foe foes[4];
+	Foe foes[MAX_FOES];
 	int nfoes;
 	int biome;
 	bool boss;
 	bool no_escape;
-	int field;       /* panel preset: 0 plain, 1 cracked, 2 grass, 3 poison, 4 holy, 5 ice */
+	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 } Encounter;
 
 #endif

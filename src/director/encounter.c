@@ -77,11 +77,12 @@ void emu_battle_release(void) {
 bool emu_battle_forcing(void) { return forcing; }
 
 void emu_encounter_set(const Encounter *e) {
-	uint8_t list[4 * 6 + 1], *p = list;
+	uint8_t list[4 * (MAX_FOES + 1) + 1], *p = list;
 	*p++ = 0x00; *p++ = 0x22; *p++ = 0; *p++ = 0;          /* MegaMan, column 2 row 2 */
-	for (int i = 0; i < e->nfoes && i < 4; ++i) {
+	for (int i = 0; i < e->nfoes && i < MAX_FOES; ++i) {
 		const Foe *f = &e->foes[i];
-		int id = enemy_id(f->kind == FOE_NAVI ? 1 : 0, f->family, f->version);
+		int id = f->id;
+		if (id < 0) id = enemy_id(f->kind == FOE_NAVI ? 1 : 0, f->family, f->version);
 		if (id < 0) id = enemy_id(f->kind == FOE_NAVI ? 1 : 0, f->family, 0);
 		if (id < 0) continue;
 		*p++ = 0x11;
@@ -91,9 +92,9 @@ void emu_encounter_set(const Encounter *e) {
 	}
 	*p++ = 0xF0;
 	emu_write(ENTITIES, list, (size_t)(p - list));
-	/* the values of a Central Area random battle, with the area's background
-	 * and the virus or boss theme */
-	uint8_t s[16] = { 0x00, 0x36, (uint8_t)(e->boss ? 0x16 : 0x15), 0x00, (uint8_t)biome_bg(e->biome), 0x00, 0x38, 0x00 };
+	/* the values of a Central Area random battle, with the formation's
+	 * battlefield, the area's background and the virus or boss theme */
+	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)(e->boss ? 0x16 : 0x15), 0x00, (uint8_t)biome_bg(e->biome), 0x00, 0x38, 0x00 };
 	put32(s + 8, 0x000049E2);
 	put32(s + 12, ENTITIES);
 	emu_write(SETTINGS, s, sizeof s);

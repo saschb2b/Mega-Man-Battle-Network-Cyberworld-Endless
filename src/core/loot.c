@@ -1,8 +1,10 @@
 #include "loot.h"
 
 #include "data.h"
+#include "formations.h"
 #include "game.h"
 #include "run.h"
+#include "rom.h"
 
 int virus_version(int depth, bool hard) {
 	int loop = (depth - 1) / CYCLE_LAYERS;
@@ -14,23 +16,67 @@ int virus_version(int depth, bool hard) {
 	return v;
 }
 
-static int field_for(int biome) {
-	switch (biome) {
-	case BIOME_CENTRAL: return rng_range(0, 3) == 0 ? 1 : 0;
-	case BIOME_SEASIDE: return rng_range(0, 2) == 0 ? 5 : 0;
-	case BIOME_SKY: return rng_range(0, 2) == 0 ? 4 : 0;
-	case BIOME_GREEN: return 2;
-	case BIOME_GRAVEYARD: return rng_range(0, 1) ? 1 : 5;
-	case BIOME_UNDERNET: return 3;
-	case BIOME_SECRET: return 4;
-	default: return 5;
+#define NAVI_CHALLENGE 40   /* % of deep challenges against one of the area's SP navis */
+
+static int weight_of(const Formation *list, int n, bool navi) {
+	int total = 0;
+	for (int i = 0; i < n; ++i) total += list[i].navi == navi ? list[i].weight : 0;
+	return total;
+}
+
+/* A formation from the area's original random battles, its viruses at the
+ * depth's version. False when the ROM has none for the area. */
+static bool original_encounter(int depth, int biome, bool challenge, Encounter *e) {
+	const Formation *list;
+	int n = formations_of(biome, &list);
+	if (!n) return false;
+	/* deep challenges may meet a navi, everything else the viruses */
+	bool navi = challenge && depth >= 8 && rng_range(0, 99) < NAVI_CHALLENGE;
+	int total = weight_of(list, n, navi);
+	if (!total && navi) total = weight_of(list, n, navi = false);
+	if (!total) return false;
+	int roll = rng_range(0, total - 1), pick = 0;
+	for (int i = 0; i < n; ++i) {
+		if (list[i].navi != navi) continue;
+		if (roll < list[i].weight) { pick = i; break; }
+		roll -= list[i].weight;
 	}
+	const Formation *f = &list[pick];
+	e->field = f->battlefield;
+	int target = virus_version(depth, challenge);
+	bool rare_done = false;
+	for (int i = 0; i < f->n && e->nfoes < MAX_FOES; ++i) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[i].id * 3;
+		Foe *o = &e->foes[e->nfoes++];
+		o->version = row[0];
+		o->family = row[2];
+		o->col = (f->ent[i].panel & 15) - 1;
+		o->row = (f->ent[i].panel >> 4) - 1;
+		o->id = f->ent[i].id;
+		/* a virus is the first entry of its family and version; the rest of
+		 * the table's type 0 are rocks, cubes and other objects */
+		if (row[1] == 1) o->kind = FOE_NAVI;
+		else if (row[1] == 0 && o->family >= 1 && o->family <= 29 && enemy_id(0, o->family, o->version) == o->id) o->kind = FOE_VIRUS;
+		else { o->kind = FOE_ROCK; continue; }
+		if (o->kind != FOE_VIRUS || o->version > 3) continue;
+		/* the depth's version, up or down (the originals are paced for the
+		 * story), one rare at most */
+		int want = target > 3 ? (rare_done ? 3 : target) : target;
+		if (want == o->version) continue;
+		int id = enemy_id(0, o->family, want);
+		if (id < 0) continue;
+		o->version = want;
+		o->id = id;
+		rare_done |= want > 3;
+	}
+	return e->nfoes > 0;
 }
 
 Encounter make_encounter(int depth, int biome, bool challenge) {
 	Encounter e = { 0 };
 	e.biome = biome;
-	e.field = field_for(biome);
+	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
+	if (original_encounter(depth, biome, challenge, &e)) return e;
 	int pool[16], n = 0;
 	int p = (depth - 1) % CYCLE_LAYERS + (depth > CYCLE_LAYERS ? 12 : 0);
 	for (int i = 0; i < virus_def_count; ++i)
@@ -61,10 +107,10 @@ Encounter make_encounter(int depth, int biome, bool challenge) {
 Encounter make_boss(int depth, int biome, int navi) {
 	Encounter e = { 0 };
 	e.biome = biome;
-	e.field = biome == BIOME_NEST ? 1 : 0;
 	e.boss = true;
 	e.no_escape = true;
 	e.nfoes = 1;
+	e.foes[0].id = -1;
 	e.foes[0].kind = FOE_NAVI;
 	e.foes[0].family = navi;
 	int loop = (depth - 1) / CYCLE_LAYERS, act = ((depth - 1) % CYCLE_LAYERS) / 3;
