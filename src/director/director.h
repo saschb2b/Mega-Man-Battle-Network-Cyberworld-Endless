@@ -13,6 +13,13 @@ void director_update(void);
 /* Where the test autopilot heads (grid panel): the guardian, to talk to
  * (*talk), or the exit pad. */
 bool director_goal_panel(int *x, int *y, bool *talk);
+/* Dev tools: MegaMan walks a layer's map (not a battle, a menu, a warp). */
+bool director_on_map(void);
+/* ... on to the next layer, or the next guardian's (arriving in the room
+ * before its arena), or to grid panel (x, y) of this one. */
+bool director_dev_next_layer(void);
+bool director_dev_guardian(void);
+bool director_dev_warp_cell(int x, int y);
 /* Test hook (--net-biome): every layer in this biome. */
 extern int director_debug_biome;
 

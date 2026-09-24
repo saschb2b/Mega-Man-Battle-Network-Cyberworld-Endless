@@ -169,6 +169,39 @@ bool director_start_layer(void) {
 	return true;
 }
 
+/* ---- dev tools (src/dev/devtools.c) ---- */
+
+bool director_on_map(void) { return D.active && on_map(); }
+
+bool director_dev_next_layer(void) {
+	if (!director_on_map()) return false;
+	run.depth++;
+	run.side_kind = LAYER_NORMAL;
+	return director_start_layer();
+}
+
+bool director_dev_warp_cell(int x, int y) {
+	if (!director_on_map()) return false;
+	int wx, wy;
+	netmap_world(x, y, &wx, &wy);
+	emu_warp(D.group, D.number, wx, wy, 4);
+	return true;
+}
+
+bool director_dev_guardian(void) {
+	if (!director_on_map()) return false;
+	/* the next guardian's layer, arriving in the room before its arena */
+	do run.depth++; while (!is_boss_depth(run.depth));
+	run.side_kind = LAYER_NORMAL;
+	if (!director_start_layer()) return false;
+	if (layer.ante >= 0) {
+		int wx, wy;
+		netmap_world(layer.rooms[layer.ante].ax, layer.rooms[layer.ante].ay, &wx, &wy);
+		emu_warp(D.group, D.number, wx, wy, 4);
+	}
+	return true;
+}
+
 bool director_goal_panel(int *x, int *y, bool *talk) {
 	if (!D.active) return false;
 	/* the guardian's arena and its Guardian Data, then the exit pad */
