@@ -49,7 +49,8 @@ buster; L and R open the Custom screen; Start opens the PET.
   words, then the game's own navi battle. Guardians remember how your
   earlier battles went.
 - **Areas.** The first four acts visit four of Central, Seaside, Sky and
-  Green Area, two computers and a homepage, in a random order, then the
+  Green Area, the Robot Control and Mr. Weather comps, two home computers
+  and the Aquarium, ACDC, Green and Sky homepages, in a random order, then the
   Graveyard and the Undernet. Layer 19 is the Underground. After that the
   cycle starts again, harder each time.
 - **Battles.** The game's own battles: each area fights the random battles
