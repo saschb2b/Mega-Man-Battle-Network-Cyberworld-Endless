@@ -257,19 +257,21 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
 	if (!L->ok) return false;
 	cur = lay;
-	/* centre the floor on the world origin */
-	int x0 = lay->gw, y0 = lay->gh, x1 = -1, y1 = -1;
+	/* centre the floor on the world origin, across (x - y) and up and down
+	 * (x + y) the screen */
+	int u0 = 1 << 30, u1 = -(1 << 30), v0 = 1 << 30, v1 = -(1 << 30);
 	for (int y = 0; y < lay->gh; ++y)
 		for (int x = 0; x < lay->gw; ++x)
 			if (lay->cell[y * lay->gw + x]) {
-				if (x < x0) x0 = x;
-				if (x > x1) x1 = x;
-				if (y < y0) y0 = y;
-				if (y > y1) y1 = y;
+				if (x - y < u0) u0 = x - y;
+				if (x - y > u1) u1 = x - y;
+				if (x + y < v0) v0 = x + y;
+				if (x + y > v1) v1 = x + y;
 			}
-	if (x1 < 0) return false;
-	place.gx0 = (x0 + x1) / 2;
-	place.gy0 = (y0 + y1) / 2;
+	if (u1 < u0) return false;
+	int cu = (u0 + u1) / 2, cv = (v0 + v1) / 2;
+	place.gx0 = (cu + cv) / 2;
+	place.gy0 = (cv - cu) / 2;
 	place.ex = L->ex;
 	place.ey = L->ey;
 	coord_slot = L->coord_slot;
