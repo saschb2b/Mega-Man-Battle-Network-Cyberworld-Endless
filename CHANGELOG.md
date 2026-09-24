@@ -27,7 +27,8 @@ First playable version.
   pools, stronger with depth; deeper layers can hold a Chip Trader Special
   (10 chips for 1).
 - Random encounters from the game's own roll and its own formations: each
-  area fights the battles of its original maps, all 29 virus families where
+  area fights the battles of its original maps, 28 of the 29 virus families
+  (all but WindBox) where
   Capcom put them, on their battlefields (grass, ice, holes, poison), with
   versions that grow with depth. A guardian Navi stands before every third layer's exit
   pad, which stays shut until he is beaten.
