@@ -1,7 +1,11 @@
 /* Layer objects on the game's own NPCs, Mystery Data and text scripts. */
 #include "layer_objs.h"
 
+#include <stdio.h>
+
 #include "bn6.h"
+#include "data.h"
+#include "debug.h"
 #include "emu.h"
 #include "flags.h"
 #include "game.h"
@@ -205,7 +209,15 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	}
 	/* the shops' stock, in the game's shop data */
 	ShopItem stock[SHOP_MAX_ITEMS];
-	shop_install(SHOP_DEALER, stock, shop_dealer_stock(run.depth, stock));
+	int nstock = shop_dealer_stock(run.depth, stock);
+	if (emu_debug_on())
+		for (int i = 0; i < nstock; ++i)
+			if (stock[i].kind == 2) {
+				ChipInfo ci;
+				chip_info(stock[i].id, &ci);
+				fprintf(stderr, "shop chip %s %c %dz\n", ci.name, stock[i].code == 26 ? '*' : 'A' + stock[i].code, stock[i].price * 100);
+			}
+	shop_install(SHOP_DEALER, stock, nstock);
 	shop_install(SHOP_PROGRAMS, stock, shop_program_stock(run.depth, stock));
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);

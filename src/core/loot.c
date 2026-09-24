@@ -1,6 +1,7 @@
 #include "loot.h"
 
 #include "data.h"
+#include "chip_pool.h"
 #include "formations.h"
 #include "game.h"
 #include "run.h"
@@ -122,17 +123,24 @@ Encounter make_boss(int depth, int biome, int navi) {
 
 int roll_chip(int depth, int bonus_tier, char *code) {
 	int p = (depth - 1) % CYCLE_LAYERS + 3 * ((depth - 1) / CYCLE_LAYERS);
-	int w[5] = { 60 - p * 3, 30, 6 + p * 2, p > 5 ? p : 0, 0 };
+	/* tiers (chip_pool.h): common and uncommon standard chips early, rarer
+	 * ones and Megas deeper, a Giga now and then past the middle */
+	int w[CHIP_TIERS] = { 60 - p * 3, 30, 6 + p * 2, p > 5 ? p : 0, p > 12 ? (p - 12) / 2 : 0 };
 	if (w[0] < 8) w[0] = 8;
-	for (int b = 0; b < bonus_tier; ++b) { w[0] /= 2; w[3] += 6; w[2] += 6; }
+	for (int b = 0; b < bonus_tier; ++b) { w[0] /= 2; w[3] += 6; w[2] += 6; w[4] += p > 8 ? 2 : 0; }
 	int total = w[0] + w[1] + w[2] + w[3] + w[4];
 	int roll = rng_range(0, total - 1), tier = 0;
-	while (tier < 4 && roll >= w[tier]) roll -= w[tier++];
-	int pick[128], n = 0;
-	for (int i = 0; i < chip_def_count; ++i)
-		if (chip_defs[i].tier == tier && chip_defs[i].kind != CK_NAVI) pick[n++] = chip_defs[i].rom_id;
-	if (!n) for (int i = 0; i < chip_def_count; ++i) if (chip_defs[i].tier <= 1) pick[n++] = chip_defs[i].rom_id;
-	int id = pick[rng_range(0, n - 1)];
+	while (tier < CHIP_TIERS - 1 && roll >= w[tier]) roll -= w[tier++];
+	int id = chip_pool_pick(tier);
+	if (id <= 0) {
+		/* without a ROM: the engine's own list */
+		int pick[128], n = 0;
+		if (tier > 3) tier = 3;
+		for (int i = 0; i < chip_def_count; ++i)
+			if (chip_defs[i].tier == tier && chip_defs[i].kind != CK_NAVI) pick[n++] = chip_defs[i].rom_id;
+		if (!n) for (int i = 0; i < chip_def_count; ++i) if (chip_defs[i].tier <= 1) pick[n++] = chip_defs[i].rom_id;
+		id = pick[rng_range(0, n - 1)];
+	}
 	ChipInfo ci;
 	chip_info(id, &ci);
 	*code = ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*';
@@ -140,7 +148,9 @@ int roll_chip(int depth, int bonus_tier, char *code) {
 }
 
 int chip_price(int id) {
-	const ChipDef *d = chip_def(id);
-	int loop = (run.depth - 1) / CYCLE_LAYERS;
-	return d->price * 100 * (2 + loop) / 2;
+	/* zenny by tier, dearer on later cycles */
+	static const int by_tier[CHIP_TIERS] = { 5, 10, 20, 40, 80 };
+	int t = chip_pool_tier(id), loop = (run.depth - 1) / CYCLE_LAYERS;
+	int base = t >= 0 ? by_tier[t] : chip_def(id)->price;
+	return base * 100 * (2 + loop) / 2;
 }
