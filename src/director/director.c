@@ -12,17 +12,20 @@
 
 #include "foes.h"
 #include "bn6.h"
+#include "boss.h"
+#include "cinema.h"
 #include "emu.h"
 #include "encounter.h"
 #include "debug.h"
 #include "flags.h"
 #include "game.h"
 #include "gamecall.h"
+#include "gfx.h"
+#include "guardians.h"
 #include "layer_objs.h"
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
-#include "powers.h"
 #include "netmap.h"
 #include "rom.h"
 #include "run.h"
@@ -39,7 +42,6 @@ static struct {
 	int frame;
 	bool checkpoint;       /* save once MegaMan has arrived */
 	bool gameover;         /* the game's GAME OVER is playing */
-	bool boss_pending;     /* the boss battle was started from the exit */
 	int start_x, start_y;
 	LayerObjs objs;
 	unsigned chosen;       /* choices already acted on (bit per choice) */
@@ -48,7 +50,43 @@ static struct {
 	int foes;              /* viruses in the battle the game will start next */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
+	bool area_card;        /* show the area's title card once MegaMan is in */
+	int arrived;           /* frames on the layer's map since the warp ended */
+	int act_viruses;       /* viruses deleted when the act began */
+	int act_frames;        /* frames spent in the act */
+	const char *act_guardian;  /* the guardian beaten on the way out */
 } D;
+
+#define AREA_CARD_AT 45   /* frames on the map after arriving */
+
+/* An act begins (or a side layer): its title card, as Hades names each
+ * region on entering it. */
+static void begin_area(bool new_act) {
+	D.area_card = true;
+	D.arrived = 0;
+	if (!new_act) return;
+	D.act_viruses = run.viruses_deleted;
+	D.act_frames = 0;
+}
+
+static void area_card(void) {
+	char act[32];
+	int biome = run.biome;
+	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "A dark warp");
+	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "The sealed gate opens");
+	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "Journey's end");
+	else snprintf(act, sizeof act, "Act %d", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1 + 7 * ((run.depth - 1) / CYCLE_LAYERS));
+	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), NULL, rgba(120, 200, 248, 255), 200);
+}
+
+/* Leaving an area past its beaten guardian. */
+static void clear_card(void) {
+	char who[48], stats[48];
+	int secs = D.act_frames / 60;
+	snprintf(who, sizeof who, "%s deleted", D.act_guardian ? D.act_guardian : "Guardian");
+	snprintf(stats, sizeof stats, "Viruses %d   Time %d:%02d", run.viruses_deleted - D.act_viruses, secs / 60, secs % 60);
+	cinema_card(guardian_area_name(run.biome), "AREA CLEAR", who, stats, rgba(248, 208, 88, 255), 220);
+}
 
 /* The next battle's enemies, for the game's encounter roll. */
 static void set_encounter(const Encounter *e, bool force) {
@@ -110,6 +148,7 @@ static bool build_layer(void) {
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, a->song);
 	D.chosen = 0;
+	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 
 	Encounter e = make_encounter(run.depth, biome, false);
 	set_encounter(&e, false);
@@ -120,6 +159,9 @@ static bool build_layer(void) {
 	D.active = true;
 	D.frame = 0;
 	D.gameover = false;
+	D.act_guardian = D.objs.guardian.navi ? guardian(D.objs.guardian.navi)->name : NULL;
+	bool first_of_act = run.side_kind == LAYER_NORMAL && (run.depth - 1) % 3 == 0;
+	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
 	return true;
 }
 
@@ -133,12 +175,12 @@ bool director_start_layer(void) {
 
 bool director_goal_panel(int *x, int *y, bool *talk) {
 	if (!D.active) return false;
-	/* the guardian while he stands, then the exit pad */
-	int want = layer.boss_layer && !layer.boss_beaten ? OBJ_BOSS : -1;
-	*talk = want == OBJ_BOSS;
+	/* the guardian's arena and its Guardian Data, then the exit pad */
+	if (boss_goal(x, y, talk)) return true;
+	*talk = false;
 	for (int i = 0; i < layer.nobj; ++i) {
 		int t = layer.obj[i].type;
-		if (want == OBJ_BOSS ? t == OBJ_BOSS : (t == OBJ_EXIT || t == OBJ_RETURN)) {
+		if (t == OBJ_EXIT || t == OBJ_RETURN) {
 			*x = (int)layer.obj[i].x;
 			*y = (int)layer.obj[i].y;
 			return true;
@@ -178,16 +220,7 @@ static void enter_side_layer(void) {
 	emu_warp_out();
 }
 
-/* The layer's guardian: the game's own navi battle. */
-static void start_boss(void) {
-	if (D.boss_pending) return;
-	Encounter e = make_boss(run.depth, run.biome, layer.boss_navi);
-	set_encounter(&e, true);
-	D.boss_pending = true;
-}
-
-/* A Yes in a layer's choice: a challenge or guardian battle, or into a side
- * layer. */
+/* A Yes in a layer's choice: a challenge battle, or into a side layer. */
 static bool act_on_choices(void) {
 	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
 	for (int i = 0; i < D.objs.nchoices; ++i) {
@@ -200,9 +233,6 @@ static bool act_on_choices(void) {
 			D.challenge = true;
 			return true;
 		}
-		case OBJ_BOSS:
-			start_boss();
-			return true;
 		case OBJ_UNDERNET:
 		case OBJ_SECRET_GATE:
 			run.side_kind = D.objs.choice[i].type == OBJ_UNDERNET ? LAYER_UNDERNET : LAYER_SECRET;
@@ -227,6 +257,7 @@ static bool follow_exit_warp(void) {
 		return !arrived;
 	}
 	if (pending != 1 || emu_read8(BN6_WARP + 0x11) != 1) return false;
+	if (boss_beaten()) clear_card();
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
@@ -248,9 +279,13 @@ static void end_run(void) {
 void director_update(void) {
 	if (!D.active) return;
 	++D.frame;
+	++D.act_frames;
 	/* MegaMan deleted: the game plays its GAME OVER, then the run ends */
 	int mode = main_mode();
-	if (mode == BN6_MODE_GAME_OVER) D.gameover = true;
+	if (mode == BN6_MODE_GAME_OVER && !D.gameover) {
+		D.gameover = true;
+		boss_lost();
+	}
 	if (D.gameover) {
 		if (mode == BN6_MODE_START_SCREEN) end_run();
 		return;
@@ -267,20 +302,10 @@ void director_update(void) {
 	if (D.in_battle) {
 		/* back from a battle: count the deleted viruses (a navi counts below) */
 		D.in_battle = false;
-		if (emu_read8(BN6_BATTLE_RESULT) == 1 && !D.boss_pending) run.viruses_deleted += D.foes;
+		if (emu_read8(BN6_BATTLE_RESULT) == 1 && !boss_fighting()) run.viruses_deleted += D.foes;
 	}
-	if (D.boss_pending && !emu_battle_forcing()) {
-		/* back from the boss battle */
-		D.boss_pending = false;
-		if (emu_read8(BN6_BATTLE_RESULT) == 1) {
-			layer.boss_beaten = true;
-			run.bosses_beaten++;
-			powers_after_boss(layer.boss_navi, run.biome);
-			if (D.objs.reward_script >= 0) game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)D.objs.reward_script);
-			if (D.objs.boss_gone_flag >= 0) flag_set(D.objs.boss_gone_flag);
-			if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
-		}
-	}
+	/* back from the guardian's battle */
+	if (boss_fighting() && !emu_battle_forcing()) boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
 	if (D.challenge && !emu_battle_forcing()) {
 		/* back from the challenge (the game gave its reward): random battles again */
 		D.challenge = false;
@@ -290,8 +315,14 @@ void director_update(void) {
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	/* a guardian keeps the exit pad shut (the game clears the map's warp
 	 * flags when it enters a map) */
-	if (layer.boss_layer && !layer.boss_beaten) flag_set(BN6_FLAG_WARP_OFF + 1);
+	if (!boss_exit_open()) flag_set(BN6_FLAG_WARP_OFF + 1);
 	else flag_clear(BN6_FLAG_WARP_OFF + 1);
+	boss_update();
+	/* (after the last card: the area cleared on the way here) */
+	if (D.area_card && ++D.arrived >= AREA_CARD_AT && !cinema_busy()) {
+		D.area_card = false;
+		area_card();
+	}
 	if (act_on_choices()) return;
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
 		D.checkpoint = false;
@@ -309,7 +340,8 @@ void director_update(void) {
 		return;
 	}
 	D.astray = 0;
-	if (D.frame % REROLL_FRAMES == 0) {
+	/* (not over a battle that is about to start) */
+	if (D.frame % REROLL_FRAMES == 0 && !emu_battle_forcing()) {
 		Encounter e = make_encounter(run.depth, run.biome, false);
 		set_encounter(&e, false);
 	}

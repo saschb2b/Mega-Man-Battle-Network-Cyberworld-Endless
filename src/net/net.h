@@ -69,11 +69,11 @@ typedef struct {
 	int biome;
 	int kind;
 	bool boss_layer;
-	bool boss_beaten;
 	int boss_navi;
 	int exit_room;
 	int arena;                     /* the guardian's arena room, -1 for none */
 	int ante;                      /* the room before it, with the last services */
+	int arena_dir;                 /* DIR_* from the antechamber into the arena */
 	int layout;                    /* LAYOUT_* (net_layouts.h) */
 } Layer;
 

@@ -172,6 +172,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	if (layer.arena < 0 && layer.boss_layer && arena.room >= 0 && arena.room < layer.nrooms) {
 		layer.arena = arena.room;
 		layer.ante = arena.ante;
+		layer.arena_dir = arena.dir;
 	}
 	layer.exit_room = layer.arena >= 0 ? layer.arena : bfs_far(0);
 	layer_raise_rooms(seed, stair_dirs, rise);

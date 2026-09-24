@@ -2,6 +2,7 @@
  * its sound on the audio device and the port's buttons as GBA keys. */
 #include "audio.h"
 #include "boot.h"
+#include "cinema.h"
 #include "autopilot.h"
 #include "debug.h"
 #include "director.h"
@@ -29,6 +30,7 @@ static uint32_t keys_from_buttons(void) {
 
 static void enter(void) {
 	if (!emu_init(R.data, ROM_SIZE)) return;
+	cinema_reset();
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
 		emu_encounters_install();
@@ -44,8 +46,9 @@ static void enter(void) {
 static void leave(void) { audio_external(NULL); }
 
 static void update(void) {
-	emu_frame(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+	emu_frame(cinema_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons()));
 	director_update();
+	cinema_update();
 	emu_debug_frame();
 }
 
@@ -62,8 +65,11 @@ static void draw(void) {
 	const uint32_t *v = emu_video();
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = v[i] | 0xFF000000u;
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
-	SDL_Rect dst = { P.core_x, P.core_y, EMU_W, EMU_H };
+	int dx, dy;
+	cinema_offset(&dx, &dy);
+	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
+	cinema_draw();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };
