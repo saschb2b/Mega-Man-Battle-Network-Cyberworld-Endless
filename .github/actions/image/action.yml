@@ -1,0 +1,23 @@
+name: Build image
+description: >
+  Builds one of the build images in docker/ with Buildx, cached in the
+  GitHub Actions cache, and loads it under the name build.py expects.
+inputs:
+  dockerfile:
+    description: Dockerfile in docker/
+    required: true
+  tag:
+    description: Image name build.py uses
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: docker/setup-buildx-action@v3
+    - uses: docker/build-push-action@v6
+      with:
+        context: docker
+        file: docker/${{ inputs.dockerfile }}
+        tags: ${{ inputs.tag }}
+        load: true
+        cache-from: type=gha,scope=${{ inputs.tag }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.tag }}

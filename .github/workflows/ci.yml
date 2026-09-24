@@ -1,23 +1,94 @@
+# Every push and pull request: the ROM-free checks and every build target.
+# Nothing here has the ROM, so the game itself is not run; build.py drives
+# the same builds as on a developer's machine.
 name: CI
 
 on:
   push:
+    branches: [main, dev]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_CONTEXT_NAME: ""   # build.py: the runner's own Docker, not Docker Desktop
 
 jobs:
-  build:
+  lint:
+    name: Lint scripts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build image
-        run: docker build -t cyberworld-build docker
-      - name: Unit tests
-        run: docker run --rm -v "$PWD:/src" -w /src cyberworld-build make test
-      - name: Host build
-        run: docker run --rm -v "$PWD:/src" -w /src cyberworld-build make TARGET=host -j4
-      - name: Device build
-        run: docker run --rm -v "$PWD:/src" -w /src cyberworld-build make TARGET=aarch64 -j4
+      - name: Shell scripts
+        run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh
+      - name: Python
+        run: python3 -m py_compile build.py tools/*.py
+      - name: Workflows
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest -color
+
+  test:
+    name: Unit tests (sanitizers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile, tag: cyberworld-build }
+      - run: python3 build.py test
+
+  handheld:
+    name: ROCKNIX (PortMaster)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile, tag: cyberworld-build }
+      - name: Host and aarch64 builds
+        run: python3 build.py all
+      - name: Port archive
+        run: python3 build.py package && mkdir -p build/release && (cd build/port && zip -qr ../release/cyberworld.zip .)
       - uses: actions/upload-artifact@v4
         with:
-          name: cyberworld-aarch64
-          path: build/aarch64/cyberworld.aarch64
+          name: cyberworld-portmaster
+          path: build/release/cyberworld.zip
+          retention-days: 14
+
+  linux:
+    name: Linux desktop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.linux, tag: cyberworld-linux }
+      - run: python3 build.py linux
+      - name: Runs without the build image's libraries
+        run: |
+          tar xzf build/release/cyberworld-endless-linux-x86_64.tar.gz -C "$RUNNER_TEMP"
+          ldd "$RUNNER_TEMP/cyberworld-endless-linux-x86_64/cyberworld-endless" | tee /dev/stderr | grep -q 'libSDL2-2.0.so.0 => .*/lib/libSDL2'
+          out=$("$RUNNER_TEMP/cyberworld-endless-linux-x86_64/cyberworld-endless" --help 2>&1 || true)
+          grep -q 'unknown argument' <<< "$out"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-linux
+          path: build/release/cyberworld-endless-linux-x86_64.tar.gz
+          retention-days: 14
+
+  web:
+    name: Browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.web, tag: cyberworld-web }
+      - run: python3 build.py web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-web
+          path: build/site
+          include-hidden-files: true
+          retention-days: 14

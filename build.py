@@ -81,7 +81,8 @@ def ensure_image(image=IMAGE):
 def build(target):
     image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE}.get(target, IMAGE)
     ensure_image(image)
-    if docker('make', f'TARGET={target}', f'-j{os.cpu_count() or 4}', image=image) != 0:
+    werror = ['WERROR=1'] if os.environ.get('CI') else []
+    if docker('make', f'TARGET={target}', f'-j{os.cpu_count() or 4}', *werror, image=image) != 0:
         sys.exit(f'{target} build failed')
     if target == 'linux':
         # SDL2 travels with the binary (its rpath is $ORIGIN/lib), with its license
@@ -343,7 +344,7 @@ def main():
         return
     if a.action == 'test':
         ensure_image()
-        sys.exit(docker('make', 'test'))
+        sys.exit(docker('make', 'test', *(['WERROR=1'] if os.environ.get('CI') else [])))
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))

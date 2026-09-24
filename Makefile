@@ -22,6 +22,10 @@ SRCS := $(wildcard src/*/*.c)
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 CFLAGS += -std=c11 -O2 -g -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(shell $(PKGCONF) --cflags sdl2)
+# CI builds with WERROR=1: a warning in the game's own code fails the build
+ifdef WERROR
+CFLAGS += -Werror
+endif
 # the embedded GBA core, built into the image by docker/mgba.sh
 MGBA_TARGET := $(if $(filter aarch64 web,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
@@ -72,11 +76,13 @@ clean:
 -include $(OBJS:.o=.d)
 .PHONY: all clean
 
-# ROM-free unit tests (host only)
+# ROM-free unit tests (host only), with the address and undefined-behaviour
+# sanitizers
+TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
 TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c
 build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g -Wall -Wextra -Wno-unused-parameter -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) -Wall -Wextra -Wno-unused-parameter -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS)
 
 test: build/host/test_core
 	build/host/test_core
