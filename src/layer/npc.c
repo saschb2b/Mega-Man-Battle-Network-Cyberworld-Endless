@@ -12,7 +12,7 @@
  * whatever their priority bits, and the game orders sprites front to back
  * by depth. A pad at priority 3 that MegaMan stands behind comes first,
  * wins the pixels over his feet and then loses them to the floor layer, so
- * his legs show the floor. A floor sprite therefore stands FLOOR_BACK units
+ * his legs show the floor. A floor sprite therefore stands NPC_FLOOR_BACK units
  * further back in depth (+X, -Y) and as much lower, which draws it at the
  * same place on screen but after anything near it; its centre is shifted
  * back to where it is. */
@@ -24,14 +24,12 @@
 #include "emu.h"
 #include "mapslot.h"
 
-#define FLOOR_BACK 64
-
 /* The commands that place a floor sprite at world (x, y, z) (12 bytes). */
 static int floor_place(uint8_t *s, int x, int y, int z) {
-	x += FLOOR_BACK; y -= FLOOR_BACK; z -= FLOOR_BACK;
+	x += NPC_FLOOR_BACK; y -= NPC_FLOOR_BACK; z -= NPC_FLOOR_BACK;
 	uint8_t c[] = {
 		0x14, (uint8_t)x, (uint8_t)(x >> 8), (uint8_t)y, (uint8_t)(y >> 8), (uint8_t)z, (uint8_t)(z >> 8),
-		0x0C, (uint8_t)-FLOOR_BACK, (uint8_t)FLOOR_BACK, (uint8_t)FLOOR_BACK,
+		0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK,
 		0x1B,         /* layer priority 3: under MegaMan, over the floor layers */
 	};
 	memcpy(s, c, sizeof c);

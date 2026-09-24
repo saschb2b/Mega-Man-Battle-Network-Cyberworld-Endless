@@ -6,6 +6,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* How far back in depth a floor sprite stands (npc.c). */
+#define NPC_FLOOR_BACK 64
+
 /* A Mystery Data crystal for flag MAPSLOT_MD_FLAG + index; the game places
  * it at its placement and gives its content when taken. */
 uint32_t npc_mystery(int index);

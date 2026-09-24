@@ -2,6 +2,8 @@
  * commands (bn6f text_script_commands.inc). */
 #include "scripts.h"
 
+#include <stdio.h>
+
 /* A Yes/No choice after `question`, as the game's shopkeepers ask it:
  * two options, then select (Yes continues, No and B jump to `no`). */
 static void ask(TextArchive *t, const char *question, int no) {
@@ -92,23 +94,25 @@ int ta_secret_gate(TextArchive *t, int flag) {
 	return i;
 }
 
-int ta_boss(TextArchive *t, int flag) {
-	int no = closing(t);
+int ta_music(TextArchive *t, int song) {
 	int i = ta_script(t);
-	ta_open(t);
-	ta_text(t, "So you made it\nthis far.");
-	ta_wait(t);
-	ta_clear(t);
-	ask(t, "The way on is\nthrough me. Fight?\n", no);
-	flag_set(t, flag);
+	uint8_t play[] = { 0xFD, 0x01, (uint8_t)song, (uint8_t)(song >> 8) };   /* ts_sound_play_bgm; 0xFF stops */
+	static const uint8_t area[] = { 0xFD, 0x0A };                            /* ts_sound_play_area_bgm */
+	if (song == SCRIPTS_AREA_MUSIC) ta_bytes(t, area, sizeof area);
+	else ta_bytes(t, play, sizeof play);
 	ta_end(t);
 	return i;
 }
 
-int ta_boss_reward(TextArchive *t, const char *power) {
+int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int taken_flag) {
 	int i = ta_script(t);
 	static const uint8_t give[] = { 0xF4, 0x00, SCRIPTS_HP_MEMORY, SCRIPTS_BOSS_HP_MEMORIES };  /* ts_item_give, with its jingle */
+	char head[64];
+	snprintf(head, sizeof head, "%s's\nGuardian Data!", name);
 	ta_open(t);
+	ta_text(t, head);
+	ta_wait(t);
+	ta_clear(t);
 	if (power) {
 		ta_text(t, power);
 		ta_wait(t);
@@ -117,6 +121,7 @@ int ta_boss_reward(TextArchive *t, const char *power) {
 	ta_bytes(t, give, sizeof give);
 	ta_text(t, "MegaMan got\n3 HPMemory!");
 	ta_wait(t);
+	flag_set(t, taken_flag);
 	ta_end(t);
 	return i;
 }

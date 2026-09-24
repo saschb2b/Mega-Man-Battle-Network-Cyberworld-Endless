@@ -13,7 +13,7 @@
 #include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
-#include "powers.h"
+#include "stage_npc.h"
 #include "npc.h"
 #include "npc_lines.h"
 #include "rom.h"
@@ -112,8 +112,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	MysteryData md[16];
 	int nmd = 0;
 	out->nchoices = 0;
-	out->boss_gone_flag = -1;
-	out->reward_script = -1;
+	out->guardian.navi = 0;
 	/* ScrtData lie in deep layers until three are out there */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
@@ -137,7 +136,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			CoordPad exit = { wx, wy, 1 };
 			netmap_set_pads(&exit, 1);
 			need_sprite(&npcs, 7, pad);
-			if (npcs.n < 32) npcs.script[npcs.n++] = npc_prop(7, pad, wx, wy, wz, 0);
+			/* a guardian's exit shows once the guardian is beaten */
+			if (npcs.n < 32)
+				npcs.script[npcs.n++] = layer.boss_layer ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG)
+					: npc_prop(7, pad, wx, wy, wz, 0);
 			break;
 		}
 		case OBJ_MYSTERY:
@@ -185,12 +187,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
 		case OBJ_BOSS:
-			/* the guardian waits before the exit pad, which stays shut */
-			tk.sprite = navi_sprite(o->param);
-			asks = true;
-			out->reward_script = ta_boss_reward(&text, powers_reward_text(o->param, layer.biome));
-			tk.gone_flag = out->boss_gone_flag = LAYER_BOSS_GONE_FLAG;
-			flag_clear(LAYER_BOSS_GONE_FLAG);
+			/* the guardian's own actors and scripts (guardian_objs.c) */
+			guardian_scripts(&text, o, wx, wy, wz, &out->guardian);
 			break;
 		default:
 			break;
@@ -201,7 +199,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			out->choice[out->nchoices++].flag = flag;
 			tk.script = o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
 				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag)
-				: o->type == OBJ_BOSS ? ta_boss(&text, flag) : ta_secret_gate(&text, flag);
+				: ta_secret_gate(&text, flag);
 			/* not chosen yet */
 			flag_clear(flag);
 		}
@@ -223,6 +221,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	out->archive = archive;
+	if (out->guardian.navi) guardian_actors(&npcs, archive, navi_sprite(out->guardian.navi), &out->guardian);
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
 		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, talkers[i].z,
 			talkers[i].cat == 7 ? 0 : 4, talkers[i].archive ? talkers[i].archive : archive, talkers[i].script,

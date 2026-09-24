@@ -21,10 +21,13 @@ int ta_shop(TextArchive *t, int shop, const char *greeting);
 int ta_challenge(TextArchive *t, int flag);
 int ta_undernet(TextArchive *t, int flag);
 int ta_secret_gate(TextArchive *t, int flag);
-/* The layer's guardian Navi: Yes starts its battle. */
-int ta_boss(TextArchive *t, int flag);
-/* After the guardian's battle: `power` (a Cross, Beast Out; NULL for none),
- * then HPMemory through the game's own item (+20 max HP each). */
-int ta_boss_reward(TextArchive *t, const char *power);
+/* Plays song `song` (0xFF stops the music, SCRIPTS_AREA_MUSIC the map's
+ * own) without opening the chat box. */
+#define SCRIPTS_AREA_MUSIC -1
+int ta_music(TextArchive *t, int song);
+/* A guardian's Guardian Data, checked: `power` (a Cross, Beast Out; NULL
+ * for none), then HPMemory through the game's own item (+20 max HP each),
+ * then event flag `taken_flag`. */
+int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int taken_flag);
 
 #endif
