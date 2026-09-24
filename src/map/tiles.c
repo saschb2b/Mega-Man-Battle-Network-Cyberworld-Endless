@@ -385,18 +385,26 @@ static int unplain(const TileBook *b, int m, int phase, const TileCand *c, uint6
 static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty, int phase,
 	unsigned oa, unsigned ob, TileFloor floor, const void *ctx, bool single) {
 	int cm = ob & 0x10 ? TILE_B : TILE_A;   /* the centre panel's material */
-	uint64_t must, never, deep;
-	expect(g, tx, ty, floor, ctx, cm, &must, &never, &deep);
-	int allowed = __builtin_popcountll(deep) / 8;
+	uint64_t must = 0, never = 0, deep = 0;
+	int allowed = 0;
+	TileGrid gk = *g;
+	gk.dv = -1;
 	const TileCand *fit = NULL, *same = NULL, *any = NULL;
 	int fit_d = INT_MAX, same_d = INT_MAX, any_score = INT_MAX, fit_k = -1, same_k = -1;
 	unsigned near = nearest(phase, true);
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
+		/* each book's tiles as its own map draws floor, faces and legs (a
+		 * floor raised in the original may stand on taller sides) */
+		if (b->dv != gk.dv || b->face != gk.face || b->hang != gk.hang) {
+			gk.dv = b->dv; gk.face = b->face; gk.hang = b->hang;
+			expect(&gk, tx, ty, floor, ctx, cm, &must, &never, &deep);
+			allowed = __builtin_popcountll(deep) / 8;
+		}
 		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
 			const TileCand *c = &b->cand[i];
 			if (single && c->e1) continue;
-			int d = distance(phase, g->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
+			int d = distance(phase, b->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			int u = unplain(b, cm - 1, phase, c, deep);
 			/* ties go to the first book with the class (the area's own map
 			 * before its others), so a floor keeps one look */

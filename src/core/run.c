@@ -15,7 +15,7 @@ void run_new(uint32_t seed) {
 	/* Acts 1-4 visit four of the surface areas, in a random order. */
 	uint8_t surface[] = {
 		BIOME_CENTRAL, BIOME_SEASIDE, BIOME_SKY, BIOME_GREEN, BIOME_COMP, BIOME_HOMEPAGE, BIOME_COMP_B,
-		BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_JUDGE_COMP, BIOME_WEATHER_COMP,   /* (CopyBot's comp: its edges do not draw yet) */
+		BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_JUDGE_COMP, BIOME_WEATHER_COMP, BIOME_COPYBOT_COMP,
 		BIOME_ACDC_HP, BIOME_GREEN_HP, BIOME_SKY_HP,
 	};
 	enum { NSURFACE = sizeof surface };
