@@ -20,6 +20,7 @@
 #include "bytes.h"
 #include "coords.h"
 #include "debug.h"
+#include "decor.h"
 #include "emu.h"
 #include "lz.h"
 #include "stairs.h"
@@ -36,6 +37,7 @@ typedef struct {
 	int ex, ey, tw, th;
 	TileBook book[MAX_BOOKS]; /* each source map, then its mirror image */
 	int nbooks;
+	DecorBook decor;          /* the scenery of the area's maps */
 	uint32_t desc, coord_slot;
 	StairTemplate stairs[STAIR_DIRS];
 } Learned;
@@ -108,6 +110,7 @@ static bool learn(int area, Learned *L) {
 	L->desc = a.desc; L->coord_slot = a.coord_slot;
 	L->nbooks = 0;
 	learn_map(&a, &a, area, L);
+	decor_learn(&a, na->bg_in_map, &L->decor);
 	stairs_learn(&a, L->stairs);
 	/* the area's other maps in the same tiles and colours, for the places
 	 * this one never shows */
@@ -115,10 +118,11 @@ static bool learn(int area, Learned *L) {
 		AreaSrc b;
 		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
 		learn_map(&b, &a, area, L);
+		decor_learn(&b, na->bg_in_map, &L->decor);
 		area_src_free(&b);
 	}
 	if (emu_debug_on()) {
-		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks);
+		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n);
 		for (int d = 0; d < STAIR_DIRS; ++d)
 			fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
 				L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
@@ -246,6 +250,7 @@ static bool write_tilemap(const Learned *L) {
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
+	decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
 	put32(out + 4, 12);
