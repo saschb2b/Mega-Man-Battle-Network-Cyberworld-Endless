@@ -188,8 +188,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* the guardian waits before the exit pad, which stays shut */
 			tk.sprite = navi_sprite(o->param);
 			asks = true;
-			const char *reward = powers_reward_text(o->param, layer.biome);
-			if (reward) out->reward_script = ta_say(&text, -1, reward);
+			out->reward_script = ta_boss_reward(&text, powers_reward_text(o->param, layer.biome));
 			tk.gone_flag = out->boss_gone_flag = LAYER_BOSS_GONE_FLAG;
 			flag_clear(LAYER_BOSS_GONE_FLAG);
 			break;

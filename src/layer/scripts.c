@@ -104,3 +104,19 @@ int ta_boss(TextArchive *t, int flag) {
 	ta_end(t);
 	return i;
 }
+
+int ta_boss_reward(TextArchive *t, const char *power) {
+	int i = ta_script(t);
+	static const uint8_t give[] = { 0xF4, 0x00, SCRIPTS_HP_MEMORY, SCRIPTS_BOSS_HP_MEMORIES };  /* ts_item_give, with its jingle */
+	ta_open(t);
+	if (power) {
+		ta_text(t, power);
+		ta_wait(t);
+		ta_clear(t);
+	}
+	ta_bytes(t, give, sizeof give);
+	ta_text(t, "MegaMan got\n3 HPMemory!");
+	ta_wait(t);
+	ta_end(t);
+	return i;
+}
