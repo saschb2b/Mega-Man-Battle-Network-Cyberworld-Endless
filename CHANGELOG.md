@@ -20,6 +20,8 @@ First playable version.
   decoration hanging off an edge) are not used on plain walkways. Sky and
   Undernet layers can raise a dead-end room onto a stair taken from the
   area's own map.
+- Mystery Data, shops and traders draw from the whole chip library: every
+  standard chip, the Megas and, deep in a run, the Gigas, by rarity.
 - Each layer places the game's own exit pads, Mystery Data, Normal Navis,
   Mr. Progs, the Net Dealer, the program vendor, the Chip Trader and the
   BugFrag Trader, all running on the game's NPC and text scripts. Chip
