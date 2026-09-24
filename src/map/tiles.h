@@ -44,13 +44,20 @@ typedef struct {
  * many pixels below them the floor is drawn, how tall the side faces under
  * its bottom edges are and how far below those edges things may hang, such
  * as the pedestals under a homepage's panels (from TileBook). */
-typedef struct { int tw, th, ex, ey, dv, face, hang; } TileGrid;
+typedef struct {
+	int tw, th, ex, ey, dv, face, hang;
+	bool rimmed;   /* floor edges are rims, not plain floor (areas told by shape) */
+} TileGrid;
 
 /* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD. */
 typedef int (*TileFloor)(int A, int B, const void *ctx);
 
 /* Learns the tiles of the map's panels whose middle has a hue in `styles`
- * (platforms) or `walk_styles` (walkways; 0 for none). */
+ * (platforms) or `walk_styles` (walkways; 0 for none), or with
+ * TILES_BY_SHAPE, platform floor what lies in 2 x 2 blocks of floor with
+ * floor all around, and walkway the rest (walkways and platforms' rims),
+ * as a generated layer tells them. */
+#define TILES_BY_SHAPE 0x8000
 void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 
