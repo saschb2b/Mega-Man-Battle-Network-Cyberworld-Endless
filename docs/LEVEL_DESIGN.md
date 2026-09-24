@@ -101,5 +101,8 @@ area's second floor, learned from the same source map by its hue
 yellow boardwalks, Sky's darker glass, Green's orange planks, Graveyard's
 purple bridges and the Undernet's red striped bridges. The tile classes
 tell platform, walkway and void apart, so the joins between the two floors
-come from the places the original maps join them. The Nest's source map
-(Underground 2) has no second floor.
+come from the places the original maps join them. Green Area never joins
+them flush (its planks reach the raised grass by ramps), so where Green's
+two floors meet, the plank's end is drawn on the front tile layer over the
+grass edge on the back one, each as if the other were not there. The Nest's
+source map (Underground 2) has no second floor.
