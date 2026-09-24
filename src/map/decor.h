@@ -25,7 +25,8 @@ typedef struct {
 void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out);
 void decor_free(DecorBook *b);
 /* Sets some pieces into the layers of a tw x th tile map (layer 1 after
- * layer 0's cells), on empty tiles near its floor, chosen by `seed`. */
-void decor_place(const DecorBook *b, uint16_t *map, int tw, int th, uint32_t seed);
+ * layer 0's cells), on empty tiles near its floor, chosen by `seed`; how
+ * many it set. */
+int decor_place(const DecorBook *b, uint16_t *map, int tw, int th, uint32_t seed);
 
 #endif

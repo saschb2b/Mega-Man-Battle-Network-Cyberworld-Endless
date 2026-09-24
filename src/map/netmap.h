@@ -26,6 +26,12 @@ typedef struct {
  * writes its tile map and walls into the free ROM space and points that map
  * at them. The map is (group, number) of the area, entered with emu_warp. */
 bool netmap_build(int area, const NetLayout *lay);
+/* netmap_build for the current layer (net.h), its scenery placed by `seed`. */
+bool netmap_build_layer(int area, uint32_t seed);
+/* The pieces of scenery the last layer got. */
+extern int netmap_scenery;
+/* The last tile map written: tw x th entries of layer 0, then layer 1. */
+const uint16_t *netmap_last_tiles(int *tw, int *th);
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 unsigned netmap_stair_dirs(int area, int *rise);
 

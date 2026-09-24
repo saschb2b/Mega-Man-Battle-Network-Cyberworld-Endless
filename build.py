@@ -8,6 +8,9 @@ which matches the glibc and SDL2 that current ROCKNIX ships.
   python3 build.py host         host binary only
   python3 build.py device       aarch64 binary only
   python3 build.py shot ...     run the host binary headlessly (options below)
+  python3 build.py atlas [BIOMES] [SEEDS]
+                                every area's layers drawn, one sheet per area
+                                in .build/atlas (docs/DEVTOOLS.md)
   python3 build.py test         ROM-free unit tests
   python3 build.py package      assemble build/port/ for PortMaster
 """
@@ -68,9 +71,66 @@ def package():
     print('packaged', out)
 
 
+def atlas(biomes='all', seeds='1'):
+    """Every area's generated layers, drawn headless, one PNG sheet per area."""
+    out = os.path.join(ROOT, '.build', 'atlas')
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+    code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                  '--atlas', f'/src/.build/atlas:{biomes}:{seeds}', mounts=[(rom_dir, '/rom:ro')])
+    if code:
+        return code
+    from PIL import Image
+    import collections
+    import glob
+    import re
+    layers = collections.defaultdict(list)
+    for path in sorted(glob.glob(os.path.join(out, 'b*.bmp'))):
+        layers[int(re.match(r'b(\d+)_', os.path.basename(path)).group(1))].append(path)
+    for biome, paths in layers.items():
+        whole, crops = [], []
+        for path in paths:
+            im = Image.open(path).convert('RGB')
+            box = im.getbbox() or (0, 0, im.width, im.height)
+            im = im.crop(box)
+            thumb = im.copy()
+            thumb.thumbnail((400, 400))
+            whole.append(thumb)
+            crops.append(densest(im, 200, 130).resize((400, 260), Image.NEAREST))
+        sheet = Image.new('RGB', (400 * len(paths), 400 + 260), (20, 20, 24))
+        for i, (t, c) in enumerate(zip(whole, crops)):
+            sheet.paste(t, (i * 400, 0))
+            sheet.paste(c, (i * 400, 400))
+        sheet.save(os.path.join(out, f'sheet_b{biome:02d}.png'))
+        for path in paths:
+            os.remove(path)
+    report = open(os.path.join(out, 'report.txt')).read()
+    print(report, end='')
+    flagged = [l for l in report.splitlines() if 'NOT BUILT' in l or 'arena NO' in l or
+               float(re.search(r'fallback ([\d.]+)%', l).group(1)) > 1.0]
+    print(f'{len(layers)} sheets in .build/atlas; {len(flagged)} layers flagged')
+    for l in flagged:
+        print('  !', l)
+    return 0
+
+
+def densest(im, w, h):
+    """The w x h window with the most floor in it."""
+    px = im.load()
+    step = 10
+    best = (0, 0, -1)
+    for y0 in range(0, max(1, im.height - h), step):
+        for x0 in range(0, max(1, im.width - w), step):
+            n = sum(px[x, y] != (40, 40, 48) for y in range(y0, min(im.height, y0 + h), step) for x in range(x0, min(im.width, x0 + w), step))
+            if n > best[2]:
+                best = (x0, y0, n)
+    return im.crop((best[0], best[1], best[0] + w, best[1] + h))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'package', 'shot', 'asan', 'test', 'clean', 'atlas'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -79,6 +139,9 @@ def main():
     if a.action == 'test':
         ensure_image()
         sys.exit(docker('make', 'test'))
+    if a.action == 'atlas':
+        build('host')
+        sys.exit(atlas(*a.rest[:2]))
     if a.action in ('all', 'host', 'shot'):
         build('host')
     if a.action == 'asan':

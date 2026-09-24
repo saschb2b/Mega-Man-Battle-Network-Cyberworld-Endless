@@ -44,6 +44,11 @@ typedef struct {
 
 static Learned learned[NET_AREAS];
 
+int netmap_scenery;
+
+/* the last tile map written, both layers (for the dev tools) */
+static struct { uint16_t *map; int tw, th; } last;
+
 /* the current layer's placement */
 static struct { int gx0, gy0, ex, ey; } place;
 
@@ -262,7 +267,7 @@ static bool write_tilemap(const Learned *L) {
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
-	decor_place(&L->decor, map, tw, th, cur->seed);
+	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
 	put32(out + 4, 12);
@@ -274,7 +279,10 @@ static bool write_tilemap(const Learned *L) {
 	}
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
 	free(out);
-	free(map);
+	free(last.map);
+	last.map = map;
+	last.tw = tw;
+	last.th = th;
 	return true;
 }
 
@@ -384,4 +392,29 @@ unsigned netmap_stair_dirs(int area, int *rise) {
 	for (int d = 0; d < STAIR_DIRS; ++d)
 		if (L->ok && L->stairs[d].ok) { dirs |= 1u << d; *rise = L->stairs[d].rise; }
 	return dirs;
+}
+
+bool netmap_build_layer(int area, uint32_t seed) {
+	/* the pads, in their own look */
+	static uint8_t pads[MAP_H][MAP_W];
+	memset(pads, 0, sizeof pads);
+	for (int r = 0; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		if (m->kind != ROOM_PAD) continue;
+		for (int y = m->y; y < m->y + m->h; ++y)
+			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;
+	}
+	static NetLayout lay;
+	lay = (NetLayout){ MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, seed, &pads[0][0] };
+	if (layer.arena >= 0) {
+		const Room *a = &layer.rooms[layer.arena];
+		lay.ax = a->x; lay.ay = a->y; lay.aw = a->w; lay.ah = a->h;
+	}
+	return netmap_build(area, &lay);
+}
+
+const uint16_t *netmap_last_tiles(int *tw, int *th) {
+	*tw = last.tw;
+	*th = last.th;
+	return last.map;
 }

@@ -64,6 +64,12 @@ void tiles_free(TileBook *b);
 /* The class of tile (tx, ty): its phase and the panel it lies in. */
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
 
+/* How the picks went since the last reset (the dev atlas reads them): each
+ * tile matched exactly, near (the nearest neighbourhood seen) or by falling
+ * back on the least bad tile. */
+typedef struct { int picks, near, fallbacks; } TileStats;
+extern TileStats tiles_stats;
+
 /* The layer entries for tile (tx, ty) of a map whose floor is `floor`: of
  * the pairs whose pixels cover the floor there, do not reach beyond it and
  * look like plain floor well inside it, the one seen with the nearest

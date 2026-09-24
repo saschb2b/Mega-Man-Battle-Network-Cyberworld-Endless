@@ -164,6 +164,8 @@ static uint8_t *find_pads(const Src *s) {
 	return pad;
 }
 
+TileStats tiles_stats;
+
 /* ---- classes ---- */
 
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B) {
@@ -502,7 +504,10 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 			if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; }
 		}
 	}
-	if (same) fit = same;
+	if (same) { fit = same; fit_d = same_d; }
+	tiles_stats.picks++;
+	if (!fit) tiles_stats.fallbacks++;
+	else if (fit_d) tiles_stats.near++;
 	return fit ? fit : any;
 }
 

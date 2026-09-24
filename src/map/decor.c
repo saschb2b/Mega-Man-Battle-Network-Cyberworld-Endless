@@ -189,8 +189,8 @@ static bool fits(const DecorPiece *p, const uint16_t *map, int tw, int th, int p
 	return false;
 }
 
-void decor_place(const DecorBook *b, uint16_t *map, int tw, int th, uint32_t seed) {
-	if (!b->n) return;
+int decor_place(const DecorBook *b, uint16_t *map, int tw, int th, uint32_t seed) {
+	if (!b->n) return 0;
 	size_t cells = (size_t)tw * th;
 	uint32_t s = seed ^ 0xDEC0u;
 	int want = PIECES_MIN + (int)(next(&s) % (PIECES_MAX - PIECES_MIN + 1)), placed = 0;
@@ -210,4 +210,5 @@ void decor_place(const DecorBook *b, uint16_t *map, int tw, int th, uint32_t see
 		used[k]++;
 		++placed;
 	}
+	return placed;
 }

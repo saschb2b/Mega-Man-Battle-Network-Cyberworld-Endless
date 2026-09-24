@@ -9,6 +9,7 @@
 #include "save.h"
 #include "run.h"
 #include "audio.h"
+#include "atlas.h"
 #include "director.h"
 #include "net_layouts.h"
 
@@ -152,6 +153,7 @@ int main(int argc, char **argv) {
 	uint32_t seed = 0;
 	const char *render_spec = NULL;
 	const char *sheet_spec = NULL;
+	const char *atlas_spec = NULL;
 	for (int i = 1; i < argc; ++i) {
 		const char *a = argv[i];
 		const char *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -174,6 +176,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
+		else if (!strcmp(a, "--atlas") && v) { atlas_spec = v; ++i; }
 		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
 	}
@@ -191,6 +194,11 @@ int main(int argc, char **argv) {
 	} else {
 		printf("ROM: %s (%s)\n", R.layout->name, R.path);
 		save_init();
+		if (atlas_spec) {
+			int r = atlas_run(atlas_spec);
+			platform_shutdown();
+			return r;
+		}
 		if (render_spec) {
 			int song = 0, secs = 20;
 			char out[256] = "song.wav";

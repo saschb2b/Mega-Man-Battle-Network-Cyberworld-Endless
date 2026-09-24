@@ -20,6 +20,8 @@ enum {
 /* One of the area's layouts, from the generator's random numbers, or
  * `layout_forced` when that is set (tools and tests; -1 otherwise). */
 int layout_pick(int biome);
+/* How often (percent) area `biome` builds `layout`. */
+int layout_weight(int biome, int layout);
 extern int layout_forced;
 /* Layer `index` of an act (three layers in one area): the area's layouts in
  * an order drawn from `act_seed` by their weights, so an act does not

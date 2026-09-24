@@ -39,6 +39,11 @@ static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
 
 int layout_forced = -1;
 
+int layout_weight(int biome, int layout) {
+	if (biome < 0 || biome >= BIOME_COUNT || layout < 0 || layout >= LAYOUT_COUNT) return 0;
+	return weights[biome][layout];
+}
+
 int layout_pick(int biome) {
 	if (layout_forced >= 0 && layout_forced < LAYOUT_COUNT) return layout_forced;
 	if (biome < 0 || biome >= BIOME_COUNT) biome = BIOME_CENTRAL;

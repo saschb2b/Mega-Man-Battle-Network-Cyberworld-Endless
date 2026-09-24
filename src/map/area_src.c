@@ -13,13 +13,58 @@
 #define MAP_TABLE   0x0329C4u /* MapBGDescriptor lists, internet groups from 0x80 */
 #define COORD_TABLE 0x03354Cu /* coordinate data lists, internet groups from 0x80 */
 
-static bool decode_tiles(AreaSrc *a) {
-	uint32_t list = rom_u32(MAP_TABLE + (uint32_t)(a->group - 0x80) * 4);
+/* A map's tile graphics (as the game loads them to VRAM) and colours. */
+static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
+	uint8_t *vram = calloc(0x10000, 1);
+	for (int k = 0; k < 2; ++k) {
+		uint32_t wc = rom_u32(ts + (uint32_t)k * 12), off = rom_u32(ts + (uint32_t)k * 12 + 4), vo = rom_u32(ts + (uint32_t)k * 12 + 8);
+		if (!wc) continue;
+		size_t tn = 0;
+		uint8_t *t = lz77_decompress(R.data + ts + off, ROM_SIZE - (ts + off), &tn);
+		if (!t) continue;
+		size_t want = (size_t)wc * 4 < tn ? (size_t)wc * 4 : tn;
+		if (vo < 0x10000) memcpy(vram + vo, t, want < 0x10000 - vo ? want : 0x10000 - vo);
+		free(t);
+	}
+	for (int i = 0; i < 256; ++i) colors[i] = bgr555(rom_u16(pal + (uint32_t)i * 2));
+	return vram;
+}
+
+/* Draws tile maps `tile[layers - 1]` .. `tile[0]` (front last) into px
+ * (tw * 8 x th * 8), marking front when given. */
+static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_t *const *tile, int layers, int tw, int th, uint32_t *px, uint8_t *front) {
+	int W = tw * 8;
+	for (int l = layers - 1; l >= 0; --l)
+		for (int ty = 0; ty < th; ++ty)
+			for (int tx = 0; tx < tw; ++tx) {
+				uint16_t e = tile[l][ty * tw + tx];
+				if (!(e & 0x3FF)) continue;
+				const uint8_t *t = vram + (e & 0x3FF) * 32;
+				for (int y = 0; y < 8; ++y)
+					for (int x = 0; x < 8; ++x) {
+						uint8_t v = t[y * 4 + x / 2];
+						int ci = (x & 1) ? v >> 4 : v & 15;
+						if (!ci) continue;
+						int X = (e & 0x400) ? 7 - x : x, Y = (e & 0x800) ? 7 - y : y;
+						px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[(e >> 12) * 16 + ci];
+						if (l == 0 && front) front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
+					}
+			}
+}
+
+static bool map_desc(int group, int number, uint32_t *desc, uint32_t *ts, uint32_t *pal, uint32_t *tm) {
+	uint32_t list = rom_u32(MAP_TABLE + (uint32_t)(group - 0x80) * 4);
 	if (!rom_is_ptr(list)) return false;
-	a->desc = rom_off(list) + (uint32_t)a->number * 12;
-	uint32_t ts = rom_u32(a->desc), pal = rom_u32(a->desc + 4), tm = rom_u32(a->desc + 8);
-	if (!rom_is_ptr(ts) || !rom_is_ptr(pal) || !rom_is_ptr(tm)) return false;
-	ts = rom_off(ts); pal = rom_off(pal) + 4; tm = rom_off(tm);
+	*desc = rom_off(list) + (uint32_t)number * 12;
+	*ts = rom_u32(*desc); *pal = rom_u32(*desc + 4); *tm = rom_u32(*desc + 8);
+	if (!rom_is_ptr(*ts) || !rom_is_ptr(*pal) || !rom_is_ptr(*tm)) return false;
+	*ts = rom_off(*ts); *pal = rom_off(*pal) + 4; *tm = rom_off(*tm);
+	return true;
+}
+
+static bool decode_tiles(AreaSrc *a) {
+	uint32_t ts, pal, tm;
+	if (!map_desc(a->group, a->number, &a->desc, &ts, &pal, &tm)) return false;
 	a->tw = R.data[tm]; a->th = R.data[tm + 1];
 	size_t n = 0;
 	uint8_t *m = lz77_decompress(R.data + tm + 12, ROM_SIZE - (tm + 12), &n);
@@ -33,40 +78,24 @@ static bool decode_tiles(AreaSrc *a) {
 	}
 	free(m);
 	/* draw it, back layer first */
-	uint8_t *vram = calloc(0x10000, 1);
-	for (int k = 0; k < 2; ++k) {
-		uint32_t wc = rom_u32(ts + (uint32_t)k * 12), off = rom_u32(ts + (uint32_t)k * 12 + 4), vo = rom_u32(ts + (uint32_t)k * 12 + 8);
-		if (!wc) continue;
-		size_t tn = 0;
-		uint8_t *t = lz77_decompress(R.data + ts + off, ROM_SIZE - (ts + off), &tn);
-		if (!t) continue;
-		size_t want = (size_t)wc * 4 < tn ? (size_t)wc * 4 : tn;
-		if (vo < 0x10000) memcpy(vram + vo, t, want < 0x10000 - vo ? want : 0x10000 - vo);
-		free(t);
-	}
 	uint32_t colors[256];
-	for (int i = 0; i < 256; ++i) colors[i] = bgr555(rom_u16(pal + (uint32_t)i * 2));
+	uint8_t *vram = map_gfx(ts, pal, colors);
 	a->px = calloc(cells * 64, 4);
 	a->front = calloc(cells * 64, 1);
-	int W = a->tw * 8;
-	for (int l = a->layers - 1; l >= 0; --l)
-		for (int ty = 0; ty < a->th; ++ty)
-			for (int tx = 0; tx < a->tw; ++tx) {
-				uint16_t e = a->tile[l][ty * a->tw + tx];
-				if (!(e & 0x3FF)) continue;
-				const uint8_t *tile = vram + (e & 0x3FF) * 32;
-				for (int y = 0; y < 8; ++y)
-					for (int x = 0; x < 8; ++x) {
-						uint8_t v = tile[y * 4 + x / 2];
-						int ci = (x & 1) ? v >> 4 : v & 15;
-						if (!ci) continue;
-						int X = (e & 0x400) ? 7 - x : x, Y = (e & 0x800) ? 7 - y : y;
-						a->px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[(e >> 12) * 16 + ci];
-						if (l == 0) a->front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
-					}
-			}
+	draw_layers(vram, colors, a->tile, a->layers, a->tw, a->th, a->px, a->front);
 	free(vram);
 	return true;
+}
+
+uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, int th) {
+	uint32_t desc, ts, pal, tm, colors[256];
+	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return NULL;
+	uint8_t *vram = map_gfx(ts, pal, colors);
+	uint32_t *px = calloc((size_t)tw * th * 64, 4);
+	uint16_t *layers[2] = { (uint16_t *)tiles, (uint16_t *)tiles + (size_t)tw * th };
+	draw_layers(vram, colors, layers, 2, tw, th, px, NULL);
+	free(vram);
+	return px;
 }
 
 /* The coordinate data's four sections, each a count, (key, offset)
