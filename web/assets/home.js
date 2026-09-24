@@ -19,11 +19,6 @@
 		if (focus) b.focus();
 	}
 	chips.forEach((b, i) => {
-		// each chip's picture as its icon
-		const ico = document.createElement('span');
-		ico.className = 'ico';
-		ico.style.backgroundImage = `url(shots/${b.dataset.shot}.png)`;
-		b.prepend(ico);
 		b.addEventListener('click', () => pick(b));
 		b.addEventListener('keydown', (e) => {
 			const d = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
@@ -64,7 +59,7 @@
 		if (!res.ok) throw new Error(res.status);
 		release = await res.json();
 	} catch (e) {
-		line.textContent = 'Out of stock: the first release is on its way. Until then, build any of them from the source.';
+		line.textContent = 'Out of stock: no release yet. Build them from the source.';
 		for (const a of document.querySelectorAll('[data-asset]')) a.setAttribute('aria-disabled', 'true');
 		return;
 	}
@@ -77,6 +72,6 @@
 		const info = document.createElement('span');
 		info.className = 'version';
 		info.textContent = `${release.tag_name} · ${(asset.size / 1048576).toFixed(1)} MB`;
-		a.closest('li').querySelector('div').append(info);
+		a.closest('li').querySelector('.what').append(info);
 	}
 })();

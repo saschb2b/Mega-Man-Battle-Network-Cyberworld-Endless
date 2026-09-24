@@ -3,80 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Play · Cyberworld Endless</title>
+<title>Jack in · Cyberworld Endless</title>
 <meta name="description" content="Play Cyberworld Endless, a Mega Man Battle Network 6 roguelike, in the browser. Bring your own ROM: it stays on your device.">
-<meta name="theme-color" content="#06103a">
+<meta name="theme-color" content="#4a7b42">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="play.css">
 </head>
 <body>
 
-<header class="nav">
+<header class="pet-bar">
 	<div class="wrap">
-		<a class="brand" href="../"><img src="../assets/mark.svg" alt="">Cyberworld Endless</a>
+		<a class="brand" href="../"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
 		<nav aria-label="Site">
 			<a class="opt" href="../#run">Run</a>
 			<a class="opt" href="../#folder">Folder</a>
-			<a href="../#downloads">Shop</a>
+			<a class="opt" href="../#navis">Navis</a>
+			<a href="../#shop">Shop</a>
 			<a href="./" aria-current="page">Jack in</a>
 		</nav>
 	</div>
 </header>
 
 <main class="wrap">
-	<div class="win player">
-		<span class="tab">Jack in</span>
+	<div class="panel player">
 		<div id="stage">
 			<canvas id="screen" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
 
 			<section id="gate" aria-live="polite">
-				<h2>Bring your own ROM</h2>
-				<p>The game runs from your copy of <strong>Mega Man Battle Network 6: Cybeast Gregar (USA)</strong>,
-					an unmodified <code>.gba</code> file. It stays in this browser and is never uploaded;
-					nothing from the game is on this site.</p>
-				<p id="status">Loading the engine…</p>
+				<h1 class="label">Game Pak</h1>
+				<p>Mega Man Battle Network 6: Cybeast Gregar (USA), an unmodified <code>.gba</code>.
+					It stays in this browser and is never uploaded.</p>
+				<p id="status">Loading…</p>
 				<div class="actions">
-					<button id="play" class="btn" type="button" hidden>Play</button>
-					<label id="pick" class="btn blue" hidden>
+					<button id="play" class="exit" type="button" hidden>Jack in</button>
+					<label id="pick" class="plate" hidden>
 						<input id="rom" type="file" accept=".gba,application/octet-stream">
-						<span id="pick-label">Choose ROM file</span>
+						<i class="icon i-chip" aria-hidden="true"></i><span id="pick-label">Choose ROM file</span>
 					</label>
 				</div>
-				<p class="small muted">or drop the file anywhere on this page</p>
+				<p class="drop">or drop the file on this page</p>
 			</section>
 		</div>
 		<div class="bar">
-			<button id="fullscreen" class="btn small" type="button">Fullscreen</button>
-			<button id="forget" class="btn small quiet" type="button">Forget ROM and saves</button>
+			<button id="fullscreen" class="pill" type="button">Fullscreen</button>
+			<button id="forget" class="pill gold" type="button">Forget ROM and saves</button>
 		</div>
 	</div>
 
-	<section class="help grid-2">
-		<div class="textbox">
-			<p class="who">Controls</p>
-			<table>
-				<tr><th>Game Boy Advance</th><th>Keyboard</th><th>Controller</th></tr>
-				<tr><td>D-Pad</td><td>Arrow keys</td><td>D-Pad or left stick</td></tr>
-				<tr><td>A</td><td><kbd>X</kbd> or <kbd>Space</kbd></td><td>A</td></tr>
-				<tr><td>B</td><td><kbd>Z</kbd> or <kbd>Backspace</kbd></td><td>B</td></tr>
-				<tr><td>L / R</td><td><kbd>A</kbd> or <kbd>Q</kbd> / <kbd>S</kbd> or <kbd>W</kbd></td><td>Shoulders</td></tr>
-				<tr><td>Start / Select</td><td><kbd>Enter</kbd> / <kbd>Tab</kbd></td><td>Start / Back</td></tr>
-			</table>
+	<div class="help grid-2">
+		<div>
+			<span class="who">Controls</span>
+			<div class="panel">
+				<table>
+					<tr><th>GBA</th><th>Keyboard</th><th>Controller</th></tr>
+					<tr><td>D-Pad</td><td><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd></td><td>D-Pad, left stick</td></tr>
+					<tr><td>A</td><td><kbd>X</kbd><kbd>Space</kbd></td><td>A</td></tr>
+					<tr><td>B</td><td><kbd>Z</kbd><kbd>Bksp</kbd></td><td>B</td></tr>
+					<tr><td>L</td><td><kbd>A</kbd><kbd>Q</kbd></td><td>L</td></tr>
+					<tr><td>R</td><td><kbd>S</kbd><kbd>W</kbd></td><td>R</td></tr>
+					<tr><td>Start</td><td><kbd>Enter</kbd></td><td>Start</td></tr>
+					<tr><td>Select</td><td><kbd>Tab</kbd></td><td>Back</td></tr>
+				</table>
+			</div>
 		</div>
-		<div class="textbox">
-			<p class="who">Your run</p>
-			<p>It is saved in this browser each time MegaMan reaches a new layer; CONTINUE on the
-				title brings you back there. Clearing the site's data or <em>Forget ROM and saves</em> removes
-				it. The same game runs on ROCKNIX handhelds and on Linux:
-				<a href="../#downloads">downloads</a>.</p>
-			<p class="small">Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by
-				Capcom. The code is <a href="../LICENSE.txt">MIT-licensed</a>; it embeds <a href="https://mgba.io">mGBA</a>
-				(<a href="../licenses/mGBA.txt">MPL-2.0</a>) and <a href="https://libsdl.org">SDL2</a> (zlib).</p>
+		<div>
+			<span class="who">Navigator</span>
+			<div class="textbox">
+				<p>The run is saved in this browser on every new layer. CONTINUE on the title picks it up.</p>
+				<p><em>Forget ROM and saves</em>, or clearing this site's data, deletes both.</p>
+				<p>Also on ROCKNIX handhelds and Linux: <a href="../#shop">Net Dealer</a>.</p>
+			</div>
 		</div>
-	</section>
+	</div>
 </main>
+
+<footer class="site">
+	<div class="wrap">
+		<p>Mega Man Battle Network is © Capcom. Unofficial fan project, not affiliated with or endorsed by Capcom.
+			Code under the <a href="../LICENSE.txt">MIT license</a>; embeds <a href="https://mgba.io">mGBA</a>
+			(<a href="../licenses/mGBA.txt">MPL-2.0</a>) and SDL2 (zlib).</p>
+	</div>
+</footer>
 
 <script src="app.js"></script>
 <script src="cyberworld.js" async></script>
