@@ -441,12 +441,14 @@ static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int m
 }
 
 bool netmap_build_layer(int area, uint32_t seed) {
-	/* the pads, in their own look */
+	/* the pads, in their own look (and where the area's platforms are pads,
+	 * the small platforms) */
 	static uint8_t pads[MAP_H][MAP_W];
 	memset(pads, 0, sizeof pads);
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
-		if (m->kind != ROOM_PAD) continue;
+		int small = R.layout->net_area[area].pad_rooms;
+		if (m->kind != ROOM_PAD && !(m->kind == ROOM_PLATFORM && m->w * m->h <= small)) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;
 	}

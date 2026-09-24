@@ -18,6 +18,8 @@ Output in `.build/atlas`:
 
 - `sheet_bXX.png`: one sheet per area, each layer small next to a 2x crop of
   its densest part.
+- `src_bXX_GG_N.png`: the area's original maps (group, number), to hold the
+  layers against.
 - `bXX_lL_dD_sS.png`: each layer whole, at 1x, for zooming in.
 - `seams_bXX_...png`: the same with the seams marked in red: tile edges
   along the floor's edges where two tiles meet as no original map shows

@@ -28,9 +28,9 @@ static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
 	[BIOME_HOMEPAGE]  = { 30, 0, 0, 40, 0, 0, 30, 0 },
 	[BIOME_COMP_B]    = { 30, 0, 0, 0, 0, 30, 40, 0 },
 	[BIOME_ROBOT_COMP]    = { 40, 0, 0, 35, 0, 0, 25, 0 },
-	[BIOME_AQUARIUM_COMP] = { 50, 50, 0, 0, 0, 0, 0, 0 },
+	[BIOME_AQUARIUM_COMP] = { 0, 0, 0, 0, 0, 0, 0, 100 },
 	[BIOME_JUDGE_COMP]    = { 0, 0, 0, 0, 0, 0, 0, 100 },
-	[BIOME_WEATHER_COMP]  = { 0, 60, 0, 0, 40, 0, 0, 0 },
+	[BIOME_WEATHER_COMP]  = { 0, 100, 0, 0, 0, 0, 0, 0 },
 	[BIOME_COPYBOT_COMP]  = { 40, 0, 0, 0, 0, 30, 0, 30 },
 	[BIOME_ACDC_HP]       = { 30, 0, 0, 30, 0, 0, 40, 0 },
 	[BIOME_GREEN_HP]      = { 30, 0, 0, 30, 0, 0, 40, 0 },
@@ -190,15 +190,18 @@ static void route(int biome, int size, bool slabs) {
 	stubs(slabs ? 2 : 3 + 2 * size);
 }
 
-/* One big field (ragged, or around a crater) with comb boardwalks. */
+/* One big field (ragged, or around a crater) with comb boardwalks; Mr.
+ * Weather's is one plain slab, as its comp is, reached by conveyor belts
+ * alone (its art has no boardwalks). */
 static void field(int biome, int size) {
 	int w = 9 + size + rng_range(0, 2), h = 9 + size + rng_range(0, 2);
 	int fx = WIN_C - w / 2, fy = WIN_C - h / 2;
-	int shape = biome == BIOME_CENTRAL ? SHAPE_CRATER : SHAPE_RAGGED;
+	bool slab = biome == BIOME_WEATHER_COMP;
+	int shape = biome == BIOME_CENTRAL ? SHAPE_CRATER : slab ? SHAPE_RECT : SHAPE_RAGGED;
 	carve_shape(shape, fx, fy, w, h);
 	add_room(fx, fy, w, h, ROOM_FIELD);
 	/* boardwalks two cells off some sides, their teeth pointing out */
-	int first = rng_range(0, 3), sides = 2 + rng_range(0, 1);
+	int first = rng_range(0, 3), sides = slab ? 0 : 2 + rng_range(0, 1);
 	for (int k = 0; k < sides; ++k) {
 		int d = (first + k) % 4;   /* the side's outward direction */
 		int run = (d == DIR_E || d == DIR_W) ? DIR_S : DIR_E;
@@ -382,10 +385,12 @@ static void catwalks(int biome, int size) {
 		int i = rng_range(0, N - 2), j = rng_range(0, N - 1);
 		if (floor_at(ox + 2 * i, oy + 2 * j) && floor_at(ox + 2 * i + 2, oy + 2 * j)) put(ox + 2 * i + 1, oy + 2 * j);
 	}
-	/* plazas beyond both ends of the maze, up and down the window */
+	/* plazas beyond both ends of the maze, up and down the window (the
+	 * Aquarium's are its glass pads' size: its water never widens) */
 	for (int e = 0; e < 2; ++e) {
 		int off = e ? N + 2 : -N - 2;
-		platform(WIN_C + off, WIN_C + off, 5, 4 + rng_range(0, 1), route_shape(biome), ROOM_PLATFORM);
+		if (biome == BIOME_AQUARIUM_COMP) platform(WIN_C + off, WIN_C + off, 4, 4, SHAPE_RECT, ROOM_PLATFORM);
+		else platform(WIN_C + off, WIN_C + off, 5, 4 + rng_range(0, 1), route_shape(biome), ROOM_PLATFORM);
 	}
 	spurs(4 + size, 1, 2);
 }

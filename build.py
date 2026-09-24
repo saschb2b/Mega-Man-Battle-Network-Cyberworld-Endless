@@ -111,7 +111,7 @@ def atlas(biomes='all', seeds='1', baseline=False):
         sheet.save(os.path.join(out, f'sheet_b{biome:02d}.png'))
         for path in paths:
             os.remove(path)
-    for path in glob.glob(os.path.join(out, 'seams_*.bmp')):   # the same, seams marked
+    for path in glob.glob(os.path.join(out, 'seams_*.bmp')) + glob.glob(os.path.join(out, 'src_*.bmp')):   # seams marked; the originals
         im = Image.open(path).convert('RGB')
         im.crop(im.getbbox()).save(path[:-4] + '.png')
         os.remove(path)

@@ -106,6 +106,23 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs);
 }
 
+/* The area's own maps as the game draws them, to hold the layers against. */
+static void sources(const char *dir, int biome) {
+	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[biome];
+	for (int k = -1; k < NET_MORE_MAPS; ++k) {
+		int group = k < 0 ? na->group : na->more[k][0], number = k < 0 ? na->number : na->more[k][1];
+		if (k >= 0 && !group) break;
+		AreaSrc a;
+		if (!area_src_load(group, number, &a)) continue;
+		int W = a.tw * 8, H = a.th * 8;
+		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+		char path[600];
+		snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d.bmp", dir, biome, group, number);
+		save_bmp(path, a.px, W, H);
+		area_src_free(&a);
+	}
+}
+
 int atlas_run(const char *spec) {
 	/* DIR[:BIOMES[:SEEDS]]: BIOMES "all" or a comma list, SEEDS per layout */
 	char dir[512] = ".build/atlas", biomes[256] = "all";
@@ -121,6 +138,7 @@ int atlas_run(const char *spec) {
 	if (!report) { fprintf(stderr, "atlas: cannot write %s\n", path); return 1; }
 	for (int b = 0; b < BIOME_COUNT; ++b) {
 		if (!want[b]) continue;
+		sources(dir, b);
 		for (int l = 0; l < LAYOUT_COUNT; ++l) {
 			if (!layout_weight(b, l)) continue;
 			for (int s = 1; s <= seeds; ++s) one(dir, report, b, l, 2, (uint32_t)(s * 7919 + b * 131));

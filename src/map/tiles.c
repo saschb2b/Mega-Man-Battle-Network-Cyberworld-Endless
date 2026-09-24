@@ -329,11 +329,12 @@ static int cmp_count(const void *a, const void *b) {
 }
 
 /* Per material and phase, the looks of floor with the same floor all
- * around, common enough. */
+ * around, common enough (off the pads, which have their own). */
 static void find_plain(TileBook *b) {
 	memset(b->nplain, 0, sizeof b->nplain);
 	for (int i = 0; i < b->n; ++i) {
 		const TileCand *c = &b->cand[i];
+		if (c->pad) continue;
 		int m = KEY_A(c->key) == 0x1FF ? 0 : KEY_B(c->key) == 0x1FF ? 1 : -1;
 		if (m < 0) continue;
 		int phase = KEY_PHASE(c->key), *np = &b->nplain[m][phase];

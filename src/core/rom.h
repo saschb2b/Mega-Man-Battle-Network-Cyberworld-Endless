@@ -43,6 +43,7 @@ typedef struct {
 		uint8_t song;            /* the area's theme (MP2K song) */
 		uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
 		uint8_t more[NET_MORE_MAPS][2];  /* more maps (group, number) in the same tiles and colours to learn from */
+		uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads (the Aquarium's glass pads; 0: none) */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 } RomLayout;
