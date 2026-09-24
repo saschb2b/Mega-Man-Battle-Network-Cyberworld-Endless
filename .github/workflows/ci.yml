@@ -26,7 +26,7 @@ jobs:
     name: Lint scripts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Shell scripts
         run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh
       - name: Python
@@ -38,7 +38,7 @@ jobs:
     name: Unit tests (sanitizers)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - run: python3 build.py test
@@ -47,14 +47,14 @@ jobs:
     name: ROCKNIX (PortMaster)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - name: Host and aarch64 builds
         run: python3 build.py all
       - name: Port archive
         run: python3 build.py package && mkdir -p build/release && (cd build/port && zip -qr ../release/cyberworld.zip .)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-portmaster
           path: build/release/cyberworld.zip
@@ -64,7 +64,7 @@ jobs:
     name: Linux desktop
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.linux, tag: cyberworld-linux }
       - run: python3 build.py linux
@@ -74,7 +74,7 @@ jobs:
           ldd "$RUNNER_TEMP/cyberworld-endless-linux-x86_64/cyberworld-endless" | tee /dev/stderr | grep -q 'libSDL2-2.0.so.0 => .*/lib/libSDL2'
           out=$("$RUNNER_TEMP/cyberworld-endless-linux-x86_64/cyberworld-endless" --help 2>&1 || true)
           grep -q 'unknown argument' <<< "$out"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-linux
           path: build/release/cyberworld-endless-linux-x86_64.tar.gz
@@ -84,11 +84,11 @@ jobs:
     name: Browser
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.web, tag: cyberworld-web }
       - run: python3 build.py web
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-web
           path: build/site
@@ -96,7 +96,7 @@ jobs:
           retention-days: 14
       - name: Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build/site
 
@@ -116,4 +116,4 @@ jobs:
       cancel-in-progress: false
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
