@@ -72,7 +72,7 @@ static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_
 static int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }
 
 static const __typeof__(R.layout->net_area[0]) *area(int biome) {
-	return &R.layout->net_area[biome < 0 || biome >= 8 ? 0 : biome];
+	return &R.layout->net_area[biome < 0 || biome >= NET_AREAS ? 0 : biome];
 }
 
 static int layer_biome(void) {

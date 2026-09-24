@@ -29,6 +29,7 @@ void error_show(const char *msg);
 uint32_t rng_next(void);
 int rng_range(int lo, int hi); /* inclusive */
 void rng_seed(uint32_t s);
+uint32_t rng_state(void);    /* to put back after an aside */
 
 extern char g_data_dir[512];
 

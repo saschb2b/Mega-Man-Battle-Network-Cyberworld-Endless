@@ -20,6 +20,7 @@ void scene_set(const Scene *s) { pending = s; }
 
 static uint32_t rng_s = 0x9E3779B9u;
 void rng_seed(uint32_t s) { rng_s = s ? s : 0x9E3779B9u; }
+uint32_t rng_state(void) { return rng_s; }
 uint32_t rng_next(void) {
 	uint32_t x = rng_s;
 	x ^= x << 13; x ^= x >> 17; x ^= x << 5;

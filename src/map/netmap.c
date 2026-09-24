@@ -37,7 +37,7 @@ typedef struct {
 	StairTemplate stairs[STAIR_DIRS];
 } Learned;
 
-static Learned learned[8];
+static Learned learned[NET_AREAS];
 
 /* the current layer's placement */
 static struct { int gx0, gy0, ex, ey; } place;
@@ -265,7 +265,7 @@ static void build_extra(const Learned *L) {
 }
 
 bool netmap_build(int area, const NetLayout *lay) {
-	if (area < 0 || area >= 8) return false;
+	if (area < 0 || area >= NET_AREAS) return false;
 	Learned *L = &learned[area];
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
 	if (!L->ok) return false;
@@ -295,7 +295,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &extra); }
 
 unsigned netmap_stair_dirs(int area, int *rise) {
-	if (area < 0 || area >= 8) return 0;
+	if (area < 0 || area >= NET_AREAS) return 0;
 	Learned *L = &learned[area];
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
 	unsigned dirs = 0;

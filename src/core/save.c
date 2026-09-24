@@ -10,7 +10,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define RUN_MAGIC 0x43574532u /* "CWE2" */
+#define RUN_MAGIC 0x43574533u /* "CWE3": room for 16 areas */
 #define PROFILE_MAGIC 0x43575032u
 
 Profile profile;

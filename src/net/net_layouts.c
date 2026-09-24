@@ -24,6 +24,9 @@ static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
 	[BIOME_UNDERNET]  = { 0, 0, 0, 0, 0, 45, 25, 30 },
 	[BIOME_SECRET]    = { 25, 0, 0, 25, 0, 50, 0, 0 },
 	[BIOME_NEST]      = { 0, 0, 0, 0, 40, 0, 60, 0 },
+	[BIOME_COMP]      = { 30, 40, 0, 0, 0, 0, 30, 0 },
+	[BIOME_HOMEPAGE]  = { 30, 0, 0, 40, 0, 0, 30, 0 },
+	[BIOME_COMP_B]    = { 30, 0, 0, 0, 0, 30, 40, 0 },
 };
 
 int layout_forced = -1;

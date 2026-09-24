@@ -27,6 +27,9 @@ static const RomLayout layouts[] = {
 			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3 },      /* Undernet 1; Undernet 1-3 */
 			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2 },      /* Undernet Zero; Undernet 3-4 */
 			{ 0x93, 1, 0x0004, 0x0000, true, 0x21, 0x93, 0, 2 },      /* Underground 2; Underground 1-2 */
+			{ 0x8C, 0, 0x0002, 0x0008, false, 0x13, 0x8C, 0, 16 },    /* a comp (orange, green); the comps of group 0x8C */
+			{ 0x88, 3, 0x0800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */
+			{ 0x8C, 1, 0x00C0, 0x0400, false, 0x13, 0x8D, 0, 16 },    /* a comp (blue, pink); the comps of group 0x8D */
 		},
 		.song_table = 0x159F48,
 	},

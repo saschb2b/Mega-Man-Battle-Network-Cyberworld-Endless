@@ -94,7 +94,8 @@ typedef struct {
 static int navi_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
-		{ 11, 0x3B }, { 13, 0x52 }, { 15, 0x55 },                          /* Proto, Dive, Judge */
+		{ 11, 0x3B }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 },            /* Proto, Dive, Circus, Judge */
+		{ 17, 0x53 },                                                        /* Colonel */
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
