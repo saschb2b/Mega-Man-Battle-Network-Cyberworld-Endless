@@ -110,7 +110,7 @@ static int bfs_far(int from) {
 	return best;
 }
 
-void layer_generate(uint32_t seed, int depth, int biome, int kind) {
+void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stair_dirs, int rise) {
 	memset(&layer, 0, sizeof layer);
 	rng_seed(seed);
 	layer.biome = biome;
@@ -164,6 +164,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind) {
 	}
 
 	layer.exit_room = bfs_far(0);
+	layer_raise_rooms(seed, stair_dirs, rise);
 	int cx, cy;
 	room_center(&layer.rooms[0], &cx, &cy);
 	add_obj(OBJ_WARP_IN, cx, cy);

@@ -87,7 +87,7 @@ static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
-	layer_generate(run.layer_seed, run.depth, biome, run.side_kind);
+	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, 0u, 0);
 	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0] };
 	if (!netmap_build(biome, &lay)) return false;
 

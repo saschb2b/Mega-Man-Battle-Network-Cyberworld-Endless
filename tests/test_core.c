@@ -71,7 +71,7 @@ static void test_generation(void) {
 	for (uint32_t seed = 1; seed <= 300; ++seed) {
 		int depth = 1 + (int)(seed % 25);
 		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
-		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind);
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, 3u, 32);
 		CHECK(layer.nrooms >= 3, "seed %u: only %d rooms", seed, layer.nrooms);
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
@@ -95,11 +95,56 @@ static void test_generation(void) {
 		}
 	}
 	/* Determinism: the same seed builds the same layer. */
-	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL);
+	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
 	static Layer a;
 	a = layer;
-	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL);
+	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
 	CHECK(!memcmp(a.cell, layer.cell, sizeof a.cell) && a.nobj == layer.nobj, "generation is deterministic");
+}
+
+static bool on_stair(int x, int y) {
+	for (int i = 0; i < layer.nstairs; ++i)
+		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return true;
+	return false;
+}
+
+/* Raised rooms are reached only by their stair, which climbs from a ground
+ * landing to the room's floor. */
+static void test_stairs(void) {
+	int layers = 0;
+	for (uint32_t seed = 1; seed <= 400; ++seed) {
+		int depth = 1 + (int)(seed % 25);
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), LAYER_NORMAL, 3u, 32);
+		if (!layer.nstairs) continue;
+		++layers;
+		CHECK(layer.rise == 32, "seed %u: rise %d", seed, layer.rise);
+		for (int i = 0; i < layer.nstairs; ++i) {
+			const Stair *st = &layer.stair[i];
+			bool nx = st->dir == STAIR_UP_NX;
+			for (int k = 0; k < 2; ++k) {
+				int tx = nx ? st->x - 1 : st->x + k, ty = nx ? st->y + k : st->y - 1;       /* above the top */
+				int fx = nx ? st->x + 2 : st->x + k, fy = nx ? st->y + k : st->y + 2;       /* below the foot */
+				CHECK(layer.level[ty][tx] && layer.cell[ty][tx] == C_PATH, "seed %u: stair %d tops onto no raised floor", seed, i);
+				CHECK(!layer.level[fy][fx] && layer.cell[fy][fx] == C_PATH, "seed %u: stair %d has no landing", seed, i);
+			}
+		}
+		for (int y = 1; y < MAP_H - 1; ++y)
+			for (int x = 1; x < MAP_W - 1; ++x) {
+				if (!layer.level[y][x]) continue;
+				static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+				for (int k = 0; k < 4; ++k) {
+					int ax = x + d[k][0], ay = y + d[k][1];
+					bool ok = layer.cell[ay][ax] != C_PATH || layer.level[ay][ax] || on_stair(ax, ay);
+					CHECK(ok, "seed %u: raised floor at %d,%d touches the ground", seed, x, y);
+				}
+			}
+		for (int i = 0; i < layer.nobj; ++i)
+			CHECK(!on_stair((int)layer.obj[i].x, (int)layer.obj[i].y), "seed %u: object %d on a stair", seed, i);
+	}
+	CHECK(layers > 10, "only %d of 400 layers have a stair", layers);
+	/* an area without stairs keeps its layers flat */
+	layer_generate(7919u, 2, BIOME_SKY, LAYER_NORMAL, 0u, 0);
+	CHECK(!layer.nstairs && !layer.rise, "flat area got a stair");
 }
 
 static void test_depth_plan(void) {
@@ -114,6 +159,7 @@ int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
+	test_stairs();
 	test_depth_plan();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");

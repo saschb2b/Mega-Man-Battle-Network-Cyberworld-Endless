@@ -9,6 +9,7 @@
 #define MAP_H 64
 #define MAX_OBJS 64
 #define MAX_ROOMS 14
+#define MAX_STAIRS 4
 
 enum { C_VOID = 0, C_PATH = 1 };
 
@@ -43,8 +44,18 @@ typedef struct {
 
 enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET };
 
+/* Which way a stair climbs: towards grid -x or -y (see src/map/stairs.h). */
+enum { STAIR_UP_NX, STAIR_UP_NY };
+
+/* A stair: 2 x 2 cells from (x, y). */
+typedef struct { int x, y, dir; } Stair;
+
 typedef struct {
 	uint8_t cell[MAP_H][MAP_W];
+	uint8_t level[MAP_H][MAP_W];   /* 1: a raised room's floor */
+	Stair stair[MAX_STAIRS];
+	int nstairs;
+	int rise;                      /* world z of the raised floor */
 	Room rooms[MAX_ROOMS];
 	int nrooms;
 	NetObj obj[MAX_OBJS];
@@ -59,8 +70,11 @@ typedef struct {
 
 extern Layer layer;
 
-/* Generation is deterministic for a given seed. */
-void layer_generate(uint32_t seed, int depth, int biome, int kind);
+/* Generation is deterministic for a given seed. `stair_dirs` (bit per
+ * STAIR_UP_*) are the stairs the area can draw, `rise` their height. */
+void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stair_dirs, int rise);
+/* Lifts dead-end rooms onto stairs (net_height.c). */
+void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
 

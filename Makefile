@@ -48,7 +48,7 @@ clean:
 .PHONY: all clean
 
 # ROM-free unit tests (host only)
-TEST_SRCS := tests/test_core.c src/core/rom.c src/net/net_gen.c
+TEST_SRCS := tests/test_core.c src/core/rom.c src/net/net_gen.c src/net/net_height.c
 build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g -Wall -Wextra -Wno-unused-parameter -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS)
