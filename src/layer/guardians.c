@@ -179,8 +179,12 @@ const char *guardian_area_name(int biome) {
 	static const char *const names[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Central Area", [BIOME_SEASIDE] = "Seaside Area", [BIOME_SKY] = "Sky Area",
 		[BIOME_GREEN] = "Green Area", [BIOME_GRAVEYARD] = "Graveyard", [BIOME_UNDERNET] = "Undernet",
-		[BIOME_SECRET] = "Secret Area", [BIOME_NEST] = "Cybeast Nest", [BIOME_COMP] = "Comp Network",
-		[BIOME_HOMEPAGE] = "Homepages", [BIOME_COMP_B] = "Lab Comps",
+		[BIOME_SECRET] = "Secret Area", [BIOME_NEST] = "Cybeast Nest", [BIOME_COMP] = "RoboDog Comp",
+		[BIOME_HOMEPAGE] = "Aquarium HP", [BIOME_COMP_B] = "Lab Comps",
+		[BIOME_ROBOT_COMP] = "Robot Control Comp", [BIOME_AQUARIUM_COMP] = "Aquarium Comp",
+		[BIOME_JUDGE_COMP] = "Judge Tree Comp", [BIOME_WEATHER_COMP] = "Mr. Weather Comp",
+		[BIOME_COPYBOT_COMP] = "CopyBot's Comp", [BIOME_ACDC_HP] = "ACDC HP", [BIOME_GREEN_HP] = "Green HP",
+		[BIOME_SKY_HP] = "Sky HP",
 	};
 	return biome >= 0 && biome < BIOME_COUNT && names[biome] ? names[biome] : "the Net";
 }
@@ -193,6 +197,10 @@ const char *guardian_area_motto(int biome) {
 		[BIOME_SECRET] = "Beyond the sealed gate", [BIOME_NEST] = "Lair of the Cybeasts",
 		[BIOME_COMP] = "Circuits of a home comp", [BIOME_HOMEPAGE] = "Pages of the net's citizens",
 		[BIOME_COMP_B] = "Deep in the lab's machines",
+		[BIOME_ROBOT_COMP] = "The city's robots run here", [BIOME_AQUARIUM_COMP] = "Mazes of water and light",
+		[BIOME_JUDGE_COMP] = "Roots of the great tree", [BIOME_WEATHER_COMP] = "Where the forecast is made",
+		[BIOME_COPYBOT_COMP] = "A copy of a copy", [BIOME_ACDC_HP] = "Home of ACDC Town",
+		[BIOME_GREEN_HP] = "Home of Green Town", [BIOME_SKY_HP] = "Home of Sky Town",
 	};
 	return biome >= 0 && biome < BIOME_COUNT && mottos[biome] ? mottos[biome] : "";
 }

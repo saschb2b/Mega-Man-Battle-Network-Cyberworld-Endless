@@ -5,14 +5,17 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* The areas a run visits (RomLayout.net_area has one per area). The comps
- * and the homepages came after the Cybeast Nest; saves keep their numbers. */
+/* The areas a run visits (RomLayout.net_area has one per area). Areas added
+ * later come after the Cybeast Nest; saves keep their numbers. */
 enum {
 	BIOME_CENTRAL, BIOME_SEASIDE, BIOME_SKY, BIOME_GREEN, BIOME_GRAVEYARD, BIOME_UNDERNET, BIOME_SECRET, BIOME_NEST,
 	BIOME_COMP, BIOME_HOMEPAGE, BIOME_COMP_B,
+	/* the story's comps and the other homepages */
+	BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_JUDGE_COMP, BIOME_WEATHER_COMP, BIOME_COPYBOT_COMP,
+	BIOME_ACDC_HP, BIOME_GREEN_HP, BIOME_SKY_HP,
 	BIOME_COUNT
 };
-#define MAX_BIOMES 16   /* room in the run save */
+#define MAX_BIOMES 32   /* room in the run save */
 
 /* What the engine decides about a run. MegaMan himself (HP, folder, pack,
  * zenny, BugFrags, key items) lives in the game's memory and its state. */

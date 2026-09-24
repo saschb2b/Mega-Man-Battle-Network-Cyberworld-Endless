@@ -11,7 +11,8 @@
 
 typedef enum { ROM_BN6_GREGAR_US } RomVersion;
 
-#define NET_AREAS 11   /* one per BIOME_* */
+#define NET_AREAS 19   /* one per BIOME_* */
+#define NET_MORE_MAPS 3
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
 typedef struct {
@@ -41,6 +42,7 @@ typedef struct {
 		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
 		uint8_t song;            /* the area's theme (MP2K song) */
 		uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
+		uint8_t more[NET_MORE_MAPS][2];  /* more maps (group, number) in the same tiles and colours to learn from */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 } RomLayout;

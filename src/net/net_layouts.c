@@ -27,6 +27,14 @@ static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
 	[BIOME_COMP]      = { 30, 40, 0, 0, 0, 0, 30, 0 },
 	[BIOME_HOMEPAGE]  = { 30, 0, 0, 40, 0, 0, 30, 0 },
 	[BIOME_COMP_B]    = { 30, 0, 0, 0, 0, 30, 40, 0 },
+	[BIOME_ROBOT_COMP]    = { 40, 0, 0, 35, 0, 0, 25, 0 },
+	[BIOME_AQUARIUM_COMP] = { 20, 30, 0, 0, 0, 0, 0, 50 },
+	[BIOME_JUDGE_COMP]    = { 0, 0, 0, 0, 0, 0, 0, 100 },
+	[BIOME_WEATHER_COMP]  = { 0, 60, 0, 0, 40, 0, 0, 0 },
+	[BIOME_COPYBOT_COMP]  = { 0, 0, 0, 0, 30, 70, 0, 0 },
+	[BIOME_ACDC_HP]       = { 30, 0, 0, 30, 0, 0, 40, 0 },
+	[BIOME_GREEN_HP]      = { 30, 0, 0, 30, 0, 0, 40, 0 },
+	[BIOME_SKY_HP]        = { 30, 0, 0, 30, 0, 0, 40, 0 },
 };
 
 int layout_forced = -1;
@@ -70,6 +78,9 @@ static int route_shape(int biome) {
 	case BIOME_SECRET: return rng_range(0, 1) ? SHAPE_OCTAGON : SHAPE_PLUS;
 	case BIOME_NEST: return rng_range(0, 1) ? SHAPE_PLUS : SHAPE_RECT;
 	case BIOME_CENTRAL: return rng_range(0, 2) ? SHAPE_RECT : SHAPE_OCTAGON;
+	case BIOME_WEATHER_COMP: return rng_range(0, 1) ? SHAPE_HOLED : SHAPE_RECT;
+	case BIOME_COPYBOT_COMP: return SHAPE_RECT;
+	case BIOME_JUDGE_COMP: return rng_range(0, 1) ? SHAPE_RAGGED : SHAPE_PLUS;
 	default: return SHAPE_RECT;
 	}
 }
