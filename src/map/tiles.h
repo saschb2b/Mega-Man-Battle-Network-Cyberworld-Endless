@@ -39,6 +39,8 @@ typedef struct {
 	int dv, face, hang;                 /* how the floor is drawn, see TileGrid */
 	int joins;                          /* pairs where the two floors meet */
 	int plain[2][64][TILE_PLAIN], nplain[2][64];   /* per material and phase: the floor's usual looks */
+	uint32_t *shapes;                   /* the panels' neighbourhoods seen (TILE_SHAPE), sorted */
+	int nshapes;
 } TileBook;
 
 /* A tile map's size, where its panel edges fall (world units mod 32), how
@@ -97,5 +99,11 @@ int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNe
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
 	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
 	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask);
+/* A panel's neighbourhood: its 3 x 3 panels' floors (bit k: panel
+ * (A + k % 3 - 1, B + k / 3 - 1)) and whether it lies on a pad. */
+#define TILE_SHAPE(oa, ob, pad) ((uint32_t)(oa) << 10 | (uint32_t)(ob) << 1 | ((pad) ? 1u : 0u))
+/* Whether one of the original maps has a panel with this neighbourhood:
+ * its tiles are drawn for it. */
+bool tiles_shape_seen(const TileBook *books, int nbooks, uint32_t shape);
 
 #endif

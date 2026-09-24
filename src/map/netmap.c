@@ -22,6 +22,7 @@
 #include "debug.h"
 #include "decor.h"
 #include "emu.h"
+#include "legal.h"
 #include "lz.h"
 #include "stairs.h"
 #include "tilemap.h"
@@ -47,6 +48,7 @@ typedef struct {
 static Learned learned[NET_AREAS];
 
 int netmap_scenery;
+LegalStats netmap_legal;
 
 /* the last tile map written, both layers (for the dev tools) */
 static struct { uint16_t *map; uint8_t *seams; int tw, th; } last;   /* seams: bit 0 right, bit 1 below */
@@ -354,16 +356,9 @@ static void build_extra(const Learned *L) {
 	}
 }
 
-bool netmap_build(int area, const NetLayout *lay) {
-	if (area < 0 || area >= NET_AREAS) return false;
-	Learned *L = &learned[area];
-	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
-	if (!L->ok) return false;
-	cur = lay;
-	one_floor = !R.layout->net_area[area].walk_styles;
-	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
-	/* centre the floor on the world origin, across (x - y) and up and down
-	 * (x + y) the screen */
+/* Centres the floor on the world origin, across (x - y) and up and down
+ * (x + y) the screen; false without floor. */
+static bool centre(const NetLayout *lay) {
 	int u0 = 1 << 30, u1 = -(1 << 30), v0 = 1 << 30, v1 = -(1 << 30);
 	for (int y = 0; y < lay->gh; ++y)
 		for (int x = 0; x < lay->gw; ++x)
@@ -377,8 +372,49 @@ bool netmap_build(int area, const NetLayout *lay) {
 	int cu = (u0 + u1) / 2, cv = (v0 + v1) / 2;
 	place.gx0 = (cu + cv) / 2;
 	place.gy0 = (cv - cu) / 2;
+	return true;
+}
+
+/* ---- a floor the tiles can draw ---- */
+
+#define LEGAL_BUDGET 400   /* cells changed at most */
+
+/* Whether the panel of grid cell (x, y) has a neighbourhood the original
+ * maps show. */
+static bool legal_clean(int x, int y, void *ctx) {
+	const Learned *L = ctx;
+	int A, B;
+	grid_to_panel(x, y, &A, &B);
+	unsigned oa = 0, ob = 0;
+	for (int k = 0; k < 9; ++k) {
+		int m = TILE_MATERIAL(floor_cb(A + k % 3 - 1, B + k / 3 - 1, NULL));
+		if (m == TILE_A) oa |= 1u << k;
+		if (m == TILE_B) ob |= 1u << k;
+	}
+	return tiles_shape_seen(L->book, L->nbooks, TILE_SHAPE(oa, ob, floor_cb(A, B, NULL) & TILE_PAD));
+}
+
+static void legalize(Learned *L, const NetLayout *lay) {
+	LegalGrid g = { lay->gw, lay->gh, lay->cell, lay->locked, legal_clean, L };
+	netmap_legal = legal_fix(&g, LEGAL_BUDGET);
+}
+
+bool netmap_build(int area, const NetLayout *lay) {
+	if (area < 0 || area >= NET_AREAS) return false;
+	Learned *L = &learned[area];
+	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
+	if (!L->ok) return false;
+	cur = lay;
+	one_floor = !R.layout->net_area[area].walk_styles;
+	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
 	place.ex = L->ex;
 	place.ey = L->ey;
+	if (!centre(lay)) return false;
+	netmap_legal = (LegalStats){ 0, 0 };
+	if (lay->locked) {
+		legalize(L, lay);
+		centre(lay);
+	}
 	coord_slot = L->coord_slot;
 	build_extra(L);
 	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &extra);
@@ -397,6 +433,13 @@ unsigned netmap_stair_dirs(int area, int *rise) {
 	return dirs;
 }
 
+/* Locks the w x h cells from (x, y) and `margin` around them. */
+static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int margin) {
+	for (int j = y - margin; j < y + h + margin; ++j)
+		for (int i = x - margin; i < x + w + margin; ++i)
+			if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) locked[j][i] = 1;
+}
+
 bool netmap_build_layer(int area, uint32_t seed) {
 	/* the pads, in their own look */
 	static uint8_t pads[MAP_H][MAP_W];
@@ -407,8 +450,23 @@ bool netmap_build_layer(int area, uint32_t seed) {
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;
 	}
+	/* what the floor must keep: the cells of objects, rooms' anchors, pads
+	 * and the guardian's arena, and the stairs and raised floors with the
+	 * cells beside them */
+	static uint8_t locked[MAP_H][MAP_W];
+	memset(locked, 0, sizeof locked);
+	for (int i = 0; i < layer.nobj; ++i) lock(locked, (int)layer.obj[i].x, (int)layer.obj[i].y, 1, 1, 0);
+	for (int r = 0; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		lock(locked, m->ax, m->ay, 1, 1, 0);
+		if (m->kind == ROOM_PAD || r == layer.arena) lock(locked, m->x, m->y, m->w, m->h, 0);
+	}
+	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, 2, 2, 2);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (layer.level[y][x]) lock(locked, x, y, 1, 1, 2);
 	static NetLayout lay;
-	lay = (NetLayout){ MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, seed, &pads[0][0] };
+	lay = (NetLayout){ MAP_W, MAP_H, &layer.cell[0][0], &locked[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, seed, &pads[0][0] };
 	if (layer.arena >= 0) {
 		const Room *a = &layer.rooms[layer.arena];
 		lay.ax = a->x; lay.ay = a->y; lay.aw = a->w; lay.ah = a->h;

@@ -6,13 +6,15 @@
 #include <stdint.h>
 
 #include "coords.h"
+#include "legal.h"
 #include "net.h"
 
 /* A layer: panels on a gw x gh grid (1 = floor). Grid x runs down-right on
  * screen, y down-left, as in the layer generator. */
 typedef struct {
 	int gw, gh;
-	const uint8_t *cell;
+	uint8_t *cell;          /* made drawable where `locked` allows (legal.c) */
+	const uint8_t *locked;  /* 1 where the floor must stay (NULL: all of it) */
 	const uint8_t *level;   /* 1: raised by `rise` (NULL: all flat) */
 	int rise;
 	const Stair *stairs;
@@ -30,6 +32,9 @@ bool netmap_build(int area, const NetLayout *lay);
 bool netmap_build_layer(int area, uint32_t seed);
 /* The pieces of scenery the last layer got. */
 extern int netmap_scenery;
+/* The floor cells the last layer's floor changed to be drawable, and the
+ * panels still not drawn exactly. */
+extern LegalStats netmap_legal;
 /* The last tile map written: tw x th entries of layer 0, then layer 1. */
 const uint16_t *netmap_last_tiles(int *tw, int *th);
 /* ... and where its tiles meet as no original map shows (per tile: bit 0

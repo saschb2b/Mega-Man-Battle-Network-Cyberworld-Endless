@@ -80,6 +80,10 @@ First playable version.
   stops on a tile's edge. Central Area's corners, Sky HP's faces and the Sky
   arena's lower edges were the worst. Where a catwalk meets a platform some
   joins still show.
+- Layers keep to shapes the original maps draw: before its tiles are
+  picked, a layer's floor fills notches, trims stray cells and widens
+  walkways' bends and branches into small platforms, without changing how
+  anything connects. About a third fewer tiles are approximated.
 - Dev tools (docs/DEVTOOLS.md): Select+R opens a dev menu for test runs (no
   random battles, can't die, one-hit enemies, up to 8x speed, win the battle,
   heal, zenny, the next layer or guardian, a chosen area). `build.py atlas`

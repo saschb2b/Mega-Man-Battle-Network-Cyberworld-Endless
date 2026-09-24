@@ -317,6 +317,11 @@ static int cmp_cand(const void *a, const void *b) {
 	return x->pad - y->pad;
 }
 
+static int cmp_u32(const void *a, const void *b) {
+	uint32_t x = *(const uint32_t *)a, y = *(const uint32_t *)b;
+	return (x > y) - (x < y);
+}
+
 static int cmp_count(const void *a, const void *b) {
 	const TileCand *x = a, *y = b;
 	if (x->key != y->key) return x->key < y->key ? -1 : 1;
@@ -389,6 +394,27 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 			t->pad = A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 ? pads[(B + SPAN / 2) * SPAN + A + SPAN / 2] : 0;
 			++n;
 		}
+	/* the panels' neighbourhoods, as legal.c asks after them */
+	out->shapes = malloc(SPAN * SPAN * sizeof *out->shapes);
+	out->nshapes = 0;
+	for (int B = -SPAN / 2 + 1; B < SPAN / 2 - 1; ++B)
+		for (int A = -SPAN / 2 + 1; A < SPAN / 2 - 1; ++A) {
+			unsigned oa = 0, ob = 0;
+			bool mixed = false;
+			for (int k = 0; k < 9; ++k) {
+				int st = src_panel(&src, A + k % 3 - 1, B + k / 3 - 1);
+				if (st == OTHER) mixed = true;
+				if (st == TILE_A) oa |= 1u << k;
+				if (st == TILE_B) ob |= 1u << k;
+			}
+			if (mixed || !(oa | ob)) continue;
+			out->shapes[out->nshapes++] = TILE_SHAPE(oa, ob, pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]);
+		}
+	qsort(out->shapes, (size_t)out->nshapes, sizeof *out->shapes, cmp_u32);
+	int ns = 0;
+	for (int i = 0; i < out->nshapes; ++i)
+		if (!ns || out->shapes[ns - 1] != out->shapes[i]) out->shapes[ns++] = out->shapes[i];
+	out->nshapes = ns;
 	/* one entry per pair, counted */
 	qsort(c, n, sizeof *c, cmp_cand);
 	int nu = 0;
@@ -411,6 +437,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 
 void tiles_free(TileBook *b) {
 	free(b->cand);
+	free(b->shapes);
 	memset(b, 0, sizeof *b);
 }
 
@@ -494,7 +521,7 @@ int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNe
  * bad. Only pairs without a back tile when `single`. */
 static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty, int phase,
 	unsigned oa, unsigned ob, bool pad, TileFloor floor, const void *ctx, bool single,
-	const TileSeams *seams, const TileNeighbours *n) {
+	const TileSeams *seams, const TileNeighbours *n, int *dist) {
 	int cm = ob & 0x10 ? TILE_B : TILE_A;   /* the centre panel's material */
 	/* each book's tiles with the faces and legs its own map draws (a
 	 * walkway's may be thinner than a platform's), but the floor where this
@@ -537,9 +564,7 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 		}
 	}
 	if (same) { fit = same; fit_d = same_d; }
-	tiles_stats.picks++;
-	if (!fit) tiles_stats.fallbacks++;
-	else if (fit_d) tiles_stats.near++;
+	*dist = fit ? fit_d : -1;
 	return fit ? fit : any;
 }
 
@@ -552,24 +577,50 @@ static int only(int A, int B, const void *ctx) {
 	return TILE_MATERIAL(m) == o->keep ? m : TILE_VOID;
 }
 
+/* a pick with this distance (-1: none fitted) in the stats */
+static void count(int dist) {
+	tiles_stats.picks++;
+	if (dist < 0) tiles_stats.fallbacks++;
+	else if (dist) tiles_stats.near++;
+}
+
+/* Where the original never joins its two floors (Green's planks reach its
+ * raised grass by ramps): the walkway's end over the platform's edge, each
+ * drawn as if the other were not there, on the two layers. */
+static bool apart(const TileBook *books, int nbooks, unsigned oa, unsigned ob) {
+	if (!oa || !ob) return false;
+	for (int k = 0; k < nbooks; ++k) if (books[k].joins) return false;
+	return true;
+}
+
+bool tiles_shape_seen(const TileBook *books, int nbooks, uint32_t shape) {
+	for (int k = 0; k < nbooks; ++k) {
+		const TileBook *b = &books[k];
+		int lo = 0, hi = b->nshapes;
+		while (lo < hi) {
+			int mid = (lo + hi) / 2;
+			if (b->shapes[mid] < shape) lo = mid + 1; else hi = mid;
+		}
+		if (lo < b->nshapes && b->shapes[lo] == shape) return true;
+	}
+	return false;
+}
+
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
 	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
 	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask) {
-	int phase, A, B;
+	int phase, A, B, dist;
 	tile_class(g, tx, ty, &phase, &A, &B);
 	unsigned oa, ob;
 	occupancy(floor, ctx, A, B, &oa, &ob);
 	if (!(oa | ob)) return false;
 	bool pad = floor(A, B, ctx) & TILE_PAD;
-	int joins = 0;
-	for (int k = 0; k < nbooks; ++k) joins += books[k].joins;
-	if (oa && ob && !joins) {
-		/* the original never joins its two floors (Green's planks reach its
-		 * raised grass by ramps): the walkway's end over the platform's edge,
-		 * each drawn as if the other were not there, on the two layers */
+	if (apart(books, nbooks, oa, ob)) {
 		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
-		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true, NULL, n);
-		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, pad, only, &ob_only, true, NULL, n);
+		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true, NULL, n, &dist);
+		count(dist);
+		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, pad, only, &ob_only, true, NULL, n, &dist);
+		count(dist);
 		if (pb && !pb->mask) pb = NULL;
 		if (pa && !pa->mask) pa = NULL;
 		if (pa || pb) {
@@ -580,7 +631,8 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 			return true;
 		}
 	}
-	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n);
+	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n, &dist);
+	count(dist);
 	if (!c) return false;
 	*e0 = c->e0;
 	*e1 = c->e1;

@@ -114,3 +114,18 @@ them flush (its planks reach the raised grass by ramps), so where Green's
 two floors meet, the plank's end is drawn on the front tile layer over the
 grass edge on the back one, each as if the other were not there. The Nest's
 source map (Underground 2) has no second floor.
+
+Before its tiles are picked, a layer's floor is made drawable
+(`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,
+walkway and void no original map shows is a place the tiles can only
+approximate, so single floor cells are added into notches or taken away,
+and walkways' bends and branches are widened into a 2x2 platform (the
+originals join their walkways on platforms), where that leaves fewer such
+panels around. An edit may not join, split or enclose anything (a
+simple-point test, and for the 2x2 blocks a count of the floor's and
+void's pieces), nor touch objects, rooms' anchors, pads, the arena, stairs
+and raised floors; straight walkways keep their width. The originals'
+neighbourhoods are recorded while their tiles are learned. It removes about
+a third of the approximated tiles; mazes of 1-wide walkways (Central's
+catwalks, the Undernet's webs) have shapes no original has and stay
+approximate.

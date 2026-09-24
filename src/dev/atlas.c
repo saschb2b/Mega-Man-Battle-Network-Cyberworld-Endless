@@ -100,9 +100,9 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	int floor = 0;
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) floor += layer.cell[y][x] == C_PATH;
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1;
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, scenery %d, arena %s, stairs %d\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, cells changed %d, panels not exact %d, scenery %d, arena %s, stairs %d\n",
 		biome, layer.layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
-		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, netmap_scenery,
+		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, netmap_legal.edits, netmap_legal.left, netmap_scenery,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs);
 }
 

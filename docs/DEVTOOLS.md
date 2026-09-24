@@ -25,8 +25,10 @@ Output in `.build/atlas`:
   floor up to its own edge above or below an empty tile (the steps along a
   platform's lower edges).
 - `report.txt`: a line per layer with its panels, rooms, how many tile picks
-  were near misses or fallbacks, how many seams are left, the scenery
-  placed, whether a guardian layer has its arena, and its stairs.
+  were near misses or fallbacks, how many seams are left, the floor cells
+  changed to be drawable and the panels whose neighbourhood no original
+  shows (docs/LEVEL_DESIGN.md), the scenery placed, whether a guardian
+  layer has its arena, and its stairs.
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the
