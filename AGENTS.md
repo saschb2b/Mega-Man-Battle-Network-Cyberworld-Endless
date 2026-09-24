@@ -45,7 +45,7 @@ README and the site.
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `port/` | PortMaster launcher and metadata |
 | `linux/` | The Linux desktop release's README and menu installer |
-| `web/` | The project site on GitHub Pages: the home page (`index.html`, `assets/`) in Battle Network's own interface (text boxes, menus, act cards, ChipFolder, Net Dealer, E-Mail), and the player in `play/` (ROM check and storage, scaling) |
+| `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling). Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
 | `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each (`build.py clips`, ffmpeg in a pinned image) |
 | `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.web` (Emscripten, mGBA without threads) |
@@ -87,6 +87,7 @@ python3 build.py run        # the Linux desktop build, played here in a window
 python3 build.py serve      # the site and the browser build on http://localhost:8080
 python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless runs
 python3 build.py clips [NAMES]         # docs/clips: the same runs as 30 fps videos
+python3 tools/site_art.py              # web/assets/ui: the site's pixel-art frames and icons
 python3 build.py release    # build/release/: the PortMaster zip, the Linux tar.gz, the site zip
 ```
 
