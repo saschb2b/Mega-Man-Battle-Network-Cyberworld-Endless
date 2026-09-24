@@ -48,30 +48,6 @@ int ta_heal(TextArchive *t) {
 	return i;
 }
 
-int ta_chip_trader(TextArchive *t) {
-	int refuse = ta_say(t, -1, "You need 3 chips\nto trade.");
-	int i = ta_script(t);
-	uint8_t trade[] = { 0xFB, 0x06, 0x03, (uint8_t)refuse };      /* ts_start_chip_trader 3 */
-	ta_open(t);
-	ta_text(t, "It's a Chip Trader.\n3 chips for 1!");
-	ta_wait(t);
-	ta_bytes(t, trade, sizeof trade);
-	ta_end(t);
-	return i;
-}
-
-int ta_bug_trader(TextArchive *t) {
-	int refuse = ta_say(t, -1, "Come back with\nmore BugFrags!");
-	int i = ta_script(t);
-	uint8_t trade[] = { 0xFB, 0x06, 0x01, (uint8_t)refuse };      /* ts_start_bug_frag_trader */
-	ta_open(t);
-	ta_text(t, "BugFrags for chips.\nInterested?");
-	ta_wait(t);
-	ta_bytes(t, trade, sizeof trade);
-	ta_end(t);
-	return i;
-}
-
 int ta_shop(TextArchive *t, int shop, const char *greeting) {
 	int i = ta_script(t);
 	uint8_t open[] = { 0xFB, 0x05, (uint8_t)shop };               /* ts_start_shop */

@@ -191,6 +191,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	bool trader = rng_range(0, 99) < 25;
 	bool programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
 	bool bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
+	trader &= !bugtrader;   /* the trade screen serves one trader per map */
 	bool challenge = rng_range(0, 99) < 20 + depth;
 	bool undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
 		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);

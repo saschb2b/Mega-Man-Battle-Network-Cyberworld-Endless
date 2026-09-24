@@ -7,11 +7,9 @@
 /* The ScrtData key item: three open the Secret Area's gate. */
 #define SCRIPTS_SECRET_DATA 0x31
 
-/* Service NPCs on the game's own commands: heal to full HP, the Chip Trader
- * (3 chips) and the BugFrag trader. */
+/* Service NPCs on the game's own commands: heal to full HP. (Chip Traders
+ * speak the game's own lines, see trader.h.) */
 int ta_heal(TextArchive *t);
-int ta_chip_trader(TextArchive *t);
-int ta_bug_trader(TextArchive *t);
 /* A shopkeeper: `greeting`, then shop `shop`'s screen. */
 int ta_shop(TextArchive *t, int shop, const char *greeting);
 

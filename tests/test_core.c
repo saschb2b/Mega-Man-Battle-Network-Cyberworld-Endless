@@ -88,6 +88,9 @@ static void test_generation(void) {
 			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN) has_exit = true;
 		}
 		CHECK(has_exit, "seed %u: no way out", seed);
+		int traders = 0;
+		for (int i = 0; i < layer.nobj; ++i) traders += layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
+		CHECK(traders <= 1, "seed %u: %d traders (the trade screen serves one per map)", seed, traders);
 		if (layer.boss_layer) {
 			bool boss = false;
 			for (int i = 0; i < layer.nobj; ++i) boss |= layer.obj[i].type == OBJ_BOSS;

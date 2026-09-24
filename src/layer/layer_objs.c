@@ -16,6 +16,7 @@
 #include "run.h"
 #include "scripts.h"
 #include "shop.h"
+#include "trader.h"
 
 /* Overworld objects (sprite list 7) */
 #define SPR_EXIT_PAD    0x22
@@ -29,6 +30,8 @@
 #define SPR_PROG_BLUE   93
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
+#define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
+#define SPECIAL_CHANCE  40   /* % of those */
 
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
  * 4 key item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md). */
@@ -73,7 +76,11 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
 }
 
-typedef struct { int x, y, z, cat, sprite, script, gone_flag; bool floor; } Talker;
+typedef struct {
+	int x, y, z, cat, sprite, script, gone_flag;
+	bool floor;
+	uint32_t archive;   /* its text archive; 0: the layer's */
+} Talker;
 
 /* Overworld sprites (list 6) of the Navis Gregar has on the net, by navi
  * index; the others (Falzar's Navis are placeholders here) take the shape of
@@ -111,7 +118,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
 		/* in a raised room, on its floor */
 		int wz = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
-		Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false };
+		Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, 0 };
 		bool asks = false;   /* a Yes/No the director acts on */
 		switch (o->type) {
 		case OBJ_WARP_IN:
@@ -153,11 +160,17 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		}
 		case OBJ_HEAL: tk.script = ta_heal(&text); break;
-		case OBJ_BUGTRADER: tk.script = ta_bug_trader(&text); break;
 		case OBJ_TRADER:
+		case OBJ_BUGTRADER: {
+			/* the game's own machine and lines; deeper, some are Specials */
+			TraderKind kind = o->type == OBJ_BUGTRADER ? TRADER_BUGFRAG
+				: (run.depth - 1) % CYCLE_LAYERS >= SPECIAL_FROM && run.layer_seed % 100 < SPECIAL_CHANCE ? TRADER_SPECIAL : TRADER_CHIPS;
+			trader_install(group, number, kind, run.depth);
 			tk.cat = 7; tk.sprite = SPR_CHIP_TRADER;
-			tk.script = ta_chip_trader(&text);
+			tk.archive = BN6_TRADER_TEXT;
+			tk.script = kind;
 			break;
+		}
 		case OBJ_SHOP: tk.script = ta_shop(&text, SHOP_DEALER, "Welcome to the\nNet Dealer!"); break;
 		case OBJ_PROGRAMS:
 			tk.sprite = SPR_PROG_BLUE;
@@ -200,6 +213,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->archive = archive;
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
 		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, talkers[i].z,
-			talkers[i].cat == 7 ? 0 : 4, archive, talkers[i].script, talkers[i].gone_flag, talkers[i].floor);
+			talkers[i].cat == 7 ? 0 : 4, talkers[i].archive ? talkers[i].archive : archive, talkers[i].script,
+			talkers[i].gone_flag, talkers[i].floor);
 	return mapslot_install(group, number, &npcs, md, nmd);
 }
