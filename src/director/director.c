@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "foes.h"
 #include "bn6.h"
@@ -135,7 +136,16 @@ static bool build_layer(void) {
 	unsigned stairs = netmap_stair_dirs(biome, &rise);
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, stairs, rise);
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
-	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, run.layer_seed };
+	/* the pads, in their own look */
+	static uint8_t pads[MAP_H][MAP_W];
+	memset(pads, 0, sizeof pads);
+	for (int r = 0; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		if (m->kind != ROOM_PAD) continue;
+		for (int y = m->y; y < m->y + m->h; ++y)
+			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;
+	}
+	NetLayout lay = { MAP_W, MAP_H, &layer.cell[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, run.layer_seed, &pads[0][0] };
 	if (layer.arena >= 0) {
 		const Room *a = &layer.rooms[layer.arena];
 		lay.ax = a->x; lay.ay = a->y; lay.aw = a->w; lay.ah = a->h;

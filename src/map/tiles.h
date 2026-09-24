@@ -13,6 +13,10 @@
 
 /* Floor materials: the area's platform floor and its walkway floor. */
 enum { TILE_VOID, TILE_A, TILE_B };
+/* With a floor: this panel is a pad (a small platform on a spur), drawn in
+ * the pads' own look where the original has one. */
+#define TILE_PAD 4
+#define TILE_MATERIAL(m) ((m) & 3)
 
 /* One pair of layer entries seen for a class (phase, then the platform and
  * walkway panels around), how
@@ -22,6 +26,7 @@ typedef struct {
 	uint32_t key;
 	uint16_t e0, e1;
 	uint32_t count;
+	uint8_t pad;          /* seen on a pad of the original */
 	uint64_t mask;
 	uint16_t px[64];
 } TileCand;
@@ -41,7 +46,7 @@ typedef struct {
  * as the pedestals under a homepage's panels (from TileBook). */
 typedef struct { int tw, th, ex, ey, dv, face, hang; } TileGrid;
 
-/* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B. */
+/* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD. */
 typedef int (*TileFloor)(int A, int B, const void *ctx);
 
 /* Learns the tiles of the map's panels whose middle has a hue in `styles`

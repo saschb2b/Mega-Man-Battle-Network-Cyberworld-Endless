@@ -97,6 +97,41 @@ static int src_floor(int A, int B, const void *ctx) {
 	return st == OTHER ? TILE_A : st;
 }
 
+/* The source's pads: panels of small platforms (at most PAD_PANELS in 2 x 2
+ * blocks, joined to the rest by 1-wide bridges at most). SPAN x SPAN. */
+#define PAD_PANELS 12
+#define PAD_LOOK 3      /* how far a tile of the wrong look (pad or not) is */
+
+static uint8_t *find_pads(const Src *s) {
+	uint8_t *block = calloc(SPAN * SPAN, 1), *pad = calloc(SPAN * SPAN, 1);
+	int H = SPAN / 2;
+	for (int j = 0; j + 1 < SPAN; ++j)
+		for (int i = 0; i + 1 < SPAN; ++i)
+			if (src_panel(s, i - H, j - H) && src_panel(s, i + 1 - H, j - H) && src_panel(s, i - H, j + 1 - H) && src_panel(s, i + 1 - H, j + 1 - H))
+				block[j * SPAN + i] = block[j * SPAN + i + 1] = block[(j + 1) * SPAN + i] = block[(j + 1) * SPAN + i + 1] = 1;
+	static int q[SPAN * SPAN];
+	for (int start = 0; start < SPAN * SPAN; ++start) {
+		if (block[start] != 1) continue;
+		int n = 0, h = 0;
+		q[n++] = start;
+		block[start] = 2;
+		while (h < n) {
+			int c = q[h++], x = c % SPAN, y = c / SPAN;
+			static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+			for (int k = 0; k < 4; ++k) {
+				int nx = x + d[k][0], ny = y + d[k][1];
+				if (nx < 0 || ny < 0 || nx >= SPAN || ny >= SPAN || block[ny * SPAN + nx] != 1) continue;
+				block[ny * SPAN + nx] = 2;
+				q[n++] = ny * SPAN + nx;
+			}
+		}
+		if (n <= PAD_PANELS)
+			for (int k = 0; k < n; ++k) pad[q[k]] = 1;
+	}
+	free(block);
+	return pad;
+}
+
 /* ---- classes ---- */
 
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B) {
@@ -122,7 +157,7 @@ static unsigned nearest(int phase, bool corner) {
 static void occupancy(TileFloor floor, const void *ctx, int A, int B, unsigned *a, unsigned *b) {
 	*a = *b = 0;
 	for (int k = 0; k < 9; ++k) {
-		int m = floor(A + k % 3 - 1, B + k / 3 - 1, ctx);
+		int m = TILE_MATERIAL(floor(A + k % 3 - 1, B + k / 3 - 1, ctx));
 		if (m == TILE_A) *a |= 1u << k;
 		if (m == TILE_B) *b |= 1u << k;
 	}
@@ -142,7 +177,7 @@ static void occupancy(TileFloor floor, const void *ctx, int A, int B, unsigned *
 static int floor_px(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py) {
 	int u2 = 2 * px + 1 - g->tw * 8, v2 = 2 * (py - g->dv) + 1 - g->th * 8;
 	int X4 = u2 - 2 * v2, Y4 = u2 + 2 * v2;
-	return floor(floordiv(X4 - 4 * g->ex, 128), floordiv(Y4 - 4 * g->ey, 128), ctx);
+	return TILE_MATERIAL(floor(floordiv(X4 - 4 * g->ex, 128), floordiv(Y4 - 4 * g->ey, 128), ctx));
 }
 
 /* The pixels of tile (tx, ty) that must be drawn (inside the floor and on
@@ -242,7 +277,8 @@ static int cmp_cand(const void *a, const void *b) {
 	const TileCand *x = a, *y = b;
 	if (x->key != y->key) return x->key < y->key ? -1 : 1;
 	if (x->e0 != y->e0) return x->e0 < y->e0 ? -1 : 1;
-	return (x->e1 > y->e1) - (x->e1 < y->e1);
+	if (x->e1 != y->e1) return x->e1 < y->e1 ? -1 : 1;
+	return x->pad - y->pad;
 }
 
 static int cmp_count(const void *a, const void *b) {
@@ -270,6 +306,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 	memset(out, 0, sizeof *out);
 	Src src = { a, styles, walk_styles, bg_in_map, malloc(SPAN * SPAN) };
 	memset(src.state, -1, SPAN * SPAN);
+	uint8_t *pads = find_pads(&src);
 	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0 };
 	calibrate(a, &src, &g);
 	out->dv = g.dv;
@@ -304,6 +341,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 			 * background's pieces, not floor */
 			t->e1 = a->layers > 1 && !bg_in_map ? a->tile[1][i] : 0;
 			t->count = 1;
+			t->pad = A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 ? pads[(B + SPAN / 2) * SPAN + A + SPAN / 2] : 0;
 			++n;
 		}
 	/* one entry per pair, counted */
@@ -311,7 +349,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 	int nu = 0;
 	for (size_t i = 0; i < n;) {
 		size_t j = i;
-		while (j < n && c[j].key == c[i].key && c[j].e0 == c[i].e0 && c[j].e1 == c[i].e1) ++j;
+		while (j < n && c[j].key == c[i].key && c[j].e0 == c[i].e0 && c[j].e1 == c[i].e1 && c[j].pad == c[i].pad) ++j;
 		c[nu] = c[i];
 		c[nu++].count = (uint32_t)(j - i);
 		i = j;
@@ -322,6 +360,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool b
 	find_plain(out);
 	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
 	free(src.state);
+	free(pads);
 }
 
 void tiles_free(TileBook *b) {
@@ -383,7 +422,7 @@ static int unplain(const TileBook *b, int m, int phase, const TileCand *c, uint6
  * preferring those with the same floors on the panels nearest the tile;
  * failing that, the least bad. Only pairs without a back tile when `single`. */
 static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty, int phase,
-	unsigned oa, unsigned ob, TileFloor floor, const void *ctx, bool single) {
+	unsigned oa, unsigned ob, bool pad, TileFloor floor, const void *ctx, bool single) {
 	int cm = ob & 0x10 ? TILE_B : TILE_A;   /* the centre panel's material */
 	uint64_t must = 0, never = 0, deep = 0;
 	int allowed = 0;
@@ -405,7 +444,10 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 			const TileCand *c = &b->cand[i];
 			if (single && c->e1) continue;
 			int d = distance(phase, b->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
-			int u = unplain(b, cm - 1, phase, c, deep);
+			/* a pad in the pads' look, other floor not */
+			if (c->pad != pad) d += PAD_LOOK;
+			/* (a pad's middle is not the usual floor: it has its own look) */
+			int u = pad ? 0 : unplain(b, cm - 1, phase, c, deep);
 			/* ties go to the first book with the class (the area's own map
 			 * before its others), so a floor keeps one look */
 			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; }
@@ -425,7 +467,7 @@ typedef struct { TileFloor floor; const void *ctx; int keep; } Only;
 static int only(int A, int B, const void *ctx) {
 	const Only *o = ctx;
 	int m = o->floor(A, B, o->ctx);
-	return m == o->keep ? m : TILE_VOID;
+	return TILE_MATERIAL(m) == o->keep ? m : TILE_VOID;
 }
 
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
@@ -435,6 +477,7 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	unsigned oa, ob;
 	occupancy(floor, ctx, A, B, &oa, &ob);
 	if (!(oa | ob)) return false;
+	bool pad = floor(A, B, ctx) & TILE_PAD;
 	int joins = 0;
 	for (int k = 0; k < nbooks; ++k) joins += books[k].joins;
 	if (oa && ob && !joins) {
@@ -442,8 +485,8 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 		 * raised grass by ramps): the walkway's end over the platform's edge,
 		 * each drawn as if the other were not there, on the two layers */
 		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
-		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, only, &oa_only, true);
-		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, only, &ob_only, true);
+		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true);
+		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, pad, only, &ob_only, true);
 		if (pb && !pb->mask) pb = NULL;
 		if (pa && !pa->mask) pa = NULL;
 		if (pa || pb) {
@@ -452,7 +495,7 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 			return true;
 		}
 	}
-	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, floor, ctx, false);
+	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false);
 	if (!c) return false;
 	*e0 = c->e0;
 	*e1 = c->e1;

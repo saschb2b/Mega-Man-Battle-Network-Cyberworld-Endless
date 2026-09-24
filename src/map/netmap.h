@@ -19,6 +19,7 @@ typedef struct {
 	int nstairs;
 	int ax, ay, aw, ah;     /* the guardian's arena, drawn in the walkway floor (aw 0: none) */
 	uint32_t seed;          /* where the scenery goes */
+	const uint8_t *pad;     /* 1 on the cells of pads (NULL: none) */
 } NetLayout;
 
 /* Builds the layer from biome `area`'s original map (RomLayout.net_area),

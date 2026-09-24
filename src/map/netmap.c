@@ -186,9 +186,10 @@ static int floor_cb(int A, int B, const void *ctx) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (kind(x, y) != K_RAISED) return TILE_VOID;
 	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
-	if (one_floor) return TILE_A;
+	int pad = cur->pad && cur->pad[y * cur->gw + x] ? TILE_PAD : 0;
+	if (one_floor) return TILE_A | pad;
 	if (x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B;
-	return walkway(x, y) ? TILE_B : TILE_A;
+	return (walkway(x, y) ? TILE_B : TILE_A) | pad;
 }
 
 int netmap_rise(void) { return cur ? cur->rise : 0; }
