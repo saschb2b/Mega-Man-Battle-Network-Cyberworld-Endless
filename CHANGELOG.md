@@ -10,7 +10,12 @@ First playable version.
 - Generated net layers in the game's own map formats: floors learned from one
   of the game's maps per area (Central, Seaside, Sky, Green, Graveyard,
   Undernet, Undernet Zero, Underground), with walls the game's collision
-  reads. Tiles made for one place in the original (bridges, cut corners,
+  reads. Each area builds its layers in its own layouts, after how BN6's net
+  maps are laid out (docs/LEVEL_DESIGN.md): Central's routes, crater fields
+  and catwalk mazes, Seaside's fields framed by comb boardwalks, Sky's
+  mirrored hubs, Green's plank ladders, Graveyard's holed slabs, the
+  Undernet's webs of long bridges and lattices of crosses. Pads on spurs and
+  dead ends hide most of the Mystery Data. Tiles made for one place in the original (bridges, cut corners,
   decoration hanging off an edge) are not used on plain walkways. Sky and
   Undernet layers can raise a dead-end room onto a stair taken from the
   area's own map.

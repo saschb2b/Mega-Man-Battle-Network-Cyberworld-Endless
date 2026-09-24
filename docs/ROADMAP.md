@@ -25,9 +25,15 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
   up, reached by a stair cut whole from the area's own map (tiles, ramp and
   side walls); the raised floor gets its heights and walls in the game's
   format, and whatever stands there is placed on it.
+- **Layouts.** Layers follow the shape language of BN6's own net areas,
+  measured from the ROM: eight layouts, several per area, varied within an
+  act (docs/LEVEL_DESIGN.md).
 
 ## Next
 
+- **Two materials.** The original areas draw their walkways in a second
+  floor (Central's blue catwalks on green fields, Seaside's yellow
+  boardwalks); the tile learner would need two styles and their joins.
 - **More stairs.** Other areas' slopes are longer than two panels or not
   aligned to them (Seaside's rises 16 over five cells); taking those needs
   stairs of other lengths and a raised floor at their height.
