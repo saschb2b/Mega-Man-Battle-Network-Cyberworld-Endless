@@ -26,6 +26,8 @@ First playable version.
   and homepages: a comp in orange and green, a homepage in pink and teal and
   a comp in blue and pink, each with its own battles, background and
   guardians (CircusMan, Colonel, BlastMan, ElementMan, JudgeMan, DiveMan).
+  SpoutMan and TenguMan join Seaside's and Sky's guardians, and most areas
+  alternate between two battle backgrounds.
   Every guardian leaves three HPMemory. Runs saved before this version carry
   over.
 - Each layer places the game's own exit pads, Mystery Data, Normal Navis,
