@@ -50,8 +50,8 @@ jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState
 The exit pad is the game's own warp pad: trigger cells that take warp 1 of
 the map's warp list. When MegaMan steps on it, the game starts its jack-out;
 the director builds the next layer meanwhile and points warp 1 at its start,
-so the game jacks him in there. A guardian Navi keeps the pad shut (flag
-`0x16F1`) until he is beaten. A Yes to the Undernet or the Secret Area
+so the game jacks him in there. A guardian keeps the pad hidden and shut
+(flag `0x16F1`) until its Guardian Data is taken (docs/BOSSES.md). A Yes to the Undernet or the Secret Area
 starts the same departure (`0x080059B5`) to a side layer built at once.
 
 `director.c` then watches the game: the exit pad's warp, choices made in text (event flags set by
@@ -70,8 +70,8 @@ and never shipped.
 
 ## Testing
 
-`CYBERWORLD_AUTOPILOT=1` walks MegaMan to each exit (talking to a guardian
-first) and presses through battles; `CYBERWORLD_AUTOPILOT=weak` also keeps
+`CYBERWORLD_AUTOPILOT=1` walks MegaMan to each exit (into a guardian's arena
+and to its Guardian Data first) and presses through battles; `CYBERWORLD_AUTOPILOT=weak` also keeps
 enemies at 1 HP, so what follows a won guardian battle can be tested.
 `tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position and
 map every 30 frames, prints the generated walls, and writes the tile map to

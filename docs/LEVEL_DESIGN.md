@@ -88,7 +88,12 @@ order, so an area does not repeat one while it has others.
 | Catwalks | Central 30, Undernet 30 | a maze of 1-wide turns with some walls knocked through, plazas at its ends |
 
 MegaMan arrives on the pad nearest the top of the screen; the exit is the
-room farthest from it by walking. Services go to the bigger platforms, the
+room farthest from it by walking. On a guardian's layer the exit is an
+arena instead (`src/net/net_arena.c`): a 5x5 platform at the end of a single
+bridge of 3-5 panels, attached where it lies farthest from the arrival,
+drawn in the area's second floor so it reads apart from the platforms. The
+guardian holds its middle and the exit waits on its far side; the room the
+bridge leaves from gets the heal and the Net Dealer (docs/BOSSES.md). Services go to the bigger platforms, the
 better Mystery Data to pads, and most other Mystery Data to dead ends. A
 layer has 120 to about 250 panels (depth grows the layouts) and fits a
 window of 29 x 53 panels along the grid's diagonals, the screen rectangle

@@ -16,9 +16,11 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
   CWE2, older saves converted); MegaMan himself lives in the game's state.
 - **Warps.** Exits are the game's own warp pads; the next layer is built
   while MegaMan jacks out. Side layers start the same departure.
-- **Guardians on the net.** Every guardian Navi waits before the sealed exit
-  pad and asks to fight (HeelNavi for those without an overworld sprite),
-  and leaves once beaten.
+- **Guardians on the net.** Every guardian Navi waits in an arena of its own
+  and is staged from beginning to end after Hades' bosses: the arena seals,
+  it logs in over the boss prelude with a title card and lines that
+  remember past battles, and it logs out leaving its Guardian Data, which
+  opens the exit (docs/BOSSES.md).
 - **Testing.** `CYBERWORLD_AUTOPILOT=weak` clears a whole cycle (depth 2 to
   19) headless; `tools/device_run.py` runs builds on the Nova from `/tmp`.
 - **Height.** Dead-end rooms in Sky and Undernet layers can stand one level

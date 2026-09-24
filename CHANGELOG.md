@@ -40,8 +40,14 @@ First playable version.
   area fights the battles of its original maps, 28 of the 29 virus families
   (all but WindBox) where Capcom put them, on their battlefields (grass, ice,
   holes, poison), with versions that grow with depth; viruses the story
-  meets late (the dragons, Nightmare) wait for the later acts. A guardian Navi stands
-  before every third layer's exit pad, which stays shut until he is beaten.
+  meets late (the dragons, Nightmare) wait for the later acts. Every third
+  layer ends in a guardian's arena, staged after Hades' bosses
+  (docs/BOSSES.md): a safe room with a heal and the Net Dealer before it;
+  the arena seals, the guardian logs in over the boss prelude with a title
+  card and lines that remember earlier battles, and the battle starts
+  without a question. Deleted, it says a last word and logs out; its
+  Guardian Data holds the reward and taking it makes the exit appear. An
+  area-clear card and the next area's title card mark each act.
 - Exits are the game's own warp pads: MegaMan jacks out and into the next
   layer, built while he jacks out. The Undernet and the Secret Area are
   entered the same way.
