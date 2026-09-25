@@ -207,7 +207,7 @@ static bool tree_fits(int cx, int cy) {
 	for (int dy = -1; dy <= 1; ++dy)
 		for (int dx = -1; dx <= 1; ++dx) if (!paved(cx + dx, cy + dy)) return false;
 	int x = cx * 8 + 4, y = cy * 8 + 4;
-	if (abs(x - T.info.port_x) + abs(y - T.info.port_y) < 48) return false;
+	if (abs(x - T.info.port_x) + abs(y - T.info.port_y) < 64) return false;
 	if (abs(x - T.info.start_x) + abs(y - T.info.start_y) < 40) return false;
 	for (int i = 0; i < T.ntrees; ++i) if (abs(x - T.trees[i][0]) + abs(y - T.trees[i][1]) < 40) return false;
 	for (int i = 0; i < T.nfolk; ++i) if (abs(x - T.folk[i][0]) + abs(y - T.folk[i][1]) < 32) return false;
@@ -259,8 +259,13 @@ static int plan_once(uint32_t seed) {
 	};
 	for (int i = 0; i < 5 && T.nfolk < 4; ++i) {
 		if (!walkable(spots[i][0], spots[i][1]) || rnd_range(0, 4) == 0) continue;
-		T.folk[T.nfolk][0] = spots[i][0] * 8 + 4;
-		T.folk[T.nfolk][1] = spots[i][1] * 8 + 4;
+		/* apart from each other and from where Lan arrives */
+		int fx = spots[i][0] * 8 + 4, fy = spots[i][1] * 8 + 4;
+		bool near = abs(fx - T.info.start_x) + abs(fy - T.info.start_y) < 48;
+		for (int k = 0; k < T.nfolk && !near; ++k) near = abs(fx - T.folk[k][0]) + abs(fy - T.folk[k][1]) < 48;
+		if (near) continue;
+		T.folk[T.nfolk][0] = fx;
+		T.folk[T.nfolk][1] = fy;
 		T.folk_kind[T.nfolk] = rnd_range(0, FOLK_KINDS - 1);
 		for (int k = 0; k < T.nfolk; ++k) if (T.folk_kind[k] == T.folk_kind[T.nfolk]) T.folk_kind[T.nfolk] = (T.folk_kind[T.nfolk] + 1) % FOLK_KINDS;
 		++T.nfolk;
