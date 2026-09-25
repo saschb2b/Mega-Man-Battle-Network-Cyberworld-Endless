@@ -327,6 +327,20 @@ int main(int argc, char **argv) {
 	if (headless && !force_w) { force_w = 1280; force_h = 960; }
 	if (DESKTOP && !data_dir_given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
 	if (DESKTOP) { char rom[600]; snprintf(rom, sizeof rom, "%s/rom", g_data_dir); make_dirs(rom); }
+	char msg[512];
+	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
+#ifdef CW_DESKTOP
+	/* the desktop's dialogs come before the window, which would be marked
+	 * "not responding" while they wait */
+	if (!headless) desktop_menu_entry(g_data_dir);
+	if (!rom_ok && !headless && !rom_dir) {
+		char dir[600];
+		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+		fprintf(stderr, "%s\n", msg);
+		rom_ok = desktop_rom_dialog(dir, desktop_rom, msg, sizeof msg);
+		if (!rom_ok) return 1;
+	}
+#endif
 	if (!platform_init(force_w, force_h, headless, fullscreen)) return 1;
 	if (!headless) {
 		char keys[600];
@@ -335,19 +349,6 @@ int main(int argc, char **argv) {
 	}
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
 
-	char msg[512];
-	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
-#ifdef CW_DESKTOP
-	if (!headless) desktop_menu_entry(g_data_dir);
-	if (!rom_ok && !headless && !rom_dir) {
-		/* no ROM, no font: ask for it in the desktop's own boxes */
-		char dir[600];
-		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-		fprintf(stderr, "%s\n", msg);
-		rom_ok = desktop_rom_dialog(dir, desktop_rom, msg, sizeof msg);
-		if (!rom_ok) { platform_shutdown(); return 1; }
-	}
-#endif
 	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);
 		if (DESKTOP && !headless) {

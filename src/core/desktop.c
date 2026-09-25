@@ -55,6 +55,21 @@ static bool run(char *const argv[], char *out, size_t outlen) {
 	return WIFEXITED(status) && WEXITSTATUS(status) == 0;
 }
 
+/* Runs argv and waits; its exit status, or -1. */
+static int run_status(char *const argv[]) {
+	pid_t pid = fork();
+	if (pid < 0) return -1;
+	if (pid == 0) {
+		int null = open("/dev/null", O_WRONLY);
+		if (null >= 0) { dup2(null, 1); dup2(null, 2); }
+		execvp(argv[0], argv);
+		_exit(127);
+	}
+	int status;
+	while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+	return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+}
+
 static bool copy_file(const char *from, const char *to) {
 	FILE *in = fopen(from, "rb");
 	if (!in) return false;
@@ -102,6 +117,83 @@ static void wrap(char *text, size_t cap, int width) {
 	}
 }
 
+/* ---- questions: the desktop's own dialog (zenity on GNOME and most
+ * others, kdialog on KDE), else SDL's. They come before the game's window
+ * exists: a window that stops answering while a dialog waits is marked
+ * "not responding". ---- */
+
+/* Whether the desktop can find the icon by name: installed, or inside the
+ * AppImage (whose share folder the dialogs then get to search). */
+static bool icon_known(void) {
+	char path[1200];
+	const char *appdir = getenv("APPDIR"), *home = getenv("HOME");
+	if (appdir) {
+		snprintf(path, sizeof path, "%s/usr/share/icons/hicolor/256x256/apps/" APP_ID ".png", appdir);
+		if (access(path, R_OK) == 0) {
+			const char *old = getenv("XDG_DATA_DIRS");
+			char dirs_env[2400];
+			snprintf(dirs_env, sizeof dirs_env, "%s/usr/share:%s", appdir, old && *old ? old : "/usr/local/share:/usr/share");
+			setenv("XDG_DATA_DIRS", dirs_env, 1);
+			return true;
+		}
+	}
+	if (home) {
+		snprintf(path, sizeof path, "%s/.local/share/icons/hicolor/256x256/apps/" APP_ID ".png", home);
+		if (access(path, R_OK) == 0) return true;
+	}
+	return access("/usr/share/icons/hicolor/256x256/apps/" APP_ID ".png", R_OK) == 0;
+}
+
+/* zenity's text is Pango markup */
+static void markup_escape(char *out, size_t n, const char *in) {
+	size_t o = 0;
+	for (; *in && o + 6 < n; ++in) {
+		const char *rep = *in == '&' ? "&amp;" : *in == '<' ? "&lt;" : *in == '>' ? "&gt;" : NULL;
+		if (rep) { memcpy(out + o, rep, strlen(rep)); o += strlen(rep); }
+		else out[o++] = *in;
+	}
+	out[o] = 0;
+}
+
+/* Asks with two or three buttons: labels[0] is the default, the last is
+ * what closing the dialog means. Returns the chosen label's index. */
+static int ask(const char *text, const char *const *labels, int n) {
+	if (on_path("zenity")) {
+		char body[2400], ok[80], cancel[80], extra[80];
+		markup_escape(body, sizeof body, text);
+		char textarg[2500];
+		snprintf(textarg, sizeof textarg, "--text=%s", body);
+		snprintf(ok, sizeof ok, "--ok-label=%s", labels[0]);
+		snprintf(cancel, sizeof cancel, "--cancel-label=%s", labels[n - 1]);
+		snprintf(extra, sizeof extra, "--extra-button=%s", n > 2 ? labels[1] : "");
+		char *argv[] = { "zenity", "--question", "--title=Cyberworld Endless", "--width=440", textarg, ok, cancel,
+			icon_known() ? "--icon=" APP_ID : "--icon=dialog-question", n > 2 ? extra : NULL, NULL };
+		char out[128] = "";
+		if (run(argv, out, sizeof out)) return 0;
+		for (int i = 1; i < n - 1; ++i) if (!strcmp(out, labels[i])) return i;
+		return n - 1;
+	}
+	if (on_path("kdialog")) {
+		char *argv[] = { "kdialog", "--title", "Cyberworld Endless", n > 2 ? "--yesnocancel" : "--yesno", (char *)text,
+			"--yes-label", (char *)labels[0], "--no-label", (char *)labels[1],
+			n > 2 ? "--cancel-label" : NULL, (char *)labels[n - 1], NULL };
+		int code = run_status(argv);
+		return code >= 0 && code < n ? code : n - 1;
+	}
+	char body[2400];
+	snprintf(body, sizeof body, "%s", text);
+	wrap(body, sizeof body, 60);
+	SDL_MessageBoxButtonData buttons[3];
+	for (int i = 0; i < n; ++i)
+		buttons[i] = (SDL_MessageBoxButtonData){ i == 0 ? SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT
+			: i == n - 1 ? SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT : 0, i, labels[i] };
+	SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT, NULL,
+		"Cyberworld Endless", body, n, buttons, NULL };
+	int hit = n - 1;
+	if (SDL_ShowMessageBox(&box, &hit) != 0 || hit < 0) return n - 1;
+	return hit;
+}
+
 /* ---- the ROM ---- */
 
 static bool choose_file(char *path, size_t n) {
@@ -120,29 +212,20 @@ static bool choose_file(char *path, size_t n) {
 }
 
 bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
+	/* with a file chooser: choose it; without, open the folder to put it in */
 	bool picker = on_path("zenity") || on_path("kdialog");
-	enum { QUIT, CHOOSE, FOLDER, AGAIN };
 	for (;;) {
 		/* the reason, unless it is only that the folder holds no ROM */
 		char text[1800], why[700] = "";
 		if (strncmp(msg, "Put your", 8)) snprintf(why, sizeof why, "%s\n\n", msg);
 		snprintf(text, sizeof text,
 			"%sCyberworld Endless runs on your own copy of Mega Man Battle Network 6: Cybeast Gregar (USA), "
-			"an unmodified .gba file.\n\n%s it, or copy it into\n%s\nand choose Look again.",
-			why, picker ? "Choose" : "Open the folder and put", rom_dir);
-		wrap(text, sizeof text, 60);
-		SDL_MessageBoxButtonData buttons[4];
-		int nb = 0;
-		if (picker) buttons[nb++] = (SDL_MessageBoxButtonData){ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, CHOOSE, "Choose ROM…" };
-		buttons[nb++] = (SDL_MessageBoxButtonData){ picker ? 0 : SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, FOLDER, "Open folder" };
-		buttons[nb++] = (SDL_MessageBoxButtonData){ 0, AGAIN, "Look again" };
-		buttons[nb++] = (SDL_MessageBoxButtonData){ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, QUIT, "Quit" };
-		SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT, P.window,
-			"Cyberworld Endless", text, nb, buttons, NULL };
-		int hit = QUIT;
-		if (SDL_ShowMessageBox(&box, &hit) != 0) return false;
-		if (hit == QUIT || hit < 0) return false;
-		if (hit == CHOOSE) {
+			"an unmodified .gba file.\n\nChoose the file, or put it into\n%s\nand look again.",
+			why, rom_dir);
+		const char *labels[] = { picker ? "Choose ROM..." : "Open folder", "Look again", "Quit" };
+		int hit = ask(text, labels, 3);
+		if (hit == 2) return false;
+		if (hit == 0 && picker) {
 			char path[1024] = "";
 			if (!choose_file(path, sizeof path)) continue;
 			if (!rom_load_file(path, msg, msglen)) continue;
@@ -154,7 +237,7 @@ bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgl
 				fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, path);
 			return true;
 		}
-		if (hit == FOLDER) {
+		if (hit == 0) {
 			char *argv[] = { "xdg-open", (char *)rom_dir, NULL };
 			run(argv, NULL, 0);
 		}
@@ -238,25 +321,17 @@ void desktop_menu_entry(const char *data_dir) {
 	}
 	if (access(declined, F_OK) == 0) return;
 
-	enum { LATER, ADD };
-	SDL_MessageBoxButtonData buttons[] = {
-		{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, ADD, "Add to menu" },
-		{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, LATER, "Not now" },
-	};
 	char text[1400];
 	snprintf(text, sizeof text,
 		"Add Cyberworld Endless to your application menu?\n\n"
-		"It will start this AppImage:\n%s\n\nIf you move the file, start it once from its new place.", appimage);
-	wrap(text, sizeof text, 60);
-	SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT, P.window,
-		"Cyberworld Endless", text, 2, buttons, NULL };
-	int hit = LATER;
-	if (SDL_ShowMessageBox(&box, &hit) != 0) return;
-	if (hit != ADD) {
+		"The entry starts this AppImage:\n%s\n\nIf you move the file, start it once from its new place.", appimage);
+	const char *labels[] = { "Add to menu", "Don't ask again", "Not now" };
+	int hit = ask(text, labels, 3);
+	if (hit == 1) {
 		FILE *d = fopen(declined, "w");
 		if (d) fclose(d);
-		return;
 	}
+	if (hit != 0) return;
 	make_dirs(apps);
 	copy_icons(appdir, share);
 	if (!write_entry(file, appimage)) { fprintf(stderr, "could not write %s\n", file); return; }
