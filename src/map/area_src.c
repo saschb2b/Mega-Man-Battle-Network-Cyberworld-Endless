@@ -1,7 +1,8 @@
-/* Decoding an original internet map: MapBGDescriptor (tile sets, palette,
- * LZ77 tile map with two layers) from the table at 0x0329C4, and the
- * coordinate data (LZ77 wall list) from the table at 0x03354C, whose walls
- * give where the panel edges fall in world units. */
+/* Decoding an original map: MapBGDescriptor (tile sets, palette, LZ77 tile
+ * map with two layers) from the tables at 0x0329A8 (real world, groups
+ * 0x00-0x06) and 0x0329C4 (internet, from 0x80), and the coordinate data
+ * (LZ77 wall list) from 0x033530 and 0x03354C, whose walls give where the
+ * panel edges fall in world units. */
 #include "area_src.h"
 
 #include <stdlib.h>
@@ -10,8 +11,17 @@
 #include "gfx.h"
 #include "rom.h"
 
-#define MAP_TABLE   0x0329C4u /* MapBGDescriptor lists, internet groups from 0x80 */
-#define COORD_TABLE 0x03354Cu /* coordinate data lists, internet groups from 0x80 */
+#define MAP_TABLE_RW   0x0329A8u /* MapBGDescriptor lists, real-world groups 0x00-0x06 */
+#define MAP_TABLE      0x0329C4u /* ... internet groups from 0x80 */
+#define COORD_TABLE_RW 0x033530u /* coordinate data lists, real-world groups */
+#define COORD_TABLE    0x03354Cu /* ... internet groups from 0x80 */
+#define RW_GROUPS      7
+
+/* The group's entry in a real-world or internet table. */
+static uint32_t group_slot(uint32_t rw_table, uint32_t net_table, int group) {
+	if (group < RW_GROUPS) return rw_table + (uint32_t)group * 4;
+	return net_table + (uint32_t)(group - 0x80) * 4;
+}
 
 /* A map's tile graphics (as the game loads them to VRAM) and colours. */
 static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
@@ -30,30 +40,38 @@ static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
 	return vram;
 }
 
-/* Draws tile maps `tile[layers - 1]` .. `tile[0]` (front last) into px
- * (tw * 8 x th * 8), marking front when given. */
-static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_t *const *tile, int layers, int tw, int th, uint32_t *px, uint8_t *front) {
+/* Draws tile maps back to front into px (tw * 8 x th * 8), marking the
+ * front layer's pixels when given. The real world's maps use
+ * 256-colour tiles (64 bytes, a colour index per pixel), the internet's
+ * 16-colour ones (32 bytes, a bank per map entry). */
+static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_t *const *tile, int layers, int tw, int th, uint32_t *px, uint8_t *front, uint8_t *idx, bool bpp8) {
 	int W = tw * 8;
-	for (int l = layers - 1; l >= 0; --l)
+	/* the internet draws the first layer in front; the real world the
+	 * second (its first is the ground, the second what stands on it) */
+	int first = bpp8 ? 0 : layers - 1, last = bpp8 ? layers - 1 : 0, step = bpp8 ? 1 : -1;
+	for (int l = first; bpp8 ? l <= last : l >= last; l += step)
 		for (int ty = 0; ty < th; ++ty)
 			for (int tx = 0; tx < tw; ++tx) {
 				uint16_t e = tile[l][ty * tw + tx];
 				if (!(e & 0x3FF)) continue;
-				const uint8_t *t = vram + (e & 0x3FF) * 32;
+				const uint8_t *t = vram + (e & 0x3FF) * (bpp8 ? 64 : 32);
+				if ((e & 0x3FF) * (bpp8 ? 64 : 32) + (bpp8 ? 64 : 32) > 0x10000) continue;
 				for (int y = 0; y < 8; ++y)
 					for (int x = 0; x < 8; ++x) {
-						uint8_t v = t[y * 4 + x / 2];
-						int ci = (x & 1) ? v >> 4 : v & 15;
+						int ci;
+						if (bpp8) ci = t[y * 8 + x];
+						else { uint8_t v = t[y * 4 + x / 2]; ci = (x & 1) ? v >> 4 : v & 15; }
 						if (!ci) continue;
 						int X = (e & 0x400) ? 7 - x : x, Y = (e & 0x800) ? 7 - y : y;
-						px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[(e >> 12) * 16 + ci];
-						if (l == 0 && front) front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
+						px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[bpp8 ? ci : (e >> 12) * 16 + ci];
+						if (idx) idx[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = (uint8_t)(bpp8 ? ci : (e >> 12) * 16 + ci);
+						if (l == last && front) front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
 					}
 			}
 }
 
 static bool map_desc(int group, int number, uint32_t *desc, uint32_t *ts, uint32_t *pal, uint32_t *tm) {
-	uint32_t list = rom_u32(MAP_TABLE + (uint32_t)(group - 0x80) * 4);
+	uint32_t list = rom_u32(group_slot(MAP_TABLE_RW, MAP_TABLE, group));
 	if (!rom_is_ptr(list)) return false;
 	*desc = rom_off(list) + (uint32_t)number * 12;
 	*ts = rom_u32(*desc); *pal = rom_u32(*desc + 4); *tm = rom_u32(*desc + 8);
@@ -82,7 +100,8 @@ static bool decode_tiles(AreaSrc *a) {
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	a->px = calloc(cells * 64, 4);
 	a->front = calloc(cells * 64, 1);
-	draw_layers(vram, colors, a->tile, a->layers, a->tw, a->th, a->px, a->front);
+	a->idx = calloc(cells * 64, 1);
+	draw_layers(vram, colors, a->tile, a->layers, a->tw, a->th, a->px, a->front, a->idx, a->group < RW_GROUPS);
 	free(vram);
 	return true;
 }
@@ -93,7 +112,7 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	uint32_t *px = calloc((size_t)tw * th * 64, 4);
 	uint16_t *layers[2] = { (uint16_t *)tiles, (uint16_t *)tiles + (size_t)tw * th };
-	draw_layers(vram, colors, layers, 2, tw, th, px, NULL);
+	draw_layers(vram, colors, layers, 2, tw, th, px, NULL, NULL, group < RW_GROUPS);
 	free(vram);
 	return px;
 }
@@ -101,7 +120,7 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 /* The coordinate data's four sections, each a count, (key, offset)
  * entries and 4-byte shapes (see coords.c). */
 static void decode_coords(AreaSrc *a) {
-	uint32_t list = rom_u32(COORD_TABLE + (uint32_t)(a->group - 0x80) * 4);
+	uint32_t list = rom_u32(group_slot(COORD_TABLE_RW, COORD_TABLE, a->group));
 	if (!rom_is_ptr(list)) return;
 	a->coord_slot = rom_off(list) + (uint32_t)a->number * 4;
 	uint32_t c = rom_u32(a->coord_slot);
@@ -256,6 +275,7 @@ void area_src_free(AreaSrc *a) {
 	for (int l = 0; l < 2; ++l) free(a->tile[l]);
 	free(a->px);
 	free(a->front);
+	free(a->idx);
 	for (int k = 0; k < 4; ++k) free(a->sec[k]);
 	free(a->hz);
 	free(a->rings);
@@ -276,10 +296,12 @@ void area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 	}
 	m->px = malloc((size_t)W * H * 4);
 	m->front = malloc((size_t)W * H);
+	m->idx = a->idx ? malloc((size_t)W * H) : NULL;
 	for (int y = 0; y < H; ++y)
 		for (int x = 0; x < W; ++x) {
 			m->px[(size_t)y * W + (W - 1 - x)] = a->px[(size_t)y * W + x];
 			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
+			if (m->idx) m->idx[(size_t)y * W + (W - 1 - x)] = a->idx[(size_t)y * W + x];
 		}
 	for (int k = 0; k < 4; ++k) { m->sec[k] = NULL; m->nsec[k] = 0; }   /* the mirror is for tiles only */
 	m->ex = (32 - a->ey) & 31;
@@ -318,9 +340,11 @@ void area_src_raise(const AreaSrc *a, int z, AreaSrc *r) {
 	}
 	r->px = calloc((size_t)W * H, 4);
 	r->front = calloc((size_t)W * H, 1);
+	r->idx = a->idx ? calloc((size_t)W * H, 1) : NULL;
 	for (int y = z; y < H; ++y) {
 		memcpy(r->px + (size_t)y * W, a->px + (size_t)(y - z) * W, (size_t)W * 4);
 		memcpy(r->front + (size_t)y * W, a->front + (size_t)(y - z) * W, (size_t)W);
+		if (r->idx) memcpy(r->idx + (size_t)y * W, a->idx + (size_t)(y - z) * W, (size_t)W);
 	}
 	for (int k = 0; k < 4; ++k) { r->sec[k] = NULL; r->nsec[k] = 0; }
 	r->hz = NULL;

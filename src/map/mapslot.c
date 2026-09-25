@@ -1,4 +1,6 @@
-/* Taking over a game map for a layer (tables per bn6f; see docs/ROM_DATA.md).
+/* Taking over a game map for a layer or the town (tables per bn6f; see
+ * docs/ROM_DATA.md). Real-world groups (0x00-0x06) have the same tables at
+ * other addresses (RW_*).
  *
  * NPCs: NPCList_maps80 -> per-map list of NPC script pointers ending 0xFF.
  * Map scripts: (on enter, continuous) per-map lists; ms_end (0x00) runs none.
@@ -22,14 +24,37 @@
 #define SCRATCH      (EMU_FREE + 0x3000)
 #define SCRATCH_HALF 0x6800
 #define WARP_LIST    (EMU_FREE + 0x2F00)  /* the layer map's warps: entry 1 is the exit */
+#define TOWN_ARENA   (EMU_FREE + 0x140000) /* the town's data, apart from the layers' */
+#define TOWN_SIZE    0x8000
+
+#define RW_GROUPS      7
+#define RW_NPC_LISTS   0x08034638u /* NPCList_maps00 */
+#define RW_MAP_SCRIPTS 0x080345E4u /* RealWorldMapScriptPointers: (on enter, continuous) per group */
+#define RW_OBJ_SPAWNERS 0x08034654u /* RealWorldSpawnMapObjectJumptable */
+#define RW_ENTER_GROUP 0x08030904u /* EnterMap_RealWorldMapGroupJumptable */
+#define JACK_IN_RECORDS 0x08099A00u /* 20-byte jack-in destinations (bn6f byte_80984C8) */
+#define JACK_IN_RECORD  42           /* the one the town rewrites (a comp the run never visits) */
 
 static int half;
+static bool town;
 static uint32_t next = SCRATCH, end = SCRATCH + SCRATCH_HALF;
+static uint32_t layer_next, layer_end;
 
 void mapslot_reset(void) {
 	half ^= 1;
 	next = SCRATCH + (uint32_t)half * SCRATCH_HALF;
 	end = next + SCRATCH_HALF;
+}
+
+void mapslot_town(bool on) {
+	if (on == town) return;
+	town = on;
+	if (on) {
+		layer_next = next; layer_end = end;
+		next = TOWN_ARENA; end = TOWN_ARENA + TOWN_SIZE;
+	} else {
+		next = layer_next; end = layer_end;
+	}
 }
 
 uint32_t mapslot_alloc(const void *bytes, int len) {
@@ -40,10 +65,15 @@ uint32_t mapslot_alloc(const void *bytes, int len) {
 	return at;
 }
 
+static bool real_world(int group) { return group >= 0 && group < RW_GROUPS; }
+static uint32_t group_entry(uint32_t rw_table, uint32_t net_table, int group) {
+	return real_world(group) ? rw_table + (uint32_t)group * 4 : net_table + (uint32_t)(group - 0x80) * 4;
+}
+
 /* The per-map table a group's object spawner reads: its first
  * "ldr r1, [pc, #imm]" literal. */
 static uint32_t object_table(int group) {
-	uint32_t fn = emu_read32(BN6_OBJ_SPAWNERS + (uint32_t)(group - 0x80) * 4) & ~1u;
+	uint32_t fn = emu_read32(group_entry(RW_OBJ_SPAWNERS, BN6_OBJ_SPAWNERS, group)) & ~1u;
 	if (fn < 0x08000000u) return 0;
 	for (uint32_t pc = fn; pc < fn + 32; pc += 2) {
 		uint16_t op = emu_read16(pc);
@@ -55,7 +85,7 @@ static uint32_t object_table(int group) {
 /* The per-map sprite load lists a group's loader passes to uncompSprite:
  * the literal of "lsl r1,r1,#2; ldr r0,[pc,#n]; ldr r0,[r0,r1]". */
 static uint32_t sprite_table(int group) {
-	uint32_t fn = emu_read32(BN6_ENTER_GROUP + (uint32_t)(group - 0x80) * 4) & ~1u;
+	uint32_t fn = emu_read32(group_entry(RW_ENTER_GROUP, BN6_ENTER_GROUP, group)) & ~1u;
 	if (fn < 0x08000000u) return 0;
 	for (uint32_t pc = fn; pc < fn + 160; pc += 2) {
 		uint16_t op = emu_read16(pc + 2);
@@ -68,13 +98,43 @@ static uint32_t sprite_table(int group) {
 /* The per-map warp lists a group's loader hands the game: the literal of its
  * first "ldr r0, [pc]". */
 static uint32_t warp_table(int group) {
-	uint32_t fn = emu_read32(BN6_ENTER_GROUP + (uint32_t)(group - 0x80) * 4) & ~1u;
+	uint32_t fn = emu_read32(group_entry(RW_ENTER_GROUP, BN6_ENTER_GROUP, group)) & ~1u;
 	if (fn < 0x08000000u) return 0;
 	for (uint32_t pc = fn; pc < fn + 16; pc += 2) {
 		uint16_t op = emu_read16(pc);
 		if ((op & 0xF800) == 0x4800) return emu_read32(((pc + 4) & ~3u) + (uint32_t)(op & 0xFF) * 4);
 	}
 	return 0;
+}
+
+/* The per-map jack-in tables a real-world group's loader stores in
+ * GameState+0x64: the literal loaded before its "str r0, [r5, #0x64]". */
+static uint32_t jack_in_table(int group) {
+	uint32_t fn = emu_read32(group_entry(RW_ENTER_GROUP, BN6_ENTER_GROUP, group)) & ~1u;
+	if (fn < 0x08000000u || !real_world(group)) return 0;
+	uint32_t lit = 0;
+	for (uint32_t pc = fn; pc < fn + 200; pc += 2) {
+		uint16_t op = emu_read16(pc);
+		if ((op & 0xFF00) == 0x4800) lit = emu_read32(((pc + 4) & ~3u) + (uint32_t)(op & 0xFF) * 4);
+		if (op == 0x6668) return lit;   /* str r0, [r5, #0x64] */
+	}
+	return 0;
+}
+
+bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, int y, int facing) {
+	/* trigger 0x40 (index 0) -> the record the town takes over */
+	uint8_t table[24];
+	memset(table, 0xFF, sizeof table);
+	table[0] = JACK_IN_RECORD;
+	uint32_t at = mapslot_alloc(table, sizeof table), tables = jack_in_table(group);
+	if (!at || tables < 0x08000000u) return false;
+	emu_write32(tables + (uint32_t)number * 4, at);
+	/* WarpData (group, number, departure, facing, x, y, z), then the "Jack in!" line: 0 */
+	uint8_t rec[20] = { (uint8_t)to_group, (uint8_t)to_number, 0, (uint8_t)facing };
+	put32(rec + 4, (uint32_t)x << 16);
+	put32(rec + 8, (uint32_t)y << 16);
+	emu_write(JACK_IN_RECORDS + JACK_IN_RECORD * 20, rec, sizeof rec);
+	return true;
 }
 
 void mapslot_exit_to(int group, int number, int x, int y, int facing) {
@@ -93,7 +153,8 @@ static uint32_t mystery_slot(int group, int number) {
 }
 
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd) {
-	uint32_t g = (uint32_t)(group - 0x80);
+	bool rw = real_world(group);
+	uint32_t g = rw ? (uint32_t)group : (uint32_t)(group - 0x80);
 	/* sprites to decompress for the map: the layer's (the original's objects
 	 * are gone, and their sprites would fill the buffer) */
 	uint32_t sprites = sprite_table(group);
@@ -115,23 +176,25 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	for (int i = 0; i < n; ++i) put32(list + i * 4, npcs->script[i]);
 	put32(list + n * 4, 0xFF);
 	uint32_t npc_at = mapslot_alloc(list, (n + 1) * 4);
-	uint32_t npc_lists = emu_read32(BN6_NPC_LISTS + g * 4);
+	uint32_t npc_lists = emu_read32((rw ? RW_NPC_LISTS : BN6_NPC_LISTS) + g * 4);
 	if (!npc_at || npc_lists < 0x08000000u) return false;
 	emu_write32(npc_lists + (uint32_t)number * 4, npc_at);
 	/* map scripts: none */
 	static const uint8_t ms_end[4] = { 0 };
 	uint32_t end_at = mapslot_alloc(ms_end, 4);
 	for (int k = 0; k < 2; ++k) {
-		uint32_t scripts = emu_read32(BN6_MAP_SCRIPTS + g * 8 + (uint32_t)k * 4);
+		uint32_t scripts = emu_read32((rw ? RW_MAP_SCRIPTS : BN6_MAP_SCRIPTS) + g * 8 + (uint32_t)k * 4);
 		if (scripts >= 0x08000000u) emu_write32(scripts + (uint32_t)number * 4, end_at);
 	}
 	/* warps: the fixed list whose entry 1 the exit pad takes */
 	uint32_t warps = warp_table(group);
 	if (warps >= 0x08000000u) emu_write32(warps + (uint32_t)number * 4, WARP_LIST);
-	/* objects: none */
+	/* objects: the town's (20-byte spawn records), else none */
 	uint32_t objs = object_table(group);
 	static const uint8_t no_objects[4] = { 0xFF };
-	if (objs >= 0x08000000u) emu_write32(objs + (uint32_t)number * 4, mapslot_alloc(no_objects, 4));
+	uint32_t obj_at = npcs && npcs->objects ? npcs->objects : mapslot_alloc(no_objects, 4);
+	if (objs >= 0x08000000u) emu_write32(objs + (uint32_t)number * 4, obj_at);
+	if (rw) return true;   /* no Mystery Data in the real world */
 	/* Mystery Data: one placement and one content each, picked and not taken */
 	uint8_t entries[33 * 12];
 	if (nmd > 32) nmd = 32;
@@ -161,18 +224,37 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	return true;
 }
 
+/* the maps whose songs the lists hold: the town and the layer */
+static struct { int group, number, song; } songs_of[2] = { { -1 }, { -1 } };
+
 bool mapslot_music(int group, int number, int song) {
-	/* the song per map of the group, then a list holding only that group */
-	uint8_t songs[16];
-	memset(songs, 0x63, sizeof songs);          /* 0x63: no song */
 	if (number < 0 || number >= 16) return false;
-	songs[number] = (uint8_t)song;
-	uint32_t at = mapslot_alloc(songs, sizeof songs);
-	uint8_t list[16] = { (uint8_t)group };
-	put32(list + 4, at);
-	list[8] = 0xFF;
-	uint32_t list_at = mapslot_alloc(list, sizeof list);
-	if (!at || !list_at) return false;
+	/* one entry per kind of map, real world and internet */
+	int slot = real_world(group) ? 0 : 1;
+	songs_of[slot].group = group;
+	songs_of[slot].number = number;
+	songs_of[slot].song = song;
+	/* per map of each group its song, then a list of (group, songs) */
+	uint8_t list[3 * 8];
+	int n = 0;
+	for (int i = 0; i < 2; ++i) {
+		if (songs_of[i].group < 0) continue;
+		uint8_t songs[16];
+		memset(songs, 0x63, sizeof songs);          /* 0x63: no song */
+		songs[songs_of[i].number] = (uint8_t)songs_of[i].song;
+		uint32_t at = mapslot_alloc(songs, sizeof songs);
+		if (!at) return false;
+		memset(list + n * 8, 0, 8);
+		list[n * 8] = (uint8_t)songs_of[i].group;
+		put32(list + n * 8 + 4, at);
+		++n;
+	}
+	memset(list + n * 8, 0, 8);
+	list[n * 8] = 0xFF;
+	uint32_t list_at = mapslot_alloc(list, (n + 1) * 8);
+	if (!list_at) return false;
 	for (int i = 0; i < BN6_MAP_MUSIC_LISTS; ++i) emu_write32(BN6_MAP_MUSIC + (uint32_t)i * 4, list_at);
 	return true;
 }
+
+void mapslot_music_forget_town(void) { songs_of[0].group = -1; }

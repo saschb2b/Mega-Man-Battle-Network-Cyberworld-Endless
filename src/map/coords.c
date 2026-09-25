@@ -17,6 +17,7 @@
 #include "netmap.h"
 
 #define COORD_AT (EMU_FREE + 0x60000) /* generated coordinate data */
+#define TOWN_COORD_AT (EMU_FREE + 0x130000) /* the town's */
 
 /* One cell's shape: key, then lowest z, value, height, type. */
 typedef struct { uint16_t key; uint8_t shape[4]; } Cell;
@@ -38,6 +39,10 @@ static Cell from(const CoordCell *c) {
 	return o;
 }
 
+/* The floor the walls ring: the layer's by level (netmap), or the town's. */
+static bool (*town_floor)(int cx, int cy);
+static bool floor_at(int cx, int cy, int level) { return town_floor ? town_floor(cx, cy) : netmap_floor_cell(cx, cy, level); }
+
 /* The wall cells around the floor of `level`, 8 high from z. Walls beside
  * a stair rise with it from the ground (the original's are 10 higher than
  * the climb), and the ground has none where a stair's top meets the raised
@@ -51,13 +56,13 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 	int n = 0;
 	for (int cy = -126; cy < 126; ++cy)
 		for (int cx = -126; cx < 126; ++cx) {
-			if (netmap_floor_cell(cx, cy, level)) continue;
-			if (!level && rise && netmap_floor_cell(cx, cy, 1)) continue;
+			if (floor_at(cx, cy, level)) continue;
+			if (!level && rise && floor_at(cx, cy, 1)) continue;
 			bool edge = false;
 			for (int k = 0; k < 8 && n < cap; ++k) {
 				if (k >= 4 && edge) break;
 				int nx = cx + dir[k][0], ny = cy + dir[k][1];
-				if (!netmap_floor_cell(nx, ny, level)) continue;
+				if (!floor_at(nx, ny, level)) continue;
 				if (k < 4) edge = true;
 				bool by_stair = rise && netmap_stair_cell(nx, ny);
 				if (by_stair && level) { if (k >= 4) break; continue; }   /* the ground's wall covers it */
@@ -103,18 +108,32 @@ static void debug_print(const Cell *w, int n) {
 	}
 }
 
+static bool write_at(uint32_t at, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra);
+
 bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
+	town_floor = NULL;
+	return write_at(COORD_AT, slot, pads, npads, extra);
+}
+
+bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const CoordExtra *extra) {
+	town_floor = floor;
+	bool ok = write_at(TOWN_COORD_AT, slot, NULL, 0, extra);
+	town_floor = NULL;
+	return ok;
+}
+
+static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
 	enum { WALLS_MAX = 16384, TRIGGERS_MAX = 9 * 16 };
 	static Cell sec[4][WALLS_MAX];
 	int n[4] = { 0 };
-	int rise = netmap_rise();
+	int rise = town_floor ? 0 : netmap_rise();
 	n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
 	if (rise) n[0] += walls(sec[0] + n[0], WALLS_MAX - n[0], 1, rise, rise);
 	for (int i = 0; i < npads && n[3] + 9 <= TRIGGERS_MAX; ++i) n[3] += pad(sec[3] + n[3], &pads[i]);
 	/* raised floor heights, stairs' ramps, walls and layer priorities */
 	for (int s = 0; extra && s < 4; ++s)
 		for (int i = 0; i < extra->n[s] && n[s] < WALLS_MAX; ++i) sec[s][n[s]++] = from(&extra->cells[s][i]);
-	if (emu_debug_on()) debug_print(sec[0], n[0]);
+	if (emu_debug_on() && !town_floor) debug_print(sec[0], n[0]);
 	size_t cap = 32 + (size_t)(n[0] + n[1] + n[2] + n[3]) * 8;
 	uint8_t *d = calloc(cap, 1);
 	size_t at[4], len = 0;
@@ -125,8 +144,8 @@ bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExt
 	uint8_t *out = malloc(16 + len + len / 8 + 16);
 	for (int s = 0; s < 4; ++s) put32(out + s * 4, (uint32_t)at[s]);
 	size_t lz = lz_literal(d, len, out + 16);
-	emu_write(COORD_AT, out, 16 + lz);
-	emu_write32(0x08000000u + slot, COORD_AT);
+	emu_write(at_bus, out, 16 + lz);
+	emu_write32(0x08000000u + slot, at_bus);
 	free(out);
 	free(d);
 	return true;

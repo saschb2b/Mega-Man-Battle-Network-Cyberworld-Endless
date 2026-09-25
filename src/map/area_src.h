@@ -21,6 +21,8 @@ typedef struct {
 	uint16_t *tile[2];     /* map entries, row-major, per layer */
 	uint32_t *px;          /* the map drawn (ARGB, alpha 0 where empty) */
 	uint8_t *front;        /* 1 where the front layer (0) is drawn */
+	uint8_t *idx;          /* the colour index drawn there (0 where empty): a
+	                        * 256-colour map's materials are index ranges */
 	int ex, ey;            /* panel edges in world units: X = ex, Y = ey (mod 32) */
 	uint32_t desc;         /* ROM offset of its MapBGDescriptor */
 	uint32_t coord_slot;   /* ROM offset of its coordinate-data pointer */
