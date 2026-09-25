@@ -10,7 +10,8 @@ glibc runs on more distributions.
   python3 build.py host         host binary only
   python3 build.py device       aarch64 binary only
   python3 build.py linux        Linux desktop binary (build/linux) and its
-                                release archive in build/release
+                                release files in build/release: a tar.gz,
+                                an AppImage and a .deb
   python3 build.py run ...      build the Linux desktop binary and play it here
                                 in a window (game options may follow)
   python3 build.py web          the browser build, assembled as a site in
@@ -40,6 +41,7 @@ glibc runs on more distributions.
 """
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -52,6 +54,11 @@ IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dock
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
+APP_ID = 'io.github.saschb2b.CyberworldEndless'   # src/core/platform.h, linux/
+APPIMAGE_NAME = 'cyberworld-endless-x86_64.AppImage'
+DEB_NAME = 'cyberworld-endless_amd64.deb'
+REPO = 'saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless'
+ICON_SIZES = (32, 64, 128, 256, 512)                # linux/icons, drawn by tools/app_icon.py
 
 
 def default_rom_dir():
@@ -118,11 +125,142 @@ def linux_release():
     with open(os.path.join(stage, 'rom', 'PUT_YOUR_ROM_HERE.txt'), 'w') as f:
         f.write('Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba file into this folder,\n'
                 'or into ~/.local/share/cyberworld-endless/rom/.\n')
+    shutil.copytree(os.path.join(ROOT, 'linux', 'icons'), os.path.join(stage, 'icons'))
     archive = os.path.join(RELEASE, LINUX_NAME + '.tar.gz')
     with tarfile.open(archive, 'w:gz') as tar:
         tar.add(stage, arcname=LINUX_NAME)
     shutil.rmtree(stage)
     print('released', archive)
+    appimage()
+    deb()
+
+
+def version():
+    """The release's version: the tag being released (TAG, as the release
+    workflow sets it) or the latest v* tag with the commits since, else 0.0.0
+    and the commit."""
+    def git(*args):
+        try:
+            return subprocess.check_output(['git', *args], cwd=ROOT, stderr=subprocess.DEVNULL, text=True).strip()
+        except (OSError, subprocess.CalledProcessError):
+            return ''
+    tag = os.environ.get('TAG', '')
+    if not tag.startswith('v'):
+        tag = git('describe', '--tags', '--match', 'v*')
+    if tag.startswith('v'):
+        m = re.match(r'(.+?)-(\d+)-(g[0-9a-f]+)$', tag[1:])   # v0.1.0-3-gabc123 -> 0.1.0+3.gabc123
+        return f'{m[1]}+{m[2]}.{m[3]}' if m else tag[1:]
+    return f'0.0.0+git.{git("rev-parse", "--short", "HEAD") or "unknown"}'
+
+
+def install_tree(root, doc_name):
+    """The installed layout under root/usr: the program and SDL2 in
+    lib/cyberworld-endless, the menu entry, icons, AppStream data and the
+    licenses."""
+    src = os.path.join(ROOT, 'build', 'linux')
+    prog = os.path.join(root, 'usr', 'lib', 'cyberworld-endless')
+    os.makedirs(prog)
+    shutil.copy2(os.path.join(src, 'cyberworld'), os.path.join(prog, 'cyberworld-endless'))
+    shutil.copytree(os.path.join(src, 'lib'), os.path.join(prog, 'lib'))
+    rel = os.path.relpath(prog, ROOT)
+    if docker('strip', '--strip-unneeded', f'{rel}/cyberworld-endless', f'{rel}/lib/libSDL2-2.0.so.0', image=LINUX_IMAGE) != 0:
+        sys.exit('strip failed')
+    share = os.path.join(root, 'usr', 'share')
+    os.makedirs(os.path.join(share, 'applications'))
+    shutil.copy2(os.path.join(ROOT, 'linux', APP_ID + '.desktop'), os.path.join(share, 'applications'))
+    for size in ICON_SIZES:
+        icons = os.path.join(share, 'icons', 'hicolor', f'{size}x{size}', 'apps')
+        os.makedirs(icons)
+        shutil.copy2(os.path.join(ROOT, 'linux', 'icons', f'{size}.png'), os.path.join(icons, APP_ID + '.png'))
+    os.makedirs(os.path.join(share, 'metainfo'))
+    date = subprocess.check_output(['git', 'log', '-1', '--format=%cs'], cwd=ROOT, text=True).strip()
+    with open(os.path.join(ROOT, 'linux', APP_ID + '.metainfo.xml')) as f:
+        meta = f.read().replace('<!-- release -->', f'<release version="{version()}" date="{date}"/>')
+    with open(os.path.join(share, 'metainfo', APP_ID + '.metainfo.xml'), 'w') as f:
+        f.write(meta)
+    doc = os.path.join(share, 'doc', doc_name)
+    shutil.copytree(os.path.join(src, 'licenses'), doc)
+    shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(doc, 'LICENSE'))
+    return prog
+
+
+def appimage():
+    """build/release/cyberworld-endless-x86_64.AppImage and its .zsync: one
+    file that runs on any x86-64 distribution with glibc 2.34+, and offers to
+    add itself to the application menu (src/core/desktop.c). The update
+    information lets AppImageUpdate or Gear Lever fetch the next release."""
+    appdir = os.path.join(ROOT, 'build', 'appdir')
+    shutil.rmtree(appdir, ignore_errors=True)
+    install_tree(appdir, 'cyberworld-endless')
+    shutil.copy2(os.path.join(ROOT, 'linux', APP_ID + '.desktop'), appdir)
+    shutil.copy2(os.path.join(ROOT, 'linux', 'icons', '256.png'), os.path.join(appdir, APP_ID + '.png'))
+    os.symlink(APP_ID + '.png', os.path.join(appdir, '.DirIcon'))
+    with open(os.path.join(appdir, 'AppRun'), 'w') as f:
+        f.write('#!/bin/sh\n'
+                'here=$(dirname "$(readlink -f "$0")")\n'
+                'exec "$here/usr/lib/cyberworld-endless/cyberworld-endless" "$@"\n')
+    os.chmod(os.path.join(appdir, 'AppRun'), 0o755)
+    out = os.path.join(RELEASE, APPIMAGE_NAME)
+    for old in (out, out + '.zsync'):
+        if os.path.exists(old):
+            os.remove(old)
+    update = f'gh-releases-zsync|{REPO.replace("/", "|")}|latest|{APPIMAGE_NAME}.zsync'
+    if docker('sh', '-c', 'cd build/release && HOME=/tmp ARCH=x86_64 /opt/appimage/appimagetool/AppRun '
+              f'--runtime-file /opt/appimage/runtime-x86_64 -u "{update}" ../appdir {APPIMAGE_NAME}',
+              image=LINUX_IMAGE) != 0:
+        sys.exit('appimagetool failed')
+    print('released', out)
+
+
+def deb():
+    """build/release/cyberworld-endless_amd64.deb: installs into /usr like
+    any package (the program in /usr/lib/cyberworld-endless, the command in
+    /usr/bin), for Debian, Ubuntu, Mint and Pop!_OS."""
+    root = os.path.join(ROOT, 'build', 'deb')
+    shutil.rmtree(root, ignore_errors=True)
+    install_tree(root, 'cyberworld-endless')
+    os.makedirs(os.path.join(root, 'usr', 'bin'))
+    os.symlink('../lib/cyberworld-endless/cyberworld-endless', os.path.join(root, 'usr', 'bin', 'cyberworld-endless'))
+    with open(os.path.join(root, 'usr', 'share', 'doc', 'cyberworld-endless', 'copyright'), 'w') as f:
+        f.write('Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\n'
+                'Upstream-Name: Cyberworld Endless\n'
+                f'Source: https://github.com/{REPO}\n\n'
+                'Files: *\nCopyright: Sascha Becker\nLicense: MIT\n See LICENSE.\n\n'
+                'Files: usr/lib/cyberworld-endless/cyberworld-endless\nComment: embeds mGBA\nLicense: MPL-2.0\n See mGBA.txt.\n\n'
+                'Files: usr/lib/cyberworld-endless/lib/*\nCopyright: Sam Lantinga and SDL contributors\nLicense: Zlib\n See SDL2.txt.\n')
+    size = 0
+    os.chmod(root, 0o755)
+    for d, dirs, files in os.walk(root):
+        for name in dirs:
+            os.chmod(os.path.join(d, name), 0o755)
+        for name in files:
+            path = os.path.join(d, name)
+            if not os.path.islink(path):
+                os.chmod(path, 0o755 if name.startswith('cyberworld-endless') or name.endswith('.so.0') else 0o644)
+                size += os.path.getsize(path)
+    os.makedirs(os.path.join(root, 'DEBIAN'))
+    with open(os.path.join(root, 'DEBIAN', 'control'), 'w') as f:
+        f.write('Package: cyberworld-endless\n'
+                f'Version: {version()}\n'
+                'Architecture: amd64\n'
+                'Maintainer: Sascha Becker <saschb2b@gmail.com>\n'
+                f'Installed-Size: {(size + 1023) // 1024}\n'
+                'Depends: libc6 (>= 2.34)\n'
+                'Recommends: zenity | kdialog, xdg-utils\n'
+                'Section: games\n'
+                'Priority: optional\n'
+                'Homepage: https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/\n'
+                'Description: roguelike on Mega Man Battle Network 6\n'
+                ' Every run builds a new net in the style of Mega Man Battle Network 6\n'
+                ' and the game runs it: its battles, chips, Navis and music. It needs the\n'
+                ' player\'s own Mega Man Battle Network 6: Cybeast Gregar (USA) ROM; no game\n'
+                ' data is included. Unofficial, not affiliated with Capcom.\n')
+    os.chmod(os.path.join(root, 'DEBIAN', 'control'), 0o644)
+    out = os.path.join(RELEASE, DEB_NAME)
+    if docker('dpkg-deb', '--root-owner-group', '-Zxz', '--build', 'build/deb', f'build/release/{DEB_NAME}',
+              image=LINUX_IMAGE) != 0:
+        sys.exit('dpkg-deb failed')
+    print('released', out)
 
 
 def site():

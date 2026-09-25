@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The Linux packages' AppStream data: what software centres show. The
+     release line is filled in by build.py. -->
+<component type="desktop-application">
+  <id>io.github.saschb2b.CyberworldEndless</id>
+  <name>Cyberworld Endless</name>
+  <summary>A roguelike on Mega Man Battle Network 6</summary>
+  <developer id="io.github.saschb2b">
+    <name>Sascha Becker</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT AND MPL-2.0 AND Zlib</project_license>
+  <description>
+    <p>
+      Every run builds a new net in the style of Mega Man Battle Network 6's areas, and the game
+      runs it: its battles, chips, Navis and music. Layers get harder as you go deeper, a guardian
+      Navi waits at the end of every act, and the run ends when MegaMan is deleted.
+    </p>
+    <p>
+      You need your own copy of Mega Man Battle Network 6: Cybeast Gregar (USA) as an unmodified
+      .gba file. No game data is included. This is an unofficial fan project, not affiliated with
+      or endorsed by Capcom.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.saschb2b.CyberworldEndless.desktop</launchable>
+  <provides>
+    <binary>cyberworld-endless</binary>
+  </provides>
+  <url type="homepage">https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/</url>
+  <url type="bugtracker">https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues</url>
+  <url type="vcs-browser">https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>A generated layer of Sky HP</caption>
+      <image>https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/net.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A battle</caption>
+      <image>https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/battle.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A guardian Navi at the end of an act</caption>
+      <image>https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/guardian-talk.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">mild</content_attribute>
+  </content_rating>
+  <supports>
+    <control>keyboard</control>
+    <control>gamepad</control>
+  </supports>
+  <categories>
+    <category>Game</category>
+    <category>ActionGame</category>
+    <category>RolePlaying</category>
+  </categories>
+  <releases>
+    <!-- release -->
+  </releases>
+</component>

@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Shell scripts
-        run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh
+        run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh docker/appimage.sh
       - name: Python
         run: python3 -m py_compile build.py tools/*.py
       - name: Workflows
@@ -74,10 +74,21 @@ jobs:
           ldd "$RUNNER_TEMP/cyberworld-endless-linux-x86_64/cyberworld-endless" | tee /dev/stderr | grep -q 'libSDL2-2.0.so.0 => .*/lib/libSDL2'
           out=$("$RUNNER_TEMP/cyberworld-endless-linux-x86_64/cyberworld-endless" --help 2>&1 || true)
           grep -q 'unknown argument' <<< "$out"
+      - name: The AppImage and the .deb start
+        run: |
+          out=$(APPIMAGE_EXTRACT_AND_RUN=1 build/release/cyberworld-endless-x86_64.AppImage --help 2>&1 || true)
+          grep -q 'unknown argument' <<< "$out"
+          dpkg-deb -I build/release/cyberworld-endless_amd64.deb
+          dpkg-deb -x build/release/cyberworld-endless_amd64.deb "$RUNNER_TEMP/deb"
+          out=$("$RUNNER_TEMP/deb/usr/lib/cyberworld-endless/cyberworld-endless" --help 2>&1 || true)
+          grep -q 'unknown argument' <<< "$out"
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-linux
-          path: build/release/cyberworld-endless-linux-x86_64.tar.gz
+          path: |
+            build/release/cyberworld-endless-linux-x86_64.tar.gz
+            build/release/cyberworld-endless-x86_64.AppImage
+            build/release/cyberworld-endless_amd64.deb
           retention-days: 14
 
   web:

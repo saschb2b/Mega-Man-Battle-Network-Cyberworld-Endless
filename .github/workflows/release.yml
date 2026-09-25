@@ -1,6 +1,7 @@
-# A version tag (v1.0.0) builds the three release archives and publishes
-# them as a GitHub release: the PortMaster port, the Linux desktop build and
-# the browser build as a site to serve anywhere. None holds game data.
+# A version tag (v1.0.0) builds the release files and publishes them as a
+# GitHub release: the PortMaster port, the Linux desktop build (AppImage with
+# its .zsync, .deb and tar.gz) and the browser build as a site to serve
+# anywhere. None holds game data.
 name: Release
 
 on:
@@ -42,11 +43,15 @@ jobs:
       - run: python3 build.py release
       - name: Checksums
         working-directory: build/release
-        run: sha256sum cyberworld.zip cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless-web.zip > SHA256SUMS.txt
+        run: >
+          sha256sum cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb
+          cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless-web.zip > SHA256SUMS.txt
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: >
           gh release create "$TAG" --verify-tag --generate-notes --title "Cyberworld Endless $TAG"
-          build/release/cyberworld.zip build/release/cyberworld-endless-linux-x86_64.tar.gz
-          build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt
+          build/release/cyberworld.zip build/release/cyberworld-endless-x86_64.AppImage
+          build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb
+          build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless-web.zip
+          build/release/SHA256SUMS.txt

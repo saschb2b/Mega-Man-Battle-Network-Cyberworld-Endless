@@ -21,8 +21,12 @@ included here.
 ./cyberworld-endless
 ```
 
-`./install.sh` adds it to your desktop's application menu. The first start
-records the game's boot once, which takes a few seconds.
+`./install.sh` adds it to your desktop's application menu with its icon
+(`./install.sh --remove` takes it away again). Without a ROM the first start
+asks for the file. The first start with one records the game's boot once,
+which takes a few seconds.
+
+The releases also have this build as an AppImage and as a `.deb` package.
 
 It runs on x86-64 distributions with glibc 2.34 or newer (Ubuntu 22.04,
 Debian 12, Fedora 35 and later) and brings its own SDL2 in `lib/`, which
