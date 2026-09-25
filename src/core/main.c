@@ -209,6 +209,15 @@ static struct {
 	double acc;
 } loop;
 
+/* After one Escape: a strip over the picture until the second quits. */
+static void quit_prompt_draw(void) {
+	if (P.quit_prompt <= 0 || !R.data) return;
+	int y = P.core_y + CORE_H - 30;
+	fill_rect(0, y, P.w, 26, rgba(0, 0, 0, 200));
+	text_draw(P.w / 2, y + 2, "Press Esc again to quit", WHITE, TEXT_CENTER);
+	text_draw(P.w / 2, y + 14, "Run saved at layer start", rgba(170, 200, 255, 255), TEXT_CENTER);
+}
+
 /* One game frame: scenes, input, update, sound, drawing. False once the
  * frame budget of a headless run is spent. */
 static bool game_frame(void) {
@@ -225,6 +234,7 @@ static bool game_frame(void) {
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
+	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	for (int i = 0; i < shot_count; ++i)
 		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
@@ -318,6 +328,11 @@ int main(int argc, char **argv) {
 	if (DESKTOP && !data_dir_given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
 	if (DESKTOP) { char rom[600]; snprintf(rom, sizeof rom, "%s/rom", g_data_dir); make_dirs(rom); }
 	if (!platform_init(force_w, force_h, headless, fullscreen)) return 1;
+	if (!headless) {
+		char keys[600];
+		snprintf(keys, sizeof keys, "%s/keys.ini", g_data_dir);
+		platform_load_keys(keys);
+	}
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
 
 	char msg[512];

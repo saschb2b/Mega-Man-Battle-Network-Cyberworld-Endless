@@ -45,6 +45,7 @@ typedef struct {
 	bool fullscreen;
 	uint64_t frame;
 	bool keyboard_last; /* last input came from the keyboard */
+	int quit_prompt;    /* frames left of "Esc again to quit" after one Escape */
 	/* Full-screen effects, set by the scene each frame while drawing and
 	 * applied to the canvas before it is shown (the GBA's MOSAIC register and
 	 * palette fades). fade is 0..16 toward fade_color. */
@@ -61,6 +62,10 @@ extern Platform P;
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen);
 void platform_shutdown(void);
 void platform_poll(void);
+/* The keyboard's buttons: the defaults (docs in platform.c), then path
+ * (keys.ini in the data folder), which is written with the defaults when
+ * it does not exist yet. */
+void platform_load_keys(const char *path);
 void platform_begin_frame(void);
 void platform_end_frame(void);
 /* Apply fx_mosaic and fx_fade to the canvas (called once the scene has drawn). */

@@ -15,6 +15,7 @@ Platform P;
 static SDL_GameController *pads[4];
 static uint32_t injected;
 static uint32_t pad_bits, key_bits;
+static void keys_default(void);
 static uint32_t tapped;   /* pressed since the last poll: a tap released in the same frame still counts */
 
 static void open_pads(void) {
@@ -60,6 +61,7 @@ static void set_fullscreen(bool on) {
 
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
+	keys_default();
 	if (headless) {
 		SDL_SetHint(SDL_HINT_VIDEODRIVER, "dummy");
 		SDL_SetHint(SDL_HINT_AUDIODRIVER, "dummy");
@@ -127,20 +129,98 @@ void platform_shutdown(void) {
 	SDL_Quit();
 }
 
-static uint32_t key_button(SDL_Keycode k) {
-	switch (k) {
-	case SDLK_UP: return BTN_UP;
-	case SDLK_DOWN: return BTN_DOWN;
-	case SDLK_LEFT: return BTN_LEFT;
-	case SDLK_RIGHT: return BTN_RIGHT;
-	case SDLK_x: case SDLK_SPACE: return BTN_A;
-	case SDLK_z: case SDLK_BACKSPACE: return BTN_B;
-	case SDLK_a: case SDLK_q: return BTN_L;
-	case SDLK_s: case SDLK_w: return BTN_R;
-	case SDLK_RETURN: return BTN_START;
-	case SDLK_RSHIFT: case SDLK_TAB: return BTN_SELECT;
-	default: return 0;
+/* The keyboard, after Capcom's own PC layout for Battle Network (the Legacy
+ * Collection): WASD moves, J and K are A and B, Q and E are L and R, Enter
+ * is Start and R is Select. The arrows with X and Z also work, as on most
+ * GBA emulators. Keys are positions (scancodes), not letters, so an AZERTY
+ * keyboard moves with ZQSD. keys.ini in the data folder changes them. */
+static const struct { const char *name; uint32_t bit; const char *keys; } key_defaults[] = {
+	{ "UP", BTN_UP, "W, Up" },
+	{ "DOWN", BTN_DOWN, "S, Down" },
+	{ "LEFT", BTN_LEFT, "A, Left" },
+	{ "RIGHT", BTN_RIGHT, "D, Right" },
+	{ "A", BTN_A, "J, X" },
+	{ "B", BTN_B, "K, Z" },
+	{ "L", BTN_L, "Q" },
+	{ "R", BTN_R, "E" },
+	{ "START", BTN_START, "Return, Keypad Enter" },
+	{ "SELECT", BTN_SELECT, "R, Backspace" },
+};
+static uint32_t key_map[SDL_NUM_SCANCODES];
+
+/* "J, X" -> the button on each key; false and a message for an unknown name */
+static bool bind_keys(uint32_t bit, const char *list, const char *where) {
+	char buf[256];
+	snprintf(buf, sizeof buf, "%s", list);
+	bool ok = true;
+	char *save = NULL;
+	for (char *t = strtok_r(buf, ",", &save); t; t = strtok_r(NULL, ",", &save)) {
+		while (*t == ' ' || *t == '\t') ++t;
+		char *e = t + strlen(t);
+		while (e > t && (e[-1] == ' ' || e[-1] == '\t' || e[-1] == '\r' || e[-1] == '\n')) *--e = 0;
+		if (!*t) continue;
+		SDL_Scancode sc = SDL_GetScancodeFromName(t);
+		if (sc == SDL_SCANCODE_UNKNOWN || sc == SDL_SCANCODE_ESCAPE || sc == SDL_SCANCODE_F11) {
+			fprintf(stderr, "%s: no key called \"%s\"%s\n", where, t,
+				sc == SDL_SCANCODE_UNKNOWN ? "" : " (Escape and F11 are taken)");
+			ok = false;
+			continue;
+		}
+		key_map[sc] |= bit;
 	}
+	return ok;
+}
+
+static void keys_default(void) {
+	memset(key_map, 0, sizeof key_map);
+	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
+		bind_keys(key_defaults[i].bit, key_defaults[i].keys, "defaults");
+}
+
+void platform_load_keys(const char *path) {
+	keys_default();
+	FILE *f = fopen(path, "r");
+	if (!f) {
+		f = fopen(path, "w");
+		if (!f) return;
+		fprintf(f,
+			"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
+			"# button its keys, separated by commas. Keys are named as on a US\n"
+			"# keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return, Backspace, Tab,\n"
+			"# Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad Enter...) and mean\n"
+			"# that position: on an AZERTY keyboard W is the key marked Z. Escape (quit)\n"
+			"# and F11 (fullscreen) are taken. Delete this file for the defaults.\n\n");
+		for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
+			fprintf(f, "%-6s = %s\n", key_defaults[i].name, key_defaults[i].keys);
+		fclose(f);
+		platform_persist();
+		return;
+	}
+	char line[256];
+	int n = 0;
+	while (fgets(line, sizeof line, f)) {
+		++n;
+		char *eq = strchr(line, '=');
+		char *hash = strchr(line, '#');
+		if (hash && (!eq || hash < eq)) continue;
+		if (!eq) continue;
+		*eq = 0;
+		char name[16] = "";
+		sscanf(line, " %15s", name);
+		size_t i = 0;
+		while (i < sizeof key_defaults / sizeof *key_defaults && SDL_strcasecmp(name, key_defaults[i].name)) ++i;
+		char where[600];
+		snprintf(where, sizeof where, "%s:%d", path, n);
+		if (i == sizeof key_defaults / sizeof *key_defaults) { fprintf(stderr, "%s: no button called \"%s\"\n", where, name); continue; }
+		/* the file's keys replace the defaults for this button */
+		for (int sc = 0; sc < SDL_NUM_SCANCODES; ++sc) key_map[sc] &= ~key_defaults[i].bit;
+		bind_keys(key_defaults[i].bit, eq + 1, where);
+	}
+	fclose(f);
+}
+
+static uint32_t key_button(SDL_Scancode sc) {
+	return (unsigned)sc < SDL_NUM_SCANCODES ? key_map[sc] : 0;
 }
 
 static uint32_t pad_button(Uint8 b) {
@@ -182,24 +262,31 @@ void platform_poll(void) {
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_QUIT: P.quit = true; break;
-		case SDL_KEYDOWN:
-			if (!e.key.repeat) { key_bits |= key_button(e.key.keysym.sym); tapped |= key_button(e.key.keysym.sym); P.keyboard_last = true; }
+		case SDL_KEYDOWN: {
+			uint32_t b = key_button(e.key.keysym.scancode);
+			/* Alt+Enter is fullscreen, not Start */
+			if (e.key.keysym.mod & KMOD_ALT) b &= ~BTN_START;
+			if (!e.key.repeat) { key_bits |= b; tapped |= b; if (b) P.keyboard_last = true; }
 #ifndef __EMSCRIPTEN__
 			/* (in a browser the page keeps Escape and fullscreen) */
-			if (e.key.keysym.sym == SDLK_ESCAPE) P.quit = true;
+			if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE && !e.key.repeat) {
+				/* the first Escape asks, the second within two seconds quits */
+				if (P.quit_prompt > 0) P.quit = true;
+				else P.quit_prompt = 120;
+			}
 			/* F11 or Alt+Enter: fullscreen and back */
 			if (!e.key.repeat && !P.headless && (e.key.keysym.sym == SDLK_F11 ||
-				(e.key.keysym.sym == SDLK_RETURN && (e.key.keysym.mod & KMOD_ALT)))) {
-				key_bits &= ~BTN_START;
-				tapped &= ~BTN_START;
+				(e.key.keysym.sym == SDLK_RETURN && (e.key.keysym.mod & KMOD_ALT))))
 				set_fullscreen(!P.fullscreen);
-			}
 #endif
 			break;
+		}
 		case SDL_WINDOWEVENT:
 			if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
+			/* keys let go of in another window would stay held */
+			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) key_bits = 0;
 			break;
-		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.sym); break;
+		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.scancode); break;
 		case SDL_CONTROLLERBUTTONDOWN:
 			pad_bits |= pad_button(e.cbutton.button);
 			tapped |= pad_button(e.cbutton.button);
@@ -210,6 +297,7 @@ void platform_poll(void) {
 		default: break;
 		}
 	}
+	if (P.quit_prompt > 0) --P.quit_prompt;
 	uint32_t now = key_bits | pad_bits | stick_bits() | injected | tapped;
 	tapped = 0;
 	P.pressed = now & ~P.held;
