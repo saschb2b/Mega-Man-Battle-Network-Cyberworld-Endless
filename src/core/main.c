@@ -20,6 +20,7 @@
 #include "tour.h"
 #include "director.h"
 #include "net_layouts.h"
+#include "desktop.h"
 
 char g_data_dir[512] = ".";
 
@@ -321,10 +322,20 @@ int main(int argc, char **argv) {
 
 	char msg[512];
 	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
+#ifdef CW_DESKTOP
+	if (!headless) desktop_menu_entry(g_data_dir);
+	if (!rom_ok && !headless && !rom_dir) {
+		/* no ROM, no font: ask for it in the desktop's own boxes */
+		char dir[600];
+		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+		fprintf(stderr, "%s\n", msg);
+		rom_ok = desktop_rom_dialog(dir, desktop_rom, msg, sizeof msg);
+		if (!rom_ok) { platform_shutdown(); return 1; }
+	}
+#endif
 	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);
 		if (DESKTOP && !headless) {
-			/* no ROM, no font: say it in a box of the desktop's own */
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cyberworld Endless", msg, P.window);
 			platform_shutdown();
 			return 1;

@@ -5,6 +5,10 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
+#ifdef CW_DESKTOP
+#include <stdlib.h>
+#include "app_icon.h"
+#endif
 
 Platform P;
 
@@ -61,6 +65,12 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		SDL_SetHint(SDL_HINT_AUDIODRIVER, "dummy");
 	}
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+#ifdef CW_DESKTOP
+	/* the window's class is the application ID, which the .desktop file names */
+	setenv("SDL_VIDEO_X11_WMCLASS", APP_ID, 0);
+	setenv("SDL_VIDEO_WAYLAND_WMCLASS", APP_ID, 0);
+	SDL_SetHint("SDL_APP_NAME", "Cyberworld Endless");
+#endif
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0) {
 			fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
@@ -88,6 +98,11 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.window = SDL_CreateWindow("Mega Man Battle Network: Cyberworld Endless",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, flags);
 	if (!P.window) { fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
+#ifdef CW_DESKTOP
+	SDL_Surface *icon = SDL_CreateRGBSurfaceWithFormatFrom((void *)app_icon_rgba, APP_ICON_SIZE, APP_ICON_SIZE, 32,
+		APP_ICON_SIZE * 4, SDL_PIXELFORMAT_RGBA32);
+	if (icon) { SDL_SetWindowIcon(P.window, icon); SDL_FreeSurface(icon); }
+#endif
 	Uint32 rflags = headless ? SDL_RENDERER_SOFTWARE : (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	P.renderer = SDL_CreateRenderer(P.window, -1, rflags);
 	if (!P.renderer) P.renderer = SDL_CreateRenderer(P.window, -1, SDL_RENDERER_SOFTWARE);
