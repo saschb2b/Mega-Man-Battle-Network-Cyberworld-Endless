@@ -4,6 +4,11 @@
 
 First playable version.
 
+- Keyboard: the layout of Capcom's PC version (the Legacy Collection). W A S D
+  move, J and K are A and B, Q and E are L and R, Enter is Start, R is Select;
+  the arrows with X and Z still work. Keys are physical positions (Z Q S D on
+  AZERTY). `keys.ini` in the save folder remaps them. Escape asks before it
+  quits, and keys held while the window loses focus are let go.
 - Linux: an AppImage (runs on any x86-64 distribution with glibc 2.34+,
   without libfuse2, and offers to add itself to the application menu; its
   update information lets AppImageUpdate or Gear Lever fetch new releases)

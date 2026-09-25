@@ -39,15 +39,21 @@ A keyboard or any game controller SDL knows.
 
 | Game Boy Advance | Keyboard | Controller |
 | --- | --- | --- |
-| D-Pad | Arrow keys | D-Pad or left stick |
-| A | X or Space | A |
-| B | Z or Backspace | B |
-| L | A or Q | Left shoulder or trigger |
-| R | S or W | Right shoulder or trigger |
+| D-Pad | W A S D or the arrows | D-Pad or left stick |
+| A | J or X | A |
+| B | K or Z | B |
+| L | Q | Left shoulder or trigger |
+| R | E | Right shoulder or trigger |
 | Start | Enter | Start |
-| Select | Tab or Right Shift | Back / Select |
+| Select | R or Backspace | Back / Select |
 
-F11 or Alt+Enter switches between the window and fullscreen, Escape quits.
+This is the layout of Capcom's PC version (the Legacy Collection). Keys are
+positions: on an AZERTY keyboard you move with Z Q S D. To change them, edit
+`~/.local/share/cyberworld-endless/keys.ini`, which the first start writes
+with the defaults.
+
+F11 or Alt+Enter switches between the window and fullscreen; Escape twice
+quits (the run is saved at the start of each layer).
 `--fullscreen` starts in fullscreen.
 
 ## Saves

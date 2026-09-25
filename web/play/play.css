@@ -57,3 +57,5 @@ table { border-collapse: collapse; width: 100%; }
 th, td { padding: 5px 12px 5px 0; text-align: left; vertical-align: middle; }
 th { font: 700 0.8rem/1 var(--caps); color: #6bdeff; text-transform: uppercase; }
 td:first-child { font: 700 0.9rem/1 var(--caps); text-shadow: var(--edge); }
+
+.help .note { margin: 10px 0 0; font-size: 0.95rem; color: #d6f4ff; }

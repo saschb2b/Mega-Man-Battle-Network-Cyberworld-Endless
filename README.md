@@ -92,8 +92,24 @@ On the title screen, press Start and choose **NEW GAME** or **CONTINUE**.
 CONTINUE shows how deep your saved run is; the corner shows your best depth.
 
 In the net, the buttons are the Game Boy Advance's and BN6 plays as it always
-has. On a PC keyboard the arrows move, X is A, Z is B, A and S are L and R,
-Enter is Start.
+has. On a keyboard the layout is the one Capcom's PC version (the Legacy
+Collection) uses: the left hand moves and opens the Custom screen, the right
+hand uses chips and the buster.
+
+| Button | Keyboard | Also |
+| --- | --- | --- |
+| D-Pad | W A S D | Arrow keys |
+| A | J | X |
+| B | K | Z |
+| L / R | Q / E | |
+| Start | Enter | Keypad Enter |
+| Select | R | Backspace |
+
+Keys are positions, so on an AZERTY keyboard you move with Z Q S D.
+`keys.ini` in the save folder (`~/.local/share/cyberworld-endless/` on Linux,
+`savedata/` on the handheld) changes them; it is written with these defaults
+on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
+quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 
 | Button | In the net | In battle |
 | --- | --- | --- |
