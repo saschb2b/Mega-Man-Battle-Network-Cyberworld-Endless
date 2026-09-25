@@ -56,16 +56,27 @@ After that the title screen appears straight away.
 
 ### On a Linux PC
 
-1. Download `cyberworld-endless-linux-x86_64.tar.gz` from the
-   [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it anywhere.
-2. Copy your ROM into `~/.local/share/cyberworld-endless/rom/` or the
-   `rom/` folder next to `cyberworld-endless`.
-3. Run `./cyberworld-endless`. `./install.sh` adds it to the application
-   menu.
+Two ways from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), both with a menu entry and an icon you
+can pin to the dock:
 
-It opens in a window at the largest whole scale that fits; F11 or Alt+Enter
-switches to fullscreen. Saves live in `~/.local/share/cyberworld-endless/`.
-The archive's own `README.md` has the keyboard keys.
+- **AppImage** (any distribution): download
+  `cyberworld-endless-x86_64.AppImage`, make it executable (`chmod +x`, or
+  the file's Properties) and start it. On the first start it offers to add
+  itself to the application menu. It does not need libfuse2.
+- **.deb** (Debian, Ubuntu, Mint, Pop!_OS): download
+  `cyberworld-endless_amd64.deb` and open it with your software centre, or
+  `sudo apt install ./cyberworld-endless_amd64.deb`. It appears in the menu
+  as **Cyberworld Endless**; remove it like any other package.
+
+On the first start without a ROM it asks for the file (a file chooser when
+`zenity` or `kdialog` is installed) and keeps a copy in
+`~/.local/share/cyberworld-endless/rom/`, where your saves also live. It
+opens in a window at the largest whole scale that fits; F11 or Alt+Enter
+switches to fullscreen.
+
+`cyberworld-endless-linux-x86_64.tar.gz` is the same game as a plain folder:
+unpack it anywhere and run `./cyberworld-endless`; `./install.sh` adds it
+to the menu. Its `README.md` has the keyboard keys.
 
 ### In a browser
 
@@ -204,9 +215,9 @@ site and the browser version and serves them on `http://localhost:8080`;
 `python3 build.py screenshots` retakes the screenshots in
 `docs/screenshots` from scripted headless runs, and `python3 build.py clips`
 records the site's short videos (WebM and MP4, `docs/clips`) the same way. `python3 build.py release`
-writes the three release archives to `build/release/`: `cyberworld.zip` for
-PortMaster, `cyberworld-endless-linux-x86_64.tar.gz` and
-`cyberworld-endless-web.zip`. Each target builds in its own Docker image
+writes the release files to `build/release/`: `cyberworld.zip` for
+PortMaster; for Linux the AppImage (with its `.zsync` for updates), the
+`.deb` and the tar.gz; and `cyberworld-endless-web.zip`. Each target builds in its own Docker image
 (`docker/`): the handheld on Debian trixie as ROCKNIX, the Linux desktop on
 bookworm with SDL2 built to load X11, Wayland and the sound servers at run
 time, the browser with Emscripten.

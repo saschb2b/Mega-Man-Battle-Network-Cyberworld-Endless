@@ -4,6 +4,15 @@
 
 First playable version.
 
+- Linux: an AppImage (runs on any x86-64 distribution with glibc 2.34+,
+  without libfuse2, and offers to add itself to the application menu; its
+  update information lets AppImageUpdate or Gear Lever fetch new releases)
+  and a `.deb` that installs into the menu like any package, beside the
+  tar.gz. All three carry an application icon and AppStream data, and the
+  window's class is the app ID, so a pinned dock icon matches the running
+  game. Without a ROM the first start asks for the file (a file chooser with
+  zenity or kdialog) instead of stopping.
+
 - The game itself runs from the player's BN6 Cybeast Gregar (USA) ROM on an
   embedded mGBA core: its battles, net, PET, shops, traders and music.
   Nothing from the ROM is shipped.

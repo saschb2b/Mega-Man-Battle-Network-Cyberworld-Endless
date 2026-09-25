@@ -44,7 +44,7 @@ README and the site.
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `port/` | PortMaster launcher and metadata |
-| `linux/` | The Linux desktop release's README and menu installer |
+| `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage and the `.deb` carry. The app ID `io.github.saschb2b.CyberworldEndless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling). Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
 | `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each (`build.py clips`, ffmpeg in a pinned image) |
@@ -88,7 +88,8 @@ python3 build.py serve      # the site and the browser build on http://localhost
 python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless runs
 python3 build.py clips [NAMES]         # docs/clips: the same runs as 30 fps videos
 python3 tools/site_art.py              # web/assets/ui: the site's pixel-art frames and icons
-python3 build.py release    # build/release/: the PortMaster zip, the Linux tar.gz, the site zip
+python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: the application icon
+python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
 
 The host and Linux builds are desktop builds (`CW_DESKTOP`): a resizable
@@ -133,7 +134,8 @@ tiles, palettes and OBJs back to ROM offsets.
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |
 | Browser page or platform code | `build.py serve` and a run in a browser: ROM choice, a new game, CONTINUE after a reload |
 | The site | `build.py serve` at desktop and phone widths; `build.py screenshots` and `build.py clips` again when what they show changed |
-| Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux archive started from a fresh unpack; tag `vX.Y.Z` on `main` |
+| Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one) |
+| Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
 
 ## Device testing
 
