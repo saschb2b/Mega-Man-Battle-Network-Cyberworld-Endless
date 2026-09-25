@@ -23,6 +23,7 @@ README and the site.
 | --- | --- |
 | Player experience, controls, install | [README.md](README.md) |
 | How the engine drives the game, and the memory it writes | [docs/EMULATION.md](docs/EMULATION.md) |
+| The real world and the town | [docs/OVERWORLD.md](docs/OVERWORLD.md) |
 | Where ROM data lives and how it was found | [docs/ROM_DATA.md](docs/ROM_DATA.md) |
 | What is original, generated or adapted | [docs/FIDELITY.md](docs/FIDELITY.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
@@ -39,7 +40,8 @@ README and the site.
 | `src/emu/` | The mGBA core, calls into the game (warps, chat), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`) |
 | `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
-| `src/director/` | The run on the game: layers, warps, encounters, bosses, checkpoints, powers |
+| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers |
+| `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
 | `tests/test_core.c` | ROM-free unit tests |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
@@ -85,6 +87,8 @@ CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk
 python3 build.py package    # build/port/
 python3 build.py run        # the Linux desktop build, played here in a window
 python3 build.py serve      # the site and the browser build on http://localhost:8080
+python3 build.py town [SEEDS]  # the town drawn per seed, and the game around it
+python3 build.py world        # the real world's original maps, drawn and toured
 python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless runs
 python3 build.py clips [NAMES]         # docs/clips: the same runs as 30 fps videos
 python3 tools/site_art.py              # web/assets/ui: the site's pixel-art frames and icons
@@ -114,7 +118,7 @@ pacing) stays local.
 `~/.cache/mmbn-ref/roms` (override with `CYBERWORLD_ROM_DIR`) mounted
 read-only; `--data-dir` defaults to `.build/data`. `--scene emu` starts a new
 run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
-`--seed S` with a given seed. `--input "FRAMES:BUTTONS,..."` scripts the
+`--seed S` with a given seed, `--scene town` from the town as NEW GAME does. `--input "FRAMES:BUTTONS,..."` scripts the
 buttons (`UP+RIGHT`, `A`), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames, and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
 @CAT:FIRST:COUNT:PATH` draw sprites. Environment variables reach the image
@@ -129,6 +133,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | --- | --- |
 | Engine code | `build.py test`, a headless capture of the affected screen, an autopilot run |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), captures of every area (`--net-biome 0`-`7`) |
+| The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in |
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input |
 | Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band), an autopilot run |
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |

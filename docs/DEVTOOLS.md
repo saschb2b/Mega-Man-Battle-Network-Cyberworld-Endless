@@ -80,6 +80,23 @@ family.version, the foes' HP together, and MegaMan's HP after (or
 "deleted"). A last line gives where the run ended. Past 512 KB the log moves
 to `runlog.old`. Collected from real runs, it shows where runs are lost.
 
+## Town and world: the real world
+
+```bash
+python3 build.py town [SEEDS]
+python3 build.py world
+```
+
+`town` plans the run's town (docs/OVERWORLD.md) for a few seeds and draws
+each with Central Town's tiles, tiles without a matching source tile
+marked red, Lan's start blue and the port green (`.build/town/town_sNN.png`),
+then starts a run in the town and shows the game at six places around it
+(`tour.png`). `world` draws the real world's 37 original maps as they are
+stored (`.build/world/world_GG_N.png`, and `_coords` with walls red, raised
+floor blue and triggers yellow) and warps Lan through each in the game
+(`tour_GG_N.png`). `CYBERWORLD_TOWN_DEBUG=1` prints the edges the town's
+plan took.
+
 ## Tour: the game shows every room
 
 ```bash

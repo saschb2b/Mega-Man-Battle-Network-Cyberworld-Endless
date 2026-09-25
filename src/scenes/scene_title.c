@@ -254,7 +254,7 @@ static void update(void) {
 		S.jack_y += S.jack_v;
 		if (S.leaving > LEAVE_FRAMES) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
-			else run_new(rng_next() ^ (uint32_t)SDL_GetTicks());
+			else { run_new(rng_next() ^ (uint32_t)SDL_GetTicks()); emu_start_in_town = true; }
 			scene_set(&scene_emu);
 		}
 		return;

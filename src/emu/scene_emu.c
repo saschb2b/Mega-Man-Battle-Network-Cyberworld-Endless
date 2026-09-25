@@ -17,6 +17,7 @@
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
+bool emu_start_in_town;
 
 static uint32_t keys_from_buttons(void) {
 	static const struct { int btn; uint32_t key; } map[] = {
@@ -40,7 +41,9 @@ static void enter(void) {
 	} else {
 		emu_boot();
 		emu_encounters_install();
-		director_start_layer();
+		if (emu_start_in_town) director_start_run();
+		else director_start_layer();
+		emu_start_in_town = false;
 	}
 	audio_external(emu_audio_read);
 }

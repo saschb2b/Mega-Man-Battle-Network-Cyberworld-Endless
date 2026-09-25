@@ -20,6 +20,7 @@ extern const Scene scene_title;
 extern const Scene scene_gallery;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
+extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool title_summary;          /* the title opens on the finished run's summary */
 
 

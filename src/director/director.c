@@ -33,6 +33,7 @@
 #include "runlog.h"
 #include "save.h"
 #include "scripts.h"
+#include "town.h"
 
 int director_debug_biome = -1;
 
@@ -59,6 +60,8 @@ static struct {
 	int act_viruses;       /* viruses deleted when the act began */
 	int act_frames;        /* frames spent in the act */
 	const char *act_guardian;  /* the guardian beaten on the way out */
+	bool town;             /* Lan is in the town; the first layer waits for his jack-in */
+	bool town_seen;        /* ... and has got there */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -178,7 +181,49 @@ static bool build_layer(void) {
 	return true;
 }
 
+bool director_start_run(void) {
+	/* a new run leaves the last one behind: CONTINUE is for runs that
+	 * have reached the net */
+	save_delete();
+	/* the first layer, entered through the town's port; the town itself
+	 * (its seed apart from the layers') */
+	if (!build_layer()) return false;
+	if (!town_plan(run.seed ^ 0x70776E00u) || !town_install(D.group, D.number, D.start_x, D.start_y)) {
+		fprintf(stderr, "town: not built; starting in the net\n");
+		lock_run();
+		emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+		D.checkpoint = true;
+		return true;
+	}
+	/* R jacks in there; the PET's own Save stays off */
+	flag_clear(BN6_FLAG_NO_JACK);
+	flag_set(BN6_FLAG_NO_PET_SAVE);
+	const TownInfo *ti = town_info();
+	emu_warp(TOWN_GROUP, TOWN_NUMBER, ti->start_x, ti->start_y, 2);
+	D.town = true;
+	D.town_seen = false;
+	return true;
+}
+
+bool director_in_town(void) { return D.active && D.town; }
+
+/* In the town: nothing to watch but the jack-in, whose arrival on the
+ * layer's map starts the run as a layer's warp does. */
+static void town_update(void) {
+	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
+	if (group == TOWN_GROUP && number == TOWN_NUMBER) D.town_seen = true;
+	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP + 0x10) == 0 &&
+		emu_read8(BN6_GAMESTATE + 4) == D.group && emu_read8(BN6_GAMESTATE + 5) == D.number;
+	if (!arrived) return;
+	D.town = false;
+	D.frame = 0;
+	D.checkpoint = true;
+	lock_run();
+	mapslot_music_forget_town();
+}
+
 bool director_start_layer(void) {
+	D.town = false;
 	if (!build_layer()) return false;
 	lock_run();
 	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
@@ -189,6 +234,8 @@ bool director_start_layer(void) {
 /* ---- dev tools (src/dev/devtools.c) ---- */
 
 bool director_on_map(void) { return D.active && on_map(); }
+
+void director_stop(void) { D.active = false; }
 
 bool director_dev_next_layer(void) {
 	if (!director_on_map()) return false;
@@ -330,6 +377,7 @@ static void end_run(void) {
 
 void director_update(void) {
 	if (!D.active) return;
+	if (D.town) { town_update(); return; }
 	++D.frame;
 	++D.act_frames;
 	/* MegaMan deleted: the game plays its GAME OVER, then the run ends */

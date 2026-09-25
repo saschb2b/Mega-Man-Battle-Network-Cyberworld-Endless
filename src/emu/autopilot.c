@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "net.h"
 #include "netmap.h"
+#include "town.h"
 
 bool autopilot_on(void) { return getenv("CYBERWORLD_AUTOPILOT") != NULL; }
 
@@ -123,11 +124,19 @@ uint32_t autopilot_keys(void) {
 	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	int cx, cy, ex, ey, nx, ny;
-	bool talk;
-	if (!netmap_panel(px, py, &cx, &cy) || !director_goal_panel(&ex, &ey, &talk)) return 0;
-	if (cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || !next_panel(cx, cy, ex, ey, &nx, &ny)) { nx = ex; ny = ey; }
+	bool talk = false;
 	int wx, wy;
-	netmap_world(nx, ny, &wx, &wy);
+	if (director_in_town()) {
+		/* in the town: to the port's south-east side, then R to jack in */
+		const TownInfo *ti = town_info();
+		wx = ti->port_x;
+		wy = ti->port_y + 16;
+		if (abs(px - wx) + abs(py - wy) < 6) return frame % 16 < 2 ? KEY_R : 0;
+	} else {
+		if (!netmap_panel(px, py, &cx, &cy) || !director_goal_panel(&ex, &ey, &talk)) return 0;
+		if (cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || !next_panel(cx, cy, ex, ey, &nx, &ny)) { nx = ex; ny = ey; }
+		netmap_world(nx, ny, &wx, &wy);
+	}
 	/* the pad direction whose world motion best follows the path (UP moves
 	 * +X -Y, RIGHT +X +Y, DOWN -X +Y, LEFT -X -Y; diagonals one axis) */
 	static const struct { int x, y; uint32_t k; } dirs[8] = {

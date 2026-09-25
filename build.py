@@ -36,6 +36,12 @@ glibc runs on more distributions.
                                 the README, into docs/screenshots
   python3 build.py clips [NAMES] short videos of the game for the site
                                 (WebM, MP4 and a poster), into docs/clips
+  python3 build.py town [SEEDS] the run's town drawn for a few seeds, and
+                                the game shown around it, in .build/town
+                                (docs/OVERWORLD.md)
+  python3 build.py world        the real world's original maps drawn with
+                                their walls and triggers, and the game
+                                warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
   python3 build.py package      assemble build/port/ for PortMaster
 """
@@ -72,7 +78,7 @@ def docker(*cmd, mounts=(), image=IMAGE):
     args += ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
     for host, guest in mounts:
         args += ['-v', f'{host}:{guest}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_AUTOPILOT'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -386,6 +392,75 @@ BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
 TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10}
 
 
+def bmp_sheet(paths, out, cols=3):
+    """The game's frames (240 x 160 in the middle of each capture) in a sheet."""
+    from PIL import Image
+    if not paths:
+        return
+    rows = (len(paths) + cols - 1) // cols
+    sheet = Image.new('RGB', (cols * 480, rows * 320))
+    for i, path in enumerate(paths):
+        im = Image.open(path).convert('RGB')
+        w, h = im.size
+        im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)).resize((480, 320), Image.NEAREST)
+        sheet.paste(im, ((i % cols) * 480, (i // cols) * 320))
+        os.remove(path)
+    sheet.save(out)
+
+
+def town(seeds='4'):
+    """The town for a few seeds, drawn; then the game around the first one."""
+    import glob
+    from PIL import Image
+    out = os.path.join(ROOT, '.build', 'town')
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    rom_dir = default_rom_dir()
+    code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                  '--atlas', f'/src/.build/town:town:{seeds}', mounts=[(rom_dir, '/rom:ro')])
+    if code:
+        return code
+    for path in sorted(glob.glob(os.path.join(out, 'town_s*.bmp'))):
+        im = Image.open(path).convert('RGB')
+        im.crop(im.getbbox()).save(path[:-4] + '.png')
+        os.remove(path)
+    code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                  '--tour', '/src/.build/town:town', '--seed', '1', '--frames', '3000', mounts=[(rom_dir, '/rom:ro')])
+    bmp_sheet(sorted(glob.glob(os.path.join(out, 'town_[0-9].bmp'))), os.path.join(out, 'tour.png'))
+    print('the town in .build/town: town_sNN.png per seed (red: tiles without a match), tour.png in the game')
+    return code
+
+
+def world():
+    """The real world's original maps, drawn and toured."""
+    import collections
+    import glob
+    import re
+    from PIL import Image
+    out = os.path.join(ROOT, '.build', 'world')
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    rom_dir = default_rom_dir()
+    code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                  '--atlas', '/src/.build/world:world', mounts=[(rom_dir, '/rom:ro')])
+    if code:
+        return code
+    for path in glob.glob(os.path.join(out, 'world_*.bmp')):
+        im = Image.open(path).convert('RGB')
+        im.save(path[:-4] + '.png')
+        os.remove(path)
+    code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                  '--tour', '/src/.build/world:world', '--seed', '5', '--frames', '60000', mounts=[(rom_dir, '/rom:ro')])
+    maps = collections.defaultdict(list)
+    for path in sorted(glob.glob(os.path.join(out, 'world_*_*_*.bmp'))):
+        m = re.match(r'world_(\w\w)_(\d+)_\d+\.bmp', os.path.basename(path))
+        maps[(m[1], int(m[2]))].append(path)
+    for (g, n), paths in maps.items():
+        bmp_sheet(paths, os.path.join(out, f'tour_{g}_{n}.png'), cols=6)
+    print('the real world in .build/world: world_GG_N.png drawn, _coords marked, tour_GG_N.png in the game')
+    return code
+
+
 def atlas_metrics(report):
     """Per layer (biome, layout, depth, seed): its near and fallback shares, seams and inexact panels."""
     import re
@@ -596,7 +671,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots', 'clips'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -651,6 +726,12 @@ def main():
         os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
         sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
                         '--pacing', '/src/.build/pacing.txt', mounts=[(rom_dir, '/rom:ro')]))
+    if a.action == 'town':
+        build('host')
+        sys.exit(town(*a.rest[:1]))
+    if a.action == 'world':
+        build('host')
+        sys.exit(world())
     if a.action == 'atlas':
         build('host')
         rest = [r for r in a.rest if r != '--baseline']

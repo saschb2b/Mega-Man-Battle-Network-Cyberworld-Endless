@@ -6,6 +6,10 @@
 
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
 bool director_start_layer(void);
+/* A new run: Lan in the town, the first layer built for the port's jack-in. */
+bool director_start_run(void);
+/* Lan is still in the town. */
+bool director_in_town(void);
 /* Rebuilds the saved run's layer and restores the game at its checkpoint. */
 bool director_resume(void);
 /* Once a frame, after the game's frame: exits and encounters. */
@@ -20,6 +24,8 @@ bool director_on_map(void);
 bool director_dev_next_layer(void);
 bool director_dev_guardian(void);
 bool director_dev_warp_cell(int x, int y);
+/* The director lets go of the game (the real world's tour). */
+void director_stop(void);
 /* Test hook (--net-biome): every layer in this biome. */
 extern int director_debug_biome;
 

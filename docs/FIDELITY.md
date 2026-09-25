@@ -10,6 +10,8 @@ use.
 | Title screen | Original logo and backgrounds, generated mark and subtitle | The logo (emblem, MEGAMAN, BATTLE NETWORK) cut from the game's title picture, copyright, PRESS START, NEW GAME / CONTINUE, cursor and sounds are the game's (`docs/ROM_DATA.md`). The infinity mark in the 6's place and the CYBERWORLD ENDLESS subtitle are drawn by the engine in the 6's and the plate's palette colours; behind them the battle backgrounds of the run's areas take turns, with the game's animations and scroll. The best depth and the saved run's depth are drawn text |
 | Start gift | Original items, engine script | A Mr. Prog on the first layer offers two HPMemory, a chip or a NaviCust program through the game's own give commands and option menu |
 | Run summary | Adapted | Drawn text over the darkened battle background of the area where MegaMan was deleted, after the game's GAME OVER |
+| The town | Generated ground, original tiles, objects and people | A square planned per run in Central Town's materials and drawn with its own tiles, picked by the materials under them and copied from the source in runs (docs/OVERWORLD.md); about one tile in a hundred, at corners, has no exact match. Trees are the game's tree objects, the townsfolk its NPC sprites with lines written by the engine, the port its kiosk sprite, the music Central Town's |
+| Jacking in | Original | The game's jack-in (Lan's line, the transmission, MegaMan's arrival) to one of its jack-in destinations, pointed at the first layer |
 | Net movement, collision, camera, HUD | Original | The game's overworld code on generated maps |
 | Net floors | Generated | Tiles learned from one original map per area, platforms and walkways in its two floors, each checked against where the floor and its side faces are drawn and, inside the floor, against the area's usual panels; a few inner corners the original never shows still take the nearest shape |
 | Net walls | Generated | Wall cells in the game's coordinate-data format, shapes as the original maps use them |
@@ -24,6 +26,10 @@ use.
 | Screen | Adapted | 240x160 at a whole-number scale with black borders |
 
 ## Known gaps
+
+- The town is one square in one style; its north-west edge's planting
+  strip comes from Central Town's mirror image (the lit side of its curb
+  is the other one). No houses stand on it yet.
 
 - Area names show the padding the ROM stores before shorter names (`0xB2`,
   drawn as `_`); the game's own code draws them.

@@ -120,6 +120,11 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 
 ### A run
 
+A run begins in town. Lan stands on a square in the style of BN6's Central
+Town, with trees, planters and a few people to talk to; the public jack-in
+port stands on the brick plaza. Walk up to it and press R: Lan jacks
+MegaMan in, and the net begins. The town is a new one every run.
+
 Each layer is a new layout of platforms and walkways in the style of one of
 the game's areas. Find the exit pad to go one layer deeper. On the way, the
 game's own random battles come up, with the viruses of that area. How hard

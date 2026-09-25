@@ -388,11 +388,15 @@ int main(int argc, char **argv) {
 			sscanf(sheet_spec + 1, "%i:%i:%i:%255s", &cat, &first, &count, out);
 			platform_begin_frame();
 			fill_rect(0, 0, P.w, P.h, rgba(96, 96, 96, 255));
+			/* 32 x 48 cells, or 96 x 128 when the canvas is wide enough to
+			 * show the big overworld objects whole (--size 479xH) */
+			int cw = P.w >= 384 ? 96 : 32, ch = P.w >= 384 ? 128 : 48, cols = P.w / cw;
 			for (int i = 0; i < count; ++i) {
-				int cx = (i % 8) * 32, cy = (i / 8) * 48;
+				int cx = (i % cols) * cw, cy = (i / cols) * ch;
 				Sprite *spr = sprite_get(cat, first + i);
-				fill_rect(cx + 1, cy + 1, 30, 46, rgba(40, 40, 60, 255));
-				if (spr) sprite_draw_frame(spr, 0, 0, cx + 16, cy + 40, false, 0, 0);
+				fill_rect(cx + 1, cy + 1, cw - 2, ch - 2, rgba(40, 40, 60, 255));
+				if (spr) sprite_draw_frame(spr, 0, 0, cx + cw / 2, cy + ch - 8, false, 0, 0);
+				if (cw > 32 && R.data) text_drawf(cx + 2, cy + 1, WHITE, TEXT_LEFT, "%x", first + i);
 			}
 			platform_save_canvas(out);
 			platform_shutdown();
@@ -419,8 +423,11 @@ int main(int argc, char **argv) {
 			return 0;
 		}
 		audio_init();
-		const Scene *s = scene_by_name(start_scene);
+		/* "town": a new run from the town, as NEW GAME starts one */
+		bool town = !strcmp(start_scene, "town");
+		const Scene *s = town ? &scene_emu : scene_by_name(start_scene);
 		if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
+		if (town) emu_start_in_town = true;
 		scene_set(s ? s : &scene_title);
 	}
 

@@ -4,6 +4,7 @@
  * own tiles and colours, with its objects marked; a report line per layer
  * says how the tile picks went. */
 #include "atlas.h"
+#include "town.h"
 
 #include <SDL.h>
 #include <stdio.h>
@@ -123,12 +124,72 @@ static void sources(const char *dir, int biome) {
 	}
 }
 
+/* The real world's maps (groups 0x00-0x06) as the game draws them, and
+ * again with their coordinate data marked: walls red, raised floor blue,
+ * triggers yellow. */
+static void world_sources(const char *dir) {
+	static const int counts[7] = { 2, 5, 11, 5, 5, 4, 5 };
+	for (int g = 0; g < 7; ++g)
+		for (int n = 0; n < counts[g]; ++n) {
+			AreaSrc a;
+			if (!area_src_load(g, n, &a)) { printf("world %02x:%d: no map\n", g, n); continue; }
+			int W = a.tw * 8, H = a.th * 8;
+			for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+			char path[600];
+			snprintf(path, sizeof path, "%s/world_%02x_%d.bmp", dir, g, n);
+			save_bmp(path, a.px, W, H);
+			static const uint32_t mark[4] = { 0xFFFF3030u, 0xFF3070FFu, 0xFF30FF30u, 0xFFFFE020u };
+			for (int s = 0; s < 4; ++s)
+				for (int i = 0; i < a.nsec[s]; ++i) {
+					const CoordCell *c = &a.sec[s][i];
+					int x = area_px(a.tw, c->x + 4, c->y + 4), y = area_py(a.th, c->x + 4, c->y + 4) - (c->z > 0 ? c->z : 0);
+					if (s == 2) continue;
+					dot(a.px, W, H, x, y, s == 3 ? 2 : 1, mark[s]);
+				}
+			snprintf(path, sizeof path, "%s/world_%02x_%d_coords.bmp", dir, g, n);
+			save_bmp(path, a.px, W, H);
+			printf("world %02x:%d: %dx%d tiles, %d layers, walls %d, heights %d, priority %d, triggers %d\n", g, n, a.tw, a.th,
+				a.layers, a.nsec[0], a.nsec[1], a.nsec[2], a.nsec[3]);
+			area_src_free(&a);
+		}
+}
+
+/* The town (src/world/town.c) for a few seeds, drawn with Central Town's
+ * tiles; tiles no source tile matched are marked red. */
+static void towns(const char *dir, int seeds) {
+	for (int s = 1; s <= seeds; ++s) {
+		if (!town_plan((uint32_t)s)) { printf("town seed %d: not planned\n", s); continue; }
+		int W, H;
+		uint32_t *px = town_render(&W, &H);
+		if (!px) continue;
+		const TownInfo *ti = town_info();
+		const uint8_t *miss = town_misses();
+		for (int i = 0; i < W * H; ++i) if (!(px[i] >> 24)) px[i] = 0xFF5AFFEFu;
+		for (int ty = 0; ty < ti->th; ++ty)
+			for (int tx = 0; tx < ti->tw; ++tx)
+				if (miss[ty * ti->tw + tx] & 1)
+					for (int k = 0; k < 8; ++k) { px[(ty * 8) * W + tx * 8 + k] = 0xFFFF0000u; px[(ty * 8 + k) * W + tx * 8] = 0xFFFF0000u; }
+				else if ((miss[ty * ti->tw + tx] & 2) && getenv("CYBERWORLD_TOWN_DEBUG"))
+					for (int k = 0; k < 8; ++k) px[(ty * 8 + k) * W + tx * 8 + k] = 0xFF0000FFu;
+		int sx = area_px(ti->tw, ti->start_x, ti->start_y), sy = area_py(ti->th, ti->start_x, ti->start_y);
+		dot(px, W, H, sx, sy, 3, 0xFF3080FFu);
+		dot(px, W, H, area_px(ti->tw, ti->port_x, ti->port_y), area_py(ti->th, ti->port_x, ti->port_y), 3, 0xFF30FF30u);
+		char path[600];
+		snprintf(path, sizeof path, "%s/town_s%02d.bmp", dir, s);
+		save_bmp(path, px, W, H);
+		free(px);
+		printf("town seed %d: %dx%d tiles, %d picks, %d misses\n", s, ti->tw, ti->th, ti->picks, ti->misses);
+	}
+}
+
 int atlas_run(const char *spec) {
 	/* DIR[:BIOMES[:SEEDS]]: BIOMES "all" or a comma list, SEEDS per layout */
 	char dir[512] = ".build/atlas", biomes[256] = "all";
 	int seeds = 1;
 	sscanf(spec, "%511[^:]:%255[^:]:%d", dir, biomes, &seeds);
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "atlas: no core\n"); return 1; }
+	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
+	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	bool want[BIOME_COUNT] = { false };
 	if (!strcmp(biomes, "all")) for (int b = 0; b < BIOME_COUNT; ++b) want[b] = true;
 	else for (char *t = strtok(biomes, ","); t; t = strtok(NULL, ",")) { int b = atoi(t); if (b >= 0 && b < BIOME_COUNT) want[b] = true; }
