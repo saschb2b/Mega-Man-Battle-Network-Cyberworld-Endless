@@ -548,7 +548,8 @@ int main(int argc, char **argv) {
 			s = &scene_title;
 		}
 		if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
-		if (!s || s == &scene_title) title_seed = seed;
+		/* (later NEW GAMEs take the next seeds, so a session replays) */
+		title_seed = !seed ? 0 : !s || s == &scene_title ? seed : seed + 1;
 		if (town) emu_start_in_town = true;
 		scene_set(s ? s : &scene_title);
 	}

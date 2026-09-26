@@ -47,12 +47,45 @@ static bool cell_free(int x, int y) {
 	return true;
 }
 
-/* A free cell inside a room, off its middle so paths stay clear. */
+/* Whether a solid object at (x, y) would cut the floor: MegaMan cannot pass
+ * a navi or a Mystery Data (their radius keeps him about half a panel off),
+ * so with the cell blocked, and the cells of the solid objects already
+ * placed, every other floor cell must still be reached from the arrival. */
+static bool cuts_way(int x, int y) {
+	static uint8_t blocked[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	if (!layer.nobj) return false;
+	memset(blocked, 0, sizeof blocked);
+	int open = 0;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].solid) blocked[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
+	blocked[y][x] = 1;
+	for (int cy = 0; cy < MAP_H; ++cy)
+		for (int cx = 0; cx < MAP_W; ++cx) open += layer.cell[cy][cx] == C_PATH && !blocked[cy][cx];
+	int sx = (int)layer.obj[0].x, sy = (int)layer.obj[0].y, h = 0, t = 0;
+	if (blocked[sy][sx]) return true;
+	blocked[sy][sx] = 2;
+	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
+	while (h < t) {
+		int cx = qx[h], cy = qy[h++];
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = cx + d[k][0], ny = cy + d[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || blocked[ny][nx] || layer.cell[ny][nx] != C_PATH) continue;
+			blocked[ny][nx] = 2;
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	return t < open;
+}
+
+/* A free cell inside a room, off its middle so paths stay clear, where a
+ * solid object cuts no way. */
 static bool room_spot(const Room *r, int *ox, int *oy) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if (tries < 30 && x == r->ax && y == r->ay) continue;
-		if (cell_free(x, y)) { *ox = x; *oy = y; return true; }
+		if (cell_free(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;
 }
@@ -262,7 +295,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	for (int k = 0; k < md; ++k) {
 		bool got = false;
 		if (rng_range(0, 99) < 70)
-			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y); }
+			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !cuts_way(x, y); }
 		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
 		if (!got) continue;
 		NetObj *o = add_obj(OBJ_MYSTERY, x, y);

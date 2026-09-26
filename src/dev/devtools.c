@@ -21,7 +21,7 @@
 #include "run.h"
 #include "text.h"
 
-DevFlags dev = { false, false, false, 1 };
+DevFlags dev = { false, false, false, false, 1 };
 char devtools_shot[512];
 
 enum { I_GOD, I_ONEHIT, I_QUIET, I_SPEED, I_WIN, I_HEAL, I_ZENNY, I_NEXT, I_GUARDIAN, I_AREA, I_COUNT };
@@ -41,6 +41,7 @@ void devtools_parse(const char *spec) {
 		if (!strcmp(t, "god")) dev.god = true;
 		else if (!strcmp(t, "onehit")) dev.onehit = true;
 		else if (!strcmp(t, "quiet")) dev.quiet = true;
+		else if (!strcmp(t, "fragile")) dev.fragile = true;
 		else if (!strncmp(t, "speed=", 6)) dev.speed = atoi(t + 6);
 	}
 	if (dev.speed < 1) dev.speed = 1;
@@ -155,6 +156,7 @@ void devtools_update(void) {
 		battle_hp(0, -1, true);
 	}
 	if (dev.onehit) battle_hp(1, 1, false);
+	if (dev.fragile) battle_hp(0, 1, false);
 }
 
 static void line(int x, int y, bool sel, const char *label, const char *value) {

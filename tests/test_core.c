@@ -122,6 +122,23 @@ static void test_generation(void) {
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cells += layer.cell[y][x] == C_PATH;
 		int reach = reachable_cells((int)start->x, (int)start->y, seen);
 		CHECK(reach == cells, "seed %u: %d of %d walkable cells reachable", seed, reach, cells);
+		/* ... and with the solid objects (navis, Mystery Data, services)
+		 * standing in the way, every other cell still; the guardian keeps
+		 * its arena until beaten, so it does not count */
+		{
+			static uint8_t save[MAP_H][MAP_W];
+			memcpy(save, layer.cell, sizeof save);
+			int blocked = 0;
+			for (int i = 1; i < layer.nobj; ++i) {
+				const NetObj *o = &layer.obj[i];
+				if (!o->solid || o->type == OBJ_BOSS) continue;
+				layer.cell[(int)o->y][(int)o->x] = C_VOID;
+				++blocked;
+			}
+			int open = reachable_cells((int)start->x, (int)start->y, seen);
+			CHECK(open == cells - blocked, "seed %u: objects cut the way (%d of %d cells)", seed, open, cells - blocked);
+			memcpy(layer.cell, save, sizeof save);
+		}
 		bool has_exit = false;
 		for (int i = 0; i < layer.nobj; ++i) {
 			NetObj *o = &layer.obj[i];

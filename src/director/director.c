@@ -359,9 +359,19 @@ void director_describe(FILE *f) {
 		(unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
-		fprintf(f, "pos %d %d %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16,
-			(int)emu_read32(BN6_PLAYER + 0x24) >> 16);
-		if (D.town) town_objects(print_near, f);
+		fprintf(f, "pos %d %d %d locked %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16,
+			(int)emu_read32(BN6_PLAYER + 0x24) >> 16, emu_read8(BN6_PLAYER + 0x17));
+		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
+		else fprintf(f, "exit %d %d\n", D.objs.exit_x, D.objs.exit_y);
+		/* the game's NPC objects near him: flags, state, radius, lock, text */
+		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		for (int i = 0; i < 16; ++i) {
+			uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
+			int x = (int16_t)emu_read16(o + 0x26), y = (int16_t)emu_read16(o + 0x2A), z = (int16_t)emu_read16(o + 0x2E);
+			if (!(emu_read8(o) & 1) || abs(x - px) > 64 || abs(y - py) > 64) continue;
+			fprintf(f, "npc %d flags %02x state %02x radius %d zreach %d locked %d text %d at %d %d %d\n", i, emu_read8(o),
+				emu_read8(o + 8), emu_read8(o + 0x0C), emu_read8(o + 0x0D), emu_read8(o + 0x17), emu_read8(o + 0x1C), x, y, z);
+		}
 	}
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);

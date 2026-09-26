@@ -7,6 +7,7 @@
 #include "bn6.h"
 #include "cinema.h"
 #include "emu.h"
+#include "flags.h"
 #include "gamecall.h"
 #include "text.h"
 
@@ -18,7 +19,18 @@ static struct {
 	int t;
 } K;
 
+/* The player held for the talk as the game holds him for a dialogue no NPC
+ * starts (bn6f owPlayer_lockPlayerForNonNPCDialogue_809E0B0 and its unlock):
+ * else the A that pages the text also talks to an NPC he faces, whose chat
+ * takes over the box and leaves the NPC unable to talk again. */
+static void hold(bool on) {
+	emu_write8(BN6_DIALOGUE_LOCK, on ? 1 : 0);
+	if (on) { flag_set(BN6_FLAG_DIALOGUE_1718); flag_clear(BN6_FLAG_PLAYER_CAN_MOVE); }
+	else { flag_set(BN6_FLAG_PLAYER_CAN_MOVE); flag_clear(BN6_FLAG_DIALOGUE_1719); }
+}
+
 static void begin(uint32_t archive, int script) {
+	hold(true);
 	game_call(BN6_CHAT_RUN_SCRIPT, archive, (uint32_t)script);
 	cinema_input(CINEMA_TALK);
 	K.running = true;
@@ -52,6 +64,7 @@ void talk_update(void) {
 	/* read to its end (or never shown: a minute on, the keys come back) */
 	if ((K.seen && !open) || ++K.t > 60 * 60) {
 		K.running = false;
+		hold(false);
 		/* (unless a guardian's staging has taken the keys meanwhile) */
 		if (cinema_input_mode() == CINEMA_TALK) cinema_input(CINEMA_FREE);
 	}
@@ -61,5 +74,6 @@ bool talk_busy(void) { return K.running; }
 
 void talk_reset(void) {
 	if (K.running && cinema_input_mode() == CINEMA_TALK) cinema_input(CINEMA_FREE);
+	if (K.running) hold(false);
 	K.running = false;
 }

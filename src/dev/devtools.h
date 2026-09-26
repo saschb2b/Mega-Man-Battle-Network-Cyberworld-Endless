@@ -11,6 +11,7 @@ typedef struct {
 	bool god;       /* MegaMan's HP stays full, in battle and out */
 	bool onehit;    /* enemies keep 1 HP: one hit deletes them */
 	bool quiet;     /* no random battles */
+	bool fragile;   /* MegaMan keeps 1 HP in battle: the run ends at the first hit */
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
 } DevFlags;
 
