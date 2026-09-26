@@ -32,8 +32,8 @@ use.
   doors lead nowhere (a check says why), and most of its people stand
   still.
 
-- Area names show the padding the ROM stores before shorter names (`0xB2`,
-  drawn as `_`); the game's own code draws them.
+- The game's map-name label at the bottom right shows where the run is
+  ("Layer 12", "Undernet", "ACDC Town") in the game's own font and box.
 - Only Sky and Undernet layers raise rooms: their maps are the only ones
   with a stair two panels square. Raised rooms are one level high and
   never overlap other floor on screen, so layer priorities (section 2) are

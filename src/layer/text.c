@@ -24,6 +24,12 @@ static int code_of(char c) {
 	}
 }
 
+int ta_encode(const char *s, uint8_t *out, int max) {
+	int n = 0;
+	for (; *s && n < max; ++s) out[n++] = (uint8_t)code_of(*s);
+	return n;
+}
+
 void ta_begin(TextArchive *t) { t->len = 0; t->n = 0; t->full = false; }
 
 int ta_script(TextArchive *t) {

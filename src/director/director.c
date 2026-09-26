@@ -88,6 +88,34 @@ static void begin_area(bool new_act) {
 	D.act_resumed = false;
 }
 
+/* The label the game keeps at the map's bottom right: its own name for the
+ * original map ("AquarumComp3") gave way to where the run is. The game's
+ * label routine is pointed at an archive of ours whose every name is it. */
+#define LABEL_AT    (EMU_FREE + 0x152000)
+#define LABEL_NAMES 244
+
+static void map_label(void) {
+	static char last[16];
+	char name[16];
+	if (D.town) snprintf(name, sizeof name, "%s", town_info()->group == 0x00 ? "ACDC Town" : "Central Town");
+	else if (run.side_kind == LAYER_UNDERNET) snprintf(name, sizeof name, "Undernet");
+	else if (run.side_kind == LAYER_SECRET) snprintf(name, sizeof name, "Secret Area");
+	else if (run.biome == BIOME_NEST) snprintf(name, sizeof name, "Cybeast Nest");
+	else snprintf(name, sizeof name, "Layer %d", run.depth);
+	if (!strcmp(name, last) && emu_read32(BN6_MAP_NAMES_PTR) == LABEL_AT) return;
+	snprintf(last, sizeof last, "%s", name);
+	uint8_t a[LABEL_NAMES * 2 + 13];
+	for (int i = 0; i < LABEL_NAMES; ++i) { a[2 * i] = (uint8_t)(LABEL_NAMES * 2); a[2 * i + 1] = (uint8_t)(LABEL_NAMES * 2 >> 8); }
+	/* twelve characters, right-aligned with spaces (the game pads its own
+	 * with underscores, which show) */
+	char padded[20];
+	snprintf(padded, sizeof padded, "%12.12s", name);
+	ta_encode(padded, a + LABEL_NAMES * 2, 12);
+	a[LABEL_NAMES * 2 + 12] = 0xE6;
+	emu_write(LABEL_AT, a, sizeof a);
+	emu_write32(BN6_MAP_NAMES_PTR, LABEL_AT);
+}
+
 /* The net's version: the Nest rebuilds it, one stronger, each time its
  * guardian falls (1 for the first cycle). */
 static int net_version(void) { return (run.depth - 1) / CYCLE_LAYERS + 1; }
@@ -333,6 +361,7 @@ uint32_t director_keys(uint32_t keys) {
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
 static void town_update(void) {
+	map_label();
 	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
 	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
 	talk_update();
@@ -568,6 +597,7 @@ void director_update(void) {
 		return;
 	}
 	if (follow_exit_warp()) return;
+	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

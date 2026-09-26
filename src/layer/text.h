@@ -17,6 +17,8 @@ typedef struct {
 } TextArchive;
 
 void ta_begin(TextArchive *t);
+/* `s` in the game's charmap, at most `max` bytes; returns how many. */
+int ta_encode(const char *s, uint8_t *out, int max);
 /* Starts the next script; returns its index. */
 int ta_script(TextArchive *t);
 void ta_bytes(TextArchive *t, const uint8_t *b, int n);

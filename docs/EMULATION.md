@@ -32,6 +32,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
+| `+0x152000`-`+0x152200` | The map-name label's archive: 244 names, each where the run is ("Layer 12", "ACDC Town") | `director.c` |
 
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,
