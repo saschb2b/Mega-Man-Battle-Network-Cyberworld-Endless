@@ -22,6 +22,8 @@ extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool title_summary;          /* the title opens on the finished run's summary */
+extern char title_cause[48];        /* ... where MegaMan was deleted ("DiveMan in Sky HP") */
+extern bool title_new_best;         /* ... deeper than any run before */
 
 
 void error_show(const char *msg);

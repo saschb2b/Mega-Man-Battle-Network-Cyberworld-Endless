@@ -2,26 +2,46 @@
  * docs/ROM_DATA.md). */
 #include "powers.h"
 
-#include <stddef.h>
+#include <stdio.h>
 
 #include "bn6.h"
 #include "flags.h"
+#include "net.h"
 #include "run.h"
 
-/* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5 */
-static const struct { int navi, flag; const char *text; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "MegaMan got\nHeatCross!" },
-	{ 2, BN6_FLAG_ELEC_CROSS, "MegaMan got\nElecCross!" },
-	{ 3, BN6_FLAG_SLASH_CROSS, "MegaMan got\nSlashCross!" },
-	{ 4, BN6_FLAG_ERASE_CROSS, "MegaMan got\nEraseCross!" },
-	{ 5, BN6_FLAG_CHARGE_CROSS, "MegaMan got\nChargeCross!" },
+/* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, and what
+ * MegaMan feels of each */
+static const struct { int navi, flag; const char *name, *feel; } crosses[] = {
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!" },
+	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!" },
+	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!" },
+	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power." },
+	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!" },
 };
 
-const char *powers_reward_text(int navi, int biome) {
-	if (biome == BIOME_GRAVEYARD) return "The Cybeast stirs.\nMegaMan can\nBeast Out!";
+/* Whether the run has beaten `navi` as an earlier act's guardian (its
+ * Cross is MegaMan's already). */
+static bool beaten_before(int navi, int depth) {
+	for (int d = 1; d < depth; ++d)
+		if (is_boss_depth(d) && run.boss_order[biome_for_depth(d)] == navi) return true;
+	return false;
+}
+
+const char *powers_reward_text(int navi, int biome, int depth) {
+	static char text[512];
+	int k = 0;
+	#define ADD(...) (k += snprintf(text + k, k < (int)sizeof text ? sizeof text - (size_t)k : 0, __VA_ARGS__))
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == navi) return crosses[i].text;
-	return NULL;
+		if (crosses[i].navi == navi && !beaten_before(navi, depth))
+			ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", crosses[i].name, crosses[i].feel);
+	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
+	 * MegaMan, and Dad lets him use it (once a run) */
+	if (biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS)
+		ADD("%s@B Grrrr...!|@M Lan... The Nest is calling to the Cybeast inside me!|"
+			"@D Lan, it's Dad! I'm unlocking the Cybeast Button in your PET.|"
+			"@D BeastOut is strong, but don't let the beast take over!|@N MegaMan can now BeastOut!", k ? "|" : "");
+	#undef ADD
+	return k ? text : NULL;
 }
 
 void powers_after_boss(int navi, int biome) {

@@ -24,6 +24,8 @@
 #define LEAVE_WHITE 24   /* jacking in: the net rushes by into white... */
 #define LEAVE_FRAMES 40  /* ...which fades to black */
 #define SUMMARY_MIN 60   /* frames before the summary can be closed */
+#define SUMMARY_FACE_X 30   /* Lan's face on it */
+#define SUMMARY_FACE_Y 66
 #define SHOW_FRAMES 600  /* each backdrop's turn */
 #define SWAP_FRAMES 12   /* mosaic out and in between them */
 
@@ -37,6 +39,8 @@ static const uint8_t cycle[] = { 0x09, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 
 #define NCYCLE (int)(sizeof cycle / sizeof *cycle)
 
 bool title_summary;
+char title_cause[48];
+bool title_new_best;
 
 static struct {
 	int t, pressed, menu, leaving, cursor, choice;
@@ -348,16 +352,33 @@ static void draw(void) {
 	for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
 
 	if (S.summary) {
-		int x = x0 + CORE_W / 2, y = y0 + 24;
-		text_draw(x, y, "MegaMan was deleted", rgba(255, 120, 120, 255), TEXT_CENTER);
-		text_drawf(x, y + 24, WHITE, TEXT_CENTER, "Reached B%d", run.depth);
-		text_drawf(x, y + 40, WHITE, TEXT_CENTER, "Viruses deleted  %d", run.viruses_deleted);
-		text_drawf(x, y + 56, WHITE, TEXT_CENTER, "Navis deleted  %d", run.bosses_beaten);
-		text_drawf(x, y + 80, rgba(255, 230, 90, 255), TEXT_CENTER, "Best  B%d", profile.best_depth);
+		SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255);
+		int x = x0 + CORE_W / 2;
+		text_draw(x, y0 + 8, "MegaMan was deleted", rgba(255, 120, 120, 255), TEXT_CENTER);
+		if (title_cause[0]) text_draw(x, y0 + 22, title_cause, sky, TEXT_CENTER);
+		/* Lan at his PET, and how far they got */
+		Sprite *lan = sprite_get(SPR_MUGSHOT, 0x00);
+		if (lan) sprite_draw_frame(lan, 0, 0, x0 + SUMMARY_FACE_X, y0 + SUMMARY_FACE_Y, false, 0, 0);
+		int lx = x0 + 70, rx = x0 + CORE_W - 14;
+		text_draw(lx, y0 + 44, "Reached", WHITE, TEXT_LEFT);
+		text_drawf(rx, y0 + 44, WHITE, TEXT_RIGHT, "Layer %d", run.depth);
+		text_draw(lx, y0 + 58, "Viruses deleted", WHITE, TEXT_LEFT);
+		text_drawf(rx, y0 + 58, WHITE, TEXT_RIGHT, "%d", run.viruses_deleted);
+		text_draw(lx, y0 + 72, "Navis deleted", WHITE, TEXT_LEFT);
+		text_drawf(rx, y0 + 72, WHITE, TEXT_RIGHT, "%d", run.bosses_beaten);
+		if (title_new_best) text_draw(lx, y0 + 88, "New best!", gold, TEXT_LEFT);
+		else {
+			text_draw(lx, y0 + 88, "Best", gold, TEXT_LEFT);
+			text_drawf(rx, y0 + 88, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
+		}
+		const char *said = title_new_best ? "Our deepest dive yet, MegaMan!"
+			: run.depth <= 3 ? "Let's jack in again, MegaMan!"
+			: "We'll get further next time!";
+		text_draw(x, y0 + 106, said, sky, TEXT_CENTER);
 		return;
 	}
 	if (profile.best_depth > 0)
-		text_drawf(x0 + CORE_W - 4, y0 + 2, rgba(255, 230, 90, 255), TEXT_RIGHT, "Best B%d", profile.best_depth);
+		text_drawf(x0 + CORE_W - 4, y0 + 2, rgba(255, 230, 90, 255), TEXT_RIGHT, "Best: Layer %d", profile.best_depth);
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */
@@ -377,7 +398,7 @@ static void draw(void) {
 			rom_tiles(text + (first + 16) * 32, T.menu_pal, x0 + 152, y, 2, 2, 0);
 		}
 		if (S.has_save && S.saved_depth)
-			text_drawf(x0 + 170, y0 + 130, WHITE, TEXT_LEFT, "B%d", S.saved_depth);
+			text_drawf(x0 + 170, y0 + 130, WHITE, TEXT_LEFT, "Layer %d", S.saved_depth);
 		/* the arrow cycles three frames, 6 frames each */
 		int f = ((S.t - S.menu) / 6) % 3;
 		rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);

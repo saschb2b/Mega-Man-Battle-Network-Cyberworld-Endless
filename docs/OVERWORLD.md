@@ -98,7 +98,11 @@ crossing and its landing stay at the corner of their block. Lan comes up
 the Metroline's stairs, and jacks in beside the squirrel statue or at the
 doghouse (the original's second point, made the first's).
 
-In both, the townsfolk stand where they belong, each saying something
+Once Lan is out, he and MegaMan talk over the PET: on the very first run
+Dad calls about the new net under the town, later runs have a word of
+their own (and, after the Nest has fallen, of the net rebuilding). In
+both, the townsfolk stand where they belong, each with their own face in
+the chat box and saying something
 about the place (the game's generic people, never its story's, each out
 one run in four; a Mr. Prog explains the jack-in), a few
 pace a sidewalk up and back as the game's own walkers do (NPC command

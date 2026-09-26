@@ -27,6 +27,7 @@ uint32_t cinema_keys(uint32_t keys);
 void cinema_on_map(bool on_map);
 
 void cinema_input(int mode);
+int cinema_input_mode(void);
 /* The keys MegaMan walks by this frame, in CINEMA_WALK. */
 void cinema_walk(uint32_t keys);
 void cinema_letterbox(bool on);

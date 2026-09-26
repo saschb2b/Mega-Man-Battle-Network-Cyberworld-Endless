@@ -110,7 +110,7 @@ static void title_card(void) {
 	static const char *const suffix[3] = { "", " EX", " SP" };
 	char name[40], top[48];
 	snprintf(name, sizeof name, "%s%s", gd->name, suffix[B.g.version < 0 || B.g.version > 2 ? 0 : B.g.version]);
-	snprintf(top, sizeof top, "Guardian of %s", guardian_area_name(layer.biome));
+	snprintf(top, sizeof top, "Guardian of %s", guardian_area_in_text(layer.biome, run.side_kind));
 	cinema_title(top, name, gd->epithet, rgba(gd->r, gd->g, gd->b, 255), 170);
 }
 
@@ -223,6 +223,10 @@ void boss_lost(void) {
 bool boss_exit_open(void) { return B.state == B_NONE || B.state >= B_OPEN; }
 
 bool boss_beaten(void) { return B.state >= B_AFTER; }
+
+bool boss_cinematic(void) { return B.state >= B_ENTER && B.state <= B_LOGOUT && B.state != B_FIGHT; }
+
+bool boss_done(void) { return B.state >= B_OPEN; }
 
 bool boss_goal(int *x, int *y, bool *talk) {
 	if (B.state == B_NONE || B.state >= B_OPEN) return false;

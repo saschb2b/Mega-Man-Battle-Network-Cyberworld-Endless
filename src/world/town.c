@@ -27,6 +27,7 @@
 #include "mapslot.h"
 #include "npc.h"
 #include "rom.h"
+#include "save.h"
 #include "text.h"
 #include "townmath.h"
 #include "townsrc.h"
@@ -277,19 +278,19 @@ static void design_central(void) {
 /* Its people: at the statue, the shop, the school gate, the bus stop, the
  * houses, the closed road to the Expo. */
 static const Folk central_folk[] = {
-	{ 108, -68, FACE_SW, 5, 0x36, "Isn't the bird statue\npretty?|Everybody meets up here\nbefore they jack in!" },
+	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear? The port by the bird statue opens into a brand new net!" },
 	{ 100, -52, 0, 7, 0x11, "Woof! Woof!" },   /* (the robot dog: one animation) */
-	{ 60, -96, FACE_SE, 7, 0x0F, "Stand in front of the\nstatue and press R to\njack in.|The net under this town\nnever ends, they say." },
-	{ 44, -20, FACE_NE, 5, 0x2E, "I heard the net runs\ndeeper every time you\njack in...|Must be my imagination." },
-	{ -172, -4, FACE_NW, 5, 0x2C, "Aster Land has the\nnewest chips!|I could look at them\nall day." },
-	{ -108, -36, FACE_NE, 5, 0x2B, "My dad parks here every\nSunday. Aster Land's the\nbest!" },
-	{ 130, 150, FACE_NE, 5, 0x2F, "The bus should be here\nany minute now..." },
-	{ 84, -180, FACE_SE, 5, 0x34, "The Cyber Academy's gate\nsure looks grand, huh?" },
-	{ -164, 196, FACE_NE, 5, 0x38, "Heading out, Lan?\nBe careful on the net!" },
-	{ 18, 290, FACE_SW, 5, 0x39, "The flowers on this\nstreet are something,\naren't they?" },
-	{ -146, -184, FACE_SE, 5, 0x3A, "The road to the Expo\nsite is closed today.|Such a shame. I wanted\nto see the pavilions." },
-	{ 132, 180, FACE_SE, 5, 0x2D, "Nothing beats a walk\nafter a long day at the\nlab.", 10 },
-	{ -12, -164, FACE_NE, 5, 0x28, "Do you go to the Cyber\nAcademy too?|I'm late for my\nNetBattle club!", 10 },
+	{ 60, -96, FACE_SE, 7, 0x0F, "I'M THE PLAZA'S PORT GUIDE PROGRAM!|STAND BEFORE THE STATUE AND PRESS R TO JACK IN!" },
+	{ 44, -20, FACE_NE, 5, 0x2E, "I jacked in there yesterday. Today the paths were all different!|It really does go on forever down there." },
+	{ -172, -4, FACE_NW, 5, 0x2C, "Aster Land just got new chips in! I could look at them all day." },
+	{ -108, -36, FACE_NE, 5, 0x2B, "My dad parks here every Sunday. Aster Land is the best!" },
+	{ 130, 150, FACE_NE, 5, 0x2F, "The bus should be here any minute now..." },
+	{ 84, -180, FACE_SE, 5, 0x34, "Hey, Lan! No class today...|Are you diving into the Endless Net too?" },
+	{ -164, 196, FACE_NE, 5, 0x38, "Heading out, Lan? Be careful on the net!" },
+	{ 18, 290, FACE_SW, 5, 0x39, "The flowers on this street are something, aren't they?" },
+	{ -146, -184, FACE_SE, 5, 0x3A, "The road to the Expo site is closed today.|Such a shame. I wanted to see the pavilions." },
+	{ 132, 180, FACE_SE, 5, 0x2D, "Nothing beats a walk after a long day at the lab.", 10 },
+	{ -12, -164, FACE_NE, 5, 0x28, "Do you go to the Cyber Academy too? I'm late for NetBattle club!", 10 },
 };
 
 /* What its checks (triggers 0xF0 + n, in front of each thing) say: the
@@ -297,19 +298,19 @@ static const Folk central_folk[] = {
  * bed, the bus stop, Aster Land's door, the Expo gates' signs and road, the
  * Academy's gate, the statue, Aster Land's window. */
 static const char *const central_checks[16] = {
-	"Home sweet home.|Mom said dinner's at six.\nPlenty of time to net\nbattle first!",
-	"A pink house. The\ncurtains are drawn.",
-	"Someone's watering the\nplants on the roof\nterrace.",
-	"Two gray houses side by\nside. It's quiet in there.",
-	"The flowers are in full\nbloom.",
-	"The bus stop.|\"Next bus: ACDC Town.\"",
-	"Aster Land. The lights are\non, but MegaMan's waiting\nto jack in.",
-	"EXPO\nThe sign lists the\npavilions on show.",
-	"Cyber Academy. The gate's\nclosed for the day.",
-	"A statue of a blue bird.\nFolks meet here before\nthey jack in.",
-	"The road to the Expo site.\nIt's closed off today.",
-	"EXPO\nA map of the site.\nIt's huge!",
-	"Chips and PETs line the\nshelves in the window.",
+	"@L Home sweet home. Mom's making curry tonight!|@M Then let's be back in time for dinner, Lan!",
+	"A pink house. The curtains are drawn.",
+	"Someone is watering the plants on the roof terrace.",
+	"Two gray houses, side by side. It's quiet in there.",
+	"The flowers are in full bloom.",
+	"The bus stop.|\"Next bus: ACDC Town\"",
+	"@M Aster Land! Let's go shopping later, Lan. The net's waiting!",
+	"EXPO\nThe sign lists the pavilions on show.",
+	"Cyber Academy. The gate is closed for the day.",
+	"A statue of a blue bird. Its port leads into the Endless Net.",
+	"The road to the Expo site. It's closed off today.",
+	"EXPO\nA map of the site. It's huge!",
+	"Chips and PETs line the shelves in the window.",
 	NULL, NULL, NULL,
 };
 
@@ -362,29 +363,29 @@ static void design_acdc(void) {
 /* Its people: kids in the park, the chip shop, the Metroline, the
  * mansion, the houses, the promenade. */
 static const Folk acdc_folk[] = {
-	{ -196, -20, FACE_SE, 5, 0x2B, "Meet you at the squirrel!\nLast one there's a\nMettaur!" },
-	{ -180, -4, FACE_NW, 5, 0x34, "I'm gonna be a\nNetBattler like you\nsomeday, Lan!" },
+	{ -196, -20, FACE_SE, 5, 0x2B, "Meet you at the squirrel! Last one there's a Mettaur!" },
+	{ -180, -4, FACE_NW, 5, 0x34, "Lan! You came all the way from Central Town?|The squirrel's port goes into the Endless Net too!" },
 	{ -204, -4, FACE_NE, 5, 0x37, "Squirrel! Squirrel!" },
-	{ -180, -44, FACE_SE, 7, 0x0F, "Stand beside the\nsquirrel statue and\npress R to jack in.|The net under this town\nnever ends, they say." },
-	{ -188, -92, FACE_NE, 5, 0x2D, "Higsby's got rare chips\nin... but the prices!|Guess I'll keep saving\nmy Zenny." },
-	{ 4, -132, FACE_SW, 5, 0x30, "The Metroline runs\nstraight to Central Town.\nSo handy!" },
-	{ 252, -28, FACE_SW, 5, 0x2E, "That's the Ayano\nmansion. They say it has\nits own garden inside!" },
-	{ 100, 36, FACE_SE, 5, 0x36, "Nobody lives in that\nhouse now...|But someone still waters\nthe flowers." },
-	{ 60, 164, FACE_SW, 5, 0x39, "A fine breeze today.\nJust right for a walk\nalong the avenue." },
-	{ 124, -84, FACE_SW, 5, 0x38, "The boy who lives here\npractices NetBattles day\nand night. So noisy!" },
-	{ -60, 164, FACE_NE, 5, 0x2C, "I walk the promenade\nevery morning. The\nbreeze is lovely!", 12 },
+	{ -180, -44, FACE_SE, 7, 0x0F, "I'M THE PARK'S PORT GUIDE PROGRAM!|STAND BESIDE THE SQUIRREL STATUE AND PRESS R TO JACK IN!" },
+	{ -188, -92, FACE_NE, 5, 0x2D, "Higsby's got rare chips in... but have you seen the prices?|Guess I'll keep saving my Zenny." },
+	{ 4, -132, FACE_SW, 5, 0x30, "The Metroline runs straight to Central Town. So handy!" },
+	{ 252, -28, FACE_SW, 5, 0x2E, "That's the Ayano mansion. They say it has its own garden inside!" },
+	{ 100, 36, FACE_SE, 5, 0x36, "Nobody lives in that house anymore...|But somebody still waters the flowers." },
+	{ 60, 164, FACE_SW, 5, 0x39, "A fine breeze today. Just right for a stroll down the avenue." },
+	{ 124, -84, FACE_SW, 5, 0x38, "The boy who lives here practices NetBattles day and night. So noisy!" },
+	{ -60, 164, FACE_NE, 5, 0x2C, "Every morning I walk the promenade, then dive a few layers!", 12 },
 };
 
 static const char *const acdc_checks[16] = {
-	"The house Lan's family\nused to live in.|It feels like only\nyesterday...",
-	"The hedge is neatly\ntrimmed.",
-	"Mayl's house. Piano\npractice drifts out of\nthe window.",
-	"The squirrel statue!\nEveryone in ACDC Town\nknows it.",
+	"@L Our old house... It feels like only yesterday we lived here.|@M We had so many adventures in ACDC Town, Lan.",
+	"The hedge is neatly trimmed.",
+	"Mayl's house. Piano music drifts out of the window.|@M Mayl's practicing again, Lan!",
+	"The squirrel statue! Its port leads into the Endless Net.",
 	"Higsby's chip shop.|\"Rare chips in stock!\"",
-	"A blue house. The\nmailbox says \"Oyama.\"",
-	"A tall wall runs around\nthe Ayano mansion.",
-	"The Ayano mansion. The\ngate is shut tight.",
-	"A Chip Trader. It's out\nof order today.",
+	"A blue house. The mailbox says \"Oyama.\"|@L Dex is probably NetBattling again...",
+	"A tall wall runs around the Ayano mansion.",
+	"The Ayano mansion. The gate is shut tight.",
+	"A Chip Trader. It's out of order today.",
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
@@ -794,6 +795,52 @@ void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx) {
 
 /* ---- in the game ---- */
 
+/* The face a townsperson talks with: a person of sprite list 5 has the
+ * face of its sprite less 0x20, the port guide is a Mr. Prog, the robot
+ * dog has none. */
+static int folk_face(const Folk *f) {
+	if (f->cat == 5) return f->sprite - 0x20;
+	if (f->cat == 7 && f->sprite == 0x0F) return FACE_PROG;
+	return FACE_NONE;
+}
+
+/* What Lan and MegaMan say as a run begins: on the first dive ever, Dad's
+ * call about the Endless Net; after that, a word about the last one. */
+static const char *intro(void) {
+	static char buf[900];
+	bool acdc = T.style->group == 0x00;
+	const char *port = acdc ? "squirrel statue in the park" : "bird statue on the plaza";
+	int k = 0;
+	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
+	if (acdc) ADD("@M The Metroline got us to ACDC Town in no time, Lan!|");
+	if (!profile.seen_intro) {
+		ADD("@D Lan, it's Dad. Have you got a minute?|"
+			"@D A new stretch of net just opened up under town. Its paths change every time someone jacks in.|"
+			"@D And it only goes down. The Navis are calling it the Endless Net.|"
+			"@M The Endless Net... Lan, that sounds like an adventure!|"
+			"@D Everything down there is copied data. Nothing you find will come back out with you.|"
+			"@D Something at the very bottom is doing the copying. We're calling it the Nest.|"
+			"@D And if MegaMan gets deleted, my backup program will bring him home safe.|"
+			"@D So dive as deep as you can, and send me your readings!|"
+			"@L Leave it to us, Dad!|"
+			"@M The port's by the %s. Let's go, Lan!", port);
+	} else if (profile.nest_clears > 0 && profile.runs % 2) {
+		ADD("@D Lan, MegaMan has reached the Nest before. The net's changed all over again since then.|"
+			"@D Be careful down there!|@L Got it, Dad!");
+	} else if (profile.runs == 0) {
+		/* (the call heard, but no run over yet: no best to speak of) */
+		ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port);
+	} else {
+		switch (profile.runs % 3) {
+		case 0: ADD("@M Ready for another dive, Lan? Our best is layer %d!|@L This time we'll go even deeper!", profile.best_depth); break;
+		case 1: ADD("@M Dad's backup got me home safe last time.|@L Good! Let's beat layer %d today!", profile.best_depth); break;
+		default: ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port); break;
+		}
+	}
+	#undef ADD
+	return buf;
+}
+
 /* Compressed sprites only draw once the map loads them. */
 static void need_sprite(NpcList *npcs, int category, int index) {
 	uint32_t list = emu_read32(0x08000000u + R.layout->sprite_lists + (uint32_t)category * 4);
@@ -827,12 +874,14 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	mapslot_town(true);
 	NpcList npcs;
 	memset(&npcs, 0, sizeof npcs);
-	TextArchive text;
+	static TextArchive text;
 	ta_begin(&text);
-	static const int none[4] = { -1, -1, -1, -1 };
 	int script[MAX_FOLK];
-	for (int i = 0; i < T.style->nfolk; ++i) script[i] = ta_talk(&text, T.style->folk[i].words, none);
+	for (int i = 0; i < T.style->nfolk; ++i) script[i] = ta_talk(&text, T.style->folk[i].words, folk_face(&T.style->folk[i]));
+	/* what Lan and MegaMan say when they step out (the director runs it) */
+	T.info.intro = ta_talk(&text, intro(), FACE_MEGAMAN);
 	uint32_t archive = ta_commit(&text);
+	T.info.talk_archive = archive;
 	for (int i = 0; i < T.style->nfolk && npcs.n < 16; ++i) {
 		if (T.folk_at[i][0] == 1 << 20) continue;
 		const Folk *f = &T.style->folk[i];
@@ -846,7 +895,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	uint8_t check_script[16];
 	memset(check_script, 0xFF, sizeof check_script);
 	for (int n = 0; n < 16; ++n)
-		if (T.style->checks[n]) check_script[n] = (uint8_t)ta_talk(&words, T.style->checks[n], none);
+		if (T.style->checks[n]) check_script[n] = (uint8_t)ta_talk(&words, T.style->checks[n], FACE_NONE);
 	static uint8_t archive_bytes[TEXT_ARCHIVE_MAX];
 	int archive_len = ta_build(&words, archive_bytes);
 	/* trees and the statue: the game's own objects (20-byte spawn records) */

@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "game.h"
+#include "guardians.h"
 #include "loot.h"
 #include "mapslot.h"
 #include "net.h"
@@ -34,6 +35,8 @@
 /* Mr. Progs and navis (sprite list 6) */
 #define SPR_PROG        60
 #define SPR_PROG_BLUE   93
+#define SPR_DEALER      62   /* a Normal Navi, the Net Dealer's keeper in the game */
+#define SPR_TECH        66   /* the orange technician navi (shop 3's keeper) */
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -97,22 +100,6 @@ typedef struct {
 	uint32_t archive;   /* its text archive; 0: the layer's */
 } Talker;
 
-/* Overworld sprites (list 6) of the Navis Gregar has on the net, by navi
- * index; the others (Falzar's Navis are placeholders here) take the shape of
- * a HeelNavi. */
-#define SPR_HEEL_NAVI 0x43
-
-static int navi_sprite(int navi) {
-	static const struct { uint8_t navi, sprite; } sprites[] = {
-		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
-		{ 11, 0x3B }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 },            /* Proto, Dive, Circus, Judge */
-		{ 18, 0x53 },                                                        /* Colonel */
-	};
-	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
-		if (sprites[i].navi == navi) return sprites[i].sprite;
-	return SPR_HEEL_NAVI;
-}
-
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -125,7 +112,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->nchoices = 0;
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
+	for (int i = 0; i <= OBJ_GIFT; ++i) out->script_of[i] = -1;
 	/* ScrtData lie in deep layers until three are out there */
+	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	for (int i = 0; i < layer.nobj; ++i) {
@@ -174,11 +163,14 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_NPC: {
 			/* Normal Navis and pink navis */
 			static const int navis[6] = { 62, 64, 65, 66, 69, 87 };
+			static int base;
+			if (!said) base = o->npc_line;
 			tk.sprite = navis[o->param % 6];
-			tk.script = ta_say(&text, -1, npc_line(o->npc_line));
+			/* (a list-6 navi's face has its sprite's number) */
+			tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said++));
 			break;
 		}
-		case OBJ_HEAL: tk.script = ta_heal(&text); break;
+		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth); break;
 		case OBJ_TRADER:
 		case OBJ_BUGTRADER: {
 			/* the game's own machine and lines; deeper, some are Specials */
@@ -190,10 +182,16 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.script = kind;
 			break;
 		}
-		case OBJ_SHOP: tk.script = ta_shop(&text, SHOP_DEALER, "Welcome to the\nNet Dealer!"); break;
+		case OBJ_SHOP:
+			tk.sprite = SPR_DEALER;
+			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, run.depth <= 3
+				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
+				: "Still diving, MegaMan? Stock up. It only gets tougher from here!");
+			break;
 		case OBJ_PROGRAMS:
-			tk.sprite = SPR_PROG_BLUE;
-			tk.script = ta_shop(&text, SHOP_PROGRAMS, "NaviCust programs\nfor sale!");
+			tk.sprite = SPR_TECH;
+			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH,
+				"NaviCust programs, fresh from my workbench!|Install them from the NaviCust, and they're yours.");
 			break;
 		case OBJ_CHALLENGE: {
 			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;
@@ -234,11 +232,12 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			out->choice[out->nchoices].type = o->type;
 			out->choice[out->nchoices++].flag = flag;
 			tk.script = o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
-				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag)
+				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag, run.biome == BIOME_UNDERNET)
 				: ta_secret_gate(&text, flag);
 			/* not chosen yet */
 			flag_clear(flag);
 		}
+		if (tk.script >= 0 && !tk.archive && out->script_of[o->type] < 0) out->script_of[o->type] = tk.script;
 		if (tk.script >= 0 && ntalk < 16) talkers[ntalk++] = tk;
 	}
 	/* the shops' stock, in the game's shop data */
@@ -255,9 +254,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	shop_install(SHOP_PROGRAMS, stock, shop_program_stock(run.depth, stock));
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
+	if (text.full || emu_debug_on())
+		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	out->archive = archive;
-	if (out->guardian.navi) guardian_actors(&npcs, archive, navi_sprite(out->guardian.navi), &out->guardian);
+	if (out->guardian.navi) guardian_actors(&npcs, archive, guardian_sprite(out->guardian.navi), &out->guardian);
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
 		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, talkers[i].z,
 			talkers[i].cat == 7 ? 0 : 4, talkers[i].archive ? talkers[i].archive : archive, talkers[i].script,

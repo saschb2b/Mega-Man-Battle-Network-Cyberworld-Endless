@@ -30,6 +30,7 @@ static struct {
 void cinema_reset(void) { memset(&C, 0, sizeof C); }
 
 void cinema_input(int mode) { C.input = mode; }
+int cinema_input_mode(void) { return C.input; }
 void cinema_walk(uint32_t keys) { C.walk = keys; }
 void cinema_letterbox(bool on) { C.bars = on; }
 void cinema_flash(int frames) { C.flash = C.flash_len = frames; }
@@ -70,7 +71,8 @@ void cinema_update(void) {
 	if (!C.bars && C.bar > 0) --C.bar;
 	if (C.flash > 0) --C.flash;
 	if (C.shake > 0) --C.shake;
-	if (C.card && ++C.card_t >= C.card_len) C.card = CARD_NONE;
+	/* (a card waits out a shop, the PET or a battle, unseen) */
+	if (C.card && !C.off_map && ++C.card_t >= C.card_len) C.card = CARD_NONE;
 }
 
 void cinema_offset(int *dx, int *dy) {
@@ -101,6 +103,10 @@ static int card_alpha(void) {
 
 static SDL_Color with_alpha(SDL_Color c, int a) { c.a = (Uint8)(c.a * a / 255); return c; }
 
+/* A card's big name: twice the size where it fits the picture ("Robot
+ * Control Comp" does not). */
+static int name_scale(const char *s) { return text_width(s) * 2 <= CORE_W - 8 ? 2 : 1; }
+
 static void draw_title(int x0, int y0) {
 	int a = card_alpha();
 	int open = ease(C.card_t, 0);
@@ -115,8 +121,9 @@ static void draw_title(int x0, int y0) {
 	text_draw(x0 + CORE_W / 2, mid - 30, C.top, with_alpha(rgba(200, 200, 216, 255), a * ease(C.card_t, 6) / 255), TEXT_CENTER);
 	int in = ease(C.card_t, 8);
 	int nx = x0 + CORE_W / 2 + (255 - in) * 90 / 255;
-	text_draw_scaled(nx + 1, mid - 15, C.name, with_alpha(C.accent, a * in / 255), TEXT_CENTER, 2);
-	text_draw_scaled(nx, mid - 16, C.name, with_alpha(WHITE, a * in / 255), TEXT_CENTER, 2);
+	int sc = name_scale(C.name), ny = mid - 16 + (2 - sc) * TEXT_H / 2;
+	text_draw_scaled(nx + 1, ny + 1, C.name, with_alpha(C.accent, a * in / 255), TEXT_CENTER, sc);
+	text_draw_scaled(nx, ny, C.name, with_alpha(WHITE, a * in / 255), TEXT_CENTER, sc);
 	int ep = ease(C.card_t, 16);
 	int ex = x0 + CORE_W / 2 - (255 - ep) * 90 / 255;
 	text_draw(ex, mid + 14, C.line1, with_alpha(C.accent, a * ep / 255), TEXT_CENTER);
@@ -125,14 +132,15 @@ static void draw_title(int x0, int y0) {
 static void draw_area(int x0, int y0) {
 	int a = card_alpha();
 	int y = y0 + 44;
-	fill_rect(x0, y - 8, CORE_W, 72, rgba(0, 0, 16, 150 * a / 255));
+	fill_rect(x0, y - 8, CORE_W, C.line2[0] ? 80 : 68, rgba(0, 0, 16, 150 * a / 255));
 	text_draw(x0 + CORE_W / 2, y, C.top, with_alpha(C.accent, a * ease(C.card_t, 0) / 255), TEXT_CENTER);
 	int in = ease(C.card_t, 4);
-	text_draw_scaled(x0 + CORE_W / 2, y + 12 - (255 - in) * 8 / 255, C.name, with_alpha(WHITE, a * in / 255), TEXT_CENTER, 2);
+	int sc = name_scale(C.name);
+	text_draw_scaled(x0 + CORE_W / 2, y + 12 + (2 - sc) * TEXT_H / 2 - (255 - in) * 8 / 255, C.name, with_alpha(WHITE, a * in / 255), TEXT_CENTER, sc);
 	int line = 150 * ease(C.card_t, 10) / 255;
 	fill_rect(x0 + (CORE_W - line) / 2, y + 38, line, 1, with_alpha(C.accent, a));
 	text_draw(x0 + CORE_W / 2, y + 42, C.line1, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 14) / 255), TEXT_CENTER);
-	text_draw(x0 + CORE_W / 2, y + 52, C.line2, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 18) / 255), TEXT_CENTER);
+	text_draw(x0 + CORE_W / 2, y + 42 + TEXT_H, C.line2, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 18) / 255), TEXT_CENTER);
 }
 
 void cinema_draw(void) {
@@ -142,7 +150,7 @@ void cinema_draw(void) {
 		fill_rect(x0, y0, CORE_W, bar, BLACK);
 		fill_rect(x0, y0 + CORE_H - bar, CORE_W, bar, BLACK);
 	}
-	if (C.card == CARD_TITLE) draw_title(x0, y0);
-	if (C.card == CARD_AREA) draw_area(x0, y0);
+	if (C.card == CARD_TITLE && !C.off_map) draw_title(x0, y0);
+	if (C.card == CARD_AREA && !C.off_map) draw_area(x0, y0);
 	if (C.flash > 0) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, 230 * C.flash / C.flash_len));
 }

@@ -12,17 +12,22 @@
 #include "game.h"
 #include "loot.h"
 #include "pacing.h"
+#include "rom.h"
 
 #define ORDER_SHOP 18   /* the Chip Order list: one entry per chip */
 
 static uint32_t desc(int shop) { return BN6_SHOP_DESCS + (uint32_t)shop * 16; }
 
+/* An entry of the initial shops as the player's ROM has it (the core's
+ * copy carries the layers' stock), so the picks and their prices never
+ * depend on the layers built before. */
 static void read_item(uint32_t a, ShopItem *it) {
-	it->kind = emu_read8(a);
-	it->stock = emu_read8(a + 1);
-	it->id = emu_read16(a + 2);
-	it->code = emu_read8(a + 4);
-	it->price = emu_read16(a + 6);
+	uint32_t o = a - 0x08000000u;
+	it->kind = R.data[o];
+	it->stock = R.data[o + 1];
+	it->id = rom_u16(o + 2);
+	it->code = R.data[o + 4];
+	it->price = rom_u16(o + 6);
 }
 
 bool shop_install(int shop, const ShopItem *items, int n) {
@@ -49,15 +54,20 @@ bool shop_install(int shop, const ShopItem *items, int n) {
 static bool pick(int kind, int min_id, ShopItem *out) {
 	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
 	int count = 0;
-	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8)
-		if (emu_read8(a) == kind && emu_read16(a + 2) >= min_id) ++count;
+	ShopItem it;
+	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8) {
+		read_item(a, &it);
+		if (it.kind == kind && it.id >= min_id) ++count;
+	}
 	if (!count) return false;
 	int k = rng_range(0, count - 1);
-	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8)
-		if (emu_read8(a) == kind && emu_read16(a + 2) >= min_id && k-- == 0) {
-			read_item(a, out);
+	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8) {
+		read_item(a, &it);
+		if (it.kind == kind && it.id >= min_id && k-- == 0) {
+			*out = it;
 			return true;
 		}
+	}
 	return false;
 }
 

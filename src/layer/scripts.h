@@ -12,32 +12,35 @@
 #define SCRIPTS_HP_MEMORY 0x70
 #define SCRIPTS_BOSS_HP_MEMORIES 5
 
-/* Service NPCs on the game's own commands: heal to full HP. (Chip Traders
- * speak the game's own lines, see trader.h.) */
-int ta_heal(TextArchive *t);
-/* A shopkeeper: `greeting`, then shop `shop`'s screen. */
-int ta_shop(TextArchive *t, int shop, const char *greeting);
+/* Service NPCs on the game's own commands: a recovery Mr. Prog heals to
+ * full HP (`variant` picks his words). (Chip Traders speak the game's own
+ * lines, see trader.h.) */
+int ta_heal(TextArchive *t, int variant);
+/* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
+ * `shop`'s screen. */
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting);
 
 /* Choices: Yes sets event flag `flag`, which the director acts on. A
  * challenge answers only once; the gate first wants three ScrtData. */
 int ta_challenge(TextArchive *t, int flag);
-int ta_undernet(TextArchive *t, int flag);
+int ta_undernet(TextArchive *t, int flag, bool deeper);
 int ta_secret_gate(TextArchive *t, int flag);
 /* Plays song `song` (0xFF stops the music, SCRIPTS_AREA_MUSIC the map's
  * own) without opening the chat box. */
 #define SCRIPTS_AREA_MUSIC -1
 int ta_music(TextArchive *t, int song);
-/* A guardian's Guardian Data, checked: `power` (a Cross, Beast Out; NULL
- * for none), then HPMemory through the game's own item (+20 max HP each),
- * its navi chip (`chip` 0 for none; `code` A=0 .. *=26), a full heal, then
- * event flag `taken_flag`. */
+/* A guardian's Guardian Data, checked: `power` (what a Cross or BeastOut
+ * brings, ta_talk's boxes; NULL for none), then HPMemory through the game's
+ * own item (+20 max HP each), its navi chip (`chip` 0 for none; `code`
+ * A=0 .. *=26), a full heal, then event flag `taken_flag`. */
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
                        int taken_flag);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
-/* The run's first layer: a Mr. Prog offers one of two HPMemory, a chip or
- * a NaviCust program (`program` in `color`), once (event flag `flag`);
- * with `comfort`, after a run lost early, an HPMemory more first. */
+/* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of
+ * two HPMemory, a chip or a NaviCust program (`program` in `color`, named
+ * by the game), once (event flag `flag`); with `comfort`, after a run lost
+ * early, an HPMemory more first. */
 int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int code, int program, int color);
 
 #endif

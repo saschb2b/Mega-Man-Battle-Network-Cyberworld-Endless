@@ -9,6 +9,11 @@
 #include "rom.h"
 #include "run.h"
 #include "area_src.h"
+#include "guardians.h"
+#include "npc_lines.h"
+#include "powers.h"
+#include "rivals.h"
+#include "text.h"
 #include "townmath.h"
 
 static int failures;
@@ -22,6 +27,11 @@ void rng_seed(uint32_t s) { rng_s = s ? s : 1; }
 uint32_t rng_state(void) { return rng_s; }
 uint32_t rng_next(void) { uint32_t x = rng_s; x ^= x << 13; x ^= x >> 17; x ^= x << 5; return rng_s = x; }
 int rng_range(int lo, int hi) { return hi <= lo ? lo : lo + (int)(rng_next() % (uint32_t)(hi - lo + 1)); }
+/* (the talk's pieces need no saves or game flags here) */
+void flag_set(int flag) { (void)flag; }
+bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
+bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
+uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
 
 static void test_sha1(void) {
 	char hex[41];
@@ -278,6 +288,111 @@ static void test_town_moves(void) {
 			}
 }
 
+/* Text for the chat box (ta_talk's boxes): only characters the game's
+ * charmap has, known speaker marks, boxes that fit ta_pages' buffer and
+ * words that fit a line. */
+static void check_pages(const char *what, const char *s);
+static void check_talk(const char *what, const char *s) {
+	if (!s) return;
+	check_pages(what, s);
+	static const char marks[] = "LMDPBCYHN";
+	static const char punct[] = " *-=:%?+!&,.;'\"~/()>_\n|";
+	int box = 0, word = 0;
+	for (const char *p = s; *p; ++p) {
+		if (*p == '@') {
+			CHECK((p == s || p[-1] == '|') && p[1] && strchr(marks, p[1]), "%s: a speaker mark out of place or unknown in \"%s\"", what, s);
+			if (p[1]) ++p;
+			continue;
+		}
+		bool ok = (*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z') || (*p >= '0' && *p <= '9') || strchr(punct, *p);
+		CHECK(ok, "%s: '%c' is not in the charmap: \"%s\"", what, *p, s);
+		if (*p == '|') { box = word = 0; continue; }
+		CHECK(++box < 197, "%s: a box over ta_pages' buffer with its speaker mark: \"%s\"", what, s);
+		word = *p == ' ' || *p == '\n' ? 0 : word + 1;
+		CHECK(word <= 20, "%s: a word longer than a line: \"%s\"", what, s);
+	}
+	CHECK(s[0] && s[strlen(s) - 1] != '|', "%s: an empty box: \"%s\"", what, s);
+}
+
+/* The pages ta_talk builds from `s`: at most three lines of at most 20
+ * characters, and no page with a line alone in a box of more. */
+static void check_pages(const char *what, const char *s) {
+	if (!s) return;
+	static TextArchive t;
+	ta_begin(&t);
+	ta_talk(&t, s, FACE_MEGAMAN);
+	CHECK(!t.full, "%s: the archive overflowed", what);
+	int page_lines[16], pages = 0, lines = 0, chars = 0;
+	bool in_text = false;
+	for (int i = 0; i <= t.len; ++i) {
+		int b = i < t.len ? t.buf[i] : 0xE6;
+		bool page_end = b == 0xF2 || b == 0xF5 || b == 0xE6;
+		if (b == 0xE9) { ++lines; chars = 0; continue; }
+		if (page_end || b == 0xE7 || b == 0xE8) {
+			if (in_text) { ++lines; in_text = false; }
+			if (b == 0xE7 || b == 0xE8) { ++i; continue; }   /* (their argument) */
+			if (lines && pages < 16) page_lines[pages++] = lines;
+			lines = chars = 0;
+			if (b == 0xF5) {
+				/* a new box: its pages checked, then forgotten */
+				int total = 0;
+				for (int k = 0; k < pages; ++k) total += page_lines[k];
+				for (int k = 0; k < pages; ++k) {
+					CHECK(page_lines[k] <= 3, "%s: a page of %d lines", what, page_lines[k]);
+					CHECK(page_lines[k] > 1 || total == 1, "%s: a line alone on a page", what);
+				}
+				pages = 0;
+				i += t.buf[i + 1] == 0x00 ? 2 : 1;   /* F5 00 face, F5 01 */
+			}
+			continue;
+		}
+		in_text = true;
+		CHECK(++chars <= 20, "%s: a line over 20 characters", what);
+	}
+	int total = 0;
+	for (int k = 0; k < pages; ++k) total += page_lines[k];
+	for (int k = 0; k < pages; ++k) {
+		CHECK(page_lines[k] <= 3, "%s: a page of %d lines", what, page_lines[k]);
+		CHECK(page_lines[k] > 1 || total == 1, "%s: a line alone on a page", what);
+	}
+}
+
+static void test_talk(void) {
+	char what[96];
+	for (int depth = 1; depth <= 60; ++depth)
+		for (int i = 0; i < 40; ++i) {
+			snprintf(what, sizeof what, "npc_line(%d, %d)", depth, i);
+			check_talk(what, npc_line(depth, i));
+		}
+	/* no repeats among a layer's first bystanders */
+	for (int depth = 1; depth <= 40; depth += 3)
+		for (int a = 0; a < 4; ++a)
+			for (int b = a + 1; b < 4; ++b)
+				CHECK(npc_line(depth, 7 + a) != npc_line(depth, 7 + b), "npc_line repeats at depth %d", depth);
+	memset(&run, 0, sizeof run);
+	for (int navi = 1; navi < 32; ++navi) {
+		/* every history: a first meeting, a loss, wins up to respect */
+		for (int step = 0; step < 7; ++step) {
+			if (step == 1) { rival_met(navi); rival_result(navi, RIVAL_NAVI_WON); }
+			else if (step > 1) { rival_met(navi); rival_result(navi, RIVAL_MEGAMAN_WON); }
+			for (int version = 0; version < 3; ++version)
+				for (int biome = 0; biome < BIOME_COUNT; ++biome) {
+					snprintf(what, sizeof what, "guardian_intro(%d, %d, %d) step %d", navi, version, biome, step);
+					check_talk(what, guardian_intro(navi, version, biome));
+				}
+		}
+		snprintf(what, sizeof what, "guardian_defeat(%d)", navi);
+		check_talk(what, guardian_defeat(navi));
+		for (int depth = 3; depth <= 19; depth += 3) {
+			snprintf(what, sizeof what, "powers_reward_text(%d, graveyard, %d)", navi, depth);
+			check_talk(what, powers_reward_text(navi, BIOME_GRAVEYARD, depth));
+		}
+	}
+	for (int biome = 0; biome < BIOME_COUNT; ++biome)
+		for (int side = LAYER_NORMAL; side <= LAYER_SECRET; ++side)
+			CHECK(strlen(guardian_area_in_text(biome, side)) < 28, "area %d's name is long for the cards", biome);
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -286,6 +401,7 @@ int main(void) {
 	test_depth_plan();
 	test_pacing();
 	test_town_moves();
+	test_talk();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

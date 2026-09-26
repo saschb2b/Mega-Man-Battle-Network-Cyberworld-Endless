@@ -33,9 +33,12 @@
 #include "runlog.h"
 #include "save.h"
 #include "scripts.h"
+#include "talk.h"
+#include "text.h"
 #include "town.h"
 
 int director_debug_biome = -1;
+const char *director_dev_talks;
 
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
 
@@ -62,6 +65,14 @@ static struct {
 	const char *act_guardian;  /* the guardian beaten on the way out */
 	bool town;             /* Lan is in the town; the first layer waits for his jack-in */
 	bool town_seen;        /* ... and has got there */
+	int town_frames;       /* frames on the town's map */
+	bool intro_said;       /* Lan and MegaMan have spoken there */
+	char beat[640];        /* what they say on arriving, once the card has gone */
+	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
+	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
+	bool l_held;           /* L was down last frame */
+	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
+	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -74,19 +85,72 @@ static void begin_area(bool new_act) {
 	if (!new_act) return;
 	D.act_viruses = run.viruses_deleted;
 	D.act_frames = 0;
+	D.act_resumed = false;
+}
+
+/* The net's version: the Nest rebuilds it, one stronger, each time its
+ * guardian falls (1 for the first cycle). */
+static int net_version(void) { return (run.depth - 1) / CYCLE_LAYERS + 1; }
+
+/* What MegaMan and Lan (and Dad) say on arriving somewhere new: the first
+ * layer, a new cycle, the Undernet, the Graveyard, the Nest, the side
+ * layers. Empty for the rest. */
+static void arrival_words(void) {
+	const char *area = guardian_area_in_text(run.biome, LAYER_NORMAL);
+	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
+	D.beat[0] = 0;
+	if (run.side_kind == LAYER_UNDERNET)
+		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke, Lan.|@L Stay sharp. The exit pad leads back to the main path.");
+	else if (run.side_kind == LAYER_SECRET)
+		snprintf(D.beat, sizeof D.beat, "@M The gate opened, Lan... This must be the Secret Area.|@M Something strong is waiting in here. I can feel it.");
+	else if (run.depth == 1)
+		snprintf(D.beat, sizeof D.beat, "@M Lan, it looks just like %s... But it's all copied data!|@L Dad was right. Let's find the exit pad and head down!", area);
+	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
+		snprintf(D.beat, sizeof D.beat, "@D Lan! The Endless Net just rebuilt itself, all of it!|@D The same areas, but stronger data. It's Net V%d now!|@M Then we keep going, Lan!", net_version());
+	else if (run.biome == BIOME_NEST)
+		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest. Something down here is copying everything.|@B Grrrr...|@L Hang on, MegaMan! Whatever it is, we'll find it!");
+	else if (first_of_act && run.biome == BIOME_UNDERNET)
+		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied... Stay sharp, Lan.");
+	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
+		snprintf(D.beat, sizeof D.beat, "@M So much deleted data... Lan, I think the bottom is close.");
+}
+
+/* What MegaMan says when L is pressed: where they are, what is ahead. */
+static const char *status_words(void) {
+	static char buf[400];
+	int k = 0;
+	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
+	if (D.town) {
+		ADD("@M The port's by the %s, Lan. Let's jack in!", town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
+		return buf;
+	}
+	const char *area = guardian_area_in_text(run.biome, run.side_kind);
+	ADD("@M We're on layer %d, Lan. This is %s.", run.depth, area);
+	if (D.objs.guardian.navi && !boss_beaten()) ADD("|@M %s is waiting at the end of this layer!", guardian(D.objs.guardian.navi)->name);
+	else if (D.objs.guardian.navi && !boss_done()) ADD("|@M Let's take its Guardian Data, Lan!");
+	else if (D.objs.guardian.navi) ADD("|@M The exit pad's open. Let's head down!");
+	else if (run.side_kind == LAYER_NORMAL) ADD("|@M %s guards the end of this area.", guardian(run.boss_order[run.biome])->name);
+	if (run.fragments == 1) ADD("|@M We're carrying one ScrtData.");
+	else if (run.fragments > 1) ADD("|@M We're carrying %d ScrtData.", run.fragments);
+	if (!D.objs.guardian.navi) ADD("|@L Let's find the exit pad!");
+	#undef ADD
+	return buf;
 }
 
 static void area_card(void) {
 	char act[32];
-	int biome = run.biome;
-	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "A dark warp");
-	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "The sealed gate opens");
-	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "Journey's end");
-	else snprintf(act, sizeof act, "Act %d", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1 + 7 * ((run.depth - 1) / CYCLE_LAYERS));
+	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
+	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "Through a dark warp");
+	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "Beyond the sealed gate");
+	else if (biome == BIOME_NEST && net_version() > 1) snprintf(act, sizeof act, "The bottom of Net V%d", net_version());
+	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "The bottom of the net");
+	else if (net_version() > 1) snprintf(act, sizeof act, "Net V%d - Act %d", net_version(), act_no);
+	else snprintf(act, sizeof act, "Act %d", act_no);
 	/* the guardian ahead, named from the start, so the folder can be set
 	 * for it (as Slay the Spire shows each act's boss) */
 	char ahead[48] = "";
-	if (run.side_kind == LAYER_NORMAL) snprintf(ahead, sizeof ahead, "Guardian: %s", guardian(run.boss_order[biome])->name);
+	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer))
+		snprintf(ahead, sizeof ahead, "Guardian: %s", guardian(run.boss_order[biome])->name);
 	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), ahead[0] ? ahead : NULL, rgba(120, 200, 248, 255), 200);
 }
 
@@ -96,7 +160,8 @@ static void clear_card(void) {
 	int secs = D.act_frames / 60;
 	snprintf(who, sizeof who, "%s deleted", D.act_guardian ? D.act_guardian : "Guardian");
 	snprintf(stats, sizeof stats, "Viruses %d   Time %d:%02d", run.viruses_deleted - D.act_viruses, secs / 60, secs % 60);
-	cinema_card(guardian_area_name(run.biome), "AREA CLEAR", who, stats, rgba(248, 208, 88, 255), 220);
+	/* (an act continued from a checkpoint has no whole count) */
+	cinema_card(guardian_area_name(run.biome), "AREA CLEAR", who, D.act_resumed ? NULL : stats, rgba(248, 208, 88, 255), 220);
 }
 
 /* The next battle's enemies, for the game's encounter roll. */
@@ -142,7 +207,7 @@ static void lock_run(void) {
 /* The next random battle: the run's first two and the first after each
  * guardian from the lower half of the act's band (docs/PROGRESSION.md). */
 static void roll_encounter(void) {
-	bool opening = run.side_kind == LAYER_NORMAL && (run.depth - 1) % 3 == 0 &&
+	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
 		(run.depth == 1 ? D.battles < 2 : D.battles < 1);
 	Encounter e = make_encounter(run.depth, run.biome, opening ? ENC_EASY : ENC_NORMAL);
 	set_encounter(&e, false);
@@ -176,8 +241,11 @@ static bool build_layer(void) {
 	D.frame = 0;
 	D.gameover = false;
 	D.act_guardian = D.objs.guardian.navi ? guardian(D.objs.guardian.navi)->name : NULL;
-	bool first_of_act = run.side_kind == LAYER_NORMAL && (run.depth - 1) % 3 == 0;
+	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
+	arrival_words();
+	D.secret_call = run.side_kind == LAYER_SECRET;
+	talk_reset();
 	return true;
 }
 
@@ -202,16 +270,43 @@ bool director_start_run(void) {
 	emu_warp(ti->group, ti->number, ti->start_x, ti->start_y, ti->start_face);
 	D.town = true;
 	D.town_seen = false;
+	D.town_frames = 0;
+	D.intro_said = false;
 	return true;
 }
 
 bool director_in_town(void) { return D.active && D.town; }
+
+bool director_on_layer(void) { return D.active && !D.town; }
+
+uint32_t director_keys(uint32_t keys) {
+	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
+	D.l_held = l;
+	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
+	/* on the map L is MegaMan's word on where they are: the game's own
+	 * has no lines for this story */
+	keys &= ~KEY_L;
+	/* (not while a warp or the jack-in departs, nor through a guardian's
+	 * staging or the battle it has armed) */
+	if (pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP + 0x10) == 0 &&
+		(D.town || (!boss_cinematic() && !boss_fighting())))
+		talk_start(status_words(), FACE_MEGAMAN);
+	return keys;
+}
 
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
 static void town_update(void) {
 	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
 	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
+	talk_update();
+	/* Lan and MegaMan's words (Dad's call, the first time), once Lan is
+	 * out and the map has settled */
+	if (D.town_seen && on_map() && !D.intro_said && emu_read8(BN6_WARP + 0x10) == 0 && ++D.town_frames > 40 &&
+		talk_script(town_info()->talk_archive, town_info()->intro)) {
+		D.intro_said = true;
+		if (!profile.seen_intro) { profile.seen_intro = true; profile_save(); }
+	}
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP + 0x10) == 0 &&
 		emu_read8(BN6_GAMESTATE + 4) == D.group && emu_read8(BN6_GAMESTATE + 5) == D.number;
 	if (!arrived) return;
@@ -301,6 +396,10 @@ bool director_resume(void) {
 		if (!netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || layer.cell[cy][cx] != C_PATH)
 			x = D.start_x, y = D.start_y;
 		emu_warp(D.group, D.number, x, y, 4);
+		/* where they are, again; the arrival's words were said before */
+		begin_area(false);
+		D.act_resumed = true;
+		D.beat[0] = 0;
 		return true;
 	}
 	/* no state (a run from before the game engine): enter the layer fresh */
@@ -356,6 +455,9 @@ static bool follow_exit_warp(void) {
 	}
 	if (pending != 1 || emu_read8(BN6_WARP + 0x11) != 1) return false;
 	if (boss_beaten()) clear_card();
+	/* past the Nest's guardian: the net rebuilds (the next arrival says so;
+	 * counted with the next checkpoint, which a CONTINUE cannot undo) */
+	if (boss_beaten() && run.biome == BIOME_NEST) D.nest_cleared = true;
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
@@ -365,7 +467,45 @@ static bool follow_exit_warp(void) {
 	return true;
 }
 
+/* --talk NAME:FRAME,...: from the layer's frame FRAME, once no chat is
+ * open, the chat of its first NAME (npc shop heal programs gift challenge
+ * undernet gate; intro defeat reward for its guardian; status for L), for
+ * captures. */
+static void dev_talks(void) {
+	static unsigned done;
+	if (D.frame <= 1) done = 0;
+	if (!director_dev_talks || talk_busy() || emu_read8(BN6_CHATBOX)) return;
+	static const struct { const char *name; int type; } kinds[] = {
+		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
+		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
+	};
+	char buf[256];
+	snprintf(buf, sizeof buf, "%s", director_dev_talks);
+	int n = 0;
+	for (char *t = strtok(buf, ","); t; t = strtok(NULL, ","), ++n) {
+		char name[32];
+		int frame = 0;
+		if (sscanf(t, "%31[^:]:%d", name, &frame) != 2 || D.frame < frame || (done & (1u << n))) continue;
+		done |= 1u << n;
+		int script = -1;
+		for (unsigned i = 0; i < sizeof kinds / sizeof *kinds; ++i)
+			if (!strcmp(name, kinds[i].name)) script = D.objs.script_of[kinds[i].type];
+		if (!strcmp(name, "intro")) script = D.objs.guardian.intro;
+		else if (!strcmp(name, "defeat")) script = D.objs.guardian.defeat;
+		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
+		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
+		if (script < 0) { printf("--talk: no %s on this layer\n", name); continue; }
+		game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)script);
+		return;   /* (one a frame: the chat box opens on the next) */
+	}
+}
+
 static void end_run(void) {
+	/* what the summary tells: where, and by whom */
+	const char *area = guardian_area_in_text(run.biome, run.side_kind);
+	if (D.lost_to) snprintf(title_cause, sizeof title_cause, "by %s in %s", guardian(D.lost_to)->name, area);
+	else snprintf(title_cause, sizeof title_cause, "in %s", area);
+	title_new_best = run.depth > profile.best_depth;
 	runlog_run_end();
 	profile_record_run();
 	save_delete();
@@ -384,6 +524,7 @@ void director_update(void) {
 	int mode = main_mode();
 	if (mode == BN6_MODE_GAME_OVER && !D.gameover) {
 		D.gameover = true;
+		D.lost_to = boss_fighting() ? D.objs.guardian.navi : 0;
 		boss_lost();
 	}
 	if (D.gameover) {
@@ -434,13 +575,30 @@ void director_update(void) {
 		D.area_card = false;
 		area_card();
 	}
+	/* the arrival's words once the card has gone; Chaud's call once the
+	 * Secret Area's guardian is done */
+	talk_update();
+	if (!D.area_card && !cinema_busy() && !boss_cinematic() && !boss_fighting() && !talk_busy()) {
+		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) {
+			if (run.biome == BIOME_NEST) cinema_shake(30, 3);
+			D.beat[0] = 0;
+		} else if (D.secret_call && boss_done() &&
+			talk_start("@C Lan, it's Chaud. ProtoMan hasn't left my PET all day.|@C Whatever you just beat down there was a copy. Watch yourself.|"
+				"@M The Nest can even copy ProtoMan...|@L Then we'd better keep our guard up!", FACE_MEGAMAN)) {
+			D.secret_call = false;
+		}
+	}
+	dev_talks();
 	if (act_on_choices()) return;
-	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER) {
+	/* (never with a chat box open: a state would keep it, and the talk
+	 * slot's text is not in a state) */
+	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX)) {
 		D.checkpoint = false;
 		char path[600];
 		save_state_path(path, sizeof path);
 		save_run();
 		emu_save_state(path);
+		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}
 	/* on another map (a story warp the run does not use): back to the layer */
 	if (emu_read8(BN6_GAMESTATE + 4) != D.group || emu_read8(BN6_GAMESTATE + 5) != D.number) {

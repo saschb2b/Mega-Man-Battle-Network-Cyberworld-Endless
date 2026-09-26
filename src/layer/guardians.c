@@ -1,8 +1,11 @@
 #include "guardians.h"
 
 #include <stddef.h>
+#include <stdio.h>
 
+#include "net.h"
 #include "rivals.h"
+#include "text.h"
 #include "run.h"
 
 /* Mugshots share their index with the Navi's overworld sprite (list 6);
@@ -35,144 +38,169 @@ const Guardian *guardian(int navi) {
 }
 
 /* What each says: meeting MegaMan the first time, again after losing to
- * him, after beating him, as a stronger version, and when deleted. */
+ * him, after beating him, as a stronger version, and when deleted. They
+ * are the Nest's copies (docs/BOSSES.md), built from every battle the net
+ * has seen: they remember. */
 static const struct { const char *first, *rematch, *revenge, *stronger, *defeat; } lines[] = {
-	[1] = { "So you're the one\nclimbing the net.|Let's see if you\ncan take the heat!",
-		"You again! This\ntime I'll burn\nhotter!",
-		"Back for more\nburns? You never\nlearn!",
-		"My flames have\nno limit now!\nBurn to ash!",
-		"Tch... My fire\nwent out..." },
-	[2] = { "The current here\nanswers to me.|One jolt is all\nit takes!",
-		"Last time was a\nfluke. My power\nhas recharged!",
-		"You felt my\nvoltage before.\nFeel it again!",
-		"A million volts\nmore than before!\nPrepare yourself!",
-		"Short circuit...\nImpossible..." },
-	[3] = { "Heh. Fresh prey\ncame crawling in.|My claws will\nsplit you apart!",
-		"You got lucky.\nThe Swift Claw\nnever misses twice",
-		"Still in one\npiece? Let me fix\nthat.",
-		"I'm faster than\nyou can see now!",
-		"Too... slow...?\nNot me..." },
-	[4] = { "Target confirmed.\nMegaMan.EXE.|Commencing\ndeletion.",
-		"Deletion failed\nlast time. It\nwill not repeat.",
-		"You were deleted\nonce. Again is\na formality.",
-		"Deletion program\nupgraded. You\nwill not escape.",
-		"Error... Target\nnot... deleted..." },
-	[5] = { "Full steam ahead!\nWho's on my\ntracks?|All aboard for\nyour last ride!",
-		"You derailed me\nonce. Not again!\nChoo choo!",
-		"Heh, got run over\nlast time, huh?\nNext stop: you!",
-		"Engine overhauled!\nTop speed! Out\nof my way!",
-		"Engine... stall...\nEnd of the line..." },
-	[6] = { "Splash! This\nwater is mine!|I'll wash you\nright out!",
-		"You made waves\nlast time. Now\nI'll drown you!",
-		"Glub glub! Back\nfor another\nswim?",
-		"The tide rises!\nNo stopping it!",
-		"Bloop... I'm all\ndried up..." },
-	[7] = { "A warrior walks\ninto my forest.|Face me with\nhonor!",
-		"Your spirit beat\nmine once. My axe\nremembers.",
-		"The forest\nsleeps well since\nI felled you.",
-		"My spirit burns\nstronger now!",
-		"You fight with\ntrue honor..." },
-	[8] = { "Hohoho! A guest\nin my sky!|Let the wind\ncarry you off!",
-		"You rode out my\nstorm once. Not\nthis time!",
-		"Hohoho! Blown\naway before!\nAgain!",
-		"This gale could\ntopple mountains!",
-		"The wind... has\nturned..." },
-	[9] = { "Rumble rumble!\nYou're standing\non my turf!|I'll drill you\ninto the floor!",
-		"You dug me up\nlast time. I'm\ngoing deeper!",
-		"Buried you once!\nAnd I'll bury\nyou again!",
-		"New drill bit!\nNothing is too\nhard now!",
+	[1] = { "So you're the one diving through this net. Let's see if you can take the heat!",
+		"You put out my fire last time. Now I'll burn twice as hot!",
+		"Back for more burns? You never learn, do you?",
+		"The Nest stoked my flames even hotter. Burn to ash!",
+		"Tch... My fire... went out..." },
+	[2] = { "The current down here answers to me. One jolt is all it takes!",
+		"Last time was a fluke. I'm fully recharged!",
+		"You felt my voltage before. Feel it again!",
+		"A million volts more than before! Brace yourself!",
+		"Short circuit... Impossible..." },
+	[3] = { "Heh. Fresh prey came crawling in. My claws will split you apart!",
+		"You got lucky. The Swift Claw never misses twice!",
+		"Still in one piece? Let me fix that.",
+		"I'm faster than you can see now!",
+		"Too... slow...? Not me..." },
+	[4] = { "Target confirmed: MegaMan.EXE. Commencing deletion.",
+		"Deletion failed last time. That will not repeat.",
+		"I deleted you once. Doing it again is a formality.",
+		"Deletion program upgraded. You will not escape.",
+		"Error... Target... not... deleted..." },
+	[5] = { "Full steam ahead! Who's on my tracks?|All aboard for your last ride!",
+		"You derailed me once. Not again! Choo choo!",
+		"Heh, got run over last time, huh? Next stop: you!",
+		"Engine overhauled! Top speed! Out of my way!",
+		"Engine... stalled... End of the line..." },
+	[6] = { "Splash! Water is my element! I'll wash you right out!",
+		"You made waves last time. Now I'll sink you!",
+		"Glub glub! Back for another swim?",
+		"The tide is rising! Nothing can stop it!",
+		"Bloop... I'm all dried up..." },
+	[7] = { "A warrior walks into my path. Face me with honor!",
+		"Your spirit beat mine once. My axe remembers.",
+		"My axe felled you before. It will again.",
+		"My spirit burns stronger now!",
+		"You fight... with true honor..." },
+	[8] = { "Hohoho! A guest! Let my wind carry you off!",
+		"You rode out my storm once. Not this time!",
+		"Hohoho! Blown away before, blown away again!",
+		"This gale could topple mountains!",
+		"The wind... has turned..." },
+	[9] = { "Rumble rumble! You're standing on my turf!|I'll drill you into the floor!",
+		"You dug me up last time. I'm going deeper!",
+		"Buried you once! I'll bury you again!",
+		"New drill bit! Nothing is too hard now!",
 		"Drill... jammed..." },
-	[10] = { "Scrap! Junk!\nYou'll join my\ncollection!|Into the heap\nyou go!",
-		"You slipped out\nof my heap. It\nwon't happen again",
-		"You were such\nnice junk last\ntime!",
-		"My heap has\ngrown! It'll\ncrush you!",
-		"Just... junk...\nafter all..." },
-	[11] = { "MegaMan. Show me\nyour strength.|Draw your\nweapon.",
-		"You bested me\nonce. My blade\nhas been honed.",
-		"You fell to my\nblade before.\nRise higher.",
-		"...I have\nsurpassed my\nlimits. Come.",
-		"...Well done.\nGo on ahead." },
-	[12] = { "KABOOM! Did you\ncome for a show?|Then watch me\nblow it all up!",
-		"Your last trick\nwas explosive.\nMine are bigger!",
-		"Haha! Want to go\nup in smoke\nagain?",
-		"Bigger booms!\nHotter blasts!\nMy best show!",
-		"The show's...\nover...?" },
-	[13] = { "Dive! Dive!\nIntruder in the\ndeep!|Torpedoes ready!\nFire!",
-		"You sank my plans\nonce. Full\npower this time!",
-		"Surface again,\ndid you? Back\ndown you go!",
-		"Hull reinforced!\nI can't be sunk!",
-		"Taking on water...\nAbandon ship..." },
-	[14] = { "Welcome, welcome!\nThe show is about\nto begin!|And you are the\nmain act!",
-		"The crowd wants\na rematch! Let's\nnot disappoint!",
-		"Encore! Encore!\nLet's make you\ncry again!",
-		"A brand new act!\nEven scarier than\nthe last!",
-		"The curtain...\nfalls..." },
-	[15] = { "Order! The court\nis in session.|The defendant,\nMegaMan, stands\naccused!",
-		"The verdict was\noverturned once.\nNot on appeal!",
-		"Guilty then,\nguilty now! The\nsentence stands!",
-		"The law has been\nrewritten in my\nfavor!",
-		"Court... is...\nadjourned..." },
-	[16] = { "Fire, water,\nwood, lightning.|All the elements\nobey me!",
-		"You broke my\nharmony once. I\nhave rebalanced.",
-		"The elements\nrejected you.\nThey still do.",
-		"I have mastered\nevery element!",
-		"The elements...\nabandon me..." },
-	[18] = { "Soldier. This\nposition is held\nby me.|Your advance\nstops here!",
-		"You took this\nposition once. I\nhave re-planned.",
-		"The last campaign\nwas mine. So is\nthis one.",
-		"My forces have\ndoubled. Your\nodds have not.",
-		"A strategic...\nretreat..." },
+	[10] = { "Scrap! Junk! You'll make a fine addition to my heap!",
+		"You slipped out of my heap. It won't happen again!",
+		"You made such nice junk last time!",
+		"My heap has grown! It'll crush you!",
+		"Just... junk... after all..." },
+	[11] = { "MegaMan. Show me your strength. Draw your weapon.",
+		"You bested me once. My blade has been honed.",
+		"You fell to my blade before. Rise higher.",
+		"I have surpassed my limits. Come.",
+		"...Well done. Go on ahead." },
+	[12] = { "KABOOM! Came for the show?|Then watch me blow it all up!",
+		"Your last trick was explosive. Mine are bigger!",
+		"Haha! Want to go up in smoke again?",
+		"Bigger booms! Hotter blasts! My best show yet!",
+		"The show's... over...?" },
+	[13] = { "Dive! Dive! Intruder in the deep!|Torpedoes ready... Fire!",
+		"You sank my plans once. Full power this time!",
+		"Surfaced again, did you? Back down you go!",
+		"Hull reinforced! I can't be sunk!",
+		"Taking on water... Abandon ship..." },
+	[14] = { "Welcome, welcome! The show is about to begin...|...and you're the main act!",
+		"The crowd wants a rematch! Let's not disappoint!",
+		"Encore! Encore! Let's make you cry again!",
+		"A brand new act, even scarier than the last!",
+		"The curtain... falls..." },
+	[15] = { "Order! The court is in session.|The defendant, MegaMan, stands accused!",
+		"The verdict was overturned once. Not on appeal!",
+		"Guilty then, guilty now! The sentence stands!",
+		"The law has been rewritten in my favor!",
+		"Court... is... adjourned..." },
+	[16] = { "Fire, water, wood, lightning. All the elements obey me!",
+		"You broke my harmony once. I have rebalanced.",
+		"The elements rejected you. They still do.",
+		"I have mastered every element!",
+		"The elements... abandon me..." },
+	[18] = { "Soldier. This position is held by me. Your advance stops here!",
+		"You took this position once. I have revised my strategy.",
+		"The last campaign was mine. So is this one.",
+		"My forces have doubled. Your odds have not.",
+		"A strategic... retreat..." },
 };
 #define NLINES ((int)(sizeof lines / sizeof *lines))
 
 /* Rematches after many of MegaMan's wins: grudging respect. */
 static const char *const respect[] = {
-	"You again. You\nkeep getting\nstronger...|This time I\nwon't hold back!",
-	"How many times\nmust we fight?|Until one of us\nstops standing!",
-	"I've studied\nevery move you\nmade.|Let's see what\nyou learned!",
+	"You again. You keep getting stronger...|This time I won't hold back!",
+	"How many times must we fight?|Until one of us stops standing!",
+	"I've studied every move you've made.|Let's see what you've learned!",
 };
 
 /* MegaMan's answer, for the lines that give him one. */
 static const char *const replies[] = {
-	"I won't lose!", "Let's go!", "Bring it on!", "I'm ready!",
+	"I won't lose!", "Let's go!", "Bring it on!", "I'm ready this time!",
 };
 
-GuardianLine guardian_intro(int navi, int version) {
-	static char buf[256], who[8];
-	const Rival *r = rival(navi);
-	const char *s = NULL;
-	if (navi > 0 && navi < NLINES && lines[navi].first) {
-		if (!r->met) s = lines[navi].first;
-		else if (r->last == RIVAL_NAVI_WON) s = lines[navi].revenge;
-		else if (version > 0 && r->met % 2) s = lines[navi].stronger;
-		else if (r->megaman_won >= 3) s = respect[r->met % 3];
-		else s = lines[navi].rematch;
-	}
-	if (!s) s = "The way on is\nthrough me.|Prepare yourself!";
-	/* MegaMan answers now and then, never over a first meeting */
-	int n = 0;
-	const char *p = s;
-	for (; *p; ++p) n += *p == '|';
-	bool reply = r->met && r->met % 3 != 1;
-	int k = 0;
-	for (p = s; *p && k < (int)sizeof buf - 40; ++p) buf[k++] = *p;
-	buf[k] = 0;
-	for (int i = 0; i <= n && i < 6; ++i) who[i] = 'N';
-	who[n + 1] = 0;
-	if (reply && n < 5) {
-		const char *a = replies[r->met % 4];
-		buf[k++] = '|';
-		while (*a && k < (int)sizeof buf - 1) buf[k++] = *a++;
-		buf[k] = 0;
-		who[n + 1] = 'M';
-		who[n + 2] = 0;
-	}
-	return (GuardianLine){ buf, who };
+/* How MegaMan and Lan take a guardian they have never met: BN6's Link Navis
+ * and ProtoMan as friends in copied form, its villains, and the Navis of
+ * the other Cybeast's version, whose copies came out in a HeelNavi's shape. */
+static bool friendly(int navi) { return (navi >= 1 && navi <= 3) || navi == 5 || navi == 11; }
+int guardian_sprite(int navi) {
+	static const struct { uint8_t navi, sprite; } sprites[] = {
+		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
+		{ 11, 0x3B }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 },            /* Proto, Dive, Circus, Judge */
+		{ 18, 0x53 },                                                        /* Colonel */
+	};
+	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
+		if (sprites[i].navi == navi) return sprites[i].sprite;
+	return GUARDIAN_HEEL_SPRITE;
 }
 
-GuardianLine guardian_defeat(int navi) {
-	const char *s = navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
-	return (GuardianLine){ s, "N" };
+/* the navis who stand in a HeelNavi's shape */
+static bool misshapen(int navi) { return guardian_sprite(navi) == GUARDIAN_HEEL_SPRITE; }
+
+int guardian_face(int navi) {
+	const Guardian *g = guardian(navi);
+	return g->mugshot == GUARDIAN_NO_MUGSHOT ? FACE_HEEL : g->mugshot;
+}
+
+const char *guardian_intro(int navi, int version, int biome) {
+	static char buf[800];
+	const Rival *r = rival(navi);
+	const char *name = guardian(navi)->name;
+	const char *s = NULL;
+	if (navi > 0 && navi < NLINES && lines[navi].first) {
+		/* (a meeting without a result, MegaMan gone or the run over, is no
+		 * rematch) */
+		bool fought = r->megaman_won || r->navi_won;
+		if (!fought) s = lines[navi].first;
+		else if (r->last == RIVAL_NAVI_WON) s = lines[navi].revenge;
+		else if (version > 0 && r->megaman_won % 2) s = lines[navi].stronger;
+		else if (r->megaman_won >= 3) s = respect[r->megaman_won % 3];
+		else s = lines[navi].rematch;
+	}
+	if (!s) s = "The way on is through me. Prepare yourself!";
+	int k = 0;
+	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
+	/* the first meeting: who MegaMan and Lan see */
+	if (!r->megaman_won && !r->navi_won && !r->met) {
+		if (friendly(navi)) ADD("@M %s?! ...No. You're one of the Nest's copies!|", name);
+		else if (misshapen(navi)) ADD("@M That voice... it's %s! But that's a HeelNavi's body!|@L The Nest's copy didn't come out right!|", name);
+		else ADD("@L That's %s! Or a copy the Nest made of him...|", name);
+	}
+	/* the Nest's own guardian knows what it is */
+	if (biome == BIOME_NEST) ADD("The Nest built me from every battle you have fought.|");
+	ADD("%s", s);
+	/* MegaMan answers now and then, never over a first meeting */
+	if (r->met && r->met % 3 != 1) ADD("|@M %s", replies[r->met % 4]);
+	ADD("|@L Battle routine, set!|@M Execute!");
+	#undef ADD
+	return buf;
+}
+
+const char *guardian_defeat(int navi) {
+	return navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
 }
 
 const char *guardian_area_name(int biome) {
@@ -189,13 +217,22 @@ const char *guardian_area_name(int biome) {
 	return biome >= 0 && biome < BIOME_COUNT && names[biome] ? names[biome] : "the Net";
 }
 
+const char *guardian_area_in_text(int biome, int side) {
+	static char buf[32];
+	if (side == LAYER_UNDERNET) biome = BIOME_UNDERNET;
+	else if (side == LAYER_SECRET) biome = BIOME_SECRET;
+	bool the = biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET || biome == BIOME_SECRET || biome == BIOME_NEST;
+	snprintf(buf, sizeof buf, "%s%s", the ? "the " : "", guardian_area_name(biome));
+	return buf;
+}
+
 const char *guardian_area_motto(int biome) {
 	static const char *const mottos[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Where every net path begins", [BIOME_SEASIDE] = "Currents of the aquarium net",
 		[BIOME_SKY] = "Above the clouds of data", [BIOME_GREEN] = "Wild data, overgrown",
 		[BIOME_GRAVEYARD] = "Where deleted data rests", [BIOME_UNDERNET] = "The lawless depths",
-		[BIOME_SECRET] = "Beyond the sealed gate", [BIOME_NEST] = "Lair of the Cybeasts",
-		[BIOME_COMP] = "Circuits of a home comp", [BIOME_HOMEPAGE] = "Pages of the net's citizens",
+		[BIOME_SECRET] = "Where the strongest wait", [BIOME_NEST] = "Lair of the Cybeasts",
+		[BIOME_COMP] = "Circuits of a home comp", [BIOME_HOMEPAGE] = "The aquarium's own homepage",
 		[BIOME_COMP_B] = "Deep in the lab's machines",
 		[BIOME_ROBOT_COMP] = "The city's robots run here", [BIOME_AQUARIUM_COMP] = "Mazes of water and light",
 		[BIOME_JUDGE_COMP] = "Roots of the great tree", [BIOME_WEATHER_COMP] = "Where the forecast is made",

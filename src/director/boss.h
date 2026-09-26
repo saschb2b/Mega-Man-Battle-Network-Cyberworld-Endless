@@ -20,6 +20,10 @@ void boss_lost(void);
 /* The exit pad works: no guardian, or it is beaten and its data taken. */
 bool boss_exit_open(void);
 bool boss_beaten(void);
+/* The guardian's scene holds the stage (from its entrance to its logout). */
+bool boss_cinematic(void);
+/* Its Guardian Data has been taken. */
+bool boss_done(void);
 /* Where the test autopilot heads while the guardian stands: into the
  * arena, then to its Guardian Data (to check, *talk). */
 bool boss_goal(int *x, int *y, bool *talk);

@@ -87,5 +87,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
+/* The layer's place in its act, 0-2 (the Nest counts as a first). */
+int layer_in_act(int depth);
 
 #endif

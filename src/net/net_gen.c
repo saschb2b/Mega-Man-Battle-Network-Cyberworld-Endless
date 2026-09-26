@@ -20,6 +20,8 @@ int biome_for_depth(int depth) {
 	return run.biome_order[p / 3];
 }
 
+int layer_in_act(int depth) { return ((depth - 1) % CYCLE_LAYERS) % 3; }
+
 bool is_boss_depth(int depth) {
 	int p = (depth - 1) % CYCLE_LAYERS;
 	return p % 3 == 2 || p == 18;
@@ -152,7 +154,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
 	/* an act's three layers each in another of the area's layouts */
 	int planned = kind == LAYER_NORMAL
-		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / 3 + 1) * 0x9E3779B9u, (depth - 1) % 3)
+		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / CYCLE_LAYERS * 7 + p / 3 + 1) * 0x9E3779B9u, layer_in_act(depth))
 		: layout_pick(biome);
 	for (int attempt = 0; attempt < 12; ++attempt) {
 		memset(layer.cell, 0, sizeof layer.cell);
@@ -204,7 +206,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	/* Points of interest in the other rooms. */
 	/* each act's middle layer has the Net Dealer and a heal; its first often
 	 * a shop (docs/PROGRESSION.md) */
-	int biome_layer = (depth - 1) % 3;
+	int biome_layer = layer_in_act(depth);
 	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
 	bool heal = rng_range(0, 99) < (layer.boss_layer ? 70 : 30) || (kind == LAYER_NORMAL && pacing_heal_certain(depth));
 	bool trader = rng_range(0, 99) < 25;

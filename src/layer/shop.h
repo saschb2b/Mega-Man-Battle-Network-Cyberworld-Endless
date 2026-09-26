@@ -17,7 +17,7 @@ typedef struct {
 } ShopItem;
 
 #define SHOP_DEALER   0   /* shops the layers take over */
-#define SHOP_PROGRAMS 1
+#define SHOP_PROGRAMS 3   /* (its keeper's face is the technician navi's) */
 #define SHOP_MAX_ITEMS 8
 
 /* Writes the stock of shop `shop`; false before the game has set up its data. */

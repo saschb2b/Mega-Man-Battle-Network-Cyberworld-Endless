@@ -4,6 +4,32 @@
 
 First playable version.
 
+- A story for the run, the Endless Net: Dad's call on the first run, Lan
+  and MegaMan talking on arriving somewhere new (the first layer, the
+  Undernet, the Graveyard, the Nest, the side layers, the net rebuilt
+  after the Nest as Net V2 and on), Chaud's call after the Secret Area,
+  and the guardians as the Nest's copies of MegaMan's old battles. Every
+  chat box shows its speaker's face: Lan, MegaMan, Dad, Chaud, Mr. Prog,
+  the townsfolk, the bystanders, the Net Dealer's Normal Navi, the
+  NaviCust vendor's technician navi (with its own shop screen) and the
+  guardians. On the map L asks MegaMan where they are, what guards the
+  area and how much ScrtData they carry.
+- Bystander navis are other divers, with lines for the early, middle and
+  deep net and for a rebuilt one; no two on a layer say the same thing,
+  and every hint is true of this game. Services, choices and rewards talk
+  like the game does ("MegaMan got: ..."), the Secret Area gate counts
+  your ScrtData, and the Crosses and BeastOut come with their own words.
+- The run summary shows Lan, where and by whom MegaMan was deleted, the
+  layer reached and a new best; depths read "Layer N" everywhere. Area
+  cards fit long names, and cards wait out shops, the PET and battles.
+- Chat boxes that run past three lines turn the page evenly (two and two,
+  never three and a lone line), at the end of a sentence where they can.
+- From layer 20 on, acts begin where they should again: the second cycle's
+  act cards, easy opening battles, Net Dealer layers and layouts were one
+  layer off. The NaviCust vendor's and the gift's programs always come
+  from the game's full program list at their own prices, however many
+  layers came before.
+
 - The run begins in the real world, in Central Town or ACDC Town, each
   cut into pieces from the game's own map and set out again per run.
   Central Town: Lan steps out of his front door among Capcom's houses,

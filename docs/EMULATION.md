@@ -31,6 +31,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
+| `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
 
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,
@@ -38,7 +39,7 @@ objects, sprite list, warp list, jack-in table, check table
 `0x0803461C`, text archive `0x08040794` and music), clears the check
 flags `0x16C0`-`0x16CF`, rewrites jack-in destination 42 (`0x08099A00` +
 42 x 20) to the first layer, and
-rewrites the stock of the game's shops 0 and 1 (in RAM and
+rewrites the stock of the game's shops 0 and 3 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags
 (`0x1400`+) and choice flags (`0x1440`+) it uses, sets the flags that stop
 jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState
@@ -69,6 +70,17 @@ Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER
 the layer's start), and a checkpoint shortly after each arrival (`run.sav` plus
 the core's `run.state`). CONTINUE loads the state and enters the map again,
 so the game reloads it from the current build's tables.
+
+It also starts conversations of its own (`talk.c`): Lan and MegaMan on
+arriving somewhere new (the first layer, the Undernet and the Graveyard,
+the Nest, a side layer, a net rebuilt after the Nest), Chaud's call after
+the Secret Area's guardian, and MegaMan's word on where they are when L is
+pressed on the map (in battle L still opens the Custom screen). Each is
+built into the talk slot and run by the game's chat box
+(`BN6_CHAT_RUN_SCRIPT`), once the area card has gone and no guardian scene
+is playing; the player's keys only page it until the box closes. In the
+town the first conversation is the town's own (its text archive, Dad's
+call on the very first run).
 
 ## A new run: the town
 

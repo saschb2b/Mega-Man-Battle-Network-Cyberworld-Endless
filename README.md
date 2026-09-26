@@ -117,10 +117,18 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 | --- | --- | --- |
 | A | Talk, open Mystery Data | Use a chip |
 | B | Run | Fire the buster |
-| L / R | | Open the Custom screen |
+| L | Ask MegaMan where you are and what's ahead | Open the Custom screen |
+| R | Jack in (at the town's statue) | Open the Custom screen |
 | Start | Open the PET | Pause |
 
 ### A run
+
+A new stretch of net has opened under the town: the Endless Net. Its
+paths change every time someone jacks in, it only goes down, and
+everything in it is copied from the real net, the guardians too, built
+from every battle MegaMan has fought. Something at the bottom keeps
+copying. Dad calls the first time; after that Lan and MegaMan talk it
+over as they go, and L asks MegaMan where they are.
 
 A run begins in town: Central Town or ACDC Town, Capcom's own, set out a
 little differently each run, with shops, houses, townsfolk to talk to and
@@ -163,7 +171,7 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.
-- **Beast Out.** The Graveyard's guardian wakes the Cybeast, and Beast Out
+- **BeastOut.** The Graveyard's guardian wakes the Cybeast, and BeastOut
   joins the Custom screen.
 - **Chips.** Mystery Data, shops and traders draw from the whole chip
   library by rarity: Megas deeper down and, rarely, a Giga. Green Mystery
@@ -174,8 +182,8 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 
 | Place | What it does |
 | --- | --- |
-| Net Dealer (Mr. Prog) | The game's shop: chips, an HP Memory and SubChips |
-| Program vendor (Mr. Prog) | NaviCust programs from the game's own shops |
+| Net Dealer (a Normal Navi) | The game's shop: chips, an HP Memory and SubChips |
+| NaviCust vendor (a technician navi) | NaviCust programs from the game's own shops |
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |

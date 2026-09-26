@@ -22,6 +22,7 @@ typedef struct {
 	int nchoices;
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
+	int script_of[OBJ_GIFT + 1];   /* each kind's first talker's script, -1 none (for --talk) */
 } LayerObjs;
 
 /* Installs the current layer's objects in map (group, number). */

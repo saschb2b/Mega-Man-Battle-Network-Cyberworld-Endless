@@ -24,16 +24,16 @@ static int code_of(char c) {
 	}
 }
 
-void ta_begin(TextArchive *t) { t->len = 0; t->n = 0; }
+void ta_begin(TextArchive *t) { t->len = 0; t->n = 0; t->full = false; }
 
 int ta_script(TextArchive *t) {
-	if (t->n >= TEXT_MAX_SCRIPTS) return t->n - 1;
+	if (t->n >= TEXT_MAX_SCRIPTS) { t->full = true; return t->n - 1; }
 	t->off[t->n] = (uint16_t)t->len;
 	return t->n++;
 }
 
 void ta_bytes(TextArchive *t, const uint8_t *b, int n) {
-	if (t->len + n > TEXT_MAX_BYTES) return;
+	if (t->len + n > TEXT_MAX_BYTES) { t->full = true; return; }
 	memcpy(t->buf + t->len, b, (size_t)n);
 	t->len += n;
 }
@@ -51,14 +51,26 @@ void ta_clear(TextArchive *t) { static const uint8_t b[] = { 0xF2 }; ta_bytes(t,
 void ta_end(TextArchive *t) { static const uint8_t b[] = { 0xE6 }; ta_bytes(t, b, 1); }
 void ta_mugshot(TextArchive *t, int m) { uint8_t b[] = { 0xF5, 0x00, (uint8_t)m }; ta_bytes(t, b, 3); }
 
-/* Word wrap to the chat box: 16 characters a line, three lines a page. */
-#define LINE_CHARS 16
+/* Word wrap to the chat box: its text fits 22 characters a line (8 pixels
+ * each, beside the face's place, which the box keeps with or without a
+ * face); 20 leaves the page's arrow its room. Three lines a page. */
+#define LINE_CHARS 20
 
-/* `s` word-wrapped into the open box, a new page every three lines. */
+#define MAX_LINES 24
+
+/* Whether a line ends a sentence (a good place to turn the page). */
+static bool sentence_end(const char *line) {
+	size_t n = strlen(line);
+	return n && (line[n - 1] == '.' || line[n - 1] == '!' || line[n - 1] == '?');
+}
+
+/* `s` word-wrapped into the open box. Pages hold three lines; a box that
+ * does not fill its pages evenly spreads its lines over them (four lines
+ * are two pages of two, never three and one), turning where a sentence
+ * ends if it can. */
 static void wrap(TextArchive *t, const char *s) {
-	int lines = 0;
-	char line[LINE_CHARS + 1];
-	int n = 0;
+	static char lines[MAX_LINES][LINE_CHARS + 1];
+	int nl = 0, n = 0;
 	const char *p = s;
 	for (;;) {
 		/* the next word */
@@ -67,58 +79,93 @@ static void wrap(TextArchive *t, const char *s) {
 		while (*p && *p != ' ' && *p != '\n') ++p;
 		int wl = (int)(p - w);
 		bool brk = *p == '\n' || !*p;
-		if (wl && n + (n ? 1 : 0) + wl > LINE_CHARS && n) {
-			if (lines == 3) { ta_wait(t); ta_clear(t); lines = 0; }
-			if (lines) ta_text(t, "\n");
-			line[n] = 0; ta_text(t, line); ++lines; n = 0;
+		if (wl && n + (n ? 1 : 0) + wl > LINE_CHARS && n && nl < MAX_LINES) { lines[nl++][n] = 0; n = 0; }
+		if (wl && nl < MAX_LINES) {
+			if (n) lines[nl][n++] = ' ';
+			for (int k = 0; k < wl && n < LINE_CHARS; ++k) lines[nl][n++] = w[k];
 		}
-		if (wl) {
-			if (n) line[n++] = ' ';
-			for (int k = 0; k < wl && n < LINE_CHARS; ++k) line[n++] = w[k];
-		}
-		if (brk && n) {
-			if (lines == 3) { ta_wait(t); ta_clear(t); lines = 0; }
-			if (lines) ta_text(t, "\n");
-			line[n] = 0; ta_text(t, line); ++lines; n = 0;
-		}
+		if (brk && n && nl < MAX_LINES) { lines[nl++][n] = 0; n = 0; }
 		if (!*p) break;
 		if (*p == '\n') ++p;
 	}
+	/* the fewest pages, then the page breaks that cost least: a page of one
+	 * line, a page turned mid-sentence */
+	int pages = (nl + 2) / 3;
+	enum { BIG = 1 << 20 };
+	static int cost[MAX_LINES + 1][MAX_LINES / 3 + 2], from[MAX_LINES + 1][MAX_LINES / 3 + 2];
+	for (int i = 0; i <= nl; ++i)
+		for (int k = 0; k <= pages; ++k) cost[i][k] = BIG;
+	cost[0][0] = 0;
+	for (int k = 1; k <= pages; ++k)
+		for (int i = 1; i <= nl; ++i)
+			for (int take = 1; take <= 3 && take <= i; ++take) {
+				int prev = cost[i - take][k - 1];
+				if (prev >= BIG) continue;
+				int c = prev + (take == 1 && nl > 1 ? 3 : 0) + (i < nl && !sentence_end(lines[i - 1]) ? 2 : 0);
+				if (c < cost[i][k]) { cost[i][k] = c; from[i][k] = i - take; }
+			}
+	int ends[MAX_LINES / 3 + 2];
+	for (int k = pages, i = nl; k > 0; i = from[i][k], --k) ends[k - 1] = i;
+	for (int k = 0, i = 0; k < pages; ++k) {
+		if (k) { ta_wait(t); ta_clear(t); }
+		for (int first = i; i < ends[k]; ++i) {
+			if (i > first) ta_text(t, "\n");
+			ta_text(t, lines[i]);
+		}
+	}
 }
 
-int ta_say(TextArchive *t, int mugshot, const char *s) {
-	int i = ta_script(t);
-	if (mugshot >= 0) ta_mugshot(t, mugshot);
-	ta_open(t);
+void ta_page(TextArchive *t, int face, const char *s, bool first) {
+	static const uint8_t hide[] = { 0xF5, 0x01 };
+	if (face >= 0) ta_mugshot(t, face);
+	else ta_bytes(t, hide, sizeof hide);
+	if (first) ta_open(t); else ta_clear(t);
 	wrap(t, s);
 	ta_wait(t);
+}
+
+/* The face a box's speaker mark names, or `face`. */
+static int speaker(const char **s, int face) {
+	static const struct { char mark; int face; } marks[] = {
+		{ 'L', FACE_LAN }, { 'M', FACE_MEGAMAN }, { 'D', FACE_DAD }, { 'P', FACE_PROG }, { 'B', FACE_BEAST },
+		{ 'C', FACE_CHAUD }, { 'Y', FACE_MAYL }, { 'H', FACE_HEEL }, { 'N', FACE_NONE },
+	};
+	const char *p = *s;
+	if (p[0] != '@') return face;
+	for (unsigned i = 0; i < sizeof marks / sizeof *marks; ++i)
+		if (p[1] == marks[i].mark) {
+			p += 2;
+			while (*p == ' ') ++p;
+			*s = p;
+			return marks[i].face;
+		}
+	return face;
+}
+
+void ta_pages(TextArchive *t, const char *boxes, int face, bool *first) {
+	char box[200];
+	int k = 0;
+	for (const char *p = boxes;; ++p) {
+		if (*p && *p != '|') { if (k < (int)sizeof box - 1) box[k++] = *p; continue; }
+		box[k] = 0;
+		k = 0;
+		const char *b = box;
+		int f = speaker(&b, face);
+		ta_page(t, f, b, *first);
+		*first = false;
+		if (!*p) break;
+	}
+}
+
+int ta_talk(TextArchive *t, const char *boxes, int face) {
+	int i = ta_script(t);
+	bool first = true;
+	ta_pages(t, boxes, face, &first);
 	ta_end(t);
 	return i;
 }
 
-int ta_talk(TextArchive *t, const char *boxes, const int *mugshots) {
-	int i = ta_script(t);
-	char box[160];
-	int k = 0;
-	bool first = true;
-	for (const char *p = boxes;; ++p) {
-		/* the box wraps its words itself */
-		if (*p && *p != '|') { if (k < (int)sizeof box - 1) box[k++] = *p == '\n' ? ' ' : *p; continue; }
-		box[k] = 0;
-		k = 0;
-		static const uint8_t hide[] = { 0xF5, 0x01 };
-		if (*mugshots >= 0) ta_mugshot(t, *mugshots);
-		else ta_bytes(t, hide, sizeof hide);
-		++mugshots;
-		if (first) ta_open(t); else ta_clear(t);
-		first = false;
-		wrap(t, box);
-		ta_wait(t);
-		if (!*p) break;
-	}
-	ta_end(t);
-	return i;
-}
+int ta_say(TextArchive *t, int face, const char *s) { return ta_talk(t, s, face); }
 
 int ta_build(const TextArchive *t, uint8_t *out) {
 	int head = t->n * 2;

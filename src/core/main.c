@@ -212,10 +212,12 @@ static struct {
 /* After one Escape: a strip over the picture until the second quits. */
 static void quit_prompt_draw(void) {
 	if (P.quit_prompt <= 0 || !R.data) return;
+	/* (a run is saved from its first layer on) */
+	bool saved = director_on_layer();
 	int y = P.core_y + CORE_H - 30;
-	fill_rect(0, y, P.w, 26, rgba(0, 0, 0, 200));
+	fill_rect(0, y, P.w, saved ? 26 : 14, rgba(0, 0, 0, 200));
 	text_draw(P.w / 2, y + 2, "Press Esc again to quit", WHITE, TEXT_CENTER);
-	text_draw(P.w / 2, y + 14, "Run saved at layer start", rgba(170, 200, 255, 255), TEXT_CENTER);
+	if (saved) text_draw(P.w / 2, y + 14, "Run saved at layer start", rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
 /* One game frame: scenes, input, update, sound, drawing. False once the
@@ -315,6 +317,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
+		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
 		else if (!strcmp(a, "--atlas") && v) { atlas_spec = v; ++i; }
 		else if (!strcmp(a, "--pacing") && v) { pacing_spec = v; ++i; }
@@ -426,6 +429,17 @@ int main(int argc, char **argv) {
 		/* "town": a new run from the town, as NEW GAME starts one */
 		bool town = !strcmp(start_scene, "town");
 		const Scene *s = town ? &scene_emu : scene_by_name(start_scene);
+		/* "summary": the title's summary of a made-up run lost at --run-depth */
+		if (!strcmp(start_scene, "summary")) {
+			run_new(seed ? seed : 1);
+			run.depth = run_depth > 0 ? run_depth : 12;
+			run.viruses_deleted = run.depth * 6;
+			run.bosses_beaten = run.depth / 3;
+			snprintf(title_cause, sizeof title_cause, "by HeatMan in the Graveyard");
+			title_new_best = run.depth > profile.best_depth;
+			title_summary = true;
+			s = &scene_title;
+		}
 		if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
 		if (town) emu_start_in_town = true;
 		scene_set(s ? s : &scene_title);

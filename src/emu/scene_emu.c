@@ -51,7 +51,7 @@ static void enter(void) {
 static void leave(void) { audio_external(NULL); }
 
 static void update(void) {
-	uint32_t keys = devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+	uint32_t keys = director_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons()));
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
 	/* (fast-forwarded: several game frames to one shown) */
 	for (int i = 0; i < dev.speed; ++i) {
