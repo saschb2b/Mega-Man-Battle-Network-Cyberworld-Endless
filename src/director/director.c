@@ -70,7 +70,7 @@ static struct {
 	char beat[640];        /* what they say on arriving, once the card has gone */
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
-	bool l_held;           /* L was down last frame */
+	bool l_held, r_held;   /* L and R were down last frame */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 } D;
@@ -121,7 +121,8 @@ static const char *status_words(void) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (D.town) {
-		ADD("@M The port's by the %s, Lan. Let's jack in!", town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
+		ADD("@M The port's by the %s, Lan.|@M Stand next to the statue and press R to jack me in!",
+			town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
 		return buf;
 	}
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
@@ -304,8 +305,20 @@ void director_describe(FILE *f) {
 
 uint32_t director_keys(uint32_t keys) {
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
+	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
 	D.l_held = l;
+	D.r_held = r;
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
+	/* R in the town away from the port: MegaMan says where it is (the game
+	 * itself does nothing there) */
+	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&
+		!town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
+		static char buf[160];
+		snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!",
+			town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
+		talk_start(buf, FACE_MEGAMAN);
+		return keys & ~KEY_R;
+	}
 	/* on the map L is MegaMan's word on where they are: the game's own
 	 * has no lines for this story */
 	keys &= ~KEY_L;

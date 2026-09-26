@@ -11,6 +11,9 @@ playtests by a person or an agent, and for reproducing what they found.
       path of a picture of the screen (with --every N, a sheet of pictures
       taken every N frames)
   tools/play.py stop NAME
+  tools/play.py replay FROM NAME [--until FRAME]
+      a new game NAME that replays FROM's session (its seed, its data as it
+      began, its commands) up to the batch that reaches FRAME
 
 Commands, apart by ';':
   press BTN [N]   hold BTN N frames (6), then let go 6 frames
@@ -26,6 +29,8 @@ screen in battle.
 Every command is kept in NAME/history.txt; with the seed and NAME/data0
 (the data folder as the session began) a session replays exactly.
 """
+import contextlib
+import io
 import os
 import shutil
 import signal
@@ -223,15 +228,47 @@ def cmd_do(name, rest):
             items.append(f'{s[0]} {s[1]}'.strip())
     state = os.path.join(h, 'state.txt')
     items.append(f'state {state}')
-    with open(os.path.join(h, 'history.txt'), 'a') as f:
-        f.write(commands + (f'  # every {every}' if every else '') + '\n')
     answer = talk(h, ';'.join(items))
+    with open(os.path.join(h, 'history.txt'), 'a') as f:
+        f.write(commands + (f'  # every {every}' if every else '') + f'  # {answer}\n')
     out = os.path.join(h, 'shots', f'{n:04d}.png')
     picture(shots, out)
     print(open(state).read().strip())
     print(f'picture {out}')
     if not answer.startswith('ok'):
         print('answer:', answer)
+
+
+def cmd_replay(name, rest):
+    """Replays session `name` into a new game rest[0]."""
+    src, dst = home(name), rest[0]
+    until = int(rest[rest.index('--until') + 1]) if '--until' in rest else None
+    lines = open(os.path.join(src, 'history.txt')).read().splitlines()
+    seed = int(lines[0].split()[-1])
+    args = lines[1].split(' ', 2)[2].split() if len(lines) > 1 and lines[1].startswith('# args ') and len(lines[1]) > 7 else []
+    h = home(dst)
+    if os.path.exists(os.path.join(h, 'pid')):
+        cmd_stop(dst)
+    if os.path.isdir(os.path.join(h, 'data')):
+        shutil.rmtree(os.path.join(h, 'data'))
+    shutil.copytree(os.path.join(src, 'data0'), os.path.join(h, 'data'))
+    cmd_start(dst, ['--seed', str(seed)] + (['--'] + args if args else []))
+    for line in lines[2:]:
+        body, _, rest_ = line.partition('  # ')
+        frame = None
+        for part in line.split('  # '):
+            if part.startswith('ok '):
+                frame = int(part.split()[1])
+        every = 0
+        if rest_.startswith('every '):
+            every = int(rest_.split()[1])
+        if body.strip() in ('', 'wait 1') and frame is not None and frame <= 2:
+            continue
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_do(dst, [body] + (['--every', str(every)] if every else []))
+        if until is not None and frame is not None and frame >= until:
+            break
+    cmd_do(dst, ['wait 1'])
 
 
 def cmd_stop(name):
@@ -247,10 +284,10 @@ def cmd_stop(name):
 
 
 def main():
-    if len(sys.argv) < 3 or sys.argv[1] not in ('start', 'do', 'stop'):
+    if len(sys.argv) < 3 or sys.argv[1] not in ('start', 'do', 'stop', 'replay'):
         sys.exit(__doc__)
     op, name, rest = sys.argv[1], sys.argv[2], sys.argv[3:]
-    {'start': cmd_start, 'do': cmd_do, 'stop': lambda n, r: cmd_stop(n)}[op](name, rest)
+    {'start': cmd_start, 'do': cmd_do, 'stop': lambda n, r: cmd_stop(n), 'replay': cmd_replay}[op](name, rest)
 
 
 if __name__ == '__main__':

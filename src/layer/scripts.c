@@ -221,6 +221,7 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
+	ta_page(t, FACE_PROG, "INSTALL IT FROM THE NAVICUST IN YOUR PET!", false);
 	flag_set(t, flag);
 	ta_end(t);
 
@@ -229,7 +230,8 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	ta_bytes(t, done, sizeof done);
 	first = true;
 	ta_pages(t, "HELLO, MEGAMAN! I'M DR. HIKARI'S DIVE SUPPORT PROGRAM!|"
-		"EVERY DIVE STARTS FROM SCRATCH, SO I'VE GOT ONE GIFT FOR YOU.", FACE_PROG, &first);
+		"EVERY DIVE STARTS FROM SCRATCH, SO HERE'S A GIFT!|"
+		"PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", FACE_PROG, &first);
 	if (comfort) {
 		/* the last dive ended early: a little more help */
 		ta_page(t, FACE_PROG, "MY LOGS SAY YOUR LAST DIVE ENDED EARLY. TAKE THIS TOO!", false);

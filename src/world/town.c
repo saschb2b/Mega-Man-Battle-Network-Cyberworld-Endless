@@ -213,6 +213,7 @@ struct TownStyle {
 	unsigned jack_ins;                  /* the original's jack-in points kept: bit n for 0x40 + n */
 	int front[4];                       /* the landmark's front (the original's cells x0, y0, x1, y1):
 	                                     * R jacks in anywhere Lan stands there */
+	int statue[4];                      /* the statue's own cells: R jacks in all round it too */
 	TownMatOf mat_of;
 	void (*design)(void);
 	int start_x, start_y, start_face;   /* where Lan arrives */
@@ -392,9 +393,9 @@ static const char *const acdc_checks[16] = {
 #define FOLK(list) list, (int)(sizeof list / sizeof *list)
 
 static const Style styles[] = {
-	{ 0x01, 0x00, 0x03, 1 << 0, { 12, -9, 16, -2 }, central_mat, design_central, -40, 266, FACE_SW, FOLK(central_folk), central_checks,
+	{ 0x01, 0x00, 0x03, 1 << 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW, FOLK(central_folk), central_checks,
 	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } } },
-	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, { -23, -10, -17, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW, FOLK(acdc_folk), acdc_checks,
+	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW, FOLK(acdc_folk), acdc_checks,
 	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } } },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
@@ -531,13 +532,18 @@ static void carry(void) {
 		 * original has the statue's check), and every point is the town's
 		 * one: n = 0 */
 		const int *f = T.style->front;
+		/* (the front, and two cells all round the statue: a player walks up
+		 * to it from any side) */
+		const int *st = T.style->statue;
+		#define PORT_CELL(cx, cy) (((cx) >= f[0] && (cy) >= f[1] && (cx) <= f[2] && (cy) <= f[3]) || \
+			((cx) >= st[0] - 2 && (cy) >= st[1] - 2 && (cx) <= st[2] + 2 && (cy) <= st[3] + 2))
 		for (int k = 0; k < a->nsec[3]; ++k) {
 			const CoordCell *c = &a->sec[3][k];
 			int cx = fdiv(c->x, 8), cy = fdiv(c->y, 8);
 			bool jack = c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 && (p->flags & F_JACK_IN) &&
 				(T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1);
 			bool check = c->value >= CHECK_TRIGGER && T.style->checks[c->value - CHECK_TRIGGER];
-			bool front = cx >= f[0] && cy >= f[1] && cx <= f[2] && cy <= f[3];
+			bool front = PORT_CELL(cx, cy) && townsrc_walk(T.book, cx, cy);
 			if (!(jack || check) || front || !in_source(p, cx, cy) || T.ntrig >= MAX_TRIG) continue;
 			CoordCell o = *c;
 			o.x = (int16_t)(c->x + dx * 8);
@@ -546,10 +552,13 @@ static void carry(void) {
 			if (jack) o.value = JACK_IN_TRIGGER | 0x80;
 			T.trig[T.ntrig++] = o;
 		}
-		for (int cy = f[1]; cy <= f[3] && (p->flags & F_JACK_IN); ++cy)
-			for (int cx = f[0]; cx <= f[2]; ++cx)
-				if (in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG)
+		int x0 = f[0] < st[0] - 2 ? f[0] : st[0] - 2, y0 = f[1] < st[1] - 2 ? f[1] : st[1] - 2;
+		int x1 = f[2] > st[2] + 2 ? f[2] : st[2] + 2, y1 = f[3] > st[3] + 2 ? f[3] : st[3] + 2;
+		for (int cy = y0; cy <= y1 && (p->flags & F_JACK_IN); ++cy)
+			for (int cx = x0; cx <= x1; ++cx)
+				if (PORT_CELL(cx, cy) && in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG)
 					T.trig[T.ntrig++] = (CoordCell){ (int16_t)((cx + dx) * 8), (int16_t)((cy + dy) * 8), 0, JACK_IN_TRIGGER, 8, 0x11 };
+		#undef PORT_CELL
 		/* trees and the statue: the game's own map objects */
 		for (int k = 0; k < T.nsrc_obj && T.nobj < MAX_OBJS; ++k) {
 			const uint8_t *r = T.src_obj[k];
@@ -786,6 +795,14 @@ uint32_t *town_render(int *w, int *h) {
 int town_triggers(const CoordCell **cells) {
 	*cells = T.trig;
 	return T.ntrig;
+}
+
+bool town_on_port(int x, int y) {
+	for (int i = 0; i < T.ntrig; ++i) {
+		const CoordCell *c = &T.trig[i];
+		if ((c->value & 0x7F) == JACK_IN_TRIGGER && x >= c->x && y >= c->y && x < c->x + 8 && y < c->y + 8) return true;
+	}
+	return false;
 }
 
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx) {
