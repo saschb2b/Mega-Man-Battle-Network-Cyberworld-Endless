@@ -37,6 +37,16 @@ static int family_stage(int family) {
 	return family >= 0 && family < 32 ? stage[family] : 3;
 }
 
+/* How many viruses a formation sets out (not its rocks and cubes). */
+static int viruses_in(const Formation *f) {
+	int n = 0;
+	for (int k = 0; k < f->n; ++k) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		if (row[1] == 0 && row[2] >= 1 && row[2] <= 29) ++n;
+	}
+	return n;
+}
+
 static bool reached(const Formation *f, int allowed) {
 	for (int k = 0; k < f->n; ++k) {
 		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
@@ -104,13 +114,14 @@ static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
 /* Each formation's version inside the band (fit[i], -1 for none), and their
  * weight together: the ones that reach the band's aim if any do, else the
  * lighter ones. `skip` is left out. */
-static int weigh(const Formation *list, int n, int depth, int target, PacingBand band, int allowed, int skip, int8_t fit[MAX_FIT]) {
+static int weigh(const Formation *list, int n, int depth, int target, PacingBand band, int allowed, int skip, int most,
+                 int8_t fit[MAX_FIT]) {
 	static uint8_t inside[MAX_FIT];
 	int in_total = 0, any_total = 0;
 	for (int i = 0; i < n && i < MAX_FIT; ++i) {
 		fit[i] = -1;
 		inside[i] = 0;
-		if (i == skip || list[i].navi || !reached(&list[i], allowed)) continue;
+		if (i == skip || list[i].navi || !reached(&list[i], allowed) || viruses_in(&list[i]) > most) continue;
 		for (int v = target; v >= 0; --v) {
 			Encounter t;
 			int hp, dmg;
@@ -159,12 +170,18 @@ static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
 	static int8_t fit[MAX_FIT];
 	PacingBand band = pacing_band(depth, challenge, easy);
 	int total = 0;
-	for (int widen = 0; widen < 4 && !total; ++widen) {
-		if (widen == 3) allowed = 3;   /* an area of late viruses only */
-		/* not the last battle again, unless nothing else fits */
-		total = weigh(list, n, depth, target, band, allowed, biome == last_biome ? last_pick : -1, fit);
-		if (!total) total = weigh(list, n, depth, target, band, allowed, -1, fit);
-		band = pacing_band_wider(band);
+	/* an opening battle sets out two viruses at most, where the area has
+	 * such battles */
+	for (int most = easy ? 2 : 9; !total && most <= 9; most = 9) {
+		PacingBand b = band;
+		for (int widen = 0; widen < 4 && !total; ++widen) {
+			int allow = widen == 3 ? 3 : allowed;   /* an area of late viruses only */
+			/* not the last battle again, unless nothing else fits */
+			total = weigh(list, n, depth, target, b, allow, biome == last_biome ? last_pick : -1, most, fit);
+			if (!total) total = weigh(list, n, depth, target, b, allow, -1, most, fit);
+			b = pacing_band_wider(b);
+		}
+		if (most == 9) break;
 	}
 	if (!total) return false;
 	int roll = rng_range(0, total - 1), pick = -1;

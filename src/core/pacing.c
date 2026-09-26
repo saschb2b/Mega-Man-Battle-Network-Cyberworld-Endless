@@ -16,9 +16,10 @@ int pacing_act(int depth) {
 int pacing_loop(int depth) { return (depth - 1) / CYCLE_LAYERS; }
 
 /* per act: HP aimed for, HP at most, the strongest virus's damage at most
- * (about 40% of MegaMan's HP then) */
+ * (about 40% of MegaMan's HP then; in the first act, with the starting
+ * folder, a third less: a playtest lost its first battle to two 20s) */
 static const PacingBand bands[PACING_ACTS] = {
-	{ 100, 200, 50 }, { 150, 280, 80 }, { 200, 360, 120 }, { 280, 420, 160 },
+	{ 90, 200, 30 }, { 150, 280, 80 }, { 200, 360, 120 }, { 280, 420, 160 },
 	{ 350, 500, 200 }, { 400, 580, 240 }, { 450, 650, 280 },
 };
 
@@ -35,7 +36,8 @@ PacingBand pacing_band(int depth, bool challenge, bool easy) {
 	PacingBand b = bands[act];
 	if (challenge) b = act + 1 < PACING_ACTS ? bands[act + 1] : pacing_band_wider(b);
 	b = scaled(b, loop);
-	if (easy) b.hi = b.lo + (b.hi - b.lo) / 2;
+	/* an opening battle: the band's lower half, and softer hits */
+	if (easy) { b.hi = b.lo + (b.hi - b.lo) / 2; b.cap = b.cap * 2 / 3; }
 	return b;
 }
 
@@ -59,8 +61,9 @@ bool pacing_rare(int depth, int roll) {
 
 void pacing_area_order(uint8_t out[4]) {
 	/* by the HP of the areas' own battles (docs/PROGRESSION.md) */
-	uint8_t opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_SKY_HP, BIOME_COMP };
-	uint8_t middle[] = { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B };
+	/* (Sky HP's battles all come in threes of 200 HP: not a first act's) */
+	uint8_t opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_COMP };
+	uint8_t middle[] = { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP };
 	uint8_t late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
 	enum { NO = sizeof opening, NM = sizeof middle, NL = sizeof late };
 	uint8_t pool[NO + NM + NL];

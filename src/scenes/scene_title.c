@@ -372,10 +372,12 @@ static void draw(void) {
 			text_draw(lx, y0 + 88, "Best", gold, TEXT_LEFT);
 			text_drawf(rx, y0 + 88, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
 		}
+		/* Dad's backup, as his call promised, and Lan's word */
+		text_draw(x, y0 + 100, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
 		const char *said = title_new_best ? "Our deepest dive yet, MegaMan!"
-			: run.depth <= 3 ? "Let's jack in again, MegaMan!"
+			: run.depth <= 2 ? "That was rough... Let's try again!"
 			: "We'll get further next time!";
-		text_draw(x, y0 + 106, said, sky, TEXT_CENTER);
+		text_draw(x, y0 + 112, said, WHITE, TEXT_CENTER);
 		return;
 	}
 	if (profile.best_depth > 0)

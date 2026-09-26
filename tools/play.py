@@ -43,6 +43,7 @@ BINARY = os.path.join(ROOT, 'build', 'linux', 'cyberworld')
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
+MAX_SHOTS = 24
 
 
 def home(name):
@@ -214,7 +215,12 @@ def cmd_do(name, rest):
     commands = ' ; '.join(rest)
     seq = steps(commands)
     if every:
+        # at most MAX_SHOTS pictures: a longer batch spaces them out
+        frames = sum(s[0] for s in seq if s != 'shot')
+        every = max(every, -(-frames // MAX_SHOTS))
         seq = split_every(seq, every)
+    while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
+        seq.remove('shot')
     if not seq or seq[-1] != 'shot':
         seq.append('shot')
     shots, items = [], []

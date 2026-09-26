@@ -123,7 +123,7 @@ const Scene scene_error = { "error", NULL, error_update, error_draw, NULL };
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
 typedef struct { int frames; uint32_t buttons; char shot[160], state[160]; } InputStep;
-static InputStep script[512];
+static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
 static uint32_t parse_buttons(const char *s) {
@@ -214,7 +214,7 @@ static bool remote_open(const char *dir) {
  * "quit"; items apart by ';'. */
 static void remote_parse(char *line) {
 	script_len = script_pos = 0;
-	for (char *tok = strtok(line, ";\n"); tok && script_len < 512; tok = strtok(NULL, ";\n")) {
+	for (char *tok = strtok(line, ";\n"); tok && script_len < (int)(sizeof script / sizeof *script); tok = strtok(NULL, ";\n")) {
 		while (*tok == ' ') ++tok;
 		InputStep *s = &script[script_len];
 		memset(s, 0, sizeof *s);
@@ -242,7 +242,7 @@ static void remote_tick(void) {
 			if (write(remote_out, ok, (size_t)n) < 0) { P.quit = true; return; }
 			remote_answer = false;
 		}
-		char line[4096];
+		static char line[1 << 17];   /* (a sheet of pictures names every one) */
 		int n = 0;
 		while (n < (int)sizeof line - 1) {
 			char c;

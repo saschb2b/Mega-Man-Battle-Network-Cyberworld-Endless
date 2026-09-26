@@ -596,7 +596,8 @@ static void end_run(void) {
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
 	if (D.lost_to) snprintf(title_cause, sizeof title_cause, "by %s in %s", guardian(D.lost_to)->name, area);
 	else snprintf(title_cause, sizeof title_cause, "in %s", area);
-	title_new_best = run.depth > profile.best_depth;
+	/* (a first run is no record to beat) */
+	title_new_best = profile.runs > 0 && run.depth > profile.best_depth;
 	runlog_run_end();
 	profile_record_run();
 	save_delete();

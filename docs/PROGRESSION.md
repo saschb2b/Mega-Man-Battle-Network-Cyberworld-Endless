@@ -210,7 +210,7 @@ bought; the value before this structure is in brackets.
 
 | Act | Layers | MegaMan max HP | HP per battle | Hardest hit | Versions | Guardian |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1-3 | 100 (100) | 100-200 | 50 | V1 | 400-600 V1 |
+| 1 | 1-3 | 100 (100) | 90-200 | 30 | V1 | 400-600 V1 |
 | 2 | 4-6 | 200 (160) | 150-280 | 80 | V1 | 600-800 V1 |
 | 3 | 7-9 | 300 (220) | 200-360 | 120 | V1-V2 | 800-1000 V1 |
 | 4 | 10-12 | 400 (280) | 280-420 | 160 | V2 | 1100-1300 (Colonel V1, EX of the 800s) |
@@ -221,7 +221,9 @@ bought; the value before this structure is in brackets.
 "Hardest hit" is the damage value of the strongest virus in a formation,
 kept to about 40% of MegaMan's HP, so no single hit takes more than half.
 At act 1 that keeps Puffy, Trumpy, WindBox and ScarCrow (80-100 damage)
-out until MegaMan has grown.
+out until MegaMan has grown. The first act allows a third of MegaMan's HP:
+with the starting folder a playtester lost the run's first battle to two
+viruses hitting for 20.
 
 ### Choosing battles
 
@@ -233,8 +235,9 @@ not fit even at V1 is left out on that layer. If an area leaves nothing,
 the band widens by one step before any formation is allowed.
 
 Two more rules from Slay the Spire: the first two battles of a run, and the
-first battle after each guardian, come from the lower half of the band, and
-the same formation does not come twice in a row.
+first battle after each guardian, come from the lower half of the band, with
+two thirds of its hardest hit and two viruses at most where the area has
+such battles, and the same formation does not come twice in a row.
 
 A rare virus (one, the others unchanged) may come from act 3 on, 3% of
 battles and 2% more each later cycle, and only when the battle still fits
@@ -248,8 +251,8 @@ Areas fall into three tiers by their own battles:
 
 | Tier | Areas |
 | --- | --- |
-| Opening | Central, Robot Control Comp, Aquarium Comp, Sky HP, the first home computers (0x8C) |
-| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D) |
+| Opening | Central, Robot Control Comp, Aquarium Comp, the first home computers (0x8C) |
+| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP) |
 | Late | Sky, Mr. Weather Comp, ACDC HP, CopyBot's comp |
 
 Act 1 draws from the opening tier, act 2 from opening or middle, act 3 from
