@@ -7,6 +7,7 @@
  * random battle's enemies in step with the depth. */
 #include "director.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -144,6 +145,24 @@ static void arrival_words(void) {
 }
 
 /* What MegaMan says when L is pressed: where they are, what is ahead. */
+/* Which way the exit pad lies from MegaMan, as the screen shows it (the
+ * d-pad's UP moves +X -Y, RIGHT +X +Y: a world step (dx, dy) goes
+ * dx + dy across and (dy - dx) / 2 down), and how far. */
+static const char *exit_way(int *far) {
+	static const char *const ways[8] = {
+		"to the right", "down and to the right", "straight down", "down and to the left",
+		"to the left", "up and to the left", "straight up", "up and to the right",
+	};
+	int dx = D.objs.exit_x - ((int)emu_read32(BN6_PLAYER + 0x1C) >> 16);
+	int dy = D.objs.exit_y - ((int)emu_read32(BN6_PLAYER + 0x20) >> 16);
+	double sx = dx + dy, sy = (dy - dx) / 2.0;
+	int panels = (abs(dx) + abs(dy)) / 32;
+	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
+	double a = atan2(sy, sx);   /* (screen y grows downwards) */
+	int k = (int)lround(a / (3.14159265358979 / 4));
+	return ways[(k % 8 + 8) % 8];
+}
+
 static const char *status_words(void) {
 	static char buf[400];
 	int k = 0;
@@ -161,7 +180,14 @@ static const char *status_words(void) {
 	else if (run.side_kind == LAYER_NORMAL) ADD("|@M %s guards the end of this area.", guardian(run.boss_order[run.biome])->name);
 	if (run.fragments == 1) ADD("|@M We're carrying one ScrtData.");
 	else if (run.fragments > 1) ADD("|@M We're carrying %d ScrtData.", run.fragments);
-	if (!D.objs.guardian.navi) ADD("|@L Let's find the exit pad!");
+	/* the way on, as MegaMan senses it */
+	int far;
+	const char *way = exit_way(&far);
+	static const char *const how_far[3] = { "It's close!", "It's a little ways off.", "It's still a long way." };
+	if (!D.objs.guardian.navi || boss_done())
+		ADD("|@M I can sense the exit pad, Lan. It's %s.|@M %s", way, how_far[far]);
+	else if (!boss_beaten())
+		ADD("|@M Its arena is %s, Lan.|@M %s", way, how_far[far]);
 	#undef ADD
 	return buf;
 }

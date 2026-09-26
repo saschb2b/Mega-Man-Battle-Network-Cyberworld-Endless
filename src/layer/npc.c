@@ -26,6 +26,8 @@
 #include "emu.h"
 #include "mapslot.h"
 
+#define NPC_TALK_RADIUS 10   /* world units (a panel is 32) */
+
 /* The commands that place a floor sprite at world (x, y, z) (12 bytes). */
 static int floor_place(uint8_t *s, int x, int y, int z) {
 	x += NPC_FLOOR_BACK; y -= NPC_FLOOR_BACK; z -= NPC_FLOOR_BACK;
@@ -82,6 +84,10 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 	/* an object (sprite list 7) has no frames facing MegaMan: turning to
 	 * him when spoken to would hide it for the whole conversation */
 	if (category == 7) s[n++] = 0x13;
+	/* a navi answers MegaMan facing anywhere its way: the check reaches 8
+	 * units ahead with a radius of 8, and the game's radius of 4 for NPCs
+	 * wanted him facing it square on (isometric diagonals make that hard) */
+	else if (!floor) { s[n++] = 0x0A; s[n++] = NPC_TALK_RADIUS; }
 	int loop = n, gone_jump = -1;
 	/* idle: leave once gone_flag is set, else pause a frame and look again */
 	if (gone_flag >= 0) {
