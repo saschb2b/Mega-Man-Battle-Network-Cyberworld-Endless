@@ -72,6 +72,7 @@ static struct {
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held;   /* L and R were down last frame */
+	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 } D;
@@ -170,8 +171,11 @@ static const char *status_words(void) {
 	if (D.town) {
 		int far;
 		const char *way = way_to(town_info()->port_x, town_info()->port_y, &far);
-		ADD("@M The port's by the %s, Lan.|@M It's %s from here.|@M Stand next to the statue and press R to jack me in!",
-			town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza", way);
+		const char *statue = town_info()->group == 0x00 ? "squirrel" : "bird";
+		/* all of it the first time, then only the way (a box each) */
+		if (!D.port_told) ADD("@M The port's %s, by the %s statue!|@M Stand next to the statue and press R to jack me in!", way, statue);
+		else ADD("@M The port's %s, Lan!", way);
+		D.port_told = true;
 		return buf;
 	}
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
@@ -308,7 +312,8 @@ static bool build_layer(void) {
 
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
-	 * have reached the net */
+	 * have reached the net (one left so is no deletion to speak of) */
+	town_after_abandon = save_exists();
 	save_delete();
 	/* the first layer, entered through the town's port; the town itself
 	 * (its seed apart from the layers') */
@@ -329,6 +334,7 @@ bool director_start_run(void) {
 	D.town_seen = false;
 	D.town_frames = 0;
 	D.intro_said = false;
+	D.port_told = false;
 	return true;
 }
 
@@ -391,8 +397,14 @@ uint32_t director_keys(uint32_t keys) {
 	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&
 		!town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
 		static char buf[160];
-		snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!",
-			town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
+		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		int dx = town_info()->port_x - px, dy = town_info()->port_y - py;
+		/* (close by: a step more, not the way across town) */
+		if (dx * dx + dy * dy < 72 * 72)
+			snprintf(buf, sizeof buf, "@M Almost, Lan! Step right up to the statue and press R.");
+		else
+			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!",
+				town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
 		talk_start(buf, FACE_MEGAMAN);
 		return keys & ~KEY_R;
 	}

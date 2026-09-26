@@ -802,6 +802,8 @@ int town_triggers(const CoordCell **cells) {
 	return T.ntrig;
 }
 
+bool town_after_abandon;
+
 bool town_on_port(int x, int y) {
 	for (int i = 0; i < T.ntrig; ++i) {
 		const CoordCell *c = &T.trig[i];
@@ -849,6 +851,8 @@ static const char *intro(void) {
 	} else if (profile.nest_clears > 0 && profile.runs % 2) {
 		ADD("@D Lan, MegaMan has reached the Nest before. The net's changed all over again since then.|"
 			"@D Be careful down there!|@L Got it, Dad!");
+	} else if (town_after_abandon) {
+		ADD("@L We never finished that last dive...|@M Then let's start a fresh one, Lan! The port's by the %s.", port);
 	} else if (profile.runs == 0) {
 		/* (the call heard, but no run over yet: no best to speak of) */
 		ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port);

@@ -40,6 +40,9 @@ bool town_walkable(int cx, int cy);
 bool town_route(int x, int y, int *wx, int *wy);
 /* The town's trigger cells (section 3: the jack-in 0x40, checks 0xF0 +). */
 int town_triggers(const CoordCell **cells);
+/* The run before this one was left unfinished (NEW GAME over CONTINUE):
+ * the town's first words do not speak of how it ended. */
+extern bool town_after_abandon;
 /* Whether world position (x, y) is a jack-in cell (R jacks in there). */
 bool town_on_port(int x, int y);
 /* The town's map objects (id) and people (id -1), in world units. */
