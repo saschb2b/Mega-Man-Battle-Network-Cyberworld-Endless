@@ -23,7 +23,14 @@ static int failures;
 char g_data_dir[512] = ".";
 Run run;
 static uint32_t rng_s = 1;
-void rng_seed(uint32_t s) { rng_s = s ? s : 1; }
+/* (as the game's: the seed mixed first) */
+void rng_seed(uint32_t s) {
+	s += 0x9E3779B9u;
+	s ^= s >> 16; s *= 0x85EBCA6Bu;
+	s ^= s >> 13; s *= 0xC2B2AE35u;
+	s ^= s >> 16;
+	rng_s = s ? s : 0x9E3779B9u;
+}
 uint32_t rng_state(void) { return rng_s; }
 uint32_t rng_next(void) { uint32_t x = rng_s; x ^= x << 13; x ^= x >> 17; x ^= x << 5; return rng_s = x; }
 int rng_range(int lo, int hi) { return hi <= lo ? lo : lo + (int)(rng_next() % (uint32_t)(hi - lo + 1)); }

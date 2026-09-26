@@ -79,7 +79,7 @@ static bool load_v3(void) {
 	if (!save_read_blob("run.sav", RUN_MAGIC_V3, &v, sizeof v) || !v.active) return false;
 	uint32_t keep = rng_state();
 	run_new(v.seed);   /* the new areas' guardians */
-	rng_seed(keep);
+	rng_restore(keep);
 	run.depth = v.depth;
 	run.biome = v.biome;
 	run.side_kind = v.side_kind;
@@ -98,7 +98,7 @@ static bool load_v2(void) {
 	if (!save_read_blob("run.sav", RUN_MAGIC_V2, &v, sizeof v) || !v.active) return false;
 	uint32_t keep = rng_state();
 	run_new(v.seed);   /* the new areas' guardians */
-	rng_seed(keep);
+	rng_restore(keep);
 	run.depth = v.depth;
 	run.biome = v.biome;
 	run.side_kind = v.side_kind;
