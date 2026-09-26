@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "game.h"
 #include "net.h"
 #include "net_arena.h"
@@ -90,7 +91,7 @@ static int floor_cells(void) {
 	return n;
 }
 
-/* Whether the layer's tile map fits the game's 0x14000-byte buffer, as
+/* Whether the layer's tile map fits the game's buffer (BN6_TILEMAP_MAX), as
  * netmap centres and sizes it (panel edges up to 28 units off, `rise` for a
  * raised floor). */
 static bool fits(int rise) {
@@ -105,7 +106,7 @@ static bool fits(int rise) {
 		}
 	int uh = (u1 - u0) / 2 + 2, vh = (v1 - v0) / 2 + 2;   /* half extents, rounding and centring slack */
 	int tw = 2 * ((32 * uh + 88 + 64 + 7) / 8) + 1, th = 2 * ((16 * vh + 14 + 48 + rise + 7) / 8) + 1;
-	return tw <= 255 && th <= 255 && tw * th * 4 <= 0x14000;
+	return tw <= 255 && th <= 255 && tw * th * 4 <= BN6_TILEMAP_MAX;
 }
 
 /* MegaMan arrives at the pad nearest the top of the screen (least x + y),

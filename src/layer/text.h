@@ -31,7 +31,11 @@ int ta_say(TextArchive *t, int mugshot, const char *s);
  * `mugshots` (-1: none), its words wrapped anew (a '\n' counts as a space)
  * and waiting for A. */
 int ta_talk(TextArchive *t, const char *boxes, const int *mugshots);
-/* Writes the archive (u16 offsets, then the scripts); bus address or 0. */
+/* The archive's bytes (u16 offsets, then the scripts) into `out`
+ * (TEXT_ARCHIVE_MAX bytes); returns their length. */
+#define TEXT_ARCHIVE_MAX (TEXT_MAX_SCRIPTS * 2 + TEXT_MAX_BYTES)
+int ta_build(const TextArchive *t, uint8_t *out);
+/* Writes the archive; bus address or 0. */
 uint32_t ta_commit(TextArchive *t);
 
 #endif

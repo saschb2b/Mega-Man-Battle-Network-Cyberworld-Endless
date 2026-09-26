@@ -22,4 +22,8 @@ uint32_t npc_prop(int category, int index, int x, int y, int z, int anim);
  * (a pad) is drawn under MegaMan. */
 uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor);
 
+/* A talker who paces `steps` along facing `face` (1, 3, 5, 7: +x, +y, -x,
+ * -y) and back, looking about at each end. */
+uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script);
+
 #endif

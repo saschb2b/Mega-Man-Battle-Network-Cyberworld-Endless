@@ -154,11 +154,20 @@ static void world_sources(const char *dir) {
 		}
 }
 
-/* The town (src/world/town.c) for a few seeds, drawn with Central Town's
- * tiles; tiles no source tile matched are marked red. */
+typedef struct { uint32_t *px; int W, H, tw, th; } TownDots;
+/* trees green, other objects blue, people yellow, at their feet */
+static void town_dot(int id, int x, int y, void *ctx) {
+	TownDots *d = ctx;
+	dot(d->px, d->W, d->H, area_px(d->tw, x, y), area_py(d->th, x, y), 2, id < 0 ? 0xFFFFE020u : id == 0x7D || id == 0x7E ? 0xFF20C020u : 0xFF3060FFu);
+}
+
+/* The towns (src/world/town.c) runs of a few seeds start in, drawn with
+ * their original's tiles; tiles no source tile matched are marked red, the
+ * town's objects and people dotted. */
 static void towns(const char *dir, int seeds) {
 	for (int s = 1; s <= seeds; ++s) {
-		if (!town_plan((uint32_t)s)) { printf("town seed %d: not planned\n", s); continue; }
+		/* (the town a run of seed s starts in) */
+		if (!town_plan(town_seed((uint32_t)s))) { printf("town seed %d: not planned\n", s); continue; }
 		int W, H;
 		uint32_t *px = town_render(&W, &H);
 		if (!px) continue;
@@ -169,11 +178,14 @@ static void towns(const char *dir, int seeds) {
 			for (int tx = 0; tx < ti->tw; ++tx)
 				if (miss[ty * ti->tw + tx] & 1)
 					for (int k = 0; k < 8; ++k) { px[(ty * 8) * W + tx * 8 + k] = 0xFFFF0000u; px[(ty * 8 + k) * W + tx * 8] = 0xFFFF0000u; }
-				else if ((miss[ty * ti->tw + tx] & 2) && getenv("CYBERWORLD_TOWN_DEBUG"))
-					for (int k = 0; k < 8; ++k) px[(ty * 8 + k) * W + tx * 8 + k] = 0xFF0000FFu;
+				else if (getenv("CYBERWORLD_TOWN_DEBUG") && (miss[ty * ti->tw + tx] & 6))
+					/* blue: the mirror's tile; green: the hinted one */
+					for (int k = 0; k < 8; ++k) px[(ty * 8 + k) * W + tx * 8 + k] = miss[ty * ti->tw + tx] & 2 ? 0xFF0000FFu : 0xFF00A000u;
 		int sx = area_px(ti->tw, ti->start_x, ti->start_y), sy = area_py(ti->th, ti->start_x, ti->start_y);
 		dot(px, W, H, sx, sy, 3, 0xFF3080FFu);
 		dot(px, W, H, area_px(ti->tw, ti->port_x, ti->port_y), area_py(ti->th, ti->port_x, ti->port_y), 3, 0xFF30FF30u);
+		TownDots dots = { px, W, H, ti->tw, ti->th };
+		town_objects(town_dot, &dots);
 		char path[600];
 		snprintf(path, sizeof path, "%s/town_s%02d.bmp", dir, s);
 		save_bmp(path, px, W, H);

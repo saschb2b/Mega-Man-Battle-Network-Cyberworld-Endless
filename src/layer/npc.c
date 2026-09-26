@@ -6,7 +6,9 @@
  * 0x10 pause (frames), 0x02 jump (address), 0x04 jump if flag set (flag,
  * address), 0x44 text script (index, archive), 0x13 do not face the player
  * when spoken to, 0x0C shift centre (x, y, z
- * signed bytes: where collision and talking are measured from).
+ * signed bytes: where collision and talking are measured from), 0x38 init
+ * movement (direction, speed, steps, then the script it runs: the town's
+ * pacing), 0x39 walk on (0) or back (4).
  *
  * Floor sprites: between sprites the GBA draws the one earlier in OAM,
  * whatever their priority bits, and the game orders sprites front to back
@@ -95,6 +97,35 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 	/* the jump targets are this script's own addresses */
 	put32(s + loop_jump, at + (uint32_t)loop);
 	if (gone_jump >= 0) put32(s + gone_jump, at + (uint32_t)gone);
+	emu_write(at, s, (size_t)n);
+	return at;
+}
+
+uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script) {
+	/* walk `steps` one way, look about, walk back, look about; as the
+	 * game's own walkers do (bn6f byte_809F6EC): animations 1-7 stand
+	 * facing a way, 9-15 walk it */
+	int back = (face + 4) & 7;
+	uint8_t s[64] = {
+		0x08,
+		0x25, (uint8_t)index, (uint8_t)(category * 4),
+		0x16, (uint8_t)face,
+		0x44, (uint8_t)script, (uint8_t)archive, (uint8_t)(archive >> 8), (uint8_t)(archive >> 16), (uint8_t)(archive >> 24),
+		0x14, (uint8_t)x, (uint8_t)(x >> 8), (uint8_t)y, (uint8_t)(y >> 8), 0, 0,
+		0x38, (uint8_t)face, 6, (uint8_t)steps, 0, 0, 0, 0,
+	};
+	int n = 27, pace = n;
+	uint8_t loop[] = {
+		0x16, (uint8_t)(face + 8), 0x39, 0x00, 0x16, (uint8_t)face, 0x10, 0x3C,
+		0x16, (uint8_t)(back + 8), 0x39, 0x04, 0x16, (uint8_t)back, 0x10, 0x3C,
+		0x02, 0, 0, 0, 0,
+	};
+	memcpy(s + n, loop, sizeof loop);
+	n += (int)sizeof loop;
+	uint32_t at = mapslot_alloc(s, n);
+	if (!at) return 0;
+	put32(s + pace - 4, at + (uint32_t)pace);
+	put32(s + n - 4, at + (uint32_t)pace);
 	emu_write(at, s, (size_t)n);
 	return at;
 }

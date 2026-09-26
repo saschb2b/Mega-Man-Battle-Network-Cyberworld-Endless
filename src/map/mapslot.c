@@ -17,6 +17,7 @@
 #include "bytes.h"
 #include "emu.h"
 #include "flags.h"
+#include "lz.h"
 
 /* Layer data comes from a bump allocator over two halves, one per layer in
  * turn: the map being left keeps running its NPC scripts while the next
@@ -32,6 +33,8 @@
 #define RW_MAP_SCRIPTS 0x080345E4u /* RealWorldMapScriptPointers: (on enter, continuous) per group */
 #define RW_OBJ_SPAWNERS 0x08034654u /* RealWorldSpawnMapObjectJumptable */
 #define RW_ENTER_GROUP 0x08030904u /* EnterMap_RealWorldMapGroupJumptable */
+#define RW_CHECK_TABLES 0x0803461Cu /* per real-world group, per map: the 16 checks' text scripts (bn6f off_803461C) */
+#define MAP_TEXT_ARCHIVES 0x08040794u /* per map, its LZ77 text archive (bn6f mapPtrs80407C0: real world, internet) */
 #define JACK_IN_RECORDS 0x08099A00u /* 20-byte jack-in destinations (bn6f byte_80984C8) */
 #define JACK_IN_RECORD  42           /* the one the town rewrites (a comp the run never visits) */
 
@@ -134,6 +137,43 @@ bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, 
 	put32(rec + 4, (uint32_t)x << 16);
 	put32(rec + 8, (uint32_t)y << 16);
 	emu_write(JACK_IN_RECORDS + JACK_IN_RECORD * 20, rec, sizeof rec);
+	return true;
+}
+
+bool mapslot_town_warps(int group, int number, int x, int y, int facing) {
+	uint8_t list[16 * 16];
+	for (int i = 0; i < 16; ++i) {
+		uint8_t *e = list + i * 16;
+		memset(e, 0, 16);
+		e[0] = (uint8_t)group; e[1] = (uint8_t)number; e[3] = (uint8_t)facing;
+		put32(e + 4, (uint32_t)x << 16);
+		put32(e + 8, (uint32_t)y << 16);
+	}
+	uint32_t at = mapslot_alloc(list, sizeof list), warps = warp_table(group);
+	if (!at || warps < 0x08000000u) return false;
+	emu_write32(warps + (uint32_t)number * 4, at);
+	return true;
+}
+
+bool mapslot_checks(int group, int number, const uint8_t script[16], const uint8_t *archive, int len) {
+	if (!real_world(group) || len <= 0 || len > 0x1600 - 4) return false;
+	/* the map's archive decompresses to 0x02033400; the checks read it
+	 * from +4, after a word holding its size */
+	static uint8_t raw[0x1600], lz[0x1600 + 0x1600 / 8 + 16];
+	raw[0] = 0;
+	raw[1] = (uint8_t)(len + 4);
+	raw[2] = (uint8_t)((len + 4) >> 8);
+	raw[3] = 0;
+	memcpy(raw + 4, archive, (size_t)len);
+	size_t n = lz_literal(raw, (size_t)len + 4, lz);
+	uint32_t at = mapslot_alloc(lz, (int)n), table = mapslot_alloc(script, 16);
+	uint32_t archives = emu_read32(emu_read32(MAP_TEXT_ARCHIVES) + (uint32_t)group * 4);
+	uint32_t checks = emu_read32(RW_CHECK_TABLES + (uint32_t)group * 4);
+	if (!at || !table || archives < 0x08000000u || checks < 0x08000000u) return false;
+	emu_write32(archives + (uint32_t)number * 4, at);
+	emu_write32(checks + (uint32_t)number * 4, table);
+	/* (flags 0x16C0 + n turn check n off; the story sets some) */
+	for (int i = 0; i < 16; ++i) flag_clear(0x16C0 + i);
 	return true;
 }
 

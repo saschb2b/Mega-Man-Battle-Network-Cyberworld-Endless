@@ -127,11 +127,10 @@ uint32_t autopilot_keys(void) {
 	bool talk = false;
 	int wx, wy;
 	if (director_in_town()) {
-		/* in the town: to the port's south-east side, then R to jack in */
+		/* in the town: along the streets to the jack-in, then R */
 		const TownInfo *ti = town_info();
-		wx = ti->port_x;
-		wy = ti->port_y + 16;
-		if (abs(px - wx) + abs(py - wy) < 6) return frame % 16 < 2 ? KEY_R : 0;
+		if (abs(px - ti->port_x) + abs(py - ti->port_y) < 6) return frame % 16 < 2 ? KEY_R : 0;
+		if (!town_route(px, py, &wx, &wy)) { wx = ti->port_x; wy = ti->port_y; }
 	} else {
 		if (!netmap_panel(px, py, &cx, &cy) || !director_goal_panel(&ex, &ey, &talk)) return 0;
 		if (cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || !next_panel(cx, cy, ex, ey, &nx, &ny)) { nx = ex; ny = ey; }

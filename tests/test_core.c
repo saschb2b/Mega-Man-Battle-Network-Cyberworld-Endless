@@ -8,6 +8,8 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "area_src.h"
+#include "townmath.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -253,6 +255,29 @@ static void test_pacing(void) {
 	CHECK(pacing_heal_certain(2 + CYCLE_LAYERS) && !pacing_heal_certain(2 + 2 * CYCLE_LAYERS), "the third cycle drops it");
 }
 
+/* The town's moves (src/world/townmath.h): a moved tile shows the same
+ * world point the source tile showed, moved. */
+static void test_town_moves(void) {
+	CHECK(town_move_keeps_tiles(0, 0) && town_move_keeps_tiles(-24, 0) && town_move_keeps_tiles(1, 1) && town_move_keeps_tiles(36, 0), "even moves keep the tile grid");
+	CHECK(!town_move_keeps_tiles(1, 0) && !town_move_keeps_tiles(0, -3), "odd moves do not");
+	CHECK(town_move_keeps_pattern(8, 0) && town_move_keeps_pattern(4, 4) && town_move_keeps_pattern(4, -4) && town_move_keeps_pattern(-4, -12),
+		"moves on the (4, 4), (4, -4) lattice keep the brick");
+	CHECK(!town_move_keeps_pattern(0, 4) && !town_move_keeps_pattern(2, 2) && !town_move_keeps_pattern(36, 0), "others do not");
+	/* Central Town's 132 x 72 tiles onto a 152 x 84 map, moves of every kind */
+	static const int moves[][2] = { { 0, 0 }, { 8, 0 }, { 1, 1 }, { -24, 0 }, { 36, 0 }, { -4, -12 }, { 3, -5 } };
+	for (int m = 0; m < (int)(sizeof moves / sizeof *moves); ++m)
+		for (int wx = -200; wx <= 200; wx += 38)   /* (even: the half pixel of an odd y - x rounds either way) */
+			for (int wy = -160; wy <= 320; wy += 42) {
+				int dx = moves[m][0], dy = moves[m][1];
+				int sx = area_px(132, wx, wy), sy = area_py(72, wx, wy);
+				int tx = area_px(152, wx + 8 * dx, wy + 8 * dy), ty = area_py(84, wx + 8 * dx, wy + 8 * dy);
+				int mx, my;
+				town_move_tile(sx >> 3, sy >> 3, 132, 72, dx, dy, 152, 84, &mx, &my);
+				CHECK(mx == tx >> 3 && my == ty >> 3 && (sx & 7) == (tx & 7) && (sy & 7) == (ty & 7),
+					"move (%d, %d): world (%d, %d) in tile (%d, %d), moved to (%d, %d), drawn in (%d, %d)", dx, dy, wx, wy, sx >> 3, sy >> 3, mx, my, tx >> 3, ty >> 3);
+			}
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -260,6 +285,7 @@ int main(void) {
 	test_stairs();
 	test_depth_plan();
 	test_pacing();
+	test_town_moves();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

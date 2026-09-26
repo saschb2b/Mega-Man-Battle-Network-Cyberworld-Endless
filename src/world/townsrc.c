@@ -3,8 +3,9 @@
  *
  * Every 8-unit world cell of the source gets a material from the colours
  * its ground shows (real-world maps are 256-colour, and each material has
- * its own colour indices) and from the walls (walkable or not). A tile is
- * keyed by the materials under 16 points of it, 3 points above it (the
+ * its own colour indices, which the town's style gives) and from the walls
+ * (walkable or not). A tile is
+ * keyed by the materials under 16 points of it, 8 points above it (the
  * slab's faces hang below the floor's edge) and its phase against the cell
  * lattice. A generated map's tiles are the source's tiles of the same key:
  * where a neighbour's source continues with a matching tile, that one (the
@@ -14,10 +15,12 @@
  * planting strip into a north-west one. */
 #include "townsrc.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "area_src.h"
+#include "rom.h"
 
 #define SAMPLES 16
 #define UI_COLOURS 208   /* colour indices from here on are the game's UI palettes while it runs */
@@ -33,20 +36,6 @@ static const int8_t above[ABOVE][2] = {
 	{ 0, -2 }, { 7, -2 }, { 0, -6 }, { 7, -6 }, { 0, -10 }, { 7, -10 }, { 0, -14 }, { 7, -14 },
 };
 
-/* Central Town's colour indices by material (the source: group 0x01, map 0,
- * whose palette the town keeps). */
-static int mat_of_index(int i) {
-	if (i == 0) return TM_VOID;
-	if (i == 10) return TM_ROAD;
-	if (i >= 1 && i <= 3) return TM_MARK;
-	if (i == 4) return TM_SIDE;
-	if (i >= 5 && i <= 8) return TM_COBB;
-	if (i >= 80 && i <= 84) return TM_BRICK;
-	if ((i >= 32 && i <= 39) || i == 15 || i == 17 || i == 18 || i == 20 || i == 97 || i == 98)
-		return TM_GRASS;   /* (the pinks 106-109 are the houses' walls) */
-	return TM_EDGE;
-}
-
 static int fdiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 static int fmod_(int a, int b) { int m = a % b; return m < 0 ? m + b : m; }
 /* (buildings stay apart from the sky: the plan has none, so no tile
@@ -58,6 +47,7 @@ typedef struct {
 	uint8_t *cell;         /* material per cell of the box */
 	int cx0, cy0, cw, ch;
 	int *entry;            /* book entry per tile, -1 none */
+	uint8_t *walk;         /* per cell of the box: Lan walks there (the original only) */
 } View;
 
 typedef struct {
@@ -67,6 +57,7 @@ typedef struct {
 	uint16_t tx, ty;
 	uint8_t view, tex;
 	uint16_t freq;         /* entries alike in key, texture phase and tiles */
+	uint16_t seen;         /* the original's tiles alike in tiles (1: a one-off) */
 } Entry;
 
 typedef struct { uint64_t key; int first, n; } Key;
@@ -80,6 +71,9 @@ struct TownBook {
 	int nkeys;
 	TownProfile *prof;
 	int nprof;
+	int *part;             /* the front layer's piece per tile, -1 none */
+	TownFoot *foot;
+	int nparts;
 	/* the colours each material shows inside itself (for the sky: its
 	 * faces); anything else on a tile is foreign there */
 	uint8_t allowed[TM_COUNT][256];
@@ -90,6 +84,9 @@ static int view_cell(const View *v, int cx, int cy) {
 	if (x < 0 || y < 0 || x >= v->cw || y >= v->ch) return TM_VOID;
 	return v->cell[(size_t)y * v->cw + x];
 }
+
+/* the source's colour indices by material (TownMatOf) */
+static TownMatOf mat_of_index;
 
 static void classify(View *v) {
 	const AreaSrc *a = &v->a;
@@ -128,13 +125,79 @@ static void classify(View *v) {
 		}
 }
 
+/* Where Lan walks in the original: floor its walls ring, less the wall
+ * cells themselves (walls lifted by an event flag, value 0x80 and up, do
+ * not count: the town has no events). */
+static void learn_walk(View *v) {
+	const AreaSrc *a = &v->a;
+	v->walk = calloc((size_t)v->cw * v->ch, 1);
+	for (int y = 0; y < v->ch; ++y)
+		for (int x = 0; x < v->cw; ++x)
+			v->walk[(size_t)y * v->cw + x] = area_src_walled_floor(a, (x + v->cx0) * 8 + 4, (y + v->cy0) * 8 + 4) == 1;
+	for (int i = 0; i < a->nsec[0]; ++i) {
+		const CoordCell *c = &a->sec[0][i];
+		int x = fdiv(c->x, 8) - v->cx0, y = fdiv(c->y, 8) - v->cy0;
+		if (c->value < 0x80 && x >= 0 && y >= 0 && x < v->cw && y < v->ch) v->walk[(size_t)y * v->cw + x] = 0;
+	}
+}
+
+/* The front layer's pieces: 8-connected runs of its tiles, each standing
+ * on the cell under its lowest pixels (where the game would sort it). */
+static void learn_parts(TownBook *b) {
+	const AreaSrc *a = &b->v[0].a;
+	int tw = a->tw, th = a->th, W = tw * 8;
+	b->part = malloc(sizeof(int) * (size_t)tw * th);
+	for (int i = 0; i < tw * th; ++i) b->part[i] = -1;
+	if (a->layers < 2) return;
+	b->foot = malloc(sizeof(TownFoot) * (size_t)tw * th);
+	int *stack = malloc(sizeof(int) * (size_t)tw * th);
+	for (int start = 0; start < tw * th; ++start) {
+		if (b->part[start] >= 0 || !(a->tile[1][start] & 0x3FF)) continue;
+		int id = b->nparts++, top = 0, low = -1, xsum = 0, xn = 0;
+		b->part[start] = id;
+		stack[top++] = start;
+		while (top) {
+			int t = stack[--top], tx = t % tw, ty = t / tw;
+			/* its lowest pixels */
+			for (int y = 7; y >= 0; --y) {
+				int Y = ty * 8 + y;
+				if (Y < low) break;
+				for (int x = 0; x < 8; ++x) {
+					if (!a->front[(size_t)Y * W + tx * 8 + x]) continue;
+					if (Y > low) { low = Y; xsum = 0; xn = 0; }
+					xsum += tx * 8 + x;
+					++xn;
+				}
+			}
+			for (int dy = -1; dy <= 1; ++dy)
+				for (int dx = -1; dx <= 1; ++dx) {
+					int nx = tx + dx, ny = ty + dy;
+					if (nx < 0 || ny < 0 || nx >= tw || ny >= th) continue;
+					int n = ny * tw + nx;
+					if (b->part[n] >= 0 || !(a->tile[1][n] & 0x3FF)) continue;
+					b->part[n] = id;
+					stack[top++] = n;
+				}
+		}
+		int X = xn ? xsum / xn : 0, ax = X - tw * 4, by = (low - th * 4) * 2;
+		b->foot[id].cx = (int16_t)fdiv(fdiv(ax - by, 2), 8);
+		b->foot[id].cy = (int16_t)fdiv(fdiv(ax + by, 2), 8);
+	}
+	free(stack);
+}
+
 /* The colours inside each material: pixels of cells whose eight
- * neighbours are of the same material; for the sky, 0 and the colours
- * of the faces (non-floor pixels up to 16 below a walkable cell's). */
+ * neighbours are of the same material, the colours of at least 1 in 400
+ * of them (a stray curb's corner is not the ground's); for the sky, 0 and
+ * the colours of the faces (non-floor pixels up to 16 below a walkable
+ * cell's). */
 static void learn_palettes(TownBook *b) {
 	const View *v = &b->v[0];
 	const AreaSrc *a = &v->a;
 	int W = a->tw * 8, H = a->th * 8;
+	static int count[TM_COUNT][256];
+	int total[TM_COUNT] = { 0 };
+	memset(count, 0, sizeof count);
 	memset(b->allowed, 0, sizeof b->allowed);
 	b->allowed[TM_VOID][0] = 1;
 	for (int y = 0; y < H; ++y)
@@ -157,8 +220,10 @@ static void learn_palettes(TownBook *b) {
 			bool inner = true;
 			for (int dy = -1; dy <= 1 && inner; ++dy)
 				for (int dx = -1; dx <= 1 && inner; ++dx) inner = view_cell(v, cx + dx, cy + dy) == m;
-			if (inner) b->allowed[m][i] = 1;
+			if (inner) { count[m][i]++; total[m]++; }
 		}
+	for (int m = 1; m < TM_COUNT; ++m)
+		for (int i = 1; i < 256; ++i) b->allowed[m][i] = count[m][i] * 400 >= total[m] && count[m][i] > 0;
 	/* a curb's colours are its own; a road is plain (its markings are
 	 * where the source's crossings and lanes are) */
 	for (int i = 1; i < 256; ++i) {
@@ -215,6 +280,12 @@ static int cmp_alike(const void *p, const void *q) {
 	const Entry *a = *(const Entry *const *)p, *b = *(const Entry *const *)q;
 	if (a->key != b->key) return a->key < b->key ? -1 : 1;
 	if (a->tex != b->tex) return a->tex - b->tex;
+	if (a->e0 != b->e0) return a->e0 - b->e0;
+	return a->e1 - b->e1;
+}
+
+static int cmp_tiles(const void *p, const void *q) {
+	const Entry *a = *(const Entry *const *)p, *b = *(const Entry *const *)q;
 	if (a->e0 != b->e0) return a->e0 - b->e0;
 	return a->e1 - b->e1;
 }
@@ -309,13 +380,16 @@ static void learn_profiles(TownBook *b, int vi, bool only_new) {
 	free(line);
 }
 
-TownBook *townsrc_learn(int group, int number) {
+TownBook *townsrc_learn(int group, int number, TownMatOf mat_of) {
 	TownBook *b = calloc(1, sizeof *b);
+	mat_of_index = mat_of;
 	if (!area_src_load(group, number, &b->v[0].a) || !b->v[0].a.idx) { free(b); return NULL; }
 	area_src_mirror(&b->v[0].a, &b->v[1].a);
 	b->tw = b->v[0].a.tw;
 	b->th = b->v[0].a.th;
 	for (int vi = 0; vi < 2; ++vi) classify(&b->v[vi]);
+	learn_walk(&b->v[0]);
+	learn_parts(b);
 	learn_palettes(b);
 	b->e = malloc(sizeof(Entry) * (size_t)b->tw * b->th * 2);
 	for (int vi = 0; vi < 2; ++vi) add_view_entries(b, vi);
@@ -328,6 +402,14 @@ TownBook *townsrc_learn(int group, int number) {
 		int j = i;
 		while (j < b->ne && !cmp_alike(&by[i], &by[j])) ++j;
 		for (int k = i; k < j; ++k) by[k]->freq = (uint16_t)(j - i > 65535 ? 65535 : j - i);
+		i = j;
+	}
+	/* how often the original shows each tile, anywhere */
+	qsort(by, (size_t)b->ne, sizeof(Entry *), cmp_tiles);
+	for (int i = 0; i < b->ne;) {
+		int j = i, n = 0;
+		while (j < b->ne && !cmp_tiles(&by[i], &by[j])) n += !by[j++]->view;
+		for (int k = i; k < j; ++k) by[k]->seen = (uint16_t)(n > 65535 ? 65535 : n);
 		i = j;
 	}
 	free(by);
@@ -356,7 +438,10 @@ void townsrc_free(TownBook *b) {
 		area_src_free(&b->v[vi].a);
 		free(b->v[vi].cell);
 		free(b->v[vi].entry);
+		free(b->v[vi].walk);
 	}
+	free(b->part);
+	free(b->foot);
 	free(b->e);
 	free(b->keys);
 	free(b->prof);
@@ -373,6 +458,42 @@ void townsrc_slots(const TownBook *b, uint32_t *desc, uint32_t *coord_slot) {
 int townsrc_profiles(const TownBook *b, const TownProfile **out) {
 	*out = b->prof;
 	return b->nprof;
+}
+
+const AreaSrc *townsrc_area(const TownBook *b) { return &b->v[0].a; }
+int townsrc_mat(const TownBook *b, int cx, int cy) { return view_cell(&b->v[0], cx, cy); }
+
+bool townsrc_walk(const TownBook *b, int cx, int cy) {
+	const View *v = &b->v[0];
+	int x = cx - v->cx0, y = cy - v->cy0;
+	return x >= 0 && y >= 0 && x < v->cw && y < v->ch && v->walk[(size_t)y * v->cw + x];
+}
+
+int townsrc_parts(const TownBook *b, const int **part, const TownFoot **foot) {
+	*part = b->part;
+	*foot = b->foot;
+	return b->nparts;
+}
+
+#define RW_OBJ_SPAWNERS 0x034654u /* RealWorldSpawnMapObjectJumptable */
+
+int townsrc_objects(const TownBook *b, uint8_t (*rec)[20], int max) {
+	/* the group's spawner loads its per-map table with its first
+	 * "ldr r1, [pc, #imm]" */
+	uint32_t fn = rom_u32(RW_OBJ_SPAWNERS + (uint32_t)b->v[0].a.group * 4);
+	if (!rom_is_ptr(fn)) return 0;
+	fn = rom_off(fn) & ~1u;
+	uint32_t table = 0;
+	for (uint32_t pc = fn; pc < fn + 32 && !table; pc += 2) {
+		uint16_t op = rom_u16(pc);
+		if ((op & 0xFF00) == 0x4900) table = rom_u32(((pc + 4) & ~3u) + (uint32_t)(op & 0xFF) * 4);
+	}
+	if (!rom_is_ptr(table)) return 0;
+	uint32_t list = rom_u32(rom_off(table) + (uint32_t)b->v[0].a.number * 4);
+	if (!rom_is_ptr(list)) return 0;
+	int n = 0;
+	for (uint32_t at = rom_off(list); n < max && at + 20 <= ROM_SIZE && R.data[at] != 0xFF; at += 20) memcpy(rec[n++], R.data + at, 20);
+	return n;
 }
 
 /* ---- picking ---- */
@@ -426,7 +547,8 @@ static uint32_t rng_next32(uint32_t *s) {
 	return *s = x;
 }
 
-void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t seed, uint16_t *map, uint8_t *miss, TownSynthStats *st) {
+void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t seed, const TownPin *pins, uint16_t *map, uint8_t *miss, TownSynthStats *st) {
+	const AreaSrc *sa = &b->v[0].a;
 	PlanCtx ctx = { cell };
 	fit_book = b;
 	int *src = malloc(sizeof(int) * (size_t)tw * th);
@@ -435,12 +557,25 @@ void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t se
 	if (!st) st = &local;
 	memset(st, 0, sizeof *st);
 	uint32_t rs = seed * 2654435761u + 1;
+	for (int i = 0; i < tw * th; ++i) src[i] = -1;
+	int dbg_tx = -1, dbg_ty = -1;
+	if (getenv("CYBERWORLD_TOWN_TILE")) sscanf(getenv("CYBERWORLD_TOWN_TILE"), "%d,%d", &dbg_tx, &dbg_ty);
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
 			size_t at = (size_t)ty * tw + tx;
 			src[at] = -1;
 			l0[at] = l1[at] = 0;
 			if (miss) miss[at] = 0;
+			const TownPin *pin = pins ? &pins[at] : NULL;
+			if (pin && pin->x1 >= 0) l1[at] = sa->tile[1][(size_t)pin->y1 * sa->tw + pin->x1];
+			if (pin && pin->x0 >= 0) {
+				/* taken whole: what follows it continues it */
+				size_t s = (size_t)pin->y0 * sa->tw + pin->x0;
+				l0[at] = sa->tile[0][s];
+				src[at] = b->v[0].entry[s];
+				if (miss) miss[at] |= 8;
+				continue;
+			}
 			uint64_t k = key_at(plan_cell, &ctx, tx, ty, tw, th);
 			if (key_empty(k)) continue;
 			st->picks++;
@@ -480,17 +615,49 @@ void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t se
 				int s = full_agree(e, k, want, uniform);
 				if (s > ba) ba = s;
 			}
-			/* coherence: the source tile after the left neighbour's, or below the upper one's */
+			/* the hinted tile, if it is of this key and fits as well as the
+			 * best (no crossing's stripes on a plain road) */
 			int pick = -1;
-			for (int d = 0; d < 2 && pick < 0; ++d) {
-				int n = d == 0 ? (tx ? src[at - 1] : -1) : (ty ? src[at - tw] : -1);
-				if (n < 0) continue;
-				const Entry *ne = &b->e[n];
-				int nx = ne->tx + (d == 0), ny = ne->ty + (d == 1);
-				if (nx >= b->tw || ny >= b->th || ne->view != view) continue;
-				int c = b->v[ne->view].entry[ny * b->tw + nx];
-				if (c >= 0 && b->e[c].key == K->key && full_agree(&b->e[c], k, want, uniform) == ba) { pick = c; st->coherent++; }
+			if (pin && pin->hx >= 0 && pin->hx < b->tw && pin->hy >= 0 && pin->hy < b->th) {
+				int c = b->v[0].entry[pin->hy * b->tw + pin->hx];
+				/* (and whose own pixels show the key's grounds as well as
+				 * any: a cell's ground is its most, not all of it) */
+				int best_pk = 0;
+				for (int i = 0; c >= 0 && i < K->n; ++i) {
+					int a = agree(b->e[K->first + i].pk, k);
+					if (a > best_pk) best_pk = a;
+				}
+				if (c >= 0 && b->e[c].key == K->key && b->e[c].seen >= 2 && full_agree(&b->e[c], k, want, uniform) >= ba && agree(b->e[c].pk, k) >= best_pk) {
+					pick = c;
+					st->hinted++;
+					if (miss) miss[at] |= 4;
+				}
 			}
+			/* coherence: the source's own neighbour of a neighbour's source
+			 * tile, first beside the tiles taken whole (on every side), then
+			 * after the picked ones (left, above) */
+			static const int nd[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+			for (int pass = 0; pass < 2 && pick < 0; ++pass)
+				for (int d = 0; d < 4 && pick < 0; ++d) {
+					int nx = tx + nd[d][0], ny = ty + nd[d][1];
+					if (nx < 0 || ny < 0 || nx >= tw || ny >= th) continue;
+					size_t na = (size_t)ny * tw + nx;
+					bool whole = pins && pins[na].x0 >= 0;
+					int sx, sy, sv;
+					if (pass == 0) {
+						if (!whole) continue;
+						sx = pins[na].x0; sy = pins[na].y0; sv = 0;
+					} else {
+						if (whole || src[na] < 0) continue;
+						sx = b->e[src[na]].tx; sy = b->e[src[na]].ty; sv = b->e[src[na]].view;
+					}
+					int cx = sx - nd[d][0], cy = sy - nd[d][1];
+					if (sv != view || cx < 0 || cy < 0 || cx >= b->tw || cy >= b->th) continue;
+					int c = b->v[sv].entry[cy * b->tw + cx];
+					/* (not into a one-off: a tile the source shows once is
+					 * part of something, a corner, a drain) */
+					if (c >= 0 && b->e[c].key == K->key && b->e[c].seen >= 2 && full_agree(&b->e[c], k, want, uniform) == ba) { pick = c; st->coherent++; }
+				}
 			if (pick < 0) {
 				/* of those: the texture phase's if any, the most common, a
 				 * random one of what ties */
@@ -510,10 +677,15 @@ void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t se
 				}
 			}
 			if (pick < 0) continue;
+			if (dbg_tx == tx && dbg_ty == ty) {
+				const Entry *e = &b->e[pick];
+				fprintf(stderr, "tile %d,%d: key %016llx (%d candidates), best fit %d; picked source %d,%d view %d fit %d pk-agree %d, hint %d,%d\n", tx, ty,
+					(unsigned long long)k, K->n, ba, e->tx, e->ty, e->view, full_agree(e, k, want, uniform), agree(e->pk, k), pin ? pin->hx : -9, pin ? pin->hy : -9);
+			}
 			src[at] = pick;
 			if (miss && b->e[pick].view) miss[at] |= 2;   /* (from the mirror) */
 			l0[at] = b->e[pick].e0;
-			l1[at] = b->e[pick].e1;
+			if (!pin || pin->x1 == -1) l1[at] = b->e[pick].e1;
 		}
 	free(src);
 }

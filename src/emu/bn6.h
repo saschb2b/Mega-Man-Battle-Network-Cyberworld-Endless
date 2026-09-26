@@ -22,6 +22,10 @@
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
 
 #define BN6_ENGINE_MARK       0x0203FFF0u /* past everything the game uses: the engine's stubs signal here */
+/* A map's tile map decompresses to 0x02013A00 (12-byte header, then the
+ * entries) and its coordinate data to 0x02027A00, which the game reads in
+ * place: the raw entries may take up to here, not a byte more. */
+#define BN6_TILEMAP_MAX       0x13FF4
 
 /* Event flags */
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */

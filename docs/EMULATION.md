@@ -29,11 +29,15 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
 | `+0x60000` | Generated coordinate data (walls, the exit pad's trigger) | `coords.c` |
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
-| `+0x130000` | The town's coordinate data (walls, the port's jack-in trigger) | `coords.c` |
-| `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists and trees, apart from the layers' | `mapslot.c` |
+| `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
+| `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 
-The engine also takes over Central Town (`0x01:0`) for the town, rewrites
-jack-in destination 42 (`0x08099A00` + 42 x 20) to the first layer, and
+The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
+for the town (its tile map, coordinate data, NPC list, map scripts,
+objects, sprite list, warp list, jack-in table, check table
+`0x0803461C`, text archive `0x08040794` and music), clears the check
+flags `0x16C0`-`0x16CF`, rewrites jack-in destination 42 (`0x08099A00` +
+42 x 20) to the first layer, and
 rewrites the stock of the game's shops 0 and 1 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags
 (`0x1400`+) and choice flags (`0x1440`+) it uses, sets the flags that stop
@@ -69,9 +73,10 @@ so the game reloads it from the current build's tables.
 ## A new run: the town
 
 NEW GAME builds the run's first layer and the town (docs/OVERWORLD.md),
-warps Lan to the town's start and clears the flag that stops jacking in
-(`0x1727`); the PET's Save stays off. While Lan walks the town the
-director waits: the port's trigger and the town's jack-in table send the
+warps Lan to where the town starts him (his front door in Central Town,
+the Metroline's stairs in ACDC Town) and clears the flag that stops
+jacking in (`0x1727`); the PET's Save stays off. While Lan walks the town
+the director waits: the town's jack-in cells and jack-in table send the
 game's own jack-in to the first layer, and when MegaMan has arrived there
 the run goes on as after any layer's warp (the flags set again, a
 checkpoint). A NEW GAME deletes the last run's save at once, so CONTINUE

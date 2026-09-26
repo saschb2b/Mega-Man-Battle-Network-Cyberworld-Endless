@@ -4,15 +4,20 @@
 
 First playable version.
 
-- The run begins in the real world. Lan starts on a town square generated
-  per run in the style of BN6's Central Town: its ground planned from the
-  edges Central Town shows (sidewalk, a cobbled court with a planter, the
-  brick plaza, a road, planting strips and the slab's faces) and drawn with
-  Central Town's own tiles, copied from it in runs, with the game's trees
-  and townsfolk. At the plaza's public port R plays the game's own jack-in
-  to the first layer. The real world's maps, their tables, objects and
-  jack-in destinations are documented in docs/OVERWORLD.md and
-  docs/ROM_DATA.md; `build.py town` and `build.py world` show them.
+- The run begins in the real world, in Central Town or ACDC Town, each
+  cut into pieces from the game's own map and set out again per run.
+  Central Town: Lan steps out of his front door among Capcom's houses,
+  Aster Land, the Academy gate, the Expo gates, the bus stop and the plaza
+  with its trees and blue bird statue, the plaza, the main road and the
+  houses' court sometimes wider. ACDC Town: he comes up the Metroline's
+  stairs among the park with its squirrel statue, Higsby's, Dex's and
+  Mayl's houses and the Ayano mansion, the blocks sometimes in another
+  order. Townsfolk stand where they belong and talk about the place, and
+  the houses, shops, signs and statues answer A. At the statue (or ACDC
+  Town's doghouse) R plays the game's own jack-in to the first layer. The
+  real world's maps, their tables, objects, checks and jack-in
+  destinations are documented in docs/OVERWORLD.md and docs/ROM_DATA.md;
+  `build.py town` and `build.py world` show them.
 - Keyboard: the layout of Capcom's PC version (the Legacy Collection). W A S D
   move, J and K are A and B, Q and E are L and R, Enter is Start, R is Select;
   the arrows with X and Z still work. Keys are physical positions (Z Q S D on

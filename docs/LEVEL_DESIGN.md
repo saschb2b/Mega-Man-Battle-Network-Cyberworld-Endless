@@ -100,8 +100,8 @@ bridge leaves from gets the heal and the Net Dealer (docs/BOSSES.md). Services g
 better Mystery Data to pads, and most other Mystery Data to dead ends. A
 layer has 120 to about 250 panels (depth grows the layouts) and fits a
 window of 29 x 53 panels along the grid's diagonals, the screen rectangle
-the game's 0x14000-byte tile map buffer holds; `netmap.c` centres it on that
-rectangle.
+the game's tile map buffer holds (0x13FF4 bytes, up to the coordinate
+data); `netmap.c` centres it on that rectangle.
 
 Walkways, the floor panels in no 2x2 block of floor, are drawn in the
 area's second floor, learned from the same source map by its hue

@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "area_src.h"
+#include "bn6.h"
 #include "bytes.h"
 #include "coords.h"
 #include "debug.h"
@@ -30,7 +31,6 @@
 #include "rom.h"
 
 #define TILEMAP_AT  (EMU_FREE + 0x10000) /* generated tile map (LZ77) */
-#define MAX_TILE_BYTES 0x14000           /* the game's tile map buffer */
 
 #define MAX_BOOKS (4 * (1 + NET_MORE_MAPS))   /* maps, their mirrors, two heights each */
 
@@ -261,7 +261,7 @@ static bool write_tilemap(const Learned *L) {
 	int tw = 2 * ((umax + 64 + 7) / 8), th = 2 * ((vmax + 48 + cur->rise + 7) / 8);
 	if ((tw & 1) != (L->tw & 1)) ++tw;   /* same tile phase as the source */
 	if ((th & 1) != (L->th & 1)) ++th;
-	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > MAX_TILE_BYTES) return false;
+	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
 	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape };

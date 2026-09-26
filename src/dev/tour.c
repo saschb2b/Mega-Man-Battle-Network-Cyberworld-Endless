@@ -168,23 +168,18 @@ static void world_update(void) {
 
 static void town_spot(int i, int *x, int *y) {
 	const TownInfo *ti = town_info();
-	int spots[6][2] = {
-		{ ti->start_x, ti->start_y }, { ti->port_x, ti->port_y + 24 },
-		{ ti->port_x - 120, ti->port_y }, { ti->port_x - 200, ti->port_y + 40 },
-		{ ti->start_x + 80, ti->start_y - 80 }, { ti->port_x - 40, ti->port_y + 120 },
-	};
-	*x = spots[i][0];
-	*y = spots[i][1];
+	*x = ti->spots[i][0];
+	*y = ti->spots[i][1];
 }
 
 static void town_update(void) {
 	if (!director_in_town()) { T.t = 0; return; }
 	if (++T.t < 120) return;
 	snprintf(devtools_shot, sizeof devtools_shot, "%s/town_%d.bmp", T.dir, T.spot);
-	if (++T.spot >= 6) { T.on = false; P.quit = true; return; }
+	if (++T.spot >= TOWN_SPOTS) { T.on = false; P.quit = true; return; }
 	int x, y;
 	town_spot(T.spot, &x, &y);
-	emu_warp(TOWN_GROUP, TOWN_NUMBER, x, y, 2);
+	emu_warp(town_info()->group, town_info()->number, x, y, 2);
 	T.t = 0;
 }
 

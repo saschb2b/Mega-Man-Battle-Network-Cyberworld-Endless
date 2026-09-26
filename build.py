@@ -78,7 +78,7 @@ def docker(*cmd, mounts=(), image=IMAGE):
     args += ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
     for host, guest in mounts:
         args += ['-v', f'{host}:{guest}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -409,7 +409,7 @@ def bmp_sheet(paths, out, cols=3):
 
 
 def town(seeds='4'):
-    """The town for a few seeds, drawn; then the game around the first one."""
+    """The towns runs of seeds 1..SEEDS start in, drawn; then the game around the first one."""
     import glob
     from PIL import Image
     out = os.path.join(ROOT, '.build', 'town')
@@ -549,6 +549,8 @@ SCREENSHOTS = [
      [(240, 'net'), (870, 'custom'), (1140, 'battle'), (1455, 'result'), (2220, 'guardian'),
       (2380, 'guardian-talk'), (2580, 'boss-custom'), (3852, 'reward'), (3872, 'restored')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--dev', 'quiet'], [(120, 'act-card')], {}),
+    ('town-central', ['--scene', 'town', '--seed', '3'], [(280, 'town-central')], {}),
+    ('town-acdc', ['--scene', 'town', '--seed', '5'], [(280, 'town-acdc')], {}),
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
     ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'seaside')], {}),
     ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),

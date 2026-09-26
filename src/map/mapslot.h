@@ -47,6 +47,15 @@ void mapslot_music_forget_town(void);
  * jack-in (one of its 20-byte destinations is taken over). */
 bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, int y, int facing);
 
+/* The town's warp list: every entry leads back to its own world (x, y),
+ * so no trigger left in it can take Lan anywhere else. */
+bool mapslot_town_warps(int group, int number, int x, int y, int facing);
+
+/* What the map's checks say (section-3 triggers 0xF0 + n, answered by A):
+ * script[n] of `archive` (a text archive's bytes; 0xFF none). The archive
+ * becomes the map's own, which the game decompresses when it enters. */
+bool mapslot_checks(int group, int number, const uint8_t script[16], const uint8_t *archive, int len);
+
 /* Allocation from the town's own space (on) or the layers' (off): the
  * layers' halves are reused while the town still runs. */
 void mapslot_town(bool on);

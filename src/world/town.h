@@ -1,24 +1,26 @@
-/* The town: a generated square in Central Town's style, where Lan starts a
- * run and jacks MegaMan in (docs/OVERWORLD.md). */
+/* The town: one of BN6's towns cut into pieces and set out again, where
+ * Lan starts a run and jacks MegaMan in (docs/OVERWORLD.md). */
 #ifndef CW_TOWN_H
 #define CW_TOWN_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
-/* The real-world map the town takes over, and whose tiles it is made of
- * (Central Town). */
-#define TOWN_GROUP  0x01
-#define TOWN_NUMBER 0x00
-#define TOWN_SONG   0x03
+#define TOWN_SPOTS 6
 
 typedef struct {
+	int group, number;      /* the real-world map it is cut from and takes over */
 	int start_x, start_y;   /* where Lan arrives (world units) */
-	int port_x, port_y;     /* the jack-in port */
+	int start_face;         /* ... facing (the game's warp facing) */
+	int port_x, port_y;     /* the middle of the jack-in point */
 	int tw, th;             /* the tile map's size */
-	int misses;             /* tiles no source tile matched */
+	int misses;             /* picked tiles no source tile matched */
 	int picks;
+	int spots[TOWN_SPOTS][2];   /* places worth a look (the dev tour) */
 } TownInfo;
+
+/* The town's seed for a run's seed (apart from the layers'). */
+static inline uint32_t town_seed(uint32_t run_seed) { return run_seed ^ 0x70776E00u; }
 
 /* Plans the town for `seed` and picks its tiles (no core needed). */
 bool town_plan(uint32_t seed);
@@ -28,9 +30,17 @@ const TownInfo *town_info(void);
 const uint16_t *town_tiles(void);
 const uint8_t *town_misses(void);
 
-/* Installs the planned town in its map: tiles, walls, the port's jack-in
- * trigger, trees, people and their words, the music; jacking in takes
- * MegaMan to world (x, y) of map (group, number). */
+/* Whether Lan can stand on 8-unit world cell (cx, cy). */
+bool town_walkable(int cx, int cy);
+/* Where to head from world (x, y) to reach the jack-in on foot. */
+bool town_route(int x, int y, int *wx, int *wy);
+/* The town's map objects (id) and people (id -1), in world units. */
+void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
+
+/* Installs the planned town in its original's map: tiles, walls, the
+ * jack-in cells and checks and what they say, trees and statues, people
+ * and their words, the music; jacking in takes MegaMan to world (x, y) of
+ * map (group, number). */
 bool town_install(int to_group, int to_number, int x, int y);
 
 /* The planned town drawn with the source's tiles (the dev atlas): ARGB,

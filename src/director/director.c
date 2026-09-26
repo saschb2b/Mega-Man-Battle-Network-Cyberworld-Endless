@@ -188,7 +188,7 @@ bool director_start_run(void) {
 	/* the first layer, entered through the town's port; the town itself
 	 * (its seed apart from the layers') */
 	if (!build_layer()) return false;
-	if (!town_plan(run.seed ^ 0x70776E00u) || !town_install(D.group, D.number, D.start_x, D.start_y)) {
+	if (!town_plan(town_seed(run.seed)) || !town_install(D.group, D.number, D.start_x, D.start_y)) {
 		fprintf(stderr, "town: not built; starting in the net\n");
 		lock_run();
 		emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
@@ -199,7 +199,7 @@ bool director_start_run(void) {
 	flag_clear(BN6_FLAG_NO_JACK);
 	flag_set(BN6_FLAG_NO_PET_SAVE);
 	const TownInfo *ti = town_info();
-	emu_warp(TOWN_GROUP, TOWN_NUMBER, ti->start_x, ti->start_y, 2);
+	emu_warp(ti->group, ti->number, ti->start_x, ti->start_y, ti->start_face);
 	D.town = true;
 	D.town_seen = false;
 	return true;
@@ -211,7 +211,7 @@ bool director_in_town(void) { return D.active && D.town; }
  * layer's map starts the run as a layer's warp does. */
 static void town_update(void) {
 	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
-	if (group == TOWN_GROUP && number == TOWN_NUMBER) D.town_seen = true;
+	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP + 0x10) == 0 &&
 		emu_read8(BN6_GAMESTATE + 4) == D.group && emu_read8(BN6_GAMESTATE + 5) == D.number;
 	if (!arrived) return;

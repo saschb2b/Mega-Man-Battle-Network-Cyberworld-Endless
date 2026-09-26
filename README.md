@@ -5,6 +5,8 @@
 
 <p>
 <img src="docs/screenshots/title.png" width="360" alt="The title screen: the Battle Network logo with an infinity mark and the plate Cyberworld Endless">
+<img src="docs/screenshots/town-central.png" width="360" alt="Lan outside his house in Central Town, an old man by the flower bed">
+<img src="docs/screenshots/town-acdc.png" width="360" alt="Lan by the Metroline in ACDC Town, Higsby's and the squirrel statue below">
 <img src="docs/screenshots/act-card.png" width="360" alt="Act 1: RoboDog Comp, its guardian BlastMan">
 <img src="docs/screenshots/battle.png" width="360" alt="BATTLE START against a Gunner and a FgtrPlne">
 <img src="docs/screenshots/guardian.png" width="360" alt="The guardian of Sky HP: DiveMan, Terror of the Deep">
@@ -120,10 +122,11 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 
 ### A run
 
-A run begins in town. Lan stands on a square in the style of BN6's Central
-Town, with trees, planters and a few people to talk to; the public jack-in
-port stands on the brick plaza. Walk up to it and press R: Lan jacks
-MegaMan in, and the net begins. The town is a new one every run.
+A run begins in town: Central Town or ACDC Town, Capcom's own, set out a
+little differently each run, with shops, houses, townsfolk to talk to and
+signs to read. Walk to the town's statue (the blue bird on Central Town's
+plaza, the squirrel in ACDC Town's park) and press R: Lan jacks MegaMan
+in, and the net begins.
 
 Each layer is a new layout of platforms and walkways in the style of one of
 the game's areas. Find the exit pad to go one layer deeper. On the way, the

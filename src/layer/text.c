@@ -120,8 +120,7 @@ int ta_talk(TextArchive *t, const char *boxes, const int *mugshots) {
 	return i;
 }
 
-uint32_t ta_commit(TextArchive *t) {
-	static uint8_t out[TEXT_MAX_SCRIPTS * 2 + TEXT_MAX_BYTES];
+int ta_build(const TextArchive *t, uint8_t *out) {
 	int head = t->n * 2;
 	for (int i = 0; i < t->n; ++i) {
 		uint16_t o = (uint16_t)(t->off[i] + head);
@@ -129,5 +128,10 @@ uint32_t ta_commit(TextArchive *t) {
 		out[i * 2 + 1] = (uint8_t)(o >> 8);
 	}
 	memcpy(out + head, t->buf, (size_t)t->len);
-	return mapslot_alloc(out, head + t->len);
+	return head + t->len;
+}
+
+uint32_t ta_commit(TextArchive *t) {
+	static uint8_t out[TEXT_ARCHIVE_MAX];
+	return mapslot_alloc(out, ta_build(t, out));
 }
