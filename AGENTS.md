@@ -45,6 +45,7 @@ README and the site.
 | `tests/test_core.c` | ROM-free unit tests |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
+| `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
 | `port/` | PortMaster launcher and metadata |
 | `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage and the `.deb` carry. The app ID `io.github.saschb2b.CyberworldEndless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling). Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
@@ -86,6 +87,8 @@ python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.b
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/
 python3 build.py run        # the Linux desktop build, played here in a window
+python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
+python3 tools/play.py do NAME "press A; hold UP 30" [--every 10]   # input, then a picture and the state
 python3 build.py serve      # the site and the browser build on http://localhost:8080
 python3 build.py town [SEEDS]  # the town drawn per seed, and the game around it
 python3 build.py world        # the real world's original maps, drawn and toured
@@ -127,6 +130,12 @@ save frames, and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
 @CAT:FIRST:COUNT:PATH` draw sprites. Environment variables reach the image
 only when `build.py` lists them (`CYBERWORLD_EMU_DEBUG`, `CYBERWORLD_AUTOPILOT`
 and the audio ones).
+
+`tools/play.py` keeps one game running per NAME (`.build/play/NAME`: its
+saves in `data/`, every command in `history.txt`, the seed in its first
+line), so a playtester, person or agent, plays it like the handheld,
+reading each picture; a session replays from the seed, `data0/` and the
+history.
 
 `tools/romlab` runs the plain ROM in libmgba for research: scripted input,
 memory peeks and pokes, states and recordings. `labtrace.py` traces captured

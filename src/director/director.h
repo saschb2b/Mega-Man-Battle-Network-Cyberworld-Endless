@@ -3,6 +3,7 @@
 #define CW_DIRECTOR_H
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdint.h>
 
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
@@ -13,6 +14,10 @@ bool director_start_run(void);
 bool director_in_town(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
+/* Lan (or MegaMan) is on the map the run put him on: the picture can show. */
+bool director_arrived(void);
+/* What a player sees, in words, one fact a line (remote play). */
+void director_describe(FILE *f);
 /* The pad's keys on their way to the game: on the map L is MegaMan's
  * word on where they are. */
 uint32_t director_keys(uint32_t keys);

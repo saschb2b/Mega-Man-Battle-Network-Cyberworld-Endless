@@ -279,6 +279,29 @@ bool director_in_town(void) { return D.active && D.town; }
 
 bool director_on_layer(void) { return D.active && !D.town; }
 
+bool director_arrived(void) {
+	if (!D.active || !on_map()) return false;
+	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
+	return D.town ? group == town_info()->group && number == town_info()->number : group == D.group && number == D.number;
+}
+
+void director_describe(FILE *f) {
+	if (!D.active) { fprintf(f, "where none\n"); return; }
+	int mode = main_mode(), sub = emu_read8(BN6_GAMESTATE);
+	const char *doing = mode == BN6_MODE_GAME_OVER ? "gameover"
+		: mode != BN6_MODE_GAME ? "menu"
+		: sub == BN6_SUB_MAP ? "map" : sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT ? "battle" : "other";
+	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
+		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
+	fprintf(f, "hp %d/%d\nzenny %u\n", emu_read16(BN6_NAVI_STATS + 0x40), emu_read16(BN6_NAVI_STATS + 0x42),
+		(unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
+	if (D.town) return;
+	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	if (D.objs.guardian.navi)
+		fprintf(f, "guardian %s %s\n", guardian(D.objs.guardian.navi)->name,
+			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");
+}
+
 uint32_t director_keys(uint32_t keys) {
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	D.l_held = l;

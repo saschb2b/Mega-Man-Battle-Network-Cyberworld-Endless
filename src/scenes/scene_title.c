@@ -39,6 +39,7 @@ static const uint8_t cycle[] = { 0x09, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 
 #define NCYCLE (int)(sizeof cycle / sizeof *cycle)
 
 bool title_summary;
+uint32_t title_seed;
 char title_cause[48];
 bool title_new_best;
 
@@ -258,7 +259,7 @@ static void update(void) {
 		S.jack_y += S.jack_v;
 		if (S.leaving > LEAVE_FRAMES) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
-			else { run_new(rng_next() ^ (uint32_t)SDL_GetTicks()); emu_start_in_town = true; }
+			else { run_new(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks()); emu_start_in_town = true; }
 			scene_set(&scene_emu);
 		}
 		return;

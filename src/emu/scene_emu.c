@@ -31,7 +31,14 @@ static uint32_t keys_from_buttons(void) {
 	return k;
 }
 
+/* The picture stays black until the run's first map has loaded (the boot
+ * state's own screen shows meanwhile: its backdrop is bright green), then
+ * fades in. */
+#define REVEAL_FRAMES 16
+static int revealed;   /* frames since the first map showed, 0 not yet */
+
 static void enter(void) {
+	revealed = 0;
 	if (!emu_init(R.data, ROM_SIZE)) return;
 	cinema_reset();
 	if (emu_resume_requested) {
@@ -62,6 +69,7 @@ static void update(void) {
 		cinema_update();
 		emu_debug_frame();
 	}
+	if (revealed || director_arrived()) ++revealed;
 }
 
 static void draw(void) {
@@ -81,6 +89,8 @@ static void draw(void) {
 	cinema_offset(&dx, &dy);
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
+	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
+	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	devtools_draw();
 }

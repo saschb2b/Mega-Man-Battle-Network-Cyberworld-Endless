@@ -5,6 +5,8 @@
 #include <unistd.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#else
+#include <fcntl.h>
 #endif
 
 #include "game.h"
@@ -118,7 +120,9 @@ static void error_update(void) {
 const Scene scene_error = { "error", NULL, error_update, error_draw, NULL };
 
 /* ---- scripted input and captures for headless tests ---- */
-typedef struct { int frames; uint32_t buttons; } InputStep;
+/* A step holds buttons for some frames; one of no frames takes a picture
+ * or writes the state instead (remote play). */
+typedef struct { int frames; uint32_t buttons; char shot[160], state[160]; } InputStep;
 static InputStep script[512];
 static int script_len, script_pos, script_left;
 
@@ -142,6 +146,7 @@ static void parse_script(const char *spec) {
 	char *copy = strdup(spec);
 	for (char *tok = strtok(copy, ","); tok && script_len < 512; tok = strtok(NULL, ",")) {
 		char *colon = strchr(tok, ':');
+		memset(&script[script_len], 0, sizeof script[script_len]);
 		script[script_len].frames = atoi(tok);
 		script[script_len].buttons = colon ? parse_buttons(colon + 1) : 0;
 		++script_len;
@@ -168,8 +173,96 @@ static void bot_tick(void) {
 	platform_inject(bot_buttons);
 }
 
+/* What a player sees, in words (remote play's state file). */
+static void write_state(const char *path) {
+	FILE *f = fopen(path, "w");
+	if (!f) return;
+	fprintf(f, "frame %llu\nscene %s\n", (unsigned long long)P.frame, current ? current->name : "none");
+	if (current == &scene_emu) director_describe(f);
+	fclose(f);
+}
+
+/* The steps of no frames at the script's position: pictures, states. */
+static void script_actions(void) {
+	while (script_pos < script_len && script[script_pos].frames == 0) {
+		InputStep *s = &script[script_pos];
+		if (s->shot[0]) platform_save_canvas(s->shot);
+		if (s->state[0]) write_state(s->state);
+		if (++script_pos < script_len) script_left = script[script_pos].frames;
+	}
+}
+
+#ifndef __EMSCRIPTEN__
+/* ---- remote play (tools/play.py): the game waits for batches of steps on
+ * DIR/in and answers each on DIR/out once its frames have run ---- */
+static int remote_in = -1, remote_out = -1;
+static bool remote_answer;   /* a batch has run: answer before the next */
+
+static bool remote_open(const char *dir) {
+	char in[600], out[600];
+	snprintf(in, sizeof in, "%s/in", dir);
+	snprintf(out, sizeof out, "%s/out", dir);
+	mkfifo(in, 0600);
+	mkfifo(out, 0600);
+	/* (both ends read-write: no end of file between the client's calls) */
+	remote_in = open(in, O_RDWR);
+	remote_out = open(out, O_RDWR);
+	return remote_in >= 0 && remote_out >= 0;
+}
+
+/* One line: "N BUTTONS" holds them N frames, "shot PATH", "state PATH",
+ * "quit"; items apart by ';'. */
+static void remote_parse(char *line) {
+	script_len = script_pos = 0;
+	for (char *tok = strtok(line, ";\n"); tok && script_len < 512; tok = strtok(NULL, ";\n")) {
+		while (*tok == ' ') ++tok;
+		InputStep *s = &script[script_len];
+		memset(s, 0, sizeof *s);
+		if (!strncmp(tok, "shot ", 5)) snprintf(s->shot, sizeof s->shot, "%s", tok + 5);
+		else if (!strncmp(tok, "state ", 6)) snprintf(s->state, sizeof s->state, "%s", tok + 6);
+		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
+		else {
+			char buttons[128] = "";
+			if (sscanf(tok, "%d %127s", &s->frames, buttons) < 1 || s->frames <= 0) continue;
+			s->buttons = parse_buttons(buttons);
+		}
+		++script_len;
+	}
+	script_left = script_len ? script[0].frames : 0;
+}
+
+/* Between batches: the answer to the last, then the next (blocking). */
+static void remote_tick(void) {
+	for (;;) {
+		script_actions();
+		if (script_pos < script_len || P.quit) return;
+		if (remote_answer) {
+			char ok[64];
+			int n = snprintf(ok, sizeof ok, "ok %llu\n", (unsigned long long)P.frame);
+			if (write(remote_out, ok, (size_t)n) < 0) { P.quit = true; return; }
+			remote_answer = false;
+		}
+		char line[4096];
+		int n = 0;
+		while (n < (int)sizeof line - 1) {
+			char c;
+			if (read(remote_in, &c, 1) != 1) { P.quit = true; return; }
+			if (c == '\n') break;
+			line[n++] = c;
+		}
+		line[n] = 0;
+		remote_parse(line);
+		remote_answer = true;
+	}
+}
+#endif
+
 static void script_tick(void) {
 	if (bot_seed) { bot_tick(); return; }
+#ifndef __EMSCRIPTEN__
+	if (remote_in >= 0) remote_tick();
+#endif
+	script_actions();
 	if (script_pos >= script_len) { platform_inject(0); return; }
 	platform_inject(script[script_pos].buttons);
 	if (--script_left <= 0 && ++script_pos < script_len) script_left = script[script_pos].frames;
@@ -288,6 +381,7 @@ int main(int argc, char **argv) {
 	int run_depth = 0;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
+	const char *remote_dir = NULL;
 	uint64_t max_frames = 0;
 	uint32_t seed = 0;
 	const char *render_spec = NULL;
@@ -318,6 +412,9 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
+#ifndef __EMSCRIPTEN__
+		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
+#endif
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
 		else if (!strcmp(a, "--atlas") && v) { atlas_spec = v; ++i; }
 		else if (!strcmp(a, "--pacing") && v) { pacing_spec = v; ++i; }
@@ -441,10 +538,14 @@ int main(int argc, char **argv) {
 			s = &scene_title;
 		}
 		if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
+		if (!s || s == &scene_title) title_seed = seed;
 		if (town) emu_start_in_town = true;
 		scene_set(s ? s : &scene_title);
 	}
 
+#ifndef __EMSCRIPTEN__
+	if (remote_dir && !remote_open(remote_dir)) { fprintf(stderr, "--remote: cannot open the pipes in %s\n", remote_dir); return 1; }
+#endif
 	loop.headless = headless;
 	loop.max_frames = max_frames;
 	loop.last = SDL_GetPerformanceCounter();
