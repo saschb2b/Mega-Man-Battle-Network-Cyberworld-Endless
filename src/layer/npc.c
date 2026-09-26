@@ -46,6 +46,7 @@ uint32_t npc_mystery(int index) {
 		0x08,
 		0x25, 0x02, 0x1C,
 		0x29, (uint8_t)flag, (uint8_t)(flag >> 8),
+		0x0A, NPC_TALK_RADIUS,   /* (0x29 sets 4: opened from any facing its way) */
 		0x45, (uint8_t)flag, (uint8_t)(flag >> 8),
 		0x03,
 	};
