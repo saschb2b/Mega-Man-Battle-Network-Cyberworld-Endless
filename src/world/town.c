@@ -556,8 +556,13 @@ static void carry(void) {
 		int x1 = f[2] > st[2] + 2 ? f[2] : st[2] + 2, y1 = f[3] > st[3] + 2 ? f[3] : st[3] + 2;
 		for (int cy = y0; cy <= y1 && (p->flags & F_JACK_IN); ++cy)
 			for (int cx = x0; cx <= x1; ++cx)
-				if (PORT_CELL(cx, cy) && in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG)
-					T.trig[T.ntrig++] = (CoordCell){ (int16_t)((cx + dx) * 8), (int16_t)((cy + dy) * 8), 0, JACK_IN_TRIGGER, 8, 0x11 };
+				if (PORT_CELL(cx, cy) && in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG) {
+					/* (the ring's own cells marked apart too: the front's middle
+					 * stays where the autopilot heads) */
+					bool in_front = cx >= f[0] && cy >= f[1] && cx <= f[2] && cy <= f[3];
+					T.trig[T.ntrig++] = (CoordCell){ (int16_t)((cx + dx) * 8), (int16_t)((cy + dy) * 8), 0,
+						in_front ? JACK_IN_TRIGGER : JACK_IN_TRIGGER | 0x80, 8, 0x11 };
+				}
 		#undef PORT_CELL
 		/* trees and the statue: the game's own map objects */
 		for (int k = 0; k < T.nsrc_obj && T.nobj < MAX_OBJS; ++k) {

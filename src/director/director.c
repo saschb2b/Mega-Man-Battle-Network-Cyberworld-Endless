@@ -148,13 +148,13 @@ static void arrival_words(void) {
 /* Which way the exit pad lies from MegaMan, as the screen shows it (the
  * d-pad's UP moves +X -Y, RIGHT +X +Y: a world step (dx, dy) goes
  * dx + dy across and (dy - dx) / 2 down), and how far. */
-static const char *exit_way(int *far) {
+static const char *way_to(int tx, int ty, int *far) {
 	static const char *const ways[8] = {
 		"to the right", "down and to the right", "straight down", "down and to the left",
 		"to the left", "up and to the left", "straight up", "up and to the right",
 	};
-	int dx = D.objs.exit_x - ((int)emu_read32(BN6_PLAYER + 0x1C) >> 16);
-	int dy = D.objs.exit_y - ((int)emu_read32(BN6_PLAYER + 0x20) >> 16);
+	int dx = tx - ((int)emu_read32(BN6_PLAYER + 0x1C) >> 16);
+	int dy = ty - ((int)emu_read32(BN6_PLAYER + 0x20) >> 16);
 	double sx = dx + dy, sy = (dy - dx) / 2.0;
 	int panels = (abs(dx) + abs(dy)) / 32;
 	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
@@ -168,8 +168,10 @@ static const char *status_words(void) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (D.town) {
-		ADD("@M The port's by the %s, Lan.|@M Stand next to the statue and press R to jack me in!",
-			town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
+		int far;
+		const char *way = way_to(town_info()->port_x, town_info()->port_y, &far);
+		ADD("@M The port's by the %s, Lan.|@M It's %s from here.|@M Stand next to the statue and press R to jack me in!",
+			town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza", way);
 		return buf;
 	}
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
@@ -182,7 +184,7 @@ static const char *status_words(void) {
 	else if (run.fragments > 1) ADD("|@M We're carrying %d ScrtData.", run.fragments);
 	/* the way on, as MegaMan senses it */
 	int far;
-	const char *way = exit_way(&far);
+	const char *way = way_to(D.objs.exit_x, D.objs.exit_y, &far);
 	static const char *const how_far[3] = { "It's close!", "It's a little ways off.", "It's still a long way." };
 	if (!D.objs.guardian.navi || boss_done())
 		ADD("|@M I can sense the exit pad, Lan. It's %s.|@M %s", way, how_far[far]);
@@ -340,6 +342,11 @@ bool director_arrived(void) {
 	return D.town ? group == town_info()->group && number == town_info()->number : group == D.group && number == D.number;
 }
 
+static void print_near(int id, int x, int y, void *ctx) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	if (abs(x - px) < 48 && abs(y - py) < 48) fprintf(ctx, "near %s %d %d\n", id < 0 ? "folk" : "object", x, y);
+}
+
 void director_describe(FILE *f) {
 	if (!D.active) { fprintf(f, "where none\n"); return; }
 	int mode = main_mode(), sub = emu_read8(BN6_GAMESTATE);
@@ -350,6 +357,12 @@ void director_describe(FILE *f) {
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
 	fprintf(f, "hp %d/%d\nzenny %u\n", emu_read16(BN6_NAVI_STATS + 0x40), emu_read16(BN6_NAVI_STATS + 0x42),
 		(unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
+	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
+	if (getenv("CYBERWORLD_STATE_POS")) {
+		fprintf(f, "pos %d %d %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16,
+			(int)emu_read32(BN6_PLAYER + 0x24) >> 16);
+		if (D.town) town_objects(print_near, f);
+	}
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
 	if (D.objs.guardian.navi)
