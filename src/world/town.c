@@ -210,6 +210,8 @@ static void raster(void) {
 struct TownStyle {
 	int group, number, song;
 	unsigned jack_ins;                  /* the original's jack-in points kept: bit n for 0x40 + n */
+	int front[4];                       /* the landmark's front (the original's cells x0, y0, x1, y1):
+	                                     * R jacks in anywhere Lan stands there */
 	TownMatOf mat_of;
 	void (*design)(void);
 	int start_x, start_y, start_face;   /* where Lan arrives */
@@ -389,9 +391,9 @@ static const char *const acdc_checks[16] = {
 #define FOLK(list) list, (int)(sizeof list / sizeof *list)
 
 static const Style styles[] = {
-	{ 0x01, 0x00, 0x03, 1 << 0, central_mat, design_central, -40, 266, FACE_SW, FOLK(central_folk), central_checks,
+	{ 0x01, 0x00, 0x03, 1 << 0, { 12, -9, 16, -2 }, central_mat, design_central, -40, 266, FACE_SW, FOLK(central_folk), central_checks,
 	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } } },
-	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, acdc_mat, design_acdc, -60, -108, FACE_SW, FOLK(acdc_folk), acdc_checks,
+	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, { -23, -10, -17, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW, FOLK(acdc_folk), acdc_checks,
 	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } } },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
@@ -523,22 +525,30 @@ static void carry(void) {
 			o.y = (int16_t)((cy + dy) * 8);
 			T.sec2[T.nsec2++] = o;
 		}
-		/* the jack-in point before the statue (the town has one), and the
-		 * checks in front of things */
+		/* the jack-in points and the checks in front of things; the
+		 * landmark's whole front jacks in (where a player stands to, the
+		 * original has the statue's check), and every point is the town's
+		 * one: n = 0 */
+		const int *f = T.style->front;
 		for (int k = 0; k < a->nsec[3]; ++k) {
 			const CoordCell *c = &a->sec[3][k];
+			int cx = fdiv(c->x, 8), cy = fdiv(c->y, 8);
 			bool jack = c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 && (p->flags & F_JACK_IN) &&
 				(T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1);
 			bool check = c->value >= CHECK_TRIGGER && T.style->checks[c->value - CHECK_TRIGGER];
-			if (!(jack || check) || !in_source(p, fdiv(c->x, 8), fdiv(c->y, 8)) || T.ntrig >= MAX_TRIG) continue;
+			bool front = cx >= f[0] && cy >= f[1] && cx <= f[2] && cy <= f[3];
+			if (!(jack || check) || front || !in_source(p, cx, cy) || T.ntrig >= MAX_TRIG) continue;
 			CoordCell o = *c;
 			o.x = (int16_t)(c->x + dx * 8);
 			o.y = (int16_t)(c->y + dy * 8);
-			/* (every jack-in point is the town's one: n = 0; the first's
-			 * middle is where the autopilot heads) */
-			if (jack) o.value = c->value == JACK_IN_TRIGGER ? JACK_IN_TRIGGER : JACK_IN_TRIGGER | 0x80;
+			/* (marked apart from the front, whose middle the autopilot heads for) */
+			if (jack) o.value = JACK_IN_TRIGGER | 0x80;
 			T.trig[T.ntrig++] = o;
 		}
+		for (int cy = f[1]; cy <= f[3] && (p->flags & F_JACK_IN); ++cy)
+			for (int cx = f[0]; cx <= f[2]; ++cx)
+				if (in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG)
+					T.trig[T.ntrig++] = (CoordCell){ (int16_t)((cx + dx) * 8), (int16_t)((cy + dy) * 8), 0, JACK_IN_TRIGGER, 8, 0x11 };
 		/* trees and the statue: the game's own map objects */
 		for (int k = 0; k < T.nsrc_obj && T.nobj < MAX_OBJS; ++k) {
 			const uint8_t *r = T.src_obj[k];
@@ -671,7 +681,9 @@ static int plan_once(uint32_t seed) {
 	memset(&T.info, 0, sizeof T.info);
 	T.info.group = T.style->group;
 	T.info.number = T.style->number;
-	moved(T.style->start_x, T.style->start_y, &T.info.start_x, &T.info.start_y);
+	int sx = T.style->start_x, sy = T.style->start_y;
+	if (getenv("CYBERWORLD_TOWN_START")) sscanf(getenv("CYBERWORLD_TOWN_START"), "%d,%d", &sx, &sy);   /* (the original's world units) */
+	moved(sx, sy, &T.info.start_x, &T.info.start_y);
 	T.info.start_face = T.style->start_face;
 	int jx = 0, jy = 0, nj = 0;
 	for (int i = 0; i < T.ntrig; ++i)
@@ -768,6 +780,11 @@ uint32_t *town_render(int *w, int *h) {
 	*w = T.info.tw * 8;
 	*h = T.info.th * 8;
 	return area_src_render(T.style->group, T.style->number, T.tiles, T.info.tw, T.info.th);
+}
+
+int town_triggers(const CoordCell **cells) {
+	*cells = T.trig;
+	return T.ntrig;
 }
 
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx) {

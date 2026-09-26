@@ -164,18 +164,22 @@ set. The map's jack-in table (per map, in GameState `+0x64`) turns n into
 one of 43 20-byte destinations (WarpData: group, number, departure,
 facing, x, y, z; then the index of Lan's "Jack in!" line), and the game
 plays its jack-in cutscene to it. The town keeps the style's points
-(Central Town's 4 x 4 cells before the bird statue, not the story's second
-one in front of Aster Land; ACDC Town's 2 x 5 beside the squirrel statue
-and 4 x 2 at the doghouse), all as value `0x40`; its table
+(Central Town's 4 x 4 cells on the plaza, not the story's second one in
+front of Aster Land; ACDC Town's 2 x 5 beside the squirrel statue and
+4 x 2 at the doghouse) and makes the landmark's whole front one too: the
+original's points lie a few cells from the statue, with the statue's own
+check between, where a player walks up and presses R. Every cell is value
+`0x40`; its table
 points n = 0 at destination 42, and the engine rewrites destination 42
 (a comp the run never visits) to the first layer's arrival. When MegaMan
 arrives there, the run goes on as from any layer (docs/EMULATION.md).
 
-`CYBERWORLD_AUTOPILOT` walks Lan along the streets to the (first) jack-in
-point (a breadth-first path over the town's walkable cells) and presses R.
+`CYBERWORLD_AUTOPILOT` walks Lan along the streets to the landmark's front
+(a breadth-first path over the town's walkable cells) and presses R.
 `python3 build.py town` draws the towns runs of seeds 1, 2, ... start in,
 tiles without a match marked red, objects and people dotted, and shows
 the game around the first; `CYBERWORLD_TOWN_STYLE` (0 Central, 1 ACDC) and
-`CYBERWORLD_TOWN_VARIANT` fix the plan, `CYBERWORLD_TOWN_DEBUG` marks
-hinted tiles and prints the plan, `CYBERWORLD_TOWN_TILE=x,y` how one tile
-was picked.
+`CYBERWORLD_TOWN_VARIANT` fix the plan, `CYBERWORLD_TOWN_START=x,y` where
+Lan starts (the original's world units), `CYBERWORLD_TOWN_DEBUG` marks
+hinted tiles and trigger cells and prints the plan,
+`CYBERWORLD_TOWN_TILE=x,y` how one tile was picked.

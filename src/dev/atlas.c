@@ -186,6 +186,12 @@ static void towns(const char *dir, int seeds) {
 		dot(px, W, H, area_px(ti->tw, ti->port_x, ti->port_y), area_py(ti->th, ti->port_x, ti->port_y), 3, 0xFF30FF30u);
 		TownDots dots = { px, W, H, ti->tw, ti->th };
 		town_objects(town_dot, &dots);
+		/* the jack-in cells green, the checks yellow */
+		const CoordCell *trig;
+		int nt = town_triggers(&trig);
+		for (int i = 0; i < nt && getenv("CYBERWORLD_TOWN_DEBUG"); ++i)
+			dot(px, W, H, area_px(ti->tw, trig[i].x + 4, trig[i].y + 4), area_py(ti->th, trig[i].x + 4, trig[i].y + 4), 1,
+				trig[i].value == 0x40 ? 0xFF00FF00u : 0xFFFFE000u);
 		char path[600];
 		snprintf(path, sizeof path, "%s/town_s%02d.bmp", dir, s);
 		save_bmp(path, px, W, H);
