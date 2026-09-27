@@ -16,6 +16,10 @@ First playable version.
   none). The pacing report lists each battle roll's virus families.
   `--guardian N` pins every area's guardian for a scripted capture, and
   `--net-biome` puts its area in the run's act as well.
+- The way-on arrow leads around Mystery Data and navis where MegaMan
+  stands right beside one (it walked him into it, from the object's own
+  panel), and its look ahead keeps clear of them; the arrow test walks
+  among them now, as round objects smaller than a panel.
 - The way-on arrow keeps to the walk. It showed a turn's first panel when
   the walk cut a platform's corner, and a running MegaMan was two panels
   past the turn before it turned (a look every 15 frames, now 5), so on

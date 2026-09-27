@@ -11,6 +11,11 @@ int route_walk_len, route_walk_aim = -1;
 
 static bool floor_at(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
 
+/* the panels a solid object stands on (a Mystery Data, a navi), but the
+ * walk's two ends */
+static uint8_t solid[MAP_H][MAP_W];
+static bool open_at(int x, int y) { return floor_at(x, y) && !solid[y][x]; }
+
 int route_grid_way(double dx, double dy) {
 	/* the pad's eight ways (its RIGHT is grid +x -y, its DOWN +x +y), not
 	 * the screen's eighths: a walkway (along x or y) runs in the middle of
@@ -24,9 +29,11 @@ int route_grid_way(double dx, double dy) {
 /* Whether MegaMan walks from panel (sx, sy) to (ax, ay) in a straight line
  * over the floor: the line on floor panels throughout, where it crosses a
  * panel's side on either, and where it crosses a corner with three of the
- * four panels around it floor (a turn's corner cut; not between two drops).
- * (Rounded, a line through a corner fell on its empty panel, and the arrow
- * showed a turn's first panel only: followed, it ran past the turn.) */
+ * four panels around it floor (a turn's corner cut; not between two drops),
+ * and clear of what stands on the floor (MegaMan, walking at a Mystery Data
+ * on the line, stopped against it). (Rounded, a line through a corner fell
+ * on its empty panel, and the arrow showed a turn's first panel only:
+ * followed, it ran past the turn.) */
 static bool floor_line(int sx, int sy, int ax, int ay) {
 	int n = 16 * (abs(ax - sx) + abs(ay - sy));
 	for (int t = 1; t < n; ++t) {
@@ -34,7 +41,7 @@ static bool floor_line(int sx, int sy, int ax, int ay) {
 		bool ex = fabs(fx - floor(fx) - 0.5) < 1e-6, ey = fabs(fy - floor(fy) - 0.5) < 1e-6;
 		int x0 = ex ? (int)floor(fx) : (int)lround(fx), y0 = ey ? (int)floor(fy) : (int)lround(fy);
 		int x1 = x0 + ex, y1 = y0 + ey, floors = 0;
-		for (int k = 0; k < 4; ++k) floors += floor_at(k & 1 ? x1 : x0, k & 2 ? y1 : y0);
+		for (int k = 0; k < 4; ++k) floors += open_at(k & 1 ? x1 : x0, k & 2 ? y1 : y0);
 		if (ex && ey ? floors < 3 : !floors) return false;
 	}
 	return true;
@@ -43,7 +50,6 @@ static bool floor_line(int sx, int sy, int ax, int ay) {
 int route_way(double px, double py, int tx, int ty, int *len) {
 	static int16_t prev[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
-	static uint8_t solid[MAP_H][MAP_W];
 	int sx = (int)lround(px), sy = (int)lround(py);
 	route_walk_len = 0;
 	route_walk_aim = -1;
@@ -53,7 +59,24 @@ int route_way(double px, double py, int tx, int ty, int *len) {
 	memset(solid, 0, sizeof solid);
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].solid && floor_at((int)layer.obj[i].x, (int)layer.obj[i].y)) solid[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
-	solid[sy][sx] = solid[ty][tx] = 0;
+	solid[ty][tx] = 0;
+	/* MegaMan beside a Mystery Data, in its panel's corner: the walk from
+	 * the free panel nearest him (from the object's own it led through it,
+	 * and he pushed into it for good) */
+	if (solid[sy][sx]) {
+		double best = 1e9;
+		int bx = sx, by = sy;
+		for (int k = 0; k < 8; ++k) {
+			static const int d[8][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
+			int x = sx + d[k][0], y = sy + d[k][1];
+			if (!floor_at(x, y) || solid[y][x]) continue;
+			double dist = (x - px) * (x - px) + (y - py) * (y - py);
+			if (dist < best) { best = dist; bx = x; by = y; }
+		}
+		sx = bx;
+		sy = by;
+	}
+	solid[sy][sx] = 0;
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) prev[y][x] = -1;
 	int h = 0, t = 0;
 	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;

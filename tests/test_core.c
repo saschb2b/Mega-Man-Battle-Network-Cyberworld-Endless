@@ -463,15 +463,28 @@ static void test_talk(void) {
  * past a turn, into a platform's corner, round in circles.) */
 static bool walk_floor(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
 
-/* one frame's step from (x, y) by (dx, dy), or along one axis of it */
-static bool walk_step(double *x, double *y, double dx, double dy) {
+/* whether a solid object (a Mystery Data, a navi) stands within MegaMan's
+ * reach of (x, y): the game's are circles smaller than a panel, so he can
+ * stand in the corner of one's panel */
+static bool walk_blocked(double x, double y, int gx, int gy) {
+	for (int i = 1; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (!o->solid || ((int)o->x == gx && (int)o->y == gy)) continue;
+		if ((x - (int)o->x) * (x - (int)o->x) + (y - (int)o->y) * (y - (int)o->y) < 0.45 * 0.45) return true;
+	}
+	return false;
+}
+
+/* one frame's step from (x, y) by (dx, dy), or along one axis of it, short
+ * of the objects but the goal (gx, gy) */
+static bool walk_step(double *x, double *y, double dx, double dy, int gx, int gy) {
 	int cx = (int)lround(*x), cy = (int)lround(*y);
 	const double tries[3][2] = { { dx, dy }, { dx, 0 }, { 0, dy } };
 	for (int i = 0; i < 3; ++i) {
 		if (fabs(tries[i][0]) + fabs(tries[i][1]) < 1e-9) continue;
 		double nx = *x + tries[i][0], ny = *y + tries[i][1];
 		int ncx = (int)lround(nx), ncy = (int)lround(ny);
-		if (!walk_floor(ncx, ncy)) continue;
+		if (!walk_floor(ncx, ncy) || walk_blocked(nx, ny, gx, gy)) continue;
 		if (ncx != cx && ncy != cy && !walk_floor(ncx, cy) && !walk_floor(cx, ncy)) continue;
 		*x = nx;
 		*y = ny;
@@ -499,14 +512,14 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 		double dx = (right + down) / 2, dy = (down - right) / 2, n = sqrt(dx * dx + dy * dy);
 		dx = fabs(dx) < 1e-9 ? 0 : dx / n * run;
 		dy = fabs(dy) < 1e-9 ? 0 : dy / n * run;
-		if (walk_step(&x, &y, dx, dy)) { stuck = 0; continue; }
+		if (walk_step(&x, &y, dx, dy, tx, ty)) { stuck = 0; continue; }
 		/* along one axis into an edge: towards the side the floor goes on */
 		if (++stuck >= 3 && (!dx || !dy)) {
 			int ax = dx > 0 ? 1 : dx < 0 ? -1 : 0, ay = dy > 0 ? 1 : dy < 0 ? -1 : 0;
 			for (int s = -1; s <= 1; s += 2) {
 				int bx = ay ? s : 0, by = ax ? s : 0;
 				if (!walk_floor(cx + ax, cy + ay) && walk_floor(cx + bx, cy + by) && walk_floor(cx + ax + bx, cy + ay + by)) {
-					walk_step(&x, &y, bx * run, by * run);
+					walk_step(&x, &y, bx * run, by * run, tx, ty);
 					break;
 				}
 			}
