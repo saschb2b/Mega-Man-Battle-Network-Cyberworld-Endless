@@ -235,18 +235,28 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	uint32_t obj_at = npcs && npcs->objects ? npcs->objects : mapslot_alloc(no_objects, 4);
 	if (objs >= 0x08000000u) emu_write32(objs + (uint32_t)number * 4, obj_at);
 	if (rw) return true;   /* no Mystery Data in the real world */
-	/* Mystery Data: one placement and one content each, picked and not taken */
+	/* Mystery Data: one placement and one content each, picked and not taken.
+	 * Each is written eight times over: the picks are kept per flag
+	 * (0x1400 + n), and the game's own Mystery Data of other maps share
+	 * those flags; a new game steps their picks (bn6f sub_809FAF4), and a
+	 * pick past our one record read zeros (a Mystery Data at the world's
+	 * origin, another that said it was locked and printed stray text). */
 	uint8_t entries[33 * 12];
 	if (nmd > 32) nmd = 32;
+	enum { COPIES = 8 };
 	for (int i = 0; i < nmd; ++i) {
-		uint8_t place[16] = { 1, 0x20 };
-		place[2] = (uint8_t)md[i].x; place[3] = (uint8_t)(md[i].x >> 8);
-		place[4] = (uint8_t)md[i].y; place[5] = (uint8_t)(md[i].y >> 8);
-		place[6] = (uint8_t)md[i].z; place[7] = (uint8_t)(md[i].z >> 8);
-		uint8_t content[16];
-		memcpy(content, md[i].content, 8);
-		memset(content + 8, 0, 8);
-		uint32_t pa = mapslot_alloc(place, 16), ca = mapslot_alloc(content, 16);
+		uint8_t place[(COPIES + 1) * 8], content[(COPIES + 1) * 8];
+		memset(place, 0, sizeof place);
+		memset(content, 0, sizeof content);
+		for (int c = 0; c < COPIES; ++c) {
+			uint8_t *p = place + c * 8;
+			p[0] = 1; p[1] = 0x20;
+			p[2] = (uint8_t)md[i].x; p[3] = (uint8_t)(md[i].x >> 8);
+			p[4] = (uint8_t)md[i].y; p[5] = (uint8_t)(md[i].y >> 8);
+			p[6] = (uint8_t)md[i].z; p[7] = (uint8_t)(md[i].z >> 8);
+			memcpy(content + c * 8, md[i].content, 8);
+		}
+		uint32_t pa = mapslot_alloc(place, (int)sizeof place), ca = mapslot_alloc(content, (int)sizeof content);
 		uint16_t flag = (uint16_t)(MAPSLOT_MD_FLAG + i);
 		uint8_t *e = entries + i * 12;
 		e[0] = (uint8_t)md[i].type; e[1] = 0; e[2] = (uint8_t)flag; e[3] = (uint8_t)(flag >> 8);

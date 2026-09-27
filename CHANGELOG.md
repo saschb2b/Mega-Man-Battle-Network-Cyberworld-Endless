@@ -38,6 +38,9 @@ First playable version.
   and says which, naming the guardian, and that it has two. A
   bystander's tip on where Net Dealers set up no longer says the middle
   layer only.
+- Every Mystery Data opens: some on a new run's first layer stood at the
+  world's origin or said they were locked and printed stray text, their
+  picks shared with the game's own Mystery Data of other maps.
 - A Navi chip's version mark reads "EX" or "SP" in chat boxes: the chat
   font draws each mark as two letters stacked in one cell, which read as a
   kanji ("ProtoMn" and one came out of a Mystery Data), and now draws them
