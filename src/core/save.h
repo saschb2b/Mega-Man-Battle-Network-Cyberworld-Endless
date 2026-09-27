@@ -18,6 +18,9 @@ typedef struct {
 	int music_volume; /* 0-10, stored +1 so a fresh profile reads as default */
 	int sfx_volume;
 	bool seen_intro;
+	/* (fields after here are new since profiles began: an older, shorter
+	 * profile reads them as 0) */
+	uint8_t first_guardian;   /* the last new run's act 1 guardian, navi + 1 */
 } Profile;
 
 extern Profile profile;
@@ -33,6 +36,9 @@ void save_delete(void);
 /* Where the run's checkpoint keeps the game's state. */
 void save_state_path(char *out, size_t n);
 void profile_save(void);
+/* A new run from the title: the seed's, or the next seed's where its act 1
+ * guardian is the last run's (BlastMan six runs running). */
+void run_new_varied(uint32_t seed);
 void profile_record_run(void);
 
 #endif

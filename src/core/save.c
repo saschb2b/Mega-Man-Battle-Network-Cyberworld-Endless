@@ -45,22 +45,29 @@ bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t 
 	return ok;
 }
 
-bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
+static bool read_blob(const char *name, uint32_t magic, void *data, size_t n, bool upto) {
 	char file[600];
 	save_path(file, sizeof file, name);
 	FILE *f = fopen(file, "rb");
 	if (!f) return false;
 	uint32_t hdr[3];
-	bool ok = fread(hdr, sizeof hdr, 1, f) == 1 && hdr[0] == magic && hdr[1] == n && fread(data, n, 1, f) == 1 && checksum(data, n) == hdr[2];
+	bool ok = fread(hdr, sizeof hdr, 1, f) == 1 && hdr[0] == magic && (upto ? hdr[1] > 0 && hdr[1] <= n : hdr[1] == n);
+	if (ok) {
+		memset(data, 0, n);
+		ok = fread(data, hdr[1], 1, f) == 1 && checksum(data, hdr[1]) == hdr[2];
+	}
 	fclose(f);
 	return ok;
 }
+
+bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { return read_blob(name, magic, data, n, false); }
+bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { return read_blob(name, magic, data, n, true); }
 
 void save_state_path(char *out, size_t n) { save_path(out, n, "run.state"); }
 
 void save_init(void) {
 	legacy_move_state();
-	if (!save_read_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
+	if (!save_read_blob_upto("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
 	if (!profile.music_volume) profile.music_volume = 9;
 	if (!profile.sfx_volume) profile.sfx_volume = 9;
 	audio_set_volume(profile.music_volume - 1, profile.sfx_volume - 1);
@@ -105,6 +112,17 @@ void save_delete(void) {
 }
 
 void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }
+
+void run_new_varied(uint32_t seed) {
+	run_new(seed);
+	int first = run.boss_order[run.biome_order[0]];
+	if (profile.first_guardian == first + 1) {
+		run_new(seed * 2654435761u + 0x9E37u);
+		first = run.boss_order[run.biome_order[0]];
+	}
+	profile.first_guardian = (uint8_t)(first + 1);
+	profile_save();
+}
 
 void profile_record_run(void) {
 	profile.runs++;

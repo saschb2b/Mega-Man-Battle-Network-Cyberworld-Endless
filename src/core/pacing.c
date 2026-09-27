@@ -62,10 +62,12 @@ bool pacing_rare(int depth, int roll) {
 void pacing_area_order(uint8_t out[4]) {
 	/* by the HP of the areas' own battles (docs/PROGRESSION.md) */
 	/* (Sky HP's battles all come in threes of 200 HP, and the Aquarium
-	 * Comp's pools and water mazes are a hard first map: not a first act's) */
-	uint8_t opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_COMP };
+	 * Comp's pools and water mazes are a hard first map: not a first act's;
+	 * the Robot Control Comp's that fit act 1 are all OldStove and Mettaur,
+	 * which a playtester met in every battle of the act) */
+	uint8_t opening[] = { BIOME_CENTRAL, BIOME_COMP };
 	uint8_t middle[] = { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP,
-		BIOME_AQUARIUM_COMP };
+		BIOME_AQUARIUM_COMP, BIOME_ROBOT_COMP };
 	uint8_t late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
 	enum { NO = sizeof opening, NM = sizeof middle, NL = sizeof late };
 	uint8_t pool[NO + NM + NL];
@@ -127,10 +129,18 @@ int pacing_guardian_miss(int navi, int act, int loop, bool always_sp, int (*hp)(
 int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothers, int act, int loop,
                          bool always_sp, int (*hp)(int navi, int version)) {
 	/* the area's own that suit the act, twice as likely as the other navis
-	 * that do (the three opening areas' own gave act 1 BlastMan every run) */
+	 * that do (the three opening areas' own gave act 1 BlastMan every run);
+	 * in act 1, whose band holds two, both alike (BlastMan, the opening
+	 * areas' own, was a playtester's first guardian six runs running) */
 	int fit[8 + 32], nfit = 0;
 	for (int i = 0; i < 4; ++i)
-		if (pacing_guardian_miss(pool[i], act, loop, always_sp, hp) == 0) { fit[nfit++] = pool[i]; fit[nfit++] = pool[i]; }
+		if (pacing_guardian_miss(pool[i], act, loop, always_sp, hp) == 0) {
+			bool again = false;
+			for (int j = 0; j < i; ++j) again |= pool[j] == pool[i];
+			fit[nfit++] = pool[i];
+			if (act > 0 || loop > 0) fit[nfit++] = pool[i];
+			else if (again) --nfit;
+		}
 	for (int i = 0; i < nothers && nfit < (int)(sizeof fit / sizeof *fit); ++i) {
 		bool own = false;
 		for (int j = 0; j < 4; ++j) own |= others[i] == pool[j];

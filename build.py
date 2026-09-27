@@ -555,11 +555,11 @@ def tour(biomes='all'):
 # Screenshots are fine to publish; files extracted from the ROM are not.
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
-    ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7'],
+    ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(240, 'net'), (1420, 'custom'), (1660, 'battle'), (1970, 'result'), (2220, 'guardian'),
       (2380, 'guardian-talk'), (2610, 'boss-custom'), (3670, 'reward'), (3720, 'restored'), (3880, 'area-clear')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
-    ('act', ['--scene', 'emu', '--seed', '11', '--dev', 'quiet'], [(120, 'act-card')], {}),
+    ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
     ('town-central', ['--scene', 'town', '--seed', '3'], [(280, 'town-central')], {}),
     ('town-acdc', ['--scene', 'town', '--seed', '5'], [(280, 'town-acdc')], {}),
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
@@ -607,7 +607,9 @@ def screenshots(only=None):
 # Short videos of the game for the site (docs/clips): name, game options,
 # env, scripted input, first and last frame. Every second frame, at 30 fps.
 FFMPEG_IMAGE = 'linuxserver/ffmpeg:9.0-cli-ls82'
-RUN_7 = ['--scene', 'emu', '--run-depth', '3', '--seed', '7']
+# (seed 7's layer 3 in the Robot Control Comp against BlastMan, as the
+# captures were timed: the areas' and guardians' draw has changed since)
+RUN_7 = ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12']
 CLIPS = [
     ('title', ['--scene', 'title'], {}, None, 300, 780),
     ('net', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 150, 600),

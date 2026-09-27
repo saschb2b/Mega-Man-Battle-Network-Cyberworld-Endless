@@ -126,6 +126,7 @@ pacing) stays local.
 `~/.cache/mmbn-ref/roms` (override with `CYBERWORLD_ROM_DIR`) mounted
 read-only; `--data-dir` defaults to `.build/data`. `--scene emu` starts a new
 run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
+`--guardian N` with navi N guarding every area,
 `--seed S` with a given seed, `--scene town` from the town as NEW GAME does,
 `--scene summary` the title's run summary, `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,

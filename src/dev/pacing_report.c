@@ -39,9 +39,14 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	static int hps[ROLLS];
 	/* an opening battle aims low but may take the act's whole band */
 	PacingBand band = pacing_band(depth, kind == ENC_CHALLENGE, false);
-	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 };
+	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[32] = { 0 };
 	for (int r = 0; r < ROLLS; ++r) {
 		Encounter e = make_encounter(depth, biome, kind);
+		/* (the virus families a battle brings, each counted once) */
+		unsigned in = 0;
+		for (int i = 0; i < e.nfoes; ++i)
+			if (e.foes[i].kind == FOE_VIRUS && e.foes[i].family > 0 && e.foes[i].family < 32) in |= 1u << e.foes[i].family;
+		for (int f = 1; f < 32; ++f) families[f] += (in >> f) & 1;
 		int hp, dmg, top;
 		battle_stats(&e, &hp, &dmg, &top);
 		bool navi = false;
@@ -58,6 +63,8 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 		depth, label, band.lo, band.hi, band.cap, n ? h[0] : 0, n ? h[n / 2] : 0, n ? h[n - 1] : 0, maxdmg,
 		versions[0], versions[1], versions[2], versions[3], versions[4] + versions[5]);
 	if (navis) fprintf(out, "  SP navi %d", navis);
+	fprintf(out, "  families");
+	for (int f = 1; f < 32; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);
 	fprintf(out, "%s\n", over ? "  OVER" : "");
 	return over;
 }
@@ -66,10 +73,11 @@ int pacing_report_run(const char *path) {
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;
 	static const struct { int act; int biomes[8]; } acts[] = {
-		{ 0, { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_COMP, -1 } },
-		{ 1, { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_COMP, BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE } },
+		{ 0, { BIOME_CENTRAL, BIOME_COMP, -1 } },
+		{ 1, { BIOME_CENTRAL, BIOME_COMP, BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_ROBOT_COMP } },
 		{ 1, { BIOME_COMP_B, BIOME_SKY_HP, BIOME_AQUARIUM_COMP, -1 } },
 		{ 2, { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP, BIOME_AQUARIUM_COMP } },
+		{ 2, { BIOME_ROBOT_COMP, -1 } },
 		{ 2, { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
 		{ 3, { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
 		{ 4, { BIOME_UNDERNET, -1 } },

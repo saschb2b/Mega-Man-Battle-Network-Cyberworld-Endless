@@ -254,8 +254,8 @@ Areas fall into three tiers by their own battles:
 
 | Tier | Areas |
 | --- | --- |
-| Opening | Central, Robot Control Comp, the first home computers (0x8C) |
-| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP), Aquarium Comp (its pools and water mazes a hard first map) |
+| Opening | Central, the first home computers (0x8C) |
+| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP), Aquarium Comp (its pools and water mazes a hard first map), Robot Control Comp (the battles that fit act 1 are all OldStove and Mettaur; from act 2 Champy and Gunner join them) |
 | Late | Sky, Mr. Weather Comp, ACDC HP, CopyBot's comp |
 
 Act 1 draws from the opening tier, act 2 from opening or middle, act 3 from
@@ -274,7 +274,10 @@ Each area keeps its pool of Navis. A guardian is drawn from the Navis of
 the area's pool whose HP at the act's version falls in the act's band;
 when none does, from all Navis in the band; only then the pool's nearest.
 Acts 1-3 fight V1, acts 4-6 EX where it fits and V1 otherwise. Act 1 meets
-BlastMan, DiveMan or SpoutMan, and Colonel appears from act 4 on. Over 500
+BlastMan or DiveMan, as likely, and a new run from the title draws the next
+seed's run where its act 1 guardian is the last run's (the profile keeps
+it), so one comes again after the other only a quarter of the time.
+Colonel appears from act 4 on. Over 500
 drawn runs every guardian lies in its act's band (`build.py pacing`).
 
 ### Growth
@@ -343,6 +346,10 @@ Built as described above, with these differences from the first proposal:
 - A guardian is drawn from the navis whose HP suits the act, the area's
   own twice as likely as the others: the three opening areas' own gave
   act 1 BlastMan in every run, and act 1 (400-500) now meets DiveMan too.
+  In act 1 the two are as likely, and a new run avoids the last one's
+  first guardian once: a playtester met BlastMan six runs running, and
+  the Robot Control Comp's OldStove and Mettaur in every act 1 battle, so
+  that area waits for act 2.
 - Act 2's guardian band is 600-700: HeatMan, SpoutMan or CircusMan. At
   600-800 it held the 800s (SlashMan, EraseMan, TenguMan, JudgeMan), and a
   playtester with 240 HP and 40-150 damage chips dented EraseMan by 1 of

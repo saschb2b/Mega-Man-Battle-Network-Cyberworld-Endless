@@ -4,6 +4,15 @@
 
 First playable version.
 
+- Act 1 varies more. It is Central Area or the RoboDog Comp: the Robot
+  Control Comp's battles that fit act 1 were all OldStove and Mettaur, and
+  it waits for act 2, where Champy and Gunner join them. Act 1's guardian
+  is BlastMan or DiveMan as likely (BlastMan was two in three), and a new
+  run from the title takes the next seed's where its first guardian would
+  be the last run's (the profile keeps it; an older profile reads as
+  none). The pacing report lists each battle roll's virus families.
+  `--guardian N` pins every area's guardian for a scripted capture, and
+  `--net-biome` puts its area in the run's act as well.
 - The way-on arrow keeps to the walk. It showed a turn's first panel when
   the walk cut a platform's corner, and a running MegaMan was two panels
   past the turn before it turned (a look every 15 frames, now 5), so on

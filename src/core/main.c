@@ -420,7 +420,7 @@ int main(int argc, char **argv) {
 	const char *rom_dir = NULL;
 	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
 	const char *start_scene = "title";
-	int run_depth = 0;
+	int run_depth = 0, guardian_navi = 0;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
 #ifndef __EMSCRIPTEN__
@@ -455,6 +455,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
+		else if (!strcmp(a, "--guardian") && v) { guardian_navi = atoi(v); ++i; }
 		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
 #ifndef __EMSCRIPTEN__
 		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
@@ -593,7 +594,16 @@ int main(int argc, char **argv) {
 			title_summary = true;
 			s = &scene_title;
 		}
-		if (s == &scene_emu) { run_new(seed ? seed : 1); if (run_depth > 0) run.depth = run_depth; }
+		if (s == &scene_emu) {
+			run_new(seed ? seed : 1);
+			if (run_depth > 0) run.depth = run_depth;
+			/* (the area its act's in the run too, whose draws read it, and
+			 * every area's guardian one navi: a scripted capture keeps its
+			 * run as the areas' draw changes) */
+			int p = (run.depth - 1) % CYCLE_LAYERS;
+			if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
+			if (guardian_navi > 0) for (int b = 0; b < MAX_BIOMES; ++b) run.boss_order[b] = (uint8_t)guardian_navi;
+		}
 		/* (later NEW GAMEs take the next seeds, so a session replays) */
 		title_seed = !seed ? 0 : !s || s == &scene_title ? seed : seed + 1;
 		if (town) emu_start_in_town = true;

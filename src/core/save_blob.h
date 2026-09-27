@@ -10,6 +10,9 @@
 void save_path(char *out, size_t n, const char *name);
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n);
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n);
+/* The same for a struct that grows at its end: a blob up to n bytes, the
+ * rest zeroed. */
+bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n);
 
 /* Older formats, turned into the current ones (save_legacy.c). */
 bool legacy_load_run(void);
