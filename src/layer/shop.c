@@ -94,21 +94,25 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 		char code = '*';
 		ShopItem it = { 2, 1, 0, 0, 0 };
 		it.id = (uint16_t)roll_chip(depth + 2, 0, &code);
-		/* the first: of the element that answers the act, the cheapest of
-		 * the first few found (a 2000-zenny answer is none on layer 2) */
+		/* the first: of the element that answers the act, the hardest
+		 * hitting of the first few found (the cheapest was IceSeed, 10
+		 * damage against a Fire guardian), two of it (one in 30 chips
+		 * missed a whole guardian fight) */
 		if (i == 0 && counter > 0) {
-			int best = -1, found = 0;
+			int best = -1, best_power = 0, found = 0;
 			char best_code = code;
 			for (int tries = 0; tries < 80 && found < 4; ++tries) {
 				ChipInfo ci;
 				chip_info(it.id, &ci);
 				if (ci.element == counter && ci.power > 0) {
 					++found;
-					if (best < 0 || chip_price(it.id) < chip_price(best)) { best = it.id; best_code = code; }
+					if (best < 0 || ci.power > best_power || (ci.power == best_power && chip_price(it.id) < chip_price(best))) {
+						best = it.id; best_power = ci.power; best_code = code;
+					}
 				}
 				it.id = (uint16_t)roll_chip(depth + 2, tries / 30, &code);
 			}
-			if (best >= 0) { it.id = (uint16_t)best; code = best_code; }
+			if (best >= 0) { it.id = (uint16_t)best; code = best_code; it.stock = 2; }
 		}
 		it.code = (uint8_t)(code == '*' ? 26 : code - 'A');
 		it.price = (uint16_t)(chip_price(it.id) / 100);

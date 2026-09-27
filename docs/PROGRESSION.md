@@ -292,9 +292,12 @@ MegaMan reaches about 100 HP more per act:
   one strong against the act's guardian, or with a guardian of none,
   against the element most of the area's viruses have (Fire beats Wood,
   Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`), and
-  says so ("Word is, Fire chips work wonders down here"). Reading the act
-  card, buying for it and winning with it is the loop a playtester
-  called the best moment of the game.
+  says so, naming the guardian ("Word is, BlastMan can't stand Aqua
+  chips") or the viruses. It is the hardest hitting of the first few of
+  that element the depth rolls (the cheapest was IceSeed, 10 damage), and
+  two are in stock: one in a 30-chip folder missed a whole guardian fight.
+  Reading the act card, buying for it and winning with it is the loop a
+  playtester called the best moment of the game.
 
 A start gift adds a choice before the first battle: on layer 1 a Mr. Prog
 offers one of three (two HPMemory, a ★3 chip, a NaviCust program). If the

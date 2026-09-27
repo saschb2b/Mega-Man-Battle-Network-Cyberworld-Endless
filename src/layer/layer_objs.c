@@ -194,11 +194,17 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
 			static const char *const elem[5] = { "", "Fire", "Aqua", "Elec", "Wood" };
-			char hello[200];
-			snprintf(hello, sizeof hello, "%s%s%s%s", run.depth <= 3
+			char hello[240], word[120] = "";
+			int navi = run.boss_order[run.biome], ge = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
+			/* (the guardian's weakness by name; an element-less guardian's
+			 * act is answered for its viruses) */
+			if (counter > 0 && ge > 0 && ge <= 4)
+				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.", guardian(navi)->name, elem[counter]);
+			else if (counter > 0)
+				snprintf(word, sizeof word, "|Word is, the viruses around here can't stand %s chips.", elem[counter]);
+			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
-				: "Still diving, MegaMan? Stock up. It only gets tougher from here!",
-				counter > 0 ? "|Word is, " : "", counter > 0 ? elem[counter] : "", counter > 0 ? " chips work wonders down here." : "");
+				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
 			tk.sprite = SPR_DEALER;
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello);
 			break;

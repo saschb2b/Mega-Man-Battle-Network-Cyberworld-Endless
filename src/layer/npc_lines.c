@@ -14,7 +14,7 @@ static const char *const early[] = {
 	"The exit pad only goes down. Nobody's found a way back up yet!",
 	"Each area's last layer has a guardian. The exit pad stays shut until it's deleted.",
 	"Green Mystery Data holds chips and Zenny. The blue ones hold rarer things!",
-	"The Net Dealer sets up on the middle layer of every area. Save some Zenny!",
+	"A Net Dealer sets up on every area's middle layer, and one waits by every guardian. Save some Zenny!",
 	"Hold B to charge your buster. A charged shot makes most viruses flinch.",
 };
 

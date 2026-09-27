@@ -31,9 +31,11 @@ First playable version.
 - A navi's tip on running from a battle says how (on the Custom screen, hold
   L and press R); it said START, which only pauses.
 - An act's first layer from act 2 on always has a Net Dealer, and every
-  Net Dealer stocks a chip of the element that answers the act (its
-  guardian's weakness, else its viruses') at a price a run has by then
-  (400 zenny in act 1, 300 more an act), and says which.
+  Net Dealer stocks two of a chip of the element that answers the act
+  (its guardian's weakness, else its viruses'), the hardest hitting of a
+  few, at a price a run has by then (400 zenny in act 1, 300 more an act),
+  and says which, naming the guardian. A bystander's tip on where Net
+  Dealers set up no longer says the middle layer only.
 - Servers, Net Dealers and other services stand off a room's exits, where
   they blocked the way on. The map's key lists what the layer holds,
   Servers and dark warps as "Event". An L pressed as a chat closes is
