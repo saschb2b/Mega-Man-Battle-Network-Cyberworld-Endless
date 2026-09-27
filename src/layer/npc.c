@@ -110,9 +110,11 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 		n += (int)sizeof c;
 	}
 	/* an object (sprite list 7) has no frames facing MegaMan: turning to
-	 * him when spoken to would hide it for the whole conversation */
+	 * him when spoken to would hide it for the whole conversation. Its
+	 * reach is a navi's (the game's 4 answered a Server only from before
+	 * its face) */
 	if (category == 7) s[n++] = 0x13;
-	else if (!floor) { s[n++] = 0x0A; s[n++] = NPC_TALK_RADIUS; }
+	if (!floor) { s[n++] = 0x0A; s[n++] = NPC_TALK_RADIUS; }
 	int loop = n, gone_jump = -1;
 	/* idle: leave once gone_flag is set, else pause a frame and look again */
 	if (gone_flag >= 0) {

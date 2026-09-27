@@ -182,7 +182,7 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;
-	ta_page(t, FACE_MEGAMAN, "The virus signal left some data behind, Lan!", true);
+	ta_page(t, FACE_MEGAMAN, "The virus signal left a chip behind, Lan!", true);
 	first = false;
 	give_chip(t, chip, code, 1);
 	got_chip(t, chip_name, code, &first);
