@@ -3,7 +3,7 @@
 # org.flatpak.Builder, the Freedesktop 26.08 SDK). For Flathub the last
 # module's source is this repository at a release tag instead of the
 # checkout (linux/flatpak/README.md).
-id: io.github.saschb2b.CyberworldEndless
+id: io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless
 runtime: org.freedesktop.Platform
 runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
@@ -72,9 +72,9 @@ modules:
     build-commands:
       - make TARGET=flatpak -j"$FLATPAK_BUILDER_N_JOBS" build/flatpak/cyberworld
       - install -Dm755 build/flatpak/cyberworld /app/bin/cyberworld-endless
-      - install -Dm644 linux/io.github.saschb2b.CyberworldEndless.desktop -t /app/share/applications
-      - install -Dm644 linux/io.github.saschb2b.CyberworldEndless.metainfo.xml -t /app/share/metainfo
-      - for s in 32 64 128 256 512; do install -Dm644 linux/icons/$s.png /app/share/icons/hicolor/${s}x${s}/apps/io.github.saschb2b.CyberworldEndless.png; done
+      - install -Dm644 linux/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.desktop -t /app/share/applications
+      - install -Dm644 linux/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.metainfo.xml -t /app/share/metainfo
+      - for s in 32 64 128 256 512; do install -Dm644 linux/icons/$s.png /app/share/icons/hicolor/${s}x${s}/apps/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.png; done
     sources:
       - type: dir
         path: ../..

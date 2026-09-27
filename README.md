@@ -103,7 +103,7 @@ On the first start without a ROM it looks in Downloads and in EmuDeck's and
 RetroDECK's folders, then asks for the file (a file chooser when `zenity`
 or `kdialog` is installed), and keeps a copy in
 `~/.local/share/cyberworld-endless/rom/` (the Flatpak's in
-`~/.var/app/io.github.saschb2b.CyberworldEndless/data/`), where your saves
+`~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/`), where your saves
 also live. It opens in a window at the largest whole scale that fits; F11
 or Alt+Enter switches to fullscreen.
 
@@ -135,7 +135,7 @@ In Gaming Mode it fills the screen, at 5x (1200x800) on the Deck's 1280x800.
 The Deck's A, B, L1 and R1 are the GBA's A, B, L and R, the Menu button (☰)
 is Start and the View button (⧉) is Select. To quit, hold View and Menu
 for a second, then again; or use the Steam button's **Exit Game**. Saves
-live in `~/.var/app/io.github.saschb2b.CyberworldEndless/data/cyberworld-endless/`
+live in `~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/cyberworld-endless/`
 (the AppImage's in `~/.local/share/cyberworld-endless/`) and survive
 SteamOS updates.
 

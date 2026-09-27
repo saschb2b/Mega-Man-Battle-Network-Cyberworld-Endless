@@ -14,7 +14,7 @@
 
 /* The desktop builds' application ID: the .desktop file's name and the
  * window's class, so a dock matches the window to its pinned icon. */
-#define APP_ID "io.github.saschb2b.CyberworldEndless"
+#define APP_ID "io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless"
 
 enum {
 	BTN_UP = 1 << 0,

@@ -38,7 +38,7 @@ jobs:
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: cyberworld-endless.flatpak
-          manifest-path: linux/flatpak/io.github.saschb2b.CyberworldEndless.yml
+          manifest-path: linux/flatpak/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.yml
           upload-artifact: false
           cache: false
       - uses: actions/upload-artifact@v4

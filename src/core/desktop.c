@@ -364,6 +364,32 @@ static void copy_icons(const char *appdir, const char *share) {
 	}
 }
 
+/* The application ID before this one: an entry and icons this AppImage made
+ * under it move to APP_ID (else the menu would show the game twice). */
+#define OLD_APP_ID "io.github.saschb2b.CyberworldEndless"
+
+static bool made_by_us(const char *file) {
+	FILE *f = fopen(file, "r");
+	if (!f) return false;
+	char line[2200];
+	bool ours = false;
+	while (!ours && fgets(line, sizeof line, f)) ours = !strncmp(line, "X-Cyberworld-AppImage=", 22);
+	fclose(f);
+	return ours;
+}
+
+static void drop_old_entry(const char *apps, const char *share) {
+	static const int sizes[] = { 32, 64, 128, 256, 512 };
+	char old[1200], icon[1400];
+	snprintf(old, sizeof old, "%s/" OLD_APP_ID ".desktop", apps);
+	if (!made_by_us(old)) return;
+	unlink(old);
+	for (size_t i = 0; i < sizeof sizes / sizeof *sizes; ++i) {
+		snprintf(icon, sizeof icon, "%s/icons/hicolor/%dx%d/apps/" OLD_APP_ID ".png", share, sizes[i], sizes[i]);
+		unlink(icon);
+	}
+}
+
 void desktop_menu_entry(const char *data_dir) {
 	const char *appimage = getenv("APPIMAGE"), *appdir = getenv("APPDIR");
 	const char *xdg = getenv("XDG_DATA_HOME"), *home = getenv("HOME");
@@ -375,6 +401,15 @@ void desktop_menu_entry(const char *data_dir) {
 	snprintf(apps, sizeof apps, "%s/applications", share);
 	snprintf(file, sizeof file, "%s/" APP_ID ".desktop", apps);
 	snprintf(declined, sizeof declined, "%s/menu-entry-declined", data_dir);
+
+	/* an entry made under the old ID: made again under this one */
+	char old_file[1200];
+	snprintf(old_file, sizeof old_file, "%s/" OLD_APP_ID ".desktop", apps);
+	if (access(file, F_OK) != 0 && made_by_us(old_file)) {
+		copy_icons(appdir, share);
+		if (write_entry(file, appimage)) { drop_old_entry(apps, share); printf("moved %s to %s\n", old_file, file); }
+		return;
+	}
 
 	FILE *f = fopen(file, "r");
 	if (f) {

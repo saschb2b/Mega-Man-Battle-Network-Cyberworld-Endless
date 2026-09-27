@@ -4,6 +4,10 @@
 
 First playable version.
 
+- The application ID is the repository's name,
+  `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless`, as
+  Flathub asks. The AppImage moves a menu entry it made under the old ID,
+  and `install.sh` replaces its old entry and icons.
 - A Flatpak (`linux/flatpak/`, `build.py flatpak`, on every tagged
   release): the Steam Deck's way to install software, from Discover. It
   reads the ROM from Downloads and EmuDeck's and RetroDECK's folders, read

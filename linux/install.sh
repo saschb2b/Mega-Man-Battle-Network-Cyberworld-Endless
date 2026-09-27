@@ -3,13 +3,14 @@
 # pointing at this folder. Run it again after moving the folder;
 # ./install.sh --remove takes the entry and the icons away again.
 set -e
-id=io.github.saschb2b.CyberworldEndless
+id=io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless
+old=io.github.saschb2b.CyberworldEndless   # the ID before: its entry and icons go
 here=$(cd "$(dirname "$0")" && pwd)
 share="${XDG_DATA_HOME:-$HOME/.local/share}"
 apps="$share/applications"
 if [ "$1" = --remove ]; then
-	rm -f "$apps/$id.desktop" "$apps/cyberworld-endless.desktop"
-	for s in 32 64 128 256 512; do rm -f "$share/icons/hicolor/${s}x$s/apps/$id.png"; done
+	rm -f "$apps/$id.desktop" "$apps/$old.desktop" "$apps/cyberworld-endless.desktop"
+	for s in 32 64 128 256 512; do rm -f "$share/icons/hicolor/${s}x$s/apps/$id.png" "$share/icons/hicolor/${s}x$s/apps/$old.png"; done
 	echo "Removed Cyberworld Endless from the application menu."
 	exit 0
 fi
@@ -18,8 +19,9 @@ for s in 32 64 128 256 512; do
 	mkdir -p "$share/icons/hicolor/${s}x$s/apps"
 	cp "$here/icons/$s.png" "$share/icons/hicolor/${s}x$s/apps/$id.png"
 done
-# the name older versions used
-rm -f "$apps/cyberworld-endless.desktop"
+# the names older versions used
+rm -f "$apps/cyberworld-endless.desktop" "$apps/$old.desktop"
+for s in 32 64 128 256 512; do rm -f "$share/icons/hicolor/${s}x$s/apps/$old.png"; done
 cat > "$apps/$id.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application

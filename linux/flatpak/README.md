@@ -1,6 +1,6 @@
 # The Flatpak
 
-`io.github.saschb2b.CyberworldEndless.yml` builds Cyberworld Endless as a
+`io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.yml` builds Cyberworld Endless as a
 Flatpak on the Freedesktop runtime: mGBA 0.10.5 as a static GBA-only core
 (as `docker/mgba.sh` builds it for the other targets), then the game with
 `make TARGET=flatpak` against the runtime's SDL2. It is the way SteamOS
@@ -24,7 +24,7 @@ flatpak install --user build/release/cyberworld-endless.flatpak
 ```
 
 ```bash
-flatpak run io.github.saschb2b.CyberworldEndless
+flatpak run io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless
 ```
 
 On SteamOS the bundle opens in Discover from the file manager. A tag's
@@ -41,7 +41,7 @@ image).
   A ROM found there is copied into the game's own folder.
 
 Its saves and that copy live in
-`~/.var/app/io.github.saschb2b.CyberworldEndless/data/cyberworld-endless/`,
+`~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/cyberworld-endless/`,
 apart from the AppImage's `~/.local/share/cyberworld-endless/` (copy the
 folder over to carry a run across).
 
@@ -50,12 +50,9 @@ folder over to carry a run across).
 Flathub builds from a manifest in its own repository, sent as a pull
 request to `flathub/flathub` (docs.flathub.org, "Submission"). Before that:
 
-1. **The app ID.** Flathub checks that `io.github.saschb2b.CyberworldEndless`
-   names a repository `github.com/saschb2b/CyberworldEndless`. This one is
-   `Mega-Man-Battle-Network-Cyberworld-Endless`: rename it (GitHub redirects
-   the old address, but the Pages site moves with it), or change the ID
-   everywhere it is used (`src/core/platform.h`, `linux/`, this folder) to
-   one Flathub accepts.
+1. **The app ID** is the repository's own name (Flathub checks that
+   `io.github.saschb2b.X` names `github.com/saschb2b/X`; Flatpak takes the
+   hyphens in its last part). Its linter passes it.
 2. **A release.** Tag `vX.Y.Z` and add it to the metainfo's `<releases>`
    (`<release version="X.Y.Z" date="YYYY-MM-DD"/>`); Flathub's linter fails
    without one.
@@ -73,7 +70,7 @@ request to `flathub/flathub` (docs.flathub.org, "Submission"). Before that:
 4. **The linter**, as Flathub runs it:
 
    ```bash
-   flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest linux/flatpak/io.github.saschb2b.CyberworldEndless.yml
+   flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest linux/flatpak/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.yml
    ```
 
    (A local build's "screenshots not mirrored" errors are Flathub's own

@@ -63,7 +63,7 @@ IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dock
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
-APP_ID = 'io.github.saschb2b.CyberworldEndless'   # src/core/platform.h, linux/
+APP_ID = 'io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless'   # src/core/platform.h, linux/
 APPIMAGE_NAME = 'cyberworld-endless-x86_64.AppImage'
 DEB_NAME = 'cyberworld-endless_amd64.deb'
 REPO = 'saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless'
@@ -679,7 +679,7 @@ def clips(only=None):
     return 0
 
 
-FLATPAK_ID = 'io.github.saschb2b.CyberworldEndless'
+FLATPAK_ID = 'io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless'
 
 
 def flatpak():

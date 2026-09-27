@@ -2,7 +2,7 @@
 <!-- The Linux packages' AppStream data: what software centres show. The
      release line is filled in by build.py. -->
 <component type="desktop-application">
-  <id>io.github.saschb2b.CyberworldEndless</id>
+  <id>io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless</id>
   <name>Cyberworld Endless</name>
   <summary>A roguelike on Mega Man Battle Network 6</summary>
   <developer id="io.github.saschb2b">
@@ -22,7 +22,7 @@
       or endorsed by Capcom.
     </p>
   </description>
-  <launchable type="desktop-id">io.github.saschb2b.CyberworldEndless.desktop</launchable>
+  <launchable type="desktop-id">io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.desktop</launchable>
   <provides>
     <binary>cyberworld-endless</binary>
   </provides>
