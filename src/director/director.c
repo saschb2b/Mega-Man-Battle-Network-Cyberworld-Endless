@@ -100,7 +100,38 @@ static void begin_area(bool new_act) {
  * original map ("AquarumComp3") gave way to where the run is. The game's
  * label routine is pointed at an archive of ours whose every name is it. */
 #define LABEL_AT    (EMU_FREE + 0x152000)
-#define LABEL_NAMES 244
+#define LABEL_SIZE  0x1000
+
+/* The archive holds more than names: the PET prints its HP, zenny and
+ * BugFrags by scripts 0xF0-0xF2, and others are placeholders. A copy of the
+ * player's own archive is written with only its twelve-character names
+ * pointed at the label. */
+static int label_archive(const char *label, uint8_t *out, int max) {
+	uint32_t src = rom_u32(BN6_MAP_NAMES_PTR - 0x08000000u) - 0x08000000u;
+	if (src + 2 > ROM_SIZE) return 0;
+	int n = rom_u16(src) / 2, end = 0;
+	if (n <= 0 || n > 512) return 0;
+	for (int k = 0; k < n; ++k) {
+		int o = rom_u16(src + 2 * (uint32_t)k), j = o;
+		while (src + (uint32_t)j < ROM_SIZE && R.data[src + (uint32_t)j] != 0xE6) ++j;
+		if (j + 1 > end) end = j + 1;
+	}
+	if (end + 13 > max) return 0;
+	memcpy(out, R.data + src, (size_t)end);
+	char padded[20];
+	snprintf(padded, sizeof padded, "%12.12s", label);
+	ta_encode(padded, out + end, 12);
+	out[end + 12] = 0xE6;
+	for (int k = 0; k < n; ++k) {
+		int o = rom_u16(src + 2 * (uint32_t)k), len = 0;
+		bool name = true;
+		while (R.data[src + (uint32_t)(o + len)] != 0xE6 && len < 16) { name &= R.data[src + (uint32_t)(o + len)] < 0xE7; ++len; }
+		if (!name || len != 12) continue;
+		out[2 * k] = (uint8_t)end;
+		out[2 * k + 1] = (uint8_t)(end >> 8);
+	}
+	return end + 13;
+}
 
 static void map_label(void) {
 	static char last[16];
@@ -112,15 +143,12 @@ static void map_label(void) {
 	else snprintf(name, sizeof name, "Layer %d", run.depth);
 	if (!strcmp(name, last) && emu_read32(BN6_MAP_NAMES_PTR) == LABEL_AT) return;
 	snprintf(last, sizeof last, "%s", name);
-	uint8_t a[LABEL_NAMES * 2 + 13];
-	for (int i = 0; i < LABEL_NAMES; ++i) { a[2 * i] = (uint8_t)(LABEL_NAMES * 2); a[2 * i + 1] = (uint8_t)(LABEL_NAMES * 2 >> 8); }
-	/* twelve characters, right-aligned with spaces (the game pads its own
-	 * with underscores, which show) */
-	char padded[20];
-	snprintf(padded, sizeof padded, "%12.12s", name);
-	ta_encode(padded, a + LABEL_NAMES * 2, 12);
-	a[LABEL_NAMES * 2 + 12] = 0xE6;
-	emu_write(LABEL_AT, a, sizeof a);
+	/* (right-aligned with spaces: the game pads its own with underscores,
+	 * which show) */
+	static uint8_t a[LABEL_SIZE];
+	int len = label_archive(name, a, sizeof a);
+	if (!len) return;
+	emu_write(LABEL_AT, a, (size_t)len);
 	emu_write32(BN6_MAP_NAMES_PTR, LABEL_AT);
 	emu_write32(BN6_PET_MAP_NAMES_PTR, LABEL_AT);   /* (the PET's PLACE too) */
 }
