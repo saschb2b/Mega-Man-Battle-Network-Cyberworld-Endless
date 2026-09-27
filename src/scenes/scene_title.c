@@ -380,8 +380,10 @@ static void draw(void) {
 		text_draw(x, y0 + 112, said, WHITE, TEXT_CENTER);
 		return;
 	}
-	if (profile.best_depth > 0)
-		text_drawf(x0 + CORE_W - 4, y0 + 2, rgba(255, 230, 90, 255), TEXT_RIGHT, "Best: Layer %d", profile.best_depth);
+	/* (a saved run deeper than the record is the best so far too) */
+	int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
+	if (best > 0)
+		text_drawf(x0 + CORE_W - 4, y0 + 2, rgba(255, 230, 90, 255), TEXT_RIGHT, "Best: Layer %d", best);
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */

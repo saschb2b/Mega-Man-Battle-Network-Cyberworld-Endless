@@ -565,10 +565,10 @@ void director_draw_map(void) {
 			fill_rect(ax - 1, ay + 3, 3, 1, gc);
 		}
 	}
-	/* MegaMan, blinking */
+	/* MegaMan, always there, his border pulsing */
 	int ms = SX(mx, my), mt = SY(mx, my);
-	if ((D.frame / 8) % 2 == 0 && INSIDE(ms, mt, 3)) {
-		fill_rect(ms - 3, mt - 3, 7, 7, rgba(0, 8, 28, 255));
+	if (INSIDE(ms, mt, 3)) {
+		fill_rect(ms - 3, mt - 3, 7, 7, (D.frame / 10) % 2 ? rgba(120, 200, 255, 255) : rgba(0, 8, 28, 255));
 		fill_rect(ms - 2, mt - 2, 5, 5, rgba(255, 255, 255, 255));
 	}
 	/* the key, under the map */
