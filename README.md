@@ -84,7 +84,7 @@ After that the title screen appears straight away.
 
 ### On a Linux PC
 
-Two ways from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), both with a menu entry and an icon you
+Three ways from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), each with a menu entry and an icon you
 can pin to the dock:
 
 - **AppImage** (any distribution): download
@@ -95,12 +95,17 @@ can pin to the dock:
   `cyberworld-endless_amd64.deb` and open it with your software centre, or
   `sudo apt install ./cyberworld-endless_amd64.deb`. It appears in the menu
   as **Cyberworld Endless**; remove it like any other package.
+- **Flatpak** (any distribution with Flatpak): download
+  `cyberworld-endless.flatpak` and open it with your software centre, or
+  `flatpak install --user cyberworld-endless.flatpak`.
 
-On the first start without a ROM it asks for the file (a file chooser when
-`zenity` or `kdialog` is installed) and keeps a copy in
-`~/.local/share/cyberworld-endless/rom/`, where your saves also live. It
-opens in a window at the largest whole scale that fits; F11 or Alt+Enter
-switches to fullscreen.
+On the first start without a ROM it looks in Downloads and in EmuDeck's and
+RetroDECK's folders, then asks for the file (a file chooser when `zenity`
+or `kdialog` is installed), and keeps a copy in
+`~/.local/share/cyberworld-endless/rom/` (the Flatpak's in
+`~/.var/app/io.github.saschb2b.CyberworldEndless/data/`), where your saves
+also live. It opens in a window at the largest whole scale that fits; F11
+or Alt+Enter switches to fullscreen.
 
 `cyberworld-endless-linux-x86_64.tar.gz` is the same game as a plain folder:
 unpack it anywhere and run `./cyberworld-endless`; `./install.sh` adds it
@@ -108,14 +113,16 @@ to the menu. Its `README.md` has the keyboard keys.
 
 ### On a Steam Deck
 
-The Deck runs the Linux build. Until it is on Flathub (and so in Discover),
-the AppImage is the way:
+The Deck runs the Linux build, best as a Flatpak, the way SteamOS installs
+software:
 
-1. In Desktop Mode, download `cyberworld-endless-x86_64.AppImage` from the
-   [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases),
-   right-click it, **Properties**, **Permissions**, and tick **Is executable**.
-2. Right-click it again and choose **Add to Steam** (or in Steam: **Games**,
-   **Add a Non-Steam Game to My Library**). Start it from Steam, in Gaming
+1. In Desktop Mode, download `cyberworld-endless.flatpak` from the
+   [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
+   and open it: Discover installs it (and the runtime it needs from
+   Flathub). The AppImage works too: right-click it, **Properties**,
+   **Permissions**, **Is executable**.
+2. Right-click **Cyberworld Endless** in the application menu (or the
+   AppImage) and choose **Add to Steam**. Start it from Steam, in Gaming
    Mode or on the desktop: Steam then hands the Deck's controls to the game
    as a gamepad.
 3. The ROM: with EmuDeck or RetroDECK there is nothing to do. The game looks
@@ -128,7 +135,9 @@ In Gaming Mode it fills the screen, at 5x (1200x800) on the Deck's 1280x800.
 The Deck's A, B, L1 and R1 are the GBA's A, B, L and R, the Menu button (☰)
 is Start and the View button (⧉) is Select. To quit, hold View and Menu
 for a second, then again; or use the Steam button's **Exit Game**. Saves
-live in `~/.local/share/cyberworld-endless/` and survive SteamOS updates.
+live in `~/.var/app/io.github.saschb2b.CyberworldEndless/data/cyberworld-endless/`
+(the AppImage's in `~/.local/share/cyberworld-endless/`) and survive
+SteamOS updates.
 
 ### In a browser
 

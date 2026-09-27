@@ -12,6 +12,9 @@ glibc runs on more distributions.
   python3 build.py linux        Linux desktop binary (build/linux) and its
                                 release files in build/release: a tar.gz,
                                 an AppImage and a .deb
+  python3 build.py flatpak      the Flatpak (linux/flatpak) built by flatpak-builder
+                                from this checkout and bundled in build/release
+                                (needs flatpak; see linux/flatpak/README.md)
   python3 build.py run ...      build the Linux desktop binary and play it here
                                 in a window (game options may follow)
   python3 build.py web          the browser build, assembled as a site in
@@ -676,6 +679,33 @@ def clips(only=None):
     return 0
 
 
+FLATPAK_ID = 'io.github.saschb2b.CyberworldEndless'
+
+
+def flatpak():
+    """build/release/cyberworld-endless.flatpak: linux/flatpak's manifest built on this machine
+    by flatpak-builder (Flathub's org.flatpak.Builder when it is not installed as a command),
+    from this checkout, then bundled with Flathub named for its runtime."""
+    manifest = os.path.join(ROOT, 'linux', 'flatpak', FLATPAK_ID + '.yml')
+    work = os.path.join(ROOT, '.build', 'flatpak')
+    if not shutil.which('flatpak'):
+        print('flatpak is not installed')
+        return 1
+    builder = ['flatpak-builder'] if shutil.which('flatpak-builder') else ['flatpak', 'run', 'org.flatpak.Builder']
+    code = subprocess.call(builder + ['--user', '--install-deps-from=flathub', '--force-clean', '--disable-rofiles-fuse',
+                                      f'--state-dir={work}/state', f'--repo={work}/repo', f'{work}/build', manifest])
+    if code:
+        return code
+    os.makedirs(RELEASE, exist_ok=True)
+    out = os.path.join(RELEASE, 'cyberworld-endless.flatpak')
+    # (the runtime's repository in the bundle: installing it fetches the runtime too)
+    code = subprocess.call(['flatpak', 'build-bundle', '--runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo',
+                            f'{work}/repo', out, FLATPAK_ID])
+    if not code:
+        print(f'flatpak {out}: {os.path.getsize(out) // 1024} KB')
+    return code
+
+
 def densest(im, w, h):
     """The w x h window with the most floor in it."""
     px = im.load()
@@ -691,7 +721,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -708,6 +738,8 @@ def main():
         os.makedirs(RELEASE, exist_ok=True)
         linux_release()
         return
+    if a.action == 'flatpak':
+        sys.exit(flatpak())
     if a.action == 'run':
         # the desktop build on this machine, its saves apart from a player's
         build('linux')

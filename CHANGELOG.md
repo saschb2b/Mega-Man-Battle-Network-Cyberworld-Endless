@@ -4,6 +4,10 @@
 
 First playable version.
 
+- A Flatpak (`linux/flatpak/`, `build.py flatpak`, on every tagged
+  release): the Steam Deck's way to install software, from Discover. It
+  reads the ROM from Downloads and EmuDeck's and RetroDECK's folders, read
+  only, and keeps its saves in its own folder.
 - Steam Deck: started by Steam's Gaming Mode or Big Picture (or in
   gamescope) the game fills the screen, 5x on the Deck (a window was scaled
   to it by a fraction, and blurred), and skips the AppImage's menu offer.

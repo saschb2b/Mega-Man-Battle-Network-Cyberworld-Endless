@@ -4,6 +4,7 @@ CC_host := gcc
 CC_aarch64 := aarch64-linux-gnu-gcc
 CC_asan := gcc
 CC_linux := gcc
+CC_flatpak := gcc
 CC_web := emcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
@@ -14,6 +15,7 @@ BIN_host := $(OUT)/cyberworld
 BIN_aarch64 := $(OUT)/cyberworld.aarch64
 BIN_asan := $(OUT)/cyberworld
 BIN_linux := $(OUT)/cyberworld
+BIN_flatpak := $(OUT)/cyberworld
 BIN_web := $(OUT)/cyberworld.js
 BIN := $(BIN_$(TARGET))
 
@@ -32,10 +34,14 @@ ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
+# the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
+ifeq ($(TARGET),flatpak)
+MGBA := /app
+endif
 CFLAGS += -I$(MGBA)/include
 LDLIBS += $(shell $(PKGCONF) --libs sdl2) $(MGBA)/lib/libmgba.a -lpthread -lm
 # the desktop builds: a window, the user's data folder (src/core/main.c)
-ifneq ($(filter host asan linux,$(TARGET)),)
+ifneq ($(filter host asan linux flatpak,$(TARGET)),)
 CFLAGS += -DCW_DESKTOP
 endif
 # the browser build (docker/Dockerfile.web, web/): one thread, the page

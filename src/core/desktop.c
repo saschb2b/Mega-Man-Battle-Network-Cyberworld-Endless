@@ -221,7 +221,7 @@ bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgl
 		if (strncmp(msg, "Put your", 8)) snprintf(why, sizeof why, "%s\n\n", msg);
 		snprintf(text, sizeof text,
 			"%sCyberworld Endless runs on your own copy of Mega Man Battle Network 6: Cybeast Gregar (USA), "
-			"an unmodified .gba file.\n\nChoose the file, or put it into\n%s\nand look again.",
+			"an unmodified .gba file.\n\nChoose the file, or put it into\n%s\nor your Downloads folder, and look again.",
 			why, rom_dir);
 		const char *labels[] = { picker ? "Choose ROM..." : "Open folder", "Look again", "Quit" };
 		int hit = ask(text, labels, 3);

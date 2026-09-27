@@ -76,6 +76,16 @@ static bool desktop_rom(char *msg, size_t msglen) {
 	return false;
 }
 
+#ifdef CW_DESKTOP
+/* ... and, looking again, where front ends and downloads keep theirs */
+static bool desktop_rom_anywhere(char *msg, size_t msglen) {
+	if (desktop_rom(msg, msglen)) return true;
+	char dir[600];
+	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+	return desktop_rom_elsewhere(dir, msg, msglen);
+}
+#endif
+
 static const Scene *current, *pending;
 
 void scene_set(const Scene *s) { pending = s; }
@@ -481,7 +491,7 @@ int main(int argc, char **argv) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
 		fprintf(stderr, "%s\n", msg);
-		rom_ok = desktop_rom_dialog(dir, desktop_rom, msg, sizeof msg);
+		rom_ok = desktop_rom_dialog(dir, desktop_rom_anywhere, msg, sizeof msg);
 		if (!rom_ok) return 1;
 	}
 #else

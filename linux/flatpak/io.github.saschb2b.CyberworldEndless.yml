@@ -1,0 +1,84 @@
+# The Flatpak: python3 build.py flatpak builds it from this checkout into
+# build/release/cyberworld-endless.flatpak (flatpak-builder from Flathub's
+# org.flatpak.Builder, the Freedesktop 26.08 SDK). For Flathub the last
+# module's source is this repository at a release tag instead of the
+# checkout (linux/flatpak/README.md).
+id: io.github.saschb2b.CyberworldEndless
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+command: cyberworld-endless
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  # game controllers
+  - --device=all
+  # the ROM, read only, where players keep it: the game finds it by its
+  # contents in Downloads, EmuDeck's and RetroDECK's gba folders (on the
+  # home or an SD card) and ~/ROMs, and copies it into its own folder
+  - --filesystem=xdg-download:ro
+  - --filesystem=~/Emulation/roms/gba:ro
+  - --filesystem=~/retrodeck/roms/gba:ro
+  - --filesystem=~/ROMs:ro
+  - --filesystem=~/roms:ro
+  - --filesystem=/run/media:ro
+modules:
+  # the embedded GBA core: a static libmgba, GBA only, no frontends (as
+  # docker/mgba.sh builds it for the other targets)
+  - name: mgba
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_STATIC=ON
+      - -DBUILD_SHARED=OFF
+      - -DBUILD_QT=OFF
+      - -DBUILD_SDL=OFF
+      - -DBUILD_GL=OFF
+      - -DBUILD_GLES2=OFF
+      - -DBUILD_GLES3=OFF
+      - -DUSE_EPOXY=OFF
+      - -DDISABLE_DEPS=ON
+      - -DUSE_DEBUGGERS=OFF
+      - -DUSE_GDB_STUB=OFF
+      - -DUSE_EDITLINE=OFF
+      - -DENABLE_SCRIPTING=OFF
+      - -DUSE_LUA=OFF
+      - -DM_CORE_GB=OFF
+      - -DM_CORE_GBA=ON
+      - -DUSE_DISCORD_RPC=OFF
+      - -DBUILD_LTO=OFF
+      - -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      # (0.10.5 asks for CMake 2.8, which CMake 4 no longer takes as is)
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    # (its license stays: flatpak-builder puts each module's under share/licenses)
+    cleanup:
+      - /include
+      - /lib
+      - /share/icons
+      - /share/applications
+      - /share/metainfo
+      - /share/doc
+      - /share/mgba
+    sources:
+      - type: archive
+        url: https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz
+        sha256: 91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14
+
+  - name: cyberworld-endless
+    buildsystem: simple
+    build-commands:
+      - make TARGET=flatpak -j"$FLATPAK_BUILDER_N_JOBS" build/flatpak/cyberworld
+      - install -Dm755 build/flatpak/cyberworld /app/bin/cyberworld-endless
+      - install -Dm644 linux/io.github.saschb2b.CyberworldEndless.desktop -t /app/share/applications
+      - install -Dm644 linux/io.github.saschb2b.CyberworldEndless.metainfo.xml -t /app/share/metainfo
+      - for s in 32 64 128 256 512; do install -Dm644 linux/icons/$s.png /app/share/icons/hicolor/${s}x${s}/apps/io.github.saschb2b.CyberworldEndless.png; done
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - build
+          - .build
+          - .git
