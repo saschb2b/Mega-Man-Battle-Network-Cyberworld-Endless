@@ -4,6 +4,10 @@
 
 First playable version.
 
+- Sky HP and Green HP vary their battles: their own random battle is a
+  single one (every act 2 battle on Sky HP was Gunner and FgtrPlne), so two
+  in three come from the Sky's and the Green Area's, inside the act's
+  limits. The pacing report shows nine kinds of virus on Sky HP in act 2.
 - The NaviCust vendor stocks from the NaviCust's pool and tiers: no HP+400
   in the first cycle (it sold at 2300 zenny in act 2 beside the dealer's
   20-HP HPMemory at 1200), no SneakRun. A on the map takes the navi or

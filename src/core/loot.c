@@ -166,7 +166,28 @@ static int weigh(const Formation *list, int n, int depth, int target, PacingBand
 /* A formation from the area's original random battles, at the highest
  * version up to the act's that keeps it inside the act's band
  * (docs/PROGRESSION.md). False when the ROM has none for the area. */
+/* The area whose battles an area with a single one of its own shares: the
+ * Sky and Green homepages' random battles are one formation each (every
+ * act 2 battle on Sky HP was Gunner and FgtrPlne), and each stands in an
+ * area of its own world with ten kinds of virus. -1 for none. */
+static int shares_with(int biome) {
+	switch (biome) {
+	case BIOME_SKY_HP: return BIOME_SKY;
+	case BIOME_GREEN_HP: return BIOME_GREEN;
+	default: return -1;
+	}
+}
+
+static bool from_formations(int depth, int biome, int kind, Encounter *e);
+
 static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
+	/* two battles in three from the shared area, where one fits the act */
+	int other = shares_with(biome);
+	if (other >= 0 && rng_range(0, 2) > 0 && from_formations(depth, other, kind, e)) return true;
+	return from_formations(depth, biome, kind, e);
+}
+
+static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	const Formation *list;
 	int n = formations_of(biome, &list);
 	if (!n) return false;

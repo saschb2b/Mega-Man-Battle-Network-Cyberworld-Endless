@@ -100,7 +100,7 @@ versions the game gives them there (median, and the highest):
 | Central 1-3 | 120-200 / 260 | Mettaur, Gunner, Champy, OldStov, Swordy, Quaker |
 | Aquarium HP | 160 / 220 | Piranha, Puffy |
 | Aquarium Comp | 200 / 360 | Piranha, Puffy, Quaker, StarFish |
-| Sky HP | 200 / 260 | FgtrPlne, Gunner |
+| Sky HP | 200 / 260 | FgtrPlne, Gunner (and the Sky's battles: see below) |
 | Home computers (0x8C, 0x8D) | 80-420 by map | mixed, mostly V1 |
 | Seaside 1-3 | 210-220 / 420 | Piranha, Puffy, Swordy, Mettaur2 |
 | Judge Tree Comp | 230-320 / 550 | Armadill, Cragger, HonyBmbr, Shrubby |
@@ -247,6 +247,12 @@ battles and 2% more each later cycle, and only when the battle still fits
 the band with it. BN6's own rare battles (byte 7 of a BattleSettings record)
 are left out: the game holds them back until a family has been deleted 16
 or 32 times.
+
+Sky HP and Green HP each have a single random battle of their own: every
+act 2 battle on Sky HP was Gunner and FgtrPlne. Two battles in three there
+come from the area each homepage stands in (the Sky, the Green Area),
+inside the act's limits as always; the report shows Sky HP's act 2 battles
+across nine kinds of virus since.
 
 ### Choosing areas
 
