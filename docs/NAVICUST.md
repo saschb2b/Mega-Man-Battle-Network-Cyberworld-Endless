@@ -135,16 +135,16 @@ comes late and rarely.
 
 ### 6. The pool, and the builds it makes
 
-The pool holds 33 of BN6's 46 programs, by tier (the act they can appear
+The pool holds 34 of BN6's 46 programs, by tier (the act they can appear
 from), and leaves out the inert and the harmful: Humor, Poem, Rush, Beat,
-Tango, OilBody, Fish, Battery, Jungle, Millions, and SneakRun until its
-effect on the engine's battles is known. Four builds come out of BN6's own
+Tango, OilBody, Fish, Battery, Jungle, Millions, SneakRun until its effect
+on the engine's battles is known, and NumbrOpn until its condition is. Four builds come out of BN6's own
 programs, each needing more space than a 4x4 board has:
 
 | Build | Programs | It changes |
 | --- | --- | --- |
 | Buster | Attack+1, Speed+1, Charge+1, BustPack, AttckMAX, SpeedMAX, ChargMAX | The buster between chips, and a charge shot worth holding |
-| Hand | Custom1, Custom2, MegFldr1, MegFldr2, GigFldr1, FldrPak1, FldrPak2, ChpShufl, NumbrOpn | More chips a turn, more Megas and a Giga in the folder |
+| Hand | Custom1, Custom2, MegFldr1, MegFldr2, GigFldr1, FldrPak1, FldrPak2, ChpShufl | More chips a turn, more Megas and a Giga in the folder |
 | Guard | SuprArmr, FstBarr, Shield, Reflect, AntiDmg, UnderSht, BodyPack | Defense verbs on B+Left, no flinching, a barrier, surviving a lethal hit |
 | Field | FlotShoe, AirShoes, AutoHeal, SlipRunr, Collect, BugStop | The panels, the map, the drops, the bugs |
 
@@ -157,7 +157,7 @@ HP+50, HP+100, UnderSht, FstBarr, Shield, SlipRunr, Custom1, MegFldr1,
 SuprArmr); acts 3 and 4 add the middle ones (Reflect, AntiDmg, FlotShoe,
 AirShoes, AutoHeal, HP+200, Collect, FldrPak1, BustPack, MegFldr2,
 ChargMAX, SpeedMAX); from act 5 the large ones (Custom2, GigFldr1,
-AttckMAX, BodyPack, FldrPak2, ChpShufl, NumbrOpn, BugStop, HP+300 and up
+AttckMAX, BodyPack, FldrPak2, ChpShufl, BugStop, HP+300 and up
 in later cycles).
 
 ### 7. Programs found join later runs
@@ -228,7 +228,7 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
 `src/layer/scripts.c`, the bug watch in `src/director/director.c`):
 
 - The pool of 34 programs with their tiers and builds, and MegaMan's
-  words for each. NumbrOpn is left out too until its condition is known.
+  words for each.
 - The guardian's draft on every normal layer's guardian: three programs
   of three builds, or B for BugFrags (10, and 5 more an act); the run's
   first draft says how the board works.
