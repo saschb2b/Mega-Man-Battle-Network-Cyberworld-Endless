@@ -97,8 +97,13 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 		/* the first: of the element that answers the act, the hardest
 		 * hitting of the first few found (the cheapest was IceSeed, 10
 		 * damage against a Fire guardian), two of it (one in 30 chips
-		 * missed a whole guardian fight) */
+		 * missed a whole guardian fight), but a hit of at most a third of
+		 * the act's guardian (AquaSwrd's 160 doubled took 320 of
+		 * BlastMan's 400 in the first hand: he never had a turn) */
 		if (i == 0 && counter != 0) {
+			int lo, hi;
+			pacing_guardian_band(pacing_act(depth), &lo, &hi);
+			int most = counter > 0 ? lo / 6 : lo / 3;   /* (an element's answer hits for double) */
 			int best = -1, best_power = 0, found = 0;
 			char best_code = code;
 			for (int tries = 0; tries < 80 && found < 4; ++tries) {
@@ -107,9 +112,12 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 				/* (-1: a guardian of no element, answered by the hardest hit) */
 				if ((ci.element == counter || counter < 0) && ci.power > 0) {
 					++found;
-					if (best < 0 || ci.power > best_power || (ci.power == best_power && chip_price(it.id) < chip_price(best))) {
-						best = it.id; best_power = ci.power; best_code = code;
-					}
+					/* the hardest under the most, else the lightest over it */
+					bool under = ci.power <= most, best_under = best >= 0 && best_power <= most;
+					bool better = best < 0 || (under && !best_under) ||
+						(under && best_under && (ci.power > best_power || (ci.power == best_power && chip_price(it.id) < chip_price(best)))) ||
+						(!under && !best_under && ci.power < best_power);
+					if (better) { best = it.id; best_power = ci.power; best_code = code; }
 				}
 				it.id = (uint16_t)roll_chip(depth + 2, tries / 30, &code);
 			}

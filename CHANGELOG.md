@@ -34,7 +34,8 @@ First playable version.
 - An act's first layer from act 2 on always has a Net Dealer, and every
   Net Dealer stocks two of a chip of the element that answers the act
   (its guardian's weakness, else its viruses'), the hardest hitting of a
-  few, at a price a run has by then (400 zenny in act 1, 300 more an act),
+  few that takes at most a third of the act's guardian, at a price a run
+  has by then (400 zenny in act 1, 300 more an act),
   and says which, naming the guardian, and that it has two. A
   bystander's tip on where Net Dealers set up no longer says the middle
   layer only. A shop's list takes no A for its first moment, so the A

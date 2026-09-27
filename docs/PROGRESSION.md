@@ -296,9 +296,12 @@ MegaMan reaches about 100 HP more per act:
   Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`), and
   says so, naming the guardian ("Word is, BlastMan can't stand Aqua
   chips"). A guardian of no element is answered by the hardest hit on the
-  list instead, and the dealer says so, and names the viruses' weakness. It is the hardest hitting of the first few of
-  that element the depth rolls (the cheapest was IceSeed, 10 damage), and
-  two are in stock: one in a 30-chip folder missed a whole guardian fight.
+  list instead, and the dealer says so, and names the viruses' weakness.
+  It is the hardest hitting of the first few of that element the depth
+  rolls (the cheapest was IceSeed, 10 damage) that hits the act's
+  guardian for at most a third of its HP, doubled (an AquaSwrd, 160
+  doubled, took 320 of BlastMan's 400 in the first hand), and two are in
+  stock: one in a 30-chip folder missed a whole guardian fight.
   Reading the act card, buying for it and winning with it is the loop a
   playtester called the best moment of the game.
 
