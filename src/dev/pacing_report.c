@@ -116,7 +116,7 @@ int pacing_report_run(const char *path) {
 	fprintf(out, "\nGuardians' elements:");
 	for (int n = 1; n < 32; ++n) {
 		int id = enemy_id(1, n, 0);
-		if (id >= 0 && guardian(n)->name) fprintf(out, " %s %d", guardian(n)->name, enemy_element(id));
+		if (id >= 0 && guardian(n)->name && guardian(n)->name[0] != '?') fprintf(out, " %s %d", guardian(n)->name, enemy_element(id));
 	}
 	fprintf(out, "\n");
 	fclose(out);

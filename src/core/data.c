@@ -153,7 +153,9 @@ int navi_chip(int navi, int version) {
 	return 0;
 }
 
-/* The record of enemy `id`'s stats (see enemy_stats), 0 when not found. */
+/* The record of enemy `id`'s stats, 0 when not found: a table per actor
+ * type, a pointer per ai, a record per version of u16 element << 12 | HP,
+ * version, flags, u16 element << 12 | damage. */
 static uint32_t enemy_record(int id) {
 	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return 0;
 	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
@@ -172,17 +174,8 @@ int enemy_element(int id) {
 }
 
 bool enemy_stats(int id, int *hp, int *damage) {
-	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return false;
-	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
-	if (e[1] > 2) return false;
-	/* a table per actor type, a pointer per ai, a record per version:
-	 * u16 element << 12 | HP, version, flags, u16 element << 12 | damage */
-	uint32_t types = rom_u32(R.layout->enemy_stats + (uint32_t)e[1] * 4);
-	if (!rom_is_ptr(types)) return false;
-	uint32_t recs = rom_u32(rom_off(types) + (uint32_t)e[2] * 4);
-	if (!rom_is_ptr(recs)) return false;
-	uint32_t r = rom_off(recs) + (uint32_t)e[0] * 6;
-	if (r + 6 > ROM_SIZE) return false;
+	uint32_t r = enemy_record(id);
+	if (!r) return false;
 	*hp = rom_u16(r) & 0xFFF;
 	*damage = rom_u16(r + 4) & 0xFFF;
 	return true;
