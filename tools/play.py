@@ -176,6 +176,14 @@ def cmd_start(name, rest):
     for f in ('in', 'out'):
         if os.path.exists(os.path.join(h, f)):
             os.remove(os.path.join(h, f))
+    # an earlier start's history and data keep a number (history-N.txt, data0-N)
+    if os.path.exists(os.path.join(h, 'history.txt')):
+        k = 1
+        while os.path.exists(os.path.join(h, f'history-{k}.txt')):
+            k += 1
+        os.rename(os.path.join(h, 'history.txt'), os.path.join(h, f'history-{k}.txt'))
+        if os.path.isdir(os.path.join(h, 'data0')):
+            os.rename(os.path.join(h, 'data0'), os.path.join(h, f'data0-{k}'))
     if os.path.isdir(os.path.join(h, 'data0')):
         shutil.rmtree(os.path.join(h, 'data0'))
     shutil.copytree(data, os.path.join(h, 'data0'))
