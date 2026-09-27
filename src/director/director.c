@@ -271,17 +271,20 @@ static const char *status_words(void) {
 		else ADD("|");
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData.|");
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData.|", run.fragments);
-		/* the services here, so a player knows to look for them */
-		bool shop = false, heal = false, programs = false;
-		for (int i = 0; i < layer.nobj; ++i) {
-			shop |= layer.obj[i].type == OBJ_SHOP;
-			heal |= layer.obj[i].type == OBJ_HEAL;
-			programs |= layer.obj[i].type == OBJ_PROGRAMS;
-		}
-		if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
-		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
-		else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
-		if (programs) ADD("@M There's a NaviCust program shop here too.|");
+	}
+	/* the services here, every time (holding B skips a box, and the
+	 * first word is said once) */
+	bool shop = false, heal = false, programs = false;
+	for (int i = 0; i < layer.nobj; ++i) {
+		shop |= layer.obj[i].type == OBJ_SHOP;
+		heal |= layer.obj[i].type == OBJ_HEAL;
+		programs |= layer.obj[i].type == OBJ_PROGRAMS;
+	}
+	if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
+	else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
+	else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
+	if (programs) ADD("@M There's a NaviCust program shop here too.|");
+	if (!D.layer_told) {
 		ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 	}
