@@ -49,6 +49,8 @@ First playable version.
   short (up to two and a half panels before him) he walks up to and talks
   to; the pad or B stops the walk. With two navis side by side, A talks to
   the one he means (the game's check took the first its probe touched).
+  Of those within reach, one on the side he faces comes before a nearer
+  one behind him (a vendor a step behind turned him from Mystery Data).
 - A navi's tip on running from a battle says how (on the Custom screen, hold
   L and press R); it said START, which only pauses.
 - An act's first layer from act 2 on always has a Net Dealer, and every

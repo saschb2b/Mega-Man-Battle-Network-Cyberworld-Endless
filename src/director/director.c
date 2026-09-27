@@ -1091,7 +1091,9 @@ static uint32_t corner_assist(uint32_t keys) {
  * game's own check finds it (walking into a navi slides him round it, and a
  * tap of the pad can leave him facing past it): the navi or Mystery Data
  * clearly before him if there is one, out to two and a half panels, else
- * the nearest within 52 units (the probes' reach). One out of reach he
+ * the nearest within 52 units (the probes' reach) on the side he faces,
+ * else the nearest behind (a vendor a step behind turned him round from
+ * Mystery Data ahead). One out of reach he
  * walks up to (a step or two short of a navi, the press did nothing). */
 static void probe_vectors(int vx[8], int vy[8]) {
 	for (int k = 0; k < 8; ++k) {
@@ -1107,19 +1109,21 @@ static int talk_target(void) {
 	probe_vectors(vx, vy);
 	double fl = sqrt((double)vx[face] * vx[face] + vy[face] * vy[face]);
 	if (fl < 1) return -1;
-	int front = -1, near = -1, fd = 1 << 30, nd = 52 * 52 + 1;
+	int front = -1, ahead = -1, near = -1, fd = 1 << 30, ad = 52 * 52 + 1, nd = 52 * 52 + 1;
 	for (int i = 0; i < 16; ++i) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
 		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
 		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
 		/* before him: within 30 degrees of his facing (one he faces out of
 		 * reach is the one he means: no turn to another beside him) */
-		if (d <= 80 * 80 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; }
+		double c = d > 0 ? (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) : 1;
+		if (d <= 80 * 80 && d > 0 && c >= 0.866 && d < fd) { fd = d; front = i; }
+		if (d <= 52 * 52 && c >= 0.2 && d < ad) { ad = d; ahead = i; }
 		if (d <= 52 * 52 && d < nd) { nd = d; near = i; }
 	}
 	/* (but one he touches beats one before him out of reach) */
 	if (front >= 0 && !(near >= 0 && nd <= 24 * 24 && fd > 52 * 52)) return front;
-	return near;
+	return ahead >= 0 ? ahead : near;
 }
 
 /* Where NPC slot i stands from MegaMan, the facing whose probe points at
