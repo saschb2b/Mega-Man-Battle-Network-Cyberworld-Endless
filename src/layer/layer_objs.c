@@ -35,8 +35,13 @@
 /* Mr. Progs and navis (sprite list 6) */
 #define SPR_PROG        60
 #define SPR_PROG_BLUE   93
-#define SPR_DEALER      62   /* a Normal Navi, the Net Dealer's keeper in the game */
-#define SPR_TECH        57   /* a heavy engineer navi, the NaviCust vendor */
+/* List 6's generic navis are three: GreenNavi (62-66, 87: one sprite), EvilNavi
+ * (67, 68) and GirlNavi (69, 70), each role its own (Kai took bystanders for
+ * the dealer while they shared GreenNavi); 56-58 are Roll, GutsMan and Glyde,
+ * compressed, 59 ProtoMan, 71-86 the guardians (bn6f npcSpritePtrs) */
+#define SPR_DEALER      62   /* GreenNavi, the Net Dealer's keeper in the game */
+#define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
+#define SPR_BYSTANDER   67   /* EvilNavi */
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -176,13 +181,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		case OBJ_NPC: {
 			/* Normal Navis and pink navis */
-			/* (not the Net Dealer's look nor the vendor's: list 6's 62-66
-			 * and 87 are one green armored navi on the map, and Kai took
-			 * bystanders for the dealer; their faces differ, which hid it) */
-			static const int navis[5] = { 56, 58, 67, 69, 73 };
 			static int base;
 			if (!said) base = o->npc_line;
-			tk.sprite = navis[o->param % 5];
+			tk.sprite = SPR_BYSTANDER;
 			/* (a list-6 navi's face has its sprite's number) */
 			tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said++));
 			break;

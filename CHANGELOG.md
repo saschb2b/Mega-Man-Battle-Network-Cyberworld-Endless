@@ -5,9 +5,9 @@
 First playable version.
 
 - The Net Dealer is the only green armored navi on a layer: bystanders are
-  pink, gold, dark blue, red and black navis, and the NaviCust vendor a
-  heavy engineer. The sprites the bystanders and the vendor had were the
-  dealer's on the map (their chat faces differed, which hid it). The
+  the game's dark EvilNavi and the NaviCust vendor its pink GirlNavi. The
+  sprites the bystanders and the vendor had were the dealer's on the map
+  (their chat faces differed, which hid it). The
   vendor, talked to again, says "More programs? Take a look!" and opens
   his list, as the dealer does.
 - The Net Dealer's answer is a Standard chip (he offered two DiveMan, and a

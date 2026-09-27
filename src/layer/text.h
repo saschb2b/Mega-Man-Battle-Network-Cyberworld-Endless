@@ -41,7 +41,7 @@ void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
 #define FACE_MEGAMAN 0x37
 #define FACE_PROG    0x3C   /* Mr. Prog */
 #define FACE_NAVI    0x3E   /* a Normal Navi, the Net Dealers' own */
-#define FACE_TECH    0x39   /* a heavy engineer Navi, the NaviCust vendor (shop 3's keeper, 0x42, is the Net Dealer's green navi on the map) */
+#define FACE_TECH    0x45   /* GirlNavi, the NaviCust vendor (shop 3's keeper, 0x42, is the Net Dealer's GreenNavi on the map) */
 #define FACE_HEEL    0x43   /* a HeelNavi */
 #define FACE_BEAST   0x58   /* MegaMan in Gregar's BeastOut */
 
