@@ -4,6 +4,10 @@
 
 First playable version.
 
+- Net Dealers, vendors, Mr. Progs and bystanders stand off the walkways'
+  mouths: a dealer stood where a walkway met his platform, and the way
+  on went through him (the platform's box took in the walkway's end).
+  Runs saved before this version continue their layer from its start.
 - A battle starts MegaMan on the panel its original battle gives him:
   column 2 row 2 on most fields, beside it where that panel is a hole or
   poison (he always stood on column 2 row 2, in the hole too). The next battle, re-rolled every five seconds on a layer, is

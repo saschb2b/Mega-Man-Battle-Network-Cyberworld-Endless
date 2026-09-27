@@ -98,6 +98,20 @@ static bool at_exit(const Room *r, int x, int y) {
 	return false;
 }
 
+/* Whether (x, y) is beside a panel-wide stretch of floor, whatever room box
+ * holds it: a walkway's mouth (the Net Dealer stood where a walkway met his
+ * platform, a corner of the room's box, and the way on went through him) */
+static bool beside_narrow(int x, int y) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int nx = x + d[k][0], ny = y + d[k][1];
+		if (nx < 1 || ny < 1 || nx >= MAP_W - 1 || ny >= MAP_H - 1 || layer.cell[ny][nx] != C_PATH) continue;
+		int ax = d[k][1], ay = d[k][0];   /* across the step */
+		if (layer.cell[ny + ay][nx + ax] != C_PATH && layer.cell[ny - ay][nx - ax] != C_PATH) return true;
+	}
+	return false;
+}
+
 static bool beside_other_level(int x, int y) {
 	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 	for (int k = 0; k < 4; ++k) {
@@ -108,15 +122,16 @@ static bool beside_other_level(int x, int y) {
 	return false;
 }
 
-/* A free cell inside a room, off its middle and its exits so paths stay
- * clear, where a solid object cuts no way; with `open`, first one with
+/* A free cell inside a room, off its middle, its exits and any walkway's
+ * mouth so paths stay clear, where a solid object cuts no way; with `open`, first one with
  * floor on its four sides (a bystander in a panel-wide gap beside a
  * service pinned MegaMan in the nook, where the way still went round). */
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if (tries < 30 && x == r->ax && y == r->ay) continue;
-		if (tries < 36 && at_exit(r, x, y)) continue;
+		/* (a bystander, who may stay away, never at one) */
+		if ((tries < 36 || open) && (at_exit(r, x, y) || beside_narrow(x, y))) continue;
 		if (open && tries < 24 && !(layer.cell[y][x + 1] == C_PATH && layer.cell[y][x - 1] == C_PATH &&
 			layer.cell[y + 1][x] == C_PATH && layer.cell[y - 1][x] == C_PATH)) continue;
 		/* (not beside a floor of another height: a NaviCust vendor below a

@@ -105,9 +105,22 @@ static void check_arena(uint32_t seed) {
 	CHECK(layer.ante >= 0 && layer.ante != layer.arena, "seed %u: no antechamber", seed);
 }
 
+/* Whether (x, y) is beside a panel-wide stretch of floor: a walkway's
+ * mouth, where a navi stands in the way on */
+static bool beside_narrow(int x, int y) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int nx = x + d[k][0], ny = y + d[k][1];
+		if (nx < 1 || ny < 1 || nx >= MAP_W - 1 || ny >= MAP_H - 1 || layer.cell[ny][nx] != C_PATH) continue;
+		int ax = d[k][1], ay = d[k][0];   /* across the step */
+		if (layer.cell[ny + ay][nx + ax] != C_PATH && layer.cell[ny - ay][nx - ax] != C_PATH) return true;
+	}
+	return false;
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
-	int boss_layers = 0, arenas = 0;
+	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -153,6 +166,14 @@ static void test_generation(void) {
 			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN) has_exit = true;
 		}
 		CHECK(has_exit, "seed %u: no way out", seed);
+		/* services and navis off the walkways' mouths */
+		for (int i = 1; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			bool stands = o->type == OBJ_SHOP || o->type == OBJ_HEAL || o->type == OBJ_TRADER || o->type == OBJ_BUGTRADER ||
+				o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
+			if (stands && beside_narrow((int)o->x, (int)o->y)) ++mouths;
+			if (stands) ++standing;
+		}
 		int traders = 0;
 		for (int i = 0; i < layer.nobj; ++i) traders += layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
 		CHECK(traders <= 1, "seed %u: %d traders (the trade screen serves one per map)", seed, traders);
@@ -165,6 +186,7 @@ static void test_generation(void) {
 		}
 	}
 	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
+	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
 	/* Determinism: the same seed builds the same layer. */
 	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
 	static Layer a;
