@@ -36,6 +36,8 @@ const char *guardian_tip(int navi) {
 	switch (navi) {
 	case 12: return "BlastMan's bombs roll down our row and burst. Step off the yellow panels!";
 	case 13: return "DiveMan sends giant waves across our area. Keep moving between rows!";
+	case 14: return "CircusMan keeps to the back of his area, claps down on a lit column and drops his tent to trap us. "
+		"Keep moving, and bring chips that reach the back!";
 	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
 		"Keep our HP up, and hit him with swords and bombs!";
 	case 5: return "ChargeMan rams straight down our row like a train. Step aside, then hit back!";
