@@ -309,7 +309,8 @@ last run ended before the first guardian, he gives an HPMemory first
 After the Nest the band and the damage cap rise by a quarter per cycle and
 versions by one, capped at SP; guardians are SP. Two rules change besides
 the numbers: rare viruses come 2% more often each cycle, and from the third
-cycle the middle layer's heal is no longer certain.
+cycle the middle layer's heal is no longer certain. The run's first layer
+always has a heal too.
 
 ## Status
 

@@ -145,6 +145,8 @@ int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothe
 
 bool pacing_heal_certain(int depth) {
 	int p = (depth - 1) % CYCLE_LAYERS;
-	/* the middle layer of each act, until the third cycle takes it away */
-	return p < 18 && p % 3 == 1 && pacing_loop(depth) < 2;
+	/* the middle layer of each act, until the third cycle takes it away;
+	 * and the run's first layer, where the starting folder meets its first
+	 * battles (a playtester reached its exit at a third of their HP) */
+	return (p < 18 && p % 3 == 1 && pacing_loop(depth) < 2) || depth == 1;
 }
