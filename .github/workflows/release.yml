@@ -72,12 +72,19 @@ jobs:
         run: >
           sha256sum cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb
           cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-web.zip > SHA256SUMS.txt
+      # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
+      # section); a 0.x version is an alpha, published as a pre-release
+      - name: Notes
+        run: python3 tools/release_notes.py "$TAG" > build/release/NOTES.md
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "$TAG" --verify-tag --generate-notes --title "Cyberworld Endless $TAG"
-          build/release/cyberworld.zip build/release/cyberworld-endless-x86_64.AppImage
-          build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb
-          build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless.flatpak
-          build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt
+        run: |
+          flags=()
+          title="Cyberworld Endless $TAG"
+          case "$TAG" in v0.*) flags+=(--prerelease); title="$title (alpha)";; esac
+          gh release create "$TAG" --verify-tag --notes-file build/release/NOTES.md "${flags[@]}" --title "$title" \
+            build/release/cyberworld.zip build/release/cyberworld-endless-x86_64.AppImage \
+            build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb \
+            build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless.flatpak \
+            build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt

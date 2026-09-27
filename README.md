@@ -223,8 +223,8 @@ Guardians remember how your earlier battles went.
 The first four acts visit four of Central, Seaside, Sky and Green Area, the
 Robot Control, Aquarium, Judge Tree, Mr. Weather and CopyBot comps, two home
 computers and the Aquarium, ACDC, Green and Sky homepages. The order is
-random, but the gentler areas come first (Central, Robot Control, a home
-computer) and the hardest last (Sky, Mr. Weather,
+random, but the gentler areas come first (Central or a home computer) and
+the hardest last (Sky, Mr. Weather,
 ACDC HP, CopyBot's comp). Then come the Undernet and the Graveyard, and
 layer 19 is the Underground. After that the cycle starts again, harder.
 
@@ -236,6 +236,11 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 - **Guardian Data.** Every guardian leaves five HPMemory (+100 max HP), its
   own Navi chip at the version you beat, and its Cross where it has one.
   Taking it also restores MegaMan's HP.
+- **The NaviCust.** Guardian Data also offers three NaviCust programs, one
+  from each of three builds (buster, hand, guard, field, HP), or BugFrags
+  if you take none. The second and fourth acts' guardians grow the board
+  from 4x4 to 5x4, then 5x5. A layout that breaks BN6's rules runs bugged,
+  and MegaMan says what the bug does.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.

@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 (2026-09-27)
 
-First playable version.
+The first alpha, and the first release. Its players' notes are
+[docs/releases/v0.1.0.md](docs/releases/v0.1.0.md).
 
 - Sky HP and Green HP vary their battles: their own random battle is a
   single one (every act 2 battle on Sky HP was Gunner and FgtrPlne), so two
