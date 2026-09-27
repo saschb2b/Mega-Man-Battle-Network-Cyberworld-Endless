@@ -267,8 +267,9 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 		uint8_t give[] = { 0xF4, 0x00, SCRIPTS_EXP_MEMORY, 1 };   /* ts_item_give */
 		ta_bytes(t, give, sizeof give);
 		got(t, "ExpMemry", &first);
-		ta_page(t, FACE_MEGAMAN, draft->expmemry == 1 ? "Our NaviCust has room for a fifth column now, Lan!"
-			: "Our NaviCust has room for a fifth row now: the whole 5x5!", false);
+		/* (the board it grows to is the game's count, not the act's: a run
+		 * that passed act 2 on an older build gets its first here) */
+		ta_page(t, FACE_MEGAMAN, "Our NaviCust's board just grew, Lan! More room for programs.", false);
 	}
 	if (!n) {
 		flag_set(t, taken_flag);
