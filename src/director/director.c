@@ -370,7 +370,8 @@ static const char *status_words(void) {
 	if (apart > 4) apart = 8 - apart;
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
 	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
-	else if (apart >= 2 && told) ADD("@M The %s %s. Follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies);
+	/* (the words where it lies, the arrow the walk: say they part) */
+	else if (apart >= 2 && told) ADD("@M The %s %s, but the way winds. Follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies);
 	else if (apart >= 2)
 		ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies, how_far[far]);
 	else ADD("@M The way on goes %s. %s", way, how_far[far]);
