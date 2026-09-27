@@ -133,7 +133,7 @@ answers per act and element (`+` over the cap). Read it after any change
 to the chip pools, the bands or the dealer.
 
 **A layer and the arrow's walk**: `CYBERWORLD_STATE_POS=map` adds the whole
-layer to a session's state (`#`-less: `.` floor, `^` raised, `*` the
+layer to a session's state (`.` floor, `^` raised floor, `*` the
 arrow's walk, `+` where it aims, `@` MegaMan, letters the objects), and the
 state names the arrow's way; `scripts/follow_arrow.py NAME` walks the way it
 shows and prints each panel. Use them when a persona reports going in
