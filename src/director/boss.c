@@ -228,6 +228,15 @@ bool boss_cinematic(void) { return B.state >= B_ENTER && B.state <= B_LOGOUT && 
 
 bool boss_done(void) { return B.state >= B_OPEN; }
 
+bool boss_idle(void) { return B.state == B_NONE || B.state == B_WAIT || B.state >= B_OPEN; }
+
+void boss_resume(void) {
+	/* (a run saved mid-layer: the guardian's flags are in the state) */
+	if (B.state != B_WAIT) return;
+	if (flag_get(LAYER_EXIT_OPEN_FLAG)) to(B_DONE);
+	else if (flag_get(LAYER_REWARD_FLAG) && !flag_get(LAYER_REWARD_TAKEN_FLAG)) to(B_REWARD);
+}
+
 bool boss_goal(int *x, int *y, bool *talk) {
 	if (B.state == B_NONE || B.state >= B_OPEN) return false;
 	for (int i = 0; i < layer.nobj; ++i)

@@ -24,6 +24,12 @@ bool boss_beaten(void);
 bool boss_cinematic(void);
 /* Its Guardian Data has been taken. */
 bool boss_done(void);
+/* Nothing of the guardian under way: not met yet, or all done (a run can
+ * be saved then). */
+bool boss_idle(void);
+/* After a run saved mid-layer is loaded: the guardian's state from its
+ * flags. */
+void boss_resume(void);
 /* Where the test autopilot heads while the guardian stands: into the
  * arena, then to its Guardian Data (to check, *talk). */
 bool boss_goal(int *x, int *y, bool *talk);

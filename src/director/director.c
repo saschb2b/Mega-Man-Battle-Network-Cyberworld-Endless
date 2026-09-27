@@ -435,6 +435,21 @@ bool director_in_town(void) { return D.active && D.town; }
 
 bool director_on_layer(void) { return D.active && !D.town; }
 
+bool director_can_suspend(void) {
+	return D.active && !D.town && !D.gameover && on_map() && !emu_read8(BN6_CHATBOX) && !talk_busy() && !D.warping &&
+		emu_read8(BN6_WARP + 0x10) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
+		flag_get(BN6_FLAG_PLAYER_CAN_MOVE);
+}
+
+bool director_suspend(void) {
+	if (!director_can_suspend()) return false;
+	char path[600];
+	save_state_path(path, sizeof path);
+	save_run();
+	emu_save_state(path);
+	return true;
+}
+
 bool director_arrived(void) {
 	if (!D.active || !on_map()) return false;
 	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
@@ -653,6 +668,7 @@ bool director_resume(void) {
 			flag_set(BN6_FLAG_PLAYER_CAN_MOVE);
 			flag_clear(BN6_FLAG_DIALOGUE_1719);
 		}
+		boss_resume();
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_get(D.objs.choice[i].flag)) D.chosen |= 1u << i;

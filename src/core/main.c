@@ -7,6 +7,7 @@
 #include <emscripten.h>
 #else
 #include <fcntl.h>
+#include <signal.h>
 #endif
 
 #include "game.h"
@@ -315,12 +316,14 @@ static struct {
 /* After one Escape: a strip over the picture until the second quits. */
 static void quit_prompt_draw(void) {
 	if (P.quit_prompt <= 0 || !R.data) return;
-	/* (a run is saved from its first layer on) */
+	/* (a run is saved from its first layer on: where MegaMan stands when he
+	 * is free to move, else at the layer's start) */
 	bool saved = director_on_layer();
 	int y = P.core_y + CORE_H - 30;
 	fill_rect(0, y, P.w, saved ? 26 : 14, rgba(0, 0, 0, 200));
 	text_draw(P.w / 2, y + 2, "Press Esc again to quit", WHITE, TEXT_CENTER);
-	if (saved) text_draw(P.w / 2, y + 14, "Run saved at layer start", rgba(170, 200, 255, 255), TEXT_CENTER);
+	if (saved) text_draw(P.w / 2, y + 14, director_can_suspend() ? "Your run is saved right here" : "Run saved at layer start",
+		rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
 /* One game frame: scenes, input, update, sound, drawing. False once the
@@ -382,6 +385,13 @@ static void web_frame(void) {
 		if (!game_frame() || P.quit) { emscripten_cancel_main_loop(); platform_shutdown(); return; }
 	}
 }
+#endif
+
+#ifndef __EMSCRIPTEN__
+/* SIGTERM or SIGINT (a launcher closing the port, a terminal's Ctrl+C):
+ * the loop ends at a frame's end and the run is kept */
+static volatile sig_atomic_t quit_signal;
+static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
 #endif
 
 int main(int argc, char **argv) {
@@ -555,6 +565,12 @@ int main(int argc, char **argv) {
 	}
 
 #ifndef __EMSCRIPTEN__
+	/* (no SA_RESTART: a remote game waiting in read() wakes up to quit) */
+	struct sigaction sa;
+	memset(&sa, 0, sizeof sa);
+	sa.sa_handler = on_quit_signal;
+	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
 	if (remote_dir && !remote_open(remote_dir)) { fprintf(stderr, "--remote: cannot open the pipes in %s\n", remote_dir); return 1; }
 #endif
 	loop.headless = headless;
@@ -564,7 +580,9 @@ int main(int argc, char **argv) {
 	/* the browser calls in once per display frame */
 	emscripten_set_main_loop(web_frame, 0, 1);
 #else
-	while (!P.quit && step()) {}
+	while (!P.quit && !quit_signal && step()) {}
+	/* a run on a layer is kept where MegaMan stands */
+	if (current == &scene_emu) director_suspend();
 #endif
 	platform_shutdown();
 	return 0;

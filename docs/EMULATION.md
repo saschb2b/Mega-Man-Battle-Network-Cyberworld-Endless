@@ -71,7 +71,10 @@ starts the same departure (`0x080059B5`) to a side layer built at once.
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER
 (the run ends), MegaMan on any other map for 90 frames (warped back to
 the layer's start), and a checkpoint shortly after each arrival (`run.sav` plus
-the core's `run.state`). CONTINUE loads the state and enters the map again,
+the core's `run.state`), once MegaMan is free to move. Quitting (Escape
+twice, SIGTERM or SIGINT from a launcher) saves the run once more where he
+stands if he is free on the layer's map with nothing of the guardian under
+way; loading it restores the guardian's state from its flags. CONTINUE loads the state and enters the map again,
 so the game reloads it from the current build's tables.
 
 It also starts conversations of its own (`talk.c`): Lan and MegaMan on

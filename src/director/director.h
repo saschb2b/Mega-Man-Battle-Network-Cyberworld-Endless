@@ -14,6 +14,10 @@ bool director_start_run(void);
 bool director_in_town(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
+/* Quitting on a layer's map, free to move: the run is saved there
+ * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
+bool director_can_suspend(void);
+bool director_suspend(void);
 /* Lan (or MegaMan) is on the map the run put him on: the picture can show. */
 bool director_arrived(void);
 /* What a player sees, in words, one fact a line (remote play). */
