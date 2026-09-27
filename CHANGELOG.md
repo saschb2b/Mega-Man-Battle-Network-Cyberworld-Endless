@@ -99,6 +99,18 @@ First playable version.
   yellow panels, the only fields of its second floor, which draw its
   guardian's arena. `build.py atlas` counts such tiles per layer (other
   colours). Floors, walls, objects and scenery are unchanged.
+- Robot Control Comp's white platforms keep their rims: the two light
+  bands that frame the original's platforms run all the way round, with
+  the dotted corner caps, where the layers showed flat white fields with
+  ragged, broken edges. The bands reach half a panel into the floor,
+  deeper than a tile is held to the plain floor's look, so the edges now
+  take the original's own tiles; and the walls around the grey cubes on
+  Comp 2's platforms no longer count as holes when its tiles are learned,
+  so inner corners keep the bands too. Pads are small white platforms in
+  the look of Comp 1's and the Pavilion's raised ones, no longer half the
+  striped conveyor from before the robot's door. The atlas counts less
+  than half the near misses and seams it did in the area. Floors, walls,
+  objects and scenery are unchanged.
 
 - The run begins in the real world, in Central Town or ACDC Town, each
   cut into pieces from the game's own map and set out again per run.

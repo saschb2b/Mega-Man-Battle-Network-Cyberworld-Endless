@@ -52,7 +52,7 @@ typedef struct {
  * as the pedestals under a homepage's panels (from TileBook). */
 typedef struct {
 	int tw, th, ex, ey, dv, face, hang;
-	bool rimmed;       /* floor edges are rims, not plain floor (areas told by shape) */
+	bool rimmed;       /* floor edges are rims, not plain floor (areas told by shape, TILES_RIMMED) */
 	bool apart;        /* the TILE_APART pieces are drawn as if no other floor touched them (tilemap.c) */
 	bool single;       /* pairs that draw on one layer only */
 	int side;          /* how far down beside a side face a tile may draw (0: the face's height) */
@@ -78,7 +78,21 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * second floor forms fields only in Seaside 2 and 3, as their yellow panels,
  * which draw its guardian's arena. */
 #define TILES_MORE_COLOURS 0x2000
-void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
+/* ... and with TILES_RIMMED, its platforms' edges are rims, not held to the
+ * plain look (netmap.c): Robot Control's white platforms are framed by two
+ * light bands half a panel deep, reaching past where a tile must already
+ * look like plain floor. */
+#define TILES_RIMMED 0x10000
+/* ... and with TILES_INNER_WALLS, the rings of walls inside its floors keep
+ * MegaMan off what stands on them and are no holes: floor where the map
+ * draws a panel there (the grey cubes on Robot Control's white platforms).
+ * The neighbourhoods seen, which legal.c asks after, keep them as holes. */
+#define TILES_INNER_WALLS 0x20000
+/* ... and with TILES_MORE_PADS, its pads take the look of its other maps'
+ * pads alone (netmap.c): Robot Control Comp 2's one small platform is the
+ * striped conveyor before the robot's door. */
+#define TILES_MORE_PADS 0x40000
+void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* The colours the pairs of `b` draw, marked in `seen` (one byte per BGR555
  * colour); then the pairs of another book that draw others marked (`other`),
@@ -86,6 +100,8 @@ void tiles_free(TileBook *b);
 #define TILE_COLOURS 32768
 void tiles_colours(const TileBook *b, uint8_t seen[TILE_COLOURS]);
 void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool drop);
+/* The pairs of `b` seen on the original's pads left out. */
+void tiles_drop_pads(TileBook *b);
 
 /* The class of tile (tx, ty): its phase and the panel it lies in. */
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);

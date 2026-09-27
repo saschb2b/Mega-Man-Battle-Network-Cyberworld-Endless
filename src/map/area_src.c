@@ -254,11 +254,16 @@ static void decode_rings(AreaSrc *a) {
 	free(wall);
 }
 
-int area_src_walled_floor(const AreaSrc *a, int X, int Y) {
+int area_src_rings(const AreaSrc *a, int X, int Y) {
 	int cx = cell_of(X) - a->rx0, cy = cell_of(Y) - a->ry0;
 	if (!a->rings) return -1;
 	if (cx < 0 || cy < 0 || cx >= a->rw || cy >= a->rh) return 0;
-	return a->rings[(size_t)cy * a->rw + cx] & 1;
+	return a->rings[(size_t)cy * a->rw + cx];
+}
+
+int area_src_walled_floor(const AreaSrc *a, int X, int Y) {
+	int r = area_src_rings(a, X, Y);
+	return r < 0 ? -1 : r & 1;
 }
 
 int area_src_height(const AreaSrc *a, int X, int Y) {
