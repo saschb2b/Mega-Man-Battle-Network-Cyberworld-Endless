@@ -478,7 +478,22 @@ void director_describe(FILE *f) {
 			emu_read8(BN6_PLAYER + 9), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
-		else fprintf(f, "exit %d %d\n", D.objs.exit_x, D.objs.exit_y);
+		else {
+			fprintf(f, "exit %d %d\n", D.objs.exit_x, D.objs.exit_y);
+			/* the floor around him, panels (x across, y down; @ he, # floor) */
+			int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, cx, cy;
+			if (netmap_panel(px, py, &cx, &cy)) {
+				int wx, wy;
+				netmap_world(cx, cy, &wx, &wy);
+				fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
+				for (int y = cy - 4; y <= cy + 4; ++y) {
+					fprintf(f, "cells ");
+					for (int x = cx - 4; x <= cx + 4; ++x)
+						fputc(x == cx && y == cy ? '@' : x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH ? '#' : '.', f);
+					fputc('\n', f);
+				}
+			}
+		}
 		/* the game's NPC objects near him: flags, state, radius, lock, text */
 		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 		for (int i = 0; i < 16; ++i) {
@@ -496,6 +511,57 @@ void director_describe(FILE *f) {
 			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");
 }
 
+/* Walking into a walkway's mouth off its line stops MegaMan at the corner
+ * (a single-axis direction does not slide there). After a few frames of
+ * that, where the panel ahead is empty but the one beside him and the one
+ * diagonally ahead are floor, his direction turns toward them until he
+ * has moved on along his own (a second at most). */
+static bool floor_panel(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
+
+static uint32_t corner_assist(uint32_t keys) {
+	/* the pad's world steps (UP moves +X -Y, RIGHT +X +Y); the grid's +x is
+	 * world +Y and its +y world -X (netmap_panel) */
+	static const struct { uint32_t keys; int x, y; } dirs[8] = {
+		{ KEY_UP | KEY_RIGHT, 1, 0 }, { KEY_DOWN | KEY_RIGHT, 0, 1 }, { KEY_DOWN | KEY_LEFT, -1, 0 }, { KEY_UP | KEY_LEFT, 0, -1 },
+		{ KEY_UP, 1, -1 }, { KEY_RIGHT, 1, 1 }, { KEY_DOWN, -1, 1 }, { KEY_LEFT, -1, -1 },
+	};
+	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
+	uint32_t pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	bool moved = px != lx || py != ly;
+	lx = px; ly = py;
+	int held = -1;
+	for (int k = 0; k < 4; ++k) if (pad == dirs[k].keys) held = k;
+	if (held < 0 || D.town || emu_read8(BN6_CHATBOX) || talk_busy() || (assist >= 0 && held != assist_for)) {
+		stuck = 0; assist = -1;
+		return keys;
+	}
+	int ax = dirs[held].x, ay = dirs[held].y;
+	if (assist >= 0) {
+		int a = ax ? px * ax : py * ay;
+		if (a > along || ++frames > 60) { assist = -1; stuck = 0; return keys; }
+		return (keys & ~pad) | dirs[assist].keys;
+	}
+	stuck = moved ? 0 : stuck + 1;
+	int cx, cy;
+	if (stuck < 3 || !netmap_panel(px, py, &cx, &cy)) return keys;
+	int gdx = ay, gdy = -ax;   /* his direction on the grid */
+	if (floor_panel(cx + gdx, cy + gdy)) return keys;   /* (the way ahead is open: a wall of something else) */
+	for (int s = -1; s <= 1; s += 2) {
+		int sx = ay ? s : 0, sy = ax ? s : 0, gsx = sy, gsy = -sx;
+		if (!floor_panel(cx + gsx, cy + gsy) || !floor_panel(cx + gsx + gdx, cy + gsy + gdy)) continue;
+		for (int k = 4; k < 8; ++k)
+			if (dirs[k].x == ax + sx && dirs[k].y == ay + sy) {
+				assist = k;
+				assist_for = held;
+				along = ax ? px * ax : py * ay;
+				frames = 0;
+				return (keys & ~pad) | dirs[k].keys;
+			}
+	}
+	return keys;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
@@ -503,6 +569,7 @@ uint32_t director_keys(uint32_t keys) {
 	D.r_held = r;
 	D.dir_held = (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) != 0;
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
+	keys = corner_assist(keys);
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
 	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&
