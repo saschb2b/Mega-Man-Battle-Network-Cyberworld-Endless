@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- The Guardian Data's word on how the NaviCust's board works comes with a
+  player's first draft ever (the profile keeps that it came), not only at
+  act 1's guardian: a run carried over from an older build met its first
+  draft at act 3's, without it.
+
 ## 0.1.0 (2026-09-27)
 
 The first alpha, and the first release. Its players' notes are

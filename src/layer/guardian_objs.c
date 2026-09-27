@@ -10,6 +10,7 @@
 #include "npc.h"
 #include "powers.h"
 #include "run.h"
+#include "save.h"
 #include "scripts.h"
 #include "stage_npc.h"
 
@@ -63,7 +64,9 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		if (colored) {
 			draft.n = n;
 			draft.skip_frags = navicust_skip_frags(run.depth);
-			draft.teach = run.depth == 3;
+			/* (the player's first draft ever: a run from an older build met
+			 * its first past act 1's, without it) */
+			draft.teach = !profile.navicust_taught;
 		}
 	}
 	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome, run.depth), chip, ci.name, code,

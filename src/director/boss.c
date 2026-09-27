@@ -24,6 +24,7 @@
 #include "powers.h"
 #include "rivals.h"
 #include "run.h"
+#include "save.h"
 
 #define WALK_NEAR 52   /* world units from the guardian MegaMan walks up to */
 
@@ -190,6 +191,11 @@ void boss_update(void) {
 		break;
 	case B_REWARD:
 		if (!flag_get(LAYER_REWARD_TAKEN_FLAG) || emu_read8(BN6_CHATBOX)) break;
+		/* (the Guardian Data's draft has told the board's rules once) */
+		if (!profile.navicust_taught && run.side_kind == LAYER_NORMAL) {
+			profile.navicust_taught = 1;
+			profile_save();
+		}
 		flag_set(LAYER_EXIT_OPEN_FLAG);
 		cinema_shake(12, 2);
 		to(B_OPEN);

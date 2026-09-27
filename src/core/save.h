@@ -21,6 +21,7 @@ typedef struct {
 	/* (fields after here are new since profiles began: an older, shorter
 	 * profile reads them as 0) */
 	uint8_t first_guardian;   /* the last new run's act 1 guardian, navi + 1 */
+	uint8_t navicust_taught;  /* a Guardian Data's draft has said how the NaviCust's board works */
 } Profile;
 
 extern Profile profile;
