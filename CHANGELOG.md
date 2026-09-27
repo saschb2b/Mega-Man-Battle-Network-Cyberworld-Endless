@@ -41,6 +41,9 @@ First playable version.
   layer only. A shop's list takes no A for its first moment, so the A
   that closed its keeper's words twice over no longer asks to buy the
   first item.
+- In battle, an L or R pressed just before the Custom gauge fills opens
+  the Custom screen when it does (the game drops it; a playtester
+  re-pressed in every fight).
 - Every Mystery Data opens: some on a new run's first layer stood at the
   world's origin or said they were locked and printed stray text, their
   picks shared with the game's own Mystery Data of other maps.

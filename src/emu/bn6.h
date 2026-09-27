@@ -83,5 +83,6 @@
 #define BN6_SUB_MAP           0x04
 #define BN6_SUB_BATTLE_INIT   0x08
 #define BN6_SUB_BATTLE        0x0C
+#define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 
 #endif

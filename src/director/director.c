@@ -756,6 +756,7 @@ void director_describe(FILE *f) {
 			if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) { hp = emu_read16(o + 0x24); max = emu_read16(o + 0x26); break; }
 		}
 	fprintf(f, "hp %d/%d\nzenny %u\n", hp, max, (unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
+	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
 		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16,
@@ -1201,6 +1202,22 @@ static uint32_t shop_guard(uint32_t keys) {
 	return keys;
 }
 
+/* In battle an L or R pressed as the Custom gauge was all but full was
+ * lost (the game takes them at a full gauge only; Kai re-pressed in every
+ * fight): it is kept half a second and given as the gauge fills, one
+ * frame let go first so the game sees a press. */
+static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
+	static int kept, step;
+	static uint32_t which;
+	if (main_mode() != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { kept = step = 0; return keys; }
+	bool full = emu_read16(BN6_CUSTOM_GAUGE) >= 0x4000;
+	if (step == 1) { step = 2; return keys & ~(KEY_L | KEY_R); }
+	if (step == 2) { step = 0; return keys | which; }
+	if ((l_pressed || r_pressed) && !full) { kept = 30; which = l_pressed ? KEY_L : KEY_R; return keys; }
+	if (kept > 0 && --kept > 0 && full) { kept = 0; step = 1; return keys & ~(KEY_L | KEY_R); }
+	return keys;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
 	if (D.active) keys = shop_guard(keys);
@@ -1212,6 +1229,7 @@ uint32_t director_keys(uint32_t keys) {
 	D.a_held = a;
 	D.dir_held = (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) != 0;
 	D.map_shown = false;
+	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	keys = corner_assist(keys);
 	/* (turned to what A would talk to, the pad left alone for that frame so
