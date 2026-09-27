@@ -666,14 +666,17 @@ uint32_t director_keys(uint32_t keys) {
 		!town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
 		static char buf[160];
 		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-		int dx = town_info()->port_x - px, dy = town_info()->port_y - py;
-		/* (close by: a step more, not the way across town) */
-		if (dx * dx + dy * dy < 72 * 72)
-			snprintf(buf, sizeof buf, "@M Almost, Lan! Step right up to the statue and press R.");
+		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far;
+		const char *way = way_to(town_info()->port_x, town_info()->port_y, &far);
+		/* (close by, from any side of it: a step more, and which way) */
+		if (dx * dx + dy * dy < 128 * 128)
+			snprintf(buf, sizeof buf, "@M Almost, Lan! The statue's %s.|@M Step right up to it and press R.", way);
 		else
 			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!",
 				town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
 		talk_start(buf, FACE_MEGAMAN);
+		D.arrow_pending = true;
+		cinema_arrow(way_dir, 600);
 		return keys & ~KEY_R;
 	}
 	/* on the map L is MegaMan's word on where they are: the game's own
