@@ -146,8 +146,10 @@ def linux_release():
 
 def version():
     """The release's version: the tag being released (TAG, as the release
-    workflow sets it) or the latest v* tag with the commits since, else 0.0.0
-    and the commit."""
+    workflow sets it) or the latest v* tag with the commits since, else a
+    development build's 0.0.1 with the commit count and the commit (the count
+    orders them, as a package manager compares them; 0.0.1 comes after the
+    0.0.0+git.HASH builds had, which did not)."""
     def git(*args):
         try:
             return subprocess.check_output(['git', *args], cwd=ROOT, stderr=subprocess.DEVNULL, text=True).strip()
@@ -159,7 +161,7 @@ def version():
     if tag.startswith('v'):
         m = re.match(r'(.+?)-(\d+)-(g[0-9a-f]+)$', tag[1:])   # v0.1.0-3-gabc123 -> 0.1.0+3.gabc123
         return f'{m[1]}+{m[2]}.{m[3]}' if m else tag[1:]
-    return f'0.0.0+git.{git("rev-parse", "--short", "HEAD") or "unknown"}'
+    return f'0.0.1+git{git("rev-list", "--count", "HEAD") or "0"}.{git("rev-parse", "--short", "HEAD") or "unknown"}'
 
 
 def install_tree(root, doc_name):
