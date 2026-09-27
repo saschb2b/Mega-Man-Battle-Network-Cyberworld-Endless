@@ -66,6 +66,8 @@ void chip_info(int rom_id, ChipInfo *out);
  * of those, the attack families (0xB) of the Navi chips, MachGun,
  * AquaNdl, WaveArm, AirSpin and the Dragons strike outright too. */
 bool chip_direct(int rom_id);
+/* A sword: its attack family (0xB) is 19, reaching the panels just ahead. */
+bool chip_sword(int rom_id);
 
 /* Virus families the encounters draw from. */
 typedef struct {

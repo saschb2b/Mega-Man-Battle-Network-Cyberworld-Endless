@@ -72,7 +72,9 @@ First playable version.
 - A Server's prize is the hardest hitting of a few chips a tier better
   than Mystery Data (it could be a WhiCapsl). The prize and the Net
   Dealer's answer are chips that strike outright: an answer that needed a
-  paralysed enemy (MchnSwrd) was no answer.
+  paralysed enemy (MchnSwrd) or a hole in the floor (SumnBlk) was no
+  answer. The answer is no sword either: CircusMan kept to his back
+  column, and two AquaSwrd never reached him.
 - A new act eases in: every battle on its first layer comes from the lower
   half of its band (two BombCorns on the first layer after BlastMan took a
   playtester from 220 HP to 10).
