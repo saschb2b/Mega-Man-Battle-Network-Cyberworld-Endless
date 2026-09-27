@@ -143,8 +143,13 @@ static void test_generation(void) {
 		for (int i = 0; i < layer.nobj; ++i) {
 			NetObj *o = &layer.obj[i];
 			CHECK(layer.cell[(int)o->y][(int)o->x] == C_PATH, "seed %u: object %d off the path", seed, i);
-			for (int j = i + 1; j < layer.nobj; ++j)
-				CHECK((int)o->x != (int)layer.obj[j].x || (int)o->y != (int)layer.obj[j].y, "seed %u: objects %d and %d overlap", seed, i, j);
+			for (int j = i + 1; j < layer.nobj; ++j) {
+				const NetObj *q = &layer.obj[j];
+				CHECK((int)o->x != (int)q->x || (int)o->y != (int)q->y, "seed %u: objects %d and %d overlap", seed, i, j);
+				/* no two solid objects side by side (the guardian keeps its arena) */
+				if (o->solid && q->solid && o->type != OBJ_BOSS && q->type != OBJ_BOSS)
+					CHECK(abs((int)o->x - (int)q->x) > 1 || abs((int)o->y - (int)q->y) > 1, "seed %u: objects %d and %d side by side", seed, i, j);
+			}
 			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN) has_exit = true;
 		}
 		CHECK(has_exit, "seed %u: no way out", seed);

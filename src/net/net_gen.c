@@ -42,8 +42,13 @@ static bool cell_free(int x, int y) {
 	if (layer.cell[y][x] != C_PATH) return false;
 	for (int i = 0; i < layer.nstairs; ++i)
 		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return false;
-	for (int i = 0; i < layer.nobj; ++i)
-		if ((int)layer.obj[i].x == x && (int)layer.obj[i].y == y) return false;
+	/* (nor beside another solid object: A answers whichever is in reach,
+	 * and a crowd answered the wrong one) */
+	for (int i = 0; i < layer.nobj; ++i) {
+		int dx = abs((int)layer.obj[i].x - x), dy = abs((int)layer.obj[i].y - y);
+		if (dx == 0 && dy == 0) return false;
+		if (layer.obj[i].solid && dx <= 1 && dy <= 1) return false;
+	}
 	return true;
 }
 
