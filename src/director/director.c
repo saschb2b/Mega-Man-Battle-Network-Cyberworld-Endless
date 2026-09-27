@@ -757,6 +757,24 @@ static int slide_axis(int held, int cx, int cy) {
 	return a ? step_key(x, 0) : step_key(0, y);
 }
 
+/* In a lane, one way on besides back to (bx, by): that way for a single
+ * key (world step x, y) held against the lane's side, unless the way back
+ * suits the key better (-1: not a lane, or back). */
+static int corridor_way(int cx, int cy, int x, int y, int bx, int by) {
+	static const int w[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	int k = -1, n = 0, on = -9, back = -9;
+	for (int i = 0; i < 4; ++i) {
+		int nx = cx + w[i][1], ny = cy - w[i][0];
+		if (!floor_panel(nx, ny)) continue;
+		int dot = w[i][0] * x + w[i][1] * y;
+		if (nx == bx && ny == by) { back = dot; continue; }
+		++n;
+		k = step_key(w[i][0], w[i][1]);
+		on = dot;
+	}
+	return n == 1 && on >= back ? k : -1;
+}
+
 static uint32_t corner_assist(uint32_t keys) {
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
 	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
@@ -803,13 +821,18 @@ static uint32_t corner_assist(uint32_t keys) {
 		if (assist >= 0) {
 			frames = moved ? 0 : frames + 1;
 			int k = slide_axis(held, cx, cy);
+			if (k < 0) k = corridor_way(cx, cy, x, y, prev_cx, prev_cy);
 			if (frames > 6 || k < 0) { assist = -1; stuck = 0; return keys; }
 			assist = k;
 			return (keys & ~pad) | pad_dirs[assist].keys;
 		}
 		stuck = moved ? 0 : stuck + 1;
-		int k;
-		if (stuck < 3 || (k = slide_axis(held, cx, cy)) < 0) return keys;
+		if (stuck < 3) return keys;
+		/* (at a lane's peak or tip, where neither of the key's steps goes
+		 * on: along the lane) */
+		int k = slide_axis(held, cx, cy);
+		if (k < 0) k = corridor_way(cx, cy, x, y, prev_cx, prev_cy);
+		if (k < 0) return keys;
 		assist = k;
 		assist_for = held;
 		frames = 0;
