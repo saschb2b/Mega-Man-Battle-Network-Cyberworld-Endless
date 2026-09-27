@@ -51,7 +51,7 @@ README and the site.
 | `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage and the `.deb` carry. The app ID `io.github.saschb2b.CyberworldEndless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling). Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
-| `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each (`build.py clips`, ffmpeg in a pinned image) |
+| `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image) |
 | `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.web` (Emscripten, mGBA without threads) |
 | `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot |
 

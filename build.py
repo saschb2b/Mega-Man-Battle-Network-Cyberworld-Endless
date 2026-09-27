@@ -551,8 +551,9 @@ def tour(biomes='all'):
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7'],
-     [(240, 'net'), (1420, 'custom'), (1660, 'battle'), (1930, 'result'), (2220, 'guardian'),
-      (2345, 'guardian-talk'), (2580, 'boss-custom'), (3714, 'reward'), (3760, 'restored')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+     [(240, 'net'), (1420, 'custom'), (1660, 'battle'), (1970, 'result'), (2220, 'guardian'),
+      (2380, 'guardian-talk'), (2610, 'boss-custom'), (3670, 'reward'), (3720, 'restored'), (3880, 'area-clear')],
+     {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--dev', 'quiet'], [(120, 'act-card')], {}),
     ('town-central', ['--scene', 'town', '--seed', '3'], [(280, 'town-central')], {}),
     ('town-acdc', ['--scene', 'town', '--seed', '5'], [(280, 'town-acdc')], {}),
@@ -613,8 +614,13 @@ CLIPS = [
 ]
 
 
+# the clips the README shows as GIFs too (GitHub plays no video from the repository)
+README_GIFS = ('guardian',)
+
+
 def clips(only=None):
-    """docs/clips/NAME.webm, .mp4 and .png: frames of scripted runs, 4x, 30 fps."""
+    """docs/clips/NAME.webm, .mp4 and .png: frames of scripted runs, 4x, 30 fps (and
+    NAME.gif, 2x, 15 fps, for those in README_GIFS)."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'clips')
     tmp = os.path.join(ROOT, '.build', 'clips')
@@ -650,15 +656,22 @@ def clips(only=None):
         # 4x with whole pixels (and the colour planes' 2x2 blocks inside them)
         common = ['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png',
                   '-vf', 'scale=960:640:flags=neighbor', '-an']
-        for enc in (['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-pix_fmt', 'yuv420p', f'/out/{name}.webm'],
-                    ['-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-                     f'/out/{name}.mp4']):
+        encodes = [common + ['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-pix_fmt', 'yuv420p', f'/out/{name}.webm'],
+                   common + ['-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+                             f'/out/{name}.mp4']]
+        # (the GIF from the same frames: 2x with whole pixels, its palette the clip's own colours)
+        if name in README_GIFS:
+            encodes.append(['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png', '-vf',
+                            'fps=15,scale=480:320:flags=neighbor,split[a][b];[a]palettegen=max_colors=128:stats_mode=full[p];'
+                            '[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
+        for enc in encodes:
             cmd = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + [
                 'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',
-                FFMPEG_IMAGE, *common, *enc]
+                FFMPEG_IMAGE, *enc]
             if subprocess.call(cmd):
                 return 1
-        sizes = ', '.join(f'{ext} {os.path.getsize(os.path.join(out, name + "." + ext)) // 1024} KB' for ext in ('webm', 'mp4'))
+        exts = ('webm', 'mp4', 'gif') if name in README_GIFS else ('webm', 'mp4')
+        sizes = ', '.join(f'{ext} {os.path.getsize(os.path.join(out, name + "." + ext)) // 1024} KB' for ext in exts)
         print(f'clip {name}: {n} frames, {sizes}')
     return 0
 

@@ -1,29 +1,55 @@
-# Mega Man Battle Network: Cyberworld Endless
+<h1 align="center">Mega Man Battle Network: Cyberworld Endless</h1>
 
-[![CI](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml/badge.svg)](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml)
-**[Play in the browser](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** · [Project page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/) · [Downloads](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
-
-<p>
-<img src="docs/screenshots/title.png" width="360" alt="The title screen: the Battle Network logo with an infinity mark and the plate Cyberworld Endless">
-<img src="docs/screenshots/town-central.png" width="360" alt="Lan outside his house in Central Town, an old man by the flower bed">
-<img src="docs/screenshots/town-acdc.png" width="360" alt="Lan by the Metroline in ACDC Town, Higsby's and the squirrel statue below">
-<img src="docs/screenshots/act-card.png" width="360" alt="Act 1: RoboDog Comp, its guardian BlastMan">
-<img src="docs/screenshots/battle.png" width="360" alt="BATTLE START against a Gunner and a FgtrPlne">
-<img src="docs/screenshots/guardian.png" width="360" alt="The guardian of Sky HP: DiveMan, Terror of the Deep">
-<img src="docs/screenshots/undernet.png" width="360" alt="A generated layer of the Undernet">
-<img src="docs/screenshots/reward.png" width="360" alt="MegaMan got DiveMan D!">
+<p align="center">
+<b>A roguelike for Mega Man Battle Network 6.</b><br>
+Jack MegaMan into a net that is generated anew every run, and see how deep he gets.
 </p>
 
-A roguelike for Mega Man Battle Network 6. Every run jacks MegaMan into a
-freshly generated net and sends him down, layer by layer, for as long as he
-lasts. The net changes as you go deeper: from the surface areas and the
-story's comps down through the Undernet and the Graveyard to the
-Underground, and then around again, harder each time. Every third layer
-ends at a Navi guarding the exit.
+<p align="center">
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/"><b>Play in the browser</b></a>
+&nbsp;·&nbsp;
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">Project page</a>
+&nbsp;·&nbsp;
+<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Downloads</a>
+</p>
+
+<p align="center">
+<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml"><img src="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+<img src="https://img.shields.io/badge/ROCKNIX-PortMaster-c0392b" alt="ROCKNIX handhelds through PortMaster">
+<img src="https://img.shields.io/badge/Linux-AppImage%20%C2%B7%20.deb-2f6fb5" alt="Linux: AppImage and .deb">
+<img src="https://img.shields.io/badge/browser-WebAssembly-6a4fb5" alt="In the browser, as WebAssembly">
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3a9d23" alt="MIT license"></a>
+</p>
+
+<p align="center">
+<img src="docs/clips/guardian.gif" width="480" alt="MegaMan steps into a guardian's arena in Robot Control Comp; the card reads Guardian of Robot Control Comp, BlastMan, The Living Blast">
+</p>
 
 Everything you see and hear is BN6 itself, running from your own ROM: its
-battles, chips, PET, shops and music. Cyberworld Endless builds the layers,
-places the Mystery Data and shopkeepers, and keeps the run going.
+battles, chips, PET, shops and music. Cyberworld Endless builds the net
+around it, one layer at a time, and keeps the run going.
+
+- **A new net every run.** Layers of platforms and walkways in the style of
+  BN6's areas, with Mystery Data, Net Dealers, Chip Traders and Mr. Progs on
+  them, and the game's own viruses in its own random battles.
+- **Acts and guardians.** Every third layer ends in a Navi's arena. The act
+  card names the guardian, the Net Dealer stocks a chip that answers it, and
+  MegaMan warns you how it fights.
+- **A run that grows.** A gift to start, Guardian Data (HP, the Navi's chip
+  and its Cross), BeastOut from the Graveyard, and rarer chips the deeper
+  you go.
+- **Deeper, harder, around again.** From the surface areas through the
+  story's comps, the Undernet and the Graveyard to the Underground, then
+  around again, harder.
+
+<p align="center">
+<img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan, it's Dad. Have you got a minute?">
+<img src="docs/screenshots/act-card.png" width="240" alt="Act 1: RoboDog Comp, circuits of a home comp, its guardian BlastMan">
+<img src="docs/screenshots/net.png" width="240" alt="MegaMan on a generated layer of Robot Control Comp">
+<img src="docs/screenshots/battle.png" width="240" alt="A battle against an OldStove and a Mettaur">
+<img src="docs/screenshots/undernet.png" width="240" alt="A generated layer of the Undernet, a HeelNavi on its stairs">
+<img src="docs/screenshots/area-clear.png" width="240" alt="Robot Control Comp: AREA CLEAR, BlastMan deleted">
+</p>
 
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
 Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays in a
@@ -190,7 +216,7 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 
 | Place | What it does |
 | --- | --- |
-| Net Dealer (a Normal Navi) | The game's shop: chips, an HP Memory and SubChips |
+| Net Dealer (a green Normal Navi) | The game's shop: chips, an HP Memory and SubChips |
 | NaviCust vendor (a pink navi) | NaviCust programs from the game's own shops |
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
@@ -256,7 +282,8 @@ and saves in `.build/desktop`. `python3 build.py serve` builds the project
 site and the browser version and serves them on `http://localhost:8080`;
 `python3 build.py screenshots` retakes the screenshots in
 `docs/screenshots` from scripted headless runs, and `python3 build.py clips`
-records the site's short videos (WebM and MP4, `docs/clips`) the same way. `python3 build.py release`
+records the site's short videos (WebM and MP4, `docs/clips`, and a GIF of
+the guardian for this README) the same way. `python3 build.py release`
 writes the release files to `build/release/`: `cyberworld.zip` for
 PortMaster; for Linux the AppImage (with its `.zsync` for updates), the
 `.deb` and the tar.gz; and `cyberworld-endless-web.zip`. Each target builds in its own Docker image
