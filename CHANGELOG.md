@@ -37,7 +37,9 @@ First playable version.
   few, at a price a run has by then (400 zenny in act 1, 300 more an act),
   and says which, naming the guardian, and that it has two. A
   bystander's tip on where Net Dealers set up no longer says the middle
-  layer only.
+  layer only. A shop's list takes no A for its first moment, so the A
+  that closed its keeper's words twice over no longer asks to buy the
+  first item.
 - Every Mystery Data opens: some on a new run's first layer stood at the
   world's origin or said they were locked and printed stray text, their
   picks shared with the game's own Mystery Data of other maps.

@@ -1184,8 +1184,22 @@ static uint32_t talk_walk(uint32_t keys) {
 	return (keys & ~(PAD_KEYS | KEY_A)) | face_pad[k];
 }
 
+/* A shop's list opened by its keeper's last box: the A pressed to close
+ * that box twice over bought the first item's "Are you sure?" (Kai, three
+ * sessions running). A is held off the list's first frames. */
+static uint32_t shop_guard(uint32_t keys) {
+	static int chat_recent, guard, last_mode = -1;
+	int mode = main_mode();
+	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = 45;
+	last_mode = mode;
+	if (guard > 0) { --guard; keys &= ~KEY_A; }
+	return keys;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
+	if (D.active) keys = shop_guard(keys);
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
 	bool a = (keys & KEY_A) != 0, a_pressed = a && !D.a_held;
