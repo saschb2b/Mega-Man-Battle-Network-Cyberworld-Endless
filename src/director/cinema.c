@@ -39,6 +39,7 @@ void cinema_flash(int frames) { C.flash = C.flash_len = frames; }
 void cinema_shake(int frames, int amplitude) { C.shake = frames; C.shake_amp = amplitude; }
 bool cinema_busy(void) { return C.card != CARD_NONE; }
 void cinema_arrow(int dir, int frames) { C.arrow_dir = dir & 7; C.arrow_t = 0; C.arrow_len = frames; }
+void cinema_arrow_extend(int frames) { if (C.arrow_len && C.arrow_len - C.arrow_t < frames) C.arrow_len = C.arrow_t + frames; }
 
 static void card(int kind, const char *top, const char *name, const char *l1, const char *l2, SDL_Color accent, int frames) {
 	C.card = kind;

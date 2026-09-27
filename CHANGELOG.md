@@ -18,7 +18,9 @@ First playable version.
 - L says where the exit or the guardian lies when the walk there sets off
   another way ("The way winds, so follow the arrow!"), so the words hold
   still while the arrow shows the next stretch; the Recovery Mr. Prog,
-  which heals every time, is named again while MegaMan is hurt.
+  which heals every time, is named again while MegaMan is hurt. After a
+  CONTINUE, L remembers it has told where they are, the map remembers what
+  was seen, and the way-on arrow stays up for as many boxes as L speaks.
 - Standing anywhere on the exit pad takes MegaMan on: its trigger is the
   pad's whole square (on its rims he stayed before).
 - The map (hold Select) fills the screen: the floor seen so far with its

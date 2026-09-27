@@ -83,7 +83,7 @@ static struct {
 	int wedged;            /* frames he has pushed, unmoving, against an NPC he stands inside */
 	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
-	bool layer_told;       /* ... where they are on this layer */
+	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 } D;
@@ -264,6 +264,7 @@ static const char *status_words(void) {
 	}
 	/* where they are and what guards it the first time on a layer, then
 	 * only the way on */
+	D.layer_told |= flag_get(LAYER_TOLD_FLAG);
 	if (!D.layer_told) {
 		const char *area = guardian_area_in_text(run.biome, run.side_kind);
 		ADD("@M Layer %d, Lan: %s.", run.depth, area);
@@ -290,6 +291,7 @@ static const char *status_words(void) {
 	if (!D.layer_told) {
 		ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
+		flag_set(LAYER_TOLD_FLAG);
 	}
 	/* the way on, as MegaMan senses it: along the floor where he can (the
 	 * arrow's way); where the walk sets off well away from where the goal
@@ -428,6 +430,7 @@ static bool build_layer(void) {
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
 	D.layer_told = false;
+	flag_clear(LAYER_TOLD_FLAG);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -590,6 +593,7 @@ void director_draw_map(void) {
  * with any change to what a layer seed makes. */
 #define LAYER_MAKE 5
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
+#define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
 static void save_checkpoint(void) {
 	char path[600];
@@ -598,6 +602,8 @@ static void save_checkpoint(void) {
 	emu_save_state(path);
 	int make = LAYER_MAKE;
 	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
+	/* the map's panels seen so far, beside the state they go with */
+	save_write_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen);
 }
 
 bool director_can_suspend(void) {
@@ -909,9 +915,12 @@ static void unwedge(void) {
 
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
-/* The way-on arrow: once L's words have closed, three seconds more. */
+/* The way-on arrow: on while L's words last, however many boxes, then
+ * three seconds more. */
 static void arrow_update(void) {
-	if (D.arrow_pending && !talk_busy()) { D.arrow_pending = false; cinema_arrow(way_dir, 180); }
+	if (!D.arrow_pending) return;
+	if (talk_busy()) cinema_arrow_extend(60);
+	else { D.arrow_pending = false; cinema_arrow_extend(180); }
 }
 
 static void town_update(void) {
@@ -1022,7 +1031,7 @@ bool director_resume(void) {
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
-			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_GIFT_FLAG; ++f) flag_clear(f);
+			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_TOLD_FLAG; ++f) flag_clear(f);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
@@ -1036,6 +1045,8 @@ bool director_resume(void) {
 			flag_clear(BN6_FLAG_DIALOGUE_1719);
 		}
 		boss_resume();
+		/* the map as far as it was seen (none for another build's layer) */
+		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_get(D.objs.choice[i].flag)) D.chosen |= 1u << i;

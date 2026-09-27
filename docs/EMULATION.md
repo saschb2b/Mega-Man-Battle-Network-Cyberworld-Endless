@@ -84,8 +84,10 @@ stock is written again after the load (the state's RAM holds the saved
 one), and `run.make` records the build's `LAYER_MAKE`: a run saved by a
 build that makes layers otherwise continues its layer from the start, with
 the layer's flags and Mystery Data picks cleared (its RAM would not match
-this build's objects). CONTINUE loads the state and enters the map again,
-so the game reloads it from the current build's tables.
+this build's objects). `run.seen` beside it keeps the map's panels seen so
+far, and event flag `0x144E` in the state that L has told where they are.
+CONTINUE loads the state and enters the map again, so the game reloads it
+from the current build's tables.
 
 It also starts conversations of its own (`talk.c`): Lan and MegaMan on
 arriving somewhere new (the first layer, the Undernet and the Graveyard,

@@ -14,6 +14,9 @@
 #define LAYER_MAX_CHOICES 8
 /* The first layer's gift was chosen. */
 #define LAYER_GIFT_FLAG 0x144D
+/* L has told where they are on this layer (in the saved RAM, so a CONTINUE
+ * mid-layer does not tell it all again). */
+#define LAYER_TOLD_FLAG 0x144E
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
