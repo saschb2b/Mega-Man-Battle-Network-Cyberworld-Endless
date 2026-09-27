@@ -98,6 +98,16 @@ static bool at_exit(const Room *r, int x, int y) {
 	return false;
 }
 
+static bool beside_other_level(int x, int y) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int nx = x + d[k][0], ny = y + d[k][1];
+		if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || layer.cell[ny][nx] != C_PATH) continue;
+		if (layer.level[ny][nx] != layer.level[y][x]) return true;
+	}
+	return false;
+}
+
 /* A free cell inside a room, off its middle and its exits so paths stay
  * clear, where a solid object cuts no way; with `open`, first one with
  * floor on its four sides (a bystander in a panel-wide gap beside a
@@ -109,6 +119,10 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 		if (tries < 36 && at_exit(r, x, y)) continue;
 		if (open && tries < 24 && !(layer.cell[y][x + 1] == C_PATH && layer.cell[y][x - 1] == C_PATH &&
 			layer.cell[y + 1][x] == C_PATH && layer.cell[y - 1][x] == C_PATH)) continue;
+		/* (not beside a floor of another height: a NaviCust vendor below a
+		 * raised platform's edge looked a step away from it and was a
+		 * stair's walk round) */
+		if (tries < 30 && beside_other_level(x, y)) continue;
 		if (cell_free(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;

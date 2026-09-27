@@ -62,7 +62,9 @@ First playable version.
   would triple a first act's HP, costs 2400 and 400 more an act.
 - Servers, Net Dealers and other services stand off a room's exits, where
   they blocked the way on, and bystanders stand in the open, not in a
-  panel-wide gap where they pinned MegaMan. The map's key lists what the layer holds,
+  panel-wide gap where they pinned MegaMan. None stands beside a floor
+  of another height, where he looked a step away and was a stair's walk
+  round. The map's key lists what the layer holds,
   Servers and dark warps as "Event", and shows the services MegaMan
   senses but has not reached: a ring where each stands, or a pip on the
   map's edge its way. An L pressed as a chat closes is heard, and a
