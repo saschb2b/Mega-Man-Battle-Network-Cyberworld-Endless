@@ -24,9 +24,21 @@ static int code_of(char c) {
 	}
 }
 
+/* The version marks chip names carry as bytes 1-5 (rom.c): the chat
+ * box's font has kanji where the chip font has them, so they are spelt
+ * out ("BlastMn" and [EX] showed as "BlastMn" and a blank). */
+static const char *mark_letters(char c) {
+	static const char *const marks[5] = { "RV", "BX", "EX", "SP", "FZ" };
+	return c >= 1 && c <= 5 ? marks[c - 1] : NULL;
+}
+
 int ta_encode(const char *s, uint8_t *out, int max) {
 	int n = 0;
-	for (; *s && n < max; ++s) out[n++] = (uint8_t)code_of(*s);
+	for (; *s && n < max; ++s) {
+		const char *m = mark_letters(*s);
+		if (m) { for (; *m && n < max; ++m) out[n++] = (uint8_t)code_of(*m); continue; }
+		out[n++] = (uint8_t)code_of(*s);
+	}
 	return n;
 }
 
@@ -46,6 +58,12 @@ void ta_bytes(TextArchive *t, const uint8_t *b, int n) {
 
 void ta_text(TextArchive *t, const char *s) {
 	for (; *s; ++s) {
+		const char *m = mark_letters(*s);
+		for (; m && *m; ++m) {
+			uint8_t c = (uint8_t)code_of(*m);
+			ta_bytes(t, &c, 1);
+		}
+		if (m) continue;
 		uint8_t c = (uint8_t)code_of(*s);
 		ta_bytes(t, &c, 1);
 	}
@@ -83,9 +101,10 @@ static void wrap(TextArchive *t, const char *s) {
 		while (*p == ' ') ++p;
 		const char *w = p;
 		while (*p && *p != ' ' && *p != '\n') ++p;
-		int wl = (int)(p - w);
+		int wl = (int)(p - w), wide = wl;
+		for (const char *c = w; c < p; ++c) wide += mark_letters(*c) != NULL;   /* (a mark is spelt in two) */
 		bool brk = *p == '\n' || !*p;
-		if (wl && n + (n ? 1 : 0) + wl > LINE_CHARS && n && nl < MAX_LINES) { lines[nl++][n] = 0; n = 0; }
+		if (wl && n + (n ? 1 : 0) + wide > LINE_CHARS && n && nl < MAX_LINES) { lines[nl++][n] = 0; n = 0; }
 		if (wl && nl < MAX_LINES) {
 			if (n) lines[nl][n++] = ' ';
 			for (int k = 0; k < wl && n < LINE_CHARS; ++k) lines[nl][n++] = w[k];

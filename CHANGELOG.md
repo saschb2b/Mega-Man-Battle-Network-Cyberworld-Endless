@@ -37,6 +37,10 @@ First playable version.
   and says which, naming the guardian, and that it has two. A
   bystander's tip on where Net Dealers set up no longer says the middle
   layer only.
+- Chip names with a Navi chip's version mark read "BlastMnEX" in chat
+  boxes, whose font has kanji where the chip font has the mark ("ProtoMn"
+  and a kanji came out of a Mystery Data): our own texts spell the mark,
+  and Mystery Data hold a Navi chip's first version.
 - The NaviCust vendor's programs cost a quarter of the game's prices,
   which are its endgame's (2500 to 7100 zenny against a run's 100 to
   1000 a battle or Mystery Data), and 200 more an act.
