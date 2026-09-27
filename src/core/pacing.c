@@ -61,9 +61,11 @@ bool pacing_rare(int depth, int roll) {
 
 void pacing_area_order(uint8_t out[4]) {
 	/* by the HP of the areas' own battles (docs/PROGRESSION.md) */
-	/* (Sky HP's battles all come in threes of 200 HP: not a first act's) */
-	uint8_t opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_COMP };
-	uint8_t middle[] = { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP };
+	/* (Sky HP's battles all come in threes of 200 HP, and the Aquarium
+	 * Comp's pools and water mazes are a hard first map: not a first act's) */
+	uint8_t opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_COMP };
+	uint8_t middle[] = { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP,
+		BIOME_AQUARIUM_COMP };
 	uint8_t late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
 	enum { NO = sizeof opening, NM = sizeof middle, NL = sizeof late };
 	uint8_t pool[NO + NM + NL];

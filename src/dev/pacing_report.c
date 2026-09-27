@@ -65,11 +65,11 @@ int pacing_report_run(const char *path) {
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;
 	static const struct { int act; int biomes[8]; } acts[] = {
-		{ 0, { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_SKY_HP, BIOME_COMP, -1 } },
-		{ 1, { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_SKY_HP, BIOME_COMP, BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN } },
-		{ 1, { BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, -1 } },
-		{ 2, { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY, BIOME_WEATHER_COMP } },
-		{ 2, { BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
+		{ 0, { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_COMP, -1 } },
+		{ 1, { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_COMP, BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE } },
+		{ 1, { BIOME_COMP_B, BIOME_SKY_HP, BIOME_AQUARIUM_COMP, -1 } },
+		{ 2, { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP, BIOME_AQUARIUM_COMP } },
+		{ 2, { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
 		{ 3, { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP, -1 } },
 		{ 4, { BIOME_UNDERNET, -1 } },
 		{ 5, { BIOME_GRAVEYARD, -1 } },
@@ -87,6 +87,7 @@ int pacing_report_run(const char *path) {
 				rng_seed(0xC0FFEEu + (uint32_t)(a * 97 + k));
 				for (int d = first; d <= last; ++d) flagged += battles(out, d, b, ENC_NORMAL, "battle");
 				flagged += battles(out, first, b, ENC_EASY, "opening");
+				if (first == 1) flagged += battles(out, first, b, ENC_FIRST, "first");
 				if (acts[a].act < 6) flagged += battles(out, first + 1, b, ENC_CHALLENGE, "challenge");
 			}
 		}

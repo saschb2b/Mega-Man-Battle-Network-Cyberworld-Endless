@@ -237,7 +237,8 @@ the band widens by one step before any formation is allowed.
 Two more rules from Slay the Spire: the first two battles of a run, and the
 first battle after each guardian, come from the lower half of the band, with
 two thirds of its hardest hit and two viruses at most where the area has
-such battles, and the same formation does not come twice in a row.
+such battles (the run's very first battle keeps the formation's first virus
+alone), and the same formation does not come twice in a row.
 
 A rare virus (one, the others unchanged) may come from act 3 on, 3% of
 battles and 2% more each later cycle, and only when the battle still fits
@@ -251,8 +252,8 @@ Areas fall into three tiers by their own battles:
 
 | Tier | Areas |
 | --- | --- |
-| Opening | Central, Robot Control Comp, Aquarium Comp, the first home computers (0x8C) |
-| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP) |
+| Opening | Central, Robot Control Comp, the first home computers (0x8C) |
+| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP), Aquarium Comp (its pools and water mazes a hard first map) |
 | Late | Sky, Mr. Weather Comp, ACDC HP, CopyBot's comp |
 
 Act 1 draws from the opening tier, act 2 from opening or middle, act 3 from

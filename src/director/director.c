@@ -73,6 +73,7 @@ static struct {
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held;   /* L and R were down last frame */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
+	bool layer_told;       /* ... where they are on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 } D;
@@ -116,6 +117,7 @@ static void map_label(void) {
 	a[LABEL_NAMES * 2 + 12] = 0xE6;
 	emu_write(LABEL_AT, a, sizeof a);
 	emu_write32(BN6_MAP_NAMES_PTR, LABEL_AT);
+	emu_write32(BN6_PET_MAP_NAMES_PTR, LABEL_AT);   /* (the PET's PLACE too) */
 }
 
 /* The net's version: the Nest rebuilds it, one stronger, each time its
@@ -178,22 +180,25 @@ static const char *status_words(void) {
 		D.port_told = true;
 		return buf;
 	}
-	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	ADD("@M We're on layer %d, Lan. This is %s.", run.depth, area);
-	if (D.objs.guardian.navi && !boss_beaten()) ADD("|@M %s is waiting at the end of this layer!", guardian(D.objs.guardian.navi)->name);
-	else if (D.objs.guardian.navi && !boss_done()) ADD("|@M Let's take its Guardian Data, Lan!");
-	else if (D.objs.guardian.navi) ADD("|@M The exit pad's open. Let's head down!");
-	else if (run.side_kind == LAYER_NORMAL) ADD("|@M %s guards the end of this area.", guardian(run.boss_order[run.biome])->name);
-	if (run.fragments == 1) ADD("|@M We're carrying one ScrtData.");
-	else if (run.fragments > 1) ADD("|@M We're carrying %d ScrtData.", run.fragments);
+	/* where they are and what guards it the first time on a layer, then
+	 * only the way on */
+	if (!D.layer_told) {
+		const char *area = guardian_area_in_text(run.biome, run.side_kind);
+		ADD("@M Layer %d, Lan: %s.", run.depth, area);
+		if (D.objs.guardian.navi && !boss_beaten()) ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
+		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL) ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
+		else ADD("|");
+		if (run.fragments == 1) ADD("@M We're carrying one ScrtData.|");
+		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData.|", run.fragments);
+		D.layer_told = true;
+	}
 	/* the way on, as MegaMan senses it */
 	int far;
 	const char *way = way_to(D.objs.exit_x, D.objs.exit_y, &far);
-	static const char *const how_far[3] = { "It's close!", "It's a little ways off.", "It's still a long way." };
-	if (!D.objs.guardian.navi || boss_done())
-		ADD("|@M I can sense the exit pad, Lan. It's %s.|@M %s", way, how_far[far]);
-	else if (!boss_beaten())
-		ADD("|@M Its arena is %s, Lan.|@M %s", way, how_far[far]);
+	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
+	if (!D.objs.guardian.navi || boss_done()) ADD("@M The exit pad's %s. %s", way, how_far[far]);
+	else if (!boss_beaten()) ADD("@M Its arena is %s. %s", way, how_far[far]);
+	else ADD("@M Let's take its Guardian Data, Lan!");
 	#undef ADD
 	return buf;
 }
@@ -270,7 +275,8 @@ static void lock_run(void) {
 static void roll_encounter(void) {
 	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
 		(run.depth == 1 ? D.battles < 2 : D.battles < 1);
-	Encounter e = make_encounter(run.depth, run.biome, opening ? ENC_EASY : ENC_NORMAL);
+	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && D.battles == 0;
+	Encounter e = make_encounter(run.depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL);
 	set_encounter(&e, false);
 }
 
@@ -305,6 +311,7 @@ static bool build_layer(void) {
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
 	arrival_words();
+	D.layer_told = false;
 	D.secret_call = run.side_kind == LAYER_SECRET;
 	talk_reset();
 	return true;

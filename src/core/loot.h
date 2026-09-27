@@ -7,7 +7,9 @@
 /* A random battle: plain, from the lower half of the act's band (the run's
  * first battles, the first after a guardian), or a challenge (the next act's
  * band, one version up). */
-enum { ENC_NORMAL, ENC_EASY, ENC_CHALLENGE };
+/* ENC_FIRST: the run's very first battle, one virus where the area has
+ * such battles (else as ENC_EASY) */
+enum { ENC_NORMAL, ENC_EASY, ENC_CHALLENGE, ENC_FIRST };
 Encounter make_encounter(int depth, int biome, int kind);
 Encounter make_boss(int depth, int biome, int navi);
 /* Random chip for rewards/shops; code chosen from the chip's own codes. */

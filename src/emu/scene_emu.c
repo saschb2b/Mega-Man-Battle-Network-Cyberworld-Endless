@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "devtools.h"
 #include "director.h"
+#include "npc.h"
 #include "encounter.h"
 #include "emu.h"
 #include "game.h"
@@ -40,6 +41,7 @@ static int revealed;   /* frames since the first map showed, 0 not yet */
 static void enter(void) {
 	revealed = 0;
 	if (!emu_init(R.data, ROM_SIZE)) return;
+	npc_reach_install();
 	cinema_reset();
 	if (emu_resume_requested) {
 		emu_resume_requested = false;

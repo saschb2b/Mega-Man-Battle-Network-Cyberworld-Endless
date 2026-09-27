@@ -155,8 +155,8 @@ own boss battle. Guardians remember how your earlier battles went.
 The first four acts visit four of Central, Seaside, Sky and Green Area, the
 Robot Control, Aquarium, Judge Tree, Mr. Weather and CopyBot comps, two home
 computers and the Aquarium, ACDC, Green and Sky homepages. The order is
-random, but the gentler areas come first (Central, Robot Control, the
-Aquarium, a home computer) and the hardest last (Sky, Mr. Weather,
+random, but the gentler areas come first (Central, Robot Control, a home
+computer) and the hardest last (Sky, Mr. Weather,
 ACDC HP, CopyBot's comp). Then come the Undernet and the Graveyard, and
 layer 19 is the Underground. After that the cycle starts again, harder.
 

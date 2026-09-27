@@ -26,4 +26,7 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
  * -y) and back, looking about at each end. */
 uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script);
 
+/* Widens MegaMan's reach for talking (the core's ROM copy; once). */
+void npc_reach_install(void);
+
 #endif

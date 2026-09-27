@@ -40,7 +40,9 @@ objects, sprite list, warp list, jack-in table, check table
 `0x0803461C`, text archive `0x08040794` and music), clears the check
 flags `0x16C0`-`0x16CF`, rewrites jack-in destination 42 (`0x08099A00` +
 42 x 20) to the first layer, and
-rewrites the stock of the game's shops 0 and 3 (in RAM and
+widens MegaMan's facing probes for talking (`0x0809F164`), points the
+map-name label and the PET's at the run's own names, rewrites the stock of
+the game's shops 0 and 3 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags
 (`0x1400`+) and choice flags (`0x1440`+) it uses, sets the flags that stop
 jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState

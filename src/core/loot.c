@@ -147,7 +147,7 @@ static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
 	const Formation *list;
 	int n = formations_of(biome, &list);
 	if (!n) return false;
-	bool challenge = kind == ENC_CHALLENGE, easy = kind == ENC_EASY;
+	bool challenge = kind == ENC_CHALLENGE, easy = kind == ENC_EASY || kind == ENC_FIRST;
 	int p = (depth - 1) % CYCLE_LAYERS, allowed = depth > CYCLE_LAYERS ? 2 : p < 6 ? 0 : p < 12 ? 1 : 2;
 	int target = pacing_virus_version(depth, challenge);
 	bool rare = pacing_rare(depth, rng_range(0, 99));
@@ -170,18 +170,19 @@ static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
 	static int8_t fit[MAX_FIT];
 	PacingBand band = pacing_band(depth, challenge, easy);
 	int total = 0;
-	/* an opening battle sets out two viruses at most, where the area has
-	 * such battles */
-	for (int most = easy ? 2 : 9; !total && most <= 9; most = 9) {
+	/* an opening battle sets out two viruses at most, the run's first one,
+	 * where the area has such battles */
+	static const int8_t tries[3][3] = { { 9, 0, 0 }, { 2, 9, 0 }, { 1, 2, 9 } };
+	const int8_t *most = tries[kind == ENC_FIRST ? 2 : easy ? 1 : 0];
+	for (int t = 0; t < 3 && most[t] && !total; ++t) {
 		PacingBand b = band;
 		for (int widen = 0; widen < 4 && !total; ++widen) {
 			int allow = widen == 3 ? 3 : allowed;   /* an area of late viruses only */
 			/* not the last battle again, unless nothing else fits */
-			total = weigh(list, n, depth, target, b, allow, biome == last_biome ? last_pick : -1, most, fit);
-			if (!total) total = weigh(list, n, depth, target, b, allow, -1, most, fit);
+			total = weigh(list, n, depth, target, b, allow, biome == last_biome ? last_pick : -1, most[t], fit);
+			if (!total) total = weigh(list, n, depth, target, b, allow, -1, most[t], fit);
 			b = pacing_band_wider(b);
 		}
-		if (most == 9) break;
 	}
 	if (!total) return false;
 	int roll = rng_range(0, total - 1), pick = -1;
@@ -211,7 +212,22 @@ Encounter make_encounter(int depth, int biome, int kind) {
 	Encounter e = { 0 };
 	e.biome = biome;
 	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
-	if (original_encounter(depth, biome, kind, &e)) return e;
+	if (original_encounter(depth, biome, kind, &e)) {
+		/* the run's first battle: the formation's first virus alone (the
+		 * areas' own battles all bring two or more) */
+		if (kind == ENC_FIRST) {
+			int n = 0;
+			bool kept = false;
+			for (int i = 0; i < e.nfoes; ++i) {
+				if (e.foes[i].kind == FOE_VIRUS && kept) continue;
+				kept |= e.foes[i].kind == FOE_VIRUS;
+				e.foes[n++] = e.foes[i];
+			}
+			for (int i = n; i < e.nfoes; ++i) e.foes[i].id = -1;
+			e.nfoes = n;
+		}
+		return e;
+	}
 	e.nfoes = 0;
 	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
 	int pool[16], n = 0;
