@@ -21,6 +21,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 10 | 8 | The prep loop works; AquaSwrd one-shot BlastMan (too good) |
 | 11 | 7 | CircusMan a real fight; the dealer's answer (SumnBlk1) a dud |
 | 12 | 8 | BlastMan beaten with the dealer's BblStar1; R presses lost |
+| 13 | 8 | HeatMan "the fairest, tensest boss yet", lost at 111/700; the R buffer works |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -60,13 +61,26 @@ its problems there. The loop was reacting.
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.
 
-## Session 13 (in progress)
+## Session 13 (8/10, keep playing: yes, new run started at once)
 
-Build b24aaa3. Checking: the L/R buffer, bystanders unlike the dealer, a
-steadier arrow, "Back for more?", "my pick for the job", the Chip Trader in
-L. Seen in its notes before the report: the trader gave BlastMan B three
-times (fixed in fa81690, the game's Library rule); a bystander still looked
-like the dealer on the layer CONTINUE restored (its sprite came from the
-save; layers after it are new). Swept ahead meanwhile: warning lines for
-the eight guardians that had none (875c7da). The user, playing, met
-MegaMan standing in a hole at a battle's start (0d7d36b).
+Build b24aaa3. Confirmed: the L/R buffer (4 times, the fight "flowed for
+the first time"), "Back for more?", "my pick for the job", the Chip Trader
+in L, a steadier arrow, and both developer notes (no eaten moves after the
+map; the A after BATTLE START fires the chip at the bottom left).
+
+Raised: the shops looked like the bystanders still (the s12 fix picked
+sprites 64, 65 and 87, which are the dealer's green navi on the map: it was
+never looked at, only its faces differed), no HeatMan warning, the trader's
+three BlastMan B, services in walkway mouths, L's words against the arrow,
+A turning to a vendor behind, the vendor's full chat every time, rows
+misread in battle. All but the misreads were fixed before the report came
+(875c7da, fa81690, d3f3265, 81e468d) or right after (3b13355, 5ecf688, the
+vendor's repeat line); the misreads got a harness aid (b59dcc7: the battle
+state names MegaMan's panel). Swept ahead: every guardian's warning, every
+act's dealer answers (4c6bad0). The user, playing, found MegaMan starting a
+battle in a hole (0d7d36b).
+
+Cost: 257 calls, 82 minutes. Loop change: **a visual fix is verified in a
+picture of the result**, not by its code: draw the sprites
+(`build.py shot --scene gallery --sheet @6:56:48:/src/.build/l6.png`) or
+capture the layer, and look.

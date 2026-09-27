@@ -51,7 +51,9 @@ raised, and the loop's own lessons.
    - *Real bug or design gap*: fix it.
 7. **Fix, verify, commit** per AGENTS.md (its check table; `build.py test`;
    a capture of the screen; `LAYER_MAKE` / `RUN_MAGIC` bumps; ROM_DATA.md
-   for a new offset; CHANGELOG). One commit per change: the subject states
+   for a new offset; CHANGELOG). A visual fix is verified by looking at
+   a picture of the result, never by its code alone (sprite indexes that
+   differed in the code drew one navi on the map for two sessions). One commit per change: the subject states
    the new behaviour ("A Chip Trader's prize is a chip new to the Library"),
    the body why and the evidence. No AI co-author trailer. Never commit
    anything from `.build/`.
