@@ -59,6 +59,18 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 		for (int cx = -126; cx < 126; ++cx) {
 			if (floor_at(cx, cy, level)) continue;
 			if (!level && rise && floor_at(cx, cy, 1)) continue;
+			/* floor on two sides round a corner (a walkway's mouth): the
+			 * corner's type, as the originals have it there; two edges in
+			 * one cell, the game took either, and the mouth's side pushed
+			 * MegaMan out sideways or held him */
+			int m = 0;
+			for (int k = 0; k < 4; ++k)
+				if (floor_at(cx + dir[k][0], cy + dir[k][1], level) && !(rise && netmap_stair_cell(cx + dir[k][0], cy + dir[k][1]))) m |= 1 << k;
+			if ((m & 3) && (m & 3) != 3 && (m & 12) && (m & 12) != 12 && n < cap) {
+				static const int corner[2][2] = { { 5, 7 }, { 6, 8 } };   /* [+X][+Y] */
+				w[n++] = cell(cx, cy, z, 0, 8, corner[(m & 2) != 0][(m & 8) != 0]);
+				continue;
+			}
 			bool edge = false;
 			for (int k = 0; k < 8 && n < cap; ++k) {
 				if (k >= 4 && edge) break;

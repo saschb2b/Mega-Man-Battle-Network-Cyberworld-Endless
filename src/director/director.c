@@ -821,6 +821,12 @@ static int corridor_way(int cx, int cy, int x, int y, int bx, int by) {
 	return n == 1 && on >= back ? k : -1;
 }
 
+/* Calls without MegaMan moving before a held key counts as stuck: the game
+ * moves him from the third frame a key is held, so three still frames
+ * were every start from rest, and the assist stepped him to the panel's
+ * middle before letting him go the way he pressed. */
+#define STUCK 5
+
 static uint32_t corner_assist(uint32_t keys) {
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
 	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
@@ -920,7 +926,7 @@ static uint32_t corner_assist(uint32_t keys) {
 			return (keys & ~pad) | pad_dirs[assist].keys;
 		}
 		stuck = moved ? 0 : stuck + 1;
-		if (stuck < 3) return keys;
+		if (stuck < STUCK) return keys;
 		/* (at a lane's peak or tip, where neither of the key's steps goes
 		 * on: along the lane) */
 		int k = slide_axis(held, cx, cy);
@@ -972,7 +978,7 @@ static uint32_t corner_assist(uint32_t keys) {
 	}
 	stuck = moved ? 0 : stuck + 1;
 	int cx, cy;
-	if (stuck < 3 || !netmap_panel(px, py, &cx, &cy)) return keys;
+	if (stuck < STUCK || !netmap_panel(px, py, &cx, &cy)) return keys;
 	int gdx = ay, gdy = -ax;   /* his direction on the grid */
 	if (floor_panel(cx + gdx, cy + gdy)) {
 		/* the way ahead is floor: off the middle of a lane he scrapes its

@@ -16,7 +16,12 @@ First playable version.
   diagonal held into a corner slides him round it, and a push into a navi
   frees him. A key held into a platform's corner leaves him there (it
   walked him along the edge and back), and pushing a while where the pad
-  goes nowhere shows the way-on arrow.
+  goes nowhere shows the way-on arrow. Starting to walk from rest off a
+  panel's middle no longer steps MegaMan sideways first: the help read
+  the game's two frames before he moves as being stuck.
+- Walkway mouths' corners are walls of the corner's shape, as the
+  originals have them; each was two edges in one cell, and the game took
+  either, pushing MegaMan out sideways at a mouth's side.
 - A talks to the navi or Mystery Data MegaMan stands at even when he faces
   past it: he turns to the one before him, else the nearest (walking into
   a navi slides him round it), and reaches about 54 units, which is how
