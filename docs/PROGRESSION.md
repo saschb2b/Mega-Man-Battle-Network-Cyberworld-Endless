@@ -234,8 +234,10 @@ the formation fits the act's HP band and damage cap. A formation that does
 not fit even at V1 is left out on that layer. If an area leaves nothing,
 the band widens by one step before any formation is allowed.
 
-Two more rules from Slay the Spire: the first two battles of a run, and the
-first battle after each guardian, come from the lower half of the band, with
+Two more rules from Slay the Spire: the first two battles of a run, and
+every battle on the first layer after each guardian, come from the lower
+half of the band (a new act eases in: its viruses hit harder and the step
+from the last act's easiest is large), with
 two thirds of its hardest hit and two viruses at most where the area has
 such battles (the run's very first battle keeps the formation's first virus
 alone), and the same formation does not come twice in a row.

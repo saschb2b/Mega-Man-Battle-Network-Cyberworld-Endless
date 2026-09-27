@@ -420,11 +420,12 @@ static void lock_run(void) {
 	flag_set(BN6_FLAG_NAVICUST);
 }
 
-/* The next random battle: the run's first two and the first after each
- * guardian from the lower half of the act's band (docs/PROGRESSION.md). */
+/* The next random battle: the run's first two and every one on the first
+ * layer after a guardian from the lower half of the act's band
+ * (docs/PROGRESSION.md). */
 static void roll_encounter(void) {
 	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
-		(run.depth == 1 ? D.battles < 2 : D.battles < 1);
+		(run.depth == 1 ? D.battles < 2 : true);
 	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && D.battles == 0;
 	Encounter e = make_encounter(run.depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL);
 	set_encounter(&e, false);
@@ -950,7 +951,7 @@ static uint32_t corner_assist(uint32_t keys) {
 /* A on the map: MegaMan turns to face what he means to talk to, so the
  * game's own check finds it (walking into a navi slides him round it, and a
  * tap of the pad can leave him facing past it): the navi or Mystery Data
- * clearly before him if there is one, else the nearest within 44 units
+ * clearly before him if there is one, else the nearest within 52 units
  * (the probes' reach), with the facing whose probe points at it best. True
  * when he turned. */
 static bool talk_face(void) {
@@ -962,14 +963,14 @@ static bool talk_face(void) {
 	}
 	double fl = sqrt((double)vx[face] * vx[face] + vy[face] * vy[face]);
 	if (fl < 1) return false;
-	int front = -1, near = -1, fd = 1 << 30, nd = 44 * 44 + 1, tx = 0, ty = 0, fx = 0, fy = 0;
+	int front = -1, near = -1, fd = 1 << 30, nd = 52 * 52 + 1, tx = 0, ty = 0, fx = 0, fy = 0;
 	for (int i = 0; i < 16; ++i) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
 		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
 		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
-		if (d > 44 * 44) continue;
-		/* before him: within 30 degrees of his facing, 40 units */
-		if (d <= 40 * 40 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; fx = dx; fy = dy; }
+		if (d > 52 * 52) continue;
+		/* before him: within 30 degrees of his facing, 48 units */
+		if (d <= 48 * 48 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; fx = dx; fy = dy; }
 		if (d < nd) { nd = d; near = i; tx = dx; ty = dy; }
 	}
 	if (front >= 0) { tx = fx; ty = fy; }

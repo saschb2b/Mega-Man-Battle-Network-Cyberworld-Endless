@@ -77,11 +77,11 @@ uint32_t npc_prop(int category, int index, int x, int y, int z, int anim) {
 void npc_reach_install(void) {
 	/* MegaMan's facing probes: 8 units ahead with a radius of 8 in the
 	 * game, which with the platforms' edges left navis standing at an
-	 * edge out of reach; 24 ahead and 12 wide reach a navi he seems to
+	 * edge out of reach; 24 ahead and 20 wide reach a navi he seems to
 	 * touch in the isometric view (sprites overlap well before the world
 	 * does, and a short Mr. Prog looks a tile away from 50 units) from
-	 * beside it to about 44 units, and still none behind him (navis stand
-	 * two panels apart) */
+	 * right before him to about 54 units, and still none behind him (navis
+	 * stand two panels apart) */
 	static bool done;   /* (the ROM copy lives as long as the core) */
 	if (done) return;
 	done = true;
@@ -91,7 +91,7 @@ void npc_reach_install(void) {
 		if (x == 0 && y == 0) return;   /* (not the table: leave it) */
 		emu_write32(at, (uint32_t)(int32_t)((int64_t)x * 3));
 		emu_write32(at + 4, (uint32_t)(int32_t)((int64_t)y * 3));
-		emu_write8(at + 12, 12);
+		emu_write8(at + 12, 20);
 	}
 }
 

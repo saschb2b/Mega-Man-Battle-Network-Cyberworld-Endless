@@ -17,8 +17,11 @@ First playable version.
   frees him.
 - A talks to the navi or Mystery Data MegaMan stands at even when he faces
   past it: he turns to the one before him, else the nearest (walking into
-  a navi slides him round it), and reaches about 44 units, which is how
+  a navi slides him round it), and reaches about 54 units, which is how
   far a short Mr. Prog can be while looking a tile away.
+- A new act eases in: every battle on its first layer comes from the lower
+  half of its band (two BombCorns on the first layer after BlastMan took a
+  playtester from 220 HP to 10).
 - L says where the exit or the guardian lies when the walk there sets off
   another way ("The way winds, so follow the arrow!"), so the words hold
   still while the arrow shows the next stretch; the Recovery Mr. Prog,
