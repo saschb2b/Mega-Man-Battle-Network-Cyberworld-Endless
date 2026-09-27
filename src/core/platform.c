@@ -272,7 +272,7 @@ void platform_poll(void) {
 			if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE && !e.key.repeat) {
 				/* the first Escape asks, the second within two seconds quits */
 				if (P.quit_prompt > 0) P.quit = true;
-				else P.quit_prompt = 120;
+				else { P.quit_prompt = 120; P.quit_pad = false; }
 			}
 			/* F11 or Alt+Enter: fullscreen and back */
 			if (!e.key.repeat && !P.headless && (e.key.keysym.sym == SDLK_F11 ||
@@ -298,6 +298,18 @@ void platform_poll(void) {
 		}
 	}
 	if (P.quit_prompt > 0) --P.quit_prompt;
+#ifndef __EMSCRIPTEN__
+	/* a controller's Escape: SELECT and START held a second asks, and
+	 * held again while it asks quits (a handheld's Steam Deck or a pad on
+	 * the couch has no keyboard; PortMaster's own hotkey is the same pair) */
+	static int pair_held;
+	if ((pad_bits & (BTN_SELECT | BTN_START)) == (BTN_SELECT | BTN_START)) {
+		if (++pair_held == 60) {
+			if (P.quit_prompt > 0 && P.quit_pad) P.quit = true;
+			else { P.quit_prompt = 180; P.quit_pad = true; }
+		}
+	} else pair_held = 0;
+#endif
 	uint32_t now = key_bits | pad_bits | stick_bits() | injected | tapped;
 	tapped = 0;
 	P.pressed = now & ~P.held;

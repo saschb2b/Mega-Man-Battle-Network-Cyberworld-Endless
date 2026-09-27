@@ -3,6 +3,7 @@
 #ifdef CW_DESKTOP
 #include <errno.h>
 #include <fcntl.h>
+#include <glob.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -243,6 +244,72 @@ bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgl
 		}
 		if (scan(msg, msglen)) return true;
 	}
+}
+
+/* ---- the ROM where front ends keep it ---- */
+
+/* The Downloads folder as the desktop names it (user-dirs.dirs), else ~/Downloads. */
+static void downloads_dir(const char *home, char *out, size_t n) {
+	snprintf(out, n, "%s/Downloads", home);
+	const char *config = getenv("XDG_CONFIG_HOME");
+	char file[1024], line[1024];
+	if (config && *config == '/') snprintf(file, sizeof file, "%s/user-dirs.dirs", config);
+	else snprintf(file, sizeof file, "%s/.config/user-dirs.dirs", home);
+	FILE *f = fopen(file, "r");
+	if (!f) return;
+	while (fgets(line, sizeof line, f)) {
+		if (strncmp(line, "XDG_DOWNLOAD_DIR=\"", 18)) continue;
+		char *v = line + 18, *end = strchr(v, '"');
+		if (!end) break;
+		*end = 0;
+		if (!strncmp(v, "$HOME", 5)) snprintf(out, n, "%s%s", home, v + 5);
+		else if (*v == '/') snprintf(out, n, "%s", v);
+		break;
+	}
+	fclose(f);
+}
+
+bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen) {
+	const char *home = getenv("HOME");
+	if (!home || !*home) return false;
+	/* EmuDeck's folder, on the Deck or its SD card (/run/media/mmcblk0p1 or
+	 * /run/media/deck/LABEL), RetroDECK's, a ROMs folder, the downloads */
+	static const char *const places[] = {
+		"~/Emulation/roms/gba", "/run/media/*/Emulation/roms/gba", "/run/media/*/*/Emulation/roms/gba",
+		"~/retrodeck/roms/gba", "/run/media/*/retrodeck/roms/gba", "/run/media/*/*/retrodeck/roms/gba",
+		"~/ROMs/gba", "~/ROMs/GBA", "~/roms/gba", "~/ROMs", "~/roms", NULL,
+	};
+	char said[512], pattern[1100], dl[1024], why[512];
+	snprintf(said, sizeof said, "%s", msg);
+	downloads_dir(home, dl, sizeof dl);
+	bool found = false;
+	for (int i = 0; !found && i <= (int)(sizeof places / sizeof *places) - 1; ++i) {
+		if (places[i]) snprintf(pattern, sizeof pattern, "%s%s", places[i][0] == '~' ? home : "", places[i] + (places[i][0] == '~'));
+		else snprintf(pattern, sizeof pattern, "%s", dl);
+		glob_t g;
+		if (glob(pattern, GLOB_ONLYDIR, NULL, &g) != 0) continue;
+		for (size_t k = 0; !found && k < g.gl_pathc; ++k) found = rom_find(g.gl_pathv[k], why, sizeof why);
+		globfree(&g);
+	}
+	/* (another game's .gba in those folders is no news: the message stays the ROM folder's) */
+	snprintf(msg, msglen, "%s", said);
+	if (!found) return false;
+	fprintf(stderr, "found the ROM at %s\n", R.path);
+	/* a copy where the next start looks first (the SD card may be out then) */
+	const char *base = strrchr(R.path, '/');
+	char to[1400];
+	snprintf(to, sizeof to, "%s/%s", rom_dir, base ? base + 1 : R.path);
+	if (access(to, F_OK) != 0 && !copy_file(R.path, to))
+		fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, R.path);
+	return true;
+}
+
+/* ---- Steam's big screen ---- */
+
+bool desktop_big_screen(void) {
+	const char *deck = getenv("SteamDeck"), *ui = getenv("SteamGamepadUI"), *desktop = getenv("XDG_CURRENT_DESKTOP");
+	return (deck && !strcmp(deck, "1")) || (ui && !strcmp(ui, "1")) || getenv("GAMESCOPE_WAYLAND_DISPLAY") ||
+		(desktop && strstr(desktop, "gamescope"));
 }
 
 /* ---- the AppImage's menu entry ---- */

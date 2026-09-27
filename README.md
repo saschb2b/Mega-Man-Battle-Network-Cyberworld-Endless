@@ -58,9 +58,9 @@ window on a Linux PC and in a desktop browser at
 
 ## What you need
 
-- A handheld running ROCKNIX with PortMaster installed, an x86-64 Linux PC
-  (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35 and later), or a
-  current desktop browser.
+- A handheld running ROCKNIX with PortMaster installed, a Steam Deck, an
+  x86-64 Linux PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35
+  and later), or a current desktop browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -106,6 +106,30 @@ switches to fullscreen.
 unpack it anywhere and run `./cyberworld-endless`; `./install.sh` adds it
 to the menu. Its `README.md` has the keyboard keys.
 
+### On a Steam Deck
+
+The Deck runs the Linux build. Until it is on Flathub (and so in Discover),
+the AppImage is the way:
+
+1. In Desktop Mode, download `cyberworld-endless-x86_64.AppImage` from the
+   [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases),
+   right-click it, **Properties**, **Permissions**, and tick **Is executable**.
+2. Right-click it again and choose **Add to Steam** (or in Steam: **Games**,
+   **Add a Non-Steam Game to My Library**). Start it from Steam, in Gaming
+   Mode or on the desktop: Steam then hands the Deck's controls to the game
+   as a gamepad.
+3. The ROM: with EmuDeck or RetroDECK there is nothing to do. The game looks
+   in `Emulation/roms/gba` and `retrodeck/roms/gba`, on the Deck and on its
+   SD card, finds the ROM by its contents and keeps a copy of its own.
+   Otherwise put the `.gba` file (unzipped) into Downloads, or choose it on
+   the first start in Desktop Mode.
+
+In Gaming Mode it fills the screen, at 5x (1200x800) on the Deck's 1280x800.
+The Deck's A, B, L1 and R1 are the GBA's A, B, L and R, the Menu button (☰)
+is Start and the View button (⧉) is Select. To quit, hold View and Menu
+for a second, then again; or use the Steam button's **Exit Game**. Saves
+live in `~/.local/share/cyberworld-endless/` and survive SteamOS updates.
+
 ### In a browser
 
 Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** and choose your ROM file, or drop it on
@@ -137,7 +161,8 @@ Keys are positions, so on an AZERTY keyboard you move with Z Q S D.
 `keys.ini` in the save folder (`~/.local/share/cyberworld-endless/` on Linux,
 `savedata/` on the handheld) changes them; it is written with these defaults
 on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
-quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
+quits. Controllers use their own buttons (A, B, shoulders, Start, Back);
+holding Back and Start for a second, twice, quits.
 
 | Button | In the net | In battle |
 | --- | --- | --- |

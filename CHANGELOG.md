@@ -4,6 +4,13 @@
 
 First playable version.
 
+- Steam Deck: started by Steam's Gaming Mode or Big Picture (or in
+  gamescope) the game fills the screen, 5x on the Deck (a window was scaled
+  to it by a fraction, and blurred), and skips the AppImage's menu offer.
+  The ROM is looked for in EmuDeck's and RetroDECK's gba folders, on the
+  Deck and its SD card, in ~/ROMs and in Downloads, found by its contents
+  and copied in, before any dialog. On a controller, Back and Start held a
+  second ask to quit, and held again quit, as Escape does on a keyboard.
 - The Net Dealer is the only green armored navi on a layer: bystanders are
   the game's dark EvilNavi and the NaviCust vendor its pink GirlNavi. The
   sprites the bystanders and the vendor had were the dealer's on the map

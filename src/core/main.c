@@ -333,7 +333,7 @@ static void quit_prompt_draw(void) {
 	bool saved = director_on_layer();
 	int y = P.core_y + CORE_H - 30;
 	fill_rect(0, y, P.w, saved ? 26 : 14, rgba(0, 0, 0, 200));
-	text_draw(P.w / 2, y + 2, "Press Esc again to quit", WHITE, TEXT_CENTER);
+	text_draw(P.w / 2, y + 2, P.quit_pad ? "Hold SELECT+START again to quit" : "Press Esc again to quit", WHITE, TEXT_CENTER);
 	if (saved) text_draw(P.w / 2, y + 14, director_can_suspend() ? "Your run is saved right here" : "Run saved at layer start",
 		rgba(170, 200, 255, 255), TEXT_CENTER);
 }
@@ -408,7 +408,7 @@ static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
 
 int main(int argc, char **argv) {
 	const char *rom_dir = NULL;
-	bool fullscreen = !DESKTOP, data_dir_given = false;
+	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
 	const char *start_scene = "title";
 	int run_depth = 0;
 	int force_w = 0, force_h = 0;
@@ -428,8 +428,8 @@ int main(int argc, char **argv) {
 		if (!strcmp(a, "--headless")) headless = true;
 		else if (!strcmp(a, "--rom-dir") && v) { rom_dir = v; ++i; }
 		else if (!strcmp(a, "--data-dir") && v) { snprintf(g_data_dir, sizeof g_data_dir, "%s", v); data_dir_given = true; ++i; }
-		else if (!strcmp(a, "--fullscreen")) fullscreen = true;
-		else if (!strcmp(a, "--window")) fullscreen = false;
+		else if (!strcmp(a, "--fullscreen")) { fullscreen = true; screen_given = true; }
+		else if (!strcmp(a, "--window")) { fullscreen = false; screen_given = true; }
 		else if (!strcmp(a, "--size") && v) { sscanf(v, "%dx%d", &force_w, &force_h); ++i; }
 		else if (!strcmp(a, "--frames") && v) { max_frames = strtoull(v, NULL, 10); ++i; }
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
@@ -464,9 +464,19 @@ int main(int argc, char **argv) {
 	char msg[512];
 	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
 #ifdef CW_DESKTOP
+	bool big = !headless && desktop_big_screen();
+	if (!screen_given && big) fullscreen = true;
 	/* the desktop's dialogs come before the window, which would be marked
-	 * "not responding" while they wait */
-	if (!headless) desktop_menu_entry(g_data_dir);
+	 * "not responding" while they wait (and Steam, not a menu entry, starts
+	 * the game on its big screen) */
+	if (!headless && !big) desktop_menu_entry(g_data_dir);
+	if (!rom_ok && !headless && !rom_dir) {
+		char dir[600];
+		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+		/* first where a Steam Deck keeps its ROMs: its Gaming Mode shows no
+		 * file chooser a pad can work */
+		rom_ok = desktop_rom_elsewhere(dir, msg, sizeof msg);
+	}
 	if (!rom_ok && !headless && !rom_dir) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
@@ -474,6 +484,8 @@ int main(int argc, char **argv) {
 		rom_ok = desktop_rom_dialog(dir, desktop_rom, msg, sizeof msg);
 		if (!rom_ok) return 1;
 	}
+#else
+	(void)screen_given;   /* (the handheld fills its screen, the page its canvas) */
 #endif
 	if (!platform_init(force_w, force_h, headless, fullscreen)) return 1;
 	if (!headless) {

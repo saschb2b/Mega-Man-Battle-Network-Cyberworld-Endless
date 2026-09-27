@@ -53,8 +53,18 @@ positions: on an AZERTY keyboard you move with Z Q S D. To change them, edit
 with the defaults.
 
 F11 or Alt+Enter switches between the window and fullscreen; Escape twice
-quits (the run is saved at the start of each layer).
-`--fullscreen` starts in fullscreen.
+quits (the run is saved at the start of each layer), and so does holding
+Back and Start on a controller for a second, twice. `--fullscreen` starts
+in fullscreen and `--window` in a window; started by Steam's Gaming Mode or
+Big Picture it fills the screen.
+
+## Steam Deck
+
+Right-click the AppImage in Desktop Mode, make it executable (Properties,
+Permissions) and choose **Add to Steam**; start it from Steam, which then
+gives it the Deck's controls as a gamepad. A ROM in EmuDeck's
+`Emulation/roms/gba` or RetroDECK's `retrodeck/roms/gba`, on the Deck or its
+SD card, or in Downloads, is found by its contents and copied in.
 
 ## Saves
 

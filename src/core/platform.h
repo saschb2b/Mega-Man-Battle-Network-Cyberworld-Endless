@@ -46,6 +46,7 @@ typedef struct {
 	uint64_t frame;
 	bool keyboard_last; /* last input came from the keyboard */
 	int quit_prompt;    /* frames left of "Esc again to quit" after one Escape */
+	bool quit_pad;      /* ... opened by a controller's SELECT+START, held */
 	/* Full-screen effects, set by the scene each frame while drawing and
 	 * applied to the canvas before it is shown (the GBA's MOSAIC register and
 	 * palette fades). fade is 0..16 toward fade_color. */

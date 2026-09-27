@@ -19,4 +19,15 @@ bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgl
  * made pointing at the AppImage when the file moved. */
 void desktop_menu_entry(const char *data_dir);
 
+/* Started by Steam's Gaming Mode or Big Picture, or in gamescope (a Steam
+ * Deck, SteamOS on a TV): the game fills the screen there, where a window
+ * would be scaled to it by a fraction and blur. */
+bool desktop_big_screen(void);
+
+/* Looks for the ROM where emulator front ends and downloads keep them
+ * (EmuDeck's and RetroDECK's gba folders, on the home or an SD card,
+ * ~/ROMs, the Downloads folder) and, found, copies it into rom_dir. True
+ * once it is loaded. */
+bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen);
+
 #endif
