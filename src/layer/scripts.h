@@ -38,9 +38,11 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of
- * two HPMemory, a chip or a NaviCust program (`program` in `color`, named
- * by the game), once (event flag `flag`); with `comfort`, after a run lost
+ * two HPMemory, a chip (`power`: what it hits for) or a NaviCust program
+ * (`program` in `color`, named by the game; `about`: what it does, or
+ * NULL), once (event flag `flag`); with `comfort`, after a run lost
  * early, an HPMemory more first. */
-int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int code, int program, int color);
+int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int power, int code, int program, int color,
+            const char *about);
 
 #endif

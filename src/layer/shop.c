@@ -100,6 +100,28 @@ int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 
 bool shop_pick_program(ShopItem *out) { return pick(3, 0, out); }
 
+/* The gift's programs: of the game's shop programs, those that help a
+ * first act at once (ids per the shop data, the names' index is id / 4) */
+static const struct { uint16_t id; const char *about; } gifts[] = {
+	{ 0x04, "SUPERARMOR: NO FLINCHING WHEN YOU'RE HIT!" },
+	{ 0x08, "CUSTOM1: ONE MORE CHIP IN THE CUSTOM SCREEN!" },
+	{ 0x10, "MEGFLDR1: ROOM FOR ONE MORE MEGA CHIP!" },
+	{ 0x8C, "ATTACK+1: A STRONGER BUSTER!" },
+};
+
+const char *shop_pick_gift_program(ShopItem *out) {
+	int k = rng_range(0, (int)(sizeof gifts / sizeof *gifts) - 1);
+	/* its color as the game's shop data has it */
+	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
+	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8) {
+		ShopItem it;
+		read_item(a, &it);
+		if (it.kind == 3 && it.id == gifts[k].id) { *out = it; return gifts[k].about; }
+	}
+	pick(3, 0, out);
+	return NULL;
+}
+
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	for (int i = 0; i < 6 && n < 4; ++i) {

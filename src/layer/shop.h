@@ -28,5 +28,8 @@ int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 /* One NaviCust program (id, color in `code`) from the game's shops. */
 bool shop_pick_program(ShopItem *out);
+/* One of the programs the start gift offers, and what it does (in Mr.
+ * Prog's capitals; NULL when it had to take any program). */
+const char *shop_pick_gift_program(ShopItem *out);
 
 #endif

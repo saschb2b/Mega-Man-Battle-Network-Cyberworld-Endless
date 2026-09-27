@@ -200,7 +200,8 @@ static void program_name(TextArchive *t, int program) {
 	ta_bytes(t, b, sizeof b);
 }
 
-int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int code, int program, int color) {
+int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int power, int code, int program, int color,
+            const char *about) {
 	/* what each choice gives, then the flag that it was chosen */
 	char line[64];
 	int thanks = ta_say(t, FACE_PROG, "GOOD LUCK DOWN THERE, MEGAMAN! DIVE AS DEEP AS YOU CAN!");
@@ -237,6 +238,15 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	ta_pages(t, "HELLO, MEGAMAN! I'M DR. HIKARI'S DIVE SUPPORT PROGRAM!|"
 		"EVERY DIVE STARTS FROM SCRATCH, SO HERE'S A GIFT!|"
 		"PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", FACE_PROG, &first);
+	/* what the chip and the program do, before the choice */
+	{
+		char said[160];
+		if (power > 0) snprintf(said, sizeof said, "THE CHIP IS %s: IT HITS FOR %d!", chip_name, power);
+		else snprintf(said, sizeof said, "THE CHIP IS %s!", chip_name);
+		for (char *c = said; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
+		ta_page(t, FACE_PROG, said, false);
+		if (about) ta_page(t, FACE_PROG, about, false);
+	}
 	if (comfort) {
 		/* the last dive ended early: a little more help */
 		ta_page(t, FACE_PROG, "YOUR LAST DIVE ENDED EARLY, SO TAKE THIS TOO!", false);

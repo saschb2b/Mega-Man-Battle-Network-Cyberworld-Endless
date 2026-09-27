@@ -206,16 +206,26 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_GIFT: {
 			char code = '*';
 			ChipInfo ci;
-			int chip = chip_pool_pick(2);
+			/* a chip that hits hard (the tier's traps and supports are
+			 * little help to a starting folder) */
+			int chip = -1;
+			for (int tries = 0; tries < 24; ++tries) {
+				int c = chip_pool_pick(2);
+				if (c <= 0) break;
+				chip_info(c, &ci);
+				chip = c;
+				if (ci.power >= 60 && ci.ncodes) break;
+			}
 			if (chip <= 0) chip = roll_chip(run.depth, 3, &code);
 			chip_info(chip, &ci);
 			code = ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*';
 			ShopItem program = { 3, 1, 0, 0, 0 };
-			shop_pick_program(&program);
+			const char *about = shop_pick_gift_program(&program);
 			/* a run lost before its first guardian earns a little more */
 			bool comfort = profile.last_depth >= 1 && profile.last_depth <= 3;
 			if (emu_debug_on()) fprintf(stderr, "gift: chip %d \"%s\" %c, program %d color %d\n", chip, ci.name, code, program.id, program.code);
-			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, chip, ci.name, code == '*' ? 26 : code - 'A', program.id, program.code);
+			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, chip, ci.name, ci.power, code == '*' ? 26 : code - 'A', program.id,
+				program.code, about);
 			flag_clear(LAYER_GIFT_FLAG);
 			break;
 		}
