@@ -33,6 +33,9 @@ void cinema_walk(uint32_t keys);
 void cinema_letterbox(bool on);
 void cinema_flash(int frames);
 void cinema_shake(int frames, int amplitude);
+/* An arrow pointing the way on for `frames` (screen direction 0 right,
+ * then clockwise in eighths). */
+void cinema_arrow(int dir, int frames);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */
 void cinema_title(const char *top, const char *name, const char *epithet, SDL_Color accent, int frames);
 /* A card between areas: `small` over `big`, then up to two lines. */

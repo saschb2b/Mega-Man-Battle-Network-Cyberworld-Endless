@@ -1,5 +1,6 @@
 #include "cinema.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -25,6 +26,7 @@ static struct {
 	int card, card_t, card_len;
 	char top[48], name[48], line1[48], line2[48];
 	SDL_Color accent;
+	int arrow_dir, arrow_t, arrow_len;   /* the way-on arrow: screen direction 0-7, frames shown, of */
 } C;
 
 void cinema_reset(void) { memset(&C, 0, sizeof C); }
@@ -36,6 +38,7 @@ void cinema_letterbox(bool on) { C.bars = on; }
 void cinema_flash(int frames) { C.flash = C.flash_len = frames; }
 void cinema_shake(int frames, int amplitude) { C.shake = frames; C.shake_amp = amplitude; }
 bool cinema_busy(void) { return C.card != CARD_NONE; }
+void cinema_arrow(int dir, int frames) { C.arrow_dir = dir & 7; C.arrow_t = 0; C.arrow_len = frames; }
 
 static void card(int kind, const char *top, const char *name, const char *l1, const char *l2, SDL_Color accent, int frames) {
 	C.card = kind;
@@ -73,6 +76,7 @@ void cinema_update(void) {
 	if (C.shake > 0) --C.shake;
 	/* (a card waits out a shop, the PET or a battle, unseen) */
 	if (C.card && !C.off_map && ++C.card_t >= C.card_len) C.card = CARD_NONE;
+	if (C.arrow_len && ++C.arrow_t >= C.arrow_len) C.arrow_len = 0;
 }
 
 void cinema_offset(int *dx, int *dy) {
@@ -143,6 +147,49 @@ static void draw_area(int x0, int y0) {
 	text_draw(x0 + CORE_W / 2, y + 42 + TEXT_H, C.line2, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 18) / 255), TEXT_CENTER);
 }
 
+/* A filled triangle, pixel by pixel on the canvas. */
+static void tri(float ax, float ay, float bx, float by, float cx, float cy, SDL_Color c) {
+	int x0 = (int)fminf(ax, fminf(bx, cx)), x1 = (int)fmaxf(ax, fmaxf(bx, cx)) + 1;
+	int y0 = (int)fminf(ay, fminf(by, cy)), y1 = (int)fmaxf(ay, fmaxf(by, cy)) + 1;
+	for (int y = y0; y <= y1; ++y)
+		for (int x = x0; x <= x1; ++x) {
+			float px = x + 0.5f, py = y + 0.5f;
+			float d1 = (px - bx) * (ay - by) - (ax - bx) * (py - by);
+			float d2 = (px - cx) * (by - cy) - (bx - cx) * (py - cy);
+			float d3 = (px - ax) * (cy - ay) - (cx - ax) * (py - ay);
+			bool neg = d1 < 0 || d2 < 0 || d3 < 0, pos = d1 > 0 || d2 > 0 || d3 > 0;
+			if (!(neg && pos)) fill_rect(x, y, 1, 1, c);
+		}
+}
+
+/* The way on: an arrow a little off the middle of the picture, where the
+ * camera keeps MegaMan, pointing along the route (0 right, then clockwise
+ * in eighths), bobbing that way; it fades out at its end. */
+static void draw_arrow(int x0, int y0) {
+	if (!C.arrow_len || C.off_map) return;
+	int left = C.arrow_len - C.arrow_t;
+	int a = C.arrow_t < 8 ? C.arrow_t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
+	float ang = (float)C.arrow_dir * 3.14159265f / 4.0f;
+	float ux = cosf(ang), uy = sinf(ang) * 0.75f;   /* (the isometric screen: flatter up and down) */
+	float n = sqrtf(ux * ux + uy * uy);
+	ux /= n; uy /= n;
+	float bob = 3.0f * sinf((float)C.arrow_t * 0.25f);
+	/* (clear of the chat box below when it points down) */
+	float cx = (float)x0 + 120 + ux * (32 + bob), cy = (float)y0 + 66 + uy * (30 + bob);
+	/* two slender heads, one behind the other (">>"), outlined */
+	for (int head = 1; head >= 0; --head) {
+		float hx = cx - ux * 9 * (float)head, hy = cy - uy * 9 * (float)head;
+		int ha = head ? a * 3 / 5 : a;
+		for (int pass = 0; pass < 2; ++pass) {
+			float s = pass ? 1.0f : 1.4f, w = pass ? 5.0f : 7.0f;
+			SDL_Color col = pass ? rgba(120, 248, 255, (Uint8)ha) : rgba(0, 24, 64, (Uint8)(ha * 3 / 4));
+			float tx = hx + ux * 8 * s, ty = hy + uy * 8 * s;
+			float bx = hx - ux * 4, by = hy - uy * 4;
+			tri(tx, ty, bx - uy * w, by + ux * w, bx + uy * w, by - ux * w, col);
+		}
+	}
+}
+
 void cinema_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
 	int bar = BAR_H * C.bar / BAR_FRAMES;
@@ -150,6 +197,7 @@ void cinema_draw(void) {
 		fill_rect(x0, y0, CORE_W, bar, BLACK);
 		fill_rect(x0, y0 + CORE_H - bar, CORE_W, bar, BLACK);
 	}
+	draw_arrow(x0, y0);
 	if (C.card == CARD_TITLE && !C.off_map) draw_title(x0, y0);
 	if (C.card == CARD_AREA && !C.off_map) draw_area(x0, y0);
 	if (C.flash > 0) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, 230 * C.flash / C.flash_len));

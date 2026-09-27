@@ -73,6 +73,7 @@ static struct {
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held;   /* L and R were down last frame */
 	bool dir_held;         /* a direction is held this frame */
+	bool arrow_pending;    /* the way-on arrow lasts until a little after L's words close */
 	int free_x, free_y;    /* MegaMan's last place clear of every NPC */
 	int wedged;            /* frames he has pushed, unmoving, against an NPC he stands inside */
 	int last_x, last_y;    /* where he stood the frame before */
@@ -155,6 +156,8 @@ static void arrival_words(void) {
 /* Which way the exit pad lies from MegaMan, as the screen shows it (the
  * d-pad's UP moves +X -Y, RIGHT +X +Y: a world step (dx, dy) goes
  * dx + dy across and (dy - dx) / 2 down), and how far. */
+static int way_dir;   /* the index of the last way_to: 0 right, then clockwise */
+
 static const char *way_to(int tx, int ty, int *far) {
 	static const char *const ways[8] = {
 		"to the right", "down and to the right", "straight down", "down and to the left",
@@ -167,7 +170,8 @@ static const char *way_to(int tx, int ty, int *far) {
 	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
 	double a = atan2(sy, sx);   /* (screen y grows downwards) */
 	int k = (int)lround(a / (3.14159265358979 / 4));
-	return ways[(k % 8 + 8) % 8];
+	way_dir = (k % 8 + 8) % 8;
+	return ways[way_dir];
 }
 
 /* The way on along the floor, not as the crow flies: the direction to a
@@ -362,6 +366,8 @@ static bool build_layer(void) {
 	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
 	arrival_words();
 	D.layer_told = false;
+	D.arrow_pending = false;
+	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
 	talk_reset();
 	return true;
@@ -476,8 +482,13 @@ uint32_t director_keys(uint32_t keys) {
 	/* (not while a warp or the jack-in departs, nor through a guardian's
 	 * staging or the battle it has armed) */
 	if (pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP + 0x10) == 0 &&
-		(D.town || (!boss_cinematic() && !boss_fighting())))
-		talk_start(status_words(), FACE_MEGAMAN);
+		(D.town || (!boss_cinematic() && !boss_fighting()))) {
+		/* (the arrow shows through the words and a few seconds after) */
+		if (talk_start(status_words(), FACE_MEGAMAN) && (D.town || !D.objs.guardian.navi || !boss_beaten() || boss_done())) {
+			D.arrow_pending = true;
+			cinema_arrow(way_dir, 600);
+		}
+	}
 	return keys;
 }
 
@@ -510,8 +521,14 @@ static void unwedge(void) {
 
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
+/* The way-on arrow: once L's words have closed, three seconds more. */
+static void arrow_update(void) {
+	if (D.arrow_pending && !talk_busy()) { D.arrow_pending = false; cinema_arrow(way_dir, 180); }
+}
+
 static void town_update(void) {
 	map_label();
+	arrow_update();
 	if (on_map()) unwedge();
 	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
 	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
@@ -758,6 +775,7 @@ void director_update(void) {
 	}
 	if (follow_exit_warp()) return;
 	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
+	arrow_update();
 	if (on_map()) unwedge();
 	cinema_on_map(on_map());
 	if (!on_map()) {
