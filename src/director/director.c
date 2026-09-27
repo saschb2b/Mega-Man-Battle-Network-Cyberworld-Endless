@@ -968,12 +968,14 @@ static bool talk_face(void) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
 		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
 		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
-		if (d > 52 * 52) continue;
-		/* before him: within 30 degrees of his facing, 48 units */
-		if (d <= 48 * 48 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; fx = dx; fy = dy; }
-		if (d < nd) { nd = d; near = i; tx = dx; ty = dy; }
+		/* before him: within 30 degrees of his facing, out to two panels
+		 * (one he faces out of reach is the one he means: no turn to
+		 * another beside him) */
+		if (d <= 72 * 72 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; fx = dx; fy = dy; }
+		if (d <= 52 * 52 && d < nd) { nd = d; near = i; tx = dx; ty = dy; }
 	}
-	if (front >= 0) { tx = fx; ty = fy; }
+	/* (but one he touches beats one before him out of reach) */
+	if (front >= 0 && !(near >= 0 && nd <= 24 * 24 && fd > 52 * 52)) { tx = fx; ty = fy; }
 	else if (near < 0) return false;
 	int k = face;
 	double top = -2;
@@ -1190,7 +1192,8 @@ bool director_resume(void) {
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
-			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_TOLD_FLAG; ++f) flag_clear(f);
+			/* (a gift taken stays taken: it is the run's, not the layer's) */
+			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
