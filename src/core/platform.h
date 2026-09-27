@@ -76,6 +76,8 @@ bool platform_save_canvas(const char *path);
 void platform_persist(void);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
+/* Whether a game controller is connected (a PC without one is told its keys). */
+bool platform_pad_present(void);
 
 static inline bool btn_pressed(uint32_t b) { return (P.pressed & b) != 0; }
 static inline bool btn_held(uint32_t b) { return (P.held & b) != 0; }

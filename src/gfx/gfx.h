@@ -63,6 +63,9 @@ uint32_t gfx_lz_ref(uint32_t lz);
 void rom_tile(uint32_t tile, uint32_t pal, int x, int y, int flip);
 /* A block of consecutive tiles (w x h tiles, row-major, as sprites use). */
 void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int flip);
+/* The game's character code for a byte of text (1-5 the version marks),
+ * -1 where it has none; the battle and chat fonts share the codes. */
+int text_code(unsigned char ch);
 /* Text in the game's bold battle font. Height 12 on screen. */
 enum { TEXT_LEFT = 0, TEXT_CENTER = 1, TEXT_RIGHT = 2 };
 int text_width(const char *s);

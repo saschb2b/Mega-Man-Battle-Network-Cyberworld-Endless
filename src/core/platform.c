@@ -24,6 +24,11 @@ static void open_pads(void) {
 	}
 }
 
+bool platform_pad_present(void) {
+	for (int i = 0; i < 4; ++i) if (pads[i]) return true;
+	return false;
+}
+
 static void layout_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;

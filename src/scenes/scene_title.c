@@ -4,19 +4,26 @@
  * 6's colours, and under BATTLE NETWORK the subtitle CYBERWORLD ENDLESS in
  * the plate's. Behind it the battle backgrounds of the areas a run passes
  * through take turns, scrolling and animated as in battle. PRESS START,
- * NEW GAME / CONTINUE, the cursor and the copyright line are the game's. */
+ * NEW GAME / CONTINUE, the cursor and the copyright line are the game's,
+ * and NEW GAME over a saved run asks in the game's chat box. */
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "audio.h"
 #include "backdrop.h"
+#include "chatbox.h"
 #include "game.h"
 #include "gfx.h"
+#include "minifont.h"
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
 #include "save.h"
+#include "text.h"
+
+#include "version.h"   /* CW_VERSION, from the build (Makefile) */
 
 #define T (R.layout->title)
 #define BLINK 32         /* PRESS START: 32 frames on, 32 off */
@@ -28,6 +35,7 @@
 #define SUMMARY_FACE_Y 66
 #define SHOW_FRAMES 600  /* each backdrop's turn */
 #define SWAP_FRAMES 12   /* mosaic out and in between them */
+#define ASK_FIRST "Start a new run? We'd"   /* the question's first line */
 
 #define LOGO_UP 8        /* the logo stands higher than in the original picture */
 #define LOGO_BOTTOM 95   /* below: the CYBEAST GREGAR plate */
@@ -52,6 +60,10 @@ static struct {
 	int shown_at;         /* frame the backdrop came in */
 	bool first;           /* the first backdrop fades in instead */
 	int jack_v, jack_y;   /* jacking in: the backdrop's speed and offset, 1/16 pixel */
+	int lift;             /* the backdrop's own darkening: a bright one more (the Sky's pale clouds took the logo's white) */
+	bool confirm, yes;    /* NEW GAME over a saved run asks first; Yes chosen */
+	int asked;            /* the frame it asked: its text types out from there */
+	char ask[32];         /* its second line, the saved run's layer */
 	SDL_Texture *tex;
 } S;
 
@@ -151,10 +163,11 @@ static void build_subtitle(void) {
 
 /* The infinity mark: a lemniscate of Bernoulli drawn as a thick stroke,
  * slanted like the logo, the stroke from the upper right to the lower left
- * crossing over the other one. */
+ * crossing over the other one; the size of MEGAMAN's letters beside it (at
+ * the 6's size it stood over them and outweighed the name). */
 static void build_infinity(void) {
 	enum { W = 96, H = 52, N = 360 };
-	const double A = 28, B = 48, RAD = 3.9, SLANT = 0.42;
+	const double A = 23.8, B = 40.8, RAD = 3.6, SLANT = 0.42;
 	static double seg[2][N + 1][2];
 	for (int s = 0; s < 2; ++s)
 		for (int i = 0; i <= N; ++i) {
@@ -184,7 +197,7 @@ static void build_infinity(void) {
 		for (int c = 0; c < W; ++c)
 			if (m[r][c]) { if (r < top) top = r; bottom = r; }
 	if (top > bottom) return;
-	stamp(&m[top][0], W, bottom - top + 1, 204 - W / 2, 60 - (bottom - top + 1) / 2, fill, (int)sizeof fill,
+	stamp(&m[top][0], W, bottom - top + 1, 201 - W / 2, 62 - (bottom - top + 1) / 2, fill, (int)sizeof fill,
 	      0x46, ring, 2);
 }
 
@@ -217,9 +230,20 @@ static bool build_logo(void) {
 
 /* ------------------------------------------------------------------ */
 
+/* How bright a backdrop is undimmed: the mean of its channels, 0-31. */
+static int brightness(void) {
+	static uint32_t px[240 * 160];
+	backdrop_draw(&bd, 0, 0, 0, NULL, 1, px);
+	long sum = 0;
+	for (int i = 0; i < 240 * 160; ++i) sum += ((px[i] >> 16 & 255) + (px[i] >> 8 & 255) + (px[i] & 255)) / 3;
+	return (int)(sum / (240 * 160) * 31 / 255);
+}
+
 static void show(int id) {
 	backdrop_load(&bd, id);
 	S.shown_at = S.t;
+	int b = brightness();
+	S.lift = b > 10 ? b - 10 : 0;
 }
 
 static void show_next(void) {
@@ -282,15 +306,42 @@ static void update(void) {
 		if (S.t - S.pressed >= MENU_AFTER) S.menu = S.t;
 		return;
 	}
-	int items = S.has_save ? 2 : 1;
-	if (items > 1 && (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN))) { S.cursor ^= 1; audio_sfx(SFX_CURSOR); }
-	if (btn_pressed(BTN_A) || btn_pressed(BTN_START)) {
-		S.choice = S.cursor;
-		/* the game plays 0x9D for NEW GAME and 0x9C for CONTINUE and stops the music */
-		audio_play_song(S.choice == 1 ? 0x9C : 0x9D, false);
-		audio_music(MUS_NONE);
-		S.leaving = 1;
+	/* NEW GAME over a saved run: the run ends at its next checkpoint, so
+	 * the one destructive choice here asks first, No chosen */
+	bool ok = btn_pressed(BTN_A) || btn_pressed(BTN_START);
+	if (S.confirm) {
+		/* while it types, A or B shows all of it (as the game's chats) */
+		int all = (int)(strlen(ASK_FIRST) + strlen(S.ask));
+		if (S.t - S.asked < all) {
+			if (ok || btn_pressed(BTN_B)) S.asked = S.t - all;
+			return;
+		}
+		if (btn_pressed(BTN_LEFT) || btn_pressed(BTN_RIGHT) || btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN)) {
+			S.yes = !S.yes;
+			audio_sfx(SFX_CURSOR);
+		}
+		if (btn_pressed(BTN_B) || (ok && !S.yes)) { S.confirm = false; audio_sfx(SFX_CANCEL); return; }
+		if (!ok) return;
+		S.confirm = false;
+	} else {
+		int items = S.has_save ? 2 : 1;
+		if (items > 1 && (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN))) { S.cursor ^= 1; audio_sfx(SFX_CURSOR); }
+		if (!ok) return;
+		if (S.cursor == 0 && S.has_save) {
+			S.confirm = true;
+			S.yes = false;
+			S.asked = S.t;
+			if (S.saved_depth) snprintf(S.ask, sizeof S.ask, "lose our Layer %d run!", S.saved_depth);
+			else snprintf(S.ask, sizeof S.ask, "lose our saved run!");
+			audio_sfx(SFX_SELECT);
+			return;
+		}
 	}
+	S.choice = S.cursor;
+	/* the game plays 0x9D for NEW GAME and 0x9C for CONTINUE and stops the music */
+	audio_play_song(S.choice == 1 ? 0x9C : 0x9D, false);
+	audio_music(MUS_NONE);
+	S.leaving = 1;
 }
 
 /* ------------------------------------------------------------------ */
@@ -306,7 +357,7 @@ static void render(void) {
 	int extra = S.summary ? 14 : 0;
 	if (S.pressed) extra = S.t - S.pressed >= 3 ? 6 : 2 * (S.t - S.pressed);
 	uint8_t dim[160];
-	for (int y = 0; y < 160; ++y) dim[y] = (uint8_t)(1 + y * 9 / 160 + extra);
+	for (int y = 0; y < 160; ++y) dim[y] = (uint8_t)(1 + y * 9 / 160 + extra + S.lift);
 	int k = S.t - S.shown_at, mosaic = 1;
 	if (!S.summary && !S.leaving) {
 		if (k < SWAP_FRAMES && !S.first) mosaic = SWAP_FRAMES - k;
@@ -350,7 +401,8 @@ static void draw(void) {
 
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
-	for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
+	if (!S.confirm)   /* (the question takes its place a moment) */
+		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
 
 	if (S.summary) {
 		SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255);
@@ -380,6 +432,17 @@ static void draw(void) {
 		text_draw(x, y0 + 112, said, WHITE, TEXT_CENTER);
 		return;
 	}
+	/* the build, for a report: v0.1.0 alpha, v0.1.0+12 a dozen commits on */
+	{
+		char v[40];
+		const char *cw = CW_VERSION;
+		if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, sizeof v, "dev");
+		else {
+			const char *g = strstr(cw, ".g");
+			snprintf(v, sizeof v, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " alpha" : "");
+		}
+		text_draw(x0 + 4, y0 + 2, v, rgba(150, 160, 190, 255), TEXT_LEFT);
+	}
 	/* (a saved run deeper than the record is the best so far too) */
 	int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
 	if (best > 0)
@@ -392,6 +455,9 @@ static void draw(void) {
 		for (int i = 0; i < 4; ++i) rom_tiles(text + (uint32_t)(1 + i * 8) * 32, T.text_pal, x0 + 52 + i * 32, y0 + 120, 4, 2, 0);
 		rom_tiles(text + 33u * 32, T.text_pal, x0 + 180, y0 + 120, 1, 2, 0);
 	}
+	/* (a keyboard's Start, where no controller is: a PC player had no word
+	 * of which key it is) */
+	if (!S.menu && !S.pressed && !platform_pad_present()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", rgba(150, 160, 190, 255), 1);
 	if (S.menu) {
 		/* NEW GAME (tiles 35-54) and CONTINUE (55-74): 32x16, 32x16, 16x16 */
 		int n = S.has_save ? 2 : 1;
@@ -406,7 +472,26 @@ static void draw(void) {
 			text_drawf(x0 + 170, y0 + 130, WHITE, TEXT_LEFT, "Layer %d", S.saved_depth);
 		/* the arrow cycles three frames, 6 frames each */
 		int f = ((S.t - S.menu) / 6) % 3;
-		rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);
+		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);
+	}
+	if (S.confirm) {
+		/* over the menu, MegaMan asks as in the game's chats: two lines,
+		 * typed a character a frame, then Yes and No with the cursor (the
+		 * places are the game's, from its own Yes/No) */
+		chatbox_frame(x0 + CHATBOX_X, y0 + CHATBOX_Y, CHATBOX_W, CHATBOX_H);
+		Sprite *face = sprite_get(SPR_MUGSHOT, FACE_MEGAMAN);
+		if (face) sprite_draw_frame(face, 0, 0, x0 + CHATBOX_FACE_X, y0 + CHATBOX_FACE_Y, false, 0, 0);
+		int typed = S.t - S.asked, first = (int)strlen(ASK_FIRST);
+		int tx = x0 + CHATBOX_TEXT_X, ty = y0 + CHATBOX_TEXT_Y;
+		chatbox_text(tx, ty, ASK_FIRST, typed);
+		if (typed > first) chatbox_text(tx, ty + CHATBOX_LINE, S.ask, typed - first);
+		if (typed >= first + (int)strlen(S.ask)) {
+			int oy = ty + 2 * CHATBOX_LINE;
+			chatbox_text(x0 + 91, oy, "Yes", -1);
+			chatbox_text(x0 + 138, oy, "No", -1);
+			int f = (S.t / 6) % 3;
+			rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + (S.yes ? 68 : 115), oy - 1, 2, 2, 0);
+		}
 	}
 	if (S.first && S.t < 16 && !S.summary) { P.fx_fade = 16 - S.t; P.fx_fade_color = BLACK; }
 	if (S.leaving) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, S.leaving * 255 / LEAVE_WHITE));

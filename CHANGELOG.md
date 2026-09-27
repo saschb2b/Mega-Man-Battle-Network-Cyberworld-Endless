@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- The title: NEW GAME over a saved run asks first, in the game's own chat
+  box ("Start a new run? We'd lose our Layer 5 run!", MegaMan's face, the
+  text typed out, No chosen), where one press had ended the run. The
+  build's version stands in the top-left corner (v0.1.0 alpha, and the
+  commits since), for a report. The infinity mark is a size smaller; the
+  brightest backdrops (the Sky's clouds,
+  the Seaside) are dimmed further so the logo's white stays readable; and
+  with no controller connected, ENTER is named under PRESS START.
 - Without its ROM, a desktop build that can show no dialog (the Flatpak,
   whose sandbox has neither zenity nor kdialog, and SDL's box on Wayland is
   zenity's; the Steam Deck's big screen, where a pad cannot answer one)

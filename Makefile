@@ -22,6 +22,12 @@ BIN := $(BIN_$(TARGET))
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
 SRCS := $(wildcard src/*/*.c)
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
+
+# The version the title shows: build.py passes its own (the tag, or the tag
+# and the commits since); made alone, git's; else dev. A header written
+# only when it changes, so only what shows it is built again.
+VERSION ?= $(shell git describe --tags --match 'v*' 2>/dev/null | sed 's/^v//' | grep . || echo dev)
+GEN := $(OUT)/gen
 CFLAGS += -std=c11 -O2 -g -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(shell $(PKGCONF) --cflags sdl2)
 # CI builds with WERROR=1: a warning in the game's own code fails the build
@@ -72,15 +78,22 @@ $(OUT)/licenses/mGBA.txt: /opt/mgba/LICENSE
 $(BIN): $(OBJS)
 	$(CC) -o $@ $^ $(LDLIBS)
 
-$(OUT)/obj/%.o: src/%.c
+$(OUT)/obj/%.o: src/%.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -I$(GEN) -c -o $@ $<
+
+$(GEN)/version.h: FORCE
+	@mkdir -p $(GEN)
+	@printf '#define CW_VERSION "%s"\n' '$(VERSION)' > $@.new
+	@if cmp -s $@.new $@; then rm -f $@.new; else mv $@.new $@; fi
+
+FORCE:
 
 clean:
 	rm -rf build
 
 -include $(OBJS:.o=.d)
-.PHONY: all clean
+.PHONY: all clean FORCE
 
 # ROM-free unit tests (host only), with the address and undefined-behaviour
 # sanitizers

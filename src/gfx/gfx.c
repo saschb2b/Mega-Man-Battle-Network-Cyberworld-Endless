@@ -355,7 +355,7 @@ void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int fli
 static SDL_Texture *font_tex;
 static uint8_t font_w[256];
 
-static int ascii_code(unsigned char ch) {
+int text_code(unsigned char ch) {
 	if (ch >= 1 && ch <= 5) return 0x40 + ch - 1; /* version marks */
 	if (ch == ' ') return 0;
 	if (ch >= '0' && ch <= '9') return 1 + ch - '0';
@@ -393,7 +393,7 @@ static void build_font(void) {
 	memset(px, 0, sizeof px);
 	for (int ch = 1; ch < 128; ++ch) {
 		if (ch > 5 && ch < 32) continue;
-		int code = ascii_code((unsigned char)ch);
+		int code = text_code((unsigned char)ch);
 		int cell = ch;
 		if (code < 0) { font_w[ch] = 4; continue; }
 		const uint8_t *g = R.data + FONT_BASE + code * 64;
