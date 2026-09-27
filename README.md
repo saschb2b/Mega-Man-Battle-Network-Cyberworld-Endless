@@ -120,7 +120,7 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 | L | Ask MegaMan where you are and what's ahead | Open the Custom screen; on it, hold L and press R to try to run |
 | R | Jack in (at the town's statue) | Open the Custom screen |
 | Start | Open the PET | Pause |
-| Select | Hold for the map of the layer so far: where you have been, the services, and the way to the exit or guardian | |
+| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings, or pips on the edge), and the way to the exit or guardian | |
 
 In the net, a direction held toward a walkway lines MegaMan up with it and
 follows it round its turns, and A turns him to the navi or Mystery Data
@@ -154,8 +154,11 @@ Three layers make an act. The second layer of every act always has the Net
 Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and
 the room before it again has a heal and the Net Dealer. The card at the
 start of each act names the guardian waiting at its end, so you can set
-your folder for it. Step into the arena and the Navi logs in for the game's
-own boss battle. Guardians remember how your earlier battles went.
+your folder for it: every Net Dealer keeps two of a chip that answers the
+act (the guardian's weakness, or a hard hitter when it has none) and says
+so, and on the guardian's layer MegaMan warns you of its way of fighting.
+Step into the arena and the Navi logs in for the game's own boss battle.
+Guardians remember how your earlier battles went.
 
 The first four acts visit four of Central, Seaside, Sky and Green Area, the
 Robot Control, Aquarium, Judge Tree, Mr. Weather and CopyBot comps, two home
