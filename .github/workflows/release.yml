@@ -32,7 +32,7 @@ jobs:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
       options: --privileged
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
@@ -41,7 +41,7 @@ jobs:
           manifest-path: linux/flatpak/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.yml
           upload-artifact: false
           cache: false
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: flatpak
           path: cyberworld-endless.flatpak
@@ -52,7 +52,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
       - uses: ./.github/actions/image
@@ -63,7 +63,7 @@ jobs:
         with: { dockerfile: Dockerfile.web, tag: cyberworld-web }
       - run: python3 build.py test
       - run: python3 build.py release
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: flatpak
           path: build/release
