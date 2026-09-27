@@ -246,7 +246,21 @@ static const char *route_to(int tx, int ty, int *far) {
 		cx = p % MAP_W; cy = p / MAP_W;
 	}
 	*far = len < 5 ? 0 : len < 14 ? 1 : 2;
-	int aim = len > 3 ? path[len - 3] : len ? path[0] : sy * MAP_W + sx;
+	/* aim at the farthest of the next four panels he can walk to in a
+	 * straight line over the floor (three along, as the crow flies, cut
+	 * corners over drops) */
+	int aim = len ? path[len - 1] : sy * MAP_W + sx;
+	for (int k = 4; k >= 2; --k) {
+		if (len < k) continue;
+		int ax = path[len - k] % MAP_W, ay = path[len - k] / MAP_W;
+		bool clear = true;
+		for (int t = 1; t < 16 * k && clear; ++t) {
+			double f = t / (16.0 * k);
+			int qx = (int)lround(sx + (ax - sx) * f), qy = (int)lround(sy + (ay - sy) * f);
+			clear = qx >= 0 && qy >= 0 && qx < MAP_W && qy < MAP_H && layer.cell[qy][qx] == C_PATH;
+		}
+		if (clear) { aim = path[len - k]; break; }
+	}
 	int wx, wy, dummy;
 	netmap_world(aim % MAP_W, aim / MAP_W, &wx, &wy);
 	return way_to(wx, wy, &dummy);
