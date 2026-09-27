@@ -122,6 +122,10 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 | Start | Open the PET | Pause |
 | Select | Hold for the map of the layer so far: where you have been, the services, and the way to the exit or guardian | |
 
+In the net, a direction held toward a walkway lines MegaMan up with it and
+follows it round its turns, and A turns him to the navi or Mystery Data
+beside him.
+
 ### A run
 
 A new stretch of net has opened under the town: the Endless Net. Its
