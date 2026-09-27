@@ -163,6 +163,8 @@ const char *shop_pick_gift_program(ShopItem *out) {
 	return NULL;
 }
 
+#define PROGRAM_HP_200 0xAC   /* its id in the game's shops (4200 zenny there) */
+
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	for (int i = 0; i < 6 && n < 4; ++i) {
@@ -173,6 +175,9 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		 * brings 100 to 1000 zenny a battle or Mystery Data, and the
 		 * programs sat at 2500 to 7100; 200 more an act) */
 		it.price = (uint16_t)(it.price / 4 + 2 + 2 * (pacing_act(depth) + 7 * pacing_loop(depth)));
+		/* (HP+200 at that price tripled a first act's 100 HP for 1200
+		 * zenny, where an HPMemory's 20 cost 800) */
+		if (it.id == PROGRAM_HP_200) it.price = (uint16_t)(24 + 4 * (pacing_act(depth) + 7 * pacing_loop(depth)));
 		out[n++] = it;
 	}
 	return n;

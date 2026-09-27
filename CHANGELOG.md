@@ -55,7 +55,8 @@ First playable version.
   erasing blow, BlastMan's rolling bombs, ChargeMan's charge and more).
 - The NaviCust vendor's programs cost a quarter of the game's prices,
   which are its endgame's (2500 to 7100 zenny against a run's 100 to
-  1000 a battle or Mystery Data), and 200 more an act.
+  1000 a battle or Mystery Data), and 200 more an act; HP+200, which
+  would triple a first act's HP, costs 2400 and 400 more an act.
 - Servers, Net Dealers and other services stand off a room's exits, where
   they blocked the way on, and bystanders stand in the open, not in a
   panel-wide gap where they pinned MegaMan. The map's key lists what the layer holds,
