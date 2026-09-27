@@ -311,25 +311,25 @@ static const char *status_words(void) {
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData.|");
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData.|", run.fragments);
 	}
-	/* the services here, every time (holding B skips a box, and the
-	 * first word is said once) */
-	bool shop = false, heal = false, programs = false;
+	/* the services here: all of them the first time, then only the heal
+	 * while he is hurt (it heals every time; the map's key names the rest,
+	 * and a later L is a box or two, not the briefing again) */
+	bool shop = false, heal = false, programs = false, told = D.layer_told;
 	for (int i = 0; i < layer.nobj; ++i) {
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
 	}
-	/* (the heal heals every time: after the first word, named while he is hurt) */
-	heal = heal && (!D.layer_told || emu_read16(BN6_NAVI_STATS + 0x40) < emu_read16(BN6_NAVI_STATS + 0x42));
-	if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
-	else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
-	else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
-	if (programs) ADD("@M There's a NaviCust program shop here too.|");
-	if (!D.layer_told) {
+	bool hurt = emu_read16(BN6_NAVI_STATS + 0x40) < emu_read16(BN6_NAVI_STATS + 0x42);
+	if (!told) {
+		if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
+		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
+		else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
+		if (programs) ADD("@M There's a NaviCust program shop here too.|");
 		ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
-	}
+	} else if (heal && hurt) ADD("@M The Recovery Mr. Prog here can patch us up.|");
 	/* the way on, as MegaMan senses it: along the floor where he can (the
 	 * arrow's way); where the walk sets off well away from where the goal
 	 * lies, where it lies, which holds still as the walk winds */
@@ -345,6 +345,7 @@ static const char *status_words(void) {
 	if (apart > 4) apart = 8 - apart;
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
 	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
+	else if (apart >= 2 && told) ADD("@M The %s %s. Follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies);
 	else if (apart >= 2)
 		ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies, how_far[far]);
 	else ADD("@M The way on goes %s. %s", way, how_far[far]);
@@ -818,6 +819,7 @@ static uint32_t corner_assist(uint32_t keys) {
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
 	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
 	static int held_for, last_held = -1;          /* frames the same key has been held */
+	static int pull_t, pull_for, pull_ex, pull_ey, pull_wx, pull_wy;   /* a pull into a lane: its frames, key, mouth and way */
 	static int turn_cx, turn_cy, cur_cx = -99, cur_cy = -99, prev_cx = -99, prev_cy = -99;
 	static int walked[12][2], nwalked;            /* the panels he has walked lately, newest last */
 	uint32_t pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
@@ -849,23 +851,56 @@ static uint32_t corner_assist(uint32_t keys) {
 		if (autopilot_on()) return keys;
 		int cx, cy, x = pad_dirs[held].x, y = pad_dirs[held].y;
 		netmap_panel(px, py, &cx, &cy);
-		/* (a tap, a sidestep, is left alone: the key held a moment first) */
+		/* (a tap is left alone: the key held a moment first) */
 		held_for = held == last_held ? held_for + 1 : 0;
 		last_held = held;
-		if (held_for >= 8 && !floor_panel(cx + y, cy - x)) {
-			/* (not back into a lane he has lately walked: he came out of it) */
-			bool la = lane_step(cx, cy, x, 0), lb = lane_step(cx, cy, 0, y);
-			for (int i = 0; i < nwalked; ++i) {
-				if (walked[i][0] == cx && walked[i][1] == cy - x) la = false;
-				if (walked[i][0] == cx + y && walked[i][1] == cy) lb = false;
-			}
-			if (la != lb) {
+		/* a pull under way: on towards the lane it chose until he stands in
+		 * it (a pull re-chosen from each panel fought his own key where the
+		 * floor opened: he rocked on a panel's border) */
+		if (pull_t > 0 && held == pull_for) {
+			if (++pull_t > 60 || (cx == pull_ex + pull_wy && cy == pull_ey - pull_wx)) pull_t = 0;
+			else {
 				int wcx, wcy;
-				netmap_world(cx, cy, &wcx, &wcy);
-				/* (into the lane along world X: on its middle in Y first; along Y: in X) */
-				int off = la ? py - wcy : px - wcx, k;
-				if (abs(off) > 4) k = la ? step_key(0, off > 0 ? -1 : 1) : step_key(off > 0 ? -1 : 1, 0);
-				else k = la ? step_key(x, 0) : step_key(0, y);
+				netmap_world(pull_ex, pull_ey, &wcx, &wcy);
+				int off = pull_wx ? py - wcy : px - wcx;
+				int k = abs(off) > 4 ? (pull_wx ? step_key(0, off > 0 ? -1 : 1) : step_key(off > 0 ? -1 : 1, 0)) : step_key(pull_wx, pull_wy);
+				stuck = 0; assist = -1;
+				return (keys & ~pad) | pad_dirs[k].keys;
+			}
+		}
+		pull_t = 0;
+		if (held_for >= 3 && !floor_panel(cx + y, cy - x)) {
+			/* a lane's mouth his key points into, opening from his panel or
+			 * the one beside it across the lane (standing a unit short of
+			 * the panel before a walkway, the mouth was his panel's diagonal
+			 * and LEFT slid him back to the corner): on to its middle line,
+			 * a step sideways if need be, then in; never into a lane he has
+			 * lately walked (he came out of it) */
+			int best_off = 37;
+			for (int along = 0; along < 2; ++along) {
+				int wx = along == 0 ? x : 0, wy = along == 0 ? 0 : y;   /* the lane's way, world */
+				int gx = wy, gy = -wx, qx = abs(gy), qy = abs(gx);      /* ... on the grid, and across it */
+				for (int s = -1; s <= 1; ++s) {
+					int ex = cx + qx * s, ey = cy + qy * s;               /* where the lane opens from */
+					if (!floor_panel(ex, ey) || !lane_step(ex, ey, wx, wy)) continue;
+					bool walked_it = false;
+					for (int i = 0; i < nwalked; ++i) walked_it |= walked[i][0] == ex + gx && walked[i][1] == ey + gy;
+					if (walked_it) continue;
+					int wcx, wcy;
+					netmap_world(ex, ey, &wcx, &wcy);
+					int off = wx ? py - wcy : px - wcx;                   /* across the lane, world */
+					if (abs(off) >= best_off) continue;
+					best_off = abs(off);
+					pull_ex = ex; pull_ey = ey; pull_wx = wx; pull_wy = wy;
+				}
+			}
+			if (best_off < 37) {
+				pull_t = 1;
+				pull_for = held;
+				int wcx, wcy;
+				netmap_world(pull_ex, pull_ey, &wcx, &wcy);
+				int off = pull_wx ? py - wcy : px - wcx;
+				int k = abs(off) > 4 ? (pull_wx ? step_key(0, off > 0 ? -1 : 1) : step_key(off > 0 ? -1 : 1, 0)) : step_key(pull_wx, pull_wy);
 				stuck = 0; assist = -1;
 				return (keys & ~pad) | pad_dirs[k].keys;
 			}
