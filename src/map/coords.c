@@ -5,7 +5,7 @@
  * x / 8 + 127. Walls: types 1 NE, 2 SW, 3 SE, 4 NW edges and 5 E, 6 S, 7 N,
  * 8 W outer corners. Triggers: an original warp pad is 3x3 cells, types 9-C
  * at the corners and 0x11 elsewhere, the value its warp index (see
- * docs/ROM_DATA.md); a layer's is its whole panel, 4x4. */
+ * docs/ROM_DATA.md); a layer's covers the pad's square whole. */
 #include "coords.h"
 
 #include <stdio.h>
@@ -74,19 +74,17 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 	return n;
 }
 
-/* A warp pad's trigger cells: the whole panel around its centre, 4x4 (a
- * panel's centre is a cell's corner, so the originals' 3x3 reached 8 units
- * one way and 16 the other, and MegaMan stood on the pad's front rim
- * without leaving). Types 9-C at the corners and 0x11 elsewhere, as the
- * originals'. */
+/* A warp pad's trigger cells: every cell over the square 12 units round
+ * its centre, whole (3x3 for a centre in a cell's middle, 4x4 on a cell's
+ * corner). The originals cut their corner cells (types 9-C); in the
+ * isometric view those corners are the ring's top, bottom and sides on
+ * screen, so MegaMan stood on the pad's rim, the sprite over its middle,
+ * and stayed. */
 #define PAD_CELLS 16
 static int pad(Cell *t, const CoordPad *p) {
-	int cx = p->x >> 3, cy = p->y >> 3, n = 0;   /* arithmetic shift: floor */
-	for (int dy = -2; dy <= 1; ++dy)
-		for (int dx = -2; dx <= 1; ++dx) {
-			int type = dy == -2 ? (dx == -2 ? 0x09 : dx == 1 ? 0x0A : 0x11) : dy == 1 ? (dx == -2 ? 0x0B : dx == 1 ? 0x0C : 0x11) : 0x11;
-			t[n++] = cell(cx + dx, cy + dy, 0, p->index, 8, type);
-		}
+	int x0 = (p->x - 12) >> 3, x1 = (p->x + 11) >> 3, y0 = (p->y - 12) >> 3, y1 = (p->y + 11) >> 3, n = 0;   /* (arithmetic shift: floor) */
+	for (int cy = y0; cy <= y1 && n < PAD_CELLS; ++cy)
+		for (int cx = x0; cx <= x1 && n < PAD_CELLS; ++cx) t[n++] = cell(cx, cy, 0, p->index, 8, 0x11);
 	return n;
 }
 

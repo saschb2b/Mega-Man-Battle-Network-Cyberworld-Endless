@@ -19,8 +19,8 @@ First playable version.
   another way ("The way winds, so follow the arrow!"), so the words hold
   still while the arrow shows the next stretch; the Recovery Mr. Prog,
   which heals every time, is named again while MegaMan is hurt.
-- Standing anywhere on the exit pad takes MegaMan on: its trigger covers
-  the pad's whole panel (on its front rim he stayed before).
+- Standing anywhere on the exit pad takes MegaMan on: its trigger is the
+  pad's whole square (on its rims he stayed before).
 - The map (hold Select) fills the screen: the floor seen so far with its
   panels apart, so walkways read as lines, the whole of it when it fits,
   marks for MegaMan, the exit, heals, shops and the guardian with a key
