@@ -17,6 +17,9 @@
 /* L has told where they are on this layer (in the saved RAM, so a CONTINUE
  * mid-layer does not tell it all again). */
 #define LAYER_TOLD_FLAG 0x144E
+/* The Net Dealer has said his words on this layer (a later talk is a line
+ * and the list). */
+#define LAYER_DEALER_TOLD_FLAG 0x144F
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */

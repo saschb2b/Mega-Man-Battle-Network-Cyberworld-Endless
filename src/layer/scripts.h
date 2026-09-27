@@ -23,8 +23,9 @@ void chat_marks_install(void);
  * lines, see trader.h.) */
 int ta_heal(TextArchive *t, int variant);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
- * `shop`'s screen. */
-int ta_shop(TextArchive *t, int shop, int face, const char *greeting);
+ * `shop`'s screen; with `again` and a flag, the greeting the first time
+ * (the flag set) and `again` after. */
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag);
 
 /* Choices: Yes sets event flag `flag`, which the director acts on. A
  * challenge answers only once; the gate first wants three ScrtData. */

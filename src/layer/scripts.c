@@ -83,11 +83,26 @@ int ta_heal(TextArchive *t, int variant) {
 	return i;
 }
 
-int ta_shop(TextArchive *t, int shop, int face, const char *greeting) {
-	int i = ta_script(t);
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag) {
 	uint8_t open[] = { 0xFB, 0x05, (uint8_t)shop };               /* ts_start_shop */
 	bool first = true;
+	/* once his words are said (flag set), a line and the list: Kai sat
+	 * through six boxes each time he came back */
+	int back = -1;
+	if (again && told_flag >= 0) {
+		back = ta_script(t);
+		ta_pages(t, again, face, &first);
+		ta_bytes(t, open, sizeof open);
+		ta_end(t);
+		first = true;
+	}
+	int i = ta_script(t);
+	if (back >= 0) {
+		uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
+		ta_bytes(t, check, sizeof check);
+	}
 	ta_pages(t, greeting, face, &first);
+	if (back >= 0) flag_set(t, told_flag);
 	ta_bytes(t, open, sizeof open);
 	ta_end(t);
 	return i;

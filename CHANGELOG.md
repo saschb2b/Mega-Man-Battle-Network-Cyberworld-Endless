@@ -38,7 +38,8 @@ First playable version.
   has by then (400 zenny in act 1, 300 more an act),
   and says which, naming the guardian, and that it has two. A
   bystander's tip on where Net Dealers set up no longer says the middle
-  layer only. A shop's list takes no A for its first moment, so the A
+  layer only. Talked to again, the Net Dealer says "Back for more?" and
+  opens his list. A shop's list takes no A for its first moment, so the A
   that closed its keeper's words twice over no longer asks to buy the
   first item.
 - In battle, an L or R pressed just before the Custom gauge fills opens

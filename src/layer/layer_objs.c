@@ -215,13 +215,13 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
 				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
 			tk.sprite = SPR_DEALER;
-			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello);
+			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!", LAYER_DEALER_TOLD_FLAG);
 			break;
 		}
 		case OBJ_PROGRAMS:
 			tk.sprite = SPR_TECH;
 			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH,
-				"NaviCust programs, fresh from my workbench!|Install them in your PET: MegaMan, then NaviCust.");
+				"NaviCust programs, fresh from my workbench!|Install them in your PET: MegaMan, then NaviCust.", NULL, -1);
 			break;
 		case OBJ_CHALLENGE: {
 			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;

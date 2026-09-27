@@ -87,7 +87,9 @@ one), and `run.make` records the build's `LAYER_MAKE`: a run saved by a
 build that makes layers otherwise continues its layer from the start, with
 the layer's flags and Mystery Data picks cleared (its RAM would not match
 this build's objects). `run.seen` beside it keeps the map's panels seen so
-far, and event flag `0x144E` in the state that L has told where they are.
+far, and event flag `0x144E` in the state that L has told where they are
+(`0x144F`: that the Net Dealer has said his words, so a later talk is a
+line and the list).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 
