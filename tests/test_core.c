@@ -283,9 +283,10 @@ static void test_pacing(void) {
 	CHECK(pacing_guardian_version(18, 3, 0, false, fake_navi_hp) == 0, "Colonel V1 in the fourth act");
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
 	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
-	/* heals: the middle layer of each act on the first two cycles */
-	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && !pacing_heal_certain(1) && !pacing_heal_certain(19),
-		"a heal on each act's middle layer");
+	/* heals: the middle layer of each act on the first two cycles, and the
+	 * run's first layer */
+	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
+		!pacing_heal_certain(19) && !pacing_heal_certain(1 + CYCLE_LAYERS), "a heal on each act's middle layer and the first");
 	CHECK(pacing_heal_certain(2 + CYCLE_LAYERS) && !pacing_heal_certain(2 + 2 * CYCLE_LAYERS), "the third cycle drops it");
 }
 
