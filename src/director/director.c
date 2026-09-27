@@ -365,8 +365,10 @@ void director_describe(FILE *f) {
 		(unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
-		fprintf(f, "pos %d %d %d locked %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16,
-			(int)emu_read32(BN6_PLAYER + 0x24) >> 16, emu_read8(BN6_PLAYER + 0x17));
+		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16,
+			(int)emu_read32(BN6_PLAYER + 0x20) >> 16, (int)emu_read32(BN6_PLAYER + 0x24) >> 16, emu_read8(BN6_PLAYER + 0x17),
+			emu_read8(BN6_PLAYER + 9), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
+			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 		else fprintf(f, "exit %d %d\n", D.objs.exit_x, D.objs.exit_y);
 		/* the game's NPC objects near him: flags, state, radius, lock, text */
@@ -510,6 +512,14 @@ bool director_resume(void) {
 	save_state_path(path, sizeof path);
 	if (emu_load_state(path)) {
 		lock_run();
+		/* a state saved while the jack-in still held MegaMan (runs from
+		 * before the checkpoint waited for him): the game's own release
+		 * would never come, so it is done here */
+		if (emu_read8(BN6_DIALOGUE_LOCK) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) {
+			emu_write8(BN6_DIALOGUE_LOCK, 0);
+			flag_set(BN6_FLAG_PLAYER_CAN_MOVE);
+			flag_clear(BN6_FLAG_DIALOGUE_1719);
+		}
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_get(D.objs.choice[i].flag)) D.chosen |= 1u << i;
@@ -720,7 +730,10 @@ void director_update(void) {
 	if (act_on_choices()) return;
 	/* (never with a chat box open: a state would keep it, and the talk
 	 * slot's text is not in a state) */
-	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX)) {
+	/* (nor while the arrival still holds him: the jack-in and the warp pad
+	 * keep him for about 90 frames, and the release is not in the state) */
+	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
+		!emu_read8(BN6_DIALOGUE_LOCK) && flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) {
 		D.checkpoint = false;
 		char path[600];
 		save_state_path(path, sizeof path);

@@ -190,8 +190,13 @@ int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int cod
 }
 
 /* ts_print_navi_cust_program5: the program's name, printed by the game */
+/* A NaviCust program's name: the shop data's (and EF 1B's) program id
+ * counts in fours (the game adds 0x90 to make an item id), its name
+ * archive by one; a direct FA takes the name's index (bn6f chatbox_8041FB4:
+ * a buffered value goes (value - 0x90) >> 2). The id itself read past the
+ * 75 names for most programs and printed garbage into the gift's menu. */
 static void program_name(TextArchive *t, int program) {
-	uint8_t b[] = { 0xFA, 0x00, (uint8_t)program, 0x05 };
+	uint8_t b[] = { 0xFA, 0x00, (uint8_t)(program >> 2), 0x05 };
 	ta_bytes(t, b, sizeof b);
 }
 
@@ -234,7 +239,7 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 		"PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", FACE_PROG, &first);
 	if (comfort) {
 		/* the last dive ended early: a little more help */
-		ta_page(t, FACE_PROG, "MY LOGS SAY YOUR LAST DIVE ENDED EARLY. TAKE THIS TOO!", false);
+		ta_page(t, FACE_PROG, "YOUR LAST DIVE ENDED EARLY, SO TAKE THIS TOO!", false);
 		give_hp_memory(t, 1);
 		got_hp(t, 1, &first);
 	}
