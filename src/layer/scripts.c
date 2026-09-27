@@ -69,16 +69,25 @@ static int closing(TextArchive *t) {
 
 static const uint8_t full_hp[] = { 0xFC, 0x03, 0x13, 0x00 };  /* ts_call_set_full_h_p */
 
-int ta_heal(TextArchive *t, int variant) {
+int ta_heal(TextArchive *t, int variant, int told_flag) {
 	static const char *const hello[] = {
 		"I'M A RECOVERY PROGRAM FROM SCILAB! HOLD STILL, MEGAMAN...",
 		"DR. HIKARI SENT ME TO PATCH YOU UP! HERE GOES...",
 		"RECOVERY PROGRAM, RUNNING! THIS WON'T TAKE A SECOND!",
 	};
+	/* once he has spoken on this layer (flag set): the heal in one box (an
+	 * A too many after "fully restored" talked to him again, two boxes) */
+	int back = ta_script(t);
+	ta_bytes(t, full_hp, sizeof full_hp);
+	ta_page(t, FACE_PROG, "ALL PATCHED UP! COME BACK ANYTIME!", true);
+	ta_end(t);
 	int i = ta_script(t);
+	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
+	ta_bytes(t, check, sizeof check);
 	ta_page(t, FACE_PROG, hello[(unsigned)variant % 3], true);
 	ta_bytes(t, full_hp, sizeof full_hp);
 	ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+	flag_set(t, told_flag);
 	ta_end(t);
 	return i;
 }

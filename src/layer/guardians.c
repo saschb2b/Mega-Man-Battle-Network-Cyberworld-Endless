@@ -51,7 +51,8 @@ const char *guardian_tip(int navi) {
 	case 9: return "GroundMan drills through the panels. Watch our footing!";
 	case 10: return "DustMan throws scrap onto our panels and charges in to hit us up close. Keep moving!";
 	case 11: return "ProtoMan's shield stops our shots. Hit him when he swings his sword!";
-	case 12: return "BlastMan's bombs roll down our row and burst. Step off the yellow panels!";
+	case 12: return "BlastMan's bombs roll down our row and burst, his flames dash along it, and a fire wall walks down a column. "
+		"Step off the yellow panels!";
 	case 13: return "DiveMan sends giant waves across our area. Keep moving between rows!";
 	case 14: return "CircusMan keeps to the back of his area, claps down on a lit column and drops his tent to trap us. "
 		"Keep moving, and bring chips that reach the back!";

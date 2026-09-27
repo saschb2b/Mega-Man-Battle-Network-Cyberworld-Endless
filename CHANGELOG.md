@@ -4,6 +4,13 @@
 
 First playable version.
 
+- A battle's viruses are counted from the battle the game set up: the
+  pointer that names it kept the last battle's until the setup wrote it, so
+  a battle after a re-roll could count the other battle's viruses (AREA
+  CLEAR showed 11 of 12). The run log writes a battle once it is known.
+- A Recovery Mr. Prog talked to again on a layer heals in one box ("ALL
+  PATCHED UP!") instead of his whole greeting. BlastMan's warning names his
+  flame dash and fire wall beside the bombs.
 - The application ID is the repository's name,
   `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless`, as
   Flathub asks. The AppImage moves a menu entry it made under the old ID,

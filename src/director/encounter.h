@@ -15,6 +15,10 @@ void emu_encounter_set(const Encounter *e);
  * not yet named, early in its setup). */
 int emu_encounter_slot(void);
 int emu_encounter_battle_slot(void);
+/* Off the game's last battle's record: the pointer the next one's setup
+ * names its record by keeps the last battle's until the setup writes it
+ * (a CONTINUE's state or the last battle), so it is cleared on the map. */
+void emu_encounter_battle_forget(void);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
 void emu_battle_release(void);

@@ -188,7 +188,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said++));
 			break;
 		}
-		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth); break;
+		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG); break;
 		case OBJ_TRADER:
 		case OBJ_BUGTRADER: {
 			/* the game's own machine and lines; deeper, some are Specials */

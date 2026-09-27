@@ -499,6 +499,7 @@ static bool build_layer(void) {
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
+	flag_clear(LAYER_HEAL_TOLD_FLAG);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -1486,7 +1487,7 @@ bool director_resume(void) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
 			/* (a gift taken stays taken: it is the run's, not the layer's) */
-			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_VENDOR_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
+			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_HEAL_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
@@ -1670,7 +1671,7 @@ void director_update(void) {
 			}
 		}
 	}
-	if (on_map()) { unwedge(); push_arrow(); }
+	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
@@ -1680,7 +1681,7 @@ void director_update(void) {
 				bool guardian = boss_fighting();
 				D.record_known = guardian;
 				if (!guardian && !D.challenge) ++D.battles;
-				runlog_battle_start(guardian ? NULL : &D.next, guardian ? "guardian" : D.challenge ? "challenge" : "battle");
+				if (guardian) runlog_battle_start(NULL, "guardian");
 			}
 			D.in_battle = true;
 			/* the battle the game was handed, once its setup names the
@@ -1688,8 +1689,11 @@ void director_update(void) {
 			if (!D.record_known) {
 				int s = emu_encounter_battle_slot();
 				if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
-				if (s != -2) D.record_known = true;
-				if (emu_debug_on() && s >= 0) fprintf(stderr, "battle from record %d: field %02x player %02x\n", s, D.next.field, D.next.player);
+				if (s != -2) {
+					D.record_known = true;
+					runlog_battle_start(&D.next, D.challenge ? "challenge" : "battle");
+				}
+				if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);
 			}
 			/* (where the game put MegaMan, once a battle) */
 			if (emu_debug_on() && !D.placed_told)

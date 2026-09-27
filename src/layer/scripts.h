@@ -21,7 +21,7 @@ void chat_marks_install(void);
 /* Service NPCs on the game's own commands: a recovery Mr. Prog heals to
  * full HP (`variant` picks his words). (Chip Traders speak the game's own
  * lines, see trader.h.) */
-int ta_heal(TextArchive *t, int variant);
+int ta_heal(TextArchive *t, int variant, int told_flag);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
  * `shop`'s screen; with `again` and a flag, the greeting the first time
  * (the flag set) and `again` after. */

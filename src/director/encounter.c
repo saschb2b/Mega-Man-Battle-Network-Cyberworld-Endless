@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "bytes.h"
 #include "data.h"
 #include "emu.h"
@@ -117,8 +118,19 @@ void emu_encounter_set(const Encounter *e) {
 
 int emu_encounter_slot(void) { return slot; }
 
+/* eToolkit's battle state, where the setup keeps its BattleSettings pointer
+ * (bn6f), a few frames into it */
+static uint32_t battle_settings_at(void) {
+	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
+	return state >= 0x02000000u && state < 0x02040000u ? state + 0x3C : 0;
+}
+
 int emu_encounter_battle_slot(void) {
-	/* eToolkit's battle state, its BattleSettings pointer (bn6f) */
-	uint32_t state = emu_read32(0x020093B0u + 0x18), at = state ? emu_read32(state + 0x3C) : 0;
+	uint32_t p = battle_settings_at(), at = p ? emu_read32(p) : 0;
 	return !at ? -2 : at == settings_of(0) ? 0 : at == settings_of(1) ? 1 : -1;
+}
+
+void emu_encounter_battle_forget(void) {
+	uint32_t p = battle_settings_at();
+	if (p && emu_read32(p)) emu_write32(p, 0);
 }
