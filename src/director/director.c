@@ -1323,8 +1323,15 @@ static void push_arrow(void) {
 static void arrow_update(void) {
 	/* (it turns as MegaMan walks: frozen, it pointed into the gap he had
 	 * walked past) */
-	static int tick;
-	if (cinema_arrow_on() && on_map() && ++tick % 15 == 0) { goal_way(); cinema_arrow_turn(way_dir); }
+	/* (a new way twice running before it turns: at a walkway's mouth the
+	 * route's first leg flipped as MegaMan crossed a panel's border, and
+	 * the arrow with it) */
+	static int tick, pending = -1;
+	if (cinema_arrow_on() && on_map() && ++tick % 15 == 0) {
+		goal_way();
+		if (way_dir == pending) cinema_arrow_turn(way_dir);
+		pending = way_dir;
+	}
 	if (!D.arrow_pending) return;
 	if (talk_busy()) cinema_arrow_extend(60);
 	else { D.arrow_pending = false; cinema_arrow_extend(180); }

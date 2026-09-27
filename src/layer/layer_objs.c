@@ -170,10 +170,12 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		case OBJ_NPC: {
 			/* Normal Navis and pink navis */
-			static const int navis[6] = { 62, 64, 65, 66, 69, 87 };
+			/* (not the Net Dealer's nor the technician's look: Kai took a
+			 * bystander for the dealer) */
+			static const int navis[4] = { 64, 65, 69, 87 };
 			static int base;
 			if (!said) base = o->npc_line;
-			tk.sprite = navis[o->param % 6];
+			tk.sprite = navis[o->param % 4];
 			/* (a list-6 navi's face has its sprite's number) */
 			tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said++));
 			break;
