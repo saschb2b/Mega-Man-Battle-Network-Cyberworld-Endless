@@ -75,17 +75,20 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 }
 
 /* A warp pad's trigger cells: every cell over the pad's panel (5x5 for a
- * centre in a cell's middle, 4x4 on a cell's corner), whole but for the
- * corners, which are cut as the originals' 3x3 cuts them (types 9-C). The
- * originals' 3x3 reaches 12 units, and its cut corners are the ring's top,
- * bottom and sides on screen: MegaMan stood on the pad's rim, the sprite
- * over its middle, and stayed. */
-#define PAD_CELLS 25
+ * centre in a cell's middle, 4x4 on a cell's corner) and a cell more
+ * towards the screen's foot (world -X and +Y: standing below the pad,
+ * MegaMan's sprite covers its lower rim while his feet are still short of
+ * it), whole but for the corners at the screen's left, top and right,
+ * which are cut as the originals' 3x3 cuts them (types 9, A, C). The originals' 3x3 reaches 12 units, and its cut
+ * corners are the ring's top, bottom and sides on screen: MegaMan stood on
+ * the pad's rim, the sprite over its middle, and stayed. */
+#define PAD_CELLS 36
 static int pad(Cell *t, const CoordPad *p) {
-	int x0 = (p->x - 16) >> 3, x1 = (p->x + 15) >> 3, y0 = (p->y - 16) >> 3, y1 = (p->y + 15) >> 3, n = 0;   /* (arithmetic shift: floor) */
+	int x0 = (p->x - 24) >> 3, x1 = (p->x + 15) >> 3, y0 = (p->y - 16) >> 3, y1 = (p->y + 23) >> 3, n = 0;   /* (arithmetic shift: floor) */
 	for (int cy = y0; cy <= y1 && n < PAD_CELLS; ++cy)
 		for (int cx = x0; cx <= x1 && n < PAD_CELLS; ++cx) {
-			int type = cy == y0 ? (cx == x0 ? 0x09 : cx == x1 ? 0x0A : 0x11) : cy == y1 ? (cx == x0 ? 0x0B : cx == x1 ? 0x0C : 0x11) : 0x11;
+			/* (the corner at the screen's foot, world -X +Y, whole) */
+			int type = cy == y0 ? (cx == x0 ? 0x09 : cx == x1 ? 0x0A : 0x11) : cy == y1 && cx == x1 ? 0x0C : 0x11;
 			t[n++] = cell(cx, cy, 0, p->index, 8, type);
 		}
 	return n;
