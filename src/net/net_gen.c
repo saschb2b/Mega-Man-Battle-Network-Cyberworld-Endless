@@ -122,6 +122,16 @@ static bool beside_other_level(int x, int y) {
 	return false;
 }
 
+/* Whether a floor lies a panel's gap in front of (x, y), down-left or
+ * down-right on the screen, where the camera looks from: the cell's own
+ * wall hides the gap, so from that floor what stands here looks a step
+ * away on a raised block (a playtester pressed A at a Mystery Data that
+ * was a walk round, and left it) */
+static bool behind_gap(int x, int y) {
+	return (x + 2 < MAP_W && layer.cell[y][x + 1] != C_PATH && layer.cell[y][x + 2] == C_PATH) ||
+		(y + 2 < MAP_H && layer.cell[y + 1][x] != C_PATH && layer.cell[y + 2][x] == C_PATH);
+}
+
 /* A free cell inside a room, off its middle, its exits and any walkway's
  * mouth so paths stay clear, where a solid object cuts no way; with `open`, first one with
  * floor on its four sides (a bystander in a panel-wide gap beside a
@@ -138,6 +148,7 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 		 * raised platform's edge looked a step away from it and was a
 		 * stair's walk round) */
 		if (tries < 30 && beside_other_level(x, y)) continue;
+		if (tries < 38 && behind_gap(x, y)) continue;
 		if (cell_free(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;
@@ -351,7 +362,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	for (int k = 0; k < md; ++k) {
 		bool got = false;
 		if (rng_range(0, 99) < 70)
-			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !cuts_way(x, y); }
+			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !behind_gap(x, y) && !cuts_way(x, y); }
 		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
 		if (!got) continue;
 		NetObj *o = add_obj(OBJ_MYSTERY, x, y);

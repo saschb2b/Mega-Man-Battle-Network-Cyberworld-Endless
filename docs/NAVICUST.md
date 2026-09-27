@@ -87,7 +87,10 @@ feels punishing; one too generous stops biting. BN6 itself stops at 5x5.)
   against one that shoots); one fits the board's build (a Charge+1 beside
   an Attack+1); one is from the act's tier. "None" pays BugFrags, so a
   thin, clean board is a real choice.
-- **The layer-1 gift** keeps its program option.
+- **The layer-1 gift** keeps its program option: one that changes how a
+  first act plays at once (SuperArmor, Custom1, Attack+1, Charge+1), in
+  one of the colours the ROM's program records give it. MegFldr1 left
+  it: room for a Mega chip beside a starting folder was no choice.
 - **Blue Mystery Data**, as BN6 hides programs: on the Undernet's layers
   and as a Server challenge's prize, where the run already takes a risk.
 

@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Mystery Data, services and navis no longer stand one panel's gap behind
+  a walkway: the floor's own wall hides such a gap, so from the walkway
+  they looked a step away on a raised block, and were a walk round (15
+  in a hundred stood so; under one now). Runs from an older build start
+  their layer afresh.
+- DustMan's warning names the broken panels he hurls back (their first
+  hit stuns) and the breath that pulls MegaMan up close for a punch, and
+  says to keep a Recover chip ready.
+- MegaMan's word on a NaviCust bug says where bugs come from: a program
+  over the board's edge or off the command line, a Plus part on it, or
+  two of one color side by side.
+- The layer-1 gift's program changes how a first act plays: SuperArmor,
+  Custom1, Attack+1 or Charge+1 (MegFldr1, room for a Mega chip beside a
+  starting folder, is gone).
+- Where the act's guardian has no weak element, the Net Dealer who names
+  the viruses' weakness now stocks a chip of it.
 - The title: NEW GAME over a saved run asks first, in the game's own chat
   box ("Start a new run? We'd lose our Layer 5 run!", MegaMan's face, the
   text typed out, No chosen), where one press had ended the run. The

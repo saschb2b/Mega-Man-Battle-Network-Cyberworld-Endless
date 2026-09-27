@@ -121,9 +121,17 @@ static bool beside_narrow(int x, int y) {
 	return false;
 }
 
+/* Whether a floor lies a panel's gap in front of (x, y), down-left or
+ * down-right on the screen: the cell's own wall hides the gap, and from
+ * that floor what stands here looks a step away */
+static bool behind_gap(int x, int y) {
+	return (x + 2 < MAP_W && layer.cell[y][x + 1] != C_PATH && layer.cell[y][x + 2] == C_PATH) ||
+		(y + 2 < MAP_H && layer.cell[y + 1][x] != C_PATH && layer.cell[y + 2][x] == C_PATH);
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
-	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0;
+	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -176,6 +184,10 @@ static void test_generation(void) {
 				o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
 			if (stands && beside_narrow((int)o->x, (int)o->y)) ++mouths;
 			if (stands) ++standing;
+			if (stands || o->type == OBJ_MYSTERY) {
+				++approached;
+				hidden += behind_gap((int)o->x, (int)o->y);
+			}
 		}
 		int traders = 0;
 		for (int i = 0; i < layer.nobj; ++i) traders += layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
@@ -190,6 +202,8 @@ static void test_generation(void) {
 	}
 	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
 	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
+	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
+	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
 	/* Determinism: the same seed builds the same layer. */
 	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
 	static Layer a;
@@ -599,6 +613,10 @@ static void test_navicust(void) {
 	bugs[11] = 1;
 	const char *w = navicust_bug_words(bugs);
 	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
+	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
+	memset(bugs, 0, sizeof bugs);
+	bugs[11] = 1;
+	CHECK(!strstr(navicust_bug_words(bugs), "command line"), "a colours' bug alone names itself");
 }
 
 int main(void) {

@@ -50,7 +50,8 @@ const char *guardian_tip(int navi) {
 	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "
 		"Step off the yellow panels, and watch our footing!";
 	case 9: return "GroundMan drills through the panels. Watch our footing!";
-	case 10: return "DustMan throws scrap onto our panels and charges in to hit us up close. Keep moving!";
+	case 10: return "DustMan drops scrap onto the lit panels and hurls our broken panels back at us, and their first hit stuns. "
+		"When he breathes in, he pulls us up close for a big punch. Keep a Recover chip ready!";
 	case 11: return "ProtoMan's shield stops our shots. Hit him when he swings his sword!";
 	case 12: return "BlastMan's bombs roll down our row and burst, his flames dash along it, and a fire wall walks down a column. "
 		"Step off the yellow panels!";

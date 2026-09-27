@@ -137,7 +137,7 @@ int shop_dealer_answer(int depth, int counter, char *code) {
 	return answer(depth, counter, id, code);
 }
 
-int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
+int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	for (int i = 0; i < 4; ++i) {
 		char code = '*';
@@ -155,6 +155,13 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 				it.id = (uint16_t)a;
 				it.stock = ci.power > answer_most(depth, counter) ? 1 : 2;
 			}
+		}
+		/* the second, where the first is the hardest hit for a guardian of
+		 * no element: a chip of the element the act's viruses can't stand,
+		 * which he names (a playtester heard "Fire" beside a list of none) */
+		if (i == 1 && counter < 0 && viruses > 0) {
+			int a = answer(depth, viruses, it.id, &code);
+			if (a >= 0) it.id = (uint16_t)a;
 		}
 		it.code = (uint8_t)(code == '*' ? 26 : code - 'A');
 		it.price = (uint16_t)(chip_price(it.id) / 100);
@@ -182,26 +189,24 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 
 bool shop_pick_program(ShopItem *out) { return pick(3, 0, out); }
 
-/* The gift's programs: of the game's shop programs, those that help a
- * first act at once (ids per the shop data, the names' index is id / 4) */
-static const struct { uint16_t id; const char *about; } gifts[] = {
-	{ 0x04, "SUPERARMOR: NO FLINCHING WHEN YOU'RE HIT!" },
-	{ 0x08, "CUSTOM1: ONE MORE CHIP IN THE CUSTOM SCREEN!" },
-	{ 0x10, "MEGFLDR1: ROOM FOR ONE MORE MEGA CHIP!" },
-	{ 0x8C, "ATTACK+1: A STRONGER BUSTER!" },
+/* The gift's programs: those that change how a first act plays at once
+ * (the names' index is the program; a playtester offered MegFldr1 on
+ * layer 1, room for a Mega chip beside a starting folder, took it only to
+ * see the PET) */
+static const struct { uint8_t program; const char *about; } gifts[] = {
+	{ 1, "SUPERARMOR: NO FLINCHING WHEN YOU'RE HIT!" },
+	{ 2, "CUSTOM1: ONE MORE CHIP IN THE CUSTOM SCREEN!" },
+	{ 35, "ATTACK+1: A STRONGER BUSTER!" },
+	{ 37, "CHARGE+1: A QUICKER CHARGE SHOT!" },
 };
 
 const char *shop_pick_gift_program(ShopItem *out) {
 	int k = rng_range(0, (int)(sizeof gifts / sizeof *gifts) - 1);
-	/* its color as the game's shop data has it */
-	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
-	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8) {
-		ShopItem it;
-		read_item(a, &it);
-		if (it.kind == 3 && it.id == gifts[k].id) { *out = it; return gifts[k].about; }
-	}
-	pick(3, 0, out);
-	return NULL;
+	/* in one of its colours as the ROM's program records have them */
+	int color = navicust_color(gifts[k].program);
+	if (!color) { pick(3, 0, out); return NULL; }
+	*out = (ShopItem){ 3, 1, (uint16_t)(gifts[k].program * 4), (uint8_t)color, 0 };
+	return gifts[k].about;
 }
 
 #define PROGRAM_HP_200 0xAC   /* its id in the game's shops (4200 zenny there) */

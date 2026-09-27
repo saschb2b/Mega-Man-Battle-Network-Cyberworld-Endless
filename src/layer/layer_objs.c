@@ -134,7 +134,14 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	 * answer he brought) */
 	ShopItem stock[SHOP_MAX_ITEMS];
 	int navi_of_act = run.boss_order[run.biome], ge_of_act = navi_of_act > 0 ? enemy_element(enemy_id(1, navi_of_act, 0)) : 0;
-	int nstock = shop_dealer_stock(run.depth, navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4) ? -1 : counter, stock);
+	bool elementless = navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4);
+	int nstock = shop_dealer_stock(run.depth, elementless ? -1 : counter, elementless ? counter : 0, stock);
+	/* (whether his list has a chip of the viruses' element, for his word) */
+	bool virus_chip = false;
+	for (int i = 0; i < nstock; ++i) {
+		ChipInfo ci;
+		if (stock[i].kind == 2 && counter > 0 && (chip_info(stock[i].id, &ci), ci.element == counter)) virus_chip = true;
+	}
 	const char *brought = nstock && stock[0].stock == 1 ? "It's the only one I've got, so make it count!" : "I brought two, and they go fast!";
 	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
 	 * a hopping BlastMan two times in three) */
@@ -215,11 +222,13 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			if (counter > 0 && ge > 0 && ge <= 4)
 				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s",
 					guardian(navi)->name, elem[counter], brought, lands);
-			else if (navi > 0 && counter > 0)
+			else if (navi > 0 && counter > 0 && virus_chip)
 				/* (no element to answer the guardian with: the hardest hit on
-				 * the list, and the viruses' weakness besides) */
+				 * the list, and the viruses' weakness besides, of which the
+				 * list has one) */
 				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s|"
-					"The viruses around here can't stand %s chips, though.", guardian(navi)->name, brought, elem[counter]);
+					"The viruses around here can't stand %s chips, though. I've got one of those too!", guardian(navi)->name, brought,
+					elem[counter]);
 			else if (navi > 0)
 				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s",
 					guardian(navi)->name, brought);

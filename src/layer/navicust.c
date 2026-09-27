@@ -150,6 +150,15 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS]) {
 		const char *article = level == 1 ? "A light" : level == 3 ? "A bad" : vowel ? "An" : "A";
 		k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s %s bug: %s.", article, name[t], effect[t]);
 	}
+	/* (where to look, from the game's rules: a playtester told only what a
+	 * bug did, of a program he had pushed over the edge, found the board
+	 * looking clean again; the colours' count names itself) */
+	bool placed = false;
+	for (int t = 1; t < 11; ++t) placed |= counts[t] && effect[t];
+	if (placed && k < (int)sizeof buf - 220)
+		k += snprintf(buf + k, sizeof buf - (size_t)k,
+			"|@M Bugs come from a program over the board's edge or off the command line, a Plus part on it, "
+			"or two of one color side by side.");
 	if (k < (int)sizeof buf - 80) snprintf(buf + k, sizeof buf - (size_t)k, "|@M We can rearrange it in the PET, or live with it.");
 	return buf;
 }
