@@ -717,9 +717,13 @@ static int plan_once(uint32_t seed) {
 			for (int dy = -r; dy <= r && T.folk_at[i][0] == 1 << 20; ++dy)
 				for (int dx = -r; dx <= r; ++dx) {
 					int cx = fdiv(fx, 8) + dx, cy = fdiv(fy, 8) + dy;
-					/* (off the triggers, and clear of where Lan arrives) */
+					/* (off the triggers, clear of where Lan arrives, and off the
+					 * statue's approach: a kid on the squirrel's front corner
+					 * stood where the arrow pointed) */
+					int px = fx + dx * 8 - T.info.port_x, py = fy + dy * 8 - T.info.port_y;
 					if ((abs(dx) != r && abs(dy) != r) || !walkable(cx, cy) || on_trigger(cx, cy) ||
-						abs(fx + dx * 8 - T.info.start_x) + abs(fy + dy * 8 - T.info.start_y) < 24) continue;
+						abs(fx + dx * 8 - T.info.start_x) + abs(fy + dy * 8 - T.info.start_y) < 24 ||
+						(nj && px * px + py * py < 36 * 36)) continue;
 					T.folk_at[i][0] = fx + dx * 8;
 					T.folk_at[i][1] = fy + dy * 8;
 					break;

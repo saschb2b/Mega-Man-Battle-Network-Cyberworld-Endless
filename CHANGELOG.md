@@ -8,7 +8,7 @@ First playable version.
   NaviCust): the gift's and the vendor's programs could not be installed
   before. The gift, the vendor and a bystander say where to install them.
 - R near the town's statue says which way the statue is and shows the
-  way-on arrow.
+  way-on arrow, and the townsfolk stand off the statue's approach.
 - Walkways without lining up: holding one direction at a walkway's mouth
   or a spur lines MegaMan up and takes him in (never back into the one he
   came out of); a diagonal held along a walkway follows it round its
