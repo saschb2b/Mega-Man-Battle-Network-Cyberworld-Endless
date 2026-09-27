@@ -44,8 +44,10 @@ its problems there. The loop was reacting.
   each surprised the persona with no warning; the other eight guardians had
   none either, found only when watched one by one (s13, `guardian_watch.sh`).
   The dealer's answer chip failed three ways over three sessions (a dud
-  needing a hole, a sword that couldn't reach, a one-shot); check every
-  act's answer against every guardian it can meet, not the one in play.
+  needing a hole, a sword that couldn't reach, a one-shot); the sweep of
+  every act's answers per element (`build.py pacing`, s13) found three
+  more at once: navi chips sold in twos, act 1's Elec answers over the
+  cap, layers with none.
 - **Budget the persona.** Sessions ran 320+ calls against 240: boss fights
   one action per call. The prompt now asks for bursts of two or three moves.
 - **Where the engine writes a game record, carry every field the original

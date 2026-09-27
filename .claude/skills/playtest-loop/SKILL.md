@@ -104,6 +104,10 @@ it, walks in, fights in god mode and saves four sheets;
 `scripts/montage.py NAVI` packs them into one picture. The pools are in
 `src/core/run.c` (biome indexes by their order there).
 
+**Every act's answer chips**: `build.py pacing` ends with the Net Dealers'
+answers per act and element (`+` over the cap). Read it after any change
+to the chip pools, the bands or the dealer.
+
 **Talk and shop screens**: `play.py start NAME --fresh -- --scene emu
 --run-depth D --talk shop:430` opens a layer's chat on frame 430 (`npc`,
 `shop`, `heal`, `programs`, `gift`, `challenge`, `undernet`, `gate`).
