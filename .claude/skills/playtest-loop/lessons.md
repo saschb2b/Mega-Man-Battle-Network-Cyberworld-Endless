@@ -22,6 +22,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 11 | 7 | CircusMan a real fight; the dealer's answer (SumnBlk1) a dud |
 | 12 | 8 | BlastMan beaten with the dealer's BblStar1; R presses lost |
 | 13 | 8 | HeatMan "the fairest, tensest boss yet", lost at 111/700; the R buffer works |
+| 14 | 8 | BlastMan beaten with the dealer's AquaNdl2; 25 calls in circles on his layer |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -64,6 +65,16 @@ its problems there. The loop was reacting.
   the pace was the harness's. The watchdog (`scripts/watch_session.py`)
   now wakes the loop every 15 minutes and on an alert, and the persona's
   prompt asks for 60-120 frames a call in battle.
+- **Going in circles is measurable.** Kai's "the arrow led me round"
+  (s14) looked like a misread until the layer was dumped with its walk
+  (`CYBERWORLD_STATE_POS=map`) and the moment replayed: the arrow showed a
+  turn's first panel, turned 30 frames late, and its eighths put a
+  walkway's run 4 degrees from "left". A ROM-free test now follows the
+  arrow from every room of 120 layers (the old arrow lost 22% of the
+  walks); `scripts/follow_arrow.py` does the same in a session.
+- **Count what the game counts.** AREA CLEAR's 11 viruses against Kai's
+  12 led to a stale pointer: the battle's record was read before the game
+  wrote it, and the run log wrote the rolled battle, not the fought one.
 - **Save the report verbatim** the moment it arrives
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.
@@ -100,3 +111,27 @@ ElecMan's. The in-game capture after the launch caught it; the session was
 stopped ten minutes in, Kai's profile put back from `data0` and relaunched
 on 62a748e (EvilNavi bystanders, GirlNavi vendor, looked at on a layer).
 Loop change: look **before** pinning. bn6f's `npcSpritePtrs` names list 6.
+
+## Session 14 (8/10, keep playing: yes; recommend: yes)
+
+Build 62a748e, 348 calls. Confirmed: the dealer's pick a Standard chip of
+the named element (AquaNdl2 three times), A talks to the side MegaMan
+faces, L says when the way winds, the battle state names MegaMan's panel,
+the R buffer. BlastMan beaten at 20 HP with AquaNdl2 for the kill.
+
+Raised: 25 calls going in circles on the guardian layer (the arrow: a
+turn's first panel, late turns, screen eighths; fixed 52ec579 with a
+follow-the-arrow test), every act 1 battle OldStove + Mettaur and BlastMan
+the first guardian six runs running (c75757d: the Robot Control Comp waits
+for act 2, BlastMan and DiveMan alike, a new run avoids the last one's),
+AREA CLEAR's virus count one short (150d61d: a stale battle pointer), the
+heal Mr. Prog's whole chat on an extra A (150d61d), BlastMan's warning
+without his flame dash and fire wall (150d61d), the dealer silent on how
+AquaNdl lands (d66ca3b). Possibly vanilla: CrakShot missing BlastMan in
+front, hit right after BATTLE START. Found on the way: town folk block the
+way to the port for the autopilot (seed 21; a task of its own).
+
+Loop change: **reproduce navigation reports on the layer itself**
+(`CYBERWORLD_STATE_POS=map`, `follow_arrow.py`), and look at every fix in a
+picture before pinning (done: the heal repeat, the arrow, the dealer's
+line).

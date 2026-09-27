@@ -132,6 +132,13 @@ it, walks in, fights in god mode and saves four sheets;
 answers per act and element (`+` over the cap). Read it after any change
 to the chip pools, the bands or the dealer.
 
+**A layer and the arrow's walk**: `CYBERWORLD_STATE_POS=map` adds the whole
+layer to a session's state (`#`-less: `.` floor, `^` raised, `*` the
+arrow's walk, `+` where it aims, `@` MegaMan, letters the objects), and the
+state names the arrow's way; `scripts/follow_arrow.py NAME` walks the way it
+shows and prints each panel. Use them when a persona reports going in
+circles.
+
 **Talk and shop screens**: `play.py start NAME --fresh -- --scene emu
 --run-depth D --talk shop:430` opens a layer's chat on frame 430 (`npc`,
 `shop`, `heal`, `programs`, `gift`, `challenge`, `undernet`, `gate`).
