@@ -30,6 +30,7 @@
 #include "net.h"
 #include "netmap.h"
 #include "rom.h"
+#include "platform.h"
 #include "run.h"
 #include "runlog.h"
 #include "save.h"
@@ -74,6 +75,8 @@ static struct {
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held;   /* L and R were down last frame */
 	bool dir_held;         /* a direction is held this frame */
+	bool map_shown;        /* SELECT is held on a layer's map: the map shows */
+	uint8_t seen[MAP_H][MAP_W];   /* panels MegaMan has come near on this layer */
 	bool arrow_pending;    /* the way-on arrow lasts until a little after L's words close */
 	int free_x, free_y;    /* MegaMan's last place clear of every NPC */
 	int wedged;            /* frames he has pushed, unmoving, against an NPC he stands inside */
@@ -268,6 +271,18 @@ static const char *status_words(void) {
 		else ADD("|");
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData.|");
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData.|", run.fragments);
+		/* the services here, so a player knows to look for them */
+		bool shop = false, heal = false, programs = false;
+		for (int i = 0; i < layer.nobj; ++i) {
+			shop |= layer.obj[i].type == OBJ_SHOP;
+			heal |= layer.obj[i].type == OBJ_HEAL;
+			programs |= layer.obj[i].type == OBJ_PROGRAMS;
+		}
+		if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
+		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
+		else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
+		if (programs) ADD("@M There's a NaviCust program shop here too.|");
+		ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 	}
 	/* the way on, as MegaMan senses it: along the floor where he can */
@@ -394,6 +409,7 @@ static bool build_layer(void) {
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
 	arrival_words();
+	memset(D.seen, 0, sizeof D.seen);
 	D.layer_told = false;
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
@@ -435,6 +451,56 @@ bool director_start_run(void) {
 bool director_in_town(void) { return D.active && D.town; }
 
 bool director_on_layer(void) { return D.active && !D.town; }
+
+/* The layer's map, while SELECT is held: the panels MegaMan has come near,
+ * as the screen shows them (a panel 4 by 2 pixels, isometric), around him;
+ * the exit pad, the arena, the services and the ways off it marked. */
+void director_draw_map(void) {
+	if (!D.active || D.town || !D.map_shown || !on_map()) return;
+	int bx = P.core_x + 128, by = P.core_y + 6, bw = 106, bh = 70;
+	fill_rect(bx - 2, by - 2, bw + 4, bh + 4, rgba(0, 12, 40, 235));
+	fill_rect(bx - 2, by - 2, bw + 4, 1, rgba(120, 200, 255, 220));
+	fill_rect(bx - 2, by + bh + 1, bw + 4, 1, rgba(120, 200, 255, 220));
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, mx, my;
+	if (!netmap_panel(px, py, &mx, &my)) return;
+	int ox = bx + bw / 2, oy = by + bh / 2;
+	#define SX(x, y) (ox + ((x) - mx - ((y) - my)) * 3)
+	#define SY(x, y) (oy + ((x) - mx + (y) - my) * 3 / 2)
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (!D.seen[y][x] || layer.cell[y][x] != C_PATH) continue;
+			int sx = SX(x, y), sy = SY(x, y);
+			if (sx - 3 < bx || sy - 2 < by || sx + 3 > bx + bw || sy + 2 > by + bh) continue;
+			/* a panel as a small diamond: 2, 6, 2 pixels wide */
+			SDL_Color c = layer.level[y][x] ? rgba(150, 210, 255, 240) : rgba(60, 140, 230, 240);
+			fill_rect(sx - 1, sy - 2, 2, 1, c);
+			fill_rect(sx - 3, sy - 1, 6, 2, c);
+			fill_rect(sx - 1, sy + 1, 2, 1, c);
+		}
+	/* what stands there, once seen */
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		int x = (int)o->x, y = (int)o->y;
+		SDL_Color c;
+		switch (o->type) {
+		case OBJ_EXIT: case OBJ_RETURN: c = rgba(255, 230, 60, 255); break;
+		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
+		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
+		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: c = rgba(210, 110, 255, 255); break;
+		default: continue;
+		}
+		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || !D.seen[y][x]) continue;
+		int sx = SX(x, y), sy = SY(x, y);
+		if (sx - 2 < bx || sy - 2 < by || sx + 2 > bx + bw || sy + 2 > by + bh) continue;
+		fill_rect(sx - 2, sy - 2, 4, 4, c);
+	}
+	/* MegaMan, blinking */
+	if ((D.frame / 8) % 2 == 0) fill_rect(ox - 2, oy - 2, 4, 4, rgba(255, 255, 255, 255));
+	text_draw(bx + 2, by + bh - 11, "MAP", rgba(170, 220, 255, 255), TEXT_LEFT);
+	#undef SX
+	#undef SY
+}
 
 /* The layers' make (generation, objects, loot rolls): a run saved by a build
  * that makes them otherwise continues its layer afresh from its start (the
@@ -493,6 +559,9 @@ void director_describe(FILE *f) {
 			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 		else {
+			int ns = 0, nf = 0;
+			for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) { ns += D.seen[y][x]; nf += D.seen[y][x] && layer.cell[y][x] == C_PATH; }
+			fprintf(f, "seen %d floor %d\n", ns, nf);
 			fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
 				D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
 			/* the floor around him, panels (x across, y down; @ he, # floor) */
@@ -583,8 +652,11 @@ uint32_t director_keys(uint32_t keys) {
 	D.l_held = l;
 	D.r_held = r;
 	D.dir_held = (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) != 0;
+	D.map_shown = false;
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	keys = corner_assist(keys);
+	/* SELECT on a layer: the map, while it is held */
+	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); keys &= ~KEY_SELECT; }
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
 	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&
@@ -924,6 +996,23 @@ void director_update(void) {
 	if (follow_exit_warp()) return;
 	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
 	arrow_update();
+	if (on_map()) {
+		/* what MegaMan has come near, for the map */
+		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, cx, cy;
+		if (netmap_panel(px, py, &cx, &cy)) {
+			for (int y = cy - 4; y <= cy + 4; ++y)
+				for (int x = cx - 4; x <= cx + 4; ++x)
+					if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
+			/* a platform he stands on, all of it */
+			for (int i = 0; i < layer.nrooms; ++i) {
+				const Room *r = &layer.rooms[i];
+				if (cx < r->x || cy < r->y || cx >= r->x + r->w || cy >= r->y + r->h) continue;
+				for (int y = r->y - 1; y <= r->y + r->h; ++y)
+					for (int x = r->x - 1; x <= r->x + r->w; ++x)
+						if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
+			}
+		}
+	}
 	if (on_map()) unwedge();
 	cinema_on_map(on_map());
 	if (!on_map()) {

@@ -14,6 +14,8 @@ bool director_start_run(void);
 bool director_in_town(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
+/* The layer's map over the picture while SELECT is held (drawing only). */
+void director_draw_map(void);
 /* Quitting on a layer's map, free to move: the run is saved there
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);

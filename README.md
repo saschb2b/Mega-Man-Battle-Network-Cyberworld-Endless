@@ -120,6 +120,7 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 | L | Ask MegaMan where you are and what's ahead | Open the Custom screen |
 | R | Jack in (at the town's statue) | Open the Custom screen |
 | Start | Open the PET | Pause |
+| Select | Hold for the map of the layer so far | |
 
 ### A run
 
