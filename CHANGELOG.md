@@ -37,6 +37,9 @@ First playable version.
   and says which, naming the guardian, and that it has two. A
   bystander's tip on where Net Dealers set up no longer says the middle
   layer only.
+- The NaviCust vendor's programs cost a quarter of the game's prices,
+  which are its endgame's (2500 to 7100 zenny against a run's 100 to
+  1000 a battle or Mystery Data), and 200 more an act.
 - Servers, Net Dealers and other services stand off a room's exits, where
   they blocked the way on. The map's key lists what the layer holds,
   Servers and dark warps as "Event". An L pressed as a chat closes is

@@ -168,7 +168,10 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		ShopItem it;
 		if (!pick(3, 0, &it) || listed(out, n, &it)) continue;
 		it.stock = 1;
-		it.price = (uint16_t)(it.price + depth);
+		/* (a quarter of the game's price, which is its endgame's: a run
+		 * brings 100 to 1000 zenny a battle or Mystery Data, and the
+		 * programs sat at 2500 to 7100; 200 more an act) */
+		it.price = (uint16_t)(it.price / 4 + 2 + 2 * (pacing_act(depth) + 7 * pacing_loop(depth)));
 		out[n++] = it;
 	}
 	return n;

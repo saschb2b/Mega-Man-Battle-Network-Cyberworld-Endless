@@ -287,7 +287,9 @@ MegaMan reaches about 100 HP more per act:
 - From act 2 on, 15% of the rich Mystery Data (the best of three
   qualities) hold an HPMemory, blue as the game keeps them.
 - The Net Dealer's HPMemory costs 800 zenny in act 1 and 400 more each
-  act, not more each layer.
+  act, not more each layer. The NaviCust vendor's programs cost a quarter
+  of the game's prices (its endgame's) plus 200, and 200 more each act:
+  SuperArmor 1000 zenny in act 1, Attack+1 700.
 - Every Net Dealer stocks a chip of the element that answers its act: the
   one strong against the act's guardian, or with a guardian of none,
   against the element most of the area's viruses have (Fire beats Wood,
