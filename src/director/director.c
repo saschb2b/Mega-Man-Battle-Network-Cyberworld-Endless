@@ -183,6 +183,10 @@ static void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied... Stay sharp, Lan.");
 	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
 		snprintf(D.beat, sizeof D.beat, "@M So much deleted data... Lan, I think the bottom is close.");
+	else if (first_of_act && run.depth > 1)
+		/* a new act: where they are now, and whose copy waits at its end */
+		snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!",
+			area, guardian(run.boss_order[run.biome])->name);
 }
 
 /* What MegaMan says when L is pressed: where they are, what is ahead. */
