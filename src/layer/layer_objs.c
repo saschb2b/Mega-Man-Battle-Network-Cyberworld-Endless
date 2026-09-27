@@ -199,15 +199,15 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (the guardian's weakness by name; an element-less guardian's
 			 * act is answered for its viruses) */
 			if (counter > 0 && ge > 0 && ge <= 4)
-				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My best %s chip's first on the list, and I've got two!",
+				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My best %s chip's first on the list. I brought two, and they go fast!",
 					guardian(navi)->name, elem[counter], elem[counter]);
 			else if (navi > 0 && counter > 0)
 				/* (no element to answer the guardian with: the hardest hit on
 				 * the list, and the viruses' weakness besides) */
-				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my hardest hitter's first on the list, and I've got two!|"
+				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my hardest hitter's first on the list. I brought two, and they go fast!|"
 					"The viruses around here can't stand %s chips, though.", guardian(navi)->name, elem[counter]);
 			else if (navi > 0)
-				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my hardest hitter's first on the list, and I've got two!",
+				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my hardest hitter's first on the list. I brought two, and they go fast!",
 					guardian(navi)->name);
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
