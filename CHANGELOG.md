@@ -13,6 +13,12 @@ First playable version.
   or a spur lines MegaMan up and takes him in, and on round the walkway's
   turns; a diagonal held into a corner slides him round it, and a push
   into a navi frees him.
+- A talks to the navi or Mystery Data MegaMan stands at even when he faces
+  past it: he turns to it first (walking into a navi slides him round it).
+- L says where the exit or the guardian lies when the walk there sets off
+  another way ("The way winds, so follow the arrow!"), so the words hold
+  still while the arrow shows the next stretch; the Recovery Mr. Prog,
+  which heals every time, is named again while MegaMan is hurt.
 - A story for the run, the Endless Net: Dad's call on the first run, Lan
   and MegaMan talking on arriving somewhere new (the first layer, the
   Undernet, the Graveyard, the Nest, the side layers, the net rebuilt

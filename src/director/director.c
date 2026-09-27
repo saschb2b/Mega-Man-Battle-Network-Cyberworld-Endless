@@ -74,7 +74,7 @@ static struct {
 	char beat[640];        /* what they say on arriving, once the card has gone */
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
-	bool l_held, r_held;   /* L and R were down last frame */
+	bool l_held, r_held, a_held;   /* L, R and A were down last frame */
 	bool dir_held;         /* a direction is held this frame */
 	bool map_shown;        /* SELECT is held on a layer's map: the map shows */
 	uint8_t seen[MAP_H][MAP_W];   /* panels MegaMan has come near on this layer */
@@ -281,6 +281,8 @@ static const char *status_words(void) {
 		heal |= layer.obj[i].type == OBJ_HEAL;
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
 	}
+	/* (the heal heals every time: after the first word, named while he is hurt) */
+	heal = heal && (!D.layer_told || emu_read16(BN6_NAVI_STATS + 0x40) < emu_read16(BN6_NAVI_STATS + 0x42));
 	if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
 	else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
 	else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
@@ -289,15 +291,24 @@ static const char *status_words(void) {
 		ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 	}
-	/* the way on, as MegaMan senses it: along the floor where he can */
+	/* the way on, as MegaMan senses it: along the floor where he can (the
+	 * arrow's way); where the walk sets off well away from where the goal
+	 * lies, where it lies, which holds still as the walk winds */
 	int far;
+	bool to_guardian = D.objs.guardian.navi && !boss_beaten();
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
-	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
+	if (to_guardian) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
+	const char *lies = way_to(gx, gy, &far);
+	int lies_dir = way_dir;
 	const char *way = route_to(gx, gy, &far);
 	if (!way) way = way_to(gx, gy, &far);
+	int apart = abs(way_dir - lies_dir);
+	if (apart > 4) apart = 8 - apart;
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
-	if (!D.objs.guardian.navi || boss_done() || !boss_beaten()) ADD("@M The way on goes %s. %s", way, how_far[far]);
-	else ADD("@M Let's take its Guardian Data, Lan!");
+	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
+	else if (apart >= 2)
+		ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies, how_far[far]);
+	else ADD("@M The way on goes %s. %s", way, how_far[far]);
 	#undef ADD
 	return buf;
 }
@@ -717,15 +728,56 @@ static uint32_t corner_assist(uint32_t keys) {
 	return keys;
 }
 
+/* A on the map: when MegaMan's facing probe misses every navi and Mystery
+ * Data but one stands close by, he turns to it first, so the game's own
+ * check finds it (walking into a navi slides him round it, and a tap of
+ * the pad can leave him facing past). True when he turned. */
+static bool talk_face(void) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int face = emu_read8(BN6_PLAYER + 0x10) & 7, vx[8], vy[8], best = -1, bestd = 34 * 34 + 1, bx = 0, by = 0;
+	for (int k = 0; k < 8; ++k) {
+		vx[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24) >> 16;
+		vy[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24 + 4) >> 16;
+	}
+	if (!vx[face] && !vy[face]) return false;
+	int reach = emu_read8(BN6_TALK_PROBES + (uint32_t)face * 24 + 12);
+	for (int i = 0; i < 16; ++i) {
+		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
+		int r = emu_read8(o + 0x0C);
+		if (!(emu_read8(o) & 1) || !r) continue;
+		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py;
+		int hx = vx[face] - dx, hy = vy[face] - dy;
+		int in = r + reach - 4;   /* (a little inside the game's own test, which misses at its rim) */
+		if (hx * hx + hy * hy < in * in) return false;   /* (his facing finds one already) */
+		if (dx * dx + dy * dy < bestd) { bestd = dx * dx + dy * dy; best = i; bx = dx; by = dy; }
+	}
+	if (best < 0) return false;
+	int k = -1;
+	double top = -2;
+	for (int f = 0; f < 8; ++f) {
+		double c = (vx[f] * bx + vy[f] * by) / (sqrt((double)vx[f] * vx[f] + vy[f] * vy[f]) * sqrt((double)bestd) + 1e-9);
+		if (c > top) { top = c; k = f; }
+	}
+	emu_write8(BN6_PLAYER + 0x10, (uint8_t)k);
+	emu_write8(BN6_PLAYER + 0x14, (uint8_t)k);
+	return true;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
+	bool a = (keys & KEY_A) != 0, a_pressed = a && !D.a_held;
 	D.l_held = l;
 	D.r_held = r;
+	D.a_held = a;
 	D.dir_held = (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) != 0;
 	D.map_shown = false;
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	keys = corner_assist(keys);
+	/* (turned to what A would talk to, the pad left alone for that frame so
+	 * the game does not turn him back) */
+	if (a_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && talk_face())
+		keys &= ~(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); keys &= ~KEY_SELECT; }
 	/* R in the town away from the port: MegaMan says where it is (the game
