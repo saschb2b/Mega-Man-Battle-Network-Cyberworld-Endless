@@ -99,16 +99,22 @@ static bool at_exit(const Room *r, int x, int y) {
 }
 
 /* A free cell inside a room, off its middle and its exits so paths stay
- * clear, where a solid object cuts no way. */
-static bool room_spot(const Room *r, int *ox, int *oy) {
+ * clear, where a solid object cuts no way; with `open`, first one with
+ * floor on its four sides (a bystander in a panel-wide gap beside a
+ * service pinned MegaMan in the nook, where the way still went round). */
+static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if (tries < 30 && x == r->ax && y == r->ay) continue;
 		if (tries < 36 && at_exit(r, x, y)) continue;
+		if (open && tries < 24 && !(layer.cell[y][x + 1] == C_PATH && layer.cell[y][x - 1] == C_PATH &&
+			layer.cell[y + 1][x] == C_PATH && layer.cell[y - 1][x] == C_PATH)) continue;
 		if (cell_free(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;
 }
+
+static bool room_spot(const Room *r, int *ox, int *oy) { return room_spot_in(r, ox, oy, false); }
 
 static int bfs_far(int from) {
 	/* Room graph distance by flood fill over cells; returns farthest room. */
@@ -328,7 +334,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	int npcs = 2 + rng_range(0, 1);
 	for (int k = 0; k < npcs && n; ++k) {
 		Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
-		if (!room_spot(r, &x, &y)) continue;
+		if (!room_spot_in(r, &x, &y, true)) continue;
 		NetObj *o = add_obj(OBJ_NPC, x, y);
 		if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
 	}

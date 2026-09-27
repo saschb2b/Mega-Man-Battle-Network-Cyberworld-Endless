@@ -57,7 +57,8 @@ First playable version.
   which are its endgame's (2500 to 7100 zenny against a run's 100 to
   1000 a battle or Mystery Data), and 200 more an act.
 - Servers, Net Dealers and other services stand off a room's exits, where
-  they blocked the way on. The map's key lists what the layer holds,
+  they blocked the way on, and bystanders stand in the open, not in a
+  panel-wide gap where they pinned MegaMan. The map's key lists what the layer holds,
   Servers and dark warps as "Event", and shows the services MegaMan
   senses but has not reached: a ring where each stands, or a pip on the
   map's edge its way. An L pressed as a chat closes is heard, and a
