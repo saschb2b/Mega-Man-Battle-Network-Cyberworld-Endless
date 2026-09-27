@@ -1,6 +1,6 @@
 // The home page: the ChipFolder's picker, and the Net Dealer's links to the
-// latest GitHub release (without a release they keep pointing at the
-// releases page).
+// newest GitHub release, an alpha's pre-release too (without a release they
+// keep pointing at the releases page).
 'use strict';
 
 // ---- the ChipFolder ----
@@ -55,9 +55,12 @@
 	const line = document.getElementById('release-line');
 	let release;
 	try {
-		const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' } });
+		// (releases/latest skips pre-releases, and the 0.x alphas are ones:
+		// the newest published release of any kind, the list's first)
+		const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=10`, { headers: { Accept: 'application/vnd.github+json' } });
 		if (!res.ok) throw new Error(res.status);
-		release = await res.json();
+		release = (await res.json()).find((r) => !r.draft);
+		if (!release) throw new Error('none');
 	} catch (e) {
 		line.textContent = 'Out of stock: no release yet. Build them from the source.';
 		for (const a of document.querySelectorAll('[data-asset]')) a.setAttribute('aria-disabled', 'true');

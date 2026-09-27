@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The site's downloads show the newest release, an alpha's pre-release too
+  (GitHub's "latest" skips pre-releases, and the page said there was no
+  release), and list the Flatpak for the Steam Deck.
 - The Guardian Data's word on how the NaviCust's board works comes with a
   player's first draft ever (the profile keeps that it came), not only at
   act 1's guardian: a run carried over from an older build met its first
