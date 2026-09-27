@@ -233,7 +233,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				char c = '*';
 				int id = tries ? roll_chip(run.depth, 3, &c) : chip;
 				chip_info(id, &ci);
-				if (ci.power > best_power) { best_power = ci.power; chip = id; if (tries) code = c; }
+				int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
+				if (power > best_power) { best_power = power; chip = id; if (tries) code = c; }
 			}
 			chip_info(chip, &ci);
 			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');

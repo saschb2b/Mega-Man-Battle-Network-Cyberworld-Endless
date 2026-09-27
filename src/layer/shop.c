@@ -110,7 +110,7 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 				ChipInfo ci;
 				chip_info(it.id, &ci);
 				/* (-1: a guardian of no element, answered by the hardest hit) */
-				if ((ci.element == counter || counter < 0) && ci.power > 0) {
+				if ((ci.element == counter || counter < 0) && ci.power > 0 && chip_direct(it.id)) {
 					++found;
 					/* the hardest under the most, else the lightest over it */
 					bool under = ci.power <= most, best_under = best >= 0 && best_power <= most;

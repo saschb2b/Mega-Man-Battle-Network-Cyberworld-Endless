@@ -102,6 +102,8 @@ const ChipDef *chip_def(int rom_id) {
 	return &chip_defs[0];
 }
 
+bool chip_direct(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xF] == 1; }
+
 void chip_info(int rom_id, ChipInfo *out) {
 	memset(out, 0, sizeof *out);
 	uint32_t rec = R.layout->chip_data + rom_id * 0x2C;

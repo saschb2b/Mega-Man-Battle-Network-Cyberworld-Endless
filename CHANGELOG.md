@@ -68,7 +68,9 @@ First playable version.
   map's edge its way. An L pressed as a chat closes is heard, and a
   later L while MegaMan is hurt says where the Recovery Mr. Prog lies.
 - A Server's prize is the hardest hitting of a few chips a tier better
-  than Mystery Data (it could be a WhiCapsl).
+  than Mystery Data (it could be a WhiCapsl). The prize and the Net
+  Dealer's answer are chips that strike outright: an answer that needed a
+  paralysed enemy (MchnSwrd) was no answer.
 - A new act eases in: every battle on its first layer comes from the lower
   half of its band (two BombCorns on the first layer after BlastMan took a
   playtester from 220 HP to 10).
