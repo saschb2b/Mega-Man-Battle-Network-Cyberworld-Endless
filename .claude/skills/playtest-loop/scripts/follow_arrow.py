@@ -8,7 +8,9 @@ random battles are held off (event flag 0x1700) while it walks.
   CYBERWORLD_STATE_POS=1 python3 tools/play.py start fa --seed S --fresh -- --scene emu --run-depth 3
   python3 .claude/skills/playtest-loop/scripts/follow_arrow.py fa 150
 
-It stops when the state names no way (a chat, a battle, a title card)."""
+A chat that opens on the way (a layer's arrival words, a bystander) is
+read through with A, as a player would; it stops when the state names no
+way (a battle, a title card), or after ten steps without a new panel."""
 import os
 import re
 import subprocess
@@ -29,6 +31,7 @@ def main():
         sys.exit(__doc__)
     name, steps = sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 150
     out = do(name, 'flags 0x1700 0x1700 1; wait 1')
+    last, still = None, 0
     for i in range(steps):
         way = re.search(r'^way (\d) (.*)$', out, re.M)
         panel = re.search(r'^panel (\d+) (\d+)', out, re.M)
@@ -36,7 +39,18 @@ def main():
         if not way or not panel:
             print(f'{i}: no way ({doing.group(1) if doing else "?"}); picture: {re.search(r"^picture (.*)$", out, re.M).group(1)}')
             return
-        print(f'{i}: panel {panel.group(1)} {panel.group(2)}, the arrow {way.group(2)}')
+        # (a chat blocks the walk while the state still names the way)
+        if re.search(r'^chat open', out, re.M):
+            print(f'{i}: a chat, read through')
+            out = do(name, 'press A; wait 30')
+            continue
+        at = (panel.group(1), panel.group(2))
+        still = still + 1 if at == last else 0
+        last = at
+        print(f'{i}: panel {at[0]} {at[1]}, the arrow {way.group(2)}')
+        if still >= 10:
+            print(f'{i}: stuck; picture: {re.search(r"^picture (.*)$", out, re.M).group(1)}')
+            return
         out = do(name, f'flags 0x1700 0x1700 1; hold {PAD[int(way.group(1))]} 10')
 
 
