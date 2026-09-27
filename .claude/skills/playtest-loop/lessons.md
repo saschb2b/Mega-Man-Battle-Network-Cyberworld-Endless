@@ -57,6 +57,13 @@ its problems there. The loop was reacting.
   poison. Swept the record's other bytes after (only byte 1 varies, and
   ours is one of the originals'). And a record rewritten in place can
   change under a battle the game has already rolled: write in turn.
+- **Watch the session, don't just wait for it.** In s14 the BlastMan fight
+  ran 80 calls and over half an hour of wall time at 40 frames and eight
+  pictures a call, past the call budget, while the loop did other work;
+  the user noticed it first. Game time was normal (under three minutes):
+  the pace was the harness's. The watchdog (`scripts/watch_session.py`)
+  now wakes the loop every 15 minutes and on an alert, and the persona's
+  prompt asks for 60-120 frames a call in battle.
 - **Save the report verbatim** the moment it arrives
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.

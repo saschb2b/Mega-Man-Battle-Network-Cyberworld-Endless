@@ -47,6 +47,7 @@ Run everything from /home/saschabecker/Documents/GitHub/Mega-Man-Battle-Network-
   - START: the PET menu on the map; pause in battle.
 - On the isometric map the d-pad moves diagonally on screen: a single direction goes straight across the screen, and two together (like DOWN+LEFT) go along a walkway's line. The camera follows MegaMan, so he stays in the middle of the screen: judge whether he moved by the floor and landmarks, not by his place on screen.
 - The Custom screen pauses the battle, so pick chips calmly there, then act in short bursts with `--every` sheets. After OK, "BATTLE START!" shows for about two and a half seconds (it's BN6's own); wait it out before pressing. A uses the chip named at the bottom left. BN6 draws some viruses (Piranhas) and MegaMan's chip icon a row above their panel: read rows by the panels under their feet. In battle the state names the panel MegaMan stands on ("megaman stands column 2 row 2", from the left and the top): a player sees it at a glance, the stills don't show it well.
+- The game is frozen between your calls: plan there, then make each call count. In battle, cover 60–120 frames a call (a move, a chip, a wait) with `--every 10` or `--every 12`; drop to short steps only while a yellow warning is on screen.
 - Be efficient: batch a whole chat into one call (for example `press A; wait 50` a few times with a `shot` between), walk in longer bursts (40–90 frames, holding B to run) when the way is clear, and check the picture. In boss fights, move out of any yellow-lit warning panel before anything else.
 
 ## Rules

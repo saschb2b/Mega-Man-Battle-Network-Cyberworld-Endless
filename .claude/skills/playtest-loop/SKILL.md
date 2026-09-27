@@ -33,8 +33,26 @@ raised, and the loop's own lessons.
    `run_in_background: true`) with `persona.md` filled in: the session
    number, last session in two sentences, patch notes, goals. About 260
    `do` calls, 1 to 1.5 hours.
-4. **While it plays**, don't wait idle:
-   - Read `.build/play/kai/notes-sN.md` now and then; start on its issues
+4. **While it plays, watch it**, whatever else you do meanwhile:
+   - Keep the watchdog running from the launch to the report, and look
+     every time it wakes you (at least every 15 minutes):
+
+     ```bash
+     for i in 1 2 3; do sleep 300; python3 .claude/skills/playtest-loop/scripts/watch_session.py kai; [ -e .build/play/kai/pid ] || break; done
+     ```
+
+     (run in the background; restart it after each look). It prints the
+     calls against the budget, what the game shows, the current battle's
+     length, the pace in frames a call and the minutes since the last
+     note, and says "look:" when a battle runs past 15 minutes or 40
+     calls, the budget is spent, no note came for 20 minutes, no call for
+     10, or the pace falls under 50 frames a call.
+   - Each look: read the latest picture it names and the notes' tail. A
+     game problem (a fight that cannot end, a soft-lock, a wall) is yours
+     to fix or to stop the session for; a harness problem (tiny steps,
+     too many pictures, the budget spent) gets a short SendMessage to the
+     persona about pace only, never about how to play.
+   - Read `.build/play/kai/notes-sN.md` as it grows; start on its issues
      before the report comes (it runs a pinned build, so commit freely).
    - Sweep ahead: test what the persona will reach next (the next act's
      guardian, shops, traders) with the recipes below. New ground is where
