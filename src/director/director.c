@@ -320,11 +320,12 @@ static const char *status_words(void) {
 	/* the services here: all of them the first time, then only the heal
 	 * while he is hurt (it heals every time; the map's key names the rest,
 	 * and a later L is a box or two, not the briefing again) */
-	bool shop = false, heal = false, programs = false, told = D.layer_told;
+	bool shop = false, heal = false, programs = false, trader = false, told = D.layer_told;
 	for (int i = 0; i < layer.nobj; ++i) {
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
+		trader |= layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
 	}
 	bool hurt = emu_read16(BN6_NAVI_STATS + 0x40) < emu_read16(BN6_NAVI_STATS + 0x42);
 	if (!told) {
@@ -332,6 +333,8 @@ static const char *status_words(void) {
 		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
 		else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
 		if (programs) ADD("@M There's a NaviCust program shop here too.|");
+		/* (the map marks a trader as a shop, and L said nothing of it) */
+		if (trader) ADD("@M And a Chip Trader!|");
 		/* (the map's tip on the run's first layers: every first L repeated it) */
 		if (run.depth <= 2) ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
