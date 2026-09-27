@@ -23,6 +23,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 12 | 8 | BlastMan beaten with the dealer's BblStar1; R presses lost |
 | 13 | 8 | HeatMan "the fairest, tensest boss yet", lost at 111/700; the R buffer works |
 | 14 | 8 | BlastMan beaten with the dealer's AquaNdl2; 25 calls in circles on his layer |
+| 15 | 9 | A whole act (Sky HP, SpoutMan) with no circles; every battle one virus pair |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -75,6 +76,15 @@ its problems there. The loop was reacting.
 - **Count what the game counts.** AREA CLEAR's 11 viruses against Kai's
   12 led to a stale pointer: the battle's record was read before the game
   wrote it, and the run log wrote the rolled battle, not the fought one.
+- **Sweep the next layers with the tools you just built.** Before s15's
+  persona reached them, following the arrow on his exact next three
+  layers (`follow_arrow.py`, the run's seed with `--net-biome` and
+  `--guardian`) found it walking MegaMan into a Mystery Data: the session
+  was restarted on the fix ten minutes in and confirmed it.
+- **A network outage stalls the persona, not the game.** Twice in s15 the
+  agent stalled; the game stays frozen between calls, so a SendMessage to
+  the agent ("continue from frame F with play.py do") resumes it where it
+  was. The watchdog's "no call for 10 minutes" is the signal.
 - **Save the report verbatim** the moment it arrives
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.
@@ -135,3 +145,26 @@ Loop change: **reproduce navigation reports on the layer itself**
 (`CYBERWORLD_STATE_POS=map`, `follow_arrow.py`), and look at every fix in a
 picture before pinning (done: the heal repeat, the arrow, the dealer's
 line).
+
+## Session 15 (9/10, keep playing: yes; recommend: yes)
+
+Build 506a757 (relaunched ten minutes in: the arrow walked into a Mystery
+Data on his layer 4, found by sweeping ahead). Confirmed: the arrow on all
+three layers (corner cuts, prompt turns, walkways, around Mystery Data and
+navis), L's ways, the heal's one box, CONTINUE, SpoutMan's warning.
+SpoutMan beaten with the dealer's DolThdr2 and act 1's BlastMan B.
+
+Raised: every Sky HP battle Gunner and FgtrPlne (major; its own random
+battle is one formation, as Green HP's: 190d0d0 shares the Sky's and the
+Green Area's), a 1-damage buster against a lone back-row virus (the
+NaviCust's draft answers it, 6c69ed6), HP+400 far cheaper per HP than an
+HPMemory (4e970e6: the vendor stocks from the pool's tiers), A at a
+Mystery Data going to a navi beside it, L's heal hint at 220 of 240, no
+word on ScrtData, SpoutMan's whirl (all 4e970e6). AREA CLEAR's count is
+left out after a CONTINUE by design (the next notes say so).
+
+Meanwhile the user asked for a substantial NaviCust: designed with the
+game-design skill (docs/NAVICUST.md) and built its first part (6c69ed6).
+
+Loop change: **sweep the persona's exact next layers** with the run's
+seed, and resume a stalled persona by message.
