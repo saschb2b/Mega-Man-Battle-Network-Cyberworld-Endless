@@ -99,6 +99,7 @@ python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless
 python3 build.py clips [NAMES]         # docs/clips: the same runs as 30 fps videos
 python3 tools/site_art.py              # web/assets/ui: the site's pixel-art frames and icons
 python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: the application icon
+python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
 
