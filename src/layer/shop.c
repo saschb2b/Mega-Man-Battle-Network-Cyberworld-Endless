@@ -12,6 +12,7 @@
 #include "game.h"
 #include "data.h"
 #include "loot.h"
+#include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
 
@@ -207,9 +208,12 @@ const char *shop_pick_gift_program(ShopItem *out) {
 
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
-	for (int i = 0; i < 6 && n < 4; ++i) {
+	for (int i = 0; i < 10 && n < 4; ++i) {
 		ShopItem it;
-		if (!pick(3, 0, &it) || listed(out, n, &it)) continue;
+		/* (the NaviCust's pool and its tiers, docs/NAVICUST.md: HP+400 at
+		 * 2300 zenny in act 2 beside the dealer's 20-HP HPMemory at 1200;
+		 * SneakRun judged the game's battles, not the engine's) */
+		if (!pick(3, 0, &it) || listed(out, n, &it) || !navicust_offerable(it.id / 4, depth)) continue;
 		it.stock = 1;
 		/* (a quarter of the game's price, which is its endgame's: a run
 		 * brings 100 to 1000 zenny a battle or Mystery Data, and the

@@ -43,7 +43,8 @@ const char *guardian_tip(int navi) {
 	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
 		"Keep our HP up, and hit him with swords and bombs!";
 	case 5: return "ChargeMan rams straight down our row like a train. Step aside, then hit back!";
-	case 6: return "SpoutMan's bubbles burst over our panels, and his hose sprays water down the lit ones. Step off the yellow panels!";
+	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
+		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!";
 	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
 		"Step off the yellow panels, and keep our distance!";
 	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "

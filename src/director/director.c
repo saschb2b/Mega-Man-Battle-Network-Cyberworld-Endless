@@ -272,8 +272,9 @@ static const char *status_words(void) {
 		}
 		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL) ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
 		else ADD("|");
-		if (run.fragments == 1) ADD("@M We're carrying one ScrtData.|");
-		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData.|", run.fragments);
+		/* (what they are for: a playtester carried two and never learned) */
+		if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
+		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
 	}
 	/* the services here: all of them the first time, then only the heal
 	 * while he is hurt (it heals every time; the map's key names the rest,
@@ -285,7 +286,9 @@ static const char *status_words(void) {
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
 		trader |= layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
 	}
-	bool hurt = emu_read16(BN6_NAVI_STATS + 0x40) < emu_read16(BN6_NAVI_STATS + 0x42);
+	/* (below three quarters: at 220 of 240 the heal led L's words before
+	 * the way on) */
+	bool hurt = emu_read16(BN6_NAVI_STATS + 0x40) * 4 < emu_read16(BN6_NAVI_STATS + 0x42) * 3;
 	if (!told) {
 		if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
 		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
@@ -1093,14 +1096,17 @@ static int talk_target(void) {
 	double fl = sqrt((double)vx[face] * vx[face] + vy[face] * vy[face]);
 	if (fl < 1) return -1;
 	int front = -1, ahead = -1, near = -1, fd = 1 << 30, ad = 52 * 52 + 1, nd = 52 * 52 + 1;
+	double fc = 0;
 	for (int i = 0; i < 16; ++i) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
 		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
 		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
-		/* before him: within 30 degrees of his facing (one he faces out of
-		 * reach is the one he means: no turn to another beside him) */
+		/* before him: within 30 degrees of his facing, the one most straight
+		 * ahead (the nearest in that cone took a bystander a little off his
+		 * line over the Mystery Data he faced); one he faces out of reach is
+		 * the one he means: no turn to another beside him */
 		double c = d > 0 ? (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) : 1;
-		if (d <= 80 * 80 && d > 0 && c >= 0.866 && d < fd) { fd = d; front = i; }
+		if (d <= 80 * 80 && d > 0 && c >= 0.866 && (c > fc + 0.02 || (c > fc - 0.02 && d < fd))) { fd = d; fc = c; front = i; }
 		if (d <= 52 * 52 && c >= 0.2 && d < ad) { ad = d; ahead = i; }
 		if (d <= 52 * 52 && d < nd) { nd = d; near = i; }
 	}

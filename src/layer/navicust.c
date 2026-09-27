@@ -73,6 +73,11 @@ const char *navicust_about(int program) { int i = find(program); return i < 0 ? 
 /* the act a guardian at `depth` closes, as the pool's tiers count it */
 static int reached(int depth) { return pacing_loop(depth) > 0 ? 7 : pacing_act(depth); }
 
+bool navicust_offerable(int program, int depth) {
+	int i = find(program);
+	return i >= 0 && POOL[i].tier <= reached(depth);
+}
+
 int navicust_draft(int depth, NaviProgram out[NAVICUST_DRAFT]) {
 	/* three builds of the five, in a random order, one program of each:
 	 * the choice is a direction, not three of a kind */

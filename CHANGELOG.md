@@ -4,6 +4,14 @@
 
 First playable version.
 
+- The NaviCust vendor stocks from the NaviCust's pool and tiers: no HP+400
+  in the first cycle (it sold at 2300 zenny in act 2 beside the dealer's
+  20-HP HPMemory at 1200), no SneakRun. A on the map takes the navi or
+  Mystery Data most straight ahead, not the nearest in front (a bystander a
+  little off MegaMan's line took A from the Mystery Data he faced). L
+  names the Recovery Mr. Prog only below three quarters of MegaMan's HP,
+  says that three ScrtData open the golden gate, and SpoutMan's warning
+  names his whirl.
 - The NaviCust is a run's second build (docs/NAVICUST.md). Every guardian's
   Guardian Data offers three programs of three builds (buster, hand, guard,
   field, HP), each with MegaMan's words for what it does, or B for

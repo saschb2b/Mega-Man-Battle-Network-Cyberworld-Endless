@@ -31,6 +31,8 @@ int navicust_color(int program);
 const char *navicust_about(int program);
 /* Whether `program` may ever be offered (the inert and the harmful are not). */
 bool navicust_in_pool(int program);
+/* Whether it may be offered at `depth`: in the pool, of a tier reached. */
+bool navicust_offerable(int program, int depth);
 /* The build a program belongs to (BUILD_*), -1 outside the pool. */
 int navicust_build(int program);
 /* BugFrags a guardian's draft pays when none is taken, at `depth`. */
