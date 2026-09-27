@@ -18,7 +18,9 @@ First playable version.
 - A talks to the navi or Mystery Data MegaMan stands at even when he faces
   past it: he turns to the one before him, else the nearest (walking into
   a navi slides him round it), and reaches about 54 units, which is how
-  far a short Mr. Prog can be while looking a tile away.
+  far a short Mr. Prog can be while looking a tile away. One a step or two
+  short (up to two and a half panels before him) he walks up to and talks
+  to; the pad or B stops the walk.
 - A navi's tip on running from a battle says how (on the Custom screen, hold
   L and press R); it said START, which only pauses.
 - An act's first layer from act 2 on always has a Net Dealer, and every

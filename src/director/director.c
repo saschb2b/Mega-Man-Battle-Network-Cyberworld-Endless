@@ -76,6 +76,7 @@ static struct {
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held, a_held;   /* L, R and A were down last frame */
 	int l_kept;                    /* frames an L pressed while busy is kept */
+	int walk_to, walk_t;           /* the NPC slot MegaMan walks up to after an A short of it, frames left */
 	bool dir_held;         /* a direction is held this frame */
 	bool map_shown;        /* SELECT is held on a layer's map: the map shows */
 	uint8_t seen[MAP_H][MAP_W];   /* panels MegaMan has come near on this layer */
@@ -90,6 +91,7 @@ static struct {
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
+#define WALK_UP      45   /* frames the walk up to a navi out of reach may take */
 
 /* An act begins (or a side layer): its title card, as Hades names each
  * region on entering it. */
@@ -1019,43 +1021,92 @@ static uint32_t corner_assist(uint32_t keys) {
 /* A on the map: MegaMan turns to face what he means to talk to, so the
  * game's own check finds it (walking into a navi slides him round it, and a
  * tap of the pad can leave him facing past it): the navi or Mystery Data
- * clearly before him if there is one, else the nearest within 52 units
- * (the probes' reach), with the facing whose probe points at it best. True
- * when he turned. */
-static bool talk_face(void) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-	int face = emu_read8(BN6_PLAYER + 0x10) & 7, vx[8], vy[8];
+ * clearly before him if there is one, out to two and a half panels, else
+ * the nearest within 52 units (the probes' reach). One out of reach he
+ * walks up to (a step or two short of a navi, the press did nothing). */
+static void probe_vectors(int vx[8], int vy[8]) {
 	for (int k = 0; k < 8; ++k) {
 		vx[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24) >> 16;
 		vy[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24 + 4) >> 16;
 	}
+}
+
+/* The NPC slot A means, or -1. */
+static int talk_target(void) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int face = emu_read8(BN6_PLAYER + 0x10) & 7, vx[8], vy[8];
+	probe_vectors(vx, vy);
 	double fl = sqrt((double)vx[face] * vx[face] + vy[face] * vy[face]);
-	if (fl < 1) return false;
-	int front = -1, near = -1, fd = 1 << 30, nd = 52 * 52 + 1, tx = 0, ty = 0, fx = 0, fy = 0;
+	if (fl < 1) return -1;
+	int front = -1, near = -1, fd = 1 << 30, nd = 52 * 52 + 1;
 	for (int i = 0; i < 16; ++i) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
 		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
 		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
-		/* before him: within 30 degrees of his facing, out to two panels
-		 * (one he faces out of reach is the one he means: no turn to
-		 * another beside him) */
-		if (d <= 72 * 72 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; fx = dx; fy = dy; }
-		if (d <= 52 * 52 && d < nd) { nd = d; near = i; tx = dx; ty = dy; }
+		/* before him: within 30 degrees of his facing (one he faces out of
+		 * reach is the one he means: no turn to another beside him) */
+		if (d <= 80 * 80 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; }
+		if (d <= 52 * 52 && d < nd) { nd = d; near = i; }
 	}
 	/* (but one he touches beats one before him out of reach) */
-	if (front >= 0 && !(near >= 0 && nd <= 24 * 24 && fd > 52 * 52)) { tx = fx; ty = fy; }
-	else if (near < 0) return false;
-	int k = face;
+	if (front >= 0 && !(near >= 0 && nd <= 24 * 24 && fd > 52 * 52)) return front;
+	return near;
+}
+
+/* Where NPC slot i stands from MegaMan, the facing whose probe points at
+ * it best, and whether that probe reaches it. */
+static bool talk_reach(int i, int *face) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, vx[8], vy[8];
+	uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
+	int tx = (int16_t)emu_read16(o + 0x26) - px, ty = (int16_t)emu_read16(o + 0x2A) - py;
+	probe_vectors(vx, vy);
+	int k = emu_read8(BN6_PLAYER + 0x10) & 7;
 	double top = -2;
 	for (int f = 0; f < 8; ++f) {
 		double l = sqrt((double)vx[f] * vx[f] + vy[f] * vy[f]) * sqrt((double)tx * tx + ty * ty);
 		double c = l > 0 ? (vx[f] * tx + vy[f] * ty) / l : -2;
 		if (c > top) { top = c; k = f; }
 	}
-	if (k == face) return false;
+	*face = k;
+	/* (the probe's circle and the NPC's meet, with a little to spare) */
+	int r = emu_read8(BN6_TALK_PROBES + (uint32_t)k * 24 + 12) + emu_read8(o + 0x0C) - 3;
+	int ex = tx - vx[k], ey = ty - vy[k];
+	return ex * ex + ey * ey <= r * r;
+}
+
+static void talk_turn(int k) {
 	emu_write8(BN6_PLAYER + 0x10, (uint8_t)k);
 	emu_write8(BN6_PLAYER + 0x14, (uint8_t)k);
-	return true;
+}
+
+#define PAD_KEYS (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)
+/* the pad for each facing, in the probes' order */
+static const uint32_t face_pad[8] = {
+	KEY_UP, KEY_UP | KEY_RIGHT, KEY_RIGHT, KEY_DOWN | KEY_RIGHT, KEY_DOWN, KEY_DOWN | KEY_LEFT, KEY_LEFT, KEY_UP | KEY_LEFT,
+};
+
+/* The walk up: towards the NPC until its probe reaches, then A for him.
+ * The pad or B takes over; a wall ends it with the A all the same. */
+static uint32_t talk_walk(uint32_t keys) {
+	static int last_x, last_y, still;
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	uint32_t o = 0x020057B0u + (uint32_t)D.walk_to * 0xD8;
+	if ((keys & (PAD_KEYS | KEY_B)) || !(emu_read8(o) & 1) || !emu_read8(o + 0x0C) || emu_read8(BN6_CHATBOX) || talk_busy()) {
+		D.walk_t = 0;
+		return keys;
+	}
+	if (D.walk_t == WALK_UP) still = 0;
+	else if (px == last_x && py == last_y) ++still;
+	else still = 0;
+	last_x = px; last_y = py;
+	int k;
+	bool reach = talk_reach(D.walk_to, &k);
+	if (reach || still >= 6 || --D.walk_t <= 0) {
+		D.walk_t = 0;
+		talk_turn(k);
+		return (keys & ~PAD_KEYS) | KEY_A;
+	}
+	return (keys & ~(PAD_KEYS | KEY_A)) | face_pad[k];
 }
 
 uint32_t director_keys(uint32_t keys) {
@@ -1072,8 +1123,18 @@ uint32_t director_keys(uint32_t keys) {
 	/* (turned to what A would talk to, the pad left alone for that frame so
 	 * the game does not turn him back; not in the town, where A also reads
 	 * the doors and signs Lan faces) */
-	if (a_pressed && !D.town && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && talk_face())
-		keys &= ~(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
+	if (D.walk_t > 0) keys = talk_walk(keys);
+	else if (a_pressed && !D.town && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping) {
+		int i = talk_target(), k;
+		if (i >= 0 && talk_reach(i, &k)) {
+			if (k != (emu_read8(BN6_PLAYER + 0x10) & 7)) { talk_turn(k); keys &= ~PAD_KEYS; }
+		} else if (i >= 0 && !(keys & PAD_KEYS) && !autopilot_on()) {
+			/* (not while he walks: the pad is his) */
+			D.walk_to = i;
+			D.walk_t = WALK_UP;
+			keys = talk_walk(keys & ~KEY_A);
+		}
+	}
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); keys &= ~KEY_SELECT; }
 	/* R in the town away from the port: MegaMan says where it is (the game

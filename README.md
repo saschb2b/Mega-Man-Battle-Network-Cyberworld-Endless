@@ -124,7 +124,7 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 
 In the net, a direction held toward a walkway lines MegaMan up with it and
 follows it round its turns, and A turns him to the navi or Mystery Data
-beside him.
+beside him, or walks him up to one a step or two before him.
 
 ### A run
 
