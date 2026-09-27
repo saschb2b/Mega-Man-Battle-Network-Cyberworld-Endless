@@ -72,6 +72,10 @@ static struct {
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held;   /* L and R were down last frame */
+	bool dir_held;         /* a direction is held this frame */
+	int free_x, free_y;    /* MegaMan's last place clear of every NPC */
+	int wedged;            /* frames he has pushed, unmoving, against an NPC he stands inside */
+	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	bool layer_told;       /* ... where they are on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
@@ -345,6 +349,9 @@ static bool build_layer(void) {
 	roll_encounter();
 	D.start_x = D.objs.start_x;
 	D.start_y = D.objs.start_y;
+	D.free_x = D.start_x;
+	D.free_y = D.start_y;
+	D.wedged = 0;
 	/* until MegaMan takes it, the exit pad leads back to the layer's start */
 	mapslot_exit_to(D.group, D.number, D.start_x, D.start_y, 4);
 	D.active = true;
@@ -385,6 +392,8 @@ bool director_start_run(void) {
 	D.town_frames = 0;
 	D.intro_said = false;
 	D.port_told = false;
+	D.free_x = town_info()->start_x;
+	D.free_y = town_info()->start_y;
 	return true;
 }
 
@@ -443,6 +452,7 @@ uint32_t director_keys(uint32_t keys) {
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
 	D.l_held = l;
 	D.r_held = r;
+	D.dir_held = (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) != 0;
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
@@ -471,10 +481,38 @@ uint32_t director_keys(uint32_t keys) {
 	return keys;
 }
 
+/* MegaMan wedged inside an NPC (a walker came at him, or a wall's push-out
+ * on a walkway moved him in): every one of his movement probes meets it, so
+ * no direction moves him. After a second of pushing he is put back where
+ * he last stood clear of every NPC (the game's NPC objects, bn6f
+ * eOverworldNPCObjects: 16 of 0xD8 bytes). */
+static void unwedge(void) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	bool inside = false;
+	for (int i = 0; i < 16 && !inside; ++i) {
+		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
+		int r = emu_read8(o + 0x0C);
+		if (!(emu_read8(o) & 1) || !r) continue;
+		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py;
+		inside = dx * dx + dy * dy < (r + 2) * (r + 2);
+	}
+	bool moved = px != D.last_x || py != D.last_y;
+	D.last_x = px; D.last_y = py;
+	if (!inside) { D.free_x = px; D.free_y = py; D.wedged = 0; return; }
+	if (moved || !D.dir_held || emu_read8(BN6_CHATBOX) || talk_busy()) { D.wedged = 0; return; }
+	if (++D.wedged < 60 || (D.free_x == px && D.free_y == py)) return;
+	D.wedged = 0;
+	emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.free_x << 16);
+	emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.free_y << 16);
+	emu_write32(BN6_PLAYER + 0x28, (uint32_t)D.free_x << 16);
+	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)D.free_y << 16);
+}
+
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
 static void town_update(void) {
 	map_label();
+	if (on_map()) unwedge();
 	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
 	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
 	talk_update();
@@ -720,6 +758,7 @@ void director_update(void) {
 	}
 	if (follow_exit_warp()) return;
 	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
+	if (on_map()) unwedge();
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

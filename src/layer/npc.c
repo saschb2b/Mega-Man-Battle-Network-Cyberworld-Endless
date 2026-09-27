@@ -27,7 +27,12 @@
 #include "emu.h"
 #include "mapslot.h"
 
-#define NPC_TALK_RADIUS 10   /* world units (a panel is 32) */
+/* A navi's radius (the game's is 4 units; a panel is 32), for talking and
+ * collision both: with MegaMan's facing probes widened (npc_reach_install)
+ * 10 answered 17 of 24 approaches in a measured test, 4 only 14. A wall's
+ * push-out on a walkway can wedge MegaMan inside it; the director frees
+ * him (unwedge). */
+#define NPC_TALK_RADIUS 10
 
 /* The commands that place a floor sprite at world (x, y, z) (12 bytes). */
 static int floor_place(uint8_t *s, int x, int y, int z) {
@@ -47,7 +52,6 @@ uint32_t npc_mystery(int index) {
 		0x08,
 		0x25, 0x02, 0x1C,
 		0x29, (uint8_t)flag, (uint8_t)(flag >> 8),
-		0x0A, NPC_TALK_RADIUS,   /* (0x29 sets 4: opened from any facing its way) */
 		0x45, (uint8_t)flag, (uint8_t)(flag >> 8),
 		0x03,
 	};
@@ -104,9 +108,6 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 	/* an object (sprite list 7) has no frames facing MegaMan: turning to
 	 * him when spoken to would hide it for the whole conversation */
 	if (category == 7) s[n++] = 0x13;
-	/* a navi answers MegaMan facing anywhere its way: the check reaches 8
-	 * units ahead with a radius of 8, and the game's radius of 4 for NPCs
-	 * wanted him facing it square on (isometric diagonals make that hard) */
 	else if (!floor) { s[n++] = 0x0A; s[n++] = NPC_TALK_RADIUS; }
 	int loop = n, gone_jump = -1;
 	/* idle: leave once gone_flag is set, else pause a frame and look again */
