@@ -89,7 +89,7 @@ the layer's flags and Mystery Data picks cleared (its RAM would not match
 this build's objects). `run.seen` beside it keeps the map's panels seen so
 far, and event flag `0x144E` in the state that L has told where they are
 (`0x144F`: that the Net Dealer has said his words, so a later talk is a
-line and the list).
+line and the list; `0x1450` the same for the NaviCust vendor).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 

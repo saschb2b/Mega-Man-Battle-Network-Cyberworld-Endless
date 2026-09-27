@@ -498,6 +498,7 @@ static bool build_layer(void) {
 	D.layer_told = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
+	flag_clear(LAYER_VENDOR_TOLD_FLAG);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -1481,7 +1482,7 @@ bool director_resume(void) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
 			/* (a gift taken stays taken: it is the run's, not the layer's) */
-			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_DEALER_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
+			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_VENDOR_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);

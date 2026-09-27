@@ -191,7 +191,7 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 | Place | What it does |
 | --- | --- |
 | Net Dealer (a Normal Navi) | The game's shop: chips, an HP Memory and SubChips |
-| NaviCust vendor (a technician navi) | NaviCust programs from the game's own shops |
+| NaviCust vendor (a heavy engineer navi) | NaviCust programs from the game's own shops |
 | Chip Trader | Three chips in, one out |
 | BugFrag Trader | The game's BugFrag trades |
 | Recovery Mr. Prog | Restores HP |

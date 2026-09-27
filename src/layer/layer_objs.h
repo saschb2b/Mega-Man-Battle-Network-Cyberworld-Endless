@@ -20,6 +20,8 @@
 /* The Net Dealer has said his words on this layer (a later talk is a line
  * and the list). */
 #define LAYER_DEALER_TOLD_FLAG 0x144F
+/* ... and the NaviCust vendor his. */
+#define LAYER_VENDOR_TOLD_FLAG 0x1450
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
