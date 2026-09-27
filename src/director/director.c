@@ -341,8 +341,8 @@ static const char *status_words(void) {
 			if (layer.obj[i].type != OBJ_HEAL) continue;
 			int wx, wy, hf;
 			netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &wx, &wy);
-			const char *hw = route_to(wx, wy, &hf);
-			if (!hw) hw = way_to(wx, wy, &hf);
+			/* (where it lies: the way's first leg pointed off from it) */
+			const char *hw = way_to(wx, wy, &hf);
 			static const char *const near_far[3] = { "close by", "a ways off", "far off" };
 			ADD("@M The Recovery Mr. Prog can patch us up. It's %s, %s.|", hw, near_far[hf]);
 			break;
@@ -698,7 +698,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 11
+#define LAYER_MAKE 12
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 

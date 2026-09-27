@@ -223,10 +223,18 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		case OBJ_CHALLENGE: {
 			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;
-			/* a win pays with a chip a tier better than Mystery Data */
+			/* a win pays with a chip a tier better than Mystery Data, the
+			 * hardest hitting of a few (a WhiCapsl was a poor prize for
+			 * the risk) */
 			char code = '*';
 			ChipInfo ci;
-			int chip = roll_chip(run.depth, 3, &code);
+			int chip = roll_chip(run.depth, 3, &code), best_power = -1;
+			for (int tries = 0; tries < 6; ++tries) {
+				char c = '*';
+				int id = tries ? roll_chip(run.depth, 3, &c) : chip;
+				chip_info(id, &ci);
+				if (ci.power > best_power) { best_power = ci.power; chip = id; if (tries) code = c; }
+			}
 			chip_info(chip, &ci);
 			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');
 			break;
