@@ -42,8 +42,10 @@ First playable version.
   1000 a battle or Mystery Data), and 200 more an act.
 - Servers, Net Dealers and other services stand off a room's exits, where
   they blocked the way on. The map's key lists what the layer holds,
-  Servers and dark warps as "Event". An L pressed as a chat closes is
-  heard.
+  Servers and dark warps as "Event", and shows the services MegaMan
+  senses but has not reached: a ring where each stands, or a pip on the
+  map's edge its way. An L pressed as a chat closes is heard, and a
+  later L while MegaMan is hurt says which way the Recovery Mr. Prog is.
 - A new act eases in: every battle on its first layer comes from the lower
   half of its band (two BombCorns on the first layer after BlastMan took a
   playtester from 220 HP to 10).

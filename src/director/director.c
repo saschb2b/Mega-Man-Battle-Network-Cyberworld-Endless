@@ -331,7 +331,19 @@ static const char *status_words(void) {
 		ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
-	} else if (heal && hurt) ADD("@M The Recovery Mr. Prog here can patch us up.|");
+	} else if (heal && hurt) {
+		/* (and which way: it was on no map yet, and never found) */
+		for (int i = 0; i < layer.nobj; ++i) {
+			if (layer.obj[i].type != OBJ_HEAL) continue;
+			int wx, wy, hf;
+			netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &wx, &wy);
+			const char *hw = route_to(wx, wy, &hf);
+			if (!hw) hw = way_to(wx, wy, &hf);
+			static const char *const near_far[3] = { "close by", "a ways off", "far off" };
+			ADD("@M The Recovery Mr. Prog can patch us up. It's %s, %s.|", hw, near_far[hf]);
+			break;
+		}
+	}
 	/* the way on, as MegaMan senses it: along the floor where he can (the
 	 * arrow's way); where the walk sets off well away from where the goal
 	 * lies, where it lies, which holds still as the walk winds */
@@ -593,8 +605,28 @@ void director_draw_map(void) {
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
 		if (o->type == OBJ_BOSS && !boss_beaten()) { gx = x; gy = y; gc = c; goal_boss = true; }
 		else if (o->type == OBJ_EXIT && !goal_boss) { gx = x; gy = y; }
-		if (!D.seen[y][x]) continue;
 		int sx = SX(x, y), sy = SY(x, y);
+		if (!D.seen[y][x]) {
+			/* a service MegaMan senses but has not come near: its ring
+			 * where it stands, or a pip on the frame's edge its way (L
+			 * named the Recovery Mr. Prog, and it was nowhere on the map) */
+			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS) continue;
+			if (!INSIDE(sx, sy, 3)) {
+				double dx = sx - SX(mx, my), dy = sy - SY(mx, my), t = 1e9, hx = bw / 2.0 - 3, hy = bh / 2.0 - 3;
+				double sx0 = SX(mx, my), sy0 = SY(mx, my);
+				if (dx > 0) t = fmin(t, (ox + hx - sx0) / dx);
+				if (dx < 0) t = fmin(t, (ox - hx - sx0) / dx);
+				if (dy > 0) t = fmin(t, (oy + hy - sy0) / dy);
+				if (dy < 0) t = fmin(t, (oy - hy - sy0) / dy);
+				if (!(t > 0 && t < 1e8)) continue;
+				sx = (int)lround(sx0 + dx * t); sy = (int)lround(sy0 + dy * t);
+				fill_rect(sx - 1, sy - 1, 3, 3, c);
+				continue;
+			}
+			fill_rect(sx - 3, sy - 3, 7, 7, c);
+			fill_rect(sx - 2, sy - 2, 5, 5, rgba(0, 8, 28, 255));
+			continue;
+		}
 		if (!INSIDE(sx, sy, 3)) continue;
 		fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
 		fill_rect(sx - 2, sy - 2, 5, 5, c);
