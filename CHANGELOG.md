@@ -14,7 +14,9 @@ First playable version.
   came out of); a diagonal held along a walkway follows it round its
   turns, stepping to the middle of a lane first when he is off it; a
   diagonal held into a corner slides him round it, and a push into a navi
-  frees him.
+  frees him. A key held into a platform's corner leaves him there (it
+  walked him along the edge and back), and pushing a while where the pad
+  goes nowhere shows the way-on arrow.
 - A talks to the navi or Mystery Data MegaMan stands at even when he faces
   past it: he turns to the one before him, else the nearest (walking into
   a navi slides him round it), and reaches about 54 units, which is how

@@ -801,10 +801,12 @@ static int slide_axis(int held, int cx, int cy) {
 
 /* In a lane, one way on besides back to (bx, by): that way for a single
  * key (world step x, y) held against the lane's side, unless the way back
- * suits the key better (-1: not a lane, or back). */
+ * suits the key better (-1: not a lane, or back). A platform's corner is
+ * no lane's turn: the floor between its two ways is platform (taken for
+ * one, a key held into the corner walked him along the edge and back). */
 static int corridor_way(int cx, int cy, int x, int y, int bx, int by) {
 	static const int w[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
-	int k = -1, n = 0, on = -9, back = -9;
+	int k = -1, n = 0, on = -9, back = -9, ox = 0, oy = 0;
 	for (int i = 0; i < 4; ++i) {
 		int nx = cx + w[i][1], ny = cy - w[i][0];
 		if (!floor_panel(nx, ny)) continue;
@@ -813,7 +815,9 @@ static int corridor_way(int cx, int cy, int x, int y, int bx, int by) {
 		++n;
 		k = step_key(w[i][0], w[i][1]);
 		on = dot;
+		ox = nx - cx; oy = ny - cy;
 	}
+	if (n == 1 && back > -9 && ox != cx - bx && oy != cy - by && floor_panel(cx + ox + bx - cx, cy + oy + by - cy)) return -1;
 	return n == 1 && on >= back ? k : -1;
 }
 
@@ -1204,6 +1208,23 @@ static void unwedge(void) {
 	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)D.free_y << 16);
 }
 
+/* MegaMan pushing a while where the pad goes nowhere (a platform's
+ * corner, a lane's end, with no walkway in reach to line him up with):
+ * the way-on arrow shows along the floor, as after L's words. */
+static void push_arrow(void) {
+	static int ax, ay, pushed;
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	/* (the edge's push-out jostles him a unit or two) */
+	bool moved = abs(px - ax) > 4 || abs(py - ay) > 4;
+	if (moved || !D.dir_held || D.walk_t || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || boss_cinematic()) {
+		ax = px; ay = py; pushed = 0;
+		return;
+	}
+	if (++pushed != 40 || cinema_arrow_on()) return;
+	goal_way();
+	cinema_arrow(way_dir, 150);
+}
+
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
 /* The way-on arrow: on while L's words last, however many boxes, then
@@ -1511,7 +1532,7 @@ void director_update(void) {
 			}
 		}
 	}
-	if (on_map()) unwedge();
+	if (on_map()) { unwedge(); push_arrow(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
