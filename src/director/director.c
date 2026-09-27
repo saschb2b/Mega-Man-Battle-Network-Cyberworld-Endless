@@ -797,6 +797,7 @@ static int corridor_way(int cx, int cy, int x, int y, int bx, int by) {
 static uint32_t corner_assist(uint32_t keys) {
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
 	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
+	static int held_for, last_held = -1;          /* frames the same key has been held */
 	static int turn_cx, turn_cy, cur_cx = -99, cur_cy = -99, prev_cx = -99, prev_cy = -99;
 	uint32_t pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
@@ -808,6 +809,7 @@ static uint32_t corner_assist(uint32_t keys) {
 	if (pcx != cur_cx || pcy != cur_cy) { prev_cx = cur_cx; prev_cy = cur_cy; cur_cx = pcx; cur_cy = pcy; }
 	int held = -1;
 	for (int k = 0; k < 8; ++k) if (pad == pad_dirs[k].keys) held = k;
+	if (held < 0) last_held = -1;
 	if (held < 0 || D.town || emu_read8(BN6_CHATBOX) || talk_busy() || (assist >= 0 && held != assist_for)) {
 		stuck = 0; assist = -1; turning = centring = false;
 		return keys;
@@ -822,7 +824,10 @@ static uint32_t corner_assist(uint32_t keys) {
 		if (autopilot_on()) return keys;
 		int cx, cy, x = pad_dirs[held].x, y = pad_dirs[held].y;
 		netmap_panel(px, py, &cx, &cy);
-		if (!floor_panel(cx + y, cy - x)) {
+		/* (a tap, a sidestep, is left alone: the key held a moment first) */
+		held_for = held == last_held ? held_for + 1 : 0;
+		last_held = held;
+		if (held_for >= 8 && !floor_panel(cx + y, cy - x)) {
 			/* (not back into the lane he has just come out of) */
 			bool la = lane_step(cx, cy, x, 0) && !(cx == prev_cx && cy - x == prev_cy);
 			bool lb = lane_step(cx, cy, 0, y) && !(cx + y == prev_cx && cy == prev_cy);
