@@ -29,6 +29,7 @@
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
+#include "net_route.h"
 #include "netmap.h"
 #include "rom.h"
 #include "platform.h"
@@ -200,84 +201,35 @@ static void arrival_words(void) {
  * d-pad's UP moves +X -Y, RIGHT +X +Y: a world step (dx, dy) goes
  * dx + dy across and (dy - dx) / 2 down), and how far. */
 static int way_dir;   /* the index of the last way_to: 0 right, then clockwise */
+static const char *const ways[8] = {
+	"to the right", "down and to the right", "straight down", "down and to the left",
+	"to the left", "up and to the left", "straight up", "up and to the right",
+};
 
 static const char *way_to(int tx, int ty, int *far) {
-	static const char *const ways[8] = {
-		"to the right", "down and to the right", "straight down", "down and to the left",
-		"to the left", "up and to the left", "straight up", "up and to the right",
-	};
-	int dx = tx - ((int)emu_read32(BN6_PLAYER + 0x1C) >> 16);
-	int dy = ty - ((int)emu_read32(BN6_PLAYER + 0x20) >> 16);
-	double sx = dx + dy, sy = (dy - dx) / 2.0;
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int dx = tx - px, dy = ty - py;
 	int panels = (abs(dx) + abs(dy)) / 32;
 	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
-	double a = atan2(sy, sx);   /* (screen y grows downwards) */
-	int k = (int)lround(a / (3.14159265358979 / 4));
-	way_dir = (k % 8 + 8) % 8;
+	/* (on the grid, whose +x is the world's +Y and +y its -X: the pad's
+	 * ways, net_route.c) */
+	way_dir = route_grid_way(dy / 32.0, -dx / 32.0);
 	return ways[way_dir];
 }
 
-/* The way on along the floor, not as the crow flies: the direction to a
- * point a few panels along the shortest walk from MegaMan to (tx, ty),
- * and how far that walk is. NULL when either is off the grid. */
+/* The way on along the floor, not as the crow flies (net_route.c), and
+ * how far that walk is. NULL when either end is off the floor. */
 static const char *route_to(int tx, int ty, int *far) {
-	static int16_t prev[MAP_H][MAP_W];
-	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-	int sx, sy, ex, ey;
-	if (!netmap_panel(px, py, &sx, &sy) || !netmap_panel(tx, ty, &ex, &ey)) return NULL;
-	if (sx < 0 || sy < 0 || sx >= MAP_W || sy >= MAP_H || ex < 0 || ey < 0 || ex >= MAP_W || ey >= MAP_H) return NULL;
-	if (layer.cell[sy][sx] != C_PATH || layer.cell[ey][ex] != C_PATH) return NULL;
-	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) prev[y][x] = -1;
-	int h = 0, t = 0;
-	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
-	prev[sy][sx] = (int16_t)(sy * MAP_W + sx);
-	while (h < t && prev[ey][ex] < 0) {
-		int x = qx[h], y = qy[h++];
-		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-		for (int k = 0; k < 4; ++k) {
-			int nx = x + d[k][0], ny = y + d[k][1];
-			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || prev[ny][nx] >= 0 || layer.cell[ny][nx] != C_PATH) continue;
-			prev[ny][nx] = (int16_t)(y * MAP_W + x);
-			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
-		}
-	}
-	if (prev[ey][ex] < 0) return NULL;
-	/* the walk, backwards from the target; aim at the panel 3 along it */
-	int len = 0, cx = ex, cy = ey;
-	static int16_t path[MAP_W * MAP_H];
-	while (!(cx == sx && cy == sy)) {
-		path[len++] = (int16_t)(cy * MAP_W + cx);
-		int p = prev[cy][cx];
-		cx = p % MAP_W; cy = p / MAP_W;
-	}
+	double gx, gy;
+	int ex, ey, len;
+	netmap_grid(px, py, &gx, &gy);
+	if (!netmap_panel(tx, ty, &ex, &ey)) return NULL;
+	int w = route_way(gx, gy, ex, ey, &len);
+	if (w < 0) return NULL;
 	*far = len < 5 ? 0 : len < 14 ? 1 : 2;
-	/* aim along the walk's first leg while it runs straight (on a walkway
-	 * that is one of the screen's diagonals: a flat arrow between two
-	 * forking walkways said neither), else at the farthest of the next four
-	 * panels he can walk to in a straight line over the floor (three
-	 * along, as the crow flies, cut corners over drops) */
-	int aim = len ? path[len - 1] : sy * MAP_W + sx;
-	int leg = 0;
-	if (len) {
-		int dx = path[len - 1] % MAP_W - sx, dy = path[len - 1] / MAP_W - sy;
-		while (leg < 4 && leg < len && path[len - 1 - leg] % MAP_W == sx + dx * (leg + 1) && path[len - 1 - leg] / MAP_W == sy + dy * (leg + 1)) ++leg;
-	}
-	if (leg >= 2) aim = path[len - leg];
-	else for (int k = 4; k >= 2; --k) {
-		if (len < k) continue;
-		int ax = path[len - k] % MAP_W, ay = path[len - k] / MAP_W;
-		bool clear = true;
-		for (int t = 1; t < 16 * k && clear; ++t) {
-			double f = t / (16.0 * k);
-			int qx = (int)lround(sx + (ax - sx) * f), qy = (int)lround(sy + (ay - sy) * f);
-			clear = qx >= 0 && qy >= 0 && qx < MAP_W && qy < MAP_H && layer.cell[qy][qx] == C_PATH;
-		}
-		if (clear) { aim = path[len - k]; break; }
-	}
-	int wx, wy, dummy;
-	netmap_world(aim % MAP_W, aim / MAP_W, &wx, &wy);
-	return way_to(wx, wy, &dummy);
+	way_dir = w;
+	return ways[w];
 }
 
 /* The way on as the arrow shows it: along the floor to the exit or the
@@ -795,11 +747,37 @@ void director_describe(FILE *f) {
 				int wx, wy;
 				netmap_world(cx, cy, &wx, &wy);
 				fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
+				goal_way();
+				fprintf(f, "way %d %s\n", way_dir, ways[way_dir]);
 				for (int y = cy - 4; y <= cy + 4; ++y) {
 					fprintf(f, "cells ");
 					for (int x = cx - 4; x <= cx + 4; ++x)
 						fputc(x == cx && y == cy ? '@' : x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH ? '#' : '.', f);
 					fputc('\n', f);
+				}
+				/* (CYBERWORLD_STATE_POS=map: the whole layer, with its objects
+				 * and the arrow's walk: * the walk, + where the arrow aims,
+				 * letters the objects, ^ raised floor) */
+				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) {
+					goal_way();
+					static char g[MAP_H][MAP_W + 1];
+					int x0 = MAP_W, y0 = MAP_H, x1 = 0, y1 = 0;
+					for (int y = 0; y < MAP_H; ++y) {
+						for (int x = 0; x < MAP_W; ++x) {
+							g[y][x] = layer.cell[y][x] != C_PATH ? ' ' : layer.level[y][x] ? '^' : '.';
+							if (layer.cell[y][x] == C_PATH) { x0 = x < x0 ? x : x0; y0 = y < y0 ? y : y0; x1 = x > x1 ? x : x1; y1 = y > y1 ? y : y1; }
+						}
+						g[y][MAP_W] = 0;
+					}
+					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
+					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
+					static const char mark[] = "IXMSHTTBUGNCPRF";
+					for (int i = 0; i < layer.nobj; ++i) {
+						int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
+						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && layer.obj[i].type < (int)sizeof mark - 1) g[oy][ox] = mark[layer.obj[i].type];
+					}
+					g[cy][cx] = '@';
+					for (int y = y0; y <= y1; ++y) fprintf(f, "map %.*s\n", x1 - x0 + 1, &g[y][x0]);
 				}
 			}
 		}
@@ -1366,9 +1344,10 @@ static void arrow_update(void) {
 	 * walked past) */
 	/* (a new way twice running before it turns: at a walkway's mouth the
 	 * route's first leg flipped as MegaMan crossed a panel's border, and
-	 * the arrow with it) */
+	 * the arrow with it; a look every 5 frames, as every 15 a running
+	 * MegaMan was two panels past a turn before it turned) */
 	static int tick, pending = -1;
-	if (cinema_arrow_on() && on_map() && ++tick % 15 == 0) {
+	if (cinema_arrow_on() && on_map() && ++tick % 5 == 0) {
 		goal_way();
 		if (way_dir == pending) cinema_arrow_turn(way_dir);
 		pending = way_dir;

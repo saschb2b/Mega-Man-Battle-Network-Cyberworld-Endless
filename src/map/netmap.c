@@ -171,6 +171,11 @@ void netmap_world(int x, int y, int *wx, int *wy) {
 	*wy = place.ey + 16 + 32 * B;
 }
 
+void netmap_grid(int wx, int wy, double *x, double *y) {
+	*x = (wy - place.ey - 16) / 32.0 + place.gx0;
+	*y = -(wx - place.ex - 16) / 32.0 + place.gy0;
+}
+
 bool netmap_panel(int wx, int wy, int *x, int *y) {
 	int A = floordiv(wx - place.ex, 32), B = floordiv(wy - place.ey, 32);
 	*x = B + place.gx0;

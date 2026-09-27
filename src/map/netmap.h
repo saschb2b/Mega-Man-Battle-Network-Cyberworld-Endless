@@ -47,6 +47,9 @@ unsigned netmap_stair_dirs(int area, int *rise);
 void netmap_world(int x, int y, int *wx, int *wy);
 /* The grid panel under world (wx, wy), or false outside the grid. */
 bool netmap_panel(int wx, int wy, int *x, int *y);
+/* The same point on the grid, not rounded to a panel (a panel's centre at
+ * whole numbers). */
+void netmap_grid(int wx, int wy, double *x, double *y);
 /* Whether wall cell (cx, cy) (8x8 world units) lies on the last layer's
  * floor at `level` (0 ground, 1 raised); stairs belong to both. */
 bool netmap_floor_cell(int cx, int cy, int level);

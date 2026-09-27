@@ -173,7 +173,7 @@ static void draw_arrow(int x0, int y0) {
 	int left = C.arrow_len - C.arrow_t;
 	int a = C.arrow_t < 8 ? C.arrow_t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
 	float ang = (float)C.arrow_dir * 3.14159265f / 4.0f;
-	float ux = cosf(ang), uy = sinf(ang) * 0.75f;   /* (the isometric screen: flatter up and down) */
+	float ux = cosf(ang), uy = sinf(ang) * 0.5f;   /* (a diagonal along the isometric floor's, as a walkway runs) */
 	float n = sqrtf(ux * ux + uy * uy);
 	ux /= n; uy /= n;
 	float bob = 3.0f * sinf((float)C.arrow_t * 0.25f);

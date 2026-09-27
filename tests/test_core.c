@@ -1,10 +1,12 @@
 /* ROM-free checks: hashing, decompression and map generation. */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "game.h"
 #include "net.h"
+#include "net_route.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
@@ -453,11 +455,99 @@ static void test_talk(void) {
 			CHECK(strlen(guardian_area_in_text(biome, side)) < 28, "area %d's name is long for the cards", biome);
 }
 
+/* Following the arrow gets MegaMan there: from the arrival and from each
+ * room, walking the way it shows at a run's pace (a look every 5 frames, a
+ * new way taken when two looks agree, as the director's arrow_update),
+ * sliding along the floor's edges and turned into a walkway's mouth (the
+ * director's unwedge), he reaches the guardian or the exit pad. (It led
+ * past a turn, into a platform's corner, round in circles.) */
+static bool walk_floor(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
+
+/* one frame's step from (x, y) by (dx, dy), or along one axis of it */
+static bool walk_step(double *x, double *y, double dx, double dy) {
+	int cx = (int)lround(*x), cy = (int)lround(*y);
+	const double tries[3][2] = { { dx, dy }, { dx, 0 }, { 0, dy } };
+	for (int i = 0; i < 3; ++i) {
+		if (fabs(tries[i][0]) + fabs(tries[i][1]) < 1e-9) continue;
+		double nx = *x + tries[i][0], ny = *y + tries[i][1];
+		int ncx = (int)lround(nx), ncy = (int)lround(ny);
+		if (!walk_floor(ncx, ncy)) continue;
+		if (ncx != cx && ncy != cy && !walk_floor(ncx, cy) && !walk_floor(cx, ncy)) continue;
+		*x = nx;
+		*y = ny;
+		return true;
+	}
+	return false;
+}
+
+/* frames to get beside (tx, ty) from (x, y) following the arrow, -1 never */
+static int follow_arrow(double x, double y, int tx, int ty) {
+	const double run = 2.0 / 32;   /* panels a frame */
+	int len, shown = route_way(x, y, tx, ty, &len), pending = shown, stuck = 0;
+	if (shown < 0) return -1;
+	int budget = 200 + 48 * len;
+	for (int f = 1; f <= budget; ++f) {
+		int cx = (int)lround(x), cy = (int)lround(y);
+		if (abs(cx - tx) + abs(cy - ty) <= 1) return f;
+		if (f % 5 == 0) {
+			int w = route_way(x, y, tx, ty, &len);
+			if (w >= 0 && w == pending) shown = w;
+			pending = w;
+		}
+		/* the pad's way on the grid (RIGHT +x -y, DOWN +x +y) */
+		double a = shown * 3.14159265358979 / 4, right = cos(a), down = sin(a);
+		double dx = (right + down) / 2, dy = (down - right) / 2, n = sqrt(dx * dx + dy * dy);
+		dx = fabs(dx) < 1e-9 ? 0 : dx / n * run;
+		dy = fabs(dy) < 1e-9 ? 0 : dy / n * run;
+		if (walk_step(&x, &y, dx, dy)) { stuck = 0; continue; }
+		/* along one axis into an edge: towards the side the floor goes on */
+		if (++stuck >= 3 && (!dx || !dy)) {
+			int ax = dx > 0 ? 1 : dx < 0 ? -1 : 0, ay = dy > 0 ? 1 : dy < 0 ? -1 : 0;
+			for (int s = -1; s <= 1; s += 2) {
+				int bx = ay ? s : 0, by = ax ? s : 0;
+				if (!walk_floor(cx + ax, cy + ay) && walk_floor(cx + bx, cy + by) && walk_floor(cx + ax + bx, cy + ay + by)) {
+					walk_step(&x, &y, bx * run, by * run);
+					break;
+				}
+			}
+		}
+	}
+	return -1;
+}
+
+static void test_arrow(void) {
+	int walks = 0, lost = 0;
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	for (uint32_t seed = 1; seed <= 120; ++seed) {
+		int depth = 1 + (int)(seed % 25);
+		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, 3u, 32);
+		int tx = -1, ty = -1;
+		for (int i = 0; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			bool goal = layer.boss_layer ? o->type == OBJ_BOSS : o->type == OBJ_EXIT || o->type == OBJ_RETURN;
+			if (goal && tx < 0) { tx = (int)o->x; ty = (int)o->y; }
+		}
+		if (tx < 0) continue;
+		for (int r = -1; r < layer.nrooms; ++r) {
+			int sx = r < 0 ? (int)layer.obj[0].x : layer.rooms[r].ax, sy = r < 0 ? (int)layer.obj[0].y : layer.rooms[r].ay;
+			if (abs(sx - tx) + abs(sy - ty) <= 1) continue;
+			++walks;
+			if (follow_arrow(sx, sy, tx, ty) >= 0) continue;
+			if (++lost <= 5) printf("  seed %u (depth %d): lost from %d,%d on the way to %d,%d\n", seed, depth, sx, sy, tx, ty);
+		}
+	}
+	CHECK(lost == 0, "the arrow lost MegaMan on %d of %d walks", lost, walks);
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
 	test_stairs();
+	test_arrow();
 	test_depth_plan();
 	test_pacing();
 	test_town_moves();

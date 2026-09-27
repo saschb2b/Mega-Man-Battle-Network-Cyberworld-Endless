@@ -4,6 +4,17 @@
 
 First playable version.
 
+- The way-on arrow keeps to the walk. It showed a turn's first panel when
+  the walk cut a platform's corner, and a running MegaMan was two panels
+  past the turn before it turned (a look every 15 frames, now 5), so on
+  BlastMan's layer it led off the start platform's corner and round in
+  circles. Its eight ways are the pad's: a walkway's run lies in the middle
+  of a diagonal, where on the screen it lay a hair from "left" or "right",
+  and the diagonals are drawn along the floor's. It leads around Mystery
+  Data and navis. A ROM-free test follows it from every room of 120
+  layers to the guardian or the exit pad (the old arrow lost 208 of 956
+  walks). The playtest state names the arrow's way, and
+  `CYBERWORLD_STATE_POS=map` draws the whole layer with its walk.
 - A battle's viruses are counted from the battle the game set up: the
   pointer that names it kept the last battle's until the setup wrote it, so
   a battle after a re-roll could count the other battle's viruses (AREA
