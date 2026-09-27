@@ -16,10 +16,14 @@ raised, and the loop's own lessons.
 
 ## One iteration
 
-1. **Build and pin.** `python3 build.py linux`, then
-   `.claude/skills/playtest-loop/scripts/pin.sh kai`: the session runs this
-   copy (`.build/play/kai/bin/`, kept by `bin.pin`), so rebuilding while it
-   plays changes nothing for it, and its replays stay exact.
+1. **Build, look, pin.** `python3 build.py linux`; capture every visual
+   change of the iteration in the game (not only its chat or its code);
+   then `.claude/skills/playtest-loop/scripts/pin.sh kai`: the session runs
+   this copy (`.build/play/kai/bin/`, kept by `bin.pin`), so rebuilding
+   while it plays changes nothing for it, and its replays stay exact. A
+   session launched on a broken build is stopped at once (TaskStop, then
+   `play.py stop kai`), its profile put back (`rm -rf data; cp -rp data0
+   data` in `.build/play/kai/`, delete `notes-sN.md`) and launched again.
 2. **Patch notes** (player-facing, in the prompt): what changed since the
    last pinned build (`git log` from it), a one-time note when a change made
    CONTINUE restart the layer (`LAYER_MAKE` or `RUN_MAGIC` bumped), and

@@ -84,3 +84,12 @@ Cost: 257 calls, 82 minutes. Loop change: **a visual fix is verified in a
 picture of the result**, not by its code: draw the sprites
 (`build.py shot --scene gallery --sheet @6:56:48:/src/.build/l6.png`) or
 capture the layer, and look.
+
+## Session 14 (restarted)
+
+Launched on 872ad88, whose new bystander and vendor sprites (Roll, GutsMan,
+Glyde: compressed, unlisted) drew as white dots on the map, one of them
+ElecMan's. The in-game capture after the launch caught it; the session was
+stopped ten minutes in, Kai's profile put back from `data0` and relaunched
+on 62a748e (EvilNavi bystanders, GirlNavi vendor, looked at on a layer).
+Loop change: look **before** pinning. bn6f's `npcSpritePtrs` names list 6.
