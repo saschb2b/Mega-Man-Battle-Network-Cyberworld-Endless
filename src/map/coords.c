@@ -3,8 +3,9 @@
  * (triggers) hold a count, (key, offset) entries sorted by key and 4-byte
  * shapes (lowest z, value, height, type); key = (y / 8 + 127) * 254 +
  * x / 8 + 127. Walls: types 1 NE, 2 SW, 3 SE, 4 NW edges and 5 E, 6 S, 7 N,
- * 8 W outer corners. Triggers: a warp pad is 3x3 cells, types 9-C at the
- * corners and 0x11 elsewhere, the value its warp index (see docs/ROM_DATA.md). */
+ * 8 W outer corners. Triggers: an original warp pad is 3x3 cells, types 9-C
+ * at the corners and 0x11 elsewhere, the value its warp index (see
+ * docs/ROM_DATA.md); a layer's is its whole panel, 4x4. */
 #include "coords.h"
 
 #include <stdio.h>
@@ -73,12 +74,19 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 	return n;
 }
 
-/* A warp pad's 3x3 trigger cells. */
+/* A warp pad's trigger cells: the whole panel around its centre, 4x4 (a
+ * panel's centre is a cell's corner, so the originals' 3x3 reached 8 units
+ * one way and 16 the other, and MegaMan stood on the pad's front rim
+ * without leaving). Types 9-C at the corners and 0x11 elsewhere, as the
+ * originals'. */
+#define PAD_CELLS 16
 static int pad(Cell *t, const CoordPad *p) {
-	static const int corner[3][3] = { { 0x09, 0x11, 0x0A }, { 0x11, 0x11, 0x11 }, { 0x0B, 0x11, 0x0C } };
 	int cx = p->x >> 3, cy = p->y >> 3, n = 0;   /* arithmetic shift: floor */
-	for (int dy = -1; dy <= 1; ++dy)
-		for (int dx = -1; dx <= 1; ++dx) t[n++] = cell(cx + dx, cy + dy, 0, p->index, 8, corner[dy + 1][dx + 1]);
+	for (int dy = -2; dy <= 1; ++dy)
+		for (int dx = -2; dx <= 1; ++dx) {
+			int type = dy == -2 ? (dx == -2 ? 0x09 : dx == 1 ? 0x0A : 0x11) : dy == 1 ? (dx == -2 ? 0x0B : dx == 1 ? 0x0C : 0x11) : 0x11;
+			t[n++] = cell(cx + dx, cy + dy, 0, p->index, 8, type);
+		}
 	return n;
 }
 
@@ -123,13 +131,13 @@ bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const Coord
 }
 
 static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
-	enum { WALLS_MAX = 16384, TRIGGERS_MAX = 9 * 16 };
+	enum { WALLS_MAX = 16384, TRIGGERS_MAX = PAD_CELLS * 16 };
 	static Cell sec[4][WALLS_MAX];
 	int n[4] = { 0 };
 	int rise = town_floor ? 0 : netmap_rise();
 	n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
 	if (rise) n[0] += walls(sec[0] + n[0], WALLS_MAX - n[0], 1, rise, rise);
-	for (int i = 0; i < npads && n[3] + 9 <= TRIGGERS_MAX; ++i) n[3] += pad(sec[3] + n[3], &pads[i]);
+	for (int i = 0; i < npads && n[3] + PAD_CELLS <= TRIGGERS_MAX; ++i) n[3] += pad(sec[3] + n[3], &pads[i]);
 	/* raised floor heights, stairs' ramps, walls and layer priorities */
 	for (int s = 0; extra && s < 4; ++s)
 		for (int i = 0; i < extra->n[s] && n[s] < WALLS_MAX; ++i) sec[s][n[s]++] = from(&extra->cells[s][i]);
