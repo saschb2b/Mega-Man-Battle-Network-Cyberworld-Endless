@@ -763,18 +763,23 @@ void director_describe(FILE *f) {
 		}
 	fprintf(f, "hp %d/%d\nzenny %u\n", hp, max, (unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
+	/* (in a battle, the panel MegaMan stands on, from the left and the top:
+	 * a player sees it at a glance, a playtester reading stills misread it
+	 * turn after turn, as BN6 draws him half a row above his panel) */
+	if (!on_map())
+		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+			if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0 && emu_read8(o + 0x12)) {
+				fprintf(f, "megaman stands column %d row %d\n", emu_read8(o + 0x12), emu_read8(o + 0x13));
+				break;
+			}
+		}
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
 		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16,
 			(int)emu_read32(BN6_PLAYER + 0x20) >> 16, (int)emu_read32(BN6_PLAYER + 0x24) >> 16, emu_read8(BN6_PLAYER + 0x17),
 			emu_read8(BN6_PLAYER + 9), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
-		/* (in a battle, MegaMan's panel: column, row from 1) */
-		if (!on_map())
-			for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
-				uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-				if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) { fprintf(f, "panel %d %d\n", emu_read8(o + 0x12), emu_read8(o + 0x13)); break; }
-			}
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 		else {
 			int ns = 0, nf = 0;
