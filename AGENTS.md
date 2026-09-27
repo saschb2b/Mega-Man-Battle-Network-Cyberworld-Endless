@@ -137,7 +137,11 @@ and the audio ones).
 saves in `data/`, every command in `history.txt`, the seed in its first
 line), so a playtester, person or agent, plays it like the handheld,
 reading each picture; a session replays from the seed, `data0/` and the
-history.
+history. Each start copies the current build into the session's `bin/`;
+with `NAME/bin.pin` present its restarts keep that copy, so a rebuild
+during a playtest leaves its CONTINUE alone. Dev steps beside the
+player's: `place X Y FACING` puts MegaMan somewhere, `flags FROM TO 1`
+sets a block of event flags and `flags FROM TO 0` puts them back.
 
 `tools/romlab` runs the plain ROM in libmgba for research: scripted input,
 memory peeks and pokes, states and recordings. `labtrace.py` traces captured

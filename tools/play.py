@@ -21,6 +21,9 @@ Commands, apart by ';':
   wait N          N frames without input
   mash BTN N      press BTN every 10 frames for N frames
   shot            a picture now (one is always taken at the end)
+Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
+flags set, then back as they were). NAME/bin.pin keeps the session's
+build across starts.
 BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT).
 The keyboard's layout is the handheld's buttons: A talks and confirms, B
 runs (hold) and cancels, START opens the PET, L and R open the Custom
