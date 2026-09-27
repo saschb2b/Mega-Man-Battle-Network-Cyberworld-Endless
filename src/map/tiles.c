@@ -249,6 +249,33 @@ static int misses(uint64_t mask, uint64_t must, uint64_t never) {
 	return __builtin_popcountll(must & ~mask) + __builtin_popcountll(never & mask);
 }
 
+bool tiles_in_front(const TileGrid *g, int tx, int ty, TileFloor fa, const void *ca, TileFloor fb, const void *cb) {
+	/* votes: pixels on one floor's top within a side face's height under
+	 * the other's */
+	int va = 0, vb = 0;
+	for (int y = 0; y < 8; ++y)
+		for (int x = 0; x < 8; ++x) {
+			int px = tx * 8 + x, py = ty * 8 + y;
+			bool ta = floor_px(g, fa, ca, px, py) != 0, tb = floor_px(g, fb, cb, px, py) != 0;
+			if (ta == tb) continue;
+			TileFloor fo = ta ? fb : fa;
+			const void *co = ta ? cb : ca;
+			for (int k = 1; k <= g->face; ++k)
+				if (floor_px(g, fo, co, px, py - k)) { ++*(ta ? &va : &vb); break; }
+		}
+	if (va != vb) return va > vb;
+	/* only faces meet here: the floor lower on screen in front (panel
+	 * (A + k % 3 - 1, B + k / 3 - 1) lies k / 3 - k % 3 rows further down) */
+	int phase, A, B, sa = 0, na = 0, sb = 0, nb = 0;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	for (int k = 0; k < 9; ++k) {
+		int down = k / 3 - k % 3;
+		if (TILE_MATERIAL(fa(A + k % 3 - 1, B + k / 3 - 1, ca))) { sa += down; ++na; }
+		if (TILE_MATERIAL(fb(A + k % 3 - 1, B + k / 3 - 1, cb))) { sb += down; ++nb; }
+	}
+	return sa * nb >= sb * na;
+}
+
 /* ---- learning ---- */
 
 /* An opaque tile of one colour: filler the original hides under floor */
@@ -544,7 +571,8 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 		}
 		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
 			const TileCand *c = &b->cand[i];
-			if (single && c->e1) continue;
+			/* (a mirror image's empty back entry is tile 0 flipped) */
+			if ((single && c->e1) || (g->single && (c->e1 & 0x3FF))) continue;
 			int d = distance(phase, b->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			/* a pad in the pads' look, other floor not */
 			if (c->pad != pad) d += PAD_LOOK;

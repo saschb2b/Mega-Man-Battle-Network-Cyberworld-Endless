@@ -166,6 +166,7 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 static const NetLayout *cur;
 static bool one_floor;        /* the area has no walkway floor: all is platform */
 static bool by_shape;         /* its floors are told by shape: an arena is platform */
+static bool pads_apart;       /* its pads never lie flush with other floor (RomLayout.net_area) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR };
@@ -264,7 +265,7 @@ static bool write_tilemap(const Learned *L) {
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
-	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape };
+	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape, pads_apart };
 	free(last.seams);
 	last.seams = calloc(cells, 1);
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
@@ -407,6 +408,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	cur = lay;
 	one_floor = !R.layout->net_area[area].walk_styles;
 	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
+	pads_apart = R.layout->net_area[area].pads_apart;
 	place.ex = L->ex;
 	place.ey = L->ey;
 	if (!centre(lay)) return false;
@@ -442,13 +444,15 @@ static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int m
 
 bool netmap_build_layer(int area, uint32_t seed) {
 	/* the pads, in their own look (and where the area's platforms are pads,
-	 * the small platforms) */
+	 * the small platforms and the guardian's arena: the Aquarium's water
+	 * never widens into one) */
 	static uint8_t pads[MAP_H][MAP_W];
 	memset(pads, 0, sizeof pads);
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
 		int small = R.layout->net_area[area].pad_rooms;
-		if (m->kind != ROOM_PAD && !(m->kind == ROOM_PLATFORM && m->w * m->h <= small)) continue;
+		bool pad = m->kind == ROOM_PAD || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena));
+		if (!pad) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;
 	}
