@@ -10,11 +10,15 @@ First playable version.
 - R near the town's statue says which way the statue is and shows the
   way-on arrow.
 - Walkways without lining up: holding one direction at a walkway's mouth
-  or a spur lines MegaMan up and takes him in, and on round the walkway's
-  turns; a diagonal held into a corner slides him round it, and a push
-  into a navi frees him.
+  or a spur lines MegaMan up and takes him in (never back into the one he
+  came out of); a diagonal held along a walkway follows it round its
+  turns, stepping to the middle of a lane first when he is off it; a
+  diagonal held into a corner slides him round it, and a push into a navi
+  frees him.
 - A talks to the navi or Mystery Data MegaMan stands at even when he faces
-  past it: he turns to it first (walking into a navi slides him round it).
+  past it: he turns to the one before him, else the nearest (walking into
+  a navi slides him round it), and reaches about 44 units, which is how
+  far a short Mr. Prog can be while looking a tile away.
 - L says where the exit or the guardian lies when the walk there sets off
   another way ("The way winds, so follow the arrow!"), so the words hold
   still while the arrow shows the next stretch; the Recovery Mr. Prog,

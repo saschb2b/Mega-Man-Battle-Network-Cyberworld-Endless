@@ -505,22 +505,33 @@ void director_draw_map(void) {
 			if (v < vmin) vmin = v;
 			if (v > vmax) vmax = v;
 		}
-	int cu = (umin + umax) / 2, cv = (vmin + vmax) / 2;
-	if ((umax - umin) * 4 + 10 > bw || (vmax - vmin) * 2 + 6 > bh) { cu = mx - my; cv = mx + my; }
+	/* larger while the seen floor fits at it */
+	int cu = (umin + umax) / 2, cv = (vmin + vmax) / 2, s = 6;
+	if ((umax - umin) * 6 + 14 > bw || (vmax - vmin) * 3 + 8 > bh) s = 4;
+	if (s == 4 && ((umax - umin) * 4 + 10 > bw || (vmax - vmin) * 2 + 6 > bh)) { cu = mx - my; cv = mx + my; }
 	int ox = bx + bw / 2, oy = by + bh / 2;
-	#define SX(x, y) (ox + ((x) - (y) - cu) * 4)
-	#define SY(x, y) (oy + ((x) + (y) - cv) * 2)
+	#define SX(x, y) (ox + ((x) - (y) - cu) * s)
+	#define SY(x, y) (oy + ((x) + (y) - cv) * (s / 2))
 	#define INSIDE(sx, sy, m) ((sx) - (m) >= bx && (sy) - (m) >= by && (sx) + (m) < bx + bw && (sy) + (m) < by + bh)
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] != C_PATH) continue;
 			int sx = SX(x, y), sy = SY(x, y);
 			if (!INSIDE(sx, sy, 3)) continue;
-			/* a panel: a diamond 7 wide and 3 high, a pixel apart from the next */
+			/* a panel: a diamond 7 wide and 3 high (11 and 5 larger), a pixel
+			 * apart from the next */
 			SDL_Color c = layer.level[y][x] ? rgba(150, 210, 255, 240) : rgba(60, 140, 230, 240);
-			fill_rect(sx - 1, sy - 1, 3, 1, c);
-			fill_rect(sx - 3, sy, 7, 1, c);
-			fill_rect(sx - 1, sy + 1, 3, 1, c);
+			if (s == 6) {
+				fill_rect(sx - 1, sy - 2, 3, 1, c);
+				fill_rect(sx - 3, sy - 1, 7, 1, c);
+				fill_rect(sx - 5, sy, 11, 1, c);
+				fill_rect(sx - 3, sy + 1, 7, 1, c);
+				fill_rect(sx - 1, sy + 2, 3, 1, c);
+			} else {
+				fill_rect(sx - 1, sy - 1, 3, 1, c);
+				fill_rect(sx - 3, sy, 7, 1, c);
+				fill_rect(sx - 1, sy + 1, 3, 1, c);
+			}
 		}
 	/* what stands there, once seen; the goal's way while it is not */
 	int gx = -1, gy = -1;
@@ -730,14 +741,20 @@ static int slide_axis(int held, int cx, int cy) {
 
 static uint32_t corner_assist(uint32_t keys) {
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
+	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
+	static int turn_cx, turn_cy, cur_cx = -99, cur_cy = -99, prev_cx = -99, prev_cy = -99;
 	uint32_t pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	bool moved = px != lx || py != ly;
 	lx = px; ly = py;
+	/* the panel he stands on and the one before it */
+	int pcx, pcy;
+	netmap_panel(px, py, &pcx, &pcy);
+	if (pcx != cur_cx || pcy != cur_cy) { prev_cx = cur_cx; prev_cy = cur_cy; cur_cx = pcx; cur_cy = pcy; }
 	int held = -1;
 	for (int k = 0; k < 8; ++k) if (pad == pad_dirs[k].keys) held = k;
 	if (held < 0 || D.town || emu_read8(BN6_CHATBOX) || talk_busy() || (assist >= 0 && held != assist_for)) {
-		stuck = 0; assist = -1;
+		stuck = 0; assist = -1; turning = centring = false;
 		return keys;
 	}
 	/* a single key goes across the panels' diagonal. Where one of its two
@@ -751,7 +768,9 @@ static uint32_t corner_assist(uint32_t keys) {
 		int cx, cy, x = pad_dirs[held].x, y = pad_dirs[held].y;
 		netmap_panel(px, py, &cx, &cy);
 		if (!floor_panel(cx + y, cy - x)) {
-			bool la = lane_step(cx, cy, x, 0), lb = lane_step(cx, cy, 0, y);
+			/* (not back into the lane he has just come out of) */
+			bool la = lane_step(cx, cy, x, 0) && !(cx == prev_cx && cy - x == prev_cy);
+			bool lb = lane_step(cx, cy, 0, y) && !(cx + y == prev_cx && cy == prev_cy);
 			if (la != lb) {
 				int wcx, wcy;
 				netmap_world(cx, cy, &wcx, &wcy);
@@ -779,6 +798,39 @@ static uint32_t corner_assist(uint32_t keys) {
 		return (keys & ~pad) | pad_dirs[k].keys;
 	}
 	int ax = pad_dirs[held].x, ay = pad_dirs[held].y;
+	if (assist >= 0 && turning) {
+		/* round a lane's turn: to the panel's middle on his own axis, then
+		 * along the side; on the next panel on round the lane while it
+		 * goes on one way only, and let go where the pad's way opens */
+		frames = moved ? 0 : frames + 1;
+		if (frames > 8) { assist = -1; turning = false; stuck = 0; return keys; }   /* (something in the way) */
+		if (pcx != turn_cx || pcy != turn_cy) {
+			int k = -1, open = 0;
+			if (!floor_panel(pcx + ay, pcy - ax))
+				for (int s = -1; s <= 1; s += 2) {
+					int sx = ay ? s : 0, sy = ax ? s : 0, nx = pcx + sy, ny = pcy - sx;
+					if (!floor_panel(nx, ny) || (nx == prev_cx && ny == prev_cy)) continue;
+					++open;
+					k = step_key(sx, sy);
+				}
+			if (open != 1 || k < 0) { assist = -1; turning = false; stuck = 0; return keys; }
+			assist = k;
+			turn_cx = pcx; turn_cy = pcy;
+		}
+		int wcx, wcy;
+		netmap_world(pcx, pcy, &wcx, &wcy);
+		int off = ax ? px - wcx : py - wcy;
+		if (abs(off) > 4) return (keys & ~pad) | pad_dirs[step_key(ax ? (off > 0 ? -1 : 1) : 0, ay ? (off > 0 ? -1 : 1) : 0)].keys;
+		return (keys & ~pad) | pad_dirs[assist].keys;
+	}
+	if (assist >= 0 && centring) {
+		/* to the panel's middle across his way, then on */
+		int wcx, wcy;
+		netmap_world(pcx, pcy, &wcx, &wcy);
+		int off = ax ? py - wcy : px - wcx;
+		if (abs(off) <= 3 || ++frames > 30) { assist = -1; centring = false; stuck = 0; return keys; }
+		return (keys & ~pad) | pad_dirs[step_key(ax ? 0 : (off > 0 ? -1 : 1), ax ? (off > 0 ? -1 : 1) : 0)].keys;
+	}
 	if (assist >= 0) {
 		int a = ax ? px * ax : py * ay;
 		if (a > along || ++frames > 60) { assist = -1; stuck = 0; return keys; }
@@ -788,7 +840,21 @@ static uint32_t corner_assist(uint32_t keys) {
 	int cx, cy;
 	if (stuck < 3 || !netmap_panel(px, py, &cx, &cy)) return keys;
 	int gdx = ay, gdy = -ax;   /* his direction on the grid */
-	if (floor_panel(cx + gdx, cy + gdy)) return keys;   /* (the way ahead is open: a wall of something else) */
+	if (floor_panel(cx + gdx, cy + gdy)) {
+		/* the way ahead is floor: off the middle of a lane he scrapes its
+		 * side, so a step across to the middle first (a navi in the way
+		 * is left to him; the autopilot keeps to its own path) */
+		if (autopilot_on()) return keys;
+		int wcx, wcy;
+		netmap_world(cx, cy, &wcx, &wcy);
+		int off = ax ? py - wcy : px - wcx;
+		if (abs(off) <= 4) return keys;
+		assist = step_key(ax ? 0 : (off > 0 ? -1 : 1), ax ? (off > 0 ? -1 : 1) : 0);
+		assist_for = held;
+		centring = true;
+		frames = 0;
+		return (keys & ~pad) | pad_dirs[assist].keys;
+	}
 	for (int s = -1; s <= 1; s += 2) {
 		int sx = ay ? s : 0, sy = ax ? s : 0, gsx = sy, gsy = -sx;
 		if (!floor_panel(cx + gsx, cy + gsy) || !floor_panel(cx + gsx + gdx, cy + gsy + gdy)) continue;
@@ -801,39 +867,62 @@ static uint32_t corner_assist(uint32_t keys) {
 				return (keys & ~pad) | pad_dirs[k].keys;
 			}
 	}
+	/* no step round it: a lane turning, one side going on (not back the way
+	 * he came), is followed (with the pad held the old way, on round its
+	 * turns; a junction is left to him) */
+	int k = -1, open = 0;
+	for (int s = -1; s <= 1; s += 2) {
+		int sx = ay ? s : 0, sy = ax ? s : 0, nx = cx + sy, ny = cy - sx;
+		if (!floor_panel(nx, ny) || (nx == prev_cx && ny == prev_cy)) continue;
+		++open;
+		k = step_key(sx, sy);
+	}
+	if (open == 1 && k >= 0 && !autopilot_on()) {
+		assist = k;
+		assist_for = held;
+		turning = true;
+		turn_cx = cx; turn_cy = cy;
+		frames = 0;
+		return (keys & ~pad) | pad_dirs[k].keys;
+	}
 	return keys;
 }
 
-/* A on the map: when MegaMan's facing probe misses every navi and Mystery
- * Data but one stands close by, he turns to it first, so the game's own
- * check finds it (walking into a navi slides him round it, and a tap of
- * the pad can leave him facing past). True when he turned. */
+/* A on the map: MegaMan turns to face what he means to talk to, so the
+ * game's own check finds it (walking into a navi slides him round it, and a
+ * tap of the pad can leave him facing past it): the navi or Mystery Data
+ * clearly before him if there is one, else the nearest within 44 units
+ * (the probes' reach), with the facing whose probe points at it best. True
+ * when he turned. */
 static bool talk_face(void) {
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-	int face = emu_read8(BN6_PLAYER + 0x10) & 7, vx[8], vy[8], best = -1, bestd = 34 * 34 + 1, bx = 0, by = 0;
+	int face = emu_read8(BN6_PLAYER + 0x10) & 7, vx[8], vy[8];
 	for (int k = 0; k < 8; ++k) {
 		vx[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24) >> 16;
 		vy[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24 + 4) >> 16;
 	}
-	if (!vx[face] && !vy[face]) return false;
-	int reach = emu_read8(BN6_TALK_PROBES + (uint32_t)face * 24 + 12);
+	double fl = sqrt((double)vx[face] * vx[face] + vy[face] * vy[face]);
+	if (fl < 1) return false;
+	int front = -1, near = -1, fd = 1 << 30, nd = 44 * 44 + 1, tx = 0, ty = 0, fx = 0, fy = 0;
 	for (int i = 0; i < 16; ++i) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
-		int r = emu_read8(o + 0x0C);
-		if (!(emu_read8(o) & 1) || !r) continue;
-		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py;
-		int hx = vx[face] - dx, hy = vy[face] - dy;
-		int in = r + reach - 4;   /* (a little inside the game's own test, which misses at its rim) */
-		if (hx * hx + hy * hy < in * in) return false;   /* (his facing finds one already) */
-		if (dx * dx + dy * dy < bestd) { bestd = dx * dx + dy * dy; best = i; bx = dx; by = dy; }
+		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
+		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
+		if (d > 44 * 44) continue;
+		/* before him: within 30 degrees of his facing, 40 units */
+		if (d <= 40 * 40 && d > 0 && (vx[face] * dx + vy[face] * dy) / (fl * sqrt((double)d)) >= 0.866 && d < fd) { fd = d; front = i; fx = dx; fy = dy; }
+		if (d < nd) { nd = d; near = i; tx = dx; ty = dy; }
 	}
-	if (best < 0) return false;
-	int k = -1;
+	if (front >= 0) { tx = fx; ty = fy; }
+	else if (near < 0) return false;
+	int k = face;
 	double top = -2;
 	for (int f = 0; f < 8; ++f) {
-		double c = (vx[f] * bx + vy[f] * by) / (sqrt((double)vx[f] * vx[f] + vy[f] * vy[f]) * sqrt((double)bestd) + 1e-9);
+		double l = sqrt((double)vx[f] * vx[f] + vy[f] * vy[f]) * sqrt((double)tx * tx + ty * ty);
+		double c = l > 0 ? (vx[f] * tx + vy[f] * ty) / l : -2;
 		if (c > top) { top = c; k = f; }
 	}
+	if (k == face) return false;
 	emu_write8(BN6_PLAYER + 0x10, (uint8_t)k);
 	emu_write8(BN6_PLAYER + 0x14, (uint8_t)k);
 	return true;
