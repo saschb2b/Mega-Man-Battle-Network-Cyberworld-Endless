@@ -18,6 +18,7 @@ static const RomLayout layouts[] = {
 		.enemy_ids = 0x0182C4,
 		.enemy_stats = 0x00F260,
 		.encounters = 0x020170,
+		.navicust_programs = 0x13B22C,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {
 			{ 0x90, 0, 0x0018, 0x0040, false, 0x13, 0x90, 0, 3, { { 0x90, 1 } } },     /* Central Area 1; battles of Central 1-3 */

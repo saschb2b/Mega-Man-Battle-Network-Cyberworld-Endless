@@ -19,6 +19,7 @@
 #define BN6_T1_SIZE           0xD8        /* ... each: flag bit 0 in play, +0x16 alliance (0 MegaMan), +0x24 HP, +0x26 max HP */
 #define BN6_T1_COUNT          0x20
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's, +0x40 HP, +0x42 max HP */
+#define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data; +0x10 1 while a trigger's warp is under way, +0x11 its warp index */
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
 

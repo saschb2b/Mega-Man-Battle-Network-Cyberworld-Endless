@@ -4,6 +4,14 @@
 
 First playable version.
 
+- The NaviCust is a run's second build (docs/NAVICUST.md). Every guardian's
+  Guardian Data offers three programs of three builds (buster, hand, guard,
+  field, HP), each with MegaMan's words for what it does, or B for
+  BugFrags; the pool is 34 of BN6's programs by tier, the large ones as the
+  board grows. The act 2 and act 4 guardians give an ExpMemry: the board
+  grows from 4x4 to 5x4, then 5x5. When the NaviCust's bugs change,
+  MegaMan names each and what it does (BN6's RUN says OK over a part left
+  past the board's edge, which bugs).
 - The Net Dealer says how an AquaNdl pick lands: its needles drop where the
   guardian stands a moment later, so fire when he stops (two of three
   missed a hopping BlastMan).

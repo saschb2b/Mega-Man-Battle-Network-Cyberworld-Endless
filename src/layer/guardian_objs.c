@@ -6,6 +6,7 @@
 #include "flags.h"
 #include "guardians.h"
 #include "loot.h"
+#include "navicust.h"
 #include "npc.h"
 #include "powers.h"
 #include "run.h"
@@ -42,8 +43,31 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		chip_info(chip, &ci);
 		if (ci.ncodes) code = ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A';
 	}
+	/* the NaviCust's part (docs/NAVICUST.md): an ExpMemry at the second
+	 * and fourth acts' guardians, and a draft of three programs, or none
+	 * for BugFrags (only a normal layer's guardian; a side layer's is its
+	 * own reward) */
+	ScriptsDraft draft = { 0 };
+	if (run.side_kind == LAYER_NORMAL) {
+		draft.expmemry = !navicust_expmemry(run.depth) ? 0 : run.depth <= 6 ? 1 : 2;
+		NaviProgram pick[NAVICUST_DRAFT];
+		int n = navicust_draft(run.depth, pick);
+		bool colored = n == NAVICUST_DRAFT;
+		for (int k = 0; k < n && colored; ++k) {
+			int c = navicust_color(pick[k].program);
+			draft.program[k] = (uint8_t)(pick[k].program * 4);
+			draft.color[k] = (uint8_t)c;
+			draft.about[k] = navicust_about(pick[k].program);
+			colored = c > 0;
+		}
+		if (colored) {
+			draft.n = n;
+			draft.skip_frags = navicust_skip_frags(run.depth);
+			draft.teach = run.depth == 3;
+		}
+	}
 	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome, run.depth), chip, ci.name, code,
-		LAYER_REWARD_TAKEN_FLAG);
+		LAYER_REWARD_TAKEN_FLAG, &draft);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);

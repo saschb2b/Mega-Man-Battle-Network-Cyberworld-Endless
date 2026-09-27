@@ -11,6 +11,7 @@
 /* HPMemory, and how many a beaten guardian leaves */
 #define SCRIPTS_HP_MEMORY 0x70
 #define SCRIPTS_BOSS_HP_MEMORIES 5
+#define SCRIPTS_EXP_MEMORY 0x71   /* ExpMemry, the NaviCust's board: 4x4, 5x4, 5x5 */
 
 /* The chat box's version marks ([RV] [BX] [EX] [SP] [FZ], codes 0x40-0x44)
  * drawn as their two letters in the font's own capitals, in the core's
@@ -36,12 +37,26 @@ int ta_secret_gate(TextArchive *t, int flag);
  * own) without opening the chat box. */
 #define SCRIPTS_AREA_MUSIC -1
 int ta_music(TextArchive *t, int song);
+/* What a Guardian Data adds for the NaviCust (docs/NAVICUST.md): an
+ * ExpMemry, then a draft of `n` programs (give ids and colours, with
+ * MegaMan's words for each) or none for `skip_frags` BugFrags; `teach` adds
+ * a word on the board's rules (the run's first draft). */
+typedef struct {
+	int expmemry;         /* the board it grows to: 0 none, 1 5x4, 2 5x5 */
+	int n;
+	uint8_t program[3], color[3];
+	const char *about[3];
+	int skip_frags;
+	bool teach;
+} ScriptsDraft;
+
 /* A guardian's Guardian Data, checked: `power` (what a Cross or BeastOut
  * brings, ta_talk's boxes; NULL for none), then HPMemory through the game's
  * own item (+20 max HP each), its navi chip (`chip` 0 for none; `code`
- * A=0 .. *=26), a full heal, then event flag `taken_flag`. */
+ * A=0 .. *=26), a full heal, the NaviCust's `draft` (NULL for none), then
+ * event flag `taken_flag` (on every branch of the draft). */
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
-                       int taken_flag);
+                       int taken_flag, const ScriptsDraft *draft);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of

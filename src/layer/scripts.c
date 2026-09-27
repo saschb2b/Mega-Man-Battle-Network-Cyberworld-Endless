@@ -205,8 +205,45 @@ static void got_chip(TextArchive *t, const char *chip, int code, bool *first) {
 	got(t, thing, first);
 }
 
+static void program_name(TextArchive *t, int program);
+
+/* the draft's branches: a program given, or BugFrags for none; each sets
+ * `taken_flag` and ends */
+static int draft_take(TextArchive *t, int program, int color, bool teach, int taken_flag) {
+	int s = ta_script(t);
+	uint8_t give[] = { 0xEF, 0x1B, (uint8_t)program, 1, (uint8_t)color };   /* ts_item_give_navi_cust_program */
+	ta_bytes(t, give, sizeof give);
+	static const uint8_t no_face[] = { 0xF5, 0x01 };   /* (the options kept MegaMan's) */
+	ta_bytes(t, no_face, sizeof no_face);
+	ta_open(t);
+	ta_text(t, "MegaMan got:\n\"");
+	program_name(t, program);
+	ta_text(t, "\"!!");
+	ta_wait(t);
+	if (teach) ta_page(t, FACE_MEGAMAN, "Let's install it, Lan! In the PET: MegaMan, then NaviCust.", false);
+	flag_set(t, taken_flag);
+	ta_end(t);
+	return s;
+}
+
+static int draft_skip(TextArchive *t, int frags, int taken_flag) {
+	int s = ta_script(t);
+	uint8_t give[] = { 0xEF, 0x12, (uint8_t)frags, (uint8_t)(frags >> 8), 0, 0, 0xFF, 0xFF, 0xFF };   /* ts_check_give_bug_frags */
+	ta_bytes(t, give, sizeof give);
+	char line[96];
+	snprintf(line, sizeof line, "We'll travel light, Lan. The program data broke down into %d BugFrags!", frags);
+	ta_page(t, FACE_MEGAMAN, line, false);
+	flag_set(t, taken_flag);
+	ta_end(t);
+	return s;
+}
+
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
-                       int taken_flag) {
+                       int taken_flag, const ScriptsDraft *draft) {
+	/* (the draft's branches first: the choice jumps to them) */
+	int take[3] = { 0 }, skip = 0, n = draft ? draft->n : 0;
+	for (int k = 0; k < n; ++k) take[k] = draft_take(t, draft->program[k], draft->color[k], draft->teach, taken_flag);
+	if (n) skip = draft_skip(t, draft->skip_frags, taken_flag);
 	int i = ta_script(t);
 	char head[64];
 	bool first = true;
@@ -224,7 +261,43 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	}
 	ta_bytes(t, full_hp, sizeof full_hp);
 	ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
-	flag_set(t, taken_flag);
+	if (draft && draft->expmemry) {
+		/* BN6's own ExpMemry (key item 0x71): the game grows the board and
+		 * runs the NaviCust again as it gives it */
+		uint8_t give[] = { 0xF4, 0x00, SCRIPTS_EXP_MEMORY, 1 };   /* ts_item_give */
+		ta_bytes(t, give, sizeof give);
+		got(t, "ExpMemry", &first);
+		ta_page(t, FACE_MEGAMAN, draft->expmemry == 1 ? "Our NaviCust has room for a fifth column now, Lan!"
+			: "Our NaviCust has room for a fifth row now: the whole 5x5!", false);
+	}
+	if (!n) {
+		flag_set(t, taken_flag);
+		ta_end(t);
+		return i;
+	}
+	/* the draft: what each program does, then the choice (B: none) */
+	ta_page(t, FACE_MEGAMAN, "Program data too, Lan! Pick one for our NaviCust:", false);
+	for (int k = 0; k < n; ++k) if (draft->about[k]) ta_page(t, FACE_MEGAMAN, draft->about[k], false);
+	if (draft->teach)
+		ta_page(t, FACE_MEGAMAN, "Big programs need a block on the command line; plus parts go anywhere else. "
+			"Same colors touching or a block off the edge: a bug.", false);
+	char none[96];
+	snprintf(none, sizeof none, "Or B takes none: the data breaks down into %d BugFrags.", draft->skip_frags);
+	ta_page(t, FACE_MEGAMAN, none, false);
+	ta_mugshot(t, FACE_MEGAMAN);
+	ta_clear(t);
+	/* three in a column (ts_option), as the gift's; ts_select: clear, B its
+	 * own choice (0xA0), a script per option and one for B */
+	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
+	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	for (int k = 0; k < n; ++k) {
+		ta_bytes(t, opt[k], 4);
+		ta_bytes(t, space, sizeof space);
+		program_name(t, draft->program[k]);
+		if (k + 1 < n) ta_text(t, "\n");
+	}
+	uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)take[0], (uint8_t)take[1], (uint8_t)take[2], (uint8_t)skip };
+	ta_bytes(t, select, sizeof select);
 	ta_end(t);
 	return i;
 }

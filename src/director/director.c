@@ -29,6 +29,7 @@
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
+#include "navicust.h"
 #include "net_route.h"
 #include "netmap.h"
 #include "rom.h"
@@ -92,6 +93,8 @@ static struct {
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
+	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
+	bool bugs_known;       /* ... read on this layer */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -448,6 +451,7 @@ static bool build_layer(void) {
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
 	D.layer_told = false;
+	D.bugs_known = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
@@ -662,7 +666,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 17
+#define LAYER_MAKE 18
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1318,6 +1322,33 @@ static void unwedge(void) {
 	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)D.free_y << 16);
 }
 
+/* The NaviCust's bugs, named in MegaMan's words when they change: after the
+ * player runs the NaviCust in the PET, or an ExpMemry grows the board
+ * (docs/NAVICUST.md). A bug the player can read is a price they chose; the
+ * game only says that there is one. Read on the layer's first quiet frame
+ * without a word, so a layer entered bugged does not repeat it; spoken a
+ * second after the map is back (straight out of the PET, the chat box's
+ * letters were not loaded yet and it drew as noise). */
+static void bug_watch(void) {
+	static int last, calm;
+	calm = D.frame == last + 1 ? calm + 1 : 0;
+	last = D.frame;
+	if (calm < 60) return;
+	uint8_t now[NAVICUST_BUGS];
+	for (int t = 0; t < NAVICUST_BUGS; ++t) now[t] = emu_read8(BN6_NAVICUST_BUGS + (uint32_t)t);
+	if (!D.bugs_known) {
+		memcpy(D.bugs, now, sizeof now);
+		D.bugs_known = true;
+		return;
+	}
+	if (!memcmp(D.bugs, now, sizeof now) || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
+	bool had = false;
+	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
+	const char *words = navicust_bug_words(now);
+	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN))
+		memcpy(D.bugs, now, sizeof now);
+}
+
 /* MegaMan pushing a while where the pad goes nowhere (a platform's
  * corner, a lane's end, with no walkway in reach to line him up with):
  * the way-on arrow shows along the floor, as after L's words. */
@@ -1650,7 +1681,7 @@ void director_update(void) {
 			}
 		}
 	}
-	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); }
+	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

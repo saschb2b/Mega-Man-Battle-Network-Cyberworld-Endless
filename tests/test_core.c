@@ -7,6 +7,7 @@
 #include "game.h"
 #include "net.h"
 #include "net_route.h"
+#include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
@@ -555,12 +556,58 @@ static void test_arrow(void) {
 	CHECK(lost == 0, "the arrow lost MegaMan on %d of %d walks", lost, walks);
 }
 
+/* The NaviCust's draft (docs/NAVICUST.md): three programs of three builds,
+ * each of a tier its act has reached, none of the left-out ones; and
+ * MegaMan's words for the bugs. */
+static void test_navicust(void) {
+	static const int left_out[] = { 15, 16, 17, 18, 19, 20, 22, 23, 24, 32, 33, 34 };
+	int offered[47] = { 0 };
+	for (uint32_t seed = 1; seed <= 400; ++seed) {
+		rng_seed(seed * 2654435761u);
+		int depth = 3 * (1 + (int)(seed % 7));   /* every guardian of a cycle, and the second cycle's first */
+		if (depth > 18) depth = 22;
+		NaviProgram p[NAVICUST_DRAFT];
+		int n = navicust_draft(depth, p);
+		CHECK(n == NAVICUST_DRAFT, "depth %d: a draft of %d", depth, n);
+		for (int k = 0; k < n; ++k) {
+			CHECK(navicust_in_pool(p[k].program), "depth %d: program %d offered", depth, p[k].program);
+			for (unsigned j = 0; j < sizeof left_out / sizeof *left_out; ++j)
+				CHECK(p[k].program != left_out[j], "depth %d: left-out program %d offered", depth, p[k].program);
+			for (int j = 0; j < k; ++j)
+				CHECK(navicust_build(p[j].program) != navicust_build(p[k].program), "depth %d: two of one build", depth);
+			/* the first act's guardian: small programs only; HP+300 and up
+			 * wait for the second cycle */
+			if (depth == 3) CHECK(p[k].program <= 2 || p[k].program == 4 || p[k].program == 7 || p[k].program == 8 ||
+				p[k].program == 13 || p[k].program == 25 || (p[k].program >= 35 && p[k].program <= 37) ||
+				p[k].program == 41 || p[k].program == 42, "act 1's guardian offered program %d", p[k].program);
+			if (depth <= 18) CHECK(p[k].program < 44, "the first cycle offered HP+%d00", p[k].program - 41);
+			if (p[k].program <= 46) ++offered[p[k].program];
+		}
+	}
+	int kinds = 0;
+	for (int i = 1; i <= 46; ++i) kinds += offered[i] > 0;
+	CHECK(kinds >= 25, "only %d programs ever offered", kinds);
+	CHECK(navicust_expmemry(6) && navicust_expmemry(12) && !navicust_expmemry(3) && !navicust_expmemry(25), "ExpMemry milestones");
+	/* the bug words: none, one light, several */
+	uint8_t bugs[NAVICUST_BUGS] = { 0 };
+	CHECK(!*navicust_bug_words(bugs), "words for no bug");
+	bugs[9] = 1;
+	CHECK(strstr(navicust_bug_words(bugs), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs));
+	bugs[9] = 2;
+	CHECK(strstr(navicust_bug_words(bugs), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs));
+	bugs[7] = 5;
+	bugs[11] = 1;
+	const char *w = navicust_bug_words(bugs);
+	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
 	test_stairs();
 	test_arrow();
+	test_navicust();
 	test_depth_plan();
 	test_pacing();
 	test_town_moves();

@@ -224,8 +224,23 @@ each was found go into `docs/ROM_DATA.md` as the parts are built.
 
 ## Status
 
-Designed; nothing of it is built yet. Built first: the pool and its tiers,
-the guardian's draft, ExpMemry at the act 2 and act 4 guardians, and the
-bug line. Then BugFrags as the vendor's currency with the workshop and the
-bugged-battle pay, then blue Mystery Data programs, then the profile's
-programs.
+Built (`src/layer/navicust.c`, the Guardian Data script in
+`src/layer/scripts.c`, the bug watch in `src/director/director.c`):
+
+- The pool of 34 programs with their tiers and builds, and MegaMan's
+  words for each. NumbrOpn is left out too until its condition is known.
+- The guardian's draft on every normal layer's guardian: three programs
+  of three builds, or B for BugFrags (10, and 5 more an act); the run's
+  first draft says how the board works.
+- ExpMemry at the act 2 and act 4 guardians: the board grows to 5x4, then
+  5x5 (checked on the NaviCust screen).
+- The bug line: a second after the map is back, MegaMan names each bug
+  that changed and what it does. BN6's RUN says OK over a part left past
+  the board's edge, which does bug; the line is the only place the player
+  learns it.
+
+Next: BugFrags as the vendor's currency with the workshop and the
+bugged-battle pay, the vendor's stock from this pool (it still sells
+HP+400 at 2100 zenny beside the dealer's 20-HP HPMemory at 1200), then
+blue Mystery Data programs, the next act's answer in the draft, then the
+profile's programs.
