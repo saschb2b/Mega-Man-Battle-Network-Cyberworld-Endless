@@ -167,9 +167,10 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	give_hp_memory(t, SCRIPTS_BOSS_HP_MEMORIES);
 	got_hp(t, SCRIPTS_BOSS_HP_MEMORIES, &first);
 	if (chip > 0) {
-		/* the navi's own chip, as Battle Network gives it */
+		/* the navi's own chip, as Battle Network gives it (to the pack) */
 		give_chip(t, chip, code, 1);
 		got_chip(t, chip_name, code, &first);
+		ta_page(t, FACE_MEGAMAN, "It's in our pack, Lan. Let's put it in our folder from the PET!", false);
 	}
 	ta_bytes(t, full_hp, sizeof full_hp);
 	ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
@@ -185,6 +186,7 @@ int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int cod
 	first = false;
 	give_chip(t, chip, code, 1);
 	got_chip(t, chip_name, code, &first);
+	ta_page(t, FACE_MEGAMAN, "It's in our pack. Let's put it in our folder, Lan!", false);
 	ta_end(t);
 	return i;
 }
@@ -215,6 +217,8 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	first = true;
 	give_chip(t, chip, code, 1);
 	got_chip(t, chip_name, code, &first);
+	/* (a new chip goes to the pack, as in BN6: the folder is the player's) */
+	ta_page(t, FACE_PROG, "IT'S IN YOUR PACK! PUT IT IN YOUR FOLDER FROM THE PET'S CHIPFOLDER!", false);
 	flag_set(t, flag);
 	ta_end(t);
 	int programmed = ta_script(t);
