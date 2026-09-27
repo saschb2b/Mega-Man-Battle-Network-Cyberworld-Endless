@@ -47,6 +47,7 @@ README and the site.
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
 | `.claude/skills/playtest-loop/` | The playtest loop as a skill: a persona plays through `tools/play.py`, its reports are triaged and fixed, and the loop's log (`lessons.md`) grows with every session |
+| `.claude/skills/game-design/` | The game-design skill (from saschb2b/skills): the lens, pattern catalog and frameworks to reason from before a design decision |
 | `port/` | PortMaster launcher and metadata |
 | `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage, the `.deb` and the Flatpak (`linux/flatpak/`: its manifest, how to build it and bring it to Flathub) carry. The app ID `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling). Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
@@ -80,6 +81,14 @@ README and the site.
   (layouts, object placement, loot and stock rolls): bump `LAYER_MAKE` in
   `director.c`, so a run saved by an older build continues its layer afresh. Emulator states (`boot-3.state`,
   `run.state`) are made on the device and never committed.
+
+## Game design
+
+A change that decides how the game plays (balance values, scaling, drop
+rates, prices, rewards, progression, the NaviCust and other loadouts, menus
+and screens, "is this fun") goes through the game-design skill first: name
+the dialectic it serves, the loop layer it feeds and the patterns it uses,
+before the numbers. This holds mid-implementation too.
 
 ## Build and verify
 
