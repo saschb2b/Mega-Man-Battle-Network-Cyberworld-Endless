@@ -58,8 +58,9 @@ First playable version.
   as likely, so act 1 is not always BlastMan (DiveMan too). A guardian
   of no element has the Net Dealer stock his hardest hitter, two of it,
   and say so. MegaMan's first word on a guardian's layer warns of its way
-  of fighting where it has one to learn (EraseMan's ghosts and his
-  erasing blow, BlastMan's rolling bombs, ChargeMan's charge and more).
+  of fighting, for every guardian (EraseMan's ghosts and his erasing
+  blow, BlastMan's rolling bombs, HeatMan's burner behind MegaMan and
+  more), each written from a fight watched.
 - The NaviCust vendor's programs cost a quarter of the game's prices,
   which are its endgame's (2500 to 7100 zenny against a run's 100 to
   1000 a battle or Mystery Data), and 200 more an act; HP+200, which

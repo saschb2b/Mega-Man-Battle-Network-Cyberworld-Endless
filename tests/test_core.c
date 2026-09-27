@@ -417,6 +417,10 @@ static void test_talk(void) {
 		}
 		snprintf(what, sizeof what, "guardian_defeat(%d)", navi);
 		check_talk(what, guardian_defeat(navi));
+		snprintf(what, sizeof what, "guardian_tip(%d)", navi);
+		check_talk(what, guardian_tip(navi));
+		/* (MegaMan warns of every guardian a run can meet) */
+		CHECK(guardian_tip(navi) || navi == 17 || navi > 18, "guardian %d has no tip", navi);
 		for (int depth = 3; depth <= 19; depth += 3) {
 			snprintf(what, sizeof what, "powers_reward_text(%d, graveyard, %d)", navi, depth);
 			check_talk(what, powers_reward_text(navi, BIOME_GRAVEYARD, depth));

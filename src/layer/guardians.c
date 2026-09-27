@@ -34,17 +34,30 @@ static const Guardian guardians[] = {
 
 const char *guardian_tip(int navi) {
 	switch (navi) {
+	case 1: return "HeatMan sends fire towers along the panels at us, and a burner behind us blasts flame down a lit row. "
+		"Keep moving, and step off the yellow panels!";
+	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
+		"and he warps in close to slash. Keep moving!";
+	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
+		"Step off the yellow panel when he lands!";
+	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
+		"Keep our HP up, and hit him with swords and bombs!";
+	case 5: return "ChargeMan rams straight down our row like a train. Step aside, then hit back!";
+	case 6: return "SpoutMan's bubbles burst over our panels, and his hose sprays water down the lit ones. Step off the yellow panels!";
+	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
+		"Step off the yellow panels, and keep our distance!";
+	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "
+		"Step off the yellow panels, and watch our footing!";
+	case 9: return "GroundMan drills through the panels. Watch our footing!";
+	case 10: return "DustMan throws scrap onto our panels and charges in to hit us up close. Keep moving!";
+	case 11: return "ProtoMan's shield stops our shots. Hit him when he swings his sword!";
 	case 12: return "BlastMan's bombs roll down our row and burst. Step off the yellow panels!";
 	case 13: return "DiveMan sends giant waves across our area. Keep moving between rows!";
 	case 14: return "CircusMan keeps to the back of his area, claps down on a lit column and drops his tent to trap us. "
 		"Keep moving, and bring chips that reach the back!";
-	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
-		"Keep our HP up, and hit him with swords and bombs!";
-	case 5: return "ChargeMan rams straight down our row like a train. Step aside, then hit back!";
-	case 11: return "ProtoMan's shield stops our shots. Hit him when he swings his sword!";
+	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!";
 	case 16: return "ElementMan changes his element as he fights. Hard hits work whatever he is!";
 	case 18: return "Colonel sends his soldiers at us. Clear them out, then go for him!";
-	case 9: return "GroundMan drills through the panels. Watch our footing!";
 	default: return NULL;
 	}
 }
