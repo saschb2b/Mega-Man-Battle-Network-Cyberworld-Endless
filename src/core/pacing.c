@@ -90,7 +90,7 @@ void pacing_area_order(uint8_t out[4]) {
 
 void pacing_guardian_band(int act, int *lo, int *hi) {
 	static const int band[PACING_ACTS][2] = {
-		{ 400, 600 }, { 600, 700 }, { 800, 1000 }, { 1000, 1300 }, { 1100, 1500 }, { 1200, 2000 }, { 0, 100000 },
+		{ 400, 500 }, { 600, 700 }, { 800, 1000 }, { 1000, 1300 }, { 1100, 1500 }, { 1200, 2000 }, { 0, 100000 },
 	};
 	if (act < 0) act = 0;
 	if (act >= PACING_ACTS) act = PACING_ACTS - 1;
@@ -126,15 +126,17 @@ int pacing_guardian_miss(int navi, int act, int loop, bool always_sp, int (*hp)(
 
 int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothers, int act, int loop,
                          bool always_sp, int (*hp)(int navi, int version)) {
-	int fit[4], nfit = 0;
+	/* the area's own that suit the act, twice as likely as the other navis
+	 * that do (the three opening areas' own gave act 1 BlastMan every run) */
+	int fit[8 + 32], nfit = 0;
 	for (int i = 0; i < 4; ++i)
-		if (pacing_guardian_miss(pool[i], act, loop, always_sp, hp) == 0) fit[nfit++] = pool[i];
+		if (pacing_guardian_miss(pool[i], act, loop, always_sp, hp) == 0) { fit[nfit++] = pool[i]; fit[nfit++] = pool[i]; }
+	for (int i = 0; i < nothers && nfit < (int)(sizeof fit / sizeof *fit); ++i) {
+		bool own = false;
+		for (int j = 0; j < 4; ++j) own |= others[i] == pool[j];
+		if (!own && pacing_guardian_miss(others[i], act, loop, always_sp, hp) == 0) fit[nfit++] = others[i];
+	}
 	if (nfit) return fit[rng_range(0, nfit - 1)];
-	/* none of the area's own suits the act: another navi that does */
-	int ofit[32], nofit = 0;
-	for (int i = 0; i < nothers && nofit < 32; ++i)
-		if (pacing_guardian_miss(others[i], act, loop, always_sp, hp) == 0) ofit[nofit++] = others[i];
-	if (nofit) return ofit[rng_range(0, nofit - 1)];
 	int best = pool[0], best_miss = 1 << 30;
 	for (int i = 0; i < 4; ++i) {
 		int m = pacing_guardian_miss(pool[i], act, loop, always_sp, hp);

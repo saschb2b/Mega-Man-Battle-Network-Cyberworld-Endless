@@ -281,9 +281,9 @@ static void test_pacing(void) {
 	for (uint32_t seed = 1; seed <= 100; ++seed) {
 		rng_seed(seed);
 		int g = pacing_guardian_pick(heavy, others, (int)sizeof others, 0, 0, false, fake_navi_hp);
-		CHECK(g == 12, "the lab comps' first-act guardian is BlastMan, got %d", g);
+		CHECK(g == 12 || g == 13, "the lab comps' first-act guardian is BlastMan or DiveMan, got %d", g);
 		g = pacing_guardian_pick(sky_hp, others, (int)sizeof others, 0, 0, false, fake_navi_hp);
-		CHECK(fake_navi_hp(g, 0) <= 600, "a first-act guardian of 600 HP at most, got %d", g);
+		CHECK(fake_navi_hp(g, 0) <= 500, "a first-act guardian of 500 HP at most, got %d", g);
 	}
 	CHECK(pacing_guardian_version(18, 3, 0, false, fake_navi_hp) == 0, "Colonel V1 in the fourth act");
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");

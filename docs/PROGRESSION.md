@@ -210,7 +210,7 @@ bought; the value before this structure is in brackets.
 
 | Act | Layers | MegaMan max HP | HP per battle | Hardest hit | Versions | Guardian |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1-3 | 100 (100) | 90-160 | 30 | V1 | 400-600 V1 |
+| 1 | 1-3 | 100 (100) | 90-160 | 30 | V1 | 400-500 V1 |
 | 2 | 4-6 | 200 (160) | 150-280 | 80 | V1 | 600-700 V1 |
 | 3 | 7-9 | 300 (220) | 200-360 | 120 | V1-V2 | 800-1000 V1 |
 | 4 | 10-12 | 400 (280) | 280-420 | 160 | V2 | 1100-1300 (Colonel V1, EX of the 800s) |
@@ -333,6 +333,9 @@ Built as described above, with these differences from the first proposal:
 
 - SP Navis in Server challenges wait until act 4, not act 3: at act 3
   MegaMan has about 300 HP against their 1400-1700.
+- A guardian is drawn from the navis whose HP suits the act, the area's
+  own twice as likely as the others: the three opening areas' own gave
+  act 1 BlastMan in every run, and act 1 (400-500) now meets DiveMan too.
 - Act 2's guardian band is 600-700: HeatMan, SpoutMan or CircusMan. At
   600-800 it held the 800s (SlashMan, EraseMan, TenguMan, JudgeMan), and a
   playtester with 240 HP and 40-150 damage chips dented EraseMan by 1 of

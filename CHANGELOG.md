@@ -43,7 +43,9 @@ First playable version.
   kanji ("ProtoMn" and one came out of a Mystery Data), and now draws them
   side by side.
 - Act 2's guardian is one of 600 to 700 HP (HeatMan, SpoutMan,
-  CircusMan): EraseMan's 800 after BlastMan's 400 was a wall. A guardian
+  CircusMan): EraseMan's 800 after BlastMan's 400 was a wall. Guardians
+  are drawn from every navi whose HP suits the act, the area's own twice
+  as likely, so act 1 is not always BlastMan (DiveMan too). A guardian
   of no element has the Net Dealer stock his hardest hitter, two of it,
   and say so. MegaMan's first word on a guardian's layer warns of its way
   of fighting where it has one to learn (EraseMan's ghosts and his
