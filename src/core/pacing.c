@@ -90,7 +90,7 @@ void pacing_area_order(uint8_t out[4]) {
 
 void pacing_guardian_band(int act, int *lo, int *hi) {
 	static const int band[PACING_ACTS][2] = {
-		{ 400, 600 }, { 600, 800 }, { 800, 1000 }, { 1000, 1300 }, { 1100, 1500 }, { 1200, 2000 }, { 0, 100000 },
+		{ 400, 600 }, { 600, 700 }, { 800, 1000 }, { 1000, 1300 }, { 1100, 1500 }, { 1200, 2000 }, { 0, 100000 },
 	};
 	if (act < 0) act = 0;
 	if (act >= PACING_ACTS) act = PACING_ACTS - 1;

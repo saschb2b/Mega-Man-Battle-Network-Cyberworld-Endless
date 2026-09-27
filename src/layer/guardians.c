@@ -32,6 +32,20 @@ static const Guardian guardians[] = {
 };
 #define NGUARDIANS ((int)(sizeof guardians / sizeof *guardians))
 
+const char *guardian_tip(int navi) {
+	switch (navi) {
+	case 12: return "BlastMan's bombs roll down our row and burst. Step off the yellow panels!";
+	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
+		"Keep our HP up, and hit him with swords and bombs!";
+	case 5: return "ChargeMan rams straight down our row like a train. Step aside, then hit back!";
+	case 11: return "ProtoMan's shield stops our shots. Hit him when he swings his sword!";
+	case 16: return "ElementMan changes his element as he fights. Hard hits work whatever he is!";
+	case 18: return "Colonel sends his soldiers at us. Clear them out, then go for him!";
+	case 9: return "GroundMan drills through the panels. Watch our footing!";
+	default: return NULL;
+	}
+}
+
 const Guardian *guardian(int navi) {
 	static const Guardian unknown = { "???", "Guardian", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 200 };
 	return navi > 0 && navi < NGUARDIANS && guardians[navi].name ? &guardians[navi] : &unknown;

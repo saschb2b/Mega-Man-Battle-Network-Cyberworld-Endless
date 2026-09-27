@@ -27,6 +27,10 @@ const Guardian *guardian(int navi);
 const char *guardian_intro(int navi, int version, int biome);
 /* After MegaMan wins. */
 const char *guardian_defeat(int navi);
+/* What MegaMan knows of a guardian's way of fighting, said on its layer
+ * before the arena (a playtester met EraseMan's ghosts and his erasing
+ * blow unwarned); NULL where there is nothing to add. */
+const char *guardian_tip(int navi);
 /* A guardian's overworld sprite (list 6): its own where Gregar has one,
  * else a HeelNavi's (Falzar's Navis, BlastMan, ElementMan). */
 #define GUARDIAN_HEEL_SPRITE 0x43

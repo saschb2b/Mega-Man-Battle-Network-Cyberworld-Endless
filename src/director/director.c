@@ -288,7 +288,7 @@ static void goal_way(void) {
 }
 
 static const char *status_words(void) {
-	static char buf[400];
+	static char buf[800];
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (D.town) {
@@ -307,7 +307,11 @@ static const char *status_words(void) {
 	if (!D.layer_told) {
 		const char *area = guardian_area_in_text(run.biome, run.side_kind);
 		ADD("@M Layer %d, Lan: %s.", run.depth, area);
-		if (D.objs.guardian.navi && !boss_beaten()) ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
+		if (D.objs.guardian.navi && !boss_beaten()) {
+			ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
+			const char *tip = guardian_tip(D.objs.guardian.navi);
+			if (tip) ADD("@M %s|", tip);
+		}
 		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL) ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
 		else ADD("|");
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData.|");
@@ -694,7 +698,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 9
+#define LAYER_MAKE 10
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 

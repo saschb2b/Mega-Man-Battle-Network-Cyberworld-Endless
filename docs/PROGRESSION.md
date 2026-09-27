@@ -211,7 +211,7 @@ bought; the value before this structure is in brackets.
 | Act | Layers | MegaMan max HP | HP per battle | Hardest hit | Versions | Guardian |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 1-3 | 100 (100) | 90-160 | 30 | V1 | 400-600 V1 |
-| 2 | 4-6 | 200 (160) | 150-280 | 80 | V1 | 600-800 V1 |
+| 2 | 4-6 | 200 (160) | 150-280 | 80 | V1 | 600-700 V1 |
 | 3 | 7-9 | 300 (220) | 200-360 | 120 | V1-V2 | 800-1000 V1 |
 | 4 | 10-12 | 400 (280) | 280-420 | 160 | V2 | 1100-1300 (Colonel V1, EX of the 800s) |
 | 5 | 13-15 | 500 (340) | 350-500 | 200 | V2-V3 | 1100-1500 EX (the Undernet) |
@@ -295,7 +295,8 @@ MegaMan reaches about 100 HP more per act:
   against the element most of the area's viruses have (Fire beats Wood,
   Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`), and
   says so, naming the guardian ("Word is, BlastMan can't stand Aqua
-  chips") or the viruses. It is the hardest hitting of the first few of
+  chips"). A guardian of no element is answered by the hardest hit on the
+  list instead, and the dealer says so, and names the viruses' weakness. It is the hardest hitting of the first few of
   that element the depth rolls (the cheapest was IceSeed, 10 damage), and
   two are in stock: one in a 30-chip folder missed a whole guardian fight.
   Reading the act card, buying for it and winning with it is the loop a
@@ -332,6 +333,10 @@ Built as described above, with these differences from the first proposal:
 
 - SP Navis in Server challenges wait until act 4, not act 3: at act 3
   MegaMan has about 300 HP against their 1400-1700.
+- Act 2's guardian band is 600-700: HeatMan, SpoutMan or CircusMan. At
+  600-800 it held the 800s (SlashMan, EraseMan, TenguMan, JudgeMan), and a
+  playtester with 240 HP and 40-150 damage chips dented EraseMan by 1 of
+  800 after a 400-HP BlastMan; they wait for act 3.
 - The guardian bands of acts 5 and 6 are 1100-1500 and 1200-2000, so the
   Undernet's and the Graveyard's own Navis (SlashMan, HeatMan, EraseMan,
   DustMan at EX) can hold them.

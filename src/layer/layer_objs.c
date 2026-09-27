@@ -194,16 +194,21 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
 			static const char *const elem[5] = { "", "Fire", "Aqua", "Elec", "Wood" };
-			char hello[320], word[200] = "";
+			char hello[400], word[280] = "";
 			int navi = run.boss_order[run.biome], ge = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
 			/* (the guardian's weakness by name; an element-less guardian's
 			 * act is answered for its viruses) */
 			if (counter > 0 && ge > 0 && ge <= 4)
 				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My best %s chip's first on the list, and I've got two!",
 					guardian(navi)->name, elem[counter], elem[counter]);
-			else if (counter > 0)
-				snprintf(word, sizeof word, "|Word is, the viruses around here can't stand %s chips.|My best %s chip's first on the list, and I've got two!",
-					elem[counter], elem[counter]);
+			else if (navi > 0 && counter > 0)
+				/* (no element to answer the guardian with: the hardest hit on
+				 * the list, and the viruses' weakness besides) */
+				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my hardest hitter's first on the list, and I've got two!|"
+					"The viruses around here can't stand %s chips, though.", guardian(navi)->name, elem[counter]);
+			else if (navi > 0)
+				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my hardest hitter's first on the list, and I've got two!",
+					guardian(navi)->name);
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
 				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
@@ -276,7 +281,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	}
 	/* the shops' stock, in the game's shop data */
 	ShopItem stock[SHOP_MAX_ITEMS];
-	int nstock = shop_dealer_stock(run.depth, counter, stock);
+	int navi_of_act = run.boss_order[run.biome], ge_of_act = navi_of_act > 0 ? enemy_element(enemy_id(1, navi_of_act, 0)) : 0;
+	int nstock = shop_dealer_stock(run.depth, navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4) ? -1 : counter, stock);
 	if (emu_debug_on())
 		for (int i = 0; i < nstock; ++i)
 			if (stock[i].kind == 2) {

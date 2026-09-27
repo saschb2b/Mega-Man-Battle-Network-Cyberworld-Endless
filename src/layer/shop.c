@@ -98,13 +98,14 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 		 * hitting of the first few found (the cheapest was IceSeed, 10
 		 * damage against a Fire guardian), two of it (one in 30 chips
 		 * missed a whole guardian fight) */
-		if (i == 0 && counter > 0) {
+		if (i == 0 && counter != 0) {
 			int best = -1, best_power = 0, found = 0;
 			char best_code = code;
 			for (int tries = 0; tries < 80 && found < 4; ++tries) {
 				ChipInfo ci;
 				chip_info(it.id, &ci);
-				if (ci.element == counter && ci.power > 0) {
+				/* (-1: a guardian of no element, answered by the hardest hit) */
+				if ((ci.element == counter || counter < 0) && ci.power > 0) {
 					++found;
 					if (best < 0 || ci.power > best_power || (ci.power == best_power && chip_price(it.id) < chip_price(best))) {
 						best = it.id; best_power = ci.power; best_code = code;
@@ -119,7 +120,7 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 		/* (the answer at a price a run has by then: 400 zenny in act 1, 300
 		 * more an act) */
 		int cap = 4 + 3 * (pacing_act(depth) + 7 * pacing_loop(depth));
-		if (i == 0 && counter > 0 && it.price > cap) it.price = (uint16_t)cap;
+		if (i == 0 && counter != 0 && it.price > cap) it.price = (uint16_t)cap;
 		if (!listed(out, n, &it)) out[n++] = it;
 	}
 	/* one HPMemory, dearer act by act (800 zenny in the first: about what

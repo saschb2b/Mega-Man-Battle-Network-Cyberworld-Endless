@@ -30,7 +30,9 @@ typedef struct {
 /* Writes the stock of shop `shop`; false before the game has set up its data. */
 bool shop_install(int shop, const ShopItem *items, int n);
 
-/* A layer's stock at `depth` (the rng decides the picks). */
+/* A layer's stock at `depth` (the rng decides the picks): first two of
+ * the hardest hitting chip of element `counter` (1-4), or of any element
+ * for -1 (a guardian with none), 0 for no such chip. */
 int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]);
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 /* One NaviCust program (id, color in `code`) from the game's shops. */
