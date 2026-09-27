@@ -332,7 +332,8 @@ static const char *status_words(void) {
 		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
 		else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
 		if (programs) ADD("@M There's a NaviCust program shop here too.|");
-		ADD("@M Hold SELECT to see the map of where we've been.|");
+		/* (the map's tip on the run's first layers: every first L repeated it) */
+		if (run.depth <= 2) ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
 	} else if (heal && hurt) {
