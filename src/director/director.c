@@ -839,8 +839,9 @@ uint32_t director_keys(uint32_t keys) {
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	keys = corner_assist(keys);
 	/* (turned to what A would talk to, the pad left alone for that frame so
-	 * the game does not turn him back) */
-	if (a_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && talk_face())
+	 * the game does not turn him back; not in the town, where A also reads
+	 * the doors and signs Lan faces) */
+	if (a_pressed && !D.town && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && talk_face())
 		keys &= ~(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); keys &= ~KEY_SELECT; }
