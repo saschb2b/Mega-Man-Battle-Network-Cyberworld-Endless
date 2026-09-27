@@ -48,6 +48,12 @@ its problems there. The loop was reacting.
   act's answer against every guardian it can meet, not the one in play.
 - **Budget the persona.** Sessions ran 320+ calls against 240: boss fights
   one action per call. The prompt now asks for bursts of two or three moves.
+- **Where the engine writes a game record, carry every field the original
+  has.** The battle record always put MegaMan on column 2 row 2; the user,
+  playing, found him in a hole: the originals start him beside a hole or
+  poison. Swept the record's other bytes after (only byte 1 varies, and
+  ours is one of the originals'). And a record rewritten in place can
+  change under a battle the game has already rolled: write in turn.
 - **Save the report verbatim** the moment it arrives
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.
@@ -60,4 +66,5 @@ L. Seen in its notes before the report: the trader gave BlastMan B three
 times (fixed in fa81690, the game's Library rule); a bystander still looked
 like the dealer on the layer CONTINUE restored (its sprite came from the
 save; layers after it are new). Swept ahead meanwhile: warning lines for
-the eight guardians that had none (875c7da).
+the eight guardians that had none (875c7da). The user, playing, met
+MegaMan standing in a hole at a battle's start (0d7d36b).
