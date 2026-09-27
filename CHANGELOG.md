@@ -238,7 +238,9 @@ First playable version.
   BugFrag Trader, all running on the game's NPC and text scripts. Chip
   Traders speak the game's own lines and hand out chips from its own prize
   pools, stronger with depth; deeper layers can hold a Chip Trader Special
-  (10 chips for 1).
+  (10 chips for 1). Their prize is a chip new to the Library: the game's
+  three in four from those it has, a whole story's there, gave a run's
+  near-empty Library the same chip (BlastMan B) trade after trade.
 - Random encounters from the game's own roll and its own formations: each
   area fights the battles of its original maps, 28 of the 29 virus families
   (all but WindBox) where Capcom put them, on their battlefields (grass, ice,

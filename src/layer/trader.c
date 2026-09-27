@@ -39,4 +39,9 @@ void trader_install(int group, int number, TraderKind kind, int depth) {
 	put32(kinds, key);
 	kinds[4] = (uint8_t)kind;
 	emu_write(BN6_TRADER_KINDS, kinds, sizeof kinds);
+	/* a chip new to the Library: the game's three in four from those it
+	 * has (a whole story's) left a run's few, and a trader gave BlastMan B
+	 * three times running; the ones it has are still its fallback */
+	static const uint8_t modes[2] = { 0, 64 };
+	emu_write(BN6_TRADER_MODES, modes, sizeof modes);
 }
