@@ -25,8 +25,8 @@ First playable version.
   which heals every time, is named again while MegaMan is hurt. After a
   CONTINUE, L remembers it has told where they are, the map remembers what
   was seen, and the way-on arrow stays up for as many boxes as L speaks.
-- Standing anywhere on the exit pad takes MegaMan on: its trigger is the
-  pad's whole square (on its rims he stayed before).
+- Standing anywhere on the exit pad takes MegaMan on: its trigger covers
+  the pad's whole panel (on its rims he stayed before).
 - The map (hold Select) fills the screen: the floor seen so far with its
   panels apart, so walkways read as lines, the whole of it when it fits,
   marks for MegaMan, the exit, heals, shops and the guardian with a key
