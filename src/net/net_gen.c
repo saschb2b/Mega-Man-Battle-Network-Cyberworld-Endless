@@ -242,10 +242,11 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	}
 
 	/* Points of interest in the other rooms. */
-	/* each act's middle layer has the Net Dealer and a heal; its first often
-	 * a shop (docs/PROGRESSION.md) */
+	/* each act's middle layer has the Net Dealer and a heal, and so does its
+	 * first after the run's first (the guardian's zenny to spend on what the
+	 * new act calls for); docs/PROGRESSION.md */
 	int biome_layer = layer_in_act(depth);
-	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
+	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
 	bool heal = rng_range(0, 99) < (layer.boss_layer ? 70 : 30) || (kind == LAYER_NORMAL && pacing_heal_certain(depth));
 	bool trader = rng_range(0, 99) < 25;
 	bool programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;

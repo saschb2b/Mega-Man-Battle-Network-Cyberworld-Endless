@@ -12,6 +12,9 @@
 enum { ENC_NORMAL, ENC_EASY, ENC_CHALLENGE, ENC_FIRST };
 Encounter make_encounter(int depth, int biome, int kind);
 Encounter make_boss(int depth, int biome, int navi);
+/* The element strong against an act's guardian, else against its area's
+ * viruses (ELEM_*, 0 for none): the Net Dealers stock a chip of it. */
+int counter_element(int biome, int navi);
 /* Random chip for rewards/shops; code chosen from the chip's own codes. */
 int roll_chip(int depth, int bonus_tier, char *code);
 int chip_price(int id);

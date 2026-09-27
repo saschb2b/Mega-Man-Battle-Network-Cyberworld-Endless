@@ -153,6 +153,24 @@ int navi_chip(int navi, int version) {
 	return 0;
 }
 
+/* The record of enemy `id`'s stats (see enemy_stats), 0 when not found. */
+static uint32_t enemy_record(int id) {
+	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return 0;
+	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
+	if (e[1] > 2) return 0;
+	uint32_t types = rom_u32(R.layout->enemy_stats + (uint32_t)e[1] * 4);
+	if (!rom_is_ptr(types)) return 0;
+	uint32_t recs = rom_u32(rom_off(types) + (uint32_t)e[2] * 4);
+	if (!rom_is_ptr(recs)) return 0;
+	uint32_t r = rom_off(recs) + (uint32_t)e[0] * 6;
+	return r + 6 > ROM_SIZE ? 0 : r;
+}
+
+int enemy_element(int id) {
+	uint32_t r = enemy_record(id);
+	return r ? rom_u16(r) >> 12 : -1;
+}
+
 bool enemy_stats(int id, int *hp, int *damage) {
 	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return false;
 	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;

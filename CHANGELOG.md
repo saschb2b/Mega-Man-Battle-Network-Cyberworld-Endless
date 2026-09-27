@@ -21,6 +21,9 @@ First playable version.
   far a short Mr. Prog can be while looking a tile away.
 - A navi's tip on running from a battle says how (on the Custom screen, hold
   L and press R); it said START, which only pauses.
+- An act's first layer from act 2 on always has a Net Dealer, and every
+  Net Dealer stocks a chip of the element that answers the act (its
+  guardian's weakness, else its viruses') and says which.
 - A new act eases in: every battle on its first layer comes from the lower
   half of its band (two BombCorns on the first layer after BlastMan took a
   playtester from 220 HP to 10).

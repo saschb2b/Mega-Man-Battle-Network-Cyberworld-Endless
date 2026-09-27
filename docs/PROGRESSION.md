@@ -195,7 +195,7 @@ Every act keeps three layers and gets a fixed rhythm:
 
 | Layer | Battles | Services |
 | --- | --- | --- |
-| First | The first two battles from the easier half of the act's band | Mystery Data, a shop at 50% |
+| First | The easier half of the act's band (the run's first layer: its first two battles) | Mystery Data; a Net Dealer from act 2 on (a shop at 50% on the run's first layer) |
 | Second | The full band; a marked Server challenge may appear | Net Dealer and Recovery Mr. Prog, always |
 | Third | The full band | Heal and Net Dealer before the arena, then the guardian |
 
@@ -286,8 +286,15 @@ MegaMan reaches about 100 HP more per act:
   SP). Beating a Navi and getting its chip is Battle Network's own reward.
 - From act 2 on, 15% of the rich Mystery Data (the best of three
   qualities) hold an HPMemory, blue as the game keeps them.
-- The Net Dealer's HPMemory costs 1200 zenny in act 1 and 600 more each
+- The Net Dealer's HPMemory costs 800 zenny in act 1 and 400 more each
   act, not more each layer.
+- Every Net Dealer stocks a chip of the element that answers its act: the
+  one strong against the act's guardian, or with a guardian of none,
+  against the element most of the area's viruses have (Fire beats Wood,
+  Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`), and
+  says so ("Word is, Fire chips work wonders down here"). Reading the act
+  card, buying for it and winning with it is the loop a playtester
+  called the best moment of the game.
 
 A start gift adds a choice before the first battle: on layer 1 a Mr. Prog
 offers one of three (two HPMemory, a ★3 chip, a NaviCust program). If the

@@ -107,6 +107,28 @@ static void build_foes(const Formation *f, int depth, int want, bool rare, Encou
 	}
 }
 
+/* The element that answers an act: the one strong against its guardian,
+ * or with a guardian of none, against the element most of the area's
+ * viruses have (Fire beats Wood, Aqua Fire, Elec Aqua, Wood Elec); 0 for
+ * none. */
+int counter_element(int biome, int navi) {
+	static const int beats[5] = { 0, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_FIRE };
+	int e = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : -1;
+	if (e > 0 && e <= 4) return beats[e];
+	const Formation *list;
+	int n = formations_of(biome, &list), count[5] = { 0 };
+	for (int i = 0; i < n; ++i)
+		for (int k = 0; k < list[i].n; ++k) {
+			const uint8_t *row = R.data + R.layout->enemy_ids + list[i].ent[k].id * 3;
+			if (row[1] != 0 || row[2] < 1 || row[2] > 29) continue;
+			int v = enemy_element(virus_id(row[2], 0));
+			if (v > 0 && v <= 4) ++count[v];
+		}
+	int best = 0;
+	for (int v = 1; v <= 4; ++v) if (count[v] > count[best]) best = v;
+	return best ? beats[best] : 0;
+}
+
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
 
 #define MAX_FIT 160

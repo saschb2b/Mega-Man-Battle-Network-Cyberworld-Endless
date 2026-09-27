@@ -111,6 +111,14 @@ int pacing_report_run(const char *path) {
 		fprintf(out, "%s\n", outside ? "  OUTSIDE" : "");
 		flagged += outside;
 	}
+	/* each guardian's element (ELEM_*: 1 fire, 2 aqua, 3 elec, 4 wood), which
+	 * the Net Dealers' counter chip answers */
+	fprintf(out, "\nGuardians' elements:");
+	for (int n = 1; n < 32; ++n) {
+		int id = enemy_id(1, n, 0);
+		if (id >= 0 && guardian(n)->name) fprintf(out, " %s %d", guardian(n)->name, enemy_element(id));
+	}
+	fprintf(out, "\n");
 	fclose(out);
 	printf("pacing report in %s: %d battles or guardians past their band\n", path, flagged);
 	return 0;

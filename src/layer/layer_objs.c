@@ -118,6 +118,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
 	for (int i = 0; i <= OBJ_GIFT; ++i) out->script_of[i] = -1;
+	/* the element that answers this act: its guardian's weakness, else its
+	 * viruses' (the Net Dealer stocks a chip of it and says so) */
+	int counter = counter_element(run.biome, run.boss_order[run.biome]);
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
@@ -187,12 +190,19 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.script = kind;
 			break;
 		}
-		case OBJ_SHOP:
-			tk.sprite = SPR_DEALER;
-			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, run.depth <= 3
+		case OBJ_SHOP: {
+			/* (and a word on the element that answers this act, which the
+			 * stock carries a chip of) */
+			static const char *const elem[5] = { "", "Fire", "Aqua", "Elec", "Wood" };
+			char hello[200];
+			snprintf(hello, sizeof hello, "%s%s%s%s", run.depth <= 3
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
-				: "Still diving, MegaMan? Stock up. It only gets tougher from here!");
+				: "Still diving, MegaMan? Stock up. It only gets tougher from here!",
+				counter > 0 ? "|Word is, " : "", counter > 0 ? elem[counter] : "", counter > 0 ? " chips work wonders down here." : "");
+			tk.sprite = SPR_DEALER;
+			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello);
 			break;
+		}
 		case OBJ_PROGRAMS:
 			tk.sprite = SPR_TECH;
 			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH,
@@ -258,7 +268,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	}
 	/* the shops' stock, in the game's shop data */
 	ShopItem stock[SHOP_MAX_ITEMS];
-	int nstock = shop_dealer_stock(run.depth, stock);
+	int nstock = shop_dealer_stock(run.depth, counter, stock);
 	if (emu_debug_on())
 		for (int i = 0; i < nstock; ++i)
 			if (stock[i].kind == 2) {

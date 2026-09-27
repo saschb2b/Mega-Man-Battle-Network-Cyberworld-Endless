@@ -10,6 +10,7 @@
 #include "bn6.h"
 #include "emu.h"
 #include "game.h"
+#include "data.h"
 #include "loot.h"
 #include "pacing.h"
 #include "rom.h"
@@ -87,12 +88,19 @@ static bool listed(const ShopItem *items, int n, const ShopItem *it) {
 	return false;
 }
 
-int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
+int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	for (int i = 0; i < 4; ++i) {
 		char code = '*';
 		ShopItem it = { 2, 1, 0, 0, 0 };
 		it.id = (uint16_t)roll_chip(depth + 2, 0, &code);
+		/* the first: of the element that answers the act, when one is found */
+		for (int tries = 0; i == 0 && counter > 0 && tries < 60; ++tries) {
+			ChipInfo ci;
+			chip_info(it.id, &ci);
+			if (ci.element == counter && ci.power > 0) break;
+			it.id = (uint16_t)roll_chip(depth + 2, tries / 20, &code);
+		}
 		it.code = (uint8_t)(code == '*' ? 26 : code - 'A');
 		it.price = (uint16_t)(chip_price(it.id) / 100);
 		if (!listed(out, n, &it)) out[n++] = it;
