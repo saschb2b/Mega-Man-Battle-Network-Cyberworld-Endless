@@ -133,7 +133,7 @@ const Scene scene_error = { "error", NULL, error_update, error_draw, NULL };
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; char shot[160], state[160]; } InputStep;
+typedef struct { int frames; uint32_t buttons; char shot[160], state[160]; int place[3]; bool placed; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -199,6 +199,7 @@ static void script_actions(void) {
 		InputStep *s = &script[script_pos];
 		if (s->shot[0]) platform_save_canvas(s->shot);
 		if (s->state[0]) write_state(s->state);
+		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
 		if (++script_pos < script_len) script_left = script[script_pos].frames;
 	}
 }
@@ -231,6 +232,7 @@ static void remote_parse(char *line) {
 		memset(s, 0, sizeof *s);
 		if (!strncmp(tok, "shot ", 5)) snprintf(s->shot, sizeof s->shot, "%s", tok + 5);
 		else if (!strncmp(tok, "state ", 6)) snprintf(s->state, sizeof s->state, "%s", tok + 6);
+		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
 		else {
 			char buttons[128] = "";

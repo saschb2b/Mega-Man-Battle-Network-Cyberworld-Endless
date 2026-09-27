@@ -493,7 +493,8 @@ void director_describe(FILE *f) {
 			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 		else {
-			fprintf(f, "exit %d %d\n", D.objs.exit_x, D.objs.exit_y);
+			fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
+				D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
 			/* the floor around him, panels (x across, y down; @ he, # floor) */
 			int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, cx, cy;
 			if (netmap_panel(px, py, &cx, &cy)) {
@@ -694,6 +695,16 @@ bool director_dev_next_layer(void) {
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
 	return director_start_layer();
+}
+
+void director_dev_place(int x, int y, int face) {
+	/* (a test's step: MegaMan put down at world (x, y), facing 0-7) */
+	if (!director_on_map()) return;
+	emu_write32(BN6_PLAYER + 0x1C, (uint32_t)x << 16);
+	emu_write32(BN6_PLAYER + 0x20, (uint32_t)y << 16);
+	emu_write32(BN6_PLAYER + 0x28, (uint32_t)x << 16);
+	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)y << 16);
+	if (face >= 0 && face < 8) { emu_write8(BN6_PLAYER + 0x10, (uint8_t)face); emu_write8(BN6_PLAYER + 0x14, (uint8_t)face); }
 }
 
 bool director_dev_warp_cell(int x, int y) {

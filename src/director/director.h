@@ -22,6 +22,8 @@ bool director_suspend(void);
 bool director_arrived(void);
 /* What a player sees, in words, one fact a line (remote play). */
 void director_describe(FILE *f);
+/* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
+void director_dev_place(int x, int y, int face);
 /* The pad's keys on their way to the game: on the map L is MegaMan's
  * word on where they are. */
 uint32_t director_keys(uint32_t keys);

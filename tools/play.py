@@ -79,6 +79,8 @@ def steps(commands):
                     out += [(4, buttons(args[0])), (6, '')]
             elif op == 'shot':
                 out.append('shot')
+            elif op == 'place':
+                out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
             else:
                 sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot)')
         except (IndexError, ValueError):
@@ -90,6 +92,9 @@ def split_every(seq, every):
     """Pictures every `every` frames through the steps."""
     out, since = [], 0
     for s in seq:
+        if s != 'shot' and s[0] == 'place':
+            out.append(s)
+            continue
         if s == 'shot':
             out.append(s)
             since = 0
@@ -225,7 +230,7 @@ def cmd_do(name, rest):
     seq = steps(commands)
     if every:
         # at most MAX_SHOTS pictures: a longer batch spaces them out
-        frames = sum(s[0] for s in seq if s != 'shot')
+        frames = sum(s[0] for s in seq if s != 'shot' and s[0] != 'place')
         every = max(every, -(-frames // MAX_SHOTS))
         seq = split_every(seq, every)
     while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
@@ -239,6 +244,8 @@ def cmd_do(name, rest):
             path = os.path.join(h, 'shots', f'_{n}_{len(shots)}.bmp')
             shots.append(path)
             items.append(f'shot {path}')
+        elif s[0] == 'place':
+            items.append(f'place {s[1]} {s[2]} {s[3]}')
         else:
             items.append(f'{s[0]} {s[1]}'.strip())
     state = os.path.join(h, 'state.txt')
