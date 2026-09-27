@@ -84,12 +84,27 @@ static bool cuts_way(int x, int y) {
 	return t < open;
 }
 
-/* A free cell inside a room, off its middle so paths stay clear, where a
- * solid object cuts no way. */
+/* Whether (x, y) in room `r` is at one of its exits: a floor cell beside it
+ * outside the room (a walkway's mouth, where a Server or a navi stood in
+ * the way on, the gap round it hard to find). */
+static bool at_exit(const Room *r, int x, int y) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int nx = x + d[k][0], ny = y + d[k][1];
+		if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
+		bool inside = nx >= r->x && nx < r->x + r->w && ny >= r->y && ny < r->y + r->h;
+		if (!inside && layer.cell[ny][nx] == C_PATH) return true;
+	}
+	return false;
+}
+
+/* A free cell inside a room, off its middle and its exits so paths stay
+ * clear, where a solid object cuts no way. */
 static bool room_spot(const Room *r, int *ox, int *oy) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if (tries < 30 && x == r->ax && y == r->ay) continue;
+		if (tries < 36 && at_exit(r, x, y)) continue;
 		if (cell_free(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;

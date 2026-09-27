@@ -75,6 +75,7 @@ static struct {
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held, a_held;   /* L, R and A were down last frame */
+	int l_kept;                    /* frames an L pressed while busy is kept */
 	bool dir_held;         /* a direction is held this frame */
 	bool map_shown;        /* SELECT is held on a layer's map: the map shows */
 	uint8_t seen[MAP_H][MAP_W];   /* panels MegaMan has come near on this layer */
@@ -619,16 +620,35 @@ void director_draw_map(void) {
 		fill_rect(ms - 3, mt - 3, 7, 7, (D.frame / 10) % 2 ? rgba(120, 200, 255, 255) : rgba(0, 8, 28, 255));
 		fill_rect(ms - 2, mt - 2, 5, 5, rgba(255, 255, 255, 255));
 	}
-	/* the key, under the map */
+	/* the key, under the map: MegaMan, the exit, and what else this layer
+	 * holds (a Server, a dark warp or a gate is "Event") */
 	static const struct { const char *what; SDL_Color c; } key[] = {
 		{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
 		{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
+		{ "Event", { 210, 110, 255, 255 } },
 	};
-	int kx = bx + 2, ky = by + bh + 5, keys = D.objs.guardian.navi ? 5 : 4;
-	for (int i = 0; i < keys; ++i) {
+	bool has[6] = { true, true, false, false, D.objs.guardian.navi != 0, false };
+	for (int i = 0; i < layer.nobj; ++i)
+		switch (layer.obj[i].type) {
+		case OBJ_HEAL: has[2] = true; break;
+		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: has[5] = true; break;
+		default: break;
+		}
+	/* (the gaps close up until it fits the picture's width) */
+	int gap = 10, width;
+	do {
+		width = 0;
+		for (int i = 0; i < 6; ++i) if (has[i]) width += 8 + text_width(key[i].what) + gap;
+		width -= gap;
+	} while (width > bw - 2 && (gap -= 2) >= 0);
+	if (gap < 0) gap = 0;
+	int kx = bx + 1, ky = by + bh + 5;
+	for (int i = 0; i < 6; ++i) {
+		if (!has[i]) continue;
 		fill_rect(kx, ky + 3, 5, 5, key[i].c);
-		text_draw(kx + 8, ky, key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
-		kx += 8 + text_width(key[i].what) + 10;
+		text_draw(kx + 7, ky, key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
+		kx += 8 + text_width(key[i].what) + gap;
 	}
 	#undef SX
 	#undef SY
@@ -639,7 +659,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 6
+#define LAYER_MAKE 7
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -799,6 +819,7 @@ static uint32_t corner_assist(uint32_t keys) {
 	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
 	static int held_for, last_held = -1;          /* frames the same key has been held */
 	static int turn_cx, turn_cy, cur_cx = -99, cur_cy = -99, prev_cx = -99, prev_cy = -99;
+	static int walked[12][2], nwalked;            /* the panels he has walked lately, newest last */
 	uint32_t pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	bool moved = px != lx || py != ly;
@@ -806,7 +827,11 @@ static uint32_t corner_assist(uint32_t keys) {
 	/* the panel he stands on and the one before it */
 	int pcx, pcy;
 	netmap_panel(px, py, &pcx, &pcy);
-	if (pcx != cur_cx || pcy != cur_cy) { prev_cx = cur_cx; prev_cy = cur_cy; cur_cx = pcx; cur_cy = pcy; }
+	if (pcx != cur_cx || pcy != cur_cy) {
+		prev_cx = cur_cx; prev_cy = cur_cy; cur_cx = pcx; cur_cy = pcy;
+		if (nwalked == 12) { memmove(walked, walked[1], sizeof walked - sizeof walked[0]); --nwalked; }
+		walked[nwalked][0] = prev_cx; walked[nwalked][1] = prev_cy; ++nwalked;
+	}
 	int held = -1;
 	for (int k = 0; k < 8; ++k) if (pad == pad_dirs[k].keys) held = k;
 	if (held < 0) last_held = -1;
@@ -828,9 +853,12 @@ static uint32_t corner_assist(uint32_t keys) {
 		held_for = held == last_held ? held_for + 1 : 0;
 		last_held = held;
 		if (held_for >= 8 && !floor_panel(cx + y, cy - x)) {
-			/* (not back into the lane he has just come out of) */
-			bool la = lane_step(cx, cy, x, 0) && !(cx == prev_cx && cy - x == prev_cy);
-			bool lb = lane_step(cx, cy, 0, y) && !(cx + y == prev_cx && cy == prev_cy);
+			/* (not back into a lane he has lately walked: he came out of it) */
+			bool la = lane_step(cx, cy, x, 0), lb = lane_step(cx, cy, 0, y);
+			for (int i = 0; i < nwalked; ++i) {
+				if (walked[i][0] == cx && walked[i][1] == cy - x) la = false;
+				if (walked[i][0] == cx + y && walked[i][1] == cy) lb = false;
+			}
 			if (la != lb) {
 				int wcx, wcy;
 				netmap_world(cx, cy, &wcx, &wcy);
@@ -1036,9 +1064,14 @@ uint32_t director_keys(uint32_t keys) {
 	 * has no lines for this story */
 	keys &= ~KEY_L;
 	/* (not while a warp or the jack-in departs, nor through a guardian's
-	 * staging or the battle it has armed) */
-	if (pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP + 0x10) == 0 &&
-		(D.town || (!boss_cinematic() && !boss_fighting()))) {
+	 * staging or the battle it has armed; an L pressed as a chat closes is
+	 * kept half a second, as the first press after one went unheard) */
+	bool can_l = !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP + 0x10) == 0 &&
+		(D.town || (!boss_cinematic() && !boss_fighting()));
+	if (pressed && !can_l) D.l_kept = 30;
+	else if (!pressed && D.l_kept > 0) { if (can_l) { pressed = true; D.l_kept = 0; } else --D.l_kept; }
+	if (pressed && can_l) {
+		D.l_kept = 0;
 		/* (the arrow shows through the words and a few seconds after) */
 		if (talk_start(status_words(), FACE_MEGAMAN) && (D.town || !D.objs.guardian.navi || !boss_beaten() || boss_done())) {
 			D.arrow_pending = true;

@@ -112,6 +112,10 @@ int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]) {
 		}
 		it.code = (uint8_t)(code == '*' ? 26 : code - 'A');
 		it.price = (uint16_t)(chip_price(it.id) / 100);
+		/* (the answer at a price a run has by then: 400 zenny in act 1, 300
+		 * more an act) */
+		int cap = 4 + 3 * (pacing_act(depth) + 7 * pacing_loop(depth));
+		if (i == 0 && counter > 0 && it.price > cap) it.price = (uint16_t)cap;
 		if (!listed(out, n, &it)) out[n++] = it;
 	}
 	/* one HPMemory, dearer act by act (800 zenny in the first: about what
