@@ -196,7 +196,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_PROGRAMS:
 			tk.sprite = SPR_TECH;
 			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH,
-				"NaviCust programs, fresh from my workbench!|Install them from the NaviCust, and they're yours.");
+				"NaviCust programs, fresh from my workbench!|Install them in your PET: MegaMan, then NaviCust.");
 			break;
 		case OBJ_CHALLENGE: {
 			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;

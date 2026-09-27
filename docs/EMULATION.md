@@ -45,7 +45,12 @@ map-name label and the PET's at the run's own names, rewrites the stock of
 the game's shops 0 and 3 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags
 (`0x1400`+) and choice flags (`0x1440`+) it uses, sets the flags that stop
-jacking out and the PET's Save (`0x1727`, `0x1706`), and borrows cbGameState
+jacking out and the PET's Save (`0x1727`, `0x1706`) and the one that puts
+the NaviCust under MegaMan in the PET (`0x00F2`; without it MegaMan's entry
+goes straight to his status and a program cannot be installed. Found by
+setting blocks of flags with the PET open, `tools/play.py`'s dev `flags`
+step, and halving: `0x00AC` and `0x00F7` add Records there instead), and
+borrows cbGameState
 (`0x080050EC`) for one frame to warp.
 
 ## A layer

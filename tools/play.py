@@ -81,6 +81,8 @@ def steps(commands):
                 out.append('shot')
             elif op == 'place':
                 out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
+            elif op == 'flags':
+                out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
             else:
                 sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot)')
         except (IndexError, ValueError):
@@ -92,7 +94,7 @@ def split_every(seq, every):
     """Pictures every `every` frames through the steps."""
     out, since = [], 0
     for s in seq:
-        if s != 'shot' and s[0] == 'place':
+        if s != 'shot' and s[0] in ('place', 'flags'):
             out.append(s)
             continue
         if s == 'shot':
@@ -194,13 +196,16 @@ def cmd_start(name, rest):
     shutil.copytree(data, os.path.join(h, 'data0'))
     if not os.path.exists(BINARY):
         sys.exit('no build/linux/cyberworld: run python3 build.py linux first')
-    # the session's own copy, so a rebuild meanwhile leaves it alone
+    # the session's own copy, so a rebuild meanwhile leaves it alone (with
+    # NAME/bin.pin, kept across starts: a playtest's restarts run the build
+    # it began with)
     bin_dir = os.path.join(h, 'bin')
-    if os.path.isdir(bin_dir):
-        shutil.rmtree(bin_dir)
-    os.makedirs(bin_dir)
-    shutil.copy2(BINARY, bin_dir)
-    shutil.copytree(os.path.join(os.path.dirname(BINARY), 'lib'), os.path.join(bin_dir, 'lib'))
+    if not (os.path.exists(os.path.join(h, 'bin.pin')) and os.path.exists(os.path.join(bin_dir, 'cyberworld'))):
+        if os.path.isdir(bin_dir):
+            shutil.rmtree(bin_dir)
+        os.makedirs(bin_dir)
+        shutil.copy2(BINARY, bin_dir)
+        shutil.copytree(os.path.join(os.path.dirname(BINARY), 'lib'), os.path.join(bin_dir, 'lib'))
     if not seed:
         seed = int.from_bytes(os.urandom(3), 'little') | 1
     args = [os.path.join(bin_dir, 'cyberworld'), '--headless', '--size', '256x192', '--remote', h, '--rom-dir', ROM_DIR,
@@ -230,7 +235,7 @@ def cmd_do(name, rest):
     seq = steps(commands)
     if every:
         # at most MAX_SHOTS pictures: a longer batch spaces them out
-        frames = sum(s[0] for s in seq if s != 'shot' and s[0] != 'place')
+        frames = sum(s[0] for s in seq if s != 'shot' and s[0] not in ('place', 'flags'))
         every = max(every, -(-frames // MAX_SHOTS))
         seq = split_every(seq, every)
     while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
@@ -246,6 +251,8 @@ def cmd_do(name, rest):
             items.append(f'shot {path}')
         elif s[0] == 'place':
             items.append(f'place {s[1]} {s[2]} {s[3]}')
+        elif s[0] == 'flags':
+            items.append(f'flags {s[1]} {s[2]} {s[3]}')
         else:
             items.append(f'{s[0]} {s[1]}'.strip())
     state = os.path.join(h, 'state.txt')

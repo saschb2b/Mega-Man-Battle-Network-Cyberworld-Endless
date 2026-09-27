@@ -4,6 +4,11 @@
 
 First playable version.
 
+- The NaviCust is in the PET from the start of a run (MegaMan, then
+  NaviCust): the gift's and the vendor's programs could not be installed
+  before. The gift, the vendor and a bystander say where to install them.
+- R near the town's statue says which way the statue is and shows the
+  way-on arrow.
 - A story for the run, the Endless Net: Dad's call on the first run, Lan
   and MegaMan talking on arriving somewhere new (the first layer, the
   Undernet, the Graveyard, the Nest, the side layers, the net rebuilt

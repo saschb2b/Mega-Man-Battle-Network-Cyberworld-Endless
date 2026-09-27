@@ -231,7 +231,7 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
-	ta_page(t, FACE_PROG, "INSTALL IT FROM THE NAVICUST IN YOUR PET!", false);
+	ta_page(t, FACE_PROG, "INSTALL IT IN YOUR PET: MEGAMAN, THEN NAVICUST!", false);
 	flag_set(t, flag);
 	ta_end(t);
 

@@ -362,10 +362,12 @@ static int layer_biome(void) {
 }
 
 /* MegaMan stays in the run: no jacking out, and no PET save to the game's
- * own flash (the run keeps its checkpoints). */
+ * own flash (the run keeps its checkpoints). The NaviCust is there from the
+ * start, for the programs a run finds and buys. */
 static void lock_run(void) {
 	flag_set(BN6_FLAG_NO_JACK);
 	flag_set(BN6_FLAG_NO_PET_SAVE);
+	flag_set(BN6_FLAG_NAVICUST);
 }
 
 /* The next random battle: the run's first two and the first after each
@@ -439,6 +441,7 @@ bool director_start_run(void) {
 	/* R jacks in there; the PET's own Save stays off */
 	flag_clear(BN6_FLAG_NO_JACK);
 	flag_set(BN6_FLAG_NO_PET_SAVE);
+	flag_set(BN6_FLAG_NAVICUST);
 	const TownInfo *ti = town_info();
 	emu_warp(ti->group, ti->number, ti->start_x, ti->start_y, ti->start_face);
 	D.town = true;

@@ -25,7 +25,7 @@ static const char *const mid[] = {
 	"There's a sealed gate in the Undernet copy. They say three ScrtData open it.",
 	"ScrtData hide in blue Mystery Data on the deeper layers. Keep your eyes open!",
 	"A strong virus signal is a tough fight, but the chip it leaves is worth it.",
-	"Programs from the NaviCust vendor go into your NaviCust. Don't forget to install them!",
+	"A NaviCust program does nothing until it's installed. In the PET: MegaMan, then NaviCust!",
 	"A deleted guardian leaves its HPMemory behind. More HP, more chances!",
 };
 
