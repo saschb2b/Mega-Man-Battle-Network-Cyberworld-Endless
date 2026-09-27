@@ -56,10 +56,12 @@ static int style_at(const AreaSrc *a, int cx, int cy) {
 
 typedef struct {
 	const AreaSrc *a;
-	uint16_t styles, walk_styles, skip_styles;
+	uint32_t styles;
+	uint16_t walk_styles, skip_styles;
 	bool bg_in_map;
 	int8_t *state;   /* SPAN x SPAN panel states, -1 until measured */
 	int8_t *drawn;   /* ... whether each is floor of this view at all */
+	bool inner_walls;   /* rings of walls inside the floor ring no holes (TILES_INNER_WALLS) */
 } Src;
 
 /* Whether panel (A, B) is floor of this view at all. */
@@ -68,8 +70,10 @@ static bool panel_drawn(const Src *s, int A, int B) {
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	/* floor of another height is drawn elsewhere: learned in its own view */
 	if (a->hz && area_src_height(a, X, Y) != a->level) return 0;
-	/* nor is a hole in it, however much of the faces around hangs over it */
-	if (!area_src_walled_floor(a, X, Y)) return 0;
+	/* nor is a hole in it, however much of the faces around hangs over it
+	 * (but for what the walls keep MegaMan off, on floor drawn whole) */
+	int rings = area_src_rings(a, X, Y);
+	if (rings >= 0 && !(rings & 1) && !(s->inner_walls && rings >= 2)) return 0;
 	int px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
 	int W = a->tw * 8, H = a->th * 8;
 	/* its middle and four points around it drawn: a panel, not the legs a
@@ -402,11 +406,21 @@ static bool skipped(const Src *s, int A, int B) {
 	return s->skip_styles >> style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
 }
 
-void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out) {
+static void src_open(Src *s, const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, bool inner_walls) {
+	*s = (Src){ a, styles, walk_styles, skip_styles, bg_in_map, malloc(SPAN * SPAN), malloc(SPAN * SPAN), inner_walls };
+	memset(s->state, -1, SPAN * SPAN);
+	memset(s->drawn, -1, SPAN * SPAN);
+}
+
+static void src_close(Src *s) {
+	free(s->state);
+	free(s->drawn);
+}
+
+void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out) {
 	memset(out, 0, sizeof *out);
-	Src src = { a, styles, walk_styles, skip_styles, bg_in_map, malloc(SPAN * SPAN), malloc(SPAN * SPAN) };
-	memset(src.state, -1, SPAN * SPAN);
-	memset(src.drawn, -1, SPAN * SPAN);
+	Src src;
+	src_open(&src, a, styles, walk_styles, skip_styles, bg_in_map, styles & TILES_INNER_WALLS);
 	uint8_t *pads = find_pads(&src);
 	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0, false };
 	calibrate(a, &src, &g);
@@ -456,7 +470,15 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16
 			t->pad = !(styles & TILES_NO_PAD_LOOK) && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 ? pads[(B + SPAN / 2) * SPAN + A + SPAN / 2] : 0;
 			++n;
 		}
-	/* the panels' neighbourhoods, as legal.c asks after them */
+	/* the panels' neighbourhoods, as legal.c asks after them (every ring of
+	 * walls inside the floor a hole: what the tiles are learned from leaves
+	 * the floors a layer keeps as they were) */
+	Src walled = src;
+	uint8_t *walled_pads = pads;
+	if (src.inner_walls) {
+		src_open(&walled, a, styles, walk_styles, skip_styles, bg_in_map, false);
+		walled_pads = find_pads(&walled);
+	}
 	out->shapes = malloc(SPAN * SPAN * sizeof *out->shapes);
 	out->nshapes = 0;
 	for (int B = -SPAN / 2 + 1; B < SPAN / 2 - 1; ++B)
@@ -464,14 +486,18 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16
 			unsigned oa = 0, ob = 0;
 			bool mixed = false;
 			for (int k = 0; k < 9; ++k) {
-				int st = src_panel(&src, A + k % 3 - 1, B + k / 3 - 1);
+				int st = src_panel(&walled, A + k % 3 - 1, B + k / 3 - 1);
 				if (st == OTHER) mixed = true;
 				if (st == TILE_A) oa |= 1u << k;
 				if (st == TILE_B) ob |= 1u << k;
 			}
 			if (mixed || !(oa | ob)) continue;
-			out->shapes[out->nshapes++] = TILE_SHAPE(oa, ob, pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]);
+			out->shapes[out->nshapes++] = TILE_SHAPE(oa, ob, walled_pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]);
 		}
+	if (src.inner_walls) {
+		src_close(&walled);
+		free(walled_pads);
+	}
 	qsort(out->shapes, (size_t)out->nshapes, sizeof *out->shapes, cmp_u32);
 	int ns = 0;
 	for (int i = 0; i < out->nshapes; ++i)
@@ -492,8 +518,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16
 	out->n = nu;
 	find_plain(out);
 	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
-	free(src.state);
-	free(src.drawn);
+	src_close(&src);
 	free(pads);
 }
 
@@ -509,6 +534,16 @@ void tiles_colours(const TileBook *b, uint8_t seen[TILE_COLOURS]) {
 			if (b->cand[i].mask >> p & 1) seen[b->cand[i].px[p] & 0x7FFF] = 1;
 }
 
+/* The first n pairs of `b` kept (still in order): the plain looks and joins
+ * of those left. */
+static void keep_first(TileBook *b, int n) {
+	if (n == b->n) return;
+	b->n = n;
+	find_plain(b);
+	b->joins = 0;
+	for (int i = 0; i < b->n; ++i) b->joins += KEY_A(b->cand[i].key) && KEY_B(b->cand[i].key);
+}
+
 void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool drop) {
 	int n = 0;
 	for (int i = 0; i < b->n; ++i) {
@@ -517,12 +552,14 @@ void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool dro
 		for (int p = 0; p < 64 && !c->other; ++p) c->other = c->mask >> p & 1 && !seen[c->px[p] & 0x7FFF];
 		if (!drop || !c->other) b->cand[n++] = *c;
 	}
-	if (n == b->n) return;
-	/* (still in order) the plain looks and joins of the pairs left */
-	b->n = n;
-	find_plain(b);
-	b->joins = 0;
-	for (int i = 0; i < b->n; ++i) b->joins += KEY_A(b->cand[i].key) && KEY_B(b->cand[i].key);
+	keep_first(b, n);
+}
+
+void tiles_drop_pads(TileBook *b) {
+	int n = 0;
+	for (int i = 0; i < b->n; ++i)
+		if (!b->cand[i].pad) b->cand[n++] = b->cand[i];
+	keep_first(b, n);
 }
 
 /* ---- picking ---- */

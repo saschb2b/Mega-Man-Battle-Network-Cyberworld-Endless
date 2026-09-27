@@ -59,6 +59,9 @@ int area_src_height(const AreaSrc *a, int X, int Y);
  * tell (-1): floor lies inside an odd number of rings of walls, since the
  * walls ring each floor and again each hole in it. */
 int area_src_walled_floor(const AreaSrc *a, int X, int Y);
+/* ... and inside how many rings (-1: cannot tell): 2 and more, even, inside
+ * a ring within the floor, a hole or what the walls keep MegaMan off. */
+int area_src_rings(const AreaSrc *a, int X, int Y);
 
 /* Pixel i of the map's floors: the first layer where it draws, else the
  * second, as if nothing stood in front of them (the originals set their

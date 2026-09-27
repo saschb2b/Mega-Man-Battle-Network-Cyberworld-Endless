@@ -94,7 +94,8 @@ bridge of 3-5 panels, attached where it lies farthest from the arrival,
 drawn in the area's second floor so it reads apart from the platforms.
 Pads (the 3x3 rooms on spurs) are drawn with tiles learned on the
 original's own pads, where those are square (not the Judge Tree's round
-stumps or Sky's round pods), and the originals' free-standing scenery is
+stumps or Sky's round pods; Robot Control's are its other maps' raised
+white platforms), and the originals' free-standing scenery is
 set in the void beside the floor (`src/map/decor.c`). The
 guardian holds its middle and the exit waits on its far side; the room the
 bridge leaves from gets the heal and the Net Dealer (docs/BOSSES.md). Services go to the bigger platforms, the
@@ -151,6 +152,23 @@ seen (legal.c), so floors do not change: the nearest tile in the area's
 own colours draws them. Seaside keeps its other maps' colours
 (`TILES_MORE_COLOURS`): its second floor forms fields only in Seaside 2
 and 3, as their yellow panels, and its guardian's arena is drawn in them.
+
+Well inside the floor, a tile must look like the area's plain floor, from
+about 5 pixels inside its edge. Robot Control Comp's white platforms are
+framed by two light bands half a panel deep (16 pixels under their upper
+edges), so its own tiles for an edge failed that test wherever they
+reached that far in, and plain white or a pad's piece stood in: the
+platforms read as flat white fields with ragged edges. Its platforms'
+edges, like CopyBot's rims, are not held to the plain look
+(`TILES_RIMMED`). The walls inside Comp 2's platforms ring the grey cubes
+that stand on them, not holes; learned as holes, the panels beside them
+taught plain white next to the void, which the inner corners of generated
+platforms took. The tiles are learned with those panels as floor
+(`TILES_INNER_WALLS`), while the neighbourhoods legal.c asks after keep
+them as holes, so floors do not change. Comp 2's one small platform is the
+striped conveyor before the robot's door, which drew the pads half striped:
+the pads take the look of Comp 1's and the Pavilion's raised white
+platforms alone (`TILES_MORE_PADS`).
 
 Before its tiles are picked, a layer's floor is made drawable
 (`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,

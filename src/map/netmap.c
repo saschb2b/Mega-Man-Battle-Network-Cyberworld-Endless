@@ -130,6 +130,10 @@ static bool learn(int area, Learned *L) {
 	memset(seen, 0, sizeof seen);
 	int own = L->nbooks;
 	for (int k = 0; k < own; ++k) tiles_colours(&L->book[k], seen);
+	/* pads in the look of the other maps' pads alone, where the own map's
+	 * small platforms are something else (Robot Control Comp 2's conveyor) */
+	if (na->styles & TILES_MORE_PADS)
+		for (int k = 0; k < own; ++k) tiles_drop_pads(&L->book[k]);
 	/* the area's other maps in the same tiles and colours, for the places
 	 * this one never shows */
 	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
@@ -177,6 +181,7 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 static const NetLayout *cur;
 static bool one_floor;        /* the area has no walkway floor: all is platform */
 static bool by_shape;         /* its floors are told by shape: an arena is platform */
+static bool rimmed;           /* its platforms' edges are rims (TILES_RIMMED) */
 static int apart;             /* what of its floor stands apart from the rest (NET_APART_*) */
 static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
@@ -281,7 +286,7 @@ static bool write_tilemap(const Learned *L) {
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
-	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape, apart != NET_APART_NONE };
+	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape || rimmed, apart != NET_APART_NONE };
 	free(last.seams);
 	last.seams = calloc(cells, 1);
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
@@ -424,6 +429,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	cur = lay;
 	one_floor = !R.layout->net_area[area].walk_styles;
 	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
+	rimmed = R.layout->net_area[area].styles & TILES_RIMMED;
 	pad_look = !(R.layout->net_area[area].styles & TILES_NO_PAD_LOOK);
 	apart = R.layout->net_area[area].apart;
 	place.ex = L->ex;
