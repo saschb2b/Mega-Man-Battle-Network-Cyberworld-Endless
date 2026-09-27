@@ -157,7 +157,9 @@ static void markup_escape(char *out, size_t n, const char *in) {
 }
 
 /* Asks with two or three buttons: labels[0] is the default, the last is
- * what closing the dialog means. Returns the chosen label's index. */
+ * what closing the dialog means. Returns the chosen label's index, or -1
+ * when no dialog could be shown (a Flatpak has no zenity or kdialog, and
+ * SDL's box on Wayland is zenity's). */
 static int ask(const char *text, const char *const *labels, int n) {
 	if (on_path("zenity")) {
 		char body[2400], ok[80], cancel[80], extra[80];
@@ -191,8 +193,8 @@ static int ask(const char *text, const char *const *labels, int n) {
 	SDL_MessageBoxData box = { SDL_MESSAGEBOX_INFORMATION | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT, NULL,
 		"Cyberworld Endless", body, n, buttons, NULL };
 	int hit = n - 1;
-	if (SDL_ShowMessageBox(&box, &hit) != 0 || hit < 0) return n - 1;
-	return hit;
+	if (SDL_ShowMessageBox(&box, &hit) != 0) return -1;
+	return hit < 0 ? n - 1 : hit;
 }
 
 /* ---- the ROM ---- */
@@ -212,7 +214,7 @@ static bool choose_file(char *path, size_t n) {
 	return false;
 }
 
-bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
+int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
 	/* with a file chooser: choose it; without, open the folder to put it in */
 	bool picker = on_path("zenity") || on_path("kdialog");
 	for (;;) {
@@ -225,7 +227,8 @@ bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgl
 			why, rom_dir);
 		const char *labels[] = { picker ? "Choose ROM..." : "Open folder", "Look again", "Quit" };
 		int hit = ask(text, labels, 3);
-		if (hit == 2) return false;
+		if (hit < 0) return -1;
+		if (hit == 2) return 0;
 		if (hit == 0 && picker) {
 			char path[1024] = "";
 			if (!choose_file(path, sizeof path)) continue;
@@ -236,13 +239,13 @@ bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgl
 			snprintf(to, sizeof to, "%s/%s", rom_dir, base ? base + 1 : path);
 			if (strcmp(to, path) && access(to, F_OK) != 0 && !copy_file(path, to))
 				fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, path);
-			return true;
+			return 1;
 		}
 		if (hit == 0) {
 			char *argv[] = { "xdg-open", (char *)rom_dir, NULL };
 			run(argv, NULL, 0);
 		}
-		if (scan(msg, msglen)) return true;
+		if (scan(msg, msglen)) return 1;
 	}
 }
 
@@ -428,7 +431,7 @@ void desktop_menu_entry(const char *data_dir) {
 		"Add Cyberworld Endless to your application menu?\n\n"
 		"The entry starts this AppImage:\n%s\n\nIf you move the file, start it once from its new place.", appimage);
 	const char *labels[] = { "Add to menu", "Don't ask again", "Not now" };
-	int hit = ask(text, labels, 3);
+	int hit = ask(text, labels, 3);   /* (-1: none could be shown: not now) */
 	if (hit == 1) {
 		FILE *d = fopen(declined, "w");
 		if (d) fclose(d);

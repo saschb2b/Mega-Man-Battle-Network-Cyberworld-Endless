@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Without its ROM, a desktop build that can show no dialog (the Flatpak,
+  whose sandbox has neither zenity nor kdialog, and SDL's box on Wayland is
+  zenity's; the Steam Deck's big screen, where a pad cannot answer one)
+  opens its own window on a "No ROM found" screen instead of quitting at
+  once: where to put the ROM, a look again every three seconds and on A,
+  and once it is there the game starts itself again. On a Steam Deck the
+  Flatpak had shown its icon for a moment and gone. The screens before a
+  ROM is found draw in a 3x5 font of the engine's own; a handheld's error
+  without its ROM showed a row of bars.
 - The site's downloads show the newest release, an alpha's pre-release too
   (GitHub's "latest" skips pre-releases, and the page said there was no
   release), and list the Flatpak for the Steam Deck.

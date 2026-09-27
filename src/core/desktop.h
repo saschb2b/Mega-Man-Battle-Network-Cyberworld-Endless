@@ -10,9 +10,10 @@
 
 /* No usable ROM was found in rom_dir (msg says why). Asks the player for
  * one: a file chooser (zenity or kdialog) or, without one, the folder
- * opened in the file manager; then a new look. True once a ROM is loaded;
- * false if they quit. scan looks again and fills msg. */
-bool desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen);
+ * opened in the file manager; then a new look. 1 once a ROM is loaded, 0
+ * if they quit, -1 when no dialog could be shown (the game's own window
+ * then asks). scan looks again and fills msg. */
+int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen);
 
 /* Run as an AppImage: offers to add it to the application menu (until it
  * is added or the player says not to ask again), and keeps an entry it

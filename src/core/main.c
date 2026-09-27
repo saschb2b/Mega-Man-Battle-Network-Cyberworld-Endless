@@ -25,6 +25,7 @@
 #include "flags.h"
 #include "net_layouts.h"
 #include "desktop.h"
+#include "minifont.h"
 
 char g_data_dir[512] = ".";
 
@@ -121,7 +122,31 @@ void error_show(const char *msg) {
 	scene_set(&scene_error);
 }
 
-/* Plain fallback text for when the ROM font is unavailable. */
+/* Lines of `text` at most `cols` (under 64) characters wide, broken at
+ * newlines, spaces, and after a slash, dot or hyphen (a long path breaks at
+ * its folders, a Flatpak's at its app id's words); returns how many. */
+static int wrap_lines(const char *text, int cols, char out[][64], int max) {
+	int n = 0;
+	const char *p = text;
+	while (*p && n < max) {
+		while (*p == ' ') ++p;
+		if (!*p) break;
+		int len = 0, cut = 0;
+		while (p[len] && p[len] != '\n' && len < cols) ++len;
+		if (!p[len] || p[len] == '\n') cut = len;
+		else {
+			for (int i = len; i > 0 && !cut; --i) if (p[i] == ' ' || strchr("/.-", p[i - 1])) cut = i;
+			if (!cut) cut = len;
+		}
+		snprintf(out[n++], 64, "%.*s", cut, p);
+		p += cut;
+		if (*p == '\n') ++p;
+	}
+	return n;
+}
+
+/* The message, in the ROM's font when there is one, else in the engine's
+ * own (a handheld without its ROM showed a row of bars). */
 static void error_draw(void) {
 	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
 	SDL_RenderClear(P.renderer);
@@ -130,9 +155,11 @@ static void error_draw(void) {
 		text_draw(P.w / 2, 70, error_msg, WHITE, TEXT_CENTER);
 		return;
 	}
-	/* Without a ROM there is no font: draw a simple bar pattern so the
-	 * screen is not blank, and print the message to the log. */
-	for (int i = 0; i < 6; ++i) fill_rect(P.w / 2 - 60 + i * 20, P.h / 2 - 4, 12, 8, rgba(80, 160, 255, 255));
+	char lines[12][64];
+	int n = wrap_lines(error_msg, 54, lines, 12);
+	minifont_draw_centered(P.w / 2, 24, "CYBERWORLD ENDLESS", rgba(120, 200, 248, 255), 2);
+	for (int i = 0; i < n; ++i) minifont_draw_centered(P.w / 2, 56 + i * 8, lines[i], WHITE, 1);
+	minifont_draw_centered(P.w / 2, P.h - 20, "START OR B: QUIT", rgba(160, 170, 200, 255), 1);
 }
 
 static void error_update(void) {
@@ -140,6 +167,66 @@ static void error_update(void) {
 }
 
 const Scene scene_error = { "error", NULL, error_update, error_draw, NULL };
+
+#ifdef CW_DESKTOP
+/* ---- no ROM on a desktop that can show no dialog: the game's own window
+ * says where to put it, and looks again every three seconds and on A; once
+ * it is there the game starts itself again (a Flatpak on the Steam Deck
+ * has no dialog, and quit before its window opened) ---- */
+static char **g_argv;
+static int norom_t, norom_looks;
+static char norom_dir[600];
+
+static void norom_update(void) {
+	++norom_t;
+	if (btn_pressed(BTN_B) || btn_pressed(BTN_START)) { P.quit = true; return; }
+	if (!btn_pressed(BTN_A) && norom_t % 180) return;
+	++norom_looks;
+	char msg[512];
+	if (!desktop_rom_anywhere(msg, sizeof msg)) return;
+	/* (found: a fresh start sets everything up from it) */
+	platform_shutdown();
+	execv("/proc/self/exe", g_argv);
+	perror("restart");
+	exit(0);
+}
+
+static void norom_draw(void) {
+	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
+	SDL_RenderClear(P.renderer);
+	SDL_Color blue = rgba(120, 200, 248, 255), grey = rgba(160, 170, 200, 255);
+	minifont_draw_centered(P.w / 2, 10, "CYBERWORLD ENDLESS", blue, 2);
+	minifont_draw_centered(P.w / 2, 28, "NO ROM FOUND", WHITE, 2);
+	static const char *const text[] = {
+		"IT RUNS ON YOUR OWN COPY OF",
+		"MEGA MAN BATTLE NETWORK 6: CYBEAST GREGAR (USA),",
+		"AN UNZIPPED .GBA FILE.",
+		"",
+		"PUT IT IN YOUR DOWNLOADS FOLDER, IN EMULATION/ROMS/GBA",
+		"(EMUDECK) OR RETRODECK/ROMS/GBA, OR IN THIS FOLDER:",
+	};
+	int y = 46;
+	for (unsigned i = 0; i < sizeof text / sizeof *text; ++i, y += 8) minifont_draw_centered(P.w / 2, y, text[i], WHITE, 1);
+	char lines[4][64];
+	int n = wrap_lines(norom_dir, 56, lines, 4);
+	for (int i = 0; i < n; ++i, y += 8) minifont_draw_centered(P.w / 2, y + 2, lines[i], blue, 1);
+	char looked[64];
+	snprintf(looked, sizeof looked, norom_looks ? "LOOKED AGAIN: NOT THERE YET" : "IT LOOKS AGAIN ON ITS OWN");
+	minifont_draw_centered(P.w / 2, P.h - 26, looked, grey, 1);
+	minifont_draw_centered(P.w / 2, P.h - 14, "A: LOOK NOW    B: QUIT", WHITE, 1);
+}
+
+static const Scene scene_norom = { "norom", NULL, norom_update, norom_draw, NULL };
+
+static void norom_show(void) {
+	/* (the home folder as ~, a Flatpak's is long) */
+	const char *home = getenv("HOME");
+	size_t hl = home ? strlen(home) : 0;
+	if (hl > 1 && !strncmp(g_data_dir, home, hl) && g_data_dir[hl] == '/') snprintf(norom_dir, sizeof norom_dir, "~%s/rom", g_data_dir + hl);
+	else snprintf(norom_dir, sizeof norom_dir, "%s/rom", g_data_dir);
+	scene_set(&scene_norom);
+}
+#endif
 
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
@@ -417,6 +504,9 @@ static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
 #endif
 
 int main(int argc, char **argv) {
+#ifdef CW_DESKTOP
+	g_argv = argv;
+#endif
 	const char *rom_dir = NULL;
 	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
 	const char *start_scene = "title";
@@ -474,6 +564,10 @@ int main(int argc, char **argv) {
 	if (DESKTOP) { char rom[600]; snprintf(rom, sizeof rom, "%s/rom", g_data_dir); make_dirs(rom); }
 	char msg[512];
 	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
+	/* ("--scene norom": the screen a desktop without its ROM shows, for a
+	 * capture) */
+	bool norom_scene = start_scene && !strcmp(start_scene, "norom");
+	if (norom_scene) rom_ok = false;
 #ifdef CW_DESKTOP
 	bool big = !headless && desktop_big_screen();
 	if (!screen_given && big) fullscreen = true;
@@ -488,12 +582,16 @@ int main(int argc, char **argv) {
 		 * file chooser a pad can work */
 		rom_ok = desktop_rom_elsewhere(dir, msg, sizeof msg);
 	}
-	if (!rom_ok && !headless && !rom_dir) {
+	/* the desktop's own dialog; none on the big screen, where a pad cannot
+	 * answer one, and none in a Flatpak on Wayland: the game's window asks
+	 * then (norom_show) */
+	if (!rom_ok && !headless && !rom_dir && !big) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
 		fprintf(stderr, "%s\n", msg);
-		rom_ok = desktop_rom_dialog(dir, desktop_rom_anywhere, msg, sizeof msg);
-		if (!rom_ok) return 1;
+		int asked = desktop_rom_dialog(dir, desktop_rom_anywhere, msg, sizeof msg);
+		if (asked == 0) return 1;
+		rom_ok = asked > 0;
 	}
 #else
 	(void)screen_given;   /* (the handheld fills its screen, the page its canvas) */
@@ -508,11 +606,11 @@ int main(int argc, char **argv) {
 
 	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);
-		if (DESKTOP && !headless) {
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Cyberworld Endless", msg, P.window);
-			platform_shutdown();
-			return 1;
-		}
+#ifdef CW_DESKTOP
+		/* (a ROM given by --rom-dir that is not one keeps the plain error) */
+		if ((!headless && !rom_dir) || norom_scene) norom_show();
+		else
+#endif
 		error_show(msg);
 	} else if (!gfx_init()) {
 		error_show("The ROM could not be decoded.");
