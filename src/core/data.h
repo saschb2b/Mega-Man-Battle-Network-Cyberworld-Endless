@@ -62,7 +62,9 @@ void chip_info(int rom_id, ChipInfo *out);
 /* Whether a chip strikes an enemy outright: the record's lock-on setting
  * (0xF) is 1 for Cannon, the swords, bombs and the like, 0 for traps,
  * counters and the ones that need a stunned or paralysed enemy
- * (MchnSwrd), a key combination (VarSwrd) or a delay (GolmHit, TimeBom). */
+ * (MchnSwrd), a key combination (VarSwrd) or a delay (GolmHit, TimeBom);
+ * of those, the attack families (0xB) of the Navi chips, MachGun,
+ * AquaNdl, WaveArm, AirSpin and the Dragons strike outright too. */
 bool chip_direct(int rom_id);
 
 /* Virus families the encounters draw from. */

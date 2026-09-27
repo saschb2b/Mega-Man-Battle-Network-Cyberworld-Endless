@@ -102,7 +102,16 @@ const ChipDef *chip_def(int rom_id) {
 	return &chip_defs[0];
 }
 
-bool chip_direct(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xF] == 1; }
+bool chip_direct(int rom_id) {
+	const uint8_t *c = R.data + R.layout->chip_data + (uint32_t)rom_id * 0x2C;
+	if (c[0xF] == 1) return true;
+	/* (and the families that strike outright without the lock-on: the Navi
+	 * chips, MachGun, AquaNdl, WaveArm, AirSpin, the Dragons) */
+	switch (c[0xB]) {
+	case 27: case 41: case 49: case 50: case 56: case 81: return true;
+	default: return false;
+	}
+}
 
 void chip_info(int rom_id, ChipInfo *out) {
 	memset(out, 0, sizeof *out);
