@@ -9,8 +9,8 @@
 
 /* Both layers of the g->tw x g->th map into `map` (layer 0, then layer 1).
  * `left` (a byte per tile) gets where tiles still meet badly: bit 0 with the
- * one to the right, bit 1 with the one below. With g->pads_apart, each pad
- * (TILE_PAD panels joined side by side) and the rest of the floor are
+ * one to the right, bit 1 with the one below. With g->apart, each piece
+ * (TILE_APART panels joined side by side) and the rest of the floor are
  * picked apart, each as if the others were not there, and where two draw a
  * tile, the one whose top covers the other's side faces (tiles_in_front)
  * goes on the second layer, which the game shows in front. */

@@ -1,9 +1,10 @@
 /* A whole tile map: every tile's pair in reading order, each knowing the
  * tiles picked before it; then again where a tile meets its neighbours badly
  * (tiles_trouble), now knowing all four, with the neighbours it meets badly,
- * until none changes. Where the pads stand apart, each pad and the rest of
- * the floor are picked so, each as if the others were not there, and laid
- * over each other on the two tile layers. */
+ * until none changes. Where pieces of the floor stand apart (the Aquarium's
+ * pads, Green's and CopyBot's platforms), each piece and the rest of the
+ * floor are picked so, each as if the others were not there, and laid over
+ * each other on the two tile layers. */
 #include "tilemap.h"
 
 #include <limits.h>
@@ -117,9 +118,9 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	free(p.on);
 }
 
-/* Where the pads stand apart, the floor in pieces: each pad (its panels
- * joined side by side) and the rest of the floor. `label` covers the
- * panels the map shows: 0 off the floor, 1 the rest, 2 and up the pads. */
+/* Where pieces stand apart, the floor in pieces: each piece (its TILE_APART
+ * panels joined side by side) and the rest of the floor. `label` covers the
+ * panels the map shows: 0 off the floor, 1 the rest, 2 and up the pieces. */
 typedef struct {
 	TileFloor floor;
 	const void *ctx;
@@ -129,7 +130,7 @@ typedef struct {
 } Pieces;
 
 #define REST 1
-#define FIRST_PAD 2
+#define FIRST_PIECE 2
 
 static int piece(const Pieces *p, int A, int B) {
 	if (A < p->A0 || B < p->B0 || A >= p->A0 + p->w || B >= p->B0 + p->h) return 0;
@@ -143,7 +144,7 @@ static int pieces_floor(int A, int B, const void *ctx) {
 	return l && l >= p->lo && l <= p->hi ? p->floor(A, B, p->ctx) : TILE_VOID;
 }
 
-/* Labels the floor's pieces; how many pads it found. */
+/* Labels the floor's pieces; how many apart from the rest it found. */
 static int label_pieces(const TileGrid *g, Pieces *p) {
 	int phase, A, B, A1 = INT_MIN, B1 = INT_MIN;
 	p->A0 = p->B0 = INT_MAX;
@@ -159,15 +160,15 @@ static int label_pieces(const TileGrid *g, Pieces *p) {
 	p->h = B1 + 2 - p->B0;
 	size_t n = (size_t)p->w * p->h;
 	p->label = calloc(n, 1);
-	int *queue = malloc(n * sizeof *queue), pads = 0;
+	int *queue = malloc(n * sizeof *queue), pieces = 0;
 	for (size_t i = 0; i < n; ++i) {
 		int m = p->floor(p->A0 + (int)(i % p->w), p->B0 + (int)(i / p->w), p->ctx);
-		if (TILE_MATERIAL(m)) p->label[i] = m & TILE_PAD ? 255 : REST;
+		if (TILE_MATERIAL(m)) p->label[i] = m & TILE_APART ? 255 : REST;
 	}
 	for (size_t i = 0; i < n; ++i) {
 		if (p->label[i] != 255) continue;
-		/* (past 253 pads, the last takes them all) */
-		uint8_t l = (uint8_t)(FIRST_PAD + (pads < 253 ? pads++ : pads - 1));
+		/* (past 253 pieces, the last takes them all) */
+		uint8_t l = (uint8_t)(FIRST_PIECE + (pieces < 253 ? pieces++ : pieces - 1));
 		int head = 0, tail = 0;
 		queue[tail++] = (int)i;
 		p->label[i] = l;
@@ -183,7 +184,7 @@ static int label_pieces(const TileGrid *g, Pieces *p) {
 		}
 	}
 	free(queue);
-	return pads;
+	return pieces;
 }
 
 static bool drawn(uint16_t e) { return e & 0x3FF; }
@@ -194,17 +195,17 @@ static uint16_t front_of(uint16_t e0, uint16_t e1) { return drawn(e1) ? e1 : e0;
 
 void tilemap_pick(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g,
 	TileFloor floor, const void *ctx, uint16_t *map, uint8_t *left) {
-	if (!g->pads_apart) {
+	if (!g->apart) {
 		pick_all(books, nbooks, seams, g, floor, ctx, map, left);
 		return;
 	}
-	/* Each pad as if no other floor were there, then the other floor as if
-	 * there were no pads, laid over each other: where two draw a tile, the
-	 * one whose top covers the other's side faces on the second layer, which
-	 * the game shows in front. A pad keeps its whole rim, and a walkway
-	 * ends at it. */
+	/* Each piece as if no other floor were there, then the rest of the
+	 * floor as if there were no pieces, laid over each other: where two draw
+	 * a tile, the one whose top covers the other's side faces on the second
+	 * layer, which the game shows in front. A piece keeps its whole rim, and
+	 * a walkway ends at it. */
 	Pieces all = { floor, ctx, 0, 0, 0, 0, NULL, 0, 0 };
-	int pads = label_pieces(g, &all);
+	int pieces = label_pieces(g, &all);
 	size_t cells = (size_t)g->tw * g->th;
 	uint16_t *one = calloc(cells * 2, sizeof *one);
 	uint8_t *one_left = calloc(cells, 1), *stacked = calloc(cells, 1);
@@ -215,9 +216,9 @@ void tilemap_pick(const TileBook *books, int nbooks, const TileSeams *seams, con
 	TileGrid one_layer = *g;
 	one_layer.single = true;
 	Pieces laid = all, view = all;   /* the pieces laid so far, the next one */
-	laid.lo = FIRST_PAD; laid.hi = FIRST_PAD - 1;
-	for (int k = 0; k <= pads; ++k) {
-		int l = k < pads ? FIRST_PAD + k : REST;
+	laid.lo = FIRST_PIECE; laid.hi = FIRST_PIECE - 1;
+	for (int k = 0; k <= pieces; ++k) {
+		int l = k < pieces ? FIRST_PIECE + k : REST;
 		view.lo = view.hi = l;
 		pick_all(books, nbooks, seams, &one_layer, pieces_floor, &view, one, one_left);
 		for (int ty = 0; ty < g->th; ++ty)

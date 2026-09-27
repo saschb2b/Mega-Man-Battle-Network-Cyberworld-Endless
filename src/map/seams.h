@@ -18,7 +18,7 @@ typedef struct {
 	unsigned cap, n;
 } TileSeams;
 
-/* Adds the pairs of neighbours map `a` shows (its front layer where the map
+/* Adds the pairs of neighbours map `a` shows (its first layer where the map
  * holds the background too). */
 void seams_add(TileSeams *s, const AreaSrc *a, bool bg_in_map);
 void seams_free(TileSeams *s);

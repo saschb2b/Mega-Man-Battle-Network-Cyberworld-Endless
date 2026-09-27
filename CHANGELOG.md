@@ -37,6 +37,21 @@ First playable version.
   The guardian's arena is a pool too, no longer a patch of glass in water.
   `build.py atlas` draws the two tile layers in the game's order, the
   second over the first.
+- Joins look like the originals'. The tiles are learned from the originals
+  as the game shows them, the second tile layer in front of the first, and
+  a tile keeps what the originals set in front of a floor on that layer only
+  where the floor needs it. Pieces of it no longer come along: Seaside's
+  boardwalk railings across its platforms, Central's bridge, the broken red
+  ornaments on Green's and Central's pads, CopyBot's spikes over its rims.
+  Green's planks end in front of the grass's side face or behind its rim,
+  and CopyBot's plateaus and red pads are drawn whole with their walkways
+  ending at them (no more blocks of plateau face, nor rim strips in the red
+  floor), as the Aquarium's pools are. The Judge Tree no longer draws its
+  courts' flat red where a catwalk meets a room, nor stump rings on its
+  pads, and Sky's pads lose the pieces of its round pods. A floor's corners
+  may keep the outline the originals draw a pixel past a side face, so the
+  atlas counts no fallbacks in any area. Floors, walls and objects are
+  unchanged.
 
 - The run begins in the real world, in Central Town or ACDC Town, each
   cut into pieces from the game's own map and set out again per run.

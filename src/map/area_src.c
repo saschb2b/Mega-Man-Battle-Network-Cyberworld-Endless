@@ -94,17 +94,20 @@ static bool decode_tiles(AreaSrc *a) {
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)(m[(l * cells + i) * 2] | m[(l * cells + i) * 2 + 1] << 8);
 	}
 	free(m);
-	/* draw it: the real world's ground under what stands on it, the
-	 * internet's floor (its first layer) over its second, which holds the
-	 * background where its maps keep one (the game itself shows the second
-	 * layer in front, see area_src_render) */
+	/* draw it as the game shows it, the second layer (BG2, priority 2) in
+	 * front of the first (BG1, priority 3): the real world's ground under
+	 * what stands on it, the internet's floors under what the originals set
+	 * in front of them (bridges, stairs, spikes, the floors that overlap
+	 * others on screen); and the first layer alone */
 	uint32_t colors[256];
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	a->px = calloc(cells * 64, 4);
+	a->px0 = calloc(cells * 64, 4);
 	a->front = calloc(cells * 64, 1);
 	a->idx = calloc(cells * 64, 1);
 	bool rw = a->group < RW_GROUPS;
-	draw_layers(vram, colors, a->tile, a->layers, rw ? a->layers - 1 : 0, a->tw, a->th, a->px, a->front, a->idx, rw);
+	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, a->px, a->front, a->idx, rw);
+	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, a->px0, NULL, NULL, rw);
 	free(vram);
 	return true;
 }
@@ -279,6 +282,7 @@ bool area_src_load(int group, int number, AreaSrc *a) {
 void area_src_free(AreaSrc *a) {
 	for (int l = 0; l < 2; ++l) free(a->tile[l]);
 	free(a->px);
+	free(a->px0);
 	free(a->front);
 	free(a->idx);
 	for (int k = 0; k < 4; ++k) free(a->sec[k]);
@@ -300,11 +304,13 @@ void area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 				m->tile[l][ty * a->tw + (a->tw - 1 - tx)] = a->tile[l][ty * a->tw + tx] ^ 0x400;
 	}
 	m->px = malloc((size_t)W * H * 4);
+	m->px0 = malloc((size_t)W * H * 4);
 	m->front = malloc((size_t)W * H);
 	m->idx = a->idx ? malloc((size_t)W * H) : NULL;
 	for (int y = 0; y < H; ++y)
 		for (int x = 0; x < W; ++x) {
 			m->px[(size_t)y * W + (W - 1 - x)] = a->px[(size_t)y * W + x];
+			m->px0[(size_t)y * W + (W - 1 - x)] = a->px0[(size_t)y * W + x];
 			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
 			if (m->idx) m->idx[(size_t)y * W + (W - 1 - x)] = a->idx[(size_t)y * W + x];
 		}
@@ -344,10 +350,12 @@ void area_src_raise(const AreaSrc *a, int z, AreaSrc *r) {
 			memcpy(r->tile[l] + (size_t)ty * a->tw, a->tile[l] + (size_t)(ty - rows) * a->tw, (size_t)a->tw * 2);
 	}
 	r->px = calloc((size_t)W * H, 4);
+	r->px0 = calloc((size_t)W * H, 4);
 	r->front = calloc((size_t)W * H, 1);
 	r->idx = a->idx ? calloc((size_t)W * H, 1) : NULL;
 	for (int y = z; y < H; ++y) {
 		memcpy(r->px + (size_t)y * W, a->px + (size_t)(y - z) * W, (size_t)W * 4);
+		memcpy(r->px0 + (size_t)y * W, a->px0 + (size_t)(y - z) * W, (size_t)W * 4);
 		memcpy(r->front + (size_t)y * W, a->front + (size_t)(y - z) * W, (size_t)W);
 		if (r->idx) memcpy(r->idx + (size_t)y * W, a->idx + (size_t)(y - z) * W, (size_t)W);
 	}

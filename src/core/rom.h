@@ -14,6 +14,11 @@ typedef enum { ROM_BN6_GREGAR_US } RomVersion;
 #define NET_AREAS 19   /* one per BIOME_* */
 #define NET_MORE_MAPS 3
 
+/* RomLayout.net_area.apart: what of a layer's floor is drawn apart from the
+ * rest, each piece whole, as the originals never set it flush with other
+ * floor: the pads, or the platforms (all but the walkways; src/map/tilemap.c). */
+enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
+
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
 typedef struct {
 	const char *name;
@@ -36,14 +41,15 @@ typedef struct {
 	} title;
 	struct {                  /* the original area each net biome borrows (docs/ROM_DATA.md) */
 		uint8_t group, number;   /* map whose floor panels are learned */
-		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000) */
+		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look */
 		uint16_t walk_styles;    /* hue buckets of its walkways, drawn on 1-wide paths (0: none) */
 		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
 		uint8_t song;            /* the area's theme (MP2K song) */
 		uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
 		uint8_t more[NET_MORE_MAPS][2];  /* more maps (group, number) in the same tiles and colours to learn from */
 		uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads, the guardian's arena too (the Aquarium's glass pads; 0: none) */
-		bool pads_apart;         /* its pads never lie flush with other floor: where a walkway meets one, each is drawn whole */
+		uint8_t apart;           /* NET_APART_*: floor its originals never set flush with the rest, drawn whole where a walkway meets it */
+		uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */

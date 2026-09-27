@@ -22,8 +22,8 @@ static const RomLayout layouts[] = {
 		.net_area = {
 			{ 0x90, 0, 0x0018, 0x0040, false, 0x13, 0x90, 0, 3, { { 0x90, 1 } } },     /* Central Area 1; battles of Central 1-3 */
 			{ 0x91, 0, 0x0040, 0x0006, false, 0x11, 0x91, 0, 3, { { 0x91, 1 }, { 0x91, 2 } } },     /* Seaside Area 1; Seaside 1-3 */
-			{ 0x94, 1, 0x1000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } } },     /* Sky Area 2; Sky 1-3 */
-			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2 },     /* Green Area 1; Green 1-2 */
+			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } } },     /* Sky Area 2; Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK) */
+			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush) */
 			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } } },     /* Graveyard; Graveyard 1-3 */
 			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } } },      /* Undernet 1; Undernet 1-3 */
 			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2 },      /* Undernet Zero; Undernet 3-4 */
@@ -32,10 +32,10 @@ static const RomLayout layouts[] = {
 			{ 0x88, 3, 0x0800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */
 			{ 0x8C, 1, 0x00C0, 0x0400, false, 0x13, 0x8D, 0, 16 },    /* a comp (blue, pink); the comps of group 0x8D */
 			{ 0x80, 1, 0x1000, 0x0200, false, 0x10, 0x80, 0, 2, { { 0x80, 0 }, { 0x85, 3 } } },     /* Robot Control Comp 2 (white, violet walkways; its teal pads are flat inside and would fill the platforms) */
-			{ 0x81, 2, 0x00C0, 0x0000, false, 0x11, 0x81, 0, 3, { { 0x81, 0 }, { 0x81, 1 }, { 0x85, 0 } }, 16, true },     /* Aquarium Comp 3 (water; its mazes are water too, its yellow fish two panels long; its platforms are glass pads, raised on legs and reached by stairs) */
-			{ 0x82, 2, 0x0003, 0x0000, false, 0x12, 0x82, 0, 3, { { 0x82, 0 }, { 0x82, 1 }, { 0x85, 1 } } },     /* Judge Tree Comp 3 (brick) */
+			{ 0x81, 2, 0x00C0, 0x0000, false, 0x11, 0x81, 0, 3, { { 0x81, 0 }, { 0x81, 1 }, { 0x85, 0 } }, 16, NET_APART_PADS },     /* Aquarium Comp 3 (water; its mazes are water too, its yellow fish two panels long; its platforms are glass pads, raised on legs and reached by stairs) */
+			{ 0x82, 2, 0x4003, 0x0000, false, 0x12, 0x82, 0, 3, { { 0x82, 0 }, { 0x82, 1 }, { 0x85, 1 } }, 0, NET_APART_NONE, 0x0001 },     /* Judge Tree Comp 3 (brick; the tiles of its flat red courts are left out, and its pads' look, round stumps: TILES_NO_PAD_LOOK) */
 			{ 0x83, 2, 0x0180, 0x1000, true, 0x0A, 0x83, 0, 3, { { 0x83, 0 }, { 0x83, 1 }, { 0x85, 2 } } },     /* Mr. Weather Comp 3 (lavender; its pale conveyor belts the walkways; snow and clouds on the back layer, their drifts too ragged to learn) */
-			{ 0x85, 4, 0x8000, 0x8000, false, 0x20, 0x85, 0, 5 },     /* CopyBot Comp, its floors told by shape (TILES_BY_SHAPE): hue cannot part its purple plateaus in stone rims from its pink and white walkways with teal discs; the Pavilion comps' battles */
+			{ 0x85, 4, 0x8000, 0x8000, false, 0x20, 0x85, 0, 5, { { 0 } }, 0, NET_APART_PLATFORMS },     /* CopyBot Comp, its floors told by shape (TILES_BY_SHAPE): hue cannot part its purple plateaus in stone rims from its pink and white walkways with teal discs; its plateaus stand on pods, reached by ladders; the Pavilion comps' battles */
 			{ 0x88, 1, 0x0003, 0x1000, false, 0x13, 0x88, 1, 1 },     /* ACDC HP (yellow, grey) */
 			{ 0x88, 5, 0x0002, 0x0008, false, 0x13, 0x88, 5, 1 },     /* Green HP (brown, green) */
 			{ 0x88, 6, 0x0100, 0x00C0, false, 0x13, 0x88, 6, 1 },     /* Sky HP (purple, cyan) */
