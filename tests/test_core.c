@@ -389,6 +389,10 @@ static void check_pages(const char *what, const char *s) {
 
 static void test_talk(void) {
 	char what[96];
+	/* a Navi chip's version mark (byte 3, [EX]) is spelt in a chat box */
+	uint8_t enc[16];
+	int n = ta_encode("BlastMn\3 B", enc, (int)sizeof enc);
+	CHECK(n == 11 && enc[7] == 0x0B + ('E' - 'A') && enc[8] == 0x0B + ('X' - 'A') && enc[9] == 0x00, "version mark spelt: %d bytes", n);
 	for (int depth = 1; depth <= 60; ++depth)
 		for (int i = 0; i < 40; ++i) {
 			snprintf(what, sizeof what, "npc_line(%d, %d)", depth, i);
