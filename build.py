@@ -389,7 +389,7 @@ def atlas(biomes='all', seeds='1', baseline=False):
 
 BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
 # how much worse a layer may get than the baseline before the atlas fails
-TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10}
+TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10}
 
 
 def bmp_sheet(paths, out, cols=3):
@@ -462,16 +462,19 @@ def world():
 
 
 def atlas_metrics(report):
-    """Per layer (biome, layout, depth, seed): its near and fallback shares, seams and inexact panels."""
+    """Per layer (biome, layout, depth, seed): its near and fallback shares, seams, inexact panels and
+    tiles in colours the area's own map never shows on its floors (0 where a report has none)."""
     import re
     out = {}
     for l in report.splitlines():
         m = re.match(r'biome +(\d+) layout (-?\d+) \(\w+\) depth (\d+) seed (\d+):', l)
         if not m or 'NOT BUILT' in l:
             continue
-        get = lambda k: float(re.search(k + r' ([\d.]+)', l).group(1))
+        def get(k, l=l):
+            f = re.search(k + r' ([\d.]+)', l)
+            return float(f.group(1)) if f else 0.0
         out[m.groups()] = {'near': get('near'), 'fallback': get('fallback'), 'seams': get('seams'),
-                           'inexact': get('not exact')}
+                           'inexact': get('not exact'), 'other': get('other colours')}
     return out
 
 
@@ -483,11 +486,13 @@ def compare_baseline(report, write=False):
         old.update(now)
         with open(BASELINE, 'w') as f:
             f.write('# build.py atlas --baseline: per layer (biome layout depth seed) its near and\n'
-                    '# fallback shares (%), seams and panels not exact; the atlas fails when one gets worse\n')
+                    '# fallback shares (%), seams, panels not exact and tiles in colours the area\'s own map never\n'
+                    '# shows on its floors; the atlas fails when one gets worse\n')
             for k in sorted(old, key=lambda k: tuple(int(v) for v in k)):
                 v = old[k]
                 f.write(f'biome {k[0]} layout {k[1]} (x) depth {k[2]} seed {k[3]}: near {v["near"]}, '
-                        f'fallback {v["fallback"]}, seams {v["seams"]:.0f}, not exact {v["inexact"]:.0f}\n')
+                        f'fallback {v["fallback"]}, seams {v["seams"]:.0f}, not exact {v["inexact"]:.0f}, '
+                        f'other colours {v["other"]:.0f}\n')
         print(f'baseline: {len(now)} layers written to tests/atlas_baseline.txt')
         return 0
     if not os.path.exists(BASELINE):

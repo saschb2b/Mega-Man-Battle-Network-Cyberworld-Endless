@@ -137,6 +137,21 @@ none of these comes along in pieces. Surfaces that share a floor's colours
 but not its look are left out of its tiles, still counting as floor around
 them: the Judge Tree's flat red courts (`skip_styles`).
 
+An area's other maps (`more`), at each of their heights, fill in the
+neighbourhoods its own map never shows, in the same tiles and palette. A
+tile of theirs that draws a colour the own map never shows on its floors
+(at any height) belongs to another surface and is left out
+(`tiles_other_colours`): Central Area 2's raised plateau is yellow-green
+where Central's fields are green, and its corners fitted the inner corners
+where two of Central's floors meet, which Central Area 1 never shows,
+better than any green tile; so did an Undernet map's raised court at
+bridge ends, and stray pieces of other maps at the joins of Sky, Robot
+Control Comp and Mr. Weather Comp. Their neighbourhoods still count as
+seen (legal.c), so floors do not change: the nearest tile in the area's
+own colours draws them. Seaside keeps its other maps' colours
+(`TILES_MORE_COLOURS`): its second floor forms fields only in Seaside 2
+and 3, as their yellow panels, and its guardian's arena is drawn in them.
+
 Before its tiles are picked, a layer's floor is made drawable
 (`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,
 walkway and void no original map shows is a place the tiles can only

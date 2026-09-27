@@ -41,7 +41,7 @@ typedef struct {
 	} title;
 	struct {                  /* the original area each net biome borrows (docs/ROM_DATA.md) */
 		uint8_t group, number;   /* map whose floor panels are learned */
-		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look */
+		uint16_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look; TILES_MORE_COLOURS (0x2000): its other maps' tiles in colours its own map's floors never show too */
 		uint16_t walk_styles;    /* hue buckets of its walkways, drawn on 1-wide paths (0: none) */
 		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
 		uint8_t song;            /* the area's theme (MP2K song) */

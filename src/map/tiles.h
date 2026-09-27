@@ -30,6 +30,7 @@ typedef struct {
 	uint16_t e0, e1;
 	uint32_t count;
 	uint8_t pad;          /* seen on a pad of the original */
+	uint8_t other;        /* draws colours the area's own map never shows on its floors */
 	uint64_t mask;
 	uint16_t px[64];
 } TileCand;
@@ -72,17 +73,29 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * spurs): the Judge Tree's are round stumps, whose rings a square pad would
  * show in its middle alone. */
 #define TILES_NO_PAD_LOOK 0x4000
+/* ... and with TILES_MORE_COLOURS, its other maps' pairs are kept where they
+ * draw colours its own map never shows on its floors (netmap.c): Seaside's
+ * second floor forms fields only in Seaside 2 and 3, as their yellow panels,
+ * which draw its guardian's arena. */
+#define TILES_MORE_COLOURS 0x2000
 void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
+/* The colours the pairs of `b` draw, marked in `seen` (one byte per BGR555
+ * colour); then the pairs of another book that draw others marked (`other`),
+ * and with `drop` left out. */
+#define TILE_COLOURS 32768
+void tiles_colours(const TileBook *b, uint8_t seen[TILE_COLOURS]);
+void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool drop);
 
 /* The class of tile (tx, ty): its phase and the panel it lies in. */
 void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
 
 /* How the picks went since the last reset (the dev atlas reads them): each
  * tile matched exactly, near (the nearest neighbourhood seen, or meeting a
- * neighbour badly) or by falling back on the least bad tile; and the pairs
- * of neighbouring tiles left meeting badly (netmap counts them). */
-typedef struct { int picks, near, fallbacks, seams; } TileStats;
+ * neighbour badly) or by falling back on the least bad tile; the pairs of
+ * neighbouring tiles left meeting badly (netmap counts them); and the pairs
+ * picked in colours the area's own map never shows on its floors. */
+typedef struct { int picks, near, fallbacks, seams, other; } TileStats;
 extern TileStats tiles_stats;
 
 /* The tiles beside one (left, above, right, below) as far as they are

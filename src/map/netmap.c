@@ -125,6 +125,11 @@ static bool learn(int area, Learned *L) {
 	learn_map(&a, &a, area, L);
 	decor_learn(&a, na->bg_in_map, &L->decor);
 	stairs_learn(&a, L->stairs);
+	/* the colours its floors show (an area's maps share its palette) */
+	static uint8_t seen[TILE_COLOURS];
+	memset(seen, 0, sizeof seen);
+	int own = L->nbooks;
+	for (int k = 0; k < own; ++k) tiles_colours(&L->book[k], seen);
 	/* the area's other maps in the same tiles and colours, for the places
 	 * this one never shows */
 	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
@@ -134,6 +139,12 @@ static bool learn(int area, Learned *L) {
 		decor_learn(&b, na->bg_in_map, &L->decor);
 		area_src_free(&b);
 	}
+	/* but not their pieces in colours this one's floors never show: another
+	 * surface's (Central Area 2's raised plateau, yellow where Central's
+	 * fields are green; an Undernet map's raised grey court), which fit some
+	 * joins and dead ends better than the area's own tiles and stand out
+	 * there, unless the area takes those colours too */
+	for (int k = own; k < L->nbooks; ++k) tiles_other_colours(&L->book[k], seen, !(na->styles & TILES_MORE_COLOURS));
 	if (emu_debug_on()) {
 		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n);
 		for (int d = 0; d < STAIR_DIRS; ++d)
