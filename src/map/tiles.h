@@ -17,6 +17,8 @@ enum { TILE_VOID, TILE_A, TILE_B };
 /* With a floor: this panel is a pad (a small platform on a spur), drawn in
  * the pads' own look where the original has one. */
 #define TILE_PAD 4
+/* ... it belongs to a piece drawn apart from the rest (tilemap.c). */
+#define TILE_APART 8
 #define TILE_MATERIAL(m) ((m) & 3)
 
 /* One pair of layer entries seen for a class (phase, then the platform and
@@ -50,20 +52,27 @@ typedef struct {
 typedef struct {
 	int tw, th, ex, ey, dv, face, hang;
 	bool rimmed;       /* floor edges are rims, not plain floor (areas told by shape) */
-	bool pads_apart;   /* pads are drawn as if no other floor touched them (tilemap.c) */
-	bool single;       /* pairs that draw nothing on the second layer only */
+	bool apart;        /* the TILE_APART pieces are drawn as if no other floor touched them (tilemap.c) */
+	bool single;       /* pairs that draw on one layer only */
+	int side;          /* how far down beside a side face a tile may draw (0: the face's height) */
 } TileGrid;
 
-/* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD. */
+/* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD
+ * and | TILE_APART. */
 typedef int (*TileFloor)(int A, int B, const void *ctx);
 
 /* Learns the tiles of the map's panels whose middle has a hue in `styles`
  * (platforms) or `walk_styles` (walkways; 0 for none), or with
  * TILES_BY_SHAPE, platform floor what lies in 2 x 2 blocks of floor with
  * floor all around, and walkway the rest (walkways and platforms' rims),
- * as a generated layer tells them. */
+ * as a generated layer tells them; but none beside a panel with a hue in
+ * `skip_styles`, floor still in the neighbourhoods seen. */
 #define TILES_BY_SHAPE 0x8000
-void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, bool bg_in_map, TileBook *out);
+/* ... and with TILES_NO_PAD_LOOK, no look of its pads (small platforms on
+ * spurs): the Judge Tree's are round stumps, whose rings a square pad would
+ * show in its middle alone. */
+#define TILES_NO_PAD_LOOK 0x4000
+void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 
 /* The class of tile (tx, ty): its phase and the panel it lies in. */

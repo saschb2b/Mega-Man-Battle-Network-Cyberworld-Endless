@@ -40,7 +40,7 @@ static uint32_t look(const AreaSrc *a, bool bg_in_map, int tx, int ty) {
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
 			size_t p = (size_t)(ty * 8 + y) * W + tx * 8 + x;
-			if (bg_in_map ? a->front[p] : a->px[p] >> 24) return a->tile[0][(size_t)ty * a->tw + tx];
+			if ((bg_in_map ? a->px0 : a->px)[p] >> 24) return a->tile[0][(size_t)ty * a->tw + tx];
 		}
 	return SEAM_VOID;
 }

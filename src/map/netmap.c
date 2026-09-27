@@ -86,13 +86,13 @@ static bool aligned(const AreaSrc *a, const AreaSrc *b) {
 static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
-		tiles_learn(src, na->styles, na->walk_styles, na->bg_in_map, &L->book[L->nbooks++]);
+		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);
 	}
 	AreaSrc m;
 	area_src_mirror(src, &m);
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
-		tiles_learn(&m, na->styles, na->walk_styles, na->bg_in_map, &L->book[L->nbooks++]);
+		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, &m, na->bg_in_map);
 	}
 	area_src_free(&m);
@@ -166,7 +166,8 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 static const NetLayout *cur;
 static bool one_floor;        /* the area has no walkway floor: all is platform */
 static bool by_shape;         /* its floors are told by shape: an arena is platform */
-static bool pads_apart;       /* its pads never lie flush with other floor (RomLayout.net_area) */
+static int apart;             /* what of its floor stands apart from the rest (NET_APART_*) */
+static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR };
@@ -202,14 +203,18 @@ static bool edge(int x, int y) {
 	return false;
 }
 
+/* (with a context, the layout's pads, whatever their look: the
+ * neighbourhoods legal.c asks after) */
 static int floor_cb(int A, int B, const void *ctx) {
-	(void)ctx;
 	int k = cur->rise / 32, x = B + place.gx0, y = -A + place.gy0;
 	if (kind(x, y) != K_FLOOR && k) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (kind(x, y) != K_RAISED) return TILE_VOID;
 	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
-	int pad = cur->pad && cur->pad[y * cur->gw + x] ? TILE_PAD : 0;
+	int pad = cur->pad && cur->pad[y * cur->gw + x] && (pad_look || ctx) ? TILE_PAD : 0;
+	/* the pieces drawn apart: the pads, or the platforms (all but the
+	 * walkways) */
+	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y)) pad |= TILE_APART;
 	if (one_floor) return TILE_A | pad;
 	/* by shape: walkways and platforms' rims one floor, their middles the other */
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
@@ -265,7 +270,7 @@ static bool write_tilemap(const Learned *L) {
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
-	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape, pads_apart };
+	TileGrid grid = { tw, th, place.ex, place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape, apart != NET_APART_NONE };
 	free(last.seams);
 	last.seams = calloc(cells, 1);
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
@@ -392,7 +397,7 @@ static bool legal_clean(int x, int y, void *ctx) {
 		if (m == TILE_A) oa |= 1u << k;
 		if (m == TILE_B) ob |= 1u << k;
 	}
-	return tiles_shape_seen(L->book, L->nbooks, TILE_SHAPE(oa, ob, floor_cb(A, B, NULL) & TILE_PAD));
+	return tiles_shape_seen(L->book, L->nbooks, TILE_SHAPE(oa, ob, floor_cb(A, B, L) & TILE_PAD));
 }
 
 static void legalize(Learned *L, const NetLayout *lay) {
@@ -408,7 +413,8 @@ bool netmap_build(int area, const NetLayout *lay) {
 	cur = lay;
 	one_floor = !R.layout->net_area[area].walk_styles;
 	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
-	pads_apart = R.layout->net_area[area].pads_apart;
+	pad_look = !(R.layout->net_area[area].styles & TILES_NO_PAD_LOOK);
+	apart = R.layout->net_area[area].apart;
 	place.ex = L->ex;
 	place.ey = L->ey;
 	if (!centre(lay)) return false;

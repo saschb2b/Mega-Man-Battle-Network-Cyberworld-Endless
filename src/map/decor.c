@@ -52,18 +52,17 @@ static uint8_t *footprint(const AreaSrc *a) {
 /* An opaque tile of one colour: filler, not scenery. */
 static bool flat(const AreaSrc *a, int tx, int ty) {
 	int W = a->tw * 8;
-	uint32_t c = a->px[(size_t)(ty * 8) * W + tx * 8];
+	uint32_t c = area_src_floor_px(a, (size_t)(ty * 8) * W + tx * 8);
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x)
-			if (a->px[(size_t)(ty * 8 + y) * W + tx * 8 + x] != c) return false;
+			if (area_src_floor_px(a, (size_t)(ty * 8 + y) * W + tx * 8 + x) != c) return false;
 	return true;
 }
 
 static bool drawn_at(const AreaSrc *a, bool bg_in_map, int x, int y) {
 	int W = a->tw * 8, H = a->th * 8;
 	if (x < 0 || y < 0 || x >= W || y >= H) return false;
-	size_t i = (size_t)y * W + x;
-	return bg_in_map ? a->front[i] : a->px[i] >> 24;
+	return (bg_in_map ? a->px0 : a->px)[(size_t)y * W + x] >> 24;
 }
 
 /* Whether tile (tx, ty)'s art runs on into its neighbour (dx, dy): a
@@ -98,7 +97,7 @@ void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out) {
 			for (int y = 0; y < 8; ++y)
 				for (int x = 0; x < 8; ++x) {
 					size_t i = (size_t)(ty * 8 + y) * W + tx * 8 + x;
-					if (!(bg_in_map ? a->front[i] : a->px[i] >> 24)) continue;
+					if (!((bg_in_map ? a->px0 : a->px)[i] >> 24)) continue;
 					++drawn;
 					on_floor += fp[i];
 				}

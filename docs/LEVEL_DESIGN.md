@@ -93,8 +93,9 @@ arena instead (`src/net/net_arena.c`): a 5x5 platform at the end of a single
 bridge of 3-5 panels, attached where it lies farthest from the arrival,
 drawn in the area's second floor so it reads apart from the platforms.
 Pads (the 3x3 rooms on spurs) are drawn with tiles learned on the
-original's own pads, and the originals' free-standing scenery is set in
-the void beside the floor (`src/map/decor.c`). The
+original's own pads, where those are square (not the Judge Tree's round
+stumps or Sky's round pods), and the originals' free-standing scenery is
+set in the void beside the floor (`src/map/decor.c`). The
 guardian holds its middle and the exit waits on its far side; the room the
 bridge leaves from gets the heal and the Net Dealer (docs/BOSSES.md). Services go to the bigger platforms, the
 better Mystery Data to pads, and most other Mystery Data to dead ends. A
@@ -109,18 +110,32 @@ area's second floor, learned from the same source map by its hue
 yellow boardwalks, Sky's darker glass, Green's orange planks, Graveyard's
 purple bridges and the Undernet's red striped bridges. The tile classes
 tell platform, walkway and void apart, so the joins between the two floors
-come from the places the original maps join them. Green Area never joins
-them flush (its planks reach the raised grass by ramps), so where Green's
-two floors meet, the plank's end is drawn on the front tile layer over the
-grass edge on the back one, each as if the other were not there. The Nest's
-source map (Underground 2) has no second floor. The Aquarium never sets its
-glass pads flush with its water either: they stand on legs, stairs climb
-to them and its glass walkways end at their rims. So there each pad and the
-rest of the floor are picked apart, each as if the others were not there,
-and laid over each other on the game's two tile layers, the one whose top
-covers the other's side face on the second, which the game shows in front
-(`src/map/tilemap.c`): a pool keeps its whole rim and a channel ends at it.
-Its guardian's arena, wider than its water ever gets, is a pool as well.
+come from the places the original maps join them. The Nest's source map
+(Underground 2) has no second floor.
+
+Some areas never set one floor flush with another. Green's planks reach
+its raised grass by stairs, CopyBot's walkways reach its plateaus, which
+stand on pods, by ladders, and the Aquarium's glass pads stand on legs
+above its water, reached by stairs, with glass walkways ending at their
+rims. There each of those pieces (Green's and CopyBot's platforms, CopyBot's
+red pads among them, and the Aquarium's pads) and the rest of the floor
+are picked apart, each as if the others were not there, and laid over each
+other on the game's two tile layers (`net_area.apart`, `src/map/tilemap.c`).
+Where two draw the same tile, the one whose top covers the other's side
+face goes on the second layer, which the game shows in front: a platform
+keeps its whole rim, a walkway coming from below on screen ends over its
+side face and one coming from above ends behind its rim. The Aquarium's
+guardian arena, wider than its water ever gets, is a pool as well.
+
+The originals draw on their second tile layer what stands in front of a
+floor: Seaside's boardwalks and Central's bridges where they cross a
+platform, Green's and Central's pad ornaments, CopyBot's spikes and claws,
+the corners of platforms that overlap others on screen. A tile keeps its
+first layer alone where that draws the floor, and its second too only where
+the floor needs it (the Judge Tree draws its panels' middles there), so
+none of these comes along in pieces. Surfaces that share a floor's colours
+but not its look are left out of its tiles, still counting as floor around
+them: the Judge Tree's flat red courts (`skip_styles`).
 
 Before its tiles are picked, a layer's floor is made drawable
 (`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,

@@ -4,6 +4,7 @@
 #define CW_AREA_SRC_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* One cell of a coordinate-data section: its 8x8 world cell (x, y) and
@@ -19,9 +20,11 @@ typedef struct {
 	int tw, th;            /* size in tiles */
 	int layers;
 	uint16_t *tile[2];     /* map entries, row-major, per layer */
-	uint32_t *px;          /* the map drawn (ARGB, alpha 0 where empty) */
-	uint8_t *front;        /* 1 where the front layer (0) is drawn */
-	uint8_t *idx;          /* the colour index drawn there (0 where empty): a
+	uint32_t *px;          /* the map as the game shows it, the second layer in
+	                        * front of the first (ARGB, alpha 0 where empty) */
+	uint32_t *px0;         /* the first layer alone */
+	uint8_t *front;        /* 1 where the last layer (the second) is drawn */
+	uint8_t *idx;          /* the colour index shown (0 where empty): a
 	                        * 256-colour map's materials are index ranges */
 	int ex, ey;            /* panel edges in world units: X = ex, Y = ey (mod 32) */
 	uint32_t desc;         /* ROM offset of its MapBGDescriptor */
@@ -56,6 +59,11 @@ int area_src_height(const AreaSrc *a, int X, int Y);
  * tell (-1): floor lies inside an odd number of rings of walls, since the
  * walls ring each floor and again each hole in it. */
 int area_src_walled_floor(const AreaSrc *a, int X, int Y);
+
+/* Pixel i of the map's floors: the first layer where it draws, else the
+ * second, as if nothing stood in front of them (the originals set their
+ * bridges, spikes and ornaments on the second layer, and some floors). */
+static inline uint32_t area_src_floor_px(const AreaSrc *a, size_t i) { return a->px0[i] >> 24 ? a->px0[i] : a->px[i]; }
 
 /* World <-> map pixel, as the game's camera routine maps them. */
 static inline int area_px(int tw, int x, int y) { return x + y + tw * 4; }
