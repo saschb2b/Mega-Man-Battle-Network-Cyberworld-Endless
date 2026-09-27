@@ -100,6 +100,11 @@ typedef struct {
 	uint32_t archive;   /* its text archive; 0: the layer's */
 } Talker;
 
+void layer_objs_shops(const LayerObjs *o) {
+	shop_install(SHOP_DEALER, o->dealer, o->ndealer);
+	shop_install(SHOP_PROGRAMS, o->programs, o->nprograms);
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -261,8 +266,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				chip_info(stock[i].id, &ci);
 				fprintf(stderr, "shop chip %s %c %dz\n", ci.name, stock[i].code == 26 ? '*' : 'A' + stock[i].code, stock[i].price * 100);
 			}
-	shop_install(SHOP_DEALER, stock, nstock);
-	shop_install(SHOP_PROGRAMS, stock, shop_program_stock(run.depth, stock));
+	for (int i = 0; i < nstock; ++i) out->dealer[i] = stock[i];
+	out->ndealer = nstock;
+	out->nprograms = shop_program_stock(run.depth, out->programs);
+	layer_objs_shops(out);
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
 	if (text.full || emu_debug_on())

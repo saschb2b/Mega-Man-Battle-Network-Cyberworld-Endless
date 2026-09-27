@@ -75,7 +75,9 @@ README and the site.
   layer before it loads `run.state`, so generation and object placement
   must not depend on the game's RAM.
 - Run state is saved as a raw struct with a checksum. Changing `Run` breaks
-  old saves: bump `RUN_MAGIC` in `save.c`. Emulator states (`boot-3.state`,
+  old saves: bump `RUN_MAGIC` in `save.c`. Changing what a layer seed makes
+  (layouts, object placement, loot and stock rolls): bump `LAYER_MAKE` in
+  `director.c`, so a run saved by an older build continues its layer afresh. Emulator states (`boot-3.state`,
   `run.state`) are made on the device and never committed.
 
 ## Build and verify

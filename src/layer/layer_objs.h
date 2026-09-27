@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "guardian_objs.h"
+#include "shop.h"
 
 /* Event flags the layer's choices set (Yes), one per choice. */
 #define LAYER_FLAG_BASE 0x1440
@@ -23,7 +24,13 @@ typedef struct {
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 	int script_of[OBJ_GIFT + 1];   /* each kind's first talker's script, -1 none (for --talk) */
+	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
+	int ndealer, nprograms;
 } LayerObjs;
+
+/* The layer's shop stock written again (after a state load, whose RAM
+ * holds the shop data as it was saved). */
+void layer_objs_shops(const LayerObjs *o);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);

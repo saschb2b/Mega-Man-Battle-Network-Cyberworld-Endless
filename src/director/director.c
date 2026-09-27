@@ -33,6 +33,7 @@
 #include "run.h"
 #include "runlog.h"
 #include "save.h"
+#include "save_blob.h"
 #include "scripts.h"
 #include "talk.h"
 #include "text.h"
@@ -435,6 +436,22 @@ bool director_in_town(void) { return D.active && D.town; }
 
 bool director_on_layer(void) { return D.active && !D.town; }
 
+/* The layers' make (generation, objects, loot rolls): a run saved by a build
+ * that makes them otherwise continues its layer afresh from its start (the
+ * saved RAM's flags and Mystery Data would not match this build's). Bump it
+ * with any change to what a layer seed makes. */
+#define LAYER_MAKE 2
+#define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
+
+static void save_checkpoint(void) {
+	char path[600];
+	save_state_path(path, sizeof path);
+	save_run();
+	emu_save_state(path);
+	int make = LAYER_MAKE;
+	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
+}
+
 bool director_can_suspend(void) {
 	return D.active && !D.town && !D.gameover && on_map() && !emu_read8(BN6_CHATBOX) && !talk_busy() && !D.warping &&
 		emu_read8(BN6_WARP + 0x10) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
@@ -443,10 +460,7 @@ bool director_can_suspend(void) {
 
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
-	char path[600];
-	save_state_path(path, sizeof path);
-	save_run();
-	emu_save_state(path);
+	save_checkpoint();
 	return true;
 }
 
@@ -499,7 +513,7 @@ void director_describe(FILE *f) {
 		for (int i = 0; i < 16; ++i) {
 			uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
 			int x = (int16_t)emu_read16(o + 0x26), y = (int16_t)emu_read16(o + 0x2A), z = (int16_t)emu_read16(o + 0x2E);
-			if (!(emu_read8(o) & 1) || abs(x - px) > 64 || abs(y - py) > 64) continue;
+			if (!(emu_read8(o) & 1) || ((abs(x - px) > 64 || abs(y - py) > 64) && !getenv("CYBERWORLD_STATE_ALLNPC"))) continue;
 			fprintf(f, "npc %d flags %02x state %02x radius %d zreach %d locked %d text %d at %d %d %d\n", i, emu_read8(o),
 				emu_read8(o + 8), emu_read8(o + 0x0C), emu_read8(o + 0x0D), emu_read8(o + 0x17), emu_read8(o + 0x1C), x, y, z);
 		}
@@ -725,8 +739,20 @@ bool director_resume(void) {
 	if (!build_layer()) return false;
 	char path[600];
 	save_state_path(path, sizeof path);
+	int make = 0;
+	bool same = save_read_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make) && make == LAYER_MAKE;
 	if (emu_load_state(path)) {
 		lock_run();
+		/* the shops' data in RAM is the saved one: this layer's again */
+		layer_objs_shops(&D.objs);
+		if (!same) {
+			/* another build's layer: its flags and Mystery Data picks
+			 * forgotten, and in from the start */
+			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_GIFT_FLAG; ++f) flag_clear(f);
+			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
+			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
+			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
+		}
 		/* a state saved while the jack-in still held MegaMan (runs from
 		 * before the checkpoint waited for him): the game's own release
 		 * would never come, so it is done here */
@@ -953,10 +979,7 @@ void director_update(void) {
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
 		!emu_read8(BN6_DIALOGUE_LOCK) && flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) {
 		D.checkpoint = false;
-		char path[600];
-		save_state_path(path, sizeof path);
-		save_run();
-		emu_save_state(path);
+		save_checkpoint();
 		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}
 	/* on another map (a story warp the run does not use): back to the layer */
