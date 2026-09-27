@@ -637,8 +637,14 @@ void director_describe(FILE *f) {
 		: sub == BN6_SUB_MAP ? "map" : sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT ? "battle" : "other";
 	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
-	fprintf(f, "hp %d/%d\nzenny %u\n", emu_read16(BN6_NAVI_STATS + 0x40), emu_read16(BN6_NAVI_STATS + 0x42),
-		(unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
+	/* (in a battle the HUD's HP is MegaMan's battle object's) */
+	int hp = emu_read16(BN6_NAVI_STATS + 0x40), max = emu_read16(BN6_NAVI_STATS + 0x42);
+	if (!on_map())
+		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+			if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) { hp = emu_read16(o + 0x24); max = emu_read16(o + 0x26); break; }
+		}
+	fprintf(f, "hp %d/%d\nzenny %u\n", hp, max, (unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
 		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16,
