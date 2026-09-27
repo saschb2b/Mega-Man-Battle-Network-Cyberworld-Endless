@@ -29,6 +29,10 @@ raised, and the loop's own lessons.
    CONTINUE restart the layer (`LAYER_MAKE` or `RUN_MAGIC` bumped), and
    "From the developers, after replaying your session: ..." for each report
    that turned out to be a misread. Teaching the player cuts false reports.
+   Check the headline lies where the persona's save will go this session
+   (its layer and act in `state.txt`); a run begun before the feature may
+   never reach it (s16 lost an old run's guardian and never saw the
+   NaviCust draft), so say where it is, or suggest a new run.
 3. **Launch** the persona as a background agent (Agent tool,
    `run_in_background: true`) with `persona.md` filled in: the session
    number, last session in two sentences, patch notes, goals. About 260
@@ -70,7 +74,10 @@ raised, and the loop's own lessons.
      Falzar; Gregar addresses are shifted, find the same bytes) or with
      `tools/romlab`. Change it only where the roguelike breaks it: the Chip
      Trader's "chips the Library has" rule gave one chip every time.
-   - *Real bug or design gap*: fix it.
+   - *Real bug or design gap*: fix it. A single sighting of something the
+     generator makes (an unreachable-looking object, a crowded room) is
+     first counted over the tests' 300 layers: the count sizes the problem
+     and, kept as a check, holds the fix.
 7. **Fix, verify, commit** per AGENTS.md (its check table; `build.py test`;
    a capture of the screen; `LAYER_MAKE` / `RUN_MAGIC` bumps; ROM_DATA.md
    for a new offset; CHANGELOG). A visual fix is verified by looking at

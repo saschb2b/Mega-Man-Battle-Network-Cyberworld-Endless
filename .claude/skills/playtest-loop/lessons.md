@@ -24,6 +24,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 13 | 8 | HeatMan "the fairest, tensest boss yet", lost at 111/700; the R buffer works |
 | 14 | 8 | BlastMan beaten with the dealer's AquaNdl2; 25 calls in circles on his layer |
 | 15 | 9 | A whole act (Sky HP, SpoutMan) with no circles; every battle one virus pair |
+| 16 | 7 | Act 3's fights varied at last; DustMan's two unannounced moves ended the run |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -85,6 +86,16 @@ its problems there. The loop was reacting.
   agent stalled; the game stays frozen between calls, so a SendMessage to
   the agent ("continue from frame F with play.py do") resumes it where it
   was. The watchdog's "no call for 10 minutes" is the signal.
+- **Turn one report into a rate.** Kai's single unreachable Mystery Data
+  (s16) was a Mystery Data one panel's gap behind his walkway, the gap
+  hidden by its own floor's wall. A count over the test's 300 layers found
+  15% of all Mystery Data, services and navis standing so; the fix brought
+  it under 1%, and the count stays in the tests.
+- **A carried-over run can miss the patch's headline.** Kai's s16 played an
+  act-3 run begun before the NaviCust's draft existed, lost at its guardian
+  and never saw the draft. Before a session, check that its patch notes'
+  headline lies on ground the persona's save will reach; if not, say so in
+  the notes (a new run, or which layer).
 - **Save the report verbatim** the moment it arrives
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.
@@ -168,3 +179,28 @@ game-design skill (docs/NAVICUST.md) and built its first part (6c69ed6).
 
 Loop change: **sweep the persona's exact next layers** with the run's
 seed, and resume a stalled persona by message.
+
+## Session 16 (7/10, keep playing: yes; recommend: yes)
+
+Build 06994d0's parent (the NaviCust draft, the vendor's tiers, Sky HP's
+battles). CONTINUE into act 3 (Judge Tree Comp): six fights, five
+line-ups, BlastMan B's revenge on the corns, the dealer's ElecDrgn A
+(a counter hit on DustMan). Deleted with DustMan at 550/900; a new run
+started at once (DiveMan the first guardian, the gift's MegFldr1 taken to
+test the PET, a bug built on purpose and named).
+
+Raised: DustMan's thrown panels (their first hit stuns) and his pull-in
+punch unannounced, a NaviCust bug named by its effect but not its cause,
+the gift offering MegFldr1, the dealer naming Fire with no Fire chip in
+stock, a Mystery Data that looked a step away and was a walk round (all
+0da2ecb). DustMan's 900 HP sits in act 3's band (800-1000): left as
+designed, with the warning's "keep a Recover chip ready". Vanilla: the
+NaviCust's cursor after placing, the quit prompt's No. The draft, the
+ExpMemry and the act-3 NaviCust vendor went untested.
+
+Meanwhile: the title's NEW GAME question in BN6's chat box (06994d0),
+pixel for pixel against a capture of the game's own.
+
+Loop change: **turn one report into a rate** (the hidden gap: 15% of
+objects), and **check the patch's headline is reachable** from the
+persona's save.
