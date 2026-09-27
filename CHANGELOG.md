@@ -4,6 +4,11 @@
 
 First playable version.
 
+- A battle starts MegaMan on the panel its original battle gives him:
+  column 2 row 2 on most fields, beside it where that panel is a hole or
+  poison (he always stood on column 2 row 2, in the hole too). The next battle, re-rolled every five seconds on a layer, is
+  written to one of two records in turn, so a battle the game has rolled
+  but not yet set up keeps its own field, foes and MegaMan's panel.
 - The NaviCust is in the PET from the start of a run (MegaMan, then
   NaviCust): the gift's and the vendor's programs could not be installed
   before. The gift, the vendor and a bystander say where to install them.

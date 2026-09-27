@@ -10,6 +10,11 @@
 void emu_encounters_install(void);
 /* The battle the next encounter starts: enemies, area background and music. */
 void emu_encounter_set(const Encounter *e);
+/* The record the last emu_encounter_set wrote (0 or 1), and the one the
+ * game's battle is set up from (-1: another, a story or test battle; -2:
+ * not yet named, early in its setup). */
+int emu_encounter_slot(void);
+int emu_encounter_battle_slot(void);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
 void emu_battle_release(void);

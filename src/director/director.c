@@ -57,8 +57,11 @@ static struct {
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
 	bool in_battle;        /* a battle is on */
+	bool record_known;     /* the battle's record (D.rolled) is known */
+	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
 	int foes;              /* viruses in the battle the game will start next */
 	Encounter next;        /* that battle */
+	Encounter rolled[2];   /* the battles in the two records the roll hands out (encounter.c) */
 	int battles;           /* random battles fought on this layer */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
@@ -407,12 +410,13 @@ static void set_encounter(const Encounter *e, bool force) {
 	D.foes = e->nfoes;
 	D.next = *e;
 	if (emu_debug_on()) {
-		fprintf(stderr, "encounter field %02x:", e->field);
+		fprintf(stderr, "encounter field %02x player %02x:", e->field, e->player);
 		for (int i = 0; i < e->nfoes; ++i) fprintf(stderr, " %d/%d/%d@%d,%d", e->foes[i].kind, e->foes[i].family, e->foes[i].version, e->foes[i].col, e->foes[i].row);
 		fprintf(stderr, "\n");
 	}
 	if (force) emu_battle_force(e);
 	else emu_encounter_set(e);
+	D.rolled[emu_encounter_slot()] = *e;
 }
 
 #define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
@@ -764,6 +768,12 @@ void director_describe(FILE *f) {
 			(int)emu_read32(BN6_PLAYER + 0x20) >> 16, (int)emu_read32(BN6_PLAYER + 0x24) >> 16, emu_read8(BN6_PLAYER + 0x17),
 			emu_read8(BN6_PLAYER + 9), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
+		/* (in a battle, MegaMan's panel: column, row from 1) */
+		if (!on_map())
+			for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+				uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+				if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) { fprintf(f, "panel %d %d\n", emu_read8(o + 0x12), emu_read8(o + 0x13)); break; }
+			}
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 		else {
 			int ns = 0, nf = 0;
@@ -1657,16 +1667,36 @@ void director_update(void) {
 			emu_battle_release();   /* the forced battle has begun */
 			if (!D.in_battle) {
 				bool guardian = boss_fighting();
+				D.record_known = guardian;
 				if (!guardian && !D.challenge) ++D.battles;
 				runlog_battle_start(guardian ? NULL : &D.next, guardian ? "guardian" : D.challenge ? "challenge" : "battle");
 			}
 			D.in_battle = true;
+			/* the battle the game was handed, once its setup names the
+			 * record (a re-roll may have come between its roll and now) */
+			if (!D.record_known) {
+				int s = emu_encounter_battle_slot();
+				if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
+				if (s != -2) D.record_known = true;
+				if (emu_debug_on() && s >= 0) fprintf(stderr, "battle from record %d: field %02x player %02x\n", s, D.next.field, D.next.player);
+			}
+			/* (where the game put MegaMan, once a battle) */
+			if (emu_debug_on() && !D.placed_told)
+				for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+					uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+					if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) {
+						fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + 0x12), emu_read8(o + 0x13));
+						D.placed_told = true;
+						break;
+					}
+				}
 		}
 		return;
 	}
 	if (D.in_battle) {
 		/* back from a battle: count the deleted viruses (a navi counts below) */
 		D.in_battle = false;
+		D.placed_told = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		runlog_battle_end(won);
 		if (won && !boss_fighting()) run.viruses_deleted += D.foes;

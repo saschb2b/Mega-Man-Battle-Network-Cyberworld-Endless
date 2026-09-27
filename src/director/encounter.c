@@ -15,8 +15,15 @@
 #include "run.h"
 
 #define ROLL        0x080ABD30u        /* the encounter roll (returns BattleSettings*) */
-#define SETTINGS    (EMU_FREE + 0x200)
-#define ENTITIES    (EMU_FREE + 0x220)
+/* Two records in turn, each BattleSettings and 0x20 on its entity list: the
+ * next battle is written to the one the roll does not hand out, and the
+ * roll turned to it. A battle the game has rolled but not yet set up reads
+ * the record it was handed (rewritten in place, a re-roll in that gap gave
+ * the battle another's MegaMan panel and field). */
+#define RECORDS     (EMU_FREE + 0x200)
+#define RECORD_SIZE 0x40
+static int slot;
+static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE; }
 
 /* The roll keeps its own chance: its first 12 bytes (position independent)
  * move into a trampoline that jumps back into it, and a wrapper swaps a
@@ -32,7 +39,7 @@ void emu_encounters_install(void) {
 	for (int i = 0; i < 12; ++i) orig[i] = emu_read8(ROLL + (uint32_t)i);
 	/* wrapper: push {lr}; bl tramp; cmp r0,#0; beq 1f; ldr r0,=SETTINGS; 1: pop {pc} */
 	uint8_t w[20] = { 0x00, 0xB5, 0x00, 0xF0, 0x07, 0xF8, 0x00, 0x28, 0x00, 0xD0, 0x01, 0x48, 0x00, 0xBD, 0xC0, 0x46 };
-	put32(w + 16, SETTINGS);
+	put32(w + 16, settings_of(slot));
 	/* trampoline: the roll's first 12 bytes, then ldr r3,[pc]; bx r3 back into it */
 	uint8_t t[20];
 	memcpy(t, orig, 12);
@@ -58,9 +65,9 @@ void emu_battle_force(const Encounter *e) {
 	if (forcing) return;
 	for (int i = 0; i < 12; ++i) saved_roll[i] = emu_read8(ROLL + (uint32_t)i);
 	for (int i = 0; i < 2; ++i) saved_check[i] = emu_read8(CHECK + (uint32_t)i);
-	/* ldr r0,[pc,#4]; tst r0,r0; bx lr; nop; .word SETTINGS */
+	/* ldr r0,[pc,#4]; tst r0,r0; bx lr; nop; .word the record */
 	uint8_t stub[12] = { 0x01, 0x48, 0x00, 0x42, 0x70, 0x47, 0xC0, 0x46 };
-	put32(stub + 8, SETTINGS);
+	put32(stub + 8, settings_of(slot));
 	emu_write(ROLL, stub, sizeof stub);
 	static const uint8_t branch[2] = { 0x21, 0xE0 };
 	emu_write(CHECK, branch, 2);
@@ -78,7 +85,9 @@ bool emu_battle_forcing(void) { return forcing; }
 
 void emu_encounter_set(const Encounter *e) {
 	uint8_t list[4 * (MAX_FOES + 1) + 1], *p = list;
-	*p++ = 0x00; *p++ = 0x22; *p++ = 0; *p++ = 0;          /* MegaMan, column 2 row 2 */
+	/* MegaMan where the battle's field has him: column 2 row 2, or beside
+	 * it where that panel is a hole (he started in one) */
+	*p++ = 0x00; *p++ = (uint8_t)(e->player ? e->player : 0x22); *p++ = 0; *p++ = 0;
 	for (int i = 0; i < e->nfoes && i < MAX_FOES; ++i) {
 		const Foe *f = &e->foes[i];
 		int id = f->id;
@@ -91,11 +100,25 @@ void emu_encounter_set(const Encounter *e) {
 		*p++ = (uint8_t)(id >> 8);
 	}
 	*p++ = 0xF0;
-	emu_write(ENTITIES, list, (size_t)(p - list));
+	slot ^= 1;
+	uint32_t settings = settings_of(slot);
+	emu_write(settings + 0x20, list, (size_t)(p - list));
 	/* the values of a Central Area random battle, with the formation's
 	 * battlefield, the area's background and the virus or boss theme */
 	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)(e->boss ? 0x16 : 0x15), 0x00, (uint8_t)biome_bg(e->biome), 0x00, 0x38, 0x00 };
 	put32(s + 8, 0x000049E2);
-	put32(s + 12, ENTITIES);
-	emu_write(SETTINGS, s, sizeof s);
+	put32(s + 12, settings + 0x20);
+	emu_write(settings, s, sizeof s);
+	uint8_t at[4];
+	put32(at, settings);
+	emu_write(WRAPPER + 16, at, 4);
+	if (forcing) emu_write(ROLL + 8, at, 4);
+}
+
+int emu_encounter_slot(void) { return slot; }
+
+int emu_encounter_battle_slot(void) {
+	/* eToolkit's battle state, its BattleSettings pointer (bn6f) */
+	uint32_t state = emu_read32(0x020093B0u + 0x18), at = state ? emu_read32(state + 0x3C) : 0;
+	return !at ? -2 : at == settings_of(0) ? 0 : at == settings_of(1) ? 1 : -1;
 }

@@ -22,6 +22,7 @@ typedef struct {
 	int biome;
 	bool boss;
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
+	int player;      /* MegaMan's panel on it (row << 4 | column, from 1); 0 column 2 row 2 */
 } Encounter;
 
 #endif

@@ -11,6 +11,7 @@
 
 typedef struct {
 	uint8_t battlefield;
+	uint8_t player;      /* MegaMan's panel (row << 4 | column, from 1): off the battlefield's holes */
 	uint8_t n;
 	struct { uint8_t panel; uint16_t id; } ent[FORMATION_MAX_ENTS];   /* panel: row << 4 | column, from 1 */
 	uint8_t weight;      /* how many of the original tables list it */

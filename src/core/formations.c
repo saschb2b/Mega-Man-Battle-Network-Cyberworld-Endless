@@ -30,9 +30,12 @@ static void add(int biome, uint32_t rec) {
 	Formation *f = &list[biome][count[biome]];
 	memset(f, 0, sizeof *f);
 	f->battlefield = R.data[rec];
+	f->player = 0x22;
 	f->weight = 1;
 	for (uint32_t a = ents & 0x1FFFFFF; R.data[a] != 0xF0 && f->n < FORMATION_MAX_ENTS; a += 4) {
-		if (R.data[a] != 0x11) continue;   /* 0x00 is MegaMan */
+		/* MegaMan (column 2 row 2, or beside it where the field has a hole) */
+		if (R.data[a] == 0x00) f->player = R.data[a + 1];
+		if (R.data[a] != 0x11) continue;
 		uint16_t id = rom_u16(a + 2);
 		f->ent[f->n].panel = R.data[a + 1];
 		f->ent[f->n++].id = id;

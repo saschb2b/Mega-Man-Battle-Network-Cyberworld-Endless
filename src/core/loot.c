@@ -75,6 +75,7 @@ static int virus_id(int family, int version) {
 static void build_foes(const Formation *f, int depth, int want, bool rare, Encounter *e, int *hp, int *dmg) {
 	e->nfoes = 0;
 	e->field = f->battlefield;
+	e->player = f->player;
 	*hp = *dmg = 0;
 	for (int i = 0; i < f->n && e->nfoes < MAX_FOES; ++i) {
 		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[i].id * 3;
