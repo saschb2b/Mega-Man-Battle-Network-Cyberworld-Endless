@@ -27,7 +27,8 @@ First playable version.
   a navi slides him round it), and reaches about 54 units, which is how
   far a short Mr. Prog can be while looking a tile away. One a step or two
   short (up to two and a half panels before him) he walks up to and talks
-  to; the pad or B stops the walk.
+  to; the pad or B stops the walk. With two navis side by side, A talks to
+  the one he means (the game's check took the first its probe touched).
 - A navi's tip on running from a battle says how (on the Custom screen, hold
   L and press R); it said START, which only pauses.
 - An act's first layer from act 2 on always has a Net Dealer, and every

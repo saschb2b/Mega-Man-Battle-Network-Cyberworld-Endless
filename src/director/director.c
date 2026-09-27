@@ -1127,6 +1127,34 @@ static const uint32_t face_pad[8] = {
 	KEY_UP, KEY_UP | KEY_RIGHT, KEY_RIGHT, KEY_DOWN | KEY_RIGHT, KEY_DOWN, KEY_DOWN | KEY_LEFT, KEY_LEFT, KEY_UP | KEY_LEFT,
 };
 
+/* Two navis side by side: the game's own check takes the first whose ring
+ * its probe touches (every A went to the Recovery Mr. Prog beside the Net
+ * Dealer Kai faced), so while the press goes through, the others near have
+ * no ring. */
+static struct { int t; uint8_t r[16]; } excl;
+
+static void talk_only(int i) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	for (int j = 0; j < 16; ++j) {
+		uint32_t o = 0x020057B0u + (uint32_t)j * 0xD8;
+		uint8_t r = emu_read8(o + 0x0C);
+		if (j == i || !(emu_read8(o) & 1) || !r || excl.r[j]) continue;
+		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py;
+		if (dx * dx + dy * dy > 96 * 96) continue;
+		excl.r[j] = r;
+		emu_write8(o + 0x0C, 0);
+	}
+	excl.t = 8;   /* (the game takes a press two frames on) */
+}
+
+static void talk_only_update(void) {
+	if (!excl.t || --excl.t) return;
+	for (int j = 0; j < 16; ++j) {
+		if (excl.r[j]) emu_write8(0x020057B0u + (uint32_t)j * 0xD8 + 0x0C, excl.r[j]);
+		excl.r[j] = 0;
+	}
+}
+
 /* The walk up: towards the NPC until its probe reaches, then A for him.
  * The pad or B takes over; a wall ends it with the A all the same. */
 static uint32_t talk_walk(uint32_t keys) {
@@ -1146,12 +1174,14 @@ static uint32_t talk_walk(uint32_t keys) {
 	if (reach || still >= 6 || --D.walk_t <= 0) {
 		D.walk_t = 0;
 		talk_turn(k);
+		talk_only(D.walk_to);
 		return (keys & ~PAD_KEYS) | KEY_A;
 	}
 	return (keys & ~(PAD_KEYS | KEY_A)) | face_pad[k];
 }
 
 uint32_t director_keys(uint32_t keys) {
+	talk_only_update();
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
 	bool a = (keys & KEY_A) != 0, a_pressed = a && !D.a_held;
@@ -1170,6 +1200,7 @@ uint32_t director_keys(uint32_t keys) {
 		int i = talk_target(), k;
 		if (i >= 0 && talk_reach(i, &k)) {
 			if (k != (emu_read8(BN6_PLAYER + 0x10) & 7)) { talk_turn(k); keys &= ~PAD_KEYS; }
+			talk_only(i);
 		} else if (i >= 0 && !(keys & PAD_KEYS) && !autopilot_on()) {
 			/* (not while he walks: the pad is his) */
 			D.walk_to = i;
