@@ -64,6 +64,10 @@ void cinema_card(const char *small, const char *big, const char *line1, const ch
 
 void cinema_on_map(bool on_map) { C.off_map = !on_map; }
 
+void cinema_card_yield(void) {
+	if (C.card == CARD_AREA && C.card_len - C.card_t > FADE_OUT) C.card_t = C.card_len - FADE_OUT;
+}
+
 uint32_t cinema_keys(uint32_t keys) {
 	if (C.off_map) return keys;
 	if (C.input == CINEMA_HOLD) return 0;

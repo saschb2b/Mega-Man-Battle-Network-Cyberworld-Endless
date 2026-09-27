@@ -1754,6 +1754,7 @@ void director_update(void) {
 		D.area_card = false;
 		area_card();
 	}
+	if (emu_read8(BN6_CHATBOX)) cinema_card_yield();
 	/* the arrival's words once the card has gone; Chaud's call once the
 	 * Secret Area's guardian is done */
 	talk_update();

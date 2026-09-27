@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- An area's card fades out when a chat opens under it: an A at the gift
+  Prog beside the arrival drew the chat box under the card.
 - Mystery Data, services and navis no longer stand one panel's gap behind
   a walkway: the floor's own wall hides such a gap, so from the walkway
   they looked a step away on a raised block, and were a walk round (15

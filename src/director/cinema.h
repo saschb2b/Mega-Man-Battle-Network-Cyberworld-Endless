@@ -47,5 +47,8 @@ void cinema_title(const char *top, const char *name, const char *epithet, SDL_Co
 void cinema_card(const char *small, const char *big, const char *line1, const char *line2, SDL_Color accent, int frames);
 /* A title or card is showing. */
 bool cinema_busy(void);
+/* An area's card fades out at once, where a chat has opened under it (an A
+ * at the gift Prog beside the arrival drew its box under the card). */
+void cinema_card_yield(void);
 
 #endif
