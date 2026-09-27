@@ -605,7 +605,7 @@ RUN_7 = ['--scene', 'emu', '--run-depth', '3', '--seed', '7']
 CLIPS = [
     ('title', ['--scene', 'title'], {}, None, 300, 780),
     ('net', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 150, 600),
-    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1040, 1470),
+    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1400, 1860),
     ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 2110, 2380),
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
