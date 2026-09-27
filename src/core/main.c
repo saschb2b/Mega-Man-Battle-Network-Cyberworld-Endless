@@ -401,7 +401,9 @@ int main(int argc, char **argv) {
 	int run_depth = 0;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
+#ifndef __EMSCRIPTEN__
 	const char *remote_dir = NULL;
+#endif
 	uint64_t max_frames = 0;
 	uint32_t seed = 0;
 	const char *render_spec = NULL;
