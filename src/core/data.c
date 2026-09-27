@@ -113,6 +113,8 @@ bool chip_direct(int rom_id) {
 	}
 }
 
+int chip_family(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB]; }
+
 bool chip_sword(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB] == 19; }
 
 bool chip_standard(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0x7] == 0; }

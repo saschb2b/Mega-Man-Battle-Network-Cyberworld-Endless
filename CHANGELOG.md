@@ -4,6 +4,9 @@
 
 First playable version.
 
+- The Net Dealer says how an AquaNdl pick lands: its needles drop where the
+  guardian stands a moment later, so fire when he stops (two of three
+  missed a hopping BlastMan).
 - Act 1 varies more. It is Central Area or the RoboDog Comp: the Robot
   Control Comp's battles that fit act 1 were all OldStove and Mettaur, and
   it waits for act 2, where Champy and Gunner join them. Act 1's guardian

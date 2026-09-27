@@ -136,6 +136,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int navi_of_act = run.boss_order[run.biome], ge_of_act = navi_of_act > 0 ? enemy_element(enemy_id(1, navi_of_act, 0)) : 0;
 	int nstock = shop_dealer_stock(run.depth, navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4) ? -1 : counter, stock);
 	const char *brought = nstock && stock[0].stock == 1 ? "It's the only one I've got, so make it count!" : "I brought two, and they go fast!";
+	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
+	 * a hopping BlastMan two times in three) */
+	const char *lands = nstock && stock[0].kind == 2 && chip_family(stock[0].id) == 50
+		? "|Its needles drop where he's standing a moment later, so fire when he stops!" : "";
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int wx, wy;
@@ -209,8 +213,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (the guardian's weakness by name; an element-less guardian's
 			 * act is answered for its viruses) */
 			if (counter > 0 && ge > 0 && ge <= 4)
-				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s",
-					guardian(navi)->name, elem[counter], brought);
+				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s",
+					guardian(navi)->name, elem[counter], brought, lands);
 			else if (navi > 0 && counter > 0)
 				/* (no element to answer the guardian with: the hardest hit on
 				 * the list, and the viruses' weakness besides) */
