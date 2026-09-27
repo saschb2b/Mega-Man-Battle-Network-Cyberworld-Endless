@@ -117,7 +117,7 @@ quits. Controllers use their own buttons (A, B, shoulders, Start, Back).
 | --- | --- | --- |
 | A | Talk, open Mystery Data | Use a chip |
 | B | Run; in a chat, hold to fast-forward the text | Fire the buster |
-| L | Ask MegaMan where you are and what's ahead | Open the Custom screen |
+| L | Ask MegaMan where you are and what's ahead | Open the Custom screen; on it, hold L and press R to try to run |
 | R | Jack in (at the town's statue) | Open the Custom screen |
 | Start | Open the PET | Pause |
 | Select | Hold for the map of the layer so far: where you have been, the services, and the way to the exit or guardian | |

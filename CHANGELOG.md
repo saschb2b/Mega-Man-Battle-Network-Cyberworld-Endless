@@ -19,6 +19,8 @@ First playable version.
   past it: he turns to the one before him, else the nearest (walking into
   a navi slides him round it), and reaches about 54 units, which is how
   far a short Mr. Prog can be while looking a tile away.
+- A navi's tip on running from a battle says how (on the Custom screen, hold
+  L and press R); it said START, which only pauses.
 - A new act eases in: every battle on its first layer comes from the lower
   half of its band (two BombCorns on the first layer after BlastMan took a
   playtester from 220 HP to 10).
