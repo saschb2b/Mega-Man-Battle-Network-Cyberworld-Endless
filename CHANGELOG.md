@@ -79,6 +79,18 @@ First playable version.
   may keep the outline the originals draw a pixel past a side face, so the
   atlas counts no fallbacks in any area. Floors, walls and objects are
   unchanged.
+- Where two of Central's floors meet at an inner corner, the panels there
+  no longer show scraps of yellow-green floor: they were pieces of Central
+  Area 2's raised yellow plateau, whose corners fitted those joins better
+  than any green floor's. Tiles of an area's other maps that draw colours
+  its own map never shows on its floors are left out everywhere, so the
+  brown and orange scraps at the ends of the Undernet's bridges, the
+  orange blocks beside Robot Control Comp's walkways, the dark posts where
+  Sky's walkways meet its platforms and the green arrow pieces under
+  Mr. Weather Comp's edges are gone too. Seaside keeps Seaside 2 and 3's
+  yellow panels, the only fields of its second floor, which draw its
+  guardian's arena. `build.py atlas` counts such tiles per layer (other
+  colours). Floors, walls, objects and scenery are unchanged.
 
 - The run begins in the real world, in Central Town or ACDC Town, each
   cut into pieces from the game's own map and set out again per run.

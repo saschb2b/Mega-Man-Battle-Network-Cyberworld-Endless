@@ -452,6 +452,7 @@ void tiles_learn(const AreaSrc *a, uint16_t styles, uint16_t walk_styles, uint16
 			t->e0 = a->tile[0][i];
 			t->e1 = back ? a->tile[1][i] : 0;
 			t->count = 1;
+			t->other = 0;
 			t->pad = !(styles & TILES_NO_PAD_LOOK) && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 ? pads[(B + SPAN / 2) * SPAN + A + SPAN / 2] : 0;
 			++n;
 		}
@@ -500,6 +501,28 @@ void tiles_free(TileBook *b) {
 	free(b->cand);
 	free(b->shapes);
 	memset(b, 0, sizeof *b);
+}
+
+void tiles_colours(const TileBook *b, uint8_t seen[TILE_COLOURS]) {
+	for (int i = 0; i < b->n; ++i)
+		for (int p = 0; p < 64; ++p)
+			if (b->cand[i].mask >> p & 1) seen[b->cand[i].px[p] & 0x7FFF] = 1;
+}
+
+void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool drop) {
+	int n = 0;
+	for (int i = 0; i < b->n; ++i) {
+		TileCand *c = &b->cand[i];
+		c->other = 0;
+		for (int p = 0; p < 64 && !c->other; ++p) c->other = c->mask >> p & 1 && !seen[c->px[p] & 0x7FFF];
+		if (!drop || !c->other) b->cand[n++] = *c;
+	}
+	if (n == b->n) return;
+	/* (still in order) the plain looks and joins of the pairs left */
+	b->n = n;
+	find_plain(b);
+	b->joins = 0;
+	for (int i = 0; i < b->n; ++i) b->joins += KEY_A(b->cand[i].key) && KEY_B(b->cand[i].key);
 }
 
 /* ---- picking ---- */
@@ -643,10 +666,11 @@ static int only(int A, int B, const void *ctx) {
 }
 
 /* a pick with this distance (-1: none fitted) in the stats */
-static void count(int dist) {
+static void count(int dist, const TileCand *c) {
 	tiles_stats.picks++;
 	if (dist < 0) tiles_stats.fallbacks++;
 	else if (dist) tiles_stats.near++;
+	if (c && c->other) tiles_stats.other++;
 }
 
 /* Where the original never joins its two floors (areas whose floors are
@@ -684,9 +708,9 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	if (apart(books, nbooks, oa, ob)) {
 		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
 		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true, NULL, n, &dist);
-		count(dist);
+		count(dist, pa);
 		const TileCand *pb = best(books, nbooks, g, tx, ty, phase, 0, ob, pad, only, &ob_only, true, NULL, n, &dist);
-		count(dist);
+		count(dist, pb);
 		if (pb && !pb->mask) pb = NULL;
 		if (pa && !pa->mask) pa = NULL;
 		if (pa || pb) {
@@ -701,7 +725,7 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 		}
 	}
 	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n, &dist);
-	count(dist);
+	count(dist, c);
 	if (!c) return false;
 	*e0 = c->e0;
 	*e1 = c->e1;

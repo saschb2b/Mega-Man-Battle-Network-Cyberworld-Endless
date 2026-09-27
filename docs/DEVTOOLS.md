@@ -31,8 +31,10 @@ Output in `.build/atlas`:
 - `report.txt`: a line per layer with its panels, rooms, how many tile picks
   were near misses or fallbacks, how many seams are left, the floor cells
   changed to be drawable and the panels whose neighbourhood no original
-  shows (docs/LEVEL_DESIGN.md), the scenery placed, whether a guardian
-  layer has its arena, and its stairs.
+  shows (docs/LEVEL_DESIGN.md), the tiles picked in colours the area's own
+  map never shows on its floors (other colours: pieces of another surface,
+  0 but for Seaside's yellow panels, `TILES_MORE_COLOURS`), the scenery
+  placed, whether a guardian layer has its arena, and its stairs.
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the
@@ -43,13 +45,13 @@ traders, pink the heal pad, white Mystery Data.
 number of seeds per layout (default 1).
 
 The atlas is also the tiles' regression check: each layer's near misses,
-fallbacks, seams and inexact panels are compared with
-`tests/atlas_baseline.txt`, and the build fails (exit 1) listing every
+fallbacks, seams, inexact panels and tiles in other colours are compared
+with `tests/atlas_baseline.txt`, and the build fails (exit 1) listing every
 layer that got worse than it by more than a little (2 points of near
-misses, 0.15 of fallbacks, a tenth more seams or inexact panels). After a
-change that improves the tiles, `python3 build.py atlas --baseline` writes
-the new numbers; commit them with the change. The baseline holds counts
-only, nothing from the ROM.
+misses, 0.15 of fallbacks, a tenth more seams, inexact panels or tiles in
+other colours). After a change that improves the tiles, `python3 build.py
+atlas --baseline` writes the new numbers; commit them with the change. The
+baseline holds counts only, nothing from the ROM.
 
 ## Pacing report: every act's battles and guardians
 

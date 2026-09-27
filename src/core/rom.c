@@ -21,7 +21,7 @@ static const RomLayout layouts[] = {
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {
 			{ 0x90, 0, 0x0018, 0x0040, false, 0x13, 0x90, 0, 3, { { 0x90, 1 } } },     /* Central Area 1; battles of Central 1-3 */
-			{ 0x91, 0, 0x0040, 0x0006, false, 0x11, 0x91, 0, 3, { { 0x91, 1 }, { 0x91, 2 } } },     /* Seaside Area 1; Seaside 1-3 */
+			{ 0x91, 0, 0x2040, 0x0006, false, 0x11, 0x91, 0, 3, { { 0x91, 1 }, { 0x91, 2 } } },     /* Seaside Area 1; Seaside 1-3 (and their colours: TILES_MORE_COLOURS, Seaside 2 and 3's yellow panels are its second floor's only fields) */
 			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } } },     /* Sky Area 2; Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK) */
 			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush) */
 			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } } },     /* Graveyard; Graveyard 1-3 */
