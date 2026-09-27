@@ -551,8 +551,8 @@ def tour(biomes='all'):
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7'],
-     [(240, 'net'), (870, 'custom'), (1140, 'battle'), (1455, 'result'), (2220, 'guardian'),
-      (2380, 'guardian-talk'), (2580, 'boss-custom'), (3852, 'reward'), (3872, 'restored')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+     [(240, 'net'), (1420, 'custom'), (1660, 'battle'), (1980, 'result'), (2220, 'guardian'),
+      (2380, 'guardian-talk'), (2580, 'boss-custom'), (3672, 'reward'), (3720, 'restored')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--dev', 'quiet'], [(120, 'act-card')], {}),
     ('town-central', ['--scene', 'town', '--seed', '3'], [(280, 'town-central')], {}),
     ('town-acdc', ['--scene', 'town', '--seed', '5'], [(280, 'town-acdc')], {}),
