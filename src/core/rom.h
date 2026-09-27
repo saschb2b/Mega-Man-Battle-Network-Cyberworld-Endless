@@ -42,7 +42,8 @@ typedef struct {
 		uint8_t song;            /* the area's theme (MP2K song) */
 		uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
 		uint8_t more[NET_MORE_MAPS][2];  /* more maps (group, number) in the same tiles and colours to learn from */
-		uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads (the Aquarium's glass pads; 0: none) */
+		uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads, the guardian's arena too (the Aquarium's glass pads; 0: none) */
+		bool pads_apart;         /* its pads never lie flush with other floor: where a walkway meets one, each is drawn whole */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */

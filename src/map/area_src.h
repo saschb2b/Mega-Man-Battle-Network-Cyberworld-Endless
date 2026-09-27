@@ -47,8 +47,8 @@ void area_src_mirror(const AreaSrc *a, AreaSrc *m);
  * height z lies where ground floor would: a view of that level. */
 void area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
 /* Tile maps (tw x th entries of layer 0, then layer 1) drawn with map
- * (group, number)'s tiles and colours: ARGB pixels, alpha 0 where empty
- * (free them). */
+ * (group, number)'s tiles and colours as the game shows them, layer 1 in
+ * front: ARGB pixels, alpha 0 where empty (free them). */
 uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, int th);
 /* Floor height at world (X, Y): 0 where section 1 says nothing. */
 int area_src_height(const AreaSrc *a, int X, int Y);

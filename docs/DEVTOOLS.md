@@ -13,7 +13,8 @@ python3 build.py atlas [BIOMES] [SEEDS]
 
 Builds each area's layers without running the game (`src/dev/atlas.c`): every
 layout the area uses at depth 2, plus its guardian's layer at depth 3, drawn
-with the area's own tiles and palettes. All 19 areas take about 35 seconds.
+with the area's own tiles and palettes, the second tile layer over the first
+as the game shows them. All 19 areas take about 35 seconds.
 
 Output in `.build/atlas`:
 

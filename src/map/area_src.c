@@ -40,16 +40,14 @@ static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
 	return vram;
 }
 
-/* Draws tile maps back to front into px (tw * 8 x th * 8), marking the
- * front layer's pixels when given. The real world's maps use
- * 256-colour tiles (64 bytes, a colour index per pixel), the internet's
- * 16-colour ones (32 bytes, a bank per map entry). */
-static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_t *const *tile, int layers, int tw, int th, uint32_t *px, uint8_t *front, uint8_t *idx, bool bpp8) {
+/* Draws tile maps into px (tw * 8 x th * 8), layer `top` over the others,
+ * marking its pixels when given. The real world's maps use 256-colour
+ * tiles (64 bytes, a colour index per pixel), the internet's 16-colour
+ * ones (32 bytes, a bank per map entry). */
+static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_t *const *tile, int layers, int top, int tw, int th, uint32_t *px, uint8_t *front, uint8_t *idx, bool bpp8) {
 	int W = tw * 8;
-	/* the internet draws the first layer in front; the real world the
-	 * second (its first is the ground, the second what stands on it) */
-	int first = bpp8 ? 0 : layers - 1, last = bpp8 ? layers - 1 : 0, step = bpp8 ? 1 : -1;
-	for (int l = first; bpp8 ? l <= last : l >= last; l += step)
+	for (int k = 0; k < layers; ++k) {
+		int l = k == layers - 1 ? top : k < top ? k : k + 1;   /* the others first, then `top` */
 		for (int ty = 0; ty < th; ++ty)
 			for (int tx = 0; tx < tw; ++tx) {
 				uint16_t e = tile[l][ty * tw + tx];
@@ -65,9 +63,10 @@ static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_
 						int X = (e & 0x400) ? 7 - x : x, Y = (e & 0x800) ? 7 - y : y;
 						px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[bpp8 ? ci : (e >> 12) * 16 + ci];
 						if (idx) idx[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = (uint8_t)(bpp8 ? ci : (e >> 12) * 16 + ci);
-						if (l == last && front) front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
+						if (l == top && front) front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
 					}
 			}
+	}
 }
 
 static bool map_desc(int group, int number, uint32_t *desc, uint32_t *ts, uint32_t *pal, uint32_t *tm) {
@@ -95,13 +94,17 @@ static bool decode_tiles(AreaSrc *a) {
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)(m[(l * cells + i) * 2] | m[(l * cells + i) * 2 + 1] << 8);
 	}
 	free(m);
-	/* draw it, back layer first */
+	/* draw it: the real world's ground under what stands on it, the
+	 * internet's floor (its first layer) over its second, which holds the
+	 * background where its maps keep one (the game itself shows the second
+	 * layer in front, see area_src_render) */
 	uint32_t colors[256];
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	a->px = calloc(cells * 64, 4);
 	a->front = calloc(cells * 64, 1);
 	a->idx = calloc(cells * 64, 1);
-	draw_layers(vram, colors, a->tile, a->layers, a->tw, a->th, a->px, a->front, a->idx, a->group < RW_GROUPS);
+	bool rw = a->group < RW_GROUPS;
+	draw_layers(vram, colors, a->tile, a->layers, rw ? a->layers - 1 : 0, a->tw, a->th, a->px, a->front, a->idx, rw);
 	free(vram);
 	return true;
 }
@@ -112,7 +115,9 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	uint32_t *px = calloc((size_t)tw * th * 64, 4);
 	uint16_t *layers[2] = { (uint16_t *)tiles, (uint16_t *)tiles + (size_t)tw * th };
-	draw_layers(vram, colors, layers, 2, tw, th, px, NULL, NULL, group < RW_GROUPS);
+	/* as the game shows them, in the real world and the internet alike: the
+	 * second layer (BG2, priority 2) over the first (BG1, priority 3) */
+	draw_layers(vram, colors, layers, 2, 1, tw, th, px, NULL, NULL, group < RW_GROUPS);
 	free(vram);
 	return px;
 }

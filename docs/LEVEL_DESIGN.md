@@ -113,7 +113,14 @@ come from the places the original maps join them. Green Area never joins
 them flush (its planks reach the raised grass by ramps), so where Green's
 two floors meet, the plank's end is drawn on the front tile layer over the
 grass edge on the back one, each as if the other were not there. The Nest's
-source map (Underground 2) has no second floor.
+source map (Underground 2) has no second floor. The Aquarium never sets its
+glass pads flush with its water either: they stand on legs, stairs climb
+to them and its glass walkways end at their rims. So there each pad and the
+rest of the floor are picked apart, each as if the others were not there,
+and laid over each other on the game's two tile layers, the one whose top
+covers the other's side face on the second, which the game shows in front
+(`src/map/tilemap.c`): a pool keeps its whole rim and a channel ends at it.
+Its guardian's arena, wider than its water ever gets, is a pool as well.
 
 Before its tiles are picked, a layer's floor is made drawable
 (`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,

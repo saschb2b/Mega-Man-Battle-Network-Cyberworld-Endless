@@ -29,6 +29,14 @@ First playable version.
   layer off. The NaviCust vendor's and the gift's programs always come
   from the game's full program list at their own prices, however many
   layers came before.
+- Aquarium Comp's glass pools keep their whole rims: where a water channel
+  meets one, the channel ends at the rim, instead of its water stepping
+  over the rim and the glass in 8x8 blocks. Each pool and the rest of the
+  floor are drawn on their own and laid over each other on the game's two
+  tile layers, as the original sets its pools on legs apart from the water.
+  The guardian's arena is a pool too, no longer a patch of glass in water.
+  `build.py atlas` draws the two tile layers in the game's order, the
+  second over the first.
 
 - The run begins in the real world, in Central Town or ACDC Town, each
   cut into pieces from the game's own map and set out again per run.
