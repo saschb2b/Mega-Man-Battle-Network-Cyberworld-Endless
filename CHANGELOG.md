@@ -9,6 +9,10 @@ First playable version.
   before. The gift, the vendor and a bystander say where to install them.
 - R near the town's statue says which way the statue is and shows the
   way-on arrow.
+- Walkways without lining up: holding one direction at a walkway's mouth
+  or a spur lines MegaMan up and takes him in, and on round the walkway's
+  turns; a diagonal held into a corner slides him round it, and a push
+  into a navi frees him.
 - A story for the run, the Endless Net: Dad's call on the first run, Lan
   and MegaMan talking on arriving somewhere new (the first layer, the
   Undernet, the Graveyard, the Nest, the side layers, the net rebuilt

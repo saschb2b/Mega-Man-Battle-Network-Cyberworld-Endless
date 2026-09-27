@@ -14,6 +14,7 @@
 
 #include "foes.h"
 #include "bn6.h"
+#include "autopilot.h"
 #include "boss.h"
 #include "cinema.h"
 #include "emu.h"
@@ -608,29 +609,93 @@ void director_describe(FILE *f) {
  * has moved on along his own (a second at most). */
 static bool floor_panel(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
 
+/* the pad's world steps (UP moves +X -Y, RIGHT +X +Y); the grid's +x is
+ * world +Y and its +y world -X (netmap_panel). The first four go along the
+ * grid, the single keys across its diagonal. */
+static const struct { uint32_t keys; int x, y; } pad_dirs[8] = {
+	{ KEY_UP | KEY_RIGHT, 1, 0 }, { KEY_DOWN | KEY_RIGHT, 0, 1 }, { KEY_DOWN | KEY_LEFT, -1, 0 }, { KEY_UP | KEY_LEFT, 0, -1 },
+	{ KEY_UP, 1, -1 }, { KEY_RIGHT, 1, 1 }, { KEY_DOWN, -1, 1 }, { KEY_LEFT, -1, -1 },
+};
+
+/* A world step (x, y) of one axis from grid panel (cx, cy) onto floor, and
+ * the pad key for it (the grid's +x is world +Y, its +y world -X). */
+static bool open_step(int cx, int cy, int x, int y) { return floor_panel(cx + y, cy - x); }
+
+static int step_key(int x, int y) {
+	for (int k = 0; k < 4; ++k) if (pad_dirs[k].x == x && pad_dirs[k].y == y) return k;
+	return -1;
+}
+
+/* The step leads into a lane or a spur: floor, with nothing either side. */
+static bool lane_step(int cx, int cy, int x, int y) {
+	int nx = cx + y, ny = cy - x;
+	return floor_panel(nx, ny) && !floor_panel(nx - x, ny - y) && !floor_panel(nx + x, ny + y);
+}
+
+/* For a single key held with MegaMan stuck at an edge: the one of its two
+ * steps along the grid that is open when the other is not (-1: none). */
+static int slide_axis(int held, int cx, int cy) {
+	int x = pad_dirs[held].x, y = pad_dirs[held].y;
+	bool a = open_step(cx, cy, x, 0), b = open_step(cx, cy, 0, y);
+	if (a == b) return -1;
+	return a ? step_key(x, 0) : step_key(0, y);
+}
+
 static uint32_t corner_assist(uint32_t keys) {
-	/* the pad's world steps (UP moves +X -Y, RIGHT +X +Y); the grid's +x is
-	 * world +Y and its +y world -X (netmap_panel) */
-	static const struct { uint32_t keys; int x, y; } dirs[8] = {
-		{ KEY_UP | KEY_RIGHT, 1, 0 }, { KEY_DOWN | KEY_RIGHT, 0, 1 }, { KEY_DOWN | KEY_LEFT, -1, 0 }, { KEY_UP | KEY_LEFT, 0, -1 },
-		{ KEY_UP, 1, -1 }, { KEY_RIGHT, 1, 1 }, { KEY_DOWN, -1, 1 }, { KEY_LEFT, -1, -1 },
-	};
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
 	uint32_t pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 	bool moved = px != lx || py != ly;
 	lx = px; ly = py;
 	int held = -1;
-	for (int k = 0; k < 4; ++k) if (pad == dirs[k].keys) held = k;
+	for (int k = 0; k < 8; ++k) if (pad == pad_dirs[k].keys) held = k;
 	if (held < 0 || D.town || emu_read8(BN6_CHATBOX) || talk_busy() || (assist >= 0 && held != assist_for)) {
 		stuck = 0; assist = -1;
 		return keys;
 	}
-	int ax = dirs[held].x, ay = dirs[held].y;
+	/* a single key goes across the panels' diagonal. Where one of its two
+	 * steps leads into a lane and the diagonal is off the floor (a walkway's
+	 * mouth, a lane's turn), MegaMan lines up with the lane, then goes in:
+	 * no lining up by hand. Stuck at an edge otherwise, he slides along the
+	 * step that is open. (Not for the autopilot, whose single keys follow
+	 * its own path.) */
+	if (held >= 4) {
+		if (autopilot_on()) return keys;
+		int cx, cy, x = pad_dirs[held].x, y = pad_dirs[held].y;
+		netmap_panel(px, py, &cx, &cy);
+		if (!floor_panel(cx + y, cy - x)) {
+			bool la = lane_step(cx, cy, x, 0), lb = lane_step(cx, cy, 0, y);
+			if (la != lb) {
+				int wcx, wcy;
+				netmap_world(cx, cy, &wcx, &wcy);
+				/* (into the lane along world X: on its middle in Y first; along Y: in X) */
+				int off = la ? py - wcy : px - wcx, k;
+				if (abs(off) > 4) k = la ? step_key(0, off > 0 ? -1 : 1) : step_key(off > 0 ? -1 : 1, 0);
+				else k = la ? step_key(x, 0) : step_key(0, y);
+				stuck = 0; assist = -1;
+				return (keys & ~pad) | pad_dirs[k].keys;
+			}
+		}
+		if (assist >= 0) {
+			frames = moved ? 0 : frames + 1;
+			int k = slide_axis(held, cx, cy);
+			if (frames > 6 || k < 0) { assist = -1; stuck = 0; return keys; }
+			assist = k;
+			return (keys & ~pad) | pad_dirs[assist].keys;
+		}
+		stuck = moved ? 0 : stuck + 1;
+		int k;
+		if (stuck < 3 || (k = slide_axis(held, cx, cy)) < 0) return keys;
+		assist = k;
+		assist_for = held;
+		frames = 0;
+		return (keys & ~pad) | pad_dirs[k].keys;
+	}
+	int ax = pad_dirs[held].x, ay = pad_dirs[held].y;
 	if (assist >= 0) {
 		int a = ax ? px * ax : py * ay;
 		if (a > along || ++frames > 60) { assist = -1; stuck = 0; return keys; }
-		return (keys & ~pad) | dirs[assist].keys;
+		return (keys & ~pad) | pad_dirs[assist].keys;
 	}
 	stuck = moved ? 0 : stuck + 1;
 	int cx, cy;
@@ -641,12 +706,12 @@ static uint32_t corner_assist(uint32_t keys) {
 		int sx = ay ? s : 0, sy = ax ? s : 0, gsx = sy, gsy = -sx;
 		if (!floor_panel(cx + gsx, cy + gsy) || !floor_panel(cx + gsx + gdx, cy + gsy + gdy)) continue;
 		for (int k = 4; k < 8; ++k)
-			if (dirs[k].x == ax + sx && dirs[k].y == ay + sy) {
+			if (pad_dirs[k].x == ax + sx && pad_dirs[k].y == ay + sy) {
 				assist = k;
 				assist_for = held;
 				along = ax ? px * ax : py * ay;
 				frames = 0;
-				return (keys & ~pad) | dirs[k].keys;
+				return (keys & ~pad) | pad_dirs[k].keys;
 			}
 	}
 	return keys;
