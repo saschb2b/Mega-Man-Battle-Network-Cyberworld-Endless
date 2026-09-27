@@ -34,8 +34,9 @@ First playable version.
   Net Dealer stocks two of a chip of the element that answers the act
   (its guardian's weakness, else its viruses'), the hardest hitting of a
   few, at a price a run has by then (400 zenny in act 1, 300 more an act),
-  and says which, naming the guardian. A bystander's tip on where Net
-  Dealers set up no longer says the middle layer only.
+  and says which, naming the guardian, and that it has two. A
+  bystander's tip on where Net Dealers set up no longer says the middle
+  layer only.
 - Servers, Net Dealers and other services stand off a room's exits, where
   they blocked the way on. The map's key lists what the layer holds,
   Servers and dark warps as "Event". An L pressed as a chat closes is
