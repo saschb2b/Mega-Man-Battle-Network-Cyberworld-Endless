@@ -8,6 +8,7 @@
 #include "devtools.h"
 #include "director.h"
 #include "npc.h"
+#include "scripts.h"
 #include "encounter.h"
 #include "emu.h"
 #include "game.h"
@@ -42,6 +43,7 @@ static void enter(void) {
 	revealed = 0;
 	if (!emu_init(R.data, ROM_SIZE)) return;
 	npc_reach_install();
+	chat_marks_install();
 	cinema_reset();
 	if (emu_resume_requested) {
 		emu_resume_requested = false;

@@ -40,7 +40,9 @@ objects, sprite list, warp list, jack-in table, check table
 `0x0803461C`, text archive `0x08040794` and music), clears the check
 flags `0x16C0`-`0x16CF`, rewrites jack-in destination 42 (`0x08099A00` +
 42 x 20) to the first layer, and
-widens MegaMan's facing probes for talking (`0x0809F164`), points the
+widens MegaMan's facing probes for talking (`0x0809F164`), redraws the
+chat font's version marks as two letters side by side (`0x086AACAC`,
+widths `0x08043C74`), points the
 map-name label and the PET's at the run's own names, rewrites the stock of
 the game's shops 0 and 3 (in RAM and
 in the initial table in ROM, `shop.c`), clears the Mystery Data flags

@@ -7,6 +7,32 @@
 
 #include <stdio.h>
 
+#include "bn6.h"
+#include "emu.h"
+#include "rom.h"
+
+void chat_marks_install(void) {
+	static const char pairs[5][2] = { { 'R', 'V' }, { 'B', 'X' }, { 'E', 'X' }, { 'S', 'P' }, { 'F', 'Z' } };
+	uint32_t font = BN6_CHAT_FONT - 0x08000000u, widths = BN6_CHAT_FONT_WIDTHS - 0x08000000u;
+	/* (the font where it should be: an 'E' of 8 pixels, its top row full) */
+	if (R.data[widths + 0x0F] != 8 || R.data[font + 0x0F * 0x60] != 0x11) return;
+	for (int m = 0; m < 5; ++m) {
+		int a = 0x0B + pairs[m][0] - 'A', b = 0x0B + pairs[m][1] - 'A';
+		int wa = R.data[widths + (uint32_t)a], wb = R.data[widths + (uint32_t)b];
+		uint8_t g[0x60] = { 0 };
+		for (int y = 0; y < 12; ++y)
+			for (int x = 0; x < 16; ++x) {
+				int code = x < wa ? a : b, sx = x < wa ? x : x - wa;
+				if (sx >= (x < wa ? wa : wb)) continue;
+				uint8_t v = R.data[font + (uint32_t)code * 0x60 + (uint32_t)(y * 8 + sx / 2)];
+				int ci = sx & 1 ? v >> 4 : v & 15;
+				g[y * 8 + x / 2] |= (uint8_t)(x & 1 ? ci << 4 : ci);
+			}
+		emu_write(BN6_CHAT_FONT + (uint32_t)(0x40 + m) * 0x60, g, sizeof g);
+		emu_write8(BN6_CHAT_FONT_WIDTHS + (uint32_t)(0x40 + m), (uint8_t)(wa + wb > 16 ? 16 : wa + wb));
+	}
+}
+
 /* A Yes/No choice after `question`, asked with `face` as the game's
  * shopkeepers ask it: two options, then select (Yes continues, No and B
  * jump to `no`). */

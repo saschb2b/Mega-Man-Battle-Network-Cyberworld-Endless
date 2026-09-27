@@ -2,7 +2,6 @@
 #include "layer_objs.h"
 
 #include <stdio.h>
-#include <string.h>
 
 #include "bn6.h"
 #include "chip_pool.h"
@@ -45,22 +44,6 @@
 
 #define HP_MEMORY_CHANCE 15   /* % of the rich Mystery Data from the second act on */
 
-/* A chip the game's own "MegaMan got:" can name: its chat font has kanji
- * where a Navi chip's later versions carry their mark ([EX] and [SP], one
- * and two ids on from the first), so Mystery Data hold the first version
- * (with the code rolled, where it has it). */
-static int md_chip(int id, char *code) {
-	ChipInfo ci;
-	for (int step = 0; step < 2; ++step) {
-		chip_info(id, &ci);
-		if (!strpbrk(ci.name, "\1\2\3\4\5")) break;
-		--id;
-	}
-	chip_info(id, &ci);
-	if (ci.ncodes && !strchr(ci.codes, *code)) *code = ci.codes[0];
-	return id;
-}
-
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
  * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md). True for
  * an HPMemory, which the game keeps in blue Mystery Data. */
@@ -84,7 +67,6 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 		kind = 1;
 		value = roll_chip(run.depth, 3, &code);
 	}
-	if (kind == 1) value = md_chip(value, &code);
 	out[0] = (uint8_t)kind;
 	out[1] = 0x20;
 	out[2] = 0xFF;

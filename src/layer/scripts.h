@@ -12,6 +12,12 @@
 #define SCRIPTS_HP_MEMORY 0x70
 #define SCRIPTS_BOSS_HP_MEMORIES 5
 
+/* The chat box's version marks ([RV] [BX] [EX] [SP] [FZ], codes 0x40-0x44)
+ * drawn as their two letters in the font's own capitals, in the core's
+ * ROM copy: its marks are two letters stacked in one cell, which read as
+ * a kanji ("ProtoMn" and one came out of a Mystery Data). */
+void chat_marks_install(void);
+
 /* Service NPCs on the game's own commands: a recovery Mr. Prog heals to
  * full HP (`variant` picks his words). (Chip Traders speak the game's own
  * lines, see trader.h.) */
