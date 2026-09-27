@@ -38,6 +38,9 @@ void cinema_shake(int frames, int amplitude);
 void cinema_arrow(int dir, int frames);
 /* The arrow shown on for at least `frames` more (none shown: nothing). */
 void cinema_arrow_extend(int frames);
+/* Whether the arrow shows, and a new way for it as it shows. */
+bool cinema_arrow_on(void);
+void cinema_arrow_turn(int dir);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */
 void cinema_title(const char *top, const char *name, const char *epithet, SDL_Color accent, int frames);
 /* A card between areas: `small` over `big`, then up to two lines. */

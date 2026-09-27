@@ -246,11 +246,19 @@ static const char *route_to(int tx, int ty, int *far) {
 		cx = p % MAP_W; cy = p / MAP_W;
 	}
 	*far = len < 5 ? 0 : len < 14 ? 1 : 2;
-	/* aim at the farthest of the next four panels he can walk to in a
-	 * straight line over the floor (three along, as the crow flies, cut
-	 * corners over drops) */
+	/* aim along the walk's first leg while it runs straight (on a walkway
+	 * that is one of the screen's diagonals: a flat arrow between two
+	 * forking walkways said neither), else at the farthest of the next four
+	 * panels he can walk to in a straight line over the floor (three
+	 * along, as the crow flies, cut corners over drops) */
 	int aim = len ? path[len - 1] : sy * MAP_W + sx;
-	for (int k = 4; k >= 2; --k) {
+	int leg = 0;
+	if (len) {
+		int dx = path[len - 1] % MAP_W - sx, dy = path[len - 1] / MAP_W - sy;
+		while (leg < 4 && leg < len && path[len - 1 - leg] % MAP_W == sx + dx * (leg + 1) && path[len - 1 - leg] / MAP_W == sy + dy * (leg + 1)) ++leg;
+	}
+	if (leg >= 2) aim = path[len - leg];
+	else for (int k = 4; k >= 2; --k) {
 		if (len < k) continue;
 		int ax = path[len - k] % MAP_W, ay = path[len - k] / MAP_W;
 		bool clear = true;
@@ -264,6 +272,16 @@ static const char *route_to(int tx, int ty, int *far) {
 	int wx, wy, dummy;
 	netmap_world(aim % MAP_W, aim / MAP_W, &wx, &wy);
 	return way_to(wx, wy, &dummy);
+}
+
+/* The way on as the arrow shows it: along the floor to the exit or the
+ * guardian (the port in the town); way_dir holds it. */
+static void goal_way(void) {
+	int far;
+	if (D.town) { way_to(town_info()->port_x, town_info()->port_y, &far); return; }
+	int gx = D.objs.exit_x, gy = D.objs.exit_y;
+	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
+	if (!route_to(gx, gy, &far)) way_to(gx, gy, &far);
 }
 
 static const char *status_words(void) {
@@ -1054,6 +1072,10 @@ static void unwedge(void) {
 /* The way-on arrow: on while L's words last, however many boxes, then
  * three seconds more. */
 static void arrow_update(void) {
+	/* (it turns as MegaMan walks: frozen, it pointed into the gap he had
+	 * walked past) */
+	static int tick;
+	if (cinema_arrow_on() && on_map() && ++tick % 15 == 0) { goal_way(); cinema_arrow_turn(way_dir); }
 	if (!D.arrow_pending) return;
 	if (talk_busy()) cinema_arrow_extend(60);
 	else { D.arrow_pending = false; cinema_arrow_extend(180); }
