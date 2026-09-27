@@ -473,29 +473,56 @@ bool director_on_layer(void) { return D.active && !D.town; }
 /* The layer's map, while SELECT is held: the panels MegaMan has come near,
  * as the screen shows them (a panel 4 by 2 pixels, isometric), around him;
  * the exit pad, the arena, the services and the ways off it marked. */
+/* SELECT held on a layer: the layer as far as MegaMan has seen it, over the
+ * dimmed game. Panels stand apart, so a walkway reads as a line and a room
+ * as a block; the whole seen floor is fitted in when it fits, else the map
+ * follows MegaMan. The goal, until seen, is a mark on the frame the way it
+ * lies. */
 void director_draw_map(void) {
 	if (!D.active || D.town || !D.map_shown || !on_map()) return;
-	int bx = P.core_x + 128, by = P.core_y + 6, bw = 106, bh = 70;
-	fill_rect(bx - 2, by - 2, bw + 4, bh + 4, rgba(0, 12, 40, 235));
-	fill_rect(bx - 2, by - 2, bw + 4, 1, rgba(120, 200, 255, 220));
-	fill_rect(bx - 2, by + bh + 1, bw + 4, 1, rgba(120, 200, 255, 220));
+	int x0 = P.core_x, y0 = P.core_y;
+	fill_rect(x0, y0, 240, 160, rgba(0, 8, 28, 255));
+	int bx = x0 + 6, by = y0 + 18, bw = 228, bh = 122;
+	SDL_Color edge = rgba(120, 200, 255, 220);
+	fill_rect(bx - 2, by - 2, bw + 4, 1, edge);
+	fill_rect(bx - 2, by + bh + 1, bw + 4, 1, edge);
+	fill_rect(bx - 2, by - 2, 1, bh + 4, edge);
+	fill_rect(bx + bw + 1, by - 2, 1, bh + 4, edge);
+	text_drawf(bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, mx, my;
 	if (!netmap_panel(px, py, &mx, &my)) return;
+	/* a grid step goes 4 pixels across and 2 down (x - y across, x + y down) */
+	int umin = mx - my, umax = umin, vmin = mx + my, vmax = vmin;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (!D.seen[y][x] || layer.cell[y][x] != C_PATH) continue;
+			int u = x - y, v = x + y;
+			if (u < umin) umin = u;
+			if (u > umax) umax = u;
+			if (v < vmin) vmin = v;
+			if (v > vmax) vmax = v;
+		}
+	int cu = (umin + umax) / 2, cv = (vmin + vmax) / 2;
+	if ((umax - umin) * 4 + 10 > bw || (vmax - vmin) * 2 + 6 > bh) { cu = mx - my; cv = mx + my; }
 	int ox = bx + bw / 2, oy = by + bh / 2;
-	#define SX(x, y) (ox + ((x) - mx - ((y) - my)) * 3)
-	#define SY(x, y) (oy + ((x) - mx + (y) - my) * 3 / 2)
+	#define SX(x, y) (ox + ((x) - (y) - cu) * 4)
+	#define SY(x, y) (oy + ((x) + (y) - cv) * 2)
+	#define INSIDE(sx, sy, m) ((sx) - (m) >= bx && (sy) - (m) >= by && (sx) + (m) < bx + bw && (sy) + (m) < by + bh)
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] != C_PATH) continue;
 			int sx = SX(x, y), sy = SY(x, y);
-			if (sx - 3 < bx || sy - 2 < by || sx + 3 > bx + bw || sy + 2 > by + bh) continue;
-			/* a panel as a small diamond: 2, 6, 2 pixels wide */
+			if (!INSIDE(sx, sy, 3)) continue;
+			/* a panel: a diamond 7 wide and 3 high, a pixel apart from the next */
 			SDL_Color c = layer.level[y][x] ? rgba(150, 210, 255, 240) : rgba(60, 140, 230, 240);
-			fill_rect(sx - 1, sy - 2, 2, 1, c);
-			fill_rect(sx - 3, sy - 1, 6, 2, c);
-			fill_rect(sx - 1, sy + 1, 2, 1, c);
+			fill_rect(sx - 1, sy - 1, 3, 1, c);
+			fill_rect(sx - 3, sy, 7, 1, c);
+			fill_rect(sx - 1, sy + 1, 3, 1, c);
 		}
-	/* what stands there, once seen */
+	/* what stands there, once seen; the goal's way while it is not */
+	int gx = -1, gy = -1;
+	bool goal_boss = false;   /* (the guardian while it stands, else the exit) */
+	SDL_Color gc = rgba(255, 230, 60, 255);
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int x = (int)o->x, y = (int)o->y;
@@ -508,16 +535,53 @@ void director_draw_map(void) {
 		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: c = rgba(210, 110, 255, 255); break;
 		default: continue;
 		}
-		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || !D.seen[y][x]) continue;
+		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
+		if (o->type == OBJ_BOSS && !boss_beaten()) { gx = x; gy = y; gc = c; goal_boss = true; }
+		else if (o->type == OBJ_EXIT && !goal_boss) { gx = x; gy = y; }
+		if (!D.seen[y][x]) continue;
 		int sx = SX(x, y), sy = SY(x, y);
-		if (sx - 2 < bx || sy - 2 < by || sx + 2 > bx + bw || sy + 2 > by + bh) continue;
-		fill_rect(sx - 2, sy - 2, 4, 4, c);
+		if (!INSIDE(sx, sy, 3)) continue;
+		fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
+		fill_rect(sx - 2, sy - 2, 5, 5, c);
+	}
+	if (gx >= 0 && !D.seen[gy][gx]) {
+		/* where the ray from MegaMan to it leaves the frame */
+		double dx = SX(gx, gy) - SX(mx, my), dy = SY(gx, gy) - SY(mx, my);
+		double t = 1e9, hx = bw / 2.0 - 5, hy = bh / 2.0 - 5;
+		double sx0 = SX(mx, my), sy0 = SY(mx, my);
+		if (dx > 0) t = fmin(t, (ox + hx - sx0) / dx);
+		if (dx < 0) t = fmin(t, (ox - hx - sx0) / dx);
+		if (dy > 0) t = fmin(t, (oy + hy - sy0) / dy);
+		if (dy < 0) t = fmin(t, (oy - hy - sy0) / dy);
+		if (t > 0 && t < 1e8) {
+			int ax = (int)lround(sx0 + dx * t), ay = (int)lround(sy0 + dy * t);
+			fill_rect(ax - 1, ay - 3, 3, 1, gc);
+			fill_rect(ax - 2, ay - 2, 5, 1, gc);
+			fill_rect(ax - 3, ay - 1, 7, 3, gc);
+			fill_rect(ax - 2, ay + 2, 5, 1, gc);
+			fill_rect(ax - 1, ay + 3, 3, 1, gc);
+		}
 	}
 	/* MegaMan, blinking */
-	if ((D.frame / 8) % 2 == 0) fill_rect(ox - 2, oy - 2, 4, 4, rgba(255, 255, 255, 255));
-	text_draw(bx + 2, by + bh - 11, "MAP", rgba(170, 220, 255, 255), TEXT_LEFT);
+	int ms = SX(mx, my), mt = SY(mx, my);
+	if ((D.frame / 8) % 2 == 0 && INSIDE(ms, mt, 3)) {
+		fill_rect(ms - 3, mt - 3, 7, 7, rgba(0, 8, 28, 255));
+		fill_rect(ms - 2, mt - 2, 5, 5, rgba(255, 255, 255, 255));
+	}
+	/* the key, under the map */
+	static const struct { const char *what; SDL_Color c; } key[] = {
+		{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
+		{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
+	};
+	int kx = bx + 2, ky = by + bh + 5, keys = D.objs.guardian.navi ? 5 : 4;
+	for (int i = 0; i < keys; ++i) {
+		fill_rect(kx, ky + 3, 5, 5, key[i].c);
+		text_draw(kx + 8, ky, key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
+		kx += 8 + text_width(key[i].what) + 10;
+	}
 	#undef SX
 	#undef SY
+	#undef INSIDE
 }
 
 /* The layers' make (generation, objects, loot rolls): a run saved by a build

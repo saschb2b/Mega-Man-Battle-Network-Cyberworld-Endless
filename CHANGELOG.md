@@ -19,6 +19,10 @@ First playable version.
   another way ("The way winds, so follow the arrow!"), so the words hold
   still while the arrow shows the next stretch; the Recovery Mr. Prog,
   which heals every time, is named again while MegaMan is hurt.
+- The map (hold Select) fills the screen: the floor seen so far with its
+  panels apart, so walkways read as lines, the whole of it when it fits,
+  marks for MegaMan, the exit, heals, shops and the guardian with a key
+  under it, and until the goal is seen a mark on the frame the way it lies.
 - A story for the run, the Endless Net: Dad's call on the first run, Lan
   and MegaMan talking on arriving somewhere new (the first layer, the
   Undernet, the Graveyard, the Nest, the side layers, the net rebuilt
