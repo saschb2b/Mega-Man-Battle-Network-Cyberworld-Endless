@@ -34,6 +34,10 @@ bool shop_install(int shop, const ShopItem *items, int n);
  * the hardest hitting chip of element `counter` (1-4), or of any element
  * for -1 (a guardian with none), 0 for no such chip. */
 int shop_dealer_stock(int depth, int counter, ShopItem out[SHOP_MAX_ITEMS]);
+/* The chip a Net Dealer lists first at `depth` for the element `counter`
+ * (-1: a guardian of none, the hardest hitter), as a layer's roll picks it
+ * (the pacing report samples it); -1 for none found. */
+int shop_dealer_answer(int depth, int counter, char *code);
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 /* One NaviCust program (id, color in `code`) from the game's shops. */
 bool shop_pick_program(ShopItem *out);

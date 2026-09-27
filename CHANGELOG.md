@@ -4,6 +4,11 @@
 
 First playable version.
 
+- The Net Dealer's answer is a Standard chip (he offered two DiveMan, and a
+  folder takes one), the best of eight found rather than four (half of act
+  1's Elec answers hit past a third of the guardian), and always of the
+  element he names (a few layers had none). One over that third he brings
+  alone, and says so.
 - Net Dealers, vendors, Mr. Progs and bystanders stand off the walkways'
   mouths: a dealer stood where a walkway met his platform, and the way
   on went through him (the platform's box took in the walkway's end).

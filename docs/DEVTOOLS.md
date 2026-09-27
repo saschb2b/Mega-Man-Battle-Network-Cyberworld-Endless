@@ -67,7 +67,9 @@ together (lowest, median, highest), the strongest hit and how many battles
 reached each version, and marks OVER where a battle lies past the band or
 its damage cap. A challenge that meets an SP Navi is counted apart. Then it
 draws 500 runs and lists the guardian each act met, with version and HP,
-marked OUTSIDE when one lies past the act's band. The whole report takes
+marked OUTSIDE when one lies past the act's band, and the Net Dealers'
+answers: per act and element, the chips 300 layers list first, with a `+`
+on those over the act's cap (stocked one, not two). The whole report takes
 about a minute.
 
 Output: `.build/pacing.txt`. It needs the ROM, and prints how many

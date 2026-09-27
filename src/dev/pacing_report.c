@@ -15,6 +15,7 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "shop.h"
 
 #define ROLLS 300
 
@@ -119,6 +120,39 @@ int pacing_report_run(const char *path) {
 		if (id >= 0 && guardian(n)->name && guardian(n)->name[0] != '?') fprintf(out, " %s %d", guardian(n)->name, enemy_element(id));
 	}
 	fprintf(out, "\n");
+	/* what the Net Dealers answer each act with, per element (every one a
+	 * straight hit; a "+" is over the act's cap, the lightest found) */
+	fprintf(out, "\nNet Dealers' answers (%d layers each: chip power share):\n", ROLLS);
+	static const char *const elems[5] = { "any", "Fire", "Aqua", "Elec", "Wood" };
+	for (int act = 0; act < 6; ++act) {
+		int depth = act * 3 + 2, lo, hi;
+		pacing_guardian_band(act, &lo, &hi);
+		for (int e = 0; e <= 4; ++e) {
+			int counter = e ? e : -1, most = counter > 0 ? lo / 6 : lo / 3;
+			static int ids[ROLLS];
+			int none = 0;
+			for (int k = 0; k < ROLLS; ++k) {
+				rng_seed(0xDEA1u + (uint32_t)(act * 977 + e * 131 + k));
+				char code;
+				ids[k] = shop_dealer_answer(depth, counter, &code);
+				none += ids[k] < 0;
+			}
+			qsort(ids, ROLLS, sizeof *ids, cmp_int);
+			fprintf(out, "act %d %s (cap %d):", act + 1, elems[e], most);
+			for (int k = 0; k < ROLLS;) {
+				int j = k;
+				while (j < ROLLS && ids[j] == ids[k]) ++j;
+				if (ids[k] >= 0 && (j - k) * 100 >= ROLLS * 5) {
+					ChipInfo ci;
+					chip_info(ids[k], &ci);
+					fprintf(out, " %s %d%s %d%%", ci.name, ci.power, ci.power > most ? "+" : "", (j - k) * 100 / ROLLS);
+				}
+				k = j;
+			}
+			if (none) fprintf(out, " (none %d%%)", none * 100 / ROLLS);
+			fprintf(out, "\n");
+		}
+	}
 	fclose(out);
 	printf("pacing report in %s: %d battles or guardians past their band\n", path, flagged);
 	return 0;

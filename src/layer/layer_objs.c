@@ -125,6 +125,12 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
+	/* the Net Dealer's stock, before his words (they say how many of his
+	 * answer he brought) */
+	ShopItem stock[SHOP_MAX_ITEMS];
+	int navi_of_act = run.boss_order[run.biome], ge_of_act = navi_of_act > 0 ? enemy_element(enemy_id(1, navi_of_act, 0)) : 0;
+	int nstock = shop_dealer_stock(run.depth, navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4) ? -1 : counter, stock);
+	const char *brought = nstock && stock[0].stock == 1 ? "It's the only one I've got, so make it count!" : "I brought two, and they go fast!";
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int wx, wy;
@@ -201,16 +207,16 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (the guardian's weakness by name; an element-less guardian's
 			 * act is answered for its viruses) */
 			if (counter > 0 && ge > 0 && ge <= 4)
-				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. I brought two, and they go fast!",
-					guardian(navi)->name, elem[counter]);
+				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s",
+					guardian(navi)->name, elem[counter], brought);
 			else if (navi > 0 && counter > 0)
 				/* (no element to answer the guardian with: the hardest hit on
 				 * the list, and the viruses' weakness besides) */
-				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. I brought two, and they go fast!|"
-					"The viruses around here can't stand %s chips, though.", guardian(navi)->name, elem[counter]);
+				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s|"
+					"The viruses around here can't stand %s chips, though.", guardian(navi)->name, brought, elem[counter]);
 			else if (navi > 0)
-				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. I brought two, and they go fast!",
-					guardian(navi)->name);
+				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s",
+					guardian(navi)->name, brought);
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
 				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
@@ -291,9 +297,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		if (tk.script >= 0 && ntalk < 16) talkers[ntalk++] = tk;
 	}
 	/* the shops' stock, in the game's shop data */
-	ShopItem stock[SHOP_MAX_ITEMS];
-	int navi_of_act = run.boss_order[run.biome], ge_of_act = navi_of_act > 0 ? enemy_element(enemy_id(1, navi_of_act, 0)) : 0;
-	int nstock = shop_dealer_stock(run.depth, navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4) ? -1 : counter, stock);
 	if (emu_debug_on())
 		for (int i = 0; i < nstock; ++i)
 			if (stock[i].kind == 2) {
