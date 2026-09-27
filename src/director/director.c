@@ -166,6 +166,47 @@ static const char *way_to(int tx, int ty, int *far) {
 	return ways[(k % 8 + 8) % 8];
 }
 
+/* The way on along the floor, not as the crow flies: the direction to a
+ * point a few panels along the shortest walk from MegaMan to (tx, ty),
+ * and how far that walk is. NULL when either is off the grid. */
+static const char *route_to(int tx, int ty, int *far) {
+	static int16_t prev[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int sx, sy, ex, ey;
+	if (!netmap_panel(px, py, &sx, &sy) || !netmap_panel(tx, ty, &ex, &ey)) return NULL;
+	if (sx < 0 || sy < 0 || sx >= MAP_W || sy >= MAP_H || ex < 0 || ey < 0 || ex >= MAP_W || ey >= MAP_H) return NULL;
+	if (layer.cell[sy][sx] != C_PATH || layer.cell[ey][ex] != C_PATH) return NULL;
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) prev[y][x] = -1;
+	int h = 0, t = 0;
+	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
+	prev[sy][sx] = (int16_t)(sy * MAP_W + sx);
+	while (h < t && prev[ey][ex] < 0) {
+		int x = qx[h], y = qy[h++];
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d[k][0], ny = y + d[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || prev[ny][nx] >= 0 || layer.cell[ny][nx] != C_PATH) continue;
+			prev[ny][nx] = (int16_t)(y * MAP_W + x);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	if (prev[ey][ex] < 0) return NULL;
+	/* the walk, backwards from the target; aim at the panel 3 along it */
+	int len = 0, cx = ex, cy = ey;
+	static int16_t path[MAP_W * MAP_H];
+	while (!(cx == sx && cy == sy)) {
+		path[len++] = (int16_t)(cy * MAP_W + cx);
+		int p = prev[cy][cx];
+		cx = p % MAP_W; cy = p / MAP_W;
+	}
+	*far = len < 5 ? 0 : len < 14 ? 1 : 2;
+	int aim = len > 3 ? path[len - 3] : len ? path[0] : sy * MAP_W + sx;
+	int wx, wy, dummy;
+	netmap_world(aim % MAP_W, aim / MAP_W, &wx, &wy);
+	return way_to(wx, wy, &dummy);
+}
+
 static const char *status_words(void) {
 	static char buf[400];
 	int k = 0;
@@ -192,12 +233,14 @@ static const char *status_words(void) {
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData.|", run.fragments);
 		D.layer_told = true;
 	}
-	/* the way on, as MegaMan senses it */
+	/* the way on, as MegaMan senses it: along the floor where he can */
 	int far;
-	const char *way = way_to(D.objs.exit_x, D.objs.exit_y, &far);
+	int gx = D.objs.exit_x, gy = D.objs.exit_y;
+	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
+	const char *way = route_to(gx, gy, &far);
+	if (!way) way = way_to(gx, gy, &far);
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
-	if (!D.objs.guardian.navi || boss_done()) ADD("@M The exit pad's %s. %s", way, how_far[far]);
-	else if (!boss_beaten()) ADD("@M Its arena is %s. %s", way, how_far[far]);
+	if (!D.objs.guardian.navi || boss_done() || !boss_beaten()) ADD("@M The way on goes %s. %s", way, how_far[far]);
 	else ADD("@M Let's take its Guardian Data, Lan!");
 	#undef ADD
 	return buf;
