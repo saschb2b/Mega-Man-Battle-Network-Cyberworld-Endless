@@ -71,6 +71,16 @@ static bool pick(int kind, int min_id, ShopItem *out) {
 	return false;
 }
 
+/* The game's own entry for item `id` of `kind` in its initial shops. */
+static bool find_item(int kind, int id, ShopItem *out) {
+	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
+	for (uint32_t a = BN6_SHOP_INIT; a < end; a += 8) {
+		read_item(a, out);
+		if (out->kind == kind && out->id == id) return true;
+	}
+	return false;
+}
+
 static bool listed(const ShopItem *items, int n, const ShopItem *it) {
 	for (int i = 0; i < n; ++i)
 		if (items[i].kind == it->kind && items[i].id == it->id && items[i].code == it->code) return true;
@@ -87,14 +97,19 @@ int shop_dealer_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		it.price = (uint16_t)(chip_price(it.id) / 100);
 		if (!listed(out, n, &it)) out[n++] = it;
 	}
-	/* one HPMemory, dearer act by act (1200 zenny in the first) */
+	/* one HPMemory, dearer act by act (800 zenny in the first: about what
+	 * a layer's battles and Mystery Data bring) */
 	ShopItem hp = { 1, 1, 0x70, 0xFF, 0 };
-	hp.price = (uint16_t)(12 + 6 * (pacing_act(depth) + 7 * pacing_loop(depth)));
+	hp.price = (uint16_t)(8 + 4 * (pacing_act(depth) + 7 * pacing_loop(depth)));
 	out[n++] = hp;
-	for (int i = 0; i < 2; ++i) {
-		ShopItem it;
-		if (pick(1, 0x80, &it) && !listed(out, n, &it)) out[n++] = it;
-	}
+	/* SubChips: always a MiniEnrg (a heal to carry), and one of FullEnrg,
+	 * SneakRun or Untrap (LocEnemy's 7000 zenny and an Unlocker, with no
+	 * purple Mystery Data about, are no use in a run) */
+	static const uint16_t subs[] = { SUB_FULL_ENERGY, SUB_SNEAK_RUN, SUB_UNTRAP };
+	ShopItem mini;
+	if (find_item(1, SUB_MINI_ENERGY, &mini)) out[n++] = mini;
+	ShopItem other;
+	if (find_item(1, subs[rng_range(0, (int)(sizeof subs / sizeof *subs) - 1)], &other) && !listed(out, n, &other)) out[n++] = other;
 	return n;
 }
 

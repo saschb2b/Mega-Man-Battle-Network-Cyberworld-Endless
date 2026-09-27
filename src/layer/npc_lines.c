@@ -53,6 +53,7 @@ static const char *const tips[] = {
 	"Chip Traders swap three of your chips for one. Good for clearing out junk.",
 	"When the Custom Gauge fills, press L or R to pick new chips right away.",
 	"AreaGrab steals the enemy's front column. More room to move, less room to hide!",
+	"A fight going badly? Press START in battle and MegaMan can try to run. It doesn't always work!",
 };
 
 const char *npc_line(int depth, int i) {

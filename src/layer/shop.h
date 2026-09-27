@@ -20,6 +20,13 @@ typedef struct {
 #define SHOP_PROGRAMS 3   /* (its keeper's face is the technician navi's) */
 #define SHOP_MAX_ITEMS 8
 
+/* SubChips (item ids, per the initial shops' prices: MiniEnrg 100 zenny,
+ * FullEnrg 1000, SneakRun 500, Untrap 800, LocEnemy 7000, Unlocker 4000) */
+#define SUB_MINI_ENERGY 0x80
+#define SUB_FULL_ENERGY 0x81
+#define SUB_SNEAK_RUN   0x82
+#define SUB_UNTRAP      0x83
+
 /* Writes the stock of shop `shop`; false before the game has set up its data. */
 bool shop_install(int shop, const ShopItem *items, int n);
 

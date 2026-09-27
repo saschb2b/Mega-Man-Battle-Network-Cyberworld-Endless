@@ -19,7 +19,7 @@ int pacing_loop(int depth) { return (depth - 1) / CYCLE_LAYERS; }
  * (about 40% of MegaMan's HP then; in the first act, with the starting
  * folder, a third less: a playtest lost its first battle to two 20s) */
 static const PacingBand bands[PACING_ACTS] = {
-	{ 90, 200, 30 }, { 150, 280, 80 }, { 200, 360, 120 }, { 280, 420, 160 },
+	{ 90, 160, 30 }, { 150, 280, 80 }, { 200, 360, 120 }, { 280, 420, 160 },
 	{ 350, 500, 200 }, { 400, 580, 240 }, { 450, 650, 280 },
 };
 

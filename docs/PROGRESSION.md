@@ -210,7 +210,7 @@ bought; the value before this structure is in brackets.
 
 | Act | Layers | MegaMan max HP | HP per battle | Hardest hit | Versions | Guardian |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1-3 | 100 (100) | 90-200 | 30 | V1 | 400-600 V1 |
+| 1 | 1-3 | 100 (100) | 90-160 | 30 | V1 | 400-600 V1 |
 | 2 | 4-6 | 200 (160) | 150-280 | 80 | V1 | 600-800 V1 |
 | 3 | 7-9 | 300 (220) | 200-360 | 120 | V1-V2 | 800-1000 V1 |
 | 4 | 10-12 | 400 (280) | 280-420 | 160 | V2 | 1100-1300 (Colonel V1, EX of the 800s) |
