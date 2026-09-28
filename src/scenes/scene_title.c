@@ -71,6 +71,7 @@ static struct {
 	int row, net, folder, threat, helpers, helper;
 	int asked;            /* the frame it asked: its text types out from there */
 	char ask[32];         /* its second line, the saved run's layer */
+	uint16_t new_marks;   /* marks the run just over earned: they blink in after its summary */
 	SDL_Texture *tex;
 } S;
 
@@ -296,10 +297,13 @@ static const struct { int bit, x, y, tile, w, h, bank; } mark_parts[] = {
 	{ MARK_NEST, 64, 20, 0x200, 4, 2, 7 }, { MARK_NEST, 64, 36, 0x208, 2, 1, 7 },
 };
 
+#define MARK_ARRIVE 96   /* frames a new mark blinks, 4 on and 4 off */
+
 static void marks_draw(int x0, int y0) {
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
 	for (unsigned i = 0; i < sizeof mark_parts / sizeof *mark_parts; ++i) {
 		if (!(profile.marks & mark_parts[i].bit)) continue;
+		if ((S.new_marks & mark_parts[i].bit) && S.t < MARK_ARRIVE && (S.t / 4) % 2) continue;
 		rom_tiles(copy + (uint32_t)(mark_parts[i].tile - 0x180) * 32, T.copy_pal + (uint32_t)(mark_parts[i].bank - 5) * 32,
 			x0 + mark_parts[i].x, y0 + mark_parts[i].y, mark_parts[i].w, mark_parts[i].h, 0);
 	}
@@ -473,6 +477,9 @@ static void update(void) {
 		if (S.t > SUMMARY_MIN && (btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
 			S.summary = false;
 			S.t = S.shown_at = 0;
+			/* (the summary has room for two unlocks: a mark shows itself) */
+			S.new_marks = meta_marks_new();
+			if (S.new_marks) audio_sfx(SFX_REVEAL);
 		}
 		return;
 	}

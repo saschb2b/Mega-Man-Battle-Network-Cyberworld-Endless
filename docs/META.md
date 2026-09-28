@@ -265,7 +265,8 @@ Built as planned, with these particulars:
 BN6 draws marks over its title for what a save has done: its ending, its
 Library, its Program Advances, two of its events. Here the same sprites, at
 BN6's places, mark a profile's milestones. They are trophies, never keys:
-nothing needs one. The summary names a mark the run earned.
+nothing needs one. The summary names a mark the run earned where it has
+room, and the new mark blinks in on the title after it, with a chime.
 
 | Mark | BN6 | Here |
 | --- | --- | --- |

@@ -83,6 +83,7 @@ const char *meta_threat_rule(int rung) {
 bool meta_threat(int rung) { return run.threat >= rung; }
 
 static const char *said[6];
+static uint16_t marks_new;
 static char lines[6][48];
 static int nsaid;
 
@@ -95,6 +96,7 @@ static void say(const char *fmt, const char *what) {
 
 void meta_run_over(bool won) {
 	nsaid = 0;
+	marks_new = 0;
 	/* the endless net, once a short one is won */
 	if (won && run.mode == RUN_SHORT && !meta_endless_open()) say("%s", "the endless net");
 	if (won) profile.short_wins += run.mode == RUN_SHORT;
@@ -117,6 +119,7 @@ void meta_run_over(bool won) {
 			(b == MARK_THREAT && won && run.threat >= THREAT_MAX);
 		if (!earned || (profile.marks & b)) continue;
 		profile.marks |= (uint16_t)b;
+		marks_new |= (uint16_t)b;
 		say("%s", marks[i].what);
 	}
 	/* a folder, once its guardian has been deleted in any run */
@@ -127,6 +130,8 @@ void meta_run_over(bool won) {
 	}
 	profile_save();
 }
+
+uint16_t meta_marks_new(void) { return marks_new; }
 
 int meta_unlocked(const char **out, int max) {
 	int n = nsaid < max ? nsaid : max;

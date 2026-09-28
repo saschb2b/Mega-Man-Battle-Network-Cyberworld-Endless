@@ -43,6 +43,9 @@ enum {
 /* At a run's end, won or lost: the profile's unlocks from what the run and
  * the ones before it did, and the summary's lines for them. */
 void meta_run_over(bool won);
+/* The marks the run just over earned (MARK_* bits): the title shows them
+ * arriving. */
+uint16_t meta_marks_new(void);
 /* What the run just over unlocked, up to `max` lines; how many. */
 int meta_unlocked(const char **out, int max);
 /* The closest unlock still ahead, a line, or NULL. */

@@ -17,8 +17,9 @@
   - The summary names what a run opened, and the closest goal.
   - BN6's title marks, at BN6's places, stand for milestones: Gregar's
     head for a short net won, Bass for the endless net's Nest, the S for
-    the Secret Area, the green disc for a win on the top threat rung. The
-    version and the best depth moved to a line above the copyright.
+    the Secret Area, the green disc for a win on the top threat rung. A
+    new mark blinks in after the run's summary. The version and the best
+    depth moved to a line above the copyright.
   - Runs saved by an older build start afresh.
 - A returning player hears less at a run's start: the gift Mr. Prog's
   greeting is one page from the third run on, and so are the first
