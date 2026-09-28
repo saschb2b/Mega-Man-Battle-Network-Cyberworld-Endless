@@ -157,7 +157,8 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
 `--marks HEX` the title's marks, `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
-undernet, gate; intro, defeat, reward for the guardian; status for L). `--input "FRAMES:BUTTONS,..."` scripts the
+undernet, gate; intro, defeat, reward for the guardian; status for L;
+fragment for MegaMan's words at a ScrtData). `--input "FRAMES:BUTTONS,..."` scripts the
 buttons (`UP+RIGHT`, `A`), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames, and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
 @CAT:FIRST:COUNT:PATH` draw sprites. Environment variables reach the image

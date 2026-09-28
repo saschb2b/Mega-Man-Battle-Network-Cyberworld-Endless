@@ -39,9 +39,9 @@ const char *guardian_tip(int navi) {
 	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
 		"and he warps in close to slash. Keep moving!";
 	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
-		"Step off the yellow panel when he lands!";
-	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
-		"Keep our HP up, and hit him with swords and bombs!";
+		"Step off the yellow panel when he lands! Blades he leaves stuck in our side fly back across their rows.";
+	case 4: return "EraseMan's ghosts soak up our shots and drift across the rows: dodge up and down. "
+		"If our HP runs low he erases us in one blow, so heal before we face him!";
 	case 5: return "ChargeMan rams down our row like a train, his coal bombs burst on the lit panels, and his freight cars roll down "
 		"the rows and block our chips. Hit him as he pulls back in at the back!";
 	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "

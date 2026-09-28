@@ -189,6 +189,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->nchoices = 0;
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
+	out->fragment_found = -1;
 	for (int i = 0; i <= OBJ_GIFT; ++i) out->script_of[i] = -1;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
@@ -196,7 +197,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
-		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
+		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE, fragment_placed = false;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
 	ShopItem stock[SHOP_MAX_ITEMS];
@@ -254,6 +255,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				md[nmd].type = MYSTERY_GREEN;
 				if (fragment) {
 					fragment = false;
+					fragment_placed = true;
 					md[nmd].type = MYSTERY_BLUE;
 					fragment_content(md[nmd].content);
 				} else if (mystery_content(o, md[nmd].content)) {
@@ -411,6 +413,16 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	npcs.objects = props_objects(&npcs);
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
+	/* (what a ScrtData is for, said as it is picked up: a playtester was
+	 * told a layer later, then on every layer after) */
+	if (fragment_placed) {
+		static const char *const found[3] = {
+			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area. Let's find two more!",
+			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens!",
+			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now!",
+		};
+		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
+	}
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	out->archive = archive;
 	if (out->guardian.navi) guardian_actors(&npcs, archive, guardian_sprite(out->guardian.navi), &out->guardian);

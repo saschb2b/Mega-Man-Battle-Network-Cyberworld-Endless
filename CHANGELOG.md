@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A ScrtData says what it is for as it is picked up (three open the golden
+  gate to the Secret Area), and L's briefing counts them only when the
+  count changed, where it said so a layer late and then on every layer.
+- A run's summary names only what that run unlocked: a folder earned in an
+  earlier run that never reached a summary is no longer announced as new.
+- SlashMan's warning names the blades he leaves stuck in our side;
+  EraseMan's says his ghosts drift across the rows and to heal first.
 - **Touch controls.** On a touch screen the game draws a D-pad, A, B, L, R,
   Start and Select round the picture, in its own pixel art: under it on an
   upright phone, beside it on a wide screen (the picture a whole scale

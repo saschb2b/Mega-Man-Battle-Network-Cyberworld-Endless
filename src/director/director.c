@@ -60,6 +60,9 @@ static struct {
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
+	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
+	bool fragment_due;     /* ... once a talk can start */
+	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
 	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
@@ -321,9 +324,13 @@ static const char *status_words(void) {
 		 * froze him twice in the next act) */
 		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 			ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
-		/* (what they are for: a playtester carried two and never learned) */
-		if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
-		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
+		/* (what they are for: a playtester carried two and never learned;
+		 * once per count, the next heard it on every layer) */
+		if (run.fragments != D.fragments_told) {
+			if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
+			else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
+			D.fragments_told = run.fragments;
+		}
 	}
 	/* the services here: all of them the first time, then only the heal
 	 * while he is hurt (it heals every time; the map's key names the rest,
@@ -542,6 +549,8 @@ static bool build_layer(void) {
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
 	D.layer_told = false;
+	D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
+	D.fragment_due = false;
 	D.bugs_known = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
@@ -1832,8 +1841,8 @@ static bool follow_exit_warp(void) {
 
 /* --talk NAME:FRAME,...: from the layer's frame FRAME, once no chat is
  * open, the chat of its first NAME (npc shop heal programs gift challenge
- * undernet gate; intro defeat reward for its guardian; status for L), for
- * captures. */
+ * undernet gate; intro defeat reward for its guardian; status for L;
+ * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
 static void dev_talks(void) {
 	static unsigned done;
 	if (D.frame <= 1) done = 0;
@@ -1856,6 +1865,7 @@ static void dev_talks(void) {
 		if (!strcmp(name, "intro")) script = D.objs.guardian.intro;
 		else if (!strcmp(name, "defeat")) script = D.objs.guardian.defeat;
 		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
+		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
 		if (script < 0) { printf("--talk: no %s on this layer\n", name); continue; }
 		game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)script);
@@ -1996,6 +2006,12 @@ void director_update(void) {
 	 * the prize was never named) */
 	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
+	if (run.fragments > D.fragments_seen && D.objs.fragment_found >= 0) D.fragment_due = true;
+	D.fragments_seen = run.fragments;
+	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
+		D.fragment_due = false;
+		D.fragments_told = run.fragments;
+	}
 	/* a guardian keeps the exit pad shut (the game clears the map's warp
 	 * flags when it enters a map) */
 	if (!boss_exit_open()) flag_set(BN6_FLAG_WARP_OFF + 1);
