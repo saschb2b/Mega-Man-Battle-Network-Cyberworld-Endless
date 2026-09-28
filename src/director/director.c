@@ -92,7 +92,8 @@ static struct {
 	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
-	bool guardian_named;   /* the arrival's words named the act's guardian */
+	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
+	bool guardian_named;   /* ... and have been said on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
@@ -181,7 +182,7 @@ static void arrival_words(void) {
 	const char *area = guardian_area_in_text(run.biome, LAYER_NORMAL);
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	D.beat[0] = 0;
-	D.guardian_named = false;
+	D.beat_guardian = D.guardian_named = false;
 	if (run.side_kind == LAYER_UNDERNET)
 		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke, Lan.|@L Stay sharp. The exit pad leads back to the main path.");
 	else if (run.side_kind == LAYER_SECRET)
@@ -200,7 +201,7 @@ static void arrival_words(void) {
 		/* a new act: where they are now, and whose copy waits at its end */
 		snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!",
 			area, guardian(run.boss_order[run.biome])->name);
-		D.guardian_named = true;
+		D.beat_guardian = true;
 	}
 }
 
@@ -276,7 +277,8 @@ static const char *status_words(void) {
 			const char *tip = guardian_tip(D.objs.guardian.navi);
 			if (tip) ADD("@M %s|", tip);
 		}
-		/* (not straight after the act's arrival, whose words named him) */
+		/* (not after the act's arrival words, which named him; a CONTINUE
+		 * does not say them again, and there he is named) */
 		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named)
 			ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
 		else ADD("|");
@@ -1313,12 +1315,13 @@ static uint32_t shop_guard(uint32_t keys) {
 
 /* In battle an L or R pressed as the Custom gauge was all but full was
  * lost (the game takes them at a full gauge only; Kai re-pressed in every
- * fight), and so was one the game let pass while MegaMan fired or
- * flinched: a press is kept most of a second and given as the gauge
- * fills, one frame let go first so the game sees a press, then again
- * every CUSTOM_RETRY frames until the Custom screen opens (the gauge
- * empties as it does) or CUSTOM_TRIES frames have passed. */
-#define CUSTOM_EARLY 50
+ * fight, and at 50 frames still: the gauge's last tenth takes about a
+ * second and looks full), and so was one the game let pass while MegaMan
+ * fired or flinched: a press is kept a second and a half and given as
+ * the gauge fills, one frame let go first so the game sees a press, then
+ * again every CUSTOM_RETRY frames until the Custom screen opens (the
+ * gauge empties as it does) or CUSTOM_TRIES frames have passed. */
+#define CUSTOM_EARLY 90
 #define CUSTOM_TRIES 45
 #define CUSTOM_RETRY 20
 static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
@@ -1912,6 +1915,7 @@ void director_update(void) {
 	if (!D.area_card && !cinema_busy() && !boss_cinematic() && !boss_fighting() && !talk_busy()) {
 		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) {
 			if (run.biome == BIOME_NEST) cinema_shake(30, 3);
+			D.guardian_named = D.beat_guardian;
 			D.beat[0] = 0;
 		} else if (D.secret_call && boss_done() &&
 			talk_start("@C Lan, it's Chaud. ProtoMan hasn't left my PET all day.|@C Whatever you just beat down there was a copy. Watch yourself.|"
