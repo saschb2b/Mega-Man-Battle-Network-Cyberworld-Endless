@@ -346,7 +346,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				if (c <= 0) break;
 				chip_info(c, &ci);
 				chip = c;
-				if (ci.power >= 60 && ci.ncodes) break;
+				/* (not a recovery chip, whose power is what it heals: Recov150
+				 * was offered as hitting for 150) */
+				if (ci.power >= 60 && ci.ncodes && chip_def(c)->kind != CK_RECOVER) break;
 			}
 			if (chip <= 0) chip = roll_chip(run.depth, 3, &code);
 			chip_info(chip, &ci);

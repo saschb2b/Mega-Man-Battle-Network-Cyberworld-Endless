@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "bn6.h"
+#include "data.h"
 #include "emu.h"
 #include "rom.h"
 
@@ -369,7 +370,8 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	/* what the chip and the program do, before the choice */
 	{
 		char said[160];
-		if (power > 0) snprintf(said, sizeof said, "THE CHIP IS %s: IT HITS FOR %d!", chip_name, power);
+		if (power > 0 && chip_def(chip)->kind == CK_RECOVER) snprintf(said, sizeof said, "THE CHIP IS %s: IT RESTORES %d HP!", chip_name, power);
+		else if (power > 0) snprintf(said, sizeof said, "THE CHIP IS %s: IT HITS FOR %d!", chip_name, power);
 		else snprintf(said, sizeof said, "THE CHIP IS %s!", chip_name);
 		for (char *c = said; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 		ta_page(t, FACE_PROG, said, false);
@@ -383,6 +385,10 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	}
 	ta_mugshot(t, FACE_PROG);
 	ta_clear(t);
+	/* half a second before the options (an A pressed through the last page
+	 * chose the first of them, unread) */
+	static const uint8_t pause[] = { 0xEE, 0x00, 30, 0 };   /* ts_wait */
+	ta_bytes(t, pause, sizeof pause);
 	/* three options in a column (ts_option: left/right stay, up/down move) */
 	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
