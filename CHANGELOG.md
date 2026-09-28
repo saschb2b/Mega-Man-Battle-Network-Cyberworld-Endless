@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Six guardians' warnings name the moves they were missing, each checked
+  against a recording of the fight: GroundMan bursting up under the lit
+  panel and his drill missiles, ChargeMan's coal bombs and freight cars,
+  ProtoMan's dash across a lit row, CircusMan's lion through the burning
+  hoop, ElementMan's whirlwinds, logs and grass, and Colonel's slash
+  across a zigzag of lit panels.
 - Central's layers lay out combs as Central Area 2 does: five 1-wide
   catwalks side by side, long and short in turn, hung off a green walkway,
   gem pads on the short ones, a rung closing one loop, the middle one

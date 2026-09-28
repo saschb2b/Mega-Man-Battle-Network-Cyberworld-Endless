@@ -42,26 +42,31 @@ const char *guardian_tip(int navi) {
 		"Step off the yellow panel when he lands!";
 	case 4: return "EraseMan's ghosts soak up our shots, and if our HP runs low he can erase us in one blow. "
 		"Keep our HP up, and hit him with swords and bombs!";
-	case 5: return "ChargeMan rams straight down our row like a train. Step aside, then hit back!";
+	case 5: return "ChargeMan rams straight down our row like a train, and his coal bombs burst in flames on the lit panels. "
+		"His freight cars roll down the rows too. Step aside, then hit back!";
 	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
 		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!";
 	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
 		"Step off the yellow panels, and keep our distance!";
 	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "
 		"Step off the yellow panels, and watch our footing!";
-	case 9: return "GroundMan drills through the panels. Watch our footing!";
+	case 9: return "GroundMan bursts up from under the lit panel with his drill, and his drill missiles run down the rows in their shadows. "
+		"The panels he drills through crack: keep moving!";
 	case 10: return "DustMan drops scrap onto the lit panels and hurls our broken panels back at us, and their first hit stuns. "
 		"When he breathes in, he pulls us up close for a big punch. Keep a Recover chip ready!";
-	case 11: return "ProtoMan's shield stops our shots. Hit him when he swings his sword!";
+	case 11: return "ProtoMan's shield stops our shots. When our row lights up, he dashes across it to slash: "
+		"step out of the row, then hit him as he swings!";
 	case 12: return "BlastMan's bombs roll down our row and burst, his flames dash along it, and a fire wall walks down a column. "
 		"Step off the yellow panels!";
 	case 13: return "DiveMan hides under the water, where only bombs reach him: strike when he surfaces! "
 		"When his wave lights our panels, stand in our back column. His torpedoes run in their shadows' row.";
-	case 14: return "CircusMan keeps to the back of his area, claps down on a lit column and drops his tent to trap us. "
-		"Keep moving, and bring chips that reach the back!";
+	case 14: return "CircusMan claps down on a lit column, his lion leaps through a burning hoop down our row, and he drops his tent to trap us. "
+		"He keeps to the back: bring chips that reach it!";
 	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!";
-	case 16: return "ElementMan changes his element as he fights. Hard hits work whatever he is!";
-	case 18: return "Colonel sends his soldiers at us. Clear them out, then go for him!";
+	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "
+		"Hard hits work whatever he is!";
+	case 18: return "Colonel sends his soldiers at us: clear them out. When our panels light in a zigzag, he warps in and slashes across them. "
+		"Step off the yellow panels!";
 	default: return NULL;
 	}
 }
