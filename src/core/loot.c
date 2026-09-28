@@ -131,6 +131,17 @@ int counter_element(int biome, int navi) {
 }
 
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
+static uint32_t last_families;                  /* the virus families of the last battle (a bit each) */
+
+/* The virus families formation `f` brings, a bit each. */
+static uint32_t families_of(const Formation *f) {
+	uint32_t in = 0;
+	for (int k = 0; k < f->n; ++k) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		if (row[1] == 0 && row[2] > 0 && row[2] < 32) in |= 1u << row[2];
+	}
+	return in;
+}
 
 #define MAX_FIT 160
 
@@ -234,15 +245,25 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 		}
 	}
 	if (!total) return false;
+	/* a family the last battle brought a third as likely (six of a
+	 * playtester's seven act 1 battles held Gunners): the area's own
+	 * viruses, not the same ones fight after fight */
+	int weight[MAX_FIT];
+	total = 0;
+	for (int i = 0; i < n && i < MAX_FIT; ++i) {
+		weight[i] = fit[i] < 0 ? 0 : list[i].weight * (families_of(&list[i]) & last_families ? 1 : 3);
+		total += weight[i];
+	}
 	int roll = rng_range(0, total - 1), pick = -1;
 	for (int i = 0; i < n && i < MAX_FIT; ++i) {
-		if (fit[i] < 0) continue;
-		if (roll < list[i].weight) { pick = i; break; }
-		roll -= list[i].weight;
+		if (!weight[i]) continue;
+		if (roll < weight[i]) { pick = i; break; }
+		roll -= weight[i];
 	}
 	if (pick < 0) return false;
 	last_biome = biome;
 	last_pick = pick;
+	last_families = families_of(&list[pick]);
 	int hp, dmg;
 	build_foes(&list[pick], depth, fit[pick], false, e, &hp, &dmg);
 	band = pacing_band(depth, challenge, easy);

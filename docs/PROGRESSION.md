@@ -257,7 +257,10 @@ virus: the Aquarium Comp's Piranhas and Quakers take 70% of its battles (a
 playtester met nothing else in seven fights) and the ACDC HP has three
 kinds, 85% of them two. One battle in three there comes from the town's
 other area (the Aquarium HP, Central Area): 11 and 9 kinds of virus in the
-report, the two commonest about half.
+report, the two commonest about half. And a battle that shares a family
+with the last one is a third as likely as it would be (six of a
+playtester's seven act 1 battles in the RoboDog Comp held Gunners): the
+area keeps its viruses, but not the same ones fight after fight.
 
 ### Choosing areas
 

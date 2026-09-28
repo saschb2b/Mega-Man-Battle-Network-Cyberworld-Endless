@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A random battle that shares a virus family with the last one is a third
+  as likely (six of seven act 1 battles in the RoboDog Comp held Gunners).
 - Act 1's guardian is BlastMan, DiveMan or SpoutMan, alike (a playtester
   met BlastMan in seven of eleven runs, DiveMan the only other), and a run
   never meets one guardian in two acts where another fits.
