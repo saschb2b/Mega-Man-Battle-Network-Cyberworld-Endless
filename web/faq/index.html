@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ · Cyberworld Endless</title>
+<meta name="description" content="Questions about Cyberworld Endless, the Mega Man Battle Network 6 roguelike: the ROM it needs, where it plays, how a run goes and how it runs the game.">
+<meta name="theme-color" content="#4a7b42">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="faq.css">
+</head>
+<body>
+
+<header class="pet-bar">
+	<div class="wrap">
+		<a class="brand" href="../"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
+		<nav aria-label="Site">
+			<a class="opt" href="../#game">Game</a>
+			<a href="../#play">Play</a>
+			<a href="./" aria-current="page">FAQ</a>
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source</a>
+		</nav>
+	</div>
+</header>
+
+<main class="wrap">
+	<div class="band"><h1>FAQ</h1><span class="hint">New <b id="new">12</b></span></div>
+
+	<div class="mailbox">
+		<nav class="panel inbox" id="inbox" aria-label="Questions">
+			<ul class="menu mails">
+				<li><a class="row" href="#rom"><i class="icon i-mail" aria-hidden="true"></i><span>Which ROM do I need?</span></a></li>
+				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>Why isn't the game included?</span></a></li>
+				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>Does the browser upload my ROM?</span></a></li>
+				<li><a class="row" href="#where"><i class="icon i-mail" aria-hidden="true"></i><span>Where can I play?</span></a></li>
+				<li><a class="row" href="#run"><i class="icon i-mail" aria-hidden="true"></i><span>What is a run?</span></a></li>
+				<li><a class="row" href="#stronger"><i class="icon i-mail" aria-hidden="true"></i><span>How does MegaMan get stronger?</span></a></li>
+				<li><a class="row" href="#deleted"><i class="icon i-mail" aria-hidden="true"></i><span>What happens when MegaMan is deleted?</span></a></li>
+				<li><a class="row" href="#saves"><i class="icon i-mail" aria-hidden="true"></i><span>When is the run saved?</span></a></li>
+				<li><a class="row" href="#keys"><i class="icon i-mail" aria-hidden="true"></i><span>Can I change the keys?</span></a></li>
+				<li><a class="row" href="#original"><i class="icon i-mail" aria-hidden="true"></i><span>What is BN6's own, and what is new?</span></a></li>
+				<li><a class="row" href="#how"><i class="icon i-mail" aria-hidden="true"></i><span>How does it run BN6?</span></a></li>
+				<li><a class="row" href="#bug"><i class="icon i-mail" aria-hidden="true"></i><span>Something broke. Where do I say so?</span></a></li>
+			</ul>
+		</nav>
+
+		<div class="reader">
+			<article class="mail" id="rom">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>Which ROM do I need?</h2>
+					<p>Mega Man Battle Network 6: Cybeast Gregar (USA), unmodified, as the <code>.gba</code> file dumped from your own
+						cartridge. Its SHA-1 is <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code>. The file's name doesn't matter: the
+						game checks what is in it.</p>
+					<p>Cybeast Falzar, other regions and the Legacy Collection's version don't work yet.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#what-you-need">README: What you need</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="why-rom">
+				<span class="who">From: Fidelity</span>
+				<div class="textbox">
+					<h2>Why isn't the game included?</h2>
+					<p>Because the ROM is the game. BN6's battles, chips, viruses, PET, shops and music all run from it on an embedded
+						mGBA core; Cyberworld Endless builds the net around them and keeps the run going. No download and no page holds
+						Capcom's data, so without the ROM there is no game.</p>
+					<p>It is an unofficial fan project, not affiliated with or endorsed by Capcom.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md">FIDELITY: whose each part is</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="upload">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>Does the browser upload my ROM?</h2>
+					<p>No. The player checks the file and keeps it, with your saves, in the browser's own storage (IndexedDB) on your
+						device. The next visit starts straight away, and <em>Forget ROM and saves</em> removes both.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#in-a-browser">README: In a browser</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="where">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>Where can I play?</h2>
+					<p>On ROCKNIX handhelds through PortMaster (made for the Retroid Nova and the Retroid Pocket Flip 2), on a Steam
+						Deck, on an x86-64 Linux PC (Flatpak, AppImage or .deb) and in a desktop browser, which is also the way on
+						Windows and macOS.</p>
+					<p>Phones and touch screens aren't supported yet: the browser needs a keyboard or a controller.</p>
+					<p class="more"><a href="../#play">The builds</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#install">README: Install</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="run">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>What is a run?</h2>
+					<p>A run starts in town. Walk to the statue and press R: MegaMan jacks in to the first layer of a net that is new
+						every run, laid out in the style of one of BN6's areas. Find the exit pad to go a layer deeper; the area's
+						viruses meet you on the way.</p>
+					<p>Three layers make an act, and a guardian Navi waits at the end of each. Acts 1 to 4 visit the surface areas,
+						the story's comps and the homepages, act 5 the Undernet, act 6 the Graveyard, and layer 19 is the Cybeast
+						Nest. Then it starts again, harder.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#a-run">README: A run</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="stronger">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>How does MegaMan get stronger?</h2>
+					<p>On the first layer a Mr. Prog offers a gift: two HPMemory, a ★3 chip or a NaviCust program.</p>
+					<p>Every guardian leaves Guardian Data: five HPMemory, its Navi chip, its Cross where it has one, and a choice of
+						NaviCust programs. The second and fourth guardians grow the NaviCust to 5x4, then 5x5, and the Graveyard's
+						wakes BeastOut.</p>
+					<p>Chips come from Mystery Data, Net Dealers and traders, rarer the deeper you go.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#getting-stronger">README: Getting stronger</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="deleted">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>What happens when MegaMan is deleted?</h2>
+					<p>The run is over. The title shows how deep you got, how many viruses and Navis you deleted, and your best depth,
+						which stays. The guardians remember how your battles with them went, run after run.</p>
+					<p>If a run ends before its first guardian, the next run's gift comes with an extra HPMemory.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#saving-and-losing">README: Saving and losing</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="saves">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>When is the run saved?</h2>
+					<p>Each time MegaMan arrives on a layer, and when you quit while he is free to move (not in a battle, a talk or a
+						guardian's scene). CONTINUE on the title brings you back there. The PET's own Save is off during a run.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#saving-and-losing">README: Saving and losing</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="keys">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>Can I change the keys?</h2>
+					<p>The keyboard starts with the layout of Capcom's PC version: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+						move, <kbd>J</kbd> is A, <kbd>K</kbd> is B, <kbd>Q</kbd> and <kbd>E</kbd> are L and R, <kbd>Enter</kbd> is Start
+						and <kbd>R</kbd> is Select. Keys are positions, so on AZERTY you move with Z Q S D. Controllers use their own
+						buttons.</p>
+					<p>On Linux and the handhelds, <code>keys.ini</code> in the save folder changes the keys. The browser keeps this
+						layout.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#playing">README: Playing</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="original">
+				<span class="who">From: Fidelity</span>
+				<div class="textbox">
+					<h2>What is BN6's own, and what is new?</h2>
+					<p><b>BN6's own</b>, running from your ROM: battles and viruses, chips and Busting Levels, the PET, shops and
+						traders, the guardians' boss battles, the sprites, faces, text engine and music.</p>
+					<p><b>Built by the engine</b> in the game's formats: every layer's layout, its floors (tiles learned from the
+						area's original maps), its walls and what stands where. <b>Written for the run</b>: the Endless Net's story,
+						what people say, the run summary.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md">FIDELITY: whose each part is</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="how">
+				<span class="who">From: Emulation</span>
+				<div class="textbox">
+					<h2>How does it run BN6?</h2>
+					<p>An embedded mGBA core runs the game's own code from your ROM. Cyberworld Endless is the director around it: it
+						builds each layer in the game's map formats, points the map tables of the core's in-memory copy of the ROM at
+						it (your file is never written), and watches the game's memory to move the run along.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md">EMULATION: the memory it writes</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="bug">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>Something broke. Where do I say so?</h2>
+					<p>In an issue on GitHub: what happened, and where in the run. On a handheld, attach
+						<code>ports/cyberworld/log.txt</code>, the last start's output.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues">Issues</a></p>
+				</div>
+			</article>
+
+			<p class="back"><a class="pill" href="#inbox">All questions</a></p>
+		</div>
+	</div>
+</main>
+
+<footer class="site">
+	<div class="wrap">
+		<p>Mega Man Battle Network is © Capcom. Unofficial fan project, not affiliated with or endorsed by Capcom.
+			Code under the <a href="../LICENSE.txt">MIT license</a>; embeds <a href="https://mgba.io">mGBA</a>
+			(<a href="../licenses/mGBA.txt">MPL-2.0</a>) and SDL2 (zlib).</p>
+	</div>
+</footer>
+
+<script src="faq.js"></script>
+</body>
+</html>

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The site is one page of the game's pictures and its builds, and an FAQ
+  laid out as the PET's E-Mail answers what the docs answer: the ROM,
+  where it plays, a run, saves, keys and how it runs BN6.
 - A Server's prize comes from where the Net Dealer finds his picks, two
   layers deeper (an M-Cannon had paid for a Server beside a dealer's
   DolThdr2), and the last battle is kept with the run's save: the first

@@ -167,7 +167,7 @@ code { font: 0.92em ui-monospace, Menlo, Consolas, monospace; overflow-wrap: any
 	background: var(--band);
 	clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 100%, 0 100%);
 }
-.band h2 {
+.band h1, .band h2 {
 	margin: 0;
 	font: 700 clamp(1.3rem, 3vw, 1.9rem)/1.1 var(--caps);
 	color: var(--white);
@@ -295,6 +295,7 @@ footer.site a { color: #c6ff8c; }
 .i-handheld { background-image: url(ui/icon-handheld.png); }
 .i-web { background-image: url(ui/icon-web.png); }
 .i-mail { background-image: url(ui/icon-mail.png); }
+.i-mail-open { background-image: url(ui/icon-mail-open.png); }
 
 /* keys: dark caps with a light edge, as the game's button prompts */
 kbd {

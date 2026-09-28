@@ -239,6 +239,20 @@ kwwwwwwwwwwk
 kkkkkkkkkkkk
 ............
 ............""",
+    # the letter opened: its flap up, its inside showing
+    'mail-open': """
+............
+.....kk.....
+...kkwwkk...
+.kkwwwwwwkk.
+kkkkkkkkkkkk
+kksssssssskk
+kwksssssskwk
+kwwksssskwwk
+kwwwksskwwwk
+kwwwwkkwwwwk
+kwwwwwwwwwwk
+kkkkkkkkkkkk""",
 }
 
 
