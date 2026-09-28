@@ -813,8 +813,8 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	TileGrid gk = *g;
 	gk.face = -1;
 	gk.side = g->face;   /* (outlines beside its faces as deep as this map's) */
-	const TileCand *fit = NULL, *any = NULL;
-	int fit_d = INT_MAX, any_score = INT_MAX, fit_k = -1, fit_p = 0, any_p = 0;
+	const TileCand *fit = NULL, *any = NULL, *shows = NULL;
+	int fit_d = INT_MAX, any_score = INT_MAX, fit_k = -1, fit_p = 0, any_p = 0, shows_d = INT_MAX, shows_p = 0;
 	/* the walkway floor in a 2 x 2 block with the tile's panel: a field of it
 	 * (not a pad, which is its own island) */
 	unsigned pads = 0;
@@ -868,9 +868,16 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 			 * before its others), so a floor keeps one look (the other
 			 * floor's edge coming along where only one is costs its pixels) */
 			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; fit_p = pic; }
+			/* (and the nearest showing what the tile shows, however its
+			 * middle looks: a join's own tile, a bridge plugging into the
+			 * Graveyard's slabs, lightens the slab around it) */
+			if (m <= SLACK && pic <= OFF_EDGE_PX && d < shows_d) { shows = c; shows_d = d; shows_p = pic; }
 			if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; any_p = pic; }
 		}
 	}
+	/* a tile showing other floors than its own is worse than one whose
+	 * middle is not the plain floor's */
+	if (fit && fit_p > OFF_EDGE_PX && shows) { fit = shows; fit_d = shows_d; fit_p = shows_p; }
 	*dist = fit ? fit_d : -1;
 	const TileCand *c = fit ? fit : any;
 	*off = !tiles_measure ? TILE_EXACT : c ? off_by(oa, ob, c, fit ? fit_p : any_p) : TILE_OFF_NEAR;

@@ -152,7 +152,10 @@ right floors wins (most tiles drawn with a wrong floor or edge had a right
 one passed over for a nearer neighbourhood). The plain look inside the
 floor may come in another shade of the same colours: the Green HP draws its
 walkways a shade darker than its platforms, in tiles of their own, and
-every walkway tile had failed the test.
+every walkway tile had failed the test. Still, a pair showing what the
+tile shows beats a plain-looking one that shows other floors: where a
+bridge plugs into a Graveyard slab, the originals' own join lightens the
+slab around it, and the plain slab's tile left a notch there.
 
 Some areas never set one floor flush with another. Green's planks reach
 its raised grass by stairs, CopyBot's walkways reach its plateaus, which

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Where a bridge plugs into a Graveyard slab (and at a few other joins),
+  the join's own tiles from the originals are drawn, their lighter patch
+  on the slab included, in place of plain slab tiles that left a notch.
 - Central's, Seaside's and Sky's framed pads keep straight upper edges and
   meet their catwalks whole: a stamp change had left tile-wide steps along
   their upper edges, and its edge was laid over a catwalk's last panel.
