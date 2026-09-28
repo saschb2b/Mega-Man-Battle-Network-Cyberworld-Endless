@@ -325,9 +325,9 @@ MegaMan starts every run as strong as the first time: what runs leave
 behind is options. From the second run, NEW GAME opens a setup:
 
 - **Net:** the short net, or the endless net once a short one is won.
-- **Folder:** BN6's starting folder, or one opened by deleting a guardian
-  in any run: Blade (swords in S for LifeSword, after SlashMan) and Storm
-  (Elec chips, after ElecMan).
+- **Folder:** BN6's starting folder, or one opened in any run: Blade
+  (swords in S for LifeSword), once any guardian falls, and Storm (Elec
+  chips), once an Aqua guardian does.
 - **Threat:** rungs that each add one constraint (stronger viruses from act
   2, fewer heals, dearer dealers, EX guardians, SP Navis in Servers), each
   opened by winning on the one below.

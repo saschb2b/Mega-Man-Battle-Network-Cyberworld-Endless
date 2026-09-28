@@ -27,9 +27,10 @@
     10, whose fall wins the run and opens the endless net.
   - From the second run, NEW GAME opens a setup: the net, the starting
     folder, a threat rung, helpers.
-  - Two starting folders open by deleting a guardian in any run: Blade
-    (swords in S for LifeSword, after SlashMan) and Storm (Elec, after
-    ElecMan).
+  - Two starting folders open in any run: Blade (swords in S for
+    LifeSword) once any guardian falls, Storm (Elec) once an Aqua
+    guardian does; the setup lists each folder still closed and how it
+    opens.
   - Five threat rungs open one by one with wins, each one constraint.
   - Three helpers (two more HPMemory, a heal on every layer, gentle
     battles) count for everything.

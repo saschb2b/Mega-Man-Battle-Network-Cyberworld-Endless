@@ -426,23 +426,20 @@ static void setup_draw(int x0, int y0) {
 	for (int i = 0; i < 4; ++i) fill_rect(ax + i, ay + i, 1, 8 - 2 * i, orange);
 	/* what the chosen row means */
 	const char *note = "";
-	char buf[80];
+	char buf[80], locked[FOLDER_COUNT][48];
+	int nlocked = 0;
 	switch (S.row) {
 	case ROW_NET:
 		note = S.net == RUN_ENDLESS ? "The net repeats, harder each time" : meta_endless_open() ? "Three acts, then the Nest" :
 			"Three acts, then the Nest. Win it for the endless net";
 		break;
-	case ROW_FOLDER: {
+	case ROW_FOLDER:
 		note = meta_folder(S.folder)->about;
-		/* (what is still to open, and how: the telegraph comes first) */
+		/* (every folder still to open, and how: the telegraph comes first) */
 		for (int f = 1; f < FOLDER_COUNT; ++f)
-			if (!meta_folder_open(f) && meta_folder(f)->navi) {
-				snprintf(buf, sizeof buf, "%s: delete %s", meta_folder(f)->name, guardian(meta_folder(f)->navi)->name);
-				text_draw(cx, y0 + 112, buf, dim, TEXT_CENTER);
-				break;
-			}
+			if (!meta_folder_open(f) && meta_folder(f)->opens)
+				snprintf(locked[nlocked++], sizeof locked[0], "%s: %s", meta_folder(f)->name, meta_folder(f)->opens);
 		break;
-	}
 	case ROW_THREAT:
 		if (!S.threat) note = meta_threat_open() ? "The net as it comes" : "The net as it comes. Win it for threat 1";
 		else note = meta_threat_rule(S.threat);
@@ -450,7 +447,8 @@ static void setup_draw(int x0, int y0) {
 	case ROW_HELPERS: snprintf(buf, sizeof buf, "%s. A: on or off", helper_about[S.helper]); note = buf; break;
 	default: note = "A or START: jack in. B: back"; break;
 	}
-	note_line(cx, y0 + 92, note, sky);
+	int lines = note_line(cx, y0 + 92, note, sky);
+	for (int i = 0; i < nlocked; ++i) text_draw(cx, y0 + 94 + (lines + i) * 12, locked[i], dim, TEXT_CENTER);
 }
 
 static void update(void) {

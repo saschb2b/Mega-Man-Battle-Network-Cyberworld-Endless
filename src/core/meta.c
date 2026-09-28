@@ -4,18 +4,33 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "guardians.h"
 #include "rivals.h"
 #include "run.h"
 #include "save.h"
 
-/* Each folder opens as a run deletes the guardian whose style it takes
- * (the skill's milestones that teach, not counts to grind). */
+/* Each folder opens with a milestone that teaches its style and that a
+ * first or second run reaches (not a count to grind, and not a guardian
+ * the net may not bring for many runs: SlashMan and ElecMan, their first
+ * keys, came in act 3 or the Nest). */
 static const FolderInfo folders[FOLDER_COUNT] = {
-	{ "Standard", "BN6's own starting folder", 0 },
-	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", 3 },   /* SlashMan */
-	{ "Storm", "Elec chips: double on Aqua, plain on the rest", 2 },       /* ElecMan */
+	{ "Standard", "BN6's own starting folder", NULL },
+	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", "delete any guardian" },
+	{ "Storm", "Elec chips: double on Aqua, plain on the rest", "delete an Aqua guardian" },
 };
+
+/* (in any run, this build's or one before: rivals.sav keeps who fell) */
+static bool earned(int folder) {
+	switch (folder) {
+	case FOLDER_BLADE:
+		for (int n = 1; n < RIVAL_NAVIS; ++n)
+			if (rival(n)->megaman_won > 0) return true;
+		return false;
+	case FOLDER_STORM:
+		/* BN6's Aqua navis among the guardians: SpoutMan and DiveMan */
+		return rival(6)->megaman_won > 0 || rival(13)->megaman_won > 0;
+	default: return folder == FOLDER_STANDARD;
+	}
+}
 
 const FolderInfo *meta_folder(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
 
@@ -58,11 +73,11 @@ const uint16_t *meta_folder_chips(int folder) {
 	}
 }
 
-/* (its guardian deleted in any run, this build's or one before; the
- * profile's bit marks it as announced on a summary) */
+/* (earned in any run; the profile's bit marks it as announced on a
+ * summary, and keeps one opened under an older rule) */
 bool meta_folder_open(int folder) {
 	if (folder <= FOLDER_STANDARD || folder >= FOLDER_COUNT) return folder == FOLDER_STANDARD;
-	return (profile.folders_open >> folder & 1) || (folders[folder].navi && rival(folders[folder].navi)->megaman_won > 0);
+	return (profile.folders_open >> folder & 1) || earned(folder);
 }
 
 bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_clears > 0; }
@@ -122,9 +137,9 @@ void meta_run_over(bool won) {
 		marks_new |= (uint16_t)b;
 		say("%s", marks[i].what);
 	}
-	/* a folder, once its guardian has been deleted in any run */
+	/* a folder, once its milestone is reached in any run */
 	for (int f = 1; f < FOLDER_COUNT; ++f) {
-		if ((profile.folders_open >> f & 1) || !folders[f].navi || rival(folders[f].navi)->megaman_won <= 0) continue;
+		if ((profile.folders_open >> f & 1) || !earned(f)) continue;
 		profile.folders_open |= (uint16_t)(1u << f);
 		say("the %s folder", folders[f].name);
 	}
@@ -144,9 +159,9 @@ const char *meta_next_goal(void) {
 	/* (a line of the summary: 32 letters at most) */
 	if (!meta_endless_open()) return "Win the net for the endless net";
 	for (int f = 1; f < FOLDER_COUNT; ++f)
-		if (!meta_folder_open(f) && folders[f].navi) {
-			snprintf(goal, sizeof goal, "Delete %s: the %s folder", guardian(folders[f].navi)->name, folders[f].name);
-			if (strlen(goal) > 32) snprintf(goal, sizeof goal, "Delete %s: %s folder", guardian(folders[f].navi)->name, folders[f].name);
+		if (!meta_folder_open(f) && folders[f].opens) {
+			/* ("Delete an Aqua guardian: Storm") */
+			snprintf(goal, sizeof goal, "%c%s: %s", folders[f].opens[0] - 'a' + 'A', folders[f].opens + 1, folders[f].name);
 			return goal;
 		}
 	if (meta_threat_open() < THREAT_MAX) {

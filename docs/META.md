@@ -251,9 +251,12 @@ Built as planned, with these particulars:
 
 - The setup screen is skipped on a profile's very first run, and remembers
   the last run's choices.
-- The two folders to unlock are Blade (after SlashMan) and Storm (after
-  ElecMan); a folder counts as open once its guardian has fallen in any
-  run. BN6's five other preset folders (docs/ROM_DATA.md) wait for later
+- The two folders to unlock are Blade, once any guardian falls, and
+  Storm, once an Aqua guardian (DiveMan, SpoutMan) does, in any run. They
+  first opened with SlashMan and ElecMan, whom the net brings in act 3 or
+  the Nest: a playtester's setup offered nothing to choose until a first
+  win. The milestones now come in the first or second run and still
+  teach the folder's style (Storm's Elec answers Aqua). BN6's five other preset folders (docs/ROM_DATA.md) wait for later
   phases: one is a Program Advance folder, one a Navi-chip folder.
 - The helpers are two more HPMemory from the gift, a heal on every layer,
   and gentle battles (the lower half of the band all run).

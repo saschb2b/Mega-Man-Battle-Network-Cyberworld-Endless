@@ -11,7 +11,7 @@ enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_COUNT };
 typedef struct {
 	const char *name;
 	const char *about;   /* its style and its cost, a line */
-	int navi;            /* the guardian whose deletion opens it, 0 none */
+	const char *opens;   /* how it opens ("delete any guardian"), NULL: open from the start */
 } FolderInfo;
 
 const FolderInfo *meta_folder(int folder);
