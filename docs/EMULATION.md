@@ -86,7 +86,9 @@ stock is written again after the load (the state's RAM holds the saved
 one), and `run.make` records the build's `LAYER_MAKE`: a run saved by a
 build that makes layers otherwise continues its layer from the start, with
 the layer's flags and Mystery Data picks cleared (its RAM would not match
-this build's objects). `run.seen` beside it keeps the map's panels seen so
+this build's objects). `battle.sav` keeps what the random battles
+remember of the last one (its virus families, loot.h), so the first after a
+CONTINUE brings none of them either. `run.seen` beside it keeps the map's panels seen so
 far, and event flag `0x144E` in the state that L has told where they are
 (`0x144F`: that the Net Dealer has said his words, so a later talk is a
 line and the list; `0x1450` the same for the NaviCust vendor, `0x1451` for a
