@@ -27,6 +27,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 16 | 7 | Act 3's fights varied at last; DustMan's two unannounced moves ended the run |
 | 17 | 6 | Act 1 a joy, then DiveMan: his dive unannounced, the act's Elec plan fired into the water |
 | 18 | 8 | DiveMan beaten with the warning and the dealer's chip; the draft a real choice |
+| 19 | 8 | HeatMan lost on his last 29 HP, "the tensest fight yet"; 25 calls lost at a maze's V |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -261,3 +262,36 @@ Loop change: **re-watch the persona's next guardian** before the session
 (guardian_entry.sh with --guardian, then guardian_watch.sh), and check
 every "vanilla" report for an item or setting BN6 hands out over its
 story (the rotations were BN6's, missing from a run).
+
+## Session 19 (8/10, keep playing: yes; recommend: yes)
+
+Build af53461 (HeatMan's warning, the rotations). Act 2 in the Aquarium
+Comp from a CONTINUE: the rotations worked (both ways, the overlap purple),
+the dealer's tip for HeatMan read true ("its needles drop where he stood a
+moment later"), DiveMan D from the last Guardian Data took HeatMan from
+510 to 270, and he died on his last 29 HP after a minute at 20-40. Kai went
+far past the budget (496 calls), 150 of them watching HeatMan in slices.
+
+Raised: the leap's burst "burning an unlit panel" (the frames: an unlit
+fire tower crawling in from column 3 reached his new row as he stepped off
+the lit leap; the warning had said the towers run down lit panels, and now
+says they crawl unlit and turn into our row), 25 calls lost at a V in the
+water maze (the map now marks the way on over the floor he has seen), only
+Piranhas and Quakers in seven fights (the Aquarium Comp's and the ACDC
+HP's thin pools take one battle in three from their town's other area),
+the ice freezing him unannounced (told in the area's first briefing), a
+bystander on a platform's corner beside a walkway's end (a quarter of all
+navis and services stood so; bystanders never do now). Left: the dealer's
+list taking the A after its pitch and the NaviCust's quit prompt (BN6's
+own), a summon fired into a jumping Quaker (vanilla), rotation not yet a
+puzzle on a 4x4 board.
+
+Meanwhile the user's net generator request: Central's comb, the plus
+layout that had never built, the Graveyard's and the Undernet's cross
+emblems, the Nest's and the Undernet's floors in their own stone.
+
+Loop change: **read a death frame by frame before blaming the telegraph**
+(the lit panels were honest; the unlit attack was another move), and
+**watch a guardian's recording for what does not light up**: the warning
+must name those moves too.
+
