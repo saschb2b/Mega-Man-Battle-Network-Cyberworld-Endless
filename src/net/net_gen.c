@@ -171,9 +171,10 @@ static bool room_spot(const Room *r, int *ox, int *oy) { return room_spot_in(r, 
 
 #define MAX_COUNTER 4   /* panels */
 
-static bool on_stair(int x, int y) {
+/* within a cell of a stair's block: its landing stays open */
+static bool near_stair(int x, int y) {
 	for (int i = 0; i < layer.nstairs; ++i)
-		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return true;
+		if (x >= layer.stair[i].x - 1 && x < layer.stair[i].x + 3 && y >= layer.stair[i].y - 1 && y < layer.stair[i].y + 3) return true;
 	return false;
 }
 
@@ -213,7 +214,7 @@ static NetObj *counter(int r, int type, const LayerKit *kit) {
 					int x = faces == FACES_X ? v0 + d : u0 + t, y = faces == FACES_X ? u0 + t : v0 + d;
 					if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) { ok = d == -1; continue; }
 					if (d == -1) { ok = layer.cell[y][x] == C_VOID; continue; }
-					if (layer.cell[y][x] != C_PATH || layer.level[y][x] || on_stair(x, y) || object_at(x, y) ||
+					if (layer.cell[y][x] != C_PATH || layer.level[y][x] || near_stair(x, y) || object_at(x, y) ||
 					    (x == m->ax && y == m->ay)) { ok = false; continue; }
 					if (d == 2) { ok = cell_free(x, y); continue; }
 					xs[nb] = x; ys[nb++] = y;
@@ -227,7 +228,7 @@ static NetObj *counter(int r, int type, const LayerKit *kit) {
 				for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = C_PATH;
 				return NULL;
 			}
-			layer.props[layer.nprops] = (NetProp){ PROP_COUNTER, faces, faces == FACES_X ? v0 + 1 : u0, faces == FACES_X ? u0 : v0 + 1, len };
+			layer.props[layer.nprops] = (NetProp){ PROP_COUNTER, faces, faces == FACES_X ? v0 + 1 : u0, faces == FACES_X ? u0 : v0 + 1, len, 0 };
 			o->prop = layer.nprops++;
 			return o;
 		}
@@ -301,6 +302,289 @@ static void choose_arrival(void) {
 	Room t = layer.rooms[0];
 	layer.rooms[0] = layer.rooms[best];
 	layer.rooms[best] = t;
+}
+
+/* ---- Sprite props: sets as the originals compose them (docs/LEVEL_DESIGN.md,
+ * Props) ---- */
+
+static int16_t rdist[MAP_H][MAP_W];   /* cells from the way between the warps */
+
+static bool floor_cell(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
+static bool void_cell(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_VOID; }
+
+/* The cells on a shortest way from the arrival to the exit (or the
+ * guardian), and every cell's distance from them, void too: decoration
+ * keeps off the way players walk. */
+static void route_distances(void) {
+	static int16_t da[MAP_H][MAP_W], db[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	int gx = -1, gy = -1;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_EXIT || layer.obj[i].type == OBJ_RETURN || layer.obj[i].type == OBJ_BOSS) { gx = (int)layer.obj[i].x; gy = (int)layer.obj[i].y; }
+	int16_t (*d[2])[MAP_W] = { da, db };
+	int sx[2] = { (int)layer.obj[0].x, gx }, sy[2] = { (int)layer.obj[0].y, gy };
+	for (int k = 0; k < 2; ++k) {
+		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) d[k][y][x] = -1;
+		if (sx[k] < 0) continue;
+		int h = 0, t = 0;
+		d[k][sy[k]][sx[k]] = 0;
+		qx[t] = (int16_t)sx[k]; qy[t++] = (int16_t)sy[k];
+		while (h < t) {
+			int cx = qx[h], cy = qy[h++];
+			for (int j = 0; j < 4; ++j) {
+				int nx = cx + d4[j][0], ny = cy + d4[j][1];
+				if (!floor_cell(nx, ny) || d[k][ny][nx] >= 0) continue;
+				d[k][ny][nx] = (int16_t)(d[k][cy][cx] + 1);
+				qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+			}
+		}
+	}
+	int h = 0, t = 0, whole = gx >= 0 ? da[gy][gx] : -1;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			rdist[y][x] = -1;
+			if (whole >= 0 && da[y][x] >= 0 && db[y][x] >= 0 && da[y][x] + db[y][x] == whole) {
+				rdist[y][x] = 0;
+				qx[t] = (int16_t)x; qy[t++] = (int16_t)y;
+			}
+		}
+	while (h < t) {
+		int cx = qx[h], cy = qy[h++];
+		for (int j = 0; j < 4; ++j) {
+			int nx = cx + d4[j][0], ny = cy + d4[j][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || rdist[ny][nx] >= 0) continue;
+			rdist[ny][nx] = (int16_t)(rdist[cy][cx] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+static int far_from_way(int x, int y) { return rdist[y][x] < 0 ? 99 : rdist[y][x]; }
+
+static bool prop_at_cell(int x, int y) {
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind == PROP_SPRITE && p->x == x && p->y == y) return true;
+	}
+	return false;
+}
+
+static bool add_sprite(int look, int x, int y) {
+	if (layer.nprops >= MAX_PROPS) return false;
+	layer.props[layer.nprops++] = (NetProp){ PROP_SPRITE, 0, x, y, 1, look };
+	return true;
+}
+
+/* A room's back edge, along its -x side (s 0) or -y side (s 1), where it is
+ * the platform's rim: the longest run of its edge cells with floor on them
+ * (at ground level, with no object and no counter) and void past them.
+ * Cell u of it lies at edge(s, u), the void past it at past(s, u). */
+typedef struct { int s, v, u0, len; } Rim;
+static void edge_cell(const Room *m, int s, int u, int *x, int *y) { *x = s == 0 ? m->x : u; *y = s == 0 ? u : m->y; }
+static void past_cell(const Room *m, int s, int u, int k, int *x, int *y) { *x = s == 0 ? m->x - k : u; *y = s == 0 ? u : m->y - k; }
+
+static Rim back_rim(const Room *m, int s) {
+	Rim best = { s, 0, 0, 0 };
+	int span = s == 0 ? m->h : m->w, base = s == 0 ? m->y : m->x, run = 0;
+	for (int i = 0; i <= span; ++i) {
+		bool ok = false;
+		if (i < span) {
+			int ex, ey, px, py, qx, qy;
+			edge_cell(m, s, base + i, &ex, &ey);
+			past_cell(m, s, base + i, 1, &px, &py);
+			past_cell(m, s, base + i, 2, &qx, &qy);
+			/* (void two deep: not a gap between platforms) */
+			ok = floor_cell(ex, ey) && !layer.level[ey][ex] && !object_at(ex, ey) && void_cell(px, py) && void_cell(qx, qy);
+		}
+		if (ok) { ++run; continue; }
+		if (run > best.len) { best.len = run; best.u0 = base + i - run; }
+		run = 0;
+	}
+	return best;
+}
+
+/* Whether a room may carry a set: no counter in it or beside it. */
+static bool room_bare(const Room *m) {
+	for (int y = m->y - 1; y <= m->y + m->h; ++y)
+		for (int x = m->x - 1; x <= m->x + m->w; ++x)
+			if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && (layer.cell[y][x] == C_SOLID || layer.cell[y][x] == C_PROPPED)) return false;
+	return true;
+}
+
+/* A walled hole of n cells in a row along the floor (grid x for dir 0, y
+ * for 1) from (x, y): floor all round it (the originals' statues and
+ * stones stand in the floor's middle), clear of objects, walkway mouths
+ * and the way, and cutting nothing off. */
+static bool anchor_at(int x, int y) {
+	for (int r = 0; r < layer.nrooms; ++r)
+		if (layer.rooms[r].ax == x && layer.rooms[r].ay == y) return true;
+	return false;
+}
+
+static bool hole_fits(int x, int y, int n, int dir) {
+	int xs[4], ys[4];
+	for (int i = 0; i < n; ++i) {
+		int cx = dir == 0 ? x + i : x, cy = dir == 0 ? y : y + i;
+		if (!floor_cell(cx, cy) || layer.level[cy][cx] || near_stair(cx, cy) || !cell_free(cx, cy) || beside_narrow(cx, cy) ||
+		    anchor_at(cx, cy) || far_from_way(cx, cy) < 1) return false;
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) {
+				int nx = cx + dx, ny = cy + dy;
+				bool in_row = dir == 0 ? (ny == cy && nx >= x && nx < x + n) : (nx == cx && ny >= y && ny < y + n);
+				if (!in_row && (!floor_cell(nx, ny) || layer.level[ny][nx])) return false;
+			}
+		xs[i] = cx; ys[i] = cy;
+	}
+	return !cuts(n, xs, ys);
+}
+
+static void wall_off(int x, int y, int n, int dir, int look) {
+	for (int i = 0; i < n; ++i) {
+		int cx = dir == 0 ? x + i : x, cy = dir == 0 ? y : y + i;
+		layer.cell[cy][cx] = C_SOLID;
+		add_sprite(look, cx, cy);
+	}
+}
+
+/* The layer's landmark (one set piece, at the back of its biggest room off
+ * the way): Green's giant cybertree in the floor with an avenue of trees
+ * past the rim on both sides of it, mirrored; the Undernet's statue past
+ * the rim between two braziers, mirrored; the Graveyard's monument past it.
+ * Returns the room it stands in, or -1. */
+static int landmark(const LayerKit *kit) {
+	int set = kit->looks & (1u << LOOK_GIANT_TREE) ? LOOK_GIANT_TREE : kit->looks & (1u << LOOK_STATUE) ? LOOK_STATUE
+		: kit->looks & (1u << LOOK_MONUMENT) ? LOOK_MONUMENT : -1;
+	if (set < 0) return -1;
+	int need = set == LOOK_STATUE ? 5 : 3;
+	/* the candidates, best first: big rooms, long rims, far from the way */
+	struct { int r, score; Rim rim; } cand[MAX_ROOMS * 2];
+	int nc = 0;
+	for (int r = 1; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		if (r == layer.exit_room || r == layer.arena || m->kind == ROOM_PAD || m->w * m->h < 12 || !room_bare(m)) continue;
+		for (int s = 0; s < 2; ++s) {
+			Rim rim = back_rim(m, s);
+			if (rim.len < need) continue;
+			int ex, ey;
+			edge_cell(m, s, rim.u0 + rim.len / 2, &ex, &ey);
+			int away = far_from_way(ex, ey);
+			if (away < 1) continue;
+			cand[nc].r = r;
+			cand[nc].rim = rim;
+			cand[nc++].score = m->w * m->h * 4 + rim.len * 8 + (away > 6 ? 6 : away) * 10;
+		}
+	}
+	for (int i = 1; i < nc; ++i)
+		for (int j = i; j > 0 && cand[j].score > cand[j - 1].score; --j) {
+			__typeof__(cand[0]) t = cand[j]; cand[j] = cand[j - 1]; cand[j - 1] = t;
+		}
+	for (int c = 0; c < nc; ++c) {
+		const Room *m = &layer.rooms[cand[c].r];
+		Rim rim = cand[c].rim;
+		int s = rim.s, mid0 = rim.u0 + rim.len / 2;
+		/* the middle of the rim, else the nearest place along it the set fits */
+		for (int j = 0; j < 2 * rim.len; ++j) {
+			int mid = mid0 + ((j & 1) ? (j + 1) / 2 : -(j / 2));
+			int half = set == LOOK_STATUE ? 2 : 1;
+			if (mid - half < rim.u0 || mid + half >= rim.u0 + rim.len) continue;
+			int px, py;
+			past_cell(m, s, mid, 1, &px, &py);
+			if (set == LOOK_GIANT_TREE) {
+				/* in the floor one panel in from the rim, the trees past it */
+				int hx, hy;
+				edge_cell(m, s, mid, &hx, &hy);
+				if (s == 0) ++hx; else ++hy;
+				if (!hole_fits(hx, hy, 1, 0)) continue;
+				wall_off(hx, hy, 1, 0, LOOK_GIANT_TREE);
+				for (int k = 1; k <= 4; ++k) {
+					int a = mid - k, b = mid + k, ax, ay, bx, by;
+					if (a < rim.u0 || b >= rim.u0 + rim.len) break;
+					past_cell(m, s, a, 1, &ax, &ay);
+					past_cell(m, s, b, 1, &bx, &by);
+					if (far_from_way(ax, ay) < 2 || far_from_way(bx, by) < 2) break;
+					add_sprite(LOOK_TREE, ax, ay);
+					add_sprite(LOOK_TREE, bx, by);
+				}
+				return cand[c].r;
+			}
+			add_sprite(set, px, py);
+			if (set == LOOK_STATUE && kit->looks & (1u << LOOK_BRAZIER)) {
+				int ax, ay, bx, by;
+				past_cell(m, s, mid - 2, 1, &ax, &ay);
+				past_cell(m, s, mid + 2, 1, &bx, &by);
+				add_sprite(LOOK_BRAZIER, ax, ay);
+				add_sprite(LOOK_BRAZIER, bx, by);
+			}
+			return cand[c].r;
+		}
+	}
+	return -1;
+}
+
+/* Rows of three a panel apart, as the originals line up their trees past a
+ * rim and their gravestones in one walled hole of three panels. */
+static void rows(const LayerKit *kit, int skip, const int *order, int n) {
+	int trees = 0, graves = 0;
+	for (int i = 0; i < n; ++i) {
+		int r = order[i];
+		const Room *m = &layer.rooms[r];
+		if (r == skip || r == 0 || r == layer.arena || !room_bare(m)) continue;
+		if ((kit->looks & (1u << LOOK_TREE)) && trees < 2 && m->w * m->h >= 9) {
+			int s = rng_range(0, 1);
+			Rim rim = back_rim(m, s);
+			if (rim.len < 3) rim = back_rim(m, s ^ 1);
+			if (rim.len >= 3) {
+				int mid = rim.u0 + rim.len / 2, ok = 1, xs[3], ys[3];
+				for (int k = -1; k <= 1; ++k) {
+					past_cell(m, rim.s, mid + k, 1, &xs[k + 1], &ys[k + 1]);
+					ok &= far_from_way(xs[k + 1], ys[k + 1]) >= 2 && !prop_at_cell(xs[k + 1], ys[k + 1]);
+				}
+				if (ok) {
+					for (int k = 0; k < 3; ++k) add_sprite(LOOK_TREE, xs[k], ys[k]);
+					++trees;
+					continue;
+				}
+			}
+		}
+		if ((kit->looks & (1u << LOOK_GRAVE)) && graves < 2 && m->w >= 5 && m->h >= 5) {
+			int dir = rng_range(0, 1);
+			for (int tries = 0; tries < 12; ++tries) {
+				int x = m->x + 1 + rng_range(0, m->w - 3 - (dir == 0 ? 2 : 0)), y = m->y + 1 + rng_range(0, m->h - 3 - (dir == 1 ? 2 : 0));
+				if (!hole_fits(x, y, 3, dir)) continue;
+				wall_off(x, y, 3, dir, LOOK_GRAVE);
+				++graves;
+				break;
+			}
+		}
+	}
+}
+
+/* The WELCOME sign past the rim beside a counter's aisle, at its end, as
+ * the originals' NetCafes set theirs by the way in; the BBS past a big
+ * room's rim. */
+static void signs(const LayerKit *kit, int skip, const int *order, int n) {
+	for (int i = 0; i < layer.nprops && (kit->looks & (1u << LOOK_SIGN)); ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind != PROP_COUNTER) continue;
+		int cand[2][2];
+		if (p->faces == FACES_X) { cand[0][0] = p->x - 2; cand[0][1] = p->y + p->len; cand[1][0] = p->x - 2; cand[1][1] = p->y - 1; }
+		else { cand[0][0] = p->x + p->len; cand[0][1] = p->y - 2; cand[1][0] = p->x - 1; cand[1][1] = p->y - 2; }
+		for (int k = 0; k < 2; ++k)
+			if (void_cell(cand[k][0], cand[k][1]) && !prop_at_cell(cand[k][0], cand[k][1])) { add_sprite(LOOK_SIGN, cand[k][0], cand[k][1]); break; }
+	}
+	if (!(kit->looks & (1u << LOOK_BBS))) return;
+	for (int i = 0; i < n; ++i) {
+		const Room *m = &layer.rooms[order[i]];
+		if (order[i] == skip || m->w * m->h < 12 || !room_bare(m)) continue;
+		Rim rim = back_rim(m, rng_range(0, 1));
+		if (rim.len < 3) continue;
+		int x, y;
+		past_cell(m, rim.s, rim.u0 + rim.len / 2, 1, &x, &y);
+		if (far_from_way(x, y) < 2 || prop_at_cell(x, y)) continue;
+		add_sprite(LOOK_BBS, x, y);
+		return;
+	}
 }
 
 /* The next room of `order`; once each has had one, one of the big ones
@@ -438,6 +722,15 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (challenge) { PLACE(OBJ_CHALLENGE); ++next; }
 	if (undernet) { PLACE(OBJ_UNDERNET); ++next; }
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
+	/* the area's props, set as the originals set theirs, before the loose
+	 * Mystery Data and bystanders fill the rooms: a landmark, rows and the
+	 * signs (docs/LEVEL_DESIGN.md, Props) */
+	if (kit && kit->looks) {
+		route_distances();
+		int land = landmark(kit);
+		rows(kit, land, order, n);
+		signs(kit, land, order, n);
+	}
 	/* Rooms holding better data, more of them deeper and in the Undernet. */
 	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET);
 	for (int k = 0; k < rich; ++k, ++next) {

@@ -877,7 +877,7 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 	if (!(emu_read32(list + (uint32_t)index * 4) & 0x80000000u)) return;
 	for (int i = 0; i < npcs->nsprites; ++i)
 		if (npcs->sprite_idx[i] == index && npcs->sprite_cat[i] == category * 4) return;
-	if (npcs->nsprites >= 8) return;
+	if (npcs->nsprites >= MAPSLOT_SPRITES) return;
 	npcs->sprite_cat[npcs->nsprites] = (uint8_t)(category * 4);
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
 }

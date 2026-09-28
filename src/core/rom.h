@@ -52,6 +52,7 @@ typedef struct {
 		uint8_t apart;           /* NET_APART_*: floor its originals never set flush with the rest, drawn whole where a walkway meets it */
 		uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours */
 		int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
+		uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */

@@ -199,9 +199,9 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	 * are gone, and their sprites would fill the buffer) */
 	uint32_t sprites = sprite_table(group);
 	if (sprites >= 0x08000000u && npcs) {
-		uint8_t list[2 * 8 + 2];
+		uint8_t list[2 * MAPSLOT_SPRITES + 2];
 		int n = 0;
-		for (int i = 0; i < npcs->nsprites && i < 8; ++i) {
+		for (int i = 0; i < npcs->nsprites && i < MAPSLOT_SPRITES; ++i) {
 			list[n++] = npcs->sprite_cat[i];
 			list[n++] = npcs->sprite_idx[i];
 		}

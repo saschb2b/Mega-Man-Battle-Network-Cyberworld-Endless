@@ -1,5 +1,7 @@
 #include "rom.h"
 
+#include "net.h"   /* LOOK_* */
+
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +10,8 @@
 
 Rom R;
 
+/* (an area's looks, bit per LOOK_*) */
+#define L(look) (1u << LOOK_##look)
 static const RomLayout layouts[] = {
 	[ROM_BN6_GREGAR_US] = {
 		.name = "Mega Man Battle Network 6: Cybeast Gregar (USA)",
@@ -21,13 +25,13 @@ static const RomLayout layouts[] = {
 		.navicust_programs = 0x13B22C,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {
-			{ 0x90, 0, 0x0018, 0x0040, false, 0x13, 0x90, 0, 3, { { 0x90, 1 } }, .counter = { 0x94, 2, -300, -144 } },     /* Central Area 1; battles of Central 1-3; the Net Dealer's capsule is Sky Area 3's, in the same tiles as Central Area 2's (bank 3), in Central's colours */
-			{ 0x91, 0, 0x2040, 0x0006, false, 0x11, 0x91, 0, 3, { { 0x91, 1 }, { 0x91, 2 } }, .counter = { 0x94, 2, -300, -144 } },     /* Seaside Area 1; Seaside 1-3 (and their colours: TILES_MORE_COLOURS, Seaside 2 and 3's yellow panels are its second floor's only fields) */
-			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } }, .counter = { 0x94, 2, -300, -144 } },     /* Sky Area 2; Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK); the Net Dealer's capsule of Sky Area 3 */
-			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS, .counter = { 0x92, 1, -28, -468 } },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush); the Net Dealer's NetCafe desk of Green Area 2 */
-			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } } },     /* Graveyard; Graveyard 1-3 */
-			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } } },      /* Undernet 1; Undernet 1-3 */
-			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2 },      /* Undernet Zero; Undernet 3-4 */
+			{ 0x90, 0, 0x0018, 0x0040, false, 0x13, 0x90, 0, 3, { { 0x90, 1 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(TREE) | L(SIGN) },     /* Central Area 1; battles of Central 1-3; the Net Dealer's capsule is Sky Area 3's, in the same tiles as Central Area 2's (bank 3), in Central's colours */
+			{ 0x91, 0, 0x2040, 0x0006, false, 0x11, 0x91, 0, 3, { { 0x91, 1 }, { 0x91, 2 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(BBS) | L(SIGN) },     /* Seaside Area 1; Seaside 1-3 (and their colours: TILES_MORE_COLOURS, Seaside 2 and 3's yellow panels are its second floor's only fields) */
+			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(TREE) | L(SIGN) },     /* Sky Area 2; Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK); the Net Dealer's capsule of Sky Area 3 */
+			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS, .counter = { 0x92, 1, -28, -468 }, .looks = L(TREE) | L(GIANT_TREE) | L(SIGN) },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush); the Net Dealer's NetCafe desk of Green Area 2 */
+			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } }, .looks = L(MONUMENT) | L(GRAVE) },     /* Graveyard; Graveyard 1-3 */
+			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet 1; Undernet 1-3 */
+			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet Zero; Undernet 3-4 */
 			{ 0x93, 1, 0x0004, 0x0000, true, 0x21, 0x93, 0, 2, { { 0x93, 0 } } },      /* Underground 2; Underground 1-2 */
 			{ 0x8C, 0, 0x0002, 0x0008, false, 0x13, 0x8C, 0, 16 },    /* a comp (orange, green); the comps of group 0x8C */
 			{ 0x88, 3, 0x0800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */
@@ -46,6 +50,8 @@ static const RomLayout layouts[] = {
 		.battle_bg_anims = 0x0822E0,
 	},
 };
+
+#undef L
 
 /* ---- SHA-1 (FIPS 180-1) ---- */
 typedef struct { uint32_t h[5]; uint64_t len; uint8_t buf[64]; size_t fill; } Sha1;

@@ -48,14 +48,20 @@ typedef struct {
 /* Props: what the originals set on their floors (docs/LEVEL_DESIGN.md,
  * Props). A counter faces the camera: along grid y with its front towards
  * grid +x (screen down-right), or along grid x with its front towards
- * grid +y (down-left); its navi stands in the aisle behind it. */
-enum { PROP_COUNTER };
+ * grid +y (down-left); its navi stands in the aisle behind it. A sprite
+ * prop is one of the originals' map objects on a cell: in the void past
+ * the floor's edge, or on a walled-off cell (C_SOLID) in the floor, a hole
+ * as the originals set their statues and stones in. */
+enum { PROP_COUNTER, PROP_SPRITE };
 enum { FACES_X, FACES_Y };
-#define MAX_PROPS 8
+/* the sprite props' looks (the map side knows their objects) */
+enum { LOOK_TREE, LOOK_GIANT_TREE, LOOK_STATUE, LOOK_BRAZIER, LOOK_MONUMENT, LOOK_GRAVE, LOOK_SIGN, LOOK_BBS, LOOK_COUNT };
+#define MAX_PROPS 40
 
 typedef struct {
 	int kind, faces;
-	int x, y, len;    /* the counter's first cell (lowest along its run) */
+	int x, y, len;    /* a counter's first cell (lowest along its run); a sprite's cell */
+	int look;         /* a sprite's LOOK_* */
 } NetProp;
 
 /* Room kinds: where points of interest go (docs/LEVEL_DESIGN.md). */
@@ -109,6 +115,7 @@ typedef struct {
 	unsigned stair_dirs;
 	int rise;
 	int counter_len[2];
+	unsigned looks;   /* the sprite props its maps have (bit per LOOK_*) */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */

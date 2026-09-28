@@ -2,8 +2,10 @@
 #include "layer_objs.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "bn6.h"
+#include "bytes.h"
 #include "chip_pool.h"
 #include "data.h"
 #include "debug.h"
@@ -88,15 +90,74 @@ static void fragment_content(uint8_t out[8]) {
 	for (int i = 0; i < 8; ++i) out[i] = c[i];
 }
 
-/* Compressed sprites only draw once the map loads them. */
-static void need_sprite(NpcList *npcs, int category, int index) {
+/* Compressed sprites only draw once the map loads them: false where the
+ * map's list has no room left for one (12 of them, 0x8800 bytes
+ * decompressed, the game's loader), which then must not be shown. */
+static bool need_sprite(NpcList *npcs, int category, int index) {
 	uint32_t list = emu_read32(0x08000000u + R.layout->sprite_lists + (uint32_t)category * 4);
-	if (!(emu_read32(list + (uint32_t)index * 4) & 0x80000000u)) return;
+	uint32_t ptr = emu_read32(list + (uint32_t)index * 4);
+	if (!(ptr & 0x80000000u)) return true;
 	for (int i = 0; i < npcs->nsprites; ++i)
-		if (npcs->sprite_idx[i] == index && npcs->sprite_cat[i] == category * 4) return;
-	if (npcs->nsprites >= 8) return;
+		if (npcs->sprite_idx[i] == index && npcs->sprite_cat[i] == category * 4) return true;
+	uint32_t bytes = emu_read32(ptr & 0x7FFFFFFFu) >> 8;   /* (its LZ77 header) */
+	if (npcs->nsprites >= MAPSLOT_SPRITES || npcs->sprite_bytes + bytes > MAPSLOT_SPRITE_BYTES) return false;
 	npcs->sprite_cat[npcs->nsprites] = (uint8_t)(category * 4);
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
+	npcs->sprite_bytes += bytes;
+	return true;
+}
+
+/* The sprite props' map objects (docs/LEVEL_DESIGN.md, Props): the
+ * originals' objects by their OverworldMapObjects ids, each at its panel's
+ * spot +(14, 18) from the corner, as the originals set theirs, a set
+ * piece's pieces where the original has them. */
+#define OW_MAP_OBJECTS 0x0A4F24u
+static const struct { uint8_t look; uint8_t id; int8_t dx, dy; int16_t dz; } prop_pieces[] = {
+	{ LOOK_TREE, 0x3D, 14, 18, 0 },            /* a cybertree (Green Area 2, ACDC Area) */
+	{ LOOK_GIANT_TREE, 0x7F, 14, 18, 0 },      /* the giant cybertree's body, */
+	{ LOOK_GIANT_TREE, 0x80, 38, -6, -24 },    /* its base */
+	{ LOOK_GIANT_TREE, 0x81, -10, 42, 154 },   /* and its crown (Green Area 2) */
+	{ LOOK_STATUE, 0x9C, 14, 18, -12 },        /* the Undernet's statue */
+	{ LOOK_BRAZIER, 0x9F, 14, 18, 0 },         /* a brazier (Undernet 1 and Zero) */
+	{ LOOK_MONUMENT, 0xD3, 16, 16, 0 },        /* the Graveyard's monument */
+	{ LOOK_GRAVE, 0xCA, 14, 18, 0 },           /* a gravestone (the Graveyard's rows) */
+	{ LOOK_SIGN, 0x3E, 14, 18, 0 },            /* the NetCafe's WELCOME sign (Central Area 1) */
+	{ LOOK_BBS, 0x47, 14, 18, -24 },           /* a BBS (Seaside Area 1) */
+};
+
+static uint32_t props_objects(NpcList *npcs) {
+	static uint8_t recs[(MAX_PROPS * 3 + 1) * 20];
+	int n = 0;
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind != PROP_SPRITE) continue;
+		/* (its sprites first: a piece without its sprite would draw noise) */
+		bool loaded = true;
+		for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces; ++k)
+			if (prop_pieces[k].look == p->look) {
+				const uint8_t *e = R.data + OW_MAP_OBJECTS + prop_pieces[k].id * 16u;
+				loaded &= need_sprite(npcs, e[0] / 4, e[1]);
+			}
+		if (emu_debug_on()) fprintf(stderr, "prop look %d at %d,%d%s%s\n", p->look, p->x, p->y, layer.cell[p->y][p->x] ? " (hole)" : "", loaded ? "" : " - no room for its sprite");
+		if (!loaded) continue;
+		int cx, cy;
+		netmap_world(p->x, p->y, &cx, &cy);   /* (the panel's centre, 16 in from its corner) */
+		int cz = layer.level[p->y][p->x] ? layer.rise : 0;
+		for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces && n < MAX_PROPS * 3; ++k) {
+			if (prop_pieces[k].look != p->look) continue;
+			uint8_t *r = recs + n++ * 20;
+			memset(r, 0, 20);
+			r[0] = 5;   /* a map object, its handler looked up by its id */
+			put32(r + 4, (uint32_t)((int32_t)(cx - 16 + prop_pieces[k].dx) * 65536));
+			put32(r + 8, (uint32_t)((int32_t)(cy - 16 + prop_pieces[k].dy) * 65536));
+			put32(r + 12, (uint32_t)((int32_t)(cz + prop_pieces[k].dz) * 65536));
+			put32(r + 16, prop_pieces[k].id);
+		}
+	}
+	if (!n) return 0;
+	memset(recs + n * 20, 0, 4);
+	recs[n * 20] = 0xFF;
+	return mapslot_alloc(recs, n * 20 + 4);
 }
 
 typedef struct {
@@ -336,6 +397,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	layer_objs_shops(out);
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
+	npcs.objects = props_objects(&npcs);
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
 	uint32_t archive = text.n ? ta_commit(&text) : 0;

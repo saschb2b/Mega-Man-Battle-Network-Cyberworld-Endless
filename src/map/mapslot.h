@@ -6,13 +6,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define MAPSLOT_SPRITES 12
+#define MAPSLOT_SPRITE_BYTES 0x8800
+
 /* NPC scripts the layer runs (bus addresses of script bytecode), up to 32. */
 typedef struct {
 	uint32_t script[32];
 	int n;
-	/* compressed sprites the NPCs use (list byte offset, index), loaded with the map */
-	uint8_t sprite_cat[8], sprite_idx[8];
+	/* compressed sprites the NPCs and objects use (list byte offset, index),
+	 * loaded with the map: the game takes 12 and 0x8800 bytes decompressed */
+	uint8_t sprite_cat[MAPSLOT_SPRITES], sprite_idx[MAPSLOT_SPRITES];
 	int nsprites;
+	uint32_t sprite_bytes;
 	/* the map's object spawns (20-byte records ending 0xFF, bus address), or 0 */
 	uint32_t objects;
 } NpcList;

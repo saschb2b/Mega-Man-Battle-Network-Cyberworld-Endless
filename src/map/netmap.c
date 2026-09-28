@@ -573,6 +573,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	kit->stair_dirs = netmap_stair_dirs(area, &kit->rise);
 	if (area < 0 || area >= NET_AREAS || !learned[area].ok) return;
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
+	kit->looks = R.layout->net_area[area].looks;
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */

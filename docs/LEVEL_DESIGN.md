@@ -258,14 +258,55 @@ hubs, 99% of Green's routes and 75% of its ladders. The navi is drawn under
 the second layer (script 0x1B) so the counter's art covers its legs, and the
 director aims A at the talk centre (OverworldNPCObject +0x11-0x13).
 
+### Sets (built)
+
+Each area furnishes its layers from its own maps' objects (`RomLayout.
+net_area[].looks`): the originals' map objects by their ids, each at its
+panel's spot 14 and 18 in from the corner as the originals set theirs,
+spawned with the layer's map (docs/ROM_DATA.md, Map objects). The
+generator composes them after the services and before the loose Mystery
+Data and bystanders, as a map is built before it is filled
+(`landmark`, `rows`, `signs` in `net_gen.c`):
+
+| Area | Landmark | Rows and signs |
+| --- | --- | --- |
+| Green | the giant cybertree in a walled hole one panel in from a room's back rim, cybertrees past the rim on both sides of it, mirrored, up to four pairs | rows of three cybertrees past rims; the WELCOME sign by the counter |
+| Undernet, Secret Area | the statue past a back rim, a brazier two panels to either side, mirrored | |
+| Graveyard | the monument past a back rim | rows of three gravestones in one walled hole of three panels in a big slab |
+| Central, Sky | | rows of three cybertrees past rims; the WELCOME sign by the counter |
+| Seaside | | a BBS past a big room's rim; the WELCOME sign by the counter |
+
+The rules, from the originals' numbers above:
+
+- **The landmark** takes the best room for it: not the arrival's, the
+  exit's or the arena, no pad, twelve panels or more, no counter in or
+  beside it, a back rim (grid -x or -y, the top of the screen) of three
+  panels (five for the statue's pair) with void two panels deep past it,
+  its middle off the way between the warps; bigger rooms, longer rims and
+  more distance from the way first. The set slides along the rim from its
+  middle until it fits.
+- **A walled hole** (the giant tree, the gravestones) has floor all round
+  it, keeps a cell clear of stairs, rooms' anchors, walkway mouths and
+  objects, stands off the way, and cuts nothing off.
+- **Past a rim** a prop stands in the void a panel out, with void a second
+  panel out, so never in a gap between two platforms.
+- **Rows** of trees go past the rims of up to two other rooms, trees two
+  panels or more from the way; rows of gravestones go in slabs five panels
+  or more across, up to two.
+- **Signs**: the WELCOME sign in the void at the end of a counter's aisle,
+  as the originals set theirs by a NetCafe's way in; a BBS past a big
+  room's rim.
+
+Over the tests' 300 layers with every look: 2348 props, 255 of them in
+walled holes, a landmark on 162 layers (the areas' own looks give fewer).
+A map loads at most 12 compressed sprites and 0x8800 bytes of them (the
+game's loader); a prop whose sprite no longer fits is left out whole, not
+shown as noise.
+
 ### Next
 
-Each area's signature props, set by those rules: the sprite objects of the
-maps' object lists (cybertrees, statues and braziers, gravestones, signs,
-boards, the BBS), which carry their own palettes and need only an object
-record, the map's sprite list and their walls; one landmark set piece per
-layer at a hub or a big field's back; pairs flanking an important room's
-entrance; rows and avenues along a field's rim; the pads' centrepieces
-(the red-gem ornament, the link ring, the cube on its base), walkable, on
-3x3 pads. Every one of them is placed off the route and away from walkway
-mouths, and the tests count what each rule makes over hundreds of layers.
+The pads' centrepieces (the red-gem ornament, the link ring, the cube on
+its base: second-layer tiles, walkable, on 3x3 pads), Green's potted
+bushes between parallel planks (tiles), the field pictures and a hub's
+centrepiece where the layout has a centre; each a stamp cut like the
+counters, set by the same rules.

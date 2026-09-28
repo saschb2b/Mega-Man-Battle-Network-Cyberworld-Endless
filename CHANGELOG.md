@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- The layers are furnished with their areas' own props, composed as the
+  originals compose theirs rather than scattered: Green's giant cybertree
+  in the floor at the back of a room with an avenue of cybertrees past the
+  rim on both sides, the Undernet's statue between two braziers, the
+  Graveyard's monument and rows of three gravestones in walled holes,
+  rows of cybertrees past the rims in Central, Sky and Green, the WELCOME
+  sign beside the Net Dealer's counter and a BBS in Seaside. The game's own
+  map objects; a layer loads their sprites within the game's limits.
 - DiveMan's warning says he hides under the water where nothing hits him,
   to strike when he surfaces, to stand in the back column when his wave
   lights the panels and that his torpedoes run in their shadows' row (it

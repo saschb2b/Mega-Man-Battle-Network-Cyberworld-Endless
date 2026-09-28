@@ -669,7 +669,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 20
+#define LAYER_MAKE 21
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -778,6 +778,13 @@ void director_describe(FILE *f) {
 						}
 						g[y][MAP_W] = 0;
 					}
+					/* (% a sprite prop, in the void or in its walled hole) */
+					for (int i = 0; i < layer.nprops; ++i)
+						if (layer.props[i].kind == PROP_SPRITE) {
+							int px = layer.props[i].x, py = layer.props[i].y;
+							g[py][px] = '%';
+							x0 = px < x0 ? px : x0; y0 = py < y0 ? py : y0; x1 = px > x1 ? px : x1; y1 = py > y1 ? py : y1;
+						}
 					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
 					static const char mark[] = "IXMSHTTBUGNCPRF";
