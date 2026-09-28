@@ -323,23 +323,23 @@ on; `paste_ornaments` sets one on the middle of every pad at ground level
 with nothing standing there, the red gem three times in five, from the
 layer's seed (the floor and the layout unchanged).
 
-### Central's and Seaside's framed pads (built)
+### Central's, Seaside's and Sky's framed pads (built)
 
 Central Area 1's pads are one piece of art over their 3x3 panels: a pale
 frame with violet corners, a cyan band and a blue recess that holds the
 centrepiece, the catwalks meeting the frame's edges; Seaside's the same in
 yellow with green corners, Sky Area 2's in lavender with pink ones. The
-tile classes drew
-a layer's pads in Central's green floor (the framed pads' blue lies in the
-walkway material, and classed as walkway their pieces came apart).
-`props_learn_pad` finds one in the area's own map, the first 3x3 island
-of floor whose middle has the recess's hue (`net_area.pad_hues`: Central's
-blue, Seaside's yellow, Sky's lavender), and cuts the first layer's tiles
-over its panels
-and the faces under them; `paste_pads` sets it whole on every 3x3 pad at
-ground level away from the stairs, never over a platform it touches, and
-the centrepieces go on it. Green's are not cut: its pads stand raised on
-the originals, and would sink MegaMan into them.
+tile classes drew a layer's pads in Central's green floor (the framed
+pads' blue lies in the walkway material, and classed as walkway their
+pieces came apart). `props_learn_pad` finds one in the area's own map, the
+first 3x3 island of floor whose middle has the recess's hue
+(`net_area.pad_hues`: Central's blue, Seaside's yellow, Sky's lavender),
+and cuts the first layer's tiles over its panels and the faces under them;
+`paste_pads` sets it whole on every 3x3 pad at ground level away from the
+stairs, never over a platform it touches, and the centrepieces go on it
+(never art that draws mostly black: Sky's gem tile is the pit in one of
+its platforms). Green's are not cut: its pads stand raised on the
+originals, and would sink MegaMan into them.
 
 ### Green's potted bushes (built)
 
