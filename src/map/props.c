@@ -8,6 +8,7 @@
  * NetCafe desks of Sky Area 1 and Green Area 2). */
 #include "props.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -261,6 +262,73 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out) {
 	memset(out, 0, sizeof *out);
 	uint32_t want = bgr555(bgr) & 0xFFFFFF;
 	return floor_emblem_on(a, want, 0, out) || (a->layers > 1 && floor_emblem_on(a, want, 1, out));
+}
+
+/* The hue bucket of the floor around map pixel (cx, cy), as tiles.c's
+ * style_at: 0-11, 12 grey. */
+static int hue_at(const AreaSrc *a, int cx, int cy) {
+	long r = 0, g = 0, b = 0, n = 0;
+	int W = a->tw * 8, H = a->th * 8;
+	for (int y = cy - 4; y < cy + 4; ++y)
+		for (int x = cx - 8; x < cx + 8; ++x) {
+			if (x < 0 || y < 0 || x >= W || y >= H) continue;
+			uint32_t c = area_src_floor_px(a, (size_t)y * W + x);
+			r += (c >> 16) & 255; g += (c >> 8) & 255; b += c & 255; ++n;
+		}
+	if (!n) return 12;
+	float fr = (float)r / n, fg = (float)g / n, fb = (float)b / n;
+	float mx = fr > fg ? (fr > fb ? fr : fb) : (fg > fb ? fg : fb), mn = fr < fg ? (fr < fb ? fr : fb) : (fg < fb ? fg : fb);
+	if (mx <= 0 || (mx - mn) / mx <= 0.25f) return 12;
+	float d = mx - mn, hue = mx == fr ? (fg - fb) / d : mx == fg ? 2 + (fb - fr) / d : 4 + (fr - fg) / d;
+	hue /= 6;
+	if (hue < 0) hue += 1;
+	int k = (int)(hue * 12);
+	return k > 11 ? 11 : k;
+}
+
+bool props_learn_pad(const AreaSrc *a, uint32_t platform, PropStamp *out) {
+	memset(out, 0, sizeof *out);
+	/* the map's panels, around its middle */
+	int A0 = -(a->tw * 8 + a->th * 8) / PANEL, A1 = -A0;
+	for (int B = A0; B <= A1; ++B)
+		for (int A = A0; A <= A1; ++A) {
+			int Xa = a->ex + PANEL * A, Ya = a->ey + PANEL * B;
+			bool island = true;
+			int beside = 0;
+			for (int j = -1; j <= 3 && island; ++j)
+				for (int i = -1; i <= 3 && island; ++i) {
+					int f = area_src_walled_floor(a, Xa + 16 + PANEL * i, Ya + 16 + PANEL * j);
+					bool in = i >= 0 && i <= 2 && j >= 0 && j <= 2, corner = (i < 0 || i > 2) && (j < 0 || j > 2);
+					if (in) island = f == 1;
+					else if (corner) island = f != 1;
+					else beside += f == 1;
+				}
+			if (!island || beside > 4) continue;
+			int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
+			if (platform >> hue_at(a, cx, cy + 4) & 1) continue;
+			/* its tiles: over the diamond of its panels (the floor drawn 4
+			 * below their edges) and the faces under its lower edges */
+			int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+			StairTile got[400];
+			int n = 0;
+			for (int ty = (cy - 56) / 8; ty <= (cy + 72) / 8; ++ty)
+				for (int tx = (cx - 104) / 8; tx <= (cx + 104) / 8; ++tx) {
+					if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || !(a->tile[0][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
+					float dx = (float)(tx * 8 + 4 - cx), dy = (float)(ty * 8 + 4 - cy - 4);
+					bool floor = fabsf(dx) / 96.0f + fabsf(dy) / 48.0f <= 1.0f;
+					bool face = dy > 0 && fabsf(dx) / 96.0f + (dy - 12.0f) / 48.0f <= 1.0f;
+					if ((!floor && !face) || n == 400) continue;
+					got[n++] = (StairTile){ .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay), .e0 = a->tile[0][(size_t)ty * a->tw + tx] };
+				}
+			if (n < 40) continue;
+			out->tiles = calloc((size_t)n, sizeof *out->tiles);
+			memcpy(out->tiles, got, sizeof *got * (size_t)n);
+			out->ntiles = n;
+			out->len = 3;
+			out->ok = true;
+			return true;
+		}
+	return false;
 }
 
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {

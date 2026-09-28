@@ -49,6 +49,7 @@ typedef struct {
 	PropStamp ornament[3];    /* pads' centrepieces: the red gem, the link ring, the cube on its base */
 	PropStamp bush[2];        /* Green's potted bushes, plain and in flower */
 	PropStamp emblem;         /* the emblem its floors carry (the Graveyard's crosses) */
+	PropStamp pad;            /* a whole pad of its maps, for its layers' (Central's framed pads) */
 	uint8_t rebank[2];        /* RomLayout.net_area[].rebank */
 	uint8_t rebank_to[128];   /* the first-layer tiles its maps draw in rebank[1] (a bit each) */
 } Learned;
@@ -185,6 +186,8 @@ static bool learn(int area, Learned *L) {
 	learn_counter(na->counter, &a, L);
 	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
+	if (na->pad_stamp) props_learn_pad(&a, na->styles & 0x1FFF, &L->pad);
+	if (emu_debug_on()) fprintf(stderr, "pad stamp area %d ok %d tiles %d\n", area, L->pad.ok, L->pad.ntiles);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];
 	rebank_seen(&a, na->rebank[1], L);
@@ -411,6 +414,40 @@ static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
+/* The area's own pad, whole, on every 3 x 3 pad at ground level away from
+ * the stairs, in place of the floor the classes drew there (the classes
+ * drew Central's pads green, where its maps frame them); their
+ * centrepieces go on after. */
+static void paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
+	if (!L->pad.ok) return;
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *m = &layer.rooms[i];
+		if (m->kind != ROOM_PAD || m->w != 3 || m->h != 3) continue;
+		bool flat = true;
+		for (int y = m->y; y < m->y + 3; ++y)
+			for (int x = m->x; x < m->x + 3; ++x) flat &= layer.cell[y][x] == C_PATH && !layer.level[y][x];
+		for (int s = 0; s < layer.nstairs; ++s)
+			flat &= layer.stair[s].x + 2 < m->x - 1 || layer.stair[s].x > m->x + 3 || layer.stair[s].y + 2 < m->y - 1 || layer.stair[s].y > m->y + 3;
+		if (!flat) continue;
+		int A, B;
+		grid_to_panel(m->x, m->y + 2, &A, &B);
+		int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+		for (int k = 0; k < L->pad.ntiles; ++k) {
+			int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+			/* only over the pad's own panels or the void: its edges and
+			 * faces cut into a platform it touches */
+			int u = px + 4 - tw * 4, v = 2 * (py - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
+			int A = (X - place.ex) >= 0 ? (X - place.ex) / 32 : -((place.ex - X + 31) / 32);
+			int Bp = (Y - place.ey) >= 0 ? (Y - place.ey) / 32 : -((place.ey - Y + 31) / 32);
+			int gx = Bp + place.gx0, gy = -A + place.gy0;
+			bool own = gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3;
+			if (!own && gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && layer.cell[gy][gx] != C_VOID) continue;
+			map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
+		}
+	}
+}
+
 /* The emblems the generator set in the floor (PROP_EMBLEM), in place of
  * the floor the classes drew there. */
 static void paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
@@ -495,6 +532,7 @@ static bool write_tilemap(const Learned *L) {
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
 	paste_props(map, tw, th);
+	paste_pads(L, map, tw, th);
 	paste_ornaments(L, map, tw, th);
 	paste_emblems(L, map, tw, th);
 	paste_bushes(L, map, tw, th);

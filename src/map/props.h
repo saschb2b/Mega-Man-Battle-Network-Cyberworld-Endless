@@ -44,6 +44,12 @@ bool props_learn_void_art(const AreaSrc *a, int seed, PropStamp *out);
  * layer's entries (StairTile.e0) where the first layer draws it, else the
  * second's (e1), anchored as an ornament's. */
 bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
+/* A whole pad of `a`: a 3 x 3 island of floor (bridges at most beside it)
+ * whose middle panel is not `platform` (the hue buckets of the area's
+ * platforms, as `styles`): the first layer's tiles over its panels and
+ * the faces under them, anchored on its corner of lowest world X and Y
+ * (Central's framed pads, their recess holding a centrepiece). */
+bool props_learn_pad(const AreaSrc *a, uint32_t platform, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,
  * mirrored with it: world (X, Y) to (-Y, -X). */

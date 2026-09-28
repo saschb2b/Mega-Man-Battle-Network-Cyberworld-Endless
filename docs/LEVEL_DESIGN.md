@@ -322,6 +322,21 @@ on; `paste_ornaments` sets one on the middle of every pad at ground level
 with nothing standing there, the red gem three times in five, from the
 layer's seed (the floor and the layout unchanged).
 
+### Central's framed pads (built)
+
+Central Area 1's pads are one piece of art over their 3x3 panels: a pale
+frame with violet corners, a cyan band and a blue recess that holds the
+centrepiece, the catwalks meeting the frame's edges. The tile classes drew
+a layer's pads in Central's green floor (the framed pads' blue lies in the
+walkway material, and classed as walkway their pieces came apart).
+`props_learn_pad` finds one in Central's own map, a 3x3 island of floor
+whose middle is not the platforms' hue, and cuts the first layer's tiles
+over its panels and the faces under them; `paste_pads` sets it whole on
+every 3x3 pad at ground level away from the stairs, never over a platform
+it touches, and the centrepieces go on it. Seaside's and Green's are not
+cut: Green's pads stand raised on the originals, and Seaside's first
+island was a blue platform.
+
 ### Green's potted bushes (built)
 
 Green's maps set potted bushes, a 4x4 block of second-layer tiles, in the
