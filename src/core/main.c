@@ -716,6 +716,8 @@ int main(int argc, char **argv) {
 			const char *c = strchr(setup_spec, ',');
 			if (c) sscanf(c + 1, "%d,%d,%d", &folder, &threat, &helpers);
 		}
+		/* "setup": the title with the setup after NEW GAME open */
+		if (!strcmp(start_scene, "setup")) { title_setup = true; s = &scene_title; }
 		/* "summary": the title's summary of a made-up run lost at --run-depth,
 		 * or won with --setup short at layer 10 (its unlocks said, and saved
 		 * in --data-dir) */

@@ -744,6 +744,11 @@ def tour(biomes='all'):
 # Screenshots are fine to publish; files extracted from the ROM are not.
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
+    # (the setup after NEW GAME at its Folder row, and the title with the
+    # marks a profile can earn: a won short net, the endless Nest, the
+    # Secret Area, the top threat rung)
+    ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
+    ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(240, 'net'), (1420, 'custom'), (1660, 'battle'), (1970, 'result'), (2220, 'guardian'),
       (2380, 'guardian-talk'), (2610, 'boss-custom'), (3670, 'reward'), (3720, 'restored'), (3880, 'area-clear')],

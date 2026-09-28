@@ -49,6 +49,7 @@ static const uint8_t cycle[] = { 0x09, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 
 #define NCYCLE (int)(sizeof cycle / sizeof *cycle)
 
 bool title_summary;
+bool title_setup;
 uint32_t title_seed;
 char title_cause[48];
 bool title_new_best;
@@ -265,6 +266,8 @@ static void show_area(int b) {
 	else { show(biome_backdrop(b)); S.next = 0; }
 }
 
+static void setup_open(void);
+
 static void enter(void) {
 	SDL_Texture *tex = S.tex;
 	memset(&S, 0, sizeof S);
@@ -281,6 +284,11 @@ static void enter(void) {
 	else if (S.saved_depth) show_area(saved.biome);
 	else show_next();
 	audio_music(MUS_TITLE);
+	if (title_setup) {
+		title_setup = false;
+		S.menu = 1;
+		setup_open();
+	}
 }
 
 static void jack_in(void);
@@ -445,7 +453,7 @@ static void setup_draw(int x0, int y0) {
 		else note = meta_threat_rule(S.threat);
 		break;
 	case ROW_HELPERS: snprintf(buf, sizeof buf, "%s. A: on or off", helper_about[S.helper]); note = buf; break;
-	default: note = "A or START: jack in. B: back"; break;
+	default: note = "A: jack in. B: back"; break;
 	}
 	int lines = note_line(cx, y0 + 92, note, sky);
 	for (int i = 0; i < nlocked; ++i) text_draw(cx, y0 + 94 + (lines + i) * 12, locked[i], dim, TEXT_CENTER);

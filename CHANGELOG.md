@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-09-28)
 
 - A Net Dealer met again in the same act greets in a line ("Back again,
   MegaMan! My pick for SpoutMan is first on the list."), where every
