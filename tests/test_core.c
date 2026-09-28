@@ -669,6 +669,15 @@ static void test_arrow(void) {
 		if (tx < 0) continue;
 		for (int r = -1; r < layer.nrooms; ++r) {
 			int sx = r < 0 ? (int)layer.obj[0].x : layer.rooms[r].ax, sy = r < 0 ? (int)layer.obj[0].y : layer.rooms[r].ay;
+			/* (from beside what stands on a room's middle, where MegaMan
+			 * would: a Mystery Data on a pad's) */
+			for (int i = 1; i < layer.nobj; ++i) {
+				if (!layer.obj[i].solid || (int)layer.obj[i].x != sx || (int)layer.obj[i].y != sy) continue;
+				static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+				for (int k = 0; k < 4; ++k)
+					if (layer.cell[sy + d4[k][1]][sx + d4[k][0]] == C_PATH) { sx += d4[k][0]; sy += d4[k][1]; break; }
+				break;
+			}
 			if (abs(sx - tx) + abs(sy - ty) <= 1) continue;
 			++walks;
 			if (follow_arrow(sx, sy, tx, ty) >= 0) continue;

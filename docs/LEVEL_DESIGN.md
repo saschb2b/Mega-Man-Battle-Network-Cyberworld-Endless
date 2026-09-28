@@ -58,9 +58,9 @@ L-shaped walkways: about 100 panels in a 14x16 box, every area alike.
   ring road around coloured fields (Sky 3), a raised block (Underground), a
   symmetric hub of pods and stairs (Sky 1).
 - **Each area has its own shape language.**
-  - Central: fields of 2-4 panel wide paths, with combs of 1-wide catwalks
-    hung off them (Central 2: long and short in turn, pads on their ends)
-    and satellite pads.
+  - Central: fields of 2-4 panel wide paths winding across the map
+    (Central 1), with combs of 1-wide catwalks hung off them (Central 2:
+    long and short in turn, pads on their ends) and satellite pads.
   - Seaside: one huge field with ragged edges, framed by comb boardwalks.
   - Green: long parallel planks (ladders with rungs) beside grass blocks.
   - Sky: pods and platforms joined by stairs, often mirrored.
@@ -79,7 +79,7 @@ order, so an area does not repeat one while it has others.
 
 | Layout | Areas (weight) | Built from |
 | --- | --- | --- |
-| Route | Central 35, Seaside 40, Sky 45, Green 45, Secret 25, the comps and homepage 30 | a winding chain of platforms on bridges, pad spurs, stubs, a shortcut |
+| Route | Seaside 40, Sky 45, Green 45, Secret 25, the comps and homepage 30 | a winding chain of platforms on bridges, pad spurs, stubs, a shortcut |
 | Field | Central 35 (around a crater), Seaside 60 (ragged), Comp 40 | one big field, comb boardwalks with teeth on two or three sides, pads |
 | Ladder | Green 55 | four or five parallel planks joined by rungs, teeth on the outer ones, grass blocks at the ends |
 | Hub | Sky 55, Secret 25, Homepage 40 | an octagon centre, four mirrored spokes to pods, a ring between them |
@@ -87,6 +87,7 @@ order, so an area does not repeat one while it has others.
 | Web | Graveyard 35, Undernet 45, Secret 50, second Comp 30 | plateaus kept far apart, bridges crossing between them, many stubs |
 | Crosses | Undernet 25, Nest 60, Comp 30, Homepage 30, second Comp 40 | plus-shaped platforms grown over a lattice from a big middle block; the lattice runs along the window's diagonal, as the window is narrow across the screen |
 | Catwalks | Undernet 30, Aquarium and Judge Tree comps | a maze of 1-wide turns with some walls knocked through, plazas at its ends |
+| Trail | Central 35 | after Central 1: a path two or three panels wide winding down the window in legs along x and y by turns (each leg's length steered back towards the middle), a bulge a panel wider here and there, pads hung off its sides on short catwalks; a room on every second leg, never raised |
 | Comb | Central 30 | after Central 2: five 1-wide catwalks three apart, long and short in turn, hung off a 2-deep walkway; pads on the short ones, a rung closing one loop, the middle one leading to a plaza, the arrival behind the walkway's end |
 
 Every layout an area draws must build as planned on most seeds (`build.py

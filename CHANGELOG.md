@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Central's layers can be a winding path two or three panels wide, as
+  Central Area 1's, framed pads hung off its sides, in place of the chain
+  of rooms on bridges. A raised room's stair never tops onto an octagon's
+  cut corner.
 - Central's and Seaside's pads are their maps' framed pads, cut whole: a
   pale frame, a cyan band and a blue recess holding the centrepiece in
   Central, the same in yellow in Seaside (they were drawn in the areas'

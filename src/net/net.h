@@ -66,7 +66,7 @@ typedef struct {
 } NetProp;
 
 /* Room kinds: where points of interest go (docs/LEVEL_DESIGN.md). */
-enum { ROOM_PLATFORM, ROOM_PAD, ROOM_FIELD };
+enum { ROOM_PLATFORM, ROOM_PAD, ROOM_FIELD, ROOM_LEG };   /* ROOM_LEG: a stretch of a winding path, never raised */
 
 /* A platform or pad: its box, a floor cell in it (ax, ay) and its kind. */
 typedef struct {

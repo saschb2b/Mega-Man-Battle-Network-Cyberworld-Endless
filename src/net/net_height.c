@@ -41,16 +41,18 @@ static bool single_entry(const Room *r, int side, int *ex, int *ey) {
 /* The stair block (2 x 2 cells, top-left at sx, sy) and a landing beyond it,
  * along the corridor: along +x for side 0, +y for side 1. */
 static bool fits_stair(const Room *r, int side, int ex, int ey, int *sx, int *sy) {
+	/* (both its columns top onto the room's floor: one on an octagon's cut
+	 * corner climbed into the void) */
 	if (side == 0) {
 		*sx = ex;
 		*sy = ey + 1 < r->y + r->h ? ey : ey - 1;
-		if (*sy < r->y) return false;
+		if (*sy < r->y || !floor_at(ex - 1, *sy) || !floor_at(ex - 1, *sy + 1)) return false;
 		/* the corridor runs on past the stair */
 		return floor_at(ex + 1, ey) && floor_at(ex + 2, ey);
 	}
 	*sy = ey;
 	*sx = ex + 1 < r->x + r->w ? ex : ex - 1;
-	if (*sx < r->x) return false;
+	if (*sx < r->x || !floor_at(*sx, ey - 1) || !floor_at(*sx + 1, ey - 1)) return false;
 	return floor_at(ex, ey + 1) && floor_at(ex, ey + 2);
 }
 
@@ -72,7 +74,7 @@ void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise) {
 	int shift = rise / 32;
 	if (!dirs || shift < 1) return;
 	for (int i = 1; i < layer.nrooms && layer.nstairs < MAX_STAIRS; ++i) {
-		if (i == layer.exit_room) continue;
+		if (i == layer.exit_room || layer.rooms[i].kind == ROOM_LEG) continue;
 		const Room *r = &layer.rooms[i];
 		for (int side = 0; side < 2; ++side) {
 			/* side 0 climbs towards -x, side 1 towards -y */

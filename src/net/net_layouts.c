@@ -10,13 +10,13 @@
 #include "run.h"
 
 const char *const layout_names[LAYOUT_COUNT] = {
-	"route", "field", "ladder", "hub", "slabs", "web", "crosses", "catwalks", "comb",
+	"route", "field", "ladder", "hub", "slabs", "web", "crosses", "catwalks", "comb", "trail",
 };
 
 /* per area: weights of each layout (percent) */
 static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
-	/*                 route field ladder hub slabs web crosses catwalks comb */
-	[BIOME_CENTRAL]   = { 35, 35, 0, 0, 0, 0, 0, 0, 30 },
+	/*                 route field ladder hub slabs web crosses catwalks comb trail */
+	[BIOME_CENTRAL]   = { 0, 35, 0, 0, 0, 0, 0, 0, 30, 35 },
 	[BIOME_SEASIDE]   = { 40, 60, 0, 0, 0, 0, 0, 0 },
 	[BIOME_SKY]       = { 45, 0, 0, 55, 0, 0, 0, 0 },
 	[BIOME_GREEN]     = { 45, 0, 55, 0, 0, 0, 0, 0 },
@@ -420,6 +420,47 @@ static void comb(int biome, int size) {
 	spurs(1 + size, 1, 2);
 }
 
+/* After Central Area 1: a path two or three panels wide winding down the
+ * window in legs along x and y by turns (the screen's two diagonals), a
+ * bulge a panel wider here and there, and pads hung off its sides on short
+ * catwalks. */
+static void trail(int biome, int size) {
+	int x = WIN_C - 10 + rng_range(-1, 1), y = WIN_C - 10 + rng_range(-1, 1);
+	bool along_x = rng_range(0, 1);
+	for (int l = 0; l < 7 + size; ++l) {
+		/* (a leg along x carries the path right across the screen, one
+		 * along y left: each is steered back towards the middle, or the
+		 * window's edge cut the legs to stubs) */
+		int drift = (x - y) * (along_x ? 1 : -1), len = drift > 3 ? rng_range(4, 5) : drift < -3 ? rng_range(7, 8) : rng_range(5, 8);
+		int wide = rng_range(2, 3);
+		int bw = along_x ? len : wide, bh = along_x ? wide : len;
+		/* (short of the window's edge) */
+		while (len > 2 && !(win_in(x, y) && win_in(x + bw - 1, y) && win_in(x, y + bh - 1) && win_in(x + bw - 1, y + bh - 1))) {
+			--len;
+			bw = along_x ? len : wide; bh = along_x ? wide : len;
+		}
+		if (len <= 2) break;
+		for (int j = y; j < y + bh; ++j)
+			for (int i = x; i < x + bw; ++i) put(i, j);
+		/* a bulge on its outer side, mid-leg */
+		if (len >= 5 && rng_range(0, 2) == 0) {
+			int t0 = rng_range(1, len - 3);
+			for (int t = t0; t < t0 + 2; ++t) {
+				int bx = along_x ? x + t : x - 1, by = along_x ? y - 1 : y + t;
+				if (win_in(bx, by)) put(bx, by);
+			}
+		}
+		/* (a room of every second leg: the legs overlap at their turns) */
+		if (!(l & 1)) add_room(x, y, bw, bh, ROOM_LEG);
+		/* the next leg turns at this one's end, overlapping its corner */
+		if (along_x) x += len - 2; else y += len - 2;
+		along_x = !along_x;
+	}
+	(void)biome;
+	spurs(3 + size, 1, 2);
+	stubs(2);
+}
+
 /* A maze of 1-wide catwalks, some dead ends cut back, plazas at the ends. */
 static void catwalks(int biome, int size) {
 	enum { N = 8 };   /* lattice nodes per side, two cells apart */
@@ -471,6 +512,7 @@ void layout_build(int layout, int biome, int size) {
 	case LAYOUT_CROSSES: crosses(biome, size); break;
 	case LAYOUT_CATWALKS: catwalks(biome, size); break;
 	case LAYOUT_COMB: comb(biome, size); break;
+	case LAYOUT_TRAIL: trail(biome, size); break;
 	default: route(biome, size, false); break;
 	}
 }

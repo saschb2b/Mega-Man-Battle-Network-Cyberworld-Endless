@@ -194,6 +194,9 @@ static void emblem_at(int x, int y) {
 	for (int dy = -1; dy <= 1; ++dy)
 		for (int dx = -1; dx <= 1; ++dx)
 			if (layer.cell[y + dy][x + dx] != C_PATH || layer.level[y + dy][x + dx]) return;
+	/* (rooms that overlap set theirs apart) */
+	for (int i = 0; i < layer.nprops; ++i)
+		if (layer.props[i].kind == PROP_EMBLEM && abs(layer.props[i].x - x) <= 1 && abs(layer.props[i].y - y) <= 1) return;
 	layer.props[layer.nprops++] = (NetProp){ PROP_EMBLEM, 0, x, y, 1, -1 };
 }
 

@@ -15,6 +15,7 @@ enum {
 	LAYOUT_CROSSES,   /* plus-shaped platforms on a lattice */
 	LAYOUT_CATWALKS,  /* a maze of 1-wide turns between plazas */
 	LAYOUT_COMB,      /* long parallel catwalks on a spine, pads at their ends */
+	LAYOUT_TRAIL,     /* a winding path two to four wide, pads hung off it */
 	LAYOUT_COUNT
 };
 
