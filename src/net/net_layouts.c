@@ -10,13 +10,13 @@
 #include "run.h"
 
 const char *const layout_names[LAYOUT_COUNT] = {
-	"route", "field", "ladder", "hub", "slabs", "web", "crosses", "catwalks",
+	"route", "field", "ladder", "hub", "slabs", "web", "crosses", "catwalks", "comb",
 };
 
 /* per area: weights of each layout (percent) */
 static const uint8_t weights[BIOME_COUNT][LAYOUT_COUNT] = {
-	/*                 route field ladder hub slabs web crosses catwalks */
-	[BIOME_CENTRAL]   = { 35, 35, 0, 0, 0, 0, 0, 30 },
+	/*                 route field ladder hub slabs web crosses catwalks comb */
+	[BIOME_CENTRAL]   = { 35, 35, 0, 0, 0, 0, 0, 0, 30 },
 	[BIOME_SEASIDE]   = { 40, 60, 0, 0, 0, 0, 0, 0 },
 	[BIOME_SKY]       = { 45, 0, 0, 55, 0, 0, 0, 0 },
 	[BIOME_GREEN]     = { 45, 0, 55, 0, 0, 0, 0, 0 },
@@ -329,35 +329,95 @@ static void web(int biome, int size) {
 	stubs(5 + 2 * size);
 }
 
-/* Plus-shaped platforms on a lattice around a big block. */
+/* Plus-shaped platforms on a lattice around a big block. The window is
+ * narrow across the screen, so the lattice runs along its diagonal: 5-wide
+ * pluses 7 apart fit where |i - j| <= 1 (and |i + j| <= 3). */
 static void crosses(int biome, int size) {
-	enum { STEP = 9 };
-	int node[5][5];
-	for (int j = 0; j < 5; ++j)
-		for (int i = 0; i < 5; ++i) node[j][i] = -1;
+	enum { STEP = 7, N = 7, M = N / 2 };
+	int node[N][N];
+	for (int j = 0; j < N; ++j)
+		for (int i = 0; i < N; ++i) node[j][i] = -1;
 	/* grow a tree over the lattice from its middle */
-	int want = 6 + size, have = 0, qi[25], qj[25], nq = 0;
-	node[2][2] = platform(WIN_C, WIN_C, 7, 7, SHAPE_RECT, ROOM_PLATFORM);
-	if (node[2][2] < 0) return;
-	qi[nq] = 2; qj[nq++] = 2; ++have;
+	int want = 6 + size, have = 0, qi[N * N], qj[N * N], nq = 0;
+	node[M][M] = platform(WIN_C, WIN_C, 7, 7, SHAPE_RECT, ROOM_PLATFORM);
+	if (node[M][M] < 0) return;
+	qi[nq] = M; qj[nq++] = M; ++have;
 	for (int tries = 0; tries < 200 && have < want; ++tries) {
 		int k = rng_range(0, nq - 1), d = rng_range(0, 3);
 		int i = qi[k] + dir_dx[d], j = qj[k] + dir_dy[d];
-		if (i < 0 || j < 0 || i > 4 || j > 4 || node[j][i] >= 0) continue;
-		int r = platform(WIN_C + (i - 2) * STEP, WIN_C + (j - 2) * STEP, 7, 7, SHAPE_PLUS, ROOM_PLATFORM);
+		if (i < 0 || j < 0 || i >= N || j >= N || node[j][i] >= 0) continue;
+		int r = platform(WIN_C + (i - M) * STEP, WIN_C + (j - M) * STEP, 5, 5, SHAPE_PLUS, ROOM_PLATFORM);
 		if (r < 0) continue;
 		node[j][i] = r;
 		link(node[qj[k]][qi[k]], r);
 		qi[nq] = i; qj[nq++] = j; ++have;
 	}
 	/* a loop or two between lattice neighbours */
-	for (int k = 0; k < 2; ++k) {
-		int i = rng_range(0, 3), j = rng_range(0, 4);
-		if (node[j][i] >= 0 && node[j][i + 1] >= 0 && rng_range(0, 1)) link(node[j][i], node[j][i + 1]);
+	for (int k = 0; k < 4; ++k) {
+		int i = rng_range(0, N - 2), j = rng_range(0, N - 1);
+		bool across = rng_range(0, 1);
+		int a = across ? node[i][j] : node[j][i], b = across ? node[i + 1][j] : node[j][i + 1];
+		if (a >= 0 && b >= 0 && rng_range(0, 1)) link(a, b);
 	}
 	(void)biome;
 	spurs(2, 2, 3);
 	stubs(3);
+}
+
+/* After Central Area 2: 1-wide catwalks side by side, long and short in
+ * turn, hung off a wide walkway. The short ones end in pads, a rung joins
+ * two long ones into a loop and the middle one leads on to a plaza; the
+ * arrival waits behind the walkway's end. */
+static void comb(int biome, int size) {
+	enum { LANES = 5, GAP = 3, C = LANES / 2 };
+	bool along_x = rng_range(0, 1);
+	int run = along_x ? DIR_E : DIR_S, across = along_x ? DIR_S : DIR_E;
+	int base = -(LANES - 1) * GAP / 2, root = -4, len[LANES];
+	bool pad[LANES];
+#define AT_X(t, o) (WIN_C + dir_dx[run] * (t) + dir_dx[across] * (o))
+#define AT_Y(t, o) (WIN_C + dir_dy[run] * (t) + dir_dy[across] * (o))
+	/* the lanes (t along them from the walkway, o across), as long as the
+	 * window lets them run (|t - o| <= WIN_U, |t + o| <= WIN_V) */
+	for (int r = 0; r < LANES; ++r) {
+		int o = base + GAP * r, room_to = (o + WIN_U < WIN_V - o ? o + WIN_U : WIN_V - o) - root;
+		bool lng = !(r & 1);
+		len[r] = lng ? 9 + rng_range(0, 2) + size : 3 + rng_range(0, 1) + size;
+		if (len[r] > room_to - 1) len[r] = room_to - 1;
+		pad[r] = r != C && ((r & 1) || rng_range(0, 1));
+	}
+	/* the middle one leads on to a plaza, which the window must hold */
+	int pw = 5, pl = 4 + (size > 0);
+	if (root + len[C] > WIN_U - pw / 2 - pl - 1) len[C] = WIN_U - pw / 2 - pl - 1 - root;
+	/* a rung joins it to an outer one at the shorter one's end: the one
+	 * loop, the short lane between kept clear of it with its pad */
+	int side = rng_range(0, 1) ? LANES - 1 : 0, mid = (side + C) / 2;
+	int t_rung = root + (len[side] < len[C] ? len[side] : len[C]);
+	if (root + len[mid] + (pad[mid] ? 5 : 1) >= t_rung) {
+		len[mid] = t_rung - root - 6;
+		if (len[mid] < 2) { len[mid] = t_rung - root - 2; pad[mid] = false; }
+	}
+	/* the walkway: two panels deep, one past the outer lanes */
+	int span = (LANES - 1) * GAP + 3;
+	platform(AT_X(root - 1 + 1, 0), AT_Y(root - 1 + 1, 0), along_x ? 2 : span, along_x ? span : 2, SHAPE_RECT, ROOM_PLATFORM);
+	for (int r = 0; r < LANES; ++r) {
+		int o = base + GAP * r;
+		bridge_line(AT_X(root, o), AT_Y(root, o), run, len[r]);
+	}
+	int o0 = side ? base + GAP * C : base;
+	bridge_line(AT_X(t_rung, o0), AT_Y(t_rung, o0), across, 2 * GAP - 1);
+	int end = root + len[C];
+	if (platform(AT_X(end + 2 + pl / 2, 0), AT_Y(end + 2 + pl / 2, 0), along_x ? pl : pw, along_x ? pw : pl,
+			route_shape(biome), ROOM_PLATFORM) >= 0)
+		put(AT_X(end + 1, 0), AT_Y(end + 1, 0));
+	/* the arrival behind the walkway's first end, two panels of catwalk
+	 * between, the walkway's back left clear */
+	if (platform(AT_X(root - 5, base + 1), AT_Y(root - 5, base + 1), 4, 4, route_shape(biome), ROOM_PLATFORM) >= 0)
+		bridge_line(AT_X(root - 1, base + 1), AT_Y(root - 1, base + 1), (run + 2) % 4, 2);
+	for (int r = 0; r < LANES; ++r)
+		if (pad[r]) pad_spur(AT_X(root + len[r], base + GAP * r), AT_Y(root + len[r], base + GAP * r), run, 1);
+#undef AT_X
+#undef AT_Y
+	spurs(1 + size, 1, 2);
 }
 
 /* A maze of 1-wide catwalks, some dead ends cut back, plazas at the ends. */
@@ -410,6 +470,7 @@ void layout_build(int layout, int biome, int size) {
 	case LAYOUT_WEB: web(biome, size); break;
 	case LAYOUT_CROSSES: crosses(biome, size); break;
 	case LAYOUT_CATWALKS: catwalks(biome, size); break;
+	case LAYOUT_COMB: comb(biome, size); break;
 	default: route(biome, size, false); break;
 	}
 }

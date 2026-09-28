@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Central's layers lay out combs as Central Area 2 does: five 1-wide
+  catwalks side by side, long and short in turn, hung off a green walkway,
+  gem pads on the short ones, a rung closing one loop, the middle one
+  leading on to a plaza (the maze of turns there read as random floor).
+  The plus-shaped platforms of the Nest, the Undernet, the comps and the
+  homepages are built at last: their lattice never fit the map's window,
+  so those layers had always fallen back to another layout.
 - NaviCust programs turn with L and R as they are placed from the list: a
   run holds all six of BN6's rotation items from its start (BN6 hands them
   out over its story; a drafted Shield would not fit beside SuperArmor and

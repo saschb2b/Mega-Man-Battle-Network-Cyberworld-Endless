@@ -58,8 +58,9 @@ L-shaped walkways: about 100 panels in a 14x16 box, every area alike.
   ring road around coloured fields (Sky 3), a raised block (Underground), a
   symmetric hub of pods and stairs (Sky 1).
 - **Each area has its own shape language.**
-  - Central: fields of 2-4 panel wide paths, with catwalk mazes of 1-wide
-    turns and satellite pads.
+  - Central: fields of 2-4 panel wide paths, with combs of 1-wide catwalks
+    hung off them (Central 2: long and short in turn, pads on their ends)
+    and satellite pads.
   - Seaside: one huge field with ragged edges, framed by comb boardwalks.
   - Green: long parallel planks (ladders with rungs) beside grass blocks.
   - Sky: pods and platforms joined by stairs, often mirrored.
@@ -84,8 +85,14 @@ order, so an area does not repeat one while it has others.
 | Hub | Sky 55, Secret 25, Homepage 40 | an octagon centre, four mirrored spokes to pods, a ring between them |
 | Slabs | Graveyard 65, Nest 40 | a chain of big slabs with punched holes, long bridges between |
 | Web | Graveyard 35, Undernet 45, Secret 50, second Comp 30 | plateaus kept far apart, bridges crossing between them, many stubs |
-| Crosses | Undernet 25, Nest 60, Comp 30, Homepage 30, second Comp 40 | plus-shaped platforms grown over a lattice from a big middle block |
-| Catwalks | Central 30, Undernet 30 | a maze of 1-wide turns with some walls knocked through, plazas at its ends |
+| Crosses | Undernet 25, Nest 60, Comp 30, Homepage 30, second Comp 40 | plus-shaped platforms grown over a lattice from a big middle block; the lattice runs along the window's diagonal, as the window is narrow across the screen |
+| Catwalks | Undernet 30, Aquarium and Judge Tree comps | a maze of 1-wide turns with some walls knocked through, plazas at its ends |
+| Comb | Central 30 | after Central 2: five 1-wide catwalks three apart, long and short in turn, hung off a 2-deep walkway; pads on the short ones, a rung closing one loop, the middle one leading to a plaza, the arrival behind the walkway's end |
+
+Every layout an area draws must build as planned on most seeds (`build.py
+test` checks 40): one that does not fit the window falls back to another
+layout each time, and its share of the area is silently lost. Crosses did
+so everywhere until its lattice was turned to the window.
 
 MegaMan arrives on the pad nearest the top of the screen; the exit is the
 room farthest from it by walking. On a guardian's layer the exit is an

@@ -6,6 +6,7 @@
 
 #include "game.h"
 #include "net.h"
+#include "net_layouts.h"
 #include "net_route.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -689,10 +690,29 @@ static void test_navicust(void) {
 	CHECK(!strstr(navicust_bug_words(bugs), "command line"), "a colours' bug alone names itself");
 }
 
+/* Every layout an area draws builds as planned: one that never fits the
+ * window falls back to another every time, and its share of the area is
+ * silently lost. */
+static void test_layouts_build(void) {
+	for (int b = 0; b < BIOME_COUNT; ++b)
+		for (int l = 0; l < LAYOUT_COUNT; ++l) {
+			if (!layout_weight(b, l)) continue;
+			int ok = 0;
+			for (uint32_t seed = 1; seed <= 40; ++seed) {
+				layout_forced = l;
+				layer_generate(seed * 7919u, 2 + (int)(seed % 7), b, LAYER_NORMAL, &kit);
+				ok += layer.layout == l;
+			}
+			layout_forced = -1;
+			CHECK(ok >= 32, "area %d builds %s on %d of 40 seeds", b, layout_names[l], ok);
+		}
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
+	test_layouts_build();
 	test_stairs();
 	test_arrow();
 	test_navicust();
