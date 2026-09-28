@@ -47,6 +47,12 @@ L-shaped walkways: about 100 panels in a 14x16 box, every area alike.
   pink plateaus and red bridges, Graveyard slabs and purple ramps.
 - **Walkways are 1 panel wide and straight.** Bridges run 3 to 13 panels
   without a turn and bend at right angles; 2-wide paths are rare.
+- **Walkways meet platforms square on,** in the middle of a side, with
+  platform floor on both sides of the join; never at a corner or along an
+  edge. The comps and homepages go further: a walkway runs on across the
+  field it enters as a stripe of its own floor (the orange comp's field is
+  crossed by green traces from both its walkways), ending a panel inside
+  the field's edge or leaving it as another walkway.
 - **3x3 pads on spurs.** The most common platform is a 3x3 square on a short
   bridge off the route (Central, Seaside, Sky, Green): the places for Mystery
   Data, Mr. Progs, shops and warps.
@@ -117,10 +123,36 @@ Walkways, the floor panels in no 2x2 block of floor, are drawn in the
 area's second floor, learned from the same source map by its hue
 (`walk_styles` in `src/core/rom.c`): Central's blue catwalks, Seaside's
 yellow boardwalks, Sky's darker glass, Green's orange planks, Graveyard's
-purple bridges and the Undernet's red striped bridges. The tile classes
+purple bridges and the Undernet's red striped bridges, which turn and meet
+the plateaus in joints with a yellow gem. The tile classes
 tell platform, walkway and void apart, so the joins between the two floors
 come from the places the original maps join them. The Nest's source map
 (Underground 2) has no second floor.
+
+So the generator joins them as the originals do (`src/net/net_layouts.c`):
+a bridge between two rooms runs straight across where their sides face each
+other, else leaves one square on and bends once into the other's near side,
+else jogs halfway; either way it meets both in the middle of a side, where
+floor lies on both sides of it. Spurs and stubs leave the floor square on
+too. An L that ran along a platform's edge into its corner was a join no
+map draws, and its tiles came out as wedges of one floor cut into the
+other. In the comps and homepages (`TILES_CROSSING`), a walkway entering a
+platform square on goes on straight in its own floor for as long as floor
+lies on both sides of it (`netmap.c`, after the floor is made drawable),
+out the far side only into another walkway, else a panel short of the edge:
+a stripe ending on the rim was another join no map draws. The comp's pads,
+which its map has none of, are crossed as well; pads with a look of their
+own keep it.
+
+Each tile is also held to what it shows: per pixel, which panel's top or
+side face it draws and in which floor. A pair costs a point for every pixel
+where its own neighbourhood would have shown otherwise, beside the
+neighbourhood's distance, so of the pairs near enough the one drawing the
+right floors wins (most tiles drawn with a wrong floor or edge had a right
+one passed over for a nearer neighbourhood). The plain look inside the
+floor may come in another shade of the same colours: the Green HP draws its
+walkways a shade darker than its platforms, in tiles of their own, and
+every walkway tile had failed the test.
 
 Some areas never set one floor flush with another. Green's planks reach
 its raised grass by stairs, CopyBot's walkways reach its plateaus, which

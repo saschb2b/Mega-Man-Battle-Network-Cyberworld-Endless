@@ -100,17 +100,85 @@ static int platform(int cx, int cy, int w, int h, int shape, int kind) {
 	return add_room(x, y, w, h, kind);
 }
 
-/* A bridge between rooms a and b: straight out of a towards b, one bend. */
+/* The floor cell of room r in line v (a row for d east or west, else a
+ * column) furthest in direction d, where a bridge along d leaves it square
+ * on: false where that is a corner (no floor beside it along the side) or
+ * floor lies beyond it. */
+static bool side_at(int r, int d, int v, int *x, int *y) {
+	const Room *m = &layer.rooms[r];
+	bool along_x = d == DIR_E || d == DIR_W;
+	int lo = along_x ? m->x : m->y, n = along_x ? m->w : m->h, s = (d + 1) % 4;
+	int step = d == DIR_E || d == DIR_S ? 1 : -1, from = step > 0 ? lo + n - 1 : lo;
+	for (int k = 0; k < n; ++k) {
+		int u = from - step * k, cx = along_x ? u : v, cy = along_x ? v : u;
+		if (!floor_at(cx, cy)) continue;
+		if (floor_at(cx + dir_dx[d], cy + dir_dy[d]) ||
+			!floor_at(cx + dir_dx[s], cy + dir_dy[s]) || !floor_at(cx - dir_dx[s], cy - dir_dy[s])) return false;
+		*x = cx;
+		*y = cy;
+		return true;
+	}
+	return false;
+}
+
+/* A bridge between rooms a and b that meets each square on in the middle
+ * of a side, as the originals' walkways meet their platforms (one entering
+ * at a corner, or running into a platform's edge, is a join their tiles
+ * never draw): straight across where the two face each other; else out of
+ * a towards b and one bend into b's near side; else with a jog halfway. */
 static void link(int a, int b) {
 	const Room *ra = &layer.rooms[a], *rb = &layer.rooms[b];
 	int dx = rb->ax - ra->ax, dy = rb->ay - ra->ay;
-	int d = abs(dx) >= abs(dy) ? (dx > 0 ? DIR_E : DIR_W) : (dy > 0 ? DIR_S : DIR_N);
+	int d = abs(dx) >= abs(dy) ? (dx > 0 ? DIR_E : DIR_W) : (dy > 0 ? DIR_S : DIR_N), back = (d + 2) % 4;
+	bool along_x = d == DIR_E || d == DIR_W;
 	int ax, ay, bx, by;
-	if (!room_edge(a, d, &ax, &ay) || !room_edge(b, (d + 2) % 4, &bx, &by)) {
+	/* straight: the line both sides cross nearest the rooms' middles */
+	int lo_a = along_x ? ra->y : ra->x, lo_b = along_x ? rb->y : rb->x;
+	int hi_a = lo_a + (along_x ? ra->h : ra->w) - 1, hi_b = lo_b + (along_x ? rb->h : rb->w) - 1;
+	int mid = (along_x ? ra->ay + rb->ay : ra->ax + rb->ax) / 2, best = -1;
+	for (int v = lo_a > lo_b ? lo_a : lo_b; v <= (hi_a < hi_b ? hi_a : hi_b); ++v)
+		if ((best < 0 || abs(v - mid) < abs(best - mid)) && side_at(a, d, v, &ax, &ay) && side_at(b, back, v, &bx, &by)) best = v;
+	if (best >= 0) {
+		side_at(a, d, best, &ax, &ay);
+		side_at(b, back, best, &bx, &by);
+		bridge_l(ax, ay, bx, by, along_x);
+		return;
+	}
+	if (!room_edge(a, d, &ax, &ay)) {
 		bridge_l(ra->ax, ra->ay, rb->ax, rb->ay, true);
 		return;
 	}
-	bridge_l(ax, ay, bx, by, d == DIR_E || d == DIR_W);
+	/* one bend: along d to b's middle, then across into b's near side, a
+	 * row (column) of void between the first leg and b */
+	int s = along_x ? (rb->ay > ay ? DIR_S : DIR_N) : (rb->ax > ax ? DIR_E : DIR_W);
+	if (side_at(b, (s + 2) % 4, along_x ? rb->ax : rb->ay, &bx, &by)) {
+		int gap = along_x ? abs(by - ay) : abs(bx - ax), run = along_x ? abs(bx - ax) : abs(by - ay);
+		if (gap >= 2 && run >= 2) {
+			bridge_l(ax, ay, bx, by, along_x);
+			return;
+		}
+	}
+	/* a jog halfway between the two sides' middles */
+	if (room_edge(b, back, &bx, &by)) {
+		int u0 = along_x ? ax : ay, u1 = along_x ? bx : by, um = (u0 + u1) / 2;
+		if (abs(u1 - u0) >= 4) {
+			int jx = along_x ? um : bx, jy = along_x ? by : um;
+			bridge_l(ax, ay, jx, jy, along_x);
+			bridge_l(jx, jy, bx, by, along_x);
+			return;
+		}
+		bridge_l(ax, ay, bx, by, along_x);
+		return;
+	}
+	bridge_l(ra->ax, ra->ay, rb->ax, rb->ay, true);
+}
+
+/* Whether a bridge along d may leave floor cell (x, y) square on: floor on
+ * both sides of it across d (the middle of a side, or a walkway it leaves
+ * sideways), never a corner. */
+static bool square_on(int x, int y, int d) {
+	int s = (d + 1) % 4;
+	return floor_at(x + dir_dx[s], y + dir_dy[s]) && floor_at(x - dir_dx[s], y - dir_dy[s]);
 }
 
 static void random_cell(int *x, int *y) {
@@ -135,7 +203,7 @@ static void spurs(int want, int minlen, int maxlen) {
 		int d0 = rng_range(0, 3);
 		for (int k = 0; k < 4; ++k) {
 			int d = (d0 + k) % 4;
-			if (floor_at(cx[i] + dir_dx[d], cy[i] + dir_dy[d])) continue;
+			if (floor_at(cx[i] + dir_dx[d], cy[i] + dir_dy[d]) || !square_on(cx[i], cy[i], d)) continue;
 			if (pad_spur(cx[i], cy[i], d, rng_range(minlen, maxlen)) >= 0) { --want; break; }
 		}
 	}
@@ -147,7 +215,7 @@ static void stubs(int want) {
 		int x, y;
 		random_cell(&x, &y);
 		int d = rng_range(0, 3), len = rng_range(1, 3);
-		if (!floor_at(x, y)) continue;
+		if (!floor_at(x, y) || !square_on(x, y, d)) continue;
 		int s = (d + 1) % 4;
 		bool ok = true;
 		for (int k = 1; k <= len + 1 && ok; ++k)

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Cleaner joins between a net area's two floors. Walkways meet platforms
+  square on in the middle of a side, never at a corner or along an edge,
+  and in the comps and homepages a walkway runs on across the platform it
+  enters as a stripe of its own floor, ending a panel inside the edge, as
+  their maps draw them: no more green wedges cut into orange fields. Every
+  tile is also picked by what it shows (which panel's top or side face, in
+  which floor), which cleared most wrong-floor tiles in every area; the
+  Green HP's walkways keep their own darker shade (every one had been drawn
+  from pieces of the platforms), and the Undernet's bridges turn and meet
+  its plateaus in their joints with a yellow gem, as its maps draw them
+  (they had left dark patches on the plateaus). `build.py tiles` checks
+  all of it.
 - MegaMan's first briefing on a layer names what the map's violet mark is:
   a strong virus signal and its Server, a dark warp into the Undernet, or
   the golden gate. In the Aquarium HP it says its battlefields' conveyor

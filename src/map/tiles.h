@@ -6,6 +6,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "area_src.h"
 #include "seams.h"
@@ -92,8 +93,18 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * pads alone (netmap.c): Robot Control Comp 2's one small platform is the
  * striped conveyor before the robot's door. */
 #define TILES_MORE_PADS 0x40000
+/* ... and with TILES_CROSSING, a walkway meeting a platform square on runs
+ * on straight across it in its own floor (netmap.c), as the comps' and
+ * homepages' maps cross their fields with stripes of it: a walkway stopped
+ * at a field's edge is a join of the two floors the originals never draw. */
+#define TILES_CROSSING 0x80000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
+/* (dev) The panels of map `a` as tiles_learn sees them, as text in a
+ * generated layer's rows and columns: 'a' platform floor, 'b' walkway
+ * floor, upper case ('P', 'Q') on its pads; floor of another style by its
+ * hue bucket (0-9, 'X' 10, 'Y' 11, 'G' grey). */
+void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, FILE *f);
 /* The colours the pairs of `b` draw, marked in `seen` (one byte per BGR555
  * colour); then the pairs of another book that draw others marked (`other`),
  * and with `drop` left out. */
@@ -111,8 +122,24 @@ void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
  * neighbour badly) or by falling back on the least bad tile; the pairs of
  * neighbouring tiles left meeting badly (netmap counts them); and the pairs
  * picked in colours the area's own map never shows on its floors. */
-typedef struct { int picks, near, fallbacks, seams, other; } TileStats;
+typedef struct { int picks, near, fallbacks, seams, other, off_near, off_edge; } TileStats;
 extern TileStats tiles_stats;
+
+/* With tiles_measure (the dev atlas), how far the pair the last tiles_pick
+ * took was seen from the tile's own neighbourhood: exactly; on panels the
+ * tile does not show; or where it shows them (their floors, side faces and
+ * what hangs under those, in their materials) at a few pixels, or more: the
+ * tile draws a floor, a material or an edge that is not there. netmap counts
+ * the last two over a map in tiles_stats. */
+enum { TILE_EXACT, TILE_OFF_FAR, TILE_OFF_EDGE, TILE_OFF_NEAR };
+extern bool tiles_measure;
+extern int tiles_pick_off;
+/* ... and for one drawn off, why: no pair of its phase shows what it
+ * shows; those that do cover the floor wrongly here (the pixel test); they
+ * do not look like plain floor well inside it; or one would do and lost to
+ * a nearer neighbourhood or a seam. */
+enum { TILE_WHY_NONE, TILE_WHY_UNSEEN, TILE_WHY_PIXELS, TILE_WHY_PLAIN, TILE_WHY_RANKED };
+extern int tiles_pick_why;
 
 /* The tiles beside one (left, above, right, below) as far as they are
  * picked: how they look to the seams (SEAM_ANY: not yet) and what they draw. */

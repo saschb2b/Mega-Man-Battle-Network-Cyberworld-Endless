@@ -9,7 +9,9 @@
 
 /* Both layers of the g->tw x g->th map into `map` (layer 0, then layer 1).
  * `left` (a byte per tile) gets where tiles still meet badly: bit 0 with the
- * one to the right, bit 1 with the one below. With g->apart, each piece
+ * one to the right, bit 1 with the one below; and in bits 2-3 how far its
+ * pair was seen from its own neighbourhood (tiles_pick_off), in bits 4-6 why
+ * (tiles_pick_why). With g->apart, each piece
  * (TILE_APART panels joined side by side) and the rest of the floor are
  * picked apart, each as if the others were not there, and where two draw a
  * tile, the one whose top covers the other's side faces (tiles_in_front)

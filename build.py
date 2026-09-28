@@ -32,6 +32,14 @@ glibc runs on more distributions.
                                 in .build/atlas, compared with (or written to,
                                 --baseline) tests/atlas_baseline.txt
                                 (docs/DEVTOOLS.md)
+  python3 build.py tiles [SEEDS] [--baseline]
+                                the tile test: the atlas of every area and
+                                layout (SEEDS each, 2 by default), a table of
+                                each area's tiles drawn with other floors
+                                than they show and seams, close-ups of them
+                                in .build/atlas/defects_bNN.png; fails where a
+                                layer got worse than tests/atlas_baseline.txt
+                                (docs/DEVTOOLS.md)
   python3 build.py pacing       every act's battles and guardians against
                                 their bands, in .build/pacing.txt
                                 (docs/DEVTOOLS.md)
@@ -367,6 +375,8 @@ def atlas(biomes='all', seeds='1', baseline=False):
             box = im.getbbox() or (0, 0, im.width, im.height)
             im = im.crop(box)
             im.save(path[:-4] + '.png')   # kept whole, for zooming in
+            with open(path[:-4] + '.box', 'w') as f:   # where the crop lies (the flagged tiles are listed uncropped)
+                f.write(f'{box[0]} {box[1]}\n')
             thumb = im.copy()
             thumb.thumbnail((400, 400))
             whole.append(thumb)
@@ -380,10 +390,26 @@ def atlas(biomes='all', seeds='1', baseline=False):
             os.remove(path)
     for path in glob.glob(os.path.join(out, 'seams_*.bmp')) + glob.glob(os.path.join(out, 'src_*.bmp')):   # seams marked; the originals
         im = Image.open(path).convert('RGB')
-        im.crop(im.getbbox()).save(path[:-4] + '.png')
+        name = os.path.basename(path)
+        box = os.path.join(out, name[6:-4] + '.box') if name.startswith('seams_') else None
+        if box and os.path.exists(box):   # (cut as the layer's picture is)
+            x0, y0 = map(int, open(box).read().split())
+            plain = Image.open(os.path.join(out, name[6:-4] + '.png'))
+            im.crop((x0, y0, x0 + plain.width, y0 + plain.height)).save(path[:-4] + '.png')
+        else:
+            im.crop(im.getbbox()).save(path[:-4] + '.png')
         os.remove(path)
+    if not os.path.exists(os.path.join(out, 'report.txt')):   # a group's maps alone (gNN)
+        print('maps in .build/atlas')
+        return 0
     report = open(os.path.join(out, 'report.txt')).read()
     print(report, end='')
+    found = defect_sheets(out)
+    if found:
+        print('spots drawn with other floors than they show, per area (defects_bNN.png):',
+              ', '.join(f'{b}: {n}' for b, n in sorted(found.items())))
+        for b in sorted(WHY):
+            print(f'  area {b:2d} tiles off by why:', ', '.join(f'{WHY_NAMES[k]} {v}' for k, v in enumerate(WHY[b]) if v))
     flagged = [l for l in report.splitlines() if 'NOT BUILT' in l or 'arena NO' in l or
                float(re.search(r'fallback ([\d.]+)%', l).group(1)) > 1.0]
     print(f'{len(layers)} sheets in .build/atlas; {len(flagged)} layers flagged')
@@ -394,7 +420,37 @@ def atlas(biomes='all', seeds='1', baseline=False):
 
 BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
 # how much worse a layer may get than the baseline before the atlas fails
-TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10}
+TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10, 'off': 1.10}
+AREAS = ['Central', 'Seaside', 'Sky', 'Green', 'Graveyard', 'Undernet', 'Secret', 'Nest', 'Comp', 'Homepage', 'Comp B',
+         'Robot Comp', 'Aquarium Comp', 'Judge Comp', 'Weather Comp', 'CopyBot Comp', 'ACDC HP', 'Green HP', 'Sky HP']   # src/core/run.h
+
+
+def tiles(seeds='2', baseline=False):
+    """The tile test: every area's layers drawn (the atlas), and per area how many tiles were
+    drawn with other floors than they show and how many seams show; nonzero where a layer got
+    worse than the baseline."""
+    import collections
+    code = atlas('all', seeds, baseline=baseline)
+    report = os.path.join(ROOT, '.build', 'atlas', 'report.txt')
+    if not os.path.exists(report):
+        return code or 1
+    agg = collections.defaultdict(lambda: [0, 0, 0, 0])
+    for l in open(report):
+        m = re.match(r'biome +(\d+) .*?: (\d+) panels.*seams (\d+), off near (\d+)', l)
+        if m:
+            a = agg[int(m[1])]
+            a[0] += 1; a[1] += int(m[2]); a[2] += int(m[3]); a[3] += int(m[4])
+    print()
+    print(f'{"area":16} {"layers":>6} {"panels":>7} {"off /100":>9} {"seams /100":>11}   why off')
+    total = [0, 0, 0]
+    for b, (n, panels, seams, off) in sorted(agg.items()):
+        why = ', '.join(f'{WHY_NAMES[k]} {v}' for k, v in enumerate((WHY or {}).get(b, [])) if v) if WHY else ''
+        print(f'{AREAS[b] if b < len(AREAS) else b:16} {n:6} {panels:7} {100 * off / panels:9.1f} {100 * seams / panels:11.1f}   {why}')
+        total[0] += panels; total[1] += off; total[2] += seams
+    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}')
+    print('off: tiles drawn with other floors than they show (framed magenta, close-ups in .build/atlas/defects_bNN.png);'
+          ' seams: tiles meeting as no original map sets them (red)')
+    return code
 
 
 def bmp_sheet(paths, out, cols=3):
@@ -479,7 +535,7 @@ def atlas_metrics(report):
             f = re.search(k + r' ([\d.]+)', l)
             return float(f.group(1)) if f else 0.0
         out[m.groups()] = {'near': get('near'), 'fallback': get('fallback'), 'seams': get('seams'),
-                           'inexact': get('not exact'), 'other': get('other colours')}
+                           'inexact': get('not exact'), 'other': get('other colours'), 'off': get('off near')}
     return out
 
 
@@ -491,13 +547,14 @@ def compare_baseline(report, write=False):
         old.update(now)
         with open(BASELINE, 'w') as f:
             f.write('# build.py atlas --baseline: per layer (biome layout depth seed) its near and\n'
-                    '# fallback shares (%), seams, panels not exact and tiles in colours the area\'s own map never\n'
-                    '# shows on its floors; the atlas fails when one gets worse\n')
+                    '# fallback shares (%), seams, panels not exact, tiles in colours the area\'s own map never\n'
+                    '# shows on its floors and tiles drawn with other floors than they show; the atlas fails\n'
+                    '# when one gets worse\n')
             for k in sorted(old, key=lambda k: tuple(int(v) for v in k)):
                 v = old[k]
                 f.write(f'biome {k[0]} layout {k[1]} (x) depth {k[2]} seed {k[3]}: near {v["near"]}, '
                         f'fallback {v["fallback"]}, seams {v["seams"]:.0f}, not exact {v["inexact"]:.0f}, '
-                        f'other colours {v["other"]:.0f}\n')
+                        f'other colours {v["other"]:.0f}, off near {v.get("off", 0):.0f}\n')
         print(f'baseline: {len(now)} layers written to tests/atlas_baseline.txt')
         return 0
     if not os.path.exists(BASELINE):
@@ -710,6 +767,82 @@ def flatpak():
     return code
 
 
+# why a tile was drawn with other floors than it shows (src/map/tiles.h, TILE_WHY_*)
+WHY_NAMES = ['-', 'unseen', 'pixels', 'plain', 'ranked']
+WHY = None
+
+
+def defect_sheets(out, per_area=24):
+    """Per area, a sheet of close-ups of the spots where tiles were drawn with other floors
+    than they show (offs_*.txt, framed magenta in the seams images), each as drawn and as marked."""
+    import collections
+    import glob
+    import re
+    from PIL import Image, ImageDraw
+    global WHY
+    WHY = collections.defaultdict(lambda: [0] * len(WHY_NAMES))
+    spots = collections.defaultdict(list)
+    for path in sorted(glob.glob(os.path.join(out, 'seams_b*.png'))):
+        name = os.path.basename(path)[6:-4]
+        biome = int(re.match(r'b(\d+)_', name).group(1))
+        offs, box = os.path.join(out, 'offs_' + name + '.txt'), os.path.join(out, name + '.box')
+        if not os.path.exists(offs) or not os.path.exists(box):
+            continue
+        bx, by = map(int, open(box).read().split())
+        # the flagged tiles, as cells of the cut picture; then clusters of them two tiles apart
+        cells = set()
+        for line in open(offs):
+            x, y, why = map(int, line.split())
+            cells.add(((x - bx) // 8, (y - by) // 8))
+            WHY[biome][why] += 1
+        seen = set()
+        for c in sorted(cells):
+            if c in seen:
+                continue
+            group, todo = [], [c]
+            seen.add(c)
+            while todo:
+                cx, cy = todo.pop()
+                group.append((cx, cy))
+                for dx in (-2, -1, 0, 1, 2):
+                    for dy in (-2, -1, 0, 1, 2):
+                        n = (cx + dx, cy + dy)
+                        if n in cells and n not in seen:
+                            seen.add(n)
+                            todo.append(n)
+            x0 = min(g[0] for g in group) * 8 - 24; x1 = max(g[0] for g in group) * 8 + 32
+            y0 = min(g[1] for g in group) * 8 - 16; y1 = max(g[1] for g in group) * 8 + 24
+            cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+            w, h = max(x1 - x0, 96), max(y1 - y0, 64)
+            box = (cx - w // 2, cy - h // 2, cx - w // 2 + w, cy - h // 2 + h)
+            spots[biome].append((len(group), path, box))
+    for biome, found in spots.items():
+        found.sort(key=lambda f: -f[0])
+        shown = found[:per_area]
+        tiles = []
+        for n, path, box in shown:
+            plain = Image.open(path.replace('seams_', '')).convert('RGB')
+            marked = Image.open(path).convert('RGB')
+            a, b = plain.crop(box), marked.crop(box)
+            scale = 3 if a.width <= 128 else 2
+            pair = Image.new('RGB', (a.width * scale * 2 + 4, a.height * scale + 12), (20, 20, 24))
+            pair.paste(a.resize((a.width * scale, a.height * scale), Image.NEAREST), (0, 12))
+            pair.paste(b.resize((b.width * scale, b.height * scale), Image.NEAREST), (a.width * scale + 4, 12))
+            ImageDraw.Draw(pair).text((2, 0), f'{os.path.basename(path)[6:-4]} @{box[0]},{box[1]}: {n} tiles', fill=(255, 255, 0))
+            tiles.append(pair)
+        cols = 2
+        cw = max(t.width for t in tiles)
+        rows_h = [max(t.height for t in tiles[r:r + cols]) for r in range(0, len(tiles), cols)]
+        sheet = Image.new('RGB', (cols * (cw + 8), sum(rows_h) + 8 * len(rows_h)), (0, 0, 0))
+        y = 0
+        for r, rh in zip(range(0, len(tiles), cols), rows_h):
+            for k, t in enumerate(tiles[r:r + cols]):
+                sheet.paste(t, (k * (cw + 8), y))
+            y += rh + 8
+        sheet.save(os.path.join(out, f'defects_b{biome:02d}.png'))
+    return {b: len(f) for b, f in spots.items()}
+
+
 def densest(im, w, h):
     """The w x h window with the most floor in it."""
     px = im.load()
@@ -725,7 +858,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -792,6 +925,10 @@ def main():
         build('host')
         rest = [r for r in a.rest if r != '--baseline']
         sys.exit(atlas(*rest[:2], baseline='--baseline' in a.rest))
+    if a.action == 'tiles':
+        build('host')
+        rest = [r for r in a.rest if r != '--baseline']
+        sys.exit(tiles(*rest[:1], baseline='--baseline' in a.rest))
     if a.action in ('all', 'host', 'shot'):
         build('host')
     if a.action == 'asan':

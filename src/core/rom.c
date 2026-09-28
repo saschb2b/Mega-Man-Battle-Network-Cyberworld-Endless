@@ -30,20 +30,20 @@ static const RomLayout layouts[] = {
 			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(TREE) | L(SIGN), .pad_hues = 0x0F00 },     /* Sky Area 2 (its framed pads, their lavender recess, cut whole); Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK); the Net Dealer's capsule of Sky Area 3 */
 			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS, .counter = { 0x92, 1, -28, -468 }, .looks = L(TREE) | L(GIANT_TREE) | L(SIGN) },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush); the Net Dealer's NetCafe desk of Green Area 2 */
 			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } }, .looks = L(MONUMENT) | L(GRAVE), .emblem = 0x56C0, .rebank = { 2, 1 } },     /* Graveyard; Graveyard 1-3 (its cyan crosses; its pale platforms' tiles drawn in its dark slabs' colours) */
-			{ 0x95, 0, 0x11000, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER), .emblem = 0x7D3F },      /* Undernet 1; Undernet 1-3 (mauve stone plateaus in a red lip with spikes, TILES_RIMMED; its magenta crosses) */
-			{ 0x95, 1, 0x11000, 0x0C00, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER), .emblem = 0x7D3F },      /* Undernet Zero; Undernet 3-4 (the same plateaus and crosses) */
+			{ 0x95, 0, 0x11000, 0x0C01, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER), .emblem = 0x7D3F },      /* Undernet 1; Undernet 1-3 (mauve stone plateaus in a red lip with spikes, TILES_RIMMED; its magenta crosses; its red striped bridges turn and end in joints with a yellow gem, redder: walkway floor too) */
+			{ 0x95, 1, 0x11000, 0x0C01, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER), .emblem = 0x7D3F },      /* Undernet Zero; Undernet 3-4 (the same plateaus, crosses and bridges) */
 			{ 0x93, 1, 0x11000, 0x0004, true, 0x21, 0x93, 0, 2, { { 0x93, 0 } } },      /* Underground 2; Underground 1-2 (grey stone platforms in a magenta lip with spikes, TILES_RIMMED; its walkways the magenta links with a yellow gem) */
-			{ 0x8C, 0, 0x0002, 0x0008, false, 0x13, 0x8C, 0, 16 },    /* a comp (orange, green); the comps of group 0x8C */
-			{ 0x88, 3, 0x0800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */
-			{ 0x8C, 1, 0x00C0, 0x0400, false, 0x13, 0x8D, 0, 16 },    /* a comp (blue, pink); the comps of group 0x8D */
+			{ 0x8C, 0, 0x80002, 0x0008, false, 0x13, 0x8C, 0, 16 },    /* a comp (orange, green; its green crosses its orange fields in stripes, TILES_CROSSING); the comps of group 0x8C */
+			{ 0x88, 3, 0x80800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */
+			{ 0x8C, 1, 0x800C0, 0x0400, false, 0x13, 0x8D, 0, 16 },    /* a comp (blue, pink); the comps of group 0x8D */
 			{ 0x80, 1, 0x71000, 0x0200, false, 0x10, 0x80, 0, 2, { { 0x80, 0 }, { 0x85, 3 } } },     /* Robot Control Comp 2 (white, violet walkways; its teal pads are flat inside and would fill the platforms). Its white platforms are framed by two bands half a panel deep (TILES_RIMMED); the walls inside them ring the grey cubes that stand on them, no holes (TILES_INNER_WALLS); its one small platform is the striped conveyor before the robot's door, so its pads take the look of Comp 1's and the Pavilion's raised white platforms (TILES_MORE_PADS) */
 			{ 0x81, 2, 0x00C0, 0x0000, false, 0x11, 0x81, 0, 3, { { 0x81, 0 }, { 0x81, 1 }, { 0x85, 0 } }, 16, NET_APART_PADS },     /* Aquarium Comp 3 (water; its mazes are water too, its yellow fish two panels long; its platforms are glass pads, raised on legs and reached by stairs) */
 			{ 0x82, 2, 0x4003, 0x0000, false, 0x12, 0x82, 0, 3, { { 0x82, 0 }, { 0x82, 1 }, { 0x85, 1 } }, 0, NET_APART_NONE, 0x0001 },     /* Judge Tree Comp 3 (brick; the tiles of its flat red courts are left out, and its pads' look, round stumps: TILES_NO_PAD_LOOK) */
 			{ 0x83, 2, 0x0180, 0x1000, true, 0x0A, 0x83, 0, 3, { { 0x83, 0 }, { 0x83, 1 }, { 0x85, 2 } } },     /* Mr. Weather Comp 3 (lavender; its pale conveyor belts the walkways; snow and clouds on the back layer, their drifts too ragged to learn) */
 			{ 0x85, 4, 0x8000, 0x8000, false, 0x20, 0x85, 0, 5, { { 0 } }, 0, NET_APART_PLATFORMS },     /* CopyBot Comp, its floors told by shape (TILES_BY_SHAPE): hue cannot part its purple plateaus in stone rims from its pink and white walkways with teal discs; its plateaus stand on pods, reached by ladders; the Pavilion comps' battles */
-			{ 0x88, 1, 0x0003, 0x1000, false, 0x13, 0x88, 1, 1 },     /* ACDC HP (yellow, grey) */
-			{ 0x88, 5, 0x0002, 0x0008, false, 0x13, 0x88, 5, 1 },     /* Green HP (brown, green) */
-			{ 0x88, 6, 0x0100, 0x00C0, false, 0x13, 0x88, 6, 1 },     /* Sky HP (purple, cyan) */
+			{ 0x88, 1, 0x80003, 0x1000, false, 0x13, 0x88, 1, 1 },     /* ACDC HP (yellow, grey) */
+			{ 0x88, 5, 0x80002, 0x0008, false, 0x13, 0x88, 5, 1 },     /* Green HP (brown, green) */
+			{ 0x88, 6, 0x80100, 0x00C0, false, 0x13, 0x88, 6, 1 },     /* Sky HP (purple, cyan) */
 		},
 		.song_table = 0x159F48,
 		.battle_bgs = 0x082058,

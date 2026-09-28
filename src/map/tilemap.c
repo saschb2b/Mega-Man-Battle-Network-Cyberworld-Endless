@@ -26,6 +26,7 @@ typedef struct {
 	uint32_t *look;
 	uint64_t *mask;
 	bool *on;       /* on the floor: has a pair */
+	uint8_t *off;   /* how far its pair was seen from its neighbourhood, and why (tiles_pick_off, _why) */
 } Picked;
 
 /* Tile (tx, ty)'s four neighbours: left, above, right, below. */
@@ -45,8 +46,10 @@ static bool pick_one(Picked *p, int tx, int ty) {
 	neighbours(p, tx, ty, &n);
 	p->look[i] = SEAM_VOID;
 	p->mask[i] = 0;
-	return tiles_pick(p->books, p->nbooks, p->g, tx, ty, p->floor, p->ctx, p->seams, &n,
+	bool on = tiles_pick(p->books, p->nbooks, p->g, tx, ty, p->floor, p->ctx, p->seams, &n,
 		&p->map[i], &p->map[cells + i], &p->look[i], &p->mask[i]);
+	p->off[i] = (uint8_t)(tiles_pick_off | tiles_pick_why << 2);
+	return on;
 }
 
 /* The sides (bit k: left, above, right, below) where tile (tx, ty) meets its
@@ -70,7 +73,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	int tw = g->tw, th = g->th;
 	size_t cells = (size_t)tw * th;
 	Picked p = { books, nbooks, seams, g, floor, ctx, map,
-		malloc(cells * sizeof *p.look), calloc(cells, sizeof *p.mask), calloc(cells, 1) };
+		malloc(cells * sizeof *p.look), calloc(cells, sizeof *p.mask), calloc(cells, 1), calloc(cells, 1) };
 	memset(map, 0, cells * 2 * sizeof *map);   /* (off the floor a tile keeps nothing) */
 	for (size_t i = 0; i < cells; ++i) p.look[i] = SEAM_ANY;
 	for (int ty = 0; ty < th; ++ty)
@@ -110,12 +113,13 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
 			unsigned sides = trouble(&p, tx, ty);
-			left[ty * tw + tx] = (uint8_t)((sides >> 2 & 1) | (sides >> 3 & 1) << 1);
+			left[ty * tw + tx] = (uint8_t)((sides >> 2 & 1) | (sides >> 3 & 1) << 1 | p.off[ty * tw + tx] << 2);   /* (off: bits 2-3, why: 4-6) */
 		}
 	free(dirty);
 	free(p.look);
 	free(p.mask);
 	free(p.on);
+	free(p.off);
 }
 
 /* Where pieces stand apart, the floor in pieces: each piece (its TILE_APART
@@ -225,7 +229,8 @@ void tilemap_pick(const TileBook *books, int nbooks, const TileSeams *seams, con
 			for (int tx = 0; tx < g->tw; ++tx) {
 				size_t i = (size_t)ty * g->tw + tx;
 				uint16_t *e0 = &map[i], *e1 = &map[cells + i], n0 = one[i], n1 = one[cells + i];
-				left[i] |= one_left[i];
+				unsigned was = left[i] >> 2, now = one_left[i] >> 2;
+				left[i] = (uint8_t)((left[i] | one_left[i]) & 3) | (uint8_t)(((now & 3) > (was & 3) ? now : was) << 2);
 				if (!drawn(n0) && !drawn(n1)) continue;
 				if (!drawn(*e0) && !drawn(*e1)) { *e0 = n0; *e1 = n1; continue; }
 				/* (a tile holds two pieces: of three, the one found behind

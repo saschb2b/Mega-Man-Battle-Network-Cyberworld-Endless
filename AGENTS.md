@@ -103,6 +103,7 @@ python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-
 python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
 python3 tools/play.py do NAME "press A; hold UP 30" [--every 10]   # input, then a picture and the state
 python3 build.py serve      # the site and the browser build on http://localhost:8080
+python3 build.py tiles [SEEDS]  # the tile test: every area's layers drawn, wrong-floor tiles and seams per area
 python3 build.py town [SEEDS]  # the town drawn per seed, and the game around it
 python3 build.py world        # the real world's original maps, drawn and toured
 python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless runs
@@ -163,7 +164,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Change | Checks |
 | --- | --- |
 | Engine code | `build.py test`, a headless capture of the affected screen, an autopilot run |
-| Layer generation or maps | `build.py test` (connectivity over 300 seeds), captures of every area (`--net-biome 0`-`7`) |
+| Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
 | The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in |
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input |
 | Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band), an autopilot run |

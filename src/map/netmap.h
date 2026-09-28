@@ -40,8 +40,15 @@ extern LegalStats netmap_legal;
 /* The last tile map written: tw x th entries of layer 0, then layer 1. */
 const uint16_t *netmap_last_tiles(int *tw, int *th);
 /* ... and where its tiles meet as no original map shows (per tile: bit 0
- * with the one to the right, bit 1 with the one below). */
+ * with the one to the right, bit 1 with the one below), in bits 2-3 how far
+ * its pair was seen from its own neighbourhood (tiles_pick_off), in bits 4-6
+ * why (tiles_pick_why). */
 const uint8_t *netmap_last_seams(void);
+/* (dev) The last layer's floor as text, a row per grid y: '.' void, 'a'
+ * platform floor, 'b' walkway floor, 's' walkway floor across a platform
+ * (TILES_CROSSING), 'p' a pad; upper case (a void panel '*') where a tile
+ * centred on the panel was seen with other floors where it shows them. */
+void netmap_last_cells(char out[MAP_H][MAP_W + 1]);
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 unsigned netmap_stair_dirs(int area, int *rise);
 /* What area `area`'s layers can draw: its stairs and counters (net.h). */

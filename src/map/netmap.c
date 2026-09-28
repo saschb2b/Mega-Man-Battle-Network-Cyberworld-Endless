@@ -52,6 +52,7 @@ typedef struct {
 	PropStamp pad;            /* a whole pad of its maps, for its layers' (Central's framed pads) */
 	uint8_t rebank[2];        /* RomLayout.net_area[].rebank */
 	uint8_t rebank_to[128];   /* the first-layer tiles its maps draw in rebank[1] (a bit each) */
+	bool pads_seen;           /* its maps have pads, whose look its layers' pads take */
 } Learned;
 
 /* the centrepieces' tiles (the four surface areas share their tile set) */
@@ -221,6 +222,9 @@ static bool learn(int area, Learned *L) {
 	 * joins and dead ends better than the area's own tiles and stand out
 	 * there, unless the area takes those colours too */
 	for (int k = own; k < L->nbooks; ++k) tiles_other_colours(&L->book[k], seen, !(na->styles & TILES_MORE_COLOURS));
+	L->pads_seen = false;
+	for (int k = 0; k < L->nbooks; ++k)
+		for (int i = 0; i < L->book[k].n && !L->pads_seen; ++i) L->pads_seen = L->book[k].cand[i].pad;
 	if (emu_debug_on()) {
 		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n);
 		for (int d = 0; d < STAIR_DIRS; ++d)
@@ -301,6 +305,57 @@ static bool edge(int x, int y) {
 	return false;
 }
 
+/* Where the walkways' floor runs on across the platforms they meet
+ * (TILES_CROSSING), as the comps' and homepages' maps cross their fields
+ * with stripes of it: a walkway entering a platform square on, in the
+ * middle of a side, goes on straight in its own floor as far as floor lies
+ * on both sides of it, out the other side only into a walkway: their
+ * stripes end a panel inside a field's edge or leave it as a walkway. A
+ * walkway stopped at a field's edge is a join of the two floors their maps
+ * never draw (green cut square over orange), and so is a stripe ending on
+ * the edge. */
+static bool striped;
+static uint8_t stripe[MAP_H][MAP_W];
+
+static bool floor_c(int x, int y) { return x >= 0 && y >= 0 && x < cur->gw && y < cur->gh && cur->cell[y * cur->gw + x] == C_PATH; }
+
+/* platform floor: in a 2 x 2 block of floor (a walkway is in none) */
+static bool platform_c(int x, int y) {
+	if (!floor_c(x, y)) return false;
+	for (int dy = -1; dy <= 0; ++dy)
+		for (int dx = -1; dx <= 0; ++dx)
+			if (floor_c(x + dx, y + dy) && floor_c(x + dx + 1, y + dy) && floor_c(x + dx, y + dy + 1) && floor_c(x + dx + 1, y + dy + 1)) return true;
+	return false;
+}
+
+/* raised floor, and pads where the area's maps give them a look of their
+ * own, keep theirs */
+static bool kept(int x, int y, bool keep_pads) {
+	return (keep_pads && cur->pad && cur->pad[y * cur->gw + x]) || (cur->level && cur->level[y * cur->gw + x]);
+}
+
+static void make_stripes(bool keep_pads) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	memset(stripe, 0, sizeof stripe);
+	for (int y = 0; y < cur->gh && y < MAP_H; ++y)
+		for (int x = 0; x < cur->gw && x < MAP_W; ++x) {
+			if (!floor_c(x, y) || platform_c(x, y) || kept(x, y, keep_pads)) continue;
+			for (int d = 0; d < 4; ++d) {
+				int dx = d4[d][0], dy = d4[d][1];
+				/* straight on from the walkway behind */
+				if (!floor_c(x - dx, y - dy) || platform_c(x - dx, y - dy)) continue;
+				int k = 1;
+				for (;; ++k) {
+					int cx = x + dx * k, cy = y + dy * k;
+					if (!platform_c(cx, cy) || kept(cx, cy, keep_pads) || !floor_c(cx + dy, cy + dx) || !floor_c(cx - dy, cy - dx)) break;
+				}
+				/* (on the edge, a panel short) */
+				if (!floor_c(x + dx * k, y + dy * k)) --k;
+				for (int j = 1; j < k; ++j) stripe[y + dy * j][x + dx * j] = 1;
+			}
+		}
+}
+
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
 static int floor_cb(int A, int B, const void *ctx) {
@@ -317,6 +372,7 @@ static int floor_cb(int A, int B, const void *ctx) {
 	/* by shape: walkways and platforms' rims one floor, their middles the other */
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
 	if (!by_shape && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B | pad;
+	if (striped && stripe[y][x]) return TILE_B | pad;
 	return (walkway(x, y) ? TILE_B : TILE_A) | pad;
 }
 
@@ -532,7 +588,11 @@ static bool write_tilemap(const Learned *L) {
 	free(last.seams);
 	last.seams = calloc(cells, 1);
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
-	for (size_t i = 0; i < cells; ++i) tiles_stats.seams += (last.seams[i] & 1) + (last.seams[i] >> 1);
+	for (size_t i = 0; i < cells; ++i) {
+		tiles_stats.seams += (last.seams[i] & 1) + (last.seams[i] >> 1 & 1);
+		tiles_stats.off_near += (last.seams[i] >> 2 & 3) == TILE_OFF_NEAR;
+		tiles_stats.off_edge += (last.seams[i] >> 2 & 3) == TILE_OFF_EDGE;
+	}
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
@@ -705,10 +765,15 @@ bool netmap_build(int area, const NetLayout *lay) {
 	place.ey = L->ey;
 	if (!centre(lay)) return false;
 	netmap_legal = (LegalStats){ 0, 0 };
+	/* (the stripes as the floor is, and again as the legalizer left it) */
+	striped = R.layout->net_area[area].styles & TILES_CROSSING;
+	bool keep_pads = pad_look && L->pads_seen;
+	if (striped) make_stripes(keep_pads);
 	if (lay->locked) {
 		legalize(L, lay);
 		centre(lay);
 	}
+	if (striped) make_stripes(keep_pads);
 	coord_slot = L->coord_slot;
 	build_extra(L);
 	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &extra);
@@ -796,3 +861,30 @@ const uint16_t *netmap_last_tiles(int *tw, int *th) {
 }
 
 const uint8_t *netmap_last_seams(void) { return last.seams; }
+
+void netmap_last_cells(char out[MAP_H][MAP_W + 1]) {
+	for (int y = 0; y < MAP_H; ++y) {
+		for (int x = 0; x < MAP_W; ++x) {
+			int A, B;
+			grid_to_panel(x, y, &A, &B);
+			int m = cur ? floor_cb(A, B, NULL) : TILE_VOID;
+			char c = ".ab"[TILE_MATERIAL(m)];
+			if (c == 'b' && striped && stripe[y][x]) c = 's';
+			if (m & TILE_PAD) c = 'p';
+			out[y][x] = c;
+		}
+		out[y][MAP_W] = 0;
+	}
+	if (!last.seams) return;
+	TileGrid grid = { last.tw, last.th, place.ex, place.ey, 0, 0, 0, false, false, false, 0 };
+	for (int ty = 0; ty < last.th; ++ty)
+		for (int tx = 0; tx < last.tw; ++tx) {
+			if ((last.seams[ty * last.tw + tx] >> 2 & 3) != TILE_OFF_NEAR) continue;
+			int phase, A, B;
+			tile_class(&grid, tx, ty, &phase, &A, &B);
+			int x = B + place.gx0, y = -A + place.gy0;
+			if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
+			char *c = &out[y][x];
+			*c = *c == '.' ? '*' : *c >= 'a' ? (char)(*c - 'a' + 'A') : *c;
+		}
+}

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "area_src.h"
 #include "emu.h"
@@ -22,6 +23,8 @@
 
 #define VOID_ARGB 0xFF282830u
 #define SEAM_ARGB 0xFFFF2040u
+#define OFF_NEAR_ARGB 0xFFFF40FFu   /* a tile whose pair was seen with other floors where it shows them */
+#define OFF_EDGE_ARGB 0xFFFFE040u   /* ... at a few pixels */
 
 static uint32_t marker(int type) {
 	switch (type) {
@@ -61,9 +64,17 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	layout_forced = layout;
 	LayerKit kit;
 	netmap_kit(biome, &kit);
+	/* timed as the game builds it, then again measured */
+	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
+	tiles_measure = false;
+	clock_t t0 = clock();
+	netmap_build_layer(biome, seed);
+	int ms = (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
+	tiles_measure = true;
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	memset(&tiles_stats, 0, sizeof tiles_stats);
-	if (!netmap_build_layer(biome, seed)) {
+	bool built = netmap_build_layer(biome, seed);
+	if (!built) {
 		fprintf(report, "biome %2d layout %d depth %d seed %u: NOT BUILT\n", biome, layout, depth, seed);
 		return;
 	}
@@ -78,6 +89,23 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	uint32_t *sp = malloc((size_t)W * H * 4);
 	memcpy(sp, px, (size_t)W * H * 4);
 	const uint8_t *seams = netmap_last_seams();
+	/* the tiles whose pairs were seen with other floors where they show
+	 * them, framed and listed (build.py cuts close-ups of them) */
+	char path[600];
+	snprintf(path, sizeof path, "%s/offs_b%02d_l%d_d%d_s%u.txt", dir, biome, layout, depth, seed);
+	FILE *offs = fopen(path, "w");
+	for (int ty = 0; ty < th; ++ty)
+		for (int tx = 0; tx < tw; ++tx) {
+			int off = seams[ty * tw + tx] >> 2 & 3, why = seams[ty * tw + tx] >> 4;
+			if (off < TILE_OFF_EDGE) continue;
+			if (offs && off == TILE_OFF_NEAR) fprintf(offs, "%d %d %d\n", tx * 8, ty * 8, why);
+			uint32_t c = off == TILE_OFF_NEAR ? OFF_NEAR_ARGB : OFF_EDGE_ARGB;
+			for (int k = 1; k < 7; ++k) {
+				sp[(size_t)(ty * 8 + 1) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 6) * W + tx * 8 + k] = c;
+				sp[(size_t)(ty * 8 + k) * W + tx * 8 + 1] = sp[(size_t)(ty * 8 + k) * W + tx * 8 + 6] = c;
+			}
+		}
+	if (offs) fclose(offs);
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx)
 			for (int k = 0; k < 8; ++k) {
@@ -91,20 +119,39 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 		int z = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
 		dot(px, W, H, area_px(tw, X, Y), area_py(th, X, Y) - z, o->type == OBJ_MYSTERY ? 2 : 4, marker(o->type));
 	}
-	char path[600];
 	snprintf(path, sizeof path, "%s/b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
 	save_bmp(path, px, W, H);
 	snprintf(path, sizeof path, "%s/seams_b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
 	save_bmp(path, sp, W, H);
+	/* the floor as text, cut to where it is */
+	static char cells[MAP_H][MAP_W + 1];
+	netmap_last_cells(cells);
+	int x0 = MAP_W, x1 = -1, y0 = MAP_H, y1 = -1;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (cells[y][x] != '.') {
+				if (x < x0) x0 = x;
+				if (x > x1) x1 = x;
+				if (y < y0) y0 = y;
+				if (y > y1) y1 = y;
+			}
+	snprintf(path, sizeof path, "%s/cells_b%02d_l%d_d%d_s%u.txt", dir, biome, layout, depth, seed);
+	FILE *cf = fopen(path, "w");
+	if (cf) {
+		for (int y = y0; y <= y1; ++y) fprintf(cf, "%3d %.*s\n", y, x1 - x0 + 1, cells[y] + x0);
+		fprintf(cf, "(x from %d)\n", x0);
+		fclose(cf);
+	}
 	free(sp);
 	free(px);
 	int floor = 0;
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) floor += layer.cell[y][x] == C_PATH;
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1;
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms\n",
 		biome, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
-		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
-		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs);
+		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.off_near, tiles_stats.off_edge,
+		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
+		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms);
 }
 
 /* The area's own maps as the game draws them, to hold the layers against. */
@@ -119,6 +166,28 @@ static void sources(const char *dir, int biome) {
 		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
 		char path[600];
 		snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d.bmp", dir, biome, group, number);
+		save_bmp(path, a.px, W, H);
+		snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d.txt", dir, biome, group, number);
+		FILE *f = fopen(path, "w");
+		if (f) {
+			tiles_src_text(&a, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, f);
+			fclose(f);
+		}
+		area_src_free(&a);
+	}
+}
+
+/* Every map of a group as the game draws them (up to four missing in a
+ * row), for choosing the maps an area learns from. */
+static void group_sources(const char *dir, int group) {
+	for (int n = 0, miss = 0; n < 64 && miss < 4; ++n) {
+		AreaSrc a;
+		if (!area_src_load(group, n, &a)) { ++miss; continue; }
+		miss = 0;
+		int W = a.tw * 8, H = a.th * 8;
+		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+		char path[600];
+		snprintf(path, sizeof path, "%s/src_g%02x_%d.bmp", dir, group, n);
 		save_bmp(path, a.px, W, H);
 		area_src_free(&a);
 	}
@@ -206,8 +275,10 @@ int atlas_run(const char *spec) {
 	int seeds = 1;
 	sscanf(spec, "%511[^:]:%255[^:]:%d", dir, biomes, &seeds);
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "atlas: no core\n"); return 1; }
+	tiles_measure = true;
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
+	if (biomes[0] == 'g') { group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0; }
 	bool want[BIOME_COUNT] = { false };
 	if (!strcmp(biomes, "all")) for (int b = 0; b < BIOME_COUNT; ++b) want[b] = true;
 	else for (char *t = strtok(biomes, ","); t; t = strtok(NULL, ",")) { int b = atoi(t); if (b >= 0 && b < BIOME_COUNT) want[b] = true; }
