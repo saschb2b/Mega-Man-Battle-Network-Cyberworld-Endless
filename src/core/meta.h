@@ -40,6 +40,10 @@ enum {
 	MARK_NEST = 0x100,    /* Bass in Gregar's form: the endless net's own Nest cleared */
 };
 
+/* A new run's start: what earlier runs opened is no news on its summary
+ * (a folder earned in a run that never reached one was announced late, as
+ * if the run after had opened it). */
+void meta_run_begun(void);
 /* At a run's end, won or lost: the profile's unlocks from what the run and
  * the ones before it did, and the summary's lines for them. */
 void meta_run_over(bool won);

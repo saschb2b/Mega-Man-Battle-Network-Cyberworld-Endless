@@ -109,6 +109,13 @@ static void say(const char *fmt, const char *what) {
 	++nsaid;
 }
 
+void meta_run_begun(void) {
+	uint16_t was = profile.folders_open;
+	for (int f = 1; f < FOLDER_COUNT; ++f)
+		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
+	if (profile.folders_open != was) profile_save();
+}
+
 void meta_run_over(bool won) {
 	nsaid = 0;
 	marks_new = 0;

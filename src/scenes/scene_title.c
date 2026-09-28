@@ -471,6 +471,7 @@ static void update(void) {
 			else {
 				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
 				run_setup(S.net, S.folder, S.threat, S.helpers);
+				meta_run_begun();
 				emu_start_in_town = true;
 			}
 			scene_set(&scene_emu);
