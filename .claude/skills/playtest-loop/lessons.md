@@ -322,3 +322,32 @@ Loop change: **run `build.py tiles` before pinning and look over the
 close-ups of the areas the persona's run is in and reaches next**: a
 wedge of one floor in another is found there in minutes, never by a
 persona who reads it as the area's look.
+
+## Session 21 (8/10, keep playing: yes; recommend: yes)
+
+Build c305e47 (the clean joins, the tile test). Act 2's Aquarium HP from a
+CONTINUE that rebuilt layer 4, through layers 5 and 6 to CircusMan's
+door, where the budget ran out (282 calls, the first pace note sent at
+267). The joins held: "the floors look designed now", about 60 map
+pictures on layers 4-6 without a wedge, a cut edge or a stray colour; the
+dealers' picks, CircusMan's warning and the violet mark's line confirmed.
+
+Raised, all fixed before the next pin: the Server's prize never named
+(its talk ran unheld, and the A paging it talked to the Server, whose own
+line took the box: 9899261, the prize a dozen rolls a tier richer), the
+same virus family back to back (b033697: none of the last battle's
+families where another fits), ice unmentioned in the Aquarium HP
+(66e987c), a Chip Trader in a walkway's mouth (the legalizer had changed
+a cell beside him after placement, 8 of 128 atlas layers: 2626d94). Left:
+FighterPlane fights long (vanilla), A reaching a Mystery Data only
+square on (vanilla), the exit pad's rim (vanilla collision). Misread: his
+charged shots did 1 damage because a charge takes 100 frames at the
+start, not 64 (from the disassembly's `powerAttackChargeTimes`; now in
+persona.md). Meanwhile the user's own look found the framed pads' upper
+edges stepped and their catwalk joins cut, from a pad-stamp change the
+tile test could not see (it counted the picks under the stamp): fixed in
+9d1ef07, and the metrics now count the map as drawn.
+
+Loop change: **every pasted piece (pads, emblems, stairs) gets a look in
+the game before a pin**: the tile test sees the classes' picks, not what
+is set whole over them, and a regression there reached the user first.
