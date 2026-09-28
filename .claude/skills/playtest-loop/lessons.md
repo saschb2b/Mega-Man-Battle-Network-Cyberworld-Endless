@@ -484,3 +484,37 @@ to me" in session 25, had been met three times).
 Loop change: **a persona's "never met" is checked against the save**: its
 memory is its diary, which does not reach back 26 sessions; the profile's
 rivals.sav answered both greetings in a minute.
+
+## Session 27 (8/10, keep playing: yes; recommend: yes)
+
+Build 16264f3. CONTINUE of the short-net run to its end: act 3 in the
+Seaside comps under SlashMan (about 600 HP, deleted with LilBolr2 on 22
+HP, SlashCross from his Guardian Data), then the Cybeast Nest on layer 10
+for the first time, where EraseMan EX deleted MegaMan with 720 of his 1200
+HP left (about 383 calls, 120 over the budget to finish the fight).
+Confirmed: L naming an unplaced program, the install line in the Guardian
+Data talk, the dealer's one-line greeting within an act, dealer and heal
+apart, the one-time CONTINUE with the right act card, the setup's Blade
+and Storm lines. The Nest read as an ending: its arrival words and
+EraseMan's line made the fight personal.
+
+Raised, fixed: ScrtData unexplained at pickup, then repeated by L on every
+layer (MegaMan now says what it is for as it is picked up; L counts them
+only when the count changed), the summary announcing Blade and Storm as
+this run's unlocks (earned in a run that never reached a summary; a new
+run now marks earlier unlocks known), SlashMan's warning silent on his
+stuck blades, EraseMan's on his ghosts (both lines rewritten).
+Left, for the game-design skill: the final fight's dead hands (every
+reward in its own code diluted the folder: four or five codes a hand),
+EraseMan EX's ghosts as unreadable damage (BN6's own attacks; the warning
+now says to dodge between rows and heal first), two DarkMechs in one
+act-3 random battle (480 to 20 HP), a Guardian Data program left off the
+board after RUN (wish: place it itself or ask), ScarCrow healing on Elec
+with no hint, the layer-8 maze of parallel walkways, the dealer's list
+taking the A meant for his last box, a bystander by the Nest's heal.
+
+Loop change: **sweep the finale before the persona reaches it**: session
+27 was the first to meet the Nest, and every Nest problem (the guardian's
+unwarned attacks, the heal skipped, dead hands) surfaced there at once;
+the next sweep plays each Nest guardian's first minute with the autopilot
+and a folder of the run's rewards, and checks the warning against it.
