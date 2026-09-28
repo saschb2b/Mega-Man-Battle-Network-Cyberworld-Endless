@@ -118,6 +118,30 @@ jobs:
             build/release/cyberworld-endless-setup-x64.exe
           retention-days: 14
 
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.android, tag: cyberworld-android }
+      - uses: actions/cache@v4
+        with:
+          path: .build/gradle-home
+          key: gradle-${{ hashFiles('android/**/*.gradle') }}
+      - run: python3 build.py android
+      - name: One APK for arm64, 32-bit ARM and x86-64, starting at RomActivity
+        run: |
+          unzip -l build/release/cyberworld-endless.apk | tee /dev/stderr | grep -c 'lib/.*/libmain.so' | grep -qx 3
+          docker run --rm -v "$PWD:/src" -w /src cyberworld-android \
+            /opt/android-sdk/build-tools/35.0.0/aapt2 dump badging build/release/cyberworld-endless.apk \
+            | tee /dev/stderr | grep -q "launchable-activity: name='io.github.saschb2b.cyberworldendless.RomActivity'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-android
+          path: build/release/cyberworld-endless.apk
+          retention-days: 14
+
   macos:
     name: macOS
     runs-on: macos-14
@@ -171,7 +195,7 @@ jobs:
   pages:
     name: Publish on GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, handheld, linux, windows, macos, web]
+    needs: [test, handheld, linux, windows, android, macos, web]
     runs-on: ubuntu-latest
     permissions:
       pages: write

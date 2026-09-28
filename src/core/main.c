@@ -446,7 +446,12 @@ static void quit_prompt_draw(void) {
 	bool saved = director_on_layer();
 	int y = P.core_y + CORE_H - 30;
 	fill_rect(0, y, P.w, saved ? 26 : 14, rgba(0, 0, 0, 200));
-	text_draw(P.w / 2, y + 2, P.quit_pad ? "Hold SELECT+START again to quit" : "Press Esc again to quit", WHITE, TEXT_CENTER);
+#ifdef __ANDROID__
+	const char *again = P.quit_pad ? "Hold SELECT+START again to quit" : "Press Back again to quit";
+#else
+	const char *again = P.quit_pad ? "Hold SELECT+START again to quit" : "Press Esc again to quit";
+#endif
+	text_draw(P.w / 2, y + 2, again, WHITE, TEXT_CENTER);
 	if (saved) text_draw(P.w / 2, y + 14, director_can_suspend() ? "Your run is saved right here" : "Run saved at layer start",
 		rgba(170, 200, 255, 255), TEXT_CENTER);
 }

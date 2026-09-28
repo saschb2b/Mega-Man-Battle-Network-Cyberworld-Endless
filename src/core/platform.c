@@ -95,6 +95,14 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		SDL_SetHint(SDL_HINT_AUDIODRIVER, "dummy");
 	}
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+#ifdef __ANDROID__
+	/* a phone turns (the touch controls go under the picture or beside it),
+	 * and Back is Escape (the quit prompt), not the end of the app */
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait PortraitUpsideDown");
+	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+	/* (a phone's tilt is no controller) */
+	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
 #ifdef CW_DESKTOP
 	/* the window's class is the application ID, which the .desktop file names */
 #ifndef _WIN32
@@ -127,6 +135,11 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		}
 	}
 	P.fullscreen = fullscreen && !headless;
+#ifdef __ANDROID__
+	/* (SDL locks a window that cannot resize to the way the phone is held
+	 * at the start, whatever the hint allows) */
+	flags |= SDL_WINDOW_RESIZABLE;
+#endif
 	P.window = SDL_CreateWindow("Mega Man Battle Network: Cyberworld Endless",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, flags);
 	if (!P.window) { fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
@@ -144,6 +157,14 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	layout_canvas();
 	SDL_ShowCursor(P.fullscreen || headless ? SDL_DISABLE : SDL_ENABLE);
 	open_pads();
+#ifdef __ANDROID__
+	/* the buttons from the start, until a controller's first press (a
+	 * handheld's own controls: its first START); a keyboard with arrow keys
+	 * counts as a controller here, so its presence decides nothing */
+	if (touch_show(true)) layout_canvas();
+	SDL_Log("screen %dx%d, canvas %dx%d at %dx, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, P.scale, touch_shown() ? "shown" : "hidden");
+	for (int i = 0; i < SDL_NumJoysticks(); ++i) SDL_Log("controller %d: %s%s", i, SDL_JoystickNameForIndex(i), SDL_IsGameController(i) ? " (a gamepad)" : "");
+#endif
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(P.renderer, &info);
 	printf("display %dx%d renderer %s canvas %dx%d at %dx\n", P.screen_w, P.screen_h, info.name, P.w, P.h, P.scale);

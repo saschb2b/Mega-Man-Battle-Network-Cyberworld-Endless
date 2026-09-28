@@ -1,0 +1,66 @@
+// The Android app: SDL's activity running the game's C (jni/CMakeLists.txt),
+// built by build.py android in docker/Dockerfile.android. build.py passes the
+// version; ANDROID_KEYSTORE (a path), ANDROID_KEYSTORE_PASSWORD and, if they
+// differ from the defaults, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD sign a
+// release, else the debug key in ANDROID_USER_HOME signs it (android/README.md).
+plugins {
+    id 'com.android.application'
+}
+
+def cwVersion = project.findProperty('cwVersion') ?: 'dev'
+def cwVersionCode = (project.findProperty('cwVersionCode') ?: '1') as int
+def sdl2 = System.getenv('SDL2_SRC') ?: '/opt/sdl2-src'
+def keystore = System.getenv('ANDROID_KEYSTORE')
+
+android {
+    namespace 'io.github.saschb2b.cyberworldendless'
+    compileSdk 35
+    buildToolsVersion '35.0.0'
+    ndkVersion '27.2.12479018'
+
+    defaultConfig {
+        applicationId 'io.github.saschb2b.cyberworldendless'
+        minSdk 21
+        targetSdk 35
+        versionCode cwVersionCode
+        versionName cwVersion
+        externalNativeBuild {
+            cmake {
+                arguments "-DCW_VERSION=${cwVersion}", "-DSDL2_SRC=${sdl2}", "-DCW_WERROR=${System.getenv('CI') ? 'ON' : 'OFF'}"
+                abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+            }
+        }
+    }
+    signingConfigs {
+        release {
+            if (keystore) {
+                storeFile file(keystore)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS') ?: 'cyberworld'
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD') ?: System.getenv('ANDROID_KEYSTORE_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig keystore ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+    // SDL's Java half, from the same source as its C half
+    sourceSets.main.java.srcDirs += ["${sdl2}/android-project/app/src/main/java"]
+    externalNativeBuild {
+        cmake {
+            path 'jni/CMakeLists.txt'
+            version '3.22.1'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}

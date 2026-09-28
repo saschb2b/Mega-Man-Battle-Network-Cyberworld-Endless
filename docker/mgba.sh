@@ -2,7 +2,8 @@
 # Builds a minimal static libmgba (GBA core only, no frontends, scripting,
 # debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba;
 # with arguments, for those targets only (host, aarch64, web, windows: the
-# MinGW-w64 cross compiler of docker/Dockerfile.windows). The web build
+# MinGW-w64 cross compiler of docker/Dockerfile.windows; android: each
+# Android ABI with the NDK of docker/Dockerfile.android). The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
 # mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
@@ -18,9 +19,9 @@ OPTS="-DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC=ON -DBUILD_SHARED=OFF -DBUILD_QT
  -DUSE_GDB_STUB=OFF -DUSE_EDITLINE=OFF -DENABLE_SCRIPTING=OFF -DUSE_LUA=OFF -DM_CORE_GB=OFF -DM_CORE_GBA=ON \
  -DUSE_DISCORD_RPC=OFF -DBUILD_LTO=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
 build() { # $1 name, $2 extra cmake args
-	cmake -S mgba-$VER -B build-$1 $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/$1 $2
-	cmake --build build-$1 -j"$(nproc)"
-	cmake --install build-$1
+	cmake -S mgba-$VER -B "build-$1" $OPTS -DCMAKE_INSTALL_PREFIX="/opt/mgba/$1" $2
+	cmake --build "build-$1" -j"$(nproc)"
+	cmake --install "build-$1"
 }
 TARGETS=${*:-host aarch64}
 case " $TARGETS " in *" host "*) build host "" ;; esac
@@ -35,6 +36,11 @@ case " $TARGETS " in *" windows "*)
 	# frontends, which are not built here)
 	sed -i 's/if(WIN32 AND NOT (LIBMGBA_ONLY OR SKIP_LIBRARY OR USE_EPOXY))/if(FALSE)/' mgba-$VER/CMakeLists.txt
 	build windows "-DCMAKE_TOOLCHAIN_FILE=/opt/mingw.cmake" ;;
+esac
+case " $TARGETS " in *" android "*)
+	for abi in arm64-v8a armeabi-v7a x86_64; do
+		build android/$abi "-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=$abi -DANDROID_PLATFORM=android-21"
+	done ;;
 esac
 case " $TARGETS " in *" aarch64 "*)
 cat > aarch64.cmake <<'T'

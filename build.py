@@ -15,6 +15,8 @@ glibc runs on more distributions.
   python3 build.py windows      the Windows build (build/windows, MinGW-w64 in
                                 `cyberworld-windows`) and its release files in
                                 build/release: a zip and an installer (NSIS)
+  python3 build.py android      the Android app (build/release/cyberworld-endless.apk,
+                                the NDK and Gradle in `cyberworld-android`)
   python3 build.py macos        the macOS app in a .dmg (build/release), on a Mac:
                                 SDL2 and mGBA built by macos/deps.sh
   python3 build.py flatpak      the Flatpak (linux/flatpak) built by flatpak-builder
@@ -73,8 +75,9 @@ IMAGE = 'cyberworld-build'
 LINUX_IMAGE = 'cyberworld-linux'   # docker/Dockerfile.linux
 WEB_IMAGE = 'cyberworld-web'       # docker/Dockerfile.web
 WINDOWS_IMAGE = 'cyberworld-windows'   # docker/Dockerfile.windows
+ANDROID_IMAGE = 'cyberworld-android'   # docker/Dockerfile.android
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows'}
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android'}
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
@@ -89,13 +92,15 @@ def default_rom_dir():
     return os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 
 
-def docker(*cmd, mounts=(), image=IMAGE):
+def docker(*cmd, mounts=(), image=IMAGE, env=()):
     args = ['docker']
     if CONTEXT:
         args += ['--context', CONTEXT]
     args += ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
     for host, guest in mounts:
         args += ['-v', f'{host}:{guest}']
+    for name, value in env:
+        args += ['-e', f'{name}={value}']
     for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
@@ -164,6 +169,32 @@ def linux_release():
     print('released', archive)
     appimage()
     deb()
+
+
+APK_NAME = 'cyberworld-endless.apk'
+
+
+def android_release():
+    """build/release/cyberworld-endless.apk: the Android app (android/), SDL's
+    activity running the game, for phones, tablets and Android handhelds
+    (arm64, 32-bit ARM, x86-64; Android 5 on). Gradle and its downloads live
+    in .build/gradle-home, the debug key that signs a build without a release
+    key in .build/android-home (android/README.md)."""
+    ensure_image(ANDROID_IMAGE)
+    os.makedirs(RELEASE, exist_ok=True)
+    m = re.match(r'(\d+)\.(\d+)\.(\d+)(?:\+(\d+))?', version())
+    # (a later version or build installs over an earlier one)
+    code = sum(int(g or 0) * f for g, f in zip(m.groups(), (10 ** 7, 10 ** 5, 10 ** 3, 1))) if m else 1
+    env = [('GRADLE_USER_HOME', '/src/.build/gradle-home'), ('ANDROID_USER_HOME', '/src/.build/android-home'), ('HOME', '/src/.build/android-home')]
+    for name in ('CI', 'ANDROID_KEYSTORE', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD'):
+        if os.environ.get(name):
+            env.append((name, os.environ[name]))
+    if docker('gradle', '-p', 'android', '--no-daemon', '--console=plain', 'assembleRelease',
+              f'-PcwVersion={version()}', f'-PcwVersionCode={code}', image=ANDROID_IMAGE, env=env) != 0:
+        sys.exit('the Android build failed')
+    shutil.copy2(os.path.join(ROOT, 'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk'),
+                 os.path.join(RELEASE, APK_NAME))
+    print('released', os.path.join(RELEASE, APK_NAME))
 
 
 def file_version():
@@ -995,7 +1026,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'macos', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -1018,6 +1049,9 @@ def main():
         return
     if a.action == 'windows':
         windows_release()
+        return
+    if a.action == 'android':
+        android_release()
         return
     if a.action == 'macos':
         macos_release()

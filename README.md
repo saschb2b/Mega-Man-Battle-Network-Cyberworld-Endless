@@ -56,16 +56,19 @@ around it, one layer at a time, and keeps the run going.
 </p>
 
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
-Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays in a
-window on a Linux or Windows PC or a Mac and in a desktop browser at
-[saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/).
+Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays on
+Android phones, tablets and handhelds, in a window on a Linux or Windows PC or
+a Mac, and in a browser at
+[saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/),
+on a phone too.
 
 ## What you need
 
 - A handheld running ROCKNIX with PortMaster installed, a Steam Deck, an
   x86-64 Linux PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35
   and later), a 64-bit Windows 10 or 11 PC, a Mac with macOS 11 or newer
-  (Apple silicon or Intel), or a current desktop browser.
+  (Apple silicon or Intel), an Android 5 or newer phone, tablet or
+  handheld, or a current browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -192,6 +195,18 @@ for a second, then again; or use the Steam button's **Exit Game**. Saves
 live in `~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/cyberworld-endless/`
 (the AppImage's in `~/.local/share/cyberworld-endless/`) and survive
 SteamOS updates.
+
+### On Android
+
+Download `cyberworld-endless.apk` from the
+[releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
+on the phone, tablet or handheld and open it (Android asks once to allow
+installs from your browser or file manager). The first start asks for your
+ROM with Android's own file picker; the app checks it and keeps a copy in its
+own storage, beside your saves. A handheld's own controls, a Bluetooth or USB
+controller and the touch screen all work: the game draws touch controls
+round the picture until a controller's button is pressed, and Back asks
+before it quits. Uninstalling the app deletes its saves.
 
 ### In a browser
 

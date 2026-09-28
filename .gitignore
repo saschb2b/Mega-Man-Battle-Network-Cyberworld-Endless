@@ -13,3 +13,10 @@ tools/romlab/romlab.bin
 *.dat
 rom/
 savedata/
+
+# the Android app's build (build.py android)
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties

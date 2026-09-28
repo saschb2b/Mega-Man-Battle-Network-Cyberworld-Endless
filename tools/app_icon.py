@@ -123,6 +123,30 @@ def main():
     mask = Image.new('RGBA', (512, 512), BACKDROP + (255,))
     mask.alpha_composite(im.resize((N * 10, N * 10), Image.NEAREST), ((512 - N * 10) // 2,) * 2)
     mask.save(os.path.join(web, 'maskable-512.png'), optimize=True)
+    # Android's launcher: an adaptive icon (Android 8 on: the tile in the
+    # middle 64 of its 108 dp, the net blue behind) and the square one before
+    res = os.path.join(ROOT, 'android', 'app', 'src', 'main', 'res')
+    for dpi, dp in (('mdpi', 1), ('hdpi', 1.5), ('xhdpi', 2), ('xxhdpi', 3), ('xxxhdpi', 4)):
+        d = os.path.join(res, f'mipmap-{dpi}')
+        os.makedirs(d, exist_ok=True)
+        size, k = int(108 * dp), int(64 * dp) // N
+        fg = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        fg.alpha_composite(im.resize((N * k, N * k), Image.NEAREST), ((size - N * k) // 2,) * 2)
+        fg.save(os.path.join(d, 'ic_launcher_foreground.png'), optimize=True)
+        size, k = int(48 * dp), max(1, int(40 * dp) // N)
+        tile = Image.new('RGBA', (size, size), BACKDROP + (255,))
+        tile.alpha_composite(im.resize((N * k, N * k), Image.NEAREST), ((size - N * k) // 2,) * 2)
+        tile.save(os.path.join(d, 'ic_launcher.png'), optimize=True)
+    d = os.path.join(res, 'mipmap-anydpi-v26')
+    os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, 'ic_launcher.xml'), 'w') as f:
+        f.write('<?xml version="1.0" encoding="utf-8"?>\n<!-- drawn by tools/app_icon.py -->\n'
+                '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+                '    <background android:drawable="@color/ic_launcher_background" />\n'
+                '    <foreground android:drawable="@mipmap/ic_launcher_foreground" />\n</adaptive-icon>\n')
+    with open(os.path.join(res, 'values', 'ic_launcher.xml'), 'w') as f:
+        f.write('<?xml version="1.0" encoding="utf-8"?>\n<!-- drawn by tools/app_icon.py -->\n<resources>\n'
+                '    <color name="ic_launcher_background">#%02X%02X%02X</color>\n</resources>\n' % BACKDROP)
     px = list(im.tobytes())
     lines = [', '.join(f'0x{b:02x}' for b in px[i:i + 16]) for i in range(0, len(px), 16)]
     with open(os.path.join(ROOT, 'src', 'core', 'app_icon.h'), 'w') as f:
@@ -130,7 +154,7 @@ def main():
         f.write('#pragma once\n#include <stdint.h>\n\n')
         f.write(f'enum {{ APP_ICON_SIZE = {N} }};\n')
         f.write(f'static const uint8_t app_icon_rgba[{len(px)}] = {{\n\t' + ',\n\t'.join(lines) + '\n};\n')
-    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons and src/core/app_icon.h')
+    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons, the Android app\'s icons and src/core/app_icon.h')
 
 
 if __name__ == '__main__':

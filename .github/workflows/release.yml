@@ -61,8 +61,34 @@ jobs:
           name: macos
           path: build/release/cyberworld-endless-macos.dmg
 
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.android, tag: cyberworld-android }
+      # one key for every release (android/README.md): the secrets, or a
+      # debug key when the repository has none yet
+      - name: The APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            mkdir -p .build && echo "$KEYSTORE_BASE64" | base64 -d > .build/release.jks
+            export ANDROID_KEYSTORE=/src/.build/release.jks
+          fi
+          python3 build.py android
+          rm -f .build/release.jks
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: build/release/cyberworld-endless.apk
+
   release:
-    needs: [flatpak, macos]
+    needs: [flatpak, macos, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,12 +114,16 @@ jobs:
         with:
           name: macos
           path: build/release
+      - uses: actions/download-artifact@v4
+        with:
+          name: android
+          path: build/release
       - name: Checksums
         working-directory: build/release
         run: >
           sha256sum cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb
           cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe
-          cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless-web.zip > SHA256SUMS.txt
+          cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless-web.zip > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
       # section); a 0.x version is an alpha, published as a pre-release
       - name: Notes
@@ -110,5 +140,5 @@ jobs:
             build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb \
             build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless.flatpak \
             build/release/cyberworld-endless-setup-x64.exe build/release/cyberworld-endless-windows-x64.zip \
-            build/release/cyberworld-endless-macos.dmg \
+            build/release/cyberworld-endless-macos.dmg build/release/cyberworld-endless.apk \
             build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt

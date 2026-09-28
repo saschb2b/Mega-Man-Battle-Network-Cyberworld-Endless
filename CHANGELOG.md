@@ -7,6 +7,11 @@
   upright phone, beside it on a wide screen (the picture a whole scale
   smaller where it would leave the thumbs no room). A thumb slides across
   the D-pad and rolls from B to A; a controller or keyboard puts them away.
+- **An Android app** for phones, tablets and Android handhelds (Android 5 on,
+  one APK for arm64, 32-bit ARM and x86-64): the first start asks for the ROM
+  with Android's own file picker, checks it and keeps a copy with the saves;
+  a handheld's own controls, a controller or the touch controls play it,
+  upright or on its side, and Back asks before it quits.
 - **The browser on a phone or tablet:** the player fills the screen (full
   screen where the browser allows it), turns with the phone, keeps the
   screen on, and installs to the home screen as an app.
