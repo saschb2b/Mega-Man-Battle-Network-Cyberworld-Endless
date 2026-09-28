@@ -75,6 +75,11 @@ modules:
       - install -Dm644 linux/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.desktop -t /app/share/applications
       - install -Dm644 linux/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.metainfo.xml -t /app/share/metainfo
       - for s in 32 64 128 256 512; do install -Dm644 linux/icons/$s.png /app/share/icons/hicolor/${s}x${s}/apps/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.png; done
+      # Steam's library artwork and the script that adds the game to Steam,
+      # which the host runs from here (the sandbox cannot reach Steam's folder)
+      - install -Dm755 linux/steam/add-to-steam.py -t /app/share/cyberworld-endless/steam
+      - install -Dm644 linux/steam/capsule.png linux/steam/wide.png linux/steam/hero.png linux/steam/logo.png -t /app/share/cyberworld-endless/steam
+      - install -Dm644 linux/icons/256.png /app/share/cyberworld-endless/steam/icon.png
     sources:
       - type: dir
         path: ../..

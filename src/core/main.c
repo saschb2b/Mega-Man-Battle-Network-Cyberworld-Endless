@@ -531,6 +531,10 @@ int main(int argc, char **argv) {
 	for (int i = 1; i < argc; ++i) {
 		const char *a = argv[i];
 		const char *v = i + 1 < argc ? argv[i + 1] : NULL;
+#ifdef CW_DESKTOP
+		/* (linux/steam/add-to-steam.py, which the Linux builds carry) */
+		if (!strcmp(a, "--add-to-steam") || !strcmp(a, "--remove-from-steam")) return desktop_steam_command(a[2] == 'r');
+#endif
 		if (!strcmp(a, "--headless")) headless = true;
 		else if (!strcmp(a, "--rom-dir") && v) { rom_dir = v; ++i; }
 		else if (!strcmp(a, "--data-dir") && v) { snprintf(g_data_dir, sizeof g_data_dir, "%s", v); data_dir_given = true; ++i; }
@@ -584,6 +588,7 @@ int main(int argc, char **argv) {
 	 * "not responding" while they wait (and Steam, not a menu entry, starts
 	 * the game on its big screen) */
 	if (!headless && !big) desktop_menu_entry(g_data_dir);
+	if (!headless && !big) desktop_steam_offer(g_data_dir);
 	if (!rom_ok && !headless && !rom_dir) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);

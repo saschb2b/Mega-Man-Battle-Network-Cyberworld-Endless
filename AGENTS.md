@@ -43,7 +43,7 @@ README and the site.
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
 | `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers |
 | `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
-| `tests/test_core.c` | ROM-free unit tests |
+| `tests/test_core.c` | ROM-free unit tests; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
@@ -51,7 +51,7 @@ README and the site.
 | `.claude/skills/game-design/` | The game-design skill (from saschb2b/skills): the lens, pattern catalog and frameworks to reason from before a design decision |
 | `.claude/skills/agent-browser/` | The agent-browser skill: a real Chrome driven from the shell (`npm i -g agent-browser`), to look over the site at desktop and phone widths |
 | `port/` | PortMaster launcher and metadata |
-| `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage, the `.deb` and the Flatpak (`linux/flatpak/`: its manifest, how to build it and bring it to Flathub) carry. The app ID `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu |
+| `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage, the `.deb` and the Flatpak (`linux/flatpak/`: its manifest, how to build it and bring it to Flathub) carry. The app ID `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu. `linux/steam/`: `add-to-steam.py` (the game as a non-Steam shortcut, with the library artwork `tools/steam_art.py` draws), which every Linux build carries and `--add-to-steam` runs |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling), the FAQ in `faq/` as the PET's E-Mail, its answers taken from the docs. Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
 | `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image) |
@@ -112,6 +112,7 @@ python3 build.py screenshots [NAMES]   # docs/screenshots from scripted headless
 python3 build.py clips [NAMES]         # docs/clips: the same runs as 30 fps videos
 python3 tools/site_art.py              # web/assets/ui: the site's pixel-art frames and icons
 python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: the application icon
+python3 tools/steam_art.py             # linux/steam: Steam's library artwork (capsules, hero, logo)
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
@@ -131,7 +132,7 @@ itself only takes a ROM the player chooses.
 
 CI runs without a ROM: it builds every target with `-Werror`
 (`WERROR=1`, set when `CI` is) and runs `tests/test_core.c` under the
-sanitizers. Everything that needs the game (captures, autopilot, atlas,
+sanitizers, then `tests/test_add_to_steam.py`. Everything that needs the game (captures, autopilot, atlas,
 pacing) stays local.
 
 `shot` runs headless in the build image with the repository at `/src` and
@@ -175,7 +176,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |
 | Browser page or platform code | `build.py serve` and a run in a browser: ROM choice, a new game, CONTINUE after a reload |
 | The site | `build.py serve` at desktop and phone widths (agent-browser); `build.py screenshots` and `build.py clips` again when what they show changed |
-| Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one) |
+| Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
 | Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
 
 ## Device testing

@@ -143,6 +143,7 @@ def linux_release():
         f.write('Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba file into this folder,\n'
                 'or into ~/.local/share/cyberworld-endless/rom/.\n')
     shutil.copytree(os.path.join(ROOT, 'linux', 'icons'), os.path.join(stage, 'icons'))
+    copy_steam(os.path.join(stage, 'steam'))
     archive = os.path.join(RELEASE, LINUX_NAME + '.tar.gz')
     with tarfile.open(archive, 'w:gz') as tar:
         tar.add(stage, arcname=LINUX_NAME)
@@ -172,6 +173,21 @@ def version():
     return f'0.0.1+git{git("rev-list", "--count", "HEAD") or "0"}.{git("rev-parse", "--short", "HEAD") or "unknown"}'
 
 
+STEAM_ART = ('capsule.png', 'wide.png', 'hero.png', 'logo.png')
+
+
+def copy_steam(dst):
+    """linux/steam: add-to-steam.py and the library artwork (tools/steam_art.py),
+    with the 256 px icon as icon.png, into dst."""
+    os.makedirs(dst, exist_ok=True)
+    src = os.path.join(ROOT, 'linux', 'steam')
+    shutil.copy2(os.path.join(src, 'add-to-steam.py'), dst)
+    os.chmod(os.path.join(dst, 'add-to-steam.py'), 0o755)
+    for name in STEAM_ART:
+        shutil.copy2(os.path.join(src, name), dst)
+    shutil.copy2(os.path.join(ROOT, 'linux', 'icons', '256.png'), os.path.join(dst, 'icon.png'))
+
+
 def install_tree(root, doc_name):
     """The installed layout under root/usr: the program and SDL2 in
     lib/cyberworld-endless, the menu entry, icons, AppStream data and the
@@ -197,6 +213,7 @@ def install_tree(root, doc_name):
         meta = f.read().replace('<!-- release -->', f'<release version="{version()}" date="{date}"/>')
     with open(os.path.join(share, 'metainfo', APP_ID + '.metainfo.xml'), 'w') as f:
         f.write(meta)
+    copy_steam(os.path.join(share, 'cyberworld-endless', 'steam'))
     doc = os.path.join(share, 'doc', doc_name)
     shutil.copytree(os.path.join(src, 'licenses'), doc)
     shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(doc, 'LICENSE'))
@@ -255,7 +272,7 @@ def deb():
         for name in files:
             path = os.path.join(d, name)
             if not os.path.islink(path):
-                os.chmod(path, 0o755 if name.startswith('cyberworld-endless') or name.endswith('.so.0') else 0o644)
+                os.chmod(path, 0o755 if name.startswith('cyberworld-endless') or name.endswith(('.so.0', '.py')) else 0o644)
                 size += os.path.getsize(path)
     os.makedirs(os.path.join(root, 'DEBIAN'))
     with open(os.path.join(root, 'DEBIAN', 'control'), 'w') as f:
@@ -868,7 +885,11 @@ def main():
         return
     if a.action == 'test':
         ensure_image()
-        sys.exit(docker('make', 'test', *(['WERROR=1'] if os.environ.get('CI') else [])))
+        code = docker('make', 'test', *(['WERROR=1'] if os.environ.get('CI') else []))
+        # (linux/steam/add-to-steam.py, on the host's Python)
+        if code == 0:
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
+        sys.exit(code)
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))

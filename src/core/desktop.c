@@ -447,6 +447,102 @@ void desktop_menu_entry(const char *data_dir) {
 	printf("added %s\n", file);
 }
 
+/* ---- Steam: the game as a non-Steam shortcut, with its artwork ---- */
+
+/* Says something with an OK button. */
+static void tell(const char *text) {
+	if (on_path("zenity")) {
+		char body[2400], textarg[2500];
+		markup_escape(body, sizeof body, text);
+		snprintf(textarg, sizeof textarg, "--text=%s", body);
+		char *argv[] = { "zenity", "--info", "--title=Cyberworld Endless", "--width=440", textarg,
+			icon_known() ? "--icon=" APP_ID : "--icon=dialog-information", NULL };
+		run(argv, NULL, 0);
+		return;
+	}
+	if (on_path("kdialog")) {
+		char *argv[] = { "kdialog", "--title", "Cyberworld Endless", "--msgbox", (char *)text, NULL };
+		run(argv, NULL, 0);
+		return;
+	}
+	char body[2400];
+	snprintf(body, sizeof body, "%s", text);
+	wrap(body, sizeof body, 60);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Cyberworld Endless", body, NULL);
+}
+
+/* linux/steam/add-to-steam.py where this build carries it (the AppImage's
+ * and the .deb's share folder, the tar.gz's steam folder beside the
+ * program), and the program Steam should start. */
+static bool steam_script(char *script, size_t n, char *exe, size_t en) {
+	const char *appimage = getenv("APPIMAGE"), *appdir = getenv("APPDIR");
+	if (appimage && appdir && *appimage == '/') {
+		snprintf(script, n, "%s/usr/share/cyberworld-endless/steam/add-to-steam.py", appdir);
+		snprintf(exe, en, "%s", appimage);
+		return access(script, R_OK) == 0;
+	}
+	char self[1024];
+	ssize_t len = readlink("/proc/self/exe", self, sizeof self - 1);
+	if (len <= 0) return false;
+	self[len] = 0;
+	char dir[1024];
+	snprintf(dir, sizeof dir, "%s", self);
+	char *slash = strrchr(dir, '/');
+	if (!slash) return false;
+	*slash = 0;
+	snprintf(exe, en, "%s", self);
+	snprintf(script, n, "%s/steam/add-to-steam.py", dir);
+	if (access(script, R_OK) == 0) return true;
+	snprintf(script, n, "%s/../../share/cyberworld-endless/steam/add-to-steam.py", dir);
+	if (access(script, R_OK) != 0) return false;
+	if (access("/usr/bin/cyberworld-endless", X_OK) == 0) snprintf(exe, en, "/usr/bin/cyberworld-endless");
+	return true;
+}
+
+int desktop_steam_command(bool remove) {
+	if (getenv("FLATPAK_ID")) {
+		/* (the sandbox has no way into Steam's folder: the host runs it) */
+		printf("The Flatpak cannot reach Steam's folder from its sandbox. In a terminal, run:\n\n"
+			"  python3 \"$(flatpak info --show-location " APP_ID ")/files/share/cyberworld-endless/steam/add-to-steam.py\"%s\n",
+			remove ? " --remove" : "");
+		return 1;
+	}
+	char script[1200], exe[1100];
+	if (!steam_script(script, sizeof script, exe, sizeof exe)) {
+		fprintf(stderr, "this build carries no add-to-steam.py\n");
+		return 1;
+	}
+	char *argv[] = { "python3", script, "--exe", exe, remove ? "--remove" : NULL, NULL };
+	execvp("python3", argv);
+	fprintf(stderr, "add-to-steam.py needs python3\n");
+	return 1;
+}
+
+void desktop_steam_offer(const char *data_dir) {
+	/* not when Steam started the game (closing Steam would end it), nor
+	 * in the Flatpak's sandbox, nor once answered */
+	if (getenv("SteamGameId") || getenv("SteamAppId") || getenv("SteamClientLaunch") || getenv("FLATPAK_ID")) return;
+	char done[1024], script[1200], exe[1100];
+	snprintf(done, sizeof done, "%s/steam-asked", data_dir);
+	if (access(done, F_OK) == 0 || !on_path("python3") || !steam_script(script, sizeof script, exe, sizeof exe)) return;
+	/* 0: there already, 2: no Steam here */
+	char *check[] = { "python3", script, "--exe", exe, "--check", NULL };
+	if (run_status(check) != 1) return;
+	const char *labels[] = { "Add to Steam", "Don't ask again", "Not now" };
+	int hit = ask("Add Cyberworld Endless to Steam, with its library artwork?\n\n"
+		"Steam closes for a moment and opens again. On a Steam Deck the game is then in "
+		"your library in Gaming Mode, where Steam gives it the Deck's controls.", labels, 3);
+	if (hit == 2 || hit < 0) return;
+	FILE *f = fopen(done, "w");
+	if (f) fclose(f);
+	if (hit != 0) return;
+	char *add[] = { "python3", script, "--exe", exe, "--yes", NULL };
+	if (run_status(add) == 0)
+		tell("Cyberworld Endless is in your Steam library, with its artwork.");
+	else
+		tell("Steam could not be updated. Run the game with --add-to-steam in a terminal to see why.");
+}
+
 #else
 typedef int desktop_unused;
 #endif

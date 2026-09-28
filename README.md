@@ -107,6 +107,11 @@ or `kdialog` is installed), and keeps a copy in
 also live. It opens in a window at the largest whole scale that fits; F11
 or Alt+Enter switches to fullscreen.
 
+With Steam installed, the first start from the desktop offers to add the
+game to Steam as well, with its library artwork; `--add-to-steam` does it
+later (the AppImage: `./cyberworld-endless-x86_64.AppImage --add-to-steam`;
+the Flatpak: see the Steam Deck steps below).
+
 `cyberworld-endless-linux-x86_64.tar.gz` is the same game as a plain folder:
 unpack it anywhere and run `./cyberworld-endless`; `./install.sh` adds it
 to the menu. Its `README.md` has the keyboard keys.
@@ -119,17 +124,30 @@ software:
 1. In Desktop Mode, download `cyberworld-endless.flatpak` from the
    [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
    and open it: Discover installs it (and the runtime it needs from
-   Flathub). The AppImage works too: right-click it, **Properties**,
-   **Permissions**, **Is executable**.
-2. Right-click **Cyberworld Endless** in the application menu (or the
-   AppImage) and choose **Add to Steam**. Start it from Steam, in Gaming
-   Mode or on the desktop: Steam then hands the Deck's controls to the game
-   as a gamepad.
-3. The ROM: with EmuDeck or RetroDECK there is nothing to do. The game looks
+   Flathub).
+2. Add it to Steam with its library artwork (the capsules, the banner, the
+   logo and the icon): open **Konsole** and paste
+
+   ```bash
+   python3 "$(flatpak info --show-location io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless)/files/share/cyberworld-endless/steam/add-to-steam.py"
+   ```
+
+   It asks to close Steam for a moment (Steam reads its games only when it
+   starts), adds the game and opens Steam again; run it again after
+   reinstalling, add `--remove` to take the entry away. Without the
+   artwork: right-click **Cyberworld Endless** in the application menu and
+   choose **Add to Steam**.
+3. Return to Gaming Mode: the game is in your library under **Non-Steam**,
+   and Steam hands the Deck's controls to it as a gamepad.
+4. The ROM: with EmuDeck or RetroDECK there is nothing to do. The game looks
    in `Emulation/roms/gba` and `retrodeck/roms/gba`, on the Deck and on its
    SD card, finds the ROM by its contents and keeps a copy of its own.
    Otherwise put the `.gba` file (unzipped) into Downloads, or choose it on
    the first start in Desktop Mode.
+
+The AppImage works too: right-click it, **Properties**, **Permissions**,
+**Is executable**, and start it once in Desktop Mode. It offers to add
+itself to the application menu and to Steam, with the artwork.
 
 In Gaming Mode it fills the screen, at 5x (1200x800) on the Deck's 1280x800.
 The Deck's A, B, L1 and R1 are the GBA's A, B, L and R, the Menu button (☰)

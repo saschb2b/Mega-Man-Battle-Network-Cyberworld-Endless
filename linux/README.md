@@ -60,9 +60,11 @@ Big Picture it fills the screen.
 
 ## Steam Deck
 
-Right-click the AppImage in Desktop Mode, make it executable (Properties,
-Permissions) and choose **Add to Steam**; start it from Steam, which then
-gives it the Deck's controls as a gamepad. A ROM in EmuDeck's
+`./cyberworld-endless --add-to-steam` adds the game to Steam with its
+library artwork (Steam closes for a moment and opens again; `steam/` holds
+the script and the pictures), and the first start from the desktop offers
+it. Start it from Steam, which then gives it the Deck's controls as a
+gamepad. A ROM in EmuDeck's
 `Emulation/roms/gba` or RetroDECK's `retrodeck/roms/gba`, on the Deck or its
 SD card, or in Downloads, is found by its contents and copied in.
 

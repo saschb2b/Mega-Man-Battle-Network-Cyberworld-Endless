@@ -38,3 +38,4 @@ StartupWMClass=$id
 DESKTOP
 update-desktop-database "$apps" >/dev/null 2>&1 || true
 echo "Added Cyberworld Endless to the application menu ($apps/$id.desktop)."
+echo "To add it to Steam too, with its library artwork: ./cyberworld-endless --add-to-steam"

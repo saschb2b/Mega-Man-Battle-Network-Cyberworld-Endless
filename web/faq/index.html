@@ -27,7 +27,7 @@
 </header>
 
 <main class="wrap">
-	<div class="band"><h1>FAQ</h1><span class="hint">New <b id="new">12</b></span></div>
+	<div class="band"><h1>FAQ</h1><span class="hint">New <b id="new">13</b></span></div>
 
 	<div class="mailbox">
 		<nav class="panel inbox" id="inbox" aria-label="Questions">
@@ -36,6 +36,7 @@
 				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>Why isn't the game included?</span></a></li>
 				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>Does the browser upload my ROM?</span></a></li>
 				<li><a class="row" href="#where"><i class="icon i-mail" aria-hidden="true"></i><span>Where can I play?</span></a></li>
+				<li><a class="row" href="#deck"><i class="icon i-mail" aria-hidden="true"></i><span>How do I add it to Steam on a Deck?</span></a></li>
 				<li><a class="row" href="#run"><i class="icon i-mail" aria-hidden="true"></i><span>What is a run?</span></a></li>
 				<li><a class="row" href="#stronger"><i class="icon i-mail" aria-hidden="true"></i><span>How does MegaMan get stronger?</span></a></li>
 				<li><a class="row" href="#deleted"><i class="icon i-mail" aria-hidden="true"></i><span>What happens when MegaMan is deleted?</span></a></li>
@@ -91,6 +92,19 @@
 						Windows and macOS.</p>
 					<p>Phones and touch screens aren't supported yet: the browser needs a keyboard or a controller.</p>
 					<p class="more"><a href="../#play">The builds</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#install">README: Install</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="deck">
+				<span class="who">From: README</span>
+				<div class="textbox">
+					<h2>How do I add it to Steam on a Deck?</h2>
+					<p>In Desktop Mode, install the Flatpak from the releases (Discover opens it), then paste this into Konsole:</p>
+					<p><code>python3 "$(flatpak info --show-location io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless)/files/share/cyberworld-endless/steam/add-to-steam.py"</code></p>
+					<p>Steam closes for a moment and opens again with the game in its library under Non-Steam, with its own capsule,
+						banner and logo. In Gaming Mode, Steam hands it the Deck's controls. The AppImage offers the same on its first
+						start.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#on-a-steam-deck">README: On a Steam Deck</a></p>
 				</div>
 			</article>
 

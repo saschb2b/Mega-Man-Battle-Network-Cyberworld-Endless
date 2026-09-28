@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Steam:** the game adds itself to Steam as a non-Steam game with its
+  own library artwork: a capsule, a wide capsule, a banner, a logo and the
+  icon, drawn for it (nothing from the ROM). The AppImage, the `.deb` and
+  the archive offer it on their first start from the desktop and do it
+  with `--add-to-steam`; on a Steam Deck the Flatpak's is one command in
+  Konsole (README). Steam closes for a moment and opens again; an entry
+  made before by Steam's own "Add to Steam" keeps its place and play time
+  and gets the artwork.
 - **The meta layer, phase one** (docs/META.md): what a run leaves for the
   next is options, never power.
   - A run is the short net: three acts, then the Cybeast Nest on layer

@@ -40,6 +40,19 @@ image).
   `~/ROMs`, `~/roms`, and `/run/media` for the same folders on an SD card.
   A ROM found there is copied into the game's own folder.
 
+## Steam
+
+`/app/share/cyberworld-endless/steam/` holds Steam's library artwork
+(`tools/steam_art.py`) and `add-to-steam.py`, which adds the game to Steam
+as a non-Steam shortcut with it. The sandbox cannot reach Steam's folder,
+so the host runs the script from the installed files:
+
+```bash
+python3 "$(flatpak info --show-location io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless)/files/share/cyberworld-endless/steam/add-to-steam.py"
+```
+
+(`flatpak run ... --add-to-steam` prints this command.)
+
 Its saves and that copy live in
 `~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/cyberworld-endless/`,
 apart from the AppImage's `~/.local/share/cyberworld-endless/` (copy the
