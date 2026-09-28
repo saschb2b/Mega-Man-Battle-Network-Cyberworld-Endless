@@ -295,3 +295,30 @@ Loop change: **read a death frame by frame before blaming the telegraph**
 **watch a guardian's recording for what does not light up**: the warning
 must name those moves too.
 
+
+## Session 20 (8/10, keep playing: yes; recommend: yes)
+
+Build of 08:46 (before 255e957; the dealer's list under "Welcome!", the
+map's way marks). Act 1 from a CONTINUE in the RoboDog Comp to BlastMan
+(the warning true for the rolling bombs and the flame dash; three dealers'
+Aqua tips did 290 of his 400 HP), the Guardian Data (Attack+1 drafted and
+installed), and into act 2's Aquarium HP, stopped on layer 4. 272 calls:
+on budget for the first time in four sessions. The map's way marks were
+checked ten times and no circle was walked.
+
+Raised, all fixed in the next build: Gunners in six of seven act-1 fights
+(a random battle sharing a family with the last is a third as likely,
+8ea9a0e), a bystander beside a Mystery Data taking the A (bystanders stand
+two panels from anything, 25719d2), the gift's menu taking the A meant for
+its text (it waits half a second, 0bdcdec; its chip now always hits),
+conveyor panels and the map's violet mark unexplained (the first briefing
+names both, a951b6b), BlastMan the act-1 guardian again (BlastMan, DiveMan
+and SpoutMan alike, dbf6ce6). Left: R presses before the gauge filled (the
+persona's timing). "The homepage floor is one repeated tile" and "no
+props" stood for the user's own report on the net's joins, which led to
+the tile test (`build.py tiles`, 8e641eb, c305e47).
+
+Loop change: **run `build.py tiles` before pinning and look over the
+close-ups of the areas the persona's run is in and reaches next**: a
+wedge of one floor in another is found there in minutes, never by a
+persona who reads it as the area's look.
