@@ -136,9 +136,11 @@ int counter_element(int biome, int navi) {
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
 static uint32_t last_families;                  /* the virus families of the last battle (a bit each) */
 static uint32_t last_viruses;                   /* ... and its viruses (viruses_of) */
+static uint32_t before_families;                /* the battle's before it, its families */
 
 void loot_battle_fought(const Encounter *e) {
 	if (e->from_pick < 0) return;
+	before_families = last_families;
 	last_biome = e->from_biome;
 	last_pick = e->from_pick;
 	last_families = e->from_families;
@@ -146,7 +148,7 @@ void loot_battle_fought(const Encounter *e) {
 }
 
 void loot_memory(LootMemory *out) {
-	*out = (LootMemory){ last_biome, last_pick, last_families, last_viruses };
+	*out = (LootMemory){ last_biome, last_pick, last_families, last_viruses, before_families };
 }
 
 void loot_memory_set(const LootMemory *m) {
@@ -154,6 +156,7 @@ void loot_memory_set(const LootMemory *m) {
 	last_pick = m->pick;
 	last_families = m->families;
 	last_viruses = m->viruses;
+	before_families = m->families_before;
 }
 
 /* Formation `f`'s viruses, whatever their panels: the same few viruses
@@ -281,18 +284,23 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 		}
 	}
 	if (!total) return false;
-	/* none of the last battle's virus families where another battle fits
-	 * (six of a playtester's seven act 1 battles held Gunners; a third as
+	/* none of the last two battles' virus families where another battle
+	 * fits (a Server's pair came back two fights after it, and planes flew
+	 * in three of a playtester's five Sky HP fights), then none of the
+	 * last one's (six of seven act 1 battles held Gunners; a third as
 	 * likely still let two repeats through in five), then a family it
 	 * brought a third as likely but never its very viruses (Piranha and
 	 * Puffy twice in a row, from two of the area's records), then anything:
 	 * the area's own viruses, not the same ones fight after fight */
 	int weight[MAX_FIT];
 	total = 0;
-	for (int again = 0; again < 3 && !total; ++again)
+	for (int again = 0; again < 4 && !total; ++again)
 		for (int i = 0; i < n && i < MAX_FIT; ++i) {
-			bool shares = families_of(&list[i]) & last_families, same = biome == last_biome && viruses_of(&list[i]) == last_viruses;
-			weight[i] = fit[i] < 0 || (again == 0 && shares) || (again == 1 && same) ? 0 : list[i].weight * (shares ? 1 : 3);
+			uint32_t fam = families_of(&list[i]);
+			bool shares = fam & last_families, before = fam & before_families;
+			bool same = biome == last_biome && viruses_of(&list[i]) == last_viruses;
+			weight[i] = fit[i] < 0 || (again == 0 && (shares || before)) || (again == 1 && shares) || (again == 2 && same)
+				? 0 : list[i].weight * (shares ? 1 : 3);
 			total += weight[i];
 		}
 	int roll = rng_range(0, total - 1), pick = -1;

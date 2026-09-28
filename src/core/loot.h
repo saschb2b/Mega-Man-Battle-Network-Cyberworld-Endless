@@ -23,7 +23,7 @@ int chip_price(int id);
 /* What the random battles remember of the last one (none of its virus
  * families next), kept beside the run's save: a CONTINUE had forgotten it
  * and brought the last session's pair back first thing. */
-typedef struct { int32_t biome, pick; uint32_t families, viruses; } LootMemory;
+typedef struct { int32_t biome, pick; uint32_t families, viruses, families_before; } LootMemory;
 void loot_memory(LootMemory *out);
 /* The battle MegaMan fights: the next random battle keeps clear of it. */
 void loot_battle_fought(const Encounter *e);

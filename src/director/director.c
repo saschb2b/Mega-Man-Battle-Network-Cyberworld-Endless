@@ -1327,14 +1327,18 @@ static uint32_t shop_guard(uint32_t keys) {
  * fired or flinched: a press is kept a second and a half and given as
  * the gauge fills, one frame let go first so the game sees a press, then
  * again every CUSTOM_RETRY frames until the Custom screen opens (the
- * gauge empties as it does) or CUSTOM_TRIES frames have passed. */
+ * gauge empties as it does) or CUSTOM_TRIES frames have passed. A press
+ * of the d-pad drops it: the latest intent wins (a kept R opened the
+ * Custom screen over the UP that was stepping MegaMan off a lit panel, and
+ * the bomb burst as the battle went on). */
 #define CUSTOM_EARLY 90
 #define CUSTOM_TRIES 45
 #define CUSTOM_RETRY 20
-static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
+static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed, bool pad_pressed) {
 	static int kept, step;
 	static uint32_t which;
 	if (main_mode() != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { kept = step = 0; return keys; }
+	if (pad_pressed) kept = step = 0;
 	bool full = emu_read16(BN6_CUSTOM_GAUGE) >= 0x4000;
 	if (l_pressed || r_pressed) {
 		/* (pressed at a full gauge: the game has this press; again later
@@ -1367,9 +1371,12 @@ uint32_t director_keys(uint32_t keys) {
 	D.l_held = l;
 	D.r_held = r;
 	D.a_held = a;
-	D.dir_held = (keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) != 0;
+	static uint32_t pad_before;   /* (a direction newly pressed, another held or not) */
+	bool pad_pressed = (keys & PAD_KEYS & ~pad_before) != 0;
+	pad_before = keys & PAD_KEYS;
+	D.dir_held = (keys & PAD_KEYS) != 0;
 	D.map_shown = false;
-	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
+	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed, pad_pressed);
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	keys = corner_assist(keys);
 	/* (turned to what A would talk to, the pad left alone for that frame so

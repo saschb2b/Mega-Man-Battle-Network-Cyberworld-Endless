@@ -83,7 +83,7 @@ bool save_exists(void) {
 	return old;
 }
 
-#define BATTLE_MAGIC 0x43574231u   /* "CWB1": the last battle, loot.h */
+#define BATTLE_MAGIC 0x43574232u   /* "CWB2": the last two battles, loot.h */
 
 bool save_run(void) {
 	if (!run.active) return false;
@@ -103,8 +103,8 @@ static void upgrade_run(void) {
 
 /* the last battle as the run's save left it (none: forgotten) */
 static void load_battle(void) {
-	LootMemory m = { -1, -1, 0, 0 };
-	if (!save_read_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m)) m = (LootMemory){ -1, -1, 0, 0 };
+	LootMemory m = { -1, -1, 0, 0, 0 };
+	if (!save_read_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m)) m = (LootMemory){ -1, -1, 0, 0, 0 };
 	loot_memory_set(&m);
 }
 
