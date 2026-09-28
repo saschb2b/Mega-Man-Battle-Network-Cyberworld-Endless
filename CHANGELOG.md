@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A Server's prize is named and given in full: its talk holds MegaMan now,
+  so the A that paged "The virus signal left a chip behind" no longer talked
+  to the Server he faced, whose own words had taken the box before the chip
+  was named. The prize is the hardest hitter of a dozen rolls a tier
+  richer (a FireBrn1 had paid for 120 HP of a hard battle). A run saved by
+  an older build starts its current layer afresh.
 - A random battle never brings the last battle's very viruses again where
   another battle fits (Piranha and Puffy twice in a row, from two of the
   area's records), and the Aquarium HP's first briefing names its ice

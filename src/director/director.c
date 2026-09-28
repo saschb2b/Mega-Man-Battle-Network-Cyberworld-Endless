@@ -58,6 +58,7 @@ static struct {
 	LayerObjs objs;
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
+	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
 	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
@@ -720,7 +721,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 29
+#define LAYER_MAKE 30
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1836,10 +1837,13 @@ void director_update(void) {
 		/* back from the challenge (the game gave its reward, the signal
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
-		if (emu_read8(BN6_BATTLE_RESULT) == 1 && D.objs.challenge_reward >= 0)
-			game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)D.objs.challenge_reward);
+		D.reward_due = emu_read8(BN6_BATTLE_RESULT) == 1 && D.objs.challenge_reward >= 0;
 		roll_encounter();
 	}
+	/* (as a talk, MegaMan held: run straight off, the A paging its first
+	 * box talked to the Server he faced, whose own words took the box, and
+	 * the prize was never named) */
+	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	/* a guardian keeps the exit pad shut (the game clears the map's warp
 	 * flags when it enters a map) */

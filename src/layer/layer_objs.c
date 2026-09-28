@@ -318,15 +318,15 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		case OBJ_CHALLENGE: {
 			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;
-			/* a win pays with a chip a tier better than Mystery Data, the
-			 * hardest hitting of a few (a WhiCapsl was a poor prize for
-			 * the risk) */
+			/* a win pays with a chip well past Mystery Data, the hardest
+			 * hitting of a dozen (a WhiCapsl, then a FireBrn1 for 120 HP,
+			 * were poor prizes for the risk) */
 			char code = '*';
 			ChipInfo ci;
-			int chip = roll_chip(run.depth, 3, &code), best_power = -1;
-			for (int tries = 0; tries < 6; ++tries) {
+			int chip = roll_chip(run.depth, 4, &code), best_power = -1;
+			for (int tries = 0; tries < 12; ++tries) {
 				char c = '*';
-				int id = tries ? roll_chip(run.depth, 3, &c) : chip;
+				int id = tries ? roll_chip(run.depth, 4, &c) : chip;
 				chip_info(id, &ci);
 				int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
 				if (power > best_power) { best_power = power; chip = id; if (tries) code = c; }
