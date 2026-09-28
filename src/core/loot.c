@@ -166,14 +166,19 @@ static int weigh(const Formation *list, int n, int depth, int target, PacingBand
 /* A formation from the area's original random battles, at the highest
  * version up to the act's that keeps it inside the act's band
  * (docs/PROGRESSION.md). False when the ROM has none for the area. */
-/* The area whose battles an area with a single one of its own shares: the
- * Sky and Green homepages' random battles are one formation each (every
- * act 2 battle on Sky HP was Gunner and FgtrPlne), and each stands in an
- * area of its own world with ten kinds of virus. -1 for none. */
-static int shares_with(int biome) {
+/* The area whose battles an area with few of its own shares, and in how
+ * many thirds of them: the Sky and Green homepages' random battles are one
+ * formation each (every act 2 battle on Sky HP was Gunner and FgtrPlne),
+ * and each stands in an area of its own world with ten kinds of virus, two
+ * in three; the Aquarium Comp's two kinds of virus take most of its battles
+ * (seven in a row were Piranhas and Quakers) and the ACDC HP's three kinds
+ * all of them, one in three from their town's other area. -1 for none. */
+static int shares_with(int biome, int *thirds) {
 	switch (biome) {
-	case BIOME_SKY_HP: return BIOME_SKY;
-	case BIOME_GREEN_HP: return BIOME_GREEN;
+	case BIOME_SKY_HP: *thirds = 2; return BIOME_SKY;
+	case BIOME_GREEN_HP: *thirds = 2; return BIOME_GREEN;
+	case BIOME_AQUARIUM_COMP: *thirds = 1; return BIOME_HOMEPAGE;
+	case BIOME_ACDC_HP: *thirds = 1; return BIOME_CENTRAL;
 	default: return -1;
 	}
 }
@@ -181,9 +186,9 @@ static int shares_with(int biome) {
 static bool from_formations(int depth, int biome, int kind, Encounter *e);
 
 static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
-	/* two battles in three from the shared area, where one fits the act */
-	int other = shares_with(biome);
-	if (other >= 0 && rng_range(0, 2) > 0 && from_formations(depth, other, kind, e)) return true;
+	/* its thirds of the battles from the shared area, where one fits the act */
+	int thirds = 0, other = shares_with(biome, &thirds);
+	if (other >= 0 && rng_range(0, 2) < thirds && from_formations(depth, other, kind, e)) return true;
 	return from_formations(depth, biome, kind, e);
 }
 

@@ -252,7 +252,12 @@ Sky HP and Green HP each have a single random battle of their own: every
 act 2 battle on Sky HP was Gunner and FgtrPlne. Two battles in three there
 come from the area each homepage stands in (the Sky, the Green Area),
 inside the act's limits as always; the report shows Sky HP's act 2 battles
-across nine kinds of virus since.
+across nine kinds of virus since. Two more areas bring too few kinds of
+virus: the Aquarium Comp's Piranhas and Quakers take 70% of its battles (a
+playtester met nothing else in seven fights) and the ACDC HP has three
+kinds, 85% of them two. One battle in three there comes from the town's
+other area (the Aquarium HP, Central Area): 11 and 9 kinds of virus in the
+report, the two commonest about half.
 
 ### Choosing areas
 

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- HeatMan's warning says his fire tower crawls at us unlit and turns into
+  our row, to sidestep it late (a playtester stepped off his lit leap into
+  its path and lost on HeatMan's last 29 HP); his flamethrower sweeps the
+  lit row, and his leap's yellow panels are to be cleared.
+- The map (SELECT) marks the way on over the floor MegaMan has come near,
+  up to where he has not been: a V in a comp's maze read as a dead end
+  twice, the arm on to the exit nowhere on the map.
+- The Aquarium Comp and the ACDC HP take one battle in three from their
+  town's other area (the Aquarium HP, Central Area): seven Aquarium
+  battles in a row were Piranhas and Quakers. MegaMan's first briefing
+  there says an Aqua hit on its icy battlefields freezes us.
 - Bystanders never stand corner to corner with a walkway's last panel,
   where one on a platform's corner looked to stand in the way in; services
   keep off it too unless their room has no other place (a quarter of them

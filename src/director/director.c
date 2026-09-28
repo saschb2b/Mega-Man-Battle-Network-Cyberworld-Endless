@@ -272,6 +272,10 @@ static const char *status_words(void) {
 		}
 		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL) ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
 		else ADD("|");
+		/* (the area's battlefields, on its first layer: a playtester froze
+		 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
+		if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
+			ADD("@M The battlefields here are icy. An Aqua hit on ice freezes us, so keep off it when the viruses shoot water!|");
 		/* (what they are for: a playtester carried two and never learned) */
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
@@ -561,6 +565,23 @@ void director_draw_map(void) {
 				fill_rect(sx - 1, sy + 1, 3, 1, c);
 			}
 		}
+	/* the way on, over the panels he has come near, up to the first he
+	 * hasn't: marks he earned (a V in a comp's maze read as a dead end,
+	 * the arm on to the exit nowhere on the map) */
+	{
+		int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey, len;
+		SDL_Color tc = rgba(255, 230, 60, 200);
+		if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
+		double wx, wy;
+		netmap_grid(px, py, &wx, &wy);
+		if (netmap_panel(tx, ty, &ex, &ey) && route_way(wx, wy, ex, ey, &len) >= 0)
+			for (int k = route_walk_len - 1; k >= 0; --k) {
+				int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W;
+				if (!D.seen[y][x]) break;
+				int sx = SX(x, y), sy = SY(x, y);
+				if (INSIDE(sx, sy, 3)) fill_rect(sx - (s == 6 ? 2 : 1), sy, s == 6 ? 5 : 3, 1, tc);
+			}
+	}
 	/* what stands there, once seen; the goal's way while it is not */
 	int gx = -1, gy = -1;
 	bool goal_boss = false;   /* (the guardian while it stands, else the exit) */

@@ -34,8 +34,8 @@ static const Guardian guardians[] = {
 
 const char *guardian_tip(int navi) {
 	switch (navi) {
-	case 1: return "HeatMan's fire towers run down the lit panels and his flamethrower sweeps our row. "
-		"When a shadow opens under us, he's leaping onto that panel in a burst of fire: move away!";
+	case 1: return "HeatMan's fire tower crawls at us unlit and turns into our row: sidestep it late. His flamethrower sweeps the lit row. "
+		"When a shadow opens under us, he's leaping there: clear the yellow!";
 	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
 		"and he warps in close to slash. Keep moving!";
 	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
