@@ -20,6 +20,7 @@
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
+#include "guardians.h"
 #include "meta.h"
 #include "save.h"
 #include "text.h"
@@ -64,6 +65,10 @@ static struct {
 	int jack_v, jack_y;   /* jacking in: the backdrop's speed and offset, 1/16 pixel */
 	int lift;             /* the backdrop's own darkening: a bright one more (the Sky's pale clouds took the logo's white) */
 	bool confirm, yes;    /* NEW GAME over a saved run asks first; Yes chosen */
+	/* the setup after NEW GAME (docs/META.md): its row, the choices, the
+	 * helper the cursor is on */
+	bool setup;
+	int row, net, folder, threat, helpers, helper;
 	int asked;            /* the frame it asked: its text types out from there */
 	char ask[32];         /* its second line, the saved run's layer */
 	SDL_Texture *tex;
@@ -277,6 +282,152 @@ static void enter(void) {
 	audio_music(MUS_TITLE);
 }
 
+static void jack_in(void);
+
+/* ---- the setup after NEW GAME (docs/META.md): the net's length, the
+ * starting folder, the threat rung, the helpers; the last run's choices
+ * to start from ---- */
+
+enum { ROW_NET, ROW_FOLDER, ROW_THREAT, ROW_HELPERS, ROW_GO, ROWS };
+static const char *const helper_names[3] = { "HP+", "Heals", "Gentle" };
+static const char *const helper_about[3] = {
+	"Two more HPMemory at start", "A heal Prog on every layer", "Gentler battles all along",
+};
+
+static void setup_open(void) {
+	S.setup = true;
+	S.row = ROW_GO;
+	S.net = profile.last_net == RUN_ENDLESS && meta_endless_open() ? RUN_ENDLESS : RUN_SHORT;
+	S.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
+	S.threat = profile.last_threat <= meta_threat_open() ? profile.last_threat : meta_threat_open();
+	S.helpers = profile.last_helpers & 7;
+	S.helper = 0;
+}
+
+static void setup_update(void) {
+	if (btn_pressed(BTN_B)) { S.setup = false; audio_sfx(SFX_CANCEL); return; }
+	if (btn_repeat(BTN_UP)) { S.row = (S.row + ROWS - 1) % ROWS; audio_sfx(SFX_CURSOR); }
+	if (btn_repeat(BTN_DOWN)) { S.row = (S.row + 1) % ROWS; audio_sfx(SFX_CURSOR); }
+	int d = btn_repeat(BTN_RIGHT) ? 1 : btn_repeat(BTN_LEFT) ? -1 : 0;
+	if (d) {
+		int was = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_THREAT ? S.threat : S.helper;
+		if (S.row == ROW_NET && meta_endless_open()) S.net = S.net == RUN_SHORT ? RUN_ENDLESS : RUN_SHORT;
+		if (S.row == ROW_FOLDER)   /* (the open ones only) */
+			for (int k = 1; k < FOLDER_COUNT; ++k) {
+				int f = (S.folder + d * k + FOLDER_COUNT * k) % FOLDER_COUNT;
+				if (meta_folder_open(f)) { S.folder = f; break; }
+			}
+		if (S.row == ROW_THREAT) S.threat = (S.threat + d + meta_threat_open() + 1) % (meta_threat_open() + 1);
+		if (S.row == ROW_HELPERS) S.helper = (S.helper + d + 3) % 3;
+		int now = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_THREAT ? S.threat : S.helper;
+		if (now != was) audio_sfx(SFX_CURSOR);
+	}
+	bool ok = btn_pressed(BTN_A) || btn_pressed(BTN_START);
+	if (!ok) return;
+	if (S.row == ROW_HELPERS && !btn_pressed(BTN_START)) { S.helpers ^= 1 << S.helper; audio_sfx(SFX_SELECT); return; }
+	/* (A on another row, or START anywhere: jack in with these) */
+	profile.last_net = (uint8_t)S.net;
+	profile.last_folder = (uint8_t)S.folder;
+	profile.last_threat = (uint8_t)S.threat;
+	profile.last_helpers = (uint8_t)S.helpers;
+	profile_save();
+	S.setup = false;
+	jack_in();
+}
+
+/* the setup's note, at most two lines of 26 letters (the panel's width):
+ * cut at a space */
+#define NOTE_CHARS 26
+static int note_line(int x, int y, const char *s, SDL_Color c) {
+	char a[40];
+	size_t n = strlen(s);
+	if (n <= NOTE_CHARS) { text_draw(x, y, s, c, TEXT_CENTER); return 1; }
+	size_t cut = NOTE_CHARS;
+	while (cut > 0 && s[cut] != ' ') --cut;
+	if (!cut) cut = NOTE_CHARS;
+	snprintf(a, sizeof a, "%.*s", (int)cut, s);
+	text_draw(x, y, a, c, TEXT_CENTER);
+	text_draw(x, y + 12, s + cut + (s[cut] == ' '), c, TEXT_CENTER);
+	return 2;
+}
+
+/* a value the d-pad changes: the PET's small arrows either side of it */
+static void choice_draw(int x, int y, const char *s, SDL_Color c, bool changes) {
+	text_draw(x, y, s, c, TEXT_CENTER);
+	if (!changes) return;
+	int w = text_width(s) / 2, a = y + 2;
+	SDL_Color arrow = rgba(255, 170, 40, 255);
+	for (int i = 0; i < 4; ++i) {
+		fill_rect(x - w - 10 + 3 - i, a + i, 1, 8 - 2 * i, arrow);   /* pointing left */
+		fill_rect(x + w + 6 + i, a + i, 1, 8 - 2 * i, arrow);        /* pointing right */
+	}
+}
+
+static void setup_draw(int x0, int y0) {
+	SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255), dim = rgba(120, 140, 170, 255);
+	SDL_Color on = rgba(120, 255, 140, 255), orange = rgba(255, 170, 40, 255);
+	fill_rect(x0 + 8, y0 + 6, CORE_W - 16, CORE_H - 12, rgba(66, 198, 231, 255));
+	fill_rect(x0 + 10, y0 + 8, CORE_W - 20, CORE_H - 16, rgba(16, 60, 90, 245));
+	int cx = x0 + CORE_W / 2, lx = x0 + 26, vx = x0 + 150;
+	text_draw(cx, y0 + 12, "JACK-IN SETUP", gold, TEXT_CENTER);
+	char v[48];
+	static const int ry[ROWS] = { 32, 46, 60, 74, 134 };
+	/* the net */
+	text_draw(lx, y0 + ry[ROW_NET], "Net", WHITE, TEXT_LEFT);
+	choice_draw(vx, y0 + ry[ROW_NET], S.net == RUN_ENDLESS ? "Endless" : "Short", WHITE, meta_endless_open());
+	/* the folder */
+	text_draw(lx, y0 + ry[ROW_FOLDER], "Folder", WHITE, TEXT_LEFT);
+	int open_folders = 0;
+	for (int f = 0; f < FOLDER_COUNT; ++f) open_folders += meta_folder_open(f);
+	choice_draw(vx, y0 + ry[ROW_FOLDER], meta_folder(S.folder)->name, WHITE, open_folders > 1);
+	/* the threat */
+	text_draw(lx, y0 + ry[ROW_THREAT], "Threat", WHITE, TEXT_LEFT);
+	snprintf(v, sizeof v, "%d", S.threat);
+	choice_draw(vx, y0 + ry[ROW_THREAT], v, S.threat ? orange : WHITE, meta_threat_open() > 0);
+	/* the helpers, each on or off */
+	text_draw(lx, y0 + ry[ROW_HELPERS], "Help", WHITE, TEXT_LEFT);
+	static const int hxs[3] = { 100, 146, 196 };
+	for (int h = 0; h < 3; ++h) {
+		int hx = x0 + hxs[h];
+		bool set = S.helpers >> h & 1;
+		text_draw(hx, y0 + ry[ROW_HELPERS], helper_names[h], set ? on : dim, TEXT_CENTER);
+		if (S.row == ROW_HELPERS && S.helper == h) fill_rect(hx - 16, y0 + ry[ROW_HELPERS] + 11, 32, 1, orange);
+	}
+	/* jack in */
+	text_draw(cx, y0 + ry[ROW_GO], "JACK IN!", S.row == ROW_GO ? gold : WHITE, TEXT_CENTER);
+	/* the cursor: the PET's orange arrow */
+	int ay = y0 + ry[S.row] + 2;
+	int ax = S.row == ROW_GO ? cx - 44 : lx - 12;
+	for (int i = 0; i < 4; ++i) fill_rect(ax + i, ay + i, 1, 8 - 2 * i, orange);
+	/* what the chosen row means */
+	const char *note = "";
+	char buf[80];
+	switch (S.row) {
+	case ROW_NET:
+		note = S.net == RUN_ENDLESS ? "The net repeats, harder each time" : meta_endless_open() ? "Three acts, then the Nest" :
+			"Three acts, then the Nest. Win it for the endless net";
+		break;
+	case ROW_FOLDER: {
+		note = meta_folder(S.folder)->about;
+		/* (what is still to open, and how: the telegraph comes first) */
+		for (int f = 1; f < FOLDER_COUNT; ++f)
+			if (!meta_folder_open(f) && meta_folder(f)->navi) {
+				snprintf(buf, sizeof buf, "%s: delete %s", meta_folder(f)->name, guardian(meta_folder(f)->navi)->name);
+				text_draw(cx, y0 + 112, buf, dim, TEXT_CENTER);
+				break;
+			}
+		break;
+	}
+	case ROW_THREAT:
+		if (!S.threat) note = meta_threat_open() ? "The net as it comes" : "The net as it comes. Win it for threat 1";
+		else note = meta_threat_rule(S.threat);
+		break;
+	case ROW_HELPERS: snprintf(buf, sizeof buf, "%s. A: on or off", helper_about[S.helper]); note = buf; break;
+	default: note = "A or START: jack in. B: back"; break;
+	}
+	note_line(cx, y0 + 92, note, sky);
+}
+
 static void update(void) {
 	++S.t;
 	if (S.leaving) {
@@ -287,13 +438,14 @@ static void update(void) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
 			else {
 				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
-				run_setup(RUN_SHORT, FOLDER_STANDARD, 0, 0);
+				run_setup(S.net, S.folder, S.threat, S.helpers);
 				emu_start_in_town = true;
 			}
 			scene_set(&scene_emu);
 		}
 		return;
 	}
+	if (S.setup) { setup_update(); return; }
 	if (!S.summary && S.t - S.shown_at >= SHOW_FRAMES) { S.first = false; show_next(); }
 	if (S.summary) {
 		/* then the net comes back for PRESS START */
@@ -344,6 +496,18 @@ static void update(void) {
 		}
 	}
 	S.choice = S.cursor;
+	S.net = RUN_SHORT;
+	if (S.choice == 0 && profile.runs > 0) {
+		/* (a first run starts as the net comes: nothing to choose yet) */
+		setup_open();
+		audio_sfx(SFX_SELECT);
+		return;
+	}
+	jack_in();
+}
+
+/* NEW GAME or CONTINUE chosen: the jack-in sound, and away */
+static void jack_in(void) {
 	/* the game plays 0x9D for NEW GAME and 0x9C for CONTINUE and stops the music */
 	audio_play_song(S.choice == 1 ? 0x9C : 0x9D, false);
 	audio_music(MUS_NONE);
@@ -404,6 +568,7 @@ static void draw(void) {
 	render();
 	SDL_Rect dst = { x0, y0, 240, 160 };
 	SDL_RenderCopy(P.renderer, S.tex, NULL, &dst);
+	if (S.setup) { setup_draw(x0, y0); return; }
 
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;

@@ -13,8 +13,8 @@
  * (the skill's milestones that teach, not counts to grind). */
 static const FolderInfo folders[FOLDER_COUNT] = {
 	{ "Standard", "BN6's own starting folder", 0 },
-	{ "Blade", "Swords in one code for LifeSword; nothing reaches the back", 3 },   /* SlashMan */
-	{ "Storm", "Elec chips: double on Aqua, plain on the rest", 2 },               /* ElecMan */
+	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", 3 },   /* SlashMan */
+	{ "Storm", "Elec chips: double on Aqua, plain on the rest", 2 },       /* ElecMan */
 };
 
 const FolderInfo *meta_folder(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
@@ -58,7 +58,12 @@ const uint16_t *meta_folder_chips(int folder) {
 	}
 }
 
-bool meta_folder_open(int folder) { return folder == FOLDER_STANDARD || (profile.folders_open >> folder & 1); }
+/* (its guardian deleted in any run, this build's or one before; the
+ * profile's bit marks it as announced on a summary) */
+bool meta_folder_open(int folder) {
+	if (folder <= FOLDER_STANDARD || folder >= FOLDER_COUNT) return folder == FOLDER_STANDARD;
+	return (profile.folders_open >> folder & 1) || (folders[folder].navi && rival(folders[folder].navi)->megaman_won > 0);
+}
 
 bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_clears > 0; }
 
@@ -67,7 +72,7 @@ int meta_threat_open(void) { return profile.threat_open > THREAT_MAX ? THREAT_MA
 const char *meta_threat_rule(int rung) {
 	static const char *const rules[THREAT_MAX] = {
 		"Viruses a version stronger from act 2",
-		"Recovery Mr. Progs only on middle layers and before guardians",
+		"Heals only mid-act and before guardians",
 		"Net Dealers charge half again",
 		"Guardians at EX from act 2",
 		"Servers may hold SP Navis from act 1",
@@ -102,7 +107,7 @@ void meta_run_over(bool won) {
 	}
 	/* a folder, once its guardian has been deleted in any run */
 	for (int f = 1; f < FOLDER_COUNT; ++f) {
-		if (meta_folder_open(f) || !folders[f].navi || rival(folders[f].navi)->megaman_won <= 0) continue;
+		if ((profile.folders_open >> f & 1) || !folders[f].navi || rival(folders[f].navi)->megaman_won <= 0) continue;
 		profile.folders_open |= (uint16_t)(1u << f);
 		say("the %s folder", folders[f].name);
 	}
