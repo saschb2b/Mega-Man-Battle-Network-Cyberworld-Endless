@@ -220,7 +220,12 @@ so, and on the guardian's layer MegaMan warns you of its way of fighting.
 Step into the arena and the Navi logs in for the game's own boss battle.
 Guardians remember how your earlier battles went.
 
-The first four acts visit four of Central, Seaside, Sky and Green Area, the
+A run is **the short net**: three acts, then the Cybeast Nest on layer 10,
+about an hour. When the Nest's guardian falls, the run is won, and that
+opens **the endless net**: the long dive described below, repeating
+harder after its own Nest.
+
+The endless net's first four acts visit four of Central, Seaside, Sky and Green Area, the
 Robot Control, Aquarium, Judge Tree, Mr. Weather and CopyBot comps, two home
 computers and the Aquarium, ACDC, Green and Sky homepages. The order is
 random, but the gentler areas come first (Central or a home computer) and
@@ -264,6 +269,23 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 | Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero |
 
+### What carries over
+
+MegaMan starts every run as strong as the first time: what runs leave
+behind is options. From the second run, NEW GAME opens a setup:
+
+- **Net:** the short net, or the endless net once a short one is won.
+- **Folder:** BN6's starting folder, or one opened by deleting a guardian
+  in any run: Blade (swords in S for LifeSword, after SlashMan) and Storm
+  (Elec chips, after ElecMan).
+- **Threat:** rungs that each add one constraint (stronger viruses from act
+  2, fewer heals, dearer dealers, EX guardians, SP Navis in Servers), each
+  opened by winning on the one below.
+- **Help:** two more HPMemory at the start, a heal on every layer, gentler
+  battles. Helped runs count for everything.
+
+The run's summary names what it opened and the closest goal.
+
 ### Saving and losing
 
 The run is saved each time you arrive on a layer, and again when you quit
@@ -271,7 +293,8 @@ while MegaMan is free to move on a layer (not in a battle, a talk or a
 guardian's scene); CONTINUE brings you back to where it was saved. The
 PET's Save is switched off during a run. When MegaMan is
 deleted the run is over: the title screen shows how deep you got, how many
-viruses and Navis you deleted, and your best depth.
+viruses and Navis you deleted, and your best depth. When the short net's
+Nest falls, the run is won.
 
 Saves live in `ports/cyberworld/savedata/`. To give up a run without playing
 it out, delete `savedata/run.sav`; your best depth is kept in `profile.sav`.

@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **The meta layer, phase one** (docs/META.md): what a run leaves for the
+  next is options, never power.
+  - A run is the short net: three acts, then the Cybeast Nest on layer
+    10, whose fall wins the run and opens the endless net.
+  - From the second run, NEW GAME opens a setup: the net, the starting
+    folder, a threat rung, helpers.
+  - Two starting folders open by deleting a guardian in any run: Blade
+    (swords in S for LifeSword, after SlashMan) and Storm (Elec, after
+    ElecMan).
+  - Five threat rungs open one by one with wins, each one constraint.
+  - Three helpers (two more HPMemory, a heal on every layer, gentle
+    battles) count for everything.
+  - The summary names what a run opened, and the closest goal.
+  - Runs saved by an older build start afresh.
 - A returning player hears less at a run's start: the gift Mr. Prog's
   greeting is one page from the third run on, and so are the first
   layer's arrival words (a restart after a long run was called a chore).

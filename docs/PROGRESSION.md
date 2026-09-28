@@ -189,6 +189,18 @@ Sources: [StS map generation](https://slaythespire.wiki.gg/wiki/Map_Generation),
 4. Everything is decided from the run and layer seeds, before the game's
    RAM is involved, so layers stay reproducible.
 
+### The short net and the endless net
+
+A new run is the short net (docs/META.md): layers 1-9 are the endless
+net's first three acts, as they are below, and layer 10 is the Cybeast
+Nest, paced as a fourth act (its battles in act 4's band, its guardian,
+one of the Nest's own, picked and versioned as a fourth act's, never SP).
+Its fall wins the run. The endless net, opened by a win, is the whole
+structure below. A threat rung (docs/META.md) adds one constraint to
+either: a virus version up from act 2, heals only where an act is sure of
+one, dealers half again, guardians at EX from act 2, SP Navis in Servers
+from act 1.
+
 ### The act
 
 Every act keeps three layers and gets a fixed rhythm:

@@ -231,7 +231,7 @@ them a use.
 4. **Phase one starts with a setup screen** after NEW GAME, in the PET's
    style; the town hub comes later.
 
-## Phase one, in order
+## Phase one, in order (built)
 
 1. Returning players hear less: the arrival's words, the town's opening
    and the gift's offers shorten after the first runs (a playtester called
@@ -245,4 +245,17 @@ them a use.
    folder at the run's start (its RAM layout from bn6f, noted in
    docs/ROM_DATA.md).
 6. The setup screen after NEW GAME, and the summary's line for what a run
+
+Built as planned, with these particulars:
+
+- The setup screen is skipped on a profile's very first run, and remembers
+  the last run's choices.
+- The two folders to unlock are Blade (after SlashMan) and Storm (after
+  ElecMan); a folder counts as open once its guardian has fallen in any
+  run. BN6's five other preset folders (docs/ROM_DATA.md) wait for later
+  phases: one is a Program Advance folder, one a Navi-chip folder.
+- The helpers are two more HPMemory from the gift, a heal on every layer,
+  and gentle battles (the lower half of the band all run).
+- `--setup NET,FOLDER,THREAT,HELPERS` sets a headless run's; the weak
+  autopilot wins a short net (layers 1-10).
    unlocked and what is closest.

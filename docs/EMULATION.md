@@ -55,6 +55,11 @@ step, and halving: `0x00AC` and `0x00F7` add Records there instead), and
 borrows cbGameState
 (`0x080050EC`) for one frame to warp.
 
+
+At a new run's start the engine writes the chosen starting folder (docs/META.md)
+over the game's first folder: 30 u16 at the chip data eToolkit `+0x48` points
+at (docs/ROM_DATA.md, chip folders), as BN6's own GiveFolder copies one in.
+The Standard folder writes nothing.
 ## A layer
 
 1. `net_gen.c` generates rooms, walkways and objects from the run seed.
