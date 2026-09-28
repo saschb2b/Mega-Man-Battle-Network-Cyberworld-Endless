@@ -159,6 +159,7 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS]) {
 		k += snprintf(buf + k, sizeof buf - (size_t)k,
 			"|@M Bugs come from a program over the board's edge or off the command line, a Plus part on it, "
 			"or two of one color side by side.");
-	if (k < (int)sizeof buf - 80) snprintf(buf + k, sizeof buf - (size_t)k, "|@M We can rearrange it in the PET, or live with it.");
+	if (k < (int)sizeof buf - 120)
+		snprintf(buf + k, sizeof buf - (size_t)k, "|@M We can rearrange it in the PET (L and R turn a program placed from the list), or live with it.");
 	return buf;
 }

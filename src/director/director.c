@@ -1354,6 +1354,25 @@ static void unwedge(void) {
 	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)D.free_y << 16);
 }
 
+/* The NaviCust's rotations (key items 0x50-0x55, one a colour: white,
+ * yellow, pink, red, blue, green; "Lets you rotate white parts with the L
+ * and R Button"): BN6 hands them out over its story, a run has them from
+ * its start, so a drafted program turns to fit the board (a playtester's
+ * Shield would not fit beside his SuprArmr, and nothing turned it). */
+static void grant_rotation(void) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
+	if (items < 0x02000000u || items >= 0x02040000u || check < 0x02000000u || check >= 0x02040000u) return;
+	/* (the count and the item's check, its seed ^ 0x55, as the game's own
+	 * giving writes them: a count without it reads as none) */
+	for (uint32_t id = 0x50; id <= 0x55; ++id) {
+		uint8_t want = (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + id) ^ 0x55);
+		if (!emu_read8(items + id) || emu_read8(check + id) != want) {
+			emu_write8(items + id, 1);
+			emu_write8(check + id, want);
+		}
+	}
+}
+
 /* The NaviCust's bugs, named in MegaMan's words when they change: after the
  * player runs the NaviCust in the PET, or an ExpMemry grows the board
  * (docs/NAVICUST.md). A bug the player can read is a price they chose; the
@@ -1714,7 +1733,7 @@ void director_update(void) {
 			}
 		}
 	}
-	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); }
+	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); grant_rotation(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

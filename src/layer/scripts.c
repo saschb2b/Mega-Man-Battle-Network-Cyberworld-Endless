@@ -281,7 +281,7 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	for (int k = 0; k < n; ++k) if (draft->about[k]) ta_page(t, FACE_MEGAMAN, draft->about[k], false);
 	if (draft->teach)
 		ta_page(t, FACE_MEGAMAN, "Big programs need a block on the command line; plus parts go anywhere else. "
-			"Same colors touching or a block off the edge: a bug.", false);
+			"Same colors touching or a block off the edge: a bug. L and R turn a program as we place it from the list.", false);
 	char none[96];
 	snprintf(none, sizeof none, "Or B takes none: the data breaks down into %d BugFrags.", draft->skip_frags);
 	ta_page(t, FACE_MEGAMAN, none, false);

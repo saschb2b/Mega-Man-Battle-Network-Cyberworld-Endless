@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- NaviCust programs turn with L and R as they are placed from the list: a
+  run holds all six of BN6's rotation items from its start (BN6 hands them
+  out over its story; a drafted Shield would not fit beside SuperArmor and
+  nothing turned it). The first draft and MegaMan's bug line say so.
+  DiveMan's warning says bombs still reach him under the water.
 - The pads carry the originals' centrepieces on their middle panel, walkable:
   the red gem, the link ring or the cube on its round base, in each surface
   area's colours. Green's potted bushes stand in the gaps between its
