@@ -17,6 +17,9 @@ typedef struct { int x, y, index; } CoordPad;
 typedef struct {
 	const CoordCell *cells[4];
 	int n[4];
+	/* walls in place of the floor's own at their cells (a prop's ring) */
+	const CoordCell *over;
+	int nover;
 } CoordExtra;
 
 /* Writes the layer's walls (from netmap_floor_cell, each level at its

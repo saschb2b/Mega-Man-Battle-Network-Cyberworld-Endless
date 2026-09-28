@@ -95,8 +95,12 @@ void npc_reach_install(void) {
 	}
 }
 
-uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor) {
-	uint8_t s[48] = {
+/* (behind: a navi behind a counter, drawn under the second layer that
+ * draws the counter, its talk centre shifted by (sx, sy) towards the
+ * counter's front: the originals' 0x1B and 0x0C, collision radius 8) */
+static uint32_t talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor,
+                       bool behind, int sx, int sy) {
+	uint8_t s[56] = {
 		0x08,
 		0x25, (uint8_t)index, (uint8_t)(category * 4),
 		0x16, (uint8_t)anim,
@@ -114,7 +118,11 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 	 * reach is a navi's (the game's 4 answered a Server only from before
 	 * its face) */
 	if (category == 7) s[n++] = 0x13;
-	if (!floor) { s[n++] = 0x0A; s[n++] = NPC_TALK_RADIUS; }
+	if (behind) {
+		s[n++] = 0x1B;
+		s[n++] = 0x0C; s[n++] = (uint8_t)sx; s[n++] = (uint8_t)sy; s[n++] = 0;
+		s[n++] = 0x0A; s[n++] = 8;
+	} else if (!floor) { s[n++] = 0x0A; s[n++] = NPC_TALK_RADIUS; }
 	int loop = n, gone_jump = -1;
 	/* idle: leave once gone_flag is set, else pause a frame and look again */
 	if (gone_flag >= 0) {
@@ -132,6 +140,14 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 	if (gone_jump >= 0) put32(s + gone_jump, at + (uint32_t)gone);
 	emu_write(at, s, (size_t)n);
 	return at;
+}
+
+uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor) {
+	return talker(category, index, x, y, z, anim, archive, script, gone_flag, floor, false, 0, 0);
+}
+
+uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy) {
+	return talker(category, index, x, y, z, anim, archive, script, -1, false, true, sx, sy);
 }
 
 uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script) {

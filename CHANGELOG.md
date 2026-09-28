@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- The Net Dealer stands behind a counter, as the originals' dealers do: Sky
+  Area 3's capsule in Central, Seaside and Sky, each in its own colours, and
+  Green Area 2's NetCafe desk in Green, cut whole from the ROM with their
+  walls, facing the camera one panel in from a platform's back edge, the
+  aisle behind them walled off. MegaMan speaks to him across it. The first of
+  the originals' props on generated floors (docs/LEVEL_DESIGN.md, Props);
+  runs from an older build start their layer afresh.
 - An area's card fades out when a chat opens under it: an A at the gift
   Prog beside the arrival drew the chat box under the card.
 - Mystery Data, services and navis no longer stand one panel's gap behind

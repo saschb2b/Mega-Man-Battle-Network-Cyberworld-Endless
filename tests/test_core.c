@@ -121,24 +121,36 @@ static bool beside_narrow(int x, int y) {
 	return false;
 }
 
+/* A kit as the surface areas' (stairs both ways, a two-panel counter each
+ * way), and one with neither. */
+static const LayerKit kit = { 3u, 32, { 2, 2 } };
+static const LayerKit flat = { 0u, 0, { 0, 0 } };
+
+/* A counter's cells: the aisle behind it (d 0), its own (1) and the floor
+ * before it (2), t along its run. */
+static void counter_cell(const NetProp *p, int t, int d, int *x, int *y) {
+	*x = p->faces == FACES_X ? p->x - 1 + d : p->x + t;
+	*y = p->faces == FACES_X ? p->y + t : p->y - 1 + d;
+}
+
 /* Whether a floor lies a panel's gap in front of (x, y), down-left or
  * down-right on the screen: the cell's own wall hides the gap, and from
  * that floor what stands here looks a step away */
 static bool behind_gap(int x, int y) {
-	return (x + 2 < MAP_W && layer.cell[y][x + 1] != C_PATH && layer.cell[y][x + 2] == C_PATH) ||
-		(y + 2 < MAP_H && layer.cell[y + 1][x] != C_PATH && layer.cell[y + 2][x] == C_PATH);
+	return (x + 2 < MAP_W && layer.cell[y][x + 1] == C_VOID && layer.cell[y][x + 2] == C_PATH) ||
+		(y + 2 < MAP_H && layer.cell[y + 1][x] == C_VOID && layer.cell[y + 2][x] == C_PATH);
 }
 
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
-	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0;
+	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
 	for (uint32_t seed = 1; seed <= 300; ++seed) {
 		int depth = 1 + (int)(seed % 25);
 		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
-		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, 3u, 32);
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, &kit);
 		CHECK(layer.nrooms >= 3, "seed %u: only %d rooms", seed, layer.nrooms);
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
@@ -155,7 +167,8 @@ static void test_generation(void) {
 			int blocked = 0;
 			for (int i = 1; i < layer.nobj; ++i) {
 				const NetObj *o = &layer.obj[i];
-				if (!o->solid || o->type == OBJ_BOSS) continue;
+				/* (a navi behind a counter stands in its walled-off aisle) */
+				if (!o->solid || o->type == OBJ_BOSS || layer.cell[(int)o->y][(int)o->x] != C_PATH) continue;
 				layer.cell[(int)o->y][(int)o->x] = C_VOID;
 				++blocked;
 			}
@@ -166,7 +179,8 @@ static void test_generation(void) {
 		bool has_exit = false;
 		for (int i = 0; i < layer.nobj; ++i) {
 			NetObj *o = &layer.obj[i];
-			CHECK(layer.cell[(int)o->y][(int)o->x] == C_PATH, "seed %u: object %d off the path", seed, i);
+			CHECK(layer.cell[(int)o->y][(int)o->x] == C_PATH || (o->prop >= 0 && layer.cell[(int)o->y][(int)o->x] == C_SOLID),
+				"seed %u: object %d off the path", seed, i);
 			for (int j = i + 1; j < layer.nobj; ++j) {
 				const NetObj *q = &layer.obj[j];
 				CHECK((int)o->x != (int)q->x || (int)o->y != (int)q->y, "seed %u: objects %d and %d overlap", seed, i, j);
@@ -182,12 +196,37 @@ static void test_generation(void) {
 			const NetObj *o = &layer.obj[i];
 			bool stands = o->type == OBJ_SHOP || o->type == OBJ_HEAL || o->type == OBJ_TRADER || o->type == OBJ_BUGTRADER ||
 				o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
-			if (stands && beside_narrow((int)o->x, (int)o->y)) ++mouths;
+			if (stands && o->prop < 0 && beside_narrow((int)o->x, (int)o->y)) ++mouths;
 			if (stands) ++standing;
 			if (stands || o->type == OBJ_MYSTERY) {
 				++approached;
 				hidden += behind_gap((int)o->x, (int)o->y);
 			}
+		}
+		/* a counter: its aisle walled off on the platform's rim, its own
+		 * panels, the floor before it walkable and reached; its navi in the
+		 * aisle behind it */
+		for (int i = 0; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			if (o->type == OBJ_SHOP) ++dealers;
+			if (o->prop < 0) continue;
+			++counters;
+			CHECK(o->prop < layer.nprops && o->type == OBJ_SHOP, "seed %u: object %d behind prop %d", seed, i, o->prop);
+			const NetProp *p = &layer.props[o->prop];
+			for (int t = 0; t < p->len; ++t) {
+				int x, y;
+				counter_cell(p, t, -1, &x, &y);
+				CHECK(x < 0 || y < 0 || layer.cell[y][x] == C_VOID, "seed %u: a counter's aisle not on the rim", seed);
+				counter_cell(p, t, 0, &x, &y);
+				CHECK(layer.cell[y][x] == C_SOLID, "seed %u: a counter's aisle not walled off", seed);
+				counter_cell(p, t, 1, &x, &y);
+				CHECK(layer.cell[y][x] == C_PROPPED, "seed %u: a counter's panel not propped", seed);
+				counter_cell(p, t, 2, &x, &y);
+				CHECK(layer.cell[y][x] == C_PATH && seen[y][x], "seed %u: no way to the front of a counter", seed);
+			}
+			int ax, ay;
+			counter_cell(p, (p->len - 1) / 2, 0, &ax, &ay);
+			CHECK((int)o->x == ax && (int)o->y == ay, "seed %u: a counter's navi not behind its middle", seed);
 		}
 		int traders = 0;
 		for (int i = 0; i < layer.nobj; ++i) traders += layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
@@ -202,13 +241,16 @@ static void test_generation(void) {
 	}
 	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
 	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
+	/* (the Net Dealer stands behind a counter wherever the area has one and
+	 * its room a place for it) */
+	CHECK(counters * 2 >= dealers, "only %d of %d Net Dealers behind a counter", counters, dealers);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
 	/* Determinism: the same seed builds the same layer. */
-	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
+	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, &kit);
 	static Layer a;
 	a = layer;
-	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, 3u, 32);
+	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, &kit);
 	CHECK(!memcmp(a.cell, layer.cell, sizeof a.cell) && a.nobj == layer.nobj, "generation is deterministic");
 }
 
@@ -224,7 +266,7 @@ static void test_stairs(void) {
 	int layers = 0;
 	for (uint32_t seed = 1; seed <= 400; ++seed) {
 		int depth = 1 + (int)(seed % 25);
-		layer_generate(seed * 7919u, depth, biome_for_depth(depth), LAYER_NORMAL, 3u, 32);
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
 		if (!layer.nstairs) continue;
 		++layers;
 		CHECK(layer.rise == 32, "seed %u: rise %d", seed, layer.rise);
@@ -253,7 +295,7 @@ static void test_stairs(void) {
 	}
 	CHECK(layers > 10, "only %d of 400 layers have a stair", layers);
 	/* an area without stairs keeps its layers flat */
-	layer_generate(7919u, 2, BIOME_SKY, LAYER_NORMAL, 0u, 0);
+	layer_generate(7919u, 2, BIOME_SKY, LAYER_NORMAL, &flat);
 	CHECK(!layer.nstairs && !layer.rise, "flat area got a stair");
 }
 
@@ -551,7 +593,7 @@ static void test_arrow(void) {
 	for (uint32_t seed = 1; seed <= 120; ++seed) {
 		int depth = 1 + (int)(seed % 25);
 		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
-		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, 3u, 32);
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, &kit);
 		int tx = -1, ty = -1;
 		for (int i = 0; i < layer.nobj; ++i) {
 			const NetObj *o = &layer.obj[i];

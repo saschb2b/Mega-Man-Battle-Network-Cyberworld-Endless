@@ -59,9 +59,9 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	run.depth = depth;
 	run.biome = biome;
 	layout_forced = layout;
-	int rise;
-	unsigned stairs = netmap_stair_dirs(biome, &rise);
-	layer_generate(seed, depth, biome, LAYER_NORMAL, stairs, rise);
+	LayerKit kit;
+	netmap_kit(biome, &kit);
+	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	memset(&tiles_stats, 0, sizeof tiles_stats);
 	if (!netmap_build_layer(biome, seed)) {
 		fprintf(report, "biome %2d layout %d depth %d seed %u: NOT BUILT\n", biome, layout, depth, seed);

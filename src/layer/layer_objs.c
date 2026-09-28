@@ -103,6 +103,10 @@ typedef struct {
 	int x, y, z, cat, sprite, script, gone_flag;
 	bool floor;
 	uint32_t archive;   /* its text archive; 0: the layer's */
+	/* behind a counter: facing its front (animation), spoken to across it
+	 * at (sx, sy) from where it stands */
+	bool behind;
+	int anim, sx, sy;
 } Talker;
 
 void layer_objs_shops(const LayerObjs *o) {
@@ -153,7 +157,13 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
 		/* in a raised room, on its floor */
 		int wz = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
-		Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, 0 };
+		Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, 0, false, 0, 0, 0 };
+		/* a navi behind a counter stands in its aisle, facing its front
+		 * (screen down-right or down-left: the game's facings 3 and 5) */
+		if (o->prop >= 0 && netmap_prop_navi(o->prop, &tk.x, &tk.y, &tk.sx, &tk.sy)) {
+			tk.behind = true;
+			tk.anim = layer.props[o->prop].faces == FACES_X ? 3 : 5;
+		}
 		bool asks = false;   /* a Yes/No the director acts on */
 		switch (o->type) {
 		case OBJ_WARP_IN:
@@ -331,9 +341,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	out->archive = archive;
 	if (out->guardian.navi) guardian_actors(&npcs, archive, guardian_sprite(out->guardian.navi), &out->guardian);
-	for (int i = 0; i < ntalk && npcs.n < 32; ++i)
-		npcs.script[npcs.n++] = npc_talker(talkers[i].cat, talkers[i].sprite, talkers[i].x, talkers[i].y, talkers[i].z,
-			talkers[i].cat == 7 ? 0 : 4, talkers[i].archive ? talkers[i].archive : archive, talkers[i].script,
-			talkers[i].gone_flag, talkers[i].floor);
+	for (int i = 0; i < ntalk && npcs.n < 32; ++i) {
+		const Talker *t = &talkers[i];
+		uint32_t a = t->archive ? t->archive : archive;
+		npcs.script[npcs.n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
+			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
+	}
 	return mapslot_install(group, number, &npcs, md, nmd);
 }

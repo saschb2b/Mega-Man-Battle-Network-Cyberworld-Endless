@@ -184,3 +184,88 @@ neighbourhoods are recorded while their tiles are learned. It removes about
 a third of the approximated tiles; mazes of 1-wide walkways (Central's
 catwalks, the Undernet's webs) have shapes no original has and stay
 approximate.
+
+## Props
+
+The originals furnish their floors: a Net Dealer behind his capsule counter,
+NetCafe desks with their staff behind them, avenues of cybertrees framing a
+giant tree, a statue between two braziers, rows of gravestones. They are what
+makes a map read as a place, and none of it is scattered. Each prop does a
+job, and the generator sets one only where it does that job:
+
+- **A signifier.** A counter says "a service stands here" before a word is
+  read, as a shop's awning does. The navi behind it is spoken to across it.
+- **A landmark.** One set piece per layer that the eye finds and the way can
+  be told by ("past the statue"): the originals' hubs, craters and giant
+  trees.
+- **The area's identity.** Each area furnishes itself from its own maps:
+  Green's trees and potted bushes, the Undernet's statues and braziers, the
+  Graveyard's stones, Sky's field pictures and pods.
+
+The pattern is the hand-authored unit in a generated layout (the game-design
+skill's handcrafted-pcg-hybrid): the units are Capcom's own, cut whole from
+the ROM with their tiles, walls and the navi's place, and the generator
+decides only where they go, by rules measured on the originals.
+
+### How the originals place them
+
+Measured over the internet maps and their object lists (the research's
+counts, maps 0x90-0x96):
+
+- **Counters face the camera** (6 of 7): their front towards the screen's
+  foot, the navi behind on the far side. A dealer's capsule sits one panel
+  in from a platform's back edge, the aisle behind it on the rim, or closes
+  a dead-end stub; a NetCafe desk sits at its room's far end, facing the way
+  in, with the WELCOME sign beside the entrance.
+- **Tall props stand at the back** of their platform, in its back third
+  (signs 6 of 7, statues 8 of 11, boards 8 of 10, braziers 5 of 6).
+- **Clear of the way**: decoration keeps two panels or more from a
+  walkway's mouth (trees 25 of 25, signs 7 of 7, statues 10 of 11) and three
+  or more from the shortest route between the warps (trees 16 of 25,
+  statues 8 of 11, boards 10 of 10). What stands in a mouth is a story
+  obstacle, a gate.
+- **Symmetry and rhythm**: braziers flank a statue as a mirrored pair;
+  Green Area 2's nineteen cybertrees form a V along its field's rim, mirrored
+  about its axis (18 of 19 have their mirror), framing the giant tree in the
+  back corner; gravestones and Sky's trees stand in rows of three a panel
+  apart; Green's potted bushes repeat every second panel in the gaps between
+  its planks.
+- **Edge or hole**: signs and braziers stand in the void just past the
+  floor's edge (11 of 13); gravestones, boards and statues fill walled holes
+  of one panel inside platforms (33 of 39).
+
+### Counters (built)
+
+The Net Dealer stands behind a counter wherever the area has one:
+Sky Area 3's capsule in Central, Seaside and Sky (the four surface areas
+share one tile set, each drawing it in its own colours) and Green Area 2's
+NetCafe desk in Green (`RomLayout.net_area[].counter`, docs/ROM_DATA.md).
+`src/map/props.c` cuts it: its second-layer tiles from the floor it stands
+on, its ring of walls, its navi one cell behind the ring's back row and the
+navi's talk centre 8 towards the front; the map's mirror image gives the
+other way it can face. The generator (`counter` in `net_gen.c`) puts it one
+panel in from a room's back edge, grid -x or -y, facing the camera: the
+aisle behind it on the platform's rim (void beyond) is walled off
+(`C_SOLID`), its own panels keep their floor under the ring (`C_PROPPED`),
+the floor before it stays free, and nothing it closes off may be cut from
+the rest. It is centred along the edge, trying outwards from the middle.
+Where the dealer's room has no such place, the next room that has one takes
+him; the room before a guardian's arena keeps its dealer, standing if need
+be. Over 400 layers per layout the dealer stands behind a counter on 97% of
+Central's routes, all its fields and 16% of its catwalks (their mazes have
+few rooms with a rim), 99% of Seaside's, 79% of Sky's routes and all its
+hubs, 99% of Green's routes and 75% of its ladders. The navi is drawn under
+the second layer (script 0x1B) so the counter's art covers its legs, and the
+director aims A at the talk centre (OverworldNPCObject +0x11-0x13).
+
+### Next
+
+Each area's signature props, set by those rules: the sprite objects of the
+maps' object lists (cybertrees, statues and braziers, gravestones, signs,
+boards, the BBS), which carry their own palettes and need only an object
+record, the map's sprite list and their walls; one landmark set piece per
+layer at a hub or a big field's back; pairs flanking an important room's
+entrance; rows and avenues along a field's rim; the pads' centrepieces
+(the red-gem ornament, the link ring, the cube on its base), walkable, on
+3x3 pads. Every one of them is placed off the route and away from walkway
+mouths, and the tests count what each rule makes over hundreds of layers.

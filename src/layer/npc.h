@@ -21,6 +21,11 @@ uint32_t npc_prop(int category, int index, int x, int y, int z, int anim);
  * and leaves once event flag `gone_flag` is set (-1: never); a `floor` one
  * (a pad) is drawn under MegaMan. */
 uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor);
+/* ... standing behind a counter: drawn under the second layer (the
+ * counter's art covers its legs), spoken to across it at its talk centre
+ * (sx, sy) world units from where it stands, as the originals' counter
+ * navis are. */
+uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy);
 
 /* A talker who paces `steps` along facing `face` (1, 3, 5, 7: +x, +y, -x,
  * -y) and back, looking about at each end. */

@@ -11,7 +11,12 @@
 #define MAX_ROOMS 24
 #define MAX_STAIRS 4
 
-enum { C_VOID = 0, C_PATH = 1 };
+/* A cell: void, floor, or floor a prop stands on (drawn as floor, never
+ * walked in the layout's terms): C_SOLID is walled off in the game too (a
+ * counter's aisle, where its navi stands), C_PROPPED keeps the floor and
+ * takes the prop's own walls (the counter's panels, whose front half
+ * MegaMan can step on up to the counter). */
+enum { C_VOID = 0, C_PATH = 1, C_SOLID = 2, C_PROPPED = 3 };
 
 typedef enum {
 	OBJ_WARP_IN,
@@ -37,7 +42,21 @@ typedef struct {
 	int param;
 	bool solid;
 	int npc_line;
+	int prop;         /* the prop it stands behind (a counter), -1 none */
 } NetObj;
+
+/* Props: what the originals set on their floors (docs/LEVEL_DESIGN.md,
+ * Props). A counter faces the camera: along grid y with its front towards
+ * grid +x (screen down-right), or along grid x with its front towards
+ * grid +y (down-left); its navi stands in the aisle behind it. */
+enum { PROP_COUNTER };
+enum { FACES_X, FACES_Y };
+#define MAX_PROPS 8
+
+typedef struct {
+	int kind, faces;
+	int x, y, len;    /* the counter's first cell (lowest along its run) */
+} NetProp;
 
 /* Room kinds: where points of interest go (docs/LEVEL_DESIGN.md). */
 enum { ROOM_PLATFORM, ROOM_PAD, ROOM_FIELD };
@@ -76,13 +95,24 @@ typedef struct {
 	int ante;                      /* the room before it, with the last services */
 	int arena_dir;                 /* DIR_* from the antechamber into the arena */
 	int layout;                    /* LAYOUT_* (net_layouts.h) */
+	NetProp props[MAX_PROPS];
+	int nprops;
 } Layer;
 
 extern Layer layer;
 
-/* Generation is deterministic for a given seed. `stair_dirs` (bit per
- * STAIR_UP_*) are the stairs the area can draw, `rise` their height. */
-void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stair_dirs, int rise);
+/* What an area's original maps give its layers to draw (learned from the
+ * ROM, src/map): the stairs it has (bit per STAIR_UP_*) and their height,
+ * and a counter's length in panels for each way it can face (FACES_*, 0
+ * none). */
+typedef struct {
+	unsigned stair_dirs;
+	int rise;
+	int counter_len[2];
+} LayerKit;
+
+/* Generation is deterministic for a given seed and kit. */
+void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit);
 /* Lifts dead-end rooms onto stairs (net_height.c). */
 void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
 int biome_for_depth(int depth);

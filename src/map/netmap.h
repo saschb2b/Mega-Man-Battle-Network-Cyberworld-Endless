@@ -22,6 +22,8 @@ typedef struct {
 	int ax, ay, aw, ah;     /* the guardian's arena, drawn in the walkway floor (aw 0: none) */
 	uint32_t seed;          /* where the scenery goes */
 	const uint8_t *pad;     /* 1 on the cells of pads (NULL: none) */
+	const NetProp *props;   /* the props set on its floor (net.h) */
+	int nprops;
 } NetLayout;
 
 /* Builds the layer from biome `area`'s original map (RomLayout.net_area),
@@ -42,6 +44,11 @@ const uint16_t *netmap_last_tiles(int *tw, int *th);
 const uint8_t *netmap_last_seams(void);
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 unsigned netmap_stair_dirs(int area, int *rise);
+/* What area `area`'s layers can draw: its stairs and counters (net.h). */
+void netmap_kit(int area, LayerKit *kit);
+/* Where the navi of the last layer's prop `i` stands (world units), and its
+ * talk centre from there; false for a prop not drawn. */
+bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty);
 
 /* World position of the centre of grid panel (x, y) in the last layer. */
 void netmap_world(int x, int y, int *wx, int *wy);

@@ -25,6 +25,7 @@
 #include "emu.h"
 #include "legal.h"
 #include "lz.h"
+#include "props.h"
 #include "stairs.h"
 #include "tilemap.h"
 #include "tiles.h"
@@ -43,6 +44,8 @@ typedef struct {
 	DecorBook decor;          /* the scenery of the area's maps */
 	uint32_t desc, coord_slot;
 	StairTemplate stairs[STAIR_DIRS];
+	PropStamp counter[2];     /* the Net Dealer's counter, facing FACES_X and FACES_Y */
+	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
 } Learned;
 
 static Learned learned[NET_AREAS];
@@ -115,6 +118,45 @@ static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Lear
 	}
 }
 
+/* The Net Dealer's counter, cut from its map facing world +Y (FACES_X) and
+ * from that map's mirror image facing world -X (FACES_Y). Its tiles must
+ * fall on the layer's lattice (`own`'s) at some small offset (paste). */
+static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
+	if (!c[0]) return;
+	AreaSrc src, m;
+	if (!area_src_load(c[0], c[1], &src)) return;
+	props_learn_counter(&src, c[2], c[3], FACES_X, &L->counter[FACES_X]);
+	area_src_mirror(&src, &m);
+	props_mirror_walls(&src, &m);
+	props_learn_counter(&m, -c[3], -c[2], FACES_Y, &L->counter[FACES_Y]);
+	/* anchored on a panel corner of the layer (whose lattice is `own`'s:
+	 * the same phase whatever the corner), the least move that sets its
+	 * tiles on the lattice, along its run before in its depth (its back
+	 * row stays on the panel edge the aisle's walls run along) */
+	for (int f = 0; f < 2; ++f) {
+		PropStamp *st = &L->counter[f];
+		if (!st->ok) continue;
+		int best = -1;
+		for (int dx = -16; dx <= 16; dx += 4)
+			for (int dy = -16; dy <= 16; dy += 4) {
+				int X = own->ex + dx, Y = own->ey + dy;
+				int px = area_px(own->tw, X, Y) + st->tiles[0].px, py = area_py(own->th, X, Y) + st->tiles[0].py;
+				if ((px & 7) || (py & 7)) continue;
+				int cost = f == FACES_X ? abs(dx) + 4 * abs(dy) : 4 * abs(dx) + abs(dy);
+				if (best < 0 || cost < best) { best = cost; L->counter_dx[f] = dx; L->counter_dy[f] = dy; }
+			}
+		if (best < 0) props_free(st);
+	}
+	if (emu_debug_on())
+		for (int f = 0; f < 2; ++f)
+			fprintf(stderr, "counter faces %d ok %d len %d tiles %d walls %d navi %d,%d\n", f, L->counter[f].ok, L->counter[f].len,
+				L->counter[f].ntiles, L->counter[f].nwalls, L->counter[f].navi_x, L->counter[f].navi_y);
+	if (emu_debug_on())
+		for (int f = 0; f < 2; ++f) fprintf(stderr, "counter faces %d moved %d,%d onto the lattice\n", f, L->counter_dx[f], L->counter_dy[f]);
+	area_src_free(&m);
+	area_src_free(&src);
+}
+
 static bool learn(int area, Learned *L) {
 	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
 	AreaSrc a;
@@ -125,6 +167,7 @@ static bool learn(int area, Learned *L) {
 	learn_map(&a, &a, area, L);
 	decor_learn(&a, na->bg_in_map, &L->decor);
 	stairs_learn(&a, L->stairs);
+	learn_counter(na->counter, &a, L);
 	/* the colours its floors show (an area's maps share its palette) */
 	static uint8_t seen[TILE_COLOURS];
 	memset(seen, 0, sizeof seen);
@@ -191,15 +234,20 @@ static int apart;             /* what of its floor stands apart from the rest (N
 static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
-enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR };
+/* K_SOLID: floor drawn, walled off (a counter's aisle, net.h C_SOLID) */
+enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR, K_SOLID };
 
 /* What the layer has at grid cell (x, y). */
 static int kind(int x, int y) {
 	if (x < 0 || y < 0 || x >= cur->gw || y >= cur->gh || !cur->cell[y * cur->gw + x]) return K_VOID;
 	for (int i = 0; i < cur->nstairs; ++i)
 		if (x >= cur->stairs[i].x && x < cur->stairs[i].x + 2 && y >= cur->stairs[i].y && y < cur->stairs[i].y + 2) return K_STAIR;
+	if (cur->cell[y * cur->gw + x] == C_SOLID) return K_SOLID;
 	return cur->level && cur->level[y * cur->gw + x] ? K_RAISED : K_FLOOR;
 }
+
+/* The ground floor as drawn: walled-off panels look like the rest. */
+static bool ground(int k) { return k == K_FLOOR || k == K_SOLID; }
 
 static int kind_at(int A, int B) { return kind(B + place.gx0, -A + place.gy0); }
 
@@ -228,10 +276,10 @@ static bool edge(int x, int y) {
  * neighbourhoods legal.c asks after) */
 static int floor_cb(int A, int B, const void *ctx) {
 	int k = cur->rise / 32, x = B + place.gx0, y = -A + place.gy0;
-	if (kind(x, y) != K_FLOOR && k) {
+	if (!ground(kind(x, y)) && k) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (kind(x, y) != K_RAISED) return TILE_VOID;
-	} else if (kind(x, y) != K_FLOOR) return TILE_VOID;
+	} else if (!ground(kind(x, y))) return TILE_VOID;
 	int pad = cur->pad && cur->pad[y * cur->gw + x] && (pad_look || ctx) ? TILE_PAD : 0;
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
@@ -273,6 +321,48 @@ static void paste_stairs(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
+/* ---- props ---- */
+
+/* The last layer's props as drawn: their anchors (world units, props.h). */
+static struct { bool ok; int X, Y; const PropStamp *st; } prop_at[MAX_PROPS];
+
+static void props_place(const Learned *L) {
+	memset(prop_at, 0, sizeof prop_at);
+	for (int i = 0; i < cur->nprops && i < MAX_PROPS; ++i) {
+		const NetProp *p = &cur->props[i];
+		const PropStamp *st = &L->counter[p->faces];
+		if (p->kind != PROP_COUNTER || !st->ok || st->len != p->len) continue;
+		/* the corner of its panels with the lowest world X and Y: FACES_X
+		 * runs along grid y, whose highest cell is the lowest X */
+		int A = p->faces == FACES_X ? -(p->y + p->len - 1 - place.gy0) : -(p->y - place.gy0), B = p->x - place.gx0;
+		prop_at[i] = (__typeof__(prop_at[0])){ true, place.ex + 32 * A + L->counter_dx[p->faces], place.ey + 32 * B + L->counter_dy[p->faces], st };
+	}
+}
+
+/* Their tiles on the second layer, over the floor the classes drew. */
+static void paste_props(uint16_t *map, int tw, int th) {
+	size_t cells = (size_t)tw * th;
+	for (int i = 0; i < MAX_PROPS; ++i) {
+		if (!prop_at[i].ok) continue;
+		const PropStamp *st = prop_at[i].st;
+		int px0 = area_px(tw, prop_at[i].X, prop_at[i].Y), py0 = area_py(th, prop_at[i].X, prop_at[i].Y);
+		for (int k = 0; k < st->ntiles; ++k) {
+			int px = px0 + st->tiles[k].px, py = py0 + st->tiles[k].py;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+			map[cells + (size_t)(py / 8) * tw + px / 8] = st->tiles[k].e1;
+		}
+	}
+}
+
+bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {
+	if (i < 0 || i >= MAX_PROPS || !prop_at[i].ok) return false;
+	*wx = prop_at[i].X + prop_at[i].st->navi_x;
+	*wy = prop_at[i].Y + prop_at[i].st->navi_y;
+	*tx = prop_at[i].st->talk_x;
+	*ty = prop_at[i].st->talk_y;
+	return true;
+}
+
 static bool write_tilemap(const Learned *L) {
 	/* extent of the floor around the world origin */
 	int umax = 0, vmax = 0;
@@ -299,6 +389,7 @@ static bool write_tilemap(const Learned *L) {
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
+	paste_props(map, tw, th);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
@@ -345,6 +436,7 @@ bool netmap_stair_cell(int cx, int cy) {
  * own ramps, walls and layer priorities, placed at their blocks. */
 static CoordExtra extra;
 static CoordCell extra_cells[4][4096];
+static CoordCell over_cells[1024];   /* walls in place of the floor's own (props') */
 
 static void add_extra(int s, CoordCell c) {
 	if (extra.n[s] < 4096) extra_cells[s][extra.n[s]++] = c;
@@ -353,6 +445,19 @@ static void add_extra(int s, CoordCell c) {
 static void build_extra(const Learned *L) {
 	memset(&extra, 0, sizeof extra);
 	for (int s = 0; s < 4; ++s) extra.cells[s] = extra_cells[s];
+	/* the props' own walls: a counter's ring, whose back row the walls of
+	 * its walled-off aisle would duplicate */
+	extra.over = over_cells;
+	props_place(L);
+	for (int i = 0; i < MAX_PROPS; ++i) {
+		if (!prop_at[i].ok) continue;
+		for (int k = 0; k < prop_at[i].st->nwalls && extra.nover < 1024; ++k) {
+			CoordCell c = prop_at[i].st->walls[k];
+			c.x = (int16_t)(c.x + prop_at[i].X);
+			c.y = (int16_t)(c.y + prop_at[i].Y);
+			over_cells[extra.nover++] = c;
+		}
+	}
 	for (int y = 0; y < cur->gh; ++y)
 		for (int x = 0; x < cur->gw; ++x) {
 			if (kind(x, y) != K_RAISED) continue;
@@ -463,6 +568,13 @@ unsigned netmap_stair_dirs(int area, int *rise) {
 	return dirs;
 }
 
+void netmap_kit(int area, LayerKit *kit) {
+	memset(kit, 0, sizeof *kit);
+	kit->stair_dirs = netmap_stair_dirs(area, &kit->rise);
+	if (area < 0 || area >= NET_AREAS || !learned[area].ok) return;
+	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
+}
+
 /* Locks the w x h cells from (x, y) and `margin` around them. */
 static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int margin) {
 	for (int j = y - margin; j < y + h + margin; ++j)
@@ -499,8 +611,15 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x)
 			if (layer.level[y][x]) lock(locked, x, y, 1, 1, 2);
+	/* the props with their aisles and the floor before them */
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->faces == FACES_X) lock(locked, p->x - 1, p->y, 3, p->len, 1);
+		else lock(locked, p->x, p->y - 1, p->len, 3, 1);
+	}
 	static NetLayout lay;
-	lay = (NetLayout){ MAP_W, MAP_H, &layer.cell[0][0], &locked[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, seed, &pads[0][0] };
+	lay = (NetLayout){ MAP_W, MAP_H, &layer.cell[0][0], &locked[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, seed, &pads[0][0],
+		layer.props, layer.nprops };
 	if (layer.arena >= 0) {
 		const Room *a = &layer.rooms[layer.arena];
 		lay.ax = a->x; lay.ay = a->y; lay.aw = a->w; lay.ah = a->h;

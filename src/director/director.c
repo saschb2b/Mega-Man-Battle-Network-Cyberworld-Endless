@@ -422,9 +422,9 @@ static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
-	int rise;
-	unsigned stairs = netmap_stair_dirs(biome, &rise);
-	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, stairs, rise);
+	LayerKit kit;
+	netmap_kit(biome, &kit);
+	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
 	if (!netmap_build_layer(biome, run.layer_seed)) return false;
 
@@ -526,7 +526,7 @@ void director_draw_map(void) {
 	int umin = mx - my, umax = umin, vmin = mx + my, vmax = vmin;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
-			if (!D.seen[y][x] || layer.cell[y][x] != C_PATH) continue;
+			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
 			int u = x - y, v = x + y;
 			if (u < umin) umin = u;
 			if (u > umax) umax = u;
@@ -543,7 +543,7 @@ void director_draw_map(void) {
 	#define INSIDE(sx, sy, m) ((sx) - (m) >= bx && (sy) - (m) >= by && (sx) + (m) < bx + bw && (sy) + (m) < by + bh)
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
-			if (!D.seen[y][x] || layer.cell[y][x] != C_PATH) continue;
+			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
 			int sx = SX(x, y), sy = SY(x, y);
 			if (!INSIDE(sx, sy, 3)) continue;
 			/* a panel: a diamond 7 wide and 3 high (11 and 5 larger), a pixel
@@ -669,7 +669,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 19
+#define LAYER_MAKE 20
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -771,8 +771,10 @@ void director_describe(FILE *f) {
 					int x0 = MAP_W, y0 = MAP_H, x1 = 0, y1 = 0;
 					for (int y = 0; y < MAP_H; ++y) {
 						for (int x = 0; x < MAP_W; ++x) {
-							g[y][x] = layer.cell[y][x] != C_PATH ? ' ' : layer.level[y][x] ? '^' : '.';
-							if (layer.cell[y][x] == C_PATH) { x0 = x < x0 ? x : x0; y0 = y < y0 ? y : y0; x1 = x > x1 ? x : x1; y1 = y > y1 ? y : y1; }
+							/* (= a counter's aisle, # the counter) */
+							g[y][x] = layer.cell[y][x] == C_VOID ? ' ' : layer.cell[y][x] == C_SOLID ? '=' : layer.cell[y][x] == C_PROPPED ? '#'
+								: layer.level[y][x] ? '^' : '.';
+							if (layer.cell[y][x] != C_VOID) { x0 = x < x0 ? x : x0; y0 = y < y0 ? y : y0; x1 = x > x1 ? x : x1; y1 = y > y1 ? y : y1; }
 						}
 						g[y][MAP_W] = 0;
 					}
@@ -1088,6 +1090,15 @@ static void probe_vectors(int vx[8], int vy[8]) {
 	}
 }
 
+/* Where the game measures NPC object o from for talking and collision:
+ * its place and its centre's shift (bn6f OverworldNPCObject +0x11-0x13: a
+ * navi behind a counter is spoken to across it; a floor sprite stands
+ * further back than it shows). */
+static void npc_centre(uint32_t o, int *x, int *y) {
+	*x = (int16_t)emu_read16(o + 0x26) + (int8_t)emu_read8(o + 0x11);
+	*y = (int16_t)emu_read16(o + 0x2A) + (int8_t)emu_read8(o + 0x12);
+}
+
 /* The NPC slot A means, or -1. */
 static int talk_target(void) {
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
@@ -1100,7 +1111,9 @@ static int talk_target(void) {
 	for (int i = 0; i < 16; ++i) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
 		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
-		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py, d = dx * dx + dy * dy;
+		int cx, cy;
+		npc_centre(o, &cx, &cy);
+		int dx = cx - px, dy = cy - py, d = dx * dx + dy * dy;
 		/* before him: within 30 degrees of his facing, the one most straight
 		 * ahead (the nearest in that cone took a bystander a little off his
 		 * line over the Mystery Data he faced); one he faces out of reach is
@@ -1120,7 +1133,9 @@ static int talk_target(void) {
 static bool talk_reach(int i, int *face) {
 	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, vx[8], vy[8];
 	uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
-	int tx = (int16_t)emu_read16(o + 0x26) - px, ty = (int16_t)emu_read16(o + 0x2A) - py;
+	int cx, cy;
+	npc_centre(o, &cx, &cy);
+	int tx = cx - px, ty = cy - py;
 	probe_vectors(vx, vy);
 	int k = emu_read8(BN6_PLAYER + 0x10) & 7;
 	double top = -2;
@@ -1159,7 +1174,9 @@ static void talk_only(int i) {
 		uint32_t o = 0x020057B0u + (uint32_t)j * 0xD8;
 		uint8_t r = emu_read8(o + 0x0C);
 		if (j == i || !(emu_read8(o) & 1) || !r || excl.r[j]) continue;
-		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py;
+		int cx, cy;
+		npc_centre(o, &cx, &cy);
+		int dx = cx - px, dy = cy - py;
 		if (dx * dx + dy * dy > 96 * 96) continue;
 		excl.r[j] = r;
 		emu_write8(o + 0x0C, 0);
@@ -1313,7 +1330,9 @@ static void unwedge(void) {
 		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
 		int r = emu_read8(o + 0x0C);
 		if (!(emu_read8(o) & 1) || !r) continue;
-		int dx = (int16_t)emu_read16(o + 0x26) - px, dy = (int16_t)emu_read16(o + 0x2A) - py;
+		int cx, cy;
+		npc_centre(o, &cx, &cy);
+		int dx = cx - px, dy = cy - py;
 		inside = dx * dx + dy * dy < (r + 2) * (r + 2);
 	}
 	bool moved = px != D.last_x || py != D.last_y;
@@ -1528,7 +1547,8 @@ bool director_resume(void) {
 		/* (a build that lays the layer out otherwise may have no floor there
 		 * any more: then its arrival) */
 		int cx, cy;
-		if (!netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H || layer.cell[cy][cx] != C_PATH)
+		if (!netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H ||
+		    (layer.cell[cy][cx] != C_PATH && layer.cell[cy][cx] != C_PROPPED))
 			x = D.start_x, y = D.start_y;
 		emu_warp(D.group, D.number, x, y, 4);
 		/* where they are, again; the arrival's words were said before */

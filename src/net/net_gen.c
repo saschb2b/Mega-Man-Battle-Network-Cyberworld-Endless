@@ -35,11 +35,18 @@ static NetObj *add_obj(int type, int x, int y) {
 	o->x = (float)x + 0.5f;
 	o->y = (float)y + 0.5f;
 	o->solid = type != OBJ_WARP_IN && type != OBJ_EXIT && type != OBJ_UNDERNET && type != OBJ_SECRET_GATE && type != OBJ_RETURN;
+	o->prop = -1;
 	return o;
 }
 
 static bool cell_free(int x, int y) {
 	if (layer.cell[y][x] != C_PATH) return false;
+	/* (nor before or beside a counter: its navi is spoken to from there) */
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int nx = x + d4[k][0], ny = y + d4[k][1];
+		if (nx >= 0 && ny >= 0 && nx < MAP_W && ny < MAP_H && layer.cell[ny][nx] == C_PROPPED) return false;
+	}
 	for (int i = 0; i < layer.nstairs; ++i)
 		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return false;
 	/* (nor beside another solid object: A answers whichever is in reach,
@@ -52,11 +59,12 @@ static bool cell_free(int x, int y) {
 	return true;
 }
 
-/* Whether a solid object at (x, y) would cut the floor: MegaMan cannot pass
- * a navi or a Mystery Data (their radius keeps him about half a panel off),
- * so with the cell blocked, and the cells of the solid objects already
- * placed, every other floor cell must still be reached from the arrival. */
-static bool cuts_way(int x, int y) {
+/* Whether solid objects at the n cells would cut the floor: MegaMan cannot
+ * pass a navi or a Mystery Data (their radius keeps him about half a panel
+ * off), so with the cells blocked, and the cells of the solid objects
+ * already placed, every other floor cell must still be reached from the
+ * arrival. */
+static bool cuts(int n, const int *xs, const int *ys) {
 	static uint8_t blocked[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
 	if (!layer.nobj) return false;
@@ -64,7 +72,7 @@ static bool cuts_way(int x, int y) {
 	int open = 0;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].solid) blocked[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
-	blocked[y][x] = 1;
+	for (int i = 0; i < n; ++i) blocked[ys[i]][xs[i]] = 1;
 	for (int cy = 0; cy < MAP_H; ++cy)
 		for (int cx = 0; cx < MAP_W; ++cx) open += layer.cell[cy][cx] == C_PATH && !blocked[cy][cx];
 	int sx = (int)layer.obj[0].x, sy = (int)layer.obj[0].y, h = 0, t = 0;
@@ -83,6 +91,8 @@ static bool cuts_way(int x, int y) {
 	}
 	return t < open;
 }
+
+static bool cuts_way(int x, int y) { return cuts(1, &x, &y); }
 
 /* Whether (x, y) in room `r` is at one of its exits: a floor cell beside it
  * outside the room (a walkway's mouth, where a Server or a navi stood in
@@ -128,8 +138,8 @@ static bool beside_other_level(int x, int y) {
  * away on a raised block (a playtester pressed A at a Mystery Data that
  * was a walk round, and left it) */
 static bool behind_gap(int x, int y) {
-	return (x + 2 < MAP_W && layer.cell[y][x + 1] != C_PATH && layer.cell[y][x + 2] == C_PATH) ||
-		(y + 2 < MAP_H && layer.cell[y + 1][x] != C_PATH && layer.cell[y + 2][x] == C_PATH);
+	return (x + 2 < MAP_W && layer.cell[y][x + 1] == C_VOID && layer.cell[y][x + 2] == C_PATH) ||
+		(y + 2 < MAP_H && layer.cell[y + 1][x] == C_VOID && layer.cell[y + 2][x] == C_PATH);
 }
 
 /* A free cell inside a room, off its middle, its exits and any walkway's
@@ -139,7 +149,7 @@ static bool behind_gap(int x, int y) {
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
-		if (tries < 30 && x == r->ax && y == r->ay) continue;
+		if ((tries < 30 || open) && x == r->ax && y == r->ay) continue;
 		/* (a bystander, who may stay away, never at one) */
 		if ((tries < 36 || open) && (at_exit(r, x, y) || beside_narrow(x, y))) continue;
 		if (open && tries < 24 && !(layer.cell[y][x + 1] == C_PATH && layer.cell[y][x - 1] == C_PATH &&
@@ -148,13 +158,82 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 		 * raised platform's edge looked a step away from it and was a
 		 * stair's walk round) */
 		if (tries < 30 && beside_other_level(x, y)) continue;
-		if (tries < 38 && behind_gap(x, y)) continue;
+		/* (a bystander, who may stay away, never there) */
+		if ((tries < 38 || open) && behind_gap(x, y)) continue;
 		if (cell_free(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
 	}
 	return false;
 }
 
 static bool room_spot(const Room *r, int *ox, int *oy) { return room_spot_in(r, ox, oy, false); }
+
+/* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
+
+#define MAX_COUNTER 4   /* panels */
+
+static bool on_stair(int x, int y) {
+	for (int i = 0; i < layer.nstairs; ++i)
+		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return true;
+	return false;
+}
+
+static bool object_at(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if ((int)layer.obj[i].x == x && (int)layer.obj[i].y == y) return true;
+	return false;
+}
+
+/* A counter in room r for a service of `type` to stand behind, as the
+ * originals set their Net Dealers' capsules and NetCafe desks: one panel in
+ * from a back edge (grid -x or -y, the top of the screen), facing the
+ * camera, with the aisle behind it on the platform's rim (the navi's place,
+ * walled off), centred along that edge, and the floor before it free to
+ * talk from; nothing it closes off may be cut from the rest. The object
+ * stands in the aisle behind the counter's middle; NULL where the room has
+ * no such place. */
+static NetObj *counter(int r, int type, const LayerKit *kit) {
+	const Room *m = &layer.rooms[r];
+	if (!kit || layer.nprops >= MAX_PROPS || (kit->counter_len[0] <= 0 && kit->counter_len[1] <= 0)) return NULL;
+	int first = rng_range(0, 1);
+	for (int k = 0; k < 2; ++k) {
+		int faces = first ^ k, len = kit->counter_len[faces];
+		/* u along the run, v in depth from the back edge: FACES_X runs along y */
+		int span = faces == FACES_X ? m->h : m->w, deep = faces == FACES_X ? m->w : m->h;
+		if (len <= 0 || len > MAX_COUNTER || len > span || deep < 3) continue;
+		int u_base = faces == FACES_X ? m->y : m->x, v0 = faces == FACES_X ? m->x : m->y;
+		int mid = (span - len) / 2;
+		for (int j = 0; j <= span - len; ++j) {
+			int off = mid + ((j & 1) ? (j + 1) / 2 : -(j / 2));   /* from the middle outwards */
+			if (off < 0 || off > span - len) continue;
+			int u0 = u_base + off, xs[2 * MAX_COUNTER], ys[2 * MAX_COUNTER], nb = 0;
+			bool ok = true;
+			for (int t = 0; t < len && ok; ++t)
+				/* d -1 behind the aisle (void: the rim), 0 the aisle, 1 the counter, 2 before it */
+				for (int d = -1; d <= 2 && ok; ++d) {
+					int x = faces == FACES_X ? v0 + d : u0 + t, y = faces == FACES_X ? u0 + t : v0 + d;
+					if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) { ok = d == -1; continue; }
+					if (d == -1) { ok = layer.cell[y][x] == C_VOID; continue; }
+					if (layer.cell[y][x] != C_PATH || layer.level[y][x] || on_stair(x, y) || object_at(x, y) ||
+					    (x == m->ax && y == m->ay)) { ok = false; continue; }
+					if (d == 2) { ok = cell_free(x, y); continue; }
+					xs[nb] = x; ys[nb++] = y;
+				}
+			if (!ok || cuts(nb, xs, ys)) continue;
+			/* the aisle walled off, the counter's panels floor under its own walls */
+			for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = (uint8_t)(i % 2 == 0 ? C_SOLID : C_PROPPED);
+			int tm = (len - 1) / 2;
+			NetObj *o = add_obj(type, faces == FACES_X ? v0 : u0 + tm, faces == FACES_X ? u0 + tm : v0);
+			if (!o) {
+				for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = C_PATH;
+				return NULL;
+			}
+			layer.props[layer.nprops] = (NetProp){ PROP_COUNTER, faces, faces == FACES_X ? v0 + 1 : u0, faces == FACES_X ? u0 : v0 + 1, len };
+			o->prop = layer.nprops++;
+			return o;
+		}
+	}
+	return NULL;
+}
 
 static int bfs_far(int from) {
 	/* Room graph distance by flood fill over cells; returns farthest room. */
@@ -224,21 +303,36 @@ static void choose_arrival(void) {
 	layer.rooms[best] = t;
 }
 
-/* Object `type` in the next room of `order`; once each has one, again in
- * the big ones (fields and platforms of 16 cells or more). */
+/* The next room of `order`; once each has had one, one of the big ones
+ * (fields and platforms of 16 cells or more); -1 for none. */
+static int pick_room(const int *order, int n, int next) {
+	if (next < n) return order[next];
+	int big[MAX_ROOMS], nb = 0;
+	for (int i = 0; i < n; ++i)
+		if (layer.rooms[order[i]].w * layer.rooms[order[i]].h >= 16) big[nb++] = order[i];
+	return nb ? big[rng_range(0, nb - 1)] : -1;
+}
+
+/* Object `type` in the next room of `order`. */
 static NetObj *place(int type, const int *order, int n, int next, int *x, int *y) {
-	int r = -1;
-	if (next < n) r = order[next];
-	else {
-		int big[MAX_ROOMS], nb = 0;
-		for (int i = 0; i < n; ++i)
-			if (layer.rooms[order[i]].w * layer.rooms[order[i]].h >= 16) big[nb++] = order[i];
-		if (nb) r = big[rng_range(0, nb - 1)];
-	}
+	int r = pick_room(order, n, next);
 	return r >= 0 && room_spot(&layer.rooms[r], x, y) ? add_obj(type, *x, *y) : NULL;
 }
 
-void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stair_dirs, int rise) {
+/* The Net Dealer in room r: behind a counter where it has a place for one,
+ * else in the first of `order`'s rooms that has (the originals' dealers
+ * all stand behind one), else standing in r. */
+static NetObj *dealer(int r, const int *order, int n, const LayerKit *kit, int *x, int *y) {
+	if (r < 0) return NULL;
+	NetObj *o = counter(r, OBJ_SHOP, kit);
+	for (int i = 0; i < n && !o; ++i)
+		if (order[i] != r) o = counter(order[i], OBJ_SHOP, kit);
+	return o ? o : room_spot(&layer.rooms[r], x, y) ? add_obj(OBJ_SHOP, *x, *y) : NULL;
+}
+
+void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
+	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
+	int rise = kit ? kit->rise : 0;
 	memset(&layer, 0, sizeof layer);
 	rng_seed(seed);
 	layer.biome = biome;
@@ -328,15 +422,15 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, unsigned stai
 	int x, y;
 #define PLACE(t) place((t), order, n, next, &x, &y)
 	if (layer.arena >= 0) {
-		/* the last stop before the arena: a heal and the Net Dealer, as the
-		 * rooms before Hades' guardians hold a fountain and Charon */
+		/* the last stop before the arena: the Net Dealer and a heal, as the
+		 * rooms before Hades' guardians hold Charon and a fountain */
+		if (kind == LAYER_NORMAL) dealer(layer.ante, NULL, 0, kit, &x, &y);
 		if (room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
-		if (kind == LAYER_NORMAL && room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_SHOP, x, y);
 		shop = heal = false;
 	}
 	/* a Mr. Prog with a gift by the run's start */
 	if (depth == 1 && kind == LAYER_NORMAL && room_spot(&layer.rooms[0], &x, &y)) add_obj(OBJ_GIFT, x, y);
-	if (shop) { PLACE(OBJ_SHOP); ++next; }
+	if (shop) { dealer(pick_room(order, n, next), order, n, kit, &x, &y); ++next; }
 	if (heal) { PLACE(OBJ_HEAL); ++next; }
 	if (trader) { PLACE(OBJ_TRADER); ++next; }
 	if (programs) { PLACE(OBJ_PROGRAMS); ++next; }

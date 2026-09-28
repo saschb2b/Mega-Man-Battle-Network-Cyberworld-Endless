@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "bytes.h"
 #include "debug.h"
@@ -153,6 +154,17 @@ static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int n
 	int rise = town_floor ? 0 : netmap_rise();
 	n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
 	if (rise) n[0] += walls(sec[0] + n[0], WALLS_MAX - n[0], 1, rise, rise);
+	/* a prop's walls in place of the floor's own at their cells */
+	if (extra && extra->nover) {
+		static uint8_t taken[254 * 254];
+		memset(taken, 0, sizeof taken);
+		for (int i = 0; i < extra->nover; ++i) taken[from(&extra->over[i]).key] = 1;
+		int k = 0;
+		for (int i = 0; i < n[0]; ++i)
+			if (!taken[sec[0][i].key]) sec[0][k++] = sec[0][i];
+		n[0] = k;
+		for (int i = 0; i < extra->nover && n[0] < WALLS_MAX; ++i) sec[0][n[0]++] = from(&extra->over[i]);
+	}
 	for (int i = 0; i < npads && n[3] + PAD_CELLS <= TRIGGERS_MAX; ++i) n[3] += pad(sec[3] + n[3], &pads[i]);
 	/* raised floor heights, stairs' ramps, walls and layer priorities */
 	for (int s = 0; extra && s < 4; ++s)
