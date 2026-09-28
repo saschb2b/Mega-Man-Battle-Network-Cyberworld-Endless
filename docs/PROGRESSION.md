@@ -210,7 +210,7 @@ bought; the value before this structure is in brackets.
 
 | Act | Layers | MegaMan max HP | HP per battle | Hardest hit | Versions | Guardian |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1-3 | 100 (100) | 90-160 | 30 | V1 | 400-500 V1 |
+| 1 | 1-3 | 100 (100) | 90-160 | 30 | V1 | 400-600 V1 |
 | 2 | 4-6 | 200 (160) | 150-280 | 80 | V1 | 600-700 V1 |
 | 3 | 7-9 | 300 (220) | 200-360 | 120 | V1-V2 | 800-1000 V1 |
 | 4 | 10-12 | 400 (280) | 280-420 | 160 | V2 | 1100-1300 (Colonel V1, EX of the 800s) |
@@ -285,9 +285,10 @@ Each area keeps its pool of Navis. A guardian is drawn from the Navis of
 the area's pool whose HP at the act's version falls in the act's band;
 when none does, from all Navis in the band; only then the pool's nearest.
 Acts 1-3 fight V1, acts 4-6 EX where it fits and V1 otherwise. Act 1 meets
-BlastMan or DiveMan, as likely, and a new run from the title draws the next
-seed's run where its act 1 guardian is the last run's (the profile keeps
-it), so one comes again after the other only a quarter of the time.
+BlastMan, DiveMan or SpoutMan, alike, and a new run from the title draws
+the next seed's run where its act 1 guardian is the last run's (the
+profile keeps it). A later act draws again where it met an earlier act's
+guardian and another fits (SpoutMan lies in both of the first two bands).
 Colonel appears from act 4 on. Over 500
 drawn runs every guardian lies in its act's band (`build.py pacing`).
 
@@ -356,7 +357,11 @@ Built as described above, with these differences from the first proposal:
   MegaMan has about 300 HP against their 1400-1700.
 - A guardian is drawn from the navis whose HP suits the act, the area's
   own twice as likely as the others: the three opening areas' own gave
-  act 1 BlastMan in every run, and act 1 (400-500) now meets DiveMan too.
+  act 1 BlastMan in every run, and act 1 now meets DiveMan and SpoutMan
+  too. Its band was 400-500, BlastMan and DiveMan alone: a playtester met
+  BlastMan in seven of eleven runs. Act 1 is the act every run plays, the
+  one whose sameness shows first, so its band takes the third navi of the
+  400-600 tier; SpoutMan's 600 HP is still under act 2's lightest.
   In act 1 the two are as likely, and a new run avoids the last one's
   first guardian once: a playtester met BlastMan six runs running, and
   the Robot Control Comp's OldStove and Mettaur in every act 1 battle, so

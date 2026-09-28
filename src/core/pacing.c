@@ -92,7 +92,7 @@ void pacing_area_order(uint8_t out[4]) {
 
 void pacing_guardian_band(int act, int *lo, int *hi) {
 	static const int band[PACING_ACTS][2] = {
-		{ 400, 500 }, { 600, 700 }, { 800, 1000 }, { 1000, 1300 }, { 1100, 1500 }, { 1200, 2000 }, { 0, 100000 },
+		{ 400, 600 }, { 600, 700 }, { 800, 1000 }, { 1000, 1300 }, { 1100, 1500 }, { 1200, 2000 }, { 0, 100000 },
 	};
 	if (act < 0) act = 0;
 	if (act >= PACING_ACTS) act = PACING_ACTS - 1;
@@ -130,8 +130,9 @@ int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothe
                          bool always_sp, int (*hp)(int navi, int version)) {
 	/* the area's own that suit the act, twice as likely as the other navis
 	 * that do (the three opening areas' own gave act 1 BlastMan every run);
-	 * in act 1, whose band holds two, both alike (BlastMan, the opening
-	 * areas' own, was a playtester's first guardian six runs running) */
+	 * in act 1, whose band holds three, all alike (BlastMan, the opening
+	 * areas' own, was a playtester's first guardian six runs running, and
+	 * seven of eleven with DiveMan the only other) */
 	int fit[8 + 32], nfit = 0;
 	for (int i = 0; i < 4; ++i)
 		if (pacing_guardian_miss(pool[i], act, loop, always_sp, hp) == 0) {

@@ -45,8 +45,16 @@ void run_new(uint32_t seed) {
 	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = pools[b][rng_range(0, 3)];
 	for (int act = 0; act < 6; ++act) {
-		int b = run.biome_order[act];
-		run.boss_order[b] = (uint8_t)pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
+		int b = run.biome_order[act], g = 0;
+		/* (not an earlier act's guardian again, where another fits: act 1's
+		 * band shares SpoutMan with act 2's) */
+		for (int tries = 0; tries < 8; ++tries) {
+			g = pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
+			bool again = false;
+			for (int e = 0; e < act; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+			if (!again) break;
+		}
+		run.boss_order[b] = (uint8_t)g;
 	}
 }
 

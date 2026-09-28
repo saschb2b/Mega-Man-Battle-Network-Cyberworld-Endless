@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Act 1's guardian is BlastMan, DiveMan or SpoutMan, alike (a playtester
+  met BlastMan in seven of eleven runs, DiveMan the only other), and a run
+  never meets one guardian in two acts where another fits.
 - MegaMan's tip on holding SELECT for the map is left out once the map has
   been held (it came on every run's first two layers).
 - Central's layers can be a winding path two or three panels wide, as
