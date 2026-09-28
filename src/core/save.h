@@ -29,6 +29,7 @@ typedef struct {
 	uint16_t folders_open;
 	uint16_t short_wins;
 	uint8_t last_net, last_folder, last_threat, last_helpers;   /* the setup screen starts where the last run's did */
+	uint16_t marks;           /* the title's marks earned (MARK_*, BN6's own bits: meta.h) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4 };

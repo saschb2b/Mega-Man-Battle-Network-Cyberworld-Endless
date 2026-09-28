@@ -284,6 +284,27 @@ static void enter(void) {
 
 static void jack_in(void);
 
+/* ---- the title's marks (docs/META.md): BN6's own sprites, where its title
+ * draws them, loaded with the copyright line (tiles from OBJ tile 0x180,
+ * palettes from OBJ bank 5: docs/ROM_DATA.md) ---- */
+
+static const struct { int bit, x, y, tile, w, h, bank; } mark_parts[] = {
+	{ MARK_WIN, 4, 2, 0x280, 4, 2, 9 }, { MARK_WIN, 4, 18, 0x288, 2, 1, 9 },
+	{ MARK_STD, 44, 4, 0x220, 4, 2, 8 }, { MARK_MEGA, 84, 4, 0x230, 4, 2, 8 }, { MARK_GIGA, 124, 4, 0x240, 4, 2, 8 },
+	{ MARK_PA, 164, 4, 0x250, 4, 2, 8 }, { MARK_THREAT, 204, 4, 0x260, 4, 2, 8 },
+	{ MARK_SECRET, 142, 20, 0x210, 4, 2, 7 }, { MARK_SECRET, 142, 36, 0x218, 2, 1, 7 },
+	{ MARK_NEST, 64, 20, 0x200, 4, 2, 7 }, { MARK_NEST, 64, 36, 0x208, 2, 1, 7 },
+};
+
+static void marks_draw(int x0, int y0) {
+	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
+	for (unsigned i = 0; i < sizeof mark_parts / sizeof *mark_parts; ++i) {
+		if (!(profile.marks & mark_parts[i].bit)) continue;
+		rom_tiles(copy + (uint32_t)(mark_parts[i].tile - 0x180) * 32, T.copy_pal + (uint32_t)(mark_parts[i].bank - 5) * 32,
+			x0 + mark_parts[i].x, y0 + mark_parts[i].y, mark_parts[i].w, mark_parts[i].h, 0);
+	}
+}
+
 /* ---- the setup after NEW GAME (docs/META.md): the net's length, the
  * starting folder, the threat rung, the helpers; the last run's choices
  * to start from ---- */
@@ -574,6 +595,7 @@ static void draw(void) {
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
 	if (!S.confirm && !S.summary)   /* (the question takes its place a moment; the summary runs to the bottom) */
 		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
+	if (!S.summary) marks_draw(x0, y0);
 
 	if (S.summary) {
 		SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255);
@@ -617,8 +639,11 @@ static void draw(void) {
 		if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);
 		return;
 	}
-	/* the build, for a report: v0.1.0 alpha, v0.1.0+12 a dozen commits on */
-	{
+	/* a line above the copyright, the marks holding the top: the build, for
+	 * a report (v0.1.0 alpha, v0.1.0+12 a dozen commits on), and the best
+	 * depth, a saved run deeper than the record counting too (the menu's
+	 * CONTINUE names its own layer there; the question's box covers both) */
+	if (!S.confirm) {
 		char v[40];
 		const char *cw = CW_VERSION;
 		if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, sizeof v, "dev");
@@ -626,12 +651,13 @@ static void draw(void) {
 			const char *g = strstr(cw, ".g");
 			snprintf(v, sizeof v, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " alpha" : "");
 		}
-		text_draw(x0 + 4, y0 + 2, v, rgba(150, 160, 190, 255), TEXT_LEFT);
+		minifont_draw(x0 + 4, y0 + 138, v, rgba(150, 160, 190, 255), 1);
+		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
+		if (best > 0 && !(S.menu && S.has_save && S.saved_depth)) {
+			snprintf(v, sizeof v, "Best: Layer %d", best);
+			minifont_draw(x0 + CORE_W - 4 - minifont_width(v, 1), y0 + 138, v, rgba(255, 230, 90, 255), 1);
+		}
 	}
-	/* (a saved run deeper than the record is the best so far too) */
-	int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
-	if (best > 0)
-		text_drawf(x0 + CORE_W - 4, y0 + 2, rgba(255, 230, 90, 255), TEXT_RIGHT, "Best: Layer %d", best);
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */

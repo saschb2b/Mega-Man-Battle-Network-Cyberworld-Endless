@@ -26,6 +26,7 @@
 #include "net_layouts.h"
 #include "desktop.h"
 #include "minifont.h"
+#include "meta.h"
 
 char g_data_dir[512] = ".";
 
@@ -515,6 +516,7 @@ int main(int argc, char **argv) {
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
 	 * short net) for --scene town, the endless net otherwise */
 	const char *setup_spec = NULL;
+	int marks_spec = -1;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
 #ifndef __EMSCRIPTEN__
@@ -551,6 +553,8 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--guardian") && v) { guardian_navi = atoi(v); ++i; }
 		else if (!strcmp(a, "--setup") && v) { setup_spec = v; ++i; }
+		/* --marks HEX: the title's marks as if earned, for a capture */
+		else if (!strcmp(a, "--marks") && v) { marks_spec = (int)strtol(v, NULL, 16); ++i; }
 		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
 #ifndef __EMSCRIPTEN__
 		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
@@ -622,6 +626,7 @@ int main(int argc, char **argv) {
 	} else {
 		printf("ROM: %s (%s)\n", R.layout->name, R.path);
 		save_init();
+		if (marks_spec >= 0) profile.marks = (uint16_t)marks_spec;
 		if (atlas_spec) {
 			int r = atlas_run(atlas_spec);
 			platform_shutdown();
@@ -686,25 +691,32 @@ int main(int argc, char **argv) {
 		/* "town": a new run from the town, as NEW GAME starts one */
 		bool town = !strcmp(start_scene, "town");
 		const Scene *s = town ? &scene_emu : scene_by_name(start_scene);
-		/* "summary": the title's summary of a made-up run lost at --run-depth */
+		int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0;
+		if (setup_spec) {
+			net = !strncmp(setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
+			const char *c = strchr(setup_spec, ',');
+			if (c) sscanf(c + 1, "%d,%d,%d", &folder, &threat, &helpers);
+		}
+		/* "summary": the title's summary of a made-up run lost at --run-depth,
+		 * or won with --setup short at layer 10 (its unlocks said, and saved
+		 * in --data-dir) */
 		if (!strcmp(start_scene, "summary")) {
 			run_new(seed ? seed : 1);
+			run_setup(net, folder, threat, helpers);
 			run.depth = run_depth > 0 ? run_depth : 12;
 			run.viruses_deleted = run.depth * 6;
 			run.bosses_beaten = run.depth / 3;
-			snprintf(title_cause, sizeof title_cause, "by HeatMan in the Graveyard");
 			title_new_best = run.depth > profile.best_depth;
+			title_won = run_short_nest(run.depth);
+			if (title_won) {
+				snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
+				meta_run_over(true);
+			} else snprintf(title_cause, sizeof title_cause, "by HeatMan in the Graveyard");
 			title_summary = true;
 			s = &scene_title;
 		}
 		if (s == &scene_emu) {
 			run_new(seed ? seed : 1);
-			int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0;
-			if (setup_spec) {
-				net = !strncmp(setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
-				const char *c = strchr(setup_spec, ',');
-				if (c) sscanf(c + 1, "%d,%d,%d", &folder, &threat, &helpers);
-			}
 			run_setup(net, folder, threat, helpers);
 			if (run_depth > 0) run.depth = run_depth;
 			/* (the area its act's in the run too, whose draws read it, and

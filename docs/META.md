@@ -245,6 +245,7 @@ them a use.
    folder at the run's start (its RAM layout from bn6f, noted in
    docs/ROM_DATA.md).
 6. The setup screen after NEW GAME, and the summary's line for what a run
+   unlocked and what is closest.
 
 Built as planned, with these particulars:
 
@@ -258,4 +259,21 @@ Built as planned, with these particulars:
   and gentle battles (the lower half of the band all run).
 - `--setup NET,FOLDER,THREAT,HELPERS` sets a headless run's; the weak
   autopilot wins a short net (layers 1-10).
-   unlocked and what is closest.
+
+## The title's marks
+
+BN6 draws marks over its title for what a save has done: its ending, its
+Library, its Program Advances, two of its events. Here the same sprites, at
+BN6's places, mark a profile's milestones. They are trophies, never keys:
+nothing needs one. The summary names a mark the run earned.
+
+| Mark | BN6 | Here |
+| --- | --- | --- |
+| Gregar's head (top left) | The ending | A short net won |
+| Bass in Gregar's form | Event 0x340 | The endless net's own Nest (past layer 19) |
+| S | A Library count | The Secret Area cleared |
+| The green disc (top right) | Event 0x370 | A win on the top threat rung |
+| STD, MEGA, GIGA, P.A. COMP | The Library, the P.A. memo | Waiting for the Library (phase two) |
+
+The version and the best depth moved from the top corners to a line above
+the copyright, where the marks leave room.

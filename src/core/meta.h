@@ -27,6 +27,19 @@ const char *meta_threat_rule(int rung);
 /* Whether the run's threat reaches rung `rung`: each adds to those below. */
 bool meta_threat(int rung);
 
+/* The title's marks, BN6's own (its GetTitleScreenIconCount bits, drawn
+ * with its sprites): each for a milestone here, never power. */
+enum {
+	MARK_THREAT = 0x02,   /* the green disc: a win on the top threat rung */
+	MARK_PA = 0x04,       /* P.A. COMP (not yet earned here) */
+	MARK_SECRET = 0x08,   /* the S: the Secret Area cleared */
+	MARK_GIGA = 0x10,     /* GIGA COMP, MEGA COMP, STD COMP: the Library, later */
+	MARK_MEGA = 0x20,
+	MARK_STD = 0x40,
+	MARK_WIN = 0x80,      /* Gregar: a short net won (BN6's for its ending) */
+	MARK_NEST = 0x100,    /* Bass in Gregar's form: the endless net's own Nest cleared */
+};
+
 /* At a run's end, won or lost: the profile's unlocks from what the run and
  * the ones before it did, and the summary's lines for them. */
 void meta_run_over(bool won);

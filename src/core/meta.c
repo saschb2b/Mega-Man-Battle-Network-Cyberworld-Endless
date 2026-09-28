@@ -105,6 +105,20 @@ void meta_run_over(bool won) {
 		snprintf(rung, sizeof rung, "threat %d", run.threat + 1);
 		say("%s", rung);
 	}
+	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark") */
+	static const struct { int bit; const char *what; } marks[] = {
+		{ MARK_WIN, "Gregar's mark" }, { MARK_NEST, "Bass's mark" }, { MARK_SECRET, "the S mark" }, { MARK_THREAT, "the disc mark" },
+	};
+	for (unsigned i = 0; i < sizeof marks / sizeof *marks; ++i) {
+		int b = marks[i].bit;
+		bool earned = (b == MARK_WIN && won && run.mode == RUN_SHORT) ||
+			(b == MARK_NEST && run.mode == RUN_ENDLESS && run.depth > CYCLE_LAYERS) ||
+			(b == MARK_SECRET && run.secret_cleared) ||
+			(b == MARK_THREAT && won && run.threat >= THREAT_MAX);
+		if (!earned || (profile.marks & b)) continue;
+		profile.marks |= (uint16_t)b;
+		say("%s", marks[i].what);
+	}
 	/* a folder, once its guardian has been deleted in any run */
 	for (int f = 1; f < FOLDER_COUNT; ++f) {
 		if ((profile.folders_open >> f & 1) || !folders[f].navi || rival(folders[f].navi)->megaman_won <= 0) continue;
