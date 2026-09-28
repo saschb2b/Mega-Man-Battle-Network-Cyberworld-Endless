@@ -132,6 +132,20 @@ int counter_element(int biome, int navi) {
 
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
 static uint32_t last_families;                  /* the virus families of the last battle (a bit each) */
+static uint32_t last_viruses;                   /* ... and its viruses (viruses_of) */
+
+/* Formation `f`'s viruses, whatever their panels: the same few viruses
+ * stand in several of an area's records. */
+static uint32_t viruses_of(const Formation *f) {
+	uint16_t id[FORMATION_MAX_ENTS];
+	int n = f->n < FORMATION_MAX_ENTS ? f->n : FORMATION_MAX_ENTS;
+	for (int k = 0; k < n; ++k) id[k] = f->ent[k].id;
+	for (int i = 1; i < n; ++i)
+		for (int j = i; j > 0 && id[j - 1] > id[j]; --j) { uint16_t t = id[j]; id[j] = id[j - 1]; id[j - 1] = t; }
+	uint32_t h = 2166136261u;
+	for (int k = 0; k < n; ++k) h = (h ^ id[k]) * 16777619u;
+	return h;
+}
 
 /* The virus families formation `f` brings, a bit each. */
 static uint32_t families_of(const Formation *f) {
@@ -250,10 +264,14 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	 * viruses, not the same ones fight after fight */
 	int weight[MAX_FIT];
 	total = 0;
-	for (int i = 0; i < n && i < MAX_FIT; ++i) {
-		weight[i] = fit[i] < 0 ? 0 : list[i].weight * (families_of(&list[i]) & last_families ? 1 : 3);
-		total += weight[i];
-	}
+	/* and never the last battle's very viruses again where others fit
+	 * (Piranha and Puffy twice in a row, from two of the area's records) */
+	for (int again = 0; again < 2 && !total; ++again)
+		for (int i = 0; i < n && i < MAX_FIT; ++i) {
+			weight[i] = fit[i] < 0 || (!again && biome == last_biome && viruses_of(&list[i]) == last_viruses) ? 0 :
+				list[i].weight * (families_of(&list[i]) & last_families ? 1 : 3);
+			total += weight[i];
+		}
 	int roll = rng_range(0, total - 1), pick = -1;
 	for (int i = 0; i < n && i < MAX_FIT; ++i) {
 		if (!weight[i]) continue;
@@ -264,6 +282,7 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	last_biome = biome;
 	last_pick = pick;
 	last_families = families_of(&list[pick]);
+	last_viruses = viruses_of(&list[pick]);
 	int hp, dmg;
 	build_foes(&list[pick], depth, fit[pick], false, e, &hp, &dmg);
 	band = pacing_band(depth, challenge, easy);

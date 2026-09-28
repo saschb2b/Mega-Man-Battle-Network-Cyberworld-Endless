@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A random battle never brings the last battle's very viruses again where
+  another battle fits (Piranha and Puffy twice in a row, from two of the
+  area's records), and the Aquarium HP's first briefing names its ice
+  panels beside the conveyors (a playtester froze on them twice).
 - A shop, a trader or a navi never ends up in a walkway's mouth: the floor
   around what stands on a layer stays as the layer was laid out when its
   tiles are fitted (a Chip Trader had stood where a walkway entered his

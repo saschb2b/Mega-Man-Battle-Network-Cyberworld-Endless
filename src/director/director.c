@@ -277,10 +277,11 @@ static const char *status_words(void) {
 		 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
 		if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 			ADD("@M The battlefields here are icy. An Aqua hit on ice freezes us, so keep off it when the viruses shoot water!|");
-		/* (and a homepage's conveyors: one carried a playtester off the row
-		 * he stepped into, every time) */
+		/* (and a homepage's conveyors and ice: a conveyor carried a
+		 * playtester off the row he stepped into, every time, and the ice
+		 * froze him twice in the next act) */
 		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-			ADD("@M The battlefields here have conveyor panels. Their arrows carry us along, so mind where we stand!|");
+			ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
 		/* (what they are for: a playtester carried two and never learned) */
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
