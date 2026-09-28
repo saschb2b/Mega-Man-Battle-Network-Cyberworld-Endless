@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- CircusMan's warning names his tent's tell: when only MegaMan's own panel
+  lights, the tent drops over him about half a second later (watched frame
+  by frame; the clap's column and the lion's hoop were already right).
 - Cleaner joins between a net area's two floors. Walkways meet platforms
   square on in the middle of a side, never at a corner or along an edge,
   and in the comps and homepages a walkway runs on across the platform it

@@ -60,8 +60,8 @@ const char *guardian_tip(int navi) {
 		"Step off the yellow panels!";
 	case 13: return "DiveMan hides under the water, where only bombs reach him: strike when he surfaces! "
 		"When his wave lights our panels, stand in our back column. His torpedoes run in their shadows' row.";
-	case 14: return "CircusMan claps down on a lit column, his lion leaps through a burning hoop down our row, and he drops his tent to trap us. "
-		"He keeps to the back: bring chips that reach it!";
+	case 14: return "CircusMan claps down on a lit column, his lion leaps a burning hoop down our row, and when only our panel lights, "
+		"his tent drops on us. He keeps to the back: bring chips that reach it!";
 	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!";
 	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "
 		"Hard hits work whatever he is!";
