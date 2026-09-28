@@ -7,6 +7,7 @@
 #ifndef NET_ROUTE_H
 #define NET_ROUTE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "net.h"
@@ -18,6 +19,10 @@ int route_grid_way(double dx, double dy);
  * around the layer's solid objects; -1 when either is off the floor. *len:
  * the walk's panels. */
 int route_way(double px, double py, int tx, int ty, int *len);
+
+/* Whether MegaMan walks from panel (sx, sy) to (ax, ay) in a straight line
+ * over the floor, clear of what stands on it (as of the last route_way). */
+bool route_floor_line(int sx, int sy, int ax, int ay);
 
 /* The last route_way's walk (panels y * MAP_W + x, from the target back)
  * and the panel it aimed at (-1 for none), for the playtest state's map. */

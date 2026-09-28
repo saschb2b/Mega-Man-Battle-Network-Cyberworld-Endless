@@ -576,13 +576,27 @@ void director_draw_map(void) {
 		if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
 		double wx, wy;
 		netmap_grid(px, py, &wx, &wy);
-		if (netmap_panel(tx, ty, &ex, &ey) && route_way(wx, wy, ex, ey, &len) >= 0)
-			for (int k = route_walk_len - 1; k >= 0; --k) {
-				int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W;
+		if (netmap_panel(tx, ty, &ex, &ey) && route_way(wx, wy, ex, ey, &len) >= 0) {
+			/* in straight runs as far as a straight line over the floor
+			 * goes (the walk's steps zig-zagged across a platform) */
+			int cx = mx, cy = my, k = route_walk_len - 1;
+			while (k >= 0) {
+				int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;
 				if (!D.seen[y][x]) break;
-				int sx = SX(x, y), sy = SY(x, y);
-				if (INSIDE(sx, sy, 3)) fill_rect(sx - (s == 6 ? 2 : 1), sy, s == 6 ? 5 : 3, 1, tc);
+				for (int j = k - 1; j >= 0 && j >= k - 12; --j) {
+					int jx = route_walk[j] % MAP_W, jy = route_walk[j] / MAP_W;
+					if (!D.seen[jy][jx]) break;
+					if (route_floor_line(cx, cy, jx, jy)) far = j;
+				}
+				int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W, steps = abs(fx - cx) + abs(fy - cy);
+				for (int t = 1; t <= steps; ++t) {
+					int px2 = SX(cx, cy) + (SX(fx, fy) - SX(cx, cy)) * t / steps, py2 = SY(cx, cy) + (SY(fx, fy) - SY(cx, cy)) * t / steps;
+					if (INSIDE(px2, py2, 3)) fill_rect(px2 - (s == 6 ? 2 : 1), py2, s == 6 ? 5 : 3, 1, tc);
+				}
+				cx = fx; cy = fy;
+				k = far - 1;
 			}
+		}
 	}
 	/* what stands there, once seen; the goal's way while it is not */
 	int gx = -1, gy = -1;

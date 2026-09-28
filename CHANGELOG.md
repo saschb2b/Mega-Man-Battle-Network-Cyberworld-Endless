@@ -22,7 +22,9 @@
 - The Graveyard's slabs are one shade of stone throughout: its pale
   platforms' tiles, which the tiles mixed into its dark slabs panel by
   panel, are drawn in the dark slabs' colours.
-- The map (SELECT) marks the way on over the floor MegaMan has come near,
+- The map (SELECT) marks the way on in straight runs, as far as a straight
+  line over the floor goes (it zig-zagged panel by panel across platforms),
+  over the floor MegaMan has come near,
   up to where he has not been: a V in a comp's maze read as a dead end
   twice, the arm on to the exit nowhere on the map.
 - The Aquarium Comp and the ACDC HP take one battle in three from their

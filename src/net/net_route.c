@@ -47,6 +47,8 @@ static bool floor_line(int sx, int sy, int ax, int ay) {
 	return true;
 }
 
+bool route_floor_line(int sx, int sy, int ax, int ay) { return floor_line(sx, sy, ax, ay); }
+
 int route_way(double px, double py, int tx, int ty, int *len) {
 	static int16_t prev[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
