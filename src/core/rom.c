@@ -32,7 +32,7 @@ static const RomLayout layouts[] = {
 			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } }, .looks = L(MONUMENT) | L(GRAVE), .emblem = 0x56C0 },     /* Graveyard; Graveyard 1-3 (its cyan crosses) */
 			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet 1; Undernet 1-3 */
 			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet Zero; Undernet 3-4 */
-			{ 0x93, 1, 0x0004, 0x0000, true, 0x21, 0x93, 0, 2, { { 0x93, 0 } } },      /* Underground 2; Underground 1-2 */
+			{ 0x93, 1, 0x11000, 0x0004, true, 0x21, 0x93, 0, 2, { { 0x93, 0 } } },      /* Underground 2; Underground 1-2 (grey stone platforms in a magenta lip with spikes, TILES_RIMMED; its walkways the magenta links with a yellow gem) */
 			{ 0x8C, 0, 0x0002, 0x0008, false, 0x13, 0x8C, 0, 16 },    /* a comp (orange, green); the comps of group 0x8C */
 			{ 0x88, 3, 0x0800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */
 			{ 0x8C, 1, 0x00C0, 0x0400, false, 0x13, 0x8D, 0, 16 },    /* a comp (blue, pink); the comps of group 0x8D */

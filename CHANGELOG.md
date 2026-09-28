@@ -7,6 +7,9 @@
   holes through a big slab, kept off rims and holes. The holes run in a
   line along the slab's middle, as the originals punch them, rather than
   in a grid.
+- The Nest's platforms are its grey stone in a magenta lip with spikes,
+  its walkways the magenta links with a yellow gem, as Underground's maps
+  draw them (every floor there had taken the links' look).
 - Six guardians' warnings name the moves they were missing, each checked
   against a recording of the fight: GroundMan bursting up under the lit
   panel and his drill missiles, ChargeMan's coal bombs and freight cars,
