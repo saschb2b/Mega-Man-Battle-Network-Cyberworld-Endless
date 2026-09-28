@@ -861,9 +861,17 @@ static const char *intro(void) {
 		/* (the call heard, but no run over yet: no best to speak of) */
 		ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port);
 	} else {
+		/* (the short net ends on its Nest: its goal, not a depth to beat) */
+		bool nest_goal = run.mode == RUN_SHORT && profile.best_depth >= SHORT_LAYERS - 1;
 		switch (profile.runs % 3) {
-		case 0: ADD("@M Ready for another dive, Lan? Our best is layer %d!|@L This time we'll go even deeper!", profile.best_depth); break;
-		case 1: ADD("@M Dad's backup got me home safe last time.|@L Good! Let's beat layer %d today!", profile.best_depth); break;
+		case 0:
+			if (nest_goal) ADD("@M Ready for another dive, Lan? The Nest is waiting at the bottom!|@L This time we'll bring it down!");
+			else ADD("@M Ready for another dive, Lan? Our best is layer %d!|@L This time we'll go even deeper!", profile.best_depth);
+			break;
+		case 1:
+			if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Good! Let's reach the Nest today!");
+			else ADD("@M Dad's backup got me home safe last time.|@L Good! Let's beat layer %d today!", profile.best_depth);
+			break;
 		default: ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port); break;
 		}
 	}
