@@ -12,7 +12,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define RUN_MAGIC 0x43574534u /* "CWE4": room for 32 areas */
+#define RUN_MAGIC 0x43574535u /* "CWE5": the run's setup (docs/META.md) */
 #define PROFILE_MAGIC 0x43575032u
 
 Profile profile;

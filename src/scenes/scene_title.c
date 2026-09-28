@@ -20,6 +20,7 @@
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
+#include "meta.h"
 #include "save.h"
 #include "text.h"
 
@@ -50,6 +51,7 @@ bool title_summary;
 uint32_t title_seed;
 char title_cause[48];
 bool title_new_best;
+bool title_won;
 
 static struct {
 	int t, pressed, menu, leaving, cursor, choice;
@@ -283,7 +285,11 @@ static void update(void) {
 		S.jack_y += S.jack_v;
 		if (S.leaving > LEAVE_FRAMES) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
-			else { run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks()); emu_start_in_town = true; }
+			else {
+				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
+				run_setup(RUN_SHORT, FOLDER_STANDARD, 0, 0);
+				emu_start_in_town = true;
+			}
 			scene_set(&scene_emu);
 		}
 		return;
@@ -401,13 +407,14 @@ static void draw(void) {
 
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
-	if (!S.confirm)   /* (the question takes its place a moment) */
+	if (!S.confirm && !S.summary)   /* (the question takes its place a moment; the summary runs to the bottom) */
 		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
 
 	if (S.summary) {
 		SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255);
 		int x = x0 + CORE_W / 2;
-		text_draw(x, y0 + 8, "MegaMan was deleted", rgba(255, 120, 120, 255), TEXT_CENTER);
+		if (title_won) text_draw(x, y0 + 8, "The Nest has fallen!", gold, TEXT_CENTER);
+		else text_draw(x, y0 + 8, "MegaMan was deleted", rgba(255, 120, 120, 255), TEXT_CENTER);
 		if (title_cause[0]) text_draw(x, y0 + 22, title_cause, sky, TEXT_CENTER);
 		/* Lan at his PET, and how far they got */
 		Sprite *lan = sprite_get(SPR_MUGSHOT, 0x00);
@@ -424,12 +431,25 @@ static void draw(void) {
 			text_draw(lx, y0 + 88, "Best", gold, TEXT_LEFT);
 			text_drawf(rx, y0 + 88, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
 		}
-		/* Dad's backup, as his call promised, and Lan's word */
-		text_draw(x, y0 + 100, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
-		const char *said = title_new_best ? "Our deepest dive yet, MegaMan!"
-			: run.depth <= 2 ? "That was rough... Let's try again!"
-			: "We'll get further next time!";
-		text_draw(x, y0 + 112, said, WHITE, TEXT_CENTER);
+		/* Dad's backup, as his call promised, and Lan's word; a won run
+		 * jacks out */
+		if (title_won) {
+			text_draw(x, y0 + 100, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
+			text_draw(x, y0 + 112, "We did it, MegaMan!", WHITE, TEXT_CENTER);
+		} else {
+			text_draw(x, y0 + 100, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
+			const char *said = title_new_best ? "Our deepest dive yet, MegaMan!"
+				: run.depth <= 2 ? "That was rough... Let's try again!"
+				: "We'll get further next time!";
+			text_draw(x, y0 + 112, said, WHITE, TEXT_CENTER);
+		}
+		/* what the run opened for the next, else the closest goal
+		 * (docs/META.md) */
+		const char *open[2];
+		int n = meta_unlocked(open, 2), y = y0 + 128;
+		for (int i = 0; i < n; ++i, y += 12) text_drawf(x, y, gold, TEXT_CENTER, "Unlocked: %s", open[i]);
+		const char *next = meta_next_goal();
+		if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);
 		return;
 	}
 	/* the build, for a report: v0.1.0 alpha, v0.1.0+12 a dozen commits on */

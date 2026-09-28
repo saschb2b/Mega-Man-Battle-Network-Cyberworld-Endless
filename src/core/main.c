@@ -511,6 +511,10 @@ int main(int argc, char **argv) {
 	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
 	const char *start_scene = "title";
 	int run_depth = 0, guardian_navi = 0;
+	/* --setup NET,FOLDER,THREAT,HELPERS (short or endless, then numbers):
+	 * the run's setup as the setup screen chooses it; NEW GAME's (the
+	 * short net) for --scene town, the endless net otherwise */
+	const char *setup_spec = NULL;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
 #ifndef __EMSCRIPTEN__
@@ -546,6 +550,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
 		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
 		else if (!strcmp(a, "--guardian") && v) { guardian_navi = atoi(v); ++i; }
+		else if (!strcmp(a, "--setup") && v) { setup_spec = v; ++i; }
 		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
 #ifndef __EMSCRIPTEN__
 		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
@@ -694,6 +699,13 @@ int main(int argc, char **argv) {
 		}
 		if (s == &scene_emu) {
 			run_new(seed ? seed : 1);
+			int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0;
+			if (setup_spec) {
+				net = !strncmp(setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
+				const char *c = strchr(setup_spec, ',');
+				if (c) sscanf(c + 1, "%d,%d,%d", &folder, &threat, &helpers);
+			}
+			run_setup(net, folder, threat, helpers);
 			if (run_depth > 0) run.depth = run_depth;
 			/* (the area its act's in the run too, whose draws read it, and
 			 * every area's guardian one navi: a scripted capture keeps its

@@ -16,7 +16,7 @@ Layer layer;
 
 int biome_for_depth(int depth) {
 	int p = (depth - 1) % CYCLE_LAYERS;
-	if (p >= 18) return BIOME_NEST;
+	if (p >= 18 || run_short_nest(depth)) return BIOME_NEST;
 	return run.biome_order[p / 3];
 }
 
@@ -24,7 +24,7 @@ int layer_in_act(int depth) { return ((depth - 1) % CYCLE_LAYERS) % 3; }
 
 bool is_boss_depth(int depth) {
 	int p = (depth - 1) % CYCLE_LAYERS;
-	return p % 3 == 2 || p == 18;
+	return p % 3 == 2 || p == 18 || run_short_nest(depth);
 }
 
 static NetObj *add_obj(int type, int x, int y) {

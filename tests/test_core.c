@@ -418,6 +418,13 @@ static void test_depth_plan(void) {
 	CHECK(!is_boss_depth(1) && !is_boss_depth(2) && is_boss_depth(3), "every third layer has a boss");
 	CHECK(biome_for_depth(19) == BIOME_NEST && is_boss_depth(19), "layer 19 is the Cybeast Nest");
 	CHECK(biome_for_depth(20) == run.biome_order[0], "the cycle restarts after the Nest");
+	/* the short net: three acts, then the Nest on layer 10 (docs/META.md) */
+	run.mode = RUN_SHORT;
+	CHECK(is_boss_depth(3) && is_boss_depth(6) && is_boss_depth(9) && !is_boss_depth(8), "the short net's acts end in guardians");
+	CHECK(biome_for_depth(9) == run.biome_order[2], "the short net's third act is the run's third area");
+	CHECK(biome_for_depth(SHORT_LAYERS) == BIOME_NEST && is_boss_depth(SHORT_LAYERS), "the short net's Nest is layer 10");
+	CHECK(layer_in_act(SHORT_LAYERS) == 0, "the short net's Nest counts as a first layer");
+	run.mode = RUN_ENDLESS;
 }
 
 

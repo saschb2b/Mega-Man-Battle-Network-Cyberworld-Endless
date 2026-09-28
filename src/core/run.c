@@ -58,6 +58,27 @@ void run_new(uint32_t seed) {
 	}
 }
 
+void run_setup(int mode, int folder, int threat, int helpers) {
+	run.mode = (uint8_t)mode;
+	run.folder = (uint8_t)folder;
+	run.threat = (uint8_t)(threat < 0 ? 0 : threat > THREAT_MAX ? THREAT_MAX : threat);
+	run.helpers = (uint8_t)helpers;
+	if (mode != RUN_SHORT) return;
+	/* the short net's Nest comes as the fourth act (its guardian no SP),
+	 * none of the three acts' guardians again */
+	static const uint8_t nest_pool[4] = { 3, 4, 11, 3 };   /* SlashMan, EraseMan, ProtoMan */
+	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
+	rng_seed(run.seed ^ 0x4E455354u);
+	int g = 0;
+	for (int tries = 0; tries < 8; ++tries) {
+		g = pacing_guardian_pick(nest_pool, navis, (int)sizeof navis, 3, 0, false, navi_hp);
+		bool again = false;
+		for (int e = 0; e < 3; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+		if (!again) break;
+	}
+	run.boss_order[BIOME_NEST] = (uint8_t)g;
+}
+
 int navi_hp(int navi, int version) {
 	int hp, damage, id = enemy_id(1, navi, version);
 	return id >= 0 && enemy_stats(id, &hp, &damage) ? hp : -1;

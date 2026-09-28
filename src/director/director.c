@@ -36,6 +36,7 @@
 #include "platform.h"
 #include "run.h"
 #include "runlog.h"
+#include "meta.h"
 #include "save.h"
 #include "save_blob.h"
 #include "scripts.h"
@@ -1743,6 +1744,8 @@ static bool act_on_choices(void) {
 	return false;
 }
 
+static void win_run(void);
+
 /* MegaMan stepped on the exit pad: the game plays its warp (jack out, fade,
  * jack in) to warp 1. While it jacks out, the next layer is built and warp 1
  * pointed at its start; nothing else happens until MegaMan has arrived. */
@@ -1755,6 +1758,8 @@ static bool follow_exit_warp(void) {
 		return !arrived;
 	}
 	if (pending != 1 || emu_read8(BN6_WARP + 0x11) != 1) return false;
+	/* the short net's Nest fallen: the run is won */
+	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) { win_run(); return true; }
 	if (boss_beaten()) clear_card();
 	/* past the Nest's guardian: the net rebuilds (the next arrival says so;
 	 * counted with the next checkpoint, which a CONTINUE cannot undo) */
@@ -1808,7 +1813,27 @@ static void end_run(void) {
 	else snprintf(title_cause, sizeof title_cause, "in %s", area);
 	/* (a first run is no record to beat) */
 	title_new_best = profile.runs > 0 && run.depth > profile.best_depth;
+	title_won = false;
 	runlog_run_end();
+	meta_run_over(false);
+	profile_record_run();
+	save_delete();
+	run.active = false;
+	D.active = false;
+	title_summary = true;
+	scene_set(&scene_title);
+}
+
+/* The short net won: its Nest's guardian fell and MegaMan stepped on its
+ * exit. The run ends on the title's summary of a win, and what it opened
+ * for the next (docs/META.md). */
+static void win_run(void) {
+	snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
+	title_new_best = run.depth > profile.best_depth;
+	title_won = true;
+	runlog_run_end();
+	meta_run_over(true);   /* (before the clear counts: it names what the win opened) */
+	profile.nest_clears++;
 	profile_record_run();
 	save_delete();
 	run.active = false;

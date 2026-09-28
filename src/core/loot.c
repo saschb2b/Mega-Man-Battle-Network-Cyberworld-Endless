@@ -389,7 +389,7 @@ Encounter make_boss(int depth, int biome, int navi) {
 	e.foes[0].family = navi;
 	/* the version whose HP suits the act (docs/PROGRESSION.md) */
 	e.foes[0].version = pacing_guardian_version(navi, pacing_act(depth), pacing_loop(depth),
-		biome == BIOME_NEST || biome == BIOME_SECRET, navi_hp);
+		(biome == BIOME_NEST && !run_short_nest(depth)) || biome == BIOME_SECRET, navi_hp);
 	e.foes[0].col = 4;
 	e.foes[0].row = 1;
 	return e;

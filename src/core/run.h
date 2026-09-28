@@ -32,13 +32,30 @@ typedef struct {
 	int viruses_deleted;
 	int fragments;           /* ScrtData held (the game's key item), for generation */
 	bool secret_cleared;
+	/* what the player brought (docs/META.md): the net's length, the
+	 * starting folder, the threat rung, the helpers switched on */
+	uint8_t mode;            /* RUN_ENDLESS (0, as runs were), RUN_SHORT */
+	uint8_t folder;          /* FOLDER_* (folders.h) */
+	uint8_t threat;          /* 0-THREAT_MAX */
+	uint8_t helpers;         /* HELP_* bits */
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */
+/* The short net: three acts, then the Nest on layer 10, whose fall wins
+ * the run; the endless net repeats CYCLE_LAYERS, harder each time. */
+enum { RUN_ENDLESS, RUN_SHORT };
+#define SHORT_LAYERS 10
+#define THREAT_MAX 5
+enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4 };
 
 extern Run run;
 
 void run_new(uint32_t seed);
+/* The setup chosen for the run just made: in the short net its Nest's
+ * guardian is picked as a fourth act's. */
+void run_setup(int mode, int folder, int threat, int helpers);
+/* Whether depth is the short net's Nest, the run's last layer. */
+static inline bool run_short_nest(int depth) { return run.mode == RUN_SHORT && depth >= SHORT_LAYERS; }
 int biome_bg(int b);
 /* A navi's HP at a version (0 V1, 1 EX, 2 SP) from the ROM; -1 unknown. */
 int navi_hp(int navi, int version);
