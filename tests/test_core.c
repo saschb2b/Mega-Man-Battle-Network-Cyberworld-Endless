@@ -196,6 +196,13 @@ static void test_generation(void) {
 			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN) has_exit = true;
 		}
 		CHECK(has_exit, "seed %u: no way out", seed);
+		/* bystanders two panels at least from what else stands there */
+		for (int i = 0; i < layer.nobj; ++i) {
+			if (layer.obj[i].type != OBJ_NPC) continue;
+			for (int j = 0; j < layer.nobj; ++j)
+				if (j != i) CHECK(abs((int)layer.obj[i].x - (int)layer.obj[j].x) > 2 || abs((int)layer.obj[i].y - (int)layer.obj[j].y) > 2,
+					"seed %u: a bystander within two panels of object %d (type %d)", seed, j, layer.obj[j].type);
+		}
 		/* services and navis off the walkways' mouths */
 		for (int i = 1; i < layer.nobj; ++i) {
 			const NetObj *o = &layer.obj[i];

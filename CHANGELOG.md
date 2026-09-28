@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Bystander navis stand two panels or more from anything else on a layer:
+  one beside a Mystery Data took MegaMan's A, and each A that closed his
+  words opened them again.
+- The run's gift waits half a second before its three choices, so an A
+  pressed through its last page no longer takes the first unread; and its
+  chip is one that hits (Recov150 had been offered "hitting for 150").
 - A random battle that shares a virus family with the last one is a third
   as likely (six of seven act 1 battles in the RoboDog Comp held Gunners).
 - Act 1's guardian is BlastMan, DiveMan or SpoutMan, alike (a playtester

@@ -845,14 +845,21 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		int roll = rng_range(0, 99);
 		o->param = roll < 70 ? 0 : roll < 92 ? 1 : 2;
 	}
-	/* Bystander navis with a word to share. */
+	/* Bystander navis with a word to share, two panels at least from what
+	 * else stands there (one beside a Mystery Data took MegaMan's A, and
+	 * each A that closed his words opened them again) */
 	int npcs = 2 + rng_range(0, 1);
-	for (int k = 0; k < npcs && n; ++k) {
-		Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
-		if (!room_spot_in(r, &x, &y, true)) continue;
-		NetObj *o = add_obj(OBJ_NPC, x, y);
-		if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
-	}
+	for (int k = 0; k < npcs && n; ++k)
+		for (int tries = 0; tries < 4; ++tries) {
+			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
+			if (!room_spot_in(r, &x, &y, true)) continue;
+			bool near = false;
+			for (int i = 0; i < layer.nobj; ++i) near |= abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2;
+			if (near) continue;
+			NetObj *o = add_obj(OBJ_NPC, x, y);
+			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
+			break;
+		}
 	emblems(kit);
 #undef PLACE
 }
