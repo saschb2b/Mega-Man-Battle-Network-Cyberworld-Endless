@@ -134,6 +134,17 @@ static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
 static uint32_t last_families;                  /* the virus families of the last battle (a bit each) */
 static uint32_t last_viruses;                   /* ... and its viruses (viruses_of) */
 
+void loot_memory(LootMemory *out) {
+	*out = (LootMemory){ last_biome, last_pick, last_families, last_viruses };
+}
+
+void loot_memory_set(const LootMemory *m) {
+	last_biome = m->biome;
+	last_pick = m->pick;
+	last_families = m->families;
+	last_viruses = m->viruses;
+}
+
 /* Formation `f`'s viruses, whatever their panels: the same few viruses
  * stand in several of an area's records. */
 static uint32_t viruses_of(const Formation *f) {

@@ -7,6 +7,7 @@
 
 #include "audio.h"
 #include "game.h"
+#include "loot.h"
 #include "platform.h"
 #include "run.h"
 #include "save_blob.h"
@@ -82,8 +83,13 @@ bool save_exists(void) {
 	return old;
 }
 
+#define BATTLE_MAGIC 0x43574231u   /* "CWB1": the last battle, loot.h */
+
 bool save_run(void) {
 	if (!run.active) return false;
+	LootMemory m;
+	loot_memory(&m);
+	save_write_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m);
 	return save_write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
 }
 
@@ -95,9 +101,16 @@ static void upgrade_run(void) {
 	for (int b = 0; b < MAX_BIOMES; ++b) if (run.boss_order[b] == 17) run.boss_order[b] = 18;
 }
 
+/* the last battle as the run's save left it (none: forgotten) */
+static void load_battle(void) {
+	LootMemory m = { -1, -1, 0, 0 };
+	if (!save_read_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m)) m = (LootMemory){ -1, -1, 0, 0 };
+	loot_memory_set(&m);
+}
+
 bool load_run(void) {
 	Run tmp;
-	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); return true; }
+	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); return true; }
 	if (!legacy_load_run()) return false;
 	upgrade_run();
 	return true;
@@ -106,6 +119,8 @@ bool load_run(void) {
 void save_delete(void) {
 	char file[600];
 	save_path(file, sizeof file, "run.sav");
+	remove(file);
+	save_path(file, sizeof file, "battle.sav");
 	remove(file);
 	save_state_path(file, sizeof file);
 	remove(file);

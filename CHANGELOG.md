@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A Server's prize comes from where the Net Dealer finds his picks, two
+  layers deeper (an M-Cannon had paid for a Server beside a dealer's
+  DolThdr2), and the last battle is kept with the run's save: the first
+  battle after a CONTINUE had brought the last session's pair back. A run
+  saved by an older build starts its current layer afresh.
 - Where a bridge plugs into a Graveyard slab (and at a few other joins),
   the join's own tiles from the originals are drawn, their lighter patch
   on the slab included, in place of plain slab tiles that left a notch.
