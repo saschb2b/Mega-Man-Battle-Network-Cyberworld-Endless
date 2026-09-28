@@ -4,6 +4,7 @@
 #define META_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_COUNT };
 
@@ -14,6 +15,9 @@ typedef struct {
 } FolderInfo;
 
 const FolderInfo *meta_folder(int folder);
+/* A folder's 30 chips as BN6 keeps them (chip id | code << 9, code 26 for
+ * *), or NULL for the Standard folder, which is the game's own. */
+const uint16_t *meta_folder_chips(int folder);
 bool meta_folder_open(int folder);
 bool meta_endless_open(void);
 /* The highest threat rung a new run may take. */

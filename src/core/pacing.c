@@ -58,6 +58,8 @@ int pacing_virus_version(int depth, bool challenge) {
 	static const int8_t low[PACING_ACTS] = { 0, 0, 0, 1, 1, 2, 2 }, high[PACING_ACTS] = { 0, 0, 1, 1, 2, 2, 2 };
 	int act = pacing_act(depth);
 	int v = rng_range(low[act], high[act]) + pacing_loop(depth) + (challenge ? 1 : 0);
+	/* (threat 1, docs/META.md: a version stronger from act 2) */
+	if (run.threat >= 1 && act >= 1) ++v;
 	return v > 3 ? 3 : v;
 }
 

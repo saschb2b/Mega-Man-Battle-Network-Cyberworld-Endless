@@ -19,6 +19,45 @@ static const FolderInfo folders[FOLDER_COUNT] = {
 
 const FolderInfo *meta_folder(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
 
+/* The folders' chips by BN6's record numbers (docs/ROM_DATA.md, chip
+ * records): no more than five of a chip, as the game's folders hold; codes
+ * gathered so a hand can be picked together. */
+#define C(id, code) (uint16_t)((id) | (((code) == '*' ? 26 : (code) - 'A') << 9))
+enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
+	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175 };
+static const uint16_t blade[30] = {
+	/* LifeSword's three in S, a spare in L; AreaGrab to close in, nothing
+	 * that reaches the back */
+	C(SWORD, 'S'), C(SWORD, 'S'), C(SWORD, 'S'), C(SWORD, 'S'), C(SWORD, 'L'),
+	C(WIDESWRD, 'S'), C(WIDESWRD, 'S'), C(WIDESWRD, 'S'), C(WIDESWRD, 'S'), C(WIDESWRD, 'L'),
+	C(LONGSWRD, 'S'), C(LONGSWRD, 'S'), C(LONGSWRD, 'S'),
+	C(AREAGRAB, 'S'), C(AREAGRAB, 'S'), C(AREAGRAB, 'S'), C(PANLGRAB, '*'), C(PANLGRAB, '*'),
+	C(RECOV10, 'L'), C(RECOV10, 'L'), C(RECOV10, 'L'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'),
+	C(BARRIER, '*'), C(BARRIER, '*'), C(BARRIER, '*'),
+};
+static const uint16_t storm[30] = {
+	/* Elec in S and A: Thunder, ElcPuls1, DolThdr1; Cannons and bombs for
+	 * the rest */
+	C(THUNDER, 'S'), C(THUNDER, 'S'), C(THUNDER, 'S'), C(THUNDER, 'S'),
+	C(ELCPULS1, 'S'), C(ELCPULS1, 'S'), C(DOLTHDR1, 'A'),
+	C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, '*'),
+	C(VULCAN1, 'S'), C(VULCAN1, 'S'), C(VULCAN1, 'S'),
+	C(MINIBOMB, '*'), C(MINIBOMB, '*'), C(AIRSHOT, '*'), C(AIRSHOT, '*'), C(AIRSHOT, '*'),
+	C(RECOV10, 'A'), C(RECOV10, 'A'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(AREAGRAB, 'S'), C(AREAGRAB, 'S'), C(BARRIER, 'A'), C(BARRIER, 'A'),
+	C(ATK10, '*'), C(ATK10, '*'), C(BUSTERUP, '*'),
+};
+#undef C
+
+const uint16_t *meta_folder_chips(int folder) {
+	switch (folder) {
+	case FOLDER_BLADE: return blade;
+	case FOLDER_STORM: return storm;
+	default: return NULL;
+	}
+}
+
 bool meta_folder_open(int folder) { return folder == FOLDER_STANDARD || (profile.folders_open >> folder & 1); }
 
 bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_clears > 0; }
@@ -28,7 +67,7 @@ int meta_threat_open(void) { return profile.threat_open > THREAT_MAX ? THREAT_MA
 const char *meta_threat_rule(int rung) {
 	static const char *const rules[THREAT_MAX] = {
 		"Viruses a version stronger from act 2",
-		"A Recovery Mr. Prog only on each act's middle layer",
+		"Recovery Mr. Progs only on middle layers and before guardians",
 		"Net Dealers charge half again",
 		"Guardians at EX from act 2",
 		"Servers may hold SP Navis from act 1",

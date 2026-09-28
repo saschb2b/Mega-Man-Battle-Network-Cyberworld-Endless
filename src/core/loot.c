@@ -246,13 +246,14 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	const Formation *list;
 	int n = formations_of(biome, &list);
 	if (!n) return false;
-	bool challenge = kind == ENC_CHALLENGE, easy = kind == ENC_EASY || kind == ENC_FIRST;
+	bool challenge = kind == ENC_CHALLENGE, easy = kind == ENC_EASY || kind == ENC_FIRST || (kind == ENC_NORMAL && (run.helpers & HELP_GENTLE));
 	int p = (depth - 1) % CYCLE_LAYERS, allowed = depth > CYCLE_LAYERS ? 2 : p < 6 ? 0 : p < 12 ? 1 : 2;
 	int target = pacing_virus_version(depth, challenge);
 	bool rare = pacing_rare(depth, rng_range(0, 99));
 	/* from the fourth act a challenge may meet one of the area's SP navis,
 	 * who keeps his own strength */
-	if (challenge && pacing_act(depth) >= 3 && rng_range(0, 99) < NAVI_CHALLENGE) {
+	/* (threat 5, docs/META.md: from the first act) */
+	if (challenge && (pacing_act(depth) >= 3 || run.threat >= 5) && rng_range(0, 99) < NAVI_CHALLENGE) {
 		int total = 0;
 		for (int i = 0; i < n; ++i) total += list[i].navi ? list[i].weight : 0;
 		if (total) {
@@ -390,6 +391,8 @@ Encounter make_boss(int depth, int biome, int navi) {
 	/* the version whose HP suits the act (docs/PROGRESSION.md) */
 	e.foes[0].version = pacing_guardian_version(navi, pacing_act(depth), pacing_loop(depth),
 		(biome == BIOME_NEST && !run_short_nest(depth)) || biome == BIOME_SECRET, navi_hp);
+	/* (threat 4, docs/META.md: EX from act 2) */
+	if (run.threat >= 4 && pacing_act(depth) >= 1 && e.foes[0].version < 1) e.foes[0].version = 1;
 	e.foes[0].col = 4;
 	e.foes[0].row = 1;
 	return e;

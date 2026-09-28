@@ -5,6 +5,8 @@
 
 /* EWRAM */
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
+#define BN6_TOOLKIT_CHIPS     0x48        /* eToolkit +0x48: the chips' data (0x02002178): folders of 30 u16 from +0, 0x3C each (bn6f sub_8021AB4) */
+#define BN6_FOLDER_ENTRIES    30
 #define BN6_TOOLKIT_BATTLE    0x18        /* eToolkit BattleStatePtr: +0x3C its BattleSettings* */
 #define BN6_TOOLKIT_KEY_ITEMS 0x50        /* eToolkit KeyItemsPtr: a count per key item */
 #define BN6_TOOLKIT_KEY_CHECK 0x78        /* eToolkit Unk2004a8c_Ptr: per key item, its seed ^ 0x55 once given (CheckKeyItem reads 0 where it differs) */

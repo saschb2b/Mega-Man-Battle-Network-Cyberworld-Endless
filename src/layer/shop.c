@@ -15,6 +15,7 @@
 #include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
+#include "run.h"
 
 #define ORDER_SHOP 18   /* the Chip Order list: one entry per chip */
 
@@ -187,6 +188,9 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 	if (find_item(1, SUB_MINI_ENERGY, &mini)) out[n++] = mini;
 	ShopItem other;
 	if (find_item(1, subs[rng_range(0, (int)(sizeof subs / sizeof *subs) - 1)], &other) && !listed(out, n, &other)) out[n++] = other;
+	/* (threat 3, docs/META.md: half again for everything) */
+	if (run.threat >= 3)
+		for (int i = 0; i < n; ++i) out[i].price = (uint16_t)(out[i].price + out[i].price / 2);
 	return n;
 }
 

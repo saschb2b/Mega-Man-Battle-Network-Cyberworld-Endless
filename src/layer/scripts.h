@@ -64,7 +64,7 @@ int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int cod
  * (`program` in `color`, named by the game; `about`: what it does, or
  * NULL), once (event flag `flag`); with `comfort`, after a run lost
  * early, an HPMemory more first. */
-int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, int chip, const char *chip_name, int power, int code, int program, int color,
+int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start, int chip, const char *chip_name, int power, int code, int program, int color,
             const char *about);
 
 #endif

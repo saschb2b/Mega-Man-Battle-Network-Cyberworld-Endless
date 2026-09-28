@@ -340,7 +340,7 @@ static void program_name(TextArchive *t, int program) {
 	ta_bytes(t, b, sizeof b);
 }
 
-int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, int chip, const char *chip_name, int power, int code, int program, int color,
+int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start, int chip, const char *chip_name, int power, int code, int program, int color,
             const char *about) {
 	/* what each choice gives, then the flag that it was chosen */
 	char line[64];
@@ -392,6 +392,12 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, int chip, const 
 		for (char *c = said; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 		ta_page(t, FACE_PROG, said, false);
 		if (about) ta_page(t, FACE_PROG, about, false);
+	}
+	if (head_start) {
+		/* the head-start helper (docs/META.md) */
+		ta_page(t, FACE_PROG, "YOU ASKED FOR A HEAD START, SO TAKE THESE TOO!", false);
+		give_hp_memory(t, 2);
+		got_hp(t, 2, &first);
 	}
 	if (comfort) {
 		/* the last dive ended early: a little more help */

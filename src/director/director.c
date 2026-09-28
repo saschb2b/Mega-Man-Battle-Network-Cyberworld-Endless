@@ -514,9 +514,23 @@ static bool build_layer(void) {
 	return true;
 }
 
+/* The run's starting folder in the game's first folder (docs/META.md): the
+ * chosen one's 30 chips over the game's own (Standard keeps those), as
+ * BN6's GiveFolder copies a folder in (bn6f sub_8021AB4). */
+static void set_start_folder(void) {
+	const uint16_t *chips = meta_folder_chips(run.folder);
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (!chips || data < 0x02000000u || data >= 0x02040000u) return;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
+		uint8_t b[2] = { (uint8_t)chips[i], (uint8_t)(chips[i] >> 8) };
+		emu_write(data + 2u * (uint32_t)i, b, 2);
+	}
+}
+
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
+	set_start_folder();
 	town_after_abandon = save_exists();
 	save_delete();
 	/* the first layer, entered through the town's port; the town itself
@@ -1586,6 +1600,9 @@ static void town_update(void) {
 
 bool director_start_layer(void) {
 	D.town = false;
+	/* (a headless run starting in the net: its folder as the town would
+	 * have set it) */
+	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) set_start_folder();
 	if (!build_layer()) return false;
 	lock_run();
 	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
