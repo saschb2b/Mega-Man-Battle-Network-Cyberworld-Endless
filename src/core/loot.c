@@ -259,17 +259,18 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 		}
 	}
 	if (!total) return false;
-	/* a family the last battle brought a third as likely (six of a
-	 * playtester's seven act 1 battles held Gunners): the area's own
-	 * viruses, not the same ones fight after fight */
+	/* none of the last battle's virus families where another battle fits
+	 * (six of a playtester's seven act 1 battles held Gunners; a third as
+	 * likely still let two repeats through in five), then a family it
+	 * brought a third as likely but never its very viruses (Piranha and
+	 * Puffy twice in a row, from two of the area's records), then anything:
+	 * the area's own viruses, not the same ones fight after fight */
 	int weight[MAX_FIT];
 	total = 0;
-	/* and never the last battle's very viruses again where others fit
-	 * (Piranha and Puffy twice in a row, from two of the area's records) */
-	for (int again = 0; again < 2 && !total; ++again)
+	for (int again = 0; again < 3 && !total; ++again)
 		for (int i = 0; i < n && i < MAX_FIT; ++i) {
-			weight[i] = fit[i] < 0 || (!again && biome == last_biome && viruses_of(&list[i]) == last_viruses) ? 0 :
-				list[i].weight * (families_of(&list[i]) & last_families ? 1 : 3);
+			bool shares = families_of(&list[i]) & last_families, same = biome == last_biome && viruses_of(&list[i]) == last_viruses;
+			weight[i] = fit[i] < 0 || (again == 0 && shares) || (again == 1 && same) ? 0 : list[i].weight * (shares ? 1 : 3);
 			total += weight[i];
 		}
 	int roll = rng_range(0, total - 1), pick = -1;
