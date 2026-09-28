@@ -155,6 +155,34 @@ kkkkkkkkkkkk""",
 .kwwwwwwwwk.
 .kkkkkkkkkk.
 ............""",
+    # a speaker and its sound: the trailer's sound on
+    'sound': """
+.....k......
+....kk...c..
+...kwk....c.
+kkkwwk.c...c
+kwwwwk..c..c
+kwwwwk..c..c
+kwwwwk..c..c
+kwwwwk..c..c
+kkkwwk.c...c
+...kwk....c.
+....kk...c..
+.....k......""",
+    # the speaker crossed out: sound off
+    'muted': """
+.....k......
+....kk......
+...kwk......
+kkkwwk.r...r
+kwwwwk..r.r.
+kwwwwk...r..
+kwwwwk..r.r.
+kwwwwk.r...r
+kkkwwk......
+...kwk......
+....kk......
+.....k......""",
     # steps down: the run, layer by layer
     'layers': """
 kkkkkk......

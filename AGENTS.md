@@ -14,8 +14,9 @@ Never commit or publish ROMs, save files, extracted assets, emulator save
 states or disassembly files. `.gitignore` covers the usual names; check
 `git status` before committing anything. Screenshots of the game running
 are the one exception: `docs/screenshots/` and the short videos in
-`docs/clips/`, made by `build.py screenshots` and `build.py clips`, for the
-README and the site.
+`docs/clips/`, made by `build.py screenshots`, `build.py clips` and
+`tools/trailer.py` (the trailer, its music original), for the README and
+the site.
 
 ## Read before changing
 
@@ -56,7 +57,7 @@ README and the site.
 | `macos/` | The macOS app: `deps.sh` (SDL2 and mGBA as universal static libraries, on a Mac), the bundle's `Info.plist`, its icon (`tools/app_icon.py`) and the .dmg's README; `build.py macos` runs only on a Mac, so CI's macOS job builds and checks it |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling), the FAQ in `faq/` as the PET's E-Mail, its answers taken from the docs. Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
-| `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image) |
+| `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image); the trailer, the site's hero, and `trailer-play.png`, its poster with a play button, which the README links to the MP4 (`tools/trailer.py`) |
 | `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.web` (Emscripten, mGBA without threads) |
 | `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot |
 

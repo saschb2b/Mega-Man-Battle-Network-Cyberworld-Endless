@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **A trailer:** 21 seconds of runs, battles, a HeatCross, a BeastOut, the
+  guardians and the Undernet, with an original battle theme in the manner
+  of BN6's, played through a model of the GBA's sound. The project page
+  opens on it: it plays muted in the hero (its words carry it), and Sound
+  on starts it over with the music; the README links it.
+
 ## 0.2.0 (2026-09-28)
 
 - A Net Dealer met again in the same act greets in a line ("Back again,

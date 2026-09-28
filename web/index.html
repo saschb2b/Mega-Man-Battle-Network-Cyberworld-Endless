@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike</title>
-<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Linux or on a ROCKNIX handheld, with your own ROM.">
+<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Windows, macOS, Linux, a Steam Deck or a ROCKNIX handheld, with your own ROM.">
 <meta property="og:title" content="Cyberworld Endless">
 <meta property="og:description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it.">
 <meta property="og:type" content="website">
@@ -31,17 +31,22 @@
 </header>
 
 <main>
-	<section class="hero">
+	<section class="hero" id="trailer">
 		<div class="wrap">
-			<figure class="frame x2 hero-screen">
-				<video class="clip" muted loop playsinline preload="none" poster="clips/title.png" width="240" height="160"
-					aria-label="The title screen: the Battle Network logo with an infinity mark and the plate Cyberworld Endless"><source src="clips/title.webm" type="video/webm"><source src="clips/title.mp4" type="video/mp4"></video>
+			<figure class="frame theater">
+				<video class="trailer" muted loop playsinline preload="none" poster="clips/trailer.png" width="1280" height="720"
+					aria-label="The trailer, 21 seconds: MegaMan jacks in, walks generated layers, battles, becomes HeatCross and Beast MegaMan, meets the guardians and goes down into the Undernet; then the jack-in setup, the title's marks and the logo"><source src="clips/trailer.webm" type="video/webm"><source src="clips/trailer.mp4" type="video/mp4"></video>
+				<button class="sound" type="button" aria-pressed="false" hidden><i class="icon i-sound" aria-hidden="true"></i><span>Sound on</span></button>
 			</figure>
-			<p class="pitch">A roguelike on Mega Man Battle Network 6. Every run builds a new net in the style of BN6's areas,
-				and the game itself runs it.</p>
-			<div class="actions">
-				<a class="exit" href="play/">Jack in</a>
-				<a class="plate" href="#play"><i class="icon i-get" aria-hidden="true"></i>Download</a>
+			<div class="bar">
+				<div class="intro">
+					<h1>A roguelike on Mega Man Battle Network 6</h1>
+					<p class="pitch">Every run builds a new net in the style of BN6's areas, and the game itself runs it.</p>
+				</div>
+				<div class="actions">
+					<a class="exit" href="play/">Jack in</a>
+					<a class="plate" href="#play"><i class="icon i-get" aria-hidden="true"></i>Download</a>
+				</div>
 			</div>
 		</div>
 	</section>

@@ -21,6 +21,40 @@
 	for (const v of clips) seen.observe(v);
 })();
 
+// ---- the trailer: muted while on screen, its words carry it; Sound on
+// starts it over with the music. Phones, and visitors who asked for less
+// motion or to save data, get its poster and the player's own controls ----
+
+(() => {
+	const v = document.querySelector('video.trailer');
+	const sound = document.querySelector('.theater .sound');
+	if (!v) return;
+	const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData
+		|| !window.matchMedia('(min-width: 700px)').matches || !('IntersectionObserver' in window);
+	if (still) {
+		v.muted = false;
+		v.loop = false;
+		v.controls = true;
+		return;
+	}
+	sound.hidden = false;
+	const seen = new IntersectionObserver(([e]) => {
+		if (e.isIntersecting) {
+			v.preload = 'auto';
+			v.play().catch(() => { sound.hidden = true; v.muted = false; v.controls = true; });
+		} else v.pause();
+	}, { threshold: 0.3 });
+	seen.observe(v);
+	sound.addEventListener('click', () => {
+		const on = v.muted;
+		v.muted = !on;
+		if (on) { v.currentTime = 0; v.play(); }
+		sound.setAttribute('aria-pressed', String(on));
+		sound.querySelector('span').textContent = on ? 'Sound off' : 'Sound on';
+		sound.querySelector('.icon').className = `icon ${on ? 'i-muted' : 'i-sound'}`;
+	});
+})();
+
 // ---- the downloads ----
 
 (async () => {

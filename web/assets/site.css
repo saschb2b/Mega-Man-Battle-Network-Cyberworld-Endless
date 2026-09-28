@@ -296,6 +296,8 @@ footer.site a { color: #c6ff8c; }
 .i-web { background-image: url(ui/icon-web.png); }
 .i-mail { background-image: url(ui/icon-mail.png); }
 .i-mail-open { background-image: url(ui/icon-mail-open.png); }
+.i-sound { background-image: url(ui/icon-sound.png); }
+.i-muted { background-image: url(ui/icon-muted.png); }
 
 /* keys: dark caps with a light edge, as the game's button prompts */
 kbd {

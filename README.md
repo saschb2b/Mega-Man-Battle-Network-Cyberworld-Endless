@@ -22,7 +22,7 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 </p>
 
 <p align="center">
-<img src="docs/clips/guardian.gif" width="480" alt="MegaMan steps into a guardian's arena in Robot Control Comp; the card reads Guardian of Robot Control Comp, BlastMan, The Living Blast">
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The trailer, 21 seconds with sound: the Cyberworld Endless logo, a roguelike for Mega Man Battle Network 6. Watch the trailer"></a>
 </p>
 
 Everything you see and hear is BN6 itself, running from your own ROM: its
@@ -41,6 +41,10 @@ around it, one layer at a time, and keeps the run going.
 - **Deeper, harder, around again.** From the surface areas through the
   story's comps, the Undernet and the Graveyard to the Underground, then
   around again, harder.
+
+<p align="center">
+<img src="docs/clips/guardian.gif" width="480" alt="MegaMan steps into a guardian's arena in Robot Control Comp; the card reads Guardian of Robot Control Comp, BlastMan, The Living Blast">
+</p>
 
 <p align="center">
 <img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan, it's Dad. Have you got a minute?">

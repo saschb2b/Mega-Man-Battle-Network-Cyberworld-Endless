@@ -435,6 +435,25 @@ def encode():
             sys.exit('ffmpeg failed')
     poster = Image.open(os.path.join(WORK, 'frames', f'{B(11) + 20:05d}.png'))
     poster.save(os.path.join(OUT, 'trailer.png'), optimize=True)
+    play_poster()
+
+
+def play_poster():
+    """docs/clips/trailer-play.png: the poster with a play button, for the
+    README, which links the MP4 (GitHub plays no video from a repository)."""
+    im = Image.open(os.path.join(OUT, 'trailer.png')).convert('RGBA')
+    over = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(over)
+    label = 'WATCH THE TRAILER'
+    font = ImageFont.truetype(NARROW, 44)
+    w, h = int(d.textlength(label, font=font)) + 150, 92
+    x0, y0 = (W - w) // 2, 572
+    d.rounded_rectangle([x0, y0, x0 + w, y0 + h], radius=h // 2, fill=(7, 24, 58, 235), outline=(66, 198, 231, 255), width=5)
+    cx, cy = x0 + 58, y0 + h // 2
+    d.polygon([(cx - 14, cy - 20), (cx - 14, cy + 20), (cx + 22, cy)], fill=(255, 214, 16, 255))
+    d.text((x0 + 100, cy), label, font=font, fill=(255, 255, 255, 255), anchor='lm')
+    im.alpha_composite(over)
+    im.convert('RGB').save(os.path.join(OUT, 'trailer-play.png'), optimize=True)
 
 
 def main():

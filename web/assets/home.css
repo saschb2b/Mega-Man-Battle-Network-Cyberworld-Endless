@@ -1,11 +1,66 @@
 /* The home page's screens (site.css holds the PET's pieces). */
 
-/* the title, what it is, and the two ways in */
-.hero { padding: 36px 0 8px; }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 22px; text-align: center; }
-.pitch { margin: 0; max-width: 36em; font-size: 1.25rem; color: var(--white); text-shadow: var(--edge); }
-.actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; }
+/* the hero: the trailer on the net's dark blue (the PET's green starts
+ * below it), what the game is, and the two ways in. The trailer plays
+ * muted while it is on screen: its words carry it without sound. Its
+ * frame grows with the window's height, so the bar under it stays in
+ * view, but not below 820 pixels, where the bar's words would crowd. */
+.hero {
+	--seat: max(min(100%, 820px), min(100%, calc((100svh - 300px) * 16 / 9 + 30px)));
+	padding: 30px 0 34px;
+	background:
+		radial-gradient(60% 55% at 50% 42%, rgb(66 198 231 / 0.2), transparent 70%),
+		linear-gradient(#0f2b5c 3px, transparent 3px) 0 0 / 48px 48px,
+		linear-gradient(90deg, #0f2b5c 3px, transparent 3px) 0 0 / 48px 48px,
+		#07183a;
+	border-bottom: var(--u) solid #214a52;
+}
+.theater { position: relative; width: var(--seat); margin: 0 auto; }
+.theater video { aspect-ratio: 16 / 9; image-rendering: auto; background: #07183a; }
+.theater .sound {
+	position: absolute;
+	left: 27px;
+	bottom: 27px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border: 12px solid transparent;
+	border-image: url(ui/exit.png) 4 fill / 12px;
+	padding: 0 8px 0 2px;
+	color: var(--white);
+	font: 700 0.95rem/1 var(--caps);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	cursor: pointer;
+	background: none;
+	opacity: 0.92;
+}
+.theater .sound:hover, .theater .sound:focus-visible { color: #c6ff8c; opacity: 1; outline: none; }
+.theater .sound[hidden] { display: none; }
+.hero .bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px 36px;
+	width: var(--seat);
+	margin: 26px auto 0;
+	padding: 0 6px;
+}
+.hero h1 { margin: 0 0 6px; font: 700 clamp(1.15rem, 2.2vw, 1.55rem)/1.25 var(--caps); color: var(--white); text-shadow: var(--edge); letter-spacing: 0.04em; text-wrap: balance; }
+.pitch { margin: 0; max-width: 34em; font-size: 1.2rem; line-height: 1.45; color: #d6f4ff; text-wrap: pretty; }
+.actions { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+.actions .exit { justify-content: center; }
 .actions .plate { padding-right: 16px; }
+@media (max-height: 780px) { .hero { padding: 20px 0 22px; } .hero .bar { margin-top: 18px; } }
+@media (max-width: 960px) {
+	.hero .bar { flex-direction: column; text-align: center; }
+	.pitch { margin: 0 auto; }
+	.actions { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; }
+}
+@media (max-width: 760px) {
+	.hero { padding-top: 18px; }
+	.theater .sound { left: 21px; bottom: 21px; font-size: 0.8rem; }
+}
 
 /* pictures with their name on a pill below the frame's corner */
 .clips, .areas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 20px; }
