@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- MegaMan's first briefing on a layer names what the map's violet mark is:
+  a strong virus signal and its Server, a dark warp into the Undernet, or
+  the golden gate. In the Aquarium HP it says its battlefields' conveyor
+  panels carry us along their arrows.
 - Bystander navis stand two panels or more from anything else on a layer:
   one beside a Mystery Data took MegaMan's A, and each A that closed his
   words opened them again.

@@ -277,6 +277,10 @@ static const char *status_words(void) {
 		 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
 		if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 			ADD("@M The battlefields here are icy. An Aqua hit on ice freezes us, so keep off it when the viruses shoot water!|");
+		/* (and a homepage's conveyors: one carried a playtester off the row
+		 * he stepped into, every time) */
+		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
+			ADD("@M The battlefields here have conveyor panels. Their arrows carry us along, so mind where we stand!|");
 		/* (what they are for: a playtester carried two and never learned) */
 		if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
 		else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
@@ -285,11 +289,15 @@ static const char *status_words(void) {
 	 * while he is hurt (it heals every time; the map's key names the rest,
 	 * and a later L is a box or two, not the briefing again) */
 	bool shop = false, heal = false, programs = false, trader = false, told = D.layer_told;
+	bool challenge = false, warp = false, gate = false;
 	for (int i = 0; i < layer.nobj; ++i) {
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
 		trader |= layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
+		challenge |= layer.obj[i].type == OBJ_CHALLENGE;
+		warp |= layer.obj[i].type == OBJ_UNDERNET;
+		gate |= layer.obj[i].type == OBJ_SECRET_GATE;
 	}
 	/* (below three quarters: at 220 of 240 the heal led L's words before
 	 * the way on) */
@@ -301,6 +309,11 @@ static const char *status_words(void) {
 		if (programs) ADD("@M There's a NaviCust program shop here too.|");
 		/* (the map marks a trader as a shop, and L said nothing of it) */
 		if (trader) ADD("@M And a Chip Trader!|");
+		/* (what the map's violet "Event" mark is: a playtester stood beside
+		 * one and never found out) */
+		if (challenge) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
+		if (warp) ADD("@M A dark warp down into the Undernet, the violet mark on the map!|");
+		if (gate) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
 		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
