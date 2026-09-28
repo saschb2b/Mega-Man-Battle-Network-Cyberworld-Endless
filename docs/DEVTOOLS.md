@@ -49,7 +49,9 @@ Output in `.build/atlas`:
   0 but for Seaside's yellow panels, `TILES_MORE_COLOURS`), the scenery
   placed, whether a guardian layer has its arena, its stairs, and how long
   the layer took to build as the game builds it. `off near` and `off edge`
-  count the magenta and yellow tiles.
+  count the magenta and yellow tiles, `at mouths` the services and navis
+  beside a panel-wide stretch of the floor as drawn (the atlas fails on
+  any: they stand in the way on).
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the

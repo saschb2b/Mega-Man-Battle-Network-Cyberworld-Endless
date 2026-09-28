@@ -873,7 +873,10 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	 * cells beside them */
 	static uint8_t locked[MAP_H][MAP_W];
 	memset(locked, 0, sizeof locked);
-	for (int i = 0; i < layer.nobj; ++i) lock(locked, (int)layer.obj[i].x, (int)layer.obj[i].y, 1, 1, 0);
+	/* (and the floor around them: the rules that kept a service off a
+	 * walkway's mouth held for the floor as generated, and a cell changed
+	 * beside one made it a mouth, the way on through a Chip Trader) */
+	for (int i = 0; i < layer.nobj; ++i) lock(locked, (int)layer.obj[i].x, (int)layer.obj[i].y, 1, 1, 1);
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
 		lock(locked, m->ax, m->ay, 1, 1, 0);

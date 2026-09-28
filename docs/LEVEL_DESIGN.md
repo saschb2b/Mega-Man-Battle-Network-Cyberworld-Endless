@@ -220,7 +220,9 @@ and walkways' bends and branches are widened into a 2x2 platform (the
 originals join their walkways on platforms), where that leaves fewer such
 panels around. An edit may not join, split or enclose anything (a
 simple-point test, and for the 2x2 blocks a count of the floor's and
-void's pieces), nor touch objects, rooms' anchors, pads, the arena, stairs
+void's pieces), nor touch objects and the eight panels around each (a cell
+changed beside a service could make it a walkway's mouth, where the
+generator had kept it off one), rooms' anchors, pads, the arena, stairs
 and raised floors; straight walkways keep their width. The originals'
 neighbourhoods are recorded while their tiles are learned. It removes about
 a third of the approximated tiles; mazes of 1-wide walkways (Central's

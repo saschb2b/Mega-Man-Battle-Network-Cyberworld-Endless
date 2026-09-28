@@ -412,10 +412,12 @@ def atlas(biomes='all', seeds='1', baseline=False):
             print(f'  area {b:2d} tiles off by why:', ', '.join(f'{WHY_NAMES[k]} {v}' for k, v in enumerate(WHY[b]) if v))
     flagged = [l for l in report.splitlines() if 'NOT BUILT' in l or 'arena NO' in l or
                float(re.search(r'fallback ([\d.]+)%', l).group(1)) > 1.0]
-    print(f'{len(layers)} sheets in .build/atlas; {len(flagged)} layers flagged')
-    for l in flagged:
+    # a service or navi beside a panel-wide stretch of the floor as drawn: in the way on
+    mouths = [l for l in report.splitlines() if re.search(r'at mouths [1-9]', l)]
+    print(f'{len(layers)} sheets in .build/atlas; {len(flagged)} layers flagged, {len(mouths)} with a service at a walkway\'s mouth')
+    for l in flagged + mouths:
         print('  !', l)
-    return compare_baseline(report, write=baseline)
+    return compare_baseline(report, write=baseline) or (1 if mouths else 0)
 
 
 BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')

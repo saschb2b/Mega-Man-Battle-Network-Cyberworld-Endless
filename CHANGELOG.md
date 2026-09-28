@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A shop, a trader or a navi never ends up in a walkway's mouth: the floor
+  around what stands on a layer stays as the layer was laid out when its
+  tiles are fitted (a Chip Trader had stood where a walkway entered his
+  platform, one layer in sixteen in the homepages). A run saved by an
+  older build starts its current layer afresh.
 - CircusMan's warning names his tent's tell: when only MegaMan's own panel
   lights, the tent drops over him about half a second later (watched frame
   by frame; the clap's column and the lion's hoop were already right).
