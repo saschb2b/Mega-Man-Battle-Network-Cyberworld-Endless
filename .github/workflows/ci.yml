@@ -134,7 +134,8 @@ jobs:
           app="build/macos/Cyberworld Endless.app"
           bin="$app/Contents/MacOS/cyberworld-endless"
           lipo -archs "$bin" | tee /dev/stderr | grep -q 'x86_64 arm64'
-          if otool -L "$bin" | tail -n +2 | grep -vE '^[[:space:]]+(/System/Library/|/usr/lib/)'; then
+          # (a line per library under each architecture's header)
+          if otool -L "$bin" | grep -E '^[[:space:]]' | grep -vE '^[[:space:]]+(/System/Library/|/usr/lib/)'; then
             echo "links a library macOS does not have"; exit 1
           fi
           codesign --verify --deep --strict "$app"
