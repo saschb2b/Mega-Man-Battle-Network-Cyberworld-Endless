@@ -186,7 +186,7 @@ static bool learn(int area, Learned *L) {
 	learn_counter(na->counter, &a, L);
 	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
-	if (na->pad_stamp) props_learn_pad(&a, na->styles & 0x1FFF, &L->pad);
+	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
 	if (emu_debug_on()) fprintf(stderr, "pad stamp area %d ok %d tiles %d\n", area, L->pad.ok, L->pad.ntiles);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];
@@ -418,6 +418,16 @@ static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
  * the stairs, in place of the floor the classes drew there (the classes
  * drew Central's pads green, where its maps frame them); their
  * centrepieces go on after. */
+/* Whether the tile at map pixel (px, py) lies over pad `m`'s own panels or
+ * the void (at the floor's height). */
+static bool pad_own_or_void(const Room *m, int tw, int th, int px, int py) {
+	int u = px + 4 - tw * 4, v = 2 * (py - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
+	int A = floordiv(X - place.ex, 32), B = floordiv(Y - place.ey, 32);
+	int gx = B + place.gx0, gy = -A + place.gy0;
+	if (gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3) return true;
+	return gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H || layer.cell[gy][gx] == C_VOID;
+}
+
 static void paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 	if (!L->pad.ok) return;
 	for (int i = 0; i < layer.nrooms; ++i) {
@@ -431,18 +441,13 @@ static void paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 		if (!flat) continue;
 		int A, B;
 		grid_to_panel(m->x, m->y + 2, &A, &B);
-		int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+		int X0 = place.ex + 32 * A, Y0 = place.ey + 32 * B;
+		int px0 = area_px(tw, X0, Y0), py0 = area_py(th, X0, Y0);
+		/* the stamp only over the pad's own panels or the void: its edges
+		 * and faces cut into a platform it touches */
 		for (int k = 0; k < L->pad.ntiles; ++k) {
 			int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
-			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
-			/* only over the pad's own panels or the void: its edges and
-			 * faces cut into a platform it touches */
-			int u = px + 4 - tw * 4, v = 2 * (py - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
-			int A = (X - place.ex) >= 0 ? (X - place.ex) / 32 : -((place.ex - X + 31) / 32);
-			int Bp = (Y - place.ey) >= 0 ? (Y - place.ey) / 32 : -((place.ey - Y + 31) / 32);
-			int gx = Bp + place.gx0, gy = -A + place.gy0;
-			bool own = gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3;
-			if (!own && gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && layer.cell[gy][gx] != C_VOID) continue;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || !pad_own_or_void(m, tw, th, px, py)) continue;
 			map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
 		}
 	}

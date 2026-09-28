@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-- Central's pads are its maps' framed pads, cut whole: a pale frame, a
-  cyan band and a blue recess holding the centrepiece (they were drawn in
-  the green floor).
+- Central's and Seaside's pads are their maps' framed pads, cut whole: a
+  pale frame, a cyan band and a blue recess holding the centrepiece in
+  Central, the same in yellow in Seaside (they were drawn in the areas'
+  platform floor).
 - The Net Dealer before a guardian stands behind a counter in one of the
   rooms nearest the arena's antechamber when the antechamber (mostly a
   pad) has no place for one: 58 of 80 such dealers in the tests, from 20.

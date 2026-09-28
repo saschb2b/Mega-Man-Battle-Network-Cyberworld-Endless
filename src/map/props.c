@@ -286,7 +286,7 @@ static int hue_at(const AreaSrc *a, int cx, int cy) {
 	return k > 11 ? 11 : k;
 }
 
-bool props_learn_pad(const AreaSrc *a, uint32_t platform, PropStamp *out) {
+bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 	memset(out, 0, sizeof *out);
 	/* the map's panels, around its middle */
 	int A0 = -(a->tw * 8 + a->th * 8) / PANEL, A1 = -A0;
@@ -305,7 +305,7 @@ bool props_learn_pad(const AreaSrc *a, uint32_t platform, PropStamp *out) {
 				}
 			if (!island || beside > 4) continue;
 			int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
-			if (platform >> hue_at(a, cx, cy + 4) & 1) continue;
+			if (!(hues >> hue_at(a, cx, cy + 4) & 1)) continue;
 			/* its tiles: over the diamond of its panels (the floor drawn 4
 			 * below their edges) and the faces under its lower edges */
 			int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);

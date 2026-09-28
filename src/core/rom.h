@@ -54,7 +54,7 @@ typedef struct {
 		int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
 		uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
 		uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/LEVEL_DESIGN.md, Props) */
-		bool pad_stamp;          /* its pads are cut whole from its maps' own (props_learn_pad): Central's framed pads */
+		uint16_t pad_hues;       /* its pads are cut whole from its maps' own, the first whose middle has one of these hue buckets (props_learn_pad): Central's and Seaside's framed pads; 0 none */
 		uint8_t rebank[2];       /* first-layer tiles in palette bank rebank[0] drawn in bank rebank[1] where its maps use the same tile in that bank too: one shade of floor (the Graveyard's pale platforms, bank 2, among its dark slabs, bank 1); { 0, 0 } none */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
