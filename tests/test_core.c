@@ -367,6 +367,7 @@ static void test_stairs(void) {
 			CHECK(!on_stair((int)layer.obj[i].x, (int)layer.obj[i].y), "seed %u: object %d on a stair", seed, i);
 	}
 	CHECK(layers > 10, "only %d of 400 layers have a stair", layers);
+	printf("  stairs: %d of 400 layers\n", layers);
 	/* an area without stairs keeps its layers flat */
 	layer_generate(7919u, 2, BIOME_SKY, LAYER_NORMAL, &flat);
 	CHECK(!layer.nstairs && !layer.rise, "flat area got a stair");
