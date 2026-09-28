@@ -8,10 +8,11 @@
   Central Area 1's, framed pads hung off its sides, in place of the chain
   of rooms on bridges. A raised room's stair never tops onto an octagon's
   cut corner.
-- Central's and Seaside's pads are their maps' framed pads, cut whole: a
-  pale frame, a cyan band and a blue recess holding the centrepiece in
-  Central, the same in yellow in Seaside (they were drawn in the areas'
-  platform floor).
+- Central's, Seaside's and Sky's pads are their maps' framed pads, cut
+  whole: a pale frame, a cyan band and a blue recess holding the
+  centrepiece in Central, the same in yellow in Seaside and in lavender in
+  Sky (they were drawn in the areas' platform floor). Sky's pads no longer
+  hold a black blob: its gem's tile is the pit in one of its platforms.
 - The Net Dealer before a guardian stands behind a counter in one of the
   rooms nearest the arena's antechamber when the antechamber (mostly a
   pad) has no place for one: 58 of 80 such dealers in the tests, from 20.
