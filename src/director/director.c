@@ -204,6 +204,7 @@ static void arrival_words(void) {
  * d-pad's UP moves +X -Y, RIGHT +X +Y: a world step (dx, dy) goes
  * dx + dy across and (dy - dx) / 2 down), and how far. */
 static int way_dir;   /* the index of the last way_to: 0 right, then clockwise */
+static bool map_used;   /* the layer's map has been held (SELECT) since the game started */
 static const char *const ways[8] = {
 	"to the right", "down and to the right", "straight down", "down and to the left",
 	"to the left", "up and to the left", "straight up", "up and to the right",
@@ -300,8 +301,9 @@ static const char *status_words(void) {
 		if (programs) ADD("@M There's a NaviCust program shop here too.|");
 		/* (the map marks a trader as a shop, and L said nothing of it) */
 		if (trader) ADD("@M And a Chip Trader!|");
-		/* (the map's tip on the run's first layers: every first L repeated it) */
-		if (run.depth <= 2) ADD("@M Hold SELECT to see the map of where we've been.|");
+		/* (the map's tip on the run's first layers, until the map has been
+		 * held: a playtester who used it heard it again every run) */
+		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
 	} else if (heal && hurt) {
@@ -1305,7 +1307,7 @@ uint32_t director_keys(uint32_t keys) {
 		}
 	}
 	/* SELECT on a layer: the map, while it is held */
-	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); keys &= ~KEY_SELECT; }
+	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_used |= D.map_shown; keys &= ~KEY_SELECT; }
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
 	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&

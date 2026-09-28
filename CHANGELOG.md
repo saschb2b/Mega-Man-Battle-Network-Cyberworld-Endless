@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- MegaMan's tip on holding SELECT for the map is left out once the map has
+  been held (it came on every run's first two layers).
 - Central's layers can be a winding path two or three panels wide, as
   Central Area 1's, framed pads hung off its sides, in place of the chain
   of rooms on bridges. A raised room's stair never tops onto an octagon's
