@@ -9,7 +9,10 @@
   in a grid.
 - The Nest's platforms are its grey stone in a magenta lip with spikes,
   its walkways the magenta links with a yellow gem, as Underground's maps
-  draw them (every floor there had taken the links' look).
+  draw them (every floor there had taken the links' look). The Undernet's
+  and the Secret Area's plateaus are their mauve stone in a red lip with
+  spikes, carrying the Undernet's magenta crosses; the Undernet's had
+  taken its links' look too.
 - Six guardians' warnings name the moves they were missing, each checked
   against a recording of the fight: GroundMan bursting up under the lit
   panel and his drill missiles, ChargeMan's coal bombs and freight cars,

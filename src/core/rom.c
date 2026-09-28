@@ -30,8 +30,8 @@ static const RomLayout layouts[] = {
 			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(TREE) | L(SIGN) },     /* Sky Area 2; Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK); the Net Dealer's capsule of Sky Area 3 */
 			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS, .counter = { 0x92, 1, -28, -468 }, .looks = L(TREE) | L(GIANT_TREE) | L(SIGN) },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush); the Net Dealer's NetCafe desk of Green Area 2 */
 			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } }, .looks = L(MONUMENT) | L(GRAVE), .emblem = 0x56C0 },     /* Graveyard; Graveyard 1-3 (its cyan crosses) */
-			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet 1; Undernet 1-3 */
-			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet Zero; Undernet 3-4 */
+			{ 0x95, 0, 0x11000, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER), .emblem = 0x7D3F },      /* Undernet 1; Undernet 1-3 (mauve stone plateaus in a red lip with spikes, TILES_RIMMED; its magenta crosses) */
+			{ 0x95, 1, 0x11000, 0x0C00, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER), .emblem = 0x7D3F },      /* Undernet Zero; Undernet 3-4 (the same plateaus and crosses) */
 			{ 0x93, 1, 0x11000, 0x0004, true, 0x21, 0x93, 0, 2, { { 0x93, 0 } } },      /* Underground 2; Underground 1-2 (grey stone platforms in a magenta lip with spikes, TILES_RIMMED; its walkways the magenta links with a yellow gem) */
 			{ 0x8C, 0, 0x0002, 0x0008, false, 0x13, 0x8C, 0, 16 },    /* a comp (orange, green); the comps of group 0x8C */
 			{ 0x88, 3, 0x0800, 0x0020, false, 0x13, 0x88, 1, 6 },     /* a homepage (pink, teal); the homepages */

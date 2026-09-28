@@ -208,16 +208,19 @@ static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out) {
 	return false;
 }
 
-bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out) {
-	memset(out, 0, sizeof *out);
-	uint32_t want = bgr555(bgr) & 0xFFFFFF;
+/* The tiles of layer `l` that draw colour `want` (RGB), a group of 2 to 24
+ * joined 8 ways on one panel with floor all round. */
+static bool floor_emblem_on(const AreaSrc *a, uint32_t want, int l, PropStamp *out) {
 	int W = a->tw * 8, cells = a->tw * a->th;
 	uint8_t *mark = calloc((size_t)cells, 1);
 	int *q = malloc(sizeof *q * (size_t)cells);
 	for (int t = 0; t < cells; ++t)
 		for (int y = 0; y < 8 && !mark[t]; ++y)
-			for (int x = 0; x < 8; ++x)
-				if ((a->px0[(size_t)(t / a->tw * 8 + y) * W + t % a->tw * 8 + x] & 0xFFFFFF) == want && a->px0[(size_t)(t / a->tw * 8 + y) * W + t % a->tw * 8 + x] >> 24) { mark[t] = 1; break; }
+			for (int x = 0; x < 8; ++x) {
+				size_t i = (size_t)(t / a->tw * 8 + y) * W + t % a->tw * 8 + x;
+				uint32_t c = l ? (a->front[i] ? a->px[i] : 0) : a->px0[i];
+				if (c >> 24 && (c & 0xFFFFFF) == want) { mark[t] = 1; break; }
+			}
 	for (int t0 = 0; t0 < cells && !out->ok; ++t0) {
 		if (mark[t0] != 1) continue;
 		int n = 0, sx = 0, sy = 0;
@@ -243,7 +246,8 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out) {
 		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
 		out->tiles = calloc((size_t)n, sizeof *out->tiles);
 		for (int k = 0; k < n; ++k)
-			out->tiles[k] = (StairTile){ .px = (int16_t)(q[k] % a->tw * 8 - ax), .py = (int16_t)(q[k] / a->tw * 8 - ay), .e0 = a->tile[0][q[k]] };
+			out->tiles[k] = (StairTile){ .px = (int16_t)(q[k] % a->tw * 8 - ax), .py = (int16_t)(q[k] / a->tw * 8 - ay),
+				.e0 = l ? 0 : a->tile[0][q[k]], .e1 = l ? a->tile[1][q[k]] : 0 };
 		out->ntiles = n;
 		out->len = 1;
 		out->ok = true;
@@ -251,6 +255,12 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out) {
 	free(q);
 	free(mark);
 	return out->ok;
+}
+
+bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out) {
+	memset(out, 0, sizeof *out);
+	uint32_t want = bgr555(bgr) & 0xFFFFFF;
+	return floor_emblem_on(a, want, 0, out) || (a->layers > 1 && floor_emblem_on(a, want, 1, out));
 }
 
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {

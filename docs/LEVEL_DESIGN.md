@@ -331,10 +331,11 @@ does so in a void panel with floor on both sides along one axis and void
 on the other two, every second one along the gap, never over the floor's
 own art.
 
-### The Graveyard's emblems (built)
+### The Graveyard's and the Undernet's emblems (built)
 
-The Graveyard's slabs carry cyan crosses drawn in the floor itself (the
-first layer, not second-layer art): one on each small platform's middle
+The Undernet's plateaus carry the same cross in magenta, alone or four in
+a diamond; the Graveyard's slabs carry cyan crosses drawn in the floor
+itself (the first layer, not second-layer art): one on each small platform's middle
 panel, and on its big slabs in rows alongside the line of holes through
 their middle, two panels to either side, at even steps, never at a rim or
 beside a hole. `props_learn_floor_emblem` finds them by their colour

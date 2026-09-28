@@ -412,7 +412,9 @@ static void paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
 		for (int k = 0; k < L->emblem.ntiles; ++k) {
 			int px = px0 + L->emblem.tiles[k].px, py = py0 + L->emblem.tiles[k].py;
 			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
-			map[(size_t)(py / 8) * tw + px / 8] = L->emblem.tiles[k].e0;
+			size_t at = (size_t)(py / 8) * tw + px / 8;
+			if (L->emblem.tiles[k].e0) map[at] = L->emblem.tiles[k].e0;
+			if (L->emblem.tiles[k].e1) map[cells + at] = L->emblem.tiles[k].e1;
 		}
 	}
 }
