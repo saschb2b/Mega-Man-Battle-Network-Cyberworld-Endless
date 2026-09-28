@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <signal.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
-#else
+#elif !defined(_WIN32)
 #include <fcntl.h>
-#include <signal.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
+
+#include "compat.h"
 
 #include "game.h"
 #include "gfx.h"
@@ -44,16 +46,25 @@ static void make_dirs(const char *path) {
 	char p[600];
 	snprintf(p, sizeof p, "%s", path);
 	for (char *c = p + 1; *c; ++c)
-		if (*c == '/') { *c = 0; mkdir(p, 0755); *c = '/'; }
-	mkdir(p, 0755);
+		if (*c == '/') { *c = 0; cw_mkdir(p); *c = '/'; }
+	cw_mkdir(p);
 }
 
-/* $XDG_DATA_HOME/cyberworld-endless, or ~/.local/share/cyberworld-endless */
+/* $XDG_DATA_HOME/cyberworld-endless, or ~/.local/share/cyberworld-endless;
+ * on Windows %LOCALAPPDATA%\cyberworld-endless */
 static void desktop_data_dir(char *out, size_t n) {
+#ifdef _WIN32
+	const char *local = getenv("LOCALAPPDATA");
+	if (local && *local) snprintf(out, n, "%s/cyberworld-endless", local);
+	else snprintf(out, n, ".");
+	for (char *c = out; *c; ++c)
+		if (*c == '\\') *c = '/';
+#else
 	const char *xdg = getenv("XDG_DATA_HOME"), *home = getenv("HOME");
 	if (xdg && *xdg == '/') snprintf(out, n, "%s/cyberworld-endless", xdg);
 	else if (home && *home) snprintf(out, n, "%s/.local/share/cyberworld-endless", home);
 	else snprintf(out, n, ".");
+#endif
 }
 
 /* The ROM: in the data folder's rom/, beside the binary, or in ./rom. */
@@ -61,9 +72,7 @@ static bool desktop_rom(char *msg, size_t msglen) {
 	char dirs[3][600], exe[512];
 	int n = 0;
 	snprintf(dirs[n++], sizeof dirs[0], "%s/rom", g_data_dir);
-	ssize_t len = readlink("/proc/self/exe", exe, sizeof exe - 1);
-	if (len > 0) {
-		exe[len] = 0;
+	if (cw_exe_path(exe, sizeof exe)) {
 		char *slash = strrchr(exe, '/');
 		if (slash) { *slash = 0; snprintf(dirs[n++], sizeof dirs[0], "%s/rom", exe); }
 	}
@@ -311,7 +320,7 @@ static void script_actions(void) {
 	}
 }
 
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
 /* ---- remote play (tools/play.py): the game waits for batches of steps on
  * DIR/in and answers each on DIR/out once its frames have run ---- */
 static int remote_in = -1, remote_out = -1;
@@ -380,7 +389,7 @@ static void remote_tick(void) {
 
 static void script_tick(void) {
 	if (bot_seed) { bot_tick(); return; }
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
 	if (remote_in >= 0) remote_tick();
 #endif
 	script_actions();
@@ -519,7 +528,7 @@ int main(int argc, char **argv) {
 	int marks_spec = -1;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
 	const char *remote_dir = NULL;
 #endif
 	uint64_t max_frames = 0;
@@ -560,7 +569,7 @@ int main(int argc, char **argv) {
 		/* --marks HEX: the title's marks as if earned, for a capture */
 		else if (!strcmp(a, "--marks") && v) { marks_spec = (int)strtol(v, NULL, 16); ++i; }
 		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
 		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
 #endif
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
@@ -737,7 +746,10 @@ int main(int argc, char **argv) {
 		scene_set(s ? s : &scene_title);
 	}
 
-#ifndef __EMSCRIPTEN__
+#if defined(_WIN32)
+	signal(SIGTERM, on_quit_signal);
+	signal(SIGINT, on_quit_signal);
+#elif !defined(__EMSCRIPTEN__)
 	/* (no SA_RESTART: a remote game waiting in read() wakes up to quit) */
 	struct sigaction sa;
 	memset(&sa, 0, sizeof sa);

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Windows:** a build for 64-bit Windows 10 and 11, as an installer (for
+  the user, no administrator; Start menu, desktop shortcut, uninstall in
+  Settings > Apps) and as a zip to unpack anywhere. One .exe with SDL2 and
+  the GBA core inside; the first start finds the ROM in Downloads or asks
+  for it in Windows' own file dialog, and saves live in
+  `%LOCALAPPDATA%\cyberworld-endless`.
 - **Steam:** the game adds itself to Steam as a non-Steam game with its
   own library artwork: a capsule, a wide capsule, a banner, a logo and the
   icon, drawn for it (nothing from the ROM). The AppImage, the `.deb` and

@@ -1,0 +1,15 @@
+# Build image for the Windows release (x86-64), cross-compiled with
+# MinGW-w64: SDL2 and the GBA core linked in statically, so the game is one
+# .exe; NSIS makes its installer (build.py windows).
+FROM debian:trixie
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64 mingw-w64-tools \
+    make cmake pkg-config ca-certificates curl file nsis \
+ && rm -rf /var/lib/apt/lists/*
+COPY mingw.cmake /opt/mingw.cmake
+COPY sdl2.sh /tmp/sdl2.sh
+RUN sh /tmp/sdl2.sh windows
+# The embedded GBA core (docs/EMULATION.md)
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh windows

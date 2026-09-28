@@ -2,8 +2,9 @@
 
 #include <errno.h>
 #include <stdio.h>
+
+#include "compat.h"
 #include <string.h>
-#include <sys/stat.h>
 
 #include "audio.h"
 #include "game.h"
@@ -31,7 +32,7 @@ static uint32_t checksum(const void *p, size_t n) {
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
 	char dir[600], file[600], tmp[620];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
-	mkdir(dir, 0755);
+	cw_mkdir(dir);
 	save_path(file, sizeof file, name);
 	snprintf(tmp, sizeof tmp, "%s.tmp", file);
 	FILE *f = fopen(tmp, "wb");

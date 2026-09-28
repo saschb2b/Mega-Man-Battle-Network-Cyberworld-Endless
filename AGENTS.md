@@ -6,8 +6,8 @@ Cyberworld Endless is a roguelike that runs Mega Man Battle Network 6:
 Cybeast Gregar (USA) from the player's own ROM on an embedded mGBA core and
 directs it: generated layers in the game's map formats, the run's structure,
 loot and saves. It is written in C11 with SDL2 and ships as a PortMaster port
-for ROCKNIX, the primary target, as a Linux desktop build and as a browser
-build on GitHub Pages. Reference
+for ROCKNIX, the primary target, as a Linux desktop build, as a Windows
+build and as a browser build on GitHub Pages. Reference
 devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 
 Never commit or publish ROMs, save files, extracted assets, emulator save
@@ -52,10 +52,11 @@ README and the site.
 | `.claude/skills/agent-browser/` | The agent-browser skill: a real Chrome driven from the shell (`npm i -g agent-browser`), to look over the site at desktop and phone widths |
 | `port/` | PortMaster launcher and metadata |
 | `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage, the `.deb` and the Flatpak (`linux/flatpak/`: its manifest, how to build it and bring it to Flathub) carry. The app ID `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` asks for the ROM and adds the AppImage to the menu. `linux/steam/`: `add-to-steam.py` (the game as a non-Steam shortcut, with the library artwork `tools/steam_art.py` draws), which every Linux build carries and `--add-to-steam` runs |
+| `windows/` | The Windows release: its README, the NSIS installer script (per user, no administrator), the .exe's manifest (UTF-8 paths, per-monitor DPI), resource script and icon (`tools/app_icon.py`); `src/core/desktop_win.c` is its desktop (the ROM in Windows' file dialog and Downloads) and `src/core/compat.h` what differs from POSIX |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling), the FAQ in `faq/` as the PET's E-Mail, its answers taken from the docs. Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
 | `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image) |
-| `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.web` (Emscripten, mGBA without threads) |
+| `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.web` (Emscripten, mGBA without threads) |
 | `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot |
 
 ## Rules
@@ -101,6 +102,7 @@ python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.b
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/
 python3 build.py run        # the Linux desktop build, played here in a window
+python3 build.py windows    # build/release: the Windows installer and zip (MinGW-w64, NSIS)
 python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-builder on this machine)
 python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
 python3 tools/play.py do NAME "press A; hold UP 30" [--every 10]   # input, then a picture and the state
@@ -117,9 +119,10 @@ python3 tools/social_preview.py        # build/social-preview.png: the repositor
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
 
-The host and Linux builds are desktop builds (`CW_DESKTOP`): a resizable
-window, saves in `~/.local/share/cyberworld-endless`, the ROM looked for
-there, beside the binary and in `./rom`. The ROCKNIX build fills the screen
+The host, Linux and Windows builds are desktop builds (`CW_DESKTOP`): a
+resizable window, saves in `~/.local/share/cyberworld-endless` (Windows:
+`%LOCALAPPDATA%\cyberworld-endless`), the ROM looked for there, beside the
+binary and in `./rom`. The ROCKNIX build fills the screen
 and takes both folders from its launcher. `build.py run` is the quickest way
 to play a change; the headless `shot` stays the way to capture one.
 
@@ -176,6 +179,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Audio | `--render-song ID:SECONDS:PATH` and a listen on a device |
 | Browser page or platform code | `build.py serve` and a run in a browser: ROM choice, a new game, CONTINUE after a reload |
 | The site | `build.py serve` at desktop and phone widths (agent-browser); `build.py screenshots` and `build.py clips` again when what they show changed |
+| Windows packaging | `build.py windows`; the .exe under Wine (a Debian image with `wine`, `wine32:i386` and `xvfb`): a headless `--scene emu` capture with the ROM, a start in a window, the installer's silent install (`/S`), a start and `uninstall.exe /S` |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
 | Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
 

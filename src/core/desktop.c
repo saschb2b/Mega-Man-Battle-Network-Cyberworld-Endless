@@ -1,6 +1,6 @@
 #include "desktop.h"
 
-#ifdef CW_DESKTOP
+#if defined(CW_DESKTOP) && !defined(_WIN32)
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "compat.h"
 #include "platform.h"
 #include "rom.h"
 
@@ -482,9 +483,7 @@ static bool steam_script(char *script, size_t n, char *exe, size_t en) {
 		return access(script, R_OK) == 0;
 	}
 	char self[1024];
-	ssize_t len = readlink("/proc/self/exe", self, sizeof self - 1);
-	if (len <= 0) return false;
-	self[len] = 0;
+	if (!cw_exe_path(self, sizeof self)) return false;
 	char dir[1024];
 	snprintf(dir, sizeof dir, "%s", self);
 	char *slash = strrchr(dir, '/');

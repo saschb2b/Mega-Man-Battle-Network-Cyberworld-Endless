@@ -6,8 +6,10 @@ CC_asan := gcc
 CC_linux := gcc
 CC_flatpak := gcc
 CC_web := emcc
+CC_windows := x86_64-w64-mingw32-gcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
+PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 CC := $(CC_$(TARGET))
 PKGCONF := $(PKG_$(TARGET)) pkg-config
 OUT := build/$(TARGET)
@@ -17,6 +19,7 @@ BIN_asan := $(OUT)/cyberworld
 BIN_linux := $(OUT)/cyberworld
 BIN_flatpak := $(OUT)/cyberworld
 BIN_web := $(OUT)/cyberworld.js
+BIN_windows := $(OUT)/cyberworld-endless.exe
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -35,7 +38,7 @@ ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -47,8 +50,17 @@ endif
 CFLAGS += -I$(MGBA)/include
 LDLIBS += $(shell $(PKGCONF) --libs sdl2) $(MGBA)/lib/libmgba.a -lpthread -lm
 # the desktop builds: a window, the user's data folder (src/core/main.c)
-ifneq ($(filter host asan linux flatpak,$(TARGET)),)
+ifneq ($(filter host asan linux flatpak windows,$(TARGET)),)
 CFLAGS += -DCW_DESKTOP
+endif
+# 64-bit Windows (docker/Dockerfile.windows, MinGW-w64): SDL2 and mGBA linked
+# in, one .exe with no console window; its icon, manifest and version
+# (windows/) as a resource. build.py passes FILE_VERSION, four numbers.
+ifeq ($(TARGET),windows)
+FILE_VERSION ?= 0,0,0,0
+CFLAGS += -D_USE_MATH_DEFINES -D__USE_MINGW_ANSI_STDIO=1
+LDLIBS := $(MGBA)/libmgba.a $(shell $(PKGCONF) --static --libs sdl2) -static -lshlwapi
+OBJS += $(OUT)/obj/windows.res.o
 endif
 # the browser build (docker/Dockerfile.web, web/): one thread, the page
 # drives the frames, files kept in IndexedDB
@@ -77,6 +89,12 @@ $(OUT)/licenses/mGBA.txt: /opt/mgba/LICENSE
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $^ $(LDLIBS)
+
+ifeq ($(TARGET),windows)
+$(OUT)/obj/windows.res.o: windows/cyberworld-endless.rc windows/cyberworld-endless.manifest windows/icon.ico $(GEN)/version.h
+	@mkdir -p $(dir $@)
+	x86_64-w64-mingw32-windres -I$(GEN) -Iwindows -DCW_FILEVERSION=$(FILE_VERSION) -O coff -o $@ $<
+endif
 
 $(OUT)/obj/%.o: src/%.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)

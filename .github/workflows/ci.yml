@@ -91,6 +91,33 @@ jobs:
             build/release/cyberworld-endless_amd64.deb
           retention-days: 14
 
+  windows:
+    name: Windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.windows, tag: cyberworld-windows }
+      - run: python3 build.py windows
+      - name: One .exe that needs only Windows' own DLLs, and an installer
+        run: |
+          file build/windows-stage/cyberworld-endless.exe | tee /dev/stderr | grep -q 'PE32+ executable.*(GUI).*x86-64'
+          dlls=$(docker run --rm -v "$PWD:/src" -w /src cyberworld-windows \
+            x86_64-w64-mingw32-objdump -p build/windows-stage/cyberworld-endless.exe | awk '/DLL Name/ { print tolower($3) }')
+          echo "$dlls"
+          if grep -vxE '(kernel32|user32|gdi32|advapi32|shell32|shlwapi|ole32|oleaut32|imm32|setupapi|version|winmm|comdlg32|msvcrt)\.dll' <<< "$dlls"; then
+            echo "imports a DLL Windows does not have"; exit 1
+          fi
+          file build/release/cyberworld-endless-setup-x64.exe | tee /dev/stderr | grep -q 'Nullsoft Installer'
+          unzip -l build/release/cyberworld-endless-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-windows
+          path: |
+            build/release/cyberworld-endless-windows-x64.zip
+            build/release/cyberworld-endless-setup-x64.exe
+          retention-days: 14
+
   web:
     name: Browser
     runs-on: ubuntu-latest
@@ -114,7 +141,7 @@ jobs:
   pages:
     name: Publish on GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, handheld, linux, web]
+    needs: [test, handheld, linux, windows, web]
     runs-on: ubuntu-latest
     permissions:
       pages: write

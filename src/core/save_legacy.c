@@ -4,8 +4,9 @@
  * ("CWE2") had guardians for eight areas, the third ("CWE3") for sixteen;
  * the areas added since get theirs drawn from the run's seed. */
 #include <stdio.h>
+
+#include "compat.h"
 #include <string.h>
-#include <sys/stat.h>
 
 #include "game.h"
 #include "run.h"
@@ -143,6 +144,6 @@ void legacy_move_state(void) {
 	fclose(f);
 	char dir[600];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
-	mkdir(dir, 0755);
+	cw_mkdir(dir);
 	rename(old, cur);
 }

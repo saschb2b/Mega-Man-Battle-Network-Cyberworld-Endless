@@ -74,8 +74,10 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 #ifdef CW_DESKTOP
 	/* the window's class is the application ID, which the .desktop file names */
+#ifndef _WIN32
 	setenv("SDL_VIDEO_X11_WMCLASS", APP_ID, 0);
 	setenv("SDL_VIDEO_WAYLAND_WMCLASS", APP_ID, 0);
+#endif
 	SDL_SetHint("SDL_APP_NAME", "Cyberworld Endless");
 #endif
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {

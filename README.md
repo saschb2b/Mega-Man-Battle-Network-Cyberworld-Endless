@@ -53,14 +53,14 @@ around it, one layer at a time, and keeps the run going.
 
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
 Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays in a
-window on a Linux PC and in a desktop browser at
+window on a Linux or Windows PC and in a desktop browser at
 [saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/).
 
 ## What you need
 
 - A handheld running ROCKNIX with PortMaster installed, a Steam Deck, an
   x86-64 Linux PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35
-  and later), or a current desktop browser.
+  and later), a 64-bit Windows 10 or 11 PC, or a current desktop browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -115,6 +115,25 @@ the Flatpak: see the Steam Deck steps below).
 `cyberworld-endless-linux-x86_64.tar.gz` is the same game as a plain folder:
 unpack it anywhere and run `./cyberworld-endless`; `./install.sh` adds it
 to the menu. Its `README.md` has the keyboard keys.
+
+### On Windows
+
+From the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), for 64-bit Windows 10 and 11:
+
+- **Installer:** `cyberworld-endless-setup-x64.exe` installs the game for
+  you alone (no administrator), adds it to the Start menu and, if you like,
+  the desktop; Settings > Apps removes it again.
+- **Zip:** `cyberworld-endless-windows-x64.zip` holds the same game in a
+  folder: unpack it anywhere and run `cyberworld-endless.exe`.
+
+The game is not signed, so Windows may say "Windows protected your PC" the
+first time: **More info**, then **Run anyway**. The first start looks for
+the ROM in Downloads and asks for the file if it is not there; it keeps a
+copy in `%LOCALAPPDATA%\cyberworld-endless\rom\`, where the saves live
+too (uninstalling leaves them). It opens in a window at the largest whole
+scale that fits; F11 or Alt+Enter switches to fullscreen. Keyboards and
+controllers (Xbox, PlayStation, Switch) work as on Linux. Steam's own **Add
+a Non-Steam Game** takes `cyberworld-endless.exe`.
 
 ### On a Steam Deck
 

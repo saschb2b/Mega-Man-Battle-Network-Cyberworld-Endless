@@ -12,6 +12,9 @@ glibc runs on more distributions.
   python3 build.py linux        Linux desktop binary (build/linux) and its
                                 release files in build/release: a tar.gz,
                                 an AppImage and a .deb
+  python3 build.py windows      the Windows build (build/windows, MinGW-w64 in
+                                `cyberworld-windows`) and its release files in
+                                build/release: a zip and an installer (NSIS)
   python3 build.py flatpak      the Flatpak (linux/flatpak) built by flatpak-builder
                                 from this checkout and bundled in build/release
                                 (needs flatpak; see linux/flatpak/README.md)
@@ -21,8 +24,8 @@ glibc runs on more distributions.
                                 build/site (published on GitHub Pages)
   python3 build.py serve [PORT] build the site and serve it on localhost
   python3 build.py release      the release archives in build/release: the
-                                PortMaster port, the Linux desktop build and
-                                the browser site
+                                PortMaster port, the Linux desktop build, the
+                                Windows build and the browser site
   python3 build.py shot ...     run the host binary headlessly (options below)
   python3 build.py tour [BIOMES] the game itself warped through every room of
                                 each area's layer, one sheet per area in
@@ -67,7 +70,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 IMAGE = 'cyberworld-build'
 LINUX_IMAGE = 'cyberworld-linux'   # docker/Dockerfile.linux
 WEB_IMAGE = 'cyberworld-web'       # docker/Dockerfile.web
-IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web'}
+WINDOWS_IMAGE = 'cyberworld-windows'   # docker/Dockerfile.windows
+IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
+          WINDOWS_IMAGE: 'Dockerfile.windows'}
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
@@ -107,11 +112,17 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE}.get(target, IMAGE)
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
-    if docker('make', f'TARGET={target}', f'VERSION={version()}', f'-j{os.cpu_count() or 4}', *werror, image=image) != 0:
+    extra = [f'FILE_VERSION={file_version()}'] if target == 'windows' else []
+    if docker('make', f'TARGET={target}', f'VERSION={version()}', f'-j{os.cpu_count() or 4}', *werror, *extra, image=image) != 0:
         sys.exit(f'{target} build failed')
+    if target == 'windows':
+        # (SDL2 is linked in: its license travels with the .exe)
+        if docker('sh', '-c', 'mkdir -p build/windows/licenses && cp /opt/sdl2/LICENSE.txt build/windows/licenses/SDL2.txt',
+                  image=image) != 0:
+            sys.exit('copying the SDL2 license failed')
     if target == 'linux':
         # SDL2 travels with the binary (its rpath is $ORIGIN/lib), with its license
         if docker('sh', '-c', 'mkdir -p build/linux/lib build/linux/licenses && '
@@ -151,6 +162,55 @@ def linux_release():
     print('released', archive)
     appimage()
     deb()
+
+
+def file_version():
+    """The version as Windows keeps it, four numbers: 0.1.0+12 is 0,1,0,12."""
+    m = re.match(r'(\d+)\.(\d+)\.(\d+)(?:\+(\d+))?', version())
+    return ','.join(m.groups('0')) if m else '0,0,0,0'
+
+
+WINDOWS_ZIP = 'cyberworld-endless-windows-x64.zip'
+WINDOWS_SETUP = 'cyberworld-endless-setup-x64.exe'
+
+
+def windows_release():
+    """build/release: cyberworld-endless-windows-x64.zip (the game in a folder,
+    to unpack anywhere) and cyberworld-endless-setup-x64.exe (an installer
+    for the user who runs it, no administrator needed; windows/installer.nsi)."""
+    import zipfile
+    build('windows')
+    stage = os.path.join(ROOT, 'build', 'windows-stage')
+    shutil.rmtree(stage, ignore_errors=True)
+    os.makedirs(os.path.join(stage, 'licenses'))
+    rel = os.path.relpath(stage, ROOT)
+    if docker('x86_64-w64-mingw32-strip', '-o', f'{rel}/cyberworld-endless.exe', 'build/windows/cyberworld-endless.exe',
+              image=WINDOWS_IMAGE) != 0:
+        sys.exit('strip failed')
+    shutil.copy2(os.path.join(ROOT, 'windows', 'README.txt'), stage)
+    shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(stage, 'LICENSE.txt'))
+    for name in ('mGBA.txt', 'SDL2.txt'):
+        shutil.copy2(os.path.join(ROOT, 'build', 'windows', 'licenses', name), os.path.join(stage, 'licenses'))
+    # Windows' own line ends in the text files
+    for path in (os.path.join(stage, 'README.txt'), os.path.join(stage, 'LICENSE.txt'),
+                 *[os.path.join(stage, 'licenses', n) for n in os.listdir(os.path.join(stage, 'licenses'))]):
+        with open(path, 'rb') as f:
+            data = f.read().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n')
+        with open(path, 'wb') as f:
+            f.write(data)
+    os.makedirs(RELEASE, exist_ok=True)
+    archive = os.path.join(RELEASE, WINDOWS_ZIP)
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
+        for d, _, files in os.walk(stage):
+            for name in sorted(files):
+                path = os.path.join(d, name)
+                z.write(path, os.path.join('Cyberworld Endless', os.path.relpath(path, stage)))
+    print('released', archive)
+    if docker('makensis', '-V2', f'-DVERSION={version()}', f'-DFILEVERSION={file_version().replace(",", ".")}',
+              f'-DSTAGE=/src/{rel}', f'-DOUT=/src/build/release/{WINDOWS_SETUP}', 'windows/installer.nsi',
+              image=WINDOWS_IMAGE) != 0:
+        sys.exit('makensis failed')
+    print('released', os.path.join(RELEASE, WINDOWS_SETUP))
 
 
 def version():
@@ -877,7 +937,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -897,6 +957,9 @@ def main():
         build('linux')
         os.makedirs(RELEASE, exist_ok=True)
         linux_release()
+        return
+    if a.action == 'windows':
+        windows_release()
         return
     if a.action == 'flatpak':
         sys.exit(flatpak())
@@ -924,6 +987,7 @@ def main():
         os.makedirs(RELEASE, exist_ok=True)
         port_release()
         linux_release()
+        windows_release()
         web_release()
         return
     if a.action == 'clips':

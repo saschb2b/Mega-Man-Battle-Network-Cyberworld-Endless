@@ -1,7 +1,8 @@
 #!/bin/sh
 # Builds a minimal static libmgba (GBA core only, no frontends, scripting,
 # debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba;
-# with arguments, for those targets only (host, aarch64, web). The web build
+# with arguments, for those targets only (host, aarch64, web, windows: the
+# MinGW-w64 cross compiler of docker/Dockerfile.windows). The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
 # mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
@@ -28,6 +29,12 @@ case " $TARGETS " in *" web "*)
 	 -DCMAKE_C_FLAGS="-DDISABLE_THREADING -D_GNU_SOURCE" -DHAVE_PTHREAD_H=OFF
 	cmake --build build-web -j"$(nproc)"
 	cmake --install build-web ;;
+esac
+case " $TARGETS " in *" windows "*)
+	# (its CMake asks for epoxy on Windows, for the OpenGL of its own
+	# frontends, which are not built here)
+	sed -i 's/if(WIN32 AND NOT (LIBMGBA_ONLY OR SKIP_LIBRARY OR USE_EPOXY))/if(FALSE)/' mgba-$VER/CMakeLists.txt
+	build windows "-DCMAKE_TOOLCHAIN_FILE=/opt/mingw.cmake" ;;
 esac
 case " $TARGETS " in *" aarch64 "*)
 cat > aarch64.cmake <<'T'

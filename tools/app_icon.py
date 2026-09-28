@@ -2,9 +2,10 @@
 """The application icon: a 32x32 pixel-art tile in the site's PET colours
 with the title's infinity mark, drawn from code (nothing from the ROM).
 
-Writes linux/icons/<size>.png (32 to 512, whole-number scales) and
-src/core/app_icon.h (the 32x32 pixels, for the window icon). Run it after
-changing the drawing; the outputs are committed.
+Writes linux/icons/<size>.png (32 to 512, whole-number scales),
+windows/icon.ico (the .exe's and the installer's) and src/core/app_icon.h
+(the 32x32 pixels, for the window icon). Run it after changing the drawing;
+the outputs are committed.
 
     python3 tools/app_icon.py
 """
@@ -97,6 +98,10 @@ def main():
     os.makedirs(out, exist_ok=True)
     for size in (32, 64, 128, 256, 512):
         im.resize((size, size), Image.NEAREST).save(os.path.join(out, f'{size}.png'), optimize=True)
+    # the .exe's icon: whole-number scales, and 16 px smoothed down from 32
+    ico = [im.resize((s, s), Image.NEAREST) for s in (256, 128, 64, 32)] + [im.resize((16, 16), Image.LANCZOS)]
+    os.makedirs(os.path.join(ROOT, 'windows'), exist_ok=True)
+    ico[0].save(os.path.join(ROOT, 'windows', 'icon.ico'), sizes=[i.size for i in ico], append_images=ico[1:])
     px = list(im.tobytes())
     lines = [', '.join(f'0x{b:02x}' for b in px[i:i + 16]) for i in range(0, len(px), 16)]
     with open(os.path.join(ROOT, 'src', 'core', 'app_icon.h'), 'w') as f:
@@ -104,7 +109,7 @@ def main():
         f.write('#pragma once\n#include <stdint.h>\n\n')
         f.write(f'enum {{ APP_ICON_SIZE = {N} }};\n')
         f.write(f'static const uint8_t app_icon_rgba[{len(px)}] = {{\n\t' + ',\n\t'.join(lines) + '\n};\n')
-    print('wrote linux/icons and src/core/app_icon.h')
+    print('wrote linux/icons, windows/icon.ico and src/core/app_icon.h')
 
 
 if __name__ == '__main__':

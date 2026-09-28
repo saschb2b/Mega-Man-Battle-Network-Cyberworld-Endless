@@ -1,7 +1,8 @@
 # A version tag (v1.0.0) builds the release files and publishes them as a
 # GitHub release: the PortMaster port, the Linux desktop build (AppImage with
-# its .zsync, .deb and tar.gz, and a Flatpak bundle) and the browser build as
-# a site to serve anywhere. None holds game data.
+# its .zsync, .deb and tar.gz, and a Flatpak bundle), the Windows build (an
+# installer and a zip) and the browser build as a site to serve anywhere.
+# None holds game data.
 name: Release
 
 on:
@@ -61,6 +62,8 @@ jobs:
         with: { dockerfile: Dockerfile.linux, tag: cyberworld-linux }
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.web, tag: cyberworld-web }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.windows, tag: cyberworld-windows }
       - run: python3 build.py test
       - run: python3 build.py release
       - uses: actions/download-artifact@v4
@@ -71,7 +74,8 @@ jobs:
         working-directory: build/release
         run: >
           sha256sum cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb
-          cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-web.zip > SHA256SUMS.txt
+          cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe
+          cyberworld-endless-windows-x64.zip cyberworld-endless-web.zip > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
       # section); a 0.x version is an alpha, published as a pre-release
       - name: Notes
@@ -87,4 +91,5 @@ jobs:
             build/release/cyberworld.zip build/release/cyberworld-endless-x86_64.AppImage \
             build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb \
             build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless.flatpak \
+            build/release/cyberworld-endless-setup-x64.exe build/release/cyberworld-endless-windows-x64.zip \
             build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt
