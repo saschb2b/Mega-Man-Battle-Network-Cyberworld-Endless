@@ -172,6 +172,17 @@ static uint32_t viruses_of(const Formation *f) {
 	return h;
 }
 
+/* The family of formation `f`'s first virus (0 none): the one a run's
+ * first battle keeps. */
+#define FAMILY_PIRANHA 2
+static int first_family(const Formation *f) {
+	for (int k = 0; k < f->n; ++k) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		if (row[1] == 0 && row[2] >= 1 && row[2] <= 29) return row[2];
+	}
+	return 0;
+}
+
 /* The virus families formation `f` brings, a bit each. */
 static uint32_t families_of(const Formation *f) {
 	uint32_t in = 0;
@@ -304,6 +315,17 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 				? 0 : list[i].weight * (shares ? 1 : 3);
 			total += weight[i];
 		}
+	/* the run's first battle, the formation's first virus alone: not a
+	 * Piranha where another fits, which dives out of the starting folder's
+	 * reach and on ice freezes MegaMan (a playtester's first fight, 40 HP) */
+	if (kind == ENC_FIRST) {
+		int kept = 0;
+		for (int i = 0; i < n && i < MAX_FIT; ++i) kept += first_family(&list[i]) == FAMILY_PIRANHA ? 0 : weight[i];
+		if (kept) {
+			for (int i = 0; i < n && i < MAX_FIT; ++i) if (first_family(&list[i]) == FAMILY_PIRANHA) weight[i] = 0;
+			total = kept;
+		}
+	}
 	int roll = rng_range(0, total - 1), pick = -1;
 	for (int i = 0; i < n && i < MAX_FIT; ++i) {
 		if (!weight[i]) continue;
