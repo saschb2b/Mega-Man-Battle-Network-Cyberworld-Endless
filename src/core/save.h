@@ -22,7 +22,10 @@ typedef struct {
 	 * profile reads them as 0) */
 	uint8_t first_guardian;   /* the last new run's act 1 guardian, navi + 1 */
 	uint8_t navicust_taught;  /* a Guardian Data's draft has said how the NaviCust's board works */
+	uint8_t marks_taught;     /* the map's violet marks L has explained (MARK_*) */
 } Profile;
+
+enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4 };
 
 extern Profile profile;
 

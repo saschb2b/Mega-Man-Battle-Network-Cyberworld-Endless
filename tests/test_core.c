@@ -142,10 +142,27 @@ static bool behind_gap(int x, int y) {
 		(y + 2 < MAP_H && layer.cell[y + 1][x] == C_VOID && layer.cell[y + 2][x] == C_PATH);
 }
 
+/* Whether (x, y) stands in line with a walkway, straight on from it across
+ * the floor between: the way across a platform MegaMan runs, and on the
+ * comps' and homepages' maps their stripe of walkway floor, which runs on
+ * through as much platform as lies on both its sides (a Net Dealer on one
+ * stood where a playtester ran back and forth, two sidesteps round him
+ * each time). */
+static bool in_way_line(int x, int y) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int dx = d[k][0], dy = d[k][1], ax = dy, ay = dx;   /* (ax, ay) across the line */
+		for (int nx = x + dx, ny = y + dy; nx >= 1 && ny >= 1 && nx < MAP_W - 1 && ny < MAP_H - 1 && layer.cell[ny][nx] == C_PATH;
+		     nx += dx, ny += dy)
+			if (layer.cell[ny + ay][nx + ax] != C_PATH && layer.cell[ny - ay][nx - ax] != C_PATH) return true;
+	}
+	return false;
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
-		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0;
+		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -224,6 +241,7 @@ static void test_generation(void) {
 				navi_corners += corner && o->type == OBJ_NPC;
 			}
 			if (stands) ++standing;
+			if (stands && o->prop < 0 && in_way_line((int)o->x, (int)o->y)) ++in_line;
 			if (stands || o->type == OBJ_MYSTERY) {
 				++approached;
 				hidden += behind_gap((int)o->x, (int)o->y);
@@ -306,6 +324,9 @@ static void test_generation(void) {
 	}
 	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
 	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
+	/* (a service where its room has no other place) */
+	CHECK(in_line * 20 <= standing, "%d of %d services and navis stand in line with a walkway", in_line, standing);
+	printf("  in line with a walkway: %d of %d services and navis\n", in_line, standing);
 	/* (a bystander never; a service where its room has no other place, as
 	 * the heal on a small pad before an arena, beside the bridge) */
 	CHECK(navi_corners == 0, "%d bystanders stand corner to corner with a walkway's last panel", navi_corners);

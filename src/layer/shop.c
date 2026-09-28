@@ -115,7 +115,10 @@ static int answer(int depth, int counter, int id, char *code) {
 		/* (-1: a guardian of no element, answered by the hardest hit) */
 		/* (and one that reaches: CircusMan kept to his back column,
 		 * and two AquaSwrd never touched him) */
-		if ((ci.element == counter || counter < 0) && ci.power > 0 && chip_direct(id) && !chip_sword(id) && chip_standard(id)) {
+		/* (nor TankCan's line, which fires after a wind-up: CircusMan
+		 * hopped out of the row during it, and 200 went off on nothing) */
+		if ((ci.element == counter || counter < 0) && ci.power > 0 && chip_direct(id) && !chip_sword(id) && chip_standard(id) &&
+			chip_family(id) != CHIP_FAMILY_TANKCAN) {
 			++found;
 			/* the hardest under the most, else the lightest over it */
 			bool under = ci.power <= most, best_under = best >= 0 && best_power <= most;

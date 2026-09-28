@@ -69,7 +69,9 @@ bool chip_direct(int rom_id);
 /* A sword: its attack family (0xB) is 19, reaching the panels just ahead. */
 bool chip_sword(int rom_id);
 /* A chip's attack family (record 0xB): 50 AquaNdl, whose needles fall on
- * the panel it aimed at a moment later. */
+ * the panel it aimed at a moment later; 36 TankCan1-3 (chips 12-14), which
+ * fire after a wind-up. */
+#define CHIP_FAMILY_TANKCAN 36
 int chip_family(int rom_id);
 /* A Standard chip, by the record's library type (0x7; 1 Mega, 2 Giga, 3
  * Secret): a folder takes several of one (a Mega or Giga chip, one). */

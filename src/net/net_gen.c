@@ -160,10 +160,28 @@ static bool by_walkway(int x, int y) {
 	return false;
 }
 
+/* Whether (x, y) stands in line with a walkway, straight on from it across
+ * the floor between: the way across a platform MegaMan runs, and on the
+ * comps' and homepages' maps their stripe of walkway floor, which runs on
+ * through as much platform as lies on both its sides (a Net Dealer on one
+ * stood where a playtester ran back and forth, two sidesteps round him
+ * each time). */
+static bool in_way_line(int x, int y) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int dx = d[k][0], dy = d[k][1], ax = dy, ay = dx;   /* (ax, ay) across the line */
+		for (int nx = x + dx, ny = y + dy; nx >= 1 && ny >= 1 && nx < MAP_W - 1 && ny < MAP_H - 1 && layer.cell[ny][nx] == C_PATH;
+		     nx += dx, ny += dy)
+			if (layer.cell[ny + ay][nx + ax] != C_PATH && layer.cell[ny - ay][nx - ax] != C_PATH) return true;
+	}
+	return false;
+}
+
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if ((tries < 30 || open) && x == r->ax && y == r->ay) continue;
+		if ((tries < 34 || open) && in_way_line(x, y)) continue;
 		/* (a bystander, who may stay away, never at one, nor corner to
 		 * corner with a walkway: one on a platform's corner beside its way
 		 * in stood in the way) */

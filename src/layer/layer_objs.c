@@ -333,6 +333,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				if (power > best_power) { best_power = power; chip = id; if (tries) code = c; }
 			}
 			chip_info(chip, &ci);
+			/* (in its * code where it has one, for any folder: an M-Cannon R
+			 * went with nothing a playtester carried) */
+			if (strchr(ci.codes, '*')) code = '*';
 			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');
 			break;
 		}

@@ -92,6 +92,7 @@ static struct {
 	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
+	bool guardian_named;   /* the arrival's words named the act's guardian */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
@@ -180,6 +181,7 @@ static void arrival_words(void) {
 	const char *area = guardian_area_in_text(run.biome, LAYER_NORMAL);
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	D.beat[0] = 0;
+	D.guardian_named = false;
 	if (run.side_kind == LAYER_UNDERNET)
 		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke, Lan.|@L Stay sharp. The exit pad leads back to the main path.");
 	else if (run.side_kind == LAYER_SECRET)
@@ -194,10 +196,12 @@ static void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied... Stay sharp, Lan.");
 	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
 		snprintf(D.beat, sizeof D.beat, "@M So much deleted data... Lan, I think the bottom is close.");
-	else if (first_of_act && run.depth > 1)
+	else if (first_of_act && run.depth > 1) {
 		/* a new act: where they are now, and whose copy waits at its end */
 		snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!",
 			area, guardian(run.boss_order[run.biome])->name);
+		D.guardian_named = true;
+	}
 }
 
 /* What MegaMan says when L is pressed: where they are, what is ahead. */
@@ -272,7 +276,9 @@ static const char *status_words(void) {
 			const char *tip = guardian_tip(D.objs.guardian.navi);
 			if (tip) ADD("@M %s|", tip);
 		}
-		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL) ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
+		/* (not straight after the act's arrival, whose words named him) */
+		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named)
+			ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
 		else ADD("|");
 		/* (the area's battlefields, on its first layer: a playtester froze
 		 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
@@ -290,13 +296,14 @@ static const char *status_words(void) {
 	/* the services here: all of them the first time, then only the heal
 	 * while he is hurt (it heals every time; the map's key names the rest,
 	 * and a later L is a box or two, not the briefing again) */
-	bool shop = false, heal = false, programs = false, trader = false, told = D.layer_told;
+	bool shop = false, heal = false, programs = false, trader = false, bugtrader = false, told = D.layer_told;
 	bool challenge = false, warp = false, gate = false;
 	for (int i = 0; i < layer.nobj; ++i) {
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
-		trader |= layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
+		trader |= layer.obj[i].type == OBJ_TRADER;
+		bugtrader |= layer.obj[i].type == OBJ_BUGTRADER;
 		challenge |= layer.obj[i].type == OBJ_CHALLENGE;
 		warp |= layer.obj[i].type == OBJ_UNDERNET;
 		gate |= layer.obj[i].type == OBJ_SECRET_GATE;
@@ -305,17 +312,32 @@ static const char *status_words(void) {
 	 * the way on) */
 	bool hurt = emu_read16(BN6_NAVI_STATS + 0x40) * 4 < emu_read16(BN6_NAVI_STATS + 0x42) * 3;
 	if (!told) {
-		if (shop && heal) ADD("@M I can sense a Net Dealer and a Recovery Mr. Prog on this layer!|");
-		else if (shop) ADD("@M I can sense a Net Dealer on this layer!|");
-		else if (heal) ADD("@M I can sense a Recovery Mr. Prog on this layer!|");
-		if (programs) ADD("@M There's a NaviCust program shop here too.|");
-		/* (the map marks a trader as a shop, and L said nothing of it) */
-		if (trader) ADD("@M And a Chip Trader!|");
-		/* (what the map's violet "Event" mark is: a playtester stood beside
-		 * one and never found out) */
-		if (challenge) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
-		if (warp) ADD("@M A dark warp down into the Undernet, the violet mark on the map!|");
-		if (gate) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
+		/* what is here, in one breath (a playtester paged eight boxes on
+		 * arriving in act 3): the services (the map marks a trader as a
+		 * shop, and L had said nothing of one), then the map's violet mark,
+		 * in full until it has been explained (a playtester stood beside one
+		 * and never found out what it was), named after that */
+		const char *here[8];
+		int n = 0;
+		if (shop) here[n++] = "a Net Dealer";
+		if (heal) here[n++] = "a Recovery Mr. Prog";
+		if (programs) here[n++] = "a NaviCust program shop";
+		if (trader) here[n++] = "a Chip Trader";
+		if (bugtrader) here[n++] = "a BugFrag Trader";
+		int marks = (challenge ? MARK_SERVER : 0) | (warp ? MARK_WARP : 0) | (gate ? MARK_GATE : 0);
+		int known = marks & profile.marks_taught, fresh = marks & ~profile.marks_taught;
+		if (known & MARK_SERVER) here[n++] = "a strong virus signal";
+		if (known & MARK_WARP) here[n++] = "a dark warp";
+		if (known & MARK_GATE) here[n++] = "the golden gate";
+		if (n) {
+			ADD("@M I sense");
+			for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
+			ADD(" here!|");
+		}
+		if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
+		if (fresh & MARK_WARP) ADD("@M A dark warp down into the Undernet, the violet mark on the map!|");
+		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
+		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
 		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
@@ -721,7 +743,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 31
+#define LAYER_MAKE 32
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1386,7 +1408,13 @@ uint32_t director_keys(uint32_t keys) {
 	bool can_l = !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP + 0x10) == 0 &&
 		(D.town || (!boss_cinematic() && !boss_fighting()));
 	if (pressed && !can_l) D.l_kept = 30;
-	else if (!pressed && D.l_kept > 0) { if (can_l) { pressed = true; D.l_kept = 0; } else --D.l_kept; }
+	else if (!pressed && D.l_kept > 0) {
+		/* (kept through the engine's own cards and words, and given after
+		 * the arrival's, which wait for the card too: an L pressed as the
+		 * act card faded went to the act's arrival words and was gone) */
+		if (can_l && !D.beat[0]) { pressed = true; D.l_kept = 0; }
+		else if (!talk_busy() && !cinema_busy() && !D.beat[0]) --D.l_kept;
+	}
 	if (pressed && can_l) {
 		D.l_kept = 0;
 		/* (the arrow shows through the words and a few seconds after) */

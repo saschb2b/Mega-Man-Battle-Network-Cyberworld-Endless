@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Services and navis keep off the line a walkway makes across its
+  platform, where MegaMan runs: a Net Dealer on a homepage's stripe took
+  two sidesteps each way, and more than a quarter of them stood on such a
+  line (now 19 of 1158 on 300 layers, where a room has no other place).
+- L's briefing is shorter: what MegaMan senses in one sentence, the map's
+  violet mark explained in full until it has been heard once and named
+  after that, and on an act's first layer the guardian not named again
+  after the arrival's words (one layer's briefing ran to eight pages). An
+  L pressed during the act card now gives the briefing after the
+  arrival's words, where it had been lost.
+- The Net Dealer's pick for a guardian of no element is never a TankCan,
+  which fires after a wind-up (CircusMan hopped out of its row, and 200
+  went off on nothing), and a Server's prize comes in its * code where the
+  chip has one (an M-Cannon R fit nothing a playtester carried). A run
+  saved by an older build starts its current layer afresh.
 - A random battle keeps clear of the last battle fought: the next battle
   is rolled again every few seconds, and each roll had taken the last
   one's place in memory, so a Server's viruses could come straight back
