@@ -124,6 +124,11 @@ typedef struct {
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit);
 /* Lifts dead-end rooms onto stairs (net_height.c). */
 void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
+/* Whether panel (x, y) lies on the layer's way from its arrival to its exit
+ * or guardian, or beside it (net_gen.c: what stands keeps off it). */
+bool layer_by_way(int x, int y);
+/* ... on the way itself. */
+bool layer_on_way(int x, int y);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
 /* The layer's place in its act, 0-2 (the Nest counts as a first). */

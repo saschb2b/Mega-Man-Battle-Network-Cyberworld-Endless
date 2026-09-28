@@ -162,7 +162,7 @@ static bool in_way_line(int x, int y) {
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
-		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0;
+		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -242,6 +242,19 @@ static void test_generation(void) {
 			}
 			if (stands) ++standing;
 			if (stands && o->prop < 0 && in_way_line((int)o->x, (int)o->y)) ++in_line;
+			if (stands && o->prop < 0) {
+				bool beside = layer_by_way((int)o->x, (int)o->y), near = false;
+				/* (a panel's gap on the way itself, with a solid object two panels off) */
+				for (int j = 1; j < layer.nobj; ++j) {
+					int ox = (int)layer.obj[j].x, oy = (int)layer.obj[j].y, x = (int)o->x, y = (int)o->y;
+					if (j == i || !layer.obj[j].solid || abs(ox - x) > 2 || abs(oy - y) > 2 || (abs(ox - x) < 2 && abs(oy - y) < 2)) continue;
+					for (int gy = y - 1; gy <= y + 1; ++gy)
+						for (int gx = x - 1; gx <= x + 1; ++gx)
+							near |= abs(gx - ox) <= 1 && abs(gy - oy) <= 1 && layer_on_way(gx, gy);
+				}
+				beside_line += beside;
+				near_pairs += near;
+			}
 			if (stands || o->type == OBJ_MYSTERY) {
 				++approached;
 				hidden += behind_gap((int)o->x, (int)o->y);
@@ -326,7 +339,12 @@ static void test_generation(void) {
 	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
 	/* (a service where its room has no other place) */
 	CHECK(in_line * 20 <= standing, "%d of %d services and navis stand in line with a walkway", in_line, standing);
-	printf("  in line with a walkway: %d of %d services and navis\n", in_line, standing);
+	/* (by the way where a room on it has no other place, as the room before
+	 * an arena; a gap on the way where the room is small) */
+	CHECK(beside_line * 4 <= standing, "%d of %d services and navis stand by the way on", beside_line, standing);
+	CHECK(near_pairs * 16 <= standing, "%d of %d services and navis leave a panel's gap on the way", near_pairs, standing);
+	printf("  in line with a walkway: %d of %d services and navis; by the way on %d; a panel's gap on the way %d\n",
+		in_line, standing, beside_line, near_pairs);
 	/* (a bystander never; a service where its room has no other place, as
 	 * the heal on a small pad before an arena, beside the bridge) */
 	CHECK(navi_corners == 0, "%d bystanders stand corner to corner with a walkway's last panel", navi_corners);

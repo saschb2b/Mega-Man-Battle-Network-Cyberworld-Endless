@@ -381,3 +381,35 @@ Loop change: **count before judging a report either way**: the
 persona's `runlog.txt` answered "does the no-repeat rule hold" across 52
 battles in a second, where one report could only say "it failed once";
 the unit tests now count services in line with a walkway the same way.
+
+## Session 23 (8/10, keep playing: yes; recommend: yes)
+
+Build d96aa0c (services off the ways across, the one-breath briefing).
+From a CONTINUE that restarted layer 7 through act 3 on the Sky HP to
+ChargeMan, who ended the five-session run at 300 of his 1000 HP (337
+calls: the budget ran out at 278, mid-fight). The dealer's WideSht hit
+him for 200, the Server paid AuraHed3 F, Mystery Data a Recov300 J: "the
+richest act yet". Confirmed: no repeat after a Server, the kept early R
+(25-50 frames), the shorter briefing, the dealer's Aqua pick.
+
+Raised, fixed before the next pin: early R lost at 55-60 frames (the
+gauge's last tenth takes a second: kept 90 now, e0c66bc), a kept R that
+opened the Custom screen over the UP stepping off a lit panel (a d-pad
+press drops it), the guardian unnamed in the briefing after a CONTINUE
+(the arrival's words are not said again, e0c66bc), the dark warp
+unexplained (2e7a43d), the Server's mark left on the map (2e7a43d),
+ChargeMan's warning silent on when to hit him and on his cars blocking
+chips, the Server's pair two fights later and planes in three of five Sky
+HP fights (the last two battles' families kept clear), Recovery Progs
+beside the way and a panel's gap on it (placement keeps off the way from
+arrival to exit). Left: ChargeMan's tall sprites read a row high (vanilla;
+the persona's notes say to read rows by the HP number), the Yes/No
+cursor's first frames (vanilla), a NaviCust program that won't fit
+(vanilla shops; the board grows at act 4), the vendor's shop portrait
+(compressed keeper text).
+
+Loop change: **an input buffer ships with its cancel rule**: the Custom
+press went from 30 to 50 to 90 frames and gained retries across two
+sessions before the rule that the latest intent wins, which was what made
+the longer window safe. Ask what a kept input gives way to before tuning
+how long it is kept.

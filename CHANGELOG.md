@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Services keep off the way from a layer's arrival to its exit or
+  guardian, and the panels beside it, where their room has another place,
+  and leave no one-panel gap on the way beside another navi or Mystery
+  Data: a Recovery Mr. Prog beside a turn of the way stopped MegaMan for
+  three calls, and another, a panel from a Server, wedged him between
+  them. A run saved by an older build starts its current layer afresh.
+- A d-pad press drops a kept L or R: a kept R had opened the Custom screen
+  over the UP stepping MegaMan off a lit panel. ChargeMan's warning says
+  his freight cars block chips and that he stops only as he pulls back in
+  at the back. Random battles keep clear of the last two battles' virus
+  families where another battle fits (a Server's pair came back two
+  fights after it).
 - A dark warp says what the Undernet holds before it asks (tougher
   viruses, richer data, a BugFrag Trader, and an exit on to the next
   layer), and so does L the first time it names one: a playtester kept

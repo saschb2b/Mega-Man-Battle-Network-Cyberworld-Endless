@@ -177,11 +177,70 @@ static bool in_way_line(int x, int y) {
 	return false;
 }
 
+/* The way from the arrival to the exit or guardian, the shortest walk over
+ * the floor (2), and the panels beside it, corner to corner too (1): a
+ * navi's radius reaches half a panel past its own, and a Recovery Mr. Prog
+ * beside the way's turn stopped MegaMan walking it, three calls to get
+ * round. */
+static uint8_t way_band[MAP_H][MAP_W];
+
+bool layer_by_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && way_band[y][x]; }
+bool layer_on_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && way_band[y][x] == 2; }
+
+static void mark_way(int sx, int sy, int gx, int gy) {
+	static int16_t from[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(way_band, 0, sizeof way_band);
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) from[y][x] = -1;
+	int head = 0, tail = 0;
+	from[sy][sx] = (int16_t)(sy * MAP_W + sx);
+	qx[tail] = (int16_t)sx; qy[tail++] = (int16_t)sy;
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	while (head < tail && from[gy][gx] < 0) {
+		int x = qx[head], y = qy[head++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || layer.cell[ny][nx] != C_PATH || from[ny][nx] >= 0) continue;
+			from[ny][nx] = (int16_t)(y * MAP_W + x);
+			qx[tail] = (int16_t)nx; qy[tail++] = (int16_t)ny;
+		}
+	}
+	if (from[gy][gx] < 0) return;
+	for (int x = gx, y = gy;;) {
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx)
+				if (x + dx >= 0 && y + dy >= 0 && x + dx < MAP_W && y + dy < MAP_H && !way_band[y + dy][x + dx]) way_band[y + dy][x + dx] = 1;
+		way_band[y][x] = 2;
+		if (x == sx && y == sy) break;
+		int f = from[y][x];
+		x = f % MAP_W; y = f / MAP_W;
+	}
+}
+
+/* Whether something solid at (x, y) would leave a panel's gap on the way
+ * with a solid object two panels off: with both radii that gap is shut (a
+ * playtester wedged between a Server and a Recovery Mr. Prog, the way on
+ * between them). The gap: the panels beside both. */
+static bool gap_on_way(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		if (!layer.obj[i].solid) continue;
+		int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
+		if (abs(ox - x) > 2 || abs(oy - y) > 2 || (abs(ox - x) < 2 && abs(oy - y) < 2)) continue;
+		for (int gy = y - 1; gy <= y + 1; ++gy)
+			for (int gx = x - 1; gx <= x + 1; ++gx)
+				if (abs(gx - ox) <= 1 && abs(gy - oy) <= 1 && gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H &&
+				    way_band[gy][gx] == 2) return true;
+	}
+	return false;
+}
+
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if ((tries < 30 || open) && x == r->ax && y == r->ay) continue;
 		if ((tries < 34 || open) && in_way_line(x, y)) continue;
+		if (tries < 20 && way_band[y][x]) continue;
+		if (tries < 32 && gap_on_way(x, y)) continue;
 		/* (a bystander, who may stay away, never at one, nor corner to
 		 * corner with a walkway: one on a platform's corner beside its way
 		 * in stood in the way) */
@@ -778,6 +837,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 			layer.boss_navi = run.boss_order[biome];
 			b->param = layer.boss_navi;
 		}
+		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);
+	} else {
+		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
 	}
 
 	/* Points of interest in the other rooms. */
