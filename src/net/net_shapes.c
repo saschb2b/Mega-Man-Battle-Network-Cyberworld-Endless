@@ -75,12 +75,17 @@ void carve_shape(int shape, int x, int y, int w, int h) {
 			else if (rng_range(0, 99) < 20) put(x + w, y + j);
 		}
 		break;
-	case SHAPE_HOLED:
-		/* Graveyard's slabs: a grid of single holes inside a solid rim */
+	case SHAPE_HOLED: {
+		/* Graveyard's slabs: a line of single holes along the middle, as its
+		 * maps punch them, three panels apart (the tiles draw two holes one
+		 * panel apart poorly), centred and two in from the ends */
 		fill(x, y, w, h);
-		for (int j = y + 2; j < y + h - 2; j += 3)
-			for (int i = x + 2; i < x + w - 2; i += 3) clear(i, j);
+		int len = w >= h ? w : h, span = len - 4, k = 1 + (span - 1) / 3, first = 2 + (span - 1 - 3 * (k - 1)) / 2;
+		for (int i = 0; i < k; ++i)
+			if (w >= h) clear(x + first + 3 * i, y + h / 2);
+			else clear(x + w / 2, y + first + 3 * i);
 		break;
+	}
 	case SHAPE_CRATER:
 		/* a field around a pit, as Central Area 3's */
 		fill(x, y, w, h);

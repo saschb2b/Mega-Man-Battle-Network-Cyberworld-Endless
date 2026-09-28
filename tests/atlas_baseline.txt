@@ -15,8 +15,8 @@ biome 2 layout 3 (x) depth 2 seed 8181: near 10.7, fallback 0.0, seams 144, not 
 biome 3 layout -1 (x) depth 3 seed 104732: near 10.4, fallback 0.0, seams 68, not exact 96, other colours 0
 biome 3 layout 0 (x) depth 2 seed 8312: near 3.4, fallback 0.0, seams 52, not exact 51, other colours 0
 biome 3 layout 2 (x) depth 2 seed 8312: near 7.1, fallback 0.0, seams 136, not exact 56, other colours 0
-biome 4 layout -1 (x) depth 3 seed 104733: near 34.1, fallback 0.0, seams 348, not exact 104, other colours 0
-biome 4 layout 4 (x) depth 2 seed 8443: near 23.4, fallback 0.0, seams 287, not exact 53, other colours 0
+biome 4 layout -1 (x) depth 3 seed 104733: near 32.7, fallback 0.0, seams 348, not exact 99, other colours 0
+biome 4 layout 4 (x) depth 2 seed 8443: near 26.4, fallback 0.0, seams 331, not exact 61, other colours 0
 biome 4 layout 5 (x) depth 2 seed 8443: near 19.1, fallback 0.0, seams 471, not exact 42, other colours 0
 biome 5 layout -1 (x) depth 3 seed 104734: near 66.4, fallback 0.0, seams 650, not exact 260, other colours 0
 biome 5 layout 5 (x) depth 2 seed 8574: near 46.2, fallback 0.0, seams 407, not exact 112, other colours 0
@@ -27,7 +27,7 @@ biome 6 layout 0 (x) depth 2 seed 8705: near 27.5, fallback 0.0, seams 480, not 
 biome 6 layout 3 (x) depth 2 seed 8705: near 33.6, fallback 0.0, seams 520, not exact 61, other colours 0
 biome 6 layout 5 (x) depth 2 seed 8705: near 37.5, fallback 0.0, seams 623, not exact 88, other colours 0
 biome 7 layout -1 (x) depth 3 seed 104736: near 58.7, fallback 0.0, seams 116, not exact 223, other colours 0
-biome 7 layout 4 (x) depth 2 seed 8836: near 55.7, fallback 0.0, seams 126, not exact 195, other colours 0
+biome 7 layout 4 (x) depth 2 seed 8836: near 57.0, fallback 0.0, seams 117, not exact 189, other colours 0
 biome 7 layout 6 (x) depth 2 seed 8836: near 50.3, fallback 0.0, seams 101, not exact 151, other colours 0
 biome 8 layout -1 (x) depth 3 seed 104737: near 43.1, fallback 0.0, seams 92, not exact 138, other colours 0
 biome 8 layout 0 (x) depth 2 seed 8967: near 40.8, fallback 0.0, seams 77, not exact 114, other colours 0

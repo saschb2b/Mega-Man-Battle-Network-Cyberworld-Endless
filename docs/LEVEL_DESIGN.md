@@ -331,6 +331,23 @@ does so in a void panel with floor on both sides along one axis and void
 on the other two, every second one along the gap, never over the floor's
 own art.
 
+### The Graveyard's emblems (built)
+
+The Graveyard's slabs carry cyan crosses drawn in the floor itself (the
+first layer, not second-layer art): one on each small platform's middle
+panel, and on its big slabs in rows alongside the line of holes through
+their middle, two panels to either side, at even steps, never at a rim or
+beside a hole. `props_learn_floor_emblem` finds them by their colour
+(BGR555 0x56C0, which the floors show nowhere else) and cuts the tiles
+that draw one where it lies on a panel with floor all round; the
+generator sets `PROP_EMBLEM`s by that rule in every room, on ground floor
+with floor all round and nothing standing there (`emblems` in
+`net_gen.c`), and `paste_emblems` draws them in place of the floor there.
+The slabs' holes follow the originals too: a line along the middle rather
+than a grid, three panels apart where the originals keep two (the floor
+between two holes one panel apart reads as a walkway to the tiles, and
+takes a bridge's link look).
+
 ### Next
 
 The field pictures and a hub's centrepiece where the layout has a centre;

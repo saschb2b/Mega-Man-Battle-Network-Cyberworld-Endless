@@ -29,7 +29,7 @@ static const RomLayout layouts[] = {
 			{ 0x91, 0, 0x2040, 0x0006, false, 0x11, 0x91, 0, 3, { { 0x91, 1 }, { 0x91, 2 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(BBS) | L(SIGN) },     /* Seaside Area 1; Seaside 1-3 (and their colours: TILES_MORE_COLOURS, Seaside 2 and 3's yellow panels are its second floor's only fields) */
 			{ 0x94, 1, 0x5000, 0x0140, false, 0x0A, 0x94, 0, 3, { { 0x94, 0 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(TREE) | L(SIGN) },     /* Sky Area 2; Sky 1-3 (not the look of its pads, round pods: TILES_NO_PAD_LOOK); the Net Dealer's capsule of Sky Area 3 */
 			{ 0x92, 0, 0x0010, 0x0001, false, 0x12, 0x92, 0, 2, { { 0 } }, 0, NET_APART_PLATFORMS, .counter = { 0x92, 1, -28, -468 }, .looks = L(TREE) | L(GIANT_TREE) | L(SIGN) },     /* Green Area 1; Green 1-2 (its planks reach the raised grass by stairs, never flush); the Net Dealer's NetCafe desk of Green Area 2 */
-			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } }, .looks = L(MONUMENT) | L(GRAVE) },     /* Graveyard; Graveyard 1-3 */
+			{ 0x96, 1, 0x1000, 0x0100, false, 0x09, 0x96, 0, 3, { { 0x96, 0 }, { 0x96, 2 } }, .looks = L(MONUMENT) | L(GRAVE), .emblem = 0x56C0 },     /* Graveyard; Graveyard 1-3 (its cyan crosses) */
 			{ 0x95, 0, 0x0001, 0x0C00, true, 0x14, 0x95, 0, 3, { { 0x95, 2 }, { 0x95, 3 } }, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet 1; Undernet 1-3 */
 			{ 0x95, 1, 0x1000, 0x0C00, true, 0x20, 0x95, 2, 2, .looks = L(STATUE) | L(BRAZIER) },      /* Undernet Zero; Undernet 3-4 */
 			{ 0x93, 1, 0x0004, 0x0000, true, 0x21, 0x93, 0, 2, { { 0x93, 0 } } },      /* Underground 2; Underground 1-2 */

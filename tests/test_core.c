@@ -124,8 +124,8 @@ static bool beside_narrow(int x, int y) {
 
 /* A kit as the surface areas' (stairs both ways, a two-panel counter each
  * way) with every sprite prop, and one with none of them. */
-static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu };
-static const LayerKit flat = { 0u, 0, { 0, 0 }, 0u };
+static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu, true };
+static const LayerKit flat = { 0u, 0, { 0, 0 }, 0u, false };
 
 /* A counter's cells: the aisle behind it (d 0), its own (1) and the floor
  * before it (2), t along its run. */
@@ -145,7 +145,7 @@ static bool behind_gap(int x, int y) {
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
-		landmarks = 0, layers = 0;
+		landmarks = 0, layers = 0, emblems = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -251,6 +251,22 @@ static void test_generation(void) {
 			CHECK(by_floor, "seed %u: a %d prop far from any floor", seed, p->look);
 			if (c == C_SOLID) ++holes;
 		}
+		/* emblems: in ground floor with floor all round, none under an
+		 * object, none beside another */
+		for (int i = 0; i < layer.nprops; ++i) {
+			const NetProp *p = &layer.props[i];
+			if (p->kind != PROP_EMBLEM) continue;
+			++emblems;
+			for (int dy = -1; dy <= 1; ++dy)
+				for (int dx = -1; dx <= 1; ++dx)
+					CHECK(layer.cell[p->y + dy][p->x + dx] == C_PATH && !layer.level[p->y + dy][p->x + dx],
+						"seed %u: an emblem at (%d, %d) without ground floor all round", seed, p->x, p->y);
+			for (int o = 0; o < layer.nobj; ++o)
+				CHECK((int)layer.obj[o].x != p->x || (int)layer.obj[o].y != p->y, "seed %u: an object on an emblem", seed);
+			for (int j = 0; j < i; ++j)
+				if (layer.props[j].kind == PROP_EMBLEM)
+					CHECK(abs(layer.props[j].x - p->x) > 1 || abs(layer.props[j].y - p->y) > 1, "seed %u: emblems side by side", seed);
+		}
 		for (int i = 0; i < layer.nprops; ++i)
 			if (layer.props[i].kind == PROP_SPRITE && (layer.props[i].look == LOOK_GIANT_TREE || layer.props[i].look == LOOK_STATUE ||
 			    layer.props[i].look == LOOK_MONUMENT)) { ++landmarks; break; }
@@ -272,7 +288,8 @@ static void test_generation(void) {
 	CHECK(counters * 2 >= dealers, "only %d of %d Net Dealers behind a counter", counters, dealers);
 	/* (a landmark on most layers where the area has one) */
 	CHECK(landmarks * 2 >= layers, "a landmark on only %d of %d layers", landmarks, layers);
-	printf("  props: %d sprites (%d in holes) on %d layers, landmarks on %d\n", sprites, holes, layers, landmarks);
+	CHECK(emblems >= layers, "only %d emblems on %d layers", emblems, layers);
+	printf("  props: %d sprites (%d in holes) and %d emblems on %d layers, landmarks on %d\n", sprites, holes, emblems, layers, landmarks);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
 	/* Determinism: the same seed builds the same layer. */

@@ -53,6 +53,7 @@ typedef struct {
 		uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours */
 		int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
 		uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
+		uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/LEVEL_DESIGN.md, Props) */
 	} net_area[NET_AREAS];
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */

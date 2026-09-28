@@ -48,6 +48,7 @@ typedef struct {
 	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
 	PropStamp ornament[3];    /* pads' centrepieces: the red gem, the link ring, the cube on its base */
 	PropStamp bush[2];        /* Green's potted bushes, plain and in flower */
+	PropStamp emblem;         /* the emblem its floors carry (the Graveyard's crosses) */
 } Learned;
 
 /* the centrepieces' tiles (the four surface areas share their tile set) */
@@ -174,6 +175,8 @@ static bool learn(int area, Learned *L) {
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
 	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
+	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
+	if (emu_debug_on()) fprintf(stderr, "emblem area %d ok %d tiles %d\n", area, L->emblem.ok, L->emblem.ntiles);
 	if (na->looks & (1u << LOOK_TREE) && na->looks & (1u << LOOK_GIANT_TREE))   /* (Green's) */
 		for (int k = 0; k < 2; ++k) props_learn_void_art(&a, k ? 0x361 : 0x292, &L->bush[k]);
 	/* the colours its floors show (an area's maps share its palette) */
@@ -395,6 +398,25 @@ static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
+/* The emblems the generator set in the floor (PROP_EMBLEM), in place of
+ * the floor the classes drew there. */
+static void paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
+	if (!L->emblem.ok) return;
+	size_t cells = (size_t)tw * th;
+	for (int i = 0; i < cur->nprops && i < MAX_PROPS; ++i) {
+		const NetProp *p = &cur->props[i];
+		if (p->kind != PROP_EMBLEM) continue;
+		int A, B;
+		grid_to_panel(p->x, p->y, &A, &B);
+		int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+		for (int k = 0; k < L->emblem.ntiles; ++k) {
+			int px = px0 + L->emblem.tiles[k].px, py = py0 + L->emblem.tiles[k].py;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+			map[(size_t)(py / 8) * tw + px / 8] = L->emblem.tiles[k].e0;
+		}
+	}
+}
+
 /* Green's potted bushes in the gaps between parallel planks, as its maps
  * set them: in a void panel with floor on both sides along one axis and
  * void on the other two, every second panel along the gap, the plain and
@@ -459,6 +481,7 @@ static bool write_tilemap(const Learned *L) {
 	paste_stairs(L, map, tw, th);
 	paste_props(map, tw, th);
 	paste_ornaments(L, map, tw, th);
+	paste_emblems(L, map, tw, th);
 	paste_bushes(L, map, tw, th);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
@@ -644,6 +667,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	if (area < 0 || area >= NET_AREAS || !learned[area].ok) return;
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
 	kit->looks = R.layout->net_area[area].looks;
+	kit->emblem = learned[area].emblem.ok;
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */
@@ -685,7 +709,8 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	/* the props with their aisles and the floor before them */
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
-		if (p->faces == FACES_X) lock(locked, p->x - 1, p->y, 3, p->len, 1);
+		if (p->kind == PROP_EMBLEM) lock(locked, p->x, p->y, 1, 1, 1);   /* (its floor all round kept) */
+		else if (p->faces == FACES_X) lock(locked, p->x - 1, p->y, 3, p->len, 1);
 		else lock(locked, p->x, p->y - 1, p->len, 3, 1);
 	}
 	static NetLayout lay;

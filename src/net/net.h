@@ -51,12 +51,13 @@ typedef struct {
  * grid +y (down-left); its navi stands in the aisle behind it. A sprite
  * prop is one of the originals' map objects on a cell: in the void past
  * the floor's edge, or on a walled-off cell (C_SOLID) in the floor, a hole
- * as the originals set their statues and stones in. */
-enum { PROP_COUNTER, PROP_SPRITE };
+ * as the originals set their statues and stones in. An emblem is art in
+ * the floor itself, walked over (the Graveyard's crosses). */
+enum { PROP_COUNTER, PROP_SPRITE, PROP_EMBLEM };
 enum { FACES_X, FACES_Y };
 /* the sprite props' looks (the map side knows their objects) */
 enum { LOOK_TREE, LOOK_GIANT_TREE, LOOK_STATUE, LOOK_BRAZIER, LOOK_MONUMENT, LOOK_GRAVE, LOOK_SIGN, LOOK_BBS, LOOK_COUNT };
-#define MAX_PROPS 40
+#define MAX_PROPS 96
 
 typedef struct {
 	int kind, faces;
@@ -116,6 +117,7 @@ typedef struct {
 	int rise;
 	int counter_len[2];
 	unsigned looks;   /* the sprite props its maps have (bit per LOOK_*) */
+	bool emblem;      /* its maps set an emblem in their floors */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */

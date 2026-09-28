@@ -37,6 +37,12 @@ bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out);
 /* ... the same for art that stands in the void past the floor (Green's
  * potted bushes between its planks: 0x292, in flower 0x361). */
 bool props_learn_void_art(const AreaSrc *a, int seed, PropStamp *out);
+/* An emblem drawn in the floor itself (the first layer) of `a`, found by
+ * its colour `bgr` (BGR555), which the floor shows nowhere else: the tiles
+ * that draw it, joined 8 ways, where they lie on one panel with floor all
+ * round (the Graveyard's cyan crosses). Its tiles are layer-one entries
+ * (StairTile.e0), anchored as an ornament's. */
+bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,
  * mirrored with it: world (X, Y) to (-Y, -X). */

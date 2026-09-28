@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The Graveyard's slabs carry its cyan crosses, as its maps do: one on
+  each small platform's middle and rows of them alongside the line of
+  holes through a big slab, kept off rims and holes. The holes run in a
+  line along the slab's middle, as the originals punch them, rather than
+  in a grid.
 - Six guardians' warnings name the moves they were missing, each checked
   against a recording of the fight: GroundMan bursting up under the lit
   panel and his drill missiles, ChargeMan's coal bombs and freight cars,

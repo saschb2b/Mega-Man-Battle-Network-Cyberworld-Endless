@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "gfx.h"
+
 #define PANEL 32
 #define REACH 48   /* how far from the given point the ring may lie */
 
@@ -204,6 +206,51 @@ static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out) {
 		return true;
 	}
 	return false;
+}
+
+bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out) {
+	memset(out, 0, sizeof *out);
+	uint32_t want = bgr555(bgr) & 0xFFFFFF;
+	int W = a->tw * 8, cells = a->tw * a->th;
+	uint8_t *mark = calloc((size_t)cells, 1);
+	int *q = malloc(sizeof *q * (size_t)cells);
+	for (int t = 0; t < cells; ++t)
+		for (int y = 0; y < 8 && !mark[t]; ++y)
+			for (int x = 0; x < 8; ++x)
+				if ((a->px0[(size_t)(t / a->tw * 8 + y) * W + t % a->tw * 8 + x] & 0xFFFFFF) == want && a->px0[(size_t)(t / a->tw * 8 + y) * W + t % a->tw * 8 + x] >> 24) { mark[t] = 1; break; }
+	for (int t0 = 0; t0 < cells && !out->ok; ++t0) {
+		if (mark[t0] != 1) continue;
+		int n = 0, sx = 0, sy = 0;
+		q[n++] = t0;
+		mark[t0] = 2;
+		for (int h = 0; h < n; ++h)
+			for (int dy = -1; dy <= 1; ++dy)
+				for (int dx = -1; dx <= 1; ++dx) {
+					int x = q[h] % a->tw + dx, y = q[h] / a->tw + dy;
+					if (x < 0 || y < 0 || x >= a->tw || y >= a->th || mark[y * a->tw + x] != 1) continue;
+					mark[y * a->tw + x] = 2;
+					q[n++] = y * a->tw + x;
+				}
+		if (n < 2 || n > 24) continue;
+		for (int k = 0; k < n; ++k) { sx += q[k] % a->tw * 8 + 4; sy += q[k] / a->tw * 8 + 4; }
+		int px = sx / n - a->tw * 4, py = sy / n - a->th * 4;
+		int X = (px - 2 * py) / 2, Y = (px + 2 * py) / 2;
+		int Xa = a->ex + PANEL * floordiv(X - a->ex, PANEL), Ya = a->ey + PANEL * floordiv(Y - a->ey, PANEL);
+		bool inside = true;
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) inside &= area_src_walled_floor(a, Xa + 16 + PANEL * dx, Ya + 16 + PANEL * dy) == 1;
+		if (!inside) continue;
+		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+		out->tiles = calloc((size_t)n, sizeof *out->tiles);
+		for (int k = 0; k < n; ++k)
+			out->tiles[k] = (StairTile){ .px = (int16_t)(q[k] % a->tw * 8 - ax), .py = (int16_t)(q[k] / a->tw * 8 - ay), .e0 = a->tile[0][q[k]] };
+		out->ntiles = n;
+		out->len = 1;
+		out->ok = true;
+	}
+	free(q);
+	free(mark);
+	return out->ok;
 }
 
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {

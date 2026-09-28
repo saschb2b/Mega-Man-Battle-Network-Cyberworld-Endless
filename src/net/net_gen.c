@@ -169,6 +169,36 @@ static bool room_spot(const Room *r, int *ox, int *oy) { return room_spot_in(r, 
 
 /* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
 
+static bool object_at(int x, int y);
+static bool near_stair(int x, int y);
+
+/* An emblem on (x, y): ground floor all round, nothing standing there. */
+static void emblem_at(int x, int y) {
+	if (layer.nprops >= MAX_PROPS || x < 1 || y < 1 || x >= MAP_W - 1 || y >= MAP_H - 1 || object_at(x, y) || near_stair(x, y)) return;
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx)
+			if (layer.cell[y + dy][x + dx] != C_PATH || layer.level[y + dy][x + dx]) return;
+	layer.props[layer.nprops++] = (NetProp){ PROP_EMBLEM, 0, x, y, 1, -1 };
+}
+
+/* The area's emblem in the floor, as the Graveyard's maps set their
+ * crosses: on a small room's middle panel, and on a bigger one in two rows
+ * alongside its middle line (its holes, where it has them), two panels to
+ * either side, every second or third panel along, from the middle out. */
+static void emblems(const LayerKit *kit) {
+	if (!kit || !kit->emblem) return;
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		int cx = r->x + r->w / 2, cy = r->y + r->h / 2;
+		if (r->w <= 5 && r->h <= 5) { emblem_at(cx, cy); continue; }
+		bool along_x = r->w >= r->h;
+		int len = along_x ? r->w : r->h, step = len <= 7 ? 2 : 3, reach = len / 2 / step;
+		for (int side = -2; side <= 2; side += 4)
+			for (int k = -reach; k <= reach; ++k)
+				emblem_at(along_x ? cx + k * step : cx + side, along_x ? cy + side : cy + k * step);
+	}
+}
+
 #define MAX_COUNTER 4   /* panels */
 
 /* within a cell of a stair's block: its landing stays open */
@@ -765,5 +795,6 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		NetObj *o = add_obj(OBJ_NPC, x, y);
 		if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
 	}
+	emblems(kit);
 #undef PLACE
 }
