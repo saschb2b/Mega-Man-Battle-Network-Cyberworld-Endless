@@ -351,3 +351,33 @@ tile test could not see (it counted the picks under the stamp): fixed in
 Loop change: **every pasted piece (pads, emblems, stairs) gets a look in
 the game before a pin**: the tile test sees the classes' picks, not what
 is set whole over them, and a regression there reached the user first.
+
+## Session 22 (9/10, keep playing: yes; recommend: yes)
+
+Build f7bdc91 (the Server's prize named, the charge time in the persona's
+notes). From a CONTINUE that rebuilt layer 6 of the Aquarium HP, through
+CircusMan (0:56, 39 HP left) to act 3's first layer (270 calls).
+CircusMan's warning held line by line and the new tent tell was dodged
+twice; the dealer's DolThdr2 P did 300 in one hit: "the best boss fight
+of all 22 sessions".
+
+Raised, fixed before the next pin: the Server's viruses back in the very
+next fight (the next battle is rolled again every five seconds, and each
+roll took the last battle's place in memory: 34 of 52 back-to-back
+battles in the persona's run log shared a family; now only a fought
+battle counts, 29199b9), early L or R lost (a 30-frame window, and a
+press swallowed while MegaMan was hit: kept 50 frames and pressed again
+until the Custom screen opens, 29199b9), a dealer in line with a walkway
+(350 of 1166 services stood on such a line; now 19), the act's arrival
+words eating an L, an eight-page briefing, the dealer's TankCan3 against
+a hopping guardian, a Server's prize in a code that fit nothing. Fixed
+after the pin already: the battle memory across CONTINUE and the prize
+from a deeper pool (de5821e). Left: the tent's drain (vanilla), the exit
+pad's rim (vanilla collision), "RUN... None" (the NaviCust's own words).
+Also found: `CYBERWORLD_AUTOPILOT=1` is a blind button rhythm that loses
+its first battle; `weak` is the run-through check.
+
+Loop change: **count before judging a report either way**: the
+persona's `runlog.txt` answered "does the no-repeat rule hold" across 52
+battles in a second, where one report could only say "it failed once";
+the unit tests now count services in line with a walkway the same way.
