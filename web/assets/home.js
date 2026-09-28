@@ -1,34 +1,7 @@
-// The home page: the ChipFolder's picker, and the Net Dealer's links to the
-// newest GitHub release, an alpha's pre-release too (without a release they
-// keep pointing at the releases page).
+// The home page: its clips, and the download links to the newest GitHub
+// release, an alpha's pre-release too (without a release they keep pointing
+// at the releases page).
 'use strict';
-
-// ---- the ChipFolder ----
-
-(() => {
-	const chips = [...document.querySelectorAll('#chips button')];
-	const shot = document.getElementById('chip-shot'), name = document.getElementById('chip-name');
-	const code = document.getElementById('chip-code'), text = document.getElementById('chip-text');
-	function pick(b, focus) {
-		for (const c of chips) c.setAttribute('aria-pressed', c === b ? 'true' : 'false');
-		shot.src = `shots/${b.dataset.shot}.png`;
-		shot.alt = b.dataset.text;
-		name.textContent = b.textContent.trim();
-		code.textContent = b.dataset.code;
-		text.textContent = b.dataset.text;
-		if (focus) b.focus();
-	}
-	chips.forEach((b, i) => {
-		b.addEventListener('click', () => pick(b));
-		b.addEventListener('keydown', (e) => {
-			const d = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
-			if (!d) return;
-			e.preventDefault();
-			pick(chips[(i + d + chips.length) % chips.length], true);
-		});
-	});
-	if (chips.length) pick(chips[0]);
-})();
 
 // ---- the clips: they play while on screen, and not at all for visitors
 // who asked for less motion (they get the controls instead) ----
@@ -48,7 +21,7 @@
 	for (const v of clips) seen.observe(v);
 })();
 
-// ---- the Net Dealer ----
+// ---- the downloads ----
 
 (async () => {
 	const repo = 'saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless';
@@ -62,12 +35,12 @@
 		release = (await res.json()).find((r) => !r.draft);
 		if (!release) throw new Error('none');
 	} catch (e) {
-		line.textContent = 'Out of stock: no release yet. Build them from the source.';
+		line.textContent = 'No release yet: build from the source.';
 		for (const a of document.querySelectorAll('[data-asset]')) a.setAttribute('aria-disabled', 'true');
 		return;
 	}
 	const date = new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-	line.textContent = `${release.name || release.tag_name} · released ${date}`;
+	line.textContent = `${release.name || release.tag_name} · ${date}`;
 	for (const a of document.querySelectorAll('[data-asset]')) {
 		const asset = release.assets.find((x) => x.name === a.dataset.asset);
 		if (!asset) { a.setAttribute('aria-disabled', 'true'); continue; }

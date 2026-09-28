@@ -5,9 +5,8 @@ main.wrap { padding-top: 28px; }
 .player { padding: 6px; }
 #stage {
 	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	display: grid;
+	place-items: center;
 	min-height: 360px;
 	background: #000;
 	box-shadow: 0 0 0 var(--u) #21738c;
@@ -15,6 +14,8 @@ main.wrap { padding-top: 28px; }
 }
 #stage:fullscreen { min-height: 100vh; }
 
+/* the picture and the gate share one cell, so the gate's text grows the stage */
+#screen, #gate { grid-area: 1 / 1; }
 #screen {
 	display: block;
 	image-rendering: pixelated;
@@ -24,8 +25,8 @@ main.wrap { padding-top: 28px; }
 
 /* the ROM gate: the PET's navy screen */
 #gate {
-	position: absolute;
-	inset: 0;
+	align-self: stretch;
+	justify-self: stretch;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;

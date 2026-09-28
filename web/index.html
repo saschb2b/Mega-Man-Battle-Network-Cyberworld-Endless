@@ -22,288 +22,102 @@
 	<div class="wrap">
 		<a class="brand" href="./"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
 		<nav aria-label="Sections">
-			<a class="opt" href="#run">Run</a>
-			<a class="opt" href="#folder">Folder</a>
-			<a class="opt" href="#navis">Navis</a>
-			<a href="#shop">Shop</a>
-			<a href="play/">Jack in</a>
+			<a class="opt" href="#game">Game</a>
+			<a href="#play">Play</a>
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source</a>
 		</nav>
 	</div>
 </header>
 
 <main>
 	<section class="hero">
-		<div class="wrap pet-main">
-			<div class="select">
-				<span class="label">Select</span>
-				<ul class="menu">
-					<li class="on"><a class="plate" href="play/"><i class="icon i-play" aria-hidden="true"></i>Jack in</a></li>
-					<li><a class="plate" href="#shop"><i class="icon i-get" aria-hidden="true"></i>Download</a></li>
-					<li><a class="plate" href="#run"><i class="icon i-layers" aria-hidden="true"></i>The run</a></li>
-					<li><a class="plate" href="#folder"><i class="icon i-chip" aria-hidden="true"></i>Folder</a></li>
-					<li><a class="plate" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless"><i class="icon i-code" aria-hidden="true"></i>Source</a></li>
-				</ul>
-			</div>
+		<div class="wrap">
 			<figure class="frame x2 hero-screen">
 				<video class="clip" muted loop playsinline preload="none" poster="clips/title.png" width="240" height="160"
-					aria-label="The title screen: the Battle Network logo with an infinity mark and the plate Cyberworld Endless, over scrolling battle backgrounds"><source src="clips/title.webm" type="video/webm"><source src="clips/title.mp4" type="video/mp4"></video>
+					aria-label="The title screen: the Battle Network logo with an infinity mark and the plate Cyberworld Endless"><source src="clips/title.webm" type="video/webm"><source src="clips/title.mp4" type="video/mp4"></video>
 			</figure>
-			<div class="panel status">
-				<div class="stat"><span class="label">Depth</span><b>∞</b></div>
-				<div class="stat"><span class="label">Areas</span><b>19</b></div>
-				<div class="stat"><span class="label">Navis</span><b>17</b></div>
-				<div class="stat"><span class="label">Price</span><b>0z</b></div>
-			</div>
-		</div>
-		<div class="wrap intro">
-			<span class="who">Navigator</span>
-			<div class="textbox">
-				<p>A roguelike on Mega Man Battle Network 6. Every run builds a new net in the style of BN6's areas, and
-					the game runs it: its battles, chips, Navis and music. Go as deep as you can. You need your own ROM.</p>
+			<p class="pitch">A roguelike on Mega Man Battle Network 6. Every run builds a new net in the style of BN6's areas,
+				and the game itself runs it.</p>
+			<div class="actions">
+				<a class="exit" href="play/">Jack in</a>
+				<a class="plate" href="#play"><i class="icon i-get" aria-hidden="true"></i>Download</a>
 			</div>
 		</div>
 	</section>
 
-	<section id="run">
+	<section id="game">
 		<div class="wrap">
-			<div class="band"><h2>The run</h2><span class="hint">Acts <b>6+1</b></span></div>
-			<div class="grid-3 steps">
-				<div>
-					<figure class="frame"><img src="shots/act-card.png" width="240" height="160" loading="lazy"
-						alt="Act 1: RoboDog Comp, Circuits of a home comp, Guardian: BlastMan"></figure>
-					<span class="pill gold">1 · Act</span>
-					<div class="textbox"><p>An act is three layers in one area. Its card names the guardian at the end.</p></div>
-				</div>
-				<div>
-					<figure class="frame">
-						<video class="clip" muted loop playsinline preload="none" poster="clips/net.png" width="240" height="160"
-							aria-label="MegaMan walking a generated layer of Robot Control Comp"><source src="clips/net.webm" type="video/webm"><source src="clips/net.mp4" type="video/mp4"></video>
-					</figure>
-					<span class="pill gold">2 · Layer</span>
-					<div class="textbox"><p>Each layer is a new map, laid out after the area's own. Mystery Data, shops,
-						and a pad down to the next layer.</p></div>
-				</div>
-				<div>
-					<figure class="frame">
-						<video class="clip" muted loop playsinline preload="none" poster="clips/guardian.png" width="240" height="160"
-							aria-label="MegaMan steps into the arena: BlastMan's title card, then his first words"><source src="clips/guardian.webm" type="video/webm"><source src="clips/guardian.mp4" type="video/mp4"></video>
-					</figure>
-					<span class="pill gold">3 · Guardian</span>
-					<div class="textbox"><p>The third layer ends in an arena. Delete its Navi to go on to the next area.</p></div>
-				</div>
-			</div>
-			<span class="who">Navigator</span>
-			<div class="textbox"><p>A run starts in town: Central Town or ACDC Town, set out anew each time. Lan jacks
-				MegaMan in at the statue.</p><p>After six acts comes the Cybeast Nest at layer 19. Then the cycle starts again, harder.
-				The run is saved on every new layer. If MegaMan is deleted, the run is over.</p></div>
-		</div>
-	</section>
-
-	<section id="folder">
-		<div class="wrap">
-			<div class="band"><h2>Folder</h2><span class="hint">Screens <b>13</b></span></div>
-			<div class="folder">
-				<div class="panel list">
-					<div class="list-head"><span class="label">Screens</span><span class="mb">13/13</span></div>
-					<ol class="rows" id="chips">
-						<li><button class="row" type="button" data-shot="title" data-code="T" data-text="The title screen. The areas' battle backgrounds scroll behind it.">Title</button></li>
-						<li><button class="row" type="button" data-shot="town-central" data-code="L" data-text="Lan outside his house in Central Town. The run begins here.">CentrlTwn</button></li>
-						<li><button class="row" type="button" data-shot="town-acdc" data-code="M" data-text="ACDC Town, off the Metroline: Higsby's and the squirrel statue.">ACDCTown</button></li>
-						<li><button class="row" type="button" data-shot="act-card" data-code="A" data-text="An act begins: the area, its motto and its guardian.">ActCard</button></li>
-						<li><button class="row" type="button" data-shot="net" data-code="N" data-text="A generated layer of Sky HP.">NetLayer</button></li>
-						<li><button class="row" type="button" data-shot="custom" data-code="C" data-text="The Custom screen.">Custom</button></li>
-						<li><button class="row" type="button" data-shot="battle" data-code="B" data-text="BATTLE START against a Gunner and a FgtrPlne.">Battle</button></li>
-						<li><button class="row" type="button" data-shot="result" data-code="R" data-text="The result: Busting Level and zenny.">Result</button></li>
-						<li><button class="row" type="button" data-shot="guardian" data-code="G" data-text="Sky HP's guardian logs in.">Guardian</button></li>
-						<li><button class="row" type="button" data-shot="guardian-talk" data-code="D" data-text="DiveMan speaks before the battle.">DiveMan</button></li>
-						<li><button class="row" type="button" data-shot="boss-custom" data-code="X" data-text="The battle against DiveMan.">NaviBtl</button></li>
-						<li><button class="row" type="button" data-shot="reward" data-code="D" data-text="Guardian Data: five HPMemory and DiveMan's chip.">NaviChip</button></li>
-						<li><button class="row" type="button" data-shot="restored" data-code="H" data-text="HP restored before the next area.">Recover</button></li>
-					</ol>
-				</div>
-				<div class="card chip">
-					<div class="chip-top"><b id="chip-name">Title</b><span id="chip-code" class="code">T</span></div>
-					<figure class="frame x2"><img id="chip-shot" src="shots/title.png" width="240" height="160" alt=""></figure>
-					<p id="chip-text" class="chip-text" aria-live="polite">The title screen. The areas' battle backgrounds scroll behind it.</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section id="battle">
-		<div class="wrap">
-			<div class="band"><h2>Battle</h2><span class="hint">V1 to SP</span></div>
-			<div class="grid-2">
-				<figure class="frame x2">
+			<div class="grid-3 clips">
+				<figure class="frame">
+					<video class="clip" muted loop playsinline preload="none" poster="clips/net.png" width="240" height="160"
+						aria-label="MegaMan walking a generated layer of Robot Control Comp"><source src="clips/net.webm" type="video/webm"><source src="clips/net.mp4" type="video/mp4"></video>
+					<figcaption class="pill">A new net every run</figcaption>
+				</figure>
+				<figure class="frame">
 					<video class="clip" muted loop playsinline preload="none" poster="clips/battle.png" width="240" height="160"
 						aria-label="A battle from BATTLE START to the RESULT window"><source src="clips/battle.webm" type="video/webm"><source src="clips/battle.mp4" type="video/mp4"></video>
+					<figcaption class="pill">BN6's own battles</figcaption>
 				</figure>
-				<div>
-					<span class="who">Navigator</span>
-					<div class="textbox">
-						<p>Random battles use BN6's virus formations from the area's maps.</p>
-						<p>Depth sets how strong they are. Each battle's virus HP and hardest hit are checked against the HP
-							MegaMan should have by then, and the viruses come at the highest version that fits.</p>
-						<p>The first battles of a run, and those after a guardian, are easier. A Server offers a harder battle
-							for a better chip.</p>
-					</div>
-					<ul class="pills"><li class="pill gold">V1</li><li class="pill gold">V2</li><li class="pill gold">V3</li><li class="pill gold">SP</li></ul>
-				</div>
+				<figure class="frame">
+					<video class="clip" muted loop playsinline preload="none" poster="clips/guardian.png" width="240" height="160"
+						aria-label="MegaMan steps into the arena: BlastMan's title card, then his first words"><source src="clips/guardian.webm" type="video/webm"><source src="clips/guardian.mp4" type="video/mp4"></video>
+					<figcaption class="pill gold">A Navi ends each act</figcaption>
+				</figure>
 			</div>
-		</div>
-	</section>
-
-	<section id="navis">
-		<div class="wrap">
-			<div class="band"><h2>Navis</h2><span class="hint">Guardians <b>17</b></span></div>
-			<div class="grid-2">
-				<div>
-					<span class="who">Navigator</span>
-					<div class="textbox">
-						<p>Each area has its guardians. BlastMan, DiveMan or SpoutMan come first; Colonel appears from the
-							fourth act. A guardian remembers whether it won or lost the last time you met.</p>
-						<p>Deleting one gives five HPMemory, its Navi chip and a full heal. HeatMan, ElecMan, SlashMan, EraseMan
-							and ChargeMan also give their Cross.</p>
-					</div>
-					<ul class="pills">
-						<li class="pill">BlastMan</li><li class="pill">DiveMan</li><li class="pill">SpoutMan</li><li class="pill">HeatMan</li>
-						<li class="pill">CircusMan</li><li class="pill">SlashMan</li><li class="pill">EraseMan</li><li class="pill">TenguMan</li>
-						<li class="pill">JudgeMan</li><li class="pill">ElecMan</li><li class="pill">DustMan</li><li class="pill">ElementMan</li>
-						<li class="pill">ChargeMan</li><li class="pill">TomahawkMan</li><li class="pill">GroundMan</li><li class="pill">Colonel</li>
-						<li class="pill">ProtoMan</li>
-					</ul>
-				</div>
-				<div class="stack">
-					<figure class="frame x2"><img src="shots/guardian-talk.png" width="240" height="160" loading="lazy" alt="BlastMan in the arena: KABOOM! Came for the show?"></figure>
-					<figure class="frame x2"><img src="shots/reward.png" width="240" height="160" loading="lazy" alt="MegaMan got: BlastMan B!!"></figure>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section id="net">
-		<div class="wrap">
-			<div class="band"><h2>Net areas</h2><span class="hint">Areas <b>19</b></span></div>
 			<div class="areas">
-				<figure class="frame"><img src="shots/central.png" width="240" height="160" loading="lazy" alt="Central Area 1"><figcaption class="pill">Central Area</figcaption></figure>
-				<figure class="frame"><img src="shots/seaside.png" width="240" height="160" loading="lazy" alt="Seaside Area 1"><figcaption class="pill">Seaside Area</figcaption></figure>
-				<figure class="frame"><img src="shots/green.png" width="240" height="160" loading="lazy" alt="Green Area 1"><figcaption class="pill">Green Area</figcaption></figure>
+				<figure class="frame"><img src="shots/central.png" width="240" height="160" loading="lazy" alt="Central Area"><figcaption class="pill">Central Area</figcaption></figure>
+				<figure class="frame"><img src="shots/seaside.png" width="240" height="160" loading="lazy" alt="Seaside Area"><figcaption class="pill">Seaside Area</figcaption></figure>
+				<figure class="frame"><img src="shots/green.png" width="240" height="160" loading="lazy" alt="Green Area"><figcaption class="pill">Green Area</figcaption></figure>
 				<figure class="frame">
 					<video class="clip" muted loop playsinline preload="none" poster="clips/undernet.png" width="240" height="160"
 						aria-label="MegaMan walking a layer of the Undernet"><source src="clips/undernet.webm" type="video/webm"><source src="clips/undernet.mp4" type="video/mp4"></video>
 					<figcaption class="pill gold">Undernet</figcaption>
 				</figure>
 				<figure class="frame"><img src="shots/graveyard.png" width="240" height="160" loading="lazy" alt="The Graveyard"><figcaption class="pill gold">Graveyard</figcaption></figure>
-				<figure class="frame"><img src="shots/nest.png" width="240" height="160" loading="lazy" alt="Underground 2, the Cybeast Nest"><figcaption class="pill gold">Cybeast Nest</figcaption></figure>
-			</div>
-			<span class="who">Navigator</span>
-			<div class="textbox"><p>The first four acts are drawn from 15 areas, the easier ones first. Then come the Undernet,
-				the Graveyard and the Cybeast Nest. Three ScrtData open the gate to the Secret Area.</p></div>
-			<ul class="pills">
-				<li class="pill">Central Area</li><li class="pill">Robot Control Comp</li><li class="pill">Aquarium Comp</li><li class="pill">Sky HP</li>
-				<li class="pill">RoboDog Comp</li><li class="pill">Seaside Area</li><li class="pill">Judge Tree Comp</li><li class="pill">Green Area</li>
-				<li class="pill">Green HP</li><li class="pill">Homepages</li><li class="pill">Lab Comps</li><li class="pill">Sky Area</li>
-				<li class="pill">Mr. Weather Comp</li><li class="pill">ACDC HP</li><li class="pill">CopyBot's Comp</li>
-				<li class="pill gold">Undernet</li><li class="pill gold">Graveyard</li><li class="pill gold">Cybeast Nest</li><li class="pill gold">Secret Area</li>
-			</ul>
-		</div>
-	</section>
-
-	<section id="jack-in">
-		<div class="wrap">
-			<div class="band"><h2>Jack in</h2><span class="hint">Browser</span></div>
-			<div class="grid-2">
-				<div class="panel jack">
-					<figure class="frame">
-						<video class="clip" muted loop playsinline preload="none" poster="clips/jackin.png" width="240" height="160"
-							aria-label="NEW GAME is chosen and the screen flashes white"><source src="clips/jackin.webm" type="video/webm"><source src="clips/jackin.mp4" type="video/mp4"></video>
-					</figure>
-					<a class="exit" href="play/">Jack in</a>
-				</div>
-				<div>
-					<span class="who">Navigator</span>
-					<div class="textbox">
-						<p>You need Mega Man Battle Network 6: Cybeast Gregar (USA), an unmodified <code>.gba</code>.</p>
-						<p>SHA-1 <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code></p>
-						<p>The player checks the file and keeps it in your browser with your saves. It is never uploaded.</p>
-					</div>
-					<div class="panel keys">
-						<dl>
-							<dt>Move</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dd>
-							<dt>A</dt><dd><kbd>J</kbd></dd>
-							<dt>B</dt><dd><kbd>K</kbd></dd>
-							<dt>L R</dt><dd><kbd>Q</kbd><kbd>E</kbd></dd>
-							<dt>Start</dt><dd><kbd>Enter</kbd></dd>
-							<dt>Select</dt><dd><kbd>R</kbd></dd>
-						</dl>
-						<p>The layout of Capcom's PC version. Arrows, X and Z work too, and controllers. Desktop browsers only.</p>
-					</div>
-				</div>
+				<figure class="frame"><img src="shots/nest.png" width="240" height="160" loading="lazy" alt="The Cybeast Nest"><figcaption class="pill gold">Cybeast Nest</figcaption></figure>
 			</div>
 		</div>
 	</section>
 
-	<section id="shop">
+	<section id="play">
 		<div class="wrap">
-			<div class="band"><h2>Net Dealer</h2><span class="hint">Zenny <b>0z</b></span></div>
+			<div class="band"><h2>Play</h2></div>
 			<div class="panel shop">
-				<p class="release" id="release-line">Latest release</p>
+				<p class="rom">Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>,
+					SHA-1 <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code>. None contains game data.</p>
 				<ul class="rows">
 					<li class="row good">
+						<i class="icon i-play" aria-hidden="true"></i>
+						<span class="what"><b>Browser</b><small>Desktop browsers. The ROM stays in your browser.</small></span>
+						<a class="exit small" href="play/">Jack in</a>
+					</li>
+					<li class="row good">
 						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>PortMaster port</b><small>ROCKNIX handhelds. Made for the Retroid Nova and Pocket Flip 2.</small></span>
-						<span class="price">0z</span>
+						<span class="what"><b>PortMaster port</b><small>ROCKNIX handhelds (Retroid Nova, Pocket Flip 2)</small></span>
 						<a class="exit small" data-asset="cyberworld.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
 					<li class="row good">
 						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>Linux AppImage</b><small>Any x86-64 distribution. Adds itself to your app menu.</small></span>
-						<span class="price">0z</span>
+						<span class="what"><b>Linux AppImage</b><small>x86-64</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-x86_64.AppImage" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
 					<li class="row good">
 						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>Flatpak</b><small>Steam Deck (open it in Discover) and any Linux with Flatpak.</small></span>
-						<span class="price">0z</span>
+						<span class="what"><b>Flatpak</b><small>Steam Deck and Linux</small></span>
 						<a class="exit small" data-asset="cyberworld-endless.flatpak" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
 					<li class="row good">
 						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Linux .deb</b><small>Debian, Ubuntu, Mint, Pop!_OS. Installs like any package.</small></span>
-						<span class="price">0z</span>
+						<span class="what"><b>Linux .deb</b><small>Debian, Ubuntu</small></span>
 						<a class="exit small" data-asset="cyberworld-endless_amd64.deb" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
 					<li class="row good">
 						<i class="icon i-web" aria-hidden="true"></i>
-						<span class="what"><b>Web build</b><small>This site's player, to host yourself.</small></span>
-						<span class="price">0z</span>
+						<span class="what"><b>Web build</b><small>The browser player, to host yourself</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-web.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
-						<i class="icon i-code" aria-hidden="true"></i>
-						<span class="what"><b>Source</b><small>C11, SDL2 and mGBA. <code>python3 build.py release</code> builds all of the above.</small></span>
-						<span class="price">0z</span>
-						<a class="exit small" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Open</a>
-					</li>
 				</ul>
-			</div>
-			<span class="who">Mr. Prog</span>
-			<div class="textbox"><p>None of these contain game data. Put your own ROM next to them. Each release lists its
-				SHA-256 checksums.</p></div>
-		</div>
-	</section>
-
-	<section id="mail">
-		<div class="wrap">
-			<div class="band"><h2>E-Mail</h2><span class="hint">Docs <b>5</b></span></div>
-			<div class="panel">
-				<ul class="rows mail">
-					<li><a class="row" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md"><i class="icon i-mail" aria-hidden="true"></i><span>How the engine drives the game</span><small>Emulation</small></a></li>
-					<li><a class="row" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/LEVEL_DESIGN.md"><i class="icon i-mail" aria-hidden="true"></i><span>How layers follow BN6's maps</span><small>Level design</small></a></li>
-					<li><a class="row" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/PROGRESSION.md"><i class="icon i-mail" aria-hidden="true"></i><span>How hard each layer is</span><small>Progression</small></a></li>
-					<li><a class="row" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md"><i class="icon i-mail" aria-hidden="true"></i><span>What comes from BN6 and what is new</span><small>Fidelity</small></a></li>
-					<li><a class="row" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/CHANGELOG.md"><i class="icon i-mail" aria-hidden="true"></i><span>Changes</span><small>Changelog</small></a></li>
-				</ul>
+				<p class="release" id="release-line"></p>
 			</div>
 		</div>
 	</section>
@@ -311,7 +125,9 @@
 
 <footer class="site">
 	<div class="wrap">
-		<p>Cyberworld Endless · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">GitHub</a> ·
+		<p><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source</a> ·
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/CHANGELOG.md">Changelog</a> ·
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md">How it works</a> ·
 			<a href="LICENSE.txt">MIT license</a></p>
 		<p>Mega Man Battle Network is © Capcom. This is an unofficial fan project, not affiliated with or endorsed by
 			Capcom, and it contains no game data. The pictures are screenshots of the game running from a player's ROM.
