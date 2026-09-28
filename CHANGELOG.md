@@ -21,7 +21,7 @@
   is rolled again every few seconds, and each roll had taken the last
   one's place in memory, so a Server's viruses could come straight back
   (a HnyBmbr2 and MegaCorn, then a HonyBmbr and BombCorn).
-- An L or R pressed up to most of a second before the Custom gauge fills
+- An L or R pressed up to a second and a half before the Custom gauge fills
   opens the Custom screen as it fills, and a press the game let pass while
   MegaMan fired or was hit is pressed again until the screen opens (half a
   second had been the limit, and a hit as the gauge filled lost the press).
