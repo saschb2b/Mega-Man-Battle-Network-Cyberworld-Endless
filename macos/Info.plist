@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The app bundle's (build.py macos fills in the version) -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Cyberworld Endless</string>
+	<key>CFBundleDisplayName</key>
+	<string>Cyberworld Endless</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless</string>
+	<key>CFBundleExecutable</key>
+	<string>cyberworld-endless</string>
+	<key>CFBundleIconFile</key>
+	<string>icon</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@SHORT_VERSION@</string>
+	<key>CFBundleVersion</key>
+	<string>@SHORT_VERSION@</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Cyberworld Endless @VERSION@</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.role-playing-games</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>GCSupportsControllerUserInteraction</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>MIT license. Mega Man Battle Network is © Capcom; unofficial, not affiliated.</string>
+</dict>
+</plist>

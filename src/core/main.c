@@ -51,7 +51,8 @@ static void make_dirs(const char *path) {
 }
 
 /* $XDG_DATA_HOME/cyberworld-endless, or ~/.local/share/cyberworld-endless;
- * on Windows %LOCALAPPDATA%\cyberworld-endless */
+ * on Windows %LOCALAPPDATA%\cyberworld-endless, on macOS
+ * ~/Library/Application Support/cyberworld-endless */
 static void desktop_data_dir(char *out, size_t n) {
 #ifdef _WIN32
 	const char *local = getenv("LOCALAPPDATA");
@@ -59,6 +60,10 @@ static void desktop_data_dir(char *out, size_t n) {
 	else snprintf(out, n, ".");
 	for (char *c = out; *c; ++c)
 		if (*c == '\\') *c = '/';
+#elif defined(__APPLE__)
+	const char *home = getenv("HOME");
+	if (home && *home) snprintf(out, n, "%s/Library/Application Support/cyberworld-endless", home);
+	else snprintf(out, n, ".");
 #else
 	const char *xdg = getenv("XDG_DATA_HOME"), *home = getenv("HOME");
 	if (xdg && *xdg == '/') snprintf(out, n, "%s/cyberworld-endless", xdg);

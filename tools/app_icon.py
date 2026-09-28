@@ -3,7 +3,8 @@
 with the title's infinity mark, drawn from code (nothing from the ROM).
 
 Writes linux/icons/<size>.png (32 to 512, whole-number scales),
-windows/icon.ico (the .exe's and the installer's) and src/core/app_icon.h
+windows/icon.ico (the .exe's and the installer's), macos/icon.icns (the
+app bundle's) and src/core/app_icon.h
 (the 32x32 pixels, for the window icon). Run it after changing the drawing;
 the outputs are committed.
 
@@ -102,6 +103,13 @@ def main():
     ico = [im.resize((s, s), Image.NEAREST) for s in (256, 128, 64, 32)] + [im.resize((16, 16), Image.LANCZOS)]
     os.makedirs(os.path.join(ROOT, 'windows'), exist_ok=True)
     ico[0].save(os.path.join(ROOT, 'windows', 'icon.ico'), sizes=[i.size for i in ico], append_images=ico[1:])
+    # the Mac's, 16 to 1024: the tile at 26x in the middle of Apple's grid
+    # (a 1024 canvas with its body about 830 wide), so the Dock shows it the
+    # size of the others
+    mac = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
+    mac.paste(im.resize((N * 26, N * 26), Image.NEAREST), ((1024 - N * 26) // 2,) * 2)
+    os.makedirs(os.path.join(ROOT, 'macos'), exist_ok=True)
+    mac.save(os.path.join(ROOT, 'macos', 'icon.icns'))
     px = list(im.tobytes())
     lines = [', '.join(f'0x{b:02x}' for b in px[i:i + 16]) for i in range(0, len(px), 16)]
     with open(os.path.join(ROOT, 'src', 'core', 'app_icon.h'), 'w') as f:
@@ -109,7 +117,7 @@ def main():
         f.write('#pragma once\n#include <stdint.h>\n\n')
         f.write(f'enum {{ APP_ICON_SIZE = {N} }};\n')
         f.write(f'static const uint8_t app_icon_rgba[{len(px)}] = {{\n\t' + ',\n\t'.join(lines) + '\n};\n')
-    print('wrote linux/icons, windows/icon.ico and src/core/app_icon.h')
+    print('wrote linux/icons, windows/icon.ico, macos/icon.icns and src/core/app_icon.h')
 
 
 if __name__ == '__main__':

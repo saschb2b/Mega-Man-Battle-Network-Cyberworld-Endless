@@ -1,7 +1,8 @@
 # A version tag (v1.0.0) builds the release files and publishes them as a
 # GitHub release: the PortMaster port, the Linux desktop build (AppImage with
 # its .zsync, .deb and tar.gz, and a Flatpak bundle), the Windows build (an
-# installer and a zip) and the browser build as a site to serve anywhere.
+# installer and a zip), the macOS app (a .dmg) and the browser build as a
+# site to serve anywhere.
 # None holds game data.
 name: Release
 
@@ -47,8 +48,21 @@ jobs:
           name: flatpak
           path: cyberworld-endless.flatpak
 
+  # the macOS app, on a Mac (Apple's SDK)
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - run: python3 build.py macos
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: build/release/cyberworld-endless-macos.dmg
+
   release:
-    needs: flatpak
+    needs: [flatpak, macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -70,12 +84,16 @@ jobs:
         with:
           name: flatpak
           path: build/release
+      - uses: actions/download-artifact@v4
+        with:
+          name: macos
+          path: build/release
       - name: Checksums
         working-directory: build/release
         run: >
           sha256sum cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb
           cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe
-          cyberworld-endless-windows-x64.zip cyberworld-endless-web.zip > SHA256SUMS.txt
+          cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless-web.zip > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
       # section); a 0.x version is an alpha, published as a pre-release
       - name: Notes
@@ -92,4 +110,5 @@ jobs:
             build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb \
             build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless.flatpak \
             build/release/cyberworld-endless-setup-x64.exe build/release/cyberworld-endless-windows-x64.zip \
+            build/release/cyberworld-endless-macos.dmg \
             build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt

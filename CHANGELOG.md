@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **macOS:** one app for Apple silicon and Intel Macs (macOS 11 on) in a
+  .dmg, built on a Mac by CI. It is signed ad hoc, not notarized: the first
+  start needs Open Anyway in System Settings. The ROM is found in Downloads
+  or chosen in the Mac's own open panel; saves live in
+  `~/Library/Application Support/cyberworld-endless`.
 - **Windows:** a build for 64-bit Windows 10 and 11, as an installer (for
   the user, no administrator; Start menu, desktop shortcut, uninstall in
   Settings > Apps) and as a zip to unpack anywhere. One .exe with SDL2 and

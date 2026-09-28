@@ -4,6 +4,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
+#ifndef GLOB_ONLYDIR
+#define GLOB_ONLYDIR 0   /* (a GNU flag: elsewhere a file matches too, and rom_find passes over it) */
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -201,6 +204,11 @@ static int ask(const char *text, const char *const *labels, int n) {
 /* ---- the ROM ---- */
 
 static bool choose_file(char *path, size_t n) {
+#ifdef __APPLE__
+	/* (macOS: its own open panel, through AppleScript) */
+	char *argv[] = { "osascript", "-e", "POSIX path of (choose file with prompt \"Choose your Mega Man Battle Network 6 ROM\")", NULL };
+	return run(argv, path, n) && path[0];
+#else
 	if (on_path("zenity")) {
 		char *argv[] = { "zenity", "--file-selection", "--title=Choose your Mega Man Battle Network 6 ROM",
 			"--file-filter=GBA ROM | *.gba *.GBA", "--file-filter=All files | *", NULL };
@@ -213,11 +221,16 @@ static bool choose_file(char *path, size_t n) {
 		return run(argv, path, n) && path[0];
 	}
 	return false;
+#endif
 }
 
 int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
 	/* with a file chooser: choose it; without, open the folder to put it in */
+#ifdef __APPLE__
+	bool picker = true;
+#else
 	bool picker = on_path("zenity") || on_path("kdialog");
+#endif
 	for (;;) {
 		/* the reason, unless it is only that the folder holds no ROM */
 		char text[1800], why[700] = "";
@@ -243,7 +256,11 @@ int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgle
 			return 1;
 		}
 		if (hit == 0) {
+#ifdef __APPLE__
+			char *argv[] = { "open", (char *)rom_dir, NULL };
+#else
 			char *argv[] = { "xdg-open", (char *)rom_dir, NULL };
+#endif
 			run(argv, NULL, 0);
 		}
 		if (scan(msg, msglen)) return 1;

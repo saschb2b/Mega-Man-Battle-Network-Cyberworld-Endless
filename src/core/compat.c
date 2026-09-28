@@ -1,10 +1,15 @@
 /* compat.h */
 #include "compat.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(__APPLE__)
+#include <limits.h>
+#include <mach-o/dyld.h>
+#include <stdlib.h>
 #else
 #include <unistd.h>
 #endif
@@ -17,6 +22,15 @@ bool cw_exe_path(char *out, size_t n) {
 	if (WideCharToMultiByte(CP_UTF8, 0, w, -1, out, (int)n, NULL, NULL) <= 0) return false;
 	for (char *c = out; *c; ++c)
 		if (*c == '\\') *c = '/';
+	return true;
+#elif defined(__APPLE__)
+	char path[PATH_MAX];
+	uint32_t size = sizeof path;
+	if (_NSGetExecutablePath(path, &size) != 0) return false;
+	char *real = realpath(path, NULL);
+	if (!real) return false;
+	snprintf(out, n, "%s", real);
+	free(real);
 	return true;
 #else
 	ssize_t len = readlink("/proc/self/exe", out, n - 1);

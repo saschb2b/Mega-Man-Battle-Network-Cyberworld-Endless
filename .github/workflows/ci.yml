@@ -118,6 +118,35 @@ jobs:
             build/release/cyberworld-endless-setup-x64.exe
           retention-days: 14
 
+  macos:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      # (SDL2 and mGBA, universal and static: rebuilt when macos/deps.sh changes)
+      - uses: actions/cache@v4
+        with:
+          path: .build/macos-deps
+          key: macos-deps-${{ hashFiles('macos/deps.sh') }}
+      - run: python3 build.py macos
+      - name: One app for Apple silicon and Intel that starts
+        run: |
+          app="build/macos/Cyberworld Endless.app"
+          bin="$app/Contents/MacOS/cyberworld-endless"
+          lipo -archs "$bin" | tee /dev/stderr | grep -q 'x86_64 arm64'
+          if otool -L "$bin" | tail -n +2 | grep -vE '^[[:space:]]+(/System/Library/|/usr/lib/)'; then
+            echo "links a library macOS does not have"; exit 1
+          fi
+          codesign --verify --deep --strict "$app"
+          "$bin" --headless --scene norom --data-dir "$RUNNER_TEMP/data" --frames 30 --shot "20:$RUNNER_TEMP/norom.bmp"
+          test -s "$RUNNER_TEMP/norom.bmp"
+          hdiutil verify build/release/cyberworld-endless-macos.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-macos
+          path: build/release/cyberworld-endless-macos.dmg
+          retention-days: 14
+
   web:
     name: Browser
     runs-on: ubuntu-latest
@@ -141,7 +170,7 @@ jobs:
   pages:
     name: Publish on GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, handheld, linux, windows, web]
+    needs: [test, handheld, linux, windows, macos, web]
     runs-on: ubuntu-latest
     permissions:
       pages: write

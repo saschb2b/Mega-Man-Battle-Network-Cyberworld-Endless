@@ -88,7 +88,7 @@ void sha1_hex(const uint8_t *data, size_t len, char out[41]) {
 	for (int k = 0; k < 8; ++k) tail[tl - 1 - k] = (uint8_t)(bits >> (8 * k));
 	sha1_block(&s, tail);
 	if (tl == 128) sha1_block(&s, tail + 64);
-	for (int k = 0; k < 5; ++k) sprintf(out + k * 8, "%08x", s.h[k]);
+	for (int k = 0; k < 5; ++k) snprintf(out + k * 8, 9, "%08x", s.h[k]);
 }
 
 /* ---- LZ77 ---- */

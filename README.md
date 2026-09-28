@@ -53,14 +53,15 @@ around it, one layer at a time, and keeps the run going.
 
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
 Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays in a
-window on a Linux or Windows PC and in a desktop browser at
+window on a Linux or Windows PC or a Mac and in a desktop browser at
 [saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/).
 
 ## What you need
 
 - A handheld running ROCKNIX with PortMaster installed, a Steam Deck, an
   x86-64 Linux PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35
-  and later), a 64-bit Windows 10 or 11 PC, or a current desktop browser.
+  and later), a 64-bit Windows 10 or 11 PC, a Mac with macOS 11 or newer
+  (Apple silicon or Intel), or a current desktop browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -134,6 +135,18 @@ too (uninstalling leaves them). It opens in a window at the largest whole
 scale that fits; F11 or Alt+Enter switches to fullscreen. Keyboards and
 controllers (Xbox, PlayStation, Switch) work as on Linux. Steam's own **Add
 a Non-Steam Game** takes `cyberworld-endless.exe`.
+
+### On a Mac
+
+`cyberworld-endless-macos.dmg` from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) holds one app for Apple
+silicon and Intel Macs, macOS 11 and newer: drag **Cyberworld Endless** into
+Applications. Apple has not notarized it (that takes a paid developer
+account), so the first start is refused: open **System Settings > Privacy &
+Security**, choose **Open Anyway** beside Cyberworld Endless and confirm (on
+macOS 14 and older, Control-click the app and choose **Open**). The first
+start looks for the ROM in Downloads and asks for the file if it is not
+there; the ROM's copy, the saves and `keys.ini` live in
+`~/Library/Application Support/cyberworld-endless/`.
 
 ### On a Steam Deck
 

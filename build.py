@@ -15,6 +15,8 @@ glibc runs on more distributions.
   python3 build.py windows      the Windows build (build/windows, MinGW-w64 in
                                 `cyberworld-windows`) and its release files in
                                 build/release: a zip and an installer (NSIS)
+  python3 build.py macos        the macOS app in a .dmg (build/release), on a Mac:
+                                SDL2 and mGBA built by macos/deps.sh
   python3 build.py flatpak      the Flatpak (linux/flatpak) built by flatpak-builder
                                 from this checkout and bundled in build/release
                                 (needs flatpak; see linux/flatpak/README.md)
@@ -168,6 +170,57 @@ def file_version():
     """The version as Windows keeps it, four numbers: 0.1.0+12 is 0,1,0,12."""
     m = re.match(r'(\d+)\.(\d+)\.(\d+)(?:\+(\d+))?', version())
     return ','.join(m.groups('0')) if m else '0,0,0,0'
+
+
+MACOS_DMG = 'cyberworld-endless-macos.dmg'
+
+
+def macos_release():
+    """build/release/cyberworld-endless-macos.dmg: the game as one app for Apple
+    silicon and Intel Macs (macOS 11 on), signed ad hoc, not notarized. Runs on
+    a Mac only, with Xcode's command line tools and CMake: the SDK is Apple's
+    (CI's macOS job builds it)."""
+    if sys.platform != 'darwin':
+        sys.exit('the macOS build runs on a Mac (CI: the macos job)')
+    deps = os.path.join(ROOT, '.build', 'macos-deps')
+    if not os.path.exists(os.path.join(deps, 'lib', 'libmgba.a')):
+        subprocess.check_call(['sh', os.path.join(ROOT, 'macos', 'deps.sh'), deps])
+    werror = ['WERROR=1'] if os.environ.get('CI') else []
+    if subprocess.call(['make', 'TARGET=macos', f'MACOS_DEPS={deps}', f'VERSION={version()}',
+                        f'-j{os.cpu_count() or 4}', *werror], cwd=ROOT) != 0:
+        sys.exit('macos build failed')
+    app = os.path.join(ROOT, 'build', 'macos', 'Cyberworld Endless.app')
+    shutil.rmtree(app, ignore_errors=True)
+    contents = os.path.join(app, 'Contents')
+    os.makedirs(os.path.join(contents, 'MacOS'))
+    os.makedirs(os.path.join(contents, 'Resources', 'licenses'))
+    shutil.copy2(os.path.join(ROOT, 'build', 'macos', 'cyberworld-endless'), os.path.join(contents, 'MacOS'))
+    shutil.copy2(os.path.join(ROOT, 'macos', 'icon.icns'), os.path.join(contents, 'Resources'))
+    short = '.'.join(file_version().split(',')[:3])
+    with open(os.path.join(ROOT, 'macos', 'Info.plist')) as f:
+        plist = f.read().replace('@SHORT_VERSION@', short).replace('@VERSION@', version())
+    with open(os.path.join(contents, 'Info.plist'), 'w') as f:
+        f.write(plist)
+    shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(contents, 'Resources', 'licenses', 'LICENSE.txt'))
+    for name in ('mGBA.txt', 'SDL2.txt'):
+        shutil.copy2(os.path.join(deps, 'share', 'licenses', name), os.path.join(contents, 'Resources', 'licenses'))
+    # (an ad hoc signature: Apple silicon runs nothing unsigned)
+    if subprocess.call(['codesign', '--force', '--deep', '--sign', '-', app]) != 0:
+        sys.exit('codesign failed')
+    stage = os.path.join(ROOT, 'build', 'macos-dmg')
+    shutil.rmtree(stage, ignore_errors=True)
+    os.makedirs(stage)
+    subprocess.check_call(['cp', '-R', app, stage])
+    os.symlink('/Applications', os.path.join(stage, 'Applications'))
+    shutil.copy2(os.path.join(ROOT, 'macos', 'README.txt'), os.path.join(stage, 'Read me.txt'))
+    os.makedirs(RELEASE, exist_ok=True)
+    out = os.path.join(RELEASE, MACOS_DMG)
+    if os.path.exists(out):
+        os.remove(out)
+    if subprocess.call(['hdiutil', 'create', '-volname', 'Cyberworld Endless', '-srcfolder', stage, '-ov',
+                        '-format', 'UDZO', out]) != 0:
+        sys.exit('hdiutil failed')
+    print('released', out)
 
 
 WINDOWS_ZIP = 'cyberworld-endless-windows-x64.zip'
@@ -937,7 +990,7 @@ def densest(im, w, h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'macos', 'flatpak', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -960,6 +1013,9 @@ def main():
         return
     if a.action == 'windows':
         windows_release()
+        return
+    if a.action == 'macos':
+        macos_release()
         return
     if a.action == 'flatpak':
         sys.exit(flatpak())

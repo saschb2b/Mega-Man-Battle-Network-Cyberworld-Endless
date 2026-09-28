@@ -7,6 +7,7 @@ CC_linux := gcc
 CC_flatpak := gcc
 CC_web := emcc
 CC_windows := x86_64-w64-mingw32-gcc
+CC_macos := clang
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
@@ -20,6 +21,7 @@ BIN_linux := $(OUT)/cyberworld
 BIN_flatpak := $(OUT)/cyberworld
 BIN_web := $(OUT)/cyberworld.js
 BIN_windows := $(OUT)/cyberworld-endless.exe
+BIN_macos := $(OUT)/cyberworld-endless
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -43,6 +45,17 @@ ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
+MGBA_LICENSE := /opt/mgba/LICENSE
+# macOS (build.py macos, on a Mac): SDL2 and mGBA from macos/deps.sh, both
+# universal and static, in MACOS_DEPS; one binary for Apple silicon and Intel
+ifeq ($(TARGET),macos)
+MACOS_DEPS ?= .build/macos-deps
+PKGCONF := true
+MGBA := $(MACOS_DEPS)
+MGBA_LICENSE := $(MACOS_DEPS)/share/licenses/mGBA.txt
+MAC_ARCH := -arch arm64 -arch x86_64 -mmacosx-version-min=11.0
+CFLAGS += $(MAC_ARCH) $(shell $(MACOS_DEPS)/bin/sdl2-config --cflags)
+endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
 MGBA := /app
@@ -50,8 +63,11 @@ endif
 CFLAGS += -I$(MGBA)/include
 LDLIBS += $(shell $(PKGCONF) --libs sdl2) $(MGBA)/lib/libmgba.a -lpthread -lm
 # the desktop builds: a window, the user's data folder (src/core/main.c)
-ifneq ($(filter host asan linux flatpak windows,$(TARGET)),)
+ifneq ($(filter host asan linux flatpak windows macos,$(TARGET)),)
 CFLAGS += -DCW_DESKTOP
+endif
+ifeq ($(TARGET),macos)
+LDLIBS := $(MGBA)/lib/libmgba.a $(shell $(MACOS_DEPS)/bin/sdl2-config --static-libs) $(MAC_ARCH)
 endif
 # 64-bit Windows (docker/Dockerfile.windows, MinGW-w64): SDL2 and mGBA linked
 # in, one .exe with no console window; its icon, manifest and version
@@ -83,7 +99,7 @@ endif
 all: $(BIN) $(OUT)/licenses/mGBA.txt
 
 # mGBA is MPL-2.0; its license ships with the port (source: github.com/mgba-emu/mgba, tag 0.10.5)
-$(OUT)/licenses/mGBA.txt: /opt/mgba/LICENSE
+$(OUT)/licenses/mGBA.txt: $(MGBA_LICENSE)
 	@mkdir -p $(dir $@)
 	cp $< $@
 
