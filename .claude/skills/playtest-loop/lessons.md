@@ -457,3 +457,30 @@ Loop change: **a session launched right after a report continues the
 run while its fixes are made**: s26 plays acts 2, 3 and the Nest on the
 same build, so the first win, its summary and the marks get a player's
 eyes while s25's fixes land for s27.
+
+## Session 26 (8/10, keep playing: yes; recommend: yes)
+
+Build ffd2921. CONTINUE of session 25's short-net run: act 2 in the Sky HP
+under SpoutMan (600 HP, won from 280 to 80, ElcPuls3 the dealer's answer
+for 281), HP+100 from the draft onto a 5x4 board, then act 3's first
+layer in CopyBot's Comp (258 calls). Act 2 took 9:27 against act 1's
+12.6 minutes: the short net fits a 45 to 50 minute sitting. Confirmed:
+the footer line, true warnings, the kept early R at 65-70 frames.
+
+Raised, fixed before the next pin: a Guardian Data program never installed
+(major: the draft said how only on a profile's first; the board's RAM is
+now read, docs/ROM_DATA.md, and L names a program left off it), a Net
+Dealer's counter beside a heal Prog taking the A (placement now keeps
+talkers apart, a test counts them), the dealer's greeting on every layer
+of an act, the act card naming a deleted guardian after a CONTINUE.
+Left: a sold-out row vanishing from the dealer's list and the Chip
+Trader's list shifting (BN6's shop menus), the NaviCust's own chores,
+services spread unevenly (six on one layer, two on others), a guardian's
+chip on the result screen and again in the Guardian Data talk (the battle
+reward's RAM is not yet known). Misread: SpoutMan's "You made waves last
+time" (rivals.sav: MegaMan deleted him in an earlier run; DiveMan, "new
+to me" in session 25, had been met three times).
+
+Loop change: **a persona's "never met" is checked against the save**: its
+memory is its diary, which does not reach back 26 sessions; the profile's
+rivals.sav answered both greetings in a minute.
