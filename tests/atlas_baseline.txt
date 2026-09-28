@@ -12,7 +12,7 @@ biome 1 layout 1 (x) depth 2 seed 8050: near 17.4, fallback 0.0, seams 119, not 
 biome 2 layout -1 (x) depth 3 seed 104731: near 9.3, fallback 0.0, seams 151, not exact 19, other colours 0
 biome 2 layout 0 (x) depth 2 seed 8181: near 9.1, fallback 0.0, seams 118, not exact 25, other colours 0
 biome 2 layout 3 (x) depth 2 seed 8181: near 10.5, fallback 0.0, seams 141, not exact 17, other colours 0
-biome 3 layout -1 (x) depth 3 seed 104732: near 10.4, fallback 0.0, seams 68, not exact 96, other colours 0
+biome 3 layout -1 (x) depth 3 seed 104732: near 9.5, fallback 0.0, seams 68, not exact 93, other colours 0
 biome 3 layout 0 (x) depth 2 seed 8312: near 4.6, fallback 0.0, seams 60, not exact 49, other colours 0
 biome 3 layout 2 (x) depth 2 seed 8312: near 7.1, fallback 0.0, seams 136, not exact 56, other colours 0
 biome 4 layout -1 (x) depth 3 seed 104733: near 32.7, fallback 0.0, seams 348, not exact 99, other colours 0
