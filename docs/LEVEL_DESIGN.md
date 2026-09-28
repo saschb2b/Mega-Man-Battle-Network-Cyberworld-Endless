@@ -303,10 +303,20 @@ A map loads at most 12 compressed sprites and 0x8800 bytes of them (the
 game's loader); a prop whose sprite no longer fits is left out whole, not
 shown as noise.
 
+### Pads' centrepieces (built)
+
+The originals' 3x3 pads carry a walkable ornament on their middle panel,
+second-layer art over the floor: the red gem (16 of them over the surface
+areas), the link ring and the cube on its round base, each 28 tiles, the
+same tiles in Central, Seaside, Green and Sky in each area's colours.
+`props_learn_ornament` finds them in an area's own maps by their tiles
+(0x379, 0x372, 0x375) and cuts each on the corner of the panel it lies
+on; `paste_ornaments` sets one on the middle of every pad at ground level
+with nothing standing there, the red gem three times in five, from the
+layer's seed (the floor and the layout unchanged).
+
 ### Next
 
-The pads' centrepieces (the red-gem ornament, the link ring, the cube on
-its base: second-layer tiles, walkable, on 3x3 pads), Green's potted
-bushes between parallel planks (tiles), the field pictures and a hub's
-centrepiece where the layout has a centre; each a stamp cut like the
-counters, set by the same rules.
+Green's potted bushes in the gaps between parallel planks (tiles, every
+second panel), the field pictures and a hub's centrepiece where the layout
+has a centre; each a stamp cut like the counters, set by the same rules.

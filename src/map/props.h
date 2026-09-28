@@ -30,6 +30,10 @@ typedef struct {
 /* Cuts the counter whose wall ring holds world (x, y) out of `a`, facing
  * `faces` (FACES_X: its front towards world +Y; FACES_Y: towards -X). */
 bool props_learn_counter(const AreaSrc *a, int x, int y, int faces, PropStamp *out);
+/* The walkable ornament whose second-layer tiles hold tile `seed` in `a`
+ * (a pad's centrepiece: the red gem 0x379, the link ring 0x372, the cube
+ * on its base 0x375), anchored on the corner of the panel it lies on. */
+bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,
  * mirrored with it: world (X, Y) to (-Y, -X). */

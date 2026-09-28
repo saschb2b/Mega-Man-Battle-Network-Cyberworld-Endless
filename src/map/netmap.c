@@ -46,7 +46,11 @@ typedef struct {
 	StairTemplate stairs[STAIR_DIRS];
 	PropStamp counter[2];     /* the Net Dealer's counter, facing FACES_X and FACES_Y */
 	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
+	PropStamp ornament[3];    /* pads' centrepieces: the red gem, the link ring, the cube on its base */
 } Learned;
+
+/* the centrepieces' tiles (the four surface areas share their tile set) */
+static const int ornament_tile[3] = { 0x379, 0x372, 0x375 };
 
 static Learned learned[NET_AREAS];
 
@@ -168,6 +172,7 @@ static bool learn(int area, Learned *L) {
 	decor_learn(&a, na->bg_in_map, &L->decor);
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
+	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	/* the colours its floors show (an area's maps share its palette) */
 	static uint8_t seen[TILE_COLOURS];
 	memset(seen, 0, sizeof seen);
@@ -184,6 +189,8 @@ static bool learn(int area, Learned *L) {
 		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
 		learn_map(&b, &a, area, L);
 		decor_learn(&b, na->bg_in_map, &L->decor);
+		for (int k = 0; k < 3; ++k)
+			if (!L->ornament[k].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[k], &L->ornament[k]);
 		area_src_free(&b);
 	}
 	/* but not their pieces in colours this one's floors never show: another
@@ -354,6 +361,37 @@ static void paste_props(uint16_t *map, int tw, int th) {
 	}
 }
 
+/* The pads' centrepieces, walkable, on the middle panel of every pad at
+ * ground level with nothing standing there, as the originals set theirs:
+ * mostly the red gem, else the link ring or the cube (the layer's own
+ * choice from its seed, the floor unchanged). */
+static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
+	int have[3], n = 0;
+	for (int k = 0; k < 3; ++k) if (L->ornament[k].ok) have[n++] = k;
+	if (!n) return;
+	uint32_t r = cur->seed ^ 0x0A7E0u;
+	size_t cells = (size_t)tw * th;
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *m = &layer.rooms[i];
+		int x = m->x + m->w / 2, y = m->y + m->h / 2;
+		if (m->kind != ROOM_PAD || layer.cell[y][x] != C_PATH || layer.level[y][x]) continue;
+		bool taken = false;
+		for (int o = 0; o < layer.nobj; ++o) taken |= (int)layer.obj[o].x == x && (int)layer.obj[o].y == y;
+		if (taken) continue;
+		r = r * 1103515245u + 12345u;
+		int roll = (int)((r >> 16) % 5);
+		const PropStamp *st = &L->ornament[have[roll < 3 ? 0 : (roll - 2) % n]];
+		int A, B;
+		grid_to_panel(x, y, &A, &B);
+		int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+		for (int k = 0; k < st->ntiles; ++k) {
+			int px = px0 + st->tiles[k].px, py = py0 + st->tiles[k].py;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+			map[cells + (size_t)(py / 8) * tw + px / 8] = st->tiles[k].e1;
+		}
+	}
+}
+
 bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {
 	if (i < 0 || i >= MAX_PROPS || !prop_at[i].ok) return false;
 	*wx = prop_at[i].X + prop_at[i].st->navi_x;
@@ -390,6 +428,7 @@ static bool write_tilemap(const Learned *L) {
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
 	paste_props(map, tw, th);
+	paste_ornaments(L, map, tw, th);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;

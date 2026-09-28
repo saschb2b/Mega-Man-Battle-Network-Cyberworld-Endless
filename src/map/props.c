@@ -151,6 +151,55 @@ bool props_learn_counter(const AreaSrc *a, int x, int y, int faces, PropStamp *o
 	return out->ok;
 }
 
+bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out) {
+	memset(out, 0, sizeof *out);
+	if (a->layers < 2) return false;
+	for (int i = 0; i < a->tw * a->th; ++i) {
+		if ((a->tile[1][i] & 0x3FF) != seed) continue;
+		/* the art round it (the second layer's tiles joined 8 ways, within
+		 * two panels' width), and the panel under its middle at z 0 */
+		int sx = i % a->tw, sy = i / a->tw, n = 0;
+		int bx0 = sx - 8, by0 = sy - 6, bw = 17, bh = 13;
+		char in[17 * 13] = { 0 };
+		int q[17 * 13];
+		q[n++] = (sy - by0) * bw + sx - bx0;
+		in[q[0]] = 1;
+		for (int h = 0; h < n; ++h) {
+			int cx = q[h] % bw, cy = q[h] / bw;
+			for (int dy = -1; dy <= 1; ++dy)
+				for (int dx = -1; dx <= 1; ++dx) {
+					int x = cx + dx, y = cy + dy, tx = x + bx0, ty = y + by0;
+					if (x < 0 || y < 0 || x >= bw || y >= bh || in[y * bw + x] || tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th) continue;
+					if (!(a->tile[1][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
+					in[y * bw + x] = 1;
+					q[n++] = y * bw + x;
+				}
+		}
+		if (n < 8 || n > 60) continue;
+		int px = 0, py = 0;
+		for (int k = 0; k < n; ++k) { px += (q[k] % bw + bx0) * 8 + 4; py += (q[k] / bw + by0) * 8 + 4; }
+		px = px / n - a->tw * 4;
+		py = py / n - a->th * 4;
+		int X = (px - 2 * py) / 2, Y = (px + 2 * py) / 2;
+		int Xa = a->ex + PANEL * floordiv(X - a->ex, PANEL), Ya = a->ey + PANEL * floordiv(Y - a->ey, PANEL);
+		/* (on floor: an ornament of a pad, not art hung in the void) */
+		if (area_src_walled_floor(a, Xa + 16, Ya + 16) != 1) continue;
+		out->tiles = calloc((size_t)n, sizeof *out->tiles);
+		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+		for (int k = 0; k < n; ++k) {
+			int tx = q[k] % bw + bx0, ty = q[k] / bw + by0;
+			StairTile *t = &out->tiles[out->ntiles++];
+			t->px = (int16_t)(tx * 8 - ax);
+			t->py = (int16_t)(ty * 8 - ay);
+			t->e1 = a->tile[1][(size_t)ty * a->tw + tx];
+		}
+		out->len = 1;
+		out->ok = true;
+		return true;
+	}
+	return false;
+}
+
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {
 	/* a wall's type says where its floor lies: (dx, dy) goes to (-dy, -dx),
 	 * so NE and NW edges trade (1, 4), SE and SW (2, 3), the E and W
