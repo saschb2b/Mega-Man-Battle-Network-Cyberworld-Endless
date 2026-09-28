@@ -26,6 +26,7 @@ README and the site.
 | The real world and the town | [docs/OVERWORLD.md](docs/OVERWORLD.md) |
 | Where ROM data lives and how it was found | [docs/ROM_DATA.md](docs/ROM_DATA.md) |
 | What is original, generated or adapted | [docs/FIDELITY.md](docs/FIDELITY.md) |
+| What carries over between runs: unlocks, the run's setup, threat | [docs/META.md](docs/META.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout

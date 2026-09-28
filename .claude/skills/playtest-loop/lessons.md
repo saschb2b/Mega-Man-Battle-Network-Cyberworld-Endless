@@ -413,3 +413,23 @@ press went from 30 to 50 to 90 frames and gained retries across two
 sessions before the rule that the latest intent wins, which was what made
 the longer window safe. Ask what a kept input gives way to before tuning
 how long it is kept.
+
+## Session 24 (6/10, keep playing: yes, with a weaker pull; recommend: yes)
+
+Build a119fef. Three new runs after the long run's loss: a layer 2 Server
+(OldHeatr and Shaker, hits capped at 80 against MegaMan's 100) and then
+Armadill with Gunner ended the first; a Quaker pair on a poison field the
+second, on layer 3; the third stopped at the budget. Every patch held: the
+early R kept at 50 to 75 frames and dropped by a d-pad press, no family
+twice in three battles, no navi in the way on five layers, the Server's
+mark gone, L's briefing after the arrival's words.
+
+Raised: a restart repeats (the same town, comp, guardian and chats in the
+first twenty minutes, a chore after a long run), which the owner answered
+with the meta layer (docs/META.md); act 1's Server hitting for most of
+MegaMan's HP, and asking without saying how strong it is. Left: the town's
+arrow through a house, landing shadows read by row (vanilla).
+
+Loop change: **after a run ends, the next session plays the restart**: a
+returning player judges the first twenty minutes differently from a
+first-timer, and this session's 6/10 came from there, not from a bug.
