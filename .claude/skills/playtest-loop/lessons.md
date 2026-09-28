@@ -25,6 +25,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 14 | 8 | BlastMan beaten with the dealer's AquaNdl2; 25 calls in circles on his layer |
 | 15 | 9 | A whole act (Sky HP, SpoutMan) with no circles; every battle one virus pair |
 | 16 | 7 | Act 3's fights varied at last; DustMan's two unannounced moves ended the run |
+| 17 | 6 | Act 1 a joy, then DiveMan: his dive unannounced, the act's Elec plan fired into the water |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -96,6 +97,15 @@ its problems there. The loop was reacting.
   and never saw the draft. Before a session, check that its patch notes'
   headline lies on ground the persona's save will reach; if not, say so in
   the notes (a new run, or which layer).
+- **Check a patch note against the code before sending it.** S17's notes
+  promised the gift anew after a layer restarts; a restart keeps the RAM
+  and so the gift taken. The persona caught it in its first minutes and
+  a correction had to follow mid-session.
+- **A guardian's warning must cover when he cannot be hit.** DustMan's
+  pull (s16) and DiveMan's dive (s17) were each watched once and still
+  missing from their warnings; the act's weakness plan then became a trap
+  (the Elec chip fired into the water). Re-watch every guardian against
+  its warning for invulnerable spells, pulls and safe spots.
 - **Save the report verbatim** the moment it arrives
   (`scripts/save_report.py`); the notes and diary are the persona's, the
   report is the developers'.
@@ -204,3 +214,26 @@ pixel for pixel against a capture of the game's own.
 Loop change: **turn one report into a rate** (the hidden gap: 15% of
 objects), and **check the patch's headline is reachable** from the
 persona's save.
+
+## Session 17 (6/10, keep playing: yes, less eagerly; recommend: yes, with a warning)
+
+Build f4e014b. CONTINUE into act 1 (RoboDog Comp): six quick fights,
+three dealers all saying DiveMan can't stand Elec, ElcPuls1 from a
+Mystery Data. Deleted with DiveMan at 450/500: every chip while he dove
+did nothing, a torpedo read by its sprite (a row high) took the last 10
+HP. A new run at once, its gift now a real choice (SuprArmr taken).
+Confirmed: the title's question, the version, the area card fading under
+a chat, the new gift, the dealers' Elec stock, no hidden gaps.
+
+Raised: DiveMan's dive and his wave's safe column unannounced, the
+torpedoes' shadows (57d3015), DiveMan the first guardian twice (57d3015),
+100 HP at the first guardian (HP Memory 800z in act 1; left: the gift
+offers two), Lan wedged by a hedge at a new town's start, exit pads warping
+on a run-through, an A beside a Mystery Data (both left: BN6's own pads,
+and the talk cone). The patch note on the gift was wrong (see above).
+
+Meanwhile the user asked for the originals' props: the Net Dealer now
+stands behind a counter cut from the ROM (f2a2cb4, docs/LEVEL_DESIGN.md).
+
+Loop change: **check patch notes against the code**, and **re-watch every
+guardian against its warning**.
