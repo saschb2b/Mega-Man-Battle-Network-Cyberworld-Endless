@@ -234,7 +234,10 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
-	if (teach) ta_page(t, FACE_MEGAMAN, "Let's install it, Lan! In the PET: MegaMan, then NaviCust.", false);
+	/* (every time: a returning playtester, told once runs before, left
+	 * one off the board for two acts) */
+	ta_page(t, FACE_MEGAMAN, "Let's install it, Lan! In the PET: MegaMan, then NaviCust.", false);
+	(void)teach;
 	flag_set(t, taken_flag);
 	ta_end(t);
 	return s;

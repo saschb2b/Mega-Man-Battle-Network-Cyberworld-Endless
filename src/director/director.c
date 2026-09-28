@@ -255,6 +255,31 @@ static void goal_way(void) {
 	if (!route_to(gx, gy, &far)) way_to(gx, gy, &far);
 }
 
+/* A program MegaMan has that is not on the NaviCust's board (the key
+ * items count a program whether placed or not; the board's list holds the
+ * placed ones): its name, "" for one outside the draft's pool, NULL for
+ * none. A playtester played two acts believing a Guardian Data's UnderSht
+ * was running. */
+static const char *program_off_board(void) {
+	static char name[16];
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	for (int v = 4; v < 47 * 4; ++v) {
+		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
+		if (!owned) continue;
+		for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
+			int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
+			if (!id) break;
+			placed += id == v;
+		}
+		if (owned <= placed) continue;
+		const char *about = navicust_about(v / 4);
+		const char *colon = about ? strchr(about, ':') : NULL;
+		snprintf(name, sizeof name, "%.*s", colon ? (int)(colon - about) : 0, colon ? about : "");
+		return name;
+	}
+	return NULL;
+}
+
 static const char *status_words(void) {
 	static char buf[800];
 	int k = 0;
@@ -343,6 +368,10 @@ static const char *status_words(void) {
 		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
 		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+		/* (a program left off the board: said on every layer until placed) */
+		const char *off = program_off_board();
+		if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. L and R turn a program.|", off);
+		else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
 		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");

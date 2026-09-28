@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A program MegaMan has but has not put on the NaviCust's board is named
+  in L's briefing on every layer, with how to install it; the Guardian
+  Data talk says how every time, not only the first: a playtester played
+  two acts believing a Guardian Data's UnderSht was running.
 - Navis you talk to keep apart: a heal Prog no longer stands beside a Net
   Dealer's counter (an A meant for the Prog opened the dealer, twice), and
   none stands within two panels of another where the room has space; the

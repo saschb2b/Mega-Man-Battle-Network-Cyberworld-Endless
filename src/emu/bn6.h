@@ -24,6 +24,9 @@
 #define BN6_T1_COUNT          0x20
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's, +0x40 HP, +0x42 max HP */
 #define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
+#define BN6_NAVICUST_PLACED   0x02004190u /* the programs on the NaviCust's board, 8 bytes each: +0 u16 program * 4 + colour variant, +3 column, +4 row, +5 turns; 0 ends */
+#define BN6_NAVICUST_PLACED_MAX 25
+#define BN6_PROGRAM_ITEMS     0x90        /* key item 0x90 + program * 4 + variant: how many of it MegaMan has, on the board or not */
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data; +0x10 1 while a trigger's warp is under way, +0x11 its warp index */
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
 
