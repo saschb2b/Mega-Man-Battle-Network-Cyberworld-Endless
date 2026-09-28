@@ -26,6 +26,7 @@ raised, misreads, and one change to the loop. The persona's own files are in
 | 15 | 9 | A whole act (Sky HP, SpoutMan) with no circles; every battle one virus pair |
 | 16 | 7 | Act 3's fights varied at last; DustMan's two unannounced moves ended the run |
 | 17 | 6 | Act 1 a joy, then DiveMan: his dive unannounced, the act's Elec plan fired into the water |
+| 18 | 8 | DiveMan beaten with the warning and the dealer's chip; the draft a real choice |
 
 From session 5 the score swings 7 to 9: each session reaches ground no one
 had tested (act 2's guardians, answer chips against them, traders) and finds
@@ -237,3 +238,26 @@ stands behind a counter cut from the ROM (f2a2cb4, docs/LEVEL_DESIGN.md).
 
 Loop change: **check patch notes against the code**, and **re-watch every
 guardian against its warning**.
+
+## Session 18 (8/10, keep playing: yes; recommend: yes)
+
+Build 7db7245 (the counters, DiveMan's warning). The act-1 arc worked end
+to end: the warning read true, the dealer's Elec chip deleted DiveMan
+mid-leap, the Guardian Data paid five HP Memory, DiveMan D and the
+NaviCust draft (SlipRunr / Shield / Attack+1; Shield taken as the answer
+to hits he can't dodge). Confirmed: the counter reads as a shop on layers
+1 and 2, SuprArmr keeps his inputs through hits, the one-time CONTINUE.
+
+Raised: NaviCust parts would not turn (BN6's own: rotation needs a key
+item per colour; a run now holds all six, c3bc831), the dealer standing
+bare in the room before the arena (the counter needs a rim there; left),
+DiveMan's warning too strict (bombs reach him, c3bc831), OldStoves in four
+of six act-1 fights (the area's own battles; left), Central's catwalk maze
+reading as random floor. HeatMan, next, re-watched before the persona
+meets him: his flamethrower and his leap onto a shadowed panel were
+missing from his warning.
+
+Loop change: **re-watch the persona's next guardian** before the session
+(guardian_entry.sh with --guardian, then guardian_watch.sh), and check
+every "vanilla" report for an item or setting BN6 hands out over its
+story (the rotations were BN6's, missing from a run).
