@@ -49,6 +49,8 @@ typedef struct {
 	PropStamp ornament[3];    /* pads' centrepieces: the red gem, the link ring, the cube on its base */
 	PropStamp bush[2];        /* Green's potted bushes, plain and in flower */
 	PropStamp emblem;         /* the emblem its floors carry (the Graveyard's crosses) */
+	uint8_t rebank[2];        /* RomLayout.net_area[].rebank */
+	uint8_t rebank_to[128];   /* the first-layer tiles its maps draw in rebank[1] (a bit each) */
 } Learned;
 
 /* the centrepieces' tiles (the four surface areas share their tile set) */
@@ -163,6 +165,13 @@ static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
 	area_src_free(&src);
 }
 
+/* Marks the first-layer tiles `a` draws in palette bank `to`. */
+static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
+	if (!to) return;
+	for (int i = 0; i < a->tw * a->th; ++i)
+		if (a->tile[0][i] >> 12 == to && (a->tile[0][i] & 0x3FF)) L->rebank_to[(a->tile[0][i] & 0x3FF) >> 3] |= (uint8_t)(1u << (a->tile[0][i] & 7));
+}
+
 static bool learn(int area, Learned *L) {
 	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
 	AreaSrc a;
@@ -176,6 +185,9 @@ static bool learn(int area, Learned *L) {
 	learn_counter(na->counter, &a, L);
 	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
+	L->rebank[0] = na->rebank[0];
+	L->rebank[1] = na->rebank[1];
+	rebank_seen(&a, na->rebank[1], L);
 	if (emu_debug_on()) fprintf(stderr, "emblem area %d ok %d tiles %d\n", area, L->emblem.ok, L->emblem.ntiles);
 	if (na->looks & (1u << LOOK_TREE) && na->looks & (1u << LOOK_GIANT_TREE))   /* (Green's) */
 		for (int k = 0; k < 2; ++k) props_learn_void_art(&a, k ? 0x361 : 0x292, &L->bush[k]);
@@ -195,6 +207,7 @@ static bool learn(int area, Learned *L) {
 		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
 		learn_map(&b, &a, area, L);
 		decor_learn(&b, na->bg_in_map, &L->decor);
+		rebank_seen(&b, na->rebank[1], L);
 		for (int k = 0; k < 3; ++k)
 			if (!L->ornament[k].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[k], &L->ornament[k]);
 		area_src_free(&b);
@@ -485,6 +498,14 @@ static bool write_tilemap(const Learned *L) {
 	paste_ornaments(L, map, tw, th);
 	paste_emblems(L, map, tw, th);
 	paste_bushes(L, map, tw, th);
+	/* one shade of floor: tiles of the other bank in this one's colours,
+	 * where its maps draw the same tile in it */
+	const uint8_t *rb = L->rebank;
+	if (rb[0] && rb[1])
+		for (size_t i = 0; i < cells; ++i) {
+			uint16_t e = map[i];
+			if (e >> 12 == rb[0] && (e & 0x3FF) && L->rebank_to[(e & 0x3FF) >> 3] >> (e & 7) & 1) map[i] = (uint16_t)((e & 0x0FFF) | rb[1] << 12);
+		}
 	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;

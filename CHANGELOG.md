@@ -6,6 +6,9 @@
   our row, to sidestep it late (a playtester stepped off his lit leap into
   its path and lost on HeatMan's last 29 HP); his flamethrower sweeps the
   lit row, and his leap's yellow panels are to be cleared.
+- The Graveyard's slabs are one shade of stone throughout: its pale
+  platforms' tiles, which the tiles mixed into its dark slabs panel by
+  panel, are drawn in the dark slabs' colours.
 - The map (SELECT) marks the way on over the floor MegaMan has come near,
   up to where he has not been: a V in a comp's maze read as a dead end
   twice, the arm on to the exit nowhere on the map.
