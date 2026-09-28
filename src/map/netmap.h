@@ -44,6 +44,9 @@ const uint16_t *netmap_last_tiles(int *tw, int *th);
  * its pair was seen from its own neighbourhood (tiles_pick_off), in bits 4-6
  * why (tiles_pick_why). */
 const uint8_t *netmap_last_seams(void);
+/* ... and the tiles set whole over what the classes picked (a bit each). */
+enum { NETMAP_PASTED_PAD = 1, NETMAP_PASTED_EMBLEM = 2, NETMAP_PASTED_STAIR = 4 };
+const uint8_t *netmap_last_pasted(void);
 /* (dev) The last layer's floor as text, a row per grid y: '.' void, 'a'
  * platform floor, 'b' walkway floor, 's' walkway floor across a platform
  * (TILES_CROSSING), 'p' a pad; upper case (a void panel '*') where a tile

@@ -31,7 +31,8 @@ Output in `.build/atlas`:
   than they show (their pair's neighbourhood would have shown, over more
   than 3 of their pixels, another panel's top or side face, or another
   floor: a wedge of one floor in the other, an edge cut short), and yellow,
-  those off by 3 pixels or fewer.
+  those off by 3 pixels or fewer. A cyan dot in a tile's corner: set whole
+  over the classes' picks (a pad's stamp, an emblem, a stair).
 - `defects_bXX.png`: close-ups of the magenta spots of all the area's
   layers, most tiles first, each as drawn and as marked, named by layer and
   place.
@@ -91,6 +92,13 @@ tiles were drawn off (`src/map/tiles.h`, `TILE_WHY_*`):
 The close-ups in `.build/atlas/defects_bXX.png` show each spot. It fails as
 the atlas does, where a layer got worse than the baseline; `--baseline`
 writes the new numbers.
+
+The check sees the classes' picks, not what is pasted over them (pads,
+emblems, stairs, props), so look over the pictures too. To see why a tile
+was picked, `CYBERWORLD_TILE_AT="x,y;x,y" python3 build.py atlas BIOME
+SEEDS` prints every pair weighed for those tiles (tile x, y of the
+uncropped layer: pixel over 8, plus the offset in its `.box` file), after
+a `layer bXX_...` line for each layer.
 
 ## Pacing report: every act's battles and guardians
 

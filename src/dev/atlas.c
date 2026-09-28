@@ -71,6 +71,7 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	netmap_build_layer(biome, seed);
 	int ms = (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
 	tiles_measure = true;
+	if (getenv("CYBERWORLD_TILE_AT")) fprintf(stderr, "layer b%02d_l%d_d%d_s%u\n", biome, layout, depth, seed);
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	memset(&tiles_stats, 0, sizeof tiles_stats);
 	bool built = netmap_build_layer(biome, seed);
@@ -106,6 +107,12 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 			}
 		}
 	if (offs) fclose(offs);
+	/* the tiles set whole over the classes' picks (pads, emblems, stairs): a
+	 * cyan dot in their corner */
+	const uint8_t *pasted = netmap_last_pasted();
+	for (int ty = 0; ty < th && pasted; ++ty)
+		for (int tx = 0; tx < tw; ++tx)
+			if (pasted[ty * tw + tx]) sp[(size_t)(ty * 8) * W + tx * 8] = sp[(size_t)(ty * 8) * W + tx * 8 + 1] = sp[(size_t)(ty * 8 + 1) * W + tx * 8] = 0xFF00FFFFu;
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx)
 			for (int k = 0; k < 8; ++k) {

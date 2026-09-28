@@ -298,7 +298,7 @@ static int hue_at(const AreaSrc *a, int cx, int cy) {
 }
 
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
-	memset(out, 0, sizeof *out);
+	if (!out->ok) memset(out, 0, sizeof *out);
 	/* the map's panels, around its middle */
 	int A0 = -(a->tw * 8 + a->th * 8) / PANEL, A1 = -A0;
 	for (int B = A0; B <= A1; ++B)
@@ -317,6 +317,11 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 			if (!island || beside > 4) continue;
 			int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
 			if (!(hues >> hue_at(a, cx, cy + 4) & 1)) continue;
+			/* its lower sides on screen, world -X and +Y */
+			int low = 0;
+			for (int k = 0; k <= 2; ++k)
+				low += (area_src_walled_floor(a, Xa + 16 - PANEL, Ya + 16 + PANEL * k) == 1) + (area_src_walled_floor(a, Xa + 16 + PANEL * k, Ya + 16 + PANEL * 3) == 1);
+			if (out->ok && low >= out->low) continue;
 			/* its tiles: over the diamond of its panels (the floor drawn 4
 			 * below their edges) and the faces under its lower edges */
 			int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
@@ -332,14 +337,16 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 					got[n++] = (StairTile){ .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay), .e0 = a->tile[0][(size_t)ty * a->tw + tx] };
 				}
 			if (n < 40) continue;
+			free(out->tiles);
 			out->tiles = calloc((size_t)n, sizeof *out->tiles);
 			memcpy(out->tiles, got, sizeof *got * (size_t)n);
 			out->ntiles = n;
 			out->len = 3;
+			out->low = low;
 			out->ok = true;
-			return true;
+			if (!low) return true;
 		}
-	return false;
+	return out->ok;
 }
 
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {

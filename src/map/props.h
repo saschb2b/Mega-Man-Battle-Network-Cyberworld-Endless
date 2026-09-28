@@ -25,6 +25,7 @@ typedef struct {
 	/* the source's tile lattice (world units mod 32 of tile 0's centre),
 	 * against which the layer's is matched */
 	int fx, fy;
+	int low;              /* a pad's: the floor beside its lower sides, which its faces show cut off (0: whole) */
 } PropStamp;
 
 /* Cuts the counter whose wall ring holds world (x, y) out of `a`, facing
@@ -48,7 +49,10 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
  * whose middle panel has a hue in `hues` (buckets as `styles`): the first
  * layer's tiles over its panels and the faces under them, anchored on its
  * corner of lowest world X and Y (Central's and Seaside's framed pads,
- * their recess holding a centrepiece). */
+ * their recess holding a centrepiece). Of those, the one with the fewest
+ * bridges beside its lower sides, whose faces would bring a bridge's start
+ * along; `out` is kept where it has no more (call it again on another map
+ * of the area). */
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,

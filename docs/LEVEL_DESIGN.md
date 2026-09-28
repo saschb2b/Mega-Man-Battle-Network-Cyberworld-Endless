@@ -191,7 +191,9 @@ Control Comp and Mr. Weather Comp. Their neighbourhoods still count as
 seen (legal.c), so floors do not change: the nearest tile in the area's
 own colours draws them. Seaside keeps its other maps' colours
 (`TILES_MORE_COLOURS`): its second floor forms fields only in Seaside 2
-and 3, as their yellow panels, and its guardian's arena is drawn in them.
+and 3, as their yellow panels, and its guardian's arena is drawn in them;
+elsewhere their pieces cost more than its own (outside a field of its
+second floor they had drawn yellow panels' scraps at boardwalk joints).
 
 Well inside the floor, a tile must look like the area's plain floor, from
 about 5 pixels inside its edge. Robot Control Comp's white platforms are

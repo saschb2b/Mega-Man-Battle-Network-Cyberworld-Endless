@@ -12,8 +12,10 @@
   Green HP's walkways keep their own darker shade (every one had been drawn
   from pieces of the platforms), and the Undernet's bridges turn and meet
   its plateaus in their joints with a yellow gem, as its maps draw them
-  (they had left dark patches on the plateaus). `build.py tiles` checks
-  all of it.
+  (they had left dark patches on the plateaus). Seaside's framed pads no
+  longer hang a scrap of yellow boardwalk off their lower edge, and its
+  layers take pieces in Seaside 2's colours for its yellow fields alone.
+  `build.py tiles` checks all of it.
 - MegaMan's first briefing on a layer names what the map's violet mark is:
   a strong virus signal and its Server, a dark warp into the Undernet, or
   the golden gate. In the Aquarium HP it says its battlefields' conveyor

@@ -612,9 +612,30 @@ static int first_of(const TileBook *b, uint32_t key) {
 #define ABOVE_BIT (1u << 2)
 #define TALL_FACE 16
 
+/* (dev) CYBERWORLD_TILE_AT "x,y;x,y": the tiles whose picks are printed */
+static bool tile_debug(int tx, int ty) {
+	static const char *at;
+	static bool read;
+	if (!read) { read = true; at = getenv("CYBERWORLD_TILE_AT"); }
+	if (!at) return false;
+	char want[32];
+	snprintf(want, sizeof want, "%d,%d", tx, ty);
+	for (const char *p = at; (p = strstr(p, want)); p += strlen(want))
+		if ((p == at || p[-1] == ';') && (p[strlen(want)] == ';' || !p[strlen(want)])) return true;
+	return false;
+}
+
 /* what a pixel of a tile showing other floors than its own costs, beside
  * the neighbourhood's distance */
 #define PICTURE_COST 1
+/* what a pair in colours the area's own map never shows on its floors
+ * costs outside the walkway floor's fields, where its other maps' surfaces
+ * came along (TILES_MORE_COLOURS: Seaside's yellow panels) */
+#define OTHER_COST 16
+/* Whether the middle panel lies in a 2 x 2 block of the panels of `m`. */
+static bool in_block(unsigned m) {
+	return (m & 0x1B) == 0x1B || (m & 0x36) == 0x36 || (m & 0xD8) == 0xD8 || (m & 0x1B0) == 0x1B0;
+}
 
 static int distance(int phase, bool tall, unsigned a1, unsigned b1, unsigned a2, unsigned b2) {
 	unsigned near = nearest(phase, false), corner = nearest(phase, true) & ~near;
@@ -792,10 +813,10 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	TileGrid gk = *g;
 	gk.face = -1;
 	gk.side = g->face;   /* (outlines beside its faces as deep as this map's) */
-	const TileCand *fit = NULL, *same = NULL, *any = NULL;
-	int fit_d = INT_MAX, same_d = INT_MAX, any_score = INT_MAX, fit_k = -1, same_k = -1;
-	int fit_p = 0, same_p = 0, any_p = 0;
-	unsigned near = nearest(phase, true);
+	const TileCand *fit = NULL, *any = NULL;
+	int fit_d = INT_MAX, any_score = INT_MAX, fit_k = -1, fit_p = 0, any_p = 0;
+	/* the walkway floor in a 2 x 2 block with the tile's panel: a field of it */
+	bool field = in_block(ob);
 	/* what the tile shows of its own neighbourhood: a pair costs a point for
 	 * each pixel where its own showed other floors, faces or materials */
 	const PixCol *col = columns(g, tx, ty);
@@ -818,8 +839,9 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 			int d = distance(phase, b->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
 			/* a pad in the pads' look, other floor not */
 			if (c->pad != pad) d += PAD_LOOK;
+			if (c->other && !field) d += OTHER_COST;
 			/* (what follows only adds: a pair that cannot win is left) */
-			if (!(m <= SLACK && (d <= fit_d || d <= same_d)) && m + 4 * d >= any_score) continue;
+			if (!(m <= SLACK && d <= fit_d) && m + 4 * d >= any_score) continue;
 			/* (a pad's middle is not the usual floor: it has its own look; nor
 			 * is a rimmed floor's edge) */
 			int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain(b, cm - 1, phase, c, deep);
@@ -831,16 +853,16 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 				pic = picture_diff(col, mine, KEY_A(c->key), KEY_B(c->key));
 			}
 			d += PICTURE_COST * pic;
+			if (tiles_measure && tile_debug(tx, ty))
+				fprintf(stderr, "tile %d,%d phase %d ours a %03x b %03x: book %d e0 %04x e1 %04x count %u pad %d other %d key a %03x b %03x: d %d (picture %d) misses %d unplain %d of %d\n",
+					tx, ty, phase, oa, ob, k, c->e0, c->e1, c->count, c->pad, c->other, KEY_A(c->key), KEY_B(c->key), d, pic, m, u, allowed);
 			/* ties go to the first book with the class (the area's own map
-			 * before its others), so a floor keeps one look */
+			 * before its others), so a floor keeps one look (the other
+			 * floor's edge coming along where only one is costs its pixels) */
 			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; fit_p = pic; }
-			/* the other floor's edge must not come along where only one is */
-			bool alike = !((oa ^ KEY_A(c->key)) & (oa | ob) & (KEY_A(c->key) | KEY_B(c->key)) & near);
-			if (alike && m <= SLACK && u <= allowed && (d < same_d || (d == same_d && k == same_k && c->count > same->count))) { same = c; same_d = d; same_k = k; same_p = pic; }
 			if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; any_p = pic; }
 		}
 	}
-	if (same) { fit = same; fit_d = same_d; fit_p = same_p; }
 	*dist = fit ? fit_d : -1;
 	const TileCand *c = fit ? fit : any;
 	*off = !tiles_measure ? TILE_EXACT : c ? off_by(oa, ob, c, fit ? fit_p : any_p) : TILE_OFF_NEAR;
