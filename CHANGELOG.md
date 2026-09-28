@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A returning player hears less at a run's start: the gift Mr. Prog's
+  greeting is one page from the third run on, and so are the first
+  layer's arrival words (a restart after a long run was called a chore).
+- A Server says how strong it is before it asks ("Its viruses outclass
+  this layer"), and act 1's hits no harder than half again the act's own:
+  a Server on layer 2 had hit for 80 of a new MegaMan's 100 HP.
 - Services keep off the way from a layer's arrival to its exit or
   guardian, and the panels beside it, where their room has another place,
   and leave no one-panel gap on the way beside another navi or Mystery

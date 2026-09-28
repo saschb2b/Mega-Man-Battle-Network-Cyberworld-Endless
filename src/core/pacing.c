@@ -34,7 +34,13 @@ static PacingBand scaled(PacingBand b, int loop) {
 PacingBand pacing_band(int depth, bool challenge, bool easy) {
 	int act = pacing_act(depth), loop = pacing_loop(depth);
 	PacingBand b = bands[act];
-	if (challenge) b = act + 1 < PACING_ACTS ? bands[act + 1] : pacing_band_wider(b);
+	if (challenge) {
+		/* the next act's band, but a hit at most half again this act's cap
+		 * (act 1's Server hit for 80 of MegaMan's 100 HP) */
+		int soft = b.cap + b.cap / 2;
+		b = act + 1 < PACING_ACTS ? bands[act + 1] : pacing_band_wider(b);
+		if (b.cap > soft) b.cap = soft;
+	}
 	b = scaled(b, loop);
 	/* an opening battle: the band's lower half, and softer hits */
 	if (easy) { b.hi = b.lo + (b.hi - b.lo) / 2; b.cap = b.cap * 2 / 3; }

@@ -126,7 +126,11 @@ int ta_challenge(TextArchive *t, int flag) {
 	int i = ta_script(t);
 	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, done, sizeof done);
-	ask(t, FACE_MEGAMAN, "Lan, a strong virus\nsignal! Take it on?\n", no);
+	/* how strong, before the choice (a playtester took one on at 100 HP,
+	 * not knowing, and came out at 10) */
+	bool first = true;
+	ta_pages(t, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.", FACE_MEGAMAN, &first);
+	ask_in(t, FACE_MEGAMAN, "It pays a good chip.\nTake it on?\n", no, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -336,7 +340,7 @@ static void program_name(TextArchive *t, int program) {
 	ta_bytes(t, b, sizeof b);
 }
 
-int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_name, int power, int code, int program, int color,
+int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, int chip, const char *chip_name, int power, int code, int program, int color,
             const char *about) {
 	/* what each choice gives, then the flag that it was chosen */
 	char line[64];
@@ -373,7 +377,10 @@ int ta_gift(TextArchive *t, int flag, bool comfort, int chip, const char *chip_n
 	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)thanks, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, done, sizeof done);
 	first = true;
-	ta_pages(t, "HELLO, MEGAMAN! I'M DR. HIKARI'S DIVE SUPPORT PROGRAM!|"
+	/* (a returning player: one page, not three; a playtester called the
+	 * chats of a restart after a long run a chore) */
+	if (brief) ta_pages(t, "WELCOME BACK, MEGAMAN! PICK YOUR GIFT: HPMEMORY X2, A CHIP OR A PROGRAM!", FACE_PROG, &first);
+	else ta_pages(t, "HELLO, MEGAMAN! I'M DR. HIKARI'S DIVE SUPPORT PROGRAM!|"
 		"EVERY DIVE STARTS FROM SCRATCH, SO HERE'S A GIFT!|"
 		"PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", FACE_PROG, &first);
 	/* what the chip and the program do, before the choice */

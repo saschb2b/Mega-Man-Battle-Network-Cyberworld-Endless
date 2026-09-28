@@ -362,7 +362,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* a run lost before its first guardian earns a little more */
 			bool comfort = profile.last_depth >= 1 && profile.last_depth <= 3;
 			if (emu_debug_on()) fprintf(stderr, "gift: chip %d \"%s\" %c, program %d color %d\n", chip, ci.name, code, program.id, program.code);
-			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, chip, ci.name, ci.power, code == '*' ? 26 : code - 'A', program.id,
+			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, profile.runs >= 2, chip, ci.name, ci.power, code == '*' ? 26 : code - 'A', program.id,
 				program.code, about);
 			flag_clear(LAYER_GIFT_FLAG);
 			break;

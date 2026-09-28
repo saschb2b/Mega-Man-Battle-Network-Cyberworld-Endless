@@ -187,6 +187,8 @@ static void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke, Lan.|@L Stay sharp. The exit pad leads back to the main path.");
 	else if (run.side_kind == LAYER_SECRET)
 		snprintf(D.beat, sizeof D.beat, "@M The gate opened, Lan... This must be the Secret Area.|@M Something strong is waiting in here. I can feel it.");
+	else if (run.depth == 1 && profile.runs >= 2)
+		snprintf(D.beat, sizeof D.beat, "@M %s this time, Lan. Let's find the exit pad!", area);
 	else if (run.depth == 1)
 		snprintf(D.beat, sizeof D.beat, "@M Lan, it looks just like %s... But it's all copied data!|@L Dad was right. Let's find the exit pad and head down!", area);
 	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
