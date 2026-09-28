@@ -93,6 +93,8 @@ static struct {
 	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
+	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
+	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
 	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
 	bool guardian_named;   /* ... and have been said on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
@@ -511,6 +513,12 @@ static bool build_layer(void) {
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	D.group = a->group;
 	D.number = a->number;
+	/* (the layer just left had its Net Dealer speak: this act's next say
+	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
+	 * on every layer for a playtester) */
+	if (D.layer_act && flag_get(LAYER_DEALER_TOLD_FLAG)) D.dealer_act = D.layer_act;
+	D.layer_act = run.side_kind == LAYER_NORMAL ? (run.depth - 1) / 3 + 1 : 0;
+	layer_objs_dealer_again = D.layer_act && D.dealer_act == D.layer_act;
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, a->song);
 	D.chosen = 0;

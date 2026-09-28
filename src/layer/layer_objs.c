@@ -43,6 +43,8 @@
  * compressed, 59 ProtoMan, 71-86 the guardians (bn6f npcSpritePtrs) */
 #define SPR_DEALER      62   /* GreenNavi, the Net Dealer's keeper in the game */
 #define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
+bool layer_objs_dealer_again;
+
 #define SPR_BYSTANDER   67   /* EvilNavi */
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
@@ -306,6 +308,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
 				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
+			/* (met in this act already: the pick, in a line) */
+			if (layer_objs_dealer_again && navi > 0)
+				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);
 			tk.sprite = SPR_DEALER;
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!", LAYER_DEALER_TOLD_FLAG);
 			break;

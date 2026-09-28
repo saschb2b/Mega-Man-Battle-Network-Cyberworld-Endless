@@ -43,5 +43,8 @@ void layer_objs_shops(const LayerObjs *o);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);
+/* Set before layer_objs_install: this act's Net Dealer has already spoken,
+ * so this one greets in a line. */
+extern bool layer_objs_dealer_again;
 
 #endif

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A Net Dealer met again in the same act greets in a line ("Back again,
+  MegaMan! My pick for SpoutMan is first on the list."), where every
+  layer's said the greeting and the pick's reasons again.
+- After a CONTINUE past a deleted guardian, the act card says so.
 - A program MegaMan has but has not put on the NaviCust's board is named
   in L's briefing on every layer, with how to install it; the Guardian
   Data talk says how every time, not only the first: a playtester played
