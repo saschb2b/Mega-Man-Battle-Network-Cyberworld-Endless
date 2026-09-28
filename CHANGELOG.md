@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Navis you talk to keep apart: a heal Prog no longer stands beside a Net
+  Dealer's counter (an A meant for the Prog opened the dealer, twice), and
+  none stands within two panels of another where the room has space; the
+  heal before a guardian moves to a room nearby when the dealer fills the
+  last one. A run saved by an older build starts its current layer afresh.
+- DiveMan's warning says to hold the chips until he surfaces.
 - **macOS:** one app for Apple silicon and Intel Macs (macOS 11 on) in a
   .dmg, built on a Mac by CI. It is signed ad hoc, not notarized: the first
   start needs Open Anyway in System Settings. The ROM is found in Downloads

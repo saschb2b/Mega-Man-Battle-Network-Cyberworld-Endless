@@ -162,7 +162,8 @@ static bool in_way_line(int x, int y) {
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
-		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0;
+		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
+		talk_pairs = 0, talk_touch = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -255,6 +256,19 @@ static void test_generation(void) {
 				beside_line += beside;
 				near_pairs += near;
 			}
+			/* (two to talk to within two panels: an A for the heal Prog
+			 * opened the Net Dealer beside him, twice) */
+			if (stands)
+				for (int j = i + 1; j < layer.nobj; ++j) {
+					const NetObj *q = &layer.obj[j];
+					bool talks = q->type == OBJ_SHOP || q->type == OBJ_HEAL || q->type == OBJ_TRADER || q->type == OBJ_BUGTRADER ||
+						q->type == OBJ_NPC || q->type == OBJ_CHALLENGE || q->type == OBJ_PROGRAMS || q->type == OBJ_GIFT;
+					int d = abs((int)q->x - (int)o->x) > abs((int)q->y - (int)o->y) ? abs((int)q->x - (int)o->x) : abs((int)q->y - (int)o->y);
+					/* (one behind a counter is talked to from its front) */
+					int counter = o->prop >= 0 || q->prop >= 0;
+					if (talks && d <= 2 + counter) ++talk_pairs;
+					if (talks && d <= 1 + counter) ++talk_touch;
+				}
 			if (stands || o->type == OBJ_MYSTERY) {
 				++approached;
 				hidden += behind_gap((int)o->x, (int)o->y);
@@ -343,6 +357,8 @@ static void test_generation(void) {
 	 * an arena; a gap on the way where the room is small) */
 	CHECK(beside_line * 4 <= standing, "%d of %d services and navis stand by the way on", beside_line, standing);
 	CHECK(near_pairs * 16 <= standing, "%d of %d services and navis leave a panel's gap on the way", near_pairs, standing);
+	CHECK(talk_touch == 0, "%d pairs of navis to talk to stand side by side, or beside a counter's front", talk_touch);
+	printf("  two to talk to within two panels (a counter's navi three): %d pairs, %d side by side\n", talk_pairs, talk_touch);
 	printf("  in line with a walkway: %d of %d services and navis; by the way on %d; a panel's gap on the way %d\n",
 		in_line, standing, beside_line, near_pairs);
 	/* (a bystander never; a service where its room has no other place, as

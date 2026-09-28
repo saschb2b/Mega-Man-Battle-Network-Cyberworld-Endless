@@ -234,6 +234,19 @@ static bool gap_on_way(int x, int y) {
 	return false;
 }
 
+/* Whether one MegaMan talks to stands within two panels of (x, y), three
+ * of one behind a counter, who is talked to from the counter's front: an A
+ * meant for a heal Prog opened the Net Dealer beside him, twice. */
+static bool near_talker(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		int t = layer.obj[i].type, reach = layer.obj[i].prop >= 0 ? 3 : 2;
+		bool talks = t == OBJ_SHOP || t == OBJ_HEAL || t == OBJ_TRADER || t == OBJ_BUGTRADER || t == OBJ_NPC ||
+			t == OBJ_CHALLENGE || t == OBJ_PROGRAMS || t == OBJ_GIFT;
+		if (talks && abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
+	}
+	return false;
+}
+
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
@@ -241,6 +254,7 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 		if ((tries < 34 || open) && in_way_line(x, y)) continue;
 		if (tries < 20 && way_band[y][x]) continue;
 		if (tries < 32 && gap_on_way(x, y)) continue;
+		if (tries < 30 && near_talker(x, y)) continue;
 		/* (a bystander, who may stay away, never at one, nor corner to
 		 * corner with a walkway: one on a platform's corner beside its way
 		 * in stood in the way) */
@@ -756,10 +770,17 @@ static int pick_room(const int *order, int n, int next) {
 	return nb ? big[rng_range(0, nb - 1)] : -1;
 }
 
-/* Object `type` in the next room of `order`. */
+/* Object `type` in the next room of `order`: apart from anyone to talk
+ * to (near_talker), in the rooms after it where that one has no such
+ * place (the Net Dealer's counter may stand in another's room). */
 static NetObj *place(int type, const int *order, int n, int next, int *x, int *y) {
 	int r = pick_room(order, n, next);
-	return r >= 0 && room_spot(&layer.rooms[r], x, y) ? add_obj(type, *x, *y) : NULL;
+	if (r < 0) return NULL;
+	for (int k = 0; k < n; ++k) {
+		int room = k == 0 ? r : order[(next + k) % n];
+		if (room_spot(&layer.rooms[room], x, y) && !near_talker(*x, *y)) return add_obj(type, *x, *y);
+	}
+	return room_spot(&layer.rooms[r], x, y) ? add_obj(type, *x, *y) : NULL;
 }
 
 /* The Net Dealer in room r: behind a counter where it has a place for one,
@@ -876,11 +897,16 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		/* (behind a counter in one of the three rooms nearest it, 18
 		 * panels' walk at most, where it has no place for one: on the pads
 		 * before arenas three dealers in four stood bare) */
-		if (kind == LAYER_NORMAL) {
-			int near[3], nn = nearest_rooms(layer.ante, near, 3, 18);
-			dealer(layer.ante, near, nn, kit, &x, &y);
+		int near[3], nn = nearest_rooms(layer.ante, near, 3, 18);
+		if (kind == LAYER_NORMAL) dealer(layer.ante, near, nn, kit, &x, &y);
+		/* (the heal apart from the dealer: in a room nearest it where the
+		 * last one has no place away from his counter) */
+		bool healed = false;
+		for (int i = -1; i < nn && !healed; ++i) {
+			const Room *r = &layer.rooms[i < 0 ? layer.ante : near[i]];
+			if (room_spot(r, &x, &y) && !near_talker(x, y)) { add_obj(OBJ_HEAL, x, y); healed = true; }
 		}
-		if (room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
+		if (!healed && room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
 		shop = heal = false;
 	}
 	/* a Mr. Prog with a gift by the run's start */
