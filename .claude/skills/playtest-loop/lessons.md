@@ -433,3 +433,27 @@ arrow through a house, landing shadows read by row (vanilla).
 Loop change: **after a run ends, the next session plays the restart**: a
 returning player judges the first twenty minutes differently from a
 first-timer, and this session's 6/10 came from there, not from a bug.
+
+## Session 25 (8/10, keep playing: yes; recommend: yes)
+
+Build df6aeaa, the meta layer's phase one: the setup after NEW GAME, the
+short net, helpers. A new run with HP+ only; act 1 in RoboDog Comp under
+DiveMan, new to the persona, beaten with 10 HP left (his warning held
+true: the back column, the torpedoes' shadows), then UnderSht from the
+draft (294 calls). Confirmed: one-page arrival words and gift greeting
+for a returning player, the setup and its lines, HP+ through the gift,
+no family twice in three battles, the kept early R.
+
+Raised: the setup offers nothing but Help before a first win (the locked
+rows read as goals, Storm unlisted), Help has no cost, the same town
+street and RoboDog Comp again, a lone ice Piranha as the first fight
+(fixed after the pin, bfbdb02), act 1's three families turning in a fixed
+rotation, DiveMan's "only bombs reach him" without how to aim them, a
+dealer's list that shifts when a row sells out, a bystander beside a heal
+Prog, a Chip Trader in a walkway's mouth. Vanilla: "got" boxes taking two
+A's, Quakers choosing their row in mid-jump.
+
+Loop change: **a session launched right after a report continues the
+run while its fixes are made**: s26 plays acts 2, 3 and the Nest on the
+same build, so the first win, its summary and the marks get a player's
+eyes while s25's fixes land for s27.
