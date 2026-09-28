@@ -193,6 +193,17 @@ static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out) {
 		/* (on floor: an ornament of a pad, not art hung in the void; or
 		 * the void's own) */
 		if (area_src_walled_floor(a, Xa + 16, Ya + 16) != (floor ? 1 : 0)) continue;
+		/* (not art that draws mostly black: Sky's tile 0x379 is the pit in
+		 * one of its platforms, not a gem) */
+		long dark = 0, lit = 0;
+		for (int k = 0; k < n; ++k)
+			for (int y = 0; y < 8; ++y)
+				for (int x = 0; x < 8; ++x) {
+					uint32_t c = a->px[(size_t)((q[k] / bw + by0) * 8 + y) * (size_t)(a->tw * 8) + (size_t)((q[k] % bw + bx0) * 8 + x)];
+					if (!(c >> 24)) continue;
+					if (((c >> 16) & 255) + ((c >> 8) & 255) + (c & 255) < 90) ++dark; else ++lit;
+				}
+		if (dark > lit) continue;
 		out->tiles = calloc((size_t)n, sizeof *out->tiles);
 		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
 		for (int k = 0; k < n; ++k) {
