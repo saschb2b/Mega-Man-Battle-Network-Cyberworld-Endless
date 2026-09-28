@@ -315,8 +315,16 @@ on; `paste_ornaments` sets one on the middle of every pad at ground level
 with nothing standing there, the red gem three times in five, from the
 layer's seed (the floor and the layout unchanged).
 
+### Green's potted bushes (built)
+
+Green's maps set potted bushes, a 4x4 block of second-layer tiles, in the
+void gaps between parallel planks, one every second panel, plain and in
+flower in turn (32 in Green Area 1, 25 in Green Area 2). `paste_bushes`
+does so in a void panel with floor on both sides along one axis and void
+on the other two, every second one along the gap, never over the floor's
+own art.
+
 ### Next
 
-Green's potted bushes in the gaps between parallel planks (tiles, every
-second panel), the field pictures and a hub's centrepiece where the layout
-has a centre; each a stamp cut like the counters, set by the same rules.
+The field pictures and a hub's centrepiece where the layout has a centre;
+each a stamp cut like the counters, set by the same rules.

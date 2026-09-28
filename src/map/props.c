@@ -151,7 +151,12 @@ bool props_learn_counter(const AreaSrc *a, int x, int y, int faces, PropStamp *o
 	return out->ok;
 }
 
-bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out) {
+static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out);
+
+bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out) { return learn_art(a, seed, true, out); }
+bool props_learn_void_art(const AreaSrc *a, int seed, PropStamp *out) { return learn_art(a, seed, false, out); }
+
+static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out) {
 	memset(out, 0, sizeof *out);
 	if (a->layers < 2) return false;
 	for (int i = 0; i < a->tw * a->th; ++i) {
@@ -182,8 +187,9 @@ bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out) {
 		py = py / n - a->th * 4;
 		int X = (px - 2 * py) / 2, Y = (px + 2 * py) / 2;
 		int Xa = a->ex + PANEL * floordiv(X - a->ex, PANEL), Ya = a->ey + PANEL * floordiv(Y - a->ey, PANEL);
-		/* (on floor: an ornament of a pad, not art hung in the void) */
-		if (area_src_walled_floor(a, Xa + 16, Ya + 16) != 1) continue;
+		/* (on floor: an ornament of a pad, not art hung in the void; or
+		 * the void's own) */
+		if (area_src_walled_floor(a, Xa + 16, Ya + 16) != (floor ? 1 : 0)) continue;
 		out->tiles = calloc((size_t)n, sizeof *out->tiles);
 		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
 		for (int k = 0; k < n; ++k) {

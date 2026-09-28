@@ -4,7 +4,8 @@
 
 - The pads carry the originals' centrepieces on their middle panel, walkable:
   the red gem, the link ring or the cube on its round base, in each surface
-  area's colours.
+  area's colours. Green's potted bushes stand in the gaps between its
+  parallel planks, every second panel, plain and in flower.
 - The layers are furnished with their areas' own props, composed as the
   originals compose theirs rather than scattered: Green's giant cybertree
   in the floor at the back of a room with an avenue of cybertrees past the

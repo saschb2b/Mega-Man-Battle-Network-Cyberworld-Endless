@@ -34,6 +34,9 @@ bool props_learn_counter(const AreaSrc *a, int x, int y, int faces, PropStamp *o
  * (a pad's centrepiece: the red gem 0x379, the link ring 0x372, the cube
  * on its base 0x375), anchored on the corner of the panel it lies on. */
 bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out);
+/* ... the same for art that stands in the void past the floor (Green's
+ * potted bushes between its planks: 0x292, in flower 0x361). */
+bool props_learn_void_art(const AreaSrc *a, int seed, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,
  * mirrored with it: world (X, Y) to (-Y, -X). */

@@ -47,6 +47,7 @@ typedef struct {
 	PropStamp counter[2];     /* the Net Dealer's counter, facing FACES_X and FACES_Y */
 	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
 	PropStamp ornament[3];    /* pads' centrepieces: the red gem, the link ring, the cube on its base */
+	PropStamp bush[2];        /* Green's potted bushes, plain and in flower */
 } Learned;
 
 /* the centrepieces' tiles (the four surface areas share their tile set) */
@@ -173,6 +174,8 @@ static bool learn(int area, Learned *L) {
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
 	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
+	if (na->looks & (1u << LOOK_TREE) && na->looks & (1u << LOOK_GIANT_TREE))   /* (Green's) */
+		for (int k = 0; k < 2; ++k) props_learn_void_art(&a, k ? 0x361 : 0x292, &L->bush[k]);
 	/* the colours its floors show (an area's maps share its palette) */
 	static uint8_t seen[TILE_COLOURS];
 	memset(seen, 0, sizeof seen);
@@ -392,6 +395,33 @@ static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
+/* Green's potted bushes in the gaps between parallel planks, as its maps
+ * set them: in a void panel with floor on both sides along one axis and
+ * void on the other two, every second panel along the gap, the plain and
+ * the flowering pot in turn. */
+static void paste_bushes(const Learned *L, uint16_t *map, int tw, int th) {
+	if (!L->bush[0].ok) return;
+	size_t cells = (size_t)tw * th;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (layer.cell[y][x] != C_VOID) continue;
+			bool across = layer.cell[y][x - 1] == C_PATH && layer.cell[y][x + 1] == C_PATH && !layer.cell[y - 1][x] && !layer.cell[y + 1][x];
+			bool down = layer.cell[y - 1][x] == C_PATH && layer.cell[y + 1][x] == C_PATH && !layer.cell[y][x - 1] && !layer.cell[y][x + 1];
+			/* (every second one along the gap) */
+			if (!(across && (y & 1) == 0) && !(down && (x & 1) == 0)) continue;
+			const PropStamp *st = &L->bush[L->bush[1].ok && ((x + y) / 2 & 1)];
+			int A, B;
+			grid_to_panel(x, y, &A, &B);
+			int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+			for (int k = 0; k < st->ntiles; ++k) {
+				int px = px0 + st->tiles[k].px, py = py0 + st->tiles[k].py;
+				if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+				size_t at = (size_t)(py / 8) * tw + px / 8;
+				if (!map[cells + at]) map[cells + at] = st->tiles[k].e1;   /* (never over the floor's own art) */
+			}
+		}
+}
+
 bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {
 	if (i < 0 || i >= MAX_PROPS || !prop_at[i].ok) return false;
 	*wx = prop_at[i].X + prop_at[i].st->navi_x;
@@ -429,6 +459,7 @@ static bool write_tilemap(const Learned *L) {
 	paste_stairs(L, map, tw, th);
 	paste_props(map, tw, th);
 	paste_ornaments(L, map, tw, th);
+	paste_bushes(L, map, tw, th);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
