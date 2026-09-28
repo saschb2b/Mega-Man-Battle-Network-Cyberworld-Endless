@@ -36,15 +36,15 @@ void chat_marks_install(void) {
 
 /* A Yes/No choice after `question`, asked with `face` as the game's
  * shopkeepers ask it: two options, then select (Yes continues, No and B
- * jump to `no`). */
-static void ask(TextArchive *t, int face, const char *question, int no) {
+ * jump to `no`); in the box a page before it opened, with `after`. */
+static void ask_in(TextArchive *t, int face, const char *question, int no, bool after) {
 	static const uint8_t horizontal[] = { 0xF7, 0x07, 0x0B };        /* ts_position_option_horizontal */
 	static const uint8_t yes_opt[] = { 0xEB, 0x00, 0x11, 0x00 };     /* ts_option: left/right to No */
 	static const uint8_t no_opt[] = { 0xEB, 0x00, 0x00, 0x11 };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
 	uint8_t select[] = { 0xED, 0x06, 0x00, 0xFF, (uint8_t)no, 0xFF };
 	if (face >= 0) ta_mugshot(t, face);
-	ta_open(t);
+	if (after) ta_clear(t); else ta_open(t);
 	ta_text(t, question);
 	ta_bytes(t, horizontal, sizeof horizontal);
 	ta_bytes(t, yes_opt, sizeof yes_opt);
@@ -55,6 +55,8 @@ static void ask(TextArchive *t, int face, const char *question, int no) {
 	ta_text(t, " No ");
 	ta_bytes(t, select, sizeof select);
 }
+
+static void ask(TextArchive *t, int face, const char *question, int no) { ask_in(t, face, question, no, false); }
 
 static void flag_set(TextArchive *t, int flag) {
 	uint8_t b[] = { 0xEA, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8) };
@@ -133,7 +135,14 @@ int ta_challenge(TextArchive *t, int flag) {
 int ta_undernet(TextArchive *t, int flag, bool deeper) {
 	int no = closing(t);
 	int i = ta_script(t);
-	ask(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no);
+	/* what is in there, where it is chosen (a playtester kept off one, not
+	 * knowing what it was for): the Undernet's viruses, its richer Mystery
+	 * Data and BugFrag Trader, and where its exit leads */
+	bool first = true;
+	ta_pages(t, deeper ? "Tougher viruses still, and richer data!|Its exit leads back to the main path."
+		: "The Undernet: tougher viruses and richer data!|A BugFrag Trader too. Its exit leads to the next layer.",
+		FACE_MEGAMAN, &first);
+	ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;

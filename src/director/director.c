@@ -337,7 +337,7 @@ static const char *status_words(void) {
 			ADD(" here!|");
 		}
 		if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
-		if (fresh & MARK_WARP) ADD("@M A dark warp down into the Undernet, the violet mark on the map!|");
+		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
 		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
 		/* (the map's tip on the run's first layers, until the map has been
@@ -637,7 +637,12 @@ void director_draw_map(void) {
 			}
 		}
 	}
-	/* what stands there, once seen; the goal's way while it is not */
+	/* what stands there, once seen; the goal's way while it is not (a
+	 * Server's mark gone once its battle is taken: a playtester saw it
+	 * still there after he had won) */
+	bool server_done = false;
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		server_done |= D.objs.choice[i].type == OBJ_CHALLENGE && (D.chosen & (1u << i));
 	int gx = -1, gy = -1;
 	bool goal_boss = false;   /* (the guardian while it stands, else the exit) */
 	SDL_Color gc = rgba(255, 230, 60, 255);
@@ -654,6 +659,7 @@ void director_draw_map(void) {
 		default: continue;
 		}
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
+		if (o->type == OBJ_CHALLENGE && server_done) continue;
 		if (o->type == OBJ_BOSS && !boss_beaten()) { gx = x; gy = y; gc = c; goal_boss = true; }
 		else if (o->type == OBJ_EXIT && !goal_boss) { gx = x; gy = y; }
 		int sx = SX(x, y), sy = SY(x, y);
@@ -718,7 +724,8 @@ void director_draw_map(void) {
 		switch (layer.obj[i].type) {
 		case OBJ_HEAL: has[2] = true; break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: has[5] = true; break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: has[5] = true; break;
+		case OBJ_CHALLENGE: has[5] |= !server_done; break;
 		default: break;
 		}
 	/* (the gaps close up until it fits the picture's width) */

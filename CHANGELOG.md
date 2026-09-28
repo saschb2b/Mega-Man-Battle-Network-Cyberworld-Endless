@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A dark warp says what the Undernet holds before it asks (tougher
+  viruses, richer data, a BugFrag Trader, and an exit on to the next
+  layer), and so does L the first time it names one: a playtester kept
+  off one, not knowing what it was for. A Server's violet mark leaves the
+  map once its battle is taken.
 - Services and navis keep off the line a walkway makes across its
   platform, where MegaMan runs: a Net Dealer on a homepage's stripe took
   two sidesteps each way, and more than a quarter of them stood on such a
