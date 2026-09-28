@@ -23,6 +23,11 @@ typedef struct {
 	bool boss;
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 	int player;      /* MegaMan's panel on it (row << 4 | column, from 1); 0 column 2 row 2 */
+	/* the area's battle it was rolled from, kept in mind once fought
+	 * (loot_battle_fought): the area, the battle (-1 none), its virus
+	 * families and its viruses */
+	int from_biome, from_pick;
+	unsigned from_families, from_viruses;
 } Encounter;
 
 #endif

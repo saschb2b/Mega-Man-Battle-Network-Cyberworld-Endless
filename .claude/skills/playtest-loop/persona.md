@@ -42,7 +42,7 @@ Run everything from /home/saschabecker/Documents/GitHub/Mega-Man-Battle-Network-
 - GBA controls:
   - A: talk, confirm, use a chip.
   - B: cancel, or the buster (hold to charge). Hold B while walking to run. Hold B in a chat to fast-forward it.
-  - L/R: open the Custom screen when its gauge fills (a press up to half a second early is kept). On the map, L asks MegaMan for directions, and R jacks in at the town's statue. On the Custom screen, hold L and press R to try to run from a battle.
+  - L/R: open the Custom screen when its gauge fills (a press up to most of a second early is kept, and pressed again if a hit or a shot swallowed it). On the map, L asks MegaMan for directions, and R jacks in at the town's statue. On the Custom screen, hold L and press R to try to run from a battle.
   - SELECT (hold) on a layer: the map.
   - START: the PET menu on the map; pause in battle.
 - On the isometric map the d-pad moves diagonally on screen: a single direction goes straight across the screen, and two together (like DOWN+LEFT) go along a walkway's line. The camera follows MegaMan, so he stays in the middle of the screen: judge whether he moved by the floor and landmarks, not by his place on screen.

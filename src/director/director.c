@@ -1291,17 +1291,38 @@ static uint32_t shop_guard(uint32_t keys) {
 
 /* In battle an L or R pressed as the Custom gauge was all but full was
  * lost (the game takes them at a full gauge only; Kai re-pressed in every
- * fight): it is kept half a second and given as the gauge fills, one
- * frame let go first so the game sees a press. */
+ * fight), and so was one the game let pass while MegaMan fired or
+ * flinched: a press is kept most of a second and given as the gauge
+ * fills, one frame let go first so the game sees a press, then again
+ * every CUSTOM_RETRY frames until the Custom screen opens (the gauge
+ * empties as it does) or CUSTOM_TRIES frames have passed. */
+#define CUSTOM_EARLY 50
+#define CUSTOM_TRIES 45
+#define CUSTOM_RETRY 20
 static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
 	static int kept, step;
 	static uint32_t which;
 	if (main_mode() != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { kept = step = 0; return keys; }
 	bool full = emu_read16(BN6_CUSTOM_GAUGE) >= 0x4000;
-	if (step == 1) { step = 2; return keys & ~(KEY_L | KEY_R); }
-	if (step == 2) { step = 0; return keys | which; }
-	if ((l_pressed || r_pressed) && !full) { kept = 30; which = l_pressed ? KEY_L : KEY_R; return keys; }
-	if (kept > 0 && --kept > 0 && full) { kept = 0; step = 1; return keys & ~(KEY_L | KEY_R); }
+	if (l_pressed || r_pressed) {
+		/* (pressed at a full gauge: the game has this press; again later
+		 * only if it let it pass) */
+		kept = full ? CUSTOM_TRIES : CUSTOM_EARLY;
+		step = full ? 2 : 0;
+		which = l_pressed ? KEY_L : KEY_R;
+		return keys;
+	}
+	if (kept <= 0) return keys;
+	if (!full) {
+		/* still filling, or emptied by the Custom screen taking a press */
+		kept = step ? 0 : kept - 1;
+		return keys;
+	}
+	if (step == 0) kept = CUSTOM_TRIES;
+	--kept;
+	int s = step++ % CUSTOM_RETRY;
+	if (s == 0) return keys & ~(KEY_L | KEY_R);
+	if (s == 1) return keys | which;
 	return keys;
 }
 
@@ -1805,6 +1826,7 @@ void director_update(void) {
 				if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
 				if (s != -2) {
 					D.record_known = true;
+					loot_battle_fought(&D.next);
 					runlog_battle_start(&D.next, D.challenge ? "challenge" : "battle");
 				}
 				if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);

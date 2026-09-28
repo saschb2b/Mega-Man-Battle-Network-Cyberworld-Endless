@@ -25,6 +25,8 @@ int chip_price(int id);
  * and brought the last session's pair back first thing. */
 typedef struct { int32_t biome, pick; uint32_t families, viruses; } LootMemory;
 void loot_memory(LootMemory *out);
+/* The battle MegaMan fights: the next random battle keeps clear of it. */
+void loot_battle_fought(const Encounter *e);
 void loot_memory_set(const LootMemory *m);
 
 #endif

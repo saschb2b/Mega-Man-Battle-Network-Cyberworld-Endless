@@ -42,6 +42,7 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[32] = { 0 };
 	for (int r = 0; r < ROLLS; ++r) {
 		Encounter e = make_encounter(depth, biome, kind);
+		loot_battle_fought(&e);   /* each roll as a battle fought */
 		/* (the virus families a battle brings, each counted once) */
 		unsigned in = 0;
 		for (int i = 0; i < e.nfoes; ++i)

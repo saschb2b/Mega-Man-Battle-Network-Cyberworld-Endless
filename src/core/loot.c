@@ -130,9 +130,20 @@ int counter_element(int biome, int navi) {
 	return best ? beats[best] : 0;
 }
 
+/* the last battle fought, not the last rolled: the next random battle is
+ * rolled again every few seconds, and those rolls had pushed a Server's
+ * battle out of mind before the fight after it (loot_battle_fought) */
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
 static uint32_t last_families;                  /* the virus families of the last battle (a bit each) */
 static uint32_t last_viruses;                   /* ... and its viruses (viruses_of) */
+
+void loot_battle_fought(const Encounter *e) {
+	if (e->from_pick < 0) return;
+	last_biome = e->from_biome;
+	last_pick = e->from_pick;
+	last_families = e->from_families;
+	last_viruses = e->from_viruses;
+}
 
 void loot_memory(LootMemory *out) {
 	*out = (LootMemory){ last_biome, last_pick, last_families, last_viruses };
@@ -291,10 +302,10 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 		roll -= weight[i];
 	}
 	if (pick < 0) return false;
-	last_biome = biome;
-	last_pick = pick;
-	last_families = families_of(&list[pick]);
-	last_viruses = viruses_of(&list[pick]);
+	e->from_biome = biome;
+	e->from_pick = pick;
+	e->from_families = families_of(&list[pick]);
+	e->from_viruses = viruses_of(&list[pick]);
 	int hp, dmg;
 	build_foes(&list[pick], depth, fit[pick], false, e, &hp, &dmg);
 	band = pacing_band(depth, challenge, easy);
@@ -312,6 +323,7 @@ Encounter make_encounter(int depth, int biome, int kind) {
 	bool challenge = kind == ENC_CHALLENGE;
 	Encounter e = { 0 };
 	e.biome = biome;
+	e.from_pick = -1;
 	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
 	if (original_encounter(depth, biome, kind, &e)) {
 		/* the run's first battle: the formation's first virus alone (the
@@ -361,6 +373,7 @@ Encounter make_encounter(int depth, int biome, int kind) {
 Encounter make_boss(int depth, int biome, int navi) {
 	Encounter e = { 0 };
 	e.biome = biome;
+	e.from_pick = -1;
 	e.boss = true;
 	e.nfoes = 1;
 	e.foes[0].id = -1;
