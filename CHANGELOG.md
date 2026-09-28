@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- DiveMan's warning says he hides under the water where nothing hits him,
+  to strike when he surfaces, to stand in the back column when his wave
+  lights the panels and that his torpedoes run in their shadows' row (it
+  said only to move between rows). A new run's first guardian is another
+  than the last new run's (one retry had left DiveMan twice running).
 - The Net Dealer stands behind a counter, as the originals' dealers do: Sky
   Area 3's capsule in Central, Seaside and Sky, each in its own colours, and
   Green Area 2's NetCafe desk in Green, cut whole from the ROM with their
