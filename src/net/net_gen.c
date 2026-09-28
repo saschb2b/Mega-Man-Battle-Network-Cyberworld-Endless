@@ -308,6 +308,39 @@ static int bfs_far(int from) {
 	return best;
 }
 
+/* Up to `max` rooms nearest room `from` by walking, `reach` panels at
+ * most, nearest first, but `from` and the arena. */
+static int nearest_rooms(int from, int *out, int max, int reach) {
+	static int16_t dist[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(dist, -1, sizeof dist);
+	int h = 0, t = 0, n = 0;
+	qx[t] = (int16_t)layer.rooms[from].ax; qy[t++] = (int16_t)layer.rooms[from].ay;
+	dist[qy[0]][qx[0]] = 0;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d[k][0], ny = y + d[k][1];
+			if (layer.cell[ny][nx] != C_PATH || dist[ny][nx] >= 0) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	for (int k = 0; k < max; ++k) {
+		int best = -1, bd = reach + 1;
+		for (int i = 0; i < layer.nrooms; ++i) {
+			int d = dist[layer.rooms[i].ay][layer.rooms[i].ax];
+			bool taken = i == from || i == layer.arena;
+			for (int j = 0; j < n; ++j) taken |= out[j] == i;
+			if (!taken && d >= 0 && d < bd) { bd = d; best = i; }
+		}
+		if (best < 0) break;
+		out[n++] = best;
+	}
+	return n;
+}
+
 #define MIN_FLOOR 120   /* panels a layer has at least */
 #define ARENA_SIZE 5    /* the guardian's arena, panels a side */
 
@@ -754,7 +787,13 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (layer.arena >= 0) {
 		/* the last stop before the arena: the Net Dealer and a heal, as the
 		 * rooms before Hades' guardians hold Charon and a fountain */
-		if (kind == LAYER_NORMAL) dealer(layer.ante, NULL, 0, kit, &x, &y);
+		/* (behind a counter in one of the three rooms nearest it, 18
+		 * panels' walk at most, where it has no place for one: on the pads
+		 * before arenas three dealers in four stood bare) */
+		if (kind == LAYER_NORMAL) {
+			int near[3], nn = nearest_rooms(layer.ante, near, 3, 18);
+			dealer(layer.ante, near, nn, kit, &x, &y);
+		}
 		if (room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
 		shop = heal = false;
 	}

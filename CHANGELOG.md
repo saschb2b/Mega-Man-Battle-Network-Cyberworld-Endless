@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The Net Dealer before a guardian stands behind a counter in one of the
+  rooms nearest the arena's antechamber when the antechamber (mostly a
+  pad) has no place for one: 58 of 80 such dealers in the tests, from 20.
 - HeatMan's warning says his fire tower crawls at us unlit and turns into
   our row, to sidestep it late (a playtester stepped off his lit leap into
   its path and lost on HeatMan's last 29 HP); his flamethrower sweeps the
