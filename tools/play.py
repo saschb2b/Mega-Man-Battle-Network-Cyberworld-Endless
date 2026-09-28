@@ -234,6 +234,11 @@ def cmd_do(name, rest):
     if '--every' in rest:
         every = int(rest[rest.index('--every') + 1])
         rest = rest[:rest.index('--every')] + rest[rest.index('--every') + 2:]
+    # (--keep DIR: the batch's pictures one by one, numbered on from what DIR holds)
+    keep = None
+    if '--keep' in rest:
+        keep = rest[rest.index('--keep') + 1]
+        rest = rest[:rest.index('--keep')] + rest[rest.index('--keep') + 2:]
     commands = ' ; '.join(rest)
     seq = steps(commands)
     if every:
@@ -264,6 +269,11 @@ def cmd_do(name, rest):
     with open(os.path.join(h, 'history.txt'), 'a') as f:
         f.write(commands + (f'  # every {every}' if every else '') + f'  # {answer}\n')
     out = os.path.join(h, 'shots', f'{n:04d}.png')
+    if keep:
+        os.makedirs(keep, exist_ok=True)
+        k0 = len(os.listdir(keep))
+        for i, p in enumerate(shots):
+            shutil.copy(p, os.path.join(keep, f'{k0 + i:05d}.bmp'))
     picture(shots, out)
     print(open(state).read().strip())
     print(f'picture {out}')

@@ -13,11 +13,12 @@ typedef struct {
 	bool quiet;     /* no random battles */
 	bool fragile;   /* MegaMan keeps 1 HP in battle: the run ends at the first hit */
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
+	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
 } DevFlags;
 
 extern DevFlags dev;
 
-/* "god,onehit,quiet,speed=4" */
+/* "god,onehit,quiet,speed=4,powers" */
 void devtools_parse(const char *spec);
 /* The player's GBA keys: the menu takes them while it is open. */
 uint32_t devtools_keys(uint32_t keys);

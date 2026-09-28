@@ -21,7 +21,7 @@
 #include "run.h"
 #include "text.h"
 
-DevFlags dev = { false, false, false, false, 1 };
+DevFlags dev = { false, false, false, false, 1, false };
 char devtools_shot[512];
 
 enum { I_GOD, I_ONEHIT, I_QUIET, I_SPEED, I_WIN, I_HEAL, I_ZENNY, I_NEXT, I_GUARDIAN, I_AREA, I_COUNT };
@@ -43,6 +43,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "quiet")) dev.quiet = true;
 		else if (!strcmp(t, "fragile")) dev.fragile = true;
 		else if (!strncmp(t, "speed=", 6)) dev.speed = atoi(t + 6);
+		else if (!strcmp(t, "powers")) dev.powers = true;
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
@@ -156,6 +157,10 @@ void devtools_update(void) {
 		battle_hp(0, -1, true);
 	}
 	if (dev.onehit) battle_hp(1, 1, false);
+	if (dev.powers) {
+		flag_set(BN6_FLAG_BEAST_OUT);
+		for (int f = BN6_FLAG_HEAT_CROSS; f <= BN6_FLAG_CHARGE_CROSS; ++f) flag_set(f);
+	}
 	if (dev.fragile) battle_hp(0, 1, false);
 }
 

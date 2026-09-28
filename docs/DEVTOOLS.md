@@ -196,6 +196,10 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
+Two more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+first hit ends the run) and `powers` (the five Crosses and BeastOut open from
+the first battle on, for a capture of them: `tools/trailer.py` plays one).
+
 ## How the switches work
 
 - **Random battles** sets event flag 0x1700 every frame, one of the flags

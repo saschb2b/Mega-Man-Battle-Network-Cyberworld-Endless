@@ -107,7 +107,7 @@ python3 build.py windows    # build/release: the Windows installer and zip (MinG
 python3 build.py macos      # build/release/cyberworld-endless-macos.dmg, on a Mac only (Apple's SDK)
 python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-builder on this machine)
 python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
-python3 tools/play.py do NAME "press A; hold UP 30" [--every 10]   # input, then a picture and the state
+python3 tools/play.py do NAME "press A; hold UP 30" [--every 10] [--keep DIR]   # input, then a picture and the state (--keep: each frame into DIR)
 python3 build.py serve      # the site and the browser build on http://localhost:8080
 python3 build.py tiles [SEEDS]  # the tile test: every area's layers drawn, wrong-floor tiles and seams per area
 python3 build.py town [SEEDS]  # the town drawn per seed, and the game around it
@@ -118,6 +118,7 @@ python3 tools/site_art.py              # web/assets/ui: the site's pixel-art fra
 python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: the application icon
 python3 tools/steam_art.py             # linux/steam: Steam's library artwork (capsules, hero, logo)
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
+python3 tools/trailer.py [--keep]      # docs/clips/trailer.*: the 20-second trailer, its music by tools/trailer_music.py
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
 
