@@ -43,6 +43,9 @@ typedef struct {
 #define HEIGHT_UNEVEN 255
 
 bool area_src_load(int group, int number, AreaSrc *a);
+/* Map (group, number)'s descriptor (tile set, palette, tile map: ROM
+ * offsets of its 12 bytes) and its coordinate data's pointer. */
+bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot);
 void area_src_free(AreaSrc *a);
 /* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip. */
 void area_src_mirror(const AreaSrc *a, AreaSrc *m);

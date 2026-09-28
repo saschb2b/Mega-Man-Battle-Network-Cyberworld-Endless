@@ -43,7 +43,8 @@ typedef struct {
 	int nbooks;
 	TileSeams seams;          /* the tiles the maps set side by side */
 	DecorBook decor;          /* the scenery of the area's maps */
-	uint32_t desc, coord_slot;
+	uint32_t desc, coord_slot;   /* the map its layers take over (net_area.host) */
+	uint32_t src_desc;        /* the learned map's, whose tile set and colours they draw in */
 	StairTemplate stairs[STAIR_DIRS];
 	PropStamp counter[2];     /* the Net Dealer's counter, facing FACES_X and FACES_Y */
 	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
@@ -180,7 +181,8 @@ static bool learn(int area, Learned *L) {
 	AreaSrc a;
 	if (!area_src_load(na->group, na->number, &a)) return false;
 	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
-	L->desc = a.desc; L->coord_slot = a.coord_slot;
+	L->desc = L->src_desc = a.desc; L->coord_slot = a.coord_slot;
+	if (na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) return false;
 	L->nbooks = 0;
 	learn_map(&a, &a, area, L);
 	decor_learn(&a, na->bg_in_map, &L->decor);
@@ -642,6 +644,9 @@ static bool write_tilemap(const Learned *L) {
 		FILE *f = emu_debug_file("gen_tilemap.bin");
 		if (f) { fwrite(out, 1, 12, f); fwrite(map, 2, cells * 2, f); fclose(f); }
 	}
+	/* (a host of the same group shares the tile set and colours: set them anyway) */
+	if (L->desc != L->src_desc)
+		for (uint32_t k = 0; k < 8; k += 4) emu_write32(0x08000000u + L->desc + k, emu_read32(0x08000000u + L->src_desc + k));
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
 	free(out);
 	free(last.map);

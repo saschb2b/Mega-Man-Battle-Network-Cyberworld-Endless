@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- MegaMan no longer disappears behind Seaside's walkways and pads. Seaside
+  Area 1, whose map a Seaside layer took over, draws everyone behind the
+  map's second tile layer, where a layer puts some walkway, the pads' rims
+  and their centrepieces; its layers now take over Seaside Area 2's map,
+  which draws them in front, as every other area does (Mr. Weather's comp
+  likewise). A run saved in a layer by an older build starts that layer
+  afresh.
 - **A trailer:** 21 seconds of runs, battles, a HeatCross, a BeastOut, the
   guardians and the Undernet, with an original battle theme in the manner
   of BN6's, played through a model of the GBA's sound. The project page

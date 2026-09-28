@@ -79,6 +79,13 @@ static bool map_desc(int group, int number, uint32_t *desc, uint32_t *ts, uint32
 	return true;
 }
 
+bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot) {
+	uint32_t ts, pal, tm, list = rom_u32(group_slot(COORD_TABLE_RW, COORD_TABLE, group));
+	if (!map_desc(group, number, desc, &ts, &pal, &tm) || !rom_is_ptr(list)) return false;
+	*coord_slot = rom_off(list) + (uint32_t)number * 4;
+	return true;
+}
+
 static bool decode_tiles(AreaSrc *a) {
 	uint32_t ts, pal, tm;
 	if (!map_desc(a->group, a->number, &a->desc, &ts, &pal, &tm)) return false;

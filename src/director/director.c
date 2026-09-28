@@ -512,7 +512,7 @@ static bool build_layer(void) {
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	D.group = a->group;
-	D.number = a->number;
+	D.number = a->host ? a->host - 1 : a->number;   /* (the map its layers take over) */
 	/* (the layer just left had its Net Dealer speak: this act's next say
 	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
 	 * on every layer for a playtester) */
@@ -809,7 +809,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 34
+#define LAYER_MAKE 35
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
