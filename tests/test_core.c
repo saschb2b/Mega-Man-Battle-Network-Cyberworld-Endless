@@ -19,6 +19,8 @@
 #include "rivals.h"
 #include "text.h"
 #include "townmath.h"
+#include "touch_layout.h"
+#include "buttons.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -824,6 +826,72 @@ static void test_layouts_build(void) {
 		}
 }
 
+/* The touch controls: on the canvas, clear of the picture and of each
+ * other where there is room, and a finger's buttons. */
+static bool boxes_meet(const TouchBox *a, const TouchBox *b) {
+	return a->x < b->x + b->w && b->x < a->x + a->w && a->y < b->y + b->h && b->y < a->y + a->h;
+}
+
+/* sw x sh screen pixels, laid out as platform.c does with the controls shown */
+static void check_touch(const char *what, int sw, int sh) {
+	int sx = sw / 240, sy = sh / 160, s = sx < sy ? sx : sy;
+	s = touch_fit_scale(sw, sh, s < 1 ? 1 : s);
+	int w = sw / s, h = sh / s, px = (w - 240) / 2, py = (h - 160) / 2, top = touch_picture_top(w, h);
+	if (top >= 0) py = top;
+	TouchLayout t;
+	touch_layout_for(w, h, px, py, &t);
+	TouchBox pic = { px, py, 240, 160 };
+	CHECK(!t.over, "%s: the touch controls have no room beside or under the picture (%dx%d at %dx)", what, w, h, s);
+	for (int c = 0; c < TOUCH_CONTROLS; ++c) {
+		const TouchBox *b = &t.box[c];
+		CHECK(b->x >= 0 && b->y >= 0 && b->x + b->w <= w && b->y + b->h <= h, "%s: control %d leaves the canvas", what, c);
+		CHECK(!boxes_meet(b, &pic), "%s: control %d covers the picture", what, c);
+		for (int d = c + 1; d < TOUCH_CONTROLS; ++d) {
+			const TouchBox *e = &t.box[d];
+			bool round = (c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B) && (d == TOUCH_DPAD || d == TOUCH_A || d == TOUCH_B);
+			long dx = (b->x + b->w / 2) - (e->x + e->w / 2), dy = (b->y + b->h / 2) - (e->y + e->h / 2), rr = b->w / 2 + e->w / 2;
+			CHECK(round ? dx * dx + dy * dy > rr * rr : !boxes_meet(b, e), "%s: controls %d and %d overlap", what, c, d);
+		}
+	}
+	/* thumb sized: in picture pixels, a share of the screen's short side */
+	const TouchBox *dp = &t.box[TOUCH_DPAD];
+	int r = dp->w / 2, cx = dp->x + r, cy = dp->y + r;
+	CHECK(r >= 30, "%s: a D-pad of radius %d is small for a thumb", what, r);
+	CHECK(t.box[TOUCH_A].w / 2 >= 15 && t.box[TOUCH_B].w / 2 >= 15, "%s: A of radius %d is small for a thumb", what, t.box[TOUCH_A].w / 2);
+	CHECK(touch_hit(&t, cx, cy, TOUCH_DPAD) == 0, "%s: the D-pad's middle holds a direction", what);
+	CHECK(touch_hit(&t, cx + r * 3 / 4, cy + 1, TOUCH_DPAD) == BTN_RIGHT, "%s: right of the middle is not RIGHT", what);
+	CHECK(touch_hit(&t, cx - 2, cy - r * 3 / 4, TOUCH_DPAD) == BTN_UP, "%s: above the middle is not UP", what);
+	CHECK(touch_hit(&t, cx + r / 2, cy + r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_DOWN), "%s: the diagonal is not RIGHT+DOWN", what);
+	/* a thumb that slid off the D-pad still steers it; one from a button does not */
+	CHECK(touch_hit(&t, cx - 3 * r, cy, TOUCH_DPAD) == BTN_LEFT, "%s: a thumb slid off the D-pad lost it", what);
+	CHECK(touch_hit(&t, cx + r / 2, cy, TOUCH_B) == 0, "%s: a thumb from B steers the D-pad", what);
+	static const struct { int c; uint32_t bit; } keys[] = {
+		{ TOUCH_A, BTN_A }, { TOUCH_B, BTN_B }, { TOUCH_L, BTN_L }, { TOUCH_R, BTN_R }, { TOUCH_START, BTN_START }, { TOUCH_SELECT, BTN_SELECT },
+	};
+	for (size_t i = 0; i < sizeof keys / sizeof *keys; ++i) {
+		const TouchBox *b = &t.box[keys[i].c];
+		int bx = b->x + b->w / 2, by = b->y + b->h / 2;
+		CHECK(touch_control_at(&t, bx, by) == keys[i].c && touch_hit(&t, bx, by, keys[i].c) == keys[i].bit,
+			"%s: control %d's middle does not press it", what, keys[i].c);
+	}
+	/* a thumb rolled from B onto A presses A */
+	const TouchBox *a = &t.box[TOUCH_A];
+	CHECK(touch_hit(&t, a->x + a->w / 2, a->y + a->h / 2, TOUCH_B) == BTN_A, "%s: rolling from B to A misses A", what);
+}
+
+static void test_touch(void) {
+	check_touch("a phone upright (1080x2340)", 1080, 2340);
+	check_touch("a phone upright (1170x2532)", 1170, 2532);
+	check_touch("a phone upright (720x1600)", 720, 1600);
+	check_touch("a phone on its side (2340x1080)", 2340, 1080);
+	check_touch("a phone on its side (2532x1170)", 2532, 1170);
+	check_touch("a phone on its side (1600x720)", 1600, 720);
+	check_touch("a 16:9 screen (1920x1080)", 1920, 1080);
+	check_touch("a 4:3 tablet (2048x1536)", 2048, 1536);
+	check_touch("a 4:3 tablet upright (1536x2048)", 1536, 2048);
+	check_touch("a Retroid Pocket (1334x750)", 1334, 750);
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -836,6 +904,7 @@ int main(void) {
 	test_pacing();
 	test_town_moves();
 	test_talk();
+	test_touch();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

@@ -10,8 +10,12 @@ const ROM_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6';   // BN6 Cybeast Gr
 const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 
 const $ = (id) => document.getElementById(id);
-const canvas = $('screen'), stage = $('stage'), gate = $('gate'), statusLine = $('status');
+const canvas = $('canvas'), stage = $('stage'), gate = $('gate'), statusLine = $('status');
 let ready = false, started = false;
+// a phone or tablet: the game takes the whole screen and draws its own buttons
+// (?touch=1 or ?touch=0 decides it for a screen that tells it wrong)
+const touchParam = new URLSearchParams(location.search).get('touch');
+const touchPlay = touchParam ? touchParam === '1' : window.matchMedia('(pointer: coarse)').matches;
 
 function say(text) { statusLine.textContent = text; }
 
@@ -67,10 +71,26 @@ function start() {
 	if (!ready || started || !storedRom()) return;
 	started = true;
 	gate.hidden = true;
+	if (touchPlay) {
+		// (the canvas takes its size from the page: SDL follows it, rotations too)
+		document.body.classList.add('touch-play');
+		canvas.style.removeProperty('width');
+		canvas.style.removeProperty('height');
+		if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+		keepAwake();
+		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch']);
+		return;
+	}
 	fit();
 	canvas.focus();
 	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160']);
 }
+
+// the screen stays on while the game plays (asked again when the tab returns)
+async function keepAwake() {
+	try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) { /* not granted */ }
+}
+document.addEventListener('visibilitychange', () => { if (started && touchPlay && document.visibilityState === 'visible') keepAwake(); });
 
 // ---- the ROM ----
 
@@ -116,6 +136,7 @@ $('forget').addEventListener('click', () => {
 // ---- the picture: 240x160 at the largest whole scale in device pixels ----
 
 function fit() {
+	if (touchPlay && started) return;
 	const dpr = window.devicePixelRatio || 1;
 	const full = document.fullscreenElement === stage;
 	const w = full ? screen.width : Math.min(stage.parentElement.clientWidth, 240 * 8);

@@ -1,0 +1,120 @@
+#include "touch_layout.h"
+
+#include <string.h>
+
+#include "buttons.h"
+
+#define PIC_W 240
+#define PIC_H 160
+#define BELOW_MIN 150   /* canvas rows under the picture that take the controls */
+#define SIDE_MIN 72     /* columns beside it that do: a D-pad of radius 30, A and B of 15 (in picture
+                         * pixels, so a thumb's share of the screen's short side) */
+
+static int min_i(int a, int b) { return a < b ? a : b; }
+
+static TouchBox round_at(int cx, int cy, int r) { TouchBox b = { cx - r, cy - r, 2 * r + 1, 2 * r + 1 }; return b; }
+static TouchBox box_at(int cx, int cy, int w, int h) { TouchBox b = { cx - w / 2, cy - h / 2, w, h }; return b; }
+
+int touch_fit_scale(int sw, int sh, int scale) {
+	if (sh > sw) return scale;
+	while (scale > 1 && sw / scale - PIC_W < 2 * SIDE_MIN) --scale;
+	return scale;
+}
+
+int touch_picture_top(int w, int h) {
+	if (h <= w || h - PIC_H < BELOW_MIN) return -1;
+	/* (clear of a phone's status bar or notch) */
+	return h * 3 / 100 + 4;
+}
+
+void touch_layout_for(int w, int h, int px, int py, TouchLayout *t) {
+	memset(t, 0, sizeof *t);
+	int below = h - (py + PIC_H), side = min_i(px, w - (px + PIC_W));
+	if (below >= BELOW_MIN && below >= side) {
+		/* a tall screen: under the picture, in thumbs' reach, and clear of a
+		 * phone's bottom edge (its home gesture) */
+		t->below = true;
+		int top = py + PIC_H + 8, bot = h - 6 - h * 3 / 100, ah = bot - top;
+		int rd = min_i(w * 21 / 100, ah * 23 / 100), rb = min_i(w * 9 / 100, ah * 11 / 100);
+		int lw = min_i(w * 30 / 100, 72);
+		t->box[TOUCH_L] = box_at(8 + lw / 2, top + ah * 12 / 100 + 10, lw, 20);
+		t->box[TOUCH_R] = box_at(w - 8 - lw / 2, top + ah * 12 / 100 + 10, lw, 20);
+		t->box[TOUCH_DPAD] = round_at(w * 27 / 100, top + ah * 54 / 100, rd);
+		t->box[TOUCH_A] = round_at(w * 85 / 100, top + ah * 47 / 100, rb);
+		t->box[TOUCH_B] = round_at(w * 64 / 100, top + ah * 61 / 100, rb);
+		t->box[TOUCH_SELECT] = box_at(w * 38 / 100, bot - 10, 46, 16);
+		t->box[TOUCH_START] = box_at(w * 62 / 100, bot - 10, 46, 16);
+	} else if (side >= SIDE_MIN) {
+		/* a wide screen: the D-pad left of the picture, A and B right of it */
+		int rd = min_i(side * 42 / 100, h * 24 / 100), rb = min_i(side * 21 / 100, h * 10 / 100);
+		int bw = min_i(side - 8, 56);
+		t->box[TOUCH_L] = box_at(side / 2, 14, bw, 18);
+		t->box[TOUCH_R] = box_at(w - side / 2, 14, bw, 18);
+		t->box[TOUCH_DPAD] = round_at(side / 2, h * 56 / 100, rd);
+		t->box[TOUCH_A] = round_at(w - side * 29 / 100, h * 50 / 100, rb);
+		t->box[TOUCH_B] = round_at(w - side * 69 / 100, h * 63 / 100, rb);
+		t->box[TOUCH_SELECT] = box_at(side / 2, h - 12, min_i(bw, 46), 14);
+		t->box[TOUCH_START] = box_at(w - side / 2, h - 12, min_i(bw, 46), 14);
+	} else {
+		/* no room: over the picture's corners, see-through */
+		t->over = true;
+		t->box[TOUCH_L] = box_at(px + 26, py + 22, 44, 14);
+		t->box[TOUCH_R] = box_at(px + PIC_W - 26, py + 22, 44, 14);
+		t->box[TOUCH_DPAD] = round_at(px + 38, py + PIC_H - 44, 30);
+		t->box[TOUCH_A] = round_at(px + PIC_W - 22, py + PIC_H - 52, 14);
+		t->box[TOUCH_B] = round_at(px + PIC_W - 52, py + PIC_H - 34, 14);
+		t->box[TOUCH_SELECT] = box_at(px + PIC_W / 2 - 24, py + PIC_H - 10, 40, 12);
+		t->box[TOUCH_START] = box_at(px + PIC_W / 2 + 24, py + PIC_H - 10, 40, 12);
+	}
+}
+
+static bool round_control(int c) { return c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B; }
+
+int touch_control_at(const TouchLayout *t, int x, int y) {
+	/* the round buttons first, each with a quarter of its radius more */
+	static const int order[TOUCH_CONTROLS] = { TOUCH_A, TOUCH_B, TOUCH_DPAD, TOUCH_L, TOUCH_R, TOUCH_START, TOUCH_SELECT };
+	int best = -1;
+	long best_d = 0;
+	for (int k = 0; k < TOUCH_CONTROLS; ++k) {
+		int c = order[k];
+		const TouchBox *b = &t->box[c];
+		if (b->w <= 0) continue;
+		if (round_control(c)) {
+			int r = b->w / 2, cx = b->x + r, cy = b->y + r, reach = r + r / 4 + 2;
+			long d = (long)(x - cx) * (x - cx) + (long)(y - cy) * (y - cy);
+			/* (between A and B, the nearer) */
+			if (d <= (long)reach * reach && (best < 0 || d < best_d)) { best = c; best_d = d; }
+		} else if (best < 0 && x >= b->x - 4 && x < b->x + b->w + 4 && y >= b->y - 4 && y < b->y + b->h + 4) {
+			best = c;
+		}
+	}
+	return best;
+}
+
+static uint32_t dpad(const TouchLayout *t, int x, int y) {
+	const TouchBox *b = &t->box[TOUCH_DPAD];
+	int r = b->w / 2, dx = x - (b->x + r), dy = y - (b->y + r);
+	/* the middle holds nothing; the diagonals take 30 degrees each, the
+	 * four directions 60, so a thumb meaning one hits it */
+	if ((long)dx * dx + (long)dy * dy < (long)(r / 5 + 1) * (r / 5 + 1)) return 0;
+	int ax = dx < 0 ? -dx : dx, ay = dy < 0 ? -dy : dy;
+	uint32_t h = dx < 0 ? BTN_LEFT : BTN_RIGHT, v = dy < 0 ? BTN_UP : BTN_DOWN;
+	/* tan 30 is 0.577: 577 / 1000 */
+	if (ay * 1000 <= ax * 577) return h;
+	if (ax * 1000 <= ay * 577) return v;
+	return h | v;
+}
+
+uint32_t touch_hit(const TouchLayout *t, int x, int y, int from) {
+	if (from == TOUCH_DPAD) return dpad(t, x, y);
+	switch (touch_control_at(t, x, y)) {
+	case TOUCH_DPAD: return 0;   /* (a finger that went down on a button does not steer) */
+	case TOUCH_A: return BTN_A;
+	case TOUCH_B: return BTN_B;
+	case TOUCH_L: return BTN_L;
+	case TOUCH_R: return BTN_R;
+	case TOUCH_START: return BTN_START;
+	case TOUCH_SELECT: return BTN_SELECT;
+	default: return 0;
+	}
+}

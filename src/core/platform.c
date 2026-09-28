@@ -4,11 +4,13 @@
 #include <string.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 #ifdef CW_DESKTOP
 #include <stdlib.h>
 #include "app_icon.h"
 #endif
+#include "touch.h"
 
 Platform P;
 
@@ -33,12 +35,17 @@ static void layout_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
+	if (touch_shown()) P.scale = touch_fit_scale(P.screen_w, P.screen_h, P.scale);
 	P.w = P.screen_w / P.scale;
 	P.h = P.screen_h / P.scale;
 	if (P.w < CORE_W) P.w = CORE_W;
 	if (P.h < CORE_H) P.h = CORE_H;
 	P.core_x = (P.w - CORE_W) / 2;
 	P.core_y = (P.h - CORE_H) / 2;
+	/* on a tall screen the touch controls take the room under the picture */
+	int top = touch_shown() ? touch_picture_top(P.w, P.h) : -1;
+	if (top >= 0) P.core_y = top;
+	touch_relayout();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
 	P.canvas = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
@@ -54,6 +61,22 @@ static void resized(void) {
 	SDL_GetRendererOutputSize(P.renderer, &P.screen_w, &P.screen_h);
 	layout_canvas();
 }
+
+#ifdef __EMSCRIPTEN__
+/* The canvas's size on the page (CSS pixels) when the page sizes it (a
+ * phone's whole screen): the window follows it, drawn at the device's
+ * pixels. Asked every frame: a turned phone or the page going fullscreen
+ * moves it, and SDL takes the size of a moment where it measures 0. */
+static void follow_page(void) {
+	double w, h;
+	if (P.forced || P.headless || emscripten_get_element_css_size("#canvas", &w, &h) != EMSCRIPTEN_RESULT_SUCCESS || w < 2 || h < 2) return;
+	int cw, ch;
+	SDL_GetWindowSize(P.window, &cw, &ch);
+	if ((int)w == cw && (int)h == ch && P.screen_w > 1) return;
+	SDL_SetWindowSize(P.window, (int)w, (int)h);
+	resized();
+}
+#endif
 
 #ifndef __EMSCRIPTEN__
 static void set_fullscreen(bool on) {
@@ -265,18 +288,29 @@ static uint32_t stick_bits(void) {
 void platform_inject(uint32_t buttons) { injected = buttons; }
 
 void platform_poll(void) {
+#ifdef __EMSCRIPTEN__
+	follow_page();
+#endif
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_QUIT: P.quit = true; break;
+		case SDL_FINGERDOWN:
+		case SDL_FINGERMOTION:
+		case SDL_FINGERUP:
+			if (touch_event(&e)) layout_canvas();
+			break;
 		case SDL_KEYDOWN: {
 			uint32_t b = key_button(e.key.keysym.scancode);
 			/* Alt+Enter is fullscreen, not Start */
 			if (e.key.keysym.mod & KMOD_ALT) b &= ~BTN_START;
 			if (!e.key.repeat) { key_bits |= b; tapped |= b; if (b) P.keyboard_last = true; }
+			/* the keyboard's hands put the touch controls away */
+			if (b && !e.key.repeat && touch_show(false)) layout_canvas();
 #ifndef __EMSCRIPTEN__
-			/* (in a browser the page keeps Escape and fullscreen) */
-			if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE && !e.key.repeat) {
+			/* (in a browser the page keeps Escape and fullscreen; Android's
+			 * Back is Escape) */
+			if ((e.key.keysym.scancode == SDL_SCANCODE_ESCAPE || e.key.keysym.scancode == SDL_SCANCODE_AC_BACK) && !e.key.repeat) {
 				/* the first Escape asks, the second within two seconds quits */
 				if (P.quit_prompt > 0) P.quit = true;
 				else { P.quit_prompt = 120; P.quit_pad = false; }
@@ -298,6 +332,7 @@ void platform_poll(void) {
 			pad_bits |= pad_button(e.cbutton.button);
 			tapped |= pad_button(e.cbutton.button);
 			P.keyboard_last = false;
+			if (touch_show(false)) layout_canvas();
 			break;
 		case SDL_CONTROLLERBUTTONUP: pad_bits &= ~pad_button(e.cbutton.button); break;
 		case SDL_CONTROLLERDEVICEADDED: open_pads(); break;
@@ -317,7 +352,8 @@ void platform_poll(void) {
 		}
 	} else pair_held = 0;
 #endif
-	uint32_t now = key_bits | pad_bits | stick_bits() | injected | tapped;
+	tapped |= touch_taken();
+	uint32_t now = key_bits | pad_bits | stick_bits() | injected | tapped | touch_held();
 	tapped = 0;
 	P.pressed = now & ~P.held;
 	P.released = P.held & ~now;

@@ -29,6 +29,7 @@
 #include "desktop.h"
 #include "minifont.h"
 #include "meta.h"
+#include "touch.h"
 
 char g_data_dir[512] = ".";
 
@@ -467,6 +468,7 @@ static bool game_frame(void) {
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
 	quit_prompt_draw();
+	touch_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	for (int i = 0; i < shot_count; ++i)
 		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
@@ -555,6 +557,8 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--fullscreen")) { fullscreen = true; screen_given = true; }
 		else if (!strcmp(a, "--window")) { fullscreen = false; screen_given = true; }
 		else if (!strcmp(a, "--size") && v) { sscanf(v, "%dx%d", &force_w, &force_h); ++i; }
+		/* the touch controls from the start (the browser on a phone) */
+		else if (!strcmp(a, "--touch")) touch_always();
 		else if (!strcmp(a, "--frames") && v) { max_frames = strtoull(v, NULL, 10); ++i; }
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
 		else if (!strcmp(a, "--shot") && v) { parse_shots(v); ++i; }

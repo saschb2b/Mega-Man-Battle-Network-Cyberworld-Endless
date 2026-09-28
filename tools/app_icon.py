@@ -28,6 +28,7 @@ INK = (16, 54, 74)
 GOLD_HI = (255, 247, 165)
 GOLD = (255, 214, 16)
 ORANGE = (247, 165, 0)
+BACKDROP = (7, 24, 58)       # behind it where a launcher wants a whole tile (the site's net blue)
 
 
 def inside(x, y, r):
@@ -110,6 +111,18 @@ def main():
     mac.paste(im.resize((N * 26, N * 26), Image.NEAREST), ((1024 - N * 26) // 2,) * 2)
     os.makedirs(os.path.join(ROOT, 'macos'), exist_ok=True)
     mac.save(os.path.join(ROOT, 'macos', 'icon.icns'))
+    # the browser player's, for a phone's home screen (web/play/manifest.webmanifest):
+    # whole-number scales, and one with room round it for a round mask
+    web = os.path.join(ROOT, 'web', 'assets', 'icons')
+    os.makedirs(web, exist_ok=True)
+    for size in (180, 192, 512):
+        tile = Image.new('RGBA', (size, size), BACKDROP + (255,))
+        k = size // N
+        tile.alpha_composite(im.resize((N * k, N * k), Image.NEAREST), ((size - N * k) // 2,) * 2)
+        tile.save(os.path.join(web, f'{size}.png'), optimize=True)
+    mask = Image.new('RGBA', (512, 512), BACKDROP + (255,))
+    mask.alpha_composite(im.resize((N * 10, N * 10), Image.NEAREST), ((512 - N * 10) // 2,) * 2)
+    mask.save(os.path.join(web, 'maskable-512.png'), optimize=True)
     px = list(im.tobytes())
     lines = [', '.join(f'0x{b:02x}' for b in px[i:i + 16]) for i in range(0, len(px), 16)]
     with open(os.path.join(ROOT, 'src', 'core', 'app_icon.h'), 'w') as f:
@@ -117,7 +130,7 @@ def main():
         f.write('#pragma once\n#include <stdint.h>\n\n')
         f.write(f'enum {{ APP_ICON_SIZE = {N} }};\n')
         f.write(f'static const uint8_t app_icon_rgba[{len(px)}] = {{\n\t' + ',\n\t'.join(lines) + '\n};\n')
-    print('wrote linux/icons, windows/icon.ico, macos/icon.icns and src/core/app_icon.h')
+    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons and src/core/app_icon.h')
 
 
 if __name__ == '__main__':

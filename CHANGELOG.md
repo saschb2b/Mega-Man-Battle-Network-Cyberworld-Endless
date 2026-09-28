@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Touch controls.** On a touch screen the game draws a D-pad, A, B, L, R,
+  Start and Select round the picture, in its own pixel art: under it on an
+  upright phone, beside it on a wide screen (the picture a whole scale
+  smaller where it would leave the thumbs no room). A thumb slides across
+  the D-pad and rolls from B to A; a controller or keyboard puts them away.
+- **The browser on a phone or tablet:** the player fills the screen (full
+  screen where the browser allows it), turns with the phone, keeps the
+  screen on, and installs to the home screen as an app.
 - MegaMan no longer disappears behind Seaside's walkways and pads. Seaside
   Area 1, whose map a Seaside layer took over, draws everyone behind the
   map's second tile layer, where a layer puts some walkway, the pads' rims

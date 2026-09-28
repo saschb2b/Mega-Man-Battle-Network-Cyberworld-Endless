@@ -198,8 +198,14 @@ SteamOS updates.
 Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** and choose your ROM file, or drop it on
 the page. The page checks it and keeps it, with your saves, in the
 browser's own storage (IndexedDB); it is never uploaded. Next time **Play**
-starts straight away. **Forget ROM and saves** removes both. It needs a
-keyboard or a controller; phones and touch screens are not supported yet.
+starts straight away. **Forget ROM and saves** removes both.
+
+On a phone or tablet the game fills the screen and draws its own buttons
+round the picture: a D-pad, A, B, L, R, Start and Select, under the picture
+when the phone is upright and beside it when it lies on its side. A
+controller or a keyboard puts them away until the screen is touched again.
+Added to the home screen (the browser's *Add to Home screen* or *Install*),
+it opens full screen like an app.
 
 ## Playing
 
@@ -225,7 +231,9 @@ Keys are positions, so on an AZERTY keyboard you move with Z Q S D.
 `savedata/` on the handheld) changes them; it is written with these defaults
 on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
 quits. Controllers use their own buttons (A, B, shoulders, Start, Back);
-holding Back and Start for a second, twice, quits.
+holding Back and Start for a second, twice, quits. A touch screen shows the
+buttons on it from its first touch (a Steam Deck's too), until a key or a
+controller is used again.
 
 | Button | In the net | In battle |
 | --- | --- | --- |

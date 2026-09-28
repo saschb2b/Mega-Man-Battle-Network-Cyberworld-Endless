@@ -2,11 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jack in · Cyberworld Endless</title>
 <meta name="description" content="Play Cyberworld Endless, a Mega Man Battle Network 6 roguelike, in the browser. Bring your own ROM: it stays on your device.">
 <meta name="theme-color" content="#4a7b42">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/icons/180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preload" href="../assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/site.css">
@@ -29,7 +34,7 @@
 <main class="wrap">
 	<div class="panel player">
 		<div id="stage">
-			<canvas id="screen" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
+			<canvas id="canvas" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
 
 			<section id="gate" aria-live="polite">
 				<h1 class="label">Game Pak</h1>
@@ -44,6 +49,7 @@
 					</label>
 				</div>
 				<p class="drop">or drop the file on this page</p>
+				<p class="touch-note">On this screen the game draws its own buttons round the picture; a controller or keyboard puts them away.</p>
 			</section>
 		</div>
 		<div class="bar">
@@ -66,7 +72,9 @@
 					<tr><td>Start</td><td><kbd>Enter</kbd></td><td>Start</td></tr>
 					<tr><td>Select</td><td><kbd>R</kbd><kbd>Bksp</kbd></td><td>Back</td></tr>
 				</table>
-				<p class="note">The layout of Capcom's PC version. Keys are positions: on AZERTY, Z Q S D move.</p>
+				<p class="note">The layout of Capcom's PC version. Keys are positions: on AZERTY, Z Q S D move.
+					On a phone or tablet the game draws its own buttons round the picture, a D-pad, A, B, L, R, START and SELECT; they go away while a controller or keyboard is used.
+					Added to the home screen, it opens full screen.</p>
 			</div>
 		</div>
 		<div>

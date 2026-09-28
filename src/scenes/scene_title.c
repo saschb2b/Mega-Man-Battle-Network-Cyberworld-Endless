@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "touch.h"
 #include "audio.h"
 #include "backdrop.h"
 #include "chatbox.h"
@@ -681,7 +682,7 @@ static void draw(void) {
 	}
 	/* (a keyboard's Start, where no controller is: a PC player had no word
 	 * of which key it is) */
-	if (!S.menu && !S.pressed && !platform_pad_present()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", rgba(150, 160, 190, 255), 1);
+	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", rgba(150, 160, 190, 255), 1);
 	if (S.menu) {
 		/* NEW GAME (tiles 35-54) and CONTINUE (55-74): 32x16, 32x16, 16x16 */
 		int n = S.has_save ? 2 : 1;
