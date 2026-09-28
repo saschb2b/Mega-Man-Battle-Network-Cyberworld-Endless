@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Bystanders never stand corner to corner with a walkway's last panel,
+  where one on a platform's corner looked to stand in the way in; services
+  keep off it too unless their room has no other place (a quarter of them
+  stood there). The layer tests take every area, the comps and homepages
+  too.
 - The Graveyard's slabs carry its cyan crosses, as its maps do: one on
   each small platform's middle and rows of them alongside the line of
   holes through a big slab, kept off rims and holes. The holes run in a

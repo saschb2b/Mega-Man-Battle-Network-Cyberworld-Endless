@@ -98,13 +98,15 @@ static bool cuts_way(int x, int y) { return cuts(1, &x, &y); }
  * outside the room (a walkway's mouth, where a Server or a navi stood in
  * the way on, the gap round it hard to find). */
 static bool at_exit(const Room *r, int x, int y) {
-	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-	for (int k = 0; k < 4; ++k) {
-		int nx = x + d[k][0], ny = y + d[k][1];
-		if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
-		bool inside = nx >= r->x && nx < r->x + r->w && ny >= r->y && ny < r->y + r->h;
-		if (!inside && layer.cell[ny][nx] == C_PATH) return true;
-	}
+	/* (corner to corner too: a navi on a platform's corner beside a
+	 * walkway's last panel stood in the way in) */
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx) {
+			int nx = x + dx, ny = y + dy;
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
+			bool inside = nx >= r->x && nx < r->x + r->w && ny >= r->y && ny < r->y + r->h;
+			if (!inside && layer.cell[ny][nx] == C_PATH) return true;
+		}
 	return false;
 }
 
@@ -146,12 +148,26 @@ static bool behind_gap(int x, int y) {
  * mouth so paths stay clear, where a solid object cuts no way; with `open`, first one with
  * floor on its four sides (a bystander in a panel-wide gap beside a
  * service pinned MegaMan in the nook, where the way still went round). */
+/* Whether a panel-wide stretch of walkway touches (x, y) corner to corner. */
+static bool by_walkway(int x, int y) {
+	for (int dy = -1; dy <= 1; dy += 2)
+		for (int dx = -1; dx <= 1; dx += 2) {
+			int nx = x + dx, ny = y + dy;
+			if (nx < 1 || ny < 1 || nx >= MAP_W - 1 || ny >= MAP_H - 1 || layer.cell[ny][nx] != C_PATH) continue;
+			if ((layer.cell[ny][nx - 1] == C_VOID && layer.cell[ny][nx + 1] == C_VOID) ||
+				(layer.cell[ny - 1][nx] == C_VOID && layer.cell[ny + 1][nx] == C_VOID)) return true;
+		}
+	return false;
+}
+
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if ((tries < 30 || open) && x == r->ax && y == r->ay) continue;
-		/* (a bystander, who may stay away, never at one) */
-		if ((tries < 36 || open) && (at_exit(r, x, y) || beside_narrow(x, y))) continue;
+		/* (a bystander, who may stay away, never at one, nor corner to
+		 * corner with a walkway: one on a platform's corner beside its way
+		 * in stood in the way) */
+		if ((tries < 36 || open) && (at_exit(r, x, y) || beside_narrow(x, y) || by_walkway(x, y))) continue;
 		if (open && tries < 24 && !(layer.cell[y][x + 1] == C_PATH && layer.cell[y][x - 1] == C_PATH &&
 			layer.cell[y + 1][x] == C_PATH && layer.cell[y - 1][x] == C_PATH)) continue;
 		/* (not beside a floor of another height: a NaviCust vendor below a

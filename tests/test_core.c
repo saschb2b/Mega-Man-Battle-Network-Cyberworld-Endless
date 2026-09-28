@@ -145,14 +145,16 @@ static bool behind_gap(int x, int y) {
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
-		landmarks = 0, layers = 0, emblems = 0;
+		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
 	for (uint32_t seed = 1; seed <= 300; ++seed) {
 		int depth = 1 + (int)(seed % 25);
 		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
-		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, &kit);
+		/* (a third of them in any area: the comps and homepages too) */
+		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
+		layer_generate(seed * 7919u, depth, biome, kind, &kit);
 		++layers;
 		CHECK(layer.nrooms >= 3, "seed %u: only %d rooms", seed, layer.nrooms);
 		NetObj *start = &layer.obj[0];
@@ -200,6 +202,20 @@ static void test_generation(void) {
 			bool stands = o->type == OBJ_SHOP || o->type == OBJ_HEAL || o->type == OBJ_TRADER || o->type == OBJ_BUGTRADER ||
 				o->type == OBJ_NPC || o->type == OBJ_CHALLENGE || o->type == OBJ_PROGRAMS || o->type == OBJ_GIFT;
 			if (stands && o->prop < 0 && beside_narrow((int)o->x, (int)o->y)) ++mouths;
+			/* (nor corner to corner with a walkway's last panel: a bystander
+			 * on a platform's corner there stood in the way in) */
+			if (stands && o->prop < 0) {
+				bool corner = false;
+				for (int dy = -1; dy <= 1; dy += 2)
+					for (int dx = -1; dx <= 1; dx += 2) {
+						int nx = (int)o->x + dx, ny = (int)o->y + dy;
+						bool walkway = layer.cell[ny][nx] == C_PATH && ((layer.cell[ny][nx - 1] == C_VOID && layer.cell[ny][nx + 1] == C_VOID) ||
+							(layer.cell[ny - 1][nx] == C_VOID && layer.cell[ny + 1][nx] == C_VOID));
+						corner |= walkway;
+					}
+				corners += corner;
+				navi_corners += corner && o->type == OBJ_NPC;
+			}
 			if (stands) ++standing;
 			if (stands || o->type == OBJ_MYSTERY) {
 				++approached;
@@ -283,6 +299,10 @@ static void test_generation(void) {
 	}
 	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
 	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
+	/* (a bystander never; a service where its room has no other place, as
+	 * the heal on a small pad before an arena, beside the bridge) */
+	CHECK(navi_corners == 0, "%d bystanders stand corner to corner with a walkway's last panel", navi_corners);
+	CHECK(corners * 40 <= standing, "%d of %d services and navis stand corner to corner with a walkway's last panel", corners, standing);
 	/* (the Net Dealer stands behind a counter wherever the area has one and
 	 * its room a place for it) */
 	CHECK(counters * 2 >= dealers, "only %d of %d Net Dealers behind a counter", counters, dealers);
