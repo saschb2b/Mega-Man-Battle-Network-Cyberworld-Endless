@@ -214,9 +214,9 @@ static bool learn(int area, Learned *L) {
 		rebank_seen(&b, na->rebank[1], L);
 		for (int k = 0; k < 3; ++k)
 			if (!L->ornament[k].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[k], &L->ornament[k]);
-		/* (a pad of its own map's with a bridge beside a lower side brings
-		 * the bridge's start along in its faces: another map's, whole) */
-		if (na->pad_hues && (!L->pad.ok || L->pad.low) && aligned(&a, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
+		/* (its pads' tiles too, where its own map's all have a bridge
+		 * beside them there) */
+		if (na->pad_hues && aligned(&a, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
 		area_src_free(&b);
 	}
 	if (emu_debug_on()) fprintf(stderr, "pad stamp area %d ok %d tiles %d, %d panels beside its lower sides\n", area, L->pad.ok, L->pad.ntiles, L->pad.low);
@@ -269,6 +269,7 @@ static bool by_shape;         /* its floors are told by shape: an arena is platf
 static bool rimmed;           /* its platforms' edges are rims (TILES_RIMMED) */
 static int apart;             /* what of its floor stands apart from the rest (NET_APART_*) */
 static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
+static bool pads_walkway;     /* its framed pads are cut from its maps in their walkways' floor */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 /* K_SOLID: floor drawn, walled off (a counter's aisle, net.h C_SOLID) */
@@ -377,6 +378,10 @@ static int floor_cb(int A, int B, const void *ctx) {
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
 	if (!by_shape && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B | pad;
 	if (striped && stripe[y][x]) return TILE_B | pad;
+	/* (Central's, Seaside's and Sky's framed pads are islands of their
+	 * walkways' floor: a walkway's last panel before one was drawn meeting
+	 * a field, green at its sides) */
+	if (pads_walkway && cur->pad && cur->pad[y * cur->gw + x]) return TILE_B | pad;
 	return (walkway(x, y) ? TILE_B : TILE_A) | pad;
 }
 
@@ -480,35 +485,21 @@ static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
  * drew Central's pads green, where its maps frame them); their
  * centrepieces go on after. */
 /* Whether the tile at map pixel (px, py) lies over pad `m`'s own panels or
- * the void (at the floor's height). */
-static bool pad_own_or_void(const Room *m, int tw, int th, int px, int py) {
-	int u = px + 4 - tw * 4, v = 2 * (py - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
-	int A = floordiv(X - place.ex, 32), B = floordiv(Y - place.ey, 32);
-	int gx = B + place.gx0, gy = -A + place.gy0;
-	if (gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3) return true;
-	return gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H || layer.cell[gy][gx] == C_VOID;
-}
-
-/* Whether tile (tx, ty) shows only pad m's panels and the void: its
- * pixels, and the floor above them as far as faces and legs hang. */
-static bool shows_pad_only(const Learned *L, const Room *m, int tw, int th, int tx, int ty) {
-	int reach = L->book[0].face + L->book[0].hang;
+ * the void alone (at the floor's height, drawn dv below the panel edges). */
+static bool pad_tile_ok(const Learned *L, const Room *m, int tw, int th, int px, int py) {
 	for (int y = 1; y < 8; y += 2)
-		for (int x = 1; x < 8; x += 2)
-			for (int d = 0; d <= reach; d += 2) {
-				int px = tx * 8 + x, py = ty * 8 + y - L->book[0].dv - d;
-				int u = px - tw * 4, v = 2 * (py - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
-				int A = floordiv(X - place.ex, 32), B = floordiv(Y - place.ey, 32);
-				int gx = B + place.gx0, gy = -A + place.gy0;
-				bool own = gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3;
-				if (!own && gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && layer.cell[gy][gx] != C_VOID) return false;
-			}
+		for (int x = 1; x < 8; x += 2) {
+			int u = px + x - tw * 4, v = 2 * (py + y - L->book[0].dv - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
+			int A = floordiv(X - place.ex, 32), B = floordiv(Y - place.ey, 32);
+			int gx = B + place.gx0, gy = -A + place.gy0;
+			if (gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3) continue;
+			if (gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && layer.cell[gy][gx] != C_VOID) return false;
+		}
 	return true;
 }
 
 static void paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 	if (!L->pad.ok) return;
-	size_t cells = (size_t)tw * th;
 	for (int i = 0; i < layer.nrooms; ++i) {
 		const Room *m = &layer.rooms[i];
 		if (m->kind != ROOM_PAD || m->w != 3 || m->h != 3) continue;
@@ -523,32 +514,14 @@ static void paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 		int X0 = place.ex + 32 * A, Y0 = place.ey + 32 * B;
 		int px0 = area_px(tw, X0, Y0), py0 = area_py(th, X0, Y0);
 		/* the stamp only over the pad's own panels or the void: its edges
-		 * and faces cut into a platform it touches */
-		int x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
-		static uint32_t set[256 * 256], gen;   /* the tiles this pad's stamp set */
-		++gen;
+		 * and faces would cut into a walkway or a platform it touches (a
+		 * walkway's last panel before the pad came out cut) */
 		for (int k = 0; k < L->pad.ntiles; ++k) {
 			int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
-			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
-			if (px / 8 < x0) x0 = px / 8;
-			if (px / 8 > x1) x1 = px / 8;
-			if (py / 8 < y0) y0 = py / 8;
-			if (py / 8 > y1) y1 = py / 8;
-			if (!pad_own_or_void(m, tw, th, px, py)) continue;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || !pad_tile_ok(L, m, tw, th, px, py)) continue;
 			map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
-			set[(py / 8) * 256 + px / 8] = gen;
 			if (last.pasted) last.pasted[(size_t)(py / 8) * tw + px / 8] |= NETMAP_PASTED_PAD;
 		}
-		/* and nothing else around it that shows the pad alone: the classes'
-		 * pieces of its edges and faces the stamp does not cover */
-		for (int ty = y0 - 1; ty <= y1 + 1; ++ty)
-			for (int tx = x0 - 1; tx <= x1 + 1; ++tx) {
-				if (tx < 0 || ty < 0 || tx >= tw || ty >= th || set[ty * 256 + tx] == gen) continue;
-				if (!shows_pad_only(L, m, tw, th, tx, ty)) continue;
-				map[(size_t)ty * tw + tx] = 0;
-				map[cells + (size_t)ty * tw + tx] = 0;
-				if (last.pasted) last.pasted[(size_t)ty * tw + tx] |= NETMAP_PASTED_PAD;
-			}
 	}
 }
 
@@ -634,11 +607,6 @@ static bool write_tilemap(const Learned *L) {
 	free(last.pasted);
 	last.pasted = calloc(cells, 1);
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
-	for (size_t i = 0; i < cells; ++i) {
-		tiles_stats.seams += (last.seams[i] & 1) + (last.seams[i] >> 1 & 1);
-		tiles_stats.off_near += (last.seams[i] >> 2 & 3) == TILE_OFF_NEAR;
-		tiles_stats.off_edge += (last.seams[i] >> 2 & 3) == TILE_OFF_EDGE;
-	}
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
@@ -647,6 +615,15 @@ static bool write_tilemap(const Learned *L) {
 	paste_ornaments(L, map, tw, th);
 	paste_emblems(L, map, tw, th);
 	paste_bushes(L, map, tw, th);
+	/* how the classes' picks went, where they are drawn: not under what
+	 * was set whole over them */
+	for (size_t i = 0; i < cells; ++i) {
+		if (last.pasted[i] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;
+		tiles_stats.seams += (last.seams[i] & 1) + (last.seams[i] >> 1 & 1);
+		tiles_stats.off_near += (last.seams[i] >> 2 & 3) == TILE_OFF_NEAR;
+		tiles_stats.off_edge += (last.seams[i] >> 2 & 3) == TILE_OFF_EDGE;
+		tiles_stats.other += last.seams[i] >> 7;
+	}
 	/* one shade of floor: tiles of the other bank in this one's colours,
 	 * where its maps draw the same tile in it */
 	const uint8_t *rb = L->rebank;
@@ -806,6 +783,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
 	rimmed = R.layout->net_area[area].styles & TILES_RIMMED;
 	pad_look = !(R.layout->net_area[area].styles & TILES_NO_PAD_LOOK);
+	pads_walkway = L->pad.ok && (R.layout->net_area[area].pad_hues & R.layout->net_area[area].walk_styles);
 	apart = R.layout->net_area[area].apart;
 	place.ex = L->ex;
 	place.ey = L->ey;
@@ -930,7 +908,7 @@ void netmap_last_cells(char out[MAP_H][MAP_W + 1]) {
 	TileGrid grid = { last.tw, last.th, place.ex, place.ey, 0, 0, 0, false, false, false, 0 };
 	for (int ty = 0; ty < last.th; ++ty)
 		for (int tx = 0; tx < last.tw; ++tx) {
-			if ((last.seams[ty * last.tw + tx] >> 2 & 3) != TILE_OFF_NEAR) continue;
+			if ((last.seams[ty * last.tw + tx] >> 2 & 3) != TILE_OFF_NEAR || last.pasted[ty * last.tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;
 			int phase, A, B;
 			tile_class(&grid, tx, ty, &phase, &A, &B);
 			int x = B + place.gx0, y = -A + place.gy0;

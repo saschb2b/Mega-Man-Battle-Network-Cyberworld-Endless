@@ -367,15 +367,25 @@ centrepiece, the catwalks meeting the frame's edges; Seaside's the same in
 yellow with green corners, Sky Area 2's in lavender with pink ones. The
 tile classes drew a layer's pads in Central's green floor (the framed
 pads' blue lies in the walkway material, and classed as walkway their
-pieces came apart). `props_learn_pad` finds one in the area's own map, the
-first 3x3 island of floor whose middle has the recess's hue
-(`net_area.pad_hues`: Central's blue, Seaside's yellow, Sky's lavender),
-and cuts the first layer's tiles over its panels and the faces under them;
-`paste_pads` sets it whole on every 3x3 pad at ground level away from the
-stairs, never over a platform it touches, and the centrepieces go on it
+pieces came apart). `props_learn_pad` takes the 3x3 islands of floor in the
+area's maps whose middle has the recess's hue (`net_area.pad_hues`:
+Central's blue, Seaside's yellow, Sky's lavender) and lays them over each
+other: the first layer's tiles over their panels, the faces under them and
+the rim their upper edges reach past the diamond, each tile from an island
+where it draws the island alone, the one with the fewest bridges beside
+its lower sides first (every island has a bridge somewhere, and a bridge's
+start came along in the tiles beside it: Seaside's pads hung a scrap of
+boardwalk off their lower edge, and where the rim was left to the classes
+Central's showed tile-wide steps along its upper edges). `paste_pads` sets
+it on every 3x3 pad at ground level away from the stairs, each tile only
+where it covers the pad and the void alone (a catwalk's last panel came
+out cut where the stamp's edge lay over it), and the centrepieces go on it
 (never art that draws mostly black: Sky's gem tile is the pit in one of
-its platforms). Green's are not cut: its pads stand raised on the
-originals, and would sink MegaMan into them.
+its platforms). A pad itself is walkway floor in these areas, as the
+originals' are, so the tiles the stamp leaves at a catwalk's join are the
+originals' join of a catwalk into a pad (as platform floor they drew the
+catwalk meeting a green field). Green's are not cut: its pads stand
+raised on the originals, and would sink MegaMan into them.
 
 ### Green's potted bushes (built)
 

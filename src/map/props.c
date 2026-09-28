@@ -297,9 +297,29 @@ static int hue_at(const AreaSrc *a, int cx, int cy) {
 	return k > 11 ? 11 : k;
 }
 
+/* Whether tile (tx, ty) of `a` draws only the island of 3 x 3 panels from
+ * panel (A, B), its faces and the void: none of its first layer's pixels
+ * lies on another floor (at z 0, the floor drawn 4 below its edges). */
+static bool island_only(const AreaSrc *a, int A, int B, int tx, int ty) {
+	int W = a->tw * 8;
+	for (int y = 0; y < 8; ++y)
+		for (int x = 0; x < 8; ++x) {
+			int px = tx * 8 + x, py = ty * 8 + y;
+			if (!(a->px0[(size_t)py * W + px] >> 24)) continue;
+			int u = px - a->tw * 4, w = 2 * (py - 4 - a->th * 4);
+			int pA = floordiv((u - w) / 2 - a->ex, PANEL), pB = floordiv((u + w) / 2 - a->ey, PANEL);
+			if (pA >= A && pA <= A + 2 && pB >= B && pB <= B + 2) continue;
+			if (area_src_walled_floor(a, a->ex + 16 + PANEL * pA, a->ey + 16 + PANEL * pB) == 1) return false;
+		}
+	return true;
+}
+
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 	if (!out->ok) memset(out, 0, sizeof *out);
-	/* the map's panels, around its middle */
+	/* the map's islands, around its middle, fewest bridges beside their
+	 * lower sides first */
+	struct { int A, B, low; } isl[32];
+	int ni = 0;
 	int A0 = -(a->tw * 8 + a->th * 8) / PANEL, A1 = -A0;
 	for (int B = A0; B <= A1; ++B)
 		for (int A = A0; A <= A1; ++A) {
@@ -321,32 +341,63 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 			int low = 0;
 			for (int k = 0; k <= 2; ++k)
 				low += (area_src_walled_floor(a, Xa + 16 - PANEL, Ya + 16 + PANEL * k) == 1) + (area_src_walled_floor(a, Xa + 16 + PANEL * k, Ya + 16 + PANEL * 3) == 1);
-			if (out->ok && low >= out->low) continue;
-			/* its tiles: over the diamond of its panels (the floor drawn 4
-			 * below their edges) and the faces under its lower edges */
-			int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
-			StairTile got[400];
-			int n = 0;
-			for (int ty = (cy - 56) / 8; ty <= (cy + 72) / 8; ++ty)
-				for (int tx = (cx - 104) / 8; tx <= (cx + 104) / 8; ++tx) {
-					if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || !(a->tile[0][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
-					float dx = (float)(tx * 8 + 4 - cx), dy = (float)(ty * 8 + 4 - cy - 4);
-					bool floor = fabsf(dx) / 96.0f + fabsf(dy) / 48.0f <= 1.0f;
-					bool face = dy > 0 && fabsf(dx) / 96.0f + (dy - 12.0f) / 48.0f <= 1.0f;
-					if ((!floor && !face) || n == 400) continue;
-					got[n++] = (StairTile){ .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay), .e0 = a->tile[0][(size_t)ty * a->tw + tx] };
-				}
-			if (n < 40) continue;
-			free(out->tiles);
-			out->tiles = calloc((size_t)n, sizeof *out->tiles);
-			memcpy(out->tiles, got, sizeof *got * (size_t)n);
-			out->ntiles = n;
-			out->len = 3;
-			out->low = low;
-			out->ok = true;
-			if (!low) return true;
+			if (ni == 32) continue;
+			int k = ni++;
+			while (k > 0 && isl[k - 1].low > low) { isl[k] = isl[k - 1]; --k; }
+			isl[k].A = A; isl[k].B = B; isl[k].low = low;
 		}
-	return out->ok;
+	if (!ni) return out->ok;
+	/* its tiles: over the diamond of the first island's panels (the floor
+	 * drawn 4 below their edges), the faces under its lower edges and the
+	 * tiles its rim reaches from outside; each in place, where one of the
+	 * islands has it, as a tile drawing its island alone (e1 1 while
+	 * learning): a bridge beside one comes along in its tiles there (the
+	 * steps of the classes' pieces had shown along a pad's edges where its
+	 * stamp left them out) */
+	static StairTile got[600];
+	int n = 0;
+	bool had = out->ok;
+	if (had) {
+		n = out->ntiles < 600 ? out->ntiles : 600;
+		memcpy(got, out->tiles, sizeof *got * (size_t)n);
+	}
+	for (int k = 0; k < ni; ++k) {
+		int A = isl[k].A, B = isl[k].B, Xa = a->ex + PANEL * A, Ya = a->ey + PANEL * B;
+		int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
+		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+		for (int ty = (cy - 56) / 8; ty <= (cy + 72) / 8; ++ty)
+			for (int tx = (cx - 104) / 8; tx <= (cx + 104) / 8; ++tx) {
+				if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || !(a->tile[0][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
+				float dx = (float)(tx * 8 + 4 - cx), dy = (float)(ty * 8 + 4 - cy - 4);
+				float in = fabsf(dx) / 96.0f + fabsf(dy) / 48.0f, under = dy > 0 ? fabsf(dx) / 96.0f + (dy - 12.0f) / 48.0f : 9.0f;
+				/* (the rim past the diamond along its upper edges and
+				 * corners: below, what hangs from a bridge beside it would
+				 * come along, posts floating under a pad) */
+				bool core = in <= 1.0f || under <= 1.0f, alone = island_only(a, A, B, tx, ty);
+				if (!core && !(in <= 1.25f && dy <= 4.0f && alone)) continue;
+				int16_t px = (int16_t)(tx * 8 - ax), py = (int16_t)(ty * 8 - ay);
+				uint16_t e0 = a->tile[0][(size_t)ty * a->tw + tx];
+				int j = 0;
+				while (j < n && (got[j].px != px || got[j].py != py)) ++j;
+				if (j < n) {
+					if (!got[j].e1 && alone) got[j] = (StairTile){ .px = px, .py = py, .e0 = e0, .e1 = 1 };
+					continue;
+				}
+				/* (a new place: the first island's core, or a tile drawing
+				 * its island alone) */
+				if ((!alone && (k > 0 || had)) || n == 600) continue;
+				got[n++] = (StairTile){ .px = px, .py = py, .e0 = e0, .e1 = (uint16_t)alone };
+			}
+	}
+	if (n < 40) return out->ok;
+	free(out->tiles);
+	out->tiles = calloc((size_t)n, sizeof *out->tiles);
+	memcpy(out->tiles, got, sizeof *got * (size_t)n);
+	out->ntiles = n;
+	out->len = 3;
+	if (!had || isl[0].low < out->low) out->low = isl[0].low;
+	out->ok = true;
+	return true;
 }
 
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {

@@ -2,26 +2,26 @@
 # fallback shares (%), seams, panels not exact, tiles in colours the area's own map never
 # shows on its floors and tiles drawn with other floors than they show; the atlas fails
 # when one gets worse
-biome 0 layout -1 (x) depth 3 seed 104729: near 22.5, fallback 0.0, seams 94, not exact 79, other colours 0, off near 0
-biome 0 layout -1 (x) depth 3 seed 209458: near 21.8, fallback 0.0, seams 141, not exact 88, other colours 0, off near 0
+biome 0 layout -1 (x) depth 3 seed 104729: near 21.8, fallback 0.0, seams 86, not exact 72, other colours 0, off near 0
+biome 0 layout -1 (x) depth 3 seed 209458: near 25.1, fallback 0.0, seams 128, not exact 100, other colours 0, off near 0
 biome 0 layout 0 (x) depth 2 seed 7919: near 14.8, fallback 0.0, seams 68, not exact 39, other colours 0, off near 0
-biome 0 layout 1 (x) depth 2 seed 7919: near 13.6, fallback 0.0, seams 94, not exact 43, other colours 0, off near 0
-biome 0 layout 1 (x) depth 2 seed 15838: near 12.4, fallback 0.0, seams 90, not exact 38, other colours 0, off near 0
+biome 0 layout 1 (x) depth 2 seed 7919: near 19.9, fallback 0.0, seams 90, not exact 63, other colours 0, off near 0
+biome 0 layout 1 (x) depth 2 seed 15838: near 18.4, fallback 0.0, seams 77, not exact 56, other colours 0, off near 0
 biome 0 layout 7 (x) depth 2 seed 7919: near 27.4, fallback 0.0, seams 175, not exact 98, other colours 0, off near 0
-biome 0 layout 8 (x) depth 2 seed 7919: near 17.1, fallback 0.0, seams 79, not exact 48, other colours 0, off near 0
-biome 0 layout 8 (x) depth 2 seed 15838: near 18.8, fallback 0.0, seams 72, not exact 52, other colours 0, off near 0
-biome 0 layout 9 (x) depth 2 seed 7919: near 7.5, fallback 0.0, seams 42, not exact 13, other colours 0, off near 0
-biome 0 layout 9 (x) depth 2 seed 15838: near 14.3, fallback 0.0, seams 49, not exact 25, other colours 0, off near 0
-biome 1 layout -1 (x) depth 3 seed 104730: near 16.9, fallback 0.0, seams 123, not exact 50, other colours 382, off near 0
-biome 1 layout -1 (x) depth 3 seed 209459: near 21.3, fallback 0.0, seams 126, not exact 63, other colours 382, off near 0
-biome 1 layout 0 (x) depth 2 seed 8050: near 21.8, fallback 0.0, seams 64, not exact 39, other colours 0, off near 0
-biome 1 layout 0 (x) depth 2 seed 15969: near 22.3, fallback 0.0, seams 53, not exact 41, other colours 0, off near 0
-biome 1 layout 1 (x) depth 2 seed 8050: near 20.6, fallback 0.0, seams 112, not exact 43, other colours 0, off near 0
-biome 1 layout 1 (x) depth 2 seed 15969: near 21.0, fallback 0.0, seams 110, not exact 55, other colours 0, off near 0
+biome 0 layout 8 (x) depth 2 seed 7919: near 17.6, fallback 0.0, seams 77, not exact 46, other colours 0, off near 0
+biome 0 layout 8 (x) depth 2 seed 15838: near 17.2, fallback 0.0, seams 68, not exact 43, other colours 0, off near 0
+biome 0 layout 9 (x) depth 2 seed 7919: near 14.9, fallback 0.0, seams 39, not exact 26, other colours 0, off near 1
+biome 0 layout 9 (x) depth 2 seed 15838: near 20.7, fallback 0.0, seams 50, not exact 40, other colours 0, off near 0
+biome 1 layout -1 (x) depth 3 seed 104730: near 19.3, fallback 0.0, seams 123, not exact 37, other colours 382, off near 0
+biome 1 layout -1 (x) depth 3 seed 209459: near 22.4, fallback 0.0, seams 125, not exact 45, other colours 382, off near 0
+biome 1 layout 0 (x) depth 2 seed 8050: near 31.6, fallback 0.0, seams 71, not exact 57, other colours 0, off near 0
+biome 1 layout 0 (x) depth 2 seed 15969: near 27.7, fallback 0.0, seams 50, not exact 44, other colours 0, off near 0
+biome 1 layout 1 (x) depth 2 seed 8050: near 24.1, fallback 0.0, seams 108, not exact 36, other colours 0, off near 0
+biome 1 layout 1 (x) depth 2 seed 15969: near 22.7, fallback 0.0, seams 109, not exact 41, other colours 0, off near 0
 biome 2 layout -1 (x) depth 3 seed 104731: near 9.8, fallback 0.0, seams 133, not exact 18, other colours 0, off near 0
 biome 2 layout -1 (x) depth 3 seed 209460: near 10.1, fallback 0.0, seams 131, not exact 20, other colours 0, off near 0
-biome 2 layout 0 (x) depth 2 seed 8181: near 8.7, fallback 0.0, seams 129, not exact 17, other colours 0, off near 0
-biome 2 layout 0 (x) depth 2 seed 16100: near 9.1, fallback 0.0, seams 112, not exact 13, other colours 0, off near 0
+biome 2 layout 0 (x) depth 2 seed 8181: near 12.9, fallback 0.0, seams 106, not exact 46, other colours 0, off near 0
+biome 2 layout 0 (x) depth 2 seed 16100: near 15.0, fallback 0.0, seams 113, not exact 48, other colours 0, off near 1
 biome 2 layout 3 (x) depth 2 seed 8181: near 11.5, fallback 0.0, seams 147, not exact 24, other colours 0, off near 0
 biome 2 layout 3 (x) depth 2 seed 16100: near 11.2, fallback 0.0, seams 123, not exact 19, other colours 0, off near 0
 biome 3 layout -1 (x) depth 3 seed 104732: near 8.7, fallback 0.0, seams 65, not exact 83, other colours 0, off near 0

@@ -119,9 +119,10 @@ void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
 
 /* How the picks went since the last reset (the dev atlas reads them): each
  * tile matched exactly, near (the nearest neighbourhood seen, or meeting a
- * neighbour badly) or by falling back on the least bad tile; the pairs of
- * neighbouring tiles left meeting badly (netmap counts them); and the pairs
- * picked in colours the area's own map never shows on its floors. */
+ * neighbour badly) or by falling back on the least bad tile; and netmap
+ * counts over the map as drawn (not the tiles set whole over the picks):
+ * the pairs of neighbouring tiles left meeting badly, the pairs in colours
+ * the area's own map never shows on its floors and the tiles drawn off. */
 typedef struct { int picks, near, fallbacks, seams, other, off_near, off_edge; } TileStats;
 extern TileStats tiles_stats;
 
@@ -140,6 +141,9 @@ extern int tiles_pick_off;
  * a nearer neighbourhood or a seam. */
 enum { TILE_WHY_NONE, TILE_WHY_UNSEEN, TILE_WHY_PIXELS, TILE_WHY_PLAIN, TILE_WHY_RANKED };
 extern int tiles_pick_why;
+/* ... and whether it draws colours the area's own map never shows on its
+ * floors (1), counted in tiles_stats by netmap over the map as drawn. */
+extern int tiles_pick_other;
 
 /* The tiles beside one (left, above, right, below) as far as they are
  * picked: how they look to the seams (SEAM_ANY: not yet) and what they draw. */

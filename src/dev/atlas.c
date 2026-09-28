@@ -90,15 +90,17 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	uint32_t *sp = malloc((size_t)W * H * 4);
 	memcpy(sp, px, (size_t)W * H * 4);
 	const uint8_t *seams = netmap_last_seams();
+	const uint8_t *pasted = netmap_last_pasted();
 	/* the tiles whose pairs were seen with other floors where they show
-	 * them, framed and listed (build.py cuts close-ups of them) */
+	 * them, framed and listed (build.py cuts close-ups of them), but under
+	 * a pad or a stair set whole over them */
 	char path[600];
 	snprintf(path, sizeof path, "%s/offs_b%02d_l%d_d%d_s%u.txt", dir, biome, layout, depth, seed);
 	FILE *offs = fopen(path, "w");
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
-			int off = seams[ty * tw + tx] >> 2 & 3, why = seams[ty * tw + tx] >> 4;
-			if (off < TILE_OFF_EDGE) continue;
+			int off = seams[ty * tw + tx] >> 2 & 3, why = seams[ty * tw + tx] >> 4 & 7;
+			if (off < TILE_OFF_EDGE || (pasted && pasted[ty * tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR))) continue;
 			if (offs && off == TILE_OFF_NEAR) fprintf(offs, "%d %d %d\n", tx * 8, ty * 8, why);
 			uint32_t c = off == TILE_OFF_NEAR ? OFF_NEAR_ARGB : OFF_EDGE_ARGB;
 			for (int k = 1; k < 7; ++k) {
@@ -109,13 +111,13 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	if (offs) fclose(offs);
 	/* the tiles set whole over the classes' picks (pads, emblems, stairs): a
 	 * cyan dot in their corner */
-	const uint8_t *pasted = netmap_last_pasted();
 	for (int ty = 0; ty < th && pasted; ++ty)
 		for (int tx = 0; tx < tw; ++tx)
 			if (pasted[ty * tw + tx]) sp[(size_t)(ty * 8) * W + tx * 8] = sp[(size_t)(ty * 8) * W + tx * 8 + 1] = sp[(size_t)(ty * 8 + 1) * W + tx * 8] = 0xFF00FFFFu;
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx)
 			for (int k = 0; k < 8; ++k) {
+				if (pasted && pasted[ty * tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;
 				if (seams[ty * tw + tx] & 1 && tx + 1 < tw) sp[(size_t)(ty * 8 + k) * W + tx * 8 + 7] = sp[(size_t)(ty * 8 + k) * W + tx * 8 + 8] = SEAM_ARGB;
 				if (seams[ty * tw + tx] & 2 && ty + 1 < th) sp[(size_t)(ty * 8 + 7) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 8) * W + tx * 8 + k] = SEAM_ARGB;
 			}

@@ -48,8 +48,10 @@ Output in `.build/atlas`:
   map never shows on its floors (other colours: pieces of another surface,
   0 but for Seaside's yellow panels, `TILES_MORE_COLOURS`), the scenery
   placed, whether a guardian layer has its arena, its stairs, and how long
-  the layer took to build as the game builds it. `off near` and `off edge`
-  count the magenta and yellow tiles, `at mouths` the services and navis
+  the layer took to build as the game builds it. Seams, other colours,
+  `off near` and `off edge` count the map as drawn, not the tiles a pad's
+  or a stair's stamp covers; `off near` and `off edge` are the magenta and
+  yellow tiles, `at mouths` the services and navis
   beside a panel-wide stretch of the floor as drawn (the atlas fails on
   any: they stand in the way on).
 

@@ -47,12 +47,13 @@ bool props_learn_void_art(const AreaSrc *a, int seed, PropStamp *out);
 bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
 /* A whole pad of `a`: a 3 x 3 island of floor (bridges at most beside it)
  * whose middle panel has a hue in `hues` (buckets as `styles`): the first
- * layer's tiles over its panels and the faces under them, anchored on its
- * corner of lowest world X and Y (Central's and Seaside's framed pads,
- * their recess holding a centrepiece). Of those, the one with the fewest
- * bridges beside its lower sides, whose faces would bring a bridge's start
- * along; `out` is kept where it has no more (call it again on another map
- * of the area). */
+ * layer's tiles over its panels, the faces under them and its rim,
+ * anchored on its corner of lowest world X and Y (Central's and Seaside's
+ * framed pads, their recess holding a centrepiece). The islands are laid
+ * over each other, the one with the fewest bridges beside its lower sides
+ * first, each tile taken where one of them draws its island alone (e1 1: a
+ * bridge beside an island comes along in its tiles there); called again on
+ * another map of the area, it fills in `out`. */
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,

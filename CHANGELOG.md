@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Central's, Seaside's and Sky's framed pads keep straight upper edges and
+  meet their catwalks whole: a stamp change had left tile-wide steps along
+  their upper edges, and its edge was laid over a catwalk's last panel.
+  Their rims now come from whichever of the area's pads draws each tile
+  alone, and a pad is its walkways' floor, as on the original maps.
 - A Server's prize is named and given in full: its talk holds MegaMan now,
   so the A that paged "The virus signal left a chip behind" no longer talked
   to the Server he faced, whose own words had taken the box before the chip

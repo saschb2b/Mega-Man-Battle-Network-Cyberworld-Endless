@@ -690,7 +690,7 @@ static int unplain(const TileBook *b, int m, int phase, const TileCand *c, uint6
 }
 
 bool tiles_measure;
-int tiles_pick_off, tiles_pick_why;
+int tiles_pick_off, tiles_pick_why, tiles_pick_other;
 
 /* The panel under map pixel (px, py) at z 0, as bit k of the 3x3 around
  * (A, B); -1 beyond them. */
@@ -815,8 +815,16 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	gk.side = g->face;   /* (outlines beside its faces as deep as this map's) */
 	const TileCand *fit = NULL, *any = NULL;
 	int fit_d = INT_MAX, any_score = INT_MAX, fit_k = -1, fit_p = 0, any_p = 0;
-	/* the walkway floor in a 2 x 2 block with the tile's panel: a field of it */
-	bool field = in_block(ob);
+	/* the walkway floor in a 2 x 2 block with the tile's panel: a field of it
+	 * (not a pad, which is its own island) */
+	unsigned pads = 0;
+	{
+		int ph, A, B;
+		tile_class(g, tx, ty, &ph, &A, &B);
+		for (int k = 0; k < 9; ++k)
+			if (floor(A + k % 3 - 1, B + k / 3 - 1, ctx) & TILE_PAD) pads |= 1u << k;
+	}
+	bool field = in_block(ob & ~pads);
 	/* what the tile shows of its own neighbourhood: a pair costs a point for
 	 * each pixel where its own showed other floors, faces or materials */
 	const PixCol *col = columns(g, tx, ty);
@@ -903,12 +911,13 @@ static int only(int A, int B, const void *ctx) {
 	return TILE_MATERIAL(m) == o->keep ? m : TILE_VOID;
 }
 
-/* a pick with this distance (-1: none fitted) in the stats */
+/* a pick with this distance (-1: none fitted) in the stats (the pairs in
+ * other colours are counted over the map as drawn: tiles_pick_other) */
 static void count(int dist, const TileCand *c) {
 	tiles_stats.picks++;
 	if (dist < 0) tiles_stats.fallbacks++;
 	else if (dist) tiles_stats.near++;
-	if (c && c->other) tiles_stats.other++;
+	if (c && c->other) tiles_pick_other = 1;
 }
 
 /* Where the original never joins its two floors (areas whose floors are
@@ -940,6 +949,7 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	int phase, A, B, dist, off, off2;
 	tiles_pick_off = TILE_EXACT;
 	tiles_pick_why = TILE_WHY_NONE;
+	tiles_pick_other = 0;
 	tile_class(g, tx, ty, &phase, &A, &B);
 	unsigned oa, ob;
 	occupancy(floor, ctx, A, B, &oa, &ob);

@@ -26,7 +26,7 @@ typedef struct {
 	uint32_t *look;
 	uint64_t *mask;
 	bool *on;       /* on the floor: has a pair */
-	uint8_t *off;   /* how far its pair was seen from its neighbourhood, and why (tiles_pick_off, _why) */
+	uint8_t *off;   /* how far its pair was seen from its neighbourhood, why, and its colours (tiles_pick_off, _why, _other) */
 } Picked;
 
 /* Tile (tx, ty)'s four neighbours: left, above, right, below. */
@@ -48,7 +48,7 @@ static bool pick_one(Picked *p, int tx, int ty) {
 	p->mask[i] = 0;
 	bool on = tiles_pick(p->books, p->nbooks, p->g, tx, ty, p->floor, p->ctx, p->seams, &n,
 		&p->map[i], &p->map[cells + i], &p->look[i], &p->mask[i]);
-	p->off[i] = (uint8_t)(tiles_pick_off | tiles_pick_why << 2);
+	p->off[i] = (uint8_t)(tiles_pick_off | tiles_pick_why << 2 | tiles_pick_other << 5);
 	return on;
 }
 
@@ -113,7 +113,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
 			unsigned sides = trouble(&p, tx, ty);
-			left[ty * tw + tx] = (uint8_t)((sides >> 2 & 1) | (sides >> 3 & 1) << 1 | p.off[ty * tw + tx] << 2);   /* (off: bits 2-3, why: 4-6) */
+			left[ty * tw + tx] = (uint8_t)((sides >> 2 & 1) | (sides >> 3 & 1) << 1 | p.off[ty * tw + tx] << 2);   /* (off: bits 2-3, why: 4-6, other: 7) */
 		}
 	free(dirty);
 	free(p.look);
