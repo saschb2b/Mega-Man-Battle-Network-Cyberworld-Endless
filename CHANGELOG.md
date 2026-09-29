@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The project page's downloads open on your platform (Windows, macOS,
+  Linux, Steam Deck, Android, the handhelds or the browser), its best
+  build first and the others under it with what each is for, then what
+  to do next; the hero's button says whose download it leads to. The
+  Game section shows a town, the jack-in setup and Dad's records.
 - The NaviCust's Spins are found in the net, one a run: a blue Mystery
   Data on one layer of 4-8 holds a Spin of a colour you don't have yet,
   kept for every run after, and MegaMan says what it does. A program
