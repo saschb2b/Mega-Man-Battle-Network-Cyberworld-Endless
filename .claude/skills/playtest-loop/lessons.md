@@ -590,3 +590,50 @@ session's walking showed in its notes but only the report said how much.
 (past sessions 9 to 60%, most 20 to 40) and says "look:" past 80 calls
 with more than 45% on it; a look then asks whether the persona is lost or
 the layer long, and the layer's walk is counted before the report comes.
+
+## Session 30 (7/10, keep playing: yes; recommend: yes)
+
+Build 7985687. A CONTINUE of the Blade run on its rebuilt layer 6 (the
+Aquarium Comp's smaller maze), CircusMan twice, deleted in the rematch at
+his 290 of 700; the summary opened the SlashCross start, and a new run
+began (243 calls, 10 to 13% of them on the map, against 46% before).
+"The rematch LifeSword is why I play": AreaGrab into LifeSword, 410 in one
+swing. Confirmed: the arrow on while walking, the dealer and the heal
+beside the guardian's arena, a chip listed once, the code lean in the
+dealer's stock and the gift, the new run's other town, area and guardian,
+the gift's install line, the quit prompt's Yes.
+
+Raised, fixed:
+- **Running from a guardian put MegaMan back on his trigger**, twice at 5
+  HP, and the rematch ended the run. BN6 keeps its story bosses from
+  running: bit 0x20 of the battle record's options, which the engine set
+  for every battle. Guardians now clear it: "Lan, this is no time to run
+  away!"
+- **Blank chips in a new run's Blade folder**, one or two in every hand:
+  BN6 marks each chip it gives (a key byte XOR 0x17 in a per-chip table)
+  and draws an unmarked chip blank, as a cheat's. The engine wrote the
+  folder without the marks; the Standard folder's chips, given at NEW
+  GAME, played. Session 28's Blade run played because the player opened
+  the folder in the PET first. The folder's chips are now marked at the
+  start, on every fresh layer and on CONTINUE.
+- **The setup after an unlock** opened on JACK IN!, the new Cross unseen:
+  it now opens on the new option's row, marked NEW.
+- **The briefing's arrow faded** before the last box closed: it stays ten
+  seconds after the words.
+
+Misread, twice now: "early R fails" (0 of 6). Replayed without the second
+R, the Custom screen slid in 10 to 20 frames after the gauge filled; the
+second R came first. The persona's controls now say to wait 30 frames
+past the full gauge.
+
+Left: overshooting the arrow's turns in 20-30 frame bursts (the arrow
+turns at the junction), the gift Prog's talk reopened by the A that
+closed MegaMan's line, a lone Gunner at the back against a Blade folder
+(its identity: the dealer's pick reaches).
+
+Loop change: **bisect a regression's start path before its code.** The
+blank chips took a long hunt because every "clean" control hand happened
+to hold only Standard chips. A deterministic probe (a test folder of only
+the suspect chips, an env switch the test sets) settled in one run what
+three chance hands had not. For a bug that shows in some hands or some
+runs, make the probe force it.
