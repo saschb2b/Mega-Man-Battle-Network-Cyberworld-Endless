@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "compat.h"
 #include "data.h"
 #include "emu.h"
 #include "game.h"
@@ -35,7 +36,7 @@ static void append(const char *line) {
 	if (size > LOG_LIMIT) {
 		snprintf(old, sizeof old, "%s/runlog.old", g_data_dir);
 		remove(old);
-		rename(path, old);
+		cw_rename(path, old);
 	}
 }
 

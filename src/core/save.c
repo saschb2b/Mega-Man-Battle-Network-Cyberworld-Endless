@@ -43,7 +43,7 @@ bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t 
 	ok = fflush(f) == 0 && ok;
 	fclose(f);
 	/* Atomic replace so a power cut never leaves a half-written save. */
-	ok = ok && rename(tmp, file) == 0;
+	ok = ok && cw_rename(tmp, file);
 	platform_persist();
 	return ok;
 }

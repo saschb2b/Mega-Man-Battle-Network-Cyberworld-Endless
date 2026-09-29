@@ -39,3 +39,15 @@ bool cw_exe_path(char *out, size_t n) {
 	return true;
 #endif
 }
+
+bool cw_rename(const char *from, const char *to) {
+#ifdef _WIN32
+	/* (UTF-8 paths: the .exe's manifest makes them the ANSI calls' own) */
+	return MoveFileExA(from, to, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
+#else
+#ifdef __3DS__
+	remove(to);
+#endif
+	return rename(from, to) == 0;
+#endif
+}

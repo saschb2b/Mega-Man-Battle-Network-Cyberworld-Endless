@@ -169,5 +169,5 @@ void legacy_move_state(void) {
 	char dir[600];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
 	cw_mkdir(dir);
-	rename(old, cur);
+	cw_rename(old, cur);
 }

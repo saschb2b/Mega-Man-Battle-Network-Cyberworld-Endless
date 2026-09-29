@@ -19,4 +19,9 @@
 /* The running program's path; false when it cannot be told. */
 bool cw_exe_path(char *out, size_t n);
 
+/* rename(), replacing `to` where it exists, as POSIX's does: Windows' C
+ * library and the 3DS's SD card refuse a name that is taken (a save's
+ * .tmp was left beside the old save, which stayed) */
+bool cw_rename(const char *from, const char *to);
+
 #endif

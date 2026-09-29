@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Windows keeps what a save writes.** A save writes its new file beside
+  the old one and renames it over it, so a power cut never leaves half a
+  save; Windows' C library refuses that rename where the old file is, so
+  every save after a file's first stayed beside it as a `.tmp` and the
+  first stayed in use: the run's checkpoints, the profile's unlocks and
+  records. Saves now replace the old file there (and on the 3DS's SD card,
+  which refuses it too).
 - **Smooth motion**, an option for 90, 144 and 165 Hz screens: the game
   runs at the GBA's 60 frames a second, which such a screen shows for one
   refresh or two (or two or three) in turn, a slight judder; with smooth
