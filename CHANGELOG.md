@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A run can begin in Green Town, the fourth starting town: the Judge
+  Tree, the flower shop, the lily ponds and the stumps as Capcom made
+  them, with its own theme. Lan jacks in at the knight statue on the
+  flower plaza; the townsfolk, the flower shop and the stumps' tables
+  have words of their own.
 - More of what a run finds fits its folder. Half the Mystery Data's chips
   are rolled again for one in the folder's codes, where only the code had
   leaned: a Blade folder's finds came in its codes two times in seven, now

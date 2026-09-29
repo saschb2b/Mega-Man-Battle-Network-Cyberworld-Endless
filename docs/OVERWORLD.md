@@ -2,10 +2,10 @@
 
 How BN6's real world is stored, and how the engine builds the town where
 a run begins (`src/world/`): Central Town or ACDC Town, cut into pieces
-and set out again, or Seaside Town as it stands. Lan walks to the town's
-landmark (the blue bird statue, the squirrel statue, the mermaid fountain)
-and jacks MegaMan in; the game's own jack-in takes him to the run's first
-layer.
+and set out again, or Seaside Town or Green Town as they stand. Lan walks
+to the town's landmark (the blue bird statue, the squirrel statue, the
+mermaid fountain, the knight statue) and jacks MegaMan in; the game's own
+jack-in takes him to the run's first layer.
 
 ## BN6's real world
 
@@ -53,9 +53,9 @@ Town shows only some of them:
 
 ## The town
 
-A run's town is one of three styles, picked by its seed: Central Town
+A run's town is one of four styles, picked by its seed: Central Town
 (`0x01:0`) or ACDC Town (`0x00:0`), both 132 x 72 tiles, or Seaside Town
-(`0x03:0`, below). A cut style's town is
+(`0x03:0`) or Green Town (`0x04:0`), below. A cut style's town is
 its original cut into pieces and set out again, in the original's own map
 (its tables in the game, its music): the generator arranges Capcom's
 buildings and does not make new ones. `town.c` plans a town as a list of
@@ -151,7 +151,8 @@ The map holds the floor with room for the camera (136 pixels either side,
 104 above and below) and every copied tile, and the whole plan moves by
 a pattern-keeping step to sit in the map's middle (the camera's bounds are
 symmetric around it): Central Town 142 x 82 tiles (152 x 84 widened),
-ACDC Town 156 x 88; Seaside Town keeps its own 132 x 96.
+ACDC Town 156 x 88; Seaside Town keeps its own 132 x 96, Green Town its
+184 x 104.
 
 The town takes over its original's own map, in the game's tables only:
 its tile map pointer, coordinate data (walls around the walkable cells,
@@ -186,18 +187,29 @@ it; with a townsperson (list 5) in that place, its chats type at speed.
 Why the Prog slows the game on this map and not in Central or ACDC Town
 is not known, so Seaside's people come from list 5 alone.
 
+## Green Town
+
+Green Town (`0x04:0`, 184 x 104 tiles, song `0x08`) is copied whole as
+Seaside Town is: its planks, lily ponds and the two stumps stand at 16,
+the plaza, the paths up to the flower shop and the Judge Tree and the pond
+beside it at 0 (the town hall's steps rise to 48). Its one jack-in point,
+0x40, is the port: a ring of 56 cells (x -56..8, y -192..-128 in world
+units) round a knight statue, map object `0x72` at (-22, -154), which the
+town keeps beside the trees, the bird statue and the Chip Trader (the
+drawn map has only the plaza's planks there). Beside it stands object
+`0xBE` at (28, -122), which shows nothing and is left out. Its checks:
+the stump's table of books (f0, f4), the flower shop (f1) and its flower
+boxes (f5), the stumps' stools (f3, f6) and the lily ponds (f7); the
+knight's own (f2) lies under his pedestal, which keeps Lan from reaching
+it, so the port guide and L name him instead. Its people come from sprite
+list 5 alone, as Seaside's, and every chat types at speed with seven of
+them. Lan arrives on the grass east of the plaza, at height 0.
+
 ## Further towns (planned)
 
-The roadmap's more starting towns (docs/META.md) would come from the other
-real-world groups, each first as its original whole, as Seaside Town is.
-Found so far (`build.py world`, and the section 3 values dumped per cell):
+The roadmap's last starting town (docs/META.md) would come the same way:
 
-- **Green Town** (`0x04:0`, song `0x08`): one jack-in point, 0x40, a ring
-  of 56 cells (x -56..8, y -192..-128 in world units) round a large object.
-- **Sky Town** (`0x05:0`, song `0x07`).
-
-Both stand on more than one height (Green Town's stumps, Sky Town's
-decks), so they would be copied whole like Seaside Town.
+- **Sky Town** (`0x05:0`, song `0x07`), which stands on several decks.
 
 The songs are the per-map bytes of the map music lists
 (`0x080360E4`: a list pointer per chapter byte, the later chapters' from
@@ -216,7 +228,8 @@ to the flash (a playtester's picture between the two read as R doing
 nothing). The town keeps the style's points
 (Central Town's 4 x 4 cells on the plaza, not the story's second one in
 front of Aster Land; ACDC Town's 2 x 5 beside the squirrel statue and
-4 x 2 at the doghouse; none of Seaside Town's) and makes the landmark's
+4 x 2 at the doghouse; none of Seaside Town's; Green Town's ring round
+the knight) and makes the landmark's
 whole front one too, with a ring two cells wide round it: the
 original's points lie a few cells from the statue, with the statue's own
 check between, where a player walks up and presses R. Every cell is value
@@ -234,7 +247,7 @@ by Lan's house four or five runs running.
 (a breadth-first path over the town's walkable cells) and presses R.
 `python3 build.py town` draws the towns runs of seeds 1, 2, ... start in,
 tiles without a match marked red, objects and people dotted, and shows
-the game around the first; `CYBERWORLD_TOWN_STYLE` (0 Central, 1 ACDC, 2 Seaside) and
+the game around the first; `CYBERWORLD_TOWN_STYLE` (0 Central, 1 ACDC, 2 Seaside, 3 Green) and
 `CYBERWORLD_TOWN_VARIANT` fix the plan, `CYBERWORLD_TOWN_START=x,y` where
 Lan starts (the original's world units), `CYBERWORLD_TOWN_DEBUG` marks
 hinted tiles and trigger cells and prints the plan,

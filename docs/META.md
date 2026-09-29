@@ -231,10 +231,10 @@ them a use.
    net's Nest: its first guardian's exit leads to a layer 11 with a heal,
    a dealer and another of the Nest's guardians, drawn from the run's
    seed, none of the acts' nor the first; the endless net's Nest rebuilds
-   the net, so the rung says it is the short net's). Seaside Town is the
-   third starting town, copied whole with its own walls and heights,
-   since it stands on several; Green and Sky Towns would come the same
-   way (docs/OVERWORLD.md, further towns). The town as hub
+   the net, so the rung says it is the short net's). Seaside and Green
+   Towns are the third and fourth starting towns, copied whole with their
+   own walls and heights, since each stands on several; Sky Town would
+   come the same way (docs/OVERWORLD.md, further towns). The town as hub
    (the setup's choices made in the town, at its people and shops) waits
    on the playtests: the setup screen has raised no complaint.
 

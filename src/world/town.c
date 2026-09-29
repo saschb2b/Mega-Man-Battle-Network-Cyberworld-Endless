@@ -431,6 +431,41 @@ static const char *const seaside_checks[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
+/* -- Green Town (0x04:0) -- */
+
+/* (copied whole, as Seaside Town: its planks, ponds and stumps stand at 16,
+ * its plaza, paths and the pond by the Judge Tree at 0) */
+static int green_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
+static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
+
+/* Its people, on the ground at 0: by the knight statue, up the paths to
+ * the flower shop and the Judge Tree, round the pond. */
+static const Folk green_folk[] = {
+	{ -60, -156, FACE_SE, 5, 0x31, "The knight statue has a port, you know.|Stand beside it and press R to jack in!" },
+	{ -20, -268, FACE_SW, 5, 0x36, "The flower shop's roses are in full bloom!|Take a look before you dive in." },
+	{ -196, -172, FACE_SE, 5, 0x2C, "The lilies open every morning. The frogs like them too." },
+	{ -180, -236, FACE_NW, 5, 0x2E, "The Judge Tree was here long before the town.|They say its roots reach all the way into the net." },
+	{ 68, -124, FACE_SW, 5, 0x30, "Lan! Did you ride the bus out to Green Town? Good luck down there!" },
+	{ -60, -204, FACE_SE, 5, 0x39, "I jacked in at the knight yesterday. Today the paths were all different!|It really does go on forever down there." },
+	{ -132, -108, FACE_NE, 5, 0x38, "Green Town keeps its air clean. Even its net feels fresher!", 10 },
+};
+
+/* What its checks say: the stump's table of books (0, 4), the flower shop
+ * (1) and its flower boxes (5), the stumps' stools (3, 6), the lily ponds
+ * (7); 8, by the plaza's east arm, has nothing to see, and the knight's
+ * own (2) lies under his pedestal, which keeps Lan from reaching it. */
+static const char *const green_checks[16] = {
+	"A table of books on a tree stump. Someone left them out to read in the sun.",
+	"The flower shop.|\"FRESH FLOWERS! Picked this morning!\"",
+	NULL,
+	"Stumps cut smooth for stools. The whole town sits on its trees.",
+	"A table of books on a tree stump. Someone left them out to read in the sun.",
+	"Flower boxes in rows. The whole plaza smells sweet.",
+	"Stools round a stump table. A nice spot for lunch.",
+	"Lilies float on the pond. A frog watches from a leaf.",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+};
+
 #define FOLK(list) list, (int)(sizeof list / sizeof *list)
 
 static const Style styles[] = {
@@ -444,10 +479,14 @@ static const Style styles[] = {
 	{ 0x03, 0x00, 0x06, 0, { -8, -15, -6, -8 }, { -18, -16, -9, -7 }, seaside_mat, design_seaside, 4, -100, FACE_SW, FOLK(seaside_folk), seaside_checks,
 	  { { 4, -100 }, { -100, -100 }, { -120, -170 }, { 40, -70 }, { 150, 40 }, { 300, 0 } }, true,
 	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza", "@M The train got us out to Seaside Town, Lan! Smell that sea air!|" },
+	/* (its port the original's own, round the knight statue) */
+	{ 0x04, 0x00, 0x08, 1 << 0, { -7, -22, -1, -16 }, { -5, -22, -1, -18 }, green_mat, design_green, 40, -100, FACE_SW, FOLK(green_folk), green_checks,
+	  { { 40, -100 }, { -60, -204 }, { -20, -268 }, { -196, -172 }, { -32, 24 }, { -64, 312 } }, true,
+	  "Green Town", "knight statue", "knight statue on the flower plaza", "@M The bus got us out to Green Town, Lan! Smell those flowers!|" },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
 _Static_assert(sizeof central_folk / sizeof *central_folk <= MAX_FOLK && sizeof acdc_folk / sizeof *acdc_folk <= MAX_FOLK &&
-	sizeof seaside_folk / sizeof *seaside_folk <= MAX_FOLK, "at most MAX_FOLK townsfolk");
+	sizeof seaside_folk / sizeof *seaside_folk <= MAX_FOLK && sizeof green_folk / sizeof *green_folk <= MAX_FOLK, "at most MAX_FOLK townsfolk");
 
 /* ---- what the copied pieces bring ---- */
 
@@ -627,9 +666,10 @@ static void carry(void) {
 		for (int k = 0; k < T.nsrc_obj && T.nobj < MAX_OBJS; ++k) {
 			const uint8_t *r = T.src_obj[k];
 			uint32_t id = get32(r + 16);
-			/* (trees, the bird statue, the Chip Trader: none an event
-			 * flag hides or shows) */
-			if (r[0] != OBJ_SPAWN_MAP_OBJECT || r[1] || (id != 0x7D && id != 0x7E && id != 0x16 && id != 0xBC)) continue;
+			/* (trees, the bird statue, the Chip Trader, Green Town's
+			 * knight: none an event flag hides or shows) */
+			bool green = T.style->group == 0x04 && id == 0x72;   /* (Green Town's knight statue) */
+			if (r[0] != OBJ_SPAWN_MAP_OBJECT || r[1] || (id != 0x7D && id != 0x7E && id != 0x16 && id != 0xBC && !green)) continue;
 			int x = (int32_t)get32(r + 4) >> 16, y = (int32_t)get32(r + 8) >> 16;
 			if (!in_source(p, fdiv(x, 8), fdiv(y, 8))) continue;
 			uint8_t *o = T.obj[T.nobj++];
