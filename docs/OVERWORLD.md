@@ -160,6 +160,29 @@ every entry leads back to where Lan starts, jack-in table and music
 from the layers' (docs/EMULATION.md), since the first layer is built while
 Lan still walks the town.
 
+## Further towns (planned)
+
+The roadmap's more starting towns (docs/META.md) would come from the other
+real-world groups, each first as its original whole (ACDC Town's first
+variant is that), then cut like the two. Found so far (`build.py world`,
+and the section 3 values dumped per cell):
+
+- **Seaside Town** (`0x03:0`, song `0x06`): jack-in points 0x40 (cells x
+  -21..-14, y -22..-21, before the fish shop) and 0x41 (a ring, cells x
+  2..6, y -10..-6, round an object at the plaza's east edge, whose check is
+  f7); the mermaid fountain is a check ring (f0, cells x -19..-8, y
+  -17..-6), a landmark as the statues are. The plaza and the fish shop lie
+  at height 0, the walkway over the whale and the station at 64, the pier
+  at -32: Lan should start at height 0, since the town's warp entry holds
+  no height.
+- **Green Town** (`0x04:0`, song `0x08`): one jack-in point, 0x40, a ring
+  of 56 cells (x -56..8, y -192..-128 in world units) round a large object.
+- **Sky Town** (`0x05:0`, song `0x07`).
+
+The songs are the per-map bytes of the map music lists
+(`0x080360E4`: a list pointer per chapter byte, the later chapters' from
+index 0x10 on, docs/ROM_DATA.md), in the chapters where the town is open.
+
 ## The jack-in
 
 Pressing R in the real world, the game reads the trigger cell under Lan:
