@@ -37,15 +37,17 @@ const char *guardian_tip(int navi) {
 	/* (a second box, "|@M ", for when a sword lands, where a guardian's
 	 * warps made swords miss:
 	 * watched in god mode, HeatMan stands at the back through his tower
-	 * and his flame, SpoutMan in his front column through his bubbles) */
+	 * and his flame, SpoutMan in his front column through his bubbles,
+	 * SlashMan beside MegaMan some 40 frames after his slash, EraseMan at
+	 * the back while his ghosts drift) */
 	case 1: return "HeatMan's fire tower crawls at us unlit and turns into our row: sidestep it late. His flamethrower sweeps the lit row. "
 		"When a shadow opens under us, he's leaping there: clear the yellow!|@M He stands still at the back while his tower and flame play out: strike then!";
 	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
 		"and he warps in close to slash. Keep moving!";
 	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
-		"Step off the yellow panel when he lands! Blades he leaves stuck in our side fly back across their rows.";
+		"Step off the yellow panel when he lands! Blades he leaves stuck in our side fly back across their rows.|@M He stays beside us a moment after his slash: swing back then!";
 	case 4: return "EraseMan's ghosts soak up our shots and drift across the rows: dodge up and down. "
-		"If our HP runs low he erases us in one blow, so heal before we face him!";
+		"If our HP runs low he erases us in one blow, so heal before we face him!|@M He holds still at the back while his ghosts drift at us: strike then, with something that reaches him!";
 	case 5: return "ChargeMan rams down our row like a train, his coal bombs burst on the lit panels, and his freight cars roll down "
 		"the rows and block our chips. Hit him as he pulls back in at the back!";
 	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
