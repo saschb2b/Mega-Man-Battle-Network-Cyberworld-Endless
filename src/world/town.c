@@ -969,8 +969,14 @@ static const char *intro(void) {
 			"@L Leave it to us, Dad!|"
 			"@M The port's by the %s. Let's go, Lan!", port);
 	} else if (profile.nest_clears > 0 && profile.runs % 2) {
-		ADD("@D Lan, MegaMan has reached the Nest before. The net's changed all over again since then.|"
-			"@D Be careful down there!|@L Got it, Dad!");
+		/* (after a win, the ending's hook: "reached" undersold it to a
+		 * playtester who had won) */
+		if (profile.short_wins > 0)
+			ADD("@D Lan, MegaMan brought the Nest down before, but something below it is still awake.|"
+				"@D The net's changed all over again since then. Be careful down there!|@L Got it, Dad!");
+		else
+			ADD("@D Lan, MegaMan has reached the Nest before. The net's changed all over again since then.|"
+				"@D Be careful down there!|@L Got it, Dad!");
 	} else if (town_after_abandon) {
 		ADD("@L We never finished that last dive...|@M Then let's start a fresh one, Lan! The port's by the %s.", port);
 	} else if (profile.runs == 0) {
