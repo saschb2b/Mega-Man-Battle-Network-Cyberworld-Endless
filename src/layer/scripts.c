@@ -36,13 +36,15 @@ void chat_marks_install(void) {
 
 /* A Yes/No choice after `question`, asked with `face` as the game's
  * shopkeepers ask it: two options, then select (Yes continues, No and B
- * jump to `no`); in the box a page before it opened, with `after`. */
-static void ask_in(TextArchive *t, int face, const char *question, int no, bool after) {
+ * jump to `no`); in the box a page before it opened, with `after`. A risky
+ * one (a fight, a warp away) starts on No: a playtester's A pressed through
+ * a strong virus signal's words took it on at Yes, and cost him 150 HP. */
+static void ask_in(TextArchive *t, int face, const char *question, int no, bool after, bool risky) {
 	static const uint8_t horizontal[] = { 0xF7, 0x07, 0x0B };        /* ts_position_option_horizontal */
 	static const uint8_t yes_opt[] = { 0xEB, 0x00, 0x11, 0x00 };     /* ts_option: left/right to No */
 	static const uint8_t no_opt[] = { 0xEB, 0x00, 0x00, 0x11 };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	uint8_t select[] = { 0xED, 0x06, 0x00, 0xFF, (uint8_t)no, 0xFF };
+	uint8_t select[] = { 0xED, 0x06, (uint8_t)(risky ? 1 : 0), 0xFF, (uint8_t)no, 0xFF };   /* (ts_select: its length, the option it starts on) */
 	if (face >= 0) ta_mugshot(t, face);
 	if (after) ta_clear(t); else ta_open(t);
 	ta_text(t, question);
@@ -56,7 +58,7 @@ static void ask_in(TextArchive *t, int face, const char *question, int no, bool 
 	ta_bytes(t, select, sizeof select);
 }
 
-static void ask(TextArchive *t, int face, const char *question, int no) { ask_in(t, face, question, no, false); }
+static void ask(TextArchive *t, int face, const char *question, int no) { ask_in(t, face, question, no, false, false); }
 
 static void flag_set(TextArchive *t, int flag) {
 	uint8_t b[] = { 0xEA, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8) };
@@ -132,7 +134,7 @@ int ta_challenge(TextArchive *t, int flag) {
 	 * not knowing, and came out at 10) */
 	bool first = true;
 	ta_pages(t, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.", FACE_MEGAMAN, &first);
-	ask_in(t, FACE_MEGAMAN, "It pays a good chip.\nTake it on?\n", no, true);
+	ask_in(t, FACE_MEGAMAN, "It pays a good chip.\nTake it on?\n", no, true, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -148,7 +150,7 @@ int ta_undernet(TextArchive *t, int flag, bool deeper) {
 	ta_pages(t, deeper ? "Tougher viruses still, and richer data!|Its exit leads back to the main path."
 		: "The Undernet: tougher viruses and richer data!|A BugFrag Trader too. Its exit leads to the next layer.",
 		FACE_MEGAMAN, &first);
-	ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true);
+	ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -390,7 +392,7 @@ int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int nee
 	bool first = true;
 	snprintf(s, sizeof s, "%s's code opens the gate! %s SP waits inside, the hardest fight on this layer.", navi, navi);
 	ta_pages(t, s, FACE_MEGAMAN, &first);
-	ask_in(t, FACE_MEGAMAN, "His SP chip is the prize.\nTake him on?\n", no, true);
+	ask_in(t, FACE_MEGAMAN, "His SP chip is the prize.\nTake him on?\n", no, true, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;

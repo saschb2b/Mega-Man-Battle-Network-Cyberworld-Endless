@@ -368,17 +368,24 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			char code = '*';
 			ChipInfo ci;
 			int chip = roll_chip(run.depth + 2, 4, &code), best_power = -1;
+			bool best_fits = false;
 			for (int tries = 0; tries < 12; ++tries) {
 				char c = '*';
 				int id = tries ? roll_chip(run.depth + 2, 4, &c) : chip;
 				chip_info(id, &ci);
 				int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
-				if (power > best_power) { best_power = power; chip = id; if (tries) code = c; }
+				/* (one the folder can play first, in its codes or *: a Blade
+				 * folder's won HeatManEX H) */
+				bool fits = loot_folder_code(id, true) != 0;
+				if ((fits && !best_fits) || (fits == best_fits && power > best_power)) { best_power = power; best_fits = fits; chip = id; if (tries) code = c; }
 			}
 			chip_info(chip, &ci);
-			/* (in its * code where it has one, for any folder: an M-Cannon R
-			 * went with nothing a playtester carried) */
-			if (strchr(ci.codes, '*')) code = '*';
+			/* (in the folder's code, or its * where it has none of them, for
+			 * any folder: an M-Cannon R went with nothing a playtester
+			 * carried) */
+			char fit = loot_folder_code(chip, true);
+			if (fit) code = fit;
+			else if (strchr(ci.codes, '*')) code = '*';
 			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');
 			break;
 		}

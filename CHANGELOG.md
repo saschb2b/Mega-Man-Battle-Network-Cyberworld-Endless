@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A risky choice starts on No: a strong virus signal's fight, a Navi
+  gate's and a warp into the Undernet. A playtester's A pressed through
+  the signal's words took its fight on at Yes and cost him 150 HP.
+- A strong virus signal's prize is one the folder can play where one of
+  its twelve draws is (in the folder's code or *), the hardest hitting of
+  those: a Blade folder won HeatManEX H. A run continued from an older
+  build starts its layer afresh.
 - A run can begin in Green Town, the fourth starting town: the Judge
   Tree, the flower shop, the lily ponds and the stumps as Capcom made
   them, with its own theme. Lan jacks in at the knight statue on the
