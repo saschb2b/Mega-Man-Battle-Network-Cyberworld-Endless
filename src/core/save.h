@@ -38,6 +38,7 @@ typedef struct {
 	uint8_t library[40];
 	uint16_t library_start;
 	uint8_t last_town;        /* the last new run's town, style + 1 (town_style_for) */
+	uint8_t programs_found[8];   /* NaviCust programs MegaMan has had in any run, a bit each (docs/NAVICUST.md, 7) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8 };

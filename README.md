@@ -373,12 +373,14 @@ behind is options. From the second run, NEW GAME opens a setup:
   battles. Helped runs count for everything.
 
 Every chip MegaMan holds joins the Library, BN6's own, which every run's
-PET shows whole: a Chip Trader's prize is new to it first, and the
-summary counts what a run added. The run's summary names what it opened
-and the closest goal. Milestones put BN6's own marks on the title:
-Gregar's head for a won short net, Bass for the endless net's Nest, the S
-for the Secret Area, the green disc for a win on the top threat rung, STD,
-MEGA and GIGA COMP for a class of the Library complete.
+PET shows whole: a Chip Trader's prize is new to it first, and the summary
+counts what a run added. The NaviCust programs MegaMan has run with come
+back too: a later run's program vendor lists two of them first. The run's
+summary names what it opened and the closest goal. Milestones put BN6's
+own marks on the title: Gregar's head for a won short net, Bass for the
+endless net's Nest, the S for the Secret Area, the green disc for a win on
+the top threat rung, STD, MEGA and GIGA COMP for a class of the Library
+complete.
 
 ### Saving and losing
 

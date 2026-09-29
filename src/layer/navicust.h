@@ -33,6 +33,8 @@ const char *navicust_about(int program);
 bool navicust_in_pool(int program);
 /* Whether it may be offered at `depth`: in the pool, of a tier reached. */
 bool navicust_offerable(int program, int depth);
+/* The act a program may be offered from (the pool's tier), -1 outside it. */
+int navicust_tier(int program);
 /* The build a program belongs to (BUILD_*), -1 outside the pool. */
 int navicust_build(int program);
 /* A program's shape (one colour variant, program * 4 + v) as its record

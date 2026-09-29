@@ -42,6 +42,7 @@
 #include "save.h"
 #include "save_blob.h"
 #include "scripts.h"
+#include "shop.h"
 #include "talk.h"
 #include "text.h"
 #include "town.h"
@@ -713,6 +714,21 @@ static void library_from_game(void) {
 	if (added) profile_save();
 }
 
+/* ... and the programs MegaMan has, into the programs found, which later
+ * runs' NaviCust vendors keep (docs/NAVICUST.md, 7). */
+static void programs_from_game(void) {
+	uint8_t now[10];
+	int n = board_programs(now, (int)sizeof now);
+	bool added = false;
+	for (int i = 0; i < n; ++i) {
+		int p = now[i] / 4;
+		if (p <= 0 || p >= 64 || shop_program_found(p)) continue;
+		profile.programs_found[p / 8] |= (uint8_t)(1u << (p % 8));
+		added = true;
+	}
+	if (added) profile_save();
+}
+
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
@@ -959,7 +975,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 43
+#define LAYER_MAKE 44
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -967,6 +983,7 @@ static void save_checkpoint(void) {
 	char path[600];
 	save_state_path(path, sizeof path);
 	library_from_game();
+	programs_from_game();
 	save_run();
 	emu_save_state(path);
 	int make = LAYER_MAKE;
@@ -2070,6 +2087,7 @@ static void end_run(void) {
 	title_won = false;
 	runlog_run_end();
 	library_from_game();
+	programs_from_game();
 	meta_run_over(false);
 	profile_record_run();
 	save_delete();
@@ -2088,6 +2106,7 @@ static void win_run(void) {
 	title_won = true;
 	runlog_run_end();
 	library_from_game();
+	programs_from_game();
 	meta_run_over(true);   /* (before the clear counts: it names what the win opened) */
 	profile.nest_clears++;
 	profile_record_run();

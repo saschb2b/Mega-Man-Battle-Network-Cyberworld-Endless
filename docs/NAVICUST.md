@@ -171,6 +171,15 @@ draft, blue Mystery Data) and installs is remembered in the profile and can
 be offered in later runs. The first BugStop found in the Undernet is a
 story; afterwards it is an option.
 
+Built: the profile keeps a bit per program MegaMan has run with (on the
+board, or in the PET where it fits the board), read at every checkpoint and
+at the run's end. A NaviCust vendor lists two of them first, shuffled, when
+the act's tier (6) may offer them, at the price the others have (a quarter
+of the game's shop price, or of its tier's where the shops don't sell it),
+and his greeting names them: "I hear MegaMan's used Collect and AutoHeal
+before. I brought them along!" BN6's own picks fill the rest of his four,
+a program once whatever its colour.
+
 ## Teaching it
 
 Introduce, develop, twist, test (the skill's onboarding shape), each at

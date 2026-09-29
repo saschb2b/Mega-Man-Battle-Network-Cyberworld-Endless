@@ -14,8 +14,7 @@ A run resets fully. What persists today is little and mostly invisible:
 - `rivals.sav`: per guardian, meetings and who won, which picks its lines;
 - one-time tips (the NaviCust board, the map's violet marks) and the last
   run's first guardian, so the next run meets another;
-- planned, not built: programs found join later runs (docs/NAVICUST.md,
-  7).
+- (since built: programs found join later runs, docs/NAVICUST.md, 7).
 
 A run is long. The playtester's last run reached layer 9 in about an hour
 of game time, over five sessions, and ended at ChargeMan on a summary of
@@ -217,7 +216,7 @@ them a use.
    and the engine's existing pacing knobs; needs the folder's RAM layout
    (bn6f). Built.
 2. The Library, the programs pool, Cross starts (reasoned below), and
-   rewards in the folder's codes. Built but the programs pool.
+   rewards in the folder's codes. Built.
 3. Gates and route choice, with new areas and guardians as branches.
    The route choice and the Navi gates are built; vaults and branches
    wait.
@@ -303,8 +302,12 @@ against what you find**; each piece restates it.
    counts a run's new entries; STD, MEGA and GIGA COMP mark a class
    complete, counted over the chips the net can give. Entries grant
    nothing in battle.
-4. **Programs found join later runs** (docs/NAVICUST.md, 7): the run's
-   gift offers a program from those earlier runs installed.
+4. **Programs found join later runs** (docs/NAVICUST.md, 7): the
+   NaviCust vendor lists first two of the programs earlier runs ran with,
+   and names them. Not the gift: it is the first layer's lesson, picked for
+   the first board, where a found program would mostly be one of the same
+   small ones. At the vendor a found program costs what the others do and
+   takes a slot of BN6's own, so the list changes, not the power.
 
 Built so far: the codes (the Net Dealers and the gift always, Mystery
 Data half the time; read from the game's first folder as a layer is made,
@@ -315,7 +318,10 @@ deleted later says his data won't fit beside it), and the Library (the
 profile keeps a bit per chip; the game's Library flags are set from it as
 a run begins and read back at every checkpoint and at the run's end; the
 summary's Library row counts the run's new entries; STD, MEGA and GIGA
-COMP mark a class whole over the chips a run can hold). With them the Seaside
+COMP mark a class whole over the chips a run can hold), and the programs
+found (a bit per program in the profile, set from the board, and the PET's
+programs that fit it, at every checkpoint and at the run's end; the
+vendor's first two, when the act's tier offers them). With them the Seaside
 Area became a third opening area, and a new run avoids the last one's act
 1 area: a playtester began four runs running in the RoboDog Comp.
 

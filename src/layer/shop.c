@@ -12,6 +12,7 @@
 #include "game.h"
 #include "data.h"
 #include "loot.h"
+#include "save.h"
 #include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
@@ -223,22 +224,61 @@ const char *shop_pick_gift_program(ShopItem *out) {
 
 #define PROGRAM_HP_200 0xAC   /* its id in the game's shops (4200 zenny there) */
 
+bool shop_program_found(int program) {
+	return program > 0 && program < 64 && (profile.programs_found[program / 8] >> (program % 8) & 1);
+}
+
+/* Program `id`'s price at `depth`, from `base`, the game's shop price (0:
+ * the first the game's shops ask for it): a quarter of it, which is its
+ * endgame's (a run brings 100 to 1000 zenny a battle or Mystery Data, and
+ * the programs sat at 2500 to 7100), 200 more an act; one the game's
+ * shops don't sell, by its tier as they price theirs */
+static uint16_t program_price(int id, int base, int depth) {
+	int step = pacing_act(depth) + 7 * pacing_loop(depth);
+	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
+	ShopItem it;
+	for (uint32_t a = BN6_SHOP_INIT; a < end && !base; a += 8) {
+		read_item(a, &it);
+		if (it.kind == 3 && it.id / 4 == id / 4) base = it.price;
+	}
+	if (!base) {
+		static const uint8_t by_tier[8] = { 25, 25, 40, 40, 55, 55, 60, 70 };   /* hundreds */
+		int t = navicust_tier(id / 4);
+		base = by_tier[t < 0 ? 0 : t > 7 ? 7 : t];
+	}
+	/* (HP+200 at that price tripled a first act's 100 HP for 1200 zenny,
+	 * where an HPMemory's 20 cost 800) */
+	if (id == PROGRAM_HP_200) return (uint16_t)(24 + 4 * step);
+	return (uint16_t)(base / 4 + 2 + 2 * step);
+}
+
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
+	/* first, two at most of the programs MegaMan has had in earlier runs
+	 * that the act may offer (docs/NAVICUST.md, 7: the draft finds, the
+	 * vendor keeps) */
+	int found[64], nfound = 0;
+	for (int p = 1; p < 64; ++p)
+		if (shop_program_found(p) && navicust_offerable(p, depth)) found[nfound++] = p;
+	for (int i = nfound - 1; i > 0; --i) { int j = rng_range(0, i), t = found[i]; found[i] = found[j]; found[j] = t; }
+	for (int i = 0; i < nfound && n < 2; ++i) {
+		int color = navicust_color(found[i]);
+		if (!color) continue;
+		ShopItem it = { 3, 1, (uint16_t)(found[i] * 4), (uint8_t)color, 0 };
+		it.price = program_price(it.id, 0, depth);
+		out[n++] = it;
+	}
 	for (int i = 0; i < 10 && n < 4; ++i) {
 		ShopItem it;
 		/* (the NaviCust's pool and its tiers, docs/NAVICUST.md: HP+400 at
 		 * 2300 zenny in act 2 beside the dealer's 20-HP HPMemory at 1200;
 		 * SneakRun judged the game's battles, not the engine's) */
-		if (!pick(3, 0, &it) || listed(out, n, &it) || !navicust_offerable(it.id / 4, depth)) continue;
+		if (!pick(3, 0, &it) || !navicust_offerable(it.id / 4, depth)) continue;
+		bool again = false;   /* (a program once, whatever its colour) */
+		for (int k = 0; k < n; ++k) again |= out[k].kind == 3 && out[k].id / 4 == it.id / 4;
+		if (again) continue;
 		it.stock = 1;
-		/* (a quarter of the game's price, which is its endgame's: a run
-		 * brings 100 to 1000 zenny a battle or Mystery Data, and the
-		 * programs sat at 2500 to 7100; 200 more an act) */
-		it.price = (uint16_t)(it.price / 4 + 2 + 2 * (pacing_act(depth) + 7 * pacing_loop(depth)));
-		/* (HP+200 at that price tripled a first act's 100 HP for 1200
-		 * zenny, where an HPMemory's 20 cost 800) */
-		if (it.id == PROGRAM_HP_200) it.price = (uint16_t)(24 + 4 * (pacing_act(depth) + 7 * pacing_loop(depth)));
+		it.price = program_price(it.id, it.price, depth);
 		out[n++] = it;
 	}
 	return n;

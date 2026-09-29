@@ -71,6 +71,7 @@ static int find(int program) {
 
 bool navicust_in_pool(int program) { return find(program) >= 0; }
 int navicust_build(int program) { int i = find(program); return i < 0 ? -1 : POOL[i].build; }
+int navicust_tier(int program) { int i = find(program); return i < 0 ? -1 : POOL[i].tier; }
 const char *navicust_about(int program) { int i = find(program); return i < 0 ? NULL : POOL[i].about; }
 
 /* the act a guardian at `depth` closes, as the pool's tiers count it */

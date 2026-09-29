@@ -17,6 +17,7 @@
 #include "rivals.h"
 #include "mapslot.h"
 #include "net.h"
+#include "navicust.h"
 #include "netmap.h"
 #include "stage_npc.h"
 #include "npc.h"
@@ -217,6 +218,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		ChipInfo ci;
 		if (stock[i].kind == 2 && counter > 0 && (chip_info(stock[i].id, &ci), ci.element == counter)) virus_chip = true;
 	}
+	/* the program vendor's, before his words too (he names the programs
+	 * MegaMan has had in earlier runs, which lead his list) */
+	out->nprograms = shop_program_stock(run.depth, out->programs);
 	const char *brought = nstock && stock[0].stock == 1 ? "It's the only one I've got, so make it count!" : "I brought two, and they go fast!";
 	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
 	 * a hopping BlastMan two times in three) */
@@ -326,12 +330,24 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!", LAYER_DEALER_TOLD_FLAG);
 			break;
 		}
-		case OBJ_PROGRAMS:
+		case OBJ_PROGRAMS: {
+			/* (programs from earlier runs, by name: the reason they lead) */
+			char names[2][16], hello[300], again[140] = "";
+			int nnames = 0;
+			for (int k = 0; k < out->nprograms && nnames < 2; ++k) {
+				const char *about = navicust_about(out->programs[k].id / 4);
+				if (!about || !shop_program_found(out->programs[k].id / 4)) continue;
+				snprintf(names[nnames++], sizeof names[0], "%.*s", (int)strcspn(about, ":"), about);
+			}
+			if (nnames == 1) snprintf(again, sizeof again, "|I hear MegaMan's used %s before. I brought it along!", names[0]);
+			else if (nnames == 2)
+				snprintf(again, sizeof again, "|I hear MegaMan's used %s and %s before. I brought them along!", names[0], names[1]);
+			snprintf(hello, sizeof hello, "NaviCust programs, fresh from my workbench!%s|Install them in your PET: MegaMan, then NaviCust.",
+				again);
 			tk.sprite = SPR_TECH;
-			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH,
-				"NaviCust programs, fresh from my workbench!|Install them in your PET: MegaMan, then NaviCust.",
-				"More programs? Take a look!", LAYER_VENDOR_TOLD_FLAG);
+			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH, hello, "More programs? Take a look!", LAYER_VENDOR_TOLD_FLAG);
 			break;
+		}
 		case OBJ_CHALLENGE: {
 			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;
 			/* a win pays with a chip well past Mystery Data, the hardest
@@ -437,7 +453,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			}
 	for (int i = 0; i < nstock; ++i) out->dealer[i] = stock[i];
 	out->ndealer = nstock;
-	out->nprograms = shop_program_stock(run.depth, out->programs);
 	layer_objs_shops(out);
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);

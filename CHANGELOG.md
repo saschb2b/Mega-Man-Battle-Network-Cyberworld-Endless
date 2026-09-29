@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- NaviCust programs found join later runs: every program MegaMan runs with
+  (on the board, or in the PET where it fits) is kept in the profile, and a
+  later run's program vendor lists two of them first, when the act may
+  offer them, at the price the others have, and names them in his greeting.
+  A program a draft brought, which BN6's shops never sell, can so be bought
+  in a later run.
 - Threat rungs 6 to 9, each opened by a win on the one below: Mystery Data
   holds chips, never zenny; Chip Traders come half as often; a Guardian Data
   drafts two programs; and gives four HPMemory. The top rung, and the
