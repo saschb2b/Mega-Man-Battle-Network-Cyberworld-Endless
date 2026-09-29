@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The ACDC HP takes two in three of its random battles from Central
+  Area, where it took one in three: from act 3 its own Catacks alone
+  fill the act's band, and they came in two of three battles there
+  (three of a playtester's four were the same Catack pair). Now in one
+  of three, the rest Central Area's ten kinds.
 - A Chip Trader's prizes are only chips that come in the folder's codes
   or in *, where a dozen of its pool do: it had rewritten a prize's code
   to the folder's only where the chip came in one, and a playtester's

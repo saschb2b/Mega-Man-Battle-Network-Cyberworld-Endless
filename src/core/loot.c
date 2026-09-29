@@ -254,14 +254,16 @@ static int weigh(const Formation *list, int n, int depth, int target, PacingBand
  * formation each (every act 2 battle on Sky HP was Gunner and FgtrPlne),
  * and each stands in an area of its own world with ten kinds of virus, two
  * in three; the Aquarium Comp's two kinds of virus take most of its battles
- * (seven in a row were Piranhas and Quakers) and the ACDC HP's three kinds
- * all of them, one in three from their town's other area. -1 for none. */
+ * (seven in a row were Piranhas and Quakers), one in three from their
+ * town's other area; the ACDC HP's three kinds two in three too (from
+ * act 3, where its Catacks alone fill the band: three of a playtester's
+ * four battles there were the same Catack pair). -1 for none. */
 static int shares_with(int biome, int *thirds) {
 	switch (biome) {
 	case BIOME_SKY_HP: *thirds = 2; return BIOME_SKY;
 	case BIOME_GREEN_HP: *thirds = 2; return BIOME_GREEN;
 	case BIOME_AQUARIUM_COMP: *thirds = 1; return BIOME_HOMEPAGE;
-	case BIOME_ACDC_HP: *thirds = 1; return BIOME_CENTRAL;
+	case BIOME_ACDC_HP: *thirds = 2; return BIOME_CENTRAL;
 	default: return -1;
 	}
 }
