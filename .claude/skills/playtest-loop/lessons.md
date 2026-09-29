@@ -886,3 +886,32 @@ Loop change: **let a session end at a payoff, not on the budget.** Told
 to stop at 268 calls one layer short of a first meeting, he scored the
 session as "the calm middle of a run": the budget now stretches by up
 to 40 calls to finish the act's guardian when his layer is reached.
+
+## Session 37: 9/10 (keep playing: yes; recommend: yes)
+
+CONTINUE on layer 9 (rebuilt afresh by LAYER_MAKE 53), then ElementMan
+at a first meeting: "I don't recognize it", Dad's "We don't know who
+yet", the dealer's word one room before the arena, the reveal ("That
+voice... it's ElementMan! But that's a HeelNavi's body!"), and a fight
+won at 80 of 500 HP by reading his colours: "no weak element" turned out
+to mean a weakness per form, which he found himself. "The best story
+moment of the series." Stopped on the exit pad to the Nest, the budget
+spent on the fight (the new 40-call extension used as meant).
+
+Confirmed: Comm grey, the Dive report and Records mails, NaviCode's
+count, the dealer's pick fitting the folder (no capped chip), the dealer's
+word from the act's second layer, the HeelNavi guardian's first-meeting
+words, the layer rebuilt afresh.
+
+Raised, for after 0.3.0: ElementMan's HP falling by 1 every ~25 frames
+with nothing hitting him (no poison in our fields: BN6's own battle, to
+confirm in god mode); one attack (a shadow sliding across his panels)
+with no yellow panel; batched A lands on the shop's "Are you sure? >
+Yes" (BN6's default), twice; Dad's mails never NEW, ", code" terse; the
+vault's count moving (30 to 60 by act) with nothing saying what a vault
+is; a strong virus signal's prize a third copy of a chip just bought; a
+bystander reciting button names.
+
+Loop change: **the budget's guardian extension works**: the session
+ended on the payoff it came for, where session 36 had ended one layer
+short of it. Keep it.
