@@ -502,6 +502,17 @@ static bool step(void) {
 		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
 		loop.acc -= 1.0 / 60.0;
 		if (loop.acc > 0.1) loop.acc = 0;
+		/* a frame behind (a phone slower than a frame, a display's refresh
+		 * missed, a 50 Hz display): one more game frame first, not shown,
+		 * so the game keeps the GBA's pace, as the browser's loop does (a
+		 * player's phone felt slow; each missed refresh had cost a frame) */
+		if (loop.acc >= 1.0 / 60.0 - 0.002) {
+			loop.acc -= 1.0 / 60.0;
+			P.skip_present = true;
+			bool go = game_frame();
+			P.skip_present = false;
+			if (!go) return false;
+		}
 	}
 	return game_frame();
 }

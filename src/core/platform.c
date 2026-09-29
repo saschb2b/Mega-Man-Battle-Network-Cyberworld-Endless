@@ -345,9 +345,11 @@ void platform_poll(void) {
 		}
 		case SDL_WINDOWEVENT:
 			if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
-			/* keys let go of in another window would stay held */
-			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) key_bits = 0;
+			/* keys let go of in another window would stay held, and fingers
+			 * lifted over another app's */
+			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) { key_bits = 0; touch_release(); }
 			break;
+		case SDL_APP_WILLENTERBACKGROUND: key_bits = 0; touch_release(); break;
 		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.scancode); break;
 		case SDL_CONTROLLERBUTTONDOWN:
 			pad_bits |= pad_button(e.cbutton.button);
@@ -423,6 +425,13 @@ void platform_apply_effects(void) {
 }
 
 void platform_end_frame(void) {
+	/* (a frame the loop plays to catch up: not shown, so it waits for no
+	 * refresh of the display) */
+	if (P.skip_present) {
+		++P.frame;
+		{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
+		return;
+	}
 	SDL_SetRenderTarget(P.renderer, NULL);
 	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
 	SDL_RenderClear(P.renderer);

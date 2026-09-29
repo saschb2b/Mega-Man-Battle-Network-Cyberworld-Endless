@@ -34,6 +34,7 @@ typedef struct {
 	bool fullscreen;
 	uint64_t frame;
 	bool keyboard_last; /* last input came from the keyboard */
+	bool skip_present;  /* this frame is played, not shown: the loop catching up (main.c) */
 	int quit_prompt;    /* frames left of "Esc again to quit" after one Escape */
 	bool quit_pad;      /* ... opened by a controller's SELECT+START, held */
 	/* Full-screen effects, set by the scene each frame while drawing and

@@ -1028,6 +1028,17 @@ static void check_touch(const char *what, int sw, int sh) {
 	CHECK(touch_hit(&t, cx + r * 3 / 4, cy + 1, TOUCH_DPAD) == BTN_RIGHT, "%s: right of the middle is not RIGHT", what);
 	CHECK(touch_hit(&t, cx - 2, cy - r * 3 / 4, TOUCH_DPAD) == BTN_UP, "%s: above the middle is not UP", what);
 	CHECK(touch_hit(&t, cx + r / 2, cy + r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_DOWN), "%s: the diagonal is not RIGHT+DOWN", what);
+	/* the diagonals as wide as the four directions (BN6's walkways run
+	 * along them): 30 degrees off an axis is the diagonal */
+	CHECK(touch_hit(&t, cx + r * 866 / 1000, cy - r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_UP), "%s: 30 degrees up is not RIGHT+UP", what);
+	CHECK(touch_hit(&t, cx + r * 940 / 1000, cy - r * 342 / 1000, TOUCH_DPAD) == BTN_RIGHT, "%s: 20 degrees up is not RIGHT", what);
+	/* a thumb rolling back toward the middle keeps its direction until
+	 * the middle, and does not turn round short of a third past it */
+	CHECK(touch_dpad_steer(&t, cx, cy - r / 4, BTN_UP) == BTN_UP, "%s: UP lost a quarter out", what);
+	CHECK(touch_dpad_steer(&t, cx, cy + r / 4, BTN_UP) == BTN_UP, "%s: a thumb a quarter past the middle turned round", what);
+	CHECK(touch_dpad_steer(&t, cx, cy + r / 4, 0) == 0, "%s: a quarter out from the middle steers", what);
+	CHECK(touch_dpad_steer(&t, cx, cy + r / 10, BTN_UP) == 0, "%s: the middle holds a direction", what);
+	CHECK(touch_dpad_steer(&t, cx, cy + r / 2, BTN_UP) == BTN_DOWN, "%s: half way down is not DOWN", what);
 	/* a thumb that slid off the D-pad still steers it; one from a button does not */
 	CHECK(touch_hit(&t, cx - 3 * r, cy, TOUCH_DPAD) == BTN_LEFT, "%s: a thumb slid off the D-pad lost it", what);
 	CHECK(touch_hit(&t, cx + r / 2, cy, TOUCH_B) == 0, "%s: a thumb from B steers the D-pad", what);

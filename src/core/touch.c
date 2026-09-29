@@ -13,7 +13,7 @@
 static TouchLayout lay;
 static bool shown, always;
 static uint32_t taken;
-static struct { bool on; SDL_FingerID id; int x, y, from; } fingers[FINGERS];
+static struct { bool on; SDL_FingerID id; int x, y, from; uint32_t dir; } fingers[FINGERS];
 
 bool touch_shown(void) { return shown; }
 
@@ -26,6 +26,8 @@ bool touch_show(bool on) {
 }
 
 void touch_always(void) { always = shown = true; }
+
+void touch_release(void) { memset(fingers, 0, sizeof fingers); }
 
 void touch_relayout(void) { touch_layout_for(P.w, P.h, P.core_x, P.core_y, &lay); }
 
@@ -52,6 +54,7 @@ bool touch_event(const SDL_Event *e) {
 		fingers[k].x = x;
 		fingers[k].y = y;
 		fingers[k].from = touch_control_at(&lay, x, y);
+		fingers[k].dir = fingers[k].from == TOUCH_DPAD ? touch_dpad_steer(&lay, x, y, 0) : 0;
 		taken |= touch_hit(&lay, x, y, fingers[k].from);
 	} else if (k < FINGERS) {
 		if (e->type == SDL_FINGERUP) {
@@ -62,6 +65,7 @@ bool touch_event(const SDL_Event *e) {
 		fingers[k].y = y;
 		/* (one that went down on nothing takes the first control it reaches) */
 		if (fingers[k].from < 0) fingers[k].from = touch_control_at(&lay, x, y);
+		if (fingers[k].from == TOUCH_DPAD) fingers[k].dir = touch_dpad_steer(&lay, x, y, fingers[k].dir);
 	}
 	return false;
 }
@@ -69,7 +73,7 @@ bool touch_event(const SDL_Event *e) {
 uint32_t touch_held(void) {
 	uint32_t bits = 0;
 	for (int k = 0; k < FINGERS; ++k)
-		if (fingers[k].on) bits |= touch_hit(&lay, fingers[k].x, fingers[k].y, fingers[k].from);
+		if (fingers[k].on) bits |= fingers[k].from == TOUCH_DPAD ? fingers[k].dir : touch_hit(&lay, fingers[k].x, fingers[k].y, fingers[k].from);
 	return bits;
 }
 

@@ -91,19 +91,26 @@ int touch_control_at(const TouchLayout *t, int x, int y) {
 	return best;
 }
 
-static uint32_t dpad(const TouchLayout *t, int x, int y) {
+uint32_t touch_dpad_steer(const TouchLayout *t, int x, int y, uint32_t last) {
 	const TouchBox *b = &t->box[TOUCH_DPAD];
 	int r = b->w / 2, dx = x - (b->x + r), dy = y - (b->y + r);
-	/* the middle holds nothing; the diagonals take 30 degrees each, the
-	 * four directions 60, so a thumb meaning one hits it */
-	if ((long)dx * dx + (long)dy * dy < (long)(r / 5 + 1) * (r / 5 + 1)) return 0;
+	long d2 = (long)dx * dx + (long)dy * dy, stop = r / 5 + 1, start = r / 3 + 1;
+	/* the middle holds nothing, and a thumb steers once it is a third of
+	 * the way out; between, it keeps what it held, so a thumb rolling back
+	 * toward the middle neither stops nor, past it, turns round (a
+	 * player's MegaMan went the opposite way now and then) */
+	if (d2 < stop * stop) return 0;
+	if (d2 < start * start) return last;
 	int ax = dx < 0 ? -dx : dx, ay = dy < 0 ? -dy : dy;
 	uint32_t h = dx < 0 ? BTN_LEFT : BTN_RIGHT, v = dy < 0 ? BTN_UP : BTN_DOWN;
-	/* tan 30 is 0.577: 577 / 1000 */
-	if (ay * 1000 <= ax * 577) return h;
-	if (ax * 1000 <= ay * 577) return v;
+	/* eight directions of 45 degrees each: BN6's walkways run along the
+	 * diagonals, which had 30 (tan 22.5 is 0.414) */
+	if (ay * 1000 <= ax * 414) return h;
+	if (ax * 1000 <= ay * 414) return v;
 	return h | v;
 }
+
+static uint32_t dpad(const TouchLayout *t, int x, int y) { return touch_dpad_steer(t, x, y, 0); }
 
 uint32_t touch_hit(const TouchLayout *t, int x, int y, int from) {
 	if (from == TOUCH_DPAD) return dpad(t, x, y);

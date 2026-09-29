@@ -33,5 +33,9 @@ int touch_control_at(const TouchLayout *t, int x, int y);
  * D-pad (`from`) steers it wherever it slides; the others press what is
  * under them now, so a thumb rolls from B to A. */
 uint32_t touch_hit(const TouchLayout *t, int x, int y, int from);
+/* The directions a finger steering the D-pad holds at (x, y), `last` those
+ * it held a moment ago: nothing in the middle, eight directions from a
+ * third of the way out, and what it held in between. */
+uint32_t touch_dpad_steer(const TouchLayout *t, int x, int y, uint32_t last);
 
 #endif

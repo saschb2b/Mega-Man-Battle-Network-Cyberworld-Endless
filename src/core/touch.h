@@ -18,6 +18,9 @@ bool touch_shown(void);
 bool touch_show(bool on);
 /* --touch: shown from the start and never hidden. */
 void touch_always(void);
+/* Every finger let go: the app lost the screen (a notification shade, the
+ * home screen), whose fingers never send their lifting. */
+void touch_release(void);
 /* A finger event (SDL_FINGERDOWN, MOTION or UP) from platform_poll; true
  * when it showed the controls (the first touch only shows them). */
 bool touch_event(const SDL_Event *e);
