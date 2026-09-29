@@ -292,8 +292,21 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			static int base;
 			if (!said) base = o->npc_line;
 			tk.sprite = SPR_BYSTANDER;
+			/* the first on an act's first layer passes on the net's word
+			 * about its guardian, where MegaMan has never battled him: who
+			 * he is and a rumor, no moves (docs/META.md, what MegaMan
+			 * knows; MegaMan himself had said it, and how could he know?) */
+			static char rumor[200];
+			int navi = run.boss_order[run.biome];
+			const char *line = npc_line(run.depth, base + said);
+			if (!said && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 && navi && !guardian_known(navi) && guardian_rumor(navi)) {
+				snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
+					guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
+				line = rumor;
+			}
+			++said;
 			/* (a list-6 navi's face has its sprite's number) */
-			tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said++));
+			tk.script = ta_say(&text, tk.sprite, line);
 			break;
 		}
 		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG); break;

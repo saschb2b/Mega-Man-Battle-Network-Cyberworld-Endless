@@ -225,9 +225,16 @@ static void arrival_words(void) {
 	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
 		snprintf(D.beat, sizeof D.beat, "@M So much deleted data... Lan, I think the bottom is close.");
 	else if (first_of_act && run.depth > 1) {
-		/* a new act: where they are now, and whose copy waits at its end */
-		snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!",
-			area, guardian(run.boss_order[run.biome])->name);
+		/* a new act: where they are now, and whose copy waits at its end,
+		 * named where they have battled him (else what his signal tells:
+		 * docs/META.md, what MegaMan knows) */
+		int navi = run.boss_order[run.biome];
+		const char *el = guardian_element_word(navi);
+		if (guardian_known(navi))
+			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
+		else
+			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan! A strong %s%sNavi guards it, one we've never battled.|"
+				"@L Then let's find out who. Let's go!", area, el ? el : "", el ? " " : "");
 		D.beat_guardian = true;
 	}
 }
@@ -358,27 +365,30 @@ static const char *status_words(void) {
 		const char *area = guardian_area_in_text(run.biome, run.side_kind);
 		ADD("@M Layer %d, Lan: %s.", run.depth, area);
 		if (D.objs.guardian.navi && !boss_beaten()) {
-			/* how he fights once they have fought him, in any run: before
-			 * that MegaMan has no battle data on the copy, and reciting its
-			 * moves would spend the first fight's discovery (and how could
-			 * he know?); what he always knows is the net's own grammar, the
-			 * yellow panels that light where an attack will land */
-			const Rival *rv = rival(D.objs.guardian.navi);
-			const char *tip = guardian_tip(D.objs.guardian.navi);
-			ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
-			const char *rumor = guardian_rumor(D.objs.guardian.navi);
-			if (tip && rv->megaman_won + rv->navi_won > 0) ADD("@M We've got battle data on him from before:|@M %s|", tip);
-			else {
-				/* (the net's gossip, a name's worth of insight) */
-				if (rumor) ADD("@M We don't know this copy's moves yet, Lan. Word on the net is, %s|", rumor);
-				else ADD("@M We don't know this copy's moves yet, Lan.|");
-				ADD("@M Watch the yellow panels: they light where an attack will land!|");
-			}
+			/* who he is and how he fights once they have fought him, in any
+			 * run: before that MegaMan has no battle data on the copy, only
+			 * a strong signal, and naming him or reciting his moves would
+			 * spend the first fight's discovery (and how could he know?);
+			 * what he always knows is the net's own grammar, the yellow
+			 * panels that light where an attack will land */
+			int navi = D.objs.guardian.navi;
+			const char *tip = guardian_tip(navi), *el = guardian_element_word(navi);
+			if (guardian_known(navi)) {
+				ADD(" %s waits at its end!|", guardian(navi)->name);
+				if (tip) ADD("@M We've got battle data on him from before:|@M %s|", tip);
+				else ADD("@M Watch the yellow panels: they light where an attack will land!|");
+			} else
+				ADD(" A strong %s%sNavi waits at its end, one we've never battled.|@M We've got no battle data on it, Lan. Watch the "
+					"yellow panels: they light where an attack will land!|", el ? el : "", el ? " " : "");
 		}
-		/* (not after the act's arrival words, which named him; a CONTINUE
-		 * does not say them again, and there he is named) */
-		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named)
-			ADD(" %s guards the end of it.|", guardian(run.boss_order[run.biome])->name);
+		/* (not after the act's arrival words, which spoke of him; a
+		 * CONTINUE does not say them again, and there he is spoken of) */
+		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
+			int navi = run.boss_order[run.biome];
+			const char *el = guardian_element_word(navi);
+			if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
+			else ADD(" A strong %s%sNavi guards the end of it.|", el ? el : "", el ? " " : "");
+		}
 		else ADD("|");
 		/* (the area's battlefields, on its first layer: a playtester froze
 		 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
@@ -531,11 +541,17 @@ static void area_card(void) {
 	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "The bottom of the net");
 	else if (net_version() > 1) snprintf(act, sizeof act, "Net V%d - Act %d", net_version(), act_no);
 	else snprintf(act, sizeof act, "Act %d", act_no);
-	/* the guardian ahead, named from the start, so the folder can be set
-	 * for it (as Slay the Spire shows each act's boss) */
+	/* the guardian ahead, from the start, so the folder can be set for it
+	 * (as Slay the Spire shows each act's boss): named where MegaMan has
+	 * battled him, else "???" and the element his signal shows (docs/
+	 * META.md, what MegaMan knows) */
 	char ahead[48] = "";
-	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer))
-		snprintf(ahead, sizeof ahead, "Guardian: %s", guardian(run.boss_order[biome])->name);
+	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer)) {
+		int navi = run.boss_order[biome];
+		const char *el = guardian_element_word(navi);
+		if (guardian_known(navi)) snprintf(ahead, sizeof ahead, "Guardian: %s", guardian(navi)->name);
+		else snprintf(ahead, sizeof ahead, "Guardian: ???%s%s%s", el ? " (" : "", el ? el : "", el ? ")" : "");
+	}
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())
 		snprintf(ahead, sizeof ahead, "%s deleted", guardian(D.objs.guardian.navi)->name);
@@ -1221,8 +1237,11 @@ void director_describe(FILE *f) {
 	}
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	/* (named as the game shows him: a playtester reads this) */
 	if (D.objs.guardian.navi)
-		fprintf(f, "guardian %s %s\n", guardian(D.objs.guardian.navi)->name,
+		fprintf(f, "guardian %s %s\n",
+			guardian_known(D.objs.guardian.navi) || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done()
+				? guardian(D.objs.guardian.navi)->name : "???",
 			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");
 }
 
@@ -2320,7 +2339,9 @@ static void last_stop(int cx, int cy) {
 	way_dir = keep;
 	if (!dealer && !heal) return;
 	static char buf[300];
-	int k = snprintf(buf, sizeof buf, "@M %s's arena is just ahead, Lan!|@M ", guardian(D.objs.guardian.navi)->name);
+	int k = guardian_known(D.objs.guardian.navi)
+		? snprintf(buf, sizeof buf, "@M %s's arena is just ahead, Lan!|@M ", guardian(D.objs.guardian.navi)->name)
+		: snprintf(buf, sizeof buf, "@M The guardian's arena is just ahead, Lan!|@M ");
 	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, and a Recovery Mr. Prog's %s, if we want to get ready first.", dealer, heal);
 	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, if we want to get ready first.", dealer);
 	else snprintf(buf + k, sizeof buf - (size_t)k, "A Recovery Mr. Prog's %s, if we want to heal up first.", heal);

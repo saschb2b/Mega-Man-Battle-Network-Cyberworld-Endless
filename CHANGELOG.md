@@ -5,12 +5,17 @@
 - A guardian's Cross that won't fit beside the one brought is "We can
   only carry one Cross down here!", where MegaMan had said "One Cross a
   run!", the game's word rather than his.
-- A guardian met for the first time comes with the net's rumor about it,
-  a line each that hints at its manner without its moves: HeatMan's fire
-  "never runs out", EraseMan "deletes Navis outright", BlastMan "leaves
-  nothing but craters". MegaMan still has no battle data on the copy;
-  the rumor is what others on the net say, as the Net Dealer's "word is"
-  about a weakness.
+- MegaMan knows who guards an area only once he has battled that Navi,
+  in any run. Before, he senses a strong Navi and its element: the act's
+  card reads "Guardian: ??? (Aqua)", L and the arena's approach speak of
+  "a strong Aqua Navi" and "the guardian", the way on offers the areas
+  with "an Aqua Navi we've never battled", and the arena's card reveals
+  him. The Navis on the net know more: the first bystander on an act's
+  first layer says who guards its end and a rumor about him ("They say
+  a copy of EraseMan guards the end of Judge Tree Comp. Word is, he
+  deletes Navis outright."), and the Net Dealer names him and his
+  weakness. MegaMan had named every guardian from the act's start and
+  briefed a first meeting with the rumor himself.
 - MegaMan's words before a guardian's arena give each service's way as L
   and the map do, where it lies, and say when the way there winds: they
   had named the walk's first step, and a playtester's heal Prog was "up

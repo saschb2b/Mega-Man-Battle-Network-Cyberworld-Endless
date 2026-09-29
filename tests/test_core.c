@@ -646,13 +646,16 @@ static void test_talk(void) {
 		check_talk(what, guardian_defeat(navi));
 		snprintf(what, sizeof what, "guardian_tip(%d)", navi);
 		check_talk(what, guardian_tip(navi));
-		/* (a first meeting's words, as the briefing puts them) */
-		if (guardian_rumor(navi)) {
-			char line[256];
-			snprintf(line, sizeof line, "We don't know this copy's moves yet, Lan. Word on the net is, %s", guardian_rumor(navi));
-			snprintf(what, sizeof what, "guardian_rumor(%d)", navi);
-			check_talk(what, line);
-		}
+		/* (the net's word on him, as a bystander passes it on, in every
+		 * area) */
+		if (guardian_rumor(navi))
+			for (int biome = 0; biome < BIOME_COUNT; ++biome) {
+				char line[256];
+				snprintf(line, sizeof line, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
+					guardian_area_in_text(biome, LAYER_NORMAL), guardian_rumor(navi));
+				snprintf(what, sizeof what, "guardian_rumor(%d) in area %d", navi, biome);
+				check_talk(what, line);
+			}
 		CHECK(guardian_rumor(navi) || navi == 17 || navi > 18, "guardian %d has no rumor", navi);
 		/* (MegaMan warns of every guardian a run can meet) */
 		CHECK(guardian_tip(navi) || navi == 17 || navi > 18, "guardian %d has no tip", navi);
@@ -673,6 +676,37 @@ static void test_talk(void) {
 	for (int biome = 0; biome < BIOME_COUNT; ++biome)
 		for (int side = LAYER_NORMAL; side <= LAYER_SECRET; ++side)
 			CHECK(strlen(guardian_area_in_text(biome, side)) < 28, "area %d's name is long for the cards", biome);
+	/* (a guardian never battled, as MegaMan speaks of him: by what his
+	 * signal tells, an element of four letters or none, in every area) */
+	static const char *const sensed[] = { "Aqua ", "" };
+	for (int biome = 0; biome < BIOME_COUNT; ++biome)
+		for (int e = 0; e < 2; ++e) {
+			const char *area = guardian_area_in_text(biome, LAYER_NORMAL);
+			char line[400];
+			snprintf(line, sizeof line, "@M We're through to %s, Lan! A strong %sNavi guards it, one we've never battled.|"
+				"@L Then let's find out who. Let's go!", area, sensed[e]);
+			snprintf(what, sizeof what, "the arrival's words in area %d", biome);
+			check_talk(what, line);
+			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. A strong %sNavi waits at its end, one we've never battled.|@M We've got "
+				"no battle data on it, Lan. Watch the yellow panels: they light where an attack will land!", area, sensed[e]);
+			snprintf(what, sizeof what, "the briefing in area %d", biome);
+			check_talk(what, line);
+			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. A strong %sNavi guards the end of it.", area, sensed[e]);
+			check_talk(what, line);
+			for (int other = 0; other < BIOME_COUNT; ++other) {
+				snprintf(line, sizeof line, "@M The net splits below us, Lan! An %sNavi we've never battled guards %s,|@M and an %sNavi "
+					"we've never battled guards %s.|@M A dark way leads down into the Undernet too, but it's sealed. Clearing the "
+					"Secret Area would open it. Which way?", sensed[e], area, sensed[e], guardian_area_in_text(other, LAYER_NORMAL));
+				snprintf(what, sizeof what, "the way on from area %d to %d", biome, other);
+				check_talk(what, line);
+				snprintf(line, sizeof line, "@M The net splits below us, Lan! An %sNavi we've never battled guards %s,|@M an %sNavi we've "
+					"never battled guards %s, and a dark way leads down into the Undernet, where an %sNavi we've never battled waits. "
+					"Which way?", sensed[e], area, sensed[e], guardian_area_in_text(other, LAYER_NORMAL), sensed[e]);
+				check_talk(what, line);
+			}
+			/* (the way's option, alone on its line in the choice) */
+			CHECK(strlen(guardian_area_name(biome)) <= 18, "area %d's name is long for the way on's choice", biome);
+		}
 }
 
 /* Following the arrow gets MegaMan there: from the arrival and from each

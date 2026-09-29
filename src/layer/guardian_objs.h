@@ -30,5 +30,8 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 /* Its actors, once `archive` holds the scripts: the guardian (overworld
  * sprite `sprite`) and the Guardian Data it leaves. */
 void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const GuardianStage *g);
+/* What a strong Navi's signal tells of guardian `navi` before MegaMan has
+ * battled him (guardian_known): his element ("Fire"), NULL for none. */
+const char *guardian_element_word(int navi);
 
 #endif

@@ -98,9 +98,11 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		}
 	}
 	/* the way on (docs/META.md, routes): after an act's guardian, the next
-	 * act's area or another of its tier, each named with its guardian */
+	 * act's area or another of its tier, each named with its guardian
+	 * where MegaMan has battled him, else with what his signal tells (the
+	 * way named by its area: two unknown Fire Navis were one option) */
 	ScriptsRoute route = { 0 };
-	static char question[320], then[3][96], area[3][32];
+	static char question[400], then[3][96], area[3][32], who[3][48];
 	const ScriptsRoute *way = NULL;
 	int next = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, alt = -1, dark_navi = 0, dark = -1;
 	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth)) alt = run_route_alt(next, &alt_navi);
@@ -118,22 +120,32 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
 			e[k] = enemy_element(enemy_id(1, n[k], 0));
 			if (e[k] < 0 || e[k] > 4) e[k] = 0;
-			snprintf(option[k], sizeof option[k], "%s%s", guardian(n[k])->name, elem[e[k]]);
+			const char *el = guardian_element_word(n[k]);
+			if (guardian_known(n[k])) {
+				snprintf(option[k], sizeof option[k], "%s%s", guardian(n[k])->name, elem[e[k]]);
+				snprintf(who[k], sizeof who[k], "%s%s", guardian(n[k])->name, elem[e[k]]);
+			} else {
+				snprintf(option[k], sizeof option[k], "%s", guardian_area_name(b[k]));
+				snprintf(who[k], sizeof who[k], "%s %s%sNavi we've never battled", el && strchr("AE", el[0]) ? "an" : "a", el ? el : "",
+					el ? " " : "");
+			}
 			route.option[k] = option[k];
 			snprintf(then[k], sizeof then[k], "%c%s it is! The exit pad will take us there.", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
 			route.then[k] = then[k];
 		}
+		/* (the first names a sentence's start) */
+		if ('a' <= who[0][0] && who[0][0] <= 'z') who[0][0] = (char)(who[0][0] - 32);
 		/* (two boxes: five had named the ways) */
 		if (dark_open)
 			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M %s guards %s, and a dark way "
-				"leads down into the Undernet, where %s waits. Which way?", option[0], area[0], option[1], area[1], option[2]);
+				"leads down into the Undernet, where %s waits. Which way?", who[0], area[0], who[1], area[1], who[2]);
 		else if (dark >= 0)
 			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s.|@M A dark way "
 				"leads down into the Undernet too, but it's sealed. Clearing the Secret Area would open it. Which way?",
-				option[0], area[0], option[1], area[1]);
+				who[0], area[0], who[1], area[1]);
 		else
 			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s. Which way?",
-				option[0], area[0], option[1], area[1]);
+				who[0], area[0], who[1], area[1]);
 		route.question = question;
 		route.n = nways;
 		route.flag = LAYER_ROUTE_FLAG;
@@ -143,9 +155,8 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* (a first battle with this Navi, in any run: its battle data comes
 	 * with the Guardian Data, and the next briefing reads it) */
 	const char *power = powers_reward_text(g->navi, layer.biome, run.depth);
-	const Rival *rv = rival(g->navi);
 	static char with_data[640];
-	if (rv->megaman_won + rv->navi_won == 0) {
+	if (!guardian_known(g->navi)) {
 		snprintf(with_data, sizeof with_data, "%s%s@M And his battle data, Lan. Next time, we'll know how he fights!", power ? power : "", power ? "|" : "");
 		power = with_data;
 	}
@@ -166,4 +177,10 @@ void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const Guardian
 		npcs->script[npcs->n++] = npc_guardian(sprite, g->x, g->y, g->z, g->face, known ? gd->pose : -1, known, &flags);
 	if (npcs->n < 32)
 		npcs->script[npcs->n++] = npc_guardian_data(g->x, g->y, g->z, MD_ANIM_GUARDIAN, archive, g->reward, &flags);
+}
+
+const char *guardian_element_word(int navi) {
+	static const char *const word[5] = { NULL, "Fire", "Aqua", "Elec", "Wood" };
+	int e = enemy_element(enemy_id(1, navi, 0));
+	return e > 0 && e < 5 ? word[e] : NULL;
 }

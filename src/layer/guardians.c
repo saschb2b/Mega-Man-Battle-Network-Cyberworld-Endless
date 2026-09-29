@@ -87,13 +87,13 @@ const char *guardian_rumor(int navi) {
 	case 1: return "his fire never runs out.";
 	case 2: return "his lightning comes out of a clear sky.";
 	case 3: return "you never see him coming, only his claws.";
-	case 4: return "he deletes Navis outright. Let's not face him weak!";
+	case 4: return "he deletes Navis outright. Don't face him weak!";
 	case 5: return "he runs down anything in his path.";
 	case 6: return "he floods the whole field.";
 	case 7: return "he never fights alone: something circles overhead.";
 	case 8: return "he moves like the wind itself.";
 	case 9: return "he comes up from below.";
-	case 10: return "he turns our own panels against us.";
+	case 10: return "he turns your own panels against you.";
 	case 11: return "his shield stops everything, and his sword is faster than sight.";
 	case 12: return "he leaves nothing but craters.";
 	case 13: return "he hunts from under the water.";
@@ -103,6 +103,11 @@ const char *guardian_rumor(int navi) {
 	case 18: return "he commands an army, and ends fights with a single stroke.";
 	default: return NULL;
 	}
+}
+
+bool guardian_known(int navi) {
+	const Rival *rv = rival(navi);
+	return rv->megaman_won + rv->navi_won > 0;
 }
 
 const Guardian *guardian(int navi) {
