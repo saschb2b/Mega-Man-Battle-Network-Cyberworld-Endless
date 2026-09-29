@@ -339,6 +339,16 @@ static const char *status_words(void) {
 		 * froze him twice in the next act) */
 		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 			ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
+		/* (the area's viruses that fight in ways BN6 never explains, where
+		 * the act or a side layer begins: a playtester's Thunder healed a
+		 * ScarCrow to full, and two DarkMechs took 460 HP before he knew) */
+		if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) {
+			uint32_t fams = loot_families_here(run.depth, run.biome);
+			if (fams & (1u << FAMILY_SCARCROW))
+				ADD("@M Watch the ScarCrows here: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|");
+			if (fams & (1u << FAMILY_DARKMECH))
+				ADD("@M DarkMechs lurk here. They warp right beside us to slash, so keep moving and strike as they appear!|");
+		}
 		/* (what they are for: a playtester carried two and never learned;
 		 * once per count, the next heard it on every layer) */
 		if (run.fragments != D.fragments_told) {

@@ -210,7 +210,6 @@ static int family_count(const Formation *f, int family) {
  * one from 480 HP to 20 in act 3, and neither could be kept out of reach.
  * Not two in a battle before the Undernet, their own area (act 5); CopyBot's
  * comps hold them only in pairs, so they wait for it. */
-#define FAMILY_DARKMECH 25
 static bool too_many_slashers(const Formation *f, int depth) {
 	return pacing_act(depth) < 4 && family_count(f, FAMILY_DARKMECH) > 1;
 }
@@ -267,6 +266,20 @@ static int shares_with(int biome, int *thirds) {
 }
 
 static bool from_formations(int depth, int biome, int kind, Encounter *e);
+
+uint32_t loot_families_here(int depth, int biome) {
+	const Formation *list;
+	int n = formations_of(biome, &list);
+	uint32_t in = 0;
+	int p = (depth - 1) % CYCLE_LAYERS, allowed = depth > CYCLE_LAYERS ? 2 : p < 6 ? 0 : p < 12 ? 1 : 2;
+	static int8_t fit[MAX_FIT];
+	if (n && weigh(list, n, depth, pacing_virus_version(depth, false), pacing_band(depth, false, false), allowed, -1, 9, fit))
+		for (int i = 0; i < n && i < MAX_FIT; ++i)
+			if (fit[i] >= 0) in |= families_of(&list[i]);
+	int thirds, other = shares_with(biome, &thirds);
+	if (other >= 0) in |= loot_families_here(depth, other);
+	return in;
+}
 
 static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
 	/* its thirds of the battles from the shared area, where one fits the act */

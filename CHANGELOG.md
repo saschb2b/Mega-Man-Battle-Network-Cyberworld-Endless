@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- L's briefing warns of the area's ScarCrows (lightning heals them, and so
+  do Elec chips) and DarkMechs (they warp beside MegaMan to slash) where an
+  act or a side layer begins and its battles can hold them. A playtester's
+  Thunder healed a ScarCrow to full, three times, with no word why.
 - No random battle before the Undernet holds two DarkMechs: their teleport
   slashes hit well past their damage value, and a pair took a playtester
   from 480 HP to 20 in act 3. CopyBot's comps hold them only in pairs, so
