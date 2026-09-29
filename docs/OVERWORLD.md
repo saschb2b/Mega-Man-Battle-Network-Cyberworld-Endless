@@ -179,6 +179,16 @@ and the section 3 values dumped per cell):
   of 56 cells (x -56..8, y -192..-128 in world units) round a large object.
 - **Sky Town** (`0x05:0`, song `0x07`).
 
+All three stand on more than one height (Seaside's walkway and station at
+64 and its pier at -32, Green Town's stumps, Sky Town's decks), which the
+town's plan does not model: it rings the walkable cells with walls on one
+floor. A trial of Seaside Town copied whole, with those walls, drew right
+(the copy must reach cells -62..62: its roofs' and the whale's art stands
+on cells far up the picture) but typed its chat ten times slower than
+Central Town, and its raised floors had no heights. A third town wants
+the original's own walls and heights (sections 0 and 1) carried with the
+copied pieces first.
+
 The songs are the per-map bytes of the map music lists
 (`0x080360E4`: a list pointer per chapter byte, the later chapters' from
 index 0x10 on, docs/ROM_DATA.md), in the chapters where the town is open.
