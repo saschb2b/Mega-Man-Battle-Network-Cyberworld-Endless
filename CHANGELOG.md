@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The Aquarium's and the Judge Tree's mazes keep two panels between their
+  walkways, where they ran one apart: on the Judge Tree's brick walkways a
+  playtester read side-by-side walkways as terraces he could not step down
+  to, and lost his way to a heal and two shops. A run continued from an
+  older build starts its layer afresh.
 - The setup's Cross row names the Cross's weakness ("Breaker attacks do
   2x", as BN6's own Cross tutorials have it), and MegaMan says it when a
   guardian's Cross is won. A playtester was told the wrong one.

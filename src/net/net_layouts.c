@@ -539,21 +539,26 @@ static void catwalks(int biome, int size) {
 	 * their layers with other layouts, and their tiles draw it best as it
 	 * was) */
 	bool comp = biome == BIOME_AQUARIUM_COMP || biome == BIOME_JUDGE_COMP;
-	/* lattice nodes per side, two cells apart; a comp guardian's layer a
-	 * smaller maze, which leaves its arena room (at eight, eleven Aquarium
-	 * guardians' layers in twelve found none and fell back to a plain
-	 * route) */
-	const int N = comp && layer.boss_layer ? 6 : NMAX;
+	/* lattice nodes per side, two cells apart, a comp's three: two panels
+	 * between its corridors (one apart, 44% of the Aquarium's and the
+	 * Judge Tree's floor faced floor across one empty panel, against 1 to
+	 * 9% elsewhere, and on the Judge Tree's brick walkways a playtester
+	 * read the maze as terraces he could not step down to); a comp
+	 * guardian's layer a smaller maze, which leaves its arena room (at
+	 * eight, eleven Aquarium guardians' layers in twelve found none and
+	 * fell back to a plain route) */
+	const int step = comp ? 3 : 2;
+	const int N = comp ? (layer.boss_layer ? 5 : 6) : NMAX;
 	static bool seen[NMAX][NMAX];
-	int ox = WIN_C - N + 1, oy = WIN_C - N + 1;
+	int ox = WIN_C - step * (N - 1) / 2, oy = ox;
 	for (int j = 0; j < N; ++j)
-		for (int i = 0; i < N; ++i) seen[j][i] = !win_in(ox + 2 * i, oy + 2 * j);
+		for (int i = 0; i < N; ++i) seen[j][i] = !win_in(ox + step * i, oy + step * j);
 	/* a depth-first maze, a comp's corridors running straight on where
 	 * they can */
-	int si[N * N], sj[N * N], sd[N * N], sp = 0;
+	int si[NMAX * NMAX], sj[NMAX * NMAX], sd[NMAX * NMAX], sp = 0;
 	si[sp] = N / 2; sj[sp] = N / 2; sd[sp++] = -1;
 	seen[N / 2][N / 2] = true;
-	put(ox + N, oy + N);
+	put(ox + step * (N / 2), oy + step * (N / 2));
 	while (sp) {
 		int i = si[sp - 1], j = sj[sp - 1], last = sd[sp - 1], opts[4], no = 0;
 		bool on = false;
@@ -565,20 +570,21 @@ static void catwalks(int biome, int size) {
 		int d = comp && on && rng_range(0, 99) < 70 ? last : opts[rng_range(0, no - 1)];
 		int ni = i + dir_dx[d], nj = j + dir_dy[d];
 		seen[nj][ni] = true;
-		put(ox + 2 * i + dir_dx[d], oy + 2 * j + dir_dy[d]);
-		put(ox + 2 * ni, oy + 2 * nj);
+		for (int c = 1; c < step; ++c) put(ox + step * i + c * dir_dx[d], oy + step * j + c * dir_dy[d]);
+		put(ox + step * ni, oy + step * nj);
 		si[sp] = ni; sj[sp] = nj; sd[sp++] = d;
 	}
 	/* loops: walls knocked through (a comp's more, shortcuts that cut its
 	 * way down) */
 	for (int k = 0; k < (comp ? 8 + 2 * size : 3 + size); ++k) {
 		int i = rng_range(0, N - 2), j = rng_range(0, N - 1);
-		if (floor_at(ox + 2 * i, oy + 2 * j) && floor_at(ox + 2 * i + 2, oy + 2 * j)) put(ox + 2 * i + 1, oy + 2 * j);
+		if (floor_at(ox + step * i, oy + step * j) && floor_at(ox + step * i + step, oy + step * j))
+			for (int c = 1; c < step; ++c) put(ox + step * i + c, oy + step * j);
 	}
 	/* plazas beyond both ends of the maze, up and down the window (the
 	 * Aquarium's are its glass pads' size: its water never widens) */
 	for (int e = 0; e < 2; ++e) {
-		int off = e ? N + 2 : -N - 2;
+		int half = step * (N - 1) / 2 + 3, off = e ? half : -half;
 		if (biome == BIOME_AQUARIUM_COMP) platform(WIN_C + off, WIN_C + off, 4, 4, SHAPE_RECT, ROOM_PLATFORM);
 		else platform(WIN_C + off, WIN_C + off, 5, 4 + rng_range(0, 1), route_shape(biome), ROOM_PLATFORM);
 	}
