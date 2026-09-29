@@ -767,6 +767,48 @@ static void test_arrow(void) {
 	CHECK(lost == 0, "the arrow lost MegaMan on %d of %d walks", lost, walks);
 }
 
+/* The walk from the arrival to the exit (or the guardian) in every area:
+ * its legs, the straight runs of two panels or more, fewer than eleven on
+ * average. The Aquarium's and Judge Tree's catwalk mazes took 16 against
+ * the rest's 8, and a playtester spent 110 of 249 moves walking and
+ * reading the map there (session 29). */
+static void test_walks(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	double most = 0;
+	int most_area = -1;
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		double legs[2] = { 0, 0 };
+		int n[2] = { 0, 0 };
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			int boss = seed % 2;
+			layer_generate(seed * 104729u + (uint32_t)b, boss ? 6 : 5, b, LAYER_NORMAL, &kit);
+			int tx = -1, ty = -1, len = 0;
+			for (int i = 0; i < layer.nobj && tx < 0; ++i) {
+				const NetObj *o = &layer.obj[i];
+				if (layer.boss_layer ? o->type == OBJ_BOSS : o->type == OBJ_EXIT) { tx = (int)o->x; ty = (int)o->y; }
+			}
+			if (tx < 0 || route_way(layer.obj[0].x, layer.obj[0].y, tx, ty, &len) < 0) continue;
+			int k = layer.boss_layer, runs = 0, last = -1, run_len = 0;
+			for (int i = 1; i < route_walk_len; ++i) {
+				int d = route_walk[i] - route_walk[i - 1], dir = d == 1 ? 0 : d == -1 ? 1 : d > 0 ? 2 : 3;
+				if (dir == last) ++run_len;
+				else { runs += run_len >= 2; last = dir; run_len = 1; }
+			}
+			runs += run_len >= 2;
+			legs[k] += runs;
+			++n[k];
+		}
+		for (int k = 0; k < 2; ++k) {
+			double avg = n[k] ? legs[k] / n[k] : 0;
+			CHECK(avg < 11, "area %d: the walk to the %s takes %.1f legs", b, k ? "guardian" : "exit", avg);
+			if (avg > most) { most = avg; most_area = b; }
+		}
+	}
+	printf("  walks: the most winding area (%d) %.1f legs on average\n", most_area, most);
+}
+
 /* The NaviCust's draft (docs/NAVICUST.md): three programs of three builds,
  * each of a tier its act has reached, none of the left-out ones; and
  * MegaMan's words for the bugs. */
@@ -932,6 +974,7 @@ int main(void) {
 	test_layouts_build();
 	test_stairs();
 	test_arrow();
+	test_walks();
 	test_navicust();
 	test_depth_plan();
 	test_pacing();

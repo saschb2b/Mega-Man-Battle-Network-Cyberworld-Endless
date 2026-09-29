@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- The Aquarium and Judge Tree Comps' mazes wind half as much: their
+  corridors run straight on where they can and more walls are knocked
+  through, so the walk from the arrival to the exit takes 8 legs, as in the
+  other areas, not 16; a playtester spent 110 of 249 moves walking and
+  reading the map there. Their guardians' layers are smaller mazes that
+  leave room for the arena, where eleven in twelve had fallen back to a
+  plain route.
 - A battle's chip reward comes in one of the folder's codes half the time,
   where the chip comes in one, as Mystery Data's does: a playtester's Blade
   folder of S, L and * won WaveArm1 E and the like, off every code it held.

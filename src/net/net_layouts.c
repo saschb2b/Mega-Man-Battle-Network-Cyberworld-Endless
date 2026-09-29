@@ -531,32 +531,47 @@ static void trail(int biome, int size) {
 
 /* A maze of 1-wide catwalks, some dead ends cut back, plazas at the ends. */
 static void catwalks(int biome, int size) {
-	enum { N = 8 };   /* lattice nodes per side, two cells apart */
-	static bool seen[N][N];
+	enum { NMAX = 8 };
+	/* (the two comps whose every layer is a maze wind less: theirs turned
+	 * twice as often as the other areas' ways, 16 legs from the arrival to
+	 * the exit against their 8, and a playtester spent 110 of 249 moves
+	 * walking and reading the map there. The Undernet's and CopyBot's share
+	 * their layers with other layouts, and their tiles draw it best as it
+	 * was) */
+	bool comp = biome == BIOME_AQUARIUM_COMP || biome == BIOME_JUDGE_COMP;
+	/* lattice nodes per side, two cells apart; a comp guardian's layer a
+	 * smaller maze, which leaves its arena room (at eight, eleven Aquarium
+	 * guardians' layers in twelve found none and fell back to a plain
+	 * route) */
+	const int N = comp && layer.boss_layer ? 6 : NMAX;
+	static bool seen[NMAX][NMAX];
 	int ox = WIN_C - N + 1, oy = WIN_C - N + 1;
 	for (int j = 0; j < N; ++j)
 		for (int i = 0; i < N; ++i) seen[j][i] = !win_in(ox + 2 * i, oy + 2 * j);
-	/* a depth-first maze */
-	int si[N * N], sj[N * N], sp = 0;
-	si[sp] = N / 2; sj[sp++] = N / 2;
+	/* a depth-first maze, a comp's corridors running straight on where
+	 * they can */
+	int si[N * N], sj[N * N], sd[N * N], sp = 0;
+	si[sp] = N / 2; sj[sp] = N / 2; sd[sp++] = -1;
 	seen[N / 2][N / 2] = true;
 	put(ox + N, oy + N);
 	while (sp) {
-		int i = si[sp - 1], j = sj[sp - 1], opts[4], no = 0;
+		int i = si[sp - 1], j = sj[sp - 1], last = sd[sp - 1], opts[4], no = 0;
+		bool on = false;
 		for (int d = 0; d < 4; ++d) {
 			int ni = i + dir_dx[d], nj = j + dir_dy[d];
-			if (ni >= 0 && nj >= 0 && ni < N && nj < N && !seen[nj][ni]) opts[no++] = d;
+			if (ni >= 0 && nj >= 0 && ni < N && nj < N && !seen[nj][ni]) { opts[no++] = d; on |= d == last; }
 		}
 		if (!no) { --sp; continue; }
-		int d = opts[rng_range(0, no - 1)];
+		int d = comp && on && rng_range(0, 99) < 70 ? last : opts[rng_range(0, no - 1)];
 		int ni = i + dir_dx[d], nj = j + dir_dy[d];
 		seen[nj][ni] = true;
 		put(ox + 2 * i + dir_dx[d], oy + 2 * j + dir_dy[d]);
 		put(ox + 2 * ni, oy + 2 * nj);
-		si[sp] = ni; sj[sp++] = nj;
+		si[sp] = ni; sj[sp] = nj; sd[sp++] = d;
 	}
-	/* loops: a few walls knocked through */
-	for (int k = 0; k < 3 + size; ++k) {
+	/* loops: walls knocked through (a comp's more, shortcuts that cut its
+	 * way down) */
+	for (int k = 0; k < (comp ? 8 + 2 * size : 3 + size); ++k) {
 		int i = rng_range(0, N - 2), j = rng_range(0, N - 1);
 		if (floor_at(ox + 2 * i, oy + 2 * j) && floor_at(ox + 2 * i + 2, oy + 2 * j)) put(ox + 2 * i + 1, oy + 2 * j);
 	}
