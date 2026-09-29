@@ -115,6 +115,7 @@ static struct {
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
+	bool final_told;       /* ... and, the short net's last guardian fallen, said the run is won */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -701,6 +702,7 @@ static bool build_layer(void) {
 	D.bugs_known = false;
 	D.off_told = false;
 	D.last_stop_told = false;
+	D.final_told = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
@@ -2331,6 +2333,14 @@ void director_update(void) {
 						if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
 			}
 			last_stop(cx, cy);
+			/* the short net's last guardian fallen and its exit open: the
+			 * run's end said on the map, before the pad (the win went from
+			 * the pad straight to the title's summary) */
+			if (!D.final_told && run.biome == BIOME_NEST && run_short_last(run.depth) && boss_done() && !emu_read8(BN6_CHATBOX) &&
+				!talk_busy() && !cinema_busy() && !D.warping &&
+				talk_start("@M That was the Nest's last guardian, Lan... The whole net has gone quiet.|"
+					"@L We did it, MegaMan! The exit's open. Let's jack out!", FACE_MEGAMAN))
+				D.final_told = true;
 		}
 	}
 	/* (the PET's first menu is a screen of the game's own mode, its pages

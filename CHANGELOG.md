@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-- A won run's summary plays BN6's staff roll theme, and the title's own
-  once it is closed: the Nest's fall had gone straight from the exit pad
-  to the title tune.
+- A won run ends with words on the map and BN6's staff roll theme: as the
+  short net's last guardian's exit opens, MegaMan and Lan say the net has
+  gone quiet and they did it, and the summary plays the credits' song,
+  the title's own once it is closed. The Nest's fall had gone straight
+  from the exit pad to the title tune.
 - Every guardian's warning says when a hit lands, as its fight shows it:
   HeatMan stands still at the back while his tower and flame play out,
   SpoutMan, JudgeMan and ElementMan right in front of us while they
