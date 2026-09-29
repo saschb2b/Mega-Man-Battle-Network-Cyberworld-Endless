@@ -528,6 +528,7 @@ static const int sfx_ids[SFX_COUNT] = {
 static const int music_ids[MUS_COUNT] = {
 	[MUS_NONE] = 0, [MUS_TITLE] = 0x01, [MUS_NET] = 0x13, [MUS_BATTLE] = 0x15, [MUS_BOSS] = 0x16,
 	[MUS_WIN] = 0x19, [MUS_UNDERNET] = 0x14, [MUS_SHOP] = 0x1E, [MUS_GAMEOVER] = 0x1B,
+	[MUS_CREDITS] = 0x1D,   /* (bn6f SONG_CREDITS, the staff roll's) */
 };
 
 bool audio_init(void) {

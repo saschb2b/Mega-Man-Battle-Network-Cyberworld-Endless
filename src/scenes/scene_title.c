@@ -285,7 +285,9 @@ static void enter(void) {
 	if (S.summary) show_area(run.biome);
 	else if (S.saved_depth) show_area(saved.biome);
 	else show_next();
-	audio_music(MUS_TITLE);
+	/* (a won run's summary to BN6's staff roll theme, the title's after:
+	 * the Nest's fall went from the exit pad to the title's own tune) */
+	audio_music(S.summary && title_won ? MUS_CREDITS : MUS_TITLE);
 	if (title_setup) {
 		title_setup = false;
 		S.menu = 1;
@@ -530,6 +532,7 @@ static void update(void) {
 		/* then the net comes back for PRESS START */
 		if (S.t > SUMMARY_MIN && (btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
 			S.summary = false;
+			audio_music(MUS_TITLE);
 			S.t = S.shown_at = 0;
 			/* (the summary has room for two unlocks: a mark shows itself) */
 			S.new_marks = meta_marks_new();

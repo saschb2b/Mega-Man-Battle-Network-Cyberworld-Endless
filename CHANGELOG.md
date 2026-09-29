@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A won run's summary plays BN6's staff roll theme, and the title's own
+  once it is closed: the Nest's fall had gone straight from the exit pad
+  to the title tune.
 - HeatMan's, SpoutMan's, SlashMan's and EraseMan's warnings say when a
   hit lands: HeatMan stands still at the back while his tower and flame
   play out, SpoutMan in front of us while he blows bubbles, SlashMan

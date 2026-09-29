@@ -18,7 +18,7 @@ typedef enum {
 	SFX_COUNT
 } Sfx;
 
-typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_COUNT } Music;
+typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_CREDITS, MUS_COUNT } Music;
 
 bool audio_init(void);
 /* Replaces the engine's own sound with another source (48 kHz stereo frames);
