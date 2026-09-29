@@ -962,7 +962,14 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		for (int i = n - 1; i >= next && !placed; --i)
 			if (layer.rooms[order[i]].kind == ROOM_PAD && room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y))
 				placed = add_obj(OBJ_DUEL, x, y) != NULL;
-		if (!placed) { PLACE(OBJ_DUEL); ++next; }
+		if (!placed) { placed = PLACE(OBJ_DUEL) != NULL; ++next; }
+		/* (a small layer, its rooms all taken: in any room but the
+		 * exit's, apart from the others where it can be; an act 3 layer
+		 * of the Judge Tree Comp had no ProtoMan) */
+		for (int i = 0; i < n && !placed; ++i)
+			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
+		for (int i = 0; i < layer.nrooms && !placed; ++i)
+			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
 	}
 	/* Rooms holding better data, more of them deeper and in the Undernet
 	 * (a dark warp's, or the short net's dark way's act) */

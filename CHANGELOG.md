@@ -23,6 +23,8 @@
   Chip Order of three standard chips the Library holds, one to take; after
   the netbattle won, level two, three Mega chips. Sealed, a gate says for
   whom it opens and how far the rivalry is.
+- Every act's second layer holds its duel: on a small layer whose rooms
+  were all taken, ProtoMan was left out (one layer in 300 of the tests').
 - A run saved after beating a guardian, on his layer, keeps him beaten
   when an update starts the layer afresh: his Guardian Data shown or
   taken and his exit open stay, as a gift taken does. A playtester's

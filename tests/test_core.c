@@ -201,6 +201,12 @@ static void test_generation(void) {
 			CHECK(open == cells - blocked, "seed %u: objects cut the way (%d of %d cells)", seed, open, cells - blocked);
 			memcpy(layer.cell, save, sizeof save);
 		}
+		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
+		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
+			bool duel = false;
+			for (int i = 0; i < layer.nobj; ++i) duel |= layer.obj[i].type == OBJ_DUEL;
+			CHECK(duel, "seed %u: no duel on an act's second layer (depth %d, area %d)", seed, depth, biome);
+		}
 		bool has_exit = false;
 		for (int i = 0; i < layer.nobj; ++i) {
 			NetObj *o = &layer.obj[i];
