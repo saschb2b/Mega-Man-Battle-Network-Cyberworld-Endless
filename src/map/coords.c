@@ -149,12 +149,21 @@ bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const Coord
 	return ok;
 }
 
+static bool raw_only;
+
+bool coords_write_raw(uint32_t slot, const CoordExtra *extra) {
+	raw_only = true;
+	bool ok = write_at(TOWN_COORD_AT, slot, NULL, 0, extra);
+	raw_only = false;
+	return ok;
+}
+
 static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int npads, const CoordExtra *extra) {
 	enum { WALLS_MAX = 16384, TRIGGERS_MAX = PAD_CELLS * 16 };
 	static Cell sec[4][WALLS_MAX];
 	int n[4] = { 0 };
-	int rise = town_floor ? 0 : netmap_rise();
-	n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
+	int rise = town_floor || raw_only ? 0 : netmap_rise();
+	if (!raw_only) n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
 	if (rise) n[0] += walls(sec[0] + n[0], WALLS_MAX - n[0], 1, rise, rise);
 	/* a prop's walls in place of the floor's own at their cells */
 	if (extra && extra->nover) {
@@ -171,7 +180,7 @@ static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int n
 	/* raised floor heights, stairs' ramps, walls and layer priorities */
 	for (int s = 0; extra && s < 4; ++s)
 		for (int i = 0; i < extra->n[s] && n[s] < WALLS_MAX; ++i) sec[s][n[s]++] = from(&extra->cells[s][i]);
-	if (emu_debug_on() && !town_floor) debug_print(sec[0], n[0]);
+	if (emu_debug_on() && !town_floor && !raw_only) debug_print(sec[0], n[0]);
 	size_t cap = 32 + (size_t)(n[0] + n[1] + n[2] + n[3]) * 8;
 	uint8_t *d = calloc(cap, 1);
 	size_t at[4], len = 0;

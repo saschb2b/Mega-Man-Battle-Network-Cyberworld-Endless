@@ -40,7 +40,8 @@
 #define MAX_PIECES 48
 #define MAX_OBJS 40
 #define MAX_SEC2 2048
-#define MAX_TRIG 160
+#define MAX_TRIG 256
+#define MAX_WALLS 2048   /* a town copied whole: its original's walls and heights */
 #define MAX_FOLK 14   /* of the game's 16 NPCs */
 
 /* The jack-in trigger: 0x40 is the map's jack-in destination 0. */
@@ -89,8 +90,8 @@ static struct {
 	uint8_t mat[PLAN_N][PLAN_N], walk[PLAN_N][PLAN_N];
 	int8_t owner[PLAN_N][PLAN_N];
 	TownPin *pins;
-	CoordCell sec2[MAX_SEC2], trig[MAX_TRIG];
-	int nsec2, ntrig;
+	CoordCell sec2[MAX_SEC2], trig[MAX_TRIG], walls[MAX_WALLS], heights[MAX_WALLS];
+	int nsec2, ntrig, nwalls, nheights;
 	uint8_t obj[MAX_OBJS][20];
 	int nobj;
 	/* trees the plan adds, off the walkable ground (world units) */
@@ -221,6 +222,10 @@ struct TownStyle {
 	int nfolk;
 	const char *const *checks;          /* what check 0xF0 + n says */
 	int look[TOWN_SPOTS][2];            /* places worth a look */
+	bool whole;                         /* copied whole, with its own walls and heights (not the
+	                                     * plan's walls round flat walkable cells) */
+	const char *name, *landmark, *landmark_at;
+	const char *arrival;                /* what MegaMan says on arriving there, or NULL */
 };
 
 static int env_or(const char *name, int value) {
@@ -390,16 +395,59 @@ static const char *const acdc_checks[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
+/* -- Seaside Town (0x03:0) -- */
+
+/* (its ground is copied whole: the materials only tell sky from the rest) */
+static int seaside_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
+
+/* The plan: the original as it stands, with its own walls and heights (the
+ * plaza at 0, the walkway over the whale and the station at 64, the pier
+ * at -32), which the other towns' flat plans do not model; the whole of
+ * it, since the roofs' and the whale's art stands on cells far up the
+ * picture. */
+static void design_seaside(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
+
+/* Its people, on the plaza's height (they stand at 0): by the fountain,
+ * the fish shop, the way down to the aquarium. */
+static const Folk seaside_folk[] = {
+	{ -60, -44, FACE_SW, 5, 0x31, "The mermaid fountain has a port, you know.|Stand beside it and press R to jack in!" },
+	{ -44, -108, FACE_SW, 5, 0x36, "The mermaid's port opens into a brand new net, they say.|The sea air makes me want to dive in!" },
+	{ -92, -156, FACE_NW, 5, 0x2C, "Fish sticks, fresh from the sea! I buy a dozen every Sunday." },
+	{ -132, -150, FACE_NW, 5, 0x2E, "They say the aquarium's net copied itself overnight...|Even the fish in there look puzzled." },
+	{ -140, -60, FACE_NE, 5, 0x39, "I come here to watch the boats. The whale never gets old, either." },
+	{ -60, -20, FACE_SE, 5, 0x30, "Lan! Did you ride the train out to Seaside? Good luck down there!" },
+	{ -108, -44, FACE_NE, 5, 0x38, "The fountain's mermaid looks out over the sea. Lovely, isn't she?", 10 },
+};
+
+/* What its checks say: the fountain (0), the fish shop (2, 3); the others
+ * say nothing (1 and 7 round the plaza's east corner, 4 to 6 up on the
+ * station's walkway). */
+static const char *const seaside_checks[16] = {
+	"A mermaid over the fountain, gazing out to sea. Her port leads into the Endless Net.",
+	NULL,
+	"The fish shop.|\"FISH STICKS! Fresh every morning!\"",
+	"Fish of every color swim in the shop's window.",
+	NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+};
+
 #define FOLK(list) list, (int)(sizeof list / sizeof *list)
 
 static const Style styles[] = {
 	{ 0x01, 0x00, 0x03, 1 << 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW, FOLK(central_folk), central_checks,
-	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } } },
+	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } }, false,
+	  "Central Town", "bird statue", "bird statue on the plaza", NULL },
 	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW, FOLK(acdc_folk), acdc_checks,
-	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } } },
+	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } }, false,
+	  "ACDC Town", "squirrel statue", "squirrel statue in the park", "@M The Metroline got us to ACDC Town in no time, Lan!|" },
+	/* (none of its own ports: the fountain is the landmark) */
+	{ 0x03, 0x00, 0x06, 0, { -8, -15, -6, -8 }, { -18, -16, -9, -7 }, seaside_mat, design_seaside, 4, -100, FACE_SW, FOLK(seaside_folk), seaside_checks,
+	  { { 4, -100 }, { -100, -100 }, { -120, -170 }, { 40, -70 }, { 150, 40 }, { 300, 0 } }, true,
+	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza", "@M The train got us out to Seaside Town, Lan! Smell that sea air!|" },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
-_Static_assert(sizeof central_folk / sizeof *central_folk <= MAX_FOLK && sizeof acdc_folk / sizeof *acdc_folk <= MAX_FOLK, "at most MAX_FOLK townsfolk");
+_Static_assert(sizeof central_folk / sizeof *central_folk <= MAX_FOLK && sizeof acdc_folk / sizeof *acdc_folk <= MAX_FOLK &&
+	sizeof seaside_folk / sizeof *seaside_folk <= MAX_FOLK, "at most MAX_FOLK townsfolk");
 
 /* ---- what the copied pieces bring ---- */
 
@@ -502,11 +550,22 @@ static void carry(void) {
 	const int *part;
 	const TownFoot *foot;
 	townsrc_parts(T.book, &part, &foot);
-	T.nsec2 = T.ntrig = T.nobj = 0;
+	T.nsec2 = T.ntrig = T.nobj = T.nwalls = T.nheights = 0;
 	for (int i = 0; i < T.npieces; ++i) {
 		const Piece *p = &T.piece[i];
 		if (p->kind != P_COPY) continue;
 		int dx = p->x0 - p->sx, dy = p->y0 - p->sy;
+		/* (a town copied whole: its own walls and heights, as they were) */
+		for (int s = 0; s < 2 && T.style->whole; ++s)
+			for (int k = 0; k < a->nsec[s]; ++k) {
+				const CoordCell *c = &a->sec[s][k];
+				int *n = s ? &T.nheights : &T.nwalls;
+				if (!in_source(p, fdiv(c->x, 8), fdiv(c->y, 8)) || *n >= MAX_WALLS) continue;
+				CoordCell o = *c;
+				o.x = (int16_t)(c->x + dx * 8);
+				o.y = (int16_t)(c->y + dy * 8);
+				(s ? T.heights : T.walls)[(*n)++] = o;
+			}
 		/* behind the art: the piece's own cells, and those its art covers */
 		for (int k = 0; k < a->nsec[2]; ++k) {
 			const CoordCell *c = &a->sec[2][k];
@@ -704,6 +763,9 @@ static int plan_once(uint32_t seed) {
 	memset(&T.info, 0, sizeof T.info);
 	T.info.group = T.style->group;
 	T.info.number = T.style->number;
+	T.info.name = T.style->name;
+	T.info.landmark = T.style->landmark;
+	T.info.landmark_at = T.style->landmark_at;
 	int sx = T.style->start_x, sy = T.style->start_y;
 	if (getenv("CYBERWORLD_TOWN_START")) sscanf(getenv("CYBERWORLD_TOWN_START"), "%d,%d", &sx, &sy);   /* (the original's world units) */
 	moved(sx, sy, &T.info.start_x, &T.info.start_y);
@@ -847,11 +909,10 @@ static int folk_face(const Folk *f) {
  * call about the Endless Net; after that, a word about the last one. */
 static const char *intro(void) {
 	static char buf[900];
-	bool acdc = T.style->group == 0x00;
-	const char *port = acdc ? "squirrel statue in the park" : "bird statue on the plaza";
+	const char *port = T.style->landmark_at;
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
-	if (acdc) ADD("@M The Metroline got us to ACDC Town in no time, Lan!|");
+	if (T.style->arrival) ADD("%s", T.style->arrival);
 	/* (the net's name is the Endless Net, but a short run goes to its Nest:
 	 * "The Endless Net again" read odd to a playtester who chose Short) */
 	const char *again = run.mode == RUN_SHORT ? "@L Down to the Nest again... I wonder what's changed on the way."
@@ -921,8 +982,8 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	free(out);
 	emu_write32(0x08000000u + desc + 8, TOWN_TILEMAP_AT);
 	/* walls around the walkable cells, the cells behind the art, the jack-in */
-	CoordExtra extra = { { NULL, NULL, T.sec2, T.trig }, { 0, 0, T.nsec2, T.ntrig } };
-	if (!coords_write_town(coord_slot, walkable, &extra)) return false;
+	CoordExtra extra = { { T.walls, T.heights, T.sec2, T.trig }, { T.nwalls, T.nheights, T.nsec2, T.ntrig } };
+	if (!(T.style->whole ? coords_write_raw(coord_slot, &extra) : coords_write_town(coord_slot, walkable, &extra))) return false;
 	/* people and the trees, in the town's own space */
 	mapslot_town(true);
 	NpcList npcs;

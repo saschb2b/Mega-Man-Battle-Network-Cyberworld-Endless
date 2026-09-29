@@ -2,9 +2,10 @@
 
 How BN6's real world is stored, and how the engine builds the town where
 a run begins (`src/world/`): Central Town or ACDC Town, cut into pieces
-and set out again. Lan walks to the town's landmark (the blue bird statue,
-the squirrel statue) and jacks MegaMan in; the game's own jack-in takes
-him to the run's first layer.
+and set out again, or Seaside Town as it stands. Lan walks to the town's
+landmark (the blue bird statue, the squirrel statue, the mermaid fountain)
+and jacks MegaMan in; the game's own jack-in takes him to the run's first
+layer.
 
 ## BN6's real world
 
@@ -52,8 +53,9 @@ Town shows only some of them:
 
 ## The town
 
-A run's town is one of two styles, picked by its seed: Central Town
-(`0x01:0`) or ACDC Town (`0x00:0`), both 132 x 72 tiles. A style's town is
+A run's town is one of three styles, picked by its seed: Central Town
+(`0x01:0`) or ACDC Town (`0x00:0`), both 132 x 72 tiles, or Seaside Town
+(`0x03:0`, below). A cut style's town is
 its original cut into pieces and set out again, in the original's own map
 (its tables in the game, its music): the generator arranges Capcom's
 buildings and does not make new ones. `town.c` plans a town as a list of
@@ -149,7 +151,7 @@ The map holds the floor with room for the camera (136 pixels either side,
 104 above and below) and every copied tile, and the whole plan moves by
 a pattern-keeping step to sit in the map's middle (the camera's bounds are
 symmetric around it): Central Town 142 x 82 tiles (152 x 84 widened),
-ACDC Town 156 x 88.
+ACDC Town 156 x 88; Seaside Town keeps its own 132 x 96.
 
 The town takes over its original's own map, in the game's tables only:
 its tile map pointer, coordinate data (walls around the walkable cells,
@@ -160,37 +162,42 @@ every entry leads back to where Lan starts, jack-in table and music
 from the layers' (docs/EMULATION.md), since the first layer is built while
 Lan still walks the town.
 
+## Seaside Town
+
+Seaside Town (`0x03:0`, 132 x 96 tiles, song `0x06`) is not cut: it
+stands on more than one height (the plaza and the fish shop at 0, the
+walkway over the whale and the station at 64, the pier at -32), which a
+cut town's plan does not model, since it rings its walkable cells with
+walls on one floor. So its plan is the original copied whole (cells
+-62..62: its roofs' and the whale's art stands on cells far up the
+picture), and it takes the original's own walls and heights (coordinate
+sections 0 and 1, `coords_write_raw`) instead of walls made round the
+walkable cells. Its own jack-in points (0x40 before the fish shop, 0x41
+round an object at the plaza's east edge) are left out: the port is the
+mermaid fountain's front and a ring round it, where its check ring (f0)
+stood. Lan starts at height 0, since the town's warp entry holds no
+height.
+
+Its first trial typed every chat about sixty times slower than the other
+towns (the first line at speed, then some six seconds a letter), with its
+own walls or the plan's. The cause was one of its people: a Mr. Prog
+(sprite list 7, sprite `0x0F`), the port guide as the other towns have
+it; with a townsperson (list 5) in that place, its chats type at speed.
+Why the Prog slows the game on this map and not in Central or ACDC Town
+is not known, so Seaside's people come from list 5 alone.
+
 ## Further towns (planned)
 
 The roadmap's more starting towns (docs/META.md) would come from the other
-real-world groups, each first as its original whole (ACDC Town's first
-variant is that), then cut like the two. Found so far (`build.py world`,
-and the section 3 values dumped per cell):
+real-world groups, each first as its original whole, as Seaside Town is.
+Found so far (`build.py world`, and the section 3 values dumped per cell):
 
-- **Seaside Town** (`0x03:0`, song `0x06`): jack-in points 0x40 (cells x
-  -21..-14, y -22..-21, before the fish shop) and 0x41 (a ring, cells x
-  2..6, y -10..-6, round an object at the plaza's east edge, whose check is
-  f7); the mermaid fountain is a check ring (f0, cells x -19..-8, y
-  -17..-6), a landmark as the statues are. The plaza and the fish shop lie
-  at height 0, the walkway over the whale and the station at 64, the pier
-  at -32: Lan should start at height 0, since the town's warp entry holds
-  no height.
 - **Green Town** (`0x04:0`, song `0x08`): one jack-in point, 0x40, a ring
   of 56 cells (x -56..8, y -192..-128 in world units) round a large object.
 - **Sky Town** (`0x05:0`, song `0x07`).
 
-All three stand on more than one height (Seaside's walkway and station at
-64 and its pier at -32, Green Town's stumps, Sky Town's decks), which the
-town's plan does not model: it rings the walkable cells with walls on one
-floor. A trial of Seaside Town copied whole, with those walls, drew right
-(the copy must reach cells -62..62: its roofs' and the whale's art stands
-on cells far up the picture) but typed its chat ten times slower than
-Central Town, and its raised floors had no heights. With the original's
-own walls and heights (sections 0 and 1) installed instead, the heights
-were right but the lag stayed: the first line of a chat types at speed,
-then each letter waits about six seconds. Its cause is still to be found
-(the map's size, 132 x 96 tiles of 256 colours, and its section 2 of 447
-cells are the original's own); a third town waits on it.
+Both stand on more than one height (Green Town's stumps, Sky Town's
+decks), so they would be copied whole like Seaside Town.
 
 The songs are the per-map bytes of the map music lists
 (`0x080360E4`: a list pointer per chapter byte, the later chapters' from
@@ -203,10 +210,14 @@ a value `0x40` + n is jack-in point n, unless event flag `0x16D0` + n is
 set. The map's jack-in table (per map, in GameState `+0x64`) turns n into
 one of 43 20-byte destinations (WarpData: group, number, departure,
 facing, x, y, z; then the index of Lan's "Jack in!" line), and the game
-plays its jack-in cutscene to it. The town keeps the style's points
+plays its jack-in cutscene to it: Lan's "Jack in! MegaMan, Execute!!",
+which closes by itself, then Lan raises the PET, about 220 frames from R
+to the flash (a playtester's picture between the two read as R doing
+nothing). The town keeps the style's points
 (Central Town's 4 x 4 cells on the plaza, not the story's second one in
 front of Aster Land; ACDC Town's 2 x 5 beside the squirrel statue and
-4 x 2 at the doghouse) and makes the landmark's whole front one too: the
+4 x 2 at the doghouse; none of Seaside Town's) and makes the landmark's
+whole front one too, with a ring two cells wide round it: the
 original's points lie a few cells from the statue, with the statue's own
 check between, where a player walks up and presses R. Every cell is value
 `0x40`; its table
@@ -214,7 +225,7 @@ points n = 0 at destination 42, and the engine rewrites destination 42
 (a comp the run never visits) to the first layer's arrival. When MegaMan
 arrives there, the run goes on as from any layer (docs/EMULATION.md).
 
-A new run plans the other town than the last run did (`town_style_for`,
+A new run plans another town than the last run did (`town_style_for`,
 in `run_new_varied`, which also keeps the first area and guardian off the
 last two runs' where it can): a playtester began on Central Town's street
 by Lan's house four or five runs running.
@@ -223,7 +234,7 @@ by Lan's house four or five runs running.
 (a breadth-first path over the town's walkable cells) and presses R.
 `python3 build.py town` draws the towns runs of seeds 1, 2, ... start in,
 tiles without a match marked red, objects and people dotted, and shows
-the game around the first; `CYBERWORLD_TOWN_STYLE` (0 Central, 1 ACDC) and
+the game around the first; `CYBERWORLD_TOWN_STYLE` (0 Central, 1 ACDC, 2 Seaside) and
 `CYBERWORLD_TOWN_VARIANT` fix the plan, `CYBERWORLD_TOWN_START=x,y` where
 Lan starts (the original's world units), `CYBERWORLD_TOWN_DEBUG` marks
 hinted tiles and trigger cells and prints the plan,

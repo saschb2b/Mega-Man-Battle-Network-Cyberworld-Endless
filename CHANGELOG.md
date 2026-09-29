@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A run can begin in Seaside Town: the third starting town, beside
+  Central and ACDC Town, and the first as Capcom made it, whole, with the
+  whale, the pier and the station walkway at their own heights. Lan jacks
+  in at the mermaid fountain on the plaza; the townsfolk, the fish shop
+  and the fountain have words of their own, and the town plays its own
+  theme.
 - L's arrow keeps its way until the way on is clearly in the next eighth,
   not the moment it crosses the edge: it wobbled between two neighbouring
   eighths as MegaMan walked, a third of its turns swinging back within a

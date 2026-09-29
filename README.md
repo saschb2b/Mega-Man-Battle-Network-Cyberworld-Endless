@@ -273,10 +273,11 @@ copying. Dad calls the first time; after that Lan and MegaMan talk it
 over as they go, and L asks MegaMan where they are.
 
 A run begins in town: Central Town or ACDC Town, Capcom's own, set out a
-little differently each run, with shops, houses, townsfolk to talk to and
-signs to read. Walk to the town's statue (the blue bird on Central Town's
-plaza, the squirrel in ACDC Town's park) and press R: Lan jacks MegaMan
-in, and the net begins.
+little differently each run, or Seaside Town as it stands, with shops,
+houses, townsfolk to talk to and signs to read. Walk to the town's
+landmark (the blue bird on Central Town's plaza, the squirrel in ACDC
+Town's park, the mermaid fountain by Seaside's whale) and press R: Lan
+jacks MegaMan in, and the net begins.
 
 Each layer is a new layout of platforms and walkways in the style of one of
 the game's areas. Find the exit pad to go one layer deeper. On the way, the

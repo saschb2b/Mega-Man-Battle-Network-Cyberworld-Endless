@@ -31,4 +31,8 @@ bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExt
  * says are walkable (8-unit world cells), and `extra` (its triggers). */
 bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const CoordExtra *extra);
 
+/* ... or only `extra`: a town copied whole brings its original's own walls
+ * and heights. */
+bool coords_write_raw(uint32_t slot, const CoordExtra *extra);
+
 #endif

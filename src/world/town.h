@@ -19,6 +19,9 @@ typedef struct {
 	int misses;             /* picked tiles no source tile matched */
 	int picks;
 	int spots[TOWN_SPOTS][2];   /* places worth a look (the dev tour) */
+	const char *name;           /* "Central Town" */
+	const char *landmark;       /* where the port is: "bird statue" */
+	const char *landmark_at;    /* ... and where that is: "bird statue on the plaza" */
 	uint32_t talk_archive;      /* once installed: the townsfolk's text archive */
 	int intro;                  /* ... and in it, what Lan and MegaMan say on arriving */
 } TownInfo;

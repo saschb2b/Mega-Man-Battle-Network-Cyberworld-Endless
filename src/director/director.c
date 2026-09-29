@@ -170,7 +170,7 @@ static int label_archive(const char *label, uint8_t *out, int max) {
 static void map_label(void) {
 	static char last[16];
 	char name[16];
-	if (D.town) snprintf(name, sizeof name, "%s", town_info()->group == 0x00 ? "ACDC Town" : "Central Town");
+	if (D.town) snprintf(name, sizeof name, "%s", town_info()->name ? town_info()->name : "Town");
 	else if (run.side_kind == LAYER_UNDERNET) snprintf(name, sizeof name, "Undernet");
 	else if (run.side_kind == LAYER_SECRET) snprintf(name, sizeof name, "Secret Area");
 	else if (run.biome == BIOME_NEST) snprintf(name, sizeof name, "Cybeast Nest");
@@ -342,9 +342,8 @@ static const char *status_words(void) {
 	if (D.town) {
 		int far;
 		const char *way = town_way(&far);
-		const char *statue = town_info()->group == 0x00 ? "squirrel" : "bird";
 		/* all of it the first time, then only the way (a box each) */
-		if (!D.port_told) ADD("@M The port's %s, by the %s statue!|@M Stand next to the statue and press R to jack me in!", way, statue);
+		if (!D.port_told) ADD("@M The port's %s, by the %s!|@M Stand next to it and press R to jack me in!", way, town_info()->landmark);
 		else ADD("@M The port's %s, Lan!", way);
 		D.port_told = true;
 		return buf;
@@ -1721,10 +1720,9 @@ uint32_t director_keys(uint32_t keys) {
 		const char *way = town_way(&far);
 		/* (close by, from any side of it: a step more, and which way) */
 		if (dx * dx + dy * dy < 128 * 128)
-			snprintf(buf, sizeof buf, "@M Almost, Lan! The statue's %s.|@M Step right up to it and press R.", way);
+			snprintf(buf, sizeof buf, "@M Almost, Lan! The %s is %s.|@M Step right up to it and press R.", town_info()->landmark, way);
 		else
-			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!",
-				town_info()->group == 0x00 ? "squirrel statue in the park" : "bird statue on the plaza");
+			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!", town_info()->landmark_at);
 		talk_start(buf, FACE_MEGAMAN);
 		D.arrow_pending = true;
 		cinema_arrow(way_dir, 600);
