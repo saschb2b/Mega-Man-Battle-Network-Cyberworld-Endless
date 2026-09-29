@@ -53,6 +53,7 @@ typedef struct {
 	uint8_t spins;
 	uint8_t spin_colour;
 	uint32_t spin_run;
+	uint32_t records_mark;    /* the guardians' records as Dad's Records mail last showed them (a hash): NEW when they change */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };

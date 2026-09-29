@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+- A run saved after beating a guardian, on his layer, keeps him beaten
+  when an update starts the layer afresh: his Guardian Data shown or
+  taken and his exit open stay, as a gift taken does. A playtester's
+  run saved beside ElementMan's open exit would have met him again, and
+  his Guardian Data twice.
+- Dad's Dive report is marked NEW on an act's first layer, a new guardian
+  ahead, and his Records once a battle has changed them; the Records say
+  what "code" beside a guardian means. A playtester never saw either
+  marked, so never knew when to read them.
+- A strong virus signal's prize is a chip the layer's Net Dealer doesn't
+  sell, from the same pool: a playtester won a third MoonBld A beside the
+  two he had just bought there. A run saved by an older build continues
+  its layer afresh.
+- LibCard says a vault holds rare chips ("Vaults open at 60, rare chips
+  inside"), and a bystander's word on running from a battle is an
+  operator's trick, not a list of buttons.
+
 ## 0.3.0 (2026-09-29)
 
 - The project page's downloads open on your platform (Windows, macOS,

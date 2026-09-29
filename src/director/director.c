@@ -1151,7 +1151,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 54
+#define LAYER_MAKE 55
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -2197,8 +2197,13 @@ bool director_resume(void) {
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
-			/* (a gift taken stays taken: it is the run's, not the layer's) */
-			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_HEAL_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
+			/* (a gift taken stays taken, and a guardian beaten stays
+			 * beaten, his Guardian Data shown or taken, his exit open:
+			 * they are the run's, not the layer's; a playtester's run
+			 * saved beside ElementMan's open exit would have met him
+			 * again, his Guardian Data twice) */
+			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_HEAL_TOLD_FLAG; ++f)
+				if (f != LAYER_GIFT_FLAG && (f < LAYER_BOSS_GONE_FLAG || f > LAYER_EXIT_OPEN_FLAG)) flag_clear(f);
 			flag_clear(LAYER_VAULT_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);

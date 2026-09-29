@@ -156,7 +156,9 @@ static void install_descriptions(void) {
 	rep[ITEM_PASS] = (Script){ pass, description(v31, "Clearing the Secret Area opened the dark way to the Undernet.", pass, sizeof pass) };
 	/* (a collector's vault's need, on this layer: "vaults here" read as a
 	 * place) */
-	snprintf(text, sizeof text, "Library: %d chips. Collector's vaults open at %d now.", meta_library_count(-1), meta_vault_need(run.depth));
+	/* (what a vault holds: a playtester saw its count move and knew
+	 * nothing else of it) */
+	snprintf(text, sizeof text, "Library: %d chips. Vaults open at %d, rare chips inside.", meta_library_count(-1), meta_vault_need(run.depth));
 	rep[ITEM_LIBRARY] = (Script){ library, description(v31, text, library, sizeof library) };
 	int size = rebuild(src, len, n, rep, out, sizeof out);
 	free(src);
@@ -290,6 +292,9 @@ static void records_text(char *s, int size) {
 		ADD("%s %d-%d%s\n", guardian(navis[i])->name, r->megaman_won, r->navi_won, r->megaman_won >= GATE_CODE ? ", code" : "");
 	}
 	if (!met) ADD("No guardian met yet.\n");
+	/* (what ", code" means, once one is held) */
+	for (unsigned i = 0; i < sizeof navis; ++i)
+		if (rival(navis[i])->megaman_won >= GATE_CODE) { ADD("\"code\": we hold his NaviCode.\n"); break; }
 	ADD("%d of %d guardians met. Best dive: layer %d", met, (int)sizeof navis, profile.best_depth);
 	if (profile.nest_clears) ADD(", the Nest won %d time%s", profile.nest_clears, profile.nest_clears == 1 ? "" : "s");
 	ADD(".");
@@ -416,9 +421,23 @@ int pet_text_refresh(void) {
 	int got = 0;
 	for (int m = 1; m <= 18; ++m)
 		if (mail_of(m) && guardian_known(m) && mail_deliver(m)) got = m;
-	/* (the lab's two, quietly: at the head of the list, not NEW each layer) */
+	/* (the lab's two at the head of the list, NEW only with news: the
+	 * report on an act's first layer, a new guardian ahead; the records
+	 * once a battle has changed them. A playtester never saw either NEW,
+	 * so never knew when to read them) */
+	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
+	uint32_t mark = 1;
+	for (unsigned i = 0; i < sizeof navis; ++i) {
+		const Rival *r = rival(navis[i]);
+		mark = mark * 31u + (uint32_t)(r->met * 7 + r->megaman_won * 101 + r->navi_won * 1009);
+	}
+	bool records_news = mark != profile.records_mark,
+		report_news = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
+	if (records_news) { profile.records_mark = mark; profile_save(); }
 	for (int m = MAIL_RECORDS; m >= MAIL_REPORT; --m) {
-		if (mail_deliver(m)) { flag_clear(BN6_FLAG_MAIL_NEW + m); flag_set(BN6_FLAG_MAIL_READ + m); }
+		bool news = m == MAIL_REPORT ? report_news : records_news;
+		mail_deliver(m);
+		if (news) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
 		mail_first(m);
 	}
 	return got;

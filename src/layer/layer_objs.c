@@ -428,16 +428,21 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			char code = '*';
 			ChipInfo ci;
 			int chip = roll_chip(run.depth + 2, 4, &code), best_power = -1;
-			bool best_fits = false;
+			bool best_fits = false, best_new = false;
 			for (int tries = 0; tries < 12; ++tries) {
 				char c = '*';
 				int id = tries ? roll_chip(run.depth + 2, 4, &c) : chip;
 				chip_info(id, &ci);
 				int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
 				/* (one the folder can play first, in its codes or *: a Blade
-				 * folder's won HeatManEX H) */
-				bool fits = loot_folder_code(id, true) != 0;
-				if ((fits && !best_fits) || (fits == best_fits && power > best_power)) { best_power = power; best_fits = fits; chip = id; if (tries) code = c; }
+				 * folder's won HeatManEX H; and first of all one the layer's
+				 * Net Dealer doesn't sell, from the same pool: a playtester
+				 * won a third MoonBld A beside the two he had just bought) */
+				bool fits = loot_folder_code(id, true) != 0, fresh = true;
+				for (int s = 0; s < nstock; ++s) fresh &= !(stock[s].kind == 2 && stock[s].id == id);
+				if ((fresh && !best_new) || (fresh == best_new && ((fits && !best_fits) || (fits == best_fits && power > best_power)))) {
+					best_power = power; best_fits = fits; best_new = fresh; chip = id; if (tries) code = c;
+				}
 			}
 			chip_info(chip, &ci);
 			/* (in the folder's code, or its * where it has none of them, for
