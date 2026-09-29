@@ -8,8 +8,10 @@
   playtester's first dealer named the "???" guardian two minutes into
   the act; a bystander's rumor, sought out, still tells it early.
 - A HeelNavi-shaped guardian (Falzar's Navis, GroundMan, DustMan) is
-  named at every rematch, not only the first meeting, and MegaMan says
-  "I'm ready this time!" only after a loss to him.
+  named at every rematch, not only the first meeting, and speaks without
+  a face: the HeelNavi's is the bystanders', and a playtester read
+  SpoutMan's lines as a bystander's. MegaMan says "I'm ready this time!"
+  only after a loss to him.
 - A Net Dealer neither picks nor stocks a chip the folder already holds
   as many of as BN6 lets it (by its memory: five under 20 MB down to one
   from 50): a playtester paid 1000 zenny for two ElcPuls1 S beside the

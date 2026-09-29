@@ -244,9 +244,12 @@ int guardian_sprite(int navi) {
 /* the navis who stand in a HeelNavi's shape */
 static bool misshapen(int navi) { return guardian_sprite(navi) == GUARDIAN_HEEL_SPRITE; }
 
+/* A HeelNavi-shaped copy speaks without a face: the voice is his, the body
+ * not ("That voice... it's SpoutMan!"), and the HeelNavi's face is the
+ * bystanders' (a playtester read SpoutMan's lines as a bystander's) */
 int guardian_face(int navi) {
 	const Guardian *g = guardian(navi);
-	return g->mugshot == GUARDIAN_NO_MUGSHOT ? FACE_HEEL : g->mugshot;
+	return g->mugshot == GUARDIAN_NO_MUGSHOT ? FACE_NONE : g->mugshot;
 }
 
 const char *guardian_intro(int navi, int version, int biome) {
