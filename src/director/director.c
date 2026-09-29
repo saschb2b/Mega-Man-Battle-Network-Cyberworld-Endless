@@ -634,8 +634,11 @@ static void library_from_game(void);
  * NaviCust's board, which the guardian's draft fits its programs beside;
  * and the Library, which a vault's lock counts (as the checkpoint after
  * keeps it, which a CONTINUE's rebuild reads). */
+static void own_folder_chips(void);
+
 static void note_folder_codes(void) {
 	library_from_game();
+	own_folder_chips();
 	memset(run.programs, 0, sizeof run.programs);
 	board_programs(run.programs, (int)sizeof run.programs);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
@@ -706,6 +709,24 @@ static bool build_layer(void) {
 /* The run's starting folder in the game's first folder (docs/META.md): the
  * chosen one's 30 chips over the game's own (Standard keeps those), as
  * BN6's GiveFolder copies a folder in (bn6f sub_8021AB4). */
+/* The folder's chips owned, as BN6 marks a chip it gives (bn6f
+ * encryption_applyPack, Gregar 0x08006E70): its byte in the table at
+ * Toolkit+0x7C is its key (0x020008A0 + chip) XOR 0x17, and a chip whose
+ * byte does not match is taken for a cheat's and drawn blank in battle, no
+ * name and no effect. A chip only written into the folder had none: a
+ * playtester's LongSwrd, PanlGrab and Barrier came up blank in every hand,
+ * where the Standard folder's chips, given at NEW GAME, played (session
+ * 30). Every fresh layer and CONTINUE mark the folder's chips again, so a
+ * run saved before this is mended. */
+static void own_folder_chips(void) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
+	if (data < 0x02000000u || data >= 0x02040000u || marks < 0x02000000u || marks >= 0x02040000u) return;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
+		int id = emu_read16(data + 2u * (uint32_t)i) & 0x1FF;
+		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
+	}
+}
+
 static void set_start_folder(void) {
 	const uint16_t *chips = meta_folder_chips(run.folder);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
@@ -715,6 +736,7 @@ static void set_start_folder(void) {
 		emu_write(data + 2u * (uint32_t)i, b, 2);
 		flag_set(BN6_FLAG_LIBRARY + (chips[i] & 0x1FF));   /* (in the Library, as GiveFolder puts them) */
 	}
+	own_folder_chips();
 }
 
 /* The profile's Library (docs/META.md) in the run's game: the PET's Library
@@ -1943,6 +1965,7 @@ bool director_resume(void) {
 		lock_run();
 		/* the shops' data in RAM is the saved one: this layer's again */
 		layer_objs_shops(&D.objs);
+		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */

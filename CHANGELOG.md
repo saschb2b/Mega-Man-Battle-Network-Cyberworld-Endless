@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The Blade and Storm folders' chips that BN6's Standard folder lacks
+  (LongSwrd, PanlGrab, Barrier, Thunder and the rest) play: they came up
+  blank in a new run's hands, with no name and no effect, since BN6 takes a
+  chip it never gave for a cheat's. The engine now marks the folder's chips
+  as given, at a run's start, on every fresh layer and on CONTINUE, which
+  also mends a run saved before.
 - No running from a guardian, as from BN6's story bosses: "Lan, this is no
   time to run away!" A playtester ran from CircusMan at 5 HP, healed beside
   the arena and came back to a fresh fight. Virus battles, Servers and the
