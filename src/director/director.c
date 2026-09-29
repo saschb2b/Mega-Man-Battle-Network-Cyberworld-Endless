@@ -2231,6 +2231,10 @@ static void end_run(void) {
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
 	if (D.lost_to) snprintf(title_cause, sizeof title_cause, "by %s in %s", guardian(D.lost_to)->name, area);
 	else snprintf(title_cause, sizeof title_cause, "in %s", area);
+	/* (the guardian's first battle, lost: its battle data is what the run
+	 * leaves for the next briefing) */
+	const Rival *rv = D.lost_to ? rival(D.lost_to) : NULL;
+	snprintf(title_learned, sizeof title_learned, "%s", rv && rv->megaman_won + rv->navi_won == 1 ? guardian(D.lost_to)->name : "");
 	/* (a first run is no record to beat) */
 	title_new_best = profile.runs > 0 && run.depth > profile.best_depth;
 	title_won = false;
@@ -2251,6 +2255,7 @@ static void end_run(void) {
  * for the next (docs/META.md). */
 static void win_run(void) {
 	snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
+	title_learned[0] = 0;
 	title_new_best = run.depth > profile.best_depth;
 	title_won = true;
 	runlog_run_end();

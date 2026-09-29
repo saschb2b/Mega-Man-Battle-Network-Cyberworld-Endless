@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "flags.h"
 #include "guardians.h"
+#include "rivals.h"
 #include "loot.h"
 #include "meta.h"
 #include "navicust.h"
@@ -139,7 +140,16 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		route.dark_flag = LAYER_ROUTE_DARK_FLAG;
 		way = &route;
 	}
-	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome, run.depth), chip, ci.name, code,
+	/* (a first battle with this Navi, in any run: its battle data comes
+	 * with the Guardian Data, and the next briefing reads it) */
+	const char *power = powers_reward_text(g->navi, layer.biome, run.depth);
+	const Rival *rv = rival(g->navi);
+	static char with_data[640];
+	if (rv->megaman_won + rv->navi_won == 0) {
+		snprintf(with_data, sizeof with_data, "%s%s@M And his battle data, Lan. Next time, we'll know how he fights!", power ? power : "", power ? "|" : "");
+		power = with_data;
+	}
+	g->reward = ta_guardian_reward(text, gd->name, power, chip, ci.name, code,
 		LAYER_REWARD_TAKEN_FLAG, run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES, &draft, way);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);

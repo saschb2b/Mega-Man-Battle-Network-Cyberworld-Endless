@@ -24,6 +24,7 @@ extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW G
 extern bool title_summary;          /* the title opens on the finished run's summary */
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
+extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */
 extern bool title_new_best;         /* ... deeper than any run before */
 extern bool title_won;              /* ... the run was won: the short net's Nest fell */
 extern uint32_t title_seed;         /* NEW GAME's seed when not 0 (--seed on the title: a session replays) */

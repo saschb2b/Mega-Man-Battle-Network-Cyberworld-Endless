@@ -9,7 +9,9 @@
   The area's warnings about ScarCrows and DarkMechs likewise come once
   those viruses have been battled. The briefings had recited a copy's
   moves before MegaMan could know them, and spent the first fight's
-  discovery.
+  discovery. The data is said when it comes: a first win's Guardian Data
+  brings "his battle data", and a run lost to a guardian at the first
+  meeting ends on Lan's "We've got his battle data now!".
 - A won run ends with words on the map and BN6's staff roll theme: as the
   short net's last guardian's exit opens, MegaMan and Lan say the net has
   gone quiet and they did it, and the summary plays the credits' song,

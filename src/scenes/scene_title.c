@@ -54,6 +54,7 @@ bool title_summary;
 bool title_setup;
 uint32_t title_seed;
 char title_cause[48];
+char title_learned[24];
 bool title_new_best;
 bool title_won;
 
@@ -694,7 +695,13 @@ static void draw(void) {
 			text_draw(x, y0 + 114, "We did it, MegaMan!", WHITE, TEXT_CENTER);
 		} else {
 			text_draw(x, y0 + 102, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
-			const char *said = title_new_best ? "Our deepest dive yet, MegaMan!"
+			/* (a first fight with the guardian who deleted him, named on
+			 * the line above: what it gave, his battle data, which the
+			 * next briefing reads, before a new best, which "New best!"
+			 * says above; "We've got BlastMan's battle data now!" ran off
+			 * the screen's sides) */
+			const char *said = title_learned[0] ? "We've got his battle data now!"
+				: title_new_best ? "Our deepest dive yet, MegaMan!"
 				: run.depth <= 2 ? "That was rough... Let's try again!"
 				: "We'll get further next time!";
 			text_draw(x, y0 + 114, said, WHITE, TEXT_CENTER);
