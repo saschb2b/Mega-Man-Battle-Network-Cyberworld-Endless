@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-09-29)
 
 - The project page's downloads open on your platform (Windows, macOS,
   Linux, Steam Deck, Android, the handhelds or the browser), its best
