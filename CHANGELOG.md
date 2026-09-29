@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A Guardian Data draft offers only NaviCust programs that fit beside those
+  on MegaMan's board, each in a colour that fits too, on the board it
+  leaves. A playtester was offered SuprArmr beside the gift's Custom1 on the
+  4x4 board, where the two cannot fit. A program that cannot fit is named
+  once a board size instead of on every layer. A run saved before continues,
+  its current layer afresh.
 - A shop's list opens a moment after its keeper's last line, so an A pressed
   twice to close it no longer picks the first chip ("Are you sure? > Yes").
 - A Net Dealer names the viruses' weakness only where it holds: half or more

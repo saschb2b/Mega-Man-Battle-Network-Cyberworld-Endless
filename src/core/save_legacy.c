@@ -3,7 +3,8 @@
  * fields carry over, since the game's state holds MegaMan. The second
  * ("CWE2") had guardians for eight areas, the third ("CWE3") for sixteen;
  * the areas added since get theirs drawn from the run's seed. The fifth
- * ("CWE5") is the current run without the fields added at its end. */
+ * and sixth ("CWE5", "CWE6") are the current run without the fields added
+ * at its end since. */
 #include <stdio.h>
 
 #include "compat.h"
@@ -17,6 +18,7 @@
 #define RUN_MAGIC_V2 0x43574532u /* "CWE2" */
 #define RUN_MAGIC_V3 0x43574533u /* "CWE3" */
 #define RUN_MAGIC_V5 0x43574535u /* "CWE5" */
+#define RUN_MAGIC_V6 0x43574536u /* "CWE6" */
 
 typedef struct {
 	bool active;
@@ -77,13 +79,22 @@ typedef struct {
 	bool layer_boss_beaten;
 } RunV1;
 
-/* (no Cross brought, and the folder's codes read again as the next layer
- * is made) */
+/* (no Cross brought, and the folder's codes and the board's programs read
+ * again as the next layer is made) */
 static bool load_v5(void) {
 	Run v;
 	if (!save_read_blob_upto("run.sav", RUN_MAGIC_V5, &v, sizeof v) || !v.active) return false;
 	v.cross = 0;
 	memset(v.codes, 0, sizeof v.codes);
+	memset(v.programs, 0, sizeof v.programs);
+	run = v;
+	return true;
+}
+
+static bool load_v6(void) {
+	Run v;
+	if (!save_read_blob_upto("run.sav", RUN_MAGIC_V6, &v, sizeof v) || !v.active) return false;
+	memset(v.programs, 0, sizeof v.programs);
 	run = v;
 	return true;
 }
@@ -127,7 +138,7 @@ static bool load_v2(void) {
 }
 
 bool legacy_load_run(void) {
-	if (load_v5() || load_v3() || load_v2()) return true;
+	if (load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
 	memset(&run, 0, sizeof run);

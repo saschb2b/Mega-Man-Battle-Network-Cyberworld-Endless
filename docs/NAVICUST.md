@@ -232,6 +232,14 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
 
 - The pool of 34 programs with their tiers and builds, and MegaMan's
   words for each.
+- A draft offers only programs that fit beside those on MegaMan's board
+  (read as each layer is made, kept with the run), on the board its
+  Guardian Data leaves, each in a colour that fits too: a playtester's
+  draft offered SuprArmr, which could not share the 4x4 board with the
+  gift's Custom1. The packing (`navicust_pack`) turns each program as L
+  and R do and allows no bug. A program left off because it cannot fit is
+  named once a board size ("won't fit ... until the board grows"), not on
+  every layer.
 - The guardian's draft on every normal layer's guardian: three programs
   of three builds, or B for BugFrags (10, and 5 more an act); the run's
   first draft says how the board works.

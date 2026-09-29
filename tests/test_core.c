@@ -799,6 +799,31 @@ static void test_navicust(void) {
 	for (int i = 1; i <= 46; ++i) kinds += offered[i] > 0;
 	CHECK(kinds >= 25, "only %d programs ever offered", kinds);
 	CHECK(navicust_expmemry(6) && navicust_expmemry(12) && !navicust_expmemry(3) && !navicust_expmemry(25), "ExpMemry milestones");
+	/* the packing (made-up shapes): a bar on the command line, two squares
+	 * that must share it (not of one colour), a plus part off it, too
+	 * many cells, and a turn */
+	NaviShape bar = { .kind = NAVI_PART, .color = 1 }, sq = { .kind = NAVI_PART, .color = 2 }, sq2 = sq, plus = { .kind = NAVI_PLUS, .color = 3 };
+	for (int x = 0; x < 4; ++x) bar.cell[3][x] = 1;
+	for (int y = 0; y < 2; ++y) for (int x = 0; x < 2; ++x) sq.cell[y][x] = sq2.cell[y][x] = 1;
+	plus.cell[0][0] = plus.cell[1][0] = 1;
+	int bw, bh;
+	navicust_board(0, &bw, &bh);
+	CHECK(bw == 4 && bh == 4, "the first board is 4x4");
+	navicust_board(2, &bw, &bh);
+	CHECK(bw == 5 && bh == 5, "two ExpMemry: 5x5");
+	CHECK(navicust_pack(&bar, 1, 4, 4), "a bar of four fits the command line");
+	CHECK(navicust_pack(&bar, 1, 3, 4) && !navicust_pack(&bar, 1, 3, 3), "a bar of four turned upright on a board three wide, not on three by three");
+	NaviShape two[2] = { sq, sq2 };
+	CHECK(!navicust_pack(two, 2, 4, 4), "two squares of one colour both on the command line touch");
+	two[1].color = 5;
+	CHECK(navicust_pack(two, 2, 4, 4), "two squares of two colours share the command line");
+	NaviShape three[3] = { sq, two[1], plus };
+	CHECK(navicust_pack(three, 3, 4, 4), "a plus part above them");
+	NaviShape tall = { .kind = NAVI_PART, .color = 4 };
+	for (int y = 0; y < 5; ++y) tall.cell[y][3] = 1;
+	CHECK(!navicust_pack(&tall, 1, 4, 4) && navicust_pack(&tall, 1, 5, 4), "five in a column: turned on a board five wide");
+	NaviShape many[5] = { bar, bar, bar, bar, bar };
+	CHECK(!navicust_pack(many, 5, 4, 4), "twenty cells on sixteen");
 	/* the bug words: none, one light, several */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
 	CHECK(!*navicust_bug_words(bugs), "words for no bug");

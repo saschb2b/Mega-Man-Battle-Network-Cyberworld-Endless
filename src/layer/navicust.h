@@ -35,6 +35,29 @@ bool navicust_in_pool(int program);
 bool navicust_offerable(int program, int depth);
 /* The build a program belongs to (BUILD_*), -1 outside the pool. */
 int navicust_build(int program);
+/* A program's shape (one colour variant, program * 4 + v) as its record
+ * draws it on a 7x7 grid, its colour and its kind: a program part needs a
+ * block on the command line, a plus part keeps off it, either may. */
+enum { NAVI_PART, NAVI_PLUS, NAVI_EITHER };
+typedef struct {
+	uint8_t cell[7][7];
+	uint8_t kind;      /* NAVI_* */
+	uint8_t color;     /* 1-6 */
+} NaviShape;
+/* The draft, of programs that fit a `w` x `h` board beside the `nhave`
+ * variants on it (`have`), each in a colour whose variant fits (colour
+ * 1-6 in out[k].color); fewer than three where not enough fit. Without a
+ * ROM as navicust_draft, colours left 0. */
+int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uint8_t *have, int nhave, int w, int h);
+/* The shape of variant `variant` from the ROM; false without one. */
+bool navicust_shape(int variant, NaviShape *out);
+/* Whether `n` shapes fit a `w` x `h` board together without a bug: all on
+ * it, none over another, the command line (the third row) under every
+ * program part and no plus part, no two program parts of one colour side
+ * by side; each turned as the NaviCust's L and R turn it. */
+bool navicust_pack(const NaviShape *shapes, int n, int w, int h);
+/* The board's size after `expmemry` ExpMemry (0-2): 4x4, 5x4, 5x5. */
+void navicust_board(int expmemry, int *w, int *h);
 /* BugFrags a guardian's draft pays when none is taken, at `depth`. */
 int navicust_skip_frags(int depth);
 /* ExpMemry a guardian at `depth` gives (the board grows 4x4, 5x4, 5x5):

@@ -41,6 +41,8 @@ typedef struct {
 	/* (new since the "CWE5" save, which reads them as 0) */
 	uint8_t cross;           /* the Cross brought from the start: its navi (1-5, powers.c), 0 none */
 	uint8_t codes[3];        /* the folder's codes as the layer was made, most held first: code + 1 (loot_fit_code) */
+	/* (new since the "CWE6" save) */
+	uint8_t programs[8];     /* the NaviCust programs on MegaMan's board as the layer was made (variant: program * 4 + v), 0 ends */
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */

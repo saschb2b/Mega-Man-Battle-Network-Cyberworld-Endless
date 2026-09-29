@@ -60,6 +60,9 @@ static const struct {
 };
 #define POOL_N ((int)(sizeof POOL / sizeof *POOL))
 
+#define PACK_MAX 10      /* programs the packing takes at once */
+#define COMMAND_ROW 2    /* the command line, the board's third row */
+
 static int find(int program) {
 	for (int i = 0; i < POOL_N; ++i)
 		if (POOL[i].program == program) return i;
@@ -99,6 +102,54 @@ int navicust_draft(int depth, NaviProgram out[NAVICUST_DRAFT]) {
 	return n;
 }
 
+/* A colour variant of `program` that fits beside `have`, chosen at random
+ * among those that do: its colour, 0 for none. */
+static int fitting_color(int program, const uint8_t *have, int nhave, int w, int h) {
+	NaviShape s[PACK_MAX];
+	int n = 0;
+	for (int i = 0; i < nhave && n < PACK_MAX - 1; ++i)
+		if (navicust_shape(have[i], &s[n])) ++n;
+	int colors[4], ncolors = 0;
+	for (int v = 0; v < 4; ++v) {
+		if (!navicust_shape(program * 4 + v, &s[n])) continue;
+		if (navicust_pack(s, n + 1, w, h)) colors[ncolors++] = s[n].color;
+	}
+	return ncolors ? colors[rng_range(0, ncolors - 1)] : 0;
+}
+
+int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uint8_t *have, int nhave, int w, int h) {
+	if (!R.data) return navicust_draft(depth, out);
+	/* as navicust_draft, three builds in a random order; in each, its
+	 * programs in a random order until one fits (a playtester drafted a
+	 * SuprArmr that could not share his 4x4 board with the gift's Custom1,
+	 * and nothing said so) */
+	int builds[BUILD_COUNT] = { BUILD_BUSTER, BUILD_HAND, BUILD_GUARD, BUILD_FIELD, BUILD_HP };
+	for (int i = BUILD_COUNT - 1; i > 0; --i) {
+		int j = rng_range(0, i), t = builds[i];
+		builds[i] = builds[j];
+		builds[j] = t;
+	}
+	int n = 0, top = reached(depth);
+	for (int b = 0; b < BUILD_COUNT && n < NAVICUST_DRAFT; ++b) {
+		int fit[POOL_N], nfit = 0;
+		for (int i = 0; i < POOL_N; ++i)
+			if (POOL[i].build == builds[b] && POOL[i].tier <= top) fit[nfit++] = i;
+		for (int i = nfit - 1; i > 0; --i) {
+			int j = rng_range(0, i), t = fit[i];
+			fit[i] = fit[j];
+			fit[j] = t;
+		}
+		for (int i = 0; i < nfit; ++i) {
+			int c = fitting_color(POOL[fit[i]].program, have, nhave, w, h);
+			if (!c) continue;
+			out[n].program = POOL[fit[i]].program;
+			out[n++].color = (uint8_t)c;
+			break;
+		}
+	}
+	return n;
+}
+
 int navicust_color(int program) {
 	/* the program records: 16 bytes per colour variant (program * 4 + v),
 	 * the colour at +3, 0 where the variant is absent */
@@ -109,6 +160,144 @@ int navicust_color(int program) {
 		if (c >= 1 && c <= 6) colors[n++] = c;
 	}
 	return n ? colors[rng_range(0, n - 1)] : 0;
+}
+
+bool navicust_shape(int variant, NaviShape *out) {
+	/* the record's +1 the kind, +3 the colour, +8 a pointer to the shape:
+	 * 49 bytes, a row of seven after another (docs/ROM_DATA.md) */
+	if (!R.data || !R.layout || !R.layout->navicust_programs || variant <= 0 || variant >= 47 * 4) return false;
+	const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)variant * 16;
+	uint32_t at = (uint32_t)rec[8] | (uint32_t)rec[9] << 8 | (uint32_t)rec[10] << 16 | (uint32_t)rec[11] << 24;
+	if (rec[3] < 1 || rec[3] > 6 || (at >> 25) != 4 || (at & 0x1FFFFFF) + 49 > ROM_SIZE) return false;
+	const uint8_t *g = R.data + (at & 0x1FFFFFF);
+	int cells = 0;
+	for (int y = 0; y < 7; ++y)
+		for (int x = 0; x < 7; ++x) cells += (out->cell[y][x] = g[y * 7 + x] != 0);
+	out->kind = rec[1] <= 2 ? rec[1] : NAVI_EITHER;
+	out->color = rec[3];
+	return cells > 0;
+}
+
+void navicust_board(int expmemry, int *w, int *h) {
+	*w = expmemry >= 1 ? 5 : 4;
+	*h = expmemry >= 2 ? 5 : 4;
+}
+
+/* ---- packing: every placement of every turn, depth first (a board of 25
+ * cells and a handful of programs) ---- */
+
+
+typedef struct { int n; int8_t x[49], y[49]; int w, h; } Turn;
+typedef struct { Turn turn[4]; int nturns; int kind, color; } Piece;
+
+static void turn_of(const NaviShape *s, int k, Turn *t) {
+	/* turned k quarters clockwise, then moved to its corner */
+	int n = 0, minx = 7, miny = 7, maxx = 0, maxy = 0;
+	int8_t xs[49], ys[49];
+	for (int y = 0; y < 7; ++y)
+		for (int x = 0; x < 7; ++x) {
+			if (!s->cell[y][x]) continue;
+			int rx = x, ry = y;
+			for (int q = 0; q < k; ++q) { int tx = 6 - ry; ry = rx; rx = tx; }
+			xs[n] = (int8_t)rx; ys[n] = (int8_t)ry; ++n;
+			if (rx < minx) minx = rx;
+			if (ry < miny) miny = ry;
+			if (rx > maxx) maxx = rx;
+			if (ry > maxy) maxy = ry;
+		}
+	t->n = n;
+	for (int i = 0; i < n; ++i) { t->x[i] = (int8_t)(xs[i] - minx); t->y[i] = (int8_t)(ys[i] - miny); }
+	t->w = maxx - minx + 1;
+	t->h = maxy - miny + 1;
+}
+
+static bool same_turn(const Turn *a, const Turn *b) {
+	if (a->n != b->n || a->w != b->w || a->h != b->h) return false;
+	for (int i = 0; i < a->n; ++i) {
+		bool found = false;
+		for (int j = 0; j < b->n && !found; ++j) found = a->x[i] == b->x[j] && a->y[i] == b->y[j];
+		if (!found) return false;
+	}
+	return true;
+}
+
+static int8_t board[7][7];   /* the piece standing on each cell, -1 none */
+
+static bool place(const Piece *p, const Turn *t, int ox, int oy, int w, int h, int id) {
+	bool on_line = false;
+	for (int i = 0; i < t->n; ++i) {
+		int x = ox + t->x[i], y = oy + t->y[i];
+		if (x < 0 || y < 0 || x >= w || y >= h || board[y][x] >= 0) return false;
+		on_line |= y == COMMAND_ROW;
+	}
+	if ((p->kind == NAVI_PART && !on_line) || (p->kind == NAVI_PLUS && on_line)) return false;
+	for (int i = 0; i < t->n; ++i) board[oy + t->y[i]][ox + t->x[i]] = (int8_t)id;
+	return true;
+}
+
+static void lift(const Turn *t, int ox, int oy) {
+	for (int i = 0; i < t->n; ++i) board[oy + t->y[i]][ox + t->x[i]] = -1;
+}
+
+/* (two program parts of one colour side by side: a bug) */
+static bool touches_kin(const Piece *pieces, const Turn *t, int ox, int oy, int w, int h, int id) {
+	if (pieces[id].kind != NAVI_PART) return false;
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int i = 0; i < t->n; ++i)
+		for (int k = 0; k < 4; ++k) {
+			int x = ox + t->x[i] + d[k][0], y = oy + t->y[i] + d[k][1];
+			if (x < 0 || y < 0 || x >= w || y >= h) continue;
+			int o = board[y][x];
+			if (o >= 0 && o != id && pieces[o].kind == NAVI_PART && pieces[o].color == pieces[id].color) return true;
+		}
+	return false;
+}
+
+static bool pack_from(const Piece *pieces, const int *order, int k, int n, int w, int h) {
+	if (k == n) return true;
+	int id = order[k];
+	const Piece *p = &pieces[id];
+	for (int r = 0; r < p->nturns; ++r) {
+		const Turn *t = &p->turn[r];
+		for (int oy = 0; oy + t->h <= h; ++oy)
+			for (int ox = 0; ox + t->w <= w; ++ox) {
+				if (!place(p, t, ox, oy, w, h, id)) continue;
+				bool ok = !touches_kin(pieces, t, ox, oy, w, h, id) && pack_from(pieces, order, k + 1, n, w, h);
+				lift(t, ox, oy);
+				if (ok) return true;
+			}
+	}
+	return false;
+}
+
+bool navicust_pack(const NaviShape *shapes, int n, int w, int h) {
+	if (n <= 0) return true;
+	if (n > PACK_MAX || w > 7 || h > 7) return false;
+	static Piece pieces[PACK_MAX];
+	int order[PACK_MAX], cells = 0;
+	for (int i = 0; i < n; ++i) {
+		Piece *p = &pieces[i];
+		p->kind = shapes[i].kind;
+		p->color = shapes[i].color;
+		p->nturns = 0;
+		for (int k = 0; k < 4; ++k) {
+			Turn t;
+			turn_of(&shapes[i], k, &t);
+			bool again = false;
+			for (int j = 0; j < p->nturns && !again; ++j) again = same_turn(&t, &p->turn[j]);
+			if (!again) p->turn[p->nturns++] = t;
+		}
+		cells += p->turn[0].n;
+		order[i] = i;
+	}
+	if (cells > w * h) return false;
+	/* (the biggest first: the fewest ways to place) */
+	for (int i = 1; i < n; ++i)
+		for (int j = i; j > 0 && pieces[order[j]].turn[0].n > pieces[order[j - 1]].turn[0].n; --j) {
+			int t = order[j]; order[j] = order[j - 1]; order[j - 1] = t;
+		}
+	for (int y = 0; y < 7; ++y) for (int x = 0; x < 7; ++x) board[y][x] = -1;
+	return pack_from(pieces, order, 0, n, w, h);
 }
 
 int navicust_skip_frags(int depth) { return 10 + 5 * (pacing_act(depth) + 7 * pacing_loop(depth)); }

@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "data.h"
+#include "debug.h"
 #include "flags.h"
 #include "guardians.h"
 #include "loot.h"
@@ -54,11 +55,24 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	ScriptsDraft draft = { 0 };
 	if (run.side_kind == LAYER_NORMAL) {
 		draft.expmemry = !navicust_expmemry(run.depth) ? 0 : run.depth <= 6 ? 1 : 2;
+		/* (programs that fit beside those on MegaMan's board as the layer
+		 * was made, on the board this Guardian Data leaves: its ExpMemry
+		 * comes first) */
 		NaviProgram pick[NAVICUST_DRAFT];
-		int n = navicust_draft(run.depth, pick);
-		bool colored = n == NAVICUST_DRAFT;
+		int have = 0, w, h;
+		while (have < (int)sizeof run.programs && run.programs[have]) ++have;
+		navicust_board((run.depth >= 6) + (run.depth >= 12), &w, &h);
+		int n = navicust_draft_fitting(run.depth, pick, run.programs, have, w, h);
+		if (emu_debug_on()) {
+			fprintf(stderr, "draft: a %dx%d board beside", w, h);
+			for (int i = 0; i < have; ++i) fprintf(stderr, " %d/%d", run.programs[i] / 4, run.programs[i] % 4);
+			fprintf(stderr, ":");
+			for (int k = 0; k < n; ++k) fprintf(stderr, " %d (colour %d)", pick[k].program, pick[k].color);
+			fprintf(stderr, "\n");
+		}
+		bool colored = n > 0;
 		for (int k = 0; k < n && colored; ++k) {
-			int c = navicust_color(pick[k].program);
+			int c = pick[k].color ? pick[k].color : navicust_color(pick[k].program);
 			draft.program[k] = (uint8_t)(pick[k].program * 4);
 			draft.color[k] = (uint8_t)c;
 			draft.about[k] = navicust_about(pick[k].program);

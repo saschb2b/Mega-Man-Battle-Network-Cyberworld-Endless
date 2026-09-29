@@ -13,7 +13,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define RUN_MAGIC 0x43574536u /* "CWE6": the Cross brought and the folder's codes (docs/META.md) */
+#define RUN_MAGIC 0x43574537u /* "CWE7": the board's programs (docs/NAVICUST.md) */
 #define PROFILE_MAGIC 0x43575032u
 
 Profile profile;

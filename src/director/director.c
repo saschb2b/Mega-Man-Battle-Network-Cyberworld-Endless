@@ -282,9 +282,29 @@ static void goal_way(void) {
  * placed ones): its name, "" for one outside the draft's pool, NULL for
  * none. A playtester played two acts believing a Guardian Data's UnderSht
  * was running. */
-static const char *program_off_board(void) {
+static bool fits_beside_placed(int v);
+static int key_item(int id);
+
+/* A program left off the board that cannot fit beside those on it: said
+ * once a board size (the next grows it), not on every layer; the words, or
+ * NULL when said already. */
+static int no_room_told = -1;   /* the board size it was said for (a new run or a CONTINUE forgets) */
+
+static const char *no_room_words(const char *name) {
+	static char words[200];
+	int board = key_item(SCRIPTS_EXP_MEMORY);
+	if (no_room_told == board) return NULL;
+	no_room_told = board;
+	if (board < 2)
+		snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board yet, Lan. It'll keep in the PET until the board grows.", name);
+	else snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board, Lan. To use it, we'd have to take another off.", name);
+	return words;
+}
+
+static const char *program_off_board(int *variant) {
 	static char name[16];
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	*variant = 0;
 	for (int v = 4; v < 47 * 4; ++v) {
 		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
 		if (!owned) continue;
@@ -294,6 +314,7 @@ static const char *program_off_board(void) {
 			placed += id == v;
 		}
 		if (owned <= placed) continue;
+		*variant = v;
 		const char *about = navicust_about(v / 4);
 		const char *colon = about ? strchr(about, ':') : NULL;
 		snprintf(name, sizeof name, "%.*s", colon ? (int)(colon - about) : 0, colon ? about : "");
@@ -404,9 +425,15 @@ static const char *status_words(void) {
 		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
 		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
-		/* (a program left off the board: said on every layer until placed) */
-		const char *off = program_off_board();
-		if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. L and R turn a program.|", off);
+		/* (a program left off the board: said on every layer until placed;
+		 * one that cannot fit, once a board: a playtester's SuprArmr could
+		 * not share the 4x4 board with Custom1) */
+		int offv;
+		const char *off = program_off_board(&offv);
+		if (off && !fits_beside_placed(offv)) {
+			const char *w = no_room_words(*off ? off : "That program");
+			if (w) ADD("%s|", w);
+		} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. L and R turn a program.|", off);
 		else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
@@ -534,10 +561,56 @@ static void roll_encounter(void) {
 	set_encounter(&e, false);
 }
 
+/* The NaviCust's board as the game has it: the variants on it, then those
+ * MegaMan has that are not, where they fit beside them (a program left
+ * off because it cannot fit is left out); how many. */
+static int board_programs(uint8_t *out, int max) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	int n = 0, w, h;
+	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
+	NaviShape s[10];
+	int ns = 0;
+	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX && n < max; ++e) {
+		int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
+		if (!id) break;
+		if (id >= 47 * 4) continue;
+		out[n++] = (uint8_t)id;
+		if (ns < 10 && navicust_shape(id, &s[ns])) ++ns;
+	}
+	if (items < 0x02000000u || items >= 0x02040000u) return n;
+	for (int v = 4; v < 47 * 4 && n < max && ns < 10; ++v) {
+		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
+		for (int i = 0; i < n; ++i) placed += out[i] == v;
+		for (int k = placed; k < owned && n < max && ns < 10; ++k) {
+			if (!navicust_shape(v, &s[ns]) || !navicust_pack(s, ns + 1, w, h)) break;
+			out[n++] = (uint8_t)v;
+			++ns;
+		}
+	}
+	return n;
+}
+
+/* Whether variant `v` fits the board beside the programs placed on it. */
+static bool fits_beside_placed(int v) {
+	int w, h, ns = 0;
+	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
+	NaviShape s[10];
+	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX && ns < 9; ++e) {
+		int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
+		if (!id) break;
+		if (id != v && navicust_shape(id, &s[ns])) ++ns;
+	}
+	if (!navicust_shape(v, &s[ns])) return true;
+	return navicust_pack(s, ns + 1, w, h);
+}
+
 /* The folder's codes, for the layer about to be made (loot_fit_code): read
  * from the game as MegaMan moves on, kept with the run, so a checkpoint
- * rebuilds the layer as it was without the game's memory. */
+ * rebuilds the layer as it was without the game's memory; and the
+ * NaviCust's board, which the guardian's draft fits its programs beside. */
 static void note_folder_codes(void) {
+	memset(run.programs, 0, sizeof run.programs);
+	board_programs(run.programs, (int)sizeof run.programs);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (data < 0x02000000u || data >= 0x02040000u) return;
 	uint16_t folder[BN6_FOLDER_ENTRIES];
@@ -635,6 +708,7 @@ static void library_from_game(void) {
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
+	no_room_told = -1;
 	set_start_folder();
 	library_to_game();
 	powers_bring(run.cross);
@@ -877,7 +951,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 38
+#define LAYER_MAKE 39
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1641,11 +1715,16 @@ static void bug_watch(void) {
 	 * without placing his Guardian Data's HP+100) */
 	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
 		D.pet_seen = false;
-		const char *off = D.off_told ? NULL : program_off_board();
+		int offv = 0;
+		const char *off = D.off_told ? NULL : program_off_board(&offv);
 		static char words[200];
-		if (off && *off)
+		const char *say = NULL;
+		if (off && *off && !fits_beside_placed(offv)) say = no_room_words(off);
+		else if (off && *off) {
 			snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.", off);
-		if (off && *off && talk_start(words, FACE_MEGAMAN)) { D.off_told = true; return; }
+			say = words;
+		}
+		if (say && talk_start(say, FACE_MEGAMAN)) { D.off_told = true; return; }
 	}
 	if (!memcmp(D.bugs, now, sizeof now) || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
 	bool had = false;
@@ -1719,6 +1798,7 @@ static void town_update(void) {
 }
 
 bool director_start_layer(void) {
+	no_room_told = -1;
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it) */
@@ -1793,6 +1873,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 }
 
 bool director_resume(void) {
+	no_room_told = -1;
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!build_layer()) return false;
 	char path[600];
