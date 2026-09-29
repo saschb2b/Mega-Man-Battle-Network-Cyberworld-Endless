@@ -28,6 +28,8 @@ static inline uint32_t town_seed(uint32_t run_seed) { return run_seed ^ 0x70776E
 
 /* Plans the town for `seed` and picks its tiles (no core needed). */
 bool town_plan(uint32_t seed);
+/* The town `seed` plans (0 Central Town, 1 ACDC Town), without planning. */
+int town_style_for(uint32_t seed);
 const TownInfo *town_info(void);
 /* The planned town's two tile layers (tw * th entries each), and where
  * no source tile matched. */

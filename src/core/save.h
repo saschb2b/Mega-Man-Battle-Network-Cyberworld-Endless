@@ -37,6 +37,7 @@ typedef struct {
 	 * how many it held as the current run began */
 	uint8_t library[40];
 	uint16_t library_start;
+	uint8_t last_town;        /* the last new run's town, style + 1 (town_style_for) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4 };

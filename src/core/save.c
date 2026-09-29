@@ -12,6 +12,7 @@
 #include "platform.h"
 #include "run.h"
 #include "save_blob.h"
+#include "town.h"
 
 #define RUN_MAGIC 0x43574537u /* "CWE7": the board's programs (docs/NAVICUST.md) */
 #define PROFILE_MAGIC 0x43575032u
@@ -143,14 +144,18 @@ void run_new_varied(uint32_t seed) {
 	/* (one retry left the same guardian a time in three: DiveMan guarded
 	 * two new runs running; and the same area: a playtester began in the
 	 * RoboDog Comp four runs running) */
-	int first = run.boss_order[run.biome_order[0]], area = run.biome_order[0];
-	for (int k = 1; k <= 8 && (profile.first_guardian == first + 1 || profile.first_area == area + 1); ++k) {
+	/* (and the same town: a playtester began on Central Town's street by
+	 * Lan's house four or five runs running) */
+	int first = run.boss_order[run.biome_order[0]], area = run.biome_order[0], place = town_style_for(town_seed(run.seed));
+	for (int k = 1; k <= 16 && (profile.first_guardian == first + 1 || profile.first_area == area + 1 || profile.last_town == place + 1); ++k) {
 		run_new(seed * 2654435761u + 0x9E37u * (uint32_t)k);
 		first = run.boss_order[run.biome_order[0]];
 		area = run.biome_order[0];
+		place = town_style_for(town_seed(run.seed));
 	}
 	profile.first_guardian = (uint8_t)(first + 1);
 	profile.first_area = (uint8_t)(area + 1);
+	profile.last_town = (uint8_t)(place + 1);
 	profile_save();
 }
 

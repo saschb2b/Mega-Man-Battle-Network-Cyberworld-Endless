@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A new run begins in the other town than the last one (Central Town or ACDC
+  Town), as it already avoids the last run's first area and guardian: a
+  playtester began on the same street four or five runs running.
 - Walking onto a warp pad from the side takes it: its trigger covers the
   side corners too, where a playtester stood on the rim without leaving, on
   two runs.

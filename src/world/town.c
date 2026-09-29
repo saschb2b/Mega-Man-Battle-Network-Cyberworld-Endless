@@ -627,10 +627,18 @@ static void hint_tiles(int tw, int th) {
 
 /* ---- planning ---- */
 
+int town_style_for(uint32_t seed) {
+	uint32_t keep = T.rng;
+	T.rng = seed * 2246822519u + 0x165667B1u;
+	int si = env_or("CYBERWORLD_TOWN_STYLE", rnd_range(0, STYLES - 1));
+	T.rng = keep;
+	return si < 0 || si >= STYLES ? 0 : si;
+}
+
 /* One plan and its tiles; the number of tiles no source tile matched. */
 static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
-	/* the style, its source learned once */
+	/* the style, its source learned once (town_style_for the same) */
 	int si = env_or("CYBERWORLD_TOWN_STYLE", rnd_range(0, STYLES - 1));
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];
