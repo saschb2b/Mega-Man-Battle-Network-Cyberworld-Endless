@@ -29,6 +29,9 @@ int chip_price(int id);
  * rolled a letter and has one of the codes the folder holds most, that one,
  * always or half the time; a * stays a *. */
 char loot_fit_code(int id, char code, bool always);
+/* A code the folder can play chip `id` in: the first of the folder's codes
+ * the chip comes in, else (with `star`) its * if it has one, else 0. */
+char loot_folder_code(int id, bool star);
 /* The codes a folder holds most, three chips or more each, as run.codes
  * keeps them (code + 1, most held first, 0 for none). */
 void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]);

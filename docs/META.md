@@ -296,12 +296,20 @@ against what you find**; each piece restates it.
    viruses, which a run has no time for. Here the net answers the folder:
    as each layer is made, the codes the folder holds most (three chips or
    more each) are noted with the run, and a reward chip that comes in one
-   of them takes it: the Net Dealers' stock and the gift always, Mystery
-   Data and a battle's chip half the time (BN6 picks a reward from a pair
-   of entries in its virus's row by a coin; the second of each pair
-   leans). A * stays a *. The
-   choice between a strong chip and one that fits stays; a folder built
-   around a code is paid back. The first dealer of a run says so.
+   of them takes it: the Net Dealers' stock and the gift always, a
+   battle's chip half the time (BN6 picks a reward from a pair of entries
+   in its virus's row by a coin; the second of each pair leans). Mystery
+   Data, half the time, roll their chip again (eight times at most) for
+   one that comes in the folder's codes, smart loot as Diablo 3 leans a
+   drop to its finder: leaning the code alone, where the chip had one, a
+   Blade folder's finds came in its codes two times in seven (session 31;
+   measured over 400 rolls, 37% in the folder's codes or *, now 65%). A
+   Chip Trader's prize comes in the folder's code, or in * where its chip
+   has one and none of theirs: a trade turns three chips the folder cannot
+   play into one it can, the fusion that keeps the finds that do not fit
+   worth picking up. A * stays a *. The choice between a strong chip and
+   one that fits stays; a folder built around a code is paid back. The
+   first dealer of a run says so.
 2. **Cross starts** (costed power, nested progression: MegaMan's axis
    beside the folder). A Cross Navi deleted as a guardian in any run lets
    later runs bring his Cross from the first battle. Crossing is a choice
@@ -325,8 +333,8 @@ against what you find**; each piece restates it.
    small ones. At the vendor a found program costs what the others do and
    takes a slot of BN6's own, so the list changes, not the power.
 
-Built so far: the codes (the Net Dealers and the gift always, Mystery
-Data and battles half the time; read from the game's first folder as a layer is made,
+Built so far: the codes (the Net Dealers, the gift and the Chip Traders
+always, Mystery Data and battles half the time; read from the game's first folder as a layer is made,
 kept in the run) and Cross starts (the setup's Cross row, open with that
 Navi's first defeat as a guardian, announced on the summary like a folder;
 the brought Cross's flag is set as the run begins, and a Cross Navi
@@ -396,8 +404,8 @@ the run's seed, none of the acts' nor the other way's. Event flag `0x1454`
 carries the choice to the exit pad, as `0x1452` the second way.
 
 What could go wrong: the lean flattening the code game into "add
-everything" (it leaves * and every chip without the folder's codes as
-they roll); a Cross start picked every time (the playtests will tell: a
+everything" (it leaves * and, but at a Chip Trader, every chip without
+the folder's codes as they roll); a Cross start picked every time (the playtests will tell: a
 start nobody passes on needs a larger cost); the Library read as a grind
 (it is optional, its marks trophies, and the traders turn it into play).
 

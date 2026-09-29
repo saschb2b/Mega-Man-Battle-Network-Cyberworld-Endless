@@ -12,6 +12,7 @@
 #include "bytes.h"
 #include "emu.h"
 #include "rom.h"
+#include "loot.h"
 #include "run.h"
 
 /* The original pools (entries of BN6_TRADER_POOLS, by their map key and
@@ -35,6 +36,20 @@ void trader_install(int group, int number, TraderKind kind, int depth) {
 	put32(pool + 4, rom_u32(from + 4));   /* chip list and weights, from the ROM file */
 	put32(pool + 8, rom_u32(from + 8));
 	emu_write(BN6_TRADER_POOLS, pool, sizeof pool);
+	/* its prizes in the folder's codes, or a * where the chip has one and
+	 * none of them: a trade turns three chips the folder cannot play into
+	 * one it can (BN6's own pick, sub_804BF18, takes a code the pack lacks
+	 * three times in four; a Blade run traded three Recov10 for TrplShot V).
+	 * The list's records (u16 chip, four codes ending 0xFF) are rewritten in
+	 * the core's copy from the file's own, so each run's folder sets them. */
+	uint32_t list = rom_u32(from + 4);
+	if (rom_is_ptr(list))
+		for (uint32_t r = rom_off(list); r + 6 <= ROM_SIZE && rom_u16(r); r += 6) {
+			char c = loot_folder_code(rom_u16(r) & 0x1FF, true);
+			uint8_t codes[4] = { R.data[r + 2], R.data[r + 3], R.data[r + 4], R.data[r + 5] };
+			if (c) { codes[0] = (uint8_t)(c == '*' ? 26 : c - 'A'); codes[1] = codes[2] = codes[3] = 0xFF; }
+			emu_write(0x08000000u + r + 2, codes, sizeof codes);
+		}
 	uint8_t kinds[8] = { 0 };
 	put32(kinds, key);
 	kinds[4] = (uint8_t)kind;

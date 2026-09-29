@@ -496,6 +496,16 @@ char loot_fit_code(int id, char code, bool always) {
 	return code;
 }
 
+char loot_folder_code(int id, bool star) {
+	ChipInfo ci;
+	chip_info(id, &ci);
+	for (int k = 0; k < 3 && run.codes[k]; ++k) {
+		char c = (char)('A' + run.codes[k] - 1);
+		if (memchr(ci.codes, c, (size_t)ci.ncodes)) return c;
+	}
+	return star && memchr(ci.codes, '*', (size_t)ci.ncodes) ? '*' : 0;
+}
+
 void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]) {
 	int count[26] = { 0 };
 	for (int i = 0; i < n; ++i) {

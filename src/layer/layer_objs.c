@@ -70,19 +70,29 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 	}
 	/* (threat 6, docs/META.md: a chip where zenny would be) */
 	bool chips_only = run.threat >= 6;
+	int bonus = -1;   /* a chip's bonus tier (roll_chip), -1 for none */
 	if (o->param == 0) {
-		if (roll < 50 || (chips_only && roll < 85)) { kind = 1; value = roll_chip(run.depth, 0, &code); }
+		if (roll < 50 || (chips_only && roll < 85)) bonus = 0;
 		else if (roll < 85) value = (100 + rng_range(0, 8) * 50) * (1 + run.depth / 6);
 		else { kind = 5; value = rng_range(3, 8); }
 	} else if (o->param == 1) {
-		if (roll < 60 || chips_only) { kind = 1; value = roll_chip(run.depth, 1, &code); }
+		if (roll < 60 || chips_only) bonus = 1;
 		else value = 800 + run.depth * 60;
-	} else {
+	} else bonus = 3;
+	if (bonus >= 0) {
 		kind = 1;
-		value = roll_chip(run.depth, 3, &code);
+		value = roll_chip(run.depth, bonus, &code);
+		/* half the time a chip that comes in the folder's codes, in one of
+		 * them: rolled again, eight times at most, for one (smart loot, as
+		 * Diablo 3 leans a drop to its finder); the other half as it rolls.
+		 * Leaning only the code, where the chip had one, a Blade folder's
+		 * (S, L) finds came in its codes two times in seven (docs/META.md) */
+		if (run.codes[0] && rng_range(0, 1)) {
+			for (int t = 0; t < 8 && !loot_folder_code(value, false); ++t) value = roll_chip(run.depth, bonus, &code);
+			char c = loot_folder_code(value, false);
+			if (c) code = c;
+		}
 	}
-	/* (half the time in the folder's codes, the dealers' always) */
-	if (kind == 1) code = loot_fit_code(value, code, false);
 	out[0] = (uint8_t)kind;
 	out[1] = 0x20;
 	out[2] = 0xFF;

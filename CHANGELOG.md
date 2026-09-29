@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- More of what a run finds fits its folder. Half the Mystery Data's chips
+  are rolled again for one in the folder's codes, where only the code had
+  leaned: a Blade folder's finds came in its codes two times in seven, now
+  about two in three. A Chip Trader's prize comes in the folder's code, or
+  in * where it has none of them, so three chips the folder cannot play
+  trade for one it can. A run continued from an older build starts its
+  layer afresh.
 - An L or R pressed before the Custom gauge fills is kept through a dodge:
   a step waits its turn (the press is given once MegaMan has moved, a
   second at most), where a d-pad press had dropped it. A playtester's R
