@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A new run's acts prefer guardians MegaMan has never met, in any run,
+  where the area's own can be one: a first meeting is a discovery, and a
+  playtester 34 sessions in had met eight of the seventeen. On his
+  profile, every sample run now meets two new ones by its third and
+  fourth acts.
 - Facing a guardian MegaMan has battled before, he reminds Lan when to
   strike just before the battle, from battle data ("Remember our battle
   data, Lan: he stands still at the back while his tower and flame play

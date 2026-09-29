@@ -461,7 +461,12 @@ the PET's battle data on a copy exists once they have fought it.
 
 The knowledge carries between runs as the player's does, a meta layer of
 its own: what you bring now includes what you have learned, and a second
-run's guardians meet a MegaMan who knows them. Its gain is said where it
+run's guardians meet a MegaMan who knows them. The other side of it is
+what is left to find: a new run's acts prefer guardians never met, where
+the area's pool has one (`run_new`: a guardian met before is rolled
+again, eight times at most), so a veteran still meets new ones (a
+playtester who had met eight of seventeen met two new ones in every
+sample run). Its gain is said where it
 happens: a first win's Guardian Data talk adds "And his battle data,
 Lan. Next time, we'll know how he fights!", and a run lost to a guardian
 at the first meeting closes on Lan's "We've got his battle data now!", so

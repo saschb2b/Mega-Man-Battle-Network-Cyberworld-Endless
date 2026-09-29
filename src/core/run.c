@@ -5,6 +5,7 @@
 #include "data.h"
 #include "game.h"
 #include "pacing.h"
+#include "rivals.h"
 
 Run run;
 
@@ -48,11 +49,15 @@ void run_new(uint32_t seed) {
 	for (int act = 0; act < 6; ++act) {
 		int b = run.biome_order[act], g = 0;
 		/* (not an earlier act's guardian again, where another fits: act 1's
-		 * band shares SpoutMan with act 2's) */
-		for (int tries = 0; tries < 8; ++tries) {
+		 * band shares SpoutMan with act 2's; and one never met, in any run,
+		 * where the area has one: a first meeting is a discovery, and a
+		 * playtester 34 sessions in had met eight of the seventeen) */
+		for (int tries = 0; tries < 14; ++tries) {
 			g = pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
 			bool again = false;
 			for (int e = 0; e < act; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+			const Rival *r = rival(g);
+			if (!again && tries < 8 && (r->met || r->megaman_won || r->navi_won)) again = true;
 			if (!again) break;
 		}
 		run.boss_order[b] = (uint8_t)g;

@@ -866,6 +866,14 @@ bool director_start_run(void) {
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
 	forget_heard();
+	if (emu_debug_on()) {
+		fprintf(stderr, "run guardians:");
+		for (int a = 0; a < 4; ++a) {
+			int g = run.boss_order[run.biome_order[a]];
+			fprintf(stderr, " %s%s", guardian(g)->name, guardian_known(g) || rival(g)->met ? "" : "(new)");
+		}
+		fprintf(stderr, " nest %s\n", guardian(run.boss_order[BIOME_NEST])->name);
+	}
 	set_start_folder();
 	library_to_game();
 	powers_bring(run.cross);
