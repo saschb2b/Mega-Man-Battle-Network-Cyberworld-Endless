@@ -11,6 +11,8 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 <a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">Project page</a>
 &nbsp;·&nbsp;
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Downloads</a>
+&nbsp;·&nbsp;
+<a href="https://buymeacoffee.com/qohreuukw">Buy me a coffee</a>
 </p>
 
 <p align="center">
@@ -491,6 +493,13 @@ guardian). See [docs/DEVTOOLS.md](docs/DEVTOOLS.md) for the tools,
 [AGENTS.md](AGENTS.md) for the development workflow,
 [docs/LEVEL_DESIGN.md](docs/LEVEL_DESIGN.md) for how layers are laid out and
 [docs/ROM_DATA.md](docs/ROM_DATA.md) for where the ROM data comes from.
+
+## Support
+
+Cyberworld Endless is free, and stays free. If you enjoy it and want to say
+thanks, you can [buy me a coffee](https://buymeacoffee.com/qohreuukw). Bug reports and playtest notes in
+the [issues](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues)
+help just as much.
 
 ## Credits
 
