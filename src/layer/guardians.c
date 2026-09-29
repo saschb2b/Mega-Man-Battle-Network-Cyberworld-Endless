@@ -220,9 +220,10 @@ static const char *const respect[] = {
 	"I've studied every move you've made.|Let's see what you've learned!",
 };
 
-/* MegaMan's answer, for the lines that give him one. */
+/* MegaMan's answer, for the lines that give him one ("I'm ready this
+ * time!" only after a loss: a playtester 3-0 against SpoutMan heard it) */
 static const char *const replies[] = {
-	"I won't lose!", "Let's go!", "Bring it on!", "I'm ready this time!",
+	"I won't lose!", "Let's go!", "Bring it on!",
 };
 
 /* How MegaMan and Lan take a guardian they have never met: BN6's Link Navis
@@ -272,11 +273,15 @@ const char *guardian_intro(int navi, int version, int biome) {
 		else if (misshapen(navi)) ADD("@M That voice... it's %s! But that's a HeelNavi's body!|@L The Nest's copy didn't come out right!|", name);
 		else ADD("@L That's %s! Or a copy the Nest made of him...|", name);
 	}
+	/* and at every meeting after, who that HeelNavi's body is (a
+	 * playtester who had met SpoutMan three times asked who was talking) */
+	else if (misshapen(navi)) ADD("@L %s's copy, in that HeelNavi body again!|", name);
 	/* the Nest's own guardian knows what it is */
 	if (biome == BIOME_NEST) ADD("The Nest built me from every battle you have fought.|");
 	ADD("%s", s);
 	/* MegaMan answers now and then, never over a first meeting */
-	if (r->met && r->met % 3 != 1) ADD("|@M %s", replies[r->met % 4]);
+	if (r->met && r->last == RIVAL_NAVI_WON) ADD("|@M I'm ready this time!");
+	else if (r->met && r->met % 3 != 1) ADD("|@M %s", replies[r->met % 3]);
 	/* and, from battle data, when to strike, just before the fight: the
 	 * briefing on his layer came ten minutes before a playtester's fight,
 	 * who asked for it again at the arena */
