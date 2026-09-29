@@ -855,3 +855,34 @@ shop, lost as the map reloads.
 
 Beside the loop, from the owner: the PET's five entries (Comm's SciLab
 link, Save, PLACE, Dad's battle-data mail, the profile's key items).
+
+## Session 36: 8/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of the Storm/HeatCross run on the PET build: layers 4 to 9,
+SpoutMan beaten on a plan (the dealer's Elec word, MegaMan's reminder, a
+Thunder ball left as a mine), act 3 entered against a never-met guardian
+("I don't recognize it" / "Then let's find out who", the session's best
+moment). Stopped on the budget one layer short of ElementMan's arena.
+
+Confirmed: the PET's entries (Save, PLACE, Dad's mails, KeyItem; Comm's
+SciLab link, since moved into two mails at the owner's word), CONTINUE
+where he quit, the arena's reminder, the early R, "Run saved".
+
+Raised, fixed after the pinned build: the dealer's pick a chip the
+folder was full of (3747852); the mail's band (91993f8); NaviCode's
+"and more". Raised, fixed now: the first dealer of an act naming the
+"???" guardian (the word comes from the act's second layer); SpoutMan's
+HeelNavi body unexplained at a rematch and his lines in the bystanders'
+face (named at every rematch, no face); "I'm ready this time!" at 3-0.
+
+By design, or BN6's own: act 3's fights without bite (he runs HP+ and
+took HP+100: 500 HP against a band sized for 300); the NaviCust's two
+quit prompts (both in BN6's text); the battlefield Mystery Data drawn
+above its panel, read by its shadow; input lost as a chat closes. Kept
+for later: a hint per unknown Navi at the fork (the area's character,
+which MegaMan may know).
+
+Loop change: **let a session end at a payoff, not on the budget.** Told
+to stop at 268 calls one layer short of a first meeting, he scored the
+session as "the calm middle of a run": the budget now stretches by up
+to 40 calls to finish the act's guardian when his layer is reached.

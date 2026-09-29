@@ -57,7 +57,7 @@ Run everything from /home/saschabecker/Documents/GitHub/Mega-Man-Battle-Network-
 - Play only through the harness.
 - Do NOT read the game's source code, docs/, tests, .claude/ or git history, and use no dev options or environment variables. You MAY read README.md.
 - Don't edit repository files. Write only inside `.build/play/kai/`.
-- Budget: about 260 `do` calls; batch, and in battle act in bursts of two or three moves per call when nothing is lit. Stop earlier if you genuinely lose interest, and say why.
+- Budget: about 260 `do` calls; batch, and in battle act in bursts of two or three moves per call when nothing is lit. If the budget runs out on a guardian's layer, you may take up to 40 more calls to reach and finish that fight. Stop earlier if you genuinely lose interest, and say why.
 - Keep brief notes as you go in `.build/play/kai/notes-s{{N}}.md`, with frame numbers. The frame counter restarts with each launch, so tag notes by boot. At the end, add a frame index of the main events from `history.txt`.
 
 ## At the end
