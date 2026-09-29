@@ -209,7 +209,15 @@ them. Lan arrives on the grass east of the plaza, at height 0.
 
 The roadmap's last starting town (docs/META.md) would come the same way:
 
-- **Sky Town** (`0x05:0`, song `0x07`), which stands on several decks.
+- **Sky Town** (`0x05:0`, 128 x 96 tiles, song `0x07`): decks at 96 (the
+  Sky building's, cells round y -208..16) and 64 (the lower decks and the
+  helipad's), a few cells at 0. Its one jack-in point, 0x40, is 8 cells
+  (x 32..56, y 32..40, z 0 as all its triggers, which the jack routine
+  raises by the map's z offset) before a console under the main deck,
+  with that console's check (f0) in the row between. Its warp entry holds
+  no height, so Lan would arrive at 0, under the decks: its start needs a
+  height (the warp record's z, or a first step onto a deck) before the
+  town can be one.
 
 The songs are the per-map bytes of the map music lists
 (`0x080360E4`: a list pointer per chapter byte, the later chapters' from
