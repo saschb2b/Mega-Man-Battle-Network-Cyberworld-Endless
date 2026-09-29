@@ -518,3 +518,40 @@ Loop change: **sweep the finale before the persona reaches it**: session
 unwarned attacks, the heal skipped, dead hands) surfaced there at once;
 the next sweep plays each Nest guardian's first minute with the autopilot
 and a folder of the run's rewards, and checks the warning against it.
+
+## Session 28 (8/10, keep playing: yes; recommend: yes)
+
+Build 189b23d. A NEW GAME on the short net with the Blade folder: act 1
+in the RoboDog Comp, BlastMan deleted (0:44, 160 to 100 HP), saved on
+layer 4 in the Aquarium Comp under CircusMan (269 calls, the budget spent
+after a 30-call guardian fight). "The best start the game has given me":
+LifeSword fired on layer 1, and every hand held only S, L and *.
+Confirmed: the dealer's one-line greeting within an act, the install
+lines in the gift's and the Guardian Data's talks, Blade and Storm in the
+setup, BlastMan's warning line by line.
+
+Raised, fixed: a Guardian Data draft offering SuprArmr beside the gift's
+Custom1 on the 4x4 board, where the two cannot fit (the draft now fits
+its programs and colours beside the board's, a packing solver over the
+ROM's shapes; a program that cannot fit is named once a board size),
+rewards off the folder's codes (the dealers' and the gift's chips lean to
+the folder's, Mystery Data half the time, a V1 Navi chip comes in *),
+the same town, comp and guardian four runs running (a third opening area;
+a new run avoids the last one's town, first area and first guardian),
+the exit pad's side rim (its trigger now whole but the far corner), an
+early R dropped (kept 2.5 s, not 1.5). Built meanwhile, from the roadmap:
+Cross starts, the Library across runs, the route choice after a guardian.
+Left as BN6's own: "Quit programming?" defaulting to No before RUN,
+AreaGrab's banner eating the next inputs, the chip cursor's wrap, battle
+drops' codes (BN6's reward tables).
+
+Misread: the dropped R "about 40 frames early" was pressed 126 frames
+before the gauge filled (history.txt: call 212 at 30457). Check a timing
+complaint's frames in the history before touching the code.
+
+Loop change: **sweep a run's opening for sameness across the persona's
+last runs**. Every run plays the town, act 1's area and its guardian;
+their repeats (Central Town, the RoboDog Comp and BlastMan four runs
+running) showed only in the diary, never in one session's notes. Before
+each launch, read the last few runs' openings in `diary.md` and count
+them against the pools.
