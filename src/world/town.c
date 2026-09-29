@@ -844,6 +844,10 @@ static const char *intro(void) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (acdc) ADD("@M The Metroline got us to ACDC Town in no time, Lan!|");
+	/* (the net's name is the Endless Net, but a short run goes to its Nest:
+	 * "The Endless Net again" read odd to a playtester who chose Short) */
+	const char *again = run.mode == RUN_SHORT ? "@L Down to the Nest again... I wonder what's changed on the way."
+		: "@L The Endless Net again... I wonder what's changed down there.";
 	if (!profile.seen_intro) {
 		ADD("@D Lan, it's Dad. Have you got a minute?|"
 			"@D A new stretch of net just opened up under town. Its paths change every time someone jacks in.|"
@@ -862,7 +866,7 @@ static const char *intro(void) {
 		ADD("@L We never finished that last dive...|@M Then let's start a fresh one, Lan! The port's by the %s.", port);
 	} else if (profile.runs == 0) {
 		/* (the call heard, but no run over yet: no best to speak of) */
-		ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port);
+		ADD("%s|@M Let's find out, Lan! The port's by the %s.", again, port);
 	} else {
 		/* (the short net ends on its Nest: its goal, not a depth to beat) */
 		bool nest_goal = run.mode == RUN_SHORT && profile.best_depth >= SHORT_LAYERS - 1;
@@ -875,7 +879,7 @@ static const char *intro(void) {
 			if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Good! Let's reach the Nest today!");
 			else ADD("@M Dad's backup got me home safe last time.|@L Good! Let's beat layer %d today!", profile.best_depth);
 			break;
-		default: ADD("@L The Endless Net again... I wonder what's changed down there.|@M Let's find out, Lan! The port's by the %s.", port); break;
+		default: ADD("%s|@M Let's find out, Lan! The port's by the %s.", again, port); break;
 		}
 	}
 	#undef ADD

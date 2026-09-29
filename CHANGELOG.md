@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- On a short net Lan says "Down to the Nest again", where "The Endless Net
+  again" read odd to a playtester who had chosen Short.
 - The Library carries over: every chip MegaMan holds joins the profile's
   Library, and each run's game is given it, so the PET's Library shows the
   whole collection and a Chip Trader's prize is new across runs. The summary
