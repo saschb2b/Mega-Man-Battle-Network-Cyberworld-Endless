@@ -27,6 +27,8 @@ static struct {
 	char top[48], name[48], line1[48], line2[48];
 	SDL_Color accent;
 	int arrow_dir, arrow_t, arrow_len;   /* the way-on arrow: screen direction 0-7, frames shown, of */
+	char note[24];
+	int note_t, note_len;                /* a corner note: frames shown, of */
 } C;
 
 void cinema_reset(void) { memset(&C, 0, sizeof C); }
@@ -44,6 +46,7 @@ bool cinema_arrow_on(void) { return C.arrow_len > 0; }
 int cinema_arrow_age(void) { return C.arrow_len ? C.arrow_t : 0; }
 void cinema_arrow_turn(int dir) { C.arrow_dir = dir & 7; }
 int cinema_arrow_dir(void) { return C.arrow_dir; }
+void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note, "%s", text); C.note_t = 0; C.note_len = frames; }
 
 static void card(int kind, const char *top, const char *name, const char *l1, const char *l2, SDL_Color accent, int frames) {
 	C.card = kind;
@@ -86,6 +89,8 @@ void cinema_update(void) {
 	/* (a card waits out a shop, the PET or a battle, unseen) */
 	if (C.card && !C.off_map && ++C.card_t >= C.card_len) C.card = CARD_NONE;
 	if (C.arrow_len && ++C.arrow_t >= C.arrow_len) C.arrow_len = 0;
+	/* (and a note waits out a menu, unseen, as a card does) */
+	if (C.note_len && !C.off_map && ++C.note_t >= C.note_len) C.note_len = 0;
 }
 
 void cinema_offset(int *dx, int *dy) {
@@ -199,6 +204,18 @@ static void draw_arrow(int x0, int y0) {
 	}
 }
 
+/* The note: a small dark box in the top right corner, the HP's opposite,
+ * fading in and out. */
+static void draw_note(int x0, int y0) {
+	if (!C.note_len || C.off_map) return;
+	int left = C.note_len - C.note_t;
+	int a = C.note_t < 8 ? C.note_t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
+	int w = text_width(C.note) + 8, x = x0 + CORE_W - w - 3, y = y0 + 3;
+	fill_rect(x, y, w, TEXT_H + 4, rgba(0, 16, 40, 170 * a / 255));
+	fill_rect(x, y + TEXT_H + 3, w, 1, rgba(120, 248, 255, 200 * a / 255));
+	text_draw(x + 4, y + 2, C.note, rgba(200, 236, 255, (Uint8)a), TEXT_LEFT);
+}
+
 void cinema_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
 	int bar = BAR_H * C.bar / BAR_FRAMES;
@@ -207,6 +224,7 @@ void cinema_draw(void) {
 		fill_rect(x0, y0 + CORE_H - bar, CORE_W, bar, BLACK);
 	}
 	draw_arrow(x0, y0);
+	draw_note(x0, y0);
 	if (C.card == CARD_TITLE && !C.off_map) draw_title(x0, y0);
 	if (C.card == CARD_AREA && !C.off_map) draw_area(x0, y0);
 	if (C.flash > 0) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, 230 * C.flash / C.flash_len));

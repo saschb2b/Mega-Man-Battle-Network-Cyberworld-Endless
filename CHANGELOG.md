@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- "Run saved" shows in the picture's corner for a moment each time the
+  run is saved on its way (a layer's arrival, a guardian's Guardian
+  Data), and the quit prompt names where it was saved (the layer's
+  start, the Guardian Data, or where you continued) when it cannot save
+  right there: a playtester playing in short sessions asked when it was
+  safe to stop.
 - A Net Dealer's pick for the guardian prefers a chip in the folder's
   codes or *, where one hits nearly as hard (counted a quarter harder
   than one that comes in neither): a playtester's pick was WideSht Q

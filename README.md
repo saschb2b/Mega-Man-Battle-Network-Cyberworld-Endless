@@ -401,10 +401,12 @@ complete.
 
 ### Saving and losing
 
-The run is saved each time you arrive on a layer, and again when you quit
-while MegaMan is free to move on a layer (not in a battle, a talk or a
-guardian's scene); CONTINUE brings you back to where it was saved. The
-PET's Save is switched off during a run. When MegaMan is
+The run is saved each time you arrive on a layer and as a guardian's
+Guardian Data appears ("Run saved" shows in the corner), and again when
+you quit while MegaMan is free to move on a layer (not in a battle, a
+talk or a guardian's scene; the quit prompt says which); CONTINUE brings
+you back to where it was saved. The PET's Save is switched off during a
+run. When MegaMan is
 deleted the run is over: the title screen shows how deep you got, how many
 viruses and Navis you deleted, and your best depth. When the short net's
 Nest falls, the run is won.

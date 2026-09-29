@@ -20,6 +20,9 @@ void director_draw_map(void);
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);
 bool director_suspend(void);
+/* Where the run was last saved on this layer, for the quit prompt: its
+ * start, or its Guardian Data. */
+const char *director_saved_where(void);
 /* Lan (or MegaMan) is on the map the run put him on: the picture can show. */
 bool director_arrived(void);
 /* What a player sees, in words, one fact a line (remote play). */

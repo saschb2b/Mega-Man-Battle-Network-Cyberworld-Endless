@@ -108,6 +108,8 @@ static struct {
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
+	bool checkpoint_data;  /* the checkpoint due is the Guardian Data's */
+	const char *saved_at;  /* where the run was last saved, for the quit prompt */
 	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
 	bool guardian_named;   /* ... and have been said on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
@@ -744,6 +746,7 @@ static bool build_layer(void) {
 	D.off_told = false;
 	D.last_stop_told = false;
 	D.final_told = false;
+	D.checkpoint_data = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
@@ -1124,6 +1127,8 @@ bool director_can_suspend(void) {
 		emu_read8(BN6_WARP + 0x10) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
 		flag_get(BN6_FLAG_PLAYER_CAN_MOVE);
 }
+
+const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
 
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
@@ -2076,6 +2081,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 bool director_resume(void) {
 	no_room_told = -1;
 	forget_heard();
+	D.saved_at = "Run saved where you continued";
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!build_layer()) return false;
 	char path[600];
@@ -2542,11 +2548,16 @@ void director_update(void) {
 	 * slot's text is not in a state) */
 	/* (nor while the arrival still holds him: the jack-in and the warp pad
 	 * keep him for about 90 frames, and the release is not in the state) */
-	if (boss_take_checkpoint()) D.checkpoint = true;
+	if (boss_take_checkpoint()) D.checkpoint = D.checkpoint_data = true;
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
 		!emu_read8(BN6_DIALOGUE_LOCK) && flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) {
 		D.checkpoint = false;
 		save_checkpoint();
+		/* (said: a playtester who plays in short sessions asked where it
+		 * is safe to stop) */
+		D.saved_at = D.checkpoint_data ? "Run saved at the Guardian Data" : "Run saved at the layer's start";
+		D.checkpoint_data = false;
+		cinema_note("Run saved", 150);
 		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}
 	/* on another map (a story warp the run does not use): back to the layer */

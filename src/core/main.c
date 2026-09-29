@@ -452,7 +452,7 @@ static void quit_prompt_draw(void) {
 	const char *again = P.quit_pad ? "Hold SELECT+START again to quit" : "Press Esc again to quit";
 #endif
 	text_draw(P.w / 2, y + 2, again, WHITE, TEXT_CENTER);
-	if (saved) text_draw(P.w / 2, y + 14, director_can_suspend() ? "Your run is saved right here" : "Run saved at layer start",
+	if (saved) text_draw(P.w / 2, y + 14, director_can_suspend() ? "Your run is saved right here" : director_saved_where(),
 		rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
