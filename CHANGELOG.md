@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Hurt on a layer with no Recovery Mr. Prog, MegaMan's answer to L names
+  the Net Dealer, who always has MiniEnrg, and which way he is: a
+  playtester at 90 of 240 ran to the exit past him, then a dozen moves
+  back.
 - The Aquarium's and the Judge Tree's mazes keep two panels between their
   walkways, where they ran one apart: on the Judge Tree's brick walkways a
   playtester read side-by-side walkways as terraces he could not step down

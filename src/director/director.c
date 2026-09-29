@@ -463,16 +463,20 @@ static const char *status_words(void) {
 		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
-	} else if (heal && hurt) {
-		/* (and which way: it was on no map yet, and never found) */
+	} else if (hurt && (heal || shop)) {
+		/* (and which way: it was on no map yet, and never found; with no
+		 * Recovery Mr. Prog here, the Net Dealer, who always has a
+		 * MiniEnrg: a playtester at 90 of 240 ran to the exit past him,
+		 * then a dozen moves back) */
 		for (int i = 0; i < layer.nobj; ++i) {
-			if (layer.obj[i].type != OBJ_HEAL) continue;
+			if (layer.obj[i].type != (heal ? OBJ_HEAL : OBJ_SHOP)) continue;
 			int wx, wy, hf;
 			netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &wx, &wy);
 			/* (where it lies: the way's first leg pointed off from it) */
 			const char *hw = way_to(wx, wy, &hf);
 			static const char *const near_far[3] = { "close by", "a ways off", "far off" };
-			ADD("@M The Recovery Mr. Prog can patch us up. It's %s, %s.|", hw, near_far[hf]);
+			if (heal) ADD("@M The Recovery Mr. Prog can patch us up. It's %s, %s.|", hw, near_far[hf]);
+			else ADD("@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s.|", hw, near_far[hf]);
 			break;
 		}
 	}
