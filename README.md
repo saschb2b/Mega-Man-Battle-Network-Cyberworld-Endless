@@ -193,6 +193,10 @@ The AppImage works too: right-click it, **Properties**, **Permissions**,
 itself to the application menu and to Steam, with the artwork.
 
 In Gaming Mode it fills the screen, at 5x (1200x800) on the Deck's 1280x800.
+On a Deck OLED, set the game's refresh rate to 60 Hz (the **...** button,
+**Performance**, **Refresh Rate**, with the per-game profile on): the game
+runs at the GBA's 60 frames a second, which the OLED's 90 Hz shows for one
+refresh or two in turn, a slight judder.
 The Deck's A, B, L1 and R1 are the GBA's A, B, L and R, the Menu button (☰)
 is Start and the View button (⧉) is Select. To quit, hold View and Menu
 for a second, then again; or use the Steam button's **Exit Game**. Saves

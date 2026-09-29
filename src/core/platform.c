@@ -447,6 +447,32 @@ void platform_end_frame(void) {
 	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
 	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
 	SDL_RenderPresent(P.renderer);
+	/* CYBERWORLD_FRAME_LOG: a line a second of how the frames reached the
+	 * display (shown, played unshown, the gaps between shown ones), for a
+	 * player's pacing or lag */
+	static int log_on = -1;
+	if (log_on < 0) log_on = getenv("CYBERWORLD_FRAME_LOG") != NULL;
+	if (log_on) {
+		static uint64_t last, second;
+		static int shown, lo = 1 << 30, hi, gaps[4];
+		uint64_t now = SDL_GetPerformanceCounter(), hz = SDL_GetPerformanceFrequency();
+		if (last) {
+			int us = (int)((now - last) * 1000000 / hz);
+			if (us < lo) lo = us;
+			if (us > hi) hi = us;
+			++gaps[us < 12500 ? 0 : us < 20000 ? 1 : us < 30000 ? 2 : 3];
+		}
+		last = now;
+		++shown;
+		if (!second) second = now;
+		if (now - second >= hz) {
+			printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)\n", shown,
+				(unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3]);
+			fflush(stdout);
+			shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
+			second = now;
+		}
+	}
 	++P.frame;
 	{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
 }

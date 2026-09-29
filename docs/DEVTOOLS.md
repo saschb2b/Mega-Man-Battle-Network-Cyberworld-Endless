@@ -136,6 +136,17 @@ family.version, the foes' HP together, and MegaMan's HP after (or
 "deleted"). A last line gives where the run ended. Past 512 KB the log moves
 to `runlog.old`. Collected from real runs, it shows where runs are lost.
 
+## Frame log: pacing on a player's machine
+
+`CYBERWORLD_FRAME_LOG=1` prints a line a second of how frames reached the
+display: how many were shown, the game frames played so far, and the gaps
+between shown frames (shortest, longest, and how many fell under 12.5, 20
+and 30 ms and over). 60 shown with gaps near 16.7 ms is the GBA's pace;
+fewer shown with more played is the loop catching up (a slow machine, a
+missed refresh). On the Steam Deck OLED in Desktop Mode it showed 60 shown
+and played a second, gaps 15-18 ms, after the first layer's first seconds
+(27 shown, 52 played, while the layer is made).
+
 ## Town and world: the real world
 
 ```bash
