@@ -81,10 +81,13 @@
   sell, from the same pool: a playtester won a third MoonBld A beside the
   two he had just bought there. A run saved by an older build continues
   its layer afresh.
-- A choice, BN6's or ours, takes no A in its first half second, so A's
-  pressed through a Net Dealer's words no longer land on the shop's "Are
-  you sure? > Yes" (BN6's default) and buy: a playtester's did twice in
-  a session. B still answers No at once.
+- A choice, BN6's or ours, takes no A in its first fifth of a second, too
+  soon to be an answer to it, so A's pressed through a Net Dealer's words
+  no longer land on the shop's "Are you sure? > Yes" (BN6's default) and
+  buy: a playtester's did twice in a session. B still answers No at once.
+  The same fifth of a second, not half a second or more, holds A off as a
+  shop's list opens and after a chat closes: the longer ones read as input
+  lag.
 - LibCard says a vault holds rare chips ("Vaults open at 60, rare chips
   inside"), and a bystander's word on running from a battle is an
   operator's trick, not a list of buttons.

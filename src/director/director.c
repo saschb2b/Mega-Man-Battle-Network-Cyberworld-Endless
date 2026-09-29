@@ -1545,28 +1545,34 @@ static uint32_t talk_walk(uint32_t keys) {
 	return (keys & ~(PAD_KEYS | KEY_A)) | face_pad[k];
 }
 
+/* The guards below hold off an A for a fifth of a second as a screen
+ * changes under it: a press that soon cannot be an answer to what just
+ * appeared (a reaction takes about that long), so it was pressed at what
+ * went before. One pressed after a look always passes (they had held A
+ * off for half a second and more, which read as input lag). */
+#define A_GUARD 12
+
 /* A shop's list opened by its keeper's last box: the A pressed to close
  * that box twice over bought the first item's "Are you sure?" (Kai, three
- * sessions running). A is held off the list's first frames. */
+ * sessions running). */
 static uint32_t shop_guard(uint32_t keys) {
 	static int chat_recent, guard, last_mode = -1;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
-	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = 45;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD;
 	last_mode = mode;
 	if (guard > 0) { --guard; keys &= ~KEY_A; }
 	return keys;
 }
 
-/* A choice, BN6's or ours, takes no A in its first half second: a
- * playtester's A's, pressed through a Net Dealer's words, landed twice on
- * the shop's "Are you sure? > Yes" (BN6's default) and bought what he had
- * not chosen. B still answers No. */
+/* A choice, BN6's or ours: a playtester's A's, pressed through a Net
+ * Dealer's words, landed twice on the shop's "Are you sure? > Yes" (BN6's
+ * default) and bought what he had not chosen. B still answers No. */
 static uint32_t choice_guard(uint32_t keys) {
 	static int age;
 	bool choice = emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2;
 	age = choice ? age + 1 : 0;
-	if (choice && age <= 30) keys &= ~KEY_A;
+	if (choice && age <= A_GUARD) keys &= ~KEY_A;
 	return keys;
 }
 
@@ -1638,11 +1644,11 @@ uint32_t director_keys(uint32_t keys) {
 	D.map_shown = false;
 	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
-	/* (half a second without A after a chat closes: a playtester's A pressed
-	 * through a chat's last box talked to the gift Prog beside him again,
-	 * twice a session) */
+	/* (no A a fifth of a second after a chat closes: a playtester's A
+	 * pressed through a chat's last box talked to the gift Prog beside him
+	 * again, twice a session) */
 	bool chat_open = emu_read8(BN6_CHATBOX) || talk_busy();
-	if (D.chat_was_open && !chat_open) D.a_quiet = 30;
+	if (D.chat_was_open && !chat_open) D.a_quiet = A_GUARD;
 	D.chat_was_open = chat_open;
 	if (D.a_quiet > 0) { --D.a_quiet; if (!chat_open) { keys &= ~KEY_A; a_pressed = false; } }
 	/* (turned to what A would talk to, the pad left alone for that frame so
