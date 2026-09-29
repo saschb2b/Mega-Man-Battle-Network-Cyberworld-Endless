@@ -215,10 +215,11 @@ them a use.
 1. Starting folders (three), helpers (three), threat rungs 1 to 5, the
    setup screen, the unlock line on the summary. Uses BN6's folder data
    and the engine's existing pacing knobs; needs the folder's RAM layout
-   (bn6f).
+   (bn6f). Built.
 2. The Library, the programs pool, Cross starts (reasoned below), and
-   rewards in the folder's codes.
+   rewards in the folder's codes. Built but the programs pool.
 3. Gates and route choice, with new areas and guardians as branches.
+   The route choice is built; gates wait.
 4. The town as hub, more starting towns, rungs 6 to 10.
 
 ## Decisions (28 September 2026)
