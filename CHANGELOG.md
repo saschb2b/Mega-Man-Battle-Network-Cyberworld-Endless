@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A Chip Trader's prizes are only chips that come in the folder's codes
+  or in *, where a dozen of its pool do: it had rewritten a prize's code
+  to the folder's only where the chip came in one, and a playtester's
+  two trades beside a folder of S and * gave SumnBlk2 H and GunDelS2 E.
 - A guardian's Cross that won't fit beside the one brought is "We can
   only carry one Cross down here!", where MegaMan had said "One Cross a
   run!", the game's word rather than his.
