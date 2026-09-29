@@ -239,10 +239,10 @@ static void end_or(TextArchive *t, int next) {
 /* The way on: the question, the two ways in a column, a branch each (the
  * second sets the flag; B takes the first); the question's script. */
 static int route_scripts(TextArchive *t, const ScriptsRoute *r) {
-	int way[2];
-	for (int k = 0; k < 2; ++k) {
+	int way[3] = { 0 }, n = r->n == 3 ? 3 : 2;
+	for (int k = 0; k < n; ++k) {
 		way[k] = ta_script(t);
-		if (k) flag_set(t, r->flag);
+		if (k) flag_set(t, k == 1 ? r->flag : r->dark_flag);
 		ta_page(t, FACE_MEGAMAN, r->then[k], true);
 		ta_end(t);
 	}
@@ -251,16 +251,24 @@ static int route_scripts(TextArchive *t, const ScriptsRoute *r) {
 	ta_pages(t, r->question, FACE_MEGAMAN, &first);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
-	static const uint8_t opt[2][4] = { { 0xEB, 0x00, 0x00, 0x11 }, { 0xEB, 0x00, 0x11, 0x00 } };
+	/* (in a column, as the draft's: up and down move, left and right too
+	 * where two) */
+	static const uint8_t opt2[2][4] = { { 0xEB, 0x00, 0x00, 0x11 }, { 0xEB, 0x00, 0x11, 0x00 } };
+	static const uint8_t opt3[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	for (int k = 0; k < 2; ++k) {
-		ta_bytes(t, opt[k], 4);
+	for (int k = 0; k < n; ++k) {
+		ta_bytes(t, n == 3 ? opt3[k] : opt2[k], 4);
 		ta_bytes(t, space, sizeof space);
 		ta_text(t, r->option[k]);
-		if (!k) ta_text(t, "\n");
+		if (k + 1 < n) ta_text(t, "\n");
 	}
-	uint8_t select[] = { 0xED, 0x06, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[0] };
-	ta_bytes(t, select, sizeof select);
+	if (n == 3) {
+		uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[2], (uint8_t)way[0] };
+		ta_bytes(t, select, sizeof select);
+	} else {
+		uint8_t select[] = { 0xED, 0x06, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[0] };
+		ta_bytes(t, select, sizeof select);
+	}
 	ta_end(t);
 	return q;
 }

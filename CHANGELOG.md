@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The short net's dark way: after act 2's guardian, once the Secret Area
+  has been cleared in any run, the way on offers a third way, into the
+  Undernet for act 3, where one of its own Navis waits. Its battles hit
+  harder and come in more kinds, and its layers hold more rich Mystery
+  Data. Until it opens, MegaMan says it is sealed and what opens it.
 - A run begun by an older build counts its Library's news from its first
   checkpoint on this one: a playtester's run would have ended on "Library
   32 (+32)", with 26 of them from runs before.

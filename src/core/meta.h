@@ -52,6 +52,9 @@ bool meta_library_add(int id);
  * how many the current run added. */
 int meta_library_count(int cls);
 int meta_library_new(void);
+/* Whether the short net's dark way into the Undernet is open: the Secret
+ * Area cleared in any run (the title's S). */
+bool meta_dark_way_open(void);
 /* How many chips a collector's vault at `depth` wants in the Library
  * (docs/META.md, gates): more in each act. */
 int meta_vault_need(int depth);

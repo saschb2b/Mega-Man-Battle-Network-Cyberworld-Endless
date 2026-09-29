@@ -104,6 +104,22 @@ int run_nest_second(void) {
 	return g;
 }
 
+int run_route_dark(int act, int avoid, int *navi) {
+	if (run.mode != RUN_SHORT || act != 2) return -1;
+	uint32_t keep = rng_state();
+	rng_seed(run.seed ^ 0x4441524Bu);   /* "DARK" */
+	int g = 0;
+	for (int tries = 0; tries < 8; ++tries) {
+		g = pacing_guardian_pick(pools[BIOME_UNDERNET], navis, (int)sizeof navis, act, 0, false, navi_hp);
+		bool again = g == avoid || run.boss_order[BIOME_NEST] == g;
+		for (int e = 0; e < 3; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+		if (!again) break;
+	}
+	rng_restore(keep);
+	*navi = g;
+	return BIOME_UNDERNET;
+}
+
 void run_setup(int mode, int folder, int threat, int helpers, int cross) {
 	run.mode = (uint8_t)mode;
 	run.folder = (uint8_t)folder;

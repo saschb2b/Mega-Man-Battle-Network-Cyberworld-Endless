@@ -64,6 +64,11 @@ void run_setup(int mode, int folder, int threat, int helpers, int cross);
  * taken, and `navi` its guardian, fit for the act and no other act's; -1
  * for none (the first act, the short net's Nest, the Undernet and on). */
 int run_route_alt(int act, int *navi);
+/* The dark way the short net's last act before the Nest (act 2, 0-based)
+ * may take once it is open (docs/META.md, branches): the Undernet, `navi`
+ * its guardian, fit for the act, no other act's and not `avoid` (the other
+ * way's); -1 for none. */
+int run_route_dark(int act, int avoid, int *navi);
 /* Whether depth is the short net's Nest, the run's last layer (on threat
  * 10 its last two: the first guardian leads down to a second). */
 static inline bool run_short_nest(int depth) { return run.mode == RUN_SHORT && depth >= SHORT_LAYERS; }

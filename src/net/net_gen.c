@@ -941,8 +941,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		rows(kit, land, order, n);
 		signs(kit, land, order, n);
 	}
-	/* Rooms holding better data, more of them deeper and in the Undernet. */
-	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET);
+	/* Rooms holding better data, more of them deeper and in the Undernet
+	 * (a dark warp's, or the short net's dark way's act) */
+	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET);
 	for (int k = 0; k < rich; ++k, ++next) {
 		NetObj *o = PLACE(OBJ_MYSTERY);
 		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;

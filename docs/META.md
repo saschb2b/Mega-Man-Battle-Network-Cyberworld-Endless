@@ -218,8 +218,8 @@ them a use.
 2. The Library, the programs pool, Cross starts (reasoned below), and
    rewards in the folder's codes. Built.
 3. Gates and route choice, with new areas and guardians as branches.
-   The route choice, the Navi gates and the vaults are built; branches
-   behind gates wait.
+   The route choice, the Navi gates, the vaults and the dark way are
+   built.
 4. The town as hub, more starting towns, rungs 6 to 10. The rungs are
    built (Mystery Data of chips, half the Chip Traders, drafts of two,
    four HPMemory a Guardian Data, and a second guardian below the short
@@ -370,7 +370,20 @@ the Library, a collector's loop with a cap: one chip a vault, a vault in
 about every other short run, the folder's own limits (five Megas, one
 Giga). The chips are rolled from the layer's seed, never from the
 Library, so a CONTINUE offers the same three; the lock reads the Library
-as it stood when the layer was made. Gates to route branches wait.
+as it stood when the layer was made.
+
+And a branch behind a code: the short net's dark way. After act 2's
+guardian, the way on names a third way once the Secret Area has been
+cleared in any run (the title's S): "a dark way leads down into the
+Undernet, where SlashMan waits". Until then the question says the way is
+sealed and what opens it, the telegraph a run or more before the key. The
+Undernet as the last act before the Nest restates the dialectic at the
+act's scale: its battles keep act 3's band but hit at its cap and come
+from sixteen virus families, against a surface area's five to ten, and
+its layers hold one rich Mystery Data more; its guardian is one of the
+Undernet's own (ProtoMan, SlashMan, HeatMan) that fits the act, drawn from
+the run's seed, none of the acts' nor the other way's. Event flag `0x1454`
+carries the choice to the exit pad, as `0x1452` the second way.
 
 What could go wrong: the lean flattening the code game into "add
 everything" (it leaves * and every chip without the folder's codes as

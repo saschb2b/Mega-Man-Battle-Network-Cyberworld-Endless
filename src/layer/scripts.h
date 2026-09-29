@@ -51,13 +51,14 @@ typedef struct {
 } ScriptsDraft;
 
 /* The way on after an act's guardian (docs/META.md, routes): MegaMan's
- * `question` (ta_talk's boxes), the two ways as options, and what he says
- * after each; the second sets event flag `flag` (B takes the first). */
+ * `question` (ta_talk's boxes), the `n` ways (two, or three with the dark
+ * way) as options, and what he says after each; the second sets event flag
+ * `flag`, the third `dark_flag` (B takes the first). */
 typedef struct {
 	const char *question;
-	const char *option[2];
-	const char *then[2];
-	int flag;
+	const char *option[3];
+	const char *then[3];
+	int n, flag, dark_flag;
 } ScriptsRoute;
 
 /* A guardian's Guardian Data, checked: `power` (what a Cross or BeastOut

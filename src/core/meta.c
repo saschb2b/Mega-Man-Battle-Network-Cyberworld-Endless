@@ -137,6 +137,8 @@ int meta_library_count(int cls) {
 	return n;
 }
 
+bool meta_dark_way_open(void) { return (profile.marks & MARK_SECRET) != 0; }
+
 int meta_vault_need(int depth) {
 	/* (a run holds its starting folder's dozen and about twenty more: act
 	 * 2's opens after a run or two, act 4's for a collector) */

@@ -1001,7 +1001,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 47
+#define LAYER_MAKE 48
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -2063,6 +2063,16 @@ static bool follow_exit_warp(void) {
 			run.boss_order[b] = (uint8_t)navi;
 		}
 		flag_clear(LAYER_ROUTE_FLAG);
+	}
+	/* ... or its dark way, into the Undernet */
+	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth) && flag_get(LAYER_ROUTE_DARK_FLAG)) {
+		int act = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, navi = 0;
+		int b = run_route_alt(act, &alt_navi) >= 0 ? run_route_dark(act, alt_navi, &navi) : -1;
+		if (b >= 0) {
+			run.biome_order[act] = (uint8_t)b;
+			run.boss_order[b] = (uint8_t)navi;
+		}
+		flag_clear(LAYER_ROUTE_DARK_FLAG);
 	}
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;

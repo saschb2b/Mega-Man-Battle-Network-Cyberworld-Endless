@@ -10,6 +10,7 @@
 #include "flags.h"
 #include "guardians.h"
 #include "loot.h"
+#include "meta.h"
 #include "navicust.h"
 #include "net.h"
 #include "npc.h"
@@ -98,15 +99,21 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* the way on (docs/META.md, routes): after an act's guardian, the next
 	 * act's area or another of its tier, each named with its guardian */
 	ScriptsRoute route = { 0 };
-	static char question[240], then[2][96], area[2][32];
+	static char question[320], then[3][96], area[3][32];
 	const ScriptsRoute *way = NULL;
-	int next = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, alt = -1;
+	int next = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, alt = -1, dark_navi = 0, dark = -1;
 	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth)) alt = run_route_alt(next, &alt_navi);
+	/* (the short net's last act before the Nest: the dark way into the
+	 * Undernet, open once the Secret Area has been cleared in any run, and
+	 * said to be sealed till then: docs/META.md, branches) */
+	if (alt >= 0) dark = run_route_dark(next, alt_navi, &dark_navi);
+	bool dark_open = dark >= 0 && meta_dark_way_open();
 	if (alt >= 0) {
 		static const char *const elem[5] = { "", " (Fire)", " (Aqua)", " (Elec)", " (Wood)" };
-		int b[2] = { run.biome_order[next], alt }, n[2] = { run.boss_order[run.biome_order[next]], alt_navi }, e[2];
-		static char option[2][32];
-		for (int k = 0; k < 2; ++k) {
+		int nways = dark_open ? 3 : 2;
+		int b[3] = { run.biome_order[next], alt, dark }, n[3] = { run.boss_order[run.biome_order[next]], alt_navi, dark_navi }, e[3];
+		static char option[3][32];
+		for (int k = 0; k < nways; ++k) {
 			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
 			e[k] = enemy_element(enemy_id(1, n[k], 0));
 			if (e[k] < 0 || e[k] > 4) e[k] = 0;
@@ -116,10 +123,20 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			route.then[k] = then[k];
 		}
 		/* (two boxes: five had named the ways) */
-		snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s. Which way?",
-			option[0], area[0], option[1], area[1]);
+		if (dark_open)
+			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M %s guards %s, and a dark way "
+				"leads down into the Undernet, where %s waits. Which way?", option[0], area[0], option[1], area[1], option[2]);
+		else if (dark >= 0)
+			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s.|@M A dark way "
+				"leads down into the Undernet too, but it's sealed. Clearing the Secret Area would open it. Which way?",
+				option[0], area[0], option[1], area[1]);
+		else
+			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s. Which way?",
+				option[0], area[0], option[1], area[1]);
 		route.question = question;
+		route.n = nways;
 		route.flag = LAYER_ROUTE_FLAG;
+		route.dark_flag = LAYER_ROUTE_DARK_FLAG;
 		way = &route;
 	}
 	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome, run.depth), chip, ci.name, code,
@@ -129,6 +146,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
 	for (int f = LAYER_BOSS_GONE_FLAG; f <= LAYER_EXIT_OPEN_FLAG; ++f) flag_clear(f);
 	flag_clear(LAYER_ROUTE_FLAG);
+	flag_clear(LAYER_ROUTE_DARK_FLAG);
 }
 
 void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const GuardianStage *g) {

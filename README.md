@@ -298,6 +298,9 @@ Step into the arena and the Navi logs in for the game's own boss battle.
 Guardians remember how your earlier battles went. Their Guardian Data
 ends with the way on: two areas for the next act, each named with its
 guardian and his element, so you choose the fight your folder answers.
+In the short net, once the Secret Area has been cleared in any run, act
+2's also offers a dark way: act 3 in the Undernet, with one of its own
+Navis, harder battles and richer data.
 
 A run is **the short net**: three acts, then the Cybeast Nest on layer 10,
 about an hour. When the Nest's guardian falls, the run is won, and that
