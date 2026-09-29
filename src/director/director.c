@@ -1781,7 +1781,7 @@ static void push_arrow(void) {
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
 /* The way-on arrow: on while L's words last, however many boxes, then
- * three seconds more. */
+ * three seconds more, and on while MegaMan walks, up to half a minute. */
 static void arrow_update(void) {
 	/* (it turns as MegaMan walks: frozen, it pointed into the gap he had
 	 * walked past) */
@@ -1795,6 +1795,10 @@ static void arrow_update(void) {
 		if (way_dir == pending) cinema_arrow_turn(way_dir);
 		pending = way_dir;
 	}
+	/* (it faded three seconds after the words, and in the Aquarium Comp's
+	 * mazes of short walkways a playtester lost a dozen moves at a time
+	 * between one L and the next) */
+	if (cinema_arrow_on() && !D.arrow_pending && D.dir_held && on_map() && cinema_arrow_age() < 1800) cinema_arrow_extend(180);
 	if (!D.arrow_pending) return;
 	if (talk_busy()) cinema_arrow_extend(60);
 	else { D.arrow_pending = false; cinema_arrow_extend(180); }

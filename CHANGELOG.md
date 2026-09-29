@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The way-on arrow L shows stays while MegaMan walks, up to half a minute,
+  and fades three seconds after he stops: it faded three seconds after L's
+  words, and in the Aquarium Comp's mazes of short walkways a playtester
+  lost a dozen moves at a time between one L and the next.
 - NaviCust programs found join later runs: every program MegaMan runs with
   (on the board, or in the PET where it fits) is kept in the profile, and a
   later run's program vendor lists two of them first, when the act may
