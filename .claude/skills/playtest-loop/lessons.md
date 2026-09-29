@@ -830,3 +830,28 @@ what its warning lacks, and the watch checks the persona's own theory
 in minutes (ChargeMan's cars, confirmed from four sheets). And a rule
 for the harness: a player-honest state (the ??? guardian) must not blind
 the dev scripts; they read it under CYBERWORLD_STATE_POS.
+
+## Session 35: 9/10 (keep playing: yes; recommend: yes)
+
+A new run (Storm folder, the HeatCross start the last loss unlocked, HP+)
+from its layer 2 through DiveMan, "the best first-act guardian fight of
+the series": the dealer's "word is" and an Elec pick in his code, the
+arena's reminder ("he's only open when he surfaces") and a Thunder ball
+he found waits on the water for a surfacing boss. Stopped on act 2's
+first layer; the session was cut by an API limit and resumed.
+
+Confirmed: the pre-battle reminder, the battlefield Mystery Data and its
+second reward, dealer picks in his codes, the draft's green arrow, "Run
+saved", the early R, the arrow at junctions.
+
+Raised, fixed: the gem's find read as none (980 zenny, a blue Mystery
+Data's): three in four now chips a tier above, in the folder's codes.
+
+Kept as designed: the gem explained after the first battle that held one,
+not before (discovery first, the owner's rule); no rocks in Seaside and
+Central battles (their originals hold few); CONTINUE mid-layer where he
+quit on the map (the quit saves there). BN6's own: a START right after a
+shop, lost as the map reloads.
+
+Beside the loop, from the owner: the PET's five entries (Comm's SciLab
+link, Save, PLACE, Dad's battle-data mail, the profile's key items).
