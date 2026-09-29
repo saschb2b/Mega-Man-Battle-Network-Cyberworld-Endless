@@ -743,3 +743,49 @@ Loop change: **count a class of confusion before designing its fix.**
 raised floor at all. One throwaway count (floor facing floor across one
 empty panel, per area) named the two outlier areas at 43-45% against
 1-9%, sized the fix and kept it as the measure (3% after).
+
+## Session 33: 9/10 (keep playing: yes; recommend: yes)
+
+Continued the Blade run from layer 6 (rebuilt by the LAYER_MAKE bump):
+HeatMan again, "the best fight of the series" (the new timing line
+turned into a plan and the finishing LongSwrd), the way on to ChargeMan,
+act 3's first two layers on the ACDC HP. Stopped at the budget on layer
+8, ChargeMan and the Nest next.
+
+Confirmed: the layer restart, the Judge Tree's two-panel maze, HeatMan's
+"strike then" timing, the guardian's drop in *, finds in the folder's
+codes, the last-stop words.
+
+Raised, fixed:
+- **Act 3's battles repeat**: three of four were the same Catack pair.
+  `build.py pacing` counted it: Catacks in 203 of 300 ACDC HP battles at
+  depth 7 (its own three kinds fill the band only with them). Sharing
+  two in three with Central Area, as the Sky and Green homepages do,
+  brought it to 106.
+- **The dealer's pick off the folder's codes** (WideSht Q beside S and
+  *): a fitting answer counts a quarter harder. Preferred outright, the
+  pacing report showed act 1's picks falling from 120 to Cannon's 40;
+  the quarter keeps the element answers as they were.
+- **Chip Trader prizes off-code** (SumnBlk2 H, GunDelS2 E): the pool's
+  list holds only chips in the folder's codes or * now.
+- **The heal's way told two ways**: fixed after the pin (fa5022c).
+- **"When is it safe to stop?"**: "Run saved" in the corner at each
+  checkpoint; the quit prompt names the checkpoint.
+
+Misreads, BN6's own: A presses during the charged slash's follow-through,
+the draft's "second A" (replayed: the press landed as the page finished
+typing), "Sending chip data..." on OK before it is pressed.
+
+The owner, reading the iteration's own work: the rumor briefing had
+MegaMan tell what he could not know (EraseMan's name, a rumor), and the
+first rework still let him sense a guardian's element (Aqua is SpoutMan
+by name). The rule now: MegaMan knows a guardian from battle data, or
+as hearsay from a Navi on the net; the card says "???". The persona now
+reads the game as a story too (persona.md) and reports an immersion
+category.
+
+Loop change: **for every line a character says, ask who says it and how
+they could know, and follow the same fact through every surface** (the
+act card, L, the arrival and last-stop words, the way on, the state line
+the persona reads). The owner found two slips in one fact that a
+line-by-line fix missed; a fact is told in six places.
