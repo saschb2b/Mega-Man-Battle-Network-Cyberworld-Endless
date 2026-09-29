@@ -206,6 +206,12 @@ static void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M Lan, it looks just like %s... But it's all copied data!|@L Dad was right. Let's find the exit pad and head down!", area);
 	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
 		snprintf(D.beat, sizeof D.beat, "@D Lan! The Endless Net just rebuilt itself, all of it!|@D The same areas, but stronger data. It's Net V%d now!|@M Then we keep going, Lan!", net_version());
+	else if (run.biome == BIOME_NEST && run_short_nest(run.depth) && !run_short_last(run.depth))
+		/* (threat 10: said before the first of the two, docs/META.md) */
+		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest. Something down here is copying everything.|@B Grrrr...|"
+			"@M And it's not alone. I can feel a second guardian further down.|@L Then we beat them both, MegaMan!");
+	else if (run.biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS)
+		snprintf(D.beat, sizeof D.beat, "@M Below the Nest... The second guardian's here, Lan.|@B Grrrr...|@L The last one, MegaMan. Let's finish this!");
 	else if (run.biome == BIOME_NEST)
 		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest. Something down here is copying everything.|@B Grrrr...|@L Hang on, MegaMan! Whatever it is, we'll find it!");
 	else if (first_of_act && run.biome == BIOME_UNDERNET)
@@ -491,6 +497,7 @@ static void area_card(void) {
 	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
 	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "Through a dark warp");
 	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "Beyond the sealed gate");
+	else if (biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS) snprintf(act, sizeof act, "Below the Nest");
 	else if (biome == BIOME_NEST && net_version() > 1) snprintf(act, sizeof act, "The bottom of Net V%d", net_version());
 	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "The bottom of the net");
 	else if (net_version() > 1) snprintf(act, sizeof act, "Net V%d - Act %d", net_version(), act_no);
@@ -2018,12 +2025,15 @@ static bool follow_exit_warp(void) {
 		return !arrived;
 	}
 	if (pending != 1 || emu_read8(BN6_WARP + 0x11) != 1) return false;
-	/* the short net's Nest fallen: the run is won */
-	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) { win_run(); return true; }
+	/* the short net's Nest fallen: the run is won (on threat 10, its first
+	 * guardian's exit leads down to the second's, docs/META.md) */
+	if (boss_beaten() && run.biome == BIOME_NEST && run_short_last(run.depth)) { win_run(); return true; }
+	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) run.boss_order[BIOME_NEST] = (uint8_t)run_nest_second();
 	if (boss_beaten()) clear_card();
-	/* past the Nest's guardian: the net rebuilds (the next arrival says so;
-	 * counted with the next checkpoint, which a CONTINUE cannot undo) */
-	if (boss_beaten() && run.biome == BIOME_NEST) D.nest_cleared = true;
+	/* past the endless net's Nest guardian: the net rebuilds (the next
+	 * arrival says so; counted with the next checkpoint, which a CONTINUE
+	 * cannot undo) */
+	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) D.nest_cleared = true;
 	/* the Guardian Data's second way on, where it was taken (docs/META.md,
 	 * routes): the next act in that area, under its guardian */
 	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth) && flag_get(LAYER_ROUTE_FLAG)) {

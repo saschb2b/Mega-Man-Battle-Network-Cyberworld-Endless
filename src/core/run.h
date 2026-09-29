@@ -50,7 +50,7 @@ typedef struct {
  * the run; the endless net repeats CYCLE_LAYERS, harder each time. */
 enum { RUN_ENDLESS, RUN_SHORT };
 #define SHORT_LAYERS 10
-#define THREAT_MAX 9
+#define THREAT_MAX 10
 enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4 };
 
 extern Run run;
@@ -64,8 +64,13 @@ void run_setup(int mode, int folder, int threat, int helpers, int cross);
  * taken, and `navi` its guardian, fit for the act and no other act's; -1
  * for none (the first act, the short net's Nest, the Undernet and on). */
 int run_route_alt(int act, int *navi);
-/* Whether depth is the short net's Nest, the run's last layer. */
+/* Whether depth is the short net's Nest, the run's last layer (on threat
+ * 10 its last two: the first guardian leads down to a second). */
 static inline bool run_short_nest(int depth) { return run.mode == RUN_SHORT && depth >= SHORT_LAYERS; }
+static inline bool run_short_last(int depth) { return run_short_nest(depth) && depth >= SHORT_LAYERS + (run.threat >= 10); }
+/* The short net's second Nest guardian (threat 10): drawn from the run's
+ * seed as the first is, none of the acts' guardians nor the first. */
+int run_nest_second(void);
 int biome_bg(int b);
 /* A navi's HP at a version (0 V1, 1 EX, 2 SP) from the ROM; -1 unknown. */
 int navi_hp(int navi, int version);

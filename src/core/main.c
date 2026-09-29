@@ -729,8 +729,8 @@ int main(int argc, char **argv) {
 		/* "setup": the title with the setup after NEW GAME open */
 		if (!strcmp(start_scene, "setup")) { title_setup = true; s = &scene_title; }
 		/* "summary": the title's summary of a made-up run lost at --run-depth,
-		 * or won with --setup short at layer 10 (its unlocks said, and saved
-		 * in --data-dir) */
+		 * or won with --setup short at layer 10 (11 on threat 10; its
+		 * unlocks said, and saved in --data-dir) */
 		if (!strcmp(start_scene, "summary")) {
 			run_new(seed ? seed : 1);
 			run_setup(net, folder, threat, helpers, cross);
@@ -738,7 +738,7 @@ int main(int argc, char **argv) {
 			run.viruses_deleted = run.depth * 6;
 			run.bosses_beaten = run.depth / 3;
 			title_new_best = run.depth > profile.best_depth;
-			title_won = run_short_nest(run.depth);
+			title_won = run_short_last(run.depth);
 			if (title_won) {
 				snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
 				meta_run_over(true);

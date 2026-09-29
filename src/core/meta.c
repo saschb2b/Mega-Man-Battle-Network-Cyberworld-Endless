@@ -102,6 +102,7 @@ const char *meta_threat_rule(int rung) {
 		"Chip Traders come half as often",
 		"Guardian Data drafts two programs",
 		"Guardian Data gives four HPMemory",
+		"A second guardian waits below the short net's Nest",
 	};
 	return rung >= 1 && rung <= THREAT_MAX ? rules[rung - 1] : "";
 }

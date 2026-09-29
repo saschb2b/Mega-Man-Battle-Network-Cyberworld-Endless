@@ -88,6 +88,22 @@ int run_route_alt(int act, int *navi) {
 	return b;
 }
 
+static const uint8_t nest_pool[4] = { 3, 4, 11, 3 };   /* SlashMan, EraseMan, ProtoMan */
+
+int run_nest_second(void) {
+	uint32_t keep = rng_state();
+	rng_seed(run.seed ^ 0x4E455332u);
+	int first = run.boss_order[BIOME_NEST], g = first;
+	for (int tries = 0; tries < 16; ++tries) {
+		g = pacing_guardian_pick(nest_pool, navis, (int)sizeof navis, 3, 0, false, navi_hp);
+		bool again = g == first;
+		for (int e = 0; e < 3; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+		if (!again) break;
+	}
+	rng_restore(keep);
+	return g;
+}
+
 void run_setup(int mode, int folder, int threat, int helpers, int cross) {
 	run.mode = (uint8_t)mode;
 	run.folder = (uint8_t)folder;
@@ -97,8 +113,6 @@ void run_setup(int mode, int folder, int threat, int helpers, int cross) {
 	if (mode != RUN_SHORT) return;
 	/* the short net's Nest comes as the fourth act (its guardian no SP),
 	 * none of the three acts' guardians again */
-	static const uint8_t nest_pool[4] = { 3, 4, 11, 3 };   /* SlashMan, EraseMan, ProtoMan */
-	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 	rng_seed(run.seed ^ 0x4E455354u);
 	int g = 0;
 	for (int tries = 0; tries < 8; ++tries) {
