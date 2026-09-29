@@ -109,6 +109,7 @@ static struct {
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
+	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	bool checkpoint_data;  /* the checkpoint due is the Guardian Data's */
 	const char *saved_at;  /* where the run was last saved, for the quit prompt */
 	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
@@ -2482,6 +2483,9 @@ void director_update(void) {
 			for (int i = 0; i < D.next.nfoes; ++i)
 				if (D.next.foes[i].kind == FOE_VIRUS) profile_family_note(D.next.foes[i].family);
 			profile_save();
+			/* (and, the first time, what the Mystery Data on its field
+			 * was: said after it was met, kept or broken, not before) */
+			for (int i = 0; i < D.next.nobj; ++i) D.gem_due |= D.next.obj[i].kind >> 4 == FIELD_GEM && !profile.gem_taught;
 		}
 		if (emu_debug_on() && won) {
 			int r = emu_read16(BN6_BATTLE_REWARD);
@@ -2511,6 +2515,12 @@ void director_update(void) {
 	 * box talked to the Server he faced, whose own words took the box, and
 	 * the prize was never named) */
 	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
+	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"
+		"@M But if it's still there when we win, its data is ours!", FACE_MEGAMAN)) {
+		D.gem_due = false;
+		profile.gem_taught = 1;
+		profile_save();
+	}
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	if (run.fragments > D.fragments_seen && D.objs.fragment_found >= 0) D.fragment_due = true;

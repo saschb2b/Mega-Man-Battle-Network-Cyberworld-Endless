@@ -46,6 +46,7 @@ typedef struct {
 	 * PET's battle data on them, which his warnings read (a guardian's is
 	 * its rivals.sav record) */
 	uint32_t families_fought[2];
+	uint8_t gem_taught;       /* MegaMan has said what a Mystery Data on the battlefield is */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };
