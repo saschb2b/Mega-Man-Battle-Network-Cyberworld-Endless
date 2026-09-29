@@ -235,6 +235,19 @@ static const char *way_to(int tx, int ty, int *far) {
 	return ways[way_dir];
 }
 
+/* The town's way to the port on foot (town_walk): the first stretch of the
+ * walk, not the line to it, which led a playtester into a house front
+ * ("straight up") on two runs; how far that walk is. */
+static const char *town_way(int *far) {
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int wx, wy, cells;
+	if (!town_walk(px, py, 8, &wx, &wy, &cells)) return way_to(town_info()->port_x, town_info()->port_y, far);
+	const char *way = way_to(wx, wy, far);
+	int panels = cells / 4;   /* (a panel is 32 units, a cell 8) */
+	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
+	return way;
+}
+
 /* The way on along the floor, not as the crow flies (net_route.c), and
  * how far that walk is. NULL when either end is off the floor. */
 static const char *route_to(int tx, int ty, int *far) {
@@ -254,7 +267,7 @@ static const char *route_to(int tx, int ty, int *far) {
  * guardian (the port in the town); way_dir holds it. */
 static void goal_way(void) {
 	int far;
-	if (D.town) { way_to(town_info()->port_x, town_info()->port_y, &far); return; }
+	if (D.town) { town_way(&far); return; }
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
 	if (!route_to(gx, gy, &far)) way_to(gx, gy, &far);
@@ -291,7 +304,7 @@ static const char *status_words(void) {
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (D.town) {
 		int far;
-		const char *way = way_to(town_info()->port_x, town_info()->port_y, &far);
+		const char *way = town_way(&far);
 		const char *statue = town_info()->group == 0x00 ? "squirrel" : "bird";
 		/* all of it the first time, then only the way (a box each) */
 		if (!D.port_told) ADD("@M The port's %s, by the %s statue!|@M Stand next to the statue and press R to jack me in!", way, statue);
@@ -1482,7 +1495,7 @@ uint32_t director_keys(uint32_t keys) {
 		static char buf[160];
 		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
 		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far;
-		const char *way = way_to(town_info()->port_x, town_info()->port_y, &far);
+		const char *way = town_way(&far);
 		/* (close by, from any side of it: a step more, and which way) */
 		if (dx * dx + dy * dy < 128 * 128)
 			snprintf(buf, sizeof buf, "@M Almost, Lan! The statue's %s.|@M Step right up to it and press R.", way);

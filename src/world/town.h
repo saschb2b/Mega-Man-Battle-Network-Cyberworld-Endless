@@ -38,6 +38,9 @@ const uint8_t *town_misses(void);
 bool town_walkable(int cx, int cy);
 /* Where to head from world (x, y) to reach the jack-in on foot. */
 bool town_route(int x, int y, int *wx, int *wy);
+/* The same `steps` cells along the walk, and the walk's length in cells
+ * (8 world units each) when `cells` is given. */
+bool town_walk(int x, int y, int steps, int *wx, int *wy, int *cells);
 /* The town's trigger cells (section 3: the jack-in 0x40, checks 0xF0 +). */
 int town_triggers(const CoordCell **cells);
 /* The run before this one was left unfinished (NEW GAME over CONTINUE):

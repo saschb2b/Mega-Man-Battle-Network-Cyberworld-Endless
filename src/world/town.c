@@ -758,9 +758,11 @@ const uint16_t *town_tiles(void) { return T.tiles; }
 const uint8_t *town_misses(void) { return T.miss; }
 bool town_walkable(int cx, int cy) { return walkable(cx, cy); }
 
-bool town_route(int x, int y, int *wx, int *wy) {
-	/* breadth first from the jack-in's middle over walkable cells; then a
-	 * few cells along the way from Lan's */
+bool town_route(int x, int y, int *wx, int *wy) { return town_walk(x, y, 3, wx, wy, NULL); }
+
+bool town_walk(int x, int y, int steps, int *wx, int *wy, int *cells) {
+	/* breadth first from the jack-in's middle over walkable cells; then
+	 * `steps` cells along the way from Lan's */
 	static int16_t dist[PLAN_N][PLAN_N];
 	static int16_t q[PLAN_N * PLAN_N];
 	int gx = fdiv(T.info.port_x, 8) + PLAN_R, gy = fdiv(T.info.port_y, 8) + PLAN_R;
@@ -781,10 +783,11 @@ bool town_route(int x, int y, int *wx, int *wy) {
 		}
 	}
 	if (dist[sy][sx] < 0) return false;
+	if (cells) *cells = dist[sy][sx];
 	/* (at the goal's cell: the point itself, which may be a cell's corner) */
 	if (!dist[sy][sx]) { *wx = T.info.port_x; *wy = T.info.port_y; return true; }
 	int cx = sx, cy = sy;
-	for (int step = 0; step < 3 && dist[cy][cx] > 0; ++step)
+	for (int step = 0; step < steps && dist[cy][cx] > 0; ++step)
 		for (int k = 0; k < 4; ++k) {
 			int nx = cx + d[k][0], ny = cy + d[k][1];
 			if (nx >= 0 && ny >= 0 && nx < PLAN_N && ny < PLAN_N && dist[ny][nx] >= 0 && dist[ny][nx] < dist[cy][cx]) { cx = nx; cy = ny; break; }

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- In the town, L and the arrow give the way to the port on foot: the first
+  stretch of the walk around the houses, where they pointed straight at the
+  port and sent a playtester into a house front on two runs.
 - Runs open in three areas: the Seaside Area joins Central and the RoboDog
   Comp for act 1 (five kinds of virus in the act's band), and a new run
   avoids the last one's act 1 area as it does its first guardian. A
