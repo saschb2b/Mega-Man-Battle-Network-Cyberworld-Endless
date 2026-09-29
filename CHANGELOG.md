@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The setup's Cross row names the Cross's weakness ("Breaker attacks do
+  2x", as BN6's own Cross tutorials have it), and MegaMan says it when a
+  guardian's Cross is won. A playtester was told the wrong one.
 - A risky choice starts on No: a strong virus signal's fight, a Navi
   gate's and a warp into the Undernet. A playtester's A pressed through
   the signal's words took its fight on at Yes and cost him 150 HP.

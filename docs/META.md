@@ -100,7 +100,10 @@ CrakShot and Cannons and so lose its cost (session 31).
 A Navi deleted in any run lets later runs start in its Cross (HeatCross,
 ElecCross, SlashCross, EraseCross, ChargeCross), chosen beside the folder.
 The cost is BN6's own: the Cross's element makes MegaMan weak to its
-counter. The Cross still comes from its guardian mid-run as today; a Cross
+counter (HeatCross and ChargeCross to Aqua, ElecCross to Wood, SlashCross
+to Breaker, EraseCross to Wind, as BN6's own Cross tutorials say), which
+the setup's Cross row names, as MegaMan does when a guardian's Cross is
+won. The Cross still comes from its guardian mid-run as today; a Cross
 start only moves when. BeastOut stays the Graveyard's.
 
 ### 3. The threat staircase (Ascension, Heat, Stakes)

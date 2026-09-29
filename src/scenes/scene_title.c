@@ -467,7 +467,7 @@ static void setup_draw(int x0, int y0) {
 	for (int i = 0; i < 4; ++i) fill_rect(ax + i, ay + i, 1, 8 - 2 * i, orange);
 	/* what the chosen row means */
 	const char *note = "";
-	char buf[80], locked[FOLDER_COUNT][48];
+	char buf[128], locked[FOLDER_COUNT][48];
 	int nlocked = 0;
 	switch (S.row) {
 	case ROW_NET:
@@ -484,10 +484,15 @@ static void setup_draw(int x0, int y0) {
 	case ROW_CROSS: {
 		int open_crosses = 0;
 		for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
-		note = S.cross ? "From the first battle. No other Cross this run"
+		/* (and its costs: BN6's own weakness, which a playtester was told
+		 * wrong, and no other Cross) */
+		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL;
+		if (weak) snprintf(buf, sizeof buf, "From the first battle. %s attacks do 2x", weak);
+		note = weak ? buf : S.cross ? "From the first battle"
 			: open_crosses ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
 		/* (the ones still shut, and how) */
-		if (open_crosses && open_crosses < 5) snprintf(locked[nlocked++], sizeof locked[0], "%s", "Others: delete their Navis");
+		if (S.cross) snprintf(locked[nlocked++], sizeof locked[0], "%s", "No other Cross this run");
+		else if (open_crosses && open_crosses < 5) snprintf(locked[nlocked++], sizeof locked[0], "%s", "Others: delete their Navis");
 		break;
 	}
 	case ROW_THREAT:

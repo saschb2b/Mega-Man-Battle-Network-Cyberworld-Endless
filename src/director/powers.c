@@ -10,14 +10,15 @@
 #include "net.h"
 #include "run.h"
 
-/* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, and what
- * MegaMan feels of each */
-static const struct { int navi, flag; const char *name, *feel; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!" },
-	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!" },
-	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!" },
-	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power." },
-	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!" },
+/* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, what MegaMan
+ * feels of each, and the attacks that hit it twice as hard (BN6's own
+ * Cross tutorials, CompText86D0614) */
+static const struct { int navi, flag; const char *name, *feel, *weak; } crosses[] = {
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua" },
+	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood" },
+	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker" },
+	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind" },
+	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua" },
 };
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its
@@ -34,6 +35,12 @@ const char *powers_cross_name(int navi) {
 	return NULL;
 }
 
+const char *powers_cross_weakness(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) return crosses[i].weak;
+	return NULL;
+}
+
 void powers_bring(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi) flag_set(crosses[i].flag);
@@ -47,7 +54,8 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 	const char *brought = powers_cross_name(run.cross);
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i) {
 		if (crosses[i].navi != navi || beaten_before(navi, depth)) continue;
-		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", crosses[i].name, crosses[i].feel);
+		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s|@M But %s attacks hit me twice as hard in it, Lan.", k ? "|" : "", crosses[i].name, crosses[i].feel,
+			crosses[i].weak);
 		else if (run.cross == navi) ADD("%s@M %s's Cross data... We brought his Cross along already, Lan!", k ? "|" : "", guardian(navi)->name);
 		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. One Cross a run!", k ? "|" : "", guardian(navi)->name, brought);
 	}
