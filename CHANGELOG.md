@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A guardian's battle chip comes in its * whenever the folder holds none
+  of its letters, not half the time: a playtester's Blade folder won
+  SpoutMan A.
 - An exit pad takes MegaMan from anywhere on its drawn ring, from every
   side: its trigger is round, 26 units out, where it had reached less at
   the screen's top. A playtester coming down onto a pad from the upper

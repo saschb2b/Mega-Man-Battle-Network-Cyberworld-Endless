@@ -147,7 +147,8 @@ bool emu_encounter_lean_drops(void) {
 	 * the id in 0-8 and the code in 9-13. The coin picks between the two
 	 * entries of a pair: the second of each, rewritten from the ROM's own
 	 * in the core's copy, comes in one of the folder's codes where the
-	 * chip does, so a chip reward leans half the time, as Mystery Data's) */
+	 * chip does, so a chip reward leans half the time, as Mystery Data's;
+	 * a Navi's chip, in either entry, in its * off the folder's codes) */
 	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
 	if (state < 0x02000000u || state >= 0x02040000u) return false;
 	int n = emu_read8(state + BN6_BATTLE_ENEMY_COUNT);
@@ -156,14 +157,16 @@ bool emu_encounter_lean_drops(void) {
 		int id = emu_read16(state + BN6_BATTLE_ENEMY_IDS + 2u * (uint32_t)i);
 		if (id <= 0 || id >= 0x200) continue;
 		uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
-		for (uint32_t k = 1; k < 20; k += 2) {
+		for (uint32_t k = 0; k < 20; ++k) {
 			uint16_t v = rom_u16(row + 2 * k);
 			if (v == 0xFFFF || v >> 14) continue;
 			int chip = v & 0x1FF, code = v >> 9 & 0x1F;
-			char c = loot_fit_code(chip, code >= 26 ? '*' : (char)('A' + code), true);
+			char c = code >= 26 ? '*' : (char)('A' + code);
+			if (k & 1) c = loot_fit_code(chip, c, true);
 			/* (a Navi's chip in its * where the folder holds not its
-			 * letter, as his Guardian Data gives it: a Blade folder's
-			 * guardian dropped ChrgeMan C) */
+			 * letter, as his Guardian Data gives it, from both entries of
+			 * a pair: a Blade folder's guardian dropped ChrgeMan C, and
+			 * with the second entry alone, SpoutMan A) */
 			bool held = false;
 			for (int h = 0; h < 3 && run.codes[h]; ++h) held |= c == 'A' + run.codes[h] - 1;
 			if (!held && c != '*' && chip_family(chip) == CHIP_FAMILY_NAVI) {
