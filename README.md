@@ -263,9 +263,10 @@ controller is used again.
 | Start | Open the PET | Pause |
 | Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings, or pips on the edge), and the way to the exit or guardian | |
 
-In the net, a direction held toward a walkway lines MegaMan up with it and
-follows it round its turns, and A turns him to the navi or Mystery Data
-beside him, or walks him up to one a step or two before him.
+In the net MegaMan walks as in BN6: a single direction goes straight across
+the screen, and two together (like DOWN+LEFT) go along a walkway. A turns
+him to the navi or Mystery Data beside him, or walks him up to one a step
+or two before him.
 
 ### A run
 

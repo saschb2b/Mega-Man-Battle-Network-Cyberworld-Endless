@@ -2,12 +2,13 @@
 
 ## Unreleased
 
-- MegaMan never walks against the direction held. The walking assist that
-  lines him up with a walkway's mouth and rounds a lane's turn could step
-  him backward, for up to a third of a second: a player with a controller
-  saw him go the opposite way now and then, and a walk of 540 held keys
-  on one layer found 23 such steps (none now). It still steers along and
-  across the way held.
+- MegaMan walks as in BN6 again: the walking assist that lined him up with
+  a walkway's mouth and followed lanes round their turns is gone. It could
+  step him backward, for up to a third of a second: a player with a
+  controller saw him go the opposite way now and then, and a walk of 540
+  held keys on one layer found 23 such steps. It was made for a
+  playtester who reads still pictures; along a walkway, hold its two
+  directions together, as in BN6.
 - The game keeps its pace where a frame misses the display's refresh, a
   50 Hz display or a slower machine: a frame behind is played unshown
   and caught up, as the browser's player does. Each missed refresh had
