@@ -72,6 +72,7 @@ bool chip_sword(int rom_id);
  * the panel it aimed at a moment later; 36 TankCan1-3 (chips 12-14), which
  * fire after a wind-up. */
 #define CHIP_FAMILY_TANKCAN 36
+#define CHIP_FAMILY_NAVI 27   /* the Navi chips (docs/ROM_DATA.md, chip records) */
 int chip_family(int rom_id);
 /* A Standard chip, by the record's library type (0x7; 1 Mega, 2 Giga, 3
  * Secret): a folder takes several of one (a Mega or Giga chip, one). */

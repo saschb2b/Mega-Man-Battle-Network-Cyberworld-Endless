@@ -7,7 +7,6 @@
 #include "encounter.h"
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "bn6.h"
@@ -159,6 +158,16 @@ bool emu_encounter_lean_drops(void) {
 			if (v == 0xFFFF || v >> 14) continue;
 			int chip = v & 0x1FF, code = v >> 9 & 0x1F;
 			char c = loot_fit_code(chip, code >= 26 ? '*' : (char)('A' + code), true);
+			/* (a Navi's chip in its * where the folder holds not its
+			 * letter, as his Guardian Data gives it: a Blade folder's
+			 * guardian dropped ChrgeMan C) */
+			bool held = false;
+			for (int h = 0; h < 3 && run.codes[h]; ++h) held |= c == 'A' + run.codes[h] - 1;
+			if (!held && c != '*' && chip_family(chip) == CHIP_FAMILY_NAVI) {
+				ChipInfo ci;
+				chip_info(chip, &ci);
+				if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
+			}
 			uint16_t w = (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9);
 			uint8_t b[2] = { (uint8_t)w, (uint8_t)(w >> 8) };
 			emu_write(0x08000000u + row + 2 * k, b, 2);

@@ -12,6 +12,8 @@
 - A battle's chip reward comes in one of the folder's codes half the time,
   where the chip comes in one, as Mystery Data's does: a playtester's Blade
   folder of S, L and * won WaveArm1 E and the like, off every code it held.
+  A guardian's own chip comes in its * then where the folder does not hold
+  its letter, as his Guardian Data gives it (not ChrgeMan C for S, L and *).
 - Collector's vaults: from the second act a layer may hold a vault whose
   lock counts the Library (30 chips in act 2, 60 in act 3, 90 later; its
   words say how many it wants and how many the Library holds). Open, it
