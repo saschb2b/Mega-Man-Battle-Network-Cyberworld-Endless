@@ -31,8 +31,10 @@
   stake: if they delete him, the dive is over. A playtester took a duel
   at 100 of 140 HP on layer 2, nothing saying it was a real fight, and
   his run ended there; the summary now says a deletion was in ProtoMan's
-  duel. Lan answers Chaud's call, and ProtoMan greets MegaMan as the old
-  rival he is.
+  duel, and it counts as a duel lost. Chaud's calls say the record ("It's
+  0-1 between us"): after that deletion his next call was word for word
+  the first. Lan answers Chaud's call, and ProtoMan greets MegaMan as the
+  old rival he is.
 - The rivalry's third rung is a netbattle: after two duels won, ProtoMan
   stops racing and faces MegaMan himself, from the third act on (before
   it he says where he'll wait), at the act's guardian strength. It is a

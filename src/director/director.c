@@ -2648,6 +2648,10 @@ void director_update(void) {
 		D.gameover = true;
 		D.lost_to = boss_fighting() ? D.objs.guardian.navi : 0;
 		D.lost_duel = D.duel;
+		/* (deleted in a duel: a duel lost, which the verdict, never
+		 * reached, would have counted; Chaud's next call knew nothing of
+		 * it) */
+		if (D.duel) { profile.duel_lost++; profile_save(); }
 		boss_lost();
 	}
 	if (D.gameover) {
@@ -2837,6 +2841,9 @@ void director_update(void) {
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic() && D.frame > 60) {
 		int f = layer_objs_duel_frames, sec = f / 60;
 		char call[400];
+		/* (the record said: Chaud remembers every duel) */
+		char record[64];
+		snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
 		if (layer_objs_duel_later)
 			snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
 				"@C He'll be waiting in the third act. Get MegaMan ready.");
@@ -2846,7 +2853,7 @@ void director_update(void) {
 				: "He hasn't forgotten the last time.");
 		else
 			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|@C Think MegaMan can beat that%s?",
-				profile.duel_won + profile.duel_lost ? "@C Lan, it's Chaud.|" :
+				profile.duel_won + profile.duel_lost ? record :
 				"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
 				sec / 60, sec % 60, (f % 60) * 100 / 60, layer_objs_duel_rung == 1 ? ", without a hit" : "");
 		/* (Lan answers: a call no one answered read as a message left) */
