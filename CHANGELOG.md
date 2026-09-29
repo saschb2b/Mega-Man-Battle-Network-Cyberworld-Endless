@@ -12,6 +12,13 @@
   act's, a little above its band, the same every time the layer is made.
   docs/RIVAL.md has the design. A run saved by an older build continues
   its layer afresh.
+- A duel's squad is one of the act's own battles, not one above them, and
+  before the choice ProtoMan says how many viruses it is and MegaMan the
+  stake: if they delete him, the dive is over. A playtester took a duel
+  at 100 of 140 HP on layer 2, nothing saying it was a real fight, and
+  his run ended there; the summary now says a deletion was in ProtoMan's
+  duel. Lan answers Chaud's call, and ProtoMan greets MegaMan as the old
+  rival he is.
 - The rivalry's third rung is a netbattle: after two duels won, ProtoMan
   stops racing and faces MegaMan himself, from the third act on (before
   it he says where he'll wait), at the act's guardian strength. It is a

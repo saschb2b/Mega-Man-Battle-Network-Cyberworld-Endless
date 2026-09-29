@@ -77,6 +77,7 @@ static struct {
 	bool duel, duel_hit, duel_call_due, duel_verdict_due;
 	int duel_hp, duel_time;
 	int duel_cap;       /* the netbattle's ProtoMan at most this HP (the act's guardian band), 0 none or done */
+	bool lost_duel;     /* MegaMan deleted in the rival's duel (the summary says so) */
 	char duel_verdict[400];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
@@ -811,7 +812,11 @@ static bool build_layer(void) {
 			 * he names the act) */
 			layer_objs_duel_rung = profile.duel_won % 3;
 			layer_objs_duel_later = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 && pacing_act(run.depth) < 2;
-			D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_CHALLENGE);
+			/* (a race's squad is one of the act's own battles: its time is
+			 * the test, not its strength; one above the band deleted a
+			 * playtester at 100 of 140 HP on layer 2, his run over) */
+			D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_NORMAL);
+			layer_objs_duel_foes = D.duel_enc.nfoes;
 			int lo, hi;
 			pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 			D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi : 0;
@@ -2521,6 +2526,7 @@ static void end_run(void) {
 	/* what the summary tells: where, and by whom */
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
 	if (D.lost_to) snprintf(title_cause, sizeof title_cause, "by %s in %s", guardian(D.lost_to)->name, area);
+	else if (D.lost_duel) snprintf(title_cause, sizeof title_cause, "in ProtoMan's duel");
 	else snprintf(title_cause, sizeof title_cause, "in %s", area);
 	/* (the guardian's first battle, lost: its battle data is what the run
 	 * leaves for the next briefing) */
@@ -2624,6 +2630,7 @@ void director_update(void) {
 	if (mode == BN6_MODE_GAME_OVER && !D.gameover) {
 		D.gameover = true;
 		D.lost_to = boss_fighting() ? D.objs.guardian.navi : 0;
+		D.lost_duel = D.duel;
 		boss_lost();
 	}
 	if (D.gameover) {
@@ -2825,6 +2832,11 @@ void director_update(void) {
 				profile.duel_won + profile.duel_lost ? "@C Lan, it's Chaud.|" :
 				"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
 				sec / 60, sec % 60, (f % 60) * 100 / 60, layer_objs_duel_rung == 1 ? ", without a hit" : "");
+		/* (Lan answers: a call no one answered read as a message left) */
+		if (!layer_objs_duel_later) {
+			size_t n = strlen(call);
+			snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
+		}
 		if (talk_start(call, FACE_CHAUD)) D.duel_call_due = false;
 	}
 	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"

@@ -65,12 +65,18 @@ clearance opens), which only matter to a player who plays on.
 
 1. **Chaud's call.** On a duel's layer, after the arrival words, Lan's
    PET rings: "Lan. It's Chaud. ProtoMan's on this layer. He busted a
-   squad here in 0:14.20. Think MegaMan can do better?" L's briefing
-   names ProtoMan's way, and the map marks him.
+   squad here in 0:14.20. Think MegaMan can do better?", and Lan answers
+   ("You're on, Chaud!"). L's briefing names ProtoMan's way, and the map
+   marks him.
 2. **The ring.** ProtoMan stands on the layer, off the way on. His words
-   give the terms, the squad and his time; the choice starts on No.
-3. **The squad.** A formation of the act, a little above its band: the
-   same viruses ProtoMan busted, fixed by the layer's seed.
+   give the terms: the squad's size ("a pair of viruses"), his time and
+   the rung's rule; then MegaMan the stake ("Real viruses, Lan. If they
+   delete us, the dive's over, so let's be at full HP."). The choice
+   starts on No. ProtoMan greets MegaMan as the old rival he is.
+3. **The squad.** One of the act's own formations, in its band: the same
+   viruses ProtoMan busted, fixed by the layer's seed. The time is the
+   test, not the squad's strength (one above the band deleted a
+   playtester at 100 of 140 HP on layer 2, his run over).
 4. **ProtoMan's time.** Set from the squad's HP so that a good hand beats
    it and a slow one does not, then eight percent faster for each duel
    he has lost at that rung, never under a floor. Tuned by playtests.

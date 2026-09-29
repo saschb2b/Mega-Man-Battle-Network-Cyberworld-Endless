@@ -64,7 +64,7 @@ extern bool layer_objs_dealer_named;
  * time to beat, in frames, the rivalry's rung (0 his time, 1 his time
  * without a hit, 2 a netbattle with him), and whether the netbattle waits
  * for a later act (ProtoMan then names it, and asks nothing). */
-extern int layer_objs_duel_frames, layer_objs_duel_rung;
+extern int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
 extern bool layer_objs_duel_later;
 
 #endif

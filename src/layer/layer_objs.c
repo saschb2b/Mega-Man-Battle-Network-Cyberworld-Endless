@@ -47,7 +47,7 @@
 #define SPR_DEALER      62   /* GreenNavi, the Net Dealer's keeper in the game */
 #define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
 bool layer_objs_dealer_again, layer_objs_dealer_named;
-int layer_objs_duel_frames, layer_objs_duel_rung;
+int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
 bool layer_objs_duel_later;
 
 #define SPR_BYSTANDER   67   /* EvilNavi */
@@ -609,10 +609,19 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					snprintf(terms, sizeof terms, "Enough racing, MegaMan.|Chaud says you're ready. This time, you face me.|"
 						"@M He won't hold back, Lan. If ProtoMan deletes us, the dive's over. We can run if it goes bad.");
 				else
-				snprintf(terms, sizeof terms, "%sI busted this net's viruses in %d:%02d.%02d. Beat that%s, MegaMan.",
-					met ? "Back again, MegaMan? Chaud's watching.|" :
-					"So you're the one diving the Cyberworld. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
-					sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? ", without taking a hit" : "");
+				{
+					/* (the squad and the stake said before the choice, as
+					 * docs/RIVAL.md promises: a playtester took it at 100 HP,
+					 * nothing saying it was a real fight; and the two are old
+					 * rivals, not strangers) */
+					static const char *const count[] = { "", "a lone virus", "a pair of viruses", "three viruses", "four viruses" };
+					int nf = layer_objs_duel_foes >= 1 && layer_objs_duel_foes <= 4 ? layer_objs_duel_foes : 3;
+					snprintf(terms, sizeof terms, "%sI busted %s here in %d:%02d.%02d. Beat that%s, MegaMan.|"
+						"@M Real viruses, Lan. If they delete us, the dive's over, so let's be at full HP.",
+						met ? "Back again, MegaMan? Chaud's watching.|" :
+						"MegaMan. So it's you diving the Cyberworld. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
+						count[nf], sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? ", without taking a hit" : "");
+				}
 				/* (he logs out as the duel begins: one a layer) */
 				tk.gone_flag = flag;
 			}
