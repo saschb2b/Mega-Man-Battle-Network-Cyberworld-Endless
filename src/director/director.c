@@ -34,6 +34,7 @@
 #include "netmap.h"
 #include "rom.h"
 #include "platform.h"
+#include "powers.h"
 #include "run.h"
 #include "runlog.h"
 #include "meta.h"
@@ -604,6 +605,7 @@ bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	set_start_folder();
+	powers_bring(run.cross);
 	note_folder_codes();
 	town_after_abandon = save_exists();
 	save_delete();
@@ -1676,7 +1678,7 @@ bool director_start_layer(void) {
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it) */
-	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) set_start_folder();
+	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); powers_bring(run.cross); }
 	note_folder_codes();
 	if (!build_layer()) return false;
 	lock_run();

@@ -19,6 +19,9 @@ const FolderInfo *meta_folder(int folder);
  * *), or NULL for the Standard folder, which is the game's own. */
 const uint16_t *meta_folder_chips(int folder);
 bool meta_folder_open(int folder);
+/* Whether a run may bring `navi`'s Cross (HeatMan 1 .. ChargeMan 5): open
+ * once that navi has been deleted as a guardian, in any run. */
+bool meta_cross_open(int navi);
 bool meta_endless_open(void);
 /* The highest threat rung a new run may take. */
 int meta_threat_open(void);

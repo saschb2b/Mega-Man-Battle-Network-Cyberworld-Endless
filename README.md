@@ -354,7 +354,12 @@ behind is options. From the second run, NEW GAME opens a setup:
 - **Net:** the short net, or the endless net once a short one is won.
 - **Folder:** BN6's starting folder, or one opened in any run: Blade
   (swords in S for LifeSword), once any guardian falls, and Storm (Elec
-  chips), once an Aqua guardian does.
+  chips), once an Aqua guardian does. Chips the net gives lean to the
+  codes the folder holds most.
+- **Cross:** a Cross MegaMan has from the first battle, once its Navi
+  (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan) has fallen as a
+  guardian. It is the run's only Cross: guardians' Cross data won't fit
+  beside it.
 - **Threat:** rungs that each add one constraint (stronger viruses from act
   2, fewer heals, dearer dealers, EX guardians, SP Navis in Servers), each
   opened by winning on the one below.

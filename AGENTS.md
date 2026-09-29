@@ -153,7 +153,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
 `--guardian N` with navi N guarding every area,
 `--seed S` with a given seed, `--scene town` from the town as NEW GAME does,
 `--scene summary` the title's run summary (a win's with `--setup short` at
-`--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS` the run's setup,
+`--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS[,CROSS]` the run's setup (CROSS the navi whose Cross it brings, 1-5),
 `--marks HEX` the title's marks, `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,

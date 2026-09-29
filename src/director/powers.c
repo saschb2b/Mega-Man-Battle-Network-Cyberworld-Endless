@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "flags.h"
+#include "guardians.h"
 #include "net.h"
 #include "run.h"
 
@@ -27,13 +28,29 @@ static bool beaten_before(int navi, int depth) {
 	return false;
 }
 
+const char *powers_cross_name(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) return crosses[i].name;
+	return NULL;
+}
+
+void powers_bring(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) flag_set(crosses[i].flag);
+}
+
 const char *powers_reward_text(int navi, int biome, int depth) {
 	static char text[512];
 	int k = 0;
 	#define ADD(...) (k += snprintf(text + k, k < (int)sizeof text ? sizeof text - (size_t)k : 0, __VA_ARGS__))
-	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == navi && !beaten_before(navi, depth))
-			ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", crosses[i].name, crosses[i].feel);
+	/* (a run that brought a Cross keeps it alone: the choice's cost) */
+	const char *brought = powers_cross_name(run.cross);
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i) {
+		if (crosses[i].navi != navi || beaten_before(navi, depth)) continue;
+		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", crosses[i].name, crosses[i].feel);
+		else if (run.cross == navi) ADD("%s@M %s's Cross data... We brought his Cross along already, Lan!", k ? "|" : "", guardian(navi)->name);
+		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. One Cross a run!", k ? "|" : "", guardian(navi)->name, brought);
+	}
 	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
 	 * MegaMan, and Dad lets him use it (once a run) */
 	if (biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS)
@@ -46,7 +63,7 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 
 void powers_after_boss(int navi, int biome) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == navi) flag_set(crosses[i].flag);
+		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
 	/* the Graveyard's guardian wakes the Cybeast */
 	if (biome == BIOME_GRAVEYARD) flag_set(BN6_FLAG_BEAST_OUT);
 }

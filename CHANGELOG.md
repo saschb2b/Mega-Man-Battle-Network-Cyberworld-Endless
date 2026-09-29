@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Cross starts: once HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan has
+  fallen as a guardian in any run, the setup's new Cross row lets a run
+  bring his Cross from the first battle. It is the run's only Cross: a Cross
+  Navi deleted later says his data won't fit beside it. The summary
+  announces a new Cross start, and its goal line points at the first.
 - In the town, L and the arrow give the way to the port on foot: the first
   stretch of the walk around the houses, where they pointed straight at the
   port and sent a playtester into a house front on two runs.

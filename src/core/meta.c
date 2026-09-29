@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "powers.h"
 #include "rivals.h"
 #include "run.h"
 #include "save.h"
@@ -80,6 +81,11 @@ bool meta_folder_open(int folder) {
 	return (profile.folders_open >> folder & 1) || earned(folder);
 }
 
+/* (the Cross navis, HeatMan 1 .. ChargeMan 5: rivals.sav keeps who fell) */
+static bool cross_earned(int navi) { return navi >= 1 && navi <= 5 && rival(navi)->megaman_won > 0; }
+
+bool meta_cross_open(int navi) { return navi >= 1 && navi <= 5 && ((profile.crosses_open >> navi & 1) || cross_earned(navi)); }
+
 bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_clears > 0; }
 
 int meta_threat_open(void) { return profile.threat_open > THREAT_MAX ? THREAT_MAX : profile.threat_open; }
@@ -111,9 +117,12 @@ static void say(const char *fmt, const char *what) {
 
 void meta_run_begun(void) {
 	uint16_t was = profile.folders_open;
+	uint8_t crosses = profile.crosses_open;
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
-	if (profile.folders_open != was) profile_save();
+	for (int n = 1; n <= 5; ++n)
+		if (cross_earned(n)) profile.crosses_open |= (uint8_t)(1u << n);
+	if (profile.folders_open != was || profile.crosses_open != crosses) profile_save();
 }
 
 void meta_run_over(bool won) {
@@ -150,6 +159,12 @@ void meta_run_over(bool won) {
 		profile.folders_open |= (uint16_t)(1u << f);
 		say("the %s folder", folders[f].name);
 	}
+	/* a Cross start, once its navi falls as a guardian */
+	for (int n = 1; n <= 5; ++n) {
+		if ((profile.crosses_open >> n & 1) || !cross_earned(n)) continue;
+		profile.crosses_open |= (uint8_t)(1u << n);
+		say("the %s start", powers_cross_name(n));
+	}
 	profile_save();
 }
 
@@ -171,6 +186,9 @@ const char *meta_next_goal(void) {
 			snprintf(goal, sizeof goal, "%c%s: %s", folders[f].opens[0] - 'a' + 'A', folders[f].opens + 1, folders[f].name);
 			return goal;
 		}
+	bool cross = false;
+	for (int n = 1; n <= 5; ++n) cross |= meta_cross_open(n);
+	if (!cross) return "Delete a Cross Navi: Cross start";
 	if (meta_threat_open() < THREAT_MAX) {
 		snprintf(goal, sizeof goal, "Win on threat %d for threat %d", meta_threat_open(), meta_threat_open() + 1);
 		return goal;

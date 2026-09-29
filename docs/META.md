@@ -302,6 +302,15 @@ against what you find**; each piece restates it.
 4. **Programs found join later runs** (docs/NAVICUST.md, 7): the run's
    gift offers a program from those earlier runs installed.
 
+Built so far: the codes (the Net Dealers and the gift always, Mystery
+Data half the time; read from the game's first folder as a layer is made,
+kept in the run) and Cross starts (the setup's Cross row, open with that
+Navi's first defeat as a guardian, announced on the summary like a folder;
+the brought Cross's flag is set as the run begins, and a Cross Navi
+deleted later says his data won't fit beside it). With them the Seaside
+Area became a third opening area, and a new run avoids the last one's act
+1 area: a playtester began four runs running in the RoboDog Comp.
+
 What could go wrong: the lean flattening the code game into "add
 everything" (it leaves * and every chip without the folder's codes as
 they roll); a Cross start picked every time (the playtests will tell: a

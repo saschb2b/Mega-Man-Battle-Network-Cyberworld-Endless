@@ -31,6 +31,8 @@ typedef struct {
 	uint8_t last_net, last_folder, last_threat, last_helpers;   /* the setup screen starts where the last run's did */
 	uint16_t marks;           /* the title's marks earned (MARK_*, BN6's own bits: meta.h) */
 	uint8_t first_area;       /* the last new run's act 1 area, biome + 1 */
+	uint8_t crosses_open;     /* the Cross starts announced (a bit per navi 1-5, meta.h) */
+	uint8_t last_cross;
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4 };

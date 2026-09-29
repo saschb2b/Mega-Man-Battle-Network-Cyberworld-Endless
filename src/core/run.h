@@ -56,7 +56,7 @@ extern Run run;
 void run_new(uint32_t seed);
 /* The setup chosen for the run just made: in the short net its Nest's
  * guardian is picked as a fourth act's. */
-void run_setup(int mode, int folder, int threat, int helpers);
+void run_setup(int mode, int folder, int threat, int helpers, int cross);
 /* Whether depth is the short net's Nest, the run's last layer. */
 static inline bool run_short_nest(int depth) { return run.mode == RUN_SHORT && depth >= SHORT_LAYERS; }
 int biome_bg(int b);

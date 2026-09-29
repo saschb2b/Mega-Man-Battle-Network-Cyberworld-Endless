@@ -23,6 +23,7 @@
 #include "run.h"
 #include "guardians.h"
 #include "meta.h"
+#include "powers.h"
 #include "save.h"
 #include "text.h"
 
@@ -70,7 +71,7 @@ static struct {
 	/* the setup after NEW GAME (docs/META.md): its row, the choices, the
 	 * helper the cursor is on */
 	bool setup;
-	int row, net, folder, threat, helpers, helper;
+	int row, net, folder, cross, threat, helpers, helper;
 	int asked;            /* the frame it asked: its text types out from there */
 	char ask[32];         /* its second line, the saved run's layer */
 	uint16_t new_marks;   /* marks the run just over earned: they blink in after its summary */
@@ -322,7 +323,7 @@ static void marks_draw(int x0, int y0) {
  * starting folder, the threat rung, the helpers; the last run's choices
  * to start from ---- */
 
-enum { ROW_NET, ROW_FOLDER, ROW_THREAT, ROW_HELPERS, ROW_GO, ROWS };
+enum { ROW_NET, ROW_FOLDER, ROW_CROSS, ROW_THREAT, ROW_HELPERS, ROW_GO, ROWS };
 static const char *const helper_names[3] = { "HP+", "Heals", "Gentle" };
 static const char *const helper_about[3] = {
 	"Two more HPMemory at start", "A heal Prog on every layer", "Gentler battles all along",
@@ -333,6 +334,7 @@ static void setup_open(void) {
 	S.row = ROW_GO;
 	S.net = profile.last_net == RUN_ENDLESS && meta_endless_open() ? RUN_ENDLESS : RUN_SHORT;
 	S.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
+	S.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
 	S.threat = profile.last_threat <= meta_threat_open() ? profile.last_threat : meta_threat_open();
 	S.helpers = profile.last_helpers & 7;
 	S.helper = 0;
@@ -344,16 +346,21 @@ static void setup_update(void) {
 	if (btn_repeat(BTN_DOWN)) { S.row = (S.row + 1) % ROWS; audio_sfx(SFX_CURSOR); }
 	int d = btn_repeat(BTN_RIGHT) ? 1 : btn_repeat(BTN_LEFT) ? -1 : 0;
 	if (d) {
-		int was = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_THREAT ? S.threat : S.helper;
+		int was = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_CROSS ? S.cross : S.row == ROW_THREAT ? S.threat : S.helper;
 		if (S.row == ROW_NET && meta_endless_open()) S.net = S.net == RUN_SHORT ? RUN_ENDLESS : RUN_SHORT;
 		if (S.row == ROW_FOLDER)   /* (the open ones only) */
 			for (int k = 1; k < FOLDER_COUNT; ++k) {
 				int f = (S.folder + d * k + FOLDER_COUNT * k) % FOLDER_COUNT;
 				if (meta_folder_open(f)) { S.folder = f; break; }
 			}
+		if (S.row == ROW_CROSS)   /* (none, or an open one) */
+			for (int k = 1; k < 6; ++k) {
+				int c = (S.cross + d * k + 6 * k) % 6;
+				if (!c || meta_cross_open(c)) { S.cross = c; break; }
+			}
 		if (S.row == ROW_THREAT) S.threat = (S.threat + d + meta_threat_open() + 1) % (meta_threat_open() + 1);
 		if (S.row == ROW_HELPERS) S.helper = (S.helper + d + 3) % 3;
-		int now = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_THREAT ? S.threat : S.helper;
+		int now = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_CROSS ? S.cross : S.row == ROW_THREAT ? S.threat : S.helper;
 		if (now != was) audio_sfx(SFX_CURSOR);
 	}
 	bool ok = btn_pressed(BTN_A) || btn_pressed(BTN_START);
@@ -362,6 +369,7 @@ static void setup_update(void) {
 	/* (A on another row, or START anywhere: jack in with these) */
 	profile.last_net = (uint8_t)S.net;
 	profile.last_folder = (uint8_t)S.folder;
+	profile.last_cross = (uint8_t)S.cross;
 	profile.last_threat = (uint8_t)S.threat;
 	profile.last_helpers = (uint8_t)S.helpers;
 	profile_save();
@@ -405,7 +413,7 @@ static void setup_draw(int x0, int y0) {
 	int cx = x0 + CORE_W / 2, lx = x0 + 26, vx = x0 + 150;
 	text_draw(cx, y0 + 12, "JACK-IN SETUP", gold, TEXT_CENTER);
 	char v[48];
-	static const int ry[ROWS] = { 32, 46, 60, 74, 134 };
+	static const int ry[ROWS] = { 30, 43, 56, 69, 82, 139 };
 	/* the net */
 	text_draw(lx, y0 + ry[ROW_NET], "Net", WHITE, TEXT_LEFT);
 	choice_draw(vx, y0 + ry[ROW_NET], S.net == RUN_ENDLESS ? "Endless" : "Short", WHITE, meta_endless_open());
@@ -414,6 +422,11 @@ static void setup_draw(int x0, int y0) {
 	int open_folders = 0;
 	for (int f = 0; f < FOLDER_COUNT; ++f) open_folders += meta_folder_open(f);
 	choice_draw(vx, y0 + ry[ROW_FOLDER], meta_folder(S.folder)->name, WHITE, open_folders > 1);
+	/* the Cross brought */
+	text_draw(lx, y0 + ry[ROW_CROSS], "Cross", WHITE, TEXT_LEFT);
+	int open_crosses = 0;
+	for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
+	choice_draw(vx, y0 + ry[ROW_CROSS], S.cross ? powers_cross_name(S.cross) : "None", S.cross ? orange : WHITE, open_crosses > 0);
 	/* the threat */
 	text_draw(lx, y0 + ry[ROW_THREAT], "Threat", WHITE, TEXT_LEFT);
 	snprintf(v, sizeof v, "%d", S.threat);
@@ -449,6 +462,15 @@ static void setup_draw(int x0, int y0) {
 			if (!meta_folder_open(f) && meta_folder(f)->opens)
 				snprintf(locked[nlocked++], sizeof locked[0], "%s: %s", meta_folder(f)->name, meta_folder(f)->opens);
 		break;
+	case ROW_CROSS: {
+		int open_crosses = 0;
+		for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
+		note = S.cross ? "From the first battle. No other Cross this run"
+			: open_crosses ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
+		/* (the ones still shut, and how) */
+		if (open_crosses && open_crosses < 5) snprintf(locked[nlocked++], sizeof locked[0], "%s", "Others: delete their Navis");
+		break;
+	}
 	case ROW_THREAT:
 		if (!S.threat) note = meta_threat_open() ? "The net as it comes" : "The net as it comes. Win it for threat 1";
 		else note = meta_threat_rule(S.threat);
@@ -456,8 +478,8 @@ static void setup_draw(int x0, int y0) {
 	case ROW_HELPERS: snprintf(buf, sizeof buf, "%s. A: on or off", helper_about[S.helper]); note = buf; break;
 	default: note = "A: jack in. B: back"; break;
 	}
-	int lines = note_line(cx, y0 + 92, note, sky);
-	for (int i = 0; i < nlocked; ++i) text_draw(cx, y0 + 94 + (lines + i) * 12, locked[i], dim, TEXT_CENTER);
+	int lines = note_line(cx, y0 + 97, note, sky);
+	for (int i = 0; i < nlocked; ++i) text_draw(cx, y0 + 99 + (lines + i) * 12, locked[i], dim, TEXT_CENTER);
 }
 
 static void update(void) {
@@ -470,7 +492,7 @@ static void update(void) {
 			if (S.choice == 1 && load_run()) emu_resume_requested = true;
 			else {
 				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
-				run_setup(S.net, S.folder, S.threat, S.helpers);
+				run_setup(S.net, S.folder, S.threat, S.helpers, S.cross);
 				meta_run_begun();
 				emu_start_in_town = true;
 			}

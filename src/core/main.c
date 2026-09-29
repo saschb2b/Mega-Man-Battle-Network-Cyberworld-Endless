@@ -533,7 +533,8 @@ int main(int argc, char **argv) {
 	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
 	const char *start_scene = "title";
 	int run_depth = 0, guardian_navi = 0;
-	/* --setup NET,FOLDER,THREAT,HELPERS (short or endless, then numbers):
+	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
+	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
 	 * short net) for --scene town, the endless net otherwise */
 	const char *setup_spec = NULL;
@@ -719,11 +720,11 @@ int main(int argc, char **argv) {
 		/* "town": a new run from the town, as NEW GAME starts one */
 		bool town = !strcmp(start_scene, "town");
 		const Scene *s = town ? &scene_emu : scene_by_name(start_scene);
-		int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0;
+		int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;
 		if (setup_spec) {
 			net = !strncmp(setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
 			const char *c = strchr(setup_spec, ',');
-			if (c) sscanf(c + 1, "%d,%d,%d", &folder, &threat, &helpers);
+			if (c) sscanf(c + 1, "%d,%d,%d,%d", &folder, &threat, &helpers, &cross);
 		}
 		/* "setup": the title with the setup after NEW GAME open */
 		if (!strcmp(start_scene, "setup")) { title_setup = true; s = &scene_title; }
@@ -732,7 +733,7 @@ int main(int argc, char **argv) {
 		 * in --data-dir) */
 		if (!strcmp(start_scene, "summary")) {
 			run_new(seed ? seed : 1);
-			run_setup(net, folder, threat, helpers);
+			run_setup(net, folder, threat, helpers, cross);
 			run.depth = run_depth > 0 ? run_depth : 12;
 			run.viruses_deleted = run.depth * 6;
 			run.bosses_beaten = run.depth / 3;
@@ -747,7 +748,7 @@ int main(int argc, char **argv) {
 		}
 		if (s == &scene_emu) {
 			run_new(seed ? seed : 1);
-			run_setup(net, folder, threat, helpers);
+			run_setup(net, folder, threat, helpers, cross);
 			if (run_depth > 0) run.depth = run_depth;
 			/* (the area its act's in the run too, whose draws read it, and
 			 * every area's guardian one navi: a scripted capture keeps its
