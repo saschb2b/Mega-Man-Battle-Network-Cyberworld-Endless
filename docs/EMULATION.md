@@ -42,6 +42,11 @@ row its record names (rows 0 and 1, one per record, of the table at
 `0x080211A0`, docs/ROM_DATA.md) with the run's own rewards before the
 battle.
 
+In the rival's netbattle (docs/RIVAL.md), once ProtoMan stands on the
+field, his battle object's HP and MaxHP (`+0x24`, `+0x26` of his T1 object,
+`0x0203A9B0` + 0xD8 per object) are lowered once to the act's guardian
+band, where his own 1800 is above it.
+
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,
 objects, sprite list, warp list, jack-in table, check table

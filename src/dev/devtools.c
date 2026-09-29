@@ -23,7 +23,7 @@
 #include "save.h"
 #include "text.h"
 
-DevFlags dev = { false, false, false, false, 1, false };
+DevFlags dev = { .speed = 1, .duels = -1 };
 char devtools_shot[512];
 
 enum { I_GOD, I_ONEHIT, I_QUIET, I_SPEED, I_WIN, I_HEAL, I_ZENNY, I_NEXT, I_GUARDIAN, I_AREA, I_COUNT };
@@ -48,12 +48,14 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "powers")) dev.powers = true;
 		else if (!strcmp(t, "gem")) dev.gem = true;
 		else if (!strcmp(t, "veteran")) dev.veteran = true;
+		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
 }
 
 void devtools_veteran(void) {
+	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	if (!dev.veteran) return;
 	/* (guardian, MegaMan's wins, the guardian's, how the last went) */
 	static const struct { int navi, won, lost, last; } rec[] = {
@@ -71,6 +73,7 @@ void devtools_veteran(void) {
 		}
 	}
 	if (!profile.spins) profile.spins = 0x05;   /* (white and pink) */
+	if (!profile.duel_won && dev.duels < 0) { profile.duel_won = 3; profile.duel_lost = 1; }   /* (the rival beaten: every official gate open) */
 	if (profile.best_depth < 9) profile.best_depth = 9;
 	if (profile.runs < 6) profile.runs = 6;
 	profile_save();

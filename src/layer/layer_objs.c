@@ -48,6 +48,7 @@
 #define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
 bool layer_objs_dealer_again, layer_objs_dealer_named;
 int layer_objs_duel_frames, layer_objs_duel_rung;
+bool layer_objs_duel_later;
 
 #define SPR_BYSTANDER   67   /* EvilNavi */
 
@@ -228,7 +229,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = 0;
-	for (int i = 0; i <= OBJ_DUEL; ++i) out->script_of[i] = -1;
+	for (int i = 0; i <= OBJ_OFFICIAL; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	/* the element that answers this act: its guardian's weakness, else its
@@ -490,11 +491,15 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
 		case OBJ_DUEL:
 			/* the real ProtoMan (docs/RIVAL.md), in his own body: the Nest's
-			 * copies are the guardians */
-			asks = true;
+			 * copies are the guardians; a netbattle not yet due, he names
+			 * where it will be */
+			asks = !layer_objs_duel_later;
 			tk.cat = 6;
 			tk.sprite = guardian_sprite(11);
 			need_sprite(&npcs, 6, tk.sprite);
+			if (layer_objs_duel_later)
+				tk.script = ta_say(&text, guardian_face(11), "Enough racing, MegaMan. Our next duel is a netbattle: you against me.|"
+					"Not here. I'll be waiting in the third act.");
 			if (emu_debug_on()) fprintf(stderr, "duel: ProtoMan at %d %d, his time %d frames\n", wx, wy, layer_objs_duel_frames);
 			break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
@@ -517,6 +522,37 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				}
 				out->gate_reward = chip > 0 ? ta_gate_reward(&text, name, chip, ci.name, code) : -1;
 			}
+			break;
+		}
+		case OBJ_OFFICIAL: {
+			/* an official gate (docs/RIVAL.md): sealed until Chaud's
+			 * clearance reaches its level; open, three chips to take one:
+			 * at level 1 an official Chip Order, standard chips the
+			 * Library holds (held in any run), as BN6's Chip Order orders
+			 * them; at level 2 Mega chips */
+			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
+			int level = o->param >= 2 ? 2 : 1, need = level >= 2 ? 3 : 1;
+			ScriptsVault v = { 0 };
+			int from[512], nfrom = 0;
+			for (int id = 1; id < 512 && nfrom < 512; ++id)
+				if (level == 1 ? chip_pool_class(id) == 0 && meta_library_has(id) : chip_pool_class(id) == 1) from[nfrom++] = id;
+			for (int k = 0; k < 3; ++k) {
+				char code = '*';
+				int id = 0;
+				for (int tries = 0; tries < 16; ++tries) {
+					id = nfrom >= 3 ? from[rng_range(0, nfrom - 1)] : chip_pool_pick(2);
+					bool again = id <= 0;
+					for (int j = 0; j < k; ++j) again |= v.chip[j] == id;
+					if (!again) break;
+				}
+				ChipInfo ci;
+				chip_info(id, &ci);
+				code = loot_fit_code(id, ci.ncodes ? ci.codes[0] : '*', true);
+				v.chip[k] = id;
+				v.code[k] = code == '*' ? 26 : code - 'A';
+				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
+			}
+			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, level, need, profile.duel_won, &v);
 			break;
 		}
 		case OBJ_VAULT: {
@@ -564,6 +600,12 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				 * rule; the first duel says who he is */
 				int f = layer_objs_duel_frames, sec = f / 60, cs = (f % 60) * 100 / 60;
 				int met = profile.duel_won + profile.duel_lost;
+				if (layer_objs_duel_rung == 2)
+					/* (the stake said: BN6 deletes MegaMan in a netbattle as
+					 * anywhere, its GAME OVER from inside the battle) */
+					snprintf(terms, sizeof terms, "Enough racing, MegaMan.|Chaud says you're ready. This time, you face me.|"
+						"@M He won't hold back, Lan. If ProtoMan deletes us, the dive's over. We can run if it goes bad.");
+				else
 				snprintf(terms, sizeof terms, "%sI busted this net's viruses in %d:%02d.%02d. Beat that%s, MegaMan.",
 					met ? "Back again, MegaMan? Chaud's watching.|" :
 					"So you're the one diving the Cyberworld. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",

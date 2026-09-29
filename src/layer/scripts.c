@@ -434,6 +434,8 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 	return i;
 }
 
+static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *empty_words, const char *leave_words);
+
 int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v) {
 	char s[240];
 	if (have < need) {
@@ -442,8 +444,17 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 			"@M Every chip we hold, in any dive, goes in the Library!", need, have);
 		return ta_say(t, FACE_MEGAMAN, s);
 	}
-	int empty = ta_say(t, FACE_MEGAMAN, "The vault stands open, Lan. We took our pick.");
-	int leave = ta_say(t, FACE_MEGAMAN, "We'll leave them for now. The vault keeps.");
+	snprintf(s, sizeof s, "Our Library of %d opens the collector's lock!|Three rare chips inside, Lan. We can take one.", have);
+	return pick_three(t, flag, v, s, "The vault stands open, Lan. We took our pick.", "We'll leave them for now. The vault keeps.");
+}
+
+/* Three chips, one to take (event flag `flag` set as it is, after which
+ * `empty` is said instead); B leaves them (`leave`): a vault's, an official
+ * gate's. */
+static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *empty_words, const char *leave_words) {
+	char s[240];
+	int empty = ta_say(t, FACE_MEGAMAN, empty_words);
+	int leave = ta_say(t, FACE_MEGAMAN, leave_words);
 	int take[3];
 	for (int k = 0; k < 3; ++k) {
 		take[k] = ta_script(t);
@@ -458,8 +469,7 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)empty, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, done, sizeof done);
 	bool first = true;
-	snprintf(s, sizeof s, "Our Library of %d opens the collector's lock!|Three rare chips inside, Lan. We can take one.", have);
-	ta_pages(t, s, FACE_MEGAMAN, &first);
+	ta_pages(t, open, FACE_MEGAMAN, &first);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
 	/* three in a column, as the draft's; B leaves them */
@@ -475,6 +485,23 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 	ta_bytes(t, select, sizeof select);
 	ta_end(t);
 	return i;
+}
+
+int ta_official(TextArchive *t, int flag, int level, int need, int won, const ScriptsVault *v) {
+	char s[300];
+	if (won < need) {
+		/* (the telegraph first: whose clearance, and how far we are) */
+		if (level >= 2)
+			snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance.|"
+				"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
+		else
+			snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance.|"
+				"@M It opens once we've won a duel against ProtoMan. Not yet!");
+		return ta_say(t, FACE_MEGAMAN, s);
+	}
+	snprintf(s, sizeof s, level >= 2 ? "Chaud's clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
+		: "Chaud's clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
+	return pick_three(t, flag, v, s, "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
 }
 
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {

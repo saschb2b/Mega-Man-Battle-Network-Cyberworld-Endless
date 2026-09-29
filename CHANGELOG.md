@@ -10,8 +10,19 @@
   across runs ("That's 3-1 between us"), ProtoMan gets faster as he
   loses, and Dad's Records mail lists it. Each duel is one squad of the
   act's, a little above its band, the same every time the layer is made.
-  docs/RIVAL.md has the design; his netbattle and what his respect opens
-  come next. A run saved by an older build continues its layer afresh.
+  docs/RIVAL.md has the design. A run saved by an older build continues
+  its layer afresh.
+- The rivalry's third rung is a netbattle: after two duels won, ProtoMan
+  stops racing and faces MegaMan himself, from the third act on (before
+  it he says where he'll wait), at the act's guardian strength. It is a
+  real fight: MegaMan can run from it (a loss), and if ProtoMan deletes
+  him the run ends, which MegaMan says before the choice. Then the rungs
+  come round again, faster.
+- Chaud's clearance opens official gates, from the second act on, on one
+  layer in four: after a first duel won, a gate of level one, an official
+  Chip Order of three standard chips the Library holds, one to take; after
+  the netbattle won, level two, three Mega chips. Sealed, a gate says for
+  whom it opens and how far the rivalry is.
 - A run saved after beating a guardian, on his layer, keeps him beaten
   when an update starts the layer afresh: his Guardian Data shown or
   taken and his exit open stay, as a gift taken does. A playtester's

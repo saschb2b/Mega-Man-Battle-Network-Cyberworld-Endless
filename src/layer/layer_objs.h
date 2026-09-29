@@ -28,6 +28,8 @@
 #define LAYER_HEAL_TOLD_FLAG   0x1451
 /* The layer's vault gave its chip (docs/META.md, gates). */
 #define LAYER_VAULT_FLAG       0x1453
+/* The layer's official gate gave its chip (docs/RIVAL.md). */
+#define LAYER_OFFICIAL_FLAG    0x1455
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -40,7 +42,7 @@ typedef struct {
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/META.md), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
-	int script_of[OBJ_DUEL + 1];    /* each kind's first talker's script, -1 none (for --talk); OBJ_DUEL the last kind */
+	int script_of[OBJ_OFFICIAL + 1];   /* each kind's first talker's script, -1 none (for --talk); OBJ_OFFICIAL the last kind */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
 	int ndealer, nprograms;
@@ -59,8 +61,10 @@ extern bool layer_objs_dealer_again;
  * guardian (from the act's second layer, or once battled). */
 extern bool layer_objs_dealer_named;
 /* Set before layer_objs_install on a duel's layer (docs/RIVAL.md): ProtoMan's
- * time to beat, in frames, and the rivalry's rung (0 his time, 1 his time
- * without a hit). */
+ * time to beat, in frames, the rivalry's rung (0 his time, 1 his time
+ * without a hit, 2 a netbattle with him), and whether the netbattle waits
+ * for a later act (ProtoMan then names it, and asks nothing). */
 extern int layer_objs_duel_frames, layer_objs_duel_rung;
+extern bool layer_objs_duel_later;
 
 #endif

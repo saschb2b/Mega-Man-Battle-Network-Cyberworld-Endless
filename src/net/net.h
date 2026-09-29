@@ -37,6 +37,7 @@ typedef enum {
 	OBJ_NAVI_GATE,   /* a gate sealed with a Navi's code, his SP inside (docs/META.md, gates); param: navi */
 	OBJ_VAULT,       /* a collector's vault: a Library's count opens it, three chips inside (docs/META.md, gates) */
 	OBJ_DUEL,        /* ProtoMan, the rival: a busting duel against his time (docs/RIVAL.md) */
+	OBJ_OFFICIAL,    /* an official gate: Chaud's clearance opens it (docs/RIVAL.md); param: its level, 1-2 */
 } ObjType;
 
 typedef struct {

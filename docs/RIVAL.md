@@ -55,7 +55,9 @@ clearance opens), which only matter to a player who plays on.
 - **Fair challenge, cheap retry**: a lost duel costs only the HP spent,
   the time to beat stays known, and ProtoMan comes back.
 - **Meta as variety, not power**: Chaud's clearance opens places, not
-  stats (phase two).
+  stats: official gates, whose chips are a pick of three, not a stat.
+- **The risky elite** (Hades' Charon, Slay the Spire's burning elites):
+  the top rung is optional, telegraphed and deadly, its prize permanent.
 - **Name failure in the fiction's voice**: "Too slow, Lan." "Log out,
   ProtoMan."
 
@@ -75,7 +77,7 @@ clearance opens), which only matter to a player who plays on.
 5. **The terms, by rung** (the rivalry's wins, in any run):
    - rung 0: beat his time;
    - rung 1: beat his time without taking a hit;
-   - rung 2: the netbattle: ProtoMan faces MegaMan himself (phase two);
+   - rung 2: the netbattle: ProtoMan faces MegaMan himself (below);
    - after it, the rungs again, tighter.
 6. **The verdict.** BN6's results screen shows the DeleteTime; then
    Chaud: a win ("...0:12.80. Not bad, Lan. ProtoMan, we train
@@ -83,6 +85,43 @@ clearance opens), which only matter to a player who plays on.
    took a hit. That doesn't count.").
 7. **The record.** Wins and losses in the profile; Dad's Records mail
    lists "Chaud and ProtoMan 2-1", and the run's summary names a duel won.
+
+## The netbattle
+
+The third rung, after two duels won: "Enough racing, MegaMan." No time to
+beat: ProtoMan in battle, his own AI and his attacks.
+
+- **From the third act.** His attacks are his 1800 HP version's: his first
+  slash deleted a 100 HP MegaMan. Before the third act (a later run's
+  first acts), Chaud's call and ProtoMan's words say where he will wait,
+  and nothing is asked. From it on, his HP is the act's guardian band at
+  most (1000 in act 3), written once as he stands on the field.
+- **A real fight.** BN6 deletes MegaMan in a netbattle as anywhere: its
+  GAME OVER starts inside the battle, as he falls (tried: the battle
+  options' bit 0x08 is a link battle, which waits for a partner; bit
+  0x800000 makes his HP full after a lost battle, too late; clearing
+  `EVENT_1733`, which the deletion sets, changes nothing). So the stake is said before
+  the choice, in MegaMan's voice: "If ProtoMan deletes us, the dive's
+  over. We can run if it goes bad." The battle lets him run (a loss).
+- **Won**, Chaud: "...Log out, ProtoMan. You beat him, Lan." and his full
+  clearance.
+
+## Chaud's clearance
+
+Level one after the first duel won, level two after the third (the
+netbattle). Official gates stand on normal layers from the second act,
+one layer in four (from the layer's seed, not its rolls), never with a
+Navi gate, a vault or a dark warp; each is level one or two.
+
+- **Sealed**, MegaMan says for whom it opens: "It opens once we've won a
+  duel against ProtoMan. Not yet!", "It takes three duel wins against
+  ProtoMan, the last in a netbattle with him. We have 1."
+- **Level one: an official Chip Order.** Three standard chips the Library
+  holds (held in any run), as BN6's Chip Order orders only chips seen,
+  one to take, in the folder's codes where they come in them.
+- **Level two: the official vault.** Three Mega chips, one to take.
+- Chaud says so as the clearance is earned: "You've earned my clearance,
+  Lan. The net's official gates will open for you now."
 
 ## What BN6 gives it
 
@@ -98,11 +137,12 @@ clearance opens), which only matter to a player who plays on.
 ## Phases
 
 1. The duel: the call, ProtoMan on the layer, the terms of rungs 0 and 1,
-   the battle, the verdict, the record. LAYER_MAKE (a new object).
+   the battle, the verdict, the record. LAYER_MAKE (a new object). Done.
 2. The netbattle rung, and Chaud's clearance: official gates on later
    layers, sealed for a Netbattler without it, each holding what only an
-   official's pass reaches.
-3. Tuning with the playtest loop: ProtoMan's times against real hands.
+   official's pass reaches. Done.
+3. Tuning with the playtest loop: ProtoMan's times against real hands,
+   and his netbattle against a third act's MegaMan.
 
 ## What could go wrong
 
@@ -111,6 +151,11 @@ clearance opens), which only matter to a player who plays on.
   stay loose until playtests set them.
 - **A duel that reads as a chore**: one an act at most, never on a
   guardian's layer, and never forced.
+- **A netbattle that ends a run unfairly**: optional, starting on No, its
+  stake said, a run from it allowed, and from the third act only, with
+  his HP at the act's guardian band. If playtests find it too sharp, the
+  next lever is his attacks (a lower version where BN6 has one: it has
+  none under 1800 HP) or MegaMan's HP for it.
 - **The copy and the real ProtoMan**: the Nest copies ProtoMan as a
   guardian too. Chaud says so ("A copy. It'll never match the real
   thing.") the first time the copy is met.
