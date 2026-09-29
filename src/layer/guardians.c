@@ -39,11 +39,12 @@ const char *guardian_tip(int navi) {
 	 * watched in god mode, HeatMan stands at the back through his tower
 	 * and his flame, SpoutMan in his front column through his bubbles,
 	 * SlashMan beside MegaMan some 40 frames after his slash, EraseMan at
-	 * the back while his ghosts drift) */
+	 * the back while his ghosts drift, and so on for each below; Colonel's
+	 * dark-screen slash, unannounced, deleted a standing MegaMan) */
 	case 1: return "HeatMan's fire tower crawls at us unlit and turns into our row: sidestep it late. His flamethrower sweeps the lit row. "
 		"When a shadow opens under us, he's leaping there: clear the yellow!|@M He stands still at the back while his tower and flame play out: strike then!";
 	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
-		"and he warps in close to slash. Keep moving!";
+		"and he warps in close to slash. Keep moving!|@M He stands still while his lightning comes down: strike then!";
 	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
 		"Step off the yellow panel when he lands! Blades he leaves stuck in our side fly back across their rows.|@M He stays beside us a moment after his slash: swing back then!";
 	case 4: return "EraseMan's ghosts soak up our shots and drift across the rows: dodge up and down. "
@@ -53,26 +54,26 @@ const char *guardian_tip(int navi) {
 	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
 		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!|@M He stands still in front of us while he blows bubbles: swing then!";
 	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
-		"Step off the yellow panels, and keep our distance!";
+		"Step off the yellow panels, and keep our distance!|@M He stands still while his eagle swoops, and stays close a moment after his axe: strike then!";
 	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "
-		"Step off the yellow panels, and watch our footing!";
+		"Step off the yellow panels, and watch our footing!|@M He hovers right in front of us between his dashes: swing then!";
 	case 9: return "GroundMan bursts up from under the lit panel with his drill, and his drill missiles run down the rows in their shadows. "
-		"The panels he drills through crack: keep moving!";
+		"The panels he drills through crack: keep moving!|@M When he bursts up on our side, he stays there a moment: hit him then!";
 	case 10: return "DustMan drops scrap onto the lit panels and hurls our broken panels back at us, and their first hit stuns. "
-		"When he breathes in, he pulls us up close for a big punch. Keep a Recover chip ready!";
+		"When he breathes in, he pulls us up close for a big punch. Keep a Recover chip ready!|@M He stands a while right in front of us between throws: swing then!";
 	case 11: return "ProtoMan's shield stops our shots. When our row lights up, he dashes across it to slash: "
 		"step out of the row, then hit him as he swings!";
 	case 12: return "BlastMan's bombs roll down our row and burst, his flames dash along it, and a fire wall walks down a column. "
-		"Step off the yellow panels!";
+		"Step off the yellow panels!|@M He hovers still while he throws his bombs: strike then!";
 	case 13: return "DiveMan moves unseen under the water: hold our chips until he surfaces, then strike! "
 		"When his wave lights our panels, stand in our back column. His torpedoes run in their shadows' row.";
 	case 14: return "CircusMan claps down on a lit column, his lion leaps a burning hoop down our row, and when only our panel lights, "
 		"his tent drops on us. He keeps to the back: bring chips that reach it!";
-	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!";
+	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!|@M He stands right in front of us while he cracks his whip: swing then!";
 	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "
-		"Hard hits work whatever he is!";
+		"Hard hits work whatever he is!|@M He stands right in front of us while he calls his whirlwinds: swing then!";
 	case 18: return "Colonel sends his soldiers at us: clear them out. When our panels light in a zigzag, he warps in and slashes across them. "
-		"Step off the yellow panels!";
+		"Step off the yellow panels!|@M He stays beside us a moment after his slash: swing back then! When the screen goes dark, his big slash is coming: brace for it!";
 	default: return NULL;
 	}
 }
