@@ -692,3 +692,54 @@ came back four times, each fix covering the side a playtester stood on.
 For a trigger, a wall or a talk radius, place MegaMan at the eight
 compass offsets round it (the `place` step) and at two distances, and
 check each, before calling it fixed.
+
+## Session 32: 9/10, the stop criterion met
+
+Build b617cc0. A CONTINUE of the Blade + SlashCross run: act 2 (Judge
+Tree Comp) and HeatMan, lost to twice in earlier runs, deleted in 0:39 at
+160 of 240 HP "to a plan the game helped me make": the dealer's hint and
+his pick in the folder's code (BblStar3 S), MiniEnrg, the last-stop words,
+two AreaGrabs and charged slashes (277 calls, over budget: the agent hit
+an API limit mid-fight and was resumed). Keep playing: yes, for a run he
+cares about ("the net splits after act 2... I hold HeatMan *"). Recommend:
+yes, with play tips only (short bursts behind the arrow, swing at
+warpers when they land).
+
+Confirmed: the layer restart on a changed make, the guardian's drop in *
+(HeatMan *), no running from a guardian, the last-stop words, an early R
+kept through a dodge (twice), the exit pad from the ring, every find in
+the folder's codes but the signal's prize, the arrow's turns in short
+bursts (one overshoot all session), A after a chat not re-talking.
+
+Raised, fixed:
+- **A risky choice defaulting to Yes** (the strong virus signal, 150 HP)
+  and **its prize off the folder's codes** (HeatManEX H): both fixed
+  after the pin, before the report (Yes/No starts on No for fights and
+  warps; the prize the strongest the folder can play).
+- **At low HP, no word of the dealer** on a layer with no heal Prog: L's
+  later answers name the dealer's MiniEnrg and his way.
+- **The Judge Tree's "terraces"**: its walkways (brick blocks) ran one
+  empty panel apart, which the isometric view draws as levels; 43-45% of
+  the Aquarium's and the Judge Tree's floor faced floor across one panel,
+  against 1-9% elsewhere. Their mazes keep two panels apart now (3%).
+
+Corrected mid-session: the patch notes had told him SlashCross was weak
+to Fire; BN6's own tutorial says Breaker. The setup's Cross row and a
+won Cross now say each Cross's weakness.
+
+Left: a timing hint for swords against warping guardians (BN6's AI;
+unverified per guardian, so not written), the pad's decorative corner
+cap (outside the ring, as intended), act 2's regular viruses gentle for
+a strong build (the threat rungs are the answer).
+
+Stop criterion (SKILL.md): 9 or more (9), wants to keep playing for his
+own reasons (yes), recommends without a major caveat (yes), two sessions
+in a row with nothing major (31 and 32: minor and polish only). Met. The
+town screenshots were refreshed; the run's shots and clips still show
+the game as it is.
+
+Loop change: **count a class of confusion before designing its fix.**
+"Couldn't see a way down" suggested stairs on the map; the layer had no
+raised floor at all. One throwaway count (floor facing floor across one
+empty panel, per area) named the two outlier areas at 43-45% against
+1-9%, sized the fix and kept it as the measure (3% after).
