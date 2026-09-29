@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- HeatMan's and SpoutMan's warnings say when a sword lands: HeatMan
+  stands still at the back while his tower and flame play out, SpoutMan
+  in front of us while he blows bubbles (watched in their fights). A
+  playtester's swords missed both as they warped.
 - A run is saved as a guardian logs out and its Guardian Data appears, so
   a CONTINUE after quitting in its talk picks up the Guardian Data, not
   the guardian: a playtester who quit there had to fight HeatMan again.

@@ -34,8 +34,12 @@ static const Guardian guardians[] = {
 
 const char *guardian_tip(int navi) {
 	switch (navi) {
+	/* (a second box, "|@M ", for when a sword lands, where a guardian's
+	 * warps made swords miss:
+	 * watched in god mode, HeatMan stands at the back through his tower
+	 * and his flame, SpoutMan in his front column through his bubbles) */
 	case 1: return "HeatMan's fire tower crawls at us unlit and turns into our row: sidestep it late. His flamethrower sweeps the lit row. "
-		"When a shadow opens under us, he's leaping there: clear the yellow!";
+		"When a shadow opens under us, he's leaping there: clear the yellow!|@M He stands still at the back while his tower and flame play out: strike then!";
 	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
 		"and he warps in close to slash. Keep moving!";
 	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
@@ -45,7 +49,7 @@ const char *guardian_tip(int navi) {
 	case 5: return "ChargeMan rams down our row like a train, his coal bombs burst on the lit panels, and his freight cars roll down "
 		"the rows and block our chips. Hit him as he pulls back in at the back!";
 	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
-		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!";
+		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!|@M He stands still in front of us while he blows bubbles: swing then!";
 	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
 		"Step off the yellow panels, and keep our distance!";
 	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "

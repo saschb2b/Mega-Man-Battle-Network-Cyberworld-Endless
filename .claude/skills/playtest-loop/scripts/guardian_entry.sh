@@ -13,6 +13,12 @@ for i in $(seq 1 300); do
 	out=$(python3 tools/play.py do $n 'wait 10' 2>&1)
 	p=$(echo "$out" | grep '^pos' | awk '{print $2, $3}')
 	c=$(echo "$out" | grep '^pos' | sed 's/.*cinema //')
+	# (MegaMan's words in the room before the arena open a chat too: read
+	# them and walk on)
+	if echo "$out" | grep -q "^chat open" && ! echo "$out" | grep -q "^guardian .* staging"; then
+		python3 tools/play.py do $n 'press A; wait 30; press A; wait 30' >/dev/null 2>&1
+		if python3 tools/play.py do $n 'wait 1' 2>&1 | grep -q '^guardian .* waiting'; then continue; fi
+	fi
 	if [ "$c" != "0" ] || echo "$out" | grep -q "doing battle"; then echo "$1 b$b s$s: $last -> $p"; break; fi
 	last=$(echo "$last | $p" | awk -F' [|] ' '{s=""; for (i = (NF > 4 ? NF - 3 : 1); i <= NF; ++i) s = s (s ? " | " : "") $i; print s}')
 done
