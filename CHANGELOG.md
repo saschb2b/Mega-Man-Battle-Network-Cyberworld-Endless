@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The PET's Comm and Save, greyed in a run, are the run's own. Comm opens
+  the SciLab link, Dad's lab watching the dive: the layer, the act and
+  area, the guardian ahead as MegaMan knows him (a name, "Name?" as word
+  on the net, or "???"), ScrtData, what the run brought, and the battle
+  records against every guardian met. Save closes the PET and saves the
+  run where MegaMan stands.
 - The PET's PLACE names the area beside the layer ("JudgeTree 14",
   "ACDC HP 8"); the label on entering a map keeps "Layer 8".
 - A new run's acts prefer guardians MegaMan has never met, in any run,

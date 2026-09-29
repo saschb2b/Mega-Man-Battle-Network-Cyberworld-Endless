@@ -44,6 +44,13 @@
 
 /* Event flags */
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
+/* The PET menu (docs/ROM_DATA.md, the PET): ePETMenuData, +0 its state, +4
+ * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the disabled entry A
+ * chose (patched: BN6_PET_A_DISABLED); the A handler's buzzer on a
+ * disabled entry, and the branch that greys Comm and Save */
+#define BN6_PET_MENU          0x0200DF20u
+#define BN6_PET_A_DISABLED    0x08120BF8u
+#define BN6_PET_GREY          0x08120F20u
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
 #define BN6_FLAG_WARP_OFF     0x16F0      /* + n: the map's warp trigger n does nothing */
 #define BN6_FLAG_NO_ENCOUNTERS 0x1700     /* checkThenStartBattle skips random battles while set (a BBS request sets it); cleared on entering a map */

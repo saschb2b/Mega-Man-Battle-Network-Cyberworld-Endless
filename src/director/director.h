@@ -20,6 +20,11 @@ void director_draw_map(void);
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);
 bool director_suspend(void);
+/* The PET's Save: a checkpoint where MegaMan stands, once he is free to
+ * move on the map ("Run saved"). */
+void director_save_here(void);
+/* A Navi on the net has named the act's guardian this session. */
+bool director_guardian_heard(void);
 /* Where the run was last saved on this layer, for the quit prompt: its
  * start, or its Guardian Data. */
 const char *director_saved_where(void);

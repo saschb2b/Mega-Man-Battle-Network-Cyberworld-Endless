@@ -37,6 +37,7 @@
 #include "netmap.h"
 #include "rom.h"
 #include "platform.h"
+#include "pet.h"
 #include "powers.h"
 #include "rivals.h"
 #include "run.h"
@@ -110,7 +111,8 @@ static struct {
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
-	bool checkpoint_data;  /* the checkpoint due is the Guardian Data's */
+	bool checkpoint_data;  /* the checkpoint due is the Guardian Data's ... */
+	bool checkpoint_here;  /* ... or the PET's Save's, where MegaMan stands */
 	const char *saved_at;  /* where the run was last saved, for the quit prompt */
 	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
 	bool guardian_named;   /* ... and have been said on this layer */
@@ -368,6 +370,8 @@ static const char *program_off_board(int *variant) {
 static bool guardian_heard(void) {
 	return D.layer_act && (D.heard_act == D.layer_act || D.dealer_act == D.layer_act || flag_get(LAYER_DEALER_TOLD_FLAG));
 }
+
+bool director_guardian_heard(void) { return guardian_heard(); }
 
 static const char *status_words(void) {
 	static char buf[800];
@@ -1153,6 +1157,15 @@ bool director_can_suspend(void) {
 }
 
 const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
+
+void director_save_here(void) {
+	/* (the PET's Save: in the town, before the run's first layer, there is
+	 * no run to save yet) */
+	if (!D.active) return;
+	if (D.town) { cinema_note("Saves begin on layer 1", 150); return; }
+	D.checkpoint = true;
+	D.checkpoint_here = true;
+}
 
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
@@ -2301,6 +2314,8 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
+		/* (the PET's SciLab link, as Comm opens it) */
+		else if (!strcmp(name, "link")) { pet_link_open(); return; }
 		if (script < 0) { printf("--talk: no %s on this layer\n", name); continue; }
 		game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)script);
 		return;   /* (one a frame: the chat box opens on the next) */
@@ -2591,8 +2606,9 @@ void director_update(void) {
 		save_checkpoint();
 		/* (said: a playtester who plays in short sessions asked where it
 		 * is safe to stop) */
-		D.saved_at = D.checkpoint_data ? "Run saved at the Guardian Data" : "Run saved at the layer's start";
-		D.checkpoint_data = false;
+		D.saved_at = D.checkpoint_here ? "Run saved where you saved it" : D.checkpoint_data ? "Run saved at the Guardian Data" :
+			"Run saved at the layer's start";
+		D.checkpoint_data = D.checkpoint_here = false;
 		cinema_note("Run saved", 150);
 		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}

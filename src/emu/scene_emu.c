@@ -6,6 +6,7 @@
 #include "autopilot.h"
 #include "debug.h"
 #include "devtools.h"
+#include "pet.h"
 #include "director.h"
 #include "npc.h"
 #include "scripts.h"
@@ -44,6 +45,7 @@ static void enter(void) {
 	if (!emu_init(R.data, ROM_SIZE)) return;
 	npc_reach_install();
 	chat_marks_install();
+	pet_install();
 	cinema_reset();
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
@@ -62,12 +64,13 @@ static void enter(void) {
 static void leave(void) { audio_external(NULL); }
 
 static void update(void) {
-	uint32_t keys = director_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons()));
-	if (devtools_open()) return;   /* the game holds still under the dev menu */
+	uint32_t keys = director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
+	if (devtools_open() || pet_link_is_open()) return;   /* the game holds still under the dev menu and the SciLab link */
 	/* (fast-forwarded: several game frames to one shown) */
 	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
 		director_update();
+		pet_update();
 		devtools_update();
 		tour_update();
 		cinema_update();
@@ -97,6 +100,7 @@ static void draw(void) {
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	director_draw_map();
+	pet_link_draw();
 	devtools_draw();
 }
 
