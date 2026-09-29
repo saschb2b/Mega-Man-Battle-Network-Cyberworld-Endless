@@ -1746,6 +1746,18 @@ static uint32_t shop_guard(uint32_t keys) {
 	return keys;
 }
 
+/* A choice, BN6's or ours, takes no A in its first half second: a
+ * playtester's A's, pressed through a Net Dealer's words, landed twice on
+ * the shop's "Are you sure? > Yes" (BN6's default) and bought what he had
+ * not chosen. B still answers No. */
+static uint32_t choice_guard(uint32_t keys) {
+	static int age;
+	bool choice = emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2;
+	age = choice ? age + 1 : 0;
+	if (choice && age <= 30) keys &= ~KEY_A;
+	return keys;
+}
+
 /* In battle an L or R pressed as the Custom gauge was all but full was
  * lost (the game takes them at a full gauge only; Kai re-pressed in every
  * fight, and at 50 frames still: the gauge's last tenth takes about a
@@ -1803,7 +1815,7 @@ static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
 
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
-	if (D.active) keys = shop_guard(keys);
+	if (D.active) keys = choice_guard(shop_guard(keys));
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
 	bool a = (keys & KEY_A) != 0, a_pressed = a && !D.a_held;
