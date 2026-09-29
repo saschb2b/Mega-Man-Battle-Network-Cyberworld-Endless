@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- The PET's E-Mail holds a mail from Dad for every guardian MegaMan has
+  battled, in any run: his battle data, the guardian's warning in
+  MegaMan's words, to read again any time. A guardian battled for the
+  first time mails his on the next layer ("Mail from Dad, Lan!"). The
+  KeyItem list shows what the profile holds beside the run's items:
+  NaviCode (the codes of guardians deleted twice, which open their
+  gates), DarkPass (the Secret Area cleared) and LibCard (the Library's
+  size, and a vault's), and ScrtData says what three of them open.
 - The PET's Comm and Save, greyed in a run, are the run's own. Comm opens
   the SciLab link, Dad's lab watching the dive: the layer, the act and
   area, the guardian ahead as MegaMan knows him (a name, "Name?" as word

@@ -49,6 +49,31 @@
  * chose (patched: BN6_PET_A_DISABLED); the A handler's buzzer on a
  * disabled entry, and the branch that greys Comm and Save */
 #define BN6_PET_MENU          0x0200DF20u
+/* The KeyItem screen's words (docs/ROM_DATA.md, the PET): the names'
+ * archive (uncompressed, an entry per id) and the literals that point at
+ * it (the KeyItem screen's, the text scripts', the shop's, SubChip's); the
+ * descriptions' (LZ77) and the literal the screen runs them through */
+#define BN6_KEY_NAMES         0x0873B938u
+#define BN6_KEY_NAMES_PTRS    { 0x08042034u, 0x0804761Cu, 0x081265FCu, 0x0812A870u }
+#define BN6_KEY_DESCS         0x0873BD88u
+#define BN6_KEY_DESC_PTR      0x0812A9C4u
+/* The E-Mail screen's (docs/ROM_DATA.md, the PET): senders (script 2n) and
+ * subjects (2n + 1), and bodies (n), both LZ77, each read through a literal
+ * holding its unpacked buffer; a row of 4 bytes a mail (its icon, bit 7 Lan's
+ * HP, its places in the sorts); the list of mail ids, newest first, and its
+ * count; the flags per mail: received, unread, read */
+#define BN6_MAIL_TEXT         0x086D10D8u
+#define BN6_MAIL_TEXT_PTR     0x08129E90u
+#define BN6_MAIL_TEXT_BUF     0x02025700u
+#define BN6_MAIL_BODIES       0x086CE598u
+#define BN6_MAIL_BODY_PTR     0x0812A12Cu
+#define BN6_MAIL_BODY_BUF     0x0201C700u
+#define BN6_MAIL_TABLE        0x0812A2F8u
+#define BN6_MAIL_LIST         0x02006530u
+#define BN6_MAIL_COUNT        0x02001140u
+#define BN6_FLAG_MAIL_GOT     0x1CA0
+#define BN6_FLAG_MAIL_NEW     0x1D20
+#define BN6_FLAG_MAIL_READ    0x1DA0
 #define BN6_PET_A_DISABLED    0x08120BF8u
 #define BN6_PET_GREY          0x08120F20u
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */

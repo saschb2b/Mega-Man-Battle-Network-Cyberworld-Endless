@@ -38,6 +38,7 @@
 #include "rom.h"
 #include "platform.h"
 #include "pet.h"
+#include "pet_text.h"
 #include "powers.h"
 #include "rivals.h"
 #include "run.h"
@@ -111,6 +112,9 @@ static struct {
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
+	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
+	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
+	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
 	bool checkpoint_data;  /* the checkpoint due is the Guardian Data's ... */
 	bool checkpoint_here;  /* ... or the PET's Save's, where MegaMan stands */
 	const char *saved_at;  /* where the run was last saved, for the quit prompt */
@@ -767,6 +771,7 @@ static bool build_layer(void) {
 	D.last_stop_told = false;
 	D.final_told = false;
 	D.checkpoint_data = false;
+	D.pet_refreshed = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
@@ -876,7 +881,7 @@ static void programs_from_game(void) {
 
 /* What this session has heard, forgotten by a run begun or continued (a
  * last run's act 1 is not this one's). */
-static void forget_heard(void) { D.heard_act = D.dealer_act = 0; }
+static void forget_heard(void) { D.heard_act = D.dealer_act = 0; D.mail_quiet = false; D.mail_due = 0; }
 
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
@@ -2554,6 +2559,24 @@ void director_update(void) {
 	 * box talked to the Server he faced, whose own words took the box, and
 	 * the prize was never named) */
 	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
+	/* the PET's words that count (the codes, the Library), the profile's
+	 * key items and Dad's mail, once a layer is under way (after a
+	 * CONTINUE's state, which holds what the run had) */
+	if (!D.pet_refreshed && on_map()) {
+		D.pet_refreshed = true;
+		int mailed = pet_text_refresh();
+		if (mailed && D.mail_quiet) D.mail_due = mailed;
+		D.mail_quiet = true;
+	}
+	/* (after the arrival's card and words: said over the jack-in, it was
+	 * lost under them) */
+	if (D.mail_due && !D.reward_due && !D.gem_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
+		!emu_read8(BN6_CHATBOX) && !boss_cinematic()) {
+		char words[160];
+		snprintf(words, sizeof words, "@M Mail from Dad, Lan! He sorted out our battle data on %s. It's in the PET's E-Mail.",
+			guardian(D.mail_due)->name);
+		if (talk_start(words, FACE_MEGAMAN)) D.mail_due = 0;
+	}
 	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"
 		"@M But if it's still there when we win, its data is ours!", FACE_MEGAMAN)) {
 		D.gem_due = false;

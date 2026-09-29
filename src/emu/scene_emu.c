@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "devtools.h"
 #include "pet.h"
+#include "pet_text.h"
 #include "director.h"
 #include "npc.h"
 #include "scripts.h"
@@ -46,6 +47,7 @@ static void enter(void) {
 	npc_reach_install();
 	chat_marks_install();
 	pet_install();
+	pet_text_install();
 	cinema_reset();
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
