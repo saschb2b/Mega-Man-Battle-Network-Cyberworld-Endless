@@ -1470,7 +1470,7 @@ static int corridor_way(int cx, int cy, int x, int y, int bx, int by) {
  * middle before letting him go the way he pressed. */
 #define STUCK 5
 
-static uint32_t corner_assist(uint32_t keys) {
+static uint32_t corner_assist_turn(uint32_t keys) {
 	static int stuck, lx, ly, assist = -1, assist_for = -1, along, frames;
 	static bool turning, centring;                /* (the assist is a lane's turn, or a step to a panel's middle) */
 	static int held_for, last_held = -1;          /* frames the same key has been held */
@@ -1669,6 +1669,23 @@ static uint32_t corner_assist(uint32_t keys) {
 		return (keys & ~pad) | pad_dirs[k].keys;
 	}
 	return keys;
+}
+
+/* The assist, never against the key held: it may step MegaMan along or
+ * across his way to line him up with a lane or round a turn, but a step
+ * backward read as MegaMan going the opposite way now and then (a
+ * player's report; a walk of 540 held keys on one layer found 23 such
+ * steps, some straight back for a third of a second). */
+static uint32_t corner_assist(uint32_t keys) {
+	uint32_t out = corner_assist_turn(keys), pad = keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT), got = out & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
+	if (got == pad) return out;
+	int held = -1, turned = -1;
+	for (int k = 0; k < 8; ++k) {
+		if (pad == pad_dirs[k].keys) held = k;
+		if (got == pad_dirs[k].keys) turned = k;
+	}
+	if (held >= 0 && turned >= 0 && pad_dirs[held].x * pad_dirs[turned].x + pad_dirs[held].y * pad_dirs[turned].y < 0) return keys;
+	return out;
 }
 
 /* A on the map: MegaMan turns to face what he means to talk to, so the

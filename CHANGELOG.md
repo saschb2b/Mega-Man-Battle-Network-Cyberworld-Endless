@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- MegaMan never walks against the direction held. The walking assist that
+  lines him up with a walkway's mouth and rounds a lane's turn could step
+  him backward, for up to a third of a second: a player with a controller
+  saw him go the opposite way now and then, and a walk of 540 held keys
+  on one layer found 23 such steps (none now). It still steers along and
+  across the way held.
+- The game keeps its pace where a frame misses the display's refresh, a
+  50 Hz display or a slower machine: a frame behind is played unshown
+  and caught up, as the browser's player does. Each missed refresh had
+  cost a frame, and a phone slower than a frame ran at half speed.
+- The touch D-pad steers eight ways alike (its diagonals, which BN6's
+  walkways need, were narrower) and holds its direction through its
+  middle, where a thumb rolling a few pixels past it had turned UP into
+  DOWN; fingers are let go when the app loses the screen.
 - A rival: Chaud and the real ProtoMan (the Nest's are copies). On each
   act's second layer Chaud calls: ProtoMan is on the layer, standing on a
   pad apart, and he has busted its viruses in a time he says. Take his
