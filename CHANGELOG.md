@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- An L or R pressed before the Custom gauge fills is kept through a dodge:
+  a step waits its turn (the press is given once MegaMan has moved, a
+  second at most), where a d-pad press had dropped it. A playtester's R
+  pressed before dodging a bubble in SpoutMan's fight never opened the
+  Custom screen.
 - Stepping into the room before a guardian's arena, MegaMan names the Net
   Dealer and the Recovery Mr. Prog there, and which way each is, if they
   have not been used (the heal only below full HP): the arrow leads past
