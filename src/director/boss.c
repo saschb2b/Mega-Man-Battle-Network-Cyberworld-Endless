@@ -46,6 +46,7 @@ enum {
 static struct {
 	int state, t;
 	bool chat_seen;
+	bool checkpoint;      /* the guardian fell: the run wants saving past it */
 	uint32_t archive;
 	GuardianStage g;
 } B;
@@ -191,6 +192,10 @@ void boss_update(void) {
 		cinema_letterbox(false);
 		cinema_input(CINEMA_FREE);
 		run_script(B.g.theme);
+		/* (a checkpoint here, which boss_resume takes up with the Guardian
+		 * Data waiting: a playtester quit in its talk after deleting
+		 * HeatMan, and his CONTINUE began the layer, and HeatMan, again) */
+		B.checkpoint = true;
 		to(B_REWARD);
 		break;
 	case B_REWARD:
@@ -239,6 +244,12 @@ bool boss_cinematic(void) { return B.state >= B_ENTER && B.state <= B_LOGOUT && 
 bool boss_done(void) { return B.state >= B_OPEN; }
 
 bool boss_idle(void) { return B.state == B_NONE || B.state == B_WAIT || B.state >= B_OPEN; }
+
+bool boss_take_checkpoint(void) {
+	bool due = B.checkpoint;
+	B.checkpoint = false;
+	return due;
+}
 
 void boss_resume(void) {
 	/* (a run saved mid-layer: the guardian's flags are in the state) */

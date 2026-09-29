@@ -2453,6 +2453,7 @@ void director_update(void) {
 	 * slot's text is not in a state) */
 	/* (nor while the arrival still holds him: the jack-in and the warp pad
 	 * keep him for about 90 frames, and the release is not in the state) */
+	if (boss_take_checkpoint()) D.checkpoint = true;
 	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
 		!emu_read8(BN6_DIALOGUE_LOCK) && flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) {
 		D.checkpoint = false;

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A run is saved as a guardian logs out and its Guardian Data appears, so
+  a CONTINUE after quitting in its talk picks up the Guardian Data, not
+  the guardian: a playtester who quit there had to fight HeatMan again.
 - Hurt on a layer with no Recovery Mr. Prog, MegaMan's answer to L names
   the Net Dealer, who always has MiniEnrg, and which way he is: a
   playtester at 90 of 240 ran to the exit past him, then a dozen moves

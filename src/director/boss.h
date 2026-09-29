@@ -27,6 +27,9 @@ bool boss_done(void);
 /* Nothing of the guardian under way: not met yet, or all done (a run can
  * be saved then). */
 bool boss_idle(void);
+/* Whether the guardian has just fallen and the run wants a checkpoint
+ * (once: the call clears it). */
+bool boss_take_checkpoint(void);
 /* After a run saved mid-layer is loaded: the guardian's state from its
  * flags. */
 void boss_resume(void);
