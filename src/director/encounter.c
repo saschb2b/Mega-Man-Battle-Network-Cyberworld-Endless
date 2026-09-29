@@ -109,7 +109,10 @@ void emu_encounter_set(const Encounter *e) {
 	/* the values of a Central Area random battle, with the formation's
 	 * battlefield, the area's background and the virus or boss theme */
 	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)(e->boss ? 0x16 : 0x15), 0x00, (uint8_t)biome_bg(e->biome), 0x00, 0x38, 0x00 };
-	put32(s + 8, 0x000049E2);
+	/* (bit 0x20 of the options lets MegaMan run, bn6f 0x08026EC8: the
+	 * story's bosses clear it, the random battles and BN6's roaming SP
+	 * Navis set it; docs/ROM_DATA.md) */
+	put32(s + 8, e->held ? 0x000049C2 : 0x000049E2);
 	put32(s + 12, settings + 0x20);
 	emu_write(settings, s, sizeof s);
 	uint8_t at[4];

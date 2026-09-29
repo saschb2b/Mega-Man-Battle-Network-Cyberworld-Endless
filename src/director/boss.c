@@ -156,6 +156,10 @@ void boss_update(void) {
 		cinema_input(CINEMA_FREE);
 		cinema_letterbox(false);
 		Encounter e = make_boss(run.depth, run.biome, B.g.navi);
+		/* (no running from a guardian, as from BN6's story bosses: a
+		 * playtester ran from CircusMan at 5 HP, healed beside the arena
+		 * and came back to a fresh fight) */
+		e.held = true;
 		emu_battle_force(&e);
 		to(B_FIGHT);
 		break;

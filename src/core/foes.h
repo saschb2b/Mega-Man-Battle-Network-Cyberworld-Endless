@@ -21,6 +21,7 @@ typedef struct {
 	int nfoes;
 	int biome;
 	bool boss;
+	bool held;       /* no running from it: a guardian's, as BN6's story bosses */
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 	int player;      /* MegaMan's panel on it (row << 4 | column, from 1); 0 column 2 row 2 */
 	/* the area's battle it was rolled from, kept in mind once fought

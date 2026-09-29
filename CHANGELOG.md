@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No running from a guardian, as from BN6's story bosses: "Lan, this is no
+  time to run away!" A playtester ran from CircusMan at 5 HP, healed beside
+  the arena and came back to a fresh fight. Virus battles, Servers and the
+  Navi gates' SP fights can still be run from.
 - The short net's dark way: after act 2's guardian, once the Secret Area
   has been cleared in any run, the way on offers a third way, into the
   Undernet for act 3, where one of its own Navis waits. Its battles hit
