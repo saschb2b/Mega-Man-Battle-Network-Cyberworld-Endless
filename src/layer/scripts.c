@@ -331,7 +331,7 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	return s;
 }
 
-int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
+int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code, bool last,
                        int taken_flag, int hp_memories, const ScriptsDraft *draft, const ScriptsRoute *route) {
 	/* (the way on, then the draft's branches first: the choices jump to
 	 * them) */
@@ -346,16 +346,22 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	ta_page(t, FACE_NONE, head, first);
 	first = false;
 	if (power) ta_pages(t, power, FACE_NONE, &first);
-	give_hp_memory(t, hp_memories);
-	got_hp(t, hp_memories, &first);
+	/* (the run's last: no HP or heal for a walk to its exit, a playtester
+	 * given five HPMemory and a program after the final fight) */
+	if (!last) {
+		give_hp_memory(t, hp_memories);
+		got_hp(t, hp_memories, &first);
+	}
 	if (chip > 0) {
 		/* the navi's own chip, as Battle Network gives it (to the pack) */
 		give_chip(t, chip, code, 1);
 		got_chip(t, chip_name, code, &first);
-		ta_page(t, FACE_MEGAMAN, "It's in our pack, Lan. Let's put it in our folder from the PET!", false);
+		ta_page(t, FACE_MEGAMAN, last ? "It goes in our Library for good, Lan!" : "It's in our pack, Lan. Let's put it in our folder from the PET!", false);
 	}
-	ta_bytes(t, full_hp, sizeof full_hp);
-	ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+	if (!last) {
+		ta_bytes(t, full_hp, sizeof full_hp);
+		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+	}
 	if (draft && draft->expmemry) {
 		/* BN6's own ExpMemry (key item 0x71): the game grows the board and
 		 * runs the NaviCust again as it gives it */

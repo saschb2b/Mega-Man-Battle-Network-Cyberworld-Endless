@@ -393,7 +393,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? run.codes[0] ? "Welcome to the Net Dealer! Divers need chips, and I've got 'em, in your folder's codes when I can!"
 					: "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
-				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
+				: run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth)
+					/* (the run's last layer has no "from here": a playtester heard it there) */
+					? "The bottom of the net, MegaMan! Stock up. This is my last stop, and yours!"
+					: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
 			/* (met in this act already: the pick, in a line) */
 			if (layer_objs_dealer_again && tells)
 				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);

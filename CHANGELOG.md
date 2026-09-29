@@ -25,6 +25,19 @@
   whom it opens and how far the rivalry is.
 - Every act's second layer holds its duel: on a small layer whose rooms
   were all taken, ProtoMan was left out (one layer in 300 of the tests').
+- A won run ends as one: the Nest's last Guardian Data gives only its chip
+  ("It goes in our Library for good"), no HPMemory, heal or program pick,
+  and no reminder to place a program follows on the way out. The net goes
+  quiet, the Cybeast growls once more ("Something deeper down is still
+  awake"), and Dad calls from the lab. His Dive report and Records are
+  made again as a guardian's battle ends, and the last layer's Net Dealer
+  no longer says it only gets tougher from here. A playtester's first win
+  ended on two lines, with rewards that could no longer matter.
+- The summary names three unlocks where a run opened three or more, the
+  setup's new entries before the title's marks: a first win opened the
+  endless net, threat 1, a mark and a Cross start, and it named two. A
+  Cross that won't fit beside the run's says the next dive can start with
+  it.
 - A run saved after beating a guardian, on his layer, keeps him beaten
   when an update starts the layer afresh: his Guardian Data shown or
   taken and his exit open stay, as a gift taken does. A playtester's

@@ -188,8 +188,11 @@ them a use.
 
 ## Teaching it
 
-- The run summary names what the run unlocked and what is closest ("One
-  more sword finish: the Blade folder").
+- The run summary names what the run unlocked (three lines at most: the
+  setup's new entries first, then the title's marks) and what is closest
+  ("One more sword finish: the Blade folder"). A Cross that won't fit
+  beside the run's says, at its first win, that the next dive can start
+  with it.
 - The first unlock comes in the first or second run (front-load the first
   reward).
 - An unexpected unlock (a code found in a vault) pays more than an

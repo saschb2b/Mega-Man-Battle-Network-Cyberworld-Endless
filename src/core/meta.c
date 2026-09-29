@@ -211,26 +211,6 @@ void meta_run_over(bool won) {
 		say("%s", rung);
 		profile.setup_new |= SETUP_NEW_THREAT;
 	}
-	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark") */
-	static const struct { int bit; const char *what; } marks[] = {
-		{ MARK_WIN, "Gregar's mark" }, { MARK_NEST, "Bass's mark" }, { MARK_SECRET, "the S mark" }, { MARK_THREAT, "the disc mark" },
-		{ MARK_STD, "the STD COMP mark" }, { MARK_MEGA, "the MEGA COMP mark" }, { MARK_GIGA, "the GIGA COMP mark" },
-	};
-	/* (a Library class complete: every chip of it a run can hold) */
-	bool comp[3];
-	for (int c = 0; c < 3; ++c) comp[c] = chip_pool_class_count(c) > 0 && meta_library_count(c) >= chip_pool_class_count(c);
-	for (unsigned i = 0; i < sizeof marks / sizeof *marks; ++i) {
-		int b = marks[i].bit;
-		bool earned = (b == MARK_WIN && won && run.mode == RUN_SHORT) ||
-			(b == MARK_NEST && run.mode == RUN_ENDLESS && run.depth > CYCLE_LAYERS) ||
-			(b == MARK_SECRET && run.secret_cleared) ||
-			(b == MARK_THREAT && won && run.threat >= THREAT_MAX) ||
-			(b == MARK_STD && comp[0]) || (b == MARK_MEGA && comp[1]) || (b == MARK_GIGA && comp[2]);
-		if (!earned || (profile.marks & b)) continue;
-		profile.marks |= (uint16_t)b;
-		marks_new |= (uint16_t)b;
-		say("%s", marks[i].what);
-	}
 	/* a folder, once its milestone is reached in any run */
 	for (int f = 1; f < FOLDER_COUNT; ++f) {
 		if ((profile.folders_open >> f & 1) || !earned(f)) continue;
@@ -250,6 +230,27 @@ void meta_run_over(bool won) {
 		profile.crosses_open |= (uint8_t)(1u << n);
 		say("the %s start", powers_cross_name(n));
 		profile.setup_new |= SETUP_NEW_CROSS;
+	}
+	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark"),
+	 * said last: the setup's new options matter more to the next run */
+	static const struct { int bit; const char *what; } marks[] = {
+		{ MARK_WIN, "Gregar's mark" }, { MARK_NEST, "Bass's mark" }, { MARK_SECRET, "the S mark" }, { MARK_THREAT, "the disc mark" },
+		{ MARK_STD, "the STD COMP mark" }, { MARK_MEGA, "the MEGA COMP mark" }, { MARK_GIGA, "the GIGA COMP mark" },
+	};
+	/* (a Library class complete: every chip of it a run can hold) */
+	bool comp[3];
+	for (int c = 0; c < 3; ++c) comp[c] = chip_pool_class_count(c) > 0 && meta_library_count(c) >= chip_pool_class_count(c);
+	for (unsigned i = 0; i < sizeof marks / sizeof *marks; ++i) {
+		int b = marks[i].bit;
+		bool earned = (b == MARK_WIN && won && run.mode == RUN_SHORT) ||
+			(b == MARK_NEST && run.mode == RUN_ENDLESS && run.depth > CYCLE_LAYERS) ||
+			(b == MARK_SECRET && run.secret_cleared) ||
+			(b == MARK_THREAT && won && run.threat >= THREAT_MAX) ||
+			(b == MARK_STD && comp[0]) || (b == MARK_MEGA && comp[1]) || (b == MARK_GIGA && comp[2]);
+		if (!earned || (profile.marks & b)) continue;
+		profile.marks |= (uint16_t)b;
+		marks_new |= (uint16_t)b;
+		say("%s", marks[i].what);
 	}
 	profile_save();
 }

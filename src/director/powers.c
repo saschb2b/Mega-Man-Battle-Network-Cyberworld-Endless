@@ -9,6 +9,7 @@
 #include "guardians.h"
 #include "net.h"
 #include "run.h"
+#include "save.h"
 
 /* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, what MegaMan
  * feels of each, and the attacks that hit it twice as hard (BN6's own
@@ -58,9 +59,11 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 			crosses[i].weak);
 		else if (run.cross == navi) ADD("%s@M %s's Cross data... We brought his Cross along already, Lan!", k ? "|" : "", guardian(navi)->name);
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
-		 * the game's word in MegaMan's mouth) */
-		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. We can only carry one Cross down here!", k ? "|" : "",
-			guardian(navi)->name, brought);
+		 * the game's word in MegaMan's mouth; a first win opens its start
+		 * for good, said here, where a playtester read "won't fit" as
+		 * lost, and found the start in the setup) */
+		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. We can only carry one Cross down here!%s", k ? "|" : "",
+			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But it's ours now. Next dive, we can start with it!");
 	}
 	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
 	 * MegaMan, and Dad lets him use it (once a run) */

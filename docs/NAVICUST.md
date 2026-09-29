@@ -81,7 +81,9 @@ feels punishing; one too generous stops biting. BN6 itself stops at 5x5.)
 ### 2. Programs come at the moments that matter
 
 - **The guardian's draft.** Every Guardian Data adds a choice of three
-  programs or none (card-draft-with-skip). One answers the next act's
+  programs or none (card-draft-with-skip), but the run's last: nothing is
+  left to run with (a playtester took HP+50 after the final fight, and was
+  told on the way out to place it). One answers the next act's
   guardian or area where one does (AirShoes where the floor has holes,
   SuperArmor against a guardian that flinches MegaMan, Shield or Reflect
   against one that shoots); one fits the board's build (a Charge+1 beside

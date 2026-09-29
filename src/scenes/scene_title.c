@@ -688,13 +688,19 @@ static void draw(void) {
 			text_draw(lx, y0 + 89, "Best", gold, TEXT_LEFT);
 			text_drawf(rx, y0 + 89, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
 		}
+		/* what the run opened for the next (docs/META.md): three lines
+		 * where it opened three, the lines above drawn closer (a won run
+		 * opened the endless net, a threat, a mark and a Cross start, and
+		 * the summary named two) */
+		const char *open[3];
+		int n = meta_unlocked(open, 3), up = n >= 3 ? 2 : 0;
 		/* Dad's backup, as his call promised, and Lan's word; a won run
 		 * jacks out */
 		if (title_won) {
-			text_draw(x, y0 + 102, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
-			text_draw(x, y0 + 114, "We did it, MegaMan!", WHITE, TEXT_CENTER);
+			text_draw(x, y0 + 102 - up, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
+			text_draw(x, y0 + 114 - 2 * up, "We did it, MegaMan!", WHITE, TEXT_CENTER);
 		} else {
-			text_draw(x, y0 + 102, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
+			text_draw(x, y0 + 102 - up, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
 			/* (a first fight with the guardian who deleted him, named on
 			 * the line above: what it gave, his battle data, which the
 			 * next briefing reads, before a new best, which "New best!"
@@ -704,12 +710,10 @@ static void draw(void) {
 				: title_new_best ? "Our deepest dive yet, MegaMan!"
 				: run.depth <= 2 ? "That was rough... Let's try again!"
 				: "We'll get further next time!";
-			text_draw(x, y0 + 114, said, WHITE, TEXT_CENTER);
+			text_draw(x, y0 + 114 - 2 * up, said, WHITE, TEXT_CENTER);
 		}
-		/* what the run opened for the next, else the closest goal
-		 * (docs/META.md) */
-		const char *open[2];
-		int n = meta_unlocked(open, 2), y = y0 + 129;
+		/* ... else the closest goal */
+		int y = y0 + (n >= 3 ? 124 : 129);
 		for (int i = 0; i < n; ++i, y += 12) text_drawf(x, y, gold, TEXT_CENTER, "Unlocked: %s", open[i]);
 		const char *next = meta_next_goal();
 		if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);

@@ -72,8 +72,9 @@ typedef struct {
  * own item (+20 max HP each, `hp_memories` of them), its navi chip (`chip` 0 for none; `code`
  * A=0 .. *=26), a full heal, the NaviCust's `draft` (NULL for none), then
  * event flag `taken_flag` (on every branch of the draft), and last the
- * `route` on (NULL for none). */
-int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
+ * `route` on (NULL for none). The run's `last` guardian gives only what
+ * carries over: his chip, for the Library. */
+int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code, bool last,
                        int taken_flag, int hp_memories, const ScriptsDraft *draft, const ScriptsRoute *route);
 /* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
  * guardian, any runs) is short of `needed`, its words say so (flag -1:

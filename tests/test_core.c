@@ -17,6 +17,7 @@
 #include "npc_lines.h"
 #include "powers.h"
 #include "rivals.h"
+#include "save.h"
 #include "text.h"
 #include "townmath.h"
 #include "touch_layout.h"
@@ -28,6 +29,7 @@ static int failures;
 /* Minimal stand-ins for the engine pieces the generator links against. */
 char g_data_dir[512] = ".";
 Run run;
+Profile profile;
 static uint32_t rng_s = 1;
 /* (as the game's: the seed mixed first) */
 void rng_seed(uint32_t s) {

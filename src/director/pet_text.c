@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "boss.h"
 #include "director.h"
 #include "emu.h"
 #include "flags.h"
@@ -259,7 +260,13 @@ static void report_text(char *s, int size) {
 	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD("act %d: %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
 	else ADD("%s.", area);
 	int navi = run.side_kind == LAYER_NORMAL ? run.boss_order[run.biome] : 0;
-	if (navi && guardian_known(navi)) ADD(" %s guards this act's end: MegaMan has battle data on him.", guardian(navi)->name);
+	/* (made again as his battle ends: a playtester read "guards this
+	 * act's end" after deleting the Nest's last guardian) */
+	bool down = navi && is_boss_depth(run.depth) && boss_done();
+	if (down && run.mode == RUN_SHORT && run_short_last(run.depth))
+		ADD(" %s is deleted, and the whole net has gone quiet. Jack out and come home, Lan!", guardian(navi)->name);
+	else if (down) ADD(" %s is deleted: the way on is open.", guardian(navi)->name);
+	else if (navi && guardian_known(navi)) ADD(" %s guards this act's end: MegaMan has battle data on him.", guardian(navi)->name);
 	else if (navi && director_guardian_heard()) ADD(" Word on the net: %s guards this act's end.", guardian(navi)->name);
 	else if (navi) ADD(" A strong Navi guards this act's end. We don't know who yet.");
 	ADD(" ScrtData: %d of 3%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ", the gate open" : "");

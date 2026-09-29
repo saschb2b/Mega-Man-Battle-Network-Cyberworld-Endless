@@ -390,6 +390,13 @@ static bool guardian_heard(void) {
 
 bool director_guardian_heard(void) { return guardian_heard(); }
 
+/* The run is won where MegaMan stands: the short net's last guardian
+ * deleted, only the exit ahead (no reminders then: a playtester was told
+ * to place a program on the walk to it). */
+static bool run_won_here(void) {
+	return run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth) && boss_done();
+}
+
 static const char *status_words(void) {
 	static char buf[800];
 	int k = 0;
@@ -533,7 +540,7 @@ static const char *status_words(void) {
 		 * one that cannot fit, once a board: a playtester's SuprArmr could
 		 * not share the 4x4 board with Custom1) */
 		int offv;
-		const char *off = program_off_board(&offv);
+		const char *off = run_won_here() ? NULL : program_off_board(&offv);
 		if (off && !fits_beside_placed(offv)) {
 			const char *w = no_room_words(*off ? off : "That program");
 			if (w) ADD("%s|", w);
@@ -2081,7 +2088,7 @@ static void bug_watch(void) {
 	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
 		D.pet_seen = false;
 		int offv = 0;
-		const char *off = D.off_told ? NULL : program_off_board(&offv);
+		const char *off = D.off_told || run_won_here() ? NULL : program_off_board(&offv);
 		static char words[200];
 		const char *say = NULL;
 		if (off && *off && !fits_beside_placed(offv)) say = no_room_words(off);
@@ -2647,7 +2654,13 @@ void director_update(void) {
 			 * the pad straight to the title's summary) */
 			if (!D.final_told && run.biome == BIOME_NEST && run_short_last(run.depth) && boss_done() && !emu_read8(BN6_CHATBOX) &&
 				!talk_busy() && !cinema_busy() && !D.warping &&
+				/* (the arrival's growl answered, Dad's voice, and the endless
+				 * net's hook: a playtester's first win ended on two lines) */
 				talk_start("@M That was the Nest's last guardian, Lan... The whole net has gone quiet.|"
+					"@B Grrrr......|"
+					"@M ...Almost. Something deeper down is still awake, Lan. The Nest was only its den.|"
+					"@D Lan, MegaMan, it's Dad! I watched it all from the lab. You did it!|"
+					"@D Whatever is growling down there, we'll be ready for it. Now jack out and come home, you two.|"
 					"@L We did it, MegaMan! The exit's open. Let's jack out!", FACE_MEGAMAN))
 				D.final_told = true;
 		}
@@ -2754,13 +2767,16 @@ void director_update(void) {
 		if (!D.challenge && !boss_fighting()) roll_encounter();
 	}
 	/* back from the guardian's battle */
-	if (boss_fighting() && !emu_battle_forcing()) boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
+	if (boss_fighting() && !emu_battle_forcing()) {
+		boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
+		D.pet_refreshed = false;   /* (Dad's mails made again: the Records, the report) */
+	}
 	if (D.challenge && !emu_battle_forcing()) {
 		/* back from the challenge (the game gave its reward, the signal
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-		if (D.duel) duel_verdict(won);
+		if (D.duel) { duel_verdict(won); D.pet_refreshed = false; }
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
 		else D.reward_due = won && D.objs.challenge_reward >= 0;
 		D.gate_fight = false;

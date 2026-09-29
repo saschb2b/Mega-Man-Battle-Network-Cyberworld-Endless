@@ -63,7 +63,9 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	 * for BugFrags (only a normal layer's guardian; a side layer's is its
 	 * own reward) */
 	ScriptsDraft draft = { 0 };
-	if (run.side_kind == LAYER_NORMAL) {
+	/* (the run's last guardian: none, nothing more to run with) */
+	bool last = run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth);
+	if (run.side_kind == LAYER_NORMAL && !last) {
 		draft.expmemry = !navicust_expmemry(run.depth) ? 0 : run.depth <= 6 ? 1 : 2;
 		/* (programs that fit beside those on MegaMan's board as the layer
 		 * was made, on the board this Guardian Data leaves: its ExpMemry
@@ -158,7 +160,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		snprintf(with_data, sizeof with_data, "%s%s@M And his battle data, Lan. Next time, we'll know how he fights!", power ? power : "", power ? "|" : "");
 		power = with_data;
 	}
-	g->reward = ta_guardian_reward(text, gd->name, power, chip, ci.name, code,
+	g->reward = ta_guardian_reward(text, gd->name, power, chip, ci.name, code, last,
 		LAYER_REWARD_TAKEN_FLAG, run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES, &draft, way);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
