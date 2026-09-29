@@ -8,6 +8,7 @@
 
 int16_t route_walk[MAP_W * MAP_H];
 int route_walk_len, route_walk_aim = -1;
+static double way_eighths;   /* the last way, in eighths, not rounded */
 
 static bool floor_at(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
 
@@ -22,8 +23,15 @@ int route_grid_way(double dx, double dy) {
 	 * a diagonal way, where on the screen, 27 degrees off level, it lay 4
 	 * from "left" or "right", and MegaMan a little aside on it tipped it */
 	double right = dx - dy, down = dx + dy;
-	int k = (int)lround(atan2(down, right) / (3.14159265358979 / 4));
+	way_eighths = atan2(down, right) / (3.14159265358979 / 4);
+	int k = (int)lround(way_eighths);
 	return (k % 8 + 8) % 8;
+}
+
+bool route_way_holds(int shown, double margin) {
+	double d = fmod(way_eighths - shown + 16.0, 8.0);
+	if (d > 4.0) d = 8.0 - d;
+	return d <= margin;
 }
 
 /* Whether MegaMan walks from panel (sx, sy) to (ax, ay) in a straight line

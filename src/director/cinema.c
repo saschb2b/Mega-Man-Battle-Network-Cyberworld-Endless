@@ -43,6 +43,7 @@ void cinema_arrow_extend(int frames) { if (C.arrow_len && C.arrow_len - C.arrow_
 bool cinema_arrow_on(void) { return C.arrow_len > 0; }
 int cinema_arrow_age(void) { return C.arrow_len ? C.arrow_t : 0; }
 void cinema_arrow_turn(int dir) { C.arrow_dir = dir & 7; }
+int cinema_arrow_dir(void) { return C.arrow_dir; }
 
 static void card(int kind, const char *top, const char *name, const char *l1, const char *l2, SDL_Color accent, int frames) {
 	C.card = kind;

@@ -29,4 +29,9 @@ bool route_floor_line(int sx, int sy, int ax, int ay);
 extern int16_t route_walk[MAP_W * MAP_H];
 extern int route_walk_len, route_walk_aim;
 
+/* Whether the last route_way's way is still `shown`'s, one of the eight:
+ * within `margin` eighths of its middle (a half is its own edge; more holds
+ * a way a little past it, so the arrow does not wobble between two). */
+bool route_way_holds(int shown, double margin);
+
 #endif

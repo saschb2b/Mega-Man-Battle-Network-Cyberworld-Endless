@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- L's arrow keeps its way until the way on is clearly in the next eighth,
+  not the moment it crosses the edge: it wobbled between two neighbouring
+  eighths as MegaMan walked, a third of its turns swinging back within a
+  second, and a playtester holding the way a picture showed ran past turns.
 - A run with the Blade or Storm folder starts with the pack as BN6 would
   have it after giving that folder at NEW GAME: the Standard folder's chips
   are no longer spares in it (a playtester's Blade run slotted in its

@@ -41,6 +41,8 @@ void cinema_arrow_extend(int frames);
 /* Whether the arrow shows, and a new way for it as it shows. */
 bool cinema_arrow_on(void);
 void cinema_arrow_turn(int dir);
+/* The way the arrow shows (screen eighths). */
+int cinema_arrow_dir(void);
 /* How long the arrow has shown, in frames. */
 int cinema_arrow_age(void);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */

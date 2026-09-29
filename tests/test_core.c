@@ -697,17 +697,23 @@ static bool walk_step(double *x, double *y, double dx, double dy, int gx, int gy
 }
 
 /* frames to get beside (tx, ty) from (x, y) following the arrow, -1 never */
+static int arrow_turns, arrow_frames, arrow_swings;
 static int follow_arrow(double x, double y, int tx, int ty) {
 	const double run = 2.0 / 32;   /* panels a frame */
 	int len, shown = route_way(x, y, tx, ty, &len), pending = shown, stuck = 0;
 	if (shown < 0) return -1;
-	int budget = 200 + 48 * len;
+	int budget = 200 + 48 * len, before = -1, turned_at = -1000;
 	for (int f = 1; f <= budget; ++f) {
 		int cx = (int)lround(x), cy = (int)lround(y);
 		if (abs(cx - tx) + abs(cy - ty) <= 1) return f;
+		++arrow_frames;
 		if (f % 5 == 0) {
 			int w = route_way(x, y, tx, ty, &len);
-			if (w >= 0 && w == pending) shown = w;
+			if (w >= 0 && w == pending && shown != w && !route_way_holds(shown, 0.8)) {
+				++arrow_turns;
+				if (w == before && f - turned_at < 60) ++arrow_swings;
+				before = shown; turned_at = f; shown = w;
+			}
 			pending = w;
 		}
 		/* the pad's way on the grid (RIGHT +x -y, DOWN +x +y) */
@@ -765,6 +771,10 @@ static void test_arrow(void) {
 		}
 	}
 	CHECK(lost == 0, "the arrow lost MegaMan on %d of %d walks", lost, walks);
+	/* (how steady it is: a turn back to the way before within a second is a
+	 * swing; the director holds a way a little past its edge, 0.8 eighths,
+	 * which took a quarter off them) */
+	printf("  arrow: %d turns over %d frames of walking, %d swung back within a second\n", arrow_turns, arrow_frames, arrow_swings);
 }
 
 /* The walk from the arrival to the exit (or the guardian) in every area:

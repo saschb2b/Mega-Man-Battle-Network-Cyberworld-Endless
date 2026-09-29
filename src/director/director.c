@@ -1882,10 +1882,14 @@ static void arrow_update(void) {
 	 * route's first leg flipped as MegaMan crossed a panel's border, and
 	 * the arrow with it; a look every 5 frames, as every 15 a running
 	 * MegaMan was two panels past a turn before it turned) */
+	/* (and not for a way just past the edge of the one shown: the arrow
+	 * wobbled between neighbouring eighths as the walk's aim moved, a third
+	 * of its turns swung back within a second, and a playtester holding
+	 * the way a picture showed ran past the turns) */
 	static int tick, pending = -1;
 	if (cinema_arrow_on() && on_map() && ++tick % 5 == 0) {
 		goal_way();
-		if (way_dir == pending) cinema_arrow_turn(way_dir);
+		if (way_dir == pending && !route_way_holds(cinema_arrow_dir(), 0.8)) cinema_arrow_turn(way_dir);
 		pending = way_dir;
 	}
 	/* (it faded three seconds after the words, and in the Aquarium Comp's
