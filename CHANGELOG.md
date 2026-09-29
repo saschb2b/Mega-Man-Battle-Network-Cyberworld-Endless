@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The layer-1 gift's Mr. Prog logs out once the gift is taken, and an A
+  pressed within half a second of a chat closing on the map is not passed
+  on: a playtester's A pressed through the last box talked to the Prog
+  beside him again, two sessions running.
+- L's arrow no longer shows over a jack-in's or a warp's flash and tunnel.
 - After a run that opened something (a folder, a Cross start, a threat
   rung, the endless net), the setup opens on that row, with NEW beside it,
   until the next jack-in: a playtester's A went through a setup that showed

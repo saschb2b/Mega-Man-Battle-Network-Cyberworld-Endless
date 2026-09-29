@@ -91,6 +91,8 @@ static struct {
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held, a_held;   /* L, R and A were down last frame */
+	bool chat_was_open;            /* the game's chat box was open last frame */
+	int a_quiet;                   /* frames an A is not passed on after a chat on the map closed */
 	int l_kept;                    /* frames an L pressed while busy is kept */
 	int walk_to, walk_t;           /* the NPC slot MegaMan walks up to after an A short of it, frames left */
 	bool dir_held;         /* a direction is held this frame */
@@ -1653,6 +1655,13 @@ uint32_t director_keys(uint32_t keys) {
 	D.map_shown = false;
 	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed, pad_pressed);
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
+	/* (half a second without A after a chat closes: a playtester's A pressed
+	 * through a chat's last box talked to the gift Prog beside him again,
+	 * twice a session) */
+	bool chat_open = emu_read8(BN6_CHATBOX) || talk_busy();
+	if (D.chat_was_open && !chat_open) D.a_quiet = 30;
+	D.chat_was_open = chat_open;
+	if (D.a_quiet > 0) { --D.a_quiet; if (!chat_open) { keys &= ~KEY_A; a_pressed = false; } }
 	keys = corner_assist(keys);
 	/* (turned to what A would talk to, the pad left alone for that frame so
 	 * the game does not turn him back; not in the town, where A also reads
@@ -1672,6 +1681,12 @@ uint32_t director_keys(uint32_t keys) {
 	}
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_used |= D.map_shown; keys &= ~KEY_SELECT; }
+	/* R on the port: the jack-in, which the arrow does not follow into its
+	 * flash and tunnel (a playtester saw it drawn over them) */
+	if (D.town && r_pressed && town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
+		cinema_arrow(0, 0);
+		D.arrow_pending = false;
+	}
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
 	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&
@@ -1831,6 +1846,12 @@ static void push_arrow(void) {
 /* The way-on arrow: on while L's words last, however many boxes, then ten
  * seconds more, and on while MegaMan walks, up to half a minute. */
 static void arrow_update(void) {
+	/* (not over a warp's or the jack-in's flash and tunnel) */
+	if (D.warping || emu_read8(BN6_WARP + 0x10)) {
+		if (cinema_arrow_on()) cinema_arrow(0, 0);
+		D.arrow_pending = false;
+		return;
+	}
 	/* (it turns as MegaMan walks: frozen, it pointed into the gap he had
 	 * walked past) */
 	/* (a new way twice running before it turns: at a walkway's mouth the

@@ -397,6 +397,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			if (emu_debug_on()) fprintf(stderr, "gift: chip %d \"%s\" %c, program %d color %d\n", chip, ci.name, code, program.id, program.code);
 			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, profile.runs >= 2, (run.helpers & HELP_HEAD_START) != 0, chip, ci.name, ci.power, code == '*' ? 26 : code - 'A', program.id,
 				program.code, about);
+			/* (and logs out once it is taken: he stood beside the arrival,
+			 * and a playtester's A pressed through the last box talked to
+			 * him again, two sessions running) */
+			tk.gone_flag = LAYER_GIFT_FLAG;
 			flag_clear(LAYER_GIFT_FLAG);
 			break;
 		}
