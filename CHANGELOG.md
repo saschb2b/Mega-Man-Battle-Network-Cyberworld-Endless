@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A guardian's Cross that won't fit beside the one brought is "We can
+  only carry one Cross down here!", where MegaMan had said "One Cross a
+  run!", the game's word rather than his.
 - A guardian met for the first time comes with the net's rumor about it,
   a line each that hints at its manner without its moves: HeatMan's fire
   "never runs out", EraseMan "deletes Navis outright", BlastMan "leaves

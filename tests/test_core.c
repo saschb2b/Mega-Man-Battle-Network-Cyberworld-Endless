@@ -660,6 +660,15 @@ static void test_talk(void) {
 			snprintf(what, sizeof what, "powers_reward_text(%d, graveyard, %d)", navi, depth);
 			check_talk(what, powers_reward_text(navi, BIOME_GRAVEYARD, depth));
 		}
+		/* (and beside every Cross a run can bring) */
+		for (int brought = 1; brought <= 18; ++brought) {
+			if (!powers_cross_name(brought)) continue;
+			int cross = run.cross;
+			run.cross = (uint8_t)brought;
+			snprintf(what, sizeof what, "powers_reward_text(%d) beside %d", navi, brought);
+			check_talk(what, powers_reward_text(navi, 0, 3));
+			run.cross = (uint8_t)cross;
+		}
 	}
 	for (int biome = 0; biome < BIOME_COUNT; ++biome)
 		for (int side = LAYER_NORMAL; side <= LAYER_SECRET; ++side)

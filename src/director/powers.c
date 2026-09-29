@@ -57,7 +57,10 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s|@M But %s attacks hit me twice as hard in it, Lan.", k ? "|" : "", crosses[i].name, crosses[i].feel,
 			crosses[i].weak);
 		else if (run.cross == navi) ADD("%s@M %s's Cross data... We brought his Cross along already, Lan!", k ? "|" : "", guardian(navi)->name);
-		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. One Cross a run!", k ? "|" : "", guardian(navi)->name, brought);
+		/* (said as the net's fact, not a rule's: "One Cross a run!" put
+		 * the game's word in MegaMan's mouth) */
+		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. We can only carry one Cross down here!", k ? "|" : "",
+			guardian(navi)->name, brought);
 	}
 	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
 	 * MegaMan, and Dad lets him use it (once a run) */
