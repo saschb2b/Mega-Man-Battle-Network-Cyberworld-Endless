@@ -226,7 +226,11 @@ them a use.
    net's Nest: its first guardian's exit leads to a layer 11 with a heal,
    a dealer and another of the Nest's guardians, drawn from the run's
    seed, none of the acts' nor the first; the endless net's Nest rebuilds
-   the net, so the rung says it is the short net's).
+   the net, so the rung says it is the short net's). More starting towns
+   wait for heights in the town's plan: Seaside, Green and Sky Towns each
+   stand on several (docs/OVERWORLD.md, further towns). The town as hub
+   (the setup's choices made in the town, at its people and shops) waits
+   on the playtests: the setup screen has raised no complaint.
 
 ## Decisions (28 September 2026)
 
