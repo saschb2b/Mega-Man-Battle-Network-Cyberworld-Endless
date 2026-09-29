@@ -9,7 +9,7 @@ or drawn over its frame by `src/director/cinema.c`.
 
 | Hades | Here |
 | --- | --- |
-| The room before a boss is safe: Charon's shop, often a fountain | The antechamber, the room the arena's bridge leaves from, always holds a heal and the Net Dealer |
+| The room before a boss is safe: Charon's shop, often a fountain | The antechamber, the room the arena's bridge leaves from, holds a heal and the Net Dealer (or a room near it, where it has no counter's place); stepping in, MegaMan names those not yet used and which way each is, since the arrow leads past them |
 | The boss chamber is an arena of its own, locked until the fight is over | A square arena at the end of one bridge, drawn in the area's second floor; the exit pad inside it stays hidden and shut |
 | The music drops to ambience on approach, the boss theme starts with the fight | Entering the arena silences the area's theme; the boss prelude (song 0x1C) plays through the intro, the game's boss theme in the battle |
 | Short intro dialogue with portraits, chosen by history (first meeting, who won last) | Lines with the guardian's mugshot for a first meeting (Lan or MegaMan naming the copy first), a rematch, revenge after beating MegaMan, a stronger version, and grudging respect after many losses; MegaMan answers now and then; the Nest's own guardian says what it is; Lan's "Battle routine, set!" and MegaMan's "Execute!" close it |

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Stepping into the room before a guardian's arena, MegaMan names the Net
+  Dealer and the Recovery Mr. Prog there, and which way each is, if they
+  have not been used (the heal only below full HP): the arrow leads past
+  them, and a playtester reached SpoutMan at 120 of 140 HP with 1150
+  zenny unspent.
 - A guardian's battle chip comes in its * whenever the folder holds none
   of its letters, not half the time: a playtester's Blade folder won
   SpoutMan A.

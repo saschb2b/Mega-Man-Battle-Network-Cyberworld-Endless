@@ -114,6 +114,7 @@ static struct {
 	bool bugs_known;       /* ... read on this layer */
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
+	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -695,6 +696,7 @@ static bool build_layer(void) {
 	D.fragment_due = false;
 	D.bugs_known = false;
 	D.off_told = false;
+	D.last_stop_told = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
@@ -1145,7 +1147,8 @@ void director_describe(FILE *f) {
 				}
 				/* (CYBERWORLD_STATE_POS=map: the whole layer, with its objects
 				 * and the arrow's walk: * the walk, + where the arrow aims,
-				 * letters the objects, ^ raised floor) */
+				 * letters the objects, ^ raised floor, , the floor of the
+				 * room before a guardian's arena) */
 				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) {
 					goal_way();
 					static char g[MAP_H][MAP_W + 1];
@@ -1158,6 +1161,12 @@ void director_describe(FILE *f) {
 							if (layer.cell[y][x] != C_VOID) { x0 = x < x0 ? x : x0; y0 = y < y0 ? y : y0; x1 = x > x1 ? x : x1; y1 = y > y1 ? y : y1; }
 						}
 						g[y][MAP_W] = 0;
+					}
+					if (layer.ante >= 0) {
+						const Room *r = &layer.rooms[layer.ante];
+						for (int y = r->y; y < r->y + r->h; ++y)
+							for (int x = r->x; x < r->x + r->w; ++x)
+								if (g[y][x] == '.') g[y][x] = ',';
 					}
 					/* (% a sprite prop, in the void or in its walled hole) */
 					for (int i = 0; i < layer.nprops; ++i)
@@ -2233,6 +2242,48 @@ static void win_run(void) {
 	scene_set(&scene_title);
 }
 
+/* The last stop before a guardian's arena: the Net Dealer and a heal stand
+ * in the room before it or one beside it (net_gen.c), off the arrow's
+ * line, and a playtester walked past both to SpoutMan at 120 of 140 HP
+ * with 1150 zenny unspent. Stepping into the room before the arena,
+ * MegaMan names those not yet used, once, and which way each is. */
+/* (where a service stands from MegaMan, along the floor: "right here, to
+ * the left", "down and to the right", "a long way back, straight up") */
+static const char *service_where(int wx, int wy, char *buf, size_t n) {
+	int far;
+	const char *w = route_to(wx, wy, &far);
+	if (!w) w = way_to(wx, wy, &far);
+	snprintf(buf, n, far == 0 ? "right here, %s" : far == 1 ? "%s" : "a long way back, %s", w);
+	return buf;
+}
+
+static void last_stop(int cx, int cy) {
+	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
+	const Room *a = &layer.rooms[layer.ante];
+	if (cx < a->x || cy < a->y || cx >= a->x + a->w || cy >= a->y + a->h) return;
+	if (emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping || D.map_shown) return;
+	D.last_stop_told = true;
+	int hp = emu_read16(BN6_NAVI_STATS + 0x40), max = emu_read16(BN6_NAVI_STATS + 0x42);
+	const char *dealer = NULL, *heal = NULL;
+	static char dway[48], hway[48];
+	int keep = way_dir;
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		int wx, wy;
+		netmap_world((int)o->x, (int)o->y, &wx, &wy);
+		if (o->type == OBJ_SHOP && !dealer && !flag_get(LAYER_DEALER_TOLD_FLAG)) dealer = service_where(wx, wy, dway, sizeof dway);
+		if (o->type == OBJ_HEAL && !heal && !flag_get(LAYER_HEAL_TOLD_FLAG) && hp < max) heal = service_where(wx, wy, hway, sizeof hway);
+	}
+	way_dir = keep;
+	if (!dealer && !heal) return;
+	static char buf[300];
+	int k = snprintf(buf, sizeof buf, "@M %s's arena is just ahead, Lan!|@M ", guardian(D.objs.guardian.navi)->name);
+	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, and a Recovery Mr. Prog's %s, if we want to get ready first.", dealer, heal);
+	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, if we want to get ready first.", dealer);
+	else snprintf(buf + k, sizeof buf - (size_t)k, "A Recovery Mr. Prog's %s, if we want to heal up first.", heal);
+	talk_start(buf, FACE_MEGAMAN);
+}
+
 void director_update(void) {
 	if (!D.active) return;
 	if (D.town) { town_update(); return; }
@@ -2267,6 +2318,7 @@ void director_update(void) {
 					for (int x = r->x - 1; x <= r->x + r->w; ++x)
 						if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
 			}
+			last_stop(cx, cy);
 		}
 	}
 	/* (the PET's first menu is a screen of the game's own mode, its pages
