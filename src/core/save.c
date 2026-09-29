@@ -146,13 +146,22 @@ void run_new_varied(uint32_t seed) {
 	 * RoboDog Comp four runs running) */
 	/* (and the same town: a playtester began on Central Town's street by
 	 * Lan's house four or five runs running) */
+	/* (and, the first tries, not the run before's either: avoiding the last
+	 * alone let two of the three opening areas take turns, and a
+	 * playtester met the RoboDog Comp five runs in seven, the Seaside Area
+	 * never) */
 	int first = run.boss_order[run.biome_order[0]], area = run.biome_order[0], place = town_style_for(town_seed(run.seed));
-	for (int k = 1; k <= 16 && (profile.first_guardian == first + 1 || profile.first_area == area + 1 || profile.last_town == place + 1); ++k) {
+	for (int k = 1; k <= 32; ++k) {
+		bool again = profile.first_guardian == first + 1 || profile.first_area == area + 1 || profile.last_town == place + 1;
+		if (k <= 24) again |= profile.guardian_before == first + 1 || profile.area_before == area + 1;
+		if (!again) break;
 		run_new(seed * 2654435761u + 0x9E37u * (uint32_t)k);
 		first = run.boss_order[run.biome_order[0]];
 		area = run.biome_order[0];
 		place = town_style_for(town_seed(run.seed));
 	}
+	profile.guardian_before = profile.first_guardian;
+	profile.area_before = profile.first_area;
 	profile.first_guardian = (uint8_t)(first + 1);
 	profile.first_area = (uint8_t)(area + 1);
 	profile.last_town = (uint8_t)(place + 1);

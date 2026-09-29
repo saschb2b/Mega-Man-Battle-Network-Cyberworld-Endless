@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A new run's first area and guardian avoid the last two runs' where they
+  can, so any three runs running open in all three opening areas: avoiding
+  the last run's alone let two of them take turns, and a playtester met the
+  RoboDog Comp five runs in seven and the Seaside Area never.
 - The layer-1 gift's Mr. Prog logs out once the gift is taken, and an A
   pressed within half a second of a chat closing on the map is not passed
   on: a playtester's A pressed through the last box talked to the Prog

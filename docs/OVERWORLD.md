@@ -215,9 +215,9 @@ points n = 0 at destination 42, and the engine rewrites destination 42
 arrives there, the run goes on as from any layer (docs/EMULATION.md).
 
 A new run plans the other town than the last run did (`town_style_for`,
-with the last run's first area and guardian in `run_new_varied`): a
-playtester began on Central Town's street by Lan's house four or five runs
-running.
+in `run_new_varied`, which also keeps the first area and guardian off the
+last two runs' where it can): a playtester began on Central Town's street
+by Lan's house four or five runs running.
 
 `CYBERWORLD_AUTOPILOT` walks Lan along the streets to the landmark's front
 (a breadth-first path over the town's walkable cells) and presses R.
