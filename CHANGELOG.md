@@ -32,8 +32,8 @@
   the short net's Nest. The first's exit leads to layer 11, with its heal
   and Net Dealer before the arena, and MegaMan feels the second from the
   Nest's first words. The top rung, and the title's green disc, is now 10.
-- The way-on arrow L shows stays while MegaMan walks, up to half a minute,
-  and fades three seconds after he stops: it faded three seconds after L's
+- The way-on arrow L shows stays ten seconds after his words and while
+  MegaMan walks, up to half a minute, and fades three seconds after he stops: it faded three seconds after L's
   words, and in the Aquarium Comp's mazes of short walkways a playtester
   lost a dozen moves at a time between one L and the next.
 - NaviCust programs found join later runs: every program MegaMan runs with
