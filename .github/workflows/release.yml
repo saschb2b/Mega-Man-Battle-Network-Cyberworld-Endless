@@ -69,23 +69,28 @@ jobs:
           ref: ${{ env.TAG }}
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.android, tag: cyberworld-android }
-      # one key for every release (android/README.md): the secrets, or a
-      # debug key when the repository has none yet
+      # one key for every release (android/README.md, tools/android_key.sh):
+      # without the secrets no APK is released, rather than one signed with
+      # a key the next release could not match (players would reinstall and
+      # lose their saves to update)
       - name: The APK
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            mkdir -p .build && echo "$KEYSTORE_BASE64" | base64 -d > .build/release.jks
-            export ANDROID_KEYSTORE=/src/.build/release.jks
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ]; then
+            echo "::warning::No Android release key in the repository's secrets: this release has no APK"
+            exit 0
           fi
+          mkdir -p .build && echo "$KEYSTORE_BASE64" | base64 -d > .build/release.jks
+          export ANDROID_KEYSTORE=/src/.build/release.jks
           python3 build.py android
           rm -f .build/release.jks
       - uses: actions/upload-artifact@v4
         with:
           name: android
           path: build/release/cyberworld-endless.apk
+          if-no-files-found: ignore
 
   release:
     needs: [flatpak, macos, android]
@@ -114,16 +119,20 @@ jobs:
         with:
           name: macos
           path: build/release
+      # (none when the release has no APK)
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: android
           path: build/release
       - name: Checksums
         working-directory: build/release
-        run: >
-          sha256sum cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb
-          cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe
-          cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless-web.zip > SHA256SUMS.txt
+        run: |
+          ls cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
+            cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe \
+            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless-web.zip \
+            2>/dev/null > FILES || true
+          sha256sum $(cat FILES) > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
       # section); a 0.x version is an alpha, published as a pre-release
       - name: Notes
@@ -135,10 +144,6 @@ jobs:
           flags=()
           title="Cyberworld Endless $TAG"
           case "$TAG" in v0.*) flags+=(--prerelease); title="$title (alpha)";; esac
-          gh release create "$TAG" --verify-tag --notes-file build/release/NOTES.md "${flags[@]}" --title "$title" \
-            build/release/cyberworld.zip build/release/cyberworld-endless-x86_64.AppImage \
-            build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/cyberworld-endless_amd64.deb \
-            build/release/cyberworld-endless-linux-x86_64.tar.gz build/release/cyberworld-endless.flatpak \
-            build/release/cyberworld-endless-setup-x64.exe build/release/cyberworld-endless-windows-x64.zip \
-            build/release/cyberworld-endless-macos.dmg build/release/cyberworld-endless.apk \
-            build/release/cyberworld-endless-web.zip build/release/SHA256SUMS.txt
+          files=(build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/SHA256SUMS.txt)
+          while read -r f; do files+=("build/release/$f"); done < build/release/FILES
+          gh release create "$TAG" --verify-tag --notes-file build/release/NOTES.md "${flags[@]}" --title "$title" "${files[@]}"

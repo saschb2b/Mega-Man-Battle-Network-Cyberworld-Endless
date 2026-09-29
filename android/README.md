@@ -45,7 +45,11 @@ is fine for trying a build on your own device.
 
 The release workflow takes the key from the repository's secrets
 `ANDROID_KEYSTORE_BASE64` (the keystore file, base64) and
-`ANDROID_KEYSTORE_PASSWORD`. A key is made once, with the JDK's keytool:
+`ANDROID_KEYSTORE_PASSWORD`; without them a release has no APK rather than
+one signed with a key the next could not match. A key is made once:
+`tools/android_key.sh` runs the JDK's keytool in the Android build image
+(it asks you for the password), writes `~/cyberworld-release.jks` and sets
+both secrets with `gh`. By hand:
 
 ```sh
 keytool -genkeypair -v -keystore release.jks -alias cyberworld -keyalg RSA -keysize 4096 -validity 36500
