@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Facing a guardian MegaMan has battled before, he reminds Lan when to
+  strike just before the battle, from battle data ("Remember our battle
+  data, Lan: he stands still at the back while his tower and flame play
+  out: strike then!"): the layer's briefing had come ten minutes before
+  a playtester's fight.
 - The first layer's gift gives a head start's HPMemory (and a comfort
   one) before it offers the pick, not just before the options, where
   "2 HPMemory" then "HPMemory x2" read as the same thing twice.

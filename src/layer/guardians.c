@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "net.h"
 #include "rivals.h"
@@ -276,6 +277,12 @@ const char *guardian_intro(int navi, int version, int biome) {
 	ADD("%s", s);
 	/* MegaMan answers now and then, never over a first meeting */
 	if (r->met && r->met % 3 != 1) ADD("|@M %s", replies[r->met % 4]);
+	/* and, from battle data, when to strike, just before the fight: the
+	 * briefing on his layer came ten minutes before a playtester's fight,
+	 * who asked for it again at the arena */
+	const char *tip = guardian_known(navi) ? guardian_tip(navi) : NULL, *when = NULL;
+	for (const char *p = tip; p && (p = strstr(p, "|@M ")) != NULL; p += 4) when = p + 4;
+	if (when && *when) ADD("|@M Remember our battle data, Lan: %c%s", *when >= 'A' && *when <= 'Z' ? *when - 'A' + 'a' : *when, when + 1);
 	ADD("|@L Battle routine, set!|@M Execute!");
 	#undef ADD
 	return buf;
