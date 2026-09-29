@@ -96,7 +96,9 @@ int ta_heal(TextArchive *t, int variant, int told_flag) {
 }
 
 int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag) {
-	uint8_t open[] = { 0xFB, 0x05, (uint8_t)shop };               /* ts_start_shop */
+	/* (ts_wait a moment first: an A mashed through his words had opened
+	 * the list on its first chip, "Are you sure? > Yes") */
+	uint8_t open[] = { 0xEE, 0x00, 24, 0, 0xFB, 0x05, (uint8_t)shop };   /* ts_wait, ts_start_shop */
 	bool first = true;
 	/* once his words are said (flag set), a line and the list: Kai sat
 	 * through six boxes each time he came back */

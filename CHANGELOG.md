@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A shop's list opens a moment after its keeper's last line, so an A pressed
+  twice to close it no longer picks the first chip ("Are you sure? > Yes").
 - A Net Dealer names the viruses' weakness only where it holds: half or more
   of the kinds of virus the area's battles can hold at that depth share the
   element (two kinds at least). A playtester told the viruses couldn't stand
