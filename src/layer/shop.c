@@ -256,10 +256,14 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	/* first, two at most of the programs MegaMan has had in earlier runs
 	 * that the act may offer (docs/NAVICUST.md, 7: the draft finds, the
-	 * vendor keeps) */
+	 * vendor keeps), but those he has now (run.programs, kept with the
+	 * run as the layer is made) */
 	int found[64], nfound = 0;
-	for (int p = 1; p < 64; ++p)
-		if (shop_program_found(p) && navicust_offerable(p, depth)) found[nfound++] = p;
+	for (int p = 1; p < 64; ++p) {
+		bool has = false;
+		for (int i = 0; i < (int)sizeof run.programs && run.programs[i]; ++i) has |= run.programs[i] / 4 == p;
+		if (!has && shop_program_found(p) && navicust_offerable(p, depth)) found[nfound++] = p;
+	}
 	for (int i = nfound - 1; i > 0; --i) { int j = rng_range(0, i), t = found[i]; found[i] = found[j]; found[j] = t; }
 	for (int i = 0; i < nfound && n < 2; ++i) {
 		int color = navicust_color(found[i]);

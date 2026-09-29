@@ -173,7 +173,8 @@ story; afterwards it is an option.
 
 Built: the profile keeps a bit per program MegaMan has run with (on the
 board, or in the PET where it fits the board), read at every checkpoint and
-at the run's end. A NaviCust vendor lists two of them first, shuffled, when
+at the run's end. A NaviCust vendor lists two of them first, shuffled (but
+those MegaMan has now), when
 the act's tier (6) may offer them, at the price the others have (a quarter
 of the game's shop price, or of its tier's where the shops don't sell it),
 and his greeting names them: "I hear MegaMan's used Collect and AutoHeal
