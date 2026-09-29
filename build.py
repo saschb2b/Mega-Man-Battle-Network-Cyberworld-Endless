@@ -785,8 +785,11 @@ SCREENSHOTS = [
       (2380, 'guardian-talk'), (2610, 'boss-custom'), (3670, 'reward'), (3720, 'restored'), (3880, 'area-clear')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
-    ('town-central', ['--scene', 'town', '--seed', '3'], [(280, 'town-central')], {}),
-    ('town-acdc', ['--scene', 'town', '--seed', '5'], [(280, 'town-acdc')], {}),
+    # (the seed picks the town: build.py town lists which each gets)
+    ('town-central', ['--scene', 'town', '--seed', '2'], [(280, 'town-central')], {}),
+    ('town-acdc', ['--scene', 'town', '--seed', '3'], [(280, 'town-acdc')], {}),
+    ('town-seaside', ['--scene', 'town', '--seed', '5'], [(280, 'town-seaside')], {}),
+    ('town-green', ['--scene', 'town', '--seed', '9'], [(280, 'town-green')], {}),
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
     ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'seaside')], {}),
     ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),

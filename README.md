@@ -280,6 +280,12 @@ squirrel in ACDC Town's park, the mermaid fountain by Seaside's whale,
 the knight on Green Town's flower plaza) and press R: Lan jacks MegaMan
 in, and the net begins.
 
+<p align="center">
+<img src="docs/screenshots/town-acdc.png" width="240" alt="Lan in ACDC Town beside Higsby's; MegaMan: The Metroline got us to ACDC Town in no time, Lan!">
+<img src="docs/screenshots/town-seaside.png" width="240" alt="Lan on Seaside Town's plaza by the station stairs; MegaMan: The train got us out to Seaside Town">
+<img src="docs/screenshots/town-green.png" width="240" alt="Lan in Green Town beside the knight statue on the flower plaza; MegaMan: The bus got us out to Green Town, Lan! Smell those flowers!">
+</p>
+
 Each layer is a new layout of platforms and walkways in the style of one of
 the game's areas. Find the exit pad to go one layer deeper. On the way, the
 game's own random battles come up, with the viruses of that area. How hard
