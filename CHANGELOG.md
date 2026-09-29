@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- MegaMan's words before a guardian's arena give each service's way as L
+  and the map do, where it lies, and say when the way there winds: they
+  had named the walk's first step, and a playtester's heal Prog was "up
+  and to the right" there and up and to the left on L and the map.
 - MegaMan knows a guardian only once he has fought it. Meeting a copy the
   first time, he has no battle data on it: L names it and says to watch
   the yellow panels, where every attack lands. From the second meeting,

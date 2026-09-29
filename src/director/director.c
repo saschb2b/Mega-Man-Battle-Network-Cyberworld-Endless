@@ -2276,13 +2276,21 @@ static void win_run(void) {
  * line, and a playtester walked past both to SpoutMan at 120 of 140 HP
  * with 1150 zenny unspent. Stepping into the room before the arena,
  * MegaMan names those not yet used, once, and which way each is. */
-/* (where a service stands from MegaMan, along the floor: "right here, to
- * the left", "down and to the right", "a long way back, straight up") */
+/* (where a service lies from MegaMan, as L and the map give it, and how
+ * far the walk there is: "right here, to the left", "down and to the
+ * right", "a long way back, straight up"; where the walk sets off another
+ * way, that it winds: the walk's first step, "up and to the right", named
+ * a heal that L and the map put up and to the left) */
 static const char *service_where(int wx, int wy, char *buf, size_t n) {
-	int far;
-	const char *w = route_to(wx, wy, &far);
-	if (!w) w = way_to(wx, wy, &far);
-	snprintf(buf, n, far == 0 ? "right here, %s" : far == 1 ? "%s" : "a long way back, %s", w);
+	int far, walk_far;
+	const char *lies = way_to(wx, wy, &far);
+	int lies_dir = way_dir;
+	const char *walk = route_to(wx, wy, &walk_far);
+	int apart = walk ? abs(way_dir - lies_dir) : 0;
+	if (apart > 4) apart = 8 - apart;
+	if (walk) far = walk_far;
+	const char *winds = apart >= 2 ? ", though the way there winds" : "";
+	snprintf(buf, n, far == 0 ? "right here, %s%s" : far == 1 ? "%s%s" : "a long way back, %s%s", lies, winds);
 	return buf;
 }
 
@@ -2294,7 +2302,7 @@ static void last_stop(int cx, int cy) {
 	D.last_stop_told = true;
 	int hp = emu_read16(BN6_NAVI_STATS + 0x40), max = emu_read16(BN6_NAVI_STATS + 0x42);
 	const char *dealer = NULL, *heal = NULL;
-	static char dway[48], hway[48];
+	static char dway[80], hway[80];
 	int keep = way_dir;
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
