@@ -728,6 +728,13 @@ static void library_to_game(void) {
 /* ... and back: the chips the run's game has put in its Library since. */
 static void library_from_game(void) {
 	bool added = false;
+	/* (a run begun by a build before the Library: its count starts here,
+	 * not at 0; a playtester's chips of earlier runs read "+32" at its end) */
+	if (run.active && profile.library_run != run.seed) {
+		profile.library_start = (uint16_t)meta_library_count(-1);
+		profile.library_run = run.seed;
+		added = true;
+	}
 	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
 		if (chip_pool_class(id) >= 0 && flag_get(BN6_FLAG_LIBRARY + id)) added |= meta_library_add(id);
 	if (added) profile_save();

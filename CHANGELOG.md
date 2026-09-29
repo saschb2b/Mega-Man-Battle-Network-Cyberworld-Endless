@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A run begun by an older build counts its Library's news from its first
+  checkpoint on this one: a playtester's run would have ended on "Library
+  32 (+32)", with 26 of them from runs before.
 - The Aquarium and Judge Tree Comps' mazes wind half as much: their
   corridors run straight on where they can and more walls are knocked
   through, so the walk from the arrival to the exit takes 8 legs, as in the

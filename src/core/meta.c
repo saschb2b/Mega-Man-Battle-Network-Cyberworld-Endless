@@ -157,6 +157,7 @@ void meta_run_begun(void) {
 		if (cross_earned(n)) profile.crosses_open |= (uint8_t)(1u << n);
 	/* (the Library as the run begins: the summary counts what it adds) */
 	profile.library_start = (uint16_t)meta_library_count(-1);
+	profile.library_run = run.seed;
 	profile_save();
 }
 
