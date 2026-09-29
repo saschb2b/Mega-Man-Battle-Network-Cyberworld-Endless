@@ -48,9 +48,11 @@ raised, and the loop's own lessons.
      (run in the background; restart it after each look). It prints the
      calls against the budget, what the game shows, the current battle's
      length, the pace in frames a call and the minutes since the last
-     note, and says "look:" when a battle runs past 15 minutes or 40
-     calls, the budget is spent, no note came for 20 minutes, no call for
-     10, or the pace falls under 50 frames a call.
+     note, and the share of the session's calls spent on the map, and
+     says "look:" when a battle runs past 15 minutes or 40 calls, the
+     budget is spent, no note came for 20 minutes, no call for 10, the
+     pace falls under 50 frames a call, or past 80 calls more than 45% of
+     them went on the map (count that area's walk: `test_walks`).
    - Each look: read the latest picture it names and the notes' tail. A
      game problem (a fight that cannot end, a soft-lock, a wall) is yours
      to fix or to stop the session for; a harness problem (tiny steps,

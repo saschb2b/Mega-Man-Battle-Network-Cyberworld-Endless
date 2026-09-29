@@ -8,8 +8,9 @@ are measured.
 
 With --alert it exits 1 when something wants a look (a battle past 15 minutes
 or 40 calls, the call budget spent, 20 minutes without a note while playing,
-no call for 10 minutes while the game runs, or under 50 frames a call over the
-last ten), and 0 otherwise; the loop to run while a persona plays:
+no call for 10 minutes while the game runs, under 50 frames a call over the
+last ten, or past 80 calls more than 45% of them on the map), and 0
+otherwise; the loop to run while a persona plays:
 
   until python3 .claude/skills/playtest-loop/scripts/watch_session.py kai --alert; do sleep 300; done
 
@@ -65,12 +66,20 @@ def main():
         if s[3] != 'battle':
             break
         start = s
+    # the calls spent on the map (walking, reading it, talking), as the
+    # snapshots saw them: each snapshot's calls go to what it showed
+    # (this session's: the log goes on across sessions, whose calls count
+    # from 0 again)
+    first = max([i for i in range(1, len(snaps)) if snaps[i][1] < snaps[i - 1][1]] or [0])
+    walk = sum(snaps[i][1] - snaps[i - 1][1] for i in range(first + 1, len(snaps)) if snaps[i][3] == 'map')
     pace = ''
     if len(frames) > 10:
         per = (frames[-1] - frames[-11]) / 10
         pace = f', {per:.0f} frames a call over the last ten'
     print(f'{name}: {calls} calls (budget {budget}), frame {frame}, doing {doing}, hp {hp}{pace}; '
           f'last call {hist_age:.0f} min ago, last note {note_age:.0f} min ago' + ('' if alive else '; game stopped'))
+    if calls:
+        print(f'  on the map: about {100 * walk // calls}% of the calls')
     want = []
     if start and doing == 'battle':
         mins, n = (now - start[0]) / 60, calls - start[1]
@@ -85,6 +94,11 @@ def main():
         want.append('no call for 10 minutes')
     if len(frames) > 10 and (frames[-1] - frames[-11]) / 10 < 50:
         want.append('a slow pace')
+    # (a session spent 110 of 249 calls walking and reading the map in the
+    # Aquarium Comp's mazes, and it showed only in the report)
+    # (past sessions: 9 to 60%, most 20 to 40)
+    if calls >= 80 and walk * 100 > calls * 45:
+        want.append('nearly half the calls on the map (lost, or a long walk?)')
     shots = sorted(glob.glob(os.path.join(h, 'shots', '*.png')))
     if shots:
         print(f'  latest picture: {shots[-1]}')

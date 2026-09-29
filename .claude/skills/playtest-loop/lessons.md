@@ -555,3 +555,38 @@ their repeats (Central Town, the RoboDog Comp and BlastMan four runs
 running) showed only in the diary, never in one session's notes. Before
 each launch, read the last few runs' openings in `diary.md` and count
 them against the pools.
+
+## Session 29 (7/10, keep playing: yes; recommend: yes)
+
+Build e667169. A CONTINUE of session 28's Blade run through the Aquarium
+Comp: layers 4 and 5, stopped on layer 6 short of CircusMan (249 calls).
+"The fights are the best they've been": three LifeSwords on layer 4, two
+of them double deletes at Busting S, and the dealer's Elec tip won the
+next fight in 1.4 seconds. Confirmed: an unfittable program named once,
+the pad's side entry (2 of 2), the early R kept (5 of 5 within the
+window), CONTINUE keeping the run, the Library carried over, the shop list
+opening past the greeting's A presses.
+
+Raised, fixed: the mazes ate the session (110 of 249 calls walking or on
+the map): counted over 60 layers per area, the Aquarium's and Judge
+Tree's catwalk mazes took 16 legs to the exit against 8 elsewhere, and
+eleven Aquarium guardians' layers in twelve had fallen back to a plain
+route for want of arena room. Their corridors now run straight on and
+more walls are knocked through (8 legs), a guardian's layer gets a
+smaller maze with its arena, and the tests check every area's walk; the
+way-on arrow stays while MegaMan walks. The dealer's ElcPuls3 S at 2000
+beside his A at 700 was fixed during the session (a chip once, whatever
+its code). His wish for rewards in the folder's codes is now whole:
+battle drops lean half the time (BN6's reward rows, found in romlab).
+Built meanwhile, from the roadmap: programs found come back at later
+vendors, threat rung 10, collector's vaults.
+
+Left: platform rims sliding MegaMan along (BN6's movement: UP runs a grid
+diagonal, the walkways' axes want UP+RIGHT and the like).
+
+Loop change: **the watchdog counts the calls spent on the map**. The
+session's walking showed in its notes but only the report said how much.
+`watch_session.py` now prints this session's share of calls on the map
+(past sessions 9 to 60%, most 20 to 40) and says "look:" past 80 calls
+with more than 45% on it; a look then asks whether the persona is lost or
+the layer long, and the layer's walk is counted before the report comes.
