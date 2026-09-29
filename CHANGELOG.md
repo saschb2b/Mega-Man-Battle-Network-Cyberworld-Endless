@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Sealed gates: from the third act a gate may stand sealed with a guardian's
+  code, which says how to earn it: delete that Navi twice as a guardian, in
+  any runs. An earned code opens every such gate in later runs, to a fight
+  with his SP whose chip is the prize. L names the gate, and the map marks
+  it violet.
 - An L or R pressed before the Custom gauge fills is kept two and a half
   seconds, not one and a half: a playtester's press two seconds early, while
   the gauge looked full, was dropped.

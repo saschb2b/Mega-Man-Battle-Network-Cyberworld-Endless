@@ -34,6 +34,7 @@ typedef enum {
 	OBJ_PROGRAMS,    /* NaviCust program vendor */
 	OBJ_RETURN,      /* leave a side layer */
 	OBJ_GIFT,        /* the run's first layer: a gift to choose */
+	OBJ_NAVI_GATE,   /* a gate sealed with a Navi's code, his SP inside (docs/META.md, gates); param: navi */
 } ObjType;
 
 typedef struct {

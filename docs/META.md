@@ -328,8 +328,20 @@ act's band, and neither is another act's (or the short net's Nest's). The
 other way is drawn from the run's seed and its areas, so the layer and a
 CONTINUE offer the same; the exit pad's warp takes it (event flag
 `0x1452`). Acts 2 and 3 in the short net; 2 to 4 in the endless net, where
-the Undernet and the Graveyard stay fixed. Opened gates and new branches
-come later.
+the Undernet and the Graveyard stay fixed. New branches come later.
+
+### Gates (phase three, begun)
+
+The first gates are Navi gates: from act 3, on a normal layer before the
+guardian's (three in ten, none beside a dark warp), a gate stands sealed
+with one guardian's code, and says so ("It's sealed with JudgeMan's code,
+Lan. Deleting JudgeMan twice as a guardian, in any dive, would crack it.
+We haven't yet."). The code is that Navi deleted twice as a guardian, in
+any runs (rivals.sav), so an earned code opens every such gate in later
+runs: behind it his SP waits, a challenge fought to the boss theme, and
+the win pays his SP chip. The telegraph comes a run or more before the
+key, and the route choice lets a player seek the guardian whose code they
+want. Gates to vaults and to route branches wait.
 
 What could go wrong: the lean flattening the code game into "add
 everything" (it leaves * and every chip without the folder's codes as

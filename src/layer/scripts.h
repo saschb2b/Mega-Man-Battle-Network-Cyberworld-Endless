@@ -68,6 +68,13 @@ typedef struct {
  * `route` on (NULL for none). */
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
                        int taken_flag, const ScriptsDraft *draft, const ScriptsRoute *route);
+/* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
+ * guardian, any runs) is short of `needed`, its words say so (flag -1:
+ * no choice); else it asks for his SP, flag set on Yes, and says the gate
+ * is quiet once it has been. */
+int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int needed);
+/* A Navi gate's win: his SP chip. */
+int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of

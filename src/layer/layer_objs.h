@@ -9,6 +9,9 @@
 #include "guardian_objs.h"
 #include "shop.h"
 
+/* A Navi gate's code: its Navi deleted this many times as a guardian, in
+ * any runs (rivals.sav). */
+#define GATE_CODE 2
 /* Event flags the layer's choices set (Yes), one per choice. */
 #define LAYER_FLAG_BASE 0x1440
 #define LAYER_MAX_CHOICES 8
@@ -33,7 +36,8 @@ typedef struct {
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
-	int script_of[OBJ_GIFT + 1];   /* each kind's first talker's script, -1 none (for --talk) */
+	int script_of[OBJ_NAVI_GATE + 1];   /* each kind's first talker's script, -1 none (for --talk) */
+	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
 	int ndealer, nprograms;
 } LayerObjs;

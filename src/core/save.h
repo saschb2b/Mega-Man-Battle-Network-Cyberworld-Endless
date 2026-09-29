@@ -40,7 +40,7 @@ typedef struct {
 	uint8_t last_town;        /* the last new run's town, style + 1 (town_style_for) */
 } Profile;
 
-enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4 };
+enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8 };
 
 extern Profile profile;
 

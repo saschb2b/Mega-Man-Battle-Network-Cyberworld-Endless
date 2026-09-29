@@ -34,7 +34,8 @@ static NetObj *add_obj(int type, int x, int y) {
 	o->type = type;
 	o->x = (float)x + 0.5f;
 	o->y = (float)y + 0.5f;
-	o->solid = type != OBJ_WARP_IN && type != OBJ_EXIT && type != OBJ_UNDERNET && type != OBJ_SECRET_GATE && type != OBJ_RETURN;
+	o->solid = type != OBJ_WARP_IN && type != OBJ_EXIT && type != OBJ_UNDERNET && type != OBJ_SECRET_GATE && type != OBJ_RETURN &&
+		type != OBJ_NAVI_GATE;
 	o->prop = -1;
 	return o;
 }
@@ -881,6 +882,12 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	bool undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
 		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
 	bool secret = kind == LAYER_UNDERNET && !run.secret_cleared;
+	/* a gate sealed with a Navi's code (docs/META.md, gates): from act 3,
+	 * before the guardian's layer, where no dark warp stands; its Navi one
+	 * of the guardians (but ProtoMan, the Secret Area's) */
+	bool navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !undernet && rng_range(0, 99) < 30;
+	static const uint8_t gate_navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
+	int gate_navi = navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
 
 	int order[MAX_ROOMS], n = 0;
 	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
@@ -919,6 +926,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (challenge) { PLACE(OBJ_CHALLENGE); ++next; }
 	if (undernet) { PLACE(OBJ_UNDERNET); ++next; }
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
+	if (navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = gate_navi; ++next; }
 	/* the area's props, set as the originals set theirs, before the loose
 	 * Mystery Data and bystanders fill the rooms: a landmark, rows and the
 	 * signs (docs/LEVEL_DESIGN.md, Props) */

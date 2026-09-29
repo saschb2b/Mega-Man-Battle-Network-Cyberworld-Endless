@@ -62,6 +62,8 @@ static struct {
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
+	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/META.md, gates) */
+	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
 	bool fragment_due;     /* ... once a talk can start */
 	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
@@ -384,7 +386,7 @@ static const char *status_words(void) {
 	 * while he is hurt (it heals every time; the map's key names the rest,
 	 * and a later L is a box or two, not the briefing again) */
 	bool shop = false, heal = false, programs = false, trader = false, bugtrader = false, told = D.layer_told;
-	bool challenge = false, warp = false, gate = false;
+	bool challenge = false, warp = false, gate = false, navi_gate = false;
 	for (int i = 0; i < layer.nobj; ++i) {
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
@@ -394,6 +396,7 @@ static const char *status_words(void) {
 		challenge |= layer.obj[i].type == OBJ_CHALLENGE;
 		warp |= layer.obj[i].type == OBJ_UNDERNET;
 		gate |= layer.obj[i].type == OBJ_SECRET_GATE;
+		navi_gate |= layer.obj[i].type == OBJ_NAVI_GATE;
 	}
 	/* (below three quarters: at 220 of 240 the heal led L's words before
 	 * the way on) */
@@ -411,11 +414,13 @@ static const char *status_words(void) {
 		if (programs) here[n++] = "a NaviCust program shop";
 		if (trader) here[n++] = "a Chip Trader";
 		if (bugtrader) here[n++] = "a BugFrag Trader";
-		int marks = (challenge ? MARK_SERVER : 0) | (warp ? MARK_WARP : 0) | (gate ? MARK_GATE : 0);
+		int marks = (challenge ? MARK_SERVER : 0) | (warp ? MARK_WARP : 0) | (gate ? MARK_GATE : 0) | (navi_gate ? MARK_NAVI_GATE : 0);
 		int known = marks & profile.marks_taught, fresh = marks & ~profile.marks_taught;
 		if (known & MARK_SERVER) here[n++] = "a strong virus signal";
 		if (known & MARK_WARP) here[n++] = "a dark warp";
 		if (known & MARK_GATE) here[n++] = "the golden gate";
+		static char sealed[48];
+		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
 		if (n) {
 			ADD("@M I sense");
 			for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
@@ -424,6 +429,9 @@ static const char *status_words(void) {
 		if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
 		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
 		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
+		if (fresh & MARK_NAVI_GATE)
+			ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
+				guardian(D.objs.gate_navi)->name);
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
 		/* (a program left off the board: said on every layer until placed;
 		 * one that cannot fit, once a board: a playtester's SuprArmr could
@@ -854,7 +862,7 @@ void director_draw_map(void) {
 		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
 		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: c = rgba(210, 110, 255, 255); break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: c = rgba(210, 110, 255, 255); break;
 		default: continue;
 		}
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
@@ -923,7 +931,7 @@ void director_draw_map(void) {
 		switch (layer.obj[i].type) {
 		case OBJ_HEAL: has[2] = true; break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: has[5] = true; break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: has[5] = true; break;
 		case OBJ_CHALLENGE: has[5] |= !server_done; break;
 		default: break;
 		}
@@ -951,7 +959,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 40
+#define LAYER_MAKE 41
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1959,6 +1967,15 @@ static bool act_on_choices(void) {
 			run.side_kind = D.objs.choice[i].type == OBJ_UNDERNET ? LAYER_UNDERNET : LAYER_SECRET;
 			enter_side_layer();
 			return true;
+		case OBJ_NAVI_GATE: {
+			/* his SP, as a challenge: the boss theme, and his chip after */
+			Encounter e = make_boss(run.depth, run.biome, D.objs.gate_navi);
+			e.foes[0].version = 2;
+			set_encounter(&e, true);
+			D.challenge = true;
+			D.gate_fight = true;
+			return true;
+		}
 		default:
 			break;
 		}
@@ -2019,6 +2036,7 @@ static void dev_talks(void) {
 	static const struct { const char *name; int type; } kinds[] = {
 		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
 		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
+		{ "navigate", OBJ_NAVI_GATE },
 	};
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", director_dev_talks);
@@ -2174,13 +2192,17 @@ void director_update(void) {
 		/* back from the challenge (the game gave its reward, the signal
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
-		D.reward_due = emu_read8(BN6_BATTLE_RESULT) == 1 && D.objs.challenge_reward >= 0;
+		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
+		if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
+		else D.reward_due = won && D.objs.challenge_reward >= 0;
+		D.gate_fight = false;
 		roll_encounter();
 	}
 	/* (as a talk, MegaMan held: run straight off, the A paging its first
 	 * box talked to the Server he faced, whose own words took the box, and
 	 * the prize was never named) */
 	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
+	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	if (run.fragments > D.fragments_seen && D.objs.fragment_found >= 0) D.fragment_due = true;
 	D.fragments_seen = run.fragments;

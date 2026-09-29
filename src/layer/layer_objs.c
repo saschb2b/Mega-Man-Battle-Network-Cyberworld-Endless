@@ -14,6 +14,7 @@
 #include "game.h"
 #include "guardians.h"
 #include "loot.h"
+#include "rivals.h"
 #include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
@@ -192,7 +193,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
 	out->fragment_found = -1;
-	for (int i = 0; i <= OBJ_GIFT; ++i) out->script_of[i] = -1;
+	for (int i = 0; i <= OBJ_NAVI_GATE; ++i) out->script_of[i] = -1;
+	out->gate_navi = 0;
+	out->gate_reward = -1;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
 	int counter = counter_element(run.depth, run.biome, run.boss_order[run.biome]);
@@ -380,6 +383,27 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		}
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
+		case OBJ_NAVI_GATE: {
+			/* sealed until his code is earned (docs/META.md, gates): its
+			 * talk then says how, else it asks for his SP and pays his SP
+			 * chip */
+			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
+			int navi = o->param, won = rival(navi)->megaman_won;
+			const char *name = guardian(navi)->name;
+			asks = won >= GATE_CODE;
+			out->gate_navi = navi;
+			if (!asks) tk.script = ta_navi_gate(&text, -1, name, won, GATE_CODE);
+			else {
+				int chip = navi_chip(navi, 2), code = 26;
+				ChipInfo ci = { 0 };
+				if (chip > 0) {
+					chip_info(chip, &ci);
+					if (ci.ncodes) code = ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A';
+				}
+				out->gate_reward = chip > 0 ? ta_gate_reward(&text, name, chip, ci.name, code) : -1;
+			}
+			break;
+		}
 		case OBJ_BOSS:
 			/* the guardian's own actors and scripts (guardian_objs.c) */
 			guardian_scripts(&text, o, wx, wy, wz, &out->guardian);
@@ -393,6 +417,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			out->choice[out->nchoices++].flag = flag;
 			tk.script = o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
 				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag, run.biome == BIOME_UNDERNET)
+				: o->type == OBJ_NAVI_GATE ? ta_navi_gate(&text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 				: ta_secret_gate(&text, flag);
 			/* not chosen yet */
 			flag_clear(flag);

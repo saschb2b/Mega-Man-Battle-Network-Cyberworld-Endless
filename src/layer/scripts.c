@@ -366,6 +366,42 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	return i;
 }
 
+int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int needed) {
+	char s[240];
+	if (beaten < needed) {
+		/* (the telegraph first: which code, and how far along) */
+		snprintf(s, sizeof s, "@M It's sealed with %s's code, Lan.|@M Deleting %s %s as a guardian, in any dive, would crack it. %s", navi, navi,
+			needed == 2 ? "twice" : "again", beaten >= 1 ? "Once more!" : "We haven't yet.");
+		return ta_say(t, FACE_MEGAMAN, s);
+	}
+	int quiet = ta_say(t, FACE_MEGAMAN, "The gate stands open, Lan. Nothing's left inside.");
+	int no = closing(t);
+	int i = ta_script(t);
+	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };  /* ts_check_flag */
+	ta_bytes(t, done, sizeof done);
+	bool first = true;
+	snprintf(s, sizeof s, "%s's code opens the gate! %s SP waits inside, the hardest fight on this layer.", navi, navi);
+	ta_pages(t, s, FACE_MEGAMAN, &first);
+	ask_in(t, FACE_MEGAMAN, "His SP chip is the prize.\nTake him on?\n", no, true);
+	flag_set(t, flag);
+	ta_end(t);
+	return i;
+}
+
+int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code) {
+	int i = ta_script(t);
+	bool first = true;
+	char s[96];
+	snprintf(s, sizeof s, "%s SP's data is ours, Lan!", navi);
+	ta_page(t, FACE_MEGAMAN, s, true);
+	first = false;
+	give_chip(t, chip, code, 1);
+	got_chip(t, chip_name, code, &first);
+	ta_page(t, FACE_MEGAMAN, "It's in our pack. Let's put it in our folder, Lan!", false);
+	ta_end(t);
+	return i;
+}
+
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;
