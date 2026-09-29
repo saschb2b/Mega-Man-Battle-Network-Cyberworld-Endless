@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "chip_pool.h"
+#include "net.h"
 #include "pacing.h"
 #include "powers.h"
 #include "rivals.h"
@@ -139,6 +140,39 @@ int meta_library_count(int cls) {
 
 bool meta_dark_way_open(void) { return (profile.marks & MARK_SECRET) != 0; }
 
+/* ---- the Spins: one a run, found in the net (docs/META.md) ---- */
+
+unsigned meta_spins(void) { return profile.spins & 0x3Fu; }
+
+static uint32_t spin_hash(uint32_t k) { k ^= k >> 16; k *= 0x7FEB352Du; k ^= k >> 15; k *= 0x846CA68Bu; return k ^ (k >> 16); }
+
+int meta_spin_colour(void) {
+	/* (a run that found one keeps its colour: a checkpoint from before
+	 * the find brings the same Spin back, not a second) */
+	if (profile.spin_colour >= 1 && profile.spin_colour <= 6 && profile.spin_run == run.seed) return profile.spin_colour;
+	int missing[6], n = 0;
+	for (int c = 1; c <= 6; ++c)
+		if (!(profile.spins >> (c - 1) & 1)) missing[n++] = c;
+	return n ? missing[spin_hash(run.seed ^ 0x5B1Du) % (uint32_t)n] : 0;
+}
+
+bool meta_spin_here(void) {
+	return run.side_kind == LAYER_NORMAL && run.depth == 4 + (int)(spin_hash(run.seed) % 5u) && meta_spin_colour() > 0;
+}
+
+void meta_spin_found(int colour) {
+	if (colour < 1 || colour > 6) return;
+	profile.spins |= (uint8_t)(1u << (colour - 1));
+	profile.spin_colour = (uint8_t)colour;
+	profile.spin_run = run.seed;
+	profile_save();
+}
+
+const char *meta_spin_name(int colour) {
+	static const char *const names[7] = { "", "white", "yellow", "pink", "red", "blue", "green" };
+	return colour >= 1 && colour <= 6 ? names[colour] : "";
+}
+
 int meta_vault_need(int depth) {
 	/* (a run holds its starting folder's dozen and about twenty more: act
 	 * 2's opens after a run or two, act 4's for a collector) */
@@ -203,6 +237,12 @@ void meta_run_over(bool won) {
 		profile.folders_open |= (uint16_t)(1u << f);
 		say("the %s folder", folders[f].name);
 		profile.setup_new |= SETUP_NEW_FOLDER;
+	}
+	/* the Spin this run found (the NaviCust's, for good) */
+	if (profile.spin_run == run.seed && profile.spin_colour >= 1 && profile.spin_colour <= 6) {
+		static char spin[24];
+		snprintf(spin, sizeof spin, "the %s Spin", meta_spin_name(profile.spin_colour));
+		say("%s", spin);
 	}
 	/* a Cross start, once its navi falls as a guardian */
 	for (int n = 1; n <= 5; ++n) {

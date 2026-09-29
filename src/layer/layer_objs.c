@@ -113,6 +113,13 @@ static bool program_had(int program) {
 	return false;
 }
 
+/* The run's Spin, a key item as a ScrtData is: the NaviCust turns programs
+ * of colour c with key item 0x4F + c (bn6f sub_8136364). */
+static void spin_content(uint8_t out[8], int colour) {
+	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, (uint8_t)(0x4F + colour), 0, 0, 0 };
+	for (int i = 0; i < 8; ++i) out[i] = c[i];
+}
+
 /* A ScrtData, as the game's key item Mystery Data hold one. */
 static void fragment_content(uint8_t out[8]) {
 	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_SECRET_DATA, 0, 0, 0 };
@@ -218,6 +225,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
 	out->fragment_found = -1;
+	out->spin_found = -1;
+	out->spin_colour = 0;
 	for (int i = 0; i <= OBJ_VAULT; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
@@ -228,6 +237,12 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE, fragment_placed = false;
+	/* the run's Spin, in the last Mystery Data of one layer of 4-8 (docs/
+	 * META.md: one a run, a colour the profile lacks, kept for good) */
+	int spin_md = -1, spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
+	for (int i = 0, k = 0; spin_colour && i < layer.nobj && k < 16; ++i)
+		if (layer.obj[i].type == OBJ_MYSTERY) { spin_md = i; ++k; }
+	bool spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
 	ShopItem stock[SHOP_MAX_ITEMS];
@@ -286,7 +301,12 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				md[nmd].y = wy;
 				md[nmd].z = wz;
 				md[nmd].type = MYSTERY_GREEN;
-				if (fragment) {
+				if (i == spin_md) {
+					md[nmd].type = MYSTERY_BLUE;
+					spin_content(md[nmd].content, spin_colour);
+					out->spin_colour = spin_colour;
+					if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", spin_colour, wx, wy);
+				} else if (fragment) {
 					fragment = false;
 					fragment_placed = true;
 					md[nmd].type = MYSTERY_BLUE;
@@ -557,6 +577,25 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now!",
 		};
 		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
+	}
+	/* (what a Spin does, and that it stays: the first also how they are
+	 * found, one deeper in each dive) */
+	if (out->spin_colour) {
+		static char words[400];
+		const char *c = meta_spin_name(out->spin_colour);
+		int held = 0;
+		for (int k = 0; k < 6; ++k) held += meta_spins() >> k & 1;
+		if (spin_first)
+			snprintf(words, sizeof words, "A Spin for %s programs, Lan! Now we can turn %s programs on the NaviCust's board: "
+				"hold one and press L or R.|And it stays with us, in every dive from now on. Every dive hides one more deeper in, "
+				"a color we don't have yet!", c, c);
+		else if (held >= 5)
+			snprintf(words, sizeof words, "A Spin for %s programs, Lan! That's all six: every program on our board turns now, "
+				"in every dive!", c);
+		else
+			snprintf(words, sizeof words, "A Spin for %s programs, Lan! %c%s programs turn with L and R on the NaviCust's board now, "
+				"in every dive from here on.", c, c[0] - 'a' + 'A', c + 1);
+		out->spin_found = ta_say(&text, FACE_MEGAMAN, words);
 	}
 	uint32_t archive = text.n ? ta_commit(&text) : 0;
 	out->archive = archive;

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- The NaviCust's Spins are found in the net, one a run: a blue Mystery
+  Data on one layer of 4-8 holds a Spin of a colour you don't have yet,
+  kept for every run after, and MegaMan says what it does. A program
+  turns with L and R only with its colour's Spin; a run had all six from
+  its start. The drafts offer only programs that fit as they can be
+  turned. A profile from before starts with none. A run saved by an older
+  build continues its layer afresh.
 - On an act's first layer the Net Dealer has no word yet on a guardian
   MegaMan has never battled ("Nobody's come back to tell. Ask me again
   deeper in!"); from its second layer he names him and his weakness. A

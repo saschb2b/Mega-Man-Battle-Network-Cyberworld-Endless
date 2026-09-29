@@ -55,6 +55,19 @@ int meta_library_new(void);
 /* Whether the short net's dark way into the Undernet is open: the Secret
  * Area cleared in any run (the title's S). */
 bool meta_dark_way_open(void);
+/* The NaviCust's Spins found in the net (docs/META.md): a bit per colour
+ * 1-6 (bit c - 1), the colours whose programs turn with L and R. */
+unsigned meta_spins(void);
+/* The Spin this run can find: its colour (1-6), one the profile lacks, or
+ * the one it found; 0 once all six are held. */
+int meta_spin_colour(void);
+/* Whether the current layer holds this run's Spin: one normal layer of 4-8,
+ * by the run's seed. */
+bool meta_spin_here(void);
+/* This run's Spin picked up: the profile keeps it. */
+void meta_spin_found(int colour);
+/* "pink", for colour 1-6. */
+const char *meta_spin_name(int colour);
 /* How many chips a collector's vault at `depth` wants in the Library
  * (docs/META.md, gates): more in each act. */
 int meta_vault_need(int depth);

@@ -223,6 +223,9 @@ static bool same_turn(const Turn *a, const Turn *b) {
 }
 
 static int8_t board[7][7];   /* the piece standing on each cell, -1 none */
+static unsigned spins = 0x3F;
+
+void navicust_set_spins(unsigned mask) { spins = mask & 0x3F; }
 
 static bool place(const Piece *p, const Turn *t, int ox, int oy, int w, int h, int id) {
 	bool on_line = false;
@@ -271,7 +274,8 @@ static bool pack_from(const Piece *pieces, const int *order, int k, int n, int w
 	return false;
 }
 
-bool navicust_pack(const NaviShape *shapes, int n, int w, int h) {
+/* (shapes before `nfree` turn whatever their colour) */
+static bool pack(const NaviShape *shapes, int n, int w, int h, int nfree) {
 	if (n <= 0) return true;
 	if (n > PACK_MAX || w > 7 || h > 7) return false;
 	static Piece pieces[PACK_MAX];
@@ -282,6 +286,9 @@ bool navicust_pack(const NaviShape *shapes, int n, int w, int h) {
 		p->color = shapes[i].color;
 		p->nturns = 0;
 		for (int k = 0; k < 4; ++k) {
+			/* (turned only with its colour's Spin, as the NaviCust's L and R:
+			 * bn6f sub_8136364 checks key item 0x4F + the record's colour) */
+			if (k && i >= nfree && !(shapes[i].color >= 1 && spins >> (shapes[i].color - 1) & 1)) break;
 			Turn t;
 			turn_of(&shapes[i], k, &t);
 			bool again = false;
@@ -299,6 +306,16 @@ bool navicust_pack(const NaviShape *shapes, int n, int w, int h) {
 		}
 	for (int y = 0; y < 7; ++y) for (int x = 0; x < 7; ++x) board[y][x] = -1;
 	return pack_from(pieces, order, 0, n, w, h);
+}
+
+bool navicust_pack(const NaviShape *shapes, int n, int w, int h) {
+	/* the last shape is the one to fit; those before it are the board's.
+	 * A board laid out while a Spin was held that the profile lacks (a run
+	 * from a build that gave all six) may hold them turned: where they fit
+	 * together only so, they may turn, and the new one only with its
+	 * Spin */
+	int nfree = n > 1 && spins != 0x3F && !pack(shapes, n - 1, w, h, 0) ? n - 1 : 0;
+	return pack(shapes, n, w, h, nfree);
 }
 
 int navicust_skip_frags(int depth) { return 10 + 5 * (pacing_act(depth) + 7 * pacing_loop(depth)); }

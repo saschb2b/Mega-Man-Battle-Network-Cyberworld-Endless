@@ -38,6 +38,8 @@ typedef struct {
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
+	int spin_found;            /* ... and the run's Spin (docs/META.md), -1 for none */
+	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
 	int script_of[OBJ_VAULT + 1];   /* each kind's first talker's script, -1 none (for --talk) */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */

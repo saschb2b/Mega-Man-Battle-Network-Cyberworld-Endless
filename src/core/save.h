@@ -47,6 +47,12 @@ typedef struct {
 	 * its rivals.sav record) */
 	uint32_t families_fought[2];
 	uint8_t gem_taught;       /* MegaMan has said what a Mystery Data on the battlefield is */
+	/* the NaviCust's Spins found in the net, a bit per colour 1-6 (bit
+	 * c - 1: docs/META.md), and the run that found one (its seed) with that
+	 * colour, so that a run finds at most one */
+	uint8_t spins;
+	uint8_t spin_colour;
+	uint32_t spin_run;
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };

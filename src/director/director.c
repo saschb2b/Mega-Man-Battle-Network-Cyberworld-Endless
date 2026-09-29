@@ -72,6 +72,8 @@ static struct {
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
 	bool fragment_due;     /* ... once a talk can start */
+	unsigned spins_seen;   /* the Spins in the game's key items last frame (a bit per colour) */
+	bool spin_due;         /* the run's Spin picked up: MegaMan says what it does once a talk can start */
 	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
@@ -329,6 +331,7 @@ static void goal_way(void) {
  * was running. */
 static bool fits_beside_placed(int v);
 static int key_item(int id);
+static void spins_sync(void);
 
 /* A program left off the board that cannot fit beside those on it: said
  * once a board size (the next grows it), not on every layer; the words, or
@@ -748,6 +751,7 @@ static bool build_layer(void) {
 	if (D.layer_act && flag_get(LAYER_DEALER_TOLD_FLAG) && layer_objs_dealer_named) D.dealer_act = D.layer_act;
 	D.layer_act = run.side_kind == LAYER_NORMAL ? (run.depth - 1) / 3 + 1 : 0;
 	layer_objs_dealer_again = D.layer_act && D.dealer_act == D.layer_act;
+	navicust_set_spins(meta_spins());   /* (the draft fits what turns) */
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, a->song);
 	D.chosen = 0;
@@ -773,6 +777,8 @@ static bool build_layer(void) {
 	D.layer_told = false;
 	D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
 	D.fragment_due = false;
+	D.spin_due = false;
+	spins_sync();
 	D.bugs_known = false;
 	D.off_told = false;
 	D.last_stop_told = false;
@@ -1145,7 +1151,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 53
+#define LAYER_MAKE 54
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1916,21 +1922,58 @@ static void unwedge(void) {
 
 /* The NaviCust's rotations (key items 0x50-0x55, one a colour: white,
  * yellow, pink, red, blue, green; "Lets you rotate white parts with the L
- * and R Button"): BN6 hands them out over its story, a run has them from
- * its start, so a drafted program turns to fit the board (a playtester's
- * Shield would not fit beside his SuprArmr, and nothing turned it). */
-static void grant_rotation(void) {
+ * and R Button"): BN6 hands them out over its story; a run has those the
+ * profile found in the net, one a run (docs/META.md), and no other: a
+ * program of another colour lies as its record draws it, and the drafts
+ * offer only what fits so (navicust_set_spins). */
+static unsigned spins_in_game(void) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	if (items < 0x02000000u || items >= 0x02040000u) return 0;
+	unsigned mask = 0;
+	for (uint32_t c = 1; c <= 6; ++c)
+		if (emu_read8(items + 0x4F + c)) mask |= 1u << (c - 1);
+	return mask;
+}
+
+static void grant_spins(void) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
 	if (items < 0x02000000u || items >= 0x02040000u || check < 0x02000000u || check >= 0x02040000u) return;
 	/* (the count and the item's check, its seed ^ 0x55, as the game's own
 	 * giving writes them: a count without it reads as none) */
-	for (uint32_t id = 0x50; id <= 0x55; ++id) {
+	unsigned held = meta_spins();
+	for (uint32_t c = 1; c <= 6; ++c) {
+		uint32_t id = 0x4F + c;
 		uint8_t want = (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + id) ^ 0x55);
-		if (!emu_read8(items + id) || emu_read8(check + id) != want) {
-			emu_write8(items + id, 1);
-			emu_write8(check + id, want);
-		}
+		if (held >> (c - 1) & 1) {
+			if (!emu_read8(items + id) || emu_read8(check + id) != want) {
+				emu_write8(items + id, 1);
+				emu_write8(check + id, want);
+			}
+		} else if (emu_read8(items + id)) emu_write8(items + id, 0);
 	}
+}
+
+/* The Spins as the profile has them, in the game's key items and the
+ * drafts: as a layer is made and after a checkpoint's state (a run saved
+ * by an older build held all six) */
+static void spins_sync(void) {
+	navicust_set_spins(meta_spins());
+	grant_spins();
+	D.spins_seen = spins_in_game();
+}
+
+/* The run's Spin picked up from its Mystery Data (the game gives the key
+ * item): the profile keeps it, and MegaMan says what it does. */
+static void spin_watch(void) {
+	unsigned now = spins_in_game(), fresh = now & ~D.spins_seen;
+	D.spins_seen = now;
+	int c = D.objs.spin_colour;
+	if (c && (fresh >> (c - 1) & 1) && !(meta_spins() >> (c - 1) & 1)) {
+		meta_spin_found(c);
+		navicust_set_spins(meta_spins());
+		D.spin_due = D.objs.spin_found >= 0;
+	}
+	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
 }
 
 /* The NaviCust's bugs, named in MegaMan's words when they change: after the
@@ -2147,6 +2190,7 @@ bool director_resume(void) {
 	bool same = save_read_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make) && make == LAYER_MAKE;
 	if (emu_load_state(path)) {
 		lock_run();
+		spins_sync();
 		/* the shops' data in RAM is the saved one: this layer's again */
 		layer_objs_shops(&D.objs);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
@@ -2330,6 +2374,7 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "defeat")) script = D.objs.guardian.defeat;
 		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
+		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
 		if (script < 0) { printf("--talk: no %s on this layer\n", name); continue; }
 		game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)script);
@@ -2484,7 +2529,7 @@ void director_update(void) {
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
 	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); grant_rotation(); }
+	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); spin_watch(); grant_spins(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

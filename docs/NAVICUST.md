@@ -181,6 +181,15 @@ and his greeting names them: "I hear MegaMan's used Collect and AutoHeal
 before. I brought them along!" BN6's own picks fill the rest of his four,
 a program once whatever its colour.
 
+### 8. The Spins, found in the net
+
+A program turns on the board with L and R only where its colour's Spin is
+held (BN6's key items 0x50-0x55: bn6f `sub_8136364` checks 0x4F + the
+program record's colour). A run finds at most one, a colour the profile
+lacks, in a blue Mystery Data on a layer of 4-8, and keeps it for good
+(docs/META.md). The drafts and the vendor's fitting pack each program
+turned only where its colour's Spin is held (`navicust_set_spins`).
+
 ## Teaching it
 
 Introduce, develop, twist, test (the skill's onboarding shape), each at

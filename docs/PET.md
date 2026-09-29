@@ -64,9 +64,10 @@ nameless:
 | DarkPass | once the Secret Area has been cleared in any run | that the dark way to the Undernet is open |
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
 
-The Spin items stay, with BN6's own words: they are what lets a held
-NaviCust program turn with L and R. The descriptions that count are made
-again on each layer.
+The Spins show with BN6's own words, those the profile has found in the
+net, one a run (docs/META.md): each lets a held NaviCust program of its
+colour turn with L and R. The descriptions that count are made again on
+each layer.
 
 ## How the entries are taken over
 

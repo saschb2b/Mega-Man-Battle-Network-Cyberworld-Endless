@@ -58,6 +58,11 @@ bool navicust_shape(int variant, NaviShape *out);
  * program part and no plus part, no two program parts of one colour side
  * by side; each turned as the NaviCust's L and R turn it. */
 bool navicust_pack(const NaviShape *shapes, int n, int w, int h);
+/* The colours whose programs turn: a bit per colour 1-6 (bit c - 1), the
+ * NaviCust's Spins (key item 0x4F + colour, found in the net: docs/META.md).
+ * navicust_pack turns only those; the others lie as their records draw
+ * them. All six until set. */
+void navicust_set_spins(unsigned mask);
 /* The board's size after `expmemry` ExpMemry (0-2): 4x4, 5x4, 5x5. */
 void navicust_board(int expmemry, int *w, int *h);
 /* BugFrags a guardian's draft pays when none is taken, at `depth`. */

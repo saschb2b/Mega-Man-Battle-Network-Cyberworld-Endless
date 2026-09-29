@@ -346,7 +346,9 @@ layer 19 is the Underground. After that the cycle starts again, harder.
   from each of three builds (buster, hand, guard, field, HP), or BugFrags
   if you take none. The second and fourth acts' guardians grow the board
   from 4x4 to 5x4, then 5x5. A layout that breaks BN6's rules runs bugged,
-  and MegaMan says what the bug does.
+  and MegaMan says what the bug does. A program turns with L and R only
+  with its colour's Spin: each run hides one, a colour you don't have yet,
+  in a blue Mystery Data deeper in, and you keep it for every run after.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.
@@ -397,7 +399,8 @@ behind is options. From the second run, NEW GAME opens a setup:
 Every chip MegaMan holds joins the Library, BN6's own, which every run's
 PET shows whole: a Chip Trader's prize is new to it first, and the summary
 counts what a run added. The NaviCust programs MegaMan has run with come
-back too: a later run's program vendor lists two of them first. The run's
+back too: a later run's program vendor lists two of them first, and the
+Spins found, one a run, turn their colour's programs in every run after. The run's
 summary names what it opened and the closest goal. Milestones put BN6's
 own marks on the title: Gregar's head for a won short net, Bass for the
 endless net's Nest, the S for the Secret Area, the green disc for a win on

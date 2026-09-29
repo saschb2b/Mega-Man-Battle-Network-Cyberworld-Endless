@@ -12,6 +12,7 @@
 #include "game.h"
 #include "guardians.h"
 #include "loot.h"
+#include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
@@ -77,6 +78,58 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	for (int f = 1; f < 32; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);
 	fprintf(out, "%s\n", over ? "  OVER" : "");
 	return over;
+}
+
+/* A variant of `program` in colour `color` (program * 4 + v), 0 for none. */
+static int variant_of(int program, int color) {
+	NaviShape s;
+	for (int v = 0; v < 4; ++v)
+		if (navicust_shape(program * 4 + v, &s) && s.color == color) return program * 4 + v;
+	return 0;
+}
+
+/* The NaviCust's drafts by the Spins held (docs/META.md, the Spins found in
+ * the net): runs of a gift program, then each guardian's draft over the
+ * first cycle, one of its options taken at random; how many options each
+ * draft had. The draft offers only programs that fit, turned only where
+ * their colour's Spin is held. */
+#define DRAFT_RUNS 200
+static void drafts_report(FILE *out) {
+	static const struct { const char *name; unsigned mask; } sets[] = {
+		{ "no Spin", 0 }, { "one (white)", 0x01 }, { "three (white, yellow, pink)", 0x07 }, { "all six", 0x3F },
+	};
+	static const uint8_t gifts[4] = { 1, 2, 35, 37 };   /* (shop.c's gift programs) */
+	static const int depths[6] = { 3, 6, 9, 12, 15, 18 };
+	fprintf(out, "\nNaviCust drafts by the Spins held (%d runs: a gift program, then a pick at random from each guardian's draft):\n"
+		"the share of drafts with three options, and with fewer\n", DRAFT_RUNS);
+	for (unsigned s = 0; s < sizeof sets / sizeof *sets; ++s) {
+		navicust_set_spins(sets[s].mask);
+		int count[6][NAVICUST_DRAFT + 1] = { { 0 } };
+		for (int r = 0; r < DRAFT_RUNS; ++r) {
+			rng_seed(0x5B1Du + (uint32_t)r * 7919u);
+			uint8_t have[8] = { 0 };
+			int nhave = 0, g = gifts[rng_range(0, 3)], v = variant_of(g, navicust_color(g));
+			if (v) have[nhave++] = (uint8_t)v;
+			for (int d = 0; d < 6; ++d) {
+				int w, h;
+				navicust_board((depths[d] >= 6) + (depths[d] >= 12), &w, &h);
+				NaviProgram pick[NAVICUST_DRAFT];
+				int n = navicust_draft_fitting(depths[d], pick, have, nhave, w, h);
+				++count[d][n < 0 ? 0 : n > NAVICUST_DRAFT ? NAVICUST_DRAFT : n];
+				if (n > 0 && nhave < 8) {
+					int k = rng_range(0, n - 1), vv = variant_of(pick[k].program, pick[k].color);
+					if (vv) have[nhave++] = (uint8_t)vv;
+				}
+			}
+		}
+		fprintf(out, "%s:\n", sets[s].name);
+		for (int d = 0; d < 6; ++d) {
+			fprintf(out, "  layer %2d:", depths[d]);
+			for (int n = NAVICUST_DRAFT; n >= 0; --n) fprintf(out, " %d: %3d%%", n, count[d][n] * 100 / DRAFT_RUNS);
+			fprintf(out, "\n");
+		}
+	}
+	navicust_set_spins(0x3F);
 }
 
 int pacing_report_run(const char *path) {
@@ -181,6 +234,7 @@ int pacing_report_run(const char *path) {
 			fprintf(out, "\n");
 		}
 	}
+	drafts_report(out);
 	fclose(out);
 	printf("pacing report in %s: %d battles or guardians past their band\n", path, flagged);
 	return 0;

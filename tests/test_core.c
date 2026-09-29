@@ -932,6 +932,21 @@ static void test_navicust(void) {
 	NaviShape tall = { .kind = NAVI_PART, .color = 4 };
 	for (int y = 0; y < 5; ++y) tall.cell[y][3] = 1;
 	CHECK(!navicust_pack(&tall, 1, 4, 4) && navicust_pack(&tall, 1, 5, 4), "five in a column: turned on a board five wide");
+	/* (turned only with its colour's Spin: the bar is white, colour 1; the
+	 * column red, colour 4) */
+	navicust_set_spins(0x3F & ~1u);
+	CHECK(navicust_pack(&bar, 1, 4, 4) && !navicust_pack(&bar, 1, 3, 4), "without the white Spin a white bar of four stays flat");
+	navicust_set_spins(1u << 3);
+	CHECK(!navicust_pack(&bar, 1, 3, 4) && navicust_pack(&tall, 1, 5, 4), "the red Spin turns the red column, not the white bar");
+	navicust_set_spins(0);
+	CHECK(!navicust_pack(&tall, 1, 5, 4), "without Spins the column stays upright");
+	/* (a board laid out turned before its Spin was lost keeps its turn; the
+	 * new program does not) */
+	NaviShape old_board[2] = { tall, plus };
+	CHECK(navicust_pack(old_board, 2, 5, 4), "a column the board already holds turned may stay turned");
+	NaviShape new_last[2] = { plus, tall };
+	CHECK(!navicust_pack(new_last, 2, 5, 4), "a new column without its Spin is not turned to fit");
+	navicust_set_spins(0x3F);
 	NaviShape many[5] = { bar, bar, bar, bar, bar };
 	CHECK(!navicust_pack(many, 5, 4, 4), "twenty cells on sixteen");
 	/* the bug words: none, one light, several */
