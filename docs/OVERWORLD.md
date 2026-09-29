@@ -185,9 +185,12 @@ town's plan does not model: it rings the walkable cells with walls on one
 floor. A trial of Seaside Town copied whole, with those walls, drew right
 (the copy must reach cells -62..62: its roofs' and the whale's art stands
 on cells far up the picture) but typed its chat ten times slower than
-Central Town, and its raised floors had no heights. A third town wants
-the original's own walls and heights (sections 0 and 1) carried with the
-copied pieces first.
+Central Town, and its raised floors had no heights. With the original's
+own walls and heights (sections 0 and 1) installed instead, the heights
+were right but the lag stayed: the first line of a chat types at speed,
+then each letter waits about six seconds. Its cause is still to be found
+(the map's size, 132 x 96 tiles of 256 colours, and its section 2 of 447
+cells are the original's own); a third town waits on it.
 
 The songs are the per-map bytes of the map music lists
 (`0x080360E4`: a list pointer per chapter byte, the later chapters' from
