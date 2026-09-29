@@ -637,3 +637,58 @@ to hold only Standard chips. A deterministic probe (a test folder of only
 the suspect chips, an env switch the test sets) settled in one run what
 three chance hands had not. For a bug that shows in some hands or some
 runs, make the probe force it.
+
+## Session 31: 8/10
+
+Build 5053ea4. A NEW GAME with the Blade folder, the SlashCross start and
+HP+: Central Town, act 1 (RoboDog Comp, SpoutMan deleted at 60 of 140 HP
+by six charged SlashCross slashes), stopped on act 2's first layer (269
+calls). "The cleanest start of any run": whole hands, a Cross that
+answers the Blade folder's "nothing reaches the back", act 1 in ten
+minutes. Keep playing: yes (HeatMan, whom he has never fought, and his
+weakness in hand). Recommend: yes.
+
+Confirmed: the folder's chips whole in every hand, the arrow kept after
+L's words and while walking, an early R (2 of 2 without a dodge), the
+setup's Cross row, the vendor naming a program used before, the Guardian
+Data's Navi chip in *, the corner slide.
+
+Raised, fixed:
+- **A guardian's battle chip in A** to a folder of S, L and *: the Navi
+  rule covered the second entry of each drop pair, BN6's coin picks
+  either. Both now.
+- **An early R dropped by a dodge**: any d-pad press dropped the kept
+  press. It is kept now, and waits for the step.
+- **An exit pad's rim that did not warp**, the fourth report, each fixed
+  on one side: the trigger is round now, 26 units, tested from nine
+  placements round a pad.
+- **The last stop passed by**: the arrow led past the heal and the dealer
+  to SpoutMan with 1150z unspent. MegaMan names them, and which way each
+  is, stepping into the room before the arena.
+- **Finds in dead codes** (2 of 7 Mystery Data, the trader's TrplShot V):
+  half the Mystery Data roll again for a chip in the folder's codes
+  (smart loot, 37% to 65% fitting for a Blade folder), and a Chip Trader's
+  prize comes in the folder's code or * (the fusion that turns the rest
+  into play).
+
+Fixed after the pin: the arrow over the jack-in's flash, the gift Prog's
+re-talk, the arrow's wobble, the same opening area again.
+
+Misread: "R beside the statue did nothing". Replayed: the first R jacked
+in; BN6 shows Lan's "Jack in!" line, which closes by itself, then Lan
+raises the PET, about 220 frames to the flash, and the picture 90 frames
+after R fell between the two. Vanilla: AreaGrab's pause, the Cross chosen
+per battle.
+
+Left: the arrow's next turn shown before the junction (his first wish;
+the arrow turns 45 degrees a panel before a corner already, and a bend
+drawn at every zigzag of an open room would mislead).
+
+Cost: the report plus about three hours of fixes; a third town (Seaside)
+landed meanwhile.
+
+Loop change: **fix a spatial trigger's class, not its side.** The pad rim
+came back four times, each fix covering the side a playtester stood on.
+For a trigger, a wall or a talk radius, place MegaMan at the eight
+compass offsets round it (the `place` step) and at two distances, and
+check each, before calling it fixed.
