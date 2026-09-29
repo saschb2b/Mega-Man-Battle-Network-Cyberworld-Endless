@@ -103,6 +103,16 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 	return false;
 }
 
+/* Whether MegaMan has program `program` now, in any colour (the PET's
+ * program items, which count those on the board too). */
+static bool program_had(int program) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	if (items < 0x02000000u || items >= 0x02040000u) return false;
+	for (int c = 0; c < 4; ++c)
+		if (emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)(program * 4 + c))) return true;
+	return false;
+}
+
 /* A ScrtData, as the game's key item Mystery Data hold one. */
 static void fragment_content(uint8_t out[8]) {
 	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_SECRET_DATA, 0, 0, 0 };
@@ -360,12 +370,14 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		}
 		case OBJ_PROGRAMS: {
-			/* (programs from earlier runs, by name: the reason they lead) */
+			/* (programs from earlier runs, by name: the reason they lead;
+			 * not one MegaMan has on him now, which the vendor's "brought
+			 * it along" offered a playtester who had SuperArmor installed) */
 			char names[2][16], hello[300], again[140] = "";
 			int nnames = 0;
 			for (int k = 0; k < out->nprograms && nnames < 2; ++k) {
 				const char *about = navicust_about(out->programs[k].id / 4);
-				if (!about || !shop_program_found(out->programs[k].id / 4)) continue;
+				if (!about || !shop_program_found(out->programs[k].id / 4) || program_had(out->programs[k].id / 4)) continue;
 				snprintf(names[nnames++], sizeof names[0], "%.*s", (int)strcspn(about, ":"), about);
 			}
 			if (nnames == 1) snprintf(again, sizeof again, "|I hear MegaMan's used %s before. I brought it along!", names[0]);

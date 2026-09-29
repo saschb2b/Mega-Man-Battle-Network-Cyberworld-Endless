@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The NaviCust vendor's "I brought it along" names only a program from
+  earlier runs that MegaMan hasn't got now (a playtester with SuperArmor
+  installed was offered it), and a bystander's word on dark warps says
+  they are a side trip into a copy of the Undernet and back, beside the
+  way on's sealed road down into it.
 - Battles set out the rocks, rock and ice cubes and metal cubes of the
   area's original battles, which were dropped: Robot Control Comp's
   metal cubes stand in a third of its battles, the Green Area's rocks in

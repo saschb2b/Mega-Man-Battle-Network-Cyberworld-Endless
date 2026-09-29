@@ -21,7 +21,7 @@ static const char *const early[] = {
 /* the middle areas */
 static const char *const mid[] = {
 	"I fought a guardian that looked just like HeatMan...|It knew every move I had!",
-	"From here on, dark warps show up now and then. They lead into a copy of the Undernet.",
+	"From here on, dark warps show up on some layers: a side trip into a copy of the Undernet, and back.",
 	"There's a sealed gate in the Undernet copy. They say three ScrtData open it.",
 	"ScrtData hide in blue Mystery Data on the deeper layers. Keep your eyes open!",
 	"A strong virus signal is a tough fight, but the chip it leaves is worth it.",
