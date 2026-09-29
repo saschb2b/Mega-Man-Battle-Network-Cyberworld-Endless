@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The PET's PLACE names the area beside the layer ("JudgeTree 14",
+  "ACDC HP 8"); the label on entering a map keeps "Layer 8".
 - A new run's acts prefer guardians MegaMan has never met, in any run,
   where the area's own can be one: a first meeting is a discovery, and a
   playtester 34 sessions in had met eight of the seventeen. On his

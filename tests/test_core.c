@@ -673,9 +673,12 @@ static void test_talk(void) {
 			run.cross = (uint8_t)cross;
 		}
 	}
-	for (int biome = 0; biome < BIOME_COUNT; ++biome)
+	for (int biome = 0; biome < BIOME_COUNT; ++biome) {
 		for (int side = LAYER_NORMAL; side <= LAYER_SECRET; ++side)
 			CHECK(strlen(guardian_area_in_text(biome, side)) < 28, "area %d's name is long for the cards", biome);
+		/* (the PET's PLACE: twelve letters with a space and two digits) */
+		CHECK(strlen(guardian_area_short(biome)) <= 9, "area %d's short name is long for the PET", biome);
+	}
 	/* (a guardian never battled, as MegaMan speaks of him: a signal he
 	 * does not know, or a name a Navi on the net gave, in every area) */
 	for (int biome = 0; biome < BIOME_COUNT; ++biome) {

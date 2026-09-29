@@ -143,6 +143,7 @@ static void begin_area(bool new_act) {
  * label routine is pointed at an archive of ours whose every name is it. */
 #define LABEL_AT    (EMU_FREE + 0x152000)
 #define LABEL_SIZE  0x1000
+#define PET_LABEL_AT (EMU_FREE + 0x153000)   /* the PET's PLACE: the area and the layer (docs/EMULATION.md) */
 
 /* The archive holds more than names: the PET prints its HP, zenny and
  * BugFrags by scripts 0xF0-0xF2, and others are placeholders. A copy of the
@@ -183,8 +184,16 @@ static void map_label(void) {
 	else if (run.side_kind == LAYER_SECRET) snprintf(name, sizeof name, "Secret Area");
 	else if (run.biome == BIOME_NEST) snprintf(name, sizeof name, "Cybeast Nest");
 	else snprintf(name, sizeof name, "Layer %d", run.depth);
-	if (!strcmp(name, last) && emu_read32(BN6_MAP_NAMES_PTR) == LABEL_AT) return;
+	/* the PET's PLACE says where, beside the layer ("ACDC HP 8"): a
+	 * label of its own, the map's entry keeping "Layer 8" */
+	char place[16];
+	if (D.town || run.side_kind != LAYER_NORMAL || run.biome == BIOME_NEST) snprintf(place, sizeof place, "%s", name);
+	else snprintf(place, sizeof place, "%s %d", guardian_area_short(run.biome), run.depth);
+	static char last_place[16];
+	if (!strcmp(name, last) && !strcmp(place, last_place) && emu_read32(BN6_MAP_NAMES_PTR) == LABEL_AT &&
+		emu_read32(BN6_PET_MAP_NAMES_PTR) == PET_LABEL_AT) return;
 	snprintf(last, sizeof last, "%s", name);
+	snprintf(last_place, sizeof last_place, "%s", place);
 	/* (right-aligned with spaces: the game pads its own with underscores,
 	 * which show) */
 	static uint8_t a[LABEL_SIZE];
@@ -192,7 +201,11 @@ static void map_label(void) {
 	if (!len) return;
 	emu_write(LABEL_AT, a, (size_t)len);
 	emu_write32(BN6_MAP_NAMES_PTR, LABEL_AT);
-	emu_write32(BN6_PET_MAP_NAMES_PTR, LABEL_AT);   /* (the PET's PLACE too) */
+	int plen = label_archive(place, a, sizeof a);
+	if (plen) {
+		emu_write(PET_LABEL_AT, a, (size_t)plen);
+		emu_write32(BN6_PET_MAP_NAMES_PTR, PET_LABEL_AT);
+	} else emu_write32(BN6_PET_MAP_NAMES_PTR, LABEL_AT);
 }
 
 /* The net's version: the Nest rebuilds it, one stronger, each time its

@@ -306,6 +306,18 @@ const char *guardian_area_name(int biome) {
 	return biome >= 0 && biome < BIOME_COUNT && names[biome] ? names[biome] : "the Net";
 }
 
+const char *guardian_area_short(int biome) {
+	/* (nine letters at most: the PET's PLACE holds twelve, with the layer) */
+	static const char *const names[BIOME_COUNT] = {
+		[BIOME_CENTRAL] = "Central", [BIOME_SEASIDE] = "Seaside", [BIOME_SKY] = "Sky Area", [BIOME_GREEN] = "Green",
+		[BIOME_GRAVEYARD] = "Graveyard", [BIOME_UNDERNET] = "Undernet", [BIOME_SECRET] = "Secret", [BIOME_NEST] = "Nest",
+		[BIOME_COMP] = "RoboDog", [BIOME_HOMEPAGE] = "Aquarium", [BIOME_COMP_B] = "Lab Comp", [BIOME_ROBOT_COMP] = "RobotComp",
+		[BIOME_AQUARIUM_COMP] = "Aquarium", [BIOME_JUDGE_COMP] = "JudgeTree", [BIOME_WEATHER_COMP] = "Weather",
+		[BIOME_COPYBOT_COMP] = "CopyBot", [BIOME_ACDC_HP] = "ACDC HP", [BIOME_GREEN_HP] = "Green HP", [BIOME_SKY_HP] = "Sky HP",
+	};
+	return biome >= 0 && biome < BIOME_COUNT && names[biome] ? names[biome] : "Net";
+}
+
 const char *guardian_area_in_text(int biome, int side) {
 	static char buf[32];
 	if (side == LAYER_UNDERNET) biome = BIOME_UNDERNET;

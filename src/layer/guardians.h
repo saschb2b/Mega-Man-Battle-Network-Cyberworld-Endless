@@ -52,6 +52,9 @@ const char *guardian_area_name(int biome);
 /* The same in a sentence, with its article ("the Graveyard"), for the
  * layer's kind `side` (LAYER_UNDERNET and LAYER_SECRET name their own). */
 const char *guardian_area_in_text(int biome, int side);
+/* Its name in nine letters at most, for the PET's PLACE beside the layer
+ * ("JudgeTree 12"). */
+const char *guardian_area_short(int biome);
 /* A line under an area's name on its title card. */
 const char *guardian_area_motto(int biome);
 
