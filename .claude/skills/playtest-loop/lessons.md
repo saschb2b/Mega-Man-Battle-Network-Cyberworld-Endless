@@ -915,3 +915,9 @@ bystander reciting button names.
 Loop change: **the budget's guardian extension works**: the session
 ended on the payoff it came for, where session 36 had ended one layer
 short of it. Keep it.
+
+Loop change, from the owner: **the loop does not stop for other work.**
+After session 37 the release came first and the next session waited an
+hour, until the owner said so. Triage and relaunch come right after a
+report; a release, a feature or a question runs beside the loop, while
+the persona plays.

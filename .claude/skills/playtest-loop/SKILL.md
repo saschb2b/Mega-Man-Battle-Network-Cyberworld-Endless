@@ -88,7 +88,9 @@ raised, and the loop's own lessons.
    the new behaviour ("A Chip Trader's prize is a chip new to the Library"),
    the body why and the evidence. No AI co-author trailer. Never commit
    anything from `.build/`.
-8. **Improve the loop** (below), then go to 1.
+8. **Improve the loop** (below), then go to 1 at once: other work (a
+   release, a feature, the owner's questions) runs beside the loop while
+   the persona plays, never instead of it.
 
 Stop when a report gives 9 or more, the persona wants to keep playing for
 reasons of its own (a run it cares about, a build to try), would recommend
