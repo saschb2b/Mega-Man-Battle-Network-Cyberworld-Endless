@@ -780,9 +780,11 @@ SCREENSHOTS = [
     # Secret Area, the top threat rung)
     ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
     ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
+    # (seed 7's layer 3 walks straight to BlastMan's arena, then layer 4's
+    # first battle; retimed for 0.3.0's layers)
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(240, 'net'), (1420, 'custom'), (1660, 'battle'), (1970, 'result'), (2220, 'guardian'),
-      (2380, 'guardian-talk'), (2610, 'boss-custom'), (3670, 'reward'), (3720, 'restored'), (3880, 'area-clear')],
+     [(240, 'net'), (1380, 'guardian'), (1530, 'guardian-talk'), (1800, 'boss-custom'), (2400, 'result'),
+      (2745, 'reward'), (2790, 'restored'), (3330, 'area-clear'), (4800, 'custom'), (5100, 'battle')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
     # (the seed picks the town: build.py town lists which each gets)
@@ -793,9 +795,20 @@ SCREENSHOTS = [
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
     ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'seaside')], {}),
     ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),
-    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], [(130, 'undernet')], {}),
+    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], [(280, 'undernet')], {}),
     ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '17', '--seed', '3', '--dev', 'quiet'], [(130, 'graveyard')], {}),
-    ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(420, 'nest')], {}),
+    ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(250, 'nest')], {}),
+    # (the PET's E-Mail on a profile that has met seven guardians: the list,
+    # then Dad's Records mail on its second page)
+    ('pet', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,veteran', '--input',
+             '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,120:,6:START,6:,50:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,'
+             '6:A,6:,80:,6:DOWN,6:,6:A,6:,150:,6:A,6:,150:'],
+     [(885, 'pet-mail'), (1221, 'pet-records')], {}),
+    # (a phone held sideways with the touch controls round the picture: the
+    # whole canvas, not the game's 240 x 160 alone)
+    ('touch', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '844x390',
+               '--input', '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,40:,30:DOWN+RIGHT'],
+     [(660, 'touch')], {}, True),
 ]
 
 
@@ -805,7 +818,7 @@ def screenshots(only=None):
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
     os.makedirs(out, exist_ok=True)
-    for name, args, frames, env in SCREENSHOTS:
+    for name, args, frames, env, *whole in SCREENSHOTS:
         if only and name not in only:
             continue
         shutil.rmtree(tmp, ignore_errors=True)
@@ -826,8 +839,9 @@ def screenshots(only=None):
         for _, n in frames:
             im = Image.open(os.path.join(tmp, f'{n}.bmp')).convert('RGB')
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
-            im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)).save(
-                os.path.join(out, f'{n}.png'), optimize=True)
+            if not whole:
+                im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+            im.save(os.path.join(out, f'{n}.png'), optimize=True)
             print('screenshot', n)
     return 0
 

@@ -196,11 +196,13 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Three more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Four more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
-the first battle on, for a capture of them: `tools/trailer.py` plays one)
-and `gem` (every random battle with a green Mystery Data on the field, to
-check it and its reward).
+the first battle on, for a capture of them: `tools/trailer.py` plays one),
+`gem` (every random battle with a green Mystery Data on the field, to
+check it and its reward) and `veteran` (a profile that has met seven
+guardians and found two Spins, where it has none: the PET's mails for
+`build.py screenshots pet`).
 
 ## How the switches work
 

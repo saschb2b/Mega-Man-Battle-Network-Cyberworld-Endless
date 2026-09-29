@@ -18,7 +18,9 @@
 #include "mapslot.h"
 #include "net.h"
 #include "platform.h"
+#include "rivals.h"
 #include "run.h"
+#include "save.h"
 #include "text.h"
 
 DevFlags dev = { false, false, false, false, 1, false };
@@ -45,9 +47,33 @@ void devtools_parse(const char *spec) {
 		else if (!strncmp(t, "speed=", 6)) dev.speed = atoi(t + 6);
 		else if (!strcmp(t, "powers")) dev.powers = true;
 		else if (!strcmp(t, "gem")) dev.gem = true;
+		else if (!strcmp(t, "veteran")) dev.veteran = true;
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
+}
+
+void devtools_veteran(void) {
+	if (!dev.veteran) return;
+	/* (guardian, MegaMan's wins, the guardian's, how the last went) */
+	static const struct { int navi, won, lost, last; } rec[] = {
+		{ 1, 2, 1, RIVAL_MEGAMAN_WON }, { 3, 1, 0, RIVAL_MEGAMAN_WON }, { 4, 0, 1, RIVAL_NAVI_WON }, { 6, 2, 0, RIVAL_MEGAMAN_WON },
+		{ 12, 3, 0, RIVAL_MEGAMAN_WON }, { 13, 1, 1, RIVAL_MEGAMAN_WON }, { 14, 1, 0, RIVAL_MEGAMAN_WON },
+	};
+	for (unsigned i = 0; i < sizeof rec / sizeof *rec; ++i) {
+		if (rival(rec[i].navi)->met) continue;
+		int n = rec[i].won + rec[i].lost;
+		for (int k = 0; k < n; ++k) {
+			rival_met(rec[i].navi);
+			/* (the last result last) */
+			bool won = k < n - 1 ? (rec[i].last == RIVAL_MEGAMAN_WON ? k < rec[i].won - 1 : k < rec[i].won) : rec[i].last == RIVAL_MEGAMAN_WON;
+			rival_result(rec[i].navi, won ? RIVAL_MEGAMAN_WON : RIVAL_NAVI_WON);
+		}
+	}
+	if (!profile.spins) profile.spins = 0x05;   /* (white and pink) */
+	if (profile.best_depth < 9) profile.best_depth = 9;
+	if (profile.runs < 6) profile.runs = 6;
+	profile_save();
 }
 
 bool devtools_open(void) { return M.open; }

@@ -239,6 +239,20 @@ kkkkkkkkkkkk
 ..kskssssk..
 ..kssssssk..
 ..kkkkkkkk..""",
+    # a phone: the Android app
+    'phone': """
+...kkkkkk...
+..kssssssk..
+..kbbbbbbk..
+..kbwwbbbk..
+..kbbbbbbk..
+..kbbbbbbk..
+..kggbbggk..
+..kggggggk..
+..kbbbbbbk..
+..kssssssk..
+..ksskkssk..
+...kkkkkk...""",
     # a globe: the browser
     'web': """
 ....kkkk....

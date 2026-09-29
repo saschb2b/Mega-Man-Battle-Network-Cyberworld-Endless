@@ -48,10 +48,10 @@ around it, one layer at a time, and keeps the run going.
 
 <p align="center">
 <img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan, it's Dad. Have you got a minute?">
-<img src="docs/screenshots/act-card.png" width="240" alt="Act 1: RoboDog Comp, circuits of a home comp, its guardian BlastMan">
+<img src="docs/screenshots/act-card.png" width="240" alt="Act 1: RoboDog Comp, circuits of a home comp; its guardian not known yet">
 <img src="docs/screenshots/net.png" width="240" alt="MegaMan on a generated layer of Robot Control Comp">
-<img src="docs/screenshots/battle.png" width="240" alt="A battle against an OldStove and a Mettaur">
-<img src="docs/screenshots/undernet.png" width="240" alt="A generated layer of the Undernet, a HeelNavi on its stairs">
+<img src="docs/screenshots/battle.png" width="240" alt="A battle against two OldStoves, a rock cube on the field between them">
+<img src="docs/screenshots/undernet.png" width="240" alt="MegaMan on a generated layer of the Undernet">
 <img src="docs/screenshots/area-clear.png" width="240" alt="Robot Control Comp: AREA CLEAR, BlastMan deleted">
 </p>
 
@@ -413,8 +413,10 @@ The run is saved each time you arrive on a layer and as a guardian's
 Guardian Data appears ("Run saved" shows in the corner), and again when
 you quit while MegaMan is free to move on a layer (not in a battle, a
 talk or a guardian's scene; the quit prompt says which); CONTINUE brings
-you back to where it was saved. The PET's Save is switched off during a
-run. When MegaMan is
+you back to where it was saved. The PET's Save saves the run where
+MegaMan stands; its E-Mail keeps Dad's mails: the dive's report, your
+records against every guardian, and the battle data on each one you have
+met. When MegaMan is
 deleted the run is over: the title screen shows how deep you got, how many
 viruses and Navis you deleted, and your best depth. When the short net's
 Nest falls, the run is won.

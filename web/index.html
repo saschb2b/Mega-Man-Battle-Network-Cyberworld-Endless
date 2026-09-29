@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike</title>
-<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Windows, macOS, Linux, a Steam Deck or a ROCKNIX handheld, with your own ROM.">
+<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Windows, macOS, Linux, Android, a Steam Deck or a ROCKNIX handheld, with your own ROM.">
 <meta property="og:title" content="Cyberworld Endless">
 <meta property="og:description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it.">
 <meta property="og:type" content="website">
@@ -80,7 +80,12 @@
 					<figcaption class="pill gold">Undernet</figcaption>
 				</figure>
 				<figure class="frame"><img src="shots/graveyard.png" width="240" height="160" loading="lazy" alt="The Graveyard"><figcaption class="pill gold">Graveyard</figcaption></figure>
-				<figure class="frame"><img src="shots/nest.png" width="240" height="160" loading="lazy" alt="The Cybeast Nest"><figcaption class="pill gold">Cybeast Nest</figcaption></figure>
+				<figure class="frame"><img src="shots/nest.png" width="240" height="160" loading="lazy" alt="The Cybeast Nest's card: the bottom of the net, lair of the Cybeasts, its guardian not known yet"><figcaption class="pill gold">Cybeast Nest</figcaption></figure>
+			</div>
+			<div class="grid-3 more">
+				<figure class="frame"><img src="shots/town-green.png" width="240" height="160" loading="lazy" alt="Lan in Green Town; MegaMan: The bus got us out to Green Town, Lan! Smell those flowers!"><figcaption class="pill">A run starts in town</figcaption></figure>
+				<figure class="frame"><img src="shots/setup.png" width="240" height="160" loading="lazy" alt="The jack-in setup: net, folder, Cross, threat and help, with the closed folders and how they open"><figcaption class="pill">Every run opens more</figcaption></figure>
+				<figure class="frame"><img src="shots/pet-records.png" width="240" height="160" loading="lazy" alt="The PET's E-Mail: Dad's Records mail, HeatMan 2-1 with his code, SlashMan 1-0, EraseMan 0-1"><figcaption class="pill gold">Dad keeps your record</figcaption></figure>
 			</div>
 		</div>
 	</section>
@@ -91,58 +96,83 @@
 			<div class="panel shop">
 				<p class="rom">Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>,
 					SHA-1 <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code>. None contains game data.</p>
-				<ul class="rows">
-					<li class="row good">
-						<i class="icon i-play" aria-hidden="true"></i>
-						<span class="what"><b>Browser</b><small>Desktop and phone browsers. The ROM stays in your browser.</small></span>
-						<a class="exit small" href="play/">Jack in</a>
-					</li>
-					<li class="row good">
-						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>PortMaster port</b><small>ROCKNIX handhelds (Retroid Nova, Pocket Flip 2)</small></span>
-						<a class="exit small" data-asset="cyberworld.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row good">
+				<div class="platforms" role="tablist" aria-label="Your system" hidden>
+					<button class="plate" type="button" role="tab" id="os-windows" data-os="windows" aria-selected="false" aria-controls="platform" tabindex="-1">Windows</button>
+					<button class="plate" type="button" role="tab" id="os-macos" data-os="macos" aria-selected="false" aria-controls="platform" tabindex="-1">macOS</button>
+					<button class="plate" type="button" role="tab" id="os-linux" data-os="linux" aria-selected="false" aria-controls="platform" tabindex="-1">Linux</button>
+					<button class="plate" type="button" role="tab" id="os-deck" data-os="deck" aria-selected="false" aria-controls="platform" tabindex="-1">Steam Deck</button>
+					<button class="plate" type="button" role="tab" id="os-android" data-os="android" aria-selected="false" aria-controls="platform" tabindex="-1">Android</button>
+					<button class="plate" type="button" role="tab" id="os-handheld" data-os="handheld" aria-selected="false" aria-controls="platform" tabindex="-1">Handhelds</button>
+					<button class="plate" type="button" role="tab" id="os-browser" data-os="browser" aria-selected="false" aria-controls="platform" tabindex="-1">Browser</button>
+					<button class="plate" type="button" role="tab" id="os-all" data-os="all" aria-selected="false" aria-controls="platform" tabindex="-1">All</button>
+				</div>
+				<p class="picked" id="picked" hidden></p>
+				<div id="platform" role="tabpanel" aria-label="Downloads">
+				<ul class="rows" id="downloads">
+					<li class="row" data-os="windows" data-pick="windows">
 						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>Windows installer</b><small>Windows 10 and 11, 64-bit</small></span>
+						<span class="what"><b>Windows installer</b><small>Windows 10 and 11, 64-bit. For you alone, no administrator: a Start menu entry, uninstalled in Settings.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-setup-x64.exe" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
+					<li class="row" data-os="windows">
 						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Windows zip</b><small>The same, to unpack anywhere</small></span>
+						<span class="what"><b>Windows zip</b><small>The same game, portable: unpack it anywhere and start <code>cyberworld-endless.exe</code>.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-windows-x64.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
-						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>Android app</b><small>Phones, tablets and Android handhelds, Android 5 on</small></span>
-						<a class="exit small" data-asset="cyberworld-endless.apk" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row good">
+					<li class="row" data-os="macos" data-pick="macos">
 						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>macOS app</b><small>Apple silicon and Intel, macOS 11 on</small></span>
+						<span class="what"><b>macOS app</b><small>One app for Apple silicon and Intel Macs, macOS 11 and newer.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-macos.dmg" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
+					<li class="row" data-os="linux deck" data-pick="linux">
 						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>Linux AppImage</b><small>x86-64</small></span>
+						<span class="what"><b>AppImage</b><small>Any x86-64 Linux: make it executable and start it. It offers to add itself to your menu and to Steam.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-x86_64.AppImage" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
+					<li class="row" data-os="linux deck" data-pick="deck">
 						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>Flatpak</b><small>Steam Deck and Linux</small></span>
+						<span class="what"><b>Flatpak</b><small>Installs with your software centre (Discover, GNOME Software), sandboxed. The Steam Deck's pick.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless.flatpak" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
+					<li class="row" data-os="linux">
 						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Linux .deb</b><small>Debian, Ubuntu</small></span>
+						<span class="what"><b>Debian package</b><small>Debian, Ubuntu, Mint and their relatives: <code>.deb</code>, installed with the system.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless_amd64.deb" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
-					<li class="row good">
+					<li class="row" data-os="linux deck">
+						<i class="icon i-get" aria-hidden="true"></i>
+						<span class="what"><b>Archive</b><small>A plain folder, nothing installed: unpack it anywhere (on a Steam Deck, in your home folder) and start it. <code>install.sh</code> adds it to your menu, <code>--add-to-steam</code> to Steam.</small></span>
+						<a class="exit small" data-asset="cyberworld-endless-linux-x86_64.tar.gz" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
+					</li>
+					<li class="row" data-os="android" data-pick="android">
+						<i class="icon i-phone" aria-hidden="true"></i>
+						<span class="what"><b>Android app</b><small>Phones, tablets and Android handhelds, Android 5 and newer. Touch controls, or a controller.</small></span>
+						<a class="exit small" data-asset="cyberworld-endless.apk" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
+					</li>
+					<li class="row" data-os="android browser" data-pick="browser">
+						<i class="icon i-play" aria-hidden="true"></i>
+						<span class="what"><b>Play in the browser</b><small>No install: desktop and phone browsers. The ROM and your saves stay in your browser.</small></span>
+						<a class="exit small" href="play/">Jack in</a>
+					</li>
+					<li class="row" data-os="handheld" data-pick="handheld">
+						<i class="icon i-handheld" aria-hidden="true"></i>
+						<span class="what"><b>PortMaster port</b><small>ROCKNIX handhelds, made for the Retroid Nova and the Retroid Pocket Flip 2.</small></span>
+						<a class="exit small" data-asset="cyberworld.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
+					</li>
+					<li class="row" data-os="browser">
 						<i class="icon i-web" aria-hidden="true"></i>
-						<span class="what"><b>Web build</b><small>The browser player, to host yourself</small></span>
+						<span class="what"><b>Web build</b><small>The browser player as files, to host yourself.</small></span>
 						<a class="exit small" data-asset="cyberworld-endless-web.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
 				</ul>
+				<p class="then textbox" data-os="windows">Start the installer, or unpack the zip. If Windows says it protected your PC: <b>More info</b>, then <b>Run anyway</b> (the game isn't signed).</p>
+				<p class="then textbox" data-os="macos">Drag the app into Applications. It isn't notarized: on its first start, <b>System Settings › Privacy &amp; Security › Open Anyway</b>.</p>
+				<p class="then textbox" data-os="linux">On first start the game looks for your ROM in Downloads and in EmuDeck's and RetroDECK's folders, or asks for it.</p>
+				<p class="then textbox" data-os="deck">In Desktop Mode, open the Flatpak with Discover. One line in Konsole then adds it to Steam with its own art: <a href="faq/#deck">how</a>.</p>
+				<p class="then textbox" data-os="android">Allow your browser or file manager to install the app when Android asks. It asks once for your ROM and keeps a copy beside your saves; uninstalling deletes both.</p>
+				<p class="then textbox" data-os="handheld">Unzip into <code>ports/</code>, put your ROM in <code>ports/cyberworld/rom/</code> and refresh the game list.</p>
+				<p class="then textbox" data-os="browser">Choose your ROM on the player's page. The next visit starts straight away; <b>Forget ROM and saves</b> removes both.</p>
+				</div>
 				<p class="release" id="release-line"></p>
 			</div>
 		</div>

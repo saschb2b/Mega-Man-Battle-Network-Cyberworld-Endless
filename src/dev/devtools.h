@@ -15,12 +15,16 @@ typedef struct {
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
 	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
 	bool gem;       /* every random battle with a Mystery Data on the field */
+	bool veteran;   /* a profile that has met seven guardians and found two Spins (captures: the PET's mail) */
 } DevFlags;
 
 extern DevFlags dev;
 
 /* "god,onehit,quiet,speed=4,powers" */
 void devtools_parse(const char *spec);
+/* With `veteran`, once the profile is loaded: its guardians' records and
+ * Spins, where it has none yet. */
+void devtools_veteran(void);
 /* The player's GBA keys: the menu takes them while it is open. */
 uint32_t devtools_keys(uint32_t keys);
 /* The menu is open: the game holds still. */

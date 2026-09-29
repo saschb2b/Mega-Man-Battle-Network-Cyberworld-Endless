@@ -655,6 +655,7 @@ int main(int argc, char **argv) {
 	} else {
 		printf("ROM: %s (%s)\n", R.layout->name, R.path);
 		save_init();
+		devtools_veteran();
 		if (marks_spec >= 0) profile.marks = (uint16_t)marks_spec;
 		if (atlas_spec) {
 			int r = atlas_run(atlas_spec);
