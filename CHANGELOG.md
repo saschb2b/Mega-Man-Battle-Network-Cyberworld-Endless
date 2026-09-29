@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Less input lag on Windows: the game asks for Direct3D 11 first, which
+  lets the graphics card queue one frame ahead at most, where Direct3D 9,
+  the default before, left the driver to queue up to three, each a frame
+  between a button and the screen. Sound on a desktop comes about a frame
+  and a half sooner after what makes it (shorter buffers: 21 ms, not 32,
+  and 512 samples, not 1024).
 - MegaMan walks as in BN6 again: the walking assist that lined him up with
   a walkway's mouth and followed lanes round their turns is gone. It could
   step him backward, for up to a third of a second: a player with a

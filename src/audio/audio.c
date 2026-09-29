@@ -538,7 +538,13 @@ bool audio_init(void) {
 	want.freq = OUT_RATE;
 	want.format = AUDIO_S16SYS;
 	want.channels = 2;
+	/* (a desktop's half as long: sound a frame and a half sooner after
+	 * what makes it; a handheld and the browser keep the longer, safer one) */
+#if defined(CW_DESKTOP)
+	want.samples = 512;
+#else
 	want.samples = 1024;
+#endif
 	want.callback = callback;
 	const char *dp = getenv("CYBERWORLD_AUDIO_DUMP");
 	if (dp) dump = fopen(dp, "wb");

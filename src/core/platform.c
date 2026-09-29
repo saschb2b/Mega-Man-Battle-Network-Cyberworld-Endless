@@ -148,6 +148,15 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		APP_ICON_SIZE * 4, SDL_PIXELFORMAT_RGBA32);
 	if (icon) { SDL_SetWindowIcon(P.window, icon); SDL_FreeSurface(icon); }
 #endif
+#ifdef _WIN32
+	/* Direct3D 11 first: SDL's lets the GPU queue one frame at most
+	 * (SetMaximumFrameLatency), where Direct3D 9, SDL2's first choice,
+	 * leaves it to the driver, which queues up to three, each a frame of
+	 * input lag; SDL falls back if it fails. (Naming a driver turns SDL's
+	 * batching off: on again.) */
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
+	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+#endif
 	Uint32 rflags = headless ? SDL_RENDERER_SOFTWARE : (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	P.renderer = SDL_CreateRenderer(P.window, -1, rflags);
 	if (!P.renderer) P.renderer = SDL_CreateRenderer(P.window, -1, SDL_RENDERER_SOFTWARE);

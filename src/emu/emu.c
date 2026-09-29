@@ -16,7 +16,11 @@
 /* The GBA runs at 59.73 Hz and frames are paced at 60, so the core makes a
  * little more sound than is played: keep the buffer near LAT_TARGET frames
  * (about 32 ms) by nudging the output rate, and drop sound past LAT_MAX. */
+#ifdef CW_DESKTOP
+#define LAT_TARGET 1024   /* (a desktop keeps up: about 21 ms) */
+#else
 #define LAT_TARGET 1536
+#endif
 #define LAT_MAX    6144
 
 static struct mCore *core;
