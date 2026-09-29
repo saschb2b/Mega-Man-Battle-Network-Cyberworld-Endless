@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A Net Dealer lists a chip once, whatever its code: a playtester's list
+  held ElcPuls3 A at 700 zenny, the pick, and ElcPuls3 S at 2000.
 - Sealed gates: from the third act a gate may stand sealed with a guardian's
   code, which says how to earn it: delete that Navi twice as a guardian, in
   any runs. An earned code opens every such gate in later runs, to a fight

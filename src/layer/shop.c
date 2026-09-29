@@ -85,8 +85,10 @@ static bool find_item(int kind, int id, ShopItem *out) {
 }
 
 static bool listed(const ShopItem *items, int n, const ShopItem *it) {
+	/* (a chip once, whatever its code: ElcPuls3 A at 700 zenny, the pick,
+	 * stood beside ElcPuls3 S at 2000 on a playtester's list) */
 	for (int i = 0; i < n; ++i)
-		if (items[i].kind == it->kind && items[i].id == it->id && items[i].code == it->code) return true;
+		if (items[i].kind == it->kind && items[i].id == it->id && (it->kind == 2 || items[i].code == it->code)) return true;
 	return false;
 }
 
