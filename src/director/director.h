@@ -16,6 +16,8 @@ bool director_in_town(void);
 bool director_on_layer(void);
 /* The layer's map over the picture while SELECT is held (drawing only). */
 void director_draw_map(void);
+/* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
+void director_draw_duel(void);
 /* Quitting on a layer's map, free to move: the run is saved there
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);

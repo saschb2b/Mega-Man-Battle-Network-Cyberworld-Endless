@@ -66,7 +66,8 @@ clearance opens), which only matter to a player who plays on.
 1. **Chaud's call.** On a duel's layer, after the arrival words, Lan's
    PET rings: "Lan. It's Chaud. ProtoMan's on this layer. He busted a
    squad here in 0:14.20. Think MegaMan can do better?", and Lan answers
-   ("You're on, Chaud!"). L's briefing names ProtoMan's way, and the map
+   ("You're on, Chaud!"). Before the first win Chaud says what it earns:
+   "Beat it, and I'll clear you for the net's official gates." L's briefing names ProtoMan's way, and the map
    marks him.
 2. **The ring.** ProtoMan stands on the layer, off the way on. His words
    give the terms: the squad's size ("a pair of viruses"), his time and
@@ -78,8 +79,12 @@ clearance opens), which only matter to a player who plays on.
    test, not the squad's strength (one above the band deleted a
    playtester at 100 of 140 HP on layer 2, his run over).
 4. **ProtoMan's time.** Set from the squad's HP so that a good hand beats
-   it and a slow one does not, then eight percent faster for each duel
-   he has lost at that rung, never under a floor. Tuned by playtests.
+   it and a slow one does not (4 s and one for each 20 HP: a playtester's
+   act 1 hand took 27.5 s to the 11 s of 3 s and one for each 30), then
+   eight percent faster for each duel he has lost at that rung, never
+   under a floor. Tuned by playtests. In the battle, under the Custom
+   gauge, MegaMan's time so far against ProtoMan's (and on the second
+   rung whether MegaMan has been hit), hidden while BN6's clock holds.
 5. **The terms, by rung** (the rivalry's wins, in any run):
    - rung 0: beat his time;
    - rung 1: beat his time without taking a hit;

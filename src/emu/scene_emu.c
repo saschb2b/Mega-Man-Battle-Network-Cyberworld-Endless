@@ -102,6 +102,7 @@ static void draw(void) {
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	director_draw_map();
+	director_draw_duel();
 	devtools_draw();
 }
 

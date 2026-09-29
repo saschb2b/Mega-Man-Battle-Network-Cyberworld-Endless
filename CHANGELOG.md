@@ -41,6 +41,11 @@
   act's, a little above its band, the same every time the layer is made.
   docs/RIVAL.md has the design. A run saved by an older build continues
   its layer afresh.
+- A duel shows its clock: in the battle, under the Custom gauge, MegaMan's
+  time so far against ProtoMan's (and on the second rung whether MegaMan
+  has been hit), hidden while BN6's clock holds. ProtoMan's first times
+  are looser (4 s and one for each 20 HP of the squad), and before the
+  first win Chaud says what it earns: the net's official gates.
 - A duel's squad is one of the act's own battles, not one above them, and
   before the choice ProtoMan says how many viruses it is and MegaMan the
   stake: if they delete him, the dive is over. A playtester took a duel

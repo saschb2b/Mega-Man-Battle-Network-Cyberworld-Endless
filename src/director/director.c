@@ -762,7 +762,9 @@ static int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : profile.du
  * seconds and one for every thirty HP, eight percent faster for every two
  * duels ProtoMan has lost (a rung's round), never under six tenths of it. */
 static int duel_frames(int hp) {
-	double t = (3.0 + hp / 30.0) * 60.0, k = 1.0;
+	/* (loose at first: a playtester's act 1 hand took 27.5 s to ProtoMan's
+	 * 11, and a good hand should beat the first rung) */
+	double t = (4.0 + hp / 20.0) * 60.0, k = 1.0;
 	for (int i = 0; i < profile.duel_won / 2; ++i) k *= 0.92;
 	if (k < 0.6) k = 0.6;
 	return (int)(t * k);
@@ -1028,6 +1030,32 @@ bool director_on_layer(void) { return D.active && !D.town; }
  * as a block; the whole seen floor is fitted in when it fits, else the map
  * follows MegaMan. The goal, until seen, is a mark on the frame the way it
  * lies. */
+/* The duel's clock (docs/RIVAL.md): while its battle runs, the time so far
+ * against ProtoMan's, as BN6's results screen counts them, in the picture's
+ * top right, under the Custom gauge; on the second rung whether MegaMan has
+ * been hit. Hidden while the clock holds (BATTLE START!, the Custom screen,
+ * the pause): a playtester raced a time he could not see. */
+void director_draw_duel(void) {
+	if (!D.active || !D.duel || layer_objs_duel_rung == 2 || on_map() || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) return;
+	static uint32_t last;
+	static int still;
+	uint32_t t = emu_read32(BN6_BATTLE_TIMER);
+	still = t == last ? still + 1 : 0;
+	last = t;
+	if (still > 2 || !t) return;
+	int his = layer_objs_duel_frames;
+	char mine[16], theirs[16];
+	snprintf(mine, sizeof mine, "%u:%02u.%02u", t / 3600, t / 60 % 60, t % 60 * 100 / 60);
+	snprintf(theirs, sizeof theirs, "%d:%02d.%02d", his / 3600, his / 60 % 60, his % 60 * 100 / 60);
+	char vs[32];
+	snprintf(vs, sizeof vs, "ProtoMan %s", theirs);
+	int lines = layer_objs_duel_rung == 1 ? 3 : 2, x = P.core_x + 236, y = P.core_y + 19, w = text_width(vs) + 6;
+	fill_rect(x - w + 2, y - 2, w, lines * 10 + 3, rgba(0, 16, 40, 170));
+	text_drawf(x, y, (int)t < his ? WHITE : rgba(255, 120, 120, 255), TEXT_RIGHT, "%s", mine);
+	text_draw(x, y + 10, vs, rgba(170, 200, 255, 255), TEXT_RIGHT);
+	if (lines == 3) text_draw(x, y + 20, D.duel_hit ? "Hit!" : "No hits", D.duel_hit ? rgba(255, 120, 120, 255) : rgba(140, 255, 170, 255), TEXT_RIGHT);
+}
+
 void director_draw_map(void) {
 	if (!D.active || D.town || !D.map_shown || !on_map()) return;
 	int x0 = P.core_x, y0 = P.core_y;
@@ -2572,10 +2600,14 @@ void director_update(void) {
 				"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? "Beat him, and every official gate opens for you."
 				: "He hasn't forgotten the last time.");
 		else
-			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|@C Think MegaMan can beat that%s?",
+			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
 				profile.duel_won + profile.duel_lost ? record :
 				"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
-				sec / 60, sec % 60, (f % 60) * 100 / 60, layer_objs_duel_rung == 1 ? ", without a hit" : "");
+				sec / 60, sec % 60, (f % 60) * 100 / 60,
+				/* (what a win earns, before the first: a playtester risked his
+				 * run for pride alone) */
+				profile.duel_won ? "" : "@C Beat it, and I'll clear you for the net's official gates.|",
+				layer_objs_duel_rung == 1 ? ", without a hit" : "");
 		/* (Lan answers: a call no one answered read as a message left) */
 		if (!layer_objs_duel_later) {
 			size_t n = strlen(call);
