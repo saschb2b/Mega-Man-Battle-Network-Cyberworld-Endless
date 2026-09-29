@@ -299,18 +299,18 @@ Three layers make an act. The second layer of every act always has the Net
 Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and
 the room before it again has a heal and the Net Dealer. The card at the
 start of each act shows the guardian waiting at its end, so you can set
-your folder for it: a guardian MegaMan has never battled is only a
-strong signal, "???" and its element, until the Navis on the net talk
-(a bystander has heard who it is, and every Net Dealer keeps two of a
-chip that answers the act, the guardian's weakness or a hard hitter
-when it has none, and says so). Step into the arena and the Navi logs
-in for the game's own boss battle. Once MegaMan has battled a guardian,
-in any run, he knows it: the card names it, and on its layer he warns
-you of its way of fighting from his battle data. Guardians remember how
-your earlier battles went. Their Guardian Data ends with the way on:
-two areas for the next act, each named with its guardian and his
-element where MegaMan knows him, so you choose the fight your folder
-answers.
+your folder for it, once MegaMan knows him. A guardian he has never
+battled is "???", a strong signal he doesn't recognize, until the Navis
+on the net talk: a bystander on the act's first layer has heard who it
+is, and every Net Dealer keeps two of a chip that answers the act (the
+guardian's weakness, or a hard hitter when it has none) and says so.
+Step into the arena and the Navi logs in for the game's own boss
+battle. Once MegaMan has battled a guardian, in any run, he knows it:
+the card names it, and on its layer he warns you of its way of
+fighting from his battle data. Guardians remember how your earlier
+battles went. Their Guardian Data ends with the way on: two areas for
+the next act, each named with its guardian and his element where
+MegaMan knows him, so you choose the fight your folder answers.
 In the short net, once the Secret Area has been cleared in any run, act
 2's also offers a dark way: act 3 in the Undernet, with one of its own
 Navis, harder battles and richer data.

@@ -676,37 +676,41 @@ static void test_talk(void) {
 	for (int biome = 0; biome < BIOME_COUNT; ++biome)
 		for (int side = LAYER_NORMAL; side <= LAYER_SECRET; ++side)
 			CHECK(strlen(guardian_area_in_text(biome, side)) < 28, "area %d's name is long for the cards", biome);
-	/* (a guardian never battled, as MegaMan speaks of him: by what his
-	 * signal tells, an element of four letters or none, in every area) */
-	static const char *const sensed[] = { "Aqua ", "" };
-	for (int biome = 0; biome < BIOME_COUNT; ++biome)
-		for (int e = 0; e < 2; ++e) {
-			const char *area = guardian_area_in_text(biome, LAYER_NORMAL);
-			char line[400];
-			snprintf(line, sizeof line, "@M We're through to %s, Lan! A strong %sNavi guards it, one we've never battled.|"
-				"@L Then let's find out who. Let's go!", area, sensed[e]);
-			snprintf(what, sizeof what, "the arrival's words in area %d", biome);
+	/* (a guardian never battled, as MegaMan speaks of him: a signal he
+	 * does not know, or a name a Navi on the net gave, in every area) */
+	for (int biome = 0; biome < BIOME_COUNT; ++biome) {
+		const char *area = guardian_area_in_text(biome, LAYER_NORMAL);
+		char line[400];
+		snprintf(line, sizeof line, "@M We're through to %s, Lan! A strong Navi's signal waits at its end. I don't recognize "
+			"it.|@L Then let's find out who. Let's go!", area);
+		snprintf(what, sizeof what, "the arrival's words in area %d", biome);
+		check_talk(what, line);
+		snprintf(what, sizeof what, "the briefing in area %d", biome);
+		snprintf(line, sizeof line, "@M Layer 19, Lan: %s. A strong Navi's signal waits at its end. I don't recognize it.|@M We've got "
+			"no battle data on it, Lan. Watch the yellow panels: they light where an attack will land!", area);
+		check_talk(what, line);
+		for (int navi = 1; navi <= 18; ++navi) {
+			if (navi == 17) continue;
+			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. %s waits at its end, if the word on the net is right.|@M We've got no "
+				"battle data on him, Lan. Watch the yellow panels: they light where an attack will land!", area, guardian(navi)->name);
 			check_talk(what, line);
-			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. A strong %sNavi waits at its end, one we've never battled.|@M We've got "
-				"no battle data on it, Lan. Watch the yellow panels: they light where an attack will land!", area, sensed[e]);
-			snprintf(what, sizeof what, "the briefing in area %d", biome);
+			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. %s guards the end of it, word is.", area, guardian(navi)->name);
 			check_talk(what, line);
-			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. A strong %sNavi guards the end of it.", area, sensed[e]);
-			check_talk(what, line);
-			for (int other = 0; other < BIOME_COUNT; ++other) {
-				snprintf(line, sizeof line, "@M The net splits below us, Lan! An %sNavi we've never battled guards %s,|@M and an %sNavi "
-					"we've never battled guards %s.|@M A dark way leads down into the Undernet too, but it's sealed. Clearing the "
-					"Secret Area would open it. Which way?", sensed[e], area, sensed[e], guardian_area_in_text(other, LAYER_NORMAL));
-				snprintf(what, sizeof what, "the way on from area %d to %d", biome, other);
-				check_talk(what, line);
-				snprintf(line, sizeof line, "@M The net splits below us, Lan! An %sNavi we've never battled guards %s,|@M an %sNavi we've "
-					"never battled guards %s, and a dark way leads down into the Undernet, where an %sNavi we've never battled waits. "
-					"Which way?", sensed[e], area, sensed[e], guardian_area_in_text(other, LAYER_NORMAL), sensed[e]);
-				check_talk(what, line);
-			}
-			/* (the way's option, alone on its line in the choice) */
-			CHECK(strlen(guardian_area_name(biome)) <= 18, "area %d's name is long for the way on's choice", biome);
 		}
+		for (int other = 0; other < BIOME_COUNT; ++other) {
+			snprintf(line, sizeof line, "@M The net splits below us, Lan! A Navi we've never battled guards %s,|@M and a Navi we've "
+				"never battled guards %s.|@M A dark way leads down into the Undernet too, but it's sealed. Clearing the Secret Area "
+				"would open it. Which way?", area, guardian_area_in_text(other, LAYER_NORMAL));
+			snprintf(what, sizeof what, "the way on from area %d to %d", biome, other);
+			check_talk(what, line);
+			snprintf(line, sizeof line, "@M The net splits below us, Lan! A Navi we've never battled guards %s,|@M a Navi we've never "
+				"battled guards %s, and a dark way leads down into the Undernet, where a Navi we've never battled waits. Which way?",
+				area, guardian_area_in_text(other, LAYER_NORMAL));
+			check_talk(what, line);
+		}
+		/* (the way's option, alone on its line in the choice) */
+		CHECK(strlen(guardian_area_name(biome)) <= 18, "area %d's name is long for the way on's choice", biome);
+	}
 }
 
 /* Following the arrow gets MegaMan there: from the arrival and from each

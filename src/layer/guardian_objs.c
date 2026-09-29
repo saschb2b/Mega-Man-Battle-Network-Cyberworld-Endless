@@ -99,8 +99,8 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	}
 	/* the way on (docs/META.md, routes): after an act's guardian, the next
 	 * act's area or another of its tier, each named with its guardian
-	 * where MegaMan has battled him, else with what his signal tells (the
-	 * way named by its area: two unknown Fire Navis were one option) */
+	 * where MegaMan has battled him (else as one never battled, the way
+	 * named by its area: docs/META.md, what MegaMan knows) */
 	ScriptsRoute route = { 0 };
 	static char question[400], then[3][96], area[3][32], who[3][48];
 	const ScriptsRoute *way = NULL;
@@ -120,14 +120,12 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
 			e[k] = enemy_element(enemy_id(1, n[k], 0));
 			if (e[k] < 0 || e[k] > 4) e[k] = 0;
-			const char *el = guardian_element_word(n[k]);
 			if (guardian_known(n[k])) {
 				snprintf(option[k], sizeof option[k], "%s%s", guardian(n[k])->name, elem[e[k]]);
 				snprintf(who[k], sizeof who[k], "%s%s", guardian(n[k])->name, elem[e[k]]);
 			} else {
 				snprintf(option[k], sizeof option[k], "%s", guardian_area_name(b[k]));
-				snprintf(who[k], sizeof who[k], "%s %s%sNavi we've never battled", el && strchr("AE", el[0]) ? "an" : "a", el ? el : "",
-					el ? " " : "");
+				snprintf(who[k], sizeof who[k], "a Navi we've never battled");
 			}
 			route.option[k] = option[k];
 			snprintf(then[k], sizeof then[k], "%c%s it is! The exit pad will take us there.", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
@@ -179,8 +177,3 @@ void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const Guardian
 		npcs->script[npcs->n++] = npc_guardian_data(g->x, g->y, g->z, MD_ANIM_GUARDIAN, archive, g->reward, &flags);
 }
 
-const char *guardian_element_word(int navi) {
-	static const char *const word[5] = { NULL, "Fire", "Aqua", "Elec", "Wood" };
-	int e = enemy_element(enemy_id(1, navi, 0));
-	return e > 0 && e < 5 ? word[e] : NULL;
-}

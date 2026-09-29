@@ -65,6 +65,15 @@ static void flag_set(TextArchive *t, int flag) {
 	ta_bytes(t, b, sizeof b);
 }
 
+int ta_say_flag(TextArchive *t, int face, const char *s, int flag) {
+	int i = ta_script(t);
+	flag_set(t, flag);
+	bool first = true;
+	ta_pages(t, s, face, &first);
+	ta_end(t);
+	return i;
+}
+
 /* closes the box: the answer No */
 static int closing(TextArchive *t) {
 	int i = ta_script(t);

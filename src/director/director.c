@@ -107,6 +107,7 @@ static struct {
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
+	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
 	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
 	bool guardian_named;   /* ... and have been said on this layer */
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
@@ -226,15 +227,14 @@ static void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M So much deleted data... Lan, I think the bottom is close.");
 	else if (first_of_act && run.depth > 1) {
 		/* a new act: where they are now, and whose copy waits at its end,
-		 * named where they have battled him (else what his signal tells:
-		 * docs/META.md, what MegaMan knows) */
+		 * named where they have battled him: else a signal MegaMan does
+		 * not know (docs/META.md, what MegaMan knows) */
 		int navi = run.boss_order[run.biome];
-		const char *el = guardian_element_word(navi);
 		if (guardian_known(navi))
 			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
 		else
-			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan! A strong %s%sNavi guards it, one we've never battled.|"
-				"@L Then let's find out who. Let's go!", area, el ? el : "", el ? " " : "");
+			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan! A strong Navi's signal waits at its end. I don't recognize "
+				"it.|@L Then let's find out who. Let's go!", area);
 		D.beat_guardian = true;
 	}
 }
@@ -345,6 +345,13 @@ static const char *program_off_board(int *variant) {
 	return NULL;
 }
 
+/* A Navi on the net has named the act's guardian this session: the first
+ * bystander on its first layer, or the Net Dealer's word (docs/META.md,
+ * what MegaMan knows). */
+static bool guardian_heard(void) {
+	return D.layer_act && (D.heard_act == D.layer_act || D.dealer_act == D.layer_act || flag_get(LAYER_DEALER_TOLD_FLAG));
+}
+
 static const char *status_words(void) {
 	static char buf[800];
 	int k = 0;
@@ -372,22 +379,26 @@ static const char *status_words(void) {
 			 * what he always knows is the net's own grammar, the yellow
 			 * panels that light where an attack will land */
 			int navi = D.objs.guardian.navi;
-			const char *tip = guardian_tip(navi), *el = guardian_element_word(navi);
+			const char *tip = guardian_tip(navi);
 			if (guardian_known(navi)) {
 				ADD(" %s waits at its end!|", guardian(navi)->name);
 				if (tip) ADD("@M We've got battle data on him from before:|@M %s|", tip);
 				else ADD("@M Watch the yellow panels: they light where an attack will land!|");
-			} else
-				ADD(" A strong %s%sNavi waits at its end, one we've never battled.|@M We've got no battle data on it, Lan. Watch the "
-					"yellow panels: they light where an attack will land!|", el ? el : "", el ? " " : "");
+			} else {
+				/* (what a Navi on the net said, as hearsay) */
+				if (guardian_heard()) ADD(" %s waits at its end, if the word on the net is right.|@M We've got no battle data on him, Lan.",
+					guardian(navi)->name);
+				else ADD(" A strong Navi's signal waits at its end. I don't recognize it.|@M We've got no battle data on it, Lan.");
+				ADD(" Watch the yellow panels: they light where an attack will land!|");
+			}
 		}
 		/* (not after the act's arrival words, which spoke of him; a
 		 * CONTINUE does not say them again, and there he is spoken of) */
 		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
 			int navi = run.boss_order[run.biome];
-			const char *el = guardian_element_word(navi);
 			if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
-			else ADD(" A strong %s%sNavi guards the end of it.|", el ? el : "", el ? " " : "");
+			else if (guardian_heard()) ADD(" %s guards the end of it, word is.|", guardian(navi)->name);
+			else ADD(" A strong Navi's signal waits at its end. I don't recognize it.|");
 		}
 		else ADD("|");
 		/* (the area's battlefields, on its first layer: a playtester froze
@@ -542,15 +553,13 @@ static void area_card(void) {
 	else if (net_version() > 1) snprintf(act, sizeof act, "Net V%d - Act %d", net_version(), act_no);
 	else snprintf(act, sizeof act, "Act %d", act_no);
 	/* the guardian ahead, from the start, so the folder can be set for it
-	 * (as Slay the Spire shows each act's boss): named where MegaMan has
-	 * battled him, else "???" and the element his signal shows (docs/
-	 * META.md, what MegaMan knows) */
+	 * (as Slay the Spire shows each act's boss), where MegaMan has battled
+	 * him: else "???", as nothing yet says who (docs/META.md, what MegaMan
+	 * knows; his element alone gave SpoutMan away) */
 	char ahead[48] = "";
 	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer)) {
 		int navi = run.boss_order[biome];
-		const char *el = guardian_element_word(navi);
-		if (guardian_known(navi)) snprintf(ahead, sizeof ahead, "Guardian: %s", guardian(navi)->name);
-		else snprintf(ahead, sizeof ahead, "Guardian: ???%s%s%s", el ? " (" : "", el ? el : "", el ? ")" : "");
+		snprintf(ahead, sizeof ahead, "Guardian: %s", guardian_known(navi) ? guardian(navi)->name : "???");
 	}
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())
@@ -842,10 +851,15 @@ static void programs_from_game(void) {
 	if (added) profile_save();
 }
 
+/* What this session has heard, forgotten by a run begun or continued (a
+ * last run's act 1 is not this one's). */
+static void forget_heard(void) { D.heard_act = D.dealer_act = 0; }
+
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
+	forget_heard();
 	set_start_folder();
 	library_to_game();
 	powers_bring(run.cross);
@@ -1240,7 +1254,7 @@ void director_describe(FILE *f) {
 	/* (named as the game shows him: a playtester reads this) */
 	if (D.objs.guardian.navi)
 		fprintf(f, "guardian %s %s\n",
-			guardian_known(D.objs.guardian.navi) || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done()
+			guardian_known(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done()
 				? guardian(D.objs.guardian.navi)->name : "???",
 			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");
 }
@@ -1985,6 +1999,7 @@ static void town_update(void) {
 
 bool director_start_layer(void) {
 	no_room_told = -1;
+	forget_heard();
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it) */
@@ -2060,6 +2075,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 
 bool director_resume(void) {
 	no_room_told = -1;
+	forget_heard();
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!build_layer()) return false;
 	char path[600];
@@ -2094,7 +2110,10 @@ bool director_resume(void) {
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
-			if (flag_get(D.objs.choice[i].flag)) D.chosen |= 1u << i;
+			if (flag_get(D.objs.choice[i].flag)) {
+				D.chosen |= 1u << i;
+				if (D.objs.choice[i].type == OBJ_NPC) D.heard_act = D.layer_act;
+			}
 		/* enter the map again where MegaMan stood: the game reloads its NPCs
 		 * and tiles from this build's tables, which a state does not hold */
 		int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
@@ -2145,6 +2164,10 @@ static bool act_on_choices(void) {
 			run.side_kind = D.objs.choice[i].type == OBJ_UNDERNET ? LAYER_UNDERNET : LAYER_SECRET;
 			enter_side_layer();
 			return true;
+		case OBJ_NPC:
+			/* a bystander named the act's guardian (and no more to do) */
+			D.heard_act = D.layer_act;
+			break;
 		case OBJ_NAVI_GATE: {
 			/* his SP, as a challenge: the boss theme, and his chip after */
 			Encounter e = make_boss(run.depth, run.biome, D.objs.gate_navi);
@@ -2339,7 +2362,7 @@ static void last_stop(int cx, int cy) {
 	way_dir = keep;
 	if (!dealer && !heal) return;
 	static char buf[300];
-	int k = guardian_known(D.objs.guardian.navi)
+	int k = guardian_known(D.objs.guardian.navi) || guardian_heard()
 		? snprintf(buf, sizeof buf, "@M %s's arena is just ahead, Lan!|@M ", guardian(D.objs.guardian.navi)->name)
 		: snprintf(buf, sizeof buf, "@M The guardian's arena is just ahead, Lan!|@M ");
 	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, and a Recovery Mr. Prog's %s, if we want to get ready first.", dealer, heal);

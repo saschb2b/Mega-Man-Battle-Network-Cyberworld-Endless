@@ -298,15 +298,20 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			 * knows; MegaMan himself had said it, and how could he know?) */
 			static char rumor[200];
 			int navi = run.boss_order[run.biome];
-			const char *line = npc_line(run.depth, base + said);
-			if (!said && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 && navi && !guardian_known(navi) && guardian_rumor(navi)) {
+			/* (a list-6 navi's face has its sprite's number) */
+			if (!said && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 && navi && !guardian_known(navi) && guardian_rumor(navi) &&
+				out->nchoices < LAYER_MAX_CHOICES) {
 				snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
 					guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
-				line = rumor;
-			}
+				/* (heard, MegaMan names him for the rest of the act: the
+				 * director watches the flag as a choice) */
+				int flag = LAYER_FLAG_BASE + out->nchoices;
+				out->choice[out->nchoices].type = OBJ_NPC;
+				out->choice[out->nchoices++].flag = flag;
+				flag_clear(flag);
+				tk.script = ta_say_flag(&text, tk.sprite, rumor, flag);
+			} else tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
 			++said;
-			/* (a list-6 navi's face has its sprite's number) */
-			tk.script = ta_say(&text, tk.sprite, line);
 			break;
 		}
 		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG); break;

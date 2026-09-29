@@ -358,8 +358,8 @@ After an act's guardian, the Guardian Data ends with the way on: the next
 act's area or another of its tier the run has not taken, each named with
 its guardian and his element ("CircusMan guards Green Area, and HeatMan
 (Fire) guards Judge Tree Comp. Which way?"), where MegaMan has battled
-him, else with his element alone ("a Fire Navi we've never battled",
-the option the area's name: what MegaMan knows); B keeps the first. The
+him, else as "a Navi we've never battled" (the option the area's name:
+what MegaMan knows); B keeps the first. The
 choice restates the dialectic at the act's scale: bring the folder to the
 guardian it answers, or take the one it does not. Both guardians fit the
 act's band, and neither is another act's (or the short net's Nest's). The
@@ -427,22 +427,26 @@ that its verbs are literal programmer verbs, so knowledge here is data:
 the PET's battle data on a copy exists once they have fought it.
 
 - **Guardians.** Before a first battle with a Navi (none in any run,
-  rivals.sav: `guardian_known`), MegaMan does not know who guards an
-  area, only that a strong Navi's signal waits at its end and what
-  element it reads as (as he senses a strong virus signal). The act's
-  card says "Guardian: ??? (Aqua)", L's words "A strong Aqua Navi
-  guards the end of it", the arena's approach "The guardian's arena is
-  just ahead", the way on "an Aqua Navi we've never battled guards the
-  Aquarium Comp" (its option the area's name), and the briefing on his
-  layer that they have no battle data on it: watch the yellow panels,
-  the net's own telegraph for every attack. The arena's card is the
-  reveal. What he can learn before is what Navis who live on the net
-  say: the first bystander on the act's first layer passes on who
-  guards its end and a rumor (`guardian_rumor`: one line on his manner,
-  never his moves or timing, "he deletes Navis outright"), and the Net
-  Dealer's "word is" names him and his weakness. From the first battle
-  on, in any run, he is known everywhere: named, and briefed from
-  "battle data from before", his moves and when a hit lands.
+  rivals.sav: `guardian_known`), MegaMan knows nothing of who guards an
+  area: a strong Navi's signal waits at its end, and he doesn't
+  recognize it (he would, with battle data). Not even its element: an
+  Aqua guardian is all but SpoutMan by name. The act's card says
+  "Guardian: ???", L "A strong Navi's signal waits at its end. I don't
+  recognize it.", the arena's approach "The guardian's arena is just
+  ahead", the way on "a Navi we've never battled guards the Aquarium
+  Comp" (its option the area's name), and the briefing on his layer
+  that they have no battle data on it: watch the yellow panels, the
+  net's own telegraph for every attack. The arena's card is the reveal.
+  What can be learned before is what Navis who live on the net say: the
+  first bystander on the act's first layer passes on who guards its end
+  and a rumor (`guardian_rumor`: one line on his manner, never his moves
+  or timing, "he deletes Navis outright"), and the Net Dealer's "word
+  is" names him and his weakness. Heard, MegaMan names him as hearsay
+  for the rest of the act ("DiveMan guards the end of it, word is", "if
+  the word on the net is right"), until the session ends (the director
+  keeps it, as the dealer's having spoken). From the first battle on, in
+  any run, he is known everywhere: named, and briefed from "battle data
+  from before", his moves and when a hit lands.
 - **Virus families.** The area's warnings for the viruses BN6 never
   explains (ScarCrows healed by Elec, DarkMechs warping in to slash) come
   once the family has been battled in any run (the profile's
