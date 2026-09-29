@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A Net Dealer's pick for the guardian prefers a chip in the folder's
+  codes or *, where one hits nearly as hard (counted a quarter harder
+  than one that comes in neither): a playtester's pick was WideSht Q
+  beside a folder of S and *, and paired with nothing. A run saved by an
+  older build continues its layer afresh.
 - The ACDC HP takes two in three of its random battles from Central
   Area, where it took one in three: from act 3 its own Catacks alone
   fill the act's band, and they came in two of three battles there

@@ -112,8 +112,9 @@ static int answer_most(int depth, int counter) {
 static int answer(int depth, int counter, int id, char *code) {
 	int most = answer_most(depth, counter);
 	int best = -1, best_power = 0, found = 0;
+	bool best_fits = false;
 	char best_code = *code, c = *code;
-	for (int tries = 0; tries < 400 && (best < 0 || (tries < 80 && found < 8)); ++tries) {
+	for (int tries = 0; tries < 400 && (best < 0 || (tries < 80 && (found < 8 || (!best_fits && found < 16)))); ++tries) {
 		ChipInfo ci;
 		chip_info(id, &ci);
 		/* (-1: a guardian of no element, answered by the hardest hit) */
@@ -124,12 +125,18 @@ static int answer(int depth, int counter, int id, char *code) {
 		if ((ci.element == counter || counter < 0) && ci.power > 0 && chip_direct(id) && !chip_sword(id) && chip_standard(id) &&
 			chip_family(id) != CHIP_FAMILY_TANKCAN) {
 			++found;
-			/* the hardest under the most, else the lightest over it */
+			/* the hardest under the most, else the lightest over it; one
+			 * that comes in the folder's codes or * counted a quarter
+			 * harder (a playtester's pick, WideSht Q beside a folder of S
+			 * and *, paired with nothing in two fights; preferred outright,
+			 * act 1's picks fell from 120 to Cannon's 40: loot_folder_code) */
 			bool under = ci.power <= most, best_under = best >= 0 && best_power <= most;
+			bool fits = loot_folder_code(id, true) != 0;
+			int eff = ci.power * (fits ? 5 : 4), best_eff = best_power * (best_fits ? 5 : 4);
 			bool better = best < 0 || (under && !best_under) ||
-				(under && best_under && (ci.power > best_power || (ci.power == best_power && chip_price(id) < chip_price(best)))) ||
-				(!under && !best_under && ci.power < best_power);
-			if (better) { best = id; best_power = ci.power; best_code = c; }
+				(under && best_under && (eff > best_eff || (eff == best_eff && chip_price(id) < chip_price(best)))) ||
+				(!under && !best_under && (ci.power < best_power || (ci.power == best_power && fits && !best_fits)));
+			if (better) { best = id; best_power = ci.power; best_code = c; best_fits = fits; }
 		}
 		id = roll_chip(depth + 2, tries < 90 ? tries / 30 : 3, &c);
 	}
