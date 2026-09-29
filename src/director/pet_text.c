@@ -7,14 +7,18 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "director.h"
 #include "emu.h"
 #include "flags.h"
 #include "guardians.h"
 #include "layer_objs.h"
 #include "meta.h"
+#include "net.h"
+#include "powers.h"
 #include "rivals.h"
 #include "rom.h"
 #include "run.h"
+#include "save.h"
 #include "text.h"
 
 #define NAMES_AT   (EMU_FREE + 0x154000)   /* the key items' names */
@@ -130,9 +134,9 @@ static int codes_known(char *text, int size) {
 	if (!n) snprintf(text, (size_t)size, "No guardian's code yet: delete one twice for his.");
 	else if (n == 1) snprintf(text, (size_t)size, "%s's code. It opens the gate sealed with it.", guardian(first)->name);
 	else if (n == 2) snprintf(text, (size_t)size, "%s's and %s's codes: each opens its gate.", guardian(first)->name, guardian(second)->name);
-	/* (all of them in gold in the SciLab link's records: a playtester asked
-	 * whose the other two of four were) */
-	else snprintf(text, (size_t)size, "%d codes, in gold in the SciLab link's records.", n);
+	/* (all of them in Dad's Records mail: a playtester asked whose the
+	 * other two of four were) */
+	else snprintf(text, (size_t)size, "%d codes, listed in Dad's Records mail.", n);
 	return n;
 }
 
@@ -199,8 +203,9 @@ static void item_set(int id, int count) {
 /* ---- E-Mail: Dad's, one a guardian, his battle data as MegaMan logged it ---- */
 
 /* a guardian's mail: its id is the navi's (BN6's own mails 1-18 are the
- * story's, which a run never delivers) */
+ * story's, which a run never delivers); then the lab's two */
 static bool mail_of(int navi) { return navi >= 1 && navi <= 18 && navi != 17 && guardian_tip(navi); }
+enum { MAIL_REPORT = 19, MAIL_RECORDS = 20 };
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,
  * a page's end waiting and clearing (E7 00 F2) as BN6's mails do; the
@@ -210,18 +215,85 @@ static int mail_pages(const char *s, uint8_t *out, int max) {
 	char line[32];
 	const char *p = s;
 	while (*p) {
-		int n = (int)strlen(p) > 20 ? 20 : (int)strlen(p);
-		if (p[n]) { int c = n; while (c > 0 && p[c] != ' ') --c; if (c > 0) n = c; }
+		int n = (int)strcspn(p, "\n");
+		if (n > 20) n = 20;
+		if (p[n] && p[n] != '\n') { int c = n; while (c > 0 && p[c] != ' ') --c; if (c > 0) n = c; }
 		if (k + 40 > max) return -1;
 		if (lines == 3) { out[k++] = 0xE7; out[k++] = 0x00; out[k++] = 0xF2; lines = 0; }
 		else if (lines) out[k++] = 0xE9;
 		snprintf(line, sizeof line, "%.*s", n, p);
 		k += ta_encode(line, out + k, max - k - 8);
 		p += n;
-		while (*p == ' ') ++p;
+		while (*p == ' ' || *p == '\n') ++p;
 		++lines;
 	}
 	return k;
+}
+
+/* Dad's words, a page or more, then the mail's end: the dive's report and
+ * the records, made again on each layer */
+static int dad_mail(const char *text, uint8_t *out, int max) {
+	static const uint8_t dad[] = { 0xFC, 0x06, 0xF5, 0x00, FACE_DAD, 0xF5, 0x02, 0x01, 0xF5, 0x03, 0x00, 0xE8, 0x10 },
+		end[] = { 0xE7, 0x00, 0xEE, 0xFF, 0x00, 0x00 };
+	if (max < (int)(sizeof dad + sizeof end) + 8) return 0;
+	memcpy(out, dad, sizeof dad);
+	int k = (int)sizeof dad, n = mail_pages(text, out + k, max - k - (int)sizeof end);
+	if (n < 0) return 0;
+	k += n;
+	memcpy(out + k, end, sizeof end);
+	return k + (int)sizeof end;
+}
+
+/* The dive as the lab sees it: where, what waits, what was brought (the
+ * SciLab link that Comm had opened, as Dad's mail: BN6's own screen, its
+ * own music) */
+static void report_text(char *s, int size) {
+	int k = 0;
+	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	ADD("Lan, here's the dive as the lab sees it.\n");
+	const char *area = guardian_area_name(run.side_kind == LAYER_UNDERNET ? BIOME_UNDERNET : run.side_kind == LAYER_SECRET ? BIOME_SECRET : run.biome);
+	if (run.mode == RUN_SHORT) ADD("Layer %d of %d, ", run.depth, SHORT_LAYERS + (run.threat >= 10));
+	else ADD("Layer %d, ", run.depth);
+	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD("act %d: %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
+	else ADD("%s.", area);
+	int navi = run.side_kind == LAYER_NORMAL ? run.boss_order[run.biome] : 0;
+	if (navi && guardian_known(navi)) ADD(" %s guards this act's end: MegaMan has battle data on him.", guardian(navi)->name);
+	else if (navi && director_guardian_heard()) ADD(" Word on the net: %s guards this act's end.", guardian(navi)->name);
+	else if (navi) ADD(" A strong Navi guards this act's end. We don't know who yet.");
+	ADD(" ScrtData: %d of 3%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ", the gate open" : "");
+	ADD(" You brought the %s folder", meta_folder(run.folder)->name);
+	const char *weak = run.cross ? powers_cross_weakness(run.cross) : NULL;
+	if (run.cross && weak) ADD(" and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
+	else if (run.cross) ADD(" and %s.", powers_cross_name(run.cross));
+	else ADD(".");
+	ADD(" Threat %d.", run.threat);
+	static const char *const helpers[3] = { "HP+", "Heals", "Gentle" };
+	if (run.helpers & 7) {
+		ADD(" Help:");
+		for (int h = 0; h < 3; ++h) if (run.helpers >> h & 1) ADD(" %s", helpers[h]);
+		ADD(".");
+	}
+	#undef ADD
+}
+
+/* Every guardian met, in any run, with how their battles went, a line
+ * each, and whose code MegaMan holds */
+static void records_text(char *s, int size) {
+	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
+	int k = 0, met = 0;
+	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	ADD("Lan, MegaMan's battle records, won and lost:\n");
+	for (unsigned i = 0; i < sizeof navis; ++i) {
+		const Rival *r = rival(navis[i]);
+		if (!r->met && !r->megaman_won && !r->navi_won) continue;
+		++met;
+		ADD("%s %d-%d%s\n", guardian(navis[i])->name, r->megaman_won, r->navi_won, r->megaman_won >= GATE_CODE ? ", code" : "");
+	}
+	if (!met) ADD("No guardian met yet.\n");
+	ADD("%d of %d guardians met. Best dive: layer %d", met, (int)sizeof navis, profile.best_depth);
+	if (profile.nest_clears) ADD(", the Nest won %d time%s", profile.nest_clears, profile.nest_clears == 1 ? "" : "s");
+	ADD(".");
+	#undef ADD
 }
 
 /* A guardian's mail: Dad's face and words, then MegaMan's, the warning as
@@ -261,11 +333,22 @@ static void install_mails(void) {
 	uint8_t *senders = unpack(BN6_MAIL_TEXT, &slen), *bodies = unpack(BN6_MAIL_BODIES, &blen);
 	if (!senders || !bodies) { free(senders); free(bodies); return; }
 	int ns = u16at(senders, 0) / 2, nb = u16at(bodies, 0) / 2;
-	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[19][16], about[19][24], body[19][1100];
+	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[21][16], about[21][24], body[21][1400];
 	Script srep[512] = { 0 }, brep[256] = { 0 };
-	if (ns > 512 || nb > 256 || ns < 2 * 19 || nb < 19) { free(senders); free(bodies); return; }
+	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_RECORDS + 1) || nb < MAIL_RECORDS + 1) { free(senders); free(bodies); return; }
 	static const uint8_t tail[] = { 0xE7, 0x00, 0xE6 };
-	for (int m = 1; m <= 18; ++m) {
+	for (int m = 1; m <= MAIL_RECORDS; ++m) {
+		if (m == MAIL_REPORT || m == MAIL_RECORDS) {
+			static char text[1400];
+			if (m == MAIL_REPORT) report_text(text, sizeof text);
+			else records_text(text, sizeof text);
+			srep[2 * m] = (Script){ from[m], words("Dad", tail, 3, from[m], sizeof from[m]) };
+			srep[2 * m + 1] = (Script){ about[m], words(m == MAIL_REPORT ? "Dive report" : "Records", tail, 3, about[m], sizeof about[m]) };
+			brep[m] = (Script){ body[m], dad_mail(text, body[m], sizeof body[m]) };
+			uint8_t row[4] = { 0x04, emu_read8(BN6_MAIL_TABLE + 4u * (uint32_t)m + 1), 0x08, (uint8_t)(0x20 + m) };
+			emu_write(BN6_MAIL_TABLE + 4u * (uint32_t)m, row, sizeof row);
+			continue;
+		}
 		if (!mail_of(m)) continue;
 		srep[2 * m] = (Script){ from[m], words("Dad", tail, 3, from[m], sizeof from[m]) };
 		srep[2 * m + 1] = (Script){ about[m], words(guardian(m)->name, tail, 3, about[m], sizeof about[m]) };
@@ -301,6 +384,22 @@ static bool mail_deliver(int m) {
 	return true;
 }
 
+/* Mail `m` first in the list (the lab's, as each layer makes them again):
+ * taken out where it stands and put back at the head, the count as it was */
+static void mail_first(int m) {
+	uint8_t list[128];
+	int n = 0;
+	for (int i = 0; i < 128; ++i) {
+		int id = emu_read8(BN6_MAIL_LIST + (uint32_t)i);
+		if (id != m) list[n++] = (uint8_t)id;
+	}
+	if (n == 128) return;
+	memmove(list + 1, list, (size_t)n);
+	list[0] = (uint8_t)m;
+	for (int i = n + 1; i < 128; ++i) list[i] = 0;
+	emu_write(BN6_MAIL_LIST, list, sizeof list);
+}
+
 void pet_text_install(void) {
 	install_names();
 	install_descriptions();
@@ -309,6 +408,7 @@ void pet_text_install(void) {
 
 int pet_text_refresh(void) {
 	install_descriptions();
+	install_mails();
 	int codes = codes_known(NULL, 0);
 	item_set(ITEM_CODES, codes > 99 ? 99 : codes);
 	item_set(ITEM_PASS, meta_dark_way_open() ? 1 : 0);
@@ -316,5 +416,10 @@ int pet_text_refresh(void) {
 	int got = 0;
 	for (int m = 1; m <= 18; ++m)
 		if (mail_of(m) && guardian_known(m) && mail_deliver(m)) got = m;
+	/* (the lab's two, quietly: at the head of the list, not NEW each layer) */
+	for (int m = MAIL_RECORDS; m >= MAIL_REPORT; --m) {
+		if (mail_deliver(m)) { flag_clear(BN6_FLAG_MAIL_NEW + m); flag_set(BN6_FLAG_MAIL_READ + m); }
+		mail_first(m);
+	}
 	return got;
 }

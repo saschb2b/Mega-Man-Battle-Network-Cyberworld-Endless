@@ -67,7 +67,7 @@ static void leave(void) { audio_external(NULL); }
 
 static void update(void) {
 	uint32_t keys = director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
-	if (devtools_open() || pet_link_is_open()) return;   /* the game holds still under the dev menu and the SciLab link */
+	if (devtools_open()) return;   /* the game holds still under the dev menu */
 	/* (fast-forwarded: several game frames to one shown) */
 	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
@@ -102,7 +102,6 @@ static void draw(void) {
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	director_draw_map();
-	pet_link_draw();
 	devtools_draw();
 }
 

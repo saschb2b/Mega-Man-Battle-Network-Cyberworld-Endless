@@ -2330,8 +2330,6 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
-		/* (the PET's SciLab link, as Comm opens it) */
-		else if (!strcmp(name, "link")) { pet_link_open(); return; }
 		if (script < 0) { printf("--talk: no %s on this layer\n", name); continue; }
 		game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)script);
 		return;   /* (one a frame: the chat box opens on the next) */

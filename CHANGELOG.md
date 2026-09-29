@@ -9,10 +9,9 @@
   build continues its layer afresh.
 - Dad's mails read in BN6's own mail form (its MESSAGE band, white box,
   Dad's face as a photo, then MegaMan's): they had drawn as a map chat,
-  their band garbled. The SciLab link's records show in gold the
-  guardians whose code MegaMan holds, which NaviCode now points to past
-  two, and LibCard says it is a collector's vault that opens at its
-  number.
+  their band garbled. NaviCode names two codes, then points to Dad's
+  Records mail, and LibCard says it is a collector's vault that opens at
+  its number.
 - The PET's E-Mail holds a mail from Dad for every guardian MegaMan has
   battled, in any run: his battle data, the guardian's warning in
   MegaMan's words, to read again any time. A guardian battled for the
@@ -21,12 +20,15 @@
   NaviCode (the codes of guardians deleted twice, which open their
   gates), DarkPass (the Secret Area cleared) and LibCard (the Library's
   size, and a vault's), and ScrtData says what three of them open.
-- The PET's Comm and Save, greyed in a run, are the run's own. Comm opens
-  the SciLab link, Dad's lab watching the dive: the layer, the act and
-  area, the guardian ahead as MegaMan knows him (a name, "Name?" as word
-  on the net, or "???"), ScrtData, what the run brought, and the battle
-  records against every guardian met. Save closes the PET and saves the
-  run where MegaMan stands.
+- The PET's Save, greyed in a run, is the run's own: it closes the PET
+  and saves the run where MegaMan stands. Comm keeps BN6's grey, as
+  without a link cable. Dad's lab mails two reports that head E-Mail,
+  made again on each layer: the Dive report (the layer, the act and
+  area, the guardian ahead as MegaMan knows him, by battle data, word on
+  the net or not yet, ScrtData, what the run brought) and the Records
+  (MegaMan's wins and losses against every guardian met, the codes he
+  holds, the best layer). They are BN6's own mail screen, its music
+  playing on.
 - The PET's PLACE names the area beside the layer ("JudgeTree 14",
   "ACDC HP 8"); the label on entering a map keeps "Layer 8".
 - A new run's acts prefer guardians MegaMan has never met, in any run,

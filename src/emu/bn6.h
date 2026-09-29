@@ -45,10 +45,13 @@
 /* Event flags */
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
 /* The PET menu (docs/ROM_DATA.md, the PET): ePETMenuData, +0 its state, +4
- * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the disabled entry A
- * chose (patched: BN6_PET_A_DISABLED); the A handler's buzzer on a
- * disabled entry, and the branch that greys Comm and Save */
+ * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the entry the engine's
+ * part of its input took (7 Save); the state table's pointer to its input
+ * handler, and that handler; the grey's store to Save's colour */
 #define BN6_PET_MENU          0x0200DF20u
+#define BN6_PET_INPUT_PTR     0x08120B1Cu
+#define BN6_PET_INPUT         0x08120B91u
+#define BN6_PET_GREY_SAVE     0x08120F26u
 /* The KeyItem screen's words (docs/ROM_DATA.md, the PET): the names'
  * archive (uncompressed, an entry per id) and the literals that point at
  * it (the KeyItem screen's, the text scripts', the shop's, SubChip's); the
@@ -74,8 +77,6 @@
 #define BN6_FLAG_MAIL_GOT     0x1CA0
 #define BN6_FLAG_MAIL_NEW     0x1D20
 #define BN6_FLAG_MAIL_READ    0x1DA0
-#define BN6_PET_A_DISABLED    0x08120BF8u
-#define BN6_PET_GREY          0x08120F20u
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
 #define BN6_FLAG_WARP_OFF     0x16F0      /* + n: the map's warp trigger n does nothing */
 #define BN6_FLAG_NO_ENCOUNTERS 0x1700     /* checkThenStartBattle skips random battles while set (a BBS request sets it); cleared on entering a map */

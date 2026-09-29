@@ -1,26 +1,17 @@
-/* The PET's entries the run gives a use of its own (docs/PET.md): the
- * SciLab link behind Comm, the lab's view of the dive, drawn by the engine
- * over the PET while the game holds still. */
+/* The PET's Save as the run's (docs/PET.md): A on it, disabled in a run,
+ * closes the PET and saves the run where MegaMan stands. Comm keeps BN6's
+ * grey; the dive's report and records are Dad's mail (pet_text.h). */
 #ifndef CW_PET_H
 #define CW_PET_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
-/* The PET menu's Comm and Save as the run's (the patches: A on either,
- * disabled in a run, leaves the entry for the engine instead of a
- * buzzer, and neither is greyed). Once, on the core's ROM copy. */
+/* Once, on the core's ROM copy: Save lit and taken by the engine. */
 void pet_install(void);
-/* Each game frame: Comm chosen opens the SciLab link, Save closes the PET
- * and saves the run on the map. */
+/* Each game frame: Save chosen closes the PET, then saves on the map. */
 void pet_update(void);
-/* The SciLab link: open (its first page), and whether it shows. */
-void pet_link_open(void);
-bool pet_link_is_open(void);
-/* The player's keys: the link takes them while it is open (LEFT and RIGHT
- * turn its pages, A or B closes it, and the game gets neither till they
- * are let go); a Save closing the PET presses B for it. */
+/* The player's keys, but for a Save closing the PET, which presses B. */
 uint32_t pet_keys(uint32_t keys);
-void pet_link_draw(void);
 
 #endif

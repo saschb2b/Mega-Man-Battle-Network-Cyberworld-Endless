@@ -9,23 +9,11 @@ a use of its own.
 | Entry | In a run |
 | --- | --- |
 | ChipFolder, SubChip, Library, MegaMan | BN6's own |
-| E-Mail | BN6's screen: Dad's mail with the battle data on each guardian met |
+| E-Mail | BN6's screen: Dad's mails, the dive and the records first, then the battle data on each guardian met |
 | KeyItem | BN6's screen: the profile's own items beside the run's |
-| Comm | The SciLab link: the lab's view of the dive, drawn by the engine |
+| Comm | BN6's grey and buzz, as without a link cable |
 | Save | Saves the run where MegaMan stands |
 | PLACE | The area beside the layer ("JudgeTree 14") |
-
-## Comm: the SciLab link
-
-Dad's lab watches the dive over the PET's link. Choosing Comm opens it
-over the PET, the game holding still: the first page is the dive (the
-layer, of the short net's ten; the act and the area; the guardian ahead as
-MegaMan knows him: his name from battle data, "Name?" as word on the net,
-"???" before either; ScrtData; the folder, the Cross and its weakness, the
-threat and the helpers brought); the next pages are the battle records,
-every guardian met in any run with its wins and losses, eight a page, and
-the best layer. LEFT and RIGHT turn the pages, A or B closes it (the key
-kept from the game till it is let go, which would close the PET too).
 
 ## Save
 
@@ -36,7 +24,24 @@ corner; the quit prompt then says "Run saved where you saved it". In the
 town, before the first layer, there is no run to save yet, and a note says
 so.
 
-## E-Mail: Dad's battle data
+## E-Mail: Dad's lab
+
+Dad's lab watches the dive, and two mails from him head the list, made
+again on each layer, read and never marked NEW:
+
+- **Dive report**: the layer (of the short net's ten), the act and the
+  area; the guardian ahead as MegaMan knows him (his name from battle
+  data, word on the net, or "a strong Navi. We don't know who yet");
+  ScrtData; the folder, the Cross and its weakness, the threat and the
+  helpers brought.
+- **Records**: every guardian met in any run with MegaMan's wins and
+  losses, three a page, "code" beside those whose NaviCode he holds; how
+  many of the seventeen he has met, the best layer and the Nest's wins.
+
+They were once a screen of the engine's own behind Comm (the SciLab
+link), drawn over the PET: it held the game still, its music with it, and
+looked like none of BN6's screens. As mail they are BN6's own screen, its
+music playing on, and Comm is BN6's again.
 
 For every guardian MegaMan has battled, in any run, the PET holds a mail
 from Dad, its subject the guardian: "Lan, I sorted out MegaMan's battle
@@ -72,8 +77,9 @@ core's copy, our scripts in place of some, in the free space
 pointed at them (docs/ROM_DATA.md, the PET).
 
 Flag `0x1706` (`EVENT_PET_COMM_SAVE_DISABLED`), which a run keeps set,
-greys Comm and Save and makes A on them buzz. Two patches on the core's ROM
-copy (`pet.c`, docs/ROM_DATA.md) turn the buzzer into a note for the
-engine, the cursor's entry written to the menu's spare byte
-(`0x0200DF2F`), and leave the two entries ungreyed; the engine reads the
-byte each frame. BN6's own Comm and Save never run.
+greys Comm and Save and makes A on them buzz. On the core's ROM copy
+(`pet.c`, docs/ROM_DATA.md) a routine of ours runs before the PET's input
+handler: A on Save is taken from the game and written to the menu's spare
+byte (`0x0200DF2F`), which the engine reads each frame; and the grey's
+store to Save's colour is a no-op, so Save shows lit while Comm keeps its
+grey and buzz. BN6's own Save never runs.

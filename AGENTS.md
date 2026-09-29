@@ -28,7 +28,7 @@ the site.
 | Where ROM data lives and how it was found | [docs/ROM_DATA.md](docs/ROM_DATA.md) |
 | What is original, generated or adapted | [docs/FIDELITY.md](docs/FIDELITY.md) |
 | What carries over between runs: unlocks, the run's setup, threat | [docs/META.md](docs/META.md) |
-| The PET's entries in a run: Comm's SciLab link, Save, E-Mail, KeyItem | [docs/PET.md](docs/PET.md) |
+| The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem | [docs/PET.md](docs/PET.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout
