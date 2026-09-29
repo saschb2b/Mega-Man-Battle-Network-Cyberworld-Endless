@@ -1259,10 +1259,13 @@ void director_describe(FILE *f) {
 	}
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
-	/* (named as the game shows him: a playtester reads this) */
+	/* (named as the game shows him: a playtester reads this; a dev's
+	 * state, CYBERWORLD_STATE_POS, names him always, as the scripts that
+	 * find a guardian's seed read it) */
 	if (D.objs.guardian.navi)
 		fprintf(f, "guardian %s %s\n",
-			guardian_known(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done()
+			guardian_known(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done() ||
+					getenv("CYBERWORLD_STATE_POS")
 				? guardian(D.objs.guardian.navi)->name : "???",
 			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");
 }

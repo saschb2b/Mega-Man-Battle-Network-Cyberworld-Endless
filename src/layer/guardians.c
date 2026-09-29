@@ -49,8 +49,12 @@ const char *guardian_tip(int navi) {
 		"Step off the yellow panel when he lands! Blades he leaves stuck in our side fly back across their rows.|@M He stays beside us a moment after his slash: swing back then!";
 	case 4: return "EraseMan's ghosts soak up our shots and drift across the rows: dodge up and down. "
 		"If our HP runs low he erases us in one blow, so heal before we face him!|@M He holds still at the back while his ghosts drift at us: strike then, with something that reaches him!";
-	case 5: return "ChargeMan rams down our row like a train, his coal bombs burst on the lit panels, and his freight cars roll down "
-		"the rows and block our chips. Hit him as he pulls back in at the back!";
+	/* (watched: the cars come with him down the other two rows, a column
+	 * or two behind; a playtester stepped into another row as the train
+	 * passed and ran into a car, twice deleted by him on layer 9) */
+	case 5: return "ChargeMan rams down our row like a train, and his coal bombs burst on the lit panels.|@M When his freight cars come "
+		"too, they roll down the other two rows a column or two behind him and block our chips.|@M Once he's passed, step into his "
+		"row behind him: the cars never follow there. Hit him as he pulls back in at the back!";
 	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
 		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!|@M He stands still in front of us while he blows bubbles: swing then!";
 	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "

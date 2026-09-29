@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- ChargeMan's warning, from battle data, says where to stand when his
+  train comes: his freight cars roll down the other two rows a column or
+  two behind him, so once he has passed, his own row behind him is safe.
+  A playtester, twice deleted by him on layer 9, ran into a car stepping
+  aside.
 - The NaviCust vendor's "I brought it along" names only a program from
   earlier runs that MegaMan hasn't got now (a playtester with SuperArmor
   installed was offered it), and a bystander's word on dark warps says
