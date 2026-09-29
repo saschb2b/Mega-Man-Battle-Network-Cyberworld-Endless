@@ -167,6 +167,9 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 			int a = answer(depth, viruses, it.id, &code);
 			if (a >= 0) it.id = (uint16_t)a;
 		}
+		/* (in the folder's codes where the chip comes in them: a playtester's
+		 * rewards, each in its own code, left him hands of five codes) */
+		code = loot_fit_code(it.id, code, true);
 		it.code = (uint8_t)(code == '*' ? 26 : code - 'A');
 		it.price = (uint16_t)(chip_price(it.id) / 100);
 		/* (the answer at a price a run has by then: 400 zenny in act 1, 300

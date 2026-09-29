@@ -507,6 +507,17 @@ static void roll_encounter(void) {
 	set_encounter(&e, false);
 }
 
+/* The folder's codes, for the layer about to be made (loot_fit_code): read
+ * from the game as MegaMan moves on, kept with the run, so a checkpoint
+ * rebuilds the layer as it was without the game's memory. */
+static void note_folder_codes(void) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (data < 0x02000000u || data >= 0x02040000u) return;
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder[i] = emu_read16(data + 2u * (uint32_t)i);
+	loot_folder_codes(folder, BN6_FOLDER_ENTRIES, run.codes);
+}
+
 static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
@@ -580,6 +591,7 @@ bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	set_start_folder();
+	note_folder_codes();
 	town_after_abandon = save_exists();
 	save_delete();
 	/* the first layer, entered through the town's port; the town itself
@@ -818,7 +830,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 35
+#define LAYER_MAKE 36
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1652,6 +1664,7 @@ bool director_start_layer(void) {
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it) */
 	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) set_start_folder();
+	note_folder_codes();
 	if (!build_layer()) return false;
 	lock_run();
 	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
@@ -1779,6 +1792,7 @@ bool director_resume(void) {
 /* Into the Undernet or the Secret Area: MegaMan jacks out as on a warp pad,
  * and into the side layer built meanwhile. */
 static void enter_side_layer(void) {
+	note_folder_codes();
 	if (!build_layer()) return;
 	D.warping = true;
 	D.checkpoint = true;
@@ -1833,6 +1847,7 @@ static bool follow_exit_warp(void) {
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
+	note_folder_codes();
 	if (!build_layer()) return false;
 	D.warping = true;
 	D.checkpoint = true;

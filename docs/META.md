@@ -216,7 +216,8 @@ them a use.
    setup screen, the unlock line on the summary. Uses BN6's folder data
    and the engine's existing pacing knobs; needs the folder's RAM layout
    (bn6f).
-2. The Library, the programs pool, Cross starts.
+2. The Library, the programs pool, Cross starts (reasoned below), and
+   rewards in the folder's codes.
 3. Gates and route choice, with new areas and guardians as branches.
 4. The town as hub, more starting towns, rungs 6 to 10.
 
@@ -262,6 +263,50 @@ Built as planned, with these particulars:
   and gentle battles (the lower half of the band all run).
 - `--setup NET,FOLDER,THREAT,HELPERS` sets a headless run's; the weak
   autopilot wins a short net (layers 1-10).
+
+## Phase two, reasoned (29 September 2026)
+
+Phase one gave a run its shape: the short net, the setup, three folders,
+the threat rungs. Phase two gives a run an identity that lasts it through,
+and the profile a collection. The dialectic stays **what you bring,
+against what you find**; each piece restates it.
+
+1. **Rewards in the folder's codes** (loadout as budget: the folder's 30
+   slots are the budget, its codes the constraint that makes hands). A
+   playtester's rewards each came in their own code; by the Nest every
+   hand held four or five codes and the build he had paid for could not
+   be played. BN6 answers this with a big pack and codes farmed from
+   viruses, which a run has no time for. Here the net answers the folder:
+   as each layer is made, the codes the folder holds most (three chips or
+   more each) are noted with the run, and a reward chip that comes in one
+   of them takes it: the Net Dealers' stock and the gift always, Mystery
+   Data half the time. A * stays a *, and battle drops are BN6's own. The
+   choice between a strong chip and one that fits stays; a folder built
+   around a code is paid back. The first dealer of a run says so.
+2. **Cross starts** (costed power, nested progression: MegaMan's axis
+   beside the folder). A Cross Navi deleted as a guardian in any run lets
+   later runs bring his Cross from the first battle. Crossing is a choice
+   in every battle, so the weakness is no cost; the cost is the run's other
+   Crosses: the brought Cross is the only one, and guardians' Cross data
+   does not fit beside it. Bring (one element, committed from act 1) or
+   find (up to three Crosses, matched to the guardians met, later). BeastOut
+   stays the Graveyard's.
+3. **The Library** (collection as meta, never power). Every chip MegaMan
+   holds enters the profile's Library, BN6's own (its flags `0x1E20` + chip
+   id), which each new run's game is given: the PET's Library shows the
+   collection, and a Chip Trader's prize, new to the Library first, is new
+   across runs, so traders become the collector's machine. The summary
+   counts a run's new entries; STD, MEGA and GIGA COMP mark a class
+   complete, counted over the chips the net can give. Entries grant
+   nothing in battle.
+4. **Programs found join later runs** (docs/NAVICUST.md, 7): the run's
+   gift offers a program from those earlier runs installed.
+
+What could go wrong: the lean flattening the code game into "add
+everything" (it leaves * and every chip without the folder's codes as
+they roll); a Cross start picked every time (the playtests will tell: a
+start nobody passes on needs a larger cost); the Library read as a grind
+(it is optional, its marks trophies, and the traders turn it into play).
 
 ## The title's marks
 

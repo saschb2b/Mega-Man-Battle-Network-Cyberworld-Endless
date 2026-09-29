@@ -76,6 +76,8 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 		kind = 1;
 		value = roll_chip(run.depth, 3, &code);
 	}
+	/* (half the time in the folder's codes, the dealers' always) */
+	if (kind == 1) code = loot_fit_code(value, code, false);
 	out[0] = (uint8_t)kind;
 	out[1] = 0x20;
 	out[2] = 0xFF;
@@ -307,8 +309,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			else if (navi > 0)
 				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s",
 					guardian(navi)->name, brought);
+			/* (and that his chips come in the folder's codes, loot_fit_code) */
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
-				? "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
+				? run.codes[0] ? "Welcome to the Net Dealer! Divers need chips, and I've got 'em, in your folder's codes when I can!"
+					: "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
 				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
 			/* (met in this act already: the pick, in a line) */
 			if (layer_objs_dealer_again && navi > 0)
@@ -363,7 +367,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			}
 			if (chip <= 0) chip = roll_chip(run.depth, 3, &code);
 			chip_info(chip, &ci);
-			code = ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*';
+			code = loot_fit_code(chip, ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*', true);
 			ShopItem program = { 3, 1, 0, 0, 0 };
 			const char *about = shop_pick_gift_program(&program);
 			/* a run lost before its first guardian earns a little more */

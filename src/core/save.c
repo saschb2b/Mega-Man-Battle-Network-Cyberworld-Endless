@@ -13,7 +13,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define RUN_MAGIC 0x43574535u /* "CWE5": the run's setup (docs/META.md) */
+#define RUN_MAGIC 0x43574536u /* "CWE6": the Cross brought and the folder's codes (docs/META.md) */
 #define PROFILE_MAGIC 0x43575032u
 
 Profile profile;
@@ -94,7 +94,15 @@ bool save_run(void) {
 	return save_write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
 }
 
-bool peek_run(Run *out) { return save_read_blob("run.sav", RUN_MAGIC, out, sizeof *out) && out->active; }
+bool peek_run(Run *out) {
+	if (save_read_blob("run.sav", RUN_MAGIC, out, sizeof *out) && out->active) return true;
+	/* (an older format's, as CONTINUE would load it) */
+	Run keep = run;
+	bool old = legacy_load_run();
+	*out = run;
+	run = keep;
+	return old && out->active;
+}
 
 /* Colonel was navi 17 before this version (the enemy table's unnamed
  * navi); he is 18. */
@@ -114,6 +122,7 @@ bool load_run(void) {
 	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); return true; }
 	if (!legacy_load_run()) return false;
 	upgrade_run();
+	load_battle();
 	return true;
 }
 

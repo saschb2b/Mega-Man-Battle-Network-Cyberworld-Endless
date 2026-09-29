@@ -38,6 +38,9 @@ typedef struct {
 	uint8_t folder;          /* FOLDER_* (folders.h) */
 	uint8_t threat;          /* 0-THREAT_MAX */
 	uint8_t helpers;         /* HELP_* bits */
+	/* (new since the "CWE5" save, which reads them as 0) */
+	uint8_t cross;           /* the Cross brought from the start: its navi (1-5, powers.c), 0 none */
+	uint8_t codes[3];        /* the folder's codes as the layer was made, most held first: code + 1 (loot_fit_code) */
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */

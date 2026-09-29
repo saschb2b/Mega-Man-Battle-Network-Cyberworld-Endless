@@ -2,6 +2,7 @@
 #ifndef LOOT_H
 #define LOOT_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "foes.h"
@@ -20,6 +21,13 @@ int counter_element(int biome, int navi);
 /* Random chip for rewards/shops; code chosen from the chip's own codes. */
 int roll_chip(int depth, int bonus_tier, char *code);
 int chip_price(int id);
+/* A reward chip's code, leaned to the folder's (docs/META.md): where it
+ * rolled a letter and has one of the codes the folder holds most, that one,
+ * always or half the time; a * stays a *. */
+char loot_fit_code(int id, char code, bool always);
+/* The codes a folder holds most, three chips or more each, as run.codes
+ * keeps them (code + 1, most held first, 0 for none). */
+void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]);
 /* What the random battles remember of the last one (none of its virus
  * families next), kept beside the run's save: a CONTINUE had forgotten it
  * and brought the last session's pair back first thing. */

@@ -1,5 +1,7 @@
 #include "loot.h"
 
+#include <string.h>
+
 #include "data.h"
 #include "chip_pool.h"
 #include "formations.h"
@@ -444,6 +446,36 @@ int roll_chip(int depth, int bonus_tier, char *code) {
 	chip_info(id, &ci);
 	*code = ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*';
 	return id;
+}
+
+/* (the folder's codes: run.codes, read as each layer is made) */
+char loot_fit_code(int id, char code, bool always) {
+	if (code == '*' || !run.codes[0]) return code;
+	for (int k = 0; k < 3 && run.codes[k]; ++k)
+		if (code == 'A' + run.codes[k] - 1) return code;   /* (one of them already) */
+	ChipInfo ci;
+	chip_info(id, &ci);
+	for (int k = 0; k < 3 && run.codes[k]; ++k) {
+		char c = (char)('A' + run.codes[k] - 1);
+		if (memchr(ci.codes, c, (size_t)ci.ncodes)) return always || rng_range(0, 1) ? c : code;
+	}
+	return code;
+}
+
+void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]) {
+	int count[26] = { 0 };
+	for (int i = 0; i < n; ++i) {
+		int c = folder[i] >> 9;
+		if (c < 26) ++count[c];
+	}
+	/* (a code three chips hold: one a hand can be built on) */
+	for (int k = 0; k < 3; ++k) {
+		int best = -1;
+		for (int c = 0; c < 26; ++c)
+			if (count[c] >= 3 && (best < 0 || count[c] > count[best])) best = c;
+		out[k] = (uint8_t)(best < 0 ? 0 : best + 1);
+		if (best >= 0) count[best] = 0;
+	}
 }
 
 int chip_price(int id) {

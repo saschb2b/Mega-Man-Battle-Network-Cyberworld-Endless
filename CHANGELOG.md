@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Rewards come in the folder's codes: the codes the folder holds most (three
+  chips or more each) are read as each layer is made, and a Net Dealer's
+  chip, the gift's, and half of the Mystery Data chips that come in one of
+  them take it (a * stays a *). The first dealer of a run says so. A
+  playtester's rewards, each in its own code, had left him hands of four or
+  five codes at the final fight. A run saved before continues, its current
+  layer afresh.
 - A ScrtData says what it is for as it is picked up (three open the golden
   gate to the Secret Area), and L's briefing counts them only when the
   count changed, where it said so a layer late and then on every layer.
