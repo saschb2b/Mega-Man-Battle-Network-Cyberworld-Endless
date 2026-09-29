@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- An exit pad takes MegaMan from anywhere on its drawn ring, from every
+  side: its trigger is round, 26 units out, where it had reached less at
+  the screen's top. A playtester coming down onto a pad from the upper
+  right stood with his feet on its rim and stayed, twice.
 - A run can begin in Seaside Town: the third starting town, beside
   Central and ACDC Town, and the first as Capcom made it, whole, with the
   whale, the pier and the station walkway at their own heights. Lan jacks

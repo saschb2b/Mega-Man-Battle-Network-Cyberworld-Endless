@@ -87,24 +87,23 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 	return n;
 }
 
-/* A warp pad's trigger cells: every cell over the pad's panel (5x5 for a
- * centre in a cell's middle, 4x4 on a cell's corner) and a cell more
- * towards the screen's foot (world -X and +Y: standing below the pad,
- * MegaMan's sprite covers its lower rim while his feet are still short of
- * it), whole but for the corner at the screen's top, cut as the originals'
- * 3x3 cuts theirs (type A). The originals' 3x3 reaches 12 units and cuts
- * the ring's top, bottom and sides on screen: MegaMan stood on the pad's
- * rim, the sprite over its middle, and stayed. The side corners were cut
- * too, and a playtester walking right onto a pad stood on its left rim
- * without leaving, on two runs. */
-#define PAD_CELLS 36
+/* A warp pad's trigger cells: every cell whose middle lies within 26
+ * units of the pad's (37 round a centre in a cell's middle), round like
+ * the drawn ring, which reaches some 18. The originals' 3x3 reaches 12
+ * units and cuts the ring's top, bottom and sides on screen: MegaMan
+ * stood on the pad's rim, the sprite over its middle, and stayed. A
+ * square reaching less on some sides left a playtester standing on the
+ * drawn ring: below it (world -X and +Y), his sprite over its lower rim;
+ * walking right onto it, on its left rim; coming down from the screen's
+ * top right, his feet on its upper rim 24 units out. */
+#define PAD_CELLS 49
+#define PAD_REACH 26
 static int pad(Cell *t, const CoordPad *p) {
-	int x0 = (p->x - 24) >> 3, x1 = (p->x + 15) >> 3, y0 = (p->y - 16) >> 3, y1 = (p->y + 23) >> 3, n = 0;   /* (arithmetic shift: floor) */
-	for (int cy = y0; cy <= y1 && n < PAD_CELLS; ++cy)
-		for (int cx = x0; cx <= x1 && n < PAD_CELLS; ++cx) {
-			/* (the corner at the screen's top, world +X -Y, cut) */
-			int type = cy == y0 && cx == x1 ? 0x0A : 0x11;
-			t[n++] = cell(cx, cy, 0, p->index, 8, type);
+	int n = 0;
+	for (int cy = (p->y - 32) >> 3; cy <= (p->y + 32) >> 3; ++cy)   /* (arithmetic shift: floor) */
+		for (int cx = (p->x - 32) >> 3; cx <= (p->x + 32) >> 3 && n < PAD_CELLS; ++cx) {
+			int dx = cx * 8 + 4 - p->x, dy = cy * 8 + 4 - p->y;
+			if (dx * dx + dy * dy <= PAD_REACH * PAD_REACH) t[n++] = cell(cx, cy, 0, p->index, 8, 0x11);
 		}
 	return n;
 }
