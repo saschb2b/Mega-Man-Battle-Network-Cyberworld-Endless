@@ -120,22 +120,23 @@ static void build_foes(const Formation *f, int depth, int want, bool rare, Encou
 	}
 }
 
-/* (as a blue Mystery Data's: two chips of the next tier up, each in the
- * folder's codes where it comes in them, zenny and BugFrags; threat 6's
- * chips only, a third chip for the zenny) */
+/* (a rare find, rarer than a blue Mystery Data's: three chips a tier above
+ * its, each in the folder's codes where one comes in them, and zenny twice
+ * its; threat 6's chips only, a fourth chip for the zenny. A playtester's
+ * gem paid 980 zenny, a blue Mystery Data's on the same layer, and read as
+ * no find at all) */
 void loot_gem_rewards(int depth, uint16_t out[4]) {
-	for (int k = 0; k < 3; ++k) {
-		if (k == 2 && run.threat < 6) break;
+	for (int k = 0; k < 4; ++k) {
+		if (k == 3 && run.threat < 6) break;
 		char code = '*';
-		int id = roll_chip(depth, 1, &code);
-		for (int t = 0; t < 8 && run.codes[0] && !loot_folder_code(id, false); ++t) id = roll_chip(depth, 1, &code);
+		int id = roll_chip(depth, 2, &code);
+		for (int t = 0; t < 12 && run.codes[0] && !loot_folder_code(id, false); ++t) id = roll_chip(depth, 2, &code);
 		char c = loot_folder_code(id, true);
 		if (c) code = c;
 		out[k] = (uint16_t)((id & 0x1FF) | (code == '*' ? 26 : code - 'A') << 9);
 	}
-	int zenny = 800 + depth * 60;
-	if (run.threat < 6) out[2] = (uint16_t)(0x4000 | (zenny > 0x3FFF ? 0x3FFF : zenny));
-	out[3] = (uint16_t)(0xC000 | (5 + pacing_act(depth)));
+	int zenny = 1600 + depth * 120;
+	if (run.threat < 6) out[3] = (uint16_t)(0x4000 | (zenny > 0x3FFF ? 0x3FFF : zenny));
 }
 
 void loot_add_gem(Encounter *e) {

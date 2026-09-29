@@ -297,7 +297,8 @@ Level as in BN6. The battlefields are the area's own too: its panels
 (grass, ice, holes), and where BN6 set them, rocks and cubes. Now and then
 (a battle in forty or so) a green Mystery Data sits on the enemies' side:
 it breaks at the first hit, yours or theirs, but still there when the
-battle ends, it gives a rare find besides the battle's reward.
+battle ends, it gives a rare find besides the battle's reward: most often
+a chip a tier above a blue Mystery Data's, in your folder's codes.
 
 Three layers make an act. The second layer of every act always has the Net
 Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and
