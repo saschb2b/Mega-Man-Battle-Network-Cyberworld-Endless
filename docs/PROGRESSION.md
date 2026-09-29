@@ -328,8 +328,11 @@ MegaMan reaches about 100 HP more per act:
   SuperArmor 1000 zenny in act 1, Attack+1 700.
 - Every Net Dealer stocks a chip of the element that answers its act: the
   one strong against the act's guardian, or with a guardian of none,
-  against the element most of the area's viruses have (Fire beats Wood,
-  Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`), and
+  against the element of half or more of the kinds of virus the area's
+  battles can hold at that depth, two kinds at least (Fire beats Wood,
+  Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`; a mixed
+  area such as CopyBot's comps gets no word, and `build.py pacing` lists
+  each act's areas), and
   says so, naming the guardian ("Word is, BlastMan can't stand Aqua
   chips"). A guardian of no element is answered by the hardest hit on the
   list instead, and the dealer says so, and names the viruses' weakness.

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A Net Dealer names the viruses' weakness only where it holds: half or more
+  of the kinds of virus the area's battles can hold at that depth share the
+  element (two kinds at least). A playtester told the viruses couldn't stand
+  Aqua met Piranhas, bees, crows and planes; that area's mix now gets no
+  word.
 - Routes: after an act's guardian, the Guardian Data asks which way on: the
   planned next area or another of its tier, each named with its guardian and
   his element. Both fit the act; B keeps the first. Acts 2 and 3 of the

@@ -120,6 +120,16 @@ int pacing_report_run(const char *path) {
 		fprintf(out, "%s\n", outside ? "  OUTSIDE" : "");
 		flagged += outside;
 	}
+	/* what a Net Dealer says the area's viruses can't stand, where the
+	 * guardian has no element (counter_element: 0, no word), by act */
+	fprintf(out, "\nThe viruses' answer by act and area (ELEM_*, 0 none):");
+	for (int act = 0; act < 4; ++act) {
+		uint8_t pool[PACING_AREA_POOL];
+		int n = pacing_area_pool(act, pool);
+		fprintf(out, "\nact %d:", act + 1);
+		for (int i = 0; i < n; ++i) fprintf(out, " %s %d", guardian_area_name(pool[i]), counter_element(act * 3 + 1, pool[i], 0));
+	}
+	fprintf(out, "\n");
 	/* each guardian's element (ELEM_*: 1 fire, 2 aqua, 3 elec, 4 wood), which
 	 * the Net Dealers' counter chip answers */
 	fprintf(out, "\nGuardians' elements:");

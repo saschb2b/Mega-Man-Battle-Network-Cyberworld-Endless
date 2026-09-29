@@ -195,7 +195,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i <= OBJ_GIFT; ++i) out->script_of[i] = -1;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
-	int counter = counter_element(run.biome, run.boss_order[run.biome]);
+	int counter = counter_element(run.depth, run.biome, run.boss_order[run.biome]);
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
