@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The first layer's gift gives a head start's HPMemory (and a comfort
+  one) before it offers the pick, not just before the options, where
+  "2 HPMemory" then "HPMemory x2" read as the same thing twice.
 - ChargeMan's warning, from battle data, says where to stand when his
   train comes: his freight cars roll down the other two rows a column or
   two behind him, so once he has passed, his own row behind him is safe.

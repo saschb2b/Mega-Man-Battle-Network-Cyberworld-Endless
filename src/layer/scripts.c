@@ -526,10 +526,27 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start,
 	first = true;
 	/* (a returning player: one page, not three; a playtester called the
 	 * chats of a restart after a long run a chore) */
-	if (brief) ta_pages(t, "WELCOME BACK, MEGAMAN! PICK YOUR GIFT: HPMEMORY X2, A CHIP OR A PROGRAM!", FACE_PROG, &first);
+	/* (the extras first, then the pick: given just before the options,
+	 * a head start's two HPMemory read as the first option given twice) */
+	bool extras = head_start || comfort;
+	if (brief) ta_pages(t, extras ? "WELCOME BACK, MEGAMAN!" : "WELCOME BACK, MEGAMAN! PICK YOUR GIFT: HPMEMORY X2, A CHIP OR A PROGRAM!",
+		FACE_PROG, &first);
 	else ta_pages(t, "HELLO, MEGAMAN! I'M DR. HIKARI'S DIVE SUPPORT PROGRAM!|"
-		"EVERY DIVE STARTS FROM SCRATCH, SO HERE'S A GIFT!|"
-		"PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", FACE_PROG, &first);
+		"EVERY DIVE STARTS FROM SCRATCH, SO HERE'S A GIFT!", FACE_PROG, &first);
+	if (head_start) {
+		/* the head-start helper (docs/META.md) */
+		ta_page(t, FACE_PROG, "YOU ASKED FOR A HEAD START, SO TAKE THESE FIRST!", false);
+		give_hp_memory(t, 2);
+		got_hp(t, 2, &first);
+	}
+	if (comfort) {
+		/* the last dive ended early: a little more help */
+		ta_page(t, FACE_PROG, "YOUR LAST DIVE ENDED EARLY, SO TAKE THIS TOO!", false);
+		give_hp_memory(t, 1);
+		got_hp(t, 1, &first);
+	}
+	if (!brief) ta_page(t, FACE_PROG, "NOW PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", false);
+	else if (extras) ta_page(t, FACE_PROG, "NOW PICK YOUR GIFT: HPMEMORY X2, A CHIP OR A PROGRAM!", false);
 	/* what the chip and the program do, before the choice */
 	{
 		char said[160];
@@ -539,18 +556,6 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start,
 		for (char *c = said; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 		ta_page(t, FACE_PROG, said, false);
 		if (about) ta_page(t, FACE_PROG, about, false);
-	}
-	if (head_start) {
-		/* the head-start helper (docs/META.md) */
-		ta_page(t, FACE_PROG, "YOU ASKED FOR A HEAD START, SO TAKE THESE TOO!", false);
-		give_hp_memory(t, 2);
-		got_hp(t, 2, &first);
-	}
-	if (comfort) {
-		/* the last dive ended early: a little more help */
-		ta_page(t, FACE_PROG, "YOUR LAST DIVE ENDED EARLY, SO TAKE THIS TOO!", false);
-		give_hp_memory(t, 1);
-		got_hp(t, 1, &first);
 	}
 	ta_mugshot(t, FACE_PROG);
 	ta_clear(t);
