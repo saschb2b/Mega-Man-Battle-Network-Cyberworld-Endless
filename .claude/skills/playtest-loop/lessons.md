@@ -921,3 +921,33 @@ After session 37 the release came first and the next session waited an
 hour, until the owner said so. Triage and relaunch come right after a
 report; a release, a feature or a question runs beside the loop, while
 the persona plays.
+
+## Session 38: 9/10 (keep playing: yes; recommend: yes)
+
+CONTINUE on layer 9 (rebuilt afresh), then the Nest and EraseMan EX, the
+Navi who ended session 27's run: won at 30 of 620 HP on a plan the
+briefing and the dealer's pick gave ("strike then, with something that
+reaches him": ElcPuls2 pulled him in). The first won run in 38 sessions.
+Stopped at the setup (Endless, EraseCross, threat 1), the budget spent.
+
+Confirmed: the layer rebuilt with the beaten guardian kept, Dad's mails
+NEW (Records, the new guardian's mail, the Dive report on the Nest), the
+Records' "code" legend, B backing out of the shop's Yes.
+
+Raised: the ending thin (rewards and a program pick after the final
+fight, the install nag on the way out, Dad's mails stale after the win,
+two of four unlocks on the summary, the growl never answered; fixed in
+a0d22cb); the last layer's dealer "tougher from here" (fixed); sold-out
+rows shifting the shop list (open: check BN6's own shops); a guardian's
+HP falling by 1 every ~25 frames, now on EraseMan too (the engine writes
+no enemy HP in play: a task was flagged to reproduce it in a controlled
+capture).
+
+Misreads: DemonEye's beam a row up (BN6 draws it floating), the ElmntMan
+chip's words (BN6's own).
+
+Loop change: **triage while the next session plays.** The report came
+while the rival's phase two was half done; the fixes for session 38 went
+in after session 39 had launched on the pinned build, since the new run
+meets the rival first and the ending last. A fix the next session cannot
+reach does not hold its launch.
