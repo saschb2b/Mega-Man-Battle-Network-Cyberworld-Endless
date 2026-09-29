@@ -219,7 +219,8 @@ them a use.
 2. The Library, the programs pool, Cross starts (reasoned below), and
    rewards in the folder's codes. Built but the programs pool.
 3. Gates and route choice, with new areas and guardians as branches.
-   The route choice is built; gates wait.
+   The route choice and the Navi gates are built; vaults and branches
+   wait.
 4. The town as hub, more starting towns, rungs 6 to 10.
 
 ## Decisions (28 September 2026)
