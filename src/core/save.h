@@ -33,6 +33,10 @@ typedef struct {
 	uint8_t first_area;       /* the last new run's act 1 area, biome + 1 */
 	uint8_t crosses_open;     /* the Cross starts announced (a bit per navi 1-5, meta.h) */
 	uint8_t last_cross;
+	/* the Library (docs/META.md): a bit per chip id held in any run, and
+	 * how many it held as the current run began */
+	uint8_t library[40];
+	uint16_t library_start;
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4 };

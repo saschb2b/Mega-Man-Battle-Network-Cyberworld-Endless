@@ -10,5 +10,9 @@
 int chip_pool_tier(int rom_id);
 /* A random chip of `tier`; -1 without a ROM. */
 int chip_pool_pick(int tier);
+/* Chip `rom_id`'s Library class (0 standard, 1 Mega, 2 Giga), or -1 when a
+ * run cannot hold it; and how many chips of a class a run can hold. */
+int chip_pool_class(int rom_id);
+int chip_pool_class_count(int cls);
 
 #endif

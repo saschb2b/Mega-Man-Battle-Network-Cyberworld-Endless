@@ -36,12 +36,22 @@ enum {
 	MARK_THREAT = 0x02,   /* the green disc: a win on the top threat rung */
 	MARK_PA = 0x04,       /* P.A. COMP (not yet earned here) */
 	MARK_SECRET = 0x08,   /* the S: the Secret Area cleared */
-	MARK_GIGA = 0x10,     /* GIGA COMP, MEGA COMP, STD COMP: the Library, later */
+	MARK_GIGA = 0x10,     /* GIGA COMP, MEGA COMP, STD COMP: a Library class complete (meta_library_count) */
 	MARK_MEGA = 0x20,
 	MARK_STD = 0x40,
 	MARK_WIN = 0x80,      /* Gregar: a short net won (BN6's for its ending) */
 	MARK_NEST = 0x100,    /* Bass in Gregar's form: the endless net's own Nest cleared */
 };
+
+/* The profile's Library: every chip MegaMan has held, in any run (BN6's
+ * own Library, which each run's game is given). */
+bool meta_library_has(int id);
+/* Adds chip `id`; whether it was new. */
+bool meta_library_add(int id);
+/* The Library's chips of a class (0 standard, 1 Mega, 2 Giga; -1 all), and
+ * how many the current run added. */
+int meta_library_count(int cls);
+int meta_library_new(void);
 
 /* A new run's start: what earlier runs opened is no news on its summary
  * (a folder earned in a run that never reached one was announced late, as

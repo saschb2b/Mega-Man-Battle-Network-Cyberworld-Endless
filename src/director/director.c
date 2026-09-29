@@ -16,6 +16,7 @@
 #include "bn6.h"
 #include "autopilot.h"
 #include "boss.h"
+#include "chip_pool.h"
 #include "cinema.h"
 #include "emu.h"
 #include "encounter.h"
@@ -598,13 +599,31 @@ static void set_start_folder(void) {
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint8_t b[2] = { (uint8_t)chips[i], (uint8_t)(chips[i] >> 8) };
 		emu_write(data + 2u * (uint32_t)i, b, 2);
+		flag_set(BN6_FLAG_LIBRARY + (chips[i] & 0x1FF));   /* (in the Library, as GiveFolder puts them) */
 	}
+}
+
+/* The profile's Library (docs/META.md) in the run's game: the PET's Library
+ * shows every chip held in any run, and a Chip Trader's prize, new to the
+ * Library first, is new across runs. */
+static void library_to_game(void) {
+	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
+		if (meta_library_has(id)) flag_set(BN6_FLAG_LIBRARY + id);
+}
+
+/* ... and back: the chips the run's game has put in its Library since. */
+static void library_from_game(void) {
+	bool added = false;
+	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
+		if (chip_pool_class(id) >= 0 && flag_get(BN6_FLAG_LIBRARY + id)) added |= meta_library_add(id);
+	if (added) profile_save();
 }
 
 bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	set_start_folder();
+	library_to_game();
 	powers_bring(run.cross);
 	note_folder_codes();
 	town_after_abandon = save_exists();
@@ -852,6 +871,7 @@ void director_draw_map(void) {
 static void save_checkpoint(void) {
 	char path[600];
 	save_state_path(path, sizeof path);
+	library_from_game();
 	save_run();
 	emu_save_state(path);
 	int make = LAYER_MAKE;
@@ -1678,7 +1698,7 @@ bool director_start_layer(void) {
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it) */
-	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); powers_bring(run.cross); }
+	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); powers_bring(run.cross); }
 	note_folder_codes();
 	if (!build_layer()) return false;
 	lock_run();
@@ -1912,6 +1932,7 @@ static void end_run(void) {
 	title_new_best = profile.runs > 0 && run.depth > profile.best_depth;
 	title_won = false;
 	runlog_run_end();
+	library_from_game();
 	meta_run_over(false);
 	profile_record_run();
 	save_delete();
@@ -1929,6 +1950,7 @@ static void win_run(void) {
 	title_new_best = run.depth > profile.best_depth;
 	title_won = true;
 	runlog_run_end();
+	library_from_game();
 	meta_run_over(true);   /* (before the clear counts: it names what the win opened) */
 	profile.nest_clears++;
 	profile_record_run();

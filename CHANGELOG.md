@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The Library carries over: every chip MegaMan holds joins the profile's
+  Library, and each run's game is given it, so the PET's Library shows the
+  whole collection and a Chip Trader's prize is new across runs. The summary
+  counts the chips a run added; STD, MEGA and GIGA COMP go on the title for
+  a class complete.
 - Cross starts: once HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan has
   fallen as a guardian in any run, the setup's new Cross row lets a run
   bring his Cross from the first battle. It is the run's only Cross: a Cross

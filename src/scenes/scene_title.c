@@ -644,33 +644,38 @@ static void draw(void) {
 		Sprite *lan = sprite_get(SPR_MUGSHOT, 0x00);
 		if (lan) sprite_draw_frame(lan, 0, 0, x0 + SUMMARY_FACE_X, y0 + SUMMARY_FACE_Y, false, 0, 0);
 		int lx = x0 + 70, rx = x0 + CORE_W - 14;
-		text_draw(lx, y0 + 44, "Reached", WHITE, TEXT_LEFT);
-		text_drawf(rx, y0 + 44, WHITE, TEXT_RIGHT, "Layer %d", run.depth);
-		text_draw(lx, y0 + 58, "Viruses deleted", WHITE, TEXT_LEFT);
-		text_drawf(rx, y0 + 58, WHITE, TEXT_RIGHT, "%d", run.viruses_deleted);
-		text_draw(lx, y0 + 72, "Navis deleted", WHITE, TEXT_LEFT);
-		text_drawf(rx, y0 + 72, WHITE, TEXT_RIGHT, "%d", run.bosses_beaten);
-		if (title_new_best) text_draw(lx, y0 + 88, "New best!", gold, TEXT_LEFT);
+		text_draw(lx, y0 + 40, "Reached", WHITE, TEXT_LEFT);
+		text_drawf(rx, y0 + 40, WHITE, TEXT_RIGHT, "Layer %d", run.depth);
+		text_draw(lx, y0 + 52, "Viruses deleted", WHITE, TEXT_LEFT);
+		text_drawf(rx, y0 + 52, WHITE, TEXT_RIGHT, "%d", run.viruses_deleted);
+		text_draw(lx, y0 + 64, "Navis deleted", WHITE, TEXT_LEFT);
+		text_drawf(rx, y0 + 64, WHITE, TEXT_RIGHT, "%d", run.bosses_beaten);
+		/* the Library, and what the run added to it (docs/META.md) */
+		text_draw(lx, y0 + 76, "Library", WHITE, TEXT_LEFT);
+		int lib = meta_library_count(-1), added = meta_library_new();
+		if (added) text_drawf(rx, y0 + 76, WHITE, TEXT_RIGHT, "%d (+%d)", lib, added);
+		else text_drawf(rx, y0 + 76, WHITE, TEXT_RIGHT, "%d", lib);
+		if (title_new_best) text_draw(lx, y0 + 89, "New best!", gold, TEXT_LEFT);
 		else {
-			text_draw(lx, y0 + 88, "Best", gold, TEXT_LEFT);
-			text_drawf(rx, y0 + 88, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
+			text_draw(lx, y0 + 89, "Best", gold, TEXT_LEFT);
+			text_drawf(rx, y0 + 89, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
 		}
 		/* Dad's backup, as his call promised, and Lan's word; a won run
 		 * jacks out */
 		if (title_won) {
-			text_draw(x, y0 + 100, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
-			text_draw(x, y0 + 112, "We did it, MegaMan!", WHITE, TEXT_CENTER);
+			text_draw(x, y0 + 102, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
+			text_draw(x, y0 + 114, "We did it, MegaMan!", WHITE, TEXT_CENTER);
 		} else {
-			text_draw(x, y0 + 100, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
+			text_draw(x, y0 + 102, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
 			const char *said = title_new_best ? "Our deepest dive yet, MegaMan!"
 				: run.depth <= 2 ? "That was rough... Let's try again!"
 				: "We'll get further next time!";
-			text_draw(x, y0 + 112, said, WHITE, TEXT_CENTER);
+			text_draw(x, y0 + 114, said, WHITE, TEXT_CENTER);
 		}
 		/* what the run opened for the next, else the closest goal
 		 * (docs/META.md) */
 		const char *open[2];
-		int n = meta_unlocked(open, 2), y = y0 + 128;
+		int n = meta_unlocked(open, 2), y = y0 + 129;
 		for (int i = 0; i < n; ++i, y += 12) text_drawf(x, y, gold, TEXT_CENTER, "Unlocked: %s", open[i]);
 		const char *next = meta_next_goal();
 		if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);

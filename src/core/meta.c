@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "chip_pool.h"
 #include "powers.h"
 #include "rivals.h"
 #include "run.h"
@@ -115,14 +116,34 @@ static void say(const char *fmt, const char *what) {
 	++nsaid;
 }
 
+bool meta_library_has(int id) { return id > 0 && id < 8 * (int)sizeof profile.library && (profile.library[id / 8] >> (id % 8) & 1); }
+
+bool meta_library_add(int id) {
+	if (id <= 0 || id >= 8 * (int)sizeof profile.library || meta_library_has(id)) return false;
+	profile.library[id / 8] |= (uint8_t)(1u << (id % 8));
+	return true;
+}
+
+int meta_library_count(int cls) {
+	int n = 0;
+	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
+		if (meta_library_has(id) && (cls < 0 ? chip_pool_class(id) >= 0 : chip_pool_class(id) == cls)) ++n;
+	return n;
+}
+
+int meta_library_new(void) {
+	int n = meta_library_count(-1) - profile.library_start;
+	return n > 0 ? n : 0;
+}
+
 void meta_run_begun(void) {
-	uint16_t was = profile.folders_open;
-	uint8_t crosses = profile.crosses_open;
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
 	for (int n = 1; n <= 5; ++n)
 		if (cross_earned(n)) profile.crosses_open |= (uint8_t)(1u << n);
-	if (profile.folders_open != was || profile.crosses_open != crosses) profile_save();
+	/* (the Library as the run begins: the summary counts what it adds) */
+	profile.library_start = (uint16_t)meta_library_count(-1);
+	profile_save();
 }
 
 void meta_run_over(bool won) {
@@ -141,13 +162,18 @@ void meta_run_over(bool won) {
 	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark") */
 	static const struct { int bit; const char *what; } marks[] = {
 		{ MARK_WIN, "Gregar's mark" }, { MARK_NEST, "Bass's mark" }, { MARK_SECRET, "the S mark" }, { MARK_THREAT, "the disc mark" },
+		{ MARK_STD, "the STD COMP mark" }, { MARK_MEGA, "the MEGA COMP mark" }, { MARK_GIGA, "the GIGA COMP mark" },
 	};
+	/* (a Library class complete: every chip of it a run can hold) */
+	bool comp[3];
+	for (int c = 0; c < 3; ++c) comp[c] = chip_pool_class_count(c) > 0 && meta_library_count(c) >= chip_pool_class_count(c);
 	for (unsigned i = 0; i < sizeof marks / sizeof *marks; ++i) {
 		int b = marks[i].bit;
 		bool earned = (b == MARK_WIN && won && run.mode == RUN_SHORT) ||
 			(b == MARK_NEST && run.mode == RUN_ENDLESS && run.depth > CYCLE_LAYERS) ||
 			(b == MARK_SECRET && run.secret_cleared) ||
-			(b == MARK_THREAT && won && run.threat >= THREAT_MAX);
+			(b == MARK_THREAT && won && run.threat >= THREAT_MAX) ||
+			(b == MARK_STD && comp[0]) || (b == MARK_MEGA && comp[1]) || (b == MARK_GIGA && comp[2]);
 		if (!earned || (profile.marks & b)) continue;
 		profile.marks |= (uint16_t)b;
 		marks_new |= (uint16_t)b;

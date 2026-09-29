@@ -307,7 +307,11 @@ Data half the time; read from the game's first folder as a layer is made,
 kept in the run) and Cross starts (the setup's Cross row, open with that
 Navi's first defeat as a guardian, announced on the summary like a folder;
 the brought Cross's flag is set as the run begins, and a Cross Navi
-deleted later says his data won't fit beside it). With them the Seaside
+deleted later says his data won't fit beside it), and the Library (the
+profile keeps a bit per chip; the game's Library flags are set from it as
+a run begins and read back at every checkpoint and at the run's end; the
+summary's Library row counts the run's new entries; STD, MEGA and GIGA
+COMP mark a class whole over the chips a run can hold). With them the Seaside
 Area became a third opening area, and a new run avoids the last one's act
 1 area: a playtester began four runs running in the RoboDog Comp.
 
@@ -331,7 +335,8 @@ room, and the new mark blinks in on the title after it, with a chime.
 | Bass in Gregar's form | Event 0x340 | The endless net's own Nest (past layer 19) |
 | S | A Library count | The Secret Area cleared |
 | The green disc (top right) | Event 0x370 | A win on the top threat rung |
-| STD, MEGA, GIGA, P.A. COMP | The Library, the P.A. memo | Waiting for the Library (phase two) |
+| STD, MEGA, GIGA COMP | The Library | Every chip of the class a run can hold, in the profile's Library |
+| P.A. COMP | The P.A. memo | Not yet earned here |
 
 The version and the best depth moved from the top corners to a line above
 the copyright, where the marks leave room.

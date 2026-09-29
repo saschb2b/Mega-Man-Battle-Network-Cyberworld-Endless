@@ -43,6 +43,22 @@ static void load(void) {
 	}
 }
 
+int chip_pool_class(int id) {
+	if (chip_pool_tier(id) < 0) return -1;
+	int t = R.data[R.layout->chip_data + (uint32_t)id * 0x2C + 7];
+	return t <= 2 ? t : -1;
+}
+
+int chip_pool_class_count(int cls) {
+	static int n[3] = { -1, -1, -1 };
+	if (cls < 0 || cls > 2 || !R.data) return 0;
+	if (n[cls] < 0) {
+		n[cls] = 0;
+		for (int id = 1; id <= LAST_CHIP; ++id) n[cls] += chip_pool_class(id) == cls;
+	}
+	return n[cls];
+}
+
 int chip_pool_pick(int tier) {
 	if (!R.data) return -1;
 	if (!loaded) load();
