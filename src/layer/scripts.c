@@ -300,7 +300,7 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 }
 
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
-                       int taken_flag, const ScriptsDraft *draft, const ScriptsRoute *route) {
+                       int taken_flag, int hp_memories, const ScriptsDraft *draft, const ScriptsRoute *route) {
 	/* (the way on, then the draft's branches first: the choices jump to
 	 * them) */
 	int next = route ? route_scripts(t, route) : -1;
@@ -314,8 +314,8 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	ta_page(t, FACE_NONE, head, first);
 	first = false;
 	if (power) ta_pages(t, power, FACE_NONE, &first);
-	give_hp_memory(t, SCRIPTS_BOSS_HP_MEMORIES);
-	got_hp(t, SCRIPTS_BOSS_HP_MEMORIES, &first);
+	give_hp_memory(t, hp_memories);
+	got_hp(t, hp_memories, &first);
 	if (chip > 0) {
 		/* the navi's own chip, as Battle Network gives it (to the pack) */
 		give_chip(t, chip, code, 1);

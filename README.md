@@ -364,9 +364,11 @@ behind is options. From the second run, NEW GAME opens a setup:
   (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan) has fallen as a
   guardian. It is the run's only Cross: guardians' Cross data won't fit
   beside it.
-- **Threat:** rungs that each add one constraint (stronger viruses from act
-  2, fewer heals, dearer dealers, EX guardians, SP Navis in Servers), each
-  opened by winning on the one below.
+- **Threat:** nine rungs that each add one constraint (stronger viruses
+  from act 2, fewer heals, dearer dealers, EX guardians, SP Navis in
+  Servers, Mystery Data of chips only, half the Chip Traders, drafts of two
+  programs, four HPMemory a guardian), each opened by winning on the one
+  below.
 - **Help:** two more HPMemory at the start, a heal on every layer, gentler
   battles. Helped runs count for everything.
 

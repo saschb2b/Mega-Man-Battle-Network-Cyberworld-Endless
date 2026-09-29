@@ -50,7 +50,7 @@ typedef struct {
  * the run; the endless net repeats CYCLE_LAYERS, harder each time. */
 enum { RUN_ENDLESS, RUN_SHORT };
 #define SHORT_LAYERS 10
-#define THREAT_MAX 5
+#define THREAT_MAX 9
 enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4 };
 
 extern Run run;

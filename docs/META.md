@@ -221,7 +221,9 @@ them a use.
 3. Gates and route choice, with new areas and guardians as branches.
    The route choice and the Navi gates are built; vaults and branches
    wait.
-4. The town as hub, more starting towns, rungs 6 to 10.
+4. The town as hub, more starting towns, rungs 6 to 10. Rungs 6 to 9
+   are built (Mystery Data of chips, half the Chip Traders, drafts of two,
+   four HPMemory a Guardian Data); the second Nest guardian waits.
 
 ## Decisions (28 September 2026)
 

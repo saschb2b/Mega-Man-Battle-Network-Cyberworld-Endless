@@ -874,7 +874,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	 * helper: one on every layer) */
 	bool heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (kind == LAYER_NORMAL && pacing_heal_certain(depth)) ||
 		(run.helpers & HELP_HEALS);
-	bool trader = rng_range(0, 99) < 25;
+	bool trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
 	bool programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
 	bool bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	trader &= !bugtrader;   /* the trade screen serves one trader per map */

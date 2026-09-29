@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Threat rungs 6 to 9, each opened by a win on the one below: Mystery Data
+  holds chips, never zenny; Chip Traders come half as often; a Guardian Data
+  drafts two programs; and gives four HPMemory. The top rung, and the
+  title's green disc, is now 9.
 - A Net Dealer lists a chip once, whatever its code: a playtester's list
   held ElcPuls3 A at 700 zenny, the pick, and ElcPuls3 S at 2000.
 - Sealed gates: from the third act a gate may stand sealed with a guardian's

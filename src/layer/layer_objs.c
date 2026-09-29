@@ -66,12 +66,14 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 		for (int i = 0; i < 8; ++i) out[i] = c[i];
 		return true;
 	}
+	/* (threat 6, docs/META.md: a chip where zenny would be) */
+	bool chips_only = run.threat >= 6;
 	if (o->param == 0) {
-		if (roll < 50) { kind = 1; value = roll_chip(run.depth, 0, &code); }
+		if (roll < 50 || (chips_only && roll < 85)) { kind = 1; value = roll_chip(run.depth, 0, &code); }
 		else if (roll < 85) value = (100 + rng_range(0, 8) * 50) * (1 + run.depth / 6);
 		else { kind = 5; value = rng_range(3, 8); }
 	} else if (o->param == 1) {
-		if (roll < 60) { kind = 1; value = roll_chip(run.depth, 1, &code); }
+		if (roll < 60 || chips_only) { kind = 1; value = roll_chip(run.depth, 1, &code); }
 		else value = 800 + run.depth * 60;
 	} else {
 		kind = 1;

@@ -98,6 +98,10 @@ const char *meta_threat_rule(int rung) {
 		"Net Dealers charge half again",
 		"Guardians at EX from act 2",
 		"Servers may hold SP Navis from act 1",
+		"Mystery Data holds chips, never zenny",
+		"Chip Traders come half as often",
+		"Guardian Data drafts two programs",
+		"Guardian Data gives four HPMemory",
 	};
 	return rung >= 1 && rung <= THREAT_MAX ? rules[rung - 1] : "";
 }

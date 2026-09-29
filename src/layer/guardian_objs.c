@@ -71,6 +71,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		while (have < (int)sizeof run.programs && run.programs[have]) ++have;
 		navicust_board((run.depth >= 6) + (run.depth >= 12), &w, &h);
 		int n = navicust_draft_fitting(run.depth, pick, run.programs, have, w, h);
+		if (run.threat >= 8 && n > 2) n = 2;   /* (threat 8, docs/META.md) */
 		if (emu_debug_on()) {
 			fprintf(stderr, "draft: a %dx%d board beside", w, h);
 			for (int i = 0; i < have; ++i) fprintf(stderr, " %d/%d", run.programs[i] / 4, run.programs[i] % 4);
@@ -122,7 +123,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		way = &route;
 	}
 	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome, run.depth), chip, ci.name, code,
-		LAYER_REWARD_TAKEN_FLAG, &draft, way);
+		LAYER_REWARD_TAKEN_FLAG, run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES, &draft, way);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
