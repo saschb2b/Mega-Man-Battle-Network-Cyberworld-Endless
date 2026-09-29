@@ -939,12 +939,30 @@ fight, the install nag on the way out, Dad's mails stale after the win,
 two of four unlocks on the summary, the growl never answered; fixed in
 a0d22cb); the last layer's dealer "tougher from here" (fixed); sold-out
 rows shifting the shop list (open: check BN6's own shops); a guardian's
-HP falling by 1 every ~25 frames, now on EraseMan too (the engine writes
-no enemy HP in play: a task was flagged to reproduce it in a controlled
-capture).
+HP falling by 1 every ~25 frames, now on EraseMan too (BN6's own, below).
 
 Misreads: DemonEye's beam a row up (BN6 draws it floating), the ElmntMan
 chip's words (BN6's own).
+
+Vanilla BN6: the guardians' HP drain is MoonBld's hidden HP bug.
+Sessions 37 and 38 replayed on their own builds, the guardian's HP
+logged per frame: each drain began on the frame a MoonBld hit landed
+(ElementMan 860 to 730, EraseMan 738 to 608) and took 1 HP every 40
+frames to the battle's end, about 50 HP a fight. A write watch in the
+core traced it: MoonBld's sweep (chip 84, bn6f AIAttack 0x40, object t3
+0x85) spawns hitboxes that carry bug 0x18, the battle HP bug, at level 1;
+a hit raises a Navi's level in its side's battle NaviStats (+0x18 of
+eBattleNaviStats1, bn6f sub_8013AE4; a virus keeps its own, sub_8013B20),
+at most 7, and sub_8010230 takes 1 HP from it every 40, 35, 30 ... 10
+frames by level, never below 1, paused on the Custom screen. The chip
+says only "Slices enemies around". On a fresh run, idle in a guardian
+fight with and without HeatCross: no drain; one MoonBld on EraseMan: the
+drain, 40 frames a point. For the next notes: "From the developers, after
+replaying your sessions: the guardians' HP ticking down was your
+MoonBld. BN6 gives it a hidden HP bug: whatever it cuts loses 1 HP every
+40 frames until the battle ends (faster after more MoonBld hits), never
+below 1, paused on the Custom screen. Neither ElementMan's copy nor the
+Nest had anything to do with it."
 
 Loop change: **triage while the next session plays.** The report came
 while the rival's phase two was half done; the fixes for session 38 went
