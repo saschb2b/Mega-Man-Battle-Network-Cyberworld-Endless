@@ -710,6 +710,12 @@ static void library_from_game(void);
  * keeps it, which a CONTINUE's rebuild reads). */
 static void own_folder_chips(void);
 
+/* The folder as the layer was made: its codes are the run's (run.codes),
+ * its copies of each chip beside the checkpoint ("run.folder"), so a
+ * CONTINUE makes the same stock before the game's memory is back. */
+static uint16_t folder_made[BN6_FOLDER_ENTRIES];
+#define FOLDER_MADE_MAGIC 0x43464C44u   /* "CFLD" */
+
 static void note_folder_codes(void) {
 	library_from_game();
 	own_folder_chips();
@@ -717,9 +723,9 @@ static void note_folder_codes(void) {
 	board_programs(run.programs, (int)sizeof run.programs);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (data < 0x02000000u || data >= 0x02040000u) return;
-	uint16_t folder[BN6_FOLDER_ENTRIES];
-	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder[i] = emu_read16(data + 2u * (uint32_t)i);
-	loot_folder_codes(folder, BN6_FOLDER_ENTRIES, run.codes);
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder_made[i] = emu_read16(data + 2u * (uint32_t)i);
+	loot_folder_codes(folder_made, BN6_FOLDER_ENTRIES, run.codes);
+	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
 static bool build_layer(void) {
@@ -1138,7 +1144,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 52
+#define LAYER_MAKE 53
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1153,6 +1159,7 @@ static void save_checkpoint(void) {
 	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
 	/* the map's panels seen so far, beside the state they go with */
 	save_write_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen);
+	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
 }
 
 bool director_can_suspend(void) {
@@ -2127,6 +2134,10 @@ bool director_resume(void) {
 	no_room_told = -1;
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
+	/* (the folder the layer was made with: none for a run saved before it
+	 * was kept, which made its stock without it) */
+	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
+	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!build_layer()) return false;
 	char path[600];

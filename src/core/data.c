@@ -125,6 +125,7 @@ void chip_info(int rom_id, ChipInfo *out) {
 	if (rom_id < 256) rom_text(R.layout->chip_names[0], rom_id, out->name, sizeof out->name);
 	else rom_text(R.layout->chip_names[1], rom_id - 256, out->name, sizeof out->name);
 	out->power = rom_u16(rec + 0x1A);
+	out->mb = R.data[rec + 8];
 	out->element = R.data[rec + 4];
 	out->chip_element = R.data[rec + 6];
 	for (int i = 0; i < 4; ++i) {

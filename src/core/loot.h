@@ -44,6 +44,11 @@ char loot_folder_code(int id, bool star);
 /* The codes a folder holds most, three chips or more each, as run.codes
  * keeps them (code + 1, most held first, 0 for none). */
 void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]);
+/* The folder's copies of each chip, as the layer is made (NULL: none), and
+ * whether chip `id` has as many as BN6 lets a folder hold (by its memory:
+ * 5 under 20 MB, 4, 3, 2, 1 from 50): a dealer's pick of it is of no use. */
+void loot_folder_counts(const uint16_t *folder, int n);
+bool loot_folder_full(int id);
 /* What the random battles remember of the last one (none of its virus
  * families next), kept beside the run's save: a CONTINUE had forgotten it
  * and brought the last session's pair back first thing. */

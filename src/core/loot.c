@@ -558,6 +558,22 @@ char loot_folder_code(int id, bool star) {
 	return star && memchr(ci.codes, '*', (size_t)ci.ncodes) ? '*' : 0;
 }
 
+static uint8_t folder_copies[512];
+
+void loot_folder_counts(const uint16_t *folder, int n) {
+	memset(folder_copies, 0, sizeof folder_copies);
+	for (int i = 0; folder && i < n; ++i)
+		if (folder_copies[folder[i] & 0x1FF] < 255) ++folder_copies[folder[i] & 0x1FF];
+}
+
+bool loot_folder_full(int id) {
+	if (id < 0 || id >= 512 || !folder_copies[id]) return false;
+	ChipInfo ci;
+	chip_info(id, &ci);
+	int most = ci.mb < 20 ? 5 : ci.mb < 30 ? 4 : ci.mb < 40 ? 3 : ci.mb < 50 ? 2 : 1;
+	return folder_copies[id] >= most;
+}
+
 void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]) {
 	int count[26] = { 0 };
 	for (int i = 0; i < n; ++i) {

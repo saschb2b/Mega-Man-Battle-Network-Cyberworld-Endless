@@ -52,6 +52,7 @@ typedef struct {
 	int chip_element; /* ROM icon element, used for colours */
 	char codes[5];    /* letters, '*' wildcard */
 	int ncodes;
+	int mb;           /* its memory, which caps its copies in a folder (loot_folder_full) */
 } ChipInfo;
 
 extern const ChipDef chip_defs[];

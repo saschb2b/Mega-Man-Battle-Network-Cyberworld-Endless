@@ -124,6 +124,10 @@ static int answer(int depth, int counter, int id, char *code) {
 		 * hopped out of the row during it, and 200 went off on nothing) */
 		if ((ci.element == counter || counter < 0) && ci.power > 0 && chip_direct(id) && !chip_sword(id) && chip_standard(id) &&
 			chip_family(id) != CHIP_FAMILY_TANKCAN) {
+			/* (not one the folder holds as many of as it may: a playtester's
+			 * pick, two ElcPuls1 S beside the three his folder had, was no
+			 * use at all) */
+			if (loot_folder_full(id) && tries < 390) { id = roll_chip(depth + 2, tries < 90 ? tries / 30 : 3, &c); continue; }
 			++found;
 			/* the hardest under the most, else the lightest over it; one
 			 * that comes in the folder's codes or * counted a quarter
@@ -157,6 +161,7 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 		char code = '*';
 		ShopItem it = { 2, 1, 0, 0, 0 };
 		it.id = (uint16_t)roll_chip(depth + 2, 0, &code);
+		for (int t = 0; t < 8 && loot_folder_full(it.id); ++t) it.id = (uint16_t)roll_chip(depth + 2, 0, &code);
 		/* the first: the act's answer, two of it (one in 30 chips missed a
 		 * whole guardian fight), one where it hits harder than the most (act
 		 * 1's Elec answers: Thunder the only one under it, ElcPuls1 two

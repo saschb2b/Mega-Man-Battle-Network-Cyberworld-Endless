@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A Net Dealer neither picks nor stocks a chip the folder already holds
+  as many of as BN6 lets it (by its memory: five under 20 MB down to one
+  from 50): a playtester paid 1000 zenny for two ElcPuls1 S beside the
+  three his folder had, which it could not take. A run saved by an older
+  build continues its layer afresh.
 - Dad's mails read in BN6's own mail form (its MESSAGE band, white box,
   Dad's face as a photo, then MegaMan's): they had drawn as a map chat,
   their band garbled. The SciLab link's records show in gold the
