@@ -39,7 +39,7 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	static int hps[ROLLS];
 	/* an opening battle aims low but may take the act's whole band */
 	PacingBand band = pacing_band(depth, kind == ENC_CHALLENGE, false);
-	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[32] = { 0 };
+	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[32] = { 0 }, gems = 0, blocks = 0;
 	for (int r = 0; r < ROLLS; ++r) {
 		Encounter e = make_encounter(depth, biome, kind);
 		loot_battle_fought(&e);   /* each roll as a battle fought */
@@ -48,6 +48,14 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 		for (int i = 0; i < e.nfoes; ++i)
 			if (e.foes[i].kind == FOE_VIRUS && e.foes[i].family > 0 && e.foes[i].family < 32) in |= 1u << e.foes[i].family;
 		for (int f = 1; f < 32; ++f) families[f] += (in >> f) & 1;
+		/* (the field's objects: a Mystery Data, and rocks or cubes) */
+		bool gem = false, block = false;
+		for (int i = 0; i < e.nobj; ++i) {
+			gem |= e.obj[i].kind >> 4 == FIELD_GEM;
+			block |= e.obj[i].kind >> 4 != FIELD_GEM;
+		}
+		gems += gem;
+		blocks += block;
 		int hp, dmg, top;
 		battle_stats(&e, &hp, &dmg, &top);
 		bool navi = false;
@@ -63,6 +71,7 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	fprintf(out, "  depth %2d %-9s band %3d-%3d cap %3d | hp %3d / %3d / %3d  hit %3d  V1-SP,rare %d/%d/%d/%d/%d",
 		depth, label, band.lo, band.hi, band.cap, n ? h[0] : 0, n ? h[n / 2] : 0, n ? h[n - 1] : 0, maxdmg,
 		versions[0], versions[1], versions[2], versions[3], versions[4] + versions[5]);
+	if (gems || blocks) fprintf(out, "  gem %d rocks %d", gems, blocks);
 	if (navis) fprintf(out, "  SP navi %d", navis);
 	fprintf(out, "  families");
 	for (int f = 1; f < 32; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);

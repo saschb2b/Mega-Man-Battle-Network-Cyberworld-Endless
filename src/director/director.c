@@ -22,6 +22,7 @@
 #include "emu.h"
 #include "encounter.h"
 #include "debug.h"
+#include "devtools.h"
 #include "flags.h"
 #include "game.h"
 #include "gamecall.h"
@@ -630,6 +631,7 @@ static void roll_encounter(void) {
 		(run.depth == 1 ? D.battles < 2 : true);
 	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && D.battles == 0;
 	Encounter e = make_encounter(run.depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL);
+	if (dev.gem) loot_add_gem(&e);
 	set_encounter(&e, false);
 }
 

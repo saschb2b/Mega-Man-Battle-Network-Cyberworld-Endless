@@ -23,7 +23,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x0000` | Warp record and warp list for direct warps | `gamecall.c` |
 | `+0x0100` | Call stub: runs one game routine with r0, r1 and sets `BN6_ENGINE_MARK` | `gamecall.c` |
 | `+0x0180` | Encounter roll wrapper and trampoline | `encounter.c` |
-| `+0x0200`, `+0x0240` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first) | `encounter.c` |
+| `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
 | `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
@@ -33,6 +33,11 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
 | `+0x152000`-`+0x153000` | The map-name label's archive: a copy of the game's with its 244 names pointed at where the run is ("Layer 12", "ACDC Town"); its other scripts (the PET's HP, zenny and BugFrags, 0xF0-0xF2) kept | `director.c` |
+
+A battle with a green Mystery Data on the field also rewrites the reward
+row its record names (rows 0 and 1, one per record, of the table at
+`0x080211A0`, docs/ROM_DATA.md) with the run's own rewards before the
+battle.
 
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,

@@ -24,7 +24,7 @@
  * the record it was handed (rewritten in place, a re-roll in that gap gave
  * the battle another's MegaMan panel and field). */
 #define RECORDS     (EMU_FREE + 0x200)
-#define RECORD_SIZE 0x40
+#define RECORD_SIZE 0x80
 static int slot;
 static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE; }
 
@@ -87,7 +87,8 @@ void emu_battle_release(void) {
 bool emu_battle_forcing(void) { return forcing; }
 
 void emu_encounter_set(const Encounter *e) {
-	uint8_t list[4 * (MAX_FOES + 1) + 1], *p = list;
+	uint8_t list[4 * (MAX_FOES + 1 + MAX_FIELD_OBJS) + 1], *p = list;
+	int next = slot ^ 1;
 	/* MegaMan where the battle's field has him: column 2 row 2, or beside
 	 * it where that panel is a hole (he started in one) */
 	*p++ = 0x00; *p++ = (uint8_t)(e->player ? e->player : 0x22); *p++ = 0; *p++ = 0;
@@ -102,8 +103,34 @@ void emu_encounter_set(const Encounter *e) {
 		*p++ = (uint8_t)id;
 		*p++ = (uint8_t)(id >> 8);
 	}
+	/* the field's objects as the area's battle has them (rocks, cubes,
+	 * statues); a Mystery Data takes this record's reward row (its byte
+	 * the row, the tier, over 0x0F: the spawn keeps it where that byte
+	 * beats RNG % 15, so always), its rewards rolled into the row in the
+	 * core's copy: one of them is the battle's second reward where it is
+	 * still there at the end (bn6f sub_80DA9FE, sub_80AA8E0) */
+	bool gem = false;
+	for (int i = 0; i < e->nobj && i < MAX_FIELD_OBJS; ++i) {
+		int arg = e->obj[i].arg;
+		if (e->obj[i].kind >> 4 == FIELD_GEM) {
+			if (gem) continue;
+			arg = next << 4 | 0x0F;
+			gem = true;
+		}
+		*p++ = (uint8_t)e->obj[i].kind;
+		*p++ = (uint8_t)e->obj[i].panel;
+		*p++ = (uint8_t)arg;
+		*p++ = (uint8_t)(arg >> 8);
+	}
+	if (gem && R.layout->battle_gem_rewards) {
+		uint16_t r[4];
+		loot_gem_rewards(run.depth, r);
+		uint8_t row[16];
+		for (int k = 0; k < 8; ++k) { row[2 * k] = (uint8_t)r[k / 2]; row[2 * k + 1] = (uint8_t)(r[k / 2] >> 8); }
+		emu_write(0x08000000u + R.layout->battle_gem_rewards + (uint32_t)next * 16, row, sizeof row);
+	}
 	*p++ = 0xF0;
-	slot ^= 1;
+	slot = next;
 	uint32_t settings = settings_of(slot);
 	emu_write(settings + 0x20, list, (size_t)(p - list));
 	/* the values of a Central Area random battle, with the formation's

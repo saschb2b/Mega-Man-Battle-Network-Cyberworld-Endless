@@ -24,6 +24,14 @@ Encounter make_boss(int depth, int biome, int navi);
 int counter_element(int depth, int biome, int navi);
 /* Random chip for rewards/shops; code chosen from the chip's own codes. */
 int roll_chip(int depth, int bonus_tier, char *code);
+/* An in-battle Mystery Data's four rewards, the game's encoding (bits
+ * 14-15: 0 chip, 1 zenny, 3 BugFrags; a chip's id in bits 0-8, its code
+ * in 9-13), one of which the game gives where it survives the battle
+ * (docs/ROM_DATA.md). */
+void loot_gem_rewards(int depth, uint16_t out[4]);
+/* A Mystery Data on the enemies' side of `e`'s field, where it has none
+ * and a panel is free (a test's, --dev gem). */
+void loot_add_gem(Encounter *e);
 int chip_price(int id);
 /* A reward chip's code, leaned to the folder's (docs/META.md): where it
  * rolled a letter and has one of the codes the folder holds most, that one,

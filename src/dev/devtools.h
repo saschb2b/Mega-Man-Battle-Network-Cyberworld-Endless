@@ -14,6 +14,7 @@ typedef struct {
 	bool fragile;   /* MegaMan keeps 1 HP in battle: the run ends at the first hit */
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
 	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
+	bool gem;       /* every random battle with a Mystery Data on the field */
 } DevFlags;
 
 extern DevFlags dev;

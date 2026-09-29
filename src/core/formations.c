@@ -35,6 +35,15 @@ static void add(int biome, uint32_t rec) {
 	for (uint32_t a = ents & 0x1FFFFFF; R.data[a] != 0xF0 && f->n < FORMATION_MAX_ENTS; a += 4) {
 		/* MegaMan (column 2 row 2, or beside it where the field has a hole) */
 		if (R.data[a] == 0x00) f->player = R.data[a + 1];
+		/* the field's objects: Mystery Data (0x2_), rocks (0x3_), rock and
+		 * ice cubes (0x8_), guardian statues (0x9_), metal cubes (0xA_)
+		 * (bn6f off_80073A0; docs/ROM_DATA.md) */
+		int type = R.data[a] >> 4;
+		if ((type == 2 || type == 3 || type == 8 || type == 9 || type == 0xA) && f->nobj < FORMATION_MAX_OBJS) {
+			f->obj[f->nobj].kind = R.data[a];
+			f->obj[f->nobj].panel = R.data[a + 1];
+			f->obj[f->nobj++].id = rom_u16(a + 2);
+		}
 		if (R.data[a] != 0x11) continue;
 		uint16_t id = rom_u16(a + 2);
 		f->ent[f->n].panel = R.data[a + 1];

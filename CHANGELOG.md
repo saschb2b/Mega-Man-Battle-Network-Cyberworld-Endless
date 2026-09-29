@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Battles set out the rocks, rock and ice cubes and metal cubes of the
+  area's original battles, which were dropped: Robot Control Comp's
+  metal cubes stand in a third of its battles, the Green Area's rocks in
+  a sixth, none in Central Area's. And now and then (a battle in forty or
+  so, more in the Sky and Seaside Areas) a green Mystery Data sits on the
+  enemies' side, as in BN6: it breaks at the first hit, from either side,
+  but still there when the battle is won, it gives a second reward, a
+  rare find as a blue Mystery Data's (a chip of the next tier, in the
+  folder's codes where it comes in them, zenny or BugFrags).
 - "Run saved" shows in the picture's corner for a moment each time the
   run is saved on its way (a layer's arrival, a guardian's Guardian
   Data), and the quit prompt names where it was saved (the layer's

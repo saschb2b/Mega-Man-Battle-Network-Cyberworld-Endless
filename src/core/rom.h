@@ -30,6 +30,7 @@ typedef struct {
 	uint32_t enemy_stats;     /* per actor type, per ai: 6-byte records per version (HP, damage) */
 	uint32_t encounters;      /* random battles: 4 story stages x (real world, internet) -> group -> map -> BattleSettings */
 	uint32_t navicust_programs; /* NaviCust program records: 16 bytes per colour variant (docs/ROM_DATA.md) */
+	uint32_t battle_gem_rewards; /* the in-battle Mystery Data's rewards: 8 tiers of 8 u16 (docs/ROM_DATA.md) */
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */

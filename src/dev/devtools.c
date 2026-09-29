@@ -44,6 +44,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "fragile")) dev.fragile = true;
 		else if (!strncmp(t, "speed=", 6)) dev.speed = atoi(t + 6);
 		else if (!strcmp(t, "powers")) dev.powers = true;
+		else if (!strcmp(t, "gem")) dev.gem = true;
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;

@@ -293,7 +293,11 @@ a battle is depends on how deep you are, not on the area: the viruses grow
 stronger (V2, V3, SP) act by act, and a battle never holds more than MegaMan
 can be expected to handle at that point. The first battles of a run, and
 the first after each guardian, are gentler. Rewards follow the Busting
-Level as in BN6.
+Level as in BN6. The battlefields are the area's own too: its panels
+(grass, ice, holes), and where BN6 set them, rocks and cubes. Now and then
+(a battle in forty or so) a green Mystery Data sits on the enemies' side:
+it breaks at the first hit, yours or theirs, but still there when the
+battle ends, it gives a rare find besides the battle's reward.
 
 Three layers make an act. The second layer of every act always has the Net
 Dealer and a Recovery Mr. Prog. The third ends in a guardian's arena, and

@@ -74,10 +74,20 @@ static int virus_id(int family, int version) {
  * Nightmare, met in packs, stay at their first version on the first
  * cycle), one of them rare with `rare`; their HP together and the
  * strongest one's damage. */
+#define GEM_KEEP 35   /* % of the battles whose original holds a Mystery Data that keep it */
+static bool gem_kept;    /* the battle being built keeps its Mystery Data */
+
 static void build_foes(const Formation *f, int depth, int want, bool rare, Encounter *e, int *hp, int *dmg) {
 	e->nfoes = 0;
 	e->field = f->battlefield;
 	e->player = f->player;
+	e->nobj = 0;
+	for (int i = 0; i < f->nobj && i < MAX_FIELD_OBJS; ++i) {
+		if (f->obj[i].kind >> 4 == FIELD_GEM && !gem_kept) continue;
+		e->obj[e->nobj].kind = f->obj[i].kind;
+		e->obj[e->nobj].panel = f->obj[i].panel;
+		e->obj[e->nobj++].arg = f->obj[i].id;
+	}
 	*hp = *dmg = 0;
 	for (int i = 0; i < f->n && e->nfoes < MAX_FOES; ++i) {
 		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[i].id * 3;
@@ -107,6 +117,41 @@ static void build_foes(const Formation *f, int depth, int want, bool rare, Encou
 			*hp += h;
 			if (d > *dmg) *dmg = d;
 		}
+	}
+}
+
+/* (as a blue Mystery Data's: two chips of the next tier up, each in the
+ * folder's codes where it comes in them, zenny and BugFrags; threat 6's
+ * chips only, a third chip for the zenny) */
+void loot_gem_rewards(int depth, uint16_t out[4]) {
+	for (int k = 0; k < 3; ++k) {
+		if (k == 2 && run.threat < 6) break;
+		char code = '*';
+		int id = roll_chip(depth, 1, &code);
+		for (int t = 0; t < 8 && run.codes[0] && !loot_folder_code(id, false); ++t) id = roll_chip(depth, 1, &code);
+		char c = loot_folder_code(id, true);
+		if (c) code = c;
+		out[k] = (uint16_t)((id & 0x1FF) | (code == '*' ? 26 : code - 'A') << 9);
+	}
+	int zenny = 800 + depth * 60;
+	if (run.threat < 6) out[2] = (uint16_t)(0x4000 | (zenny > 0x3FFF ? 0x3FFF : zenny));
+	out[3] = (uint16_t)(0xC000 | (5 + pacing_act(depth)));
+}
+
+void loot_add_gem(Encounter *e) {
+	for (int i = 0; i < e->nobj; ++i) if (e->obj[i].kind >> 4 == FIELD_GEM) return;
+	if (e->nobj >= MAX_FIELD_OBJS) return;
+	static const uint8_t panels[] = { 0x26, 0x16, 0x36, 0x25, 0x15, 0x35 };
+	for (unsigned k = 0; k < sizeof panels; ++k) {
+		int col = (panels[k] & 15) - 1, row = (panels[k] >> 4) - 1;
+		bool taken = false;
+		for (int i = 0; i < e->nfoes; ++i) taken |= e->foes[i].col == col && e->foes[i].row == row;
+		for (int i = 0; i < e->nobj; ++i) taken |= e->obj[i].panel == panels[k];
+		if (taken) continue;
+		e->obj[e->nobj].kind = FIELD_GEM << 4;
+		e->obj[e->nobj].panel = panels[k];
+		e->obj[e->nobj++].arg = 0;
+		return;
 	}
 }
 
@@ -373,6 +418,10 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	if (pick < 0) return false;
 	e->from_biome = biome;
 	e->from_pick = pick;
+	/* (a Mystery Data on the field about one battle in twenty, a run's two
+	 * or so: every one the areas' battles hold came in one of seven, to
+	 * one of four on Sky HP, each worth a blue Mystery Data) */
+	gem_kept = rng_range(0, 99) < GEM_KEEP;
 	e->from_families = families_of(&list[pick]);
 	e->from_viruses = viruses_of(&list[pick]);
 	int hp, dmg;
