@@ -287,7 +287,9 @@ against what you find**; each piece restates it.
    as each layer is made, the codes the folder holds most (three chips or
    more each) are noted with the run, and a reward chip that comes in one
    of them takes it: the Net Dealers' stock and the gift always, Mystery
-   Data half the time. A * stays a *, and battle drops are BN6's own. The
+   Data and a battle's chip half the time (BN6 picks a reward from a pair
+   of entries in its virus's row by a coin; the second of each pair
+   leans). A * stays a *. The
    choice between a strong chip and one that fits stays; a folder built
    around a code is paid back. The first dealer of a run says so.
 2. **Cross starts** (costed power, nested progression: MegaMan's axis
@@ -314,7 +316,7 @@ against what you find**; each piece restates it.
    takes a slot of BN6's own, so the list changes, not the power.
 
 Built so far: the codes (the Net Dealers and the gift always, Mystery
-Data half the time; read from the game's first folder as a layer is made,
+Data and battles half the time; read from the game's first folder as a layer is made,
 kept in the run) and Cross starts (the setup's Cross row, open with that
 Navi's first defeat as a guardian, announced on the summary like a folder;
 the brought Cross's flag is set as the run begins, and a Cross Navi

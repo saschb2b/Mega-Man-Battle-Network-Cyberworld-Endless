@@ -8,6 +8,12 @@
 #define BN6_TOOLKIT_CHIPS     0x48        /* eToolkit +0x48: the chips' data (0x02002178): folders of 30 u16 from +0, 0x3C each (bn6f sub_8021AB4) */
 #define BN6_FOLDER_ENTRIES    30
 #define BN6_TOOLKIT_BATTLE    0x18        /* eToolkit BattleStatePtr: +0x3C its BattleSettings* */
+/* ... +0x09 the enemies spawned as the battle began, +0x54 their ids (u16);
+ * each id's reward row in ROM, 20 u16 entries (docs/ROM_DATA.md) */
+#define BN6_BATTLE_ENEMY_COUNT 0x09
+#define BN6_BATTLE_ENEMY_IDS  0x54
+#define BN6_DROP_ROWS         0x080AC718u
+#define BN6_BATTLE_REWARD     0x0200A00Cu /* the reward picked as the battle ended (u16, a row's entry) */
 #define BN6_TOOLKIT_KEY_ITEMS 0x50        /* eToolkit KeyItemsPtr: a count per key item */
 #define BN6_TOOLKIT_KEY_CHECK 0x78        /* eToolkit Unk2004a8c_Ptr: per key item, its seed ^ 0x55 once given (CheckKeyItem reads 0 where it differs) */
 #define BN6_KEY_ITEM_SEEDS    0x020004E0u /* ... the seeds, a byte per key item (Gregar's code 0x006E3C writes the check, 0x006E50 tests it) */

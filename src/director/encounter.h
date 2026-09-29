@@ -19,6 +19,9 @@ int emu_encounter_battle_slot(void);
  * names its record by keeps the last battle's until the setup writes it
  * (a CONTINUE's state or the last battle), so it is cleared on the map. */
 void emu_encounter_battle_forget(void);
+/* The battle's rewards in the folder's codes, half the time (docs/META.md):
+ * once its enemies have spawned; whether it could read them yet. */
+bool emu_encounter_lean_drops(void);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
 void emu_battle_release(void);

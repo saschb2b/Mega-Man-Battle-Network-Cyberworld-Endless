@@ -18,6 +18,7 @@
 #include "boss.h"
 #include "chip_pool.h"
 #include "cinema.h"
+#include "data.h"
 #include "emu.h"
 #include "encounter.h"
 #include "debug.h"
@@ -2197,6 +2198,10 @@ void director_update(void) {
 				if (guardian) runlog_battle_start(NULL, "guardian");
 			}
 			D.in_battle = true;
+			/* its rewards in the folder's codes, half the time (read again
+			 * through the battle: its enemies spawn a few frames in, and
+			 * the reward is picked as it ends) */
+			if (sub == BN6_SUB_BATTLE && D.frame % 16 == 0) emu_encounter_lean_drops();
 			/* the battle the game was handed, once its setup names the
 			 * record (a re-roll may have come between its roll and now) */
 			if (!D.record_known) {
@@ -2228,6 +2233,15 @@ void director_update(void) {
 		D.placed_told = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		runlog_battle_end(won);
+		if (emu_debug_on() && won) {
+			int r = emu_read16(BN6_BATTLE_REWARD);
+			if (r >> 14 == 0 && r != 0xFFFF) {
+				ChipInfo ci;
+				chip_info(r & 0x1FF, &ci);
+				fprintf(stderr, "battle reward %s %c (folder codes %c%c%c)\n", ci.name, (r >> 9 & 0x1F) >= 26 ? '*' : 'A' + (r >> 9 & 0x1F),
+					run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-', run.codes[2] ? 'A' + run.codes[2] - 1 : '-');
+			} else fprintf(stderr, "battle reward %04x\n", r);
+		}
 		if (won && !boss_fighting()) run.viruses_deleted += D.foes;
 		if (!D.challenge && !boss_fighting()) roll_encounter();
 	}

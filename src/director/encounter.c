@@ -7,12 +7,15 @@
 #include "encounter.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "bn6.h"
 #include "bytes.h"
 #include "data.h"
 #include "emu.h"
+#include "loot.h"
+#include "rom.h"
 #include "run.h"
 
 #define ROLL        0x080ABD30u        /* the encounter roll (returns BattleSettings*) */
@@ -133,4 +136,33 @@ int emu_encounter_battle_slot(void) {
 void emu_encounter_battle_forget(void) {
 	uint32_t p = battle_settings_at();
 	if (p && emu_read32(p)) emu_write32(p, 0);
+}
+
+bool emu_encounter_lean_drops(void) {
+	/* (BN6 picks the reward as the battle ends, bn6f sub_80AA910: one of
+	 * the enemies spawned, then one of its row's 20 entries by the busting
+	 * level, a coin and MegaMan's HP; a chip entry has bits 14-15 clear,
+	 * the id in 0-8 and the code in 9-13. The coin picks between the two
+	 * entries of a pair: the second of each, rewritten from the ROM's own
+	 * in the core's copy, comes in one of the folder's codes where the
+	 * chip does, so a chip reward leans half the time, as Mystery Data's) */
+	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
+	if (state < 0x02000000u || state >= 0x02040000u) return false;
+	int n = emu_read8(state + BN6_BATTLE_ENEMY_COUNT);
+	if (n <= 0) return false;
+	for (int i = 0; i < n && i < 8; ++i) {
+		int id = emu_read16(state + BN6_BATTLE_ENEMY_IDS + 2u * (uint32_t)i);
+		if (id <= 0 || id >= 0x200) continue;
+		uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
+		for (uint32_t k = 1; k < 20; k += 2) {
+			uint16_t v = rom_u16(row + 2 * k);
+			if (v == 0xFFFF || v >> 14) continue;
+			int chip = v & 0x1FF, code = v >> 9 & 0x1F;
+			char c = loot_fit_code(chip, code >= 26 ? '*' : (char)('A' + code), true);
+			uint16_t w = (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9);
+			uint8_t b[2] = { (uint8_t)w, (uint8_t)(w >> 8) };
+			emu_write(0x08000000u + row + 2 * k, b, 2);
+		}
+	}
+	return true;
 }
