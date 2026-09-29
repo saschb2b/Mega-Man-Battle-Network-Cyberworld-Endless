@@ -132,7 +132,7 @@ jobs:
             cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe \
             cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless-web.zip \
             2>/dev/null > FILES || true
-          sha256sum $(cat FILES) > SHA256SUMS.txt
+          xargs sha256sum < FILES > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
       # section); a 0.x version is an alpha, published as a pre-release
       - name: Notes

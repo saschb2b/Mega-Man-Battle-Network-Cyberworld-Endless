@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Shell scripts
-        run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh docker/appimage.sh
+        run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh docker/appimage.sh tools/android_key.sh
       - name: Python
         run: python3 -m py_compile build.py tools/*.py
       - name: Workflows
