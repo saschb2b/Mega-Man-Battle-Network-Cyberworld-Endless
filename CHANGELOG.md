@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Walking onto a warp pad from the side takes it: its trigger covers the
+  side corners too, where a playtester stood on the rim without leaving, on
+  two runs.
 - A guardian's Navi chip comes in * where BN6 has one (the V1 chips) and the
   folder doesn't use its letter: a playtester's Blade folder of S, L and *
   took a BlastMan B it could not play.

@@ -91,17 +91,19 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
  * centre in a cell's middle, 4x4 on a cell's corner) and a cell more
  * towards the screen's foot (world -X and +Y: standing below the pad,
  * MegaMan's sprite covers its lower rim while his feet are still short of
- * it), whole but for the corners at the screen's left, top and right,
- * which are cut as the originals' 3x3 cuts them (types 9, A, C). The originals' 3x3 reaches 12 units, and its cut
- * corners are the ring's top, bottom and sides on screen: MegaMan stood on
- * the pad's rim, the sprite over its middle, and stayed. */
+ * it), whole but for the corner at the screen's top, cut as the originals'
+ * 3x3 cuts theirs (type A). The originals' 3x3 reaches 12 units and cuts
+ * the ring's top, bottom and sides on screen: MegaMan stood on the pad's
+ * rim, the sprite over its middle, and stayed. The side corners were cut
+ * too, and a playtester walking right onto a pad stood on its left rim
+ * without leaving, on two runs. */
 #define PAD_CELLS 36
 static int pad(Cell *t, const CoordPad *p) {
 	int x0 = (p->x - 24) >> 3, x1 = (p->x + 15) >> 3, y0 = (p->y - 16) >> 3, y1 = (p->y + 23) >> 3, n = 0;   /* (arithmetic shift: floor) */
 	for (int cy = y0; cy <= y1 && n < PAD_CELLS; ++cy)
 		for (int cx = x0; cx <= x1 && n < PAD_CELLS; ++cx) {
-			/* (the corner at the screen's foot, world -X +Y, whole) */
-			int type = cy == y0 ? (cx == x0 ? 0x09 : cx == x1 ? 0x0A : 0x11) : cy == y1 && cx == x1 ? 0x0C : 0x11;
+			/* (the corner at the screen's top, world +X -Y, cut) */
+			int type = cy == y0 && cx == x1 ? 0x0A : 0x11;
 			t[n++] = cell(cx, cy, 0, p->index, 8, type);
 		}
 	return n;
