@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "chip_pool.h"
+#include "pacing.h"
 #include "powers.h"
 #include "rivals.h"
 #include "run.h"
@@ -134,6 +135,14 @@ int meta_library_count(int cls) {
 	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
 		if (meta_library_has(id) && (cls < 0 ? chip_pool_class(id) >= 0 : chip_pool_class(id) == cls)) ++n;
 	return n;
+}
+
+int meta_vault_need(int depth) {
+	/* (a run holds its starting folder's dozen and about twenty more: act
+	 * 2's opens after a run or two, act 4's for a collector) */
+	static const int need[] = { 30, 30, 60, 90 };
+	int act = pacing_act(depth);
+	return need[act < 3 ? act : 3];
 }
 
 int meta_library_new(void) {

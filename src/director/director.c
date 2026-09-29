@@ -393,7 +393,7 @@ static const char *status_words(void) {
 	 * while he is hurt (it heals every time; the map's key names the rest,
 	 * and a later L is a box or two, not the briefing again) */
 	bool shop = false, heal = false, programs = false, trader = false, bugtrader = false, told = D.layer_told;
-	bool challenge = false, warp = false, gate = false, navi_gate = false;
+	bool challenge = false, warp = false, gate = false, navi_gate = false, vault = false;
 	for (int i = 0; i < layer.nobj; ++i) {
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
@@ -404,6 +404,7 @@ static const char *status_words(void) {
 		warp |= layer.obj[i].type == OBJ_UNDERNET;
 		gate |= layer.obj[i].type == OBJ_SECRET_GATE;
 		navi_gate |= layer.obj[i].type == OBJ_NAVI_GATE;
+		vault |= layer.obj[i].type == OBJ_VAULT;
 	}
 	/* (below three quarters: at 220 of 240 the heal led L's words before
 	 * the way on) */
@@ -421,13 +422,15 @@ static const char *status_words(void) {
 		if (programs) here[n++] = "a NaviCust program shop";
 		if (trader) here[n++] = "a Chip Trader";
 		if (bugtrader) here[n++] = "a BugFrag Trader";
-		int marks = (challenge ? MARK_SERVER : 0) | (warp ? MARK_WARP : 0) | (gate ? MARK_GATE : 0) | (navi_gate ? MARK_NAVI_GATE : 0);
+		int marks = (challenge ? MARK_SERVER : 0) | (warp ? MARK_WARP : 0) | (gate ? MARK_GATE : 0) | (navi_gate ? MARK_NAVI_GATE : 0) |
+			(vault ? MARK_VAULT : 0);
 		int known = marks & profile.marks_taught, fresh = marks & ~profile.marks_taught;
 		if (known & MARK_SERVER) here[n++] = "a strong virus signal";
 		if (known & MARK_WARP) here[n++] = "a dark warp";
 		if (known & MARK_GATE) here[n++] = "the golden gate";
 		static char sealed[48];
 		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
+		if (known & MARK_VAULT) here[n++] = "a collector's vault";
 		if (n) {
 			ADD("@M I sense");
 			for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
@@ -439,6 +442,8 @@ static const char *status_words(void) {
 		if (fresh & MARK_NAVI_GATE)
 			ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
 				guardian(D.objs.gate_navi)->name);
+		if (fresh & MARK_VAULT)
+			ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
 		/* (a program left off the board: said on every layer until placed;
 		 * one that cannot fit, once a board: a playtester's SuprArmr could
@@ -620,11 +625,16 @@ static bool fits_beside_placed(int v) {
 	return navicust_pack(s, ns + 1, w, h);
 }
 
+static void library_from_game(void);
+
 /* The folder's codes, for the layer about to be made (loot_fit_code): read
  * from the game as MegaMan moves on, kept with the run, so a checkpoint
  * rebuilds the layer as it was without the game's memory; and the
- * NaviCust's board, which the guardian's draft fits its programs beside. */
+ * NaviCust's board, which the guardian's draft fits its programs beside;
+ * and the Library, which a vault's lock counts (as the checkpoint after
+ * keeps it, which a CONTINUE's rebuild reads). */
 static void note_folder_codes(void) {
+	library_from_game();
 	memset(run.programs, 0, sizeof run.programs);
 	board_programs(run.programs, (int)sizeof run.programs);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
@@ -684,6 +694,7 @@ static bool build_layer(void) {
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
 	flag_clear(LAYER_HEAL_TOLD_FLAG);
+	flag_clear(LAYER_VAULT_FLAG);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -885,7 +896,7 @@ void director_draw_map(void) {
 		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
 		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: c = rgba(210, 110, 255, 255); break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: c = rgba(210, 110, 255, 255); break;
 		default: continue;
 		}
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
@@ -954,7 +965,7 @@ void director_draw_map(void) {
 		switch (layer.obj[i].type) {
 		case OBJ_HEAL: has[2] = true; break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: has[5] = true; break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: case OBJ_VAULT: has[5] = true; break;
 		case OBJ_CHALLENGE: has[5] |= !server_done; break;
 		default: break;
 		}
@@ -982,7 +993,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 44
+#define LAYER_MAKE 45
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1102,7 +1113,7 @@ void director_describe(FILE *f) {
 						}
 					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
-					static const char mark[] = "IXMSHTTBUGNCPRF";
+					static const char mark[] = "IXMSHTTBUGNCPRFDV";   /* (D a Navi gate, V a vault) */
 					for (int i = 0; i < layer.nobj; ++i) {
 						int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
 						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && layer.obj[i].type < (int)sizeof mark - 1) g[oy][ox] = mark[layer.obj[i].type];
@@ -1927,6 +1938,7 @@ bool director_resume(void) {
 			 * forgotten, and in from the start */
 			/* (a gift taken stays taken: it is the run's, not the layer's) */
 			for (int f = MAPSLOT_MD_FLAG; f <= LAYER_HEAL_TOLD_FLAG; ++f) if (f != LAYER_GIFT_FLAG) flag_clear(f);
+			flag_clear(LAYER_VAULT_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
@@ -2067,7 +2079,7 @@ static void dev_talks(void) {
 	static const struct { const char *name; int type; } kinds[] = {
 		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
 		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
-		{ "navigate", OBJ_NAVI_GATE },
+		{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT },
 	};
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", director_dev_talks);

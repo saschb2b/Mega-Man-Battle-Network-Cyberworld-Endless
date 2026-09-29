@@ -41,7 +41,7 @@ typedef struct {
 	uint8_t programs_found[8];   /* NaviCust programs MegaMan has had in any run, a bit each (docs/NAVICUST.md, 7) */
 } Profile;
 
-enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8 };
+enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };
 
 extern Profile profile;
 

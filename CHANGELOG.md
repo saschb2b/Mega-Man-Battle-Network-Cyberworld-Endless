@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Collector's vaults: from the second act a layer may hold a vault whose
+  lock counts the Library (30 chips in act 2, 60 in act 3, 90 later; its
+  words say how many it wants and how many the Library holds). Open, it
+  holds three rare chips, in the folder's codes where they come in them,
+  and MegaMan takes one; B leaves them for later. The map marks it violet,
+  and L explains it the first time.
 - Threat rung 10, opened by a win on rung 9: a second guardian waits below
   the short net's Nest. The first's exit leads to layer 11, with its heal
   and Net Dealer before the arena, and MegaMan feels the second from the

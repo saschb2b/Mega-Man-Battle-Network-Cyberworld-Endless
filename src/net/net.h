@@ -35,6 +35,7 @@ typedef enum {
 	OBJ_RETURN,      /* leave a side layer */
 	OBJ_GIFT,        /* the run's first layer: a gift to choose */
 	OBJ_NAVI_GATE,   /* a gate sealed with a Navi's code, his SP inside (docs/META.md, gates); param: navi */
+	OBJ_VAULT,       /* a collector's vault: a Library's count opens it, three chips inside (docs/META.md, gates) */
 } ObjType;
 
 typedef struct {

@@ -402,6 +402,49 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 	return i;
 }
 
+int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v) {
+	char s[240];
+	if (have < need) {
+		/* (the telegraph first: the count it wants, and ours) */
+		snprintf(s, sizeof s, "@M A vault, Lan, with a collector's lock. It opens for a Library of %d chips, and ours holds %d.|"
+			"@M Every chip we hold, in any dive, goes in the Library!", need, have);
+		return ta_say(t, FACE_MEGAMAN, s);
+	}
+	int empty = ta_say(t, FACE_MEGAMAN, "The vault stands open, Lan. We took our pick.");
+	int leave = ta_say(t, FACE_MEGAMAN, "We'll leave them for now. The vault keeps.");
+	int take[3];
+	for (int k = 0; k < 3; ++k) {
+		take[k] = ta_script(t);
+		bool first = true;
+		give_chip(t, v->chip[k], v->code[k], 1);
+		got_chip(t, v->name[k], v->code[k], &first);
+		ta_page(t, FACE_MEGAMAN, "It's in our pack. Let's put it in our folder, Lan!", false);
+		flag_set(t, flag);
+		ta_end(t);
+	}
+	int i = ta_script(t);
+	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)empty, 0xFF };  /* ts_check_flag */
+	ta_bytes(t, done, sizeof done);
+	bool first = true;
+	snprintf(s, sizeof s, "Our Library of %d opens the collector's lock!|Three rare chips inside, Lan. We can take one.", have);
+	ta_pages(t, s, FACE_MEGAMAN, &first);
+	ta_mugshot(t, FACE_MEGAMAN);
+	ta_clear(t);
+	/* three in a column, as the draft's; B leaves them */
+	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
+	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	for (int k = 0; k < 3; ++k) {
+		ta_bytes(t, opt[k], 4);
+		ta_bytes(t, space, sizeof space);
+		snprintf(s, sizeof s, "%s %c%s", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k], k < 2 ? "\n" : "");
+		ta_text(t, s);
+	}
+	uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)take[0], (uint8_t)take[1], (uint8_t)take[2], (uint8_t)leave };
+	ta_bytes(t, select, sizeof select);
+	ta_end(t);
+	return i;
+}
+
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;

@@ -218,8 +218,8 @@ them a use.
 2. The Library, the programs pool, Cross starts (reasoned below), and
    rewards in the folder's codes. Built.
 3. Gates and route choice, with new areas and guardians as branches.
-   The route choice and the Navi gates are built; vaults and branches
-   wait.
+   The route choice, the Navi gates and the vaults are built; branches
+   behind gates wait.
 4. The town as hub, more starting towns, rungs 6 to 10. The rungs are
    built (Mystery Data of chips, half the Chip Traders, drafts of two,
    four HPMemory a Guardian Data, and a second guardian below the short
@@ -354,7 +354,21 @@ any runs (rivals.sav), so an earned code opens every such gate in later
 runs: behind it his SP waits, a challenge fought to the boss theme, and
 the win pays his SP chip. The telegraph comes a run or more before the
 key, and the route choice lets a player seek the guardian whose code they
-want. Gates to vaults and to route branches wait.
+want.
+
+Then vaults, keyed by the collection rather than a milestone (the Library,
+5): from act 2, on one normal layer in five before the guardian's, where
+no other gate or dark warp stands, a collector's vault says how many chips
+its lock wants and how many the Library holds ("It opens for a Library of
+30 chips, and ours holds 27."): 30 in act 2, 60 in act 3, 90 later. Open,
+it holds three rare chips (rolled as a Server's prize is, two layers
+deeper, in the folder's codes where they come in them), and MegaMan takes
+one; B leaves them for later. The Library feeds the vault and the vault
+the Library, a collector's loop with a cap: one chip a vault, a vault in
+about every other short run, the folder's own limits (five Megas, one
+Giga). The chips are rolled from the layer's seed, never from the
+Library, so a CONTINUE offers the same three; the lock reads the Library
+as it stood when the layer was made. Gates to route branches wait.
 
 What could go wrong: the lean flattening the code game into "add
 everything" (it leaves * and every chip without the folder's codes as

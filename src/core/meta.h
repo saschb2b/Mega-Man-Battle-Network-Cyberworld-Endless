@@ -52,6 +52,9 @@ bool meta_library_add(int id);
  * how many the current run added. */
 int meta_library_count(int cls);
 int meta_library_new(void);
+/* How many chips a collector's vault at `depth` wants in the Library
+ * (docs/META.md, gates): more in each act. */
+int meta_vault_need(int depth);
 
 /* A new run's start: what earlier runs opened is no news on its summary
  * (a folder earned in a run that never reached one was announced late, as

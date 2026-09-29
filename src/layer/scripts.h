@@ -75,6 +75,16 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int needed);
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
+/* A collector's vault (docs/META.md, gates): its three chips (`code`
+ * A=0 .. *=26), named. */
+typedef struct {
+	int chip[3], code[3];
+	char name[3][20];
+} ScriptsVault;
+/* The vault's talk: while the Library's `have` is short of `need`, its
+ * words say so; else the three chips, one to take (event flag `flag` set
+ * as it is, after which the vault stands empty; B leaves them). */
+int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of

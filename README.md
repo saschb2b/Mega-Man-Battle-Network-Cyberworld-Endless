@@ -349,6 +349,7 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 | Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
 | Golden gate | Three ScrtData open the Secret Area in Undernet Zero |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
+| Collector's vault | From the second act: its lock opens for a Library of 30 chips (60 in act 3, 90 later), and it holds three rare chips, one to take |
 
 ### What carries over
 

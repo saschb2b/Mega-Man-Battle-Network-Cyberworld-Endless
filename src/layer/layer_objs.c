@@ -16,6 +16,7 @@
 #include "loot.h"
 #include "rivals.h"
 #include "mapslot.h"
+#include "meta.h"
 #include "net.h"
 #include "navicust.h"
 #include "netmap.h"
@@ -196,7 +197,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
 	out->fragment_found = -1;
-	for (int i = 0; i <= OBJ_NAVI_GATE; ++i) out->script_of[i] = -1;
+	for (int i = 0; i <= OBJ_VAULT; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	/* the element that answers this act: its guardian's weakness, else its
@@ -420,6 +421,33 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				}
 				out->gate_reward = chip > 0 ? ta_gate_reward(&text, name, chip, ci.name, code) : -1;
 			}
+			break;
+		}
+		case OBJ_VAULT: {
+			/* a collector's vault (docs/META.md, gates): sealed until the
+			 * profile's Library holds enough chips, its talk then says how
+			 * many; open, three rare chips, one to take, in the folder's
+			 * codes where they come in them */
+			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
+			int need = meta_vault_need(run.depth), have = meta_library_count(-1);
+			ScriptsVault v = { 0 };
+			for (int k = 0; k < 3; ++k) {
+				char code = '*';
+				int id = 0;
+				for (int tries = 0; tries < 12; ++tries) {
+					id = roll_chip(run.depth + 2, 4, &code);
+					bool again = false;
+					for (int j = 0; j < k; ++j) again |= v.chip[j] == id;
+					if (!again) break;
+				}
+				ChipInfo ci;
+				chip_info(id, &ci);
+				code = loot_fit_code(id, code, true);
+				v.chip[k] = id;
+				v.code[k] = code == '*' ? 26 : code - 'A';
+				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
+			}
+			tk.script = ta_vault(&text, LAYER_VAULT_FLAG, need, have, &v);
 			break;
 		}
 		case OBJ_BOSS:
