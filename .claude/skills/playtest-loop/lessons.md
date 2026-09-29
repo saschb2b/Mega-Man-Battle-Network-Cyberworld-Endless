@@ -969,3 +969,32 @@ while the rival's phase two was half done; the fixes for session 38 went
 in after session 39 had launched on the pinned build, since the new run
 meets the rival first and the ending last. A fix the next session cannot
 reach does not hold its launch.
+
+## Session 39: 7/10 (keep playing: yes; recommend: yes)
+
+A new endless run (Storm, EraseCross, threat 1). ProtoMan's first duel,
+taken at 100 of 140 HP on layer 2, deleted MegaMan and ended the run: a
+squad a notch above the layer's (Quakers aloft half the fight), nothing
+saying the stake, and a target (0:10.00) out of reach of an act 1 hand
+(0:27.53 in the second run's duel). A second run cleared act 1 on a
+briefing's tip that won the SpoutMan fight outright. From 9 to 7: the
+rival is a good idea told in too few words, and it cost a run.
+
+Confirmed: the choice guard (an A as a menu drew, three A's through the
+dealer's words buying nothing), the duel starting on No, every act's
+second layer holding it, the DeleteTime quoted, the record kept, Dad's
+Records counting the Nest win.
+
+Raised, fixed after the session's pin (e8e56f5, f286120, fb1605a): the
+stake said before the choice, the squad the act's own, the rival
+remembering (the record in Chaud's calls; a deletion in a duel counted
+as a loss), ProtoMan greeting an old rival, Lan answering, the summary
+naming the duel, the duel's clock in the battle, looser first times,
+what a win earns. Open: EraseCross's strength unexplained (the setup
+names only its weakness); a batched A picking the act's route.
+
+Loop change: **a new system meets the persona in its most punishing
+form first.** The duel was checked by captures of its words and one won
+fight, never lost; the persona's first contact was a loss that ended a
+run. Before launching a session into new risk, capture its failure path
+too (the loss, the deletion, the timeout), not only its success.
