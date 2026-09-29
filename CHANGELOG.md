@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Back from the PET with a program still off the NaviCust's board, MegaMan
+  says so at once (once a layer), where L's briefing said it only on the
+  next layer: a playtester ran the NaviCust without placing his Guardian
+  Data's program.
 - L's briefing warns of the area's ScarCrows (lightning heals them, and so
   do Elec chips) and DarkMechs (they warp beside MegaMan to slash) where an
   act or a side layer begins and its battles can hold them. A playtester's

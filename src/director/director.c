@@ -106,6 +106,8 @@ static struct {
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
 	bool bugs_known;       /* ... read on this layer */
+	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
+	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -588,6 +590,7 @@ static bool build_layer(void) {
 	D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
 	D.fragment_due = false;
 	D.bugs_known = false;
+	D.off_told = false;
 	flag_clear(LAYER_TOLD_FLAG);
 	flag_clear(LAYER_DEALER_TOLD_FLAG);
 	flag_clear(LAYER_VENDOR_TOLD_FLAG);
@@ -1633,6 +1636,17 @@ static void bug_watch(void) {
 		D.bugs_known = true;
 		return;
 	}
+	/* (back from the PET with a program left off the board: said at once,
+	 * where L said it only on the next layer; a playtester ran the NaviCust
+	 * without placing his Guardian Data's HP+100) */
+	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
+		D.pet_seen = false;
+		const char *off = D.off_told ? NULL : program_off_board();
+		static char words[200];
+		if (off && *off)
+			snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.", off);
+		if (off && *off && talk_start(words, FACE_MEGAMAN)) { D.off_told = true; return; }
+	}
 	if (!memcmp(D.bugs, now, sizeof now) || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
 	bool had = false;
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
@@ -2007,6 +2021,11 @@ void director_update(void) {
 			}
 		}
 	}
+	/* (the PET's first menu is a screen of the game's own mode, its pages
+	 * other modes: either, and not a battle) */
+	int screen = emu_read8(BN6_GAMESTATE);
+	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
+	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
 	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); grant_rotation(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
