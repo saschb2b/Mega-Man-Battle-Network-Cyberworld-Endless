@@ -1524,14 +1524,16 @@ static uint32_t shop_guard(uint32_t keys) {
  * lost (the game takes them at a full gauge only; Kai re-pressed in every
  * fight, and at 50 frames still: the gauge's last tenth takes about a
  * second and looks full), and so was one the game let pass while MegaMan
- * fired or flinched: a press is kept a second and a half and given as
+ * fired or flinched: a press is kept two and a half seconds (at a second
+ * and a half, one Kai pressed 126 frames before the gauge filled was
+ * dropped: the last of it looks full) and given as
  * the gauge fills, one frame let go first so the game sees a press, then
  * again every CUSTOM_RETRY frames until the Custom screen opens (the
  * gauge empties as it does) or CUSTOM_TRIES frames have passed. A press
  * of the d-pad drops it: the latest intent wins (a kept R opened the
  * Custom screen over the UP that was stepping MegaMan off a lit panel, and
  * the bomb burst as the battle went on). */
-#define CUSTOM_EARLY 90
+#define CUSTOM_EARLY 150
 #define CUSTOM_TRIES 45
 #define CUSTOM_RETRY 20
 static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed, bool pad_pressed) {

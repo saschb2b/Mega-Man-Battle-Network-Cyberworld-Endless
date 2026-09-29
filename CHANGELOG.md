@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- An L or R pressed before the Custom gauge fills is kept two and a half
+  seconds, not one and a half: a playtester's press two seconds early, while
+  the gauge looked full, was dropped.
 - A new run begins in the other town than the last one (Central Town or ACDC
   Town), as it already avoids the last run's first area and guardian: a
   playtester began on the same street four or five runs running.
