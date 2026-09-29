@@ -254,6 +254,12 @@ two thirds of its hardest hit and two viruses at most where the area has
 such battles (the run's very first battle keeps the formation's first virus
 alone), and the same formation does not come twice in a row.
 
+No battle before the Undernet (act 5) holds two DarkMechs: they teleport
+beside MegaMan and slash for more than their damage value says, and a
+pair took a playtester from 480 HP to 20 in act 3. CopyBot's comps hold
+them only in pairs, so DarkMechs now first come in the Undernet, their
+own area in BN6.
+
 A rare virus (one, the others unchanged) may come from act 3 on, 3% of
 battles and 2% more each later cycle, and only when the battle still fits
 the band with it. BN6's own rare battles (byte 7 of a BattleSettings record)

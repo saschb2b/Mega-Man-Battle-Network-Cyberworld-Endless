@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No random battle before the Undernet holds two DarkMechs: their teleport
+  slashes hit well past their damage value, and a pair took a playtester
+  from 480 HP to 20 in act 3. CopyBot's comps hold them only in pairs, so
+  they now first come in the Undernet, as in BN6.
 - On a short net Lan says "Down to the Nest again", where "The Endless Net
   again" read odd to a playtester who had chosen Short.
 - The Library carries over: every chip MegaMan holds joins the profile's

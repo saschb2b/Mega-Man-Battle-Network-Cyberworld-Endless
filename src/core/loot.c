@@ -195,6 +195,26 @@ static uint32_t families_of(const Formation *f) {
 	return in;
 }
 
+/* How many of formation `f`'s viruses are of `family`. */
+static int family_count(const Formation *f, int family) {
+	int n = 0;
+	for (int k = 0; k < f->n; ++k) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		n += row[1] == 0 && row[2] == family;
+	}
+	return n;
+}
+
+/* DarkMechs teleport beside MegaMan and slash, for more than the damage the
+ * pacing reads (a playtester took 60-110 a slash): two in one battle took
+ * one from 480 HP to 20 in act 3, and neither could be kept out of reach.
+ * Not two in a battle before the Undernet, their own area (act 5); CopyBot's
+ * comps hold them only in pairs, so they wait for it. */
+#define FAMILY_DARKMECH 25
+static bool too_many_slashers(const Formation *f, int depth) {
+	return pacing_act(depth) < 4 && family_count(f, FAMILY_DARKMECH) > 1;
+}
+
 #define MAX_FIT 160
 
 /* Each formation's version inside the band (fit[i], -1 for none), and their
@@ -207,7 +227,7 @@ static int weigh(const Formation *list, int n, int depth, int target, PacingBand
 	for (int i = 0; i < n && i < MAX_FIT; ++i) {
 		fit[i] = -1;
 		inside[i] = 0;
-		if (i == skip || list[i].navi || !reached(&list[i], allowed) || viruses_in(&list[i]) > most) continue;
+		if (i == skip || list[i].navi || !reached(&list[i], allowed) || viruses_in(&list[i]) > most || too_many_slashers(&list[i], depth)) continue;
 		for (int v = target; v >= 0; --v) {
 			Encounter t;
 			int hp, dmg;
