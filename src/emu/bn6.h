@@ -26,6 +26,7 @@
 #define BN6_PLAYER            0x02009F40u /* overworld player object: +0x1C X, +0x20 Y (16.16) */
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31): +4 status, bit 31 stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
+#define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/ROM_DATA.md) */
 #define BN6_T1_OBJECTS        0x0203A9B0u /* eT1BattleObject0: viruses and navis in a battle */
 #define BN6_T1_SIZE           0xD8        /* ... each: flag bit 0 in play, +0x16 alliance (0 MegaMan), +0x24 HP, +0x26 max HP */
 #define BN6_T1_COUNT          0x20

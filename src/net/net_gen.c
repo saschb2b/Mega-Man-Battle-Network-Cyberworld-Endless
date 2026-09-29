@@ -879,6 +879,10 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	bool bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	trader &= !bugtrader;   /* the trade screen serves one trader per map */
 	bool challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
+	/* the rival's duel (docs/RIVAL.md): on each act's second layer, where
+	 * no strong virus signal stands (one battle to seek out a layer) */
+	bool duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
+	challenge &= !duel;
 	bool undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
 		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
 	bool secret = kind == LAYER_UNDERNET && !run.secret_cleared;
@@ -940,6 +944,16 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		int land = landmark(kit);
 		rows(kit, land, order, n);
 		signs(kit, land, order, n);
+	}
+	/* (ProtoMan on a pad apart where one has room, a ring off the way on;
+	 * else the next room; after the area's props, whose landmark needs a
+	 * bare room: before them he took it on a layer in a hundred) */
+	if (duel) {
+		bool placed = false;
+		for (int i = n - 1; i >= next && !placed; --i)
+			if (layer.rooms[order[i]].kind == ROOM_PAD && room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y))
+				placed = add_obj(OBJ_DUEL, x, y) != NULL;
+		if (!placed) { PLACE(OBJ_DUEL); ++next; }
 	}
 	/* Rooms holding better data, more of them deeper and in the Undernet
 	 * (a dark warp's, or the short net's dark way's act) */

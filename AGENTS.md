@@ -29,6 +29,7 @@ the site.
 | What is original, generated or adapted | [docs/FIDELITY.md](docs/FIDELITY.md) |
 | What carries over between runs: unlocks, the run's setup, threat | [docs/META.md](docs/META.md) |
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem | [docs/PET.md](docs/PET.md) |
+| The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/RIVAL.md](docs/RIVAL.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout
@@ -158,7 +159,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
 `--marks HEX` the title's marks, `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
-undernet, gate, navigate for a Navi gate, vault; intro, defeat, reward for the guardian; status for L;
+undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms; intro, defeat, reward for the guardian; status for L;
 fragment for MegaMan's words at a ScrtData). `--input "FRAMES:BUTTONS,..."` scripts the
 buttons (`UP+RIGHT`, `A`), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames, and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet

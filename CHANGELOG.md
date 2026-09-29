@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- A rival: Chaud and the real ProtoMan (the Nest's are copies). On each
+  act's second layer Chaud calls: ProtoMan is on the layer, standing on a
+  pad apart, and he has busted its viruses in a time he says. Take his
+  duel (it starts on No) and beat his time, by BN6's own DeleteTime; from
+  the second win on, without taking a hit as well. Chaud keeps the record
+  across runs ("That's 3-1 between us"), ProtoMan gets faster as he
+  loses, and Dad's Records mail lists it. Each duel is one squad of the
+  act's, a little above its band, the same every time the layer is made.
+  docs/RIVAL.md has the design; his netbattle and what his respect opens
+  come next. A run saved by an older build continues its layer afresh.
 - A run saved after beating a guardian, on his layer, keeps him beaten
   when an update starts the layer afresh: his Guardian Data shown or
   taken and his exit open stay, as a gift taken does. A playtester's

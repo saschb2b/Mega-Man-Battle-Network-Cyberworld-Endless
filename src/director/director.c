@@ -69,6 +69,13 @@ static struct {
 	bool challenge;        /* a challenge battle was started */
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
 	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/META.md, gates) */
+	/* the rival's duel (docs/RIVAL.md): the layer's squad, the duel under
+	 * way (MegaMan's HP as last read, a hit taken, the DeleteTime), and
+	 * Chaud's words due: his call as the layer begins, his verdict after */
+	Encounter duel_enc;
+	bool duel, duel_hit, duel_call_due, duel_verdict_due;
+	int duel_hp, duel_time;
+	char duel_verdict[400];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
 	bool fragment_due;     /* ... once a talk can start */
@@ -463,8 +470,9 @@ static const char *status_words(void) {
 	 * while he is hurt (it heals every time; the map's key names the rest,
 	 * and a later L is a box or two, not the briefing again) */
 	bool shop = false, heal = false, programs = false, trader = false, bugtrader = false, told = D.layer_told;
-	bool challenge = false, warp = false, gate = false, navi_gate = false, vault = false;
+	bool challenge = false, warp = false, gate = false, navi_gate = false, vault = false, duel = false;
 	for (int i = 0; i < layer.nobj; ++i) {
+		duel |= layer.obj[i].type == OBJ_DUEL;
 		shop |= layer.obj[i].type == OBJ_SHOP;
 		heal |= layer.obj[i].type == OBJ_HEAL;
 		programs |= layer.obj[i].type == OBJ_PROGRAMS;
@@ -501,6 +509,8 @@ static const char *status_words(void) {
 		static char sealed[48];
 		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
 		if (known & MARK_VAULT) here[n++] = "a collector's vault";
+		/* (the rival, whose call has said why: docs/RIVAL.md) */
+		if (duel && n < 8) here[n++] = "ProtoMan, waiting for our duel";
 		if (n) {
 			ADD("@M I sense");
 			for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
@@ -732,6 +742,27 @@ static void note_folder_codes(void) {
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
+/* The rival's time to beat for a squad of `hp` (docs/RIVAL.md): three
+ * seconds and one for every thirty HP, eight percent faster for every two
+ * duels ProtoMan has lost (a rung's round), never under six tenths of it. */
+static int duel_frames(int hp) {
+	double t = (3.0 + hp / 30.0) * 60.0, k = 1.0;
+	for (int i = 0; i < profile.duel_won / 2; ++i) k *= 0.92;
+	if (k < 0.6) k = 0.6;
+	return (int)(t * k);
+}
+
+static int encounter_hp(const Encounter *e) {
+	int total = 0;
+	for (int i = 0; i < e->nfoes; ++i) {
+		const Foe *f = &e->foes[i];
+		if (f->kind == FOE_ROCK) continue;
+		int id = f->id >= 0 ? f->id : enemy_id(f->kind == FOE_NAVI ? 1 : 0, f->family, f->version), hp = 0, dmg = 0;
+		if (id >= 0 && enemy_stats(id, &hp, &dmg)) total += hp;
+	}
+	return total;
+}
+
 static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
@@ -752,6 +783,19 @@ static bool build_layer(void) {
 	D.layer_act = run.side_kind == LAYER_NORMAL ? (run.depth - 1) / 3 + 1 : 0;
 	layer_objs_dealer_again = D.layer_act && D.dealer_act == D.layer_act;
 	navicust_set_spins(meta_spins());   /* (the draft fits what turns) */
+	/* the rival's duel (docs/RIVAL.md): its squad, rolled aside from the
+	 * layer's own rolls, and ProtoMan's time for it */
+	D.duel_call_due = false;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_DUEL) {
+			uint32_t saved = rng_state();
+			rng_seed(run.layer_seed ^ 0xD0E15EEDu);
+			D.duel_enc = make_encounter(run.depth, run.biome, ENC_CHALLENGE);
+			rng_seed(saved);
+			layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
+			layer_objs_duel_rung = profile.duel_won % 2;
+			D.duel_call_due = true;
+		}
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, a->song);
 	D.chosen = 0;
@@ -778,6 +822,8 @@ static bool build_layer(void) {
 	D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
 	D.fragment_due = false;
 	D.spin_due = false;
+	D.duel = false;
+	D.duel_verdict_due = false;
 	spins_sync();
 	D.bugs_known = false;
 	D.off_told = false;
@@ -1039,9 +1085,11 @@ void director_draw_map(void) {
 	/* what stands there, once seen; the goal's way while it is not (a
 	 * Server's mark gone once its battle is taken: a playtester saw it
 	 * still there after he had won) */
-	bool server_done = false;
-	for (int i = 0; i < D.objs.nchoices; ++i)
+	bool server_done = false, duel_done = false;
+	for (int i = 0; i < D.objs.nchoices; ++i) {
 		server_done |= D.objs.choice[i].type == OBJ_CHALLENGE && (D.chosen & (1u << i));
+		duel_done |= D.objs.choice[i].type == OBJ_DUEL && (D.chosen & (1u << i));
+	}
 	int gx = -1, gy = -1;
 	bool goal_boss = false;   /* (the guardian while it stands, else the exit) */
 	SDL_Color gc = rgba(255, 230, 60, 255);
@@ -1054,11 +1102,12 @@ void director_draw_map(void) {
 		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
 		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: c = rgba(210, 110, 255, 255); break;
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_DUEL:
+			c = rgba(210, 110, 255, 255); break;
 		default: continue;
 		}
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
-		if (o->type == OBJ_CHALLENGE && server_done) continue;
+		if ((o->type == OBJ_CHALLENGE && server_done) || (o->type == OBJ_DUEL && duel_done)) continue;
 		if (o->type == OBJ_BOSS && !boss_beaten()) { gx = x; gy = y; gc = c; goal_boss = true; }
 		else if (o->type == OBJ_EXIT && !goal_boss) { gx = x; gy = y; }
 		int sx = SX(x, y), sy = SY(x, y);
@@ -1125,6 +1174,7 @@ void director_draw_map(void) {
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
 		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: case OBJ_VAULT: has[5] = true; break;
 		case OBJ_CHALLENGE: has[5] |= !server_done; break;
+		case OBJ_DUEL: has[5] |= !duel_done; break;
 		default: break;
 		}
 	/* (the gaps close up until it fits the picture's width) */
@@ -1151,7 +1201,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 55
+#define LAYER_MAKE 56
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1290,7 +1340,7 @@ void director_describe(FILE *f) {
 						}
 					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
-					static const char mark[] = "IXMSHTTBUGNCPRFDV";   /* (D a Navi gate, V a vault) */
+					static const char mark[] = "IXMSHTTBUGNCPRFDVY";   /* (D a Navi gate, V a vault, Y the rival) */
 					for (int i = 0; i < layer.nobj; ++i) {
 						int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
 						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && layer.obj[i].type < (int)sizeof mark - 1) g[oy][ox] = mark[layer.obj[i].type];
@@ -2270,6 +2320,31 @@ static void enter_side_layer(void) {
 	emu_warp_out();
 }
 
+/* The duel's verdict (docs/RIVAL.md): MegaMan's DeleteTime against
+ * ProtoMan's, and on rung 1 no hit taken; the record kept, and Chaud's
+ * words queued, with both times as the results screen shows them. */
+static void duel_verdict(bool won) {
+	D.duel = false;
+	int mine = D.duel_time, his = layer_objs_duel_frames, rung = layer_objs_duel_rung;
+	bool beat = won && mine < his && !(rung == 1 && D.duel_hit);
+	if (beat) profile.duel_won++;
+	else profile.duel_lost++;
+	profile_save();
+	char a[16], b[16];
+	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
+	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
+	int k = 0, size = (int)sizeof D.duel_verdict;
+	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	if (!won) ADD("@C Out of the duel, Lan? That's a loss.|");
+	else if (beat && rung == 1) ADD("@C %s, and not a scratch. ...Not bad, Lan.|@C ProtoMan, we train harder.|", a);
+	else if (beat) ADD("@C %s. ProtoMan's was %s. ...Not bad, Lan.|@C We'll be faster next time.|", a, b);
+	else if (mine < his) ADD("@C %s, but MegaMan took a hit. A clean bust or nothing, Lan.|", a);
+	else ADD("@C %s. ProtoMan's was %s. Too slow, Lan.|", a, b);
+	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
+	#undef ADD
+	D.duel_verdict_due = true;
+}
+
 /* A Yes in a layer's choice: a challenge battle, or into a side layer. */
 static bool act_on_choices(void) {
 	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
@@ -2283,6 +2358,15 @@ static bool act_on_choices(void) {
 			D.challenge = true;
 			return true;
 		}
+		case OBJ_DUEL:
+			set_encounter(&D.duel_enc, true);
+			D.challenge = true;
+			D.duel = true;
+			D.duel_hit = false;
+			D.duel_hp = -1;
+			D.duel_time = 0;
+			D.duel_call_due = false;
+			return true;
 		case OBJ_UNDERNET:
 		case OBJ_SECRET_GATE:
 			run.side_kind = D.objs.choice[i].type == OBJ_UNDERNET ? LAYER_UNDERNET : LAYER_SECRET;
@@ -2373,7 +2457,7 @@ static void dev_talks(void) {
 	if (!director_dev_talks || talk_busy() || emu_read8(BN6_CHATBOX)) return;
 	static const struct { const char *name; int type; } kinds[] = {
 		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
-		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
+		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "duel", OBJ_DUEL }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
 		{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT },
 	};
 	char buf[256];
@@ -2559,6 +2643,20 @@ void director_update(void) {
 				if (guardian) runlog_battle_start(NULL, "guardian");
 			}
 			D.in_battle = true;
+			/* the duel's hits and time: MegaMan's HP lower than at the last
+			 * frame, and the results screen's DeleteTime (docs/RIVAL.md) */
+			if (D.duel && sub == BN6_SUB_BATTLE) {
+				for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
+					uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
+					if (!(emu_read8(o) & 1) || emu_read8(o + 0x16) != 0) continue;
+					int hp = emu_read16(o + 0x24);
+					if (D.duel_hp >= 0 && hp < D.duel_hp) D.duel_hit = true;
+					D.duel_hp = hp;
+					break;
+				}
+				int t = (int)emu_read32(BN6_BATTLE_TIMER);
+				if (t > D.duel_time) D.duel_time = t;
+			}
 			/* its rewards in the folder's codes, half the time (read again
 			 * through the battle: its enemies spawn a few frames in, and
 			 * the reward is picked as it ends) */
@@ -2622,7 +2720,8 @@ void director_update(void) {
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-		if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
+		if (D.duel) duel_verdict(won);
+		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
 		else D.reward_due = won && D.objs.challenge_reward >= 0;
 		D.gate_fight = false;
 		roll_encounter();
@@ -2648,6 +2747,21 @@ void director_update(void) {
 		snprintf(words, sizeof words, "@M Mail from Dad, Lan! He sorted out our battle data on %s. It's in the PET's E-Mail.",
 			guardian(D.mail_due)->name);
 		if (talk_start(words, FACE_MEGAMAN)) D.mail_due = 0;
+	}
+	/* the rival (docs/RIVAL.md): Chaud's verdict after the duel, his call
+	 * once the layer's arrival has been said */
+	if (D.duel_verdict_due && on_map() && !cinema_busy() && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
+		talk_start(D.duel_verdict, FACE_CHAUD))
+		D.duel_verdict_due = false;
+	if (D.duel_call_due && !D.reward_due && !D.gem_due && !D.mail_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
+		!emu_read8(BN6_CHATBOX) && !boss_cinematic() && D.frame > 60) {
+		int f = layer_objs_duel_frames, sec = f / 60;
+		char call[400];
+		snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|@C Think MegaMan can beat that%s?",
+			profile.duel_won + profile.duel_lost ? "@C Lan, it's Chaud.|" :
+			"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
+			sec / 60, sec % 60, (f % 60) * 100 / 60, layer_objs_duel_rung == 1 ? ", without a hit" : "");
+		if (talk_start(call, FACE_CHAUD)) D.duel_call_due = false;
 	}
 	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"
 		"@M But if it's still there when we win, its data is ours!", FACE_MEGAMAN)) {

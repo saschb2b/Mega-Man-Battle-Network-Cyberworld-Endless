@@ -47,6 +47,7 @@
 #define SPR_DEALER      62   /* GreenNavi, the Net Dealer's keeper in the game */
 #define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
 bool layer_objs_dealer_again, layer_objs_dealer_named;
+int layer_objs_duel_frames, layer_objs_duel_rung;
 
 #define SPR_BYSTANDER   67   /* EvilNavi */
 
@@ -227,7 +228,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = 0;
-	for (int i = 0; i <= OBJ_VAULT; ++i) out->script_of[i] = -1;
+	for (int i = 0; i <= OBJ_DUEL; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	/* the element that answers this act: its guardian's weakness, else its
@@ -487,6 +488,15 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			break;
 		}
 		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
+		case OBJ_DUEL:
+			/* the real ProtoMan (docs/RIVAL.md), in his own body: the Nest's
+			 * copies are the guardians */
+			asks = true;
+			tk.cat = 6;
+			tk.sprite = guardian_sprite(11);
+			need_sprite(&npcs, 6, tk.sprite);
+			if (emu_debug_on()) fprintf(stderr, "duel: ProtoMan at %d %d, his time %d frames\n", wx, wy, layer_objs_duel_frames);
+			break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
 		case OBJ_NAVI_GATE: {
 			/* sealed until his code is earned (docs/META.md, gates): its
@@ -547,7 +557,22 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			int flag = LAYER_FLAG_BASE + out->nchoices;
 			out->choice[out->nchoices].type = o->type;
 			out->choice[out->nchoices++].flag = flag;
-			tk.script = o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
+			static char terms[400];
+			if (o->type == OBJ_DUEL) {
+				/* his terms: the time to beat, as the results screen shows a
+				 * DeleteTime (seconds and hundredths, cut), and the rung's
+				 * rule; the first duel says who he is */
+				int f = layer_objs_duel_frames, sec = f / 60, cs = (f % 60) * 100 / 60;
+				int met = profile.duel_won + profile.duel_lost;
+				snprintf(terms, sizeof terms, "%sI busted this net's viruses in %d:%02d.%02d. Beat that%s, MegaMan.",
+					met ? "Back again, MegaMan? Chaud's watching.|" :
+					"So you're the one diving the Cyberworld. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
+					sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? ", without taking a hit" : "");
+				/* (he logs out as the duel begins: one a layer) */
+				tk.gone_flag = flag;
+			}
+			tk.script = o->type == OBJ_DUEL ? ta_duel(&text, flag, guardian_face(11), terms)
+				: o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
 				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag, run.biome == BIOME_UNDERNET)
 				: o->type == OBJ_NAVI_GATE ? ta_navi_gate(&text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 				: ta_secret_gate(&text, flag);

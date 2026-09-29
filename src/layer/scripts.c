@@ -149,6 +149,19 @@ int ta_challenge(TextArchive *t, int flag) {
 	return i;
 }
 
+int ta_duel(TextArchive *t, int flag, int face, const char *terms) {
+	int no = closing(t);
+	int i = ta_script(t);
+	/* ProtoMan's terms, then the choice, which starts on No (a duel costs
+	 * HP; docs/RIVAL.md) */
+	bool first = true;
+	ta_pages(t, terms, face, &first);
+	ask_in(t, face, "Take the duel?\n", no, true, true);
+	flag_set(t, flag);
+	ta_end(t);
+	return i;
+}
+
 int ta_undernet(TextArchive *t, int flag, bool deeper) {
 	int no = closing(t);
 	int i = ta_script(t);

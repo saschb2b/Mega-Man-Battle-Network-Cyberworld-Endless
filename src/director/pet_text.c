@@ -295,6 +295,8 @@ static void records_text(char *s, int size) {
 	/* (what ", code" means, once one is held) */
 	for (unsigned i = 0; i < sizeof navis; ++i)
 		if (rival(navis[i])->megaman_won >= GATE_CODE) { ADD("\"code\": we hold his NaviCode.\n"); break; }
+	/* (the rival's duels: docs/RIVAL.md) */
+	if (profile.duel_won + profile.duel_lost) ADD("Chaud and ProtoMan %d-%d\n", profile.duel_won, profile.duel_lost);
 	ADD("%d of %d guardians met. Best dive: layer %d", met, (int)sizeof navis, profile.best_depth);
 	if (profile.nest_clears) ADD(", the Nest won %d time%s", profile.nest_clears, profile.nest_clears == 1 ? "" : "s");
 	ADD(".");

@@ -26,6 +26,9 @@ int ta_heal(TextArchive *t, int variant, int told_flag);
 /* Words that set `flag` as they are said (a bystander's news the director
  * keeps: docs/META.md, what MegaMan knows). */
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag);
+/* The rival's duel (docs/RIVAL.md): ProtoMan's terms (boxes apart by '|'),
+ * then "Take the duel?", starting on No; Yes sets `flag`. */
+int ta_duel(TextArchive *t, int flag, int face, const char *terms);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
  * `shop`'s screen; with `again` and a flag, the greeting the first time
  * (the flag set) and `again` after. */

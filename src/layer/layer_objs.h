@@ -40,7 +40,7 @@ typedef struct {
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/META.md), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
-	int script_of[OBJ_VAULT + 1];   /* each kind's first talker's script, -1 none (for --talk) */
+	int script_of[OBJ_DUEL + 1];    /* each kind's first talker's script, -1 none (for --talk); OBJ_DUEL the last kind */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
 	int ndealer, nprograms;
@@ -58,5 +58,9 @@ extern bool layer_objs_dealer_again;
 /* Set by layer_objs_install: this layer's Net Dealer names the act's
  * guardian (from the act's second layer, or once battled). */
 extern bool layer_objs_dealer_named;
+/* Set before layer_objs_install on a duel's layer (docs/RIVAL.md): ProtoMan's
+ * time to beat, in frames, and the rivalry's rung (0 his time, 1 his time
+ * without a hit). */
+extern int layer_objs_duel_frames, layer_objs_duel_rung;
 
 #endif
