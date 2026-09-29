@@ -12,6 +12,8 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 &nbsp;·&nbsp;
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Downloads</a>
 &nbsp;·&nbsp;
+<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions">Discussions</a>
+&nbsp;·&nbsp;
 <a href="https://buymeacoffee.com/qohreuukw">Buy me a coffee</a>
 </p>
 
@@ -493,6 +495,15 @@ guardian). See [docs/DEVTOOLS.md](docs/DEVTOOLS.md) for the tools,
 [AGENTS.md](AGENTS.md) for the development workflow,
 [docs/LEVEL_DESIGN.md](docs/LEVEL_DESIGN.md) for how layers are laid out and
 [docs/ROM_DATA.md](docs/ROM_DATA.md) for where the ROM data comes from.
+
+## Follow updates
+
+- **On GitHub:** on this repository, **Watch → Custom → Releases**, and
+  GitHub tells you when a new version is out.
+- **Without an account:** add the [release feed](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases.atom) to any
+  RSS reader.
+- **Talk:** the [Discussions](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions) have the announcements,
+  questions and answers, ideas and players' runs.
 
 ## Support
 
