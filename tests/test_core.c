@@ -490,6 +490,14 @@ static void test_pacing(void) {
 		for (int i = 0; i < 3; ++i) first |= o[0] == opening[i];
 		for (int i = 0; i < 4; ++i) last |= o[3] == late[i];
 		CHECK(first, "seed %u: act 1 in an opening area (%d)", seed, o[0]);
+		/* (each act's area among those its way on may offer instead) */
+		for (int a = 0; a < 4; ++a) {
+			uint8_t pool[PACING_AREA_POOL];
+			int n = pacing_area_pool(a, pool);
+			bool in = false;
+			for (int i = 0; i < n; ++i) in |= pool[i] == o[a];
+			CHECK(in, "seed %u: act %d's area in its pool", seed, a + 1);
+		}
 		CHECK(last, "seed %u: act 4 in a late area (%d)", seed, o[3]);
 		for (int i = 0; i < 4; ++i)
 			for (int j = i + 1; j < 4; ++j) CHECK(o[i] != o[j], "seed %u: an area twice", seed);

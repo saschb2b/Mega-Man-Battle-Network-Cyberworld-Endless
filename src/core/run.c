@@ -8,6 +8,31 @@
 
 Run run;
 
+/* Each area's guardian, drawn from navis that suit it; in the areas the
+ * run visits, from those whose HP suits the act. */
+static const uint8_t pools[BIOME_COUNT][4] = {
+	{ 12, 2, 5, 12 },   /* Central: BlastMan, ElecMan, ChargeMan */
+	{ 13, 6, 2, 1 },    /* Seaside: DiveMan, SpoutMan, ElecMan, HeatMan */
+	{ 16, 15, 8, 2 },   /* Sky: ElementMan, JudgeMan, TenguMan, ElecMan */
+	{ 7, 9, 5, 7 },     /* Green: TomahawkMan, GroundMan, ChargeMan */
+	{ 4, 10, 3, 4 },    /* Graveyard: EraseMan, DustMan, SlashMan */
+	{ 11, 3, 1, 11 },   /* Undernet: ProtoMan, SlashMan, HeatMan */
+	{ 11, 11, 11, 11 }, /* Secret Area: ProtoMan SP */
+	{ 3, 4, 11, 3 },    /* Cybeast Nest */
+	{ 14, 12, 18, 14 }, /* Comp: CircusMan, BlastMan, Colonel */
+	{ 14, 16, 13, 16 }, /* Homepage: CircusMan, ElementMan, DiveMan */
+	{ 18, 15, 12, 18 }, /* Comp (second): Colonel, JudgeMan, BlastMan */
+	{ 1, 12, 5, 1 },    /* Robot Control Comp: HeatMan, BlastMan, ChargeMan */
+	{ 2, 6, 13, 2 },    /* Aquarium Comp: ElecMan, SpoutMan, DiveMan */
+	{ 3, 7, 15, 3 },    /* Judge Tree Comp: SlashMan, TomahawkMan, JudgeMan */
+	{ 4, 8, 16, 4 },    /* Mr. Weather Comp: EraseMan, TenguMan, ElementMan */
+	{ 18, 14, 11, 18 }, /* CopyBot's comp: Colonel, CircusMan, ProtoMan */
+	{ 1, 5, 12, 1 },    /* ACDC HP: HeatMan, ChargeMan, BlastMan */
+	{ 3, 9, 7, 3 },     /* Green HP: SlashMan, GroundMan, TomahawkMan */
+	{ 4, 10, 16, 4 },   /* Sky HP: EraseMan, DustMan, ElementMan */
+};
+static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
+
 void run_new(uint32_t seed) {
 	memset(&run, 0, sizeof run);
 	run.active = true;
@@ -19,30 +44,6 @@ void run_new(uint32_t seed) {
 	pacing_area_order(run.biome_order);
 	run.biome_order[4] = BIOME_UNDERNET;
 	run.biome_order[5] = BIOME_GRAVEYARD;
-	/* Each area's guardian, drawn from navis that suit it; in the areas the
-	 * run visits, from those whose HP suits the act. */
-	static const uint8_t pools[BIOME_COUNT][4] = {
-		{ 12, 2, 5, 12 },   /* Central: BlastMan, ElecMan, ChargeMan */
-		{ 13, 6, 2, 1 },    /* Seaside: DiveMan, SpoutMan, ElecMan, HeatMan */
-		{ 16, 15, 8, 2 },   /* Sky: ElementMan, JudgeMan, TenguMan, ElecMan */
-		{ 7, 9, 5, 7 },     /* Green: TomahawkMan, GroundMan, ChargeMan */
-		{ 4, 10, 3, 4 },    /* Graveyard: EraseMan, DustMan, SlashMan */
-		{ 11, 3, 1, 11 },   /* Undernet: ProtoMan, SlashMan, HeatMan */
-		{ 11, 11, 11, 11 }, /* Secret Area: ProtoMan SP */
-		{ 3, 4, 11, 3 },    /* Cybeast Nest */
-		{ 14, 12, 18, 14 }, /* Comp: CircusMan, BlastMan, Colonel */
-		{ 14, 16, 13, 16 }, /* Homepage: CircusMan, ElementMan, DiveMan */
-		{ 18, 15, 12, 18 }, /* Comp (second): Colonel, JudgeMan, BlastMan */
-		{ 1, 12, 5, 1 },    /* Robot Control Comp: HeatMan, BlastMan, ChargeMan */
-		{ 2, 6, 13, 2 },    /* Aquarium Comp: ElecMan, SpoutMan, DiveMan */
-		{ 3, 7, 15, 3 },    /* Judge Tree Comp: SlashMan, TomahawkMan, JudgeMan */
-		{ 4, 8, 16, 4 },    /* Mr. Weather Comp: EraseMan, TenguMan, ElementMan */
-		{ 18, 14, 11, 18 }, /* CopyBot's comp: Colonel, CircusMan, ProtoMan */
-		{ 1, 5, 12, 1 },    /* ACDC HP: HeatMan, ChargeMan, BlastMan */
-		{ 3, 9, 7, 3 },     /* Green HP: SlashMan, GroundMan, TomahawkMan */
-		{ 4, 10, 16, 4 },   /* Sky HP: EraseMan, DustMan, ElementMan */
-	};
-	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = pools[b][rng_range(0, 3)];
 	for (int act = 0; act < 6; ++act) {
 		int b = run.biome_order[act], g = 0;
@@ -56,6 +57,35 @@ void run_new(uint32_t seed) {
 		}
 		run.boss_order[b] = (uint8_t)g;
 	}
+}
+
+int run_route_alt(int act, int *navi) {
+	/* (acts 2-4 of the surface; the short net's fourth is its Nest) */
+	if (act < 1 || act > 3 || (run.mode == RUN_SHORT && act > 2)) return -1;
+	uint8_t pool[PACING_AREA_POOL], free_areas[PACING_AREA_POOL];
+	int n = pacing_area_pool(act, pool), m = 0;
+	for (int i = 0; i < n; ++i) {
+		bool taken = false;
+		for (int a = 0; a < 6; ++a) taken |= run.biome_order[a] == pool[i];
+		if (!taken) free_areas[m++] = pool[i];
+	}
+	if (!m) return -1;
+	/* (its own random numbers, the game's kept: the same way offered on
+	 * the layer and taken at its exit, and after a CONTINUE) */
+	uint32_t keep = rng_state();
+	rng_seed(run.seed ^ 0x524F5554u ^ (uint32_t)act * 2654435761u);
+	int b = free_areas[rng_range(0, m - 1)], g = 0;
+	for (int tries = 0; tries < 8; ++tries) {
+		g = pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
+		/* (no guardian another act has: the ones before, the way it stands
+		 * beside, those after, the short net's Nest) */
+		bool again = run.mode == RUN_SHORT && run.boss_order[BIOME_NEST] == g;
+		for (int e = 0; e < 4; ++e) again |= run.boss_order[run.biome_order[e]] == g;
+		if (!again) break;
+	}
+	rng_restore(keep);
+	*navi = g;
+	return b;
 }
 
 void run_setup(int mode, int folder, int threat, int helpers, int cross) {

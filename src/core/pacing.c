@@ -67,19 +67,28 @@ bool pacing_rare(int depth, int roll) {
 	return pacing_act(depth) >= 2 && roll < 3 + 2 * pacing_loop(depth);
 }
 
+/* The areas by the HP of their own battles (docs/PROGRESSION.md). (Sky
+ * HP's battles all come in threes of 200 HP, and the Aquarium Comp's pools
+ * and water mazes are a hard first map: not a first act's; the Robot
+ * Control Comp's that fit act 1 are all OldStove and Mettaur, which a
+ * playtester met in every battle of the act; the Seaside Area's hold five
+ * kinds of virus in act 1's band, a third opening where two had brought a
+ * playtester the RoboDog Comp four runs running) */
+static const uint8_t opening[] = { BIOME_CENTRAL, BIOME_COMP, BIOME_SEASIDE };
+static const uint8_t middle[] = { BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP,
+	BIOME_AQUARIUM_COMP, BIOME_ROBOT_COMP };
+static const uint8_t late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
+enum { NO = sizeof opening, NM = sizeof middle, NL = sizeof late };
+
+int pacing_area_pool(int act, uint8_t out[NO + NM + NL]) {
+	int n = 0;
+	if (act <= 1) for (int i = 0; i < NO; ++i) out[n++] = opening[i];
+	if (act == 1 || act == 2) for (int i = 0; i < NM; ++i) out[n++] = middle[i];
+	if (act >= 2 && act <= 3) for (int i = 0; i < NL; ++i) out[n++] = late[i];
+	return n;
+}
+
 void pacing_area_order(uint8_t out[4]) {
-	/* by the HP of the areas' own battles (docs/PROGRESSION.md) */
-	/* (Sky HP's battles all come in threes of 200 HP, and the Aquarium
-	 * Comp's pools and water mazes are a hard first map: not a first act's;
-	 * the Robot Control Comp's that fit act 1 are all OldStove and Mettaur,
-	 * which a playtester met in every battle of the act; the Seaside Area's
-	 * hold five kinds of virus in act 1's band, a third opening where two
-	 * had brought a playtester the RoboDog Comp four runs running) */
-	uint8_t opening[] = { BIOME_CENTRAL, BIOME_COMP, BIOME_SEASIDE };
-	uint8_t middle[] = { BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP,
-		BIOME_AQUARIUM_COMP, BIOME_ROBOT_COMP };
-	uint8_t late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
-	enum { NO = sizeof opening, NM = sizeof middle, NL = sizeof late };
 	uint8_t pool[NO + NM + NL];
 	int n;
 	/* act 1 */

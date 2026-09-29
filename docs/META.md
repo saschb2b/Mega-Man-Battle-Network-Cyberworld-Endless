@@ -315,6 +315,21 @@ COMP mark a class whole over the chips a run can hold). With them the Seaside
 Area became a third opening area, and a new run avoids the last one's act
 1 area: a playtester began four runs running in the RoboDog Comp.
 
+### Routes (phase three, begun)
+
+After an act's guardian, the Guardian Data ends with the way on: the next
+act's area or another of its tier the run has not taken, each named with
+its guardian and his element ("CircusMan guards Green Area, and HeatMan
+(Fire) guards Judge Tree Comp. Which way?"); B keeps the first. The
+choice restates the dialectic at the act's scale: bring the folder to the
+guardian it answers, or take the one it does not. Both guardians fit the
+act's band, and neither is another act's (or the short net's Nest's). The
+other way is drawn from the run's seed and its areas, so the layer and a
+CONTINUE offer the same; the exit pad's warp takes it (event flag
+`0x1452`). Acts 2 and 3 in the short net; 2 to 4 in the endless net, where
+the Undernet and the Graveyard stay fixed. Opened gates and new branches
+come later.
+
 What could go wrong: the lean flattening the code game into "add
 everything" (it leaves * and every chip without the folder's codes as
 they roll); a Cross start picked every time (the playtests will tell: a

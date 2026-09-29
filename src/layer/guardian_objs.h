@@ -14,6 +14,7 @@
 #define LAYER_REWARD_FLAG        0x144A   /* its Guardian Data shows */
 #define LAYER_REWARD_TAKEN_FLAG  0x144B   /* ... and was taken */
 #define LAYER_EXIT_OPEN_FLAG     0x144C   /* the exit pad shows */
+#define LAYER_ROUTE_FLAG         0x1452   /* the Guardian Data's second way on was taken (docs/META.md, routes) */
 
 typedef struct {
 	int navi;                  /* 0: the layer has no guardian */

@@ -50,13 +50,24 @@ typedef struct {
 	bool teach;
 } ScriptsDraft;
 
+/* The way on after an act's guardian (docs/META.md, routes): MegaMan's
+ * `question` (ta_talk's boxes), the two ways as options, and what he says
+ * after each; the second sets event flag `flag` (B takes the first). */
+typedef struct {
+	const char *question;
+	const char *option[2];
+	const char *then[2];
+	int flag;
+} ScriptsRoute;
+
 /* A guardian's Guardian Data, checked: `power` (what a Cross or BeastOut
  * brings, ta_talk's boxes; NULL for none), then HPMemory through the game's
  * own item (+20 max HP each), its navi chip (`chip` 0 for none; `code`
  * A=0 .. *=26), a full heal, the NaviCust's `draft` (NULL for none), then
- * event flag `taken_flag` (on every branch of the draft). */
+ * event flag `taken_flag` (on every branch of the draft), and last the
+ * `route` on (NULL for none). */
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
-                       int taken_flag, const ScriptsDraft *draft);
+                       int taken_flag, const ScriptsDraft *draft, const ScriptsRoute *route);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of

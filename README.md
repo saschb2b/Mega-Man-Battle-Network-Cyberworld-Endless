@@ -295,7 +295,9 @@ your folder for it: every Net Dealer keeps two of a chip that answers the
 act (the guardian's weakness, or a hard hitter when it has none) and says
 so, and on the guardian's layer MegaMan warns you of its way of fighting.
 Step into the arena and the Navi logs in for the game's own boss battle.
-Guardians remember how your earlier battles went.
+Guardians remember how your earlier battles went. Their Guardian Data
+ends with the way on: two areas for the next act, each named with its
+guardian and his element, so you choose the fight your folder answers.
 
 A run is **the short net**: three acts, then the Cybeast Nest on layer 10,
 about an hour. When the Nest's guardian falls, the run is won, and that

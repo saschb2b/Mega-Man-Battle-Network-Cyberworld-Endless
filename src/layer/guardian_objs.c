@@ -2,11 +2,14 @@
  * layer's text archive, then its actors once the archive has an address. */
 #include "guardian_objs.h"
 
+#include <stdio.h>
+
 #include "data.h"
 #include "flags.h"
 #include "guardians.h"
 #include "loot.h"
 #include "navicust.h"
+#include "net.h"
 #include "npc.h"
 #include "powers.h"
 #include "run.h"
@@ -69,12 +72,40 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			draft.teach = !profile.navicust_taught;
 		}
 	}
+	/* the way on (docs/META.md, routes): after an act's guardian, the next
+	 * act's area or another of its tier, each named with its guardian */
+	ScriptsRoute route = { 0 };
+	static char question[240], then[2][96], area[2][32];
+	const ScriptsRoute *way = NULL;
+	int next = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, alt = -1;
+	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth)) alt = run_route_alt(next, &alt_navi);
+	if (alt >= 0) {
+		static const char *const elem[5] = { "", " (Fire)", " (Aqua)", " (Elec)", " (Wood)" };
+		int b[2] = { run.biome_order[next], alt }, n[2] = { run.boss_order[run.biome_order[next]], alt_navi }, e[2];
+		static char option[2][32];
+		for (int k = 0; k < 2; ++k) {
+			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
+			e[k] = enemy_element(enemy_id(1, n[k], 0));
+			if (e[k] < 0 || e[k] > 4) e[k] = 0;
+			snprintf(option[k], sizeof option[k], "%s%s", guardian(n[k])->name, elem[e[k]]);
+			route.option[k] = option[k];
+			snprintf(then[k], sizeof then[k], "%c%s it is! The exit pad will take us there.", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
+			route.then[k] = then[k];
+		}
+		/* (two boxes: five had named the ways) */
+		snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s. Which way?",
+			option[0], area[0], option[1], area[1]);
+		route.question = question;
+		route.flag = LAYER_ROUTE_FLAG;
+		way = &route;
+	}
 	g->reward = ta_guardian_reward(text, gd->name, powers_reward_text(g->navi, layer.biome, run.depth), chip, ci.name, code,
-		LAYER_REWARD_TAKEN_FLAG, &draft);
+		LAYER_REWARD_TAKEN_FLAG, &draft, way);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
 	for (int f = LAYER_BOSS_GONE_FLAG; f <= LAYER_EXIT_OPEN_FLAG; ++f) flag_clear(f);
+	flag_clear(LAYER_ROUTE_FLAG);
 }
 
 void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const GuardianStage *g) {

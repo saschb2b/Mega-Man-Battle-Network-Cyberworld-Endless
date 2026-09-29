@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Routes: after an act's guardian, the Guardian Data asks which way on: the
+  planned next area or another of its tier, each named with its guardian and
+  his element. Both fit the act; B keeps the first. Acts 2 and 3 of the
+  short net, 2 to 4 of the endless net. A run saved before continues, its
+  current layer afresh.
 - Back from the PET with a program still off the NaviCust's board, MegaMan
   says so at once (once a layer), where L's briefing said it only on the
   next layer: a playtester ran the NaviCust without placing his Guardian

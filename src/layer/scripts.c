@@ -221,9 +221,51 @@ static void got_chip(TextArchive *t, const char *chip, int code, bool *first) {
 
 static void program_name(TextArchive *t, int program);
 
+/* ts_jump: on in script `to` (the way on, after a branch of the draft) */
+static void jump(TextArchive *t, int to) {
+	uint8_t b[] = { 0xF0, 0x00, (uint8_t)to };
+	ta_bytes(t, b, sizeof b);
+}
+
+/* A script's end: the way on's question next, where there is one (`next`
+ * its script), else the chat's end. */
+static void end_or(TextArchive *t, int next) {
+	if (next >= 0) jump(t, next);
+	else ta_end(t);
+}
+
+/* The way on: the question, the two ways in a column, a branch each (the
+ * second sets the flag; B takes the first); the question's script. */
+static int route_scripts(TextArchive *t, const ScriptsRoute *r) {
+	int way[2];
+	for (int k = 0; k < 2; ++k) {
+		way[k] = ta_script(t);
+		if (k) flag_set(t, r->flag);
+		ta_page(t, FACE_MEGAMAN, r->then[k], true);
+		ta_end(t);
+	}
+	int q = ta_script(t);
+	bool first = false;   /* (the chat box is open: the Guardian Data's) */
+	ta_pages(t, r->question, FACE_MEGAMAN, &first);
+	ta_mugshot(t, FACE_MEGAMAN);
+	ta_clear(t);
+	static const uint8_t opt[2][4] = { { 0xEB, 0x00, 0x00, 0x11 }, { 0xEB, 0x00, 0x11, 0x00 } };
+	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	for (int k = 0; k < 2; ++k) {
+		ta_bytes(t, opt[k], 4);
+		ta_bytes(t, space, sizeof space);
+		ta_text(t, r->option[k]);
+		if (!k) ta_text(t, "\n");
+	}
+	uint8_t select[] = { 0xED, 0x06, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[0] };
+	ta_bytes(t, select, sizeof select);
+	ta_end(t);
+	return q;
+}
+
 /* the draft's branches: a program given, or BugFrags for none; each sets
- * `taken_flag` and ends */
-static int draft_take(TextArchive *t, int program, int color, bool teach, int taken_flag) {
+ * `taken_flag` and ends, or goes on to the way on (`next`) */
+static int draft_take(TextArchive *t, int program, int color, bool teach, int taken_flag, int next) {
 	int s = ta_script(t);
 	uint8_t give[] = { 0xEF, 0x1B, (uint8_t)program, 1, (uint8_t)color };   /* ts_item_give_navi_cust_program */
 	ta_bytes(t, give, sizeof give);
@@ -239,11 +281,11 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	ta_page(t, FACE_MEGAMAN, "Let's install it, Lan! In the PET: MegaMan, then NaviCust.", false);
 	(void)teach;
 	flag_set(t, taken_flag);
-	ta_end(t);
+	end_or(t, next);
 	return s;
 }
 
-static int draft_skip(TextArchive *t, int frags, int taken_flag) {
+static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	int s = ta_script(t);
 	uint8_t give[] = { 0xEF, 0x12, (uint8_t)frags, (uint8_t)(frags >> 8), 0, 0, 0xFF, 0xFF, 0xFF };   /* ts_check_give_bug_frags */
 	ta_bytes(t, give, sizeof give);
@@ -251,16 +293,18 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag) {
 	snprintf(line, sizeof line, "We'll travel light, Lan. The program data broke down into %d BugFrags!", frags);
 	ta_page(t, FACE_MEGAMAN, line, false);
 	flag_set(t, taken_flag);
-	ta_end(t);
+	end_or(t, next);
 	return s;
 }
 
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code,
-                       int taken_flag, const ScriptsDraft *draft) {
-	/* (the draft's branches first: the choice jumps to them) */
+                       int taken_flag, const ScriptsDraft *draft, const ScriptsRoute *route) {
+	/* (the way on, then the draft's branches first: the choices jump to
+	 * them) */
+	int next = route ? route_scripts(t, route) : -1;
 	int take[3] = { 0 }, skip = 0, n = draft ? draft->n : 0;
-	for (int k = 0; k < n; ++k) take[k] = draft_take(t, draft->program[k], draft->color[k], draft->teach, taken_flag);
-	if (n) skip = draft_skip(t, draft->skip_frags, taken_flag);
+	for (int k = 0; k < n; ++k) take[k] = draft_take(t, draft->program[k], draft->color[k], draft->teach, taken_flag, next);
+	if (n) skip = draft_skip(t, draft->skip_frags, taken_flag, next);
 	int i = ta_script(t);
 	char head[64];
 	bool first = true;
@@ -290,7 +334,7 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	}
 	if (!n) {
 		flag_set(t, taken_flag);
-		ta_end(t);
+		end_or(t, next);
 		return i;
 	}
 	/* the draft: what each program does, then the choice (B: none) */

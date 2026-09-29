@@ -32,6 +32,10 @@ bool pacing_rare(int depth, int roll);
  * opening areas, the second from those or the middle ones, the third from
  * the middle or late ones, the fourth from the late ones (BIOME_* values). */
 void pacing_area_order(uint8_t out[4]);
+/* The areas act `act` (0-3) may take, as pacing_area_order draws them;
+ * how many (at most PACING_AREA_POOL). */
+#define PACING_AREA_POOL 15
+int pacing_area_pool(int act, uint8_t out[PACING_AREA_POOL]);
 
 /* A guardian's HP band in an act (the Nest's is open). */
 void pacing_guardian_band(int act, int *lo, int *hi);

@@ -877,7 +877,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 36
+#define LAYER_MAKE 37
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1903,6 +1903,16 @@ static bool follow_exit_warp(void) {
 	/* past the Nest's guardian: the net rebuilds (the next arrival says so;
 	 * counted with the next checkpoint, which a CONTINUE cannot undo) */
 	if (boss_beaten() && run.biome == BIOME_NEST) D.nest_cleared = true;
+	/* the Guardian Data's second way on, where it was taken (docs/META.md,
+	 * routes): the next act in that area, under its guardian */
+	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth) && flag_get(LAYER_ROUTE_FLAG)) {
+		int act = (run.depth % CYCLE_LAYERS) / 3, navi = 0, b = run_route_alt(act, &navi);
+		if (b >= 0) {
+			run.biome_order[act] = (uint8_t)b;
+			run.boss_order[b] = (uint8_t)navi;
+		}
+		flag_clear(LAYER_ROUTE_FLAG);
+	}
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
