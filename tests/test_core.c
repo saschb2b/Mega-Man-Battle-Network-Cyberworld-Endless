@@ -480,14 +480,14 @@ static void test_pacing(void) {
 	}
 	for (int roll = 0; roll < 100; ++roll) CHECK(!pacing_rare(1 + roll % 6, roll), "no rare virus in the first two acts");
 	/* areas: easy first, late last, none twice */
-	static const int opening[] = { BIOME_CENTRAL, BIOME_ROBOT_COMP, BIOME_AQUARIUM_COMP, BIOME_SKY_HP, BIOME_COMP };
+	static const int opening[] = { BIOME_CENTRAL, BIOME_COMP, BIOME_SEASIDE };
 	static const int late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
 	for (uint32_t seed = 1; seed <= 300; ++seed) {
 		rng_seed(seed);
 		uint8_t o[4];
 		pacing_area_order(o);
 		bool first = false, last = false;
-		for (int i = 0; i < 5; ++i) first |= o[0] == opening[i];
+		for (int i = 0; i < 3; ++i) first |= o[0] == opening[i];
 		for (int i = 0; i < 4; ++i) last |= o[3] == late[i];
 		CHECK(first, "seed %u: act 1 in an opening area (%d)", seed, o[0]);
 		CHECK(last, "seed %u: act 4 in a late area (%d)", seed, o[3]);

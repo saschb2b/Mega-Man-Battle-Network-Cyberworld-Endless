@@ -141,13 +141,16 @@ void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile
 void run_new_varied(uint32_t seed) {
 	run_new(seed);
 	/* (one retry left the same guardian a time in three: DiveMan guarded
-	 * two new runs running) */
-	int first = run.boss_order[run.biome_order[0]];
-	for (int k = 1; k <= 8 && profile.first_guardian == first + 1; ++k) {
+	 * two new runs running; and the same area: a playtester began in the
+	 * RoboDog Comp four runs running) */
+	int first = run.boss_order[run.biome_order[0]], area = run.biome_order[0];
+	for (int k = 1; k <= 8 && (profile.first_guardian == first + 1 || profile.first_area == area + 1); ++k) {
 		run_new(seed * 2654435761u + 0x9E37u * (uint32_t)k);
 		first = run.boss_order[run.biome_order[0]];
+		area = run.biome_order[0];
 	}
 	profile.first_guardian = (uint8_t)(first + 1);
+	profile.first_area = (uint8_t)(area + 1);
 	profile_save();
 }
 

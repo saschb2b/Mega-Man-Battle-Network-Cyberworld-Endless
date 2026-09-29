@@ -72,9 +72,11 @@ void pacing_area_order(uint8_t out[4]) {
 	/* (Sky HP's battles all come in threes of 200 HP, and the Aquarium
 	 * Comp's pools and water mazes are a hard first map: not a first act's;
 	 * the Robot Control Comp's that fit act 1 are all OldStove and Mettaur,
-	 * which a playtester met in every battle of the act) */
-	uint8_t opening[] = { BIOME_CENTRAL, BIOME_COMP };
-	uint8_t middle[] = { BIOME_SEASIDE, BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP,
+	 * which a playtester met in every battle of the act; the Seaside Area's
+	 * hold five kinds of virus in act 1's band, a third opening where two
+	 * had brought a playtester the RoboDog Comp four runs running) */
+	uint8_t opening[] = { BIOME_CENTRAL, BIOME_COMP, BIOME_SEASIDE };
+	uint8_t middle[] = { BIOME_JUDGE_COMP, BIOME_GREEN, BIOME_GREEN_HP, BIOME_HOMEPAGE, BIOME_COMP_B, BIOME_SKY_HP,
 		BIOME_AQUARIUM_COMP, BIOME_ROBOT_COMP };
 	uint8_t late[] = { BIOME_SKY, BIOME_WEATHER_COMP, BIOME_ACDC_HP, BIOME_COPYBOT_COMP };
 	enum { NO = sizeof opening, NM = sizeof middle, NL = sizeof late };

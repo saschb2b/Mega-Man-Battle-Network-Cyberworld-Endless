@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Runs open in three areas: the Seaside Area joins Central and the RoboDog
+  Comp for act 1 (five kinds of virus in the act's band), and a new run
+  avoids the last one's act 1 area as it does its first guardian. A
+  playtester began in the RoboDog Comp four runs running.
 - Rewards come in the folder's codes: the codes the folder holds most (three
   chips or more each) are read as each layer is made, and a Net Dealer's
   chip, the gift's, and half of the Mystery Data chips that come in one of

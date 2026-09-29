@@ -280,8 +280,8 @@ Areas fall into three tiers by their own battles:
 
 | Tier | Areas |
 | --- | --- |
-| Opening | Central, the first home computers (0x8C) |
-| Middle | Seaside, Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP), Aquarium Comp (its pools and water mazes a hard first map), Robot Control Comp (the battles that fit act 1 are all OldStove and Mettaur; from act 2 Champy and Gunner join them) |
+| Opening | Central, the first home computers (0x8C), Seaside |
+| Middle | Judge Tree Comp, Green, Green HP, the homepages (0x88, Aquarium HP's battles among them), the second home computers (0x8D), Sky HP (its battles all 200 HP), Aquarium Comp (its pools and water mazes a hard first map), Robot Control Comp (the battles that fit act 1 are all OldStove and Mettaur; from act 2 Champy and Gunner join them) |
 | Late | Sky, Mr. Weather Comp, ACDC HP, CopyBot's comp |
 
 Act 1 draws from the opening tier, act 2 from opening or middle, act 3 from
@@ -380,7 +380,10 @@ Built as described above, with these differences from the first proposal:
   In act 1 the two are as likely, and a new run avoids the last one's
   first guardian once: a playtester met BlastMan six runs running, and
   the Robot Control Comp's OldStove and Mettaur in every act 1 battle, so
-  that area waits for act 2.
+  that area waits for act 2. The Seaside Area opens runs too (five kinds
+  of virus in act 1's band), and a new run avoids the last one's act 1
+  area: with two opening areas a playtester began in the RoboDog Comp
+  four runs running.
 - Act 2's guardian band is 600-700: HeatMan, SpoutMan or CircusMan. At
   600-800 it held the 800s (SlashMan, EraseMan, TenguMan, JudgeMan), and a
   playtester with 240 HP and 40-150 damage chips dented EraseMan by 1 of
