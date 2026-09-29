@@ -35,6 +35,7 @@ typedef struct {
 	uint64_t frame;
 	bool keyboard_last; /* last input came from the keyboard */
 	bool skip_present;  /* this frame is played, not shown: the loop catching up (main.c) */
+	bool blend;         /* smooth motion (settings.ini): each refresh a mix of the last two frames */
 	int quit_prompt;    /* frames left of "Esc again to quit" after one Escape */
 	bool quit_pad;      /* ... opened by a controller's SELECT+START, held */
 	/* Full-screen effects, set by the scene each frame while drawing and
@@ -64,6 +65,12 @@ void platform_apply_effects(void);
 bool platform_save_canvas(const char *path);
 /* Files were written: in a browser, keep them (IndexedDB); elsewhere nothing. */
 void platform_persist(void);
+/* settings.ini in the data folder (made with the defaults when missing):
+ * smooth_motion = on or off (P.blend). */
+void platform_load_settings(const char *path);
+/* Smooth motion: the display refreshed with the game's last two frames
+ * mixed, `w` (0-1) of the newer; the loop's frames were played unshown. */
+void platform_present_blend(double w);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */

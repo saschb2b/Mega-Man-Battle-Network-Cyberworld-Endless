@@ -78,12 +78,12 @@ function start() {
 		canvas.style.removeProperty('height');
 		if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
 		keepAwake();
-		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch']);
+		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch', '--smooth-motion', smoothOn() ? 'on' : 'off']);
 		return;
 	}
 	fit();
 	canvas.focus();
-	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160']);
+	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off']);
 }
 
 // the screen stays on while the game plays (asked again when the tab returns)
@@ -153,6 +153,24 @@ $('fullscreen').addEventListener('click', () => {
 	else stage.requestFullscreen().catch(() => {});
 	canvas.focus();
 });
+
+// Smooth motion: the game's 60 frames mixed at each refresh of a 90, 144 or
+// 165 Hz screen, which shows them unevenly otherwise (remembered here, and
+// switched while the game runs)
+function smoothOn() { try { return localStorage.getItem('cw-smooth') === 'on'; } catch (e) { return false; } }
+function showSmooth() {
+	const on = smoothOn();
+	$('smooth').textContent = 'Smooth motion: ' + (on ? 'on' : 'off');
+	$('smooth').setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+$('smooth').addEventListener('click', () => {
+	const on = !smoothOn();
+	try { localStorage.setItem('cw-smooth', on ? 'on' : 'off'); } catch (e) { /* not kept */ }
+	showSmooth();
+	if (started) Module.ccall('cw_set_smooth', null, ['number'], [on ? 1 : 0]);
+	canvas.focus();
+});
+showSmooth();
 fit();
 
 // the last writes before the tab goes away

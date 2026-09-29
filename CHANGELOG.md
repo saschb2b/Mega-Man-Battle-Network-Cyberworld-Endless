@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Smooth motion**, an option for 90, 144 and 165 Hz screens: the game
+  runs at the GBA's 60 frames a second, which such a screen shows for one
+  refresh or two (or two or three) in turn, a slight judder; with smooth
+  motion each refresh mixes the two latest frames by time, so motion is
+  even, a little blurred and a frame later. `smooth_motion = on` in the
+  new `settings.ini`, `--smooth-motion on`, or the browser player's
+  button. On a 60 or 120 Hz screen it shows the frames as they are. On a
+  Steam Deck OLED at 90 Hz: 90 pictures a second, the game at 60.
 - Less input lag on Windows: the game asks for Direct3D 11 first, which
   lets the graphics card queue one frame ahead at most, where Direct3D 9,
   the default before, left the driver to queue up to three, each a frame

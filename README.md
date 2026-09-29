@@ -196,7 +196,8 @@ In Gaming Mode it fills the screen, at 5x (1200x800) on the Deck's 1280x800.
 On a Deck OLED, set the game's refresh rate to 60 Hz (the **...** button,
 **Performance**, **Refresh Rate**, with the per-game profile on): the game
 runs at the GBA's 60 frames a second, which the OLED's 90 Hz shows for one
-refresh or two in turn, a slight judder.
+refresh or two in turn, a slight judder. Or keep 90 Hz and turn on
+smooth motion ([Screen](#screen)).
 The Deck's A, B, L1 and R1 are the GBA's A, B, L and R, the Menu button (☰)
 is Start and the View button (⧉) is Select. To quit, hold View and Menu
 for a second, then again; or use the Steam button's **Exit Game**. Saves
@@ -439,6 +440,16 @@ The game's 240x160 picture is scaled by a whole number so it stays sharp: 5x
 on the Nova's 1280x960 screen and 6x on the Flip 2's 1920x1080 screen, with
 black borders around it. On a PC the window keeps the same rule as it is
 resized.
+
+The game runs at the GBA's 60 frames a second. A 60 or 120 Hz screen shows
+every frame for the same time; a 90, 144 or 165 Hz one (a Steam Deck OLED,
+many PC monitors) shows them for one refresh or two in turn, which reads as
+a slight judder. **Smooth motion** mixes the two latest frames at each
+refresh instead: motion is even, a little blurred, and a frame later. Turn
+it on with `smooth_motion = on` in `settings.ini` in the data folder (made
+on the first start), or with the **Smooth motion** button under the
+browser player. A screen at 60 or 120 Hz, or one that follows the game
+(FreeSync, G-Sync), needs neither.
 
 ## Troubleshooting
 

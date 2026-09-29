@@ -494,9 +494,34 @@ static double elapsed(void) {
 	return dt;
 }
 
+/* Smooth motion (settings.ini): at each refresh of the display, the game
+ * frames due (two at most), not shown, then the last two mixed by how far
+ * the next one is due. */
+static bool blend_frames(void) {
+	if (loop.acc > 0.1) loop.acc = 1.0 / 60.0;
+	for (int n = 0; n < 2 && loop.acc >= 1.0 / 60.0; ++n) {
+		loop.acc -= 1.0 / 60.0;
+		P.skip_present = true;
+		bool go = game_frame();
+		P.skip_present = false;
+		if (!go || P.quit) return false;
+	}
+	platform_present_blend(loop.acc * 60.0);
+	return true;
+}
+
 #ifndef __EMSCRIPTEN__
 /* The native loop: 60 game frames a second (as fast as it can headless). */
 static bool step(void) {
+	if (!loop.headless && P.blend) {
+		loop.acc += elapsed();
+		uint64_t t0 = SDL_GetPerformanceCounter();
+		if (!blend_frames()) return false;
+		/* (a display that does not hold a present to its refresh: a
+		 * millisecond at least between them) */
+		if ((SDL_GetPerformanceCounter() - t0) * 1000 < SDL_GetPerformanceFrequency()) SDL_Delay(1);
+		return true;
+	}
 	if (!loop.headless || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
 		loop.acc += elapsed();
 		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
@@ -521,6 +546,10 @@ static bool step(void) {
  * 1/60 s steps have passed, at most two, so the game keeps the GBA's pace. */
 static void web_frame(void) {
 	loop.acc += elapsed();
+	if (P.blend) {
+		if (!blend_frames() || P.quit) { emscripten_cancel_main_loop(); platform_shutdown(); }
+		return;
+	}
 	if (loop.acc > 0.1) loop.acc = 1.0 / 60.0;
 	for (int n = 0; n < 2 && loop.acc >= 1.0 / 60.0 - 0.002; ++n) {
 		loop.acc -= 1.0 / 60.0;
@@ -544,6 +573,7 @@ int main(int argc, char **argv) {
 	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
 	const char *start_scene = "title";
 	int run_depth = 0, guardian_navi = 0;
+	int smooth_arg = -1;   /* --smooth-motion on|off, over settings.ini */
 	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
 	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
@@ -577,6 +607,7 @@ int main(int argc, char **argv) {
 		/* the touch controls from the start (the browser on a phone) */
 		else if (!strcmp(a, "--touch")) touch_always();
 		else if (!strcmp(a, "--frames") && v) { max_frames = strtoull(v, NULL, 10); ++i; }
+		else if (!strcmp(a, "--smooth-motion") && v) { smooth_arg = !strcmp(v, "on"); ++i; }
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
 		else if (!strcmp(a, "--shot") && v) { parse_shots(v); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {
@@ -650,6 +681,9 @@ int main(int argc, char **argv) {
 		char keys[600];
 		snprintf(keys, sizeof keys, "%s/keys.ini", g_data_dir);
 		platform_load_keys(keys);
+		snprintf(keys, sizeof keys, "%s/settings.ini", g_data_dir);
+		platform_load_settings(keys);
+		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
 

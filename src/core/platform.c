@@ -31,6 +31,39 @@ bool platform_pad_present(void) {
 	return false;
 }
 
+/* Smooth motion (settings.ini): the game's two latest frames, each kept
+ * whole as it ends, mixed at each refresh of the display by how far the
+ * next one is due (main.c's loop). The game runs at the GBA's 60 frames a
+ * second; a 90 or 144 Hz display shows each for one refresh or two, or two
+ * or three, in turn, which reads as judder; mixed, motion is even, a little
+ * blurred, and a frame later. */
+static SDL_Texture *blend_tex[2];
+static int blend_cur = -1, blend_n;   /* the latest kept (-1 none), how many (0-2) */
+
+static void blend_reset(void) {
+	for (int i = 0; i < 2; ++i)
+		if (blend_tex[i]) { SDL_DestroyTexture(blend_tex[i]); blend_tex[i] = NULL; }
+	blend_cur = -1;
+	blend_n = 0;
+}
+
+static void blend_keep(void) {
+	int next = blend_cur < 0 ? 0 : blend_cur ^ 1;
+	if (!blend_tex[next]) {
+		blend_tex[next] = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
+		if (!blend_tex[next]) return;
+		SDL_SetTextureScaleMode(blend_tex[next], SDL_ScaleModeNearest);
+	}
+	SDL_BlendMode mode;
+	SDL_GetTextureBlendMode(P.canvas, &mode);
+	SDL_SetTextureBlendMode(P.canvas, SDL_BLENDMODE_NONE);
+	SDL_SetRenderTarget(P.renderer, blend_tex[next]);
+	SDL_RenderCopy(P.renderer, P.canvas, NULL, NULL);
+	SDL_SetTextureBlendMode(P.canvas, mode);
+	blend_cur = next;
+	if (blend_n < 2) ++blend_n;
+}
+
 static void layout_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
@@ -48,6 +81,7 @@ static void layout_canvas(void) {
 	touch_relayout();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
+	blend_reset();
 	P.canvas = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
 	SDL_SetTextureScaleMode(P.canvas, SDL_ScaleModeNearest);
 	P.fx_copy = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
@@ -182,6 +216,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 
 void platform_shutdown(void) {
 	for (int i = 0; i < 4; ++i) if (pads[i]) SDL_GameControllerClose(pads[i]);
+	blend_reset();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
 	if (P.renderer) SDL_DestroyRenderer(P.renderer);
@@ -235,6 +270,37 @@ static void keys_default(void) {
 	memset(key_map, 0, sizeof key_map);
 	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
 		bind_keys(key_defaults[i].bit, key_defaults[i].keys, "defaults");
+}
+
+#ifdef __EMSCRIPTEN__
+/* The page's Smooth motion button, while the game runs (web/play/app.js). */
+EMSCRIPTEN_KEEPALIVE void cw_set_smooth(int on) { P.blend = on != 0; }
+#endif
+
+void platform_load_settings(const char *path) {
+	FILE *f = fopen(path, "r");
+	if (!f) {
+		f = fopen(path, "w");
+		if (!f) return;
+		fprintf(f,
+			"# Cyberworld Endless: settings. Delete this file for the defaults.\n\n"
+			"# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n"
+			"# or 165 Hz screen shows each frame for one refresh or two (or two or\n"
+			"# three) in turn, which reads as judder. on mixes the two latest frames at\n"
+			"# every refresh, so motion is even, a little blurred and a frame later;\n"
+			"# off shows the game's own frames, sharp (best on 60 and 120 Hz).\n"
+			"smooth_motion = off\n");
+		fclose(f);
+		platform_persist();
+		return;
+	}
+	char line[256];
+	while (fgets(line, sizeof line, f)) {
+		char key[64], val[64];
+		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2) continue;
+		if (!strcmp(key, "smooth_motion")) P.blend = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
+	}
+	fclose(f);
 }
 
 void platform_load_keys(const char *path) {
@@ -433,9 +499,72 @@ void platform_apply_effects(void) {
 	}
 }
 
+/* CYBERWORLD_FRAME_LOG: a line a second of how the frames reached the
+ * display (shown, played, the gaps between shown ones), for a player's
+ * pacing or lag */
+static void log_present(void) {
+	static int log_on = -1;
+	if (log_on < 0) log_on = getenv("CYBERWORLD_FRAME_LOG") != NULL;
+	if (!log_on) return;
+	static uint64_t last, second;
+	static int shown, lo = 1 << 30, hi, gaps[4];
+	uint64_t now = SDL_GetPerformanceCounter(), hz = SDL_GetPerformanceFrequency();
+	if (last) {
+		int us = (int)((now - last) * 1000000 / hz);
+		if (us < lo) lo = us;
+		if (us > hi) hi = us;
+		++gaps[us < 12500 ? 0 : us < 20000 ? 1 : us < 30000 ? 2 : 3];
+	}
+	last = now;
+	++shown;
+	if (!second) second = now;
+	if (now - second >= hz) {
+		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s\n", shown,
+			(unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "");
+		fflush(stdout);
+		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
+		second = now;
+	}
+}
+
+void platform_present_blend(double w) {
+	/* (a display at a multiple of 60 Hz shows every frame for the same
+	 * refreshes: mixing would only show it a frame later) */
+	static int hz = -1;
+	if (hz < 0) {
+#ifdef __EMSCRIPTEN__
+		hz = 0;   /* (a page is not told its screen's refresh) */
+#else
+		SDL_DisplayMode m;
+		hz = SDL_GetWindowDisplayMode(P.window, &m) == 0 ? m.refresh_rate : 0;
+#endif
+	}
+	if (hz > 0 && (hz % 60 <= 1 || hz % 60 >= 59)) w = 1;
+	SDL_SetRenderTarget(P.renderer, NULL);
+	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
+	SDL_RenderClear(P.renderer);
+	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
+	if (blend_n == 0) SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
+	else {
+		SDL_Texture *cur = blend_tex[blend_cur], *prev = blend_n > 1 ? blend_tex[blend_cur ^ 1] : cur;
+		if (w < 0) w = 0;
+		if (w > 1) w = 1;
+		SDL_SetTextureBlendMode(prev, SDL_BLENDMODE_NONE);
+		SDL_RenderCopy(P.renderer, prev, NULL, &dst);
+		SDL_SetTextureBlendMode(cur, SDL_BLENDMODE_BLEND);
+		SDL_SetTextureAlphaMod(cur, (Uint8)(w * 255.0 + 0.5));
+		SDL_RenderCopy(P.renderer, cur, NULL, &dst);
+		SDL_SetTextureAlphaMod(cur, 255);
+	}
+	SDL_RenderPresent(P.renderer);
+	log_present();
+}
+
 void platform_end_frame(void) {
-	/* (a frame the loop plays to catch up: not shown, so it waits for no
-	 * refresh of the display) */
+	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
+	if (P.blend && !P.headless) blend_keep();
+	/* (a frame the loop plays to catch up, or one smooth motion mixes: not
+	 * shown here, so it waits for no refresh of the display) */
 	if (P.skip_present) {
 		++P.frame;
 		{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
@@ -447,32 +576,7 @@ void platform_end_frame(void) {
 	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
 	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
 	SDL_RenderPresent(P.renderer);
-	/* CYBERWORLD_FRAME_LOG: a line a second of how the frames reached the
-	 * display (shown, played unshown, the gaps between shown ones), for a
-	 * player's pacing or lag */
-	static int log_on = -1;
-	if (log_on < 0) log_on = getenv("CYBERWORLD_FRAME_LOG") != NULL;
-	if (log_on) {
-		static uint64_t last, second;
-		static int shown, lo = 1 << 30, hi, gaps[4];
-		uint64_t now = SDL_GetPerformanceCounter(), hz = SDL_GetPerformanceFrequency();
-		if (last) {
-			int us = (int)((now - last) * 1000000 / hz);
-			if (us < lo) lo = us;
-			if (us > hi) hi = us;
-			++gaps[us < 12500 ? 0 : us < 20000 ? 1 : us < 30000 ? 2 : 3];
-		}
-		last = now;
-		++shown;
-		if (!second) second = now;
-		if (now - second >= hz) {
-			printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)\n", shown,
-				(unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3]);
-			fflush(stdout);
-			shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
-			second = now;
-		}
-	}
+	log_present();
 	++P.frame;
 	{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
 }
