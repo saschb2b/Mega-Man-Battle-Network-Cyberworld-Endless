@@ -789,3 +789,44 @@ they could know, and follow the same fact through every surface** (the
 act card, L, the arrival and last-stop words, the way on, the state line
 the persona reads). The owner found two slips in one fact that a
 line-by-line fix missed; a fact is told in six places.
+
+## Session 34: 8/10 (keep playing: yes; recommend: yes)
+
+Continued the Blade run from layer 8 (restarted by LAYER_MAKE 52):
+dealer picks in his codes, act 3's battles from Central Area at last,
+"Run saved" at each arrival, ChargeMan briefed "from battle data" and
+remembering the last fight. Lost to ChargeMan on layer 9 at 370 of
+1000, the second time; a new run at once (Storm folder, the HeatCross
+start the loss unlocked, Seaside Town), stopped on its layer 2.
+
+Confirmed: the layer restart, dealer picks in the folder's codes (two
+of three; the third had no answer in them), ACDC HP's variety, the
+saved note, knowledge for known guardians (named, briefed, no rumor),
+the timing lines, the last-stop words, directions held 10+ frames.
+
+Raised, fixed:
+- **Where to stand as ChargeMan's train passes** (the loss): watched in
+  god mode, the cars roll down the other two rows a column or two
+  behind him, never down his; his warning says so now.
+- **The timing again at the arena** (wish 1): a known guardian's arena
+  talk ends on "Remember our battle data, Lan: ...".
+- **No new guardians for a veteran** (wish 2): eight of seventeen met in
+  34 sessions; new runs prefer the never-met (two in acts 3-4 of every
+  sample run on his profile).
+- The vendor bringing an installed program; a bystander's dark warps
+  against the sealed way; the gift's "2 HPMemory" before "HPMemory x2".
+
+By design: no rumor for a known guardian; the arrow's half minute.
+
+Beside the loop, from the owner: BN6's battlefield objects (rocks,
+cubes) and the rare green Mystery Data were dropped; restored, the gem
+at one battle in forty with a blue Mystery Data's reward, BN6's own
+second reward on the results screen, and MegaMan explaining it after the
+first.
+
+Loop change: **when a run is lost to a guardian, watch that guardian in
+god mode before the next session** (guardian_watch.sh): the loss names
+what its warning lacks, and the watch checks the persona's own theory
+in minutes (ChargeMan's cars, confirmed from four sheets). And a rule
+for the harness: a player-honest state (the ??? guardian) must not blind
+the dev scripts; they read it under CYBERWORLD_STATE_POS.
