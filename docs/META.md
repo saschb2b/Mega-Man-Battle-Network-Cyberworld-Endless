@@ -440,8 +440,12 @@ the PET's battle data on a copy exists once they have fought it.
   What can be learned before is what Navis who live on the net say: the
   first bystander on the act's first layer passes on who guards its end
   and a rumor (`guardian_rumor`: one line on his manner, never his moves
-  or timing, "he deletes Navis outright"), and the Net Dealer's "word
-  is" names him and his weakness. Heard, MegaMan names him as hearsay
+  or timing, "he deletes Navis outright"), and from the act's second
+  layer the Net Dealer's "word is" names him and his weakness (on its
+  first, "No word yet on what guards the end of Sky HP... Ask me again
+  deeper in!": a playtester's dealer had named the guardian two minutes
+  into the act, the mystery over before it began; seeking out a
+  bystander still learns it early). Heard, MegaMan names him as hearsay
   for the rest of the act ("DiveMan guards the end of it, word is", "if
   the word on the net is right"), until the session ends (the director
   keeps it, as the dealer's having spoken). From the first battle on, in
@@ -452,8 +456,8 @@ the PET's battle data on a copy exists once they have fought it.
   once the family has been battled in any run (the profile's
   `families_fought`, noted as each battle ends).
 - **Kept, as resonant:** what MegaMan can sense or read (the services on
-  a layer, a strong virus signal's strength, who guards an area and his
-  element, the act card), the net's physics he knows as any Navi does
+  a layer, a strong virus signal's strength, a strong Navi's signal at
+  an act's end, the act card), the net's physics he knows as any Navi does
   (ice, conveyors, elements), what data says of itself (a ScrtData, a
   Cross), and what others tell (the dealer's "word is" about a
   guardian's weakness, the townsfolk). The setup's notes are a menu

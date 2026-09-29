@@ -53,5 +53,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out);
 /* Set before layer_objs_install: this act's Net Dealer has already spoken,
  * so this one greets in a line. */
 extern bool layer_objs_dealer_again;
+/* Set by layer_objs_install: this layer's Net Dealer names the act's
+ * guardian (from the act's second layer, or once battled). */
+extern bool layer_objs_dealer_named;
 
 #endif

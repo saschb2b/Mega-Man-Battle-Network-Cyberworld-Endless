@@ -369,10 +369,11 @@ static const char *program_off_board(int *variant) {
 }
 
 /* A Navi on the net has named the act's guardian this session: the first
- * bystander on its first layer, or the Net Dealer's word (docs/META.md,
- * what MegaMan knows). */
+ * bystander on its first layer, or the Net Dealer's word from its second
+ * (docs/META.md, what MegaMan knows). */
 static bool guardian_heard(void) {
-	return D.layer_act && (D.heard_act == D.layer_act || D.dealer_act == D.layer_act || flag_get(LAYER_DEALER_TOLD_FLAG));
+	return D.layer_act && (D.heard_act == D.layer_act || D.dealer_act == D.layer_act ||
+		(flag_get(LAYER_DEALER_TOLD_FLAG) && layer_objs_dealer_named));
 }
 
 bool director_guardian_heard(void) { return guardian_heard(); }
@@ -744,7 +745,7 @@ static bool build_layer(void) {
 	/* (the layer just left had its Net Dealer speak: this act's next say
 	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
 	 * on every layer for a playtester) */
-	if (D.layer_act && flag_get(LAYER_DEALER_TOLD_FLAG)) D.dealer_act = D.layer_act;
+	if (D.layer_act && flag_get(LAYER_DEALER_TOLD_FLAG) && layer_objs_dealer_named) D.dealer_act = D.layer_act;
 	D.layer_act = run.side_kind == LAYER_NORMAL ? (run.depth - 1) / 3 + 1 : 0;
 	layer_objs_dealer_again = D.layer_act && D.dealer_act == D.layer_act;
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;

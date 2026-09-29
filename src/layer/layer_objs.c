@@ -46,7 +46,7 @@
  * compressed, 59 ProtoMan, 71-86 the guardians (bn6f npcSpritePtrs) */
 #define SPR_DEALER      62   /* GreenNavi, the Net Dealer's keeper in the game */
 #define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
-bool layer_objs_dealer_again;
+bool layer_objs_dealer_again, layer_objs_dealer_named;
 
 #define SPR_BYSTANDER   67   /* EvilNavi */
 
@@ -214,6 +214,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	MysteryData md[16];
 	int nmd = 0;
 	out->nchoices = 0;
+	layer_objs_dealer_named = false;
 	out->guardian.navi = 0;
 	out->challenge_reward = -1;
 	out->fragment_found = -1;
@@ -342,9 +343,18 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			static const char *const elem[5] = { "", "Fire", "Aqua", "Elec", "Wood" };
 			char hello[400], word[280] = "";
 			int navi = run.boss_order[run.biome], ge = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
+			/* (the net's word comes back from an act's second layer: its
+			 * first keeps the mystery of a guardian never battled, but for
+			 * a bystander's rumor, sought out; a playtester's dealer named
+			 * one two minutes into the act) */
+			bool tells = navi > 0 && (guardian_known(navi) || layer_in_act(run.depth) > 0);
+			layer_objs_dealer_named = tells;
 			/* (the guardian's weakness by name; an element-less guardian's
 			 * act is answered for its viruses) */
-			if (counter > 0 && ge > 0 && ge <= 4)
+			if (navi > 0 && !tells)
+				snprintf(word, sizeof word, "|No word yet on what guards the end of %s. Nobody's come back to tell. Ask me again deeper in!",
+					guardian_area_in_text(run.biome, LAYER_NORMAL));
+			else if (counter > 0 && ge > 0 && ge <= 4)
 				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s",
 					guardian(navi)->name, elem[counter], brought, lands);
 			else if (navi > 0 && counter > 0 && virus_chip)
@@ -363,7 +373,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					: "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
 				: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
 			/* (met in this act already: the pick, in a line) */
-			if (layer_objs_dealer_again && navi > 0)
+			if (layer_objs_dealer_again && tells)
 				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);
 			tk.sprite = SPR_DEALER;
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!", LAYER_DEALER_TOLD_FLAG);

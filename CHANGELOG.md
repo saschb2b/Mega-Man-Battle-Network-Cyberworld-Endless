@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- On an act's first layer the Net Dealer has no word yet on a guardian
+  MegaMan has never battled ("Nobody's come back to tell. Ask me again
+  deeper in!"); from its second layer he names him and his weakness. A
+  playtester's first dealer named the "???" guardian two minutes into
+  the act; a bystander's rumor, sought out, still tells it early.
+- A HeelNavi-shaped guardian (Falzar's Navis, GroundMan, DustMan) is
+  named at every rematch, not only the first meeting, and MegaMan says
+  "I'm ready this time!" only after a loss to him.
 - A Net Dealer neither picks nor stocks a chip the folder already holds
   as many of as BN6 lets it (by its memory: five under 20 MB down to one
   from 50): a playtester paid 1000 zenny for two ElcPuls1 S beside the
