@@ -427,8 +427,13 @@ the PET's battle data on a copy exists once they have fought it.
 - **Guardians.** A first meeting (no battle with that Navi in any run,
   rivals.sav) names the guardian and says they have no battle data on
   the copy, and to watch the yellow panels, the net's own telegraph for
-  every attack. From the second meeting on, MegaMan briefs its moves and
-  when a hit lands, from "battle data from before".
+  every attack. What they have is the net's rumor (`guardian_rumor`):
+  one line on the guardian's manner, never its moves or timing ("he
+  deletes Navis outright", "his lightning comes out of a clear sky"),
+  what Navis who live on the net would say, as the Net Dealer does. It
+  sets a mood and a fear without spending the fight's discovery. From
+  the second meeting on, MegaMan briefs its moves and when a hit lands,
+  from "battle data from before".
 - **Virus families.** The area's warnings for the viruses BN6 never
   explains (ScarCrows healed by Elec, DarkMechs warping in to slash) come
   once the family has been battled in any run (the profile's

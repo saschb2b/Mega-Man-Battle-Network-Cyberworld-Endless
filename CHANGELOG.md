@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A guardian met for the first time comes with the net's rumor about it,
+  a line each that hints at its manner without its moves: HeatMan's fire
+  "never runs out", EraseMan "deletes Navis outright", BlastMan "leaves
+  nothing but craters". MegaMan still has no battle data on the copy;
+  the rumor is what others on the net say, as the Net Dealer's "word is"
+  about a weakness.
 - MegaMan's words before a guardian's arena give each service's way as L
   and the map do, where it lies, and say when the way there winds: they
   had named the walk's first step, and a playtester's heal Prog was "up

@@ -78,6 +78,33 @@ const char *guardian_tip(int navi) {
 	}
 }
 
+/* (a first meeting's hint: the net's gossip, which lives in that world and
+ * could know something, as the Net Dealer's "word is" does; a name's
+ * worth of insight, the moves left for the fight to show, and EraseMan's
+ * danger said as a danger: an erase at low HP had come with no word) */
+const char *guardian_rumor(int navi) {
+	switch (navi) {
+	case 1: return "his fire never runs out.";
+	case 2: return "his lightning comes out of a clear sky.";
+	case 3: return "you never see him coming, only his claws.";
+	case 4: return "he deletes Navis outright. Let's not face him weak!";
+	case 5: return "he runs down anything in his path.";
+	case 6: return "he floods the whole field.";
+	case 7: return "he never fights alone: something circles overhead.";
+	case 8: return "he moves like the wind itself.";
+	case 9: return "he comes up from below.";
+	case 10: return "he turns our own panels against us.";
+	case 11: return "his shield stops everything, and his sword is faster than sight.";
+	case 12: return "he leaves nothing but craters.";
+	case 13: return "he hunts from under the water.";
+	case 14: return "he runs his show from the back of the ring.";
+	case 15: return "he passes sentence with a whip.";
+	case 16: return "he's never the same element twice.";
+	case 18: return "he commands an army, and ends fights with a single stroke.";
+	default: return NULL;
+	}
+}
+
 const Guardian *guardian(int navi) {
 	static const Guardian unknown = { "???", "Guardian", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 200 };
 	return navi > 0 && navi < NGUARDIANS && guardians[navi].name ? &guardians[navi] : &unknown;

@@ -366,8 +366,14 @@ static const char *status_words(void) {
 			const Rival *rv = rival(D.objs.guardian.navi);
 			const char *tip = guardian_tip(D.objs.guardian.navi);
 			ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
+			const char *rumor = guardian_rumor(D.objs.guardian.navi);
 			if (tip && rv->megaman_won + rv->navi_won > 0) ADD("@M We've got battle data on him from before:|@M %s|", tip);
-			else ADD("@M We've never fought this copy, Lan, so we don't know its moves. Watch the yellow panels: they light where an attack will land!|");
+			else {
+				/* (the net's gossip, a name's worth of insight) */
+				if (rumor) ADD("@M We don't know this copy's moves yet, Lan. Word on the net is, %s|", rumor);
+				else ADD("@M We don't know this copy's moves yet, Lan.|");
+				ADD("@M Watch the yellow panels: they light where an attack will land!|");
+			}
 		}
 		/* (not after the act's arrival words, which named him; a CONTINUE
 		 * does not say them again, and there he is named) */

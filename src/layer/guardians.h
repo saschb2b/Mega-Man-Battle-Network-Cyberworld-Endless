@@ -31,6 +31,10 @@ const char *guardian_defeat(int navi);
  * before the arena (a playtester met EraseMan's ghosts and his erasing
  * blow unwarned); NULL where there is nothing to add. */
 const char *guardian_tip(int navi);
+/* What the net says of guardian `navi`, for a first meeting (the clause
+ * after "Word on the net is, "): true, vague, no moves (docs/META.md, what
+ * MegaMan knows). NULL for none. */
+const char *guardian_rumor(int navi);
 /* A guardian's overworld sprite (list 6): its own where Gregar has one,
  * else a HeelNavi's (Falzar's Navis, BlastMan, ElementMan). */
 #define GUARDIAN_HEEL_SPRITE 0x43

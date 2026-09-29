@@ -646,6 +646,14 @@ static void test_talk(void) {
 		check_talk(what, guardian_defeat(navi));
 		snprintf(what, sizeof what, "guardian_tip(%d)", navi);
 		check_talk(what, guardian_tip(navi));
+		/* (a first meeting's words, as the briefing puts them) */
+		if (guardian_rumor(navi)) {
+			char line[256];
+			snprintf(line, sizeof line, "We don't know this copy's moves yet, Lan. Word on the net is, %s", guardian_rumor(navi));
+			snprintf(what, sizeof what, "guardian_rumor(%d)", navi);
+			check_talk(what, line);
+		}
+		CHECK(guardian_rumor(navi) || navi == 17 || navi > 18, "guardian %d has no rumor", navi);
 		/* (MegaMan warns of every guardian a run can meet) */
 		CHECK(guardian_tip(navi) || navi == 17 || navi > 18, "guardian %d has no tip", navi);
 		for (int depth = 3; depth <= 19; depth += 3) {
