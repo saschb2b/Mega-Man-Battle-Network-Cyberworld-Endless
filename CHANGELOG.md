@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Dad's mails read in BN6's own mail form (its MESSAGE band, white box,
+  Dad's face as a photo, then MegaMan's): they had drawn as a map chat,
+  their band garbled. The SciLab link's records show in gold the
+  guardians whose code MegaMan holds, which NaviCode now points to past
+  two, and LibCard says it is a collector's vault that opens at its
+  number.
 - The PET's E-Mail holds a mail from Dad for every guardian MegaMan has
   battled, in any run: his battle data, the guardian's warning in
   MegaMan's words, to read again any time. A guardian battled for the

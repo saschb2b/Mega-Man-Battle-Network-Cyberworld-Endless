@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "layer_objs.h"
 #include "meta.h"
 #include "net.h"
 #include "platform.h"
@@ -149,12 +150,13 @@ static void draw_records(int x0, int y0, int page) {
 		int y = y0 + 27 + at * 12;
 		char v[32];
 		snprintf(v, sizeof v, "won %d, lost %d", r->megaman_won, r->navi_won);
-		text_draw(x0 + 20, y, guardian(navis[i])->name, WHITE, TEXT_LEFT);
+		/* (his code held, deleted twice: in gold, as NaviCode says) */
+		text_draw(x0 + 20, y, guardian(navis[i])->name, r->megaman_won >= GATE_CODE ? GOLD : WHITE, TEXT_LEFT);
 		text_draw(x0 + 108, y, v, r->megaman_won >= r->navi_won ? SKY : ORANGE, TEXT_LEFT);
 	}
 	char v[48];
 	if (!met) snprintf(v, sizeof v, "No guardian met yet");
-	else snprintf(v, sizeof v, "%d of %d guardians met", met, (int)sizeof navis);
+	else snprintf(v, sizeof v, "%d of %d met, in gold his code", met, (int)sizeof navis);
 	text_draw(x0 + CORE_W / 2, y0 + 126, v, DIM, TEXT_CENTER);
 	if (profile.best_depth) snprintf(v, sizeof v, "Best: layer %d, Nest won %d", profile.best_depth, profile.nest_clears);
 	else snprintf(v, sizeof v, "The first dive");

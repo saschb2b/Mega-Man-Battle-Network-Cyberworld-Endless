@@ -130,7 +130,9 @@ static int codes_known(char *text, int size) {
 	if (!n) snprintf(text, (size_t)size, "No guardian's code yet: delete one twice for his.");
 	else if (n == 1) snprintf(text, (size_t)size, "%s's code. It opens the gate sealed with it.", guardian(first)->name);
 	else if (n == 2) snprintf(text, (size_t)size, "%s's and %s's codes: each opens its gate.", guardian(first)->name, guardian(second)->name);
-	else snprintf(text, (size_t)size, "%d codes: %s, %s and more.", n, guardian(first)->name, guardian(second)->name);
+	/* (all of them in gold in the SciLab link's records: a playtester asked
+	 * whose the other two of four were) */
+	else snprintf(text, (size_t)size, "%d codes, in gold in the SciLab link's records.", n);
 	return n;
 }
 
@@ -148,7 +150,9 @@ static void install_descriptions(void) {
 	codes_known(text, sizeof text);
 	rep[ITEM_CODES] = (Script){ codes, description(v31, text, codes, sizeof codes) };
 	rep[ITEM_PASS] = (Script){ pass, description(v31, "Clearing the Secret Area opened the dark way to the Undernet.", pass, sizeof pass) };
-	snprintf(text, sizeof text, "The Library holds %d chips. Vaults here open at %d.", meta_library_count(-1), meta_vault_need(run.depth));
+	/* (a collector's vault's need, on this layer: "vaults here" read as a
+	 * place) */
+	snprintf(text, sizeof text, "Library: %d chips. Collector's vaults open at %d now.", meta_library_count(-1), meta_vault_need(run.depth));
 	rep[ITEM_LIBRARY] = (Script){ library, description(v31, text, library, sizeof library) };
 	int size = rebuild(src, len, n, rep, out, sizeof out);
 	free(src);
@@ -198,21 +202,58 @@ static void item_set(int id, int count) {
  * story's, which a run never delivers) */
 static bool mail_of(int navi) { return navi >= 1 && navi <= 18 && navi != 17 && guardian_tip(navi); }
 
+/* `s` into a mail's pages: lines of twenty letters at most, three a page,
+ * a page's end waiting and clearing (E7 00 F2) as BN6's mails do; the
+ * bytes written, or -1 where they would not fit. */
+static int mail_pages(const char *s, uint8_t *out, int max) {
+	int k = 0, lines = 0;
+	char line[32];
+	const char *p = s;
+	while (*p) {
+		int n = (int)strlen(p) > 20 ? 20 : (int)strlen(p);
+		if (p[n]) { int c = n; while (c > 0 && p[c] != ' ') --c; if (c > 0) n = c; }
+		if (k + 40 > max) return -1;
+		if (lines == 3) { out[k++] = 0xE7; out[k++] = 0x00; out[k++] = 0xF2; lines = 0; }
+		else if (lines) out[k++] = 0xE9;
+		snprintf(line, sizeof line, "%.*s", n, p);
+		k += ta_encode(line, out + k, max - k - 8);
+		p += n;
+		while (*p == ' ') ++p;
+		++lines;
+	}
+	return k;
+}
+
+/* A guardian's mail: Dad's face and words, then MegaMan's, the warning as
+ * he logged it (the briefing's: the tip's boxes, "|@M " apart), in BN6's
+ * own mail form (a face set up with FC 06 and F5 02/03, the box opened
+ * with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its
+ * banner garbled). */
 static int mail_body(int navi, uint8_t *out, int max) {
-	static TextArchive t;
-	char boxes[900];
-	/* (the tip in MegaMan's words, as his warning says it: Dad forwards it) */
-	snprintf(boxes, sizeof boxes, "@D Lan, I sorted out MegaMan's battle data on %s's copy. Here it is, as he logged it.|@M %s",
-		guardian(navi)->name, guardian_tip(navi));
-	ta_begin(&t);
-	ta_script(&t);
-	bool first = true;
-	ta_pages(&t, boxes, FACE_DAD, &first);
-	static const uint8_t end[] = { 0xEE, 0xFF, 0x00, 0x00 };
-	ta_bytes(&t, end, sizeof end);
-	if (t.full || t.len > max) return 0;
-	memcpy(out, t.buf, (size_t)t.len);
-	return t.len;
+	static const uint8_t dad[] = { 0xFC, 0x06, 0xF5, 0x00, FACE_DAD, 0xF5, 0x02, 0x01, 0xF5, 0x03, 0x00, 0xE8, 0x10 };
+	static const uint8_t turn[] = { 0xE7, 0x00, 0xF2, 0xF5, 0x00, FACE_MEGAMAN }, next[] = { 0xE7, 0x00, 0xF2 },
+		end[] = { 0xE7, 0x00, 0xEE, 0xFF, 0x00, 0x00 };
+	char s[400];
+	int k = 0, n;
+	#define PUT(b) do { if (k + (int)sizeof b > max) return 0; memcpy(out + k, b, sizeof b); k += (int)sizeof b; } while (0)
+	PUT(dad);
+	snprintf(s, sizeof s, "Lan, I sorted out MegaMan's battle data on %s's copy. Here it is, as he logged it.", guardian(navi)->name);
+	if ((n = mail_pages(s, out + k, max - k)) < 0) return 0;
+	k += n;
+	PUT(turn);
+	const char *tip = guardian_tip(navi);
+	for (bool first = true; tip && *tip; first = false) {
+		const char *bar = strstr(tip, "|@M ");
+		int len = bar ? (int)(bar - tip) : (int)strlen(tip);
+		snprintf(s, sizeof s, "%.*s", len, tip);
+		if (!first) PUT(next);
+		if ((n = mail_pages(s, out + k, max - k)) < 0) return 0;
+		k += n;
+		tip = bar ? bar + 4 : NULL;
+	}
+	PUT(end);
+	#undef PUT
+	return k;
 }
 
 static void install_mails(void) {
