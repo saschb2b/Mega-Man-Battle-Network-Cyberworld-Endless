@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- After a run that opened something (a folder, a Cross start, a threat
+  rung, the endless net), the setup opens on that row, with NEW beside it,
+  until the next jack-in: a playtester's A went through a setup that showed
+  none of his new SlashCross start, the cursor on JACK IN!.
 - The Blade and Storm folders' chips that BN6's Standard folder lacks
   (LongSwrd, PanlGrab, Barrier, Thunder and the rest) play: they came up
   blank in a new run's hands, with no name and no effect, since BN6 takes a

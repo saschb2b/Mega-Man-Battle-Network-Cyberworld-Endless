@@ -59,6 +59,10 @@ bool meta_dark_way_open(void);
  * (docs/META.md, gates): more in each act. */
 int meta_vault_need(int depth);
 
+/* The setup's rows with news since the last summary (profile.setup_new):
+ * the setup opens on the first, marked NEW, until the next jack-in. */
+enum { SETUP_NEW_NET = 1, SETUP_NEW_FOLDER = 2, SETUP_NEW_CROSS = 4, SETUP_NEW_THREAT = 8 };
+
 /* A new run's start: what earlier runs opened is no news on its summary
  * (a folder earned in a run that never reached one was announced late, as
  * if the run after had opened it). */

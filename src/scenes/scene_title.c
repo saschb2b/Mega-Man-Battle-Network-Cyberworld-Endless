@@ -329,9 +329,21 @@ static const char *const helper_about[3] = {
 	"Two more HPMemory at start", "A heal Prog on every layer", "Gentler battles all along",
 };
 
+/* the rows the last summary's unlocks are on (profile.setup_new) */
+static int row_new(int row) {
+	int bit = row == ROW_NET ? SETUP_NEW_NET : row == ROW_FOLDER ? SETUP_NEW_FOLDER : row == ROW_CROSS ? SETUP_NEW_CROSS
+		: row == ROW_THREAT ? SETUP_NEW_THREAT : 0;
+	return profile.setup_new & bit;
+}
+
 static void setup_open(void) {
 	S.setup = true;
 	S.row = ROW_GO;
+	/* (on the row of what the last run opened, as a new unlock is spent
+	 * here: a playtester's A went through a setup that showed none of his
+	 * new SlashCross start, the cursor on JACK IN!; else JACK IN!, for the
+	 * run again as before) */
+	for (int r = ROW_GO - 1; r >= 0; --r) if (row_new(r)) S.row = r;
 	S.net = profile.last_net == RUN_ENDLESS && meta_endless_open() ? RUN_ENDLESS : RUN_SHORT;
 	S.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
 	S.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
@@ -372,6 +384,7 @@ static void setup_update(void) {
 	profile.last_cross = (uint8_t)S.cross;
 	profile.last_threat = (uint8_t)S.threat;
 	profile.last_helpers = (uint8_t)S.helpers;
+	profile.setup_new = 0;
 	profile_save();
 	S.setup = false;
 	jack_in();
@@ -431,6 +444,12 @@ static void setup_draw(int x0, int y0) {
 	text_draw(lx, y0 + ry[ROW_THREAT], "Threat", WHITE, TEXT_LEFT);
 	snprintf(v, sizeof v, "%d", S.threat);
 	choice_draw(vx, y0 + ry[ROW_THREAT], v, S.threat ? orange : WHITE, meta_threat_open() > 0);
+	/* what the last summary announced: NEW beside its row */
+	for (int r = 0; r < ROW_HELPERS; ++r)
+		if (row_new(r)) {
+			static const char *const label[] = { "Net", "Folder", "Cross", "Threat" };
+			text_draw(lx + text_width(label[r]) + 6, y0 + ry[r], "NEW", gold, TEXT_LEFT);
+		}
 	/* the helpers, each on or off */
 	text_draw(lx, y0 + ry[ROW_HELPERS], "Help", WHITE, TEXT_LEFT);
 	static const int hxs[3] = { 100, 146, 196 };

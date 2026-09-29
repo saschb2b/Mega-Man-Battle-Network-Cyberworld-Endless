@@ -167,7 +167,7 @@ void meta_run_over(bool won) {
 	nsaid = 0;
 	marks_new = 0;
 	/* the endless net, once a short one is won */
-	if (won && run.mode == RUN_SHORT && !meta_endless_open()) say("%s", "the endless net");
+	if (won && run.mode == RUN_SHORT && !meta_endless_open()) { say("%s", "the endless net"); profile.setup_new |= SETUP_NEW_NET; }
 	if (won) profile.short_wins += run.mode == RUN_SHORT;
 	/* the next threat rung, once the Nest falls on this one */
 	if (won && run.threat >= meta_threat_open() && run.threat < THREAT_MAX) {
@@ -175,6 +175,7 @@ void meta_run_over(bool won) {
 		static char rung[24];
 		snprintf(rung, sizeof rung, "threat %d", run.threat + 1);
 		say("%s", rung);
+		profile.setup_new |= SETUP_NEW_THREAT;
 	}
 	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark") */
 	static const struct { int bit; const char *what; } marks[] = {
@@ -201,12 +202,14 @@ void meta_run_over(bool won) {
 		if ((profile.folders_open >> f & 1) || !earned(f)) continue;
 		profile.folders_open |= (uint16_t)(1u << f);
 		say("the %s folder", folders[f].name);
+		profile.setup_new |= SETUP_NEW_FOLDER;
 	}
 	/* a Cross start, once its navi falls as a guardian */
 	for (int n = 1; n <= 5; ++n) {
 		if ((profile.crosses_open >> n & 1) || !cross_earned(n)) continue;
 		profile.crosses_open |= (uint8_t)(1u << n);
 		say("the %s start", powers_cross_name(n));
+		profile.setup_new |= SETUP_NEW_CROSS;
 	}
 	profile_save();
 }
