@@ -318,7 +318,8 @@ layer 19 is the Underground. After that the cycle starts again, harder.
   HPMemory, a ★3 chip or a NaviCust program. If your last run ended before
   its first guardian, he adds an HPMemory.
 - **Guardian Data.** Every guardian leaves five HPMemory (+100 max HP), its
-  own Navi chip at the version you beat, and its Cross where it has one.
+  own Navi chip at the version you beat (in `*` where BN6 has one and your
+  folder doesn't use its letter), and its Cross where it has one.
   Taking it also restores MegaMan's HP.
 - **The NaviCust.** Guardian Data also offers three NaviCust programs, one
   from each of three builds (buster, hand, guard, field, HP), or BugFrags

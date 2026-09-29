@@ -951,7 +951,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 39
+#define LAYER_MAKE 40
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -2010,7 +2010,9 @@ static bool follow_exit_warp(void) {
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
 static void dev_talks(void) {
 	static unsigned done;
-	if (D.frame <= 1) done = 0;
+	static uint32_t layer_of;
+	/* (each layer's own: the talks of a later layer too) */
+	if (D.frame <= 1 || run.layer_seed != layer_of) { done = 0; layer_of = run.layer_seed; }
 	if (!director_dev_talks || talk_busy() || emu_read8(BN6_CHATBOX)) return;
 	static const struct { const char *name; int type; } kinds[] = {
 		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },

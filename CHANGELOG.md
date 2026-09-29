@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A guardian's Navi chip comes in * where BN6 has one (the V1 chips) and the
+  folder doesn't use its letter: a playtester's Blade folder of S, L and *
+  took a BlastMan B it could not play.
 - A Guardian Data draft offers only NaviCust programs that fit beside those
   on MegaMan's board, each in a colour that fits too, on the board it
   leaves. A playtester was offered SuprArmr beside the gift's Custom1 on the

@@ -3,6 +3,7 @@
 #include "guardian_objs.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "data.h"
 #include "debug.h"
@@ -46,7 +47,14 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	ChipInfo ci = { 0 };
 	if (chip > 0) {
 		chip_info(chip, &ci);
-		if (ci.ncodes) code = ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A';
+		/* (its letter where the folder holds it, else its * where BN6 has
+		 * one, the V1 chips: a playtester's Blade folder of S, L and * took
+		 * a BlastMan B it could not play) */
+		char c = ci.ncodes ? ci.codes[0] : '*';
+		bool held = false;
+		for (int k = 0; k < 3 && run.codes[k]; ++k) held |= c == 'A' + run.codes[k] - 1;
+		if (!held && memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
+		code = c == '*' ? 26 : c - 'A';
 	}
 	/* the NaviCust's part (docs/NAVICUST.md): an ExpMemry at the second
 	 * and fourth acts' guardians, and a draft of three programs, or none
