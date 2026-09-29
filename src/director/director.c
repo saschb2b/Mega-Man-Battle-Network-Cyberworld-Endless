@@ -729,10 +729,34 @@ static void own_folder_chips(void) {
 	}
 }
 
+/* A folder entry's count in the pack (bn6f getOffsetToQuantityOfChipCode:
+ * the code's place among the chip record's four, else the first) */
+static uint32_t pack_count_at(uint32_t pack, int entry) {
+	int id = entry & 0x1FF, code = entry >> 9, slot = 0;
+	uint32_t rec = R.layout->chip_data + (uint32_t)id * 0x2C;
+	for (int k = 0; k < 4; ++k) if (R.data[rec + (uint32_t)k] == code) { slot = k; break; }
+	return pack + 12u * (uint32_t)id + (uint32_t)slot;
+}
+
 static void set_start_folder(void) {
 	const uint16_t *chips = meta_folder_chips(run.folder);
-	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (!chips || data < 0x02000000u || data >= 0x02040000u) return;
+	/* the pack as if this folder had been given at NEW GAME, not the
+	 * Standard one (GiveFolder counts a folder's chips in the pack): a
+	 * playtester's Blade run kept the Standard folder's CrakShot and
+	 * Cannons as spares, and the folder's promise with them (session 31) */
+	bool counts = pack >= 0x02000000u && pack < 0x02040000u && R.data;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES && counts; ++i) {
+		uint32_t at = pack_count_at(pack, emu_read16(data + 2u * (uint32_t)i));
+		int n = emu_read8(at);
+		if (n > 0) emu_write8(at, (uint8_t)(n - 1));
+	}
+	for (int i = 0; i < BN6_FOLDER_ENTRIES && counts; ++i) {
+		uint32_t at = pack_count_at(pack, chips[i]);
+		int n = emu_read8(at);
+		if (n < 99) emu_write8(at, (uint8_t)(n + 1));
+	}
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint8_t b[2] = { (uint8_t)chips[i], (uint8_t)(chips[i] >> 8) };
 		emu_write(data + 2u * (uint32_t)i, b, 2);

@@ -90,6 +90,11 @@ milestone that teaches its style, never by a count to grind.
 | Busting | Heavy hitters, no Recovery chips | Every heal comes from the net | Clear an act without a Recovery chip |
 | Lean | Few kinds of chip, codes aligned for big hands | Little coverage | Reach layer 10 |
 
+A folder is what the run brings: the pack starts as BN6's would have after
+NEW GAME gave that folder (its chips counted, marked as given), not with
+the Standard folder's chips as spares, which let a Blade run slot in
+CrakShot and Cannons and so lose its cost (session 31).
+
 ### 2. Starting as a Cross (MegaMan's axis)
 
 A Navi deleted in any run lets later runs start in its Cross (HeatCross,

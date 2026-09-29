@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A run with the Blade or Storm folder starts with the pack as BN6 would
+  have it after giving that folder at NEW GAME: the Standard folder's chips
+  are no longer spares in it (a playtester's Blade run slotted in its
+  CrakShot and Cannons, and "nothing reaches the back" with them).
 - A new run's first area and guardian avoid the last two runs' where they
   can, so any three runs running open in all three opening areas: avoiding
   the last run's alone let two of them take turns, and a playtester met the
