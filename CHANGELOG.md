@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- MegaMan knows a guardian only once he has fought it. Meeting a copy the
+  first time, he has no battle data on it: L names it and says to watch
+  the yellow panels, where every attack lands. From the second meeting,
+  in any run, he briefs its moves and when a hit lands "from battle data".
+  The area's warnings about ScarCrows and DarkMechs likewise come once
+  those viruses have been battled. The briefings had recited a copy's
+  moves before MegaMan could know them, and spent the first fight's
+  discovery.
 - A won run ends with words on the map and BN6's staff roll theme: as the
   short net's last guardian's exit opens, MegaMan and Lan say the net has
   gone quiet and they did it, and the summary plays the credits' song,

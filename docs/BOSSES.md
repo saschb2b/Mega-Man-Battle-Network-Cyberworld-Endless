@@ -19,6 +19,7 @@ or drawn over its frame by `src/director/cinema.c`.
 | A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (its Cross or BeastOut with MegaMan's and Dad's words, five HPMemory, its own Navi chip at the version fought, a full heal); taking it makes the exit pad appear |
 | Stairs into the next region, its name on screen | An area-clear card (guardian, viruses, time) over the jack-out, then the next area's title card |
 | Bosses remember runs | `rivals.sav` counts meetings and who won each battle, per Navi |
+| The Codex fills as you meet things | MegaMan briefs a guardian's moves, and when a hit lands, only once they have fought that copy in any run (its `rivals.sav` record); a first meeting says they have no battle data, and to watch the yellow panels (docs/META.md, what MegaMan knows) |
 
 Not taken: arenas that change during the fight and extra phases, which
 would mean changing the game's battles themselves.

@@ -42,11 +42,20 @@ typedef struct {
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
 	uint8_t area_before, guardian_before;   /* the run before the last one's first area and guardian (+ 1) */
+	/* the virus families MegaMan has battled in any run, a bit each: the
+	 * PET's battle data on them, which his warnings read (a guardian's is
+	 * its rivals.sav record) */
+	uint32_t families_fought[2];
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };
 
 extern Profile profile;
+
+/* Whether MegaMan has battled virus family `fam` in any run; noted as a
+ * battle with it ends. */
+bool profile_family_fought(int fam);
+void profile_family_note(int fam);
 
 void save_init(void);
 bool save_exists(void);

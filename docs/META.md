@@ -412,6 +412,39 @@ the folder's codes as they roll); a Cross start picked every time (the playtests
 start nobody passes on needs a larger cost); the Library read as a grind
 (it is optional, its marks trophies, and the traders turn it into play).
 
+## What MegaMan knows (29 September 2026)
+
+Read through the resonance lens (describe the loop without its fiction,
+then ask whether it still tells a story about this character): L's
+briefing recited a guardian's moves, and when to hit it, before MegaMan
+had ever met the copy. As a loop, "the game explains the boss, then you
+fight it"; as a story, MegaMan knowing a stranger's moveset: dissonant,
+and it spent the first fight's discovery (Koster's fun is learning; FF7
+Remake teaches a new enemy by fighting it). Battle Network's resonance is
+that its verbs are literal programmer verbs, so knowledge here is data:
+the PET's battle data on a copy exists once they have fought it.
+
+- **Guardians.** A first meeting (no battle with that Navi in any run,
+  rivals.sav) names the guardian and says they have no battle data on
+  the copy, and to watch the yellow panels, the net's own telegraph for
+  every attack. From the second meeting on, MegaMan briefs its moves and
+  when a hit lands, from "battle data from before".
+- **Virus families.** The area's warnings for the viruses BN6 never
+  explains (ScarCrows healed by Elec, DarkMechs warping in to slash) come
+  once the family has been battled in any run (the profile's
+  `families_fought`, noted as each battle ends).
+- **Kept, as resonant:** what MegaMan can sense or read (the services on
+  a layer, a strong virus signal's strength, who guards an area and his
+  element, the act card), the net's physics he knows as any Navi does
+  (ice, conveyors, elements), what data says of itself (a ScrtData, a
+  Cross), and what others tell (the dealer's "word is" about a
+  guardian's weakness, the townsfolk). The setup's notes are a menu
+  outside the fiction.
+
+The knowledge carries between runs as the player's does, a meta layer of
+its own: what you bring now includes what you have learned, and a second
+run's guardians meet a MegaMan who knows them.
+
 ## The title's marks
 
 BN6 draws marks over its title for what a save has done: its ending, its

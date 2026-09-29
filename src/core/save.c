@@ -139,6 +139,9 @@ void save_delete(void) {
 
 void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }
 
+bool profile_family_fought(int fam) { return fam >= 0 && fam < 64 && (profile.families_fought[fam >> 5] >> (fam & 31) & 1); }
+void profile_family_note(int fam) { if (fam >= 0 && fam < 64) profile.families_fought[fam >> 5] |= 1u << (fam & 31); }
+
 void run_new_varied(uint32_t seed) {
 	run_new(seed);
 	/* (one retry left the same guardian a time in three: DiveMan guarded

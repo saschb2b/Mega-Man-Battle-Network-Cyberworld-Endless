@@ -37,6 +37,7 @@
 #include "rom.h"
 #include "platform.h"
 #include "powers.h"
+#include "rivals.h"
 #include "run.h"
 #include "runlog.h"
 #include "meta.h"
@@ -357,9 +358,16 @@ static const char *status_words(void) {
 		const char *area = guardian_area_in_text(run.biome, run.side_kind);
 		ADD("@M Layer %d, Lan: %s.", run.depth, area);
 		if (D.objs.guardian.navi && !boss_beaten()) {
-			ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
+			/* how he fights once they have fought him, in any run: before
+			 * that MegaMan has no battle data on the copy, and reciting its
+			 * moves would spend the first fight's discovery (and how could
+			 * he know?); what he always knows is the net's own grammar, the
+			 * yellow panels that light where an attack will land */
+			const Rival *rv = rival(D.objs.guardian.navi);
 			const char *tip = guardian_tip(D.objs.guardian.navi);
-			if (tip) ADD("@M %s|", tip);
+			ADD(" %s waits at its end!|", guardian(D.objs.guardian.navi)->name);
+			if (tip && rv->megaman_won + rv->navi_won > 0) ADD("@M We've got battle data on him from before:|@M %s|", tip);
+			else ADD("@M We've never fought this copy, Lan, so we don't know its moves. Watch the yellow panels: they light where an attack will land!|");
 		}
 		/* (not after the act's arrival words, which named him; a CONTINUE
 		 * does not say them again, and there he is named) */
@@ -379,11 +387,13 @@ static const char *status_words(void) {
 		 * the act or a side layer begins: a playtester's Thunder healed a
 		 * ScarCrow to full, and two DarkMechs took 460 HP before he knew) */
 		if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) {
+			/* (once they have been battled, in any run: the first meeting
+			 * is theirs to show) */
 			uint32_t fams = loot_families_here(run.depth, run.biome);
-			if (fams & (1u << FAMILY_SCARCROW))
-				ADD("@M Watch the ScarCrows here: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|");
-			if (fams & (1u << FAMILY_DARKMECH))
-				ADD("@M DarkMechs lurk here. They warp right beside us to slash, so keep moving and strike as they appear!|");
+			if (fams & (1u << FAMILY_SCARCROW) && profile_family_fought(FAMILY_SCARCROW))
+				ADD("@M ScarCrows here again: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|");
+			if (fams & (1u << FAMILY_DARKMECH) && profile_family_fought(FAMILY_DARKMECH))
+				ADD("@M DarkMechs here again. They warp right beside us to slash, so keep moving and strike as they appear!|");
 		}
 		/* (what they are for: a playtester carried two and never learned;
 		 * once per count, the next heard it on every layer) */
@@ -2396,6 +2406,12 @@ void director_update(void) {
 		D.placed_told = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		runlog_battle_end(won);
+		/* the PET's battle data on the viruses just fought */
+		if (!boss_fighting()) {
+			for (int i = 0; i < D.next.nfoes; ++i)
+				if (D.next.foes[i].kind == FOE_VIRUS) profile_family_note(D.next.foes[i].family);
+			profile_save();
+		}
 		if (emu_debug_on() && won) {
 			int r = emu_read16(BN6_BATTLE_REWARD);
 			if (r >> 14 == 0 && r != 0xFFFF) {
