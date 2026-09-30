@@ -78,5 +78,8 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
  * the colours whose Spins are held (navicust_set_spins); for `variant`
  * (program * 4 + v, 0 for any), whether that one turns. */
 const char *navicust_turn_words(int variant);
+/* The same for a program of colour c (1-6): whether L and R turn it, by
+ * the Spins held; "" for none. */
+const char *navicust_color_turns(int c);
 
 #endif

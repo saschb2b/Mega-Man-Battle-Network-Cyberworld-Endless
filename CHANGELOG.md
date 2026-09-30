@@ -13,6 +13,10 @@
   away from where his pink mark lies ("down and to the right, far off,
   though the way there winds"), as it says for a heal or a Net Dealer:
   it had measured the way as the crow flies, "close by" across a gap.
+- A Guardian Data's program, once picked, comes with whether L and R
+  turn it ("L and R won't turn it: that takes the pink Spin, and we
+  don't have it"), where a playtester looked for it; the reminder later
+  had said it alone.
 - Lan answers Chaud's call about the netbattle ("We'll be ready,
   Chaud!"), as he answers the races' calls: it had read as a message
   left.

@@ -322,27 +322,32 @@ int navicust_skip_frags(int depth) { return 10 + 5 * (pacing_act(depth) + 7 * pa
 
 bool navicust_expmemry(int depth) { return depth == 6 || depth == 12; }
 
+/* (BN6's own rule: a program turns only where its colour's Spin is held;
+ * MegaMan had said L and R turn a program, and a playtester with no Spin
+ * spent twenty calls pressing them, docs/NAVICUST.md 8) */
+static const char *const spin_names[7] = { "", "white", "yellow", "pink", "red", "blue", "green" };
+
+const char *navicust_color_turns(int c) {
+	static char buf[120];
+	if (c < 1 || c > 6) return "";
+	if (spins >> (c - 1) & 1) snprintf(buf, sizeof buf, "L and R turn it as we place it: we hold the %s Spin.", spin_names[c]);
+	else snprintf(buf, sizeof buf, "L and R won't turn it: that takes the %s Spin, and we don't have it.", spin_names[c]);
+	return buf;
+}
+
 const char *navicust_turn_words(int variant) {
-	/* (BN6's own rule: a program turns only where its colour's Spin is
-	 * held; MegaMan had said L and R turn a program, and a playtester with
-	 * no Spin spent twenty calls pressing them, docs/NAVICUST.md 8) */
-	static const char *const names[7] = { "", "white", "yellow", "pink", "red", "blue", "green" };
 	static char buf[160];
 	int c = 0, held = 0;
 	if (variant > 0 && variant < 47 * 4 && R.data && R.layout && R.layout->navicust_programs)
 		c = R.data[R.layout->navicust_programs + (uint32_t)variant * 16 + 3];
-	if (c >= 1 && c <= 6) {
-		if (spins >> (c - 1) & 1) snprintf(buf, sizeof buf, "L and R turn it as we place it: we hold the %s Spin.", names[c]);
-		else snprintf(buf, sizeof buf, "L and R won't turn it: that takes the %s Spin, and we don't have it.", names[c]);
-		return buf;
-	}
+	if (c >= 1 && c <= 6) return navicust_color_turns(c);
 	for (int k = 1; k <= 6; ++k) held += spins >> (k - 1) & 1;
 	if (!held) return "A program turns with L and R only once we hold a Spin of its color, and we have none yet.";
 	if (held == 6) return "L and R turn a program as we place it from the list.";
 	int k = snprintf(buf, sizeof buf, "L and R turn only "), n = 0;
 	for (int i = 1; i <= 6; ++i)
 		if (spins >> (i - 1) & 1)
-			k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s", n++ == 0 ? "" : n == held ? " and " : ", ", names[i]);
+			k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s", n++ == 0 ? "" : n == held ? " and " : ", ", spin_names[i]);
 	snprintf(buf + k, sizeof buf - (size_t)k, " programs as we place them: we hold %s.", held == 1 ? "that Spin" : "those Spins");
 	return buf;
 }

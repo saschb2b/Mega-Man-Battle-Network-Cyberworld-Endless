@@ -330,8 +330,11 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	ta_text(t, "\"!!");
 	ta_wait(t);
 	/* (every time: a returning playtester, told once runs before, left
-	 * one off the board for two acts) */
-	ta_page(t, FACE_MEGAMAN, "Let's install it, Lan! In the PET: MegaMan, then NaviCust.", false);
+	 * one off the board for two acts; and whether L and R turn it, which
+	 * a playtester looked for here) */
+	char install[200];
+	snprintf(install, sizeof install, "Let's install it, Lan! In the PET: MegaMan, then NaviCust. %s", navicust_color_turns(color));
+	ta_page(t, FACE_MEGAMAN, install, false);
 	(void)teach;
 	flag_set(t, taken_flag);
 	end_or(t, next);
