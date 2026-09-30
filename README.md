@@ -244,9 +244,11 @@ browser's own storage (IndexedDB); it is never uploaded. Next time **Play**
 starts straight away. **Forget ROM and saves** removes both.
 
 On a phone or tablet the game fills the screen and draws its own buttons
-round the picture: a D-pad, A, B, L, R, Start and Select, under the picture
-when the phone is upright and beside it when it lies on its side. A
-controller or a keyboard puts them away until the screen is touched again.
+round the picture, sized for a thumb: a D-pad, A, B, L, R, Start and
+Select, under the picture when the phone is upright and beside it when it
+lies on its side, and a MENU button that sizes and moves them (see
+[Playing](#playing)). A controller or a keyboard puts them away until the
+screen is touched again.
 Added to the home screen (the browser's *Add to Home screen* or *Install*),
 it opens full screen like an app.
 
@@ -276,10 +278,17 @@ on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
 quits. Controllers use their own buttons (A, B, shoulders, Start, Back);
 holding Back and Start for a second, twice, quits. A touch screen shows the
 buttons on it from its first touch (a Steam Deck's too), until a key or a
-controller is used again. **EDIT CONTROLS** on the title screen arranges
-them: drag a button to move it, **-** and **+** size the one you touched
-last, **RESET** puts them back, **DONE** keeps them (in `touch.ini`, one
-arrangement for the phone upright and one on its side).
+controller is used again. The D-pad takes diagonals where MegaMan walks
+(the net's walkways run along them) and four directions in battles and
+menus. Their **MENU** button pauses the game and opens their menu:
+**SIZE** and **OPACITY** of them all, **HAPTICS** (a tick under the thumb,
+on Android and in browsers that can), and **EDIT LAYOUT**: tap a button to
+choose it, drag it where your thumb wants it, pinch it or drag a corner to
+size it, give it its own opacity, or take a preset (**DEFAULT**,
+**LEFT-HANDED**, **COMPACT**, and **LARGE** where the screen has room);
+**DONE** keeps them, **CANCEL** leaves them as they were. The phone
+upright and on its side keep an arrangement each (`touch.ini` in the save
+folder).
 
 | Button | In the net | In battle |
 | --- | --- | --- |

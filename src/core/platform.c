@@ -71,20 +71,50 @@ static void blend_keep(void) {
 	if (blend_n < 2) ++blend_n;
 }
 
+static float forced_dpi;
+
+void platform_set_dpi(float dpi) { forced_dpi = dpi; }
+
+/* Screen pixels to a dp: Android's density (its dp), a page's device
+ * pixels to a CSS pixel, a display's dots per inch; where none is told, a
+ * handheld's screen of 400 dp across its short side, and never less than
+ * one of 800 (a desktop's claimed 96 dpi). */
+static float density(void) {
+	if (forced_dpi > 0) return forced_dpi / 160;
+	int short_side = P.screen_w < P.screen_h ? P.screen_w : P.screen_h;
+	float dp = 0;
+#ifdef __EMSCRIPTEN__
+	int ww = 0, wh = 0;
+	SDL_GetWindowSize(P.window, &ww, &wh);
+	if (ww > 0) dp = (float)P.screen_w / (float)ww;
+#elif !defined(__3DS__)
+	float ddpi = 0;
+	if (P.window && SDL_GetDisplayDPI(SDL_GetWindowDisplayIndex(P.window), &ddpi, NULL, NULL) == 0 && ddpi > 0) dp = ddpi / 160;
+	else dp = short_side / 400.f;
+#endif
+	if (dp < short_side / 800.f) dp = short_side / 800.f;
+	return dp > 0 ? dp : 1;
+}
+
 static void layout_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
-	if (touch_shown()) P.scale = touch_fit_scale(P.screen_w, P.screen_h, P.scale);
+	P.dp = density();
+	if (touch_shown()) P.scale = touch_fit_scale(P.screen_w, P.screen_h, P.dp, P.scale);
 	P.w = P.screen_w / P.scale;
 	P.h = P.screen_h / P.scale;
 	if (P.w < CORE_W) P.w = CORE_W;
 	if (P.h < CORE_H) P.h = CORE_H;
 	P.core_x = (P.w - CORE_W) / 2;
 	P.core_y = (P.h - CORE_H) / 2;
-	/* on a tall screen the touch controls take the room under the picture */
-	int top = touch_shown() ? touch_picture_top(P.w, P.h) : -1;
-	if (top >= 0) P.core_y = top;
+	/* on a tall screen the touch controls take the room under the picture,
+	 * which moves up clear of the status bar */
+	int top = touch_shown() ? touch_picture_top(P.screen_w, P.screen_h, P.dp, P.scale) : -1;
+	if (top >= 0) {
+		int oy = (P.screen_h - P.h * P.scale) / 2, y = (top - oy + P.scale - 1) / P.scale;
+		if (y >= 0 && y + CORE_H <= P.h) P.core_y = y;
+	}
 	touch_relayout();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
@@ -441,8 +471,10 @@ void platform_poll(void) {
 			/* (in a browser the page keeps Escape and fullscreen; Android's
 			 * Back is Escape) */
 			if ((e.key.keysym.scancode == SDL_SCANCODE_ESCAPE || e.key.keysym.scancode == SDL_SCANCODE_AC_BACK) && !e.key.repeat) {
-				/* the first Escape asks, the second within two seconds quits */
-				if (P.quit_prompt > 0) P.quit = true;
+				/* the touch controls' menu closes first; the first Escape
+				 * asks, the second within two seconds quits */
+				if (touch_back()) {}
+				else if (P.quit_prompt > 0) P.quit = true;
 				else { P.quit_prompt = 120; P.quit_pad = false; }
 			}
 			/* F11 or Alt+Enter: fullscreen and back */
@@ -459,6 +491,8 @@ void platform_poll(void) {
 			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) { key_bits = 0; touch_release(); }
 			break;
 		case SDL_APP_WILLENTERBACKGROUND: key_bits = 0; touch_release(); break;
+		/* (the renderer's textures lost: the controls' art is made again) */
+		case SDL_RENDER_DEVICE_RESET: touch_reset_art(); break;
 		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.scancode); break;
 		case SDL_CONTROLLERBUTTONDOWN:
 			pad_bits |= pad_button(e.cbutton.button);
@@ -584,6 +618,26 @@ static void log_present(void) {
 	}
 }
 
+static char screen_shot[256];
+
+void platform_shot_screen(const char *path) { snprintf(screen_shot, sizeof screen_shot, "%s", path); }
+
+/* The touch controls over the picture, at the screen's own pixels, and
+ * the screen saved whole when a test asks. */
+static void over_picture(void) {
+#ifndef __3DS__
+	touch_draw();
+#endif
+	if (!screen_shot[0]) return;
+	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, P.screen_w, P.screen_h, 32, SDL_PIXELFORMAT_ARGB8888);
+	if (s) {
+		SDL_RenderReadPixels(P.renderer, NULL, SDL_PIXELFORMAT_ARGB8888, s->pixels, s->pitch);
+		if (SDL_SaveBMP(s, screen_shot) != 0) fprintf(stderr, "screen shot %s: %s\n", screen_shot, SDL_GetError());
+		SDL_FreeSurface(s);
+	}
+	screen_shot[0] = 0;
+}
+
 void platform_present_blend(double w) {
 	/* (a display at a multiple of 60 Hz shows every frame for the same
 	 * refreshes: mixing would only show it a frame later) */
@@ -613,6 +667,7 @@ void platform_present_blend(double w) {
 		SDL_RenderCopy(P.renderer, cur, NULL, &dst);
 		SDL_SetTextureAlphaMod(cur, 255);
 	}
+	over_picture();
 #ifdef __3DS__
 	present3ds_frame(fill_3ds);
 #else
@@ -628,6 +683,7 @@ static void present_canvas(void) {
 	SDL_RenderClear(P.renderer);
 	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
 	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
+	over_picture();
 #ifdef __3DS__
 	present3ds_frame(fill_3ds);
 #else

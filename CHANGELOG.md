@@ -7,13 +7,22 @@
   order; from the netbattle, the official vault's three Mega chips), and
   MegaMan says it at the sealed gate. A playtester, five duels lost, took
   the gates for scenery.
-- **The touch buttons can be moved and sized.** EDIT CONTROLS on the title
-  screen (on a phone, a tablet, the browser on one, the Steam Deck's
-  screen): drag a button where your thumb wants it, - and + size the one
-  touched last (half to twice), RESET puts them back, DONE keeps them.
-  The phone upright and on its side each keep their own arrangement
-  (`touch.ini` in the save folder). A player asked to play on My Boy! for
-  its adjustable buttons.
+- **Touch controls, remade.** The D-pad and buttons are drawn at the
+  screen's own resolution as glass plates in the PET's colours, sized in
+  millimetres for a thumb on every phone (the D-pad 3 cm across, A and B
+  1.4 cm, smaller only where the screen has no room), each reaching a
+  little past its art; a pressed one glows, and ticks under the thumb on
+  Android and in browsers that can. The D-pad takes diagonals where
+  MegaMan walks, whose walkways run along them, and four directions in
+  battles and menus, where a diagonal only got in the way; a thumb on the
+  line between two directions keeps the one it holds. Their MENU button
+  pauses the game: size, opacity and haptics for them all, and EDIT
+  LAYOUT, where a button is chosen with a tap, dragged where the thumb
+  wants it, pinched or sized by a corner, given its own opacity, or laid
+  out by a preset (default, left-handed, compact, large where there is
+  room); DONE keeps it, CANCEL undoes it. The phone upright and on its
+  side keep an arrangement each (`touch.ini` in the save folder). A
+  player asked to play on My Boy! for its adjustable buttons.
 - The project page counts its visits with Umami, on its own domain only
   and without cookies. The release's web zip, to host elsewhere, carries
   no counter.

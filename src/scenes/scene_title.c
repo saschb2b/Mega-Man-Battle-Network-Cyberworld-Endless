@@ -512,8 +512,6 @@ static void setup_draw(int x0, int y0) {
 
 static void update(void) {
 	++S.t;
-	/* the touch controls' editor, at the title and its menu only */
-	touch_offer_edit(!S.leaving && !S.setup && !S.summary && !S.confirm);
 	if (S.leaving) {
 		++S.leaving;
 		if (S.jack_v < 96) S.jack_v += 4;

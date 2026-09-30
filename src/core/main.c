@@ -336,9 +336,9 @@ static void parse_script(const char *spec) {
 	script_left = script_len ? script[0].frames : 0;
 }
 
-/* --taps "FRAME:X,Y[>X2,Y2];...": a finger on the canvas at FRAME, held
- * six frames, or dragged to (X2, Y2) over twenty, then lifted (the touch
- * controls and their editor in headless tests) */
+/* --taps "FRAME:X,Y[>X2,Y2];...": a finger at screen pixel (X, Y) at
+ * FRAME, held six frames, or dragged to (X2, Y2) over twenty, then lifted
+ * (the touch controls, their menu and its editor in headless tests) */
 typedef struct { int frame, x0, y0, x1, y1; bool drag; } Tap;
 static Tap taps[32];
 static int ntaps;
@@ -362,7 +362,7 @@ static void taps_tick(void) {
 		int len = t->drag ? 20 : 6, f = (int)P.frame - t->frame;
 		if (f < 0 || f > len) continue;
 		uint32_t type = f == 0 ? SDL_FINGERDOWN : f == len ? SDL_FINGERUP : SDL_FINGERMOTION;
-		touch_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * f / len, t->y0 + (t->y1 - t->y0) * f / len);
+		touch_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * (float)f / len, t->y0 + (t->y1 - t->y0) * (float)f / len);
 	}
 }
 
@@ -491,19 +491,19 @@ static void script_tick(void) {
 }
 
 typedef struct { uint64_t frame; char path[256]; } Shot;
-static Shot shots[64];
-static int shot_count;
+static Shot shots[64], screen_shots[16];
+static int shot_count, screen_shot_count;
 static uint64_t range_a = 1, range_b = 0;   /* --shot-range A:B:PREFIX */
 static char range_prefix[200];
 
-static void parse_shots(const char *spec) {
+static void parse_shots(const char *spec, Shot *into, int *count, int most) {
 	char *copy = strdup(spec);
-	for (char *tok = strtok(copy, ","); tok && shot_count < 64; tok = strtok(NULL, ",")) {
+	for (char *tok = strtok(copy, ","); tok && *count < most; tok = strtok(NULL, ",")) {
 		char *colon = strchr(tok, ':');
 		if (!colon) continue;
-		shots[shot_count].frame = strtoull(tok, NULL, 10);
-		snprintf(shots[shot_count].path, sizeof shots[shot_count].path, "%s", colon + 1);
-		++shot_count;
+		into[*count].frame = strtoull(tok, NULL, 10);
+		snprintf(into[*count].path, sizeof into[*count].path, "%s", colon + 1);
+		++*count;
 	}
 	free(copy);
 }
@@ -546,7 +546,6 @@ static void quit_prompt_draw(void) {
  * frame budget of a headless run is spent. */
 static bool game_frame(void) {
 	if (pending) {
-		touch_offer_edit(false);   /* (a scene that offers it says so again) */
 		if (current && current->leave) current->leave();
 		current = pending;
 		pending = NULL;
@@ -556,17 +555,19 @@ static bool game_frame(void) {
 	script_tick();
 	platform_poll();
 	taps_tick();
-	if (current && current->update) current->update();
+	/* (the touch controls' menu pauses the game under it) */
+	if (current && current->update && !touch_paused()) current->update();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
 	quit_prompt_draw();
-	touch_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	for (int i = 0; i < shot_count; ++i)
 		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
+	for (int i = 0; i < screen_shot_count; ++i)
+		if (screen_shots[i].frame == P.frame) platform_shot_screen(screen_shots[i].path);
 	if (P.frame >= range_a && P.frame <= range_b) {
 		char path[256];
 		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
@@ -707,7 +708,11 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
 		else if (!strcmp(a, "--taps") && v) { parse_taps(v); ++i; }
-		else if (!strcmp(a, "--shot") && v) { parse_shots(v); ++i; }
+		else if (!strcmp(a, "--shot") && v) { parse_shots(v, shots, &shot_count, 64); ++i; }
+		/* (the screen as the player sees it, the touch controls on it) */
+		else if (!strcmp(a, "--screen-shot") && v) { parse_shots(v, screen_shots, &screen_shot_count, 16); ++i; }
+		/* (the screen's density for the touch controls, in dots per inch) */
+		else if (!strcmp(a, "--dpi") && v) { platform_set_dpi((float)atof(v)); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {
 			unsigned long long ra = 0, rb = 0;
 			if (sscanf(v, "%llu:%llu:%199s", &ra, &rb, range_prefix) == 3) { range_a = ra; range_b = rb; }

@@ -162,12 +162,12 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
 `--scene summary` the title's run summary (a win's with `--setup short` at
 `--run-depth 10`), `--setup NET,FOLDER,THREAT,HELPERS[,CROSS]` the run's setup (CROSS the navi whose Cross it brings, 1-5),
 `--marks HEX` the title's marks, `--touch` the touch controls from the
-start (as on a phone; with `--size` a phone's screen), `--talk NAME:FRAME,...` opens a
+start (as on a phone; with `--size` a phone's screen and `--dpi N` its density), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
 undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader; intro, defeat, reward for the guardian; status for L;
 fragment for MegaMan's words at a ScrtData; bugfrags gives 50 BugFrags). `--input "FRAMES:BUTTONS,..."` scripts the
-buttons (`UP+RIGHT`, `A`), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers on the canvas (a tap, or a drag over 20 frames: the touch controls' editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
-save frames, and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
+buttons (`UP+RIGHT`, `A`), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
+save frames (the canvas; `--screen-shot FRAME:PATH,...` the whole screen, the touch controls on it), and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
 @CAT:FIRST:COUNT:PATH` draw sprites. Environment variables reach the image
 only when `build.py` lists them (`CYBERWORLD_EMU_DEBUG`, `CYBERWORLD_AUTOPILOT`
 and the audio ones).

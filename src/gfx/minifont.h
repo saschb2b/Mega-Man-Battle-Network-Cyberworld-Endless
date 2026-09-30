@@ -6,6 +6,9 @@
 
 #include <SDL.h>
 
+/* A character's 3x5 pixels: bit (4 - row) * 3 + (2 - column) set where
+ * one is drawn (0 for a character it has none of). */
+unsigned short minifont_glyph(char ch);
 /* Pixels a string takes across at `scale` (4 a character, less the last gap). */
 int minifont_width(const char *s, int scale);
 /* Draws `s` with its top-left at (x, y) on the canvas, `scale` canvas

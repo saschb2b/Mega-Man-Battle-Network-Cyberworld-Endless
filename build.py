@@ -817,11 +817,11 @@ SCREENSHOTS = [
              '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,120:,6:START,6:,50:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,'
              '6:A,6:,80:,6:DOWN,6:,6:A,6:,150:,6:A,6:,150:'],
      [(885, 'pet-mail'), (1221, 'pet-records')], {}),
-    # (a phone held sideways with the touch controls round the picture: the
-    # whole canvas, not the game's 240 x 160 alone)
-    ('touch', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '844x390',
-               '--input', '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,40:,30:DOWN+RIGHT'],
-     [(660, 'touch')], {}, True),
+    # (a phone held sideways with the touch controls round the picture, a
+    # thumb on the D-pad: the whole screen at a phone's pixels, halved)
+    ('touch', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '2400x1080',
+               '--dpi', '420', '--taps', '400:240,581>360,701'],
+     [(418, 'touch')], {}, True),
 ]
 
 
@@ -837,10 +837,12 @@ def screenshots(only=None):
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'data'))
         shots = ','.join(f'{f}:/src/.build/screenshots/{n}.bmp' for f, n in frames)
+        # (the whole screen, the touch controls on it, where the canvas has the game alone)
+        shot = '--screen-shot' if whole else '--shot'
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
-                      *args, '--frames', str(max(f for f, _ in frames) + 1), '--shot', shots,
+                      *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots,
                       mounts=[(default_rom_dir(), '/rom:ro')])
         for k, v in saved.items():
             if v is None:
@@ -854,6 +856,8 @@ def screenshots(only=None):
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
             if not whole:
                 im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+            else:
+                im = im.resize((w // 2, h // 2), Image.LANCZOS)
             im.save(os.path.join(out, f'{n}.png'), optimize=True)
             print('screenshot', n)
     return 0

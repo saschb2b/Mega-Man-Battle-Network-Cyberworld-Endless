@@ -9,7 +9,7 @@
 #define R(r) (((r) / 100 % 10) << 2 | ((r) / 10 % 10) << 1 | (r) % 10)
 #define G(a, b, c, d, e) (unsigned short)((R(a) << 12) | (R(b) << 9) | (R(c) << 6) | (R(d) << 3) | R(e))
 
-static unsigned short glyph(char ch) {
+unsigned short minifont_glyph(char ch) {
 	if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 'A');
 	switch (ch) {
 	case 'A': return G(10, 101, 111, 101, 101);
@@ -65,6 +65,7 @@ static unsigned short glyph(char ch) {
 	case '_': return G(0, 0, 0, 0, 111);
 	case '~': return G(0, 11, 110, 0, 0);
 	case '&': return G(10, 101, 10, 101, 11);
+	case '%': return G(101, 1, 10, 100, 101);
 	default: return 0;
 	}
 }
@@ -77,7 +78,7 @@ int minifont_width(const char *s, int scale) {
 
 void minifont_draw(int x, int y, const char *s, SDL_Color c, int scale) {
 	for (; *s; ++s, x += 4 * scale) {
-		unsigned short g = glyph(*s);
+		unsigned short g = minifont_glyph(*s);
 		for (int row = 0; row < 5; ++row)
 			for (int col = 0; col < 3; ++col)
 				if (g >> ((4 - row) * 3 + (2 - col)) & 1) fill_rect(x + col * scale, y + row * scale, scale, scale, c);

@@ -1001,113 +1001,167 @@ static void test_layouts_build(void) {
 		}
 }
 
-/* The touch controls: on the canvas, clear of the picture and of each
- * other where there is room, and a finger's buttons. */
+/* The touch controls: on the screen, clear of the picture and of each
+ * other where there is room, thumb sized, and what a finger holds. */
 static bool boxes_meet(const TouchBox *a, const TouchBox *b) {
-	return a->x < b->x + b->w && b->x < a->x + a->w && a->y < b->y + b->h && b->y < a->y + a->h;
+	return fabsf(a->cx - b->cx) * 2 < a->w + b->w && fabsf(a->cy - b->cy) * 2 < a->h + b->h;
 }
 
-/* sw x sh screen pixels, laid out as platform.c does with the controls shown */
-static void check_touch(const char *what, int sw, int sh) {
-	int sx = sw / 240, sy = sh / 160, s = sx < sy ? sx : sy;
-	s = touch_fit_scale(sw, sh, s < 1 ? 1 : s);
-	int w = sw / s, h = sh / s, px = (w - 240) / 2, py = (h - 160) / 2, top = touch_picture_top(w, h);
-	if (top >= 0) py = top;
+static bool round_control(int c) { return c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B; }
+
+/* Laid out as platform.c does, the controls shown: sw x sh pixels at dpi. */
+static void touch_screen_for(int sw, int sh, float dpi, TouchScreen *s) {
+	int sx = sw / 240, sy = sh / 160, scale = sx < sy ? sx : sy;
+	float dp = dpi / 160;
+	scale = touch_fit_scale(sw, sh, dp, scale < 1 ? 1 : scale);
+	int w = sw / scale, h = sh / scale, ox = (sw - w * scale) / 2, oy = (sh - h * scale) / 2;
+	int cx = (w - 240) / 2, cy = (h - 160) / 2, top = touch_picture_top(sw, sh, dp, scale);
+	if (top >= 0 && (top - oy + scale - 1) / scale + 160 <= h) cy = (top - oy + scale - 1) / scale;
+	TouchScreen t = { sw, sh, dp, ox + cx * scale, oy + cy * scale, 240 * scale, 160 * scale };
+	*s = t;
+}
+
+static void check_touch(const char *what, int sw, int sh, float dpi, int shape) {
+	TouchScreen s;
+	touch_screen_for(sw, sh, dpi, &s);
+	TouchPrefs p;
+	touch_prefs_default(&p);
 	TouchLayout t;
-	touch_layout_for(w, h, px, py, &t);
-	TouchBox pic = { px, py, 240, 160 };
-	CHECK(!t.over, "%s: the touch controls have no room beside or under the picture (%dx%d at %dx)", what, w, h, s);
+	touch_layout_for(&s, &p, &t);
+	static const char *const shapes[] = { "under", "beside", "over" };
+	CHECK(t.shape == shape, "%s: the touch controls stand %s the picture, not %s (a %dx%d picture)", what, shapes[t.shape], shapes[shape], s.pw, s.ph);
+	TouchBox pic = { s.px + s.pw / 2.f, s.py + s.ph / 2.f, (float)s.pw, (float)s.ph };
+	float mm = s.dp * 6.3f;
 	for (int c = 0; c < TOUCH_CONTROLS; ++c) {
 		const TouchBox *b = &t.box[c];
-		CHECK(b->x >= 0 && b->y >= 0 && b->x + b->w <= w && b->y + b->h <= h, "%s: control %d leaves the canvas", what, c);
-		CHECK(!boxes_meet(b, &pic), "%s: control %d covers the picture", what, c);
+		CHECK(b->cx - b->w / 2 >= -0.5f && b->cy - b->h / 2 >= -0.5f && b->cx + b->w / 2 <= sw + 0.5f && b->cy + b->h / 2 <= sh + 0.5f,
+			"%s: control %d leaves the screen", what, c);
+		CHECK(shape == TOUCH_OVER || !boxes_meet(b, &pic), "%s: control %d covers the picture", what, c);
 		for (int d = c + 1; d < TOUCH_CONTROLS; ++d) {
 			const TouchBox *e = &t.box[d];
-			bool round = (c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B) && (d == TOUCH_DPAD || d == TOUCH_A || d == TOUCH_B);
-			long dx = (b->x + b->w / 2) - (e->x + e->w / 2), dy = (b->y + b->h / 2) - (e->y + e->h / 2), rr = b->w / 2 + e->w / 2;
-			CHECK(round ? dx * dx + dy * dy > rr * rr : !boxes_meet(b, e), "%s: controls %d and %d overlap", what, c, d);
+			float dx = b->cx - e->cx, dy = b->cy - e->cy, rr = b->w / 2 + e->w / 2;
+			CHECK(round_control(c) && round_control(d) ? dx * dx + dy * dy > rr * rr : !boxes_meet(b, e), "%s: controls %d and %d overlap", what, c, d);
 		}
 	}
-	/* thumb sized: in picture pixels, a share of the screen's short side */
+	/* thumb sized, in millimetres: a D-pad of 20 at least, A and B of 9 */
 	const TouchBox *dp = &t.box[TOUCH_DPAD];
-	int r = dp->w / 2, cx = dp->x + r, cy = dp->y + r;
-	CHECK(r >= 30, "%s: a D-pad of radius %d is small for a thumb", what, r);
-	CHECK(t.box[TOUCH_A].w / 2 >= 15 && t.box[TOUCH_B].w / 2 >= 15, "%s: A of radius %d is small for a thumb", what, t.box[TOUCH_A].w / 2);
-	CHECK(touch_hit(&t, cx, cy, TOUCH_DPAD) == 0, "%s: the D-pad's middle holds a direction", what);
-	CHECK(touch_hit(&t, cx + r * 3 / 4, cy + 1, TOUCH_DPAD) == BTN_RIGHT, "%s: right of the middle is not RIGHT", what);
-	CHECK(touch_hit(&t, cx - 2, cy - r * 3 / 4, TOUCH_DPAD) == BTN_UP, "%s: above the middle is not UP", what);
-	CHECK(touch_hit(&t, cx + r / 2, cy + r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_DOWN), "%s: the diagonal is not RIGHT+DOWN", what);
-	/* the diagonals as wide as the four directions (BN6's walkways run
-	 * along them): 30 degrees off an axis is the diagonal */
-	CHECK(touch_hit(&t, cx + r * 866 / 1000, cy - r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_UP), "%s: 30 degrees up is not RIGHT+UP", what);
-	CHECK(touch_hit(&t, cx + r * 940 / 1000, cy - r * 342 / 1000, TOUCH_DPAD) == BTN_RIGHT, "%s: 20 degrees up is not RIGHT", what);
-	/* a thumb rolling back toward the middle keeps its direction until
-	 * the middle, and does not turn round short of a third past it */
-	CHECK(touch_dpad_steer(&t, cx, cy - r / 4, BTN_UP) == BTN_UP, "%s: UP lost a quarter out", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 4, BTN_UP) == BTN_UP, "%s: a thumb a quarter past the middle turned round", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 4, 0) == 0, "%s: a quarter out from the middle steers", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 10, BTN_UP) == 0, "%s: the middle holds a direction", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 2, BTN_UP) == BTN_DOWN, "%s: half way down is not DOWN", what);
-	/* a thumb that slid off the D-pad still steers it; one from a button does not */
-	CHECK(touch_hit(&t, cx - 3 * r, cy, TOUCH_DPAD) == BTN_LEFT, "%s: a thumb slid off the D-pad lost it", what);
-	CHECK(touch_hit(&t, cx + r / 2, cy, TOUCH_B) == 0, "%s: a thumb from B steers the D-pad", what);
-	static const struct { int c; uint32_t bit; } keys[] = {
-		{ TOUCH_A, BTN_A }, { TOUCH_B, BTN_B }, { TOUCH_L, BTN_L }, { TOUCH_R, BTN_R }, { TOUCH_START, BTN_START }, { TOUCH_SELECT, BTN_SELECT },
-	};
-	for (size_t i = 0; i < sizeof keys / sizeof *keys; ++i) {
-		const TouchBox *b = &t.box[keys[i].c];
-		int bx = b->x + b->w / 2, by = b->y + b->h / 2;
-		CHECK(touch_control_at(&t, bx, by) == keys[i].c && touch_hit(&t, bx, by, keys[i].c) == keys[i].bit,
-			"%s: control %d's middle does not press it", what, keys[i].c);
-	}
-	/* a thumb rolled from B onto A presses A */
-	const TouchBox *a = &t.box[TOUCH_A];
-	CHECK(touch_hit(&t, a->x + a->w / 2, a->y + a->h / 2, TOUCH_B) == BTN_A, "%s: rolling from B to A misses A", what);
+	float r = dp->w / 2, cx = dp->cx, cy = dp->cy;
+	CHECK(dp->w / mm >= 19.8f, "%s: a D-pad of %.1f mm is small for a thumb", what, dp->w / mm);
+	CHECK(t.box[TOUCH_A].w / mm >= 9 && t.box[TOUCH_B].w / mm >= 9, "%s: A of %.1f mm is small for a thumb", what, t.box[TOUCH_A].w / mm);
+	CHECK(dp->w / mm <= 30.5f && t.box[TOUCH_A].w / mm <= 14.5f, "%s: a D-pad of %.1f mm is past its size", what, dp->w / mm);
+	/* each control's middle is its own */
+	for (int c = 0; c < TOUCH_CONTROLS; ++c)
+		CHECK(touch_control_at(&t, t.box[c].cx, t.box[c].cy, -1) == c, "%s: control %d's middle does not reach it", what, c);
+	/* the D-pad: nothing in its middle, eight ways of 45 degrees (BN6's
+	 * walkways run along the diagonals), four of 90 off the map */
+	CHECK(touch_dpad_steer(&t, cx, cy, 0, false) == 0, "%s: the D-pad's middle holds a direction", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.75f, cy + 1, 0, false) == BTN_RIGHT, "%s: right of the middle is not RIGHT", what);
+	CHECK(touch_dpad_steer(&t, cx - 2, cy - r * 0.75f, 0, false) == BTN_UP, "%s: above the middle is not UP", what);
+	CHECK(touch_dpad_steer(&t, cx + r / 2, cy + r / 2, 0, false) == (BTN_RIGHT | BTN_DOWN), "%s: the diagonal is not RIGHT+DOWN", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.866f, cy - r / 2, 0, false) == (BTN_RIGHT | BTN_UP), "%s: 30 degrees up is not RIGHT+UP", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.94f, cy - r * 0.342f, 0, false) == BTN_RIGHT, "%s: 20 degrees up is not RIGHT", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.866f, cy - r / 2, 0, true) == BTN_RIGHT, "%s: four ways, 30 degrees up is not RIGHT", what);
+	CHECK(touch_dpad_steer(&t, cx + r / 2, cy - r * 0.866f, 0, true) == BTN_UP, "%s: four ways, 60 degrees up is not UP", what);
+	CHECK(touch_dpad_steer(&t, cx + r / 2 + 2, cy + r / 2, 0, true) != (BTN_RIGHT | BTN_DOWN), "%s: four ways gave a diagonal", what);
+	/* a direction held stays 8 degrees past its edge, and a thumb rolling
+	 * back toward the middle keeps it until the middle */
+	CHECK(touch_dpad_steer(&t, cx + r * sinf(0.52f), cy - r * cosf(0.52f), BTN_UP, false) == BTN_UP, "%s: UP lost 30 degrees off it", what);
+	CHECK(touch_dpad_steer(&t, cx + r * sinf(0.62f), cy - r * cosf(0.62f), BTN_UP, false) == (BTN_UP | BTN_RIGHT), "%s: UP kept 35 degrees off it", what);
+	CHECK(touch_dpad_steer(&t, cx, cy - r * 0.16f, BTN_UP, false) == BTN_UP, "%s: UP lost a sixth out", what);
+	CHECK(touch_dpad_steer(&t, cx, cy - r * 0.16f, 0, false) == 0, "%s: a sixth out from the middle steers", what);
+	CHECK(touch_dpad_steer(&t, cx, cy + r * 0.1f, BTN_UP, false) == 0, "%s: the middle holds a direction", what);
+	CHECK(touch_dpad_steer(&t, cx - 3 * r, cy, BTN_LEFT, false) == BTN_LEFT, "%s: a thumb slid off the D-pad lost it", what);
+	/* A and B reach past their art, the one held further; between them, the nearer */
+	const TouchBox *a = &t.box[TOUCH_A], *b = &t.box[TOUCH_B];
+	CHECK(touch_control_at(&t, a->cx + a->w / 2 * 1.25f, a->cy, -1) == TOUCH_A, "%s: a finger just off A misses it", what);
+	CHECK(touch_control_at(&t, a->cx + a->w / 2 * 1.5f, a->cy, TOUCH_A) == TOUCH_A, "%s: A held lets go of a wobbling thumb", what);
+	CHECK(touch_control_at(&t, a->cx + (b->cx - a->cx) * 0.4f, a->cy + (b->cy - a->cy) * 0.4f, TOUCH_B) == TOUCH_A,
+		"%s: nearer A, a thumb from B does not reach A", what);
 }
 
 static void test_touch(void) {
-	check_touch("a phone upright (1080x2340)", 1080, 2340);
-	check_touch("a phone upright (1170x2532)", 1170, 2532);
-	check_touch("a phone upright (720x1600)", 720, 1600);
-	check_touch("a phone on its side (2340x1080)", 2340, 1080);
-	check_touch("a phone on its side (2532x1170)", 2532, 1170);
-	check_touch("a phone on its side (1600x720)", 1600, 720);
-	check_touch("a 16:9 screen (1920x1080)", 1920, 1080);
-	check_touch("a 4:3 tablet (2048x1536)", 2048, 1536);
-	check_touch("a 4:3 tablet upright (1536x2048)", 1536, 2048);
-	check_touch("a Retroid Pocket (1334x750)", 1334, 750);
+	check_touch("a phone upright (1080x2400)", 1080, 2400, 420, TOUCH_BELOW);
+	check_touch("a phone upright (1170x2532)", 1170, 2532, 480, TOUCH_BELOW);
+	check_touch("a phone upright (720x1600)", 720, 1600, 280, TOUCH_BELOW);
+	check_touch("a 16:9 phone upright (1080x1920)", 1080, 1920, 420, TOUCH_BELOW);
+	check_touch("a phone's page upright (390x844)", 390, 844, 160, TOUCH_BELOW);
+	check_touch("a phone on its side (2400x1080)", 2400, 1080, 420, TOUCH_SIDE);
+	check_touch("a phone on its side (2532x1170)", 2532, 1170, 480, TOUCH_SIDE);
+	check_touch("a phone on its side (1600x720)", 1600, 720, 280, TOUCH_SIDE);
+	check_touch("a 16:9 phone on its side (1920x1080)", 1920, 1080, 420, TOUCH_SIDE);
+	check_touch("a phone's page on its side (844x390)", 844, 390, 160, TOUCH_SIDE);
+	check_touch("a 4:3 tablet (2048x1536)", 2048, 1536, 320, TOUCH_SIDE);
+	check_touch("a 4:3 tablet upright (1536x2048)", 1536, 2048, 320, TOUCH_BELOW);
+	check_touch("a 16:10 tablet (2560x1600)", 2560, 1600, 320, TOUCH_SIDE);
+	check_touch("a 16:10 tablet upright (1600x2560)", 1600, 2560, 320, TOUCH_BELOW);
+	check_touch("a Steam Deck (1280x800)", 1280, 800, 215, TOUCH_SIDE);
+	check_touch("a Retroid Pocket (1334x750)", 1334, 750, 326, TOUCH_SIDE);
+	check_touch("a square window (1000x1000)", 1000, 1000, 320, TOUCH_OVER);
 
 	/* the player's arrangement (the editor, touch.ini): a control moved
-	 * and sized lands where it was put, whole on the canvas, and the file's
-	 * text reads back as it was written */
-	TouchLayout t, def;
-	int w = 360, h = 780, px = 60, py = touch_picture_top(w, h);
-	touch_layout_for(w, h, px, py, &def);
-	CHECK(touch_shape(&def) == TOUCH_SHAPE_BELOW, "an upright phone's controls are not under the picture");
-	TouchCustom c;
-	memset(&c, 0, sizeof c);
-	c.place[TOUCH_SHAPE_BELOW][TOUCH_A] = (TouchPlace){ 500, 900, 150, true };
-	c.place[TOUCH_SHAPE_BELOW][TOUCH_START] = (TouchPlace){ 0, 0, 120, false };
-	c.place[TOUCH_SHAPE_BELOW][TOUCH_DPAD] = (TouchPlace){ 1000, 1000, 0, true };
-	c.place[TOUCH_SHAPE_SIDE][TOUCH_B] = (TouchPlace){ 10, 20, 60, true };
-	t = def;
-	touch_layout_custom(&t, w, h, &c);
-	const TouchBox *a = &t.box[TOUCH_A], *da = &def.box[TOUCH_A];
-	CHECK(abs(a->x + a->w / 2 - 180) <= 1 && abs(a->y + a->h / 2 - 702) <= 1, "A moved to (180, 702) stands at (%d, %d)", a->x + a->w / 2, a->y + a->h / 2);
-	CHECK(abs(a->w / 2 - da->w / 2 * 3 / 2) <= 1, "A at 150%% has radius %d, laid out %d", a->w / 2, da->w / 2);
-	CHECK(touch_control_at(&t, a->x + a->w / 2, a->y + a->h / 2) == TOUCH_A, "a finger on the moved A does not reach it");
-	CHECK(t.box[TOUCH_START].w == def.box[TOUCH_START].w * 120 / 100 && t.box[TOUCH_START].x + t.box[TOUCH_START].w / 2 == def.box[TOUCH_START].x + def.box[TOUCH_START].w / 2,
+	 * and sized lands where it was put, whole on the screen, the others as
+	 * laid out; the file reads back as written */
+	TouchScreen s;
+	touch_screen_for(1080, 2400, 420, &s);
+	TouchPrefs p;
+	touch_prefs_default(&p);
+	TouchLayout def, t;
+	touch_layout_for(&s, &p, &def);
+	p.place[TOUCH_BELOW][TOUCH_A] = (TouchPlace){ 500, 900, 150, 60, true };
+	p.place[TOUCH_BELOW][TOUCH_START] = (TouchPlace){ 0, 0, 120, 0, false };
+	p.place[TOUCH_BELOW][TOUCH_DPAD] = (TouchPlace){ 1000, 1000, 0, 0, true };
+	p.place[TOUCH_SIDE][TOUCH_B] = (TouchPlace){ 10, 20, 60, 0, true };
+	touch_layout_for(&s, &p, &t);
+	const TouchBox *a = &t.box[TOUCH_A];
+	CHECK(fabsf(a->cx - 540) <= 1 && fabsf(a->cy - 2160) <= 1, "A moved to (540, 2160) stands at (%.0f, %.0f)", a->cx, a->cy);
+	CHECK(fabsf(a->w - def.box[TOUCH_A].w * 1.5f) <= 1, "A at 150%% is %.0f across, laid out %.0f", a->w, def.box[TOUCH_A].w);
+	CHECK(fabsf(t.alpha[TOUCH_A] - 0.6f) < 0.01f && t.alpha[TOUCH_B] == 1, "A at 60%% opacity is at %.2f", t.alpha[TOUCH_A]);
+	CHECK(touch_control_at(&t, a->cx, a->cy, -1) == TOUCH_A, "a finger on the moved A does not reach it");
+	CHECK(fabsf(t.box[TOUCH_START].w - def.box[TOUCH_START].w * 1.2f) < 0.01f && t.box[TOUCH_START].cx == def.box[TOUCH_START].cx,
 		"START sized, not moved, left its place or its size");
 	const TouchBox *d = &t.box[TOUCH_DPAD];
-	CHECK(d->x + d->w == w && d->y + d->h == h, "the D-pad put at the corner leaves the canvas (%d, %d)", d->x + d->w, d->y + d->h);
-	CHECK(!memcmp(&t.box[TOUCH_B], &def.box[TOUCH_B], sizeof(TouchBox)), "B moved on the other screen shape moved here");
+	CHECK(fabsf(d->cx + d->w / 2 - 1080) < 0.5f && fabsf(d->cy + d->h / 2 - 2400) < 0.5f, "the D-pad put at the corner leaves the screen");
+	CHECK(!memcmp(&t.box[TOUCH_B], &def.box[TOUCH_B], sizeof(TouchBox)), "B moved beside the picture moved under it");
 	static char text[4096];
-	touch_custom_format(&c, text, sizeof text);
-	TouchCustom back;
-	touch_custom_parse(text, &back);
-	CHECK(!memcmp(&back, &c, sizeof c), "touch.ini reads back otherwise than written:\n%s", text);
-	touch_custom_parse("below a 2000 5 100\nside nothing 1 2 3\nover l - - 999\n", &back);
-	CHECK(!back.place[TOUCH_SHAPE_BELOW][TOUCH_A].moved && !back.place[TOUCH_SHAPE_OVER][TOUCH_L].size, "touch.ini's bad values were taken");
+	p.size = 80;
+	p.opacity = 70;
+	p.haptics = false;
+	p.left_handed = true;
+	touch_prefs_format(&p, text, sizeof text);
+	TouchPrefs back;
+	touch_prefs_parse(text, &back);
+	CHECK(!memcmp(&back, &p, sizeof p), "touch.ini reads back otherwise than written:\n%s", text);
+	touch_prefs_parse("size = 999\nopacity = 5\nbelow a 2000 5 100 100\nside nothing 1 2 3 4\nover l - - 999 100\n", &back);
+	CHECK(back.size == 100 && back.opacity == 100 && !back.place[TOUCH_BELOW][TOUCH_A].moved && !back.place[TOUCH_OVER][TOUCH_L].size,
+		"touch.ini's bad values were taken");
+
+	/* left-handed: the D-pad under the right thumb, A and B the left, apart */
+	TouchPrefs left;
+	touch_prefs_default(&left);
+	left.left_handed = true;
+	touch_layout_for(&s, &left, &t);
+	CHECK(t.box[TOUCH_DPAD].cx > 540 && t.box[TOUCH_A].cx < 540 && t.box[TOUCH_B].cx < 540, "left-handed, the D-pad is not on the right");
+	for (int c = 0; c < TOUCH_CONTROLS; ++c)
+		for (int e = c + 1; e < TOUCH_CONTROLS; ++e)
+			CHECK(!boxes_meet(&t.box[c], &t.box[e]) || (round_control(c) && round_control(e) &&
+				hypotf(t.box[c].cx - t.box[e].cx, t.box[c].cy - t.box[e].cy) > (t.box[c].w + t.box[e].w) / 2),
+				"left-handed, controls %d and %d overlap", c, e);
+	/* their size: smaller anywhere; larger only where it fits (a phone's
+	 * are as large as fit, a tablet's grow) */
+	left.left_handed = false;
+	left.size = 180;
+	touch_layout_for(&s, &left, &t);
+	CHECK(t.box[TOUCH_DPAD].w <= def.box[TOUCH_DPAD].w * 1.05f && t.size_max <= 105, "a phone's D-pad grew past what fits (%d%%)", t.size_max);
+	left.size = 60;
+	touch_layout_for(&s, &left, &t);
+	CHECK(fabsf(t.box[TOUCH_DPAD].w - def.box[TOUCH_DPAD].w * 0.6f) < 1, "a phone's D-pad at 60%% is %.0f, laid out %.0f", t.box[TOUCH_DPAD].w, def.box[TOUCH_DPAD].w);
+	touch_screen_for(1600, 2560, 320, &s);
+	touch_layout_for(&s, &p, &def);
+	left.size = 130;
+	touch_layout_for(&s, &left, &t);
+	touch_prefs_default(&left);
+	touch_layout_for(&s, &left, &def);
+	CHECK(t.size_max >= 130 && fabsf(t.box[TOUCH_A].w - def.box[TOUCH_A].w * 1.3f) < 1, "a tablet's A at 130%% did not grow (%d%% fits)", t.size_max);
 }
 
 int main(void) {
