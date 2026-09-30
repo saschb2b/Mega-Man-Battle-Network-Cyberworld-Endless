@@ -215,7 +215,7 @@ bool rom_find_close;
 
 /* Battle Network 5's net areas (docs/MULTIROM.md) */
 static const NetAreaDef bn5_areas[] = {
-	{ 0x90, 0, 0x0040, 0x0010, false, 0x13, 0, 0, 0, { { 0 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0 },   /* ACDC Area 1: cyan platforms, green walkways */
+	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0 },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {
