@@ -273,7 +273,7 @@ static void report_text(char *s, int size) {
 	ADD(" You brought the %s folder", meta_folder(run.folder)->name);
 	const char *weak = run.cross ? powers_cross_weakness(run.cross) : NULL;
 	const char *strong = run.cross ? powers_cross_strength(run.cross) : NULL;
-	if (run.cross && weak && strong) ADD(" and %s: %c%s, and %s attacks do 2x to it.", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1, weak);
+	if (run.cross && weak && strong) ADD(" and %s (%c%s; %s attacks do 2x to it).", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1, weak);
 	else if (run.cross && weak) ADD(" and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
 	else if (run.cross) ADD(" and %s.", powers_cross_name(run.cross));
 	else ADD(".");

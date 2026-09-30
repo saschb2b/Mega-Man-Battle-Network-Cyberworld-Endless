@@ -20,6 +20,11 @@
 - Lan answers Chaud's call about the netbattle ("We'll be ready,
   Chaud!"), as he answers the races' calls: it had read as a message
   left.
+- EraseCross's line says BN6's own rule: a plain (elementless) chip
+  erases a virus whose HP has a 4 in it ("A 4 in HP: plain chips
+  erase"), and bugs a Navi, whose HP then drains. It had said counters
+  erase viruses, two playtesters' guess, and a third saw DiveMan's HP fall
+  with nothing hitting him.
 - The jack-in setup says what each Cross gives, above what hits it
   twice as hard, from BN6's own Cross mails: HeatCross "Fire chips +50,
   buster +1", ElecCross "Elec chips +50", SlashCross "Sword chips +50",
