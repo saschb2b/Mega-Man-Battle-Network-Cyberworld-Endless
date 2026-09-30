@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.1 (2026-09-30)
 
 - **The 3DS no longer crashes entering the Undernet or the Nest** (the
   short net's layer 10), as a player reported. Learning an area's tiles
