@@ -180,11 +180,35 @@ static bool in_way_line(int x, int y) {
 	return false;
 }
 
+/* The walk from room `from`'s anchor to the nearest panel beside an object
+ * of `type`, -1 none. */
+static int walk_to(int from, int type) {
+	static int16_t dist[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(dist, -1, sizeof dist);
+	int h = 0, t = 0;
+	qx[t] = (int16_t)layer.rooms[from].ax; qy[t++] = (int16_t)layer.rooms[from].ay;
+	dist[qy[0]][qx[0]] = 0;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int i = 0; i < layer.nobj; ++i)
+			if (layer.obj[i].type == type && abs((int)layer.obj[i].x - x) <= 1 && abs((int)layer.obj[i].y - y) <= 1) return dist[y][x];
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d[k][0], ny = y + d[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || dist[ny][nx] >= 0 || layer.cell[ny][nx] != C_PATH) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	return -1;
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
 		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
-		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0;
+		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -195,6 +219,13 @@ static void test_generation(void) {
 		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
 		layer_generate(seed * 7919u, depth, biome, kind, &kit);
 		++layers;
+		/* (a heal a short walk from every guardian's arena: a playtester
+		 * found one a long way back from SpoutMan's) */
+		if (layer.arena >= 0) {
+			int w = walk_to(layer.ante, OBJ_HEAL);
+			heal_far = w > heal_far ? w : heal_far;
+			CHECK(w >= 0 && w <= 12, "seed %u: the heal before the arena a walk of %d", seed, w);
+		}
 		CHECK(layer.nrooms >= 3, "seed %u: only %d rooms", seed, layer.nrooms);
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
@@ -416,6 +447,7 @@ static void test_generation(void) {
 	CHECK(landmarks * 2 >= layers, "a landmark on only %d of %d layers", landmarks, layers);
 	CHECK(emblems >= layers, "only %d emblems on %d layers", emblems, layers);
 	printf("  props: %d sprites (%d in holes) and %d emblems on %d layers, landmarks on %d\n", sprites, holes, emblems, layers, landmarks);
+	printf("  the heal before an arena: a walk of %d at most\n", heal_far);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
 	/* Determinism: the same seed builds the same layer. */

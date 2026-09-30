@@ -9,6 +9,10 @@
   second win he names the next rung: "Next time, no race: ProtoMan faces
   MegaMan himself." An official Chip Order offers the Library's uncommon
   and rare chips before its common ones.
+- The Recovery Mr. Prog before a guardian's arena stands a short walk
+  from its door on every guardian's layer: one had stood a long way back,
+  and one layer in a hundred had none. A run saved by an earlier build
+  continues its layer afresh.
 - **The PortMaster port no longer needs ROCKNIX's glibc.** It is built
   on Debian bullseye and asks for glibc 2.29 at most (it asked for
   2.38), older than ArkOS, AmberELEC, muOS or Knulli have. Its zip is
