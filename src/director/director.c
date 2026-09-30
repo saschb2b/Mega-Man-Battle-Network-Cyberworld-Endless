@@ -823,9 +823,11 @@ static bool duel_layer(void) {
  * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md); the one beside
  * ProtoMan's duel opens to its winner alone, as the duel is won, and stays
  * as a CONTINUE (`resumed`) finds it (a playtester with the clearance found
- * it open before the duel, which then paid nothing but the record). */
+ * it open before the duel, which then paid nothing but the record). Where
+ * his netbattle waits for a later act, there is no duel to win: the
+ * clearance's, as elsewhere. */
 static void official_sync(bool resumed) {
-	if (duel_layer()) {
+	if (duel_layer() && !layer_objs_duel_later) {
 		if (!resumed) flag_clear(LAYER_CLEARED_FLAG);
 		return;
 	}
@@ -2646,9 +2648,12 @@ static const char *duel_call_words(void) {
 	/* (the record said: Chaud remembers every duel) */
 	char record[64];
 	snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
+	/* (where, as the net goes, and what for: "the third act" was the
+	 * game's word, and a playtester asked what the netbattle would pay) */
 	if (layer_objs_duel_later)
 		snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
-			"@C He'll be waiting in the third act. Get MegaMan ready.");
+			"@C He'll be waiting past the next %s. %s", pacing_act(run.depth) == 0 ? "two guardians" : "guardian",
+			rival_clearance() < 2 ? "Beat him, and every official gate opens for you." : "Get MegaMan ready.");
 	else if (layer_objs_duel_rung == 2)
 		snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
 			"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2

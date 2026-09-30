@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The official gate on the layer where ProtoMan names his netbattle
+  opens.** From the third rung, his netbattle waits for the third act,
+  and the gate beside him in the first two had stayed sealed as his
+  duel's prize, with no duel to win. It opens to Chaud's clearance, as
+  any other official gate. Chaud and ProtoMan say where he waits in the
+  net's words ("past the next two guardians", where they had said "the
+  third act"), and Chaud what a win opens.
 - MegaMan's L says how far the walk to ProtoMan is, and when it winds
   away from where his pink mark lies ("down and to the right, far off,
   though the way there winds"), as it says for a heal or a Net Dealer:

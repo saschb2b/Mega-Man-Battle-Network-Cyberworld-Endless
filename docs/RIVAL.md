@@ -105,7 +105,10 @@ beat: ProtoMan in battle, his own AI and his attacks.
 - **From the third act.** His attacks are his 1800 HP version's: his first
   slash deleted a 100 HP MegaMan. Before the third act (a later run's
   first acts), Chaud's call and ProtoMan's words say where he will wait,
-  and nothing is asked. From it on, his HP is the act's guardian band at
+  in the net's own words ("past the next two guardians"), and what a win
+  opens, and nothing is asked; the official gate on that layer opens to
+  Chaud's clearance, as any other does, having no duel to be the prize
+  of. From it on, his HP is the act's guardian band at
   most (1000 in act 3), written once as he stands on the field.
 - **A real fight.** BN6 deletes MegaMan in a netbattle as anywhere: its
   GAME OVER starts inside the battle, as he falls (tried: the battle

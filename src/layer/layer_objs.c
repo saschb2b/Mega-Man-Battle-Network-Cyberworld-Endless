@@ -23,6 +23,7 @@
 #include "stage_npc.h"
 #include "npc.h"
 #include "npc_lines.h"
+#include "pacing.h"
 #include "rom.h"
 #include "run.h"
 #include "save.h"
@@ -253,6 +254,22 @@ static bool layer_has(int type) {
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == type) return true;
 	return false;
+}
+
+/* ProtoMan's words where his netbattle waits for a later act: where, as
+ * the net goes ("the third act" was the game's word, not his). */
+static const char *netbattle_later_words(void) {
+	return pacing_act(run.depth) == 0
+		? "Enough racing, MegaMan. Our next duel is a netbattle: you against me.|Not here. I'll be waiting past the next two guardians."
+		: "Enough racing, MegaMan. Our next duel is a netbattle: you against me.|Not here. I'll be waiting past the next guardian.";
+}
+
+/* Whether the official gate is the prize of ProtoMan's duel beside it (it
+ * opens to the winner); where the duel waits for a later act, it opens to
+ * the clearance, as any other (it had stayed sealed, a duel's prize with
+ * no duel). */
+static bool official_duel_prize(int level) {
+	return layer_has(OBJ_DUEL) && !layer_objs_duel_later && rival_clearance() >= level;
 }
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {
@@ -549,9 +566,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.cat = 6;
 			tk.sprite = guardian_sprite(11);
 			need_sprite(&npcs, 6, tk.sprite);
-			if (layer_objs_duel_later)
-				tk.script = ta_say(&text, guardian_face(11), "Enough racing, MegaMan. Our next duel is a netbattle: you against me.|"
-					"Not here. I'll be waiting in the third act.");
+			if (layer_objs_duel_later) tk.script = ta_say(&text, guardian_face(11), netbattle_later_words());
 			if (emu_debug_on()) fprintf(stderr, "duel: ProtoMan at %d %d, his time %d frames\n", wx, wy, layer_objs_duel_frames);
 			break;
 		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
@@ -587,9 +602,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			layer_objs_official_level = level;
 			ScriptsVault v = { 0 };
 			official_picks(level, &v);
-			/* (the one beside ProtoMan opens to his duel's winner) */
-			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won,
-				layer_has(OBJ_DUEL) && rival_clearance() >= level, &v);
+			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, official_duel_prize(level), &v);
 			break;
 		}
 		case OBJ_VAULT: {
