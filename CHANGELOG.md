@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **The BugFrag Trader no longer trades for nothing.** With A pressed
+  through "Try again?", it went on giving chips at 0 BugFrags, as a
+  player reported (issue #21): the game's own "not enough" line waits as
+  its Yes does, and was taken for a Yes. The ten BugFrags are now taken
+  before the chip is given, and where they aren't there the talk ends
+  after that line.
+
 ## 0.5.2 (2026-10-01)
 
 - **The 3DS's bottom-screen map no longer stutters on the net.** The

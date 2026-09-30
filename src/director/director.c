@@ -1523,7 +1523,8 @@ void director_describe(FILE *f) {
 			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
 			if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) { hp = emu_read16(o + 0x24); max = emu_read16(o + 0x26); break; }
 		}
-	fprintf(f, "hp %d/%d\nzenny %u\n", hp, max, (unsigned)emu_read32(BN6_GAMESTATE + 0x5C));
+	/* (GameState's protected zenny, then its BugFrags) */
+	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_GAMESTATE + 0x5C), (unsigned)emu_read32(BN6_GAMESTATE + 0x60));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
 	/* (in a battle, the panel MegaMan stands on, from the left and the top:
 	 * a player sees it at a glance, a playtester reading stills misread it
@@ -2129,7 +2130,10 @@ static void bug_watch(void) {
  * for the machine's scene to end the chat. A layer's trader stands without
  * the machine: its chat held for good after Yes, and after No MegaMan
  * walked with the chat still open, the PET shut. The director does what
- * the machine does where the chat holds. */
+ * the machine does where the chat holds, but takes the ten BugFrags before
+ * it gives: the script's "not enough" line holds as its Yes does, and
+ * read as a Yes it gave a chip for none, TakeBugfrags taking nothing
+ * (issue #21: A mashed through "Try again?" traded on at 0 BugFrags). */
 static void bugfrag_trade(void) {
 	static bool howl;
 	if (!emu_read8(BN6_CHATBOX)) {
@@ -2144,16 +2148,20 @@ static void bugfrag_trade(void) {
 	/* (after No the box is closed: the chat ends as the Chip Trader's No
 	 * ends it, with its script 5, a bare end) */
 	if (f & 7) { game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, 5); return; }
-	uint32_t prize[2];
+	uint32_t prize[2], took[2];
 	game_call(BN6_TRADER_RESET, 0, 0);
 	if (!game_call_ret(BN6_TRADER_PRIZE, 0, 0, 0, prize)) return;
+	/* (TakeBugfrags: 0 where it took them, else it took none) */
+	if (!game_call_ret(BN6_TAKE_BUGFRAGS, 10, 0, 0, took) || took[0]) {
+		game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, 5);
+		return;
+	}
 	uint16_t chip = (uint16_t)prize[0], code = (uint16_t)prize[1];
 	uint8_t v[4];
 	put16(v, chip);
 	put16(v + 2, code);
 	emu_write(BN6_TRADER_STATE + 4, v, 4);
 	game_call_ret(BN6_GIVE_CHIPS, chip, code, 1, NULL);
-	game_call(BN6_TAKE_BUGFRAGS, 10, 0);
 	/* (the map saved on) */
 	put16(v, emu_read16(BN6_GAMESTATE + 4));
 	emu_write(BN6_GAMESTATE + 0x0C, v, 2);
