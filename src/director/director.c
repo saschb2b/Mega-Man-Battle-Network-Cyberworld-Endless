@@ -147,6 +147,7 @@ static struct {
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
 #define CARD_SKIP    30   /* frames a card shows before A ends it, where MegaMan is held for it */
+#define PORT_STEP    16   /* world units from a jack-in cell that R steps onto it */
 #define WALK_UP      45   /* frames the walk up to a navi out of reach may take */
 
 /* An act begins (or a side layer): its title card, as Hades names each
@@ -1739,10 +1740,25 @@ uint32_t director_keys(uint32_t keys) {
 		!town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
 		static char buf[160];
 		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far;
+		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
+		int near = town_port_near(px, py, &nx, &ny);
+		/* (a step short of a jack-in cell: he takes it, and R jacks in; a
+		 * playtester stood at the mermaid fountain's rim a step off its
+		 * ring and pressed R five times) */
+		if (near >= 0 && near <= PORT_STEP * PORT_STEP) {
+			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)nx << 16);
+			emu_write32(BN6_PLAYER + 0x20, (uint32_t)ny << 16);
+			cinema_arrow(0, 0);
+			D.arrow_pending = false;
+			return keys;
+		}
 		const char *way = town_way(&far);
-		/* (close by, from any side of it: a step more, and which way) */
-		if (dx * dx + dy * dy < 128 * 128)
+		/* (close by: which way to its nearest cell, as the crow flies, where
+		 * the walk to the front's middle wound round the basin and turned
+		 * from "up and to the left" to "straight down" a step apart) */
+		if (near >= 0 && near < 128 * 128)
+			snprintf(buf, sizeof buf, "@M Almost, Lan! Step up to the %s, %s, and press R.", town_info()->landmark, way_to(nx, ny, &far));
+		else if (dx * dx + dy * dy < 128 * 128)
 			snprintf(buf, sizeof buf, "@M Almost, Lan! The %s is %s.|@M Step right up to it and press R.", town_info()->landmark, way);
 		else
 			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!", town_info()->landmark_at);

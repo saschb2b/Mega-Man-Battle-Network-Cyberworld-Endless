@@ -53,6 +53,9 @@ int town_triggers(const CoordCell **cells);
 extern bool town_after_abandon;
 /* Whether world position (x, y) is a jack-in cell (R jacks in there). */
 bool town_on_port(int x, int y);
+/* The middle of the jack-in cell nearest (x, y), in world units; its
+ * squared distance, -1 with none. */
+int town_port_near(int x, int y, int *px, int *py);
 /* The town's map objects (id) and people (id -1), in world units. */
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
 

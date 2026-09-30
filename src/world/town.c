@@ -854,6 +854,9 @@ static int plan_once(uint32_t seed) {
 		for (int i = 0; i < T.style->nfolk; ++i)
 			if (T.folk_at[i][0] != 1 << 20) fprintf(stderr, "town: %d:%02x at %d,%d\n", T.style->folk[i].cat, T.style->folk[i].sprite, T.folk_at[i][0], T.folk_at[i][1]);
 	if (getenv("CYBERWORLD_TOWN_DEBUG"))
+		for (int i = 0; i < T.ntrig; ++i)
+			if ((T.trig[i].value & 0x7F) == JACK_IN_TRIGGER) fprintf(stderr, "town: jack-in cell at %d,%d\n", T.trig[i].x, T.trig[i].y);
+	if (getenv("CYBERWORLD_TOWN_DEBUG"))
 		fprintf(stderr, "town: style %d:%d, %dx%d tiles, moved (%d, %d), %d picked (%d hinted, %d coherent, %d near), %d conflicts, %d behind-art cells, %d trigger cells (%d jack-in), %d objects\n",
 			T.style->group, T.style->number, tw, th, bgx, bgy, st.picks, st.hinted, st.coherent, st.near, pc.conflicts, T.nsec2, T.ntrig, nj, T.nobj);
 	return st.near;
@@ -927,6 +930,17 @@ bool town_on_port(int x, int y) {
 		if ((c->value & 0x7F) == JACK_IN_TRIGGER && x >= c->x && y >= c->y && x < c->x + 8 && y < c->y + 8) return true;
 	}
 	return false;
+}
+
+int town_port_near(int x, int y, int *px, int *py) {
+	int best = -1;
+	for (int i = 0; i < T.ntrig; ++i) {
+		const CoordCell *c = &T.trig[i];
+		if ((c->value & 0x7F) != JACK_IN_TRIGGER) continue;
+		int dx = c->x + 4 - x, dy = c->y + 4 - y, d = dx * dx + dy * dy;
+		if (best < 0 || d < best) { best = d; *px = c->x + 4; *py = c->y + 4; }
+	}
+	return best;
 }
 
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx) {

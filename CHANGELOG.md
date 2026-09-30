@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- A town's port takes R from a step off its ring: MegaMan steps onto it
+  and jacks in, where a playtester stood at the mermaid fountain's rim a
+  step short and pressed R five times. Further off, MegaMan says which way
+  the nearest part of the landmark's ring lies, as the crow flies; the
+  walk to its front's middle had wound round the fountain's basin and
+  turned from "up and to the left" to "straight down" a step apart.
+
 ## 0.4.0 (2026-09-30)
 
 - **The 3DS build installs on the HOME Menu:** a CIA beside the `.3dsx`,
