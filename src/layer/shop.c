@@ -284,18 +284,29 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		it.price = program_price(it.id, 0, depth);
 		out[n++] = it;
 	}
-	for (int i = 0; i < 10 && n < 4; ++i) {
+	/* then those of the game's shops the act may offer, each once, in a
+	 * random order, to four (ten random draws of their twelve had brought
+	 * two or three in the first two acts, and none one time in sixty) */
+	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
+	ShopItem offer[32];
+	int noffer = 0;
+	for (uint32_t a = BN6_SHOP_INIT; a < end && noffer < (int)(sizeof offer / sizeof *offer); a += 8) {
 		ShopItem it;
+		read_item(a, &it);
 		/* (the NaviCust's pool and its tiers, docs/NAVICUST.md: HP+400 at
 		 * 2300 zenny in act 2 beside the dealer's 20-HP HPMemory at 1200;
 		 * SneakRun judged the game's battles, not the engine's) */
-		if (!pick(3, 0, &it) || !navicust_offerable(it.id / 4, depth)) continue;
+		if (it.kind != 3 || !navicust_offerable(it.id / 4, depth)) continue;
 		bool again = false;   /* (a program once, whatever its colour) */
-		for (int k = 0; k < n; ++k) again |= out[k].kind == 3 && out[k].id / 4 == it.id / 4;
-		if (again) continue;
-		it.stock = 1;
-		it.price = program_price(it.id, it.price, depth);
-		out[n++] = it;
+		for (int k = 0; k < n; ++k) again |= out[k].id / 4 == it.id / 4;
+		for (int k = 0; k < noffer; ++k) again |= offer[k].id / 4 == it.id / 4;
+		if (!again) offer[noffer++] = it;
+	}
+	for (int i = noffer - 1; i > 0; --i) { int j = rng_range(0, i); ShopItem t = offer[i]; offer[i] = offer[j]; offer[j] = t; }
+	for (int i = 0; i < noffer && n < 4; ++i) {
+		offer[i].stock = 1;
+		offer[i].price = program_price(offer[i].id, offer[i].price, depth);
+		out[n++] = offer[i];
 	}
 	return n;
 }

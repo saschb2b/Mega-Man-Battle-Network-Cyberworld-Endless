@@ -106,11 +106,14 @@ int ta_heal(TextArchive *t, int variant, int told_flag) {
 	return i;
 }
 
-int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag) {
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, const char *sold_out, int told_flag) {
 	/* (ts_wait a moment first: an A mashed through his words had opened
 	 * the list on its first chip, "Are you sure? > Yes") */
 	uint8_t open[] = { 0xEE, 0x00, 24, 0, 0xFB, 0x05, (uint8_t)shop };   /* ts_wait, ts_start_shop */
 	bool first = true;
+	/* bought out: his word for it, and no list (an empty one after "More
+	 * programs? Take a look!" read as a broken shop, issue #17) */
+	int gone = sold_out ? ta_say(t, face, sold_out) : -1;
 	/* once his words are said (flag set), a line and the list: Kai sat
 	 * through six boxes each time he came back */
 	int back = -1;
@@ -122,6 +125,10 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 		first = true;
 	}
 	int i = ta_script(t);
+	if (gone >= 0) {
+		uint8_t stock[] = { 0xEF, 0x22, (uint8_t)shop, 0xFF, (uint8_t)gone };   /* ts_check_shop_stock */
+		ta_bytes(t, stock, sizeof stock);
+	}
 	if (back >= 0) {
 		uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
 		ta_bytes(t, check, sizeof check);

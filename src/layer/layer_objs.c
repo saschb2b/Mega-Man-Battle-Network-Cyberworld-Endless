@@ -406,7 +406,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			if (layer_objs_dealer_again && tells)
 				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);
 			tk.sprite = SPR_DEALER;
-			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!", LAYER_DEALER_TOLD_FLAG);
+			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!",
+				"Sold out, MegaMan! You bought every chip I brought.", LAYER_DEALER_TOLD_FLAG);
 			break;
 		}
 		case OBJ_PROGRAMS: {
@@ -426,7 +427,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			snprintf(hello, sizeof hello, "NaviCust programs, fresh from my workbench!%s|Install them in your PET: MegaMan, then NaviCust.",
 				again);
 			tk.sprite = SPR_TECH;
-			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH, hello, "More programs? Take a look!", LAYER_VENDOR_TOLD_FLAG);
+			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH, hello, "More programs? Take a look!",
+				"Sold out! Every program I brought is yours now.", LAYER_VENDOR_TOLD_FLAG);
 			break;
 		}
 		case OBJ_CHALLENGE: {

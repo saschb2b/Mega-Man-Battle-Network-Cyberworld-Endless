@@ -31,8 +31,9 @@ int ta_say_flag(TextArchive *t, int face, const char *s, int flag);
 int ta_duel(TextArchive *t, int flag, int face, const char *terms);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
  * `shop`'s screen; with `again` and a flag, the greeting the first time
- * (the flag set) and `again` after. */
-int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag);
+ * (the flag set) and `again` after; `sold_out` instead of both, and no
+ * screen, once nothing is left to buy. */
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, const char *sold_out, int told_flag);
 
 /* Choices: Yes sets event flag `flag`, which the director acts on. A
  * challenge answers only once; the gate first wants three ScrtData. */

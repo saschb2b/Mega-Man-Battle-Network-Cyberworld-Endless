@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A bought-out shop says so.** A Net Dealer or NaviCust vendor with
+  nothing left says "Sold out!" instead of opening an empty list: after
+  "More programs? Take a look!" the empty list read as a broken shop
+  (issue #17). The vendor also brings his whole list, up to four
+  programs: ten random draws had often brought two or three in the first
+  acts, and now and then none.
 - HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
   in official vaults or anywhere else. They are left over from the
   Japanese version: the US game has no HackJack, so using one made
