@@ -282,6 +282,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			tk.anim = layer.props[o->prop].faces == FACES_X ? 3 : 5;
 		}
 		bool asks = false;   /* a Yes/No the director acts on */
+		char prize[24] = "";   /* (a Server's chip, named in its offer) */
 		switch (o->type) {
 		case OBJ_WARP_IN:
 			out->start_x = wx; out->start_y = wy;
@@ -461,6 +462,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			if (fit) code = fit;
 			else if (strchr(ci.codes, '*')) code = '*';
 			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');
+			snprintf(prize, sizeof prize, "%s %c", ci.name, code);
 			break;
 		}
 		case OBJ_GIFT: {
@@ -631,7 +633,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				tk.gone_flag = flag;
 			}
 			tk.script = o->type == OBJ_DUEL ? ta_duel(&text, flag, guardian_face(11), terms)
-				: o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag)
+				: o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag, prize)
 				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag, run.biome == BIOME_UNDERNET)
 				: o->type == OBJ_NAVI_GATE ? ta_navi_gate(&text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 				: ta_secret_gate(&text, flag);

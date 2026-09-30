@@ -133,7 +133,7 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 	return i;
 }
 
-int ta_challenge(TextArchive *t, int flag) {
+int ta_challenge(TextArchive *t, int flag, const char *prize) {
 	int quiet = ta_say(t, FACE_MEGAMAN, "The virus signal's gone quiet, Lan.");
 	int no = closing(t);
 	int i = ta_script(t);
@@ -143,7 +143,11 @@ int ta_challenge(TextArchive *t, int flag) {
 	 * not knowing, and came out at 10) */
 	bool first = true;
 	ta_pages(t, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.", FACE_MEGAMAN, &first);
-	ask_in(t, FACE_MEGAMAN, "It pays a good chip.\nTake it on?\n", no, true, true);
+	/* (and what it pays: "a good chip" left a playtester guessing whether
+	 * the risk was worth it) */
+	char ask[64];
+	snprintf(ask, sizeof ask, "It pays %s.\nTake it on?\n", prize && *prize ? prize : "a good chip");
+	ask_in(t, FACE_MEGAMAN, ask, no, true, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;

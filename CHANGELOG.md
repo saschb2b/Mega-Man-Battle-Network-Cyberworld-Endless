@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A strong virus signal names its prize before the choice: "It pays
+  DolThdr3 B. Take it on?", where it had said "a good chip" and a
+  playtester weighed the risk blind.
 - ProtoMan is easy to find on his duel layer: the official gate he
   opens stands by him (within 8 panels on 72 of the tests' 74 duel
   layers, where it had stood anywhere), the map marks him in pink with a
