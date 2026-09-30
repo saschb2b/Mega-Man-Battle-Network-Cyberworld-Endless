@@ -1226,3 +1226,52 @@ Loop change: **the checks are part of a fix.** A fix is done when
 `build.py test` (the golden layer hash, the heal walk) and `build.py
 lint` pass; a check on `tools/play.py` needs `build.py linux` first
 (SKILL.md's pitfalls).
+
+## Session 46: 8/10 (keep playing: yes; recommend: yes)
+
+Run 4 from NEW GAME (endless, Storm, EraseCross, threat 1, HP+): act 1
+in the Seaside Area, DiveMan deleted on layer 3 by his briefing's own
+words (an ElcPuls1 counter as he surfaced, torpedoes read by their
+shadows), Custom1 from his Guardian Data, the split taken to CircusMan's
+RoboDog Comp for the grudge; the budget ended on layer 4 at 260 HP. From
+7 to 8: a clean act and a guardian beaten by listening; the rival gone
+quiet kept it from 9.
+
+Confirmed: the heal by the arena's door (on the arena's own platform),
+the Mystery Data boxes let show (four of them), "V0.5.0 BETA".
+
+Raised, fixed: the official gate beside ProtoMan's deferred netbattle was
+sealed for good, a duel's prize with no duel (f38d439: it opens to the
+clearance; Chaud and ProtoMan say "past the next two guardians" for "the
+third act", and Chaud what a win opens); Lan silent after that call
+(2502bf6); no word on L and R at the Guardian Data's pick (29bf460);
+DiveMan's HP falling with nothing hitting him, which is EraseCross's own
+Navi bug, and the setup's "Counters erase viruses" was two playtesters'
+guess (60479a8: BN6's rule from its Cross mail, "A 4 in HP: plain chips
+erase"); the arrow pointing past a walkway's mouth into the platform's
+corner, the top wish for three sessions (6bb8569: the mouth first, "on
+the line" measured in a replay: 0.375 of a panel off went in, 0.41 was
+stopped). From session 45's leftovers: L names ProtoMan's way along the
+walk (81b91d1), the setup says what each Cross gives (c4bda97). Beside
+the loop, the owner's 3DS frame log: the bottom map cost a frame at each
+redraw (b4d3b56: drawn into the GPU's memory).
+Misread: the green Mystery Data "out of reach" on layer 1 stood on a pad
+that meets the floor on its upper-right side (replayed). Vanilla: the
+torpedo drawn a row above its row (the briefing's shadow line covers
+it). Kept: Quaker pairs, the worst fight of the act three sessions
+running, from BN6's formations: a candidate for act 1's pools.
+Sweep (session 44's loop change): HeatMan's, GroundMan's, SlashMan's and
+ElementMan's tells watched in god mode with MegaMan standing: each lit
+panel shows past his sprite; CircusMan's was the only hidden one.
+
+Cost: 262 calls, 76 minutes; DiveMan's fight 45 calls. The watchdog's
+"a long battle" at 15 minutes found DiveMan at 67 HP: no step needed.
+
+Loop change: **check the rival's rung before a duel goal.** The
+session's main goal, the duel with its gate as the prize, could not
+happen: two wins had moved ProtoMan to the third act's netbattle, and
+acts 1 and 2 hold only his call. Before a goal about him, read the
+persona's record (`profile.duel_won % 3`: 0 and 1 race in every act, 2
+waits for the third act) or capture the act's second layer with `--dev
+duels=N`, and say in the goals where he is.
+
