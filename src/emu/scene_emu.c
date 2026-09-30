@@ -84,6 +84,7 @@ static uint32_t frame_keys(void) {
 
 /* What follows a frame of the game: the run's logic on it. */
 static void after_frame(void) {
+	director_see();
 	director_update();
 	pet_update();
 	devtools_update();
@@ -93,6 +94,7 @@ static void after_frame(void) {
 }
 
 static void update(void) {
+	emu_drawing = false;
 	/* the core on a thread of its own (emu.c): the frame done taken in,
 	 * then the next begun, which runs while this one is drawn; keys, frames
 	 * and the logic keep their order */
@@ -117,6 +119,7 @@ static void update(void) {
 }
 
 static void draw(void) {
+	emu_drawing = true;   /* (until the next update: the second screen's too) */
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	if (!emu_ready()) return;
 	/* (on the 3DS in the canvas's order, so the copy onto it converts

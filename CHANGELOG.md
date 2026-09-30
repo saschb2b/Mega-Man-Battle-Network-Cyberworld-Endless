@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **The 3DS's bottom-screen map no longer stutters on the net.** The
+  map read MegaMan's place from the game as it was drawn, and on a New
+  3DS the next frame is already running on another core then: each read
+  waited for it, 14 ms at every redraw, a frame lost six times a second.
+  It draws from what the frame's update saw. SELECT's map and ProtoMan's
+  duel clock read the game so too, every frame they showed. The frame
+  log counts any read of the game that waits while a frame is drawn.
+
 ## 0.5.1 (2026-09-30)
 
 - **The 3DS no longer crashes entering the Undernet or the Nest** (the

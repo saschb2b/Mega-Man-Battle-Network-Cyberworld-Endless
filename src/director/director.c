@@ -707,6 +707,21 @@ static int main_mode(void) { return emu_read8(emu_read32(BN6_TOOLKIT)); }
 /* walking the net: the game mode on its map sub-mode (not a battle or menu) */
 static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_GAMESTATE) == BN6_SUB_MAP; }
 
+/* What the drawing reads of the game, taken after each frame as the update
+ * runs: on a 3DS the next frame runs on another core while this one is
+ * drawn, and a read of the game then waits for it (the bottom screen's map
+ * took 14 ms so, a frame lost six times a second; the duel's clock every
+ * frame of its battle). */
+static struct { int px, py; bool on_map, battle; uint32_t timer; } seen;
+
+void director_see(void) {
+	seen.px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16;
+	seen.py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	seen.on_map = on_map();
+	seen.battle = emu_read8(BN6_GAMESTATE) == BN6_SUB_BATTLE;
+	seen.timer = emu_read32(BN6_BATTLE_TIMER);
+}
+
 static int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }
 
 static const __typeof__(R.layout->net_area[0]) *area(int biome) {
@@ -1134,10 +1149,10 @@ bool director_on_layer(void) { return D.active && !D.town; }
  * been hit. Hidden while the clock holds (BATTLE START!, the Custom screen,
  * the pause): a playtester raced a time he could not see. */
 void director_draw_duel(void) {
-	if (!D.active || !D.duel || layer_objs_duel_rung == 2 || on_map() || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) return;
+	if (!D.active || !D.duel || layer_objs_duel_rung == 2 || seen.on_map || !seen.battle) return;
 	static uint32_t last;
 	static int still;
-	uint32_t t = emu_read32(BN6_BATTLE_TIMER);
+	uint32_t t = seen.timer;
 	still = t == last ? still + 1 : 0;
 	last = t;
 	if (still > 2 || !t) return;
@@ -1384,7 +1399,7 @@ static void draw_map(int x0, int y0, int w, int h) {
 	fill_rect(m.bx - 2, m.by - 2, 1, m.bh + 4, edge);
 	fill_rect(m.bx + m.bw + 1, m.by - 2, 1, m.bh + 4, edge);
 	text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = seen.px, py = seen.py;
 	if (!netmap_panel(px, py, &m.mx, &m.my)) return;
 	map_view(&m);
 	map_panels(&m);
@@ -1403,7 +1418,7 @@ static void draw_map(int x0, int y0, int w, int h) {
 }
 
 void director_draw_map(void) {
-	if (!D.active || D.town || !D.map_shown || !on_map()) return;
+	if (!D.active || D.town || !D.map_shown || !seen.on_map) return;
 	draw_map(P.core_x, P.core_y, 240, 160);
 }
 

@@ -612,8 +612,15 @@ static void log_present(void) {
 		extern uint64_t emu_core_ticks, emu_core_unshown_ticks;
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
-		char bottom[80] = "";
+		char bottom[160] = "";
 		if (part_seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's map %.1f ms of it, %d times)", part_second * ms / part_seconds, part_seconds);
+		/* (and reads of the game that waited, drawing, for the next frame) */
+		extern int emu_draw_waits;
+		if (emu_draw_waits) {
+			size_t k = strlen(bottom);
+			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing", emu_draw_waits);
+			emu_draw_waits = 0;
+		}
 		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
 			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms%s\n",
 			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",

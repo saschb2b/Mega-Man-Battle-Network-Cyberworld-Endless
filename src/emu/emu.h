@@ -29,6 +29,11 @@ void emu_reset(void);
  * it, and emu_video shows the frame before until then. */
 void emu_frame(uint32_t keys);
 bool emu_threaded(void);
+/* Set while a frame is drawn: a read of the game then, with the core on a
+ * thread of its own, waits for the next frame (counted in emu_draw_waits,
+ * which the frame log shows). */
+extern bool emu_drawing;
+extern int emu_draw_waits;
 /* Ends the core's thread, before the program ends. */
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */

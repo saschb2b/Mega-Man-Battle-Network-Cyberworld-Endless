@@ -14,6 +14,10 @@ bool director_start_run(void);
 bool director_in_town(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
+/* What the drawing reads of the game, taken after each frame, before the
+ * update: on a 3DS the next frame runs on another core while this one is
+ * drawn, and a read of the game then waits for it. */
+void director_see(void);
 /* The layer's map over the picture while SELECT is held (drawing only). */
 void director_draw_map(void);
 /* The second screen (the 3DS's bottom one, issue #9): the layer's map in

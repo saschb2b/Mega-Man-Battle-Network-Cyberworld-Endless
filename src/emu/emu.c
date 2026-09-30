@@ -181,8 +181,15 @@ static int worker_main(void *arg) {
 static void worker_entry(void *arg) { worker_main(arg); }
 #endif
 
+/* (reads of the game while a frame is drawn, which waited for the next
+ * one on the core's own thread: the frame log counts them, as each costs
+ * the frame its present; the drawing takes what it reads from the update) */
+bool emu_drawing;
+int emu_draw_waits;
+
 static void wait_frame(void) {
 	if (!in_flight) return;
+	emu_draw_waits += emu_drawing;
 	SDL_SemWait(done);
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);
