@@ -21,6 +21,8 @@
   L and R turn any program. After a RUN that leaves a bug, he says the
   RUN's "OK" hides it.
 - Lan answers Chaud after a duel won, as he did after every loss.
+- A collector's vault and an official gate list what each of their three
+  chips hits for ("Cannon A 40"), where they had names alone.
 - HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
   in official vaults or anywhere else. They are left over from the
   Japanese version: the US game has no HackJack, so using one made

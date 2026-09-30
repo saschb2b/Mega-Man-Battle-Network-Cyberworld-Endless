@@ -562,6 +562,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				code = loot_fit_code(id, ci.ncodes ? ci.codes[0] : '*', true);
 				v.chip[k] = id;
 				v.code[k] = code == '*' ? 26 : code - 'A';
+				v.power[k] = ci.power;
 				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
 			}
 			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, &v);
@@ -589,6 +590,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				code = loot_fit_code(id, code, true);
 				v.chip[k] = id;
 				v.code[k] = code == '*' ? 26 : code - 'A';
+				v.power[k] = ci.power;
 				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
 			}
 			tk.script = ta_vault(&text, LAYER_VAULT_FLAG, need, have, &v);

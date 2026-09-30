@@ -502,10 +502,14 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 	/* three in a column, as the draft's; B leaves them */
 	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	/* (each with what it hits for, as BN6's chip lists show it: a
+	 * playtester picked his official Chip Order by the names alone) */
 	for (int k = 0; k < 3; ++k) {
 		ta_bytes(t, opt[k], 4);
 		ta_bytes(t, space, sizeof space);
-		snprintf(s, sizeof s, "%s %c%s", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k], k < 2 ? "\n" : "");
+		int n = snprintf(s, sizeof s, "%s %c", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
+		if (v->power[k] > 0) n += snprintf(s + n, sizeof s - (size_t)n, " %d", v->power[k]);
+		snprintf(s + n, sizeof s - (size_t)n, "%s", k < 2 ? "\n" : "");
 		ta_text(t, s);
 	}
 	choose(t, take, 3, leave);

@@ -85,9 +85,9 @@ int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int nee
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
 /* A collector's vault (docs/META.md, gates): its three chips (`code`
- * A=0 .. *=26), named. */
+ * A=0 .. *=26), named, and what each hits for (0: none to say). */
 typedef struct {
-	int chip[3], code[3];
+	int chip[3], code[3], power[3];
 	char name[3][20];
 } ScriptsVault;
 /* The vault's talk: while the Library's `have` is short of `need`, its
