@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.3 (2026-10-01)
 
 - **A duel with ProtoMan counts once.** Quitting after a duel and
   continuing met ProtoMan again on that layer, and each win counted anew
