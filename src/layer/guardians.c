@@ -6,6 +6,8 @@
 
 #include "net.h"
 #include "rivals.h"
+#include "rom.h"
+#include "run.h"
 #include "text.h"
 #include "run.h"
 
@@ -314,7 +316,15 @@ const char *guardian_defeat(int navi) {
 	return navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
 }
 
+/* Another game's area where it draws `biome` in this run (run_dress). */
+static const NetAreaDef *dressed(int biome) {
+	int a = run_dress(biome);
+	return a >= NET_AREAS ? net_area_def(a) : NULL;
+}
+
 const char *guardian_area_name(int biome) {
+	const NetAreaDef *x = dressed(biome);
+	if (x) return x->name;
 	static const char *const names[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Central Area", [BIOME_SEASIDE] = "Seaside Area", [BIOME_SKY] = "Sky Area",
 		[BIOME_GREEN] = "Green Area", [BIOME_GRAVEYARD] = "Graveyard", [BIOME_UNDERNET] = "Undernet",
@@ -329,6 +339,8 @@ const char *guardian_area_name(int biome) {
 }
 
 const char *guardian_area_short(int biome) {
+	const NetAreaDef *x = dressed(biome);
+	if (x) return x->short_name;
 	/* (nine letters at most: the PET's PLACE holds twelve, with the layer) */
 	static const char *const names[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Central", [BIOME_SEASIDE] = "Seaside", [BIOME_SKY] = "Sky Area", [BIOME_GREEN] = "Green",
@@ -350,6 +362,8 @@ const char *guardian_area_in_text(int biome, int side) {
 }
 
 const char *guardian_area_motto(int biome) {
+	const NetAreaDef *x = dressed(biome);
+	if (x) return x->motto;
 	static const char *const mottos[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Where every net path begins", [BIOME_SEASIDE] = "Currents of the aquarium net",
 		[BIOME_SKY] = "Above the clouds of data", [BIOME_GREEN] = "Wild data, overgrown",

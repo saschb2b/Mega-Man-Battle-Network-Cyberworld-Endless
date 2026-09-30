@@ -56,6 +56,10 @@ enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4 };
 extern Run run;
 
 void run_new(uint32_t seed);
+/* The net area that draws BN6 area `biome` in this run: its own, or
+ * another game's like it (docs/MULTIROM.md), where that game's ROM is
+ * there and the run's seed picks it, in half the runs. */
+int run_dress(int biome);
 /* The setup chosen for the run just made: in the short net its Nest's
  * guardian is picked as a fourth act's. */
 void run_setup(int mode, int folder, int threat, int helpers, int cross);

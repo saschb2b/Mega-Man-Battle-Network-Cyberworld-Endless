@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "data.h"
+#include "rom.h"
 #include "game.h"
 #include "pacing.h"
 #include "rivals.h"
@@ -33,6 +34,14 @@ static const uint8_t pools[BIOME_COUNT][4] = {
 	{ 4, 10, 16, 4 },   /* Sky HP: EraseMan, DustMan, ElementMan */
 };
 static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
+
+int run_dress(int biome) {
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *x = net_area_def(NET_AREAS + k);
+		if (x && x->like == biome && (run.seed * 2654435761u) >> (16 + k) & 1) return NET_AREAS + k;
+	}
+	return biome;
+}
 
 void run_new(uint32_t seed) {
 	memset(&run, 0, sizeof run);

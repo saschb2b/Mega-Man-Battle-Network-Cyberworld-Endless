@@ -965,19 +965,18 @@ static void building_word(void) {
 	platform_present_now();
 }
 
-/* The net area a layer is drawn in: the biome's own, or the test hook's
- * area of another game (docs/MULTIROM.md), laid out as the BN6 area it is
- * like, which then is the layer's biome. */
+/* The net area a layer is drawn in: the biome's own, another game's that
+ * dresses it in this run (run_dress), or the test hook's area of another
+ * game (docs/MULTIROM.md), laid out as the BN6 area it is like, which then
+ * is the layer's biome. */
 void director_net_biome_arg(const char *v) {
 	if (v[0] == 'x') director_debug_area = NET_AREAS + atoi(v + 1);
 	else director_debug_biome = atoi(v);
 }
 
 static int layer_area(int *biome) {
-	static bool read;
-	if (director_debug_area >= 0 && !read) { read = true; xrom_find_beside(); }
 	const NetAreaDef *x = director_debug_area >= 0 ? net_area_def(director_debug_area) : NULL;
-	if (!x) return *biome;
+	if (!x) return run.side_kind == LAYER_NORMAL ? run_dress(*biome) : *biome;
 	*biome = x->like;
 	return director_debug_area;
 }

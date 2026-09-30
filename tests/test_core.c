@@ -34,6 +34,8 @@ static int failures;
 char g_data_dir[512] = ".";
 Run run;
 Profile profile;
+/* (no ROM, so no other game's areas: each BN6 area draws itself) */
+int run_dress(int biome) { return biome; }
 static uint32_t rng_s = 1;
 /* (as the game's: the seed mixed first) */
 void rng_seed(uint32_t s) {

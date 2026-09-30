@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Battle Network 5's areas in a run.** With Team Colonel (USA) in the
+  same folder as your BN6 ROM, a run that comes to Central Area meets
+  BN5's ACDC Area instead in about half the runs: its own tiles and
+  colours, its name, and its act's card: "The net of Lan's old hometown".
+  Its layouts, guardian and battles stay Central Area's. BN6 alone plays
+  as before. Not on the 3DS, which has no memory for a second ROM, or in
+  the browser.
 - **CircusMan's tent shows where it drops.** As his tent comes, BN6
   lights the panel MegaMan stands on for a few frames, under his feet,
   where no one can see it, and a playtester lost to him five times. A

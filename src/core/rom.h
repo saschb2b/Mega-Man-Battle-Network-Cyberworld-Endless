@@ -42,6 +42,7 @@ typedef struct {
 	int8_t xrom;             /* the game its maps are in: 0 BN6, 1 + XRomId another's */
 	uint8_t over[2];         /* the BN6 map its layers take over (group, number) */
 	uint8_t like;            /* the BN6 area (BIOME_*) whose layouts and furnishings its layers take */
+	const char *name, *short_name, *motto;   /* what a run calls it: in full, in nine letters, on its act's card */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */

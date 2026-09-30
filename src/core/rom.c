@@ -201,6 +201,12 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 			R.version = (RomVersion)i;
 			R.layout = &layouts[i];
 			snprintf(R.path, sizeof R.path, "%s", path);
+#if !defined(__3DS__) && !defined(__EMSCRIPTEN__)
+			/* (other games' ROMs beside it lend a run their areas,
+			 * docs/MULTIROM.md: a 3DS has no memory for another, and a
+			 * browser holds only the file chosen) */
+			xrom_find_beside();
+#endif
 			return true;
 		}
 	}
@@ -215,7 +221,8 @@ bool rom_find_close;
 
 /* Battle Network 5's net areas (docs/MULTIROM.md) */
 static const NetAreaDef bn5_areas[] = {
-	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0 },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
+	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
+		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown" },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {

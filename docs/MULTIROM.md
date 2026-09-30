@@ -54,9 +54,11 @@ ROM in memory, and shows its battle screens.
    first block at 0, the second after it: 31200 bytes against 30496).
 4. **Pools by source**: each area, town, song and bystander is an entry
    with the game it came from; BN6 alone is today's game.
-5. **Runs remember their games**: a run is made from the pools of the ROMs
-   there, so it keeps which, and continues only with them (a `Run`
-   change: `RUN_MAGIC`).
+5. **Runs follow the games there**: an area of another game dresses the BN6
+   area it is like (`run_dress`): its layouts, guardian, battles and song
+   are that area's, its tiles and name its own. The run's seed picks it,
+   with the ROMs present, so nothing is saved: a run continued without
+   the other ROM goes on in the BN6 area's tiles.
 6. **Platforms**: desktop first. A New 3DS's 96 MB heap holds BN6 twice
    (mGBA's copy and the engine's) with little room left: there another
    game's data would be taken in as a run needs it, its ROM not kept.
@@ -70,9 +72,14 @@ ROM in memory, and shows its battle screens.
   cyan platforms and green walkways learned, its tile set and palette in
   BN6's free space, taking over Central Area 1 and laid out as Central
   Area (`--net-biome x0`; `--atlas DIR:a0:SEEDS` draws its layers).
-- [ ] Its areas in a run: their names, songs and battles, a biome of
-  their own when its ROM is there; the frames its platforms still show
-  inside a field joined from several (its other maps to learn from).
+- [x] Its ACDC Area in runs: it dresses Central Area in half the runs where
+  Team Colonel sits beside BN6's ROM (`run_dress`, from the run's seed and
+  the ROMs there: no save changes, and a run continued without it goes on
+  in Central Area's tiles), named on the act's card, in MegaMan's words,
+  L's and the PET's. Read where BN6's ROM is, on every build but the 3DS's
+  and the browser's.
+- [ ] Its other looks as areas: group 0x90's maps 2-3, 4-6, 7-9, 10-12 and
+  13-15, each in its palette, dressing BN6 areas they resemble.
 - [ ] Its music.
 - [ ] Its towns and bystanders.
 - [ ] Its guardians, in battles in its own engine.

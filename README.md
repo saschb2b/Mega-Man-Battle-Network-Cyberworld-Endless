@@ -79,6 +79,12 @@ on a phone too, and on a New 3DS from its HOME Menu.
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
   and the Legacy Collection version do not work yet.
+- Optional: **Mega Man Battle Network 5: Team Colonel (USA)**, unmodified,
+  in the same folder as your BN6 ROM (SHA-1
+  `5f472f78d8de2df01d5039e045c043cb40969a39`). Its net areas then turn up
+  in runs, in place of the BN6 areas they resemble: so far its ACDC Area,
+  in about half the runs that come to Central Area. Not on the 3DS or in
+  the browser.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
