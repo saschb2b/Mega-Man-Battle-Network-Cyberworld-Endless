@@ -336,6 +336,36 @@ static void parse_script(const char *spec) {
 	script_left = script_len ? script[0].frames : 0;
 }
 
+/* --taps "FRAME:X,Y[>X2,Y2];...": a finger on the canvas at FRAME, held
+ * six frames, or dragged to (X2, Y2) over twenty, then lifted (the touch
+ * controls and their editor in headless tests) */
+typedef struct { int frame, x0, y0, x1, y1; bool drag; } Tap;
+static Tap taps[32];
+static int ntaps;
+
+static void parse_taps(const char *spec) {
+	char *copy = strdup(spec), *save = NULL;
+	for (char *t = strtok_r(copy, ";", &save); t && ntaps < 32; t = strtok_r(NULL, ";", &save)) {
+		Tap *p = &taps[ntaps];
+		int n = sscanf(t, "%d:%d,%d>%d,%d", &p->frame, &p->x0, &p->y0, &p->x1, &p->y1);
+		if (n < 3) continue;
+		p->drag = n == 5;
+		if (!p->drag) { p->x1 = p->x0; p->y1 = p->y0; }
+		++ntaps;
+	}
+	free(copy);
+}
+
+static void taps_tick(void) {
+	for (int i = 0; i < ntaps; ++i) {
+		const Tap *t = &taps[i];
+		int len = t->drag ? 20 : 6, f = (int)P.frame - t->frame;
+		if (f < 0 || f > len) continue;
+		uint32_t type = f == 0 ? SDL_FINGERDOWN : f == len ? SDL_FINGERUP : SDL_FINGERMOTION;
+		touch_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * f / len, t->y0 + (t->y1 - t->y0) * f / len);
+	}
+}
+
 static uint32_t bot_seed;
 static uint32_t bot_buttons;
 
@@ -516,6 +546,7 @@ static void quit_prompt_draw(void) {
  * frame budget of a headless run is spent. */
 static bool game_frame(void) {
 	if (pending) {
+		touch_offer_edit(false);   /* (a scene that offers it says so again) */
 		if (current && current->leave) current->leave();
 		current = pending;
 		pending = NULL;
@@ -524,6 +555,7 @@ static bool game_frame(void) {
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	script_tick();
 	platform_poll();
+	taps_tick();
 	if (current && current->update) current->update();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
@@ -674,6 +706,7 @@ int main(int argc, char **argv) {
 		/* (the frame log without an environment: the 3DS over 3dslink) */
 		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
+		else if (!strcmp(a, "--taps") && v) { parse_taps(v); ++i; }
 		else if (!strcmp(a, "--shot") && v) { parse_shots(v); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {
 			unsigned long long ra = 0, rb = 0;
@@ -805,6 +838,8 @@ int main(int argc, char **argv) {
 		platform_load_keys(keys);
 		snprintf(keys, sizeof keys, "%s/settings.ini", g_data_dir);
 		platform_load_settings(keys);
+		snprintf(keys, sizeof keys, "%s/touch.ini", g_data_dir);
+		touch_load(keys);
 		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());

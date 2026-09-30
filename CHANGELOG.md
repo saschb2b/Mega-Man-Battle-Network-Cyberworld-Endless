@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The touch buttons can be moved and sized.** EDIT CONTROLS on the title
+  screen (on a phone, a tablet, the browser on one, the Steam Deck's
+  screen): drag a button where your thumb wants it, - and + size the one
+  touched last (half to twice), RESET puts them back, DONE keeps them.
+  The phone upright and on its side each keep their own arrangement
+  (`touch.ini` in the save folder). A player asked to play on My Boy! for
+  its adjustable buttons.
 - The project page counts its visits with Umami, on its own domain only
   and without cookies. The release's web zip, to host elsewhere, carries
   no counter.

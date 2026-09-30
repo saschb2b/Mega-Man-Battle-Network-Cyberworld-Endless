@@ -1,5 +1,6 @@
 #include "touch_layout.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "buttons.h"
@@ -69,6 +70,79 @@ void touch_layout_for(int w, int h, int px, int py, TouchLayout *t) {
 }
 
 static bool round_control(int c) { return c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B; }
+
+int touch_shape(const TouchLayout *t) { return t->below ? TOUCH_SHAPE_BELOW : t->over ? TOUCH_SHAPE_OVER : TOUCH_SHAPE_SIDE; }
+
+void touch_layout_custom(TouchLayout *t, int w, int h, const TouchCustom *c) {
+	if (!c) return;
+	const TouchPlace *p = c->place[touch_shape(t)];
+	for (int k = 0; k < TOUCH_CONTROLS; ++k) {
+		TouchBox *b = &t->box[k];
+		if (b->w <= 0 || (!p[k].moved && !p[k].size)) continue;
+		int cx = b->x + b->w / 2, cy = b->y + b->h / 2;
+		if (p[k].size) {
+			int s = p[k].size < TOUCH_SIZE_MIN ? TOUCH_SIZE_MIN : p[k].size > TOUCH_SIZE_MAX ? TOUCH_SIZE_MAX : p[k].size;
+			if (round_control(k)) {
+				int r = b->w / 2 * s / 100;
+				*b = round_at(cx, cy, r < 6 ? 6 : r);
+			} else {
+				int bw = b->w * s / 100, bh = b->h * s / 100;
+				*b = box_at(cx, cy, bw < 16 ? 16 : bw, bh < 10 ? 10 : bh);
+			}
+		}
+		if (p[k].moved) {
+			cx = p[k].x * w / 1000;
+			cy = p[k].y * h / 1000;
+		}
+		/* (whole on the canvas, where it fits) */
+		int x = cx - b->w / 2, y = cy - b->h / 2;
+		if (x > w - b->w) x = w - b->w;
+		if (y > h - b->h) y = h - b->h;
+		b->x = x < 0 ? 0 : x;
+		b->y = y < 0 ? 0 : y;
+	}
+}
+
+static const char *const shape_names[TOUCH_SHAPES] = { "below", "side", "over" };
+static const char *const control_names[TOUCH_CONTROLS] = { "dpad", "a", "b", "l", "r", "start", "select" };
+
+void touch_custom_parse(const char *text, TouchCustom *c) {
+	memset(c, 0, sizeof *c);
+	while (text && *text) {
+		char shape[16], name[16], xs[16], ys[16];
+		int size;
+		if (sscanf(text, " %15s %15s %15s %15s %d", shape, name, xs, ys, &size) == 5) {
+			int s = -1, k = -1;
+			for (int i = 0; i < TOUCH_SHAPES; ++i) if (!strcmp(shape, shape_names[i])) s = i;
+			for (int i = 0; i < TOUCH_CONTROLS; ++i) if (!strcmp(name, control_names[i])) k = i;
+			if (s >= 0 && k >= 0) {
+				TouchPlace *p = &c->place[s][k];
+				int x, y;
+				p->moved = sscanf(xs, "%d", &x) == 1 && sscanf(ys, "%d", &y) == 1 && x >= 0 && x <= 1000 && y >= 0 && y <= 1000;
+				p->x = (int16_t)(p->moved ? x : 0);
+				p->y = (int16_t)(p->moved ? y : 0);
+				p->size = (int16_t)(size >= TOUCH_SIZE_MIN && size <= TOUCH_SIZE_MAX && size != 100 ? size : 0);
+			}
+		}
+		const char *nl = strchr(text, '\n');
+		text = nl ? nl + 1 : NULL;
+	}
+}
+
+int touch_custom_format(const TouchCustom *c, char *out, int size) {
+	int n = snprintf(out, (size_t)size, "# Cyberworld Endless: the touch controls as you arranged them on the title's\n"
+		"# EDIT CONTROLS. Per screen shape (below or beside the picture, or over it):\n"
+		"# a control's middle in thousandths of the screen (- where it stays), its size in percent.\n");
+	for (int s = 0; s < TOUCH_SHAPES; ++s)
+		for (int k = 0; k < TOUCH_CONTROLS && n >= 0 && n < size; ++k) {
+			const TouchPlace *p = &c->place[s][k];
+			if (!p->moved && !p->size) continue;
+			char xs[8] = "-", ys[8] = "-";
+			if (p->moved) { snprintf(xs, sizeof xs, "%d", p->x); snprintf(ys, sizeof ys, "%d", p->y); }
+			n += snprintf(out + n, (size_t)(size - n), "%s %s %s %s %d\n", shape_names[s], control_names[k], xs, ys, p->size ? p->size : 100);
+		}
+	return n < size ? n : size - 1;
+}
 
 int touch_control_at(const TouchLayout *t, int x, int y) {
 	/* the round buttons first, each with a quarter of its radius more */

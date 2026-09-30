@@ -276,7 +276,10 @@ on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
 quits. Controllers use their own buttons (A, B, shoulders, Start, Back);
 holding Back and Start for a second, twice, quits. A touch screen shows the
 buttons on it from its first touch (a Steam Deck's too), until a key or a
-controller is used again.
+controller is used again. **EDIT CONTROLS** on the title screen arranges
+them: drag a button to move it, **-** and **+** size the one you touched
+last, **RESET** puts them back, **DONE** keeps them (in `touch.ini`, one
+arrangement for the phone upright and one on its side).
 
 | Button | In the net | In battle |
 | --- | --- | --- |

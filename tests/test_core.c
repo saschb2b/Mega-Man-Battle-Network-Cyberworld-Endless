@@ -1076,6 +1076,38 @@ static void test_touch(void) {
 	check_touch("a 4:3 tablet (2048x1536)", 2048, 1536);
 	check_touch("a 4:3 tablet upright (1536x2048)", 1536, 2048);
 	check_touch("a Retroid Pocket (1334x750)", 1334, 750);
+
+	/* the player's arrangement (the editor, touch.ini): a control moved
+	 * and sized lands where it was put, whole on the canvas, and the file's
+	 * text reads back as it was written */
+	TouchLayout t, def;
+	int w = 360, h = 780, px = 60, py = touch_picture_top(w, h);
+	touch_layout_for(w, h, px, py, &def);
+	CHECK(touch_shape(&def) == TOUCH_SHAPE_BELOW, "an upright phone's controls are not under the picture");
+	TouchCustom c;
+	memset(&c, 0, sizeof c);
+	c.place[TOUCH_SHAPE_BELOW][TOUCH_A] = (TouchPlace){ 500, 900, 150, true };
+	c.place[TOUCH_SHAPE_BELOW][TOUCH_START] = (TouchPlace){ 0, 0, 120, false };
+	c.place[TOUCH_SHAPE_BELOW][TOUCH_DPAD] = (TouchPlace){ 1000, 1000, 0, true };
+	c.place[TOUCH_SHAPE_SIDE][TOUCH_B] = (TouchPlace){ 10, 20, 60, true };
+	t = def;
+	touch_layout_custom(&t, w, h, &c);
+	const TouchBox *a = &t.box[TOUCH_A], *da = &def.box[TOUCH_A];
+	CHECK(abs(a->x + a->w / 2 - 180) <= 1 && abs(a->y + a->h / 2 - 702) <= 1, "A moved to (180, 702) stands at (%d, %d)", a->x + a->w / 2, a->y + a->h / 2);
+	CHECK(abs(a->w / 2 - da->w / 2 * 3 / 2) <= 1, "A at 150%% has radius %d, laid out %d", a->w / 2, da->w / 2);
+	CHECK(touch_control_at(&t, a->x + a->w / 2, a->y + a->h / 2) == TOUCH_A, "a finger on the moved A does not reach it");
+	CHECK(t.box[TOUCH_START].w == def.box[TOUCH_START].w * 120 / 100 && t.box[TOUCH_START].x + t.box[TOUCH_START].w / 2 == def.box[TOUCH_START].x + def.box[TOUCH_START].w / 2,
+		"START sized, not moved, left its place or its size");
+	const TouchBox *d = &t.box[TOUCH_DPAD];
+	CHECK(d->x + d->w == w && d->y + d->h == h, "the D-pad put at the corner leaves the canvas (%d, %d)", d->x + d->w, d->y + d->h);
+	CHECK(!memcmp(&t.box[TOUCH_B], &def.box[TOUCH_B], sizeof(TouchBox)), "B moved on the other screen shape moved here");
+	static char text[4096];
+	touch_custom_format(&c, text, sizeof text);
+	TouchCustom back;
+	touch_custom_parse(text, &back);
+	CHECK(!memcmp(&back, &c, sizeof c), "touch.ini reads back otherwise than written:\n%s", text);
+	touch_custom_parse("below a 2000 5 100\nside nothing 1 2 3\nover l - - 999\n", &back);
+	CHECK(!back.place[TOUCH_SHAPE_BELOW][TOUCH_A].moved && !back.place[TOUCH_SHAPE_OVER][TOUCH_L].size, "touch.ini's bad values were taken");
 }
 
 int main(void) {

@@ -27,6 +27,29 @@ int touch_fit_scale(int sw, int sh, int scale);
 int touch_picture_top(int w, int h);
 /* The controls on a w x h canvas whose 240x160 picture stands at (px, py). */
 void touch_layout_for(int w, int h, int px, int py, TouchLayout *t);
+/* The screen shapes the controls are laid out for, each arranged apart
+ * (a phone turned is the other one): under the picture, beside it, over
+ * its corners. */
+enum { TOUCH_SHAPE_BELOW, TOUCH_SHAPE_SIDE, TOUCH_SHAPE_OVER, TOUCH_SHAPES };
+int touch_shape(const TouchLayout *t);
+
+/* The player's arrangement (touch.ini, the touch controls' editor): per
+ * shape and control, its middle in thousandths of the canvas's width and
+ * height where moved, and its size in percent of the laid-out one (0 as
+ * laid out). */
+typedef struct { int16_t x, y, size; bool moved; } TouchPlace;
+typedef struct { TouchPlace place[TOUCH_SHAPES][TOUCH_CONTROLS]; } TouchCustom;
+#define TOUCH_SIZE_MIN 50
+#define TOUCH_SIZE_MAX 200
+/* t, laid out by touch_layout_for on a w x h canvas, as the player
+ * arranged it: sized, moved, and kept whole on the canvas. */
+void touch_layout_custom(TouchLayout *t, int w, int h, const TouchCustom *c);
+/* touch.ini's lines ("below a 850 470 120", "-" for a place not moved);
+ * others are passed over. Formatting gives the bytes written (at most
+ * size - 1). */
+void touch_custom_parse(const char *text, TouchCustom *c);
+int touch_custom_format(const TouchCustom *c, char *out, int size);
+
 /* The control at canvas (x, y), each reaching a little past its art, or -1. */
 int touch_control_at(const TouchLayout *t, int x, int y);
 /* The buttons (BTN_*) a finger at (x, y) holds. One that went down on the
