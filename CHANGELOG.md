@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- MegaMan's L says how far the walk to ProtoMan is, and when it winds
+  away from where his pink mark lies ("down and to the right, far off,
+  though the way there winds"), as it says for a heal or a Net Dealer:
+  it had measured the way as the crow flies, "close by" across a gap.
+
 ## 0.5.0 (2026-09-30)
 
 - **The first beta.** The title screen names the build a beta, and the

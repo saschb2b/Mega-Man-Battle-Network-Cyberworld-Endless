@@ -344,6 +344,36 @@ static const char *route_to(int tx, int ty, int *far) {
 	return ways[w];
 }
 
+/* Where something lies from MegaMan, as L and the map's mark give it,
+ * with how far the walk there is (*far) and whether that walk sets off
+ * another way (*winds); way_dir left as it was. */
+static const char *lie_and_walk(int wx, int wy, int *far, bool *winds) {
+	int keep = way_dir, walk_far;
+	const char *lies = way_to(wx, wy, far);
+	int lies_dir = way_dir;
+	const char *walk = route_to(wx, wy, &walk_far);
+	int apart = walk ? abs(way_dir - lies_dir) : 0;
+	if (apart > 4) apart = 8 - apart;
+	if (walk) *far = walk_far;
+	*winds = apart >= 2;
+	way_dir = keep;
+	return lies;
+}
+
+/* Where ProtoMan waits, for L's words: the lie of his pink mark, how far
+ * the walk to him is, and whether it winds (as the crow flies, "close by"
+ * named him across a gap); NULL while no duel waits. */
+static const char *rival_where(void) {
+	static const char *const dist[3] = { "close by", "a ways off", "far off" };
+	static char buf[96];
+	int wx, wy, far;
+	bool winds;
+	if (!duel_waiting(&wx, &wy)) return NULL;
+	const char *lies = lie_and_walk(wx, wy, &far, &winds);
+	snprintf(buf, sizeof buf, "%s, %s%s", lies, dist[far], winds ? ", though the way there winds" : "");
+	return buf;
+}
+
 /* The way on as the arrow shows it: along the floor to the exit or the
  * guardian (the port in the town); way_dir holds it. */
 static void goal_way(void) {
@@ -560,12 +590,8 @@ static const char *status_words(void) {
 		/* (where the rival waits, and his mark: the map showed him as the
 		 * official gate's violet, and a playtester's session ran out at
 		 * the gate, alone, looking for him) */
-		int dx, dy, df;
-		static const char *const dist[3] = { "close by", "a ways off", "far off" };
-		if (duel_waiting(&dx, &dy)) {
-			const char *dw = way_to(dx, dy, &df);
-			ADD("@M ProtoMan's %s, %s: the pink mark on the map.|", dw, dist[df]);
-		}
+		const char *rw = rival_where();
+		if (rw) ADD("@M ProtoMan's %s: the pink mark on the map.|", rw);
 		/* (a program left off the board: said on every layer until placed;
 		 * one that cannot fit, once a board: a playtester's SuprArmr could
 		 * not share the 4x4 board with Custom1) */
@@ -599,12 +625,8 @@ static const char *status_words(void) {
 		}
 	}
 	/* (and after that, where ProtoMan waits, while he does) */
-	int rx, ry, rf;
-	static const char *const rival_far[3] = { "close by", "a ways off", "far off" };
-	if (told && duel_waiting(&rx, &ry)) {
-		const char *rw = way_to(rx, ry, &rf);
-		ADD("@M ProtoMan's waiting %s, %s.|", rw, rival_far[rf]);
-	}
+	const char *rival = told ? rival_where() : NULL;
+	if (rival) ADD("@M ProtoMan's waiting %s.|", rival);
 	/* the way on, as MegaMan senses it: along the floor where he can (the
 	 * arrow's way); where the walk sets off well away from where the goal
 	 * lies, where it lies, which holds still as the walk winds */
@@ -2608,15 +2630,11 @@ static void win_run(void) {
  * way, that it winds: the walk's first step, "up and to the right", named
  * a heal that L and the map put up and to the left) */
 static const char *service_where(int wx, int wy, char *buf, size_t n) {
-	int far, walk_far;
-	const char *lies = way_to(wx, wy, &far);
-	int lies_dir = way_dir;
-	const char *walk = route_to(wx, wy, &walk_far);
-	int apart = walk ? abs(way_dir - lies_dir) : 0;
-	if (apart > 4) apart = 8 - apart;
-	if (walk) far = walk_far;
-	const char *winds = apart >= 2 ? ", though the way there winds" : "";
-	snprintf(buf, n, far == 0 ? "right here, %s%s" : far == 1 ? "%s%s" : "a long way back, %s%s", lies, winds);
+	int far;
+	bool winds;
+	const char *lies = lie_and_walk(wx, wy, &far, &winds);
+	snprintf(buf, n, far == 0 ? "right here, %s%s" : far == 1 ? "%s%s" : "a long way back, %s%s", lies,
+		winds ? ", though the way there winds" : "");
 	return buf;
 }
 
@@ -2672,7 +2690,6 @@ static void last_stop(int cx, int cy) {
 	int hp = emu_read16(BN6_NAVI_STATS + 0x40), max = emu_read16(BN6_NAVI_STATS + 0x42);
 	const char *dealer = NULL, *heal = NULL;
 	static char dway[80], hway[80];
-	int keep = way_dir;
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int wx, wy;
@@ -2680,7 +2697,6 @@ static void last_stop(int cx, int cy) {
 		if (o->type == OBJ_SHOP && !dealer && !flag_get(LAYER_DEALER_TOLD_FLAG)) dealer = service_where(wx, wy, dway, sizeof dway);
 		if (o->type == OBJ_HEAL && !heal && !flag_get(LAYER_HEAL_TOLD_FLAG) && hp < max) heal = service_where(wx, wy, hway, sizeof hway);
 	}
-	way_dir = keep;
 	if (!dealer && !heal) return;
 	static char buf[300];
 	int k = guardian_known(D.objs.guardian.navi) || guardian_heard()
