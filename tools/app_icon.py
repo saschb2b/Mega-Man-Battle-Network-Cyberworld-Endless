@@ -4,7 +4,7 @@ with the title's infinity mark, drawn from code (nothing from the ROM).
 
 Writes linux/icons/<size>.png (32 to 512, whole-number scales),
 windows/icon.ico (the .exe's and the installer's), macos/icon.icns (the
-app bundle's) and src/core/app_icon.h
+app bundle's), 3ds/icon.png (the Homebrew Launcher's) and src/core/app_icon.h
 (the 32x32 pixels, for the window icon). Run it after changing the drawing;
 the outputs are committed.
 
@@ -147,6 +147,11 @@ def main():
     with open(os.path.join(res, 'values', 'ic_launcher.xml'), 'w') as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n<!-- drawn by tools/app_icon.py -->\n<resources>\n'
                 '    <color name="ic_launcher_background">#%02X%02X%02X</color>\n</resources>\n' % BACKDROP)
+    # the 3DS Homebrew Launcher's, 48x48: the tile at 1x on the backdrop
+    tile = Image.new('RGBA', (48, 48), BACKDROP + (255,))
+    tile.alpha_composite(im, ((48 - N) // 2,) * 2)
+    os.makedirs(os.path.join(ROOT, '3ds'), exist_ok=True)
+    tile.save(os.path.join(ROOT, '3ds', 'icon.png'), optimize=True)
     px = list(im.tobytes())
     lines = [', '.join(f'0x{b:02x}' for b in px[i:i + 16]) for i in range(0, len(px), 16)]
     with open(os.path.join(ROOT, 'src', 'core', 'app_icon.h'), 'w') as f:
@@ -154,7 +159,7 @@ def main():
         f.write('#pragma once\n#include <stdint.h>\n\n')
         f.write(f'enum {{ APP_ICON_SIZE = {N} }};\n')
         f.write(f'static const uint8_t app_icon_rgba[{len(px)}] = {{\n\t' + ',\n\t'.join(lines) + '\n};\n')
-    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons, the Android app\'s icons and src/core/app_icon.h')
+    print('wrote linux/icons, windows/icon.ico, macos/icon.icns, web/assets/icons, the Android app\'s icons, 3ds/icon.png and src/core/app_icon.h')
 
 
 if __name__ == '__main__':
