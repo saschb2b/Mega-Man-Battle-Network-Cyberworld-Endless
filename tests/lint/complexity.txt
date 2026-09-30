@@ -2,7 +2,7 @@
 # none may join and none may grow: split one, then build.py lint --update
 src/audio/audio.c:track_tick 55 76
 src/core/loot.c:from_formations 59 79
-src/core/main.c:main 181 265
+src/core/main.c:main 179 264
 src/core/meta.c:meta_run_over 38 49
 src/core/platform.c:platform_init 35 67
 src/core/platform.c:platform_poll 44 66
@@ -14,7 +14,6 @@ src/dev/pacing_report.c:pacing_report_run 43 99
 src/director/boss.c:boss_update 31 79
 src/director/director.c:build_layer 27 86
 src/director/director.c:director_describe 83 103
-src/director/director.c:director_draw_map 119 179
 src/director/director.c:director_keys 70 77
 src/director/director.c:director_resume 26 55
 src/director/director.c:director_update 185 228

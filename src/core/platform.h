@@ -87,6 +87,15 @@ void platform_set_dpi(float dpi);
  * controls on it (--screen-shot), where the canvas's shots have the game
  * alone. */
 void platform_shot_screen(const char *path);
+/* The second screen (the 3DS's bottom one, issue #9): `draw` fills
+ * SECOND_W x SECOND_H at a frame's end every few frames, false for black;
+ * NULL for none. Elsewhere it is drawn only for --second-shot. */
+#define SECOND_W 320
+#define SECOND_H 240
+typedef bool (*SecondScreen)(int w, int h);
+void platform_second_screen(SecondScreen draw);
+/* The second screen's picture now, into a BMP (--second-shot). */
+bool platform_save_second_screen(const char *path);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */

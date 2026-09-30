@@ -497,8 +497,8 @@ static void script_tick(void) {
 }
 
 typedef struct { uint64_t frame; char path[256]; } Shot;
-static Shot shots[64], screen_shots[16];
-static int shot_count, screen_shot_count;
+static Shot shots[64], screen_shots[16], second_shots[16];
+static int shot_count, screen_shot_count, second_shot_count;
 static uint64_t range_a = 1, range_b = 0;   /* --shot-range A:B:PREFIX */
 static char range_prefix[200];
 
@@ -512,6 +512,17 @@ static void parse_shots(const char *spec, Shot *into, int *count, int most) {
 		++*count;
 	}
 	free(copy);
+}
+
+/* --shot FRAME:PATH,... saves the canvas; --screen-shot the screen as the
+ * player sees it, the touch controls on it; --second-shot the second
+ * screen, the 3DS's bottom one (on any target, for a check) */
+static bool shot_option(const char *a, const char *v) {
+	if (!strcmp(a, "--shot")) parse_shots(v, shots, &shot_count, 64);
+	else if (!strcmp(a, "--screen-shot")) parse_shots(v, screen_shots, &screen_shot_count, 16);
+	else if (!strcmp(a, "--second-shot")) parse_shots(v, second_shots, &second_shot_count, 16);
+	else return false;
+	return true;
 }
 
 static const Scene *scene_by_name(const char *n) {
@@ -574,6 +585,8 @@ static bool game_frame(void) {
 		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
 	for (int i = 0; i < screen_shot_count; ++i)
 		if (screen_shots[i].frame == P.frame) platform_shot_screen(screen_shots[i].path);
+	for (int i = 0; i < second_shot_count; ++i)
+		if (second_shots[i].frame == P.frame) platform_save_second_screen(second_shots[i].path);
 	if (P.frame >= range_a && P.frame <= range_b) {
 		char path[256];
 		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
@@ -714,9 +727,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
 		else if (!strcmp(a, "--taps") && v) { parse_taps(v); ++i; }
-		else if (!strcmp(a, "--shot") && v) { parse_shots(v, shots, &shot_count, 64); ++i; }
-		/* (the screen as the player sees it, the touch controls on it) */
-		else if (!strcmp(a, "--screen-shot") && v) { parse_shots(v, screen_shots, &screen_shot_count, 16); ++i; }
+		else if (v && shot_option(a, v)) ++i;
 		/* (the screen's density for the touch controls, in dots per inch) */
 		else if (!strcmp(a, "--dpi") && v) { platform_set_dpi((float)atof(v)); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {

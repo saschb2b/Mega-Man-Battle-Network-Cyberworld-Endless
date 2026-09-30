@@ -701,6 +701,10 @@ void platform_present_now(void) {
 	if (!P.headless) present_canvas();
 }
 
+#ifdef __3DS__
+static void second_to_bottom(void);
+#endif
+
 void platform_end_frame(void) {
 	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
 	if (P.blend && !P.headless) blend_keep();
@@ -712,6 +716,9 @@ void platform_end_frame(void) {
 		return;
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
+#ifdef __3DS__
+	second_to_bottom();
+#endif
 	present_canvas();
 	part_present += SDL_GetPerformanceCounter() - t0;
 	log_present();
@@ -725,6 +732,57 @@ void platform_persist(void) {
 	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
 #endif
 }
+
+/* ---- the second screen (issue #9) ---- */
+
+static SecondScreen second;
+static SDL_Texture *second_tex;
+
+void platform_second_screen(SecondScreen draw) { second = draw; }
+
+/* The second screen drawn into its texture, on the renderer that has the
+ * font and the tiles: whether it holds a picture. */
+static bool draw_second(void) {
+	if (!second || !P.renderer) return false;
+	if (!second_tex) second_tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SECOND_W, SECOND_H);
+	if (!second_tex) return false;
+	SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
+	SDL_SetRenderTarget(P.renderer, second_tex);
+	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
+	SDL_RenderClear(P.renderer);
+	bool drew = second(SECOND_W, SECOND_H);
+	SDL_SetRenderTarget(P.renderer, was);
+	return drew;
+}
+
+bool platform_save_second_screen(const char *path) {
+	if (!draw_second()) return false;
+	SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
+	SDL_SetRenderTarget(P.renderer, second_tex);
+	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, SECOND_W, SECOND_H, 32, SDL_PIXELFORMAT_ARGB8888);
+	bool ok = s && SDL_RenderReadPixels(P.renderer, NULL, SDL_PIXELFORMAT_ARGB8888, s->pixels, s->pitch) == 0 && SDL_SaveBMP(s, path) == 0;
+	if (s) SDL_FreeSurface(s);
+	SDL_SetRenderTarget(P.renderer, was);
+	return ok;
+}
+
+#ifdef __3DS__
+/* The bottom screen's picture, every tenth frame: the map's cost on the
+ * 3DS's processor, at the pace MegaMan's mark on it pulses. */
+static void second_to_bottom(void) {
+	if (P.frame % 10) return;
+	int pitch;
+	void *px = present3ds_bottom(&pitch);
+	bool on = px && draw_second();
+	if (on) {
+		SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
+		SDL_SetRenderTarget(P.renderer, second_tex);
+		on = SDL_RenderReadPixels(P.renderer, NULL, SDL_PIXELFORMAT_RGBA8888, px, pitch) == 0;
+		SDL_SetRenderTarget(P.renderer, was);
+	}
+	present3ds_bottom_show(on);
+}
+#endif
 
 bool platform_save_canvas(const char *path) {
 	SDL_SetRenderTarget(P.renderer, P.canvas);

@@ -262,7 +262,8 @@ same game for the Homebrew Launcher (`sdmc:/3ds/`).
 Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
 name works. The first NEW GAME boots BN6 once, about 15 seconds of black
-screen. The older 3DS and 2DS are too slow for it.
+screen. On the net the bottom screen shows the layer's map, always open.
+The older 3DS and 2DS are too slow for it.
 [3ds/README.md](3ds/README.md) has the rest.
 
 ### In a browser

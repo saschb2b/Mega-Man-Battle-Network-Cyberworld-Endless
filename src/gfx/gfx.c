@@ -465,6 +465,13 @@ void fill_rect(int x, int y, int w, int h, SDL_Color c) {
 	SDL_RenderFillRect(P.renderer, &r);
 }
 
+void fill_rects(const SDL_Rect *r, int n, SDL_Color c) {
+	if (n <= 0) return;
+	SDL_SetRenderDrawBlendMode(P.renderer, c.a < 255 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+	SDL_SetRenderDrawColor(P.renderer, c.r, c.g, c.b, c.a);
+	SDL_RenderFillRects(P.renderer, r, n);
+}
+
 bool gfx_init(void) {
 	build_font();
 	return true;

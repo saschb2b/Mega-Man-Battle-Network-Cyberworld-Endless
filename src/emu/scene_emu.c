@@ -45,6 +45,8 @@ static bool started;   /* (the core on its own thread: a frame begun since enter
 static void enter(void) {
 	revealed = 0;
 	started = false;
+	/* (the layer's map on the second screen, the 3DS's bottom one) */
+	platform_second_screen(director_draw_second_screen);
 	/* (making a run's net takes a while on a slow machine: twenty seconds
 	 * of black on a 3DS read as a hang) */
 	platform_begin_frame();
@@ -71,7 +73,10 @@ static void enter(void) {
 	audio_external(emu_audio_read);
 }
 
-static void leave(void) { audio_external(NULL); }
+static void leave(void) {
+	audio_external(NULL);
+	platform_second_screen(NULL);
+}
 
 static uint32_t frame_keys(void) {
 	return director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));

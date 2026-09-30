@@ -16,6 +16,13 @@ static Tex3DS_SubTexture sub;
 static u32 *pixels;   /* linear memory, which the GPU's copy engine reads */
 static SDL_Surface *surface;
 static int cw, ch, cleared;
+/* the bottom screen's picture (issue #9): 320 x 240 in a 512 x 256 texture */
+#define BOT_W 512
+#define BOT_H 256
+static C3D_Tex bot_tex;
+static Tex3DS_SubTexture bot_sub;
+static u32 *bot_pixels;
+static bool bot_ready, bot_on, bot_new;
 
 SDL_Surface *present3ds_init(int w, int h) {
 	if (w > TEX || h > TEX) return NULL;
@@ -44,6 +51,32 @@ SDL_Surface *present3ds_init(int w, int h) {
 	return surface;
 }
 
+void *present3ds_bottom(int *pitch) {
+	if (!bot_ready) {
+		bot_ready = true;   /* (tried once) */
+		bot_pixels = linearAlloc(BOT_W * BOT_H * 4);
+		if (!bot_pixels || !C3D_TexInit(&bot_tex, BOT_W, BOT_H, GPU_RGBA8)) {
+			if (bot_pixels) linearFree(bot_pixels);
+			bot_pixels = NULL;
+			return NULL;
+		}
+		memset(bot_pixels, 0, BOT_W * BOT_H * 4);
+		C3D_TexSetWrap(&bot_tex, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
+		C3D_TexSetFilter(&bot_tex, GPU_NEAREST, GPU_NEAREST);
+		bot_sub = (Tex3DS_SubTexture){ GSP_SCREEN_HEIGHT_BOTTOM, GSP_SCREEN_WIDTH, 0.0f, 1.0f,
+			(float)GSP_SCREEN_HEIGHT_BOTTOM / BOT_W, 1.0f - (float)GSP_SCREEN_WIDTH / BOT_H };
+	}
+	*pitch = BOT_W * 4;
+	return bot_pixels;
+}
+
+void present3ds_bottom_show(bool on) {
+	/* (black again: both of its buffers cleared once more) */
+	if (bot_on && !on) cleared = 0;
+	bot_on = on && bot_pixels;
+	bot_new |= bot_on;
+}
+
 void present3ds_frame(bool fill) {
 	/* (none once the system asks the game to close: the HOME Menu has the
 	 * GPU then, and waiting on it hung the console, a frame drawn after
@@ -54,6 +87,15 @@ void present3ds_frame(bool fill) {
 		GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) |
 		GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
 		GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
+	/* (the bottom screen's picture the same way, as it changes) */
+	if (bot_on && bot_new) {
+		GSPGPU_FlushDataCache(bot_pixels, BOT_W * BOT_H * 4);
+		C3D_SyncDisplayTransfer(bot_pixels, GX_BUFFER_DIM(BOT_W, BOT_H), (u32 *)bot_tex.data, GX_BUFFER_DIM(BOT_W, BOT_H),
+			GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) |
+			GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
+			GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
+		bot_new = false;
+	}
 	GPU_TEXTURE_FILTER_PARAM f = fill ? GPU_LINEAR : GPU_NEAREST;
 	C3D_TexSetFilter(&tex, f, f);
 	/* (the GPU swaps the picture in at the screen's next refresh; waiting
@@ -64,8 +106,13 @@ void present3ds_frame(bool fill) {
 	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f;
 	C2D_Image img = { &tex, &sub };
 	C2D_DrawImageAt(img, ((float)GSP_SCREEN_HEIGHT_TOP - cw * s) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, 0.5f, NULL, s, s);
-	/* (the bottom screen, black: both of its buffers once) */
-	if (cleared < 2) {
+	/* the bottom screen: its picture, else black, both of its buffers once */
+	if (bot_on) {
+		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+		C2D_SceneBegin(bottom);
+		C2D_Image b = { &bot_tex, &bot_sub };
+		C2D_DrawImageAt(b, 0, 0, 0.5f, NULL, 1.0f, 1.0f);
+	} else if (cleared < 2) {
 		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
 		C2D_SceneBegin(bottom);
 		++cleared;
@@ -76,6 +123,8 @@ void present3ds_frame(bool fill) {
 void present3ds_exit(void) {
 	if (surface) SDL_FreeSurface(surface);
 	surface = NULL;
+	if (bot_pixels) { C3D_TexDelete(&bot_tex); linearFree(bot_pixels); }
+	bot_pixels = NULL;
 	C2D_Fini();
 	C3D_Fini();
 	if (pixels) linearFree(pixels);

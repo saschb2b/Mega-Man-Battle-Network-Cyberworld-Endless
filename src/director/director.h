@@ -16,6 +16,9 @@ bool director_in_town(void);
 bool director_on_layer(void);
 /* The layer's map over the picture while SELECT is held (drawing only). */
 void director_draw_map(void);
+/* The second screen (the 3DS's bottom one, issue #9): the layer's map in
+ * w x h, always open on the net; false where there is none to show. */
+bool director_draw_second_screen(int w, int h);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);
 /* Quitting on a layer's map, free to move: the run is saved there

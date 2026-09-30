@@ -75,6 +75,8 @@ void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int s
 
 /* Primitives. */
 void fill_rect(int x, int y, int w, int h, SDL_Color c);
+/* n rectangles of one colour in one call (a call each costs on a 3DS) */
+void fill_rects(const SDL_Rect *r, int n, SDL_Color c);
 
 static inline SDL_Color rgba(int r, int g, int b, int a) { SDL_Color c = { (Uint8)r, (Uint8)g, (Uint8)b, (Uint8)a }; return c; }
 #define WHITE rgba(255, 255, 255, 255)

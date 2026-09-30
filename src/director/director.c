@@ -1130,21 +1130,75 @@ void director_draw_duel(void) {
 	if (lines == 3) text_draw(x, y + 20, D.duel_hit ? "Hit!" : "No hits", D.duel_hit ? rgba(255, 120, 120, 255) : rgba(140, 255, 170, 255), TEXT_RIGHT);
 }
 
-void director_draw_map(void) {
-	if (!D.active || D.town || !D.map_shown || !on_map()) return;
-	int x0 = P.core_x, y0 = P.core_y;
-	fill_rect(x0, y0, 240, 160, rgba(0, 8, 28, 255));
-	int bx = x0 + 6, by = y0 + 18, bw = 228, bh = 122;
-	SDL_Color edge = rgba(120, 200, 255, 220);
-	fill_rect(bx - 2, by - 2, bw + 4, 1, edge);
-	fill_rect(bx - 2, by + bh + 1, bw + 4, 1, edge);
-	fill_rect(bx - 2, by - 2, 1, bh + 4, edge);
-	fill_rect(bx + bw + 1, by - 2, 1, bh + 4, edge);
-	text_drawf(bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, mx, my;
-	if (!netmap_panel(px, py, &mx, &my)) return;
-	/* a grid step goes 4 pixels across and 2 down (x - y across, x + y down) */
-	int umin = mx - my, umax = umin, vmin = mx + my, vmax = vmin;
+/* The layer's map (SELECT's over the picture, the second screen's): its
+ * frame, and a grid step there, s pixels across and s / 2 down (x - y
+ * across, x + y down) */
+typedef struct {
+	int bx, by, bw, bh;   /* the frame, inside its edge */
+	int ox, oy, cu, cv, s;   /* the frame's middle, the grid's point there, the step */
+	int mx, my;   /* MegaMan's panel */
+} MapView;
+
+static int map_x(const MapView *m, int x, int y) { return m->ox + (x - y - m->cu) * m->s; }
+static int map_y(const MapView *m, int x, int y) { return m->oy + (x + y - m->cv) * (m->s / 2); }
+
+static bool map_inside(const MapView *m, int sx, int sy, int pad) {
+	return sx - pad >= m->bx && sy - pad >= m->by && sx + pad < m->bx + m->bw && sy + pad < m->by + m->bh;
+}
+
+/* where the ray from MegaMan to (sx, sy) leaves the frame, pad pixels in */
+static bool map_edge(const MapView *m, int sx, int sy, int pad, int *ex, int *ey) {
+	double sx0 = map_x(m, m->mx, m->my), sy0 = map_y(m, m->mx, m->my);
+	double dx = sx - sx0, dy = sy - sy0, t = 1e9, hx = m->bw / 2.0 - pad, hy = m->bh / 2.0 - pad;
+	if (dx > 0) t = fmin(t, (m->ox + hx - sx0) / dx);
+	if (dx < 0) t = fmin(t, (m->ox - hx - sx0) / dx);
+	if (dy > 0) t = fmin(t, (m->oy + hy - sy0) / dy);
+	if (dy < 0) t = fmin(t, (m->oy - hy - sy0) / dy);
+	if (!(t > 0 && t < 1e8)) return false;
+	*ex = (int)lround(sx0 + dx * t);
+	*ey = (int)lround(sy0 + dy * t);
+	return true;
+}
+
+/* the key's entries, under the map */
+enum { MAP_YOU, MAP_EXIT, MAP_HEAL, MAP_SHOP, MAP_BOSS, MAP_EVENT, MAP_RIVAL, MAP_KEYS };
+static const struct { const char *what; SDL_Color c; } map_key[MAP_KEYS] = {
+	{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
+	{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
+	{ "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
+};
+
+/* an object's entry in the key, -1 for none: a Server, a dark warp or a
+ * gate is "Event"; the rival his own, a white eye in it (he and the
+ * official gate both showed violet) */
+static int map_kind(int type) {
+	switch (type) {
+	case OBJ_EXIT: case OBJ_RETURN: return MAP_EXIT;
+	case OBJ_BOSS: return MAP_BOSS;
+	case OBJ_HEAL: return MAP_HEAL;
+	case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: return MAP_SHOP;
+	case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL:
+		return MAP_EVENT;
+	case OBJ_DUEL: return MAP_RIVAL;
+	default: return -1;
+	}
+}
+
+/* a mark the map leaves out: a Server's once its battle is taken (a
+ * playtester saw it still there after he had won), ProtoMan's once his
+ * duel is done or put off (he only talks then) */
+static bool map_left_out(int type) {
+	if (type != OBJ_CHALLENGE && type != OBJ_DUEL) return false;
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (D.objs.choice[i].type == type && (D.chosen & (1u << i))) return true;
+	return type == OBJ_DUEL && layer_objs_duel_later;
+}
+
+/* the step as large as lets the floor seen so far fit (8 on the second
+ * screen's larger frame, 6 over the picture, 4 at the least), on the
+ * seen floor's middle, or on MegaMan when it fits at none */
+static void map_view(MapView *m) {
+	int umin = m->mx - m->my, umax = umin, vmin = m->mx + m->my, vmax = vmin;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
@@ -1154,189 +1208,186 @@ void director_draw_map(void) {
 			if (v < vmin) vmin = v;
 			if (v > vmax) vmax = v;
 		}
-	/* larger while the seen floor fits at it */
-	int cu = (umin + umax) / 2, cv = (vmin + vmax) / 2, s = 6;
-	if ((umax - umin) * 6 + 14 > bw || (vmax - vmin) * 3 + 8 > bh) s = 4;
-	if (s == 4 && ((umax - umin) * 4 + 10 > bw || (vmax - vmin) * 2 + 6 > bh)) { cu = mx - my; cv = mx + my; }
-	int ox = bx + bw / 2, oy = by + bh / 2;
-	#define SX(x, y) (ox + ((x) - (y) - cu) * s)
-	#define SY(x, y) (oy + ((x) + (y) - cv) * (s / 2))
-	#define INSIDE(sx, sy, m) ((sx) - (m) >= bx && (sy) - (m) >= by && (sx) + (m) < bx + bw && (sy) + (m) < by + bh)
+	int s = m->bw >= 300 ? 8 : 6;
+	while (s > 4 && ((umax - umin) * s + 2 * s + 2 > m->bw || (vmax - vmin) * (s / 2) + s + 2 > m->bh)) s -= 2;
+	m->s = s;
+	m->ox = m->bx + m->bw / 2;
+	m->oy = m->by + m->bh / 2;
+	m->cu = (umin + umax) / 2;
+	m->cv = (vmin + vmax) / 2;
+	if (s == 4 && ((umax - umin) * 4 + 10 > m->bw || (vmax - vmin) * 2 + 6 > m->bh)) {
+		m->cu = m->mx - m->my;
+		m->cv = m->mx + m->my;
+	}
+}
+
+/* the panels seen: each a diamond 2s - 1 wide and s - 1 high (7 by 3, 11
+ * by 5, 15 by 7), a pixel apart from the next; their rows drawn a batch
+ * per colour, raised floor lighter (thousands of rows, a call each had
+ * cost the 3DS's processor) */
+static void map_panels(const MapView *m) {
+	static const SDL_Color colour[2] = { { 60, 140, 230, 240 }, { 150, 210, 255, 240 } };
+	static SDL_Rect rows[2][512];
+	int n[2] = { 0, 0 }, half = m->s / 2 - 1;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
-			int sx = SX(x, y), sy = SY(x, y);
-			if (!INSIDE(sx, sy, 3)) continue;
-			/* a panel: a diamond 7 wide and 3 high (11 and 5 larger), a pixel
-			 * apart from the next */
-			SDL_Color c = layer.level[y][x] ? rgba(150, 210, 255, 240) : rgba(60, 140, 230, 240);
-			if (s == 6) {
-				fill_rect(sx - 1, sy - 2, 3, 1, c);
-				fill_rect(sx - 3, sy - 1, 7, 1, c);
-				fill_rect(sx - 5, sy, 11, 1, c);
-				fill_rect(sx - 3, sy + 1, 7, 1, c);
-				fill_rect(sx - 1, sy + 2, 3, 1, c);
-			} else {
-				fill_rect(sx - 1, sy - 1, 3, 1, c);
-				fill_rect(sx - 3, sy, 7, 1, c);
-				fill_rect(sx - 1, sy + 1, 3, 1, c);
+			int sx = map_x(m, x, y), sy = map_y(m, x, y), k = layer.level[y][x] != 0;
+			if (!map_inside(m, sx, sy, 3)) continue;
+			for (int r = -half; r <= half; ++r) {
+				if (n[k] == 512) { fill_rects(rows[k], n[k], colour[k]); n[k] = 0; }
+				rows[k][n[k]++] = (SDL_Rect){ sx - (m->s - 1 - 2 * abs(r)), sy + r, 2 * m->s - 1 - 4 * abs(r), 1 };
 			}
 		}
-	/* the way on, over the panels he has come near, up to the first he
-	 * hasn't: marks he earned (a V in a comp's maze read as a dead end,
-	 * the arm on to the exit nowhere on the map) */
-	{
-		int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey, len;
-		SDL_Color tc = rgba(255, 230, 60, 200);
-		if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
-		double wx, wy;
-		netmap_grid(px, py, &wx, &wy);
-		if (netmap_panel(tx, ty, &ex, &ey) && route_way(wx, wy, ex, ey, &len) >= 0) {
-			/* in straight runs as far as a straight line over the floor
-			 * goes (the walk's steps zig-zagged across a platform) */
-			int cx = mx, cy = my, k = route_walk_len - 1;
-			while (k >= 0) {
-				int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;
-				if (!D.seen[y][x]) break;
-				for (int j = k - 1; j >= 0 && j >= k - 12; --j) {
-					int jx = route_walk[j] % MAP_W, jy = route_walk[j] / MAP_W;
-					if (!D.seen[jy][jx]) break;
-					if (route_floor_line(cx, cy, jx, jy)) far = j;
-				}
-				int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W, steps = abs(fx - cx) + abs(fy - cy);
-				for (int t = 1; t <= steps; ++t) {
-					int px2 = SX(cx, cy) + (SX(fx, fy) - SX(cx, cy)) * t / steps, py2 = SY(cx, cy) + (SY(fx, fy) - SY(cx, cy)) * t / steps;
-					if (INSIDE(px2, py2, 3)) fill_rect(px2 - (s == 6 ? 2 : 1), py2, s == 6 ? 5 : 3, 1, tc);
-				}
-				cx = fx; cy = fy;
-				k = far - 1;
-			}
+	for (int k = 0; k < 2; ++k) fill_rects(rows[k], n[k], colour[k]);
+}
+
+/* the way on, over the panels he has come near, up to the first he
+ * hasn't: marks he earned (a V in a comp's maze read as a dead end, the
+ * arm on to the exit nowhere on the map); in straight runs as far as a
+ * straight line over the floor goes (the walk's steps zig-zagged across a
+ * platform) */
+static void map_way(const MapView *m, int px, int py) {
+	int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey, len;
+	SDL_Color tc = rgba(255, 230, 60, 200);
+	if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
+	double wx, wy;
+	netmap_grid(px, py, &wx, &wy);
+	if (!netmap_panel(tx, ty, &ex, &ey) || route_way(wx, wy, ex, ey, &len) < 0) return;
+	int cx = m->mx, cy = m->my, k = route_walk_len - 1;
+	while (k >= 0) {
+		int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;
+		if (!D.seen[y][x]) break;
+		for (int j = k - 1; j >= 0 && j >= k - 12; --j) {
+			int jx = route_walk[j] % MAP_W, jy = route_walk[j] / MAP_W;
+			if (!D.seen[jy][jx]) break;
+			if (route_floor_line(cx, cy, jx, jy)) far = j;
 		}
+		int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W, steps = abs(fx - cx) + abs(fy - cy);
+		int ax = map_x(m, cx, cy), ay = map_y(m, cx, cy), bx = map_x(m, fx, fy), by = map_y(m, fx, fy);
+		for (int t = 1; t <= steps; ++t) {
+			int lx = ax + (bx - ax) * t / steps, ly = ay + (by - ay) * t / steps;
+			if (map_inside(m, lx, ly, 3)) fill_rect(lx - (m->s - 1) / 2, ly, m->s - 1, 1, tc);
+		}
+		cx = fx; cy = fy;
+		k = far - 1;
 	}
-	/* what stands there, once seen; the goal's way while it is not (a
-	 * Server's mark gone once its battle is taken: a playtester saw it
-	 * still there after he had won) */
-	bool server_done = false, duel_done = false;
-	for (int i = 0; i < D.objs.nchoices; ++i) {
-		server_done |= D.objs.choice[i].type == OBJ_CHALLENGE && (D.chosen & (1u << i));
-		duel_done |= D.objs.choice[i].type == OBJ_DUEL && (D.chosen & (1u << i));
-	}
-	duel_done |= layer_objs_duel_later;   /* (ProtoMan only talks: no mark) */
-	int gx = -1, gy = -1;
-	bool goal_boss = false;   /* (the guardian while it stands, else the exit) */
-	SDL_Color gc = rgba(255, 230, 60, 255);
-	for (int i = 0; i < layer.nobj; ++i) {
-		const NetObj *o = &layer.obj[i];
-		int x = (int)o->x, y = (int)o->y;
-		SDL_Color c;
-		switch (o->type) {
-		case OBJ_EXIT: case OBJ_RETURN: c = rgba(255, 230, 60, 255); break;
-		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
-		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
-		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL:
-			c = rgba(210, 110, 255, 255); break;
-		/* (the rival his own, a white eye in it: he and the official gate
-		 * both showed violet) */
-		case OBJ_DUEL: c = (SDL_Color)RIVAL_MARK; break;
-		default: continue;
-		}
-		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
-		if ((o->type == OBJ_CHALLENGE && server_done) || (o->type == OBJ_DUEL && duel_done)) continue;
-		if (o->type == OBJ_BOSS && !boss_beaten()) { gx = x; gy = y; gc = c; goal_boss = true; }
-		else if (o->type == OBJ_EXIT && !goal_boss) { gx = x; gy = y; }
-		int sx = SX(x, y), sy = SY(x, y);
-		if (!D.seen[y][x]) {
-			/* a service MegaMan senses but has not come near: its ring
-			 * where it stands, or a pip on the frame's edge its way (L
-			 * named the Recovery Mr. Prog, and it was nowhere on the map) */
-			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS) continue;
-			if (!INSIDE(sx, sy, 3)) {
-				double dx = sx - SX(mx, my), dy = sy - SY(mx, my), t = 1e9, hx = bw / 2.0 - 3, hy = bh / 2.0 - 3;
-				double sx0 = SX(mx, my), sy0 = SY(mx, my);
-				if (dx > 0) t = fmin(t, (ox + hx - sx0) / dx);
-				if (dx < 0) t = fmin(t, (ox - hx - sx0) / dx);
-				if (dy > 0) t = fmin(t, (oy + hy - sy0) / dy);
-				if (dy < 0) t = fmin(t, (oy - hy - sy0) / dy);
-				if (!(t > 0 && t < 1e8)) continue;
-				sx = (int)lround(sx0 + dx * t); sy = (int)lround(sy0 + dy * t);
-				fill_rect(sx - 1, sy - 1, 3, 3, c);
-				continue;
-			}
+}
+
+/* one thing standing there, once seen; before, a ring where it stands if
+ * MegaMan senses it, or a pip on the frame's edge its way (L named the
+ * Recovery Mr. Prog, and it was nowhere on the map): the exit and the
+ * guardian neither */
+static void map_mark(const MapView *m, int type, int x, int y, SDL_Color c) {
+	int sx = map_x(m, x, y), sy = map_y(m, x, y), ex, ey;
+	if (!D.seen[y][x]) {
+		if (type == OBJ_EXIT || type == OBJ_RETURN || type == OBJ_BOSS) return;
+		if (map_inside(m, sx, sy, 3)) {
 			fill_rect(sx - 3, sy - 3, 7, 7, c);
 			fill_rect(sx - 2, sy - 2, 5, 5, rgba(0, 8, 28, 255));
-			continue;
-		}
-		if (!INSIDE(sx, sy, 3)) continue;
-		fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
-		fill_rect(sx - 2, sy - 2, 5, 5, c);
-		if (o->type == OBJ_DUEL) fill_rect(sx, sy, 1, 1, rgba(255, 255, 255, 255));
+		} else if (map_edge(m, sx, sy, 3, &ex, &ey))
+			fill_rect(ex - 1, ey - 1, 3, 3, c);
+		return;
 	}
-	if (gx >= 0 && !D.seen[gy][gx]) {
-		/* where the ray from MegaMan to it leaves the frame */
-		double dx = SX(gx, gy) - SX(mx, my), dy = SY(gx, gy) - SY(mx, my);
-		double t = 1e9, hx = bw / 2.0 - 5, hy = bh / 2.0 - 5;
-		double sx0 = SX(mx, my), sy0 = SY(mx, my);
-		if (dx > 0) t = fmin(t, (ox + hx - sx0) / dx);
-		if (dx < 0) t = fmin(t, (ox - hx - sx0) / dx);
-		if (dy > 0) t = fmin(t, (oy + hy - sy0) / dy);
-		if (dy < 0) t = fmin(t, (oy - hy - sy0) / dy);
-		if (t > 0 && t < 1e8) {
-			int ax = (int)lround(sx0 + dx * t), ay = (int)lround(sy0 + dy * t);
-			fill_rect(ax - 1, ay - 3, 3, 1, gc);
-			fill_rect(ax - 2, ay - 2, 5, 1, gc);
-			fill_rect(ax - 3, ay - 1, 7, 3, gc);
-			fill_rect(ax - 2, ay + 2, 5, 1, gc);
-			fill_rect(ax - 1, ay + 3, 3, 1, gc);
-		}
+	if (!map_inside(m, sx, sy, 3)) return;
+	fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
+	fill_rect(sx - 2, sy - 2, 5, 5, c);
+	if (type == OBJ_DUEL) fill_rect(sx, sy, 1, 1, rgba(255, 255, 255, 255));
+}
+
+/* what stands there, and the goal: the guardian while it stands, else
+ * the exit */
+static void map_marks(const MapView *m, int *gx, int *gy, SDL_Color *gc) {
+	bool goal_boss = false;
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		int x = (int)o->x, y = (int)o->y, kind = map_kind(o->type);
+		if (kind < 0 || x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || map_left_out(o->type)) continue;
+		if (o->type == OBJ_BOSS && !boss_beaten()) { *gx = x; *gy = y; *gc = map_key[kind].c; goal_boss = true; }
+		else if (o->type == OBJ_EXIT && !goal_boss) { *gx = x; *gy = y; }
+		map_mark(m, o->type, x, y, map_key[kind].c);
 	}
+}
+
+/* the goal while it is unseen: where the ray from MegaMan to it leaves
+ * the frame */
+static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
+	int ax, ay;
+	if (gx < 0 || D.seen[gy][gx] || !map_edge(m, map_x(m, gx, gy), map_y(m, gx, gy), 5, &ax, &ay)) return;
+	fill_rect(ax - 1, ay - 3, 3, 1, gc);
+	fill_rect(ax - 2, ay - 2, 5, 1, gc);
+	fill_rect(ax - 3, ay - 1, 7, 3, gc);
+	fill_rect(ax - 2, ay + 2, 5, 1, gc);
+	fill_rect(ax - 1, ay + 3, 3, 1, gc);
+}
+
+/* the key, from (kx, ky): MegaMan, the exit, and what else this layer
+ * holds; the gaps close up until it fits the width, then "You" goes,
+ * whose mark pulses (ProtoMan's name ran off the picture) */
+static void draw_map_key(int kx, int ky, int width) {
+	bool has[MAP_KEYS] = { [MAP_YOU] = true, [MAP_EXIT] = true, [MAP_BOSS] = D.objs.guardian.navi != 0 };
+	for (int i = 0; i < layer.nobj; ++i) {
+		int kind = map_kind(layer.obj[i].type);
+		if (kind > MAP_EXIT && kind != MAP_BOSS && !map_left_out(layer.obj[i].type)) has[kind] = true;
+	}
+	int gap = 10, need;
+	for (;;) {
+		need = 0;
+		for (int i = 0; i < MAP_KEYS; ++i) if (has[i]) need += 8 + text_width(map_key[i].what) + gap;
+		need -= gap;
+		if (need <= width || (gap <= 0 && !has[MAP_YOU])) break;
+		if (gap > 2 || !has[MAP_YOU]) gap -= 2;
+		else { has[MAP_YOU] = false; gap = 8; }
+	}
+	if (gap < 0) gap = 0;
+	for (int i = 0; i < MAP_KEYS; ++i) {
+		if (!has[i]) continue;
+		fill_rect(kx, ky + 3, 5, 5, map_key[i].c);
+		if (i == MAP_RIVAL) fill_rect(kx + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
+		text_draw(kx + 7, ky, map_key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
+		kx += 8 + text_width(map_key[i].what) + gap;
+	}
+}
+
+/* The layer's map in w x h from (x0, y0): SELECT's over the picture, and
+ * the second screen's (the 3DS's bottom one, issue #9). */
+static void draw_map(int x0, int y0, int w, int h) {
+	fill_rect(x0, y0, w, h, rgba(0, 8, 28, 255));
+	MapView m = { .bx = x0 + 6, .by = y0 + 18, .bw = w - 12, .bh = h - 38 };
+	SDL_Color edge = rgba(120, 200, 255, 220);
+	fill_rect(m.bx - 2, m.by - 2, m.bw + 4, 1, edge);
+	fill_rect(m.bx - 2, m.by + m.bh + 1, m.bw + 4, 1, edge);
+	fill_rect(m.bx - 2, m.by - 2, 1, m.bh + 4, edge);
+	fill_rect(m.bx + m.bw + 1, m.by - 2, 1, m.bh + 4, edge);
+	text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	if (!netmap_panel(px, py, &m.mx, &m.my)) return;
+	map_view(&m);
+	map_panels(&m);
+	map_way(&m, px, py);
+	int gx = -1, gy = -1;
+	SDL_Color gc = map_key[MAP_EXIT].c;
+	map_marks(&m, &gx, &gy, &gc);
+	map_goal(&m, gx, gy, gc);
 	/* MegaMan, always there, his border pulsing */
-	int ms = SX(mx, my), mt = SY(mx, my);
-	if (INSIDE(ms, mt, 3)) {
+	int ms = map_x(&m, m.mx, m.my), mt = map_y(&m, m.mx, m.my);
+	if (map_inside(&m, ms, mt, 3)) {
 		fill_rect(ms - 3, mt - 3, 7, 7, (D.frame / 10) % 2 ? rgba(120, 200, 255, 255) : rgba(0, 8, 28, 255));
 		fill_rect(ms - 2, mt - 2, 5, 5, rgba(255, 255, 255, 255));
 	}
-	/* the key, under the map: MegaMan, the exit, and what else this layer
-	 * holds (a Server, a dark warp or a gate is "Event") */
-	static const struct { const char *what; SDL_Color c; } key[] = {
-		{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
-		{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
-		{ "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
-	};
-	enum { KEYS = sizeof key / sizeof *key };
-	bool has[KEYS] = { true, true, false, false, D.objs.guardian.navi != 0, false, false };
-	for (int i = 0; i < layer.nobj; ++i)
-		switch (layer.obj[i].type) {
-		case OBJ_HEAL: has[2] = true; break;
-		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL: has[5] = true; break;
-		case OBJ_CHALLENGE: has[5] |= !server_done; break;
-		case OBJ_DUEL: has[6] |= !duel_done; break;
-		default: break;
-		}
-	/* (the gaps close up until it fits the picture's width; then "You"
-	 * goes, whose mark pulses: ProtoMan's name ran off the picture) */
-	int gap = 10, width;
-	for (;;) {
-		width = 0;
-		for (int i = 0; i < KEYS; ++i) if (has[i]) width += 8 + text_width(key[i].what) + gap;
-		width -= gap;
-		if (width <= bw - 2 || (gap <= 0 && !has[0])) break;
-		if (gap > 2 || !has[0]) gap -= 2;
-		else { has[0] = false; gap = 8; }
-	}
-	if (gap < 0) gap = 0;
-	int kx = bx + 1, ky = by + bh + 5;
-	for (int i = 0; i < KEYS; ++i) {
-		if (!has[i]) continue;
-		fill_rect(kx, ky + 3, 5, 5, key[i].c);
-		if (i == 6) fill_rect(kx + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
-		text_draw(kx + 7, ky, key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
-		kx += 8 + text_width(key[i].what) + gap;
-	}
-	#undef SX
-	#undef SY
-	#undef INSIDE
+	draw_map_key(m.bx + 1, m.by + m.bh + 5, m.bw - 2);
+}
+
+void director_draw_map(void) {
+	if (!D.active || D.town || !D.map_shown || !on_map()) return;
+	draw_map(P.core_x, P.core_y, 240, 160);
+}
+
+bool director_draw_second_screen(int w, int h) {
+	/* (on the net, in battle too: the town and the title keep it dark) */
+	if (!D.active || D.town) return false;
+	draw_map(0, 0, w, h);
+	return true;
 }
 
 /* (LAYER_MAKE: layer_make.h, beside its hash) */
