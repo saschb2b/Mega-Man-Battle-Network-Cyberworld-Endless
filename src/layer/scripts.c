@@ -503,10 +503,10 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, con
 	 * on it is won (a gate beside the duel opens at once): the telegraph
 	 * first, whose clearance, and how far we are */
 	if (level >= 2)
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance.|"
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance. The official vault's behind it: three Mega chips.|"
 			"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
 	else
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance.|"
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance. An official Chip Order's behind it: three chips we've held, one to order.|"
 			"@M It opens once we've won a duel against ProtoMan. Not yet!");
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)open_flag, (uint8_t)(open_flag >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */

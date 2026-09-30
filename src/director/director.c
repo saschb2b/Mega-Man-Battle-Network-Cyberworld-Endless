@@ -2731,7 +2731,7 @@ void director_update(void) {
 		else if (layer_objs_duel_rung == 2)
 			snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
 				"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
-				? "Beat him, and every official gate opens for you. There's one on this layer." : "Beat him, and every official gate opens for you.")
+				? "Beat him, and every official gate opens for you. There's one on this layer, the official vault: three Mega chips." : "Beat him, and every official gate opens for you.")
 				: "He hasn't forgotten the last time.");
 		else
 			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
@@ -2740,7 +2740,9 @@ void director_update(void) {
 				sec / 60, sec % 60, (f % 60) * 100 / 60,
 				/* (what a win earns, before the first: a playtester risked his
 				 * run for pride alone) */
-				profile.duel_won ? "" : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer.|"
+				/* (and what the gate holds: a playtester, five duels lost, took
+				 * the gates for scenery, their prize never named) */
+				profile.duel_won ? "" : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer: an official Chip Order, three chips you've held, one to order.|"
 				: "@C Beat it, and I'll clear you for the net's official gates.|",
 				layer_objs_duel_rung == 1 ? ", without a hit" : "");
 		/* (Lan answers: a call no one answered read as a message left) */

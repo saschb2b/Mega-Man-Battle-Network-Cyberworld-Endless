@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- An official gate says what it holds: Chaud's call names the gate on the
+  duel's layer (an official Chip Order, three chips you've held, one to
+  order; from the netbattle, the official vault's three Mega chips), and
+  MegaMan says it at the sealed gate. A playtester, five duels lost, took
+  the gates for scenery.
 - **The touch buttons can be moved and sized.** EDIT CONTROLS on the title
   screen (on a phone, a tablet, the browser on one, the Steam Deck's
   screen): drag a button where your thumb wants it, - and + size the one
