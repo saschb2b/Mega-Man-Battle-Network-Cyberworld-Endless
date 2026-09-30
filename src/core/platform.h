@@ -94,6 +94,10 @@ void platform_shot_screen(const char *path);
 #define SECOND_H 240
 typedef bool (*SecondScreen)(int w, int h);
 void platform_second_screen(SecondScreen draw);
+/* Draws it where it is shown (the 3DS's bottom screen, every few frames):
+ * at a frame's update, before the game is read, where the core's own
+ * thread still runs the GBA's frame. */
+void platform_second_screen_draw(void);
 /* The second screen's picture now, into a BMP (--second-shot). */
 bool platform_save_second_screen(const char *path);
 /* Inject buttons for scripted tests; merged with real input. */

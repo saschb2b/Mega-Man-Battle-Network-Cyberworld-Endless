@@ -95,6 +95,9 @@ static void after_frame(void) {
 
 static void update(void) {
 	emu_drawing = false;
+	/* (the second screen first, from what the last update saw: the GBA's
+	 * frame runs on beside it, where the reads below would wait for it) */
+	platform_second_screen_draw();
 	/* the core on a thread of its own (emu.c): the frame done taken in,
 	 * then the next begun, which runs while this one is drawn; keys, frames
 	 * and the logic keep their order */

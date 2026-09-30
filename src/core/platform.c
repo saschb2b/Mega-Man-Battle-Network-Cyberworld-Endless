@@ -714,10 +714,6 @@ void platform_present_now(void) {
 	if (!P.headless) present_canvas();
 }
 
-#ifdef __3DS__
-static void second_to_bottom(void);
-#endif
-
 void platform_end_frame(void) {
 	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
 	if (P.blend && !P.headless) blend_keep();
@@ -729,9 +725,6 @@ void platform_end_frame(void) {
 		return;
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
-#ifdef __3DS__
-	second_to_bottom();
-#endif
 	present_canvas();
 	part_present += SDL_GetPerformanceCounter() - t0;
 	log_present();
@@ -773,10 +766,13 @@ bool platform_save_second_screen(const char *path) {
 	return ok;
 }
 
-#ifdef __3DS__
 /* The bottom screen's picture, every tenth frame (the pace MegaMan's mark
- * on it pulses), drawn straight into the memory the GPU copies from. */
-static void second_to_bottom(void) {
+ * on it pulses), drawn straight into the memory the GPU copies from; the
+ * scene calls it as its update begins, where the GBA's frame still runs on
+ * its own core and this one would wait for it anyway (drawn with the
+ * present, it made that frame late, 2 ms of 3DS time six times a second) */
+void platform_second_screen_draw(void) {
+#ifdef __3DS__
 	if (P.frame % 10) return;
 	int pitch;
 	uint32_t *px = present3ds_bottom(&pitch);
@@ -785,8 +781,8 @@ static void second_to_bottom(void) {
 	part_second += SDL_GetPerformanceCounter() - t0;
 	++part_seconds;
 	present3ds_bottom_show(on);
-}
 #endif
+}
 
 bool platform_save_canvas(const char *path) {
 	SDL_SetRenderTarget(P.renderer, P.canvas);
