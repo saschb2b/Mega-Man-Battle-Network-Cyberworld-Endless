@@ -248,6 +248,36 @@ static void world_sources(const char *dir) {
 		}
 }
 
+/* Every map of an extra game (docs/MULTIROM.md) as it draws them, its real
+ * world's groups and its internet's, read from beside the BN6 ROM: what
+ * its areas could lend a run. */
+static void xrom_sources(const char *dir, int xrom) {
+	char romdir[512];
+	snprintf(romdir, sizeof romdir, "%s", R.path);
+	char *slash = strrchr(romdir, '/');
+	if (slash) *slash = 0; else snprintf(romdir, sizeof romdir, ".");
+	if (xrom >= 0 && xrom < XROM_COUNT) xrom_find(romdir);
+	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { printf("extra ROM %d: not found in %s\n", xrom, romdir); return; }
+	const XRomLayout *x = XR[xrom].layout;
+	printf("%s\n", x->name);
+	for (int k = 0; k < x->rw_groups + x->net_groups; ++k) {
+		int g = k < x->rw_groups ? k : 0x80 + k - x->rw_groups;
+		for (int n = 0, miss = 0; n < 64 && miss < 4; ++n) {
+			AreaSrc a;
+			if (!area_src_load_x(xrom, g, n, &a)) { ++miss; continue; }
+			miss = 0;
+			int W = a.tw * 8, H = a.th * 8;
+			for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+			char path[600];
+			snprintf(path, sizeof path, "%s/x%d_%02x_%d.bmp", dir, xrom, g, n);
+			save_bmp(path, a.px, W, H);
+			printf("x%d %02x:%d: %dx%d tiles, %d layers, walls %d, heights %d, priority %d, triggers %d\n", xrom, g, n, a.tw, a.th,
+				a.layers, a.nsec[0], a.nsec[1], a.nsec[2], a.nsec[3]);
+			area_src_free(&a);
+		}
+	}
+}
+
 typedef struct { uint32_t *px; int W, H, tw, th; } TownDots;
 /* trees green, other objects blue, people yellow, at their feet */
 static void town_dot(int id, int x, int y, void *ctx) {
@@ -304,6 +334,7 @@ int atlas_run(const char *spec) {
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (biomes[0] == 'g') { group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0; }
+	if (biomes[0] == 'x') { xrom_sources(dir, atoi(biomes + 1)); return 0; }
 	bool want[BIOME_COUNT] = { false };
 	if (!strcmp(biomes, "all")) for (int b = 0; b < BIOME_COUNT; ++b) want[b] = true;
 	else for (char *t = strtok(biomes, ","); t; t = strtok(NULL, ",")) { int b = atoi(t); if (b >= 0 && b < BIOME_COUNT) want[b] = true; }

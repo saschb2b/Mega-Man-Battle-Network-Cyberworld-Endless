@@ -17,27 +17,54 @@
 #define COORD_TABLE    0x03354Cu /* ... internet groups from 0x80 */
 #define RW_GROUPS      7
 
-/* The group's entry in a real-world or internet table. */
-static uint32_t group_slot(uint32_t rw_table, uint32_t net_table, int group) {
-	if (group < RW_GROUPS) return rw_table + (uint32_t)group * 4;
-	return net_table + (uint32_t)(group - 0x80) * 4;
+/* The ROM the map being read comes from: BN6's, or an extra game's
+ * (docs/MULTIROM.md), whose maps are in the same formats. */
+static struct { const uint8_t *data; uint32_t map_rw, map_net, coord_rw, coord_net; int rw_groups, net_groups; } src;
+
+static void use_rom(int xrom) {
+	if (xrom >= 0 && xrom < XROM_COUNT && XR[xrom].data) {
+		const XRomLayout *x = XR[xrom].layout;
+		src.data = XR[xrom].data;
+		src.map_rw = x->map_table_rw; src.map_net = x->map_table;
+		src.coord_rw = x->coord_table_rw; src.coord_net = x->coord_table;
+		src.rw_groups = x->rw_groups; src.net_groups = x->net_groups;
+		return;
+	}
+	src.data = R.data;
+	src.map_rw = MAP_TABLE_RW; src.map_net = MAP_TABLE;
+	src.coord_rw = COORD_TABLE_RW; src.coord_net = COORD_TABLE;
+	src.rw_groups = RW_GROUPS; src.net_groups = 0x80;   /* (BN6's own maps: no bound kept) */
 }
+
+static uint32_t su32(uint32_t off) {
+	const uint8_t *d = src.data + off;
+	return (uint32_t)d[0] | (uint32_t)d[1] << 8 | (uint32_t)d[2] << 16 | (uint32_t)d[3] << 24;
+}
+static uint16_t su16(uint32_t off) { return (uint16_t)(src.data[off] | src.data[off + 1] << 8); }
+
+/* The group's entry in a real-world or internet table; 0 for a group the
+ * ROM's tables do not hold. */
+static uint32_t group_slot(uint32_t rw_table, uint32_t net_table, int group) {
+	if (group < 0x80) return group < src.rw_groups ? rw_table + (uint32_t)group * 4 : 0;
+	return group - 0x80 < src.net_groups ? net_table + (uint32_t)(group - 0x80) * 4 : 0;
+}
+
 
 /* A map's tile graphics (as the game loads them to VRAM) and colours. */
 static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
 	uint8_t *vram = calloc(0x10000, 1);
 	if (!vram) return NULL;
 	for (int k = 0; k < 2; ++k) {
-		uint32_t wc = rom_u32(ts + (uint32_t)k * 12), off = rom_u32(ts + (uint32_t)k * 12 + 4), vo = rom_u32(ts + (uint32_t)k * 12 + 8);
+		uint32_t wc = su32(ts + (uint32_t)k * 12), off = su32(ts + (uint32_t)k * 12 + 4), vo = su32(ts + (uint32_t)k * 12 + 8);
 		if (!wc) continue;
 		size_t tn = 0;
-		uint8_t *t = lz77_decompress(R.data + ts + off, ROM_SIZE - (ts + off), &tn);
+		uint8_t *t = lz77_decompress(src.data + ts + off, ROM_SIZE - (ts + off), &tn);
 		if (!t) continue;
 		size_t want = (size_t)wc * 4 < tn ? (size_t)wc * 4 : tn;
 		if (vo < 0x10000) memcpy(vram + vo, t, want < 0x10000 - vo ? want : 0x10000 - vo);
 		free(t);
 	}
-	for (int i = 0; i < 256; ++i) colors[i] = bgr555(rom_u16(pal + (uint32_t)i * 2));
+	for (int i = 0; i < 256; ++i) colors[i] = bgr555(su16(pal + (uint32_t)i * 2));
 	return vram;
 }
 
@@ -71,17 +98,18 @@ static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_
 }
 
 static bool map_desc(int group, int number, uint32_t *desc, uint32_t *ts, uint32_t *pal, uint32_t *tm) {
-	uint32_t list = rom_u32(group_slot(MAP_TABLE_RW, MAP_TABLE, group));
+	uint32_t list = su32(group_slot(src.map_rw, src.map_net, group));
 	if (!rom_is_ptr(list)) return false;
 	*desc = rom_off(list) + (uint32_t)number * 12;
-	*ts = rom_u32(*desc); *pal = rom_u32(*desc + 4); *tm = rom_u32(*desc + 8);
+	*ts = su32(*desc); *pal = su32(*desc + 4); *tm = su32(*desc + 8);
 	if (!rom_is_ptr(*ts) || !rom_is_ptr(*pal) || !rom_is_ptr(*tm)) return false;
 	*ts = rom_off(*ts); *pal = rom_off(*pal) + 4; *tm = rom_off(*tm);
 	return true;
 }
 
 bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot) {
-	uint32_t ts, pal, tm, list = rom_u32(group_slot(COORD_TABLE_RW, COORD_TABLE, group));
+	use_rom(-1);   /* (the slots a layer takes over are BN6's) */
+	uint32_t ts, pal, tm, list = su32(group_slot(src.coord_rw, src.coord_net, group));
 	if (!map_desc(group, number, desc, &ts, &pal, &tm) || !rom_is_ptr(list)) return false;
 	*coord_slot = rom_off(list) + (uint32_t)number * 4;
 	return true;
@@ -90,9 +118,9 @@ bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot)
 static bool decode_tiles(AreaSrc *a) {
 	uint32_t ts, pal, tm;
 	if (!map_desc(a->group, a->number, &a->desc, &ts, &pal, &tm)) return false;
-	a->tw = R.data[tm]; a->th = R.data[tm + 1];
+	a->tw = src.data[tm]; a->th = src.data[tm + 1];
 	size_t n = 0;
-	uint8_t *m = lz77_decompress(R.data + tm + 12, ROM_SIZE - (tm + 12), &n);
+	uint8_t *m = lz77_decompress(src.data + tm + 12, ROM_SIZE - (tm + 12), &n);
 	if (!m || a->tw <= 0 || a->th <= 0) { free(m); return false; }
 	size_t cells = (size_t)a->tw * a->th;
 	a->layers = (int)(n / (cells * 2));
@@ -125,6 +153,7 @@ static bool decode_tiles(AreaSrc *a) {
 }
 
 uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, int th) {
+	use_rom(-1);
 	uint32_t desc, ts, pal, tm, colors[256];
 	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return NULL;
 	uint8_t *vram = map_gfx(ts, pal, colors);
@@ -143,20 +172,23 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 /* The coordinate data's four sections, each a count, (key, offset)
  * entries and 4-byte shapes (see coords.c). */
 static void decode_coords(AreaSrc *a) {
-	uint32_t list = rom_u32(group_slot(COORD_TABLE_RW, COORD_TABLE, a->group));
+	uint32_t list = su32(group_slot(src.coord_rw, src.coord_net, a->group));
 	if (!rom_is_ptr(list)) return;
 	a->coord_slot = rom_off(list) + (uint32_t)a->number * 4;
-	uint32_t c = rom_u32(a->coord_slot);
+	uint32_t c = su32(a->coord_slot);
 	if (!rom_is_ptr(c)) return;
 	c = rom_off(c);
 	size_t n = 0;
-	uint8_t *d = lz77_decompress(R.data + c + 16, ROM_SIZE - (c + 16), &n);
+	uint8_t *d = lz77_decompress(src.data + c + 16, ROM_SIZE - (c + 16), &n);
 	if (!d) return;
 	for (int s = 0; s < 4; ++s) {
-		uint32_t at = rom_u32(c + (uint32_t)s * 4);
+		uint32_t at = su32(c + (uint32_t)s * 4);
 		if (at + 4 > n) continue;
 		uint32_t count = (uint32_t)(d[at] | d[at + 1] << 8 | d[at + 2] << 16 | d[at + 3] << 24);
-		a->sec[s] = calloc(count + 1, sizeof(CoordCell));
+		/* (no more than the data holds, and checked: another game's
+		 * sections are read as BN6's) */
+		if (count > (n - at) / 4) count = (uint32_t)((n - at) / 4);
+		if (!(a->sec[s] = calloc(count + 1, sizeof(CoordCell)))) continue;
 		for (uint32_t i = 0; i < count && at + 8 + i * 4 <= n; ++i) {
 			uint32_t e = at + 4 + i * 4;
 			int key = d[e] | d[e + 1] << 8, off = d[e + 2] | d[e + 3] << 8;
@@ -178,7 +210,7 @@ static void decode_coords(AreaSrc *a) {
  * walls: a wall cell's centre lies on the panel edge. */
 static void decode_edges(AreaSrc *a) {
 	int hx[4] = { 0 }, hy[4] = { 0 };
-	for (int i = 0; i < a->nsec[0]; ++i) {
+	for (int i = 0; a->sec[0] && i < a->nsec[0]; ++i) {
 		const CoordCell *c = &a->sec[0][i];
 		if (c->type == 1) hx[((c->x + 4) & 31) / 8]++;
 		if (c->type == 4) hy[((c->y + 4) & 31) / 8]++;
@@ -194,7 +226,7 @@ static int cell_of(int w) { return w >= 0 ? w / 8 : -((-w + 7) / 8); }
 /* Section 1 as a grid of heights: type 0x11 raises a cell, ramps (0x13,
  * 0x14) are uneven. */
 static void decode_heights(AreaSrc *a) {
-	if (!a->nsec[1]) return;
+	if (!a->nsec[1] || !a->sec[1]) return;
 	int x0 = 1 << 20, y0 = 1 << 20, x1 = -(1 << 20), y1 = -(1 << 20);
 	for (int i = 0; i < a->nsec[1]; ++i) {
 		int cx = cell_of(a->sec[1][i].x), cy = cell_of(a->sec[1][i].y);
@@ -205,7 +237,7 @@ static void decode_heights(AreaSrc *a) {
 	}
 	a->hx0 = x0; a->hy0 = y0; a->hw = x1 - x0 + 1; a->hh = y1 - y0 + 1;
 	if (a->hw <= 0 || a->hh <= 0) { a->hw = a->hh = 0; return; }
-	a->hz = calloc((size_t)a->hw * a->hh, 1);
+	if (!(a->hz = calloc((size_t)a->hw * a->hh, 1))) { a->hw = a->hh = 0; return; }
 	for (int i = 0; i < a->nsec[1]; ++i) {
 		const CoordCell *c = &a->sec[1][i];
 		uint8_t z = c->type == 0x11 ? (uint8_t)(c->z < 0 ? 0 : c->z) : c->type == 0x13 || c->type == 0x14 ? HEIGHT_UNEVEN : 0;
@@ -215,8 +247,8 @@ static void decode_heights(AreaSrc *a) {
 
 /* Rings of walls around each cell: from outside the walls' box, stepping
  * onto a wall from open cells counts one ring (a 0-1 breadth-first walk). */
-static void decode_rings(AreaSrc *a) {
-	if (!a->nsec[0]) return;
+/* The walls' cells' bounds, a cell of margin round them (false: none). */
+static bool ring_bounds(AreaSrc *a) {
 	int x0 = 1 << 20, y0 = 1 << 20, x1 = -(1 << 20), y1 = -(1 << 20);
 	for (int i = 0; i < a->nsec[0]; ++i) {
 		int cx = cell_of(a->sec[0][i].x), cy = cell_of(a->sec[0][i].y);
@@ -226,16 +258,13 @@ static void decode_rings(AreaSrc *a) {
 		if (cy > y1) y1 = cy;
 	}
 	a->rx0 = x0 - 1; a->ry0 = y0 - 1; a->rw = x1 - x0 + 3; a->rh = y1 - y0 + 3;
-	if (a->rw <= 0 || a->rh <= 0) { a->rw = a->rh = 0; return; }
-	size_t n = (size_t)a->rw * a->rh;
-	uint8_t *wall = calloc(n, 1);
-	for (int i = 0; i < a->nsec[0]; ++i)
-		wall[(size_t)(cell_of(a->sec[0][i].y) - a->ry0) * a->rw + cell_of(a->sec[0][i].x) - a->rx0] = 1;
-	a->rings = malloc(n);
-	memset(a->rings, 255, n);
-	/* ring by ring: flood what is reachable without stepping onto a wall
-	 * from open cells, and start the next ring where that happens */
-	int *cur = malloc(sizeof(int) * n), *next = malloc(sizeof(int) * n), *stack = malloc(sizeof(int) * n);
+	if (a->rw <= 0 || a->rh <= 0) { a->rw = a->rh = 0; return false; }
+	return true;
+}
+
+/* Ring by ring: flood what is reachable without stepping onto a wall from
+ * open cells, and start the next ring where that happens. */
+static void flood_rings(AreaSrc *a, const uint8_t *wall, int *cur, int *next, int *stack) {
 	int ncur = 1, ring = 0;
 	cur[0] = 0;
 	a->rings[0] = 0;
@@ -263,6 +292,24 @@ static void decode_rings(AreaSrc *a) {
 		ncur = nnext;
 		++ring;
 	}
+}
+
+static void decode_rings(AreaSrc *a) {
+	if (!a->nsec[0] || !a->sec[0] || !ring_bounds(a)) return;
+	size_t n = (size_t)a->rw * a->rh;
+	uint8_t *wall = calloc(n, 1);
+	a->rings = malloc(n);
+	int *cur = malloc(sizeof(int) * n), *next = malloc(sizeof(int) * n), *stack = malloc(sizeof(int) * n);
+	if (!wall || !a->rings || !cur || !next || !stack) {
+		free(wall); free(a->rings); free(cur); free(next); free(stack);
+		a->rings = NULL;
+		a->rw = a->rh = 0;
+		return;
+	}
+	for (int i = 0; i < a->nsec[0]; ++i)
+		wall[(size_t)(cell_of(a->sec[0][i].y) - a->ry0) * a->rw + cell_of(a->sec[0][i].x) - a->rx0] = 1;
+	memset(a->rings, 255, n);
+	flood_rings(a, wall, cur, next, stack);
 	free(cur);
 	free(next);
 	free(stack);
@@ -289,7 +336,7 @@ int area_src_height(const AreaSrc *a, int X, int Y) {
 	return a->hz[(size_t)cy * a->hw + cx];
 }
 
-bool area_src_load(int group, int number, AreaSrc *a) {
+static bool load(int group, int number, AreaSrc *a) {
 	memset(a, 0, sizeof *a);
 	a->group = group;
 	a->number = number;
@@ -299,6 +346,19 @@ bool area_src_load(int group, int number, AreaSrc *a) {
 	decode_heights(a);
 	decode_rings(a);
 	return true;
+}
+
+bool area_src_load(int group, int number, AreaSrc *a) {
+	use_rom(-1);
+	return load(group, number, a);
+}
+
+bool area_src_load_x(int xrom, int group, int number, AreaSrc *a) {
+	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) return false;
+	use_rom(xrom);
+	bool ok = load(group, number, a);
+	a->rom = (int8_t)(xrom + 1);
+	return ok;
 }
 
 void area_src_free(AreaSrc *a) {

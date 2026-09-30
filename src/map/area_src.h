@@ -17,6 +17,7 @@ typedef struct {
 
 typedef struct {
 	int group, number;
+	int8_t rom;            /* where it was read: 0 BN6, 1 + XRomId an extra game's (docs/MULTIROM.md) */
 	int tw, th;            /* size in tiles */
 	int layers;
 	uint16_t *tile[2];     /* map entries, row-major, per layer */
@@ -43,6 +44,9 @@ typedef struct {
 #define HEIGHT_UNEVEN 255
 
 bool area_src_load(int group, int number, AreaSrc *a);
+/* The same from an extra game's ROM (XRomId, docs/MULTIROM.md), where it
+ * has been read. */
+bool area_src_load_x(int xrom, int group, int number, AreaSrc *a);
 /* Map (group, number)'s descriptor (tile set, palette, tile map: ROM
  * offsets of its 12 bytes) and its coordinate data's pointer. */
 bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot);

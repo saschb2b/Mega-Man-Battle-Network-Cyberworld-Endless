@@ -31,6 +31,7 @@ the site.
 | What carries over between runs: unlocks, the run's setup, threat | [docs/META.md](docs/META.md) |
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem | [docs/PET.md](docs/PET.md) |
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/RIVAL.md](docs/RIVAL.md) |
+| Other games' ROMs (Battle Network 5 first): what they can lend a run, and how | [docs/MULTIROM.md](docs/MULTIROM.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout

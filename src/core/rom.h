@@ -74,6 +74,24 @@ typedef struct {
 
 extern Rom R;
 
+/* Other Battle Network games whose data a layer can take beside BN6's
+ * (docs/MULTIROM.md): found by their contents where the BN6 ROM is, read
+ * and never run. Each is optional: BN6 alone is the whole game. */
+typedef enum { XROM_BN5_COLONEL_US, XROM_COUNT } XRomId;
+typedef struct {
+	const char *name, *sha1, *code;
+	uint32_t map_table_rw, map_table;       /* MapBGDescriptor lists per map group, as BN6's (docs/ROM_DATA.md) */
+	uint32_t coord_table_rw, coord_table;   /* coordinate data lists per map group */
+	int rw_groups, net_groups;              /* the tables' entries: real-world groups from 0x00, internet ones from 0x80 */
+} XRomLayout;
+typedef struct {
+	uint8_t *data;
+	const XRomLayout *layout;
+} XRom;
+extern XRom XR[XROM_COUNT];
+/* Reads the extra ROMs in dir (any *.gba of theirs); how many are read now. */
+int xrom_find(const char *dir);
+
 /* Looks for a supported ROM in dir (any *.gba). On failure, msg explains why. */
 bool rom_find(const char *dir, char *msg, size_t msglen);
 /* After a rom_find that found none: a .gba of the right size was there but

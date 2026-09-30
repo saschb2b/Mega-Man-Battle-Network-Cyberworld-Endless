@@ -29,7 +29,6 @@ src/layer/layer_objs.c:layer_objs_install 174 374
 src/layer/shop.c:answer 36 26
 src/layer/text.c:code_of 29 15
 src/layer/text.c:wrap 40 44
-src/map/area_src.c:decode_rings 26 52
 src/map/coords.c:walls 28 32
 src/map/decor.c:decor_learn 46 65
 src/map/legal.c:legal_fix 38 66

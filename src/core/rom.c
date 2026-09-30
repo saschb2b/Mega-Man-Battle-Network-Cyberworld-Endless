@@ -211,6 +211,51 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 
 bool rom_find_close;
 
+/* ---- Extra ROMs (docs/MULTIROM.md) ---- */
+
+static const XRomLayout xlayouts[XROM_COUNT] = {
+	/* (tables found by their structure beside BN6's own, docs/ROM_DATA.md) */
+	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
+		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21 },
+};
+
+XRom XR[XROM_COUNT];
+
+static void xrom_load(const char *path) {
+	FILE *f = fopen(path, "rb");
+	if (!f) return;
+	char code[5] = "";
+	int id = -1;
+	if (fseek(f, 0, SEEK_END) == 0 && ftell(f) == ROM_SIZE && fseek(f, 0xAC, SEEK_SET) == 0 && fread(code, 1, 4, f) == 4)
+		for (int i = 0; i < XROM_COUNT; ++i)
+			if (!memcmp(code, xlayouts[i].code, 4) && !XR[i].data) id = i;
+	uint8_t *data = id < 0 ? NULL : malloc(ROM_SIZE);
+	bool ok = data && fseek(f, 0, SEEK_SET) == 0 && fread(data, 1, ROM_SIZE, f) == ROM_SIZE;
+	fclose(f);
+	char hex[41] = "";
+	if (ok) sha1_hex(data, ROM_SIZE, hex);
+	if (!ok || strcmp(hex, xlayouts[id].sha1)) { free(data); return; }
+	XR[id] = (XRom){ data, &xlayouts[id] };
+}
+
+int xrom_find(const char *dir) {
+	DIR *d = opendir(dir);
+	if (d) {
+		struct dirent *e;
+		while ((e = readdir(d))) {
+			size_t n = strlen(e->d_name);
+			if (n < 4 || strcasecmp(e->d_name + n - 4, ".gba")) continue;
+			char path[1024];
+			snprintf(path, sizeof path, "%s/%s", dir, e->d_name);
+			xrom_load(path);
+		}
+		closedir(d);
+	}
+	int have = 0;
+	for (int i = 0; i < XROM_COUNT; ++i) have += XR[i].data != NULL;
+	return have;
+}
+
 bool rom_find(const char *dir, char *msg, size_t msglen) {
 	DIR *d = opendir(dir);
 	snprintf(msg, msglen, "Put your Mega Man Battle Network 6: Cybeast Gregar (USA) ROM in %s", dir);
