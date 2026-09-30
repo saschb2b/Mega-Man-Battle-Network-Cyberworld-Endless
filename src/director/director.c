@@ -2203,8 +2203,10 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		spins_sync();
-		/* the shops' data in RAM is the saved one: this layer's again */
-		layer_objs_shops(&D.objs);
+		/* the shops' data in RAM is the saved one: this layer's again,
+		 * what was bought before the save still bought (a CONTINUE had
+		 * restocked both shops); another build's layer, afresh */
+		layer_objs_shops(&D.objs, same);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
 		official_sync();
 		if (!same) {

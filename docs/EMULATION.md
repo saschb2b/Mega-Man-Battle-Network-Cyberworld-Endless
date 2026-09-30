@@ -100,8 +100,9 @@ the core's `run.state`), once MegaMan is free to move. Quitting (Escape
 twice, SIGTERM or SIGINT from a launcher) saves the run once more where he
 stands if he is free on the layer's map with nothing of the guardian under
 way; loading it restores the guardian's state from its flags. The shops'
-stock is written again after the load (the state's RAM holds the saved
-one), and `run.make` records the build's `LAYER_MAKE`: a run saved by a
+stock is written again after the load (the ROM copy the shop screen checks
+the list against is not in a state), each entry the saved list holds
+keeping its stock there, and `run.make` records the build's `LAYER_MAKE`: a run saved by a
 build that makes layers otherwise continues its layer from the start, with
 the layer's flags and Mystery Data picks cleared (its RAM would not match
 this build's objects). `battle.sav` keeps what the random battles

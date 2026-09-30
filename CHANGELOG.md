@@ -8,6 +8,8 @@
   (issue #17). The vendor also brings his whole list, up to four
   programs: ten random draws had often brought two or three in the first
   acts, and now and then none.
+- A CONTINUE keeps what was bought: the Net Dealer and the NaviCust
+  vendor had restocked everything bought on the layer before the save.
 - HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
   in official vaults or anywhere else. They are left over from the
   Japanese version: the US game has no HackJack, so using one made

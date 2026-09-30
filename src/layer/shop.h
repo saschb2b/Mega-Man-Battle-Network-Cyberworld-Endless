@@ -27,8 +27,10 @@ typedef struct {
 #define SUB_SNEAK_RUN   0x82
 #define SUB_UNTRAP      0x83
 
-/* Writes the stock of shop `shop`; false before the game has set up its data. */
-bool shop_install(int shop, const ShopItem *items, int n);
+/* Writes the stock of shop `shop`; false before the game has set up its
+ * data. `kept`: over a saved state's list in RAM, an entry it holds keeps
+ * its stock there (what was bought stays bought). */
+bool shop_install(int shop, const ShopItem *items, int n, bool kept);
 
 /* A layer's stock at `depth` (the rng decides the picks): first two of
  * the hardest hitting chip of element `counter` (1-4), or of any element

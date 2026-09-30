@@ -34,11 +34,14 @@ static void read_item(uint32_t a, ShopItem *it) {
 	it->price = rom_u16(o + 6);
 }
 
-bool shop_install(int shop, const ShopItem *items, int n) {
+bool shop_install(int shop, const ShopItem *items, int n, bool kept) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
 	if (data < 0x02000000u || data >= 0x02040000u) return false;
 	uint32_t at = data + emu_read32(desc(shop) + 8);
 	int slots = (int)emu_read32(desc(shop) + 12);
+	uint8_t was[16][8] = { { 0 } };
+	for (int i = 0; kept && i < slots && i < 16; ++i)
+		for (int b = 0; b < 8; ++b) was[i][b] = emu_read8(at + 8u * (uint32_t)i + (uint32_t)b);
 	for (int i = 0; i < slots; ++i, at += 8) {
 		uint8_t e[8] = { 0 };
 		if (i < n) {
@@ -47,8 +50,16 @@ bool shop_install(int shop, const ShopItem *items, int n) {
 			e[4] = items[i].code;
 			e[6] = (uint8_t)items[i].price; e[7] = (uint8_t)(items[i].price >> 8);
 		}
-		emu_write(at, e, 8);
+		/* (the ROM copy as a fresh list has it: the screen checks the list
+		 * against its ids and codes, never its stock) */
 		emu_write(BN6_SHOP_INIT + (at - data), e, 8);
+		for (int k = 0; kept && i < n && k < 16; ++k)
+			if (was[k][0] == e[0] && was[k][2] == e[2] && was[k][3] == e[3] && was[k][4] == e[4]) {
+				e[1] = was[k][1];
+				was[k][0] = 0;   /* (each once) */
+				break;
+			}
+		emu_write(at, e, 8);
 	}
 	return true;
 }

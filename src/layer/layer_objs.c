@@ -209,9 +209,9 @@ typedef struct {
 	int anim, sx, sy;
 } Talker;
 
-void layer_objs_shops(const LayerObjs *o) {
-	shop_install(SHOP_DEALER, o->dealer, o->ndealer);
-	shop_install(SHOP_PROGRAMS, o->programs, o->nprograms);
+void layer_objs_shops(const LayerObjs *o, bool saved) {
+	shop_install(SHOP_DEALER, o->dealer, o->ndealer, saved);
+	shop_install(SHOP_PROGRAMS, o->programs, o->nprograms, saved);
 }
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {
@@ -655,7 +655,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			}
 	for (int i = 0; i < nstock; ++i) out->dealer[i] = stock[i];
 	out->ndealer = nstock;
-	layer_objs_shops(out);
+	layer_objs_shops(out, false);
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
 	npcs.objects = props_objects(&npcs);

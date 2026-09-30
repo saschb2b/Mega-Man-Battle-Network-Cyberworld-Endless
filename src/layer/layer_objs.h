@@ -52,9 +52,10 @@ typedef struct {
 	int ndealer, nprograms;
 } LayerObjs;
 
-/* The layer's shop stock written again (after a state load, whose RAM
- * holds the shop data as it was saved). */
-void layer_objs_shops(const LayerObjs *o);
+/* The layer's shop stock written (again after a state load, whose RAM
+ * holds the shop data as it was saved: `saved`, what was bought there
+ * stays bought). */
+void layer_objs_shops(const LayerObjs *o, bool saved);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);
