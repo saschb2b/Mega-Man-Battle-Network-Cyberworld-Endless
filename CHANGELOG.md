@@ -6,6 +6,9 @@
   away from where his pink mark lies ("down and to the right, far off,
   though the way there winds"), as it says for a heal or a Net Dealer:
   it had measured the way as the crow flies, "close by" across a gap.
+- Lan answers Chaud's call about the netbattle ("We'll be ready,
+  Chaud!"), as he answers the races' calls: it had read as a message
+  left.
 
 ## 0.5.0 (2026-09-30)
 

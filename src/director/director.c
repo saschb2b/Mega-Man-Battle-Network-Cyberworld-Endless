@@ -2673,11 +2673,11 @@ static const char *duel_call_words(void) {
 			: "@C Beat it, and I'll clear you for the net's official gates.|",
 			layer_objs_duel_rung == 1 ? ", without a hit" : "");
 	}
-	/* (Lan answers: a call no one answered read as a message left) */
-	if (!layer_objs_duel_later) {
-		size_t n = strlen(call);
-		snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
-	}
+	/* (Lan answers: a call no one answered read as a message left, the
+	 * netbattle's too) */
+	size_t n = strlen(call);
+	snprintf(call + n, sizeof call - n, "|@L %s", layer_objs_duel_later ? "We'll be ready, Chaud!"
+		: profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
 	return call;
 }
 
