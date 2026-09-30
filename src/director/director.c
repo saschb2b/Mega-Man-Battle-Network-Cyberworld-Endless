@@ -782,6 +782,14 @@ static int duel_frames(int hp) {
 	return (int)(t * k);
 }
 
+/* A race's squad holds no virus that decides when it can be hit. */
+#define FAMILY_QUAKER 6   /* (the families are BN6's sprite categories less 0x0E) */
+static bool duel_race_fair(const Encounter *e) {
+	for (int i = 0; i < e->nfoes; ++i)
+		if (e->foes[i].kind == FOE_VIRUS && e->foes[i].family == FAMILY_QUAKER) return false;
+	return true;
+}
+
 static int encounter_hp(const Encounter *e) {
 	int total = 0;
 	for (int i = 0; i < e->nfoes; ++i) {
@@ -830,7 +838,18 @@ static bool build_layer(void) {
 			 * the test, not its strength; one above the band deleted a
 			 * playtester at 100 of 140 HP on layer 2, his run over) */
 			D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_NORMAL);
+			/* (and none a race can't hurry: a Quaker is out of reach in the
+			 * air until it lands, so the clock times its hops, not the
+			 * player; three of a playtester's four duels were Quakers, "a
+			 * Quaker lottery") */
+			for (int tries = 0; layer_objs_duel_rung != 2 && tries < 8 && !duel_race_fair(&D.duel_enc); ++tries)
+				D.duel_enc = make_encounter(run.depth, run.biome, ENC_NORMAL);
 			layer_objs_duel_foes = D.duel_enc.nfoes;
+			if (emu_debug_on()) {
+				fprintf(stderr, "duel squad (rung %d):", layer_objs_duel_rung);
+				for (int k = 0; k < D.duel_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.duel_enc.foes[k].kind, D.duel_enc.foes[k].family, D.duel_enc.foes[k].version);
+				fprintf(stderr, "\n");
+			}
 			int lo, hi;
 			pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 			D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi : 0;
@@ -1272,7 +1291,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 58
+#define LAYER_MAKE 59
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 

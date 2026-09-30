@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- ProtoMan's races are against viruses a quick hand can hurry: a squad
+  with a Quaker, out of reach in the air until it lands, is rolled again
+  among the act's battles. Three of a playtester's four duels were
+  Quakers, "a Quaker lottery"; 3 of 20 Seaside duels held one, now none.
+  A run saved by an earlier build continues its layer afresh.
 - A town's port takes R from a step off its ring: MegaMan steps onto it
   and jacks in, where a playtester stood at the mermaid fountain's rim a
   step short and pressed R five times. Further off, MegaMan says which way
