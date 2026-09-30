@@ -948,14 +948,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
 	if (navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = gate_navi; ++next; }
 	if (vault) { PLACE(OBJ_VAULT); ++next; }
-	if (official) {
+	/* (a duel's gate stands by ProtoMan, placed after him) */
+	if (official && !duel) {
 		NetObj *g = PLACE(OBJ_OFFICIAL);
-		/* (beside a duel, wherever a room has space: a small endless layer
-		 * with every room taken had its duel and no gate) */
-		for (int i = 0; !g && duel && i < n; ++i)
-			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
-		for (int i = 0; !g && duel && i < layer.nrooms; ++i)
-			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
 		if (g) g->param = official_level;
 		++next;
 	}
@@ -984,6 +979,36 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
 		for (int i = 0; i < layer.nrooms && !placed; ++i)
 			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
+	}
+	/* the official gate the duel opens, by ProtoMan: in his room, two
+	 * panels from him or more, else in a room a short walk from his (a
+	 * playtester found the gate alone across the layer, and his session
+	 * ran out looking for the rival); else anywhere with space (a small
+	 * endless layer with every room taken had its duel and no gate) */
+	if (official && duel) {
+		NetObj *g = NULL;
+		const NetObj *p = NULL;
+		for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) p = &layer.obj[i];
+		int home = -1;
+		for (int i = 0; p && i < layer.nrooms && home < 0; ++i) {
+			const Room *r = &layer.rooms[i];
+			if (p->x >= r->x && p->x < r->x + r->w && p->y >= r->y && p->y < r->y + r->h) home = i;
+		}
+		int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
+		for (int i = -1; i < nn && !g && home >= 0; ++i) {
+			int room = i < 0 ? home : near[i];
+			if (room == layer.exit_room) continue;
+			for (int tries = 0; tries < 12 && !g; ++tries)
+				if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)p->x) >= 2 || abs(y - (int)p->y) >= 2))
+					g = add_obj(OBJ_OFFICIAL, x, y);
+		}
+		if (!g) g = PLACE(OBJ_OFFICIAL);
+		for (int i = 0; !g && i < n; ++i)
+			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
+		for (int i = 0; !g && i < layer.nrooms; ++i)
+			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
+		if (g) g->param = official_level;
+		++next;
 	}
 	/* Rooms holding better data, more of them deeper and in the Undernet
 	 * (a dark warp's, or the short net's dark way's act) */

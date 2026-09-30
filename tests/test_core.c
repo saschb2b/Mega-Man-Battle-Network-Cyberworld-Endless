@@ -167,7 +167,7 @@ static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
 		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
-		talk_pairs = 0, talk_touch = 0;
+		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -206,12 +206,16 @@ static void test_generation(void) {
 		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
 		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
 			bool duel = false;
-			int official = 0, gates = 0;
+			int official = 0, gates = 0, px = -99, py = -99, gx = 99, gy = 99;
 			for (int i = 0; i < layer.nobj; ++i) {
 				duel |= layer.obj[i].type == OBJ_DUEL;
-				if (layer.obj[i].type == OBJ_OFFICIAL) official = layer.obj[i].param;
+				if (layer.obj[i].type == OBJ_DUEL) { px = (int)layer.obj[i].x; py = (int)layer.obj[i].y; }
+				if (layer.obj[i].type == OBJ_OFFICIAL) { official = layer.obj[i].param; gx = (int)layer.obj[i].x; gy = (int)layer.obj[i].y; }
 				gates += layer.obj[i].type == OBJ_NAVI_GATE || layer.obj[i].type == OBJ_VAULT;
 			}
+			/* (the gate by ProtoMan: within 8 panels of him) */
+			++duel_layers;
+			if (abs(px - gx) + abs(py - gy) <= 8) ++gate_by_duel;
 			CHECK(duel, "seed %u: no duel on an act's second layer (depth %d, area %d)", seed, depth, biome);
 			/* ... and beside it the official gate it opens, the act's level,
 			 * the only gate there */
@@ -377,6 +381,10 @@ static void test_generation(void) {
 	CHECK(beside_line * 4 <= standing, "%d of %d services and navis stand by the way on", beside_line, standing);
 	CHECK(near_pairs * 16 <= standing, "%d of %d services and navis leave a panel's gap on the way", near_pairs, standing);
 	CHECK(talk_touch == 0, "%d pairs of navis to talk to stand side by side, or beside a counter's front", talk_touch);
+	/* (the duel's official gate by ProtoMan: a playtester found it alone,
+	 * across the layer from him) */
+	CHECK(gate_by_duel * 20 >= duel_layers * 19, "the official gate stands by ProtoMan on %d of %d duel layers", gate_by_duel, duel_layers);
+	printf("  the official gate within 8 panels of ProtoMan: %d of %d duel layers\n", gate_by_duel, duel_layers);
 	printf("  two to talk to within two panels (a counter's navi three): %d pairs, %d side by side\n", talk_pairs, talk_touch);
 	printf("  in line with a walkway: %d of %d services and navis; by the way on %d; a panel's gap on the way %d\n",
 		in_line, standing, beside_line, near_pairs);

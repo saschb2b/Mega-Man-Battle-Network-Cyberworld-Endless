@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- ProtoMan is easy to find on his duel layer: the official gate he
+  opens stands by him (within 8 panels on 72 of the tests' 74 duel
+  layers, where it had stood anywhere), the map marks him in pink with a
+  white eye and names him in its key, and MegaMan's L says which way he
+  waits and how far ("ProtoMan's down and to the right, far off: the pink
+  mark on the map"), on every L while the duel waits. A playtester found
+  the gate alone, both marks violet, and his session ran out looking for
+  the rival. A run saved by an earlier build continues its layer afresh.
 - An official gate says what it holds: Chaud's call names the gate on the
   duel's layer (an official Chip Order, three chips you've held, one to
   order; from the netbattle, the official vault's three Mega chips), and

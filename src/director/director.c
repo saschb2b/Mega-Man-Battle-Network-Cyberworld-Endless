@@ -301,6 +301,20 @@ static const char *way_to(int tx, int ty, int *far) {
 	return ways[way_dir];
 }
 
+/* ProtoMan's mark on the layer's map, and its key's */
+#define RIVAL_MARK { 255, 96, 176, 255 }
+
+/* ProtoMan, while his duel waits on this layer (not taken, not a netbattle
+ * named for later): where he stands in the world. */
+static bool duel_waiting(int *wx, int *wy) {
+	if (layer_objs_duel_later) return false;
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (D.objs.choice[i].type == OBJ_DUEL && (D.chosen & (1u << i))) return false;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_DUEL) { netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, wx, wy); return true; }
+	return false;
+}
+
 /* The town's way to the port on foot (town_walk): the first stretch of the
  * walk, not the line to it, which led a playtester into a house front
  * ("straight up") on two runs; how far that walk is. */
@@ -542,6 +556,15 @@ static const char *status_words(void) {
 		if (fresh & MARK_VAULT)
 			ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+		/* (where the rival waits, and his mark: the map showed him as the
+		 * official gate's violet, and a playtester's session ran out at
+		 * the gate, alone, looking for him) */
+		int dx, dy, df;
+		static const char *const dist[3] = { "close by", "a ways off", "far off" };
+		if (duel_waiting(&dx, &dy)) {
+			const char *dw = way_to(dx, dy, &df);
+			ADD("@M ProtoMan's %s, %s: the pink mark on the map.|", dw, dist[df]);
+		}
 		/* (a program left off the board: said on every layer until placed;
 		 * one that cannot fit, once a board: a playtester's SuprArmr could
 		 * not share the 4x4 board with Custom1) */
@@ -573,6 +596,13 @@ static const char *status_words(void) {
 			else ADD("@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s.|", hw, near_far[hf]);
 			break;
 		}
+	}
+	/* (and after that, where ProtoMan waits, while he does) */
+	int rx, ry, rf;
+	static const char *const rival_far[3] = { "close by", "a ways off", "far off" };
+	if (told && duel_waiting(&rx, &ry)) {
+		const char *rw = way_to(rx, ry, &rf);
+		ADD("@M ProtoMan's waiting %s, %s.|", rw, rival_far[rf]);
 	}
 	/* the way on, as MegaMan senses it: along the floor where he can (the
 	 * arrow's way); where the walk sets off well away from where the goal
@@ -1192,8 +1222,11 @@ void director_draw_map(void) {
 		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
 		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_DUEL: case OBJ_OFFICIAL:
+		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL:
 			c = rgba(210, 110, 255, 255); break;
+		/* (the rival his own, a white eye in it: he and the official gate
+		 * both showed violet) */
+		case OBJ_DUEL: c = (SDL_Color)RIVAL_MARK; break;
 		default: continue;
 		}
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
@@ -1225,6 +1258,7 @@ void director_draw_map(void) {
 		if (!INSIDE(sx, sy, 3)) continue;
 		fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
 		fill_rect(sx - 2, sy - 2, 5, 5, c);
+		if (o->type == OBJ_DUEL) fill_rect(sx, sy, 1, 1, rgba(255, 255, 255, 255));
 	}
 	if (gx >= 0 && !D.seen[gy][gx]) {
 		/* where the ray from MegaMan to it leaves the frame */
@@ -1255,30 +1289,36 @@ void director_draw_map(void) {
 	static const struct { const char *what; SDL_Color c; } key[] = {
 		{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
 		{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
-		{ "Event", { 210, 110, 255, 255 } },
+		{ "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
 	};
-	bool has[6] = { true, true, false, false, D.objs.guardian.navi != 0, false };
+	enum { KEYS = sizeof key / sizeof *key };
+	bool has[KEYS] = { true, true, false, false, D.objs.guardian.navi != 0, false, false };
 	for (int i = 0; i < layer.nobj; ++i)
 		switch (layer.obj[i].type) {
 		case OBJ_HEAL: has[2] = true; break;
 		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
 		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL: has[5] = true; break;
 		case OBJ_CHALLENGE: has[5] |= !server_done; break;
-		case OBJ_DUEL: has[5] |= !duel_done; break;
+		case OBJ_DUEL: has[6] |= !duel_done; break;
 		default: break;
 		}
-	/* (the gaps close up until it fits the picture's width) */
+	/* (the gaps close up until it fits the picture's width; then "You"
+	 * goes, whose mark pulses: ProtoMan's name ran off the picture) */
 	int gap = 10, width;
-	do {
+	for (;;) {
 		width = 0;
-		for (int i = 0; i < 6; ++i) if (has[i]) width += 8 + text_width(key[i].what) + gap;
+		for (int i = 0; i < KEYS; ++i) if (has[i]) width += 8 + text_width(key[i].what) + gap;
 		width -= gap;
-	} while (width > bw - 2 && (gap -= 2) >= 0);
+		if (width <= bw - 2 || (gap <= 0 && !has[0])) break;
+		if (gap > 2 || !has[0]) gap -= 2;
+		else { has[0] = false; gap = 8; }
+	}
 	if (gap < 0) gap = 0;
 	int kx = bx + 1, ky = by + bh + 5;
-	for (int i = 0; i < 6; ++i) {
+	for (int i = 0; i < KEYS; ++i) {
 		if (!has[i]) continue;
 		fill_rect(kx, ky + 3, 5, 5, key[i].c);
+		if (i == 6) fill_rect(kx + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
 		text_draw(kx + 7, ky, key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
 		kx += 8 + text_width(key[i].what) + gap;
 	}
@@ -1291,7 +1331,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 59
+#define LAYER_MAKE 60
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
