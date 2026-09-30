@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
+  in official vaults or anywhere else. They are left over from the
+  Japanese version: the US game has no HackJack, so using one made
+  MegaMan vanish until he was deleted (issue #15). A run saved by an
+  earlier build continues its layer afresh.
 - **A guardian's reward is taken once.** B at the Guardian Data's program
   choice gives the BugFrags it promises and takes the reward: it had
   ended the talk with nothing given and left the Guardian Data there, and
