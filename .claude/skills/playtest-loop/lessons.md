@@ -1103,3 +1103,42 @@ beaten or a gift taken before the save) and false for the persona's save,
 made at the layer's start: say where the persona's CONTINUE resumes and
 what it will meet again.
 
+
+## Session 43: 7/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of run 2 on Sky HP (CircusMan's act): layer 4 afresh after the
+LAYER_MAKE bump, a strong virus signal taken and won, two dealers, the
+NaviCust vendor, UnderSht installed, six fights; layer 5, the duel
+layer, searched for ProtoMan until the budget ran out (294 calls). From
+8 to 7: the session never reached its climax, neither the duel nor
+CircusMan.
+
+Confirmed: Chaud's call and the gate naming the official Chip Order (it
+now pulls: "Before, I raced for a word. Now I want the prize"), the
+shop's first "Are you sure?" on No at every counter, the NaviCust's Yes
+path quitting in one prompt, CONTINUE restarting the saved layer.
+
+Raised, fixed: ProtoMan and the official gate shared the map's violet
+mark and L named no direction, so the persona found the gate alone and
+never the rival (bd75489: the gate by him on 72 of 74 duel layers, his
+own pink mark, L says where he waits); the strong virus signal's "a good
+chip" (6bc80ad: "It pays DolThdr3 B"). Caused by the loop: the patch
+notes said the gate stood "beside" ProtoMan, which the build did not do;
+now it does. Kept: walkway corners stop MegaMan as in BN6 (the owner's
+choice, c33d2e0), though they cost about a dozen calls again;
+FIDELITY.md still described the removed assist and now does not.
+Vanilla: the enemy side's AreaGrab (replayed: the engine gives viruses
+no chips), the Armadill's rolls. Misreads into persona.md: EraseCross's
+beam needs about 115 frames (two sessions), an A after a chat's last box
+talks again (three times).
+
+Cost: 294 calls against 260, about 12 on walkway corners and 30 on the
+search; the watchdog's budget warning came at 270 and a SendMessage
+closed the session at 294.
+
+Loop change: **a goal that depends on finding something says where it
+is.** The session's two goals sat on a layer whose rival had no mark of
+his own: the persona spent its budget searching and the report scored
+the missing climax. Before launching, check each goal's object is
+findable in the persona's save (the map and L name it) with a capture,
+and say in the goals where it stands when the build cannot.
