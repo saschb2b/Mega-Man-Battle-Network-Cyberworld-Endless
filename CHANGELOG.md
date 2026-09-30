@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- MegaMan beside a Net Dealer's counter, at its far end, is drawn behind
+  it, as BN6 draws him: the counter keeps its original map's layer
+  priorities there, where he had been drawn over it, as if standing on
+  it. Only where he stands before the counter's own art: beside it a
+  raised pad's edge had cut him in half.
 - ProtoMan's races are against viruses a quick hand can hurry: a squad
   with a Quaker, out of reach in the air until it lands, is rolled again
   among the act's battles. Three of a playtester's four duels were

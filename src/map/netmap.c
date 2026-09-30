@@ -454,6 +454,7 @@ static void props_place(const Learned *L) {
 		 * runs along grid y, whose highest cell is the lowest X */
 		int A = p->faces == FACES_X ? -(p->y + p->len - 1 - place.gy0) : -(p->y - place.gy0), B = p->x - place.gx0;
 		prop_at[i] = (__typeof__(prop_at[0])){ true, place.ex + 32 * A + L->counter_dx[p->faces], place.ey + 32 * B + L->counter_dy[p->faces], st };
+		if (emu_debug_on()) fprintf(stderr, "counter faces %d at %d,%d (%d walls, %d layer priorities)\n", p->faces, prop_at[i].X, prop_at[i].Y, st->nwalls, st->nprio);
 	}
 }
 
@@ -730,6 +731,13 @@ static void build_extra(const Learned *L) {
 			c.x = (int16_t)(c.x + prop_at[i].X);
 			c.y = (int16_t)(c.y + prop_at[i].Y);
 			over_cells[extra.nover++] = c;
+		}
+		/* (and its layer priorities, as a stair's are laid) */
+		for (int k = 0; k < prop_at[i].st->nprio; ++k) {
+			CoordCell c = prop_at[i].st->prio[k];
+			c.x = (int16_t)(c.x + prop_at[i].X);
+			c.y = (int16_t)(c.y + prop_at[i].Y);
+			add_extra(2, c);
 		}
 	}
 	for (int y = 0; y < cur->gh; ++y)
