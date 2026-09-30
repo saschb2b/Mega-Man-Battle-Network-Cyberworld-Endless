@@ -516,7 +516,7 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 	return i;
 }
 
-int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, const ScriptsVault *v) {
+int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v) {
 	char s[300];
 	snprintf(s, sizeof s, level >= 2 ? "Chaud's clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
 		: "Chaud's clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
@@ -525,7 +525,10 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, con
 	 * clearance reaches the gate's level, as the layer begins or as a duel
 	 * on it is won (a gate beside the duel opens at once): the telegraph
 	 * first, whose clearance, and how far we are */
-	if (level >= 2)
+	if (duel_prize)
+		snprintf(s, sizeof s, "@M ProtoMan's official gate, Lan. %s|@M It opens for the Netbattler who beats him here.",
+			level >= 2 ? "The official vault's behind it: three Mega chips." : "An official Chip Order's behind it: three chips we've held, one to order.");
+	else if (level >= 2)
 		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance. The official vault's behind it: three Mega chips.|"
 			"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
 	else

@@ -790,13 +790,23 @@ static void note_folder_codes(void) {
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
-/* Chaud's clearance (docs/RIVAL.md): 1 after a first duel won, 2 once
- * ProtoMan himself has been beaten (the third rung, a third win). */
-static int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : profile.duel_won >= 1 ? 1 : 0; }
+/* Whether ProtoMan's duel stands on the layer. */
+static bool duel_layer(void) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_DUEL) return true;
+	return false;
+}
 
 /* The layer's official gate open where Chaud's clearance reaches its level
- * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md). */
-static void official_sync(void) {
+ * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md); the one beside
+ * ProtoMan's duel opens to its winner alone, as the duel is won, and stays
+ * as a CONTINUE (`resumed`) finds it (a playtester with the clearance found
+ * it open before the duel, which then paid nothing but the record). */
+static void official_sync(bool resumed) {
+	if (duel_layer()) {
+		if (!resumed) flag_clear(LAYER_CLEARED_FLAG);
+		return;
+	}
 	if (layer_objs_official_level && rival_clearance() >= layer_objs_official_level) flag_set(LAYER_CLEARED_FLAG);
 	else flag_clear(LAYER_CLEARED_FLAG);
 }
@@ -930,7 +940,7 @@ static bool build_layer(void) {
 	flag_clear(LAYER_VAULT_FLAG);
 	flag_clear(LAYER_OFFICIAL_FLAG);
 	flag_clear(LAYER_DUEL_CALLED_FLAG);
-	official_sync();
+	official_sync(false);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -2211,7 +2221,7 @@ bool director_resume(void) {
 		 * restocked both shops); another build's layer, afresh */
 		layer_objs_shops(&D.objs, same);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
-		official_sync();
+		official_sync(true);
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
@@ -2284,6 +2294,21 @@ static void enter_side_layer(void) {
 /* The duel's verdict (docs/RIVAL.md): MegaMan's DeleteTime against
  * ProtoMan's, and on rung 1 no hit taken; the record kept, and Chaud's
  * words queued, with both times as the results screen shows them. */
+/* Chaud's first words on a duel's end, with both times as the results
+ * screen shows them: the netbattle, a win, a hit taken, a time too slow. */
+static int verdict_result(char *out, size_t n, bool won, bool beat, int rung, int mine, int his) {
+	char a[16], b[16];
+	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
+	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
+	if (!won && rung == 2) return snprintf(out, n, "@C Out of the netbattle, Lan? Better than deleted. That's a loss.|@C ProtoMan will be back.|");
+	if (!won) return snprintf(out, n, "@C Out of the duel, Lan? That's a loss.|");
+	if (rung == 2) return snprintf(out, n, "@C ...Log out, ProtoMan. You beat him, Lan.|");
+	if (beat && rung == 1) return snprintf(out, n, "@C %s, and not a scratch. ...Not bad, Lan.|@C ProtoMan, we train harder.|", a);
+	if (beat) return snprintf(out, n, "@C %s. ProtoMan's was %s. ...Not bad, Lan.|@C We'll be faster next time.|", a, b);
+	if (mine < his) return snprintf(out, n, "@C %s, but MegaMan took a hit. A clean bust or nothing, Lan.|", a);
+	return snprintf(out, n, "@C %s. ProtoMan's was %s. Too slow, Lan.|", a, b);
+}
+
 static void duel_verdict(bool won) {
 	D.duel = false;
 	int mine = D.duel_time, his = layer_objs_duel_frames, rung = layer_objs_duel_rung, before = rival_clearance();
@@ -2292,31 +2317,24 @@ static void duel_verdict(bool won) {
 	if (beat) profile.duel_won++;
 	else profile.duel_lost++;
 	profile_save();
-	char a[16], b[16];
-	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
-	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
-	int k = 0, size = (int)sizeof D.duel_verdict;
+	int size = (int)sizeof D.duel_verdict, k = verdict_result(D.duel_verdict, sizeof D.duel_verdict, won, beat, rung, mine, his);
 	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	if (!won && rung == 2) ADD("@C Out of the netbattle, Lan? Better than deleted. That's a loss.|@C ProtoMan will be back.|");
-	else if (!won) ADD("@C Out of the duel, Lan? That's a loss.|");
-	else if (rung == 2) ADD("@C ...Log out, ProtoMan. You beat him, Lan.|");
-	else if (beat && rung == 1) ADD("@C %s, and not a scratch. ...Not bad, Lan.|@C ProtoMan, we train harder.|", a);
-	else if (beat) ADD("@C %s. ProtoMan's was %s. ...Not bad, Lan.|@C We'll be faster next time.|", a, b);
-	else if (mine < his) ADD("@C %s, but MegaMan took a hit. A clean bust or nothing, Lan.|", a);
-	else ADD("@C %s. ProtoMan's was %s. Too slow, Lan.|", a, b);
 	/* (what his respect opens: docs/RIVAL.md) */
 	int after = rival_clearance();
 	if (after > before && after == 1) ADD("@C You've earned my clearance, Lan. The net's official gates will open for you now.|");
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
+	/* (and the next rung, the door it leads to: a playtester's second win
+	 * read as for the record alone) */
+	if (beat && rung == 1 && after < 2) ADD("|@C Next time, no race: ProtoMan faces MegaMan himself. Beat him, and my full clearance is yours.");
 	/* (Lan answers a win too: a playtester's first, after five losses, met
 	 * silence where every loss had had his "Next time, Chaud!") */
 	if (beat) ADD("|@L %s", rung == 2 ? "Good battle, ProtoMan! See you next time, Chaud!"
 		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time, MegaMan! See you next time, Chaud!"
 		: "Yes! See you next time, Chaud!");
-	/* (and the gate beside the duel opens at once: the prize where it was
-	 * offered) */
-	bool opened = after > before && layer_objs_official_level && after >= layer_objs_official_level;
+	/* (and the gate beside the duel opens at once to its winner: the prize
+	 * where it was offered) */
+	bool opened = beat && layer_objs_official_level && after >= layer_objs_official_level;
 	if (opened) {
 		flag_set(LAYER_CLEARED_FLAG);
 		ADD("|@M Lan! The official gate on this layer will open for us now!");
@@ -2542,6 +2560,49 @@ static const char *service_where(int wx, int wy, char *buf, size_t n) {
 	const char *winds = apart >= 2 ? ", though the way there winds" : "";
 	snprintf(buf, n, far == 0 ? "right here, %s%s" : far == 1 ? "%s%s" : "a long way back, %s%s", lies, winds);
 	return buf;
+}
+
+/* Chaud's call on a duel layer (docs/RIVAL.md): the record, ProtoMan's time
+ * and the term, what a win opens, and Lan's answer. */
+static const char *duel_call_words(void) {
+	int f = layer_objs_duel_frames, sec = f / 60;
+	static char call[400];
+	/* (the record said: Chaud remembers every duel) */
+	char record[64];
+	snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
+	if (layer_objs_duel_later)
+		snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
+			"@C He'll be waiting in the third act. Get MegaMan ready.");
+	else if (layer_objs_duel_rung == 2)
+		snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
+			"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
+			? "Beat him, and every official gate opens for you. There's one on this layer, the official vault: three Mega chips." : "Beat him, and every official gate opens for you.")
+			: "He hasn't forgotten the last time.");
+	else {
+		/* (what a win opens for one already cleared: the gate beside
+		 * him, whose prize the duel is) */
+		const char *stake = !layer_objs_official_level ? ""
+			: rival_clearance() < layer_objs_official_level ? "@C The official vault beside him takes my full clearance: three wins, the last against ProtoMan himself.|"
+			: layer_objs_official_level >= 2 ? "@C Beat it, and the official vault beside him opens: three Mega chips.|"
+			: "@C Beat it, and the official gate beside him opens: an official Chip Order, three chips you've held, one to order.|";
+		snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
+			profile.duel_won + profile.duel_lost ? record :
+			"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
+			sec / 60, sec % 60, (f % 60) * 100 / 60,
+			/* (what a win earns, before the first: a playtester risked his
+			 * run for pride alone) */
+			/* (and what the gate holds: a playtester, five duels lost, took
+			 * the gates for scenery, their prize never named) */
+			profile.duel_won ? stake : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer: an official Chip Order, three chips you've held, one to order.|"
+			: "@C Beat it, and I'll clear you for the net's official gates.|",
+			layer_objs_duel_rung == 1 ? ", without a hit" : "");
+	}
+	/* (Lan answers: a call no one answered read as a message left) */
+	if (!layer_objs_duel_later) {
+		size_t n = strlen(call);
+		snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
+	}
+	return call;
 }
 
 static void last_stop(int cx, int cy) {
@@ -2775,36 +2836,7 @@ void director_update(void) {
 		D.duel_verdict_due = false;
 	if (D.duel_call_due && !D.reward_due && !D.gem_due && !D.mail_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic() && D.frame > 60) {
-		int f = layer_objs_duel_frames, sec = f / 60;
-		char call[400];
-		/* (the record said: Chaud remembers every duel) */
-		char record[64];
-		snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
-		if (layer_objs_duel_later)
-			snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
-				"@C He'll be waiting in the third act. Get MegaMan ready.");
-		else if (layer_objs_duel_rung == 2)
-			snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
-				"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
-				? "Beat him, and every official gate opens for you. There's one on this layer, the official vault: three Mega chips." : "Beat him, and every official gate opens for you.")
-				: "He hasn't forgotten the last time.");
-		else
-			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
-				profile.duel_won + profile.duel_lost ? record :
-				"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
-				sec / 60, sec % 60, (f % 60) * 100 / 60,
-				/* (what a win earns, before the first: a playtester risked his
-				 * run for pride alone) */
-				/* (and what the gate holds: a playtester, five duels lost, took
-				 * the gates for scenery, their prize never named) */
-				profile.duel_won ? "" : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer: an official Chip Order, three chips you've held, one to order.|"
-				: "@C Beat it, and I'll clear you for the net's official gates.|",
-				layer_objs_duel_rung == 1 ? ", without a hit" : "");
-		/* (Lan answers: a call no one answered read as a message left) */
-		if (!layer_objs_duel_later) {
-			size_t n = strlen(call);
-			snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
-		}
+		const char *call = duel_call_words();
 		if (talk_start(call, FACE_CHAUD)) {
 			D.duel_call_due = false;
 			flag_set(LAYER_DUEL_CALLED_FLAG);

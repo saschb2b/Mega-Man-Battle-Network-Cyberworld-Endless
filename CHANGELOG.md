@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **ProtoMan's official gate is his duel's prize.** It opens to the
+  winner of the duel beside it, where Chaud's clearance alone had opened
+  it before the duel, which then paid only the record. For a Netbattler
+  already cleared, Chaud's call names what the win opens, and after a
+  second win he names the next rung: "Next time, no race: ProtoMan faces
+  MegaMan himself." An official Chip Order offers the Library's uncommon
+  and rare chips before its common ones.
 - **The PortMaster port no longer needs ROCKNIX's glibc.** It is built
   on Debian bullseye and asks for glibc 2.29 at most (it asked for
   2.38), older than ArkOS, AmberELEC, muOS or Knulli have. Its zip is

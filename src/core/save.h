@@ -62,6 +62,10 @@ enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_V
 
 extern Profile profile;
 
+/* Chaud's clearance (docs/RIVAL.md): 1 after a first duel won, 2 once
+ * ProtoMan himself has been beaten (the third rung, a third win). */
+static inline int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : profile.duel_won >= 1 ? 1 : 0; }
+
 /* Whether MegaMan has battled virus family `fam` in any run; noted as a
  * battle with it ends. */
 bool profile_family_fought(int fam);

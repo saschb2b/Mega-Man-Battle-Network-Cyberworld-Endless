@@ -214,6 +214,47 @@ void layer_objs_shops(const LayerObjs *o, bool saved) {
 	shop_install(SHOP_PROGRAMS, o->programs, o->nprograms, saved);
 }
 
+/* An official gate's three chips (docs/RIVAL.md): at level 1 an official
+ * Chip Order, standard chips the Library holds (held in any run), as BN6's
+ * Chip Order orders them, in the folder's codes; at level 2 Mega chips. */
+static void official_picks(int level, ScriptsVault *v) {
+	int from[512], nfrom = 0;
+	/* (an official order: the Library's uncommon and rare standard
+	 * chips, the common ones only while it holds too few; a
+	 * playtester's was IceSeed at 10, a chip he had won and one he
+	 * had just cut) */
+	for (int floor = level == 1 ? 1 : 0; floor >= 0 && nfrom < 3; --floor) {
+		nfrom = 0;
+		for (int id = 1; id < 512 && nfrom < 512; ++id)
+			if (level == 1 ? chip_pool_class(id) == 0 && chip_pool_tier(id) >= floor && meta_library_has(id) : chip_pool_class(id) == 1)
+				from[nfrom++] = id;
+	}
+	for (int k = 0; k < 3; ++k) {
+		char code = '*';
+		int id = 0;
+		for (int tries = 0; tries < 16; ++tries) {
+			id = nfrom >= 3 ? from[rng_range(0, nfrom - 1)] : chip_pool_pick(2);
+			bool again = id <= 0;
+			for (int j = 0; j < k; ++j) again |= v->chip[j] == id;
+			if (!again) break;
+		}
+		ChipInfo ci;
+		chip_info(id, &ci);
+		code = loot_fit_code(id, ci.ncodes ? ci.codes[0] : '*', true);
+		v->chip[k] = id;
+		v->code[k] = code == '*' ? 26 : code - 'A';
+		v->power[k] = ci.power;
+		snprintf(v->name[k], sizeof v->name[k], "%s", ci.name);
+	}
+}
+
+/* Whether an object of `type` stands on the layer. */
+static bool layer_has(int type) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == type) return true;
+	return false;
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -545,27 +586,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			int level = o->param >= 2 ? 2 : 1;
 			layer_objs_official_level = level;
 			ScriptsVault v = { 0 };
-			int from[512], nfrom = 0;
-			for (int id = 1; id < 512 && nfrom < 512; ++id)
-				if (level == 1 ? chip_pool_class(id) == 0 && meta_library_has(id) : chip_pool_class(id) == 1) from[nfrom++] = id;
-			for (int k = 0; k < 3; ++k) {
-				char code = '*';
-				int id = 0;
-				for (int tries = 0; tries < 16; ++tries) {
-					id = nfrom >= 3 ? from[rng_range(0, nfrom - 1)] : chip_pool_pick(2);
-					bool again = id <= 0;
-					for (int j = 0; j < k; ++j) again |= v.chip[j] == id;
-					if (!again) break;
-				}
-				ChipInfo ci;
-				chip_info(id, &ci);
-				code = loot_fit_code(id, ci.ncodes ? ci.codes[0] : '*', true);
-				v.chip[k] = id;
-				v.code[k] = code == '*' ? 26 : code - 'A';
-				v.power[k] = ci.power;
-				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
-			}
-			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, &v);
+			official_picks(level, &v);
+			/* (the one beside ProtoMan opens to his duel's winner) */
+			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won,
+				layer_has(OBJ_DUEL) && rival_clearance() >= level, &v);
 			break;
 		}
 		case OBJ_VAULT: {
