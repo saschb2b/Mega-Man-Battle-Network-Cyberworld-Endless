@@ -405,6 +405,39 @@ static int bfs_far(int from) {
 
 /* Up to `max` rooms nearest room `from` by walking, `reach` panels at
  * most, nearest first, but `from` and the arena. */
+/* The free floor nearest room `from`'s anchor, within `reach` steps of
+ * walkway and floor, the arena kept out: off the way's line, cutting no
+ * way, and away from those who talk where it can be. */
+static bool floor_near(int from, int reach, int *ox, int *oy) {
+	const Room *a = layer.arena >= 0 ? &layer.rooms[layer.arena] : NULL;
+	#define IN_ARENA(cx, cy) (a && (cx) >= a->x && (cy) >= a->y && (cx) < a->x + a->w && (cy) < a->y + a->h)
+	static int16_t dist[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	for (int loose = 0; loose < 2; ++loose) {
+		memset(dist, -1, sizeof dist);
+		int h = 0, t = 0;
+		qx[t] = (int16_t)layer.rooms[from].ax; qy[t++] = (int16_t)layer.rooms[from].ay;
+		dist[qy[0]][qx[0]] = 0;
+		while (h < t) {
+			int x = qx[h], y = qy[h++];
+			if (dist[y][x] > 0 && cell_free(x, y) && !cuts_way(x, y) && !in_way_line(x, y) && (loose || !near_talker(x, y))) {
+				*ox = x; *oy = y;
+				return true;
+			}
+			if (dist[y][x] >= reach) continue;
+			static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+			for (int k = 0; k < 4; ++k) {
+				int nx = x + d[k][0], ny = y + d[k][1];
+				if (layer.cell[ny][nx] != C_PATH || dist[ny][nx] >= 0 || IN_ARENA(nx, ny)) continue;
+				dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+				qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+			}
+		}
+	}
+	#undef IN_ARENA
+	return false;
+}
+
 static int nearest_rooms(int from, int *out, int max, int reach) {
 	static int16_t dist[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
@@ -438,6 +471,7 @@ static int nearest_rooms(int from, int *out, int max, int reach) {
 
 #define MIN_FLOOR 120   /* panels a layer has at least */
 #define ARENA_SIZE 5    /* the guardian's arena, panels a side */
+#define HEAL_REACH 8    /* the heal before an arena, its walk from the room at its door at most */
 
 static int floor_cells(void) {
 	int n = 0;
@@ -560,7 +594,7 @@ static void past_cell(const Room *m, int s, int u, int k, int *x, int *y) { *x =
 
 static Rim back_rim(const Room *m, int s) {
 	Rim best = { s, 0, 0, 0 };
-	int span = s == 0 ? m->h : m->w, base = s == 0 ? m->y : m->x, run = 0;
+	int span = s == 0 ? m->h : m->w, base = s == 0 ? m->y : m->x, streak = 0;
 	for (int i = 0; i <= span; ++i) {
 		bool ok = false;
 		if (i < span) {
@@ -571,9 +605,9 @@ static Rim back_rim(const Room *m, int s) {
 			/* (void two deep: not a gap between platforms) */
 			ok = floor_cell(ex, ey) && !layer.level[ey][ex] && !object_at(ex, ey) && void_cell(px, py) && void_cell(qx, qy);
 		}
-		if (ok) { ++run; continue; }
-		if (run > best.len) { best.len = run; best.u0 = base + i - run; }
-		run = 0;
+		if (ok) { ++streak; continue; }
+		if (streak > best.len) { best.len = streak; best.u0 = base + i - streak; }
+		streak = 0;
 	}
 	return best;
 }
@@ -795,6 +829,28 @@ static NetObj *dealer(int r, const int *order, int n, const LayerKit *kit, int *
 	return o ? o : room_spot(&layer.rooms[r], x, y) ? add_obj(OBJ_SHOP, *x, *y) : NULL;
 }
 
+/* The last stop before the arena: the Net Dealer and a heal, as the rooms
+ * before Hades' guardians hold Charon and a fountain. */
+static void last_stop(int kind, const LayerKit *kit) {
+	int x, y;
+	/* (behind a counter in one of the three rooms nearest it, 18 panels'
+	 * walk at most, where it has no place for one: on the pads before
+	 * arenas three dealers in four stood bare) */
+	int near[3], nn = nearest_rooms(layer.ante, near, 3, 18);
+	if (kind == LAYER_NORMAL) dealer(layer.ante, near, nn, kit, &x, &y);
+	/* (the heal apart from the dealer: in a room nearest it where the last
+	 * one has no place away from his counter, else on the nearest free
+	 * floor; never farther than a short walk: a playtester found it a long
+	 * way back from SpoutMan's arena, where the rooms by it were full, and
+	 * one layer in a hundred had none) */
+	int close[3], nc = nearest_rooms(layer.ante, close, 3, HEAL_REACH);
+	for (int i = -1; i < nc; ++i) {
+		const Room *r = &layer.rooms[i < 0 ? layer.ante : close[i]];
+		if (room_spot(r, &x, &y) && !near_talker(x, y)) { add_obj(OBJ_HEAL, x, y); return; }
+	}
+	if (floor_near(layer.ante, HEAL_REACH, &x, &y) || room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
+}
+
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
 	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
 	int rise = kit ? kit->rise : 0;
@@ -919,21 +975,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	int x, y;
 #define PLACE(t) place((t), order, n, next, &x, &y)
 	if (layer.arena >= 0) {
-		/* the last stop before the arena: the Net Dealer and a heal, as the
-		 * rooms before Hades' guardians hold Charon and a fountain */
-		/* (behind a counter in one of the three rooms nearest it, 18
-		 * panels' walk at most, where it has no place for one: on the pads
-		 * before arenas three dealers in four stood bare) */
-		int near[3], nn = nearest_rooms(layer.ante, near, 3, 18);
-		if (kind == LAYER_NORMAL) dealer(layer.ante, near, nn, kit, &x, &y);
-		/* (the heal apart from the dealer: in a room nearest it where the
-		 * last one has no place away from his counter) */
-		bool healed = false;
-		for (int i = -1; i < nn && !healed; ++i) {
-			const Room *r = &layer.rooms[i < 0 ? layer.ante : near[i]];
-			if (room_spot(r, &x, &y) && !near_talker(x, y)) { add_obj(OBJ_HEAL, x, y); healed = true; }
-		}
-		if (!healed && room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
+		last_stop(kind, kit);
 		shop = heal = false;
 	}
 	/* a Mr. Prog with a gift by the run's start */
@@ -948,14 +990,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
 	if (navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = gate_navi; ++next; }
 	if (vault) { PLACE(OBJ_VAULT); ++next; }
-	if (official) {
+	/* (a duel's gate stands by ProtoMan, placed after him) */
+	if (official && !duel) {
 		NetObj *g = PLACE(OBJ_OFFICIAL);
-		/* (beside a duel, wherever a room has space: a small endless layer
-		 * with every room taken had its duel and no gate) */
-		for (int i = 0; !g && duel && i < n; ++i)
-			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
-		for (int i = 0; !g && duel && i < layer.nrooms; ++i)
-			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
 		if (g) g->param = official_level;
 		++next;
 	}
@@ -984,6 +1021,36 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
 		for (int i = 0; i < layer.nrooms && !placed; ++i)
 			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
+	}
+	/* the official gate the duel opens, by ProtoMan: in his room, two
+	 * panels from him or more, else in a room a short walk from his (a
+	 * playtester found the gate alone across the layer, and his session
+	 * ran out looking for the rival); else anywhere with space (a small
+	 * endless layer with every room taken had its duel and no gate) */
+	if (official && duel) {
+		NetObj *g = NULL;
+		const NetObj *rival = NULL;
+		for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) rival = &layer.obj[i];
+		int home = -1;
+		for (int i = 0; rival && i < layer.nrooms && home < 0; ++i) {
+			const Room *r = &layer.rooms[i];
+			if (rival->x >= r->x && rival->x < r->x + r->w && rival->y >= r->y && rival->y < r->y + r->h) home = i;
+		}
+		int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
+		for (int i = -1; i < nn && !g && home >= 0; ++i) {
+			int room = i < 0 ? home : near[i];
+			if (room == layer.exit_room) continue;
+			for (int tries = 0; tries < 12 && !g; ++tries)
+				if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2))
+					g = add_obj(OBJ_OFFICIAL, x, y);
+		}
+		if (!g) g = PLACE(OBJ_OFFICIAL);
+		for (int i = 0; !g && i < n; ++i)
+			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
+		for (int i = 0; !g && i < layer.nrooms; ++i)
+			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
+		if (g) g->param = official_level;
+		++next;
 	}
 	/* Rooms holding better data, more of them deeper and in the Undernet
 	 * (a dark warp's, or the short net's dark way's act) */

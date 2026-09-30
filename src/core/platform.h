@@ -26,6 +26,7 @@ typedef struct {
 	int w, h;          /* logical canvas */
 	int scale;
 	int core_x, core_y; /* top-left of the centered 240x160 core */
+	float dp;          /* screen pixels to a dp (a 160th of an inch): the touch controls' sizes */
 	uint32_t held, pressed, released, repeat;
 	int repeat_timer[16];
 	bool quit;
@@ -80,6 +81,21 @@ void platform_frame_parts(uint64_t update, uint64_t draw);
 /* The canvas as drawn so far on the display at once, before a long wait
  * (no frame counted; none headless). */
 void platform_present_now(void);
+/* --dpi: the screen's density taken as given (tests of the touch controls). */
+void platform_set_dpi(float dpi);
+/* The next frame shown saved whole as the player sees it, the touch
+ * controls on it (--screen-shot), where the canvas's shots have the game
+ * alone. */
+void platform_shot_screen(const char *path);
+/* The second screen (the 3DS's bottom one, issue #9): `draw` fills
+ * SECOND_W x SECOND_H at a frame's end every few frames, false for black;
+ * NULL for none. Elsewhere it is drawn only for --second-shot. */
+#define SECOND_W 320
+#define SECOND_H 240
+typedef bool (*SecondScreen)(int w, int h);
+void platform_second_screen(SecondScreen draw);
+/* The second screen's picture now, into a BMP (--second-shot). */
+bool platform_save_second_screen(const char *path);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */

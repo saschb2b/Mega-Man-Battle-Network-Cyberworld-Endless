@@ -34,11 +34,14 @@ static void read_item(uint32_t a, ShopItem *it) {
 	it->price = rom_u16(o + 6);
 }
 
-bool shop_install(int shop, const ShopItem *items, int n) {
+bool shop_install(int shop, const ShopItem *items, int n, bool kept) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
 	if (data < 0x02000000u || data >= 0x02040000u) return false;
 	uint32_t at = data + emu_read32(desc(shop) + 8);
 	int slots = (int)emu_read32(desc(shop) + 12);
+	uint8_t was[16][8] = { { 0 } };
+	for (int i = 0; kept && i < slots && i < 16; ++i)
+		for (int b = 0; b < 8; ++b) was[i][b] = emu_read8(at + 8u * (uint32_t)i + (uint32_t)b);
 	for (int i = 0; i < slots; ++i, at += 8) {
 		uint8_t e[8] = { 0 };
 		if (i < n) {
@@ -47,8 +50,16 @@ bool shop_install(int shop, const ShopItem *items, int n) {
 			e[4] = items[i].code;
 			e[6] = (uint8_t)items[i].price; e[7] = (uint8_t)(items[i].price >> 8);
 		}
-		emu_write(at, e, 8);
+		/* (the ROM copy as a fresh list has it: the screen checks the list
+		 * against its ids and codes, never its stock) */
 		emu_write(BN6_SHOP_INIT + (at - data), e, 8);
+		for (int k = 0; kept && i < n && k < 16; ++k)
+			if (was[k][0] == e[0] && was[k][2] == e[2] && was[k][3] == e[3] && was[k][4] == e[4]) {
+				e[1] = was[k][1];
+				was[k][0] = 0;   /* (each once) */
+				break;
+			}
+		emu_write(at, e, 8);
 	}
 	return true;
 }
@@ -212,8 +223,6 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 	return n;
 }
 
-bool shop_pick_program(ShopItem *out) { return pick(3, 0, out); }
-
 /* The gift's programs: those that change how a first act plays at once
  * (the names' index is the program; a playtester offered MegFldr1 on
  * layer 1, room for a Mega chip beside a starting folder, took it only to
@@ -284,18 +293,29 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		it.price = program_price(it.id, 0, depth);
 		out[n++] = it;
 	}
-	for (int i = 0; i < 10 && n < 4; ++i) {
+	/* then those of the game's shops the act may offer, each once, in a
+	 * random order, to four (ten random draws of their twelve had brought
+	 * two or three in the first two acts, and none one time in sixty) */
+	uint32_t end = BN6_SHOP_INIT + emu_read32(desc(ORDER_SHOP) + 8);
+	ShopItem offer[32];
+	int noffer = 0;
+	for (uint32_t a = BN6_SHOP_INIT; a < end && noffer < (int)(sizeof offer / sizeof *offer); a += 8) {
 		ShopItem it;
+		read_item(a, &it);
 		/* (the NaviCust's pool and its tiers, docs/NAVICUST.md: HP+400 at
 		 * 2300 zenny in act 2 beside the dealer's 20-HP HPMemory at 1200;
 		 * SneakRun judged the game's battles, not the engine's) */
-		if (!pick(3, 0, &it) || !navicust_offerable(it.id / 4, depth)) continue;
+		if (it.kind != 3 || !navicust_offerable(it.id / 4, depth)) continue;
 		bool again = false;   /* (a program once, whatever its colour) */
-		for (int k = 0; k < n; ++k) again |= out[k].kind == 3 && out[k].id / 4 == it.id / 4;
-		if (again) continue;
-		it.stock = 1;
-		it.price = program_price(it.id, it.price, depth);
-		out[n++] = it;
+		for (int k = 0; k < n; ++k) again |= out[k].id / 4 == it.id / 4;
+		for (int k = 0; k < noffer; ++k) again |= offer[k].id / 4 == it.id / 4;
+		if (!again) offer[noffer++] = it;
+	}
+	for (int i = noffer - 1; i > 0; --i) { int j = rng_range(0, i); ShopItem t = offer[i]; offer[i] = offer[j]; offer[j] = t; }
+	for (int i = 0; i < noffer && n < 4; ++i) {
+		offer[i].stock = 1;
+		offer[i].price = program_price(offer[i].id, offer[i].price, depth);
+		out[n++] = offer[i];
 	}
 	return n;
 }

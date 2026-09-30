@@ -3,15 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FAQ · Cyberworld Endless</title>
+<title>FAQ: the ROM, platforms and runs · Cyberworld Endless</title>
 <meta name="description" content="Questions about Cyberworld Endless, the Mega Man Battle Network 6 roguelike: the ROM it needs, where it plays, how a run goes and how it runs the game.">
+<link rel="canonical" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/faq/">
+<meta property="og:site_name" content="Cyberworld Endless">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/faq/">
+<meta property="og:title" content="Cyberworld Endless FAQ">
+<meta property="og:description" content="The ROM it needs, where it plays, how a run goes, what carries over and how it runs Mega Man Battle Network 6.">
+<meta property="og:image" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="Cyberworld Endless: a roguelike for Mega Man Battle Network 6">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#4a7b42">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/icons/180.png">
 <link rel="preload" href="../assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="faq.css">
-<script defer src="https://umami.saschb2b.com/script.js" data-website-id="3782c2fc-732a-43b0-b570-4e26cfe29dab" data-domains="saschb2b.github.io"></script>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+	{"@type": "ListItem", "position": 1, "name": "Cyberworld Endless", "item": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/"},
+	{"@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/faq/"}]}
+</script>
+<script defer src="https://umami.saschb2b.com/script.js" data-website-id="3782c2fc-732a-43b0-b570-4e26cfe29dab" data-domains="saschb2b.github.io" data-exclude-hash="true"></script>
 </head>
 <body>
 
@@ -20,9 +37,10 @@
 		<a class="brand" href="../"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
 		<nav aria-label="Site">
 			<a class="opt" href="../#game">Game</a>
-			<a href="../#play">Play</a>
+			<a href="../download/" data-umami-event="go-download" data-umami-event-from="nav">Download</a>
+			<a href="../play/" data-umami-event="go-play" data-umami-event-from="nav">Play</a>
 			<a href="./" aria-current="page">FAQ</a>
-			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source</a>
+			<a class="opt" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless" data-umami-event="outbound" data-umami-event-to="github">Source</a>
 		</nav>
 	</div>
 </header>
@@ -94,9 +112,9 @@
 						Deck, on an x86-64 Linux PC (Flatpak, AppImage or .deb), on Windows 10 and 11 (an installer or a zip), on a Mac
 						(macOS 11 on), on Android phones, tablets and handhelds (an APK), on a New 3DS (a HOME Menu title FBI installs from a QR code, or the
 						Homebrew Launcher), and in a browser, a phone's too.</p>
-					<p>On a touch screen the game draws its own D-pad and buttons round the picture; a controller or a keyboard puts
-						them away.</p>
-					<p class="more"><a href="../#play">The builds</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#install">README: Install</a></p>
+					<p>On a touch screen the game draws its own D-pad and buttons round the picture, sized for a thumb, and a MENU
+						button that sizes and moves them; a controller or a keyboard puts them away.</p>
+					<p class="more"><a href="../download/">The downloads</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#install">README: Install</a></p>
 				</div>
 			</article>
 
@@ -192,6 +210,10 @@
 						buttons.</p>
 					<p>On Linux and the handhelds, <code>keys.ini</code> in the save folder changes the keys. The browser keeps this
 						layout.</p>
+					<p>On a touch screen, the <b>MENU</b> button beside the buttons pauses the game: <b>SIZE</b>, <b>OPACITY</b> and
+						<b>HAPTICS</b> for them all, and <b>EDIT LAYOUT</b>, where you drag a button where your thumb wants it, pinch it
+						or drag a corner to size it, or take a preset such as <b>LEFT-HANDED</b>. <b>DONE</b> keeps it. The phone upright
+						and on its side keep an arrangement each.</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#playing">README: Playing</a></p>
 				</div>
 			</article>
@@ -254,6 +276,7 @@
 	</div>
 </footer>
 
+<script src="../assets/site.js"></script>
 <script src="faq.js"></script>
 </body>
 </html>

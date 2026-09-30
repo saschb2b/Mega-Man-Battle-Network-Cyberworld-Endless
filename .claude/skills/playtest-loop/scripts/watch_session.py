@@ -103,7 +103,9 @@ def main():
     # (past sessions: 9 to 60%, most 20 to 40)
     if calls >= 80 and walk * 100 > calls * 45:
         want.append('nearly half the calls on the map (lost, or a long walk?)')
-    shots = sorted(glob.glob(os.path.join(h, 'shots', '*.png')))
+    # (the newest written: by name, a profile past 9999 pictures named an
+    # old 9999.png the latest for a whole session)
+    shots = sorted(glob.glob(os.path.join(h, 'shots', '*.png')), key=os.path.getmtime)
     if shots:
         print(f'  latest picture: {shots[-1]}')
     if want:

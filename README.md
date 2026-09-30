@@ -85,16 +85,57 @@ game.
 
 ## Install
 
-1. Download `cyberworld.zip` from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it (or
-   build it with `python3 build.py package`, see [Building](#building)).
-2. Copy `cyberworld/` and `Cyberworld Endless.sh` into the handheld's
-   `ports` folder (on ROCKNIX: `/storage/roms/ports/`).
-3. Copy your ROM into `ports/cyberworld/rom/`. The file name does not matter;
-   the game checks the contents.
-4. Refresh the game list and start **Cyberworld Endless**.
+Every system has its own download on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases): pick
+yours from the table. The project's
+[download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/)
+opens on the system you visit it with. Each needs your own
+ROM ([What you need](#what-you-need)); none contains game data.
 
-The first start records the game's boot once, which takes a few seconds.
-After that the title screen appears straight away.
+| You play on | Download | Steps |
+| --- | --- | --- |
+| Windows 10 or 11, 64-bit | `cyberworld-endless-windows-x64-setup.exe` (an installer) or `cyberworld-endless-windows-x64.zip` (a folder, nothing installed) | [On Windows](#on-windows) |
+| A Mac, macOS 11 or newer | `cyberworld-endless-macos.dmg` | [On a Mac](#on-a-mac) |
+| A Linux PC, x86-64 | `cyberworld-endless-x86_64.AppImage`, `cyberworld-endless.flatpak`, `cyberworld-endless_amd64.deb` or `cyberworld-endless-linux-x86_64.tar.gz` | [On a Linux PC](#on-a-linux-pc) |
+| A Steam Deck | `cyberworld-endless.flatpak` | [On a Steam Deck](#on-a-steam-deck) |
+| An Android phone, tablet or handheld | `cyberworld-endless.apk` | [On Android](#on-android) |
+| A handheld running ROCKNIX, through PortMaster | `cyberworld-endless-rocknix-portmaster.zip` | [On a ROCKNIX handheld](#on-a-rocknix-handheld) |
+| A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
+| A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
+
+Releases up to 0.4.0 named the ROCKNIX port `cyberworld.zip`, the
+Windows installer `cyberworld-endless-setup-x64.exe` and the website's
+files `cyberworld-endless-web.zip`.
+
+### On Windows
+
+From the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), for 64-bit Windows 10 and 11:
+
+- **Installer:** `cyberworld-endless-windows-x64-setup.exe` installs the game for
+  you alone (no administrator), adds it to the Start menu and, if you like,
+  the desktop; Settings > Apps removes it again.
+- **Zip:** `cyberworld-endless-windows-x64.zip` holds the same game in a
+  folder: unpack it anywhere and run `cyberworld-endless.exe`.
+
+The game is not signed, so Windows may say "Windows protected your PC" the
+first time: **More info**, then **Run anyway**. The first start looks for
+the ROM in Downloads and asks for the file if it is not there; it keeps a
+copy in `%LOCALAPPDATA%\cyberworld-endless\rom\`, where the saves live
+too (uninstalling leaves them). It opens in a window at the largest whole
+scale that fits; F11 or Alt+Enter switches to fullscreen. Keyboards and
+controllers (Xbox, PlayStation, Switch) work as on Linux. Steam's own **Add
+a Non-Steam Game** takes `cyberworld-endless.exe`.
+
+### On a Mac
+
+`cyberworld-endless-macos.dmg` from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) holds one app for Apple
+silicon and Intel Macs, macOS 11 and newer: drag **Cyberworld Endless** into
+Applications. Apple has not notarized it (that takes a paid developer
+account), so the first start is refused: open **System Settings > Privacy &
+Security**, choose **Open Anyway** beside Cyberworld Endless and confirm (on
+macOS 14 and older, Control-click the app and choose **Open**). The first
+start looks for the ROM in Downloads and asks for the file if it is not
+there; the ROM's copy, the saves and `keys.ini` live in
+`~/Library/Application Support/cyberworld-endless/`.
 
 ### On a Linux PC
 
@@ -129,37 +170,6 @@ the Flatpak: see the Steam Deck steps below).
 `cyberworld-endless-linux-x86_64.tar.gz` is the same game as a plain folder:
 unpack it anywhere and run `./cyberworld-endless`; `./install.sh` adds it
 to the menu. Its `README.md` has the keyboard keys.
-
-### On Windows
-
-From the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), for 64-bit Windows 10 and 11:
-
-- **Installer:** `cyberworld-endless-setup-x64.exe` installs the game for
-  you alone (no administrator), adds it to the Start menu and, if you like,
-  the desktop; Settings > Apps removes it again.
-- **Zip:** `cyberworld-endless-windows-x64.zip` holds the same game in a
-  folder: unpack it anywhere and run `cyberworld-endless.exe`.
-
-The game is not signed, so Windows may say "Windows protected your PC" the
-first time: **More info**, then **Run anyway**. The first start looks for
-the ROM in Downloads and asks for the file if it is not there; it keeps a
-copy in `%LOCALAPPDATA%\cyberworld-endless\rom\`, where the saves live
-too (uninstalling leaves them). It opens in a window at the largest whole
-scale that fits; F11 or Alt+Enter switches to fullscreen. Keyboards and
-controllers (Xbox, PlayStation, Switch) work as on Linux. Steam's own **Add
-a Non-Steam Game** takes `cyberworld-endless.exe`.
-
-### On a Mac
-
-`cyberworld-endless-macos.dmg` from the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) holds one app for Apple
-silicon and Intel Macs, macOS 11 and newer: drag **Cyberworld Endless** into
-Applications. Apple has not notarized it (that takes a paid developer
-account), so the first start is refused: open **System Settings > Privacy &
-Security**, choose **Open Anyway** beside Cyberworld Endless and confirm (on
-macOS 14 and older, Control-click the app and choose **Open**). The first
-start looks for the ROM in Downloads and asks for the file if it is not
-there; the ROM's copy, the saves and `keys.ini` live in
-`~/Library/Application Support/cyberworld-endless/`.
 
 ### On a Steam Deck
 
@@ -219,12 +229,31 @@ controller and the touch screen all work: the game draws touch controls
 round the picture until a controller's button is pressed, and Back asks
 before it quits. Uninstalling the app deletes its saves.
 
+### On a ROCKNIX handheld
+
+For a handheld running ROCKNIX with PortMaster (the game was made for
+the Retroid Nova and the Retroid Pocket Flip 2). On a PC, a Mac or an
+Android device, take that system's download from the table above.
+
+1. Download `cyberworld-endless-rocknix-portmaster.zip` from the
+   [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it (or build it with
+   `python3 build.py package`, which writes it to `build/release/`, see
+   [Building](#building)).
+2. Copy `cyberworld/` and `Cyberworld Endless.sh` into the handheld's
+   `ports` folder (on ROCKNIX: `/storage/roms/ports/`).
+3. Copy your ROM into `ports/cyberworld/rom/`. The file name does not matter;
+   the game checks the contents.
+4. Refresh the game list and start **Cyberworld Endless**.
+
+The first start records the game's boot once, which takes a few seconds.
+After that the title screen appears straight away.
+
 ### On a New 3DS
 
 On a New 3DS, New 3DS XL or New 2DS XL with custom firmware (Luma3DS),
 open **FBI**, choose **Remote Install**, then **Scan QR Code**, and scan the
-code in the 3DS tab of the
-[project's page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/#play):
+code on the
+[download page's 3DS tab](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#3ds):
 FBI downloads `cyberworld-endless.cia` from the newest release and installs
 it on the HOME Menu, with its icon and banner. Or copy the CIA to the SD
 card and install it from FBI's SD browser. `cyberworld-endless.3dsx` is the
@@ -233,7 +262,8 @@ same game for the Homebrew Launcher (`sdmc:/3ds/`).
 Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
 name works. The first NEW GAME boots BN6 once, about 15 seconds of black
-screen. The older 3DS and 2DS are too slow for it.
+screen. On the net the bottom screen shows the layer's map, always open.
+The older 3DS and 2DS are too slow for it.
 [3ds/README.md](3ds/README.md) has the rest.
 
 ### In a browser
@@ -244,11 +274,16 @@ browser's own storage (IndexedDB); it is never uploaded. Next time **Play**
 starts straight away. **Forget ROM and saves** removes both.
 
 On a phone or tablet the game fills the screen and draws its own buttons
-round the picture: a D-pad, A, B, L, R, Start and Select, under the picture
-when the phone is upright and beside it when it lies on its side. A
-controller or a keyboard puts them away until the screen is touched again.
+round the picture, sized for a thumb: a D-pad, A, B, L, R, Start and
+Select, under the picture when the phone is upright and beside it when it
+lies on its side, and a MENU button that sizes and moves them (see
+[Playing](#playing)). A controller or a keyboard puts them away until the
+screen is touched again.
 Added to the home screen (the browser's *Add to Home screen* or *Install*),
 it opens full screen like an app.
+
+`cyberworld-endless-website.zip` on the releases page is this site and its
+player as files, for hosting them yourself; playing needs none of it.
 
 ## Playing
 
@@ -276,7 +311,17 @@ on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
 quits. Controllers use their own buttons (A, B, shoulders, Start, Back);
 holding Back and Start for a second, twice, quits. A touch screen shows the
 buttons on it from its first touch (a Steam Deck's too), until a key or a
-controller is used again.
+controller is used again. The D-pad takes diagonals where MegaMan walks
+(the net's walkways run along them) and four directions in battles and
+menus. Their **MENU** button pauses the game and opens their menu:
+**SIZE** and **OPACITY** of them all, **HAPTICS** (a tick under the thumb,
+on Android and in browsers that can), and **EDIT LAYOUT**: tap a button to
+choose it, drag it where your thumb wants it, pinch it or drag a corner to
+size it, give it its own opacity, or take a preset (**DEFAULT**,
+**LEFT-HANDED**, **COMPACT**, and **LARGE** where the screen has room);
+**DONE** keeps them, **CANCEL** leaves them as they were. The phone
+upright and on its side keep an arrangement each (`touch.ini` in the save
+folder).
 
 | Button | In the net | In battle |
 | --- | --- | --- |
@@ -483,8 +528,7 @@ browser player. A screen at 60 or 120 Hz, or one that follows the game
 
 ## Building
 
-For developers. Builds run in Docker (Debian trixie, matching ROCKNIX's glibc
-and SDL2):
+For developers. Builds run in Docker:
 
 ```bash
 python3 build.py
@@ -510,10 +554,13 @@ site and the browser version and serves them on `http://localhost:8080`;
 `docs/screenshots` from scripted headless runs, and `python3 build.py clips`
 records the site's short videos (WebM and MP4, `docs/clips`, and a GIF of
 the guardian for this README) the same way. `python3 build.py release`
-writes the release files to `build/release/`: `cyberworld.zip` for
-PortMaster; for Linux the AppImage (with its `.zsync` for updates), the
-`.deb` and the tar.gz; and `cyberworld-endless-web.zip`. Each target builds in its own Docker image
-(`docker/`): the handheld on Debian trixie as ROCKNIX, the Linux desktop on
+writes the release files to `build/release/`, each named for its system:
+`cyberworld-endless-rocknix-portmaster.zip` for PortMaster; for Linux the
+AppImage (with its `.zsync` for updates), the `.deb` and the tar.gz; and
+`cyberworld-endless-website.zip`, the site and the player to host
+elsewhere. Each target builds in its own Docker image
+(`docker/`): the handheld on Debian bullseye, whose glibc is older than
+any firmware PortMaster serves, with the firmware's own SDL2; the Linux desktop on
 bookworm with SDL2 built to load X11, Wayland and the sound servers at run
 time, the browser with Emscripten.
 

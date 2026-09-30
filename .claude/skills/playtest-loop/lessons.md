@@ -1071,3 +1071,158 @@ Patch notes now come from `git log` from the pinned commit, which
 pin.sh prints, and the goals say on which layer the persona's save meets
 each headline. The AreaGrab misread, seen twice, went into persona.md.
 
+## Session 42: 8/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of run 2 through BlastMan's act (a planned win after his
+briefing, 8-0) into act 2 (Sky HP, CircusMan's), ProtoMan's fifth duel
+lost (0-4, a Quaker and a Gunner), 400 max HP. From 7 to 8: the guardian
+fight played out as the briefing said, and the act change reads as one
+moment.
+
+Confirmed: the shop's first "Are you sure?" on No (A paced 66 frames
+through the dealer's talk), the act card and words held as one beat,
+Chaud's call naming the gate, no chip description from a kept R, layers
+made without a felt pause.
+
+Raised, fixed after the pin: Quakers in race squads (87cc31c, before the
+report), official gates never saying what they hold (f714f93). Misread,
+caused by the patch notes: "a gift you took stays taken" read as a gift
+taken after the layer's start save; CONTINUE resumes at the save. Open:
+one paid rematch per act (a loss locks the act's gates; a design
+question), the NaviCust's double quit, mail NEW after CONTINUE, a pad's
+green ring read as the exit pad. Misreads: the Custom screen's cursor
+after choosing the Cross (the second session: into persona.md), a charge
+started under a chip's finish, AreaGrab again (as told).
+
+Cost: 251 calls; the agent stalled once on the harness side at 159 calls
+and was resumed with its context.
+
+Loop change: **patch notes say what a save keeps, not what the code
+keeps.** "A gift you took stays taken" was true of the code (a guardian
+beaten or a gift taken before the save) and false for the persona's save,
+made at the layer's start: say where the persona's CONTINUE resumes and
+what it will meet again.
+
+
+## Session 43: 7/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of run 2 on Sky HP (CircusMan's act): layer 4 afresh after the
+LAYER_MAKE bump, a strong virus signal taken and won, two dealers, the
+NaviCust vendor, UnderSht installed, six fights; layer 5, the duel
+layer, searched for ProtoMan until the budget ran out (294 calls). From
+8 to 7: the session never reached its climax, neither the duel nor
+CircusMan.
+
+Confirmed: Chaud's call and the gate naming the official Chip Order (it
+now pulls: "Before, I raced for a word. Now I want the prize"), the
+shop's first "Are you sure?" on No at every counter, the NaviCust's Yes
+path quitting in one prompt, CONTINUE restarting the saved layer.
+
+Raised, fixed: ProtoMan and the official gate shared the map's violet
+mark and L named no direction, so the persona found the gate alone and
+never the rival (bd75489: the gate by him on 72 of 74 duel layers, his
+own pink mark, L says where he waits); the strong virus signal's "a good
+chip" (6bc80ad: "It pays DolThdr3 B"). Caused by the loop: the patch
+notes said the gate stood "beside" ProtoMan, which the build did not do;
+now it does. Kept: walkway corners stop MegaMan as in BN6 (the owner's
+choice, c33d2e0), though they cost about a dozen calls again;
+FIDELITY.md still described the removed assist and now does not.
+Vanilla: the enemy side's AreaGrab (replayed: the engine gives viruses
+no chips), the Armadill's rolls. Misreads into persona.md: EraseCross's
+beam needs about 115 frames (two sessions), an A after a chat's last box
+talks again (three times).
+
+Cost: 294 calls against 260, about 12 on walkway corners and 30 on the
+search; the watchdog's budget warning came at 270 and a SendMessage
+closed the session at 294.
+
+Loop change: **a goal that depends on finding something says where it
+is.** The session's two goals sat on a layer whose rival had no mark of
+his own: the persona spent its budget searching and the report scored
+the missing climax. Before launching, check each goal's object is
+findable in the persona's save (the map and L name it) with a capture,
+and say in the goals where it stands when the build cannot.
+
+## Session 44: 8/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of run 2 on layer 5, the duel layer: ProtoMan found in two calls
+by his pink mark and L's "down and to the right, a ways off", the race
+won (0:13.28 against 0:14.00, the first win in six duels), the official
+gate opened for HeatDrgn G; layer 6's CircusMan deleted MegaMan with 118
+of his 700 HP left, and the run ended. From 7 to 8: the climax came, a
+rival won and a real boss fight lost; he wants one more run.
+
+Confirmed: the rival's wayfinding (bd75489: the gate beside him, his
+pink mark, L's direction), CONTINUE restarting the layer with Chaud's
+call, no Quakers in the race, the named prize pulling him into the duel,
+`hold B 120` for EraseCross's beam and the A after a chat's last box.
+
+Raised, fixed: CircusMan's tent tell, "when only our panel lights", is
+true but the panel lies under MegaMan's feet; the persona's own frames
+showed the cue that can be seen, CircusMan fading from his panel, and a
+HeatDrgn rising beside the tent while he was gone (01a0cc6: the briefing
+names the fade and says to hold chips). The NaviCust's L and R turn a
+program only where its colour's Spin is held, BN6's rule, while three of
+MegaMan's lines said they turn any: twenty calls on an HP+50 (5b93d76:
+the words come from the Spins held; after a RUN with a bug he answers
+its "OK"). Lan silent after the first win (44d93b1). The official Chip
+Order's names alone (364b9db: each chip's damage in the choice). Fixed
+beside them, from issue #17 and its testing: a bought-out shop says so
+and the vendor brings his whole list (a9d7ecd), CONTINUE no longer
+restocks the shops (c1ed95d), Chaud's call comes once a layer (a8c6659).
+Vanilla or misread: BN6's RUN wording itself, the Cross portrait eating
+a press and START lost after a shop (both into persona.md), BlastMan's
+fire wall under a jumping CircusMan, an L at 95% (the 30-frame note).
+
+Cost: 301 calls, 83 minutes; the CircusMan fight alone 74 calls and 26
+minutes at 48 frames a call, the NaviCust 20. The watchdog named an old
+9999.png as the latest picture all session, as a name sort puts 11969
+before it (0cb6208: by time); a budget SendMessage at 293 closed it.
+
+Loop change: **read the persona's frames at a reported tell before
+the code.** The report said the tent's tell could not be seen; the
+frames around each tent showed which cue hides (the lit panel under
+MegaMan) and which shows (the fade), and the fix followed from them in
+one step. The class is a briefing that names a panel under MegaMan's own
+sprite: sweep every guardian's tip for one (GroundMan's "from under the
+lit panel", HeatMan's shadow "under us") against its fight's frames.
+
+## Session 45: 7/10 (keep playing: yes; recommend: yes)
+
+Run 3 from NEW GAME (endless, Storm, EraseCross, threat 1, HP+): act 1 in
+the RoboDog Comp, the gift's SuperArmor, the layer-1 dealer's DolThdr3 V
+for SpoutMan, layer 2's rung-1 duel won without a hit (0:04.66) and its
+gate's FireBrn1, UnderSht from the vendor; SpoutMan deleted MegaMan on
+layer 3 with 220 of his 600 HP left, the persona's own misplay by its
+account. From 8 to 7: walkway corners ate about 20 calls again, and the
+duel felt like a formality.
+
+Confirmed: the gate's chip damage, Lan's answer to a win, the vendor's
+four programs, the Cross portrait's wait, the first "Are you sure?" on
+No.
+
+Raised, fixed: ProtoMan's gate open before his duel, which paid only the
+record (fab0faa: the gate beside him opens to the duel's winner, Chaud's
+call names the stake, the verdict the next rung; the official Chip Order
+draws uncommon and rare chips). The heal "a long way back" from
+SpoutMan's arena (3aa2384: within a short walk of its door on every
+guardian's layer, held by the tests; the golden hash caught the change
+and LAYER_MAKE went to 63 with it). L and R silent on a program with no
+word why (3c28b75: the reminder after a program is gotten says whether it
+turns). Kept: walkway mouths and corners, BN6's own walking by the
+owner's choice, the persona's top wish for the third session running.
+Misreads into persona.md: a green Mystery Data "gave nothing" (a B held
+after the A skipped "MegaMan got: AirSpin1 R"), START after a shop needs
+120 frames. Left: the setup's Cross rows (what each Cross does, from
+BN6's tutorials), L naming ProtoMan's way as the crow flies, the vendor's
+shop face (the keeper's, a known limit), the shop prompts' remembered
+cursor.
+
+Cost: 301 calls, 72 minutes. Issue #19's guardrails landed during it:
+three of this iteration's fixes grew functions build.py lint lists, and
+each was split rather than the baseline raised.
+
+Loop change: **the checks are part of a fix.** A fix is done when
+`build.py test` (the golden layer hash, the heal walk) and `build.py
+lint` pass; a check on `tools/play.py` needs `build.py linux` first
+(SKILL.md's pitfalls).

@@ -7,7 +7,6 @@
 
 /* `spec` DIR[:BIOMES]; turns the tour on (it also sets dev's quiet and god). */
 bool tour_parse(const char *spec);
-bool tour_on(void);
 /* Once a game frame, after the director. */
 void tour_update(void);
 

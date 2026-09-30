@@ -1,6 +1,7 @@
 /* The meta layer (meta.h, docs/META.md). */
 #include "meta.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -109,16 +110,19 @@ const char *meta_threat_rule(int rung) {
 	return rung >= 1 && rung <= THREAT_MAX ? rules[rung - 1] : "";
 }
 
-bool meta_threat(int rung) { return run.threat >= rung; }
 
 static const char *said[6];
 static uint16_t marks_new;
 static char lines[6][48];
 static int nsaid;
 
-static void say(const char *fmt, const char *what) {
+static void say(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+static void say(const char *fmt, ...) {
 	if (nsaid >= 6) return;
-	snprintf(lines[nsaid], sizeof lines[nsaid], fmt, what);
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(lines[nsaid], sizeof lines[nsaid], fmt, ap);
+	va_end(ap);
 	said[nsaid] = lines[nsaid];
 	++nsaid;
 }

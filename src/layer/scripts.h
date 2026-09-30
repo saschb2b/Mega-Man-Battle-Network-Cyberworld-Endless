@@ -31,12 +31,13 @@ int ta_say_flag(TextArchive *t, int face, const char *s, int flag);
 int ta_duel(TextArchive *t, int flag, int face, const char *terms);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
  * `shop`'s screen; with `again` and a flag, the greeting the first time
- * (the flag set) and `again` after. */
-int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag);
+ * (the flag set) and `again` after; `sold_out` instead of both, and no
+ * screen, once nothing is left to buy. */
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, const char *sold_out, int told_flag);
 
 /* Choices: Yes sets event flag `flag`, which the director acts on. A
  * challenge answers only once; the gate first wants three ScrtData. */
-int ta_challenge(TextArchive *t, int flag);
+int ta_challenge(TextArchive *t, int flag, const char *prize);
 int ta_undernet(TextArchive *t, int flag, bool deeper);
 int ta_secret_gate(TextArchive *t, int flag);
 /* Plays song `song` (0xFF stops the music, SCRIPTS_AREA_MUSIC the map's
@@ -84,9 +85,9 @@ int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int nee
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
 /* A collector's vault (docs/META.md, gates): its three chips (`code`
- * A=0 .. *=26), named. */
+ * A=0 .. *=26), named, and what each hits for (0: none to say). */
 typedef struct {
-	int chip[3], code[3];
+	int chip[3], code[3], power[3];
 	char name[3][20];
 } ScriptsVault;
 /* The vault's talk: while the Library's `have` is short of `need`, its
@@ -96,8 +97,9 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 /* An official gate (docs/RIVAL.md): sealed while the rival's duels `won`
  * are short of `need`, its words say for whom it opens; else its three
  * chips, one to take (a Chip Order from the Library at level 1, Mega
- * chips at level 2). */
-int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, const ScriptsVault *v);
+ * chips at level 2). `duel_prize`: the one beside ProtoMan, the clearance
+ * held, waiting on his duel's winner. */
+int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of

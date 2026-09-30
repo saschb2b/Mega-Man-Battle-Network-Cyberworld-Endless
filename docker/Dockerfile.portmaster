@@ -1,0 +1,16 @@
+# Build image for the PortMaster port (aarch64). Debian bullseye's glibc
+# (2.31) and SDL2 (2.0.14) are older than any firmware PortMaster serves
+# (ArkOS has glibc 2.30; the binary asks for 2.29 at most), so one binary
+# runs on all of them. SDL2 is linked, not carried: each firmware has its own.
+# (debian/eol: Debian's own image of a release past its support; its
+# packages from the snapshot it was made from, which never changes)
+FROM debian/eol:bullseye
+RUN sed -i -e 's/^deb /# deb /' -e 's/^# deb \(http:\/\/snapshot\)/deb [check-valid-until=no] \1/' /etc/apt/sources.list \
+ && dpkg --add-architecture arm64 && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    build-essential crossbuild-essential-arm64 make pkg-config ca-certificates file \
+    cmake curl libsdl2-dev:arm64 \
+ && rm -rf /var/lib/apt/lists/*
+# The embedded GBA core (docs/EMULATION.md)
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh aarch64

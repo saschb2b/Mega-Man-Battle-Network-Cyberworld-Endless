@@ -129,8 +129,8 @@ static int miss_at(int navi, int act, int version, int (*hp)(int, int)) {
 int pacing_guardian_version(int navi, int act, int loop, bool always_sp, int (*hp)(int navi, int version)) {
 	if (always_sp || loop > 0 || act >= 6) return 2;
 	/* EX first from the fourth act, which V1 alone would leave too light */
-	static const int8_t early[] = { 0 }, late[] = { 1, 0 };
-	const int8_t *order = act < 3 ? early : late;
+	static const int8_t early[] = { 0 }, ex_first[] = { 1, 0 };
+	const int8_t *order = act < 3 ? early : ex_first;
 	int n = act < 3 ? 1 : 2, best = order[0], best_miss = 1 << 30;
 	for (int i = 0; i < n; ++i) {
 		int m = miss_at(navi, act, order[i], hp);

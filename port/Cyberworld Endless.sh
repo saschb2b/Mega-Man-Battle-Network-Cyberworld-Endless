@@ -1,5 +1,4 @@
 #!/bin/bash
-# PortMaster launcher for Mega Man Battle Network: Cyberworld Endless.
 
 XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 if [ -d "/opt/system/Tools/PortMaster/" ]; then
@@ -16,15 +15,12 @@ source $controlfolder/control.txt
 [ -f "${controlfolder}/mod_${CFW_NAME}.txt" ] && source "${controlfolder}/mod_${CFW_NAME}.txt"
 get_controls
 
-GAMEDIR="/$directory/ports/cyberworld"
-cd "$GAMEDIR"
-> "$GAMEDIR/log.txt" && exec > >(tee "$GAMEDIR/log.txt") 2>&1
-$ESUDO chmod +x "$GAMEDIR/cyberworld.aarch64"
+GAMEDIR=/$directory/ports/cyberworld
 
-# Freedreno drives Qualcomm Adreno GPUs; other GPUs keep Mesa's own choice.
-if [ -d /sys/module/msm ]; then
-  export MESA_LOADER_DRIVER_OVERRIDE=msm
-fi
+cd $GAMEDIR
+> "$GAMEDIR/log.txt" && exec > >(tee "$GAMEDIR/log.txt") 2>&1
+
+$ESUDO chmod +x "$GAMEDIR/cyberworld.aarch64"
 export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
 
 $GPTOKEYB "cyberworld.aarch64" &

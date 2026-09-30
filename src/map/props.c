@@ -16,6 +16,9 @@
 
 #define PANEL 32
 #define REACH 48   /* how far from the given point the ring may lie */
+#define PRIO_REACH 24   /* how far round its ring a counter's layer priorities are taken */
+#define SPRITE_HALF_W 10   /* MegaMan's sprite on the map: half its width, */
+#define SPRITE_H 38        /* and its height above his feet, in pixels */
 
 static int floordiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 
@@ -147,6 +150,34 @@ bool props_learn_counter(const AreaSrc *a, int x, int y, int faces, PropStamp *o
 	}
 	free(cells);
 	cut_tiles(a, X0, Y0, X1 + 8, Y1 + 8, Xa, Ya, z0, out);
+	/* its layer priorities: the original's round its ring, behind it and
+	 * beside its ends, where MegaMan goes behind its art (Green Area 2's
+	 * NetCafe desk: its aisle and its far end; without them MegaMan at
+	 * that end was drawn over the desk). Only those where MegaMan standing
+	 * there overlaps the counter's art: behind the layer's other art (a
+	 * raised pad beside it) he is drawn in front as before, where one of
+	 * the original's cut him in half. */
+	int bx0 = 1 << 20, bx1 = -(1 << 20), by0 = 1 << 20, by1 = -(1 << 20);
+	for (int k = 0; k < out->ntiles; ++k) {
+		const StairTile *t = &out->tiles[k];
+		if (t->px < bx0) bx0 = t->px;
+		if (t->px + 8 > bx1) bx1 = t->px + 8;
+		if (t->py < by0) by0 = t->py;
+		if (t->py + 8 > by1) by1 = t->py + 8;
+	}
+	out->prio = calloc((size_t)a->nsec[2] + 1, sizeof *out->prio);
+	for (int k = 0; k < a->nsec[2]; ++k) {
+		CoordCell c = a->sec[2][k];
+		if (c.x < X0 - PRIO_REACH || c.x >= X1 + 8 + PRIO_REACH || c.y < Y0 - PRIO_REACH || c.y >= Y1 + 8 + PRIO_REACH) continue;
+		c.x = (int16_t)(c.x - Xa);
+		c.y = (int16_t)(c.y - Ya);
+		c.z = (int8_t)(c.z - z0);
+		/* (his feet at the cell's middle on the screen, from the anchor's
+		 * point as the tiles are; his sprite about 20 x 38 above them) */
+		int fx = c.x + c.y + 8, fy = (c.y - c.x) / 2 - c.z;
+		if (fx + SPRITE_HALF_W <= bx0 || fx - SPRITE_HALF_W >= bx1 || fy <= by0 || fy - SPRITE_H >= by1) continue;
+		out->prio[out->nprio++] = c;
+	}
 	int u = 4 - a->tw * 4, v = 4 - a->th * 4;
 	out->fx = ((u - 2 * v) / 2 - a->ex) & 31;
 	out->fy = ((u + 2 * v) / 2 - a->ey) & 31;
@@ -417,10 +448,21 @@ void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {
 		if (c.type < 16) c.type = type[c.type];
 		m->sec[0][i] = c;
 	}
+	free(m->sec[2]);
+	m->sec[2] = malloc(sizeof(CoordCell) * (size_t)(a->nsec[2] + 1));
+	m->nsec[2] = a->nsec[2];
+	for (int i = 0; i < a->nsec[2]; ++i) {
+		CoordCell c = a->sec[2][i];
+		int x = c.x, y = c.y;
+		c.x = (int16_t)(-y - 8);
+		c.y = (int16_t)(-x - 8);
+		m->sec[2][i] = c;
+	}
 }
 
 void props_free(PropStamp *p) {
 	free(p->tiles);
 	free(p->walls);
+	free(p->prio);
 	memset(p, 0, sizeof *p);
 }

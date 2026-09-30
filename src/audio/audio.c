@@ -593,14 +593,13 @@ void audio_play_song(int id, bool music) {
 
 void audio_sfx(Sfx s) {
 	if (s < SFX_COUNT && getenv("CYBERWORLD_SFX_LOG")) {
-		extern uint64_t audio_log_frame;
 		fprintf(stderr, "sfx %llu %#x\n", (unsigned long long)audio_log_frame, sfx_ids[s]);
 	}
 	if ((!dev && !offline) || s >= SFX_COUNT || !sfx_ids[s]) return;
 	audio_play_song(sfx_ids[s], false);
 }
 
-uint64_t audio_log_frame; /* frame number for CYBERWORLD_SFX_LOG, set by the main loop */
+uint64_t audio_log_frame;
 
 void audio_music_id(int id) {
 	if (getenv("CYBERWORLD_SFX_LOG")) fprintf(stderr, "music %llu %#x\n", (unsigned long long)audio_log_frame, id);

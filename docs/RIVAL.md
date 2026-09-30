@@ -125,18 +125,27 @@ one layer in four (from the layer's seed, not its rolls), never with a
 Navi gate, a vault or a dark warp; each is level one or two. And one
 stands on every act's duel layer, beside ProtoMan, the only gate there:
 level one in the first two acts, two from the third. Chaud's call says so
-("There's one on this layer"), and a gate opens as soon as the clearance
-reaches its level, beside a won duel at once, MegaMan saying it will
-(event flag `0x1456`, which the director sets as a layer begins and as a
-duel is won; the gate's script reads it). A playtester's promise of
-official gates had pointed at gates he never met.
+("There's one on this layer"). A gate elsewhere opens as soon as the
+clearance reaches its level; the one beside ProtoMan is his duel's prize
+and opens to its winner alone, the clearance at its level (a first win
+earns both at once), MegaMan saying it will (event flag `0x1456`, which
+the director sets as a layer begins and as a duel is won; the gate's
+script reads it). A playtester's promise of official gates had pointed at
+gates he never met; a later one, cleared, found ProtoMan's gate open
+before the duel, which then paid the record alone. For one already
+cleared, Chaud's call names what the win opens ("Beat it, and the
+official gate beside him opens"), and after the second rung's win the
+next rung and its door ("Next time, no race: ProtoMan faces MegaMan
+himself. Beat him, and my full clearance is yours.").
 
 - **Sealed**, MegaMan says for whom it opens: "It opens once we've won a
   duel against ProtoMan. Not yet!", "It takes three duel wins against
   ProtoMan, the last in a netbattle with him. We have 1."
 - **Level one: an official Chip Order.** Three standard chips the Library
   holds (held in any run), as BN6's Chip Order orders only chips seen,
-  one to take, in the folder's codes where they come in them.
+  one to take, in the folder's codes where they come in them: its
+  uncommon and rare ones, the common ones only while it holds too few (a
+  playtester's order offered IceSeed at 10). Each shows what it hits for.
 - **Level two: the official vault.** Three Mega chips, one to take.
 - Chaud says so as the clearance is earned: "You've earned my clearance,
   Lan. The net's official gates will open for you now."

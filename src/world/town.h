@@ -34,13 +34,9 @@ bool town_plan(uint32_t seed);
 /* The town `seed` plans (0 Central Town, 1 ACDC Town), without planning. */
 int town_style_for(uint32_t seed);
 const TownInfo *town_info(void);
-/* The planned town's two tile layers (tw * th entries each), and where
- * no source tile matched. */
-const uint16_t *town_tiles(void);
+/* Where the planned town's tiles matched no source tile. */
 const uint8_t *town_misses(void);
 
-/* Whether Lan can stand on 8-unit world cell (cx, cy). */
-bool town_walkable(int cx, int cy);
 /* Where to head from world (x, y) to reach the jack-in on foot. */
 bool town_route(int x, int y, int *wx, int *wy);
 /* The same `steps` cells along the walk, and the walk's length in cells
@@ -53,6 +49,9 @@ int town_triggers(const CoordCell **cells);
 extern bool town_after_abandon;
 /* Whether world position (x, y) is a jack-in cell (R jacks in there). */
 bool town_on_port(int x, int y);
+/* The middle of the jack-in cell nearest (x, y), in world units; its
+ * squared distance, -1 with none. */
+int town_port_near(int x, int y, int *px, int *py);
 /* The town's map objects (id) and people (id -1), in world units. */
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
 

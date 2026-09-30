@@ -37,7 +37,6 @@ void townsrc_size(const TownBook *b, int *tw, int *th);
 /* ROM offsets of the source's MapBGDescriptor and coordinate-data pointer. */
 void townsrc_slots(const TownBook *b, uint32_t *desc, uint32_t *coord_slot);
 
-int townsrc_profiles(const TownBook *b, const TownProfile **out);
 
 /* The original map (not its mirror): decoded, and per 8-unit cell its
  * material and whether Lan walks there (floor that no wall covers; walls

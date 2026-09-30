@@ -1,5 +1,138 @@
 # Changelog
 
+## 0.5.0 (2026-09-30)
+
+- **The first beta.** The title screen names the build a beta, and the
+  release is GitHub's latest, which the AppImage's updater follows: the
+  alphas were pre-releases, which it skips.
+- **The 3DS's bottom screen shows the layer's map,** always open (issue
+  #9): the floor MegaMan has seen, the way on to the exit or the
+  guardian, the services and gates he has come near, and a mark on the
+  frame's edge for those he senses, larger than SELECT's map over the
+  picture, which still opens.
+- **ProtoMan's official gate is his duel's prize.** It opens to the
+  winner of the duel beside it, where Chaud's clearance alone had opened
+  it before the duel, which then paid only the record. For a Netbattler
+  already cleared, Chaud's call names what the win opens, and after a
+  second win he names the next rung: "Next time, no race: ProtoMan faces
+  MegaMan himself." An official Chip Order offers the Library's uncommon
+  and rare chips before its common ones.
+- The Recovery Mr. Prog before a guardian's arena stands a short walk
+  from its door on every guardian's layer: one had stood a long way back,
+  and one layer in a hundred had none. A run saved by an earlier build
+  continues its layer afresh.
+- MegaMan's reminder of a program left off the board also says whether L
+  and R turn it, as soon as it is gotten.
+- **The PortMaster port no longer needs ROCKNIX's glibc.** It is built
+  on Debian bullseye and asks for glibc 2.29 at most (it asked for
+  2.38), older than ArkOS, AmberELEC, muOS or Knulli have. Its zip is
+  laid out as PortMaster's own, with a screenshot, a gameinfo.xml
+  EmulationStation can show and one license file per part, ready for
+  PortMaster's catalogue. The launcher lost a Mesa setting it did not
+  need.
+- **A bought-out shop says so.** A Net Dealer or NaviCust vendor with
+  nothing left says "Sold out!" instead of opening an empty list: after
+  "More programs? Take a look!" the empty list read as a broken shop
+  (issue #17). The vendor also brings his whole list, up to four
+  programs: ten random draws had often brought two or three in the first
+  acts, and now and then none.
+- A CONTINUE keeps what was bought: the Net Dealer and the NaviCust
+  vendor had restocked everything bought on the layer before the save.
+- Chaud's call on a duel layer comes once: every CONTINUE there had
+  played it again, after the duel too.
+- CircusMan's briefing names the tell that shows: he fades from his
+  panel, and his tent drops where MegaMan stands. The panel that lights
+  first is under MegaMan's feet, where a playtester never saw it in four
+  tents. Chips used while CircusMan is gone find nothing, and it says so.
+- MegaMan's words about the NaviCust say which programs L and R turn:
+  only those of a colour whose Spin you hold, BN6's own rule. He had said
+  L and R turn any program. After a RUN that leaves a bug, he says the
+  RUN's "OK" hides it.
+- Lan answers Chaud after a duel won, as he did after every loss.
+- A collector's vault and an official gate list what each of their three
+  chips hits for ("Cannon A 40"), where they had names alone.
+- HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
+  in official vaults or anywhere else. They are left over from the
+  Japanese version: the US game has no HackJack, so using one made
+  MegaMan vanish until he was deleted (issue #15). A run saved by an
+  earlier build continues its layer afresh.
+- **A guardian's reward is taken once.** B at the Guardian Data's program
+  choice gives the BugFrags it promises and takes the reward: it had
+  ended the talk with nothing given and left the Guardian Data there, and
+  every talk after gave its HPMemory and the Navi's chip again (a player
+  on Android had six ClownMan chips and 1000 HP by layer 7, issue #16).
+  B at the way on after an act's guardian says the way it takes, and at a
+  vault or an official gate it leaves the chips with a word.
+- **The downloads have a page of their own**, `/download/`, where the
+  home page's `#play` held them beside a player at `/play/`: old links to
+  `#play` open it, and a system in its address opens on that system
+  (`/download/#3ds`). Every page has its canonical address, a share
+  picture and words for link previews, and schema.org data (the game, the
+  FAQ's questions); the site has a sitemap and a not-found page. The
+  analytics count what visitors do, never who they are: downloads by file
+  and system, starts in the browser, ROMs taken or refused (and why),
+  platforms chosen, FAQ letters opened and links out; section anchors no
+  longer count as pages of their own. A browser no longer runs a kept
+  older script against a newer page.
+- A strong virus signal names its prize before the choice: "It pays
+  DolThdr3 B. Take it on?", where it had said "a good chip" and a
+  playtester weighed the risk blind.
+- **The downloads say which system each is for**, and the README's
+  Install section starts with a table from system to file. Players took
+  the PortMaster port's plain `cyberworld.zip`, first under Install, for
+  the game on Windows. Renamed: the port is
+  `cyberworld-endless-rocknix-portmaster.zip`, the Windows installer
+  `cyberworld-endless-windows-x64-setup.exe` and the site's files
+  `cyberworld-endless-website.zip`. The project page finds either name.
+- ProtoMan is easy to find on his duel layer: the official gate he
+  opens stands by him (within 8 panels on 72 of the tests' 74 duel
+  layers, where it had stood anywhere), the map marks him in pink with a
+  white eye and names him in its key, and MegaMan's L says which way he
+  waits and how far ("ProtoMan's down and to the right, far off: the pink
+  mark on the map"), on every L while the duel waits. A playtester found
+  the gate alone, both marks violet, and his session ran out looking for
+  the rival. A run saved by an earlier build continues its layer afresh.
+- An official gate says what it holds: Chaud's call names the gate on the
+  duel's layer (an official Chip Order, three chips you've held, one to
+  order; from the netbattle, the official vault's three Mega chips), and
+  MegaMan says it at the sealed gate. A playtester, five duels lost, took
+  the gates for scenery.
+- **Touch controls, remade.** The D-pad and buttons are drawn at the
+  screen's own resolution as glass plates in the PET's colours, sized in
+  millimetres for a thumb on every phone (the D-pad 3 cm across, A and B
+  1.4 cm, smaller only where the screen has no room), each reaching a
+  little past its art; a pressed one glows, and ticks under the thumb on
+  Android and in browsers that can. The D-pad takes diagonals where
+  MegaMan walks, whose walkways run along them, and four directions in
+  battles and menus, where a diagonal only got in the way; a thumb on the
+  line between two directions keeps the one it holds. Their MENU button
+  pauses the game: size, opacity and haptics for them all, and EDIT
+  LAYOUT, where a button is chosen with a tap, dragged where the thumb
+  wants it, pinched or sized by a corner, given its own opacity, or laid
+  out by a preset (default, left-handed, compact, large where there is
+  room); DONE keeps it, CANCEL undoes it. The phone upright and on its
+  side keep an arrangement each (`touch.ini` in the save folder). A
+  player asked to play on My Boy! for its adjustable buttons.
+- The project page counts its visits with Umami, on its own domain only
+  and without cookies. The release's web zip, to host elsewhere, carries
+  no counter.
+- MegaMan beside a Net Dealer's counter, at its far end, is drawn behind
+  it, as BN6 draws him: the counter keeps its original map's layer
+  priorities there, where he had been drawn over it, as if standing on
+  it. Only where he stands before the counter's own art: beside it a
+  raised pad's edge had cut him in half.
+- ProtoMan's races are against viruses a quick hand can hurry: a squad
+  with a Quaker, out of reach in the air until it lands, is rolled again
+  among the act's battles. Three of a playtester's four duels were
+  Quakers, "a Quaker lottery"; 3 of 20 Seaside duels held one, now none.
+  A run saved by an earlier build continues its layer afresh.
+- A town's port takes R from a step off its ring: MegaMan steps onto it
+  and jacks in, where a playtester stood at the mermaid fountain's rim a
+  step short and pressed R five times. Further off, MegaMan says which way
+  the nearest part of the landmark's ring lies, as the crow flies; the
+  walk to its front's middle had wound round the fountain's basin and
+  turned from "up and to the left" to "straight down" a step apart.
+
 ## 0.4.0 (2026-09-30)
 
 - **The 3DS build installs on the HOME Menu:** a CIA beside the `.3dsx`,

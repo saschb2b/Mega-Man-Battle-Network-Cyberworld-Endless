@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Build, test and package Cyberworld Endless.
 
-Compilation runs inside the `cyberworld-build` Docker image (Debian trixie),
-which matches the glibc and SDL2 that current ROCKNIX ships; the Linux
-desktop release builds in `cyberworld-linux` (Debian bookworm), whose older
-glibc runs on more distributions.
+Compilation runs inside Docker images: the host build, the tests and the
+checks in `cyberworld-build` (Debian trixie), the PortMaster port's aarch64
+binary in `cyberworld-portmaster` (bullseye, older than any firmware
+PortMaster serves), the Linux desktop release in `cyberworld-linux`
+(bookworm), whose older glibc runs on more distributions.
 
   python3 build.py              host and device binaries
   python3 build.py host         host binary only
@@ -61,7 +62,14 @@ glibc runs on more distributions.
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
-  python3 build.py package      assemble build/port/ for PortMaster
+  python3 build.py lint [--update]
+                                the code's checks (issue #19): GCC's analyzer,
+                                the functions no build reaches, lizard's
+                                complexity, the ROM offsets docs/ROM_DATA.md
+                                names and the files git tracks, each against
+                                its baseline in tests/lint (--update writes
+                                them anew); a new finding fails
+  python3 build.py package      build/port/cyberworld (for PortMaster-New) and the port's zip
 """
 import argparse
 import os
@@ -77,8 +85,10 @@ WEB_IMAGE = 'cyberworld-web'       # docker/Dockerfile.web
 WINDOWS_IMAGE = 'cyberworld-windows'   # docker/Dockerfile.windows
 ANDROID_IMAGE = 'cyberworld-android'   # docker/Dockerfile.android
 N3DS_IMAGE = 'cyberworld-3ds'   # docker/Dockerfile.3ds
+PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds'}
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds',
+          PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
@@ -120,7 +130,8 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE}.get(target, IMAGE)
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE,
+             'aarch64': PORTMASTER_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
     extra = [f'FILE_VERSION={file_version()}'] if target == 'windows' else []
@@ -139,9 +150,17 @@ def build(target):
             sys.exit('copying SDL2 failed')
 
 
+# The release's files are named for the system each is for (players picked
+# the PortMaster port's plain cyberworld.zip for Windows): all but the
+# AppImage, whose name its update information points at, and the ones whose
+# kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx).
+PORT_ZIP = 'cyberworld-endless-rocknix-portmaster.zip'
+WEB_ZIP = 'cyberworld-endless-website.zip'
+
+
 def web_release():
-    """build/release/cyberworld-endless-web.zip: the site, to serve anywhere."""
-    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld-endless-web'), 'zip', site(analytics=False))
+    """build/release/cyberworld-endless-website.zip: the site and its player, to host elsewhere."""
+    archive = shutil.make_archive(os.path.join(RELEASE, WEB_ZIP[:-4]), 'zip', site(analytics=False))
     print('released', archive)
 
 
@@ -256,12 +275,12 @@ def macos_release():
 
 
 WINDOWS_ZIP = 'cyberworld-endless-windows-x64.zip'
-WINDOWS_SETUP = 'cyberworld-endless-setup-x64.exe'
+WINDOWS_SETUP = 'cyberworld-endless-windows-x64-setup.exe'
 
 
 def windows_release():
     """build/release: cyberworld-endless-windows-x64.zip (the game in a folder,
-    to unpack anywhere) and cyberworld-endless-setup-x64.exe (an installer
+    to unpack anywhere) and cyberworld-endless-windows-x64-setup.exe (an installer
     for the user who runs it, no administrator needed; windows/installer.nsi)."""
     import zipfile
     build('windows')
@@ -444,15 +463,92 @@ def deb():
     print('released', out)
 
 
+SITE_URL = 'https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/'
+SITE_PAGES = ('', 'download/', 'play/', 'faq/')
+
+
+def faq_structured(page):
+    """The FAQ's letters as schema.org's FAQPage (JSON-LD, for search engines), from the page itself:
+    each letter's heading the question, its paragraphs but the links under them the answer."""
+    import html.parser
+    import json
+
+    class Letters(html.parser.HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.items, self.depth, self.grab = [], 0, None
+        def handle_starttag(self, tag, attrs):
+            a = dict(attrs)
+            if tag == 'article' and 'mail' in (a.get('class') or '').split():
+                self.items.append({'q': '', 'a': []})
+            elif self.items and tag == 'h2':
+                self.grab = 'q'
+            elif self.items and tag == 'p' and 'more' not in (a.get('class') or '').split():
+                self.items[-1]['a'].append('')
+                self.grab = 'a'
+        def handle_endtag(self, tag):
+            if tag in ('h2', 'p'):
+                self.grab = None
+        def handle_data(self, data):
+            if self.grab == 'q':
+                self.items[-1]['q'] += data
+            elif self.grab == 'a':
+                self.items[-1]['a'][-1] += data
+
+    with open(page, encoding='utf-8') as f:
+        text = f.read()
+    letters = Letters()
+    letters.feed(text)
+    squash = lambda t: ' '.join(t.split())
+    doc = {'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [
+        {'@type': 'Question', 'name': squash(i['q']),
+         'acceptedAnswer': {'@type': 'Answer', 'text': ' '.join(squash(p) for p in i['a'] if p.strip())}}
+        for i in letters.items if i['q'].strip()]}
+    block = '<script type="application/ld+json">\n' + json.dumps(doc, ensure_ascii=False) + '\n</script>\n'
+    with open(page, 'w', encoding='utf-8') as f:
+        f.write(text.replace('</head>', block + '</head>', 1))
+
+
+def fingerprint(out):
+    """Each page's own scripts and styles named with their contents' hash (?v=...), so a visitor's
+    browser never runs an older one against a newer page: GitHub Pages lets browsers keep them ten
+    minutes."""
+    import glob
+    import hashlib
+    import re
+    for page in glob.glob(os.path.join(out, '**', '*.html'), recursive=True):
+        with open(page, encoding='utf-8') as f:
+            text = f.read()
+        def stamp(m):
+            path = os.path.normpath(os.path.join(os.path.dirname(page), m.group(2)))
+            if not os.path.isfile(path):
+                return m.group(0)
+            with open(path, 'rb') as f:
+                digest = hashlib.sha1(f.read()).hexdigest()[:10]
+            return f'{m.group(1)}="{m.group(2)}?v={digest}"'
+        text = re.sub(r'(src|href)="(?!https?:|//)([^"?#]+\.(?:js|css))"', stamp, text)
+        with open(page, 'w', encoding='utf-8') as f:
+            f.write(text)
+
+
 def site(analytics=True):
-    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it;
-    without the pages' visit counter (Umami, counting on the project's own domain only) for a copy to
-    host elsewhere."""
+    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it,
+    with its sitemap for search engines; without the pages' visit counter (Umami, counting on the
+    project's own domain only), the sitemap and the not-found page, whose links are the Pages site's,
+    for a copy to host elsewhere."""
     out = os.path.join(ROOT, 'build', 'site')
     shutil.rmtree(out, ignore_errors=True)
     shutil.copytree(os.path.join(ROOT, 'web'), out)
+    faq_structured(os.path.join(out, 'faq', 'index.html'))
+    if analytics:
+        with open(os.path.join(out, 'sitemap.xml'), 'w') as f:
+            f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
+            for page in SITE_PAGES:
+                f.write(f'  <url><loc>{SITE_URL}{page}</loc></url>\n')
+            f.write('</urlset>\n')
     if not analytics:
         import glob
+        os.remove(os.path.join(out, '404.html'))
         for page in glob.glob(os.path.join(out, '**', '*.html'), recursive=True):
             with open(page) as f:
                 lines = f.readlines()
@@ -467,6 +563,17 @@ def site(analytics=True):
     os.makedirs(os.path.join(out, 'licenses'))
     shutil.copy2(os.path.join(ROOT, 'build', 'web', 'licenses', 'mGBA.txt'), os.path.join(out, 'licenses'))
     open(os.path.join(out, '.nojekyll'), 'w').close()
+    # (the engine's two halves named by the wasm's hash, so a browser never
+    # pairs a kept one with a new one; then every page's own files by theirs)
+    import hashlib
+    with open(os.path.join(out, 'play', 'cyberworld.wasm'), 'rb') as f:
+        wasm = hashlib.sha1(f.read()).hexdigest()[:10]
+    app = os.path.join(out, 'play', 'app.js')
+    with open(app, encoding='utf-8') as f:
+        text = f.read()
+    with open(app, 'w', encoding='utf-8') as f:
+        f.write(text.replace("const ENGINE_VERSION = '';", f"const ENGINE_VERSION = '{wasm}';", 1))
+    fingerprint(out)
     print('site in', out)
     return out
 
@@ -498,28 +605,54 @@ def serve(port=8080):
 
 
 def port_release():
-    """build/release/cyberworld.zip: the PortMaster port, as port.json names it."""
-    package()
-    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld'), 'zip', os.path.join(ROOT, 'build', 'port'))
+    """build/release/cyberworld-endless-rocknix-portmaster.zip: the port laid out as PortMaster's
+    own zip of it (tools/build_release.py in PortMaster-New): the launcher, and cyberworld/
+    with port.json, gameinfo.xml, the screenshot and the README as cyberworld.md beside the
+    game (port.json keeps PortMaster's own name for it, cyberworld.zip)."""
+    import zipfile
+    port = package()
+    os.makedirs(RELEASE, exist_ok=True)
+    archive = os.path.join(RELEASE, PORT_ZIP)
+    moved = {'README.md': 'cyberworld/cyberworld.md', 'port.json': 'cyberworld/port.json',
+             'gameinfo.xml': 'cyberworld/gameinfo.xml', 'screenshot.png': 'cyberworld/screenshot.png'}
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+        for base, dirs, files in os.walk(port):
+            dirs.sort()
+            for name in sorted(files):
+                path = os.path.join(base, name)
+                rel = os.path.relpath(path, port).replace(os.sep, '/')
+                info = zipfile.ZipInfo.from_file(path, moved.get(rel, rel))
+                if rel.endswith('.sh') or rel.endswith('.aarch64'):
+                    info.external_attr = 0o100755 << 16   # (unpacked by hand, both start as they are)
+                with open(path, 'rb') as f:
+                    z.writestr(info, f.read(), zipfile.ZIP_DEFLATED)
     print('released', archive)
 
 
 def package():
+    """build/port/cyberworld: the port as a folder of PortMaster-New's ports/, to copy there
+    for a pull request: the launcher, port.json, README.md, gameinfo.xml and the screenshot
+    beside cyberworld/, which holds the binary, one license per part and rom/."""
     out = os.path.join(ROOT, 'build', 'port')
-    game = os.path.join(out, 'cyberworld')
+    port = os.path.join(out, 'cyberworld')
+    game = os.path.join(port, 'cyberworld')
     if os.path.isdir(out):
         shutil.rmtree(out)
     os.makedirs(os.path.join(game, 'rom'))
+    os.makedirs(os.path.join(game, 'licenses'))
+    # (copied without their modes: PortMaster keeps launchers at 644, the launcher sets the binary's)
+    for name in ('Cyberworld Endless.sh', 'README.md', 'gameinfo.xml', 'port.json'):
+        shutil.copyfile(os.path.join(ROOT, 'port', name), os.path.join(port, name))
+    # (a 640x480 frame, as on the most common handheld screen: build.py screenshots portmaster)
+    shutil.copyfile(os.path.join(ROOT, 'docs', 'screenshots', 'portmaster.png'), os.path.join(port, 'screenshot.png'))
     shutil.copy2(os.path.join(ROOT, 'build', 'aarch64', 'cyberworld.aarch64'), game)
-    shutil.copy2(os.path.join(ROOT, 'port', 'README.md'), game)
-    shutil.copy2(os.path.join(ROOT, 'port', 'gameinfo.xml'), game)
-    shutil.copy2(os.path.join(ROOT, 'port', 'port.json'), game)
-    shutil.copy2(os.path.join(ROOT, 'LICENSE'), game)
-    shutil.copytree(os.path.join(ROOT, 'build', 'aarch64', 'licenses'), os.path.join(game, 'licenses'))
+    shutil.copyfile(os.path.join(ROOT, 'LICENSE'), os.path.join(game, 'licenses', 'LICENSE.cyberworld.txt'))
+    shutil.copyfile(os.path.join(ROOT, 'build', 'aarch64', 'licenses', 'mGBA.txt'),
+                    os.path.join(game, 'licenses', 'LICENSE.mgba.txt'))
     with open(os.path.join(game, 'rom', 'PUT_YOUR_ROM_HERE.txt'), 'w') as f:
         f.write('Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba file into this folder.\n')
-    shutil.copy2(os.path.join(ROOT, 'port', 'Cyberworld Endless.sh'), out)
-    print('packaged', out)
+    print('packaged', port)
+    return port
 
 
 def atlas(biomes='all', seeds='1', baseline=False):
@@ -817,16 +950,39 @@ SCREENSHOTS = [
              '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,120:,6:START,6:,50:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,'
              '6:A,6:,80:,6:DOWN,6:,6:A,6:,150:,6:A,6:,150:'],
      [(885, 'pet-mail'), (1221, 'pet-records')], {}),
-    # (a phone held sideways with the touch controls round the picture: the
-    # whole canvas, not the game's 240 x 160 alone)
-    ('touch', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '844x390',
-               '--input', '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,40:,30:DOWN+RIGHT'],
-     [(660, 'touch')], {}, True),
+    # (a phone held sideways with the touch controls round the picture, a
+    # thumb on the D-pad: the whole screen at a phone's pixels, halved)
+    ('touch', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '2400x1080',
+               '--dpi', '420', '--taps', '400:240,581>360,701'],
+     [(418, 'touch')], {}, 2),
+    # (the PortMaster port's screenshot: seed 7's BlastMan fight on the
+    # most common handheld screen, 640x480, the picture at 2x in its borders)
+    ('portmaster', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12',
+                    '--size', '640x480'], [(2175, 'portmaster')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
+    # (a New 3DS's two screens: seed 7's layer 3 on the top one, the
+    # layer's map on the bottom one, a Net Dealer and a Recovery Mr. Prog
+    # met on the way to BlastMan's arena)
+    ('3ds', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
+     [(1000, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
 ]
 
 
+def two_screens(top, bottom):
+    """A New 3DS's two screens in one picture: the game's 240x160 at 1.5x on
+    the top one (400x240), its pixels mixed at their edges as the GPU's filter
+    mixes them, and the second screen (320x240) under it."""
+    from PIL import Image
+    im = Image.new('RGB', (416, 512), (28, 30, 38))
+    im.paste(Image.new('RGB', (400, 240)), (8, 8))
+    im.paste(top.resize((360, 240), Image.BILINEAR), (28, 8))
+    im.paste(bottom, (48, 264))
+    return im
+
+
 def screenshots(only=None):
-    """docs/screenshots/NAME.png: the 240x160 picture of chosen frames."""
+    """docs/screenshots/NAME.png: the 240x160 picture of chosen frames (or the
+    whole screen, shrunk by the entry's last number; or '3ds', the picture
+    and the second screen as a New 3DS shows them)."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
@@ -837,10 +993,14 @@ def screenshots(only=None):
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'data'))
         shots = ','.join(f'{f}:/src/.build/screenshots/{n}.bmp' for f, n in frames)
+        dual = whole == ['3ds']
+        # (the whole screen, the touch controls on it, where the canvas has the game alone)
+        shot = '--screen-shot' if whole and not dual else '--shot'
+        second = ['--second-shot', ','.join(f'{f}:/src/.build/screenshots/{n}-second.bmp' for f, n in frames)] if dual else []
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
-                      *args, '--frames', str(max(f for f, _ in frames) + 1), '--shot', shots,
+                      *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
                       mounts=[(default_rom_dir(), '/rom:ro')])
         for k, v in saved.items():
             if v is None:
@@ -852,8 +1012,12 @@ def screenshots(only=None):
         for _, n in frames:
             im = Image.open(os.path.join(tmp, f'{n}.bmp')).convert('RGB')
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
-            if not whole:
+            if not whole or dual:
                 im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+            elif whole[0] > 1:
+                im = im.resize((w // whole[0], h // whole[0]), Image.LANCZOS)
+            if dual:
+                im = two_screens(im, Image.open(os.path.join(tmp, f'{n}-second.bmp')).convert('RGB'))
             im.save(os.path.join(out, f'{n}.png'), optimize=True)
             print('screenshot', n)
     return 0
@@ -1054,9 +1218,210 @@ def densest(im, w, h):
     return im.crop((best[0], best[1], best[0] + w, best[1] + h))
 
 
+# ---- the code's checks (issue #19) ----
+
+LINT_DIR = os.path.join(ROOT, 'tests', 'lint')
+LINT_CCN, LINT_NLOC = 25, 120        # a function past either is listed
+LINT_BIG = 1 << 20                   # a tracked file this large belongs in docs/
+LINT_BANNED = ('.gba', '.gb', '.gbc', '.sav', '.srm', '.state', '.ss0', '.ss1', '.ss2', '.ss3', '.ss4', '.ss5',
+               '.ss6', '.ss7', '.ss8', '.ss9')
+
+
+def lint_baseline(name):
+    """A baseline's lines (a multiset), its # notes left out."""
+    from collections import Counter
+    path = os.path.join(LINT_DIR, name)
+    if not os.path.exists(path):
+        return Counter()
+    with open(path) as f:
+        return Counter(line.rstrip('\n') for line in f if line.strip() and not line.startswith('#'))
+
+
+def lint_write(name, note, lines):
+    os.makedirs(LINT_DIR, exist_ok=True)
+    with open(os.path.join(LINT_DIR, name), 'w') as f:
+        f.write(''.join(f'# {n}\n' for n in note.split('\n')))
+        f.write(''.join(f'{line}\n' for line in sorted(lines)))
+
+
+def lint_compare(title, name, note, found, update):
+    """found (a Counter of lines) against the baseline: what is new fails."""
+    base = lint_baseline(name)
+    new, gone = found - base, base - found
+    if update:
+        lint_write(name, note, list(found.elements()))
+        print(f'{title}: {sum(found.values())} listed in tests/lint/{name}')
+        return True
+    for line in sorted(new.elements()):
+        print(f'  new: {line}')
+    if gone:
+        print(f'  ({sum(gone.values())} fixed since the baseline: build.py lint --update drops them)')
+    print(f'{title}: {sum(found.values())}, {sum(new.values())} new')
+    return not new
+
+
+def lint_files():
+    """No ROM, save or state in git, and no large file outside docs/ (AGENTS.md)."""
+    names = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, capture_output=True, check=True).stdout.decode().split('\0')
+    bad = []
+    for n in filter(None, names):
+        path = os.path.join(ROOT, n)
+        if n.lower().endswith(LINT_BANNED):
+            bad.append(f'{n}: a ROM, save or state')
+        elif not n.startswith('docs/') and os.path.isfile(path) and os.path.getsize(path) > LINT_BIG:
+            bad.append(f'{n}: {os.path.getsize(path) >> 10} KB outside docs/')
+    for b in bad:
+        print(f'  refused: {b}')
+    print(f'files: {len(bad)} refused')
+    return not bad
+
+
+def lint_rom_data(update):
+    """Every address of src/emu/bn6.h and every RomLayout field named in docs/ROM_DATA.md."""
+    from collections import Counter
+    with open(os.path.join(ROOT, 'docs', 'ROM_DATA.md')) as f:
+        doc = f.read().lower()
+    with open(os.path.join(ROOT, 'src', 'emu', 'bn6.h')) as f:
+        bn6 = f.read()
+    with open(os.path.join(ROOT, 'src', 'core', 'rom.h')) as f:
+        rom = f.read()
+    missing = []
+    for name, val in re.findall(r'#define\s+(BN6_\w+)\s+\(?(0x[0-9A-Fa-f]+)u?\)?', bn6):
+        v = int(val, 16)
+        forms = {name.lower(), val.lower(), f'0x{v:08x}', f'0x{v:x}', f'0x{v:06x}', f'0x{v:04x}'}
+        if v >= 0x08000000:
+            forms |= {f'0x{v - 0x08000000:06x}', f'0x{v - 0x08000000:x}'}
+        if not any(form in doc for form in forms):
+            missing.append(f'bn6.h {name}')
+    m = re.search(r'typedef struct \{(.*?)\} RomLayout;', rom, re.S)
+    for group in re.findall(r'uint32_t\s+([\w, ]+);', m.group(1) if m else ''):
+        for field in (f.strip() for f in group.split(',')):
+            if field.lower() not in doc:
+                missing.append(f'RomLayout {field}')
+    return lint_compare('ROM offsets without their note in docs/ROM_DATA.md', 'rom_data.txt',
+                        'ROM offsets docs/ROM_DATA.md does not name (AGENTS.md: a new one needs its note);\n'
+                        'this list only shrinks: build.py lint --update after naming one', Counter(missing), update)
+
+
+def lint_complexity(update):
+    """lizard over src/: a function past CCN LINT_CCN or LINT_NLOC lines of code is new,
+    or a listed one grew."""
+    import csv
+    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                         ['run', '--rm', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE, 'lizard', '--csv', 'src'],
+                         capture_output=True, text=True)
+    if out.returncode not in (0, 1) or not out.stdout:
+        sys.exit('lizard failed in the build image: one made before it came in? docker rmi cyberworld-build, then again\n'
+                 + out.stderr[-400:])
+    now = {}
+    for row in csv.reader(out.stdout.splitlines()):
+        nloc, ccn, file, name = int(row[0]), int(row[1]), row[6], row[7]
+        if ccn > LINT_CCN or nloc > LINT_NLOC:
+            key = f'{file}:{name}'
+            now[key] = max(now.get(key, (0, 0)), (ccn, nloc))
+    note = (f'functions past CCN {LINT_CCN} or {LINT_NLOC} lines of code (lizard): "file:function CCN NLOC";\n'
+            'none may join and none may grow: split one, then build.py lint --update')
+    if update:
+        lint_write('complexity.txt', note, [f'{k} {c} {n}' for k, (c, n) in now.items()])
+        print(f'complexity: {len(now)} listed in tests/lint/complexity.txt')
+        return True
+    base = {}
+    for line in lint_baseline('complexity.txt'):
+        key, c, n = line.rsplit(' ', 2)
+        base[key] = (int(c), int(n))
+    bad = 0
+    for key, (c, n) in sorted(now.items()):
+        if key not in base:
+            print(f'  new: {key} CCN {c}, {n} lines')
+            bad += 1
+        elif c > base[key][0] or n > base[key][1]:
+            print(f'  grew: {key} CCN {base[key][0]} -> {c}, {base[key][1]} -> {n} lines')
+            bad += 1
+    print(f'complexity: {len(now)} functions past CCN {LINT_CCN} or {LINT_NLOC} lines, {bad} new or grown')
+    return not bad
+
+
+def lint_analyzer(update):
+    """GCC's analyzer over the host build's sources, at -O2 as it builds."""
+    from collections import Counter
+    script = ('for f in src/*/*.c; do gcc -std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
+              '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
+              '-isystem /opt/mgba/host/include -c -o /dev/null "$f"; done 2>&1')
+    build('host')   # (its version.h)
+    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                         ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+                          'sh', '-c', script], capture_output=True, text=True).stdout
+    found, fn = Counter(), '?'
+    for line in out.splitlines():
+        m = re.match(r"^(src/\S+): In function '([^']+)'", line)
+        if m:
+            fn = m.group(2)
+            continue
+        m = re.match(r'^(src/\S+?):\d+:\d+: warning: (.*?)(?: \[CWE-\d+\])? \[(-Wanalyzer-[a-z-]+)\]$', line)
+        if m:
+            found[f'{m.group(1)}: {fn}: {m.group(2)} [{m.group(3)}]'] += 1
+    return lint_compare("GCC's analyzer", 'analyzer.txt',
+                        "GCC's -fanalyzer (-O2, the host build's sources): \"file: function: finding\";\n"
+                        'a new one fails; fix one, then build.py lint --update', found, update)
+
+
+def lint_dead(update):
+    """The game's functions no build reaches: the host and handheld builds and the
+    tests, each linked with every function in its own section and the linker's
+    list of those it drops. A function one of them reaches is kept."""
+    from collections import Counter
+    extra = ['EXTRA_CFLAGS=-ffunction-sections', 'EXTRA_LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections']
+    links = {}
+    for target, image, binary, nm in (('host', IMAGE, 'cyberworld', 'nm'),
+                                      ('aarch64', PORTMASTER_IMAGE, 'cyberworld.aarch64', 'aarch64-linux-gnu-nm')):
+        ensure_image(image)
+        out = f'build/lint/{target}'
+        # (linked afresh each time: the linker's list is the report)
+        run = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                             ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', image,
+                              'sh', '-c', f'rm -f {out}/{binary}; make TARGET={target} OUT={out} VERSION=lint -j{os.cpu_count() or 4} '
+                              f'"{extra[0]}" "{extra[1]}" {out}/{binary} 2>&1 >/dev/null; '
+                              f'{nm} -A -g --defined-only {out}/obj/*/*.o'], capture_output=True, text=True)
+        links[target] = run.stdout
+    ensure_image()
+    test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                          ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+                           'sh', '-c', f'rm -f build/lint/test_core; make -j{os.cpu_count() or 4} build/lint/test_core 2>&1 >/dev/null; '
+                           'nm -A -g --defined-only build/lint/test/src/*/*.o'], capture_output=True, text=True)
+    links['tests'] = test.stdout
+    reached, present = set(), set()
+    for target, text in links.items():
+        here, dropped = set(), set()
+        for line in text.splitlines():
+            m = re.search(r"removing unused section '\.text\.([A-Za-z_]\w*)' in file '(?:build/lint/\w+/obj|build/lint/test/src)/(\w+/\w+)\.o'", line)
+            if m:
+                dropped.add((f'src/{m.group(2)}.c', m.group(1)))
+                continue
+            m = re.match(r'^(?:build/lint/\w+/obj|build/lint/test/src)/(\w+/\w+)\.o:[0-9a-f]* T (\w+)$', line)
+            if m:
+                here.add((f'src/{m.group(1)}.c', m.group(2)))
+        if not here:
+            sys.exit(f'the {target} link for build.py lint gave nothing to read:\n{text[-600:]}')
+        present |= here
+        reached |= here - dropped
+    dead = Counter(f'{f}: {n}' for f, n in present - reached if n != 'main')
+    return lint_compare('functions no build reaches', 'dead.txt',
+                        'functions no build reaches (the host and handheld builds and the tests, build.py lint):\n'
+                        'remove one, or make it static where its own file uses it; build.py lint --update', dead, update)
+
+
+def lint(update=False):
+    ok = lint_files()
+    ok = lint_rom_data(update) and ok
+    ok = lint_complexity(update) and ok
+    ok = lint_analyzer(update) and ok
+    ok = lint_dead(update) and ok
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -1069,6 +1434,9 @@ def main():
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         sys.exit(code)
+    if a.action == 'lint':
+        ensure_image()
+        sys.exit(lint('--update' in a.rest))
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))
@@ -1153,7 +1521,7 @@ def main():
     if a.action in ('all', 'device', 'package'):
         build('aarch64')
     if a.action == 'package':
-        package()
+        port_release()
     if a.action in ('shot', 'asan'):
         # Headless run inside the build image; the ROM directory is mounted read-only.
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))

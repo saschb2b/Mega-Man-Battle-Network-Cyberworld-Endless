@@ -33,6 +33,9 @@
 /* ... and Chaud's clearance reaches its level: it opens (the director sets
  * it as the layer begins, and as a duel on it is won). */
 #define LAYER_CLEARED_FLAG     0x1456
+/* Chaud's call on a duel layer was made (a CONTINUE does not make it
+ * again). */
+#define LAYER_DUEL_CALLED_FLAG 0x1457
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -52,9 +55,10 @@ typedef struct {
 	int ndealer, nprograms;
 } LayerObjs;
 
-/* The layer's shop stock written again (after a state load, whose RAM
- * holds the shop data as it was saved). */
-void layer_objs_shops(const LayerObjs *o);
+/* The layer's shop stock written (again after a state load, whose RAM
+ * holds the shop data as it was saved: `saved`, what was bought there
+ * stays bought). */
+void layer_objs_shops(const LayerObjs *o, bool saved);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);

@@ -1,7 +1,40 @@
-# Cyberworld Endless
+## Notes
+
+Cyberworld Endless is a roguelike built on Mega Man Battle Network 6: the
+game runs on an embedded [mGBA](https://github.com/mgba-emu/mgba) core,
+and each run jacks into a newly generated net of areas, battles, shops and
+guardians. Made by Sascha Becker:
+[source, manual and issues](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless).
+Thanks to Capcom for Mega Man Battle Network, to endrift and the mGBA
+contributors for the core, and to the [bn6f disassembly](https://github.com/dism-exe/bn6f)
+for its map of the game's data.
 
 Copy your own **Mega Man Battle Network 6: Cybeast Gregar (USA)** `.gba`
-into the `rom/` folder next to this file. The game reads everything it shows
-and plays from that file; nothing from the game is included in this port.
+into `ports/cyberworld/rom/`. The file name does not matter; the game
+checks the contents. Nothing from the game is included in this port.
 
-Saves go to `savedata/`. Delete `savedata/run.sav` to abandon a run.
+Saves go to `ports/cyberworld/savedata/`.
+
+## Controls
+
+| Button | Action |
+|--|--|
+| D-Pad | Move |
+| A | Talk, open Mystery Data / use a chip |
+| B | Run, hold to fast-forward text / fire the buster |
+| L | Ask MegaMan what's ahead / open the Custom screen |
+| R | Jack in / open the Custom screen |
+| Start | Open the PET / pause |
+| Select (hold) | Map of the layer |
+| Select + Start | Quit |
+
+## Compile
+
+```bash
+git clone https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless.git
+cd Mega-Man-Battle-Network-Cyberworld-Endless
+python3 build.py package
+```
+
+The build runs in Docker (`docker/Dockerfile.portmaster`, Debian bullseye)
+and leaves this port's folder in `build/port/cyberworld/`.

@@ -15,6 +15,10 @@
 #include "town.h"
 
 #define RUN_MAGIC 0x43574537u /* "CWE7": the board's programs (docs/NAVICUST.md) */
+/* (Run is saved as it lies in memory: a change to it does not compile
+ * until someone decides about the saves before it, issue #19) */
+_Static_assert(sizeof(Run) == 96, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
+	"previous one where it can carry over), then set this size");
 #define PROFILE_MAGIC 0x43575032u
 
 Profile profile;

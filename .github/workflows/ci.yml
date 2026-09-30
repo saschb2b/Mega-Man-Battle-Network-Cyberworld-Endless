@@ -34,6 +34,18 @@ jobs:
       - name: Workflows
         run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest -color
 
+  code:
+    # (issue #19: each against its baseline in tests/lint, which only shrinks)
+    name: Code checks (analyzer, unreached functions, complexity)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile, tag: cyberworld-build }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.portmaster, tag: cyberworld-portmaster }
+      - run: python3 build.py lint
+
   test:
     name: Unit tests (sanitizers)
     runs-on: ubuntu-latest
@@ -44,20 +56,29 @@ jobs:
       - run: python3 build.py test
 
   handheld:
-    name: ROCKNIX (PortMaster)
+    name: PortMaster (aarch64)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.portmaster, tag: cyberworld-portmaster }
       - name: Host and aarch64 builds
         run: python3 build.py all
-      - name: Port archive
-        run: python3 build.py package && mkdir -p build/release && (cd build/port && zip -qr ../release/cyberworld.zip .)
+      # (every firmware PortMaster serves has glibc 2.30 or newer: ArkOS's is the oldest)
+      - name: glibc 2.30 at most
+        run: |
+          v=$(docker run --rm -v "$PWD:/src" cyberworld-portmaster aarch64-linux-gnu-objdump -T /src/build/aarch64/cyberworld.aarch64 \
+            | grep -oE 'GLIBC_[0-9.]+' | sort -Vu | tail -1)
+          echo "$v"
+          [ "$(printf '%s\nGLIBC_2.30\n' "$v" | sort -V | tail -1)" = GLIBC_2.30 ]
+      - name: Port folder and archive
+        run: python3 build.py package
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-portmaster
-          path: build/release/cyberworld.zip
+          path: build/release/cyberworld-endless-rocknix-portmaster.zip
           retention-days: 14
 
   linux:
@@ -108,14 +129,14 @@ jobs:
           if grep -vxE '(kernel32|user32|gdi32|advapi32|shell32|shlwapi|ole32|oleaut32|imm32|setupapi|version|winmm|comdlg32|msvcrt)\.dll' <<< "$dlls"; then
             echo "imports a DLL Windows does not have"; exit 1
           fi
-          file build/release/cyberworld-endless-setup-x64.exe | tee /dev/stderr | grep -q 'Nullsoft Installer'
+          file build/release/cyberworld-endless-windows-x64-setup.exe | tee /dev/stderr | grep -q 'Nullsoft Installer'
           unzip -l build/release/cyberworld-endless-windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-windows
           path: |
             build/release/cyberworld-endless-windows-x64.zip
-            build/release/cyberworld-endless-setup-x64.exe
+            build/release/cyberworld-endless-windows-x64-setup.exe
           retention-days: 14
 
   n3ds:

@@ -64,7 +64,6 @@ bool tour_parse(const char *spec) {
 	return true;
 }
 
-bool tour_on(void) { return T.on; }
 
 /* A floor panel of room r nothing stands on (not the exit pad, which would
  * take MegaMan on), nearest its middle. */

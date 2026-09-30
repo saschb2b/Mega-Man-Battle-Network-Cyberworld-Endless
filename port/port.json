@@ -1,19 +1,34 @@
 {
-  "version": 2,
+  "version": 4,
   "name": "cyberworld.zip",
-  "items": ["Cyberworld Endless.sh", "cyberworld"],
+  "items": [
+    "Cyberworld Endless.sh",
+    "cyberworld"
+  ],
   "items_opt": [],
   "attr": {
     "title": "Mega Man Battle Network: Cyberworld Endless",
+    "porter": [
+      "Sascha Becker"
+    ],
     "desc": "A roguelike built on Mega Man Battle Network 6: generated net areas, real-time grid battles and a Navi guarding every third area.",
+    "desc_md": null,
     "inst": "Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba into ports/cyberworld/rom/.",
-    "genres": ["rpg", "action"],
-    "porter": ["Sascha Becker"],
-    "image": {},
+    "inst_md": "Copy your own **Mega Man Battle Network 6: Cybeast Gregar (USA)** `.gba` into `ports/cyberworld/rom/`.",
+    "genres": [
+      "rpg",
+      "action"
+    ],
+    "image": null,
     "rtr": false,
     "exp": false,
-    "runtime": null,
+    "runtime": [],
+    "store": [],
+    "availability": "paid",
     "reqs": [],
-    "arch": ["aarch64"]
+    "arch": [
+      "aarch64"
+    ],
+    "min_glibc": ""
   }
 }

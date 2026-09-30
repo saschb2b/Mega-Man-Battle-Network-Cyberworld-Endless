@@ -214,8 +214,8 @@ static bool learn(int area, Learned *L) {
 		learn_map(&b, &a, area, L);
 		decor_learn(&b, na->bg_in_map, &L->decor);
 		rebank_seen(&b, na->rebank[1], L);
-		for (int k = 0; k < 3; ++k)
-			if (!L->ornament[k].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[k], &L->ornament[k]);
+		for (int o = 0; o < 3; ++o)
+			if (!L->ornament[o].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
 		if (na->pad_hues && aligned(&a, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
@@ -454,6 +454,7 @@ static void props_place(const Learned *L) {
 		 * runs along grid y, whose highest cell is the lowest X */
 		int A = p->faces == FACES_X ? -(p->y + p->len - 1 - place.gy0) : -(p->y - place.gy0), B = p->x - place.gx0;
 		prop_at[i] = (__typeof__(prop_at[0])){ true, place.ex + 32 * A + L->counter_dx[p->faces], place.ey + 32 * B + L->counter_dy[p->faces], st };
+		if (emu_debug_on()) fprintf(stderr, "counter faces %d at %d,%d (%d walls, %d layer priorities)\n", p->faces, prop_at[i].X, prop_at[i].Y, st->nwalls, st->nprio);
 	}
 }
 
@@ -731,6 +732,13 @@ static void build_extra(const Learned *L) {
 			c.y = (int16_t)(c.y + prop_at[i].Y);
 			over_cells[extra.nover++] = c;
 		}
+		/* (and its layer priorities, as a stair's are laid) */
+		for (int k = 0; k < prop_at[i].st->nprio; ++k) {
+			CoordCell c = prop_at[i].st->prio[k];
+			c.x = (int16_t)(c.x + prop_at[i].X);
+			c.y = (int16_t)(c.y + prop_at[i].Y);
+			add_extra(2, c);
+		}
 	}
 	for (int y = 0; y < cur->gh; ++y)
 		for (int x = 0; x < cur->gw; ++x) {
@@ -837,7 +845,8 @@ bool netmap_build(int area, const NetLayout *lay) {
 
 bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &extra); }
 
-unsigned netmap_stair_dirs(int area, int *rise) {
+/* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
+static unsigned netmap_stair_dirs(int area, int *rise) {
 	if (area < 0 || area >= NET_AREAS) return 0;
 	Learned *L = &learned[area];
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }

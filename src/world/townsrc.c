@@ -455,11 +455,6 @@ void townsrc_slots(const TownBook *b, uint32_t *desc, uint32_t *coord_slot) {
 	*coord_slot = b->v[0].a.coord_slot;
 }
 
-int townsrc_profiles(const TownBook *b, const TownProfile **out) {
-	*out = b->prof;
-	return b->nprof;
-}
-
 const AreaSrc *townsrc_area(const TownBook *b) { return &b->v[0].a; }
 int townsrc_mat(const TownBook *b, int cx, int cy) { return view_cell(&b->v[0], cx, cy); }
 

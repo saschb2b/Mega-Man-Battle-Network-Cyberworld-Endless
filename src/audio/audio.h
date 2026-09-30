@@ -21,6 +21,8 @@ typedef enum {
 typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_CREDITS, MUS_COUNT } Music;
 
 bool audio_init(void);
+/* The frame CYBERWORLD_SFX_LOG's lines name, set by the main loop. */
+extern uint64_t audio_log_frame;
 /* Replaces the engine's own sound with another source (48 kHz stereo frames);
  * NULL returns to it. */
 typedef int (*AudioSource)(int16_t *out, int frames);

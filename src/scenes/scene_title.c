@@ -485,8 +485,6 @@ static void setup_draw(int x0, int y0) {
 				snprintf(locked[nlocked++], sizeof locked[0], "%s: %s", meta_folder(f)->name, meta_folder(f)->opens);
 		break;
 	case ROW_CROSS: {
-		int open_crosses = 0;
-		for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
 		/* (and its costs: BN6's own weakness, which a playtester was told
 		 * wrong, and no other Cross) */
 		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL, *strong = S.cross ? powers_cross_strength(S.cross) : NULL;
@@ -721,7 +719,8 @@ static void draw(void) {
 		return;
 	}
 	/* a line above the copyright, the marks holding the top: the build, for
-	 * a report (v0.1.0 alpha, v0.1.0+12 a dozen commits on), and the best
+	 * a report (v0.5.0 beta, v0.5.0+12 a dozen commits on; 0.1 to 0.4 were
+	 * alphas), and the best
 	 * depth, a saved run deeper than the record counting too (the menu's
 	 * CONTINUE names its own layer there; the question's box covers both) */
 	if (!S.confirm) {
@@ -730,7 +729,7 @@ static void draw(void) {
 		if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, sizeof v, "dev");
 		else {
 			const char *g = strstr(cw, ".g");
-			snprintf(v, sizeof v, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " alpha" : "");
+			snprintf(v, sizeof v, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " beta" : "");
 		}
 		minifont_draw(x0 + 4, y0 + 138, v, rgba(150, 160, 190, 255), 1);
 		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;

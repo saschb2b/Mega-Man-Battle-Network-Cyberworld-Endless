@@ -124,7 +124,9 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return NULL;
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	uint32_t *px = calloc((size_t)tw * th * 64, 4);
-	uint16_t *layers[2] = { (uint16_t *)tiles, (uint16_t *)tiles + (size_t)tw * th };
+	/* (draw_layers only reads them) */
+	union { const uint16_t *c; uint16_t *v; } t = { tiles };
+	uint16_t *layers[2] = { t.v, t.v + (size_t)tw * th };
 	/* as the game shows them, in the real world and the internet alike: the
 	 * second layer (BG2, priority 2) over the first (BG1, priority 3) */
 	draw_layers(vram, colors, layers, 2, 1, tw, th, px, NULL, NULL, group < RW_GROUPS);

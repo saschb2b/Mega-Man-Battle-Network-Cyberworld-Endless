@@ -33,17 +33,28 @@ static bool on_path(const char *prog) {
 	return false;
 }
 
+/* execvp for a command line of constant strings (execvp takes them as
+ * char *const and changes none) */
+static void exec_line(const char *const argv[]) {
+	union { const char *const *c; char *const *v; } a = { argv };
+	execvp(argv[0], a.v);
+}
+
 /* Runs argv and waits; its first line of output goes to out when given. */
-static bool run(char *const argv[], char *out, size_t outlen) {
+static bool run(const char *const argv[], char *out, size_t outlen) {
 	int fd[2];
 	if (out && pipe(fd) != 0) return false;
 	pid_t pid = fork();
-	if (pid < 0) return false;
+	if (pid < 0) {
+		/* (the pipe too: the analyzer found it left open, issue #19) */
+		if (out) { close(fd[0]); close(fd[1]); }
+		return false;
+	}
 	if (pid == 0) {
 		if (out) { dup2(fd[1], 1); close(fd[0]); close(fd[1]); }
 		int null = open("/dev/null", O_WRONLY);
 		if (null >= 0) { dup2(null, 2); if (!out) dup2(null, 1); }
-		execvp(argv[0], argv);
+		exec_line(argv);
 		_exit(127);
 	}
 	if (out) {
@@ -61,13 +72,13 @@ static bool run(char *const argv[], char *out, size_t outlen) {
 }
 
 /* Runs argv and waits; its exit status, or -1. */
-static int run_status(char *const argv[]) {
+static int run_status(const char *const argv[]) {
 	pid_t pid = fork();
 	if (pid < 0) return -1;
 	if (pid == 0) {
 		int null = open("/dev/null", O_WRONLY);
 		if (null >= 0) { dup2(null, 1); dup2(null, 2); }
-		execvp(argv[0], argv);
+		exec_line(argv);
 		_exit(127);
 	}
 	int status;
@@ -173,7 +184,7 @@ static int ask(const char *text, const char *const *labels, int n) {
 		snprintf(ok, sizeof ok, "--ok-label=%s", labels[0]);
 		snprintf(cancel, sizeof cancel, "--cancel-label=%s", labels[n - 1]);
 		snprintf(extra, sizeof extra, "--extra-button=%s", n > 2 ? labels[1] : "");
-		char *argv[] = { "zenity", "--question", "--title=Cyberworld Endless", "--width=440", textarg, ok, cancel,
+		const char *argv[] = { "zenity", "--question", "--title=Cyberworld Endless", "--width=440", textarg, ok, cancel,
 			icon_known() ? "--icon=" APP_ID : "--icon=dialog-question", n > 2 ? extra : NULL, NULL };
 		char out[128] = "";
 		if (run(argv, out, sizeof out)) return 0;
@@ -181,9 +192,9 @@ static int ask(const char *text, const char *const *labels, int n) {
 		return n - 1;
 	}
 	if (on_path("kdialog")) {
-		char *argv[] = { "kdialog", "--title", "Cyberworld Endless", n > 2 ? "--yesnocancel" : "--yesno", (char *)text,
-			"--yes-label", (char *)labels[0], "--no-label", (char *)labels[1],
-			n > 2 ? "--cancel-label" : NULL, (char *)labels[n - 1], NULL };
+		const char *argv[] = { "kdialog", "--title", "Cyberworld Endless", n > 2 ? "--yesnocancel" : "--yesno", text,
+			"--yes-label", labels[0], "--no-label", labels[1],
+			n > 2 ? "--cancel-label" : NULL, labels[n - 1], NULL };
 		int code = run_status(argv);
 		return code >= 0 && code < n ? code : n - 1;
 	}
@@ -206,18 +217,18 @@ static int ask(const char *text, const char *const *labels, int n) {
 static bool choose_file(char *path, size_t n) {
 #ifdef __APPLE__
 	/* (macOS: its own open panel, through AppleScript) */
-	char *argv[] = { "osascript", "-e", "POSIX path of (choose file with prompt \"Choose your Mega Man Battle Network 6 ROM\")", NULL };
+	const char *argv[] = { "osascript", "-e", "POSIX path of (choose file with prompt \"Choose your Mega Man Battle Network 6 ROM\")", NULL };
 	return run(argv, path, n) && path[0];
 #else
 	if (on_path("zenity")) {
-		char *argv[] = { "zenity", "--file-selection", "--title=Choose your Mega Man Battle Network 6 ROM",
+		const char *argv[] = { "zenity", "--file-selection", "--title=Choose your Mega Man Battle Network 6 ROM",
 			"--file-filter=GBA ROM | *.gba *.GBA", "--file-filter=All files | *", NULL };
 		return run(argv, path, n) && path[0];
 	}
 	if (on_path("kdialog")) {
 		const char *home = getenv("HOME");
-		char *argv[] = { "kdialog", "--title", "Choose your Mega Man Battle Network 6 ROM", "--getopenfilename",
-			(char *)(home ? home : "/"), "*.gba *.GBA|GBA ROM", NULL };
+		const char *argv[] = { "kdialog", "--title", "Choose your Mega Man Battle Network 6 ROM", "--getopenfilename",
+			home ? home : "/", "*.gba *.GBA|GBA ROM", NULL };
 		return run(argv, path, n) && path[0];
 	}
 	return false;
@@ -257,9 +268,9 @@ int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgle
 		}
 		if (hit == 0) {
 #ifdef __APPLE__
-			char *argv[] = { "open", (char *)rom_dir, NULL };
+			const char *argv[] = { "open", rom_dir, NULL };
 #else
-			char *argv[] = { "xdg-open", (char *)rom_dir, NULL };
+			const char *argv[] = { "xdg-open", rom_dir, NULL };
 #endif
 			run(argv, NULL, 0);
 		}
@@ -459,7 +470,7 @@ void desktop_menu_entry(const char *data_dir) {
 	copy_icons(appdir, share);
 	if (!write_entry(file, appimage)) { fprintf(stderr, "could not write %s\n", file); return; }
 	if (on_path("update-desktop-database")) {
-		char *argv[] = { "update-desktop-database", apps, NULL };
+		const char *argv[] = { "update-desktop-database", apps, NULL };
 		run(argv, NULL, 0);
 	}
 	printf("added %s\n", file);
@@ -473,13 +484,13 @@ static void tell(const char *text) {
 		char body[2400], textarg[2500];
 		markup_escape(body, sizeof body, text);
 		snprintf(textarg, sizeof textarg, "--text=%s", body);
-		char *argv[] = { "zenity", "--info", "--title=Cyberworld Endless", "--width=440", textarg,
+		const char *argv[] = { "zenity", "--info", "--title=Cyberworld Endless", "--width=440", textarg,
 			icon_known() ? "--icon=" APP_ID : "--icon=dialog-information", NULL };
 		run(argv, NULL, 0);
 		return;
 	}
 	if (on_path("kdialog")) {
-		char *argv[] = { "kdialog", "--title", "Cyberworld Endless", "--msgbox", (char *)text, NULL };
+		const char *argv[] = { "kdialog", "--title", "Cyberworld Endless", "--msgbox", text, NULL };
 		run(argv, NULL, 0);
 		return;
 	}
@@ -528,8 +539,8 @@ int desktop_steam_command(bool remove) {
 		fprintf(stderr, "this build carries no add-to-steam.py\n");
 		return 1;
 	}
-	char *argv[] = { "python3", script, "--exe", exe, remove ? "--remove" : NULL, NULL };
-	execvp("python3", argv);
+	const char *argv[] = { "python3", script, "--exe", exe, remove ? "--remove" : NULL, NULL };
+	exec_line(argv);
 	fprintf(stderr, "add-to-steam.py needs python3\n");
 	return 1;
 }
@@ -542,7 +553,7 @@ void desktop_steam_offer(const char *data_dir) {
 	snprintf(done, sizeof done, "%s/steam-asked", data_dir);
 	if (access(done, F_OK) == 0 || !on_path("python3") || !steam_script(script, sizeof script, exe, sizeof exe)) return;
 	/* 0: there already, 2: no Steam here */
-	char *check[] = { "python3", script, "--exe", exe, "--check", NULL };
+	const char *check[] = { "python3", script, "--exe", exe, "--check", NULL };
 	if (run_status(check) != 1) return;
 	const char *labels[] = { "Add to Steam", "Don't ask again", "Not now" };
 	int hit = ask("Add Cyberworld Endless to Steam, with its library artwork?\n\n"
@@ -552,7 +563,7 @@ void desktop_steam_offer(const char *data_dir) {
 	FILE *f = fopen(done, "w");
 	if (f) fclose(f);
 	if (hit != 0) return;
-	char *add[] = { "python3", script, "--exe", exe, "--yes", NULL };
+	const char *add[] = { "python3", script, "--exe", exe, "--yes", NULL };
 	if (run_status(add) == 0)
 		tell("Cyberworld Endless is in your Steam library, with its artwork.");
 	else

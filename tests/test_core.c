@@ -8,6 +8,7 @@
 #include "net.h"
 #include "net_layouts.h"
 #include "net_route.h"
+#include "layer_make.h"
 #include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
@@ -18,6 +19,9 @@
 #include "powers.h"
 #include "rivals.h"
 #include "save.h"
+#include "save_blob.h"
+#include "flags.h"
+#include "mapslot.h"
 #include "text.h"
 #include "townmath.h"
 #include "touch_layout.h"
@@ -69,6 +73,19 @@ static void test_lz77(void) {
 	free(out);
 	const uint8_t bad[] = { 0x10, 8, 0, 0, 0x80, 0x00, 0x05 };
 	CHECK(lz77_decompress(bad, sizeof bad, &n) == NULL, "lz77 rejects a reference before any output");
+	/* (fuzzed, under the tests' sanitizers: 20000 blocks of random bytes
+	 * behind its header, and every cut of the good one; a read or write
+	 * out of bounds fails the run, issue #19) */
+	static uint8_t junk[4096];
+	uint32_t x = 0x2545F491u;
+	for (int i = 0; i < 20000; ++i) {
+		size_t len = 4 + (size_t)(i % 97) * 40;
+		for (size_t k = 0; k < len; ++k) { x ^= x << 13; x ^= x >> 17; x ^= x << 5; junk[k] = (uint8_t)x; }
+		junk[0] = 0x10;
+		junk[3] = 0;   /* (a declared size under 64 KB) */
+		free(lz77_decompress(junk, len, &n));
+	}
+	for (size_t cut = 0; cut < sizeof src; ++cut) free(lz77_decompress(src, cut, &n));
 }
 
 static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
@@ -163,11 +180,35 @@ static bool in_way_line(int x, int y) {
 	return false;
 }
 
+/* The walk from room `from`'s anchor to the nearest panel beside an object
+ * of `type`, -1 none. */
+static int walk_to(int from, int type) {
+	static int16_t dist[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(dist, -1, sizeof dist);
+	int h = 0, t = 0;
+	qx[t] = (int16_t)layer.rooms[from].ax; qy[t++] = (int16_t)layer.rooms[from].ay;
+	dist[qy[0]][qx[0]] = 0;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int i = 0; i < layer.nobj; ++i)
+			if (layer.obj[i].type == type && abs((int)layer.obj[i].x - x) <= 1 && abs((int)layer.obj[i].y - y) <= 1) return dist[y][x];
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d[k][0], ny = y + d[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || dist[ny][nx] >= 0 || layer.cell[ny][nx] != C_PATH) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	return -1;
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
 		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
-		talk_pairs = 0, talk_touch = 0;
+		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
@@ -178,6 +219,13 @@ static void test_generation(void) {
 		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
 		layer_generate(seed * 7919u, depth, biome, kind, &kit);
 		++layers;
+		/* (a heal a short walk from every guardian's arena: a playtester
+		 * found one a long way back from SpoutMan's) */
+		if (layer.arena >= 0) {
+			int w = walk_to(layer.ante, OBJ_HEAL);
+			heal_far = w > heal_far ? w : heal_far;
+			CHECK(w >= 0 && w <= 12, "seed %u: the heal before the arena a walk of %d", seed, w);
+		}
 		CHECK(layer.nrooms >= 3, "seed %u: only %d rooms", seed, layer.nrooms);
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
@@ -206,12 +254,16 @@ static void test_generation(void) {
 		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
 		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
 			bool duel = false;
-			int official = 0, gates = 0;
+			int official = 0, gates = 0, px = -99, py = -99, gx = 99, gy = 99;
 			for (int i = 0; i < layer.nobj; ++i) {
 				duel |= layer.obj[i].type == OBJ_DUEL;
-				if (layer.obj[i].type == OBJ_OFFICIAL) official = layer.obj[i].param;
+				if (layer.obj[i].type == OBJ_DUEL) { px = (int)layer.obj[i].x; py = (int)layer.obj[i].y; }
+				if (layer.obj[i].type == OBJ_OFFICIAL) { official = layer.obj[i].param; gx = (int)layer.obj[i].x; gy = (int)layer.obj[i].y; }
 				gates += layer.obj[i].type == OBJ_NAVI_GATE || layer.obj[i].type == OBJ_VAULT;
 			}
+			/* (the gate by ProtoMan: within 8 panels of him) */
+			++duel_layers;
+			if (abs(px - gx) + abs(py - gy) <= 8) ++gate_by_duel;
 			CHECK(duel, "seed %u: no duel on an act's second layer (depth %d, area %d)", seed, depth, biome);
 			/* ... and beside it the official gate it opens, the act's level,
 			 * the only gate there */
@@ -377,6 +429,10 @@ static void test_generation(void) {
 	CHECK(beside_line * 4 <= standing, "%d of %d services and navis stand by the way on", beside_line, standing);
 	CHECK(near_pairs * 16 <= standing, "%d of %d services and navis leave a panel's gap on the way", near_pairs, standing);
 	CHECK(talk_touch == 0, "%d pairs of navis to talk to stand side by side, or beside a counter's front", talk_touch);
+	/* (the duel's official gate by ProtoMan: a playtester found it alone,
+	 * across the layer from him) */
+	CHECK(gate_by_duel * 20 >= duel_layers * 19, "the official gate stands by ProtoMan on %d of %d duel layers", gate_by_duel, duel_layers);
+	printf("  the official gate within 8 panels of ProtoMan: %d of %d duel layers\n", gate_by_duel, duel_layers);
 	printf("  two to talk to within two panels (a counter's navi three): %d pairs, %d side by side\n", talk_pairs, talk_touch);
 	printf("  in line with a walkway: %d of %d services and navis; by the way on %d; a panel's gap on the way %d\n",
 		in_line, standing, beside_line, near_pairs);
@@ -391,6 +447,7 @@ static void test_generation(void) {
 	CHECK(landmarks * 2 >= layers, "a landmark on only %d of %d layers", landmarks, layers);
 	CHECK(emblems >= layers, "only %d emblems on %d layers", emblems, layers);
 	printf("  props: %d sprites (%d in holes) and %d emblems on %d layers, landmarks on %d\n", sprites, holes, emblems, layers, landmarks);
+	printf("  the heal before an arena: a walk of %d at most\n", heal_far);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
 	/* Determinism: the same seed builds the same layer. */
@@ -399,6 +456,57 @@ static void test_generation(void) {
 	a = layer;
 	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, &kit);
 	CHECK(!memcmp(a.cell, layer.cell, sizeof a.cell) && a.nobj == layer.nobj, "generation is deterministic");
+}
+
+/* The golden hash (issue #19): layer_generate's output over fixed seeds,
+ * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
+ * (layer_make.h). The determinism check above builds a seed twice in one
+ * build; this one fails when a build makes a seed's layer otherwise. */
+static uint32_t fnv(uint32_t h, const void *p, size_t n) {
+	const uint8_t *b = p;
+	for (size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 16777619u;
+	return h;
+}
+
+static uint32_t mix(uint32_t h, int v) { int32_t w = v; return fnv(h, &w, sizeof w); }
+
+static void test_layer_make(void) {
+	Run before = run;   /* (the tests after it see the run as it was) */
+	memset(&run, 0, sizeof run);
+	run.seed = 0x5EED;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	uint32_t h = 2166136261u;
+	for (uint32_t s = 1; s <= 20; ++s) {
+		int depth = 1 + (int)(s * 3 % 26), kind = s % 5 == 0 ? LAYER_UNDERNET : s % 7 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		layer_generate(s * 104729u, depth, s % 2 ? (int)(s % BIOME_COUNT) : biome_for_depth(depth), kind, &kit);
+		h = fnv(h, layer.cell, sizeof layer.cell);
+		h = fnv(h, layer.level, sizeof layer.level);
+		h = mix(h, layer.nstairs);
+		for (int i = 0; i < layer.nstairs; ++i) h = mix(mix(mix(h, layer.stair[i].x), layer.stair[i].y), layer.stair[i].dir);
+		h = mix(h, layer.rise);
+		h = mix(h, layer.nrooms);
+		for (int i = 0; i < layer.nrooms; ++i) {
+			const Room *r = &layer.rooms[i];
+			h = mix(mix(mix(mix(mix(mix(mix(h, r->x), r->y), r->w), r->h), r->ax), r->ay), r->kind);
+		}
+		h = mix(h, layer.nobj);
+		for (int i = 0; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			h = mix(mix(mix(mix(h, o->type), (int)lroundf(o->x * 16)), (int)lroundf(o->y * 16)), o->param);
+			h = mix(mix(mix(h, o->solid), o->npc_line), o->prop);
+		}
+		h = mix(mix(mix(mix(mix(h, layer.biome), layer.kind), layer.boss_layer), layer.boss_navi), layer.exit_room);
+		h = mix(mix(mix(mix(h, layer.arena), layer.ante), layer.arena_dir), layer.layout);
+		h = mix(h, layer.nprops);
+		for (int i = 0; i < layer.nprops; ++i) {
+			const NetProp *p = &layer.props[i];
+			h = mix(mix(mix(mix(mix(mix(h, p->kind), p->faces), p->x), p->y), p->len), p->look);
+		}
+	}
+	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
+		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);
+	run = before;
 }
 
 static bool on_stair(int x, int y) {
@@ -774,7 +882,7 @@ static bool walk_step(double *x, double *y, double dx, double dy, int gx, int gy
 /* frames to get beside (tx, ty) from (x, y) following the arrow, -1 never */
 static int arrow_turns, arrow_frames, arrow_swings;
 static int follow_arrow(double x, double y, int tx, int ty) {
-	const double run = 2.0 / 32;   /* panels a frame */
+	const double speed = 2.0 / 32;   /* panels a frame */
 	int len, shown = route_way(x, y, tx, ty, &len), pending = shown, stuck = 0;
 	if (shown < 0) return -1;
 	int budget = 200 + 48 * len, before = -1, turned_at = -1000;
@@ -794,8 +902,8 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 		/* the pad's way on the grid (RIGHT +x -y, DOWN +x +y) */
 		double a = shown * 3.14159265358979 / 4, right = cos(a), down = sin(a);
 		double dx = (right + down) / 2, dy = (down - right) / 2, n = sqrt(dx * dx + dy * dy);
-		dx = fabs(dx) < 1e-9 ? 0 : dx / n * run;
-		dy = fabs(dy) < 1e-9 ? 0 : dy / n * run;
+		dx = fabs(dx) < 1e-9 ? 0 : dx / n * speed;
+		dy = fabs(dy) < 1e-9 ? 0 : dy / n * speed;
 		if (walk_step(&x, &y, dx, dy, tx, ty)) { stuck = 0; continue; }
 		/* along one axis into an edge: towards the side the floor goes on */
 		if (++stuck >= 3 && (!dx || !dy)) {
@@ -803,7 +911,7 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 			for (int s = -1; s <= 1; s += 2) {
 				int bx = ay ? s : 0, by = ax ? s : 0;
 				if (!walk_floor(cx + ax, cy + ay) && walk_floor(cx + bx, cy + by) && walk_floor(cx + ax + bx, cy + ay + by)) {
-					walk_step(&x, &y, bx * run, by * run, tx, ty);
+					walk_step(&x, &y, bx * speed, by * speed, tx, ty);
 					break;
 				}
 			}
@@ -968,19 +1076,32 @@ static void test_navicust(void) {
 	CHECK(!navicust_pack(many, 5, 4, 4), "twenty cells on sixteen");
 	/* the bug words: none, one light, several */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
-	CHECK(!*navicust_bug_words(bugs), "words for no bug");
+	CHECK(!*navicust_bug_words(bugs, false), "words for no bug");
 	bugs[9] = 1;
-	CHECK(strstr(navicust_bug_words(bugs), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs));
+	CHECK(strstr(navicust_bug_words(bugs, false), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs, false));
 	bugs[9] = 2;
-	CHECK(strstr(navicust_bug_words(bugs), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs));
+	CHECK(strstr(navicust_bug_words(bugs, false), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs, false));
 	bugs[7] = 5;
 	bugs[11] = 1;
-	const char *w = navicust_bug_words(bugs);
+	const char *w = navicust_bug_words(bugs, false);
 	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
 	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
 	memset(bugs, 0, sizeof bugs);
 	bugs[11] = 1;
-	CHECK(!strstr(navicust_bug_words(bugs), "command line"), "a colours' bug alone names itself");
+	CHECK(!strstr(navicust_bug_words(bugs, false), "command line"), "a colours' bug alone names itself");
+	CHECK(strstr(navicust_bug_words(bugs, true), "the RUN says OK, but") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true));
+	check_talk("navicust_bug_words", navicust_bug_words(bugs, true));
+	/* which programs turn: those whose colour's Spin is held */
+	navicust_set_spins(0);
+	CHECK(strstr(navicust_turn_words(0), "none yet") != NULL, "no Spin: %s", navicust_turn_words(0));
+	check_talk("navicust_turn_words none", navicust_turn_words(0));
+	navicust_set_spins(1u << 2);
+	CHECK(strstr(navicust_turn_words(0), "only pink programs") && strstr(navicust_turn_words(0), "that Spin"), "the pink Spin: %s", navicust_turn_words(0));
+	navicust_set_spins(0x3F & ~(1u << 5));
+	CHECK(strstr(navicust_turn_words(0), "white, yellow, pink, red and blue programs") != NULL, "five Spins: %s", navicust_turn_words(0));
+	check_talk("navicust_turn_words five", navicust_turn_words(0));
+	navicust_set_spins(0x3F);
+	CHECK(!strstr(navicust_turn_words(0), "only"), "all six: %s", navicust_turn_words(0));
 }
 
 /* Every layout an area draws builds as planned: one that never fits the
@@ -1001,87 +1122,174 @@ static void test_layouts_build(void) {
 		}
 }
 
-/* The touch controls: on the canvas, clear of the picture and of each
- * other where there is room, and a finger's buttons. */
+/* The touch controls: on the screen, clear of the picture and of each
+ * other where there is room, thumb sized, and what a finger holds. */
 static bool boxes_meet(const TouchBox *a, const TouchBox *b) {
-	return a->x < b->x + b->w && b->x < a->x + a->w && a->y < b->y + b->h && b->y < a->y + a->h;
+	return fabsf(a->cx - b->cx) * 2 < a->w + b->w && fabsf(a->cy - b->cy) * 2 < a->h + b->h;
 }
 
-/* sw x sh screen pixels, laid out as platform.c does with the controls shown */
-static void check_touch(const char *what, int sw, int sh) {
-	int sx = sw / 240, sy = sh / 160, s = sx < sy ? sx : sy;
-	s = touch_fit_scale(sw, sh, s < 1 ? 1 : s);
-	int w = sw / s, h = sh / s, px = (w - 240) / 2, py = (h - 160) / 2, top = touch_picture_top(w, h);
-	if (top >= 0) py = top;
+static bool round_control(int c) { return c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B; }
+
+/* Laid out as platform.c does, the controls shown: sw x sh pixels at dpi. */
+static void touch_screen_for(int sw, int sh, float dpi, TouchScreen *s) {
+	int sx = sw / 240, sy = sh / 160, scale = sx < sy ? sx : sy;
+	float dp = dpi / 160;
+	scale = touch_fit_scale(sw, sh, dp, scale < 1 ? 1 : scale);
+	int w = sw / scale, h = sh / scale, ox = (sw - w * scale) / 2, oy = (sh - h * scale) / 2;
+	int cx = (w - 240) / 2, cy = (h - 160) / 2, top = touch_picture_top(sw, sh, dp, scale);
+	if (top >= 0 && (top - oy + scale - 1) / scale + 160 <= h) cy = (top - oy + scale - 1) / scale;
+	TouchScreen t = { sw, sh, dp, ox + cx * scale, oy + cy * scale, 240 * scale, 160 * scale };
+	*s = t;
+}
+
+static void check_touch(const char *what, int sw, int sh, float dpi, int shape) {
+	TouchScreen s;
+	touch_screen_for(sw, sh, dpi, &s);
+	TouchPrefs p;
+	touch_prefs_default(&p);
 	TouchLayout t;
-	touch_layout_for(w, h, px, py, &t);
-	TouchBox pic = { px, py, 240, 160 };
-	CHECK(!t.over, "%s: the touch controls have no room beside or under the picture (%dx%d at %dx)", what, w, h, s);
+	touch_layout_for(&s, &p, &t);
+	static const char *const shapes[] = { "under", "beside", "over" };
+	CHECK(t.shape == shape, "%s: the touch controls stand %s the picture, not %s (a %dx%d picture)", what, shapes[t.shape], shapes[shape], s.pw, s.ph);
+	TouchBox pic = { s.px + s.pw / 2.f, s.py + s.ph / 2.f, (float)s.pw, (float)s.ph };
+	float mm = s.dp * 6.3f;
 	for (int c = 0; c < TOUCH_CONTROLS; ++c) {
 		const TouchBox *b = &t.box[c];
-		CHECK(b->x >= 0 && b->y >= 0 && b->x + b->w <= w && b->y + b->h <= h, "%s: control %d leaves the canvas", what, c);
-		CHECK(!boxes_meet(b, &pic), "%s: control %d covers the picture", what, c);
+		CHECK(b->cx - b->w / 2 >= -0.5f && b->cy - b->h / 2 >= -0.5f && b->cx + b->w / 2 <= sw + 0.5f && b->cy + b->h / 2 <= sh + 0.5f,
+			"%s: control %d leaves the screen", what, c);
+		CHECK(shape == TOUCH_OVER || !boxes_meet(b, &pic), "%s: control %d covers the picture", what, c);
 		for (int d = c + 1; d < TOUCH_CONTROLS; ++d) {
 			const TouchBox *e = &t.box[d];
-			bool round = (c == TOUCH_DPAD || c == TOUCH_A || c == TOUCH_B) && (d == TOUCH_DPAD || d == TOUCH_A || d == TOUCH_B);
-			long dx = (b->x + b->w / 2) - (e->x + e->w / 2), dy = (b->y + b->h / 2) - (e->y + e->h / 2), rr = b->w / 2 + e->w / 2;
-			CHECK(round ? dx * dx + dy * dy > rr * rr : !boxes_meet(b, e), "%s: controls %d and %d overlap", what, c, d);
+			float dx = b->cx - e->cx, dy = b->cy - e->cy, rr = b->w / 2 + e->w / 2;
+			CHECK(round_control(c) && round_control(d) ? dx * dx + dy * dy > rr * rr : !boxes_meet(b, e), "%s: controls %d and %d overlap", what, c, d);
 		}
 	}
-	/* thumb sized: in picture pixels, a share of the screen's short side */
+	/* thumb sized, in millimetres: a D-pad of 20 at least, A and B of 9 */
 	const TouchBox *dp = &t.box[TOUCH_DPAD];
-	int r = dp->w / 2, cx = dp->x + r, cy = dp->y + r;
-	CHECK(r >= 30, "%s: a D-pad of radius %d is small for a thumb", what, r);
-	CHECK(t.box[TOUCH_A].w / 2 >= 15 && t.box[TOUCH_B].w / 2 >= 15, "%s: A of radius %d is small for a thumb", what, t.box[TOUCH_A].w / 2);
-	CHECK(touch_hit(&t, cx, cy, TOUCH_DPAD) == 0, "%s: the D-pad's middle holds a direction", what);
-	CHECK(touch_hit(&t, cx + r * 3 / 4, cy + 1, TOUCH_DPAD) == BTN_RIGHT, "%s: right of the middle is not RIGHT", what);
-	CHECK(touch_hit(&t, cx - 2, cy - r * 3 / 4, TOUCH_DPAD) == BTN_UP, "%s: above the middle is not UP", what);
-	CHECK(touch_hit(&t, cx + r / 2, cy + r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_DOWN), "%s: the diagonal is not RIGHT+DOWN", what);
-	/* the diagonals as wide as the four directions (BN6's walkways run
-	 * along them): 30 degrees off an axis is the diagonal */
-	CHECK(touch_hit(&t, cx + r * 866 / 1000, cy - r / 2, TOUCH_DPAD) == (BTN_RIGHT | BTN_UP), "%s: 30 degrees up is not RIGHT+UP", what);
-	CHECK(touch_hit(&t, cx + r * 940 / 1000, cy - r * 342 / 1000, TOUCH_DPAD) == BTN_RIGHT, "%s: 20 degrees up is not RIGHT", what);
-	/* a thumb rolling back toward the middle keeps its direction until
-	 * the middle, and does not turn round short of a third past it */
-	CHECK(touch_dpad_steer(&t, cx, cy - r / 4, BTN_UP) == BTN_UP, "%s: UP lost a quarter out", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 4, BTN_UP) == BTN_UP, "%s: a thumb a quarter past the middle turned round", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 4, 0) == 0, "%s: a quarter out from the middle steers", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 10, BTN_UP) == 0, "%s: the middle holds a direction", what);
-	CHECK(touch_dpad_steer(&t, cx, cy + r / 2, BTN_UP) == BTN_DOWN, "%s: half way down is not DOWN", what);
-	/* a thumb that slid off the D-pad still steers it; one from a button does not */
-	CHECK(touch_hit(&t, cx - 3 * r, cy, TOUCH_DPAD) == BTN_LEFT, "%s: a thumb slid off the D-pad lost it", what);
-	CHECK(touch_hit(&t, cx + r / 2, cy, TOUCH_B) == 0, "%s: a thumb from B steers the D-pad", what);
-	static const struct { int c; uint32_t bit; } keys[] = {
-		{ TOUCH_A, BTN_A }, { TOUCH_B, BTN_B }, { TOUCH_L, BTN_L }, { TOUCH_R, BTN_R }, { TOUCH_START, BTN_START }, { TOUCH_SELECT, BTN_SELECT },
-	};
-	for (size_t i = 0; i < sizeof keys / sizeof *keys; ++i) {
-		const TouchBox *b = &t.box[keys[i].c];
-		int bx = b->x + b->w / 2, by = b->y + b->h / 2;
-		CHECK(touch_control_at(&t, bx, by) == keys[i].c && touch_hit(&t, bx, by, keys[i].c) == keys[i].bit,
-			"%s: control %d's middle does not press it", what, keys[i].c);
-	}
-	/* a thumb rolled from B onto A presses A */
-	const TouchBox *a = &t.box[TOUCH_A];
-	CHECK(touch_hit(&t, a->x + a->w / 2, a->y + a->h / 2, TOUCH_B) == BTN_A, "%s: rolling from B to A misses A", what);
+	float r = dp->w / 2, cx = dp->cx, cy = dp->cy;
+	CHECK(dp->w / mm >= 19.8f, "%s: a D-pad of %.1f mm is small for a thumb", what, dp->w / mm);
+	CHECK(t.box[TOUCH_A].w / mm >= 9 && t.box[TOUCH_B].w / mm >= 9, "%s: A of %.1f mm is small for a thumb", what, t.box[TOUCH_A].w / mm);
+	CHECK(dp->w / mm <= 30.5f && t.box[TOUCH_A].w / mm <= 14.5f, "%s: a D-pad of %.1f mm is past its size", what, dp->w / mm);
+	/* each control's middle is its own */
+	for (int c = 0; c < TOUCH_CONTROLS; ++c)
+		CHECK(touch_control_at(&t, t.box[c].cx, t.box[c].cy, -1) == c, "%s: control %d's middle does not reach it", what, c);
+	/* the D-pad: nothing in its middle, eight ways of 45 degrees (BN6's
+	 * walkways run along the diagonals), four of 90 off the map */
+	CHECK(touch_dpad_steer(&t, cx, cy, 0, false) == 0, "%s: the D-pad's middle holds a direction", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.75f, cy + 1, 0, false) == BTN_RIGHT, "%s: right of the middle is not RIGHT", what);
+	CHECK(touch_dpad_steer(&t, cx - 2, cy - r * 0.75f, 0, false) == BTN_UP, "%s: above the middle is not UP", what);
+	CHECK(touch_dpad_steer(&t, cx + r / 2, cy + r / 2, 0, false) == (BTN_RIGHT | BTN_DOWN), "%s: the diagonal is not RIGHT+DOWN", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.866f, cy - r / 2, 0, false) == (BTN_RIGHT | BTN_UP), "%s: 30 degrees up is not RIGHT+UP", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.94f, cy - r * 0.342f, 0, false) == BTN_RIGHT, "%s: 20 degrees up is not RIGHT", what);
+	CHECK(touch_dpad_steer(&t, cx + r * 0.866f, cy - r / 2, 0, true) == BTN_RIGHT, "%s: four ways, 30 degrees up is not RIGHT", what);
+	CHECK(touch_dpad_steer(&t, cx + r / 2, cy - r * 0.866f, 0, true) == BTN_UP, "%s: four ways, 60 degrees up is not UP", what);
+	CHECK(touch_dpad_steer(&t, cx + r / 2 + 2, cy + r / 2, 0, true) != (BTN_RIGHT | BTN_DOWN), "%s: four ways gave a diagonal", what);
+	/* a direction held stays 8 degrees past its edge, and a thumb rolling
+	 * back toward the middle keeps it until the middle */
+	CHECK(touch_dpad_steer(&t, cx + r * sinf(0.52f), cy - r * cosf(0.52f), BTN_UP, false) == BTN_UP, "%s: UP lost 30 degrees off it", what);
+	CHECK(touch_dpad_steer(&t, cx + r * sinf(0.62f), cy - r * cosf(0.62f), BTN_UP, false) == (BTN_UP | BTN_RIGHT), "%s: UP kept 35 degrees off it", what);
+	CHECK(touch_dpad_steer(&t, cx, cy - r * 0.16f, BTN_UP, false) == BTN_UP, "%s: UP lost a sixth out", what);
+	CHECK(touch_dpad_steer(&t, cx, cy - r * 0.16f, 0, false) == 0, "%s: a sixth out from the middle steers", what);
+	CHECK(touch_dpad_steer(&t, cx, cy + r * 0.1f, BTN_UP, false) == 0, "%s: the middle holds a direction", what);
+	CHECK(touch_dpad_steer(&t, cx - 3 * r, cy, BTN_LEFT, false) == BTN_LEFT, "%s: a thumb slid off the D-pad lost it", what);
+	/* A and B reach past their art, the one held further; between them, the nearer */
+	const TouchBox *a = &t.box[TOUCH_A], *b = &t.box[TOUCH_B];
+	CHECK(touch_control_at(&t, a->cx + a->w / 2 * 1.25f, a->cy, -1) == TOUCH_A, "%s: a finger just off A misses it", what);
+	CHECK(touch_control_at(&t, a->cx + a->w / 2 * 1.5f, a->cy, TOUCH_A) == TOUCH_A, "%s: A held lets go of a wobbling thumb", what);
+	CHECK(touch_control_at(&t, a->cx + (b->cx - a->cx) * 0.4f, a->cy + (b->cy - a->cy) * 0.4f, TOUCH_B) == TOUCH_A,
+		"%s: nearer A, a thumb from B does not reach A", what);
 }
 
 static void test_touch(void) {
-	check_touch("a phone upright (1080x2340)", 1080, 2340);
-	check_touch("a phone upright (1170x2532)", 1170, 2532);
-	check_touch("a phone upright (720x1600)", 720, 1600);
-	check_touch("a phone on its side (2340x1080)", 2340, 1080);
-	check_touch("a phone on its side (2532x1170)", 2532, 1170);
-	check_touch("a phone on its side (1600x720)", 1600, 720);
-	check_touch("a 16:9 screen (1920x1080)", 1920, 1080);
-	check_touch("a 4:3 tablet (2048x1536)", 2048, 1536);
-	check_touch("a 4:3 tablet upright (1536x2048)", 1536, 2048);
-	check_touch("a Retroid Pocket (1334x750)", 1334, 750);
+	check_touch("a phone upright (1080x2400)", 1080, 2400, 420, TOUCH_BELOW);
+	check_touch("a phone upright (1170x2532)", 1170, 2532, 480, TOUCH_BELOW);
+	check_touch("a phone upright (720x1600)", 720, 1600, 280, TOUCH_BELOW);
+	check_touch("a 16:9 phone upright (1080x1920)", 1080, 1920, 420, TOUCH_BELOW);
+	check_touch("a phone's page upright (390x844)", 390, 844, 160, TOUCH_BELOW);
+	check_touch("a phone on its side (2400x1080)", 2400, 1080, 420, TOUCH_SIDE);
+	check_touch("a phone on its side (2532x1170)", 2532, 1170, 480, TOUCH_SIDE);
+	check_touch("a phone on its side (1600x720)", 1600, 720, 280, TOUCH_SIDE);
+	check_touch("a 16:9 phone on its side (1920x1080)", 1920, 1080, 420, TOUCH_SIDE);
+	check_touch("a phone's page on its side (844x390)", 844, 390, 160, TOUCH_SIDE);
+	check_touch("a 4:3 tablet (2048x1536)", 2048, 1536, 320, TOUCH_SIDE);
+	check_touch("a 4:3 tablet upright (1536x2048)", 1536, 2048, 320, TOUCH_BELOW);
+	check_touch("a 16:10 tablet (2560x1600)", 2560, 1600, 320, TOUCH_SIDE);
+	check_touch("a 16:10 tablet upright (1600x2560)", 1600, 2560, 320, TOUCH_BELOW);
+	check_touch("a Steam Deck (1280x800)", 1280, 800, 215, TOUCH_SIDE);
+	check_touch("a Retroid Pocket (1334x750)", 1334, 750, 326, TOUCH_SIDE);
+	check_touch("a square window (1000x1000)", 1000, 1000, 320, TOUCH_OVER);
+
+	/* the player's arrangement (the editor, touch.ini): a control moved
+	 * and sized lands where it was put, whole on the screen, the others as
+	 * laid out; the file reads back as written */
+	TouchScreen s;
+	touch_screen_for(1080, 2400, 420, &s);
+	TouchPrefs p;
+	touch_prefs_default(&p);
+	TouchLayout def, t;
+	touch_layout_for(&s, &p, &def);
+	p.place[TOUCH_BELOW][TOUCH_A] = (TouchPlace){ 500, 900, 150, 60, true };
+	p.place[TOUCH_BELOW][TOUCH_START] = (TouchPlace){ 0, 0, 120, 0, false };
+	p.place[TOUCH_BELOW][TOUCH_DPAD] = (TouchPlace){ 1000, 1000, 0, 0, true };
+	p.place[TOUCH_SIDE][TOUCH_B] = (TouchPlace){ 10, 20, 60, 0, true };
+	touch_layout_for(&s, &p, &t);
+	const TouchBox *a = &t.box[TOUCH_A];
+	CHECK(fabsf(a->cx - 540) <= 1 && fabsf(a->cy - 2160) <= 1, "A moved to (540, 2160) stands at (%.0f, %.0f)", a->cx, a->cy);
+	CHECK(fabsf(a->w - def.box[TOUCH_A].w * 1.5f) <= 1, "A at 150%% is %.0f across, laid out %.0f", a->w, def.box[TOUCH_A].w);
+	CHECK(fabsf(t.alpha[TOUCH_A] - 0.6f) < 0.01f && t.alpha[TOUCH_B] == 1, "A at 60%% opacity is at %.2f", t.alpha[TOUCH_A]);
+	CHECK(touch_control_at(&t, a->cx, a->cy, -1) == TOUCH_A, "a finger on the moved A does not reach it");
+	CHECK(fabsf(t.box[TOUCH_START].w - def.box[TOUCH_START].w * 1.2f) < 0.01f && t.box[TOUCH_START].cx == def.box[TOUCH_START].cx,
+		"START sized, not moved, left its place or its size");
+	const TouchBox *d = &t.box[TOUCH_DPAD];
+	CHECK(fabsf(d->cx + d->w / 2 - 1080) < 0.5f && fabsf(d->cy + d->h / 2 - 2400) < 0.5f, "the D-pad put at the corner leaves the screen");
+	CHECK(!memcmp(&t.box[TOUCH_B], &def.box[TOUCH_B], sizeof(TouchBox)), "B moved beside the picture moved under it");
+	static char text[4096];
+	p.size = 80;
+	p.opacity = 70;
+	p.haptics = false;
+	p.left_handed = true;
+	touch_prefs_format(&p, text, sizeof text);
+	TouchPrefs back;
+	touch_prefs_parse(text, &back);
+	CHECK(!memcmp(&back, &p, sizeof p), "touch.ini reads back otherwise than written:\n%s", text);
+	touch_prefs_parse("size = 999\nopacity = 5\nbelow a 2000 5 100 100\nside nothing 1 2 3 4\nover l - - 999 100\n", &back);
+	CHECK(back.size == 100 && back.opacity == 100 && !back.place[TOUCH_BELOW][TOUCH_A].moved && !back.place[TOUCH_OVER][TOUCH_L].size,
+		"touch.ini's bad values were taken");
+
+	/* left-handed: the D-pad under the right thumb, A and B the left, apart */
+	TouchPrefs left;
+	touch_prefs_default(&left);
+	left.left_handed = true;
+	touch_layout_for(&s, &left, &t);
+	CHECK(t.box[TOUCH_DPAD].cx > 540 && t.box[TOUCH_A].cx < 540 && t.box[TOUCH_B].cx < 540, "left-handed, the D-pad is not on the right");
+	for (int c = 0; c < TOUCH_CONTROLS; ++c)
+		for (int e = c + 1; e < TOUCH_CONTROLS; ++e)
+			CHECK(!boxes_meet(&t.box[c], &t.box[e]) || (round_control(c) && round_control(e) &&
+				hypotf(t.box[c].cx - t.box[e].cx, t.box[c].cy - t.box[e].cy) > (t.box[c].w + t.box[e].w) / 2),
+				"left-handed, controls %d and %d overlap", c, e);
+	/* their size: smaller anywhere; larger only where it fits (a phone's
+	 * are as large as fit, a tablet's grow) */
+	left.left_handed = false;
+	left.size = 180;
+	touch_layout_for(&s, &left, &t);
+	CHECK(t.box[TOUCH_DPAD].w <= def.box[TOUCH_DPAD].w * 1.05f && t.size_max <= 105, "a phone's D-pad grew past what fits (%d%%)", t.size_max);
+	left.size = 60;
+	touch_layout_for(&s, &left, &t);
+	CHECK(fabsf(t.box[TOUCH_DPAD].w - def.box[TOUCH_DPAD].w * 0.6f) < 1, "a phone's D-pad at 60%% is %.0f, laid out %.0f", t.box[TOUCH_DPAD].w, def.box[TOUCH_DPAD].w);
+	touch_screen_for(1600, 2560, 320, &s);
+	touch_layout_for(&s, &p, &def);
+	left.size = 130;
+	touch_layout_for(&s, &left, &t);
+	touch_prefs_default(&left);
+	touch_layout_for(&s, &left, &def);
+	CHECK(t.size_max >= 130 && fabsf(t.box[TOUCH_A].w - def.box[TOUCH_A].w * 1.3f) < 1, "a tablet's A at 130%% did not grow (%d%% fits)", t.size_max);
 }
 
 int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
+	test_layer_make();
 	test_layouts_build();
 	test_stairs();
 	test_arrow();

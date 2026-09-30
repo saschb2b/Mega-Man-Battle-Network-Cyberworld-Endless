@@ -30,6 +30,7 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "layer_objs.h"
+#include "layer_make.h"
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
@@ -147,6 +148,7 @@ static struct {
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
 #define CARD_SKIP    30   /* frames a card shows before A ends it, where MegaMan is held for it */
+#define PORT_STEP    16   /* world units from a jack-in cell that R steps onto it */
 #define WALK_UP      45   /* frames the walk up to a navi out of reach may take */
 
 /* An act begins (or a side layer): its title card, as Hades names each
@@ -298,6 +300,20 @@ static const char *way_to(int tx, int ty, int *far) {
 	 * ways, net_route.c) */
 	way_dir = route_grid_way(dy / 32.0, -dx / 32.0);
 	return ways[way_dir];
+}
+
+/* ProtoMan's mark on the layer's map, and its key's */
+#define RIVAL_MARK { 255, 96, 176, 255 }
+
+/* ProtoMan, while his duel waits on this layer (not taken, not a netbattle
+ * named for later): where he stands in the world. */
+static bool duel_waiting(int *wx, int *wy) {
+	if (layer_objs_duel_later) return false;
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (D.objs.choice[i].type == OBJ_DUEL && (D.chosen & (1u << i))) return false;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_DUEL) { netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, wx, wy); return true; }
+	return false;
 }
 
 /* The town's way to the port on foot (town_walk): the first stretch of the
@@ -541,6 +557,15 @@ static const char *status_words(void) {
 		if (fresh & MARK_VAULT)
 			ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
 		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+		/* (where the rival waits, and his mark: the map showed him as the
+		 * official gate's violet, and a playtester's session ran out at
+		 * the gate, alone, looking for him) */
+		int dx, dy, df;
+		static const char *const dist[3] = { "close by", "a ways off", "far off" };
+		if (duel_waiting(&dx, &dy)) {
+			const char *dw = way_to(dx, dy, &df);
+			ADD("@M ProtoMan's %s, %s: the pink mark on the map.|", dw, dist[df]);
+		}
 		/* (a program left off the board: said on every layer until placed;
 		 * one that cannot fit, once a board: a playtester's SuprArmr could
 		 * not share the 4x4 board with Custom1) */
@@ -549,7 +574,7 @@ static const char *status_words(void) {
 		if (off && !fits_beside_placed(offv)) {
 			const char *w = no_room_words(*off ? off : "That program");
 			if (w) ADD("%s|", w);
-		} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. L and R turn a program.|", off);
+		} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
 		else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
@@ -572,6 +597,13 @@ static const char *status_words(void) {
 			else ADD("@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s.|", hw, near_far[hf]);
 			break;
 		}
+	}
+	/* (and after that, where ProtoMan waits, while he does) */
+	int rx, ry, rf;
+	static const char *const rival_far[3] = { "close by", "a ways off", "far off" };
+	if (told && duel_waiting(&rx, &ry)) {
+		const char *rw = way_to(rx, ry, &rf);
+		ADD("@M ProtoMan's waiting %s, %s.|", rw, rival_far[rf]);
 	}
 	/* the way on, as MegaMan senses it: along the floor where he can (the
 	 * arrow's way); where the walk sets off well away from where the goal
@@ -758,13 +790,23 @@ static void note_folder_codes(void) {
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
-/* Chaud's clearance (docs/RIVAL.md): 1 after a first duel won, 2 once
- * ProtoMan himself has been beaten (the third rung, a third win). */
-static int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : profile.duel_won >= 1 ? 1 : 0; }
+/* Whether ProtoMan's duel stands on the layer. */
+static bool duel_layer(void) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_DUEL) return true;
+	return false;
+}
 
 /* The layer's official gate open where Chaud's clearance reaches its level
- * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md). */
-static void official_sync(void) {
+ * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md); the one beside
+ * ProtoMan's duel opens to its winner alone, as the duel is won, and stays
+ * as a CONTINUE (`resumed`) finds it (a playtester with the clearance found
+ * it open before the duel, which then paid nothing but the record). */
+static void official_sync(bool resumed) {
+	if (duel_layer()) {
+		if (!resumed) flag_clear(LAYER_CLEARED_FLAG);
+		return;
+	}
 	if (layer_objs_official_level && rival_clearance() >= layer_objs_official_level) flag_set(LAYER_CLEARED_FLAG);
 	else flag_clear(LAYER_CLEARED_FLAG);
 }
@@ -779,6 +821,14 @@ static int duel_frames(int hp) {
 	for (int i = 0; i < profile.duel_won / 2; ++i) k *= 0.92;
 	if (k < 0.6) k = 0.6;
 	return (int)(t * k);
+}
+
+/* A race's squad holds no virus that decides when it can be hit. */
+#define FAMILY_QUAKER 6   /* (the families are BN6's sprite categories less 0x0E) */
+static bool duel_race_fair(const Encounter *e) {
+	for (int i = 0; i < e->nfoes; ++i)
+		if (e->foes[i].kind == FOE_VIRUS && e->foes[i].family == FAMILY_QUAKER) return false;
+	return true;
 }
 
 static int encounter_hp(const Encounter *e) {
@@ -829,7 +879,18 @@ static bool build_layer(void) {
 			 * the test, not its strength; one above the band deleted a
 			 * playtester at 100 of 140 HP on layer 2, his run over) */
 			D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_NORMAL);
+			/* (and none a race can't hurry: a Quaker is out of reach in the
+			 * air until it lands, so the clock times its hops, not the
+			 * player; three of a playtester's four duels were Quakers, "a
+			 * Quaker lottery") */
+			for (int tries = 0; layer_objs_duel_rung != 2 && tries < 8 && !duel_race_fair(&D.duel_enc); ++tries)
+				D.duel_enc = make_encounter(run.depth, run.biome, ENC_NORMAL);
 			layer_objs_duel_foes = D.duel_enc.nfoes;
+			if (emu_debug_on()) {
+				fprintf(stderr, "duel squad (rung %d):", layer_objs_duel_rung);
+				for (int k = 0; k < D.duel_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.duel_enc.foes[k].kind, D.duel_enc.foes[k].family, D.duel_enc.foes[k].version);
+				fprintf(stderr, "\n");
+			}
 			int lo, hi;
 			pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 			D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi : 0;
@@ -878,7 +939,8 @@ static bool build_layer(void) {
 	flag_clear(LAYER_HEAL_TOLD_FLAG);
 	flag_clear(LAYER_VAULT_FLAG);
 	flag_clear(LAYER_OFFICIAL_FLAG);
-	official_sync();
+	flag_clear(LAYER_DUEL_CALLED_FLAG);
+	official_sync(false);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -1068,21 +1130,75 @@ void director_draw_duel(void) {
 	if (lines == 3) text_draw(x, y + 20, D.duel_hit ? "Hit!" : "No hits", D.duel_hit ? rgba(255, 120, 120, 255) : rgba(140, 255, 170, 255), TEXT_RIGHT);
 }
 
-void director_draw_map(void) {
-	if (!D.active || D.town || !D.map_shown || !on_map()) return;
-	int x0 = P.core_x, y0 = P.core_y;
-	fill_rect(x0, y0, 240, 160, rgba(0, 8, 28, 255));
-	int bx = x0 + 6, by = y0 + 18, bw = 228, bh = 122;
-	SDL_Color edge = rgba(120, 200, 255, 220);
-	fill_rect(bx - 2, by - 2, bw + 4, 1, edge);
-	fill_rect(bx - 2, by + bh + 1, bw + 4, 1, edge);
-	fill_rect(bx - 2, by - 2, 1, bh + 4, edge);
-	fill_rect(bx + bw + 1, by - 2, 1, bh + 4, edge);
-	text_drawf(bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, mx, my;
-	if (!netmap_panel(px, py, &mx, &my)) return;
-	/* a grid step goes 4 pixels across and 2 down (x - y across, x + y down) */
-	int umin = mx - my, umax = umin, vmin = mx + my, vmax = vmin;
+/* The layer's map (SELECT's over the picture, the second screen's): its
+ * frame, and a grid step there, s pixels across and s / 2 down (x - y
+ * across, x + y down) */
+typedef struct {
+	int bx, by, bw, bh;   /* the frame, inside its edge */
+	int ox, oy, cu, cv, s;   /* the frame's middle, the grid's point there, the step */
+	int mx, my;   /* MegaMan's panel */
+} MapView;
+
+static int map_x(const MapView *m, int x, int y) { return m->ox + (x - y - m->cu) * m->s; }
+static int map_y(const MapView *m, int x, int y) { return m->oy + (x + y - m->cv) * (m->s / 2); }
+
+static bool map_inside(const MapView *m, int sx, int sy, int pad) {
+	return sx - pad >= m->bx && sy - pad >= m->by && sx + pad < m->bx + m->bw && sy + pad < m->by + m->bh;
+}
+
+/* where the ray from MegaMan to (sx, sy) leaves the frame, pad pixels in */
+static bool map_edge(const MapView *m, int sx, int sy, int pad, int *ex, int *ey) {
+	double sx0 = map_x(m, m->mx, m->my), sy0 = map_y(m, m->mx, m->my);
+	double dx = sx - sx0, dy = sy - sy0, t = 1e9, hx = m->bw / 2.0 - pad, hy = m->bh / 2.0 - pad;
+	if (dx > 0) t = fmin(t, (m->ox + hx - sx0) / dx);
+	if (dx < 0) t = fmin(t, (m->ox - hx - sx0) / dx);
+	if (dy > 0) t = fmin(t, (m->oy + hy - sy0) / dy);
+	if (dy < 0) t = fmin(t, (m->oy - hy - sy0) / dy);
+	if (!(t > 0 && t < 1e8)) return false;
+	*ex = (int)lround(sx0 + dx * t);
+	*ey = (int)lround(sy0 + dy * t);
+	return true;
+}
+
+/* the key's entries, under the map */
+enum { MAP_YOU, MAP_EXIT, MAP_HEAL, MAP_SHOP, MAP_BOSS, MAP_EVENT, MAP_RIVAL, MAP_KEYS };
+static const struct { const char *what; SDL_Color c; } map_key[MAP_KEYS] = {
+	{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
+	{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
+	{ "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
+};
+
+/* an object's entry in the key, -1 for none: a Server, a dark warp or a
+ * gate is "Event"; the rival his own, a white eye in it (he and the
+ * official gate both showed violet) */
+static int map_kind(int type) {
+	switch (type) {
+	case OBJ_EXIT: case OBJ_RETURN: return MAP_EXIT;
+	case OBJ_BOSS: return MAP_BOSS;
+	case OBJ_HEAL: return MAP_HEAL;
+	case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: return MAP_SHOP;
+	case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL:
+		return MAP_EVENT;
+	case OBJ_DUEL: return MAP_RIVAL;
+	default: return -1;
+	}
+}
+
+/* a mark the map leaves out: a Server's once its battle is taken (a
+ * playtester saw it still there after he had won), ProtoMan's once his
+ * duel is done or put off (he only talks then) */
+static bool map_left_out(int type) {
+	if (type != OBJ_CHALLENGE && type != OBJ_DUEL) return false;
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (D.objs.choice[i].type == type && (D.chosen & (1u << i))) return true;
+	return type == OBJ_DUEL && layer_objs_duel_later;
+}
+
+/* the step as large as lets the floor seen so far fit (8 on the second
+ * screen's larger frame, 6 over the picture, 4 at the least), on the
+ * seen floor's middle, or on MegaMan when it fits at none */
+static void map_view(MapView *m) {
+	int umin = m->mx - m->my, umax = umin, vmin = m->mx + m->my, vmax = vmin;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
@@ -1092,186 +1208,189 @@ void director_draw_map(void) {
 			if (v < vmin) vmin = v;
 			if (v > vmax) vmax = v;
 		}
-	/* larger while the seen floor fits at it */
-	int cu = (umin + umax) / 2, cv = (vmin + vmax) / 2, s = 6;
-	if ((umax - umin) * 6 + 14 > bw || (vmax - vmin) * 3 + 8 > bh) s = 4;
-	if (s == 4 && ((umax - umin) * 4 + 10 > bw || (vmax - vmin) * 2 + 6 > bh)) { cu = mx - my; cv = mx + my; }
-	int ox = bx + bw / 2, oy = by + bh / 2;
-	#define SX(x, y) (ox + ((x) - (y) - cu) * s)
-	#define SY(x, y) (oy + ((x) + (y) - cv) * (s / 2))
-	#define INSIDE(sx, sy, m) ((sx) - (m) >= bx && (sy) - (m) >= by && (sx) + (m) < bx + bw && (sy) + (m) < by + bh)
+	int s = m->bw >= 300 ? 8 : 6;
+	while (s > 4 && ((umax - umin) * s + 2 * s + 2 > m->bw || (vmax - vmin) * (s / 2) + s + 2 > m->bh)) s -= 2;
+	m->s = s;
+	m->ox = m->bx + m->bw / 2;
+	m->oy = m->by + m->bh / 2;
+	m->cu = (umin + umax) / 2;
+	m->cv = (vmin + vmax) / 2;
+	if (s == 4 && ((umax - umin) * 4 + 10 > m->bw || (vmax - vmin) * 2 + 6 > m->bh)) {
+		m->cu = m->mx - m->my;
+		m->cv = m->mx + m->my;
+	}
+}
+
+/* the panels seen: each a diamond 2s - 1 wide and s - 1 high (7 by 3, 11
+ * by 5, 15 by 7), a pixel apart from the next; their rows drawn a batch
+ * per colour, raised floor lighter (thousands of rows, a call each had
+ * cost the 3DS's processor) */
+static void map_panels(const MapView *m) {
+	static const SDL_Color colour[2] = { { 60, 140, 230, 240 }, { 150, 210, 255, 240 } };
+	static SDL_Rect rows[2][512];
+	int n[2] = { 0, 0 }, half = m->s / 2 - 1;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
-			int sx = SX(x, y), sy = SY(x, y);
-			if (!INSIDE(sx, sy, 3)) continue;
-			/* a panel: a diamond 7 wide and 3 high (11 and 5 larger), a pixel
-			 * apart from the next */
-			SDL_Color c = layer.level[y][x] ? rgba(150, 210, 255, 240) : rgba(60, 140, 230, 240);
-			if (s == 6) {
-				fill_rect(sx - 1, sy - 2, 3, 1, c);
-				fill_rect(sx - 3, sy - 1, 7, 1, c);
-				fill_rect(sx - 5, sy, 11, 1, c);
-				fill_rect(sx - 3, sy + 1, 7, 1, c);
-				fill_rect(sx - 1, sy + 2, 3, 1, c);
-			} else {
-				fill_rect(sx - 1, sy - 1, 3, 1, c);
-				fill_rect(sx - 3, sy, 7, 1, c);
-				fill_rect(sx - 1, sy + 1, 3, 1, c);
+			int sx = map_x(m, x, y), sy = map_y(m, x, y), k = layer.level[y][x] != 0;
+			if (!map_inside(m, sx, sy, 3)) continue;
+			for (int r = -half; r <= half; ++r) {
+				if (n[k] == 512) { fill_rects(rows[k], n[k], colour[k]); n[k] = 0; }
+				rows[k][n[k]++] = (SDL_Rect){ sx - (m->s - 1 - 2 * abs(r)), sy + r, 2 * m->s - 1 - 4 * abs(r), 1 };
 			}
 		}
-	/* the way on, over the panels he has come near, up to the first he
-	 * hasn't: marks he earned (a V in a comp's maze read as a dead end,
-	 * the arm on to the exit nowhere on the map) */
-	{
-		int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey, len;
-		SDL_Color tc = rgba(255, 230, 60, 200);
-		if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
-		double wx, wy;
-		netmap_grid(px, py, &wx, &wy);
-		if (netmap_panel(tx, ty, &ex, &ey) && route_way(wx, wy, ex, ey, &len) >= 0) {
-			/* in straight runs as far as a straight line over the floor
-			 * goes (the walk's steps zig-zagged across a platform) */
-			int cx = mx, cy = my, k = route_walk_len - 1;
-			while (k >= 0) {
-				int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;
-				if (!D.seen[y][x]) break;
-				for (int j = k - 1; j >= 0 && j >= k - 12; --j) {
-					int jx = route_walk[j] % MAP_W, jy = route_walk[j] / MAP_W;
-					if (!D.seen[jy][jx]) break;
-					if (route_floor_line(cx, cy, jx, jy)) far = j;
-				}
-				int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W, steps = abs(fx - cx) + abs(fy - cy);
-				for (int t = 1; t <= steps; ++t) {
-					int px2 = SX(cx, cy) + (SX(fx, fy) - SX(cx, cy)) * t / steps, py2 = SY(cx, cy) + (SY(fx, fy) - SY(cx, cy)) * t / steps;
-					if (INSIDE(px2, py2, 3)) fill_rect(px2 - (s == 6 ? 2 : 1), py2, s == 6 ? 5 : 3, 1, tc);
-				}
-				cx = fx; cy = fy;
-				k = far - 1;
-			}
+	for (int k = 0; k < 2; ++k) fill_rects(rows[k], n[k], colour[k]);
+}
+
+/* the way on, over the panels he has come near, up to the first he
+ * hasn't: marks he earned (a V in a comp's maze read as a dead end, the
+ * arm on to the exit nowhere on the map); in straight runs as far as a
+ * straight line over the floor goes (the walk's steps zig-zagged across a
+ * platform) */
+static void map_way(const MapView *m, int px, int py) {
+	int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey, len;
+	SDL_Color tc = rgba(255, 230, 60, 200);
+	if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
+	double wx, wy;
+	netmap_grid(px, py, &wx, &wy);
+	if (!netmap_panel(tx, ty, &ex, &ey) || route_way(wx, wy, ex, ey, &len) < 0) return;
+	int cx = m->mx, cy = m->my, k = route_walk_len - 1;
+	while (k >= 0) {
+		int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;
+		if (!D.seen[y][x]) break;
+		for (int j = k - 1; j >= 0 && j >= k - 12; --j) {
+			int jx = route_walk[j] % MAP_W, jy = route_walk[j] / MAP_W;
+			if (!D.seen[jy][jx]) break;
+			if (route_floor_line(cx, cy, jx, jy)) far = j;
 		}
+		int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W, steps = abs(fx - cx) + abs(fy - cy);
+		int ax = map_x(m, cx, cy), ay = map_y(m, cx, cy), bx = map_x(m, fx, fy), by = map_y(m, fx, fy);
+		for (int t = 1; t <= steps; ++t) {
+			int lx = ax + (bx - ax) * t / steps, ly = ay + (by - ay) * t / steps;
+			if (map_inside(m, lx, ly, 3)) fill_rect(lx - (m->s - 1) / 2, ly, m->s - 1, 1, tc);
+		}
+		cx = fx; cy = fy;
+		k = far - 1;
 	}
-	/* what stands there, once seen; the goal's way while it is not (a
-	 * Server's mark gone once its battle is taken: a playtester saw it
-	 * still there after he had won) */
-	bool server_done = false, duel_done = false;
-	for (int i = 0; i < D.objs.nchoices; ++i) {
-		server_done |= D.objs.choice[i].type == OBJ_CHALLENGE && (D.chosen & (1u << i));
-		duel_done |= D.objs.choice[i].type == OBJ_DUEL && (D.chosen & (1u << i));
-	}
-	duel_done |= layer_objs_duel_later;   /* (ProtoMan only talks: no mark) */
-	int gx = -1, gy = -1;
-	bool goal_boss = false;   /* (the guardian while it stands, else the exit) */
-	SDL_Color gc = rgba(255, 230, 60, 255);
-	for (int i = 0; i < layer.nobj; ++i) {
-		const NetObj *o = &layer.obj[i];
-		int x = (int)o->x, y = (int)o->y;
-		SDL_Color c;
-		switch (o->type) {
-		case OBJ_EXIT: case OBJ_RETURN: c = rgba(255, 230, 60, 255); break;
-		case OBJ_BOSS: c = rgba(255, 70, 70, 255); break;
-		case OBJ_HEAL: c = rgba(90, 255, 120, 255); break;
-		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: c = rgba(255, 160, 40, 255); break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_DUEL: case OBJ_OFFICIAL:
-			c = rgba(210, 110, 255, 255); break;
-		default: continue;
-		}
-		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
-		if ((o->type == OBJ_CHALLENGE && server_done) || (o->type == OBJ_DUEL && duel_done)) continue;
-		if (o->type == OBJ_BOSS && !boss_beaten()) { gx = x; gy = y; gc = c; goal_boss = true; }
-		else if (o->type == OBJ_EXIT && !goal_boss) { gx = x; gy = y; }
-		int sx = SX(x, y), sy = SY(x, y);
-		if (!D.seen[y][x]) {
-			/* a service MegaMan senses but has not come near: its ring
-			 * where it stands, or a pip on the frame's edge its way (L
-			 * named the Recovery Mr. Prog, and it was nowhere on the map) */
-			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS) continue;
-			if (!INSIDE(sx, sy, 3)) {
-				double dx = sx - SX(mx, my), dy = sy - SY(mx, my), t = 1e9, hx = bw / 2.0 - 3, hy = bh / 2.0 - 3;
-				double sx0 = SX(mx, my), sy0 = SY(mx, my);
-				if (dx > 0) t = fmin(t, (ox + hx - sx0) / dx);
-				if (dx < 0) t = fmin(t, (ox - hx - sx0) / dx);
-				if (dy > 0) t = fmin(t, (oy + hy - sy0) / dy);
-				if (dy < 0) t = fmin(t, (oy - hy - sy0) / dy);
-				if (!(t > 0 && t < 1e8)) continue;
-				sx = (int)lround(sx0 + dx * t); sy = (int)lround(sy0 + dy * t);
-				fill_rect(sx - 1, sy - 1, 3, 3, c);
-				continue;
-			}
+}
+
+/* one thing standing there, once seen; before, a ring where it stands if
+ * MegaMan senses it, or a pip on the frame's edge its way (L named the
+ * Recovery Mr. Prog, and it was nowhere on the map): the exit and the
+ * guardian neither */
+static void map_mark(const MapView *m, int type, int x, int y, SDL_Color c) {
+	int sx = map_x(m, x, y), sy = map_y(m, x, y), ex, ey;
+	if (!D.seen[y][x]) {
+		if (type == OBJ_EXIT || type == OBJ_RETURN || type == OBJ_BOSS) return;
+		if (map_inside(m, sx, sy, 3)) {
 			fill_rect(sx - 3, sy - 3, 7, 7, c);
 			fill_rect(sx - 2, sy - 2, 5, 5, rgba(0, 8, 28, 255));
-			continue;
-		}
-		if (!INSIDE(sx, sy, 3)) continue;
-		fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
-		fill_rect(sx - 2, sy - 2, 5, 5, c);
+		} else if (map_edge(m, sx, sy, 3, &ex, &ey))
+			fill_rect(ex - 1, ey - 1, 3, 3, c);
+		return;
 	}
-	if (gx >= 0 && !D.seen[gy][gx]) {
-		/* where the ray from MegaMan to it leaves the frame */
-		double dx = SX(gx, gy) - SX(mx, my), dy = SY(gx, gy) - SY(mx, my);
-		double t = 1e9, hx = bw / 2.0 - 5, hy = bh / 2.0 - 5;
-		double sx0 = SX(mx, my), sy0 = SY(mx, my);
-		if (dx > 0) t = fmin(t, (ox + hx - sx0) / dx);
-		if (dx < 0) t = fmin(t, (ox - hx - sx0) / dx);
-		if (dy > 0) t = fmin(t, (oy + hy - sy0) / dy);
-		if (dy < 0) t = fmin(t, (oy - hy - sy0) / dy);
-		if (t > 0 && t < 1e8) {
-			int ax = (int)lround(sx0 + dx * t), ay = (int)lround(sy0 + dy * t);
-			fill_rect(ax - 1, ay - 3, 3, 1, gc);
-			fill_rect(ax - 2, ay - 2, 5, 1, gc);
-			fill_rect(ax - 3, ay - 1, 7, 3, gc);
-			fill_rect(ax - 2, ay + 2, 5, 1, gc);
-			fill_rect(ax - 1, ay + 3, 3, 1, gc);
-		}
+	if (!map_inside(m, sx, sy, 3)) return;
+	fill_rect(sx - 3, sy - 3, 7, 7, rgba(0, 8, 28, 255));
+	fill_rect(sx - 2, sy - 2, 5, 5, c);
+	if (type == OBJ_DUEL) fill_rect(sx, sy, 1, 1, rgba(255, 255, 255, 255));
+}
+
+/* what stands there, and the goal: the guardian while it stands, else
+ * the exit */
+static void map_marks(const MapView *m, int *gx, int *gy, SDL_Color *gc) {
+	bool goal_boss = false;
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		int x = (int)o->x, y = (int)o->y, kind = map_kind(o->type);
+		if (kind < 0 || x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || map_left_out(o->type)) continue;
+		if (o->type == OBJ_BOSS && !boss_beaten()) { *gx = x; *gy = y; *gc = map_key[kind].c; goal_boss = true; }
+		else if (o->type == OBJ_EXIT && !goal_boss) { *gx = x; *gy = y; }
+		map_mark(m, o->type, x, y, map_key[kind].c);
 	}
+}
+
+/* the goal while it is unseen: where the ray from MegaMan to it leaves
+ * the frame */
+static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
+	int ax, ay;
+	if (gx < 0 || D.seen[gy][gx] || !map_edge(m, map_x(m, gx, gy), map_y(m, gx, gy), 5, &ax, &ay)) return;
+	fill_rect(ax - 1, ay - 3, 3, 1, gc);
+	fill_rect(ax - 2, ay - 2, 5, 1, gc);
+	fill_rect(ax - 3, ay - 1, 7, 3, gc);
+	fill_rect(ax - 2, ay + 2, 5, 1, gc);
+	fill_rect(ax - 1, ay + 3, 3, 1, gc);
+}
+
+/* the key, from (kx, ky): MegaMan, the exit, and what else this layer
+ * holds; the gaps close up until it fits the width, then "You" goes,
+ * whose mark pulses (ProtoMan's name ran off the picture) */
+static void draw_map_key(int kx, int ky, int width) {
+	bool has[MAP_KEYS] = { [MAP_YOU] = true, [MAP_EXIT] = true, [MAP_BOSS] = D.objs.guardian.navi != 0 };
+	for (int i = 0; i < layer.nobj; ++i) {
+		int kind = map_kind(layer.obj[i].type);
+		if (kind > MAP_EXIT && kind != MAP_BOSS && !map_left_out(layer.obj[i].type)) has[kind] = true;
+	}
+	int gap = 10, need;
+	for (;;) {
+		need = 0;
+		for (int i = 0; i < MAP_KEYS; ++i) if (has[i]) need += 8 + text_width(map_key[i].what) + gap;
+		need -= gap;
+		if (need <= width || (gap <= 0 && !has[MAP_YOU])) break;
+		if (gap > 2 || !has[MAP_YOU]) gap -= 2;
+		else { has[MAP_YOU] = false; gap = 8; }
+	}
+	if (gap < 0) gap = 0;
+	for (int i = 0; i < MAP_KEYS; ++i) {
+		if (!has[i]) continue;
+		fill_rect(kx, ky + 3, 5, 5, map_key[i].c);
+		if (i == MAP_RIVAL) fill_rect(kx + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
+		text_draw(kx + 7, ky, map_key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
+		kx += 8 + text_width(map_key[i].what) + gap;
+	}
+}
+
+/* The layer's map in w x h from (x0, y0): SELECT's over the picture, and
+ * the second screen's (the 3DS's bottom one, issue #9). */
+static void draw_map(int x0, int y0, int w, int h) {
+	fill_rect(x0, y0, w, h, rgba(0, 8, 28, 255));
+	MapView m = { .bx = x0 + 6, .by = y0 + 18, .bw = w - 12, .bh = h - 38 };
+	SDL_Color edge = rgba(120, 200, 255, 220);
+	fill_rect(m.bx - 2, m.by - 2, m.bw + 4, 1, edge);
+	fill_rect(m.bx - 2, m.by + m.bh + 1, m.bw + 4, 1, edge);
+	fill_rect(m.bx - 2, m.by - 2, 1, m.bh + 4, edge);
+	fill_rect(m.bx + m.bw + 1, m.by - 2, 1, m.bh + 4, edge);
+	text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
+	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	if (!netmap_panel(px, py, &m.mx, &m.my)) return;
+	map_view(&m);
+	map_panels(&m);
+	map_way(&m, px, py);
+	int gx = -1, gy = -1;
+	SDL_Color gc = map_key[MAP_EXIT].c;
+	map_marks(&m, &gx, &gy, &gc);
+	map_goal(&m, gx, gy, gc);
 	/* MegaMan, always there, his border pulsing */
-	int ms = SX(mx, my), mt = SY(mx, my);
-	if (INSIDE(ms, mt, 3)) {
+	int ms = map_x(&m, m.mx, m.my), mt = map_y(&m, m.mx, m.my);
+	if (map_inside(&m, ms, mt, 3)) {
 		fill_rect(ms - 3, mt - 3, 7, 7, (D.frame / 10) % 2 ? rgba(120, 200, 255, 255) : rgba(0, 8, 28, 255));
 		fill_rect(ms - 2, mt - 2, 5, 5, rgba(255, 255, 255, 255));
 	}
-	/* the key, under the map: MegaMan, the exit, and what else this layer
-	 * holds (a Server, a dark warp or a gate is "Event") */
-	static const struct { const char *what; SDL_Color c; } key[] = {
-		{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
-		{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
-		{ "Event", { 210, 110, 255, 255 } },
-	};
-	bool has[6] = { true, true, false, false, D.objs.guardian.navi != 0, false };
-	for (int i = 0; i < layer.nobj; ++i)
-		switch (layer.obj[i].type) {
-		case OBJ_HEAL: has[2] = true; break;
-		case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: has[3] = true; break;
-		case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL: has[5] = true; break;
-		case OBJ_CHALLENGE: has[5] |= !server_done; break;
-		case OBJ_DUEL: has[5] |= !duel_done; break;
-		default: break;
-		}
-	/* (the gaps close up until it fits the picture's width) */
-	int gap = 10, width;
-	do {
-		width = 0;
-		for (int i = 0; i < 6; ++i) if (has[i]) width += 8 + text_width(key[i].what) + gap;
-		width -= gap;
-	} while (width > bw - 2 && (gap -= 2) >= 0);
-	if (gap < 0) gap = 0;
-	int kx = bx + 1, ky = by + bh + 5;
-	for (int i = 0; i < 6; ++i) {
-		if (!has[i]) continue;
-		fill_rect(kx, ky + 3, 5, 5, key[i].c);
-		text_draw(kx + 7, ky, key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
-		kx += 8 + text_width(key[i].what) + gap;
-	}
-	#undef SX
-	#undef SY
-	#undef INSIDE
+	draw_map_key(m.bx + 1, m.by + m.bh + 5, m.bw - 2);
 }
 
-/* The layers' make (generation, objects, loot rolls): a run saved by a build
- * that makes them otherwise continues its layer afresh from its start (the
- * saved RAM's flags and Mystery Data would not match this build's). Bump it
- * with any change to what a layer seed makes. */
-#define LAYER_MAKE 58
+void director_draw_map(void) {
+	if (!D.active || D.town || !D.map_shown || !on_map()) return;
+	draw_map(P.core_x, P.core_y, 240, 160);
+}
+
+bool director_draw_second_screen(int w, int h) {
+	/* (on the net, in battle too: the town and the title keep it dark) */
+	if (!D.active || D.town) return false;
+	draw_map(0, 0, w, h);
+	return true;
+}
+
+/* (LAYER_MAKE: layer_make.h, beside its hash) */
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1404,9 +1523,9 @@ void director_describe(FILE *f) {
 					/* (% a sprite prop, in the void or in its walled hole) */
 					for (int i = 0; i < layer.nprops; ++i)
 						if (layer.props[i].kind == PROP_SPRITE) {
-							int px = layer.props[i].x, py = layer.props[i].y;
-							g[py][px] = '%';
-							x0 = px < x0 ? px : x0; y0 = py < y0 ? py : y0; x1 = px > x1 ? px : x1; y1 = py > y1 ? py : y1;
+							int qx = layer.props[i].x, qy = layer.props[i].y;
+							g[qy][qx] = '%';
+							x0 = qx < x0 ? qx : x0; y0 = qy < y0 ? qy : y0; x1 = qx > x1 ? qx : x1; y1 = qy > y1 ? qy : y1;
 						}
 					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
@@ -1739,10 +1858,25 @@ uint32_t director_keys(uint32_t keys) {
 		!town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
 		static char buf[160];
 		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far;
+		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
+		int near = town_port_near(px, py, &nx, &ny);
+		/* (a step short of a jack-in cell: he takes it, and R jacks in; a
+		 * playtester stood at the mermaid fountain's rim a step off its
+		 * ring and pressed R five times) */
+		if (near >= 0 && near <= PORT_STEP * PORT_STEP) {
+			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)nx << 16);
+			emu_write32(BN6_PLAYER + 0x20, (uint32_t)ny << 16);
+			cinema_arrow(0, 0);
+			D.arrow_pending = false;
+			return keys;
+		}
 		const char *way = town_way(&far);
-		/* (close by, from any side of it: a step more, and which way) */
-		if (dx * dx + dy * dy < 128 * 128)
+		/* (close by: which way to its nearest cell, as the crow flies, where
+		 * the walk to the front's middle wound round the basin and turned
+		 * from "up and to the left" to "straight down" a step apart) */
+		if (near >= 0 && near < 128 * 128)
+			snprintf(buf, sizeof buf, "@M Almost, Lan! Step up to the %s, %s, and press R.", town_info()->landmark, way_to(nx, ny, &far));
+		else if (dx * dx + dy * dy < 128 * 128)
 			snprintf(buf, sizeof buf, "@M Almost, Lan! The %s is %s.|@M Step right up to it and press R.", town_info()->landmark, way);
 		else
 			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!", town_info()->landmark_at);
@@ -1863,6 +1997,21 @@ static void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
 }
 
+/* MegaMan's words for a program left off the board, once a layer (NULL:
+ * none to say): where to place it, and whether it turns. */
+static const char *off_board_words(void) {
+	int offv = 0;
+	const char *off = D.off_told || run_won_here() ? NULL : program_off_board(&offv);
+	static char words[320];
+	if (!off || !*off) return NULL;
+	if (!fits_beside_placed(offv)) return no_room_words(off);
+	/* (and whether it turns: a playtester pressed L and R on his gift's
+	 * SuperArmor with no Spin, and nothing said why) */
+	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s",
+		off, navicust_turn_words(offv));
+	return words;
+}
+
 /* The NaviCust's bugs, named in MegaMan's words when they change: after the
  * player runs the NaviCust in the PET, or an ExpMemry grows the board
  * (docs/NAVICUST.md). A bug the player can read is a price they chose; the
@@ -1889,25 +2038,22 @@ static void bug_watch(void) {
 	/* (back from the PET with a program left off the board: said at once,
 	 * where L said it only on the next layer; a playtester ran the NaviCust
 	 * without placing his Guardian Data's HP+100) */
+	static bool ran;   /* (the PET was open since the last words: a RUN) */
+	ran |= D.pet_seen;
 	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
 		D.pet_seen = false;
-		int offv = 0;
-		const char *off = D.off_told || run_won_here() ? NULL : program_off_board(&offv);
-		static char words[200];
-		const char *say = NULL;
-		if (off && *off && !fits_beside_placed(offv)) say = no_room_words(off);
-		else if (off && *off) {
-			snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.", off);
-			say = words;
-		}
+		const char *say = off_board_words();
 		if (say && talk_start(say, FACE_MEGAMAN)) { D.off_told = true; return; }
 	}
-	if (!memcmp(D.bugs, now, sizeof now) || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
+	if (!memcmp(D.bugs, now, sizeof now)) { ran = D.pet_seen; return; }
+	if (talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
 	bool had = false;
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
-	const char *words = navicust_bug_words(now);
-	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN))
+	const char *words = navicust_bug_words(now, ran);
+	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN)) {
 		memcpy(D.bugs, now, sizeof now);
+		ran = false;
+	}
 }
 
 /* A BugFrag Trader's trade (issue #12). After Yes, BN6's script holds
@@ -2128,10 +2274,12 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		spins_sync();
-		/* the shops' data in RAM is the saved one: this layer's again */
-		layer_objs_shops(&D.objs);
+		/* the shops' data in RAM is the saved one: this layer's again,
+		 * what was bought before the save still bought (a CONTINUE had
+		 * restocked both shops); another build's layer, afresh */
+		layer_objs_shops(&D.objs, same);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
-		official_sync();
+		official_sync(true);
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
@@ -2144,6 +2292,7 @@ bool director_resume(void) {
 				if (f != LAYER_GIFT_FLAG && (f < LAYER_BOSS_GONE_FLAG || f > LAYER_EXIT_OPEN_FLAG)) flag_clear(f);
 			flag_clear(LAYER_VAULT_FLAG);
 			flag_clear(LAYER_OFFICIAL_FLAG);
+			flag_clear(LAYER_DUEL_CALLED_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
@@ -2159,6 +2308,9 @@ bool director_resume(void) {
 		boss_resume();
 		/* the map as far as it was seen (none for another build's layer) */
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
+		/* (Chaud's call, made before the save, is not made again: every
+		 * CONTINUE on a duel layer had replayed it, after the duel too) */
+		if (flag_get(LAYER_DUEL_CALLED_FLAG)) D.duel_call_due = false;
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_get(D.objs.choice[i].flag)) {
@@ -2200,6 +2352,21 @@ static void enter_side_layer(void) {
 /* The duel's verdict (docs/RIVAL.md): MegaMan's DeleteTime against
  * ProtoMan's, and on rung 1 no hit taken; the record kept, and Chaud's
  * words queued, with both times as the results screen shows them. */
+/* Chaud's first words on a duel's end, with both times as the results
+ * screen shows them: the netbattle, a win, a hit taken, a time too slow. */
+static int verdict_result(char *out, size_t n, bool won, bool beat, int rung, int mine, int his) {
+	char a[16], b[16];
+	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
+	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
+	if (!won && rung == 2) return snprintf(out, n, "@C Out of the netbattle, Lan? Better than deleted. That's a loss.|@C ProtoMan will be back.|");
+	if (!won) return snprintf(out, n, "@C Out of the duel, Lan? That's a loss.|");
+	if (rung == 2) return snprintf(out, n, "@C ...Log out, ProtoMan. You beat him, Lan.|");
+	if (beat && rung == 1) return snprintf(out, n, "@C %s, and not a scratch. ...Not bad, Lan.|@C ProtoMan, we train harder.|", a);
+	if (beat) return snprintf(out, n, "@C %s. ProtoMan's was %s. ...Not bad, Lan.|@C We'll be faster next time.|", a, b);
+	if (mine < his) return snprintf(out, n, "@C %s, but MegaMan took a hit. A clean bust or nothing, Lan.|", a);
+	return snprintf(out, n, "@C %s. ProtoMan's was %s. Too slow, Lan.|", a, b);
+}
+
 static void duel_verdict(bool won) {
 	D.duel = false;
 	int mine = D.duel_time, his = layer_objs_duel_frames, rung = layer_objs_duel_rung, before = rival_clearance();
@@ -2208,26 +2375,24 @@ static void duel_verdict(bool won) {
 	if (beat) profile.duel_won++;
 	else profile.duel_lost++;
 	profile_save();
-	char a[16], b[16];
-	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
-	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
-	int k = 0, size = (int)sizeof D.duel_verdict;
+	int size = (int)sizeof D.duel_verdict, k = verdict_result(D.duel_verdict, sizeof D.duel_verdict, won, beat, rung, mine, his);
 	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	if (!won && rung == 2) ADD("@C Out of the netbattle, Lan? Better than deleted. That's a loss.|@C ProtoMan will be back.|");
-	else if (!won) ADD("@C Out of the duel, Lan? That's a loss.|");
-	else if (rung == 2) ADD("@C ...Log out, ProtoMan. You beat him, Lan.|");
-	else if (beat && rung == 1) ADD("@C %s, and not a scratch. ...Not bad, Lan.|@C ProtoMan, we train harder.|", a);
-	else if (beat) ADD("@C %s. ProtoMan's was %s. ...Not bad, Lan.|@C We'll be faster next time.|", a, b);
-	else if (mine < his) ADD("@C %s, but MegaMan took a hit. A clean bust or nothing, Lan.|", a);
-	else ADD("@C %s. ProtoMan's was %s. Too slow, Lan.|", a, b);
 	/* (what his respect opens: docs/RIVAL.md) */
 	int after = rival_clearance();
 	if (after > before && after == 1) ADD("@C You've earned my clearance, Lan. The net's official gates will open for you now.|");
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
-	/* (and the gate beside the duel opens at once: the prize where it was
-	 * offered) */
-	bool opened = after > before && layer_objs_official_level && after >= layer_objs_official_level;
+	/* (and the next rung, the door it leads to: a playtester's second win
+	 * read as for the record alone) */
+	if (beat && rung == 1 && after < 2) ADD("|@C Next time, no race: ProtoMan faces MegaMan himself. Beat him, and my full clearance is yours.");
+	/* (Lan answers a win too: a playtester's first, after five losses, met
+	 * silence where every loss had had his "Next time, Chaud!") */
+	if (beat) ADD("|@L %s", rung == 2 ? "Good battle, ProtoMan! See you next time, Chaud!"
+		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time, MegaMan! See you next time, Chaud!"
+		: "Yes! See you next time, Chaud!");
+	/* (and the gate beside the duel opens at once to its winner: the prize
+	 * where it was offered) */
+	bool opened = beat && layer_objs_official_level && after >= layer_objs_official_level;
 	if (opened) {
 		flag_set(LAYER_CLEARED_FLAG);
 		ADD("|@M Lan! The official gate on this layer will open for us now!");
@@ -2259,6 +2424,7 @@ static bool act_on_choices(void) {
 			D.duel_hp = -1;
 			D.duel_time = 0;
 			D.duel_call_due = false;
+			flag_set(LAYER_DUEL_CALLED_FLAG);
 			return true;
 		case OBJ_UNDERNET:
 		case OBJ_SECRET_GATE:
@@ -2452,6 +2618,49 @@ static const char *service_where(int wx, int wy, char *buf, size_t n) {
 	const char *winds = apart >= 2 ? ", though the way there winds" : "";
 	snprintf(buf, n, far == 0 ? "right here, %s%s" : far == 1 ? "%s%s" : "a long way back, %s%s", lies, winds);
 	return buf;
+}
+
+/* Chaud's call on a duel layer (docs/RIVAL.md): the record, ProtoMan's time
+ * and the term, what a win opens, and Lan's answer. */
+static const char *duel_call_words(void) {
+	int f = layer_objs_duel_frames, sec = f / 60;
+	static char call[400];
+	/* (the record said: Chaud remembers every duel) */
+	char record[64];
+	snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
+	if (layer_objs_duel_later)
+		snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
+			"@C He'll be waiting in the third act. Get MegaMan ready.");
+	else if (layer_objs_duel_rung == 2)
+		snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
+			"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
+			? "Beat him, and every official gate opens for you. There's one on this layer, the official vault: three Mega chips." : "Beat him, and every official gate opens for you.")
+			: "He hasn't forgotten the last time.");
+	else {
+		/* (what a win opens for one already cleared: the gate beside
+		 * him, whose prize the duel is) */
+		const char *stake = !layer_objs_official_level ? ""
+			: rival_clearance() < layer_objs_official_level ? "@C The official vault beside him takes my full clearance: three wins, the last against ProtoMan himself.|"
+			: layer_objs_official_level >= 2 ? "@C Beat it, and the official vault beside him opens: three Mega chips.|"
+			: "@C Beat it, and the official gate beside him opens: an official Chip Order, three chips you've held, one to order.|";
+		snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
+			profile.duel_won + profile.duel_lost ? record :
+			"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
+			sec / 60, sec % 60, (f % 60) * 100 / 60,
+			/* (what a win earns, before the first: a playtester risked his
+			 * run for pride alone) */
+			/* (and what the gate holds: a playtester, five duels lost, took
+			 * the gates for scenery, their prize never named) */
+			profile.duel_won ? stake : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer: an official Chip Order, three chips you've held, one to order.|"
+			: "@C Beat it, and I'll clear you for the net's official gates.|",
+			layer_objs_duel_rung == 1 ? ", without a hit" : "");
+	}
+	/* (Lan answers: a call no one answered read as a message left) */
+	if (!layer_objs_duel_later) {
+		size_t n = strlen(call);
+		snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
+	}
+	return call;
 }
 
 static void last_stop(int cx, int cy) {
@@ -2685,35 +2894,11 @@ void director_update(void) {
 		D.duel_verdict_due = false;
 	if (D.duel_call_due && !D.reward_due && !D.gem_due && !D.mail_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic() && D.frame > 60) {
-		int f = layer_objs_duel_frames, sec = f / 60;
-		char call[400];
-		/* (the record said: Chaud remembers every duel) */
-		char record[64];
-		snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
-		if (layer_objs_duel_later)
-			snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
-				"@C He'll be waiting in the third act. Get MegaMan ready.");
-		else if (layer_objs_duel_rung == 2)
-			snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
-				"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
-				? "Beat him, and every official gate opens for you. There's one on this layer." : "Beat him, and every official gate opens for you.")
-				: "He hasn't forgotten the last time.");
-		else
-			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
-				profile.duel_won + profile.duel_lost ? record :
-				"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
-				sec / 60, sec % 60, (f % 60) * 100 / 60,
-				/* (what a win earns, before the first: a playtester risked his
-				 * run for pride alone) */
-				profile.duel_won ? "" : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer.|"
-				: "@C Beat it, and I'll clear you for the net's official gates.|",
-				layer_objs_duel_rung == 1 ? ", without a hit" : "");
-		/* (Lan answers: a call no one answered read as a message left) */
-		if (!layer_objs_duel_later) {
-			size_t n = strlen(call);
-			snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
+		const char *call = duel_call_words();
+		if (talk_start(call, FACE_CHAUD)) {
+			D.duel_call_due = false;
+			flag_set(LAYER_DUEL_CALLED_FLAG);
 		}
-		if (talk_start(call, FACE_CHAUD)) D.duel_call_due = false;
 	}
 	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"
 		"@M But if it's still there when we win, its data is ours!", FACE_MEGAMAN)) {

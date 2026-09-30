@@ -21,6 +21,9 @@ typedef struct {
 	int ntiles;
 	CoordCell *walls;
 	int nwalls;
+	CoordCell *prio;      /* its layer priorities (section 2): behind it and beside its ends,
+	                       * MegaMan is drawn behind its art */
+	int nprio;
 	int navi_x, navi_y, talk_x, talk_y;
 	/* the source's tile lattice (world units mod 32 of tile 0's centre),
 	 * against which the layer's is matched */
@@ -56,8 +59,8 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
  * another map of the area, it fills in `out`. */
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out);
 void props_free(PropStamp *p);
-/* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls,
- * mirrored with it: world (X, Y) to (-Y, -X). */
+/* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls
+ * and layer priorities, mirrored with it: world (X, Y) to (-Y, -X). */
 void props_mirror_walls(const AreaSrc *a, AreaSrc *m);
 
 #endif

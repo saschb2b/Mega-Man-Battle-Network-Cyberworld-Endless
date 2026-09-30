@@ -15,5 +15,11 @@ SDL_Surface *present3ds_init(int w, int h);
  * screen's height (1.5x) with its pixels mixed at their edges. */
 void present3ds_frame(bool fill);
 void present3ds_exit(void);
+/* The bottom screen's picture (issue #9): SECOND_W x SECOND_H pixels,
+ * RGBA8888, `pitch` bytes a row, in memory the GPU reads; NULL where it has
+ * none. present3ds_bottom_show(true) puts it on the screen at the next
+ * frame, false leaves the screen black. */
+void *present3ds_bottom(int *pitch);
+void present3ds_bottom_show(bool on);
 
 #endif

@@ -10,6 +10,7 @@
 #include "bn6.h"
 #include "data.h"
 #include "emu.h"
+#include "navicust.h"
 #include "rom.h"
 
 void chat_marks_install(void) {
@@ -106,11 +107,14 @@ int ta_heal(TextArchive *t, int variant, int told_flag) {
 	return i;
 }
 
-int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, int told_flag) {
+int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, const char *sold_out, int told_flag) {
 	/* (ts_wait a moment first: an A mashed through his words had opened
 	 * the list on its first chip, "Are you sure? > Yes") */
 	uint8_t open[] = { 0xEE, 0x00, 24, 0, 0xFB, 0x05, (uint8_t)shop };   /* ts_wait, ts_start_shop */
 	bool first = true;
+	/* bought out: his word for it, and no list (an empty one after "More
+	 * programs? Take a look!" read as a broken shop, issue #17) */
+	int gone = sold_out ? ta_say(t, face, sold_out) : -1;
 	/* once his words are said (flag set), a line and the list: Kai sat
 	 * through six boxes each time he came back */
 	int back = -1;
@@ -122,6 +126,10 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 		first = true;
 	}
 	int i = ta_script(t);
+	if (gone >= 0) {
+		uint8_t stock[] = { 0xEF, 0x22, (uint8_t)shop, 0xFF, (uint8_t)gone };   /* ts_check_shop_stock */
+		ta_bytes(t, stock, sizeof stock);
+	}
 	if (back >= 0) {
 		uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
 		ta_bytes(t, check, sizeof check);
@@ -133,7 +141,7 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 	return i;
 }
 
-int ta_challenge(TextArchive *t, int flag) {
+int ta_challenge(TextArchive *t, int flag, const char *prize) {
 	int quiet = ta_say(t, FACE_MEGAMAN, "The virus signal's gone quiet, Lan.");
 	int no = closing(t);
 	int i = ta_script(t);
@@ -143,7 +151,11 @@ int ta_challenge(TextArchive *t, int flag) {
 	 * not knowing, and came out at 10) */
 	bool first = true;
 	ta_pages(t, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.", FACE_MEGAMAN, &first);
-	ask_in(t, FACE_MEGAMAN, "It pays a good chip.\nTake it on?\n", no, true, true);
+	/* (and what it pays: "a good chip" left a playtester guessing whether
+	 * the risk was worth it) */
+	char ask[64];
+	snprintf(ask, sizeof ask, "It pays %s.\nTake it on?\n", prize && *prize ? prize : "a good chip");
+	ask_in(t, FACE_MEGAMAN, ask, no, true, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -253,6 +265,20 @@ static void jump(TextArchive *t, int to) {
 	ta_bytes(t, b, sizeof b);
 }
 
+/* BN6's choice (ts_select) among the `n` options just written in a
+ * column: the box cleared, a script for each option, and B its own
+ * (0xA0), which reads none of them but goes on past the choice (bn6f
+ * chatbox_ED_select): here to `b`, the script B means. (Once written with
+ * B's script among the options', its press ran past the choice to the
+ * talk's end: a Guardian Data's B gave no BugFrags nor marked its reward
+ * taken, and it gave its HPMemory and chip again at every talk, issue 16) */
+static void choose(TextArchive *t, const int *scripts, int n, int b) {
+	uint8_t select[6] = { 0xED, (uint8_t)(3 + n), 0xA0 };
+	for (int k = 0; k < n; ++k) select[3 + k] = (uint8_t)scripts[k];
+	ta_bytes(t, select, 3 + n);
+	jump(t, b);
+}
+
 /* A script's end: the way on's question next, where there is one (`next`
  * its script), else the chat's end. */
 static void end_or(TextArchive *t, int next) {
@@ -286,14 +312,7 @@ static int route_scripts(TextArchive *t, const ScriptsRoute *r) {
 		ta_text(t, r->option[k]);
 		if (k + 1 < n) ta_text(t, "\n");
 	}
-	if (n == 3) {
-		uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[2], (uint8_t)way[0] };
-		ta_bytes(t, select, sizeof select);
-	} else {
-		uint8_t select[] = { 0xED, 0x06, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[0] };
-		ta_bytes(t, select, sizeof select);
-	}
-	ta_end(t);
+	choose(t, way, n, way[0]);
 	return q;
 }
 
@@ -380,27 +399,29 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	/* the draft: what each program does, then the choice (B: none) */
 	ta_page(t, FACE_MEGAMAN, "Program data too, Lan! Pick one for our NaviCust:", false);
 	for (int k = 0; k < n; ++k) if (draft->about[k]) ta_page(t, FACE_MEGAMAN, draft->about[k], false);
-	if (draft->teach)
-		ta_page(t, FACE_MEGAMAN, "Big programs need a block on the command line; plus parts go anywhere else. "
-			"Same colors touching or a block off the edge: a bug. L and R turn a program as we place it from the list.", false);
+	if (draft->teach) {
+		char rules[300];
+		snprintf(rules, sizeof rules, "Big programs need a block on the command line; plus parts go anywhere else. "
+			"Same colors touching or a block off the edge: a bug. %s", navicust_turn_words(0));
+		ta_page(t, FACE_MEGAMAN, rules, false);
+	}
 	char none[96];
 	snprintf(none, sizeof none, "Or B takes none: the data breaks down into %d BugFrags.", draft->skip_frags);
 	ta_page(t, FACE_MEGAMAN, none, false);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
-	/* three in a column (ts_option), as the gift's; ts_select: clear, B its
-	 * own choice (0xA0), a script per option and one for B */
-	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
+	/* in a column, as many as the draft holds (ts_option: its number and
+	 * those above and below it); B takes none */
+	static const uint8_t around[3][3] = { { 0x00 }, { 0x11, 0x00 }, { 0x21, 0x02, 0x10 } };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
 	for (int k = 0; k < n; ++k) {
-		ta_bytes(t, opt[k], 4);
+		uint8_t opt[] = { 0xEB, 0x00, (uint8_t)(k * 0x11), around[n - 1][k] };
+		ta_bytes(t, opt, sizeof opt);
 		ta_bytes(t, space, sizeof space);
 		program_name(t, draft->program[k]);
 		if (k + 1 < n) ta_text(t, "\n");
 	}
-	uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)take[0], (uint8_t)take[1], (uint8_t)take[2], (uint8_t)skip };
-	ta_bytes(t, select, sizeof select);
-	ta_end(t);
+	choose(t, take, n, skip);
 	return i;
 }
 
@@ -481,19 +502,21 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 	/* three in a column, as the draft's; B leaves them */
 	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	/* (each with what it hits for, as BN6's chip lists show it: a
+	 * playtester picked his official Chip Order by the names alone) */
 	for (int k = 0; k < 3; ++k) {
 		ta_bytes(t, opt[k], 4);
 		ta_bytes(t, space, sizeof space);
-		snprintf(s, sizeof s, "%s %c%s", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k], k < 2 ? "\n" : "");
+		int n = snprintf(s, sizeof s, "%s %c", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
+		if (v->power[k] > 0) n += snprintf(s + n, sizeof s - (size_t)n, " %d", v->power[k]);
+		snprintf(s + n, sizeof s - (size_t)n, "%s", k < 2 ? "\n" : "");
 		ta_text(t, s);
 	}
-	uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)take[0], (uint8_t)take[1], (uint8_t)take[2], (uint8_t)leave };
-	ta_bytes(t, select, sizeof select);
-	ta_end(t);
+	choose(t, take, 3, leave);
 	return i;
 }
 
-int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, const ScriptsVault *v) {
+int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v) {
 	char s[300];
 	snprintf(s, sizeof s, level >= 2 ? "Chaud's clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
 		: "Chaud's clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
@@ -502,11 +525,14 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, con
 	 * clearance reaches the gate's level, as the layer begins or as a duel
 	 * on it is won (a gate beside the duel opens at once): the telegraph
 	 * first, whose clearance, and how far we are */
-	if (level >= 2)
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance.|"
+	if (duel_prize)
+		snprintf(s, sizeof s, "@M ProtoMan's official gate, Lan. %s|@M It opens for the Netbattler who beats him here.",
+			level >= 2 ? "The official vault's behind it: three Mega chips." : "An official Chip Order's behind it: three chips we've held, one to order.");
+	else if (level >= 2)
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance. The official vault's behind it: three Mega chips.|"
 			"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
 	else
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance.|"
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance. An official Chip Order's behind it: three chips we've held, one to order.|"
 			"@M It opens once we've won a duel against ProtoMan. Not yet!");
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)open_flag, (uint8_t)(open_flag >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */

@@ -152,8 +152,8 @@ static void link(int a, int b) {
 	 * row (column) of void between the first leg and b */
 	int s = along_x ? (rb->ay > ay ? DIR_S : DIR_N) : (rb->ax > ax ? DIR_E : DIR_W);
 	if (side_at(b, (s + 2) % 4, along_x ? rb->ax : rb->ay, &bx, &by)) {
-		int gap = along_x ? abs(by - ay) : abs(bx - ax), run = along_x ? abs(bx - ax) : abs(by - ay);
-		if (gap >= 2 && run >= 2) {
+		int gap = along_x ? abs(by - ay) : abs(bx - ax), length = along_x ? abs(bx - ax) : abs(by - ay);
+		if (gap >= 2 && length >= 2) {
 			bridge_l(ax, ay, bx, by, along_x);
 			return;
 		}
@@ -278,17 +278,17 @@ static void field(int biome, int size) {
 	int first = rng_range(0, 3), sides = slab ? 0 : 2 + rng_range(0, 1);
 	for (int k = 0; k < sides; ++k) {
 		int d = (first + k) % 4;   /* the side's outward direction */
-		int run = (d == DIR_E || d == DIR_W) ? DIR_S : DIR_E;
-		int len = (run == DIR_E ? w : h) + 2;
+		int along = (d == DIR_E || d == DIR_W) ? DIR_S : DIR_E;
+		int len = (along == DIR_E ? w : h) + 2;
 		int sx = d == DIR_E ? fx + w + 2 : d == DIR_W ? fx - 3 : fx - 2;
 		int sy = d == DIR_S ? fy + h + 2 : d == DIR_N ? fy - 3 : fy - 2;
-		if (!bridge_line(sx - dir_dx[run], sy - dir_dy[run], run, len)) continue;
-		int out = (run + 1) % 4 == d ? 1 : -1;
-		teeth(sx - dir_dx[run], sy - dir_dy[run], run, len, out);
+		if (!bridge_line(sx - dir_dx[along], sy - dir_dy[along], along, len)) continue;
+		int out = (along + 1) % 4 == d ? 1 : -1;
+		teeth(sx - dir_dx[along], sy - dir_dy[along], along, len, out);
 		/* rungs back to the field */
 		for (int r = 0; r < 2; ++r) {
 			int t = rng_range(2, len - 3);
-			int rx = sx + dir_dx[run] * t, ry = sy + dir_dy[run] * t;
+			int rx = sx + dir_dx[along] * t, ry = sy + dir_dy[along] * t;
 			int back = (d + 2) % 4;
 			for (int s = 1; s <= 3 && !floor_at(rx + dir_dx[back] * s, ry + dir_dy[back] * s); ++s)
 				put(rx + dir_dx[back] * s, ry + dir_dy[back] * s);
@@ -301,18 +301,18 @@ static void field(int biome, int size) {
 /* Parallel planks joined by rungs, grass blocks at their ends. */
 static void ladder(int biome, int size) {
 	bool along_x = rng_range(0, 1);
-	int run = along_x ? DIR_E : DIR_S, across = along_x ? DIR_S : DIR_E;
+	int along = along_x ? DIR_E : DIR_S, across = along_x ? DIR_S : DIR_E;
 	int rails = 4 + (size > 0), len = 14 + 2 * size + rng_range(0, 3);
 	int start[5], base = -(rails - 1) * 3 / 2;
 	for (int r = 0; r < rails; ++r) {
 		start[r] = -len / 2 + rng_range(-2, 2);
 		int o = base + 3 * r;
-		int x = WIN_C + dir_dx[run] * (start[r] - 1) + dir_dx[across] * o;
-		int y = WIN_C + dir_dy[run] * (start[r] - 1) + dir_dy[across] * o;
-		bridge_line(x, y, run, len);
+		int x = WIN_C + dir_dx[along] * (start[r] - 1) + dir_dx[across] * o;
+		int y = WIN_C + dir_dy[along] * (start[r] - 1) + dir_dy[across] * o;
+		bridge_line(x, y, along, len);
 		/* the outer planks' teeth */
-		if (r == 0) teeth(x, y, run, len, (run + 1) % 4 == across ? -1 : 1);
-		if (r == rails - 1) teeth(x, y, run, len, (run + 1) % 4 == across ? 1 : -1);
+		if (r == 0) teeth(x, y, along, len, (along + 1) % 4 == across ? -1 : 1);
+		if (r == rails - 1) teeth(x, y, along, len, (along + 1) % 4 == across ? 1 : -1);
 	}
 	/* rungs where neighbouring planks overlap */
 	for (int r = 0; r + 1 < rails; ++r)
@@ -321,14 +321,14 @@ static void ladder(int biome, int size) {
 			int t = lo + rng_range(1, len - 3);
 			int o = base + 3 * r;
 			for (int s = 1; s <= 2; ++s)
-				put(WIN_C + dir_dx[run] * t + dir_dx[across] * (o + s), WIN_C + dir_dy[run] * t + dir_dy[across] * (o + s));
+				put(WIN_C + dir_dx[along] * t + dir_dx[across] * (o + s), WIN_C + dir_dy[along] * t + dir_dy[across] * (o + s));
 		}
 	/* grass blocks off the first plank's start and the last plank's end */
 	for (int e = 0; e < 2; ++e) {
 		int r = e ? rails - 1 : 0, o = base + 3 * r;
 		int t = e ? start[r] + len + 3 : start[r] - 4;
 		int w = rng_range(4, 6), h = rng_range(4, 5);
-		int cx = WIN_C + dir_dx[run] * t + dir_dx[across] * o, cy = WIN_C + dir_dy[run] * t + dir_dy[across] * o;
+		int cx = WIN_C + dir_dx[along] * t + dir_dx[across] * o, cy = WIN_C + dir_dy[along] * t + dir_dy[across] * o;
 		int b = platform(cx, cy, along_x ? w : h, along_x ? h : w, SHAPE_RECT, ROOM_PLATFORM);
 		(void)b;
 	}
@@ -439,11 +439,11 @@ static void crosses(int biome, int size) {
 static void comb(int biome, int size) {
 	enum { LANES = 5, GAP = 3, C = LANES / 2 };
 	bool along_x = rng_range(0, 1);
-	int run = along_x ? DIR_E : DIR_S, across = along_x ? DIR_S : DIR_E;
+	int along = along_x ? DIR_E : DIR_S, across = along_x ? DIR_S : DIR_E;
 	int base = -(LANES - 1) * GAP / 2, root = -4, len[LANES];
 	bool pad[LANES];
-#define AT_X(t, o) (WIN_C + dir_dx[run] * (t) + dir_dx[across] * (o))
-#define AT_Y(t, o) (WIN_C + dir_dy[run] * (t) + dir_dy[across] * (o))
+#define AT_X(t, o) (WIN_C + dir_dx[along] * (t) + dir_dx[across] * (o))
+#define AT_Y(t, o) (WIN_C + dir_dy[along] * (t) + dir_dy[across] * (o))
 	/* the lanes (t along them from the walkway, o across), as long as the
 	 * window lets them run (|t - o| <= WIN_U, |t + o| <= WIN_V) */
 	for (int r = 0; r < LANES; ++r) {
@@ -469,7 +469,7 @@ static void comb(int biome, int size) {
 	platform(AT_X(root - 1 + 1, 0), AT_Y(root - 1 + 1, 0), along_x ? 2 : span, along_x ? span : 2, SHAPE_RECT, ROOM_PLATFORM);
 	for (int r = 0; r < LANES; ++r) {
 		int o = base + GAP * r;
-		bridge_line(AT_X(root, o), AT_Y(root, o), run, len[r]);
+		bridge_line(AT_X(root, o), AT_Y(root, o), along, len[r]);
 	}
 	int o0 = side ? base + GAP * C : base;
 	bridge_line(AT_X(t_rung, o0), AT_Y(t_rung, o0), across, 2 * GAP - 1);
@@ -480,9 +480,9 @@ static void comb(int biome, int size) {
 	/* the arrival behind the walkway's first end, two panels of catwalk
 	 * between, the walkway's back left clear */
 	if (platform(AT_X(root - 5, base + 1), AT_Y(root - 5, base + 1), 4, 4, route_shape(biome), ROOM_PLATFORM) >= 0)
-		bridge_line(AT_X(root - 1, base + 1), AT_Y(root - 1, base + 1), (run + 2) % 4, 2);
+		bridge_line(AT_X(root - 1, base + 1), AT_Y(root - 1, base + 1), (along + 2) % 4, 2);
 	for (int r = 0; r < LANES; ++r)
-		if (pad[r]) pad_spur(AT_X(root + len[r], base + GAP * r), AT_Y(root + len[r], base + GAP * r), run, 1);
+		if (pad[r]) pad_spur(AT_X(root + len[r], base + GAP * r), AT_Y(root + len[r], base + GAP * r), along, 1);
 #undef AT_X
 #undef AT_Y
 	spurs(1 + size, 1, 2);

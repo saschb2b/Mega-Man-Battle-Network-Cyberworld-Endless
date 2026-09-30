@@ -2,9 +2,13 @@
  * at 5, library type at 7 (0 standard, 1 Mega, 2 Giga, 3 secret, 4 Program
  * Advance), library number at 0x15 (0: not in the library) and library
  * flags at 0x16: bit 0 on the other version's Navi chips and Otenko, 0x30
- * on unused arm and dark chips, 0x10 alone on the Beast chips. The Gigas
- * (301-310) end the library; past Falzar (313) come pseudo-chips. */
+ * on unused arm and dark chips, 0x10 alone on the Beast chips; its picture
+ * at 0x24 and 0x28, one blank for both on the chips cut from this US
+ * version. The Gigas (301-310) end the library; past Falzar (313) come
+ * pseudo-chips. */
 #include "chip_pool.h"
+
+#include <string.h>
 
 #include "data.h"
 #include "game.h"
@@ -23,6 +27,11 @@ int chip_pool_tier(int id) {
 	if (c[0] > 26 || !c[0x15]) return -1;   /* no code, or not in the library */
 	int flags = c[0x16];
 	if (flags & 0x01 || flags & 0x20 || flags == 0x10) return -1;
+	/* (no picture of its own: a chip cut from the US version, which passes
+	 * every rule above but HackJack's three, Megas whose Navi the US game
+	 * no longer has: used, MegaMan vanished for good and was deleted, taken
+	 * from an official vault, issue #15) */
+	if (!memcmp(c + 0x24, c + 0x28, 4)) return -1;
 	ChipInfo ci;
 	chip_info(id, &ci);
 	if (!ci.name[0]) return -1;             /* blank records */

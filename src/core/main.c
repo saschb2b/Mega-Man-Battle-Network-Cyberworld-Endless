@@ -60,9 +60,15 @@ static void core2_probe(void *arg) { *(volatile bool *)arg = true; }
  * least 8 MB. The Homebrew Launcher gives a New 3DS app 124 MB, a 3DS 64:
  * a heap of all but the linear heap's share passed the area on the one,
  * a fixed 36 MB was too small for the game's ROM copies on both. */
+void __system_allocateHeaps(void);   /* (libctru's, replaced) */
 void __system_allocateHeaps(void) {
 	extern char *fake_heap_start, *fake_heap_end;
-	extern u32 __ctru_heap, __ctru_linear_heap, __ctru_heap_size, __ctru_linear_heap_size;
+	extern u32 __ctru_heap, __ctru_linear_heap;
+	/* (the sizes env.h reads in its own accessors, written here) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+	extern u32 __ctru_heap_size, __ctru_linear_heap_size;
+#pragma GCC diagnostic pop
 	Handle limit = 0;
 	s64 most = 0, used = 0;
 	ResourceLimitType commit = RESLIMIT_COMMIT;
@@ -336,6 +342,36 @@ static void parse_script(const char *spec) {
 	script_left = script_len ? script[0].frames : 0;
 }
 
+/* --taps "FRAME:X,Y[>X2,Y2];...": a finger at screen pixel (X, Y) at
+ * FRAME, held six frames, or dragged to (X2, Y2) over twenty, then lifted
+ * (the touch controls, their menu and its editor in headless tests) */
+typedef struct { int frame, x0, y0, x1, y1; bool drag; } Tap;
+static Tap taps[32];
+static int ntaps;
+
+static void parse_taps(const char *spec) {
+	char *copy = strdup(spec), *save = NULL;
+	for (char *t = strtok_r(copy, ";", &save); t && ntaps < 32; t = strtok_r(NULL, ";", &save)) {
+		Tap *p = &taps[ntaps];
+		int n = sscanf(t, "%d:%d,%d>%d,%d", &p->frame, &p->x0, &p->y0, &p->x1, &p->y1);
+		if (n < 3) continue;
+		p->drag = n == 5;
+		if (!p->drag) { p->x1 = p->x0; p->y1 = p->y0; }
+		++ntaps;
+	}
+	free(copy);
+}
+
+static void taps_tick(void) {
+	for (int i = 0; i < ntaps; ++i) {
+		const Tap *t = &taps[i];
+		int len = t->drag ? 20 : 6, f = (int)P.frame - t->frame;
+		if (f < 0 || f > len) continue;
+		uint32_t type = f == 0 ? SDL_FINGERDOWN : f == len ? SDL_FINGERUP : SDL_FINGERMOTION;
+		touch_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * (float)f / len, t->y0 + (t->y1 - t->y0) * (float)f / len);
+	}
+}
+
 static uint32_t bot_seed;
 static uint32_t bot_buttons;
 
@@ -461,21 +497,32 @@ static void script_tick(void) {
 }
 
 typedef struct { uint64_t frame; char path[256]; } Shot;
-static Shot shots[64];
-static int shot_count;
+static Shot shots[64], screen_shots[16], second_shots[16];
+static int shot_count, screen_shot_count, second_shot_count;
 static uint64_t range_a = 1, range_b = 0;   /* --shot-range A:B:PREFIX */
 static char range_prefix[200];
 
-static void parse_shots(const char *spec) {
+static void parse_shots(const char *spec, Shot *into, int *count, int most) {
 	char *copy = strdup(spec);
-	for (char *tok = strtok(copy, ","); tok && shot_count < 64; tok = strtok(NULL, ",")) {
+	for (char *tok = strtok(copy, ","); tok && *count < most; tok = strtok(NULL, ",")) {
 		char *colon = strchr(tok, ':');
 		if (!colon) continue;
-		shots[shot_count].frame = strtoull(tok, NULL, 10);
-		snprintf(shots[shot_count].path, sizeof shots[shot_count].path, "%s", colon + 1);
-		++shot_count;
+		into[*count].frame = strtoull(tok, NULL, 10);
+		snprintf(into[*count].path, sizeof into[*count].path, "%s", colon + 1);
+		++*count;
 	}
 	free(copy);
+}
+
+/* --shot FRAME:PATH,... saves the canvas; --screen-shot the screen as the
+ * player sees it, the touch controls on it; --second-shot the second
+ * screen, the 3DS's bottom one (on any target, for a check) */
+static bool shot_option(const char *a, const char *v) {
+	if (!strcmp(a, "--shot")) parse_shots(v, shots, &shot_count, 64);
+	else if (!strcmp(a, "--screen-shot")) parse_shots(v, screen_shots, &screen_shot_count, 16);
+	else if (!strcmp(a, "--second-shot")) parse_shots(v, second_shots, &second_shot_count, 16);
+	else return false;
+	return true;
 }
 
 static const Scene *scene_by_name(const char *n) {
@@ -524,17 +571,22 @@ static bool game_frame(void) {
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	script_tick();
 	platform_poll();
-	if (current && current->update) current->update();
+	taps_tick();
+	/* (the touch controls' menu pauses the game under it) */
+	if (current && current->update && !touch_paused()) current->update();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
 	quit_prompt_draw();
-	touch_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	for (int i = 0; i < shot_count; ++i)
 		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
+	for (int i = 0; i < screen_shot_count; ++i)
+		if (screen_shots[i].frame == P.frame) platform_shot_screen(screen_shots[i].path);
+	for (int i = 0; i < second_shot_count; ++i)
+		if (second_shots[i].frame == P.frame) platform_save_second_screen(second_shots[i].path);
 	if (P.frame >= range_a && P.frame <= range_b) {
 		char path[256];
 		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
@@ -674,7 +726,10 @@ int main(int argc, char **argv) {
 		/* (the frame log without an environment: the 3DS over 3dslink) */
 		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
-		else if (!strcmp(a, "--shot") && v) { parse_shots(v); ++i; }
+		else if (!strcmp(a, "--taps") && v) { parse_taps(v); ++i; }
+		else if (v && shot_option(a, v)) ++i;
+		/* (the screen's density for the touch controls, in dots per inch) */
+		else if (!strcmp(a, "--dpi") && v) { platform_set_dpi((float)atof(v)); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {
 			unsigned long long ra = 0, rb = 0;
 			if (sscanf(v, "%llu:%llu:%199s", &ra, &rb, range_prefix) == 3) { range_a = ra; range_b = rb; }
@@ -712,15 +767,15 @@ int main(int argc, char **argv) {
 	if (R_SUCCEEDED(sysm)) ptmSysmExit();
 	osSetSpeedupEnable(true);
 	volatile bool third = false;
-	Thread probe = threadCreate(core2_probe, (void *)&third, 0x1000, 0x30, 2, false);
+	union { volatile bool *c; void *v; } arg = { &third };   /* (the thread writes it through a volatile) */
+	Thread probe = threadCreate(core2_probe, arg.v, 0x1000, 0x30, 2, false);
 	if (probe) { threadJoin(probe, U64_MAX); threadFree(probe); }
 	bool n3ds = false;
 	APT_CheckNew3DS(&n3ds);
-	extern u32 __ctru_heap_size, __ctru_linear_heap_size;
 	char mem[300];
 	snprintf(mem, sizeof mem, "3ds: %s, %s, heap %lu KB, linear heap %lu KB; the speedup %s; the third core %s",
 		n3ds ? "New 3DS" : "3DS", envIsHomebrew() ? "homebrew" : "title",
-		(unsigned long)(__ctru_heap_size / 1024), (unsigned long)(__ctru_linear_heap_size / 1024),
+		(unsigned long)(envGetHeapSize() / 1024), (unsigned long)(envGetLinearHeapSize() / 1024),
 		R_SUCCEEDED(sysm) ? "on" : "refused", third ? "free for the game" : probe ? "ran nothing" : "refused");
 	if (__3dslink_host.s_addr) {
 		u32 *soc = memalign(0x1000, 0x100000);
@@ -805,6 +860,8 @@ int main(int argc, char **argv) {
 		platform_load_keys(keys);
 		snprintf(keys, sizeof keys, "%s/settings.ini", g_data_dir);
 		platform_load_settings(keys);
+		snprintf(keys, sizeof keys, "%s/touch.ini", g_data_dir);
+		touch_load(keys);
 		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
