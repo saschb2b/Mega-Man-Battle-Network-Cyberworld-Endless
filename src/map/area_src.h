@@ -47,11 +47,13 @@ bool area_src_load(int group, int number, AreaSrc *a);
  * offsets of its 12 bytes) and its coordinate data's pointer. */
 bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot);
 void area_src_free(AreaSrc *a);
-/* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip. */
-void area_src_mirror(const AreaSrc *a, AreaSrc *m);
+/* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip.
+ * False, and `m` empty, where the memory for it could not be had. */
+bool area_src_mirror(const AreaSrc *a, AreaSrc *m);
 /* The map drawn `z` pixels lower (a multiple of 8), so that its floor at
- * height z lies where ground floor would: a view of that level. */
-void area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
+ * height z lies where ground floor would: a view of that level. False,
+ * and `r` empty, where the memory for it could not be had. */
+bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
 /* Tile maps (tw x th entries of layer 0, then layer 1) drawn with map
  * (group, number)'s tiles and colours as the game shows them, layer 1 in
  * front: ARGB pixels, alpha 0 where empty (free them). */

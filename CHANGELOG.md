@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The 3DS no longer crashes entering the Undernet or the Nest** (the
+  short net's layer 10), as a player reported. Learning an area's tiles
+  took more memory than a New 3DS gives the game there: each area kept
+  what it learned at a whole map's size (30 MB for the Undernet), and a
+  map, its mirror image and the area's own map stood in memory at once.
+  Kept at their size (3 MB an area), the own map freed before the
+  others load, and each copy checked, the Undernet needs 61 MB at most,
+  and the Nest 58, where they had needed 98 and 86 before the 3DS's own
+  16 MB copy of the ROM. Every platform saves the memory.
 - **The arrow leads to a walkway's mouth.** Where the way on enters a
   walkway a few panels ahead and MegaMan stands off its line, the arrow
   points along the floor to the panel it starts from, then down the

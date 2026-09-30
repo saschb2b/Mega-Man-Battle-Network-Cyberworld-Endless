@@ -503,6 +503,66 @@ static void src_close(Src *s) {
 	free(s->drawn);
 }
 
+/* The panels' neighbourhoods, as legal.c asks after them (every ring of
+ * walls inside the floor a hole: what the tiles are learned from leaves the
+ * floors a layer keeps as they were), sorted, each once, and kept at the
+ * size they hold (an area kept eight books of a whole map's tiles each,
+ * 30 MB for the Undernet's, and a New 3DS ran out of memory entering it). */
+static void learn_shapes(const Src *src, const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map,
+	uint8_t *pads, TileBook *out) {
+	Src walled = *src;
+	uint8_t *walled_pads = pads;
+	if (src->inner_walls) {
+		src_open(&walled, a, styles, walk_styles, skip_styles, bg_in_map, false);
+		walled_pads = find_pads(&walled);
+	}
+	out->nshapes = 0;
+	out->shapes = malloc(SPAN * SPAN * sizeof *out->shapes);
+	for (int B = -SPAN / 2 + 1; out->shapes && B < SPAN / 2 - 1; ++B)
+		for (int A = -SPAN / 2 + 1; A < SPAN / 2 - 1; ++A) {
+			unsigned oa = 0, ob = 0;
+			bool mixed = false;
+			for (int k = 0; k < 9; ++k) {
+				int st = src_panel(&walled, A + k % 3 - 1, B + k / 3 - 1);
+				if (st == OTHER) mixed = true;
+				if (st == TILE_A) oa |= 1u << k;
+				if (st == TILE_B) ob |= 1u << k;
+			}
+			if (mixed || !(oa | ob)) continue;
+			out->shapes[out->nshapes++] = TILE_SHAPE(oa, ob, walled_pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]);
+		}
+	if (src->inner_walls) {
+		src_close(&walled);
+		free(walled_pads);
+	}
+	if (!out->shapes) return;
+	qsort(out->shapes, (size_t)out->nshapes, sizeof *out->shapes, cmp_u32);
+	int ns = 0;
+	for (int i = 0; i < out->nshapes; ++i)
+		if (!ns || out->shapes[ns - 1] != out->shapes[i]) out->shapes[ns++] = out->shapes[i];
+	out->nshapes = ns;
+	uint32_t *shapes = realloc(out->shapes, ((size_t)ns + 1) * sizeof *out->shapes);
+	if (shapes) out->shapes = shapes;
+}
+
+/* One entry per pair, counted, the most common first, kept at the size
+ * they hold, as the shapes are. */
+static void keep_cands(TileCand *c, size_t n, TileBook *out) {
+	qsort(c, n, sizeof *c, cmp_cand);
+	int nu = 0;
+	for (size_t i = 0; i < n;) {
+		size_t j = i;
+		while (j < n && c[j].key == c[i].key && c[j].e0 == c[i].e0 && c[j].e1 == c[i].e1 && c[j].pad == c[i].pad) ++j;
+		c[nu] = c[i];
+		c[nu++].count = (uint32_t)(j - i);
+		i = j;
+	}
+	qsort(c, (size_t)nu, sizeof *c, cmp_count);
+	TileCand *kept_c = realloc(c, ((size_t)nu + 1) * sizeof *c);
+	out->cand = kept_c ? kept_c : c;
+	out->n = nu;
+}
+
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out) {
 	memset(out, 0, sizeof *out);
 	Src src;
@@ -514,6 +574,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	out->face = g.face;
 	out->hang = g.hang;
 	TileCand *c = malloc(((size_t)a->tw * a->th + 1) * sizeof *c);
+	if (!c) { src_close(&src); free(pads); return; }   /* (a book of nothing) */
 	size_t n = 0;
 	/* (the original map's pixels kept as its tiles are tested: learning an
 	 * area asked after each a thousand times, three quarters of the time) */
@@ -560,52 +621,8 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 			++n;
 		}
 	tiles_keep_end();
-	/* the panels' neighbourhoods, as legal.c asks after them (every ring of
-	 * walls inside the floor a hole: what the tiles are learned from leaves
-	 * the floors a layer keeps as they were) */
-	Src walled = src;
-	uint8_t *walled_pads = pads;
-	if (src.inner_walls) {
-		src_open(&walled, a, styles, walk_styles, skip_styles, bg_in_map, false);
-		walled_pads = find_pads(&walled);
-	}
-	out->shapes = malloc(SPAN * SPAN * sizeof *out->shapes);
-	out->nshapes = 0;
-	for (int B = -SPAN / 2 + 1; B < SPAN / 2 - 1; ++B)
-		for (int A = -SPAN / 2 + 1; A < SPAN / 2 - 1; ++A) {
-			unsigned oa = 0, ob = 0;
-			bool mixed = false;
-			for (int k = 0; k < 9; ++k) {
-				int st = src_panel(&walled, A + k % 3 - 1, B + k / 3 - 1);
-				if (st == OTHER) mixed = true;
-				if (st == TILE_A) oa |= 1u << k;
-				if (st == TILE_B) ob |= 1u << k;
-			}
-			if (mixed || !(oa | ob)) continue;
-			out->shapes[out->nshapes++] = TILE_SHAPE(oa, ob, walled_pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]);
-		}
-	if (src.inner_walls) {
-		src_close(&walled);
-		free(walled_pads);
-	}
-	qsort(out->shapes, (size_t)out->nshapes, sizeof *out->shapes, cmp_u32);
-	int ns = 0;
-	for (int i = 0; i < out->nshapes; ++i)
-		if (!ns || out->shapes[ns - 1] != out->shapes[i]) out->shapes[ns++] = out->shapes[i];
-	out->nshapes = ns;
-	/* one entry per pair, counted */
-	qsort(c, n, sizeof *c, cmp_cand);
-	int nu = 0;
-	for (size_t i = 0; i < n;) {
-		size_t j = i;
-		while (j < n && c[j].key == c[i].key && c[j].e0 == c[i].e0 && c[j].e1 == c[i].e1 && c[j].pad == c[i].pad) ++j;
-		c[nu] = c[i];
-		c[nu++].count = (uint32_t)(j - i);
-		i = j;
-	}
-	qsort(c, (size_t)nu, sizeof *c, cmp_count);
-	out->cand = c;
-	out->n = nu;
+	learn_shapes(&src, a, styles, walk_styles, skip_styles, bg_in_map, pads, out);
+	keep_cands(c, n, out);
 	find_plain(out);
 	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
 	src_close(&src);

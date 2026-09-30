@@ -35,7 +35,6 @@ src/map/coords.c:walls 28 32
 src/map/decor.c:decor_learn 46 65
 src/map/legal.c:legal_fix 38 66
 src/map/netmap.c:floor_raw 27 15
-src/map/netmap.c:learn 30 52
 src/map/props.c:cut_tiles 29 48
 src/map/props.c:floor_emblem_on 29 46
 src/map/props.c:learn_art 29 54
@@ -44,7 +43,6 @@ src/map/props.c:props_learn_pad 52 70
 src/map/tilemap.c:pick_all 27 53
 src/map/tiles.c:best 68 84
 src/map/tiles.c:expect 29 36
-src/map/tiles.c:tiles_learn 43 95
 src/net/net_gen.c:counter 46 40
 src/net/net_gen.c:landmark 35 66
 src/net/net_gen.c:layer_generate 177 190

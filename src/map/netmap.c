@@ -105,7 +105,7 @@ static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Lea
 		seams_add(&L->seams, src, na->bg_in_map);
 	}
 	AreaSrc m;
-	area_src_mirror(src, &m);
+	if (!area_src_mirror(src, &m)) return;
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
 		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, &m, na->bg_in_map);
@@ -124,7 +124,7 @@ static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Lear
 	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
 		if (count[z] < LEVEL_MIN_CELLS) continue;
 		AreaSrc r;
-		area_src_raise(src, z, &r);
+		if (!area_src_raise(src, z, &r)) continue;
 		learn_view(&r, grid_of, area, L);
 		area_src_free(&r);
 	}
@@ -138,9 +138,10 @@ static void learn_counter(const int16_t *c, const AreaSrc *own, Learned *L) {
 	AreaSrc src, m;
 	if (!area_src_load(c[0], c[1], &src)) return;
 	props_learn_counter(&src, c[2], c[3], FACES_X, &L->counter[FACES_X]);
-	area_src_mirror(&src, &m);
-	props_mirror_walls(&src, &m);
-	props_learn_counter(&m, -c[3], -c[2], FACES_Y, &L->counter[FACES_Y]);
+	if (area_src_mirror(&src, &m)) {
+		props_mirror_walls(&src, &m);
+		props_learn_counter(&m, -c[3], -c[2], FACES_Y, &L->counter[FACES_Y]);
+	}
 	/* anchored on a panel corner of the layer (whose lattice is `own`'s:
 	 * the same phase whatever the corner), the least move that sets its
 	 * tiles on the lattice, along its run before in its depth (its back
@@ -176,6 +177,25 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
 		if (a->tile[0][i] >> 12 == to && (a->tile[0][i] & 0x3FF)) L->rebank_to[(a->tile[0][i] & 0x3FF) >> 3] |= (uint8_t)(1u << (a->tile[0][i] & 7));
 }
 
+/* The area's other maps in the same tiles and colours, for the places its
+ * own never shows, on its own map's grid. */
+static void learn_more(const AreaSrc *grid, int area, Learned *L) {
+	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
+	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
+		AreaSrc b;
+		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
+		learn_map(&b, grid, area, L);
+		decor_learn(&b, na->bg_in_map, &L->decor);
+		rebank_seen(&b, na->rebank[1], L);
+		for (int o = 0; o < 3; ++o)
+			if (!L->ornament[o].ok && aligned(grid, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
+		/* (its pads' tiles too, where its own map's all have a bridge
+		 * beside them there) */
+		if (na->pad_hues && aligned(grid, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
+		area_src_free(&b);
+	}
+}
+
 static bool learn(int area, Learned *L) {
 	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
 	AreaSrc a;
@@ -206,21 +226,11 @@ static bool learn(int area, Learned *L) {
 	 * small platforms are something else (Robot Control Comp 2's conveyor) */
 	if (na->styles & TILES_MORE_PADS)
 		for (int k = 0; k < own; ++k) tiles_drop_pads(&L->book[k]);
-	/* the area's other maps in the same tiles and colours, for the places
-	 * this one never shows */
-	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
-		AreaSrc b;
-		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
-		learn_map(&b, &a, area, L);
-		decor_learn(&b, na->bg_in_map, &L->decor);
-		rebank_seen(&b, na->rebank[1], L);
-		for (int o = 0; o < 3; ++o)
-			if (!L->ornament[o].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
-		/* (its pads' tiles too, where its own map's all have a bridge
-		 * beside them there) */
-		if (na->pad_hues && aligned(&a, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
-		area_src_free(&b);
-	}
+	/* (its own map's grid alone from here, freed before the others load: a
+	 * map, its mirror and the own map at once took a New 3DS's memory) */
+	AreaSrc grid = { .tw = a.tw, .th = a.th, .ex = a.ex, .ey = a.ey };
+	area_src_free(&a);
+	learn_more(&grid, area, L);
 	if (emu_debug_on()) fprintf(stderr, "pad stamp area %d ok %d tiles %d, %d panels beside its lower sides\n", area, L->pad.ok, L->pad.ntiles, L->pad.low);
 	/* but not their pieces in colours this one's floors never show: another
 	 * surface's (Central Area 2's raised plateau, yellow where Central's
@@ -237,7 +247,6 @@ static bool learn(int area, Learned *L) {
 			fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
 				L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
 	}
-	area_src_free(&a);
 	return true;
 }
 

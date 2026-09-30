@@ -383,8 +383,9 @@ static void learn_profiles(TownBook *b, int vi, bool only_new) {
 TownBook *townsrc_learn(int group, int number, TownMatOf mat_of) {
 	TownBook *b = calloc(1, sizeof *b);
 	mat_of_index = mat_of;
+	if (!b) return NULL;
 	if (!area_src_load(group, number, &b->v[0].a) || !b->v[0].a.idx) { free(b); return NULL; }
-	area_src_mirror(&b->v[0].a, &b->v[1].a);
+	if (!area_src_mirror(&b->v[0].a, &b->v[1].a)) { area_src_free(&b->v[0].a); free(b); return NULL; }
 	b->tw = b->v[0].a.tw;
 	b->th = b->v[0].a.th;
 	for (int vi = 0; vi < 2; ++vi) classify(&b->v[vi]);

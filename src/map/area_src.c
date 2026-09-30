@@ -26,6 +26,7 @@ static uint32_t group_slot(uint32_t rw_table, uint32_t net_table, int group) {
 /* A map's tile graphics (as the game loads them to VRAM) and colours. */
 static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
 	uint8_t *vram = calloc(0x10000, 1);
+	if (!vram) return NULL;
 	for (int k = 0; k < 2; ++k) {
 		uint32_t wc = rom_u32(ts + (uint32_t)k * 12), off = rom_u32(ts + (uint32_t)k * 12 + 4), vo = rom_u32(ts + (uint32_t)k * 12 + 8);
 		if (!wc) continue;
@@ -97,7 +98,9 @@ static bool decode_tiles(AreaSrc *a) {
 	a->layers = (int)(n / (cells * 2));
 	if (a->layers > 2) a->layers = 2;
 	for (int l = 0; l < a->layers; ++l) {
-		a->tile[l] = malloc(cells * 2);
+		/* (a whole map's tiles, its pixels twice: a New 3DS ran short of
+		 * memory in the Undernet, so none is written unchecked) */
+		if (!(a->tile[l] = malloc(cells * 2))) { free(m); return false; }
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)(m[(l * cells + i) * 2] | m[(l * cells + i) * 2 + 1] << 8);
 	}
 	free(m);
@@ -107,11 +110,13 @@ static bool decode_tiles(AreaSrc *a) {
 	 * in front of them (bridges, stairs, spikes, the floors that overlap
 	 * others on screen); and the first layer alone */
 	uint32_t colors[256];
-	uint8_t *vram = map_gfx(ts, pal, colors);
 	a->px = calloc(cells * 64, 4);
 	a->px0 = calloc(cells * 64, 4);
 	a->front = calloc(cells * 64, 1);
 	a->idx = calloc(cells * 64, 1);
+	if (!a->px || !a->px0 || !a->front || !a->idx) return false;
+	uint8_t *vram = map_gfx(ts, pal, colors);
+	if (!vram) return false;
 	bool rw = a->group < RW_GROUPS;
 	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, a->px, a->front, a->idx, rw);
 	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, a->px0, NULL, NULL, rw);
@@ -124,6 +129,7 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return NULL;
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	uint32_t *px = calloc((size_t)tw * th * 64, 4);
+	if (!vram || !px) { free(vram); free(px); return NULL; }
 	/* (draw_layers only reads them) */
 	union { const uint16_t *c; uint16_t *v; } t = { tiles };
 	uint16_t *layers[2] = { t.v, t.v + (size_t)tw * th };
@@ -307,22 +313,37 @@ void area_src_free(AreaSrc *a) {
 	memset(a, 0, sizeof *a);
 }
 
-void area_src_mirror(const AreaSrc *a, AreaSrc *m) {
-	*m = *a;
+/* (each copy checked: a whole map's pixels twice, and a New 3DS ran short
+ * of memory in the Undernet) */
+static bool copy_parts(const AreaSrc *a, AreaSrc *c, bool zeroed) {
 	int W = a->tw * 8, H = a->th * 8;
-	size_t cells = (size_t)a->tw * a->th;
+	size_t cells = (size_t)a->tw * a->th, n = (size_t)W * H;
+	for (int k = 0; k < 4; ++k) { c->sec[k] = NULL; c->nsec[k] = 0; }
+	c->tile[0] = c->tile[1] = NULL;
+	c->hz = c->rings = NULL;
+	c->px = zeroed ? calloc(n, 4) : malloc(n * 4);
+	c->px0 = zeroed ? calloc(n, 4) : malloc(n * 4);
+	c->front = zeroed ? calloc(n, 1) : malloc(n);
+	c->idx = !a->idx ? NULL : zeroed ? calloc(n, 1) : malloc(n);
+	bool ok = c->px && c->px0 && c->front && (!a->idx || c->idx);
+	for (int l = 0; l < 2 && ok; ++l)
+		if (a->tile[l]) ok = (c->tile[l] = calloc(cells, 2)) != NULL;
+	if (a->hz && ok) ok = (c->hz = malloc((size_t)a->hw * a->hh)) != NULL;
+	if (a->rings && ok) ok = (c->rings = malloc((size_t)a->rw * a->rh)) != NULL;
+	if (!ok) area_src_free(c);
+	return ok;
+}
+
+bool area_src_mirror(const AreaSrc *a, AreaSrc *m) {
+	*m = *a;
+	if (!copy_parts(a, m, false)) return false;   /* (the mirror is for tiles only: no sections) */
+	int W = a->tw * 8, H = a->th * 8;
 	for (int l = 0; l < 2; ++l) {
-		m->tile[l] = NULL;
 		if (!a->tile[l]) continue;
-		m->tile[l] = malloc(cells * 2);
 		for (int ty = 0; ty < a->th; ++ty)
 			for (int tx = 0; tx < a->tw; ++tx)
 				m->tile[l][ty * a->tw + (a->tw - 1 - tx)] = a->tile[l][ty * a->tw + tx] ^ 0x400;
 	}
-	m->px = malloc((size_t)W * H * 4);
-	m->px0 = malloc((size_t)W * H * 4);
-	m->front = malloc((size_t)W * H);
-	m->idx = a->idx ? malloc((size_t)W * H) : NULL;
 	for (int y = 0; y < H; ++y)
 		for (int x = 0; x < W; ++x) {
 			m->px[(size_t)y * W + (W - 1 - x)] = a->px[(size_t)y * W + x];
@@ -330,61 +351,43 @@ void area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
 			if (m->idx) m->idx[(size_t)y * W + (W - 1 - x)] = a->idx[(size_t)y * W + x];
 		}
-	for (int k = 0; k < 4; ++k) { m->sec[k] = NULL; m->nsec[k] = 0; }   /* the mirror is for tiles only */
 	m->ex = (32 - a->ey) & 31;
 	m->ey = (32 - a->ex) & 31;
 	/* heights: cell (x, y) becomes (-y - 1, -x - 1) */
-	m->hz = NULL;
 	if (a->hz) {
 		m->hw = a->hh; m->hh = a->hw;
 		m->hx0 = -(a->hy0 + a->hh); m->hy0 = -(a->hx0 + a->hw);
-		m->hz = malloc((size_t)m->hw * m->hh);
 		for (int y = 0; y < a->hh; ++y)
 			for (int x = 0; x < a->hw; ++x)
 				m->hz[(size_t)(a->hw - 1 - x) * m->hw + (a->hh - 1 - y)] = a->hz[(size_t)y * a->hw + x];
 	}
-	m->rings = NULL;
 	if (a->rings) {
 		m->rw = a->rh; m->rh = a->rw;
 		m->rx0 = -(a->ry0 + a->rh); m->ry0 = -(a->rx0 + a->rw);
-		m->rings = malloc((size_t)m->rw * m->rh);
 		for (int y = 0; y < a->rh; ++y)
 			for (int x = 0; x < a->rw; ++x)
 				m->rings[(size_t)(a->rw - 1 - x) * m->rw + (a->rh - 1 - y)] = a->rings[(size_t)y * a->rw + x];
 	}
+	return true;
 }
 
-void area_src_raise(const AreaSrc *a, int z, AreaSrc *r) {
+bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r) {
 	*r = *a;
+	if (!copy_parts(a, r, true)) return false;
 	int W = a->tw * 8, H = a->th * 8, rows = z / 8;
-	size_t cells = (size_t)a->tw * a->th;
 	for (int l = 0; l < 2; ++l) {
-		r->tile[l] = NULL;
 		if (!a->tile[l]) continue;
-		r->tile[l] = calloc(cells, 2);
 		for (int ty = rows; ty < a->th; ++ty)
 			memcpy(r->tile[l] + (size_t)ty * a->tw, a->tile[l] + (size_t)(ty - rows) * a->tw, (size_t)a->tw * 2);
 	}
-	r->px = calloc((size_t)W * H, 4);
-	r->px0 = calloc((size_t)W * H, 4);
-	r->front = calloc((size_t)W * H, 1);
-	r->idx = a->idx ? calloc((size_t)W * H, 1) : NULL;
 	for (int y = z; y < H; ++y) {
 		memcpy(r->px + (size_t)y * W, a->px + (size_t)(y - z) * W, (size_t)W * 4);
 		memcpy(r->px0 + (size_t)y * W, a->px0 + (size_t)(y - z) * W, (size_t)W * 4);
 		memcpy(r->front + (size_t)y * W, a->front + (size_t)(y - z) * W, (size_t)W);
 		if (r->idx) memcpy(r->idx + (size_t)y * W, a->idx + (size_t)(y - z) * W, (size_t)W);
 	}
-	for (int k = 0; k < 4; ++k) { r->sec[k] = NULL; r->nsec[k] = 0; }
-	r->hz = NULL;
-	if (a->hz) {
-		r->hz = malloc((size_t)a->hw * a->hh);
-		memcpy(r->hz, a->hz, (size_t)a->hw * a->hh);
-	}
-	r->rings = NULL;
-	if (a->rings) {
-		r->rings = malloc((size_t)a->rw * a->rh);
-		memcpy(r->rings, a->rings, (size_t)a->rw * a->rh);
-	}
+	if (a->hz) memcpy(r->hz, a->hz, (size_t)a->hw * a->hh);
+	if (a->rings) memcpy(r->rings, a->rings, (size_t)a->rw * a->rh);
 	r->level = z;
+	return true;
 }
