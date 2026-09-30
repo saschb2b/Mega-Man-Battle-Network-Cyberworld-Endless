@@ -2,8 +2,6 @@
 # a new one fails; fix one, then build.py lint --update
 src/core/touch_art.c: img_new: use of floating-point arithmetic here might yield unexpected results [-Wanalyzer-imprecise-fp-arithmetic]
 src/core/touch_art.c: img_new: use of floating-point arithmetic here might yield unexpected results [-Wanalyzer-imprecise-fp-arithmetic]
-src/dev/atlas.c: one: use of possibly-NULL 'offs' where non-null expected [-Wanalyzer-possible-null-argument]
-src/dev/atlas.c: one: use of possibly-NULL 'sp' where non-null expected [-Wanalyzer-possible-null-argument]
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'fp' [-Wanalyzer-possible-null-dereference]
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'kind' [-Wanalyzer-possible-null-dereference]
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'pixels' [-Wanalyzer-possible-null-dereference]

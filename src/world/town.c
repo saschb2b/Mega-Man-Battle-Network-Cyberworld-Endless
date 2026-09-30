@@ -912,7 +912,7 @@ uint32_t *town_render(int *w, int *h) {
 	if (!T.tiles) return NULL;
 	*w = T.info.tw * 8;
 	*h = T.info.th * 8;
-	return area_src_render(T.style->group, T.style->number, T.tiles, T.info.tw, T.info.th);
+	return area_src_render(0, T.style->group, T.style->number, T.tiles, T.info.tw, T.info.th);
 }
 
 int town_triggers(const CoordCell **cells) {

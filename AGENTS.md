@@ -170,7 +170,7 @@ pacing) stays local.
 `shot` runs headless in the build image with the repository at `/src` and
 `~/.cache/mmbn-ref/roms` (override with `CYBERWORLD_ROM_DIR`) mounted
 read-only; `--data-dir` defaults to `.build/data`. `--scene emu` starts a new
-run on the game, `--run-depth N` at depth N, `--net-biome N` in one area,
+run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` another game's area N, its ROM beside BN6's: docs/MULTIROM.md),
 `--guardian N` with navi N guarding every area,
 `--seed S` with a given seed, `--scene town` from the town as NEW GAME does,
 `--scene summary` the title's run summary (a win's with `--setup short` at

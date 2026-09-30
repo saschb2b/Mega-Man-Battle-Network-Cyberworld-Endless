@@ -43,10 +43,15 @@ ROM in memory, and shows its battle screens.
    its maps from the game's ROM; what learns from a map (`tiles.c`,
    `props.c`, `decor.c`, `stairs.c`) works on the decoded map, whichever
    game it came from, and each map keeps where it was read (`AreaSrc.rom`).
-3. **Into BN6** (next): a layer made in another game's tiles carries its
-   tile set and palette into BN6's in-memory free space, under a map
-   descriptor of its own for the map it takes over, one whose map scripts
-   animate nothing over them.
+3. **Into BN6**: another game's areas (`XRomLayout.areas`, the same
+   `NetAreaDef` as BN6's own, numbered after BN6's 19) name the BN6 map
+   their layers take over (`over`) and the BN6 area whose layouts and
+   furnishings they take (`like`). A layer in another game's tiles copies
+   that game's tile set (its two blocks decoded and encoded again, after a
+   header of its own) and palette into BN6's in-memory free space
+   (`+0x170000`, docs/EMULATION.md), and the taken-over map's descriptor
+   points at them. BN5's tile sets fill the same VRAM as BN6's (their
+   first block at 0, the second after it: 31200 bytes against 30496).
 4. **Pools by source**: each area, town, song and bystander is an entry
    with the game it came from; BN6 alone is today's game.
 5. **Runs remember their games**: a run is made from the pools of the ROMs
@@ -61,8 +66,13 @@ ROM in memory, and shows its battle screens.
 - [x] Battle Network 5: Team Colonel (USA): its map and coordinate
   tables, its maps drawn through the engine's map reader (`--atlas
   DIR:x0`: ACDC Town, Lan's room, the harbour, the net areas from 0x80).
-- [ ] One of its net areas as a biome: its tiles learned, its tile set
-  and palette in BN6's free space, a host map that animates nothing.
+- [x] One of its net areas drawn in the game: ACDC Area 1 (0x90:0), its
+  cyan platforms and green walkways learned, its tile set and palette in
+  BN6's free space, taking over Central Area 1 and laid out as Central
+  Area (`--net-biome x0`; `--atlas DIR:a0:SEEDS` draws its layers).
+- [ ] Its areas in a run: their names, songs and battles, a biome of
+  their own when its ROM is there; the frames its platforms still show
+  inside a field joined from several (its other maps to learn from).
 - [ ] Its music.
 - [ ] Its towns and bystanders.
 - [ ] Its guardians, in battles in its own engine.

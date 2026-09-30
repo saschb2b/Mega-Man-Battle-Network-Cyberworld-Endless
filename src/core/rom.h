@@ -19,6 +19,31 @@ typedef enum { ROM_BN6_GREGAR_US } RomVersion;
  * floor: the pads, or the platforms (all but the walkways; src/map/tilemap.c). */
 enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
 
+/* The original area a net biome borrows (docs/ROM_DATA.md): BN6's, or
+ * another Battle Network game's (docs/MULTIROM.md). */
+typedef struct {
+	uint8_t group, number;   /* map whose floor panels are learned */
+	uint32_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look; TILES_MORE_COLOURS (0x2000): its other maps' tiles in colours its own map's floors never show too; TILES_RIMMED (0x10000): its platforms' edges are rims; TILES_INNER_WALLS (0x20000): walls inside its floors ring no holes; TILES_MORE_PADS (0x40000): its pads in its other maps' pads' look alone (src/map/tiles.h) */
+	uint16_t walk_styles;    /* hue buckets of its walkways, drawn on 1-wide paths (0: none) */
+	bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
+	uint8_t song;            /* the area's theme (MP2K song) */
+	uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
+	uint8_t more[NET_MORE_MAPS][2];  /* more maps (group, number) in the same tiles and colours to learn from */
+	uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads, the guardian's arena too (the Aquarium's glass pads; 0: none) */
+	uint8_t apart;           /* NET_APART_*: floor its originals never set flush with the rest, drawn whole where a walkway meets it */
+	uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours */
+	int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
+	uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
+	uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/LEVEL_DESIGN.md, Props) */
+	uint16_t pad_hues;       /* its pads are cut whole from its maps' own, the first whose middle has one of these hue buckets (props_learn_pad): Central's and Seaside's framed pads; 0 none */
+	uint8_t rebank[2];       /* first-layer tiles in palette bank rebank[0] drawn in bank rebank[1] where its maps use the same tile in that bank too: one shade of floor (the Graveyard's pale platforms, bank 2, among its dark slabs, bank 1); { 0, 0 } none */
+	uint8_t host;            /* its layers take over map (group, host - 1) of the same tiles, where the learned one draws sprites behind the second tile layer (0: the learned map; docs/ROM_DATA.md) */
+	/* (another game's area) */
+	int8_t xrom;             /* the game its maps are in: 0 BN6, 1 + XRomId another's */
+	uint8_t over[2];         /* the BN6 map its layers take over (group, number) */
+	uint8_t like;            /* the BN6 area (BIOME_*) whose layouts and furnishings its layers take */
+} NetAreaDef;
+
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
 typedef struct {
 	const char *name;
@@ -42,24 +67,7 @@ typedef struct {
 		uint32_t copy_pal;
 		uint32_t arrow, arrow_pal; /* menu cursor: 3 frames of 16x16 */
 	} title;
-	struct {                  /* the original area each net biome borrows (docs/ROM_DATA.md) */
-		uint8_t group, number;   /* map whose floor panels are learned */
-		uint32_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look; TILES_MORE_COLOURS (0x2000): its other maps' tiles in colours its own map's floors never show too; TILES_RIMMED (0x10000): its platforms' edges are rims; TILES_INNER_WALLS (0x20000): walls inside its floors ring no holes; TILES_MORE_PADS (0x40000): its pads in its other maps' pads' look alone (src/map/tiles.h) */
-		uint16_t walk_styles;    /* hue buckets of its walkways, drawn on 1-wide paths (0: none) */
-		bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
-		uint8_t song;            /* the area's theme (MP2K song) */
-		uint8_t battles, first, nmaps;   /* the maps whose random battles the area fights */
-		uint8_t more[NET_MORE_MAPS][2];  /* more maps (group, number) in the same tiles and colours to learn from */
-		uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads, the guardian's arena too (the Aquarium's glass pads; 0: none) */
-		uint8_t apart;           /* NET_APART_*: floor its originals never set flush with the rest, drawn whole where a walkway meets it */
-		uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours */
-		int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
-		uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
-		uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/LEVEL_DESIGN.md, Props) */
-		uint16_t pad_hues;       /* its pads are cut whole from its maps' own, the first whose middle has one of these hue buckets (props_learn_pad): Central's and Seaside's framed pads; 0 none */
-		uint8_t rebank[2];       /* first-layer tiles in palette bank rebank[0] drawn in bank rebank[1] where its maps use the same tile in that bank too: one shade of floor (the Graveyard's pale platforms, bank 2, among its dark slabs, bank 1); { 0, 0 } none */
-		uint8_t host;            /* its layers take over map (group, host - 1) of the same tiles, where the learned one draws sprites behind the second tile layer (0: the learned map; docs/ROM_DATA.md) */
-	} net_area[NET_AREAS];
+	NetAreaDef net_area[NET_AREAS];   /* the original area each net biome borrows */
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */
 	uint32_t battle_bg_anims;  /* their tile and palette animation scripts */
@@ -83,6 +91,8 @@ typedef struct {
 	uint32_t map_table_rw, map_table;       /* MapBGDescriptor lists per map group, as BN6's (docs/ROM_DATA.md) */
 	uint32_t coord_table_rw, coord_table;   /* coordinate data lists per map group */
 	int rw_groups, net_groups;              /* the tables' entries: real-world groups from 0x00, internet ones from 0x80 */
+	const NetAreaDef *areas;                /* the net areas it lends a run */
+	int nareas;
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -91,6 +101,13 @@ typedef struct {
 extern XRom XR[XROM_COUNT];
 /* Reads the extra ROMs in dir (any *.gba of theirs); how many are read now. */
 int xrom_find(const char *dir);
+/* ... in the folder BN6's ROM was found in. */
+int xrom_find_beside(void);
+/* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from
+ * NET_AREAS, in XRomId order, XAREAS_MAX at most); NULL for one whose
+ * game's ROM is not read. */
+#define XAREAS_MAX 8
+const NetAreaDef *net_area_def(int area);
 
 /* Looks for a supported ROM in dir (any *.gba). On failure, msg explains why. */
 bool rom_find(const char *dir, char *msg, size_t msglen);

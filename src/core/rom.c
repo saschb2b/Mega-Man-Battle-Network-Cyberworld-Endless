@@ -213,11 +213,27 @@ bool rom_find_close;
 
 /* ---- Extra ROMs (docs/MULTIROM.md) ---- */
 
+/* Battle Network 5's net areas (docs/MULTIROM.md) */
+static const NetAreaDef bn5_areas[] = {
+	{ 0x90, 0, 0x0040, 0x0010, false, 0x13, 0, 0, 0, { { 0 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0 },   /* ACDC Area 1: cyan platforms, green walkways */
+};
+
 static const XRomLayout xlayouts[XROM_COUNT] = {
 	/* (tables found by their structure beside BN6's own, docs/ROM_DATA.md) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
-		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21 },
+		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas) },
 };
+
+const NetAreaDef *net_area_def(int area) {
+	if (area < 0) return NULL;
+	if (area < NET_AREAS) return R.layout ? &R.layout->net_area[area] : NULL;
+	int k = area - NET_AREAS;
+	for (int i = 0; i < XROM_COUNT && k < XAREAS_MAX; ++i) {
+		if (k < xlayouts[i].nareas) return XR[i].data ? &xlayouts[i].areas[k] : NULL;
+		k -= xlayouts[i].nareas;
+	}
+	return NULL;
+}
 
 XRom XR[XROM_COUNT];
 
@@ -254,6 +270,16 @@ int xrom_find(const char *dir) {
 	int have = 0;
 	for (int i = 0; i < XROM_COUNT; ++i) have += XR[i].data != NULL;
 	return have;
+}
+
+int xrom_find_beside(void) {
+	char dir[1024];
+	snprintf(dir, sizeof dir, "%s", R.path);
+	char *slash = strrchr(dir, '/'), *back = strrchr(dir, '\\');
+	if (back > slash) slash = back;
+	if (slash) *slash = 0;
+	else snprintf(dir, sizeof dir, ".");
+	return xrom_find(dir);
 }
 
 bool rom_find(const char *dir, char *msg, size_t msglen) {

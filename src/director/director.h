@@ -67,6 +67,11 @@ bool director_dev_warp_cell(int x, int y);
 void director_stop(void);
 /* Test hook (--net-biome): every layer in this biome. */
 extern int director_debug_biome;
+/* Test hook (--net-biome xN): every layer in another game's net area N
+ * (docs/MULTIROM.md), as NET_AREAS + N, where its ROM is beside BN6's. */
+extern int director_debug_area;
+/* --net-biome's value: a biome, or xN another game's area N. */
+void director_net_biome_arg(const char *v);
 /* --talk: chats to open at given frames (director.c) */
 extern const char *director_dev_talks;
 

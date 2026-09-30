@@ -60,8 +60,14 @@ bool area_src_mirror(const AreaSrc *a, AreaSrc *m);
 bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r);
 /* Tile maps (tw x th entries of layer 0, then layer 1) drawn with map
  * (group, number)'s tiles and colours as the game shows them, layer 1 in
- * front: ARGB pixels, alpha 0 where empty (free them). */
-uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, int th);
+ * front: ARGB pixels, alpha 0 where empty (free them). The map is BN6's
+ * (rom 0) or another game's (1 + XRomId, where read). */
+uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles, int tw, int th);
+/* Map (group, number)'s tile set and colours in game `rom` (as for
+ * area_src_render), to stand anywhere: the tile set's header with its
+ * blocks encoded again after it (*ts_out, *nts bytes), the palette as it
+ * is (*pal_out, *npal); free both. */
+bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts, uint8_t **pal_out, size_t *npal);
 /* Floor height at world (X, Y): 0 where section 1 says nothing. */
 int area_src_height(const AreaSrc *a, int X, int Y);
 /* Whether the walls put world (X, Y) on floor (1), off it (0) or cannot

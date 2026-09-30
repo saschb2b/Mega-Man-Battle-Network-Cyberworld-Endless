@@ -8,7 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bytes.h"
 #include "gfx.h"
+#include "lz.h"
 #include "rom.h"
 
 #define MAP_TABLE_RW   0x0329A8u /* MapBGDescriptor lists, real-world groups 0x00-0x06 */
@@ -152,8 +154,9 @@ static bool decode_tiles(AreaSrc *a) {
 	return true;
 }
 
-uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, int th) {
-	use_rom(-1);
+uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles, int tw, int th) {
+	if (rom && (rom > XROM_COUNT || !XR[rom - 1].data)) return NULL;
+	use_rom(rom - 1);
 	uint32_t desc, ts, pal, tm, colors[256];
 	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return NULL;
 	uint8_t *vram = map_gfx(ts, pal, colors);
@@ -167,6 +170,45 @@ uint32_t *area_src_render(int group, int number, const uint16_t *tiles, int tw, 
 	draw_layers(vram, colors, layers, 2, 1, tw, th, px, NULL, NULL, group < RW_GROUPS);
 	free(vram);
 	return px;
+}
+
+bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts, uint8_t **pal_out, size_t *npal) {
+	*ts_out = *pal_out = NULL;
+	*nts = *npal = 0;
+	if (rom < 0 || rom > XROM_COUNT || (rom && !XR[rom - 1].data)) return false;
+	use_rom(rom - 1);
+	uint32_t desc, ts, pal, tm;
+	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return false;
+	/* the palette as it is: its size, then the colours */
+	uint32_t psize = su32(pal - 4);
+	if (psize > 0x200 || pal + psize > ROM_SIZE) return false;
+	uint8_t *raw[2] = { NULL, NULL };
+	size_t rn[2] = { 0, 0 };
+	uint32_t wc[2], vo[2];
+	for (int k = 0; k < 2; ++k) {
+		wc[k] = su32(ts + (uint32_t)k * 12);
+		uint32_t off = su32(ts + (uint32_t)k * 12 + 4);
+		vo[k] = su32(ts + (uint32_t)k * 12 + 8);
+		if (wc[k] && off < ROM_SIZE - ts) raw[k] = lz77_decompress(src.data + ts + off, ROM_SIZE - (ts + off), &rn[k]);
+	}
+	/* the tile set: a header of its own, each block encoded again after it */
+	uint8_t *t = malloc(24 + 2 * 16 + rn[0] + rn[0] / 8 + rn[1] + rn[1] / 8), *p = malloc(4 + psize);
+	size_t at = 24;
+	for (int k = 0; t && p && k < 2; ++k) {
+		put32(t + k * 12, raw[k] ? wc[k] : 0);
+		put32(t + k * 12 + 4, (uint32_t)at);
+		put32(t + k * 12 + 8, vo[k]);
+		if (raw[k]) at = (at + lz_literal(raw[k], rn[k], t + at) + 3) & ~(size_t)3;
+	}
+	free(raw[0]);
+	free(raw[1]);
+	if (!t || !p) { free(t); free(p); return false; }
+	memcpy(p, src.data + pal - 4, 4 + psize);
+	*ts_out = t;
+	*nts = at;
+	*pal_out = p;
+	*npal = 4 + psize;
+	return true;
 }
 
 /* The coordinate data's four sections, each a count, (key, offset)

@@ -33,6 +33,8 @@
 #include "rom.h"
 
 #define TILEMAP_AT  (EMU_FREE + 0x10000) /* generated tile map (LZ77) */
+#define XGFX_AT     (EMU_FREE + 0x170000)   /* another game's area: its tile set and palette (docs/EMULATION.md) */
+#define XGFX_SIZE   0x30000
 
 #define MAX_BOOKS (4 * (1 + NET_MORE_MAPS))   /* maps, their mirrors, two heights each */
 
@@ -45,6 +47,8 @@ typedef struct {
 	DecorBook decor;          /* the scenery of the area's maps */
 	uint32_t desc, coord_slot;   /* the map its layers take over (net_area.host) */
 	uint32_t src_desc;        /* the learned map's, whose tile set and colours they draw in */
+	bool other;               /* its maps are another game's (docs/MULTIROM.md): src_desc is that game's */
+	const NetAreaDef *def;
 	StairTemplate stairs[STAIR_DIRS];
 	PropStamp counter[2];     /* the Net Dealer's counter, facing FACES_X and FACES_Y */
 	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
@@ -60,7 +64,7 @@ typedef struct {
 /* the centrepieces' tiles (the four surface areas share their tile set) */
 static const int ornament_tile[3] = { 0x379, 0x372, 0x375 };
 
-static Learned learned[NET_AREAS];
+static Learned learned[NET_AREAS + XAREAS_MAX];
 
 int netmap_scenery;
 LegalStats netmap_legal;
@@ -96,10 +100,15 @@ static bool aligned(const AreaSrc *a, const AreaSrc *b) {
 	return false;
 }
 
+/* A map of the area's own game, BN6's or another's (docs/MULTIROM.md). */
+static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
+	return na->xrom ? area_src_load_x(na->xrom - 1, group, number, a) : area_src_load(group, number, a);
+}
+
 /* Learns the tiles of map `src` and its mirror image, where their tiles
  * line up with the layer's grid (`grid_of`). */
 static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
-	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
+	const NetAreaDef *na = net_area_def(area);
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
 		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);
@@ -180,14 +189,14 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
 /* The area's other maps in the same tiles and colours, for the places its
  * own never shows, on its own map's grid. */
 static void learn_more(const AreaSrc *grid, int area, Learned *L) {
-	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
+	const NetAreaDef *na = net_area_def(area);
 	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
 		AreaSrc b;
-		if (!area_src_load(na->more[k][0], na->more[k][1], &b)) continue;
+		if (!load_map(na, na->more[k][0], na->more[k][1], &b)) continue;
 		learn_map(&b, grid, area, L);
 		decor_learn(&b, na->bg_in_map, &L->decor);
 		rebank_seen(&b, na->rebank[1], L);
-		for (int o = 0; o < 3; ++o)
+		for (int o = 0; o < 3 && !na->xrom; ++o)
 			if (!L->ornament[o].ok && aligned(grid, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
@@ -197,18 +206,23 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 }
 
 static bool learn(int area, Learned *L) {
-	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[area];
+	const NetAreaDef *na = net_area_def(area);
 	AreaSrc a;
-	if (!area_src_load(na->group, na->number, &a)) return false;
+	if (!na || !load_map(na, na->group, na->number, &a)) return false;
 	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
 	L->desc = L->src_desc = a.desc; L->coord_slot = a.coord_slot;
-	if (na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) return false;
+	/* (another game's area takes over a BN6 map: its slots are BN6's) */
+	L->other = na->xrom != 0;
+	L->def = na;
+	if (L->other ? !area_src_slots(na->over[0], na->over[1], &L->desc, &L->coord_slot)
+		: na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) { area_src_free(&a); return false; }
 	L->nbooks = 0;
 	learn_map(&a, &a, area, L);
 	decor_learn(&a, na->bg_in_map, &L->decor);
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
-	for (int k = 0; k < 3; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
+	/* (the pads' centrepieces are BN6's tiles) */
+	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
 	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
 	L->rebank[0] = na->rebank[0];
@@ -616,6 +630,36 @@ bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {
 	return true;
 }
 
+/* One shade of floor: tiles of the other bank in this one's colours, where
+ * its maps draw the same tile in it. */
+static void rebank_map(const Learned *L, uint16_t *map, size_t cells) {
+	const uint8_t *rb = L->rebank;
+	if (!rb[0] || !rb[1]) return;
+	for (size_t i = 0; i < cells; ++i) {
+		uint16_t e = map[i];
+		if (e >> 12 == rb[0] && (e & 0x3FF) && L->rebank_to[(e & 0x3FF) >> 3] >> (e & 7) & 1) map[i] = (uint16_t)((e & 0x0FFF) | rb[1] << 12);
+	}
+}
+
+/* Another game's area: its tile set and colours copied into the core's
+ * ROM, where BN6 loads them from the map the layers take over. */
+static bool install_gfx(const Learned *L) {
+	uint8_t *ts, *pal;
+	size_t nts, npal;
+	if (!area_src_gfx(L->def->xrom, L->def->group, L->def->number, &ts, &nts, &pal, &npal)) return false;
+	uint32_t pal_at = XGFX_AT + (uint32_t)nts;
+	bool ok = pal_at + npal <= XGFX_AT + XGFX_SIZE;
+	if (ok) {
+		emu_write(XGFX_AT, ts, nts);
+		emu_write(pal_at, pal, npal);
+		emu_write32(0x08000000u + L->desc, XGFX_AT);
+		emu_write32(0x08000000u + L->desc + 4, pal_at);
+	}
+	free(ts);
+	free(pal);
+	return ok;
+}
+
 static bool write_tilemap(const Learned *L) {
 	/* extent of the floor around the world origin */
 	int umax = 0, vmax = 0;
@@ -663,14 +707,7 @@ static bool write_tilemap(const Learned *L) {
 		tiles_stats.off_edge += (last.seams[i] >> 2 & 3) == TILE_OFF_EDGE;
 		tiles_stats.other += last.seams[i] >> 7;
 	}
-	/* one shade of floor: tiles of the other bank in this one's colours,
-	 * where its maps draw the same tile in it */
-	const uint8_t *rb = L->rebank;
-	if (rb[0] && rb[1])
-		for (size_t i = 0; i < cells; ++i) {
-			uint16_t e = map[i];
-			if (e >> 12 == rb[0] && (e & 0x3FF) && L->rebank_to[(e & 0x3FF) >> 3] >> (e & 7) & 1) map[i] = (uint16_t)((e & 0x0FFF) | rb[1] << 12);
-		}
+	rebank_map(L, map, cells);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, cur->seed);
 	size_t lz = lz_literal((const uint8_t *)map, raw, out + 12);
 	out[0] = (uint8_t)tw; out[1] = (uint8_t)th; out[2] = out[3] = 0;
@@ -681,10 +718,12 @@ static bool write_tilemap(const Learned *L) {
 		FILE *f = emu_debug_file("gen_tilemap.bin");
 		if (f) { fwrite(out, 1, 12, f); fwrite(map, 2, cells * 2, f); fclose(f); }
 	}
-	/* (a host of the same group shares the tile set and colours: set them anyway) */
-	if (L->desc != L->src_desc)
+	/* (a host of the same group shares the tile set and colours: set them
+	 * anyway; another game's are set with its own copies) */
+	if (L->desc != L->src_desc && !L->other)
 		for (uint32_t k = 0; k < 8; k += 4) emu_write32(0x08000000u + L->desc + k, emu_read32(0x08000000u + L->src_desc + k));
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
+	if (L->other && !install_gfx(L)) { free(out); return false; }
 	free(out);
 	free(last.map);
 	last.map = map;
@@ -823,23 +862,24 @@ static void legalize(Learned *L, const NetLayout *lay) {
 }
 
 bool netmap_build(int area, const NetLayout *lay) {
-	if (area < 0 || area >= NET_AREAS) return false;
+	const NetAreaDef *na = net_area_def(area);
+	if (!na) return false;
 	Learned *L = &learned[area];
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
 	if (!L->ok) return false;
 	cur = lay;
-	one_floor = !R.layout->net_area[area].walk_styles;
-	by_shape = R.layout->net_area[area].styles & TILES_BY_SHAPE;
-	rimmed = R.layout->net_area[area].styles & TILES_RIMMED;
-	pad_look = !(R.layout->net_area[area].styles & TILES_NO_PAD_LOOK);
-	pads_walkway = L->pad.ok && (R.layout->net_area[area].pad_hues & R.layout->net_area[area].walk_styles);
-	apart = R.layout->net_area[area].apart;
+	one_floor = !na->walk_styles;
+	by_shape = na->styles & TILES_BY_SHAPE;
+	rimmed = na->styles & TILES_RIMMED;
+	pad_look = !(na->styles & TILES_NO_PAD_LOOK);
+	pads_walkway = L->pad.ok && (na->pad_hues & na->walk_styles);
+	apart = na->apart;
 	place.ex = L->ex;
 	place.ey = L->ey;
 	if (!centre(lay)) return false;
 	netmap_legal = (LegalStats){ 0, 0 };
 	/* (the stripes as the floor is, and again as the legalizer left it) */
-	striped = R.layout->net_area[area].styles & TILES_CROSSING;
+	striped = na->styles & TILES_CROSSING;
 	bool keep_pads = pad_look && L->pads_seen;
 	if (striped) make_stripes(keep_pads);
 	if (lay->locked) {
@@ -856,7 +896,7 @@ bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_sl
 
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 static unsigned netmap_stair_dirs(int area, int *rise) {
-	if (area < 0 || area >= NET_AREAS) return 0;
+	if (!net_area_def(area)) return 0;
 	Learned *L = &learned[area];
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }
 	unsigned dirs = 0;
@@ -869,9 +909,10 @@ static unsigned netmap_stair_dirs(int area, int *rise) {
 void netmap_kit(int area, LayerKit *kit) {
 	memset(kit, 0, sizeof *kit);
 	kit->stair_dirs = netmap_stair_dirs(area, &kit->rise);
-	if (area < 0 || area >= NET_AREAS || !learned[area].ok) return;
+	const NetAreaDef *na = net_area_def(area);
+	if (!na || !learned[area].ok) return;
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
-	kit->looks = R.layout->net_area[area].looks;
+	kit->looks = na->looks;
 	kit->emblem = learned[area].emblem.ok;
 }
 
@@ -890,7 +931,7 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	memset(pads, 0, sizeof pads);
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
-		int small = R.layout->net_area[area].pad_rooms;
+		int small = net_area_def(area) ? net_area_def(area)->pad_rooms : 0;
 		bool pad = m->kind == ROOM_PAD || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena));
 		if (!pad) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)

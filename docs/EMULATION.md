@@ -30,6 +30,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
 | `+0x60000` | Generated coordinate data (walls, the exit pad's trigger) | `coords.c` |
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
+| `+0x170000`-`+0x1A0000` | Another game's net area (docs/MULTIROM.md): its tile set, a header of its own before its two blocks encoded again, and its palette as it is; the map its layers take over points at them | `netmap.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |

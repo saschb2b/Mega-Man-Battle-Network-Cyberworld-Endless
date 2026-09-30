@@ -740,7 +740,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--render-song") && v) { render_spec = v; ++i; }
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
 		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
-		else if (!strcmp(a, "--net-biome") && v) { director_debug_biome = atoi(v); ++i; }
+		else if (!strcmp(a, "--net-biome") && v) { director_net_biome_arg(v); ++i; }
 		else if (!strcmp(a, "--guardian") && v) { guardian_navi = atoi(v); ++i; }
 		else if (!strcmp(a, "--setup") && v) { setup_spec = v; ++i; }
 		/* --marks HEX: the title's marks as if earned, for a capture */

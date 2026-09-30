@@ -57,6 +57,7 @@
 #include "town.h"
 
 int director_debug_biome = -1;
+int director_debug_area = -1;
 const char *director_dev_talks;
 
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
@@ -964,19 +965,44 @@ static void building_word(void) {
 	platform_present_now();
 }
 
+/* The net area a layer is drawn in: the biome's own, or the test hook's
+ * area of another game (docs/MULTIROM.md), laid out as the BN6 area it is
+ * like, which then is the layer's biome. */
+void director_net_biome_arg(const char *v) {
+	if (v[0] == 'x') director_debug_area = NET_AREAS + atoi(v + 1);
+	else director_debug_biome = atoi(v);
+}
+
+static int layer_area(int *biome) {
+	static bool read;
+	if (director_debug_area >= 0 && !read) { read = true; xrom_find_beside(); }
+	const NetAreaDef *x = director_debug_area >= 0 ? net_area_def(director_debug_area) : NULL;
+	if (!x) return *biome;
+	*biome = x->like;
+	return director_debug_area;
+}
+
+/* The map an area's layers take over. */
+static void layer_host(int tiles, int *group, int *number) {
+	const NetAreaDef *a = net_area_def(tiles);
+	if (!a) a = net_area_def(0);
+	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
+	*group = a->group;
+	*number = a->host ? a->host - 1 : a->number;
+}
+
 static bool build_layer(void) {
-	int biome = layer_biome();
+	int biome = layer_biome(), tiles = layer_area(&biome);
 	run.biome = biome;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
 	LayerKit kit;
-	netmap_kit(biome, &kit);
+	netmap_kit(tiles, &kit);
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
-	if (!netmap_build_layer(biome, run.layer_seed)) return false;
+	if (!netmap_build_layer(tiles, run.layer_seed)) return false;
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
-	D.group = a->group;
-	D.number = a->host ? a->host - 1 : a->number;   /* (the map its layers take over) */
+	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over) */
 	/* (the layer just left had its Net Dealer speak: this act's next say
 	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
 	 * on every layer for a playtester) */

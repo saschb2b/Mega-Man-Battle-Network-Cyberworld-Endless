@@ -57,37 +57,63 @@ static bool save_bmp(const char *path, uint32_t *px, int W, int H) {
 }
 
 /* One layer: built, drawn, reported. */
-static void one(const char *dir, FILE *report, int biome, int layout, int depth, uint32_t seed) {
+/* The layer's floor as text, cut to where it is. */
+static void write_cells(const char *dir, int biome, int layout, int depth, uint32_t seed) {
+	static char cells[MAP_H][MAP_W + 1];
+	netmap_last_cells(cells);
+	int x0 = MAP_W, x1 = -1, y0 = MAP_H, y1 = -1;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (cells[y][x] != '.') {
+				if (x < x0) x0 = x;
+				if (x > x1) x1 = x;
+				if (y < y0) y0 = y;
+				if (y > y1) y1 = y;
+			}
+	char path[600];
+	snprintf(path, sizeof path, "%s/cells_b%02d_l%d_d%d_s%u.txt", dir, biome, layout, depth, seed);
+	FILE *cf = fopen(path, "w");
+	if (cf) {
+		for (int y = y0; y <= y1; ++y) fprintf(cf, "%3d %.*s\n", y, x1 - x0 + 1, cells[y] + x0);
+		fprintf(cf, "(x from %d)\n", x0);
+		fclose(cf);
+	}
+}
+
+/* A layer of `area` (a BN6 biome's own, or another game's), laid out by
+ * `biome`'s rules. */
+static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
 	run_new(seed);
 	run.depth = depth;
 	run.biome = biome;
 	layout_forced = layout;
 	LayerKit kit;
-	netmap_kit(biome, &kit);
+	netmap_kit(area, &kit);
 	/* timed as the game builds it, then again measured */
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	tiles_measure = false;
 	clock_t t0 = clock();
-	netmap_build_layer(biome, seed);
+	netmap_build_layer(area, seed);
 	int ms = (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
 	tiles_measure = true;
 	if (getenv("CYBERWORLD_TILE_AT")) fprintf(stderr, "layer b%02d_l%d_d%d_s%u\n", biome, layout, depth, seed);
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	memset(&tiles_stats, 0, sizeof tiles_stats);
-	bool built = netmap_build_layer(biome, seed);
+	bool built = netmap_build_layer(area, seed);
 	if (!built) {
-		fprintf(report, "biome %2d layout %d depth %d seed %u: NOT BUILT\n", biome, layout, depth, seed);
+		fprintf(report, "biome %2d layout %d depth %d seed %u: NOT BUILT\n", area, layout, depth, seed);
 		return;
 	}
 	int tw, th;
 	const uint16_t *tiles = netmap_last_tiles(&tw, &th);
-	const __typeof__(R.layout->net_area[0]) *a = &R.layout->net_area[biome];
-	uint32_t *px = area_src_render(a->group, a->number, tiles, tw, th);
+	const NetAreaDef *a = net_area_def(area);
+	uint32_t *px = area_src_render(a->xrom, a->group, a->number, tiles, tw, th);
 	if (!px) return;
 	int W = tw * 8, H = th * 8;
 	for (int i = 0; i < W * H; ++i) if (!(px[i] >> 24)) px[i] = VOID_ARGB;
 	/* seams, marked in a copy */
 	uint32_t *sp = malloc((size_t)W * H * 4);
+	if (!sp) { free(px); return; }
 	memcpy(sp, px, (size_t)W * H * 4);
 	const uint8_t *seams = netmap_last_seams();
 	const uint8_t *pasted = netmap_last_pasted();
@@ -101,7 +127,7 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 		for (int tx = 0; tx < tw; ++tx) {
 			int off = seams[ty * tw + tx] >> 2 & 3, why = seams[ty * tw + tx] >> 4 & 7;
 			if (off < TILE_OFF_EDGE || (pasted && pasted[ty * tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR))) continue;
-			if (offs && off == TILE_OFF_NEAR) fprintf(offs, "%d %d %d\n", tx * 8, ty * 8, why);
+			if (offs) { if (off == TILE_OFF_NEAR) fprintf(offs, "%d %d %d\n", tx * 8, ty * 8, why); }
 			uint32_t c = off == TILE_OFF_NEAR ? OFF_NEAR_ARGB : OFF_EDGE_ARGB;
 			for (int k = 1; k < 7; ++k) {
 				sp[(size_t)(ty * 8 + 1) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 6) * W + tx * 8 + k] = c;
@@ -132,25 +158,7 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 	save_bmp(path, px, W, H);
 	snprintf(path, sizeof path, "%s/seams_b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
 	save_bmp(path, sp, W, H);
-	/* the floor as text, cut to where it is */
-	static char cells[MAP_H][MAP_W + 1];
-	netmap_last_cells(cells);
-	int x0 = MAP_W, x1 = -1, y0 = MAP_H, y1 = -1;
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x)
-			if (cells[y][x] != '.') {
-				if (x < x0) x0 = x;
-				if (x > x1) x1 = x;
-				if (y < y0) y0 = y;
-				if (y > y1) y1 = y;
-			}
-	snprintf(path, sizeof path, "%s/cells_b%02d_l%d_d%d_s%u.txt", dir, biome, layout, depth, seed);
-	FILE *cf = fopen(path, "w");
-	if (cf) {
-		for (int y = y0; y <= y1; ++y) fprintf(cf, "%3d %.*s\n", y, x1 - x0 + 1, cells[y] + x0);
-		fprintf(cf, "(x from %d)\n", x0);
-		fclose(cf);
-	}
+	write_cells(dir, biome, layout, depth, seed);
 	free(sp);
 	free(px);
 	int floor = 0;
@@ -181,12 +189,12 @@ static void one(const char *dir, FILE *report, int biome, int layout, int depth,
 
 /* The area's own maps as the game draws them, to hold the layers against. */
 static void sources(const char *dir, int biome) {
-	const __typeof__(R.layout->net_area[0]) *na = &R.layout->net_area[biome];
-	for (int k = -1; k < NET_MORE_MAPS; ++k) {
+	const NetAreaDef *na = net_area_def(biome);
+	for (int k = -1; na && k < NET_MORE_MAPS; ++k) {
 		int group = k < 0 ? na->group : na->more[k][0], number = k < 0 ? na->number : na->more[k][1];
 		if (k >= 0 && !group) break;
 		AreaSrc a;
-		if (!area_src_load(group, number, &a)) continue;
+		if (!(na->xrom ? area_src_load_x(na->xrom - 1, group, number, &a) : area_src_load(group, number, &a))) continue;
 		int W = a.tw * 8, H = a.th * 8;
 		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
 		char path[600];
@@ -252,12 +260,8 @@ static void world_sources(const char *dir) {
  * world's groups and its internet's, read from beside the BN6 ROM: what
  * its areas could lend a run. */
 static void xrom_sources(const char *dir, int xrom) {
-	char romdir[512];
-	snprintf(romdir, sizeof romdir, "%s", R.path);
-	char *slash = strrchr(romdir, '/');
-	if (slash) *slash = 0; else snprintf(romdir, sizeof romdir, ".");
-	if (xrom >= 0 && xrom < XROM_COUNT) xrom_find(romdir);
-	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { printf("extra ROM %d: not found in %s\n", xrom, romdir); return; }
+	if (xrom >= 0 && xrom < XROM_COUNT) xrom_find_beside();
+	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { printf("extra ROM %d: not found beside %s\n", xrom, R.path); return; }
 	const XRomLayout *x = XR[xrom].layout;
 	printf("%s\n", x->name);
 	for (int k = 0; k < x->rw_groups + x->net_groups; ++k) {
@@ -276,6 +280,25 @@ static void xrom_sources(const char *dir, int xrom) {
 			area_src_free(&a);
 		}
 	}
+}
+
+/* Another game's net area N (docs/MULTIROM.md): its maps as learned, and
+ * layers in its tiles, laid out by the rules of the BN6 area it is like. */
+static void xrom_area(const char *dir, int n, int seeds) {
+	xrom_find_beside();
+	int area = NET_AREAS + n;
+	const NetAreaDef *na = net_area_def(area);
+	if (!na) { printf("area %d: its game's ROM is not beside %s\n", area, R.path); return; }
+	char path[600];
+	snprintf(path, sizeof path, "%s/report.txt", dir);
+	FILE *report = fopen(path, "w");
+	if (!report) return;
+	sources(dir, area);
+	for (int l = 0; l < LAYOUT_COUNT; ++l) {
+		if (!layout_weight(na->like, l)) continue;
+		for (int s = 1; s <= seeds; ++s) one(dir, report, na->like, area, l, 2, (uint32_t)(s * 7919 + area * 131));
+	}
+	fclose(report);
 }
 
 typedef struct { uint32_t *px; int W, H, tw, th; } TownDots;
@@ -335,6 +358,7 @@ int atlas_run(const char *spec) {
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (biomes[0] == 'g') { group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0; }
 	if (biomes[0] == 'x') { xrom_sources(dir, atoi(biomes + 1)); return 0; }
+	if (biomes[0] == 'a' && biomes[1] >= '0' && biomes[1] <= '9') { xrom_area(dir, atoi(biomes + 1), seeds); return 0; }
 	bool want[BIOME_COUNT] = { false };
 	if (!strcmp(biomes, "all")) for (int b = 0; b < BIOME_COUNT; ++b) want[b] = true;
 	else for (char *t = strtok(biomes, ","); t; t = strtok(NULL, ",")) { int b = atoi(t); if (b >= 0 && b < BIOME_COUNT) want[b] = true; }
@@ -347,10 +371,10 @@ int atlas_run(const char *spec) {
 		sources(dir, b);
 		for (int l = 0; l < LAYOUT_COUNT; ++l) {
 			if (!layout_weight(b, l)) continue;
-			for (int s = 1; s <= seeds; ++s) one(dir, report, b, l, 2, (uint32_t)(s * 7919 + b * 131));
+			for (int s = 1; s <= seeds; ++s) one(dir, report, b, b, l, 2, (uint32_t)(s * 7919 + b * 131));
 		}
 		/* and its guardian's layer, in the layout its act plans */
-		for (int s = 1; s <= seeds; ++s) one(dir, report, b, -1, 3, (uint32_t)(s * 104729 + b));
+		for (int s = 1; s <= seeds; ++s) one(dir, report, b, b, -1, 3, (uint32_t)(s * 104729 + b));
 	}
 	fclose(report);
 	layout_forced = -1;
