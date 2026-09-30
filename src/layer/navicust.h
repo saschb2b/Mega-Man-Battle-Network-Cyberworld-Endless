@@ -71,7 +71,12 @@ int navicust_skip_frags(int depth);
  * the second and fourth acts' guardians of the first cycle. */
 bool navicust_expmemry(int depth);
 /* MegaMan's words for the bug counts (one per type, as the game keeps
- * them): speaker-marked boxes for talk_start; "" for none. */
-const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS]);
+ * them): speaker-marked boxes for talk_start; "" for none. `after_run`:
+ * said after the NaviCust's RUN, whose "OK" they answer. */
+const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run);
+/* Which programs L and R turn, in MegaMan's words (one sentence): those of
+ * the colours whose Spins are held (navicust_set_spins); for `variant`
+ * (program * 4 + v, 0 for any), whether that one turns. */
+const char *navicust_turn_words(int variant);
 
 #endif

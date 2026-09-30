@@ -976,19 +976,32 @@ static void test_navicust(void) {
 	CHECK(!navicust_pack(many, 5, 4, 4), "twenty cells on sixteen");
 	/* the bug words: none, one light, several */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
-	CHECK(!*navicust_bug_words(bugs), "words for no bug");
+	CHECK(!*navicust_bug_words(bugs, false), "words for no bug");
 	bugs[9] = 1;
-	CHECK(strstr(navicust_bug_words(bugs), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs));
+	CHECK(strstr(navicust_bug_words(bugs, false), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs, false));
 	bugs[9] = 2;
-	CHECK(strstr(navicust_bug_words(bugs), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs));
+	CHECK(strstr(navicust_bug_words(bugs, false), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs, false));
 	bugs[7] = 5;
 	bugs[11] = 1;
-	const char *w = navicust_bug_words(bugs);
+	const char *w = navicust_bug_words(bugs, false);
 	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
 	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
 	memset(bugs, 0, sizeof bugs);
 	bugs[11] = 1;
-	CHECK(!strstr(navicust_bug_words(bugs), "command line"), "a colours' bug alone names itself");
+	CHECK(!strstr(navicust_bug_words(bugs, false), "command line"), "a colours' bug alone names itself");
+	CHECK(strstr(navicust_bug_words(bugs, true), "the RUN says OK, but") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true));
+	check_talk("navicust_bug_words", navicust_bug_words(bugs, true));
+	/* which programs turn: those whose colour's Spin is held */
+	navicust_set_spins(0);
+	CHECK(strstr(navicust_turn_words(0), "none yet") != NULL, "no Spin: %s", navicust_turn_words(0));
+	check_talk("navicust_turn_words none", navicust_turn_words(0));
+	navicust_set_spins(1u << 2);
+	CHECK(strstr(navicust_turn_words(0), "only pink programs") && strstr(navicust_turn_words(0), "that Spin"), "the pink Spin: %s", navicust_turn_words(0));
+	navicust_set_spins(0x3F & ~(1u << 5));
+	CHECK(strstr(navicust_turn_words(0), "white, yellow, pink, red and blue programs") != NULL, "five Spins: %s", navicust_turn_words(0));
+	check_talk("navicust_turn_words five", navicust_turn_words(0));
+	navicust_set_spins(0x3F);
+	CHECK(!strstr(navicust_turn_words(0), "only"), "all six: %s", navicust_turn_words(0));
 }
 
 /* Every layout an area draws builds as planned: one that never fits the

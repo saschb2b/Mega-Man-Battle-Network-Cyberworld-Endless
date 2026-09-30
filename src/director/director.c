@@ -573,7 +573,7 @@ static const char *status_words(void) {
 		if (off && !fits_beside_placed(offv)) {
 			const char *w = no_room_words(*off ? off : "That program");
 			if (w) ADD("%s|", w);
-		} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. L and R turn a program.|", off);
+		} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
 		else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
@@ -1965,6 +1965,8 @@ static void bug_watch(void) {
 	/* (back from the PET with a program left off the board: said at once,
 	 * where L said it only on the next layer; a playtester ran the NaviCust
 	 * without placing his Guardian Data's HP+100) */
+	static bool ran;   /* (the PET was open since the last words: a RUN) */
+	ran |= D.pet_seen;
 	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
 		D.pet_seen = false;
 		int offv = 0;
@@ -1978,12 +1980,15 @@ static void bug_watch(void) {
 		}
 		if (say && talk_start(say, FACE_MEGAMAN)) { D.off_told = true; return; }
 	}
-	if (!memcmp(D.bugs, now, sizeof now) || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
+	if (!memcmp(D.bugs, now, sizeof now)) { ran = D.pet_seen; return; }
+	if (talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
 	bool had = false;
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
-	const char *words = navicust_bug_words(now);
-	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN))
+	const char *words = navicust_bug_words(now, ran);
+	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN)) {
 		memcpy(D.bugs, now, sizeof now);
+		ran = false;
+	}
 }
 
 /* A BugFrag Trader's trade (issue #12). After Yes, BN6's script holds

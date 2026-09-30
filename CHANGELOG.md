@@ -16,6 +16,10 @@
   panel, and his tent drops where MegaMan stands. The panel that lights
   first is under MegaMan's feet, where a playtester never saw it in four
   tents. Chips used while CircusMan is gone find nothing, and it says so.
+- MegaMan's words about the NaviCust say which programs L and R turn:
+  only those of a colour whose Spin you hold, BN6's own rule. He had said
+  L and R turn any program. After a RUN that leaves a bug, he says the
+  RUN's "OK" hides it.
 - HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
   in official vaults or anywhere else. They are left over from the
   Japanese version: the US game has no HackJack, so using one made
