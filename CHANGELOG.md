@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 (2026-09-30)
 
 - **The 3DS build installs on the HOME Menu:** a CIA beside the `.3dsx`,
   with the game's icon and a banner that plays the trailer's opening hits.
