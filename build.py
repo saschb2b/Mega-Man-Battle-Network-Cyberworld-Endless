@@ -788,6 +788,9 @@ SCREENSHOTS = [
       (2745, 'reward'), (2790, 'restored'), (3330, 'area-clear'), (4800, 'custom'), (5100, 'battle')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
+    # (Chaud's first call on an act's duel layer, its second box)
+    ('rival', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '0', '--dev', 'quiet', '--input', '700:,6:A,60:'],
+     [(840, 'rival')], {}),
     # (the seed picks the town: build.py town lists which each gets)
     ('town-central', ['--scene', 'town', '--seed', '2'], [(280, 'town-central')], {}),
     ('town-acdc', ['--scene', 'town', '--seed', '3'], [(280, 'town-acdc')], {}),
