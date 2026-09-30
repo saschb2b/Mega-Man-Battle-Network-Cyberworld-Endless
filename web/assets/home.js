@@ -164,7 +164,10 @@ function detectPlatform() {
 	const link = (href, text) => { const a = document.createElement('a'); a.href = href; a.textContent = text; return a; };
 	line.append(link(release.html_url, 'All files and checksums'), ' · ', link(`https://github.com/${repo}/releases`, 'Older versions'));
 	for (const a of document.querySelectorAll('[data-asset]')) {
-		const asset = release.assets.find((x) => x.name === a.dataset.asset);
+		// (its names, newest first: a file renamed for the system it is for
+		// keeps its old name in the releases made before)
+		const names = a.dataset.asset.split(' ');
+		const asset = names.map((n) => release.assets.find((x) => x.name === n)).find(Boolean);
 		const info = document.createElement('span');
 		info.className = 'version';
 		if (!asset) {

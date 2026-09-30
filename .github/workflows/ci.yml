@@ -53,11 +53,11 @@ jobs:
       - name: Host and aarch64 builds
         run: python3 build.py all
       - name: Port archive
-        run: python3 build.py package && mkdir -p build/release && (cd build/port && zip -qr ../release/cyberworld.zip .)
+        run: python3 build.py package && mkdir -p build/release && (cd build/port && zip -qr ../release/cyberworld-endless-rocknix-portmaster.zip .)
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-portmaster
-          path: build/release/cyberworld.zip
+          path: build/release/cyberworld-endless-rocknix-portmaster.zip
           retention-days: 14
 
   linux:
@@ -108,14 +108,14 @@ jobs:
           if grep -vxE '(kernel32|user32|gdi32|advapi32|shell32|shlwapi|ole32|oleaut32|imm32|setupapi|version|winmm|comdlg32|msvcrt)\.dll' <<< "$dlls"; then
             echo "imports a DLL Windows does not have"; exit 1
           fi
-          file build/release/cyberworld-endless-setup-x64.exe | tee /dev/stderr | grep -q 'Nullsoft Installer'
+          file build/release/cyberworld-endless-windows-x64-setup.exe | tee /dev/stderr | grep -q 'Nullsoft Installer'
           unzip -l build/release/cyberworld-endless-windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-windows
           path: |
             build/release/cyberworld-endless-windows-x64.zip
-            build/release/cyberworld-endless-setup-x64.exe
+            build/release/cyberworld-endless-windows-x64-setup.exe
           retention-days: 14
 
   n3ds:

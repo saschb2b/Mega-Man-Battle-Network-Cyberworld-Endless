@@ -5,6 +5,13 @@
 - A strong virus signal names its prize before the choice: "It pays
   DolThdr3 B. Take it on?", where it had said "a good chip" and a
   playtester weighed the risk blind.
+- **The downloads say which system each is for**, and the README's
+  Install section starts with a table from system to file. Players took
+  the PortMaster port's plain `cyberworld.zip`, first under Install, for
+  the game on Windows. Renamed: the port is
+  `cyberworld-endless-rocknix-portmaster.zip`, the Windows installer
+  `cyberworld-endless-windows-x64-setup.exe` and the site's files
+  `cyberworld-endless-website.zip`. The project page finds either name.
 - ProtoMan is easy to find on his duel layer: the official gate he
   opens stands by him (within 8 panels on 72 of the tests' 74 duel
   layers, where it had stood anywhere), the map marks him in pink with a

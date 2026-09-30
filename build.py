@@ -139,9 +139,17 @@ def build(target):
             sys.exit('copying SDL2 failed')
 
 
+# The release's files are named for the system each is for (players picked
+# the PortMaster port's plain cyberworld.zip for Windows): all but the
+# AppImage, whose name its update information points at, and the ones whose
+# kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx).
+PORT_ZIP = 'cyberworld-endless-rocknix-portmaster.zip'
+WEB_ZIP = 'cyberworld-endless-website.zip'
+
+
 def web_release():
-    """build/release/cyberworld-endless-web.zip: the site, to serve anywhere."""
-    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld-endless-web'), 'zip', site(analytics=False))
+    """build/release/cyberworld-endless-website.zip: the site and its player, to host elsewhere."""
+    archive = shutil.make_archive(os.path.join(RELEASE, WEB_ZIP[:-4]), 'zip', site(analytics=False))
     print('released', archive)
 
 
@@ -256,12 +264,12 @@ def macos_release():
 
 
 WINDOWS_ZIP = 'cyberworld-endless-windows-x64.zip'
-WINDOWS_SETUP = 'cyberworld-endless-setup-x64.exe'
+WINDOWS_SETUP = 'cyberworld-endless-windows-x64-setup.exe'
 
 
 def windows_release():
     """build/release: cyberworld-endless-windows-x64.zip (the game in a folder,
-    to unpack anywhere) and cyberworld-endless-setup-x64.exe (an installer
+    to unpack anywhere) and cyberworld-endless-windows-x64-setup.exe (an installer
     for the user who runs it, no administrator needed; windows/installer.nsi)."""
     import zipfile
     build('windows')
@@ -498,9 +506,10 @@ def serve(port=8080):
 
 
 def port_release():
-    """build/release/cyberworld.zip: the PortMaster port, as port.json names it."""
+    """build/release/cyberworld-endless-rocknix-portmaster.zip: the PortMaster port for ROCKNIX
+    handhelds (port.json keeps PortMaster's own name for it, cyberworld.zip)."""
     package()
-    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld'), 'zip', os.path.join(ROOT, 'build', 'port'))
+    archive = shutil.make_archive(os.path.join(RELEASE, PORT_ZIP[:-4]), 'zip', os.path.join(ROOT, 'build', 'port'))
     print('released', archive)
 
 
