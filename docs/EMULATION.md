@@ -147,6 +147,23 @@ Seaside Area 1 and ends the intro cutscene, then saves `boot-3.state` in the
 data directory. Later runs start from that state. It is made on the device
 and never shipped.
 
+The boot's frames are never shown, so the core draws no picture for them;
+nor for a frame the main loop plays unshown to catch up with the GBA's pace
+(`emu_frame` sets the core's frame-skip counter for that one frame, where
+its struct reads back as expected).
+
+## The core on its own thread
+
+On the New 3DS the GBA core takes most of a frame, so it runs on the third
+core where the system gives it one (`emu_threaded`). `emu_frame` then starts
+the frame and returns, and every other access to the core (`emu_read*`,
+`emu_write*`, states, the sound's rate) waits for that frame first: the
+director's logic takes in each frame whole, as on the main thread. The emu
+scene's update takes the frame done in and then starts the next, which runs
+while the frame done is drawn from a copy of its picture; keys, frames and
+the logic keep their order, and the autopilot's run log comes out the same.
+`CYBERWORLD_EMU_THREAD=1` runs it so on a computer, to test it.
+
 ## Testing
 
 `CYBERWORLD_AUTOPILOT=1` walks MegaMan to each exit (into a guardian's arena

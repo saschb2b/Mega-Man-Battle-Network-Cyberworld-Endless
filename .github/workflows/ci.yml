@@ -118,6 +118,25 @@ jobs:
             build/release/cyberworld-endless-setup-x64.exe
           retention-days: 14
 
+  n3ds:
+    name: Nintendo 3DS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.3ds, tag: cyberworld-3ds }
+      - run: python3 build.py 3ds
+      - name: A .3dsx for the Homebrew Launcher
+        run: |
+          f=build/3ds/cyberworld-endless.3dsx
+          test "$(head -c 4 "$f")" = 3DSX
+          ls -l "$f"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-3ds
+          path: build/3ds/cyberworld-endless.3dsx
+          retention-days: 14
+
   android:
     name: Android
     runs-on: ubuntu-latest

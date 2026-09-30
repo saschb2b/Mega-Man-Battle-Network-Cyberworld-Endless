@@ -16,6 +16,7 @@ static const RomLayout layouts[] = {
 	[ROM_BN6_GREGAR_US] = {
 		.name = "Mega Man Battle Network 6: Cybeast Gregar (USA)",
 		.sha1 = "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6",
+		.code = "BR5E",
 		.sprite_lists = 0x031CC4,
 		.chip_data = 0x021DA8,
 		.chip_names = { 0x6E88D0, 0x6E92D8 },
@@ -162,7 +163,31 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 	long size = ftell(f);
 	fseek(f, 0, SEEK_SET);
 	if (size != ROM_SIZE) { fclose(f); snprintf(msg, msglen, "%s is not an 8 MB GBA ROM", path); return false; }
+	/* (the header's game code first: a folder of other games' ROMs, a 3DS's
+	 * or an emulator's, is passed over without reading each whole) */
+	char code[5] = "";
+	bool known = false;
+	if (fseek(f, 0xAC, SEEK_SET) == 0 && fread(code, 1, 4, f) == 4)
+		for (size_t i = 0; i < sizeof layouts / sizeof *layouts; ++i) known |= !memcmp(code, layouts[i].code, 4);
+	if (!known) {
+		fclose(f);
+		/* (Battle Network 6's other versions named: a 3DS player's ROM was
+		 * the European Gregar, and the message said only where to put one) */
+		static const struct { const char *code, *name; } others[] = {
+			{ "BR5P", "Cybeast Gregar (Europe)" }, { "BR6E", "Cybeast Falzar (USA)" }, { "BR6P", "Cybeast Falzar (Europe)" },
+			{ "BR5J", "Rockman EXE 6 Gregar (Japan)" }, { "BR6J", "Rockman EXE 6 Falzar (Japan)" },
+		};
+		const char *name = NULL;
+		for (size_t i = 0; i < sizeof others / sizeof *others; ++i) if (!memcmp(code, others[i].code, 4)) name = others[i].name;
+		const char *file = strrchr(path, '/');
+		file = file ? file + 1 : path;
+		if (name) snprintf(msg, msglen, "%s is %s: only Cybeast Gregar (USA) works so far", file, name);
+		else snprintf(msg, msglen, "%s is not a supported ROM (game code %.4s)", path, code);
+		return false;
+	}
+	fseek(f, 0, SEEK_SET);
 	uint8_t *data = malloc(ROM_SIZE);
+	if (!data) { fclose(f); snprintf(msg, msglen, "Not enough memory to read %s", path); return false; }
 	size_t got = fread(data, 1, ROM_SIZE, f);
 	fclose(f);
 	if (got != ROM_SIZE) { free(data); snprintf(msg, msglen, "Short read on %s", path); return false; }
@@ -183,6 +208,8 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 	return false;
 }
 
+bool rom_find_close;
+
 bool rom_find(const char *dir, char *msg, size_t msglen) {
 	DIR *d = opendir(dir);
 	snprintf(msg, msglen, "Put your Mega Man Battle Network 6: Cybeast Gregar (USA) ROM in %s", dir);
@@ -199,5 +226,6 @@ bool rom_find(const char *dir, char *msg, size_t msglen) {
 	}
 	closedir(d);
 	if (!found && last[0]) snprintf(msg, msglen, "%s", last);
+	rom_find_close = !found && last[0];
 	return found;
 }

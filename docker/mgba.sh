@@ -3,7 +3,9 @@
 # debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba;
 # with arguments, for those targets only (host, aarch64, web, windows: the
 # MinGW-w64 cross compiler of docker/Dockerfile.windows; android: each
-# Android ABI with the NDK of docker/Dockerfile.android). The web build
+# Android ABI with the NDK of docker/Dockerfile.android; 3ds: the Nintendo
+# 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
+# library alone). The web build
 # (WebAssembly, in the Emscripten image) runs without threads: a page served
 # without cross-origin isolation cannot share memory between them.
 # mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
@@ -36,6 +38,30 @@ case " $TARGETS " in *" windows "*)
 	# frontends, which are not built here)
 	sed -i 's/if(WIN32 AND NOT (LIBMGBA_ONLY OR SKIP_LIBRARY OR USE_EPOXY))/if(FALSE)/' mgba-$VER/CMakeLists.txt
 	build windows "-DCMAKE_TOOLCHAIN_FILE=/opt/mingw.cmake" ;;
+esac
+case " $TARGETS " in *" 3ds "*)
+	# (the library target alone: mGBA's own 3DS frontend needs the GB core;
+	# its headers copied as its install would, the generated ones too. Its
+	# 3DS setup, linked into the library, takes a 32 MB buffer that the
+	# core copies the ROM into before main: the game hands the core 16 MB,
+	# so the buffer is 16 MB. The game splits the app's memory itself,
+	# src/core/main.c. Its pictures are 32-bit, as on every other target:
+	# the 3DS's 16-bit ones were set for the library alone, not in the
+	# headers it installs, and the game read them as 32-bit, two rows side
+	# by side)
+	sed -i -e 's/romBuffer = malloc(0x02000000);/romBuffer = malloc(0x01000000);/' \
+	 -e 's/romBufferSize = 0x02000000;/romBufferSize = 0x01000000;/' mgba-$VER/src/platform/3ds/ctru-heap.c
+	if grep -q 0x02000000 mgba-$VER/src/platform/3ds/ctru-heap.c; then exit 1; fi
+	sed -i 's/ COLOR_16_BIT COLOR_5_6_5 / /' mgba-$VER/src/platform/3ds/CMakeLists.txt
+	if grep -q COLOR_16_BIT mgba-$VER/src/platform/3ds/CMakeLists.txt; then exit 1; fi
+	cmake -S mgba-$VER -B build-3ds $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/3ds \
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/3ds/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+	cmake --build build-3ds --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/3ds/lib /opt/mgba/3ds/include
+	cp build-3ds/libmgba.a /opt/mgba/3ds/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/3ds/include/
+	cp -r build-3ds/include/mgba /opt/mgba/3ds/include/ 2>/dev/null || true ;;
 esac
 case " $TARGETS " in *" android "*)
 	for abi in arm64-v8a armeabi-v7a x86_64; do

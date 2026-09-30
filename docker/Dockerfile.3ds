@@ -1,0 +1,8 @@
+# Build image for the Nintendo 3DS (issue #9): devkitPro's devkitARM with
+# libctru and citro3d, SDL2 and the embedded GBA core built for it. The
+# game builds into a .3dsx for the Homebrew Launcher (build.py 3ds).
+FROM devkitpro/devkitarm:latest
+COPY sdl2.sh /tmp/sdl2.sh
+RUN sh /tmp/sdl2.sh 3ds
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh 3ds

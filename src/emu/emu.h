@@ -24,8 +24,13 @@ bool emu_init(const uint8_t *rom, size_t len);
 bool emu_ready(void);
 void emu_reset(void);
 
-/* Runs one frame with these keys held. */
+/* Runs one frame with these keys held. Where the core has a thread of
+ * its own (emu_threaded), starts it: the next access to the core waits for
+ * it, and emu_video shows the frame before until then. */
 void emu_frame(uint32_t keys);
+bool emu_threaded(void);
+/* Ends the core's thread, before the program ends. */
+void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */
 const uint32_t *emu_video(void);
 

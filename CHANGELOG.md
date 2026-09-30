@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **A Nintendo 3DS build** (issue #9): a `.3dsx` for the Homebrew Launcher
+  on a New 3DS, which finds the ROM where 3DS players keep GBA games.
+  The picture fills the top screen's height (`screen = whole` in
+  `settings.ini` for 1x), drawn through the GPU; the GBA core runs on the
+  third core where the system gives one. It runs below full speed for now:
+  the core alone takes 17 to 21 ms of a 16.7 ms frame there. `3ds/README.md`.
+- A ROM of another Battle Network 6 is named for what it is ("... is Cybeast
+  Gregar (Europe): only Cybeast Gregar (USA) works so far"), where the
+  message said only where to put one; other games' ROMs in the folder are
+  passed over by their header, without reading each whole.
+- Frames played unshown to catch up (a slower machine, a 50 Hz display) and
+  the boot's frames draw no GBA picture: a fifth of the core's time on a
+  slow machine. The frame log (`frame_log = on`) splits a frame's time: its
+  update, the GBA's share with and without its picture, drawing, present.
 - Lan answers a lost duel ("Next time, Chaud!"), where Chaud had the last
   word. Before a rematch with a guardian who has beaten MegaMan more than
   once, MegaMan says the record ("CircusMan has beaten us twice. Not a

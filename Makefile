@@ -8,9 +8,11 @@ CC_flatpak := gcc
 CC_web := emcc
 CC_windows := x86_64-w64-mingw32-gcc
 CC_macos := clang
+CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
+PKG_3ds := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 CC := $(CC_$(TARGET))
 PKGCONF := $(PKG_$(TARGET)) pkg-config
 OUT := build/$(TARGET)
@@ -22,6 +24,7 @@ BIN_flatpak := $(OUT)/cyberworld
 BIN_web := $(OUT)/cyberworld.js
 BIN_windows := $(OUT)/cyberworld-endless.exe
 BIN_macos := $(OUT)/cyberworld-endless
+BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
@@ -40,7 +43,7 @@ ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -91,6 +94,21 @@ endif
 # carried in lib/ beside the binary
 ifeq ($(TARGET),linux)
 LDLIBS += -Wl,-rpath,'$$ORIGIN/lib'
+endif
+# the Nintendo 3DS (docker/Dockerfile.3ds, 3ds/, issue #9): devkitARM for
+# the 3DS's ARM11, SDL2 and mGBA linked in, a .3dsx for the Homebrew
+# Launcher with its title and icon
+ifeq ($(TARGET),3ds)
+ARCH_3DS := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+# (-Wno-format: uint32_t is an unsigned long there, which %u prints alike)
+CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_3DS) -mword-relocations -ffunction-sections -D__3DS__ -I/opt/devkitpro/libctru/include -Wno-format
+LDLIBS := $(MGBA)/lib/libmgba.a -L/opt/sdl2/lib -lSDL2main -lSDL2 -L/opt/devkitpro/libctru/lib -lcitro2d -lcitro3d -lctru -lm \
+          -specs=3dsx.specs $(ARCH_3DS) -Wl,--gc-sections
+all: $(OUT)/cyberworld-endless.3dsx
+$(OUT)/cyberworld-endless.smdh: 3ds/icon.png
+	/opt/devkitpro/tools/bin/smdhtool --create "Cyberworld Endless" "A Mega Man Battle Network 6 roguelike" "saschb2b" $< $@
+$(OUT)/cyberworld-endless.3dsx: $(BIN) $(OUT)/cyberworld-endless.smdh
+	/opt/devkitpro/tools/bin/3dsxtool $(BIN) $@ --smdh=$(OUT)/cyberworld-endless.smdh
 endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer

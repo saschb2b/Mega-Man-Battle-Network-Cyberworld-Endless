@@ -40,10 +40,12 @@ static uint32_t keys_from_buttons(void) {
  * fades in. */
 #define REVEAL_FRAMES 16
 static int revealed;   /* frames since the first map showed, 0 not yet */
+static bool started;   /* (the core on its own thread: a frame begun since enter) */
 
 static void enter(void) {
 	revealed = 0;
-	if (!emu_init(R.data, ROM_SIZE)) return;
+	started = false;
+	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
 	npc_reach_install();
 	chat_marks_install();
 	pet_install();
@@ -65,18 +67,40 @@ static void enter(void) {
 
 static void leave(void) { audio_external(NULL); }
 
+static uint32_t frame_keys(void) {
+	return director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
+}
+
+/* What follows a frame of the game: the run's logic on it. */
+static void after_frame(void) {
+	director_update();
+	pet_update();
+	devtools_update();
+	tour_update();
+	cinema_update();
+	emu_debug_frame();
+}
+
 static void update(void) {
-	uint32_t keys = director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
+	/* the core on a thread of its own (emu.c): the frame done taken in,
+	 * then the next begun, which runs while this one is drawn; keys, frames
+	 * and the logic keep their order */
+	if (emu_threaded()) {
+		if (devtools_open()) { frame_keys(); return; }
+		for (int i = 0; i < dev.speed; ++i) {
+			if (started) after_frame();
+			emu_frame(cinema_keys(frame_keys()));
+			started = true;
+		}
+		if (revealed || director_arrived()) ++revealed;
+		return;
+	}
+	uint32_t keys = frame_keys();
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
 	/* (fast-forwarded: several game frames to one shown) */
 	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
-		director_update();
-		pet_update();
-		devtools_update();
-		tour_update();
-		cinema_update();
-		emu_debug_frame();
+		after_frame();
 	}
 	if (revealed || director_arrived()) ++revealed;
 }
@@ -84,15 +108,27 @@ static void update(void) {
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	if (!emu_ready()) return;
+	/* (on the 3DS in the canvas's order, so the copy onto it converts
+	 * nothing: mGBA's red and blue swapped here, where a computer's GPU
+	 * converts them) */
+#ifdef __3DS__
+	const Uint32 format = SDL_PIXELFORMAT_ARGB8888;
+#else
+	const Uint32 format = SDL_PIXELFORMAT_ABGR8888;
+#endif
 	if (!tex) {
-		tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, EMU_W, EMU_H);
+		tex = SDL_CreateTexture(P.renderer, format, SDL_TEXTUREACCESS_STREAMING, EMU_W, EMU_H);
 		SDL_SetTextureScaleMode(tex, SDL_ScaleModeNearest);
 		SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE);
 	}
 	/* mGBA keeps layer flags in the top byte; GL renderers read it as alpha */
 	static uint32_t px[EMU_W * EMU_H];
 	const uint32_t *v = emu_video();
+#ifdef __3DS__
+	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = 0xFF000000u | (v[i] & 0xFF00u) | (v[i] & 0xFFu) << 16 | (v[i] >> 16 & 0xFFu);
+#else
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = v[i] | 0xFF000000u;
+#endif
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
 	int dx, dy;
 	cinema_offset(&dx, &dy);

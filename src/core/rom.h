@@ -23,6 +23,7 @@ enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
 typedef struct {
 	const char *name;
 	const char *sha1;
+	const char *code;   /* the cartridge header's game code at 0xAC: checked before a whole file is read */
 	uint32_t sprite_lists;    /* SpritePointersList: 10 category tables */
 	uint32_t chip_data;       /* 0x2C-byte chip records */
 	uint32_t chip_names[2];   /* text archives: ids 0-255, 256+ */
@@ -75,6 +76,9 @@ extern Rom R;
 
 /* Looks for a supported ROM in dir (any *.gba). On failure, msg explains why. */
 bool rom_find(const char *dir, char *msg, size_t msglen);
+/* After a rom_find that found none: a .gba of the right size was there but
+ * not the right game or version (its message says which). */
+extern bool rom_find_close;
 bool rom_load_file(const char *path, char *msg, size_t msglen);
 
 static inline uint32_t rom_u32(uint32_t off) {

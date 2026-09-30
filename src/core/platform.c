@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "present_3ds.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,12 @@
 #include "touch.h"
 
 Platform P;
+
+/* The canvas's pixels, the order the textures drawn on it have: on the
+ * 3DS one copy a frame turns them into the GPU's (a canvas in the GPU's
+ * order converted every sprite and letter drawn on it, 18 ms a frame
+ * under a title card) */
+#define CANVAS_FORMAT SDL_PIXELFORMAT_ARGB8888
 
 static SDL_GameController *pads[4];
 static uint32_t injected;
@@ -50,7 +57,7 @@ static void blend_reset(void) {
 static void blend_keep(void) {
 	int next = blend_cur < 0 ? 0 : blend_cur ^ 1;
 	if (!blend_tex[next]) {
-		blend_tex[next] = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
+		blend_tex[next] = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
 		if (!blend_tex[next]) return;
 		SDL_SetTextureScaleMode(blend_tex[next], SDL_ScaleModeNearest);
 	}
@@ -82,9 +89,9 @@ static void layout_canvas(void) {
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
 	blend_reset();
-	P.canvas = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
+	P.canvas = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
 	SDL_SetTextureScaleMode(P.canvas, SDL_ScaleModeNearest);
-	P.fx_copy = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
+	P.fx_copy = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
 	SDL_SetTextureScaleMode(P.fx_copy, SDL_ScaleModeNearest);
 }
 
@@ -191,10 +198,18 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "direct3d11");
 	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
 #endif
+#ifdef __3DS__
+	/* (the 3DS: the renderer draws a canvas of the GBA's size into memory
+	 * the GPU puts on the screen, present_3ds.c) */
+	SDL_Surface *screen = present3ds_init(CORE_W, CORE_H);
+	P.renderer = screen ? SDL_CreateSoftwareRenderer(screen) : NULL;
+	if (!P.renderer) { fprintf(stderr, "3ds: the GPU's present did not start: %s\n", SDL_GetError()); return false; }
+#else
 	Uint32 rflags = headless ? SDL_RENDERER_SOFTWARE : (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	P.renderer = SDL_CreateRenderer(P.window, -1, rflags);
 	if (!P.renderer) P.renderer = SDL_CreateRenderer(P.window, -1, SDL_RENDERER_SOFTWARE);
 	if (!P.renderer) { fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError()); return false; }
+#endif
 	SDL_GetRendererOutputSize(P.renderer, &P.screen_w, &P.screen_h);
 	if (force_w && force_h) { P.screen_w = force_w; P.screen_h = force_h; }
 	layout_canvas();
@@ -220,6 +235,9 @@ void platform_shutdown(void) {
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
 	if (P.renderer) SDL_DestroyRenderer(P.renderer);
+#ifdef __3DS__
+	present3ds_exit();
+#endif
 	if (P.window) SDL_DestroyWindow(P.window);
 	SDL_Quit();
 }
@@ -272,6 +290,13 @@ static void keys_default(void) {
 		bind_keys(key_defaults[i].bit, key_defaults[i].keys, "defaults");
 }
 
+bool platform_frame_log;
+#ifdef __3DS__
+/* (settings.ini's screen: fill, the picture at the top screen's height, or
+ * whole, at 1x in its middle) */
+static bool fill_3ds = true;
+#endif
+
 #ifdef __EMSCRIPTEN__
 /* The page's Smooth motion button, while the game runs (web/play/app.js). */
 EMSCRIPTEN_KEEPALIVE void cw_set_smooth(int on) { P.blend = on != 0; }
@@ -299,6 +324,11 @@ void platform_load_settings(const char *path) {
 		char key[64], val[64];
 		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2) continue;
 		if (!strcmp(key, "smooth_motion")) P.blend = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
+#ifdef __3DS__
+		if (!strcmp(key, "screen")) fill_3ds = strcmp(val, "whole") != 0;
+#endif
+		/* (not written by default: for a report of a machine's pacing) */
+		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}
 	fclose(f);
 }
@@ -390,11 +420,15 @@ void platform_poll(void) {
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
-		case SDL_QUIT: P.quit = true; break;
+		case SDL_QUIT: P.quit = true; printf("quit: the window closed, or the system asked\n"); break;
 		case SDL_FINGERDOWN:
 		case SDL_FINGERMOTION:
 		case SDL_FINGERUP:
+#ifndef __3DS__
+			/* (the 3DS's touch screen is its bottom one, apart from the
+			 * picture: not the phone's controls round it) */
 			if (touch_event(&e)) layout_canvas();
+#endif
 			break;
 		case SDL_KEYDOWN: {
 			uint32_t b = key_button(e.key.keysym.scancode);
@@ -502,9 +536,20 @@ void platform_apply_effects(void) {
 /* CYBERWORLD_FRAME_LOG: a line a second of how the frames reached the
  * display (shown, played, the gaps between shown ones), for a player's
  * pacing or lag */
+/* (the frame log's split: the game's update and its drawing, summed over
+ * the frames played, and the present, over those shown) */
+static uint64_t part_update, part_draw, part_present;
+static int part_played;
+
+void platform_frame_parts(uint64_t update, uint64_t draw) {
+	part_update += update;
+	part_draw += draw;
+	++part_played;
+}
+
 static void log_present(void) {
 	static int log_on = -1;
-	if (log_on < 0) log_on = getenv("CYBERWORLD_FRAME_LOG") != NULL;
+	if (log_on < 0) log_on = platform_frame_log || getenv("CYBERWORLD_FRAME_LOG") != NULL;
 	if (!log_on) return;
 	static uint64_t last, second;
 	static int shown, lo = 1 << 30, hi, gaps[4];
@@ -519,10 +564,22 @@ static void log_present(void) {
 	++shown;
 	if (!second) second = now;
 	if (now - second >= hz) {
-		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s\n", shown,
-			(unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "");
+		double ms = 1000.0 / (double)hz, played = part_played ? part_played : 1;
+		extern uint64_t emu_core_ticks, emu_core_unshown_ticks;
+		extern int emu_core_unshown;
+		int drawn = part_played - emu_core_unshown;
+		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
+			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms\n",
+			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",
+			part_update * ms / played, drawn > 0 ? (emu_core_ticks - emu_core_unshown_ticks) * ms / drawn : 0.0,
+			emu_core_unshown ? emu_core_unshown_ticks * ms / emu_core_unshown : 0.0, emu_core_unshown,
+			part_draw * ms / played, part_present * ms / shown);
+		emu_core_ticks = emu_core_unshown_ticks = 0;
+		emu_core_unshown = 0;
 		fflush(stdout);
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
+		part_update = part_draw = part_present = 0;
+		part_played = 0;
 		second = now;
 	}
 }
@@ -556,7 +613,11 @@ void platform_present_blend(double w) {
 		SDL_RenderCopy(P.renderer, cur, NULL, &dst);
 		SDL_SetTextureAlphaMod(cur, 255);
 	}
+#ifdef __3DS__
+	present3ds_frame(fill_3ds);
+#else
 	SDL_RenderPresent(P.renderer);
+#endif
 	log_present();
 }
 
@@ -570,12 +631,18 @@ void platform_end_frame(void) {
 		{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
 		return;
 	}
+	uint64_t t0 = SDL_GetPerformanceCounter();
 	SDL_SetRenderTarget(P.renderer, NULL);
 	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
 	SDL_RenderClear(P.renderer);
 	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
 	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
+#ifdef __3DS__
+	present3ds_frame(fill_3ds);
+#else
 	SDL_RenderPresent(P.renderer);
+#endif
+	part_present += SDL_GetPerformanceCounter() - t0;
 	log_present();
 	++P.frame;
 	{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }

@@ -7,7 +7,8 @@ Cybeast Gregar (USA) from the player's own ROM on an embedded mGBA core and
 directs it: generated layers in the game's map formats, the run's structure,
 loot and saves. It is written in C11 with SDL2 and ships as a PortMaster port
 for ROCKNIX, the primary target, as a Linux desktop build, as a Windows
-build, as a macOS app and as a browser build on GitHub Pages. Reference
+build, as a macOS app, as a browser build on GitHub Pages and as a
+homebrew build for the New 3DS. Reference
 devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 
 Never commit or publish ROMs, save files, extracted assets, emulator save
@@ -58,10 +59,11 @@ the site.
 | `windows/` | The Windows release: its README, the NSIS installer script (per user, no administrator), the .exe's manifest (UTF-8 paths, per-monitor DPI), resource script and icon (`tools/app_icon.py`); `src/core/desktop_win.c` is its desktop (the ROM in Windows' file dialog and Downloads) and `src/core/compat.h` what differs from POSIX |
 | `android/` | The Android app (`build.py android`): a Gradle project whose `RomActivity` asks once for the ROM (Android's file picker, checked by SHA-1, copied into the app's files) and whose `GameActivity` is SDL's activity running the game's C, built by the NDK from every `src/*/*.c` (`app/jni/CMakeLists.txt`) with SDL2's own source and the GBA core; its README says how releases are signed |
 | `macos/` | The macOS app: `deps.sh` (SDL2 and mGBA as universal static libraries, on a Mac), the bundle's `Info.plist`, its icon (`tools/app_icon.py`) and the .dmg's README; `build.py macos` runs only on a Mac, so CI's macOS job builds and checks it |
+| `3ds/` | The Nintendo 3DS build (`build.py 3ds`, issue #9): its README (playing, building, testing on a 3DS) and the Homebrew Launcher's icon. `src/core/present_3ds.c` puts the canvas on the top screen through the GPU (citro2d); `src/emu/emu.c` runs the GBA core on the New 3DS's third core where the system gives one; `src/core/main.c` splits the app's memory |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the player in `play/` (ROM check and storage, scaling), the FAQ in `faq/` as the PET's E-Mail, its answers taken from the docs. Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
 | `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image); the trailer, the site's hero, and `trailer-play.png`, its poster with a play button, which the README links to the MP4 (`tools/trailer.py`) |
-| `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.android` (the SDK, NDK and Gradle, SDL2's source, mGBA per ABI), `Dockerfile.web` (Emscripten, mGBA without threads) |
+| `docker/` | Build images: `Dockerfile` (host and ROCKNIX, Debian trixie), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.android` (the SDK, NDK and Gradle, SDL2's source, mGBA per ABI), `Dockerfile.web` (Emscripten, mGBA without threads), `Dockerfile.3ds` (devkitPro's devkitARM, SDL2 and mGBA's library for the 3DS) |
 | `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot |
 
 ## Rules
@@ -78,7 +80,9 @@ the site.
 - A new ROM offset needs a note in `docs/ROM_DATA.md` saying how it was
   located and how to verify it.
 - The game's 240x160 picture stays whole at a whole-number scale on every
-  screen shape.
+  screen shape. The one exception is the 3DS's top screen (400x240), where
+  1x is the only whole scale: there it fills the screen's height at 1.5x
+  by default, and `screen = whole` in `settings.ini` gives 1x.
 - Draw calls must not change game state. Input is read once per frame in
   `platform_poll`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the
@@ -111,6 +115,7 @@ python3 build.py windows    # build/release: the Windows installer and zip (MinG
 python3 build.py android    # build/release/cyberworld-endless.apk (the NDK and Gradle in Docker; android/README.md)
 python3 build.py macos      # build/release/cyberworld-endless-macos.dmg, on a Mac only (Apple's SDK)
 python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-builder on this machine)
+python3 build.py 3ds        # build/3ds/cyberworld-endless.3dsx (devkitARM in Docker; 3ds/README.md)
 python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
 python3 tools/play.py do NAME "press A; hold UP 30" [--every 10] [--keep DIR]   # input, then a picture and the state (--keep: each frame into DIR)
 python3 build.py serve      # the site and the browser build on http://localhost:8080
@@ -194,6 +199,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | Windows packaging | `build.py windows`; the .exe under Wine (a Debian image with `wine`, `wine32:i386` and `xvfb`): a headless `--scene emu` capture with the ROM, a start in a window, the installer's silent install (`/S`), a start and `uninstall.exe /S` |
 | Android packaging | `build.py android`; the APK in an emulator (KVM, the emulator and an image in `.build/android-sdk`): a fresh install asks for the ROM through Android's picker, a new game by touch, the D-pad walking, a turn to landscape |
 | macOS packaging | CI's macOS job (`lipo`, `otool -L`, `codesign --verify`, a ROM-less headless start); on a Mac, `build.py macos` and a run with the ROM: the open panel, a new game, CONTINUE |
+| 3DS build | `build.py 3ds`; on a New 3DS (3ds/README.md): the .3dsx over ftpd, a start from the Homebrew Launcher, NEW GAME to the first layer, `log.txt`'s frame lines (`frame_log = on`); the other targets still build, as the 3DS's changes are mostly shared code |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
 | Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
 

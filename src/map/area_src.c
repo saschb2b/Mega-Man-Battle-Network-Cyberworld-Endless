@@ -196,6 +196,7 @@ static void decode_heights(AreaSrc *a) {
 		if (cy > y1) y1 = cy;
 	}
 	a->hx0 = x0; a->hy0 = y0; a->hw = x1 - x0 + 1; a->hh = y1 - y0 + 1;
+	if (a->hw <= 0 || a->hh <= 0) { a->hw = a->hh = 0; return; }
 	a->hz = calloc((size_t)a->hw * a->hh, 1);
 	for (int i = 0; i < a->nsec[1]; ++i) {
 		const CoordCell *c = &a->sec[1][i];
@@ -217,6 +218,7 @@ static void decode_rings(AreaSrc *a) {
 		if (cy > y1) y1 = cy;
 	}
 	a->rx0 = x0 - 1; a->ry0 = y0 - 1; a->rw = x1 - x0 + 3; a->rh = y1 - y0 + 3;
+	if (a->rw <= 0 || a->rh <= 0) { a->rw = a->rh = 0; return; }
 	size_t n = (size_t)a->rw * a->rh;
 	uint8_t *wall = calloc(n, 1);
 	for (int i = 0; i < a->nsec[0]; ++i)

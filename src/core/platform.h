@@ -71,6 +71,12 @@ void platform_load_settings(const char *path);
 /* Smooth motion: the display refreshed with the game's last two frames
  * mixed, `w` (0-1) of the newer; the loop's frames were played unshown. */
 void platform_present_blend(double w);
+/* --frame-log (or CYBERWORLD_FRAME_LOG): a line a second of the frames'
+ * pacing on stdout */
+extern bool platform_frame_log;
+/* A played frame's update and drawing, in performance-counter ticks, for
+ * the frame log's split */
+void platform_frame_parts(uint64_t update, uint64_t draw);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */

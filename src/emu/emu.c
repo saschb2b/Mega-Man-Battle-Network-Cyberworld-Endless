@@ -11,7 +11,13 @@
 #include <mgba/core/core.h>
 #include <mgba/core/log.h>
 #include <mgba/core/serialize.h>
+#include <mgba/internal/gba/gba.h>
+#include <mgba/internal/gba/overrides.h>
 #include <mgba-util/vfs.h>
+#ifdef __3DS__
+#include <3ds/types.h>
+#include <3ds/thread.h>
+#endif
 
 #define RING 16384 /* stereo frames of buffered sound */
 /* The GBA runs at 59.73 Hz and frames are paced at 60, so the core makes a
@@ -25,6 +31,7 @@
 #define LAT_MAX    6144
 
 static struct mCore *core;
+static bool layout_ok;   /* the core's struct GBA reads as expected (emu_init) */
 static uint32_t video[EMU_W * EMU_H];
 static int out_rate = 48000;
 
@@ -37,6 +44,8 @@ static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va
 }
 static struct mLogger logger = { .log = quiet };
 
+static void start_worker(void);
+
 bool emu_init(const uint8_t *rom, size_t len) {
 	if (core) return true;
 	mLogSetDefaultLogger(&logger);
@@ -47,27 +56,45 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	if (!copy) return false;
 	memcpy(copy, rom, len);
 	memset(copy + len, 0xFF, EMU_ROM_SIZE - len);
+#ifdef __3DS__
+	/* (on the 3DS the core copies the ROM into a buffer of its own as it
+	 * loads, mGBA's FIXED_ROM_BUFFER: it reads this copy as it is, which
+	 * lives as long as the core, as a chunk made from it would be a third
+	 * 16 MB on a 3DS's heap) */
+	struct VFile *vf = VFileFromMemory(copy, EMU_ROM_SIZE);
+	if (!vf) { free(copy); return false; }
+#else
 	struct VFile *vf = VFileMemChunk(copy, EMU_ROM_SIZE);
 	free(copy);
 	if (!vf) return false;
+#endif
 	core = mCoreFindVF(vf);
 	if (!core || !core->init(core)) { vf->close(vf); core = NULL; return false; }
 	mCoreInitConfig(core, NULL);
 	core->setVideoBuffer(core, (color_t *)video, EMU_W);
 	if (!core->loadROM(core, vf)) { core->deinit(core); core = NULL; return false; }
+	/* (emu_frame reaches into the core's own struct, so only where its
+	 * fields read back what was just loaded and the library's reset value) */
+	struct GBA *gba = core->board;
+	layout_ok = gba->romVf == vf && gba->pristineRomSize == EMU_ROM_SIZE && gba->idleLoop == IDLE_LOOP_NONE;
+	if (!layout_ok) fprintf(stderr, "emu: the core's layout was not the one expected; every frame draws its picture\n");
 	/* the game's flash save lives in memory; runs keep their own saves */
 	core->loadSave(core, VFileMemChunk(NULL, 0));
 	core->setAudioBufferSize(core, 1024);
 	emu_audio_rate(out_rate);
 	ring_lock = SDL_CreateMutex();
 	core->reset(core);
+	start_worker();
 	return true;
 }
 
+static void wait_frame(void);
+
 bool emu_ready(void) { return core != NULL; }
-void emu_reset(void) { if (core) core->reset(core); }
+void emu_reset(void) { wait_frame(); if (core) core->reset(core); }
 
 void emu_audio_rate(int rate) {
+	wait_frame();
 	out_rate = rate;
 	if (!core) return;
 	blip_set_rates(core->getAudioChannel(core, 0), core->frequency(core), rate);
@@ -103,11 +130,99 @@ static void pull_audio(void) {
 	blip_set_rates(r, core->frequency(core), out_rate * adj);
 }
 
+uint64_t emu_core_ticks, emu_core_unshown_ticks;
+int emu_core_unshown;
+
+static void run_frame(bool unshown) {
+	uint64_t t0 = SDL_GetPerformanceCounter();
+	core->runFrame(core);
+	uint64_t dt = SDL_GetPerformanceCounter() - t0;
+	emu_core_ticks += dt;
+	if (unshown) { emu_core_unshown_ticks += dt; ++emu_core_unshown; }
+	pull_audio();
+}
+
+/* ---- the core on a thread of its own: the New 3DS's third core (or a
+ * computer's, with CYBERWORLD_EMU_THREAD set, to test it) ----
+ * emu_frame starts the frame and returns, and whatever else touches the
+ * core waits for that frame first (wait_frame): the director's logic takes in
+ * each frame whole, as before, and the frame done is drawn while the next
+ * runs (scene_emu.c's update takes the frame done in, then starts the
+ * next). The frame done's picture is copied aside for the drawing. */
+static bool threaded;
+static volatile bool in_flight, stopping;
+static SDL_sem *go, *done;
+static uint32_t shown[EMU_W * EMU_H];
+#ifdef __3DS__
+static Thread worker;
+#else
+static SDL_Thread *worker;
+#endif
+
+static int worker_main(void *arg) {
+	(void)arg;
+	for (;;) {
+		SDL_SemWait(go);
+		if (stopping) return 0;
+		run_frame(false);
+		SDL_SemPost(done);
+	}
+}
+#ifdef __3DS__
+static void worker_entry(void *arg) { worker_main(arg); }
+#endif
+
+static void wait_frame(void) {
+	if (!in_flight) return;
+	SDL_SemWait(done);
+	in_flight = false;
+	memcpy(shown, video, sizeof shown);
+}
+
+bool emu_threaded(void) { return threaded; }
+
+static void start_worker(void) {
+	if (!(go = SDL_CreateSemaphore(0)) || !(done = SDL_CreateSemaphore(0))) return;
+#ifdef __3DS__
+	/* (none where it is refused: the old 3DS, or a title without it) */
+	worker = threadCreate(worker_entry, NULL, 0x10000, 0x30, 2, false);
+	threaded = worker != NULL;
+#else
+	const char *e = getenv("CYBERWORLD_EMU_THREAD");
+	if (e && *e && strcmp(e, "0")) threaded = (worker = SDL_CreateThread(worker_main, "emu", NULL)) != NULL;
+#endif
+	printf("emu: the GBA core runs %s\n", threaded ? "on a core of its own" : "between the frames' drawing");
+}
+
+void emu_quit(void) {
+	if (!threaded) return;
+	wait_frame();
+	stopping = true;
+	SDL_SemPost(go);
+#ifdef __3DS__
+	threadJoin(worker, U64_MAX);
+	threadFree(worker);
+#else
+	SDL_WaitThread(worker, NULL);
+#endif
+	threaded = false;
+}
+
 void emu_frame(uint32_t keys) {
 	if (!core) return;
+	wait_frame();
 	core->setKeys(core, keys);
-	core->runFrame(core);
-	pull_audio();
+	if (threaded) {
+		in_flight = true;
+		SDL_SemPost(go);
+		return;
+	}
+	/* (a frame the loop plays to catch up is not shown: the core draws no
+	 * picture for it, a fifth of its time on a 3DS. Smooth motion mixes
+	 * every frame.) */
+	bool unshown = P.skip_present && !P.blend && layout_ok;
+	if (unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
+	run_frame(unshown);
 }
 
 int emu_audio_read(int16_t *out, int frames) {
@@ -124,24 +239,35 @@ int emu_audio_read(int16_t *out, int frames) {
 	return n;
 }
 
-const uint32_t *emu_video(void) { return video; }
+const uint32_t *emu_video(void) { return threaded ? shown : video; }
 
-uint8_t emu_read8(uint32_t a) { return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
-uint16_t emu_read16(uint32_t a) { return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
-uint32_t emu_read32(uint32_t a) { return core ? core->rawRead32(core, a, -1) : 0; }
-void emu_write8(uint32_t a, uint8_t v) { if (core) core->rawWrite8(core, a, -1, v); }
-void emu_write32(uint32_t a, uint32_t v) { if (core) core->rawWrite32(core, a, -1, v); }
+uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
+uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
+uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
+void emu_write8(uint32_t a, uint8_t v) { wait_frame(); if (core) core->rawWrite8(core, a, -1, v); }
+void emu_write32(uint32_t a, uint32_t v) { wait_frame(); if (core) core->rawWrite32(core, a, -1, v); }
 void emu_write(uint32_t a, const void *data, size_t len) {
 	const uint8_t *p = data;
 	for (size_t i = 0; i < len; ++i) emu_write8(a + (uint32_t)i, p[i]);
 }
 
+/* A path for mGBA's own files: on the 3DS they go to the SD card's file
+ * system itself, which takes a path from its root, without the C
+ * library's "sdmc:" (a state was never written there) */
+static const char *vf_path(const char *path) {
+#ifdef __3DS__
+	if (!strncmp(path, "sdmc:", 5)) return path + 5;
+#endif
+	return path;
+}
+
 bool emu_save_state(const char *path) {
+	wait_frame();
 	if (!core) return false;
 	/* written beside, then renamed over: a power cut keeps the old state */
 	char tmp[640];
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
-	struct VFile *vf = VFileOpen(tmp, O_CREAT | O_TRUNC | O_RDWR);
+	struct VFile *vf = VFileOpen(vf_path(tmp), O_CREAT | O_TRUNC | O_RDWR);
 	if (!vf) return false;
 	bool ok = mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
 	vf->close(vf);
@@ -152,8 +278,9 @@ bool emu_save_state(const char *path) {
 }
 
 bool emu_load_state(const char *path) {
+	wait_frame();
 	if (!core) return false;
-	struct VFile *vf = VFileOpen(path, O_RDONLY);
+	struct VFile *vf = VFileOpen(vf_path(path), O_RDONLY);
 	if (!vf) return false;
 	bool ok = mCoreLoadStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
 	vf->close(vf);

@@ -30,6 +30,60 @@
 #include "minifont.h"
 #include "meta.h"
 #include "touch.h"
+#include "emu.h"
+#ifdef __3DS__
+/* (libctru's parts, not <3ds.h>: its Friends service has a Profile too) */
+#include <3ds/types.h>
+#include <3ds/os.h>
+#include <3ds/services/soc.h>
+#include <3ds/3dslink.h>
+#include <3ds/env.h>
+#include <3ds/svc.h>
+#include <3ds/result.h>
+#include <3ds/allocator/mappable.h>
+#include <3ds/services/apt.h>
+#include <3ds/services/ptmsysm.h>
+#include <3ds/thread.h>
+#include <malloc.h>
+
+/* (the main thread's stack: libctru's 32 KB is tight for the game's
+ * deepest calls, a layer's making; the browser build's is 1 MB too) */
+u32 __stacksize__ = 1u << 20;
+
+/* (whether the New 3DS's third core takes a thread of the game's: emu.c
+ * runs the GBA core there) */
+static void core2_probe(void *arg) { *(volatile bool *)arg = true; }
+
+/* The app's memory, split before main in place of libctru's split (and
+ * mGBA's fixed sizes): the heap takes all its area holds, 96 MB, the
+ * linear heap (the screens' and the sound's buffers) what is left, at
+ * least 8 MB. The Homebrew Launcher gives a New 3DS app 124 MB, a 3DS 64:
+ * a heap of all but the linear heap's share passed the area on the one,
+ * a fixed 36 MB was too small for the game's ROM copies on both. */
+void __system_allocateHeaps(void) {
+	extern char *fake_heap_start, *fake_heap_end;
+	extern u32 __ctru_heap, __ctru_linear_heap, __ctru_heap_size, __ctru_linear_heap_size;
+	Handle limit = 0;
+	s64 most = 0, used = 0;
+	ResourceLimitType commit = RESLIMIT_COMMIT;
+	if (R_FAILED(svcGetResourceLimit(&limit, CUR_PROCESS_HANDLE))) svcBreak(USERBREAK_PANIC);
+	svcGetResourceLimitLimitValues(&most, limit, &commit, 1);
+	svcGetResourceLimitCurrentValues(&used, limit, &commit, 1);
+	svcCloseHandle(limit);
+	u32 left = (u32)(most - used) & ~0xFFFu, linear = 8u << 20;
+	if (left <= linear) svcBreak(USERBREAK_PANIC);
+	u32 heap = left - linear;
+	if (heap > OS_HEAP_AREA_END - OS_HEAP_AREA_BEGIN) heap = OS_HEAP_AREA_END - OS_HEAP_AREA_BEGIN;
+	__ctru_heap_size = heap;
+	__ctru_linear_heap_size = left - heap;
+	if (R_FAILED(svcControlMemory(&__ctru_heap, OS_HEAP_AREA_BEGIN, 0, heap, MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE))
+	    || R_FAILED(svcControlMemory(&__ctru_linear_heap, 0, 0, __ctru_linear_heap_size, MEMOP_ALLOC_LINEAR, MEMPERM_READ | MEMPERM_WRITE)))
+		svcBreak(USERBREAK_PANIC);
+	mappableInit(OS_MAP_AREA_BEGIN, OS_MAP_AREA_END);
+	fake_heap_start = (char *)__ctru_heap;
+	fake_heap_end = fake_heap_start + heap;
+}
+#endif
 
 char g_data_dir[512] = ".";
 
@@ -73,6 +127,7 @@ static void desktop_data_dir(char *out, size_t n) {
 #endif
 }
 
+#ifndef __3DS__
 /* The ROM: in the data folder's rom/, beside the binary, or in ./rom. */
 static bool desktop_rom(char *msg, size_t msglen) {
 	char dirs[3][600], exe[512];
@@ -92,6 +147,7 @@ static bool desktop_rom(char *msg, size_t msglen) {
 	snprintf(msg, msglen, "%s", first);
 	return false;
 }
+#endif
 
 #ifdef CW_DESKTOP
 /* ... and, looking again, where front ends and downloads keep theirs */
@@ -326,7 +382,7 @@ static void script_actions(void) {
 	}
 }
 
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
 /* ---- remote play (tools/play.py): the game waits for batches of steps on
  * DIR/in and answers each on DIR/out once its frames have run ---- */
 static int remote_in = -1, remote_out = -1;
@@ -395,7 +451,7 @@ static void remote_tick(void) {
 
 static void script_tick(void) {
 	if (bot_seed) { bot_tick(); return; }
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
 	if (remote_in >= 0) remote_tick();
 #endif
 	script_actions();
@@ -465,10 +521,12 @@ static bool game_frame(void) {
 		pending = NULL;
 		if (current->enter) current->enter();
 	}
+	uint64_t t0 = SDL_GetPerformanceCounter();
 	script_tick();
 	platform_poll();
 	if (current && current->update) current->update();
 	audio_frame();
+	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
@@ -482,6 +540,7 @@ static bool game_frame(void) {
 		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
 		platform_save_canvas(path);
 	}
+	platform_frame_parts(t1 - t0, SDL_GetPerformanceCounter() - t1);
 	platform_end_frame();
 	return !(loop.max_frames && P.frame >= loop.max_frames);
 }
@@ -531,7 +590,9 @@ static bool step(void) {
 		 * missed, a 50 Hz display): one more game frame first, not shown,
 		 * so the game keeps the GBA's pace, as the browser's loop does (a
 		 * player's phone felt slow; each missed refresh had cost a frame) */
-		if (loop.acc >= 1.0 / 60.0 - 0.002) {
+		/* (the GBA core on a thread of its own sets the pace: a frame
+		 * played unshown would cost it a whole frame, drawn aside) */
+		if (loop.acc >= 1.0 / 60.0 - 0.002 && !emu_threaded()) {
 			loop.acc -= 1.0 / 60.0;
 			P.skip_present = true;
 			bool go = game_frame();
@@ -562,7 +623,9 @@ static void web_frame(void) {
 /* SIGTERM or SIGINT (a launcher closing the port, a terminal's Ctrl+C):
  * the loop ends at a frame's end and the run is kept */
 static volatile sig_atomic_t quit_signal;
+#ifndef __3DS__
 static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
+#endif
 #endif
 
 int main(int argc, char **argv) {
@@ -582,7 +645,7 @@ int main(int argc, char **argv) {
 	int marks_spec = -1;
 	int force_w = 0, force_h = 0;
 	bool headless = false;
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
 	const char *remote_dir = NULL;
 #endif
 	uint64_t max_frames = 0;
@@ -608,6 +671,8 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--touch")) touch_always();
 		else if (!strcmp(a, "--frames") && v) { max_frames = strtoull(v, NULL, 10); ++i; }
 		else if (!strcmp(a, "--smooth-motion") && v) { smooth_arg = !strcmp(v, "on"); ++i; }
+		/* (the frame log without an environment: the 3DS over 3dslink) */
+		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
 		else if (!strcmp(a, "--shot") && v) { parse_shots(v); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {
@@ -626,7 +691,7 @@ int main(int argc, char **argv) {
 		/* --marks HEX: the title's marks as if earned, for a capture */
 		else if (!strcmp(a, "--marks") && v) { marks_spec = (int)strtol(v, NULL, 16); ++i; }
 		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
 		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
 #endif
 		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
@@ -638,11 +703,68 @@ int main(int argc, char **argv) {
 		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
 	}
 	setvbuf(stdout, NULL, _IOLBF, 0);
+#ifdef __3DS__
+	/* the 3DS (issue #9, 3ds/): the New 3DS's faster clock and cache, the
+	 * SD card's folder for the saves and the ROM, and stdout to the PC
+	 * that sent the game over 3dslink. (Whether ptm:sysm, which sets the
+	 * clock, answers is asked first for the log.) */
+	Result sysm = ptmSysmInit();
+	if (R_SUCCEEDED(sysm)) ptmSysmExit();
+	osSetSpeedupEnable(true);
+	volatile bool third = false;
+	Thread probe = threadCreate(core2_probe, (void *)&third, 0x1000, 0x30, 2, false);
+	if (probe) { threadJoin(probe, U64_MAX); threadFree(probe); }
+	bool n3ds = false;
+	APT_CheckNew3DS(&n3ds);
+	extern u32 __ctru_heap_size, __ctru_linear_heap_size;
+	char mem[300];
+	snprintf(mem, sizeof mem, "3ds: %s, %s, heap %lu KB, linear heap %lu KB; the speedup %s; the third core %s",
+		n3ds ? "New 3DS" : "3DS", envIsHomebrew() ? "homebrew" : "title",
+		(unsigned long)(__ctru_heap_size / 1024), (unsigned long)(__ctru_linear_heap_size / 1024),
+		R_SUCCEEDED(sysm) ? "on" : "refused", third ? "free for the game" : probe ? "ran nothing" : "refused");
+	if (__3dslink_host.s_addr) {
+		u32 *soc = memalign(0x1000, 0x100000);
+		if (soc && socInit(soc, 0x100000) == 0) link3dsStdio();
+	}
+	if (!data_dir_given) snprintf(g_data_dir, sizeof g_data_dir, "sdmc:/3ds/cyberworld-endless");
+	static char rom_3ds[600];
+	snprintf(rom_3ds, sizeof rom_3ds, "%s/rom", g_data_dir);
+	mkdir("sdmc:/3ds", 0777);
+	mkdir(g_data_dir, 0777);
+	mkdir(rom_3ds, 0777);
+	/* (started from the Homebrew Launcher: the output into log.txt beside
+	 * the saves, as the handhelds' launcher keeps it) */
+	if (!__3dslink_host.s_addr) {
+		char log[600];
+		snprintf(log, sizeof log, "%s/log.txt", g_data_dir);
+		if (freopen(log, "w", stdout)) setvbuf(stdout, NULL, _IOLBF, 0);
+		freopen(log, "a", stderr);
+	}
+	printf("%s\n", mem);
+#endif
 	if (headless && !force_w) { force_w = 1280; force_h = 960; }
 	if (DESKTOP && !data_dir_given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
 	if (DESKTOP) { char rom[600]; snprintf(rom, sizeof rom, "%s/rom", g_data_dir); make_dirs(rom); }
 	char msg[512];
+#ifdef __3DS__
+	/* (the game's own rom folder, then where 3DS players keep GBA ROMs: a
+	 * header check passes over the other games without reading them) */
+	bool rom_ok = false;
+	if (rom_dir) rom_ok = rom_find(rom_dir, msg, sizeof msg);
+	else {
+		const char *places[] = { rom_3ds, "sdmc:/roms/gba", "sdmc:/roms", "sdmc:/gba" };
+		char first[512] = "", close[512] = "";
+		for (size_t i = 0; !rom_ok && i < sizeof places / sizeof *places; ++i) {
+			rom_ok = rom_find(places[i], msg, sizeof msg);
+			if (!i) snprintf(first, sizeof first, "%s", msg);
+			if (!rom_ok && rom_find_close && !close[0]) snprintf(close, sizeof close, "%s", msg);
+		}
+		/* (a near miss, the wrong version found, says more than where to put one) */
+		if (!rom_ok) snprintf(msg, sizeof msg, "%s", close[0] ? close : first);
+	}
+#else
 	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
+#endif
 	/* ("--scene norom": the screen a desktop without its ROM shows, for a
 	 * capture) */
 	bool norom_scene = start_scene && !strcmp(start_scene, "norom");
@@ -812,7 +934,7 @@ int main(int argc, char **argv) {
 #if defined(_WIN32)
 	signal(SIGTERM, on_quit_signal);
 	signal(SIGINT, on_quit_signal);
-#elif !defined(__EMSCRIPTEN__)
+#elif !defined(__EMSCRIPTEN__) && !defined(__3DS__)
 	/* (no SA_RESTART: a remote game waiting in read() wakes up to quit) */
 	struct sigaction sa;
 	memset(&sa, 0, sizeof sa);
@@ -831,6 +953,7 @@ int main(int argc, char **argv) {
 	while (!P.quit && !quit_signal && step()) {}
 	/* a run on a layer is kept where MegaMan stands */
 	if (current == &scene_emu) director_suspend();
+	emu_quit();
 #endif
 	platform_shutdown();
 	return 0;

@@ -11,13 +11,23 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <SDL.h>
+
 #include "bn6.h"
 #include "emu.h"
 #include "game.h"
 #include "gamecall.h"
+#include "platform.h"
+
+static int ran;   /* frames the boot has run */
 
 static void run(int frames, uint32_t keys) {
+	/* (the boot's frames are never shown: the core draws no picture) */
+	bool shown = P.skip_present;
+	P.skip_present = true;
 	for (int i = 0; i < frames; ++i) emu_frame(keys);
+	P.skip_present = shown;
+	ran += frames;
 }
 
 /* bump the number when the boot sequence changes */
@@ -27,6 +37,8 @@ bool emu_boot(void) {
 	char path[600];
 	state_path(path, sizeof path);
 	if (emu_load_state(path)) return true;
+	uint32_t t0 = SDL_GetTicks();
+	ran = 0;
 	emu_reset();
 	run(400, 0);
 	run(4, KEY_START);
@@ -42,6 +54,9 @@ bool emu_boot(void) {
 	emu_write8(BN6_CHATBOX + 0, 0);
 	emu_write8(BN6_CHATBOX + 4, 0);
 	run(30, 0);
-	emu_save_state(path);
+	bool kept = emu_save_state(path);
+	/* (once per install: a slow machine's first start is told apart) */
+	printf("boot: %d frames from power-on in %.2f s, %s\n", ran, (SDL_GetTicks() - t0) / 1000.0,
+		kept ? "kept for the next start" : "not kept: the state could not be written");
 	return true;
 }

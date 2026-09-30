@@ -5,7 +5,8 @@
 # glibc. `sdl2.sh windows` builds it for 64-bit Windows instead (MinGW-w64,
 # /opt/mingw.cmake), a static library the game links in; `sdl2.sh android`
 # only unpacks the source into /opt/sdl2-src, which the Android app builds
-# with itself (its Java classes and its CMake project).
+# with itself (its Java classes and its CMake project); `sdl2.sh 3ds` builds
+# it for the Nintendo 3DS (devkitPro's devkitARM and libctru), static.
 # SDL2 is zlib-licensed: https://github.com/libsdl-org/SDL
 set -e
 VER=2.32.10
@@ -19,7 +20,10 @@ if [ "$1" = android ]; then
 	rm -f /tmp/sdl2.tar.gz
 	exit 0
 fi
-if [ "$1" = windows ]; then
+if [ "$1" = 3ds ]; then
+	cmake -S SDL2-$VER -B build-sdl2 -DCMAKE_TOOLCHAIN_FILE="$DEVKITPRO/cmake/3DS.cmake" -DCMAKE_BUILD_TYPE=Release \
+	 -DCMAKE_INSTALL_PREFIX=/opt/sdl2 -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DSDL_TESTS=OFF
+elif [ "$1" = windows ]; then
 	cmake -S SDL2-$VER -B build-sdl2 -DCMAKE_TOOLCHAIN_FILE=/opt/mingw.cmake -DCMAKE_BUILD_TYPE=Release \
 	 -DCMAKE_INSTALL_PREFIX=/opt/sdl2 -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DSDL_TESTS=OFF
 else
