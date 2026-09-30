@@ -69,11 +69,14 @@ What differs from the other builds:
   into a texture and citro2d draws it. SDL's own present copied and turned
   every pixel on the CPU.
 - **The bottom screen** (`src/core/platform.c`): every tenth frame the
-  director draws the layer's map (`director_draw_second_screen`) into a
-  320 x 240 texture, on the renderer that has the font; its pixels go into
-  memory the GPU reads, and `present_3ds.c` draws them on the bottom screen
-  as it draws the canvas on the top one. `--second-shot FRAME:PATH` saves
-  the same picture on any build.
+  director draws the layer's map (`director_draw_second_screen`) straight
+  into the memory the GPU copies from (`gfx_draw_into`: its rectangles and
+  text, blended as the software renderer blends them), and `present_3ds.c`
+  draws it on the bottom screen once for each of the screen's two buffers,
+  then leaves it until the next. Through the software renderer and read
+  back, the map had taken 20 ms, a frame lost at each redraw.
+  `--second-shot FRAME:PATH` saves the same picture on any build, and
+  `frame_log`'s lines give the map's own time.
 - **The GBA core** (`src/emu/emu.c`) runs on the New 3DS's third core where
   the system gives it one, the drawing of the frame done beside the next
   frame's emulation; `log.txt` says which. Its picture is drawn on the main

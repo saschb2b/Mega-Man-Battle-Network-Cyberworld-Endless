@@ -23,6 +23,7 @@ static C3D_Tex bot_tex;
 static Tex3DS_SubTexture bot_sub;
 static u32 *bot_pixels;
 static bool bot_ready, bot_on, bot_new;
+static int bot_draws;   /* frames left to draw it in, both of the screen's buffers */
 
 SDL_Surface *present3ds_init(int w, int h) {
 	if (w > TEX || h > TEX) return NULL;
@@ -95,6 +96,7 @@ void present3ds_frame(bool fill) {
 			GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
 			GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
 		bot_new = false;
+		bot_draws = 2;
 	}
 	GPU_TEXTURE_FILTER_PARAM f = fill ? GPU_LINEAR : GPU_NEAREST;
 	C3D_TexSetFilter(&tex, f, f);
@@ -106,13 +108,16 @@ void present3ds_frame(bool fill) {
 	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f;
 	C2D_Image img = { &tex, &sub };
 	C2D_DrawImageAt(img, ((float)GSP_SCREEN_HEIGHT_TOP - cw * s) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, 0.5f, NULL, s, s);
-	/* the bottom screen: its picture, else black, both of its buffers once */
-	if (bot_on) {
+	/* the bottom screen: a new picture, else black, in both of its buffers
+	 * once (a screen not drawn keeps its picture; drawn every frame, it
+	 * cost the GPU's time each one) */
+	if (bot_on && bot_draws > 0) {
 		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
 		C2D_SceneBegin(bottom);
 		C2D_Image b = { &bot_tex, &bot_sub };
 		C2D_DrawImageAt(b, 0, 0, 0.5f, NULL, 1.0f, 1.0f);
-	} else if (cleared < 2) {
+		--bot_draws;
+	} else if (!bot_on && cleared < 2) {
 		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
 		C2D_SceneBegin(bottom);
 		++cleared;

@@ -12,6 +12,7 @@
 #include "app_icon.h"
 #endif
 #include "audio.h"
+#include "gfx.h"
 #include "touch.h"
 
 Platform P;
@@ -580,6 +581,9 @@ void platform_apply_effects(void) {
  * the frames played, and the present, over those shown) */
 static uint64_t part_update, part_draw, part_present;
 static int part_played;
+/* (and the second screen's picture, where one is drawn: the 3DS's map) */
+static uint64_t part_second;
+static int part_seconds;
 
 void platform_frame_parts(uint64_t update, uint64_t draw) {
 	part_update += update;
@@ -608,18 +612,20 @@ static void log_present(void) {
 		extern uint64_t emu_core_ticks, emu_core_unshown_ticks;
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
+		char bottom[80] = "";
+		if (part_seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's map %.1f ms of it, %d times)", part_second * ms / part_seconds, part_seconds);
 		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
-			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms\n",
+			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms%s\n",
 			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",
 			part_update * ms / played, drawn > 0 ? (emu_core_ticks - emu_core_unshown_ticks) * ms / drawn : 0.0,
 			emu_core_unshown ? emu_core_unshown_ticks * ms / emu_core_unshown : 0.0, emu_core_unshown,
-			part_draw * ms / played, part_present * ms / shown);
+			part_draw * ms / played, part_present * ms / shown, bottom);
 		emu_core_ticks = emu_core_unshown_ticks = 0;
 		emu_core_unshown = 0;
 		fflush(stdout);
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
-		part_update = part_draw = part_present = 0;
-		part_played = 0;
+		part_update = part_draw = part_present = part_second = 0;
+		part_played = part_seconds = 0;
 		second = now;
 	}
 }
@@ -736,50 +742,41 @@ void platform_persist(void) {
 /* ---- the second screen (issue #9) ---- */
 
 static SecondScreen second;
-static SDL_Texture *second_tex;
 
 void platform_second_screen(SecondScreen draw) { second = draw; }
 
-/* The second screen drawn into its texture, on the renderer that has the
- * font and the tiles: whether it holds a picture. */
-static bool draw_second(void) {
-	if (!second || !P.renderer) return false;
-	if (!second_tex) second_tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SECOND_W, SECOND_H);
-	if (!second_tex) return false;
-	SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
-	SDL_SetRenderTarget(P.renderer, second_tex);
-	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
-	SDL_RenderClear(P.renderer);
+/* The second screen drawn into memory (RGBA8888, `pitch` bytes a row):
+ * whether it holds a picture. (Through the software renderer, and read
+ * back, the map took 20 ms on a New 3DS, a frame lost every redraw.) */
+static bool draw_second(uint32_t *px, int pitch) {
+	if (!second) return false;
+	gfx_draw_into(px, SECOND_W, SECOND_H, pitch);
 	bool drew = second(SECOND_W, SECOND_H);
-	SDL_SetRenderTarget(P.renderer, was);
+	gfx_draw_into(NULL, 0, 0, 0);
 	return drew;
 }
 
 bool platform_save_second_screen(const char *path) {
-	if (!draw_second()) return false;
-	SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
-	SDL_SetRenderTarget(P.renderer, second_tex);
-	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormat(0, SECOND_W, SECOND_H, 32, SDL_PIXELFORMAT_ARGB8888);
-	bool ok = s && SDL_RenderReadPixels(P.renderer, NULL, SDL_PIXELFORMAT_ARGB8888, s->pixels, s->pitch) == 0 && SDL_SaveBMP(s, path) == 0;
+	static uint32_t px[SECOND_W * SECOND_H];
+	memset(px, 0, sizeof px);
+	if (!draw_second(px, SECOND_W * 4)) return false;
+	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, SECOND_W, SECOND_H, 32, SECOND_W * 4, SDL_PIXELFORMAT_RGBA8888);
+	bool ok = s && SDL_SaveBMP(s, path) == 0;
 	if (s) SDL_FreeSurface(s);
-	SDL_SetRenderTarget(P.renderer, was);
 	return ok;
 }
 
 #ifdef __3DS__
-/* The bottom screen's picture, every tenth frame: the map's cost on the
- * 3DS's processor, at the pace MegaMan's mark on it pulses. */
+/* The bottom screen's picture, every tenth frame (the pace MegaMan's mark
+ * on it pulses), drawn straight into the memory the GPU copies from. */
 static void second_to_bottom(void) {
 	if (P.frame % 10) return;
 	int pitch;
-	void *px = present3ds_bottom(&pitch);
-	bool on = px && draw_second();
-	if (on) {
-		SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
-		SDL_SetRenderTarget(P.renderer, second_tex);
-		on = SDL_RenderReadPixels(P.renderer, NULL, SDL_PIXELFORMAT_RGBA8888, px, pitch) == 0;
-		SDL_SetRenderTarget(P.renderer, was);
-	}
+	uint32_t *px = present3ds_bottom(&pitch);
+	uint64_t t0 = SDL_GetPerformanceCounter();
+	bool on = px && draw_second(px, pitch);
+	part_second += SDL_GetPerformanceCounter() - t0;
+	++part_seconds;
 	present3ds_bottom_show(on);
 }
 #endif

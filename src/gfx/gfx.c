@@ -357,12 +357,57 @@ void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int fli
 }
 
 /* ------------------------------------------------------------------ */
+/* Drawing into memory (gfx_draw_into): RGBA8888 pixels, blended as SDL's
+ * software renderer blends them, so the picture is its own to the pixel. */
+
+static struct { uint32_t *px; int w, h, stride; } raw;
+
+void gfx_draw_into(uint32_t *px, int w, int h, int pitch) {
+	raw.px = px;
+	raw.w = w;
+	raw.h = h;
+	raw.stride = pitch / 4;
+}
+
+/* a fill's blend over one pixel: (r, g, b) already times a / 255 */
+static uint32_t raw_blend(uint32_t d, unsigned r, unsigned g, unsigned b, unsigned a) {
+	unsigned inva = 255 - a;
+	return (inva * (d >> 24) / 255 + r) << 24 | (inva * (d >> 16 & 0xFF) / 255 + g) << 16
+		| (inva * (d >> 8 & 0xFF) / 255 + b) << 8 | (inva * (d & 0xFF) / 255 + a);
+}
+
+static void raw_fill(int x, int y, int w, int h, SDL_Color c) {
+	int x1 = x + w, y1 = y + h;
+	if (x < 0) x = 0;
+	if (y < 0) y = 0;
+	if (x1 > raw.w) x1 = raw.w;
+	if (y1 > raw.h) y1 = raw.h;
+	if (x >= x1 || y >= y1) return;
+	unsigned a = c.a, r = c.r * a / 255, g = c.g * a / 255, b = c.b * a / 255;
+	uint32_t solid = (uint32_t)c.r << 24 | (uint32_t)c.g << 16 | (uint32_t)c.b << 8 | a;
+	if (a == 255) {
+		for (int j = y; j < y1; ++j)
+			for (uint32_t *p = raw.px + j * raw.stride + x, *e = p + (x1 - x); p < e; ++p) *p = solid;
+		return;
+	}
+	/* (the last pixel's blend kept: a fill mostly lies on one colour) */
+	uint32_t in = raw.px[y * raw.stride + x], out = raw_blend(in, r, g, b, a);
+	for (int j = y; j < y1; ++j)
+		for (uint32_t *p = raw.px + j * raw.stride + x, *e = p + (x1 - x); p < e; ++p) {
+			if (*p != in) { in = *p; out = raw_blend(in, r, g, b, a); }
+			*p = out;
+		}
+}
+
+/* ------------------------------------------------------------------ */
 /* Font: 8x16 cells at FONT_BASE + code * 64, two tones (fill, shade). */
 
 #define FONT_BASE 0x6B5A2C
 #define FONT_TOP 2
 static SDL_Texture *font_tex;
 static uint8_t font_w[256];
+/* the atlas's pixels (ARGB8888), kept for drawing into memory */
+static uint32_t font_px[16 * 16 * 128];
 
 int text_code(unsigned char ch) {
 	if (ch >= 1 && ch <= 5) return 0x40 + ch - 1; /* version marks */
@@ -398,8 +443,8 @@ int text_code(unsigned char ch) {
 static void build_font(void) {
 	/* Atlas of 16x16 cells indexed by byte 0-127 (1-5 are version marks,
 	 * 32-127 ASCII). Fill is white so it can be tinted; shade stays dark. */
-	static uint32_t px[16 * 16 * 128];
-	memset(px, 0, sizeof px);
+	uint32_t *px = font_px;
+	memset(font_px, 0, sizeof font_px);
 	for (int ch = 1; ch < 128; ++ch) {
 		if (ch > 5 && ch < 32) continue;
 		int code = text_code((unsigned char)ch);
@@ -422,7 +467,7 @@ static void build_font(void) {
 		}
 		font_w[ch] = (uint8_t)(code == 0 ? 4 : maxx);
 	}
-	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, 16 * 128, 16, 32, 16 * 128 * 4, SDL_PIXELFORMAT_ARGB8888);
+	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(font_px, 16 * 128, 16, 32, 16 * 128 * 4, SDL_PIXELFORMAT_ARGB8888);
 	font_tex = SDL_CreateTextureFromSurface(P.renderer, s);
 	SDL_SetTextureBlendMode(font_tex, SDL_BLENDMODE_BLEND);
 	SDL_FreeSurface(s);
@@ -438,9 +483,12 @@ int text_width(const char *s) {
 	return w;
 }
 
+static void raw_text(int x, int y, const char *s, SDL_Color c, int scale);
+
 void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int scale) {
 	if (align == TEXT_CENTER) x -= text_width(s) * scale / 2;
 	else if (align == TEXT_RIGHT) x -= text_width(s) * scale;
+	if (raw.px) { raw_text(x, y, s, c, scale); return; }
 	SDL_SetTextureColorMod(font_tex, c.r, c.g, c.b);
 	SDL_SetTextureAlphaMod(font_tex, c.a);
 	for (; *s; ++s) {
@@ -449,6 +497,31 @@ void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int s
 		SDL_Rect src = { ch * 16, 0, 16, 16 };
 		SDL_Rect dst = { x, y, 16 * scale, 16 * scale };
 		SDL_RenderCopy(P.renderer, font_tex, &src, &dst);
+		x += font_w[ch] * scale;
+	}
+}
+
+/* the atlas's texels times the text's colour, as SDL's blit modulates
+ * and blends them */
+static void raw_text(int x, int y, const char *s, SDL_Color c, int scale) {
+	for (; *s; ++s) {
+		unsigned char ch = (unsigned char)*s;
+		if ((ch < 32 && ch > 5) || ch >= 128) continue;
+		for (int ty = 0; ty < 16; ++ty)
+			for (int tx = 0; tx < 16; ++tx) {
+				uint32_t t = font_px[ty * 16 * 128 + ch * 16 + tx];
+				unsigned sa = (t >> 24) * c.a / 255;
+				if (!sa) continue;
+				unsigned sr = (t >> 16 & 0xFF) * c.r / 255, sg = (t >> 8 & 0xFF) * c.g / 255, sb = (t & 0xFF) * c.b / 255;
+				if (sa < 255) { sr = sr * sa / 255; sg = sg * sa / 255; sb = sb * sa / 255; }
+				for (int j = 0; j < scale; ++j)
+					for (int i = 0; i < scale; ++i) {
+						int px = x + tx * scale + i, py = y + ty * scale + j;
+						if (px < 0 || py < 0 || px >= raw.w || py >= raw.h) continue;
+						uint32_t *d = raw.px + py * raw.stride + px;
+						*d = sa == 255 ? sr << 24 | sg << 16 | sb << 8 | 255 : raw_blend(*d, sr, sg, sb, sa);
+					}
+			}
 		x += font_w[ch] * scale;
 	}
 }
@@ -467,6 +540,7 @@ void text_drawf(int x, int y, SDL_Color c, int align, const char *fmt, ...) {
 /* ------------------------------------------------------------------ */
 
 void fill_rect(int x, int y, int w, int h, SDL_Color c) {
+	if (raw.px) { raw_fill(x, y, w, h, c); return; }
 	SDL_SetRenderDrawBlendMode(P.renderer, c.a < 255 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
 	SDL_SetRenderDrawColor(P.renderer, c.r, c.g, c.b, c.a);
 	SDL_Rect r = { x, y, w, h };
@@ -475,6 +549,10 @@ void fill_rect(int x, int y, int w, int h, SDL_Color c) {
 
 void fill_rects(const SDL_Rect *r, int n, SDL_Color c) {
 	if (n <= 0) return;
+	if (raw.px) {
+		for (int i = 0; i < n; ++i) raw_fill(r[i].x, r[i].y, r[i].w, r[i].h, c);
+		return;
+	}
 	SDL_SetRenderDrawBlendMode(P.renderer, c.a < 255 ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
 	SDL_SetRenderDrawColor(P.renderer, c.r, c.g, c.b, c.a);
 	SDL_RenderFillRects(P.renderer, r, n);
