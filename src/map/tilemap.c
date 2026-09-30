@@ -76,6 +76,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 		malloc(cells * sizeof *p.look), calloc(cells, sizeof *p.mask), calloc(cells, 1), calloc(cells, 1) };
 	memset(map, 0, cells * 2 * sizeof *map);   /* (off the floor a tile keeps nothing) */
 	for (size_t i = 0; i < cells; ++i) p.look[i] = SEAM_ANY;
+	tiles_keep_begin(g, floor, ctx);
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) p.on[ty * tw + tx] = pick_one(&p, tx, ty);
 	TileStats first = tiles_stats;   /* (the passes below would count twice) */
@@ -120,6 +121,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	free(p.mask);
 	free(p.on);
 	free(p.off);
+	tiles_keep_end();
 }
 
 /* Where pieces stand apart, the floor in pieces: each piece (its TILE_APART

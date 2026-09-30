@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A layer is made in about a quarter less time (the wait at a new run's
+  start and at CONTINUE, 20 seconds on a 3DS): the tile pick keeps what it
+  asks of each pixel of the floor and of each tile it compares, where it
+  asked again a thousand times. The layers come out the same.
 - **MegaMan's words come on time** (issue #13). A new area's card and
   MegaMan's words about it are one beat: MegaMan holds still from his
   arrival until the words begin, as BN6 holds him for its own scenes, and

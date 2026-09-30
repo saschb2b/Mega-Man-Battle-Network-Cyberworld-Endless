@@ -174,6 +174,10 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
  * in tile (tx, ty): whether fa shows in front. A floor's top in front of the
  * other's side faces; where only faces meet, the floor lower on screen. */
 bool tiles_in_front(const TileGrid *g, int tx, int ty, TileFloor fa, const void *ca, TileFloor fb, const void *cb);
+/* From here to tiles_keep_end, what `floor` answers for grid g's pixels is
+ * kept per pixel: the floor must not change meanwhile (a map's pick). */
+void tiles_keep_begin(const TileGrid *g, TileFloor floor, const void *ctx);
+void tiles_keep_end(void);
 /* A panel's neighbourhood: its 3 x 3 panels' floors (bit k: panel
  * (A + k % 3 - 1, B + k / 3 - 1)) and whether it lies on a pad. */
 #define TILE_SHAPE(oa, ob, pad) ((uint32_t)(oa) << 10 | (uint32_t)(ob) << 1 | ((pad) ? 1u : 0u))
