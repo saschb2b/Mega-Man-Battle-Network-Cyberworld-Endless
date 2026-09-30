@@ -1142,3 +1142,47 @@ his own: the persona spent its budget searching and the report scored
 the missing climax. Before launching, check each goal's object is
 findable in the persona's save (the map and L name it) with a capture,
 and say in the goals where it stands when the build cannot.
+
+## Session 44: 8/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of run 2 on layer 5, the duel layer: ProtoMan found in two calls
+by his pink mark and L's "down and to the right, a ways off", the race
+won (0:13.28 against 0:14.00, the first win in six duels), the official
+gate opened for HeatDrgn G; layer 6's CircusMan deleted MegaMan with 118
+of his 700 HP left, and the run ended. From 7 to 8: the climax came, a
+rival won and a real boss fight lost; he wants one more run.
+
+Confirmed: the rival's wayfinding (bd75489: the gate beside him, his
+pink mark, L's direction), CONTINUE restarting the layer with Chaud's
+call, no Quakers in the race, the named prize pulling him into the duel,
+`hold B 120` for EraseCross's beam and the A after a chat's last box.
+
+Raised, fixed: CircusMan's tent tell, "when only our panel lights", is
+true but the panel lies under MegaMan's feet; the persona's own frames
+showed the cue that can be seen, CircusMan fading from his panel, and a
+HeatDrgn rising beside the tent while he was gone (01a0cc6: the briefing
+names the fade and says to hold chips). The NaviCust's L and R turn a
+program only where its colour's Spin is held, BN6's rule, while three of
+MegaMan's lines said they turn any: twenty calls on an HP+50 (5b93d76:
+the words come from the Spins held; after a RUN with a bug he answers
+its "OK"). Lan silent after the first win (44d93b1). The official Chip
+Order's names alone (364b9db: each chip's damage in the choice). Fixed
+beside them, from issue #17 and its testing: a bought-out shop says so
+and the vendor brings his whole list (a9d7ecd), CONTINUE no longer
+restocks the shops (c1ed95d), Chaud's call comes once a layer (a8c6659).
+Vanilla or misread: BN6's RUN wording itself, the Cross portrait eating
+a press and START lost after a shop (both into persona.md), BlastMan's
+fire wall under a jumping CircusMan, an L at 95% (the 30-frame note).
+
+Cost: 301 calls, 83 minutes; the CircusMan fight alone 74 calls and 26
+minutes at 48 frames a call, the NaviCust 20. The watchdog named an old
+9999.png as the latest picture all session, as a name sort puts 11969
+before it (0cb6208: by time); a budget SendMessage at 293 closed it.
+
+Loop change: **read the persona's frames at a reported tell before
+the code.** The report said the tent's tell could not be seen; the
+frames around each tent showed which cue hides (the lit panel under
+MegaMan) and which shows (the fade), and the fix followed from them in
+one step. The class is a briefing that names a panel under MegaMan's own
+sprite: sweep every guardian's tip for one (GroundMan's "from under the
+lit panel", HeatMan's shadow "under us") against its fight's frames.
