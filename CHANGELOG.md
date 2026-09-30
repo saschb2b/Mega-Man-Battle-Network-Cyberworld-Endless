@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A guardian's reward is taken once.** B at the Guardian Data's program
+  choice gives the BugFrags it promises and takes the reward: it had
+  ended the talk with nothing given and left the Guardian Data there, and
+  every talk after gave its HPMemory and the Navi's chip again (a player
+  on Android had six ClownMan chips and 1000 HP by layer 7, issue #16).
+  B at the way on after an act's guardian says the way it takes, and at a
+  vault or an official gate it leaves the chips with a word.
 - **The downloads have a page of their own**, `/download/`, where the
   home page's `#play` held them beside a player at `/play/`: old links to
   `#play` open it, and a system in its address opens on that system

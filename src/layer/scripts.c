@@ -257,6 +257,20 @@ static void jump(TextArchive *t, int to) {
 	ta_bytes(t, b, sizeof b);
 }
 
+/* BN6's choice (ts_select) among the `n` options just written in a
+ * column: the box cleared, a script for each option, and B its own
+ * (0xA0), which reads none of them but goes on past the choice (bn6f
+ * chatbox_ED_select): here to `b`, the script B means. (Once written with
+ * B's script among the options', its press ran past the choice to the
+ * talk's end: a Guardian Data's B gave no BugFrags nor marked its reward
+ * taken, and it gave its HPMemory and chip again at every talk, issue 16) */
+static void choose(TextArchive *t, const int *scripts, int n, int b) {
+	uint8_t select[6] = { 0xED, (uint8_t)(3 + n), 0xA0 };
+	for (int k = 0; k < n; ++k) select[3 + k] = (uint8_t)scripts[k];
+	ta_bytes(t, select, 3 + n);
+	jump(t, b);
+}
+
 /* A script's end: the way on's question next, where there is one (`next`
  * its script), else the chat's end. */
 static void end_or(TextArchive *t, int next) {
@@ -290,14 +304,7 @@ static int route_scripts(TextArchive *t, const ScriptsRoute *r) {
 		ta_text(t, r->option[k]);
 		if (k + 1 < n) ta_text(t, "\n");
 	}
-	if (n == 3) {
-		uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[2], (uint8_t)way[0] };
-		ta_bytes(t, select, sizeof select);
-	} else {
-		uint8_t select[] = { 0xED, 0x06, 0xA0, (uint8_t)way[0], (uint8_t)way[1], (uint8_t)way[0] };
-		ta_bytes(t, select, sizeof select);
-	}
-	ta_end(t);
+	choose(t, way, n, way[0]);
 	return q;
 }
 
@@ -392,19 +399,18 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	ta_page(t, FACE_MEGAMAN, none, false);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
-	/* three in a column (ts_option), as the gift's; ts_select: clear, B its
-	 * own choice (0xA0), a script per option and one for B */
-	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
+	/* in a column, as many as the draft holds (ts_option: its number and
+	 * those above and below it); B takes none */
+	static const uint8_t around[3][3] = { { 0x00 }, { 0x11, 0x00 }, { 0x21, 0x02, 0x10 } };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
 	for (int k = 0; k < n; ++k) {
-		ta_bytes(t, opt[k], 4);
+		uint8_t opt[] = { 0xEB, 0x00, (uint8_t)(k * 0x11), around[n - 1][k] };
+		ta_bytes(t, opt, sizeof opt);
 		ta_bytes(t, space, sizeof space);
 		program_name(t, draft->program[k]);
 		if (k + 1 < n) ta_text(t, "\n");
 	}
-	uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)take[0], (uint8_t)take[1], (uint8_t)take[2], (uint8_t)skip };
-	ta_bytes(t, select, sizeof select);
-	ta_end(t);
+	choose(t, take, n, skip);
 	return i;
 }
 
@@ -491,9 +497,7 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 		snprintf(s, sizeof s, "%s %c%s", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k], k < 2 ? "\n" : "");
 		ta_text(t, s);
 	}
-	uint8_t select[] = { 0xED, 0x07, 0xA0, (uint8_t)take[0], (uint8_t)take[1], (uint8_t)take[2], (uint8_t)leave };
-	ta_bytes(t, select, sizeof select);
-	ta_end(t);
+	choose(t, take, 3, leave);
 	return i;
 }
 
