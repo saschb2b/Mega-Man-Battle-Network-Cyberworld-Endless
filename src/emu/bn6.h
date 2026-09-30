@@ -39,6 +39,7 @@
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
 
 #define BN6_ENGINE_MARK       0x0203FFF0u /* past everything the game uses: the engine's stubs signal here */
+#define BN6_ENGINE_RET        0x0203FFF4u /* and the call stub leaves the routine's r0, r1 here */
 /* A map's tile map decompresses to 0x02013A00 (12-byte header, then the
  * entries) and its coordinate data to 0x02027A00, which the game reads in
  * place: the raw entries may take up to here, not a byte more. */
@@ -124,10 +125,20 @@
 #define BN6_TRADER_POOLS      0x0804CDE0u /* 5 x (map key, chip list, rarity weights): prizes by the trader's map */
 #define BN6_TRADER_KINDS      0x0809B7E4u /* 6 x (map key, u8 trader script): which lines the trade screen shows */
 #define BN6_TRADER_MODES      0x0804BDCCu /* 2 weights: the prize one the Library has (192) or a new one (64) */
+/* the BugFrag Trader's trade, which BN6's trader machine makes on the
+ * Undernet's map (bn6f sub_809A078; director.c bugfrag_trade) */
+#define BN6_TRADER_STATE      0x0200AC80u /* eS200AC80: +4 the prize's chip, +6 its code (u16) */
+#define BN6_TRADER_RESET      0x0804B0ADu /* bn6f sub_804A2E8: clears the trade's state and the submenu's */
+#define BN6_TRADER_PRIZE      0x0804CAC5u /* bn6f sub_804BD00: a prize from the map's pool, r0 its chip, r1 its code */
+#define BN6_GIVE_CHIPS        0x08021AEFu /* GiveChips (chip, code, count) */
+#define BN6_TAKE_BUGFRAGS     0x0803D09Du /* TakeBugfrags (count) */
+#define BN6_SAVE_GAME         0x0803F76Du /* bn6f sub_803F798: the game saved to the cartridge, as after every trade */
+#define BN6_FLAG_TRADER_HOWL  0xF6        /* EVENT_F6: the machine's howl, set by the trade's script; the machine clears it */
 
 /* ROM code */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */
 #define BN6_CHAT_RUN_SCRIPT   0x08040359u /* chatbox_runScript (archive, script index) */
+#define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags) */
 #define BN6_WARP_DEPART_JACK_OUT 0x080059B5u /* warp departure 8: the jack-out cutscene, then warp */
 #define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: the engine borrows it for a frame */
 

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The BugFrag Trader trades** (issue #12). After Yes its chat held for
+  good: BN6's trade is made by the Undernet's trader machine, which a
+  layer's trader stands without. The director now makes it as the machine
+  does: the prize from the game's own BugFrag pool, ten BugFrags taken,
+  the game's lines for the hand-over and the prize, then "Try again?". No,
+  to either question, ends the chat, where MegaMan had walked on with it
+  open and the PET shut.
 - **Chaud's prize stands beside the duel.** Every act's duel layer holds a
   sealed official gate beside ProtoMan (an official Chip Order in the first
   two acts, the official vault from the third), and Chaud's call says so.

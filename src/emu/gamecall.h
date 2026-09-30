@@ -9,6 +9,10 @@
  * game mode (up to 120 frames); false when it never ran. */
 bool game_call(uint32_t fn, uint32_t r0, uint32_t r1);
 
+/* game_call with r2 too; `out` (may be NULL) gets the routine's r0 and r1
+ * as it returned. */
+bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t out[2]);
+
 /* Warps MegaMan to map (group, number) at world (x, y) at once, through the
  * game's own warp routine; `facing` is the overworld direction. */
 void emu_warp(int group, int number, int x, int y, int facing);

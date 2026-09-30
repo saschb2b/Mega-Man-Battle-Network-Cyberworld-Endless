@@ -13,18 +13,21 @@
 #define WARP_DATA (EMU_FREE + 0x000)  /* a warp record and a one-entry warp list */
 #define CALL_STUB (EMU_FREE + 0x100)
 
-bool game_call(uint32_t fn, uint32_t r0, uint32_t r1) {
-	/* push {r4-r7,lr}; ldr r2,=mark; movs r3,#1; strb r3,[r2]; ldr r0,=a0;
-	 * ldr r1,=a1; ldr r3,=fn; bl 1f; pop {r4-r7,pc}; 1: bx r3; then
-	 * mark, a0, a1, fn */
-	uint8_t stub[40] = {
-		0xF0, 0xB5, 0x05, 0x4A, 0x01, 0x23, 0x13, 0x70, 0x04, 0x48, 0x05, 0x49,
-		0x05, 0x4B, 0x00, 0xF0, 0x01, 0xF8, 0xF0, 0xBD, 0x18, 0x47, 0x00, 0x00,
+bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t out[2]) {
+	/* push {r4-r7,lr}; ldr r4,=mark; movs r3,#1; strb r3,[r4]; ldr r0,=a0;
+	 * ldr r1,=a1; ldr r2,=a2; ldr r3,=fn; bl 1f; ldr r4,=out; str r0,[r4];
+	 * str r1,[r4,#4]; pop {r4-r7,pc}; 1: bx r3; then mark, a0, a1, a2, fn,
+	 * out */
+	uint8_t stub[56] = {
+		0xF0, 0xB5, 0x07, 0x4C, 0x01, 0x23, 0x23, 0x70, 0x06, 0x48, 0x07, 0x49, 0x07, 0x4A, 0x08, 0x4B,
+		0x00, 0xF0, 0x04, 0xF8, 0x07, 0x4C, 0x20, 0x60, 0x61, 0x60, 0xF0, 0xBD, 0x18, 0x47, 0xC0, 0x46,
 	};
-	put32(stub + 24, BN6_ENGINE_MARK);
-	put32(stub + 28, r0);
-	put32(stub + 32, r1);
-	put32(stub + 36, fn);
+	put32(stub + 32, BN6_ENGINE_MARK);
+	put32(stub + 36, r0);
+	put32(stub + 40, r1);
+	put32(stub + 44, r2);
+	put32(stub + 48, fn);
+	put32(stub + 52, BN6_ENGINE_RET);
 	emu_write(CALL_STUB, stub, sizeof stub);
 	/* the hook: ldr r0,[pc]; bx r0; .word stub+1 */
 	uint8_t saved[8], jump[8] = { 0x00, 0x48, 0x00, 0x47 };
@@ -34,8 +37,14 @@ bool game_call(uint32_t fn, uint32_t r0, uint32_t r1) {
 	emu_write(BN6_OW_HOOK, jump, sizeof jump);
 	for (int i = 0; i < 120 && !emu_read8(BN6_ENGINE_MARK); ++i) emu_frame(0);
 	emu_write(BN6_OW_HOOK, saved, sizeof saved);
+	if (out) {
+		out[0] = emu_read32(BN6_ENGINE_RET);
+		out[1] = emu_read32(BN6_ENGINE_RET + 4);
+	}
 	return emu_read8(BN6_ENGINE_MARK) != 0;
 }
+
+bool game_call(uint32_t fn, uint32_t r0, uint32_t r1) { return game_call_ret(fn, r0, r1, 0, NULL); }
 
 /* the game starts a map's song only when it is not the one it last started:
  * after the intro, or a state whose song had stopped, forget it */

@@ -17,6 +17,7 @@
 #include "autopilot.h"
 #include "boss.h"
 #include "chip_pool.h"
+#include "bytes.h"
 #include "cinema.h"
 #include "data.h"
 #include "emu.h"
@@ -50,6 +51,7 @@
 #include "scripts.h"
 #include "shop.h"
 #include "talk.h"
+#include "trader.h"
 #include "text.h"
 #include "town.h"
 
@@ -1889,6 +1891,52 @@ static void bug_watch(void) {
 		memcpy(D.bugs, now, sizeof now);
 }
 
+/* A BugFrag Trader's trade (issue #12). After Yes, BN6's script holds
+ * (ts_wait_hold) for the trader machine on the Undernet's map, which rolls
+ * the prize, gives it, takes the ten BugFrags, saves and runs the script
+ * that shows it (bn6f sub_809A078); after No it closes the box and holds
+ * for the machine's scene to end the chat. A layer's trader stands without
+ * the machine: its chat held for good after Yes, and after No MegaMan
+ * walked with the chat still open, the PET shut. The director does what
+ * the machine does where the chat holds. */
+static void bugfrag_trade(void) {
+	static bool howl;
+	if (!emu_read8(BN6_CHATBOX)) {
+		/* (the machine clears its howl as it shows the prize) */
+		if (howl) flag_clear(BN6_FLAG_TRADER_HOWL);
+		howl = false;
+		return;
+	}
+	uint32_t f = emu_read32(BN6_CHATBOX_FLAGS);
+	if (D.objs.trader_kind != TRADER_BUGFRAG || !(f & 0x80) || !(f & 0x08) ||
+	    emu_read32(BN6_CHATBOX + 0x30) != BN6_TRADER_TEXT) return;
+	/* (after No the box is closed: the chat ends as the Chip Trader's No
+	 * ends it, with its script 5, a bare end) */
+	if (f & 7) { game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, 5); return; }
+	uint32_t prize[2];
+	game_call(BN6_TRADER_RESET, 0, 0);
+	if (!game_call_ret(BN6_TRADER_PRIZE, 0, 0, 0, prize)) return;
+	uint16_t chip = (uint16_t)prize[0], code = (uint16_t)prize[1];
+	uint8_t v[4];
+	put16(v, chip);
+	put16(v + 2, code);
+	emu_write(BN6_TRADER_STATE + 4, v, 4);
+	game_call_ret(BN6_GIVE_CHIPS, chip, code, 1, NULL);
+	game_call(BN6_TAKE_BUGFRAGS, 10, 0);
+	/* (the map saved on) */
+	put16(v, emu_read16(BN6_GAMESTATE + 4));
+	emu_write(BN6_GAMESTATE + 0x0C, v, 2);
+	game_call(BN6_SAVE_GAME, 0, 0);
+	/* (the script names the prize from the chat box's two words) */
+	emu_write32(BN6_CHATBOX + 0x4C, chip);
+	emu_write32(BN6_CHATBOX + 0x50, code);
+	game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, 15);
+	memset(v, 0, sizeof v);
+	emu_write(BN6_TRADER_STATE + 4, v, 4);
+	emu_write(BN6_TRADER_STATE + 0x30, v, 2);
+	howl = true;
+}
+
 /* MegaMan pushing a while where the pad goes nowhere (a platform's
  * corner, a lane's end, with no walkway in reach to line him up with):
  * the way-on arrow shows along the floor, as after L's words. */
@@ -2284,7 +2332,7 @@ static void dev_talks(void) {
 	static const struct { const char *name; int type; } kinds[] = {
 		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
 		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "duel", OBJ_DUEL }, { "official", OBJ_OFFICIAL }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
-		{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT },
+		{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT }, { "trader", OBJ_TRADER }, { "bugtrader", OBJ_BUGTRADER },
 	};
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", director_dev_talks);
@@ -2303,6 +2351,15 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
+		/* (a BugFrag Trader's trade wants ten: fifty given, no chat) */
+		else if (!strcmp(name, "bugfrags")) { game_call(BN6_GIVE_BUGFRAGS, 50, 0); return; }
+		/* (a trader talks from the game's own trader archive) */
+		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
+			int k = D.objs.trader_kind;
+			if (k < 0 || (k == TRADER_BUGFRAG) != !strcmp(name, "bugtrader")) { printf("--talk: no %s on this layer\n", name); continue; }
+			game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, (uint32_t)k);
+			return;
+		}
 		if (script < 0) { printf("--talk: no %s on this layer\n", name); continue; }
 		game_call(BN6_CHAT_RUN_SCRIPT, D.objs.archive, (uint32_t)script);
 		return;   /* (one a frame: the chat box opens on the next) */
@@ -2468,7 +2525,7 @@ void director_update(void) {
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
 	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); spin_watch(); grant_spins(); }
+	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

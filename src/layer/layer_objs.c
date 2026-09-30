@@ -233,6 +233,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i <= OBJ_OFFICIAL; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
+	out->trader_kind = -1;
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
@@ -356,6 +357,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			TraderKind kind = o->type == OBJ_BUGTRADER ? TRADER_BUGFRAG
 				: (run.depth - 1) % CYCLE_LAYERS >= SPECIAL_FROM && run.layer_seed % 100 < SPECIAL_CHANCE ? TRADER_SPECIAL : TRADER_CHIPS;
 			trader_install(group, number, kind, run.depth);
+			out->trader_kind = kind;
 			tk.cat = 7; tk.sprite = SPR_CHIP_TRADER;
 			tk.archive = BN6_TRADER_TEXT;
 			tk.script = kind;
