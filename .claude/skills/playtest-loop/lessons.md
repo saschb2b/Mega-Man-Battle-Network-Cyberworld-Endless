@@ -1071,3 +1071,35 @@ Patch notes now come from `git log` from the pinned commit, which
 pin.sh prints, and the goals say on which layer the persona's save meets
 each headline. The AreaGrab misread, seen twice, went into persona.md.
 
+## Session 42: 8/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of run 2 through BlastMan's act (a planned win after his
+briefing, 8-0) into act 2 (Sky HP, CircusMan's), ProtoMan's fifth duel
+lost (0-4, a Quaker and a Gunner), 400 max HP. From 7 to 8: the guardian
+fight played out as the briefing said, and the act change reads as one
+moment.
+
+Confirmed: the shop's first "Are you sure?" on No (A paced 66 frames
+through the dealer's talk), the act card and words held as one beat,
+Chaud's call naming the gate, no chip description from a kept R, layers
+made without a felt pause.
+
+Raised, fixed after the pin: Quakers in race squads (87cc31c, before the
+report), official gates never saying what they hold (f714f93). Misread,
+caused by the patch notes: "a gift you took stays taken" read as a gift
+taken after the layer's start save; CONTINUE resumes at the save. Open:
+one paid rematch per act (a loss locks the act's gates; a design
+question), the NaviCust's double quit, mail NEW after CONTINUE, a pad's
+green ring read as the exit pad. Misreads: the Custom screen's cursor
+after choosing the Cross (the second session: into persona.md), a charge
+started under a chip's finish, AreaGrab again (as told).
+
+Cost: 251 calls; the agent stalled once on the harness side at 159 calls
+and was resumed with its context.
+
+Loop change: **patch notes say what a save keeps, not what the code
+keeps.** "A gift you took stays taken" was true of the code (a guardian
+beaten or a gift taken before the save) and false for the persona's save,
+made at the layer's start: say where the persona's CONTINUE resumes and
+what it will meet again.
+
