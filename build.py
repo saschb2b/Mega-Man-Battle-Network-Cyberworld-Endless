@@ -141,7 +141,7 @@ def build(target):
 
 def web_release():
     """build/release/cyberworld-endless-web.zip: the site, to serve anywhere."""
-    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld-endless-web'), 'zip', site())
+    archive = shutil.make_archive(os.path.join(RELEASE, 'cyberworld-endless-web'), 'zip', site(analytics=False))
     print('released', archive)
 
 
@@ -444,11 +444,20 @@ def deb():
     print('released', out)
 
 
-def site():
-    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it."""
+def site(analytics=True):
+    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it;
+    without the pages' visit counter (Umami, counting on the project's own domain only) for a copy to
+    host elsewhere."""
     out = os.path.join(ROOT, 'build', 'site')
     shutil.rmtree(out, ignore_errors=True)
     shutil.copytree(os.path.join(ROOT, 'web'), out)
+    if not analytics:
+        import glob
+        for page in glob.glob(os.path.join(out, '**', '*.html'), recursive=True):
+            with open(page) as f:
+                lines = f.readlines()
+            with open(page, 'w') as f:
+                f.writelines(l for l in lines if 'umami.saschb2b.com' not in l)
     shutil.copytree(os.path.join(ROOT, 'docs', 'screenshots'), os.path.join(out, 'shots'))
     if os.path.isdir(os.path.join(ROOT, 'docs', 'clips')):
         shutil.copytree(os.path.join(ROOT, 'docs', 'clips'), os.path.join(out, 'clips'))
