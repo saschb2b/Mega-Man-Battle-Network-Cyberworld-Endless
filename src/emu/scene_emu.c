@@ -156,6 +156,7 @@ static void draw(void) {
 	cinema_draw();
 	director_draw_map();
 	director_draw_duel();
+	director_draw_tent();
 	devtools_draw();
 }
 

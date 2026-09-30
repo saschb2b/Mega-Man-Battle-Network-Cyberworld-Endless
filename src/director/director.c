@@ -712,7 +712,36 @@ static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_
  * drawn, and a read of the game then waits for it (the bottom screen's map
  * took 14 ms so, a frame lost six times a second; the duel's clock every
  * frame of its battle). */
-static struct { int px, py; bool on_map, battle; uint32_t timer; } seen;
+static struct { int px, py; bool on_map, battle; uint32_t timer; int tent_x, tent_y; } seen;
+
+/* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
+ * lights the panel MegaMan stands on for a few frames, under his feet,
+ * and drops the tent there; a step off it begun within 32 frames clears
+ * it, and 36 frames in he is held (measured in god mode, a step at each
+ * delay: the fade the briefing named came 6 frames before the hold, and a
+ * playtester lost to him five times). The panel is marked over the picture
+ * for those 36 frames of the battle's clock (it holds on the Custom
+ * screen). */
+#define TENT_ACTION 0x0C
+#define TENT_FRAMES 36
+static void see_tent(void) {
+	static bool on;
+	static uint32_t start;
+	static int tx, ty;
+	seen.tent_x = seen.tent_y = 0;
+	if (!seen.battle || !boss_fighting() || D.objs.guardian.navi != 14 /* (CircusMan) */) { on = false; return; }
+	int act = -1, mx = 0, my = 0, most = 0;
+	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		if (!(emu_read8(o) & 1)) continue;
+		/* (MegaMan's panel, and the side's biggest: CircusMan, not his lion) */
+		if (emu_read8(o + 0x16) == 0 && emu_read8(o + 0x12)) { mx = emu_read8(o + 0x12); my = emu_read8(o + 0x13); }
+		else if (emu_read8(o + 0x16) == 1 && emu_read16(o + 0x26) > most) { most = emu_read16(o + 0x26); act = emu_read8(o + 0x09); }
+	}
+	if (act != TENT_ACTION) { on = false; return; }
+	if (!on) { on = true; start = seen.timer; tx = mx; ty = my; }
+	if (seen.timer - start < TENT_FRAMES) { seen.tent_x = tx; seen.tent_y = ty; }
+}
 
 void director_see(void) {
 	seen.px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16;
@@ -720,6 +749,21 @@ void director_see(void) {
 	seen.on_map = on_map();
 	seen.battle = emu_read8(BN6_GAMESTATE) == BN6_SUB_BATTLE;
 	seen.timer = emu_read32(BN6_BATTLE_TIMER);
+	see_tent();
+}
+
+/* The panel BN6 lights under MegaMan's feet, marked over his sprite: a
+ * panel of the field (40 by 24, its first row 72 down the picture) in the
+ * game's warning yellow, steady. */
+void director_draw_tent(void) {
+	if (!seen.tent_x) return;
+	int x = P.core_x + (seen.tent_x - 1) * 40, y = P.core_y + 72 + (seen.tent_y - 1) * 24;
+	SDL_Color c = rgba(255, 232, 0, 255);
+	fill_rect(x + 2, y + 2, 36, 20, rgba(255, 232, 0, 96));
+	fill_rect(x, y, 40, 2, c);
+	fill_rect(x, y + 22, 40, 2, c);
+	fill_rect(x, y + 2, 2, 20, c);
+	fill_rect(x + 38, y + 2, 2, 20, c);
 }
 
 static int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }

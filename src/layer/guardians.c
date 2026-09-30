@@ -72,12 +72,14 @@ const char *guardian_tip(int navi) {
 		"Step off the yellow panels!|@M He hovers still while he throws his bombs: strike then!";
 	case 13: return "DiveMan moves unseen under the water: hold our chips until he surfaces, then strike! "
 		"When his wave lights our panels, stand in our back column. His torpedoes run in their shadows' row.";
-	/* (watched: the panel under MegaMan lights, which his feet hide, then
-	 * CircusMan fades from his panel and the tent drops there; a chip used
-	 * while he is away finds no target, and a playtester's HeatDrgn rose
-	 * beside the tent as it deleted him) */
+	/* (watched: the panel under MegaMan lights for a few frames, which his
+	 * feet hide, then CircusMan fades from his panel and the tent drops
+	 * there; his fade came 6 frames before MegaMan was held, so the panel,
+	 * marked over MegaMan by the director, is the tell. A chip used while
+	 * he is away finds no target, and a playtester's HeatDrgn rose beside
+	 * the tent as it deleted him) */
 	case 14: return "CircusMan claps down on a lit column, and his lion leaps through a burning hoop down its row. "
-		"When he fades from his panel, his tent drops where we stand: step off it at once!|@M He keeps to the back: "
+		"When the panel under us lights up, his tent is about to drop on it: step off at once!|@M He keeps to the back: "
 		"bring chips that reach it, and hold them while he's gone from the field!";
 	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!|@M He stands right in front of us while he cracks his whip: swing then!";
 	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "

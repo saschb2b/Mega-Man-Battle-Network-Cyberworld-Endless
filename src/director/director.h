@@ -25,6 +25,9 @@ void director_draw_map(void);
 bool director_draw_second_screen(int w, int h);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);
+/* CircusMan's tent: the panel BN6 lights under MegaMan's feet, where it
+ * drops, marked over his sprite while a step can still clear it. */
+void director_draw_tent(void);
 /* Quitting on a layer's map, free to move: the run is saved there
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);

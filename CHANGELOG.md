@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **CircusMan's tent shows where it drops.** As his tent comes, BN6
+  lights the panel MegaMan stands on for a few frames, under his feet,
+  where no one can see it, and a playtester lost to him five times. A
+  step off that panel within half a second clears the tent; after that
+  MegaMan is held in it, and CircusMan's fade, which the briefing named,
+  shows only a tenth of a second before. The panel is now marked in
+  warning yellow over MegaMan for that half second, and his briefing
+  names it: "When the panel under us lights up, his tent is about to
+  drop on it: step off at once!"
+
 ## 0.5.3 (2026-10-01)
 
 - **A duel with ProtoMan counts once.** Quitting after a duel and
