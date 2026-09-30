@@ -11,6 +11,11 @@
   others load, and each copy checked, the Undernet needs 61 MB at most,
   and the Nest 58, where they had needed 98 and 86 before the 3DS's own
   16 MB copy of the ROM. Every platform saves the memory.
+- **The 3DS's bottom-screen map is lighter to draw.** It is drawn
+  straight into the memory the GPU copies from, and the GPU draws that
+  screen again only when the map changes. 0.5.0 drew it through the
+  software renderer and read it back, 20 ms each time: a frame lost six
+  times a second on the net, in a New 3DS's frame log.
 - **The arrow leads to a walkway's mouth.** Where the way on enters a
   walkway a few panels ahead and MegaMan stands off its line, the arrow
   points along the floor to the panel it starts from, then down the
