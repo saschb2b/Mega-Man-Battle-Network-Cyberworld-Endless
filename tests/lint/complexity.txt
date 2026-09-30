@@ -22,7 +22,6 @@ src/director/director.c:last_stop 30 28
 src/director/director.c:status_words 93 155
 src/director/pet_text.c:report_text 31 32
 src/emu/autopilot.c:autopilot_keys 40 62
-src/gfx/gfx.c:build_frame 31 72
 src/gfx/gfx.c:text_code 30 30
 src/gfx/minifont.c:minifont_glyph 57 60
 src/layer/guardian_objs.c:guardian_scripts 46 109

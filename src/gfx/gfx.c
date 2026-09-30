@@ -91,6 +91,33 @@ static const uint8_t obj_dims[3][4][2] = {
 	{ { 8, 16 }, { 8, 32 }, { 16, 32 }, { 32, 64 } },
 };
 
+/* One OBJ's tiles into a frame's pixels (W wide) at (x, y), turned as it
+ * says, in palette pl (NULL: white). */
+static void blit_obj(uint32_t *px, int W, const uint8_t *o, int x, int y, const uint8_t *tiles, uint32_t tiles_len, const uint8_t *pl) {
+	int shape = o[4] & 3, size = o[3] & 3;
+	int w = obj_dims[shape][size][0], h = obj_dims[shape][size][1];
+	bool hf = o[3] & 0x40, vf = o[3] & 0x80;
+	int tw = w / 8;
+	for (int ty = 0; ty < h / 8; ++ty) {
+		for (int tx = 0; tx < tw; ++tx) {
+			uint32_t t = o[0] + ty * tw + tx;
+			if ((t + 1) * 32 > tiles_len) continue;
+			const uint8_t *td = tiles + t * 32;
+			for (int py = 0; py < 8; ++py) {
+				for (int pxl = 0; pxl < 8; ++pxl) {
+					uint8_t v = td[py * 4 + pxl / 2];
+					int ci = (pxl & 1) ? v >> 4 : v & 15;
+					if (!ci) continue;
+					int X = tx * 8 + pxl, Y = ty * 8 + py;
+					if (hf) X = w - 1 - X;
+					if (vf) Y = h - 1 - Y;
+					px[(y + Y) * W + x + X] = !pl ? 0xFFFFFFFFu : bgr555((uint16_t)(pl[ci * 2] | pl[ci * 2 + 1] << 8));
+				}
+			}
+		}
+	}
+}
+
 static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) {
 	const uint8_t *b = s->base;
 	const uint8_t *tiles = b + le32(f);
@@ -119,42 +146,22 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 		if (y + h > maxy) maxy = y + h;
 	}
 	CachedFrame *cf = calloc(1, sizeof *cf);
+	if (!cf) return NULL;
 	cf->frame_off = (uint32_t)(f - b);
 	cf->pal = pal;
 	cf->part = part;
 	if (!count || maxx <= minx) { cf->w = cf->h = 0; return cf; }
 	int W = maxx - minx, H = maxy - miny;
 	uint32_t *px = calloc((size_t)W * H, 4);
+	if (!px) { cf->w = cf->h = 0; return cf; }   /* (drawn as nothing, as an empty frame) */
 	int banks = (int)(pal_len / 32);
 	if (banks < 1) banks = 1;
 	int k = 0;
 	for (const uint8_t *o = obj; !(o[0] == 0xFF && o[1] == 0xFF); o += 5, ++k) {
-		int shape = o[4] & 3, size = o[3] & 3;
-		if (shape > 2 || (part && k != part - 1)) continue;
-		int x = (int8_t)o[1] - minx, y = (int8_t)o[2] - miny;
-		int w = obj_dims[shape][size][0], h = obj_dims[shape][size][1];
-		bool hf = o[3] & 0x40, vf = o[3] & 0x80;
+		if ((o[4] & 3) > 2 || (part && k != part - 1)) continue;
 		int bank = ((o[4] >> 4) + pal) % banks;
 		const uint8_t *pl = pal >= SPRITE_ROM_PAL && pal != SPRITE_WHITE ? R.data + (pal - SPRITE_ROM_PAL) : pals + bank * 32;
-		int tw = w / 8;
-		for (int ty = 0; ty < h / 8; ++ty) {
-			for (int tx = 0; tx < tw; ++tx) {
-				uint32_t t = o[0] + ty * tw + tx;
-				if ((t + 1) * 32 > tiles_len) continue;
-				const uint8_t *td = tiles + t * 32;
-				for (int py = 0; py < 8; ++py) {
-					for (int pxl = 0; pxl < 8; ++pxl) {
-						uint8_t v = td[py * 4 + pxl / 2];
-						int ci = (pxl & 1) ? v >> 4 : v & 15;
-						if (!ci) continue;
-						int X = tx * 8 + pxl, Y = ty * 8 + py;
-						if (hf) X = w - 1 - X;
-						if (vf) Y = h - 1 - Y;
-						px[(y + Y) * W + x + X] = pal == SPRITE_WHITE ? 0xFFFFFFFFu : bgr555((uint16_t)(pl[ci * 2] | pl[ci * 2 + 1] << 8));
-					}
-				}
-			}
-		}
+		blit_obj(px, W, o, (int8_t)o[1] - minx, (int8_t)o[2] - miny, tiles, tiles_len, pal == SPRITE_WHITE ? NULL : pl);
 	}
 	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(px, W, H, 32, W * 4, SDL_PIXELFORMAT_ARGB8888);
 	cf->tex = SDL_CreateTextureFromSurface(P.renderer, surf);
@@ -172,6 +179,7 @@ static CachedFrame *get_frame_part(Sprite *s, int anim, int frame, int pal, int 
 	for (CachedFrame *c = s->cache; c; c = c->next)
 		if (c->frame_off == off && c->pal == pal && c->part == part) return c;
 	CachedFrame *c = build_frame(s, f, pal, part);
+	if (!c) return NULL;
 	c->next = s->cache;
 	s->cache = c;
 	return c;
