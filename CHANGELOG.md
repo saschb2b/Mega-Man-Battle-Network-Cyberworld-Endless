@@ -20,6 +20,7 @@
   only those of a colour whose Spin you hold, BN6's own rule. He had said
   L and R turn any program. After a RUN that leaves a bug, he says the
   RUN's "OK" hides it.
+- Lan answers Chaud after a duel won, as he did after every loss.
 - HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
   in official vaults or anywhere else. They are left over from the
   Japanese version: the US game has no HackJack, so using one made

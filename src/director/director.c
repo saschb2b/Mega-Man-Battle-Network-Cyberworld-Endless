@@ -2312,6 +2312,11 @@ static void duel_verdict(bool won) {
 	if (after > before && after == 1) ADD("@C You've earned my clearance, Lan. The net's official gates will open for you now.|");
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
+	/* (Lan answers a win too: a playtester's first, after five losses, met
+	 * silence where every loss had had his "Next time, Chaud!") */
+	if (beat) ADD("|@L %s", rung == 2 ? "Good battle, ProtoMan! See you next time, Chaud!"
+		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time, MegaMan! See you next time, Chaud!"
+		: "Yes! See you next time, Chaud!");
 	/* (and the gate beside the duel opens at once: the prize where it was
 	 * offered) */
 	bool opened = after > before && layer_objs_official_level && after >= layer_objs_official_level;
