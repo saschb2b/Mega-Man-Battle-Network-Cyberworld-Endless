@@ -12,6 +12,10 @@
   vendor had restocked everything bought on the layer before the save.
 - Chaud's call on a duel layer comes once: every CONTINUE there had
   played it again, after the duel too.
+- CircusMan's briefing names the tell that shows: he fades from his
+  panel, and his tent drops where MegaMan stands. The panel that lights
+  first is under MegaMan's feet, where a playtester never saw it in four
+  tents. Chips used while CircusMan is gone find nothing, and it says so.
 - HackJack's chips (HackJack, HackJck EX, HackJck SP) no longer turn up
   in official vaults or anywhere else. They are left over from the
   Japanese version: the US game has no HackJack, so using one made
