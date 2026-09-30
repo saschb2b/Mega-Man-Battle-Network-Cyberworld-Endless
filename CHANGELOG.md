@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The first "Are you sure?" in a shop its keeper's words opened starts on
+  No: an A carried over from the Net Dealer's words chose the list's first
+  row and bought it. A buy chosen after that starts on Yes, as in BN6.
 - **The BugFrag Trader trades** (issue #12). After Yes its chat held for
   good: BN6's trade is made by the Undernet's trader machine, which a
   layer's trader stands without. The director now makes it as the machine

@@ -1593,11 +1593,13 @@ static uint32_t talk_walk(uint32_t keys) {
 /* A shop's list opened by its keeper's last box: the A pressed to close
  * that box twice over bought the first item's "Are you sure?" (Kai, three
  * sessions running). */
+static bool shop_first;   /* a keeper's words opened the shop, and no "Are you sure?" has been asked in it */
 static uint32_t shop_guard(uint32_t keys) {
 	static int chat_recent, guard, last_mode = -1;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
-	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD, shop_first = true;
+	if (mode == BN6_MODE_GAME) shop_first = false;
 	last_mode = mode;
 	if (guard > 0) { --guard; keys &= ~KEY_A; }
 	return keys;
@@ -1605,11 +1607,20 @@ static uint32_t shop_guard(uint32_t keys) {
 
 /* A choice, BN6's or ours: a playtester's A's, pressed through a Net
  * Dealer's words, landed twice on the shop's "Are you sure? > Yes" (BN6's
- * default) and bought what he had not chosen. B still answers No. */
+ * default) and bought what he had not chosen. B still answers No. And the
+ * first "Are you sure?" in a shop its keeper's words opened starts on No:
+ * A's paced through the Net Dealer's five to eight boxes, 50 frames apart,
+ * still chose the list's first row and bought it (Kai, session 41). A
+ * press carried over from the words then cancels, where it had spent the
+ * zenny; a buy chosen after that starts on Yes, as BN6's do. */
 static uint32_t choice_guard(uint32_t keys) {
 	static int age;
 	bool choice = emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2;
 	age = choice ? age + 1 : 0;
+	if (choice && age == 1 && shop_first && main_mode() != BN6_MODE_GAME) {
+		shop_first = false;
+		emu_write8(BN6_CHATBOX_CURSOR, 1);
+	}
 	if (choice && age <= A_GUARD) keys &= ~KEY_A;
 	return keys;
 }
