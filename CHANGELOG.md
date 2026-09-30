@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The project page counts its visits with Umami, on its own domain only
+  and without cookies. The release's web zip, to host elsewhere, carries
+  no counter.
 - MegaMan beside a Net Dealer's counter, at its far end, is drawn behind
   it, as BN6 draws him: the counter keeps its original map's layer
   priorities there, where he had been drawn over it, as if standing on
