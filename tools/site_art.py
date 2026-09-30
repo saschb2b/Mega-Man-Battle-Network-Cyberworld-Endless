@@ -239,6 +239,20 @@ kkkkkkkkkkkk
 ..kskssssk..
 ..kssssssk..
 ..kkkkkkkk..""",
+    # a New 3DS, open: two screens over the hinge, the Circle Pad and A
+    '3ds': """
+.kkkkkkkkkk.
+.kssssssssk.
+.kskkkkkksk.
+.kskcbbbksk.
+.kskbbbbksk.
+.kskkkkkksk.
+.kkkkkkkkkk.
+.kssssssssk.
+.kyskkkksrk.
+.ksskcbkssk.
+.ksskkkkssk.
+.kkkkkkkkkk.""",
     # a phone: the Android app
     'phone': """
 ...kkkkkk...

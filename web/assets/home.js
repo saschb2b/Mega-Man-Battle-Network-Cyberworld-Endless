@@ -60,7 +60,7 @@
 // Godot and OBS pick theirs), its best build on top and the others under
 // it, with what to do next; without script every row shows ----
 
-const PLATFORMS = { windows: 'Windows', macos: 'macOS', linux: 'Linux', deck: 'Steam Deck', android: 'Android', handheld: 'Handhelds', browser: 'Browser', all: 'All' };
+const PLATFORMS = { windows: 'Windows', macos: 'macOS', linux: 'Linux', deck: 'Steam Deck', android: 'Android', handheld: 'Handhelds', '3ds': '3DS', browser: 'Browser', all: 'All' };
 
 // the visitor's system, as far as the browser says (a Steam Deck's desktop
 // browser says Linux; an iPhone or iPad has no build, so the browser)
@@ -177,5 +177,32 @@ function detectPlatform() {
 		}
 		a.closest('li').querySelector('.what').append(info);
 	}
+	// the 3DS title's link as a QR code, for FBI's Remote Install, which
+	// downloads a CIA and installs it on the HOME Menu
+	const cia = release.assets.find((x) => x.name === 'cyberworld-endless.cia');
+	const code = document.querySelector('#qr-3ds .code');
+	const modules = cia && code && typeof qr === 'function' ? qr(cia.browser_download_url) : null;
+	if (modules) code.replaceChildren(qrSvg(modules, `QR code of the 3DS title's link, ${release.tag_name}`));
 	document.dispatchEvent(new Event('release'));
 })();
+
+// A QR code's modules as an SVG, dark on white with its quiet zone.
+function qrSvg(modules, label) {
+	const ns = 'http://www.w3.org/2000/svg', n = modules.length + 8;
+	const svg = document.createElementNS(ns, 'svg');
+	svg.setAttribute('viewBox', `0 0 ${n} ${n}`);
+	svg.setAttribute('shape-rendering', 'crispEdges');
+	svg.setAttribute('role', 'img');
+	svg.setAttribute('aria-label', label);
+	const back = document.createElementNS(ns, 'rect');
+	back.setAttribute('width', n);
+	back.setAttribute('height', n);
+	back.setAttribute('fill', '#fff');
+	let d = '';
+	modules.forEach((row, y) => row.forEach((dark, x) => { if (dark) d += `M${x + 4} ${y + 4}h1v1h-1z`; }));
+	const path = document.createElementNS(ns, 'path');
+	path.setAttribute('d', d);
+	path.setAttribute('fill', '#000');
+	svg.append(back, path);
+	return svg;
+}

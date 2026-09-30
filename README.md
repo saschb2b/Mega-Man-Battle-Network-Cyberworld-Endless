@@ -22,6 +22,7 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 <img src="https://img.shields.io/badge/ROCKNIX-PortMaster-c0392b" alt="ROCKNIX handhelds through PortMaster">
 <img src="https://img.shields.io/badge/Linux-AppImage%20%C2%B7%20.deb-2f6fb5" alt="Linux: AppImage and .deb">
 <img src="https://img.shields.io/badge/browser-WebAssembly-6a4fb5" alt="In the browser, as WebAssembly">
+<img src="https://img.shields.io/badge/New%203DS-CIA%20%C2%B7%203DSX-d12228" alt="New 3DS: a CIA and a 3DSX">
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3a9d23" alt="MIT license"></a>
 </p>
 
@@ -62,9 +63,9 @@ around it, one layer at a time, and keeps the run going.
 It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
 Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays on
 Android phones, tablets and handhelds, in a window on a Linux or Windows PC or
-a Mac, and in a browser at
+a Mac, in a browser at
 [saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/),
-on a phone too.
+on a phone too, and on a New 3DS from its HOME Menu.
 
 ## What you need
 
@@ -72,7 +73,8 @@ on a phone too.
   x86-64 Linux PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35
   and later), a 64-bit Windows 10 or 11 PC, a Mac with macOS 11 or newer
   (Apple silicon or Intel), an Android 5 or newer phone, tablet or
-  handheld, or a current browser.
+  handheld, a New 3DS, New 3DS XL or New 2DS XL with custom firmware
+  (Luma3DS) and FBI, or a current browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
   `89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6`. Cybeast Falzar, other regions
@@ -216,6 +218,23 @@ own storage, beside your saves. A handheld's own controls, a Bluetooth or USB
 controller and the touch screen all work: the game draws touch controls
 round the picture until a controller's button is pressed, and Back asks
 before it quits. Uninstalling the app deletes its saves.
+
+### On a New 3DS
+
+On a New 3DS, New 3DS XL or New 2DS XL with custom firmware (Luma3DS),
+open **FBI**, choose **Remote Install**, then **Scan QR Code**, and scan the
+code in the 3DS tab of the
+[project's page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/#play):
+FBI downloads `cyberworld-endless.cia` from the newest release and installs
+it on the HOME Menu, with its icon and banner. Or copy the CIA to the SD
+card and install it from FBI's SD browser. `cyberworld-endless.3dsx` is the
+same game for the Homebrew Launcher (`sdmc:/3ds/`).
+
+Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
+keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
+name works. The first NEW GAME boots BN6 once, about 15 seconds of black
+screen. The older 3DS and 2DS are too slow for it.
+[3ds/README.md](3ds/README.md) has the rest.
 
 ### In a browser
 

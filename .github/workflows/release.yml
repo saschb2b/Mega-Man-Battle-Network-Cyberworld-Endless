@@ -1,8 +1,9 @@
 # A version tag (v1.0.0) builds the release files and publishes them as a
 # GitHub release: the PortMaster port, the Linux desktop build (AppImage with
 # its .zsync, .deb and tar.gz, and a Flatpak bundle), the Windows build (an
-# installer and a zip), the macOS app (a .dmg) and the browser build as a
-# site to serve anywhere.
+# installer and a zip), the macOS app (a .dmg), the Nintendo 3DS build (a
+# CIA for the HOME Menu and a .3dsx for the Homebrew Launcher) and the
+# browser build as a site to serve anywhere.
 # None holds game data.
 name: Release
 
@@ -92,8 +93,25 @@ jobs:
           path: build/release/cyberworld-endless.apk
           if-no-files-found: ignore
 
+  # the Nintendo 3DS build (3ds/README.md), in devkitPro's devkitARM
+  n3ds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.3ds, tag: cyberworld-3ds }
+      - run: python3 build.py 3ds
+      - uses: actions/upload-artifact@v4
+        with:
+          name: n3ds
+          path: |
+            build/3ds/cyberworld-endless.cia
+            build/3ds/cyberworld-endless.3dsx
+
   release:
-    needs: [flatpak, macos, android]
+    needs: [flatpak, macos, android, n3ds]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -119,6 +137,10 @@ jobs:
         with:
           name: macos
           path: build/release
+      - uses: actions/download-artifact@v4
+        with:
+          name: n3ds
+          path: build/release
       # (none when the release has no APK)
       - uses: actions/download-artifact@v4
         continue-on-error: true
@@ -130,7 +152,8 @@ jobs:
         run: |
           ls cyberworld.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
             cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-setup-x64.exe \
-            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless-web.zip \
+            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless.cia cyberworld-endless.3dsx \
+            cyberworld-endless-web.zip \
             2>/dev/null > FILES || true
           xargs sha256sum < FILES > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's

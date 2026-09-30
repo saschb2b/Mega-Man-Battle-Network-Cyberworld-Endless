@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Steam's library artwork for the game as a non-Steam shortcut: the
 portrait capsule, the wide capsule, the hero banner and the logo that sits
-on it (linux/steam/add-to-steam.py puts them in Steam's grid folder).
+on it (linux/steam/add-to-steam.py puts them in Steam's grid folder); and
+the 3DS HOME Menu's banner for the CIA (3ds/banner.png).
 
 Pixel art drawn from code, nothing from the ROM: the title's infinity mark
 and its CYBERWORLD ENDLESS lettering (the same shapes scene_title.c draws),
@@ -312,12 +313,23 @@ def logo():
     return im, 8
 
 
+def banner():
+    """256 x 128: the banner the 3DS HOME Menu shows over the game's icon
+    (base 128 x 64, 2x): the wide capsule's net under the wordmark."""
+    im = sky(128, 64)
+    net(im, 64, 30, [(-6, -1, 2, 2), (-4, 0, 3, 'u'), (-1, -1, 3, 3), (0, 2, 2, 'v'), (-1, 4, 2, 2),
+                     (3, -5, 2, 2), (4, -3, 3, 'v'), (4, 0, 2, 2), (6, 0, 2, 'u')], 4)
+    wordmark(im, 64, 26, 0.6, False)
+    return im, 2
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for name, make in (('capsule', capsule), ('wide', wide), ('hero', hero), ('logo', logo)):
+    for name, make, out in (('capsule', capsule, OUT), ('wide', wide, OUT), ('hero', hero, OUT), ('logo', logo, OUT),
+                            ('banner', banner, os.path.join(ROOT, '3ds'))):
         im, k = make()
         im = im.resize((im.width * k, im.height * k), Image.NEAREST)
-        path = os.path.join(OUT, name + '.png')
+        path = os.path.join(out, name + '.png')
         im.save(path, optimize=True)
         print(f'{path}: {im.width}x{im.height}')
 

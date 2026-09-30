@@ -126,15 +126,20 @@ jobs:
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.3ds, tag: cyberworld-3ds }
       - run: python3 build.py 3ds
-      - name: A .3dsx for the Homebrew Launcher
+      - name: A .3dsx for the Homebrew Launcher and a CIA for the HOME Menu
         run: |
           f=build/3ds/cyberworld-endless.3dsx
           test "$(head -c 4 "$f")" = 3DSX
-          ls -l "$f"
+          # (a CIA opens with its header's size, 0x2020)
+          c=build/3ds/cyberworld-endless.cia
+          test "$(head -c 4 "$c" | od -An -tx1 | tr -d ' ')" = 20200000
+          ls -l "$f" "$c"
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-3ds
-          path: build/3ds/cyberworld-endless.3dsx
+          path: |
+            build/3ds/cyberworld-endless.3dsx
+            build/3ds/cyberworld-endless.cia
           retention-days: 14
 
   android:

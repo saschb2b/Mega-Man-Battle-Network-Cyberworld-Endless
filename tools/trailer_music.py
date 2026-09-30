@@ -28,6 +28,9 @@ Undernet; a climb through III and bVI-bVII to the theme again under the
 logo; and the three hits once more, the last one major.
 
     python3 tools/trailer_music.py OUT.wav    (the music alone)
+    python3 tools/trailer_music.py OUT.wav --seconds 2.9 --rate 32728
+        (its start, faded out: the three hits, the run and the jack-in,
+        the 3DS HOME Menu banner's sound)
 """
 import math
 import random
@@ -654,8 +657,10 @@ def render_ds(events, S, n):
 
 # ---- the mix ----
 
-def render(path):
-    total = int((BARS * BAR / 60 + TAIL) * RATE)
+def render(path, seconds=None, rate=RATE):
+    """The music into the WAV at `path`; only its first `seconds`, faded out
+    over the last half second, where given, and resampled to `rate`."""
+    total = int((seconds or BARS * BAR / 60 + TAIL) * RATE)
     s = arrangement()
     parts = {}
     for name, chans, gain in (('arps', ('sq1',), 0.2), ('lead', ('sq2',), 0.24), ('bass', ('wave',), 0.3),
@@ -691,13 +696,25 @@ def render(path):
             y1 = hp * (y1 + x - x1)
             x1 = x
             ch[i] = y1
+    if seconds:
+        fade = int(0.5 * RATE)
+        for ch in (out_l, out_r):
+            for i in range(max(0, total - fade), total):
+                ch[i] *= (total - i) / fade
+    if rate != RATE:
+        n = int(total * rate / RATE)
+        def at(ch, t):
+            j = int(t)
+            f = t - j
+            return ch[j] * (1 - f) + ch[min(j + 1, total - 1)] * f
+        out_l, out_r = ([at(ch, i * RATE / rate) for i in range(n)] for ch in (out_l, out_r))
     peak = max(max(map(abs, out_l)), max(map(abs, out_r))) or 1
     drive = 0.9 / peak
     norm = 0.89 / math.tanh(0.9)
     with wave.open(path, 'wb') as w:
         w.setnchannels(2)
         w.setsampwidth(2)
-        w.setframerate(RATE)
+        w.setframerate(rate)
         buf = bytearray()
         for a, b in zip(out_l, out_r):
             buf += struct.pack('<hh', int(math.tanh(a * drive) * norm * 32767), int(math.tanh(b * drive) * norm * 32767))
@@ -705,5 +722,18 @@ def render(path):
     return parts
 
 
+def option(args, name, cast, default):
+    """The value after `name` in args (both taken out), else `default`."""
+    if name not in args:
+        return default
+    i = args.index(name)
+    value = cast(args[i + 1])
+    del args[i:i + 2]
+    return value
+
+
 if __name__ == '__main__':
-    render(sys.argv[1] if len(sys.argv) > 1 else 'music.wav')
+    args = sys.argv[1:]
+    seconds = option(args, '--seconds', float, None)
+    rate = option(args, '--rate', int, RATE)
+    render(args[0] if args else 'music.wav', seconds, rate)

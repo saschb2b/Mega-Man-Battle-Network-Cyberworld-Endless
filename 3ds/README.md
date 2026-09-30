@@ -1,14 +1,21 @@
 # The Nintendo 3DS build
 
-The same game as every other build (issue #9), a `.3dsx` for the Homebrew
-Launcher on a New 3DS or New 2DS XL with custom firmware (Luma3DS). An old
-3DS or 2DS is not supported: the GBA core alone takes longer than a frame
-there.
+The same game as every other build (issue #9), for a New 3DS, New 3DS XL or
+New 2DS XL with custom firmware (Luma3DS): a CIA the HOME Menu installs, and
+a `.3dsx` for the Homebrew Launcher. An old 3DS or 2DS is not supported: the
+GBA core alone takes longer than a frame there.
 
 ## Playing
 
-- Copy `cyberworld-endless.3dsx` to `sdmc:/3ds/` and start it from the
-  Homebrew Launcher.
+- **The HOME Menu:** install `cyberworld-endless.cia` with FBI. The
+  project's page shows the newest release's CIA as a QR code: in FBI,
+  Remote Install, then Scan QR Code, and FBI downloads and installs it.
+  Or copy the CIA to the SD card and install it from FBI's SD browser.
+  The game then has its icon on the HOME Menu, and its banner plays the
+  trailer's opening hits. FBI's Titles list deletes it again.
+- **The Homebrew Launcher:** copy `cyberworld-endless.3dsx` to
+  `sdmc:/3ds/` and start it there. It is the same game, with the same
+  saves.
 - The ROM, Mega Man Battle Network 6: Cybeast Gregar (USA), goes in
   `sdmc:/3ds/cyberworld-endless/rom/`, or stays where 3DS players keep GBA
   games (`sdmc:/roms/gba`, `sdmc:/roms`, `sdmc:/gba`). Any file name works:
@@ -30,12 +37,19 @@ does CONTINUE's.
 ## Building
 
 ```sh
-python3 build.py 3ds    # build/3ds/cyberworld-endless.3dsx
+python3 build.py 3ds    # build/3ds/cyberworld-endless.cia and .3dsx
 ```
 
 It builds in `docker/Dockerfile.3ds`: devkitPro's devkitARM with libctru and
-citro2d, SDL2 built for the 3DS (`docker/sdl2.sh 3ds`) and mGBA's library
-(`docker/mgba.sh 3ds`). `3ds/icon.png` is the Homebrew Launcher's icon.
+citro2d, SDL2 built for the 3DS (`docker/sdl2.sh 3ds`), mGBA's library
+(`docker/mgba.sh 3ds`), and makerom and bannertool built from their sources
+(`docker/ctrtools.sh`). `3ds/icon.png` (`tools/app_icon.py`) is the icon of
+both. The CIA is the same program as the `.3dsx`, packed by makerom with
+`3ds/cia.rsf`, its title settings: a New 3DS title at 804 MHz with the L2
+cache, 124 MB for the application, the third core allowed, a 1 MB stack.
+Its banner is `3ds/banner.png` (`tools/steam_art.py`) with the first 2.9
+seconds of the trailer's music (`tools/trailer_music.py --seconds 2.9 --rate
+32728`), made into a banner by bannertool.
 
 What differs from the other builds:
 
@@ -67,7 +81,12 @@ What differs from the other builds:
 ## Testing on a 3DS
 
 - **ftpd** (FTP) copies the build over and fetches `log.txt`:
-  `curl -T build/3ds/cyberworld-endless.3dsx ftp://3DS-ADDRESS:5000/3ds/`.
+  `curl -T build/3ds/cyberworld-endless.3dsx ftp://3DS-ADDRESS:5000/3ds/`,
+  or the CIA into `/cias/` to install it with FBI.
+- **FBI's QR code**, as a player installs it: serve `build/3ds` on the
+  network (`python3 -m http.server 8766 --bind 0.0.0.0 --directory
+  build/3ds`) and scan a QR code of `http://THIS-PC:8766/cyberworld-endless.cia`
+  (the page's `web/assets/qr.js` draws one in node too).
 - `frame_log = on` in `settings.ini` writes a line a second: frames shown and
   played, and a frame's update (the GBA's share, with and without its
   picture), drawing and present.

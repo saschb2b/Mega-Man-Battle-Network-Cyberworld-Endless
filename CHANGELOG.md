@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The 3DS build installs on the HOME Menu:** a CIA beside the `.3dsx`,
+  with the game's icon and a banner that plays the trailer's opening hits.
+  The project page has a 3DS tab: the newest release's CIA as a QR code
+  for FBI (Remote Install, Scan QR Code), and where the ROM goes. Releases
+  carry both files.
 - A layer is made in about a quarter less time (the wait at a new run's
   start and at CONTINUE, 20 seconds on a 3DS): the tile pick keeps what it
   asks of each pixel of the floor and of each tile it compares, where it

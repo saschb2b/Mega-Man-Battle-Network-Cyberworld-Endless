@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike</title>
-<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Windows, macOS, Linux, Android, a Steam Deck or a ROCKNIX handheld, with your own ROM.">
+<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Windows, macOS, Linux, Android, a Steam Deck, a ROCKNIX handheld or a New 3DS, with your own ROM.">
 <meta property="og:title" content="Cyberworld Endless">
 <meta property="og:description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it.">
 <meta property="og:type" content="website">
@@ -103,6 +103,7 @@
 					<button class="plate" type="button" role="tab" id="os-deck" data-os="deck" aria-selected="false" aria-controls="platform" tabindex="-1">Steam Deck</button>
 					<button class="plate" type="button" role="tab" id="os-android" data-os="android" aria-selected="false" aria-controls="platform" tabindex="-1">Android</button>
 					<button class="plate" type="button" role="tab" id="os-handheld" data-os="handheld" aria-selected="false" aria-controls="platform" tabindex="-1">Handhelds</button>
+					<button class="plate" type="button" role="tab" id="os-3ds" data-os="3ds" aria-selected="false" aria-controls="platform" tabindex="-1">3DS</button>
 					<button class="plate" type="button" role="tab" id="os-browser" data-os="browser" aria-selected="false" aria-controls="platform" tabindex="-1">Browser</button>
 					<button class="plate" type="button" role="tab" id="os-all" data-os="all" aria-selected="false" aria-controls="platform" tabindex="-1">All</button>
 				</div>
@@ -159,6 +160,16 @@
 						<span class="what"><b>PortMaster port</b><small>ROCKNIX handhelds, made for the Retroid Nova and the Retroid Pocket Flip 2.</small></span>
 						<a class="exit small" data-asset="cyberworld.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
 					</li>
+					<li class="row" data-os="3ds" data-pick="3ds">
+						<i class="icon i-3ds" aria-hidden="true"></i>
+						<span class="what"><b>New 3DS title</b><small>A CIA: FBI installs it on the HOME Menu, with its icon and banner. New 3DS, New 3DS XL and New 2DS XL with custom firmware; the older 3DS and 2DS are too slow for it.</small></span>
+						<a class="exit small" data-asset="cyberworld-endless.cia" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
+					</li>
+					<li class="row" data-os="3ds">
+						<i class="icon i-get" aria-hidden="true"></i>
+						<span class="what"><b>Homebrew Launcher</b><small>The same game as a <code>.3dsx</code>, nothing installed: copy it into <code>sdmc:/3ds/</code> and start it from the Homebrew Launcher.</small></span>
+						<a class="exit small" data-asset="cyberworld-endless.3dsx" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
+					</li>
 					<li class="row" data-os="browser">
 						<i class="icon i-web" aria-hidden="true"></i>
 						<span class="what"><b>Web build</b><small>The browser player as files, to host yourself.</small></span>
@@ -171,6 +182,16 @@
 				<p class="then textbox" data-os="deck">In Desktop Mode, open the Flatpak with Discover. One line in Konsole then adds it to Steam with its own art: <a href="faq/#deck">how</a>.</p>
 				<p class="then textbox" data-os="android">Allow your browser or file manager to install the app when Android asks. It asks once for your ROM and keeps a copy beside your saves; uninstalling deletes both.</p>
 				<p class="then textbox" data-os="handheld">Unzip into <code>ports/</code>, put your ROM in <code>ports/cyberworld/rom/</code> and refresh the game list.</p>
+				<div class="then textbox n3ds" data-os="3ds">
+					<figure class="qr" id="qr-3ds">
+						<div class="code">The QR code shows here once a release has the 3DS title.</div>
+						<figcaption>FBI › Remote Install › Scan QR Code</figcaption>
+					</figure>
+					<div class="steps">
+						<p>Scan the code with <b>FBI</b> on your 3DS: <b>Remote Install</b>, then <b>Scan QR Code</b>. FBI downloads the game and installs it on the HOME Menu.</p>
+						<p>Your ROM goes in <code>sdmc:/3ds/cyberworld-endless/rom/</code>, or stays where you keep GBA games (<code>sdmc:/roms/gba/</code>). Any file name works.</p>
+					</div>
+				</div>
 				<p class="then textbox" data-os="browser">Choose your ROM on the player's page. The next visit starts straight away; <b>Forget ROM and saves</b> removes both.</p>
 				</div>
 				<p class="release" id="release-line"></p>
@@ -197,6 +218,7 @@
 	</div>
 </footer>
 
+<script src="assets/qr.js"></script>
 <script src="assets/home.js"></script>
 </body>
 </html>

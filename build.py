@@ -1074,7 +1074,7 @@ def main():
     if a.action == '3ds':
         # the Nintendo 3DS (3ds/README.md): build/3ds/cyberworld-endless.3dsx
         build('3ds')
-        print('built', os.path.join(ROOT, 'build', '3ds', 'cyberworld-endless.3dsx'))
+        print('built', os.path.join(ROOT, 'build', '3ds', 'cyberworld-endless.3dsx'), 'and', os.path.join(ROOT, 'build', '3ds', 'cyberworld-endless.cia'))
         return
     if a.action == 'macos':
         macos_release()

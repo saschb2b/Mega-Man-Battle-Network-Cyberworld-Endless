@@ -97,18 +97,26 @@ LDLIBS += -Wl,-rpath,'$$ORIGIN/lib'
 endif
 # the Nintendo 3DS (docker/Dockerfile.3ds, 3ds/, issue #9): devkitARM for
 # the 3DS's ARM11, SDL2 and mGBA linked in, a .3dsx for the Homebrew
-# Launcher with its title and icon
+# Launcher with its title and icon, and the same game as a CIA the HOME
+# Menu installs, with a banner (3ds/banner.png, tools/steam_art.py) that
+# plays the trailer's opening hits
 ifeq ($(TARGET),3ds)
 ARCH_3DS := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 # (-Wno-format: uint32_t is an unsigned long there, which %u prints alike)
 CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_3DS) -mword-relocations -ffunction-sections -D__3DS__ -I/opt/devkitpro/libctru/include -Wno-format
 LDLIBS := $(MGBA)/lib/libmgba.a -L/opt/sdl2/lib -lSDL2main -lSDL2 -L/opt/devkitpro/libctru/lib -lcitro2d -lcitro3d -lctru -lm \
           -specs=3dsx.specs $(ARCH_3DS) -Wl,--gc-sections
-all: $(OUT)/cyberworld-endless.3dsx
+all: $(OUT)/cyberworld-endless.3dsx $(OUT)/cyberworld-endless.cia
 $(OUT)/cyberworld-endless.smdh: 3ds/icon.png
 	/opt/devkitpro/tools/bin/smdhtool --create "Cyberworld Endless" "A Mega Man Battle Network 6 roguelike" "saschb2b" $< $@
 $(OUT)/cyberworld-endless.3dsx: $(BIN) $(OUT)/cyberworld-endless.smdh
 	/opt/devkitpro/tools/bin/3dsxtool $(BIN) $@ --smdh=$(OUT)/cyberworld-endless.smdh
+$(OUT)/banner.wav: tools/trailer_music.py
+	python3 tools/trailer_music.py $@ --seconds 2.9 --rate 32728
+$(OUT)/banner.bnr: 3ds/banner.png $(OUT)/banner.wav
+	bannertool makebanner -i 3ds/banner.png -a $(OUT)/banner.wav -o $@
+$(OUT)/cyberworld-endless.cia: $(BIN) 3ds/cia.rsf $(OUT)/cyberworld-endless.smdh $(OUT)/banner.bnr
+	makerom -f cia -o $@ -rsf 3ds/cia.rsf -target t -exefslogo -elf $(BIN) -icon $(OUT)/cyberworld-endless.smdh -banner $(OUT)/banner.bnr
 endif
 ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
