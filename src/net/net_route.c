@@ -57,6 +57,46 @@ static bool floor_line(int sx, int sy, int ax, int ay) {
 
 bool route_floor_line(int sx, int sy, int ax, int ay) { return floor_line(sx, sy, ax, ay); }
 
+/* A walkway the walk enters within its next four panels (a panel of floor
+ * between void, entered along its line) while MegaMan stands off its
+ * line: its mouth, the panel before it, where the arrow aims first, as BN6
+ * lets him onto a walkway along it alone (aimed past it, the arrow's
+ * diagonal stopped a playtester at the corner, five times a session); -1
+ * for none, or where no straight line over the floor reaches the mouth.
+ * On its line means within 0.35 of a panel of it: 0.375 went in, 0.41
+ * was stopped at the walkway's edge (a replay of that corner). */
+static int mouth_aim(double px, double py, const int16_t *path, int n) {
+	int sx = (int)lround(px), sy = (int)lround(py), cx = sx, cy = sy;
+	for (int k = 1; k <= 4 && k <= n; ++k) {
+		int x = path[n - k] % MAP_W, y = path[n - k] / MAP_W, dx = x - cx, dy = y - cy;
+		if (floor_at(x + dy, y + dx) || floor_at(x - dy, y - dx)) { cx = x; cy = y; continue; }
+		if (fabs(dx ? py - y : px - x) < 0.35 || !floor_line(sx, sy, cx, cy)) return -1;
+		return cy * MAP_W + cx;
+	}
+	return -1;
+}
+
+/* Where the arrow aims on the walk (n panels, from the target back): a
+ * walkway's mouth while MegaMan stands off its line; else along the
+ * walk's first leg while it runs straight (on a walkway that is one of the
+ * screen's diagonals: a flat arrow between two forking walkways said
+ * neither), else at the farthest of the next four panels he can walk to
+ * in a straight line over the floor (three along, as the crow flies, cut
+ * corners over drops). */
+static int walk_aim(double px, double py, int sx, int sy, const int16_t *path, int n) {
+	int mouth = mouth_aim(px, py, path, n);
+	if (mouth >= 0) return mouth;
+	int leg = 0;
+	if (n) {
+		int dx = path[n - 1] % MAP_W - sx, dy = path[n - 1] / MAP_W - sy;
+		while (leg < 4 && leg < n && path[n - 1 - leg] % MAP_W == sx + dx * (leg + 1) && path[n - 1 - leg] / MAP_W == sy + dy * (leg + 1)) ++leg;
+	}
+	if (leg >= 2) return path[n - leg];
+	for (int k = 4; k >= 2; --k)
+		if (n >= k && floor_line(sx, sy, path[n - k] % MAP_W, path[n - k] / MAP_W)) return path[n - k];
+	return n ? path[n - 1] : sy * MAP_W + sx;
+}
+
 int route_way(double px, double py, int tx, int ty, int *len) {
 	static int16_t prev[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
@@ -111,20 +151,7 @@ int route_way(double px, double py, int tx, int ty, int *len) {
 		cx = p % MAP_W; cy = p / MAP_W;
 	}
 	*len = n;
-	/* aim along the walk's first leg while it runs straight (on a walkway
-	 * that is one of the screen's diagonals: a flat arrow between two
-	 * forking walkways said neither), else at the farthest of the next four
-	 * panels he can walk to in a straight line over the floor (three
-	 * along, as the crow flies, cut corners over drops) */
-	int aim = n ? path[n - 1] : sy * MAP_W + sx;
-	int leg = 0;
-	if (n) {
-		int dx = path[n - 1] % MAP_W - sx, dy = path[n - 1] / MAP_W - sy;
-		while (leg < 4 && leg < n && path[n - 1 - leg] % MAP_W == sx + dx * (leg + 1) && path[n - 1 - leg] / MAP_W == sy + dy * (leg + 1)) ++leg;
-	}
-	if (leg >= 2) aim = path[n - leg];
-	else for (int k = 4; k >= 2; --k)
-		if (n >= k && floor_line(sx, sy, path[n - k] % MAP_W, path[n - k] / MAP_W)) { aim = path[n - k]; break; }
+	int aim = walk_aim(px, py, sx, sy, path, n);
 	route_walk_len = n;
 	route_walk_aim = aim;
 	return route_grid_way(aim % MAP_W - px, aim / MAP_W - py);

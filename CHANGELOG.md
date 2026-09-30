@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The arrow leads to a walkway's mouth.** Where the way on enters a
+  walkway a few panels ahead and MegaMan stands off its line, the arrow
+  points along the floor to the panel it starts from, then down the
+  walkway once he is on its line (within a third of a panel, as BN6 lets
+  him in). It had pointed past the mouth, into the platform's corner, and
+  a playtester read it as pointing at nothing, five times a session.
 - **The official gate on the layer where ProtoMan names his netbattle
   opens.** From the third rung, his netbattle waits for the third act,
   and the gate beside him in the first two had stayed sealed as his
