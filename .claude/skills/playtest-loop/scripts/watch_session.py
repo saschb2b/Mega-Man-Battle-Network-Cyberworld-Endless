@@ -51,19 +51,23 @@ def main():
     notes = sorted(glob.glob(os.path.join(h, 'notes-s*.md')), key=os.path.getmtime)
     note_age = (now - os.path.getmtime(notes[-1])) / 60 if notes else 0
 
-    # the snapshot, and the current battle's start among the earlier ones
+    # the snapshot, and the current battle's start among the earlier ones:
+    # the battles finished so far (the run log's lines) tell one battle
+    # from the next, where two snapshots five minutes apart both in a
+    # battle had counted a layer's four fights as one long one
+    done = sum(' battle ' in l for l in read(os.path.join(h, 'data', 'runlog.txt')).splitlines())
     log = os.path.join(h, 'watch.log')
     snaps = []
     for l in read(log).splitlines():
         p = l.split()
         if len(p) >= 4:
-            snaps.append((float(p[0]), int(p[1]), int(p[2]), p[3]))
-    snaps.append((now, calls, frame, doing))
+            snaps.append((float(p[0]), int(p[1]), int(p[2]), p[3], int(p[5]) if len(p) >= 6 else -1))
+    snaps.append((now, calls, frame, doing, done))
     with open(log, 'a') as f:
-        f.write(f'{now:.0f} {calls} {frame} {doing} {hp}\n')
+        f.write(f'{now:.0f} {calls} {frame} {doing} {hp} {done}\n')
     start = None
     for s in reversed(snaps):
-        if s[3] != 'battle':
+        if s[3] != 'battle' or s[4] != done:
             break
         start = s
     # the calls spent on the map (walking, reading it, talking), as the

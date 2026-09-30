@@ -998,3 +998,39 @@ form first.** The duel was checked by captures of its words and one won
 fight, never lost; the persona's first contact was a loss that ended a
 run. Before launching a session into new risk, capture its failure path
 too (the loss, the deletion, the timeout), not only its success.
+
+## Session 40: 8/10 (keep playing: yes; recommend: yes)
+
+CONTINUE of the endless run into act 2 (Green HP): a collector's vault,
+two ScrtData, ProtoMan's second duel lost on time (0:21.60 against his
+0:17.50, the record 0-2), and CircusMan deleting MegaMan with 149 of his
+700 HP left. From 7 to 8: the rival now says its stake and keeps score,
+and the clock made the duel a race; both losses read as fair, and the
+persona wants the rematches.
+
+Confirmed: the record in Dad's Records and Chaud's call, Lan answering
+the call, ProtoMan greeting an old rival, the stake said before the
+choice, the act's own squad, the clock (hidden on the Custom screen, red
+past his time), the record kept, the summary naming the killer, the
+shorter A hold, walking without backward steps.
+
+Raised, fixed after the pin (9fb551c): Lan answering a lost duel, the
+rematch line saying the record, EraseCross's counter-erase told in the
+setup and the PET, beginner tips kept to the first act. Open: Chaud's
+prize has no face (official gates stand on one layer in four from act 2;
+none on the persona's three), a sold-out row sliding the cursor onto the
+next item (from session 38), a kept R and a fresh one opening a chip's
+description, every Dad mail NEW after CONTINUE, the NaviCust's double
+quit prompt (from session 36), the dealer's guardian pick off the
+folder's codes. Walkway mouths stop MegaMan as in BN6, by the owner's
+decision. Unverified, probably BN6's own: MegaMan unseen while AreaGrab
+stops time.
+
+Cost: 351 calls against 300; the guardian fight took about 70 in short
+steps, walkway mouths about 20.
+
+Loop change: **the watchdog tells one battle from the next by the run
+log.** Its "this battle" joined every battle seen at consecutive
+five-minute snapshots, so a layer's four fights read as one battle of
+28 minutes and raised a false alarm; it now counts the run log's
+finished battles and starts a new battle when the count moves.
