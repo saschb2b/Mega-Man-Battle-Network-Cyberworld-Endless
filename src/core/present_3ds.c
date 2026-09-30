@@ -45,7 +45,10 @@ SDL_Surface *present3ds_init(int w, int h) {
 }
 
 void present3ds_frame(bool fill) {
-	if (!surface) return;
+	/* (none once the system asks the game to close: the HOME Menu has the
+	 * GPU then, and waiting on it hung the console, a frame drawn after
+	 * the close) */
+	if (!surface || aptShouldClose()) return;
 	GSPGPU_FlushDataCache(pixels, TEX * TEX * 4);
 	C3D_SyncDisplayTransfer(pixels, GX_BUFFER_DIM(TEX, TEX), (u32 *)tex.data, GX_BUFFER_DIM(TEX, TEX),
 		GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) |

@@ -6,8 +6,9 @@
   on a New 3DS, which finds the ROM where 3DS players keep GBA games.
   The picture fills the top screen's height (`screen = whole` in
   `settings.ini` for 1x), drawn through the GPU; the GBA core runs on the
-  third core where the system gives one. It runs below full speed for now:
-  the core alone takes 17 to 21 ms of a 16.7 ms frame there. `3ds/README.md`.
+  third core and draws its picture on the main one, at full speed. A new
+  run's first layer takes about 20 seconds to make there, which a line on
+  the screen says. `3ds/README.md`.
 - A ROM of another Battle Network 6 is named for what it is ("... is Cybeast
   Gregar (Europe): only Cybeast Gregar (USA) works so far"), where the
   message said only where to put one; other games' ROMs in the folder are

@@ -54,6 +54,15 @@ case " $TARGETS " in *" 3ds "*)
 	if grep -q 0x02000000 mgba-$VER/src/platform/3ds/ctru-heap.c; then exit 1; fi
 	sed -i 's/ COLOR_16_BIT COLOR_5_6_5 / /' mgba-$VER/src/platform/3ds/CMakeLists.txt
 	if grep -q COLOR_16_BIT mgba-$VER/src/platform/3ds/CMakeLists.txt; then exit 1; fi
+	# (and the whole core, not the minimal one mGBA builds for a "Generic"
+	# system: its threaded video draws the picture beside the emulation,
+	# on the main core, where mGBA's own threads go on the 3DS's third,
+	# which the game's GBA core takes)
+	sed -i 's/^\tset(MINIMAL_CORE ON)$/\t# (the whole core: docker\/mgba.sh)/' mgba-$VER/CMakeLists.txt
+	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
+	sed -i 's/threadCreate(entry, context, 0x8000, 0x18, 2, false)/threadCreate(entry, context, 0x8000, 0x18, 0, false)/' \
+	 mgba-$VER/include/mgba-util/platform/3ds/threading.h
+	grep -q 'threadCreate(entry, context, 0x8000, 0x18, 0, false)' mgba-$VER/include/mgba-util/platform/3ds/threading.h
 	cmake -S mgba-$VER -B build-3ds $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/3ds \
 	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/3ds/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON \
 	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF

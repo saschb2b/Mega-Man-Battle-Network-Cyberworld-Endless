@@ -162,7 +162,11 @@ director's logic takes in each frame whole, as on the main thread. The emu
 scene's update takes the frame done in and then starts the next, which runs
 while the frame done is drawn from a copy of its picture; keys, frames and
 the logic keep their order, and the autopilot's run log comes out the same.
-`CYBERWORLD_EMU_THREAD=1` runs it so on a computer, to test it.
+`CYBERWORLD_EMU_THREAD=1` runs it so on a computer, to test it. With the
+core on its own thread, mGBA's threaded video draws its picture on one
+more (`threadedVideo`), beside the emulation; the worker waits for it at
+each frame's end, so the picture copied is whole. On the 3DS that thread
+is on the main core, which waits most of a frame for the emulation.
 
 ## Testing
 

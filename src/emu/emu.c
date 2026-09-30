@@ -11,6 +11,7 @@
 #include <mgba/core/core.h>
 #include <mgba/core/log.h>
 #include <mgba/core/serialize.h>
+#include <mgba/feature/video-logger.h>
 #include <mgba/internal/gba/gba.h>
 #include <mgba/internal/gba/overrides.h>
 #include <mgba-util/vfs.h>
@@ -83,8 +84,14 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	core->setAudioBufferSize(core, 1024);
 	emu_audio_rate(out_rate);
 	ring_lock = SDL_CreateMutex();
-	core->reset(core);
 	start_worker();
+#ifndef MINIMAL_CORE
+	/* (with the core on a thread of its own, its picture is drawn on one
+	 * more, mGBA's threaded video, which runs beside the emulation: on the
+	 * 3DS on the main core, idle while the core runs) */
+	if (emu_threaded()) mCoreConfigSetIntValue(&core->config, "threadedVideo", 1);
+#endif
+	core->reset(core);
 	return true;
 }
 
@@ -165,6 +172,8 @@ static int worker_main(void *arg) {
 		SDL_SemWait(go);
 		if (stopping) return 0;
 		run_frame(false);
+		/* (the picture drawn on a thread of its own: its frame whole) */
+		if (core->videoLogger && core->videoLogger->wait) core->videoLogger->wait(core->videoLogger);
 		SDL_SemPost(done);
 	}
 }
@@ -206,6 +215,10 @@ void emu_quit(void) {
 	SDL_WaitThread(worker, NULL);
 #endif
 	threaded = false;
+	/* (and the picture's thread with the core: a 3DS app ending with a
+	 * thread alive takes the HOME Menu down with it) */
+	core->deinit(core);
+	core = NULL;
 }
 
 void emu_frame(uint32_t keys) {

@@ -23,8 +23,9 @@ there.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
   or the Circle Pad. HOME pauses as for any game.
 
-It runs below full speed for now: the GBA core takes 17 to 21 ms a frame on
-the New 3DS's 804 MHz ARM11, where a frame has 16.7.
+It runs at full speed, 60 frames a second, every one shown. A new run's
+first layer takes about 20 seconds to make ("Building the net..."), as
+does CONTINUE's.
 
 ## Building
 
@@ -50,7 +51,15 @@ What differs from the other builds:
   every pixel on the CPU.
 - **The GBA core** (`src/emu/emu.c`) runs on the New 3DS's third core where
   the system gives it one, the drawing of the frame done beside the next
-  frame's emulation; `log.txt` says which.
+  frame's emulation; `log.txt` says which. Its picture is drawn on the main
+  core beside it, mGBA's threaded video: `docker/mgba.sh` builds mGBA's
+  whole core for the 3DS (not the minimal one it builds for a "Generic"
+  system) and puts mGBA's own threads on the main core. The emulation
+  alone takes about 16 ms of a 16.7 ms frame on the 804 MHz ARM11; with
+  its picture, on one core, 20.
+- **Closing** from the HOME Menu: no frame is drawn once the system asks
+  the game to close (the GPU is the HOME Menu's then; waiting on it hung
+  the console), and the core's threads end before the game does.
 - **Files**: mGBA's own files go to the SD card's file system, which takes
   paths without the C library's `sdmc:`. A rename onto a taken name is
   refused there, as on Windows (`cw_rename`).

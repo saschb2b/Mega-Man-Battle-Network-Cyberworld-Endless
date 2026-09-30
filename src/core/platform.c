@@ -621,6 +621,24 @@ void platform_present_blend(double w) {
 	log_present();
 }
 
+/* The canvas on the display, at its scale. */
+static void present_canvas(void) {
+	SDL_SetRenderTarget(P.renderer, NULL);
+	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
+	SDL_RenderClear(P.renderer);
+	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
+	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
+#ifdef __3DS__
+	present3ds_frame(fill_3ds);
+#else
+	SDL_RenderPresent(P.renderer);
+#endif
+}
+
+void platform_present_now(void) {
+	if (!P.headless) present_canvas();
+}
+
 void platform_end_frame(void) {
 	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
 	if (P.blend && !P.headless) blend_keep();
@@ -632,16 +650,7 @@ void platform_end_frame(void) {
 		return;
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
-	SDL_SetRenderTarget(P.renderer, NULL);
-	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
-	SDL_RenderClear(P.renderer);
-	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
-	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
-#ifdef __3DS__
-	present3ds_frame(fill_3ds);
-#else
-	SDL_RenderPresent(P.renderer);
-#endif
+	present_canvas();
 	part_present += SDL_GetPerformanceCounter() - t0;
 	log_present();
 	++P.frame;

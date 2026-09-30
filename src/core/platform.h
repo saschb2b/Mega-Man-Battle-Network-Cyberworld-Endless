@@ -77,6 +77,9 @@ extern bool platform_frame_log;
 /* A played frame's update and drawing, in performance-counter ticks, for
  * the frame log's split */
 void platform_frame_parts(uint64_t update, uint64_t draw);
+/* The canvas as drawn so far on the display at once, before a long wait
+ * (no frame counted; none headless). */
+void platform_present_now(void);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */
