@@ -12,16 +12,18 @@
 #include "save.h"
 
 /* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, what MegaMan
- * feels of each, and the attacks that hit it twice as hard (BN6's own
- * Cross tutorials, CompText86D0614) */
+ * feels of each, the attacks that hit it twice as hard and what it gives
+ * (BN6's own Cross tutorials, CompText86D0614: its chips' +50 is theirs
+ * that don't dim the screen; a playtester chose a Cross by its weakness
+ * alone, the setup naming no strength) */
 static const struct { int navi, flag; const char *name, *feel, *weak, *strong; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua", NULL },
-	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood", NULL },
-	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", NULL },
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua", "Fire chips +50, buster +1" },
+	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood", "Elec chips +50" },
+	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", "Sword chips +50" },
 	/* (BN6's EraseCross deletes a virus it hits with a counter: two
 	 * playtesters found it by chance, the setup named only the weakness) */
 	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind", "Counters erase viruses" },
-	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua", NULL },
+	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua", "One more chip each turn" },
 };
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its

@@ -9,6 +9,11 @@
 - Lan answers Chaud's call about the netbattle ("We'll be ready,
   Chaud!"), as he answers the races' calls: it had read as a message
   left.
+- The jack-in setup says what each Cross gives, above what hits it
+  twice as hard, from BN6's own Cross mails: HeatCross "Fire chips +50,
+  buster +1", ElecCross "Elec chips +50", SlashCross "Sword chips +50",
+  ChargeCross "One more chip each turn". Four of the five had shown
+  their weakness alone. The PET's status says it too.
 
 ## 0.5.0 (2026-09-30)
 

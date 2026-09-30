@@ -394,11 +394,18 @@ static void setup_update(void) {
 }
 
 /* the setup's note, at most two lines of 26 letters (the panel's width):
- * cut at a space */
+ * cut at a space, or where it says (\n) */
 #define NOTE_CHARS 26
 static int note_line(int x, int y, const char *s, SDL_Color c) {
 	char a[40];
 	size_t n = strlen(s);
+	const char *nl = strchr(s, '\n');
+	if (nl) {
+		snprintf(a, sizeof a, "%.*s", (int)(nl - s), s);
+		text_draw(x, y, a, c, TEXT_CENTER);
+		text_draw(x, y + 12, nl + 1, c, TEXT_CENTER);
+		return 2;
+	}
 	if (n <= NOTE_CHARS) { text_draw(x, y, s, c, TEXT_CENTER); return 1; }
 	size_t cut = NOTE_CHARS;
 	while (cut > 0 && s[cut] != ' ') --cut;
@@ -488,7 +495,7 @@ static void setup_draw(int x0, int y0) {
 		/* (and its costs: BN6's own weakness, which a playtester was told
 		 * wrong, and no other Cross) */
 		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL, *strong = S.cross ? powers_cross_strength(S.cross) : NULL;
-		if (weak && strong) snprintf(buf, sizeof buf, "%s. %s attacks do 2x", strong, weak);
+		if (weak && strong) snprintf(buf, sizeof buf, "%s.\n%s attacks do 2x", strong, weak);
 		else if (weak) snprintf(buf, sizeof buf, "From the first battle. %s attacks do 2x", weak);
 		note = weak ? buf : S.cross ? "From the first battle"
 			: open_crosses ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
