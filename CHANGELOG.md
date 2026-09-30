@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **MegaMan's words come on time** (issue #13). A new area's card and
+  MegaMan's words about it are one beat: MegaMan holds still from his
+  arrival until the words begin, as BN6 holds him for its own scenes, and
+  A ends a card early. Free under the card, a player walked to a Mystery
+  Data, opened it, and only then heard where he was. A NaviCust bug is
+  named as the map comes back from the PET, where a second's wait had let
+  MegaMan walk a few steps first.
 - The first "Are you sure?" in a shop its keeper's words opened starts on
   No: an A carried over from the Net Dealer's words chose the list's first
   row and bought it. A buy chosen after that starts on Yes, as in BN6.

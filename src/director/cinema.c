@@ -73,6 +73,8 @@ void cinema_card_yield(void) {
 	if (C.card == CARD_AREA && C.card_len - C.card_t > FADE_OUT) C.card_t = C.card_len - FADE_OUT;
 }
 
+int cinema_card_age(void) { return C.card == CARD_AREA ? C.card_t : -1; }
+
 uint32_t cinema_keys(uint32_t keys) {
 	if (C.off_map) return keys;
 	if (C.input == CINEMA_HOLD) return 0;

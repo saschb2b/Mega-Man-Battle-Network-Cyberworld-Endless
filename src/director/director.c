@@ -97,6 +97,7 @@ static struct {
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
+	bool arrival_hold;     /* MegaMan held for the arrival's cards and the words after them */
 	int arrived;           /* frames on the layer's map since the warp ended */
 	int act_viruses;       /* viruses deleted when the act began */
 	int act_frames;        /* frames spent in the act */
@@ -145,6 +146,7 @@ static struct {
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
+#define CARD_SKIP    30   /* frames a card shows before A ends it, where MegaMan is held for it */
 #define WALK_UP      45   /* frames the walk up to a navi out of reach may take */
 
 /* An act begins (or a side layer): its title card, as Hades names each
@@ -1698,6 +1700,8 @@ uint32_t director_keys(uint32_t keys) {
 	D.map_shown = false;
 	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
+	/* (A ends the arrival's card early: its words wait on it) */
+	if (D.arrival_hold && a_pressed && cinema_card_age() >= CARD_SKIP) cinema_card_yield();
 	/* (no A a fifth of a second after a chat closes: a playtester's A
 	 * pressed through a chat's last box talked to the gift Prog beside him
 	 * again, twice a session) */
@@ -1863,14 +1867,18 @@ static void spin_watch(void) {
  * player runs the NaviCust in the PET, or an ExpMemry grows the board
  * (docs/NAVICUST.md). A bug the player can read is a price they chose; the
  * game only says that there is one. Read on the layer's first quiet frame
- * without a word, so a layer entered bugged does not repeat it; spoken a
- * second after the map is back (straight out of the PET, the chat box's
- * letters were not loaded yet and it drew as noise). */
+ * without a word, so a layer entered bugged does not repeat it; spoken
+ * BUG_CALM frames after the map is back, before a step (issue #13: a
+ * second's wait, kept since a talk opened straight out of the PET had
+ * drawn its letters as noise, let MegaMan walk first; a talk opened six
+ * frames after the PET closed, from its menu and from the NaviCust, drew
+ * them whole). */
+#define BUG_CALM 10
 static void bug_watch(void) {
 	static int last, calm;
 	calm = D.frame == last + 1 ? calm + 1 : 0;
 	last = D.frame;
-	if (calm < 60) return;
+	if (calm < BUG_CALM) return;
 	uint8_t now[NAVICUST_BUGS];
 	for (int t = 0; t < NAVICUST_BUGS; ++t) now[t] = emu_read8(BN6_NAVICUST_BUGS + (uint32_t)t);
 	if (!D.bugs_known) {
@@ -2732,6 +2740,15 @@ void director_update(void) {
 		area_card();
 	}
 	if (emu_read8(BN6_CHATBOX)) cinema_card_yield();
+	/* the arrival's cards and MegaMan's words after them are one beat: he
+	 * is held from his arrival until the words begin, as BN6 holds him for
+	 * its own scenes, and A ends a card early (issue #13: free under the
+	 * card, a player walked to a Mystery Data and opened it, and the words
+	 * came after it, out of their moment) */
+	bool hold = D.beat[0] && (D.area_card || cinema_busy()) && !talk_busy();
+	if (hold && cinema_input_mode() == CINEMA_FREE) cinema_input(CINEMA_HOLD);
+	else if (!hold && D.arrival_hold && cinema_input_mode() == CINEMA_HOLD) cinema_input(CINEMA_FREE);
+	D.arrival_hold = hold;
 	/* the arrival's words once the card has gone; Chaud's call once the
 	 * Secret Area's guardian is done */
 	talk_update();

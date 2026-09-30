@@ -266,7 +266,7 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   first draft says how the board works.
 - ExpMemry at the act 2 and act 4 guardians: the board grows to 5x4, then
   5x5 (checked on the NaviCust screen).
-- The bug line: a second after the map is back, MegaMan names each bug
+- The bug line: as the map is back, before a step, MegaMan names each bug
   that changed and what it does. BN6's RUN says OK over a part left past
   the board's edge, which does bug; the line is the only place the player
   learns it.

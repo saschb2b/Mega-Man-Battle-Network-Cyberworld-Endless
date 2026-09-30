@@ -57,5 +57,7 @@ bool cinema_busy(void);
 /* An area's card fades out at once, where a chat has opened under it (an A
  * at the gift Prog beside the arrival drew its box under the card). */
 void cinema_card_yield(void);
+/* Frames an area's card has shown, -1 with none. */
+int cinema_card_age(void);
 
 #endif
