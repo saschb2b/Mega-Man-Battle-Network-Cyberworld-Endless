@@ -6,6 +6,9 @@
 'use strict';
 
 const ROM_SIZE = 8 * 1024 * 1024;
+// (the engine's build, which build.py fills in: its .wasm fetched by it, so
+// a browser never pairs a kept one with a new cyberworld.js)
+const ENGINE_VERSION = '';
 const ROM_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6';   // BN6 Cybeast Gregar (USA)
 const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 
@@ -35,6 +38,7 @@ function persist() {
 
 var Module = {
 	canvas,
+	locateFile: (path, prefix) => prefix + path + (ENGINE_VERSION && path.endsWith('.wasm') ? `?v=${ENGINE_VERSION}` : ''),
 	print: (t) => console.log(t),
 	printErr: (t) => console.warn(t),
 	persist,
@@ -50,7 +54,7 @@ var Module = {
 		});
 	}],
 	onRuntimeInitialized: () => { ready = true; offer(); },
-	onAbort: (what) => say('The engine stopped: ' + what),
+	onAbort: (what) => { say('The engine stopped: ' + what); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
 };
 
 function storedRom() {
@@ -70,6 +74,7 @@ function offer() {
 function start() {
 	if (!ready || started || !storedRom()) return;
 	started = true;
+	track('game-start', { input: touchPlay ? 'touch' : 'keys' });
 	gate.hidden = true;
 	if (touchPlay) {
 		// (the canvas takes its size from the page: SDL follows it, rotations too)
@@ -106,16 +111,19 @@ async function takeRom(file) {
 	const bytes = new Uint8Array(await file.arrayBuffer());
 	if (bytes.length !== ROM_SIZE) {
 		say(file.name + ' is not an 8 MB GBA ROM. You need Mega Man Battle Network 6: Cybeast Gregar (USA).');
+		track('rom-rejected', { reason: 'size' });
 		return;
 	}
 	if (crypto.subtle && (await sha1(bytes)) !== ROM_SHA1) {
 		say(file.name + ' is a different version or was changed. Only the unmodified Cybeast Gregar (USA) works.');
+		track('rom-rejected', { reason: 'version' });
 		return;
 	}
 	const FS = Module.FS;
 	for (const name of FS.readdir(ROM_DIR)) if (name !== '.' && name !== '..') FS.unlink(ROM_DIR + '/' + name);
 	FS.writeFile(ROM_DIR + '/bn6g.gba', bytes);
 	persist();
+	track('rom-accepted');
 	start();
 }
 
@@ -129,6 +137,7 @@ document.addEventListener('drop', (e) => {
 
 $('forget').addEventListener('click', () => {
 	if (!confirm('Remove your ROM and all saves from this browser?')) return;
+	track('forget-rom');
 	const req = indexedDB.deleteDatabase(DATA);
 	req.onsuccess = req.onerror = req.onblocked = () => location.reload();
 });
@@ -167,6 +176,7 @@ $('smooth').addEventListener('click', () => {
 	const on = !smoothOn();
 	try { localStorage.setItem('cw-smooth', on ? 'on' : 'off'); } catch (e) { /* not kept */ }
 	showSmooth();
+	track('smooth-motion', { state: on ? 'on' : 'off' });
 	if (started) Module.ccall('cw_set_smooth', null, ['number'], [on ? 1 : 0]);
 	canvas.focus();
 });

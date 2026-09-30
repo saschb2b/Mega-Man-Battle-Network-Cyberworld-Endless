@@ -4,29 +4,116 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike</title>
-<meta name="description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it. Play in the browser, on Windows, macOS, Linux, Android, a Steam Deck, a ROCKNIX handheld or a New 3DS, with your own ROM.">
-<meta property="og:title" content="Cyberworld Endless">
-<meta property="og:description" content="A roguelike on Mega Man Battle Network 6: every run builds a new net, and the game runs it.">
+<meta name="description" content="A free roguelike on Mega Man Battle Network 6: a new net every run, played by the game itself. Play in the browser, on PC, Mac, Linux, Android, Steam Deck or 3DS.">
+<link rel="canonical" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">
+<meta property="og:site_name" content="Cyberworld Endless">
 <meta property="og:type" content="website">
-<meta property="og:image" content="shots/title.png">
+<meta property="og:url" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">
+<meta property="og:title" content="Cyberworld Endless · a Mega Man Battle Network 6 roguelike">
+<meta property="og:description" content="Every run builds a new net in the style of BN6's areas, and the game itself runs it: its battles, chips, PET and music, from your own ROM.">
+<meta property="og:image" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="Cyberworld Endless: a roguelike for Mega Man Battle Network 6">
+<meta property="og:video" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4">
+<meta property="og:video:type" content="video/mp4">
+<meta property="og:video:width" content="1280">
+<meta property="og:video:height" content="720">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#4a7b42">
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/180.png">
+<script>
+// (the downloads were this page's #play; they have a page of their own)
+if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('download/');
+</script>
 <link rel="preload" href="assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/home.css">
-<script defer src="https://umami.saschb2b.com/script.js" data-website-id="3782c2fc-732a-43b0-b570-4e26cfe29dab" data-domains="saschb2b.github.io"></script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "VideoGame",
+ "name": "Cyberworld Endless",
+ "alternateName": "Mega Man Battle Network: Cyberworld Endless",
+ "url": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/",
+ "description": "A roguelike on Mega Man Battle Network 6: every run builds a new net in the style of BN6's areas, and the game itself, running from the player's own ROM, plays it: its battles, chips, PET, shops and music.",
+ "image": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png",
+ "screenshot": [
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/net.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/battle.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/act-card.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/guardian.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/undernet.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/setup.png"
+ ],
+ "genre": [
+  "Roguelike",
+  "Action RPG"
+ ],
+ "gamePlatform": [
+  "Windows",
+  "macOS",
+  "Linux",
+  "Steam Deck",
+  "Android",
+  "Nintendo 3DS",
+  "Web browser"
+ ],
+ "operatingSystem": "Windows 10 and 11, macOS 11 and newer, Linux, Android 5 and newer, Nintendo New 3DS, web browsers",
+ "applicationCategory": "Game",
+ "playMode": "SinglePlayer",
+ "isAccessibleForFree": true,
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "USD",
+  "url": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/"
+ },
+ "downloadUrl": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/",
+ "softwareRequirements": "The player's own Mega Man Battle Network 6: Cybeast Gregar (USA) GBA ROM",
+ "author": {
+  "@type": "Person",
+  "name": "Sascha Becker",
+  "url": "https://github.com/saschb2b"
+ },
+ "license": "https://opensource.org/license/mit",
+ "sameAs": [
+  "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless"
+ ],
+ "isBasedOn": {
+  "@type": "VideoGame",
+  "name": "Mega Man Battle Network 6: Cybeast Gregar",
+  "publisher": {
+   "@type": "Organization",
+   "name": "Capcom"
+  }
+ },
+ "trailer": {
+  "@type": "VideoObject",
+  "name": "Cyberworld Endless trailer",
+  "description": "21 seconds: MegaMan jacks in, walks generated layers, battles, becomes HeatCross and Beast MegaMan and meets the guardians.",
+  "thumbnailUrl": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png",
+  "contentUrl": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4",
+  "uploadDate": "2026-09-29",
+  "duration": "PT21S"
+ }
+}
+</script>
+<script defer src="https://umami.saschb2b.com/script.js" data-website-id="3782c2fc-732a-43b0-b570-4e26cfe29dab" data-domains="saschb2b.github.io" data-exclude-hash="true"></script>
 </head>
 <body>
 
 <header class="pet-bar">
 	<div class="wrap">
 		<a class="brand" href="./"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
-		<nav aria-label="Sections">
+		<nav aria-label="Site">
 			<a class="opt" href="#game">Game</a>
-			<a href="#play">Play</a>
+			<a href="download/" data-umami-event="go-download" data-umami-event-from="nav">Download</a>
+			<a href="play/" data-umami-event="go-play" data-umami-event-from="nav">Play</a>
 			<a href="faq/">FAQ</a>
-			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source</a>
+			<a class="opt" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless" data-umami-event="outbound" data-umami-event-to="github">Source</a>
 		</nav>
 	</div>
 </header>
@@ -45,15 +132,16 @@
 					<p class="pitch">Every run builds a new net in the style of BN6's areas, and the game itself runs it.</p>
 				</div>
 				<div class="actions">
-					<a class="exit" href="play/">Jack in</a>
-					<a class="plate" href="#play"><i class="icon i-get" aria-hidden="true"></i>Download</a>
+					<a class="exit" href="play/" data-umami-event="go-play" data-umami-event-from="hero">Jack in</a>
+					<a class="plate" href="download/" data-umami-event="go-download" data-umami-event-from="hero"><i class="icon i-get" aria-hidden="true"></i>Download</a>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section id="game">
+	<section id="game" aria-labelledby="game-title">
 		<div class="wrap">
+			<h2 class="vh" id="game-title">The game</h2>
 			<div class="grid-3 clips">
 				<figure class="frame">
 					<video class="clip" muted loop playsinline preload="none" poster="clips/net.png" width="240" height="160"
@@ -91,113 +179,19 @@
 		</div>
 	</section>
 
-	<section id="play">
+	<section id="get">
 		<div class="wrap">
-			<div class="band"><h2>Play</h2></div>
-			<div class="panel shop">
-				<p class="rom">Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>,
+			<div class="band"><h2>Get it</h2></div>
+			<div class="panel get">
+				<p class="rom">Free. Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>,
 					SHA-1 <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code>. None contains game data.</p>
-				<div class="platforms" role="tablist" aria-label="Your system" hidden>
-					<button class="plate" type="button" role="tab" id="os-windows" data-os="windows" aria-selected="false" aria-controls="platform" tabindex="-1">Windows</button>
-					<button class="plate" type="button" role="tab" id="os-macos" data-os="macos" aria-selected="false" aria-controls="platform" tabindex="-1">macOS</button>
-					<button class="plate" type="button" role="tab" id="os-linux" data-os="linux" aria-selected="false" aria-controls="platform" tabindex="-1">Linux</button>
-					<button class="plate" type="button" role="tab" id="os-deck" data-os="deck" aria-selected="false" aria-controls="platform" tabindex="-1">Steam Deck</button>
-					<button class="plate" type="button" role="tab" id="os-android" data-os="android" aria-selected="false" aria-controls="platform" tabindex="-1">Android</button>
-					<button class="plate" type="button" role="tab" id="os-handheld" data-os="handheld" aria-selected="false" aria-controls="platform" tabindex="-1">Handhelds</button>
-					<button class="plate" type="button" role="tab" id="os-3ds" data-os="3ds" aria-selected="false" aria-controls="platform" tabindex="-1">3DS</button>
-					<button class="plate" type="button" role="tab" id="os-browser" data-os="browser" aria-selected="false" aria-controls="platform" tabindex="-1">Browser</button>
-					<button class="plate" type="button" role="tab" id="os-all" data-os="all" aria-selected="false" aria-controls="platform" tabindex="-1">All</button>
+				<div class="ways">
+					<a class="exit" href="play/" data-umami-event="go-play" data-umami-event-from="get">Play in the browser</a>
+					<a class="plate" href="download/" data-umami-event="go-download" data-umami-event-from="get"><i class="icon i-get" aria-hidden="true"></i>Download</a>
 				</div>
-				<p class="picked" id="picked" hidden></p>
-				<div id="platform" role="tabpanel" aria-label="Downloads">
-				<ul class="rows" id="downloads">
-					<li class="row" data-os="windows" data-pick="windows">
-						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>Windows installer</b><small>Windows 10 and 11, 64-bit. For you alone, no administrator: a Start menu entry, uninstalled in Settings.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-windows-x64-setup.exe cyberworld-endless-setup-x64.exe" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="windows">
-						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Windows zip</b><small>The same game, portable: unpack it anywhere and start <code>cyberworld-endless.exe</code>.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-windows-x64.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="macos" data-pick="macos">
-						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>macOS app</b><small>One app for Apple silicon and Intel Macs, macOS 11 and newer.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-macos.dmg" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="linux deck" data-pick="linux">
-						<i class="icon i-pc" aria-hidden="true"></i>
-						<span class="what"><b>AppImage</b><small>Any x86-64 Linux: make it executable and start it. It offers to add itself to your menu and to Steam.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-x86_64.AppImage" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="linux deck" data-pick="deck">
-						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>Flatpak</b><small>Installs with your software centre (Discover, GNOME Software), sandboxed. The Steam Deck's pick.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless.flatpak" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="linux">
-						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Debian package</b><small>Debian, Ubuntu, Mint and their relatives: <code>.deb</code>, installed with the system.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless_amd64.deb" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="linux deck">
-						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Archive</b><small>A plain folder, nothing installed: unpack it anywhere (on a Steam Deck, in your home folder) and start it. <code>install.sh</code> adds it to your menu, <code>--add-to-steam</code> to Steam.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-linux-x86_64.tar.gz" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="android" data-pick="android">
-						<i class="icon i-phone" aria-hidden="true"></i>
-						<span class="what"><b>Android app</b><small>Phones, tablets and Android handhelds, Android 5 and newer. Touch controls, or a controller.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless.apk" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="android browser" data-pick="browser">
-						<i class="icon i-play" aria-hidden="true"></i>
-						<span class="what"><b>Play in the browser</b><small>No install: desktop and phone browsers. The ROM and your saves stay in your browser.</small></span>
-						<a class="exit small" href="play/">Jack in</a>
-					</li>
-					<li class="row" data-os="handheld" data-pick="handheld">
-						<i class="icon i-handheld" aria-hidden="true"></i>
-						<span class="what"><b>PortMaster port</b><small>ROCKNIX handhelds, made for the Retroid Nova and the Retroid Pocket Flip 2.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-rocknix-portmaster.zip cyberworld.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="3ds" data-pick="3ds">
-						<i class="icon i-3ds" aria-hidden="true"></i>
-						<span class="what"><b>New 3DS title</b><small>A CIA: FBI installs it on the HOME Menu, with its icon and banner. New 3DS, New 3DS XL and New 2DS XL with custom firmware; the older 3DS and 2DS are too slow for it.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless.cia" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="3ds">
-						<i class="icon i-get" aria-hidden="true"></i>
-						<span class="what"><b>Homebrew Launcher</b><small>The same game as a <code>.3dsx</code>, nothing installed: copy it into <code>sdmc:/3ds/</code> and start it from the Homebrew Launcher.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless.3dsx" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-					<li class="row" data-os="browser">
-						<i class="icon i-web" aria-hidden="true"></i>
-						<span class="what"><b>Website files</b><small>This site and its player as files, to host yourself. To play, you need none of it.</small></span>
-						<a class="exit small" data-asset="cyberworld-endless-website.zip cyberworld-endless-web.zip" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases">Get</a>
-					</li>
-				</ul>
-				<p class="then textbox" data-os="windows">Start the installer, or unpack the zip. If Windows says it protected your PC: <b>More info</b>, then <b>Run anyway</b> (the game isn't signed).</p>
-				<p class="then textbox" data-os="macos">Drag the app into Applications. It isn't notarized: on its first start, <b>System Settings › Privacy &amp; Security › Open Anyway</b>.</p>
-				<p class="then textbox" data-os="linux">On first start the game looks for your ROM in Downloads and in EmuDeck's and RetroDECK's folders, or asks for it.</p>
-				<p class="then textbox" data-os="deck">In Desktop Mode, open the Flatpak with Discover. One line in Konsole then adds it to Steam with its own art: <a href="faq/#deck">how</a>.</p>
-				<p class="then textbox" data-os="android">Allow your browser or file manager to install the app when Android asks. It asks once for your ROM and keeps a copy beside your saves; uninstalling deletes both.</p>
-				<p class="then textbox" data-os="handheld">Unzip into <code>ports/</code>, put your ROM in <code>ports/cyberworld/rom/</code> and refresh the game list.</p>
-				<div class="then textbox n3ds" data-os="3ds">
-					<figure class="qr" id="qr-3ds">
-						<div class="code">The QR code shows here once a release has the 3DS title.</div>
-						<figcaption>FBI › Remote Install › Scan QR Code</figcaption>
-					</figure>
-					<div class="steps">
-						<p>Scan the code with <b>FBI</b> on your 3DS: <b>Remote Install</b>, then <b>Scan QR Code</b>. FBI downloads the game and installs it on the HOME Menu.</p>
-						<p>Your ROM goes in <code>sdmc:/3ds/cyberworld-endless/rom/</code>, or stays where you keep GBA games (<code>sdmc:/roms/gba/</code>). Any file name works.</p>
-					</div>
-				</div>
-				<p class="then textbox" data-os="browser">Choose your ROM on the player's page. The next visit starts straight away; <b>Forget ROM and saves</b> removes both.</p>
-				</div>
-				<p class="release" id="release-line"></p>
-				<p class="tip">New versions: on GitHub, <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Watch › Custom › Releases</a>, or add the <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases.atom">release feed</a> to a reader. Questions, ideas and runs: <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions">Discussions</a>.</p>
-				<p class="tip">Enjoying it? It's free and stays free, but you can <a href="https://buymeacoffee.com/qohreuukw">buy me a coffee</a>.</p>
+				<p class="tip">For Windows, macOS, Linux, the Steam Deck, Android, ROCKNIX handhelds and the New 3DS:
+					<a href="download/" data-umami-event="go-download" data-umami-event-from="get-list">every download</a>.
+					Questions: the <a href="faq/">FAQ</a>.</p>
 			</div>
 		</div>
 	</section>
@@ -205,13 +199,14 @@
 
 <footer class="site">
 	<div class="wrap">
-		<p><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless">Source</a> ·
+		<p><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless" data-umami-event="outbound" data-umami-event-to="github">Source</a> ·
+			<a href="download/">Download</a> ·
 			<a href="faq/">FAQ</a> ·
-			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions">Discussions</a> ·
-			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/CHANGELOG.md">Changelog</a> ·
-			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md">How it works</a> ·
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions" data-umami-event="outbound" data-umami-event-to="discussions">Discussions</a> ·
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/CHANGELOG.md" data-umami-event="outbound" data-umami-event-to="changelog">Changelog</a> ·
+			<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/EMULATION.md" data-umami-event="outbound" data-umami-event-to="how-it-works">How it works</a> ·
 			<a href="LICENSE.txt">MIT license</a> ·
-			<a href="https://buymeacoffee.com/qohreuukw">Buy me a coffee</a></p>
+			<a href="https://buymeacoffee.com/qohreuukw" data-umami-event="outbound" data-umami-event-to="coffee">Buy me a coffee</a></p>
 		<p>Mega Man Battle Network is © Capcom. This is an unofficial fan project, not affiliated with or endorsed by
 			Capcom, and it contains no game data. The pictures are screenshots of the game running from a player's ROM.
 			The player embeds <a href="https://mgba.io">mGBA</a> (<a href="licenses/mGBA.txt">MPL-2.0</a>) and SDL2 (zlib).
@@ -219,7 +214,7 @@
 	</div>
 </footer>
 
-<script src="assets/qr.js"></script>
+<script src="assets/site.js"></script>
 <script src="assets/home.js"></script>
 </body>
 </html>

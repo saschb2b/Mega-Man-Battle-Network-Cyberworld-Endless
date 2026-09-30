@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **The downloads have a page of their own**, `/download/`, where the
+  home page's `#play` held them beside a player at `/play/`: old links to
+  `#play` open it, and a system in its address opens on that system
+  (`/download/#3ds`). Every page has its canonical address, a share
+  picture and words for link previews, and schema.org data (the game, the
+  FAQ's questions); the site has a sitemap and a not-found page. The
+  analytics count what visitors do, never who they are: downloads by file
+  and system, starts in the browser, ROMs taken or refused (and why),
+  platforms chosen, FAQ letters opened and links out; section anchors no
+  longer count as pages of their own. A browser no longer runs a kept
+  older script against a newer page.
 - A strong virus signal names its prize before the choice: "It pays
   DolThdr3 B. Take it on?", where it had said "a good chip" and a
   playtester weighed the risk blind.

@@ -23,8 +23,11 @@
 		unread.textContent = n;
 	}
 
-	function open(id, scroll) {
+	// (from: 'list' for the inbox's row, 'link' for an address that named it;
+	// the first letter opened by itself is not counted)
+	function open(id, scroll, from) {
 		if (!mails.has(id)) return false;
+		if (from) track('faq-open', { question: id, from });
 		for (const r of rows) {
 			const on = r.hash === `#${id}`;
 			if (on) r.setAttribute('aria-current', 'true');
@@ -43,7 +46,7 @@
 		r.addEventListener('click', (e) => {
 			e.preventDefault();
 			history.replaceState(null, '', r.hash);
-			open(r.hash.slice(1), true);
+			open(r.hash.slice(1), true, 'list');
 		});
 	}
 	// up and down move the cursor, as on the PET; Enter opens
@@ -59,7 +62,7 @@
 		inbox.scrollIntoView({ block: 'start' });
 		(rows.find((r) => r.hasAttribute('aria-current')) || rows[0]).focus({ preventScroll: true });
 	});
-	window.addEventListener('hashchange', () => open(location.hash.slice(1), true));
+	window.addEventListener('hashchange', () => open(location.hash.slice(1), true, 'link'));
 
-	if (!open(location.hash.slice(1), false)) open(rows[0].hash.slice(1), false);
+	if (!open(location.hash.slice(1), false, 'link')) open(rows[0].hash.slice(1), false);
 })();

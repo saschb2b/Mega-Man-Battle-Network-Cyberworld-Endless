@@ -86,9 +86,9 @@ game.
 ## Install
 
 Every system has its own download on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases): pick
-yours from the table. The
-[project page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/#play)
-opens its downloads on the system you visit it with. Each needs your own
+yours from the table. The project's
+[download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/)
+opens on the system you visit it with. Each needs your own
 ROM ([What you need](#what-you-need)); none contains game data.
 
 | You play on | Download | Steps |
@@ -251,8 +251,8 @@ After that the title screen appears straight away.
 
 On a New 3DS, New 3DS XL or New 2DS XL with custom firmware (Luma3DS),
 open **FBI**, choose **Remote Install**, then **Scan QR Code**, and scan the
-code in the 3DS tab of the
-[project's page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/#play):
+code on the
+[download page's 3DS tab](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#3ds):
 FBI downloads `cyberworld-endless.cia` from the newest release and installs
 it on the HOME Menu, with its icon and banner. Or copy the CIA to the SD
 card and install it from FBI's SD browser. `cyberworld-endless.3dsx` is the

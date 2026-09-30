@@ -452,15 +452,92 @@ def deb():
     print('released', out)
 
 
+SITE_URL = 'https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/'
+SITE_PAGES = ('', 'download/', 'play/', 'faq/')
+
+
+def faq_structured(page):
+    """The FAQ's letters as schema.org's FAQPage (JSON-LD, for search engines), from the page itself:
+    each letter's heading the question, its paragraphs but the links under them the answer."""
+    import html.parser
+    import json
+
+    class Letters(html.parser.HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.items, self.depth, self.grab = [], 0, None
+        def handle_starttag(self, tag, attrs):
+            a = dict(attrs)
+            if tag == 'article' and 'mail' in (a.get('class') or '').split():
+                self.items.append({'q': '', 'a': []})
+            elif self.items and tag == 'h2':
+                self.grab = 'q'
+            elif self.items and tag == 'p' and 'more' not in (a.get('class') or '').split():
+                self.items[-1]['a'].append('')
+                self.grab = 'a'
+        def handle_endtag(self, tag):
+            if tag in ('h2', 'p'):
+                self.grab = None
+        def handle_data(self, data):
+            if self.grab == 'q':
+                self.items[-1]['q'] += data
+            elif self.grab == 'a':
+                self.items[-1]['a'][-1] += data
+
+    with open(page, encoding='utf-8') as f:
+        text = f.read()
+    letters = Letters()
+    letters.feed(text)
+    squash = lambda t: ' '.join(t.split())
+    doc = {'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [
+        {'@type': 'Question', 'name': squash(i['q']),
+         'acceptedAnswer': {'@type': 'Answer', 'text': ' '.join(squash(p) for p in i['a'] if p.strip())}}
+        for i in letters.items if i['q'].strip()]}
+    block = '<script type="application/ld+json">\n' + json.dumps(doc, ensure_ascii=False) + '\n</script>\n'
+    with open(page, 'w', encoding='utf-8') as f:
+        f.write(text.replace('</head>', block + '</head>', 1))
+
+
+def fingerprint(out):
+    """Each page's own scripts and styles named with their contents' hash (?v=...), so a visitor's
+    browser never runs an older one against a newer page: GitHub Pages lets browsers keep them ten
+    minutes."""
+    import glob
+    import hashlib
+    import re
+    for page in glob.glob(os.path.join(out, '**', '*.html'), recursive=True):
+        with open(page, encoding='utf-8') as f:
+            text = f.read()
+        def stamp(m):
+            path = os.path.normpath(os.path.join(os.path.dirname(page), m.group(2)))
+            if not os.path.isfile(path):
+                return m.group(0)
+            with open(path, 'rb') as f:
+                digest = hashlib.sha1(f.read()).hexdigest()[:10]
+            return f'{m.group(1)}="{m.group(2)}?v={digest}"'
+        text = re.sub(r'(src|href)="(?!https?:|//)([^"?#]+\.(?:js|css))"', stamp, text)
+        with open(page, 'w', encoding='utf-8') as f:
+            f.write(text)
+
+
 def site(analytics=True):
-    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it;
-    without the pages' visit counter (Umami, counting on the project's own domain only) for a copy to
-    host elsewhere."""
+    """build/site: the project's pages (web/) with the browser build in play/, as GitHub Pages serves it,
+    with its sitemap for search engines; without the pages' visit counter (Umami, counting on the
+    project's own domain only), the sitemap and the not-found page, whose links are the Pages site's,
+    for a copy to host elsewhere."""
     out = os.path.join(ROOT, 'build', 'site')
     shutil.rmtree(out, ignore_errors=True)
     shutil.copytree(os.path.join(ROOT, 'web'), out)
+    faq_structured(os.path.join(out, 'faq', 'index.html'))
+    if analytics:
+        with open(os.path.join(out, 'sitemap.xml'), 'w') as f:
+            f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
+            for page in SITE_PAGES:
+                f.write(f'  <url><loc>{SITE_URL}{page}</loc></url>\n')
+            f.write('</urlset>\n')
     if not analytics:
         import glob
+        os.remove(os.path.join(out, '404.html'))
         for page in glob.glob(os.path.join(out, '**', '*.html'), recursive=True):
             with open(page) as f:
                 lines = f.readlines()
@@ -475,6 +552,17 @@ def site(analytics=True):
     os.makedirs(os.path.join(out, 'licenses'))
     shutil.copy2(os.path.join(ROOT, 'build', 'web', 'licenses', 'mGBA.txt'), os.path.join(out, 'licenses'))
     open(os.path.join(out, '.nojekyll'), 'w').close()
+    # (the engine's two halves named by the wasm's hash, so a browser never
+    # pairs a kept one with a new one; then every page's own files by theirs)
+    import hashlib
+    with open(os.path.join(out, 'play', 'cyberworld.wasm'), 'rb') as f:
+        wasm = hashlib.sha1(f.read()).hexdigest()[:10]
+    app = os.path.join(out, 'play', 'app.js')
+    with open(app, encoding='utf-8') as f:
+        text = f.read()
+    with open(app, 'w', encoding='utf-8') as f:
+        f.write(text.replace("const ENGINE_VERSION = '';", f"const ENGINE_VERSION = '{wasm}';", 1))
+    fingerprint(out)
     print('site in', out)
     return out
 
