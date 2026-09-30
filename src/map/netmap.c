@@ -365,7 +365,7 @@ static void make_stripes(bool keep_pads) {
 
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
-static int floor_cb(int A, int B, const void *ctx) {
+static int floor_raw(int A, int B, const void *ctx) {
 	int k = cur->rise / 32, x = B + place.gx0, y = -A + place.gy0;
 	if (!ground(kind(x, y)) && k) {
 		x += k; y += k;   /* a raised panel drawn here */
@@ -385,6 +385,27 @@ static int floor_cb(int A, int B, const void *ctx) {
 	 * a field, green at its sides) */
 	if (pads_walkway && cur->pad && cur->pad[y * cur->gw + x]) return TILE_B | pad;
 	return (walkway(x, y) ? TILE_B : TILE_A) | pad;
+}
+
+/* floor_raw's answers while the tiles are picked, per panel: the layout
+ * no longer changes then, and the pick asks after each panel for every
+ * pixel near it, four fifths of making a layer (a 3DS took seconds) */
+#define MEMO_EDGE 8
+static int32_t *floor_memo;   /* (-1: not asked yet) */
+static int memo_w, memo_h;
+
+static int floor_cb(int A, int B, const void *ctx) {
+	int32_t *m = NULL;
+	if (floor_memo && !ctx) {
+		int mx = B + place.gx0 + MEMO_EDGE, my = -A + place.gy0 + MEMO_EDGE;
+		if (mx >= 0 && my >= 0 && mx < memo_w && my < memo_h) {
+			m = &floor_memo[my * memo_w + mx];
+			if (*m >= 0) return *m;
+		}
+	}
+	int v = floor_raw(A, B, ctx);
+	if (m) *m = v;
+	return v;
 }
 
 int netmap_rise(void) { return cur ? cur->rise : 0; }
@@ -608,7 +629,13 @@ static bool write_tilemap(const Learned *L) {
 	last.seams = calloc(cells, 1);
 	free(last.pasted);
 	last.pasted = calloc(cells, 1);
+	memo_w = cur->gw + 2 * MEMO_EDGE;
+	memo_h = cur->gh + 2 * MEMO_EDGE;
+	floor_memo = malloc((size_t)memo_w * memo_h * sizeof *floor_memo);
+	if (floor_memo) memset(floor_memo, 0xFF, (size_t)memo_w * memo_h * sizeof *floor_memo);
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
+	free(floor_memo);
+	floor_memo = NULL;
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
 	paste_stairs(L, map, tw, th);
