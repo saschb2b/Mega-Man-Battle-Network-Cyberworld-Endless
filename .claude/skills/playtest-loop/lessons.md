@@ -1275,3 +1275,49 @@ persona's record (`profile.duel_won % 3`: 0 and 1 race in every act, 2
 waits for the third act) or capture the act's second layer with `--dev
 duels=N`, and say in the goals where he is.
 
+
+## Session 47: 7/10 (keep playing: yes; recommend: yes)
+
+Run 4 continued from layer 4 (Storm, EraseCross, threat 1, HP+):
+Custom1 installed at MegaMan's word, two acts' dealers and an official
+gate's Chip Order, then CircusMan on layer 6 deleted MegaMan with 286 of
+his 700 HP left, the fifth loss to him. From 8 to 7: the fixes landed,
+the same guardian ended the run, and ProtoMan's netbattle is still two
+layers past him.
+
+Confirmed: the official gate where ProtoMan names his netbattle opens to
+the clearance; Chaud and ProtoMan both say "past the next guardian", and
+Lan answers; a picked program says whether L and R turn it (Custom1,
+HP+100); EraseCross by BN6's rule (a Cannon erased a 40-HP Gunner, two
+erased 140-HP Shooters, WaveArm3 bugged CircusMan at 480); the arrow into
+a walkway's mouth, then down it, twice.
+
+Raised: CircusMan's tent, a wall for five sessions (major, open): two
+tents took 150 of 360 HP though Kai moved a panel every 45 frames; the
+briefing's second wording (his fade, then step off) worked once in three.
+The lit panel hides under MegaMan's sprite (session 46's sweep), so the
+tell is his fade alone, too quick to act on. Chaud's "every official
+gate opens" to a player already cleared: already fixed after the pin
+(7a81375: his full clearance, the vaults). The Chip Order's picks (no
+description on R, no code of the folder's; open, wish 3). ProtoMan
+unannounced on the layer where he names a later netbattle: by design
+(the map leaves him out, map_left_out; Chaud's call says it). "It's a
+long way yet" near the exit: 14 panels or more of walk, calibration, said
+in the patch notes. The shop's remembered Yes/No cursor: BN6's own shop
+screen. EraseCross's slow drain on a 700-HP Navi: BN6's rule.
+
+Beside the loop: 0.5.2 and 0.5.3 released (the 3DS's smooth net and
+faster layers; issues #20 and #21, a player's: a duel counted again after
+a CONTINUE, the BugFrag Trader trading at 0), and Battle Network 5's maps
+read through the map reader (docs/MULTIROM.md).
+
+Cost: 312 calls (260, the guardian's 40 and a few to finish the fight);
+CircusMan's fight 105 s of game time.
+
+Loop change: **a guardian who wins twice gets his tell measured, not
+reworded.** CircusMan's briefing was reworded in sessions 46 and 47 and
+he won both. Before a third wording, watch the attack in god mode
+(`guardian_watch.sh`) and count the frames between the first thing a
+player can see or hear and the hit; under about 30 frames (a quarter
+second to see, a step to move) no words fix it: the tell itself needs
+lengthening, or a cue of the engine's own (a sound, a mark on the panel).
