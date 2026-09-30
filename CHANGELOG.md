@@ -16,6 +16,9 @@
   the boot's frames draw no GBA picture: a fifth of the core's time on a
   slow machine. The frame log (`frame_log = on`) splits a frame's time: its
   update, the GBA's share with and without its picture, drawing, present.
+- An L or R kept for the Custom screen, pressed as its gauge was all but
+  full, no longer lets a second press open a chip's description: once the
+  kept press opens the screen, L and R are held off half a second.
 - Lan answers a lost duel ("Next time, Chaud!"), where Chaud had the last
   word. Before a rematch with a guardian who has beaten MegaMan more than
   once, MegaMan says the record ("CircusMan has beaten us twice. Not a

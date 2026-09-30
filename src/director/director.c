@@ -1619,16 +1619,20 @@ static uint32_t choice_guard(uint32_t keys) {
  * UP that was stepping MegaMan off a lit panel, and the bomb burst as the
  * battle went on; dropping the press at a d-pad press instead lost a
  * playtester's R pressed before a dodge in a guardian's fight, where both
- * are needed). */
+ * are needed). Once a kept press has opened the Custom screen, L and R are
+ * held off CUSTOM_HUSH frames: a second R, pressed as the screen was slow
+ * to slide in, opened a chip's description on it. */
 #define CUSTOM_EARLY 150
 #define CUSTOM_TRIES 45
 #define CUSTOM_RETRY 20
 #define CUSTOM_CALM 12
 #define CUSTOM_WAIT 60
+#define CUSTOM_HUSH 30
 static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
-	static int kept, step, calm, wait;
+	static int kept, step, calm, wait, hush;
 	static uint32_t which;
-	if (main_mode() != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { kept = step = calm = 0; return keys; }
+	if (main_mode() != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { kept = step = calm = hush = 0; return keys; }
+	if (hush > 0) { --hush; return keys & ~(KEY_L | KEY_R); }
 	if (keys & PAD_KEYS) calm = CUSTOM_CALM;
 	else if (calm > 0) --calm;
 	bool full = emu_read16(BN6_CUSTOM_GAUGE) >= 0x4000;
@@ -1644,6 +1648,7 @@ static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
 	if (kept <= 0) return keys;
 	if (!full) {
 		/* still filling, or emptied by the Custom screen taking a press */
+		if (step) hush = CUSTOM_HUSH;
 		kept = step ? 0 : kept - 1;
 		return keys;
 	}
