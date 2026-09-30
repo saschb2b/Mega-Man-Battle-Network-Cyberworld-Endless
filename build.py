@@ -959,12 +959,30 @@ SCREENSHOTS = [
     # most common handheld screen, 640x480, the picture at 2x in its borders)
     ('portmaster', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12',
                     '--size', '640x480'], [(2175, 'portmaster')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
+    # (a New 3DS's two screens: seed 7's layer 3 on the top one, the
+    # layer's map on the bottom one, a Net Dealer and a Recovery Mr. Prog
+    # met on the way to BlastMan's arena)
+    ('3ds', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
+     [(1000, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
 ]
+
+
+def two_screens(top, bottom):
+    """A New 3DS's two screens in one picture: the game's 240x160 at 1.5x on
+    the top one (400x240), its pixels mixed at their edges as the GPU's filter
+    mixes them, and the second screen (320x240) under it."""
+    from PIL import Image
+    im = Image.new('RGB', (416, 512), (28, 30, 38))
+    im.paste(Image.new('RGB', (400, 240)), (8, 8))
+    im.paste(top.resize((360, 240), Image.BILINEAR), (28, 8))
+    im.paste(bottom, (48, 264))
+    return im
 
 
 def screenshots(only=None):
     """docs/screenshots/NAME.png: the 240x160 picture of chosen frames (or the
-    whole screen, shrunk by the entry's last number)."""
+    whole screen, shrunk by the entry's last number; or '3ds', the picture
+    and the second screen as a New 3DS shows them)."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
@@ -975,12 +993,14 @@ def screenshots(only=None):
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'data'))
         shots = ','.join(f'{f}:/src/.build/screenshots/{n}.bmp' for f, n in frames)
+        dual = whole == ['3ds']
         # (the whole screen, the touch controls on it, where the canvas has the game alone)
-        shot = '--screen-shot' if whole else '--shot'
+        shot = '--screen-shot' if whole and not dual else '--shot'
+        second = ['--second-shot', ','.join(f'{f}:/src/.build/screenshots/{n}-second.bmp' for f, n in frames)] if dual else []
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
-                      *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots,
+                      *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
                       mounts=[(default_rom_dir(), '/rom:ro')])
         for k, v in saved.items():
             if v is None:
@@ -992,10 +1012,12 @@ def screenshots(only=None):
         for _, n in frames:
             im = Image.open(os.path.join(tmp, f'{n}.bmp')).convert('RGB')
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
-            if not whole:
+            if not whole or dual:
                 im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
             elif whole[0] > 1:
                 im = im.resize((w // whole[0], h // whole[0]), Image.LANCZOS)
+            if dual:
+                im = two_screens(im, Image.open(os.path.join(tmp, f'{n}-second.bmp')).convert('RGB'))
             im.save(os.path.join(out, f'{n}.png'), optimize=True)
             print('screenshot', n)
     return 0

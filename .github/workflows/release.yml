@@ -159,7 +159,9 @@ jobs:
             2>/dev/null > FILES || true
           xargs sha256sum < FILES > SHA256SUMS.txt
       # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
-      # section); a 0.x version is an alpha, published as a pre-release
+      # section); 0.1 to 0.4 were alphas, published as pre-releases, and
+      # 0.5 on are betas, each GitHub's latest release (which the
+      # AppImage's updater follows, and pre-releases never were)
       - name: Notes
         run: python3 tools/release_notes.py "$TAG" > build/release/NOTES.md
       - name: Publish
@@ -168,7 +170,10 @@ jobs:
         run: |
           flags=()
           title="Cyberworld Endless $TAG"
-          case "$TAG" in v0.*) flags+=(--prerelease); title="$title (alpha)";; esac
+          case "$TAG" in
+            v0.[0-4].*) flags+=(--prerelease); title="$title (alpha)";;
+            v0.*) title="$title (beta)";;
+          esac
           files=(build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/SHA256SUMS.txt)
           while read -r f; do files+=("build/release/$f"); done < build/release/FILES
           gh release create "$TAG" --verify-tag --notes-file build/release/NOTES.md "${flags[@]}" --title "$title" "${files[@]}"

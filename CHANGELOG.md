@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **The first beta.** The title screen names the build a beta, and the
+  release is GitHub's latest, which the AppImage's updater follows: the
+  alphas were pre-releases, which it skips.
 - **The 3DS's bottom screen shows the layer's map,** always open (issue
   #9): the floor MegaMan has seen, the way on to the exit or the
   guardian, the services and gates he has come near, and a mark on the
