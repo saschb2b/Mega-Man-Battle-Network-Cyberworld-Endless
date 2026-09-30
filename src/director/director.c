@@ -758,6 +758,13 @@ static void note_folder_codes(void) {
  * ProtoMan himself has been beaten (the third rung, a third win). */
 static int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : profile.duel_won >= 1 ? 1 : 0; }
 
+/* The layer's official gate open where Chaud's clearance reaches its level
+ * (its script reads LAYER_CLEARED_FLAG, docs/RIVAL.md). */
+static void official_sync(void) {
+	if (layer_objs_official_level && rival_clearance() >= layer_objs_official_level) flag_set(LAYER_CLEARED_FLAG);
+	else flag_clear(LAYER_CLEARED_FLAG);
+}
+
 /* The rival's time to beat for a squad of `hp` (docs/RIVAL.md): three
  * seconds and one for every thirty HP, eight percent faster for every two
  * duels ProtoMan has lost (a rung's round), never under six tenths of it. */
@@ -867,6 +874,7 @@ static bool build_layer(void) {
 	flag_clear(LAYER_HEAL_TOLD_FLAG);
 	flag_clear(LAYER_VAULT_FLAG);
 	flag_clear(LAYER_OFFICIAL_FLAG);
+	official_sync();
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
 	D.secret_call = run.side_kind == LAYER_SECRET;
@@ -1259,7 +1267,7 @@ void director_draw_map(void) {
  * that makes them otherwise continues its layer afresh from its start (the
  * saved RAM's flags and Mystery Data would not match this build's). Bump it
  * with any change to what a layer seed makes. */
-#define LAYER_MAKE 57
+#define LAYER_MAKE 58
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -2056,6 +2064,7 @@ bool director_resume(void) {
 		/* the shops' data in RAM is the saved one: this layer's again */
 		layer_objs_shops(&D.objs);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
+		official_sync();
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
@@ -2068,7 +2077,6 @@ bool director_resume(void) {
 				if (f != LAYER_GIFT_FLAG && (f < LAYER_BOSS_GONE_FLAG || f > LAYER_EXIT_OPEN_FLAG)) flag_clear(f);
 			flag_clear(LAYER_VAULT_FLAG);
 			flag_clear(LAYER_OFFICIAL_FLAG);
-	flag_clear(LAYER_OFFICIAL_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
@@ -2150,6 +2158,13 @@ static void duel_verdict(bool won) {
 	if (after > before && after == 1) ADD("@C You've earned my clearance, Lan. The net's official gates will open for you now.|");
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
+	/* (and the gate beside the duel opens at once: the prize where it was
+	 * offered) */
+	bool opened = after > before && layer_objs_official_level && after >= layer_objs_official_level;
+	if (opened) {
+		flag_set(LAYER_CLEARED_FLAG);
+		ADD("|@M Lan! The official gate on this layer will open for us now!");
+	}
 	/* (Lan answers a loss, as he took the duel: Chaud had the last word) */
 	if (!beat) ADD("|@L Next time, Chaud!");
 	#undef ADD
@@ -2604,7 +2619,8 @@ void director_update(void) {
 				"@C He'll be waiting in the third act. Get MegaMan ready.");
 		else if (layer_objs_duel_rung == 2)
 			snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
-				"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? "Beat him, and every official gate opens for you."
+				"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
+				? "Beat him, and every official gate opens for you. There's one on this layer." : "Beat him, and every official gate opens for you.")
 				: "He hasn't forgotten the last time.");
 		else
 			snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
@@ -2613,7 +2629,8 @@ void director_update(void) {
 				sec / 60, sec % 60, (f % 60) * 100 / 60,
 				/* (what a win earns, before the first: a playtester risked his
 				 * run for pride alone) */
-				profile.duel_won ? "" : "@C Beat it, and I'll clear you for the net's official gates.|",
+				profile.duel_won ? "" : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer.|"
+				: "@C Beat it, and I'll clear you for the net's official gates.|",
 				layer_objs_duel_rung == 1 ? ", without a hit" : "");
 		/* (Lan answers: a call no one answered read as a message left) */
 		if (!layer_objs_duel_later) {

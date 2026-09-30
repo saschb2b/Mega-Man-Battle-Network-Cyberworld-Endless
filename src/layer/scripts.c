@@ -493,21 +493,28 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 	return i;
 }
 
-int ta_official(TextArchive *t, int flag, int level, int need, int won, const ScriptsVault *v) {
+int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, const ScriptsVault *v) {
 	char s[300];
-	if (won < need) {
-		/* (the telegraph first: whose clearance, and how far we are) */
-		if (level >= 2)
-			snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance.|"
-				"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
-		else
-			snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance.|"
-				"@M It opens once we've won a duel against ProtoMan. Not yet!");
-		return ta_say(t, FACE_MEGAMAN, s);
-	}
 	snprintf(s, sizeof s, level >= 2 ? "Chaud's clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
 		: "Chaud's clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
-	return pick_three(t, flag, v, s, "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
+	int open = pick_three(t, flag, v, s, "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
+	/* sealed until `open_flag`, which the director sets where Chaud's
+	 * clearance reaches the gate's level, as the layer begins or as a duel
+	 * on it is won (a gate beside the duel opens at once): the telegraph
+	 * first, whose clearance, and how far we are */
+	if (level >= 2)
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance.|"
+			"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
+	else
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance.|"
+			"@M It opens once we've won a duel against ProtoMan. Not yet!");
+	int i = ta_script(t);
+	uint8_t check[] = { 0xEF, 0x00, (uint8_t)open_flag, (uint8_t)(open_flag >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */
+	ta_bytes(t, check, sizeof check);
+	bool first = true;
+	ta_pages(t, s, FACE_MEGAMAN, &first);
+	ta_end(t);
+	return i;
 }
 
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {

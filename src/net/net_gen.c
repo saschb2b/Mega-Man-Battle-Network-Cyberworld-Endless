@@ -899,11 +899,15 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	/* an official gate (docs/RIVAL.md): from act 2, where no other gate or
 	 * dark warp stands; sealed until Chaud's clearance reaches its level
 	 * (from the seed, not the rolls: two rolls more reshuffled the rooms
-	 * of every layer after them) */
+	 * of every layer after them). And on every act's duel layer, the prize
+	 * where the duel is offered, its level the act's (1 to the third, then
+	 * 2), the only gate there (the rolls kept): a playtester's promise of
+	 * official gates pointed at none he had met */
+	if (duel) navi_gate = vault = false;
 	uint32_t oh = (seed ^ 0x0FF1C1A1u) * 2654435761u;
-	bool official = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !undernet && !navi_gate && !vault &&
-		(oh >> 16) % 100 < 25;
-	int official_level = official ? 1 + (int)((oh >> 8) & 1) : 0;
+	bool official = kind == LAYER_NORMAL && !layer.boss_layer &&
+		(duel || (pacing_act(depth) >= 1 && !undernet && !navi_gate && !vault && (oh >> 16) % 100 < 25));
+	int official_level = !official ? 0 : duel ? (pacing_act(depth) >= 2 ? 2 : 1) : 1 + (int)((oh >> 8) & 1);
 
 	int order[MAX_ROOMS], n = 0;
 	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
@@ -944,7 +948,17 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
 	if (navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = gate_navi; ++next; }
 	if (vault) { PLACE(OBJ_VAULT); ++next; }
-	if (official) { NetObj *g = PLACE(OBJ_OFFICIAL); if (g) g->param = official_level; ++next; }
+	if (official) {
+		NetObj *g = PLACE(OBJ_OFFICIAL);
+		/* (beside a duel, wherever a room has space: a small endless layer
+		 * with every room taken had its duel and no gate) */
+		for (int i = 0; !g && duel && i < n; ++i)
+			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
+		for (int i = 0; !g && duel && i < layer.nrooms; ++i)
+			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
+		if (g) g->param = official_level;
+		++next;
+	}
 	/* the area's props, set as the originals set theirs, before the loose
 	 * Mystery Data and bystanders fill the rooms: a landmark, rows and the
 	 * signs (docs/LEVEL_DESIGN.md, Props) */

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Chaud's prize stands beside the duel.** Every act's duel layer holds a
+  sealed official gate beside ProtoMan (an official Chip Order in the first
+  two acts, the official vault from the third), and Chaud's call says so.
+  Win the duel that earns the clearance and the gate opens at once. A
+  playtester's promise of official gates had pointed at gates he never met
+  (they stand on one layer in four elsewhere). Runs saved by an earlier
+  build continue their layer afresh.
 - **A Nintendo 3DS build** (issue #9): a `.3dsx` for the Homebrew Launcher
   on a New 3DS, which finds the ROM where 3DS players keep GBA games.
   The picture fills the top screen's height (`screen = whole` in

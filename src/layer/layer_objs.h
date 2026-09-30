@@ -30,6 +30,9 @@
 #define LAYER_VAULT_FLAG       0x1453
 /* The layer's official gate gave its chip (docs/RIVAL.md). */
 #define LAYER_OFFICIAL_FLAG    0x1455
+/* ... and Chaud's clearance reaches its level: it opens (the director sets
+ * it as the layer begins, and as a duel on it is won). */
+#define LAYER_CLEARED_FLAG     0x1456
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -65,6 +68,8 @@ extern bool layer_objs_dealer_named;
  * without a hit, 2 a netbattle with him), and whether the netbattle waits
  * for a later act (ProtoMan then names it, and asks nothing). */
 extern int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
+/* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
+extern int layer_objs_official_level;
 extern bool layer_objs_duel_later;
 
 #endif

@@ -122,7 +122,14 @@ beat: ProtoMan in battle, his own AI and his attacks.
 Level one after the first duel won, level two after the third (the
 netbattle). Official gates stand on normal layers from the second act,
 one layer in four (from the layer's seed, not its rolls), never with a
-Navi gate, a vault or a dark warp; each is level one or two.
+Navi gate, a vault or a dark warp; each is level one or two. And one
+stands on every act's duel layer, beside ProtoMan, the only gate there:
+level one in the first two acts, two from the third. Chaud's call says so
+("There's one on this layer"), and a gate opens as soon as the clearance
+reaches its level, beside a won duel at once, MegaMan saying it will
+(event flag `0x1456`, which the director sets as a layer begins and as a
+duel is won; the gate's script reads it). A playtester's promise of
+official gates had pointed at gates he never met.
 
 - **Sealed**, MegaMan says for whom it opens: "It opens once we've won a
   duel against ProtoMan. Not yet!", "It takes three duel wins against

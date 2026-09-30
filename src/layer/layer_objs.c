@@ -48,6 +48,7 @@
 #define SPR_TECH        69   /* GirlNavi, the NaviCust vendor */
 bool layer_objs_dealer_again, layer_objs_dealer_named;
 int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
+int layer_objs_official_level;
 bool layer_objs_duel_later;
 
 #define SPR_BYSTANDER   67   /* EvilNavi */
@@ -232,6 +233,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i <= OBJ_OFFICIAL; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
+	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
 	int counter = counter_element(run.depth, run.biome, run.boss_order[run.biome]);
@@ -534,7 +536,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			 * Library holds (held in any run), as BN6's Chip Order orders
 			 * them; at level 2 Mega chips */
 			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
-			int level = o->param >= 2 ? 2 : 1, need = level >= 2 ? 3 : 1;
+			int level = o->param >= 2 ? 2 : 1;
+			layer_objs_official_level = level;
 			ScriptsVault v = { 0 };
 			int from[512], nfrom = 0;
 			for (int id = 1; id < 512 && nfrom < 512; ++id)
@@ -555,7 +558,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				v.code[k] = code == '*' ? 26 : code - 'A';
 				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
 			}
-			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, level, need, profile.duel_won, &v);
+			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, &v);
 			break;
 		}
 		case OBJ_VAULT: {

@@ -97,7 +97,7 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
  * are short of `need`, its words say for whom it opens; else its three
  * chips, one to take (a Chip Order from the Library at level 1, Mega
  * chips at level 2). */
-int ta_official(TextArchive *t, int flag, int level, int need, int won, const ScriptsVault *v);
+int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, const ScriptsVault *v);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
 /* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of

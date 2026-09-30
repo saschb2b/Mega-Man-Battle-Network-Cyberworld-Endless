@@ -206,8 +206,17 @@ static void test_generation(void) {
 		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
 		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
 			bool duel = false;
-			for (int i = 0; i < layer.nobj; ++i) duel |= layer.obj[i].type == OBJ_DUEL;
+			int official = 0, gates = 0;
+			for (int i = 0; i < layer.nobj; ++i) {
+				duel |= layer.obj[i].type == OBJ_DUEL;
+				if (layer.obj[i].type == OBJ_OFFICIAL) official = layer.obj[i].param;
+				gates += layer.obj[i].type == OBJ_NAVI_GATE || layer.obj[i].type == OBJ_VAULT;
+			}
 			CHECK(duel, "seed %u: no duel on an act's second layer (depth %d, area %d)", seed, depth, biome);
+			/* ... and beside it the official gate it opens, the act's level,
+			 * the only gate there */
+			CHECK(official == (pacing_act(depth) >= 2 ? 2 : 1), "seed %u: official gate %d on a duel layer (depth %d)", seed, official, depth);
+			CHECK(!gates, "seed %u: another gate beside the duel (depth %d)", seed, depth);
 		}
 		bool has_exit = false;
 		for (int i = 0; i < layer.nobj; ++i) {
