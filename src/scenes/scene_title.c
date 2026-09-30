@@ -489,8 +489,9 @@ static void setup_draw(int x0, int y0) {
 		for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
 		/* (and its costs: BN6's own weakness, which a playtester was told
 		 * wrong, and no other Cross) */
-		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL;
-		if (weak) snprintf(buf, sizeof buf, "From the first battle. %s attacks do 2x", weak);
+		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL, *strong = S.cross ? powers_cross_strength(S.cross) : NULL;
+		if (weak && strong) snprintf(buf, sizeof buf, "%s. %s attacks do 2x", strong, weak);
+		else if (weak) snprintf(buf, sizeof buf, "From the first battle. %s attacks do 2x", weak);
 		note = weak ? buf : S.cross ? "From the first battle"
 			: open_crosses ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
 		/* (the ones still shut, and how) */

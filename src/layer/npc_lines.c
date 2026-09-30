@@ -62,6 +62,9 @@ const char *npc_line(int depth, int i) {
 	int n = place < 6 ? N(early) : place < 12 ? N(mid) : N(deep);
 	/* in a rebuilt net every other bystander remembers */
 	if (depth > CYCLE_LAYERS && i % 2 == 0) return again[((i / 2) % N(again) + N(again)) % N(again)];
-	int k = ((i % (n + N(tips))) + n + N(tips)) % (n + N(tips));
+	/* (the beginner's tips in the first act only: deeper, a bystander
+	 * telling a playtester how the Custom Gauge works rang false) */
+	int nt = place < 3 ? N(tips) : 0;
+	int k = ((i % (n + nt)) + n + nt) % (n + nt);
 	return k < n ? tier[k] : tips[k - n];
 }

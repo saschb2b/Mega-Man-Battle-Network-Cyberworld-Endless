@@ -9,6 +9,8 @@ void powers_after_boss(int navi, int biome);
 const char *powers_cross_name(int navi);
 /* The attacks that hit MegaMan twice as hard in that Cross ("Aqua"). */
 const char *powers_cross_weakness(int navi);
+/* What the Cross does beyond its buster, where BN6 gives it more, or NULL. */
+const char *powers_cross_strength(int navi);
 /* A run's start with `navi`'s Cross brought (run.cross, docs/META.md): it is
  * in the Custom screen from the first battle. */
 void powers_bring(int navi);

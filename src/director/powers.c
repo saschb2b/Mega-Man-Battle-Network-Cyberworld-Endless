@@ -14,12 +14,14 @@
 /* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, what MegaMan
  * feels of each, and the attacks that hit it twice as hard (BN6's own
  * Cross tutorials, CompText86D0614) */
-static const struct { int navi, flag; const char *name, *feel, *weak; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua" },
-	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood" },
-	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker" },
-	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind" },
-	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua" },
+static const struct { int navi, flag; const char *name, *feel, *weak, *strong; } crosses[] = {
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua", NULL },
+	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood", NULL },
+	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", NULL },
+	/* (BN6's EraseCross deletes a virus it hits with a counter: two
+	 * playtesters found it by chance, the setup named only the weakness) */
+	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind", "Counters erase viruses" },
+	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua", NULL },
 };
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its
@@ -33,6 +35,12 @@ static bool beaten_before(int navi, int depth) {
 const char *powers_cross_name(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi) return crosses[i].name;
+	return NULL;
+}
+
+const char *powers_cross_strength(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) return crosses[i].strong;
 	return NULL;
 }
 

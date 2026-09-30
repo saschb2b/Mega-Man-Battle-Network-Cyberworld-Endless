@@ -272,7 +272,9 @@ static void report_text(char *s, int size) {
 	ADD(" ScrtData: %d of 3%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ", the gate open" : "");
 	ADD(" You brought the %s folder", meta_folder(run.folder)->name);
 	const char *weak = run.cross ? powers_cross_weakness(run.cross) : NULL;
-	if (run.cross && weak) ADD(" and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
+	const char *strong = run.cross ? powers_cross_strength(run.cross) : NULL;
+	if (run.cross && weak && strong) ADD(" and %s: %c%s, and %s attacks do 2x to it.", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1, weak);
+	else if (run.cross && weak) ADD(" and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
 	else if (run.cross) ADD(" and %s.", powers_cross_name(run.cross));
 	else ADD(".");
 	ADD(" Threat %d.", run.threat);

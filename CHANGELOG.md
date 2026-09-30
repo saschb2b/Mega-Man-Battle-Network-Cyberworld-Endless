@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Lan answers a lost duel ("Next time, Chaud!"), where Chaud had the last
+  word. Before a rematch with a guardian who has beaten MegaMan more than
+  once, MegaMan says the record ("CircusMan has beaten us twice. Not a
+  third time!"), not "I'm ready this time!" every time. The setup and the
+  PET say what EraseCross does, not only its weakness: its counters erase
+  viruses, as in BN6. Bystanders keep their beginner's tips (the Custom
+  Gauge, stacking codes) to the first act.
 - **Windows keeps what a save writes.** A save writes its new file beside
   the old one and renames it over it, so a power cut never leaves half a
   save; Windows' C library refuses that rename where the old file is, so

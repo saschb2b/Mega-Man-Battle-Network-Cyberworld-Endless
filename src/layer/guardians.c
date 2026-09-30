@@ -283,7 +283,14 @@ const char *guardian_intro(int navi, int version, int biome) {
 	if (biome == BIOME_NEST) ADD("The Nest built me from every battle you have fought.|");
 	ADD("%s", s);
 	/* MegaMan answers now and then, never over a first meeting */
-	if (r->met && r->last == RIVAL_NAVI_WON) ADD("|@M I'm ready this time!");
+	/* (after a loss the record in it: "I'm ready this time!" before every
+	 * rematch read as a loop to a playtester two down against CircusMan) */
+	static const char *const times[] = { "", "", "twice", "three times", "four times" };
+	static const char *const next[] = { "", "", "a third", "a fourth", "a fifth" };
+	if (r->met && r->last == RIVAL_NAVI_WON && r->navi_won >= 2 && r->navi_won <= 4)
+		ADD("|@M %s has beaten us %s. Not %s time!", name, times[r->navi_won], next[r->navi_won]);
+	else if (r->met && r->last == RIVAL_NAVI_WON && r->navi_won > 4) ADD("|@M %d times %s has beaten us. Not this time!", r->navi_won, name);
+	else if (r->met && r->last == RIVAL_NAVI_WON) ADD("|@M I'm ready this time!");
 	else if (r->met && r->met % 3 != 1) ADD("|@M %s", replies[r->met % 3]);
 	/* and, from battle data, when to strike, just before the fight: the
 	 * briefing on his layer came ten minutes before a playtester's fight,

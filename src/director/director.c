@@ -2145,6 +2145,8 @@ static void duel_verdict(bool won) {
 	if (after > before && after == 1) ADD("@C You've earned my clearance, Lan. The net's official gates will open for you now.|");
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
+	/* (Lan answers a loss, as he took the duel: Chaud had the last word) */
+	if (!beat) ADD("|@L Next time, Chaud!");
 	#undef ADD
 	D.duel_verdict_due = true;
 }
