@@ -33,6 +33,9 @@
 /* ... and Chaud's clearance reaches its level: it opens (the director sets
  * it as the layer begins, and as a duel on it is won). */
 #define LAYER_CLEARED_FLAG     0x1456
+/* Chaud's call on a duel layer was made (a CONTINUE does not make it
+ * again). */
+#define LAYER_DUEL_CALLED_FLAG 0x1457
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */

@@ -928,6 +928,7 @@ static bool build_layer(void) {
 	flag_clear(LAYER_HEAL_TOLD_FLAG);
 	flag_clear(LAYER_VAULT_FLAG);
 	flag_clear(LAYER_OFFICIAL_FLAG);
+	flag_clear(LAYER_DUEL_CALLED_FLAG);
 	official_sync();
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
@@ -2221,6 +2222,7 @@ bool director_resume(void) {
 				if (f != LAYER_GIFT_FLAG && (f < LAYER_BOSS_GONE_FLAG || f > LAYER_EXIT_OPEN_FLAG)) flag_clear(f);
 			flag_clear(LAYER_VAULT_FLAG);
 			flag_clear(LAYER_OFFICIAL_FLAG);
+			flag_clear(LAYER_DUEL_CALLED_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
@@ -2236,6 +2238,9 @@ bool director_resume(void) {
 		boss_resume();
 		/* the map as far as it was seen (none for another build's layer) */
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
+		/* (Chaud's call, made before the save, is not made again: every
+		 * CONTINUE on a duel layer had replayed it, after the duel too) */
+		if (flag_get(LAYER_DUEL_CALLED_FLAG)) D.duel_call_due = false;
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_get(D.objs.choice[i].flag)) {
@@ -2336,6 +2341,7 @@ static bool act_on_choices(void) {
 			D.duel_hp = -1;
 			D.duel_time = 0;
 			D.duel_call_due = false;
+			flag_set(LAYER_DUEL_CALLED_FLAG);
 			return true;
 		case OBJ_UNDERNET:
 		case OBJ_SECRET_GATE:
@@ -2792,7 +2798,10 @@ void director_update(void) {
 			size_t n = strlen(call);
 			snprintf(call + n, sizeof call - n, "|@L %s", profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
 		}
-		if (talk_start(call, FACE_CHAUD)) D.duel_call_due = false;
+		if (talk_start(call, FACE_CHAUD)) {
+			D.duel_call_due = false;
+			flag_set(LAYER_DUEL_CALLED_FLAG);
+		}
 	}
 	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"
 		"@M But if it's still there when we win, its data is ours!", FACE_MEGAMAN)) {

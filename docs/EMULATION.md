@@ -116,7 +116,8 @@ Data's second way on was taken, which the exit pad's warp reads; `0x1453`
 that the layer's collector's vault gave its chip; `0x1454` that the
 Guardian Data's dark way into the Undernet was taken; `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
-opens it, docs/RIVAL.md).
+opens it, `0x1457` that Chaud's call on a duel layer was made,
+docs/RIVAL.md).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 
