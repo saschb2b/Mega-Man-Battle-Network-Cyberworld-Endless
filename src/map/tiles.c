@@ -223,10 +223,32 @@ static inline int popcount64(uint64_t x) {
 /* The floor map pixel (px, py) shows at z 0 (0 none, else its material):
  * the world point under its centre, in quarter units (X = (u - 2v) / 2,
  * Y = (u + 2v) / 2), with the floor drawn dv pixels below it. */
-static int floor_px_raw(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py) {
+static void px_panel(const TileGrid *g, int px, int py, int *A, int *B) {
 	int u2 = 2 * px + 1 - g->tw * 8, v2 = 2 * (py - g->dv) + 1 - g->th * 8;
 	int X4 = u2 - 2 * v2, Y4 = u2 + 2 * v2;
-	return TILE_MATERIAL(floor(floordiv(X4 - 4 * g->ex, 128), floordiv(Y4 - 4 * g->ey, 128), ctx));
+	*A = floordiv(X4 - 4 * g->ex, 128);
+	*B = floordiv(Y4 - 4 * g->ey, 128);
+}
+
+static int floor_px_raw(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py) {
+	int A, B;
+	px_panel(g, px, py, &A, &B);
+	return TILE_MATERIAL(floor(A, B, ctx));
+}
+
+/* floor_px_raw pixel after pixel, the last panel's floor kept in `last`
+ * (A, B and its floor; A INT_MIN at first): a map's calibration asks after
+ * each of its pixels, and asking their panel's floor anew for each was 40%
+ * of its time */
+static int floor_px_on(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py, int last[3]) {
+	int A, B;
+	px_panel(g, px, py, &A, &B);
+	if (A != last[0] || B != last[1]) {
+		last[0] = A;
+		last[1] = B;
+		last[2] = TILE_MATERIAL(floor(A, B, ctx));
+	}
+	return last[2];
 }
 
 /* floor_px's answers kept per map pixel through a map's pick
@@ -264,20 +286,16 @@ static int floor_px(const TileGrid *g, TileFloor floor, const void *ctx, int px,
 	return floor_px_k(g, floor, ctx, keeps(g, floor, ctx), px, py);
 }
 
-/* picture_diff's and unplain's answers through a map's pick as well: the
- * phase's columns, the tile's own floors and a pair's decide the one, a
- * pair and the tile's deep pixels the other, and a map's tiles share them
- * (the pick's passes ask again besides) */
+/* unplain's answers through a map's pick as well: a pair and the tile's
+ * deep pixels decide them, and a map's tiles share them (the pick's passes
+ * ask again besides) */
 #define MEMO_SIZE (1 << 16)
 #define MEMO_PROBES 8
-typedef struct { uint64_t key; int value; } PicMemo;
 typedef struct { const void *pair; uint64_t deep; int m, value; } PlainMemo;
-static PicMemo *pic_memo;
 static PlainMemo *plain_memo;
 
 void tiles_keep_begin(const TileGrid *g, TileFloor floor, const void *ctx) {
 	tiles_keep_end();
-	pic_memo = calloc(MEMO_SIZE, sizeof *pic_memo);
 	plain_memo = calloc(MEMO_SIZE, sizeof *plain_memo);
 	/* (the map and a margin round it: a tile looks 40 pixels up at most) */
 	kept.x0 = -64;
@@ -294,63 +312,102 @@ void tiles_keep_begin(const TileGrid *g, TileFloor floor, const void *ctx) {
 void tiles_keep_end(void) {
 	free(kept.px);
 	kept.px = NULL;
-	free(pic_memo);
-	pic_memo = NULL;
 	free(plain_memo);
 	plain_memo = NULL;
 }
 
-/* The pixels of tile (tx, ty) that must be drawn (inside the floor and on
- * the side faces under it), those that must not (away from the floor and
- * what hangs under it, but for an outline a pixel beside a face) and those
- * well inside floor of material `cm`. */
 #define WIN (8 + 2 * OUT)   /* the columns a tile's pixels look at */
 #define FACE_SIDE 1         /* pixels beside a side face a tile may draw */
 #define FACE_TALL 32        /* taller faces are a raised floor's, down to the ground */
-static void expect(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, uint64_t *must, uint64_t *never, uint64_t *deep) {
-	*must = *never = *deep = 0;
+/* What a tile's pixel test finds whatever the faces (expect_look), then the
+ * test for one book's faces and legs (expect_for): a tile's pick tests it
+ * for each book's, and looking at its floor again for each was a third of
+ * making a layer. */
+#define NO_FLOOR (INT_MAX / 2)
+typedef struct {
+	int up[8][WIN];   /* per pixel and the OUT columns beside the tile, how far up the nearest floor is (NO_FLOOR: none as far as looked) */
+	uint64_t inner, below, deep;
+} Look;
+
+/* how far up a tile's pixels look for floor, for faces and legs so deep */
+static int reach_of(int face, int hang) {
+	int solid = face - 2 < FACE_SOLID ? face - 2 : FACE_SOLID, hangs = hang + OUT;
+	return hangs > solid ? hangs : solid;
+}
+
+static void expect_look(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, int reach, Look *l) {
 	bool k = keeps(g, floor, ctx);
-	/* (only its top need be solid: CopyBot's pods leave gaps lower down) */
-	int solid = g->face - 2 < FACE_SOLID ? g->face - 2 : FACE_SOLID;
-	int hangs = g->hang + OUT, reach = hangs > solid ? hangs : solid;
-	/* (beside a raised view's faces, which reach down to the ground, their
-	 * tops alone; and no deeper than the faces of the map being drawn) */
-	int side = g->face <= FACE_TALL ? g->face : solid;
-	if (g->side && g->side < side) side = g->side;
-	/* per pixel and the OUT columns beside the tile, how far up the nearest
-	 * floor is: 0 on the floor, past `reach` none */
-	int up[8][WIN];
-	for (int c = 0; c < WIN; ++c) {
-		int px = tx * 8 - OUT + c, last = INT_MIN / 2;
-		for (int py = ty * 8 - reach; py < ty * 8 + 8; ++py) {
-			if (floor_px_k(g, floor, ctx, k, px, py)) last = py;
-			if (py >= ty * 8) up[py - ty * 8][c] = py - last;
+	int last[WIN];
+	for (int c = 0; c < WIN; ++c) last[c] = -NO_FLOOR;
+	for (int py = ty * 8 - reach; py < ty * 8 + 8; ++py)
+		for (int c = 0; c < WIN; ++c) {
+			if (floor_px_k(g, floor, ctx, k, tx * 8 - OUT + c, py)) last[c] = py;
+			if (py >= ty * 8) l->up[py - ty * 8][c] = last[c] == -NO_FLOOR ? NO_FLOOR : py - last[c];
 		}
-	}
+	l->inner = l->below = l->deep = 0;
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
-			int px = tx * 8 + x, py = ty * 8 + y, a = up[y][x + OUT];
-			bool in = a == 0, inner = in, near = false;
-			for (int j = 0; j < 4; ++j) {
+			int px = tx * 8 + x, py = ty * 8 + y;
+			uint64_t bit = 1ull << (y * 8 + x);
+			if (floor_px_k(g, floor, ctx, k, px, py + OUT / 2)) l->below |= bit;
+			if (l->up[y][x + OUT]) continue;   /* (not on the floor) */
+			bool inner = true;
+			for (int j = 0; j < 4 && inner; ++j) {
 				static const int off[4][2] = { { -IN, 0 }, { IN, 0 }, { 0, -IN / 2 }, { 0, IN / 2 } };
-				inner &= floor_px_k(g, floor, ctx, k, px + off[j][0], py + off[j][1]) != 0;
+				inner = floor_px_k(g, floor, ctx, k, px + off[j][0], py + off[j][1]) != 0;
 			}
+			if (!inner) continue;
+			l->inner |= bit;
+			if (floor_px_k(g, floor, ctx, k, px, py) == cm && floor_px_k(g, floor, ctx, k, px - DEEP, py) == cm && floor_px_k(g, floor, ctx, k, px + DEEP, py) == cm &&
+				floor_px_k(g, floor, ctx, k, px, py - DEEP / 2) == cm && floor_px_k(g, floor, ctx, k, px, py + DEEP / 2) == cm) l->deep |= bit;
+		}
+}
+
+/* The pixels of the tile that must be drawn (inside the floor and on the
+ * side faces under it) and those that must not (away from the floor and
+ * what hangs under it, but for an outline a pixel beside a face), for side
+ * faces `face` deep over legs `hang` (a map drawn with faces `map_face`:
+ * outlines beside them no deeper). The look reached at least as far. */
+static void expect_for(const Look *l, int face, int hang, int map_face, uint64_t *must, uint64_t *never) {
+	/* (only its top need be solid: CopyBot's pods leave gaps lower down) */
+	int solid = face - 2 < FACE_SOLID ? face - 2 : FACE_SOLID;
+	int hangs = hang + OUT, reach = reach_of(face, hang);
+	/* (beside a raised view's faces, which reach down to the ground, their
+	 * tops alone; and no deeper than the faces of the map being drawn) */
+	int side = face <= FACE_TALL ? face : solid;
+	if (map_face && map_face < side) side = map_face;
+	*must = l->inner;
+	*never = 0;
+	for (int y = 0; y < 8; ++y) {
+		/* (floor further up than this reach is none) */
+		int row[WIN];
+		for (int c = 0; c < WIN; ++c) row[c] = l->up[y][c] <= reach + y ? l->up[y][c] : NO_FLOOR;
+		for (int x = 0; x < 8; ++x) {
+			uint64_t bit = 1ull << (y * 8 + x);
+			int a = row[x + OUT];
 			/* under a bottom edge: its side face, then nothing */
-			bool face = !in && a <= solid;
+			if (a && a <= solid) { *must |= bit; continue; }
+			if (l->inner & bit) continue;
 			/* near the floor or under it (its faces, legs and pedestals), and
 			 * beside its faces: the originals' outlines stand a pixel beyond a
 			 * face's side at the panels' corners */
-			near = a <= hangs || floor_px_k(g, floor, ctx, k, px, py + OUT / 2) != 0;
+			bool near = a <= hangs || (l->below & bit);
 			for (int dx = -OUT; !near && dx <= OUT; ++dx) {
-				int b = up[y][x + OUT + dx];
+				int b = row[x + OUT + dx];
 				near = b == 0 || (b <= side && dx >= -FACE_SIDE && dx <= FACE_SIDE);
 			}
-			uint64_t bit = 1ull << (y * 8 + x);
-			if (inner || face) *must |= bit;
-			else if (!near) *never |= bit;
-			if (inner && floor_px_k(g, floor, ctx, k, px, py) == cm && floor_px_k(g, floor, ctx, k, px - DEEP, py) == cm && floor_px_k(g, floor, ctx, k, px + DEEP, py) == cm &&
-				floor_px_k(g, floor, ctx, k, px, py - DEEP / 2) == cm && floor_px_k(g, floor, ctx, k, px, py + DEEP / 2) == cm) *deep |= bit;
+			if (!near) *never |= bit;
 		}
+	}
+}
+
+/* The pixels of tile (tx, ty) that must be drawn, those that must not, and
+ * those well inside floor of material `cm`. */
+static void expect(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, uint64_t *must, uint64_t *never, uint64_t *deep) {
+	Look l;
+	expect_look(g, tx, ty, floor, ctx, cm, reach_of(g->face, g->hang), &l);
+	expect_for(&l, g->face, g->hang, g->side, must, never);
+	*deep = l.deep;
 }
 
 static int misses(uint64_t mask, uint64_t must, uint64_t never) {
@@ -423,10 +480,11 @@ static void calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
 	g->dv = g->face = g->hang = 0;
 	for (int x = 0; x < W; ++x) {
 		/* (each pixel asked after once, here, then as the next one's above) */
-		bool above, here = floor_px(g, src_floor, src, x, 0);
+		int last[3] = { INT_MIN, 0, 0 };
+		bool above, here = floor_px_on(g, src_floor, src, x, 0, last);
 		for (int y = 1; y + 8 < H; ++y) {
 			above = here;
-			here = floor_px(g, src_floor, src, x, y);
+			here = floor_px_on(g, src_floor, src, x, y, last);
 			if (!above && here && !(a->px[(size_t)(y - 1) * W + x] >> 24))
 				for (int d = 0; d <= 8; ++d)
 					if (a->px[(size_t)(y + d) * W + x] >> 24) { top[d]++; break; }
@@ -545,6 +603,14 @@ static void learn_shapes(const Src *src, const AreaSrc *a, uint32_t styles, uint
 	if (shapes) out->shapes = shapes;
 }
 
+/* Each class's first pair: its pairs lie together, the most common first
+ * (in place: pairs dropped leave no more classes). */
+static void index_classes(TileBook *b) {
+	b->ncls = 0;
+	for (int i = 0; i < b->n; ++i)
+		if (!i || b->cand[i].key != b->cand[i - 1].key) b->cls[b->ncls++] = (TileClass){ b->cand[i].key, i };
+}
+
 /* One entry per pair, counted, the most common first, kept at the size
  * they hold, as the shapes are. */
 static void keep_cands(TileCand *c, size_t n, TileBook *out) {
@@ -561,6 +627,11 @@ static void keep_cands(TileCand *c, size_t n, TileBook *out) {
 	TileCand *kept_c = realloc(c, ((size_t)nu + 1) * sizeof *c);
 	out->cand = kept_c ? kept_c : c;
 	out->n = nu;
+	int ncls = 0;
+	for (int i = 0; i < nu; ++i) ncls += !i || out->cand[i].key != out->cand[i - 1].key;
+	out->cls = malloc(((size_t)ncls + 1) * sizeof *out->cls);
+	if (!out->cls) out->n = 0;   /* (a book of nothing) */
+	index_classes(out);
 }
 
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out) {
@@ -660,6 +731,7 @@ void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uin
 
 void tiles_free(TileBook *b) {
 	free(b->cand);
+	free(b->cls);
 	free(b->shapes);
 	memset(b, 0, sizeof *b);
 }
@@ -675,6 +747,7 @@ void tiles_colours(const TileBook *b, uint8_t seen[TILE_COLOURS]) {
 static void keep_first(TileBook *b, int n) {
 	if (n == b->n) return;
 	b->n = n;
+	index_classes(b);
 	find_plain(b);
 	b->joins = 0;
 	for (int i = 0; i < b->n; ++i) b->joins += KEY_A(b->cand[i].key) && KEY_B(b->cand[i].key);
@@ -699,6 +772,15 @@ void tiles_drop_pads(TileBook *b) {
 }
 
 /* ---- picking ---- */
+
+static int first_class(const TileBook *b, uint32_t key) {
+	int lo = 0, hi = b->ncls;
+	while (lo < hi) {
+		int mid = (lo + hi) / 2;
+		if (b->cls[mid].key < key) lo = mid + 1; else hi = mid;
+	}
+	return lo;
+}
 
 static int first_of(const TileBook *b, uint32_t key) {
 	int lo = 0, hi = b->n;
@@ -743,18 +825,34 @@ static bool in_block(unsigned m) {
 	return (m & 0x1B) == 0x1B || (m & 0x36) == 0x36 || (m & 0xD8) == 0xD8 || (m & 0x1B0) == 0x1B0;
 }
 
-static int distance(int phase, bool tall, unsigned a1, unsigned b1, unsigned a2, unsigned b2) {
+/* The panels' weights at `phase`: 4 the centre and the two nearest sides
+ * (and with `tall` faces the one above), 2 the nearest corner, 1 the rest;
+ * a set of them weighed by two lookups, of its bits 0-4 and 5-8, each
+ * phase's made once (a tile's pick weighs a thousand pairs' neighbourhoods,
+ * and weighing them panel by panel was half of making a layer) */
+static const uint8_t *weights(int phase, bool tall) {
+	static uint8_t w[2][64][48];
+	static uint64_t made[2];
+	uint8_t *t = w[tall][phase];
+	if (made[tall] >> phase & 1) return t;
+	made[tall] |= 1ull << phase;
 	unsigned near = nearest(phase, false), corner = nearest(phase, true) & ~near;
 	if (tall) near |= ABOVE_BIT;
-	int d = 0;
-	for (int k = 0; k < 9; ++k) {
-		unsigned bit = 1u << k;
-		int w = near & bit ? 4 : corner & bit ? 2 : 1;
-		bool f1 = (a1 | b1) & bit, f2 = (a2 | b2) & bit;
-		if (f1 != f2) d += 2 * w;
-		else if (f1 && ((a1 ^ a2) & bit)) d += k == 4 ? 6 : w;
+	for (unsigned i = 0; i < 48; ++i) {
+		unsigned bits = i < 32 ? i : (i - 32) << 5;
+		int sum = 0;
+		for (int k = 0; k < 9; ++k)
+			if (bits >> k & 1) sum += near >> k & 1 ? 4 : corner >> k & 1 ? 2 : 1;
+		t[i] = (uint8_t)sum;
 	}
-	return d;
+	return t;
+}
+
+/* floor against none counts twice its panel's weight, the other material
+ * its weight, but 6 at the centre */
+static int distance(const uint8_t *w, unsigned a1, unsigned b1, unsigned a2, unsigned b2) {
+	unsigned f1 = a1 | b1, f2 = a2 | b2, x = (f1 ^ f2) & 0x1FF, m = f1 & f2 & (a1 ^ a2) & 0x1FF;
+	return 2 * (w[x & 31] + w[32 + (x >> 5)]) + w[m & 0x0F] + w[32 + (m >> 5)] + (m & 0x10 ? 6 : 0);
 }
 
 /* The hue bucket (0-11, 12 grey) of a BGR555 colour. */
@@ -841,9 +939,14 @@ static int panel_k(const TileGrid *g, int px, int py, int A, int B) {
 #define COL_MAX 4
 typedef struct { uint8_t n, open, k[COL_MAX], part[COL_MAX]; } PixCol;
 
+/* A tile's pixels by their columns: pixels whose columns go up through the
+ * same panels show alike (comparing pairs' pictures pixel by pixel was a
+ * quarter of a map's pick). */
+typedef struct { int n; PixCol col[64]; uint8_t count[64]; } Columns;
+
 /* (the same for every tile of a phase in a map: kept per phase) */
-static const PixCol *columns(const TileGrid *g, int tx, int ty) {
-	static PixCol cache[64][64];
+static const Columns *columns(const TileGrid *g, int tx, int ty) {
+	static Columns cache[64];
 	static uint64_t have;
 	static TileGrid of;
 	if (g->tw != of.tw || g->th != of.th || g->ex != of.ex || g->ey != of.ey || g->dv != of.dv || g->face != of.face || g->hang != of.hang) {
@@ -852,25 +955,28 @@ static const PixCol *columns(const TileGrid *g, int tx, int ty) {
 	}
 	int phase, A, B;
 	tile_class(g, tx, ty, &phase, &A, &B);
-	PixCol *col = cache[phase];
-	if (have >> phase & 1) return col;
+	Columns *cs = &cache[phase];
+	if (have >> phase & 1) return cs;
 	have |= 1ull << phase;
+	cs->n = 0;
 	for (int i = 0; i < 64; ++i) {
-		PixCol *c = &col[i];
+		PixCol c = { 0 };
 		int last = -2;
-		c->n = 0;
-		c->open = 0;
 		for (int d = 0; d <= g->face + g->hang; ++d) {
 			int k = panel_k(g, tx * 8 + i % 8, ty * 8 + i / 8 - d, A, B);
 			if (k == last) continue;
-			if (c->n == COL_MAX) { c->open = 1; break; }
+			if (c.n == COL_MAX) { c.open = 1; break; }
 			last = k;
-			c->k[c->n] = k < 0 ? 0xFF : (uint8_t)k;
-			c->part[c->n++] = d == 0 ? 0 : d <= g->face ? 1 : 2;
+			c.k[c.n] = k < 0 ? 0xFF : (uint8_t)k;
+			c.part[c.n++] = d == 0 ? 0 : d <= g->face ? 1 : 2;
 			if (k < 0) break;
 		}
+		int j = 0;
+		while (j < cs->n && memcmp(&cs->col[j], &c, sizeof c)) ++j;
+		if (j == cs->n) { cs->col[j] = c; cs->count[j] = 0; ++cs->n; }
+		++cs->count[j];
 	}
-	return col;
+	return cs;
 }
 
 /* What a pixel shows of floors (a, b): 0 nothing, else which panel, whether
@@ -885,31 +991,16 @@ static uint8_t col_code(const PixCol *c, unsigned a, unsigned b) {
 	return c->open ? 0xFF : 0;
 }
 
-/* The pixels where floors (a, b) show otherwise than `mine`. */
-static int picture_diff(const PixCol col[64], const uint8_t mine[64], unsigned a, unsigned b) {
+/* The pixels where floors (a, b) show otherwise than `mine` (what the
+ * tile's own show, per column). */
+static int picture_diff(const Columns *cs, const uint8_t mine[64], unsigned a, unsigned b) {
 	int n = 0;
-	for (int i = 0; i < 64; ++i) {
-		if (mine[i] == 0xFF) continue;
-		uint8_t t = col_code(&col[i], a, b);
-		n += t != 0xFF && t != mine[i];
+	for (int j = 0; j < cs->n; ++j) {
+		if (mine[j] == 0xFF) continue;
+		uint8_t t = col_code(&cs->col[j], a, b);
+		if (t != 0xFF && t != mine[j]) n += cs->count[j];
 	}
 	return n;
-}
-
-/* picture_diff, kept (pic_memo) by the phase and both pairs of floors */
-static int picture_diff_kept(const PixCol col[64], const uint8_t mine[64], int phase, unsigned oa, unsigned ob, unsigned a, unsigned b) {
-	if (!pic_memo) return picture_diff(col, mine, a, b);
-	uint64_t key = ((uint64_t)phase << 36 | (uint64_t)oa << 27 | (uint64_t)ob << 18 | (uint64_t)a << 9 | b) + 1;
-	uint32_t h = (uint32_t)((key * 0x9E3779B97F4A7C15ull) >> 48) & (MEMO_SIZE - 1);
-	for (int i = 0; i < MEMO_PROBES; ++i) {
-		PicMemo *e = &pic_memo[(h + (uint32_t)i) & (MEMO_SIZE - 1)];
-		if (e->key == key) return e->value;
-		if (!e->key) {
-			e->key = key;
-			return e->value = picture_diff(col, mine, a, b);
-		}
-	}
-	return picture_diff(col, mine, a, b);
 }
 
 /* How far pair c was seen from (oa, ob), off by n pixels of the tile's
@@ -944,6 +1035,40 @@ int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNe
 	return t;
 }
 
+/* (measuring) Why a tile's pick is drawn off: how far the pairs showing
+ * what it shows got (TILE_WHY_...). */
+static int why_off(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty, int phase,
+	unsigned oa, unsigned ob, bool pad, TileFloor floor, const void *ctx, bool single, int cm,
+	const Columns *cols, const uint8_t mine[64]) {
+	int why = TILE_WHY_UNSEEN;
+	uint64_t must = 0, never = 0, deep = 0;
+	int allowed = 0;
+	TileGrid gk = *g;
+	gk.face = -1;
+	gk.side = g->face;
+	for (int k = 0; k < nbooks; ++k) {
+		const TileBook *b = &books[k];
+		int face = b->face > FACE_TALL ? g->face : b->face, hang = b->face > FACE_TALL ? g->hang : b->hang;
+		if (face != gk.face || hang != gk.hang) {
+			gk.face = face; gk.hang = hang;
+			expect(&gk, tx, ty, floor, ctx, cm, &must, &never, &deep);
+			allowed = popcount64(deep) / 8;
+		}
+		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
+			const TileCand *t = &b->cand[i];
+			if ((single && t->e1) || (g->single && (t->e0 & 0x3FF) && (t->e1 & 0x3FF))) continue;
+			if (picture_diff(cols, mine, KEY_A(t->key), KEY_B(t->key)) > OFF_EDGE_PX) continue;
+			int w = TILE_WHY_PIXELS;
+			if (misses(t->mask, must, never) <= SLACK) {
+				int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain(b, cm - 1, phase, t, deep);
+				w = u <= allowed ? TILE_WHY_RANKED : TILE_WHY_PLAIN;
+			}
+			if (w > why) why = w;
+		}
+	}
+	return why;
+}
+
 /* The best pair of `books` for a tile of class (phase, oa, ob) at (tx, ty):
  * the nearest neighbourhood seen whose tile fits there and meets its
  * neighbours as the originals do, most common first, preferring those with
@@ -958,11 +1083,15 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	 * map draws it: a tile from a map measured to draw it higher would step
 	 * out of the edge beside it; and a raised view's faces, which reach down
 	 * to the ground, with this map's (its floor lies on the ground here) */
-	uint64_t must = 0, never = 0, deep = 0;
-	int allowed = 0;
-	TileGrid gk = *g;
-	gk.face = -1;
-	gk.side = g->face;   /* (outlines beside its faces as deep as this map's) */
+	Look look;
+	int reach = 0;
+	for (int k = 0; k < nbooks; ++k) {
+		int r = books[k].face > FACE_TALL ? reach_of(g->face, g->hang) : reach_of(books[k].face, books[k].hang);
+		if (r > reach) reach = r;
+	}
+	expect_look(g, tx, ty, floor, ctx, cm, reach, &look);
+	uint64_t must = 0, never = 0, deep = look.deep;
+	int allowed = popcount64(deep) / 8, kface = -1, khang = -1;
 	const TileCand *fit = NULL, *any = NULL, *shows = NULL;
 	int fit_d = INT_MAX, any_score = INT_MAX, fit_k = -1, fit_p = 0, any_p = 0, shows_d = INT_MAX, shows_p = 0;
 	/* the walkway floor in a 2 x 2 block with the tile's panel: a field of it
@@ -977,52 +1106,62 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	bool field = in_block(ob & ~pads);
 	/* what the tile shows of its own neighbourhood: a pair costs a point for
 	 * each pixel where its own showed other floors, faces or materials */
-	const PixCol *col = columns(g, tx, ty);
+	const Columns *cols = columns(g, tx, ty);
 	uint8_t mine[64];
-	for (int i = 0; i < 64; ++i) mine[i] = col_code(&col[i], oa, ob);
+	for (int j = 0; j < cols->n; ++j) mine[j] = col_code(&cols->col[j], oa, ob);
 	uint32_t pic_key = UINT32_MAX;
 	int pic = 0;
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
 		int face = b->face > FACE_TALL ? g->face : b->face, hang = b->face > FACE_TALL ? g->hang : b->hang;
-		if (face != gk.face || hang != gk.hang) {
-			gk.face = face; gk.hang = hang;
-			expect(&gk, tx, ty, floor, ctx, cm, &must, &never, &deep);
-			allowed = popcount64(deep) / 8;
+		if (face != kface || hang != khang) {
+			kface = face; khang = hang;
+			/* (outlines beside its faces as deep as this map's) */
+			expect_for(&look, face, hang, g->face, &must, &never);
 		}
-		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
-			const TileCand *c = &b->cand[i];
-			/* (a mirror image's empty entry is tile 0 flipped) */
-			if ((single && c->e1) || (g->single && (c->e0 & 0x3FF) && (c->e1 & 0x3FF))) continue;
-			int d = distance(phase, b->face > TALL_FACE, oa, ob, KEY_A(c->key), KEY_B(c->key)), m = misses(c->mask, must, never);
-			/* a pad in the pads' look, other floor not */
-			if (c->pad != pad) d += PAD_LOOK;
-			if (c->other && !field) d += OTHER_COST;
-			/* (what follows only adds: a pair that cannot win is left) */
-			if (!(m <= SLACK && d <= fit_d) && m + 4 * d >= any_score) continue;
-			/* (a pad's middle is not the usual floor: it has its own look; nor
-			 * is a rimmed floor's edge) */
-			int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain_kept(b, cm - 1, phase, c, deep);
-			/* a neighbour it never meets in the originals: a seam */
-			if (seams) d += tiles_trouble(seams, look_of(c), c->mask, n);
-			/* what it shows otherwise (once per class: pairs come by class) */
-			if (c->key != pic_key) {
-				pic_key = c->key;
-				pic = picture_diff_kept(col, mine, phase, oa, ob, KEY_A(c->key), KEY_B(c->key));
+		const uint8_t *w = weights(phase, b->face > TALL_FACE);
+		for (int j = first_class(b, KEY(phase, 0, 0)); j < b->ncls && KEY_PHASE(b->cls[j].key) == phase; ++j) {
+			/* a class's pairs share its distance, which each only adds to:
+			 * a class too far to win is passed whole (of the hundreds of
+			 * classes a tile's pick meets, most) */
+			uint32_t key = b->cls[j].key;
+			int d0 = distance(w, oa, ob, KEY_A(key), KEY_B(key));
+			if (d0 > fit_d && 4 * d0 >= any_score) continue;
+			int end = j + 1 < b->ncls ? b->cls[j + 1].first : b->n;
+			for (int i = b->cls[j].first; i < end; ++i) {
+				const TileCand *c = &b->cand[i];
+				/* (a mirror image's empty entry is tile 0 flipped) */
+				if ((single && c->e1) || (g->single && (c->e0 & 0x3FF) && (c->e1 & 0x3FF))) continue;
+				int d = d0, m = misses(c->mask, must, never);
+				/* a pad in the pads' look, other floor not */
+				if (c->pad != pad) d += PAD_LOOK;
+				if (c->other && !field) d += OTHER_COST;
+				/* (what follows only adds: a pair that cannot win is left) */
+				if (!(m <= SLACK && d <= fit_d) && m + 4 * d >= any_score) continue;
+				/* (a pad's middle is not the usual floor: it has its own look; nor
+				 * is a rimmed floor's edge) */
+				int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain_kept(b, cm - 1, phase, c, deep);
+				/* a neighbour it never meets in the originals: a seam */
+				if (seams) d += tiles_trouble(seams, look_of(c), c->mask, n);
+				/* what it shows otherwise (once per class: pairs come by class) */
+				if (c->key != pic_key) {
+					pic_key = c->key;
+					pic = picture_diff(cols, mine, KEY_A(c->key), KEY_B(c->key));
+				}
+				d += PICTURE_COST * pic;
+				if (tiles_measure && tile_debug(tx, ty))
+					fprintf(stderr, "tile %d,%d phase %d ours a %03x b %03x: book %d e0 %04x e1 %04x count %u pad %d other %d key a %03x b %03x: d %d (picture %d) misses %d unplain %d of %d\n",
+						tx, ty, phase, oa, ob, k, c->e0, c->e1, c->count, c->pad, c->other, KEY_A(c->key), KEY_B(c->key), d, pic, m, u, allowed);
+				/* ties go to the first book with the class (the area's own map
+				 * before its others), so a floor keeps one look (the other
+				 * floor's edge coming along where only one is costs its pixels) */
+				if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; fit_p = pic; }
+				/* (and the nearest showing what the tile shows, however its
+				 * middle looks: a join's own tile, a bridge plugging into the
+				 * Graveyard's slabs, lightens the slab around it) */
+				if (m <= SLACK && pic <= OFF_EDGE_PX && d < shows_d) { shows = c; shows_d = d; shows_p = pic; }
+				if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; any_p = pic; }
 			}
-			d += PICTURE_COST * pic;
-			if (tiles_measure && tile_debug(tx, ty))
-				fprintf(stderr, "tile %d,%d phase %d ours a %03x b %03x: book %d e0 %04x e1 %04x count %u pad %d other %d key a %03x b %03x: d %d (picture %d) misses %d unplain %d of %d\n",
-					tx, ty, phase, oa, ob, k, c->e0, c->e1, c->count, c->pad, c->other, KEY_A(c->key), KEY_B(c->key), d, pic, m, u, allowed);
-			/* ties go to the first book with the class (the area's own map
-			 * before its others), so a floor keeps one look (the other
-			 * floor's edge coming along where only one is costs its pixels) */
-			if (m <= SLACK && u <= allowed && (d < fit_d || (d == fit_d && k == fit_k && c->count > fit->count))) { fit = c; fit_d = d; fit_k = k; fit_p = pic; }
-			/* (and the nearest showing what the tile shows, however its
-			 * middle looks: a join's own tile, a bridge plugging into the
-			 * Graveyard's slabs, lightens the slab around it) */
-			if (m <= SLACK && pic <= OFF_EDGE_PX && d < shows_d) { shows = c; shows_d = d; shows_p = pic; }
-			if (m + u + 4 * d < any_score) { any = c; any_score = m + u + 4 * d; any_p = pic; }
 		}
 	}
 	/* a tile showing other floors than its own is worse than one whose
@@ -1032,30 +1171,7 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 	const TileCand *c = fit ? fit : any;
 	*off = !tiles_measure ? TILE_EXACT : c ? off_by(oa, ob, c, fit ? fit_p : any_p) : TILE_OFF_NEAR;
 	if (*off != TILE_OFF_NEAR) return c;
-	/* (measuring) why: how far the pairs showing what it shows got */
-	int why = TILE_WHY_UNSEEN;
-	gk.face = -1;
-	for (int k = 0; k < nbooks; ++k) {
-		const TileBook *b = &books[k];
-		int face = b->face > FACE_TALL ? g->face : b->face, hang = b->face > FACE_TALL ? g->hang : b->hang;
-		if (face != gk.face || hang != gk.hang) {
-			gk.face = face; gk.hang = hang;
-			expect(&gk, tx, ty, floor, ctx, cm, &must, &never, &deep);
-			allowed = popcount64(deep) / 8;
-		}
-		for (int i = first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
-			const TileCand *t = &b->cand[i];
-			if ((single && t->e1) || (g->single && (t->e0 & 0x3FF) && (t->e1 & 0x3FF))) continue;
-			if (picture_diff_kept(col, mine, phase, oa, ob, KEY_A(t->key), KEY_B(t->key)) > OFF_EDGE_PX) continue;
-			int w = TILE_WHY_PIXELS;
-			if (misses(t->mask, must, never) <= SLACK) {
-				int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain(b, cm - 1, phase, t, deep);
-				w = u <= allowed ? TILE_WHY_RANKED : TILE_WHY_PLAIN;
-			}
-			if (w > why) why = w;
-		}
-	}
-	tiles_pick_why = why;
+	tiles_pick_why = why_off(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, single, cm, cols, mine);
 	return c;
 }
 

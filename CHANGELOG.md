@@ -9,6 +9,15 @@
   It draws from what the frame's update saw. SELECT's map and ProtoMan's
   duel clock read the game so too, every frame they showed. The frame
   log counts any read of the game that waits while a frame is drawn.
+- **A layer is made five times faster.** Stepping onto the next layer
+  stood still for six seconds on a New 3DS, where a player felt it
+  froze: nearly all of it went to choosing each tile of the new map from
+  the thousands the area's maps show. The choice is the same, made with
+  less work: the pairs of tiles seen in the same surroundings are weighed
+  once and passed together when they cannot win, a tile's floor is looked
+  at once for all the maps it is compared with, and pixels that show the
+  same panels are compared once. On a PC a layer's making went from 300
+  ms to 60, its tiles from 250 to 20; every map comes out as before.
 
 ## 0.5.1 (2026-09-30)
 

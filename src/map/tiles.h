@@ -36,10 +36,15 @@ typedef struct {
 	uint16_t px[64];
 } TileCand;
 
+/* A class's pairs: from its first to the next class's. */
+typedef struct { uint32_t key; int first; } TileClass;
+
 /* Sorted by key and then most common first. */
 typedef struct {
 	TileCand *cand;
 	int n;
+	TileClass *cls;                     /* its classes in order (a pick passes a class whole) */
+	int ncls;
 	int dv, face, hang;                 /* how the floor is drawn, see TileGrid */
 	int joins;                          /* pairs where the two floors meet */
 	int plain[2][64][TILE_PLAIN], nplain[2][64];   /* per material and phase: the floor's usual looks */
