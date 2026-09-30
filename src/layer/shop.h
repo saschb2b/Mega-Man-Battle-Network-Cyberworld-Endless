@@ -44,8 +44,6 @@ int shop_dealer_answer(int depth, int counter, char *code);
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 /* Whether MegaMan has had `program` in any run (profile.programs_found). */
 bool shop_program_found(int program);
-/* One NaviCust program (id, color in `code`) from the game's shops. */
-bool shop_pick_program(ShopItem *out);
 /* One of the programs the start gift offers, and what it does (in Mr.
  * Prog's capitals; NULL when it had to take any program). */
 const char *shop_pick_gift_program(ShopItem *out);

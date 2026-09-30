@@ -1,0 +1,7 @@
+# functions no build reaches (the host and handheld builds and the tests, build.py lint):
+# remove one, or make it static where its own file uses it; build.py lint --update
+src/map/decor.c: decor_free
+src/map/seams.c: seams_free
+src/map/stairs.c: stairs_free
+src/map/tiles.c: tiles_free
+src/world/townsrc.c: townsrc_free

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "app_icon.h"
 #endif
+#include "audio.h"
 #include "touch.h"
 
 Platform P;
@@ -217,7 +218,9 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, flags);
 	if (!P.window) { fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
 #ifdef CW_DESKTOP
-	SDL_Surface *icon = SDL_CreateRGBSurfaceWithFormatFrom((void *)app_icon_rgba, APP_ICON_SIZE, APP_ICON_SIZE, 32,
+	/* (SDL takes the pixels as void *, and only reads them) */
+	union { const void *c; void *v; } pixels = { app_icon_rgba };
+	SDL_Surface *icon = SDL_CreateRGBSurfaceWithFormatFrom(pixels.v, APP_ICON_SIZE, APP_ICON_SIZE, 32,
 		APP_ICON_SIZE * 4, SDL_PIXELFORMAT_RGBA32);
 	if (icon) { SDL_SetWindowIcon(P.window, icon); SDL_FreeSurface(icon); }
 #endif
@@ -331,6 +334,7 @@ static bool fill_3ds = true;
 
 #ifdef __EMSCRIPTEN__
 /* The page's Smooth motion button, while the game runs (web/play/app.js). */
+void cw_set_smooth(int on);
 EMSCRIPTEN_KEEPALIVE void cw_set_smooth(int on) { P.blend = on != 0; }
 #endif
 
@@ -704,7 +708,7 @@ void platform_end_frame(void) {
 	 * shown here, so it waits for no refresh of the display) */
 	if (P.skip_present) {
 		++P.frame;
-		{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
+		audio_log_frame = P.frame;
 		return;
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
@@ -712,7 +716,7 @@ void platform_end_frame(void) {
 	part_present += SDL_GetPerformanceCounter() - t0;
 	log_present();
 	++P.frame;
-	{ extern uint64_t audio_log_frame; audio_log_frame = P.frame; }
+	audio_log_frame = P.frame;
 }
 
 void platform_persist(void) {

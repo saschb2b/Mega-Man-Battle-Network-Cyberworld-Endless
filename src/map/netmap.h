@@ -52,8 +52,6 @@ const uint8_t *netmap_last_pasted(void);
  * (TILES_CROSSING), 'p' a pad; upper case (a void panel '*') where a tile
  * centred on the panel was seen with other floors where it shows them. */
 void netmap_last_cells(char out[MAP_H][MAP_W + 1]);
-/* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
-unsigned netmap_stair_dirs(int area, int *rise);
 /* What area `area`'s layers can draw: its stairs and counters (net.h). */
 void netmap_kit(int area, LayerKit *kit);
 /* Where the navi of the last layer's prop `i` stands (world units), and its

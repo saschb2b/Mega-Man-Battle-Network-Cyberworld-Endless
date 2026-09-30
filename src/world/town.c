@@ -867,9 +867,7 @@ bool town_plan(uint32_t seed) {
 }
 
 const TownInfo *town_info(void) { return &T.info; }
-const uint16_t *town_tiles(void) { return T.tiles; }
 const uint8_t *town_misses(void) { return T.miss; }
-bool town_walkable(int cx, int cy) { return walkable(cx, cy); }
 
 bool town_route(int x, int y, int *wx, int *wy) { return town_walk(x, y, 3, wx, wy, NULL); }
 

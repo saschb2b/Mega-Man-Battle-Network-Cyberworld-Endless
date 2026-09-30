@@ -36,8 +36,14 @@ OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 # only when it changes, so only what shows it is built again.
 VERSION ?= $(shell git describe --tags --match 'v*' 2>/dev/null | sed 's/^v//' | grep . || echo dev)
 GEN := $(OUT)/gen
-CFLAGS += -std=c11 -O2 -g -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-          -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(shell $(PKGCONF) --cflags sdl2)
+# The warnings (issue #19): -Wall -Wextra and stricter ones, clean on every
+# target; the last three are GCC's own, which clang (Emscripten, macOS,
+# the NDK) does not know. SDL2's and mGBA's headers are the system's.
+WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
+        -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
+WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
+CFLAGS += -std=c11 -O2 -g $(WARN) $(if $(filter web macos,$(TARGET)),,$(WARN_GCC)) \
+          -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
 CFLAGS += -Werror
@@ -57,13 +63,13 @@ PKGCONF := true
 MGBA := $(MACOS_DEPS)
 MGBA_LICENSE := $(MACOS_DEPS)/share/licenses/mGBA.txt
 MAC_ARCH := -arch arm64 -arch x86_64 -mmacosx-version-min=11.0
-CFLAGS += $(MAC_ARCH) $(shell $(MACOS_DEPS)/bin/sdl2-config --cflags)
+CFLAGS += $(MAC_ARCH) $(patsubst -I%,-isystem %,$(shell $(MACOS_DEPS)/bin/sdl2-config --cflags))
 endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
 MGBA := /app
 endif
-CFLAGS += -I$(MGBA)/include
+CFLAGS += -isystem $(MGBA)/include
 LDLIBS += $(shell $(PKGCONF) --libs sdl2) $(MGBA)/lib/libmgba.a -lpthread -lm
 # the desktop builds: a window, the user's data folder (src/core/main.c)
 ifneq ($(filter host asan linux flatpak windows macos,$(TARGET)),)
@@ -103,7 +109,7 @@ endif
 ifeq ($(TARGET),3ds)
 ARCH_3DS := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 # (-Wno-format: uint32_t is an unsigned long there, which %u prints alike)
-CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_3DS) -mword-relocations -ffunction-sections -D__3DS__ -I/opt/devkitpro/libctru/include -Wno-format
+CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_3DS) -mword-relocations -ffunction-sections -D__3DS__ -isystem /opt/devkitpro/libctru/include -Wno-format
 LDLIBS := $(MGBA)/lib/libmgba.a -L/opt/sdl2/lib -lSDL2main -lSDL2 -L/opt/devkitpro/libctru/lib -lcitro2d -lcitro3d -lctru -lm \
           -specs=3dsx.specs $(ARCH_3DS) -Wl,--gc-sections
 all: $(OUT)/cyberworld-endless.3dsx $(OUT)/cyberworld-endless.cia
@@ -122,6 +128,11 @@ ifeq ($(TARGET),asan)
 CFLAGS += -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 LDLIBS += -fsanitize=address,undefined
 endif
+
+# one make's own flags on top (build.py lint: each function in a section
+# of its own, and the linker's list of those it drops)
+CFLAGS += $(EXTRA_CFLAGS)
+LDLIBS += $(EXTRA_LDFLAGS)
 
 all: $(BIN) $(OUT)/licenses/mGBA.txt
 
@@ -163,8 +174,17 @@ TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.
 	src/layer/npc_lines.c src/layer/guardians.c src/core/rivals.c src/director/powers.c src/layer/text.c src/core/touch_layout.c
 build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) -Wall -Wextra -Wno-unused-parameter -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
 
 test: build/host/test_core
 	build/host/test_core
 .PHONY: test
+
+# the tests' link as build.py lint reads it: which of the game's functions
+# they reach (each source compiled on its own, so the linker names it)
+LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))
+build/lint/test/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -ffunction-sections -c -o $@ $<
+build/lint/test_core: $(LINT_TEST_OBJS)
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm

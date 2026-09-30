@@ -98,6 +98,7 @@ uint8_t *lz77_decompress(const uint8_t *src, size_t avail, size_t *out_len) {
 	if (avail < 4 || src[0] != 0x10) return NULL;
 	size_t n = src[1] | src[2] << 8 | src[3] << 16;
 	uint8_t *out = malloc(n ? n : 1);
+	if (!out) return NULL;   /* (the 3DS runs short: the analyzer found it written unchecked, issue #19) */
 	size_t p = 4, o = 0;
 	while (o < n) {
 		if (p >= avail) goto fail;

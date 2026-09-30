@@ -30,6 +30,7 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "layer_objs.h"
+#include "layer_make.h"
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
@@ -1328,11 +1329,7 @@ void director_draw_map(void) {
 	#undef INSIDE
 }
 
-/* The layers' make (generation, objects, loot rolls): a run saved by a build
- * that makes them otherwise continues its layer afresh from its start (the
- * saved RAM's flags and Mystery Data would not match this build's). Bump it
- * with any change to what a layer seed makes. */
-#define LAYER_MAKE 62
+/* (LAYER_MAKE: layer_make.h, beside its hash) */
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
@@ -1465,9 +1462,9 @@ void director_describe(FILE *f) {
 					/* (% a sprite prop, in the void or in its walled hole) */
 					for (int i = 0; i < layer.nprops; ++i)
 						if (layer.props[i].kind == PROP_SPRITE) {
-							int px = layer.props[i].x, py = layer.props[i].y;
-							g[py][px] = '%';
-							x0 = px < x0 ? px : x0; y0 = py < y0 ? py : y0; x1 = px > x1 ? px : x1; y1 = py > y1 ? py : y1;
+							int qx = layer.props[i].x, qy = layer.props[i].y;
+							g[qy][qx] = '%';
+							x0 = qx < x0 ? qx : x0; y0 = qy < y0 ? qy : y0; x1 = qx > x1 ? qx : x1; y1 = qy > y1 ? qy : y1;
 						}
 					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Build, test and package Cyberworld Endless.
 
-Compilation runs inside the `cyberworld-build` Docker image (Debian trixie),
-which matches the glibc and SDL2 that current ROCKNIX ships; the Linux
-desktop release builds in `cyberworld-linux` (Debian bookworm), whose older
-glibc runs on more distributions.
+Compilation runs inside Docker images: the host build, the tests and the
+checks in `cyberworld-build` (Debian trixie), the PortMaster port's aarch64
+binary in `cyberworld-portmaster` (bullseye, older than any firmware
+PortMaster serves), the Linux desktop release in `cyberworld-linux`
+(bookworm), whose older glibc runs on more distributions.
 
   python3 build.py              host and device binaries
   python3 build.py host         host binary only
@@ -61,6 +62,13 @@ glibc runs on more distributions.
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
+  python3 build.py lint [--update]
+                                the code's checks (issue #19): GCC's analyzer,
+                                the functions no build reaches, lizard's
+                                complexity, the ROM offsets docs/ROM_DATA.md
+                                names and the files git tracks, each against
+                                its baseline in tests/lint (--update writes
+                                them anew); a new finding fails
   python3 build.py package      build/port/cyberworld (for PortMaster-New) and the port's zip
 """
 import argparse
@@ -1188,9 +1196,210 @@ def densest(im, w, h):
     return im.crop((best[0], best[1], best[0] + w, best[1] + h))
 
 
+# ---- the code's checks (issue #19) ----
+
+LINT_DIR = os.path.join(ROOT, 'tests', 'lint')
+LINT_CCN, LINT_NLOC = 25, 120        # a function past either is listed
+LINT_BIG = 1 << 20                   # a tracked file this large belongs in docs/
+LINT_BANNED = ('.gba', '.gb', '.gbc', '.sav', '.srm', '.state', '.ss0', '.ss1', '.ss2', '.ss3', '.ss4', '.ss5',
+               '.ss6', '.ss7', '.ss8', '.ss9')
+
+
+def lint_baseline(name):
+    """A baseline's lines (a multiset), its # notes left out."""
+    from collections import Counter
+    path = os.path.join(LINT_DIR, name)
+    if not os.path.exists(path):
+        return Counter()
+    with open(path) as f:
+        return Counter(line.rstrip('\n') for line in f if line.strip() and not line.startswith('#'))
+
+
+def lint_write(name, note, lines):
+    os.makedirs(LINT_DIR, exist_ok=True)
+    with open(os.path.join(LINT_DIR, name), 'w') as f:
+        f.write(''.join(f'# {n}\n' for n in note.split('\n')))
+        f.write(''.join(f'{line}\n' for line in sorted(lines)))
+
+
+def lint_compare(title, name, note, found, update):
+    """found (a Counter of lines) against the baseline: what is new fails."""
+    base = lint_baseline(name)
+    new, gone = found - base, base - found
+    if update:
+        lint_write(name, note, list(found.elements()))
+        print(f'{title}: {sum(found.values())} listed in tests/lint/{name}')
+        return True
+    for line in sorted(new.elements()):
+        print(f'  new: {line}')
+    if gone:
+        print(f'  ({sum(gone.values())} fixed since the baseline: build.py lint --update drops them)')
+    print(f'{title}: {sum(found.values())}, {sum(new.values())} new')
+    return not new
+
+
+def lint_files():
+    """No ROM, save or state in git, and no large file outside docs/ (AGENTS.md)."""
+    names = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, capture_output=True, check=True).stdout.decode().split('\0')
+    bad = []
+    for n in filter(None, names):
+        path = os.path.join(ROOT, n)
+        if n.lower().endswith(LINT_BANNED):
+            bad.append(f'{n}: a ROM, save or state')
+        elif not n.startswith('docs/') and os.path.isfile(path) and os.path.getsize(path) > LINT_BIG:
+            bad.append(f'{n}: {os.path.getsize(path) >> 10} KB outside docs/')
+    for b in bad:
+        print(f'  refused: {b}')
+    print(f'files: {len(bad)} refused')
+    return not bad
+
+
+def lint_rom_data(update):
+    """Every address of src/emu/bn6.h and every RomLayout field named in docs/ROM_DATA.md."""
+    from collections import Counter
+    with open(os.path.join(ROOT, 'docs', 'ROM_DATA.md')) as f:
+        doc = f.read().lower()
+    with open(os.path.join(ROOT, 'src', 'emu', 'bn6.h')) as f:
+        bn6 = f.read()
+    with open(os.path.join(ROOT, 'src', 'core', 'rom.h')) as f:
+        rom = f.read()
+    missing = []
+    for name, val in re.findall(r'#define\s+(BN6_\w+)\s+\(?(0x[0-9A-Fa-f]+)u?\)?', bn6):
+        v = int(val, 16)
+        forms = {name.lower(), val.lower(), f'0x{v:08x}', f'0x{v:x}', f'0x{v:06x}', f'0x{v:04x}'}
+        if v >= 0x08000000:
+            forms |= {f'0x{v - 0x08000000:06x}', f'0x{v - 0x08000000:x}'}
+        if not any(form in doc for form in forms):
+            missing.append(f'bn6.h {name}')
+    m = re.search(r'typedef struct \{(.*?)\} RomLayout;', rom, re.S)
+    for group in re.findall(r'uint32_t\s+([\w, ]+);', m.group(1) if m else ''):
+        for field in (f.strip() for f in group.split(',')):
+            if field.lower() not in doc:
+                missing.append(f'RomLayout {field}')
+    return lint_compare('ROM offsets without their note in docs/ROM_DATA.md', 'rom_data.txt',
+                        'ROM offsets docs/ROM_DATA.md does not name (AGENTS.md: a new one needs its note);\n'
+                        'this list only shrinks: build.py lint --update after naming one', Counter(missing), update)
+
+
+def lint_complexity(update):
+    """lizard over src/: a function past CCN LINT_CCN or LINT_NLOC lines of code is new,
+    or a listed one grew."""
+    import csv
+    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                         ['run', '--rm', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE, 'lizard', '--csv', 'src'],
+                         capture_output=True, text=True)
+    if out.returncode not in (0, 1) or not out.stdout:
+        sys.exit('lizard failed in the build image: one made before it came in? docker rmi cyberworld-build, then again\n'
+                 + out.stderr[-400:])
+    now = {}
+    for row in csv.reader(out.stdout.splitlines()):
+        nloc, ccn, file, name = int(row[0]), int(row[1]), row[6], row[7]
+        if ccn > LINT_CCN or nloc > LINT_NLOC:
+            key = f'{file}:{name}'
+            now[key] = max(now.get(key, (0, 0)), (ccn, nloc))
+    note = (f'functions past CCN {LINT_CCN} or {LINT_NLOC} lines of code (lizard): "file:function CCN NLOC";\n'
+            'none may join and none may grow: split one, then build.py lint --update')
+    if update:
+        lint_write('complexity.txt', note, [f'{k} {c} {n}' for k, (c, n) in now.items()])
+        print(f'complexity: {len(now)} listed in tests/lint/complexity.txt')
+        return True
+    base = {}
+    for line in lint_baseline('complexity.txt'):
+        key, c, n = line.rsplit(' ', 2)
+        base[key] = (int(c), int(n))
+    bad = 0
+    for key, (c, n) in sorted(now.items()):
+        if key not in base:
+            print(f'  new: {key} CCN {c}, {n} lines')
+            bad += 1
+        elif c > base[key][0] or n > base[key][1]:
+            print(f'  grew: {key} CCN {base[key][0]} -> {c}, {base[key][1]} -> {n} lines')
+            bad += 1
+    print(f'complexity: {len(now)} functions past CCN {LINT_CCN} or {LINT_NLOC} lines, {bad} new or grown')
+    return not bad
+
+
+def lint_analyzer(update):
+    """GCC's analyzer over the host build's sources, at -O2 as it builds."""
+    from collections import Counter
+    script = ('for f in src/*/*.c; do gcc -std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
+              '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
+              '-isystem /opt/mgba/host/include -c -o /dev/null "$f"; done 2>&1')
+    build('host')   # (its version.h)
+    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                         ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+                          'sh', '-c', script], capture_output=True, text=True).stdout
+    found, fn = Counter(), '?'
+    for line in out.splitlines():
+        m = re.match(r"^(src/\S+): In function '([^']+)'", line)
+        if m:
+            fn = m.group(2)
+            continue
+        m = re.match(r'^(src/\S+?):\d+:\d+: warning: (.*?)(?: \[CWE-\d+\])? \[(-Wanalyzer-[a-z-]+)\]$', line)
+        if m:
+            found[f'{m.group(1)}: {fn}: {m.group(2)} [{m.group(3)}]'] += 1
+    return lint_compare("GCC's analyzer", 'analyzer.txt',
+                        "GCC's -fanalyzer (-O2, the host build's sources): \"file: function: finding\";\n"
+                        'a new one fails; fix one, then build.py lint --update', found, update)
+
+
+def lint_dead(update):
+    """The game's functions no build reaches: the host and handheld builds and the
+    tests, each linked with every function in its own section and the linker's
+    list of those it drops. A function one of them reaches is kept."""
+    from collections import Counter
+    extra = ['EXTRA_CFLAGS=-ffunction-sections', 'EXTRA_LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections']
+    links = {}
+    for target, image, binary, nm in (('host', IMAGE, 'cyberworld', 'nm'),
+                                      ('aarch64', PORTMASTER_IMAGE, 'cyberworld.aarch64', 'aarch64-linux-gnu-nm')):
+        ensure_image(image)
+        out = f'build/lint/{target}'
+        # (linked afresh each time: the linker's list is the report)
+        run = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                             ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', image,
+                              'sh', '-c', f'rm -f {out}/{binary}; make TARGET={target} OUT={out} VERSION=lint -j{os.cpu_count() or 4} '
+                              f'"{extra[0]}" "{extra[1]}" {out}/{binary} 2>&1 >/dev/null; '
+                              f'{nm} -A -g --defined-only {out}/obj/*/*.o'], capture_output=True, text=True)
+        links[target] = run.stdout
+    ensure_image()
+    test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                          ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+                           'sh', '-c', f'rm -f build/lint/test_core; make -j{os.cpu_count() or 4} build/lint/test_core 2>&1 >/dev/null; '
+                           'nm -A -g --defined-only build/lint/test/src/*/*.o'], capture_output=True, text=True)
+    links['tests'] = test.stdout
+    reached, present = set(), set()
+    for target, text in links.items():
+        here, dropped = set(), set()
+        for line in text.splitlines():
+            m = re.search(r"removing unused section '\.text\.([A-Za-z_]\w*)' in file '(?:build/lint/\w+/obj|build/lint/test/src)/(\w+/\w+)\.o'", line)
+            if m:
+                dropped.add((f'src/{m.group(2)}.c', m.group(1)))
+                continue
+            m = re.match(r'^(?:build/lint/\w+/obj|build/lint/test/src)/(\w+/\w+)\.o:[0-9a-f]* T (\w+)$', line)
+            if m:
+                here.add((f'src/{m.group(1)}.c', m.group(2)))
+        if not here:
+            sys.exit(f'the {target} link for build.py lint gave nothing to read:\n{text[-600:]}')
+        present |= here
+        reached |= here - dropped
+    dead = Counter(f'{f}: {n}' for f, n in present - reached if n != 'main')
+    return lint_compare('functions no build reaches', 'dead.txt',
+                        'functions no build reaches (the host and handheld builds and the tests, build.py lint):\n'
+                        'remove one, or make it static where its own file uses it; build.py lint --update', dead, update)
+
+
+def lint(update=False):
+    ok = lint_files()
+    ok = lint_rom_data(update) and ok
+    ok = lint_complexity(update) and ok
+    ok = lint_analyzer(update) and ok
+    ok = lint_dead(update) and ok
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -1203,6 +1412,9 @@ def main():
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         sys.exit(code)
+    if a.action == 'lint':
+        ensure_image()
+        sys.exit(lint('--update' in a.rest))
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))

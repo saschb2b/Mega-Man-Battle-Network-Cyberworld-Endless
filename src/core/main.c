@@ -60,9 +60,15 @@ static void core2_probe(void *arg) { *(volatile bool *)arg = true; }
  * least 8 MB. The Homebrew Launcher gives a New 3DS app 124 MB, a 3DS 64:
  * a heap of all but the linear heap's share passed the area on the one,
  * a fixed 36 MB was too small for the game's ROM copies on both. */
+void __system_allocateHeaps(void);   /* (libctru's, replaced) */
 void __system_allocateHeaps(void) {
 	extern char *fake_heap_start, *fake_heap_end;
-	extern u32 __ctru_heap, __ctru_linear_heap, __ctru_heap_size, __ctru_linear_heap_size;
+	extern u32 __ctru_heap, __ctru_linear_heap;
+	/* (the sizes env.h reads in its own accessors, written here) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+	extern u32 __ctru_heap_size, __ctru_linear_heap_size;
+#pragma GCC diagnostic pop
 	Handle limit = 0;
 	s64 most = 0, used = 0;
 	ResourceLimitType commit = RESLIMIT_COMMIT;
@@ -750,15 +756,15 @@ int main(int argc, char **argv) {
 	if (R_SUCCEEDED(sysm)) ptmSysmExit();
 	osSetSpeedupEnable(true);
 	volatile bool third = false;
-	Thread probe = threadCreate(core2_probe, (void *)&third, 0x1000, 0x30, 2, false);
+	union { volatile bool *c; void *v; } arg = { &third };   /* (the thread writes it through a volatile) */
+	Thread probe = threadCreate(core2_probe, arg.v, 0x1000, 0x30, 2, false);
 	if (probe) { threadJoin(probe, U64_MAX); threadFree(probe); }
 	bool n3ds = false;
 	APT_CheckNew3DS(&n3ds);
-	extern u32 __ctru_heap_size, __ctru_linear_heap_size;
 	char mem[300];
 	snprintf(mem, sizeof mem, "3ds: %s, %s, heap %lu KB, linear heap %lu KB; the speedup %s; the third core %s",
 		n3ds ? "New 3DS" : "3DS", envIsHomebrew() ? "homebrew" : "title",
-		(unsigned long)(__ctru_heap_size / 1024), (unsigned long)(__ctru_linear_heap_size / 1024),
+		(unsigned long)(envGetHeapSize() / 1024), (unsigned long)(envGetLinearHeapSize() / 1024),
 		R_SUCCEEDED(sysm) ? "on" : "refused", third ? "free for the game" : probe ? "ran nothing" : "refused");
 	if (__3dslink_host.s_addr) {
 		u32 *soc = memalign(0x1000, 0x100000);

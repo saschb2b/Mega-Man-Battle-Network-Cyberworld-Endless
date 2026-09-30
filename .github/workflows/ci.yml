@@ -34,6 +34,18 @@ jobs:
       - name: Workflows
         run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest -color
 
+  code:
+    # (issue #19: each against its baseline in tests/lint, which only shrinks)
+    name: Code checks (analyzer, unreached functions, complexity)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile, tag: cyberworld-build }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.portmaster, tag: cyberworld-portmaster }
+      - run: python3 build.py lint
+
   test:
     name: Unit tests (sanitizers)
     runs-on: ubuntu-latest

@@ -47,7 +47,7 @@ the site.
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
 | `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers |
 | `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
-| `tests/test_core.c` | ROM-free unit tests; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder |
+| `tests/test_core.c` | ROM-free unit tests; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
@@ -85,14 +85,26 @@ the site.
   by default, and `screen = whole` in `settings.ini` gives 1x.
 - Draw calls must not change game state. Input is read once per frame in
   `platform_poll`.
+- The C builds warning-free with the Makefile's `WARN` (`-Wall -Wextra`,
+  `-Wshadow`, `-Wcast-qual`, `-Wwrite-strings`, `-Wformat=2` and more; issue
+  #19) on every target, `-Werror` in CI. `build.py lint` holds the rest to
+  its baselines in `tests/lint/`: no new finding of GCC's analyzer, no new
+  function no build reaches, no function joins or grows past CCN 25 or 120
+  lines, no ROM offset without its name in `docs/ROM_DATA.md`, and no ROM,
+  save, state or large file in git outside `docs/`. A baseline only
+  shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the
   layer before it loads `run.state`, so generation and object placement
   must not depend on the game's RAM.
 - Run state is saved as a raw struct with a checksum. Changing `Run` breaks
-  old saves: bump `RUN_MAGIC` in `save.c`. Changing what a layer seed makes
-  (layouts, object placement, loot and stock rolls): bump `LAYER_MAKE` in
-  `director.c`, so a run saved by an older build continues its layer afresh. Emulator states (`boot-3.state`,
-  `run.state`) are made on the device and never committed.
+  old saves: bump `RUN_MAGIC` in `save.c` (a `_Static_assert` on its size
+  there fails the build until someone does, and sets the new size). Changing
+  what a layer seed makes (layouts, object placement, loot and stock rolls):
+  bump `LAYER_MAKE` in `src/net/layer_make.h`, so a run saved by an older
+  build continues its layer afresh; where generation changed, the unit tests
+  fail on `LAYER_MAKE_HASH` beside it and name the new hash to set with
+  it. Emulator states (`boot-3.state`, `run.state`) are made on the device
+  and never committed.
 
 ## Game design
 
@@ -107,6 +119,7 @@ before the numbers. This holds mid-implementation too.
 ```sh
 python3 build.py            # host + aarch64 binaries (Docker)
 python3 build.py test       # ROM-free unit tests
+python3 build.py lint       # the code's checks against tests/lint (--update after fixing one)
 python3 build.py shot --scene emu --run-depth 2 --frames 400 --shot "300:/src/.build/a.bmp"
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --frames 15000   # walk layers, fight
 python3 build.py package    # build/port/cyberworld (PortMaster-New's layout) and the port's zip
@@ -149,8 +162,8 @@ developer's ROM at `/.dev/rom.gba` for tests in a local browser; the page
 itself only takes a ROM the player chooses.
 
 CI runs without a ROM: it builds every target with `-Werror`
-(`WERROR=1`, set when `CI` is) and runs `tests/test_core.c` under the
-sanitizers, then `tests/test_add_to_steam.py`. Everything that needs the game (captures, autopilot, atlas,
+(`WERROR=1`, set when `CI` is), runs `build.py lint` and
+`tests/test_core.c` under the sanitizers, then `tests/test_add_to_steam.py`. Everything that needs the game (captures, autopilot, atlas,
 pacing) stays local.
 
 `shot` runs headless in the build image with the repository at `/src` and
@@ -188,7 +201,7 @@ tiles, palettes and OBJs back to ROM offsets.
 
 | Change | Checks |
 | --- | --- |
-| Engine code | `build.py test`, a headless capture of the affected screen, an autopilot run |
+| Engine code | `build.py test`, `build.py lint`, a headless capture of the affected screen, an autopilot run |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
 | The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in |
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input |

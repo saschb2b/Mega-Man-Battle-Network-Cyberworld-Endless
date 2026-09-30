@@ -8,6 +8,7 @@
 #include "net.h"
 #include "net_layouts.h"
 #include "net_route.h"
+#include "layer_make.h"
 #include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
@@ -18,6 +19,9 @@
 #include "powers.h"
 #include "rivals.h"
 #include "save.h"
+#include "save_blob.h"
+#include "flags.h"
+#include "mapslot.h"
 #include "text.h"
 #include "townmath.h"
 #include "touch_layout.h"
@@ -69,6 +73,19 @@ static void test_lz77(void) {
 	free(out);
 	const uint8_t bad[] = { 0x10, 8, 0, 0, 0x80, 0x00, 0x05 };
 	CHECK(lz77_decompress(bad, sizeof bad, &n) == NULL, "lz77 rejects a reference before any output");
+	/* (fuzzed, under the tests' sanitizers: 20000 blocks of random bytes
+	 * behind its header, and every cut of the good one; a read or write
+	 * out of bounds fails the run, issue #19) */
+	static uint8_t junk[4096];
+	uint32_t x = 0x2545F491u;
+	for (int i = 0; i < 20000; ++i) {
+		size_t len = 4 + (size_t)(i % 97) * 40;
+		for (size_t k = 0; k < len; ++k) { x ^= x << 13; x ^= x >> 17; x ^= x << 5; junk[k] = (uint8_t)x; }
+		junk[0] = 0x10;
+		junk[3] = 0;   /* (a declared size under 64 KB) */
+		free(lz77_decompress(junk, len, &n));
+	}
+	for (size_t cut = 0; cut < sizeof src; ++cut) free(lz77_decompress(src, cut, &n));
 }
 
 static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
@@ -407,6 +424,57 @@ static void test_generation(void) {
 	a = layer;
 	layer_generate(1234, 5, BIOME_SKY, LAYER_NORMAL, &kit);
 	CHECK(!memcmp(a.cell, layer.cell, sizeof a.cell) && a.nobj == layer.nobj, "generation is deterministic");
+}
+
+/* The golden hash (issue #19): layer_generate's output over fixed seeds,
+ * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
+ * (layer_make.h). The determinism check above builds a seed twice in one
+ * build; this one fails when a build makes a seed's layer otherwise. */
+static uint32_t fnv(uint32_t h, const void *p, size_t n) {
+	const uint8_t *b = p;
+	for (size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 16777619u;
+	return h;
+}
+
+static uint32_t mix(uint32_t h, int v) { int32_t w = v; return fnv(h, &w, sizeof w); }
+
+static void test_layer_make(void) {
+	Run before = run;   /* (the tests after it see the run as it was) */
+	memset(&run, 0, sizeof run);
+	run.seed = 0x5EED;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	uint32_t h = 2166136261u;
+	for (uint32_t s = 1; s <= 20; ++s) {
+		int depth = 1 + (int)(s * 3 % 26), kind = s % 5 == 0 ? LAYER_UNDERNET : s % 7 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		layer_generate(s * 104729u, depth, s % 2 ? (int)(s % BIOME_COUNT) : biome_for_depth(depth), kind, &kit);
+		h = fnv(h, layer.cell, sizeof layer.cell);
+		h = fnv(h, layer.level, sizeof layer.level);
+		h = mix(h, layer.nstairs);
+		for (int i = 0; i < layer.nstairs; ++i) h = mix(mix(mix(h, layer.stair[i].x), layer.stair[i].y), layer.stair[i].dir);
+		h = mix(h, layer.rise);
+		h = mix(h, layer.nrooms);
+		for (int i = 0; i < layer.nrooms; ++i) {
+			const Room *r = &layer.rooms[i];
+			h = mix(mix(mix(mix(mix(mix(mix(h, r->x), r->y), r->w), r->h), r->ax), r->ay), r->kind);
+		}
+		h = mix(h, layer.nobj);
+		for (int i = 0; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			h = mix(mix(mix(mix(h, o->type), (int)lroundf(o->x * 16)), (int)lroundf(o->y * 16)), o->param);
+			h = mix(mix(mix(h, o->solid), o->npc_line), o->prop);
+		}
+		h = mix(mix(mix(mix(mix(h, layer.biome), layer.kind), layer.boss_layer), layer.boss_navi), layer.exit_room);
+		h = mix(mix(mix(mix(h, layer.arena), layer.ante), layer.arena_dir), layer.layout);
+		h = mix(h, layer.nprops);
+		for (int i = 0; i < layer.nprops; ++i) {
+			const NetProp *p = &layer.props[i];
+			h = mix(mix(mix(mix(mix(mix(h, p->kind), p->faces), p->x), p->y), p->len), p->look);
+		}
+	}
+	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
+		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);
+	run = before;
 }
 
 static bool on_stair(int x, int y) {
@@ -782,7 +850,7 @@ static bool walk_step(double *x, double *y, double dx, double dy, int gx, int gy
 /* frames to get beside (tx, ty) from (x, y) following the arrow, -1 never */
 static int arrow_turns, arrow_frames, arrow_swings;
 static int follow_arrow(double x, double y, int tx, int ty) {
-	const double run = 2.0 / 32;   /* panels a frame */
+	const double speed = 2.0 / 32;   /* panels a frame */
 	int len, shown = route_way(x, y, tx, ty, &len), pending = shown, stuck = 0;
 	if (shown < 0) return -1;
 	int budget = 200 + 48 * len, before = -1, turned_at = -1000;
@@ -802,8 +870,8 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 		/* the pad's way on the grid (RIGHT +x -y, DOWN +x +y) */
 		double a = shown * 3.14159265358979 / 4, right = cos(a), down = sin(a);
 		double dx = (right + down) / 2, dy = (down - right) / 2, n = sqrt(dx * dx + dy * dy);
-		dx = fabs(dx) < 1e-9 ? 0 : dx / n * run;
-		dy = fabs(dy) < 1e-9 ? 0 : dy / n * run;
+		dx = fabs(dx) < 1e-9 ? 0 : dx / n * speed;
+		dy = fabs(dy) < 1e-9 ? 0 : dy / n * speed;
 		if (walk_step(&x, &y, dx, dy, tx, ty)) { stuck = 0; continue; }
 		/* along one axis into an edge: towards the side the floor goes on */
 		if (++stuck >= 3 && (!dx || !dy)) {
@@ -811,7 +879,7 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 			for (int s = -1; s <= 1; s += 2) {
 				int bx = ay ? s : 0, by = ax ? s : 0;
 				if (!walk_floor(cx + ax, cy + ay) && walk_floor(cx + bx, cy + by) && walk_floor(cx + ax + bx, cy + ay + by)) {
-					walk_step(&x, &y, bx * run, by * run, tx, ty);
+					walk_step(&x, &y, bx * speed, by * speed, tx, ty);
 					break;
 				}
 			}
@@ -1189,6 +1257,7 @@ int main(void) {
 	test_sha1();
 	test_lz77();
 	test_generation();
+	test_layer_make();
 	test_layouts_build();
 	test_stairs();
 	test_arrow();

@@ -332,7 +332,8 @@ static SDL_Texture *tile_texture(uint32_t tile, uint32_t pal, int flip) {
 	return NULL;
 }
 
-void rom_tile(uint32_t tile, uint32_t pal, int x, int y, int flip) {
+/* One 8x8 ROM tile with a ROM palette. flip: bit 0 horizontal, bit 1 vertical. */
+static void rom_tile(uint32_t tile, uint32_t pal, int x, int y, int flip) {
 	SDL_Texture *t = tile_texture(tile, pal, flip);
 	if (!t) return;
 	SDL_Rect d = { x, y, 8, 8 };

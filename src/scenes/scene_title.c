@@ -485,8 +485,6 @@ static void setup_draw(int x0, int y0) {
 				snprintf(locked[nlocked++], sizeof locked[0], "%s: %s", meta_folder(f)->name, meta_folder(f)->opens);
 		break;
 	case ROW_CROSS: {
-		int open_crosses = 0;
-		for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
 		/* (and its costs: BN6's own weakness, which a playtester was told
 		 * wrong, and no other Cross) */
 		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL, *strong = S.cross ? powers_cross_strength(S.cross) : NULL;

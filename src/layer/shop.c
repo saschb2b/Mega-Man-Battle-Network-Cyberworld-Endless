@@ -223,8 +223,6 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 	return n;
 }
 
-bool shop_pick_program(ShopItem *out) { return pick(3, 0, out); }
-
 /* The gift's programs: those that change how a first act plays at once
  * (the names' index is the program; a playtester offered MegFldr1 on
  * layer 1, room for a Mega chip beside a starting folder, took it only to

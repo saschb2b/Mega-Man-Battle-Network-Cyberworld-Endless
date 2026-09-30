@@ -27,8 +27,6 @@ bool meta_endless_open(void);
 int meta_threat_open(void);
 /* What rung `rung` (1-THREAT_MAX) adds, a line. */
 const char *meta_threat_rule(int rung);
-/* Whether the run's threat reaches rung `rung`: each adds to those below. */
-bool meta_threat(int rung);
 
 /* The title's marks, BN6's own (its GetTitleScreenIconCount bits, drawn
  * with its sprites): each for a milestone here, never power. */

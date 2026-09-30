@@ -220,7 +220,6 @@ uint32_t touch_button(int control) {
 static const char *const shape_names[TOUCH_SHAPES] = { "below", "side", "over" };
 static const char *const control_names[TOUCH_CONTROLS] = { "dpad", "a", "b", "l", "r", "start", "select", "menu" };
 
-const char *touch_control_name(int control) { return control >= 0 && control < TOUCH_CONTROLS ? control_names[control] : ""; }
 
 static bool on(const char *v) { return !strcmp(v, "on") || !strcmp(v, "yes") || !strcmp(v, "1"); }
 

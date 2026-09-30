@@ -560,7 +560,7 @@ static void past_cell(const Room *m, int s, int u, int k, int *x, int *y) { *x =
 
 static Rim back_rim(const Room *m, int s) {
 	Rim best = { s, 0, 0, 0 };
-	int span = s == 0 ? m->h : m->w, base = s == 0 ? m->y : m->x, run = 0;
+	int span = s == 0 ? m->h : m->w, base = s == 0 ? m->y : m->x, streak = 0;
 	for (int i = 0; i <= span; ++i) {
 		bool ok = false;
 		if (i < span) {
@@ -571,9 +571,9 @@ static Rim back_rim(const Room *m, int s) {
 			/* (void two deep: not a gap between platforms) */
 			ok = floor_cell(ex, ey) && !layer.level[ey][ex] && !object_at(ex, ey) && void_cell(px, py) && void_cell(qx, qy);
 		}
-		if (ok) { ++run; continue; }
-		if (run > best.len) { best.len = run; best.u0 = base + i - run; }
-		run = 0;
+		if (ok) { ++streak; continue; }
+		if (streak > best.len) { best.len = streak; best.u0 = base + i - streak; }
+		streak = 0;
 	}
 	return best;
 }
@@ -987,19 +987,19 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	 * endless layer with every room taken had its duel and no gate) */
 	if (official && duel) {
 		NetObj *g = NULL;
-		const NetObj *p = NULL;
-		for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) p = &layer.obj[i];
+		const NetObj *rival = NULL;
+		for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) rival = &layer.obj[i];
 		int home = -1;
-		for (int i = 0; p && i < layer.nrooms && home < 0; ++i) {
+		for (int i = 0; rival && i < layer.nrooms && home < 0; ++i) {
 			const Room *r = &layer.rooms[i];
-			if (p->x >= r->x && p->x < r->x + r->w && p->y >= r->y && p->y < r->y + r->h) home = i;
+			if (rival->x >= r->x && rival->x < r->x + r->w && rival->y >= r->y && rival->y < r->y + r->h) home = i;
 		}
 		int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
 		for (int i = -1; i < nn && !g && home >= 0; ++i) {
 			int room = i < 0 ? home : near[i];
 			if (room == layer.exit_room) continue;
 			for (int tries = 0; tries < 12 && !g; ++tries)
-				if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)p->x) >= 2 || abs(y - (int)p->y) >= 2))
+				if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2))
 					g = add_obj(OBJ_OFFICIAL, x, y);
 		}
 		if (!g) g = PLACE(OBJ_OFFICIAL);

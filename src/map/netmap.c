@@ -214,8 +214,8 @@ static bool learn(int area, Learned *L) {
 		learn_map(&b, &a, area, L);
 		decor_learn(&b, na->bg_in_map, &L->decor);
 		rebank_seen(&b, na->rebank[1], L);
-		for (int k = 0; k < 3; ++k)
-			if (!L->ornament[k].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[k], &L->ornament[k]);
+		for (int o = 0; o < 3; ++o)
+			if (!L->ornament[o].ok && aligned(&a, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
 		if (na->pad_hues && aligned(&a, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
@@ -845,7 +845,8 @@ bool netmap_build(int area, const NetLayout *lay) {
 
 bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &extra); }
 
-unsigned netmap_stair_dirs(int area, int *rise) {
+/* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
+static unsigned netmap_stair_dirs(int area, int *rise) {
 	if (area < 0 || area >= NET_AREAS) return 0;
 	Learned *L = &learned[area];
 	if (!L->tried) { L->tried = true; L->ok = learn(area, L); }

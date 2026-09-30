@@ -76,6 +76,5 @@ uint32_t touch_button(int control);
 void touch_prefs_parse(const char *text, TouchPrefs *p);
 int touch_prefs_format(const TouchPrefs *p, char *out, int size);
 /* A control's name in touch.ini and on the editor. */
-const char *touch_control_name(int control);
 
 #endif
