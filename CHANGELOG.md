@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The PortMaster port no longer needs ROCKNIX's glibc.** It is built
+  on Debian bullseye and asks for glibc 2.29 at most (it asked for
+  2.38), older than ArkOS, AmberELEC, muOS or Knulli have. Its zip is
+  laid out as PortMaster's own, with a screenshot, a gameinfo.xml
+  EmulationStation can show and one license file per part, ready for
+  PortMaster's catalogue. The launcher lost a Mesa setting it did not
+  need.
 - **A bought-out shop says so.** A Net Dealer or NaviCust vendor with
   nothing left says "Sold out!" instead of opening an empty list: after
   "More programs? Take a look!" the empty list read as a broken shop

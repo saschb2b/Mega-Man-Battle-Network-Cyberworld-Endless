@@ -237,7 +237,8 @@ Android device, take that system's download from the table above.
 
 1. Download `cyberworld-endless-rocknix-portmaster.zip` from the
    [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it (or build it with
-   `python3 build.py package`, see [Building](#building)).
+   `python3 build.py package`, which writes it to `build/release/`, see
+   [Building](#building)).
 2. Copy `cyberworld/` and `Cyberworld Endless.sh` into the handheld's
    `ports` folder (on ROCKNIX: `/storage/roms/ports/`).
 3. Copy your ROM into `ports/cyberworld/rom/`. The file name does not matter;
@@ -526,8 +527,7 @@ browser player. A screen at 60 or 120 Hz, or one that follows the game
 
 ## Building
 
-For developers. Builds run in Docker (Debian trixie, matching ROCKNIX's glibc
-and SDL2):
+For developers. Builds run in Docker:
 
 ```bash
 python3 build.py
@@ -558,7 +558,8 @@ writes the release files to `build/release/`, each named for its system:
 AppImage (with its `.zsync` for updates), the `.deb` and the tar.gz; and
 `cyberworld-endless-website.zip`, the site and the player to host
 elsewhere. Each target builds in its own Docker image
-(`docker/`): the handheld on Debian trixie as ROCKNIX, the Linux desktop on
+(`docker/`): the handheld on Debian bullseye, whose glibc is older than
+any firmware PortMaster serves, with the firmware's own SDL2; the Linux desktop on
 bookworm with SDL2 built to load X11, Wayland and the sound servers at run
 time, the browser with Emscripten.
 

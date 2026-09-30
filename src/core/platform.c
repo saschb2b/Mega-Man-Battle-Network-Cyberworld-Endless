@@ -162,8 +162,10 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
 	keys_default();
 	if (headless) {
-		SDL_SetHint(SDL_HINT_VIDEODRIVER, "dummy");
-		SDL_SetHint(SDL_HINT_AUDIODRIVER, "dummy");
+		/* (the variables, not their hints: SDL before 2.0.22, as on older
+		 * handhelds, has no hints for them) */
+		SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
+		SDL_setenv("SDL_AUDIODRIVER", "dummy", 1);
 	}
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 #ifdef __ANDROID__

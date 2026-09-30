@@ -122,6 +122,8 @@ jobs:
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.portmaster, tag: cyberworld-portmaster }
+      - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.linux, tag: cyberworld-linux }
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.web, tag: cyberworld-web }

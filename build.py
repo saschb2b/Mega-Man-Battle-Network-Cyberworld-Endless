@@ -61,7 +61,7 @@ glibc runs on more distributions.
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
-  python3 build.py package      assemble build/port/ for PortMaster
+  python3 build.py package      build/port/cyberworld (for PortMaster-New) and the port's zip
 """
 import argparse
 import os
@@ -77,8 +77,10 @@ WEB_IMAGE = 'cyberworld-web'       # docker/Dockerfile.web
 WINDOWS_IMAGE = 'cyberworld-windows'   # docker/Dockerfile.windows
 ANDROID_IMAGE = 'cyberworld-android'   # docker/Dockerfile.android
 N3DS_IMAGE = 'cyberworld-3ds'   # docker/Dockerfile.3ds
+PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds'}
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds',
+          PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
 CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
@@ -120,7 +122,8 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE}.get(target, IMAGE)
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE,
+             'aarch64': PORTMASTER_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
     extra = [f'FILE_VERSION={file_version()}'] if target == 'windows' else []
@@ -594,29 +597,54 @@ def serve(port=8080):
 
 
 def port_release():
-    """build/release/cyberworld-endless-rocknix-portmaster.zip: the PortMaster port for ROCKNIX
-    handhelds (port.json keeps PortMaster's own name for it, cyberworld.zip)."""
-    package()
-    archive = shutil.make_archive(os.path.join(RELEASE, PORT_ZIP[:-4]), 'zip', os.path.join(ROOT, 'build', 'port'))
+    """build/release/cyberworld-endless-rocknix-portmaster.zip: the port laid out as PortMaster's
+    own zip of it (tools/build_release.py in PortMaster-New): the launcher, and cyberworld/
+    with port.json, gameinfo.xml, the screenshot and the README as cyberworld.md beside the
+    game (port.json keeps PortMaster's own name for it, cyberworld.zip)."""
+    import zipfile
+    port = package()
+    os.makedirs(RELEASE, exist_ok=True)
+    archive = os.path.join(RELEASE, PORT_ZIP)
+    moved = {'README.md': 'cyberworld/cyberworld.md', 'port.json': 'cyberworld/port.json',
+             'gameinfo.xml': 'cyberworld/gameinfo.xml', 'screenshot.png': 'cyberworld/screenshot.png'}
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+        for base, dirs, files in os.walk(port):
+            dirs.sort()
+            for name in sorted(files):
+                path = os.path.join(base, name)
+                rel = os.path.relpath(path, port).replace(os.sep, '/')
+                info = zipfile.ZipInfo.from_file(path, moved.get(rel, rel))
+                if rel.endswith('.sh') or rel.endswith('.aarch64'):
+                    info.external_attr = 0o100755 << 16   # (unpacked by hand, both start as they are)
+                with open(path, 'rb') as f:
+                    z.writestr(info, f.read(), zipfile.ZIP_DEFLATED)
     print('released', archive)
 
 
 def package():
+    """build/port/cyberworld: the port as a folder of PortMaster-New's ports/, to copy there
+    for a pull request: the launcher, port.json, README.md, gameinfo.xml and the screenshot
+    beside cyberworld/, which holds the binary, one license per part and rom/."""
     out = os.path.join(ROOT, 'build', 'port')
-    game = os.path.join(out, 'cyberworld')
+    port = os.path.join(out, 'cyberworld')
+    game = os.path.join(port, 'cyberworld')
     if os.path.isdir(out):
         shutil.rmtree(out)
     os.makedirs(os.path.join(game, 'rom'))
+    os.makedirs(os.path.join(game, 'licenses'))
+    # (copied without their modes: PortMaster keeps launchers at 644, the launcher sets the binary's)
+    for name in ('Cyberworld Endless.sh', 'README.md', 'gameinfo.xml', 'port.json'):
+        shutil.copyfile(os.path.join(ROOT, 'port', name), os.path.join(port, name))
+    # (a 640x480 frame, as on the most common handheld screen: build.py screenshots portmaster)
+    shutil.copyfile(os.path.join(ROOT, 'docs', 'screenshots', 'portmaster.png'), os.path.join(port, 'screenshot.png'))
     shutil.copy2(os.path.join(ROOT, 'build', 'aarch64', 'cyberworld.aarch64'), game)
-    shutil.copy2(os.path.join(ROOT, 'port', 'README.md'), game)
-    shutil.copy2(os.path.join(ROOT, 'port', 'gameinfo.xml'), game)
-    shutil.copy2(os.path.join(ROOT, 'port', 'port.json'), game)
-    shutil.copy2(os.path.join(ROOT, 'LICENSE'), game)
-    shutil.copytree(os.path.join(ROOT, 'build', 'aarch64', 'licenses'), os.path.join(game, 'licenses'))
+    shutil.copyfile(os.path.join(ROOT, 'LICENSE'), os.path.join(game, 'licenses', 'LICENSE.cyberworld.txt'))
+    shutil.copyfile(os.path.join(ROOT, 'build', 'aarch64', 'licenses', 'mGBA.txt'),
+                    os.path.join(game, 'licenses', 'LICENSE.mgba.txt'))
     with open(os.path.join(game, 'rom', 'PUT_YOUR_ROM_HERE.txt'), 'w') as f:
         f.write('Copy your own Mega Man Battle Network 6: Cybeast Gregar (USA) .gba file into this folder.\n')
-    shutil.copy2(os.path.join(ROOT, 'port', 'Cyberworld Endless.sh'), out)
-    print('packaged', out)
+    print('packaged', port)
+    return port
 
 
 def atlas(biomes='all', seeds='1', baseline=False):
@@ -918,12 +946,17 @@ SCREENSHOTS = [
     # thumb on the D-pad: the whole screen at a phone's pixels, halved)
     ('touch', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '2400x1080',
                '--dpi', '420', '--taps', '400:240,581>360,701'],
-     [(418, 'touch')], {}, True),
+     [(418, 'touch')], {}, 2),
+    # (the PortMaster port's screenshot: seed 7's BlastMan fight on the
+    # most common handheld screen, 640x480, the picture at 2x in its borders)
+    ('portmaster', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12',
+                    '--size', '640x480'], [(2175, 'portmaster')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
 ]
 
 
 def screenshots(only=None):
-    """docs/screenshots/NAME.png: the 240x160 picture of chosen frames."""
+    """docs/screenshots/NAME.png: the 240x160 picture of chosen frames (or the
+    whole screen, shrunk by the entry's last number)."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
@@ -953,8 +986,8 @@ def screenshots(only=None):
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
             if not whole:
                 im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
-            else:
-                im = im.resize((w // 2, h // 2), Image.LANCZOS)
+            elif whole[0] > 1:
+                im = im.resize((w // whole[0], h // whole[0]), Image.LANCZOS)
             im.save(os.path.join(out, f'{n}.png'), optimize=True)
             print('screenshot', n)
     return 0
@@ -1254,7 +1287,7 @@ def main():
     if a.action in ('all', 'device', 'package'):
         build('aarch64')
     if a.action == 'package':
-        package()
+        port_release()
     if a.action in ('shot', 'asan'):
         # Headless run inside the build image; the ROM directory is mounted read-only.
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
