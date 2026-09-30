@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A duel with ProtoMan counts once.** Quitting after a duel and
+  continuing met ProtoMan again on that layer, and each win counted anew
+  in the record, as a player reported (issue #20): the run continues
+  from the layer's checkpoint, made before the duel. A CONTINUE now finds
+  the duel fought: ProtoMan gone, and the official gate beside him open
+  where the duel was won.
 - **The BugFrag Trader no longer trades for nothing.** With A pressed
   through "Try again?", it went on giving chips at 0 BugFrags, as a
   player reported (issue #21): the game's own "not enough" line waits as

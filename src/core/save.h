@@ -56,6 +56,12 @@ typedef struct {
 	uint32_t records_mark;    /* the guardians' records as Dad's Records mail last showed them (a hash): NEW when they change */
 	/* the rival's duels (docs/RIVAL.md), in any run: won and lost */
 	uint16_t duel_won, duel_lost;
+	/* the last duel's run (its seed) and layer, and whether it was won: a
+	 * CONTINUE from the checkpoint before it finds it fought, not to be
+	 * fought and counted again (issue #20) */
+	uint32_t duel_run;
+	uint16_t duel_depth;
+	uint8_t duel_beat;
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };

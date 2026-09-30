@@ -96,6 +96,11 @@ clearance opens), which only matter to a player who plays on.
    took a hit. That doesn't count.").
 7. **The record.** Wins and losses in the profile; Dad's Records mail
    lists "Chaud and ProtoMan 2-1", and the run's summary names a duel won.
+   A duel counts once: the profile keeps the last one's run and layer and
+   its result, and a CONTINUE from the layer's checkpoint, made before it,
+   finds it fought: ProtoMan gone, Chaud's call made, the gate beside him
+   as the verdict left it (a player's CONTINUE had met him again, and each
+   win anew counted in the record: issue #20).
 
 ## The netbattle
 

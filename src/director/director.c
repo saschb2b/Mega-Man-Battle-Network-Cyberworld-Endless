@@ -827,6 +827,27 @@ static void note_folder_codes(void) {
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 }
 
+/* Whether this run's duel on this layer is fought (the profile keeps the
+ * last one's layer). */
+static bool duel_fought(void) {
+	return run.side_kind == LAYER_NORMAL && profile.duel_depth == run.depth && profile.duel_run == run.seed;
+}
+
+/* ProtoMan's duel as a CONTINUE finds it: Chaud's call, made before the
+ * save, not made again (every CONTINUE on a duel layer had replayed it,
+ * after the duel too); and a duel fought after the checkpoint stays
+ * fought, ProtoMan gone as he goes when it begins (its choice made), the
+ * gate beside him as the verdict left it (issue #20: a CONTINUE met him
+ * again, and each duel won anew counted in the record). */
+static void resume_duel(void) {
+	if (flag_get(LAYER_DUEL_CALLED_FLAG)) D.duel_call_due = false;
+	if (!duel_fought()) return;
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (D.objs.choice[i].type == OBJ_DUEL) flag_set(D.objs.choice[i].flag);
+	if (profile.duel_beat && layer_objs_official_level && rival_clearance() >= layer_objs_official_level) flag_set(LAYER_CLEARED_FLAG);
+	D.duel_call_due = false;
+}
+
 /* Whether ProtoMan's duel stands on the layer. */
 static bool duel_layer(void) {
 	for (int i = 0; i < layer.nobj; ++i)
@@ -2382,9 +2403,7 @@ bool director_resume(void) {
 		boss_resume();
 		/* the map as far as it was seen (none for another build's layer) */
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
-		/* (Chaud's call, made before the save, is not made again: every
-		 * CONTINUE on a duel layer had replayed it, after the duel too) */
-		if (flag_get(LAYER_DUEL_CALLED_FLAG)) D.duel_call_due = false;
+		resume_duel();
 		/* choices made before the checkpoint stay made */
 		for (int i = 0; i < D.objs.nchoices; ++i)
 			if (flag_get(D.objs.choice[i].flag)) {
@@ -2448,6 +2467,9 @@ static void duel_verdict(bool won) {
 
 	if (beat) profile.duel_won++;
 	else profile.duel_lost++;
+	profile.duel_run = run.seed;
+	profile.duel_depth = (uint16_t)run.depth;
+	profile.duel_beat = beat;
 	profile_save();
 	int size = (int)sizeof D.duel_verdict, k = verdict_result(D.duel_verdict, sizeof D.duel_verdict, won, beat, rung, mine, his);
 	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
