@@ -13,6 +13,8 @@
   from its door on every guardian's layer: one had stood a long way back,
   and one layer in a hundred had none. A run saved by an earlier build
   continues its layer afresh.
+- MegaMan's reminder of a program left off the board also says whether L
+  and R turn it, as soon as it is gotten.
 - **The PortMaster port no longer needs ROCKNIX's glibc.** It is built
   on Debian bullseye and asks for glibc 2.29 at most (it asked for
   2.38), older than ArkOS, AmberELEC, muOS or Knulli have. Its zip is

@@ -1946,6 +1946,21 @@ static void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
 }
 
+/* MegaMan's words for a program left off the board, once a layer (NULL:
+ * none to say): where to place it, and whether it turns. */
+static const char *off_board_words(void) {
+	int offv = 0;
+	const char *off = D.off_told || run_won_here() ? NULL : program_off_board(&offv);
+	static char words[320];
+	if (!off || !*off) return NULL;
+	if (!fits_beside_placed(offv)) return no_room_words(off);
+	/* (and whether it turns: a playtester pressed L and R on his gift's
+	 * SuperArmor with no Spin, and nothing said why) */
+	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s",
+		off, navicust_turn_words(offv));
+	return words;
+}
+
 /* The NaviCust's bugs, named in MegaMan's words when they change: after the
  * player runs the NaviCust in the PET, or an ExpMemry grows the board
  * (docs/NAVICUST.md). A bug the player can read is a price they chose; the
@@ -1976,15 +1991,7 @@ static void bug_watch(void) {
 	ran |= D.pet_seen;
 	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
 		D.pet_seen = false;
-		int offv = 0;
-		const char *off = D.off_told || run_won_here() ? NULL : program_off_board(&offv);
-		static char words[200];
-		const char *say = NULL;
-		if (off && *off && !fits_beside_placed(offv)) say = no_room_words(off);
-		else if (off && *off) {
-			snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.", off);
-			say = words;
-		}
+		const char *say = off_board_words();
 		if (say && talk_start(say, FACE_MEGAMAN)) { D.off_told = true; return; }
 	}
 	if (!memcmp(D.bugs, now, sizeof now)) { ran = D.pet_seen; return; }
