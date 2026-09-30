@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.2 (2026-10-01)
 
 - **The 3DS's bottom-screen map no longer stutters on the net.** The
   map read MegaMan's place from the game as it was drawn, and on a New
