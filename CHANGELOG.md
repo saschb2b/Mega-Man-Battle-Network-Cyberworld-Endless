@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 (2026-09-30)
 
 - **The first beta.** The title screen names the build a beta, and the
   release is GitHub's latest, which the AppImage's updater follows: the
