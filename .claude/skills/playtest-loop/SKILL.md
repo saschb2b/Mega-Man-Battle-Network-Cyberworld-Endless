@@ -165,3 +165,9 @@ circles.
 - The persona's frame numbers are from its own history file; its "f~"
   guesses can be off by hundreds. Use its frame index or `history.txt`.
 - A history rewrite of shared commits needs the user: don't force it.
+- `tools/play.py` runs `build/linux/cyberworld`: after a change, `build.py
+  linux` before a check in it (`build.py` alone builds host and aarch64;
+  a check on the stale build read as the fix not working).
+- A fix that grows a listed function fails `build.py lint`: split the new
+  code into a function of its own rather than `--update` the baseline
+  (session 45's fixes did so three times).

@@ -1186,3 +1186,43 @@ MegaMan) and which shows (the fade), and the fix followed from them in
 one step. The class is a briefing that names a panel under MegaMan's own
 sprite: sweep every guardian's tip for one (GroundMan's "from under the
 lit panel", HeatMan's shadow "under us") against its fight's frames.
+
+## Session 45: 7/10 (keep playing: yes; recommend: yes)
+
+Run 3 from NEW GAME (endless, Storm, EraseCross, threat 1, HP+): act 1 in
+the RoboDog Comp, the gift's SuperArmor, the layer-1 dealer's DolThdr3 V
+for SpoutMan, layer 2's rung-1 duel won without a hit (0:04.66) and its
+gate's FireBrn1, UnderSht from the vendor; SpoutMan deleted MegaMan on
+layer 3 with 220 of his 600 HP left, the persona's own misplay by its
+account. From 8 to 7: walkway corners ate about 20 calls again, and the
+duel felt like a formality.
+
+Confirmed: the gate's chip damage, Lan's answer to a win, the vendor's
+four programs, the Cross portrait's wait, the first "Are you sure?" on
+No.
+
+Raised, fixed: ProtoMan's gate open before his duel, which paid only the
+record (fab0faa: the gate beside him opens to the duel's winner, Chaud's
+call names the stake, the verdict the next rung; the official Chip Order
+draws uncommon and rare chips). The heal "a long way back" from
+SpoutMan's arena (3aa2384: within a short walk of its door on every
+guardian's layer, held by the tests; the golden hash caught the change
+and LAYER_MAKE went to 63 with it). L and R silent on a program with no
+word why (3c28b75: the reminder after a program is gotten says whether it
+turns). Kept: walkway mouths and corners, BN6's own walking by the
+owner's choice, the persona's top wish for the third session running.
+Misreads into persona.md: a green Mystery Data "gave nothing" (a B held
+after the A skipped "MegaMan got: AirSpin1 R"), START after a shop needs
+120 frames. Left: the setup's Cross rows (what each Cross does, from
+BN6's tutorials), L naming ProtoMan's way as the crow flies, the vendor's
+shop face (the keeper's, a known limit), the shop prompts' remembered
+cursor.
+
+Cost: 301 calls, 72 minutes. Issue #19's guardrails landed during it:
+three of this iteration's fixes grew functions build.py lint lists, and
+each was split rather than the baseline raised.
+
+Loop change: **the checks are part of a fix.** A fix is done when
+`build.py test` (the golden layer hash, the heal walk) and `build.py
+lint` pass; a check on `tools/play.py` needs `build.py linux` first
+(SKILL.md's pitfalls).
