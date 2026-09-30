@@ -1034,3 +1034,40 @@ log.** Its "this battle" joined every battle seen at consecutive
 five-minute snapshots, so a layer's four fights read as one battle of
 28 minutes and raised a false alarm; it now counts the run log's
 finished battles and starts a new battle when the count moves.
+
+## Session 41: 7/10 (keep playing: yes; recommend: yes)
+
+NEW GAME (endless, Storm folder, EraseCross, threat 1, HP+): run 1 ended
+on Seaside's layer 2 (a Piranha and a StarFish), after ProtoMan's third
+duel was lost on time against two Quakers (0:27.30 to his 0:12.00, the
+record 0-3); run 2 stopped on Central Area's layer 1 at 180/200. From 8
+to 7: no guardian, gate or Spin met, a duel that felt like a Quaker
+lottery, a sloppy death.
+
+Confirmed: EraseCross said in the setup and the PET and seen erasing in
+play, Lan answering a lost duel, the gift Prog's consolation after an
+early death, Dad's line in town, the setup remembering its choices.
+
+Raised, fixed after the pin: the dealer's list bought by an A carried
+over from his words (c775af9, the first "Are you sure?" after a keeper's
+words starts on No). Fixed meanwhile from GitHub issues: the BugFrag
+Trader's trade (d050033), the arrival's card and words as one beat with
+MegaMan held (27f83a8), layers built a quarter faster (dd91df8). Open:
+the duel's squad (Quakers in three of four duels, only hittable as they
+land, so the clock is a lottery; his terms say "a pair of viruses", and
+BN6's enemy names are not located in the ROM yet); the town's port at
+the mermaid fountain (hints contradicting a step apart, a bystander at
+the port); every mail NEW in a new run. Misreads: AreaGrab's freeze
+eating an input (the second session running: BN6's own time stop), the
+Cross list's second A (found by the persona itself).
+
+Cost: 261 calls against 260; the port in town took 7, walkway mouths
+about 15.
+
+Loop change: **the persona's build is named with its features.** The
+official gate on every duel layer landed while session 41 played, so its
+duel layer had none, and the persona reported "no gate seen" as a gap.
+Patch notes now come from `git log` from the pinned commit, which
+pin.sh prints, and the goals say on which layer the persona's save meets
+each headline. The AreaGrab misread, seen twice, went into persona.md.
+
