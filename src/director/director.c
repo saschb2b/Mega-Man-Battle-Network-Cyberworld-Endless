@@ -881,6 +881,24 @@ static int encounter_hp(const Encounter *e) {
 	return total;
 }
 
+/* A layer takes a second to make on a New 3DS, seconds more where a new
+ * area's tiles are learned: where the last took long, the next one's
+ * making is named over the still picture as MegaMan leaves a layer, or the
+ * pause reads as a hang (a player on a 3DS: "felt like it froze"). A PC's
+ * 60 ms show nothing. */
+#define SLOW_BUILD_MS 100
+static double build_ms;
+
+static void building_word(void) {
+	if (build_ms < SLOW_BUILD_MS) return;
+	static const char *word = "Building the next layer...";
+	int w = text_width(word) + 12, y = P.core_y + EMU_H - 38;
+	platform_draw_over();
+	fill_rect(P.core_x + (EMU_W - w) / 2, y, w, 16, rgba(0, 16, 40, 200));
+	text_draw(P.core_x + EMU_W / 2, y + 4, word, WHITE, TEXT_CENTER);
+	platform_present_now();
+}
+
 static bool build_layer(void) {
 	int biome = layer_biome();
 	run.biome = biome;
@@ -985,6 +1003,15 @@ static bool build_layer(void) {
 	D.secret_call = run.side_kind == LAYER_SECRET;
 	talk_reset();
 	return true;
+}
+
+/* build_layer timed (build_ms), named first where MegaMan leaves a layer */
+static bool new_layer(bool leaving) {
+	if (leaving) building_word();
+	uint64_t t0 = SDL_GetPerformanceCounter();
+	bool ok = build_layer();
+	build_ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	return ok;
 }
 
 /* The run's starting folder in the game's first folder (docs/META.md): the
@@ -1107,7 +1134,7 @@ bool director_start_run(void) {
 	save_delete();
 	/* the first layer, entered through the town's port; the town itself
 	 * (its seed apart from the layers') */
-	if (!build_layer()) return false;
+	if (!new_layer(false)) return false;
 	if (!town_plan(town_seed(run.seed)) || !town_install(D.group, D.number, D.start_x, D.start_y)) {
 		fprintf(stderr, "town: not built; starting in the net\n");
 		lock_run();
@@ -2228,7 +2255,7 @@ bool director_start_layer(void) {
 	 * have set it) */
 	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); powers_bring(run.cross); }
 	note_folder_codes();
-	if (!build_layer()) return false;
+	if (!new_layer(false)) return false;
 	lock_run();
 	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
 	D.checkpoint = true;
@@ -2305,7 +2332,7 @@ bool director_resume(void) {
 	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
-	if (!build_layer()) return false;
+	if (!new_layer(false)) return false;
 	char path[600];
 	save_state_path(path, sizeof path);
 	int make = 0;
@@ -2382,7 +2409,7 @@ bool director_resume(void) {
  * and into the side layer built meanwhile. */
 static void enter_side_layer(void) {
 	note_folder_codes();
-	if (!build_layer()) return;
+	if (!new_layer(true)) return;
 	D.warping = true;
 	D.checkpoint = true;
 	emu_warp_out();
@@ -2537,7 +2564,7 @@ static bool follow_exit_warp(void) {
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
 	note_folder_codes();
-	if (!build_layer()) return false;
+	if (!new_layer(true)) return false;
 	D.warping = true;
 	D.checkpoint = true;
 	return true;

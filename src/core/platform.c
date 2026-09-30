@@ -714,6 +714,8 @@ void platform_present_now(void) {
 	if (!P.headless) present_canvas();
 }
 
+void platform_draw_over(void) { SDL_SetRenderTarget(P.renderer, P.canvas); }
+
 void platform_end_frame(void) {
 	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
 	if (P.blend && !P.headless) blend_keep();

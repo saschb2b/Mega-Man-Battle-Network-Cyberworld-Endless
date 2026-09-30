@@ -81,6 +81,9 @@ void platform_frame_parts(uint64_t update, uint64_t draw);
 /* The canvas as drawn so far on the display at once, before a long wait
  * (no frame counted; none headless). */
 void platform_present_now(void);
+/* Draws from here onto the canvas as last shown, not cleared: a word over
+ * the still picture before a long wait (then platform_present_now). */
+void platform_draw_over(void);
 /* --dpi: the screen's density taken as given (tests of the touch controls). */
 void platform_set_dpi(float dpi);
 /* The next frame shown saved whole as the player sees it, the touch
