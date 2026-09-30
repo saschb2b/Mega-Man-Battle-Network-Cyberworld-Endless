@@ -2649,16 +2649,18 @@ static const char *duel_call_words(void) {
 	char record[64];
 	snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
 	/* (where, as the net goes, and what for: "the third act" was the
-	 * game's word, and a playtester asked what the netbattle would pay) */
+	 * game's word, and a playtester asked what the netbattle would pay;
+	 * the rung comes after two wins, whose clearance he holds: "every
+	 * official gate" read as if he had none) */
+	static const char *const full = "Beat him, and my full clearance is yours: the official vaults open too.";
 	if (layer_objs_duel_later)
 		snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
 			"@C He'll be waiting past the next %s. %s", pacing_act(run.depth) == 0 ? "two guardians" : "guardian",
-			rival_clearance() < 2 ? "Beat him, and every official gate opens for you." : "Get MegaMan ready.");
+			rival_clearance() < 2 ? full : "Get MegaMan ready.");
 	else if (layer_objs_duel_rung == 2)
 		snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
-			"@C He'll face MegaMan himself. %s", rival_clearance() < 2 ? (layer_objs_official_level >= 2
-			? "Beat him, and every official gate opens for you. There's one on this layer, the official vault: three Mega chips." : "Beat him, and every official gate opens for you.")
-			: "He hasn't forgotten the last time.");
+			"@C He'll face MegaMan himself. %s%s", rival_clearance() < 2 ? full : "He hasn't forgotten the last time.",
+			rival_clearance() < 2 && layer_objs_official_level >= 2 ? "|@C There's one on this layer, beside him: three Mega chips." : "");
 	else {
 		/* (what a win opens for one already cleared: the gate beside
 		 * him, whose prize the duel is) */

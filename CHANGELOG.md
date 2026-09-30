@@ -23,7 +23,9 @@
   duel's prize, with no duel to win. It opens to Chaud's clearance, as
   any other official gate. Chaud and ProtoMan say where he waits in the
   net's words ("past the next two guardians", where they had said "the
-  third act"), and Chaud what a win opens.
+  third act"), and Chaud what a win opens: "my full clearance is yours:
+  the official vaults open too", as the netbattle comes after two wins,
+  whose clearance a playtester already held.
 - MegaMan's L says how far the walk to ProtoMan is, and when it winds
   away from where his pink mark lies ("down and to the right, far off,
   though the way there winds"), as it says for a heal or a Net Dealer:
