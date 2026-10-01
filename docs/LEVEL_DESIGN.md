@@ -205,7 +205,11 @@ edges), so its own tiles for an edge failed that test wherever they
 reached that far in, and plain white or a pad's piece stood in: the
 platforms read as flat white fields with ragged edges. Its platforms'
 edges, like CopyBot's rims, are not held to the plain look
-(`TILES_RIMMED`). The walls inside Comp 2's platforms ring the grey cubes
+(`TILES_RIMMED`). So are the Graveyard's, whose slabs' rims carry a clip
+at every join of two panels, and Mr. Weather Comp's: their own edge tiles
+failed the test, and full panels stood in, which poked out past the rim
+in a sawtooth (the Graveyard, its holes slots with straight sides) or
+hung stepped blocks under the field's edge (Weather). The walls inside Comp 2's platforms ring the grey cubes
 that stand on them, not holes; learned as holes, the panels beside them
 taught plain white next to the void, which the inner corners of generated
 platforms took. The tiles are learned with those panels as floor

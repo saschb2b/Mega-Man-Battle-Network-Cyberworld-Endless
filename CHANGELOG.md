@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The Graveyard's and Mr. Weather Comp's edges run straight.** The
+  Graveyard's slabs had a sawtooth edge, every panel poking out past the
+  rim with a pale post in each notch, and holes shaped like slots;
+  Weather's fields hung stepped blocks and grilles under their edges.
+  Their edges are now drawn with their own rim tiles, as the original
+  maps draw them.
 - **Mr. Weather Comp's and Robot Control's guardian arenas look like
   their areas.** Their arenas were paved with the walkways' tiles, lamps
   and circuit lines made for a path a panel wide, which tiled over a big
