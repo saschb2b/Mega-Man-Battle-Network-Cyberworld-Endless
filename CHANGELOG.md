@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The Undernet's raised rooms are plain.** Their floors showed pieces
+  of green crosses cut off at the tiles' edges, from the decorated middle
+  of the original's raised court. Green panels' tiles are no longer used
+  for its floors.
 - **Seaside's boardwalks lose their broken arrows.** Where its yellow
   boardwalks joined the blue field or a platform, pink and orange
   triangles cut off at the tiles' edges stood in the floor: pieces of the
