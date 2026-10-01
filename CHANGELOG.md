@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Fields look like the originals' fields.** Inside a platform every
+  tile took its spot's most common look, so Mr. Weather Comp's solar
+  panels ran as plain bands without their lights, and the Cybeast Nest's
+  floors lost their cracks. A field's middle is now laid as the original
+  lays it: by its repeating pattern where it has one, else a whole
+  stretch of the original field repeated, lights, fans and cracks in
+  place.
 - **No more grey cubes floating in the Cybeast Nest's void.** Its one
   piece of scenery was debris from under the original's altar, set
   alone beside the floor; the Nest now sets none.

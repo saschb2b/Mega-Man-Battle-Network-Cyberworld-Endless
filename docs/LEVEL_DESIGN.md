@@ -220,6 +220,15 @@ striped conveyor before the robot's door, which drew the pads half striped:
 the pads take the look of Comp 1's and the Pavilion's raised white
 platforms alone (`TILES_MORE_PADS`).
 
+Well inside a platform (floor all round), a tile is taken from the
+original's own field as it lays it, not by its neighbourhood, which is the
+same everywhere there: by the field's period, the smallest (up to 6 x 6
+panels) that explains 95% of its middle (Seaside's 2 x 2, the Nest's
+cracked 5 x 2), else by the largest stretch of its middle (up to 8 x 8
+panels) laid whole and repeated. Mr. Weather Comp's solar panels carry
+lights that cross the tiles' edges at random: picked tile by tile, its
+fields came out as plain bands the length of the field, their lights gone.
+
 Before its tiles are picked, a layer's floor is made drawable
 (`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,
 walkway and void no original map shows is a place the tiles can only

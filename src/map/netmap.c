@@ -188,13 +188,28 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
 
 /* The area's other maps in the same tiles and colours, for the places its
  * own never shows, on its own map's grid. */
+/* map m's free-standing pieces, unless the area sets none (TILES_NO_SCENERY) */
+static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
+	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, &L->decor);
+}
+
+/* (debug output) what area `area` learned */
+static void learn_report(int area, const Learned *L) {
+	fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery, its middle's period %dx%d, its looks %d\n",
+		area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n, L->book[0].pa, L->book[0].pb,
+		L->book[0].vary ? L->book[0].vary_first[64] : 0);
+	for (int d = 0; d < STAIR_DIRS; ++d)
+		fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
+			L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
+}
+
 static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->more[k][0], na->more[k][1], &b)) continue;
 		learn_map(&b, grid, area, L);
-		if (!(na->styles & TILES_NO_SCENERY)) decor_learn(&b, na->bg_in_map, &L->decor);
+		learn_decor(&b, na, L);
 		rebank_seen(&b, na->rebank[1], L);
 		for (int o = 0; o < 3 && !na->xrom; ++o)
 			if (!L->ornament[o].ok && aligned(grid, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
@@ -218,7 +233,7 @@ static bool learn(int area, Learned *L) {
 		: na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) { area_src_free(&a); return false; }
 	L->nbooks = 0;
 	learn_map(&a, &a, area, L);
-	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(&a, na->bg_in_map, &L->decor);
+	learn_decor(&a, na, L);
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
 	/* (the pads' centrepieces are BN6's tiles) */
@@ -255,12 +270,7 @@ static bool learn(int area, Learned *L) {
 	L->pads_seen = false;
 	for (int k = 0; k < L->nbooks; ++k)
 		for (int i = 0; i < L->book[k].n && !L->pads_seen; ++i) L->pads_seen = L->book[k].cand[i].pad;
-	if (emu_debug_on()) {
-		fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery\n", area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n);
-		for (int d = 0; d < STAIR_DIRS; ++d)
-			fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
-				L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
-	}
+	if (emu_debug_on()) learn_report(area, L);
 	return true;
 }
 

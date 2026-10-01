@@ -50,6 +50,20 @@ typedef struct {
 	int plain[2][64][TILE_PLAIN], nplain[2][64];   /* per material and phase: the floor's usual looks */
 	uint32_t *shapes;                   /* the panels' neighbourhoods seen (TILE_SHAPE), sorted */
 	int nshapes;
+	/* the platform floor's middle as the original lays it, period `pa` x
+	 * `pb` panels: per panel of the period and phase, its pair (an index
+	 * into cand, -1 none). A field of Mr. Weather Comp's solar panels ran
+	 * as bands its whole length where each tile took its phase's most
+	 * common pair. */
+	int16_t *patch;
+	int pa, pb;
+	/* ... where it has no period: per phase, its pairs whose look keeps to
+	 * the plain one's along the tile's edges (a light or a crack inside the
+	 * tile), with how often the original draws each, to scatter as it
+	 * does (Mr. Weather Comp's solar panels' lights) */
+	TileCand *vary;
+	uint32_t *vary_weight;
+	int vary_first[65];
 } TileBook;
 
 /* A tile map's size, where its panel edges fall (world units mod 32), how

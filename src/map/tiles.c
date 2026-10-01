@@ -657,6 +657,209 @@ static void keep_cands(TileCand *c, size_t n, TileBook *out) {
 	index_classes(out);
 }
 
+/* ---- the floor's middle, by its period ---- */
+
+static int first_class(const TileBook *b, uint32_t key);
+static void learn_variety(TileBook *out);
+
+#define PATCH_MAX 6        /* panels a period spans at most, per axis */
+#define PATCH_SHARE 95     /* % of the middle's tiles a period must explain */
+#define PATCH_MIN 24       /* tiles of the middle a book needs for one */
+
+typedef struct { int A, B, phase, cand; } PatchSample;
+
+static int mod_of(int v, int m) { int r = v % m; return r < 0 ? r + m : r; }
+
+/* The share (in % of `n`) of the samples the period (pa, pb) explains: per
+ * panel of the period and phase, its most common pair's; that pair in
+ * `best` (pa * pb * 64 entries, -1 none). */
+static int patch_fit(const PatchSample *s, int n, int pa, int pb, int16_t *best) {
+	int cells = pa * pb * 64;
+	static int16_t cand[PATCH_MAX * PATCH_MAX * 64][4];
+	static uint16_t cnt[PATCH_MAX * PATCH_MAX * 64][4];
+	for (int i = 0; i < cells; ++i) for (int k = 0; k < 4; ++k) { cand[i][k] = -1; cnt[i][k] = 0; }
+	for (int i = 0; i < n; ++i) {
+		int at = (mod_of(s[i].B, pb) * pa + mod_of(s[i].A, pa)) * 64 + s[i].phase, k = 0;
+		while (k < 4 && cand[at][k] >= 0 && cand[at][k] != s[i].cand) ++k;
+		if (k == 4) continue;
+		cand[at][k] = (int16_t)s[i].cand;
+		++cnt[at][k];
+	}
+	int took = 0;
+	for (int i = 0; i < cells; ++i) {
+		int m = 0;
+		for (int k = 1; k < 4; ++k) if (cnt[i][k] > cnt[i][m]) m = k;
+		best[i] = cnt[i][m] ? cand[i][m] : -1;
+		took += cnt[i][m];
+	}
+	return n ? took * 100 / n : 0;
+}
+
+#define STRETCH_MAX 8   /* panels of the largest stretch kept, per axis */
+#define STRETCH_MIN 3
+
+/* The largest rectangle of the middle's panels (up to STRETCH_MAX a side,
+ * every tile of them seen) as the patch, its tiles as the original lays
+ * them. */
+/* The largest rectangle (STRETCH_MIN to STRETCH_MAX panels a side) of the
+ * w x h panels whose tiles are all seen (tiles[k] == full): its corner and
+ * size in r (a, b, w, h), its area returned (0 none). */
+static int largest_whole(const uint8_t *tiles, int w, int h, int full, int r[4]) {
+	int best = 0;
+	for (int b = 0; b < h; ++b)
+		for (int a = 0; a < w; ++a)
+			for (int rh = STRETCH_MIN; rh <= STRETCH_MAX && b + rh <= h; ++rh)
+				for (int rw = STRETCH_MIN; rw <= STRETCH_MAX && a + rw <= w; ++rw) {
+					if (rw * rh <= best) continue;
+					bool whole = true;
+					for (int k = 0; k < rw * rh && whole; ++k) whole = tiles[(b + k / rw) * w + a + k % rw] == full;
+					if (whole) { best = rw * rh; r[0] = a; r[1] = b; r[2] = rw; r[3] = rh; }
+				}
+	return best;
+}
+
+static void patch_stretch(const PatchSample *s, int n, TileBook *out) {
+	int A0 = INT_MAX, B0 = INT_MAX, A1 = INT_MIN, B1 = INT_MIN;
+	for (int i = 0; i < n; ++i) {
+		A0 = s[i].A < A0 ? s[i].A : A0;
+		A1 = s[i].A > A1 ? s[i].A : A1;
+		B0 = s[i].B < B0 ? s[i].B : B0;
+		B1 = s[i].B > B1 ? s[i].B : B1;
+	}
+	if (n < PATCH_MIN || A1 - A0 + 1 < STRETCH_MIN || B1 - B0 + 1 < STRETCH_MIN || A1 - A0 >= SPAN || B1 - B0 >= SPAN) return;
+	int w = A1 - A0 + 1, h = B1 - B0 + 1, full = 0, r[4];
+	/* per panel: its tiles' pairs by phase (-1 none) and how many it has */
+	int16_t *at = malloc((size_t)w * h * 64 * sizeof *at);
+	uint8_t *tiles = calloc((size_t)w * h, 1);
+	if (at && tiles) {
+		for (int i = 0; i < w * h * 64; ++i) at[i] = -1;
+		for (int i = 0; i < n; ++i) {
+			int k = (s[i].B - B0) * w + s[i].A - A0;
+			tiles[k] += at[k * 64 + s[i].phase] < 0;
+			at[k * 64 + s[i].phase] = (int16_t)s[i].cand;
+		}
+		/* (a panel of the middle has as many tiles as the most of them) */
+		for (int k = 0; k < w * h; ++k) full = tiles[k] > full ? tiles[k] : full;
+		if (largest_whole(tiles, w, h, full, r)) out->patch = malloc((size_t)r[2] * r[3] * 64 * sizeof *out->patch);
+	}
+	/* (the patch's panel (i, j) lies where A mod its width is i: the stretch's own) */
+	for (int k = 0; out->patch && k < r[2] * r[3]; ++k) {
+		int A = A0 + r[0] + k % r[2], B = B0 + r[1] + k / r[2];
+		memcpy(&out->patch[(mod_of(B, r[3]) * r[2] + mod_of(A, r[2])) * 64], &at[((B - B0) * w + A - A0) * 64], 64 * sizeof *out->patch);
+	}
+	if (out->patch) { out->pa = r[2]; out->pb = r[3]; }
+	free(at);
+	free(tiles);
+}
+
+/* The platform floor's middle (panels with platform floor all round, not
+ * pads, nor beside a skipped panel): its tiles' pairs and the smallest
+ * period that lays them as the original does. */
+/* Whether panel (A, B) of the source lies in its platform floor's middle:
+ * platform floor all round, not a pad, nor beside a skipped panel. */
+static bool src_middle(const Src *src, const uint8_t *pads, int A, int B) {
+	if (A < -SPAN / 2 || B < -SPAN / 2 || A >= SPAN / 2 || B >= SPAN / 2 || pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]) return false;
+	for (int k = 0; k < 9; ++k)
+		if (src_panel(src, A + k % 3 - 1, B + k / 3 - 1) != TILE_A || skipped(src, A + k % 3 - 1, B + k / 3 - 1)) return false;
+	return true;
+}
+
+/* The pair learned for source tile i in the middle's class at `phase`, -1 none. */
+static int middle_pair(const AreaSrc *a, const TileBook *out, size_t i, int phase) {
+	uint32_t key = KEY(phase, 0x1FF, 0);
+	for (int j = first_class(out, key); j < out->ncls && out->cls[j].key == key; ++j) {
+		int end = j + 1 < out->ncls ? out->cls[j + 1].first : out->n;
+		for (int c = out->cls[j].first; c < end; ++c) {
+			const TileCand *t = &out->cand[c];
+			if (t->e0 == a->tile[0][i] && !t->pad && (!t->e1 || (a->layers > 1 && t->e1 == a->tile[1][i]))) return c;
+		}
+	}
+	return -1;
+}
+
+/* The smallest period that explains PATCH_SHARE of the samples, as the
+ * patch; false none. */
+static bool patch_period(const PatchSample *s, int n, TileBook *out) {
+	static int16_t best[PATCH_MAX * PATCH_MAX * 64];
+	for (int area = 1; n >= PATCH_MIN && area <= PATCH_MAX * PATCH_MAX; ++area)
+		for (int pa = 1; pa <= PATCH_MAX; ++pa) {
+			int pb = area / pa;
+			if (area % pa || pb > PATCH_MAX || patch_fit(s, n, pa, pb, best) < PATCH_SHARE) continue;
+			out->patch = malloc((size_t)pa * pb * 64 * sizeof *out->patch);
+			if (!out->patch) return false;
+			memcpy(out->patch, best, (size_t)pa * pb * 64 * sizeof *best);
+			out->pa = pa;
+			out->pb = pb;
+			return true;
+		}
+	return false;
+}
+
+static void learn_patch(const AreaSrc *a, const Src *src, const TileGrid *g, const uint8_t *pads, TileBook *out) {
+	PatchSample *s = malloc(((size_t)a->tw * a->th + 1) * sizeof *s);
+	if (!s) return;
+	int n = 0;
+	for (int ty = 0; ty < a->th; ++ty)
+		for (int tx = 0; tx < a->tw; ++tx) {
+			int phase, A, B;
+			tile_class(g, tx, ty, &phase, &A, &B);
+			int c = src_middle(src, pads, A, B) ? middle_pair(a, out, (size_t)ty * a->tw + tx, phase) : -1;
+			if (c >= 0) s[n++] = (PatchSample){ A, B, phase, c };
+		}
+	/* none: its largest stretch, laid whole (Mr. Weather Comp's solar panels,
+	 * whose lights cross the tiles' edges at random: each tile taking a
+	 * look of its own cut them, the plain one alone left bands); and with
+	 * none of those, its looks scattered */
+	if (!patch_period(s, n, out)) patch_stretch(s, n, out);
+	if (!out->patch) learn_variety(out);
+	free(s);
+}
+
+/* Whether two pairs draw the same along the tile's edges. */
+static bool same_edges(const TileCand *a, const TileCand *b) {
+	if (a->e1 != b->e1) return false;
+	for (int i = 0; i < 64; ++i) {
+		int x = i % 8, y = i / 8;
+		if (x && y && x < 7 && y < 7) continue;
+		bool da = a->mask >> i & 1, db = b->mask >> i & 1;
+		if (da != db || (da && a->px[i] != b->px[i])) return false;
+	}
+	return true;
+}
+
+/* The platform floor's middle where it has no period (patch): per phase,
+ * its pairs keeping to the plain one's edges, and how often each is seen. */
+static void learn_variety(TileBook *out) {
+	int cap = out->n + 1, nv = 0;
+	out->vary = malloc((size_t)cap * sizeof *out->vary);
+	out->vary_weight = malloc((size_t)cap * sizeof *out->vary_weight);
+	if (!out->vary || !out->vary_weight) { free(out->vary); free(out->vary_weight); out->vary = NULL; out->vary_weight = NULL; return; }
+	for (int phase = 0; phase < 64; ++phase) {
+		out->vary_first[phase] = nv;
+		uint32_t key = KEY(phase, 0x1FF, 0);
+		int j = first_class(out, key);
+		if (j >= out->ncls || out->cls[j].key != key) continue;
+		int end = j + 1 < out->ncls ? out->cls[j + 1].first : out->n;
+		const TileCand *plain = NULL;
+		uint32_t all = 0, held = 0;   /* (the looks besides the plain one: seen, and held) */
+		for (int c = out->cls[j].first; c < end; ++c) {
+			const TileCand *t = &out->cand[c];
+			if (t->pad) continue;
+			if (!plain) { plain = t; out->vary[nv] = *t; out->vary_weight[nv++] = t->count; continue; }
+			all += t->count;
+			if (!same_edges(t, plain)) continue;
+			held += t->count;
+			out->vary[nv] = *t;
+			out->vary_weight[nv++] = t->count;
+		}
+		/* the kept looks as often as all of them are seen: those reaching
+		 * a tile's edge (a light across two tiles) would be cut here */
+		for (int i = out->vary_first[phase] + 1; held && i < nv; ++i)
+			out->vary_weight[i] = (uint32_t)((uint64_t)out->vary_weight[i] * all / held);
+	}
+	out->vary_first[64] = nv;
+}
+
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out) {
 	memset(out, 0, sizeof *out);
 	Src src;
@@ -718,6 +921,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	learn_shapes(&src, a, styles, walk_styles, skip_styles, bg_in_map, pads, out);
 	keep_cands(c, n, out);
 	find_plain(out);
+	learn_patch(a, &src, &g, pads, out);
 	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
 	src_close(&src);
 	free(pads);
@@ -756,6 +960,9 @@ void tiles_free(TileBook *b) {
 	free(b->cand);
 	free(b->cls);
 	free(b->shapes);
+	free(b->patch);
+	free(b->vary);
+	free(b->vary_weight);
 	memset(b, 0, sizeof *b);
 }
 
@@ -776,21 +983,36 @@ static void keep_first(TileBook *b, int n) {
 	for (int i = 0; i < b->n; ++i) b->joins += KEY_A(b->cand[i].key) && KEY_B(b->cand[i].key);
 }
 
+/* The middle's pairs where `moved` moved them (-1 dropped). */
+static void remap_patch(TileBook *b, const int *moved) {
+	for (int i = 0; b->patch && i < b->pa * b->pb * 64; ++i)
+		if (b->patch[i] >= 0) b->patch[i] = (int16_t)moved[b->patch[i]];
+}
+
 void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool drop) {
-	int n = 0;
+	int n = 0, *moved = malloc(((size_t)b->n + 1) * sizeof *moved);
 	for (int i = 0; i < b->n; ++i) {
 		TileCand *c = &b->cand[i];
 		c->other = 0;
 		for (int p = 0; p < 64 && !c->other; ++p) c->other = c->mask >> p & 1 && !seen[c->px[p] & 0x7FFF];
+		if (moved) moved[i] = !drop || !c->other ? n : -1;
 		if (!drop || !c->other) b->cand[n++] = *c;
 	}
+	if (moved) remap_patch(b, moved);
+	else { free(b->patch); b->patch = NULL; }
+	free(moved);
 	keep_first(b, n);
 }
 
 void tiles_drop_pads(TileBook *b) {
-	int n = 0;
-	for (int i = 0; i < b->n; ++i)
+	int n = 0, *moved = malloc(((size_t)b->n + 1) * sizeof *moved);
+	for (int i = 0; i < b->n; ++i) {
+		if (moved) moved[i] = b->cand[i].pad ? -1 : n;
 		if (!b->cand[i].pad) b->cand[n++] = b->cand[i];
+	}
+	if (moved) remap_patch(b, moved);
+	else { free(b->patch); b->patch = NULL; }
+	free(moved);
 	keep_first(b, n);
 }
 
@@ -1239,6 +1461,26 @@ bool tiles_shape_seen(const TileBook *books, int nbooks, uint32_t shape) {
 	return false;
 }
 
+/* The middle's pair at panel (A, B) and `phase`: by its period (patch), or
+ * where it has none, one of its looks as often as the original draws it
+ * (vary); NULL neither. */
+static const TileCand *middle_pick(const TileBook *b, int A, int B, int phase) {
+	if (b->patch) {
+		int ci = b->patch[(mod_of(B, b->pb) * b->pa + mod_of(A, b->pa)) * 64 + phase];
+		return ci >= 0 ? &b->cand[ci] : NULL;
+	}
+	if (!b->vary || b->vary_first[phase + 1] <= b->vary_first[phase]) return NULL;
+	uint32_t total = 0, h = (uint32_t)A * 0x9E3779B1u ^ (uint32_t)B * 0x85EBCA77u ^ (uint32_t)phase * 0xC2B2AE3Du;
+	h ^= h >> 15;
+	h *= 0x2C1B3C6Du;
+	h ^= h >> 12;
+	for (int i = b->vary_first[phase]; i < b->vary_first[phase + 1]; ++i) total += b->vary_weight[i];
+	uint32_t r = total ? h % total : 0;
+	int i = b->vary_first[phase];
+	while (i + 1 < b->vary_first[phase + 1] && r >= b->vary_weight[i]) r -= b->vary_weight[i++];
+	return &b->vary[i];
+}
+
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
 	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
 	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask) {
@@ -1251,6 +1493,16 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	occupancy(floor, ctx, A, B, &oa, &ob);
 	if (!(oa | ob)) return false;
 	bool pad = floor(A, B, ctx) & TILE_PAD;
+	/* the platform floor's middle, as the own map lays it */
+	const TileCand *mc = oa == 0x1FF && !ob && !pad && nbooks ? middle_pick(&books[0], A, B, phase) : NULL;
+	if (mc) {
+		count(0, mc);
+		*e0 = mc->e0;
+		*e1 = mc->e1;
+		*look = look_of(mc);
+		*mask = mc->mask;
+		return true;
+	}
 	if (apart(books, nbooks, oa, ob)) {
 		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
 		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true, NULL, n, &dist, &off);
