@@ -240,6 +240,7 @@ the moment it is needed:
 | Programs owned (KeyItems 0x90 + variant, cap 9) | RAM 0x020031C4 |
 | The board (7x7) and the placed programs (49 x 8 bytes) | RAM 0x0200414C, 0x02004190 |
 | Bug counts, one per type | RAM 0x0200431C |
+| The counts rewritten: each reload of MegaMan's stats zeroes them and counts again, as a sub-screen such as a Chip Trader's opens and closes, over a frame boundary at times; with BugStop (MegaMan's stat +0x1F) they stay zero | bn6f applyNaviStatsMaybe_813C458, sub_813CBCC, sub_813C490 |
 | NaviCust results (MegaMan's stats) | RAM 0x020047CC |
 | Compressed shape flags | event flags 0x2660 + program variant |
 | Give a program | text command `EF 1B program amount colour` |
@@ -271,7 +272,11 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
 - The bug line: as the map is back, before a step, MegaMan names each bug
   that changed and what it does. BN6's RUN says OK over a part left past
   the board's edge, which does bug; the line is the only place the player
-  learns it.
+  learns it. It follows the board, not the counts: only a change of the
+  programs' places (a RUN) or of the ExpMemry makes him speak, from
+  counts that held ten frames, since BN6 rewrites them on its own (the
+  row above; a player heard the bug explained after every Chip Trader
+  trade, issue #25).
 
 Next: BugFrags as the vendor's currency with the workshop and the
 bugged-battle pay, the vendor's stock from this pool (it still sells

@@ -143,6 +143,8 @@ static struct {
 	int lost_to;           /* the guardian MegaMan was deleted by, 0 none */
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
+	uint32_t board;        /* ... the board they were read with (board_hash) */
+	int board_size;        /* ... and its ExpMemry */
 	bool bugs_known;       /* ... read on this layer */
 	int programs_seen;     /* ... with the programs in the PET, counted since */
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
@@ -2376,28 +2378,64 @@ static int programs_owned(void) {
 	return n;
 }
 
+/* MegaMan free to speak of the NaviCust: no talk, staging or chat box, and
+ * the game not holding him for lines of its own. A Chip Trader's lines go
+ * on on the map after its trade screen: a talk begun in between took their
+ * box, held the D-pad so that "Try again?" never reached No, and A traded
+ * again (issue #25). */
+static bool free_to_speak(void) {
+	return !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX) && !emu_read8(BN6_DIALOGUE_LOCK) &&
+		flag_get(BN6_FLAG_PLAYER_CAN_MOVE);
+}
+
 /* A program just come into the PET without the PET (a Guardian Data's):
  * whether the board's free space takes it, said once the chat is done
  * (from the PET, off_board_words says it); true where it spoke. */
 static bool program_watch(void) {
 	int owned = programs_owned();
 	if (D.pet_seen || owned < D.programs_seen) { D.programs_seen = owned; return false; }
-	if (owned == D.programs_seen || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return false;
+	if (owned == D.programs_seen || !free_to_speak()) return false;
 	const char *say = cramped_words();
 	if (!say || talk_start(say, FACE_MEGAMAN)) D.programs_seen = owned;
 	return say != NULL;
 }
 
+/* The board as the player sets it in the NaviCust: each slot's program,
+ * column, row and turns, and the grid they fill. */
+static uint32_t board_hash(void) {
+	uint32_t h = 2166136261u;
+	for (int i = 0; i < BN6_NAVICUST_SLOTS; ++i) {
+		uint32_t e = BN6_NAVICUST_PLACED + (uint32_t)i * 8;
+		h = (h ^ (emu_read32(e) & 0xFF00FFFFu)) * 16777619u;
+		h = (h ^ emu_read16(e + 4)) * 16777619u;
+	}
+	for (int i = 0; i < NAVICUST_GRID * NAVICUST_GRID; ++i) h = (h ^ emu_read8(BN6_NAVICUST_GRID + (uint32_t)i)) * 16777619u;
+	return h;
+}
+
 #define BUG_CALM 10
 static void bug_watch(void) {
+	/* (a reading the game has held BUG_CALM frames: it rewrites the counts
+	 * in passes that span frames, and its save scrambles them for eight) */
 	static int last, calm;
-	calm = D.frame == last + 1 ? calm + 1 : 0;
-	last = D.frame;
-	if (calm < BUG_CALM) return;
+	static uint8_t held[NAVICUST_BUGS];
+	static uint32_t held_board;
+	static int held_size;
 	uint8_t now[NAVICUST_BUGS];
 	for (int t = 0; t < NAVICUST_BUGS; ++t) now[t] = emu_read8(BN6_NAVICUST_BUGS + (uint32_t)t);
+	uint32_t board = board_hash();
+	int size = key_item(SCRIPTS_EXP_MEMORY);
+	bool same = !memcmp(now, held, sizeof now) && board == held_board && size == held_size;
+	calm = D.frame == last + 1 && same ? calm + 1 : 0;
+	last = D.frame;
+	memcpy(held, now, sizeof now);
+	held_board = board;
+	held_size = size;
+	if (calm < BUG_CALM) return;
 	if (!D.bugs_known) {
 		memcpy(D.bugs, now, sizeof now);
+		D.board = board;
+		D.board_size = size;
 		D.bugs_known = true;
 		D.programs_seen = programs_owned();
 		return;
@@ -2406,21 +2444,27 @@ static void bug_watch(void) {
 	/* (back from the PET with a program left off the board: said at once,
 	 * where L said it only on the next layer; a playtester ran the NaviCust
 	 * without placing his Guardian Data's HP+100) */
-	static bool ran;   /* (the PET was open since the last words: a RUN) */
-	ran |= D.pet_seen;
-	if (D.pet_seen && !talk_busy() && !cinema_busy() && !emu_read8(BN6_CHATBOX)) {
+	if (D.pet_seen && free_to_speak()) {
 		D.pet_seen = false;
 		const char *say = off_board_words();
 		if (say && talk_start(say, FACE_MEGAMAN)) { D.off_told = true; return; }
 	}
-	if (!memcmp(D.bugs, now, sizeof now)) { ran = D.pet_seen; return; }
-	if (talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
+	/* (the counts alone changed, the board as it was: the game's own work.
+	 * Every reload of MegaMan's stats counts them anew, as a trade screen
+	 * opens and closes, and with BugStop zeroes them; MegaMan said a
+	 * player's NaviCust ran clean after each trade, then named its bug
+	 * again; issue #25) */
+	if (board == D.board && size == D.board_size) { memcpy(D.bugs, now, sizeof now); return; }
+	if (!memcmp(D.bugs, now, sizeof now)) { D.board = board; D.board_size = size; return; }
+	if (!free_to_speak()) return;
 	bool had = false;
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
-	const char *words = navicust_bug_words(now, ran, bug_cause());
+	/* (a board placed anew is the NaviCust's RUN; an ExpMemry only grows it) */
+	const char *words = navicust_bug_words(now, board != D.board, bug_cause());
 	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN)) {
 		memcpy(D.bugs, now, sizeof now);
-		ran = false;
+		D.board = board;
+		D.board_size = size;
 	}
 }
 

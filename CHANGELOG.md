@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **MegaMan speaks of NaviCust bugs only when the board changes (issue
+  #25).** After every trade at a Chip Trader, a player heard MegaMan say
+  the NaviCust ran clean, then explain its bug all over again. BN6 counts
+  the bugs anew whenever a screen like the trade's opens and closes, and
+  clears them with BugStop on the board; MegaMan took each change of the
+  count for news. He now names a bug only when the board itself
+  changed: a RUN in the NaviCust, or an ExpMemry. And he waits for the
+  trader to finish: a talk of his begun as the trade screen closed took
+  the trader's box, and "Try again?" could no longer reach No.
 - **A layer's way across runs wide, as Capcom's maps do.** MegaMan walks
   as in BN6, so every one-wide walkway entered from a platform takes
   lining up, and a playtester spent a third of his inputs on it. BN6's
