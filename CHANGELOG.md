@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **What a guardian fight holds is said before it.** A player lost a run
+  to Colonel without knowing three things: his hits went nowhere while
+  he readied a slash, his cape swept the row he landed in with only his
+  own panel lit, and there was no running at 1 HP. Colonel's battle data
+  now names both moves, the room before every arena says there's no
+  running from a guardian, and EraseCross's drain on a Navi is said to
+  be slow.
 - **No battle under a guardian's staging (issue #24).** Running into a
   guardian's arena could roll a random battle as the staging began, and
   the battle was fought between its black bars. The staging's walk to the

@@ -92,8 +92,12 @@ const char *guardian_tip(int navi) {
 	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!|@M He stands right in front of us while he cracks his whip: swing then!";
 	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "
 		"Hard hits work whatever he is!|@M He stands right in front of us while he calls his whirlwinds: swing then!";
+	/* (what a playtester's first fight against him met unwarned: his
+	 * Cannons turned aside while he readied a slash, and his cape's sweep
+	 * along the row he landed in, with only his own panel lit) */
 	case 18: return "Colonel sends his soldiers at us: clear them out. When our panels light in a zigzag, he warps in and slashes across them. "
-		"Step off the yellow panels!|@M He stays beside us a moment after his slash: swing back then! When the screen goes dark, his big slash is coming: brace for it!";
+		"Step off the yellow panels!|@M Our hits glance off him while he readies a slash, and he stays beside us a moment after it: swing back then!|"
+		"@M When he lands in our row and the screen goes dark, his cape sweeps the row: get out of it before the dark comes!";
 	default: return NULL;
 	}
 }

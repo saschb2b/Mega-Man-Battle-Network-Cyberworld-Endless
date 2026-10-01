@@ -493,7 +493,7 @@ static int guardian_words(char *buf, int k, int size) {
 	 * saw BlastMan's HP drain after a Vulcan, and only patch notes had
 	 * said why) */
 	if (flag_get(BN6_FLAG_ERASE_CROSS))
-		ADD("@M And in EraseCross, a plain chip that hits him while his HP has a 4 in it bugs him: his HP drains away!|");
+		ADD("@M And in EraseCross, a plain chip that hits him while his HP has a 4 in it bugs him: his HP drains, slowly, for the rest of the fight!|");
 	#undef ADD
 	return k;
 }
@@ -3011,6 +3011,7 @@ static const char *duel_call_words(void) {
 	return call;
 }
 
+#define NO_RUNNING "Once we're in, there's no running from a guardian!"
 static void last_stop(int cx, int cy) {
 	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
 	const Room *a = &layer.rooms[layer.ante];
@@ -3028,13 +3029,15 @@ static void last_stop(int cx, int cy) {
 		if (o->type == OBJ_HEAL && !heal && !flag_get(LAYER_HEAL_TOLD_FLAG) && hp < max) heal = service_where(wx, wy, hway, sizeof hway);
 	}
 	if (!dealer && !heal) return;
-	static char buf[300];
+	static char buf[400];
 	int k = guardian_known(D.objs.guardian.navi) || guardian_heard()
 		? snprintf(buf, sizeof buf, "@M %s's arena is just ahead, Lan!|@M ", guardian(D.objs.guardian.navi)->name)
 		: snprintf(buf, sizeof buf, "@M The guardian's arena is just ahead, Lan!|@M ");
-	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, and a Recovery Mr. Prog's %s, if we want to get ready first.", dealer, heal);
-	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, if we want to get ready first.", dealer);
-	else snprintf(buf + k, sizeof buf - (size_t)k, "A Recovery Mr. Prog's %s, if we want to heal up first.", heal);
+	/* (and no running once in, as from BN6's story bosses: a playtester
+	 * at 1 HP tried L and R, which only BN6's random battles answer) */
+	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, and a Recovery Mr. Prog's %s, if we want to get ready first.|@M %s", dealer, heal, NO_RUNNING);
+	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, if we want to get ready first.|@M %s", dealer, NO_RUNNING);
+	else snprintf(buf + k, sizeof buf - (size_t)k, "A Recovery Mr. Prog's %s, if we want to heal up first.|@M %s", heal, NO_RUNNING);
 	talk_start(buf, FACE_MEGAMAN);
 }
 
