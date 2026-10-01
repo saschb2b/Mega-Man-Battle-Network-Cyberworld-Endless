@@ -82,7 +82,7 @@ static struct {
 	Encounter duel_enc;
 	bool duel, duel_hit, duel_call_due, duel_verdict_due;
 	int duel_hp, duel_time;
-	int duel_cap;       /* the netbattle's ProtoMan at most this HP (the act's guardian band), 0 none or done */
+	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none or done */
 	bool lost_duel;     /* MegaMan deleted in the rival's duel (the summary says so) */
 	char duel_verdict[400];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
@@ -1081,9 +1081,13 @@ static bool build_layer(void) {
 				for (int k = 0; k < D.duel_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.duel_enc.foes[k].kind, D.duel_enc.foes[k].family, D.duel_enc.foes[k].version);
 				fprintf(stderr, "\n");
 			}
+			/* (the netbattle's ProtoMan: half the act's guardian band's top
+			 * at most, as his attacks stay his 1800 HP version's, ten times
+			 * a guardian's damage a second: at the top, 1000 in act 3, a
+			 * playtester's MegaMan ran after one hand, docs/RIVAL.md) */
 			int lo, hi;
 			pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
-			D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi : 0;
+			D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
 			rng_seed(saved);
 			layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
 			D.duel_call_due = true;

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **ProtoMan's netbattle can be won.** In the third act he came in at
+  1000 HP with his full attacks, and a player ran after one hand. He now
+  has half the act's guardian band's top (500 in act 3), and MegaMan
+  says how he fights as the netbattle is offered: his shield stops shots,
+  and when your row lights up he dashes across it to slash.
 - **An act continued from a save keeps its count.** Its AREA CLEAR card
   left out the viruses deleted (the count began again with the
   CONTINUE), and its next Net Dealer greeted MegaMan as if they had never

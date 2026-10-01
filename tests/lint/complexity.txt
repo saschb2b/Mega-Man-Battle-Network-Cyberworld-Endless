@@ -24,7 +24,7 @@ src/gfx/gfx.c:text_code 30 30
 src/gfx/minifont.c:minifont_glyph 57 60
 src/layer/guardian_objs.c:guardian_scripts 46 109
 src/layer/guardians.c:guardian_intro 35 36
-src/layer/layer_objs.c:layer_objs_install 174 374
+src/layer/layer_objs.c:layer_objs_install 174 372
 src/layer/shop.c:answer 36 26
 src/layer/text.c:code_of 29 15
 src/layer/text.c:wrap 40 44

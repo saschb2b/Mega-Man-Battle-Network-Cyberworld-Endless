@@ -113,8 +113,13 @@ beat: ProtoMan in battle, his own AI and his attacks.
   in the net's own words ("past the next two guardians"), and what a win
   opens, and nothing is asked; the official gate on that layer opens to
   Chaud's clearance, as any other does, having no duel to be the prize
-  of. From it on, his HP is the act's guardian band at
-  most (1000 in act 3), written once as he stands on the field.
+  of. From it on, his HP is half the act's guardian band's top at most
+  (500 in act 3), written once as he stands on the field: his attacks
+  stay his 1800 HP version's, some ten times a guardian's damage a
+  second, and at the band's top (1000) a playtester's act-3 MegaMan, 460
+  HP and chips of 120 at most, ran after one hand (session 50). MegaMan
+  says how he fights as the netbattle is offered: his shield, and the
+  dash across a lit row (a playtester asked for his tells).
 - **A real fight.** BN6 deletes MegaMan in a netbattle as anywhere: its
   GAME OVER starts inside the battle, as he falls (tried: the battle
   options' bit 0x08 is a link battle, which waits for a partner; bit
@@ -188,9 +193,10 @@ himself. Beat him, and my full clearance is yours.").
   guardian's layer, and never forced.
 - **A netbattle that ends a run unfairly**: optional, starting on No, its
   stake said, a run from it allowed, and from the third act only, with
-  his HP at the act's guardian band. If playtests find it too sharp, the
-  next lever is his attacks (a lower version where BN6 has one: it has
-  none under 1800 HP) or MegaMan's HP for it.
+  his HP at half the act's guardian band's top and his tells said. If
+  playtests still find it too sharp, the next lever is his attacks (a
+  lower version where BN6 has one: it has none under 1800 HP) or
+  MegaMan's HP for it.
 - **The copy and the real ProtoMan**: the Nest copies ProtoMan as a
   guardian too. Chaud says so ("A copy. It'll never match the real
   thing.") the first time the copy is met.
