@@ -28,6 +28,8 @@
 #include "buttons.h"
 #include "xnavi.h"
 #include "xsong.h"
+#include "debug.h"
+#include "emu.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
