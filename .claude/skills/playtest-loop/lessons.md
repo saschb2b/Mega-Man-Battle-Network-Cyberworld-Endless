@@ -1446,3 +1446,37 @@ five-session thread. A new fight's numbers (HP, damage a second) are now
 measured against the persona's state at that point in its run before the
 session that reaches it: the HP, the folder's best chip and the guardian
 just beaten, in the session's state and notes.
+
+## Session 51: 8/10 (keep playing: yes; recommend: yes)
+
+Run 5 from layer 8: healed, a StarFish-and-Shaker battle that took 350
+HP, ElecMan (act 3's guardian, never met) deleted in 0:58.40 by reading
+him live, UnderSht from the draft, the split's "??? (ACDC HP)" taken;
+saved on layer 10 at 560/560. The same 8: "beating an unknown guardian by
+reading him" is what BN6 alone never gave, and a third of the calls went
+to walking.
+
+Confirmed: no false ScrtData line on CONTINUE, the split's "???" labels,
+act 3's card without a count as the patch notes said for an old save.
+
+Raised and fixed: the arrow led to the exit while L sent a hurt MegaMan
+to the heal (517a4c7: the arrow leads there first while he is below
+three quarters, and L says so); StarFish bubbles eating every straight
+shot unwarned (5dc6e52: the area warnings move into a table with
+StarFish); "I don't recognize it" beside Lan naming ElecMan at sight
+(7ed2f60: "one we've never faced down here").
+
+Open: the dealer's pick out of reach (1000z with 450z earned in act 3,
+whose battles paid chips): one sighting; income per act is measured
+nowhere, so count it before moving the cap (400, 700, 1000). The ElecMan
+gate's count (one deletion of two) unsaid after his deletion. Walking: a
+notch in a platform's wall that looked like a way in (the owner's call on
+BN6's walking stands; the heal arrow takes some of it).
+
+Cost: 258 calls, 74 minutes.
+
+Loop change: **when the persona names a wish that its notes show the game
+half does, finish the half.** L already named the heal's way to a hurt
+MegaMan; the arrow did not follow it, and the wish was the missing half.
+Read the notes for a cue the game gives in words but not in the world (or
+the reverse) before designing anything new.
