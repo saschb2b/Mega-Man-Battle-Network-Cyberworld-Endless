@@ -126,7 +126,10 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 				snprintf(option[k], sizeof option[k], "%s%s", guardian(n[k])->name, elem[el[k]]);
 				snprintf(who[k], sizeof who[k], "%s%s", guardian(n[k])->name, elem[el[k]]);
 			} else {
-				snprintf(option[k], sizeof option[k], "%s", guardian_area_name(b[k]));
+				/* (a Navi as the known ones are, where it waits beside it:
+				 * a playtester read "Aquarium Comp" beside "EraseMan" as a
+				 * place against a Navi) */
+				snprintf(option[k], sizeof option[k], "??? (%s)", guardian_area_short(b[k]));
 				snprintf(who[k], sizeof who[k], "a Navi we've never battled");
 			}
 			route.option[k] = option[k];
