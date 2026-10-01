@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Stairs meet their floors cleanly.** A stair's tiles came with pieces
+  of the original map around it: void notches and loose stripes in the
+  floor at its foot, a bridge pad's yellow gem, the original court's
+  crosses on the raised room, slivers floating beside Sky's stairs. A
+  stair now brings its own ramp and side faces alone. Players had seen
+  the Undernet's ramps "bugged".
 - **MegaMan says when a new program needs room made first.** A player's
   Guardian Data said "Let's install it", and Custom1 fitted the NaviCust
   only after he moved two programs, which nothing had said. A program

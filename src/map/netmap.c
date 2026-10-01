@@ -454,6 +454,9 @@ static void paste_stairs(const Learned *L, uint16_t *map, int tw, int th) {
 		for (int k = 0; k < t->ntiles; ++k) {
 			int px = px0 + t->tiles[k].px, py = py0 + t->tiles[k].py;
 			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+			/* (not a tile three quarters empty: over void it floated as a
+			 * speck, over floor it cut a notch into it) */
+			if (t->tiles[k].opaque < 16) continue;
 			size_t at = (size_t)(py / 8) * tw + px / 8;
 			map[at] = t->tiles[k].e0;
 			map[cells + at] = t->tiles[k].e1;

@@ -53,8 +53,11 @@ static CoordCell *cut(const CoordCell *src, int n, int x0, int y0, int z0, int *
 	return out;
 }
 
-/* The tiles that draw the ramp: every tile a ramp cell's box covers, from a
- * little under its foot to a little over its top. */
+/* The tiles that draw the ramp: every tile a ramp cell's box covers, from
+ * its foot to its top. (Taken from 8 under the foot to 8 over the top, they
+ * brought the original's surroundings along: its bridge pad's gem at an
+ * Undernet stair's foot, its court's crosses on the raised room, a sliver
+ * of floor in the void beside a Sky stair.) */
 static void cut_tiles(const AreaSrc *a, const int *cells, int n, int x0, int y0, int z0, StairTemplate *t) {
 	int cap = n * 64;
 	t->tiles = calloc((size_t)cap, sizeof *t->tiles);
@@ -62,7 +65,7 @@ static void cut_tiles(const AreaSrc *a, const int *cells, int n, int x0, int y0,
 	int px0 = x0 + y0 + a->tw * 4, py0 = (y0 - x0) / 2 - z0 + a->th * 4;
 	for (int k = 0; k < n; ++k) {
 		const CoordCell *c = &a->sec[1][cells[k]];
-		for (int dz = -8; dz <= c->height + 8; dz += 2)
+		for (int dz = 0; dz <= c->height; dz += 2)
 			for (int corner = 0; corner < 4; ++corner) {
 				int X = c->x + (corner & 1) * 8, Y = c->y + (corner >> 1) * 8;
 				int px = X + Y + a->tw * 4, py = (Y - X) / 2 - (c->z + dz) + a->th * 4;
@@ -76,6 +79,7 @@ static void cut_tiles(const AreaSrc *a, const int *cells, int n, int x0, int y0,
 				st->py = (int16_t)(ty * 8 - py0);
 				st->e0 = a->tile[0][i];
 				st->e1 = a->layers > 1 ? a->tile[1][i] : 0;
+				for (int p = 0; p < 64; ++p) st->opaque += (a->px[(size_t)(ty * 8 + p / 8) * a->tw * 8 + tx * 8 + p % 8] >> 24) != 0;
 			}
 	}
 	free(mark);

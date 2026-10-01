@@ -347,6 +347,25 @@ static void towns(const char *dir, int seeds) {
 	}
 }
 
+/* Layers of area `b` that climb a stair, where it has one (`seeds` of
+ * them): none of the layers above happened to raise a room, and players
+ * saw the Undernet's ramps broken. */
+static void stair_layers(const char *dir, FILE *report, int b, int seeds) {
+	LayerKit kit;
+	netmap_kit(b, &kit);
+	for (int s = 1, found = 0; kit.stair_dirs && s <= 300 && found < seeds; ++s) {
+		uint32_t seed = (uint32_t)(s * 7919 + b * 131 + 17);
+		run_new(seed);
+		run.depth = 5;
+		run.biome = b;
+		layout_forced = -1;
+		layer_generate(seed, 5, b, LAYER_NORMAL, &kit);
+		if (!layer.nstairs) continue;
+		one(dir, report, b, b, -1, 5, seed);
+		++found;
+	}
+}
+
 int atlas_run(const char *spec) {
 	/* DIR[:BIOMES[:SEEDS]]: BIOMES "all" or a comma list, SEEDS per layout */
 	char dir[512] = ".build/atlas", biomes[256] = "all";
@@ -375,6 +394,7 @@ int atlas_run(const char *spec) {
 		}
 		/* and its guardian's layer, in the layout its act plans */
 		for (int s = 1; s <= seeds; ++s) one(dir, report, b, b, -1, 3, (uint32_t)(s * 104729 + b));
+		stair_layers(dir, report, b, seeds);
 	}
 	fclose(report);
 	layout_forced = -1;
