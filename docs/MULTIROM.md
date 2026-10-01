@@ -85,10 +85,17 @@ ROM in memory, and shows its battle screens.
   in Central Area's tiles), named on the act's card, in MegaMan's words,
   L's and the PET's. Read where BN6's ROM is, on every build but the 3DS's
   and the browser's.
-- [x] SciLab (maps 4-6, dressing Sky Area), End Area (7-9, Seaside Area)
-  and Nebula Area (13-14, the Graveyard, under Green Area's map: the
-  Graveyard's group sets its own palette), each tuned over the atlas's
-  layers (`--atlas DIR:aN:3`).
+- [x] End Area (7-9, dressing Seaside Area) and Nebula Area (13-14, the
+  Graveyard, under Green Area's map: the Graveyard's group sets its own
+  palette), each tuned over the atlas's layers (`--atlas DIR:aN:3`);
+  Nebula Area's floors told by shape among its hues, its cobbles turning
+  purple and teal stone by stone.
+- [ ] SciLab (maps 4-6, dressing Sky Area): drawn (`--net-biome x1`) but
+  held out of runs (`held`): its maps hold no platform bigger than a 3x3
+  pad, and Sky Area's rooms drawn in its tiles meet their pale middles
+  with no frame. A layout of paths and small pads would fit it, but a
+  layer's layout must not depend on another ROM being there (a run
+  continued without it would break).
 - [ ] Oran Area (2-3: three walkway looks, two of platforms) and its
   Undernet (10-12), which the same tuning left at twice the seams.
 - [x] Its areas' themes, from its own map-music lists: ACDC Area, SciLab

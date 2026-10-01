@@ -2,13 +2,13 @@
 
 ## Unreleased
 
-- **Battle Network 5's SciLab and Nebula Area look like themselves.**
-  SciLab's rooms came out in pale blotches and Nebula Area's in emblems
-  repeated across them, its paths half platform: their paths' panels
-  change colour stone by stone, which the tiles had read as two floors.
-  They now tell paths from platforms by shape, as BN5 draws them: SciLab
-  framed platforms on circuit paths, Nebula Area small purple platforms
-  with one emblem each on long cobbled paths.
+- **Battle Network 5's Nebula Area looks like itself.** Its rooms came
+  out with its emblem repeated across them and its paths half platform:
+  their cobbles change colour stone by stone, which the tiles had read as
+  two floors. It now tells paths from platforms by shape, as BN5 draws
+  it: small purple platforms with one emblem each, on long cobbled paths.
+  SciLab sits out of runs for now: its maps hold no platform bigger than
+  a small pad, and Sky Area's rooms drawn in it still look rough.
 - **Battle Network 5 stays after the first start.** A BN6 ROM chosen in
   the desktop's dialog, or found in the Downloads or a ROMs folder, is
   copied where the next start looks, but a BN5 ROM beside it was not, so
@@ -134,8 +134,8 @@
   BN6's. Their random battles now play BN5's virus battle theme, and
   their guardians and ProtoMan's netbattle its boss theme, copied from
   BN5's ROM as its net themes are. Behind them stand BN5's own battle
-  backgrounds: ACDC Area's blue diamonds, SciLab's scrolling binary, End
-  Area's red field, Nebula Area's stars.
+  backgrounds: ACDC Area's blue diamonds, End Area's red field, Nebula
+  Area's stars.
 - **The arrow leads a hurt MegaMan to the heal.** Below three quarters of
   his HP, L said which way the layer's Recovery Mr. Prog was, but the
   arrow kept to the exit, and a player at 180 HP spent a dozen moves
@@ -178,10 +178,10 @@
   has a 4 in it bugs him: his HP drains away!"), and so does the PET's
   report of the dive.
 - **Battle Network 5's areas in a run.** With Team Colonel (USA) in the
-  same folder as your BN6 ROM, four of BN5's net areas stand in for the
+  same folder as your BN6 ROM, three of BN5's net areas stand in for the
   BN6 areas they resemble, each in about half the runs that come there:
-  ACDC Area for Central Area ("The net of Lan's old hometown"), SciLab for
-  Sky Area, End Area for Seaside Area and Nebula Area for the Graveyard,
+  ACDC Area for Central Area ("The net of Lan's old hometown"), End Area
+  for Seaside Area and Nebula Area for the Graveyard,
   in their own tiles and colours, under their own names, to their own
   music (BN5's net theme; Nebula Area its Undernet's), with BN5's purple
   HeelNavis as their bystanders, face and all. Their layouts,

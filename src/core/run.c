@@ -38,7 +38,7 @@ static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 
 int run_dress(int biome) {
 	for (int k = 0; k < XAREAS_MAX; ++k) {
 		const NetAreaDef *x = net_area_def(NET_AREAS + k);
-		if (x && x->like == biome && (run.seed * 2654435761u) >> (16 + k) & 1) return NET_AREAS + k;
+		if (x && !x->held && x->like == biome && (run.seed * 2654435761u) >> (16 + k) & 1) return NET_AREAS + k;
 	}
 	return biome;
 }

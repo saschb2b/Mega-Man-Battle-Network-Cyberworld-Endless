@@ -46,6 +46,7 @@ typedef struct {
 	uint8_t xsong;           /* its theme in its own game's song table (0: `song`, BN6's) */
 	uint8_t xnavi;           /* its bystanders' Navi, a list-6 sprite and mugshot of its own game (0: BN6's) */
 	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
+	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
