@@ -194,7 +194,7 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		AreaSrc b;
 		if (!load_map(na, na->more[k][0], na->more[k][1], &b)) continue;
 		learn_map(&b, grid, area, L);
-		decor_learn(&b, na->bg_in_map, &L->decor);
+		if (!(na->styles & TILES_NO_SCENERY)) decor_learn(&b, na->bg_in_map, &L->decor);
 		rebank_seen(&b, na->rebank[1], L);
 		for (int o = 0; o < 3 && !na->xrom; ++o)
 			if (!L->ornament[o].ok && aligned(grid, &b)) props_learn_ornament(&b, ornament_tile[o], &L->ornament[o]);
@@ -218,7 +218,7 @@ static bool learn(int area, Learned *L) {
 		: na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) { area_src_free(&a); return false; }
 	L->nbooks = 0;
 	learn_map(&a, &a, area, L);
-	decor_learn(&a, na->bg_in_map, &L->decor);
+	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(&a, na->bg_in_map, &L->decor);
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
 	/* (the pads' centrepieces are BN6's tiles) */

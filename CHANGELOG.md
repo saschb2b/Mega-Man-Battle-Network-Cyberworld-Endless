@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **No more grey cubes floating in the Cybeast Nest's void.** Its one
+  piece of scenery was debris from under the original's altar, set
+  alone beside the floor; the Nest now sets none.
 - **The Undernet's raised rooms are plain.** Their floors showed pieces
   of green crosses cut off at the tiles' edges, from the decorated middle
   of the original's raised court. Green panels' tiles are no longer used

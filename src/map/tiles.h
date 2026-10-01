@@ -112,6 +112,10 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * Comp's lamps and arcs, Robot Control's circuits), which laid over a 5x5
  * field came out tiled over itself. */
 #define TILES_ARENA_FLOOR 0x100000
+/* ... and with TILES_NO_SCENERY, none of its maps' free-standing pieces set
+ * beside its floor (decor.c): the Cybeast Nest's only one is a grey cube,
+ * debris under the original's altar, which stood alone in the void. */
+#define TILES_NO_SCENERY 0x200000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a
