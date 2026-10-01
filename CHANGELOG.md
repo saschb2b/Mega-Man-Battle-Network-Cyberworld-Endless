@@ -6,6 +6,10 @@
   fan belts turned up where a field's edge cut them: half domes at the
   ends of its bands, a fan cluster sliced off at the guardian's arena.
   Its fields now carry their solar panels and lights alone.
+- **A Navi chip's EX and SP versions show their damage.** A vault
+  offered "DiveManSP D 1013": the ROM keeps a Navi chip's power as 1000
+  and a tenth of it, and only the first version was read so. Its SP now
+  shows 130.
 - **The Net Dealer no longer denies the net's rumors.** On an act's first
   layer he said there was "no word yet" on its guardian, two platforms
   after a Navi had named him. He now says nobody has come back to tell,

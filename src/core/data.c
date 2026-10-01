@@ -119,6 +119,13 @@ bool chip_sword(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_
 
 bool chip_standard(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0x7] == 0; }
 
+/* Whether chip `rom_id` is a Navi's, in any of its three versions. */
+static bool navi_chip_of(int rom_id) {
+	for (int i = 0; i < chip_def_count; ++i)
+		if (chip_defs[i].kind == CK_NAVI && rom_id >= chip_defs[i].rom_id && rom_id < chip_defs[i].rom_id + 3) return true;
+	return false;
+}
+
 void chip_info(int rom_id, ChipInfo *out) {
 	memset(out, 0, sizeof *out);
 	uint32_t rec = R.layout->chip_data + rom_id * 0x2C;
@@ -135,7 +142,9 @@ void chip_info(int rom_id, ChipInfo *out) {
 	}
 	out->codes[out->ncodes] = 0;
 	const ChipDef *d = chip_def(rom_id);
-	if (d->kind == CK_NAVI) out->power = out->power > 1000 ? out->power % 1000 * 10 : out->power;
+	/* (a Navi chip's power is 1000 and a tenth of it, in its V1, EX and SP
+	 * alike: a playtester's vault offered "DiveManSP D 1013") */
+	if (navi_chip_of(rom_id) && out->power > 1000) out->power = out->power % 1000 * 10;
 	if (d->kind == CK_RECOVER) out->power = d->param;
 }
 
