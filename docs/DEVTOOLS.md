@@ -207,7 +207,7 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Four more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Six more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: `tools/trailer.py` plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
@@ -216,7 +216,9 @@ guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his
 words naming the third act before it, `duels=1` opens the official gates
-of level 1; docs/RIVAL.md).
+of level 1; docs/RIVAL.md), and `hp=N` (MegaMan's max HP made N, and his
+HP with it whenever the game moves the max: a later act's guardian, which
+a headless start meets at 100 HP, fought at a playtester's HP).
 
 ## How the switches work
 

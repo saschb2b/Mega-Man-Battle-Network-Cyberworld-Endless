@@ -49,6 +49,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "gem")) dev.gem = true;
 		else if (!strcmp(t, "veteran")) dev.veteran = true;
 		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
+		else if (!strncmp(t, "hp=", 3)) dev.hp = atoi(t + 3);
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
@@ -185,6 +186,10 @@ void devtools_update(void) {
 			emu_write(BN6_NAVI_STATS + 0x40, v, 2);
 		}
 		battle_hp(0, -1, true);
+	}
+	if (dev.hp > 0 && dev.hp <= 9999 && emu_read16(BN6_NAVI_STATS + 0x42) != dev.hp) {
+		uint8_t v[4] = { (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8), (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8) };
+		emu_write(BN6_NAVI_STATS + 0x40, v, sizeof v);
 	}
 	if (dev.onehit) battle_hp(1, 1, false);
 	if (dev.powers) {
