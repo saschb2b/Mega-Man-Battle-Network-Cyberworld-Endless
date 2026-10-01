@@ -35,8 +35,9 @@ raised, and the loop's own lessons.
    NaviCust draft), so say where it is, or suggest a new run.
 3. **Launch** the persona as a background agent (Agent tool,
    `run_in_background: true`) with `persona.md` filled in: the session
-   number, last session in two sentences, patch notes, goals. About 260
-   `do` calls, 1 to 1.5 hours.
+   number, last session in two sentences, patch notes, goals. Write those
+   three to files and `scripts/persona_prompt.py N LAST NOTES GOALS`
+   prints the prompt. About 260 `do` calls, 1 to 1.5 hours.
 4. **While it plays, watch it**, whatever else you do meanwhile:
    - Keep the watchdog running from the launch to the report, and look
      every time it wakes you (at least every 15 minutes):
