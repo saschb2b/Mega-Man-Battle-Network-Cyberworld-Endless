@@ -1018,6 +1018,35 @@ static void test_walks(void) {
 	printf("  walks: the most winding area (%d) %.1f legs on average\n", most_area, most);
 }
 
+/* The way across (docs/LEVEL_DESIGN.md, Navigation): from the arrival to
+ * the guardian's antechamber or the exit, a layer crosses no more one-wide
+ * walkways than its area's originals do, each a lining up for MegaMan. */
+static void test_way_links(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	int over_all = 0, all = 0, worst_area = -1;
+	double worst = 0;
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int over = 0, n = 0, sum = 0;
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			layer_generate(seed * 7919u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+			const Room *g = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
+			int k = layer_way_runs(layer.rooms[0].ax, layer.rooms[0].ay, g->ax, g->ay);
+			sum += k;
+			over += k > layer_way_cap(b);
+			++n;
+		}
+		double share = (double)over / n;
+		CHECK(share <= 0.1, "area %d: %d of %d ways cross more one-wide walkways than its cap %d", b, over, n, layer_way_cap(b));
+		if (share > worst) { worst = share; worst_area = b; }
+		over_all += over;
+		all += n;
+		(void)sum;
+	}
+	printf("  ways: %d of %d past their area's cap of one-wide walkways (the most in area %d, %.0f%%)\n", over_all, all, worst_area, 100 * worst);
+}
+
 /* The NaviCust's draft (docs/NAVICUST.md): three programs of three builds,
  * each of a tier its act has reached, none of the left-out ones; and
  * MegaMan's words for the bugs. */
@@ -1415,6 +1444,7 @@ int main(void) {
 	test_stairs();
 	test_arrow();
 	test_walks();
+	test_way_links();
 	test_navicust();
 	test_depth_plan();
 	test_pacing();

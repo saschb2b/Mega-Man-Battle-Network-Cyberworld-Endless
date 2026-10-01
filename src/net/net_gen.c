@@ -851,6 +851,16 @@ static void last_stop(int kind, const LayerKit *kit) {
 	if (floor_near(layer.ante, HEAL_REACH, &x, &y) || room_spot(&layer.rooms[layer.ante], &x, &y)) add_obj(OBJ_HEAL, x, y);
 }
 
+/* The rooms' last shaping once the arena stands: the exit, the way to it
+ * widened past the area's cap (net_way.c, the guardian's own bridge left
+ * as his gate), the raised rooms. */
+static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
+	layer.exit_room = layer.arena >= 0 ? layer.arena : bfs_far(0);
+	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
+	layer_widen_way(layer.biome, goal->ax, goal->ay);
+	layer_raise_rooms(seed, stair_dirs, rise);
+}
+
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
 	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
 	int rise = kit ? kit->rise : 0;
@@ -892,8 +902,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		layer.ante = arena.ante;
 		layer.arena_dir = arena.dir;
 	}
-	layer.exit_room = layer.arena >= 0 ? layer.arena : bfs_far(0);
-	layer_raise_rooms(seed, stair_dirs, rise);
+	finish_rooms(seed, stair_dirs, rise);
 	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
 	add_obj(OBJ_WARP_IN, cx, cy);
 	cx = layer.rooms[layer.exit_room].ax;

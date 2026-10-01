@@ -89,6 +89,41 @@ inputs lining up (sessions 55 to 58). So the maps carry the navigation:
 how many mouths a platform has, where they sit, and whether a way through
 keeps its lane are the generator's rules, measured from the originals.
 
+Measured on the floor the walls give (14 of BN6's net maps against 58
+generated layers; a walkway stepping corner to corner across the screen
+counts as one, as MegaMan walks it with one direction):
+
+| | Capcom's | Generated, before |
+| --- | --- | --- |
+| Mouths per 100 floor panels | 10.0 | 5.1 |
+| One-wide walkways that are dead-end spurs, per map | 12.5 | 0.9 |
+| One-wide links between the two farthest big platforms (12 panels or more) | 1.2 | 1.9, up to 4 |
+
+Capcom's maps have twice the mouths, but seven in ten of their one-wide
+walkways are spurs off the way (pads, comb teeth, stubs), and their way
+across runs over wide floor: Central's fields and Seaside's, Sky's rings;
+the Undernet crosses one bridge between plateaus, the Graveyard three
+ramps. A cap on mouths would be wrong; the rule caps the way:
+
+- **The way crosses few one-wide walkways.** From the arrival to the
+  guardian's antechamber or the exit, the way crosses at most its area's
+  count of one-wide walkways between big platforms, as its originals do
+  (`net_way.c`, `way_cap`): one in Central, Seaside, Sky, Green, the
+  Undernet, the Secret Area and most comps and homepages, two in the
+  Nest and Robot Control, three in the Graveyard and the Judge Tree's
+  catwalks. A pad's spur does not count: it leaves from the middle of
+  the pad's side, where MegaMan stands already.
+- **Past it, the way widens.** Its walkways become two panels wide,
+  the shortest first (the long bridges are an area's own), where the new
+  side touches nothing but the walkway and its two platforms and meets
+  both whole; the floor draws them in the platforms' floor, a wide way.
+  The guardian's own bridge stays one panel wide: his gate. The
+  legalizer reads the layer as before.
+- Over the tests' 1140 layers, the way's one-wide walkways between big
+  platforms fell from 1.65 to 0.86 on average, and those past their
+  area's count from 573 to 32 (`test_way_links` holds each area to 90%);
+  the tile test's seams fell from 63.0 to 61.7 per hundred panels.
+
 A layer is built from those parts, not from rectangles. Each area has its
 own layouts (`src/net/net_layouts.c`), all made of the same pieces
 (`src/net/net_shapes.c`); an act's three layers take them in a shuffled

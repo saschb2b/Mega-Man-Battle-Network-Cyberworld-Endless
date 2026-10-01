@@ -128,6 +128,12 @@ typedef struct {
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit);
 /* Lifts dead-end rooms onto stairs (net_height.c). */
 void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
+/* The one-wide walkways the way from the arrival to (gx, gy) crosses, past
+ * the area's cap widened to two panels (net_way.c, docs/LEVEL_DESIGN.md,
+ * Navigation); and how many it crosses, from (sx, sy). */
+void layer_widen_way(int biome, int gx, int gy);
+int layer_way_runs(int sx, int sy, int gx, int gy);
+int layer_way_cap(int biome);
 /* Whether panel (x, y) lies on the layer's way from its arrival to its exit
  * or guardian, or beside it (net_gen.c: what stands keeps off it). */
 bool layer_by_way(int x, int y);

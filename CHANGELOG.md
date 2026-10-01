@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **A layer's way across runs wide, as Capcom's maps do.** MegaMan walks
+  as in BN6, so every one-wide walkway entered from a platform takes
+  lining up, and a playtester spent a third of his inputs on it. BN6's
+  own net maps, measured, carry their way across over wide floor,
+  crossing about one one-wide walkway between big platforms, their many
+  other walkways spurs off it; ours crossed two, up to four. The way from
+  the arrival to the guardian or the exit now keeps to its area's own
+  count (one in most areas, three in the Graveyard): past it, its
+  walkways widen to two panels. The guardian's bridge stays his gate. A
+  run saved by an older build starts its layer afresh.
 - **The Undernet's bridges run plain between their joints.** Every other
   panel of a bridge's straight runs showed a piece of the yellow gem its
   joints wear, cut off at the tiles' edges. Its joints now keep a look of
