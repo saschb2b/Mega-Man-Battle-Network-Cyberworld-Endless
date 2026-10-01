@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **MegaMan says where the golden gate stands.** Three ScrtData open the
+  gate to the Secret Area, MegaMan said, and a player holding three asked
+  where it was: only a bystander's rumour had placed it in the Undernet.
+  MegaMan now says so as he picks one up and in his briefing, and with
+  three, that the next dark warp leads there.
 - **Battle Network 5's areas fight to BN5's battle music.** Its net
   areas played its own net theme, then every battle there played
   BN6's. Their random battles now play BN5's virus battle theme, and

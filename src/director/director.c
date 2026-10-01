@@ -498,6 +498,23 @@ static int guardian_words(char *buf, int k, int size) {
 	return k;
 }
 
+/* What the ScrtData carried are for, appended to `buf` at `k` once per
+ * count (a playtester carried two and never learned; the next heard it on
+ * every layer), and where their gate stands, which only a bystander's
+ * rumour had said (a playtester holding three asked where it was); the
+ * new length. */
+static int scrt_note(char *buf, int k, int size) {
+	if (run.fragments == D.fragments_told) return k;
+	D.fragments_told = run.fragments;
+	if (run.fragments <= 0) return k;
+	static const char *const counts[] = { "one", "two" };
+	char n[12];
+	snprintf(n, sizeof n, "%d", run.fragments);
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M We're carrying %s ScrtData. %s|", run.fragments <= 2 ? counts[run.fragments - 1] : n,
+		run.fragments < 3 ? "Three open the golden gate to the Secret Area, in the Undernet!"
+		                  : "The golden gate to the Secret Area will open for us! It stands in the Undernet, through a dark warp.");
+}
+
 /* L's word on a heal while MegaMan is hurt, appended to `buf` at `k`; the
  * new length: which way the Recovery Mr. Prog is, the arrow's way while he
  * is hurt (goal_way), else the Net Dealer, who always has a MiniEnrg (it
@@ -612,13 +629,7 @@ static const char *status_words(void) {
 		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 			ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
 		if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) k = family_words(buf, k, (int)sizeof buf);
-		/* (what they are for: a playtester carried two and never learned;
-		 * once per count, the next heard it on every layer) */
-		if (run.fragments != D.fragments_told) {
-			if (run.fragments == 1) ADD("@M We're carrying one ScrtData. Three open the golden gate to the Secret Area!|");
-			else if (run.fragments > 1) ADD("@M We're carrying %d ScrtData. Three open the golden gate to the Secret Area!|", run.fragments);
-			D.fragments_told = run.fragments;
-		}
+		k = scrt_note(buf, k, (int)sizeof buf);
 	}
 	/* the services here: all of them the first time, then only the heal
 	 * while he is hurt (it heals every time; the map's key names the rest,

@@ -697,12 +697,13 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
 	/* (what a ScrtData is for, said as it is picked up: a playtester was
-	 * told a layer later, then on every layer after) */
+	 * told a layer later, then on every layer after; and where its gate
+	 * stands, which a playtester holding three asked) */
 	if (fragment_placed) {
 		static const char *const found[3] = {
-			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area. Let's find two more!",
-			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens!",
-			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now!",
+			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area, in the Undernet. Let's find two more!",
+			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens. It stands in the Undernet!",
+			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now. It stands in the Undernet: the next dark warp leads there!",
 		};
 		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
 	}
