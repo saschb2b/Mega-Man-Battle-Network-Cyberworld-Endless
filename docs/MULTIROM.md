@@ -78,8 +78,12 @@ ROM in memory, and shows its battle screens.
   in Central Area's tiles), named on the act's card, in MegaMan's words,
   L's and the PET's. Read where BN6's ROM is, on every build but the 3DS's
   and the browser's.
-- [ ] Its other looks as areas: group 0x90's maps 2-3, 4-6, 7-9, 10-12 and
-  13-15, each in its palette, dressing BN6 areas they resemble.
+- [x] SciLab (maps 4-6, dressing Sky Area), End Area (7-9, Seaside Area)
+  and Nebula Area (13-14, the Graveyard, under Green Area's map: the
+  Graveyard's group sets its own palette), each tuned over the atlas's
+  layers (`--atlas DIR:aN:3`).
+- [ ] Oran Area (2-3: three walkway looks, two of platforms) and its
+  Undernet (10-12), which the same tuning left at twice the seams.
 - [ ] Its music.
 - [ ] Its towns and bystanders.
 - [ ] Its guardians, in battles in its own engine.

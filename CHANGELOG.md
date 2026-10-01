@@ -3,10 +3,12 @@
 ## Unreleased
 
 - **Battle Network 5's areas in a run.** With Team Colonel (USA) in the
-  same folder as your BN6 ROM, a run that comes to Central Area meets
-  BN5's ACDC Area instead in about half the runs: its own tiles and
-  colours, its name, and its act's card: "The net of Lan's old hometown".
-  Its layouts, guardian and battles stay Central Area's. BN6 alone plays
+  same folder as your BN6 ROM, four of BN5's net areas stand in for the
+  BN6 areas they resemble, each in about half the runs that come there:
+  ACDC Area for Central Area ("The net of Lan's old hometown"), SciLab for
+  Sky Area, End Area for Seaside Area and Nebula Area for the Graveyard,
+  in their own tiles and colours, under their own names. Their layouts,
+  guardians and battles stay the BN6 areas'. BN6 alone plays
   as before. Not on the 3DS, which has no memory for a second ROM, or in
   the browser.
 - **CircusMan's tent shows where it drops.** As his tent comes, BN6

@@ -219,10 +219,19 @@ bool rom_find_close;
 
 /* ---- Extra ROMs (docs/MULTIROM.md) ---- */
 
-/* Battle Network 5's net areas (docs/MULTIROM.md) */
+/* Battle Network 5's net areas (docs/MULTIROM.md): its whole internet is
+ * group 0x90, named as BN5's own map labels name it. Each takes over a map
+ * whose group keeps the descriptor's palette: the Undernet's, the
+ * Graveyard's and the Underground's set their own over it. */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
 		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown" },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
+	{ 0x90, 4, 0x1020, 0x0050, false, 0x13, 0, 0, 0, { { 0x90, 5 }, { 0x90, 6 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x94, 1 }, .like = 2,
+		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran" },
+	{ 0x90, 7, 0x1002, 0, false, 0x13, 0, 0, 0, { { 0x90, 8 }, { 0x90, 9 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x91, 1 }, .like = 1,
+		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end" },
+	{ 0x90, 13, 0x0980, 0x0440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
+		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled" },
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {

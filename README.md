@@ -82,9 +82,9 @@ on a phone too, and on a New 3DS from its HOME Menu.
 - Optional: **Mega Man Battle Network 5: Team Colonel (USA)**, unmodified,
   in the same folder as your BN6 ROM (SHA-1
   `5f472f78d8de2df01d5039e045c043cb40969a39`). Its net areas then turn up
-  in runs, in place of the BN6 areas they resemble: so far its ACDC Area,
-  in about half the runs that come to Central Area. Not on the 3DS or in
-  the browser.
+  in runs, in place of the BN6 areas they resemble (ACDC Area, SciLab, End
+  Area and Nebula Area so far), each in about half the runs that come
+  there. Not on the 3DS or in the browser.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.

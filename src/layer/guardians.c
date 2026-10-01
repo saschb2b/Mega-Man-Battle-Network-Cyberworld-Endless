@@ -356,7 +356,8 @@ const char *guardian_area_in_text(int biome, int side) {
 	static char buf[32];
 	if (side == LAYER_UNDERNET) biome = BIOME_UNDERNET;
 	else if (side == LAYER_SECRET) biome = BIOME_SECRET;
-	bool the = biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET || biome == BIOME_SECRET || biome == BIOME_NEST;
+	/* (another game's area in its place goes by its own name: "Nebula Area") */
+	bool the = !dressed(biome) && (biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET || biome == BIOME_SECRET || biome == BIOME_NEST);
 	snprintf(buf, sizeof buf, "%s%s", the ? "the " : "", guardian_area_name(biome));
 	return buf;
 }
