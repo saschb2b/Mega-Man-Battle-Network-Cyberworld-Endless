@@ -477,7 +477,7 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 	return i;
 }
 
-static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *empty_words, const char *leave_words);
+static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words);
 
 int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v) {
 	char s[240];
@@ -488,31 +488,31 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 		return ta_say(t, FACE_MEGAMAN, s);
 	}
 	snprintf(s, sizeof s, "Our Library of %d opens the collector's lock!|Three rare chips inside, Lan. We can take one.", have);
-	return pick_three(t, flag, v, s, "The vault stands open, Lan. We took our pick.", "We'll leave them for now. The vault keeps.");
+	return pick_three(t, flag, v, s, "Take", "The vault stands open, Lan. We took our pick.", "We'll leave them for now. The vault keeps.");
 }
 
 /* Three chips, one to take (event flag `flag` set as it is, after which
  * `empty` is said instead); B leaves them (`leave`): a vault's, an official
- * gate's. */
-static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *empty_words, const char *leave_words) {
+ * gate's. A pick is asked once more, "`verb` TrplShot J?", on No, which
+ * comes back to the three: a playtester's A pressed through the words
+ * before them took the first, for good (session 55). */
+static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words) {
 	char s[240];
 	int empty = ta_say(t, FACE_MEGAMAN, empty_words);
 	int leave = ta_say(t, FACE_MEGAMAN, leave_words);
-	int take[3];
+	int take[3], menu = t->n + 3;   /* (the three's script, after the picks') */
 	for (int k = 0; k < 3; ++k) {
 		take[k] = ta_script(t);
-		bool first = true;
+		snprintf(s, sizeof s, "%s %s %c?\nWe only get one!\n", verb, v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
+		ask_in(t, FACE_MEGAMAN, s, menu, true, true);
+		bool first = false;
 		give_chip(t, v->chip[k], v->code[k], 1);
 		got_chip(t, v->name[k], v->code[k], &first);
 		ta_page(t, FACE_MEGAMAN, "It's in our pack. Let's put it in our folder, Lan!", false);
 		flag_set(t, flag);
 		ta_end(t);
 	}
-	int i = ta_script(t);
-	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)empty, 0xFF };  /* ts_check_flag */
-	ta_bytes(t, done, sizeof done);
-	bool first = true;
-	ta_pages(t, open, FACE_MEGAMAN, &first);
+	ta_script(t);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
 	/* three in a column, as the draft's; B leaves them */
@@ -529,6 +529,12 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 		ta_text(t, s);
 	}
 	choose(t, take, 3, leave);
+	int i = ta_script(t);
+	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)empty, 0xFF };  /* ts_check_flag */
+	ta_bytes(t, done, sizeof done);
+	bool first = true;
+	ta_pages(t, open, FACE_MEGAMAN, &first);
+	jump(t, menu);
 	return i;
 }
 
@@ -536,7 +542,7 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, boo
 	char s[300];
 	snprintf(s, sizeof s, level >= 2 ? "Chaud's clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
 		: "Chaud's clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
-	int open = pick_three(t, flag, v, s, "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
+	int open = pick_three(t, flag, v, s, level >= 2 ? "Take" : "Order", "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
 	/* sealed until `open_flag`, which the director sets where Chaud's
 	 * clearance reaches the gate's level, as the layer begins or as a duel
 	 * on it is won (a gate beside the duel opens at once): the telegraph

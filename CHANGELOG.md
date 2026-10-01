@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **A one-time pick asks once more.** An official Chip Order's and a
+  vault's three chips gave the first one to an A pressed through the
+  words before them, for good. Picking one now asks "Order TrplShot J?
+  We only get one!", starting on No, which goes back to the three.
 - **At a walkway's corner the arrow points down the next walkway.** A run
   down a walkway stops MegaMan a little past its corner's middle, and from
   there the arrow pointed back to the middle, "straight up", though he
