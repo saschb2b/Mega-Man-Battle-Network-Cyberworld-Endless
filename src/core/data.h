@@ -4,6 +4,7 @@
 #define DATA_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 enum { ELEM_NULL, ELEM_FIRE, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD };
@@ -60,6 +61,8 @@ extern const int chip_def_count;
 const ChipDef *chip_def(int rom_id);
 
 void chip_info(int rom_id, ChipInfo *out);
+/* Chip `rom_id`'s description in BN6's words ("Cannon to attack 1 enemy"). */
+void chip_desc(int rom_id, char *out, size_t outlen);
 /* Whether a chip strikes an enemy outright: the record's lock-on setting
  * (0xF) is 1 for Cannon, the swords, bombs and the like, 0 for traps,
  * counters and the ones that need a stunned or paralysed enemy

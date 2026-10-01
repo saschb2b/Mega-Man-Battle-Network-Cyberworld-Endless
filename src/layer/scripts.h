@@ -88,7 +88,7 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
  * A=0 .. *=26), named, and what each hits for (0: none to say). */
 typedef struct {
 	int chip[3], code[3], power[3];
-	char name[3][20];
+	char name[3][20], desc[3][64];   /* desc: its description (chip_desc) */
 } ScriptsVault;
 /* The vault's talk: while the Library's `have` is short of `need`, its
  * words say so; else the three chips, one to take (event flag `flag` set

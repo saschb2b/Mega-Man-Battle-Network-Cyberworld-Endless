@@ -6,6 +6,11 @@
   fan belts turned up where a field's edge cut them: half domes at the
   ends of its bands, a fan cluster sliced off at the guardian's arena.
   Its fields now carry their solar panels and lights alone.
+- **A one-time pick says what the chip does.** A vault's and an official
+  Chip Order's three chips showed names and damage only, and R did
+  nothing there. Picking one now shows BN6's own description of it
+  ("Colonel *: Cut enmy lines in Z shape.") before "Take it? We only get
+  one!", where No goes back to the three.
 - **A Navi chip's EX and SP versions show their damage.** A vault
   offered "DiveManSP D 1013": the ROM keeps a Navi chip's power as 1000
   and a tenth of it, and only the first version was read so. Its SP now

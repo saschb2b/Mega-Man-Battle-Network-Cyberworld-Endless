@@ -20,6 +20,7 @@ static const RomLayout layouts[] = {
 		.sprite_lists = 0x031CC4,
 		.chip_data = 0x021DA8,
 		.chip_names = { 0x6E88D0, 0x6E92D8 },
+		.chip_descs = { 0x6E983C, 0x6EC050 },
 		.enemy_ids = 0x0182C4,
 		.enemy_stats = 0x00F260,
 		.encounters = 0x020170,
@@ -154,6 +155,21 @@ void rom_text(uint32_t archive, int index, char *out, size_t outlen) {
 		if (c >= 0xE5) break;
 		const char *g = glyph(c);
 		for (; *g && o + 1 < outlen; ++g) out[o++] = *g;
+	}
+	out[o] = 0;
+}
+
+void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {
+	uint32_t p = archive + rom_u16(archive + 2 * index);
+	size_t o = 0;
+	for (int i = 0; i < 96 && o + 1 < outlen;) {
+		uint8_t c = R.data[p + i];
+		if (c == 0xE8) { i += 4; continue; }   /* ts_msg_open_quick_ext */
+		if (c == 0xF1) { i += 3; continue; }   /* ts_text_speed */
+		if (c == 0xE9) { out[o++] = ' '; ++i; continue; }   /* a new line */
+		if (c >= 0xE5) break;                  /* ts_key_wait, ts_end */
+		for (const char *g = glyph(c); *g && o + 1 < outlen; ++g) out[o++] = *g;
+		++i;
 	}
 	out[o] = 0;
 }

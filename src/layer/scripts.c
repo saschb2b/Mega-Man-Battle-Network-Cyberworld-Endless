@@ -503,6 +503,12 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 	int take[3], menu = t->n + 3;   /* (the three's script, after the picks') */
 	for (int k = 0; k < 3; ++k) {
 		take[k] = ta_script(t);
+		/* (what it does first, in BN6's own words: R showed nothing in the
+		 * list, and two playtesters picked by the names alone) */
+		if (v->desc[k][0]) {
+			snprintf(s, sizeof s, "%s %c: %s.", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k], v->desc[k]);
+			ta_page(t, FACE_MEGAMAN, s, false);
+		}
 		snprintf(s, sizeof s, "%s %s %c?\nWe only get one!\n", verb, v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
 		ask_in(t, FACE_MEGAMAN, s, menu, true, true);
 		bool first = false;

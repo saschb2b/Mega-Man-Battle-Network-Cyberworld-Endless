@@ -215,6 +215,19 @@ void layer_objs_shops(const LayerObjs *o, bool saved) {
 	shop_install(SHOP_PROGRAMS, o->programs, o->nprograms, saved);
 }
 
+/* Chip `id` as pick k of a vault or an official gate, in code `code` (its
+ * own, fitted to the folder's codes where it comes in them). */
+static void vault_chip(ScriptsVault *v, int k, int id, char code) {
+	ChipInfo ci;
+	chip_info(id, &ci);
+	code = loot_fit_code(id, code, true);
+	v->chip[k] = id;
+	v->code[k] = code == '*' ? 26 : code - 'A';
+	v->power[k] = ci.power;
+	snprintf(v->name[k], sizeof v->name[k], "%s", ci.name);
+	chip_desc(id, v->desc[k], sizeof v->desc[k]);
+}
+
 /* An official gate's three chips (docs/RIVAL.md): at level 1 an official
  * Chip Order, standard chips the Library holds (held in any run), as BN6's
  * Chip Order orders them, in the folder's codes; at level 2 Mega chips. */
@@ -231,7 +244,6 @@ static void official_picks(int level, ScriptsVault *v) {
 				from[nfrom++] = id;
 	}
 	for (int k = 0; k < 3; ++k) {
-		char code = '*';
 		int id = 0;
 		for (int tries = 0; tries < 16; ++tries) {
 			id = nfrom >= 3 ? from[rng_range(0, nfrom - 1)] : chip_pool_pick(2);
@@ -241,11 +253,7 @@ static void official_picks(int level, ScriptsVault *v) {
 		}
 		ChipInfo ci;
 		chip_info(id, &ci);
-		code = loot_fit_code(id, ci.ncodes ? ci.codes[0] : '*', true);
-		v->chip[k] = id;
-		v->code[k] = code == '*' ? 26 : code - 'A';
-		v->power[k] = ci.power;
-		snprintf(v->name[k], sizeof v->name[k], "%s", ci.name);
+		vault_chip(v, k, id, ci.ncodes ? ci.codes[0] : '*');
 	}
 }
 
@@ -624,13 +632,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					for (int j = 0; j < k; ++j) again |= v.chip[j] == id;
 					if (!again) break;
 				}
-				ChipInfo ci;
-				chip_info(id, &ci);
-				code = loot_fit_code(id, code, true);
-				v.chip[k] = id;
-				v.code[k] = code == '*' ? 26 : code - 'A';
-				v.power[k] = ci.power;
-				snprintf(v.name[k], sizeof v.name[k], "%s", ci.name);
+				vault_chip(&v, k, id, code);
 			}
 			tk.script = ta_vault(&text, LAYER_VAULT_FLAG, need, have, &v);
 			break;

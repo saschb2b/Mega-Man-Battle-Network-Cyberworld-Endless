@@ -148,6 +148,11 @@ void chip_info(int rom_id, ChipInfo *out) {
 	if (d->kind == CK_RECOVER) out->power = d->param;
 }
 
+void chip_desc(int rom_id, char *out, size_t outlen) {
+	if (rom_id < 256) rom_desc(R.layout->chip_descs[0], rom_id, out, outlen);
+	else rom_desc(R.layout->chip_descs[1], rom_id - 256, out, outlen);
+}
+
 /* family, biomes, first depth. Biomes: bit 0 Central, 1 Seaside, 2 Sky,
  * 3 Green, 4 Graveyard, 5 Undernet, 6 Secret, 7 Nest. */
 const VirusDef virus_defs[] = {

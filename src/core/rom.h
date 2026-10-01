@@ -56,6 +56,7 @@ typedef struct {
 	uint32_t sprite_lists;    /* SpritePointersList: 10 category tables */
 	uint32_t chip_data;       /* 0x2C-byte chip records */
 	uint32_t chip_names[2];   /* text archives: ids 0-255, 256+ */
+	uint32_t chip_descs[2];   /* ... and their descriptions, three short lines each */
 	uint32_t enemy_ids;       /* (version, actor type, ai) triples */
 	uint32_t enemy_stats;     /* per actor type, per ai: 6-byte records per version (HP, damage) */
 	uint32_t encounters;      /* random battles: 4 story stages x (real world, internet) -> group -> map -> BattleSettings */
@@ -138,6 +139,9 @@ uint8_t *lz77_decompress(const uint8_t *src, size_t avail, size_t *out_len);
 
 /* Decode a text-archive entry into ASCII using the game's character table. */
 void rom_text(uint32_t archive, int index, char *out, size_t outlen);
+/* A description's text (a chip's): script `index` of `archive` past its
+ * box commands, its lines joined by spaces. */
+void rom_desc(uint32_t archive, int index, char *out, size_t outlen);
 
 void sha1_hex(const uint8_t *data, size_t len, char out[41]);
 
