@@ -449,6 +449,37 @@ static bool run_won_here(void) {
 	return run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth) && boss_done();
 }
 
+/* MegaMan's words on the layer's guardian, on arriving: who he is and how
+ * he fights once they have fought him, in any run: before that MegaMan has
+ * no battle data on the copy, only a strong signal, and naming him or
+ * reciting his moves would spend the first fight's discovery (and how
+ * could he know?); what he always knows is the net's own grammar, the
+ * yellow panels that light where an attack will land. Appended to `buf`
+ * at `k`; the new length. */
+static int guardian_words(char *buf, int k, int size) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	int navi = D.objs.guardian.navi;
+	const char *tip = guardian_tip(navi);
+	if (guardian_known(navi)) {
+		ADD(" %s waits at its end!|", guardian(navi)->name);
+		if (tip) ADD("@M We've got battle data on him from before:|@M %s|", tip);
+		else ADD("@M Watch the yellow panels: they light where an attack will land!|");
+	} else {
+		/* (what a Navi on the net said, as hearsay) */
+		if (guardian_heard()) ADD(" %s waits at its end, if the word on the net is right.|@M We've got no battle data on him, Lan.",
+			guardian(navi)->name);
+		else ADD(" A strong Navi's signal waits at its end. I don't recognize it.|@M We've got no battle data on it, Lan.");
+		ADD(" Watch the yellow panels: they light where an attack will land!|");
+	}
+	/* (EraseCross on a Navi, which the setup has no room for: a playtester
+	 * saw BlastMan's HP drain after a Vulcan, and only patch notes had
+	 * said why) */
+	if (flag_get(BN6_FLAG_ERASE_CROSS))
+		ADD("@M And in EraseCross, a plain chip that hits him while his HP has a 4 in it bugs him: his HP drains away!|");
+	#undef ADD
+	return k;
+}
+
 static const char *status_words(void) {
 	static char buf[800];
 	int k = 0;
@@ -468,27 +499,7 @@ static const char *status_words(void) {
 	if (!D.layer_told) {
 		const char *area = guardian_area_in_text(run.biome, run.side_kind);
 		ADD("@M Layer %d, Lan: %s.", run.depth, area);
-		if (D.objs.guardian.navi && !boss_beaten()) {
-			/* who he is and how he fights once they have fought him, in any
-			 * run: before that MegaMan has no battle data on the copy, only
-			 * a strong signal, and naming him or reciting his moves would
-			 * spend the first fight's discovery (and how could he know?);
-			 * what he always knows is the net's own grammar, the yellow
-			 * panels that light where an attack will land */
-			int navi = D.objs.guardian.navi;
-			const char *tip = guardian_tip(navi);
-			if (guardian_known(navi)) {
-				ADD(" %s waits at its end!|", guardian(navi)->name);
-				if (tip) ADD("@M We've got battle data on him from before:|@M %s|", tip);
-				else ADD("@M Watch the yellow panels: they light where an attack will land!|");
-			} else {
-				/* (what a Navi on the net said, as hearsay) */
-				if (guardian_heard()) ADD(" %s waits at its end, if the word on the net is right.|@M We've got no battle data on him, Lan.",
-					guardian(navi)->name);
-				else ADD(" A strong Navi's signal waits at its end. I don't recognize it.|@M We've got no battle data on it, Lan.");
-				ADD(" Watch the yellow panels: they light where an attack will land!|");
-			}
-		}
+		if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, (int)sizeof buf);
 		/* (not after the act's arrival words, which spoke of him; a
 		 * CONTINUE does not say them again, and there he is spoken of) */
 		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
@@ -2351,7 +2362,9 @@ bool director_start_layer(void) {
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it) */
-	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); powers_bring(run.cross); }
+	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); }
+	/* (and the Cross it brought at any depth, as a run has it there) */
+	powers_bring(run.cross);
 	note_folder_codes();
 	if (!new_layer(false)) return false;
 	lock_run();

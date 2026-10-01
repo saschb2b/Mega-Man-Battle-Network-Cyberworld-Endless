@@ -6,6 +6,12 @@
   more than one colour, and a player read the draft's pink HP+100 and a
   vendor's blue one as a contradiction. MegaMan's line for each now says
   it: "HP+100 (pink): a hundred more max HP."
+- **EraseCross's bug on a Navi is said.** The setup said only what it
+  does to viruses, and a player saw BlastMan's HP drain with nothing in
+  the game saying why. MegaMan's briefing before a guardian now says it
+  while the run has EraseCross ("a plain chip that hits him while his HP
+  has a 4 in it bugs him: his HP drains away!"), and so does the PET's
+  report of the dive.
 - **Battle Network 5's areas in a run.** With Team Colonel (USA) in the
   same folder as your BN6 ROM, four of BN5's net areas stand in for the
   BN6 areas they resemble, each in about half the runs that come there:

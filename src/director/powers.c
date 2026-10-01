@@ -16,15 +16,17 @@
  * (BN6's own Cross tutorials, CompText86D0614: its chips' +50 is theirs
  * that don't dim the screen; a playtester chose a Cross by its weakness
  * alone, the setup naming no strength) */
-static const struct { int navi, flag; const char *name, *feel, *weak, *strong; } crosses[] = {
+static const struct { int navi, flag; const char *name, *feel, *weak, *strong, *navis; } crosses[] = {
 	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua", "Fire chips +50, buster +1" },
 	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood", "Elec chips +50" },
 	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", "Sword chips +50" },
 	/* (BN6's EraseCross: an elementless chip that doesn't dim the screen
 	 * deletes a virus whose HP has a 4 in it, and bugs a Navi, whose HP
 	 * then drains; two playtesters had found it by chance and taken it for
-	 * counters, and a third saw DiveMan's HP fall with nothing hitting) */
-	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind", "A 4 in HP: plain chips erase" },
+	 * counters, and a third saw DiveMan's HP fall with nothing hitting;
+	 * a fourth, told only of viruses, met a Navi's bug unexplained) */
+	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind", "A 4 in HP: plain chips erase",
+	  "Navis: a bug drains their HP" },
 	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua", "One more chip each turn" },
 };
 
@@ -45,6 +47,12 @@ const char *powers_cross_name(int navi) {
 const char *powers_cross_strength(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi) return crosses[i].strong;
+	return NULL;
+}
+
+const char *powers_cross_on_navis(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) return crosses[i].navis;
 	return NULL;
 }
 

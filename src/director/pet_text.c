@@ -247,6 +247,23 @@ static int dad_mail(const char *text, uint8_t *out, int max) {
 	return k + (int)sizeof end;
 }
 
+/* The Cross the run brought, after its folder (" and HeatCross (fire
+ * chips +50...; Aqua attacks do 2x to it).", or "."), with what it does
+ * to a Navi where that differs */
+static const char *cross_words(void) {
+	static char buf[200];
+	const char *weak = run.cross ? powers_cross_weakness(run.cross) : NULL;
+	const char *strong = run.cross ? powers_cross_strength(run.cross) : NULL;
+	const char *navis = run.cross ? powers_cross_on_navis(run.cross) : NULL;
+	if (!run.cross) return ".";
+	if (weak && strong)
+		snprintf(buf, sizeof buf, " and %s (%c%s; %s%s%s attacks do 2x to it).", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1,
+			navis ? navis : "", navis ? "; " : "", weak);
+	else if (weak) snprintf(buf, sizeof buf, " and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
+	else snprintf(buf, sizeof buf, " and %s.", powers_cross_name(run.cross));
+	return buf;
+}
+
 /* The dive as the lab sees it: where, what waits, what was brought (the
  * SciLab link that Comm had opened, as Dad's mail: BN6's own screen, its
  * own music) */
@@ -270,13 +287,7 @@ static void report_text(char *s, int size) {
 	else if (navi && director_guardian_heard()) ADD(" Word on the net: %s guards this act's end.", guardian(navi)->name);
 	else if (navi) ADD(" A strong Navi guards this act's end. We don't know who yet.");
 	ADD(" ScrtData: %d of 3%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ", the gate open" : "");
-	ADD(" You brought the %s folder", meta_folder(run.folder)->name);
-	const char *weak = run.cross ? powers_cross_weakness(run.cross) : NULL;
-	const char *strong = run.cross ? powers_cross_strength(run.cross) : NULL;
-	if (run.cross && weak && strong) ADD(" and %s (%c%s; %s attacks do 2x to it).", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1, weak);
-	else if (run.cross && weak) ADD(" and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
-	else if (run.cross) ADD(" and %s.", powers_cross_name(run.cross));
-	else ADD(".");
+	ADD(" You brought the %s folder%s", meta_folder(run.folder)->name, cross_words());
 	ADD(" Threat %d.", run.threat);
 	static const char *const helpers[3] = { "HP+", "Heals", "Gentle" };
 	if (run.helpers & 7) {
