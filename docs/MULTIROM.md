@@ -61,7 +61,8 @@ ROM in memory, and shows its battle screens.
    plays on (`src/audio/xsong.c`): its sequence with the pointers moved,
    the voices it selects, their key splits, drum kits and samples, and
    entered in one of BN6's 61 empty song slots, where BN6's own sound
-   engine plays it as one of its own. The run's seed picks it,
+   engine plays it as one of its own; its battles name its game's battle
+   themes, copied the same way (`encounter_song`). The run's seed picks it,
    with the ROMs present, so nothing is saved: a run continued without
    the other ROM goes on in the BN6 area's tiles.
 6. **Platforms**: desktop first. A New 3DS's 96 MB heap holds BN6 twice
@@ -92,7 +93,11 @@ ROM in memory, and shows its battle screens.
 - [x] Its areas' themes, from its own map-music lists: ACDC Area, SciLab
   and End Area its net theme (song 0x13), Nebula Area its Undernet's
   (0x14).
-- [ ] Its other music (towns, battles).
+- [x] Its battle music: its random battles' theme and its bosses' (songs
+  0x15 and 0x16, named in its battle records as BN6's are), copied after
+  its areas' themes and named in the records of battles on its areas'
+  layers, guardians and ProtoMan's netbattle with the boss theme.
+- [ ] Its towns' music.
 - [x] Its bystanders on its areas' layers: its purple HeelNavi, sprite
   and face, copied into BN6's free space and listed at a number Gregar
   leaves empty in both (`src/layer/xnavi.c`, docs/ROM_DATA.md); it stands,

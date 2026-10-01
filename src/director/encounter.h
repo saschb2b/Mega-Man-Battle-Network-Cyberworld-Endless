@@ -10,6 +10,12 @@
 void emu_encounters_install(void);
 /* The battle the next encounter starts: enemies, area background and music. */
 void emu_encounter_set(const Encounter *e);
+/* The songs a battle's record names, a random battle's and a boss's: BN6's
+ * themes, or another game's where the layer is one of its areas
+ * (docs/MULTIROM.md), as the layer sets them. */
+#define ENCOUNTER_SONG_BATTLE 0x15
+#define ENCOUNTER_SONG_BOSS   0x16
+extern int encounter_song[2];
 /* The record the last emu_encounter_set wrote (0 or 1), and the one the
  * game's battle is set up from (-1: another, a story or test battle; -2:
  * not yet named, early in its setup). */

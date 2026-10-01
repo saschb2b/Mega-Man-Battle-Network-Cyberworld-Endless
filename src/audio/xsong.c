@@ -255,6 +255,13 @@ int xsong_install(int xrom, int song, int fallback) {
 			const NetAreaDef *x = net_area_def(NET_AREAS + k);
 			if (x && x->xrom > 0 && x->xsong && slot_of(x->xrom - 1, x->xsong) < 0) copy_in(x->xrom - 1, x->xsong);
 		}
+		/* then the battle themes of the games whose areas are there (after
+		 * the areas' own, which a state saved before them points into) */
+		for (int i = 0; i < XROM_COUNT; ++i)
+			for (int b = 0; b < 2; ++b) {
+				int theme = XR[i].data && XR[i].layout->nareas ? XR[i].layout->battle_songs[b] : 0;
+				if (theme && slot_of(i, theme) < 0) copy_in(i, theme);
+			}
 	}
 	int slot = slot_of(xrom, song);
 	return slot < 0 ? fallback : slot;

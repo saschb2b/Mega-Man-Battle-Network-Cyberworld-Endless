@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Battle Network 5's areas fight to BN5's battle music.** Its net
+  areas played its own net theme, then every battle there played
+  BN6's. Their random battles now play BN5's virus battle theme, and
+  their guardians and ProtoMan's netbattle its boss theme, copied from
+  BN5's ROM as its net themes are.
 - **The arrow leads a hurt MegaMan to the heal.** Below three quarters of
   his HP, L said which way the layer's Recovery Mr. Prog was, but the
   arrow kept to the exit, and a player at 180 HP spent a dozen moves

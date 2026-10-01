@@ -1045,9 +1045,15 @@ static int layer_area(int *biome) {
 
 /* The song an area's layers play: another game's area its own theme,
  * copied into BN6 (docs/MULTIROM.md), where it can be; else `song`, the
- * BN6 area's. */
+ * BN6 area's. Its battles' themes (encounter_song) the same way: that
+ * game's virus battle and boss music, else BN6's. */
 static int layer_song(int tiles, int song) {
 	const NetAreaDef *x = net_area_def(tiles);
+	static const int bn6[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
+	for (int b = 0; b < 2; ++b) {
+		int theirs = x && x->xrom > 0 ? XR[x->xrom - 1].layout->battle_songs[b] : 0;
+		encounter_song[b] = theirs ? xsong_install(x->xrom - 1, theirs, bn6[b]) : bn6[b];
+	}
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 
