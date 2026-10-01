@@ -277,8 +277,8 @@ static void arrival_words(void) {
 		if (guardian_known(navi))
 			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
 		else
-			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan! A strong Navi's signal waits at its end. I don't recognize "
-				"it.|@L Then let's find out who. Let's go!", area);
+			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan! A strong Navi's signal waits at its end, one "
+				"we've never faced down here.|@L Then let's find out who. Let's go!", area);
 		D.beat_guardian = true;
 	}
 }
@@ -470,7 +470,7 @@ static int guardian_words(char *buf, int k, int size) {
 		/* (what a Navi on the net said, as hearsay) */
 		if (guardian_heard()) ADD(" %s waits at its end, if the word on the net is right.|@M We've got no battle data on him, Lan.",
 			guardian(navi)->name);
-		else ADD(" A strong Navi's signal waits at its end. I don't recognize it.|@M We've got no battle data on it, Lan.");
+		else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|@M We've got no battle data on it, Lan.");
 		ADD(" Watch the yellow panels: they light where an attack will land!|");
 	}
 	/* (EraseCross on a Navi, which the setup has no room for: a playtester
@@ -542,7 +542,7 @@ static const char *status_words(void) {
 			int navi = run.boss_order[run.biome];
 			if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
 			else if (guardian_heard()) ADD(" %s guards the end of it, word is.|", guardian(navi)->name);
-			else ADD(" A strong Navi's signal waits at its end. I don't recognize it.|");
+			else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|");
 		}
 		else ADD("|");
 		/* (the area's battlefields, on its first layer: a playtester froze
