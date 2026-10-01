@@ -52,7 +52,7 @@ int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
 int layer_objs_official_level;
 bool layer_objs_duel_later;
 
-#define SPR_BYSTANDER   67   /* EvilNavi */
+int layer_objs_bystander = LAYER_BYSTANDER;   /* (EvilNavi) */
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -386,7 +386,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* Normal Navis and pink navis */
 			static int base;
 			if (!said) base = o->npc_line;
-			tk.sprite = SPR_BYSTANDER;
+			tk.sprite = layer_objs_bystander;
 			/* the first on an act's first layer passes on the net's word
 			 * about its guardian, where MegaMan has never battled him: who
 			 * he is and a rumor, no moves (docs/META.md, what MegaMan

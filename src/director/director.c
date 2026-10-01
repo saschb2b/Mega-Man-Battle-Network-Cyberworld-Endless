@@ -55,6 +55,7 @@
 #include "trader.h"
 #include "text.h"
 #include "town.h"
+#include "xnavi.h"
 #include "xsong.h"
 
 int director_debug_biome = -1;
@@ -1001,10 +1002,13 @@ static int layer_song(int tiles, int song) {
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 
-/* The map an area's layers take over. */
+/* The map an area's layers take over, and the Navi their bystanders are
+ * (layer_objs_bystander): another game's area its own Navi, copied into
+ * BN6 (docs/MULTIROM.md), where it can be. */
 static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
 	if (!a) a = net_area_def(0);
+	layer_objs_bystander = a->xrom > 0 && a->xnavi ? xnavi_slot(a->xrom - 1, a->xnavi, LAYER_BYSTANDER) : LAYER_BYSTANDER;
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;
 	*number = a->host ? a->host - 1 : a->number;
@@ -1021,7 +1025,7 @@ static bool build_layer(void) {
 	if (!netmap_build_layer(tiles, run.layer_seed)) return false;
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
-	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over) */
+	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over, their bystanders) */
 	/* (the layer just left had its Net Dealer speak: this act's next say
 	 * a line, not the greeting and the pick's reasons again, 5 to 8 boxes
 	 * on every layer for a playtester) */

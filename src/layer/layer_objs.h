@@ -73,6 +73,10 @@ extern bool layer_objs_dealer_named;
  * without a hit, 2 a netbattle with him), and whether the netbattle waits
  * for a later act (ProtoMan then names it, and asks nothing). */
 extern int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
+/* The bystanders' Navi, its list-6 sprite and mugshot: BN6's HeelNavi,
+ * or another game's on its area's layers (set before layer_objs_install). */
+#define LAYER_BYSTANDER 67
+extern int layer_objs_bystander;
 /* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
 extern int layer_objs_official_level;
 extern bool layer_objs_duel_later;

@@ -44,6 +44,7 @@ typedef struct {
 	uint8_t like;            /* the BN6 area (BIOME_*) whose layouts and furnishings its layers take */
 	const char *name, *short_name, *motto;   /* what a run calls it: in full, in nine letters, on its act's card */
 	uint8_t xsong;           /* its theme in its own game's song table (0: `song`, BN6's) */
+	uint8_t xnavi;           /* its bystanders' Navi, a list-6 sprite and mugshot of its own game (0: BN6's) */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
@@ -96,6 +97,7 @@ typedef struct {
 	const NetAreaDef *areas;                /* the net areas it lends a run */
 	int nareas;
 	uint32_t song_table;                    /* MP2K songs: (header, player, player), as BN6's */
+	uint32_t sprite_lists;                  /* the ten sprite lists, as BN6's */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;

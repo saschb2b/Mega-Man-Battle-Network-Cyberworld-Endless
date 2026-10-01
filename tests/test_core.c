@@ -26,6 +26,7 @@
 #include "townmath.h"
 #include "touch_layout.h"
 #include "buttons.h"
+#include "xnavi.h"
 #include "xsong.h"
 
 static int failures;
@@ -58,6 +59,7 @@ uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; ret
 void emu_write(uint32_t addr, const void *data, size_t len) { (void)addr; (void)data; (void)len; }
 uint32_t emu_read32(uint32_t addr) { (void)addr; return 0; }
 bool emu_debug_on(void) { return false; }
+void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
 
 static void test_sha1(void) {
 	char hex[41];
@@ -1332,6 +1334,23 @@ static void test_bug_cause(void) {
 	CHECK(!navicust_bug_cause(g, clean, 2, 4, 4), "bug cause: none on a clean board");
 }
 
+/* Another game's Navi (src/layer/xnavi.c): a sprite's length, as far as
+ * its frame's tiles, palette, sub-animation and object list reach; none
+ * where they reach past what can be read. */
+static void test_xnavi(void) {
+	uint8_t spr[128] = { 0 };
+	uint8_t *b = spr + 4;   /* (after the 4-byte header) */
+	b[0] = 4;               /* one animation, its frames at 4 */
+	b[4] = 24; b[8] = 60; b[12] = 96; b[16] = 104;   /* tiles, palette, sub-animation, object table */
+	b[4 + 18] = 0x80;       /* the last frame */
+	b[24] = 32;             /* 32 bytes of tiles, to 60 */
+	b[60] = 32;             /* a palette, to 96 */
+	b[104] = 4;             /* one object list, at 108: an object, then 0xFF 0xFF, to 115 */
+	b[113] = 0xFF; b[114] = 0xFF;
+	CHECK(xnavi_sprite_len(spr, sizeof spr) == 119, "xnavi: the sprite's length (%u)", xnavi_sprite_len(spr, sizeof spr));
+	CHECK(!xnavi_sprite_len(spr, 100), "xnavi: a sprite reaching past the data refused");
+}
+
 /* Another game's song (src/audio/xsong.c): the pointers a walk of its
  * tracks finds to move, and the voices it selects; a pointer out of the
  * sequence, or a command whose pointers it can't move, refuses the song. */
@@ -1379,6 +1398,7 @@ int main(void) {
 	test_touch();
 	test_xsong();
 	test_bug_cause();
+	test_xnavi();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;
