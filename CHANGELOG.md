@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Stairs lead up onto their raised rooms (issue #22).** At a stair's
+  top MegaMan dropped to the ground and walked on under the raised room,
+  out of bounds: a player reported it on an Undernet layer, and it held
+  on every area's stairs. The row past each stair's top is now the step
+  the originals have, from the ground to the room's height.
 - **MegaMan says where the golden gate stands.** Three ScrtData open the
   gate to the Secret Area, MegaMan said, and a player holding three asked
   where it was: only a bystander's rumour had placed it in the Undernet.

@@ -765,6 +765,36 @@ static void add_extra(int s, CoordCell c) {
 	if (extra.n[s] < 4096) extra_cells[s][extra.n[s]++] = c;
 }
 
+/* The row past each stair's top a step, as the originals' is: a cell from
+ * the ramp's foot as high as the rise (z 0, height 32), where the raised
+ * floor's own cells start at the rise (z 32, height 0). The game takes a
+ * floor cell only within its heights, and coming up the ramp MegaMan is
+ * under the rise until he has crossed that row: with the raised floor's
+ * cells there, he fell to the ground and walked on under the room (issue
+ * #22). */
+static void stair_steps(const Learned *L) {
+	for (int i = 0; i < cur->nstairs; ++i) {
+		const StairTemplate *t = &L->stairs[cur->stairs[i].dir];
+		if (!t->ok) continue;
+		int X0, Y0;
+		stair_origin(&cur->stairs[i], &X0, &Y0);
+		for (int k = 0; k < t->nramp; ++k) {
+			const CoordCell *r = &t->ramp[k];
+			if ((r->type != 0x13 && r->type != 0x14) || r->height != t->rise) continue;
+			/* (0x13 climbs towards +X, 0x14 towards -Y) */
+			CoordCell step = { (int16_t)(r->x + X0 + (r->type == 0x13 ? 8 : 0)), (int16_t)(r->y + Y0 - (r->type == 0x14 ? 8 : 0)), r->z, 0, (uint8_t)t->rise, 0x11 };
+			bool found = false;
+			for (int c = 0; c < extra.n[1]; ++c) {
+				CoordCell *e = &extra_cells[1][c];
+				if (e->type != 0x11 || e->x >> 3 != step.x >> 3 || e->y >> 3 != step.y >> 3) continue;
+				*e = step;
+				found = true;
+			}
+			if (!found) add_extra(1, step);
+		}
+	}
+}
+
 static void build_extra(const Learned *L) {
 	memset(&extra, 0, sizeof extra);
 	for (int s = 0; s < 4; ++s) extra.cells[s] = extra_cells[s];
@@ -816,6 +846,7 @@ static void build_extra(const Learned *L) {
 				add_extra(s, c);
 			}
 	}
+	stair_steps(L);
 }
 
 /* Centres the floor on the world origin, across (x - y) and up and down
