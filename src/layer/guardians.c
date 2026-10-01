@@ -58,8 +58,12 @@ const char *guardian_tip(int navi) {
 	case 5: return "ChargeMan rams down our row like a train, and his coal bombs burst on the lit panels.|@M When his freight cars come "
 		"too, they roll down the other two rows a column or two behind him and block our chips.|@M Once he's passed, step into his "
 		"row behind him: the cars never follow there. Hit him as he pulls back in at the back!";
-	case 6: return "SpoutMan's bubbles burst over our panels, his hose sprays water down the lit ones, "
-		"and he jumps onto our side to whirl his arms beside him. Step off the yellow panels!|@M He stands still in front of us while he blows bubbles: swing then!";
+	/* (watched: landed beside us, he lights the panels at his sides alone, and
+	 * his arms sweep the rows above and below them too: a playtester a
+	 * panel up and over, off every lit one, was deleted there, session 57) */
+	case 6: return "SpoutMan's bubbles burst over our panels, and his hose sprays water down the lit ones. Step off the yellow panels!|"
+		"@M When he jumps onto our side and whirls, his arms reach the panels at his corners too, though only those at his sides light up: "
+		"get two panels away from him!|@M He stands still in front of us while he blows bubbles: swing then!";
 	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
 		"Step off the yellow panels, and keep our distance!|@M He stands still while his eagle swoops, and stays close a moment after his axe: strike then!";
 	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "

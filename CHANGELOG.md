@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **MegaMan warns that SpoutMan's whirl reaches his corners.** Landed on
+  MegaMan's side, SpoutMan lights only the panels at his sides as he
+  whirls, but his arms sweep the panels at his corners too, and a player
+  who stepped off every lit panel was deleted on one of those. MegaMan's
+  briefing now says so: get two panels away from him.
 - **Battle Network 5's Nebula Area looks like itself.** Its rooms came
   out with its emblem repeated across them and its paths half platform:
   their cobbles change colour stone by stone, which the tiles had read as
