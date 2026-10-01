@@ -8,11 +8,13 @@
   Weather's fields hung stepped blocks and grilles under their edges.
   Their edges are now drawn with their own rim tiles, as the original
   maps draw them.
-- **Mr. Weather Comp's and Robot Control's guardian arenas look like
-  their areas.** Their arenas were paved with the walkways' tiles, lamps
-  and circuit lines made for a path a panel wide, which tiled over a big
-  field overlapped into a jumble. The arena is now one of the area's own
-  platforms: Weather's solar-panel floor, Robot Control's white slab.
+- **Guardian arenas look like their areas.** Mr. Weather Comp's, Robot
+  Control's, Central Area's and Green Area's arenas were paved with the
+  walkways' tiles, lamps, circuit lines, catwalk posts and planks made for
+  a path a panel wide, which tiled over a big field overlapped into a
+  jumble. The arena is now one of the area's own platforms: Weather's
+  solar-panel floor, Robot Control's white slab, Central's green field,
+  Green's grass.
 - **Stairs meet their floors cleanly.** A stair's tiles came with pieces
   of the original map around it: void notches and loose stripes in the
   floor at its foot, a bridge pad's yellow gem, the original court's
