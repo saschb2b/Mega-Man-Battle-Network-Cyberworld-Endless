@@ -2315,10 +2315,16 @@ static void arrow_update(void) {
 	 * wobbled between neighbouring eighths as the walk's aim moved, a third
 	 * of its turns swung back within a second, and a playtester holding
 	 * the way a picture showed ran past the turns) */
-	static int tick, pending = -1;
-	if (cinema_arrow_on() && on_map() && ++tick % 5 == 0) {
+	/* (and at once for the first frames after MegaMan stops: standing, the
+	 * way can't flip on a border, and a playtester's pictures 4 frames
+	 * after each step showed the way from before it, three steps running
+	 * at one walkway's mouth) */
+	static int tick, pending = -1, settle;
+	settle = D.dir_held ? 4 : settle > 0 ? settle - 1 : 0;
+	bool stopping = !D.dir_held && settle > 0;
+	if (cinema_arrow_on() && on_map() && (++tick % 5 == 0 || stopping)) {
 		goal_way();
-		if (way_dir == pending && !route_way_holds(cinema_arrow_dir(), 0.8)) cinema_arrow_turn(way_dir);
+		if ((way_dir == pending || stopping) && !route_way_holds(cinema_arrow_dir(), 0.8)) cinema_arrow_turn(way_dir);
 		pending = way_dir;
 	}
 	/* (it faded three seconds after the words, and in the Aquarium Comp's

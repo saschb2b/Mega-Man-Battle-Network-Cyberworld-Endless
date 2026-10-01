@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The way-on arrow turns as MegaMan stops.** It turned only after a
+  new way had held for two looks five frames apart, so a picture taken
+  just after a step still showed the way from before it: at a walkway's
+  mouth, the arrow pointed back the way MegaMan came. Standing, the way
+  can't flip, and the arrow now turns within a frame or two.
 - **The Guardian Data's programs name their colour.** A program comes in
   more than one colour, and a player read the draft's pink HP+100 and a
   vendor's blue one as a contradiction. MegaMan's line for each now says
