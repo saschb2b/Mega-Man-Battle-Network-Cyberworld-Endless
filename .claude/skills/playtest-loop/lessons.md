@@ -1660,3 +1660,49 @@ tolerance just under one misfires at every such spot, not at random: a
 replay with `CYBERWORLD_STATE_POS=1` gives the positions to check it
 against before it ships.
 
+
+## Session 56: 7/10 (keep playing: yes; recommend: yes)
+
+Run 6, act 3 (Green HP): ProtoMan beaten in the netbattle in 0:11.75,
+"my best fight in 56 sessions" (the DiveMan chip's wave mid-teleport,
+Thunder's paralysis, a counter hit, ElcPuls1 point-blank), DiveManSP D
+from the official vault, the blue Spin and ScrtData #2; then deleted on
+layer 8 by two Armadil3s in a random battle walked into at 150/430,
+past the Recovery Mr. Prog L had named. Run 7 begun at once (Endless,
+Storm, no Cross, threat 1, HP+), waiting in ACDC Town.
+
+Confirmed: the walkway arrow at corners (f427984), the one-time pick
+starting on No (d4ded6d), the gates naming their clearance (ecf85cb),
+the A at a typing box waited out.
+
+Raised, open: the Net Dealer's "No word yet" two platforms after a Navi
+named TenguMan (L repeated the rumour); MegaMan's briefing promising
+that Navi chips get past ProtoMan's shield, HeatMan's flames doing
+nothing while he guarded; the vault's list showing "DiveManSP D 1013"
+(read as damage) and no description on R before a one-time pick; the
+summary forgetting the duel, Chaud's record and the vault; the dealer's
+confirm starting on No once and Yes after; walkway corners still a few
+calls with the arrow right; ElecCross's setup text silent on a Wood hit
+knocking the Cross off.
+
+Broken-looking layers: none in 28 shots of Green HP, on 0dcd123,
+before the tile sweep (it changed other areas' looks than Green HP's).
+
+Beside the loop: the players' tile reports (stairs, the Undernet's
+ramps, "tiles all kinds of broken") worked through area by area against
+the originals: stairs with their own tiles alone, arenas in platform
+floor (Weather, Robot Control, Central, Green, Sky), rims for the
+Graveyard and Weather, Sky's catwalks thin and its rooms its fields,
+Seaside's arrows and the Undernet's crosses kept out of joins, the
+Nest's floating cubes gone, fields' middles by their period or a
+stretch whole. The tile test's seams per hundred panels 68.7 to 62.5.
+Tried and dropped: walkway runs laid by their period (the originals
+have almost no straight run five panels long to learn from).
+
+Cost: 268 calls.
+
+Loop change: **what changed is put in front of the persona.** Kai
+looked over 28 shots and found nothing broken, in an area the sweep
+had not touched; a report of "none" says little about the areas it
+never crossed. The patch notes now name the areas whose look changed
+and ask for close looks at their floors, joins and stairs there.
