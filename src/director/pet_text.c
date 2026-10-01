@@ -257,9 +257,9 @@ static const char *cross_words(void) {
 	const char *navis = run.cross ? powers_cross_on_navis(run.cross) : NULL;
 	if (!run.cross) return ".";
 	if (weak && strong)
-		snprintf(buf, sizeof buf, " and %s (%c%s; %s%s%s attacks do 2x to it).", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1,
+		snprintf(buf, sizeof buf, " and %s (%c%s; %s%s%s attacks do 2x to it and break it).", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1,
 			navis ? navis : "", navis ? "; " : "", weak);
-	else if (weak) snprintf(buf, sizeof buf, " and %s: %s attacks do 2x to it.", powers_cross_name(run.cross), weak);
+	else if (weak) snprintf(buf, sizeof buf, " and %s: %s attacks do 2x to it and break it.", powers_cross_name(run.cross), weak);
 	else snprintf(buf, sizeof buf, " and %s.", powers_cross_name(run.cross));
 	return buf;
 }

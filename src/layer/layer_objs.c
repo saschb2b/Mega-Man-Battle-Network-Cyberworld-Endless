@@ -436,9 +436,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			layer_objs_dealer_named = tells;
 			/* (the guardian's weakness by name; an element-less guardian's
 			 * act is answered for its viruses) */
+			/* (nor does he deny the bystanders' rumor: a playtester heard it
+			 * two platforms before his "No word yet") */
 			if (navi > 0 && !tells)
-				snprintf(word, sizeof word, "|No word yet on what guards the end of %s. Nobody's come back to tell. Ask me again deeper in!",
-					guardian_area_in_text(run.biome, LAYER_NORMAL));
+				snprintf(word, sizeof word, "|Nobody's come back from the end of %s to tell what guards it. There's talk on the net, "
+					"but I don't sell on talk. Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
 			else if (counter > 0 && ge > 0 && ge <= 4)
 				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s",
 					guardian(navi)->name, elem[counter], brought, lands);

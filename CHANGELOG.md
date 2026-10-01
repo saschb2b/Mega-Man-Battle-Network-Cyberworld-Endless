@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The Net Dealer no longer denies the net's rumors.** On an act's first
+  layer he said there was "no word yet" on its guardian, two platforms
+  after a Navi had named him. He now says nobody has come back to tell,
+  and that he doesn't sell on talk.
+- **A Cross's weakness says it breaks the Cross.** The setup screen and
+  the lab's mail said only that its weak element did double damage; a
+  hit of it also turns MegaMan back, as in BN6.
 - **Fields look like the originals' fields.** Inside a platform every
   tile took its spot's most common look, so Mr. Weather Comp's solar
   panels ran as plain bands without their lights, and the Cybeast Nest's
