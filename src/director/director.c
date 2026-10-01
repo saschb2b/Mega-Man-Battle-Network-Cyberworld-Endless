@@ -128,7 +128,7 @@ static struct {
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
-	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken this session, 0 none */
+	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
@@ -1583,6 +1583,36 @@ bool director_draw_second_screen(int w, int h) {
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
+/* What the director knows of the act a checkpoint is in, saved beside its
+ * state: the viruses deleted before the act began, its frames, and the act
+ * whose Net Dealer has spoken. A CONTINUE takes it back, where an act
+ * continued from a save had no count on its AREA CLEAR card and its next
+ * Net Dealer greeted MegaMan as new (a playtester's, both). */
+#define ACT_NOTE_MAGIC 0x41435431u   /* "ACT1" */
+typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer; } ActNote;
+static ActNote act_note;
+static bool act_note_ok;
+
+static void act_note_save(void) {
+	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act };
+	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
+}
+
+/* on CONTINUE, before the layer is built: its dealer's greeting reads it */
+static void act_note_read(void) {
+	act_note_ok = save_read_blob("run.act", ACT_NOTE_MAGIC, &act_note, sizeof act_note) && act_note.seed == run.seed &&
+		act_note.act == (run.depth - 1) / 3;
+	if (act_note_ok) D.dealer_act = act_note.dealer;
+}
+
+/* ... and after it, where building it began the act afresh */
+static void act_note_apply(void) {
+	D.act_resumed = !act_note_ok;
+	if (act_note_ok) { D.act_viruses = act_note.viruses; D.act_frames = act_note.frames; }
+	if (emu_debug_on()) fprintf(stderr, "act note: %s, act %d, viruses from %d, %d frames, dealer %d\n", act_note_ok ? "taken back" : "none",
+		act_note.act, act_note.viruses, act_note.frames, act_note.dealer);
+}
+
 static void save_checkpoint(void) {
 	char path[600];
 	save_state_path(path, sizeof path);
@@ -1595,6 +1625,7 @@ static void save_checkpoint(void) {
 	/* the map's panels seen so far, beside the state they go with */
 	save_write_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen);
 	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
+	act_note_save();
 }
 
 bool director_can_suspend(void) {
@@ -2510,6 +2541,7 @@ bool director_resume(void) {
 	 * was kept, which made its stock without it) */
 	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
+	act_note_read();
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
 	char path[600];
@@ -2572,7 +2604,7 @@ bool director_resume(void) {
 		emu_warp(D.group, D.number, x, y, 4);
 		/* where they are, again; the arrival's words were said before */
 		begin_area(false);
-		D.act_resumed = true;
+		act_note_apply();
 		D.beat[0] = 0;
 		return true;
 	}

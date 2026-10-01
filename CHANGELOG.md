@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **An act continued from a save keeps its count.** Its AREA CLEAR card
+  left out the viruses deleted (the count began again with the
+  CONTINUE), and its next Net Dealer greeted MegaMan as if they had never
+  met. Each save now keeps them beside the run.
 - **MegaMan says which program bugs the NaviCust, and why.** After a RUN
   with a bug he listed every rule a bug can come from, and a player had
   to work out which one he had broken. He now names it from the board:
