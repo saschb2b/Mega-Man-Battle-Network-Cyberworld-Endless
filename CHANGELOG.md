@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Bystanders don't repeat themselves across an act.** Each layer's
+  Navis took their lines from a random place in the pool, and a player
+  heard "The exit pad only goes down" on an act's first and third
+  layers. Each layer now takes the next lines on from the last.
 - **MegaMan warns that SpoutMan's whirl reaches his corners.** Landed on
   MegaMan's side, SpoutMan lights only the panels at his sides as he
   whirls, but his arms sweep the panels at his corners too, and a player

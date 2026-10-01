@@ -393,7 +393,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_NPC: {
 			/* Normal Navis and pink navis */
 			static int base;
-			if (!said) base = o->npc_line;
+			/* (the next four of the pool each layer, from where the run's seed
+			 * starts it: a bystander's random pick had a playtester hear the
+			 * same line on an act's first and third layers) */
+			if (!said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
 			tk.sprite = layer_objs_bystander;
 			/* the first on an act's first layer passes on the net's word
 			 * about its guardian, where MegaMan has never battled him: who
