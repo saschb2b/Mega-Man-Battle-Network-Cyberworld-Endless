@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Sky Area's catwalks turn cleanly.** Every bend of its cyan glass
+  catwalks had lavender wall pieces from its other catwalks in it, and a
+  walkway onto a purple pad was a jumble of both. Its walkways are now
+  drawn from the cyan glass catwalks alone.
 - **The Graveyard's and Mr. Weather Comp's edges run straight.** The
   Graveyard's slabs had a sawtooth edge, every panel poking out past the
   rim with a pale post in each notch, and holes shaped like slots;
