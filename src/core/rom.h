@@ -108,6 +108,7 @@ typedef struct {
 typedef struct {
 	uint8_t *data;
 	const XRomLayout *layout;
+	char path[1024];   /* the file it was read from */
 } XRom;
 extern XRom XR[XROM_COUNT];
 /* Reads the extra ROMs in dir (any *.gba of theirs); how many are read now. */

@@ -92,6 +92,14 @@ static void keep_copy(const char *path, const char *rom_dir) {
 		fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, path);
 }
 
+/* ... and of the other games' ROMs read beside it (docs/MULTIROM.md): the
+ * next start finds them beside the copy, or not at all */
+static void keep_copies(const char *path, const char *rom_dir) {
+	keep_copy(path, rom_dir);
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (XR[i].data) keep_copy(XR[i].path, rom_dir);
+}
+
 int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
 	char where[700];
 	shown(where, sizeof where, rom_dir);
@@ -111,7 +119,7 @@ int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgle
 			char path[1024] = "";
 			if (!choose_file(path, sizeof path)) continue;
 			if (!rom_load_file(path, msg, msglen)) continue;
-			keep_copy(path, rom_dir);
+			keep_copies(path, rom_dir);
 			return 1;
 		}
 		if (scan(msg, msglen)) return 1;
@@ -145,7 +153,7 @@ bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen) {
 	snprintf(msg, msglen, "%s", said);
 	if (!found) return false;
 	fprintf(stderr, "found the ROM at %s\n", R.path);
-	keep_copy(R.path, rom_dir);
+	keep_copies(R.path, rom_dir);
 	return true;
 }
 

@@ -286,7 +286,8 @@ static void xrom_load(const char *path) {
 	char hex[41] = "";
 	if (ok) sha1_hex(data, ROM_SIZE, hex);
 	if (!ok || strcmp(hex, xlayouts[id].sha1)) { free(data); return; }
-	XR[id] = (XRom){ data, &xlayouts[id] };
+	XR[id] = (XRom){ data, &xlayouts[id], "" };
+	snprintf(XR[id].path, sizeof XR[id].path, "%s", path);
 }
 
 int xrom_find(const char *dir) {

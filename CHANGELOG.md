@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Battle Network 5 stays after the first start.** A BN6 ROM chosen in
+  the desktop's dialog, or found in the Downloads or a ROMs folder, is
+  copied where the next start looks, but a BN5 ROM beside it was not, so
+  its areas turned up in the first session only. It is now copied along
+  (Linux, macOS, Windows).
 - **Mr. Weather Comp's fields are whole solar panels.** Pieces of its
   fan belts turned up where a field's edge cut them: half domes at the
   ends of its bands, a fan cluster sliced off at the guardian's arena.

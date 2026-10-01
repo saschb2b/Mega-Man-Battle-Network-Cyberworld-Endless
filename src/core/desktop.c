@@ -235,6 +235,23 @@ static bool choose_file(char *path, size_t n) {
 #endif
 }
 
+/* a copy where the next start looks first */
+static void keep_copy(const char *path, const char *rom_dir) {
+	const char *base = strrchr(path, '/');
+	char to[1400];
+	snprintf(to, sizeof to, "%s/%s", rom_dir, base ? base + 1 : path);
+	if (strcmp(to, path) && access(to, F_OK) != 0 && !copy_file(path, to))
+		fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, path);
+}
+
+/* ... and of the other games' ROMs read beside it (docs/MULTIROM.md): the
+ * next start finds them beside the copy, or not at all */
+static void keep_copies(const char *path, const char *rom_dir) {
+	keep_copy(path, rom_dir);
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (XR[i].data) keep_copy(XR[i].path, rom_dir);
+}
+
 int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
 	/* with a file chooser: choose it; without, open the folder to put it in */
 #ifdef __APPLE__
@@ -258,12 +275,7 @@ int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msgle
 			char path[1024] = "";
 			if (!choose_file(path, sizeof path)) continue;
 			if (!rom_load_file(path, msg, msglen)) continue;
-			/* keep a copy where the next start looks first */
-			const char *base = strrchr(path, '/');
-			char to[1400];
-			snprintf(to, sizeof to, "%s/%s", rom_dir, base ? base + 1 : path);
-			if (strcmp(to, path) && access(to, F_OK) != 0 && !copy_file(path, to))
-				fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, path);
+			keep_copies(path, rom_dir);
 			return 1;
 		}
 		if (hit == 0) {
@@ -327,12 +339,8 @@ bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen) {
 	snprintf(msg, msglen, "%s", said);
 	if (!found) return false;
 	fprintf(stderr, "found the ROM at %s\n", R.path);
-	/* a copy where the next start looks first (the SD card may be out then) */
-	const char *base = strrchr(R.path, '/');
-	char to[1400];
-	snprintf(to, sizeof to, "%s/%s", rom_dir, base ? base + 1 : R.path);
-	if (access(to, F_OK) != 0 && !copy_file(R.path, to))
-		fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, R.path);
+	/* (a copy where the next start looks first: the SD card may be out then) */
+	keep_copies(R.path, rom_dir);
 	return true;
 }
 
