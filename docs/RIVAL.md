@@ -67,7 +67,8 @@ clearance opens), which only matter to a player who plays on.
    PET rings: "Lan. It's Chaud. ProtoMan's on this layer. He busted a
    squad here in 0:14.20. Think MegaMan can do better?", and Lan answers
    ("You're on, Chaud!"). Before the first win Chaud says what it earns:
-   "Beat it, and I'll clear you for the net's official gates." L's briefing names ProtoMan's way, and the map
+   "Beat it, and you'll have my first clearance: the official Chip Orders
+   open for it." L's briefing names ProtoMan's way, and the map
    marks him.
 2. **The ring.** ProtoMan stands on the layer, off the way on. His words
    give the terms: the squad's size ("a pair of viruses"), his time and

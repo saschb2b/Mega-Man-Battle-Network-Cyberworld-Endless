@@ -3057,8 +3057,8 @@ static const char *duel_call_words(void) {
 			 * run for pride alone) */
 			/* (and what the gate holds: a playtester, five duels lost, took
 			 * the gates for scenery, their prize never named) */
-			profile.duel_won ? stake : layer_objs_official_level ? "@C Beat it, and I'll clear you for the net's official gates. There's one on this layer: an official Chip Order, three chips you've held, one to order.|"
-			: "@C Beat it, and I'll clear you for the net's official gates.|",
+			profile.duel_won ? stake : layer_objs_official_level ? "@C Beat it, and you'll have my first clearance: the official Chip Orders open for it. There's one on this layer, three chips you've held, one to order.|"
+			: "@C Beat it, and you'll have my first clearance: the official Chip Orders open for it.|",
 			layer_objs_duel_rung == 1 ? ", without a hit" : "");
 	}
 	/* (Lan answers: a call no one answered read as a message left, the
