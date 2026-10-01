@@ -23,7 +23,7 @@ inside BN6 (it calls its own game's addresses).
 | Music, sounds | Its MP2K songs and their voice groups into BN6's song table | low |
 | NPCs, mugshots | Its sprites as bystanders and dealers | low to moderate |
 | Chips | Where BN6 has the behaviour (most standard chips); its own (Navi chips, DarkChips) have no code in BN6 | limited |
-| Viruses | The families both games have; its own need their AI | limited |
+| Viruses | The families both games have; its own need their AI. BN5 shares 5 of its 33 with BN6 (Mettaur, Catack, Champy, WindBox, Trumpy, by the first name of each family in both games' tables), and its areas' battles are mostly its own (ACDC Area's CanGards and Powies), so a mix from its data alone would take the BN5 out of them | limited |
 | Guardians | Its Navis need their AI: a battle in its own engine | high |
 
 For what needs its game's code, the way is a battle in that game: the
