@@ -336,7 +336,7 @@ folder).
 | L | Ask MegaMan where you are and what's ahead | Open the Custom screen; on it, hold L and press R to try to run |
 | R | Jack in (at the town's statue) | Open the Custom screen |
 | Start | Open the PET | Pause |
-| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings, or pips on the edge), and the way to the exit or guardian | |
+| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings, or pips on the edge), and the way to the exit or guardian; let go, and the arrow shows the way on | |
 
 In the net MegaMan walks as in BN6: a single direction goes straight across
 the screen, and two together (like DOWN+LEFT) go along a walkway. A turns

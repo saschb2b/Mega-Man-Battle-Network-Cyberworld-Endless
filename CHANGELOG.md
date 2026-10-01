@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The map hands over to the arrow.** Letting go of SELECT now shows
+  the way-on arrow, as L does, where it had faded half a minute after
+  MegaMan's words: a player who looked at the map on a strip with no
+  arrow tried one direction after another to find its walkway.
 - **The way-on arrow turns as MegaMan stops.** It turned only after a
   new way had held for two looks five frames apart, so a picture taken
   just after a step still showed the way from before it: at a walkway's

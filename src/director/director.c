@@ -2294,10 +2294,25 @@ static void push_arrow(void) {
 	cinema_arrow(way_dir, 150);
 }
 
+/* As the layer's map closes (SELECT let go): the way-on arrow, as after
+ * L's words, for a player who looked for the way there (a playtester
+ * looked at the map on a strip where the arrow had faded, then probed
+ * directions for four calls). */
+static void map_arrow(void) {
+	static bool was;
+	if (was && !D.map_shown && on_map()) {
+		goal_way();
+		if (cinema_arrow_on()) cinema_arrow_extend(300);
+		else cinema_arrow(way_dir, 300);
+	}
+	was = D.map_shown;
+}
+
 /* In the town: nothing to watch but the jack-in, whose arrival on the
  * layer's map starts the run as a layer's warp does. */
 /* The way-on arrow: on while L's words last, however many boxes, then ten
- * seconds more, and on while MegaMan walks, up to half a minute. */
+ * seconds more, and on while MegaMan walks, up to half a minute; and after
+ * the map. */
 static void arrow_update(void) {
 	/* (not over a warp's or the jack-in's flash and tunnel) */
 	if (D.warping || emu_read8(BN6_WARP + 0x10)) {
@@ -2305,6 +2320,7 @@ static void arrow_update(void) {
 		D.arrow_pending = false;
 		return;
 	}
+	map_arrow();
 	/* (it turns as MegaMan walks: frozen, it pointed into the gap he had
 	 * walked past) */
 	/* (a new way twice running before it turns: at a walkway's mouth the
