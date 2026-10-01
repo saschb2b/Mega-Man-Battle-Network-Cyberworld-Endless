@@ -32,6 +32,7 @@ typedef struct {
 	uint8_t pad_rooms;       /* platforms of up to this many panels drawn as pads, the guardian's arena too (the Aquarium's glass pads; 0: none) */
 	uint8_t apart;           /* NET_APART_*: floor its originals never set flush with the rest, drawn whole where a walkway meets it */
 	uint16_t skip_styles;    /* hue buckets of floor in `styles` whose tiles are not learned: another surface in the same colours; SKIP_ANY_PIXEL, SKIP_PALE (src/map/tiles.h) */
+	uint16_t joint_hues;     /* hue buckets of its walkways' joints, a walkway panel whose top shows them: their tiles in a look of their own, drawn at a generated walkway's ends, turns and crossings (the Undernet's yellow gems; src/map/tiles.c, netmap.c) */
 	int16_t counter[4];      /* the Net Dealer's counter: its map (group, number; 0: none) and a world point inside its wall ring, the counter facing world +Y there (docs/LEVEL_DESIGN.md, Props) */
 	uint16_t looks;          /* the map objects its layers are furnished with, bit per LOOK_* (net.h), as its own maps have them */
 	uint16_t emblem;         /* the colour (BGR555) of the emblem its maps draw in their floors, shown nowhere else (0: none; docs/LEVEL_DESIGN.md, Props) */

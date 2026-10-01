@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The Undernet's bridges run plain between their joints.** Every other
+  panel of a bridge's straight runs showed a piece of the yellow gem its
+  joints wear, cut off at the tiles' edges. Its joints now keep a look of
+  their own, at a bridge's ends, turns and crossings as the original's,
+  and the striped planks between them run plain; the Secret Area's
+  bridges too.
 - **The Undernet's guardian arenas are plateaus.** The Undernet's and the
   Secret Area's arenas were paved with their bridges' gem joints and
   striped planks, a jumble a guardian stood in. They are now drawn in the

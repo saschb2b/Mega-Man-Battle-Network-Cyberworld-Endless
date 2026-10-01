@@ -149,13 +149,13 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * walkway floor): the Undernet's walkway floor is bridges, stripes and
  * gems, which laid over a 5x5 field came out a jumble of joints. */
 #define TILES_ARENA_DRAWN 0x800000
-void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
+void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a
  * generated layer's rows and columns: 'a' platform floor, 'b' walkway
  * floor, upper case ('P', 'Q') on its pads; floor of another style by its
  * hue bucket (0-9, 'X' 10, 'Y' 11, 'G' grey). */
-void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, FILE *f);
+void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, FILE *f);
 /* The colours the pairs of `b` draw, marked in `seen` (one byte per BGR555
  * colour); then the pairs of another book that draw others marked (`other`),
  * and with `drop` left out. */

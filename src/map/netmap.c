@@ -110,13 +110,13 @@ static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
 static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
-		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, &L->book[L->nbooks++]);
+		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);
 	}
 	AreaSrc m;
 	if (!area_src_mirror(src, &m)) return;
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
-		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, &L->book[L->nbooks++]);
+		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, &m, na->bg_in_map);
 	}
 	area_src_free(&m);
@@ -307,6 +307,7 @@ static int apart;             /* what of its floor stands apart from the rest (N
 static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
 static bool pads_walkway;     /* its framed pads are cut from its maps in their walkways' floor */
 static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid out as walkway (TILES_ARENA_DRAWN) */
+static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
@@ -399,6 +400,28 @@ static void make_stripes(bool keep_pads) {
 		}
 }
 
+/* A walkway cell where the area's originals set a joint (the Undernet's
+ * gems): its ends, turns and crossings, and where it meets other floor;
+ * not in a straight run, a walkway cell on each side along one line and
+ * nothing on the other two. */
+static bool joint_at(int x, int y) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	bool walk[4];
+	int n = 0;
+	for (int d = 0; d < 4; ++d) {
+		int nx = x + d4[d][0], ny = y + d4[d][1];
+		n += kind(nx, ny) != K_VOID;
+		walk[d] = ground(kind(nx, ny)) && walkway(nx, ny);
+	}
+	return !(n == 2 && ((walk[0] && walk[2]) || (walk[1] && walk[3])));
+}
+
+/* TILE_PAD for a joint while the tiles are picked: its tiles' look, as
+ * tiles.c learns it (the legalizer reads plain walkway floor, as before) */
+static int joint_look(int x, int y) {
+	return picking && joints && ground(kind(x, y)) && walkway(x, y) && joint_at(x, y) ? TILE_PAD : 0;
+}
+
 /* The guardian's arena in walkway floor, to read apart from the platforms;
  * with TILES_ARENA_DRAWN, while the tiles are picked, not (the legalizer
  * reads it so, as before). */
@@ -418,6 +441,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
 	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y)) pad |= TILE_APART;
+	pad |= joint_look(x, y);
 	if (one_floor) return TILE_A | pad;
 	/* by shape: walkways and platforms' rims one floor, their middles the other */
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
@@ -931,6 +955,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	pad_look = !(na->styles & TILES_NO_PAD_LOOK);
 	pads_walkway = L->pad.ok && (na->pad_hues & na->walk_styles);
 	arena_drawn = na->styles & TILES_ARENA_DRAWN;
+	joints = na->joint_hues;
 	apart = na->apart;
 	place.ex = L->ex;
 	place.ey = L->ey;

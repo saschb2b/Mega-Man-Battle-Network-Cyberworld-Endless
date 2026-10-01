@@ -122,7 +122,12 @@ bridges their gem joints as a floor of their own (platform floor to the
 tiles, at a generated bridge's ends, turns and crossings: the gems'
 pieces left the straight runs, but brown notches came where a stripe
 lies beside a joint corner to corner, the seams up a quarter and the
-near picks by half).
+near picks by half). What holds instead keeps both one floor and gives
+the joints the pads' look (`joint_hues`, `TILE_PAD` at a generated
+bridge's ends, turns and crossings while the tiles are picked): the
+straight runs are plain planks, and the count rose a tenth on three
+layers, where two stripes' posts meet side by side, which the originals
+rarely set (a joint stands between); the baseline records it.
 
 The close-ups in `.build/atlas/defects_bXX.png` show each spot. It fails as
 the atlas does, where a layer got worse than the baseline; `--baseline`

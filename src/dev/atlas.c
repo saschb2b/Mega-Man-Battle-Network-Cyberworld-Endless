@@ -203,7 +203,7 @@ static void sources(const char *dir, int biome) {
 		snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d.txt", dir, biome, group, number);
 		FILE *f = fopen(path, "w");
 		if (f) {
-			tiles_src_text(&a, na->styles, na->walk_styles, na->skip_styles, na->bg_in_map, f);
+			tiles_src_text(&a, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, f);
 			fclose(f);
 		}
 		area_src_free(&a);

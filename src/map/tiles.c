@@ -92,6 +92,7 @@ static int pale_pixels(const AreaSrc *a, int cx, int cy) {
 }
 
 #define PALE_PIXELS 40   /* SKIP_PALE: Mr. Weather Comp's fan belts 120 and more, its solar panels under 20 */
+#define JOINT_PIXELS 4   /* a walkway panel showing this many of its area's joint hues is a joint: the Undernet's gems */
 
 #define SPAN 128   /* panels cached per axis, centred on the world origin */
 #define OTHER 3    /* a source panel of neither material */
@@ -99,7 +100,7 @@ static int pale_pixels(const AreaSrc *a, int cx, int cy) {
 typedef struct {
 	const AreaSrc *a;
 	uint32_t styles;
-	uint16_t walk_styles, skip_styles;
+	uint16_t walk_styles, skip_styles, joint_hues;
 	bool bg_in_map;
 	int8_t *state;   /* SPAN x SPAN panel states, -1 until measured */
 	int8_t *drawn;   /* ... whether each is floor of this view at all */
@@ -598,12 +599,29 @@ static void find_plain(TileBook *b) {
 	}
 }
 
-/* Whether panel (A, B) is floor whose tiles are not learned. */
 /* Whether a side of panel (A, B) touches walkway floor. */
 static bool beside_walkway(const Src *s, int A, int B) {
 	return src_panel(s, A + 1, B) == TILE_B || src_panel(s, A - 1, B) == TILE_B || src_panel(s, A, B + 1) == TILE_B || src_panel(s, A, B - 1) == TILE_B;
 }
 
+/* Whether panel (A, B) is a walkway's joint: its top shows the area's
+ * joint hues (the Undernet's yellow gems). */
+static bool joint_panel(const Src *s, int A, int B) {
+	if (!s->joint_hues || src_panel(s, A, B) != TILE_B) return false;
+	const AreaSrc *a = s->a;
+	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->joint_hues) >= JOINT_PIXELS;
+}
+
+/* Whether panel (A, B)'s tiles are in its pads' look: a pad of the map, or
+ * a walkway's joint, in a look of its own as a pad's (a generated walkway's
+ * straight runs took the gems' pieces). */
+static bool pad_look(const Src *s, const uint8_t *pads, int A, int B) {
+	bool in = A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2;
+	return (!(s->styles & TILES_NO_PAD_LOOK) && in && pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]) || joint_panel(s, A, B);
+}
+
+/* Whether panel (A, B) is floor whose tiles are not learned. */
 static bool skipped(const Src *s, int A, int B) {
 	if (!s->skip_styles || !drawn_cached(s, A, B)) return false;
 	const AreaSrc *a = s->a;
@@ -614,8 +632,9 @@ static bool skipped(const Src *s, int A, int B) {
 	return s->skip_styles >> style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
 }
 
-static void src_open(Src *s, const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, bool inner_walls) {
-	*s = (Src){ a, styles, walk_styles, skip_styles, bg_in_map, malloc(SPAN * SPAN), malloc(SPAN * SPAN), inner_walls };
+static void src_open(Src *s, const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map,
+	bool inner_walls) {
+	*s = (Src){ a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, malloc(SPAN * SPAN), malloc(SPAN * SPAN), inner_walls };
 	memset(s->state, -1, SPAN * SPAN);
 	memset(s->drawn, -1, SPAN * SPAN);
 }
@@ -635,7 +654,7 @@ static void learn_shapes(const Src *src, const AreaSrc *a, uint32_t styles, uint
 	Src walled = *src;
 	uint8_t *walled_pads = pads;
 	if (src->inner_walls) {
-		src_open(&walled, a, styles, walk_styles, skip_styles, bg_in_map, false);
+		src_open(&walled, a, styles, walk_styles, skip_styles, src->joint_hues, bg_in_map, false);
 		walled_pads = find_pads(&walled);
 	}
 	out->nshapes = 0;
@@ -901,10 +920,10 @@ static void learn_variety(TileBook *out) {
 	out->vary_first[64] = nv;
 }
 
-void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out) {
+void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out) {
 	memset(out, 0, sizeof *out);
 	Src src;
-	src_open(&src, a, styles, walk_styles, skip_styles, bg_in_map, styles & TILES_INNER_WALLS);
+	src_open(&src, a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, styles & TILES_INNER_WALLS);
 	uint8_t *pads = find_pads(&src);
 	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0, false };
 	calibrate(a, &src, &g);
@@ -955,7 +974,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 			t->e1 = back ? a->tile[1][i] : 0;
 			t->count = 1;
 			t->other = 0;
-			t->pad = !(styles & TILES_NO_PAD_LOOK) && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 ? pads[(B + SPAN / 2) * SPAN + A + SPAN / 2] : 0;
+			t->pad = pad_look(&src, pads, A, B);
 			++n;
 		}
 	tiles_keep_end();
@@ -968,9 +987,9 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	free(pads);
 }
 
-void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, FILE *f) {
+void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, FILE *f) {
 	Src src;
-	src_open(&src, a, styles, walk_styles, skip_styles, bg_in_map, styles & TILES_INNER_WALLS);
+	src_open(&src, a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, styles & TILES_INNER_WALLS);
 	uint8_t *pads = find_pads(&src);
 	int H = SPAN / 2, a0 = H, a1 = -H, b0 = H, b1 = -H;
 	for (int B = -H; B < H; ++B)
