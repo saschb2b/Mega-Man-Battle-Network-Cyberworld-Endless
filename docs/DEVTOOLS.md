@@ -98,8 +98,25 @@ The seams count what the classes pick; what a player sees best is the
 pictures against the area's own maps (`src_bNN_*.png`). A sweep of them
 found what the numbers missed: arenas paved with walkway tiles
 (`TILES_ARENA_FLOOR`), edges whose own rim tiles failed the plain test and
-were stood in for by inner panels (`TILES_RIMMED`), and decorated panels
-whose pieces turned up elsewhere (`skip_styles` with `SKIP_ANY_PIXEL`).
+were stood in for by inner panels (`TILES_RIMMED`), decorated panels
+whose pieces turned up elsewhere (`skip_styles` with `SKIP_ANY_PIXEL`,
+`SKIP_PALE`), and two floors sharing a hue told apart by shape
+(`TILES_WALK_NARROW`).
+
+The seams are counted only where a tile is partly drawn: two whole tiles
+side by side never make one, so a floor's inside can mix two of the
+original's looks unseen by the count (the Undernet's bridges, a stripe
+from one panel beside a gem's corner from another). Tried against that
+and dropped, each over the count: taking a panel's tiles from one panel
+of the original (its most typical for the neighbourhood: the bridges read
+whole, the seams doubled at every panel border, the original alternating
+two), the same by the panel's parity (no better), costing an unseen pair
+of whole tiles 1 (2570 seams to 6098 over three areas: the edges paid for
+the insides), laying straight walkway runs by their period (the
+originals have too few runs five panels long to learn one), and for
+CopyBot Comp's plateaus a rim context (a walkway panel beside platform
+floor is a rim: its rims took the plateaus' stone, but the seams grew by
+60% where they met the walkways' lips and legs).
 
 The close-ups in `.build/atlas/defects_bXX.png` show each spot. It fails as
 the atlas does, where a layer got worse than the baseline; `--baseline`
