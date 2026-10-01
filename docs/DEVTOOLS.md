@@ -97,7 +97,8 @@ tiles were drawn off (`src/map/tiles.h`, `TILE_WHY_*`):
 The seams count what the classes pick; what a player sees best is the
 pictures against the area's own maps (`src_bNN_*.png`). A sweep of them
 found what the numbers missed: arenas paved with walkway tiles
-(`TILES_ARENA_FLOOR`), edges whose own rim tiles failed the plain test and
+(`TILES_ARENA_FLOOR`; `TILES_ARENA_DRAWN` where the arena's layout must
+stay as the legalizer made it: the Undernet's), edges whose own rim tiles failed the plain test and
 were stood in for by inner panels (`TILES_RIMMED`), decorated panels
 whose pieces turned up elsewhere (`skip_styles` with `SKIP_ANY_PIXEL`,
 `SKIP_PALE`), and two floors sharing a hue told apart by shape
@@ -116,7 +117,12 @@ the insides), laying straight walkway runs by their period (the
 originals have too few runs five panels long to learn one), and for
 CopyBot Comp's plateaus a rim context (a walkway panel beside platform
 floor is a rim: its rims took the plateaus' stone, but the seams grew by
-60% where they met the walkways' lips and legs).
+60% where they met the walkways' lips and legs), and for the Undernet's
+bridges their gem joints as a floor of their own (platform floor to the
+tiles, at a generated bridge's ends, turns and crossings: the gems'
+pieces left the straight runs, but brown notches came where a stripe
+lies beside a joint corner to corner, the seams up a quarter and the
+near picks by half).
 
 The close-ups in `.build/atlas/defects_bXX.png` show each spot. It fails as
 the atlas does, where a layer got worse than the baseline; `--baseline`

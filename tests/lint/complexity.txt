@@ -31,7 +31,6 @@ src/layer/text.c:wrap 40 44
 src/map/coords.c:walls 28 32
 src/map/decor.c:decor_learn 46 65
 src/map/legal.c:legal_fix 38 66
-src/map/netmap.c:floor_raw 27 15
 src/map/props.c:cut_tiles 29 48
 src/map/props.c:floor_emblem_on 29 46
 src/map/props.c:learn_art 29 54

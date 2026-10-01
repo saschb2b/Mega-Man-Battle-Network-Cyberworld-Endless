@@ -306,6 +306,8 @@ static bool rimmed;           /* its platforms' edges are rims (TILES_RIMMED) */
 static int apart;             /* what of its floor stands apart from the rest (NET_APART_*) */
 static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
 static bool pads_walkway;     /* its framed pads are cut from its maps in their walkways' floor */
+static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid out as walkway (TILES_ARENA_DRAWN) */
+static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 /* K_SOLID: floor drawn, walled off (a counter's aisle, net.h C_SOLID) */
@@ -397,6 +399,13 @@ static void make_stripes(bool keep_pads) {
 		}
 }
 
+/* The guardian's arena in walkway floor, to read apart from the platforms;
+ * with TILES_ARENA_DRAWN, while the tiles are picked, not (the legalizer
+ * reads it so, as before). */
+static bool arena_walkway(int x, int y) {
+	return arena_b && !(picking && arena_drawn) && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah;
+}
+
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
 static int floor_raw(int A, int B, const void *ctx) {
@@ -412,7 +421,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 	if (one_floor) return TILE_A | pad;
 	/* by shape: walkways and platforms' rims one floor, their middles the other */
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
-	if (arena_b && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B | pad;
+	if (arena_walkway(x, y)) return TILE_B | pad;
 	if (striped && stripe[y][x]) return TILE_B | pad;
 	/* (Central's, Seaside's and Sky's framed pads are islands of their
 	 * walkways' floor: a walkway's last panel before one was drawn meeting
@@ -701,7 +710,9 @@ static bool write_tilemap(const Learned *L) {
 	memo_h = cur->gh + 2 * MEMO_EDGE;
 	floor_memo = malloc((size_t)memo_w * memo_h * sizeof *floor_memo);
 	if (floor_memo) memset(floor_memo, 0xFF, (size_t)memo_w * memo_h * sizeof *floor_memo);
+	picking = true;
 	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, last.seams);
+	picking = false;
 	free(floor_memo);
 	floor_memo = NULL;
 	size_t raw = cells * 4;
@@ -919,6 +930,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	rimmed = na->styles & TILES_RIMMED;
 	pad_look = !(na->styles & TILES_NO_PAD_LOOK);
 	pads_walkway = L->pad.ok && (na->pad_hues & na->walk_styles);
+	arena_drawn = na->styles & TILES_ARENA_DRAWN;
 	apart = na->apart;
 	place.ex = L->ex;
 	place.ey = L->ey;

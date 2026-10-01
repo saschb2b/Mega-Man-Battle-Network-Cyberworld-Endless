@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The Undernet's guardian arenas are plateaus.** The Undernet's and the
+  Secret Area's arenas were paved with their bridges' gem joints and
+  striped planks, a jumble a guardian stood in. They are now drawn in the
+  area's own stone, as its plateaus are; the layers are laid out as
+  before.
 - **The game says when it has found Battle Network 5.** Nothing told a
   player whether Team Colonel beside the BN6 ROM had been read until
   one of its areas turned up, in about half the runs. As the title comes

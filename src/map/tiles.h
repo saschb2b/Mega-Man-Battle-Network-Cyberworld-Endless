@@ -144,6 +144,11 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * catwalks' hue, and their thick lavender edges with orange lights stood
  * in for the catwalks' thin ones with their clips. */
 #define TILES_WALK_NARROW 0x400000
+/* ... and with TILES_ARENA_DRAWN, its guardian's arena drawn in its
+ * platforms' floor though laid out as before (the legalizer reads it as
+ * walkway floor): the Undernet's walkway floor is bridges, stripes and
+ * gems, which laid over a 5x5 field came out a jumble of joints. */
+#define TILES_ARENA_DRAWN 0x800000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a
