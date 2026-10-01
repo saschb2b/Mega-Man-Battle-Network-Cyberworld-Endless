@@ -539,14 +539,15 @@ static int heal_note(char *buf, int k, int size, bool heal) {
 /* The area's viruses that fight in ways BN6 never explains, where the act
  * or a side layer begins, appended to `buf` at `k`; the new length. Only
  * once they have been battled, in any run: the first meeting is theirs to
- * show. (A playtester's Thunder healed a ScarCrow to full, two DarkMechs
+ * show; and as a may, which the area's battles can bring, not will (a
+ * playtester met none of "StarFish here again" in a whole act). (A playtester's Thunder healed a ScarCrow to full, two DarkMechs
  * took 460 HP before he knew, and a StarFish's bubbles ate three Cannons,
  * a WideSht and a Navi chip's fire while it took 350.) */
 static int family_words(char *buf, int k, int size) {
 	static const struct { int family; const char *words; } warn[] = {
-		{ FAMILY_SCARCROW, "@M ScarCrows here again: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|" },
-		{ FAMILY_DARKMECH, "@M DarkMechs here again. They warp right beside us to slash, so keep moving and strike as they appear!|" },
-		{ FAMILY_STARFISH, "@M StarFish here again: their bubbles soak up our shots and trap us if we touch one. "
+		{ FAMILY_SCARCROW, "@M We may meet ScarCrows here again: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|" },
+		{ FAMILY_DARKMECH, "@M We may meet DarkMechs here again. They warp right beside us to slash, so keep moving and strike as they appear!|" },
+		{ FAMILY_STARFISH, "@M We may meet StarFish here again: their bubbles soak up our shots and trap us if we touch one. "
 			"A chip that drops from above gets past them!|" },
 	};
 	uint32_t fams = loot_families_here(run.depth, run.biome);

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A held B no longer hurries a talk past unseen.** Running with B held
+  into a talk that opens on its own, such as the words before a guardian's
+  arena, let BN6 page through it before a player saw a box. The talk now
+  waits until B is let go; a fresh B still hurries it.
+- **An area's virus warnings say "may".** "StarFish here again" named a
+  family the area's battles can bring, and a player met none in a whole
+  act. MegaMan now says "We may meet StarFish here again".
 - **What a guardian fight holds is said before it.** A player lost a run
   to Colonel without knowing three things: his hits went nowhere while
   he readied a slash, his cape swept the row he landed in with only his

@@ -18,6 +18,7 @@ enum { CARD_NONE, CARD_TITLE, CARD_AREA };
 static struct {
 	bool off_map;
 	int input;
+	bool b_latch;   /* a B held as a talk took the keys: kept from it until let go */
 	uint32_t walk;
 	bool bars;
 	int bar;                 /* 0 .. BAR_FRAMES */
@@ -33,7 +34,13 @@ static struct {
 
 void cinema_reset(void) { memset(&C, 0, sizeof C); }
 
-void cinema_input(int mode) { C.input = mode; }
+/* (a talk that opens on its own takes a B held to run as a press to
+ * hurry it: a player running into a guardian's last-stop words saw none
+ * of them; the B counts again once let go) */
+void cinema_input(int mode) {
+	if (mode == CINEMA_TALK && C.input != CINEMA_TALK) C.b_latch = true;
+	C.input = mode;
+}
 int cinema_input_mode(void) { return C.input; }
 void cinema_walk(uint32_t keys) { C.walk = keys; }
 void cinema_letterbox(bool on) { C.bars = on; }
@@ -78,7 +85,10 @@ int cinema_card_age(void) { return C.card == CARD_AREA ? C.card_t : -1; }
 uint32_t cinema_keys(uint32_t keys) {
 	if (C.off_map) return keys;
 	if (C.input == CINEMA_HOLD) return 0;
-	if (C.input == CINEMA_TALK) return keys & (KEY_A | KEY_B);
+	if (C.input == CINEMA_TALK) {
+		C.b_latch &= (keys & KEY_B) != 0;
+		return keys & (C.b_latch ? KEY_A : KEY_A | KEY_B);
+	}
 	if (C.input == CINEMA_WALK) return C.walk;
 	return keys;
 }
