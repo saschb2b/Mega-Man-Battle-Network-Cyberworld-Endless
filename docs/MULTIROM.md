@@ -93,6 +93,16 @@ ROM in memory, and shows its battle screens.
   and End Area its net theme (song 0x13), Nebula Area its Undernet's
   (0x14).
 - [ ] Its other music (towns, battles).
-- [ ] Its towns and bystanders.
+- [ ] Its bystanders on its areas' layers. Found so far: its sprite
+  lists at `0x03272C` (ten pointers, the first just past the list, as
+  BN6's at `0x031CC4`); list 6 holds its generic Navis, plain sprites like
+  BN6's: a green NormalNavi (55-59), the purple HeelNavi (60-61) and an
+  orange Navi (62-63), 45 to 53 animations each where BN6's have 46 to
+  48. BN6 reaches its list 6 only through SpritePointersList's entry 6
+  (bn6f `npcSpritePtrs`), so a copy in free space with BN5's appended can
+  stand in for it. A bystander's chat face is its sprite's number in
+  BN6's mugshots, so each needs its mugshot brought along too, and its
+  animations checked against the facings the layers' scripts play.
+- [ ] Its towns.
 - [ ] Its guardians, in battles in its own engine.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.
