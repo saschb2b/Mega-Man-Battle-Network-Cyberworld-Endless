@@ -482,6 +482,24 @@ static int guardian_words(char *buf, int k, int size) {
 	return k;
 }
 
+/* L's word on a program left off the board, appended to `buf` at `k`; the
+ * new length. Said on every layer until placed, unless MegaMan has said it
+ * on this layer already (a playtester heard it on CONTINUE, then again in
+ * L's first words); one that cannot fit, once a board (a playtester's
+ * SuprArmr could not share the 4x4 board with Custom1). */
+static int off_board_note(char *buf, int k, int size) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	int offv;
+	const char *off = run_won_here() || D.off_told ? NULL : program_off_board(&offv);
+	if (off && !fits_beside_placed(offv)) {
+		const char *w = no_room_words(*off ? off : "That program");
+		if (w) ADD("%s|", w);
+	} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
+	else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
+	#undef ADD
+	return k;
+}
+
 static const char *status_words(void) {
 	static char buf[800];
 	int k = 0;
@@ -606,16 +624,7 @@ static const char *status_words(void) {
 		 * the gate, alone, looking for him) */
 		const char *rw = rival_where();
 		if (rw) ADD("@M ProtoMan's %s: the pink mark on the map.|", rw);
-		/* (a program left off the board: said on every layer until placed;
-		 * one that cannot fit, once a board: a playtester's SuprArmr could
-		 * not share the 4x4 board with Custom1) */
-		int offv;
-		const char *off = run_won_here() ? NULL : program_off_board(&offv);
-		if (off && !fits_beside_placed(offv)) {
-			const char *w = no_room_words(*off ? off : "That program");
-			if (w) ADD("%s|", w);
-		} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
-		else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
+		k = off_board_note(buf, k, (int)sizeof buf);
 		/* (the map's tip on the run's first layers, until the map has been
 		 * held: a playtester who used it heard it again every run) */
 		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
