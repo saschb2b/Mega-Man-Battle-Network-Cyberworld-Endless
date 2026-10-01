@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The official gates name the clearance they take.** A Chip Order said
+  "Chaud's clearance opens it!" a minute after Chaud had said his full
+  clearance was still to win, and a player wondered which he had. The
+  gates now say "Chaud's first clearance" or "Chaud's full clearance",
+  and Chaud, giving the first, says it opens the official Chip Orders.
 - **A one-time pick asks once more.** An official Chip Order's and a
   vault's three chips gave the first one to an A pressed through the
   words before them, for good. Picking one now asks "Order TrplShot J?

@@ -2727,7 +2727,7 @@ static void duel_verdict(bool won) {
 	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	/* (what his respect opens: docs/RIVAL.md) */
 	int after = rival_clearance();
-	if (after > before && after == 1) ADD("@C You've earned my clearance, Lan. The net's official gates will open for you now.|");
+	if (after > before && after == 1) ADD("@C You've earned my first clearance, Lan. The official Chip Orders open for you now.|");
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
 	/* (and the next rung, the door it leads to: a playtester's second win

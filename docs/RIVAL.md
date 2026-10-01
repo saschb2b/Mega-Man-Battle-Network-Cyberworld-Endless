@@ -163,8 +163,12 @@ himself. Beat him, and my full clearance is yours.").
   uncommon and rare ones, the common ones only while it holds too few (a
   playtester's order offered IceSeed at 10). Each shows what it hits for.
 - **Level two: the official vault.** Three Mega chips, one to take.
-- Chaud says so as the clearance is earned: "You've earned my clearance,
-  Lan. The net's official gates will open for you now."
+- Chaud says so as the clearance is earned: "You've earned my first
+  clearance, Lan. The official Chip Orders open for you now.", then "My
+  full clearance, Lan. Every official gate opens for you now." The gates
+  name the level that opens them ("Chaud's first clearance opens it!"): a
+  playtester read "Chaud's clearance" at a Chip Order as the full one,
+  which Chaud had just said was still to win.
 
 ## What BN6 gives it
 

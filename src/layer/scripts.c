@@ -540,8 +540,8 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v) {
 	char s[300];
-	snprintf(s, sizeof s, level >= 2 ? "Chaud's clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
-		: "Chaud's clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
+	snprintf(s, sizeof s, level >= 2 ? "Chaud's full clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
+		: "Chaud's first clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
 	int open = pick_three(t, flag, v, s, level >= 2 ? "Take" : "Order", "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
 	/* sealed until `open_flag`, which the director sets where Chaud's
 	 * clearance reaches the gate's level, as the layer begins or as a duel
@@ -551,10 +551,10 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, boo
 		snprintf(s, sizeof s, "@M ProtoMan's official gate, Lan. %s|@M It opens for the Netbattler who beats him here.",
 			level >= 2 ? "The official vault's behind it: three Mega chips." : "An official Chip Order's behind it: three chips we've held, one to order.");
 	else if (level >= 2)
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's top clearance. The official vault's behind it: three Mega chips.|"
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's full clearance. The official vault's behind it: three Mega chips.|"
 			"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
 	else
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's clearance. An official Chip Order's behind it: three chips we've held, one to order.|"
+		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's first clearance. An official Chip Order's behind it: three chips we've held, one to order.|"
 			"@M It opens once we've won a duel against ProtoMan. Not yet!");
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)open_flag, (uint8_t)(open_flag >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */
