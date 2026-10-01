@@ -104,7 +104,7 @@ static float density(void) {
  * 480 x 320, half the screen (issue #36), where a Nova's 1280 x 960 gives
  * 5x against 5.33 and a Flip 2's 1920 x 1080 6x against 6.75 */
 enum { SCREEN_AUTO, SCREEN_WHOLE, SCREEN_FILL };
-#ifndef __3DS__
+#if !defined(__3DS__) && !defined(__EMSCRIPTEN__)
 static int screen_mode = SCREEN_AUTO;
 #endif
 #define FILL_GAIN 1.25f
@@ -411,7 +411,7 @@ void platform_load_settings(const char *path) {
 		if (!strcmp(key, "smooth_motion")) P.blend = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 #ifdef __3DS__
 		if (!strcmp(key, "screen")) fill_3ds = strcmp(val, "whole") != 0;
-#else
+#elif !defined(__EMSCRIPTEN__)
 		if (!strcmp(key, "screen")) screen_mode = !strcmp(val, "whole") ? SCREEN_WHOLE : !strcmp(val, "fill") ? SCREEN_FILL : SCREEN_AUTO;
 #endif
 		/* (not written by default: for a report of a machine's pacing) */
