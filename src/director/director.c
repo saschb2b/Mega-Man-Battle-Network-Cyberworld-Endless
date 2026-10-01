@@ -55,6 +55,7 @@
 #include "trader.h"
 #include "text.h"
 #include "town.h"
+#include "xbackdrop.h"
 #include "xnavi.h"
 #include "xsong.h"
 
@@ -1057,13 +1058,15 @@ static int layer_song(int tiles, int song) {
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 
-/* The map an area's layers take over, and the Navi their bystanders are
- * (layer_objs_bystander): another game's area its own Navi, copied into
- * BN6 (docs/MULTIROM.md), where it can be. */
+/* The map an area's layers take over, the Navi their bystanders are
+ * (layer_objs_bystander) and their battles' background
+ * (encounter_backdrop): another game's area its own, copied into BN6
+ * (docs/MULTIROM.md), where they can be. */
 static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
 	if (!a) a = net_area_def(0);
 	layer_objs_bystander = a->xrom > 0 && a->xnavi ? xnavi_slot(a->xrom - 1, a->xnavi, LAYER_BYSTANDER) : LAYER_BYSTANDER;
+	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;
 	*number = a->host ? a->host - 1 : a->number;

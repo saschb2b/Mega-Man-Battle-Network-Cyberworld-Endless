@@ -20,6 +20,7 @@
 #define ROLL        0x080ABD30u        /* the encounter roll (returns BattleSettings*) */
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
+int encounter_backdrop = -1;
 /* Two records in turn, each BattleSettings and 0x20 on its entity list: the
  * next battle is written to the one the roll does not hand out, and the
  * roll turned to it. A battle the game has rolled but not yet set up reads
@@ -137,7 +138,9 @@ void emu_encounter_set(const Encounter *e) {
 	emu_write(settings + 0x20, list, (size_t)(p - list));
 	/* the values of a Central Area random battle, with the formation's
 	 * battlefield, the area's background and the virus or boss theme */
-	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)encounter_song[e->boss], 0x00, (uint8_t)biome_bg(e->biome), 0x00, 0x38, 0x00 };
+	int bg = biome_bg(e->biome);   /* (rolled either way) */
+	if (encounter_backdrop >= 0) bg = encounter_backdrop;
+	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)encounter_song[e->boss], 0x00, (uint8_t)bg, 0x00, 0x38, 0x00 };
 	/* (bit 0x20 of the options lets MegaMan run, bn6f 0x08026EC8: the
 	 * story's bosses clear it, the random battles and BN6's roaming SP
 	 * Navis set it; docs/ROM_DATA.md) */

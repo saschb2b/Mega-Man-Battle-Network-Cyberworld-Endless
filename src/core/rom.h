@@ -45,6 +45,7 @@ typedef struct {
 	const char *name, *short_name, *motto;   /* what a run calls it: in full, in nine letters, on its act's card */
 	uint8_t xsong;           /* its theme in its own game's song table (0: `song`, BN6's) */
 	uint8_t xnavi;           /* its bystanders' Navi, a list-6 sprite and mugshot of its own game (0: BN6's) */
+	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
@@ -74,6 +75,8 @@ typedef struct {
 	uint32_t song_table;       /* MP2K songs: (header, player, player) */
 	uint32_t battle_bgs;       /* BGAnimData per battle background 0x00-0x15 (docs/ROM_DATA.md) */
 	uint32_t battle_bg_anims;  /* their tile and palette animation scripts */
+	uint32_t battle_bg_scroll; /* their scroll callbacks, 16 bytes each */
+	uint32_t battle_bg_refs[3];   /* the loader's literals naming those three tables: BGAnimData, animations, scroll */
 } RomLayout;
 
 typedef struct {
@@ -99,6 +102,7 @@ typedef struct {
 	uint32_t song_table;                    /* MP2K songs: (header, player, player), as BN6's */
 	uint32_t sprite_lists;                  /* the ten sprite lists, as BN6's */
 	uint8_t battle_songs[2];                /* the songs its random battles and its bosses' name in their BattleSettings */
+	uint32_t battle_bgs, battle_bg_anims, battle_bg_scroll;   /* its battle backgrounds' tables, as BN6's */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;

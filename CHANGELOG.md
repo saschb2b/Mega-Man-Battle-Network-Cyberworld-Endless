@@ -6,7 +6,9 @@
   areas played its own net theme, then every battle there played
   BN6's. Their random battles now play BN5's virus battle theme, and
   their guardians and ProtoMan's netbattle its boss theme, copied from
-  BN5's ROM as its net themes are.
+  BN5's ROM as its net themes are. Behind them stand BN5's own battle
+  backgrounds: ACDC Area's blue diamonds, SciLab's scrolling binary, End
+  Area's red field, Nebula Area's stars.
 - **The arrow leads a hurt MegaMan to the heal.** Below three quarters of
   his HP, L said which way the layer's Recovery Mr. Prog was, but the
   arrow kept to the exit, and a player at 180 HP spent a dozen moves

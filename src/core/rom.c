@@ -50,6 +50,8 @@ static const RomLayout layouts[] = {
 		.song_table = 0x159F48,
 		.battle_bgs = 0x082058,
 		.battle_bg_anims = 0x0822E0,
+		.battle_bg_scroll = 0x081EF4,
+		.battle_bg_refs = { 0x082054, 0x081EEC, 0x081EF0 },
 	},
 };
 
@@ -225,20 +227,20 @@ bool rom_find_close;
  * Graveyard's and the Underground's set their own over it. */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
-		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60 },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
+		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xbg = 8 },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
 	{ 0x90, 4, 0x1020, 0x0050, false, 0x13, 0, 0, 0, { { 0x90, 5 }, { 0x90, 6 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x94, 1 }, .like = 2,
-		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60 },
+		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60, .xbg = 10 },
 	{ 0x90, 7, 0x1002, 0, false, 0x13, 0, 0, 0, { { 0x90, 8 }, { 0x90, 9 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x91, 1 }, .like = 1,
-		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60 },
+		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xbg = 15 },
 	{ 0x90, 13, 0x0980, 0x0440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
-		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60 },
+		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25 },
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {
 	/* (tables found by their structure beside BN6's own, docs/ROM_DATA.md) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
 		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas), 0x155BF4u,
-		0x03272Cu, { 0x15, 0x16 } },
+		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu },
 };
 
 const NetAreaDef *net_area_def(int area) {
