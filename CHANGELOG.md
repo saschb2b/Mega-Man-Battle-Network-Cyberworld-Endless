@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The arrow leads a hurt MegaMan to the heal.** Below three quarters of
+  his HP, L said which way the layer's Recovery Mr. Prog was, but the
+  arrow kept to the exit, and a player at 180 HP spent a dozen moves
+  finding the way onto its platform. The arrow now leads there first,
+  and L says so; healed, it goes back to the way on.
 - **ProtoMan's netbattle can be won.** In the third act he came in at
   1000 HP with his full attacks, and a player ran after one hand. He now
   has half the act's guardian band's top (500 in act 3), and MegaMan

@@ -377,13 +377,28 @@ static const char *rival_where(void) {
 	return buf;
 }
 
+/* MegaMan below three quarters of his HP (at 220 of 240 the heal led L's
+ * words before the way on) */
+static bool hurt_now(void) { return emu_read16(BN6_NAVI_STATS + 0x40) * 4 < emu_read16(BN6_NAVI_STATS + 0x42) * 3; }
+
+/* Where the layer's Recovery Mr. Prog stands, in the world; false for
+ * none. */
+static bool heal_spot(int *wx, int *wy) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_HEAL) { netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, wx, wy); return true; }
+	return false;
+}
+
 /* The way on as the arrow shows it: along the floor to the exit or the
- * guardian (the port in the town); way_dir holds it. */
+ * guardian (the port in the town); way_dir holds it. While MegaMan is
+ * hurt, to the layer's Recovery Mr. Prog first, as L says (a playtester
+ * at 180 HP heard which way it was, and the arrow led to the exit). */
 static void goal_way(void) {
 	int far;
 	if (D.town) { town_way(&far); return; }
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
+	if (hurt_now()) heal_spot(&gx, &gy);
 	if (!route_to(gx, gy, &far)) way_to(gx, gy, &far);
 }
 
@@ -479,6 +494,27 @@ static int guardian_words(char *buf, int k, int size) {
 	if (flag_get(BN6_FLAG_ERASE_CROSS))
 		ADD("@M And in EraseCross, a plain chip that hits him while his HP has a 4 in it bugs him: his HP drains away!|");
 	#undef ADD
+	return k;
+}
+
+/* L's word on a heal while MegaMan is hurt, appended to `buf` at `k`; the
+ * new length: which way the Recovery Mr. Prog is, the arrow's way while he
+ * is hurt (goal_way), else the Net Dealer, who always has a MiniEnrg (it
+ * was on no map yet, and never found: a playtester at 90 of 240 ran to the
+ * exit past the dealer, then a dozen moves back). */
+static int heal_note(char *buf, int k, int size, bool heal) {
+	static const char *const near_far[3] = { "close by", "a ways off", "far off" };
+	for (int i = 0; i < layer.nobj; ++i) {
+		if (layer.obj[i].type != (heal ? OBJ_HEAL : OBJ_SHOP)) continue;
+		int wx, wy, hf;
+		netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &wx, &wy);
+		/* (where it lies: the way's first leg pointed off from it) */
+		const char *hw = way_to(wx, wy, &hf);
+		k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0,
+			heal ? "@M The Recovery Mr. Prog can patch us up. It's %s, %s: the arrow leads there first.|"
+			     : "@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s.|", hw, near_far[hf]);
+		break;
+	}
 	return k;
 }
 
@@ -602,9 +638,7 @@ static const char *status_words(void) {
 		navi_gate |= layer.obj[i].type == OBJ_NAVI_GATE;
 		vault |= layer.obj[i].type == OBJ_VAULT;
 	}
-	/* (below three quarters: at 220 of 240 the heal led L's words before
-	 * the way on) */
-	bool hurt = emu_read16(BN6_NAVI_STATS + 0x40) * 4 < emu_read16(BN6_NAVI_STATS + 0x42) * 3;
+	bool hurt = hurt_now();
 	if (!told) {
 		/* what is here, in one breath (a playtester paged eight boxes on
 		 * arriving in act 3): the services (the map marks a trader as a
@@ -649,23 +683,8 @@ static const char *status_words(void) {
 		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
-	} else if (hurt && (heal || shop)) {
-		/* (and which way: it was on no map yet, and never found; with no
-		 * Recovery Mr. Prog here, the Net Dealer, who always has a
-		 * MiniEnrg: a playtester at 90 of 240 ran to the exit past him,
-		 * then a dozen moves back) */
-		for (int i = 0; i < layer.nobj; ++i) {
-			if (layer.obj[i].type != (heal ? OBJ_HEAL : OBJ_SHOP)) continue;
-			int wx, wy, hf;
-			netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &wx, &wy);
-			/* (where it lies: the way's first leg pointed off from it) */
-			const char *hw = way_to(wx, wy, &hf);
-			static const char *const near_far[3] = { "close by", "a ways off", "far off" };
-			if (heal) ADD("@M The Recovery Mr. Prog can patch us up. It's %s, %s.|", hw, near_far[hf]);
-			else ADD("@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s.|", hw, near_far[hf]);
-			break;
-		}
 	}
+	if (hurt && (heal || shop)) k = heal_note(buf, k, (int)sizeof buf, heal);
 	/* (and after that, where ProtoMan waits, while he does) */
 	const char *rival = told ? rival_where() : NULL;
 	if (rival) ADD("@M ProtoMan's waiting %s.|", rival);
@@ -680,7 +699,8 @@ static const char *status_words(void) {
 	int lies_dir = way_dir;
 	const char *way = route_to(gx, gy, &far);
 	if (!way) way = way_to(gx, gy, &far);
-	int apart = abs(way_dir - lies_dir);
+	/* (the arrow leading to the heal: the exit's words without it) */
+	int apart = hurt && heal ? 0 : abs(way_dir - lies_dir);
 	if (apart > 4) apart = 8 - apart;
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
 	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
@@ -690,6 +710,7 @@ static const char *status_words(void) {
 		ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies, how_far[far]);
 	else ADD("@M The way on goes %s. %s", way, how_far[far]);
 	#undef ADD
+	goal_way();   /* (the arrow's way, which the words that follow start) */
 	return buf;
 }
 
