@@ -88,6 +88,11 @@ the site.
   filling would (640x480: 2x against 2.67x, issue #36), which fill it with
   sharp scaling (whole-scaled, then smoothly to size) by default, and
   `screen = whole` or `fill` in `settings.ini` sets it either way.
+- MegaMan walks as BN6 walks him, always: no lining-up help, no sliding
+  onto a walkway, no movement assist of any kind (one was removed by the
+  owner's choice, docs/FIDELITY.md). Where walking drags (walkway mouths,
+  lanes), the generated maps change instead, connected as Capcom's are
+  (docs/LEVEL_DESIGN.md, Navigation).
 - Draw calls must not change game state. Input is read once per frame in
   `platform_poll`.
 - The C builds warning-free with the Makefile's `WARN` (`-Wall -Wextra`,

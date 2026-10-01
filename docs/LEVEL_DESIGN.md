@@ -78,6 +78,17 @@ L-shaped walkways: about 100 panels in a 14x16 box, every area alike.
 
 ## The generator
 
+### Navigation
+
+MegaMan walks as in BN6, and always will (docs/FIDELITY.md): a one-wide
+walkway is entered only from its own lane, and a direction held into its
+mouth half a panel off that lane stops him at the edge. In Capcom's hand
+made maps that costs little; in generated ones, with every room joined by
+one-wide walkways and each layer new, a playtester spent a third of his
+inputs lining up (sessions 55 to 58). So the maps carry the navigation:
+how many mouths a platform has, where they sit, and whether a way through
+keeps its lane are the generator's rules, measured from the originals.
+
 A layer is built from those parts, not from rectangles. Each area has its
 own layouts (`src/net/net_layouts.c`), all made of the same pieces
 (`src/net/net_shapes.c`); an act's three layers take them in a shuffled

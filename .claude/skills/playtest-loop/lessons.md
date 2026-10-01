@@ -1744,3 +1744,40 @@ whirl's lit panels and the panel that took the hit sat side by side in
 the persona's own pictures (15658); a "deleted on an unlit panel" is
 settled from those frames before any other reading, and the briefing
 says what the lights do not.
+
+## Session 58: 8/10 (keep playing: yes; recommend: yes)
+
+Run 8 continued (Endless / Storm / ElecCross / threat 1 / HP+): act 1 in
+Seaside Area won, DiveMan's 500 HP down in 0:12.35 for 10 HP (his
+battle data's tells read on screen: surfacing, the torpedoes' shadows),
+ProtoMan's race lost fairly on time (Chaud 4-7), SpoutMan chosen for act
+2 in Lab Comps (a rematch at a type advantage). Saved on layer 4.
+
+Confirmed: Chaud's first call names no clearance one already holds;
+bystanders' lines don't repeat within an act. The floors: Seaside's
+walkways, junctions, round pads and arena clean; Lab Comps, new to the
+persona, "reads like BN6's lab comps". Not reached: the one-time pick's
+description, SpoutMan's whirl line, the act-1 dealer's doubt.
+
+Raised: walkway mouths and lining up still cost about a third of the
+calls (the top wish for the fourth session running: a held diagonal
+beside a mouth carrying MegaMan onto its line, the layer's start on its
+path); the chain after a guardian is long and its program pick's first A
+is swallowed again (sessions 50, 55, 58); the PET pass after an act
+costs 14 calls; a one-panel bump on Seaside's arena edge leading
+nowhere; Chaud's verdict names only the time when the hit also lost it.
+Misread: the title's "v0.5.3+85" is the pinned dev build's.
+
+Beside the loop: 0.6.0's tile polish (the Undernet's and the Secret
+Area's arenas as plateaus, its bridges plain between their joints), the
+release notes' ten before/after pairs, "BN5 found" on the title.
+
+Cost: 294 calls (the budget's 260 passed on a non-guardian layer: a
+pace note stopped it).
+
+Loop change: **a recurring wish goes to the owner as a design question.**
+Walkway mouths topped four reports running; the loop kept treating it as
+the persona's input skill. The owner's answer: MegaMan's walk never
+changes (BN6's own, AGENTS.md); the mouths are the generator's to fix,
+by Capcom's map design (docs/LEVEL_DESIGN.md, Navigation). A movement
+assist is never a fix to propose.
