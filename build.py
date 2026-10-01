@@ -103,6 +103,24 @@ def default_rom_dir():
     return os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 
 
+BN6_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
+
+
+def docs_rom_mounts(bn5=False):
+    """The ROM folder as the docs' pictures see it: BN6's ROM alone, as most
+    players have it (BN5's beside it dresses some areas as its own, seed by
+    seed), or the whole folder for a picture of BN5's areas."""
+    import glob
+    import hashlib
+    rom_dir = default_rom_dir()
+    if not bn5:
+        for path in sorted(glob.glob(os.path.join(rom_dir, '*.gba'))):
+            with open(path, 'rb') as f:
+                if hashlib.sha1(f.read()).hexdigest() == BN6_SHA1:
+                    return [(path, '/rom/bn6.gba:ro')]
+    return [(rom_dir, '/rom:ro')]
+
+
 def docker(*cmd, mounts=(), image=IMAGE, env=()):
     args = ['docker']
     if CONTEXT:
@@ -924,10 +942,10 @@ SCREENSHOTS = [
     ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
     ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
     # (seed 7's layer 3 walks straight to BlastMan's arena, then layer 4's
-    # first battle; retimed for 0.3.0's layers)
+    # first battle; retimed for 0.6.0's layers)
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(240, 'net'), (1380, 'guardian'), (1530, 'guardian-talk'), (1800, 'boss-custom'), (2400, 'result'),
-      (2745, 'reward'), (2790, 'restored'), (3330, 'area-clear'), (4800, 'custom'), (5100, 'battle')],
+     [(240, 'net'), (1400, 'guardian'), (1540, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
+      (2900, 'reward'), (2950, 'restored'), (3500, 'area-clear'), (5150, 'custom'), (5540, 'battle')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
     # (Chaud's first call on an act's duel layer, its second box)
@@ -938,13 +956,13 @@ SCREENSHOTS = [
     ('town-acdc', ['--scene', 'town', '--seed', '3'], [(280, 'town-acdc')], {}),
     ('town-seaside', ['--scene', 'town', '--seed', '5'], [(280, 'town-seaside')], {}),
     ('town-green', ['--scene', 'town', '--seed', '9'], [(280, 'town-green')], {}),
-    ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
-    # (seed 11: no BN5 area dresses its run's Seaside Area, as seed 3's does
-    # where BN5's ROM is beside BN6's)
-    ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '11', '--dev', 'quiet'], [(420, 'seaside')], {}),
-    ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),
-    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], [(280, 'undernet')], {}),
-    ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '17', '--seed', '3', '--dev', 'quiet'], [(130, 'graveyard')], {}),
+    # (the areas on their acts' third layers: ProtoMan's duel, and Chaud's
+    # call with it, waits on the second)
+    ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '3', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
+    ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '3', '--seed', '11', '--dev', 'quiet'], [(420, 'seaside')], {}),
+    ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '3', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),
+    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], [(420, 'undernet')], {}),
+    ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '18', '--seed', '3', '--dev', 'quiet'], [(420, 'graveyard')], {}),
     ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(250, 'nest')], {}),
     # (the PET's E-Mail on a profile that has met seven guardians: the list,
     # then Dad's Records mail on its second page)
@@ -958,9 +976,9 @@ SCREENSHOTS = [
                '--dpi', '420', '--taps', '400:240,581>360,701'],
      [(418, 'touch')], {}, 2),
     # (the PortMaster port's screenshot: seed 7's BlastMan fight on the
-    # most common handheld screen, 640x480, the picture at 2x in its borders)
+    # most common handheld screen, 640x480, the picture filling its width)
     ('portmaster', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12',
-                    '--size', '640x480'], [(2175, 'portmaster')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
+                    '--size', '640x480'], [(2120, 'portmaster')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
     # (a New 3DS's two screens: seed 7's layer 3 on the top one, the
     # layer's map on the bottom one, a Net Dealer and a Recovery Mr. Prog
     # met on the way to BlastMan's arena)
@@ -1003,7 +1021,7 @@ def screenshots(only=None):
         os.environ.update(env)
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
                       *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
-                      mounts=[(default_rom_dir(), '/rom:ro')])
+                      mounts=docs_rom_mounts())
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -1035,14 +1053,16 @@ AREA_WALK = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
 CLIPS = [
     ('title', ['--scene', 'title'], {}, None, 300, 780),
     ('net', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 150, 600),
-    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1400, 1860),
-    ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 2110, 2380),
-    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], {},
+    # (layer 4's first battle, from BATTLE START to the RESULT window; the
+    # walk into BlastMan's arena and his card; the Undernet on its act's
+    # third layer, where no call from Chaud comes)
+    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 5400, 5830),
+    ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1200, 1470),
+    ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
     ('jackin', ['--scene', 'title'], {}, '120:,4:START,60:,4:A,200:', 110, 222),
     # (the areas walked, layer 1 by the weak autopilot past MegaMan's words;
-    # seeds whose runs dress no BN6 area in BN5's tiles, but acdc-bn5's, which
-    # needs BN5's ROM beside BN6's: docs/MULTIROM.md)
+    # on BN6's ROM alone, but acdc-bn5, with BN5's beside it: docs/MULTIROM.md)
     ('sky', AREA_WALK + ['--net-biome', '2', '--seed', '2'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 300, 620),
     ('weather', AREA_WALK + ['--net-biome', '14', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
     ('central', AREA_WALK + ['--net-biome', '0', '--seed', '11'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
@@ -1077,7 +1097,7 @@ def clips(only=None):
         extra = ['--input', script] if script else []
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
                       *args, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f',
-                      mounts=[(default_rom_dir(), '/rom:ro')])
+                      mounts=docs_rom_mounts(bn5=name.endswith('-bn5')))
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
