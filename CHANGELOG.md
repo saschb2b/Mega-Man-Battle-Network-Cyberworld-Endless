@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Battle Network 5's SciLab and Nebula Area look like themselves.**
+  SciLab's rooms came out in pale blotches and Nebula Area's in emblems
+  repeated across them, its paths half platform: their paths' panels
+  change colour stone by stone, which the tiles had read as two floors.
+  They now tell paths from platforms by shape, as BN5 draws them: SciLab
+  framed platforms on circuit paths, Nebula Area small purple platforms
+  with one emblem each on long cobbled paths.
 - **Battle Network 5 stays after the first start.** A BN6 ROM chosen in
   the desktop's dialog, or found in the Downloads or a ROMs folder, is
   copied where the next start looks, but a BN5 ROM beside it was not, so

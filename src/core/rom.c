@@ -244,12 +244,12 @@ bool rom_find_close;
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
 		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xbg = 8 },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
-	{ 0x90, 4, 0x1020, 0x0050, false, 0x13, 0, 0, 0, { { 0x90, 5 }, { 0x90, 6 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x94, 1 }, .like = 2,
-		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60, .xbg = 10 },
+	{ 0x90, 4, 0x9020, 0x8050, false, 0x13, 0, 0, 0, { { 0x90, 5 }, { 0x90, 6 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x94, 1 }, .like = 2,
+		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60, .xbg = 10 },   /* SciLab 1, 2 and 4: its circuit paths' panels turn green and cyan by turns, so by hue half of them were platform floor and its rooms came out in pale blotches: told by shape (TILES_BY_SHAPE), among its own hues (pale green and grey platforms, green and cyan paths) */
 	{ 0x90, 7, 0x1002, 0, false, 0x13, 0, 0, 0, { { 0x90, 8 }, { 0x90, 9 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x91, 1 }, .like = 1,
 		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xbg = 15 },
-	{ 0x90, 13, 0x0980, 0x0440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
-		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25 },
+	{ 0x90, 13, 0x8980, 0x8440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
+		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25 },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows */
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {

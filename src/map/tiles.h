@@ -97,6 +97,9 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * lying on its fields, laid as pieces at its field's edges and middles,
  * half domes at the ends of its solar panels' bands. */
 #define SKIP_PALE 0x4000
+/* (told by shape, a hue named in `styles` or `walk_styles` keeps it to
+ * those hues: a panel of another is neither floor, as BN5's Nebula Area's
+ * pale arrows on its paths) */
 #define TILES_BY_SHAPE 0x8000
 /* ... and with TILES_NO_PAD_LOOK, no look of its pads (small platforms on
  * spurs): the Judge Tree's are round stumps, whose rings a square pad would

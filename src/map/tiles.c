@@ -150,6 +150,14 @@ static bool in_block_of_floor(const Src *s, int A, int B) {
 static int measure_panel(const Src *s, int A, int B) {
 	if (!drawn_cached(s, A, B)) return 0;
 	if (s->styles & TILES_BY_SHAPE) {
+		/* (where the area names hues, a panel of another is neither:
+		 * Nebula Area's pale arrows on its paths) */
+		unsigned hues = (s->styles | s->walk_styles) & 0x1FFFu;
+		if (hues) {
+			const AreaSrc *a = s->a;
+			int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+			if (!(hues >> style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1)) return OTHER;
+		}
 		/* platform floor lies in a 2 x 2 block of floor, walkways do not;
 		 * a platform's edge, its rim, is walkway floor too */
 		if (!in_block_of_floor(s, A, B)) return TILE_B;
