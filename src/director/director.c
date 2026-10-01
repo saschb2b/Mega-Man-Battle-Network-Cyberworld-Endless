@@ -482,6 +482,22 @@ static int guardian_words(char *buf, int k, int size) {
 	return k;
 }
 
+/* What MegaMan senses on the layer (`here`, n of them), appended to `buf`
+ * at `k`, then the rival, whose call has said why (docs/RIVAL.md), apart:
+ * in the list, "ProtoMan, waiting for our duel and an official gate" read
+ * as waiting for the gate too (a playtester's). The new length. */
+static int sense_words(char *buf, int k, int size, const char *const *here, int n, bool duel) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	if (n) {
+		ADD("@M I sense");
+		for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
+		ADD(" here!|");
+	}
+	if (duel) ADD(n ? "@M And ProtoMan's waiting for our duel!|" : "@M ProtoMan's waiting for our duel here!|");
+	#undef ADD
+	return k;
+}
+
 /* L's word on a program left off the board, appended to `buf` at `k`; the
  * new length. Said on every layer until placed, unless MegaMan has said it
  * on this layer already (a playtester heard it on CONTINUE, then again in
@@ -602,14 +618,8 @@ static const char *status_words(void) {
 		static char sealed[48];
 		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
 		if (known & MARK_VAULT) here[n++] = "a collector's vault";
-		/* (the rival, whose call has said why: docs/RIVAL.md) */
-		if (duel && n < 8) here[n++] = "ProtoMan, waiting for our duel";
 		if (official && n < 8) here[n++] = "an official gate";
-		if (n) {
-			ADD("@M I sense");
-			for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
-			ADD(" here!|");
-		}
+		k = sense_words(buf, k, (int)sizeof buf, here, n, duel);
 		if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
 		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
 		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
