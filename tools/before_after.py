@@ -35,6 +35,12 @@ SCENES = [
     ('undernet-arena', ['--scene', 'emu', '--run-depth', '15', '--dev', 'quiet', '--net-biome', '5', '--seed', '5'], WEAK, 580),
     # (a catwalk and a field in Sky Area)
     ('sky', WALK + ['--net-biome', '2', '--seed', '2'], WEAK, 400),
+    # (an Undernet layer's joints and planks, MegaMan at a ramp)
+    ('undernet-joints', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '2', '--seed', '4', '--dev', 'quiet'], WEAK, 1000),
+    # (Sky Area's catwalks below a stair)
+    ('sky-catwalks', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '4', '--dev', 'quiet'], WEAK, 1000),
+    # (the Undernet's bridges in a maze of them)
+    ('undernet-bridges', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '2', '--seed', '4', '--dev', 'quiet'], WEAK, 750),
     # (the Graveyard's slabs and their edges)
     ('graveyard', WALK + ['--net-biome', '4', '--seed', '3'], WEAK, 460),
     # (Seaside Area's boardwalks meeting a platform)
