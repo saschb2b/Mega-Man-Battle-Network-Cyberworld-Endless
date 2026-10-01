@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Seaside's boardwalks lose their broken arrows.** Where its yellow
+  boardwalks joined the blue field or a platform, pink and orange
+  triangles cut off at the tiles' edges stood in the floor: pieces of the
+  arrow panels on the original's path up to its big platform. Those
+  panels' tiles are no longer used for anything else.
 - **Sky Area's catwalks turn cleanly.** Every bend of its cyan glass
   catwalks had lavender wall pieces from its other catwalks in it, and a
   walkway onto a purple pad was a jumble of both. Its walkways are now

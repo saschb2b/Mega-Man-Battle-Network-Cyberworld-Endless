@@ -52,6 +52,28 @@ static int style_at(const AreaSrc *a, int cx, int cy) {
 	return k > 11 ? 11 : k;
 }
 
+/* How many pixels of the top of the panel around map pixel (cx, cy) have
+ * a hue in `buckets` (bit per bucket 0-11), strongly coloured. */
+static int hue_pixels(const AreaSrc *a, int cx, int cy, unsigned buckets) {
+	int W = a->tw * 8, H = a->th * 8, n = 0;
+	for (int dy = -8; dy <= 8; ++dy)
+		for (int dx = -16; dx <= 16; ++dx) {
+			int x = cx + dx, y = cy + dy;
+			if (2 * abs(dy) + abs(dx) > 16 || x < 0 || y < 0 || x >= W || y >= H) continue;
+			uint32_t c = area_src_floor_px(a, (size_t)y * W + x);
+			if (!(c >> 24)) continue;
+			int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+			int mx = r > g ? (r > b ? r : b) : (g > b ? g : b), mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+			if (mx < 64 || (mx - mn) * 100 < 40 * mx) continue;
+			float d = (float)(mx - mn), hue = mx == r ? (g - b) / d : mx == g ? 2 + (b - r) / d : 4 + (r - g) / d;
+			hue /= 6;
+			if (hue < 0) hue += 1;
+			int k = (int)(hue * 12);
+			n += buckets >> (k > 11 ? 11 : k) & 1;
+		}
+	return n;
+}
+
 #define SPAN 128   /* panels cached per axis, centred on the world origin */
 #define OTHER 3    /* a source panel of neither material */
 
@@ -547,6 +569,7 @@ static bool skipped(const Src *s, int A, int B) {
 	if (!s->skip_styles || !drawn_cached(s, A, B)) return false;
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	if (s->skip_styles & SKIP_ANY_PIXEL) return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->skip_styles & 0xFFFu) >= 8;
 	return s->skip_styles >> style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
 }
 

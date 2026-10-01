@@ -73,7 +73,11 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * TILES_BY_SHAPE, platform floor what lies in 2 x 2 blocks of floor with
  * floor all around, and walkway the rest (walkways and platforms' rims),
  * as a generated layer tells them; but none beside a panel with a hue in
- * `skip_styles`, floor still in the neighbourhoods seen. */
+ * `skip_styles`, floor still in the neighbourhoods seen (with
+ * SKIP_ANY_PIXEL, a panel whose top shows those hues anywhere, not only in
+ * its middle: Seaside's arrow panels, orange chevrons in a pink frame,
+ * whose pieces its boardwalks' joins took). */
+#define SKIP_ANY_PIXEL 0x8000
 #define TILES_BY_SHAPE 0x8000
 /* ... and with TILES_NO_PAD_LOOK, no look of its pads (small platforms on
  * spurs): the Judge Tree's are round stumps, whose rings a square pad would
