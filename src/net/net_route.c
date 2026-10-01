@@ -63,14 +63,20 @@ bool route_floor_line(int sx, int sy, int ax, int ay) { return floor_line(sx, sy
  * lets him onto a walkway along it alone (aimed past it, the arrow's
  * diagonal stopped a playtester at the corner, five times a session); -1
  * for none, or where no straight line over the floor reaches the mouth.
- * On its line means within 0.35 of a panel of it: 0.375 went in, 0.41
- * was stopped at the walkway's edge (a replay of that corner). */
-static int mouth_aim(double px, double py, const int16_t *path, int n) {
+ * On its line means within 12 of a panel's 32 units of it: 12 went in,
+ * 13 was stopped at the walkway's edge (replays of two corners; a run
+ * into a corner stops him 12 past its middle, and at 0.35 of a panel the
+ * arrow pointed back from there at every turn, session 55). Where the
+ * mouth is his own panel, *across is set: the arrow points across to the
+ * walkway's line, not back to the panel's middle. */
+static int mouth_aim(double px, double py, const int16_t *path, int n, bool *across) {
 	int sx = (int)lround(px), sy = (int)lround(py), cx = sx, cy = sy;
+	*across = false;
 	for (int k = 1; k <= 4 && k <= n; ++k) {
 		int x = path[n - k] % MAP_W, y = path[n - k] / MAP_W, dx = x - cx, dy = y - cy;
 		if (floor_at(x + dy, y + dx) || floor_at(x - dy, y - dx)) { cx = x; cy = y; continue; }
-		if (fabs(dx ? py - y : px - x) < 0.35 || !floor_line(sx, sy, cx, cy)) return -1;
+		if (fabs(dx ? py - y : px - x) < 12.5 / 32 || !floor_line(sx, sy, cx, cy)) return -1;
+		*across = k == 1;
 		return cy * MAP_W + cx;
 	}
 	return -1;
@@ -83,8 +89,8 @@ static int mouth_aim(double px, double py, const int16_t *path, int n) {
  * neither), else at the farthest of the next four panels he can walk to
  * in a straight line over the floor (three along, as the crow flies, cut
  * corners over drops). */
-static int walk_aim(double px, double py, int sx, int sy, const int16_t *path, int n) {
-	int mouth = mouth_aim(px, py, path, n);
+static int walk_aim(double px, double py, int sx, int sy, const int16_t *path, int n, bool *across) {
+	int mouth = mouth_aim(px, py, path, n, across);
 	if (mouth >= 0) return mouth;
 	int leg = 0;
 	if (n) {
@@ -151,8 +157,13 @@ int route_way(double px, double py, int tx, int ty, int *len) {
 		cx = p % MAP_W; cy = p / MAP_W;
 	}
 	*len = n;
-	int aim = walk_aim(px, py, sx, sy, path, n);
+	bool across;
+	int aim = walk_aim(px, py, sx, sy, path, n, &across);
 	route_walk_len = n;
 	route_walk_aim = aim;
-	return route_grid_way(aim % MAP_W - px, aim / MAP_W - py);
+	double ax = aim % MAP_W - px, ay = aim / MAP_W - py;
+	/* (a walkway along x is lined up on y) */
+	if (across && path[n - 1] / MAP_W == aim / MAP_W) ax = 0;
+	else if (across) ay = 0;
+	return route_grid_way(ax, ay);
 }

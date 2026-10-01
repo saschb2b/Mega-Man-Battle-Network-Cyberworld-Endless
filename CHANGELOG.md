@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **At a walkway's corner the arrow points down the next walkway.** A run
+  down a walkway stops MegaMan a little past its corner's middle, and from
+  there the arrow pointed back to the middle, "straight up", though he
+  could already take the next walkway: a player spent 15 moves at such
+  corners. It now points down the next walkway, and where MegaMan does
+  stand too far off a walkway's line to enter it, straight across to it.
 - **A held B no longer hurries a talk past unseen.** Running with B held
   into a talk that opens on its own, such as the words before a guardian's
   arena, let BN6 page through it before a player saw a box. The talk now
