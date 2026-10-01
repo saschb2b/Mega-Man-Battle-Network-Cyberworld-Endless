@@ -1321,3 +1321,55 @@ he won both. Before a third wording, watch the attack in god mode
 player can see or hear and the hit; under about 30 frames (a quarter
 second to see, a step to move) no words fix it: the tell itself needs
 lengthening, or a cue of the engine's own (a sound, a mark on the panel).
+
+## Session 48: 8/10 (keep playing: yes; recommend: yes)
+
+Run 5 begun (Endless, the Standard folder for the first time in five
+runs, EraseCross, threat 1, HP+): act 1 in Central Area cleared, BlastMan
+deleted at 40/140 HP with the dealer's AquaNdl2 fired the moment he stood
+still, as both the dealer and the briefing had said; HP+100 from the
+draft, HeatMan's act chosen over CircusMan's; saved on layer 4. Up from
+7: a new folder changed how the fights played, and the dealer's tip, the
+briefing and the kill were "one moment".
+
+Confirmed: Chaud's call names what the duel's win adds (the official
+vaults); the setup's Cross lines (a Cross picked from the screen alone);
+EraseCross erasing 40-HP Mettaurs with a Cannon and a Vulcan's first
+bullet.
+
+Raised and fixed: the draft's HP+100 "takes the pink Spin" against the
+vendor's blue one (both right, a program's two colours; the draft's
+lines now name theirs, 570cf39); EraseCross's bug on a Navi unsaid
+(MegaMan's guardian briefing and the PET's report say it, ee7d62d; the
+setup had no room for a third line, captured); the None Cross line
+(1bd4ae9); the arrow "pointing right, up-right, up" at a walkway running
+down-right (replayed: the state's way was right each time, the dash had
+run a panel past the mouth, and each picture, 4 frames after its step,
+showed the arrow before its turn; it now turns at once as MegaMan stops,
+aee9982); no arrow on a strip where it had faded, after the map (the map
+now hands over to it, 37bc6f4).
+
+Open: an arrow to off-route gates and vaults L names (wish 1's second
+half; the layer-2 gate had its own walkway one strip west, and would have
+stayed shut to his clearance); act 1's three random battles, "Viruses 6"
+(BN6's own step counter, one session's count: watch it before touching
+the rate); EraseCross's drain small on a Navi (BN6's rule).
+
+Misreads: BlastMan's row (he hovers a row's height above his panel; four
+charged beams down the wrong row) into persona.md beside the Piranhas and
+ChargeMan's train; the arrow at the mouth (above), with the way to bring
+a faded arrow back.
+
+Beside the loop: Battle Network 5's ACDC, SciLab, End and Nebula Areas
+dress BN6's Central, Sky, Seaside and Graveyard in about half the runs
+that reach them (with the BN5 ROM beside BN6's, as the harness has it).
+
+Cost: 298 calls (260 and 38 on the guardian's layer); BlastMan 1:20.
+
+Loop change: **a cue "pointing wrong" in a report is checked against the
+state's words first.** The pictures come a few frames after each step,
+and anything the game turns on a delay (the arrow's looks every 5 frames,
+a fade) shows the moment before it. Replaying with the state beside each
+picture settled this one in three calls: the state was right three times
+running and each picture one step behind. Where the two disagree, the lag
+is the bug, not the cue.
