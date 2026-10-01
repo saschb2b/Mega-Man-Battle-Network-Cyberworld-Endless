@@ -482,6 +482,26 @@ static int guardian_words(char *buf, int k, int size) {
 	return k;
 }
 
+/* The area's viruses that fight in ways BN6 never explains, where the act
+ * or a side layer begins, appended to `buf` at `k`; the new length. Only
+ * once they have been battled, in any run: the first meeting is theirs to
+ * show. (A playtester's Thunder healed a ScarCrow to full, two DarkMechs
+ * took 460 HP before he knew, and a StarFish's bubbles ate three Cannons,
+ * a WideSht and a Navi chip's fire while it took 350.) */
+static int family_words(char *buf, int k, int size) {
+	static const struct { int family; const char *words; } warn[] = {
+		{ FAMILY_SCARCROW, "@M ScarCrows here again: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|" },
+		{ FAMILY_DARKMECH, "@M DarkMechs here again. They warp right beside us to slash, so keep moving and strike as they appear!|" },
+		{ FAMILY_STARFISH, "@M StarFish here again: their bubbles soak up our shots and trap us if we touch one. "
+			"A chip that drops from above gets past them!|" },
+	};
+	uint32_t fams = loot_families_here(run.depth, run.biome);
+	for (unsigned i = 0; i < sizeof warn / sizeof *warn; ++i)
+		if (fams & (1u << warn[i].family) && profile_family_fought(warn[i].family))
+			k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "%s", warn[i].words);
+	return k;
+}
+
 /* What MegaMan senses on the layer (`here`, n of them), appended to `buf`
  * at `k`, then the rival, whose call has said why (docs/RIVAL.md), apart:
  * in the list, "ProtoMan, waiting for our duel and an official gate" read
@@ -554,18 +574,7 @@ static const char *status_words(void) {
 		 * froze him twice in the next act) */
 		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 			ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
-		/* (the area's viruses that fight in ways BN6 never explains, where
-		 * the act or a side layer begins: a playtester's Thunder healed a
-		 * ScarCrow to full, and two DarkMechs took 460 HP before he knew) */
-		if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) {
-			/* (once they have been battled, in any run: the first meeting
-			 * is theirs to show) */
-			uint32_t fams = loot_families_here(run.depth, run.biome);
-			if (fams & (1u << FAMILY_SCARCROW) && profile_family_fought(FAMILY_SCARCROW))
-				ADD("@M ScarCrows here again: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|");
-			if (fams & (1u << FAMILY_DARKMECH) && profile_family_fought(FAMILY_DARKMECH))
-				ADD("@M DarkMechs here again. They warp right beside us to slash, so keep moving and strike as they appear!|");
-		}
+		if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) k = family_words(buf, k, (int)sizeof buf);
 		/* (what they are for: a playtester carried two and never learned;
 		 * once per count, the next heard it on every layer) */
 		if (run.fragments != D.fragments_told) {

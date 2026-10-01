@@ -17,7 +17,7 @@ Encounter make_encounter(int depth, int biome, int kind);
 /* The virus families (a bit each) the area's plain random battles can hold
  * at `depth`; no random numbers drawn. */
 uint32_t loot_families_here(int depth, int biome);
-enum { FAMILY_SCARCROW = 17, FAMILY_DARKMECH = 25 };
+enum { FAMILY_STARFISH = 15, FAMILY_SCARCROW = 17, FAMILY_DARKMECH = 25 };
 Encounter make_boss(int depth, int biome, int navi);
 /* The element strong against an act's guardian, else against its area's
  * viruses (ELEM_*, 0 for none): the Net Dealers stock a chip of it. */
