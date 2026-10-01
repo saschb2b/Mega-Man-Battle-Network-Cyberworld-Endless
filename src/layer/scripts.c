@@ -6,6 +6,7 @@
 #include "scripts.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "bn6.h"
 #include "data.h"
@@ -341,6 +342,18 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	return s;
 }
 
+/* A drafted program's line with its colour after its name ("HP+100
+ * (pink): ..."): a program comes in more than one, and a playtester read
+ * the draft's pink HP+100 and the vendor's blue one as a contradiction */
+static void draft_about(TextArchive *t, const char *about, int color) {
+	const char *colon = strchr(about, ':');
+	char line[160];
+	if (colon && *navicust_color_name(color))
+		snprintf(line, sizeof line, "%.*s (%s)%s", (int)(colon - about), about, navicust_color_name(color), colon);
+	else snprintf(line, sizeof line, "%s", about);
+	ta_page(t, FACE_MEGAMAN, line, false);
+}
+
 static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	int s = ta_script(t);
 	uint8_t give[] = { 0xEF, 0x12, (uint8_t)frags, (uint8_t)(frags >> 8), 0, 0, 0xFF, 0xFF, 0xFF };   /* ts_check_give_bug_frags */
@@ -401,7 +414,7 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 	}
 	/* the draft: what each program does, then the choice (B: none) */
 	ta_page(t, FACE_MEGAMAN, "Program data too, Lan! Pick one for our NaviCust:", false);
-	for (int k = 0; k < n; ++k) if (draft->about[k]) ta_page(t, FACE_MEGAMAN, draft->about[k], false);
+	for (int k = 0; k < n; ++k) if (draft->about[k]) draft_about(t, draft->about[k], draft->color[k]);
 	if (draft->teach) {
 		char rules[300];
 		snprintf(rules, sizeof rules, "Big programs need a block on the command line; plus parts go anywhere else. "

@@ -81,5 +81,8 @@ const char *navicust_turn_words(int variant);
 /* The same for a program of colour c (1-6): whether L and R turn it, by
  * the Spins held; "" for none. */
 const char *navicust_color_turns(int c);
+/* Colour `c`'s name (1-6: white, yellow, pink, red, blue, green), "" for
+ * none. */
+const char *navicust_color_name(int c);
 
 #endif

@@ -327,6 +327,8 @@ bool navicust_expmemry(int depth) { return depth == 6 || depth == 12; }
  * spent twenty calls pressing them, docs/NAVICUST.md 8) */
 static const char *const spin_names[7] = { "", "white", "yellow", "pink", "red", "blue", "green" };
 
+const char *navicust_color_name(int c) { return c >= 1 && c <= 6 ? spin_names[c] : ""; }
+
 const char *navicust_color_turns(int c) {
 	static char buf[120];
 	if (c < 1 || c > 6) return "";
