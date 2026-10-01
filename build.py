@@ -943,6 +943,16 @@ SCREENSHOTS = [
     ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], [(280, 'undernet')], {}),
     ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '17', '--seed', '3', '--dev', 'quiet'], [(130, 'graveyard')], {}),
+    # (layer 1 past MegaMan's words: Sky Area's framed fields and a catwalk,
+    # Mr. Weather Comp's solar panels; seed 2's Sky not dressed in BN5's)
+    ('sky', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '1', '--seed', '2', '--dev', 'quiet',
+             '--input', '420:,6:A,40:,6:A,40:,6:A,40:,6:A,40:,6:A,40:'], [(700, 'sky')], {}),
+    ('weather', ['--scene', 'emu', '--net-biome', '14', '--run-depth', '1', '--seed', '3', '--dev', 'quiet',
+                 '--input', '420:,6:A,40:,6:A,40:,6:A,40:,6:A,40:,6:A,40:'], [(700, 'weather')], {}),
+    # (Battle Network 5's ACDC Area, its ROM beside BN6's: docs/MULTIROM.md;
+    # seed 4's run dresses Central Area in it, layer 1 past MegaMan's words)
+    ('bn5', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet',
+             '--input', '420:,6:A,40:,6:A,40:,6:A,40:,6:A,40:,6:A,40:'], [(700, 'acdc-bn5')], {}),
     ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(250, 'nest')], {}),
     # (the PET's E-Mail on a profile that has met seven guardians: the list,
     # then Dad's Records mail on its second page)

@@ -368,6 +368,12 @@ in, and the net begins.
 <img src="docs/screenshots/town-green.png" width="240" alt="Lan in Green Town beside the knight statue on the flower plaza; MegaMan: The bus got us out to Green Town, Lan! Smell those flowers!">
 </p>
 
+<p align="center">
+<img src="docs/screenshots/sky.png" width="240" alt="MegaMan on a generated layer of Sky Area: its fields of framed squares, a cyan glass catwalk at their edge">
+<img src="docs/screenshots/weather.png" width="240" alt="MegaMan on a generated layer of Mr. Weather Comp: a field of solar panels with their lights, a conveyor walkway onto it">
+<img src="docs/screenshots/acdc-bn5.png" width="240" alt="With Battle Network 5's ROM: MegaMan on a layer of BN5's ACDC Area, its cyan framed platforms and the Net Dealer">
+</p>
+
 Each layer is a new layout of platforms and walkways in the style of one of
 the game's areas. Find the exit pad to go one layer deeper. On the way, the
 game's own random battles come up, with the viruses of that area. How hard
