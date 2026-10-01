@@ -26,6 +26,13 @@ void emu_debug_frame(void) {
 			emu_read8(BN6_GAMESTATE + 4), emu_read8(BN6_GAMESTATE + 5));
 	if (t % 60 == 0)
 		fprintf(stderr, "music t%d song %08x status %08x\n", t, emu_read32(BN6_MUSIC_PLAYER), emu_read32(BN6_MUSIC_PLAYER + 4));
+	/* (the NaviCust's bug counts, when any is set) */
+	if (t % 30 == 0) {
+		char b[16 * 3 + 1];
+		int any = 0;
+		for (uint32_t i = 0; i < 16; ++i) { any |= emu_read8(BN6_NAVICUST_BUGS + i); snprintf(b + i * 3, 4, "%02x ", emu_read8(BN6_NAVICUST_BUGS + i)); }
+		if (any) fprintf(stderr, "bugs t%d %s\n", t, b);
+	}
 	/* (an open chat box: its script state, open state, jump table offset,
 	 * cursor into the script and flags, bn6f chatbox_struct) */
 	if (t % 30 == 0 && emu_read8(BN6_CHATBOX))
