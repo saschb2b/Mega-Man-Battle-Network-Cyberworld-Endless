@@ -220,7 +220,9 @@ static void draw_note(int x0, int y0) {
 
 void cinema_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
-	int bar = BAR_H * C.bar / BAR_FRAMES;
+	/* (the bars stage the map: a battle that began under them, issue #24,
+	 * or a menu, is drawn whole) */
+	int bar = C.off_map ? 0 : BAR_H * C.bar / BAR_FRAMES;
 	if (bar) {
 		fill_rect(x0, y0, CORE_W, bar, BLACK);
 		fill_rect(x0, y0 + CORE_H - bar, CORE_W, bar, BLACK);

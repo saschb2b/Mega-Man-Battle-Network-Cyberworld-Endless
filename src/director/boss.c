@@ -124,6 +124,15 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 	cinema_letterbox(false);
 }
 
+/* MegaMan's walk to the arena's middle, with no random battle from its
+ * steps: one rolled as a player ran in, and it was fought under the
+ * staging's bars (issue #24); the game lifts the flag as it enters the
+ * next map. */
+static void enter_walk(void) {
+	flag_set(BN6_FLAG_NO_ENCOUNTERS);
+	cinema_walk(B.t < 60 ? walk_toward(B.g.x, B.g.y, WALK_NEAR) : 0);
+}
+
 void boss_update(void) {
 	++B.t;
 	switch (B.state) {
@@ -137,7 +146,7 @@ void boss_update(void) {
 		to(B_ENTER);
 		break;
 	case B_ENTER:
-		cinema_walk(B.t < 60 ? walk_toward(B.g.x, B.g.y, WALK_NEAR) : 0);
+		enter_walk();
 		if (B.t == 60) cinema_input(CINEMA_HOLD);
 		if (B.t == 30) run_script(B.g.prelude);
 		if (B.t == 50) { flag_set(LAYER_BOSS_APPEAR_FLAG); cinema_shake(16, 3); }

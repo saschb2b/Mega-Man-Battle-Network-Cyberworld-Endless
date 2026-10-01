@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **No battle under a guardian's staging (issue #24).** Running into a
+  guardian's arena could roll a random battle as the staging began, and
+  the battle was fought between its black bars. The staging's walk to the
+  arena's middle rolls no battle now, and the bars never cover a battle.
 - **Stairs lead up onto their raised rooms (issue #22).** At a stair's
   top MegaMan dropped to the ground and walked on under the raised room,
   out of bounds: a player reported it on an Undernet layer, and it held
