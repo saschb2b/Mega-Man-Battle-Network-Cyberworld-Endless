@@ -80,7 +80,8 @@ python3 build.py tiles [SEEDS] [--baseline]
 ```
 
 The atlas of every area and layout (2 seeds each by default, about three
-minutes), then a table per area: its layers and panels, the tiles drawn
+minutes), and in the areas that have stairs (Sky, the Undernet) as many
+layers that climb one, then a table per area: its layers and panels, the tiles drawn
 with other floors than they show and the seams per 100 panels, and why the
 tiles were drawn off (`src/map/tiles.h`, `TILE_WHY_*`):
 
@@ -92,6 +93,13 @@ tiles were drawn off (`src/map/tiles.h`, `TILE_WHY_*`):
 - `plain`: they do not look like the area's plain floor well inside it.
 - `ranked`: one would have done and lost to a nearer neighbourhood or a
   seam.
+
+The seams count what the classes pick; what a player sees best is the
+pictures against the area's own maps (`src_bNN_*.png`). A sweep of them
+found what the numbers missed: arenas paved with walkway tiles
+(`TILES_ARENA_FLOOR`), edges whose own rim tiles failed the plain test and
+were stood in for by inner panels (`TILES_RIMMED`), and decorated panels
+whose pieces turned up elsewhere (`skip_styles` with `SKIP_ANY_PIXEL`).
 
 The close-ups in `.build/atlas/defects_bXX.png` show each spot. It fails as
 the atlas does, where a layer got worse than the baseline; `--baseline`
