@@ -1373,3 +1373,40 @@ a fade) shows the moment before it. Replaying with the state beside each
 picture settled this one in three calls: the state was right three times
 running and each picture one step behind. Where the two disagree, the lag
 is the bug, not the cue.
+
+## Session 49: 7/10 (keep playing: yes; recommend: yes)
+
+Run 5 continued from layer 4 (Lab Comps, HeatMan's act): six battles over
+three layers (13 viruses; act 2's count "felt right"), both dealers' Aqua
+picks bought, a ScrtData; the budget ran out on layer 6, HeatMan's, a walk
+short of the arena. Down from 8: no guardian, the act-1 prize chip "fired
+backward", and menus took 65 of 300 calls.
+
+Confirmed: the arrow turning as MegaMan stops (no stale arrow all
+session), SELECT bringing the arrow back, HeatMan's briefing and the PET's
+dive report naming EraseCross's Navi bug, HP+100's colour.
+
+Raised: BlastMan B hitting nothing (major): replayed from two rows,
+BlastMan goes for the nearest enemy-side thing, and the StarFish's
+bubbles floating behind MegaMan were it; in session 43, with no bubbles,
+the fire rolled forward and hit twice (BN6's own targeting, in the patch
+notes). The NaviCust bug's cause unnamed (fixed after the pin, 92ed1fa).
+The NaviCust reminder twice at CONTINUE (4bba08c). Walkway mouths, about
+15 calls, the arrow right each time (BN6's walking, kept by the owner's
+choice). The layer-5 dealer below a raised walkway's edge (one sighting,
+not yet counted). Menus a fifth of the calls (wish 3: a bought chip into
+the folder at the shop; a design question for the owner). No how-to for
+the dealer's TrnArrw3 (only AquaNdl has one).
+
+Beside the loop: BN5's areas play BN5's music (its net and Undernet
+themes, copied into BN6's empty song slots) and have its HeelNavis as
+bystanders; MegaMan names the NaviCust bug's program and rule.
+
+Cost: 300 calls, 78 minutes.
+
+Loop change: **the goals put the guardian first when the save is a few
+layers short of one.** Sessions 47 and 49 began two or three layers before
+a guardian; one reached him with the 40 extra calls, this one did not,
+its calls spent on menus and a long last layer. When the save sits in an
+act's first or second layer, the goals say: one folder pass per dealer,
+then the arena; the fight is what the report most needs.
