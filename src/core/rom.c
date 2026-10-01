@@ -256,7 +256,7 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	/* (tables found by their structure beside BN6's own, docs/ROM_DATA.md) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
 		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas), 0x155BF4u,
-		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu },
+		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, "BN5" },
 };
 
 const NetAreaDef *net_area_def(int area) {

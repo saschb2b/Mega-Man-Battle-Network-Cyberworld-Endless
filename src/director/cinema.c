@@ -218,14 +218,18 @@ static void draw_arrow(int x0, int y0) {
 
 /* The note: a small dark box in the top right corner, the HP's opposite,
  * fading in and out. */
-static void draw_note(int x0, int y0) {
-	if (!C.note_len || C.off_map) return;
-	int left = C.note_len - C.note_t;
-	int a = C.note_t < 8 ? C.note_t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
-	int w = text_width(C.note) + 8, x = x0 + CORE_W - w - 3, y = y0 + 3;
+void cinema_note_box(int x0, int y0, const char *text, int t, int len) {
+	int left = len - t;
+	int a = t < 8 ? t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
+	int w = text_width(text) + 8, x = x0 + CORE_W - w - 3, y = y0 + 3;
 	fill_rect(x, y, w, TEXT_H + 4, rgba(0, 16, 40, 170 * a / 255));
 	fill_rect(x, y + TEXT_H + 3, w, 1, rgba(120, 248, 255, 200 * a / 255));
-	text_draw(x + 4, y + 2, C.note, rgba(200, 236, 255, (Uint8)a), TEXT_LEFT);
+	text_draw(x + 4, y + 2, text, rgba(200, 236, 255, (Uint8)a), TEXT_LEFT);
+}
+
+static void draw_note(int x0, int y0) {
+	if (!C.note_len || C.off_map) return;
+	cinema_note_box(x0, y0, C.note, C.note_t, C.note_len);
 }
 
 void cinema_draw(void) {

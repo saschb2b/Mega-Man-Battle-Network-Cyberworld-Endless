@@ -84,7 +84,8 @@ on a phone too, and on a New 3DS from its HOME Menu.
   `5f472f78d8de2df01d5039e045c043cb40969a39`). Its net areas then turn up
   in runs, in place of the BN6 areas they resemble (ACDC Area, End Area
   and Nebula Area so far), each in about half the runs that come
-  there, in BN5's own tiles, music and bystanders. On Linux, macOS,
+  there, in BN5's own tiles, music and bystanders. A note in the title's
+  top right corner says "BN5 found" as the game starts. On Linux, macOS,
   Windows, the Steam Deck and PortMaster handhelds; not on the 3DS,
   Android or in the browser yet.
 

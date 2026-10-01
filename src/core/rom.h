@@ -105,6 +105,7 @@ typedef struct {
 	uint32_t sprite_lists;                  /* the ten sprite lists, as BN6's */
 	uint8_t battle_songs[2];                /* the songs its random battles and its bosses' name in their BattleSettings */
 	uint32_t battle_bgs, battle_bg_anims, battle_bg_scroll;   /* its battle backgrounds' tables, as BN6's */
+	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;

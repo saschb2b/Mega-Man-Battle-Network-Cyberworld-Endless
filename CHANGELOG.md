@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The game says when it has found Battle Network 5.** Nothing told a
+  player whether Team Colonel beside the BN6 ROM had been read until
+  one of its areas turned up, in about half the runs. As the title comes
+  up, a note in its top right corner now says "BN5 found" for a few
+  seconds, in the box the map's "Run saved" uses.
 - **The picture fills a 640x480 screen (issue #36).** On an RG35XX Pro
   the game's picture took 480x320 of the screen's 640x480, half of it:
   scaled by whole numbers, 3x no longer fits. Where a whole number leaves

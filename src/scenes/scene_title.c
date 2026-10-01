@@ -15,6 +15,7 @@
 #include "audio.h"
 #include "backdrop.h"
 #include "chatbox.h"
+#include "cinema.h"
 #include "game.h"
 #include "gfx.h"
 #include "minifont.h"
@@ -78,6 +79,12 @@ static struct {
 	uint16_t new_marks;   /* marks the run just over earned: they blink in after its summary */
 	SDL_Texture *tex;
 } S;
+
+/* the "BN5 found" note (found_draw): from the title's frame FOUND_AT, on
+ * its first entry only, so a run's end does not say it again */
+#define FOUND_AT 30
+#define FOUND_LEN 150
+static int entries;
 
 static Backdrop bd;
 static uint8_t logo[160][256];   /* palette indices of the logo, 0 none */
@@ -275,6 +282,7 @@ static void enter(void) {
 	SDL_Texture *tex = S.tex;
 	memset(&S, 0, sizeof S);
 	S.tex = tex;
+	++entries;
 	if (!logo_ready) logo_ready = build_logo();
 	S.has_save = save_exists();
 	Run saved = { 0 };
@@ -428,6 +436,11 @@ static void choice_draw(int x, int y, const char *s, SDL_Color c, bool changes) 
 	}
 }
 
+/* under the note: what is still shut, and how, dim */
+static void note_more(int cx, int y, char lines[][48], int n) {
+	for (int i = 0; i < n; ++i, y += 12) text_draw(cx, y, lines[i], rgba(120, 140, 170, 255), TEXT_CENTER);
+}
+
 static void setup_draw(int x0, int y0) {
 	SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255), dim = rgba(120, 140, 170, 255);
 	SDL_Color on = rgba(120, 255, 140, 255), orange = rgba(255, 170, 40, 255);
@@ -512,8 +525,7 @@ static void setup_draw(int x0, int y0) {
 	case ROW_HELPERS: snprintf(buf, sizeof buf, "%s. A: on or off", helper_about[S.helper]); note = buf; break;
 	default: note = "A: jack in. B: back"; break;
 	}
-	int lines = note_line(cx, y0 + 97, note, sky);
-	for (int i = 0; i < nlocked; ++i) text_draw(cx, y0 + 99 + (lines + i) * 12, locked[i], dim, TEXT_CENTER);
+	note_more(cx, y0 + 99 + note_line(cx, y0 + 97, note, sky) * 12, locked, nlocked);
 }
 
 static void update(void) {
@@ -649,6 +661,42 @@ static void render(void) {
 	SDL_UpdateTexture(S.tex, NULL, px, 240 * 4);
 }
 
+/* The build, for a report (v0.5.0 beta, v0.5.0+12 a dozen commits on; 0.1
+ * to 0.4 were alphas) */
+static const char *version_words(char *v, size_t n) {
+	const char *cw = CW_VERSION;
+	if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, n, "dev");
+	else {
+		const char *g = strstr(cw, ".g");
+		snprintf(v, n, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " beta" : "");
+	}
+	return v;
+}
+
+/* "BN5 found": the other games' ROMs read beside BN6's, said once a start
+ * in the picture's top right corner a moment after the title comes up, in
+ * the map's "Run saved" box, and gone (nothing had said whether Team
+ * Colonel was found) */
+static void found_draw(int x0, int y0) {
+	int t = entries == 1 ? S.t - FOUND_AT : 0;
+	char s[32] = "";
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (XR[i].data) {
+			size_t m = strlen(s);
+			snprintf(s + m, sizeof s - m, "%s%s", m ? " + " : "", XR[i].layout->tag);
+		}
+	if (t <= 0 || t >= FOUND_LEN || !s[0]) return;
+	size_t m = strlen(s);
+	snprintf(s + m, sizeof s - m, " found");
+	cinema_note_box(x0, y0, s, t, FOUND_LEN);
+}
+
+/* the top: the marks (not over a run's summary), and the note over them */
+static void top_draw(int x0, int y0) {
+	if (!S.summary) marks_draw(x0, y0);
+	found_draw(x0, y0);
+}
+
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	int x0 = P.core_x, y0 = P.core_y;
@@ -667,7 +715,7 @@ static void draw(void) {
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
 	if (!S.confirm && !S.summary)   /* (the question takes its place a moment; the summary runs to the bottom) */
 		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
-	if (!S.summary) marks_draw(x0, y0);
+	top_draw(x0, y0);
 
 	if (S.summary) {
 		SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255);
@@ -729,20 +777,13 @@ static void draw(void) {
 		if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);
 		return;
 	}
-	/* a line above the copyright, the marks holding the top: the build, for
-	 * a report (v0.5.0 beta, v0.5.0+12 a dozen commits on; 0.1 to 0.4 were
-	 * alphas), and the best
-	 * depth, a saved run deeper than the record counting too (the menu's
-	 * CONTINUE names its own layer there; the question's box covers both) */
+	/* a line above the copyright, the marks holding the top: the build
+	 * (version_words), and the best depth, a saved run deeper than the
+	 * record counting too (the menu's CONTINUE names its own layer there;
+	 * the question's box covers both) */
 	if (!S.confirm) {
 		char v[40];
-		const char *cw = CW_VERSION;
-		if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, sizeof v, "dev");
-		else {
-			const char *g = strstr(cw, ".g");
-			snprintf(v, sizeof v, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " beta" : "");
-		}
-		minifont_draw(x0 + 4, y0 + 138, v, rgba(150, 160, 190, 255), 1);
+		minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
 		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
 		if (best > 0 && !(S.menu && S.has_save && S.saved_depth)) {
 			snprintf(v, sizeof v, "Best: Layer %d", best);

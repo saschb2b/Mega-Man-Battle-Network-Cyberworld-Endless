@@ -52,6 +52,10 @@ void cinema_card(const char *small, const char *big, const char *line1, const ch
 /* A short note in the picture's top right corner for `frames` on the
  * map ("Run saved"). */
 void cinema_note(const char *text, int frames);
+/* Its box with `text`, `t` frames into its `len` (fading in and out), in
+ * the corner of the picture at (x0, y0): the map's notes, and the title's
+ * "BN5 found". */
+void cinema_note_box(int x0, int y0, const char *text, int t, int len);
 /* A title or card is showing. */
 bool cinema_busy(void);
 /* An area's card fades out at once, where a chat has opened under it (an A
