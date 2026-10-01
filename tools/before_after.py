@@ -31,6 +31,8 @@ SCENES = [
     ('robot-arena', build.RUN_7, WEAK, 1300),
     # (Mr. Weather Comp's arena ahead of a walkway, the same guardian)
     ('weather-arena', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '14', '--guardian', '12'], WEAK, 900),
+    # (JudgeMan's arena on an Undernet layer)
+    ('undernet-arena', ['--scene', 'emu', '--run-depth', '15', '--dev', 'quiet', '--net-biome', '5', '--seed', '5'], WEAK, 580),
     # (a catwalk and a field in Sky Area)
     ('sky', WALK + ['--net-biome', '2', '--seed', '2'], WEAK, 400),
     # (the Graveyard's slabs and their edges)
