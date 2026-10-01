@@ -10,6 +10,8 @@ before and after.
 
     tools/device_run.py root@device --control-path /tmp/sock \\
         --frames 3600 --shots 20,40 --env CYBERWORLD_AUTOPILOT=1 -- --scene emu
+
+--setting screen=fill writes the test data's settings.ini before the start.
 """
 import argparse
 import os
@@ -33,6 +35,7 @@ def main():
     ap.add_argument('--env', action='append', default=[], help='NAME=VALUE for the game')
     ap.add_argument('--out', default=os.path.join(ROOT, '.build', 'device'))
     ap.add_argument('--with-saves', action='store_true', help='start from a copy of the installed saves')
+    ap.add_argument('--setting', action='append', default=[], help='KEY=VALUE for the test data\'s settings.ini')
     argv = sys.argv[1:]
     cut = argv.index('--') if '--' in argv else len(argv)
     a = ap.parse_args(argv[:cut])
@@ -51,6 +54,9 @@ def main():
                               f'chmod +x {TEST}/cyberworld.aarch64; cp {GAME}/boot-3.state {TEST}/data/ 2>/dev/null'
                               + (f'; cp -a {GAME}/savedata {TEST}/data/; cp {GAME}/run.state {TEST}/data/ 2>/dev/null' if a.with_saves else '')],
                        stdin=f, check=True)
+    if a.setting:
+        lines = ''.join(f'{k.strip()} = {v.strip()}\n' for k, v in (x.split('=', 1) for x in a.setting))
+        subprocess.run(ssh + [f'cat > {TEST}/data/settings.ini'], input=lines, text=True, check=True)
     env = ' '.join(a.env)
     run = (f'date +%s > {TEST}/t0; {env} {TEST}/cyberworld.aarch64 --rom-dir "$GAMEDIR/rom" '
            f'--data-dir {TEST}/data --frames {a.frames} {" ".join(game_args)}; date +%s > {TEST}/t1')
