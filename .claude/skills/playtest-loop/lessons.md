@@ -1410,3 +1410,39 @@ a guardian; one reached him with the 40 extra calls, this one did not,
 its calls spent on menus and a long last layer. When the save sits in an
 act's first or second layer, the goals say: one folder pass per dealer,
 then the arena; the fight is what the report most needs.
+
+## Session 50: 8/10 (keep playing: yes; recommend: yes)
+
+Run 5 from layer 6: HeatMan deleted first (0:47.75) with the dealer's
+AquaNdl3 as MegaMan's briefing said, his HP drained by EraseCross's bug;
+Custom1 from the Guardian Data, the unknown Aquarium Comp chosen; on layer
+8 ProtoMan's netbattle at 1000 HP, run from after a hand at 180/460. Up
+from 7: the guardian came first, as the goals asked, and menus took 30
+calls where they took 65.
+
+Confirmed: the draft's colours, BlastMan's targeting as the patch notes
+told it (forward with no bubbles, two hits on ProtoMan), BN6's own
+transmission panel and BATTLE START.
+
+Raised and fixed: ProtoMan's netbattle a wall (major): half the act's
+guardian band's top (500 in act 3) and his tells said as it is offered
+(9862b5a, the game-design pass in its message); "Our second ScrtData!"
+on CONTINUE with one held (7dbe7c0: the count read before the save
+loaded); the act's AREA CLEAR count and the dealer's greeting lost on
+CONTINUE (b6d1663, after the pin: the act kept beside the save); L's
+"ProtoMan, waiting for our duel and an official gate" (5b6efb6); the
+split's place against a Navi (e508c2c, after the pin: "??? (Aquarium)").
+
+BN6's own: the shop's remembered Yes/No cursor (third report: into the
+patch notes again). Kept: walkway mouths, about 20 calls, the arrow right
+each time (the owner's call; wish 3 asks for a slide onto the line).
+
+Cost: 266 calls, 74 minutes.
+
+Loop change: **a fight the run promises is swept before the persona gets
+there.** ProtoMan's netbattle was written to the act's guardian band and
+never fought by anyone before Kai met it as a wall at the end of a
+five-session thread. A new fight's numbers (HP, damage a second) are now
+measured against the persona's state at that point in its run before the
+session that reaches it: the HP, the folder's best chip and the guardian
+just beaten, in the session's state and notes.
