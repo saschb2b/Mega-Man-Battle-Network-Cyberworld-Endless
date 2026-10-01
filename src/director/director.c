@@ -2551,6 +2551,10 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		spins_sync();
+		/* (the ScrtData the save holds, which building the layer could not
+		 * read yet: MegaMan took the saved one for a new find, "Our second
+		 * ScrtData!" with one in hand) */
+		D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
 		/* the shops' data in RAM is the saved one: this layer's again,
 		 * what was bought before the save still bought (a CONTINUE had
 		 * restocked both shops); another build's layer, afresh */
