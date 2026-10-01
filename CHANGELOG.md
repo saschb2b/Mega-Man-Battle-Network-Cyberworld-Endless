@@ -21,6 +21,11 @@
   triangles cut off at the tiles' edges stood in the floor: pieces of the
   arrow panels on the original's path up to its big platform. Those
   panels' tiles are no longer used for anything else.
+- **Sky Area looks like Sky Area.** Its catwalks wore the thick lavender
+  edges of its fields, orange lights and all, and its rooms the frames of
+  its round pads, pink corners and rounded caps. Its rooms now take the
+  original's fields of framed squares, its guardian's arena among them,
+  and its catwalks their own thin glass edges with the clips under them.
 - **Sky Area's catwalks turn cleanly.** Every bend of its cyan glass
   catwalks had lavender wall pieces from its other catwalks in it, and a
   walkway onto a purple pad was a jumble of both. Its walkways are now

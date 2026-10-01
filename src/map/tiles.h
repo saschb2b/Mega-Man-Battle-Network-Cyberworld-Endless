@@ -130,6 +130,12 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * beside its floor (decor.c): the Cybeast Nest's only one is a grey cube,
  * debris under the original's altar, which stood alone in the void. */
 #define TILES_NO_SCENERY 0x200000
+/* ... and with TILES_WALK_NARROW, a panel of its walkways' hues is
+ * walkway where it lies in no 2 x 2 block of floor, and platform floor
+ * where it does: Sky Area's fields of framed squares share its cyan glass
+ * catwalks' hue, and their thick lavender edges with orange lights stood
+ * in for the catwalks' thin ones with their clips. */
+#define TILES_WALK_NARROW 0x400000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a

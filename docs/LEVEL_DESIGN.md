@@ -123,7 +123,9 @@ Walkways, the floor panels in no 2x2 block of floor, are drawn in the
 area's second floor, learned from the same source map by its hue
 (`walk_styles` in `src/core/rom.c`): Central's blue catwalks, Seaside's
 yellow boardwalks, Sky's cyan glass catwalks (not its lavender ones, whose
-pieces turned up in the cyan ones' bends), Green's orange planks, Graveyard's
+pieces turned up in the cyan ones' bends; its fields of framed squares share
+their hue, so there the hue's panels in 2 x 2 blocks are platform floor and
+those a panel wide the catwalks, `TILES_WALK_NARROW`), Green's orange planks, Graveyard's
 purple bridges and the Undernet's red striped bridges, which turn and meet
 the plateaus in joints with a yellow gem. The tile classes
 tell platform, walkway and void apart, so the joins between the two floors

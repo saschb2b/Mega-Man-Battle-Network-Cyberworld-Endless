@@ -119,17 +119,21 @@ static bool drawn_cached(const Src *s, int A, int B) {
 	return *d;
 }
 
+/* Whether panel (A, B) lies in a 2 x 2 block of floor. */
+static bool in_block_of_floor(const Src *s, int A, int B) {
+	for (int db = -1; db <= 0; ++db)
+		for (int da = -1; da <= 0; ++da)
+			if (drawn_cached(s, A + da, B + db) && drawn_cached(s, A + da + 1, B + db) &&
+				drawn_cached(s, A + da, B + db + 1) && drawn_cached(s, A + da + 1, B + db + 1)) return true;
+	return false;
+}
+
 static int measure_panel(const Src *s, int A, int B) {
 	if (!drawn_cached(s, A, B)) return 0;
 	if (s->styles & TILES_BY_SHAPE) {
 		/* platform floor lies in a 2 x 2 block of floor, walkways do not;
 		 * a platform's edge, its rim, is walkway floor too */
-		bool block = false;
-		for (int db = -1; db <= 0; ++db)
-			for (int da = -1; da <= 0; ++da)
-				block |= drawn_cached(s, A + da, B + db) && drawn_cached(s, A + da + 1, B + db) &&
-					drawn_cached(s, A + da, B + db + 1) && drawn_cached(s, A + da + 1, B + db + 1);
-		if (!block) return TILE_B;
+		if (!in_block_of_floor(s, A, B)) return TILE_B;
 		for (int db = -1; db <= 1; ++db)
 			for (int da = -1; da <= 1; ++da)
 				if (!drawn_cached(s, A + da, B + db)) return TILE_B;
@@ -138,7 +142,10 @@ static int measure_panel(const Src *s, int A, int B) {
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	int st = style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y));
-	return s->styles >> st & 1 ? TILE_A : s->walk_styles >> st & 1 ? TILE_B : OTHER;
+	if (s->styles >> st & 1) return TILE_A;
+	if (!(s->walk_styles >> st & 1)) return OTHER;
+	/* (TILES_WALK_NARROW: in a block, a field of the walkways' hue) */
+	return s->styles & TILES_WALK_NARROW && in_block_of_floor(s, A, B) ? TILE_A : TILE_B;
 }
 
 /* Panel state in the source map: 0 empty, TILE_A platform floor, TILE_B
