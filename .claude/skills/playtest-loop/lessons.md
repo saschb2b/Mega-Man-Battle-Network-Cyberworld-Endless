@@ -1577,3 +1577,41 @@ fights' frames before the sessions: watch each such fight every four
 frames (play.py `--every 4`), list each move with its lit panels against
 its reach and when it can't be hurt, and make his tip cover what the
 light doesn't.
+
+## Session 54: 8/10 (keep playing: yes; recommend: yes)
+
+Run 6, the first with the ElecCross start Colonel's loss unlocked: the
+Storm folder chosen for it, Seaside Area's act cleared in 10:15 of game
+time, DiveMan deleted in 0:20.43 (ElcPuls1 "100+50" took 300), and the
+split chosen by the folder ("Aquarium's Aqua viruses take double from my
+Elec chips, and Judge Tree's BombCorns are Wood"). Saved on layer 4,
+HeatMan ahead. "The ElecCross start changed how I built the run."
+
+Confirmed: the act's AREA CLEAR count and time, the exit pad from its
+ring, no random battle in a guardian's staging, the heal arrow, a stair
+walked down.
+
+Raised and fixed: a talk opening while B was held to run was paged past
+unseen, BN6's own page wait turning on ten frames of held B (0b87356:
+the held B kept from it until let go); "StarFish here again" with none
+in five battles (0b87356: "We may meet ... here again").
+
+For the owner: walkway mouths, about 12 calls (wish 1 again); installing
+a Guardian Data program and swapping its chip into the folder cost two
+PET trips, 14 calls (wish 2: offers on the Guardian Data screen; a menu
+and NaviCust design question). BN6's own: Piranhas leaving the row as a
+charge lines up. Observation: act 1 a steamroll for an Elec folder
+against an Aqua guardian, "earned, because I chose the folder for it".
+
+Beside the loop: GitHub issues #22 and #24 fixed, #23 and #25 not
+reproduced on the current build (they need their reporters); BN5's
+battle music and backgrounds; TomahawkMan's telegraphs swept for a first
+meeting (honest: a lit 2x2 for his axe, a lit row for his eagle).
+
+Cost: 255 calls, about 65 minutes.
+
+Loop change: **a talk the persona missed is found in the debug log, not
+guessed at.** Kai could only say a box "was probably" the new no-running
+line; `CYBERWORLD_EMU_DEBUG` now logs every director talk's text, so a
+replay of the moment names what was said and when. Use it before
+answering a "did it show?" in a report.
