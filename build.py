@@ -939,20 +939,12 @@ SCREENSHOTS = [
     ('town-seaside', ['--scene', 'town', '--seed', '5'], [(280, 'town-seaside')], {}),
     ('town-green', ['--scene', 'town', '--seed', '9'], [(280, 'town-green')], {}),
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
-    ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'seaside')], {}),
+    # (seed 11: no BN5 area dresses its run's Seaside Area, as seed 3's does
+    # where BN5's ROM is beside BN6's)
+    ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '2', '--seed', '11', '--dev', 'quiet'], [(420, 'seaside')], {}),
     ('green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], [(420, 'green')], {}),
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], [(280, 'undernet')], {}),
     ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '17', '--seed', '3', '--dev', 'quiet'], [(130, 'graveyard')], {}),
-    # (layer 1 past MegaMan's words: Sky Area's framed fields and a catwalk,
-    # Mr. Weather Comp's solar panels; seed 2's Sky not dressed in BN5's)
-    ('sky', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '1', '--seed', '2', '--dev', 'quiet',
-             '--input', '420:,6:A,40:,6:A,40:,6:A,40:,6:A,40:,6:A,40:'], [(700, 'sky')], {}),
-    ('weather', ['--scene', 'emu', '--net-biome', '14', '--run-depth', '1', '--seed', '3', '--dev', 'quiet',
-                 '--input', '420:,6:A,40:,6:A,40:,6:A,40:,6:A,40:,6:A,40:'], [(700, 'weather')], {}),
-    # (Battle Network 5's ACDC Area, its ROM beside BN6's: docs/MULTIROM.md;
-    # seed 4's run dresses Central Area in it, layer 1 past MegaMan's words)
-    ('bn5', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet',
-             '--input', '420:,6:A,40:,6:A,40:,6:A,40:,6:A,40:,6:A,40:'], [(700, 'acdc-bn5')], {}),
     ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(250, 'nest')], {}),
     # (the PET's E-Mail on a profile that has met seven guardians: the list,
     # then Dad's Records mail on its second page)
@@ -1039,6 +1031,7 @@ FFMPEG_IMAGE = 'linuxserver/ffmpeg:9.0-cli-ls82'
 # (seed 7's layer 3 in the Robot Control Comp against BlastMan, as the
 # captures were timed: the areas' and guardians' draw has changed since)
 RUN_7 = ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12']
+AREA_WALK = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
 CLIPS = [
     ('title', ['--scene', 'title'], {}, None, 300, 780),
     ('net', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 150, 600),
@@ -1047,16 +1040,28 @@ CLIPS = [
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '14', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
     ('jackin', ['--scene', 'title'], {}, '120:,4:START,60:,4:A,200:', 110, 222),
+    # (the areas walked, layer 1 by the weak autopilot past MegaMan's words;
+    # seeds whose runs dress no BN6 area in BN5's tiles, but acdc-bn5's, which
+    # needs BN5's ROM beside BN6's: docs/MULTIROM.md)
+    ('sky', AREA_WALK + ['--net-biome', '2', '--seed', '2'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 300, 620),
+    ('weather', AREA_WALK + ['--net-biome', '14', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
+    ('central', AREA_WALK + ['--net-biome', '0', '--seed', '11'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
+    ('seaside', AREA_WALK + ['--net-biome', '1', '--seed', '11'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
+    ('green', AREA_WALK + ['--net-biome', '3', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
+    ('graveyard', AREA_WALK + ['--net-biome', '4', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
+    ('acdc-bn5', AREA_WALK + ['--net-biome', '0', '--seed', '4'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
 ]
 
 
-# the clips the README shows as GIFs too (GitHub plays no video from the repository)
-README_GIFS = ('guardian',)
+# the clips the README shows as GIFs too (GitHub plays no video from the repository):
+# name, then its first seconds and frames a second (a walk's scrolling floor
+# makes a GIF of all of it 2 MB)
+README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12)}
 
 
 def clips(only=None):
     """docs/clips/NAME.webm, .mp4 and .png: frames of scripted runs, 4x, 30 fps (and
-    NAME.gif, 2x, 15 fps, for those in README_GIFS)."""
+    NAME.gif, 2x, at the rate README_GIFS gives, for those in it)."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'clips')
     tmp = os.path.join(ROOT, '.build', 'clips')
@@ -1097,9 +1102,10 @@ def clips(only=None):
                              f'/out/{name}.mp4']]
         # (the GIF from the same frames: 2x with whole pixels, its palette the clip's own colours)
         if name in README_GIFS:
+            secs, fps = README_GIFS[name]
             encodes.append(['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png', '-vf',
-                            'fps=15,scale=480:320:flags=neighbor,split[a][b];[a]palettegen=max_colors=128:stats_mode=full[p];'
-                            '[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
+                            (f'trim=duration={secs},' if secs else '') + f'fps={fps},scale=480:320:flags=neighbor,split[a][b];'
+                            '[a]palettegen=max_colors=128:stats_mode=full[p];[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
         for enc in encodes:
             cmd = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + [
                 'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',

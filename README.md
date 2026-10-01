@@ -369,9 +369,9 @@ in, and the net begins.
 </p>
 
 <p align="center">
-<img src="docs/screenshots/sky.png" width="240" alt="MegaMan on a generated layer of Sky Area: its fields of framed squares, a cyan glass catwalk at their edge">
-<img src="docs/screenshots/weather.png" width="240" alt="MegaMan on a generated layer of Mr. Weather Comp: a field of solar panels with their lights, a conveyor walkway onto it">
-<img src="docs/screenshots/acdc-bn5.png" width="240" alt="With Battle Network 5's ROM: MegaMan on a layer of BN5's ACDC Area, its cyan framed platforms and the Net Dealer">
+<img src="docs/clips/sky.gif" width="240" alt="MegaMan walking a generated layer of Sky Area: a cyan glass catwalk onto its fields of framed squares">
+<img src="docs/clips/weather.gif" width="240" alt="MegaMan walking a generated layer of Mr. Weather Comp: its solar panels with their lights, its conveyors">
+<img src="docs/clips/acdc-bn5.gif" width="240" alt="With Battle Network 5's ROM: MegaMan walking a layer of BN5's ACDC Area, its cyan platforms and green walkways">
 </p>
 
 Each layer is a new layout of platforms and walkways in the style of one of
