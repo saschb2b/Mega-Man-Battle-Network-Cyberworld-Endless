@@ -501,7 +501,7 @@ static void setup_draw(int x0, int y0) {
 			: open_crosses ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
 		/* (the ones still shut, and how) */
 		if (S.cross) snprintf(locked[nlocked++], sizeof locked[0], "%s", "No other Cross this run");
-		else if (open_crosses && open_crosses < 5) snprintf(locked[nlocked++], sizeof locked[0], "%s", "Others: delete their Navis");
+		else if (open_crosses && open_crosses < 5) snprintf(locked[nlocked++], sizeof locked[0], "%s", "Start in more: delete Navis");
 		break;
 	}
 	case ROW_THREAT:
