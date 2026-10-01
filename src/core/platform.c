@@ -418,8 +418,15 @@ void platform_load_settings(const char *path) {
 		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}
 	fclose(f);
-	/* (the screen setting read after the window opened) */
-	if (P.renderer && !P.headless) layout_canvas();
+	/* (the screen setting read after the window opened; logged where it
+	 * changed the scale, as the display line before it was printed with
+	 * the default's) */
+	if (P.renderer && !P.headless) {
+		char was[24];
+		snprintf(was, sizeof was, "%s", scale_words());
+		layout_canvas();
+		if (strcmp(was, scale_words())) printf("screen setting: canvas %dx%d at %s\n", P.w, P.h, scale_words());
+	}
 }
 
 void platform_load_keys(const char *path) {
