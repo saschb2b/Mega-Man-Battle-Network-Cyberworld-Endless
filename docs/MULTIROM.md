@@ -55,8 +55,13 @@ ROM in memory, and shows its battle screens.
 4. **Pools by source**: each area, town, song and bystander is an entry
    with the game it came from; BN6 alone is today's game.
 5. **Runs follow the games there**: an area of another game dresses the BN6
-   area it is like (`run_dress`): its layouts, guardian, battles and song
-   are that area's, its tiles and name its own. The run's seed picks it,
+   area it is like (`run_dress`): its layouts, guardian and battles are
+   that area's, its tiles, name and theme its own. A theme (`xsong`, a song
+   in its game's song table) is copied into BN6's free space with what it
+   plays on (`src/audio/xsong.c`): its sequence with the pointers moved,
+   the voices it selects, their key splits, drum kits and samples, and
+   entered in one of BN6's 61 empty song slots, where BN6's own sound
+   engine plays it as one of its own. The run's seed picks it,
    with the ROMs present, so nothing is saved: a run continued without
    the other ROM goes on in the BN6 area's tiles.
 6. **Platforms**: desktop first. A New 3DS's 96 MB heap holds BN6 twice
@@ -84,7 +89,10 @@ ROM in memory, and shows its battle screens.
   layers (`--atlas DIR:aN:3`).
 - [ ] Oran Area (2-3: three walkway looks, two of platforms) and its
   Undernet (10-12), which the same tuning left at twice the seams.
-- [ ] Its music.
+- [x] Its areas' themes, from its own map-music lists: ACDC Area, SciLab
+  and End Area its net theme (song 0x13), Nebula Area its Undernet's
+  (0x14).
+- [ ] Its other music (towns, battles).
 - [ ] Its towns and bystanders.
 - [ ] Its guardians, in battles in its own engine.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

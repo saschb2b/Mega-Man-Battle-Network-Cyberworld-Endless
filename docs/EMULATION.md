@@ -31,6 +31,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x60000` | Generated coordinate data (walls, the exit pad's trigger) | `coords.c` |
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
 | `+0x170000`-`+0x1A0000` | Another game's net area (docs/MULTIROM.md): its tile set, a header of its own before its two blocks encoded again, and its palette as it is; the map its layers take over points at them | `netmap.c` |
+| `+0x1A0000`-`+0x260000` | Other games' songs (docs/MULTIROM.md): each song's sequence with its pointers moved, the voices it selects, their key splits, drum kits, samples and waves (a piece two songs share once); BN6's empty song slots from 0x26 point at them. Every song the other games' areas play is copied the first time one is needed, in the areas' order, so each has the same place in every session (a checkpoint's state holds the music player's pointers into it) | `xsong.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |

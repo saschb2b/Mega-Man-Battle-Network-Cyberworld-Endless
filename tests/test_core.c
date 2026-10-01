@@ -26,6 +26,7 @@
 #include "townmath.h"
 #include "touch_layout.h"
 #include "buttons.h"
+#include "xsong.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -53,6 +54,10 @@ void flag_set(int flag) { (void)flag; }
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
+/* (another game's songs: no core to copy them into) */
+void emu_write(uint32_t addr, const void *data, size_t len) { (void)addr; (void)data; (void)len; }
+uint32_t emu_read32(uint32_t addr) { (void)addr; return 0; }
+bool emu_debug_on(void) { return false; }
 
 static void test_sha1(void) {
 	char hex[41];
@@ -1287,6 +1292,36 @@ static void test_touch(void) {
 	CHECK(t.size_max >= 130 && fabsf(t.box[TOUCH_A].w - def.box[TOUCH_A].w * 1.3f) < 1, "a tablet's A at 130%% did not grow (%d%% fits)", t.size_max);
 }
 
+/* Another game's song (src/audio/xsong.c): the pointers a walk of its
+ * tracks finds to move, and the voices it selects; a pointer out of the
+ * sequence, or a command whose pointers it can't move, refuses the song. */
+static void test_xsong(void) {
+	const uint32_t base = 0x08123400u;
+	/* 0: VOICE 5, a note, PATT to 20; 10: VOICE 3 and (running status) 7,
+	 * GOTO 0; 20: the pattern, a note, PEND, then FINE */
+	uint8_t seq[25] = { 0xBD, 5, 0xD0, 60, 100, 0xB3, 0, 0, 0, 0, 0xBD, 3, 7, 0xB2, 0, 0, 0, 0, 0, 0, 0xD0, 64, 100, 0xB4, 0xB1 };
+	seq[6] = 0x14; seq[7] = 0x34; seq[8] = 0x12; seq[9] = 0x08;      /* base + 20 */
+	seq[14] = 0x00; seq[15] = 0x34; seq[16] = 0x12; seq[17] = 0x08;   /* base */
+	uint32_t starts[1] = { 0 }, ptrs[8];
+	uint8_t programs[16] = { 0 };
+	int n = 0;
+	bool ok = xsong_walk(seq, sizeof seq, base, starts, 1, ptrs, &n, 8, programs);
+	CHECK(ok && n == 2 && ptrs[0] == 6 && ptrs[1] == 14, "xsong: the PATT's and GOTO's pointers (%d, n %d)", ok, n);
+	CHECK(programs[0] == (1 << 3 | 1 << 5 | 1 << 7), "xsong: voices 3, 5 and 7 (%#x)", programs[0]);
+	/* (a GOTO out of the sequence) */
+	seq[14] = 0x80;
+	n = 0;
+	CHECK(!xsong_walk(seq, sizeof seq, base, starts, 1, ptrs, &n, 8, programs), "xsong: a pointer out refused");
+	seq[14] = 0x00;
+	/* (REPT: its count, then its pointer; MEMACC refused) */
+	uint8_t rept[12] = { 0xB5, 2, 0x06, 0x34, 0x12, 0x08, 0xD0, 60, 100, 0xB1, 0, 0 };
+	n = 0;
+	CHECK(xsong_walk(rept, 10, base, starts, 1, ptrs, &n, 8, programs) && n == 1 && ptrs[0] == 2, "xsong: REPT's pointer after its count");
+	uint8_t memacc[6] = { 0xB9, 1, 2, 3, 0xB1, 0 };
+	n = 0;
+	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -1302,6 +1337,7 @@ int main(void) {
 	test_town_moves();
 	test_talk();
 	test_touch();
+	test_xsong();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

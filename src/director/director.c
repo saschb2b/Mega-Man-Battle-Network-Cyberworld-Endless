@@ -55,6 +55,7 @@
 #include "trader.h"
 #include "text.h"
 #include "town.h"
+#include "xsong.h"
 
 int director_debug_biome = -1;
 int director_debug_area = -1;
@@ -992,6 +993,14 @@ static int layer_area(int *biome) {
 	return director_debug_area;
 }
 
+/* The song an area's layers play: another game's area its own theme,
+ * copied into BN6 (docs/MULTIROM.md), where it can be; else `song`, the
+ * BN6 area's. */
+static int layer_song(int tiles, int song) {
+	const NetAreaDef *x = net_area_def(tiles);
+	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
+}
+
 /* The map an area's layers take over. */
 static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
@@ -1057,7 +1066,7 @@ static bool build_layer(void) {
 			D.duel_call_due = true;
 		}
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
-	mapslot_music(D.group, D.number, a->song);
+	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
 	D.chosen = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 

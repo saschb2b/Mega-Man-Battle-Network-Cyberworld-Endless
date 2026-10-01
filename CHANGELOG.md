@@ -26,7 +26,8 @@
   BN6 areas they resemble, each in about half the runs that come there:
   ACDC Area for Central Area ("The net of Lan's old hometown"), SciLab for
   Sky Area, End Area for Seaside Area and Nebula Area for the Graveyard,
-  in their own tiles and colours, under their own names. Their layouts,
+  in their own tiles and colours, under their own names, to their own
+  music (BN5's net theme; Nebula Area its Undernet's). Their layouts,
   guardians and battles stay the BN6 areas'. BN6 alone plays
   as before. Not on the 3DS, which has no memory for a second ROM, or in
   the browser.

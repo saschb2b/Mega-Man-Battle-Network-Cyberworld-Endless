@@ -43,6 +43,7 @@ typedef struct {
 	uint8_t over[2];         /* the BN6 map its layers take over (group, number) */
 	uint8_t like;            /* the BN6 area (BIOME_*) whose layouts and furnishings its layers take */
 	const char *name, *short_name, *motto;   /* what a run calls it: in full, in nine letters, on its act's card */
+	uint8_t xsong;           /* its theme in its own game's song table (0: `song`, BN6's) */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
@@ -94,6 +95,7 @@ typedef struct {
 	int rw_groups, net_groups;              /* the tables' entries: real-world groups from 0x00, internet ones from 0x80 */
 	const NetAreaDef *areas;                /* the net areas it lends a run */
 	int nareas;
+	uint32_t song_table;                    /* MP2K songs: (header, player, player), as BN6's */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
