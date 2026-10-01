@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Mr. Weather Comp's fields are whole solar panels.** Pieces of its
+  fan belts turned up where a field's edge cut them: half domes at the
+  ends of its bands, a fan cluster sliced off at the guardian's arena.
+  Its fields now carry their solar panels and lights alone.
 - **The Net Dealer no longer denies the net's rumors.** On an act's first
   layer he said there was "no word yet" on its guardian, two platforms
   after a Navi had named him. He now says nobody has come back to tell,
@@ -14,8 +18,7 @@
   panels ran as plain bands without their lights, and the Cybeast Nest's
   floors lost their cracks. A field's middle is now laid as the original
   lays it: by its repeating pattern where it has one, else a whole
-  stretch of the original field repeated, lights, fans and cracks in
-  place.
+  stretch of the original field repeated, lights and cracks in place.
 - **No more grey cubes floating in the Cybeast Nest's void.** Its one
   piece of scenery was debris from under the original's altar, set
   alone beside the floor; the Nest now sets none.

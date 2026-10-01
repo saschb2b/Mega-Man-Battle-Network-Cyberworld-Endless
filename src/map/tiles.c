@@ -74,6 +74,25 @@ static int hue_pixels(const AreaSrc *a, int cx, int cy, unsigned buckets) {
 	return n;
 }
 
+/* How many pixels of the top of the panel around map pixel (cx, cy) are
+ * pale: bright and weakly coloured. */
+static int pale_pixels(const AreaSrc *a, int cx, int cy) {
+	int W = a->tw * 8, H = a->th * 8, n = 0;
+	for (int dy = -8; dy <= 8; ++dy)
+		for (int dx = -16; dx <= 16; ++dx) {
+			int x = cx + dx, y = cy + dy;
+			if (2 * abs(dy) + abs(dx) > 16 || x < 0 || y < 0 || x >= W || y >= H) continue;
+			uint32_t c = area_src_floor_px(a, (size_t)y * W + x);
+			if (!(c >> 24)) continue;
+			int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+			int mx = r > g ? (r > b ? r : b) : (g > b ? g : b), mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+			n += mx >= 150 && (mx - mn) * 100 < 40 * mx;
+		}
+	return n;
+}
+
+#define PALE_PIXELS 40   /* SKIP_PALE: Mr. Weather Comp's fan belts 120 and more, its solar panels under 20 */
+
 #define SPAN 128   /* panels cached per axis, centred on the world origin */
 #define OTHER 3    /* a source panel of neither material */
 
@@ -572,10 +591,17 @@ static void find_plain(TileBook *b) {
 }
 
 /* Whether panel (A, B) is floor whose tiles are not learned. */
+/* Whether a side of panel (A, B) touches walkway floor. */
+static bool beside_walkway(const Src *s, int A, int B) {
+	return src_panel(s, A + 1, B) == TILE_B || src_panel(s, A - 1, B) == TILE_B || src_panel(s, A, B + 1) == TILE_B || src_panel(s, A, B - 1) == TILE_B;
+}
+
 static bool skipped(const Src *s, int A, int B) {
 	if (!s->skip_styles || !drawn_cached(s, A, B)) return false;
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	if (s->skip_styles & SKIP_PALE) return src_panel(s, A, B) == TILE_A && !beside_walkway(s, A, B) &&
+		pale_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) >= PALE_PIXELS;
 	if (s->skip_styles & SKIP_ANY_PIXEL) return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->skip_styles & 0xFFFu) >= 8;
 	return s->skip_styles >> style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
 }
@@ -734,7 +760,7 @@ static void patch_stretch(const PatchSample *s, int n, TileBook *out) {
 		B1 = s[i].B > B1 ? s[i].B : B1;
 	}
 	if (n < PATCH_MIN || A1 - A0 + 1 < STRETCH_MIN || B1 - B0 + 1 < STRETCH_MIN || A1 - A0 >= SPAN || B1 - B0 >= SPAN) return;
-	int w = A1 - A0 + 1, h = B1 - B0 + 1, full = 0, r[4];
+	int w = A1 - A0 + 1, h = B1 - B0 + 1, full = 0, r[4] = { 0 };
 	/* per panel: its tiles' pairs by phase (-1 none) and how many it has */
 	int16_t *at = malloc((size_t)w * h * 64 * sizeof *at);
 	uint8_t *tiles = calloc((size_t)w * h, 1);

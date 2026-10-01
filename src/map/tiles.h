@@ -92,6 +92,11 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * its middle: Seaside's arrow panels, orange chevrons in a pink frame,
  * whose pieces its boardwalks' joins took). */
 #define SKIP_ANY_PIXEL 0x8000
+/* ... or with SKIP_PALE, a platform panel whose top is pale in places
+ * (bright, weakly coloured): Mr. Weather Comp's fan belts and the clouds
+ * lying on its fields, laid as pieces at its field's edges and middles,
+ * half domes at the ends of its solar panels' bands. */
+#define SKIP_PALE 0x4000
 #define TILES_BY_SHAPE 0x8000
 /* ... and with TILES_NO_PAD_LOOK, no look of its pads (small platforms on
  * spurs): the Judge Tree's are round stumps, whose rings a square pad would

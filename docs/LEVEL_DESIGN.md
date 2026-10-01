@@ -230,6 +230,11 @@ cracked 5 x 2), else by the largest stretch of its middle (up to 8 x 8
 panels) laid whole and repeated. Mr. Weather Comp's solar panels carry
 lights that cross the tiles' edges at random: picked tile by tile, its
 fields came out as plain bands the length of the field, their lights gone.
+Its fan belts, which run across its fields from edge to edge, and the
+clouds lying on them lend no tiles (`SKIP_PALE`: panels whose tops are
+pale in places, but for those beside a walkway, which its joins need):
+a field cuts them anywhere, and cut, they stood as half domes at the
+ends of its bands.
 
 Before its tiles are picked, a layer's floor is made drawable
 (`src/map/legal.c`): every panel whose 3x3 neighbourhood of platform,
