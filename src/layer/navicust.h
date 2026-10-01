@@ -72,8 +72,19 @@ int navicust_skip_frags(int depth);
 bool navicust_expmemry(int depth);
 /* MegaMan's words for the bug counts (one per type, as the game keeps
  * them): speaker-marked boxes for talk_start; "" for none. `after_run`:
- * said after the NaviCust's RUN, whose "OK" they answer. */
-const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run);
+ * said after the NaviCust's RUN, whose "OK" they answer; `cause`: why,
+ * as navicust_bug_cause has it, or NULL for the rules in general. */
+const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run, const char *cause);
+/* A program on BN6's board: its name, kind (0 a program part, 1 a plus
+ * part, as its record has them) and colour (1-6). */
+typedef struct { const char *name; int kind, color; } NaviPart;
+#define NAVICUST_GRID 7   /* BN6's board: a 7x7 grid, the board in it from (1, 1), the command line its row 3 */
+/* Why the board bugs, in MegaMan's words ("HP+100 is a plus part on the
+ * command line."), from BN6's grid (each cell its program's index in
+ * `parts` + 1) on a `w` x `h` board: a plus part on the command line, a
+ * program part off it, a part past the board's edge, two programs of one
+ * colour side by side; NULL where none of them is. */
+const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, int w, int h);
 /* Which programs L and R turn, in MegaMan's words (one sentence): those of
  * the colours whose Spins are held (navicust_set_spins); for `variant`
  * (program * 4 + v, 0 for any), whether that one turns. */

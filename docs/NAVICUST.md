@@ -130,7 +130,9 @@ five colours or six bug at random at battle start; a block past the
 board's edge bugs. What changes is that the player sees the price the
 moment it lands: after the NaviCust runs, MegaMan names each active bug and
 what it does in plain words ("An HP bug: I'll lose HP slowly in battle,
-faster each time I'm hit"), and L's status and the SELECT map show the
+faster each time I'm hit"), then which program broke which rule, read
+from the game's own board ("HP+100 is a plus part on the command line:
+plus parts go anywhere else"), and L's status and the SELECT map show the
 bugs. A bug the player cannot read is a punishment; one they can read is a
 decision.
 

@@ -1083,21 +1083,24 @@ static void test_navicust(void) {
 	CHECK(!navicust_pack(many, 5, 4, 4), "twenty cells on sixteen");
 	/* the bug words: none, one light, several */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
-	CHECK(!*navicust_bug_words(bugs, false), "words for no bug");
+	CHECK(!*navicust_bug_words(bugs, false, NULL), "words for no bug");
 	bugs[9] = 1;
-	CHECK(strstr(navicust_bug_words(bugs, false), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs, false));
+	CHECK(strstr(navicust_bug_words(bugs, false, NULL), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs, false, NULL));
 	bugs[9] = 2;
-	CHECK(strstr(navicust_bug_words(bugs, false), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs, false));
+	CHECK(strstr(navicust_bug_words(bugs, false, NULL), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs, false, NULL));
 	bugs[7] = 5;
 	bugs[11] = 1;
-	const char *w = navicust_bug_words(bugs, false);
+	const char *w = navicust_bug_words(bugs, false, NULL);
 	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
 	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
+	/* (the cause where the board shows it, in place of the rules) */
+	w = navicust_bug_words(bugs, false, "HP+100 is a plus part on the command line: plus parts go anywhere else.");
+	CHECK(strstr(w, "HP+100 is a plus part") && !strstr(w, "Bugs come from"), "a placement bug names its cause: %s", w);
 	memset(bugs, 0, sizeof bugs);
 	bugs[11] = 1;
-	CHECK(!strstr(navicust_bug_words(bugs, false), "command line"), "a colours' bug alone names itself");
-	CHECK(strstr(navicust_bug_words(bugs, true), "the RUN says OK, but") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true));
-	check_talk("navicust_bug_words", navicust_bug_words(bugs, true));
+	CHECK(!strstr(navicust_bug_words(bugs, false, NULL), "command line"), "a colours' bug alone names itself");
+	CHECK(strstr(navicust_bug_words(bugs, true, NULL), "the RUN says OK, but") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true, NULL));
+	check_talk("navicust_bug_words", navicust_bug_words(bugs, true, NULL));
 	/* which programs turn: those whose colour's Spin is held */
 	navicust_set_spins(0);
 	CHECK(strstr(navicust_turn_words(0), "none yet") != NULL, "no Spin: %s", navicust_turn_words(0));
@@ -1292,6 +1295,43 @@ static void test_touch(void) {
 	CHECK(t.size_max >= 130 && fabsf(t.box[TOUCH_A].w - def.box[TOUCH_A].w * 1.3f) < 1, "a tablet's A at 130%% did not grow (%d%% fits)", t.size_max);
 }
 
+/* Why BN6's board bugs (navicust_bug_cause), from its 7x7 grid: each
+ * rule caught and named, and a clean board none. */
+static void test_bug_cause(void) {
+	uint8_t g[49];
+	const char *why;
+	NaviPart hp = { "HP+100", 1, 3 }, atk = { "Attack+1", 1, 3 }, cust = { "Custom1", 0, 5 }, armor = { "SuperArmor", 0, 4 };
+	/* (a plus part over the command line, grid row 3) */
+	memset(g, 0, sizeof g);
+	g[2 * 7 + 2] = g[2 * 7 + 3] = g[3 * 7 + 2] = g[3 * 7 + 3] = 1;
+	why = navicust_bug_cause(g, &hp, 1, 4, 4);
+	CHECK(why && strstr(why, "HP+100 is a plus part on the command line"), "bug cause: plus part on the line (%s)", why ? why : "none");
+	/* (a program part off it) */
+	memset(g, 0, sizeof g);
+	g[1 * 7 + 1] = g[2 * 7 + 1] = 1;
+	why = navicust_bug_cause(g, &cust, 1, 4, 4);
+	CHECK(why && strstr(why, "Custom1 is off the command line"), "bug cause: program part off the line (%s)", why ? why : "none");
+	/* (past a 4x4 board's edge at column 5, which a 5-wide board holds) */
+	memset(g, 0, sizeof g);
+	g[3 * 7 + 4] = g[3 * 7 + 5] = 1;
+	why = navicust_bug_cause(g, &armor, 1, 4, 4);
+	CHECK(why && strstr(why, "SuperArmor goes past the board's edge"), "bug cause: past the edge (%s)", why ? why : "none");
+	CHECK(!navicust_bug_cause(g, &armor, 1, 5, 4), "bug cause: none on a 5-wide board");
+	/* (two pink programs side by side, off the line) */
+	NaviPart two[2] = { atk, hp };
+	memset(g, 0, sizeof g);
+	g[1 * 7 + 1] = 1;
+	g[1 * 7 + 2] = g[2 * 7 + 2] = 2;
+	why = navicust_bug_cause(g, two, 2, 4, 4);
+	CHECK(why && strstr(why, "Attack+1 and HP+100, both pink, touch"), "bug cause: one colour side by side (%s)", why ? why : "none");
+	/* (clean: the program part on the line, the plus part off it, apart) */
+	NaviPart clean[2] = { cust, hp };
+	memset(g, 0, sizeof g);
+	g[3 * 7 + 1] = g[3 * 7 + 2] = 1;
+	g[1 * 7 + 3] = g[1 * 7 + 4] = 2;
+	CHECK(!navicust_bug_cause(g, clean, 2, 4, 4), "bug cause: none on a clean board");
+}
+
 /* Another game's song (src/audio/xsong.c): the pointers a walk of its
  * tracks finds to move, and the voices it selects; a pointer out of the
  * sequence, or a command whose pointers it can't move, refuses the song. */
@@ -1338,6 +1378,7 @@ int main(void) {
 	test_talk();
 	test_touch();
 	test_xsong();
+	test_bug_cause();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

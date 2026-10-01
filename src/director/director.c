@@ -2199,6 +2199,30 @@ static const char *off_board_words(void) {
  * drawn its letters as noise, let MegaMan walk first; a talk opened six
  * frames after the PET closed, from its menu and from the NaviCust, drew
  * them whole). */
+/* Why the board bugs, from the game's own grid and its programs'
+ * records (navicust_bug_cause), or NULL. */
+static const char *bug_cause(void) {
+	static char names[BN6_NAVICUST_SLOTS][16];
+	NaviPart parts[BN6_NAVICUST_SLOTS];
+	uint8_t grid[NAVICUST_GRID * NAVICUST_GRID];
+	if (!R.data || !R.layout || !R.layout->navicust_programs) return NULL;
+	int n = 0;
+	for (int i = 0; i < BN6_NAVICUST_SLOTS; ++i) {
+		int v = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)i * 8);
+		const char *about = v > 0 && v < 47 * 4 ? navicust_about(v / 4) : NULL, *colon = about ? strchr(about, ':') : NULL;
+		parts[i] = (NaviPart){ NULL, -1, 0 };
+		if (v <= 0 || v >= 47 * 4) continue;
+		const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)v * 16;
+		snprintf(names[i], sizeof names[0], "%.*s", colon ? (int)(colon - about) : 0, colon ? about : "");
+		parts[i] = (NaviPart){ colon ? names[i] : NULL, rec[1], rec[3] };
+		n = i + 1;
+	}
+	for (int i = 0; i < NAVICUST_GRID * NAVICUST_GRID; ++i) grid[i] = emu_read8(BN6_NAVICUST_GRID + (uint32_t)i);
+	int w, h;
+	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
+	return navicust_bug_cause(grid, parts, n, w, h);
+}
+
 #define BUG_CALM 10
 static void bug_watch(void) {
 	static int last, calm;
@@ -2226,7 +2250,7 @@ static void bug_watch(void) {
 	if (talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return;
 	bool had = false;
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
-	const char *words = navicust_bug_words(now, ran);
+	const char *words = navicust_bug_words(now, ran, bug_cause());
 	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN)) {
 		memcpy(D.bugs, now, sizeof now);
 		ran = false;

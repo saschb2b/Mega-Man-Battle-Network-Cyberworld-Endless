@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **MegaMan says which program bugs the NaviCust, and why.** After a RUN
+  with a bug he listed every rule a bug can come from, and a player had
+  to work out which one he had broken. He now names it from the board:
+  "HP+100 is a plus part on the command line: plus parts go anywhere
+  else", a program off the command line, a part past the board's edge,
+  or two programs of one colour side by side.
 - **The map hands over to the arrow.** Letting go of SELECT now shows
   the way-on arrow, as L does, where it had faded half a minute after
   MegaMan's words: a player who looked at the map on a strip with no

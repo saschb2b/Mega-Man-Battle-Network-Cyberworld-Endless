@@ -354,7 +354,66 @@ const char *navicust_turn_words(int variant) {
 	return buf;
 }
 
-const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run) {
+/* (BN6's compile, bn6f sub_813BBD4: a program's shape lands at its
+ * column and row less 3 on the 7x7 grid; the command line is the grid's
+ * row 3, whatever the board's size; colours touch only inside its 5x5) */
+#define CMD_ROW 3
+
+/* what the rules find of part `p` (1-based): a bit each, by the order the
+ * words take */
+enum { CAUSE_PLUS = 1, CAUSE_OFF = 2, CAUSE_EDGE = 4 };
+static int part_causes(const uint8_t *grid, const NaviPart *part, int p, int w, int h) {
+	bool on_line = false, past = false;
+	for (int y = 0; y < NAVICUST_GRID; ++y)
+		for (int x = 0; x < NAVICUST_GRID; ++x) {
+			if (grid[y * NAVICUST_GRID + x] != p) continue;
+			on_line |= y == CMD_ROW;
+			past |= x < 1 || x > w || y < 1 || y > h;
+		}
+	return (part->kind == 1 && on_line ? CAUSE_PLUS : 0) | (part->kind == 0 && !on_line ? CAUSE_OFF : 0) | (past ? CAUSE_EDGE : 0);
+}
+
+/* the first two programs of one colour side by side inside the 5x5 (their
+ * indexes, 1-based, in *a and *b); false for none */
+static bool same_colors(const uint8_t *grid, const NaviPart *parts, int n, int *a, int *b) {
+	for (int y = 1; y <= 5; ++y)
+		for (int x = 1; x <= 5; ++x) {
+			int p = grid[y * NAVICUST_GRID + x];
+			if (!p || p > n) continue;
+			int q[2] = { x < 5 ? grid[y * NAVICUST_GRID + x + 1] : 0, y < 5 ? grid[(y + 1) * NAVICUST_GRID + x] : 0 };
+			for (int k = 0; k < 2; ++k)
+				if (q[k] && q[k] <= n && q[k] != p && parts[q[k] - 1].color == parts[p - 1].color) { *a = p; *b = q[k]; return true; }
+		}
+	return false;
+}
+
+const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, int w, int h) {
+	static const char *const why[3] = {
+		" is a plus part on the command line: plus parts go anywhere else.",
+		" is off the command line: a program needs a block on it.",
+		" goes past the board's edge.",
+	};
+	static char buf[300];
+	int k = 0, said = 0;
+	buf[0] = 0;
+	for (int p = 1; p <= n && said < 2; ++p) {
+		int c = part_causes(grid, &parts[p - 1], p, w, h);
+		for (int r = 0; r < 3 && said < 2; ++r)
+			if (c >> r & 1 && parts[p - 1].name) {
+				k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s%s", k ? " " : "", parts[p - 1].name, why[r]);
+				++said;
+			}
+	}
+	int a, b;
+	if (said < 2 && same_colors(grid, parts, n, &a, &b) && parts[a - 1].name && parts[b - 1].name) {
+		k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s and %s, both %s, touch.", k ? " " : "", parts[a - 1].name, parts[b - 1].name,
+			navicust_color_name(parts[a - 1].color));
+		++said;
+	}
+	return said ? buf : NULL;
+}
+
+const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run, const char *cause) {
 	/* the game's bug types (its compile counts one per violation; the
 	 * level is the count, up to 3) and what each does, in MegaMan's words */
 	static const char *const name[NAVICUST_BUGS] = {
@@ -397,7 +456,10 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 	 * looking clean again; the colours' count names itself) */
 	bool placed = false;
 	for (int t = 1; t < 11; ++t) placed |= counts[t] && effect[t];
-	if (placed && k < (int)sizeof buf - 220)
+	/* (and where it can be read from the board, what: a playtester told
+	 * the four rules looked for the one he had broken) */
+	if (placed && cause && k < (int)sizeof buf - 320) k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s", cause);
+	else if (placed && k < (int)sizeof buf - 220)
 		k += snprintf(buf + k, sizeof buf - (size_t)k,
 			"|@M Bugs come from a program over the board's edge or off the command line, a Plus part on it, "
 			"or two of one color side by side.");

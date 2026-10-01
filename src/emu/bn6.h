@@ -35,6 +35,8 @@
 #define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
 #define BN6_NAVICUST_PLACED   0x02004190u /* the programs on the NaviCust's board, 8 bytes each: +0 u16 program * 4 + colour variant, +3 column, +4 row, +5 turns; 0 ends */
 #define BN6_NAVICUST_PLACED_MAX 25
+#define BN6_NAVICUST_SLOTS    49          /* the list's room, as the game's compile walks it (holes where a program was taken off) */
+#define BN6_NAVICUST_GRID     0x0200414Cu /* the board as a 7x7 grid, a byte a cell: its placed program's index + 1, 0 none (bn6f sub_813B9B4; docs/NAVICUST.md) */
 #define BN6_PROGRAM_ITEMS     0x90        /* key item 0x90 + program * 4 + variant: how many of it MegaMan has, on the board or not */
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data; +0x10 1 while a trigger's warp is under way, +0x11 its warp index */
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState: +0x1C script pos, +0x40 original pos */
