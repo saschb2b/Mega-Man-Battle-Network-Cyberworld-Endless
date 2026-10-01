@@ -170,6 +170,21 @@
   left out the viruses deleted (the count began again with the
   CONTINUE), and its next Net Dealer greeted MegaMan as if they had never
   met. Each save now keeps them beside the run.
+- **CONTINUE doesn't greet a saved ScrtData as a new find.** A player
+  holding one heard "Our second ScrtData! One more, and the golden gate
+  opens!" as his run came back. MegaMan's words now come for a new one
+  only.
+- **The way on names a never-met guardian as ???.** After a guardian,
+  the next ones were offered by name where MegaMan knew them ("EraseMan
+  (Wood)") and by their area where he didn't ("Aquarium Comp"), which a
+  player read as a place against a Navi. A never-met one is now "???
+  (Aquarium)", as the act card names him.
+- **MegaMan warns that StarFish soak up shots.** Their bubbles stop
+  straight shots and trap MegaMan, which BN6 never says, and a player
+  lost 350 HP to one while three Cannons went into its bubbles. Once
+  StarFish have been fought in any run, MegaMan says so as an act or a
+  side layer where they live begins: a chip that drops from above gets
+  past them.
 - **MegaMan says which program bugs the NaviCust, and why.** After a RUN
   with a bug he listed every rule a bug can come from, and a player had
   to work out which one he had broken. He now names it from the board:
