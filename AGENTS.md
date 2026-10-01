@@ -81,9 +81,13 @@ the site.
 - A new ROM offset needs a note in `docs/ROM_DATA.md` saying how it was
   located and how to verify it.
 - The game's 240x160 picture stays whole at a whole-number scale on every
-  screen shape. The one exception is the 3DS's top screen (400x240), where
-  1x is the only whole scale: there it fills the screen's height at 1.5x
-  by default, and `screen = whole` in `settings.ini` gives 1x.
+  screen shape. The exceptions: the 3DS's top screen (400x240), where 1x
+  is the only whole scale: there it fills the screen's height at 1.5x by
+  default, and `screen = whole` in `settings.ini` gives 1x; and screens
+  where a whole scale leaves the picture a quarter smaller or more than
+  filling would (640x480: 2x against 2.67x, issue #36), which fill it with
+  sharp scaling (whole-scaled, then smoothly to size) by default, and
+  `screen = whole` or `fill` in `settings.ini` sets it either way.
 - Draw calls must not change game state. Input is read once per frame in
   `platform_poll`.
 - The C builds warning-free with the Makefile's `WARN` (`-Wall -Wextra`,

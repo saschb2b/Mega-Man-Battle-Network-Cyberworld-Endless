@@ -25,6 +25,8 @@ typedef struct {
 	int screen_w, screen_h;
 	int w, h;          /* logical canvas */
 	int scale;
+	float fill;         /* (settings.ini's screen) the canvas shown at this scale to fill the screen, not a whole one; 0 whole */
+	SDL_Texture *sharp; /* ... drawn whole-scaled into this first, then smoothly to its size */
 	int core_x, core_y; /* top-left of the centered 240x160 core */
 	float dp;          /* screen pixels to a dp (a 160th of an inch): the touch controls' sizes */
 	uint32_t held, pressed, released, repeat;
@@ -67,7 +69,7 @@ bool platform_save_canvas(const char *path);
 /* Files were written: in a browser, keep them (IndexedDB); elsewhere nothing. */
 void platform_persist(void);
 /* settings.ini in the data folder (made with the defaults when missing):
- * smooth_motion = on or off (P.blend). */
+ * smooth_motion = on or off (P.blend); screen = auto, whole or fill (P.fill). */
 void platform_load_settings(const char *path);
 /* Smooth motion: the display refreshed with the game's last two frames
  * mixed, `w` (0-1) of the newer; the loop's frames were played unshown. */

@@ -707,7 +707,10 @@ static void draw(void) {
 			text_draw(x, y0 + 102 - up, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
 			text_draw(x, y0 + 114 - 2 * up, "We did it, MegaMan!", WHITE, TEXT_CENTER);
 		} else {
-			text_draw(x, y0 + 102 - up, "Dad's backup brought MegaMan home.", sky, TEXT_CENTER);
+			/* (a line the game's width holds: "brought MegaMan home." ran off
+			 * both sides where the screen shows no more than the game's 240
+			 * pixels, a 480 x 320 handheld's or a 640 x 480 filled, issue #36) */
+			text_draw(x, y0 + 102 - up, "Dad's backup got MegaMan home.", sky, TEXT_CENTER);
 			/* (a first fight with the guardian who deleted him, named on
 			 * the line above: what it gave, his battle data, which the
 			 * next briefing reads, before a new best, which "New best!"

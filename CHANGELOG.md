@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The picture fills a 640x480 screen (issue #36).** On an RG35XX Pro
+  the game's picture took 480x320 of the screen's 640x480, half of it:
+  scaled by whole numbers, 3x no longer fits. Where a whole number leaves
+  the picture a quarter smaller or more than the screen allows, it now
+  fills the screen (640x427 there), each pixel's edge a little soft.
+  `screen = whole` in `settings.ini` keeps whole pixels, `screen = fill`
+  fills every screen; the Nova, the Flip 2 and most screens stay whole as
+  before. The run summary's "Dad's backup got MegaMan home." now fits a
+  screen only the game's width wide.
 - **Bystanders don't repeat themselves across an act.** Each layer's
   Navis took their lines from a random place in the pool, and a player
   heard "The exit pad only goes down" on an act's first and third

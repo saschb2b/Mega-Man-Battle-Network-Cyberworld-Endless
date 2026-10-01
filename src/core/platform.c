@@ -98,14 +98,40 @@ static float density(void) {
 	return dp > 0 ? dp : 1;
 }
 
+/* settings.ini's screen: the picture at the largest whole scale (whole), at
+ * the largest that fits (fill), or (auto) filling where the whole one leaves
+ * it a quarter smaller or more: an RG35XX Pro's 640 x 480 drew it at
+ * 480 x 320, half the screen (issue #36), where a Nova's 1280 x 960 gives
+ * 5x against 5.33 and a Flip 2's 1920 x 1080 6x against 6.75 */
+enum { SCREEN_AUTO, SCREEN_WHOLE, SCREEN_FILL };
+#ifndef __3DS__
+static int screen_mode = SCREEN_AUTO;
+#endif
+#define FILL_GAIN 1.25f
+
+/* The scale the canvas fills the screen at, or 0 at a whole one: never
+ * under the touch controls, which lay out by whole scales, nor on the 3DS
+ * (present_3ds.c fills its top screen) or a page (which sizes its canvas). */
+static float fill_scale(void) {
+#if defined(__3DS__) || defined(__EMSCRIPTEN__)
+	return 0;
+#else
+	if (screen_mode == SCREEN_WHOLE || touch_shown()) return 0;
+	float fx = (float)P.screen_w / CORE_W, fy = (float)P.screen_h / CORE_H, f = fx < fy ? fx : fy;
+	if (f <= (float)P.scale || (screen_mode == SCREEN_AUTO && f < (float)P.scale * FILL_GAIN)) return 0;
+	return f;
+#endif
+}
+
 static void layout_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
 	P.dp = density();
 	if (touch_shown()) P.scale = touch_fit_scale(P.screen_w, P.screen_h, P.dp, P.scale);
-	P.w = P.screen_w / P.scale;
-	P.h = P.screen_h / P.scale;
+	P.fill = fill_scale();
+	P.w = P.fill > 0 ? (int)((float)P.screen_w / P.fill) : P.screen_w / P.scale;
+	P.h = P.fill > 0 ? (int)((float)P.screen_h / P.fill) : P.screen_h / P.scale;
 	if (P.w < CORE_W) P.w = CORE_W;
 	if (P.h < CORE_H) P.h = CORE_H;
 	P.core_x = (P.w - CORE_W) / 2;
@@ -125,6 +151,22 @@ static void layout_canvas(void) {
 	SDL_SetTextureScaleMode(P.canvas, SDL_ScaleModeNearest);
 	P.fx_copy = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w, P.h);
 	SDL_SetTextureScaleMode(P.fx_copy, SDL_ScaleModeNearest);
+	if (P.sharp) SDL_DestroyTexture(P.sharp);
+	P.sharp = NULL;
+	if (P.fill > 0) {
+		int k = (int)P.fill + 1;   /* (the whole scale just over the fill) */
+		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * k, P.h * k);
+		if (P.sharp) SDL_SetTextureScaleMode(P.sharp, SDL_ScaleModeLinear);
+		else P.fill = 0;   /* (no memory for it: the canvas at the whole scale, a little wide) */
+	}
+}
+
+/* The canvas's scale as the log says it: "5x", or "2.67x (fill)". */
+static const char *scale_words(void) {
+	static char s[24];
+	if (P.fill > 0) snprintf(s, sizeof s, "%.2fx (fill)", (double)P.fill);
+	else snprintf(s, sizeof s, "%dx", P.scale);
+	return s;
 }
 
 /* The window's new size (resized, or in or out of fullscreen): the canvas
@@ -256,12 +298,12 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	 * handheld's own controls: its first START); a keyboard with arrow keys
 	 * counts as a controller here, so its presence decides nothing */
 	if (touch_show(true)) layout_canvas();
-	SDL_Log("screen %dx%d, canvas %dx%d at %dx, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, P.scale, touch_shown() ? "shown" : "hidden");
+	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
 	for (int i = 0; i < SDL_NumJoysticks(); ++i) SDL_Log("controller %d: %s%s", i, SDL_JoystickNameForIndex(i), SDL_IsGameController(i) ? " (a gamepad)" : "");
 #endif
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(P.renderer, &info);
-	printf("display %dx%d renderer %s canvas %dx%d at %dx\n", P.screen_w, P.screen_h, info.name, P.w, P.h, P.scale);
+	printf("display %dx%d renderer %s canvas %dx%d at %s\n", P.screen_w, P.screen_h, info.name, P.w, P.h, scale_words());
 	return true;
 }
 
@@ -270,6 +312,7 @@ void platform_shutdown(void) {
 	blend_reset();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
+	if (P.sharp) SDL_DestroyTexture(P.sharp);
 	if (P.renderer) SDL_DestroyRenderer(P.renderer);
 #ifdef __3DS__
 	present3ds_exit();
@@ -351,7 +394,12 @@ void platform_load_settings(const char *path) {
 			"# three) in turn, which reads as judder. on mixes the two latest frames at\n"
 			"# every refresh, so motion is even, a little blurred and a frame later;\n"
 			"# off shows the game's own frames, sharp (best on 60 and 120 Hz).\n"
-			"smooth_motion = off\n");
+			"smooth_motion = off\n\n"
+			"# screen: whole draws the game's picture at the largest whole scale, every\n"
+			"# pixel the same size; fill makes it as big as the screen holds, each pixel's\n"
+			"# edge a little soft; auto fills where a whole scale would leave it a quarter\n"
+			"# smaller or more (a 640 x 480 screen), else whole.\n"
+			"screen = auto\n");
 		fclose(f);
 		platform_persist();
 		return;
@@ -363,11 +411,15 @@ void platform_load_settings(const char *path) {
 		if (!strcmp(key, "smooth_motion")) P.blend = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 #ifdef __3DS__
 		if (!strcmp(key, "screen")) fill_3ds = strcmp(val, "whole") != 0;
+#else
+		if (!strcmp(key, "screen")) screen_mode = !strcmp(val, "whole") ? SCREEN_WHOLE : !strcmp(val, "fill") ? SCREEN_FILL : SCREEN_AUTO;
 #endif
 		/* (not written by default: for a report of a machine's pacing) */
 		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}
 	fclose(f);
+	/* (the screen setting read after the window opened) */
+	if (P.renderer && !P.headless) layout_canvas();
 }
 
 void platform_load_keys(const char *path) {
@@ -657,6 +709,47 @@ static void over_picture(void) {
 	screen_shot[0] = 0;
 }
 
+/* Where the canvas lands on the screen. */
+static SDL_Rect canvas_rect(void) {
+	if (P.fill > 0) {
+		int w = (int)((float)P.w * P.fill + 0.5f), h = (int)((float)P.h * P.fill + 0.5f);
+		return (SDL_Rect){ (P.screen_w - w) / 2, (P.screen_h - h) / 2, w, h };
+	}
+	return (SDL_Rect){ (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
+}
+
+/* `older`, then `newer` at `alpha` over it (none: `older` alone), into
+ * the target's rect `dst` (NULL: all of it). */
+static void copy_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha, const SDL_Rect *dst) {
+	SDL_BlendMode was;
+	SDL_GetTextureBlendMode(older, &was);
+	SDL_SetTextureBlendMode(older, SDL_BLENDMODE_NONE);
+	SDL_RenderCopy(P.renderer, older, NULL, dst);
+	SDL_SetTextureBlendMode(older, was);
+	if (!newer) return;
+	SDL_SetTextureBlendMode(newer, SDL_BLENDMODE_BLEND);
+	SDL_SetTextureAlphaMod(newer, alpha);
+	SDL_RenderCopy(P.renderer, newer, NULL, dst);
+	SDL_SetTextureAlphaMod(newer, 255);
+}
+
+/* The frame (or smooth motion's two) on the cleared screen: at a whole
+ * scale straight; filling it, whole-scaled into P.sharp first and from
+ * there smoothly to its size (sharp bilinear: a pixel's edges a little
+ * soft, no pixel drawn wider than the next). */
+static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
+	SDL_Rect dst = canvas_rect();
+	if (P.fill > 0) {
+		SDL_SetRenderTarget(P.renderer, P.sharp);
+		copy_frames(older, newer, alpha, NULL);
+	}
+	SDL_SetRenderTarget(P.renderer, NULL);
+	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
+	SDL_RenderClear(P.renderer);
+	if (P.fill > 0) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
+	else copy_frames(older, newer, alpha, &dst);
+}
+
 void platform_present_blend(double w) {
 	/* (a display at a multiple of 60 Hz shows every frame for the same
 	 * refreshes: mixing would only show it a frame later) */
@@ -670,21 +763,12 @@ void platform_present_blend(double w) {
 #endif
 	}
 	if (hz > 0 && (hz % 60 <= 1 || hz % 60 >= 59)) w = 1;
-	SDL_SetRenderTarget(P.renderer, NULL);
-	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
-	SDL_RenderClear(P.renderer);
-	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
-	if (blend_n == 0) SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
+	if (blend_n == 0) show_frames(P.canvas, NULL, 255);
 	else {
 		SDL_Texture *cur = blend_tex[blend_cur], *prev = blend_n > 1 ? blend_tex[blend_cur ^ 1] : cur;
 		if (w < 0) w = 0;
 		if (w > 1) w = 1;
-		SDL_SetTextureBlendMode(prev, SDL_BLENDMODE_NONE);
-		SDL_RenderCopy(P.renderer, prev, NULL, &dst);
-		SDL_SetTextureBlendMode(cur, SDL_BLENDMODE_BLEND);
-		SDL_SetTextureAlphaMod(cur, (Uint8)(w * 255.0 + 0.5));
-		SDL_RenderCopy(P.renderer, cur, NULL, &dst);
-		SDL_SetTextureAlphaMod(cur, 255);
+		show_frames(prev, cur, (Uint8)(w * 255.0 + 0.5));
 	}
 	over_picture();
 #ifdef __3DS__
@@ -697,11 +781,7 @@ void platform_present_blend(double w) {
 
 /* The canvas on the display, at its scale. */
 static void present_canvas(void) {
-	SDL_SetRenderTarget(P.renderer, NULL);
-	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
-	SDL_RenderClear(P.renderer);
-	SDL_Rect dst = { (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
-	SDL_RenderCopy(P.renderer, P.canvas, NULL, &dst);
+	show_frames(P.canvas, NULL, 255);
 	over_picture();
 #ifdef __3DS__
 	present3ds_frame(fill_3ds);

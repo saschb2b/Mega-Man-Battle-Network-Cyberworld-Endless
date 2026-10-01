@@ -516,8 +516,13 @@ it out, delete `savedata/run.sav`; your best depth is kept in `profile.sav`.
 
 The game's 240x160 picture is scaled by a whole number so it stays sharp: 5x
 on the Nova's 1280x960 screen and 6x on the Flip 2's 1920x1080 screen, with
-black borders around it. On a PC the window keeps the same rule as it is
-resized.
+black borders around it. Where a whole number would leave it a quarter
+smaller or more than the screen allows, it fills the screen instead, each
+pixel's edge a little soft: on a 640x480 screen (an RG35XX Pro, an RG35XX
+Plus) it is 640x427 rather than 480x320. `screen = whole` in `settings.ini`
+in the data folder keeps whole pixels everywhere, `screen = fill` fills
+every screen, and `screen = auto` is the default. On a PC the window keeps
+the same rules as it is resized.
 
 The game runs at the GBA's 60 frames a second. A 60 or 120 Hz screen shows
 every frame for the same time; a 90, 144 or 165 Hz one (a Steam Deck OLED,
