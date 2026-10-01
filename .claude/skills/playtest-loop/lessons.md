@@ -1529,3 +1529,51 @@ Loop change: **a changed text is read in a capture to its last box.**
 The first boxes rendered right, and the cut came at the end; the unit
 tests check each text alone, while the game composes them. Page a
 changed chat to its question or its close before committing.
+
+## Session 53: 8/10 (keep playing: yes; recommend: yes)
+
+Run 5 from layer 11: healed first, a green Mystery Data's 1460z before
+the dealer, layer 12 a new best, the third ScrtData, the dealer's
+DolThdr3 for Colonel, and Colonel himself (act 4, never met): 841 of
+1200 dealt in 1:46, MegaMan deleted at Colonel's 359, UnderSht holding
+once at 1 HP. Run 6 began at once with the ElecCross the loss unlocked:
+"I lost a twelve-layer run to a guardian I'd never met, and I still
+want the next one."
+
+Confirmed: the heal arrow after CONTINUE, both act 4 dealers' returning
+greetings (the act note), the guardian named as the net's word,
+UnderSht, money before the shop this time.
+
+Raised and fixed: Colonel's cape sweep along the row he lands in, only
+his own panel lit (major), and his Cannons turned aside while he
+readied a slash (3c9cfd5: his battle data names both, given now that
+they have fought); no running from a guardian, unsaid at 1 HP (3c9cfd5:
+the room before every arena says it); the third ScrtData's gate unsaid
+(e1d1ed6, during the session: it stands in the Undernet); EraseCross's
+drain on a Navi, about a point every 40 frames, promised as his HP
+draining away (3c9cfd5).
+
+Misreads: the exit pad "only from its centre" (his feet were on the
+panel in front of it, his sprite over its ring: the trigger reaches 26
+units, the ring 18), and "CHIP DATA TRANSMISSION" again (into
+persona.md: seen twice). BN6's own: a diagonal lit about 14 frames
+before it hit, during AquaNdl3's animation. Kept: walkway crossings,
+about 25 calls (the owner's call; wish 3 again).
+
+Beside the loop: the sweep before the session measured Colonel at act
+4's middle (21 HP a second at 560 HP to ElecMan's 11), hard, not a
+wall, and Kai's 70% bore it out. BN5's battle music and backgrounds;
+GitHub issues #22 (every generated stair's top lacked the step cell
+BN6's maps have: MegaMan fell under the raised room) and #24 fixed.
+
+Cost: 292 calls, about 90 minutes; the Colonel fight 91 calls, 25
+frames a call at 1 HP until a pace note.
+
+Loop change: **the sweep of a guardian the persona meets for the first
+time looks at his telegraphs, not just his damage.** Both majors of
+sessions 52 and 53 were moves whose lit panels showed less than they
+hit (ProtoMan's WideSword, Colonel's cape), and both were in the
+fights' frames before the sessions: watch each such fight every four
+frames (play.py `--every 4`), list each move with its lit panels against
+its reach and when it can't be hurt, and make his tip cover what the
+light doesn't.
