@@ -86,8 +86,8 @@ biome 10 layout 5 (x) depth 2 seed 9229: near 32.7, fallback 0.0, seams 59, not 
 biome 10 layout 5 (x) depth 2 seed 17148: near 33.1, fallback 0.0, seams 69, not exact 129, other colours 0, off near 4
 biome 10 layout 6 (x) depth 2 seed 9229: near 39.8, fallback 0.0, seams 89, not exact 157, other colours 0, off near 0
 biome 10 layout 6 (x) depth 2 seed 17148: near 39.6, fallback 0.0, seams 61, not exact 134, other colours 0, off near 0
-biome 11 layout -1 (x) depth 3 seed 104740: near 21.8, fallback 0.0, seams 105, not exact 66, other colours 0, off near 0
-biome 11 layout -1 (x) depth 3 seed 209469: near 15.3, fallback 0.0, seams 70, not exact 34, other colours 0, off near 0
+biome 11 layout -1 (x) depth 3 seed 104740: near 15.6, fallback 0.0, seams 110, not exact 40, other colours 0, off near 0
+biome 11 layout -1 (x) depth 3 seed 209469: near 8.2, fallback 0.0, seams 75, not exact 8, other colours 0, off near 0
 biome 11 layout 0 (x) depth 2 seed 9360: near 9.7, fallback 0.0, seams 69, not exact 15, other colours 0, off near 0
 biome 11 layout 0 (x) depth 2 seed 17279: near 12.5, fallback 0.0, seams 99, not exact 19, other colours 0, off near 0
 biome 11 layout 3 (x) depth 2 seed 9360: near 30.0, fallback 0.19, seams 170, not exact 27, other colours 0, off near 0
@@ -101,8 +101,8 @@ biome 13 layout -1 (x) depth 3 seed 104742: near 6.2, fallback 0.0, seams 26, no
 biome 13 layout -1 (x) depth 3 seed 209471: near 5.9, fallback 0.0, seams 28, not exact 6, other colours 0, off near 0
 biome 13 layout 7 (x) depth 2 seed 9622: near 5.4, fallback 0.0, seams 32, not exact 2, other colours 0, off near 0
 biome 13 layout 7 (x) depth 2 seed 17541: near 5.9, fallback 0.0, seams 45, not exact 4, other colours 0, off near 0
-biome 14 layout -1 (x) depth 3 seed 104743: near 22.4, fallback 0.0, seams 111, not exact 60, other colours 0, off near 4
-biome 14 layout -1 (x) depth 3 seed 209472: near 25.0, fallback 0.0, seams 129, not exact 60, other colours 0, off near 4
+biome 14 layout -1 (x) depth 3 seed 104743: near 15.9, fallback 0.0, seams 122, not exact 35, other colours 0, off near 3
+biome 14 layout -1 (x) depth 3 seed 209472: near 17.5, fallback 0.0, seams 132, not exact 35, other colours 0, off near 3
 biome 14 layout 1 (x) depth 2 seed 9753: near 17.2, fallback 0.0, seams 134, not exact 29, other colours 0, off near 2
 biome 14 layout 1 (x) depth 2 seed 17672: near 18.9, fallback 0.0, seams 115, not exact 32, other colours 0, off near 3
 biome 15 layout -1 (x) depth 3 seed 104744: near 22.9, fallback 0.0, seams 442, not exact 75, other colours 0, off near 0

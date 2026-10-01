@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Mr. Weather Comp's and Robot Control's guardian arenas look like
+  their areas.** Their arenas were paved with the walkways' tiles, lamps
+  and circuit lines made for a path a panel wide, which tiled over a big
+  field overlapped into a jumble. The arena is now one of the area's own
+  platforms: Weather's solar-panel floor, Robot Control's white slab.
 - **Stairs meet their floors cleanly.** A stair's tiles came with pieces
   of the original map around it: void notches and loose stripes in the
   floor at its foot, a bridge pad's yellow gem, the original court's

@@ -291,6 +291,7 @@ bool netmap_panel(int wx, int wy, int *x, int *y) {
 static const NetLayout *cur;
 static bool one_floor;        /* the area has no walkway floor: all is platform */
 static bool by_shape;         /* its floors are told by shape: an arena is platform */
+static bool arena_b;          /* the guardian's arena in the walkways' floor, to read apart (TILES_ARENA_FLOOR: not) */
 static bool rimmed;           /* its platforms' edges are rims (TILES_RIMMED) */
 static int apart;             /* what of its floor stands apart from the rest (NET_APART_*) */
 static bool pad_look;         /* its originals' pads have a look for the layer's (RomLayout.net_area) */
@@ -401,7 +402,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 	if (one_floor) return TILE_A | pad;
 	/* by shape: walkways and platforms' rims one floor, their middles the other */
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
-	if (!by_shape && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B | pad;
+	if (arena_b && x >= cur->ax && x < cur->ax + cur->aw && y >= cur->ay && y < cur->ay + cur->ah) return TILE_B | pad;
 	if (striped && stripe[y][x]) return TILE_B | pad;
 	/* (Central's, Seaside's and Sky's framed pads are islands of their
 	 * walkways' floor: a walkway's last panel before one was drawn meeting
@@ -904,6 +905,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	cur = lay;
 	one_floor = !na->walk_styles;
 	by_shape = na->styles & TILES_BY_SHAPE;
+	arena_b = !by_shape && !(na->styles & TILES_ARENA_FLOOR);
 	rimmed = na->styles & TILES_RIMMED;
 	pad_look = !(na->styles & TILES_NO_PAD_LOOK);
 	pads_walkway = L->pad.ok && (na->pad_hues & na->walk_styles);

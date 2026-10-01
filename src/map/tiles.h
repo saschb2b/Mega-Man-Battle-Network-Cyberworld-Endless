@@ -103,6 +103,11 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * homepages' maps cross their fields with stripes of it: a walkway stopped
  * at a field's edge is a join of the two floors the originals never draw. */
 #define TILES_CROSSING 0x80000
+/* ... and with TILES_ARENA_FLOOR, its guardian's arena in its platforms'
+ * floor, not its walkways': theirs is a pattern a panel wide (Mr. Weather
+ * Comp's lamps and arcs, Robot Control's circuits), which laid over a 5x5
+ * field came out tiled over itself. */
+#define TILES_ARENA_FLOOR 0x100000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a

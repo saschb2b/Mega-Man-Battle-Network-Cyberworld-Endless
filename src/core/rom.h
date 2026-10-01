@@ -23,7 +23,7 @@ enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
  * another Battle Network game's (docs/MULTIROM.md). */
 typedef struct {
 	uint8_t group, number;   /* map whose floor panels are learned */
-	uint32_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look; TILES_MORE_COLOURS (0x2000): its other maps' tiles in colours its own map's floors never show too; TILES_RIMMED (0x10000): its platforms' edges are rims; TILES_INNER_WALLS (0x20000): walls inside its floors ring no holes; TILES_MORE_PADS (0x40000): its pads in its other maps' pads' look alone (src/map/tiles.h) */
+	uint32_t styles;         /* hue buckets (bit 0-11, 12 grey) of the panels to learn, or TILES_BY_SHAPE (0x8000); TILES_NO_PAD_LOOK (0x4000): not its pads' look; TILES_MORE_COLOURS (0x2000): its other maps' tiles in colours its own map's floors never show too; TILES_RIMMED (0x10000): its platforms' edges are rims; TILES_INNER_WALLS (0x20000): walls inside its floors ring no holes; TILES_MORE_PADS (0x40000): its pads in its other maps' pads' look alone; TILES_ARENA_FLOOR (0x100000): its guardian's arena in its platforms' floor (src/map/tiles.h) */
 	uint16_t walk_styles;    /* hue buckets of its walkways, drawn on 1-wide paths (0: none) */
 	bool bg_in_map;          /* the background is drawn in the map's own tiles: other styles count as empty */
 	uint8_t song;            /* the area's theme (MP2K song) */
