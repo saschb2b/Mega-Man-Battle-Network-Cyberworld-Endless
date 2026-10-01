@@ -118,8 +118,11 @@ beat: ProtoMan in battle, his own AI and his attacks.
   stay his 1800 HP version's, some ten times a guardian's damage a
   second, and at the band's top (1000) a playtester's act-3 MegaMan, 460
   HP and chips of 120 at most, ran after one hand (session 50). MegaMan
-  says how he fights as the netbattle is offered: his shield, and the
-  dash across a lit row (a playtester asked for his tells).
+  says how he fights as the netbattle is offered: his shield and what
+  gets past it (chips that lock on, Navi chips), the panels he lights
+  before he dashes in to slash, and the one panel, MegaMan's own, that
+  stands for a WideSword down its whole column (a playtester asked for
+  his tells, then met the cross, a diagonal, a row and that one panel).
 - **A real fight.** BN6 deletes MegaMan in a netbattle as anywhere: its
   GAME OVER starts inside the battle, as he falls (tried: the battle
   options' bit 0x08 is a link battle, which waits for a partner; bit

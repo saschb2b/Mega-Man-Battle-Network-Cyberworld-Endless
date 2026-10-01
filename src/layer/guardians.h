@@ -5,6 +5,7 @@
 #define CW_GUARDIANS_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #define GUARDIAN_NO_MUGSHOT -1
 
@@ -31,6 +32,14 @@ const char *guardian_defeat(int navi);
  * before the arena (a playtester met EraseMan's ghosts and his erasing
  * blow unwarned); NULL where there is nothing to add. */
 const char *guardian_tip(int navi);
+/* ProtoMan's terms for the netbattle past an act's guardian, as ta_duel
+ * shows them: the stake said (BN6 deletes MegaMan in a netbattle as
+ * anywhere, its GAME OVER from inside the battle), and how he fights,
+ * which MegaMan knows of his rival (a playtester asked for his tells after
+ * a hand against him). Into `out`; the length they take, which
+ * GUARDIAN_TERMS_MAX holds. */
+#define GUARDIAN_TERMS_MAX 512
+int guardian_netbattle_terms(char *out, size_t n);
 /* What the net says of guardian `navi` (the clause after "Word is, "), for
  * a bystander to pass on where MegaMan has never battled him: true, vague,
  * no moves (docs/META.md, what MegaMan knows). NULL for none. */

@@ -68,8 +68,14 @@ const char *guardian_tip(int navi) {
 		"The panels he drills through crack: keep moving!|@M When he bursts up on our side, he stays there a moment: hit him then!";
 	case 10: return "DustMan drops scrap onto the lit panels and hurls our broken panels back at us, and their first hit stuns. "
 		"When he breathes in, he pulls us up close for a big punch. Keep a Recover chip ready!|@M He stands a while right in front of us between throws: swing then!";
-	case 11: return "ProtoMan's shield stops our shots. When our row lights up, he dashes across it to slash: "
-		"step out of the row, then hit him as he swings!";
+	/* (every shape his panels light, and the one that tells less than it
+	 * hits: in a playtester's netbattle the cross, a diagonal and a row
+	 * lit where he slashed, and one lit panel, his, stood for a WideSword
+	 * down its whole column; shots met his shield, a lock-on chip and Navi
+	 * chips got through) */
+	case 11: return "ProtoMan's shield stops our shots. When panels light up, he dashes in to slash them: step off every lit one.|"
+		"@M If only ours lights, his WideSword takes that whole column: get out of the column, not just off the panel!|"
+		"@M Chips that lock on to him, and Navi chips, get past his shield!";
 	case 12: return "BlastMan's bombs roll down our row and burst, his flames dash along it, and a fire wall walks down a column. "
 		"Step off the yellow panels!|@M He hovers still while he throws his bombs: strike then!";
 	case 13: return "DiveMan moves unseen under the water: hold our chips until he surfaces, then strike! "
@@ -90,6 +96,11 @@ const char *guardian_tip(int navi) {
 		"Step off the yellow panels!|@M He stays beside us a moment after his slash: swing back then! When the screen goes dark, his big slash is coming: brace for it!";
 	default: return NULL;
 	}
+}
+
+int guardian_netbattle_terms(char *out, size_t n) {
+	return snprintf(out, n, "Enough racing, MegaMan.|Chaud says you're ready. This time, you face me.|"
+		"@M He won't hold back, Lan. %s|@M If ProtoMan deletes us, the dive's over. We can run if it goes bad.", guardian_tip(11));
 }
 
 /* (a first meeting's hint: the net's gossip, which lives in that world and

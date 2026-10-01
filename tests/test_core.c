@@ -809,6 +809,11 @@ static void test_talk(void) {
 			run.cross = (uint8_t)cross;
 		}
 	}
+	/* (ProtoMan's tip behind MegaMan's first words, whole: a longer one
+	 * lost its last clause to ta_pages' buffer in a capture) */
+	char terms[GUARDIAN_TERMS_MAX];
+	CHECK(guardian_netbattle_terms(terms, sizeof terms) < (int)sizeof terms, "the netbattle's terms are cut: \"%s\"", terms);
+	check_talk("the netbattle's terms", terms);
 	for (int biome = 0; biome < BIOME_COUNT; ++biome) {
 		for (int side = LAYER_NORMAL; side <= LAYER_SECRET; ++side)
 			CHECK(strlen(guardian_area_in_text(biome, side)) < 28, "area %d's name is long for the cards", biome);

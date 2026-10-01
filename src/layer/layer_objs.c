@@ -60,15 +60,6 @@ int layer_objs_bystander = LAYER_BYSTANDER;   /* (EvilNavi) */
 
 #define HP_MEMORY_CHANCE 15   /* % of the rich Mystery Data from the second act on */
 
-/* ProtoMan's terms for the netbattle: the stake said (BN6 deletes MegaMan
- * in a netbattle as anywhere, its GAME OVER from inside the battle), and
- * how he fights, which MegaMan knows of his rival (a playtester asked for
- * his tells after a hand against him) */
-static void netbattle_terms(char *terms, size_t n) {
-	snprintf(terms, n, "Enough racing, MegaMan.|Chaud says you're ready. This time, you face me.|"
-		"@M He won't hold back, Lan. %s|@M If ProtoMan deletes us, the dive's over. We can run if it goes bad.", guardian_tip(11));
-}
-
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
  * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md). True for
  * an HPMemory, which the game keeps in blue Mystery Data. */
@@ -653,14 +644,14 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			int flag = LAYER_FLAG_BASE + out->nchoices;
 			out->choice[out->nchoices].type = o->type;
 			out->choice[out->nchoices++].flag = flag;
-			static char terms[400];
+			static char terms[GUARDIAN_TERMS_MAX];
 			if (o->type == OBJ_DUEL) {
 				/* his terms: the time to beat, as the results screen shows a
 				 * DeleteTime (seconds and hundredths, cut), and the rung's
 				 * rule; the first duel says who he is */
 				int f = layer_objs_duel_frames, sec = f / 60, cs = (f % 60) * 100 / 60;
 				int met = profile.duel_won + profile.duel_lost;
-				if (layer_objs_duel_rung == 2) netbattle_terms(terms, sizeof terms);
+				if (layer_objs_duel_rung == 2) guardian_netbattle_terms(terms, sizeof terms);
 				else
 				{
 					/* (the squad and the stake said before the choice, as
