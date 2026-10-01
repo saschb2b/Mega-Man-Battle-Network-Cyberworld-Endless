@@ -124,6 +124,18 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   area's count from 573 to 32 (`test_way_links` holds each area to 90%);
   the tile test's seams fell from 63.0 to 61.7 per hundred panels.
 
+Still apart from the originals: their dead ends. Capcom's maps have about
+twenty-five dead-end panels each (comb teeth on boardwalks, stubs, pads
+on spurs), ours about three: the layouts ask for stubs off platform
+edges, but a random cell of the window is floor one time in eight, and
+few get placed. Placing every stub asked for, off any platform edge, was
+tried and set aside: stubs beside rooms took the services' and
+landmarks' places and blocked the way's widening, and placed last, two
+panels from all that stands, they were too few (2.8 to 3.4 a layer) for
+their tiles' cost (the seams 61.7 to 62.4). The originals' dead ends are
+mostly teeth on their boardwalks, off the platforms: that is where to
+start.
+
 A layer is built from those parts, not from rectangles. Each area has its
 own layouts (`src/net/net_layouts.c`), all made of the same pieces
 (`src/net/net_shapes.c`); an act's three layers take them in a shuffled
