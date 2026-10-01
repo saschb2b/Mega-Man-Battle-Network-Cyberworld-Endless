@@ -1602,13 +1602,14 @@ bool director_draw_second_screen(int w, int h) {
  * whose Net Dealer has spoken. A CONTINUE takes it back, where an act
  * continued from a save had no count on its AREA CLEAR card and its next
  * Net Dealer greeted MegaMan as new (a playtester's, both). */
-#define ACT_NOTE_MAGIC 0x41435431u   /* "ACT1" */
-typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer; } ActNote;
+#define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
+typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown; } ActNote;
 static ActNote act_note;
 static bool act_note_ok;
 
 static void act_note_save(void) {
-	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act };
+	/* (an act already continued without one has no whole count to keep) */
+	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
 
@@ -1621,7 +1622,7 @@ static void act_note_read(void) {
 
 /* ... and after it, where building it began the act afresh */
 static void act_note_apply(void) {
-	D.act_resumed = !act_note_ok;
+	D.act_resumed = !act_note_ok || act_note.unknown;
 	if (act_note_ok) { D.act_viruses = act_note.viruses; D.act_frames = act_note.frames; }
 	if (emu_debug_on()) fprintf(stderr, "act note: %s, act %d, viruses from %d, %d frames, dealer %d\n", act_note_ok ? "taken back" : "none",
 		act_note.act, act_note.viruses, act_note.frames, act_note.dealer);
