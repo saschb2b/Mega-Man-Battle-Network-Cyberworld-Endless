@@ -138,7 +138,18 @@ autopilot to the arena and prints where MegaMan steps in;
 `scripts/guardian_watch.sh NAVI BIOME SEED X Y DIR` places MegaMan short of
 it, walks in, fights in god mode and saves four sheets;
 `scripts/montage.py NAVI` packs them into one picture. The pools are in
-`src/core/run.c` (biome indexes by their order there).
+`src/core/run.c` (biome indexes by their order there). A later act's
+guardian: `DEPTH=12 GUARD=1` before the entry and watch scripts (layer 12,
+NAVI guarding it whatever the area's pool).
+
+**A guardian's damage against the persona's HP**:
+`scripts/guardian_stand.sh NAVI BIOME SEED DEPTH HP [X Y DIR]` fights him
+with MegaMan at HP (`--dev hp=N`) on his panel firing the buster, and
+prints each hit and how long MegaMan lasts. Before a session meets a
+guardian it has never fought, run it for him and for the guardian the
+persona last beat, at the persona's HP: in s52's sweep, act 4's Colonel
+dealt 21 HP a second to act 3's ElecMan's 11, and act 4's guardians
+ranged from 8 (TomahawkMan) to 29 (DustManEX).
 
 **Every act's answer chips**: `build.py pacing` ends with the Net Dealers'
 answers per act and element (`+` over the cap). Read it after any change

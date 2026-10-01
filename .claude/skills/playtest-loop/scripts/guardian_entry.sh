@@ -3,10 +3,12 @@
 # arena and prints MegaMan's last positions before its staging begins (the
 # way in, for guardian_watch.sh: start two positions back, hold the way
 # they change: -Y UP+LEFT, +Y DOWN+RIGHT, -X DOWN+LEFT, +X UP+RIGHT).
+# DEPTH (default 3) and GUARD=1 (NAVI guarding every area, for a guardian
+# no area's layer-3 pool holds) the same for both scripts.
 cd "$(git rev-parse --show-toplevel)"
 n=en$1; b=$2; s=$3
 python3 tools/play.py stop $n >/dev/null 2>&1; rm -rf .build/play/$n
-CYBERWORLD_STATE_POS=1 CYBERWORLD_AUTOPILOT=1 python3 tools/play.py start $n --fresh --seed $s -- --scene emu --net-biome $b --run-depth 3 --dev god,quiet >/dev/null 2>&1
+CYBERWORLD_STATE_POS=1 CYBERWORLD_AUTOPILOT=1 python3 tools/play.py start $n --fresh --seed $s -- --scene emu --net-biome $b --run-depth ${DEPTH:-3} ${GUARD:+--guardian $1} --dev ${DEV:-god,quiet} >/dev/null 2>&1
 python3 tools/play.py do $n 'wait 600' >/dev/null 2>&1
 last=""
 for i in $(seq 1 300); do

@@ -1480,3 +1480,52 @@ half does, finish the half.** L already named the heal's way to a hurt
 MegaMan; the arrow did not follow it, and the wish was the missing half.
 Read the notes for a cue the game gives in words but not in the world (or
 the reverse) before designing anything new.
+
+## Session 52: 8/10 (keep playing: yes; recommend: yes)
+
+Run 5 from layer 10: UnderSht installed in one NaviCust pass, BlastMnEX B
+from a green Mystery Data, the second ScrtData, five battles over layers
+10-11, and ProtoMan's netbattle at 650 HP: 442 dealt in two hands, run
+from at 20 HP with him at 208. Saved on layer 11, a new best. "Hard but
+winnable now. Keep 650": three of his four hits were the player's own
+mistakes.
+
+Confirmed: the heal arrow (three calls to the Recovery Mr. Prog), "one
+we've never faced down here", ProtoMan's 650 and his tells said, L's own
+sentence for the duel, the ScrtData count, the UnderSht reminder's colour.
+
+Raised and fixed: one lit panel, MegaMan's own, stood for a WideSword
+down its whole column (major: stepping a row up was hit anyway), and the
+tip named only the row (c4282d0: every lit shape, the column, and what
+gets past his shield). A capture of the new tip, paged to its end, showed
+its last clause gone: the netbattle's prefix took the box past ta_pages'
+200-character buffer, which the tip's own test could not see; the terms
+moved where the tests check them composed. CI's test build had failed
+since the BN5 commits on stubs without prototypes (49ebaa5), unseen
+because `build.py test` ran without CI=1.
+
+BN6's own, into the patch notes: RUN's "None" (an empty command-line
+cell), the ElecMan chip's "surroundings" (MegaMan's own). Kept: the
+dealer naming the guardian as the net's word; walkway branches, about 20
+calls (the owner's call; wish 2). Open: the money came after the shop
+(450z at the dealer, 2100z at the duel): the second sighting, so income
+per act gets measured now.
+
+Swept ahead: Colonel, act 4's guardian on Kai's next layer, fought by
+no session before. A headless start at layer 12 gives MegaMan 100 HP,
+which one Colonel hit deletes even in god mode; a dev switch (`hp=N`,
+0212f8d) and `scripts/guardian_stand.sh` measure a guardian against the
+persona's HP. At 560 HP, MegaMan on his panel firing the buster: Colonel
+21 HP a second, ElecMan (act 3, whom Kai beat) 11; act 4's others 8
+(TomahawkMan), 17 (ChargeMan), 29 (DustManEX). Colonel is hard, not a
+wall, and his moves match his tip (the zigzag lights, the dark screen
+before the big slash). Open: the bands hold a guardian's HP only, and
+act 4's damage spans four times over; a guardian's damage a second could
+join his fit for an act.
+
+Cost: 282 calls, about 80 minutes.
+
+Loop change: **a changed text is read in a capture to its last box.**
+The first boxes rendered right, and the cut came at the end; the unit
+tests check each text alone, while the game composes them. Page a
+changed chat to its question or its close before committing.
