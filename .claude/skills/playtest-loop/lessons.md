@@ -1706,3 +1706,41 @@ looked over 28 shots and found nothing broken, in an area the sweep
 had not touched; a report of "none" says little about the areas it
 never crossed. The patch notes now name the areas whose look changed
 and ask for close looks at their floors, joins and stairs there.
+
+## Session 57: 7/10 (keep playing: yes; recommend: yes)
+
+Run 7 (RoboDog Comp, act 1): ProtoMan's race won in 0:01.10 with one
+ElcPuls1 (Chaud's record 4-6), the official Chip Order's TankCan2 S, and
+SpoutMan lost at his last 100 of 600 HP: Thunder's paralysis and
+TankCan2 for 240, then a whirl on a panel the warning never lit. Run 8
+begun (ElecCross), saved on layer 1 in Seaside Area, DiveMan act 1's.
+
+The floors, this session's ask: nothing broken in about 120 frames of
+RoboDog Comp (rims, concave corners, joins, one-tile connectors, the
+arena a field of its own floor) and Seaside Area's start. "The floors
+now look like the original."
+
+Raised and fixed: SpoutMan's whirl (9d9f382: his arms reach the panels at
+his corners, which BN6 leaves dark; the briefing says so); the Chip
+Order's chips unread before a one-time pick (4d98100: BN6's own
+description shown before the confirm). Misread: Chaud's first call
+naming no clearance (he held it from run 6; his call names it only where
+a win earns it). Open: a run left in the town is not kept (title shows
+NEW GAME only), the dealer's two of a chip the folder takes once more,
+the summary forgetting the race, the rumour Navi's line repeated on
+layers 1 and 3, the act's dealer pick over a fresh run's zenny, walkway
+mouths a panel wide still costing calls, the town and the area not
+matching (Seaside Town's fountain into RoboDog Comp).
+
+Beside the loop: the 0.6.0 push. BN5's ROM kept beside BN6's copy on the
+desktops, Nebula Area told by shape, SciLab held out of runs, the site's
+areas as walking clips, chip descriptions from the ROM, the Nova's
+binary updated (its saves' hashes the same before and after).
+
+Cost: 288 calls.
+
+Loop change: **a telegraph is checked against the frames that hit.** The
+whirl's lit panels and the panel that took the hit sat side by side in
+the persona's own pictures (15658); a "deleted on an unlit panel" is
+settled from those frames before any other reading, and the briefing
+says what the lights do not.
