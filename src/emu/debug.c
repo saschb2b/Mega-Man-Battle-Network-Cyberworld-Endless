@@ -26,6 +26,11 @@ void emu_debug_frame(void) {
 			emu_read8(BN6_GAMESTATE + 4), emu_read8(BN6_GAMESTATE + 5));
 	if (t % 60 == 0)
 		fprintf(stderr, "music t%d song %08x status %08x\n", t, emu_read32(BN6_MUSIC_PLAYER), emu_read32(BN6_MUSIC_PLAYER + 4));
+	/* (an open chat box: its script state, open state, jump table offset,
+	 * cursor into the script and flags, bn6f chatbox_struct) */
+	if (t % 30 == 0 && emu_read8(BN6_CHATBOX))
+		fprintf(stderr, "chatbox t%d state %02x open %02x jump %02x at %08x flags %04x\n", t, emu_read8(BN6_CHATBOX + 4),
+			emu_read8(BN6_CHATBOX + 0x10), emu_read8(BN6_CHATBOX + 0x11), emu_read32(BN6_CHATBOX + 0x2C), emu_read16(BN6_CHATBOX + 0x3E));
 	if (t == 150) {
 		/* VRAM, palettes and IO registers, for tools/romlab/labtrace.py */
 		FILE *f = emu_debug_file("vram.bin");

@@ -4,8 +4,11 @@
  * page it until it closes. */
 #include "talk.h"
 
+#include <stdio.h>
+
 #include "bn6.h"
 #include "cinema.h"
+#include "debug.h"
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"
@@ -45,6 +48,7 @@ bool talk_start(const char *boxes, int face) {
 	ta_begin(&a);
 	ta_talk(&a, boxes, face);
 	int n = ta_build(&a, bytes);
+	if (emu_debug_on()) fprintf(stderr, "talk: %d bytes%s: %s\n", n, a.full ? ", FULL" : "", boxes);
 	if (n > TALK_SIZE) return false;
 	emu_write(TALK_AT, bytes, (size_t)n);
 	begin(TALK_AT, 0);
