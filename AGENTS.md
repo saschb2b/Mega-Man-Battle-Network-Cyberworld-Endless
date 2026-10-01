@@ -147,6 +147,7 @@ python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: th
 python3 tools/steam_art.py             # linux/steam: Steam's library artwork (capsules, hero, logo); 3ds/banner.png
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
 python3 tools/trailer.py [--keep]      # docs/clips/trailer.*: the 20-second trailer, its music by tools/trailer_music.py
+python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
 
