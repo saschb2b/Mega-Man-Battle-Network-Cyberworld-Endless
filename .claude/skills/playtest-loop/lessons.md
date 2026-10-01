@@ -1615,3 +1615,48 @@ guessed at.** Kai could only say a box "was probably" the new no-running
 line; `CYBERWORLD_EMU_DEBUG` now logs every director talk's text, so a
 replay of the moment names what was said and when. Use it before
 answering a "did it show?" in a report.
+
+## Session 55: 8/10 (keep playing: yes; recommend: yes)
+
+Run 6, act 2: HeatMan deleted in 0:54.25 with no type edge (ElcPuls1's
+counter hit took 150, the ElecCross charged zigzag about 350 of his
+550), act 2's AREA CLEAR "Viruses 7 Time 11:10", Custom1 taken from his
+Guardian Data, the unknown "??? (Green HP)" chosen at the split. Saved on
+layer 7, act 3. "I could trace the win to choices I'd made."
+
+Confirmed: a held B no longer pages a talk unseen, "We may meet", "no
+running from a guardian", the golden gate in the Undernet, no battle on
+the last walkway, the AREA CLEAR count.
+
+Raised and fixed: the arrow at walkway corners, about 15 calls on one
+layer (f427984: a run into a corner stops MegaMan 12 units of 32 past
+its middle, and the mouth's tolerance of 0.35 of a panel, 11.2 units,
+pointed the arrow back at every corner; on the line now means within the
+measured 12, and on the mouth panel itself the arrow points across, not
+back); the official Chip Order taken by a batched A (d4ded6d: "Order
+TrplShot J? We only get one!" on No); "Chaud's clearance" read as the
+full one (ecf85cb: first and full, named); Custom1 fitting only after
+two programs moved (67b5e0c: said as it comes, from the board's free
+cells).
+
+BN6's own: the DiveMan chip's wave stopping two columns in, HeatMan
+unseen at 10 HP. Misread: an A pressed while a box typed only finished
+it (into persona.md: seen in sessions 50 and 55). Open: the dealer's
+pick without a word on how to land it (WideSht missed a teleporting
+HeatMan; AquaNdl's line is the only one); walking still a third of the
+calls, two Mystery Data on other branches never reached.
+
+Beside the loop: GitHub #22 and #24 thanked and marked fixed for the
+next version; #23 and #25 tried again with the reporters' seeds (the
+Nest into layers 20 and 39, a real NaviCust bug and a Chip Trader on
+0.4.0 and now), not reproduced, #25's reporter asked to retest.
+
+Cost: 285 calls, about 85 minutes.
+
+Loop change: **a threshold the arrow or a talk acts on is checked
+against where the game itself puts MegaMan.** BN6 stops him at fixed
+offsets (12 units past a corner's middle against the void), so a
+tolerance just under one misfires at every such spot, not at random: a
+replay with `CYBERWORLD_STATE_POS=1` gives the positions to check it
+against before it ships.
+
