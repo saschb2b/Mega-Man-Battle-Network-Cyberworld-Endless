@@ -1090,6 +1090,24 @@ static void test_navicust(void) {
 	navicust_set_spins(0x3F);
 	NaviShape many[5] = { bar, bar, bar, bar, bar };
 	CHECK(!navicust_pack(many, 5, 4, 4), "twenty cells on sixteen");
+	/* the free cells as the board stands (BN6's grid, the board from (1,
+	 * 1), the command line its row 3): a pink pair in the command line's
+	 * middle leaves a cell free at each end, so a white pair fits only once
+	 * the pink one moves, or turned upright with the white Spin, and a
+	 * second pink pair not at all (a playtester's Custom1 fitted only after
+	 * he moved two programs, session 55) */
+	uint8_t grid[NAVICUST_GRID * NAVICUST_GRID] = { 0 };
+	grid[3 * NAVICUST_GRID + 2] = grid[3 * NAVICUST_GRID + 3] = 1;
+	const NaviPart parts[1] = { { "PinkPair", NAVI_PART, 3 } };
+	NaviShape pink = { .kind = NAVI_PART, .color = 3 }, white = { .kind = NAVI_PART, .color = 1 };
+	pink.cell[0][0] = pink.cell[0][1] = white.cell[0][0] = white.cell[0][1] = 1;
+	NaviShape stood[2] = { pink, white };
+	navicust_set_spins(0);
+	CHECK(!navicust_fits_free(grid, parts, 1, &white, 4, 4) && navicust_pack(stood, 2, 4, 4), "a white pair fits only once the pink one moves");
+	navicust_set_spins(1);
+	CHECK(navicust_fits_free(grid, parts, 1, &white, 4, 4), "with the white Spin the white pair stands upright at an end");
+	navicust_set_spins(0x3F);
+	CHECK(!navicust_fits_free(grid, parts, 1, &pink, 4, 4), "a second pink pair would touch the first");
 	/* the bug words: none, one light, several */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
 	CHECK(!*navicust_bug_words(bugs, false, NULL), "words for no bug");

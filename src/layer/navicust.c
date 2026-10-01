@@ -274,6 +274,24 @@ static bool pack_from(const Piece *pieces, const int *order, int k, int n, int w
 	return false;
 }
 
+/* A shape as a piece, with the turns the NaviCust gives it: all four where
+ * `turns` (a board laid out under another build), else only with its
+ * colour's Spin, as the NaviCust's L and R (bn6f sub_8136364 checks key
+ * item 0x4F + the record's colour). */
+static void piece_of(const NaviShape *s, bool turns, Piece *p) {
+	p->kind = s->kind;
+	p->color = s->color;
+	p->nturns = 0;
+	for (int k = 0; k < 4; ++k) {
+		if (k && !turns && !(s->color >= 1 && spins >> (s->color - 1) & 1)) break;
+		Turn t;
+		turn_of(s, k, &t);
+		bool again = false;
+		for (int j = 0; j < p->nturns && !again; ++j) again = same_turn(&t, &p->turn[j]);
+		if (!again) p->turn[p->nturns++] = t;
+	}
+}
+
 /* (shapes before `nfree` turn whatever their colour) */
 static bool pack(const NaviShape *shapes, int n, int w, int h, int nfree) {
 	if (n <= 0) return true;
@@ -281,21 +299,8 @@ static bool pack(const NaviShape *shapes, int n, int w, int h, int nfree) {
 	static Piece pieces[PACK_MAX];
 	int order[PACK_MAX], cells = 0;
 	for (int i = 0; i < n; ++i) {
-		Piece *p = &pieces[i];
-		p->kind = shapes[i].kind;
-		p->color = shapes[i].color;
-		p->nturns = 0;
-		for (int k = 0; k < 4; ++k) {
-			/* (turned only with its colour's Spin, as the NaviCust's L and R:
-			 * bn6f sub_8136364 checks key item 0x4F + the record's colour) */
-			if (k && i >= nfree && !(shapes[i].color >= 1 && spins >> (shapes[i].color - 1) & 1)) break;
-			Turn t;
-			turn_of(&shapes[i], k, &t);
-			bool again = false;
-			for (int j = 0; j < p->nturns && !again; ++j) again = same_turn(&t, &p->turn[j]);
-			if (!again) p->turn[p->nturns++] = t;
-		}
-		cells += p->turn[0].n;
+		piece_of(&shapes[i], i < nfree, &pieces[i]);
+		cells += pieces[i].turn[0].n;
 		order[i] = i;
 	}
 	if (cells > w * h) return false;
@@ -316,6 +321,32 @@ bool navicust_pack(const NaviShape *shapes, int n, int w, int h) {
 	 * Spin */
 	int nfree = n > 1 && spins != 0x3F && !pack(shapes, n - 1, w, h, 0) ? n - 1 : 0;
 	return pack(shapes, n, w, h, nfree);
+}
+
+bool navicust_fits_free(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, const NaviShape *shape, int w, int h) {
+	static Piece pieces[NAVICUST_GRID * NAVICUST_GRID + 1];
+	if (n < 0 || n >= NAVICUST_GRID * NAVICUST_GRID || w > 5 || h > 5) return false;
+	for (int y = 0; y < 7; ++y) for (int x = 0; x < 7; ++x) board[y][x] = -1;
+	/* the board's programs where they stand (the grid's from (1, 1)) */
+	for (int y = 0; y < h; ++y)
+		for (int x = 0; x < w; ++x) {
+			int p = grid[(y + 1) * NAVICUST_GRID + x + 1];
+			if (p && p <= n) board[y][x] = (int8_t)(p - 1);
+		}
+	for (int i = 0; i < n; ++i) pieces[i] = (Piece){ .kind = parts[i].kind, .color = parts[i].color };
+	const Piece *p = &pieces[n];
+	piece_of(shape, false, &pieces[n]);
+	for (int r = 0; r < p->nturns; ++r) {
+		const Turn *t = &p->turn[r];
+		for (int oy = 0; oy + t->h <= h; ++oy)
+			for (int ox = 0; ox + t->w <= w; ++ox) {
+				if (!place(p, t, ox, oy, w, h, n)) continue;
+				bool ok = !touches_kin(pieces, t, ox, oy, w, h, n);
+				lift(t, ox, oy);
+				if (ok) return true;
+			}
+	}
+	return false;
 }
 
 int navicust_skip_frags(int depth) { return 10 + 5 * (pacing_act(depth) + 7 * pacing_loop(depth)); }

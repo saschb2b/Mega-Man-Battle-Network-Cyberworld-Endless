@@ -144,6 +144,7 @@ static struct {
 	bool nest_cleared;     /* the Nest's guardian fell; the profile counts it at the checkpoint */
 	uint8_t bugs[NAVICUST_BUGS];   /* the NaviCust's bug counts MegaMan last spoke of */
 	bool bugs_known;       /* ... read on this layer */
+	int programs_seen;     /* ... with the programs in the PET, counted since */
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
@@ -409,6 +410,7 @@ static void goal_way(void) {
  * none. A playtester played two acts believing a Guardian Data's UnderSht
  * was running. */
 static bool fits_beside_placed(int v);
+static bool fits_as_it_stands(int v);
 static int key_item(int id);
 static void spins_sync(void);
 
@@ -2293,9 +2295,10 @@ static const char *off_board_words(void) {
 	if (!off || !*off) return NULL;
 	if (!fits_beside_placed(offv)) return no_room_words(off);
 	/* (and whether it turns: a playtester pressed L and R on his gift's
-	 * SuperArmor with no Spin, and nothing said why) */
-	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s",
-		off, navicust_turn_words(offv));
+	 * SuperArmor with no Spin, and nothing said why; and whether it takes
+	 * moving others first) */
+	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s%s",
+		off, fits_as_it_stands(offv) ? "" : "There's no room for it as the board stands: we'll have to move a program or two. ", navicust_turn_words(offv));
 	return words;
 }
 
@@ -2311,26 +2314,78 @@ static const char *off_board_words(void) {
  * them whole). */
 /* Why the board bugs, from the game's own grid and its programs'
  * records (navicust_bug_cause), or NULL. */
-static const char *bug_cause(void) {
+static NaviPart board_parts[BN6_NAVICUST_SLOTS];
+static uint8_t board_grid[NAVICUST_GRID * NAVICUST_GRID];
+
+/* The game's board: its grid and its programs from their records, the
+ * number of slots read (0 without a ROM's records). */
+static int read_board(void) {
 	static char names[BN6_NAVICUST_SLOTS][16];
-	NaviPart parts[BN6_NAVICUST_SLOTS];
-	uint8_t grid[NAVICUST_GRID * NAVICUST_GRID];
-	if (!R.data || !R.layout || !R.layout->navicust_programs) return NULL;
+	if (!R.data || !R.layout || !R.layout->navicust_programs) return 0;
 	int n = 0;
 	for (int i = 0; i < BN6_NAVICUST_SLOTS; ++i) {
 		int v = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)i * 8);
 		const char *about = v > 0 && v < 47 * 4 ? navicust_about(v / 4) : NULL, *colon = about ? strchr(about, ':') : NULL;
-		parts[i] = (NaviPart){ NULL, -1, 0 };
+		board_parts[i] = (NaviPart){ NULL, -1, 0 };
 		if (v <= 0 || v >= 47 * 4) continue;
 		const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)v * 16;
 		snprintf(names[i], sizeof names[0], "%.*s", colon ? (int)(colon - about) : 0, colon ? about : "");
-		parts[i] = (NaviPart){ colon ? names[i] : NULL, rec[1], rec[3] };
+		board_parts[i] = (NaviPart){ colon ? names[i] : NULL, rec[1], rec[3] };
 		n = i + 1;
 	}
-	for (int i = 0; i < NAVICUST_GRID * NAVICUST_GRID; ++i) grid[i] = emu_read8(BN6_NAVICUST_GRID + (uint32_t)i);
-	int w, h;
+	for (int i = 0; i < NAVICUST_GRID * NAVICUST_GRID; ++i) board_grid[i] = emu_read8(BN6_NAVICUST_GRID + (uint32_t)i);
+	return n;
+}
+
+static const char *bug_cause(void) {
+	if (!R.data || !R.layout || !R.layout->navicust_programs) return NULL;
+	int n = read_board(), w, h;
 	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
-	return navicust_bug_cause(grid, parts, n, w, h);
+	return navicust_bug_cause(board_grid, board_parts, n, w, h);
+}
+
+/* Whether program variant `v` fits the board's free cells as its programs
+ * stand (true where that cannot be read) */
+static bool fits_as_it_stands(int v) {
+	NaviShape s;
+	int n = read_board(), w, h;
+	if (!R.data || !R.layout || !R.layout->navicust_programs || !navicust_shape(v, &s)) return true;
+	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
+	return navicust_fits_free(board_grid, board_parts, n, &s, w, h);
+}
+
+/* A program just come into the PET (a Guardian Data's, a vendor's) that
+ * fits the board only once others move: said at once, where a playtester
+ * met it in the NaviCust and moved two programs to fit Custom1 (session
+ * 55); NULL for none. */
+static const char *cramped_words(void) {
+	static char words[200];
+	int v = 0;
+	const char *off = program_off_board(&v);
+	if (!off || !*off || !fits_beside_placed(v) || fits_as_it_stands(v)) return NULL;
+	snprintf(words, sizeof words, "@M %s won't fit in our board's free space as it stands, Lan. In the NaviCust we'll have to move a program "
+		"or two to make room.", off);
+	return words;
+}
+
+/* the programs in the PET, placed or not */
+static int programs_owned(void) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	int n = 0;
+	for (int v = 4; v < 47 * 4; ++v) n += emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v);
+	return n;
+}
+
+/* A program just come into the PET without the PET (a Guardian Data's):
+ * whether the board's free space takes it, said once the chat is done
+ * (from the PET, off_board_words says it); true where it spoke. */
+static bool program_watch(void) {
+	int owned = programs_owned();
+	if (D.pet_seen || owned < D.programs_seen) { D.programs_seen = owned; return false; }
+	if (owned == D.programs_seen || talk_busy() || cinema_busy() || emu_read8(BN6_CHATBOX)) return false;
+	const char *say = cramped_words();
+	if (!say || talk_start(say, FACE_MEGAMAN)) D.programs_seen = owned;
+	return say != NULL;
 }
 
 #define BUG_CALM 10
@@ -2344,8 +2399,10 @@ static void bug_watch(void) {
 	if (!D.bugs_known) {
 		memcpy(D.bugs, now, sizeof now);
 		D.bugs_known = true;
+		D.programs_seen = programs_owned();
 		return;
 	}
+	if (program_watch()) return;
 	/* (back from the PET with a program left off the board: said at once,
 	 * where L said it only on the next layer; a playtester ran the NaviCust
 	 * without placing his Guardian Data's HP+100) */

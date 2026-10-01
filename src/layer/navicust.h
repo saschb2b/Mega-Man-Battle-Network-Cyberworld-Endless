@@ -85,6 +85,13 @@ typedef struct { const char *name; int kind, color; } NaviPart;
  * program part off it, a part past the board's edge, two programs of one
  * colour side by side; NULL where none of them is. */
 const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, int w, int h);
+/* Whether `shape` fits the board's free cells as its programs stand (BN6's
+ * grid, as navicust_bug_cause reads it): on the board, over none, a
+ * program part on the command line and a plus part off it, beside no
+ * program part of its colour, turned only with its colour's Spin. (A
+ * playtester's Guardian Data program fitted only after he moved two, and
+ * nothing had said so.) */
+bool navicust_fits_free(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, const NaviShape *shape, int w, int h);
 /* Which programs L and R turn, in MegaMan's words (one sentence): those of
  * the colours whose Spins are held (navicust_set_spins); for `variant`
  * (program * 4 + v, 0 for any), whether that one turns. */

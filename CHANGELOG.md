@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **MegaMan says when a new program needs room made first.** A player's
+  Guardian Data said "Let's install it", and Custom1 fitted the NaviCust
+  only after he moved two programs, which nothing had said. A program
+  that fits the board only once others move now gets MegaMan's word as
+  it comes into the PET, and his reminder of a program left off the
+  board says the same.
 - **The official gates name the clearance they take.** A Chip Order said
   "Chaud's clearance opens it!" a minute after Chaud had said his full
   clearance was still to win, and a player wondered which he had. The
