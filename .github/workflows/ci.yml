@@ -26,7 +26,7 @@ jobs:
     name: Lint scripts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Shell scripts
         run: shellcheck -S warning linux/install.sh docker/mgba.sh docker/sdl2.sh docker/appimage.sh tools/android_key.sh ios/deps.sh
       - name: Python
@@ -39,7 +39,7 @@ jobs:
     name: Code checks (analyzer, unreached functions, complexity)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - uses: ./.github/actions/image
@@ -50,7 +50,7 @@ jobs:
     name: Unit tests (sanitizers)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - run: python3 build.py test
@@ -59,7 +59,7 @@ jobs:
     name: PortMaster (aarch64)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - uses: ./.github/actions/image
@@ -75,7 +75,7 @@ jobs:
           [ "$(printf '%s\nGLIBC_2.30\n' "$v" | sort -V | tail -1)" = GLIBC_2.30 ]
       - name: Port folder and archive
         run: python3 build.py package
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-portmaster
           path: build/release/cyberworld-endless-portmaster.zip
@@ -85,7 +85,7 @@ jobs:
     name: Linux desktop
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.linux, tag: cyberworld-linux }
       - run: python3 build.py linux
@@ -103,7 +103,7 @@ jobs:
           dpkg-deb -x build/release/cyberworld-endless_amd64.deb "$RUNNER_TEMP/deb"
           out=$("$RUNNER_TEMP/deb/usr/lib/cyberworld-endless/cyberworld-endless" --help 2>&1 || true)
           grep -q 'unknown argument' <<< "$out"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-linux
           path: |
@@ -116,7 +116,7 @@ jobs:
     name: Windows
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.windows, tag: cyberworld-windows }
       - run: python3 build.py windows
@@ -131,7 +131,7 @@ jobs:
           fi
           file build/release/cyberworld-endless-windows-x64-setup.exe | tee /dev/stderr | grep -q 'Nullsoft Installer'
           unzip -l build/release/cyberworld-endless-windows-x64.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-windows
           path: |
@@ -143,7 +143,7 @@ jobs:
     name: Nintendo 3DS
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.3ds, tag: cyberworld-3ds }
       - run: python3 build.py 3ds
@@ -155,7 +155,7 @@ jobs:
           c=build/3ds/cyberworld-endless.cia
           test "$(head -c 4 "$c" | od -An -tx1 | tr -d ' ')" = 20200000
           ls -l "$f" "$c"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-3ds
           path: |
@@ -167,10 +167,10 @@ jobs:
     name: Android
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.android, tag: cyberworld-android }
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .build/gradle-home
           key: gradle-${{ hashFiles('android/**/*.gradle') }}
@@ -181,7 +181,7 @@ jobs:
           docker run --rm -v "$PWD:/src" -w /src cyberworld-android \
             /opt/android-sdk/build-tools/35.0.0/aapt2 dump badging build/release/cyberworld-endless.apk \
             | tee /dev/stderr | grep -q "launchable-activity: name='io.github.saschb2b.cyberworldendless.RomActivity'"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-android
           path: build/release/cyberworld-endless.apk
@@ -191,9 +191,9 @@ jobs:
     name: macOS
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # (SDL2 and mGBA, universal and static: rebuilt when macos/deps.sh changes)
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .build/macos-deps
           key: macos-deps-${{ hashFiles('macos/deps.sh') }}
@@ -211,7 +211,7 @@ jobs:
           "$bin" --headless --scene norom --data-dir "$RUNNER_TEMP/data" --frames 30 --shot "20:$RUNNER_TEMP/norom.bmp"
           test -s "$RUNNER_TEMP/norom.bmp"
           hdiutil verify build/release/cyberworld-endless-macos.dmg
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-macos
           path: build/release/cyberworld-endless-macos.dmg
@@ -221,8 +221,8 @@ jobs:
     name: iOS
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: actions/checkout@v7
+      - uses: actions/cache@v6
         with:
           path: .build/ios-deps
           key: ios-deps-${{ hashFiles('ios/deps.sh') }}
@@ -257,7 +257,7 @@ jobs:
           cat "$RUNNER_TEMP/ios.out" "$RUNNER_TEMP/ios.err"
           grep -q '^display ' "$RUNNER_TEMP/ios.out"
           xcrun simctl spawn "$udid" launchctl list | grep -q cyberworldendless
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: cyberworld-ios
@@ -270,11 +270,11 @@ jobs:
     name: Browser
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.web, tag: cyberworld-web }
       - run: python3 build.py web
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cyberworld-web
           path: build/site
@@ -282,7 +282,7 @@ jobs:
           retention-days: 14
       - name: Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build/site
 
@@ -302,4 +302,4 @@ jobs:
       cancel-in-progress: false
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
