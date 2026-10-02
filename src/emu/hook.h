@@ -60,6 +60,10 @@ int hook_drain(HookEvent *out, int max);
 /* From an answer hook: an event of this kind with the registers it has,
  * where only some calls are worth one (a routine every object runs). */
 void hook_post(const HookRegs *r, int kind);
+/* From an answer hook: the CPU halted until the next interrupt it takes,
+ * once the hooked instruction has run (a wait the game would spin through:
+ * only where an interrupt will end it). */
+void hook_halt(void);
 
 /* The game's memory, from a hook. */
 uint8_t hook_read8(uint32_t addr);

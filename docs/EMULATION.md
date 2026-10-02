@@ -226,6 +226,48 @@ more (`threadedVideo`), beside the emulation; the worker waits for it at
 each frame's end, so the picture copied is whole. On the 3DS that thread
 is on the main core, which waits most of a frame for the emulation.
 
+## The core's time
+
+Measured on a computer (issue #35), with a build that sampled the GBA's PC
+every 1000 cycles and timed each frame with its picture drawn and, every
+other frame, not, over autopilot runs: a walked layer, battles, the town.
+
+| Scene | Emulation, ms a frame | With the picture | Busy-waiting for VBlank | With the idle hook |
+| --- | --- | --- | --- | --- |
+| A layer | 0.52 | 0.64 | 48% of the GBA's cycles | 0.36 (0.48) |
+| A battle | 0.53 | 0.67 | 57% | 0.35 (0.49) |
+| The town | 0.51 | 0.59 | 44% | 0.37 (0.45) |
+
+- **The picture** is about a fifth of the core's time on a layer and in
+  battle. On the New 3DS mGBA's threaded video draws it on the main core,
+  beside the emulation, so the core's own thread pays the interpreter.
+- **The wait for VBlank** was half of the interpreter's work. BN6's main
+  loop waits for each frame by reading DISPSTAT until its VBlank flag is
+  set (bn6f `main_awaitFrame`), and mGBA's own idle-loop removal leaves a
+  loop that reads DISPSTAT alone, since the flag changes with no
+  interrupt to wake a halted CPU. A hook (`src/emu/idle.c`) halts the CPU
+  there while the VBlank interrupt is on, which ends the halt where the
+  flag would have ended the loop: the autopilot's logs and run logs are
+  the same line for line, at about 30% less of the core's time.
+- **What is left** is spread out: on a layer the hottest routine is
+  bn6f `checkOWObjectInteractions` (`0x080037F4`, a sixth of the busy
+  cycles, each object's interaction area against the others'), then
+  the sprite and OAM code in IWRAM (a third, none over 3%); in battle
+  nothing passes 3.3%. No routine is worth a native version through an
+  answer hook yet; the object interactions would be the first.
+
+The sound is not the same sample for sample as 0.6.0's: the hooks (and
+before them the stubs they replaced, whose own instructions took the
+GBA's cycles) move the game's writes to the sound registers by a few
+cycles, which shifts the phase of the GBA's tone and noise channels. Its
+loudness, 20 ms at a time over 50 s of an autopilot run, follows 0.6.0's
+at a correlation of 1.0000, the mean the same.
+
+On the New 3DS, `frame_log = on` gives the GBA's time per frame with and
+without its picture: to measure there on a walked layer, a busy battle and
+the town, against 0.6.0 (3ds/README.md's 16 ms of emulation was measured
+before the hook).
+
 ## Hooks
 
 A hook lets one instruction of the game's code call the engine's C right
@@ -279,6 +321,7 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x080050EC` | cbGameState, the game mode's state update (`src/emu/gamecall.c`) | answer: a queued game call jumps to its routine in the update's place, its return to `EMU_FREE` + `0x100` | once a frame of the game mode |
 | `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |
 | `0x08120B90` | the PET's input handler (`src/director/pet.c`) | answer: A on Save taken for the engine (docs/PET.md) | each frame the PET takes input |
+| `0x080003A6` | `main_awaitFrame`'s DISPSTAT loop (`src/emu/idle.c`) | answer: the CPU halted till the VBlank interrupt (The core's time) | about four times a frame (each interrupt wakes it) |
 
 The duel's two are set as the duel begins and taken off as it ends, so
 the other battles carry no hook a frame per object. The hooks replaced
@@ -308,8 +351,9 @@ to hold, a few reads while a chat is open, and runs as game calls.
 `tests/test_emu.c` runs a ROM of the test's own bytes on mGBA (its
 `GBAIsROM` wants `0xEA` at offset 3 and `0x96` at `0xB2`, nothing more):
 routines called and their results stored, with a hook of every kind on
-them, an ARM-state one, the board's `BKPT #1` passed on, the hooks taken
-off again and one in RAM written again after a reset. `build.py test` runs
+them, an ARM-state one, an event posted from an answer hook, the board's
+`BKPT #1` passed on, the hooks taken off again, one in RAM written again
+after a reset, and a halt from a hook. `build.py test` runs
 it with the address and undefined-behaviour sanitizers, as CI does.
 
 ## Testing

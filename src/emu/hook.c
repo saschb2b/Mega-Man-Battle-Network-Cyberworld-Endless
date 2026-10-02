@@ -12,6 +12,7 @@
 
 #include <mgba/core/core.h>
 #include <mgba/internal/arm/arm.h>
+#include <mgba/internal/gba/gba.h>
 
 #define HOOK_IMM     0xCE
 #define THUMB_BKPT   (0xBE00u | HOOK_IMM)
@@ -64,6 +65,10 @@ static void enqueue(uint32_t addr, int kind, const HookRegs *r) {
 }
 
 void hook_post(const HookRegs *r, int kind) { enqueue(r->pc, kind, r); }
+
+/* (as the BIOS's Halt: the CPU idle, its cycles skipped, until an enabled
+ * interrupt is raised) */
+void hook_halt(void) { GBAHalt((struct GBA *)core->board); }
 
 static void hit(struct ARMCore *cpu, bool arm) {
 	/* (the PC runs two instructions ahead of the one executing) */

@@ -204,6 +204,7 @@
 #define BN6_FLAG_TRADER_HOWL  0xF6        /* EVENT_F6: the machine's howl, set by the trade's script; the machine clears it */
 
 /* ROM code */
+#define BN6_AWAIT_FRAME_LOOP  0x080003A6u /* bn6f main_awaitFrame (0x080003A0): its loop polling DISPSTAT for VBlank, ldrh r1,[r0] */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */
 /* Map, flag and key item events, by hook (src/director/events.c; Gregar's
  * as Falzar's where not said) */

@@ -1,6 +1,7 @@
 /* Hooks (src/emu/hook.c) on mGBA, without the game's ROM: a ROM of our own
  * bytes that calls three routines and stores what they return, run for a
- * frame with hooks of every kind on them (issue #27).
+ * frame with hooks of every kind on them (issue #27), an event posted from
+ * an answer hook and a halt from one (issues #30, #35).
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -16,6 +17,8 @@
 
 #include <mgba/core/config.h>
 #include <mgba/core/core.h>
+#include <mgba/internal/arm/arm.h>
+#include <mgba/internal/gba/gba.h>
 #include <mgba-util/vfs.h>
 
 #include "hook.h"
@@ -74,6 +77,8 @@ static HookAct doubled(HookRegs *r, void *user) { (void)user; r->r[0] *= 2; retu
 static HookAct answered(HookRegs *r, void *user) { (void)user; hook_post(r, 8); r->r[0] = 99; return HOOK_RETURN; }
 static HookAct sent_on(HookRegs *r, void *user) { (void)user; r->r[12] = 0x08000105; return HOOK_JUMP; }
 static HookAct counted(HookRegs *r, void *user) { (void)r; ++*(int *)user; return HOOK_CONTINUE; }
+/* (and the CPU halted, with no interrupt on to wake it) */
+static HookAct halting(HookRegs *r, void *user) { (void)r; ++*(int *)user; hook_halt(); return HOOK_CONTINUE; }
 
 static uint32_t stored(struct mCore *core, int i) { return core->rawRead32(core, IWRAM + 4u * (uint32_t)i, -1); }
 
@@ -150,6 +155,16 @@ int main(void) {
 	CHECK(core->rawRead16(core, IWRAM + 0x100, -1) == 0xBECE, "written again after the reset");
 	hook_remove(IWRAM + 0x100);
 	CHECK(core->rawRead16(core, IWRAM + 0x100, -1) == 0x3014, "the reset's code back as it is taken off");
+
+	/* a halt from a hook: the loop at 0xF0 met once, then the CPU idle for
+	 * the rest of the frame (no interrupt is on to end it) */
+	int halts = 0;
+	CHECK(hook_add(0x080000F0, halting, &halts), "a hook on the loop at 0xF0");
+	core->reset(core);
+	core->runFrame(core);
+	CHECK(halts == 1 && ((struct GBA *)core->board)->cpu->halted, "halted: the hook ran %d times, halted %d", halts, ((struct GBA *)core->board)->cpu->halted);
+	CHECK(stored(core, 3) == 39, "the code before the halt ran: %u", stored(core, 3));
+	hook_remove(0x080000F0);
 	mCoreConfigDeinit(&core->config);
 	core->deinit(core);
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }

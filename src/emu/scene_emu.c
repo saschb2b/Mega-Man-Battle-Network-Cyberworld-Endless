@@ -15,6 +15,7 @@
 #include "emu.h"
 #include "events.h"
 #include "gamecall.h"
+#include "idle.h"
 #include "game.h"
 #include "gfx.h"
 #include "platform.h"
@@ -57,6 +58,7 @@ static void enter(void) {
 	platform_present_now();
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
 	gamecall_install();
+	idle_install();
 	npc_reach_install();
 	chat_marks_install();
 	pet_install();

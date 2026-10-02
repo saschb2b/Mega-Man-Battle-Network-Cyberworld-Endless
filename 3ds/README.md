@@ -83,8 +83,11 @@ What differs from the other builds:
   core beside it, mGBA's threaded video: `docker/mgba.sh` builds mGBA's
   whole core for the 3DS (not the minimal one it builds for a "Generic"
   system) and puts mGBA's own threads on the main core. The emulation
-  alone takes about 16 ms of a 16.7 ms frame on the 804 MHz ARM11; with
-  its picture, on one core, 20.
+  alone took about 16 ms of a 16.7 ms frame on the 804 MHz ARM11; with
+  its picture, on one core, 20. Half of that was BN6 waiting for VBlank
+  in a loop, which a hook now halts the CPU through (docs/EMULATION.md,
+  The core's time): on a computer about 30% off the core's time, still
+  to be measured here.
 - **Closing** from the HOME Menu: no frame is drawn once the system asks
   the game to close (the GPU is the HOME Menu's then; waiting on it hung
   the console), and the core's threads end before the game does.

@@ -43,7 +43,7 @@ the site.
 | `src/audio/` | MP2K sequencer and mixer (title music and sounds); the core's sound during play |
 | `src/net/` | Layer generation (rooms, walkways, objects) |
 | `src/scenes/` | Title (with the run summary) and the sprite gallery |
-| `src/emu/` | The mGBA core, calls into the game (warps, chat), hooks on its code (`hook.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
+| `src/emu/` | The mGBA core, calls into the game through hooks (`gamecall.c`: warps, chat), hooks on its code (`hook.c`), its wait for VBlank halted (`idle.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
 | `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
 | `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers; the game's events from its hooks (`events.h`: battles in `encounter.c`, maps, choices and key items in `events.c`), taken up after each frame |
