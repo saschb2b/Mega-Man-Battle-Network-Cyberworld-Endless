@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "hook.h"
+
 #define EMU_W 240
 #define EMU_H 160
 #define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space */

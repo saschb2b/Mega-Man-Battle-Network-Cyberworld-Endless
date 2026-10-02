@@ -223,13 +223,56 @@ more (`threadedVideo`), beside the emulation; the worker waits for it at
 each frame's end, so the picture copied is whole. On the 3DS that thread
 is on the main core, which waits most of a frame for the emulation.
 
+## Hooks
+
+A hook lets one instruction of the game's code call the engine's C right
+there, mid-frame, with the CPU's registers (`src/emu/hook.c`, issue #27):
+the reach a native port's hooks give (Ship of Harkinian's, N64Recomp's
+function replacement), while BN6's code stays the ROM's.
+
+- **The BKPT.** A Thumb `BKPT #0xCE` (`0xBECE`), or an ARM one
+  (`0xE1200C7E`), is written over the instruction in the core's ROM copy,
+  as every patch is, or in RAM. mGBA runs a BKPT's handler at no cost in
+  cycles, with the PC already past it (`src/arm/isa-thumb.c`). The board's
+  handler, which mGBA installs once in `GBAInit` (a reset keeps ours),
+  takes immediate 0 (the debugger) and 1 (the cheat device): ours comes
+  first and passes it every other immediate.
+- **After the hook.** `ARMRunFake` puts an instruction into the prefetch in
+  the BKPT's place, as mGBA's own cheat hooks do: the original, which runs
+  as if never replaced (`HOOK_CONTINUE`, with the registers as the hook
+  left them); `bx lr` (`HOOK_RETURN`, r0 and r1 the result; at a routine's
+  first instruction, before it pushes anything); or `bx r12` (`HOOK_JUMP`,
+  on elsewhere).
+- **Two kinds.** An *event hook* only queues the registers it met, and the
+  director takes the queue up after the frame. An *answer hook* returns,
+  or changes, what the director prepared before the frame. Neither touches
+  the director's state.
+- **Threads.** Where the core has a thread of its own (the New 3DS,
+  `CYBERWORLD_EMU_THREAD=1`), a hook runs on it while the main thread
+  draws. `emu_read*` and `emu_write*` wait for the frame in progress, so a
+  hook reads and writes the game's memory with `hook_read*` and
+  `hook_write*`, straight through mGBA's raw access; the queue is written
+  only during a frame and read only after one, so it needs no lock. The
+  browser build has no threads, and the same rules hold there.
+- **States and resets.** A state holds RAM, not the ROM copy, so a hook in
+  the ROM stays; one in RAM is written again after a state is loaded or the
+  core reset (`hook_reapply`). A hook taken off restores the original; its
+  slot stays only while the CPU may hold its BKPT in the prefetch.
+
+`tests/test_emu.c` runs a ROM of the test's own bytes on mGBA (its
+`GBAIsROM` wants `0xEA` at offset 3 and `0x96` at `0xB2`, nothing more):
+routines called and their results stored, with a hook of every kind on
+them, an ARM-state one, the board's `BKPT #1` passed on, the hooks taken
+off again and one in RAM written again after a reset. `build.py test` runs
+it with the address and undefined-behaviour sanitizers, as CI does.
+
 ## Testing
 
 `CYBERWORLD_AUTOPILOT=1` walks MegaMan to each exit (into a guardian's arena
 and to its Guardian Data first) and presses through battles; `CYBERWORLD_AUTOPILOT=weak` also keeps
 enemies at 1 HP, so what follows a won guardian battle can be tested.
-`tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position and
-map every 30 frames, prints the generated walls, and writes the tile map to
+`tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position,
+map and the hooks' hits so far every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.
 `--net-biome N` puts every layer in one area, `--net-layout N` builds every
 layer in one layout (`LAYOUT_*` in `src/net/net_layouts.h`).

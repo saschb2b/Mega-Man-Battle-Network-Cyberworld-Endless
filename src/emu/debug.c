@@ -21,10 +21,17 @@ void emu_debug_frame(void) {
 	if (!emu_debug_on()) return;
 	++t;
 	if (t % 30 == 0)
-		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x\n", t, run.depth,
+		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x hooks %u\n", t, run.depth,
 			emu_read8(emu_read32(BN6_TOOLKIT)), emu_read8(BN6_GAMESTATE), emu_read8(BN6_CHATBOX),
 			bn6_player_x(), bn6_player_y(), bn6_player_z(),
-			emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
+			emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), (unsigned)hook_hits);
+	/* (a hook's event lost to a full queue, or our BKPT where no hook is: neither should happen) */
+	static uint32_t dropped, strays;
+	if (hook_dropped != dropped || hook_strays != strays) {
+		dropped = hook_dropped;
+		strays = hook_strays;
+		fprintf(stderr, "hooks: %u events dropped, %u strays\n", (unsigned)dropped, (unsigned)strays);
+	}
 	if (t % 60 == 0)
 		fprintf(stderr, "music t%d song %08x status %08x\n", t, emu_read32(BN6_MUSIC_PLAYER), emu_read32(BN6_MUSIC_STATUS));
 	/* (the NaviCust's bug counts, when any is set) */

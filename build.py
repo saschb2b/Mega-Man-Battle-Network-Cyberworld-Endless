@@ -1422,7 +1422,8 @@ def lint_dead(update):
     ensure_image()
     test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
                           ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
-                           'sh', '-c', f'rm -f build/lint/test_core; make -j{os.cpu_count() or 4} build/lint/test_core 2>&1 >/dev/null; '
+                           'sh', '-c', f'rm -f build/lint/test_core build/lint/test_emu; '
+                           f'make -j{os.cpu_count() or 4} build/lint/test_core build/lint/test_emu 2>&1 >/dev/null; '
                            'nm -A -g --defined-only build/lint/test/src/*/*.o'], capture_output=True, text=True)
     links['tests'] = test.stdout
     reached, present = set(), set()

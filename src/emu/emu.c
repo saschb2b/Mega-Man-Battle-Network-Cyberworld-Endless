@@ -71,6 +71,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 #endif
 	core = mCoreFindVF(vf);
 	if (!core || !core->init(core)) { vf->close(vf); core = NULL; return false; }
+	hook_attach(core);
 	mCoreInitConfig(core, NULL);
 	core->setVideoBuffer(core, (color_t *)video, EMU_W);
 	if (!core->loadROM(core, vf)) { core->deinit(core); core = NULL; return false; }
@@ -98,7 +99,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 static void wait_frame(void);
 
 bool emu_ready(void) { return core != NULL; }
-void emu_reset(void) { wait_frame(); if (core) core->reset(core); }
+void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply(); } }
 
 void emu_audio_rate(int rate) {
 	wait_frame();
@@ -304,5 +305,7 @@ bool emu_load_state(const char *path) {
 	if (!vf) return false;
 	bool ok = mCoreLoadStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
 	vf->close(vf);
+	/* (a state holds RAM, not the ROM copy: hooks in RAM are written again) */
+	if (ok) hook_reapply();
 	return ok;
 }
