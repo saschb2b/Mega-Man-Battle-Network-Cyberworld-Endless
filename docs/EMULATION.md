@@ -4,14 +4,63 @@ Battles, the net, menus, shops and messages run on BN6's own code, executed
 from the player's ROM by an embedded [mGBA](https://mgba.io) core (0.10.5,
 MPL-2.0, built by `docker/mgba.sh`). Cyberworld Endless is the director
 around it: it generates each layer in the game's own formats, patches the
-map tables of its in-memory ROM copy to point at them, and watches the game's
-memory to move the run along. Nothing from the ROM is shipped.
+map tables of its in-memory ROM copy to point at them, and follows the game
+to move the run along: hooks on its code tell it what happens as it happens
+(Hooks, below), and it reads the game's memory between frames for the rest.
+Nothing from the ROM is shipped.
 
 | Layer | Owner |
 | --- | --- |
 | CPU, video, sound, input | mGBA core (`src/emu/emu.c`), presented through SDL |
 | Battles, net movement, menus, messages, shops, traders | The game's code |
 | Run structure, layer generation, loot, saves, the title | Cyberworld Endless |
+
+## Why an emulator
+
+Ship of Harkinian runs Ocarina of Time with no emulator, and Zelda64Recomp
+runs Majora's Mask so too. Both stand on work BN6 does not have:
+
+- [Ship of Harkinian](https://github.com/HarbourMasters/Shipwright) compiles
+  [zeldaret/oot](https://github.com/zeldaret/oot), a matching decompilation:
+  C written by hand that builds back into the original ROM byte for byte.
+  [libultraship](https://github.com/Kenix3/libultraship) stands in for the
+  N64's hardware, its Fast3D renderer turning the game's display lists into
+  OpenGL, Direct3D or Metal; the assets come from the player's ROM at first
+  start. [2Ship2Harkinian](https://github.com/2ship2harkinian/2ship2harkinian)
+  does the same for Majora's Mask.
+- [Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp) translates
+  the game's MIPS code to C, function by function, with
+  [N64Recomp](https://github.com/N64Recomp/N64Recomp), which finds the
+  functions by the decompilation's symbols; [RT64](https://github.com/rt64/rt64)
+  renders. The translated code ships in the executable.
+
+Neither runs a CPU emulator, and both replace the GPU at the display-list
+level, which the N64 allows: its games hand the GPU lists of commands. BN6
+keeps mGBA because:
+
+1. **No C decompilation of BN6 exists.** [bn6f](https://github.com/dism-exe/bn6f)
+   is a matching disassembly of Falzar, almost all of it assembly.
+2. **The GBA has no display list.** BN6 writes tiles, maps, OAM and video
+   registers itself, some of it timed to the scanline, so a native build
+   would still emulate the GBA's video and sound. Only the ARM interpreter
+   would go, the core's cheapest part everywhere but the 3DS.
+3. **A decompiled or recompiled BN6 ships Capcom's code.** The project ships
+   none of it, which is what keeps it on PortMaster, Flathub, the 3DS and
+   GitHub Pages.
+4. **Other games' ROMs lend their content as data** (docs/MULTIROM.md); a
+   native build would need each game's code ported too.
+5. **Save states are free checkpoints** (`run.state`) on every target.
+
+What the native ports do have is worth taking: hooks, where the game's code
+calls the port's at named points. The engine's hooks (below) are that, on the
+emulator.
+
+The question is worth asking again when a C decompilation of BN6 covers most
+of its battle and overworld code **and** a run needs changes deep in battle
+logic (new chip behaviour, enemy AI) that hooks make awkward; or when the New
+3DS's measurements (issue #35) show that the ARM interpreter, not the
+renderer, holds its frame rate back. Even then a decompilation helps first as
+a map for hooks, as Majora's Mask's does for Zelda64Recomp.
 
 ## Memory the engine writes
 
@@ -21,10 +70,10 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | Offset | Contents | Code |
 | --- | --- | --- |
 | `+0x0000` | Warp record and warp list for direct warps | `gamecall.c` |
-| `+0x0100` | Call stub: runs one game routine with r0-r2, sets `BN6_ENGINE_MARK` and leaves the routine's r0, r1 at `BN6_ENGINE_RET` (`0x0203FFF4`, past the game's EWRAM as the mark is) | `gamecall.c` |
-| `+0x0180` | Encounter roll wrapper and trampoline | `encounter.c` |
+| `+0x0100` | Where a game call's routine returns: a hook, which takes its r0 and r1 and goes back to the main loop (until issue #33 a stub of hand-written Thumb, with `0x0203FFF0`-`0x0203FFFB` past the game's EWRAM for its mark and results: free) | `gamecall.c` |
+| `+0x0180` | Free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
-| `+0x0300` | The PET's input step: A on Save taken for the engine, then the game's own handler (docs/PET.md) | `pet.c` |
+| `+0x0300` | Free (the PET's input step until a hook on the game's own handler took its place, issue #33) | |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
 | `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
@@ -46,10 +95,13 @@ row its record names (rows 0 and 1, one per record, of the table at
 `0x080211A0`, docs/ROM_DATA.md) with the run's own rewards before the
 battle.
 
-In the rival's netbattle (docs/RIVAL.md), once ProtoMan stands on the
-field, his battle object's HP and MaxHP (`+0x24`, `+0x26` of his T1 object,
-`0x0203A9B0` + 0xD8 per object) are lowered once to the act's guardian
-band, where his own 1800 is above it.
+As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
+0x28) are rewritten in the folder's codes, half the time, by a hook on the
+reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md).
+
+In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
+given the act's guardian band at most as he spawns, where his own 1800 is
+above it: a hook lowers the value BN6's spawn sets both from.
 
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,
@@ -69,8 +121,8 @@ the NaviCust under MegaMan in the PET (`0x00F2`; without it MegaMan's entry
 goes straight to his status and a program cannot be installed. Found by
 setting blocks of flags with the PET open, `tools/play.py`'s dev `flags`
 step, and halving: `0x00AC` and `0x00F7` add Records there instead), and
-borrows cbGameState
-(`0x080050EC`) for one frame to warp.
+calls the game's routines (a warp among them) through a hook at
+cbGameState (`0x080050EC`), a frame of the game's state update each.
 
 
 At a new run's start the engine writes the chosen starting folder (docs/META.md)
@@ -176,13 +228,166 @@ more (`threadedVideo`), beside the emulation; the worker waits for it at
 each frame's end, so the picture copied is whole. On the 3DS that thread
 is on the main core, which waits most of a frame for the emulation.
 
+## The core's time
+
+Measured on a computer (issue #35), with a build that sampled the GBA's PC
+every 1000 cycles and timed each frame with its picture drawn and, every
+other frame, not, over autopilot runs: a walked layer, battles, the town.
+
+| Scene | Emulation, ms a frame | With the picture | Busy-waiting for VBlank | With the idle hook |
+| --- | --- | --- | --- | --- |
+| A layer | 0.52 | 0.64 | 48% of the GBA's cycles | 0.36 (0.48) |
+| A battle | 0.53 | 0.67 | 57% | 0.35 (0.49) |
+| The town | 0.51 | 0.59 | 44% | 0.37 (0.45) |
+
+- **The picture** is about a fifth of the core's time on a layer and in
+  battle. On the New 3DS mGBA's threaded video draws it on the main core,
+  beside the emulation, so the core's own thread pays the interpreter.
+- **The wait for VBlank** was half of the interpreter's work. BN6's main
+  loop waits for each frame by reading DISPSTAT until its VBlank flag is
+  set (bn6f `main_awaitFrame`), and mGBA's own idle-loop removal leaves a
+  loop that reads DISPSTAT alone, since the flag changes with no
+  interrupt to wake a halted CPU. A hook (`src/emu/idle.c`) halts the CPU
+  there while the VBlank interrupt is on, which ends the halt where the
+  flag would have ended the loop: the autopilot's logs and run logs are
+  the same line for line, at about 30% less of the core's time.
+- **What is left** is spread out: on a layer the hottest routine is
+  bn6f `checkOWObjectInteractions` (`0x080037F4`, a sixth of the busy
+  cycles, each object's interaction area against the others'); BN6's
+  memory copies through the BIOS's CpuSet and CpuFastSet, which mGBA's
+  own BIOS runs as interpreted ARM (a sixth); MP2K's sound mixer,
+  copied to IWRAM at `0x03005700` (a tenth); the sprite and OAM code in
+  IWRAM; in battle no one routine passes 3.3%.
+- **No routine as C.** An answer hook that does a routine's work in C
+  takes the routine's GBA cycles away, and with them BN6's own lag
+  frames, where a frame's work runs past VBlank and the game takes two
+  VBlanks for it. Tried on the object interactions (7-11% less of the
+  core's time on a map, on a computer): the game ran one frame more in
+  a layer's first second, its RNG a call ahead from there on, and the
+  random battles came at other steps. The wait for VBlank is the one
+  place the GBA's time goes without the game noticing: no work is
+  skipped there, only the wait.
+
+The sound is not the same sample for sample as 0.6.0's: the hooks (and
+before them the stubs they replaced, whose own instructions took the
+GBA's cycles) move the game's writes to the sound registers by a few
+cycles, which shifts the phase of the GBA's tone and noise channels. Its
+loudness, 20 ms at a time over 50 s of an autopilot run, follows 0.6.0's
+at a correlation of 1.0000, the mean the same.
+
+On a Retroid Nova (ROCKNIX), the same 90 s of an autopilot run (`--seed 7
+--dev god,onehit`, `tools/device_run.py` with `frame_log = on`) took the
+GBA 3.98 ms a frame with its picture on 0.6.0 and 3.09 ms with the hook
+(the median 4.00 and 2.80).
+
+On a New 3DS (`frame_log = on`, a minute or so of the town, a layer and a
+battle each), the core's own thread took 15.9 ms a frame with 0.6.0 and
+11.0 with the hook (the median), and the main thread's wait for it fell
+from 10.4 ms to 1. The frames shown are paced by the refresh now: the
+present waits for it where the core has its own thread
+(`present_3ds.c`). Before, a timer paced them, and the long core frame
+had steadied that timer by accident: with the core faster, 6 frames a
+second came early and 8 late (gaps under 12.5 ms or over 20); with the
+refresh's pace, 0.1 and 1.3, against 0.6.0's 0.1 and 2. An old 3DS or
+2DS has no third core: the core and its picture share the main one,
+and there the title stuttered and the net went black after a few
+frames, as before (3ds/README.md).
+
+## Hooks
+
+A hook lets one instruction of the game's code call the engine's C right
+there, mid-frame, with the CPU's registers (`src/emu/hook.c`, issue #27):
+the reach a native port's hooks give (Ship of Harkinian's, N64Recomp's
+function replacement), while BN6's code stays the ROM's.
+
+- **The BKPT.** A Thumb `BKPT #0xCE` (`0xBECE`), or an ARM one
+  (`0xE1200C7E`), is written over the instruction in the core's ROM copy,
+  as every patch is, or in RAM. mGBA runs a BKPT's handler at no cost in
+  cycles, with the PC already past it (`src/arm/isa-thumb.c`). The board's
+  handler, which mGBA installs once in `GBAInit` (a reset keeps ours),
+  takes immediate 0 (the debugger) and 1 (the cheat device): ours comes
+  first and passes it every other immediate.
+- **After the hook.** `ARMRunFake` puts an instruction into the prefetch in
+  the BKPT's place, as mGBA's own cheat hooks do: the original, which runs
+  as if never replaced (`HOOK_CONTINUE`, with the registers as the hook
+  left them); `bx lr` (`HOOK_RETURN`, r0 and r1 the result; at a routine's
+  first instruction, before it pushes anything); or `bx r12` (`HOOK_JUMP`,
+  on elsewhere).
+- **Two kinds.** An *event hook* only queues the registers it met, and the
+  director takes the queue up after the frame (`emu_hook_events`,
+  `src/director/events.h` its kinds). An *answer hook* returns, or changes,
+  what the director prepared before the frame, and may queue an event of
+  its own where only some calls are worth one (`hook_post`). Neither
+  touches the director's state.
+- **Threads.** Where the core has a thread of its own (the New 3DS,
+  `CYBERWORLD_EMU_THREAD=1`), a hook runs on it while the main thread
+  draws. `emu_read*` and `emu_write*` wait for the frame in progress, so a
+  hook reads and writes the game's memory with `hook_read*` and
+  `hook_write*`, straight through mGBA's raw access; the queue is written
+  only during a frame and read only after one, so it needs no lock. The
+  browser build has no threads, and the same rules hold there.
+- **States and resets.** A state holds RAM, not the ROM copy, so a hook in
+  the ROM stays; one in RAM is written again after a state is loaded or the
+  core reset (`hook_reapply`). A hook taken off restores the original; its
+  slot stays only while the CPU may hold its BKPT in the prefetch.
+
+The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x08005A98`, `0x08005AE2` | checkThenStartBattle: its first test, the branch after the roll | answer: a forced battle, the engine's record (issue #29) | once a frame on the map |
+| `0x08005BC8` | StartBattle | event: the record the battle starts from | once a battle |
+| `0x080AC180` | the reward pick (bn6f `sub_80AA910`) | answer: its enemies' reward rows rewritten first | once a battle, as it ends |
+| `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
+| `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
+| `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
+| `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) | about once a frame on the map |
+| `0x0803CD6C` | GiveItem | event: a key item given (a ScrtData, the run's Spin) | once an item |
+| `0x080050EC` | cbGameState, the game mode's state update (`src/emu/gamecall.c`) | answer: a queued game call jumps to its routine in the update's place, its return to `EMU_FREE` + `0x100` | once a frame of the game mode |
+| `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |
+| `0x08120B90` | the PET's input handler (`src/director/pet.c`) | answer: A on Save taken for the engine (docs/PET.md) | each frame the PET takes input |
+| `0x080003A6` | `main_awaitFrame`'s DISPSTAT loop (`src/emu/idle.c`) | answer: the CPU halted till the VBlank interrupt (The core's time) | about four times a frame (each interrupt wakes it) |
+
+The duel's two are set as the duel begins and taken off as it ends, so
+the other battles carry no hook a frame per object. The hooks replaced
+reading the game every frame: the battle's objects for MegaMan's HP and
+ProtoMan's, the battle state for its record, every 16 frames the
+enemies' reward rows, the flags of the layer's choices, the key items
+for a ScrtData or the Spin picked up, and the exit pad's warp-off flag,
+written every frame because EnterMap clears the map's flags (`0x1640`-
+`0x16FF`): now written as a map is entered and as the guardian's exit
+opens.
+
+What stays read a frame at a time, where a hook would only move the read:
+whether MegaMan walks the map, battles or reads a menu (`on_map`, the
+game mode, GAME OVER among them); the exit pad's warp under way and its
+arrival; the frames on a map not the layer's before he is warped back;
+the duel's DeleteTime, which its HUD shows as it runs.
+
+Where a table written into the core's copy is simpler than a hook, the
+table stays (issue #32): a layer's shop stock goes to the ROM's initial
+shop table beside RAM, as the shop screen lists only entries found there
+(one write per entry, made again with the layer after a CONTINUE); a
+Chip Trader's map takes the first entry of the prize pools and of the
+trader kinds (two writes), and its pool's records are rewritten in the
+folder's codes either way; the BugFrag Trader's trade waits for its chat
+to hold, a few reads while a chat is open, and runs as game calls.
+
+`tests/test_emu.c` runs a ROM of the test's own bytes on mGBA (its
+`GBAIsROM` wants `0xEA` at offset 3 and `0x96` at `0xB2`, nothing more):
+routines called and their results stored, with a hook of every kind on
+them, an ARM-state one, an event posted from an answer hook, the board's
+`BKPT #1` passed on, the hooks taken off again, one in RAM written again
+after a reset, and a halt from a hook. `build.py test` runs
+it with the address and undefined-behaviour sanitizers, as CI does.
+
 ## Testing
 
 `CYBERWORLD_AUTOPILOT=1` walks MegaMan to each exit (into a guardian's arena
 and to its Guardian Data first) and presses through battles; `CYBERWORLD_AUTOPILOT=weak` also keeps
 enemies at 1 HP, so what follows a won guardian battle can be tested.
-`tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position and
-map every 30 frames, prints the generated walls, and writes the tile map to
+`tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position,
+map and the hooks' hits so far every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.
 `--net-biome N` puts every layer in one area, `--net-layout N` builds every
 layer in one layout (`LAYOUT_*` in `src/net/net_layouts.h`).

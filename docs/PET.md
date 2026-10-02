@@ -79,8 +79,8 @@ pointed at them (docs/ROM_DATA.md, the PET).
 
 Flag `0x1706` (`EVENT_PET_COMM_SAVE_DISABLED`), which a run keeps set,
 greys Comm and Save and makes A on them buzz. On the core's ROM copy
-(`pet.c`, docs/ROM_DATA.md) a routine of ours runs before the PET's input
-handler: A on Save is taken from the game and written to the menu's spare
+(`pet.c`, docs/ROM_DATA.md) a hook runs as the PET's input handler
+begins: A on Save is taken from the game and written to the menu's spare
 byte (`0x0200DF2F`), which the engine reads each frame; and the grey's
 store to Save's colour is a no-op, so Save shows lit while Comm keeps its
 grey and buzz. BN6's own Save never runs.

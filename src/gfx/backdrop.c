@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "gfx.h"
 #include "rom.h"
 
-#define PAL_RAM 0x03001960u   /* the game's BG palette buffer */
 #define VRAM 0x06000000u
 
 /* Scroll per background, as the game's scroll callbacks (listed per id
@@ -82,8 +82,8 @@ bool backdrop_load(Backdrop *b, int id) {
 	free(m);
 
 	/* palette: a size word, then colours (some take theirs from an animation) */
-	if (rom_is_ptr(pal) && pal_dest >= PAL_RAM && pal_dest - PAL_RAM + pal_size <= sizeof b->pal)
-		memcpy(b->pal + (pal_dest - PAL_RAM), R.data + rom_off(pal) + 4, pal_size);
+	if (rom_is_ptr(pal) && pal_dest >= BN6_BG_PALETTE && pal_dest - BN6_BG_PALETTE + pal_size <= sizeof b->pal)
+		memcpy(b->pal + (pal_dest - BN6_BG_PALETTE), R.data + rom_off(pal) + 4, pal_size);
 	if (!load_anims(b, id)) return false;
 	b->dx = scroll[id][0];
 	b->dy = scroll[id][1];
@@ -104,8 +104,8 @@ static void anim_apply(Backdrop *b, BackdropAnim *an, int st) {
 	uint32_t src = an->step[st];
 	if (an->cmd == 0) {
 		/* palette copy: p0 destination, p1 size */
-		if (an->p0 >= PAL_RAM && an->p0 - PAL_RAM + an->p1 <= sizeof b->pal && src + an->p1 <= ROM_SIZE)
-			memcpy(b->pal + (an->p0 - PAL_RAM), R.data + src, an->p1);
+		if (an->p0 >= BN6_BG_PALETTE && an->p0 - BN6_BG_PALETTE + an->p1 <= sizeof b->pal && src + an->p1 <= ROM_SIZE)
+			memcpy(b->pal + (an->p0 - BN6_BG_PALETTE), R.data + src, an->p1);
 		return;
 	}
 	/* tile copy: `count` references (tile of p0, flips in bits 10-11) to VRAM p1 on */

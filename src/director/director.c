@@ -14,6 +14,7 @@
 
 #include "foes.h"
 #include "bn6.h"
+#include "bn6_fields.h"
 #include "autopilot.h"
 #include "boss.h"
 #include "chip_pool.h"
@@ -22,6 +23,7 @@
 #include "data.h"
 #include "emu.h"
 #include "encounter.h"
+#include "events.h"
 #include "debug.h"
 #include "devtools.h"
 #include "flags.h"
@@ -78,22 +80,23 @@ static struct {
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
 	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/META.md, gates) */
 	/* the rival's duel (docs/RIVAL.md): the layer's squad, the duel under
-	 * way (MegaMan's HP as last read, a hit taken, the DeleteTime), and
-	 * Chaud's words due: his call as the layer begins, his verdict after */
+	 * way (a hit taken, the DeleteTime), and Chaud's words due: his call
+	 * as the layer begins, his verdict after */
 	Encounter duel_enc;
 	bool duel, duel_hit, duel_call_due, duel_verdict_due;
-	int duel_hp, duel_time;
-	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none or done */
+	int duel_time;
+	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none */
 	bool lost_duel;     /* MegaMan deleted in the rival's duel (the summary says so) */
 	char duel_verdict[400];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
-	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
 	bool fragment_due;     /* ... once a talk can start */
-	unsigned spins_seen;   /* the Spins in the game's key items last frame (a bit per colour) */
 	bool spin_due;         /* the run's Spin picked up: MegaMan says what it does once a talk can start */
 	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
+	unsigned choices_due;  /* the layer's choices taken (EV_CHOICE), acted on once the chat box closes */
+	bool exit_shut;        /* the exit pad's warp-off flag as last written */
+	uint32_t battle_record;   /* the BattleSettings StartBattle was given (EV_BATTLE_START), 0 none since the last battle */
 	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
 	int foes;              /* viruses in the battle the game will start next */
 	Encounter next;        /* that battle */
@@ -299,7 +302,7 @@ static const char *const ways[8] = {
 };
 
 static const char *way_to(int tx, int ty, int *far) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	int dx = tx - px, dy = ty - py;
 	int panels = (abs(dx) + abs(dy)) / 32;
 	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
@@ -327,7 +330,7 @@ static bool duel_waiting(int *wx, int *wy) {
  * walk, not the line to it, which led a playtester into a house front
  * ("straight up") on two runs; how far that walk is. */
 static const char *town_way(int *far) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	int wx, wy, cells;
 	if (!town_walk(px, py, 8, &wx, &wy, &cells)) return way_to(town_info()->port_x, town_info()->port_y, far);
 	const char *way = way_to(wx, wy, far);
@@ -339,7 +342,7 @@ static const char *town_way(int *far) {
 /* The way on along the floor, not as the crow flies (net_route.c), and
  * how far that walk is. NULL when either end is off the floor. */
 static const char *route_to(int tx, int ty, int *far) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	double gx, gy;
 	int ex, ey, len;
 	netmap_grid(px, py, &gx, &gy);
@@ -383,7 +386,7 @@ static const char *rival_where(void) {
 
 /* MegaMan below three quarters of his HP (at 220 of 240 the heal led L's
  * words before the way on) */
-static bool hurt_now(void) { return emu_read16(BN6_NAVI_STATS + 0x40) * 4 < emu_read16(BN6_NAVI_STATS + 0x42) * 3; }
+static bool hurt_now(void) { return emu_read16(BN6_NAVI_HP) * 4 < emu_read16(BN6_NAVI_MAX_HP) * 3; }
 
 /* Where the layer's Recovery Mr. Prog stands, in the world; false for
  * none. */
@@ -414,6 +417,7 @@ static void goal_way(void) {
 static bool fits_beside_placed(int v);
 static bool fits_as_it_stands(int v);
 static int key_item(int id);
+static void drop_events(void);
 static void spins_sync(void);
 
 /* A program left off the board that cannot fit beside those on it: said
@@ -815,8 +819,8 @@ static void see_tent(void) {
 		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
 		if (!(emu_read8(o) & 1)) continue;
 		/* (MegaMan's panel, and the side's biggest: CircusMan, not his lion) */
-		if (emu_read8(o + 0x16) == 0 && emu_read8(o + 0x12)) { mx = emu_read8(o + 0x12); my = emu_read8(o + 0x13); }
-		else if (emu_read8(o + 0x16) == 1 && emu_read16(o + 0x26) > most) { most = emu_read16(o + 0x26); act = emu_read8(o + 0x09); }
+		if (emu_read8(o + BN6_T1_ALLIANCE) == 0 && emu_read8(o + BN6_T1_PANEL_X)) { mx = emu_read8(o + BN6_T1_PANEL_X); my = emu_read8(o + BN6_T1_PANEL_Y); }
+		else if (emu_read8(o + BN6_T1_ALLIANCE) == 1 && emu_read16(o + BN6_T1_MAX_HP) > most) { most = emu_read16(o + BN6_T1_MAX_HP); act = emu_read8(o + BN6_T1_ACTION); }
 	}
 	if (act != TENT_ACTION) { on = false; return; }
 	if (!on) { on = true; start = seen.timer; tx = mx; ty = my; }
@@ -824,8 +828,8 @@ static void see_tent(void) {
 }
 
 void director_see(void) {
-	seen.px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16;
-	seen.py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	seen.px = bn6_player_x();
+	seen.py = bn6_player_y();
 	seen.on_map = on_map();
 	seen.battle = emu_read8(BN6_GAMESTATE) == BN6_SUB_BATTLE;
 	seen.timer = emu_read32(BN6_BATTLE_TIMER);
@@ -896,7 +900,7 @@ static int board_programs(uint8_t *out, int max) {
 		out[n++] = (uint8_t)id;
 		if (ns < 10 && navicust_shape(id, &s[ns])) ++ns;
 	}
-	if (items < 0x02000000u || items >= 0x02040000u) return n;
+	if (items < BN6_EWRAM || items >= BN6_EWRAM_END) return n;
 	for (int v = 4; v < 47 * 4 && n < max && ns < 10; ++v) {
 		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
 		for (int i = 0; i < n; ++i) placed += out[i] == v;
@@ -945,7 +949,7 @@ static void note_folder_codes(void) {
 	memset(run.programs, 0, sizeof run.programs);
 	board_programs(run.programs, (int)sizeof run.programs);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
-	if (data < 0x02000000u || data >= 0x02040000u) return;
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder_made[i] = emu_read16(data + 2u * (uint32_t)i);
 	loot_folder_codes(folder_made, BN6_FOLDER_ENTRIES, run.codes);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
@@ -1149,7 +1153,7 @@ static bool build_layer(void) {
 		}
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
-	D.chosen = 0;
+	D.chosen = D.choices_due = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 
 	D.battles = 0;
@@ -1170,7 +1174,6 @@ static bool build_layer(void) {
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
 	D.layer_told = false;
-	D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
 	D.fragment_due = false;
 	D.spin_due = false;
 	D.duel = false;
@@ -1200,6 +1203,8 @@ static bool build_layer(void) {
 /* build_layer timed (build_ms), named first where MegaMan leaves a layer */
 static bool new_layer(bool leaving) {
 	if (leaving) building_word();
+	/* (no battle watched: a duel's, left by a battle never finished) */
+	emu_battle_unwatch();
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	bool ok = build_layer();
 	build_ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -1220,7 +1225,7 @@ static bool new_layer(bool leaving) {
  * run saved before this is mended. */
 static void own_folder_chips(void) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
-	if (data < 0x02000000u || data >= 0x02040000u || marks < 0x02000000u || marks >= 0x02040000u) return;
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		int id = emu_read16(data + 2u * (uint32_t)i) & 0x1FF;
 		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
@@ -1239,12 +1244,12 @@ static uint32_t pack_count_at(uint32_t pack, int entry) {
 static void set_start_folder(void) {
 	const uint16_t *chips = meta_folder_chips(run.folder);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
-	if (!chips || data < 0x02000000u || data >= 0x02040000u) return;
+	if (!chips || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
 	/* the pack as if this folder had been given at NEW GAME, not the
 	 * Standard one (GiveFolder counts a folder's chips in the pack): a
 	 * playtester's Blade run kept the Standard folder's CrakShot and
 	 * Cannons as spares, and the folder's promise with them (session 31) */
-	bool counts = pack >= 0x02000000u && pack < 0x02040000u && R.data;
+	bool counts = pack >= BN6_EWRAM && pack < BN6_EWRAM_END && R.data;
 	for (int i = 0; i < BN6_FOLDER_ENTRIES && counts; ++i) {
 		uint32_t at = pack_count_at(pack, emu_read16(data + 2u * (uint32_t)i));
 		int n = emu_read8(at);
@@ -1306,6 +1311,7 @@ static void programs_from_game(void) {
 static void forget_heard(void) { D.heard_act = D.dealer_act = 0; D.mail_quiet = false; D.mail_due = 0; }
 
 bool director_start_run(void) {
+	drop_events();
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
@@ -1700,7 +1706,7 @@ static void save_checkpoint(void) {
 
 bool director_can_suspend(void) {
 	return D.active && !D.town && !D.gameover && on_map() && !emu_read8(BN6_CHATBOX) && !talk_busy() && !D.warping &&
-		emu_read8(BN6_WARP + 0x10) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
+		emu_read8(BN6_WARP_PENDING) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
 		flag_get(BN6_FLAG_PLAYER_CAN_MOVE);
 }
 
@@ -1723,12 +1729,12 @@ bool director_suspend(void) {
 
 bool director_arrived(void) {
 	if (!D.active || !on_map()) return false;
-	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
+	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER);
 	return D.town ? group == town_info()->group && number == town_info()->number : group == D.group && number == D.number;
 }
 
 static void print_near(int id, int x, int y, void *ctx) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	if (abs(x - px) < 48 && abs(y - py) < 48) fprintf(ctx, "near %s %d %d\n", id < 0 ? "folk" : "object", x, y);
 }
 
@@ -1741,14 +1747,14 @@ void director_describe(FILE *f) {
 	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
 	/* (in a battle the HUD's HP is MegaMan's battle object's) */
-	int hp = emu_read16(BN6_NAVI_STATS + 0x40), max = emu_read16(BN6_NAVI_STATS + 0x42);
+	int hp = emu_read16(BN6_NAVI_HP), max = emu_read16(BN6_NAVI_MAX_HP);
 	if (!on_map())
 		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-			if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) { hp = emu_read16(o + 0x24); max = emu_read16(o + 0x26); break; }
+			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { hp = emu_read16(o + BN6_T1_HP); max = emu_read16(o + BN6_T1_MAX_HP); break; }
 		}
 	/* (GameState's protected zenny, then its BugFrags) */
-	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_GAMESTATE + 0x5C), (unsigned)emu_read32(BN6_GAMESTATE + 0x60));
+	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
 	/* (in a battle, the panel MegaMan stands on, from the left and the top:
 	 * a player sees it at a glance, a playtester reading stills misread it
@@ -1756,16 +1762,16 @@ void director_describe(FILE *f) {
 	if (!on_map())
 		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-			if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0 && emu_read8(o + 0x12)) {
-				fprintf(f, "megaman stands column %d row %d\n", emu_read8(o + 0x12), emu_read8(o + 0x13));
+			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0 && emu_read8(o + BN6_T1_PANEL_X)) {
+				fprintf(f, "megaman stands column %d row %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
 				break;
 			}
 		}
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
-		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", (int)emu_read32(BN6_PLAYER + 0x1C) >> 16,
-			(int)emu_read32(BN6_PLAYER + 0x20) >> 16, (int)emu_read32(BN6_PLAYER + 0x24) >> 16, emu_read8(BN6_PLAYER + 0x17),
-			emu_read8(BN6_PLAYER + 9), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
+		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", bn6_player_x(),
+			bn6_player_y(), bn6_player_z(), emu_read8(BN6_PLAYER_LOCKED),
+			emu_read8(BN6_PLAYER_STATE), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
 		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 		else {
@@ -1775,7 +1781,7 @@ void director_describe(FILE *f) {
 			fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
 				D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
 			/* the floor around him, panels (x across, y down; @ he, # floor) */
-			int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, cx, cy;
+			int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
 			if (netmap_panel(px, py, &cx, &cy)) {
 				int wx, wy;
 				netmap_world(cx, cy, &wx, &wy);
@@ -1831,13 +1837,13 @@ void director_describe(FILE *f) {
 			}
 		}
 		/* the game's NPC objects near him: flags, state, radius, lock, text */
-		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		int px = bn6_player_x(), py = bn6_player_y();
 		for (int i = 0; i < 16; ++i) {
-			uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
-			int x = (int16_t)emu_read16(o + 0x26), y = (int16_t)emu_read16(o + 0x2A), z = (int16_t)emu_read16(o + 0x2E);
+			uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
+			int x = (int16_t)emu_read16(o + BN6_NPC_X16), y = (int16_t)emu_read16(o + BN6_NPC_Y16), z = (int16_t)emu_read16(o + BN6_NPC_Z16);
 			if (!(emu_read8(o) & 1) || ((abs(x - px) > 64 || abs(y - py) > 64) && !getenv("CYBERWORLD_STATE_ALLNPC"))) continue;
 			fprintf(f, "npc %d flags %02x state %02x radius %d zreach %d locked %d text %d at %d %d %d\n", i, emu_read8(o),
-				emu_read8(o + 8), emu_read8(o + 0x0C), emu_read8(o + 0x0D), emu_read8(o + 0x17), emu_read8(o + 0x1C), x, y, z);
+				emu_read8(o + BN6_NPC_STATE), emu_read8(o + BN6_NPC_RADIUS), emu_read8(o + BN6_NPC_Z_REACH), emu_read8(o + BN6_NPC_LOCKED), emu_read8(o + BN6_NPC_SCRIPT), x, y, z);
 		}
 	}
 	if (D.town) return;
@@ -1863,8 +1869,8 @@ void director_describe(FILE *f) {
  * walks up to (a step or two short of a navi, the press did nothing). */
 static void probe_vectors(int vx[8], int vy[8]) {
 	for (int k = 0; k < 8; ++k) {
-		vx[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24) >> 16;
-		vy[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * 24 + 4) >> 16;
+		vx[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * BN6_TALK_PROBE_SIZE) >> 16;
+		vy[k] = (int32_t)emu_read32(BN6_TALK_PROBES + (uint32_t)k * BN6_TALK_PROBE_SIZE + BN6_TALK_PROBE_Y) >> 16;
 	}
 }
 
@@ -1873,22 +1879,22 @@ static void probe_vectors(int vx[8], int vy[8]) {
  * navi behind a counter is spoken to across it; a floor sprite stands
  * further back than it shows). */
 static void npc_centre(uint32_t o, int *x, int *y) {
-	*x = (int16_t)emu_read16(o + 0x26) + (int8_t)emu_read8(o + 0x11);
-	*y = (int16_t)emu_read16(o + 0x2A) + (int8_t)emu_read8(o + 0x12);
+	*x = (int16_t)emu_read16(o + BN6_NPC_X16) + (int8_t)emu_read8(o + BN6_NPC_CENTER_X);
+	*y = (int16_t)emu_read16(o + BN6_NPC_Y16) + (int8_t)emu_read8(o + BN6_NPC_CENTER_Y);
 }
 
 /* The NPC slot A means, or -1. */
 static int talk_target(void) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-	int face = emu_read8(BN6_PLAYER + 0x10) & 7, vx[8], vy[8];
+	int px = bn6_player_x(), py = bn6_player_y();
+	int face = emu_read8(BN6_PLAYER_FACING) & 7, vx[8], vy[8];
 	probe_vectors(vx, vy);
 	double fl = sqrt((double)vx[face] * vx[face] + vy[face] * vy[face]);
 	if (fl < 1) return -1;
 	int front = -1, ahead = -1, near = -1, fd = 1 << 30, ad = 52 * 52 + 1, nd = 52 * 52 + 1;
 	double fc = 0;
 	for (int i = 0; i < 16; ++i) {
-		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;   /* the game's NPC objects (director_describe) */
-		if (!(emu_read8(o) & 1) || !emu_read8(o + 0x0C)) continue;
+		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;   /* the game's NPC objects (director_describe) */
+		if (!(emu_read8(o) & 1) || !emu_read8(o + BN6_NPC_RADIUS)) continue;
 		int cx, cy;
 		npc_centre(o, &cx, &cy);
 		int dx = cx - px, dy = cy - py, d = dx * dx + dy * dy;
@@ -1909,13 +1915,13 @@ static int talk_target(void) {
 /* Where NPC slot i stands from MegaMan, the facing whose probe points at
  * it best, and whether that probe reaches it. */
 static bool talk_reach(int i, int *face) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, vx[8], vy[8];
-	uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
+	int px = bn6_player_x(), py = bn6_player_y(), vx[8], vy[8];
+	uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
 	int cx, cy;
 	npc_centre(o, &cx, &cy);
 	int tx = cx - px, ty = cy - py;
 	probe_vectors(vx, vy);
-	int k = emu_read8(BN6_PLAYER + 0x10) & 7;
+	int k = emu_read8(BN6_PLAYER_FACING) & 7;
 	double top = -2;
 	for (int f = 0; f < 8; ++f) {
 		double l = sqrt((double)vx[f] * vx[f] + vy[f] * vy[f]) * sqrt((double)tx * tx + ty * ty);
@@ -1924,14 +1930,14 @@ static bool talk_reach(int i, int *face) {
 	}
 	*face = k;
 	/* (the probe's circle and the NPC's meet, with a little to spare) */
-	int r = emu_read8(BN6_TALK_PROBES + (uint32_t)k * 24 + 12) + emu_read8(o + 0x0C) - 3;
+	int r = emu_read8(BN6_TALK_PROBES + (uint32_t)k * BN6_TALK_PROBE_SIZE + BN6_TALK_PROBE_RADIUS) + emu_read8(o + BN6_NPC_RADIUS) - 3;
 	int ex = tx - vx[k], ey = ty - vy[k];
 	return ex * ex + ey * ey <= r * r;
 }
 
 static void talk_turn(int k) {
-	emu_write8(BN6_PLAYER + 0x10, (uint8_t)k);
-	emu_write8(BN6_PLAYER + 0x14, (uint8_t)k);
+	emu_write8(BN6_PLAYER_FACING, (uint8_t)k);
+	emu_write8(BN6_PLAYER_ANIM, (uint8_t)k);
 }
 
 #define PAD_KEYS (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)
@@ -1947,17 +1953,17 @@ static const uint32_t face_pad[8] = {
 static struct { int t; uint8_t r[16]; } excl;
 
 static void talk_only(int i) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	for (int j = 0; j < 16; ++j) {
-		uint32_t o = 0x020057B0u + (uint32_t)j * 0xD8;
-		uint8_t r = emu_read8(o + 0x0C);
+		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)j * BN6_NPC_SIZE;
+		uint8_t r = emu_read8(o + BN6_NPC_RADIUS);
 		if (j == i || !(emu_read8(o) & 1) || !r || excl.r[j]) continue;
 		int cx, cy;
 		npc_centre(o, &cx, &cy);
 		int dx = cx - px, dy = cy - py;
 		if (dx * dx + dy * dy > 96 * 96) continue;
 		excl.r[j] = r;
-		emu_write8(o + 0x0C, 0);
+		emu_write8(o + BN6_NPC_RADIUS, 0);
 	}
 	excl.t = 8;   /* (the game takes a press two frames on) */
 }
@@ -1965,7 +1971,7 @@ static void talk_only(int i) {
 static void talk_only_update(void) {
 	if (!excl.t || --excl.t) return;
 	for (int j = 0; j < 16; ++j) {
-		if (excl.r[j]) emu_write8(0x020057B0u + (uint32_t)j * 0xD8 + 0x0C, excl.r[j]);
+		if (excl.r[j]) emu_write8(BN6_NPC_OBJECTS + (uint32_t)j * BN6_NPC_SIZE + BN6_NPC_RADIUS, excl.r[j]);
 		excl.r[j] = 0;
 	}
 }
@@ -1974,9 +1980,9 @@ static void talk_only_update(void) {
  * The pad or B takes over; a wall ends it with the A all the same. */
 static uint32_t talk_walk(uint32_t keys) {
 	static int last_x, last_y, still;
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
-	uint32_t o = 0x020057B0u + (uint32_t)D.walk_to * 0xD8;
-	if ((keys & (PAD_KEYS | KEY_B)) || !(emu_read8(o) & 1) || !emu_read8(o + 0x0C) || emu_read8(BN6_CHATBOX) || talk_busy()) {
+	int px = bn6_player_x(), py = bn6_player_y();
+	uint32_t o = BN6_NPC_OBJECTS + (uint32_t)D.walk_to * BN6_NPC_SIZE;
+	if ((keys & (PAD_KEYS | KEY_B)) || !(emu_read8(o) & 1) || !emu_read8(o + BN6_NPC_RADIUS) || emu_read8(BN6_CHATBOX) || talk_busy()) {
 		D.walk_t = 0;
 		return keys;
 	}
@@ -2126,7 +2132,7 @@ uint32_t director_keys(uint32_t keys) {
 	else if (a_pressed && !D.town && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping) {
 		int i = talk_target(), k;
 		if (i >= 0 && talk_reach(i, &k)) {
-			if (k != (emu_read8(BN6_PLAYER + 0x10) & 7)) { talk_turn(k); keys &= ~PAD_KEYS; }
+			if (k != (emu_read8(BN6_PLAYER_FACING) & 7)) { talk_turn(k); keys &= ~PAD_KEYS; }
 			talk_only(i);
 		} else if (i >= 0 && !(keys & PAD_KEYS) && !autopilot_on()) {
 			/* (not while he walks: the pad is his) */
@@ -2139,24 +2145,24 @@ uint32_t director_keys(uint32_t keys) {
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_used |= D.map_shown; keys &= ~KEY_SELECT; }
 	/* R on the port: the jack-in, which the arrow does not follow into its
 	 * flash and tunnel (a playtester saw it drawn over them) */
-	if (D.town && r_pressed && town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
+	if (D.town && r_pressed && town_on_port(bn6_player_x(), bn6_player_y())) {
 		cinema_arrow(0, 0);
 		D.arrow_pending = false;
 	}
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
-	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP + 0x10) == 0 &&
-		!town_on_port((int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16)) {
+	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP_PENDING) == 0 &&
+		!town_on_port(bn6_player_x(), bn6_player_y())) {
 		static char buf[160];
-		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		int px = bn6_player_x(), py = bn6_player_y();
 		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
 		int near = town_port_near(px, py, &nx, &ny);
 		/* (a step short of a jack-in cell: he takes it, and R jacks in; a
 		 * playtester stood at the mermaid fountain's rim a step off its
 		 * ring and pressed R five times) */
 		if (near >= 0 && near <= PORT_STEP * PORT_STEP) {
-			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)nx << 16);
-			emu_write32(BN6_PLAYER + 0x20, (uint32_t)ny << 16);
+			emu_write32(BN6_PLAYER_X, (uint32_t)nx << 16);
+			emu_write32(BN6_PLAYER_Y, (uint32_t)ny << 16);
 			cinema_arrow(0, 0);
 			D.arrow_pending = false;
 			return keys;
@@ -2182,7 +2188,7 @@ uint32_t director_keys(uint32_t keys) {
 	/* (not while a warp or the jack-in departs, nor through a guardian's
 	 * staging or the battle it has armed; an L pressed as a chat closes is
 	 * kept half a second, as the first press after one went unheard) */
-	bool can_l = !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP + 0x10) == 0 &&
+	bool can_l = !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping && emu_read8(BN6_WARP_PENDING) == 0 &&
 		(D.town || (!boss_cinematic() && !boss_fighting()));
 	if (pressed && !can_l) D.l_kept = 30;
 	else if (!pressed && D.l_kept > 0) {
@@ -2209,11 +2215,11 @@ uint32_t director_keys(uint32_t keys) {
  * he last stood clear of every NPC (the game's NPC objects, bn6f
  * eOverworldNPCObjects: 16 of 0xD8 bytes). */
 static void unwedge(void) {
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	bool inside = false;
 	for (int i = 0; i < 16 && !inside; ++i) {
-		uint32_t o = 0x020057B0u + (uint32_t)i * 0xD8;
-		int r = emu_read8(o + 0x0C);
+		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
+		int r = emu_read8(o + BN6_NPC_RADIUS);
 		if (!(emu_read8(o) & 1) || !r) continue;
 		int cx, cy;
 		npc_centre(o, &cx, &cy);
@@ -2226,10 +2232,10 @@ static void unwedge(void) {
 	if (moved || !D.dir_held || emu_read8(BN6_CHATBOX) || talk_busy()) { D.wedged = 0; return; }
 	if (++D.wedged < 60 || (D.free_x == px && D.free_y == py)) return;
 	D.wedged = 0;
-	emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.free_x << 16);
-	emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.free_y << 16);
-	emu_write32(BN6_PLAYER + 0x28, (uint32_t)D.free_x << 16);
-	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)D.free_y << 16);
+	emu_write32(BN6_PLAYER_X, (uint32_t)D.free_x << 16);
+	emu_write32(BN6_PLAYER_Y, (uint32_t)D.free_y << 16);
+	emu_write32(BN6_PLAYER_NEXT_X, (uint32_t)D.free_x << 16);
+	emu_write32(BN6_PLAYER_NEXT_Y, (uint32_t)D.free_y << 16);
 }
 
 /* The NaviCust's rotations (key items 0x50-0x55, one a colour: white,
@@ -2238,18 +2244,9 @@ static void unwedge(void) {
  * profile found in the net, one a run (docs/META.md), and no other: a
  * program of another colour lies as its record draws it, and the drafts
  * offer only what fits so (navicust_set_spins). */
-static unsigned spins_in_game(void) {
-	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
-	if (items < 0x02000000u || items >= 0x02040000u) return 0;
-	unsigned mask = 0;
-	for (uint32_t c = 1; c <= 6; ++c)
-		if (emu_read8(items + 0x4F + c)) mask |= 1u << (c - 1);
-	return mask;
-}
-
 static void grant_spins(void) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
-	if (items < 0x02000000u || items >= 0x02040000u || check < 0x02000000u || check >= 0x02040000u) return;
+	if (items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
 	/* (the count and the item's check, its seed ^ 0x55, as the game's own
 	 * giving writes them: a count without it reads as none) */
 	unsigned held = meta_spins();
@@ -2271,20 +2268,26 @@ static void grant_spins(void) {
 static void spins_sync(void) {
 	navicust_set_spins(meta_spins());
 	grant_spins();
-	D.spins_seen = spins_in_game();
 }
 
-/* The run's Spin picked up from its Mystery Data (the game gives the key
- * item): the profile keeps it, and MegaMan says what it does. */
-static void spin_watch(void) {
-	unsigned now = spins_in_game(), fresh = now & ~D.spins_seen;
-	D.spins_seen = now;
+/* A key item the game gave (EV_ITEM_GIVEN): a ScrtData, which MegaMan
+ * says is for; the run's Spin, from its Mystery Data, which the profile
+ * keeps and MegaMan says what it does. */
+static void item_given(int item) {
+	if (item == SCRIPTS_SECRET_DATA) {
+		int n = key_item(SCRIPTS_SECRET_DATA);
+		if (n > run.fragments && D.objs.fragment_found >= 0) D.fragment_due = true;
+		run.fragments = n;
+	}
 	int c = D.objs.spin_colour;
-	if (c && (fresh >> (c - 1) & 1) && !(meta_spins() >> (c - 1) & 1)) {
+	if (c && item == 0x4F + c && !(meta_spins() >> (c - 1) & 1)) {
 		meta_spin_found(c);
 		navicust_set_spins(meta_spins());
 		D.spin_due = D.objs.spin_found >= 0;
 	}
+}
+
+static void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
 }
 
@@ -2489,7 +2492,7 @@ static void bugfrag_trade(void) {
 	}
 	uint32_t f = emu_read32(BN6_CHATBOX_FLAGS);
 	if (D.objs.trader_kind != TRADER_BUGFRAG || !(f & 0x80) || !(f & 0x08) ||
-	    emu_read32(BN6_CHATBOX + 0x30) != BN6_TRADER_TEXT) return;
+	    emu_read32(BN6_CHATBOX_ARCHIVE) != BN6_TRADER_TEXT) return;
 	/* (after No the box is closed: the chat ends as the Chip Trader's No
 	 * ends it, with its script 5, a bare end) */
 	if (f & 7) { game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, 5); return; }
@@ -2505,19 +2508,19 @@ static void bugfrag_trade(void) {
 	uint8_t v[4];
 	put16(v, chip);
 	put16(v + 2, code);
-	emu_write(BN6_TRADER_STATE + 4, v, 4);
+	emu_write(BN6_TRADER_STATE_PRIZE, v, 4);
 	game_call_ret(BN6_GIVE_CHIPS, chip, code, 1, NULL);
 	/* (the map saved on) */
-	put16(v, emu_read16(BN6_GAMESTATE + 4));
-	emu_write(BN6_GAMESTATE + 0x0C, v, 2);
+	put16(v, emu_read16(BN6_MAP_ID));
+	emu_write(BN6_LAST_MAP, v, 2);
 	game_call(BN6_SAVE_GAME, 0, 0);
 	/* (the script names the prize from the chat box's two words) */
-	emu_write32(BN6_CHATBOX + 0x4C, chip);
-	emu_write32(BN6_CHATBOX + 0x50, code);
+	emu_write32(BN6_CHATBOX_WORD0, chip);
+	emu_write32(BN6_CHATBOX_WORD1, code);
 	game_call(BN6_CHAT_RUN_SCRIPT, BN6_TRADER_TEXT, 15);
 	memset(v, 0, sizeof v);
-	emu_write(BN6_TRADER_STATE + 4, v, 4);
-	emu_write(BN6_TRADER_STATE + 0x30, v, 2);
+	emu_write(BN6_TRADER_STATE_PRIZE, v, 4);
+	emu_write(BN6_TRADER_STATE_30, v, 2);
 	howl = true;
 }
 
@@ -2526,7 +2529,7 @@ static void bugfrag_trade(void) {
  * the way-on arrow shows along the floor, as after L's words. */
 static void push_arrow(void) {
 	static int ax, ay, pushed;
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	/* (the edge's push-out jostles him a unit or two) */
 	bool moved = abs(px - ax) > 4 || abs(py - ay) > 4;
 	if (moved || !D.dir_held || D.walk_t || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || boss_cinematic()) {
@@ -2559,7 +2562,7 @@ static void map_arrow(void) {
  * the map. */
 static void arrow_update(void) {
 	/* (not over a warp's or the jack-in's flash and tunnel) */
-	if (D.warping || emu_read8(BN6_WARP + 0x10)) {
+	if (D.warping || emu_read8(BN6_WARP_PENDING)) {
 		if (cinema_arrow_on()) cinema_arrow(0, 0);
 		D.arrow_pending = false;
 		return;
@@ -2602,18 +2605,18 @@ static void town_update(void) {
 	map_label();
 	arrow_update();
 	if (on_map()) unwedge();
-	int group = emu_read8(BN6_GAMESTATE + 4), number = emu_read8(BN6_GAMESTATE + 5);
+	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER);
 	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
 	talk_update();
 	/* Lan and MegaMan's words (Dad's call, the first time), once Lan is
 	 * out and the map has settled */
-	if (D.town_seen && on_map() && !D.intro_said && emu_read8(BN6_WARP + 0x10) == 0 && ++D.town_frames > 40 &&
+	if (D.town_seen && on_map() && !D.intro_said && emu_read8(BN6_WARP_PENDING) == 0 && ++D.town_frames > 40 &&
 		talk_script(town_info()->talk_archive, town_info()->intro)) {
 		D.intro_said = true;
 		if (!profile.seen_intro) { profile.seen_intro = true; profile_save(); }
 	}
-	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP + 0x10) == 0 &&
-		emu_read8(BN6_GAMESTATE + 4) == D.group && emu_read8(BN6_GAMESTATE + 5) == D.number;
+	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
+		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
 	if (!arrived) return;
 	D.town = false;
 	D.frame = 0;
@@ -2623,6 +2626,7 @@ static void town_update(void) {
 }
 
 bool director_start_layer(void) {
+	drop_events();
 	no_room_told = -1;
 	forget_heard();
 	D.town = false;
@@ -2655,11 +2659,11 @@ bool director_dev_next_layer(void) {
 void director_dev_place(int x, int y, int face) {
 	/* (a test's step: MegaMan put down at world (x, y), facing 0-7) */
 	if (!director_on_map()) return;
-	emu_write32(BN6_PLAYER + 0x1C, (uint32_t)x << 16);
-	emu_write32(BN6_PLAYER + 0x20, (uint32_t)y << 16);
-	emu_write32(BN6_PLAYER + 0x28, (uint32_t)x << 16);
-	emu_write32(BN6_PLAYER + 0x2C, (uint32_t)y << 16);
-	if (face >= 0 && face < 8) { emu_write8(BN6_PLAYER + 0x10, (uint8_t)face); emu_write8(BN6_PLAYER + 0x14, (uint8_t)face); }
+	emu_write32(BN6_PLAYER_X, (uint32_t)x << 16);
+	emu_write32(BN6_PLAYER_Y, (uint32_t)y << 16);
+	emu_write32(BN6_PLAYER_NEXT_X, (uint32_t)x << 16);
+	emu_write32(BN6_PLAYER_NEXT_Y, (uint32_t)y << 16);
+	if (face >= 0 && face < 8) { emu_write8(BN6_PLAYER_FACING, (uint8_t)face); emu_write8(BN6_PLAYER_ANIM, (uint8_t)face); }
 }
 
 bool director_dev_warp_cell(int x, int y) {
@@ -2701,6 +2705,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 }
 
 bool director_resume(void) {
+	drop_events();
 	no_room_told = -1;
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
@@ -2718,10 +2723,8 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		spins_sync();
-		/* (the ScrtData the save holds, which building the layer could not
-		 * read yet: MegaMan took the saved one for a new find, "Our second
-		 * ScrtData!" with one in hand) */
-		D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
+		/* (the ScrtData the state holds, as the game counts them) */
+		run.fragments = key_item(SCRIPTS_SECRET_DATA);
 		/* the shops' data in RAM is the saved one: this layer's again,
 		 * what was bought before the save still bought (a CONTINUE had
 		 * restocked both shops); another build's layer, afresh */
@@ -2742,8 +2745,8 @@ bool director_resume(void) {
 			flag_clear(LAYER_OFFICIAL_FLAG);
 			flag_clear(LAYER_DUEL_CALLED_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
-			emu_write32(BN6_PLAYER + 0x1C, (uint32_t)D.start_x << 16);
-			emu_write32(BN6_PLAYER + 0x20, (uint32_t)D.start_y << 16);
+			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
+			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);
 		}
 		/* a state saved while the jack-in still held MegaMan (runs from
 		 * before the checkpoint waited for him): the game's own release
@@ -2765,7 +2768,7 @@ bool director_resume(void) {
 			}
 		/* enter the map again where MegaMan stood: the game reloads its NPCs
 		 * and tiles from this build's tables, which a state does not hold */
-		int x = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, y = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+		int x = bn6_player_x(), y = bn6_player_y();
 		/* (a build that lays the layer out otherwise may have no floor there
 		 * any more: then its arrival) */
 		int cx, cy;
@@ -2854,9 +2857,11 @@ static void duel_verdict(bool won) {
 
 /* A Yes in a layer's choice: a challenge battle, or into a side layer. */
 static bool act_on_choices(void) {
-	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
+	if (!D.choices_due || emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
 	for (int i = 0; i < D.objs.nchoices; ++i) {
-		if ((D.chosen & (1u << i)) || !flag_get(D.objs.choice[i].flag)) continue;
+		if (!(D.choices_due & (1u << i))) continue;
+		D.choices_due &= ~(1u << i);
+		if (D.chosen & (1u << i)) continue;
 		D.chosen |= 1u << i;
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
@@ -2867,10 +2872,12 @@ static bool act_on_choices(void) {
 		}
 		case OBJ_DUEL:
 			set_encounter(&D.duel_enc, true);
+			/* (its hits, and the netbattle's ProtoMan held to the act's
+			 * band as he spawns: docs/RIVAL.md) */
+			emu_battle_watch(D.duel_cap);
 			D.challenge = true;
 			D.duel = true;
 			D.duel_hit = false;
-			D.duel_hp = -1;
 			D.duel_time = 0;
 			D.duel_call_due = false;
 			flag_set(LAYER_DUEL_CALLED_FLAG);
@@ -2906,14 +2913,14 @@ static void win_run(void);
  * jack in) to warp 1. While it jacks out, the next layer is built and warp 1
  * pointed at its start; nothing else happens until MegaMan has arrived. */
 static bool follow_exit_warp(void) {
-	int pending = emu_read8(BN6_WARP + 0x10);
+	int pending = emu_read8(BN6_WARP_PENDING);
 	if (D.warping) {
 		bool arrived = pending == 0 && on_map() &&
-			emu_read8(BN6_GAMESTATE + 4) == D.group && emu_read8(BN6_GAMESTATE + 5) == D.number;
+			emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
 		if (arrived) D.warping = false;
 		return !arrived;
 	}
-	if (pending != 1 || emu_read8(BN6_WARP + 0x11) != 1) return false;
+	if (pending != 1 || emu_read8(BN6_WARP_INDEX) != 1) return false;
 	/* the short net's Nest fallen: the run is won (on threat 10, its first
 	 * guardian's exit leads down to the second's, docs/META.md) */
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_last(run.depth)) { win_run(); return true; }
@@ -3120,7 +3127,7 @@ static void last_stop(int cx, int cy) {
 	if (cx < a->x || cy < a->y || cx >= a->x + a->w || cy >= a->y + a->h) return;
 	if (emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping || D.map_shown) return;
 	D.last_stop_told = true;
-	int hp = emu_read16(BN6_NAVI_STATS + 0x40), max = emu_read16(BN6_NAVI_STATS + 0x42);
+	int hp = emu_read16(BN6_NAVI_HP), max = emu_read16(BN6_NAVI_MAX_HP);
 	const char *dealer = NULL, *heal = NULL;
 	static char dway[80], hway[80];
 	for (int i = 0; i < layer.nobj; ++i) {
@@ -3143,7 +3150,44 @@ static void last_stop(int cx, int cy) {
 	talk_start(buf, FACE_MEGAMAN);
 }
 
+/* The exit pad shut while a guardian stands: its warp-off flag, written
+ * as the guardian's state changes and after the game enters a map (bn6f
+ * EnterMap clears the map's flags, 0x1640-0x16FF: EV_MAP_ENTER). */
+static void exit_flag(bool entered) {
+	bool shut = !boss_exit_open();
+	if (!entered && shut == D.exit_shut) return;
+	D.exit_shut = shut;
+	if (shut) flag_set(BN6_FLAG_WARP_OFF + 1);
+	else flag_clear(BN6_FLAG_WARP_OFF + 1);
+}
+
+/* What the hooks saw in the frames since the last update (events.h). */
+static void take_events(void) {
+	HookEvent ev[32];
+	int n = emu_hook_events(ev, 32);
+	bool on_layer = D.active && !D.town;
+	for (int i = 0; i < n; ++i)
+		switch (ev[i].kind) {
+		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; break;
+		case EV_MEGAMAN_HIT: D.duel_hit = true; break;
+		case EV_MAP_ENTER: if (on_layer) exit_flag(true); break;
+		case EV_CHOICE:
+			/* (still set: one the layer's setup cleared was a story's) */
+			for (int k = 0; on_layer && k < D.objs.nchoices; ++k)
+				if (D.objs.choice[k].flag == (int)ev[i].r[0] && flag_get(D.objs.choice[k].flag)) D.choices_due |= 1u << k;
+			break;
+		case EV_ITEM_GIVEN: if (on_layer) item_given((int)ev[i].r[0]); break;
+		}
+}
+
+/* The events queued before the run (the boot's), dropped. */
+static void drop_events(void) {
+	HookEvent ev[32];
+	while (emu_hook_events(ev, 32) == 32) {}
+}
+
 void director_update(void) {
+	take_events();
 	if (!D.active) return;
 	if (D.town) { town_update(); return; }
 	++D.frame;
@@ -3169,7 +3213,7 @@ void director_update(void) {
 	arrow_update();
 	if (on_map()) {
 		/* what MegaMan has come near, for the map */
-		int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16, cx, cy;
+		int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
 		if (netmap_panel(px, py, &cx, &cy)) {
 			for (int y = cy - 4; y <= cy + 4; ++y)
 				for (int x = cx - 4; x <= cx + 4; ++x)
@@ -3204,7 +3248,7 @@ void director_update(void) {
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
 	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); }
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
@@ -3217,41 +3261,17 @@ void director_update(void) {
 				if (guardian) runlog_battle_start(NULL, "guardian");
 			}
 			D.in_battle = true;
-			/* the duel's hits and time: MegaMan's HP lower than at the last
-			 * frame, and the results screen's DeleteTime (docs/RIVAL.md) */
+			/* the duel's time: the results screen's DeleteTime (its hits
+			 * come as events: docs/RIVAL.md) */
 			if (D.duel && sub == BN6_SUB_BATTLE) {
-				for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
-					uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
-					if (!(emu_read8(o) & 1) || emu_read8(o + 0x16) != 0) continue;
-					int hp = emu_read16(o + 0x24);
-					if (D.duel_hp >= 0 && hp < D.duel_hp) D.duel_hit = true;
-					D.duel_hp = hp;
-					break;
-				}
 				int t = (int)emu_read32(BN6_BATTLE_TIMER);
 				if (t > D.duel_time) D.duel_time = t;
-				/* the netbattle's ProtoMan, once he stands on the field: his
-				 * HP and MaxHP (+0x24, +0x26) the act's guardian band at
-				 * most (docs/RIVAL.md, docs/EMULATION.md) */
-				for (uint32_t k = 0; D.duel_cap && k < BN6_T1_COUNT; ++k) {
-					uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
-					if (!(emu_read8(o) & 1) || emu_read8(o + 0x16) != 1) continue;
-					if (emu_read16(o + 0x26) > D.duel_cap) {
-						uint8_t v[2] = { (uint8_t)D.duel_cap, (uint8_t)(D.duel_cap >> 8) };
-						emu_write(o + 0x24, v, 2);
-						emu_write(o + 0x26, v, 2);
-					}
-					D.duel_cap = 0;
-				}
 			}
-			/* its rewards in the folder's codes, half the time (read again
-			 * through the battle: its enemies spawn a few frames in, and
-			 * the reward is picked as it ends) */
-			if (sub == BN6_SUB_BATTLE && D.frame % 16 == 0) emu_encounter_lean_drops();
-			/* the battle the game was handed, once its setup names the
-			 * record (a re-roll may have come between its roll and now) */
+			/* the battle the game was handed, once StartBattle has named
+			 * its record (a re-roll may have come between its roll and
+			 * now) */
 			if (!D.record_known) {
-				int s = emu_encounter_battle_slot();
+				int s = D.battle_record ? emu_encounter_record(D.battle_record) : -2;
 				if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
 				if (s != -2) {
 					D.record_known = true;
@@ -3264,8 +3284,8 @@ void director_update(void) {
 			if (emu_debug_on() && !D.placed_told)
 				for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 					uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-					if ((emu_read8(o) & 1) && emu_read8(o + 0x16) == 0) {
-						fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + 0x12), emu_read8(o + 0x13));
+					if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) {
+						fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
 						D.placed_told = true;
 						break;
 					}
@@ -3277,6 +3297,7 @@ void director_update(void) {
 		/* back from a battle: count the deleted viruses (a navi counts below) */
 		D.in_battle = false;
 		D.placed_told = false;
+		D.battle_record = 0;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		runlog_battle_end(won);
 		/* the PET's battle data on the viruses just fought */
@@ -3310,7 +3331,7 @@ void director_update(void) {
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-		if (D.duel) { duel_verdict(won); D.pet_refreshed = false; }
+		if (D.duel) { emu_battle_unwatch(); duel_verdict(won); D.pet_refreshed = false; }
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
 		else D.reward_due = won && D.objs.challenge_reward >= 0;
 		D.gate_fight = false;
@@ -3358,17 +3379,11 @@ void director_update(void) {
 		profile_save();
 	}
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
-	run.fragments = key_item(SCRIPTS_SECRET_DATA);
-	if (run.fragments > D.fragments_seen && D.objs.fragment_found >= 0) D.fragment_due = true;
-	D.fragments_seen = run.fragments;
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
 		D.fragment_due = false;
 		D.fragments_told = run.fragments;
 	}
-	/* a guardian keeps the exit pad shut (the game clears the map's warp
-	 * flags when it enters a map) */
-	if (!boss_exit_open()) flag_set(BN6_FLAG_WARP_OFF + 1);
-	else flag_clear(BN6_FLAG_WARP_OFF + 1);
+	exit_flag(false);
 	boss_update();
 	/* (after the last card: the area cleared on the way here) */
 	if (D.area_card && ++D.arrived >= AREA_CARD_AT && !cinema_busy()) {
@@ -3419,7 +3434,7 @@ void director_update(void) {
 		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}
 	/* on another map (a story warp the run does not use): back to the layer */
-	if (emu_read8(BN6_GAMESTATE + 4) != D.group || emu_read8(BN6_GAMESTATE + 5) != D.number) {
+	if (emu_read8(BN6_MAP_GROUP) != D.group || emu_read8(BN6_MAP_NUMBER) != D.number) {
 		if (++D.astray > ASTRAY_FRAMES) {
 			D.astray = 0;
 			emu_warp(D.group, D.number, D.start_x, D.start_y, 4);

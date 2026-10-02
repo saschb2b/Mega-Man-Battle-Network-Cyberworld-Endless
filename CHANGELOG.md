@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+- **The GBA core rests while the game waits for the screen (issue
+  #35).** BN6 waits for each frame by reading the screen's status over
+  and over, half of the core's work on a layer and more in battle. The
+  core now sleeps through that wait until the frame begins, woken as the
+  GBA is by the frame's own interrupt, and the game runs as before. On a
+  PC a frame of the game takes about 30% less time (a layer's 0.52 ms
+  became 0.36, a battle's 0.53 became 0.35), on a Retroid Nova a
+  quarter less (3.98 ms became 3.09), and on a New 3DS, where it took
+  nearly all of each frame, 15.9 ms became 11.0.
+- **The New 3DS shows its frames evenly (issue #35).** Each frame now
+  waits for the screen's refresh: with the core faster, frames paced by
+  the game's own clock came early or late 14 times a second, and with
+  0.6.0 twice; now about once.
+- **The engine hears from the game as things happen (issues #27-#34).**
+  It used to look over the game's memory every frame for what had
+  changed, and to patch hand-written code into the game to call it.
+  Breakpoints in the core's copy of the game now run the engine's own
+  code at the moment: a battle starting, its reward chosen, MegaMan hit
+  in the rival's duel, ProtoMan's HP as he appears, a map entered, a
+  choice taken, a key item given, the PET's Save, and every call into the
+  game, warps among them. How the game plays is unchanged: seeded runs
+  give the same logs line for line, and a run saved by 0.6.0 continues.
+
 ## 0.6.0 (2026-10-02)
 
 - **MegaMan speaks of NaviCust bugs only when the board changes (issue

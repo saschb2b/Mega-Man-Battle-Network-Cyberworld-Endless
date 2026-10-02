@@ -115,7 +115,8 @@ beat: ProtoMan in battle, his own AI and his attacks.
   opens, and nothing is asked; the official gate on that layer opens to
   Chaud's clearance, as any other does, having no duel to be the prize
   of. From it on, his HP is half the act's guardian band's top at most
-  (500 in act 3), written once as he stands on the field: his attacks
+  (500 in act 3), given as he spawns (a hook on BN6's spawn, docs/
+  EMULATION.md): his attacks
   stay his 1800 HP version's, some ten times a guardian's damage a
   second, and at the band's top (1000) a playtester's act-3 MegaMan, 460
   HP and chips of 120 at most, ran after one hand (session 50). MegaMan
@@ -177,8 +178,8 @@ himself. Beat him, and my full clearance is yours.").
   holds on the Custom screen and in the pause), which the results screen
   shows as seconds and hundredths, cut (616 frames: "0:10:26").
   docs/ROM_DATA.md.
-- A hit: MegaMan's HP in his battle object, lower at any frame than as the
-  battle began.
+- A hit: BN6's object_subtractHP taking HP from MegaMan's battle object,
+  seen by a hook while the duel's battle runs (docs/EMULATION.md, Hooks).
 - Chaud's face (the chat's `@C`), ProtoMan's overworld sprite (`0x3B`)
   and his navi (`11`, for the netbattle).
 

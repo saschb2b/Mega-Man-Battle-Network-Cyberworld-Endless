@@ -36,7 +36,7 @@ static void read_item(uint32_t a, ShopItem *it) {
 
 bool shop_install(int shop, const ShopItem *items, int n, bool kept) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
-	if (data < 0x02000000u || data >= 0x02040000u) return false;
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return false;
 	uint32_t at = data + emu_read32(desc(shop) + 8);
 	int slots = (int)emu_read32(desc(shop) + 12);
 	uint8_t was[16][8] = { { 0 } };

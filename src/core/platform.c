@@ -12,6 +12,7 @@
 #include "app_icon.h"
 #endif
 #include "audio.h"
+#include "emu.h"
 #include "gfx.h"
 #include "touch.h"
 
@@ -674,7 +675,6 @@ static void log_present(void) {
 		char bottom[160] = "";
 		if (part_seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's map %.1f ms of it, %d times)", part_second * ms / part_seconds, part_seconds);
 		/* (and reads of the game that waited, drawing, for the next frame) */
-		extern int emu_draw_waits;
 		if (emu_draw_waits) {
 			size_t k = strlen(bottom);
 			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing", emu_draw_waits);
@@ -779,7 +779,7 @@ void platform_present_blend(double w) {
 	}
 	over_picture();
 #ifdef __3DS__
-	present3ds_frame(fill_3ds);
+	present3ds_frame(fill_3ds, emu_threaded());
 #else
 	SDL_RenderPresent(P.renderer);
 #endif
@@ -791,7 +791,7 @@ static void present_canvas(void) {
 	show_frames(P.canvas, NULL, 255);
 	over_picture();
 #ifdef __3DS__
-	present3ds_frame(fill_3ds);
+	present3ds_frame(fill_3ds, emu_threaded());
 #else
 	SDL_RenderPresent(P.renderer);
 #endif

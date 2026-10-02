@@ -111,7 +111,7 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
  * program items, which count those on the board too). */
 static bool program_had(int program) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
-	if (items < 0x02000000u || items >= 0x02040000u) return false;
+	if (items < BN6_EWRAM || items >= BN6_EWRAM_END) return false;
 	for (int c = 0; c < 4; ++c)
 		if (emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)(program * 4 + c))) return true;
 	return false;

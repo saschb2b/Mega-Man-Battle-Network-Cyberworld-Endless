@@ -48,11 +48,11 @@ bool emu_boot(void) {
 	emu_warp(0x91, 0, 0, 0, 5);  /* Seaside Area 1: a layer loads as a new area group */
 	run(120, 0);
 	/* end the intro: no cutscene script, chat box closed (chatbox_E6_end) */
-	emu_write32(BN6_CUTSCENE + 0x1C, 0);
-	emu_write32(BN6_CUTSCENE + 0x40, 0);
+	emu_write32(BN6_CUTSCENE_POS, 0);
+	emu_write32(BN6_CUTSCENE_POS0, 0);
 	emu_write32(BN6_CHATBOX_FLAGS, emu_read32(BN6_CHATBOX_FLAGS) & ~0xC8u);
-	emu_write8(BN6_CHATBOX + 0, 0);
-	emu_write8(BN6_CHATBOX + 4, 0);
+	emu_write8(BN6_CHATBOX, 0);
+	emu_write8(BN6_CHATBOX_STATE, 0);
 	run(30, 0);
 	bool kept = emu_save_state(path);
 	/* (once per install: a slow machine's first start is told apart) */

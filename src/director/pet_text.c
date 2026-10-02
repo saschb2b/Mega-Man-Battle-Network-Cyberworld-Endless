@@ -198,7 +198,7 @@ static void install_names(void) {
  * game's giving writes (a count without it reads as none: CheckKeyItem). */
 static void item_set(int id, int count) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
-	if (items < 0x02000000u || items >= 0x02040000u || check < 0x02000000u || check >= 0x02040000u) return;
+	if (items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
 	emu_write8(items + (uint32_t)id, (uint8_t)count);
 	if (count) emu_write8(check + (uint32_t)id, (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + (uint32_t)id) ^ 0x55));
 }

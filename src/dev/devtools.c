@@ -104,12 +104,12 @@ static void run_text(const uint8_t *b, int n) {
 static void battle_hp(int side, int hp, bool raise) {
 	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-		if (!(emu_read8(o) & 1) || emu_read8(o + 0x16) != side) continue;
-		int cur = emu_read16(o + 0x24), max = emu_read16(o + 0x26);
+		if (!(emu_read8(o) & 1) || emu_read8(o + BN6_T1_ALLIANCE) != side) continue;
+		int cur = emu_read16(o + BN6_T1_HP), max = emu_read16(o + BN6_T1_MAX_HP);
 		int want = hp < 0 ? max : hp;
 		if (cur <= 0 || want == cur || (!raise && want > cur) || (raise && want < cur)) continue;
 		uint8_t v[2] = { (uint8_t)want, (uint8_t)(want >> 8) };
-		emu_write(o + 0x24, v, 2);
+		emu_write(o + BN6_T1_HP, v, 2);
 	}
 }
 
@@ -131,9 +131,9 @@ static void act(int item, int dir) {
 		break;
 	case I_HEAL: {
 		M.open = false;
-		uint16_t max = emu_read16(BN6_NAVI_STATS + 0x42);
+		uint16_t max = emu_read16(BN6_NAVI_MAX_HP);
 		uint8_t v[2] = { (uint8_t)max, (uint8_t)(max >> 8) };
-		emu_write(BN6_NAVI_STATS + 0x40, v, 2);
+		emu_write(BN6_NAVI_HP, v, 2);
 		battle_hp(0, -1, true);
 		toast("HP full");
 		break;
@@ -180,16 +180,16 @@ uint32_t devtools_keys(uint32_t keys) {
 void devtools_update(void) {
 	if (dev.quiet) flag_set(BN6_FLAG_NO_ENCOUNTERS);
 	if (dev.god) {
-		uint16_t max = emu_read16(BN6_NAVI_STATS + 0x42);
-		if (max && emu_read16(BN6_NAVI_STATS + 0x40) < max) {
+		uint16_t max = emu_read16(BN6_NAVI_MAX_HP);
+		if (max && emu_read16(BN6_NAVI_HP) < max) {
 			uint8_t v[2] = { (uint8_t)max, (uint8_t)(max >> 8) };
-			emu_write(BN6_NAVI_STATS + 0x40, v, 2);
+			emu_write(BN6_NAVI_HP, v, 2);
 		}
 		battle_hp(0, -1, true);
 	}
-	if (dev.hp > 0 && dev.hp <= 9999 && emu_read16(BN6_NAVI_STATS + 0x42) != dev.hp) {
+	if (dev.hp > 0 && dev.hp <= 9999 && emu_read16(BN6_NAVI_MAX_HP) != dev.hp) {
 		uint8_t v[4] = { (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8), (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8) };
-		emu_write(BN6_NAVI_STATS + 0x40, v, sizeof v);
+		emu_write(BN6_NAVI_HP, v, sizeof v);
 	}
 	if (dev.onehit) battle_hp(1, 1, false);
 	if (dev.powers) {

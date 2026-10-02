@@ -78,7 +78,7 @@ void present3ds_bottom_show(bool on) {
 	bot_new |= bot_on;
 }
 
-void present3ds_frame(bool fill) {
+void present3ds_frame(bool fill, bool sync) {
 	/* (none once the system asks the game to close: the HOME Menu has the
 	 * GPU then, and waiting on it hung the console, a frame drawn after
 	 * the close) */
@@ -100,9 +100,13 @@ void present3ds_frame(bool fill) {
 	}
 	GPU_TEXTURE_FILTER_PARAM f = fill ? GPU_LINEAR : GPU_NEAREST;
 	C3D_TexSetFilter(&tex, f, f);
-	/* (the GPU swaps the picture in at the screen's next refresh; waiting
-	 * for that refresh here cost a frame slower than one refresh a second) */
-	C3D_FrameBegin(0);
+	/* (the GPU swaps the picture in at the screen's next refresh. With the
+	 * GBA core on the main core, waiting for that refresh here cost a frame
+	 * slower than one refresh a second; with the core on its own, since its
+	 * wait for VBlank is halted, a frame takes less than a refresh, and the
+	 * wait paces the frames evenly, where the main loop's clock alone had
+	 * five to nine a second come early or late, issue #35) */
+	C3D_FrameBegin(sync ? C3D_FRAME_SYNCDRAW : 0);
 	C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
 	C2D_SceneBegin(top);
 	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f;

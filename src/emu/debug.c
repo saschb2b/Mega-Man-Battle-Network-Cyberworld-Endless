@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "bn6.h"
+#include "bn6_fields.h"
 #include "emu.h"
 #include "game.h"
 #include "run.h"
@@ -20,12 +21,19 @@ void emu_debug_frame(void) {
 	if (!emu_debug_on()) return;
 	++t;
 	if (t % 30 == 0)
-		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x\n", t, run.depth,
+		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x hooks %u\n", t, run.depth,
 			emu_read8(emu_read32(BN6_TOOLKIT)), emu_read8(BN6_GAMESTATE), emu_read8(BN6_CHATBOX),
-			(int)emu_read32(BN6_PLAYER + 0x1C) >> 16, (int)emu_read32(BN6_PLAYER + 0x20) >> 16, (int)emu_read32(BN6_PLAYER + 0x24) >> 16,
-			emu_read8(BN6_GAMESTATE + 4), emu_read8(BN6_GAMESTATE + 5));
+			bn6_player_x(), bn6_player_y(), bn6_player_z(),
+			emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), (unsigned)hook_hits);
+	/* (a hook's event lost to a full queue, or our BKPT where no hook is: neither should happen) */
+	static uint32_t dropped, strays;
+	if (hook_dropped != dropped || hook_strays != strays) {
+		dropped = hook_dropped;
+		strays = hook_strays;
+		fprintf(stderr, "hooks: %u events dropped, %u strays\n", (unsigned)dropped, (unsigned)strays);
+	}
 	if (t % 60 == 0)
-		fprintf(stderr, "music t%d song %08x status %08x\n", t, emu_read32(BN6_MUSIC_PLAYER), emu_read32(BN6_MUSIC_PLAYER + 4));
+		fprintf(stderr, "music t%d song %08x status %08x\n", t, emu_read32(BN6_MUSIC_PLAYER), emu_read32(BN6_MUSIC_STATUS));
 	/* (the NaviCust's bug counts, when any is set) */
 	if (t % 30 == 0) {
 		char b[16 * 3 + 1];
@@ -36,8 +44,8 @@ void emu_debug_frame(void) {
 	/* (an open chat box: its script state, open state, jump table offset,
 	 * cursor into the script and flags, bn6f chatbox_struct) */
 	if (t % 30 == 0 && emu_read8(BN6_CHATBOX))
-		fprintf(stderr, "chatbox t%d state %02x open %02x jump %02x at %08x flags %04x\n", t, emu_read8(BN6_CHATBOX + 4),
-			emu_read8(BN6_CHATBOX + 0x10), emu_read8(BN6_CHATBOX + 0x11), emu_read32(BN6_CHATBOX + 0x2C), emu_read16(BN6_CHATBOX + 0x3E));
+		fprintf(stderr, "chatbox t%d state %02x open %02x jump %02x at %08x flags %04x\n", t, emu_read8(BN6_CHATBOX_STATE),
+			emu_read8(BN6_CHATBOX_OPEN), emu_read8(BN6_CHATBOX_JUMP), emu_read32(BN6_CHATBOX_SCRIPT_AT), emu_read16(BN6_CHATBOX_BOX_FLAGS));
 	if (t == 150) {
 		/* VRAM, palettes and IO registers, for tools/romlab/labtrace.py */
 		FILE *f = emu_debug_file("vram.bin");

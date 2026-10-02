@@ -21,8 +21,8 @@ static struct {
 	int len;
 } L;
 
-static int megaman_hp(void) { return emu_read16(BN6_NAVI_STATS + 0x40); }
-static int megaman_max(void) { return emu_read16(BN6_NAVI_STATS + 0x42); }
+static int megaman_hp(void) { return emu_read16(BN6_NAVI_HP); }
+static int megaman_max(void) { return emu_read16(BN6_NAVI_MAX_HP); }
 
 static void append(const char *line) {
 	char path[600], old[600];

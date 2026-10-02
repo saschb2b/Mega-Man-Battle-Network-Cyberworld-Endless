@@ -43,12 +43,12 @@ the site.
 | `src/audio/` | MP2K sequencer and mixer (title music and sounds); the core's sound during play |
 | `src/net/` | Layer generation (rooms, walkways, objects) |
 | `src/scenes/` | Title (with the run summary) and the sprite gallery |
-| `src/emu/` | The mGBA core, calls into the game (warps, chat), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`) |
+| `src/emu/` | The mGBA core, calls into the game through hooks (`gamecall.c`: warps, chat), hooks on its code (`hook.c`), its wait for VBlank halted (`idle.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
 | `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
-| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers |
+| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers; the game's events from its hooks (`events.h`: battles in `encounter.c`, maps, choices and key items in `events.c`), taken up after each frame |
 | `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
-| `tests/test_core.c` | ROM-free unit tests; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
+| `tests/test_core.c` | ROM-free unit tests; `tests/test_emu.c` the hooks on mGBA, with a ROM of its own bytes; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
@@ -100,7 +100,9 @@ the site.
   #19) on every target, `-Werror` in CI. `build.py lint` holds the rest to
   its baselines in `tests/lint/`: no new finding of GCC's analyzer, no new
   function no build reaches, no function joins or grows past CCN 25 or 120
-  lines, no ROM offset without its name in `docs/ROM_DATA.md`, and no ROM,
+  lines, no ROM offset without its name in `docs/ROM_DATA.md`, no field of
+  the game's structures as a bare offset outside `src/emu/bn6.h` (issue
+  #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), and no ROM,
   save, state or large file in git outside `docs/`. A baseline only
   shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the

@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "hook.h"
+
 #define EMU_W 240
 #define EMU_H 160
 #define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space */
@@ -29,6 +31,9 @@ void emu_reset(void);
  * it, and emu_video shows the frame before until then. */
 void emu_frame(uint32_t keys);
 bool emu_threaded(void);
+/* Waits for a frame the core runs on its own thread: what its hooks left
+ * is the main thread's to read after it. */
+void emu_sync(void);
 /* Set while a frame is drawn: a read of the game then, with the core on a
  * thread of its own, waits for the next frame (counted in emu_draw_waits,
  * which the frame log shows). */
@@ -46,6 +51,16 @@ uint32_t emu_read32(uint32_t addr);
 void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
+
+/* A hook on the game's code (hook.h; docs/EMULATION.md, Hooks), set
+ * between frames: on the Thumb instruction at addr, an answer hook or an
+ * event hook queuing `kind`; and taken off. */
+bool emu_hook(uint32_t addr, EmuHook fn, void *user);
+bool emu_hook_event(uint32_t addr, int kind);
+void emu_unhook(uint32_t addr);
+/* The events the hooks queued in the frames run since the last call,
+ * oldest first: how many. */
+int emu_hook_events(HookEvent *out, int max);
 
 /* Save states in the data directory (made on the device, never shipped). */
 bool emu_save_state(const char *path);
