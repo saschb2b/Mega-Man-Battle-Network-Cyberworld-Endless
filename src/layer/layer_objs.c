@@ -293,8 +293,64 @@ static int best_mystery(void) {
 	return best;
 }
 
-/* Blue where a detour ends, as BN6 keeps its better data; green loose. */
-static int mystery_colour(const NetObj *o) { return o->param >= 1 ? MYSTERY_BLUE : MYSTERY_GREEN; }
+/* Blue where a detour ends, as BN6 keeps its better data; green loose;
+ * purple locked. */
+static int mystery_colour(const NetObj *o) { return o->param == MD_PURPLE ? MYSTERY_PURPLE : o->param >= 1 ? MYSTERY_BLUE : MYSTERY_GREEN; }
+
+static bool purple_here(void) {
+	int best = best_mystery();
+	return best >= 0 && layer.obj[best].param == MD_PURPLE;
+}
+
+/* A purple data's: what no dealer sells, a chip of the rarest tiers in
+ * one of its letters (BN6's hold ElecSword E, Muramasa M, DreamAura U),
+ * never one the layer's dealer lists (issue #41). */
+static void purple_content(uint8_t out[8], const ShopItem *stock, int nstock) {
+	char code = '*';
+	int id = roll_chip(run.depth, 4, &code);
+	for (int t = 0; t < 8; ++t) {
+		bool sold = false;
+		for (int k = 0; k < nstock; ++k) sold |= stock[k].kind == 2 && stock[k].id == id;
+		if (code != '*' && !sold) break;
+		id = roll_chip(run.depth, 4, &code);
+	}
+	const uint8_t c[8] = { 1, 0x20, 0xFF, (uint8_t)(code == '*' ? 26 : code - 'A'), (uint8_t)id, (uint8_t)(id >> 8), 0, 0 };
+	memcpy(out, c, 8);
+}
+
+/* What a layer's Mystery Data hold beyond their rolls: the run's Spin in
+ * the best, a ScrtData in the first other (never behind a lock), and where
+ * the layer's purple data has its key on the layer, an Unlocker in a blue
+ * one on another branch. */
+typedef struct {
+	int spin_md, spin_colour;
+	bool fragment, fragment_placed, key_here;
+	const ShopItem *stock;
+	int nstock;
+} MysteryPlan;
+
+static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p, LayerObjs *out) {
+	m->type = mystery_colour(o);
+	if (i == p->spin_md) {
+		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
+		spin_content(m->content, p->spin_colour);
+		out->spin_colour = p->spin_colour;
+		if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", p->spin_colour, m->x, m->y);
+	} else if (p->fragment && o->param != MD_PURPLE) {
+		p->fragment = false;
+		p->fragment_placed = true;
+		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
+		fragment_content(m->content);
+	} else if (o->param == MD_PURPLE) {
+		purple_content(m->content, p->stock, p->nstock);
+	} else if (p->key_here && o->param >= 1) {
+		static const uint8_t key[8] = { 4, 0x20, 0xFF, 0xFF, SUB_UNLOCKER, 0, 0, 0 };
+		p->key_here = false;
+		memcpy(m->content, key, 8);
+	} else if (mystery_content(o, m->content)) {
+		m->type = MYSTERY_BLUE;
+	}
+}
 
 /* The Net Dealer's word on the act's guardian, `navi`, by his list
  * (`stock`, n of them): the element he can't stand (of either wheel:
@@ -327,6 +383,18 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 			elem_name(counter));
 }
 
+/* (the key he stocks, said: what it opens and where, issue #41) */
+static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock) {
+	for (int i = 0; i < nstock; ++i)
+		if (stock[i].kind == 1 && stock[i].id == SUB_UNLOCKER) {
+			size_t k = strlen(hello);
+			if (k < n)
+				snprintf(hello + k, n - k, "|Word is, there's purple data locked %s. An Unlocker opens it, and it's on my list!",
+					purple_here() ? "on this layer" : "deeper in this act");
+			return;
+		}
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -354,10 +422,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
-		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE, fragment_placed = false;
+		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * META.md: one a run, a colour the profile lacks, kept for good) */
-	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0, spin_md = spin_colour ? best_mystery() : -1;
+	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
+	MysteryPlan plan = { spin_colour ? best_mystery() : -1, spin_colour, fragment, false, false, NULL, 0 };
 	bool spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
@@ -365,6 +434,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int navi_of_act = run.boss_order[run.biome];
 	bool weakless = navi_of_act > 0 && enemy_weakness(enemy_id(1, navi_of_act, 0)) <= 0;
 	int nstock = shop_dealer_stock(run.depth, weakless ? -1 : counter, weakless ? counter : 0, stock);
+	plan.stock = stock;
+	plan.nstock = nstock;
+	/* (a purple data's key in a blue one, three layers in ten: a lock and
+	 * its key on one layer) */
+	plan.key_here = purple_here() && rng_range(0, 99) < 30;
 	/* the program vendor's, before his words too (he names the programs
 	 * MegaMan has had in earlier runs, which lead his list) */
 	out->nprograms = shop_program_stock(run.depth, out->programs);
@@ -411,20 +485,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				md[nmd].x = wx;
 				md[nmd].y = wy;
 				md[nmd].z = wz;
-				md[nmd].type = mystery_colour(o);
-				if (i == spin_md) {
-					md[nmd].type = MYSTERY_BLUE;
-					spin_content(md[nmd].content, spin_colour);
-					out->spin_colour = spin_colour;
-					if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", spin_colour, wx, wy);
-				} else if (fragment) {
-					fragment = false;
-					fragment_placed = true;
-					md[nmd].type = MYSTERY_BLUE;
-					fragment_content(md[nmd].content);
-				} else if (mystery_content(o, md[nmd].content)) {
-					md[nmd].type = MYSTERY_BLUE;
-				}
+				fill_mystery(&md[nmd], o, i, &plan, out);
 				npcs.script[npcs.n++] = npc_mystery(nmd);
 				++nmd;
 			}
@@ -475,7 +536,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_SHOP: {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
-			char hello[400], word[280] = "";
+			char hello[520], word[280] = "";
 			int navi = run.boss_order[run.biome];
 			/* (the net's word comes back from an act's second layer: its
 			 * first keeps the mystery of a guardian never battled, but for
@@ -501,6 +562,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (met in this act already: the pick, in a line) */
 			if (layer_objs_dealer_again && tells)
 				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);
+			dealer_keys(hello, sizeof hello, stock, nstock);
 			tk.sprite = SPR_DEALER;
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!",
 				"Sold out, MegaMan! You bought every chip I brought.", LAYER_DEALER_TOLD_FLAG);
@@ -731,7 +793,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* (what a ScrtData is for, said as it is picked up: a playtester was
 	 * told a layer later, then on every layer after; and where its gate
 	 * stands, which a playtester holding three asked) */
-	if (fragment_placed) {
+	if (plan.fragment_placed) {
 		static const char *const found[3] = {
 			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area, in the Undernet. Let's find two more!",
 			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens. It stands in the Undernet!",

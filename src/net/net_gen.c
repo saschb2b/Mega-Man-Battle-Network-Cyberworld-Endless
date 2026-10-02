@@ -1183,6 +1183,54 @@ static int npcs_for(int want) {
 	return want < left ? want : left > 0 ? left : 0;
 }
 
+/* Purple data, as BN6 sets them: none or one a map, locked until an
+ * Unlocker opens it, holding what no dealer sells. From an act's second
+ * layer, on most of its middle ones (the Net Dealer's, who stocks the key)
+ * and a third of its guardians'; more in the Graveyard and the Undernet,
+ * which hold the most of BN6's; on half the dark warps' layers. From the
+ * run's seed and the depth alone, so a dealer earlier in the act knows. */
+bool layer_purple(int depth, int biome, int kind) {
+	if (depth <= 1 || kind == LAYER_SECRET) return false;
+	uint32_t h = (run.seed ^ (uint32_t)depth * 0x9E3779B9u ^ 0x9A7B1E5Du) * 2654435761u;
+	int roll = (int)((h >> 16) % 100), in_act = layer_in_act(depth);
+	int chance = kind == LAYER_UNDERNET ? 50 : in_act == 1 ? 60 : in_act == 2 ? 30 : 0;
+	if (chance && (biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET)) chance += 25;
+	return roll < chance;
+}
+
+int layer_purples_ahead(int depth) {
+	int n = 0;
+	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) n += layer_purple(d, biome_for_depth(d), LAYER_NORMAL);
+	return n;
+}
+
+/* The panel at the landmark's foot, in front of it where it can be (BN6's
+ * Central Area 3 keeps its purple data beneath the statue). */
+static bool landmark_foot(int *ox, int *oy) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind != PROP_SPRITE || (p->look != LOOK_GIANT_TREE && p->look != LOOK_STATUE && p->look != LOOK_MONUMENT)) continue;
+		for (int k = 0; k < 4; ++k) {
+			int x = p->x + d4[k][0], y = p->y + d4[k][1];
+			if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || layer.cell[y][x] != C_PATH || layer_on_way(x, y)) continue;
+			if (cell_free(x, y) && !behind_gap(x, y) && !near_talker(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
+		}
+	}
+	return false;
+}
+
+/* The layer's purple data, first of its data: at the landmark's foot, else
+ * where the longest detour ends. */
+static void place_purple(uint8_t *taken) {
+	int x, y;
+	DetourEnd end;
+	bool at = landmark_foot(&x, &y);
+	if (!at && detour_end(DETOUR_BLUE, taken, &end)) { x = end.x; y = end.y; at = true; }
+	NetObj *o = at ? add_obj(OBJ_MYSTERY, x, y) : NULL;
+	if (o) o->param = MD_PURPLE;
+}
+
 /* Blue data where the detours end, more of them deeper and in the Undernet
  * (a dark warp's, or the short net's dark way's act), the farthest a tier
  * up where it is a long walk; in a room where the layer has too few
@@ -1195,6 +1243,7 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 	static uint8_t taken[MAP_W * MAP_H];
 	memset(taken, 0, sizeof taken);
 	measure_detours();
+	if (layer_purple(depth, biome, kind) && npcs_for(1)) place_purple(taken);
 	int rich = npcs_for(2 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET));
 	for (int k = 0; k < rich; ++k) {
 		DetourEnd end;

@@ -1682,10 +1682,11 @@ static void act_note_read(void) {
 }
 
 /* An object's letter on the state's map (D a Navi gate, V a vault, Y the
- * rival, O an official gate; m a green Mystery Data, M a blue one), 0 none. */
+ * rival, O an official gate; m a green Mystery Data, M a blue one, L a
+ * purple one, locked), 0 none. */
 static char state_mark(const NetObj *o) {
 	static const char mark[] = "IXMSHTTBUGNCPRFDVYO";
-	if (o->type == OBJ_MYSTERY && !o->param) return 'm';
+	if (o->type == OBJ_MYSTERY && o->param != 1 && o->param != 2) return o->param ? 'L' : 'm';
 	return o->type >= 0 && o->type < (int)sizeof mark - 1 ? mark[o->type] : 0;
 }
 
@@ -3001,6 +3002,8 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
 		/* (a BugFrag Trader's trade wants ten: fifty given, no chat) */
 		else if (!strcmp(name, "bugfrags")) { game_call(BN6_GIVE_BUGFRAGS, 50, 0); return; }
+		/* (the set pieces' keys: an Unlocker, no chat) */
+		else if (!strcmp(name, "keys")) { game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1); return; }
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
 			int k = D.objs.trader_kind;

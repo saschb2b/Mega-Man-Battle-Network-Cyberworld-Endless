@@ -21,7 +21,7 @@ enum { C_VOID = 0, C_PATH = 1, C_SOLID = 2, C_PROPPED = 3 };
 typedef enum {
 	OBJ_WARP_IN,
 	OBJ_EXIT,
-	OBJ_MYSTERY,     /* param: content quality 0-2 */
+	OBJ_MYSTERY,     /* param: content quality 0 (green), 1-2 (blue), MD_PURPLE */
 	OBJ_SHOP,
 	OBJ_HEAL,
 	OBJ_TRADER,
@@ -147,6 +147,13 @@ bool layer_on_way(int x, int y);
 /* How many panels a walk from the way to (x, y) takes, -1 off the floor
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);
+/* A purple Mystery Data's param: locked until an Unlocker opens it, the
+ * best a layer holds (issue #41). Whether layer `depth` holds one, from the
+ * run's seed and the depth alone; and how many lie in the act from `depth`
+ * on (a Net Dealer stocks a key for each). */
+#define MD_PURPLE 3
+bool layer_purple(int depth, int biome, int kind);
+int layer_purples_ahead(int depth);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
 /* The layer's place in its act, 0-2 (the Nest counts as a first). */

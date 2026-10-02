@@ -219,7 +219,7 @@ static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
 		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
-		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0;
+		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0, purples = 0;
 	long blue_walk = 0, green_walk = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
@@ -248,8 +248,23 @@ static void test_generation(void) {
 			const NetObj *o = &layer.obj[i];
 			if (o->type != OBJ_MYSTERY) continue;
 			int d = layer_detour((int)o->x, (int)o->y);
+			if (o->param == MD_PURPLE) continue;
 			if (o->param >= 1) { ++blue; blue_walk += d; blue_far += d >= 3; }
 			else { ++green; green_walk += d; }
+		}
+		/* (a purple data, none or one a layer as BN6 sets them, off the way:
+		 * at the landmark's foot or where a detour ends) */
+		{
+			int here = 0;
+			for (int i = 0; i < layer.nobj; ++i) {
+				const NetObj *o = &layer.obj[i];
+				if (o->type != OBJ_MYSTERY || o->param != MD_PURPLE) continue;
+				++here;
+				CHECK(!layer_on_way((int)o->x, (int)o->y), "seed %u: a purple data on the way", seed);
+			}
+			CHECK(here <= 1, "seed %u: %d purple data", seed, here);
+			CHECK(!here || layer_purple(depth, biome, kind), "seed %u: a purple data where none was planned", seed);
+			purples += here;
 		}
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
@@ -475,6 +490,8 @@ static void test_generation(void) {
 	printf("  Mystery Data: %d blue, %.1f panels off the way on average, %d of them 3 or more; %d green, %.1f\n", blue,
 		(double)blue_walk / (blue ? blue : 1), blue_far, green, (double)green_walk / (green ? green : 1));
 	CHECK(blue_far * 10 >= blue * 9, "only %d of %d blue data where a detour ends", blue_far, blue);
+	printf("  purple data on %d of %d layers\n", purples, layers);
+	CHECK(purples * 10 >= layers && purples * 2 <= layers, "purple data on %d of %d layers", purples, layers);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
 	/* Determinism: the same seed builds the same layer. */

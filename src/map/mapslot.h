@@ -30,8 +30,9 @@ typedef struct {
 	uint8_t content[8];
 } MysteryData;
 
-#define MYSTERY_BLUE  1
-#define MYSTERY_GREEN 5
+#define MYSTERY_BLUE   1
+#define MYSTERY_PURPLE 3   /* locked: the game's text asks for an Unlocker (item 0x85) and takes it */
+#define MYSTERY_GREEN  5
 
 /* Clears map (group, number) of the original's NPCs, scripts, objects and
  * Mystery Data, and installs the layer's (or the town's, in the real world). */

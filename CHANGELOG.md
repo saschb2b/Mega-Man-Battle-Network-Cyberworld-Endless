@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Purple Mystery Data.** As in BN6, a layer can hold one purple data,
+  locked: an Unlocker opens it, and it holds a chip of the rarest kinds,
+  in a code, that no dealer sells (or the run's Spin, where it lies on that
+  layer). It stands at the landmark's foot or where the longest detour
+  ends, on most of an act's middle layers. The Net Dealer stocks an
+  Unlocker for each purple data ahead in the act, at about a layer's
+  zenny, and tells you where it lies; now and then a blue data on the same
+  layer holds the key (epic #49, issue #41).
 - **Mystery Data say what the walk is worth.** Blue data now lie where the
   detours end: at the far end of a spur, on its pad, in the room farthest
   off the way, the best of them where the walk is longest. Green data lie

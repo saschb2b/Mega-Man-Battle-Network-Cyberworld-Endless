@@ -14,6 +14,7 @@
 #include "loot.h"
 #include "save.h"
 #include "navicust.h"
+#include "net.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
@@ -118,6 +119,19 @@ static int answer_most(int depth, int counter) {
 	int lo, hi;
 	pacing_guardian_band(pacing_act(depth), &lo, &hi);
 	return counter > 0 ? lo / 6 : lo / 3;
+}
+
+/* The Unlocker where the act shows purple data from here on, one for each
+ * (issue #41), at about a layer's zenny: BN6's 4000 would keep it out of a
+ * run's reach, a key priced past its use. The stock's new count. */
+static int add_keys(ShopItem *out, int n, int depth) {
+	ShopItem key;
+	int locks = layer_purples_ahead(depth);
+	if (!locks || n >= SHOP_MAX_ITEMS || !find_item(1, SUB_UNLOCKER, &key)) return n;
+	key.stock = (uint8_t)locks;
+	key.price = (uint16_t)(6 + 3 * (pacing_act(depth) + 7 * pacing_loop(depth)));
+	out[n++] = key;
+	return n;
 }
 
 /* Whether chip `id` answers `counter` (-1: a guardian of no element,
@@ -228,6 +242,7 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 	if (find_item(1, SUB_MINI_ENERGY, &mini)) out[n++] = mini;
 	ShopItem other;
 	if (find_item(1, subs[rng_range(0, (int)(sizeof subs / sizeof *subs) - 1)], &other) && !listed(out, n, &other)) out[n++] = other;
+	n = add_keys(out, n, depth);
 	/* (threat 3, docs/META.md: half again for everything) */
 	if (run.threat >= 3)
 		for (int i = 0; i < n; ++i) out[i].price = (uint16_t)(out[i].price + out[i].price / 2);
