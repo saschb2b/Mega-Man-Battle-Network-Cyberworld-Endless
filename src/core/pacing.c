@@ -53,14 +53,25 @@ PacingBand pacing_band_wider(PacingBand b) {
 	return b;
 }
 
+/* V1 through the first two acts, V2 by the fourth, V3 by the sixth */
+static const int8_t version_low[PACING_ACTS] = { 0, 0, 0, 1, 1, 2, 2 }, version_high[PACING_ACTS] = { 0, 0, 1, 1, 2, 2, 2 };
+
+/* What a version rolled at `depth` adds to the act's: the loop, the
+ * challenge, and threat 1 (docs/META.md: a version stronger from act 2) */
+static int version_more(int depth, bool challenge) {
+	return pacing_loop(depth) + (challenge ? 1 : 0) + (run.threat >= 1 && pacing_act(depth) >= 1 ? 1 : 0);
+}
+
 int pacing_virus_version(int depth, bool challenge) {
-	/* V1 through the first two acts, V2 by the fourth, V3 by the sixth */
-	static const int8_t low[PACING_ACTS] = { 0, 0, 0, 1, 1, 2, 2 }, high[PACING_ACTS] = { 0, 0, 1, 1, 2, 2, 2 };
 	int act = pacing_act(depth);
-	int v = rng_range(low[act], high[act]) + pacing_loop(depth) + (challenge ? 1 : 0);
-	/* (threat 1, docs/META.md: a version stronger from act 2) */
-	if (run.threat >= 1 && act >= 1) ++v;
+	int v = rng_range(version_low[act], version_high[act]) + version_more(depth, challenge);
 	return v > 3 ? 3 : v;
+}
+
+void pacing_virus_versions(int depth, bool challenge, int *lo, int *hi) {
+	int act = pacing_act(depth), more = version_more(depth, challenge);
+	*lo = version_low[act] + more > 3 ? 3 : version_low[act] + more;
+	*hi = version_high[act] + more > 3 ? 3 : version_high[act] + more;
 }
 
 bool pacing_rare(int depth, int roll) {

@@ -316,15 +316,29 @@ static int shares_with(int biome, int *thirds) {
 
 static bool from_formations(int depth, int biome, int kind, Encounter *e);
 
-uint32_t loot_families_here(int depth, int biome) {
-	const Formation *list;
-	int n = formations_of(biome, &list);
-	uint32_t in = 0;
+/* The formations the area's plain random battles can hold at `depth`, each
+ * at the version it fields there (fit, -1 for none) for a battle aiming at
+ * version `target`; their count, 0 for none. */
+static int fielded(int depth, int biome, int target, const Formation **list, int8_t fit[MAX_FIT]) {
+	int n = formations_of(biome, list);
 	int p = (depth - 1) % CYCLE_LAYERS, allowed = depth > CYCLE_LAYERS ? 2 : p < 6 ? 0 : p < 12 ? 1 : 2;
-	static int8_t fit[MAX_FIT];
-	if (n && weigh(list, n, depth, pacing_virus_version(depth, false), pacing_band(depth, false, false), allowed, -1, 9, fit))
+	return n && weigh(*list, n, depth, target, pacing_band(depth, false, false), allowed, -1, 9, fit) ? n : 0;
+}
+
+/* (at every version the act's battles can aim for, and no roll: a roll
+ * here, as MegaMan's status named the area's viruses, moved the run's
+ * next random numbers whenever L was pressed in acts 3 and 5) */
+uint32_t loot_families_here(int depth, int biome) {
+	uint32_t in = 0;
+	int lo, hi;
+	pacing_virus_versions(depth, false, &lo, &hi);
+	for (int v = lo; v <= hi; ++v) {
+		const Formation *list;
+		static int8_t fit[MAX_FIT];
+		int n = fielded(depth, biome, v, &list, fit);
 		for (int i = 0; i < n && i < MAX_FIT; ++i)
 			if (fit[i] >= 0) in |= families_of(&list[i]);
+	}
 	int thirds, other = shares_with(biome, &thirds);
 	if (other >= 0) in |= loot_families_here(depth, other);
 	return in;

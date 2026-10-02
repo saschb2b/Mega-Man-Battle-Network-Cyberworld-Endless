@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Pressing L no longer changes the battles to come.** On an act's
+  first layer in acts 3 and 5, MegaMan's status, naming the viruses the
+  area may hold, drew one of the run's random numbers each time it
+  opened. It now reads every version the act's battles can roll, and
+  draws none.
 - **The GBA core rests while the game waits for the screen (issue
   #35).** BN6 waits for each frame by reading the screen's status over
   and over, half of the core's work on a layer and more in battle. The
