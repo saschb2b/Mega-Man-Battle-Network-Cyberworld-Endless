@@ -263,6 +263,11 @@ cycles, which shifts the phase of the GBA's tone and noise channels. Its
 loudness, 20 ms at a time over 50 s of an autopilot run, follows 0.6.0's
 at a correlation of 1.0000, the mean the same.
 
+On a Retroid Nova (ROCKNIX), the same 90 s of an autopilot run (`--seed 7
+--dev god,onehit`, `tools/device_run.py` with `frame_log = on`) took the
+GBA 3.98 ms a frame with its picture on 0.6.0 and 3.09 ms with the hook
+(the median 4.00 and 2.80).
+
 On the New 3DS, `frame_log = on` gives the GBA's time per frame with and
 without its picture: to measure there on a walked layer, a busy battle and
 the town, against 0.6.0 (3ds/README.md's 16 ms of emulation was measured
