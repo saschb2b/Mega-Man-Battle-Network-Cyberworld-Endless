@@ -23,6 +23,7 @@
 #include "data.h"
 #include "emu.h"
 #include "encounter.h"
+#include "events.h"
 #include "debug.h"
 #include "devtools.h"
 #include "flags.h"
@@ -79,12 +80,12 @@ static struct {
 	bool reward_due;       /* ... and won: its prize is told (and given) once a talk can start */
 	bool gate_fight;       /* the challenge is a Navi gate's SP (docs/META.md, gates) */
 	/* the rival's duel (docs/RIVAL.md): the layer's squad, the duel under
-	 * way (MegaMan's HP as last read, a hit taken, the DeleteTime), and
-	 * Chaud's words due: his call as the layer begins, his verdict after */
+	 * way (a hit taken, the DeleteTime), and Chaud's words due: his call
+	 * as the layer begins, his verdict after */
 	Encounter duel_enc;
 	bool duel, duel_hit, duel_call_due, duel_verdict_due;
-	int duel_hp, duel_time;
-	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none or done */
+	int duel_time;
+	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none */
 	bool lost_duel;     /* MegaMan deleted in the rival's duel (the summary says so) */
 	char duel_verdict[400];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
@@ -95,6 +96,7 @@ static struct {
 	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
+	uint32_t battle_record;   /* the BattleSettings StartBattle was given (EV_BATTLE_START), 0 none since the last battle */
 	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
 	int foes;              /* viruses in the battle the game will start next */
 	Encounter next;        /* that battle */
@@ -1201,6 +1203,8 @@ static bool build_layer(void) {
 /* build_layer timed (build_ms), named first where MegaMan leaves a layer */
 static bool new_layer(bool leaving) {
 	if (leaving) building_word();
+	/* (no battle watched: a duel's, left by a battle never finished) */
+	emu_battle_unwatch();
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	bool ok = build_layer();
 	build_ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -2868,10 +2872,12 @@ static bool act_on_choices(void) {
 		}
 		case OBJ_DUEL:
 			set_encounter(&D.duel_enc, true);
+			/* (its hits, and the netbattle's ProtoMan held to the act's
+			 * band as he spawns: docs/RIVAL.md) */
+			emu_battle_watch(D.duel_cap);
 			D.challenge = true;
 			D.duel = true;
 			D.duel_hit = false;
-			D.duel_hp = -1;
 			D.duel_time = 0;
 			D.duel_call_due = false;
 			flag_set(LAYER_DUEL_CALLED_FLAG);
@@ -3144,7 +3150,19 @@ static void last_stop(int cx, int cy) {
 	talk_start(buf, FACE_MEGAMAN);
 }
 
+/* What the hooks saw in the frames since the last update (events.h). */
+static void take_events(void) {
+	HookEvent ev[32];
+	int n = emu_hook_events(ev, 32);
+	for (int i = 0; i < n; ++i)
+		switch (ev[i].kind) {
+		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; break;
+		case EV_MEGAMAN_HIT: D.duel_hit = true; break;
+		}
+}
+
 void director_update(void) {
+	take_events();
 	if (!D.active) return;
 	if (D.town) { town_update(); return; }
 	++D.frame;
@@ -3205,7 +3223,7 @@ void director_update(void) {
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
 	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); emu_encounter_battle_forget(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); }
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
@@ -3218,41 +3236,17 @@ void director_update(void) {
 				if (guardian) runlog_battle_start(NULL, "guardian");
 			}
 			D.in_battle = true;
-			/* the duel's hits and time: MegaMan's HP lower than at the last
-			 * frame, and the results screen's DeleteTime (docs/RIVAL.md) */
+			/* the duel's time: the results screen's DeleteTime (its hits
+			 * come as events: docs/RIVAL.md) */
 			if (D.duel && sub == BN6_SUB_BATTLE) {
-				for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
-					uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
-					if (!(emu_read8(o) & 1) || emu_read8(o + BN6_T1_ALLIANCE) != 0) continue;
-					int hp = emu_read16(o + BN6_T1_HP);
-					if (D.duel_hp >= 0 && hp < D.duel_hp) D.duel_hit = true;
-					D.duel_hp = hp;
-					break;
-				}
 				int t = (int)emu_read32(BN6_BATTLE_TIMER);
 				if (t > D.duel_time) D.duel_time = t;
-				/* the netbattle's ProtoMan, once he stands on the field: his
-				 * HP and MaxHP (+0x24, +0x26) the act's guardian band at
-				 * most (docs/RIVAL.md, docs/EMULATION.md) */
-				for (uint32_t k = 0; D.duel_cap && k < BN6_T1_COUNT; ++k) {
-					uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
-					if (!(emu_read8(o) & 1) || emu_read8(o + BN6_T1_ALLIANCE) != 1) continue;
-					if (emu_read16(o + BN6_T1_MAX_HP) > D.duel_cap) {
-						uint8_t v[2] = { (uint8_t)D.duel_cap, (uint8_t)(D.duel_cap >> 8) };
-						emu_write(o + BN6_T1_HP, v, 2);
-						emu_write(o + BN6_T1_MAX_HP, v, 2);
-					}
-					D.duel_cap = 0;
-				}
 			}
-			/* its rewards in the folder's codes, half the time (read again
-			 * through the battle: its enemies spawn a few frames in, and
-			 * the reward is picked as it ends) */
-			if (sub == BN6_SUB_BATTLE && D.frame % 16 == 0) emu_encounter_lean_drops();
-			/* the battle the game was handed, once its setup names the
-			 * record (a re-roll may have come between its roll and now) */
+			/* the battle the game was handed, once StartBattle has named
+			 * its record (a re-roll may have come between its roll and
+			 * now) */
 			if (!D.record_known) {
-				int s = emu_encounter_battle_slot();
+				int s = D.battle_record ? emu_encounter_record(D.battle_record) : -2;
 				if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
 				if (s != -2) {
 					D.record_known = true;
@@ -3278,6 +3272,7 @@ void director_update(void) {
 		/* back from a battle: count the deleted viruses (a navi counts below) */
 		D.in_battle = false;
 		D.placed_told = false;
+		D.battle_record = 0;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		runlog_battle_end(won);
 		/* the PET's battle data on the viruses just fought */
@@ -3311,7 +3306,7 @@ void director_update(void) {
 		 * gives its own for a win): random battles again */
 		D.challenge = false;
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-		if (D.duel) { duel_verdict(won); D.pet_refreshed = false; }
+		if (D.duel) { emu_battle_unwatch(); duel_verdict(won); D.pet_refreshed = false; }
 		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
 		else D.reward_due = won && D.objs.challenge_reward >= 0;
 		D.gate_fight = false;

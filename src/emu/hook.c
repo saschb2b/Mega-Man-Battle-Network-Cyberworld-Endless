@@ -41,6 +41,7 @@ static HookEvent queue[QUEUE];
 static uint32_t qhead, qtail;
 uint32_t hook_hits, hook_dropped, hook_strays;
 
+uint8_t hook_read8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
 uint16_t hook_read16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1); }
 uint32_t hook_read32(uint32_t a) { return core->rawRead32(core, a, -1); }
 void hook_write16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
@@ -52,14 +53,16 @@ static Hook *find(uint32_t addr) {
 	return NULL;
 }
 
-static void enqueue(const Hook *h, const HookRegs *r) {
+static void enqueue(uint32_t addr, int kind, const HookRegs *r) {
 	if (qtail - qhead >= QUEUE) { ++hook_dropped; return; }
 	HookEvent *e = &queue[qtail++ & (QUEUE - 1)];
-	e->addr = h->addr;
-	e->kind = h->kind;
+	e->addr = addr;
+	e->kind = kind;
 	memcpy(e->r, r->r, sizeof e->r);
 	e->lr = r->lr;
 }
+
+void hook_post(const HookRegs *r, int kind) { enqueue(r->pc, kind, r); }
 
 static void hit(struct ARMCore *cpu, bool arm) {
 	/* (the PC runs two instructions ahead of the one executing) */
@@ -69,12 +72,11 @@ static void hit(struct ARMCore *cpu, bool arm) {
 	++hook_hits;
 	HookAct act = HOOK_CONTINUE;
 	if (h->live) {
-		HookRegs r = { { (uint32_t)cpu->gprs[0], (uint32_t)cpu->gprs[1], (uint32_t)cpu->gprs[2], (uint32_t)cpu->gprs[3] },
-			(uint32_t)cpu->gprs[12], (uint32_t)cpu->gprs[ARM_SP], (uint32_t)cpu->gprs[ARM_LR], at };
+		HookRegs r = { .sp = (uint32_t)cpu->gprs[ARM_SP], .lr = (uint32_t)cpu->gprs[ARM_LR], .pc = at };
+		for (int i = 0; i < 13; ++i) r.r[i] = (uint32_t)cpu->gprs[i];
 		if (h->fn) act = h->fn(&r, h->user);
-		else enqueue(h, &r);
-		for (int i = 0; i < 4; ++i) cpu->gprs[i] = (int32_t)r.r[i];
-		cpu->gprs[12] = (int32_t)r.r12;
+		else enqueue(h->addr, h->kind, &r);
+		for (int i = 0; i < 13; ++i) cpu->gprs[i] = (int32_t)r.r[i];
 		cpu->gprs[ARM_LR] = (int32_t)r.lr;
 	}
 	if (act == HOOK_RETURN) ARMRunFake(cpu, arm ? ARM_BX_LR : THUMB_BX_LR);

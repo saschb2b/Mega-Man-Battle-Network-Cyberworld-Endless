@@ -70,8 +70,9 @@ static void make_rom(uint8_t *rom) {
 
 /* the hooks: one of each kind */
 static HookAct doubled(HookRegs *r, void *user) { (void)user; r->r[0] *= 2; return HOOK_CONTINUE; }
-static HookAct answered(HookRegs *r, void *user) { (void)user; r->r[0] = 99; return HOOK_RETURN; }
-static HookAct sent_on(HookRegs *r, void *user) { (void)user; r->r12 = 0x08000105; return HOOK_JUMP; }
+/* (and an event of its own, with the registers it met) */
+static HookAct answered(HookRegs *r, void *user) { (void)user; hook_post(r, 8); r->r[0] = 99; return HOOK_RETURN; }
+static HookAct sent_on(HookRegs *r, void *user) { (void)user; r->r[12] = 0x08000105; return HOOK_JUMP; }
 static HookAct counted(HookRegs *r, void *user) { (void)r; ++*(int *)user; return HOOK_CONTINUE; }
 
 static uint32_t stored(struct mCore *core, int i) { return core->rawRead32(core, IWRAM + 4u * (uint32_t)i, -1); }
@@ -115,10 +116,14 @@ int main(void) {
 	CHECK(stored(core, 3) == 49, "jump: %u, not 49", stored(core, 3));
 	CHECK(arm_hits == 1, "the ARM hook ran %d times, not once", arm_hits);
 	CHECK(hook_hits - hits == 5, "%u hits, not 5", hook_hits - hits);
+	/* the answer hook's post (r0 still 7), then the event hook's (r0 the
+	 * 99 it returned), in their order */
 	HookEvent ev[4];
 	int n = hook_drain(ev, 4);
-	CHECK(n == 1 && ev[0].addr == 0x080000E8 && ev[0].kind == 7 && ev[0].r[0] == 99,
-		"the event: %d queued, at %08x, kind %d, r0 %u", n, n ? ev[0].addr : 0, n ? ev[0].kind : 0, n ? ev[0].r[0] : 0);
+	CHECK(n == 2 && ev[0].addr == 0x080000FC && ev[0].kind == 8 && ev[0].r[0] == 7,
+		"the post: %d queued, at %08x, kind %d, r0 %u", n, n ? ev[0].addr : 0, n ? ev[0].kind : 0, n ? ev[0].r[0] : 0);
+	CHECK(n == 2 && ev[1].addr == 0x080000E8 && ev[1].kind == 7 && ev[1].r[0] == 99,
+		"the event: at %08x, kind %d, r0 %u", n > 1 ? ev[1].addr : 0, n > 1 ? ev[1].kind : 0, n > 1 ? ev[1].r[0] : 0);
 	CHECK(hook_strays == 0 && hook_dropped == 0, "%u strays, %u dropped", hook_strays, hook_dropped);
 
 	/* removed, the code is the ROM's again */

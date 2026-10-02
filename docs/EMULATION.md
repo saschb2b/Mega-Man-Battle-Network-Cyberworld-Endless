@@ -93,10 +93,13 @@ row its record names (rows 0 and 1, one per record, of the table at
 `0x080211A0`, docs/ROM_DATA.md) with the run's own rewards before the
 battle.
 
-In the rival's netbattle (docs/RIVAL.md), once ProtoMan stands on the
-field, his battle object's HP and MaxHP (`+0x24`, `+0x26` of his T1 object,
-`0x0203A9B0` + 0xD8 per object) are lowered once to the act's guardian
-band, where his own 1800 is above it.
+As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
+0x28) are rewritten in the folder's codes, half the time, by a hook on the
+reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md).
+
+In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
+given the act's guardian band at most as he spawns, where his own 1800 is
+above it: a hook lowers the value BN6's spawn sets both from.
 
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,
@@ -244,9 +247,11 @@ function replacement), while BN6's code stays the ROM's.
   first instruction, before it pushes anything); or `bx r12` (`HOOK_JUMP`,
   on elsewhere).
 - **Two kinds.** An *event hook* only queues the registers it met, and the
-  director takes the queue up after the frame. An *answer hook* returns,
-  or changes, what the director prepared before the frame. Neither touches
-  the director's state.
+  director takes the queue up after the frame (`emu_hook_events`,
+  `src/director/events.h` its kinds). An *answer hook* returns, or changes,
+  what the director prepared before the frame, and may queue an event of
+  its own where only some calls are worth one (`hook_post`). Neither
+  touches the director's state.
 - **Threads.** Where the core has a thread of its own (the New 3DS,
   `CYBERWORLD_EMU_THREAD=1`), a hook runs on it while the main thread
   draws. `emu_read*` and `emu_write*` wait for the frame in progress, so a
@@ -258,6 +263,21 @@ function replacement), while BN6's code stays the ROM's.
   the ROM stays; one in RAM is written again after a state is loaded or the
   core reset (`hook_reapply`). A hook taken off restores the original; its
   slot stays only while the CPU may hold its BKPT in the prefetch.
+
+The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x08005A98`, `0x08005AE2` | checkThenStartBattle: its first test, the branch after the roll | answer: a forced battle, the engine's record (issue #29) | once a frame on the map |
+| `0x08005BC8` | StartBattle | event: the record the battle starts from | once a battle |
+| `0x080AC180` | the reward pick (bn6f `sub_80AA910`) | answer: its enemies' reward rows rewritten first | once a battle, as it ends |
+| `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
+| `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
+
+The last two are set as the duel begins and taken off as it ends, so the
+other battles carry no hook a frame per object. They replaced reading the
+battle every frame: its objects for MegaMan's HP and ProtoMan's, the
+battle state for its record, and every 16 frames its enemies' rows.
 
 `tests/test_emu.c` runs a ROM of the test's own bytes on mGBA (its
 `GBAIsROM` wants `0xEA` at offset 3 and `0x96` at `0xB2`, nothing more):

@@ -13,6 +13,7 @@
 #include "bytes.h"
 #include "data.h"
 #include "emu.h"
+#include "events.h"
 #include "loot.h"
 #include "rom.h"
 #include "run.h"
@@ -50,9 +51,11 @@ static HookAct forced(HookRegs *r, void *user) {
 	(void)user;
 	if (!forcing) return HOOK_CONTINUE;
 	r->r[0] = record;
-	r->r12 = BN6_ENCOUNTER_START;
+	r->r[12] = BN6_ENCOUNTER_START;
 	return HOOK_JUMP;
 }
+
+static HookAct picking(HookRegs *r, void *user);
 
 void emu_encounters_install(void) {
 	static bool done;
@@ -60,6 +63,8 @@ void emu_encounters_install(void) {
 	done = true;
 	emu_hook(BN6_ENCOUNTER_ROLLED, rolled, NULL);
 	emu_hook(BN6_ENCOUNTER_CHECK, forced, NULL);
+	emu_hook_event(BN6_START_BATTLE, EV_BATTLE_START);
+	emu_hook(BN6_REWARD_PICK, picking, NULL);
 }
 
 void emu_battle_force(const Encounter *e) {
@@ -134,61 +139,92 @@ void emu_encounter_set(const Encounter *e) {
 
 int emu_encounter_slot(void) { return slot; }
 
-/* eToolkit's battle state, where the setup keeps its BattleSettings pointer
- * (bn6f), a few frames into it */
-static uint32_t battle_settings_at(void) {
-	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
-	return state >= BN6_EWRAM && state < BN6_EWRAM_END ? state + 0x3C : 0;
+int emu_encounter_record(uint32_t settings) {
+	return settings == settings_of(0) ? 0 : settings == settings_of(1) ? 1 : -1;
 }
 
-int emu_encounter_battle_slot(void) {
-	uint32_t p = battle_settings_at(), at = p ? emu_read32(p) : 0;
-	return !at ? -2 : at == settings_of(0) ? 0 : at == settings_of(1) ? 1 : -1;
-}
-
-void emu_encounter_battle_forget(void) {
-	uint32_t p = battle_settings_at();
-	if (p && emu_read32(p)) emu_write32(p, 0);
-}
-
-bool emu_encounter_lean_drops(void) {
-	/* (BN6 picks the reward as the battle ends, bn6f sub_80AA910: one of
-	 * the enemies spawned, then one of its row's 20 entries by the busting
-	 * level, a coin and MegaMan's HP; a chip entry has bits 14-15 clear,
-	 * the id in 0-8 and the code in 9-13. The coin picks between the two
-	 * entries of a pair: the second of each, rewritten from the ROM's own
-	 * in the core's copy, comes in one of the folder's codes where the
-	 * chip does, so a chip reward leans half the time, as Mystery Data's;
-	 * a Navi's chip, in either entry, in its * off the folder's codes) */
-	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
-	if (state < BN6_EWRAM || state >= BN6_EWRAM_END) return false;
-	int n = emu_read8(state + BN6_BATTLE_ENEMY_COUNT);
-	if (n <= 0) return false;
-	for (int i = 0; i < n && i < 8; ++i) {
-		int id = emu_read16(state + BN6_BATTLE_ENEMY_IDS + 2u * (uint32_t)i);
-		if (id <= 0 || id >= 0x200) continue;
-		uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
-		for (uint32_t k = 0; k < 20; ++k) {
-			uint16_t v = rom_u16(row + 2 * k);
-			if (v == 0xFFFF || v >> 14) continue;
-			int chip = v & 0x1FF, code = v >> 9 & 0x1F;
-			char c = code >= 26 ? '*' : (char)('A' + code);
-			if (k & 1) c = loot_fit_code(chip, c, true);
-			/* (a Navi's chip in its * where the folder holds not its
-			 * letter, as his Guardian Data gives it, from both entries of
-			 * a pair: a Blade folder's guardian dropped ChrgeMan C, and
-			 * with the second entry alone, SpoutMan A) */
-			bool held = false;
-			for (int h = 0; h < 3 && run.codes[h]; ++h) held |= c == 'A' + run.codes[h] - 1;
-			if (!held && c != '*' && chip_family(chip) == CHIP_FAMILY_NAVI) {
-				ChipInfo ci;
-				chip_info(chip, &ci);
-				if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
-			}
-			uint16_t w = (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9);
-			uint8_t b[2] = { (uint8_t)w, (uint8_t)(w >> 8) };
-			emu_write(0x08000000u + row + 2 * k, b, 2);
+/* One enemy's reward row in the folder's codes, half the time (docs/
+ * META.md). BN6 picks the reward as the battle ends: one of the enemies
+ * spawned, then one of its row's 20 entries by the busting level, a coin
+ * and MegaMan's HP; a chip entry has bits 14-15 clear, the id in 0-8 and
+ * the code in 9-13. The coin picks between the two entries of a pair: the
+ * second of each, rewritten from the ROM's own in the core's copy, comes in
+ * one of the folder's codes where the chip does, so a chip reward leans
+ * half the time, as Mystery Data's; a Navi's chip, in either entry, in its
+ * * off the folder's codes. (From a hook: the player's ROM and the run's
+ * codes are only read, and loot_fit_code rolls nothing when always.) */
+static void lean_row(int id) {
+	if (id <= 0 || id >= 0x200) return;
+	uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
+	for (uint32_t k = 0; k < 20; ++k) {
+		uint16_t v = rom_u16(row + 2 * k);
+		if (v == 0xFFFF || v >> 14) continue;
+		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
+		char c = code >= 26 ? '*' : (char)('A' + code);
+		if (k & 1) c = loot_fit_code(chip, c, true);
+		/* (a Navi's chip in its * where the folder holds not its letter,
+		 * as his Guardian Data gives it, from both entries of a pair: a
+		 * Blade folder's guardian dropped ChrgeMan C, and with the second
+		 * entry alone, SpoutMan A) */
+		bool held = false;
+		for (int h = 0; h < 3 && run.codes[h]; ++h) held |= c == 'A' + run.codes[h] - 1;
+		if (!held && c != '*' && chip_family(chip) == CHIP_FAMILY_NAVI) {
+			ChipInfo ci;
+			chip_info(chip, &ci);
+			if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
 		}
+		hook_write16(0x08000000u + row + 2 * k, (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9));
 	}
-	return true;
+}
+
+/* The reward pick, as a battle ends (bn6f sub_80AA910, the rows' one
+ * reader): the rows of the enemies it picks from, leaned just before. */
+static HookAct picking(HookRegs *r, void *user) {
+	(void)user;
+	for (uint32_t i = 0; i < r->r[1] && i < 8; ++i) lean_row(hook_read16(r->r[0] + 2 * i));
+	return HOOK_CONTINUE;
+}
+
+/* A watched battle (the duel's): MegaMan's hits, and the HP the first
+ * enemy spawns with at most, which the spawn's hook clears once used. */
+static int cap;
+
+/* MegaMan's object: the first of the battle's objects in play on his side */
+static uint32_t megaman_object(void) {
+	for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
+		uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
+		if ((hook_read8(o + BN6_T1_IN_PLAY) & 1) && hook_read8(o + BN6_T1_ALLIANCE) == 0) return o;
+	}
+	return 0;
+}
+
+/* object_subtractHP, run on every object every frame, mostly with nothing
+ * to take: an event where it lowers MegaMan's HP */
+static HookAct hurt(HookRegs *r, void *user) {
+	(void)user;
+	if (r->r[0] && hook_read16(r->r[5] + BN6_T1_HP) && r->r[5] == megaman_object()) hook_post(r, EV_MEGAMAN_HIT);
+	return HOOK_CONTINUE;
+}
+
+/* An enemy's spawn, as it is given its HP and MaxHP (r2): the first
+ * enemy's at most the cap */
+static HookAct spawned(HookRegs *r, void *user) {
+	(void)user;
+	if (cap && hook_read8(r->r[5] + BN6_T1_ALLIANCE) == 1) {
+		if (r->r[2] > (uint32_t)cap) r->r[2] = (uint32_t)cap;
+		cap = 0;
+	}
+	return HOOK_CONTINUE;
+}
+
+void emu_battle_watch(int hp_cap) {
+	emu_hook(BN6_SUBTRACT_HP, hurt, NULL);
+	if (hp_cap > 0) emu_hook(BN6_SPAWN_HP, spawned, NULL);
+	cap = hp_cap > 0 ? hp_cap : 0;
+}
+
+void emu_battle_unwatch(void) {
+	emu_unhook(BN6_SUBTRACT_HP);
+	emu_unhook(BN6_SPAWN_HP);
+	cap = 0;
 }

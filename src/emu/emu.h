@@ -50,8 +50,14 @@ void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
 
 /* A hook on the game's code (hook.h; docs/EMULATION.md, Hooks), set
- * between frames: on the Thumb instruction at addr. */
+ * between frames: on the Thumb instruction at addr, an answer hook or an
+ * event hook queuing `kind`; and taken off. */
 bool emu_hook(uint32_t addr, EmuHook fn, void *user);
+bool emu_hook_event(uint32_t addr, int kind);
+void emu_unhook(uint32_t addr);
+/* The events the hooks queued in the frames run since the last call,
+ * oldest first: how many. */
+int emu_hook_events(HookEvent *out, int max);
 
 /* Save states in the data directory (made on the device, never shipped). */
 bool emu_save_state(const char *path);

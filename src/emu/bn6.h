@@ -10,11 +10,7 @@
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
 #define BN6_TOOLKIT_CHIPS     0x48        /* eToolkit +0x48: the chips' data (0x02002178): folders of 30 u16 from +0, 0x3C each (bn6f sub_8021AB4) */
 #define BN6_FOLDER_ENTRIES    30
-#define BN6_TOOLKIT_BATTLE    0x18        /* eToolkit BattleStatePtr: +0x3C its BattleSettings* */
-/* ... +0x09 the enemies spawned as the battle began, +0x54 their ids (u16);
- * each id's reward row in ROM, 20 u16 entries (docs/ROM_DATA.md) */
-#define BN6_BATTLE_ENEMY_COUNT 0x09
-#define BN6_BATTLE_ENEMY_IDS  0x54
+/* each enemy id's reward row in ROM, 20 u16 entries (docs/ROM_DATA.md) */
 #define BN6_DROP_ROWS         0x080AC718u
 #define BN6_BATTLE_REWARD     0x0200A00Cu /* the reward picked as the battle ended (u16, a row's entry) */
 #define BN6_TOOLKIT_KEY_ITEMS 0x50        /* eToolkit KeyItemsPtr: a count per key item */
@@ -220,6 +216,12 @@
 #define BN6_ENCOUNTER_CHECK   0x08005A98u /* its first test after the map's */
 #define BN6_ENCOUNTER_ROLLED  0x08005AE2u /* the beq after the roll's bl: r0 the roll's BattleSettings* */
 #define BN6_ENCOUNTER_START   0x08005AE5u /* movs r1,#1; bl StartBattle, r0 the record (Thumb) */
+/* Battles, by hook (src/director/encounter.c; Gregar's as Falzar's where
+ * not said) */
+#define BN6_START_BATTLE      0x08005BC8u /* StartBattle: r0 the BattleSettings*, every battle's */
+#define BN6_SPAWN_HP          0x08007740u /* in bn6f sub_800768C, an enemy's spawn: strh r2,[r5,#0x24], r2 its HP and MaxHP, r5 its BattleObject */
+#define BN6_SUBTRACT_HP       0x0800E2D8u /* object_subtractHP: r5 the BattleObject, r0 the damage (every object's, every frame, mostly 0) */
+#define BN6_REWARD_PICK       0x080AC180u /* bn6f sub_80AA910 (Falzar + 0x1870), as a battle ends: r0 the enemies' u16 ids, r1 their count */
 
 
 /* Main modes (main_subsystemJumpTable) and game-state sub-modes */

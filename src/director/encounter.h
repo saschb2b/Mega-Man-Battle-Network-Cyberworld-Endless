@@ -3,10 +3,13 @@
 #define CW_ENCOUNTER_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "foes.h"
 
-/* Makes the game's encounter roll return the engine's battle settings. */
+/* Makes the game's encounter roll return the engine's battle settings, and
+ * hooks its battles: their start (EV_BATTLE_START, events.h) and their
+ * rewards, picked in the folder's codes half the time (docs/META.md). */
 void emu_encounters_install(void);
 /* The battle the next encounter starts: enemies, area background and music. */
 void emu_encounter_set(const Encounter *e);
@@ -19,18 +22,16 @@ extern int encounter_song[2];
 /* The background a battle's record names: -1 for its area's own, as BN6
  * rolls them, or another game's (xbackdrop_install), as the layer sets it. */
 extern int encounter_backdrop;
-/* The record the last emu_encounter_set wrote (0 or 1), and the one the
- * game's battle is set up from (-1: another, a story or test battle; -2:
- * not yet named, early in its setup). */
+/* The record the last emu_encounter_set wrote (0 or 1), and which one a
+ * battle's BattleSettings pointer (EV_BATTLE_START's r0) is: -1 another,
+ * a story or test battle's. */
 int emu_encounter_slot(void);
-int emu_encounter_battle_slot(void);
-/* Off the game's last battle's record: the pointer the next one's setup
- * names its record by keeps the last battle's until the setup writes it
- * (a CONTINUE's state or the last battle), so it is cleared on the map. */
-void emu_encounter_battle_forget(void);
-/* The battle's rewards in the folder's codes, half the time (docs/META.md):
- * once its enemies have spawned; whether it could read them yet. */
-bool emu_encounter_lean_drops(void);
+int emu_encounter_record(uint32_t settings);
+/* The next battle watched, until emu_battle_unwatch (the duel's: docs/
+ * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, and the first enemy
+ * to spawn given `hp_cap` HP at most (0: its own). */
+void emu_battle_watch(int hp_cap);
+void emu_battle_unwatch(void);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
 void emu_battle_release(void);

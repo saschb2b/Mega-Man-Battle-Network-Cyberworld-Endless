@@ -19,26 +19,27 @@
 
 struct mCore;
 
-/* What a hook reads, and may change: r0-r3, r12 and lr go back into the
- * CPU; sp is read only; pc is the hooked instruction's address. */
+/* What a hook reads, and may change: r0-r12 and lr go back into the CPU
+ * (BN6's routines keep their object in r5); sp is read only; pc is the
+ * hooked instruction's address. */
 typedef struct {
-	uint32_t r[4];
-	uint32_t r12, sp, lr, pc;
+	uint32_t r[13];
+	uint32_t sp, lr, pc;
 } HookRegs;
 
 typedef enum {
 	HOOK_CONTINUE,   /* the hooked instruction runs, with the registers as the hook left them */
 	HOOK_RETURN,     /* bx lr, r0 and r1 the result: only at a routine's first instruction, before it pushes */
-	HOOK_JUMP,       /* bx r12: on to r12 (its bit 0 set for Thumb code) */
+	HOOK_JUMP,       /* bx r12: on to r[12] (its bit 0 set for Thumb code) */
 } HookAct;
 
 typedef HookAct (*EmuHook)(HookRegs *regs, void *user);
 
-/* What an event hook queued. */
+/* What an event hook queued, or an answer hook posted (hook_post). */
 typedef struct {
 	uint32_t addr;   /* the hooked instruction */
 	int kind;        /* the caller's tag (emu_hook_event) */
-	uint32_t r[4], lr;
+	uint32_t r[8], lr;   /* r0-r7 and lr as it met them */
 } HookEvent;
 
 /* Our BKPT handler, before the board's: once, as the core is made. */
@@ -56,8 +57,12 @@ void hook_remove(uint32_t addr);
 void hook_reapply(void);
 /* The queued events, oldest first; how many. */
 int hook_drain(HookEvent *out, int max);
+/* From an answer hook: an event of this kind with the registers it has,
+ * where only some calls are worth one (a routine every object runs). */
+void hook_post(const HookRegs *r, int kind);
 
 /* The game's memory, from a hook. */
+uint8_t hook_read8(uint32_t addr);
 uint16_t hook_read16(uint32_t addr);
 uint32_t hook_read32(uint32_t addr);
 void hook_write16(uint32_t addr, uint16_t v);
