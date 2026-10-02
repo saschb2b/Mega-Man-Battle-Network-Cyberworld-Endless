@@ -132,6 +132,31 @@ static void drafts_report(FILE *out) {
 	navicust_set_spins(0x3F);
 }
 
+/* What a Net Dealer says the area's viruses can't stand, where the
+ * guardian is weak to none (counter_element: 0, no word), by act; then
+ * each guardian's element and the one that hits him twice as hard, which
+ * the dealers' counter chip answers (- none). */
+static void elements_report(FILE *out) {
+	fprintf(out, "\nThe viruses' answer by act and area (- none):");
+	for (int act = 0; act < 4; ++act) {
+		uint8_t pool[PACING_AREA_POOL];
+		int n = pacing_area_pool(act, pool);
+		fprintf(out, "\nact %d:", act + 1);
+		for (int i = 0; i < n; ++i) {
+			int c = counter_element(act * 3 + 1, pool[i], 0);
+			fprintf(out, " %s %s", guardian_area_name(pool[i]), c > 0 ? elem_name(c) : "-");
+		}
+	}
+	fprintf(out, "\n\nGuardians' elements and weaknesses:");
+	for (int n = 1; n < 32; ++n) {
+		int id = enemy_id(1, n, 0);
+		if (id < 0 || !guardian(n)->name || guardian(n)->name[0] == '?') continue;
+		int e = enemy_element(id), w = enemy_weakness(id);
+		fprintf(out, " %s %s/%s", guardian(n)->name, e > 0 ? elem_name(e) : "-", w > 0 ? elem_name(w) : "-");
+	}
+	fprintf(out, "\n");
+}
+
 int pacing_report_run(const char *path) {
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;
@@ -183,32 +208,14 @@ int pacing_report_run(const char *path) {
 		fprintf(out, "%s\n", outside ? "  OUTSIDE" : "");
 		flagged += outside;
 	}
-	/* what a Net Dealer says the area's viruses can't stand, where the
-	 * guardian has no element (counter_element: 0, no word), by act */
-	fprintf(out, "\nThe viruses' answer by act and area (ELEM_*, 0 none):");
-	for (int act = 0; act < 4; ++act) {
-		uint8_t pool[PACING_AREA_POOL];
-		int n = pacing_area_pool(act, pool);
-		fprintf(out, "\nact %d:", act + 1);
-		for (int i = 0; i < n; ++i) fprintf(out, " %s %d", guardian_area_name(pool[i]), counter_element(act * 3 + 1, pool[i], 0));
-	}
-	fprintf(out, "\n");
-	/* each guardian's element (ELEM_*: 1 fire, 2 aqua, 3 elec, 4 wood), which
-	 * the Net Dealers' counter chip answers */
-	fprintf(out, "\nGuardians' elements:");
-	for (int n = 1; n < 32; ++n) {
-		int id = enemy_id(1, n, 0);
-		if (id >= 0 && guardian(n)->name && guardian(n)->name[0] != '?') fprintf(out, " %s %d", guardian(n)->name, enemy_element(id));
-	}
-	fprintf(out, "\n");
+	elements_report(out);
 	/* what the Net Dealers answer each act with, per element (every one a
 	 * straight hit; a "+" is over the act's cap, the lightest found) */
 	fprintf(out, "\nNet Dealers' answers (%d layers each: chip power share):\n", ROLLS);
-	static const char *const elems[5] = { "any", "Fire", "Aqua", "Elec", "Wood" };
 	for (int act = 0; act < 6; ++act) {
 		int depth = act * 3 + 2, lo, hi;
 		pacing_guardian_band(act, &lo, &hi);
-		for (int e = 0; e <= 4; ++e) {
+		for (int e = 0; e < ELEM_COUNT; ++e) {
 			int counter = e ? e : -1, most = counter > 0 ? lo / 6 : lo / 3;
 			static int ids[ROLLS];
 			int none = 0;
@@ -219,7 +226,7 @@ int pacing_report_run(const char *path) {
 				none += ids[k] < 0;
 			}
 			qsort(ids, ROLLS, sizeof *ids, cmp_int);
-			fprintf(out, "act %d %s (cap %d):", act + 1, elems[e], most);
+			fprintf(out, "act %d %s (cap %d):", act + 1, e ? elem_name(e) : "any", most);
 			for (int k = 0; k < ROLLS;) {
 				int j = k;
 				while (j < ROLLS && ids[j] == ids[k]) ++j;

@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 66
+#define LAYER_MAKE 67
 #define LAYER_MAKE_HASH 0x6bd18801u
 
 #endif

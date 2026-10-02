@@ -115,7 +115,10 @@ bool chip_direct(int rom_id) {
 
 int chip_family(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB]; }
 
-bool chip_sword(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB] == 19; }
+bool chip_melee(int rom_id) {
+	int family = R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB];
+	return family == 19 || family == 63 || family == 64;
+}
 
 bool chip_standard(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0x7] == 0; }
 
@@ -200,9 +203,58 @@ static uint32_t enemy_record(int id) {
 	return r + 6 > ROM_SIZE ? 0 : r;
 }
 
+const char *elem_name(int elem) {
+	static const char *const names[ELEM_COUNT] = { "", "Fire", "Aqua", "Elec", "Wood", "Sword", "Wind", "Cursor", "Breaker" };
+	return elem > 0 && elem < ELEM_COUNT ? names[elem] : "";
+}
+
+/* The record of enemy `id`'s traits, 0 when not found (bn6f
+ * enemy_getStruct1): a table per actor type, a pointer per ai, 8 bytes:
+ * its sprites, then at 5 its element of the second wheel and at 6 the
+ * ones that hit it twice as hard, a bit each (0x80 Sword, 0x40 Cursor,
+ * 0x20 Wind, 0x10 Breaker) */
+static uint32_t enemy_traits(int id) {
+	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_traits) return 0;
+	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
+	if (e[1] > 2) return 0;
+	uint32_t types = rom_u32(R.layout->enemy_traits + (uint32_t)e[1] * 4);
+	if (!rom_is_ptr(types)) return 0;
+	uint32_t rec = rom_u32(rom_off(types) + (uint32_t)e[2] * 4);
+	if (!rom_is_ptr(rec)) return 0;
+	return rom_off(rec) + 8 > ROM_SIZE ? 0 : rom_off(rec);
+}
+
+static int second_wheel(uint8_t bits) {
+	return bits & 0x80 ? ELEM_SWORD : bits & 0x40 ? ELEM_CURSOR : bits & 0x20 ? ELEM_WIND : bits & 0x10 ? ELEM_BREAK : 0;
+}
+
 int enemy_element(int id) {
-	uint32_t r = enemy_record(id);
-	return r ? rom_u16(r) >> 12 : -1;
+	uint32_t r = enemy_record(id), t = enemy_traits(id);
+	if (!r) return -1;
+	int e = rom_u16(r) >> 12;
+	return e > 0 && e <= ELEM_WOOD ? e : t ? second_wheel(R.data[t + 5]) : 0;
+}
+
+int enemy_weakness(int id) {
+	static const int beats[ELEM_WOOD + 1] = { 0, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_FIRE };
+	uint32_t r = enemy_record(id), t = enemy_traits(id);
+	if (!r) return -1;
+	int e = rom_u16(r) >> 12;
+	return e > 0 && e <= ELEM_WOOD ? beats[e] : t ? second_wheel(R.data[t + 6]) : 0;
+}
+
+int chip_hits_with(int rom_id) {
+	ChipInfo ci;
+	chip_info(rom_id, &ci);
+	if (ci.element > 0 && ci.element <= ELEM_WOOD) return ci.element;
+	/* (the icon's: 5 Sword, 6 Cursor, 8 Wind, 9 Break; bn6f CHIP_ELEM_*) */
+	switch (ci.chip_element) {
+	case 5: return ELEM_SWORD;
+	case 6: return ELEM_CURSOR;
+	case 8: return ELEM_WIND;
+	case 9: return ELEM_BREAK;
+	default: return 0;
+	}
 }
 
 bool enemy_stats(int id, int *hp, int *damage) {

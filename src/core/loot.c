@@ -156,27 +156,29 @@ void loot_add_gem(Encounter *e) {
 	}
 }
 
-/* The element that answers an act: the one strong against its guardian,
- * or with a guardian of none, against the element half or more of the
- * kinds of virus the area's battles can hold at `depth` have, two kinds at
- * least (Fire beats Wood, Aqua Fire, Elec Aqua, Wood Elec); 0 for none. A
- * playtester told "the viruses around here can't stand Aqua chips" met
- * Piranhas, bees, crows and planes: the area's most common element over
- * all its battles had been three kinds of Fire among nine elemental. */
+static void weak_kinds_here(int depth, int biome, uint16_t weak[32]);
+
+/* The element that answers an act: the one that hits its guardian twice
+ * as hard, of either wheel (TenguMan's Sword: "no weak element", the Net
+ * Dealers had said of him, issue #39), or with a guardian weak to none,
+ * the one half or more of the kinds of virus the area's battles can hold
+ * at `depth` are weak to, two kinds at least, each as those battles field
+ * it (Swordy2 is Fire, Swordy3 Aqua); 0 for none. A playtester told "the
+ * viruses around here can't stand Aqua chips" met Piranhas, bees, crows
+ * and planes: the area's most common element over all its battles had
+ * been three kinds of Fire among nine elemental. */
 int counter_element(int depth, int biome, int navi) {
-	static const int beats[5] = { 0, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_FIRE };
-	int e = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : -1;
-	if (e > 0 && e <= 4) return beats[e];
-	uint32_t fams = loot_families_here(depth, biome);
-	int count[5] = { 0 }, total = 0;
-	for (int f = 1; f < 30; ++f) {
-		if (!(fams >> f & 1)) continue;
-		int v = enemy_element(virus_id(f, 0));
-		if (v > 0 && v <= 4) { ++count[v]; ++total; }
-	}
+	int w = navi > 0 ? enemy_weakness(enemy_id(1, navi, 0)) : -1;
+	if (w > 0) return w;
+	uint16_t weak[32] = { 0 };
+	weak_kinds_here(depth, biome, weak);
+	int count[ELEM_COUNT] = { 0 }, total = 0;
+	for (int f = 1; f < 32; ++f)
+		for (int v = 1; v < ELEM_COUNT; ++v)
+			if (weak[f] >> v & 1) { ++count[v]; ++total; }
 	int best = 0;
-	for (int v = 1; v <= 4; ++v) if (count[v] > count[best]) best = v;
-	return best && count[best] >= 2 && count[best] * 2 >= total ? beats[best] : 0;
+	for (int v = 1; v < ELEM_COUNT; ++v) if (count[v] > count[best]) best = v;
+	return best && count[best] >= 2 && count[best] * 2 >= total ? best : 0;
 }
 
 /* the last battle fought, not the last rolled: the next random battle is
@@ -342,6 +344,31 @@ uint32_t loot_families_here(int depth, int biome) {
 	int thirds, other = shares_with(biome, &thirds);
 	if (other >= 0) in |= loot_families_here(depth, other);
 	return in;
+}
+
+/* What each virus family the area's plain random battles can hold at
+ * `depth` is weak to, as they field it (a bit per ELEM_* in weak[family]):
+ * loot_families_here's battles, each at its version. */
+static void weak_kinds_here(int depth, int biome, uint16_t weak[32]) {
+	int lo, hi;
+	pacing_virus_versions(depth, false, &lo, &hi);
+	for (int v = lo; v <= hi; ++v) {
+		const Formation *list;
+		static int8_t fit[MAX_FIT];
+		int n = fielded(depth, biome, v, &list, fit);
+		for (int i = 0; i < n && i < MAX_FIT; ++i) {
+			if (fit[i] < 0) continue;
+			Encounter t;
+			int hp, dmg;
+			build_foes(&list[i], depth, fit[i], false, &t, &hp, &dmg);
+			for (int k = 0; k < t.nfoes; ++k) {
+				int w = t.foes[k].kind == FOE_VIRUS && t.foes[k].family < 32 ? enemy_weakness(t.foes[k].id) : -1;
+				if (w >= 0 && w < ELEM_COUNT) weak[t.foes[k].family] |= (uint16_t)(1u << w);
+			}
+		}
+	}
+	int thirds, other = shares_with(biome, &thirds);
+	if (other >= 0) weak_kinds_here(depth, other, weak);
 }
 
 static bool original_encounter(int depth, int biome, int kind, Encounter *e) {

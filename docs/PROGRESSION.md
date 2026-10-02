@@ -327,15 +327,25 @@ MegaMan reaches about 100 HP more per act:
   of the game's prices (its endgame's) plus 200, and 200 more each act:
   SuperArmor 1000 zenny in act 1, Attack+1 700.
 - Every Net Dealer stocks a chip of the element that answers its act: the
-  one strong against the act's guardian, or with a guardian of none,
-  against the element of half or more of the kinds of virus the area's
-  battles can hold at that depth, two kinds at least (Fire beats Wood,
-  Aqua Fire, Elec Aqua, Wood Elec; `counter_element` in `loot.c`; a mixed
-  area such as CopyBot's comps gets no word, and `build.py pacing` lists
-  each act's areas), and
-  says so, naming the guardian ("Word is, BlastMan can't stand Aqua
-  chips"). A guardian of no element is answered by the hardest hit on the
-  list instead, and the dealer says so, and names the viruses' weakness.
+  one that hits the act's guardian twice as hard, or with a guardian weak
+  to none, the one half or more of the kinds of virus the area's battles
+  can hold at that depth are weak to, two kinds at least, each at every
+  version the act's battles can roll (Swordy2 is Fire, Swordy3 Aqua;
+  `counter_element` in `loot.c`; a mixed area such as CopyBot's comps gets
+  no word, and `build.py pacing` lists each act's areas), and says so,
+  naming the guardian ("Word is, BlastMan can't stand Aqua chips"). Both
+  of BN6's wheels count: Aqua beats Fire, Elec Aqua, Wood Elec and Fire
+  Wood; Sword beats Wind, Wind Cursor, Cursor Breaker and Breaker Sword
+  (an enemy's traits, `enemy_weakness` in `data.c`; a chip's icon,
+  `chip_hits_with`). SlashMan can't stand Breaker chips, EraseMan Wind,
+  TenguMan Sword, GroundMan and DustMan Cursor: the dealers had said they
+  had no weak element (issue #39), and a Sword's 80 took 160 of
+  TenguMan's HP. A guardian weak to none (ProtoMan, CircusMan, JudgeMan,
+  Colonel; ElementMan, whose element changes as he fights) is answered
+  by the hardest hit on the list instead, and the dealer says so, and
+  names the viruses' weakness. The answer is a sword only where Sword is
+  the weakness (swords did not reach CircusMan at his back column;
+  TenguMan hovers right in front between his dashes).
   It is the hardest hitting of the first eight Standard chips of that
   element the depth rolls that strike outright (the cheapest was
   IceSeed, 10 damage; a Mega chip like DiveMan goes one to a folder) and

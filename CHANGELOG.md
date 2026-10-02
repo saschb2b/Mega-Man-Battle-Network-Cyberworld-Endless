@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **The Net Dealers name every guardian's weakness (issue #39).** They
+  said SlashMan, EraseMan, TenguMan, GroundMan and DustMan had no weak
+  element, but BN6 has a second wheel, as its Cross lessons teach:
+  SlashMan can't stand Breaker chips, EraseMan Wind, TenguMan Sword,
+  GroundMan and DustMan Cursor (a Sword's 80 takes 160 of TenguMan's
+  HP). The dealer now says so and stocks his pick of that kind: a sword
+  for TenguMan, who hovers right in front between his dashes, but
+  otherwise never a chip that strikes only beside MegaMan (WindRack and
+  MoonBld joined the swords there). The way on after a guardian names
+  their elements too: TenguMan (Wind).
+  Every other guardian was right, checked against the ROM and the
+  Rockman EXE Zone wiki; ElementMan is now said to change his element as
+  he fights. The viruses' weakness a dealer names counts each kind as
+  the area's battles field it (Swordy2 is Fire). A run saved by an
+  earlier build starts its current layer afresh.
 - **Pressing L no longer changes the battles to come.** On an act's
   first layer in acts 3 and 5, MegaMan's status, naming the viruses the
   area may hold, drew one of the run's random numbers each time it

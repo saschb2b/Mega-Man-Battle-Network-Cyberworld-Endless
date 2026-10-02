@@ -7,7 +7,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-enum { ELEM_NULL, ELEM_FIRE, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD };
+/* Elements: BN6's first wheel (Aqua beats Fire, Elec Aqua, Wood Elec, Fire
+ * Wood), an enemy's HP word and a chip's attack element; then its second
+ * (Sword beats Wind, Wind Cursor, Cursor Breaker, Breaker Sword), an
+ * enemy's traits and a chip's icon (docs/ROM_DATA.md). Either doubles a
+ * hit on the element it beats. */
+enum { ELEM_NULL, ELEM_FIRE, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_SWORD, ELEM_WIND, ELEM_CURSOR, ELEM_BREAK, ELEM_COUNT };
+/* An element by BN6's name for it ("Breaker" as its Cross lessons say), "" for none. */
+const char *elem_name(int elem);
 
 typedef enum {
 	CK_CANNON,     /* hits the first enemy in the row */
@@ -50,7 +57,7 @@ typedef struct {
 	char name[20];
 	int power;
 	int element;
-	int chip_element; /* ROM icon element, used for colours */
+	int chip_element; /* ROM icon element (bn6f CHIP_ELEM_*): its colours, and its second-wheel element */
 	char codes[5];    /* letters, '*' wildcard */
 	int ncodes;
 	int mb;           /* its memory, which caps its copies in a folder (loot_folder_full) */
@@ -70,8 +77,10 @@ void chip_desc(int rom_id, char *out, size_t outlen);
  * of those, the attack families (0xB) of the Navi chips, MachGun,
  * AquaNdl, WaveArm, AirSpin and the Dragons strike outright too. */
 bool chip_direct(int rom_id);
-/* A sword: its attack family (0xB) is 19, reaching the panels just ahead. */
-bool chip_sword(int rom_id);
+/* A chip that strikes only beside MegaMan, by its attack family (0xB): the
+ * swords (19), WindRack (63: "Blow enmy in front! Range 3", as WideSwrd
+ * cuts) and MoonBld (64, the panels around him). */
+bool chip_melee(int rom_id);
 /* A chip's attack family (record 0xB): 50 AquaNdl, whose needles fall on
  * the panel it aimed at a moment later; 36 TankCan1-3 (chips 12-14), which
  * fire after a wind-up. */
@@ -94,8 +103,17 @@ extern const int virus_def_count;
 
 /* ROM enemy table: enemy id for (actor type, family, version). */
 int enemy_id(int actor_type, int family, int version);
-/* Enemy `id`'s element (ELEM_*, the top of its stats' HP word), -1 when unknown. */
+/* Enemy `id`'s element (ELEM_*: the top of its stats' HP word, else its
+ * traits' second-wheel element), -1 when unknown. */
 int enemy_element(int id);
+/* The element that hits enemy `id` twice as hard (ELEM_*: its first-wheel
+ * element's, else its traits' second-wheel weakness; 0 none), -1 when
+ * unknown. */
+int enemy_weakness(int id);
+/* The element chip `rom_id` hits with (ELEM_*): its attack element, else
+ * the second-wheel one its icon shows (a Sword did 160 of TenguMan's HP
+ * for its 80); 0 none. */
+int chip_hits_with(int rom_id);
 /* A navi's chip at a version (0 V1, 1 EX, 2 SP); 0 for none. */
 int navi_chip(int navi, int version);
 /* The ROM's HP and attack damage of enemy `id` (bn6f enemy_getStruct2);
