@@ -87,6 +87,14 @@ enum { STAIR_UP_NX, STAIR_UP_NY };
 /* A stair: 2 x 2 cells from (x, y). */
 typedef struct { int x, y, dir; } Stair;
 
+/* A gap Rush bridges (issue #14): from floor panel (x, y), MegaMan's
+ * stand, `len` void panels towards DIR_* `dir` to floor of the same
+ * height; the far floor is an island holding one thing, or a shortcut. The
+ * gap's panels stay C_VOID in `cell`: the map side makes them walkable
+ * once Rush lies there (docs/LEVEL_DESIGN.md, Set pieces). */
+typedef struct { int x, y, dir, len; bool island; } NetGap;
+#define MAX_GAPS 2
+
 typedef struct {
 	uint8_t cell[MAP_H][MAP_W];
 	uint8_t level[MAP_H][MAP_W];   /* 1: a raised room's floor */
@@ -108,6 +116,8 @@ typedef struct {
 	int layout;                    /* LAYOUT_* (net_layouts.h) */
 	NetProp props[MAX_PROPS];
 	int nprops;
+	NetGap gap[MAX_GAPS];
+	int ngaps;
 } Layer;
 
 extern Layer layer;
@@ -148,12 +158,17 @@ bool layer_on_way(int x, int y);
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);
 /* A purple Mystery Data's param: locked until an Unlocker opens it, the
- * best a layer holds (issue #41). Whether layer `depth` holds one, from the
- * run's seed and the depth alone; and how many lie in the act from `depth`
- * on (a Net Dealer stocks a key for each). */
+ * best a layer holds (issue #41). */
 #define MD_PURPLE 3
+/* A layer's set pieces (net_pieces.c, epic #49): BN6's own interactables,
+ * from the run's seed and the depth alone. How many of the act's layers
+ * from `depth` on hold `piece` (a Net Dealer stocks its key); a Rush gap's
+ * length in panels. */
+enum { PIECE_PURPLE = 1, PIECE_RUSH = 2 };
+unsigned layer_pieces(int depth, int biome, int kind);
 bool layer_purple(int depth, int biome, int kind);
-int layer_purples_ahead(int depth);
+int layer_pieces_ahead(int depth, unsigned piece);
+int layer_rush_len(int depth, int biome);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
 /* The layer's place in its act, 0-2 (the Nest counts as a first). */

@@ -121,16 +121,33 @@ static int answer_most(int depth, int counter) {
 	return counter > 0 ? lo / 6 : lo / 3;
 }
 
-/* The Unlocker where the act shows purple data from here on, one for each
- * (issue #41), at about a layer's zenny: BN6's 4000 would keep it out of a
- * run's reach, a key priced past its use. The stock's new count. */
+/* The keys for the set pieces the act holds from here on, at about a
+ * layer's zenny each (BN6's 4000 for an Unlocker and 3000 for RushFood
+ * would keep them out of a run's reach, keys priced past their use):
+ *   an Unlocker for each purple data (issue #41);
+ *   RushFood for each Rush gap, as many more as the longest needs held
+ *   (Rush comes for as many as its panels, and eats one: issue #14).
+ * The stock's new count. */
 static int add_keys(ShopItem *out, int n, int depth) {
+	int act = pacing_act(depth) + 7 * pacing_loop(depth);
 	ShopItem key;
-	int locks = layer_purples_ahead(depth);
-	if (!locks || n >= SHOP_MAX_ITEMS || !find_item(1, SUB_UNLOCKER, &key)) return n;
-	key.stock = (uint8_t)locks;
-	key.price = (uint16_t)(6 + 3 * (pacing_act(depth) + 7 * pacing_loop(depth)));
-	out[n++] = key;
+	int locks = layer_pieces_ahead(depth, PIECE_PURPLE);
+	if (locks && n < SHOP_MAX_ITEMS && find_item(1, SUB_UNLOCKER, &key)) {
+		key.stock = (uint8_t)locks;
+		key.price = (uint16_t)(6 + 3 * act);
+		out[n++] = key;
+	}
+	int gaps = 0, longest = 0;
+	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
+		int b = biome_for_depth(d);
+		if (!(layer_pieces(d, b, LAYER_NORMAL) & PIECE_RUSH)) continue;
+		++gaps;
+		if (layer_rush_len(d, b) > longest) longest = layer_rush_len(d, b);
+	}
+	if (gaps && n < SHOP_MAX_ITEMS) {
+		ShopItem food = { 1, (uint8_t)(longest + gaps - 1), ITEM_RUSH_FOOD, 0xFF, (uint16_t)(3 + act) };
+		out[n++] = food;
+	}
 	return n;
 }
 

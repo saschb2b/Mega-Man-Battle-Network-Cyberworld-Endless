@@ -36,6 +36,7 @@
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
+#include "net_shapes.h"
 #include "navicust.h"
 #include "net_route.h"
 #include "pacing.h"
@@ -1078,6 +1079,15 @@ static int layer_song(int tiles, int song) {
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 
+/* The layer's own flags, cleared as a layer begins: what has been told on
+ * it (L, the dealer, the vendor, a heal, Chaud's call, Rush's gap) and
+ * what its gates gave. */
+static void layer_flags_clear(void) {
+	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
+		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG };
+	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
+}
+
 /* The map an area's layers take over, the Navi their bystanders are
  * (layer_objs_bystander) and their battles' background
  * (encounter_backdrop): another game's area its own, copied into BN6
@@ -1185,13 +1195,7 @@ static bool build_layer(void) {
 	D.final_told = false;
 	D.checkpoint_data = false;
 	D.pet_refreshed = false;
-	flag_clear(LAYER_TOLD_FLAG);
-	flag_clear(LAYER_DEALER_TOLD_FLAG);
-	flag_clear(LAYER_VENDOR_TOLD_FLAG);
-	flag_clear(LAYER_HEAL_TOLD_FLAG);
-	flag_clear(LAYER_VAULT_FLAG);
-	flag_clear(LAYER_OFFICIAL_FLAG);
-	flag_clear(LAYER_DUEL_CALLED_FLAG);
+	layer_flags_clear();
 	official_sync(false);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
@@ -1690,6 +1694,59 @@ static char state_mark(const NetObj *o) {
 	return o->type >= 0 && o->type < (int)sizeof mark - 1 ? mark[o->type] : 0;
 }
 
+static void box_add(int box[4], int x, int y) {
+	box[0] = x < box[0] ? x : box[0];
+	box[1] = y < box[1] ? y : box[1];
+	box[2] = x > box[2] ? x : box[2];
+	box[3] = y > box[3] ? y : box[3];
+}
+
+/* The layer drawn in letters for a state (CYBERWORLD_STATE_POS=map): . floor,
+ * ^ raised floor, = a counter's aisle, # the counter, , the room before a
+ * guardian's arena, % a sprite prop (in the void or its walled hole); the
+ * box its floor and props take (x0, y0, x1, y1). */
+static void map_cells(char g[MAP_H][MAP_W + 1], int box[4]) {
+	box[0] = MAP_W; box[1] = MAP_H; box[2] = box[3] = 0;
+	for (int y = 0; y < MAP_H; ++y) {
+		for (int x = 0; x < MAP_W; ++x) {
+			g[y][x] = layer.cell[y][x] == C_VOID ? ' ' : layer.cell[y][x] == C_SOLID ? '=' : layer.cell[y][x] == C_PROPPED ? '#'
+				: layer.level[y][x] ? '^' : '.';
+			if (layer.cell[y][x] != C_VOID) box_add(box, x, y);
+		}
+		g[y][MAP_W] = 0;
+	}
+	if (layer.ante >= 0) {
+		const Room *r = &layer.rooms[layer.ante];
+		for (int y = r->y; y < r->y + r->h; ++y)
+			for (int x = r->x; x < r->x + r->w; ++x)
+				if (g[y][x] == '.') g[y][x] = ',';
+	}
+	for (int i = 0; i < layer.nprops; ++i)
+		if (layer.props[i].kind == PROP_SPRITE) {
+			g[layer.props[i].y][layer.props[i].x] = '%';
+			box_add(box, layer.props[i].x, layer.props[i].y);
+		}
+}
+
+/* ... and over them: ~ a Rush gap's panels, * the arrow's walk, + where it
+ * aims, letters the objects, @ MegaMan at panel (cx, cy). */
+static void state_map(FILE *f, int cx, int cy) {
+	goal_way();
+	static char g[MAP_H][MAP_W + 1];
+	int box[4];
+	map_cells(g, box);
+	for (int k = 0; k < layer.ngaps; ++k)
+		for (int j = 1; j <= layer.gap[k].len; ++j) g[layer.gap[k].y + dir_dy[layer.gap[k].dir] * j][layer.gap[k].x + dir_dx[layer.gap[k].dir] * j] = '~';
+	for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
+	if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
+	for (int i = 0; i < layer.nobj; ++i) {
+		int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
+		if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && state_mark(&layer.obj[i])) g[oy][ox] = state_mark(&layer.obj[i]);
+	}
+	g[cy][cx] = '@';
+	for (int y = box[1]; y <= box[3]; ++y) fprintf(f, "map %.*s\n", box[2] - box[0] + 1, &g[y][box[0]]);
+}
+
 /* ... and after it, where building it began the act afresh */
 static void act_note_apply(void) {
 	D.act_resumed = !act_note_ok || act_note.unknown;
@@ -1807,41 +1864,7 @@ void director_describe(FILE *f) {
 				 * and the arrow's walk: * the walk, + where the arrow aims,
 				 * letters the objects, ^ raised floor, , the floor of the
 				 * room before a guardian's arena) */
-				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) {
-					goal_way();
-					static char g[MAP_H][MAP_W + 1];
-					int x0 = MAP_W, y0 = MAP_H, x1 = 0, y1 = 0;
-					for (int y = 0; y < MAP_H; ++y) {
-						for (int x = 0; x < MAP_W; ++x) {
-							/* (= a counter's aisle, # the counter) */
-							g[y][x] = layer.cell[y][x] == C_VOID ? ' ' : layer.cell[y][x] == C_SOLID ? '=' : layer.cell[y][x] == C_PROPPED ? '#'
-								: layer.level[y][x] ? '^' : '.';
-							if (layer.cell[y][x] != C_VOID) { x0 = x < x0 ? x : x0; y0 = y < y0 ? y : y0; x1 = x > x1 ? x : x1; y1 = y > y1 ? y : y1; }
-						}
-						g[y][MAP_W] = 0;
-					}
-					if (layer.ante >= 0) {
-						const Room *r = &layer.rooms[layer.ante];
-						for (int y = r->y; y < r->y + r->h; ++y)
-							for (int x = r->x; x < r->x + r->w; ++x)
-								if (g[y][x] == '.') g[y][x] = ',';
-					}
-					/* (% a sprite prop, in the void or in its walled hole) */
-					for (int i = 0; i < layer.nprops; ++i)
-						if (layer.props[i].kind == PROP_SPRITE) {
-							int qx = layer.props[i].x, qy = layer.props[i].y;
-							g[qy][qx] = '%';
-							x0 = qx < x0 ? qx : x0; y0 = qy < y0 ? qy : y0; x1 = qx > x1 ? qx : x1; y1 = qy > y1 ? qy : y1;
-						}
-					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
-					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
-					for (int i = 0; i < layer.nobj; ++i) {
-						int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
-						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && state_mark(&layer.obj[i])) g[oy][ox] = state_mark(&layer.obj[i]);
-					}
-					g[cy][cx] = '@';
-					for (int y = y0; y <= y1; ++y) fprintf(f, "map %.*s\n", x1 - x0 + 1, &g[y][x0]);
-				}
+				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) state_map(f, cx, cy);
 			}
 		}
 		/* the game's NPC objects near him: flags, state, radius, lock, text */
@@ -2752,6 +2775,7 @@ bool director_resume(void) {
 			flag_clear(LAYER_VAULT_FLAG);
 			flag_clear(LAYER_OFFICIAL_FLAG);
 			flag_clear(LAYER_DUEL_CALLED_FLAG);
+			flag_clear(LAYER_RUSH_TOLD_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);
@@ -2972,6 +2996,16 @@ static bool follow_exit_warp(void) {
  * open, the chat of its first NAME (npc shop heal programs gift challenge
  * undernet gate; intro defeat reward for its guardian; status for L;
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
+/* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
+ * wants ten), an Unlocker, three RushFood (the set pieces' keys). */
+static bool dev_gift(const char *name) {
+	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
+	else if (!strcmp(name, "keys")) game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1);
+	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
+	else return false;
+	return true;
+}
+
 static void dev_talks(void) {
 	static unsigned done;
 	static uint32_t layer_of;
@@ -3000,10 +3034,7 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
-		/* (a BugFrag Trader's trade wants ten: fifty given, no chat) */
-		else if (!strcmp(name, "bugfrags")) { game_call(BN6_GIVE_BUGFRAGS, 50, 0); return; }
-		/* (the set pieces' keys: an Unlocker, no chat) */
-		else if (!strcmp(name, "keys")) { game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1); return; }
+		else if (dev_gift(name)) return;
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
 			int k = D.objs.trader_kind;
@@ -3194,6 +3225,35 @@ static void take_events(void) {
 static void drop_events(void) {
 	HookEvent ev[32];
 	while (emu_hook_events(ev, 32) == 32) {}
+}
+
+/* Rush's gap (issue #14), named the first time MegaMan comes near its
+ * stand on a layer: BN6 answers A there without RushFood by a sound alone,
+ * which teaches nothing (what calls Rush, how many he needs, where to buy
+ * them), so MegaMan says it, and says it as it stands: with enough held,
+ * where to press A. */
+static void rush_hint(void) {
+	if (!layer.ngaps || flag_get(LAYER_RUSH_TOLD_FLAG) || !on_map() || cinema_busy() || talk_busy() || emu_read8(BN6_CHATBOX)) return;
+	int sx, sy;
+	netmap_world(layer.gap[0].x, layer.gap[0].y, &sx, &sy);
+	if (abs(bn6_player_x() - sx) > 40 || abs(bn6_player_y() - sy) > 40) return;
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	int held = items >= BN6_EWRAM && items < BN6_EWRAM_END ? emu_read8(items + ITEM_RUSH_FOOD) : 0;
+	char words[260];
+	if (held >= layer.gap[0].len)
+		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush can bridge this gap. Let's toss him some RushFood: A at the edge!");
+	else if (layer.gap[0].len == 1)
+		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush could bridge this gap for one RushFood.|@M A Net Dealer might have some.");
+	else
+		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush could bridge this gap with RushFood: he comes when we hold %d, and eats one.|"
+			"@M A Net Dealer might have some.", layer.gap[0].len);
+	if (talk_start(words, FACE_MEGAMAN)) flag_set(LAYER_RUSH_TOLD_FLAG);
+}
+
+/* The Navi gate's SP chip, given; Rush's gap, named. */
+static void gate_and_rush_words(void) {
+	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
+	rush_hint();
 }
 
 void director_update(void) {
@@ -3388,7 +3448,7 @@ void director_update(void) {
 		profile.gem_taught = 1;
 		profile_save();
 	}
-	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
+	gate_and_rush_words();
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
 		D.fragment_due = false;
 		D.fragments_told = run.fragments;

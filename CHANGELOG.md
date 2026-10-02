@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Rush's bone gaps (issue #14).** As in BN6's net, a layer can hold a
+  gap of one to three panels with bones over it, a walkway aimed across
+  it at a pad of its own with a blue Mystery Data on it. Hold as many
+  RushFood as the gap's panels and press A at the edge: Rush comes, eats
+  one and lies in the gap for good, and MegaMan walks across, BN6's own
+  cutscene and all. The Net Dealer sells RushFood where the act holds a
+  gap and says where it is, and MegaMan names the bones when he first
+  comes near them. Sky's gaps run longest.
 - **Purple Mystery Data.** As in BN6, a layer can hold one purple data,
   locked: an Unlocker opens it, and it holds a chip of the rarest kinds,
   in a code, that no dealer sells (or the run's Spin, where it lies on that

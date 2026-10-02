@@ -70,6 +70,12 @@ void netmap_grid(int wx, int wy, double *x, double *y);
 bool netmap_floor_cell(int cx, int cy, int level);
 /* Whether wall cell (cx, cy) lies on a stair. */
 bool netmap_stair_cell(int cx, int cy);
+/* Rush's gaps (issue #14): for the walls a walkway, whose panels count as
+ * floor unless `shut`; the gap a wall cell lies in, 1 the layer's first, 0
+ * none. */
+void netmap_gaps_shut(bool shut);
+int netmap_gap_at(int cx, int cy);
+bool netmap_gap_any(void);
 /* The raised floor's world z, 0 when the layer is flat. */
 int netmap_rise(void);
 /* The layer's warp pads (the walls are written again with them). */

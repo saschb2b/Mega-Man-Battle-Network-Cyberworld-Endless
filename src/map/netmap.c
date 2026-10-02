@@ -11,6 +11,7 @@
  * the floor get the wall types the original maps use: 1 NE, 2 SW, 3 SE, 4 NW
  * edges and 5 E, 6 S, 7 N, 8 W outer corners. */
 #include "netmap.h"
+#include "net_shapes.h"
 
 #include <stdio.h>
 #include <limits.h>
@@ -782,9 +783,65 @@ static bool write_tilemap(const Learned *L) {
 }
 
 /* the layer's floor at `level` in world panels: its own level and stairs */
+/* ---- Rush's gaps (issue #14) ----
+ * For the walls a gap's panels are a walkway, walled along its sides and
+ * open at its mouths, where coords.c sets the floor's edges again with a
+ * flag that Rush lying there switches off (Central Area 2's gap has its
+ * walls so); its tiles stay void. */
+static struct { int A, B, g; } gap_panels[MAX_GAPS * 3];
+static int ngap_panels;
+static bool gaps_shut;
+
+static int gap_panel(int A, int B) {
+	for (int i = 0; i < ngap_panels; ++i)
+		if (gap_panels[i].A == A && gap_panels[i].B == B) return gap_panels[i].g;
+	return -1;
+}
+
+void netmap_gaps_shut(bool shut) { gaps_shut = shut; }
+
+bool netmap_gap_any(void) { return ngap_panels > 0; }
+
+int netmap_gap_at(int cx, int cy) {
+	if (!ngap_panels) return 0;
+	return gap_panel(floordiv(cx * 8 + 4 - place.ex, 32), floordiv(cy * 8 + 4 - place.ey, 32)) + 1;
+}
+
 static bool floor_level(int A, int B, int level) {
 	int k = kind_at(A, B);
+	if (!level && !gaps_shut && ngap_panels && gap_panel(A, B) >= 0) return true;
 	return k == K_STAIR || k == (level ? K_RAISED : K_FLOOR);
+}
+
+static void add_extra(int s, CoordCell c);
+
+/* The gaps' panels, and each one's trigger strip: the lane's floor cells
+ * across the gap's first panel, where the engine's probe lands, 24 ahead
+ * of MegaMan, when he presses A at the edge (BN6's own strip is the
+ * mouth's row, its probe 8 ahead), taking the gap's near record (0x30 +
+ * 2g). */
+static void gaps_place(void) {
+	ngap_panels = 0;
+	gaps_shut = false;
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		int A0, B0, A1, B1;
+		grid_to_panel(p->x, p->y, &A0, &B0);
+		for (int k = 1; k <= p->len && ngap_panels < MAX_GAPS * 3; ++k) {
+			int A, B;
+			grid_to_panel(p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, &A, &B);
+			gap_panels[ngap_panels++] = (__typeof__(gap_panels[0])){ A, B, g };
+		}
+		grid_to_panel(p->x + dir_dx[p->dir], p->y + dir_dy[p->dir], &A1, &B1);
+		int ux = A1 - A0, uy = B1 - B0;
+		int ex = place.ex + 16 + 32 * A0 + 16 * ux, ey = place.ey + 16 + 32 * B0 + 16 * uy;   /* the near mouth */
+		for (int cy = (place.ey + 32 * B1) >> 3; cy < (place.ey + 32 * B1 + 32) >> 3; ++cy)
+			for (int cx = (place.ex + 32 * A1) >> 3; cx < (place.ex + 32 * A1 + 32) >> 3; ++cx) {
+				int depth = (cx * 8 + 4 - ex) * ux + (cy * 8 + 4 - ey) * uy;
+				if (depth > 0 && depth < 32 && netmap_floor_cell(cx, cy, 0))
+					add_extra(3, (CoordCell){ (int16_t)(cx * 8), (int16_t)(cy * 8), 0, (uint8_t)(0x30 + 2 * g), 8, 0x11 });
+			}
+	}
 }
 
 bool netmap_floor_cell(int cx, int cy, int level) {
@@ -972,6 +1029,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (striped) make_stripes(keep_pads);
 	coord_slot = L->coord_slot;
 	build_extra(L);
+	gaps_place();
 	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &extra);
 }
 
@@ -1035,6 +1093,12 @@ bool netmap_build_layer(int area, uint32_t seed) {
 		if (m->kind == ROOM_PAD || r == layer.arena) lock(locked, m->x, m->y, m->w, m->h, 0);
 	}
 	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, 2, 2, 2);
+	/* (a Rush gap as generated: its stand and the floor behind it, and its
+	 * void panels with the void beside them) */
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
+	}
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x)
 			if (layer.level[y][x]) lock(locked, x, y, 1, 1, 2);

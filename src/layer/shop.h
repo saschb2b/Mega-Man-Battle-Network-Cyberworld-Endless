@@ -27,6 +27,7 @@ typedef struct {
 #define SUB_SNEAK_RUN   0x82
 #define SUB_UNTRAP      0x83
 #define SUB_UNLOCKER    0x85   /* opens a purple Mystery Data (issue #41) */
+#define ITEM_RUSH_FOOD  0x2C   /* calls Rush across a gap: as many held as its panels, one eaten (issue #14) */
 
 /* Writes the stock of shop `shop`; false before the game has set up its
  * data. `kept`: over a saved state's list in RAM, an entry it holds keeps

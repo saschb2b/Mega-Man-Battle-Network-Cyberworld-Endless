@@ -26,6 +26,7 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "rush.h"
 #include "save.h"
 #include "scripts.h"
 #include "shop.h"
@@ -165,8 +166,10 @@ static const struct { uint8_t look; uint8_t id; int8_t dx, dy; int16_t dz; } pro
 	{ LOOK_BBS, 0x47, 14, 18, -24 },           /* a BBS (Seaside Area 1) */
 };
 
+#define RUSH_OBJECTS_MAX 12   /* Rush and its bones in each panel of two gaps */
+
 static uint32_t props_objects(NpcList *npcs) {
-	static uint8_t recs[(MAX_PROPS * 3 + 1) * 20];
+	static uint8_t recs[(MAX_PROPS * 3 + RUSH_OBJECTS_MAX + 1) * 20];
 	int n = 0;
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
@@ -194,6 +197,7 @@ static uint32_t props_objects(NpcList *npcs) {
 			put32(r + 16, prop_pieces[k].id);
 		}
 	}
+	n = rush_objects(recs, n, MAX_PROPS * 3 + RUSH_OBJECTS_MAX);
 	if (!n) return 0;
 	memset(recs + n * 20, 0, 4);
 	recs[n * 20] = 0xFF;
@@ -383,16 +387,18 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 			elem_name(counter));
 }
 
-/* (the key he stocks, said: what it opens and where, issue #41) */
+/* (the keys he stocks, said: what each opens and where, issues #41, #14) */
 static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock) {
-	for (int i = 0; i < nstock; ++i)
-		if (stock[i].kind == 1 && stock[i].id == SUB_UNLOCKER) {
-			size_t k = strlen(hello);
-			if (k < n)
-				snprintf(hello + k, n - k, "|Word is, there's purple data locked %s. An Unlocker opens it, and it's on my list!",
-					purple_here() ? "on this layer" : "deeper in this act");
-			return;
-		}
+	for (int i = 0; i < nstock; ++i) {
+		size_t k = strlen(hello);
+		if (stock[i].kind != 1 || k >= n) continue;
+		if (stock[i].id == SUB_UNLOCKER)
+			snprintf(hello + k, n - k, "|Word is, there's purple data locked %s. An Unlocker opens it, and it's on my list!",
+				purple_here() ? "on this layer" : "deeper in this act");
+		else if (stock[i].id == ITEM_RUSH_FOOD)
+			snprintf(hello + k, n - k, "|And there's a gap %s that Rush can bridge. RushFood's on my list too!",
+				layer.ngaps ? "on this layer" : "deeper in this act");
+	}
 }
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {
@@ -829,5 +835,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		npcs.script[npcs.n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
 			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
 	}
+	rush_install(group, number);
 	return mapslot_install(group, number, &npcs, md, nmd);
 }

@@ -8,6 +8,7 @@
 #include "net.h"
 #include "net_layouts.h"
 #include "net_route.h"
+#include "net_shapes.h"
 #include "layer_make.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -215,6 +216,50 @@ static int walk_to(int from, int type) {
 	return -1;
 }
 
+/* Rush's gaps as floor (Rush lying there) or void again. */
+static void gaps_bridge(bool on) {
+	for (int g = 0; g < layer.ngaps; ++g)
+		for (int k = 1; k <= layer.gap[g].len; ++k)
+			layer.cell[layer.gap[g].y + dir_dy[layer.gap[g].dir] * k][layer.gap[g].x + dir_dx[layer.gap[g].dir] * k] = on ? C_PATH : C_VOID;
+}
+
+/* Whether room r is a Rush gap's island. */
+static bool island_room(int r) {
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		int mx = p->x + dir_dx[p->dir] * (p->len + 2), my = p->y + dir_dy[p->dir] * (p->len + 2);
+		if (layer.rooms[r].ax == mx && layer.rooms[r].ay == my) return true;
+	}
+	return false;
+}
+
+static int gap_layers, gap_panels;
+
+/* The way never needs Rush: the exit (or the guardian) is reached with
+ * every gap open; each gap's stand stands off the way, and its island,
+ * reached only past it, holds its one Mystery Data. */
+static void gaps_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
+	if (!layer.ngaps) return;
+	++gap_layers;
+	CHECK(!layer.boss_layer, "seed %u: a Rush gap before a guardian", seed);
+	reachable_cells((int)start->x, (int)start->y, seen);
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type == OBJ_EXIT || o->type == OBJ_RETURN) CHECK(seen[(int)o->y][(int)o->x], "seed %u: the exit needs Rush", seed);
+	}
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		gap_panels += p->len;
+		CHECK(p->len >= 1 && p->len <= 3, "seed %u: a gap of %d panels", seed, p->len);
+		CHECK(!layer_on_way(p->x, p->y), "seed %u: a gap's stand on the way", seed);
+		int mx = p->x + dir_dx[p->dir] * (p->len + 2), my = p->y + dir_dy[p->dir] * (p->len + 2), held = 0;
+		CHECK(!seen[my][mx], "seed %u: an island reached without Rush", seed);
+		for (int i = 0; i < layer.nobj; ++i)
+			if (abs((int)layer.obj[i].x - mx) <= 1 && abs((int)layer.obj[i].y - my) <= 1) held += layer.obj[i].type == OBJ_MYSTERY ? 1 : 100;
+		CHECK(held == 1, "seed %u: an island holds %d", seed, held);
+	}
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
@@ -268,6 +313,11 @@ static void test_generation(void) {
 		}
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
+		/* (Rush's gaps: the way never needs one; past one, its island and
+		 * the one thing on it; bridged, as Rush lies there once called,
+		 * every panel is reached) */
+		gaps_check(seed, start, seen);
+		gaps_bridge(true);
 		int cells = 0;
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cells += layer.cell[y][x] == C_PATH;
 		int reach = reachable_cells((int)start->x, (int)start->y, seen);
@@ -290,6 +340,7 @@ static void test_generation(void) {
 			CHECK(open == cells - blocked, "seed %u: objects cut the way (%d of %d cells)", seed, open, cells - blocked);
 			memcpy(layer.cell, save, sizeof save);
 		}
+		gaps_bridge(false);
 		/* every act's second layer holds the rival's duel (docs/RIVAL.md) */
 		if (kind == LAYER_NORMAL && layer_in_act(depth) == 1 && biome != BIOME_NEST) {
 			bool duel = false;
@@ -490,7 +541,7 @@ static void test_generation(void) {
 	printf("  Mystery Data: %d blue, %.1f panels off the way on average, %d of them 3 or more; %d green, %.1f\n", blue,
 		(double)blue_walk / (blue ? blue : 1), blue_far, green, (double)green_walk / (green ? green : 1));
 	CHECK(blue_far * 10 >= blue * 9, "only %d of %d blue data where a detour ends", blue_far, blue);
-	printf("  purple data on %d of %d layers\n", purples, layers);
+	printf("  purple data on %d of %d layers; Rush gaps on %d, %d panels in all\n", purples, layers, gap_layers, gap_panels);
 	CHECK(purples * 10 >= layers && purples * 2 <= layers, "purple data on %d of %d layers", purples, layers);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
@@ -986,6 +1037,7 @@ static void test_arrow(void) {
 		}
 		if (tx < 0) continue;
 		for (int r = -1; r < layer.nrooms; ++r) {
+			if (r >= 0 && island_room(r)) continue;   /* (reached only across Rush) */
 			int sx = r < 0 ? (int)layer.obj[0].x : layer.rooms[r].ax, sy = r < 0 ? (int)layer.obj[0].y : layer.rooms[r].ay;
 			/* (from beside what stands on a room's middle, where MegaMan
 			 * would: a Mystery Data on a pad's) */

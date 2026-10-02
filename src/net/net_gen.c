@@ -40,8 +40,12 @@ static NetObj *add_obj(int type, int x, int y) {
 	return o;
 }
 
+/* A set piece's panels, kept clear of what is placed after it is planned
+ * (a Rush gap's stand and the walk to it). */
+static uint8_t reserved[MAP_H][MAP_W];
+
 static bool cell_free(int x, int y) {
-	if (layer.cell[y][x] != C_PATH) return false;
+	if (layer.cell[y][x] != C_PATH || reserved[y][x]) return false;
 	/* (nor before or beside a counter: its navi is spoken to from there) */
 	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 	for (int k = 0; k < 4; ++k) {
@@ -1178,30 +1182,11 @@ int layer_npcs(void) {
  * the rest (on one layer in sixteen the last bystanders, and on one in
  * two hundred an official gate or ProtoMan, were past the sixteenth and
  * never showed). */
+static int npcs_held;   /* kept for a set piece placed last (an island's data) */
+
 static int npcs_for(int want) {
-	int left = LAYER_NPC_MAX - layer_npcs();
+	int left = LAYER_NPC_MAX - layer_npcs() - npcs_held;
 	return want < left ? want : left > 0 ? left : 0;
-}
-
-/* Purple data, as BN6 sets them: none or one a map, locked until an
- * Unlocker opens it, holding what no dealer sells. From an act's second
- * layer, on most of its middle ones (the Net Dealer's, who stocks the key)
- * and a third of its guardians'; more in the Graveyard and the Undernet,
- * which hold the most of BN6's; on half the dark warps' layers. From the
- * run's seed and the depth alone, so a dealer earlier in the act knows. */
-bool layer_purple(int depth, int biome, int kind) {
-	if (depth <= 1 || kind == LAYER_SECRET) return false;
-	uint32_t h = (run.seed ^ (uint32_t)depth * 0x9E3779B9u ^ 0x9A7B1E5Du) * 2654435761u;
-	int roll = (int)((h >> 16) % 100), in_act = layer_in_act(depth);
-	int chance = kind == LAYER_UNDERNET ? 50 : in_act == 1 ? 60 : in_act == 2 ? 30 : 0;
-	if (chance && (biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET)) chance += 25;
-	return roll < chance;
-}
-
-int layer_purples_ahead(int depth) {
-	int n = 0;
-	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) n += layer_purple(d, biome_for_depth(d), LAYER_NORMAL);
-	return n;
 }
 
 /* The panel at the landmark's foot, in front of it where it can be (BN6's
@@ -1275,6 +1260,72 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 
 #undef PLACE
 
+/* ---- Rush's gaps (issue #14) ----
+ * As BN6 sets them: a walkway aimed across one to three void panels at a
+ * pad of its own, the pad holding one thing (Green Area 2's HPMemory, Sky
+ * Area 1's ColArmy B), where the act's plan calls for one (net_pieces.c).
+ * The stand is a ground floor panel off the way with floor behind it; the
+ * gap's panels and the island's 3x3 are void with void a panel round them
+ * and no prop, inside the camera's window. */
+typedef struct { int x, y, d, len, score; } GapSite;
+
+static bool gap_fits(int x, int y, int d, int len) {
+	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+	for (int k = 1; k <= len + 4; ++k)
+		for (int s = -2; s <= 2; ++s) {
+			if (k < len && abs(s) > 1) continue;
+			int i = x + dir_dx[d] * k + sx * s, j = y + dir_dy[d] * k + sy * s;
+			bool island = k > len && k <= len + 3 && abs(s) <= 1;
+			if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || layer.cell[j][i] != C_VOID || prop_at_cell(i, j)) return false;
+			if ((island || (k <= len && !s)) && !win_in(i, j)) return false;
+		}
+	return true;
+}
+
+static bool stand_ok(int x, int y, int d) {
+	int bx = x - dir_dx[d], by = y - dir_dy[d];
+	return floor_cell(x, y) && floor_cell(bx, by) && !layer.level[y][x] && !layer.level[by][bx] && !layer_on_way(x, y) &&
+		!in_arena(x, y) && detour[y][x] >= 1 && cell_free(x, y) && cell_free(bx, by) && !near_talker(x, y);
+}
+
+/* The best stand for a gap `want` panels long, else shorter; the farthest
+ * off the way first, a walkway's tip before a platform's edge. */
+static GapSite plan_gap(int want) {
+	GapSite best = { -1, -1, 0, 0, -1 };
+	for (int len = want; len >= 1 && best.x < 0; --len)
+		for (int y = 0; y < MAP_H; ++y)
+			for (int x = 0; x < MAP_W; ++x)
+				for (int d = 0; d < 4; ++d) {
+					if (!stand_ok(x, y, d) || !gap_fits(x, y, d, len)) continue;
+					int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+					bool tip = !floor_cell(x + sx, y + sy) && !floor_cell(x - sx, y - sy);
+					int score = detour[y][x] * 2 + (tip ? 8 : 0);
+					if (score > best.score) best = (GapSite){ x, y, d, len, score };
+				}
+	if (best.x >= 0) {
+		reserved[best.y][best.x] = 1;
+		reserved[best.y - dir_dy[best.d]][best.x - dir_dx[best.d]] = 1;
+	}
+	return best;
+}
+
+/* The island past the gap, its data in its middle (a tier up past one
+ * panel: two or three bones' worth), and the gap itself; nothing where the
+ * island would leave the map too big for the game's tile map. */
+static void carve_gap(const GapSite *g, int rise) {
+	int mx = g->x + dir_dx[g->d] * (g->len + 2), my = g->y + dir_dy[g->d] * (g->len + 2);
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	if (!fits(rise) || layer.ngaps >= MAX_GAPS) {
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		return;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	layer.gap[layer.ngaps++] = (NetGap){ g->x, g->y, g->d, g->len, true };
+	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
+	if (o) o->param = g->len >= 2 ? 2 : 1;
+}
+
 /* Bystander navis with a word to share, two panels at least from what else
  * stands there (one beside a Mystery Data took MegaMan's A, and each A
  * that closed his words opened them again). */
@@ -1298,6 +1349,8 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
 	int rise = kit ? kit->rise : 0;
 	memset(&layer, 0, sizeof layer);
+	memset(reserved, 0, sizeof reserved);
+	npcs_held = 0;
 	rng_seed(seed);
 	layer.biome = biome;
 	layer.kind = kind;
@@ -1333,7 +1386,17 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	}
 	if (s.duel) place_duel(order, n, &next);
 	if (s.official && s.duel) place_duel_gate(s.official_level, order, n, &next);
+	/* the act's set pieces (net_pieces.c): a Rush gap's stand kept clear,
+	 * its island carved once the rest stands */
+	GapSite gap = { -1, -1, 0, 0, -1 };
+	if (layer_pieces(depth, biome, kind) & PIECE_RUSH) {
+		measure_detours();
+		gap = plan_gap(layer_rush_len(depth, biome));
+		npcs_held = gap.x >= 0;
+	}
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
+	npcs_held = 0;
+	if (gap.x >= 0) carve_gap(&gap, rise);
 	emblems(kit);
 }
