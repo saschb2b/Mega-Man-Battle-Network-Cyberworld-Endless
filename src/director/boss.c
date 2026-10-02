@@ -73,20 +73,41 @@ static bool megaman_panel(int *x, int *y) {
 	return netmap_panel(wx, wy, x, y);
 }
 
-/* In the arena (or, without one, close to the guardian). */
-static bool entered(void) {
+/* In the arena (or, without one, close to the guardian), or within
+ * `margin` panels of it. */
+static bool near_arena(int margin) {
 	int x, y;
 	if (!megaman_panel(&x, &y)) return false;
 	if (layer.arena >= 0) {
 		const Room *a = &layer.rooms[layer.arena];
-		return x >= a->x && x < a->x + a->w && y >= a->y && y < a->y + a->h;
+		return x >= a->x - margin && x < a->x + a->w + margin && y >= a->y - margin && y < a->y + a->h + margin;
 	}
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_BOSS) {
 			int dx = x - (int)layer.obj[i].x, dy = y - (int)layer.obj[i].y;
-			return dx * dx + dy * dy <= 4;
+			return dx * dx + dy * dy <= (2 + margin) * (2 + margin);
 		}
 	return false;
+}
+
+static bool entered(void) { return near_arena(0); }
+
+/* No random battle on the step into the arena: the game rolls one as he
+ * steps in, before the staging can hold it, and the staging waited on a
+ * virus battle (issue #38; the walk's steps, issue #24). Held a panel out
+ * around the arena while its guardian waits, lifted again away from it. */
+static void door_quiet(void) {
+	static bool held;
+	bool near = near_arena(1);
+	if (near) flag_set(BN6_FLAG_NO_ENCOUNTERS);
+	else if (held) flag_clear(BN6_FLAG_NO_ENCOUNTERS);
+	held = near;
+}
+
+/* MegaMan in the arena, no chat open: the staging begins. */
+static bool steps_in(void) {
+	door_quiet();
+	return !emu_read8(BN6_CHATBOX) && entered();
 }
 
 /* The pad keys that walk MegaMan towards world (x, y), 0 once he is within
@@ -137,7 +158,7 @@ void boss_update(void) {
 	++B.t;
 	switch (B.state) {
 	case B_WAIT:
-		if (emu_read8(BN6_CHATBOX) || !entered()) break;
+		if (!steps_in()) break;
 		/* the arena closes around MegaMan, who steps up to its middle */
 		cinema_input(CINEMA_WALK);
 		cinema_letterbox(true);

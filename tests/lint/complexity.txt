@@ -11,7 +11,7 @@ src/core/touch_art.c:rasterize 33 61
 src/core/touch_layout.c:touch_prefs_parse 38 29
 src/dev/atlas.c:one 56 95
 src/dev/pacing_report.c:pacing_report_run 43 99
-src/director/boss.c:boss_update 30 79
+src/director/boss.c:boss_update 29 79
 src/director/director.c:build_layer 26 85
 src/director/director.c:director_describe 83 103
 src/director/director.c:director_keys 70 77
