@@ -883,7 +883,22 @@ static void test_depth_plan(void) {
 	CHECK(biome_for_depth(9) == run.biome_order[2], "the short net's third act is the run's third area");
 	CHECK(biome_for_depth(SHORT_LAYERS) == BIOME_NEST && is_boss_depth(SHORT_LAYERS), "the short net's Nest is layer 10");
 	CHECK(layer_in_act(SHORT_LAYERS) == 0, "the short net's Nest counts as a first layer");
+	/* (the RegUps, issue #51: 8 MB after the first act, 20 after the
+	 * third, none on a guardian's layer or a side layer, none past
+	 * REG_MAX) */
+	int reg = REG_START;
+	for (int d = 1; d <= SHORT_LAYERS; ++d) reg += layer_regup(d, LAYER_NORMAL);
+	CHECK(reg == 20, "the short net's RegUps bring 20 MB, not %d", reg);
+	CHECK(!layer_regup(3, LAYER_NORMAL) && !layer_regup(SHORT_LAYERS, LAYER_NORMAL) && !layer_regup(2, LAYER_UNDERNET), "no RegUp on a guardian's or a side layer");
 	run.mode = RUN_ENDLESS;
+	reg = REG_START;
+	int at3 = 0, at18 = 0;
+	for (int d = 1; d <= 6 * CYCLE_LAYERS; ++d) {
+		reg += layer_regup(d, LAYER_NORMAL);
+		if (d == 3) at3 = reg;
+		if (d == 18) at18 = reg;
+	}
+	CHECK(at3 == 8 && at18 == 38 && reg <= REG_MAX && reg > REG_MAX - 3, "RegUps: %d MB after act 1, %d after act 6, %d at most", at3, at18, reg);
 }
 
 

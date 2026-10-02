@@ -1391,7 +1391,7 @@ static void carve_gap(const GapSite *g, int rise) {
 	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
 	layer.gap[layer.ngaps++] = (NetGap){ g->x, g->y, g->d, g->len, true };
 	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
-	if (o) o->param = g->len >= 2 ? 2 : 1;
+	if (o) { o->param = g->len >= 2 ? 2 : 1; o->prize = true; }
 }
 
 /* ---- Invisible paths (issue #46; docs/LEVEL_DESIGN.md, Set pieces) ----
@@ -1440,7 +1440,7 @@ static void carve_hidden(const GapSite *g, int rise) {
 	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
 	layer.path[layer.npaths++] = (NetGap){ g->x, g->y, g->d, g->len, true };
 	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
-	if (o) o->param = 2;
+	if (o) { o->param = 2; o->prize = true; }
 	if ((o = add_obj(OBJ_NPC, hx, hy))) {
 		o->param = rng_range(0, 5);
 		o->npc_line = rng_range(0, 255);
@@ -1560,7 +1560,7 @@ static void carve_teleport_island(int rise) {
 	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
 	int cx = mx + (mx >= layer.teleport_x[1] ? 1 : -1), cy = my + (my >= layer.teleport_y[1] ? 1 : -1);
 	NetObj *o = add_obj(OBJ_MYSTERY, cx, cy);
-	if (o) o->param = 1;
+	if (o) { o->param = 1; o->prize = true; }
 }
 
 /* ---- Obstacles (issue #42) ----
@@ -1725,7 +1725,7 @@ static void place_teller(const int *order, int n) {
 static void place_block_rewards(void) {
 	for (int i = 0; i < layer.nblocks; ++i) {
 		NetObj *o = add_obj(OBJ_MYSTERY, layer.block[i].rx, layer.block[i].ry);
-		if (o) o->param = 2;
+		if (o) { o->param = 2; o->prize = true; }
 	}
 }
 

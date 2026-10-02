@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **RegUps and TagChips (issue #51).** Every layer before a guardian now
+  hides a RegUp, behind a lock or at the end of a detour, so your Reg
+  memory grows from 4 MB to about 20 by the third act. Set a Regular Chip
+  in the folder's EDIT with SELECT, and it starts every battle in your
+  hand. Win your first duel against ProtoMan, and Chaud's clearance brings
+  the TagChip system for good: two tagged chips come to your hand together.
 - **Compression codes are kept (issue #50).** A NaviCust compression code
   you enter once is kept for every run after. Dad's new Compression mail
   lists each code you have entered, and when a program won't fit, MegaMan

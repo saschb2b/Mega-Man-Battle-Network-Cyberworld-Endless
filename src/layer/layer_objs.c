@@ -318,6 +318,23 @@ static int best_mystery(void) {
  * purple locked. */
 static int mystery_colour(const NetObj *o) { return o->param == MD_PURPLE ? MYSTERY_PURPLE : o->param >= 1 ? MYSTERY_BLUE : MYSTERY_GREEN; }
 
+/* The layer's RegUp's Mystery Data, where it has one (layer_regup): the
+ * first a set piece keeps, behind a lock or on an island, else the best
+ * blue data where a detour ends; never the Spin's or a purple one (its
+ * rarest chip is its own); -1 none. */
+static int regup_md(int spin_md) {
+	int prize = -1, best = -1;
+	for (int i = 0, k = 0; i < layer.nobj && k < 16; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type != OBJ_MYSTERY) continue;
+		++k;
+		if (i == spin_md || o->param == MD_PURPLE) continue;
+		if (o->prize && prize < 0) prize = i;
+		if (o->param >= 1 && (best < 0 || o->param > layer.obj[best].param)) best = i;
+	}
+	return prize >= 0 ? prize : best;
+}
+
 static bool purple_here(void) {
 	int best = best_mystery();
 	return best >= 0 && layer.obj[best].param == MD_PURPLE;
@@ -340,23 +357,37 @@ static void purple_content(uint8_t out[8], const ShopItem *stock, int nstock) {
 }
 
 /* What a layer's Mystery Data hold beyond their rolls: the run's Spin in
- * the best, a ScrtData in the first other (never behind a lock), and where
- * the layer's purple data has its key on the layer, an Unlocker in a blue
- * one on another branch. */
+ * the best, the layer's RegUp in its prize (issue #51), a ScrtData in the
+ * first other (never behind a lock), and where the layer's purple data has
+ * its key on the layer, an Unlocker in a blue one on another branch. */
 typedef struct {
 	int spin_md, spin_colour;
+	int reg_md, reg_mb;
 	bool fragment, fragment_placed, key_here;
 	const ShopItem *stock;
 	int nstock;
 } MysteryPlan;
 
+/* The plan's RegUp: its MB and Mystery Data, where the layer has one
+ * (planned as the first Mystery Data is filled: reg_mb -1 till then). */
+static void plan_regup(MysteryPlan *p) {
+	p->reg_mb = layer_regup(run.depth, run.side_kind);
+	p->reg_md = p->reg_mb ? regup_md(p->spin_md) : -1;
+}
+
 static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p, LayerObjs *out) {
+	if (p->reg_mb < 0) plan_regup(p);
 	m->type = mystery_colour(o);
 	if (i == p->spin_md) {
 		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
 		spin_content(m->content, p->spin_colour);
 		out->spin_colour = p->spin_colour;
 		if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", p->spin_colour, m->x, m->y);
+	} else if (i == p->reg_md) {
+		const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, (uint8_t)(SCRIPTS_REG_UP1 + p->reg_mb - 1), 0, 0, 0 };
+		memcpy(m->content, c, 8);
+		m->type = MYSTERY_BLUE;
+		if (emu_debug_on()) fprintf(stderr, "regup: +%d MB in the Mystery Data at %d %d%s\n", p->reg_mb, m->x, m->y, o->prize ? " (a set piece's)" : "");
 	} else if (p->fragment && o->param != MD_PURPLE) {
 		p->fragment = false;
 		p->fragment_placed = true;
@@ -514,7 +545,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * META.md: one a run, a colour the profile lacks, kept for good) */
 	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
-	MysteryPlan plan = { spin_colour ? best_mystery() : -1, spin_colour, fragment, false, false, NULL, 0 };
+	MysteryPlan plan = { spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
 	bool spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */

@@ -478,6 +478,12 @@ layer 19 is the Underground. After that the cycle starts again, harder.
   program in the NaviCust and press its ten buttons), is kept for every run
   after: Dad's Compression mail lists it, and MegaMan names it when the
   program would only fit compressed.
+- **Reg memory.** Each layer before a guardian hides a RegUp, behind a
+  lock or at a detour's end: Reg memory grows from 4 MB to about 20 by the
+  third act, and a Regular Chip that fits (the folder's EDIT, SELECT)
+  starts every battle in your hand. Winning a duel against ProtoMan earns
+  Chaud's TagChip system for good: two chips tagged come to your hand
+  together.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.

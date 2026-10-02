@@ -4,6 +4,7 @@
  * the run's seed and the depth alone, so a Net Dealer earlier in the act
  * knows which keys to stock. Where each stands is net_gen.c's. */
 #include "net.h"
+#include "pacing.h"
 #include "run.h"
 
 /* What each area's original maps hold, as weights (BN6's own placements:
@@ -131,6 +132,25 @@ int layer_rush_len(int depth, int biome) {
 	int most = biome >= 0 && biome < BIOME_COUNT ? area_pieces[biome].rush_len : 1;
 	if (most < 1) most = 1;
 	return 1 + (int)((piece_hash(depth, 0x0B0E5u) >> 4) % (uint32_t)most);
+}
+
+/* BN6's RegUP2 (+2 MB) on each of the first act's two layers before its
+ * guardian, RegUP3 (+3) on each later act's: from 4 MB, 8 after the first
+ * act, 14 after the second, 20 after the third (the short net's), 38
+ * after the sixth; none on a guardian's layer or the Nest's, a side
+ * layer's, or past REG_MAX. A chip of the act's tier fits as the Regular
+ * Chip by then: Sword and AreaGrab at 8, WideSwrd at 12, LongSwrd and
+ * DolThdr1 at 24-25. */
+int layer_regup(int depth, int kind) {
+	int reg = REG_START;
+	for (int d = 1; d <= depth; ++d) {
+		if (is_boss_depth(d)) continue;
+		int mb = pacing_act(d) == 0 && pacing_loop(d) == 0 ? 2 : 3;
+		if (reg + mb > REG_MAX) return 0;
+		if (d == depth) return kind == LAYER_NORMAL ? mb : 0;
+		reg += mb;
+	}
+	return 0;
 }
 
 /* (as powers.c gives them: the Cross brought keeps alone, else each

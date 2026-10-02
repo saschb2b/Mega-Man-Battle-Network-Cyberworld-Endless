@@ -551,6 +551,17 @@ panels, and about as much in all (fewer of the middle quality, a fifth
 more of the best). The tests check that nine blue data in ten stand three
 panels off the way or more.
 
+### The layer's RegUp (built, issue #51)
+
+Each layer before a guardian holds one of BN6's RegUps (docs/META.md, Reg
+memory and TagChips): in the first Mystery Data a set piece keeps (behind
+an obstacle, a cube or a door, on a Rush or teleport island, at an
+invisible path's end: `NetObj.prize`), else in the best blue data where a
+detour ends; never in the Spin's or a purple one, whose rarest chip is its
+own. The lock and the walk pay the same thing the folder's consistency
+grows by, so a skipped spur is a planned opener left behind
+(`layer_regup`, `regup_md` in `layer_objs.c`).
+
 ### The act's plan (built)
 
 `layer_pieces` in `net_pieces.c` decides which set pieces a layer holds,

@@ -159,6 +159,9 @@ himself. Beat him, and my full clearance is yours.").
 - **Sealed**, MegaMan says for whom it opens: "It opens once we've won a
   duel against ProtoMan. Not yet!", "It takes three duel wins against
   ProtoMan, the last in a netbattle with him. We have 1."
+- **Level one also brings the TagChip system** (issue #51, docs/META.md):
+  BN6's TagChip key item in every run after, the folder EDIT's "Choose
+  TagChip"; Chaud says so with the clearance.
 - **Level one: an official Chip Order.** Three standard chips the Library
   holds (held in any run), as BN6's Chip Order orders only chips seen,
   one to take, in the folder's codes where they come in them: its

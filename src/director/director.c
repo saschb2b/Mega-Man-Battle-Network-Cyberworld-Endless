@@ -156,6 +156,7 @@ static struct {
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
 	bool final_told;       /* ... and, the short net's last guardian fallen, said the run is won */
 	int code_due;          /* a program whose compression code was entered for the first time in any run, until MegaMan says Dad keeps it (issue #50) */
+	bool reg_due;          /* a RegUp just found, until MegaMan says what Reg memory MegaMan has now (issue #51) */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -2399,6 +2400,12 @@ static void grant_spins(void) {
 			}
 		} else if (emu_read8(items + id)) emu_write8(items + id, 0);
 	}
+	/* (and the TagChip system, Chaud's first clearance's: issue #51) */
+	uint8_t want = (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + SCRIPTS_TAG_CHIP) ^ 0x55);
+	if (rival_clearance() >= 1 && (!emu_read8(items + SCRIPTS_TAG_CHIP) || emu_read8(check + SCRIPTS_TAG_CHIP) != want)) {
+		emu_write8(items + SCRIPTS_TAG_CHIP, 1);
+		emu_write8(check + SCRIPTS_TAG_CHIP, want);
+	}
 }
 
 /* The Spins as the profile has them, in the game's key items and the
@@ -2413,6 +2420,7 @@ static void spins_sync(void) {
  * says is for; the run's Spin, from its Mystery Data, which the profile
  * keeps and MegaMan says what it does. */
 static void item_given(int item) {
+	if (item >= SCRIPTS_REG_UP1 && item <= SCRIPTS_REG_UP1 + 2) D.reg_due = true;
 	if (item == SCRIPTS_SECRET_DATA) {
 		int n = key_item(SCRIPTS_SECRET_DATA);
 		if (n > run.fragments && D.objs.fragment_found >= 0) D.fragment_due = true;
@@ -2428,6 +2436,30 @@ static void item_given(int item) {
 
 static void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
+}
+
+/* MegaMan's words on Reg memory as a RegUp is found (issue #51): what it
+ * is for, the first time in any run, else how much there is now; and once,
+ * for a profile whose Chaud's clearance came before the TagChip system did,
+ * what that does (a first clearance has Chaud say it). Said once the
+ * PET's return has calmed, as code_watch's. */
+static void reg_watch(void) {
+	if (D.pet_seen || !free_to_speak()) return;
+	char words[400];
+	int reg = emu_read8(BN6_NAVI_REG);
+	if (D.reg_due && !profile.reg_taught)
+		snprintf(words, sizeof words, "@M A RegUp, Lan! Our Reg memory's %d MB now.|@M In the folder's EDIT, SELECT chooses a Regular Chip "
+			"of %d MB or less: it starts every battle in our hand. Every dive starts at 4 MB again, so keep an eye out for RegUps!", reg, reg);
+	else if (D.reg_due) snprintf(words, sizeof words, "@M Reg memory up: %d MB now, Lan!", reg);
+	else if (rival_clearance() >= 1 && !profile.tag_taught)
+		snprintf(words, sizeof words, "@M Lan, Chaud's clearance comes with the TagChip system! In the folder's EDIT, SELECT, then Choose "
+			"TagChip: two chips tagged come to our hand together, if our Reg memory holds both. It's %d MB now.", reg);
+	else return;
+	if (!talk_start(words, FACE_MEGAMAN)) return;
+	if (D.reg_due) profile.reg_taught = 1;
+	else profile.tag_taught = 1;
+	D.reg_due = false;
+	profile_save();
 }
 
 /* A compression code entered on the NaviCust screen (BN6 sets the flags of
@@ -3013,7 +3045,14 @@ static void duel_verdict(bool won) {
 	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	/* (what his respect opens: docs/RIVAL.md) */
 	int after = rival_clearance();
-	if (after > before && after == 1) ADD("@C You've earned my first clearance, Lan. The official Chip Orders open for you now.|");
+	if (after > before && after == 1) {
+		ADD("@C You've earned my first clearance, Lan. The official Chip Orders open for you now.|");
+		/* (and the TagChip system, for good: issue #51) */
+		ADD("@C And a NetBattler's trick: the TagChip system. Tag two chips in your folder's EDIT with SELECT, and they'll come to your "
+			"hand together, as long as your Reg memory holds both.|");
+		profile.tag_taught = 1;
+		profile_save();
+	}
 	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
 	/* (and the next rung, the door it leads to: a playtester's second win
@@ -3148,13 +3187,14 @@ static bool follow_exit_warp(void) {
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
 /* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
  * wants ten), an Unlocker, three RushFood, a WWW-ID (the set pieces'
- * keys), 10000 zenny (a cube's toll). */
+ * keys), 10000 zenny (a cube's toll), a RegUP3 (+3 MB of Reg memory). */
 static bool dev_gift(const char *name) {
 	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
 	else if (!strcmp(name, "zenny")) devtools_zenny();
 	else if (!strcmp(name, "keys")) game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1);
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
 	else if (!strcmp(name, "wwwid")) game_call(BN6_GIVE_ITEM | 1u, ITEM_WWW_ID, 1);
+	else if (!strcmp(name, "regup")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_REG_UP1 + 2, 1);
 	else return false;
 	return true;
 }
@@ -3471,7 +3511,7 @@ void director_update(void) {
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
 	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); }
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

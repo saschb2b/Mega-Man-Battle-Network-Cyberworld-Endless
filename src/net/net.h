@@ -47,6 +47,7 @@ typedef struct {
 	bool solid;
 	int npc_line;
 	int prop;         /* the prop it stands behind (a counter), -1 none */
+	bool prize;       /* a Mystery Data a set piece keeps: behind a lock, or out on an island (the layer's RegUp goes there first) */
 } NetObj;
 
 /* Props: what the originals set on their floors (docs/LEVEL_DESIGN.md,
@@ -222,6 +223,11 @@ int layer_cube_kind(int depth, int biome, int kind);
 bool layer_purple(int depth, int biome, int kind);
 int layer_pieces_ahead(int depth, unsigned piece);
 int layer_rush_len(int depth, int biome);
+/* The layer's RegUp (issue #51, docs/META.md): the MB of Reg memory its
+ * Mystery Data adds (BN6's RegUP2 or RegUP3), 0 for none. */
+#define REG_START 4    /* BN6's Reg memory as a game begins (bn6f initNaviStats) */
+#define REG_MAX   50   /* none past it: the big Mega chips and the Gigas stay out of REG's reach */
+int layer_regup(int depth, int kind);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
 /* The layer's place in its act, 0-2 (the Nest counts as a first). */

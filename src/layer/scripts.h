@@ -10,6 +10,8 @@
 #define SCRIPTS_SECRET_DATA 0x31
 /* HPMemory, and how many a beaten guardian leaves */
 #define SCRIPTS_HP_MEMORY 0x70
+#define SCRIPTS_REG_UP1   0x72   /* RegUP1-3: +1, +2, +3 MB of Reg memory (bn6f sub_803CFB0: 4 + RegUP1 + 2 RegUP2 + 3 RegUP3, at most 99) */
+#define SCRIPTS_TAG_CHIP  0x0B   /* the TagChip system's key item (issue #51) */
 #define SCRIPTS_BOSS_HP_MEMORIES 5
 #define SCRIPTS_EXP_MEMORY 0x71   /* ExpMemry, the NaviCust's board: 4x4, 5x4, 5x5 */
 

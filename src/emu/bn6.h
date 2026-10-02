@@ -82,6 +82,7 @@
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's (NaviStats) */
 #define BN6_NAVI_HP           (BN6_NAVI_STATS + 0x40) /* CurHP and MaxHP, u16 */
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)
+#define BN6_NAVI_REG          (BN6_NAVI_STATS + 0x09) /* RegUP: Reg memory in MB, made again from the RegUP items as one is given */
 #define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
 #define BN6_NAVICUST_PLACED   0x02004190u /* the programs on the NaviCust's board, 8 bytes each: +0 u16 program * 4 + colour variant, +3 column, +4 row, +5 turns; 0 ends */
 #define BN6_NAVICUST_PLACED_MAX 25
