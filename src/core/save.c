@@ -146,6 +146,14 @@ void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile
 bool profile_family_fought(int fam) { return fam >= 0 && fam < 64 && (profile.families_fought[fam >> 5] >> (fam & 31) & 1); }
 void profile_family_note(int fam) { if (fam >= 0 && fam < 64) profile.families_fought[fam >> 5] |= 1u << (fam & 31); }
 
+bool profile_code_entered(int program) { return program > 0 && program < 64 && (profile.codes_entered[program >> 3] >> (program & 7) & 1); }
+void profile_code_note(int program) { if (program > 0 && program < 64) profile.codes_entered[program >> 3] |= (uint8_t)(1u << (program & 7)); }
+int profile_codes_entered(void) {
+	int n = 0;
+	for (int p = 1; p < 64; ++p) n += profile_code_entered(p);
+	return n;
+}
+
 void run_new_varied(uint32_t seed) {
 	run_new(seed);
 	/* (one retry left the same guardian a time in three: DiveMan guarded

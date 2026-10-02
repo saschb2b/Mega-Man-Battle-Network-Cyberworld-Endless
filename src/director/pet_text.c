@@ -14,6 +14,7 @@
 #include "guardians.h"
 #include "layer_objs.h"
 #include "meta.h"
+#include "navicust.h"
 #include "net.h"
 #include "powers.h"
 #include "rivals.h"
@@ -208,19 +209,21 @@ static void item_set(int id, int count) {
 /* a guardian's mail: its id is the navi's (BN6's own mails 1-18 are the
  * story's, which a run never delivers); then the lab's two */
 static bool mail_of(int navi) { return navi >= 1 && navi <= 18 && navi != 17 && guardian_tip(navi); }
-enum { MAIL_REPORT = 19, MAIL_RECORDS = 20 };
+enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21 };
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,
- * a page's end waiting and clearing (E7 00 F2) as BN6's mails do; the
- * bytes written, or -1 where they would not fit. */
+ * a page's end waiting and clearing (E7 00 F2) as BN6's mails do, '\f'
+ * turning the page early; the bytes written, or -1 where they would not
+ * fit. */
 static int mail_pages(const char *s, uint8_t *out, int max) {
 	int k = 0, lines = 0;
 	char line[32];
 	const char *p = s;
 	while (*p) {
-		int n = (int)strcspn(p, "\n");
+		if (*p == '\f') { if (lines) lines = 3; ++p; continue; }
+		int n = (int)strcspn(p, "\n\f");
 		if (n > 20) n = 20;
-		if (p[n] && p[n] != '\n') { int c = n; while (c > 0 && p[c] != ' ') --c; if (c > 0) n = c; }
+		if (p[n] && p[n] != '\n' && p[n] != '\f') { int c = n; while (c > 0 && p[c] != ' ') --c; if (c > 0) n = c; }
 		if (k + 40 > max) return -1;
 		if (lines == 3) { out[k++] = 0xE7; out[k++] = 0x00; out[k++] = 0xF2; lines = 0; }
 		else if (lines) out[k++] = 0xE9;
@@ -323,6 +326,25 @@ static void records_text(char *s, int size) {
 	#undef ADD
 }
 
+/* The compression codes entered in any run (issue #50), after how to enter
+ * one, three a page: each program as the NaviCust lists it (SuprArmr, as
+ * eight letters allow), its code five and five, a line of twenty */
+static void codes_text(char *s, int size) {
+	int k = 0;
+	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	ADD("Lan, here are the compression codes you've entered, kept for every dive. In the NaviCust, hold RIGHT on a program, "
+		"then press its code.\f");
+	for (int p = 1; p < NAVICUST_PROGRAMS; ++p) {
+		const char *about = navicust_about(p);
+		char code[12];
+		if (!profile_code_entered(p) || !about || !navicust_code(p, code)) continue;
+		int n = (int)strcspn(about, ":");
+		if (n > 8) ADD("%-8s %s\n", p == 1 ? "SuprArmr" : "", code);
+		else ADD("%-8.*s %s\n", n, about, code);
+	}
+	#undef ADD
+}
+
 /* A guardian's mail: Dad's face and words, then MegaMan's, the warning as
  * he logged it (the briefing's: the tip's boxes, "|@M " apart), in BN6's
  * own mail form (a face set up with FC 06 and F5 02/03, the box opened
@@ -360,17 +382,19 @@ static void install_mails(void) {
 	uint8_t *senders = unpack(BN6_MAIL_TEXT, &slen), *bodies = unpack(BN6_MAIL_BODIES, &blen);
 	if (!senders || !bodies) { free(senders); free(bodies); return; }
 	int ns = u16at(senders, 0) / 2, nb = u16at(bodies, 0) / 2;
-	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[21][16], about[21][24], body[21][1400];
+	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[MAIL_CODES + 1][16], about[MAIL_CODES + 1][24], body[MAIL_CODES + 1][1400];
 	Script srep[512] = { 0 }, brep[256] = { 0 };
-	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_RECORDS + 1) || nb < MAIL_RECORDS + 1) { free(senders); free(bodies); return; }
+	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_CODES + 1) || nb < MAIL_CODES + 1) { free(senders); free(bodies); return; }
 	static const uint8_t tail[] = { 0xE7, 0x00, 0xE6 };
-	for (int m = 1; m <= MAIL_RECORDS; ++m) {
-		if (m == MAIL_REPORT || m == MAIL_RECORDS) {
+	for (int m = 1; m <= MAIL_CODES; ++m) {
+		if (m >= MAIL_REPORT) {
 			static char text[1400];
+			static const char *const subjects[] = { "Dive report", "Records", "Compression" };
 			if (m == MAIL_REPORT) report_text(text, sizeof text);
-			else records_text(text, sizeof text);
+			else if (m == MAIL_RECORDS) records_text(text, sizeof text);
+			else codes_text(text, sizeof text);
 			srep[2 * m] = (Script){ from[m], words("Dad", tail, 3, from[m], sizeof from[m]) };
-			srep[2 * m + 1] = (Script){ about[m], words(m == MAIL_REPORT ? "Dive report" : "Records", tail, 3, about[m], sizeof about[m]) };
+			srep[2 * m + 1] = (Script){ about[m], words(subjects[m - MAIL_REPORT], tail, 3, about[m], sizeof about[m]) };
 			brep[m] = (Script){ body[m], dad_mail(text, body[m], sizeof body[m]) };
 			uint8_t row[4] = { 0x04, emu_read8(BN6_MAIL_TABLE + 4u * (uint32_t)m + 1), 0x08, (uint8_t)(0x20 + m) };
 			emu_write(BN6_MAIL_TABLE + 4u * (uint32_t)m, row, sizeof row);
@@ -456,8 +480,13 @@ int pet_text_refresh(void) {
 	bool records_news = mark != profile.records_mark,
 		report_news = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	if (records_news) { profile.records_mark = mark; profile_save(); }
-	for (int m = MAIL_RECORDS; m >= MAIL_REPORT; --m) {
-		bool news = m == MAIL_REPORT ? report_news : records_news;
+	/* (and the codes', third, from the first code entered: NEW with each
+	 * new one, issue #50) */
+	int entered = profile_codes_entered();
+	bool codes_news = entered > profile.codes_mailed;
+	if (codes_news) { profile.codes_mailed = (uint8_t)entered; profile_save(); }
+	for (int m = entered ? MAIL_CODES : MAIL_RECORDS; m >= MAIL_REPORT; --m) {
+		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : codes_news;
 		mail_deliver(m);
 		if (news) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
 		mail_first(m);

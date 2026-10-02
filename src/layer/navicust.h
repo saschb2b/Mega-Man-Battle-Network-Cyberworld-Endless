@@ -56,6 +56,13 @@ int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uin
  * shape (issue #54); navicust_shape, as it comes. */
 bool navicust_shape_as(int variant, bool compressed, NaviShape *out);
 bool navicust_shape(int variant, NaviShape *out);
+/* Program `program`'s compression code, its ten buttons as the NaviCust
+ * takes them (held RIGHT on it), five and five: "LBBRB AALRR" (issue #50);
+ * false where it has none. navicust_code_text spells the table's ten bytes
+ * so (ROM-free). */
+#define NAVICUST_PROGRAMS 48   /* the code table's rows: programs 0-47 */
+bool navicust_code(int program, char out[12]);
+bool navicust_code_text(const uint8_t raw[10], char out[12]);
 /* Whether `n` shapes fit a `w` x `h` board together without a bug: all on
  * it, none over another, the command line (the third row) under every
  * program part and no plus part, no two program parts of one colour side

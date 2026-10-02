@@ -26,6 +26,7 @@ static const RomLayout layouts[] = {
 		.enemy_traits = 0x00F230,
 		.encounters = 0x020170,
 		.navicust_programs = 0x13B22C,
+		.navicust_codes = 0x13D302,
 		.battle_gem_rewards = 0x0211A0,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {

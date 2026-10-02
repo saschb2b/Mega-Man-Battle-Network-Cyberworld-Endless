@@ -474,6 +474,10 @@ layer 19 is the Underground. After that the cycle starts again, harder.
   and MegaMan says what the bug does. A program turns with L and R only
   with its colour's Spin: each run hides one, a colour you don't have yet,
   in a blue Mystery Data deeper in, and you keep it for every run after.
+  A program's compression code, once you enter it (hold RIGHT on the
+  program in the NaviCust and press its ten buttons), is kept for every run
+  after: Dad's Compression mail lists it, and MegaMan names it when the
+  program would only fit compressed.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.

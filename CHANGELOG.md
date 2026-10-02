@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Compression codes are kept (issue #50).** A NaviCust compression code
+  you enter once is kept for every run after. Dad's new Compression mail
+  lists each code you have entered, and when a program won't fit, MegaMan
+  names its code if compressing it would make room. You still press the
+  ten buttons yourself, and no code shows until you have entered it once.
 - **Compressed programs count as compressed (issue #54).** MegaMan judged
   the NaviCust's room by a program's full shape even after its
   compression code was entered, so he called a second compressed Custom1,

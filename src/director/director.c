@@ -155,6 +155,7 @@ static struct {
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
 	bool final_told;       /* ... and, the short net's last guardian fallen, said the run is won */
+	int code_due;          /* a program whose compression code was entered for the first time in any run, until MegaMan says Dad keeps it (issue #50) */
 } D;
 
 #define AREA_CARD_AT 45   /* frames on the map after arriving */
@@ -417,6 +418,8 @@ static void goal_way(void) {
  * was running. */
 static bool fits_beside_placed(int v);
 static bool fits_as_it_stands(int v);
+static const char *code_words(int v, bool as_it_stands);
+static bool free_to_speak(void);
 static int key_item(int id);
 static void drop_events(void);
 static void spins_sync(void);
@@ -426,14 +429,16 @@ static void spins_sync(void);
  * NULL when said already. */
 static int no_room_told = -1;   /* the board size it was said for (a new run or a CONTINUE forgets) */
 
-static const char *no_room_words(const char *name) {
-	static char words[200];
+static const char *no_room_words(const char *name, int v) {
+	static char words[360];
 	int board = key_item(SCRIPTS_EXP_MEMORY);
 	if (no_room_told == board) return NULL;
 	no_room_told = board;
 	if (board < 2)
-		snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board yet, Lan. It'll keep in the PET until the board grows.", name);
-	else snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board, Lan. To use it, we'd have to take another off.", name);
+		snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board yet, Lan. It'll keep in the PET until the board grows.%s", name,
+			code_words(v, false));
+	else snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board, Lan. To use it, we'd have to take another off.%s", name,
+		code_words(v, false));
 	return words;
 }
 
@@ -592,7 +597,7 @@ static int off_board_note(char *buf, int k, int size) {
 	int offv;
 	const char *off = run_won_here() || D.off_told ? NULL : program_off_board(&offv);
 	if (off && !fits_beside_placed(offv)) {
-		const char *w = no_room_words(*off ? off : "That program");
+		const char *w = no_room_words(*off ? off : "That program", offv);
 		if (w) ADD("%s|", w);
 	} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
 	else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
@@ -980,8 +985,9 @@ static int board_programs(uint8_t *out, int max) {
 static bool shape_now(int v, NaviShape *out) { return navicust_shape_as(v, flag_get(BN6_FLAG_COMPRESSED + v), out); }
 
 /* Whether variant `v` fits the board beside the programs placed on it,
- * copies of it among them (a second Custom1 beside the first: issue #54). */
-static bool fits_beside_placed(int v) {
+ * copies of it among them (a second Custom1 beside the first: issue #54),
+ * compressed or not (fits_beside_placed: as the PET has it). */
+static bool fits_beside_as(int v, bool compressed) {
 	int w, h, ns = 0;
 	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
 	NaviShape s[10];
@@ -990,9 +996,11 @@ static bool fits_beside_placed(int v) {
 		if (!id) break;
 		if (shape_now(id, &s[ns])) ++ns;
 	}
-	if (!shape_now(v, &s[ns])) return true;
+	if (!navicust_shape_as(v, compressed, &s[ns])) return true;
 	return navicust_pack(s, ns + 1, w, h);
 }
+
+static bool fits_beside_placed(int v) { return fits_beside_as(v, flag_get(BN6_FLAG_COMPRESSED + v)); }
 
 static void library_from_game(void);
 
@@ -2422,19 +2430,43 @@ static void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
 }
 
+/* A compression code entered on the NaviCust screen (BN6 sets the flags of
+ * the program's four colours at once), the first time in any run: into the
+ * profile's codebook, Dad's Compression mail made again with it, and MegaMan
+ * says where it is kept (issue #50). */
+static void code_watch(void) {
+	for (int p = 1; p < NAVICUST_PROGRAMS; ++p) {
+		if (profile_code_entered(p) || !navicust_in_pool(p) || !flag_get(BN6_FLAG_COMPRESSED + p * 4)) continue;
+		profile_code_note(p);
+		profile_save();
+		D.pet_refreshed = false;
+		D.code_due = p;
+	}
+	/* (once bug_watch has taken the PET's return, its frames calm: said as
+	 * the PET closed, the box was drawn over its fading screen, garbled) */
+	const char *about = D.code_due ? navicust_about(D.code_due) : NULL;
+	if (!about || D.pet_seen || !free_to_speak()) return;
+	char words[200];
+	snprintf(words, sizeof words, "@M %.*s's compressed, Lan! Dad's lab keeps its code for us now, for every dive: it's in his Compression mail.",
+		(int)strcspn(about, ":"), about);
+	if (talk_start(words, FACE_MEGAMAN)) D.code_due = 0;
+}
+
 /* MegaMan's words for a program left off the board, once a layer (NULL:
  * none to say): where to place it, and whether it turns. */
 static const char *off_board_words(void) {
 	int offv = 0;
 	const char *off = D.off_told || run_won_here() ? NULL : program_off_board(&offv);
-	static char words[320];
+	static char words[480];
 	if (!off || !*off) return NULL;
-	if (!fits_beside_placed(offv)) return no_room_words(off);
+	if (!fits_beside_placed(offv)) return no_room_words(off, offv);
 	/* (and whether it turns: a playtester pressed L and R on his gift's
 	 * SuperArmor with no Spin, and nothing said why; and whether it takes
-	 * moving others first) */
-	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s%s",
-		off, fits_as_it_stands(offv) ? "" : "There's no room for it as the board stands: we'll have to move a program or two. ", navicust_turn_words(offv));
+	 * moving others first, or its code) */
+	bool stands = fits_as_it_stands(offv);
+	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s%s%s",
+		off, stands ? "" : "There's no room for it as the board stands: we'll have to move a program or two. ", navicust_turn_words(offv),
+		stands ? "" : code_words(offv, true));
 	return words;
 }
 
@@ -2482,12 +2514,28 @@ static const char *bug_cause(void) {
 
 /* Whether program variant `v` fits the board's free cells as its programs
  * stand (true where that cannot be read) */
-static bool fits_as_it_stands(int v) {
+static bool fits_free_as(int v, bool compressed) {
 	NaviShape s;
 	int n = read_board(), w, h;
-	if (!R.data || !R.layout || !R.layout->navicust_programs || !shape_now(v, &s)) return true;
+	if (!R.data || !R.layout || !R.layout->navicust_programs || !navicust_shape_as(v, compressed, &s)) return true;
 	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
 	return navicust_fits_free(board_grid, board_parts, n, &s, w, h);
+}
+
+static bool fits_as_it_stands(int v) { return fits_free_as(v, flag_get(BN6_FLAG_COMPRESSED + v)); }
+
+/* MegaMan's word on a program's compression code where it is the way to fit
+ * the program (issue #50): a code entered in an earlier run, not in this
+ * one, whose shape fits beside the board's programs (`as_it_stands`: in its
+ * free cells as they stand); "" otherwise. A box of its own, the code on a
+ * line of its own, as Dad's Compression mail spells it. */
+static const char *code_words(int v, bool as_it_stands) {
+	static char words[160];
+	char code[12];
+	if (!profile_code_entered(v / 4) || flag_get(BN6_FLAG_COMPRESSED + v) || !navicust_code(v / 4, code)) return "";
+	if (as_it_stands ? !fits_free_as(v, true) : !fits_beside_as(v, true)) return "";
+	snprintf(words, sizeof words, "|@M Or we compress it! In the NaviCust, hold RIGHT on it and press\n%s", code);
+	return words;
 }
 
 /* A program just come into the PET (a Guardian Data's, a vendor's) that
@@ -2495,12 +2543,12 @@ static bool fits_as_it_stands(int v) {
  * met it in the NaviCust and moved two programs to fit Custom1 (session
  * 55); NULL for none. */
 static const char *cramped_words(void) {
-	static char words[200];
+	static char words[360];
 	int v = 0;
 	const char *off = program_off_board(&v);
 	if (!off || !*off || !fits_beside_placed(v) || fits_as_it_stands(v)) return NULL;
 	snprintf(words, sizeof words, "@M %s won't fit in our board's free space as it stands, Lan. In the NaviCust we'll have to move a program "
-		"or two to make room.", off);
+		"or two to make room.%s", off, code_words(v, true));
 	return words;
 }
 
@@ -3423,7 +3471,7 @@ void director_update(void) {
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
 	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); }
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);

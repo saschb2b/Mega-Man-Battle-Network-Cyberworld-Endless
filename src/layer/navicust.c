@@ -163,6 +163,25 @@ int navicust_color(int program) {
 	return n ? colors[rng_range(0, n - 1)] : 0;
 }
 
+bool navicust_code_text(const uint8_t raw[10], char out[12]) {
+	/* (BN6's bytes are the offsets of its joypad masks: 0 L, 2 R, 4 A, 6 B,
+	 * bn6f sub_813C334) */
+	static const char letters[] = "LRAB";
+	int k = 0;
+	for (int i = 0; i < 10; ++i) {
+		if (raw[i] > 6 || raw[i] & 1) return false;
+		if (i == 5) out[k++] = ' ';
+		out[k++] = letters[raw[i] / 2];
+	}
+	out[k] = 0;
+	return true;
+}
+
+bool navicust_code(int program, char out[12]) {
+	if (!R.data || !R.layout || !R.layout->navicust_codes || program <= 0 || program >= NAVICUST_PROGRAMS) return false;
+	return navicust_code_text(R.data + R.layout->navicust_codes + (uint32_t)program * 10, out);
+}
+
 bool navicust_shape(int variant, NaviShape *out) { return navicust_shape_as(variant, false, out); }
 
 bool navicust_shape_as(int variant, bool compressed, NaviShape *out) {

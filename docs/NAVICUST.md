@@ -194,6 +194,18 @@ lacks, in a blue Mystery Data on a layer of 4-8, and keeps it for good
 (docs/META.md). The drafts and the vendor's fitting pack each program
 turned only where its colour's Spin is held (`navicust_set_spins`).
 
+### 9. Compression codes, kept once entered
+
+BN6's compression code, ten buttons on the NaviCust screen with RIGHT held
+on a program, sets the compressed-shape flags of its four colours; a run
+starts from a fresh game, its flags clear, and a player looked every code
+up again each run (issue #50). The first time a code is entered in any run
+the profile keeps it: Dad's Compression mail lists it, and MegaMan names it
+where a program that won't fit would fit compressed. The buttons stay the
+player's to press in every run, and nothing names a code not yet entered
+(docs/META.md). MegaMan's fit checks read the shape the flags choose
+(issue #54).
+
 ## Teaching it
 
 Introduce, develop, twist, test (the skill's onboarding shape), each at
@@ -236,7 +248,7 @@ the moment it is needed:
 | --- | --- |
 | Program records, 16 bytes per colour variant (category, part or plus, colour, bug type, shape and compressed shape) | ROM 0x13B22C |
 | Board maps for 0, 1 and 2 ExpMemry (4x4, 5x4, 5x5) | ROM 0x13CFCC, 0x13D0AD, 0x13D18E |
-| Compression codes | ROM 0x13D302 |
+| Compression codes, ten bytes a program (0 L, 2 R, 4 A, 6 B; 0xFF none) | ROM 0x13D302 |
 | Programs owned (KeyItems 0x90 + variant, cap 9) | RAM 0x020031C4 |
 | The board (7x7) and the placed programs (49 x 8 bytes) | RAM 0x0200414C, 0x02004190 |
 | Bug counts, one per type | RAM 0x0200431C |
@@ -277,6 +289,11 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   counts that held ten frames, since BN6 rewrites them on its own (the
   row above; a player heard the bug explained after every Chip Trader
   trade, issue #25).
+
+- Compression codes kept once entered (issue #50): the profile's codebook,
+  Dad's Compression mail, and MegaMan's word on a known code where a
+  program would fit compressed; the fit checks read the compressed shapes
+  (issue #54).
 
 Next: BugFrags as the vendor's currency with the workshop and the
 bugged-battle pay, the vendor's stock from this pool (it still sells

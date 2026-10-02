@@ -456,6 +456,36 @@ net**:
 A profile from before starts with none: the run in progress loses the
 five it did not find.
 
+## Compression codes, kept once entered (3 October 2026)
+
+BN6 compresses a NaviCust program by a code of ten buttons, entered on the
+NaviCust screen with RIGHT held on it (its table at ROM `0x13D302`). The
+game never says them, and a run, a fresh game, forgets every compression:
+a player looked the codes up again for every run (issue #50). The owner
+chose, of three ways reasoned with the game-design skill (kept once
+entered, kept and also found on the net, all known from the start),
+**kept once entered**, the buttons still pressed by hand:
+
+- **The dialectic** is the NaviCust's, fit it or force it: compression
+  fits more in the board's budget, at the price of knowing the code.
+  Knowing is the meta layer's progress; looking it up again each run was a
+  chore with no decision in it.
+- **Knowledge, not power:** the codes are public; what carries over is what
+  the player has found, and the ten buttons stay theirs to press, BN6's
+  ritual whole.
+- **Where it shows:** the first time a code is entered in any run, MegaMan
+  says Dad's lab keeps it; Dad's Compression mail lists every code entered
+  (docs/PET.md), NEW with each new one. Where a program won't fit beside the
+  board's programs, or not in its free cells, and its code is known but not
+  entered in this run, MegaMan names it if the compressed shape would fit:
+  "Or we compress it! In the NaviCust, hold RIGHT on it and press LBBRB
+  AALRR".
+- **The secret stays one:** nothing names a code the player has not
+  entered.
+- **What could go wrong:** the planned NaviCust workshop (docs/NAVICUST.md,
+  4) sells compression; with codes kept, its part would be to compress a
+  program the first time, and so teach its code.
+
 ## What MegaMan knows (29 September 2026)
 
 Read through the resonance lens (describe the loop without its fiction,

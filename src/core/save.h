@@ -63,6 +63,11 @@ typedef struct {
 	uint16_t duel_depth;
 	uint8_t duel_beat;
 	uint8_t pieces_taught;    /* the set pieces L has explained (SENSED_*, director.c; issue #48) */
+	/* the NaviCust programs whose compression code was entered in any run,
+	 * a bit each (issue #50: Dad's Compression mail lists them), and how
+	 * many that mail showed when last marked NEW */
+	uint8_t codes_entered[8];
+	uint8_t codes_mailed;
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };
@@ -77,6 +82,12 @@ static inline int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : pro
  * battle with it ends. */
 bool profile_family_fought(int fam);
 void profile_family_note(int fam);
+/* Whether NaviCust program `program`'s compression code has been entered
+ * in any run, and how many have (issue #50); noted as the NaviCust
+ * compresses it. */
+bool profile_code_entered(int program);
+int profile_codes_entered(void);
+void profile_code_note(int program);
 
 void save_init(void);
 bool save_exists(void);

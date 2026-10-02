@@ -1398,6 +1398,12 @@ static void test_navicust(void) {
 	navicust_board(2, &bw, &bh);
 	CHECK(bw == 5 && bh == 5, "two ExpMemry: 5x5");
 	CHECK(navicust_pack(&bar, 1, 4, 4), "a bar of four fits the command line");
+	/* (a compression code as BN6's table holds it, 0 L 2 R 4 A 6 B: Custom1's,
+	 * and none, issue #50) */
+	char code[12];
+	static const uint8_t custom1[10] = { 0, 6, 6, 2, 6, 4, 4, 0, 2, 2 }, none[10] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+	CHECK(navicust_code_text(custom1, code) && !strcmp(code, "LBBRB AALRR"), "Custom1's code spelt five and five: %s", code);
+	CHECK(!navicust_code_text(none, code), "a program with no code has none");
 	CHECK(navicust_pack(&bar, 1, 3, 4) && !navicust_pack(&bar, 1, 3, 3), "a bar of four turned upright on a board three wide, not on three by three");
 	NaviShape two[2] = { sq, sq2 };
 	CHECK(!navicust_pack(two, 2, 4, 4), "two squares of one colour both on the command line touch");
