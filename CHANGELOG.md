@@ -18,7 +18,9 @@
   pick for your device, its steps open, and lists every system below in
   four groups (computer, phone and tablet, handheld and console, no
   install), each with its main file, its other formats and how to install
-  it.
+  it. The PortMaster port is named for every firmware that runs PortMaster
+  (AmberELEC, ArkOS, Knulli, muOS, ROCKNIX and others), not ROCKNIX alone:
+  its file is now `cyberworld-endless-portmaster.zip`.
 - **The Net Dealers name every guardian's weakness (issue #39).** They
   said SlashMan, EraseMan, TenguMan, GroundMan and DustMan had no weak
   element, but BN6 has a second wheel, as its Cross lessons teach:

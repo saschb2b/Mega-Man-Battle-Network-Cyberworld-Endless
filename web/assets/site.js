@@ -18,7 +18,7 @@ function track(name, data) {
 }
 document.addEventListener('DOMContentLoaded', () => { for (const [name, data] of queued.splice(0)) track(name, data); });
 
-const PLATFORMS = { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'ROCKNIX', '3ds': 'New 3DS', browser: 'Browser' };
+const PLATFORMS = { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'PortMaster', '3ds': 'New 3DS', browser: 'Browser' };
 
 // the visitor's system, as far as the browser says: a New 3DS's says it is
 // like an iPhone, an iPad's like a Mac (but with touch); a Steam Deck's

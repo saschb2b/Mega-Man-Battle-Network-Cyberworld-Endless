@@ -171,7 +171,7 @@ jobs:
       - name: Checksums
         working-directory: build/release
         run: |
-          ls cyberworld-endless-rocknix-portmaster.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
+          ls cyberworld-endless-portmaster.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
             cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-windows-x64-setup.exe \
             cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.ipa altstore-source.json \
             cyberworld-endless.apk cyberworld-endless.cia cyberworld-endless.3dsx \

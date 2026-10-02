@@ -78,7 +78,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: cyberworld-portmaster
-          path: build/release/cyberworld-endless-rocknix-portmaster.zip
+          path: build/release/cyberworld-endless-portmaster.zip
           retention-days: 14
 
   linux:

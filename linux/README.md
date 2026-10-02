@@ -1,7 +1,7 @@
 # Cyberworld Endless for Linux
 
 A roguelike built on Mega Man Battle Network 6. This is the desktop build of
-the ROCKNIX handheld port: the same game in a window on a Linux PC.
+the PortMaster handheld port: the same game in a window on a Linux PC.
 
 ## Your ROM
 

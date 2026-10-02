@@ -177,7 +177,7 @@ def build(target):
 # the PortMaster port's plain cyberworld.zip for Windows): all but the
 # AppImage, whose name its update information points at, and the ones whose
 # kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx).
-PORT_ZIP = 'cyberworld-endless-rocknix-portmaster.zip'
+PORT_ZIP = 'cyberworld-endless-portmaster.zip'
 WEB_ZIP = 'cyberworld-endless-website.zip'
 
 
@@ -685,7 +685,7 @@ def serve(port=8080):
 
 
 def port_release():
-    """build/release/cyberworld-endless-rocknix-portmaster.zip: the port laid out as PortMaster's
+    """build/release/cyberworld-endless-portmaster.zip: the port laid out as PortMaster's
     own zip of it (tools/build_release.py in PortMaster-New): the launcher, and cyberworld/
     with port.json, gameinfo.xml, the screenshot and the README as cyberworld.md beside the
     game (port.json keeps PortMaster's own name for it, cyberworld.zip)."""
