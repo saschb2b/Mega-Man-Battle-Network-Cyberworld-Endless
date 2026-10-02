@@ -8,10 +8,13 @@
   core now sleeps through that wait until the frame begins, woken as the
   GBA is by the frame's own interrupt, and the game runs as before. On a
   PC a frame of the game takes about 30% less time (a layer's 0.52 ms
-  became 0.36, a battle's 0.53 became 0.35), and on a Retroid Nova a
-  quarter less (3.98 ms became 3.09); on the New 3DS, where the
-  emulation took nearly all of each frame, the gain is still to be
-  measured there.
+  became 0.36, a battle's 0.53 became 0.35), on a Retroid Nova a
+  quarter less (3.98 ms became 3.09), and on a New 3DS, where it took
+  nearly all of each frame, 15.9 ms became 11.0.
+- **The New 3DS shows its frames evenly (issue #35).** Each frame now
+  waits for the screen's refresh: with the core faster, frames paced by
+  the game's own clock came early or late 14 times a second, and with
+  0.6.0 twice; now about once.
 - **The engine hears from the game as things happen (issues #27-#34).**
   It used to look over the game's memory every frame for what had
   changed, and to patch hand-written code into the game to call it.

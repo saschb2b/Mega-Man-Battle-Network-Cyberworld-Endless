@@ -280,10 +280,18 @@ On a Retroid Nova (ROCKNIX), the same 90 s of an autopilot run (`--seed 7
 GBA 3.98 ms a frame with its picture on 0.6.0 and 3.09 ms with the hook
 (the median 4.00 and 2.80).
 
-On the New 3DS, `frame_log = on` gives the GBA's time per frame with and
-without its picture: to measure there on a walked layer, a busy battle and
-the town, against 0.6.0 (3ds/README.md's 16 ms of emulation was measured
-before the hook).
+On a New 3DS (`frame_log = on`, a minute or so of the town, a layer and a
+battle each), the core's own thread took 15.9 ms a frame with 0.6.0 and
+11.0 with the hook (the median), and the main thread's wait for it fell
+from 10.4 ms to 1. The frames shown are paced by the refresh now: the
+present waits for it where the core has its own thread
+(`present_3ds.c`). Before, a timer paced them, and the long core frame
+had steadied that timer by accident: with the core faster, 6 frames a
+second came early and 8 late (gaps under 12.5 ms or over 20); with the
+refresh's pace, 0.1 and 1.3, against 0.6.0's 0.1 and 2. An old 3DS or
+2DS has no third core: the core and its picture share the main one,
+and there the title stuttered and the net went black after a few
+frames, as before (3ds/README.md).
 
 ## Hooks
 
