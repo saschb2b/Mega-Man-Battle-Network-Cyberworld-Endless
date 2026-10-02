@@ -6,10 +6,6 @@
 #include "net.h"
 #include "run.h"
 
-/* (Seaside's toll, as its Area 2 takes 100 zenny a pass; elsewhere a
- * P-Code, as BN6's comps and homepages ask) */
-int layer_cube_kind(int biome) { return biome == BIOME_SEASIDE ? BLOCK_TOLL : BLOCK_PCODE; }
-
 /* What each area's original maps hold, as weights (BN6's own placements:
  * the epic's Research 1): purple data in every area but the Secret Area,
  * the most in the Graveyard and the Undernet; Rush's bone gaps in
@@ -32,7 +28,7 @@ static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds,
 	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER, 0, 1, 1 },
 	[BIOME_GREEN] = { 2, 3, 1, 4, 2, 1 << BLOCK_TREE, 0, 2 },
 	[BIOME_GRAVEYARD] = { 4, 0, 0, 0, 4, 0x1F },
-	[BIOME_UNDERNET] = { 4, 2, 2, 0, 0, 0, 0, 2, 2 },
+	[BIOME_UNDERNET] = { 4, 2, 2, 0, 0, 0, 2, 2, 2 },
 	[BIOME_SECRET] = { 0, 0, 0 },
 	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES, 0, 2, 2 },
 	[BIOME_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
@@ -52,6 +48,18 @@ static uint32_t piece_hash(int depth, uint32_t salt) {
 	uint32_t h = (run.seed ^ (uint32_t)depth * 0x9E3779B9u ^ salt) * 2654435761u;
 	h ^= h >> 15;
 	return h * 2246822519u;
+}
+
+/* A cube's lock: Seaside's a toll, as its Area 2 takes 100 zenny a pass;
+ * the Undernet's its own doors (issue #47), a number door on an act's
+ * first layer and on a dark warp's (its answer on the layer itself), else
+ * a skull door half the time, which the act's Net Dealer's WWW-ID opens;
+ * elsewhere a P-Code told on the layer, as BN6's comps and homepages ask. */
+int layer_cube_kind(int depth, int biome, int kind) {
+	if (biome == BIOME_SEASIDE) return BLOCK_TOLL;
+	if (biome != BIOME_UNDERNET) return BLOCK_PCODE;
+	if (kind != LAYER_NORMAL || layer_in_act(depth) == 0) return BLOCK_NUMBER;
+	return piece_hash(depth, 0x5C011u) >> 9 & 1 ? BLOCK_SKULL : BLOCK_NUMBER;
 }
 
 /* A layer's pieces (PIECE_* bits): none on the run's first layer or in the

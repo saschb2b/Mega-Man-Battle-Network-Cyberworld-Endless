@@ -100,7 +100,8 @@ typedef struct { int x, y, dir, len; bool island; } NetGap;
  * the way that holds one thing. (x, y) the walkway's first panel, dir the
  * DIR_* from the room into it, (rx, ry) its reward's panel. */
 enum { BLOCK_WATER, BLOCK_TREE, BLOCK_FLAMES, BLOCK_CYCLONE, BLOCK_CLOUD, BLOCK_KINDS,
-	BLOCK_PCODE = BLOCK_KINDS, BLOCK_TOLL };   /* (and BN6's security cubes, issue #45: a P-Code's, a toll's) */
+	BLOCK_PCODE = BLOCK_KINDS, BLOCK_TOLL,      /* (and BN6's security cubes, issue #45: a P-Code's, a toll's, */
+	BLOCK_SKULL, BLOCK_NUMBER };                /* the Undernet's skull door and number door, issue #47) */
 typedef struct { int x, y, dir, kind, rx, ry; } NetBlock;
 #define MAX_BLOCKS 2
 
@@ -150,6 +151,7 @@ typedef struct {
 	NetGap path[MAX_PATHS];
 	int npaths;
 	int hinter;        /* the navi who hints at an invisible path: its object + 1, 0 none */
+	int braziers;      /* the braziers its props hold: a number door's answer (issue #47) */
 } Layer;
 
 extern Layer layer;
@@ -216,7 +218,7 @@ unsigned layer_crosses(int depth);
 unsigned block_openers(int kind);
 int layer_block_kind(int depth, int biome);
 /* The security cube an area's layers set (BLOCK_PCODE or BLOCK_TOLL). */
-int layer_cube_kind(int biome);
+int layer_cube_kind(int depth, int biome, int kind);
 bool layer_purple(int depth, int biome, int kind);
 int layer_pieces_ahead(int depth, unsigned piece);
 int layer_rush_len(int depth, int biome);

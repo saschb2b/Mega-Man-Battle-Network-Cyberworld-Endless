@@ -26,6 +26,7 @@
 #include "run.h"
 #include "layer_objs.h"
 #include "scripts.h"
+#include "shop.h"
 
 #define H3_LITERAL   0x080A66D4u   /* handler 3's records' literal (Gregar) */
 #define H3_TABLE     0x080A6144u   /* ... BN6's 86 (ids 0x00-0x55) */
@@ -156,6 +157,9 @@ static int talk(TextArchive *t, int k) {
 	 * zenny in act 1 and 100 more an act: half the Net Dealer's answer) */
 	if (b->kind == BLOCK_PCODE) return ta_cube_pcode(t, BLOCK_PRESENT_FLAG + k, LAYER_PCODE_FLAG, blockers_pcode());
 	if (b->kind == BLOCK_TOLL) return ta_cube_toll(t, BLOCK_PRESENT_FLAG + k, 200 + 100 * (pacing_act(run.depth) + 7 * pacing_loop(run.depth)));
+	/* (the Undernet's doors, issue #47) */
+	if (b->kind == BLOCK_SKULL) return ta_cube_skull(t, BLOCK_PRESENT_FLAG + k, ITEM_WWW_ID);
+	if (b->kind == BLOCK_NUMBER) return ta_cube_number(t, BLOCK_PRESENT_FLAG + k, LAYER_NUMBER_SEALED_FLAG, layer.braziers, run.layer_seed >> 11);
 	unsigned can = block_openers(b->kind), held = layer_crosses(run.depth) & can;
 	int i = ta_script(t);
 	bool first = true;

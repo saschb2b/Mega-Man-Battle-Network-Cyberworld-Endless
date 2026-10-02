@@ -746,6 +746,72 @@ int ta_cube_toll(TextArchive *t, int present, int price) {
 	return i;
 }
 
+int ta_cube_skull(TextArchive *t, int present, int id) {
+	int open = ta_script(t);
+	ta_page(t, FACE_NONE, "MegaMan showed the WWW-ID.", true);
+	cube_opens(t, present);
+	ta_page(t, FACE_NONE, "The skull door opens!", false);
+	ta_end(t);
+	bool first = true;
+	int shut = ta_script(t);
+	ta_pages(t, "A skull door, Lan. It only lets WWW members through...|Without a WWW-ID, we don't get past it.", FACE_MEGAMAN, &first);
+	ta_end(t);
+	int i = ta_script(t);
+	uint8_t has[] = { 0xEF, 0x07, (uint8_t)id, 1, (uint8_t)open, (uint8_t)open, (uint8_t)shut };   /* ts_check_item07 */
+	ta_bytes(t, has, sizeof has);
+	ta_end(t);
+	return i;
+}
+
+/* (the number door's three answers in a column: three numbers in a row,
+ * the right one first, second or third as `seed` has it) */
+static void number_options(TextArchive *t, int answer, unsigned seed, int right, int wrong, int no) {
+	static const uint8_t opt[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
+	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	int low = answer - (int)(seed % 3);
+	if (low < 1) low = 1;
+	char line[16];
+	for (int k = 0; k < 3; ++k) {
+		ta_bytes(t, opt[k], 4);
+		ta_bytes(t, space, sizeof space);
+		snprintf(line, sizeof line, k < 2 ? "%d\n" : "%d", low + k);   /* (a line break after the last asked for a fourth line) */
+		ta_text(t, line);
+	}
+	uint8_t select[] = { 0xED, 0x07, 0x80, (uint8_t)(low == answer ? right : wrong), (uint8_t)(low + 1 == answer ? right : wrong),
+		(uint8_t)(low + 2 == answer ? right : wrong), (uint8_t)no };   /* (ts_select: clear, a script per option, B) */
+	ta_bytes(t, select, sizeof select);
+}
+
+int ta_cube_number(TextArchive *t, int present, int sealed, int answer, unsigned seed) {
+	bool first = true;
+	int right = ta_script(t);
+	ta_page(t, FACE_NONE, "The number is right.", true);
+	cube_opens(t, present);
+	ta_page(t, FACE_NONE, "The door opens!", false);
+	ta_end(t);
+	int wrong = ta_script(t);
+	flag_set(t, sealed);
+	ta_pages(t, "ACCESS DENIED.|The door seals itself!", FACE_NONE, &first);
+	ta_end(t);
+	first = true;
+	int closed = ta_script(t);
+	ta_pages(t, "The door has sealed itself, Lan. We got its number wrong...", FACE_MEGAMAN, &first);
+	ta_end(t);
+	int no = closing(t);
+	int i = ta_script(t);
+	uint8_t check[] = { 0xEF, 0x00, (uint8_t)sealed, (uint8_t)(sealed >> 8), (uint8_t)closed, 0xFF };   /* ts_check_flag */
+	ta_bytes(t, check, sizeof check);
+	first = true;
+	ta_pages(t, "NUMBER DOOR.|How many flames of hatred burn on this layer?|"
+		"@M The braziers' flames, Lan! Let's be sure of the count: a wrong number seals it.", FACE_NONE, &first);
+	static const uint8_t hide[] = { 0xF5, 0x01 };   /* (no face over the answers) */
+	ta_bytes(t, hide, sizeof hide);
+	ta_clear(t);
+	number_options(t, answer, seed, right, wrong, no);
+	ta_end(t);
+	return i;
+}
+
 int ta_pcode_teller(TextArchive *t, int face, const char *code, int told) {
 	char s[160];
 	bool first = true;

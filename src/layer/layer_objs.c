@@ -426,7 +426,13 @@ static uint32_t commit_text(TextArchive *text, int group, int number) {
 	return archive;
 }
 
-/* (the keys he stocks, said: what each opens and where, issues #41, #14) */
+static bool skull_here(void) {
+	for (int k = 0; k < layer.nblocks; ++k)
+		if (layer.block[k].kind == BLOCK_SKULL) return true;
+	return false;
+}
+
+/* (the keys he stocks, said: what each opens and where, issues #41, #14, #47) */
 static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock) {
 	for (int i = 0; i < nstock; ++i) {
 		size_t k = strlen(hello);
@@ -437,6 +443,9 @@ static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock
 		else if (stock[i].id == ITEM_RUSH_FOOD)
 			snprintf(hello + k, n - k, "|And there's a gap %s that Rush can bridge. RushFood's on my list too!",
 				layer.ngaps ? "on this layer" : "deeper in this act");
+		else if (stock[i].id == ITEM_WWW_ID)
+			snprintf(hello + k, n - k, "|The skull doors %s only open for WWW members. A WWW-ID gets you through every one!",
+				skull_here() ? "on this layer" : "deeper in the Undernet");
 	}
 }
 

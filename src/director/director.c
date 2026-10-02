@@ -1084,7 +1084,7 @@ static int layer_song(int tiles, int song) {
  * what its gates gave. */
 static void layer_flags_clear(void) {
 	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
-		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG };
+		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG };
 	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
 }
 
@@ -1766,6 +1766,13 @@ static void state_map(FILE *f, int cx, int cy) {
 		netmap_world(p->x, p->y, &ax, &ay);
 		netmap_world(p->x + dir_dx[p->dir] * (p->len + 1), p->y + dir_dy[p->dir] * (p->len + 1), &bx, &by);
 		fprintf(f, "path %d panels from %d %d (world %d %d) to world %d %d\n", p->len, p->x, p->y, ax, ay, bx, by);
+	}
+	for (int k = 0; k < layer.nblocks; ++k) {
+		static const char *const kinds[] = { "geyser", "tree", "flames", "cyclone", "cloud", "pcode cube", "toll cube", "skull door", "number door" };
+		int bx, by;
+		netmap_world(layer.block[k].x, layer.block[k].y, &bx, &by);
+		fprintf(f, "block %s at world %d %d, braziers %d\n", layer.block[k].kind >= 0 && layer.block[k].kind <= BLOCK_NUMBER ? kinds[layer.block[k].kind] : "?",
+			bx, by, layer.braziers);
 	}
 	if (layer.hinter) {
 		int hx, hy;
@@ -2804,6 +2811,7 @@ bool director_resume(void) {
 			flag_clear(LAYER_DUEL_CALLED_FLAG);
 			flag_clear(LAYER_RUSH_TOLD_FLAG);
 			flag_clear(LAYER_PCODE_FLAG);
+			flag_clear(LAYER_NUMBER_SEALED_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);
@@ -3025,13 +3033,14 @@ static bool follow_exit_warp(void) {
  * undernet gate; intro defeat reward for its guardian; status for L;
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
 /* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
- * wants ten), an Unlocker, three RushFood (the set pieces' keys), 10000
- * zenny (a cube's toll). */
+ * wants ten), an Unlocker, three RushFood, a WWW-ID (the set pieces'
+ * keys), 10000 zenny (a cube's toll). */
 static bool dev_gift(const char *name) {
 	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
 	else if (!strcmp(name, "zenny")) devtools_zenny();
 	else if (!strcmp(name, "keys")) game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1);
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
+	else if (!strcmp(name, "wwwid")) game_call(BN6_GIVE_ITEM | 1u, ITEM_WWW_ID, 1);
 	else return false;
 	return true;
 }

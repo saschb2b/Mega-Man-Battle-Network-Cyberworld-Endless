@@ -40,6 +40,8 @@
 #define LAYER_RUSH_TOLD_FLAG   0x1464   /* (0x1458-0x145F: the obstacles' and cubes' present flags, issue #42) */
 /* A navi of the layer has told its security cube's P-Code (issue #45). */
 #define LAYER_PCODE_FLAG       0x1465
+/* A number door of the layer was answered wrong, and sealed (issue #47). */
+#define LAYER_NUMBER_SEALED_FLAG 0x1466
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */

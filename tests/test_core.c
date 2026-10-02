@@ -159,6 +159,7 @@ static bool beside_narrow(int x, int y) {
 /* A kit as the surface areas' (stairs both ways, a two-panel counter each
  * way) with every sprite prop, and one with none of them. */
 static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu, true, true, 0xFu };
+static const LayerKit undernet_kit = { 3u, 32, { 2, 2 }, 1u << LOOK_STATUE | 1u << LOOK_BRAZIER, true, true, 0xFu };
 static const LayerKit flat = { 0u, 0, { 0, 0 }, 0u, false };
 
 /* A counter's cells: the aisle behind it (d 0), its own (1) and the floor
@@ -251,7 +252,7 @@ static bool island_room(int r) {
 	return false;
 }
 
-static int gap_layers, gap_panels, teleport_layers, teleport_islands, block_layers, block_kinds[BLOCK_TOLL + 1], tellers;
+static int gap_layers, gap_panels, teleport_layers, teleport_islands, block_layers, block_kinds[BLOCK_NUMBER + 1], tellers;
 
 /* A Link Navi obstacle (issue #42): in a walkway's first panel off the way;
  * closed, the exit is still reached and the pocket behind it holds its one
@@ -291,13 +292,17 @@ static int walk_between(int sx, int sy, int tx, int ty) {
 
 static int pieces_crowded, teller_walk_min = 1 << 20, tellers_near;
 
-static void blocks_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
+static void blocks_check(uint32_t seed, int depth, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
 	if (!layer.nblocks) return;
 	++block_layers;
 	tellers += layer.teller > 0;
 	for (int b = 0; b < layer.nblocks; ++b) {
 		const NetBlock *k = &layer.block[b];
 		block_kinds[k->kind]++;
+		/* (the Undernet's doors, issue #47: a number door counts the
+		 * layer's braziers; a skull door's WWW-ID is sold before it) */
+		CHECK(k->kind != BLOCK_NUMBER || layer.braziers >= 2, "seed %u: a number door with %d braziers", seed, layer.braziers);
+		CHECK(k->kind != BLOCK_SKULL || (layer.kind == LAYER_NORMAL && layer_in_act(depth) > 0), "seed %u: a skull door before its act's dealer", seed);
 		pieces_crowded += talker_near(k->x, k->y, 3);
 		if (k->kind == BLOCK_PCODE && layer.teller > 0) {
 			const NetObj *t = &layer.obj[layer.teller - 1];
@@ -441,7 +446,7 @@ static void paths_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
-		landmarks = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
+		landmarks = 0, statues = 0, undernet_layers = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
 		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0, purples = 0;
 	long blue_walk = 0, green_walk = 0;
 	memset(&run, 0, sizeof run);
@@ -452,7 +457,9 @@ static void test_generation(void) {
 		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
 		/* (a third of them in any area: the comps and homepages too) */
 		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
-		layer_generate(seed * 7919u, depth, biome, kind, &kit);
+		/* (the Undernet with its own looks, its statue and braziers: a
+		 * number door counts them, issue #47) */
+		layer_generate(seed * 7919u, depth, biome, kind, biome == BIOME_UNDERNET ? &undernet_kit : &kit);
 		++layers;
 		/* (a heal a short walk from every guardian's arena: a playtester
 		 * found one a long way back from SpoutMan's) */
@@ -497,7 +504,7 @@ static void test_generation(void) {
 		 * every panel is reached) */
 		gaps_check(seed, start, seen);
 		teleports_check(seed);
-		blocks_check(seed, start, seen);
+		blocks_check(seed, depth, start, seen);
 		lanes_check(seed, start, seen);
 		paths_check(seed, start, seen);
 		lane_planned += (layer_pieces(depth, biome, kind) & PIECE_ARROW) != 0;
@@ -680,9 +687,12 @@ static void test_generation(void) {
 				if (layer.props[j].kind == PROP_EMBLEM)
 					CHECK(abs(layer.props[j].x - p->x) > 1 || abs(layer.props[j].y - p->y) > 1, "seed %u: emblems side by side", seed);
 		}
+		/* (the Undernet's statue apart: it wants a rim five panels long,
+		 * which its rooms often lack, as its own maps hold one) */
 		for (int i = 0; i < layer.nprops; ++i)
 			if (layer.props[i].kind == PROP_SPRITE && (layer.props[i].look == LOOK_GIANT_TREE || layer.props[i].look == LOOK_STATUE ||
-			    layer.props[i].look == LOOK_MONUMENT)) { ++landmarks; break; }
+			    layer.props[i].look == LOOK_MONUMENT)) { ++*(biome == BIOME_UNDERNET ? &statues : &landmarks); break; }
+		undernet_layers += biome == BIOME_UNDERNET;
 		int traders = 0;
 		for (int i = 0; i < layer.nobj; ++i) traders += layer.obj[i].type == OBJ_TRADER || layer.obj[i].type == OBJ_BUGTRADER;
 		CHECK(traders <= 1, "seed %u: %d traders (the trade screen serves one per map)", seed, traders);
@@ -718,9 +728,10 @@ static void test_generation(void) {
 	 * its room a place for it) */
 	CHECK(counters * 2 >= dealers, "only %d of %d Net Dealers behind a counter", counters, dealers);
 	/* (a landmark on most layers where the area has one) */
-	CHECK(landmarks * 2 >= layers, "a landmark on only %d of %d layers", landmarks, layers);
+	CHECK(landmarks * 2 >= layers - undernet_layers, "a landmark on only %d of %d layers", landmarks, layers - undernet_layers);
 	CHECK(emblems >= layers, "only %d emblems on %d layers", emblems, layers);
-	printf("  props: %d sprites (%d in holes) and %d emblems on %d layers, landmarks on %d\n", sprites, holes, emblems, layers, landmarks);
+	printf("  props: %d sprites (%d in holes) and %d emblems on %d layers, landmarks on %d, the Undernet's statue on %d of its %d\n", sprites, holes,
+		emblems, layers, landmarks, statues, undernet_layers);
 	printf("  the heal before an arena: a walk of %d at most\n", heal_far);
 	printf("  Mystery Data: %d blue, %.1f panels off the way on average, %d of them 3 or more; %d green, %.1f\n", blue,
 		(double)blue_walk / (blue ? blue : 1), blue_far, green, (double)green_walk / (green ? green : 1));
@@ -729,6 +740,7 @@ static void test_generation(void) {
 		gap_panels, teleport_layers, teleport_islands);
 	printf("  Link Navi obstacles and cubes on %d layers: water %d, tree %d, flames %d, cyclone %d, cloud %d; P-Code cubes %d (%d told), tolls %d\n",
 		block_layers, block_kinds[0], block_kinds[1], block_kinds[2], block_kinds[3], block_kinds[4], block_kinds[BLOCK_PCODE], tellers, block_kinds[BLOCK_TOLL]);
+	printf("  the Undernet's doors: %d skull doors, %d number doors\n", block_kinds[BLOCK_SKULL], block_kinds[BLOCK_NUMBER]);
 	CHECK(tellers == block_kinds[BLOCK_PCODE], "%d P-Code cubes, %d navis to tell their codes", block_kinds[BLOCK_PCODE], tellers);
 	printf("  P-Code tellers a walk of %d at least from their cubes\n", teller_walk_min);
 	printf("  invisible paths on %d layers\n", path_layers);

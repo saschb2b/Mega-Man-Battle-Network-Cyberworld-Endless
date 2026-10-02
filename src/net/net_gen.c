@@ -854,28 +854,53 @@ static int landmark(const LayerKit *kit) {
 
 /* Rows of three a panel apart, as the originals line up their trees past a
  * rim and their gravestones in one walled hole of three panels. */
+/* A row of three trees past a room's back rim, as Green's originals line
+ * theirs up. */
+static bool tree_row(const Room *m) {
+	int s = rng_range(0, 1);
+	Rim rim = back_rim(m, s);
+	if (rim.len < 3) rim = back_rim(m, s ^ 1);
+	if (rim.len < 3) return false;
+	int mid = rim.u0 + rim.len / 2, ok = 1, xs[3], ys[3];
+	for (int k = -1; k <= 1; ++k) {
+		past_cell(m, rim.s, mid + k, 1, &xs[k + 1], &ys[k + 1]);
+		ok &= far_from_way(xs[k + 1], ys[k + 1]) >= 2 && !prop_at_cell(xs[k + 1], ys[k + 1]);
+	}
+	if (!ok) return false;
+	for (int k = 0; k < 3; ++k) add_sprite(LOOK_TREE, xs[k], ys[k]);
+	return true;
+}
+
+/* A row of two or three braziers past a room's back rim, as the Undernet's
+ * originals line theirs up: the flames of hatred a number door counts
+ * (issue #47). */
+static bool brazier_row(const Room *m) {
+	int s = rng_range(0, 1), len = 2 + rng_range(0, 1);
+	Rim rim = back_rim(m, s);
+	if (rim.len < len) rim = back_rim(m, s ^ 1);
+	if (rim.len < len) return false;
+	int first = rim.u0 + (rim.len - len) / 2, xs[3], ys[3];
+	for (int k = 0; k < len; ++k) {
+		past_cell(m, rim.s, first + k, 1, &xs[k], &ys[k]);
+		if (far_from_way(xs[k], ys[k]) < 2 || prop_at_cell(xs[k], ys[k])) return false;
+	}
+	for (int k = 0; k < len; ++k) add_sprite(LOOK_BRAZIER, xs[k], ys[k]);
+	return true;
+}
+
 static void rows(const LayerKit *kit, int skip, const int *order, int n) {
-	int trees = 0, graves = 0;
+	int trees = 0, graves = 0, fires = 0;
 	for (int i = 0; i < n; ++i) {
 		int r = order[i];
 		const Room *m = &layer.rooms[r];
 		if (r == skip || r == 0 || r == layer.arena || !room_bare(m)) continue;
-		if ((kit->looks & (1u << LOOK_TREE)) && trees < 2 && m->w * m->h >= 9) {
-			int s = rng_range(0, 1);
-			Rim rim = back_rim(m, s);
-			if (rim.len < 3) rim = back_rim(m, s ^ 1);
-			if (rim.len >= 3) {
-				int mid = rim.u0 + rim.len / 2, ok = 1, xs[3], ys[3];
-				for (int k = -1; k <= 1; ++k) {
-					past_cell(m, rim.s, mid + k, 1, &xs[k + 1], &ys[k + 1]);
-					ok &= far_from_way(xs[k + 1], ys[k + 1]) >= 2 && !prop_at_cell(xs[k + 1], ys[k + 1]);
-				}
-				if (ok) {
-					for (int k = 0; k < 3; ++k) add_sprite(LOOK_TREE, xs[k], ys[k]);
-					++trees;
-					continue;
-				}
-			}
+		if (!(kit->looks & (1u << LOOK_TREE)) && (kit->looks & (1u << LOOK_BRAZIER)) && fires < 3 && m->w * m->h >= 9 && brazier_row(m)) {
+			++fires;
+			continue;
+		}
+		if ((kit->looks & (1u << LOOK_TREE)) && trees < 2 && m->w * m->h >= 9 && tree_row(m)) {
+			++trees;
+			continue;
 		}
 		if ((kit->looks & (1u << LOOK_GRAVE)) && graves < 2 && m->w >= 5 && m->h >= 5) {
 			int dir = rng_range(0, 1);
@@ -1629,6 +1654,17 @@ static void plan_obstacle(int kind) {
 	hush(bx, by);
 }
 
+/* A cube's lock (layer_cube_kind): a number door asks how many braziers
+ * burn on the layer, so one with fewer than two asks a P-Code instead (a
+ * skull door the Net Dealer did not plan for would want a WWW-ID he never
+ * stocked; issue #47). */
+static int cube_kind(int depth, int biome, int kind) {
+	layer.braziers = 0;
+	for (int i = 0; i < layer.nprops; ++i) layer.braziers += layer.props[i].kind == PROP_SPRITE && layer.props[i].look == LOOK_BRAZIER;
+	int k = layer_cube_kind(depth, biome, kind);
+	return k == BLOCK_NUMBER && layer.braziers < 2 ? BLOCK_PCODE : k;
+}
+
 /* The layer's security cube asking a P-Code (issue #45), -1 none. */
 static int pcode_cube(void) {
 	for (int i = 0; i < layer.nblocks; ++i)
@@ -1886,7 +1922,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	}
 	int block = pieces & PIECE_OBSTACLE ? layer_block_kind(depth, biome) : -1;
 	if (block >= 0) plan_obstacle(block);
-	if (pieces & PIECE_CUBE) plan_obstacle(layer_cube_kind(biome));
+	if (pieces & PIECE_CUBE) plan_obstacle(cube_kind(depth, biome, kind));
 	npcs_held += layer.nblocks + (pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
 	npcs_held += pieces & PIECE_HIDDEN ? 2 : 0;          /* (an invisible path's data and the navi who hints at it) */
 	place_data(depth, kind, biome, size, order, n, &next);

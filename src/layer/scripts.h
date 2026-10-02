@@ -90,6 +90,12 @@ int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int nee
 int ta_cube_pcode(TextArchive *t, int present, int told, const char *code);
 int ta_cube_toll(TextArchive *t, int present, int price);
 int ta_pcode_teller(TextArchive *t, int face, const char *code, int told);
+/* The Undernet's doors (issue #47): a skull door opens for the WWW-ID held
+ * (key item `id`); a number door asks how many braziers burn on the layer,
+ * `answer`, as a choice of three (`seed` orders them), and a wrong answer
+ * seals it for the layer (flag `sealed`). */
+int ta_cube_skull(TextArchive *t, int present, int id);
+int ta_cube_number(TextArchive *t, int present, int sealed, int answer, unsigned seed);
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
 /* A collector's vault (docs/META.md, gates): its three chips (`code`

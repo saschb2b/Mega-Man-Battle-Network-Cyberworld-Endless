@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The Undernet's doors (issue #47).** The Undernet now locks its spurs
+  with BN6's own doors. A skull door lets only WWW members through: the
+  act's Net Dealer sells the WWW-ID, and one opens every skull door of the
+  run. A number door asks how many flames of hatred burn on the layer, so
+  count the braziers that now line its rooms; answer wrong and it seals
+  itself.
+- **The Net Dealer's keys always make his list.** With eight places, an
+  Unlocker could take the last and push off another key the act needed.
 - **Invisible paths (issue #46).** From the second act on, Seaside, Sky,
   the Undernet and the Nest can hide floor drawn as void, as BN6 does:
   from a walkway's tip or a platform's edge straight out to a lonely pad
