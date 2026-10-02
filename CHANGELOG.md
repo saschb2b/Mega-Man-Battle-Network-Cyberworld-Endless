@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The battle controls, said right (discussion #53).** Running from a
+  battle is L on the Custom screen, not L and R: a navi's tip and the
+  README said otherwise. The README now also says that R on the Custom
+  screen describes the chip or Cross under the cursor, and that SELECT
+  hides the Custom screen to show the field; a first-act navi tells you
+  so.
 - **CircusMan's tent marker stays on the field (issue #52).** The yellow
   mark on the panel his tent is about to drop on was drawn over the Custom
   screen's chips when it opened. It now hides while the Custom screen
