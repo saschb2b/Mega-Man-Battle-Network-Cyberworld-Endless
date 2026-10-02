@@ -46,7 +46,7 @@ the site.
 | `src/emu/` | The mGBA core, calls into the game (warps, chat), hooks on its code (`hook.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
 | `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
-| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers |
+| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers; the game's events from its hooks (`events.h`: battles in `encounter.c`, maps, choices and key items in `events.c`), taken up after each frame |
 | `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
 | `tests/test_core.c` | ROM-free unit tests; `tests/test_emu.c` the hooks on mGBA, with a ROM of its own bytes; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |

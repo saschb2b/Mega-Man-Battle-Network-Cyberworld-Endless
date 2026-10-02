@@ -89,13 +89,13 @@ static struct {
 	bool lost_duel;     /* MegaMan deleted in the rival's duel (the summary says so) */
 	char duel_verdict[400];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
-	int fragments_seen;    /* ScrtData held last frame: one more, and MegaMan says what it is for */
 	bool fragment_due;     /* ... once a talk can start */
-	unsigned spins_seen;   /* the Spins in the game's key items last frame (a bit per colour) */
 	bool spin_due;         /* the run's Spin picked up: MegaMan says what it does once a talk can start */
 	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
+	unsigned choices_due;  /* the layer's choices taken (EV_CHOICE), acted on once the chat box closes */
+	bool exit_shut;        /* the exit pad's warp-off flag as last written */
 	uint32_t battle_record;   /* the BattleSettings StartBattle was given (EV_BATTLE_START), 0 none since the last battle */
 	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
 	int foes;              /* viruses in the battle the game will start next */
@@ -417,6 +417,7 @@ static void goal_way(void) {
 static bool fits_beside_placed(int v);
 static bool fits_as_it_stands(int v);
 static int key_item(int id);
+static void drop_events(void);
 static void spins_sync(void);
 
 /* A program left off the board that cannot fit beside those on it: said
@@ -1152,7 +1153,7 @@ static bool build_layer(void) {
 		}
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
-	D.chosen = 0;
+	D.chosen = D.choices_due = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 
 	D.battles = 0;
@@ -1173,7 +1174,6 @@ static bool build_layer(void) {
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
 	D.layer_told = false;
-	D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
 	D.fragment_due = false;
 	D.spin_due = false;
 	D.duel = false;
@@ -1311,6 +1311,7 @@ static void programs_from_game(void) {
 static void forget_heard(void) { D.heard_act = D.dealer_act = 0; D.mail_quiet = false; D.mail_due = 0; }
 
 bool director_start_run(void) {
+	drop_events();
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
@@ -2243,15 +2244,6 @@ static void unwedge(void) {
  * profile found in the net, one a run (docs/META.md), and no other: a
  * program of another colour lies as its record draws it, and the drafts
  * offer only what fits so (navicust_set_spins). */
-static unsigned spins_in_game(void) {
-	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
-	if (items < BN6_EWRAM || items >= BN6_EWRAM_END) return 0;
-	unsigned mask = 0;
-	for (uint32_t c = 1; c <= 6; ++c)
-		if (emu_read8(items + 0x4F + c)) mask |= 1u << (c - 1);
-	return mask;
-}
-
 static void grant_spins(void) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
 	if (items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
@@ -2276,20 +2268,26 @@ static void grant_spins(void) {
 static void spins_sync(void) {
 	navicust_set_spins(meta_spins());
 	grant_spins();
-	D.spins_seen = spins_in_game();
 }
 
-/* The run's Spin picked up from its Mystery Data (the game gives the key
- * item): the profile keeps it, and MegaMan says what it does. */
-static void spin_watch(void) {
-	unsigned now = spins_in_game(), fresh = now & ~D.spins_seen;
-	D.spins_seen = now;
+/* A key item the game gave (EV_ITEM_GIVEN): a ScrtData, which MegaMan
+ * says is for; the run's Spin, from its Mystery Data, which the profile
+ * keeps and MegaMan says what it does. */
+static void item_given(int item) {
+	if (item == SCRIPTS_SECRET_DATA) {
+		int n = key_item(SCRIPTS_SECRET_DATA);
+		if (n > run.fragments && D.objs.fragment_found >= 0) D.fragment_due = true;
+		run.fragments = n;
+	}
 	int c = D.objs.spin_colour;
-	if (c && (fresh >> (c - 1) & 1) && !(meta_spins() >> (c - 1) & 1)) {
+	if (c && item == 0x4F + c && !(meta_spins() >> (c - 1) & 1)) {
 		meta_spin_found(c);
 		navicust_set_spins(meta_spins());
 		D.spin_due = D.objs.spin_found >= 0;
 	}
+}
+
+static void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
 }
 
@@ -2628,6 +2626,7 @@ static void town_update(void) {
 }
 
 bool director_start_layer(void) {
+	drop_events();
 	no_room_told = -1;
 	forget_heard();
 	D.town = false;
@@ -2706,6 +2705,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 }
 
 bool director_resume(void) {
+	drop_events();
 	no_room_told = -1;
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
@@ -2723,10 +2723,8 @@ bool director_resume(void) {
 	if (emu_load_state(path)) {
 		lock_run();
 		spins_sync();
-		/* (the ScrtData the save holds, which building the layer could not
-		 * read yet: MegaMan took the saved one for a new find, "Our second
-		 * ScrtData!" with one in hand) */
-		D.fragments_seen = key_item(SCRIPTS_SECRET_DATA);
+		/* (the ScrtData the state holds, as the game counts them) */
+		run.fragments = key_item(SCRIPTS_SECRET_DATA);
 		/* the shops' data in RAM is the saved one: this layer's again,
 		 * what was bought before the save still bought (a CONTINUE had
 		 * restocked both shops); another build's layer, afresh */
@@ -2859,9 +2857,11 @@ static void duel_verdict(bool won) {
 
 /* A Yes in a layer's choice: a challenge battle, or into a side layer. */
 static bool act_on_choices(void) {
-	if (emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
+	if (!D.choices_due || emu_read8(BN6_CHATBOX)) return false;   /* once the chat box has closed */
 	for (int i = 0; i < D.objs.nchoices; ++i) {
-		if ((D.chosen & (1u << i)) || !flag_get(D.objs.choice[i].flag)) continue;
+		if (!(D.choices_due & (1u << i))) continue;
+		D.choices_due &= ~(1u << i);
+		if (D.chosen & (1u << i)) continue;
 		D.chosen |= 1u << i;
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
@@ -3150,15 +3150,40 @@ static void last_stop(int cx, int cy) {
 	talk_start(buf, FACE_MEGAMAN);
 }
 
+/* The exit pad shut while a guardian stands: its warp-off flag, written
+ * as the guardian's state changes and after the game enters a map (bn6f
+ * EnterMap clears the map's flags, 0x1640-0x16FF: EV_MAP_ENTER). */
+static void exit_flag(bool entered) {
+	bool shut = !boss_exit_open();
+	if (!entered && shut == D.exit_shut) return;
+	D.exit_shut = shut;
+	if (shut) flag_set(BN6_FLAG_WARP_OFF + 1);
+	else flag_clear(BN6_FLAG_WARP_OFF + 1);
+}
+
 /* What the hooks saw in the frames since the last update (events.h). */
 static void take_events(void) {
 	HookEvent ev[32];
 	int n = emu_hook_events(ev, 32);
+	bool on_layer = D.active && !D.town;
 	for (int i = 0; i < n; ++i)
 		switch (ev[i].kind) {
 		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; break;
 		case EV_MEGAMAN_HIT: D.duel_hit = true; break;
+		case EV_MAP_ENTER: if (on_layer) exit_flag(true); break;
+		case EV_CHOICE:
+			/* (still set: one the layer's setup cleared was a story's) */
+			for (int k = 0; on_layer && k < D.objs.nchoices; ++k)
+				if (D.objs.choice[k].flag == (int)ev[i].r[0] && flag_get(D.objs.choice[k].flag)) D.choices_due |= 1u << k;
+			break;
+		case EV_ITEM_GIVEN: if (on_layer) item_given((int)ev[i].r[0]); break;
 		}
+}
+
+/* The events queued before the run (the boot's), dropped. */
+static void drop_events(void) {
+	HookEvent ev[32];
+	while (emu_hook_events(ev, 32) == 32) {}
 }
 
 void director_update(void) {
@@ -3354,17 +3379,11 @@ void director_update(void) {
 		profile_save();
 	}
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
-	run.fragments = key_item(SCRIPTS_SECRET_DATA);
-	if (run.fragments > D.fragments_seen && D.objs.fragment_found >= 0) D.fragment_due = true;
-	D.fragments_seen = run.fragments;
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
 		D.fragment_due = false;
 		D.fragments_told = run.fragments;
 	}
-	/* a guardian keeps the exit pad shut (the game clears the map's warp
-	 * flags when it enters a map) */
-	if (!boss_exit_open()) flag_set(BN6_FLAG_WARP_OFF + 1);
-	else flag_clear(BN6_FLAG_WARP_OFF + 1);
+	exit_flag(false);
 	boss_update();
 	/* (after the last card: the area cleared on the way here) */
 	if (D.area_card && ++D.arrived >= AREA_CARD_AT && !cinema_busy()) {

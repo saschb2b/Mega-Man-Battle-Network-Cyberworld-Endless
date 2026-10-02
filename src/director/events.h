@@ -7,6 +7,13 @@
 enum {
 	EV_BATTLE_START = 1,   /* StartBattle, as any battle begins: r0 its record */
 	EV_MEGAMAN_HIT,        /* MegaMan's HP lowered, in a watched battle (emu_battle_watch) */
+	EV_MAP_ENTER,          /* EnterMap: a map entered, its flags cleared */
+	EV_CHOICE,             /* SetEventFlag on a layer's choice flag: r0 the flag */
+	EV_ITEM_GIVEN,         /* GiveItem: r0 the key item, r1 how many */
 };
+
+/* The hooks for the map, flag and key item events, once the core is up
+ * (the battle's: emu_encounters_install). */
+void events_install(void);
 
 #endif

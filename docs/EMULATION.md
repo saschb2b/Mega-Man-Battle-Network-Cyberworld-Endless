@@ -273,11 +273,25 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x080AC180` | the reward pick (bn6f `sub_80AA910`) | answer: its enemies' reward rows rewritten first | once a battle, as it ends |
 | `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
 | `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
+| `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
+| `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) | about once a frame on the map |
+| `0x0803CD6C` | GiveItem | event: a key item given (a ScrtData, the run's Spin) | once an item |
 
-The last two are set as the duel begins and taken off as it ends, so the
-other battles carry no hook a frame per object. They replaced reading the
-battle every frame: its objects for MegaMan's HP and ProtoMan's, the
-battle state for its record, and every 16 frames its enemies' rows.
+The duel's two are set as the duel begins and taken off as it ends, so
+the other battles carry no hook a frame per object. The hooks replaced
+reading the game every frame: the battle's objects for MegaMan's HP and
+ProtoMan's, the battle state for its record, every 16 frames the
+enemies' reward rows, the flags of the layer's choices, the key items
+for a ScrtData or the Spin picked up, and the exit pad's warp-off flag,
+written every frame because EnterMap clears the map's flags (`0x1640`-
+`0x16FF`): now written as a map is entered and as the guardian's exit
+opens.
+
+What stays read a frame at a time, where a hook would only move the read:
+whether MegaMan walks the map, battles or reads a menu (`on_map`, the
+game mode, GAME OVER among them); the exit pad's warp under way and its
+arrival; the frames on a map not the layer's before he is warped back;
+the duel's DeleteTime, which its HUD shows as it runs.
 
 `tests/test_emu.c` runs a ROM of the test's own bytes on mGBA (its
 `GBAIsROM` wants `0xEA` at offset 3 and `0x96` at `0xB2`, nothing more):

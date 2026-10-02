@@ -205,6 +205,11 @@
 
 /* ROM code */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */
+/* Map, flag and key item events, by hook (src/director/events.c; Gregar's
+ * as Falzar's where not said) */
+#define BN6_ENTER_MAP         0x08005152u /* bn6f EnterMap (game state 0x00, 0x08005148) past its wait for the fade: once a map is entered, the map flags 0x1640-0x16FF cleared just after */
+#define BN6_SET_EVENT_FLAG    0x0802F114u /* SetEventFlag: r0 the flag (SetEventFlagFromImmediate, 0x0802F110, falls into it); the chat's EA 00 command calls it */
+#define BN6_GIVE_ITEM         0x0803CD6Cu /* GiveItem (Falzar 0x0803CD98): r0 the key item, r1 how many */
 #define BN6_CHAT_RUN_SCRIPT   0x08040359u /* chatbox_runScript (archive, script index) */
 #define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags) */
 #define BN6_WARP_DEPART_JACK_OUT 0x080059B5u /* warp departure 8: the jack-out cutscene, then warp */

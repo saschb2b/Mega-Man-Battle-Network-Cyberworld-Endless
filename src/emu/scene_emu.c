@@ -13,6 +13,7 @@
 #include "scripts.h"
 #include "encounter.h"
 #include "emu.h"
+#include "events.h"
 #include "game.h"
 #include "gfx.h"
 #include "platform.h"
@@ -62,10 +63,12 @@ static void enter(void) {
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
 		emu_encounters_install();
+		events_install();
 		director_resume();
 	} else {
 		emu_boot();
 		emu_encounters_install();
+		events_install();
 		if (emu_start_in_town) director_start_run();
 		else director_start_layer();
 		emu_start_in_town = false;
