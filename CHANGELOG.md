@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 (2026-10-02)
 
 - **The game on iPhone and iPad.** It comes through AltStore Classic or
   SideStore, which install it with your own Apple ID and keep it up to
