@@ -108,11 +108,12 @@ static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
 	seen[sy][sx] = 1;
 	while (h < t) {
 		int x = qx[h], y = qy[h++];
-		++n;
+		n += layer.cell[y][x] == C_PATH;
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 		for (int k = 0; k < 4; ++k) {
 			int nx = x + d[k][0], ny = y + d[k][1];
-			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || seen[ny][nx] || layer.cell[ny][nx] != C_PATH) continue;
+			/* (4: a teleport's way, gaps_bridge) */
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || seen[ny][nx] || (layer.cell[ny][nx] != C_PATH && layer.cell[ny][nx] != 4)) continue;
 			seen[ny][nx] = 1;
 			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
 		}
@@ -157,7 +158,7 @@ static bool beside_narrow(int x, int y) {
 
 /* A kit as the surface areas' (stairs both ways, a two-panel counter each
  * way) with every sprite prop, and one with none of them. */
-static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu, true };
+static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu, true, true };
 static const LayerKit flat = { 0u, 0, { 0, 0 }, 0u, false };
 
 /* A counter's cells: the aisle behind it (d 0), its own (1) and the floor
@@ -216,15 +217,28 @@ static int walk_to(int from, int type) {
 	return -1;
 }
 
-/* Rush's gaps as floor (Rush lying there) or void again. */
+/* Rush's gaps as floor (Rush lying there) or void again; and a teleport
+ * island's pair joined by a line of floor, as the teleport joins them
+ * (cells marked 4, back to void after). */
 static void gaps_bridge(bool on) {
 	for (int g = 0; g < layer.ngaps; ++g)
 		for (int k = 1; k <= layer.gap[g].len; ++k)
 			layer.cell[layer.gap[g].y + dir_dy[layer.gap[g].dir] * k][layer.gap[g].x + dir_dx[layer.gap[g].dir] * k] = on ? C_PATH : C_VOID;
+	if (!layer.teleport_island) return;
+	int x = layer.teleport_x[1], y = layer.teleport_y[1], tx = layer.teleport_x[0], ty = layer.teleport_y[0];
+	while (x != tx || y != ty) {
+		if (x != tx) x += x < tx ? 1 : -1; else y += y < ty ? 1 : -1;
+		if (on && layer.cell[y][x] == C_VOID) layer.cell[y][x] = 4;
+		else if (!on && layer.cell[y][x] == 4) layer.cell[y][x] = C_VOID;
+	}
+	for (int j = 0; j < MAP_H; ++j)
+		for (int i = 0; i < MAP_W; ++i)
+			if (layer.cell[j][i] == 4) layer.cell[j][i] = on ? 4 : C_VOID;
 }
 
-/* Whether room r is a Rush gap's island. */
+/* Whether room r is a Rush gap's island, or a teleport's. */
 static bool island_room(int r) {
+	if (layer.teleport_island && layer.rooms[r].ax == layer.teleport_x[0] && layer.rooms[r].ay == layer.teleport_y[0]) return true;
 	for (int g = 0; g < layer.ngaps; ++g) {
 		const NetGap *p = &layer.gap[g];
 		int mx = p->x + dir_dx[p->dir] * (p->len + 2), my = p->y + dir_dy[p->dir] * (p->len + 2);
@@ -233,7 +247,29 @@ static bool island_room(int r) {
 	return false;
 }
 
-static int gap_layers, gap_panels;
+static int gap_layers, gap_panels, teleport_layers, teleport_islands;
+
+/* A teleport pair (issue #44): one panel where a long detour ends, or a pad
+ * of its own past the void, and one two to six off the way, never on it;
+ * floor all round each and nothing standing there (the gem's, the
+ * trigger's), but the island's one data on a corner. */
+static void teleports_check(uint32_t seed) {
+	if (!layer.nteleports) return;
+	++teleport_layers;
+	teleport_islands += layer.teleport_island;
+	for (int k = 0; k < 2; ++k) {
+		int x = layer.teleport_x[k], y = layer.teleport_y[k], held = 0;
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) {
+				CHECK(layer.cell[y + dy][x + dx] == C_PATH && !layer_on_way(x + dx, y + dy), "seed %u: a teleport without floor round it, or by the way", seed);
+				for (int i = 0; i < layer.nobj; ++i)
+					if ((int)layer.obj[i].x == x + dx && (int)layer.obj[i].y == y + dy) held += dx && dy && layer.obj[i].type == OBJ_MYSTERY ? 1 : 100;
+			}
+		CHECK(held == (k == 0 && layer.teleport_island), "seed %u: a teleport's pad holds %d", seed, held);
+	}
+	int da = layer_detour(layer.teleport_x[0], layer.teleport_y[0]), db = layer_detour(layer.teleport_x[1], layer.teleport_y[1]);
+	CHECK((layer.teleport_island ? da < 0 : da >= 7) && db >= 2 && db <= 6, "seed %u: a teleport pair %d and %d off the way", seed, da, db);
+}
 
 /* The way never needs Rush: the exit (or the guardian) is reached with
  * every gap open; each gap's stand stands off the way, and its island,
@@ -317,6 +353,7 @@ static void test_generation(void) {
 		 * the one thing on it; bridged, as Rush lies there once called,
 		 * every panel is reached) */
 		gaps_check(seed, start, seen);
+		teleports_check(seed);
 		gaps_bridge(true);
 		int cells = 0;
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cells += layer.cell[y][x] == C_PATH;
@@ -541,7 +578,8 @@ static void test_generation(void) {
 	printf("  Mystery Data: %d blue, %.1f panels off the way on average, %d of them 3 or more; %d green, %.1f\n", blue,
 		(double)blue_walk / (blue ? blue : 1), blue_far, green, (double)green_walk / (green ? green : 1));
 	CHECK(blue_far * 10 >= blue * 9, "only %d of %d blue data where a detour ends", blue_far, blue);
-	printf("  purple data on %d of %d layers; Rush gaps on %d, %d panels in all\n", purples, layers, gap_layers, gap_panels);
+	printf("  purple data on %d of %d layers; Rush gaps on %d, %d panels in all; teleport pairs on %d, %d to an island\n", purples, layers, gap_layers,
+		gap_panels, teleport_layers, teleport_islands);
 	CHECK(purples * 10 >= layers && purples * 2 <= layers, "purple data on %d of %d layers", purples, layers);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);

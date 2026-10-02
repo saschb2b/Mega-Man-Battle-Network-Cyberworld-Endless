@@ -118,6 +118,9 @@ typedef struct {
 	int nprops;
 	NetGap gap[MAX_GAPS];
 	int ngaps;
+	int teleport_x[2], teleport_y[2];   /* a teleport pair's two panels, when nteleports is 1 (issue #44): */
+	int nteleports;                     /* the first a pad of its own past the void when teleport_island */
+	bool teleport_island;
 } Layer;
 
 extern Layer layer;
@@ -132,6 +135,7 @@ typedef struct {
 	int counter_len[2];
 	unsigned looks;   /* the sprite props its maps have (bit per LOOK_*) */
 	bool emblem;      /* its maps set an emblem in their floors */
+	bool gem;         /* its maps mark their teleport pads with BN6's gem (issue #44) */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */
@@ -164,7 +168,7 @@ int layer_detour(int x, int y);
  * from the run's seed and the depth alone. How many of the act's layers
  * from `depth` on hold `piece` (a Net Dealer stocks its key); a Rush gap's
  * length in panels. */
-enum { PIECE_PURPLE = 1, PIECE_RUSH = 2 };
+enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4 };
 unsigned layer_pieces(int depth, int biome, int kind);
 bool layer_purple(int depth, int biome, int kind);
 int layer_pieces_ahead(int depth, unsigned piece);

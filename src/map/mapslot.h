@@ -41,6 +41,10 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 /* Where the layer's exit pad (warp 1) leads: world (x, y) of map (group,
  * number), facing `facing`. */
 void mapslot_exit_to(int group, int number, int x, int y, int facing);
+/* Warp entry `entry` (2-15, its pads' trigger value) of the layer's map: a
+ * teleport within map (group, number) to world (x, y), as BN6's gem pads
+ * warp (departure 12, the camera scrolling along: issue #44). */
+void mapslot_teleport(int entry, int group, int number, int x, int y, int facing);
 
 /* The map's theme: every chapter's map music list plays `song` there. The
  * lists hold one real-world map (the town) and one internet map (the

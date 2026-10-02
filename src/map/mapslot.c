@@ -185,6 +185,14 @@ void mapslot_exit_to(int group, int number, int x, int y, int facing) {
 	emu_write(WARP_LIST, e, sizeof e);
 }
 
+void mapslot_teleport(int entry, int group, int number, int x, int y, int facing) {
+	if (entry < 2 || entry > 15) return;
+	uint8_t e[16] = { (uint8_t)group, (uint8_t)number, 0x0C, (uint8_t)facing };
+	put32(e + 4, (uint32_t)x << 16);
+	put32(e + 8, (uint32_t)y << 16);
+	emu_write(WARP_LIST + 16u * (uint32_t)(entry - 1), e, sizeof e);
+}
+
 /* The map's list in the Mystery Data table. */
 static uint32_t mystery_slot(int group, int number) {
 	for (uint32_t a = BN6_MYSTERY_DATA; emu_read32(a) != 1; a += 8)

@@ -429,17 +429,21 @@ A map loads at most 12 compressed sprites and 0x8800 bytes of them (the
 game's loader); a prop whose sprite no longer fits is left out whole, not
 shown as noise.
 
-### Pads' centrepieces (built)
+### Pads' centrepieces: warps only (built)
 
-The originals' 3x3 pads carry a walkable ornament on their middle panel,
-second-layer art over the floor: the red gem (16 of them over the surface
-areas), the link ring and the cube on its round base, each 28 tiles, the
-same tiles in Central, Seaside, Green and Sky in each area's colours.
-`props_learn_ornament` finds them in an area's own maps by their tiles
-(0x379, 0x372, 0x375) and cuts each on the corner of the panel it lies
-on; `paste_ornaments` sets one on the middle of every pad at ground level
-with nothing standing there, the red gem three times in five, from the
-layer's seed (the floor and the layout unchanged).
+The originals' 3x3 pads carry art on their middle panel, second-layer tiles
+over the floor: the red gem, the link ring and the cube on its round base,
+each 28 tiles, the same tiles in Central, Seaside, Green and Sky in each
+area's colours. `props_learn_ornament` finds them in an area's own maps by
+their tiles (0x379, 0x372, 0x375) and cuts each on the corner of the panel
+it lies on. None of them is decoration: all 29 in BN6's net maps stand on a
+warp pad (the gem on a teleport within the map, always one of a pair; the
+cube on a link to a homepage; the ring on a link to a comp or another
+area). They were set on the middle of every pad, so most layers showed warps
+that did nothing, which players take for warps; the owner ruled it out. Now
+only a teleport pair's two pads carry the gem (`paste_ornaments`, Teleports
+below), and a pad without one keeps its plain floor, or its frame's empty
+recess, as BN6's pads without a warp do.
 
 ### Central's, Seaside's and Sky's framed pads (built)
 
@@ -630,3 +634,30 @@ a layer gives it what its own maps do.
 Over the tests' 300 layers, 62 hold a gap, 91 panels in all; the way
 never needs one, and each island is reached only across it, holding its
 one Mystery Data.
+
+### Teleports (built, issue #44)
+
+BN6's gem marks a teleport pad: step on it and MegaMan beams to its pair
+within the map, the camera scrolling along (warp-list departure 12; 18 gems
+in the surface maps, all in pairs: Green Area 1's four pairs, Sky's three,
+Central's one). A layer's pair (`plan_teleport`, `carve_teleport_island` in
+`net_gen.c`) is one of two things, in Green, Sky and Central, where the
+act's plan calls for one (`net_pieces.c`) and the area's maps give the gem's
+art:
+
+- **A quick way back:** one gem where a long detour ends (7 panels off the
+  way or more), the other 2 to 6 off the way, the walk between them 16
+  panels or more, so the long way in has a short way out.
+- **Else an island of its own,** as ACDC's homepage keeps an isolated square
+  reached by its teleport alone: a 3x3 pad past the void (two void panels
+  round it, inside the camera's window, the nearest such to the gem near
+  the way, so it is seen from there), one blue Mystery Data on its corner
+  away from its gem.
+
+Each gem stands on a panel with floor all round it (its art draws its own
+diamond over them) and never on or beside the way (its trigger reaches a
+cell into the panels round it): no one is warped walking by. The pads'
+triggers take warps 2 and 3, each leading to the other's middle
+(`mapslot_teleport`, the layer map's warp list). Over the tests' 300
+layers, 21 hold a pair, 17 of them to an island.
+

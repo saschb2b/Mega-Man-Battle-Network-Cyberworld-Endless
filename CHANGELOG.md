@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **No more pads that look like warps and aren't.** A layer's pads wore
+  BN6's gem, ring or cube in their middle as decoration, but in BN6 every
+  one of them is a warp: the gem a teleport, the cube a homepage's link,
+  the ring another area's. Pads now wear them only where they warp.
+- **Teleports (issue #44).** In Green, Sky and Central, a layer can hold a
+  pair of BN6's gem pads: step on one and MegaMan beams to the other, the
+  camera scrolling along. Either a quick way back from the end of a long
+  detour to the way, or the only way to a pad of its own out in the void,
+  with a blue Mystery Data on it.
 - **Rush's bone gaps (issue #14).** As in BN6's net, a layer can hold a
   gap of one to three panels with bones over it, a walkway aimed across
   it at a pad of its own with a blue Mystery Data on it. Hold as many

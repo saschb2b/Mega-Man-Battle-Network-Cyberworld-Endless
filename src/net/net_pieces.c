@@ -10,12 +10,13 @@
  * the epic's Research 1): purple data in every area but the Secret Area,
  * the most in the Graveyard and the Undernet; Rush's bone gaps in
  * Central, Seaside, Green, Sky, the Undernet and ACDC's homepage, the
- * longest in Sky. */
-static const struct { uint8_t purple, rush, rush_len; } area_pieces[BIOME_COUNT] = {
-	[BIOME_CENTRAL] = { 2, 3, 2 },
-	[BIOME_SEASIDE] = { 2, 2, 1 },
-	[BIOME_SKY] = { 2, 3, 3 },
-	[BIOME_GREEN] = { 2, 3, 1 },
+ * longest in Sky; teleport pairs where their gem marks them, Green's four
+ * in Green Area 1, Sky's three, Central's one. */
+static const struct { uint8_t purple, rush, rush_len, teleport; } area_pieces[BIOME_COUNT] = {
+	[BIOME_CENTRAL] = { 2, 3, 2, 1 },
+	[BIOME_SEASIDE] = { 2, 2, 1, 0 },
+	[BIOME_SKY] = { 2, 3, 3, 3 },
+	[BIOME_GREEN] = { 2, 3, 1, 4 },
 	[BIOME_GRAVEYARD] = { 4, 0, 0 },
 	[BIOME_UNDERNET] = { 4, 2, 2 },
 	[BIOME_SECRET] = { 0, 0, 0 },
@@ -56,13 +57,14 @@ unsigned layer_pieces(int depth, int biome, int kind) {
 	 * purple data) */
 	/* (no Rush before a guardian: his cutscene restarts every NPC script on
 	 * the map, the guardian's actors too) */
-	int w[3] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush, 2 };
-	unsigned bits[3] = { PIECE_PURPLE, PIECE_RUSH, 0 }, got = 0;
+	int w[4] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
+		area_pieces[biome].teleport, 2 };
+	unsigned bits[4] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, 0 }, got = 0;
 	for (int k = 0; k < budget; ++k) {
 		int total = 0;
-		for (int i = 0; i < 3; ++i) total += got & bits[i] ? 0 : w[i];
+		for (int i = 0; i < 4; ++i) total += got & bits[i] ? 0 : w[i];
 		int roll = (int)((h >> (8 + 8 * k)) % (uint32_t)total);
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 4; ++i) {
 			if (got & bits[i]) continue;
 			if (roll < w[i]) { got |= bits[i]; break; }
 			roll -= w[i];

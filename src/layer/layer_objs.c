@@ -284,6 +284,21 @@ static bool official_duel_prize(int level) {
 	return layer_has(OBJ_DUEL) && !layer_objs_duel_later && rival_clearance() >= level;
 }
 
+/* The layer's warp pads: the exit's (warp 1), and a teleport pair's (issue
+ * #44), each warping to the other within the map (warps 2 and 3). */
+static void set_pads(int group, int number, int ex, int ey) {
+	CoordPad pads[3] = { { ex, ey, 1 } };
+	int n = 1;
+	for (int k = 0; k < 2 && layer.nteleports; ++k) {
+		int x, y, px, py;
+		netmap_world(layer.teleport_x[k], layer.teleport_y[k], &x, &y);
+		netmap_world(layer.teleport_x[1 - k], layer.teleport_y[1 - k], &px, &py);
+		pads[n++] = (CoordPad){ x, y, 2 + k };
+		mapslot_teleport(2 + k, group, number, px, py, 4);
+	}
+	netmap_set_pads(pads, n);
+}
+
 /* The best of the layer's Mystery Data, the first of them (the farthest
  * detour's: net_gen.c places those first), among the 16 the map holds; -1
  * none. */
@@ -476,9 +491,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_RETURN: {
 			int pad = o->type == OBJ_EXIT ? SPR_EXIT_PAD : SPR_RETURN_PAD;
 			out->exit_x = wx; out->exit_y = wy;
-			/* the game's own warp pad: trigger cells taking warp 1 */
-			CoordPad exit = { wx, wy, 1 };
-			netmap_set_pads(&exit, 1);
+			/* the game's own warp pad: trigger cells taking warp 1; and a
+			 * teleport pair's, warps 2 and 3 to each other */
+			set_pads(group, number, wx, wy);
 			need_sprite(&npcs, 7, pad);
 			/* a guardian's exit shows once the guardian is beaten */
 			if (npcs.n < 32)

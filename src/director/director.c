@@ -1728,8 +1728,8 @@ static void map_cells(char g[MAP_H][MAP_W + 1], int box[4]) {
 		}
 }
 
-/* ... and over them: ~ a Rush gap's panels, * the arrow's walk, + where it
- * aims, letters the objects, @ MegaMan at panel (cx, cy). */
+/* ... and over them: ~ a Rush gap's panels, W a teleport, * the arrow's
+ * walk, + where it aims, letters the objects, @ MegaMan at panel (cx, cy). */
 static void state_map(FILE *f, int cx, int cy) {
 	goal_way();
 	static char g[MAP_H][MAP_W + 1];
@@ -1737,6 +1737,7 @@ static void state_map(FILE *f, int cx, int cy) {
 	map_cells(g, box);
 	for (int k = 0; k < layer.ngaps; ++k)
 		for (int j = 1; j <= layer.gap[k].len; ++j) g[layer.gap[k].y + dir_dy[layer.gap[k].dir] * j][layer.gap[k].x + dir_dx[layer.gap[k].dir] * j] = '~';
+	for (int k = 0; k < 2 && layer.nteleports; ++k) g[layer.teleport_y[k]][layer.teleport_x[k]] = 'W';
 	for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 	if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
 	for (int i = 0; i < layer.nobj; ++i) {

@@ -1326,6 +1326,116 @@ static void carve_gap(const GapSite *g, int rise) {
 	if (o) o->param = g->len >= 2 ? 2 : 1;
 }
 
+/* ---- Teleports (issue #44) ----
+ * BN6's gem marks a teleport pad, always one of a pair, each warping
+ * MegaMan to the other within the map (Green Area 1 has four pairs): never
+ * decoration. A layer's pair is a quick way back: one pad where a long
+ * detour ends, the other by the way, as far from it on foot as can be;
+ * the detour's data lies on the far pad's rim, its middle the gem's. */
+static int walk_between(int ax, int ay, int bx, int by) {
+	static int16_t dist[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) dist[y][x] = -1;
+	int h = 0, t = 0;
+	dist[ay][ax] = 0;
+	qx[t] = (int16_t)ax; qy[t++] = (int16_t)ay;
+	while (h < t && dist[by][bx] < 0) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (!floor_cell(nx, ny) || dist[ny][nx] >= 0) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	return dist[by][bx];
+}
+
+/* Whether panel (x, y) can hold a teleport: ground floor all round it (the
+ * gem draws its own diamond over it), nothing standing there or beside it,
+ * no stair, not the arena, its detour `lo` to `hi` (its trigger reaches a
+ * cell into the panels round it, so the way keeps two panels off: no one
+ * is warped walking by). */
+static bool teleport_spot(int x, int y, int lo, int hi) {
+	if (detour[y][x] < lo || detour[y][x] > hi || in_arena(x, y) || near_stair(x, y)) return false;
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx) {
+			int i = x + dx, j = y + dy;
+			if (!floor_cell(i, j) || layer.level[j][i] || layer_on_way(i, j) || reserved[j][i] || object_at(i, j)) return false;
+		}
+	return cell_free(x, y) && !near_talker(x, y);
+}
+
+/* An island for a teleport's far pad, as ACDC's homepage has an isolated
+ * square reached by its teleport alone: a 3x3 of void with void two
+ * panels round it and no prop, inside the camera's window, the nearest
+ * such to (bx, by), so it is seen from the pad that leads there. */
+static bool teleport_island_site(int bx, int by, int *ox, int *oy) {
+	int best = 1 << 30;
+	for (int y = 3; y < MAP_H - 3; ++y)
+		for (int x = 3; x < MAP_W - 3; ++x) {
+			int d = abs(x - bx) + abs(y - by);
+			if (d >= best) continue;
+			bool ok = true;
+			for (int j = -3; j <= 3 && ok; ++j)
+				for (int i = -3; i <= 3 && ok; ++i)
+					ok = layer.cell[y + j][x + i] == C_VOID && !prop_at_cell(x + i, y + j) && (abs(i) > 1 || abs(j) > 1 || win_in(x + i, y + j));
+			if (ok) { best = d; *ox = x; *oy = y; }
+		}
+	return best < (1 << 30);
+}
+
+/* The pair: a quick way back from where a long detour ends to the way,
+ * else an island of its own (its data on a corner, carved last). */
+static void plan_teleport(void) {
+	int best = 0, ax = -1, ay = -1, bx = -1, by = -1;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (!teleport_spot(x, y, 7, 999)) continue;
+			for (int j = 1; j < MAP_H - 1; ++j)
+				for (int i = 1; i < MAP_W - 1; ++i) {
+					if (!teleport_spot(i, j, 2, 6)) continue;
+					/* (a walk saved of sixteen panels at least, or it is no way back) */
+					int w = walk_between(x, y, i, j);
+					if (w > best && w >= 16) { best = w; ax = x; ay = y; bx = i; by = j; }
+				}
+		}
+	if (ax < 0) {
+		/* (the island: by the pad near the way nearest the arrival's) */
+		for (int y = 1; y < MAP_H - 1 && bx < 0; ++y)
+			for (int x = 1; x < MAP_W - 1 && bx < 0; ++x)
+				if (teleport_spot(x, y, 2, 6)) { bx = x; by = y; }
+		if (bx < 0 || !teleport_island_site(bx, by, &ax, &ay)) return;
+		layer.teleport_island = true;
+	}
+	layer.teleport_x[0] = ax; layer.teleport_y[0] = ay;
+	layer.teleport_x[1] = bx; layer.teleport_y[1] = by;
+	layer.nteleports = 1;
+	for (int k = 0; k < 2; ++k)
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) reserved[layer.teleport_y[k] + dy][layer.teleport_x[k] + dx] = 1;
+}
+
+/* The teleport's island, once the rest stands: its 3x3, its data on the
+ * corner farthest from the pad it is seen from; nothing where it would
+ * leave the map too big for the game's tile map. */
+static void carve_teleport_island(int rise) {
+	int mx = layer.teleport_x[0], my = layer.teleport_y[0];
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	if (!fits(rise)) {
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		layer.nteleports = 0;
+		layer.teleport_island = false;
+		return;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	int cx = mx + (mx >= layer.teleport_x[1] ? 1 : -1), cy = my + (my >= layer.teleport_y[1] ? 1 : -1);
+	NetObj *o = add_obj(OBJ_MYSTERY, cx, cy);
+	if (o) o->param = 1;
+}
+
 /* Bystander navis with a word to share, two panels at least from what else
  * stands there (one beside a Mystery Data took MegaMan's A, and each A
  * that closed his words opened them again). */
@@ -1389,14 +1499,20 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	/* the act's set pieces (net_pieces.c): a Rush gap's stand kept clear,
 	 * its island carved once the rest stands */
 	GapSite gap = { -1, -1, 0, 0, -1 };
-	if (layer_pieces(depth, biome, kind) & PIECE_RUSH) {
-		measure_detours();
+	unsigned pieces = layer_pieces(depth, biome, kind);
+	measure_detours();
+	if (pieces & PIECE_RUSH) {
 		gap = plan_gap(layer_rush_len(depth, biome));
 		npcs_held = gap.x >= 0;
+	}
+	if ((pieces & PIECE_TELEPORT) && kit && kit->gem) {
+		plan_teleport();
+		npcs_held += layer.teleport_island;   /* (the island's data, placed last) */
 	}
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
 	npcs_held = 0;
 	if (gap.x >= 0) carve_gap(&gap, rise);
+	if (layer.teleport_island) carve_teleport_island(rise);
 	emblems(kit);
 }

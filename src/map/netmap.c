@@ -544,26 +544,16 @@ static void paste_props(uint16_t *map, int tw, int th) {
 	}
 }
 
-/* The pads' centrepieces, walkable, on the middle panel of every pad at
- * ground level with nothing standing there, as the originals set theirs:
- * mostly the red gem, else the link ring or the cube (the layer's own
- * choice from its seed, the floor unchanged). */
+/* The teleports' gems (issue #44). Every centrepiece of BN6's net maps
+ * marks a warp (29 of them: the gem a teleport within the map, the cube a
+ * homepage's link, the ring a comp's or another area's), so none is set
+ * where no warp is: a pad that looks like a warp and does nothing lies. */
 static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
-	int have[3], n = 0;
-	for (int k = 0; k < 3; ++k) if (L->ornament[k].ok) have[n++] = k;
-	if (!n) return;
-	uint32_t r = cur->seed ^ 0x0A7E0u;
+	if (!L->ornament[0].ok) return;
 	size_t cells = (size_t)tw * th;
-	for (int i = 0; i < layer.nrooms; ++i) {
-		const Room *m = &layer.rooms[i];
-		int x = m->x + m->w / 2, y = m->y + m->h / 2;
-		if (m->kind != ROOM_PAD || layer.cell[y][x] != C_PATH || layer.level[y][x]) continue;
-		bool taken = false;
-		for (int o = 0; o < layer.nobj; ++o) taken |= (int)layer.obj[o].x == x && (int)layer.obj[o].y == y;
-		if (taken) continue;
-		r = r * 1103515245u + 12345u;
-		int roll = (int)((r >> 16) % 5);
-		const PropStamp *st = &L->ornament[have[roll < 3 ? 0 : (roll - 2) % n]];
+	for (int i = 0; i < 2 && layer.nteleports; ++i) {
+		int x = layer.teleport_x[i], y = layer.teleport_y[i];
+		const PropStamp *st = &L->ornament[0];
 		int A, B;
 		grid_to_panel(x, y, &A, &B);
 		int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
@@ -1055,6 +1045,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
 	kit->looks = na->looks;
 	kit->emblem = learned[area].emblem.ok;
+	kit->gem = learned[area].ornament[0].ok;
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */
@@ -1062,6 +1053,17 @@ static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int m
 	for (int j = y - margin; j < y + h + margin; ++j)
 		for (int i = x - margin; i < x + w + margin; ++i)
 			if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) locked[j][i] = 1;
+}
+
+/* The set pieces as generated: a teleport's panels with the floor round
+ * them (the gem's), a Rush gap's stand and the floor behind it, and its
+ * void panels with the void beside them. */
+static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
+	for (int k = 0; k < 2 && layer.nteleports; ++k) lock(locked, layer.teleport_x[k] - 1, layer.teleport_y[k] - 1, 3, 3, 0);
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
+	}
 }
 
 bool netmap_build_layer(int area, uint32_t seed) {
@@ -1093,12 +1095,7 @@ bool netmap_build_layer(int area, uint32_t seed) {
 		if (m->kind == ROOM_PAD || r == layer.arena) lock(locked, m->x, m->y, m->w, m->h, 0);
 	}
 	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, 2, 2, 2);
-	/* (a Rush gap as generated: its stand and the floor behind it, and its
-	 * void panels with the void beside them) */
-	for (int g = 0; g < layer.ngaps; ++g) {
-		const NetGap *p = &layer.gap[g];
-		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
-	}
+	lock_pieces(locked);
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x)
 			if (layer.level[y][x]) lock(locked, x, y, 1, 1, 2);
