@@ -14,14 +14,18 @@ const BEST_FOR = {
 	ios: 'For your iPhone or iPad', handheld: 'For your handheld', '3ds': 'For your New 3DS', browser: 'No install, any device',
 };
 
+// A system's entry in the list (data-os: the entries have no ids, so a
+// system in the address picks the best one without the page jumping down
+// to the list's own; the pick on top shows it already).
+const entryFor = (os) => document.querySelector(`#systems .entry[data-os="${CSS.escape(os)}"]`);
+
 // The best pick: the system's entry copied above the list, its steps open,
 // its downloads counted as the pick's (data-umami-event-slot).
 function pickBest(os) {
 	const best = document.getElementById('best');
-	const entry = document.getElementById(os);
+	const entry = entryFor(os);
 	if (!best || !entry) return;
 	const copy = entry.cloneNode(true);
-	copy.removeAttribute('id');
 	copy.classList.add('lit');
 	for (const d of copy.querySelectorAll('details')) d.open = true;
 	for (const a of copy.querySelectorAll('[data-umami-event]')) a.dataset.umamiEventSlot = 'best';
@@ -41,11 +45,14 @@ function pickBest(os) {
 		}
 	}
 	const asked = location.hash.slice(1);
-	const os = document.getElementById(asked)?.classList.contains('entry') ? asked : detectPlatform();
-	pickBest(os);
+	pickBest(asked && entryFor(asked) ? asked : detectPlatform());
+	// (a link on the page to another system, the Linux entry's to the
+	// Steam Deck's: the pick changes, and comes into view)
 	window.addEventListener('hashchange', () => {
 		const h = location.hash.slice(1);
-		if (document.getElementById(h)?.classList.contains('entry')) pickBest(h);
+		if (!h || !entryFor(h)) return;
+		pickBest(h);
+		document.getElementById('best').scrollIntoView({ behavior: 'smooth', block: 'start' });
 	});
 })();
 
@@ -134,7 +141,7 @@ document.addEventListener('click', async (e) => {
 	// (a pick this release has no file for, an iPhone's before its app or
 	// Android's without its APK: the browser, which needs none)
 	const best = document.getElementById('best');
-	if (!best.hidden && document.getElementById(best.dataset.os)?.dataset.missing) pickBest('browser');
+	if (!best.hidden && entryFor(best.dataset.os)?.dataset.missing) pickBest('browser');
 	// the 3DS title's link as a QR code, for FBI's Remote Install, which
 	// downloads a CIA and installs it on the HOME Menu
 	const cia = release.assets.find((x) => x.name === 'cyberworld-endless.cia');

@@ -56,13 +56,13 @@
 })();
 
 // ---- the way in: the hero's download button says whose download it leads
-// to, and opens the download page on that system ----
+// to; the download page leads with it, so the link stays the page's own
+// (an address naming the system had scrolled down to its entry in the
+// list, past the pick on top) ----
 
 (() => {
 	const mine = detectPlatform();
 	if (mine === 'browser') return;
 	const hero = document.querySelector('.hero .actions .plate[href="download/"]');
-	if (!hero) return;
-	hero.lastChild.textContent = `Download for ${PLATFORMS[mine]}`;
-	hero.href = `download/#${mine}`;
+	if (hero) hero.lastChild.textContent = `Download for ${PLATFORMS[mine]}`;
 })();
