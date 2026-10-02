@@ -1781,3 +1781,35 @@ the persona's input skill. The owner's answer: MegaMan's walk never
 changes (BN6's own, AGENTS.md); the mouths are the generator's to fix,
 by Capcom's map design (docs/LEVEL_DESIGN.md, Navigation). A movement
 assist is never a fix to propose.
+
+## Session 59: 7/10 (keep playing: yes; recommend: yes)
+
+A new run 9 (Endless / Storm / HeatCross / threat 1 / HP+) on the epic #49
+build (38529ed): act 1 in Central Area, BlastMan beaten in 0:45.93 with
+the dealer's BblStar2 (his "can't stand Aqua" tip, bought and used as the
+finisher), ProtoMan's race lost on a hit (Chaud 4-8). Saved on layer 4.
+
+Confirmed: the dealers name the guardian's weakness; no battle on the
+step into the arena; L senses set pieces (it named a Rush gap). Layer 3's
+way was wide bands with no walkway mouth on it.
+
+Raised: the split named SpoutMan for both ways (fixed: the nearest free
+guardian where every draw meets one, 28 of 2000 offers); the act's one
+set piece, a Rush gap, announced by three voices with no direction or
+map mark, never found; act 1 holds one set piece; RushFood at 300z out
+of act 1's reach; Central's one-panel glass bridges on the way (30 calls,
+11 on the way); a two-wide band to an empty dead end; markers pinned to
+a partial map's frame edge. Not reached: every other set piece.
+
+Beside the loop: issues #54 (fit checks with compressed shapes), #50
+(compression codes kept), #51 (RegUps on every layer before a guardian,
+in its set piece's prize first; Chaud's TagChip system).
+
+Cost: 289 calls.
+
+Loop change: **a patch's headline must lie on the persona's path.** The
+epic's set pieces are rolled per layer; act 1 offered one, off the way,
+and the session judged the epic on nothing. Before a session that is to
+judge new content, place the persona where it stands (`--dev pieces=` on
+a fresh run, or name a layer and act in the goals), or say where it is
+in the patch notes.
