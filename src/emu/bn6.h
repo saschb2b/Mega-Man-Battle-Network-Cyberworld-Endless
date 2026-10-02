@@ -26,6 +26,7 @@
 #define BN6_ZENNY             (BN6_GAMESTATE + 0x5C) /* ProtectedZenny, u32 */
 #define BN6_BUGFRAGS          (BN6_GAMESTATE + 0x60) /* ProtectedBugfrags, u32 */
 #define BN6_EVENT_FLAGS       0x02001C88u /* eEventFlags: flag n is bit 0x80 >> (n & 7) of byte n / 8 */
+#define BN6_EVENT_FLAG_BYTES  1448        /* its size (bn6f ewram.s): flags 0-0x2D3F */
 #define BN6_CHATBOX           0x02009CD0u /* eChatbox: +0 Visible */
 #define BN6_CHATBOX_STATE     (BN6_CHATBOX + 0x04)  /* TextScriptState_04 */
 #define BN6_CHATBOX_OPEN      (BN6_CHATBOX + 0x10)  /* OpenState_10 */

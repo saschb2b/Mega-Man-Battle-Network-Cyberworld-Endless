@@ -562,8 +562,8 @@ static void script_actions(void) {
 		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
 		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
 		if (s->flagged && current == &scene_emu) {
-			static bool was[0x2000];
-			for (int f = s->flags[0] < 0 ? 0 : s->flags[0]; f <= s->flags[1] && f < 0x2000; ++f)
+			static bool was[FLAG_COUNT];
+			for (int f = s->flags[0] < 0 ? 0 : s->flags[0]; f <= s->flags[1] && f < FLAG_COUNT; ++f)
 				if (s->flags[2]) { was[f] = flag_get(f); flag_set(f); }
 				else if (was[f]) flag_set(f);
 				else flag_clear(f);
