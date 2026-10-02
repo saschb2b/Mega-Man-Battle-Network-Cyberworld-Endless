@@ -375,7 +375,7 @@ folder).
 | L | Ask MegaMan where you are and what's ahead | Open the Custom screen; on it, try to run (never from a guardian) |
 | R | Jack in (at the town's statue) | Open the Custom screen; on it, describe the chip or Cross under the cursor |
 | Start | Open the PET | Pause |
-| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings, or pips on the edge), and the way to the exit or guardian; let go, and the arrow shows the way on | On the Custom screen, hide it to see the field; again to bring it back |
+| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings where they stand, or arrowheads on the frame pointing their way), and the way to the exit or guardian; let go, and the arrow shows the way on | On the Custom screen, hide it to see the field; again to bring it back |
 
 In the net MegaMan walks as in BN6: a single direction goes straight across
 the screen, and two together (like DOWN+LEFT) go along a walkway. A turns

@@ -1542,17 +1542,36 @@ static bool map_left_out(int type) {
 /* the step as large as lets the floor seen so far fit (8 on the second
  * screen's larger frame, 6 over the picture, 4 at the least), on the
  * seen floor's middle, or on MegaMan when it fits at none */
-static void map_view(MapView *m) {
-	int umin = m->mx - m->my, umax = umin, vmin = m->mx + m->my, vmax = vmin;
+/* the panels seen, and what MegaMan senses but has not reached (a ring
+ * where it stands: off the frame, a playtester read its pip on the edge
+ * as standing there, session 59); the exit and the guardian stay hidden */
+static void map_bounds(int *umin, int *umax, int *vmin, int *vmax) {
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
 			int u = x - y, v = x + y;
-			if (u < umin) umin = u;
-			if (u > umax) umax = u;
-			if (v < vmin) vmin = v;
-			if (v > vmax) vmax = v;
+			if (u < *umin) *umin = u;
+			if (u > *umax) *umax = u;
+			if (v < *vmin) *vmin = v;
+			if (v > *vmax) *vmax = v;
 		}
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		int x = (int)o->x, y = (int)o->y;
+		if (map_kind(o->type) < 0 || map_left_out(o->type) || o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS ||
+		    x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || D.seen[y][x])
+			continue;
+		int u = x - y, v = x + y;
+		if (u < *umin) *umin = u;
+		if (u > *umax) *umax = u;
+		if (v < *vmin) *vmin = v;
+		if (v > *vmax) *vmax = v;
+	}
+}
+
+static void map_view(MapView *m) {
+	int umin = m->mx - m->my, umax = umin, vmin = m->mx + m->my, vmax = vmin;
+	map_bounds(&umin, &umax, &vmin, &vmax);
 	int s = m->bw >= 300 ? 8 : 6;
 	while (s > 4 && ((umax - umin) * s + 2 * s + 2 > m->bw || (vmax - vmin) * (s / 2) + s + 2 > m->bh)) s -= 2;
 	m->s = s;
@@ -1619,6 +1638,18 @@ static void map_way(const MapView *m, int px, int py) {
 	}
 }
 
+/* An arrowhead at (ex, ey) on the frame's edge, pointing out of it: what
+ * stands that way, past the frame (a dot there read as standing at the
+ * frame's edge, session 59) */
+static void map_arrowhead(const MapView *m, int ex, int ey, int size, SDL_Color c) {
+	int dl = ex - m->bx, dr = m->bx + m->bw - 1 - ex, dt = ey - m->by, db = m->by + m->bh - 1 - ey;
+	int least = dl < dr ? dl : dr, vert = dt < db ? dt : db, h = size / 2;
+	for (int k = 0; k < size; ++k) {
+		if (vert <= least) fill_rect(ex - k, dt < db ? ey - h + k : ey + h - k, 2 * k + 1, 1, c);
+		else fill_rect(dl < dr ? ex - h + k : ex + h - k, ey - k, 1, 2 * k + 1, c);
+	}
+}
+
 /* one thing standing there, once seen; before, a ring where it stands if
  * MegaMan senses it, or a pip on the frame's edge its way (L named the
  * Recovery Mr. Prog, and it was nowhere on the map): the exit and the
@@ -1631,7 +1662,7 @@ static void map_mark(const MapView *m, int type, int x, int y, SDL_Color c) {
 			fill_rect(sx - 3, sy - 3, 7, 7, c);
 			fill_rect(sx - 2, sy - 2, 5, 5, rgba(0, 8, 28, 255));
 		} else if (map_edge(m, sx, sy, 3, &ex, &ey))
-			fill_rect(ex - 1, ey - 1, 3, 3, c);
+			map_arrowhead(m, ex, ey, 3, c);
 		return;
 	}
 	if (!map_inside(m, sx, sy, 3)) return;
@@ -1659,11 +1690,7 @@ static void map_marks(const MapView *m, int *gx, int *gy, SDL_Color *gc) {
 static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
 	int ax, ay;
 	if (gx < 0 || D.seen[gy][gx] || !map_edge(m, map_x(m, gx, gy), map_y(m, gx, gy), 5, &ax, &ay)) return;
-	fill_rect(ax - 1, ay - 3, 3, 1, gc);
-	fill_rect(ax - 2, ay - 2, 5, 1, gc);
-	fill_rect(ax - 3, ay - 1, 7, 3, gc);
-	fill_rect(ax - 2, ay + 2, 5, 1, gc);
-	fill_rect(ax - 1, ay + 3, 3, 1, gc);
+	map_arrowhead(m, ax, ay, 5, gc);
 }
 
 /* the key, from (kx, ky): MegaMan, the exit, and what else this layer

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The map shows where sensed services stand.** On a partly explored
+  layer, the shops, heals and others MegaMan senses sat as dots on the
+  map's frame, read as standing at its edge. The map now zooms out to show
+  them as rings where they stand, and anything still past the frame, the
+  exit too, is an arrowhead pointing its way.
 - **The battle controls, said right (discussion #53).** Running from a
   battle is L on the Custom screen, not L and R: a navi's tip and the
   README said otherwise. The README now also says that R on the Custom
