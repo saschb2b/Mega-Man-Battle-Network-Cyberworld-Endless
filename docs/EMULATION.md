@@ -293,6 +293,15 @@ game mode, GAME OVER among them); the exit pad's warp under way and its
 arrival; the frames on a map not the layer's before he is warped back;
 the duel's DeleteTime, which its HUD shows as it runs.
 
+Where a table written into the core's copy is simpler than a hook, the
+table stays (issue #32): a layer's shop stock goes to the ROM's initial
+shop table beside RAM, as the shop screen lists only entries found there
+(one write per entry, made again with the layer after a CONTINUE); a
+Chip Trader's map takes the first entry of the prize pools and of the
+trader kinds (two writes), and its pool's records are rewritten in the
+folder's codes either way; the BugFrag Trader's trade waits for its chat
+to hold, a few reads while a chat is open, and runs as game calls.
+
 `tests/test_emu.c` runs a ROM of the test's own bytes on mGBA (its
 `GBAIsROM` wants `0xEA` at offset 3 and `0x96` at `0xB2`, nothing more):
 routines called and their results stored, with a hook of every kind on
