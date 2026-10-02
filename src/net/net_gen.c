@@ -861,6 +861,277 @@ static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
 	layer_raise_rooms(seed, stair_dirs, rise);
 }
 
+/* The layout: the planned one, then any of the area's, last the plainest
+ * at its smallest; on a guardian's layer an arena of its own at the far
+ * end. */
+static void build_layout(int planned, int biome, int size, int rise, ArenaInfo *arena) {
+	for (int attempt = 0; attempt < 12; ++attempt) {
+		memset(layer.cell, 0, sizeof layer.cell);
+		layer.nrooms = 0;
+		arena->room = -1;
+		/* the planned layout, then any of the area's, last the plainest at its smallest */
+		bool last = attempt == 11;
+		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
+		layout_build(layer.layout, biome, last ? 0 : size);
+		if (layer.nrooms < 3) continue;
+		choose_arrival();
+		connect_all();
+		if (floor_cells() < MIN_FLOOR || !fits(rise)) continue;
+		/* a guardian waits in an arena of its own at the far end */
+		if (!layer.boss_layer || last) break;
+		if (arena_attach(ARENA_SIZE, arena) >= 0 && fits(rise)) break;
+	}
+
+	if (layer.arena < 0 && layer.boss_layer && arena->room >= 0 && arena->room < layer.nrooms) {
+		layer.arena = arena->room;
+		layer.ante = arena->ante;
+		layer.arena_dir = arena->dir;
+	}
+}
+
+/* The layer's ends: where MegaMan arrives, the exit and on a guardian's
+ * layer the guardian; then the way between them. */
+static void place_ends(int kind, int biome, const ArenaInfo *arena) {
+	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
+	add_obj(OBJ_WARP_IN, cx, cy);
+	cx = layer.rooms[layer.exit_room].ax;
+	cy = layer.rooms[layer.exit_room].ay;
+	/* in an arena the exit waits behind the guardian, who holds the middle */
+	int bx = cx, by = cy;
+	if (layer.arena >= 0) { cx = arena->exit_x; cy = arena->exit_y; }
+	NetObj *exit = add_obj(kind == LAYER_NORMAL ? OBJ_EXIT : OBJ_RETURN, cx, cy);
+	if (layer.boss_layer && exit) {
+		if (layer.arena < 0) {
+			/* no room for an arena: the guardian stands before the exit */
+			for (int d = 0; d < 4; ++d) {
+				static const int off[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+				if (layer.cell[cy + off[d][1]][cx + off[d][0]] == C_PATH) { bx = cx + off[d][0]; by = cy + off[d][1]; break; }
+			}
+		}
+		NetObj *b = add_obj(OBJ_BOSS, bx, by);
+		if (b) {
+			layer.boss_navi = run.boss_order[biome];
+			b->param = layer.boss_navi;
+		}
+		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);
+	} else {
+		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
+	}
+}
+
+/* What a layer's rolls put on it: its services, gates and the rival. */
+typedef struct {
+	bool shop, heal, trader, programs, bugtrader, challenge, duel, undernet, secret, navi_gate, vault, official;
+	int gate_navi, official_level;
+} Services;
+
+/* Points of interest in the other rooms. */
+static void roll_services(Services *s, int depth, int biome, int kind) {
+	/* each act's middle layer has the Net Dealer and a heal, and so does its
+	 * first after the run's first (the guardian's zenny to spend on what the
+	 * new act calls for); docs/PROGRESSION.md */
+	int biome_layer = layer_in_act(depth);
+	s->shop = kind == LAYER_NORMAL && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
+	/* (threat 2, docs/META.md: only the heals an act is sure of; the heals
+	 * helper: one on every layer) */
+	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (kind == LAYER_NORMAL && pacing_heal_certain(depth)) ||
+		(run.helpers & HELP_HEALS);
+	s->trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
+	s->programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
+	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
+	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
+	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
+	/* the rival's duel (docs/RIVAL.md): on each act's second layer, where
+	 * no strong virus signal stands (one battle to seek out a layer) */
+	s->duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
+	s->challenge &= !s->duel;
+	s->undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
+		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
+	s->secret = kind == LAYER_UNDERNET && !run.secret_cleared;
+}
+
+/* The gates' rolls, after the services'. */
+static void roll_gates(Services *s, uint32_t seed, int depth, int kind) {
+	/* a gate sealed with a Navi's code (docs/META.md, gates): from act 3,
+	 * before the guardian's layer, where no dark warp stands; its Navi one
+	 * of the guardians (but ProtoMan, the Secret Area's) */
+	s->navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !s->undernet && rng_range(0, 99) < 30;
+	static const uint8_t gate_navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
+	s->gate_navi = s->navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
+	/* a collector's vault (docs/META.md, gates): from act 2, before the
+	 * guardian's layer, where no other gate or dark warp stands */
+	s->vault = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !s->undernet && !s->navi_gate &&
+		rng_range(0, 99) < 20;
+	/* an official gate (docs/RIVAL.md): from act 2, where no other gate or
+	 * dark warp stands; sealed until Chaud's clearance reaches its level
+	 * (from the seed, not the rolls: two rolls more reshuffled the rooms
+	 * of every layer after them). And on every act's duel layer, the prize
+	 * where the duel is offered, its level the act's (1 to the third, then
+	 * 2), the only gate there (the rolls kept): a playtester's promise of
+	 * official gates pointed at none he had met */
+	if (s->duel) s->navi_gate = s->vault = false;
+	uint32_t oh = (seed ^ 0x0FF1C1A1u) * 2654435761u;
+	s->official = kind == LAYER_NORMAL && !layer.boss_layer &&
+		(s->duel || (pacing_act(depth) >= 1 && !s->undernet && !s->navi_gate && !s->vault && (oh >> 16) % 100 < 25));
+	s->official_level = !s->official ? 0 : s->duel ? (pacing_act(depth) >= 2 ? 2 : 1) : 1 + (int)((oh >> 8) & 1);
+}
+
+/* The other rooms in a shuffled order: services on the bigger platforms,
+ * the pads left for the better data. */
+static int room_order(int *order) {
+	int n = 0;
+	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
+	for (int i = n - 1; i > 0; --i) { int j = rng_range(0, i); int t = order[i]; order[i] = order[j]; order[j] = t; }
+	/* services on the bigger platforms, the pads left for the better data */
+	for (int i = 0, k = 0; i < n; ++i)
+		if (layer.rooms[order[i]].kind != ROOM_PAD) { int t = order[k]; order[k++] = order[i]; order[i] = t; }
+	return n;
+}
+
+#define PLACE(t) place((t), order, n, *next, &x, &y)
+
+/* The rolled services, each in the next room of `order`. */
+static void place_services(Services *s, int depth, int kind, const LayerKit *kit, const int *order, int n, int *next) {
+	int x, y;
+	if (layer.arena >= 0) {
+		last_stop(kind, kit);
+		s->shop = s->heal = false;
+	}
+	/* a Mr. Prog with a gift by the run's start */
+	if (depth == 1 && kind == LAYER_NORMAL && room_spot(&layer.rooms[0], &x, &y)) add_obj(OBJ_GIFT, x, y);
+	if (s->shop) { dealer(pick_room(order, n, *next), order, n, kit, &x, &y); ++*next; }
+	if (s->heal) { PLACE(OBJ_HEAL); ++*next; }
+	if (s->trader) { PLACE(OBJ_TRADER); ++*next; }
+	if (s->programs) { PLACE(OBJ_PROGRAMS); ++*next; }
+	if (s->bugtrader) { PLACE(OBJ_BUGTRADER); ++*next; }
+	if (s->challenge) { PLACE(OBJ_CHALLENGE); ++*next; }
+	if (s->undernet) { PLACE(OBJ_UNDERNET); ++*next; }
+	if (s->secret) { PLACE(OBJ_SECRET_GATE); ++*next; }
+	if (s->navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = s->gate_navi; ++*next; }
+	if (s->vault) { PLACE(OBJ_VAULT); ++*next; }
+	/* (a duel's gate stands by ProtoMan, placed after him) */
+	if (s->official && !s->duel) {
+		NetObj *g = PLACE(OBJ_OFFICIAL);
+		if (g) g->param = s->official_level;
+		++*next;
+	}
+}
+
+/* ProtoMan on a pad apart where one has room, a ring off the way on; else
+ * the next room; after the area's props, whose landmark needs a bare room:
+ * before them he took it on a layer in a hundred. */
+static void place_duel(const int *order, int n, int *next) {
+	int x, y;
+	NetObj *placed = NULL;
+	for (int i = n - 1; i >= *next && !placed; --i)
+		if (layer.rooms[order[i]].kind == ROOM_PAD && room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y))
+			placed = add_obj(OBJ_DUEL, x, y);
+	if (!placed) { placed = PLACE(OBJ_DUEL); ++*next; }
+	/* (a small layer, its rooms all taken: in any room but the
+	 * exit's, apart from the others where it can be; an act 3 layer
+	 * of the Judge Tree Comp had no ProtoMan) */
+	for (int i = 0; i < n && !placed; ++i)
+		if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y);
+	for (int i = 0; i < layer.nrooms && !placed; ++i)
+		if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y);
+}
+
+/* The room whose box holds cell (x, y), or -1. */
+static int room_holding(int x, int y) {
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		if (x >= r->x && x < r->x + r->w && y >= r->y && y < r->y + r->h) return i;
+	}
+	return -1;
+}
+
+/* The official gate the duel opens, by ProtoMan: in his room, two panels
+ * from him or more, else in a room a short walk from his (a playtester
+ * found the gate alone across the layer, and his session ran out looking
+ * for the rival). */
+static NetObj *gate_by_rival(const NetObj *rival) {
+	int x, y, home = room_holding(rival->x, rival->y);
+	int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
+	for (int i = -1; i < nn && home >= 0; ++i) {
+		int room = i < 0 ? home : near[i];
+		if (room == layer.exit_room) continue;
+		for (int tries = 0; tries < 12; ++tries)
+			if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2)) {
+				NetObj *g = add_obj(OBJ_OFFICIAL, x, y);
+				if (g) return g;
+			}
+	}
+	return NULL;
+}
+
+/* That gate, else anywhere with space (a small endless layer with every
+ * room taken had its duel and no gate). */
+static void place_duel_gate(int level, const int *order, int n, int *next) {
+	int x, y;
+	const NetObj *rival = NULL;
+	for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) rival = &layer.obj[i];
+	NetObj *g = rival ? gate_by_rival(rival) : NULL;
+	if (!g) g = PLACE(OBJ_OFFICIAL);
+	for (int i = 0; !g && i < n; ++i)
+		if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
+	for (int i = 0; !g && i < layer.nrooms; ++i)
+		if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
+	if (g) g->param = level;
+	++*next;
+}
+
+/* Rooms holding better data, more of them deeper and in the Undernet (a
+ * dark warp's, or the short net's dark way's act); then Mystery data
+ * scattered through the rest, most at dead ends: the side ways BN6
+ * rewards exploring. */
+static void place_data(int depth, int kind, int biome, int size, const int *order, int n, int *next) {
+	int x, y;
+	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET);
+	for (int k = 0; k < rich; ++k, ++*next) {
+		NetObj *o = PLACE(OBJ_MYSTERY);
+		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
+	}
+	static int dx[256], dy[256];
+	int nde = dead_ends(dx, dy, 256), di = 0;
+	for (int i = nde - 1; i > 0; --i) {
+		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
+		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
+	}
+	int md = 3 + rng_range(0, 2) + size;
+	for (int k = 0; k < md; ++k) {
+		bool got = false;
+		if (rng_range(0, 99) < 70)
+			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !behind_gap(x, y) && !cuts_way(x, y); }
+		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
+		if (!got) continue;
+		NetObj *o = add_obj(OBJ_MYSTERY, x, y);
+		if (!o) break;
+		int roll = rng_range(0, 99);
+		o->param = roll < 70 ? 0 : roll < 92 ? 1 : 2;
+	}
+}
+
+#undef PLACE
+
+/* Bystander navis with a word to share, two panels at least from what else
+ * stands there (one beside a Mystery Data took MegaMan's A, and each A
+ * that closed his words opened them again). */
+static void place_bystanders(const int *order, int n) {
+	int x, y;
+	int npcs = 2 + rng_range(0, 1);
+	for (int k = 0; k < npcs && n; ++k)
+		for (int tries = 0; tries < 4; ++tries) {
+			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
+			if (!room_spot_in(r, &x, &y, true)) continue;
+			bool near = false;
+			for (int i = 0; i < layer.nobj; ++i) near |= abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2;
+			if (near) continue;
+			NetObj *o = add_obj(OBJ_NPC, x, y);
+			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
+			break;
+		}
+}
+
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
 	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
 	int rise = kit ? kit->rise : 0;
@@ -880,131 +1151,15 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	int planned = kind == LAYER_NORMAL
 		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / CYCLE_LAYERS * 7 + p / 3 + 1) * 0x9E3779B9u, layer_in_act(depth))
 		: layout_pick(biome);
-	for (int attempt = 0; attempt < 12; ++attempt) {
-		memset(layer.cell, 0, sizeof layer.cell);
-		layer.nrooms = 0;
-		arena.room = -1;
-		/* the planned layout, then any of the area's, last the plainest at its smallest */
-		bool last = attempt == 11;
-		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
-		layout_build(layer.layout, biome, last ? 0 : size);
-		if (layer.nrooms < 3) continue;
-		choose_arrival();
-		connect_all();
-		if (floor_cells() < MIN_FLOOR || !fits(rise)) continue;
-		/* a guardian waits in an arena of its own at the far end */
-		if (!layer.boss_layer || last) break;
-		if (arena_attach(ARENA_SIZE, &arena) >= 0 && fits(rise)) break;
-	}
-
-	if (layer.arena < 0 && layer.boss_layer && arena.room >= 0 && arena.room < layer.nrooms) {
-		layer.arena = arena.room;
-		layer.ante = arena.ante;
-		layer.arena_dir = arena.dir;
-	}
+	build_layout(planned, biome, size, rise, &arena);
 	finish_rooms(seed, stair_dirs, rise);
-	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
-	add_obj(OBJ_WARP_IN, cx, cy);
-	cx = layer.rooms[layer.exit_room].ax;
-	cy = layer.rooms[layer.exit_room].ay;
-	/* in an arena the exit waits behind the guardian, who holds the middle */
-	int bx = cx, by = cy;
-	if (layer.arena >= 0) { cx = arena.exit_x; cy = arena.exit_y; }
-	NetObj *exit = add_obj(kind == LAYER_NORMAL ? OBJ_EXIT : OBJ_RETURN, cx, cy);
-	if (layer.boss_layer && exit) {
-		if (layer.arena < 0) {
-			/* no room for an arena: the guardian stands before the exit */
-			for (int d = 0; d < 4; ++d) {
-				static const int off[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
-				if (layer.cell[cy + off[d][1]][cx + off[d][0]] == C_PATH) { bx = cx + off[d][0]; by = cy + off[d][1]; break; }
-			}
-		}
-		NetObj *b = add_obj(OBJ_BOSS, bx, by);
-		if (b) {
-			layer.boss_navi = run.boss_order[biome];
-			b->param = layer.boss_navi;
-		}
-		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);
-	} else {
-		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
-	}
+	place_ends(kind, biome, &arena);
 
-	/* Points of interest in the other rooms. */
-	/* each act's middle layer has the Net Dealer and a heal, and so does its
-	 * first after the run's first (the guardian's zenny to spend on what the
-	 * new act calls for); docs/PROGRESSION.md */
-	int biome_layer = layer_in_act(depth);
-	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
-	/* (threat 2, docs/META.md: only the heals an act is sure of; the heals
-	 * helper: one on every layer) */
-	bool heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (kind == LAYER_NORMAL && pacing_heal_certain(depth)) ||
-		(run.helpers & HELP_HEALS);
-	bool trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
-	bool programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
-	bool bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
-	trader &= !bugtrader;   /* the trade screen serves one trader per map */
-	bool challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
-	/* the rival's duel (docs/RIVAL.md): on each act's second layer, where
-	 * no strong virus signal stands (one battle to seek out a layer) */
-	bool duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
-	challenge &= !duel;
-	bool undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
-		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
-	bool secret = kind == LAYER_UNDERNET && !run.secret_cleared;
-	/* a gate sealed with a Navi's code (docs/META.md, gates): from act 3,
-	 * before the guardian's layer, where no dark warp stands; its Navi one
-	 * of the guardians (but ProtoMan, the Secret Area's) */
-	bool navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !undernet && rng_range(0, 99) < 30;
-	static const uint8_t gate_navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
-	int gate_navi = navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
-	/* a collector's vault (docs/META.md, gates): from act 2, before the
-	 * guardian's layer, where no other gate or dark warp stands */
-	bool vault = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !undernet && !navi_gate &&
-		rng_range(0, 99) < 20;
-	/* an official gate (docs/RIVAL.md): from act 2, where no other gate or
-	 * dark warp stands; sealed until Chaud's clearance reaches its level
-	 * (from the seed, not the rolls: two rolls more reshuffled the rooms
-	 * of every layer after them). And on every act's duel layer, the prize
-	 * where the duel is offered, its level the act's (1 to the third, then
-	 * 2), the only gate there (the rolls kept): a playtester's promise of
-	 * official gates pointed at none he had met */
-	if (duel) navi_gate = vault = false;
-	uint32_t oh = (seed ^ 0x0FF1C1A1u) * 2654435761u;
-	bool official = kind == LAYER_NORMAL && !layer.boss_layer &&
-		(duel || (pacing_act(depth) >= 1 && !undernet && !navi_gate && !vault && (oh >> 16) % 100 < 25));
-	int official_level = !official ? 0 : duel ? (pacing_act(depth) >= 2 ? 2 : 1) : 1 + (int)((oh >> 8) & 1);
-
-	int order[MAX_ROOMS], n = 0;
-	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
-	for (int i = n - 1; i > 0; --i) { int j = rng_range(0, i); int t = order[i]; order[i] = order[j]; order[j] = t; }
-	/* services on the bigger platforms, the pads left for the better data */
-	for (int i = 0, k = 0; i < n; ++i)
-		if (layer.rooms[order[i]].kind != ROOM_PAD) { int t = order[k]; order[k++] = order[i]; order[i] = t; }
-	int next = 0;
-	int x, y;
-#define PLACE(t) place((t), order, n, next, &x, &y)
-	if (layer.arena >= 0) {
-		last_stop(kind, kit);
-		shop = heal = false;
-	}
-	/* a Mr. Prog with a gift by the run's start */
-	if (depth == 1 && kind == LAYER_NORMAL && room_spot(&layer.rooms[0], &x, &y)) add_obj(OBJ_GIFT, x, y);
-	if (shop) { dealer(pick_room(order, n, next), order, n, kit, &x, &y); ++next; }
-	if (heal) { PLACE(OBJ_HEAL); ++next; }
-	if (trader) { PLACE(OBJ_TRADER); ++next; }
-	if (programs) { PLACE(OBJ_PROGRAMS); ++next; }
-	if (bugtrader) { PLACE(OBJ_BUGTRADER); ++next; }
-	if (challenge) { PLACE(OBJ_CHALLENGE); ++next; }
-	if (undernet) { PLACE(OBJ_UNDERNET); ++next; }
-	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
-	if (navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = gate_navi; ++next; }
-	if (vault) { PLACE(OBJ_VAULT); ++next; }
-	/* (a duel's gate stands by ProtoMan, placed after him) */
-	if (official && !duel) {
-		NetObj *g = PLACE(OBJ_OFFICIAL);
-		if (g) g->param = official_level;
-		++next;
-	}
+	Services s;
+	roll_services(&s, depth, biome, kind);
+	roll_gates(&s, seed, depth, kind);
+	int order[MAX_ROOMS], n = room_order(order), next = 0;
+	place_services(&s, depth, kind, kit, order, n, &next);
 	/* the area's props, set as the originals set theirs, before the loose
 	 * Mystery Data and bystanders fill the rooms: a landmark, rows and the
 	 * signs (docs/LEVEL_DESIGN.md, Props) */
@@ -1014,95 +1169,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		rows(kit, land, order, n);
 		signs(kit, land, order, n);
 	}
-	/* (ProtoMan on a pad apart where one has room, a ring off the way on;
-	 * else the next room; after the area's props, whose landmark needs a
-	 * bare room: before them he took it on a layer in a hundred) */
-	if (duel) {
-		bool placed = false;
-		for (int i = n - 1; i >= next && !placed; --i)
-			if (layer.rooms[order[i]].kind == ROOM_PAD && room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y))
-				placed = add_obj(OBJ_DUEL, x, y) != NULL;
-		if (!placed) { placed = PLACE(OBJ_DUEL) != NULL; ++next; }
-		/* (a small layer, its rooms all taken: in any room but the
-		 * exit's, apart from the others where it can be; an act 3 layer
-		 * of the Judge Tree Comp had no ProtoMan) */
-		for (int i = 0; i < n && !placed; ++i)
-			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
-		for (int i = 0; i < layer.nrooms && !placed; ++i)
-			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
-	}
-	/* the official gate the duel opens, by ProtoMan: in his room, two
-	 * panels from him or more, else in a room a short walk from his (a
-	 * playtester found the gate alone across the layer, and his session
-	 * ran out looking for the rival); else anywhere with space (a small
-	 * endless layer with every room taken had its duel and no gate) */
-	if (official && duel) {
-		NetObj *g = NULL;
-		const NetObj *rival = NULL;
-		for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) rival = &layer.obj[i];
-		int home = -1;
-		for (int i = 0; rival && i < layer.nrooms && home < 0; ++i) {
-			const Room *r = &layer.rooms[i];
-			if (rival->x >= r->x && rival->x < r->x + r->w && rival->y >= r->y && rival->y < r->y + r->h) home = i;
-		}
-		int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
-		for (int i = -1; i < nn && !g && home >= 0; ++i) {
-			int room = i < 0 ? home : near[i];
-			if (room == layer.exit_room) continue;
-			for (int tries = 0; tries < 12 && !g; ++tries)
-				if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2))
-					g = add_obj(OBJ_OFFICIAL, x, y);
-		}
-		if (!g) g = PLACE(OBJ_OFFICIAL);
-		for (int i = 0; !g && i < n; ++i)
-			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
-		for (int i = 0; !g && i < layer.nrooms; ++i)
-			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
-		if (g) g->param = official_level;
-		++next;
-	}
-	/* Rooms holding better data, more of them deeper and in the Undernet
-	 * (a dark warp's, or the short net's dark way's act) */
-	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET);
-	for (int k = 0; k < rich; ++k, ++next) {
-		NetObj *o = PLACE(OBJ_MYSTERY);
-		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
-	}
-	/* Mystery data scattered through the rest, most at dead ends: the side
-	 * ways BN6 rewards exploring */
-	static int dx[256], dy[256];
-	int nde = dead_ends(dx, dy, 256), di = 0;
-	for (int i = nde - 1; i > 0; --i) {
-		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
-		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
-	}
-	int md = 3 + rng_range(0, 2) + size;
-	for (int k = 0; k < md; ++k) {
-		bool got = false;
-		if (rng_range(0, 99) < 70)
-			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !behind_gap(x, y) && !cuts_way(x, y); }
-		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
-		if (!got) continue;
-		NetObj *o = add_obj(OBJ_MYSTERY, x, y);
-		if (!o) break;
-		int roll = rng_range(0, 99);
-		o->param = roll < 70 ? 0 : roll < 92 ? 1 : 2;
-	}
-	/* Bystander navis with a word to share, two panels at least from what
-	 * else stands there (one beside a Mystery Data took MegaMan's A, and
-	 * each A that closed his words opened them again) */
-	int npcs = 2 + rng_range(0, 1);
-	for (int k = 0; k < npcs && n; ++k)
-		for (int tries = 0; tries < 4; ++tries) {
-			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
-			if (!room_spot_in(r, &x, &y, true)) continue;
-			bool near = false;
-			for (int i = 0; i < layer.nobj; ++i) near |= abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2;
-			if (near) continue;
-			NetObj *o = add_obj(OBJ_NPC, x, y);
-			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
-			break;
-		}
+	if (s.duel) place_duel(order, n, &next);
+	if (s.official && s.duel) place_duel_gate(s.official_level, order, n, &next);
+	place_data(depth, kind, biome, size, order, n, &next);
+	place_bystanders(order, n);
 	emblems(kit);
-#undef PLACE
 }

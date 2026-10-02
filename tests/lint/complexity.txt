@@ -5,7 +5,7 @@ src/core/loot.c:from_formations 59 79
 src/core/main.c:main 173 263
 src/core/meta.c:meta_run_over 38 49
 src/core/platform.c:platform_init 28 63
-src/core/platform.c:platform_poll 44 66
+src/core/platform.c:platform_poll 43 66
 src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
 src/core/touch_layout.c:touch_prefs_parse 38 29
@@ -40,7 +40,6 @@ src/map/tilemap.c:pick_all 27 53
 src/map/tiles.c:best 56 72
 src/net/net_gen.c:counter 46 40
 src/net/net_gen.c:landmark 35 66
-src/net/net_gen.c:layer_generate 176 189
 src/net/net_gen.c:room_spot_in 33 17
 src/net/net_gen.c:route_distances 27 44
 src/net/net_layouts.c:catwalks 27 40
