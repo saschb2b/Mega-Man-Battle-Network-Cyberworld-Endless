@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "bn6.h"
+#include "bn6_fields.h"
 #include "cinema.h"
 #include "debug.h"
 #include "emu.h"
@@ -69,7 +70,7 @@ static bool chat_done(void) {
 
 /* MegaMan's grid panel. */
 static bool megaman_panel(int *x, int *y) {
-	int wx = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, wy = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int wx = bn6_player_x(), wy = bn6_player_y();
 	return netmap_panel(wx, wy, x, y);
 }
 
@@ -117,7 +118,7 @@ static uint32_t walk_toward(int x, int y, int near) {
 		{ 7, -7, KEY_UP }, { 10, 0, KEY_UP | KEY_RIGHT }, { 7, 7, KEY_RIGHT }, { 0, 10, KEY_DOWN | KEY_RIGHT },
 		{ -7, 7, KEY_DOWN }, { -10, 0, KEY_DOWN | KEY_LEFT }, { -7, -7, KEY_LEFT }, { 0, -10, KEY_UP | KEY_LEFT },
 	};
-	int dx = x - ((int)emu_read32(BN6_PLAYER + 0x1C) >> 16), dy = y - ((int)emu_read32(BN6_PLAYER + 0x20) >> 16);
+	int dx = x - (bn6_player_x()), dy = y - (bn6_player_y());
 	if (dx * dx + dy * dy <= near * near) return 0;
 	uint32_t k = 0;
 	long best = -1000000;

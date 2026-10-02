@@ -159,7 +159,7 @@ int emu_encounter_slot(void) { return slot; }
  * (bn6f), a few frames into it */
 static uint32_t battle_settings_at(void) {
 	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
-	return state >= 0x02000000u && state < 0x02040000u ? state + 0x3C : 0;
+	return state >= BN6_EWRAM && state < BN6_EWRAM_END ? state + 0x3C : 0;
 }
 
 int emu_encounter_battle_slot(void) {
@@ -182,7 +182,7 @@ bool emu_encounter_lean_drops(void) {
 	 * chip does, so a chip reward leans half the time, as Mystery Data's;
 	 * a Navi's chip, in either entry, in its * off the folder's codes) */
 	uint32_t state = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_BATTLE);
-	if (state < 0x02000000u || state >= 0x02040000u) return false;
+	if (state < BN6_EWRAM || state >= BN6_EWRAM_END) return false;
 	int n = emu_read8(state + BN6_BATTLE_ENEMY_COUNT);
 	if (n <= 0) return false;
 	for (int i = 0; i < n && i < 8; ++i) {

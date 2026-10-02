@@ -39,7 +39,7 @@ bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t 
 	emu_write(BN6_OW_HOOK, saved, sizeof saved);
 	if (out) {
 		out[0] = emu_read32(BN6_ENGINE_RET);
-		out[1] = emu_read32(BN6_ENGINE_RET + 4);
+		out[1] = emu_read32(BN6_ENGINE_RET_R1);
 	}
 	return emu_read8(BN6_ENGINE_MARK) != 0;
 }
@@ -49,7 +49,7 @@ bool game_call(uint32_t fn, uint32_t r0, uint32_t r1) { return game_call_ret(fn,
 /* the game starts a map's song only when it is not the one it last started:
  * after the intro, or a state whose song had stopped, forget it */
 static void restart_music(void) {
-	if (emu_read32(BN6_MUSIC_PLAYER + 4) & 0x80000000u) emu_write8(BN6_GAMESTATE + 0x0F, 0xFF);
+	if (emu_read32(BN6_MUSIC_STATUS) & 0x80000000u) emu_write8(BN6_SONG_PLAYING, 0xFF);
 }
 
 void emu_warp(int group, int number, int x, int y, int facing) {
@@ -68,8 +68,8 @@ void emu_warp(int group, int number, int x, int y, int facing) {
 void emu_warp_out(void) {
 	restart_music();
 	/* as the warp pad's trigger leaves it: under way, index 1, same group kind */
-	emu_write8(BN6_WARP + 0x10, 1);
-	emu_write8(BN6_WARP + 0x11, 1);
-	emu_write8(BN6_WARP + 0x12, 0);
+	emu_write8(BN6_WARP_PENDING, 1);
+	emu_write8(BN6_WARP_INDEX, 1);
+	emu_write8(BN6_WARP_GROUP_KIND, 0);
 	game_call(BN6_WARP_DEPART_JACK_OUT, 0, 0);
 }

@@ -1446,9 +1446,29 @@ def lint_dead(update):
                         'remove one, or make it static where its own file uses it; build.py lint --update', dead, update)
 
 
+def lint_offsets(update):
+    """No field of the game's structures as a bare offset outside bn6.h (issue #34): BN6_PLAYER + 0x1C is
+    BN6_PLAYER_X there. Event flags (BN6_FLAG_ + n) and indexes (+ n * size) are numbers, not fields."""
+    import glob
+    from collections import Counter
+    found = []
+    for path in sorted(glob.glob(os.path.join(ROOT, 'src', '*', '*.[ch]'))):
+        if os.path.basename(path) == 'bn6.h':
+            continue
+        with open(path) as f:
+            for n, line in enumerate(f, 1):
+                for m in re.finditer(r'\b(BN6_\w+)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)\b(?!\s*\*)', line):
+                    if not m.group(1).startswith('BN6_FLAG_'):
+                        found.append(f'{os.path.relpath(path, ROOT)}: {m.group(0)}')
+    return lint_compare('fields of the game\'s structures as bare offsets, outside src/emu/bn6.h', 'offsets.txt',
+                        'bare offsets into bn6.h\'s structures (BN6_X + 0x..): name the field in bn6.h instead;\n'
+                        'this list only shrinks: build.py lint --update after naming one', Counter(found), update)
+
+
 def lint(update=False):
     ok = lint_files()
     ok = lint_rom_data(update) and ok
+    ok = lint_offsets(update) and ok
     ok = lint_complexity(update) and ok
     ok = lint_analyzer(update) and ok
     ok = lint_dead(update) and ok

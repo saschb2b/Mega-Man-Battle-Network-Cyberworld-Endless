@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_fields.h"
 #include "director.h"
 #include "emu.h"
 #include "net.h"
@@ -62,7 +63,7 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 #define T1_COUNT   BN6_T1_COUNT
 
 /* A battle object that is in play: flag bit 0 of its header, HP left. */
-static bool alive(uint32_t o) { return (emu_read8(o) & 1) && emu_read16(o + 0x24) > 0; }
+static bool alive(uint32_t o) { return (emu_read8(o) & 1) && emu_read16(o + BN6_T1_HP) > 0; }
 
 /* Up or down to MegaMan's row towards the nearest enemy's, 0 when aligned
  * (PanelY at +0x13, Alliance at +0x16). */
@@ -71,8 +72,8 @@ static uint32_t toward_enemy_row(void) {
 	for (uint32_t i = 0; i < T1_COUNT; ++i) {
 		uint32_t o = T1_OBJECTS + i * T1_SIZE;
 		if (!alive(o)) continue;
-		int row = emu_read8(o + 0x13);
-		if (emu_read8(o + 0x16) == 0) { if (mine < 0) mine = row; }
+		int row = emu_read8(o + BN6_T1_PANEL_Y);
+		if (emu_read8(o + BN6_T1_ALLIANCE) == 0) { if (mine < 0) mine = row; }
 		else if (theirs < 0 || abs(row - mine) < abs(theirs - mine)) theirs = row;
 	}
 	if (mine < 0 || theirs < 0 || mine == theirs) return 0;
@@ -91,15 +92,15 @@ static void weaken_enemies(bool finish) {
 	for (uint32_t i = 0; i < T1_COUNT; ++i) {
 		uint32_t o = T1_OBJECTS + i * T1_SIZE;
 		if (!(emu_read8(o) & 1)) continue;
-		int alliance = emu_read8(o + 0x16), hp = emu_read16(o + 0x24), max = emu_read16(o + 0x26);
+		int alliance = emu_read8(o + BN6_T1_ALLIANCE), hp = emu_read16(o + BN6_T1_HP), max = emu_read16(o + BN6_T1_MAX_HP);
 		uint8_t v[2] = { 1, 0 };
 		if (alliance == 0 && hp > 0 && hp < 60) {
 			int full = max > hp ? max : 100;
 			v[0] = (uint8_t)full; v[1] = (uint8_t)(full >> 8);
-			emu_write(o + 0x24, v, 2);
+			emu_write(o + BN6_T1_HP, v, 2);
 		}
-		if (alliance == 1 && finish) { v[0] = 0; emu_write(o + 0x24, v, 2); }
-		else if (alliance == 1 && hp > 1) emu_write(o + 0x24, v, 2);
+		if (alliance == 1 && finish) { v[0] = 0; emu_write(o + BN6_T1_HP, v, 2); }
+		else if (alliance == 1 && hp > 1) emu_write(o + BN6_T1_HP, v, 2);
 	}
 }
 
@@ -122,7 +123,7 @@ uint32_t autopilot_keys(void) {
 	}
 	battle_frames = 0;
 	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
-	int px = (int)emu_read32(BN6_PLAYER + 0x1C) >> 16, py = (int)emu_read32(BN6_PLAYER + 0x20) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y();
 	int cx, cy, ex, ey, nx, ny;
 	bool talk = false;
 	int wx, wy;

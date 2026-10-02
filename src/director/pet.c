@@ -50,13 +50,13 @@ void pet_install(void) {
 }
 
 void pet_update(void) {
-	if (emu_read8(BN6_PET_MENU + 0xF) == 7) {
-		emu_write8(BN6_PET_MENU + 0xF, 0);
+	if (emu_read8(BN6_PET_MENU_TAKEN) == 7) {
+		emu_write8(BN6_PET_MENU_TAKEN, 0);
 		saving = 1;
 	}
 	/* a Save: the PET closed, then the checkpoint on the map, as a
 	 * layer's arrival takes one (it waits for MegaMan free to move) */
-	if (saving && !(emu_read8(BN6_PET_MENU + 5) & 1)) {
+	if (saving && !(emu_read8(BN6_PET_MENU_OPEN) & 1)) {
 		saving = 0;
 		director_save_here();
 	}

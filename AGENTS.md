@@ -100,7 +100,9 @@ the site.
   #19) on every target, `-Werror` in CI. `build.py lint` holds the rest to
   its baselines in `tests/lint/`: no new finding of GCC's analyzer, no new
   function no build reaches, no function joins or grows past CCN 25 or 120
-  lines, no ROM offset without its name in `docs/ROM_DATA.md`, and no ROM,
+  lines, no ROM offset without its name in `docs/ROM_DATA.md`, no field of
+  the game's structures as a bare offset outside `src/emu/bn6.h` (issue
+  #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), and no ROM,
   save, state or large file in git outside `docs/`. A baseline only
   shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the

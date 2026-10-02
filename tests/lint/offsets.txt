@@ -1,0 +1,2 @@
+# bare offsets into bn6.h's structures (BN6_X + 0x..): name the field in bn6.h instead;
+# this list only shrinks: build.py lint --update after naming one
