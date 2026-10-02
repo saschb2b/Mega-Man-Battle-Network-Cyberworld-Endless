@@ -4,8 +4,10 @@ Battles, the net, menus, shops and messages run on BN6's own code, executed
 from the player's ROM by an embedded [mGBA](https://mgba.io) core (0.10.5,
 MPL-2.0, built by `docker/mgba.sh`). Cyberworld Endless is the director
 around it: it generates each layer in the game's own formats, patches the
-map tables of its in-memory ROM copy to point at them, and watches the game's
-memory to move the run along. Nothing from the ROM is shipped.
+map tables of its in-memory ROM copy to point at them, and follows the game
+to move the run along: hooks on its code tell it what happens as it happens
+(Hooks, below), and it reads the game's memory between frames for the rest.
+Nothing from the ROM is shipped.
 
 | Layer | Owner |
 | --- | --- |
@@ -251,10 +253,20 @@ other frame, not, over autopilot runs: a walked layer, battles, the town.
   the same line for line, at about 30% less of the core's time.
 - **What is left** is spread out: on a layer the hottest routine is
   bn6f `checkOWObjectInteractions` (`0x080037F4`, a sixth of the busy
-  cycles, each object's interaction area against the others'), then
-  the sprite and OAM code in IWRAM (a third, none over 3%); in battle
-  nothing passes 3.3%. No routine is worth a native version through an
-  answer hook yet; the object interactions would be the first.
+  cycles, each object's interaction area against the others'); BN6's
+  memory copies through the BIOS's CpuSet and CpuFastSet, which mGBA's
+  own BIOS runs as interpreted ARM (a sixth); MP2K's sound mixer,
+  copied to IWRAM at `0x03005700` (a tenth); the sprite and OAM code in
+  IWRAM; in battle no one routine passes 3.3%.
+- **No routine as C.** An answer hook that does a routine's work in C
+  takes the routine's GBA cycles away, and with them BN6's own lag
+  frames, where a frame's work runs past VBlank and the game takes two
+  VBlanks for it. Tried on the object interactions (7-11% less of the
+  core's time on a map, on a computer): the game ran one frame more in
+  a layer's first second, its RNG a call ahead from there on, and the
+  random battles came at other steps. The wait for VBlank is the one
+  place the GBA's time goes without the game noticing: no work is
+  skipped there, only the wait.
 
 The sound is not the same sample for sample as 0.6.0's: the hooks (and
 before them the stubs they replaced, whose own instructions took the
