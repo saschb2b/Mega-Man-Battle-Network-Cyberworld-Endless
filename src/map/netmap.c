@@ -805,6 +805,39 @@ static bool floor_level(int A, int B, int level) {
 
 static void add_extra(int s, CoordCell c);
 
+void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side) {
+	int wx, wy, rx, ry;
+	netmap_world(b->x, b->y, &wx, &wy);
+	netmap_world(b->x - dir_dx[b->dir], b->y - dir_dy[b->dir], &rx, &ry);
+	int ux = (wx - rx) / 32, uy = (wy - ry) / 32;
+	if (ux) { *dir = ux > 0 ? 0 : 2; *edge = rx + 16 * ux; *side = wy - 16; }
+	else { *dir = uy > 0 ? 1 : 3; *edge = ry + 16 * uy; *side = wx - 16; }
+}
+
+/* The obstacles' walls and checks (issue #42), as BN6's own stand in a
+ * walkway's mouth: a line of five wall cells across it, a cell into the
+ * walkway, flagged 0x80 + its slot (off once it opens, wall flag 0x1640 +
+ * slot); and its check cells, value 0xF0 + slot, four along from the edge
+ * and nine across, where the engine's A probe (24 ahead, 17 on a diagonal)
+ * lands from the floor before it. */
+static void blocks_place(void) {
+	for (int k = 0; k < layer.nblocks; ++k) {
+		int dir, e, s;
+		netmap_block_edges(&layer.block[k], &dir, &e, &s);
+		bool along_x = !(dir & 1);
+		int sign = dir < 2 ? 1 : -1, at = e + (sign > 0 ? 4 : -12);
+		for (int i = 0; i < 5; ++i) {
+			int a = at, c = s - 4 + 8 * i;
+			add_extra(0, (CoordCell){ (int16_t)(along_x ? a : c), (int16_t)(along_x ? c : a), 0, (uint8_t)(0x80 + k), 8, (uint8_t)(1 + dir % 2 * 2 + (dir >= 2)) });
+		}
+		for (int j = 0; j < 4; ++j)
+			for (int i = 0; i < 9; ++i) {
+				int a = at + sign * 8 * j, c = s - 20 + 8 * i;
+				add_extra(3, (CoordCell){ (int16_t)(along_x ? a : c), (int16_t)(along_x ? c : a), 0, (uint8_t)(0xF0 + k), 8, 0x11 });
+			}
+	}
+}
+
 /* The gaps' panels, and each one's trigger strip: the lane's floor cells
  * across the gap's first panel, where the engine's probe lands, 24 ahead
  * of MegaMan, when he presses A at the edge (BN6's own strip is the
@@ -1020,6 +1053,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	coord_slot = L->coord_slot;
 	build_extra(L);
 	gaps_place();
+	blocks_place();
 	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &extra);
 }
 

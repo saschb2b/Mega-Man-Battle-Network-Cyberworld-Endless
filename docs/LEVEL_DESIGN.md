@@ -661,3 +661,36 @@ triggers take warps 2 and 3, each leading to the other's middle
 (`mapslot_teleport`, the layer map's warp list). Over the tests' 300
 layers, 21 hold a pair, 17 of them to an island.
 
+### Link Navi obstacles (built, issue #42)
+
+BN6 sets 25 obstacles in its nets, each in the mouth of a pocket that holds
+one thing (a SubMemory, Attack+1, HP+100, Sky's purple data): a geyser of
+cyberwater, a cybertree, a pillar of flames, a cyclone or a cloud, which two
+of Gregar's Link Navis clear each. A layer sets one the same way:
+
+- **Its kind is its area's own** (`layer_block_kind` in `net_pieces.c`):
+  Seaside's geysers and cyclones, Green's trees, Sky's clouds, flames and
+  geysers, the Underground's clouds, cyclones and flames under the Nest,
+  all five in the Graveyard; none in Central, as in BN6.
+- **The run's Crosses are its keys:** the Cross brought (alone) or each
+  won from a guardian before this layer clears the obstacles its Navi
+  clears in Gregar. Four pockets in five take a kind the run can clear,
+  else one it can't, a hint for the next run's Cross; a run that can clear
+  none of the area's meets one two layers in five, else none (a pocket a
+  run can never open is dead weight). So the setup's Cross is a bet on the
+  net's locks as well as on its battles.
+- **Its pocket** (`plan_obstacle` in `net_gen.c`): a walkway's first panel
+  off a wider floor, off the way, whose closing cuts off 6 to 40 panels and
+  nothing the way, a service or the guardian needs; seen from the way
+  (its mouth near it). Nothing else is placed in it; its one thing, a blue
+  data of the best quality, lies where it ends.
+- **The map** (`blockers.c`, `netmap.c`): BN6's own obstacle (handler 3)
+  where BN6 sets one in a walkway's mouth, a line of wall cells across the
+  walkway flagged with its slot, and its check cells where the engine's A
+  probe lands from the floor before it; the check runs the layer's talk
+  from the map's own archive: MegaMan names it, and with the Cross, the
+  Navi's mugshot says "Leave it to me!" over his sound, and the obstacle
+  opens, for good (its present flag is kept in the run's state).
+
+Over the tests' 300 layers (their guardians Cross navis), 10 hold one.
+

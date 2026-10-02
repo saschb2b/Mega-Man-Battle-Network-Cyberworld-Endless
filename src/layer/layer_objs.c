@@ -27,6 +27,7 @@
 #include "rom.h"
 #include "run.h"
 #include "rush.h"
+#include "blockers.h"
 #include "save.h"
 #include "scripts.h"
 #include "shop.h"
@@ -169,7 +170,7 @@ static const struct { uint8_t look; uint8_t id; int8_t dx, dy; int16_t dz; } pro
 #define RUSH_OBJECTS_MAX 12   /* Rush and its bones in each panel of two gaps */
 
 static uint32_t props_objects(NpcList *npcs) {
-	static uint8_t recs[(MAX_PROPS * 3 + RUSH_OBJECTS_MAX + 1) * 20];
+	static uint8_t recs[(MAX_PROPS * 3 + RUSH_OBJECTS_MAX + MAX_BLOCKS + 1) * 20];
 	int n = 0;
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
@@ -198,6 +199,7 @@ static uint32_t props_objects(NpcList *npcs) {
 		}
 	}
 	n = rush_objects(recs, n, MAX_PROPS * 3 + RUSH_OBJECTS_MAX);
+	n = blockers_objects(recs, n, MAX_PROPS * 3 + RUSH_OBJECTS_MAX + MAX_BLOCKS);
 	if (!n) return 0;
 	memset(recs + n * 20, 0, 4);
 	recs[n * 20] = 0xFF;
@@ -400,6 +402,28 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 	if (listed && k > 0 && (size_t)k < n)
 		snprintf(word + k, n - (size_t)k, "|The viruses around here can't stand %s chips, though. I've got one of those too!",
 			elem_name(counter));
+}
+
+/* The obstacles' sprites, first: one that could not load would stand as
+ * noise in its pocket's mouth. */
+static void blocker_sprites(NpcList *npcs) {
+	for (int b = 0; b < layer.nblocks; ++b) {
+		int cat, idx;
+		blocker_sprite(b, &cat, &idx);
+		need_sprite(npcs, cat, idx);
+	}
+}
+
+/* The layer's text, whole: the obstacles' talks added, the archive the
+ * talkers read, and the obstacles readied with the map's checks taking
+ * their talks from a copy of it; the archive's address, 0 none. */
+static uint32_t commit_text(TextArchive *text, int group, int number) {
+	int block_talk[2];
+	blockers_talks(text, block_talk);
+	uint32_t archive = text->n ? ta_commit(text) : 0;
+	blockers_install();
+	blockers_checks(group, number, text, block_talk);
+	return archive;
 }
 
 /* (the keys he stocks, said: what each opens and where, issues #41, #14) */
@@ -806,6 +830,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i < nstock; ++i) out->dealer[i] = stock[i];
 	out->ndealer = nstock;
 	layer_objs_shops(out, false);
+	blocker_sprites(&npcs);
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
 	npcs.objects = props_objects(&npcs);
@@ -841,7 +866,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				"in every dive from here on.", c, c[0] - 'a' + 'A', c + 1);
 		out->spin_found = ta_say(&text, FACE_MEGAMAN, words);
 	}
-	uint32_t archive = text.n ? ta_commit(&text) : 0;
+	uint32_t archive = commit_text(&text, group, number);
 	out->archive = archive;
 	if (out->guardian.navi) guardian_actors(&npcs, archive, guardian_sprite(out->guardian.navi), &out->guardian);
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i) {

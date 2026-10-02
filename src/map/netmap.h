@@ -76,6 +76,11 @@ bool netmap_stair_cell(int cx, int cy);
 void netmap_gaps_shut(bool shut);
 int netmap_gap_at(int cx, int cy);
 bool netmap_gap_any(void);
+/* A Link Navi obstacle's place in the world (issue #42): BN6's direction
+ * from the room into its walkway (0 +X, 1 +Y, 2 -X, 3 -Y), the edge along
+ * it where the walkway leaves the room, and the walkway's lower edge
+ * across. */
+void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side);
 /* The raised floor's world z, 0 when the layer is flat. */
 int netmap_rise(void);
 /* The layer's warp pads (the walls are written again with them). */

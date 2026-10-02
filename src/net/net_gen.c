@@ -1436,6 +1436,105 @@ static void carve_teleport_island(int rise) {
 	if (o) o->param = 1;
 }
 
+/* ---- Obstacles (issue #42) ----
+ * BN6's Link Navi obstacles stand in the mouth of a pocket that holds one
+ * thing (SubMemory, Attack+1, HP+100, a purple data), seen from the way.
+ * A pocket's mouth is a walkway's first panel off a wider floor, off the
+ * way; closed, it cuts off six to forty panels and nothing the way or a
+ * service needs; its one thing a blue data where it ends. */
+static uint8_t pocket[MAP_H][MAP_W];
+
+/* The floor that panel (wx, wy) closed off cuts from the arrival, marked in
+ * `pocket`; how much, or -1 where it holds what must stay reachable. */
+static int pocket_of(int wx, int wy) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static uint8_t seen[MAP_H][MAP_W];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	memset(seen, 0, sizeof seen);
+	int h = 0, t = 0, sx = (int)layer.obj[0].x, sy = (int)layer.obj[0].y;
+	seen[sy][sx] = 1;
+	seen[wy][wx] = 1;
+	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (!floor_cell(nx, ny) || seen[ny][nx]) continue;
+			seen[ny][nx] = 1;
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	int n = 0;
+	memset(pocket, 0, sizeof pocket);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (!floor_cell(x, y) || seen[y][x]) continue;
+			if (way_band[y][x] == 2 || layer.level[y][x] || reserved[y][x] || object_at(x, y) || near_stair(x, y) || in_arena(x, y)) return -1;
+			pocket[y][x] = 1;
+			++n;
+		}
+	return n;
+}
+
+/* Whether (x, y), entered from the floor behind it towards `d`, is a
+ * walkway's first panel off a wider floor, off the way. */
+static bool pocket_mouth(int x, int y, int d) {
+	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4], bx = x - dir_dx[d], by = y - dir_dy[d];
+	if (!floor_cell(x, y) || !floor_cell(bx, by) || way_band[y][x] == 2 || layer.level[y][x] || layer.level[by][bx]) return false;
+	if (floor_cell(x + sx, y + sy) || floor_cell(x - sx, y - sy)) return false;
+	return (floor_cell(bx + sx, by + sy) || floor_cell(bx - sx, by - sy)) && cell_free(bx, by) && !near_talker(bx, by);
+}
+
+static void plan_obstacle(int kind) {
+	int best = -1, bx = 0, by = 0, bd = 0;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x)
+			for (int d = 0; d < 4; ++d) {
+				if (!pocket_mouth(x, y, d)) continue;
+				int n = pocket_of(x, y);
+				if (n < 6 || n > 40) continue;
+				/* (seen from the way: its mouth near it; a pad in it) */
+				int score = 20 - (detour[y][x] < 20 ? detour[y][x] : 20) + (n >= 9 && n <= 20 ? 5 : 0);
+				if (score > best) { best = score; bx = x; by = y; bd = d; }
+			}
+	if (best < 0 || layer.nblocks >= MAX_BLOCKS) return;
+	pocket_of(bx, by);
+	/* its one thing where it ends: the farthest panel from the mouth */
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static int16_t dist[MAP_H][MAP_W];
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) dist[y][x] = -1;
+	int h = 0, t = 0, rx = bx, ry = by;
+	dist[by][bx] = 0;
+	qx[t] = (int16_t)bx; qy[t++] = (int16_t)by;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		if (dist[y][x] > dist[ry][rx]) { rx = x; ry = y; }
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + dir_dx[k], ny = y + dir_dy[k];
+			if (!floor_cell(nx, ny) || dist[ny][nx] >= 0 || !pocket[ny][nx]) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	pad_middle(&rx, &ry);
+	layer.block[layer.nblocks++] = (NetBlock){ bx, by, bd, kind, rx, ry };
+	/* (nothing else in the pocket, its mouth or the floor before it) */
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (pocket[y][x]) reserved[y][x] = 1;
+	reserved[by][bx] = 1;
+	reserved[by - dir_dy[bd]][bx - dir_dx[bd]] = 1;
+}
+
+/* The pocket's one thing, once the rest stands: a blue data of the best
+ * quality (a Cross is the key; a lock never pays less than the open data). */
+static void place_block_rewards(void) {
+	for (int i = 0; i < layer.nblocks; ++i) {
+		NetObj *o = add_obj(OBJ_MYSTERY, layer.block[i].rx, layer.block[i].ry);
+		if (o) o->param = 2;
+	}
+}
+
 /* Bystander navis with a word to share, two panels at least from what else
  * stands there (one beside a Mystery Data took MegaMan's A, and each A
  * that closed his words opened them again). */
@@ -1509,10 +1608,16 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		plan_teleport();
 		npcs_held += layer.teleport_island;   /* (the island's data, placed last) */
 	}
+	int block = pieces & PIECE_OBSTACLE ? layer_block_kind(depth, biome) : -1;
+	if (block >= 0) {
+		plan_obstacle(block);
+		npcs_held += layer.nblocks;   /* (the pocket's data, placed last) */
+	}
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
 	npcs_held = 0;
 	if (gap.x >= 0) carve_gap(&gap, rise);
 	if (layer.teleport_island) carve_teleport_island(rise);
+	place_block_rewards();
 	emblems(kit);
 }

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Link Navi obstacles (issue #42).** BN6's cybertrees, flames, cyclones,
+  clouds and geysers of cyberwater now stand in the mouths of pockets off
+  the way, each the area's own kind, each pocket holding one good Mystery
+  Data. The run's Crosses clear them as Gregar's Link Navis do: carrying
+  HeatMan's Cross, A at a cybertree and HeatMan burns it away. Without the
+  right Cross, MegaMan says whose would clear it, a hint for the next run.
 - **No more pads that look like warps and aren't.** A layer's pads wore
   BN6's gem, ring or cube in their middle as decoration, but in BN6 every
   one of them is a warp: the gem a teleport, the cube a homepage's link,

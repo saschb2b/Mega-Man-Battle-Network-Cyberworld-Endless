@@ -95,6 +95,14 @@ typedef struct { int x, y, dir; } Stair;
 typedef struct { int x, y, dir, len; bool island; } NetGap;
 #define MAX_GAPS 2
 
+/* A Link Navi obstacle in a walkway's mouth (issue #42): BN6's own, which
+ * the run's Crosses clear as Gregar's Link Navis do, closing a pocket off
+ * the way that holds one thing. (x, y) the walkway's first panel, dir the
+ * DIR_* from the room into it, (rx, ry) its reward's panel. */
+enum { BLOCK_WATER, BLOCK_TREE, BLOCK_FLAMES, BLOCK_CYCLONE, BLOCK_CLOUD, BLOCK_KINDS };
+typedef struct { int x, y, dir, kind, rx, ry; } NetBlock;
+#define MAX_BLOCKS 2
+
 typedef struct {
 	uint8_t cell[MAP_H][MAP_W];
 	uint8_t level[MAP_H][MAP_W];   /* 1: a raised room's floor */
@@ -118,6 +126,8 @@ typedef struct {
 	int nprops;
 	NetGap gap[MAX_GAPS];
 	int ngaps;
+	NetBlock block[MAX_BLOCKS];
+	int nblocks;
 	int teleport_x[2], teleport_y[2];   /* a teleport pair's two panels, when nteleports is 1 (issue #44): */
 	int nteleports;                     /* the first a pad of its own past the void when teleport_island */
 	bool teleport_island;
@@ -168,8 +178,15 @@ int layer_detour(int x, int y);
  * from the run's seed and the depth alone. How many of the act's layers
  * from `depth` on hold `piece` (a Net Dealer stocks its key); a Rush gap's
  * length in panels. */
-enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4 };
+enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8 };
 unsigned layer_pieces(int depth, int biome, int kind);
+/* The Crosses MegaMan holds as layer `depth` begins (a bit per navi 1-5),
+ * which of them clear obstacle `kind` (BLOCK_*), and the obstacle a
+ * layer's pocket takes (BLOCK_*, -1 none): the area's own kinds, mostly
+ * one the run can clear. */
+unsigned layer_crosses(int depth);
+unsigned block_openers(int kind);
+int layer_block_kind(int depth, int biome);
 bool layer_purple(int depth, int biome, int kind);
 int layer_pieces_ahead(int depth, unsigned piece);
 int layer_rush_len(int depth, int biome);

@@ -11,16 +11,20 @@
  * the most in the Graveyard and the Undernet; Rush's bone gaps in
  * Central, Seaside, Green, Sky, the Undernet and ACDC's homepage, the
  * longest in Sky; teleport pairs where their gem marks them, Green's four
- * in Green Area 1, Sky's three, Central's one. */
-static const struct { uint8_t purple, rush, rush_len, teleport; } area_pieces[BIOME_COUNT] = {
+ * in Green Area 1, Sky's three, Central's one; the Link Navis' obstacles
+ * of the area's own kinds (Seaside's water and cyclone, Green's trees,
+ * Sky's clouds, flames and water, the Underground's under the Nest, all
+ * five in the Graveyard, which keeps nearly all its data behind them;
+ * none in Central). */
+static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds; } area_pieces[BIOME_COUNT] = {
 	[BIOME_CENTRAL] = { 2, 3, 2, 1 },
-	[BIOME_SEASIDE] = { 2, 2, 1, 0 },
-	[BIOME_SKY] = { 2, 3, 3, 3 },
-	[BIOME_GREEN] = { 2, 3, 1, 4 },
-	[BIOME_GRAVEYARD] = { 4, 0, 0 },
+	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE },
+	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER },
+	[BIOME_GREEN] = { 2, 3, 1, 4, 2, 1 << BLOCK_TREE },
+	[BIOME_GRAVEYARD] = { 4, 0, 0, 0, 4, 0x1F },
 	[BIOME_UNDERNET] = { 4, 2, 2 },
 	[BIOME_SECRET] = { 0, 0, 0 },
-	[BIOME_NEST] = { 1, 0, 0 },
+	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES },
 	[BIOME_COMP] = { 1, 0, 0 },
 	[BIOME_HOMEPAGE] = { 2, 0, 0 },
 	[BIOME_COMP_B] = { 1, 0, 0 },
@@ -57,14 +61,14 @@ unsigned layer_pieces(int depth, int biome, int kind) {
 	 * purple data) */
 	/* (no Rush before a guardian: his cutscene restarts every NPC script on
 	 * the map, the guardian's actors too) */
-	int w[4] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
-		area_pieces[biome].teleport, 2 };
-	unsigned bits[4] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, 0 }, got = 0;
+	int w[5] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
+		area_pieces[biome].teleport, area_pieces[biome].obstacle, 2 };
+	unsigned bits[5] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, 0 }, got = 0;
 	for (int k = 0; k < budget; ++k) {
 		int total = 0;
-		for (int i = 0; i < 4; ++i) total += got & bits[i] ? 0 : w[i];
+		for (int i = 0; i < 5; ++i) total += got & bits[i] ? 0 : w[i];
 		int roll = (int)((h >> (8 + 8 * k)) % (uint32_t)total);
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 5; ++i) {
 			if (got & bits[i]) continue;
 			if (roll < w[i]) { got |= bits[i]; break; }
 			roll -= w[i];
@@ -88,4 +92,51 @@ int layer_rush_len(int depth, int biome) {
 	int most = biome >= 0 && biome < BIOME_COUNT ? area_pieces[biome].rush_len : 1;
 	if (most < 1) most = 1;
 	return 1 + (int)((piece_hash(depth, 0x0B0E5u) >> 4) % (uint32_t)most);
+}
+
+/* (as powers.c gives them: the Cross brought keeps alone, else each
+ * guardian of navis 1-5 deleted before `depth` gives his) */
+unsigned layer_crosses(int depth) {
+	if (run.cross) return 1u << run.cross;
+	unsigned held = 0;
+	for (int d = 1; d < depth; ++d)
+		if (is_boss_depth(d)) {
+			int navi = run.boss_order[biome_for_depth(d)];
+			if (navi >= 1 && navi <= 5) held |= 1u << navi;
+		}
+	return held;
+}
+
+/* Gregar's pairs: the cyberwater and the cloud ElecMan or EraseMan, the
+ * cybertree HeatMan or SlashMan, the flames HeatMan or ChargeMan, the
+ * cyclone SlashMan or ChargeMan (navis 1 Heat, 2 Elec, 3 Slash, 4 Erase,
+ * 5 Charge) */
+unsigned block_openers(int kind) {
+	static const uint8_t openers[BLOCK_KINDS] = { 1 << 2 | 1 << 4, 1 << 1 | 1 << 3, 1 << 1 | 1 << 5, 1 << 3 | 1 << 5, 1 << 2 | 1 << 4 };
+	return kind >= 0 && kind < BLOCK_KINDS ? openers[kind] : 0;
+}
+
+/* The pick of n kinds among `set`, by r. */
+static int nth_kind(unsigned set, uint32_t r) {
+	int n = 0;
+	for (int k = 0; k < BLOCK_KINDS; ++k) n += set >> k & 1;
+	if (!n) return -1;
+	int pick = (int)(r % (uint32_t)n);
+	for (int k = 0; k < BLOCK_KINDS; ++k)
+		if (set >> k & 1 && pick-- == 0) return k;
+	return -1;
+}
+
+/* Mostly one the run can clear (four in five), else one it can't, a hint
+ * for the next run's Cross; with no Cross that clears any of the area's,
+ * one of them two layers in five, else none (a locked pocket a run can't
+ * open is dead weight, one now and then a lesson). */
+int layer_block_kind(int depth, int biome) {
+	if (biome < 0 || biome >= BIOME_COUNT) return -1;
+	unsigned kinds = area_pieces[biome].kinds, held = layer_crosses(depth), open = 0;
+	for (int k = 0; k < BLOCK_KINDS; ++k)
+		if (kinds >> k & 1 && block_openers(k) & held) open |= 1u << k;
+	uint32_t h = piece_hash(depth, 0x0B57AC1Eu);
+	if (open) return (h % 100 < 80 || open == kinds) ? nth_kind(open, h >> 8) : nth_kind(kinds & ~open, h >> 8);
+	return h % 100 < 40 ? nth_kind(kinds, h >> 8) : -1;
 }

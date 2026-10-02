@@ -247,7 +247,32 @@ static bool island_room(int r) {
 	return false;
 }
 
-static int gap_layers, gap_panels, teleport_layers, teleport_islands;
+static int gap_layers, gap_panels, teleport_layers, teleport_islands, block_layers, block_kinds[BLOCK_KINDS];
+
+/* A Link Navi obstacle (issue #42): in a walkway's first panel off the way;
+ * closed, the exit is still reached and the pocket behind it holds its one
+ * Mystery Data and nothing else. */
+static void blocks_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
+	if (!layer.nblocks) return;
+	++block_layers;
+	for (int b = 0; b < layer.nblocks; ++b) {
+		const NetBlock *k = &layer.block[b];
+		block_kinds[k->kind]++;
+		CHECK(!layer_on_way(k->x, k->y), "seed %u: an obstacle on the way", seed);
+		layer.cell[k->y][k->x] = C_VOID;
+		reachable_cells((int)start->x, (int)start->y, seen);
+		layer.cell[k->y][k->x] = C_PATH;
+		int held = 0;
+		for (int i = 0; i < layer.nobj; ++i) {
+			const NetObj *o = &layer.obj[i];
+			if (o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS) CHECK(seen[(int)o->y][(int)o->x], "seed %u: the way needs an obstacle cleared", seed);
+			if (!seen[(int)o->y][(int)o->x] && layer.cell[(int)o->y][(int)o->x] == C_PATH && !(o->x == k->x + 0.5f && o->y == k->y + 0.5f))
+				held += o->type == OBJ_MYSTERY ? 1 : 100;
+		}
+		/* (a teleport's island or a Rush island holds its own) */
+		if (!layer.ngaps && !layer.teleport_island) CHECK(held == 1, "seed %u: an obstacle's pocket holds %d", seed, held);
+	}
+}
 
 /* A teleport pair (issue #44): one panel where a long detour ends, or a pad
  * of its own past the void, and one two to six off the way, never on it;
@@ -303,7 +328,7 @@ static void test_generation(void) {
 		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0, purples = 0;
 	long blue_walk = 0, green_walk = 0;
 	memset(&run, 0, sizeof run);
-	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 5);   /* (Cross navis: the obstacles a run's Crosses clear) */
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
 	for (uint32_t seed = 1; seed <= 300; ++seed) {
 		int depth = 1 + (int)(seed % 25);
@@ -354,6 +379,7 @@ static void test_generation(void) {
 		 * every panel is reached) */
 		gaps_check(seed, start, seen);
 		teleports_check(seed);
+		blocks_check(seed, start, seen);
 		gaps_bridge(true);
 		int cells = 0;
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cells += layer.cell[y][x] == C_PATH;
@@ -580,6 +606,8 @@ static void test_generation(void) {
 	CHECK(blue_far * 10 >= blue * 9, "only %d of %d blue data where a detour ends", blue_far, blue);
 	printf("  purple data on %d of %d layers; Rush gaps on %d, %d panels in all; teleport pairs on %d, %d to an island\n", purples, layers, gap_layers,
 		gap_panels, teleport_layers, teleport_islands);
+	printf("  Link Navi obstacles on %d layers: water %d, tree %d, flames %d, cyclone %d, cloud %d\n", block_layers, block_kinds[0], block_kinds[1],
+		block_kinds[2], block_kinds[3], block_kinds[4]);
 	CHECK(purples * 10 >= layers && purples * 2 <= layers, "purple data on %d of %d layers", purples, layers);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);
