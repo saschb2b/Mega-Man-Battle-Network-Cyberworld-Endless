@@ -829,3 +829,22 @@ the act's plan calls for a cube (`layer_cube_kind` in `net_pieces.c`):
   layer, before his. The keys now come before the SubChips on his list of
   eight: an Unlocker had taken the last place and left the WWW-ID off.
 
+### Teaching them (issue #48, in part)
+
+A player meets each set piece without a manual, the lock and its key said
+together:
+
+- **At the piece:** a Link Navi obstacle, a cube and the Undernet's doors
+  name themselves and their key at A; Rush's bones are named when MegaMan
+  first comes near (`rush_hint`); an invisible path has its navi.
+- **From the dealer:** he names each key on his list and where its lock
+  lies (`dealer_keys`: the Unlocker, RushFood, the WWW-ID).
+- **From L** (`status_words`): on a layer's first L, MegaMan senses its set
+  pieces with its services ("I sense a Net Dealer, purple Mystery Data and
+  bone panels here!"), and the first time a profile meets a kind he says
+  what it is and what opens it (`piece_lessons`, `profile.pieces_taught`),
+  as he explains the map's violet marks once. Never an invisible path.
+
+Not built yet: the first layer of a run holding a kind holding its key
+too, and the 3DS map's marks on locks seen.
+

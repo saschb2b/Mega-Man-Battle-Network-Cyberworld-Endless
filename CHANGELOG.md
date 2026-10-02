@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **L tells what the set pieces are (issue #48).** On a layer's first L,
+  MegaMan now senses its set pieces along with its services: purple
+  Mystery Data, bone panels, teleport pads, arrow panels, obstacles,
+  cubes and the Undernet's doors. The first time you meet each kind, he
+  says what it is and what opens it.
 - **The Undernet's doors (issue #47).** The Undernet now locks its spurs
   with BN6's own doors. A skull door lets only WWW members through: the
   act's Net Dealer sells the WWW-ID, and one opens every skull door of the

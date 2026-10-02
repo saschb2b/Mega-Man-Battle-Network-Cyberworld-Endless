@@ -62,6 +62,7 @@ typedef struct {
 	uint32_t duel_run;
 	uint16_t duel_depth;
 	uint8_t duel_beat;
+	uint8_t pieces_taught;    /* the set pieces L has explained (SENSED_*, director.c; issue #48) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };

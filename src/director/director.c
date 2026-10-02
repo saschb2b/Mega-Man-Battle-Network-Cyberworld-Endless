@@ -600,8 +600,71 @@ static int off_board_note(char *buf, int k, int size) {
 	return k;
 }
 
+/* The map's violet marks L has not explained yet, explained (once a
+ * profile), appended to `buf` at `k`; the new length. */
+static int mark_lessons(char *buf, int k, int size, int fresh) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
+	if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
+	if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
+	if (fresh & MARK_NAVI_GATE)
+		ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
+			guardian(D.objs.gate_navi)->name);
+	if (fresh & MARK_VAULT) ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
+	if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+	#undef ADD
+	return k;
+}
+
+/* The layer's set pieces MegaMan senses (issue #48), a bit each; not an
+ * invisible path, whose navi's hint is its cue. */
+enum { SENSED_PURPLE = 1, SENSED_RUSH = 2, SENSED_TELEPORT = 4, SENSED_ARROWS = 8, SENSED_OBSTACLE = 16, SENSED_CUBE = 32, SENSED_SKULL = 64,
+	SENSED_NUMBER = 128 };
+
+static int pieces_sensed(void) {
+	int m = (layer.ngaps ? SENSED_RUSH : 0) | (layer.nteleports ? SENSED_TELEPORT : 0) | (layer.nlanes ? SENSED_ARROWS : 0);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_MYSTERY && layer.obj[i].param == MD_PURPLE) m |= SENSED_PURPLE;
+	for (int i = 0; i < layer.nblocks; ++i) {
+		int kind = layer.block[i].kind;
+		m |= kind < BLOCK_KINDS ? SENSED_OBSTACLE : kind == BLOCK_SKULL ? SENSED_SKULL : kind == BLOCK_NUMBER ? SENSED_NUMBER : SENSED_CUBE;
+	}
+	return m;
+}
+
+/* What each is called among what MegaMan senses, once he has explained it,
+ * and his words the first time a profile meets it: the lock and its key,
+ * as the bone panels' were (BN6 says nothing of RushFood at its bones). */
+static const struct { int bit; const char *name, *lesson; } piece_talk[] = {
+	{ SENSED_PURPLE, "purple Mystery Data", "@M Purple Mystery Data, locked tight! An Unlocker opens it, and a Net Dealer might sell one.|" },
+	{ SENSED_RUSH, "bone panels", "@M Bone panels by a gap! Rush can bridge it, if we carry RushFood.|" },
+	{ SENSED_TELEPORT, "teleport pads", "@M A pair of teleport pads! Step on one, and we beam to the other.|" },
+	{ SENSED_ARROWS, "arrow panels", "@M Arrow panels! They carry us one way only, the way they point.|" },
+	{ SENSED_OBSTACLE, "a Link Navi's obstacle", "@M Something blocks a walkway, the kind a Link Navi clears. The right Cross would do it!|" },
+	{ SENSED_CUBE, "a security cube", "@M A security cube! It wants a P-Code somebody here knows, or a toll.|" },
+	{ SENSED_SKULL, "a skull door", "@M A skull door! Only a WWW-ID gets us past one.|" },
+	{ SENSED_NUMBER, "a number door", "@M A number door! Its answer is something we can count on this layer.|" },
+};
+
+/* The `known` pieces' names added to here[] (n of them, max at most); the
+ * new count. */
+static int piece_names(int known, const char **here, int n, int max) {
+	for (unsigned i = 0; i < sizeof piece_talk / sizeof *piece_talk && n < max; ++i)
+		if (known & piece_talk[i].bit) here[n++] = piece_talk[i].name;
+	return n;
+}
+
+/* The `fresh` pieces explained, appended to `buf` at `k`, and noted as
+ * taught; the new length. */
+static int piece_lessons(char *buf, int k, int size, int fresh) {
+	for (unsigned i = 0; i < sizeof piece_talk / sizeof *piece_talk; ++i)
+		if (fresh & piece_talk[i].bit) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "%s", piece_talk[i].lesson);
+	if (fresh) { profile.pieces_taught |= (uint8_t)fresh; profile_save(); }
+	return k;
+}
+
 static const char *status_words(void) {
-	static char buf[800];
+	static char buf[1400];
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (D.town) {
@@ -667,7 +730,7 @@ static const char *status_words(void) {
 		 * shop, and L had said nothing of one), then the map's violet mark,
 		 * in full until it has been explained (a playtester stood beside one
 		 * and never found out what it was), named after that */
-		const char *here[8];
+		const char *here[16];
 		int n = 0;
 		if (shop) here[n++] = "a Net Dealer";
 		if (heal) here[n++] = "a Recovery Mr. Prog";
@@ -684,16 +747,11 @@ static const char *status_words(void) {
 		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
 		if (known & MARK_VAULT) here[n++] = "a collector's vault";
 		if (official && n < 8) here[n++] = "an official gate";
+		int pieces = pieces_sensed();
+		n = piece_names(pieces & profile.pieces_taught, here, n, 16);
 		k = sense_words(buf, k, (int)sizeof buf, here, n, duel);
-		if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
-		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
-		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
-		if (fresh & MARK_NAVI_GATE)
-			ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
-				guardian(D.objs.gate_navi)->name);
-		if (fresh & MARK_VAULT)
-			ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
-		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+		k = mark_lessons(buf, k, (int)sizeof buf, fresh);
+		k = piece_lessons(buf, k, (int)sizeof buf, pieces & ~profile.pieces_taught);
 		/* (where the rival waits, and his mark: the map showed him as the
 		 * official gate's violet, and a playtester's session ran out at
 		 * the gate, alone, looking for him) */
