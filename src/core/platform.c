@@ -89,7 +89,9 @@ static float density(void) {
 	if (forced_dpi > 0) return forced_dpi / 160;
 	int short_side = P.screen_w < P.screen_h ? P.screen_w : P.screen_h;
 	float dp = 0;
-#ifdef __EMSCRIPTEN__
+	/* (the browser's pixels to its CSS pixels; an iPhone's to its points,
+	 * a 163rd of an inch, which SDL's DPI table knows not for every model) */
+#if defined(__EMSCRIPTEN__) || defined(CW_IOS)
 	int ww = 0, wh = 0;
 	SDL_GetWindowSize(P.window, &ww, &wh);
 	if (ww > 0) dp = (float)P.screen_w / (float)ww;
