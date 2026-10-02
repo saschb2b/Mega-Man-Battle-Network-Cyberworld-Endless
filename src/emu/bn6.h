@@ -95,9 +95,6 @@
 #define BN6_CUTSCENE_POS      (BN6_CUTSCENE + 0x1C) /* CutsceneScriptPos */
 #define BN6_CUTSCENE_POS0     (BN6_CUTSCENE + 0x40) /* originalCutsceneScriptPos_40 */
 
-#define BN6_ENGINE_MARK       0x0203FFF0u /* past everything the game uses: the engine's stubs signal here */
-#define BN6_ENGINE_RET        0x0203FFF4u /* and the call stub leaves the routine's r0, r1 here */
-#define BN6_ENGINE_RET_R1     (BN6_ENGINE_RET + 4)
 /* A map's tile map decompresses to 0x02013A00 (12-byte header, then the
  * entries) and its coordinate data to 0x02027A00, which the game reads in
  * place: the raw entries may take up to here, not a byte more. */
@@ -110,11 +107,14 @@
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
 /* The PET menu (docs/ROM_DATA.md, the PET): ePETMenuData, +0 its state, +4
  * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the entry the engine's
- * part of its input took (7 Save); the state table's pointer to its input
+ * hook on its input took (7 Save); the state table's pointer to its input
  * handler, and that handler; the grey's store to Save's colour */
 #define BN6_PET_MENU          0x0200DF20u
+#define BN6_PET_CURSOR        (BN6_PET_MENU + 0x04)
 #define BN6_PET_MENU_OPEN     (BN6_PET_MENU + 0x05)
+#define BN6_PET_HOLD          (BN6_PET_MENU + 0x09) /* a count that holds its input off */
 #define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F)
+#define BN6_KEYS_PRESSED      0x0200A272u           /* eJoypad +2: the keys just pressed (u16, the GBA's bits) */
 #define BN6_PET_INPUT_PTR     0x08120B1Cu
 #define BN6_PET_INPUT         0x08120B91u
 #define BN6_PET_GREY_SAVE     0x08120F26u
@@ -213,7 +213,7 @@
 #define BN6_CHAT_RUN_SCRIPT   0x08040359u /* chatbox_runScript (archive, script index) */
 #define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags) */
 #define BN6_WARP_DEPART_JACK_OUT 0x080059B5u /* warp departure 8: the jack-out cutscene, then warp */
-#define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: the engine borrows it for a frame */
+#define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: a hook runs the engine's calls in its place */
 /* Random battles (src/director/encounter.c): bn6f checkThenStartBattle
  * (0x08005A8C, Gregar's as Falzar's) tests MegaMan on the map, then the
  * flags, fades and chat that hold a battle, calls the roll (0x080ABD30)

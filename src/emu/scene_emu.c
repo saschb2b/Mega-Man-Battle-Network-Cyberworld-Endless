@@ -14,6 +14,7 @@
 #include "encounter.h"
 #include "emu.h"
 #include "events.h"
+#include "gamecall.h"
 #include "game.h"
 #include "gfx.h"
 #include "platform.h"
@@ -55,6 +56,7 @@ static void enter(void) {
 	text_draw(P.w / 2, P.h / 2 - 8, "Building the net...", WHITE, TEXT_CENTER);
 	platform_present_now();
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
+	gamecall_install();
 	npc_reach_install();
 	chat_marks_install();
 	pet_install();

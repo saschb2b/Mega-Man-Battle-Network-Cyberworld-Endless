@@ -68,10 +68,10 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | Offset | Contents | Code |
 | --- | --- | --- |
 | `+0x0000` | Warp record and warp list for direct warps | `gamecall.c` |
-| `+0x0100` | Call stub: runs one game routine with r0-r2, sets `BN6_ENGINE_MARK` and leaves the routine's r0, r1 at `BN6_ENGINE_RET` (`0x0203FFF4`, past the game's EWRAM as the mark is) | `gamecall.c` |
+| `+0x0100` | Where a game call's routine returns: a hook, which takes its r0 and r1 and goes back to the main loop (until issue #33 a stub of hand-written Thumb, with `0x0203FFF0`-`0x0203FFFB` past the game's EWRAM for its mark and results: free) | `gamecall.c` |
 | `+0x0180` | Free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
-| `+0x0300` | The PET's input step: A on Save taken for the engine, then the game's own handler (docs/PET.md) | `pet.c` |
+| `+0x0300` | Free (the PET's input step until a hook on the game's own handler took its place, issue #33) | |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
 | `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
@@ -119,8 +119,8 @@ the NaviCust under MegaMan in the PET (`0x00F2`; without it MegaMan's entry
 goes straight to his status and a program cannot be installed. Found by
 setting blocks of flags with the PET open, `tools/play.py`'s dev `flags`
 step, and halving: `0x00AC` and `0x00F7` add Records there instead), and
-borrows cbGameState
-(`0x080050EC`) for one frame to warp.
+calls the game's routines (a warp among them) through a hook at
+cbGameState (`0x080050EC`), a frame of the game's state update each.
 
 
 At a new run's start the engine writes the chosen starting folder (docs/META.md)
@@ -276,6 +276,9 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
 | `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) | about once a frame on the map |
 | `0x0803CD6C` | GiveItem | event: a key item given (a ScrtData, the run's Spin) | once an item |
+| `0x080050EC` | cbGameState, the game mode's state update (`src/emu/gamecall.c`) | answer: a queued game call jumps to its routine in the update's place, its return to `EMU_FREE` + `0x100` | once a frame of the game mode |
+| `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |
+| `0x08120B90` | the PET's input handler (`src/director/pet.c`) | answer: A on Save taken for the engine (docs/PET.md) | each frame the PET takes input |
 
 The duel's two are set as the duel begins and taken off as it ends, so
 the other battles carry no hook a frame per object. The hooks replaced

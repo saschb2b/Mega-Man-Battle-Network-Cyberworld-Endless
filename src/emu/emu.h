@@ -31,6 +31,9 @@ void emu_reset(void);
  * it, and emu_video shows the frame before until then. */
 void emu_frame(uint32_t keys);
 bool emu_threaded(void);
+/* Waits for a frame the core runs on its own thread: what its hooks left
+ * is the main thread's to read after it. */
+void emu_sync(void);
 /* Set while a frame is drawn: a read of the game then, with the core on a
  * thread of its own, waits for the next frame (counted in emu_draw_waits,
  * which the frame log shows). */

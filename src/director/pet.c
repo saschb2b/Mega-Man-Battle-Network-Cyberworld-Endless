@@ -12,16 +12,21 @@
 /* A Save under way: the PET closing, then the checkpoint. */
 static int saving;
 
-/* Our part of the PET's input (state 4, EMU_FREE + 0x300): A on Save,
- * disabled in a run, taken from the game (its A bit cleared) and left in
- * the menu's spare byte for the engine, then on to the game's own input
- * handler, which sees no A there; Comm keeps BN6's grey and buzz.
- *   ldrb r0,[r5,#4]; cmp r0,#7; bne 1f        (the cursor on Save)
- *   ldrb r1,[r5,#9]; cmp r1,#0; bne 1f        (input not held off)
- *   ldr r2,=0x0200A272; ldrh r1,[r2]; movs r3,#1; tst r1,r3; beq 1f
- *   bics r1,r3; strh r1,[r2]; strb r0,[r5,#15]
- * 1: ldr r0,=0x08120B91; bx r0 */
-#define PET_INPUT_AT (EMU_FREE + 0x300)
+/* The PET's input handler (its state 4, run each frame the menu takes
+ * input), hooked: A on Save, disabled in a run, is taken from the game (its
+ * bit in the keys just pressed cleared) and left in the menu's spare byte
+ * for the engine, so the handler sees no A there; Comm keeps BN6's grey and
+ * buzz. */
+static HookAct pet_input(HookRegs *r, void *user) {
+	(void)r;
+	(void)user;
+	if (hook_read8(BN6_PET_CURSOR) != 7 || hook_read8(BN6_PET_HOLD)) return HOOK_CONTINUE;
+	uint16_t keys = hook_read16(BN6_KEYS_PRESSED);
+	if (!(keys & KEY_A)) return HOOK_CONTINUE;
+	hook_write16(BN6_KEYS_PRESSED, (uint16_t)(keys & ~KEY_A));
+	hook_write8(BN6_PET_MENU_TAKEN, 7);
+	return HOOK_CONTINUE;
+}
 
 static uint32_t rom32(uint32_t at) {
 	uint32_t o = at - 0x08000000u;
@@ -29,17 +34,9 @@ static uint32_t rom32(uint32_t at) {
 }
 
 void pet_install(void) {
-	static const uint8_t input[] = {
-		0x28, 0x79, 0x07, 0x28, 0x0A, 0xD1, 0x69, 0x7A, 0x00, 0x29, 0x07, 0xD1, 0x04, 0x4A, 0x11, 0x88,
-		0x01, 0x23, 0x19, 0x42, 0x02, 0xD0, 0x99, 0x43, 0x11, 0x80, 0xE8, 0x73, 0x01, 0x48, 0x00, 0x47,
-		0x72, 0xA2, 0x00, 0x02, 0x91, 0x0B, 0x12, 0x08,
-	};
 	/* (only where the game is the one we read: its input handler's
 	 * pointer in the PET's state table, the grey's store) */
-	if (rom32(BN6_PET_INPUT_PTR) == BN6_PET_INPUT) {
-		emu_write(PET_INPUT_AT, input, sizeof input);
-		emu_write32(BN6_PET_INPUT_PTR, PET_INPUT_AT | 1);
-	}
+	if (rom32(BN6_PET_INPUT_PTR) == BN6_PET_INPUT) emu_hook(BN6_PET_INPUT, pet_input, NULL);
 	/* Save lit, Comm greyed as BN6 has it without a link: the grey's
 	 * store to Save's colour (0x03001B58) made a no-op */
 	uint32_t grey = BN6_PET_GREY_SAVE - 0x08000000u;

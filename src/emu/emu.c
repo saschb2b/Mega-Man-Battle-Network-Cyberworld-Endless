@@ -104,6 +104,7 @@ void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply
 bool emu_hook(uint32_t addr, EmuHook fn, void *user) { wait_frame(); return core && hook_add(addr, fn, user); }
 bool emu_hook_event(uint32_t addr, int kind) { wait_frame(); return core && hook_add_event(addr, kind); }
 void emu_unhook(uint32_t addr) { wait_frame(); if (core) hook_remove(addr); }
+void emu_sync(void) { wait_frame(); }
 int emu_hook_events(HookEvent *out, int max) { wait_frame(); return core ? hook_drain(out, max) : 0; }
 
 void emu_audio_rate(int rate) {

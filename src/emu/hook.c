@@ -44,6 +44,7 @@ uint32_t hook_hits, hook_dropped, hook_strays;
 uint8_t hook_read8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
 uint16_t hook_read16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1); }
 uint32_t hook_read32(uint32_t a) { return core->rawRead32(core, a, -1); }
+void hook_write8(uint32_t a, uint8_t v) { core->rawWrite8(core, a, -1, v); }
 void hook_write16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
 void hook_write32(uint32_t a, uint32_t v) { core->rawWrite32(core, a, -1, v); }
 

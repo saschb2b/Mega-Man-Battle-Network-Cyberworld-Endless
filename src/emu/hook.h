@@ -65,6 +65,7 @@ void hook_post(const HookRegs *r, int kind);
 uint8_t hook_read8(uint32_t addr);
 uint16_t hook_read16(uint32_t addr);
 uint32_t hook_read32(uint32_t addr);
+void hook_write8(uint32_t addr, uint8_t v);
 void hook_write16(uint32_t addr, uint16_t v);
 void hook_write32(uint32_t addr, uint32_t v);
 
