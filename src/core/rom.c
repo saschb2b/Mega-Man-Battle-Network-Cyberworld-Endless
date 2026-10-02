@@ -23,6 +23,7 @@ static const RomLayout layouts[] = {
 		.chip_descs = { 0x6E983C, 0x6EC050 },
 		.enemy_ids = 0x0182C4,
 		.enemy_stats = 0x00F260,
+		.enemy_traits = 0x00F230,
 		.encounters = 0x020170,
 		.navicust_programs = 0x13B22C,
 		.battle_gem_rewards = 0x0211A0,

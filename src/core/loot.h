@@ -19,8 +19,9 @@ Encounter make_encounter(int depth, int biome, int kind);
 uint32_t loot_families_here(int depth, int biome);
 enum { FAMILY_STARFISH = 15, FAMILY_SCARCROW = 17, FAMILY_DARKMECH = 25 };
 Encounter make_boss(int depth, int biome, int navi);
-/* The element strong against an act's guardian, else against its area's
- * viruses (ELEM_*, 0 for none): the Net Dealers stock a chip of it. */
+/* The element that hits an act's guardian twice as hard (of either wheel),
+ * else its area's viruses (ELEM_*, 0 for none): the Net Dealers stock a
+ * chip of it. */
 int counter_element(int depth, int biome, int navi);
 /* Random chip for rewards/shops; code chosen from the chip's own codes. */
 int roll_chip(int depth, int bonus_tier, char *code);

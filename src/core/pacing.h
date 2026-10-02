@@ -24,6 +24,9 @@ PacingBand pacing_band_wider(PacingBand b);
 
 /* The highest virus version (0 V1 .. 3 SP) a battle at `depth` aims for. */
 int pacing_virus_version(int depth, bool challenge);
+/* The versions pacing_virus_version can roll at `depth`, lowest and highest,
+ * without a roll (what an area's battles can hold there). */
+void pacing_virus_versions(int depth, bool challenge, int *lo, int *hi);
 /* Whether a battle there may turn one virus rare (from the third act on,
  * more often on later cycles), on a roll of 0-99. */
 bool pacing_rare(int depth, int roll);

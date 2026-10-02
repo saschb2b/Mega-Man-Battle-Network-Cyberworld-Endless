@@ -120,6 +120,20 @@ static int answer_most(int depth, int counter) {
 	return counter > 0 ? lo / 6 : lo / 3;
 }
 
+/* Whether chip `id` answers `counter` (-1: a guardian of no element,
+ * answered by the hardest hit): a Standard chip of that element that
+ * strikes outright, and reaches, not only beside MegaMan (CircusMan kept
+ * to his back column, and two AquaSwrd never touched him; EraseMan holds
+ * still at the back), but a sword where swords are the answer (TenguMan
+ * hovers right in front between his dashes, and a Sword's 80 took 160 of
+ * his HP); nor TankCan's line, which fires after a wind-up (CircusMan
+ * hopped out of the row during it, and 200 went off on nothing). */
+static bool answers(int id, const ChipInfo *ci, int counter) {
+	if (counter >= 0 && chip_hits_with(id) != counter) return false;
+	if (chip_melee(id) && counter != ELEM_SWORD) return false;
+	return ci->power > 0 && chip_direct(id) && chip_standard(id) && chip_family(id) != CHIP_FAMILY_TANKCAN;
+}
+
 static int answer(int depth, int counter, int id, char *code) {
 	int most = answer_most(depth, counter);
 	int best = -1, best_power = 0, found = 0;
@@ -128,13 +142,7 @@ static int answer(int depth, int counter, int id, char *code) {
 	for (int tries = 0; tries < 400 && (best < 0 || (tries < 80 && (found < 8 || (!best_fits && found < 16)))); ++tries) {
 		ChipInfo ci;
 		chip_info(id, &ci);
-		/* (-1: a guardian of no element, answered by the hardest hit) */
-		/* (and one that reaches: CircusMan kept to his back column,
-		 * and two AquaSwrd never touched him) */
-		/* (nor TankCan's line, which fires after a wind-up: CircusMan
-		 * hopped out of the row during it, and 200 went off on nothing) */
-		if ((ci.element == counter || counter < 0) && ci.power > 0 && chip_direct(id) && !chip_sword(id) && chip_standard(id) &&
-			chip_family(id) != CHIP_FAMILY_TANKCAN) {
+		if (answers(id, &ci, counter)) {
 			/* (not one the folder holds as many of as it may: a playtester's
 			 * pick, two ElcPuls1 S beside the three his folder had, was no
 			 * use at all) */
@@ -178,12 +186,15 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 		 * 1's Elec answers: Thunder the only one under it, ElcPuls1 two
 		 * times 200 of DiveMan's 500) */
 		if (i == 0 && counter != 0) {
-			int a = answer(depth, counter, it.id, &code);
+			/* (none of the element found, which a few layers' rolls of
+			 * Cursor chips came to: the hardest hit, and the dealer says so) */
+			int c = counter, a = answer(depth, c, it.id, &code);
+			if (a < 0 && c > 0) a = answer(depth, c = -1, it.id, &code);
 			if (a >= 0) {
 				ChipInfo ci;
 				chip_info(a, &ci);
 				it.id = (uint16_t)a;
-				it.stock = ci.power > answer_most(depth, counter) ? 1 : 2;
+				it.stock = ci.power > answer_most(depth, c) ? 1 : 2;
 			}
 		}
 		/* the second, where the first is the hardest hit for a guardian of

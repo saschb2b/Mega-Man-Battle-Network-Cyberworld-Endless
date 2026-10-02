@@ -19,6 +19,9 @@ typedef struct {
 
 /* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel) */
 const Guardian *guardian(int navi);
+/* ElementMan, whose element changes as he fights: none of his answers his
+ * every form (bn6f: no element in his stats or traits) */
+#define GUARDIAN_ELEMENTMAN 16
 
 /* Before the battle: the story beat that fits first (first meeting, a
  * rematch, revenge for a loss, a stronger version), then variety by how

@@ -33,9 +33,9 @@ typedef struct {
 bool shop_install(int shop, const ShopItem *items, int n, bool kept);
 
 /* A layer's stock at `depth` (the rng decides the picks): first two of
- * the hardest hitting chip of element `counter` (1-4), or of any element
+ * the hardest hitting chip of element `counter` (ELEM_*), or of any element
  * for -1 (a guardian with none), 0 for no such chip; with -1, a chip of
- * element `viruses` (1-4, the act's viruses' weakness) second. */
+ * element `viruses` (ELEM_*, the act's viruses' weakness) second. */
 int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX_ITEMS]);
 /* The chip a Net Dealer lists first at `depth` for the element `counter`
  * (-1: a guardian of none, the hardest hitter), as a layer's roll picks it

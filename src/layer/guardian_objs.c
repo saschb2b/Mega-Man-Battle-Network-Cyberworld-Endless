@@ -114,17 +114,16 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	if (alt >= 0) dark = run_route_dark(next, alt_navi, &dark_navi);
 	bool dark_open = dark >= 0 && meta_dark_way_open();
 	if (alt >= 0) {
-		static const char *const elem[5] = { "", " (Fire)", " (Aqua)", " (Elec)", " (Wood)" };
 		int nways = dark_open ? 3 : 2;
 		int b[3] = { run.biome_order[next], alt, dark }, n[3] = { run.boss_order[run.biome_order[next]], alt_navi, dark_navi }, el[3];
 		static char option[3][32];
 		for (int k = 0; k < nways; ++k) {
 			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
+			/* (his element of either wheel: TenguMan's Wind as HeatMan's Fire) */
 			el[k] = enemy_element(enemy_id(1, n[k], 0));
-			if (el[k] < 0 || el[k] > 4) el[k] = 0;
 			if (guardian_known(n[k])) {
-				snprintf(option[k], sizeof option[k], "%s%s", guardian(n[k])->name, elem[el[k]]);
-				snprintf(who[k], sizeof who[k], "%s%s", guardian(n[k])->name, elem[el[k]]);
+				snprintf(option[k], sizeof option[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
+				snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
 			} else {
 				/* (a Navi as the known ones are, where it waits beside it:
 				 * a playtester read "Aquarium Comp" beside "EraseMan" as a

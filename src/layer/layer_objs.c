@@ -280,6 +280,37 @@ static bool official_duel_prize(int level) {
 	return layer_has(OBJ_DUEL) && !layer_objs_duel_later && rival_clearance() >= level;
 }
 
+/* The Net Dealer's word on the act's guardian, `navi`, by his list
+ * (`stock`, n of them): the element he can't stand (of either wheel:
+ * TenguMan's Sword, issue #39) and the pick of it, first on the list; for
+ * one weak to none, the hardest hit, and the viruses' weakness besides
+ * where the list has a chip of it (an element-less guardian's act is
+ * answered for its viruses). ElementMan's element changes as he fights,
+ * so none answers him for long. */
+static void dealer_word(char *word, size_t n, int navi, int counter, const ShopItem *stock, int nstock, const char *brought,
+                        const char *lands) {
+	bool weak = counter > 0 && enemy_weakness(enemy_id(1, navi, 0)) > 0, listed = false;
+	for (int i = 0; i < nstock; ++i)
+		if (stock[i].kind == 2 && counter > 0 && chip_hits_with(stock[i].id) == counter && (i == 0 || !weak)) listed = true;
+	if (weak && listed) {
+		snprintf(word, n, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s", guardian(navi)->name,
+			elem_name(counter), brought, lands);
+		return;
+	}
+	/* (a weakness he found no chip of, as a few layers' rolls of Cursor
+	 * chips came to: the hardest hit, shop_dealer_stock) */
+	if (weak) {
+		snprintf(word, n, "|Word is, %s can't stand %s chips, but I couldn't get my hands on any. Hit hard: my pick for the job's "
+			"first on the list. %s", guardian(navi)->name, elem_name(counter), brought);
+		return;
+	}
+	int k = snprintf(word, n, "|Word is, %s %s. Hit hard: my pick for the job's first on the list. %s", guardian(navi)->name,
+		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" : "has no weak element", brought);
+	if (listed && k > 0 && (size_t)k < n)
+		snprintf(word + k, n - (size_t)k, "|The viruses around here can't stand %s chips, though. I've got one of those too!",
+			elem_name(counter));
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -317,15 +348,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
 	ShopItem stock[SHOP_MAX_ITEMS];
-	int navi_of_act = run.boss_order[run.biome], ge_of_act = navi_of_act > 0 ? enemy_element(enemy_id(1, navi_of_act, 0)) : 0;
-	bool elementless = navi_of_act > 0 && !(ge_of_act > 0 && ge_of_act <= 4);
-	int nstock = shop_dealer_stock(run.depth, elementless ? -1 : counter, elementless ? counter : 0, stock);
-	/* (whether his list has a chip of the viruses' element, for his word) */
-	bool virus_chip = false;
-	for (int i = 0; i < nstock; ++i) {
-		ChipInfo ci;
-		if (stock[i].kind == 2 && counter > 0 && (chip_info(stock[i].id, &ci), ci.element == counter)) virus_chip = true;
-	}
+	int navi_of_act = run.boss_order[run.biome];
+	bool weakless = navi_of_act > 0 && enemy_weakness(enemy_id(1, navi_of_act, 0)) <= 0;
+	int nstock = shop_dealer_stock(run.depth, weakless ? -1 : counter, weakless ? counter : 0, stock);
 	/* the program vendor's, before his words too (he names the programs
 	 * MegaMan has had in earlier runs, which lead his list) */
 	out->nprograms = shop_program_stock(run.depth, out->programs);
@@ -436,35 +461,21 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_SHOP: {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
-			static const char *const elem[5] = { "", "Fire", "Aqua", "Elec", "Wood" };
 			char hello[400], word[280] = "";
-			int navi = run.boss_order[run.biome], ge = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
+			int navi = run.boss_order[run.biome];
 			/* (the net's word comes back from an act's second layer: its
 			 * first keeps the mystery of a guardian never battled, but for
 			 * a bystander's rumor, sought out; a playtester's dealer named
 			 * one two minutes into the act) */
 			bool tells = navi > 0 && (guardian_known(navi) || layer_in_act(run.depth) > 0);
 			layer_objs_dealer_named = tells;
-			/* (the guardian's weakness by name; an element-less guardian's
-			 * act is answered for its viruses) */
 			/* (nor does he deny the bystanders' rumor: a playtester heard it
 			 * two platforms before his "No word yet") */
 			if (navi > 0 && !tells)
 				snprintf(word, sizeof word, "|Nobody's come back from the end of %s to tell what guards it. There's talk on the net, "
 					"but I don't sell on talk. Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
-			else if (counter > 0 && ge > 0 && ge <= 4)
-				snprintf(word, sizeof word, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s",
-					guardian(navi)->name, elem[counter], brought, lands);
-			else if (navi > 0 && counter > 0 && virus_chip)
-				/* (no element to answer the guardian with: the hardest hit on
-				 * the list, and the viruses' weakness besides, of which the
-				 * list has one) */
-				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s|"
-					"The viruses around here can't stand %s chips, though. I've got one of those too!", guardian(navi)->name, brought,
-					elem[counter]);
 			else if (navi > 0)
-				snprintf(word, sizeof word, "|Word is, %s has no weak element. Hit hard: my pick for the job's first on the list. %s",
-					guardian(navi)->name, brought);
+				dealer_word(word, sizeof word, navi, counter, stock, nstock, brought, lands);
 			/* (and that his chips come in the folder's codes, loot_fit_code) */
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 				? run.codes[0] ? "Welcome to the Net Dealer! Divers need chips, and I've got 'em, in your folder's codes when I can!"
