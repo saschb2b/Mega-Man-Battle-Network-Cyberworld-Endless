@@ -443,11 +443,41 @@ static void paths_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][
 	}
 }
 
+/* Branches off the way five panels or more, and those that end in
+ * nothing: no object, no set piece's stand (session 59: a two-wide band
+ * led to an empty end); wide where two by two of its panels are floor. */
+static void empty_ends(int *branches, int *empty, int *empty_wide) {
+	static int16_t far[MAP_W * MAP_H];
+	static uint8_t holds[MAP_W * MAP_H], wide[MAP_W * MAP_H];
+	memset(far, 0, sizeof far); memset(holds, 0, sizeof holds); memset(wide, 0, sizeof wide);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			int d = layer_detour(x, y), b = layer_branch(x, y);
+			if (d <= 0 || b < 0) continue;
+			if (d > far[b]) far[b] = (int16_t)d;
+			if (layer_branch(x + 1, y) == b && layer_branch(x, y + 1) == b && layer_branch(x + 1, y + 1) == b && layer_detour(x + 1, y + 1) > 0) wide[b] = 1;
+		}
+	#define HOLDS(x, y) do { int bb = layer_detour((x), (y)) > 0 ? layer_branch((x), (y)) : -1; if (bb >= 0) holds[bb] = 1; } while (0)
+	for (int i = 0; i < layer.nobj; ++i) HOLDS((int)layer.obj[i].x, (int)layer.obj[i].y);
+	for (int i = 0; i < layer.ngaps; ++i) HOLDS(layer.gap[i].x, layer.gap[i].y);
+	for (int i = 0; i < layer.nblocks; ++i) HOLDS(layer.block[i].x, layer.block[i].y);
+	for (int i = 0; i < layer.npaths; ++i) HOLDS(layer.path[i].x, layer.path[i].y);
+	for (int i = 0; i < layer.nlanes; ++i) HOLDS(layer.lane[i].x, layer.lane[i].y);
+	for (int i = 0; i < 2 * (layer.nteleports > 0); ++i) HOLDS(layer.teleport_x[i], layer.teleport_y[i]);
+	#undef HOLDS
+	for (int b = 0; b < MAP_W * MAP_H; ++b) {
+		if (far[b] < 5) continue;
+		++*branches;
+		if (!holds[b]) { ++*empty; *empty_wide += wide[b]; }
+	}
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
 		landmarks = 0, statues = 0, undernet_layers = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
-		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0, purples = 0;
+		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0, purples = 0,
+		branches = 0, empty = 0, empty_wide = 0;
 	long blue_walk = 0, green_walk = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 5);   /* (Cross navis: the obstacles a run's Crosses clear) */
@@ -461,6 +491,7 @@ static void test_generation(void) {
 		 * number door counts them, issue #47) */
 		layer_generate(seed * 7919u, depth, biome, kind, biome == BIOME_UNDERNET ? &undernet_kit : &kit);
 		++layers;
+		empty_ends(&branches, &empty, &empty_wide);
 		/* (a heal a short walk from every guardian's arena: a playtester
 		 * found one a long way back from SpoutMan's) */
 		if (layer.arena >= 0) {
@@ -705,6 +736,11 @@ static void test_generation(void) {
 		}
 	}
 	CHECK(arenas * 10 >= boss_layers * 9, "only %d of %d guardians have an arena", arenas, boss_layers);
+	/* (a detour five panels long or more ends in something: a two-wide band
+	 * that read as the way led a playtester to nothing; 106 of 1589 such
+	 * bands were empty, and 321 detours in all, before fill_empty_detours) */
+	CHECK(empty_wide * 30 <= branches, "%d of %d long detours run wide to nothing", empty_wide, branches);
+	CHECK(empty * 6 <= branches, "%d of %d long detours end in nothing", empty, branches);
 	CHECK(mouths == 0, "%d of %d services and navis stand at a walkway's mouth", mouths, standing);
 	/* (a service where its room has no other place) */
 	CHECK(in_line * 20 <= standing, "%d of %d services and navis stand in line with a walkway", in_line, standing);

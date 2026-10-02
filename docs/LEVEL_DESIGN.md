@@ -551,6 +551,19 @@ panels, and about as much in all (fewer of the middle quality, a fifth
 more of the best). The tests check that nine blue data in ten stand three
 panels off the way or more.
 
+### No long detour left empty (built)
+
+Once all stands, a detour five panels or more off the way that holds
+nothing, no object and no set piece's stand, takes a green data at its
+end, the farthest first (`fill_empty_detours`): one lying loose (on the
+way, or on a shorter detour) is moved there, so a layer holds as many; and
+a detour that runs two panels wide or more, a band that reads as the way,
+takes a new one where the map has room. A playtester walked a two-wide
+band to an empty end; over the tests' 300 layers 321 of 1589 such
+detours had been empty, 106 of them wide; 215 and 40 now, the rest where
+the map's sixteen are spent or the end has no free panel. A narrow spur
+to nothing stays, as BN6's maps keep some.
+
 ### The layer's RegUp (built, issue #51)
 
 Each layer before a guardian holds one of BN6's RegUps (docs/META.md, Reg

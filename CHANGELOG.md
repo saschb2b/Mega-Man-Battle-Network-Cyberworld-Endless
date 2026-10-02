@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **No long detour leads to nothing.** A branch five panels or more off
+  the way that held nothing now ends in a green Mystery Data, moved from
+  one lying loose by the way, and a wide band that reads as the way gets
+  one of its own. Half the layers had held an empty one. This build makes
+  layers differently, so a CONTINUE starts the layer afresh.
 - **The map shows where sensed services stand.** On a partly explored
   layer, the shops, heals and others MegaMan senses sat as dots on the
   map's frame, read as standing at its edge. The map now zooms out to show

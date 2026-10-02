@@ -194,6 +194,10 @@ bool layer_on_way(int x, int y);
 /* How many panels a walk from the way to (x, y) takes, -1 off the floor
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);
+/* The way's cell a walk to (x, y) leaves the way from (its branch: the
+ * cells of a spur, a room off the way and what lies past them share it),
+ * as y * MAP_W + x; -1 off the floor. */
+int layer_branch(int x, int y);
 /* The DIR_* an arrow lane's panel (x, y) carries MegaMan towards, -1 none
  * (issue #43); and whether a walk may step from panel (x, y) to the panel
  * beside it (nx, ny): onto a lane and along it only the way its arrows run

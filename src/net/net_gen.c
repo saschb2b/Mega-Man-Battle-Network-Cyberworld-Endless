@@ -321,6 +321,7 @@ static int16_t detour[MAP_H][MAP_W], branch[MAP_H][MAP_W];
  * long walk that holds the best) */
 #define DETOUR_BLUE 3
 #define DETOUR_FAR 8
+#define DETOUR_EMPTY 5   /* (a detour this long is never left empty: fill_empty_detours) */
 
 /* (the guardian's arena is no detour: the way ends at him, in its middle) */
 static bool in_arena(int x, int y) {
@@ -354,6 +355,7 @@ static void measure_detours(void) {
 }
 
 int layer_detour(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H ? detour[y][x] : -1; }
+int layer_branch(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H ? branch[y][x] : -1; }
 
 /* A pad's middle where (x, y) lies on a pad: the originals set a pad's data
  * there; else (x, y). */
@@ -395,6 +397,81 @@ static bool detour_end(int min, uint8_t *taken, DetourEnd *out) {
 		return true;
 	}
 	return false;
+}
+
+/* The branch (x, y) lies on, where it is off the way; -1 on the way or off
+ * the floor. */
+static int off_way_branch(int x, int y) { return layer_detour(x, y) > 0 ? layer_branch(x, y) : -1; }
+
+/* A green data lying loose: on the way, or on a detour shorter than
+ * DETOUR_EMPTY (`far`: each branch's longest), and no set piece's; the
+ * nearest the way; -1 none. */
+static int loose_green(const int16_t *far) {
+	int best = -1, best_d = 1 << 30;
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type != OBJ_MYSTERY || o->param != 0 || o->prize) continue;
+		int x = (int)o->x, y = (int)o->y, d = layer_detour(x, y), b = off_way_branch(x, y);
+		if (d < 0 || (b >= 0 && far[b] >= DETOUR_EMPTY) || d >= best_d) continue;
+		best = i;
+		best_d = d;
+	}
+	return best;
+}
+
+static int npcs_for(int want);
+
+/* A branch's cells and how wide it runs: wide[b] where two by two of its
+ * panels are floor (a band that reads as the way, not a spur) */
+static void branch_shape(int16_t *far, uint8_t *wide) {
+	int b;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if ((b = off_way_branch(x, y)) < 0) continue;
+			if (detour[y][x] > far[b]) far[b] = detour[y][x];
+			if (off_way_branch(x + 1, y) == b && off_way_branch(x, y + 1) == b && off_way_branch(x + 1, y + 1) == b) wide[b] = 1;
+		}
+}
+
+/* Once all stands: a detour DETOUR_EMPTY panels or more off the way that
+ * holds nothing, no object and no set piece's stand, takes a loose green
+ * data at its end, the farthest first (a playtester walked a two-wide band
+ * to an empty end, session 59; half the layers held one, 321 of 1589
+ * such detours); moved, not added. A wide one still empty takes a new
+ * one where the map has room: a band reads as the way, a spur to nothing
+ * as BN6's own. */
+static void fill_empty_detours(void) {
+	static uint8_t holds[MAP_W * MAP_H], wide[MAP_W * MAP_H];
+	static int16_t far[MAP_W * MAP_H], keep_detour[MAP_H][MAP_W], keep_branch[MAP_H][MAP_W];
+	memset(holds, 0, sizeof holds);
+	memset(far, 0, sizeof far);
+	memset(wide, 0, sizeof wide);
+	/* (the layer's detours as its data were placed stay its own: an arrow
+	 * lane, carved since, is measured from them) */
+	memcpy(keep_detour, detour, sizeof detour);
+	memcpy(keep_branch, branch, sizeof branch);
+	measure_detours();
+	branch_shape(far, wide);
+	int b;
+	for (int i = 0; i < layer.nobj; ++i)
+		if ((b = off_way_branch((int)layer.obj[i].x, (int)layer.obj[i].y)) >= 0) holds[b] = 1;
+	for (int i = 0; i < layer.ngaps; ++i) if ((b = off_way_branch(layer.gap[i].x, layer.gap[i].y)) >= 0) holds[b] = 1;
+	for (int i = 0; i < layer.nblocks; ++i) if ((b = off_way_branch(layer.block[i].x, layer.block[i].y)) >= 0) holds[b] = 1;
+	for (int i = 0; i < layer.npaths; ++i) if ((b = off_way_branch(layer.path[i].x, layer.path[i].y)) >= 0) holds[b] = 1;
+	for (int i = 0; i < layer.nlanes; ++i) if ((b = off_way_branch(layer.lane[i].x, layer.lane[i].y)) >= 0) holds[b] = 1;
+	for (int i = 0; i < 2 * (layer.nteleports > 0); ++i)
+		if ((b = off_way_branch(layer.teleport_x[i], layer.teleport_y[i])) >= 0) holds[b] = 1;
+	DetourEnd end;
+	int g;
+	while ((g = loose_green(far)) >= 0 && detour_end(DETOUR_EMPTY, holds, &end)) {
+		layer.obj[g].x = (float)end.x + 0.5f;
+		layer.obj[g].y = (float)end.y + 0.5f;
+	}
+	for (b = 0; b < MAP_W * MAP_H; ++b) holds[b] |= !wide[b];
+	NetObj *o;
+	while (npcs_for(1) && detour_end(DETOUR_EMPTY, holds, &end) && (o = add_obj(OBJ_MYSTERY, end.x, end.y))) o->param = 0;
+	memcpy(detour, keep_detour, sizeof detour);
+	memcpy(branch, keep_branch, sizeof branch);
 }
 
 /* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
@@ -1862,6 +1939,7 @@ static void place_last(const GapSite *gap, unsigned pieces, int rise, const Laye
 	place_block_rewards();
 	if (pieces & PIECE_ARROW) place_lane(kit);
 	place_teller(order, n);
+	fill_empty_detours();
 	emblems(kit);
 }
 
