@@ -11,23 +11,27 @@ yet on a device.
 
 Apple's App Store takes no app that runs on a ROM, so it comes through a
 sideloading store that installs apps with the player's own Apple ID:
-[AltStore Classic](https://altstore.io) or
-[SideStore](https://sidestore.io) (each needs a computer once; on iOS 16
-and newer, Developer Mode too). AltStore PAL in the EU installs only
-notarized apps, which this is not.
+[SideStore](https://sidestore.io), set up once from a computer by
+[iloader](https://iloader.app) (Windows, macOS or Linux, over a USB cable;
+then the LocalDevVPN app on the phone lets SideStore install and renew
+apps by itself), or [AltStore Classic](https://altstore.io), with AltServer
+on a Windows PC or a Mac. On iOS 16 and newer, Developer Mode too.
+AltStore PAL, the EU's App Marketplace edition, installs only apps Apple
+has notarized: it refuses the source with "missing a marketplaceID"
+(a player's test in Germany, 2026-10-02).
 
 1. Add the source, in the app's **Sources** tab, **+**:
    `https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/altstore-source.json`.
-   On the phone, the download page's buttons open AltStore
-   (`altstore://source?url=...`) or SideStore (`sidestore://source?url=...`)
-   with it.
+   On the phone, the download page's buttons open SideStore
+   (`sidestore://source?url=...`) or AltStore Classic
+   (`altstore://source?url=...`) with it.
 2. Install **Cyberworld Endless** from the source. A free Apple ID's apps
-   last seven days; AltStore renews them in the background, and offers each
-   new release the source lists.
-3. Start it. Without a ROM it asks for one: **A** opens Files' picker,
-   which copies the file picked into the app. Or put the ROM in Files,
-   **On My iPhone › Cyberworld** (the app's Documents folder), any file
-   name; the app looks again every three seconds.
+   last seven days; SideStore and AltStore renew them, and offer each new
+   release the source lists.
+3. Start it. Without a ROM it asks for one: **CHOOSE ROM** (or A) opens
+   Files' picker, which copies the file picked into the app. Or put the
+   ROM in Files, **On My iPhone › Cyberworld** (the app's Documents
+   folder), any file name; the app looks again every three seconds.
 
 `cyberworld-endless.ipa` on the releases page is the app alone, for
 another installer (it is signed ad hoc: the installer signs it again).

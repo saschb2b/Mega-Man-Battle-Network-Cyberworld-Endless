@@ -109,7 +109,7 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A Linux PC, x86-64 | `cyberworld-endless-x86_64.AppImage`, `cyberworld-endless.flatpak`, `cyberworld-endless_amd64.deb` or `cyberworld-endless-linux-x86_64.tar.gz` | [On a Linux PC](#on-a-linux-pc) |
 | A Steam Deck | `cyberworld-endless.flatpak` | [On a Steam Deck](#on-a-steam-deck) |
 | An Android phone, tablet or handheld | `cyberworld-endless.apk` | [On Android](#on-android) |
-| An iPhone or iPad, iOS 14 or newer | through AltStore or SideStore: its source, `altstore-source.json`; or `cyberworld-endless.ipa` | [On an iPhone or iPad](#on-an-iphone-or-ipad) |
+| An iPhone or iPad, iOS 14 or newer | through SideStore or AltStore Classic: its source, `altstore-source.json`; or `cyberworld-endless.ipa` | [On an iPhone or iPad](#on-an-iphone-or-ipad) |
 | A handheld with PortMaster | `cyberworld-endless-portmaster.zip` | [On a PortMaster handheld](#on-a-portmaster-handheld) |
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
@@ -245,19 +245,26 @@ before it quits. Uninstalling the app deletes its saves.
 ### On an iPhone or iPad
 
 Apple's App Store has no place for a game that runs on a ROM, so the app
-comes through [AltStore Classic](https://altstore.io) or
-[SideStore](https://sidestore.io), which install apps with your own Apple
-ID and keep them up to date. Each needs a computer once, to set it up; on
-iOS 16 and newer, Developer Mode too.
+comes through [SideStore](https://sidestore.io), which installs apps with
+your own Apple ID and keeps them up to date. Not AltStore PAL, the EU's App
+Marketplace edition: it installs only apps Apple has notarized ("missing a
+marketplaceID").
 
-1. In AltStore or SideStore, open **Sources**, tap **+** and add
+1. Set up SideStore once, with a computer: [iloader](https://iloader.app)
+   (Windows, macOS or Linux) installs it over a USB cable, then the
+   LocalDevVPN app on the phone lets SideStore install and renew apps by
+   itself ([SideStore's guide](https://docs.sidestore.io/docs/installation/install)).
+   On iOS 16 and newer, turn on Developer Mode too. AltStore Classic works
+   the same way, with AltServer on a Windows PC or a Mac.
+2. In SideStore, open **Sources**, tap **+** and add
    `https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/altstore-source.json`
    (the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#ios)
-   has buttons that do it on the phone).
-2. Install **Cyberworld Endless** from the source. With a free Apple ID,
-   AltStore renews it every seven days, and offers each new version.
-3. Start it and press A: choose your ROM in Files. Or put the ROM in Files,
-   **On My iPhone › Cyberworld**, where the app keeps your saves too.
+   has a button that does it on the phone).
+3. Install **Cyberworld Endless** from the source. With a free Apple ID an
+   app lasts seven days: SideStore renews it, and offers each new version.
+4. Start it and tap **CHOOSE ROM**: pick your ROM in Files. Or put the ROM
+   in Files, **On My iPhone › Cyberworld**, where the app keeps your saves
+   too.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
 PlayStation). `cyberworld-endless.ipa` on the releases page is the app

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **iPhone and iPad: SideStore, not AltStore PAL.** In the EU, the AltStore
+  from Apple's App Marketplace (AltStore PAL) installs only apps Apple has
+  notarized, and refused the source ("missing a marketplaceID"). The
+  download page, the README and the FAQ now lead with SideStore, set up
+  once from a Windows, macOS or Linux computer by iloader, and name
+  AltStore Classic (with AltServer on a Windows PC or a Mac) beside it.
+
 ## 0.7.0 (2026-10-02)
 
 - **The game on iPhone and iPad.** It comes through AltStore Classic or
