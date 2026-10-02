@@ -73,6 +73,27 @@ void run_new(uint32_t seed) {
 	}
 }
 
+/* Whether guardian `g` is another act's (the four of the surface), or the
+ * short net's Nest's. */
+static bool guardian_taken(int g) {
+	bool taken = run.mode == RUN_SHORT && run.boss_order[BIOME_NEST] == g;
+	for (int e = 0; e < 4; ++e) taken |= run.boss_order[run.biome_order[e]] == g;
+	return taken;
+}
+
+/* The guardian nearest act `act`'s band that no act has, the area's own
+ * (`pool`) first where two are as near; -1 none. */
+static int nearest_free_guardian(int act, const uint8_t pool[4]) {
+	int best = -1, best_miss = 1 << 30;
+	for (unsigned i = 0; i < sizeof navis; ++i) {
+		if (guardian_taken(navis[i])) continue;
+		int miss = pacing_guardian_miss(navis[i], act, 0, false, navi_hp);
+		bool own = pool[0] == navis[i] || pool[1] == navis[i] || pool[2] == navis[i] || pool[3] == navis[i];
+		if (miss < best_miss || (miss == best_miss && own)) { best_miss = miss; best = navis[i]; }
+	}
+	return best;
+}
+
 int run_route_alt(int act, int *navi) {
 	/* (acts 2-4 of the surface; the short net's fourth is its Nest) */
 	if (act < 1 || act > 3 || (run.mode == RUN_SHORT && act > 2)) return -1;
@@ -89,14 +110,18 @@ int run_route_alt(int act, int *navi) {
 	uint32_t keep = rng_state();
 	rng_seed(run.seed ^ 0x524F5554u ^ (uint32_t)act * 2654435761u);
 	int b = free_areas[rng_range(0, m - 1)], g = 0;
-	for (int tries = 0; tries < 8; ++tries) {
+	/* (no guardian another act has: the ones before, the way it stands
+	 * beside, those after, the short net's Nest) */
+	bool again = true;
+	for (int tries = 0; tries < 8 && again; ++tries) {
 		g = pacing_guardian_pick(pools[b], navis, (int)sizeof navis, act, 0, false, navi_hp);
-		/* (no guardian another act has: the ones before, the way it stands
-		 * beside, those after, the short net's Nest) */
-		bool again = run.mode == RUN_SHORT && run.boss_order[BIOME_NEST] == g;
-		for (int e = 0; e < 4; ++e) again |= run.boss_order[run.biome_order[e]] == g;
-		if (!again) break;
+		again = guardian_taken(g);
 	}
+	/* (where every try met one, as a band that few fit gives: the nearest
+	 * no act has; a playtester's split offered SpoutMan both ways, Green
+	 * Area's and Aquarium Comp's, session 59) */
+	int free = again ? nearest_free_guardian(act, pools[b]) : -1;
+	if (free > 0) g = free;
 	rng_restore(keep);
 	*navi = g;
 	return b;

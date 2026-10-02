@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **A split offers two guardians.** After a guardian, the second way on
+  could name the same guardian as the act ahead (SpoutMan for both Green
+  Area and Aquarium Comp, about one split in seventy). It now always offers
+  another.
 - **RegUps and TagChips (issue #51).** Every layer before a guardian now
   hides a RegUp, behind a lock or at the end of a detour, so your Reg
   memory grows from 4 MB to about 20 by the third act. Set a Regular Chip
