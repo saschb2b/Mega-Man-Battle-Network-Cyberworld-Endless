@@ -74,6 +74,8 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x0180` | Free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
 | `+0x0300` | Free (the PET's input step until a hook on the game's own handler took its place, issue #33) | |
+| `+0x0700`-`+0x10E0` | Map-object handler 3's records (issue #42): BN6's 86, then the engine's Link Navi obstacles and cubes, 9 variants of 8 slots each; its literal points here, written once a core | `blockers.c` |
+| `+0x0400`-`+0x0640` | Rush's gaps (issue #14): the gap table from group 0x80 that the check's literals point at, a group's empty map list, the layer's group's maps, the layer's gap records, and handler 0x25's records (BN6's 13, then the layer's two) | `rush.c` |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
 | `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |

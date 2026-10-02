@@ -58,6 +58,12 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
  * bridge beside an island comes along in its tiles there); called again on
  * another map of the area, it fills in `out`. */
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out);
+/* An arrow panel of `a` (issue #43), carrying MegaMan towards BN6's way d
+ * (0 +X, 1 +Y, 2 -X, 3 -Y): one in a lane a panel wide, closed by the
+ * lane's end cells (section 3, 0x4C + d); the tiles of both layers whose
+ * middle lies on its diamond, anchored on its corner of lowest X and Y.
+ * Called again on another map of the area, it keeps one it has. */
+bool props_learn_arrow(const AreaSrc *a, int d, PropStamp *out);
 void props_free(PropStamp *p);
 /* Gives the mirror image `m` of `a` (area_src_mirror, tiles only) a's walls
  * and layer priorities, mirrored with it: world (X, Y) to (-Y, -X). */

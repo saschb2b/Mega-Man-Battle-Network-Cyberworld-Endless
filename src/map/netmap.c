@@ -11,6 +11,7 @@
  * the floor get the wall types the original maps use: 1 NE, 2 SW, 3 SE, 4 NW
  * edges and 5 E, 6 S, 7 N, 8 W outer corners. */
 #include "netmap.h"
+#include "net_shapes.h"
 
 #include <stdio.h>
 #include <limits.h>
@@ -56,6 +57,7 @@ typedef struct {
 	PropStamp bush[2];        /* Green's potted bushes, plain and in flower */
 	PropStamp emblem;         /* the emblem its floors carry (the Graveyard's crosses) */
 	PropStamp pad;            /* a whole pad of its maps, for its layers' (Central's framed pads) */
+	PropStamp arrow[4];       /* an arrow panel of its maps for each of BN6's ways (0 +X, 1 +Y, 2 -X, 3 -Y; issue #43) */
 	uint8_t rebank[2];        /* RomLayout.net_area[].rebank */
 	uint8_t rebank_to[128];   /* the first-layer tiles its maps draw in rebank[1] (a bit each) */
 	bool pads_seen;           /* its maps have pads, whose look its layers' pads take */
@@ -201,6 +203,13 @@ static void learn_report(int area, const Learned *L) {
 	for (int d = 0; d < STAIR_DIRS; ++d)
 		fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
 			L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
+	for (int d = 0; d < 4; ++d) fprintf(stderr, "arrow panel area %d way %d ok %d tiles %d\n", area, d, L->arrow[d].ok, L->arrow[d].ntiles);
+}
+
+/* Map a's arrow panels, the ways not learned yet (BN6's maps alone: another
+ * game's sections are its own). */
+static void learn_arrows(const AreaSrc *a, const NetAreaDef *na, Learned *L) {
+	for (int d = 0; d < 4 && !na->xrom; ++d) props_learn_arrow(a, d, &L->arrow[d]);
 }
 
 static void learn_more(const AreaSrc *grid, int area, Learned *L) {
@@ -216,6 +225,14 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
 		if (na->pad_hues && aligned(grid, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
+		if (aligned(grid, &b)) learn_arrows(&b, na, L);
+		area_src_free(&b);
+	}
+	/* (and the arrow panels of its maps listed for them alone) */
+	for (int k = 0; k < 2 && na->arrow_maps[k][0]; ++k) {
+		AreaSrc b;
+		if (!load_map(na, na->arrow_maps[k][0], na->arrow_maps[k][1], &b)) continue;
+		if (aligned(grid, &b)) learn_arrows(&b, na, L);
 		area_src_free(&b);
 	}
 }
@@ -240,6 +257,7 @@ static bool learn(int area, Learned *L) {
 	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
 	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
+	learn_arrows(&a, na, L);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];
 	rebank_seen(&a, na->rebank[1], L);
@@ -543,26 +561,16 @@ static void paste_props(uint16_t *map, int tw, int th) {
 	}
 }
 
-/* The pads' centrepieces, walkable, on the middle panel of every pad at
- * ground level with nothing standing there, as the originals set theirs:
- * mostly the red gem, else the link ring or the cube (the layer's own
- * choice from its seed, the floor unchanged). */
+/* The teleports' gems (issue #44). Every centrepiece of BN6's net maps
+ * marks a warp (29 of them: the gem a teleport within the map, the cube a
+ * homepage's link, the ring a comp's or another area's), so none is set
+ * where no warp is: a pad that looks like a warp and does nothing lies. */
 static void paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
-	int have[3], n = 0;
-	for (int k = 0; k < 3; ++k) if (L->ornament[k].ok) have[n++] = k;
-	if (!n) return;
-	uint32_t r = cur->seed ^ 0x0A7E0u;
+	if (!L->ornament[0].ok) return;
 	size_t cells = (size_t)tw * th;
-	for (int i = 0; i < layer.nrooms; ++i) {
-		const Room *m = &layer.rooms[i];
-		int x = m->x + m->w / 2, y = m->y + m->h / 2;
-		if (m->kind != ROOM_PAD || layer.cell[y][x] != C_PATH || layer.level[y][x]) continue;
-		bool taken = false;
-		for (int o = 0; o < layer.nobj; ++o) taken |= (int)layer.obj[o].x == x && (int)layer.obj[o].y == y;
-		if (taken) continue;
-		r = r * 1103515245u + 12345u;
-		int roll = (int)((r >> 16) % 5);
-		const PropStamp *st = &L->ornament[have[roll < 3 ? 0 : (roll - 2) % n]];
+	for (int i = 0; i < 2 && layer.nteleports; ++i) {
+		int x = layer.teleport_x[i], y = layer.teleport_y[i];
+		const PropStamp *st = &L->ornament[0];
 		int A, B;
 		grid_to_panel(x, y, &A, &B);
 		int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
@@ -637,6 +645,29 @@ static void paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
 			if (L->emblem.tiles[k].e0) map[at] = L->emblem.tiles[k].e0;
 			if (L->emblem.tiles[k].e1) map[cells + at] = L->emblem.tiles[k].e1;
 			if (last.pasted) last.pasted[at] |= NETMAP_PASTED_EMBLEM;
+		}
+	}
+}
+
+/* The arrow lanes' panels (issue #43), each its area's arrow panel for its
+ * way, in place of the walkway the classes drew there. */
+static void paste_arrows(const Learned *L, uint16_t *map, int tw, int th) {
+	size_t cells = (size_t)tw * th;
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		const PropStamp *st = &L->arrow[(l->dir + 1) & 3];
+		for (int k = 1; k <= l->len && st->ok; ++k) {
+			int A, B;
+			grid_to_panel(l->x + dir_dx[l->dir] * k, l->y + dir_dy[l->dir] * k, &A, &B);
+			int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+			for (int t = 0; t < st->ntiles; ++t) {
+				int px = px0 + st->tiles[t].px, py = py0 + st->tiles[t].py;
+				if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+				size_t at = (size_t)(py / 8) * tw + px / 8;
+				map[at] = st->tiles[t].e0;
+				map[cells + at] = st->tiles[t].e1;
+				if (last.pasted) last.pasted[at] |= NETMAP_PASTED_ARROW;
+			}
 		}
 	}
 }
@@ -746,6 +777,7 @@ static bool write_tilemap(const Learned *L) {
 	paste_pads(L, map, tw, th);
 	paste_ornaments(L, map, tw, th);
 	paste_emblems(L, map, tw, th);
+	paste_arrows(L, map, tw, th);
 	paste_bushes(L, map, tw, th);
 	/* how the classes' picks went, where they are drawn: not under what
 	 * was set whole over them */
@@ -782,9 +814,135 @@ static bool write_tilemap(const Learned *L) {
 }
 
 /* the layer's floor at `level` in world panels: its own level and stairs */
+/* ---- Rush's gaps (issue #14) ----
+ * For the walls a gap's panels are a walkway, walled along its sides and
+ * open at its mouths, where coords.c sets the floor's edges again with a
+ * flag that Rush lying there switches off (Central Area 2's gap has its
+ * walls so); its tiles stay void. */
+static struct { int A, B, g; } gap_panels[MAX_GAPS * 3];
+static int ngap_panels;
+static bool gaps_shut;
+
+static int gap_panel(int A, int B) {
+	for (int i = 0; i < ngap_panels; ++i)
+		if (gap_panels[i].A == A && gap_panels[i].B == B) return gap_panels[i].g;
+	return -1;
+}
+
+void netmap_gaps_shut(bool shut) { gaps_shut = shut; }
+
+bool netmap_gap_any(void) { return ngap_panels > 0; }
+
+int netmap_gap_at(int cx, int cy) {
+	if (!ngap_panels) return 0;
+	return gap_panel(floordiv(cx * 8 + 4 - place.ex, 32), floordiv(cy * 8 + 4 - place.ey, 32)) + 1;
+}
+
+/* Whether panel (A, B) is an invisible path's (issue #46): void as drawn,
+ * floor to the walls, never shut. */
+static bool path_panel(int A, int B) {
+	for (int i = 0; i < layer.npaths; ++i)
+		for (int k = 1; k <= layer.path[i].len; ++k) {
+			int pA, pB;
+			grid_to_panel(layer.path[i].x + dir_dx[layer.path[i].dir] * k, layer.path[i].y + dir_dy[layer.path[i].dir] * k, &pA, &pB);
+			if (pA == A && pB == B) return true;
+		}
+	return false;
+}
+
 static bool floor_level(int A, int B, int level) {
 	int k = kind_at(A, B);
+	if (!level && !gaps_shut && ngap_panels && gap_panel(A, B) >= 0) return true;
+	if (!level && layer.npaths && path_panel(A, B)) return true;
 	return k == K_STAIR || k == (level ? K_RAISED : K_FLOOR);
+}
+
+static void add_extra(int s, CoordCell c);
+
+void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side) {
+	int wx, wy, rx, ry;
+	netmap_world(b->x, b->y, &wx, &wy);
+	netmap_world(b->x - dir_dx[b->dir], b->y - dir_dy[b->dir], &rx, &ry);
+	int ux = (wx - rx) / 32, uy = (wy - ry) / 32;
+	if (ux) { *dir = ux > 0 ? 0 : 2; *edge = rx + 16 * ux; *side = wy - 16; }
+	else { *dir = uy > 0 ? 1 : 3; *edge = ry + 16 * uy; *side = wx - 16; }
+}
+
+/* The obstacles' walls and checks (issue #42), as BN6's own stand in a
+ * walkway's mouth: a line of five wall cells across it, a cell into the
+ * walkway, flagged 0x80 + its slot (off once it opens, wall flag 0x1640 +
+ * slot); and its check cells, value 0xF0 + slot, four along from the edge
+ * and nine across, where the engine's A probe (24 ahead, 17 on a diagonal)
+ * lands from the floor before it. */
+static void blocks_place(void) {
+	for (int k = 0; k < layer.nblocks; ++k) {
+		int dir, e, s;
+		netmap_block_edges(&layer.block[k], &dir, &e, &s);
+		bool along_x = !(dir & 1);
+		int sign = dir < 2 ? 1 : -1, at = e + (sign > 0 ? 4 : -12);
+		for (int i = 0; i < 5; ++i) {
+			int a = at, c = s - 4 + 8 * i;
+			add_extra(0, (CoordCell){ (int16_t)(along_x ? a : c), (int16_t)(along_x ? c : a), 0, (uint8_t)(0x80 + k), 8, (uint8_t)(1 + dir % 2 * 2 + (dir >= 2)) });
+		}
+		for (int j = 0; j < 4; ++j)
+			for (int i = 0; i < 9; ++i) {
+				int a = at + sign * 8 * j, c = s - 20 + 8 * i;
+				add_extra(3, (CoordCell){ (int16_t)(along_x ? a : c), (int16_t)(along_x ? c : a), 0, (uint8_t)(0xF0 + k), 8, 0x11 });
+			}
+	}
+}
+
+/* The gaps' panels, and each one's trigger strip: the lane's floor cells
+ * across the gap's first panel, where the engine's probe lands, 24 ahead
+ * of MegaMan, when he presses A at the edge (BN6's own strip is the
+ * mouth's row, its probe 8 ahead), taking the gap's near record (0x30 +
+ * 2g). */
+static void gaps_place(void) {
+	ngap_panels = 0;
+	gaps_shut = false;
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		int A0, B0, A1, B1;
+		grid_to_panel(p->x, p->y, &A0, &B0);
+		for (int k = 1; k <= p->len && ngap_panels < MAX_GAPS * 3; ++k) {
+			int A, B;
+			grid_to_panel(p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, &A, &B);
+			gap_panels[ngap_panels++] = (__typeof__(gap_panels[0])){ A, B, g };
+		}
+		grid_to_panel(p->x + dir_dx[p->dir], p->y + dir_dy[p->dir], &A1, &B1);
+		int ux = A1 - A0, uy = B1 - B0;
+		int ex = place.ex + 16 + 32 * A0 + 16 * ux, ey = place.ey + 16 + 32 * B0 + 16 * uy;   /* the near mouth */
+		for (int cy = (place.ey + 32 * B1) >> 3; cy < (place.ey + 32 * B1 + 32) >> 3; ++cy)
+			for (int cx = (place.ex + 32 * A1) >> 3; cx < (place.ex + 32 * A1 + 32) >> 3; ++cx) {
+				int depth = (cx * 8 + 4 - ex) * ux + (cy * 8 + 4 - ey) * uy;
+				if (depth > 0 && depth < 32 && netmap_floor_cell(cx, cy, 0))
+					add_extra(3, (CoordCell){ (int16_t)(cx * 8), (int16_t)(cy * 8), 0, (uint8_t)(0x30 + 2 * g), 8, 0x11 });
+			}
+	}
+}
+
+/* The arrow lanes' trigger cells (section 3, issue #43), as BN6's ring a
+ * lane a panel wide: across its first panel's near edge the start cells
+ * (0x48 + BN6's way), across its last panel's far edge the end cells (0x4C
+ * + the way), three to an edge between its corners, each centred on the
+ * edge; the ride runs from one to the other. Their shape is the way's
+ * (+X 0x13, +Y 0x15, -X 0x12, -Y 0x14), as every original's. */
+static void lanes_place(void) {
+	static const uint8_t shape[4] = { 0x13, 0x15, 0x12, 0x14 };
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		int d = (l->dir + 1) & 3, ux = d == 0 ? 1 : d == 2 ? -1 : 0, uy = d == 1 ? 1 : d == 3 ? -1 : 0;
+		for (int end = 0; end < 2; ++end) {
+			int k = end ? l->len : 1, A, B;
+			grid_to_panel(l->x + dir_dx[l->dir] * k, l->y + dir_dy[l->dir] * k, &A, &B);
+			int X0 = place.ex + 32 * A, Y0 = place.ey + 32 * B;
+			/* (the near edge against the way, the far one along it) */
+			int sign = end ? 1 : -1, X = ux ? X0 + 16 + 16 * ux * sign : 0, Y = uy ? Y0 + 16 + 16 * uy * sign : 0;
+			for (int c = 0; c < 3; ++c)
+				add_extra(3, (CoordCell){ (int16_t)(ux ? X - 4 : X0 + 4 + 8 * c), (int16_t)(uy ? Y - 4 : Y0 + 4 + 8 * c), 0,
+					(uint8_t)((end ? 0x4C : 0x48) + d), 8, shape[d] });
+		}
+	}
 }
 
 bool netmap_floor_cell(int cx, int cy, int level) {
@@ -972,6 +1130,9 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (striped) make_stripes(keep_pads);
 	coord_slot = L->coord_slot;
 	build_extra(L);
+	gaps_place();
+	blocks_place();
+	lanes_place();
 	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &extra);
 }
 
@@ -997,6 +1158,10 @@ void netmap_kit(int area, LayerKit *kit) {
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
 	kit->looks = na->looks;
 	kit->emblem = learned[area].emblem.ok;
+	kit->gem = learned[area].ornament[0].ok;
+	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
+	 * world +Y, grid y world -X) */
+	for (int g = 0; g < 4; ++g) kit->arrows |= (unsigned)learned[area].arrow[(g + 1) & 3].ok << g;
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */
@@ -1004,6 +1169,35 @@ static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int m
 	for (int j = y - margin; j < y + h + margin; ++j)
 		for (int i = x - margin; i < x + w + margin; ++i)
 			if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) locked[j][i] = 1;
+}
+
+/* The set pieces as generated: a teleport's panels with the floor round
+ * them (the gem's), a Rush gap's stand and the floor behind it, and its
+ * void panels with the void beside them; an obstacle's or a cube's mouth,
+ * one panel wide: the void beside it and the floor before and after it
+ * (widened, MegaMan walked round the cube: issue #45; the corners left to
+ * the tiles). */
+static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
+	for (int k = 0; k < 2 && layer.nteleports; ++k) lock(locked, layer.teleport_x[k] - 1, layer.teleport_y[k] - 1, 3, 3, 0);
+	/* (an arrow lane, its ends and the void beside it as generated) */
+	for (int i = 0; i < layer.nlanes; ++i)
+		for (int k = 0; k <= layer.lane[i].len + 1; ++k)
+			lock(locked, layer.lane[i].x + dir_dx[layer.lane[i].dir] * k, layer.lane[i].y + dir_dy[layer.lane[i].dir] * k, 1, 1, 1);
+	for (int k = 0; k < layer.nblocks; ++k) {
+		const NetBlock *b = &layer.block[k];
+		bool along_x = !(b->dir & 1);
+		lock(locked, b->x - along_x, b->y - !along_x, 1 + 2 * along_x, 1 + 2 * !along_x, 0);
+		lock(locked, b->x - !along_x, b->y - along_x, 1 + 2 * !along_x, 1 + 2 * along_x, 0);
+	}
+	for (int g = 0; g < layer.ngaps; ++g) {
+		const NetGap *p = &layer.gap[g];
+		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
+	}
+	/* (an invisible path's tip, its void panels and the void beside them) */
+	for (int i = 0; i < layer.npaths; ++i) {
+		const NetGap *p = &layer.path[i];
+		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
+	}
 }
 
 bool netmap_build_layer(int area, uint32_t seed) {
@@ -1035,6 +1229,7 @@ bool netmap_build_layer(int area, uint32_t seed) {
 		if (m->kind == ROOM_PAD || r == layer.arena) lock(locked, m->x, m->y, m->w, m->h, 0);
 	}
 	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, 2, 2, 2);
+	lock_pieces(locked);
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x)
 			if (layer.level[y][x]) lock(locked, x, y, 1, 1, 2);

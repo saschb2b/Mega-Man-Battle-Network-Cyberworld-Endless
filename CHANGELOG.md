@@ -2,6 +2,87 @@
 
 ## Unreleased
 
+- **L tells what the set pieces are (issue #48).** On a layer's first L,
+  MegaMan now senses its set pieces along with its services: purple
+  Mystery Data, bone panels, teleport pads, arrow panels, obstacles,
+  cubes and the Undernet's doors. The first time you meet each kind, he
+  says what it is and what opens it.
+- **The Undernet's doors (issue #47).** The Undernet now locks its spurs
+  with BN6's own doors. A skull door lets only WWW members through: the
+  act's Net Dealer sells the WWW-ID, and one opens every skull door of the
+  run. A number door asks how many flames of hatred burn on the layer, so
+  count the braziers that now line its rooms; answer wrong and it seals
+  itself.
+- **The Net Dealer's keys always make his list.** With eight places, an
+  Unlocker could take the last and push off another key the act needed.
+- **Invisible paths (issue #46).** From the second act on, Seaside, Sky,
+  the Undernet and the Nest can hide floor drawn as void, as BN6 does:
+  from a walkway's tip or a platform's edge straight out to a lonely pad
+  with a good Mystery Data on it. A navi nearby tells you he saw someone
+  walk out there over nothing.
+- **P-Code tellers stay put.** On a layer that also had a Rush island or a
+  teleport island, the navi who tells a cube's P-Code could find no place
+  to stand, and the cube asked for a toll instead.
+- **Arrow lanes (issue #43).** BN6's arrow panels now carry MegaMan across
+  a short lane from the end of a long detour back toward the way: walk the
+  long way in, ride out. Each area draws its own (Seaside's blue panels,
+  Green's magenta blocks, the Undernet's chevrons, the Judge Tree's
+  bricks), and as in BN6, walked from the far end they push him back.
+- **Security cubes (issue #45).** Comps, homepages and Central now lock a
+  pocket with BN6's security cube, its one good Mystery Data behind it.
+  The cube wants a P-Code: one navi on the layer knows it, a walk away
+  from the cube, so ask around. Seaside's cubes take a toll instead, 200
+  zenny in act 1 and 100 more an act.
+- **Obstacles and cubes can't be walked round.** The map's floor could
+  widen the one-panel walkway an obstacle or a cube stands in, leaving room
+  to pass it; their mouths now stay one panel wide.
+- **A at a set piece reaches it.** A navi standing a step or two from an
+  obstacle, a cube or Rush's bones took the A meant for them; navis now
+  keep three panels away.
+- **Link Navi obstacles (issue #42).** BN6's cybertrees, flames, cyclones,
+  clouds and geysers of cyberwater now stand in the mouths of pockets off
+  the way, each the area's own kind, each pocket holding one good Mystery
+  Data. The run's Crosses clear them as Gregar's Link Navis do: carrying
+  HeatMan's Cross, A at a cybertree and HeatMan burns it away. Without the
+  right Cross, MegaMan says whose would clear it, a hint for the next run.
+- **No more pads that look like warps and aren't.** A layer's pads wore
+  BN6's gem, ring or cube in their middle as decoration, but in BN6 every
+  one of them is a warp: the gem a teleport, the cube a homepage's link,
+  the ring another area's. Pads now wear them only where they warp.
+- **Teleports (issue #44).** In Green, Sky and Central, a layer can hold a
+  pair of BN6's gem pads: step on one and MegaMan beams to the other, the
+  camera scrolling along. Either a quick way back from the end of a long
+  detour to the way, or the only way to a pad of its own out in the void,
+  with a blue Mystery Data on it.
+- **Rush's bone gaps (issue #14).** As in BN6's net, a layer can hold a
+  gap of one to three panels with bones over it, a walkway aimed across
+  it at a pad of its own with a blue Mystery Data on it. Hold as many
+  RushFood as the gap's panels and press A at the edge: Rush comes, eats
+  one and lies in the gap for good, and MegaMan walks across, BN6's own
+  cutscene and all. The Net Dealer sells RushFood where the act holds a
+  gap and says where it is, and MegaMan names the bones when he first
+  comes near them. Sky's gaps run longest.
+- **Purple Mystery Data.** As in BN6, a layer can hold one purple data,
+  locked: an Unlocker opens it, and it holds a chip of the rarest kinds,
+  in a code, that no dealer sells (or the run's Spin, where it lies on that
+  layer). It stands at the landmark's foot or where the longest detour
+  ends, on most of an act's middle layers. The Net Dealer stocks an
+  Unlocker for each purple data ahead in the act, at about a layer's
+  zenny, and tells you where it lies; now and then a blue data on the same
+  layer holds the key (epic #49, issue #41).
+- **Mystery Data say what the walk is worth.** Blue data now lie where the
+  detours end: at the far end of a spur, on its pad, in the room farthest
+  off the way, the best of them where the walk is longest. Green data lie
+  loose. Before, a Mystery Data's worth was rolled wherever it landed, a
+  quarter of the good ones right beside the way, and all were drawn green.
+  About as much is found in all (epic #49, issue #40).
+- **Every navi on a layer shows.** BN6 runs at most sixteen NPCs on a map
+  (Mystery Data, services, gates and bystanders each take one) and leaves
+  the rest of a map's list out without a word. One layer in sixteen held
+  more: its last bystanders never appeared, and on one in two hundred an
+  official gate or ProtoMan's duel was missing. A layer now places its
+  Mystery Data and bystanders only in the places the game will run. A
+  run saved by 0.7.0 continues its current layer afresh.
 - **iPhone and iPad: SideStore, not AltStore PAL.** In the EU, the AltStore
   from Apple's App Marketplace (AltStore PAL) installs only apps Apple has
   notarized, and refused the source ("missing a marketplaceID"). The

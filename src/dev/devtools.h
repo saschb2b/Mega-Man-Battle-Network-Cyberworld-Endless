@@ -31,6 +31,8 @@ void devtools_veteran(void);
 uint32_t devtools_keys(uint32_t keys);
 /* The menu is open: the game holds still. */
 bool devtools_open(void);
+/* 10000 zenny, the game's way (the menu's, and --talk zenny). */
+void devtools_zenny(void);
 /* After each game frame: the switches' effects. */
 void devtools_update(void);
 void devtools_draw(void);

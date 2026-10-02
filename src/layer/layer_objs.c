@@ -26,6 +26,8 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "rush.h"
+#include "blockers.h"
 #include "save.h"
 #include "scripts.h"
 #include "shop.h"
@@ -165,8 +167,10 @@ static const struct { uint8_t look; uint8_t id; int8_t dx, dy; int16_t dz; } pro
 	{ LOOK_BBS, 0x47, 14, 18, -24 },           /* a BBS (Seaside Area 1) */
 };
 
+#define RUSH_OBJECTS_MAX 12   /* Rush and its bones in each panel of two gaps */
+
 static uint32_t props_objects(NpcList *npcs) {
-	static uint8_t recs[(MAX_PROPS * 3 + 1) * 20];
+	static uint8_t recs[(MAX_PROPS * 3 + RUSH_OBJECTS_MAX + MAX_BLOCKS + 1) * 20];
 	int n = 0;
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
@@ -194,6 +198,8 @@ static uint32_t props_objects(NpcList *npcs) {
 			put32(r + 16, prop_pieces[k].id);
 		}
 	}
+	n = rush_objects(recs, n, MAX_PROPS * 3 + RUSH_OBJECTS_MAX);
+	n = blockers_objects(recs, n, MAX_PROPS * 3 + RUSH_OBJECTS_MAX + MAX_BLOCKS);
 	if (!n) return 0;
 	memset(recs + n * 20, 0, 4);
 	recs[n * 20] = 0xFF;
@@ -280,6 +286,93 @@ static bool official_duel_prize(int level) {
 	return layer_has(OBJ_DUEL) && !layer_objs_duel_later && rival_clearance() >= level;
 }
 
+/* The layer's warp pads: the exit's (warp 1), and a teleport pair's (issue
+ * #44), each warping to the other within the map (warps 2 and 3). */
+static void set_pads(int group, int number, int ex, int ey) {
+	CoordPad pads[3] = { { ex, ey, 1 } };
+	int n = 1;
+	for (int k = 0; k < 2 && layer.nteleports; ++k) {
+		int x, y, px, py;
+		netmap_world(layer.teleport_x[k], layer.teleport_y[k], &x, &y);
+		netmap_world(layer.teleport_x[1 - k], layer.teleport_y[1 - k], &px, &py);
+		pads[n++] = (CoordPad){ x, y, 2 + k };
+		mapslot_teleport(2 + k, group, number, px, py, 4);
+	}
+	netmap_set_pads(pads, n);
+}
+
+/* The best of the layer's Mystery Data, the first of them (the farthest
+ * detour's: net_gen.c places those first), among the 16 the map holds; -1
+ * none. */
+static int best_mystery(void) {
+	int best = -1;
+	for (int i = 0, k = 0; i < layer.nobj && k < 16; ++i)
+		if (layer.obj[i].type == OBJ_MYSTERY) {
+			if (best < 0 || layer.obj[i].param > layer.obj[best].param) best = i;
+			++k;
+		}
+	return best;
+}
+
+/* Blue where a detour ends, as BN6 keeps its better data; green loose;
+ * purple locked. */
+static int mystery_colour(const NetObj *o) { return o->param == MD_PURPLE ? MYSTERY_PURPLE : o->param >= 1 ? MYSTERY_BLUE : MYSTERY_GREEN; }
+
+static bool purple_here(void) {
+	int best = best_mystery();
+	return best >= 0 && layer.obj[best].param == MD_PURPLE;
+}
+
+/* A purple data's: what no dealer sells, a chip of the rarest tiers in
+ * one of its letters (BN6's hold ElecSword E, Muramasa M, DreamAura U),
+ * never one the layer's dealer lists (issue #41). */
+static void purple_content(uint8_t out[8], const ShopItem *stock, int nstock) {
+	char code = '*';
+	int id = roll_chip(run.depth, 4, &code);
+	for (int t = 0; t < 8; ++t) {
+		bool sold = false;
+		for (int k = 0; k < nstock; ++k) sold |= stock[k].kind == 2 && stock[k].id == id;
+		if (code != '*' && !sold) break;
+		id = roll_chip(run.depth, 4, &code);
+	}
+	const uint8_t c[8] = { 1, 0x20, 0xFF, (uint8_t)(code == '*' ? 26 : code - 'A'), (uint8_t)id, (uint8_t)(id >> 8), 0, 0 };
+	memcpy(out, c, 8);
+}
+
+/* What a layer's Mystery Data hold beyond their rolls: the run's Spin in
+ * the best, a ScrtData in the first other (never behind a lock), and where
+ * the layer's purple data has its key on the layer, an Unlocker in a blue
+ * one on another branch. */
+typedef struct {
+	int spin_md, spin_colour;
+	bool fragment, fragment_placed, key_here;
+	const ShopItem *stock;
+	int nstock;
+} MysteryPlan;
+
+static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p, LayerObjs *out) {
+	m->type = mystery_colour(o);
+	if (i == p->spin_md) {
+		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
+		spin_content(m->content, p->spin_colour);
+		out->spin_colour = p->spin_colour;
+		if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", p->spin_colour, m->x, m->y);
+	} else if (p->fragment && o->param != MD_PURPLE) {
+		p->fragment = false;
+		p->fragment_placed = true;
+		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
+		fragment_content(m->content);
+	} else if (o->param == MD_PURPLE) {
+		purple_content(m->content, p->stock, p->nstock);
+	} else if (p->key_here && o->param >= 1) {
+		static const uint8_t key[8] = { 4, 0x20, 0xFF, 0xFF, SUB_UNLOCKER, 0, 0, 0 };
+		p->key_here = false;
+		memcpy(m->content, key, 8);
+	} else if (mystery_content(o, m->content)) {
+		m->type = MYSTERY_BLUE;
+	}
+}
+
 /* The Net Dealer's word on the act's guardian, `navi`, by his list
  * (`stock`, n of them): the element he can't stand (of either wheel:
  * TenguMan's Sword, issue #39) and the pick of it, first on the list; for
@@ -311,6 +404,85 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 			elem_name(counter));
 }
 
+/* The obstacles' sprites, first: one that could not load would stand as
+ * noise in its pocket's mouth. */
+static void blocker_sprites(NpcList *npcs) {
+	for (int b = 0; b < layer.nblocks; ++b) {
+		int cat, idx;
+		blocker_sprite(b, &cat, &idx);
+		need_sprite(npcs, cat, idx);
+	}
+}
+
+/* The layer's text, whole: the obstacles' talks added, the archive the
+ * talkers read, and the obstacles readied with the map's checks taking
+ * their talks from a copy of it; the archive's address, 0 none. */
+static uint32_t commit_text(TextArchive *text, int group, int number) {
+	int block_talk[2];
+	blockers_talks(text, block_talk);
+	uint32_t archive = text->n ? ta_commit(text) : 0;
+	blockers_install();
+	blockers_checks(group, number, text, block_talk);
+	return archive;
+}
+
+static bool skull_here(void) {
+	for (int k = 0; k < layer.nblocks; ++k)
+		if (layer.block[k].kind == BLOCK_SKULL) return true;
+	return false;
+}
+
+/* (the keys he stocks, said: what each opens and where, issues #41, #14, #47) */
+static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock) {
+	for (int i = 0; i < nstock; ++i) {
+		size_t k = strlen(hello);
+		if (stock[i].kind != 1 || k >= n) continue;
+		if (stock[i].id == SUB_UNLOCKER)
+			snprintf(hello + k, n - k, "|Word is, there's purple data locked %s. An Unlocker opens it, and it's on my list!",
+				purple_here() ? "on this layer" : "deeper in this act");
+		else if (stock[i].id == ITEM_RUSH_FOOD)
+			snprintf(hello + k, n - k, "|And there's a gap %s that Rush can bridge. RushFood's on my list too!",
+				layer.ngaps ? "on this layer" : "deeper in this act");
+		else if (stock[i].id == ITEM_WWW_ID)
+			snprintf(hello + k, n - k, "|The skull doors %s only open for WWW members. A WWW-ID gets you through every one!",
+				skull_here() ? "on this layer" : "deeper in the Undernet");
+	}
+}
+
+/* The first bystander on an act's first layer passes on the net's word
+ * about its guardian, where MegaMan has never battled him: who he is and a
+ * rumor, no moves (docs/META.md, what MegaMan knows; MegaMan himself had
+ * said it, and how could he know?). His script, -1 none. */
+static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
+	static char rumor[200];
+	int navi = run.boss_order[run.biome];
+	/* (a list-6 navi's face has its sprite's number) */
+	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || !guardian_rumor(navi) ||
+		out->nchoices >= LAYER_MAX_CHOICES)
+		return -1;
+	snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
+		guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
+	/* (heard, MegaMan names him for the rest of the act: the director
+	 * watches the flag as a choice) */
+	int flag = LAYER_FLAG_BASE + out->nchoices;
+	out->choice[out->nchoices].type = OBJ_NPC;
+	out->choice[out->nchoices++].flag = flag;
+	flag_clear(flag);
+	return ta_say_flag(text, face, rumor, flag);
+}
+
+/* A bystander's talk with a part to play: the first's rumor of the act's
+ * guardian (`first` >= 0), a P-Code's teller's, an invisible path's
+ * hint (issue #46); -1 for his own line. */
+static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first) {
+	int rumor = first >= 0 ? rumor_talk(text, out, layer_objs_bystander) : -1;
+	if (rumor >= 0) return rumor;
+	if (i == layer.teller - 1) return ta_pcode_teller(text, layer_objs_bystander, blockers_pcode(), LAYER_PCODE_FLAG);
+	if (i == layer.hinter - 1)
+		return ta_say(text, layer_objs_bystander, "See that little pad out in the void, all by itself?|I saw a Navi walk out to it. Right over nothing!");
+	return -1;
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -338,12 +510,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
-		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE, fragment_placed = false;
-	/* the run's Spin, in the last Mystery Data of one layer of 4-8 (docs/
+		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
+	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * META.md: one a run, a colour the profile lacks, kept for good) */
-	int spin_md = -1, spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
-	for (int i = 0, k = 0; spin_colour && i < layer.nobj && k < 16; ++i)
-		if (layer.obj[i].type == OBJ_MYSTERY) { spin_md = i; ++k; }
+	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
+	MysteryPlan plan = { spin_colour ? best_mystery() : -1, spin_colour, fragment, false, false, NULL, 0 };
 	bool spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
@@ -351,6 +522,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int navi_of_act = run.boss_order[run.biome];
 	bool weakless = navi_of_act > 0 && enemy_weakness(enemy_id(1, navi_of_act, 0)) <= 0;
 	int nstock = shop_dealer_stock(run.depth, weakless ? -1 : counter, weakless ? counter : 0, stock);
+	plan.stock = stock;
+	plan.nstock = nstock;
+	/* (a purple data's key in a blue one, three layers in ten: a lock and
+	 * its key on one layer) */
+	plan.key_here = purple_here() && rng_range(0, 99) < 30;
 	/* the program vendor's, before his words too (he names the programs
 	 * MegaMan has had in earlier runs, which lead his list) */
 	out->nprograms = shop_program_stock(run.depth, out->programs);
@@ -382,9 +558,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_RETURN: {
 			int pad = o->type == OBJ_EXIT ? SPR_EXIT_PAD : SPR_RETURN_PAD;
 			out->exit_x = wx; out->exit_y = wy;
-			/* the game's own warp pad: trigger cells taking warp 1 */
-			CoordPad exit = { wx, wy, 1 };
-			netmap_set_pads(&exit, 1);
+			/* the game's own warp pad: trigger cells taking warp 1; and a
+			 * teleport pair's, warps 2 and 3 to each other */
+			set_pads(group, number, wx, wy);
 			need_sprite(&npcs, 7, pad);
 			/* a guardian's exit shows once the guardian is beaten */
 			if (npcs.n < 32)
@@ -397,20 +573,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				md[nmd].x = wx;
 				md[nmd].y = wy;
 				md[nmd].z = wz;
-				md[nmd].type = MYSTERY_GREEN;
-				if (i == spin_md) {
-					md[nmd].type = MYSTERY_BLUE;
-					spin_content(md[nmd].content, spin_colour);
-					out->spin_colour = spin_colour;
-					if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", spin_colour, wx, wy);
-				} else if (fragment) {
-					fragment = false;
-					fragment_placed = true;
-					md[nmd].type = MYSTERY_BLUE;
-					fragment_content(md[nmd].content);
-				} else if (mystery_content(o, md[nmd].content)) {
-					md[nmd].type = MYSTERY_BLUE;
-				}
+				fill_mystery(&md[nmd], o, i, &plan, out);
 				npcs.script[npcs.n++] = npc_mystery(nmd);
 				++nmd;
 			}
@@ -423,25 +586,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			 * same line on an act's first and third layers) */
 			if (!said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
 			tk.sprite = layer_objs_bystander;
-			/* the first on an act's first layer passes on the net's word
-			 * about its guardian, where MegaMan has never battled him: who
-			 * he is and a rumor, no moves (docs/META.md, what MegaMan
-			 * knows; MegaMan himself had said it, and how could he know?) */
-			static char rumor[200];
-			int navi = run.boss_order[run.biome];
-			/* (a list-6 navi's face has its sprite's number) */
-			if (!said && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 && navi && !guardian_known(navi) && guardian_rumor(navi) &&
-				out->nchoices < LAYER_MAX_CHOICES) {
-				snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
-					guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
-				/* (heard, MegaMan names him for the rest of the act: the
-				 * director watches the flag as a choice) */
-				int flag = LAYER_FLAG_BASE + out->nchoices;
-				out->choice[out->nchoices].type = OBJ_NPC;
-				out->choice[out->nchoices++].flag = flag;
-				flag_clear(flag);
-				tk.script = ta_say_flag(&text, tk.sprite, rumor, flag);
-			} else tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
+			tk.script = bystander_talk(&text, out, i, said ? -1 : base + said);
+			if (tk.script < 0) tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
 			++said;
 			break;
 		}
@@ -461,7 +607,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_SHOP: {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
-			char hello[400], word[280] = "";
+			char hello[520], word[280] = "";
 			int navi = run.boss_order[run.biome];
 			/* (the net's word comes back from an act's second layer: its
 			 * first keeps the mystery of a guardian never battled, but for
@@ -487,6 +633,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (met in this act already: the pick, in a line) */
 			if (layer_objs_dealer_again && tells)
 				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);
+			dealer_keys(hello, sizeof hello, stock, nstock);
 			tk.sprite = SPR_DEALER;
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!",
 				"Sold out, MegaMan! You bought every chip I brought.", LAYER_DEALER_TOLD_FLAG);
@@ -709,6 +856,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i < nstock; ++i) out->dealer[i] = stock[i];
 	out->ndealer = nstock;
 	layer_objs_shops(out, false);
+	blocker_sprites(&npcs);
 	for (int i = 0; i < ntalk; ++i)
 		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
 	npcs.objects = props_objects(&npcs);
@@ -717,7 +865,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* (what a ScrtData is for, said as it is picked up: a playtester was
 	 * told a layer later, then on every layer after; and where its gate
 	 * stands, which a playtester holding three asked) */
-	if (fragment_placed) {
+	if (plan.fragment_placed) {
 		static const char *const found[3] = {
 			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area, in the Undernet. Let's find two more!",
 			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens. It stands in the Undernet!",
@@ -744,7 +892,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				"in every dive from here on.", c, c[0] - 'a' + 'A', c + 1);
 		out->spin_found = ta_say(&text, FACE_MEGAMAN, words);
 	}
-	uint32_t archive = text.n ? ta_commit(&text) : 0;
+	uint32_t archive = commit_text(&text, group, number);
 	out->archive = archive;
 	if (out->guardian.navi) guardian_actors(&npcs, archive, guardian_sprite(out->guardian.navi), &out->guardian);
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i) {
@@ -753,5 +901,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		npcs.script[npcs.n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
 			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
 	}
+	rush_install(group, number);
 	return mapslot_install(group, number, &npcs, md, nmd);
 }

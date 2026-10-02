@@ -14,6 +14,7 @@
 #include "loot.h"
 #include "save.h"
 #include "navicust.h"
+#include "net.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
@@ -120,6 +121,54 @@ static int answer_most(int depth, int counter) {
 	return counter > 0 ? lo / 6 : lo / 3;
 }
 
+/* The Undernet's skull doors the act holds from layer `depth` on (issue
+ * #47): one WWW-ID opens them all, as BN6's HeelNavi sells one in the
+ * Undernet. */
+static int skull_doors_ahead(int depth) {
+	int doors = 0;
+	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
+		int b = biome_for_depth(d);
+		doors += (layer_pieces(d, b, LAYER_NORMAL) & PIECE_CUBE) && layer_cube_kind(d, b, LAYER_NORMAL) == BLOCK_SKULL;
+	}
+	return doors;
+}
+
+/* The keys for the set pieces the act holds from here on, at about a
+ * layer's zenny each (BN6's 4000 for an Unlocker and 3000 for RushFood
+ * would keep them out of a run's reach, keys priced past their use):
+ *   an Unlocker for each purple data (issue #41);
+ *   RushFood for each Rush gap, as many more as the longest needs held
+ *   (Rush comes for as many as its panels, and eats one: issue #14);
+ *   a WWW-ID where a skull door lies ahead (one opens them all, at about
+ *   two layers' zenny: issue #47).
+ * The stock's new count. */
+static int add_keys(ShopItem *out, int n, int depth) {
+	int act = pacing_act(depth) + 7 * pacing_loop(depth);
+	ShopItem key;
+	int locks = layer_pieces_ahead(depth, PIECE_PURPLE);
+	if (locks && n < SHOP_MAX_ITEMS && find_item(1, SUB_UNLOCKER, &key)) {
+		key.stock = (uint8_t)locks;
+		key.price = (uint16_t)(6 + 3 * act);
+		out[n++] = key;
+	}
+	int gaps = 0, longest = 0;
+	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
+		int b = biome_for_depth(d);
+		if (!(layer_pieces(d, b, LAYER_NORMAL) & PIECE_RUSH)) continue;
+		++gaps;
+		if (layer_rush_len(d, b) > longest) longest = layer_rush_len(d, b);
+	}
+	if (gaps && n < SHOP_MAX_ITEMS) {
+		ShopItem food = { 1, (uint8_t)(longest + gaps - 1), ITEM_RUSH_FOOD, 0xFF, (uint16_t)(3 + act) };
+		out[n++] = food;
+	}
+	if (skull_doors_ahead(depth) && n < SHOP_MAX_ITEMS) {
+		ShopItem id = { 1, 1, ITEM_WWW_ID, 0xFF, (uint16_t)(10 + 3 * act) };
+		out[n++] = id;
+	}
+	return n;
+}
+
 /* Whether chip `id` answers `counter` (-1: a guardian of no element,
  * answered by the hardest hit): a Standard chip of that element that
  * strikes outright, and reaches, not only beside MegaMan (CircusMan kept
@@ -174,6 +223,22 @@ int shop_dealer_answer(int depth, int counter, char *code) {
 	return answer(depth, counter, id, code);
 }
 
+/* The keys, then the SubChips: always a MiniEnrg (a heal to carry), and
+ * one of FullEnrg, SneakRun or Untrap (LocEnemy's 7000 zenny and an
+ * Unlocker, with no purple Mystery Data about, are no use in a run). The
+ * keys first: the list holds eight, and an Unlocker took the last place,
+ * a WWW-ID for the act's skull doors left off; a lock whose key is never
+ * sold is dead weight. */
+static int add_subs(ShopItem *out, int n, int depth) {
+	static const uint16_t subs[] = { SUB_FULL_ENERGY, SUB_SNEAK_RUN, SUB_UNTRAP };
+	int pick = rng_range(0, (int)(sizeof subs / sizeof *subs) - 1);
+	n = add_keys(out, n, depth);
+	ShopItem mini, other;
+	if (n < SHOP_MAX_ITEMS && find_item(1, SUB_MINI_ENERGY, &mini)) out[n++] = mini;
+	if (n < SHOP_MAX_ITEMS && find_item(1, subs[pick], &other) && !listed(out, n, &other)) out[n++] = other;
+	return n;
+}
+
 int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX_ITEMS]) {
 	int n = 0;
 	for (int i = 0; i < 4; ++i) {
@@ -220,14 +285,7 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
 	ShopItem hp = { 1, 1, 0x70, 0xFF, 0 };
 	hp.price = (uint16_t)(8 + 4 * (pacing_act(depth) + 7 * pacing_loop(depth)));
 	out[n++] = hp;
-	/* SubChips: always a MiniEnrg (a heal to carry), and one of FullEnrg,
-	 * SneakRun or Untrap (LocEnemy's 7000 zenny and an Unlocker, with no
-	 * purple Mystery Data about, are no use in a run) */
-	static const uint16_t subs[] = { SUB_FULL_ENERGY, SUB_SNEAK_RUN, SUB_UNTRAP };
-	ShopItem mini;
-	if (find_item(1, SUB_MINI_ENERGY, &mini)) out[n++] = mini;
-	ShopItem other;
-	if (find_item(1, subs[rng_range(0, (int)(sizeof subs / sizeof *subs) - 1)], &other) && !listed(out, n, &other)) out[n++] = other;
+	n = add_subs(out, n, depth);
 	/* (threat 3, docs/META.md: half again for everything) */
 	if (run.threat >= 3)
 		for (int i = 0; i < n; ++i) out[i].price = (uint16_t)(out[i].price + out[i].price / 2);

@@ -36,6 +36,7 @@
 #include "mapslot.h"
 #include "loot.h"
 #include "net.h"
+#include "net_shapes.h"
 #include "navicust.h"
 #include "net_route.h"
 #include "pacing.h"
@@ -599,8 +600,71 @@ static int off_board_note(char *buf, int k, int size) {
 	return k;
 }
 
+/* The map's violet marks L has not explained yet, explained (once a
+ * profile), appended to `buf` at `k`; the new length. */
+static int mark_lessons(char *buf, int k, int size, int fresh) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
+	if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
+	if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
+	if (fresh & MARK_NAVI_GATE)
+		ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
+			guardian(D.objs.gate_navi)->name);
+	if (fresh & MARK_VAULT) ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
+	if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+	#undef ADD
+	return k;
+}
+
+/* The layer's set pieces MegaMan senses (issue #48), a bit each; not an
+ * invisible path, whose navi's hint is its cue. */
+enum { SENSED_PURPLE = 1, SENSED_RUSH = 2, SENSED_TELEPORT = 4, SENSED_ARROWS = 8, SENSED_OBSTACLE = 16, SENSED_CUBE = 32, SENSED_SKULL = 64,
+	SENSED_NUMBER = 128 };
+
+static int pieces_sensed(void) {
+	int m = (layer.ngaps ? SENSED_RUSH : 0) | (layer.nteleports ? SENSED_TELEPORT : 0) | (layer.nlanes ? SENSED_ARROWS : 0);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_MYSTERY && layer.obj[i].param == MD_PURPLE) m |= SENSED_PURPLE;
+	for (int i = 0; i < layer.nblocks; ++i) {
+		int kind = layer.block[i].kind;
+		m |= kind < BLOCK_KINDS ? SENSED_OBSTACLE : kind == BLOCK_SKULL ? SENSED_SKULL : kind == BLOCK_NUMBER ? SENSED_NUMBER : SENSED_CUBE;
+	}
+	return m;
+}
+
+/* What each is called among what MegaMan senses, once he has explained it,
+ * and his words the first time a profile meets it: the lock and its key,
+ * as the bone panels' were (BN6 says nothing of RushFood at its bones). */
+static const struct { int bit; const char *name, *lesson; } piece_talk[] = {
+	{ SENSED_PURPLE, "purple Mystery Data", "@M Purple Mystery Data, locked tight! An Unlocker opens it, and a Net Dealer might sell one.|" },
+	{ SENSED_RUSH, "bone panels", "@M Bone panels by a gap! Rush can bridge it, if we carry RushFood.|" },
+	{ SENSED_TELEPORT, "teleport pads", "@M A pair of teleport pads! Step on one, and we beam to the other.|" },
+	{ SENSED_ARROWS, "arrow panels", "@M Arrow panels! They carry us one way only, the way they point.|" },
+	{ SENSED_OBSTACLE, "a Link Navi's obstacle", "@M Something blocks a walkway, the kind a Link Navi clears. The right Cross would do it!|" },
+	{ SENSED_CUBE, "a security cube", "@M A security cube! It wants a P-Code somebody here knows, or a toll.|" },
+	{ SENSED_SKULL, "a skull door", "@M A skull door! Only a WWW-ID gets us past one.|" },
+	{ SENSED_NUMBER, "a number door", "@M A number door! Its answer is something we can count on this layer.|" },
+};
+
+/* The `known` pieces' names added to here[] (n of them, max at most); the
+ * new count. */
+static int piece_names(int known, const char **here, int n, int max) {
+	for (unsigned i = 0; i < sizeof piece_talk / sizeof *piece_talk && n < max; ++i)
+		if (known & piece_talk[i].bit) here[n++] = piece_talk[i].name;
+	return n;
+}
+
+/* The `fresh` pieces explained, appended to `buf` at `k`, and noted as
+ * taught; the new length. */
+static int piece_lessons(char *buf, int k, int size, int fresh) {
+	for (unsigned i = 0; i < sizeof piece_talk / sizeof *piece_talk; ++i)
+		if (fresh & piece_talk[i].bit) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "%s", piece_talk[i].lesson);
+	if (fresh) { profile.pieces_taught |= (uint8_t)fresh; profile_save(); }
+	return k;
+}
+
 static const char *status_words(void) {
-	static char buf[800];
+	static char buf[1400];
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (D.town) {
@@ -666,7 +730,7 @@ static const char *status_words(void) {
 		 * shop, and L had said nothing of one), then the map's violet mark,
 		 * in full until it has been explained (a playtester stood beside one
 		 * and never found out what it was), named after that */
-		const char *here[8];
+		const char *here[16];
 		int n = 0;
 		if (shop) here[n++] = "a Net Dealer";
 		if (heal) here[n++] = "a Recovery Mr. Prog";
@@ -683,16 +747,11 @@ static const char *status_words(void) {
 		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
 		if (known & MARK_VAULT) here[n++] = "a collector's vault";
 		if (official && n < 8) here[n++] = "an official gate";
+		int pieces = pieces_sensed();
+		n = piece_names(pieces & profile.pieces_taught, here, n, 16);
 		k = sense_words(buf, k, (int)sizeof buf, here, n, duel);
-		if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
-		if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
-		if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
-		if (fresh & MARK_NAVI_GATE)
-			ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
-				guardian(D.objs.gate_navi)->name);
-		if (fresh & MARK_VAULT)
-			ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
-		if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
+		k = mark_lessons(buf, k, (int)sizeof buf, fresh);
+		k = piece_lessons(buf, k, (int)sizeof buf, pieces & ~profile.pieces_taught);
 		/* (where the rival waits, and his mark: the map showed him as the
 		 * official gate's violet, and a playtester's session ran out at
 		 * the gate, alone, looking for him) */
@@ -1078,6 +1137,15 @@ static int layer_song(int tiles, int song) {
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 
+/* The layer's own flags, cleared as a layer begins: what has been told on
+ * it (L, the dealer, the vendor, a heal, Chaud's call, Rush's gap) and
+ * what its gates gave. */
+static void layer_flags_clear(void) {
+	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
+		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG };
+	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
+}
+
 /* The map an area's layers take over, the Navi their bystanders are
  * (layer_objs_bystander) and their battles' background
  * (encounter_backdrop): another game's area its own, copied into BN6
@@ -1185,13 +1253,7 @@ static bool build_layer(void) {
 	D.final_told = false;
 	D.checkpoint_data = false;
 	D.pet_refreshed = false;
-	flag_clear(LAYER_TOLD_FLAG);
-	flag_clear(LAYER_DEALER_TOLD_FLAG);
-	flag_clear(LAYER_VENDOR_TOLD_FLAG);
-	flag_clear(LAYER_HEAL_TOLD_FLAG);
-	flag_clear(LAYER_VAULT_FLAG);
-	flag_clear(LAYER_OFFICIAL_FLAG);
-	flag_clear(LAYER_DUEL_CALLED_FLAG);
+	layer_flags_clear();
 	official_sync(false);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
@@ -1681,6 +1743,102 @@ static void act_note_read(void) {
 	if (act_note_ok) D.dealer_act = act_note.dealer;
 }
 
+/* An object's letter on the state's map (D a Navi gate, V a vault, Y the
+ * rival, O an official gate; m a green Mystery Data, M a blue one, L a
+ * purple one, locked), 0 none. */
+static char state_mark(const NetObj *o) {
+	static const char mark[] = "IXMSHTTBUGNCPRFDVYO";
+	if (o->type == OBJ_MYSTERY && o->param != 1 && o->param != 2) return o->param ? 'L' : 'm';
+	return o->type >= 0 && o->type < (int)sizeof mark - 1 ? mark[o->type] : 0;
+}
+
+static void box_add(int box[4], int x, int y) {
+	box[0] = x < box[0] ? x : box[0];
+	box[1] = y < box[1] ? y : box[1];
+	box[2] = x > box[2] ? x : box[2];
+	box[3] = y > box[3] ? y : box[3];
+}
+
+/* The layer drawn in letters for a state (CYBERWORLD_STATE_POS=map): . floor,
+ * ^ raised floor, = a counter's aisle, # the counter, , the room before a
+ * guardian's arena, % a sprite prop (in the void or its walled hole); the
+ * box its floor and props take (x0, y0, x1, y1). */
+static void map_cells(char g[MAP_H][MAP_W + 1], int box[4]) {
+	box[0] = MAP_W; box[1] = MAP_H; box[2] = box[3] = 0;
+	for (int y = 0; y < MAP_H; ++y) {
+		for (int x = 0; x < MAP_W; ++x) {
+			g[y][x] = layer.cell[y][x] == C_VOID ? ' ' : layer.cell[y][x] == C_SOLID ? '=' : layer.cell[y][x] == C_PROPPED ? '#'
+				: layer.level[y][x] ? '^' : '.';
+			if (layer.cell[y][x] != C_VOID) box_add(box, x, y);
+		}
+		g[y][MAP_W] = 0;
+	}
+	if (layer.ante >= 0) {
+		const Room *r = &layer.rooms[layer.ante];
+		for (int y = r->y; y < r->y + r->h; ++y)
+			for (int x = r->x; x < r->x + r->w; ++x)
+				if (g[y][x] == '.') g[y][x] = ',';
+	}
+	for (int i = 0; i < layer.nprops; ++i)
+		if (layer.props[i].kind == PROP_SPRITE) {
+			g[layer.props[i].y][layer.props[i].x] = '%';
+			box_add(box, layer.props[i].x, layer.props[i].y);
+		}
+}
+
+/* ... and over them: ~ a Rush gap's panels, W a teleport, K a Link Navi
+ * obstacle or a cube, > an arrow lane's panels, ? an invisible path's, *
+ * the arrow's walk, + where it aims, letters the objects, @ MegaMan at
+ * panel (cx, cy); and each lane's and path's ends in the world. */
+static void state_map(FILE *f, int cx, int cy) {
+	goal_way();
+	static char g[MAP_H][MAP_W + 1];
+	int box[4];
+	map_cells(g, box);
+	for (int k = 0; k < layer.ngaps; ++k)
+		for (int j = 1; j <= layer.gap[k].len; ++j) g[layer.gap[k].y + dir_dy[layer.gap[k].dir] * j][layer.gap[k].x + dir_dx[layer.gap[k].dir] * j] = '~';
+	for (int k = 0; k < 2 && layer.nteleports; ++k) g[layer.teleport_y[k]][layer.teleport_x[k]] = 'W';
+	for (int k = 0; k < layer.nblocks; ++k) g[layer.block[k].y][layer.block[k].x] = 'K';
+	for (int k = 0; k < layer.nlanes; ++k)
+		for (int j = 1; j <= layer.lane[k].len; ++j) g[layer.lane[k].y + dir_dy[layer.lane[k].dir] * j][layer.lane[k].x + dir_dx[layer.lane[k].dir] * j] = '>';
+	for (int k = 0; k < layer.npaths; ++k)
+		for (int j = 1; j <= layer.path[k].len; ++j) g[layer.path[k].y + dir_dy[layer.path[k].dir] * j][layer.path[k].x + dir_dx[layer.path[k].dir] * j] = '?';
+	for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
+	if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
+	for (int i = 0; i < layer.nobj; ++i) {
+		int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
+		if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && state_mark(&layer.obj[i])) g[oy][ox] = state_mark(&layer.obj[i]);
+	}
+	g[cy][cx] = '@';
+	for (int y = box[1]; y <= box[3]; ++y) fprintf(f, "map %.*s\n", box[2] - box[0] + 1, &g[y][box[0]]);
+	for (int k = 0; k < layer.nlanes; ++k) {
+		const NetLane *l = &layer.lane[k];
+		int ax, ay, bx, by;
+		netmap_world(l->x, l->y, &ax, &ay);
+		netmap_world(l->x + dir_dx[l->dir] * (l->len + 1), l->y + dir_dy[l->dir] * (l->len + 1), &bx, &by);
+		fprintf(f, "lane %d panels from %d %d (world %d %d) to world %d %d\n", l->len, l->x, l->y, ax, ay, bx, by);
+	}
+	for (int k = 0; k < layer.npaths; ++k) {
+		const NetGap *p = &layer.path[k];
+		int ax, ay, bx, by;
+		netmap_world(p->x, p->y, &ax, &ay);
+		netmap_world(p->x + dir_dx[p->dir] * (p->len + 1), p->y + dir_dy[p->dir] * (p->len + 1), &bx, &by);
+		fprintf(f, "path %d panels from %d %d (world %d %d) to world %d %d\n", p->len, p->x, p->y, ax, ay, bx, by);
+	}
+	for (int k = 0; k < layer.nblocks; ++k) {
+		static const char *const kinds[] = { "geyser", "tree", "flames", "cyclone", "cloud", "pcode cube", "toll cube", "skull door", "number door" };
+		int bx, by;
+		netmap_world(layer.block[k].x, layer.block[k].y, &bx, &by);
+		fprintf(f, "block %s at world %d %d, braziers %d\n", layer.block[k].kind >= 0 && layer.block[k].kind <= BLOCK_NUMBER ? kinds[layer.block[k].kind] : "?",
+			bx, by, layer.braziers);
+	}
+	if (layer.hinter) {
+		int hx, hy;
+		netmap_world((int)layer.obj[layer.hinter - 1].x, (int)layer.obj[layer.hinter - 1].y, &hx, &hy);
+		fprintf(f, "hinter at world %d %d\n", hx, hy);
+	}
+}
+
 /* ... and after it, where building it began the act afresh */
 static void act_note_apply(void) {
 	D.act_resumed = !act_note_ok || act_note.unknown;
@@ -1798,42 +1956,7 @@ void director_describe(FILE *f) {
 				 * and the arrow's walk: * the walk, + where the arrow aims,
 				 * letters the objects, ^ raised floor, , the floor of the
 				 * room before a guardian's arena) */
-				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) {
-					goal_way();
-					static char g[MAP_H][MAP_W + 1];
-					int x0 = MAP_W, y0 = MAP_H, x1 = 0, y1 = 0;
-					for (int y = 0; y < MAP_H; ++y) {
-						for (int x = 0; x < MAP_W; ++x) {
-							/* (= a counter's aisle, # the counter) */
-							g[y][x] = layer.cell[y][x] == C_VOID ? ' ' : layer.cell[y][x] == C_SOLID ? '=' : layer.cell[y][x] == C_PROPPED ? '#'
-								: layer.level[y][x] ? '^' : '.';
-							if (layer.cell[y][x] != C_VOID) { x0 = x < x0 ? x : x0; y0 = y < y0 ? y : y0; x1 = x > x1 ? x : x1; y1 = y > y1 ? y : y1; }
-						}
-						g[y][MAP_W] = 0;
-					}
-					if (layer.ante >= 0) {
-						const Room *r = &layer.rooms[layer.ante];
-						for (int y = r->y; y < r->y + r->h; ++y)
-							for (int x = r->x; x < r->x + r->w; ++x)
-								if (g[y][x] == '.') g[y][x] = ',';
-					}
-					/* (% a sprite prop, in the void or in its walled hole) */
-					for (int i = 0; i < layer.nprops; ++i)
-						if (layer.props[i].kind == PROP_SPRITE) {
-							int qx = layer.props[i].x, qy = layer.props[i].y;
-							g[qy][qx] = '%';
-							x0 = qx < x0 ? qx : x0; y0 = qy < y0 ? qy : y0; x1 = qx > x1 ? qx : x1; y1 = qy > y1 ? qy : y1;
-						}
-					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
-					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
-					static const char mark[] = "IXMSHTTBUGNCPRFDVYO";   /* (D a Navi gate, V a vault, Y the rival, O an official gate) */
-					for (int i = 0; i < layer.nobj; ++i) {
-						int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
-						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && layer.obj[i].type < (int)sizeof mark - 1) g[oy][ox] = mark[layer.obj[i].type];
-					}
-					g[cy][cx] = '@';
-					for (int y = y0; y <= y1; ++y) fprintf(f, "map %.*s\n", x1 - x0 + 1, &g[y][x0]);
-				}
+				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) state_map(f, cx, cy);
 			}
 		}
 		/* the game's NPC objects near him: flags, state, radius, lock, text */
@@ -2744,6 +2867,9 @@ bool director_resume(void) {
 			flag_clear(LAYER_VAULT_FLAG);
 			flag_clear(LAYER_OFFICIAL_FLAG);
 			flag_clear(LAYER_DUEL_CALLED_FLAG);
+			flag_clear(LAYER_RUSH_TOLD_FLAG);
+			flag_clear(LAYER_PCODE_FLAG);
+			flag_clear(LAYER_NUMBER_SEALED_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);
@@ -2964,6 +3090,19 @@ static bool follow_exit_warp(void) {
  * open, the chat of its first NAME (npc shop heal programs gift challenge
  * undernet gate; intro defeat reward for its guardian; status for L;
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
+/* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
+ * wants ten), an Unlocker, three RushFood, a WWW-ID (the set pieces'
+ * keys), 10000 zenny (a cube's toll). */
+static bool dev_gift(const char *name) {
+	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
+	else if (!strcmp(name, "zenny")) devtools_zenny();
+	else if (!strcmp(name, "keys")) game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1);
+	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
+	else if (!strcmp(name, "wwwid")) game_call(BN6_GIVE_ITEM | 1u, ITEM_WWW_ID, 1);
+	else return false;
+	return true;
+}
+
 static void dev_talks(void) {
 	static unsigned done;
 	static uint32_t layer_of;
@@ -2992,8 +3131,7 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
 		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
-		/* (a BugFrag Trader's trade wants ten: fifty given, no chat) */
-		else if (!strcmp(name, "bugfrags")) { game_call(BN6_GIVE_BUGFRAGS, 50, 0); return; }
+		else if (dev_gift(name)) return;
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
 			int k = D.objs.trader_kind;
@@ -3184,6 +3322,35 @@ static void take_events(void) {
 static void drop_events(void) {
 	HookEvent ev[32];
 	while (emu_hook_events(ev, 32) == 32) {}
+}
+
+/* Rush's gap (issue #14), named the first time MegaMan comes near its
+ * stand on a layer: BN6 answers A there without RushFood by a sound alone,
+ * which teaches nothing (what calls Rush, how many he needs, where to buy
+ * them), so MegaMan says it, and says it as it stands: with enough held,
+ * where to press A. */
+static void rush_hint(void) {
+	if (!layer.ngaps || flag_get(LAYER_RUSH_TOLD_FLAG) || !on_map() || cinema_busy() || talk_busy() || emu_read8(BN6_CHATBOX)) return;
+	int sx, sy;
+	netmap_world(layer.gap[0].x, layer.gap[0].y, &sx, &sy);
+	if (abs(bn6_player_x() - sx) > 40 || abs(bn6_player_y() - sy) > 40) return;
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	int held = items >= BN6_EWRAM && items < BN6_EWRAM_END ? emu_read8(items + ITEM_RUSH_FOOD) : 0;
+	char words[260];
+	if (held >= layer.gap[0].len)
+		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush can bridge this gap. Let's toss him some RushFood: A at the edge!");
+	else if (layer.gap[0].len == 1)
+		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush could bridge this gap for one RushFood.|@M A Net Dealer might have some.");
+	else
+		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush could bridge this gap with RushFood: he comes when we hold %d, and eats one.|"
+			"@M A Net Dealer might have some.", layer.gap[0].len);
+	if (talk_start(words, FACE_MEGAMAN)) flag_set(LAYER_RUSH_TOLD_FLAG);
+}
+
+/* The Navi gate's SP chip, given; Rush's gap, named. */
+static void gate_and_rush_words(void) {
+	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
+	rush_hint();
 }
 
 void director_update(void) {
@@ -3378,7 +3545,7 @@ void director_update(void) {
 		profile.gem_taught = 1;
 		profile_save();
 	}
-	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
+	gate_and_rush_words();
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
 		D.fragment_due = false;
 		D.fragments_told = run.fragments;

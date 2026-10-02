@@ -40,8 +40,18 @@ static NetObj *add_obj(int type, int x, int y) {
 	return o;
 }
 
+/* A set piece's panels, kept clear of what is placed after it is planned
+ * (a Rush gap's stand and the walk to it). */
+static uint8_t reserved[MAP_H][MAP_W];
+/* ... and the panels round where it is spoken to (a Rush stand, an
+ * obstacle's or a cube's mouth), kept clear of navis: the engine's A turns
+ * to a navi within 52 units before a map's check (a P-Code's teller two
+ * panels from his cube took its A; issue #45). */
+#define PIECE_QUIET 3
+static uint8_t hushed[MAP_H][MAP_W];
+
 static bool cell_free(int x, int y) {
-	if (layer.cell[y][x] != C_PATH) return false;
+	if (layer.cell[y][x] != C_PATH || reserved[y][x]) return false;
 	/* (nor before or beside a counter: its navi is spoken to from there) */
 	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 	for (int k = 0; k < 4; ++k) {
@@ -60,24 +70,11 @@ static bool cell_free(int x, int y) {
 	return true;
 }
 
-/* Whether solid objects at the n cells would cut the floor: MegaMan cannot
- * pass a navi or a Mystery Data (their radius keeps him about half a panel
- * off), so with the cells blocked, and the cells of the solid objects
- * already placed, every other floor cell must still be reached from the
- * arrival. */
-static bool cuts(int n, const int *xs, const int *ys) {
-	static uint8_t blocked[MAP_H][MAP_W];
+/* The open floor a walk from the arrival reaches, marked 2; how much. */
+static int reach_marked(uint8_t blocked[MAP_H][MAP_W]) {
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
-	if (!layer.nobj) return false;
-	memset(blocked, 0, sizeof blocked);
-	int open = 0;
-	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].solid) blocked[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
-	for (int i = 0; i < n; ++i) blocked[ys[i]][xs[i]] = 1;
-	for (int cy = 0; cy < MAP_H; ++cy)
-		for (int cx = 0; cx < MAP_W; ++cx) open += layer.cell[cy][cx] == C_PATH && !blocked[cy][cx];
 	int sx = (int)layer.obj[0].x, sy = (int)layer.obj[0].y, h = 0, t = 0;
-	if (blocked[sy][sx]) return true;
+	if (blocked[sy][sx]) return 0;
 	blocked[sy][sx] = 2;
 	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
 	while (h < t) {
@@ -90,7 +87,29 @@ static bool cuts(int n, const int *xs, const int *ys) {
 			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
 		}
 	}
-	return t < open;
+	return t;
+}
+
+/* Whether solid objects at the n cells would cut the floor: MegaMan cannot
+ * pass a navi or a Mystery Data (their radius keeps him about half a panel
+ * off), so with the cells blocked, and the cells of the solid objects
+ * already placed, every floor cell reached before must still be reached
+ * from the arrival (an island past a gap or a teleport's void is reached
+ * neither way: counted as cut, it turned every navi placed after it away,
+ * a P-Code's teller and an invisible path's). */
+static bool cuts(int n, const int *xs, const int *ys) {
+	static uint8_t blocked[MAP_H][MAP_W];
+	if (!layer.nobj) return false;
+	memset(blocked, 0, sizeof blocked);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].solid) blocked[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
+	int before = reach_marked(blocked), taken = 0;
+	for (int i = 0; i < n; ++i) taken += blocked[ys[i]][xs[i]] == 2;
+	for (int cy = 0; cy < MAP_H; ++cy)
+		for (int cx = 0; cx < MAP_W; ++cx)
+			if (blocked[cy][cx] == 2) blocked[cy][cx] = 0;
+	for (int i = 0; i < n; ++i) blocked[ys[i]][xs[i]] = 1;
+	return reach_marked(blocked) < before - taken;
 }
 
 static bool cuts_way(int x, int y) { return cuts(1, &x, &y); }
@@ -248,6 +267,22 @@ static bool near_talker(int x, int y) {
 	return false;
 }
 
+/* Whether a navi of any kind stands within PIECE_QUIET panels of (x, y). */
+static bool navi_near(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		int t = layer.obj[i].type;
+		bool navi = t != OBJ_WARP_IN && t != OBJ_EXIT && t != OBJ_MYSTERY && t != OBJ_UNDERNET && t != OBJ_RETURN;
+		if (navi && abs((int)layer.obj[i].x - x) <= PIECE_QUIET && abs((int)layer.obj[i].y - y) <= PIECE_QUIET) return true;
+	}
+	return false;
+}
+
+static void hush(int x, int y) {
+	for (int j = y - PIECE_QUIET; j <= y + PIECE_QUIET; ++j)
+		for (int i = x - PIECE_QUIET; i <= x + PIECE_QUIET; ++i)
+			if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) hushed[j][i] = 1;
+}
+
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 	for (int tries = 0; tries < 40; ++tries) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
@@ -274,6 +309,93 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 }
 
 static bool room_spot(const Room *r, int *ox, int *oy) { return room_spot_in(r, ox, oy, false); }
+
+/* ---- Detours (docs/LEVEL_DESIGN.md, Set pieces) ----
+ * How far each floor cell lies off the way, in panels walked (0 on it, -1
+ * where no walk reaches), and the way's cell its walk leaves from: the
+ * cells of a spur, a room off the way and what lies past them share it, a
+ * branch. The originals' blue data lie at a branch's far end, and what a
+ * detour holds follows its length. */
+static int16_t detour[MAP_H][MAP_W], branch[MAP_H][MAP_W];
+/* (a blue data's detour at least, three panels there and three back; the
+ * long walk that holds the best) */
+#define DETOUR_BLUE 3
+#define DETOUR_FAR 8
+
+/* (the guardian's arena is no detour: the way ends at him, in its middle) */
+static bool in_arena(int x, int y) {
+	if (layer.arena < 0) return false;
+	const Room *a = &layer.rooms[layer.arena];
+	return x >= a->x && x < a->x + a->w && y >= a->y && y < a->y + a->h;
+}
+
+static void measure_detours(void) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	int h = 0, t = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			detour[y][x] = branch[y][x] = -1;
+			if (way_band[y][x] != 2 || layer.cell[y][x] != C_PATH || in_arena(x, y)) continue;
+			detour[y][x] = 0;
+			branch[y][x] = (int16_t)(y * MAP_W + x);
+			qx[t] = (int16_t)x; qy[t++] = (int16_t)y;
+		}
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || layer.cell[ny][nx] != C_PATH || detour[ny][nx] >= 0 || in_arena(nx, ny)) continue;
+			detour[ny][nx] = (int16_t)(detour[y][x] + 1);
+			branch[ny][nx] = branch[y][x];
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+int layer_detour(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H ? detour[y][x] : -1; }
+
+/* A pad's middle where (x, y) lies on a pad: the originals set a pad's data
+ * there; else (x, y). */
+static void pad_middle(int *x, int *y) {
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		if (r->kind != ROOM_PAD || *x < r->x || *x >= r->x + r->w || *y < r->y || *y >= r->y + r->h) continue;
+		int mx = r->x + r->w / 2, my = r->y + r->h / 2;
+		if (cell_free(mx, my) && !cuts_way(mx, my)) { *x = mx; *y = my; }
+		return;
+	}
+}
+
+/* The far end of a detour: the farthest free cell, `min` panels off the
+ * way or more, of a branch not `taken` yet (which it then takes); false
+ * where none is left. One at a time, as each object placed changes where
+ * the next may stand. */
+typedef struct { int x, y, d; } DetourEnd;
+
+static bool detour_end(int min, uint8_t *taken, DetourEnd *out) {
+	enum { MAX_D = 160 };
+	static int16_t cells[MAP_W * MAP_H];
+	int count[MAX_D + 1] = { 0 }, start[MAX_D + 1], total = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (detour[y][x] >= min) { ++count[detour[y][x] < MAX_D ? detour[y][x] : MAX_D]; ++total; }
+	/* (by distance, farthest first; in a distance, in the grid's order) */
+	for (int d = MAX_D, at = 0; d >= 0; --d) { start[d] = at; at += count[d]; }
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (detour[y][x] >= min) cells[start[detour[y][x] < MAX_D ? detour[y][x] : MAX_D]++] = (int16_t)(y * MAP_W + x);
+	for (int i = 0; i < total; ++i) {
+		int x = cells[i] % MAP_W, y = cells[i] / MAP_W, b = branch[y][x];
+		if (taken[b] || !cell_free(x, y) || behind_gap(x, y) || near_talker(x, y) || cuts_way(x, y)) continue;
+		taken[b] = 1;
+		out->d = detour[y][x];
+		pad_middle(&x, &y);
+		out->x = x; out->y = y;
+		return true;
+	}
+	return false;
+}
 
 /* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
 
@@ -732,28 +854,53 @@ static int landmark(const LayerKit *kit) {
 
 /* Rows of three a panel apart, as the originals line up their trees past a
  * rim and their gravestones in one walled hole of three panels. */
+/* A row of three trees past a room's back rim, as Green's originals line
+ * theirs up. */
+static bool tree_row(const Room *m) {
+	int s = rng_range(0, 1);
+	Rim rim = back_rim(m, s);
+	if (rim.len < 3) rim = back_rim(m, s ^ 1);
+	if (rim.len < 3) return false;
+	int mid = rim.u0 + rim.len / 2, ok = 1, xs[3], ys[3];
+	for (int k = -1; k <= 1; ++k) {
+		past_cell(m, rim.s, mid + k, 1, &xs[k + 1], &ys[k + 1]);
+		ok &= far_from_way(xs[k + 1], ys[k + 1]) >= 2 && !prop_at_cell(xs[k + 1], ys[k + 1]);
+	}
+	if (!ok) return false;
+	for (int k = 0; k < 3; ++k) add_sprite(LOOK_TREE, xs[k], ys[k]);
+	return true;
+}
+
+/* A row of two or three braziers past a room's back rim, as the Undernet's
+ * originals line theirs up: the flames of hatred a number door counts
+ * (issue #47). */
+static bool brazier_row(const Room *m) {
+	int s = rng_range(0, 1), len = 2 + rng_range(0, 1);
+	Rim rim = back_rim(m, s);
+	if (rim.len < len) rim = back_rim(m, s ^ 1);
+	if (rim.len < len) return false;
+	int first = rim.u0 + (rim.len - len) / 2, xs[3], ys[3];
+	for (int k = 0; k < len; ++k) {
+		past_cell(m, rim.s, first + k, 1, &xs[k], &ys[k]);
+		if (far_from_way(xs[k], ys[k]) < 2 || prop_at_cell(xs[k], ys[k])) return false;
+	}
+	for (int k = 0; k < len; ++k) add_sprite(LOOK_BRAZIER, xs[k], ys[k]);
+	return true;
+}
+
 static void rows(const LayerKit *kit, int skip, const int *order, int n) {
-	int trees = 0, graves = 0;
+	int trees = 0, graves = 0, fires = 0;
 	for (int i = 0; i < n; ++i) {
 		int r = order[i];
 		const Room *m = &layer.rooms[r];
 		if (r == skip || r == 0 || r == layer.arena || !room_bare(m)) continue;
-		if ((kit->looks & (1u << LOOK_TREE)) && trees < 2 && m->w * m->h >= 9) {
-			int s = rng_range(0, 1);
-			Rim rim = back_rim(m, s);
-			if (rim.len < 3) rim = back_rim(m, s ^ 1);
-			if (rim.len >= 3) {
-				int mid = rim.u0 + rim.len / 2, ok = 1, xs[3], ys[3];
-				for (int k = -1; k <= 1; ++k) {
-					past_cell(m, rim.s, mid + k, 1, &xs[k + 1], &ys[k + 1]);
-					ok &= far_from_way(xs[k + 1], ys[k + 1]) >= 2 && !prop_at_cell(xs[k + 1], ys[k + 1]);
-				}
-				if (ok) {
-					for (int k = 0; k < 3; ++k) add_sprite(LOOK_TREE, xs[k], ys[k]);
-					++trees;
-					continue;
-				}
-			}
+		if (!(kit->looks & (1u << LOOK_TREE)) && (kit->looks & (1u << LOOK_BRAZIER)) && fires < 3 && m->w * m->h >= 9 && brazier_row(m)) {
+			++fires;
+			continue;
+		}
+		if ((kit->looks & (1u << LOOK_TREE)) && trees < 2 && m->w * m->h >= 9 && tree_row(m)) {
+			++trees;
+			continue;
 		}
 		if ((kit->looks & (1u << LOOK_GRAVE)) && graves < 2 && m->w >= 5 && m->h >= 5) {
 			int dir = rng_range(0, 1);
@@ -861,29 +1008,14 @@ static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
 	layer_raise_rooms(seed, stair_dirs, rise);
 }
 
-void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
-	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
-	int rise = kit ? kit->rise : 0;
-	memset(&layer, 0, sizeof layer);
-	rng_seed(seed);
-	layer.biome = biome;
-	layer.kind = kind;
-	layer.boss_layer = kind == LAYER_NORMAL && is_boss_depth(depth);
-	if (kind == LAYER_SECRET) layer.boss_layer = !run.secret_cleared;
-	layer.arena = layer.ante = -1;
-	ArenaInfo arena = { -1, -1, 0, 0, 0 };
-
-	/* bigger layouts deeper into a cycle */
-	int p = (depth - 1) % CYCLE_LAYERS;
-	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
-	/* an act's three layers each in another of the area's layouts */
-	int planned = kind == LAYER_NORMAL
-		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / CYCLE_LAYERS * 7 + p / 3 + 1) * 0x9E3779B9u, layer_in_act(depth))
-		: layout_pick(biome);
+/* The layout: the planned one, then any of the area's, last the plainest
+ * at its smallest; on a guardian's layer an arena of its own at the far
+ * end. */
+static void build_layout(int planned, int biome, int size, int rise, ArenaInfo *arena) {
 	for (int attempt = 0; attempt < 12; ++attempt) {
 		memset(layer.cell, 0, sizeof layer.cell);
 		layer.nrooms = 0;
-		arena.room = -1;
+		arena->room = -1;
 		/* the planned layout, then any of the area's, last the plainest at its smallest */
 		bool last = attempt == 11;
 		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
@@ -894,22 +1026,26 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		if (floor_cells() < MIN_FLOOR || !fits(rise)) continue;
 		/* a guardian waits in an arena of its own at the far end */
 		if (!layer.boss_layer || last) break;
-		if (arena_attach(ARENA_SIZE, &arena) >= 0 && fits(rise)) break;
+		if (arena_attach(ARENA_SIZE, arena) >= 0 && fits(rise)) break;
 	}
 
-	if (layer.arena < 0 && layer.boss_layer && arena.room >= 0 && arena.room < layer.nrooms) {
-		layer.arena = arena.room;
-		layer.ante = arena.ante;
-		layer.arena_dir = arena.dir;
+	if (layer.arena < 0 && layer.boss_layer && arena->room >= 0 && arena->room < layer.nrooms) {
+		layer.arena = arena->room;
+		layer.ante = arena->ante;
+		layer.arena_dir = arena->dir;
 	}
-	finish_rooms(seed, stair_dirs, rise);
+}
+
+/* The layer's ends: where MegaMan arrives, the exit and on a guardian's
+ * layer the guardian; then the way between them. */
+static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
 	add_obj(OBJ_WARP_IN, cx, cy);
 	cx = layer.rooms[layer.exit_room].ax;
 	cy = layer.rooms[layer.exit_room].ay;
 	/* in an arena the exit waits behind the guardian, who holds the middle */
 	int bx = cx, by = cy;
-	if (layer.arena >= 0) { cx = arena.exit_x; cy = arena.exit_y; }
+	if (layer.arena >= 0) { cx = arena->exit_x; cy = arena->exit_y; }
 	NetObj *exit = add_obj(kind == LAYER_NORMAL ? OBJ_EXIT : OBJ_RETURN, cx, cy);
 	if (layer.boss_layer && exit) {
 		if (layer.arena < 0) {
@@ -928,38 +1064,50 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	} else {
 		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
 	}
+}
 
-	/* Points of interest in the other rooms. */
+/* What a layer's rolls put on it: its services, gates and the rival. */
+typedef struct {
+	bool shop, heal, trader, programs, bugtrader, challenge, duel, undernet, secret, navi_gate, vault, official;
+	int gate_navi, official_level;
+} Services;
+
+/* Points of interest in the other rooms. */
+static void roll_services(Services *s, int depth, int biome, int kind) {
 	/* each act's middle layer has the Net Dealer and a heal, and so does its
 	 * first after the run's first (the guardian's zenny to spend on what the
 	 * new act calls for); docs/PROGRESSION.md */
 	int biome_layer = layer_in_act(depth);
-	bool shop = kind == LAYER_NORMAL && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
+	s->shop = kind == LAYER_NORMAL && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
 	/* (threat 2, docs/META.md: only the heals an act is sure of; the heals
 	 * helper: one on every layer) */
-	bool heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (kind == LAYER_NORMAL && pacing_heal_certain(depth)) ||
+	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (kind == LAYER_NORMAL && pacing_heal_certain(depth)) ||
 		(run.helpers & HELP_HEALS);
-	bool trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
-	bool programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
-	bool bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
-	trader &= !bugtrader;   /* the trade screen serves one trader per map */
-	bool challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
+	s->trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
+	s->programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
+	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
+	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
+	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;
 	/* the rival's duel (docs/RIVAL.md): on each act's second layer, where
 	 * no strong virus signal stands (one battle to seek out a layer) */
-	bool duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
-	challenge &= !duel;
-	bool undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
+	s->duel = kind == LAYER_NORMAL && biome_layer == 1 && biome != BIOME_NEST;
+	s->challenge &= !s->duel;
+	s->undernet = kind == LAYER_NORMAL && depth >= 4 && !layer.boss_layer &&
 		rng_range(0, 99) < (biome == BIOME_GRAVEYARD ? 40 : 12);
-	bool secret = kind == LAYER_UNDERNET && !run.secret_cleared;
+	s->secret = kind == LAYER_UNDERNET && !run.secret_cleared;
+}
+
+/* The gates' rolls, after the services'. */
+static void roll_gates(Services *s, uint32_t seed, int depth, int kind) {
 	/* a gate sealed with a Navi's code (docs/META.md, gates): from act 3,
 	 * before the guardian's layer, where no dark warp stands; its Navi one
 	 * of the guardians (but ProtoMan, the Secret Area's) */
-	bool navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !undernet && rng_range(0, 99) < 30;
+	s->navi_gate = kind == LAYER_NORMAL && pacing_act(depth) >= 2 && !layer.boss_layer && !s->undernet && rng_range(0, 99) < 30;
 	static const uint8_t gate_navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
-	int gate_navi = navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
+	s->gate_navi = s->navi_gate ? gate_navis[rng_range(0, (int)sizeof gate_navis - 1)] : 0;
 	/* a collector's vault (docs/META.md, gates): from act 2, before the
 	 * guardian's layer, where no other gate or dark warp stands */
-	bool vault = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !undernet && !navi_gate &&
+	s->vault = kind == LAYER_NORMAL && pacing_act(depth) >= 1 && !layer.boss_layer && !s->undernet && !s->navi_gate &&
 		rng_range(0, 99) < 20;
 	/* an official gate (docs/RIVAL.md): from act 2, where no other gate or
 	 * dark warp stands; sealed until Chaud's clearance reaches its level
@@ -968,43 +1116,786 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	 * where the duel is offered, its level the act's (1 to the third, then
 	 * 2), the only gate there (the rolls kept): a playtester's promise of
 	 * official gates pointed at none he had met */
-	if (duel) navi_gate = vault = false;
+	if (s->duel) s->navi_gate = s->vault = false;
 	uint32_t oh = (seed ^ 0x0FF1C1A1u) * 2654435761u;
-	bool official = kind == LAYER_NORMAL && !layer.boss_layer &&
-		(duel || (pacing_act(depth) >= 1 && !undernet && !navi_gate && !vault && (oh >> 16) % 100 < 25));
-	int official_level = !official ? 0 : duel ? (pacing_act(depth) >= 2 ? 2 : 1) : 1 + (int)((oh >> 8) & 1);
+	s->official = kind == LAYER_NORMAL && !layer.boss_layer &&
+		(s->duel || (pacing_act(depth) >= 1 && !s->undernet && !s->navi_gate && !s->vault && (oh >> 16) % 100 < 25));
+	s->official_level = !s->official ? 0 : s->duel ? (pacing_act(depth) >= 2 ? 2 : 1) : 1 + (int)((oh >> 8) & 1);
+}
 
-	int order[MAX_ROOMS], n = 0;
+/* The other rooms in a shuffled order: services on the bigger platforms,
+ * the pads left for the better data. */
+static int room_order(int *order) {
+	int n = 0;
 	for (int i = 0; i < layer.nrooms; ++i) if (i != 0 && i != layer.exit_room) order[n++] = i;
 	for (int i = n - 1; i > 0; --i) { int j = rng_range(0, i); int t = order[i]; order[i] = order[j]; order[j] = t; }
 	/* services on the bigger platforms, the pads left for the better data */
 	for (int i = 0, k = 0; i < n; ++i)
 		if (layer.rooms[order[i]].kind != ROOM_PAD) { int t = order[k]; order[k++] = order[i]; order[i] = t; }
-	int next = 0;
+	return n;
+}
+
+#define PLACE(t) place((t), order, n, *next, &x, &y)
+
+/* The rolled services, each in the next room of `order`. */
+static void place_services(Services *s, int depth, int kind, const LayerKit *kit, const int *order, int n, int *next) {
 	int x, y;
-#define PLACE(t) place((t), order, n, next, &x, &y)
 	if (layer.arena >= 0) {
 		last_stop(kind, kit);
-		shop = heal = false;
+		s->shop = s->heal = false;
 	}
 	/* a Mr. Prog with a gift by the run's start */
 	if (depth == 1 && kind == LAYER_NORMAL && room_spot(&layer.rooms[0], &x, &y)) add_obj(OBJ_GIFT, x, y);
-	if (shop) { dealer(pick_room(order, n, next), order, n, kit, &x, &y); ++next; }
-	if (heal) { PLACE(OBJ_HEAL); ++next; }
-	if (trader) { PLACE(OBJ_TRADER); ++next; }
-	if (programs) { PLACE(OBJ_PROGRAMS); ++next; }
-	if (bugtrader) { PLACE(OBJ_BUGTRADER); ++next; }
-	if (challenge) { PLACE(OBJ_CHALLENGE); ++next; }
-	if (undernet) { PLACE(OBJ_UNDERNET); ++next; }
-	if (secret) { PLACE(OBJ_SECRET_GATE); ++next; }
-	if (navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = gate_navi; ++next; }
-	if (vault) { PLACE(OBJ_VAULT); ++next; }
+	if (s->shop) { dealer(pick_room(order, n, *next), order, n, kit, &x, &y); ++*next; }
+	if (s->heal) { PLACE(OBJ_HEAL); ++*next; }
+	if (s->trader) { PLACE(OBJ_TRADER); ++*next; }
+	if (s->programs) { PLACE(OBJ_PROGRAMS); ++*next; }
+	if (s->bugtrader) { PLACE(OBJ_BUGTRADER); ++*next; }
+	if (s->challenge) { PLACE(OBJ_CHALLENGE); ++*next; }
+	if (s->undernet) { PLACE(OBJ_UNDERNET); ++*next; }
+	if (s->secret) { PLACE(OBJ_SECRET_GATE); ++*next; }
+	if (s->navi_gate) { NetObj *g = PLACE(OBJ_NAVI_GATE); if (g) g->param = s->gate_navi; ++*next; }
+	if (s->vault) { PLACE(OBJ_VAULT); ++*next; }
 	/* (a duel's gate stands by ProtoMan, placed after him) */
-	if (official && !duel) {
+	if (s->official && !s->duel) {
 		NetObj *g = PLACE(OBJ_OFFICIAL);
-		if (g) g->param = official_level;
-		++next;
+		if (g) g->param = s->official_level;
+		++*next;
 	}
+}
+
+/* ProtoMan on a pad apart where one has room, a ring off the way on; else
+ * the next room; after the area's props, whose landmark needs a bare room:
+ * before them he took it on a layer in a hundred. */
+static void place_duel(const int *order, int n, int *next) {
+	int x, y;
+	NetObj *placed = NULL;
+	for (int i = n - 1; i >= *next && !placed; --i)
+		if (layer.rooms[order[i]].kind == ROOM_PAD && room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y))
+			placed = add_obj(OBJ_DUEL, x, y);
+	if (!placed) { placed = PLACE(OBJ_DUEL); ++*next; }
+	/* (a small layer, its rooms all taken: in any room but the
+	 * exit's, apart from the others where it can be; an act 3 layer
+	 * of the Judge Tree Comp had no ProtoMan) */
+	for (int i = 0; i < n && !placed; ++i)
+		if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y);
+	for (int i = 0; i < layer.nrooms && !placed; ++i)
+		if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y);
+}
+
+/* The room whose box holds cell (x, y), or -1. */
+static int room_holding(int x, int y) {
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		if (x >= r->x && x < r->x + r->w && y >= r->y && y < r->y + r->h) return i;
+	}
+	return -1;
+}
+
+/* The official gate the duel opens, by ProtoMan: in his room, two panels
+ * from him or more, else in a room a short walk from his (a playtester
+ * found the gate alone across the layer, and his session ran out looking
+ * for the rival). */
+static NetObj *gate_by_rival(const NetObj *rival) {
+	int x, y, home = room_holding(rival->x, rival->y);
+	int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
+	for (int i = -1; i < nn && home >= 0; ++i) {
+		int room = i < 0 ? home : near[i];
+		if (room == layer.exit_room) continue;
+		for (int tries = 0; tries < 12; ++tries)
+			if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2)) {
+				NetObj *g = add_obj(OBJ_OFFICIAL, x, y);
+				if (g) return g;
+			}
+	}
+	return NULL;
+}
+
+/* That gate, else anywhere with space (a small endless layer with every
+ * room taken had its duel and no gate). */
+static void place_duel_gate(int level, const int *order, int n, int *next) {
+	int x, y;
+	const NetObj *rival = NULL;
+	for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) rival = &layer.obj[i];
+	NetObj *g = rival ? gate_by_rival(rival) : NULL;
+	if (!g) g = PLACE(OBJ_OFFICIAL);
+	for (int i = 0; !g && i < n; ++i)
+		if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
+	for (int i = 0; !g && i < layer.nrooms; ++i)
+		if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
+	if (g) g->param = level;
+	++*next;
+}
+
+int layer_npcs(void) {
+	int n = 0;
+	for (int i = 0; i < layer.nobj; ++i) n += layer.obj[i].type == OBJ_WARP_IN ? 0 : layer.obj[i].type == OBJ_BOSS ? 2 : 1;
+	return n;
+}
+
+/* What the NPCs the game runs leave for `want` more, the services and
+ * gates placed first: the Mystery Data take what is left, the bystanders
+ * the rest (on one layer in sixteen the last bystanders, and on one in
+ * two hundred an official gate or ProtoMan, were past the sixteenth and
+ * never showed). */
+static int npcs_held;   /* kept for a set piece placed last (an island's data) */
+
+static int npcs_for(int want) {
+	int left = LAYER_NPC_MAX - layer_npcs() - npcs_held;
+	return want < left ? want : left > 0 ? left : 0;
+}
+
+/* The panel at the landmark's foot, in front of it where it can be (BN6's
+ * Central Area 3 keeps its purple data beneath the statue). */
+static bool landmark_foot(int *ox, int *oy) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind != PROP_SPRITE || (p->look != LOOK_GIANT_TREE && p->look != LOOK_STATUE && p->look != LOOK_MONUMENT)) continue;
+		for (int k = 0; k < 4; ++k) {
+			int x = p->x + d4[k][0], y = p->y + d4[k][1];
+			if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || layer.cell[y][x] != C_PATH || layer_on_way(x, y)) continue;
+			if (cell_free(x, y) && !behind_gap(x, y) && !near_talker(x, y) && !cuts_way(x, y)) { *ox = x; *oy = y; return true; }
+		}
+	}
+	return false;
+}
+
+/* The layer's purple data, first of its data: at the landmark's foot, else
+ * where the longest detour ends. */
+static void place_purple(uint8_t *taken) {
+	int x, y;
+	DetourEnd end;
+	bool at = landmark_foot(&x, &y);
+	if (!at && detour_end(DETOUR_BLUE, taken, &end)) { x = end.x; y = end.y; at = true; }
+	NetObj *o = at ? add_obj(OBJ_MYSTERY, x, y) : NULL;
+	if (o) o->param = MD_PURPLE;
+}
+
+/* Blue data where the detours end, more of them deeper and in the Undernet
+ * (a dark warp's, or the short net's dark way's act), the farthest a tier
+ * up where it is a long walk; in a room where the layer has too few
+ * detours. Then green data loose through the rest, most at dead ends. The
+ * colour says what a walk there is worth, as BN6's do: where the old roll
+ * gave any data any tier, most of the good ones lay by the way, all green
+ * (docs/LEVEL_DESIGN.md, Set pieces). */
+static void place_data(int depth, int kind, int biome, int size, const int *order, int n, int *next) {
+	int x, y;
+	static uint8_t taken[MAP_W * MAP_H];
+	memset(taken, 0, sizeof taken);
+	measure_detours();
+	if (layer_purple(depth, biome, kind) && npcs_for(1)) place_purple(taken);
+	int rich = npcs_for(2 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET));
+	for (int k = 0; k < rich; ++k) {
+		DetourEnd end;
+		bool far = detour_end(DETOUR_BLUE, taken, &end);
+		NetObj *o = far ? add_obj(OBJ_MYSTERY, end.x, end.y) : PLACE(OBJ_MYSTERY);
+		if (!far) ++*next;
+		/* (the best three times in ten besides: what the old roll gave the
+		 * rich data, about as much in all) */
+		if (o) o->param = k == 0 && far && end.d >= DETOUR_FAR ? 2 : rng_range(0, 99) < 30 ? 2 : 1;
+	}
+	static int dx[256], dy[256];
+	int nde = dead_ends(dx, dy, 256), di = 0;
+	for (int i = nde - 1; i > 0; --i) {
+		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
+		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
+	}
+	int md = npcs_for(2 + rng_range(0, 2) + size);
+	for (int k = 0; k < md; ++k) {
+		bool got = false;
+		if (rng_range(0, 99) < 70)
+			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !behind_gap(x, y) && !cuts_way(x, y); }
+		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
+		if (!got) continue;
+		NetObj *o = add_obj(OBJ_MYSTERY, x, y);
+		if (!o) break;
+		o->param = 0;
+	}
+}
+
+#undef PLACE
+
+/* ---- Rush's gaps (issue #14) ----
+ * As BN6 sets them: a walkway aimed across one to three void panels at a
+ * pad of its own, the pad holding one thing (Green Area 2's HPMemory, Sky
+ * Area 1's ColArmy B), where the act's plan calls for one (net_pieces.c).
+ * The stand is a ground floor panel off the way with floor behind it; the
+ * gap's panels and the island's 3x3 are void with void a panel round them
+ * and no prop, inside the camera's window. */
+typedef struct { int x, y, d, len, score; } GapSite;
+
+/* Whether panel (x, y) is a Rush gap's or an invisible path's: void in
+ * cell[], floor to the map. */
+static bool in_gap_of(const NetGap *g, int n, int x, int y) {
+	for (int i = 0; i < n; ++i)
+		for (int k = 1; k <= g[i].len; ++k)
+			if (x == g[i].x + dir_dx[g[i].dir] * k && y == g[i].y + dir_dy[g[i].dir] * k) return true;
+	return false;
+}
+
+static bool in_gap(int x, int y) { return in_gap_of(layer.gap, layer.ngaps, x, y) || in_gap_of(layer.path, layer.npaths, x, y); }
+
+static bool gap_fits(int x, int y, int d, int len) {
+	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+	for (int k = 1; k <= len + 4; ++k)
+		for (int s = -2; s <= 2; ++s) {
+			if (k < len && abs(s) > 1) continue;
+			int i = x + dir_dx[d] * k + sx * s, j = y + dir_dy[d] * k + sy * s;
+			bool island = k > len && k <= len + 3 && abs(s) <= 1;
+			if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || layer.cell[j][i] != C_VOID || prop_at_cell(i, j) || in_gap(i, j)) return false;
+			if ((island || (k <= len && !s)) && !win_in(i, j)) return false;
+		}
+	return true;
+}
+
+static bool stand_ok(int x, int y, int d) {
+	int bx = x - dir_dx[d], by = y - dir_dy[d];
+	return floor_cell(x, y) && floor_cell(bx, by) && !layer.level[y][x] && !layer.level[by][bx] && !layer_on_way(x, y) &&
+		!in_arena(x, y) && detour[y][x] >= 1 && cell_free(x, y) && cell_free(bx, by) && !navi_near(x, y);
+}
+
+/* The best stand for a gap `want` panels long, else shorter; the farthest
+ * off the way first, a walkway's tip before a platform's edge. */
+static GapSite plan_gap(int want) {
+	GapSite best = { -1, -1, 0, 0, -1 };
+	for (int len = want; len >= 1 && best.x < 0; --len)
+		for (int y = 0; y < MAP_H; ++y)
+			for (int x = 0; x < MAP_W; ++x)
+				for (int d = 0; d < 4; ++d) {
+					if (!stand_ok(x, y, d) || !gap_fits(x, y, d, len)) continue;
+					int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+					bool tip = !floor_cell(x + sx, y + sy) && !floor_cell(x - sx, y - sy);
+					int score = detour[y][x] * 2 + (tip ? 8 : 0);
+					if (score > best.score) best = (GapSite){ x, y, d, len, score };
+				}
+	if (best.x >= 0) {
+		reserved[best.y][best.x] = 1;
+		reserved[best.y - dir_dy[best.d]][best.x - dir_dx[best.d]] = 1;
+		hush(best.x, best.y);
+	}
+	return best;
+}
+
+/* The island past the gap, its data in its middle (a tier up past one
+ * panel: two or three bones' worth), and the gap itself; nothing where the
+ * island would leave the map too big for the game's tile map. */
+static void carve_gap(const GapSite *g, int rise) {
+	int mx = g->x + dir_dx[g->d] * (g->len + 2), my = g->y + dir_dy[g->d] * (g->len + 2);
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	if (!fits(rise) || layer.ngaps >= MAX_GAPS) {
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		return;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	layer.gap[layer.ngaps++] = (NetGap){ g->x, g->y, g->d, g->len, true };
+	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
+	if (o) o->param = g->len >= 2 ? 2 : 1;
+}
+
+/* ---- Invisible paths (issue #46; docs/LEVEL_DESIGN.md, Set pieces) ----
+ * BN6's floor drawn as void (Seaside Area 1, Sky Area 2, Underground 1,
+ * Undernet 2): a walkway's tip aimed across the void at a lonely pad, the
+ * floor between drawn as void, its pad holding what a player who walks on
+ * finds. Its site is a Rush gap's (plan_gap), planned once the islands
+ * stand; a navi near the tip says what he saw. */
+#define PATH_LEN 3   /* its panels, at most */
+
+static bool apart(int x, int y);
+
+/* Where the navi who hints may stand: two to eight panels from the tip,
+ * the nearest, apart from what else stands there, off the way and beside
+ * it and out of walkways' mouths; false where none may (no path without
+ * its cue). */
+static bool hinter_spot(const GapSite *g, int *hx, int *hy) {
+	for (int r = 2; r <= 8; ++r)
+		for (int dy = -r; dy <= r; ++dy)
+			for (int dx = -r; dx <= r; ++dx) {
+				int x = g->x + dx, y = g->y + dy;
+				if ((abs(dx) != r && abs(dy) != r) || x < 1 || y < 1 || x >= MAP_W - 1 || y >= MAP_H - 1) continue;
+				if (!cell_free(x, y) || way_band[y][x] || layer.level[y][x] || hushed[y][x] || beside_narrow(x, y) || by_walkway(x, y) ||
+					!apart(x, y) || cuts_way(x, y))
+					continue;
+				*hx = x;
+				*hy = y;
+				return true;
+			}
+	return false;
+}
+
+/* The path across the void from the site, its pad and its one thing (the
+ * best kind: an HPMemory now and then, else a chip three tiers up), and
+ * the navi who hints at it; none where the pad would leave the map too
+ * big for the game's tile map, or where no navi may stand to hint. */
+static void carve_hidden(const GapSite *g, int rise) {
+	int mx = g->x + dir_dx[g->d] * (g->len + 2), my = g->y + dir_dy[g->d] * (g->len + 2), hx, hy;
+	if (layer.npaths >= MAX_PATHS || !hinter_spot(g, &hx, &hy)) return;
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	if (!fits(rise)) {
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		return;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	layer.path[layer.npaths++] = (NetGap){ g->x, g->y, g->d, g->len, true };
+	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
+	if (o) o->param = 2;
+	if ((o = add_obj(OBJ_NPC, hx, hy))) {
+		o->param = rng_range(0, 5);
+		o->npc_line = rng_range(0, 255);
+		layer.hinter = layer.nobj;
+	}
+}
+
+static void place_hidden(int rise) {
+	GapSite site = plan_gap(PATH_LEN);
+	if (site.x >= 0) carve_hidden(&site, rise);
+}
+
+/* ---- Teleports (issue #44) ----
+ * BN6's gem marks a teleport pad, always one of a pair, each warping
+ * MegaMan to the other within the map (Green Area 1 has four pairs): never
+ * decoration. A layer's pair is a quick way back: one pad where a long
+ * detour ends, the other by the way, as far from it on foot as can be;
+ * the detour's data lies on the far pad's rim, its middle the gem's. */
+static int walk_between(int ax, int ay, int bx, int by) {
+	static int16_t dist[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) dist[y][x] = -1;
+	int h = 0, t = 0;
+	dist[ay][ax] = 0;
+	qx[t] = (int16_t)ax; qy[t++] = (int16_t)ay;
+	while (h < t && dist[by][bx] < 0) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (!floor_cell(nx, ny) || dist[ny][nx] >= 0) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	return dist[by][bx];
+}
+
+/* Whether panel (x, y) can hold a teleport: ground floor all round it (the
+ * gem draws its own diamond over it), nothing standing there or beside it,
+ * no stair, not the arena, its detour `lo` to `hi` (its trigger reaches a
+ * cell into the panels round it, so the way keeps two panels off: no one
+ * is warped walking by). */
+static bool teleport_spot(int x, int y, int lo, int hi) {
+	if (detour[y][x] < lo || detour[y][x] > hi || in_arena(x, y) || near_stair(x, y)) return false;
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx) {
+			int i = x + dx, j = y + dy;
+			if (!floor_cell(i, j) || layer.level[j][i] || layer_on_way(i, j) || reserved[j][i] || object_at(i, j)) return false;
+		}
+	return cell_free(x, y) && !near_talker(x, y);
+}
+
+/* An island for a teleport's far pad, as ACDC's homepage has an isolated
+ * square reached by its teleport alone: a 3x3 of void with void two
+ * panels round it and no prop, inside the camera's window, the nearest
+ * such to (bx, by), so it is seen from the pad that leads there. */
+static bool teleport_island_site(int bx, int by, int *ox, int *oy) {
+	int best = 1 << 30;
+	for (int y = 3; y < MAP_H - 3; ++y)
+		for (int x = 3; x < MAP_W - 3; ++x) {
+			int d = abs(x - bx) + abs(y - by);
+			if (d >= best) continue;
+			bool ok = true;
+			for (int j = -3; j <= 3 && ok; ++j)
+				for (int i = -3; i <= 3 && ok; ++i)
+					ok = layer.cell[y + j][x + i] == C_VOID && !prop_at_cell(x + i, y + j) && (abs(i) > 1 || abs(j) > 1 || win_in(x + i, y + j));
+			if (ok) { best = d; *ox = x; *oy = y; }
+		}
+	return best < (1 << 30);
+}
+
+/* The pair: a quick way back from where a long detour ends to the way,
+ * else an island of its own (its data on a corner, carved last). */
+static void plan_teleport(void) {
+	int best = 0, ax = -1, ay = -1, bx = -1, by = -1;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (!teleport_spot(x, y, 7, 999)) continue;
+			for (int j = 1; j < MAP_H - 1; ++j)
+				for (int i = 1; i < MAP_W - 1; ++i) {
+					if (!teleport_spot(i, j, 2, 6)) continue;
+					/* (a walk saved of sixteen panels at least, or it is no way back) */
+					int w = walk_between(x, y, i, j);
+					if (w > best && w >= 16) { best = w; ax = x; ay = y; bx = i; by = j; }
+				}
+		}
+	if (ax < 0) {
+		/* (the island: by the pad near the way nearest the arrival's) */
+		for (int y = 1; y < MAP_H - 1 && bx < 0; ++y)
+			for (int x = 1; x < MAP_W - 1 && bx < 0; ++x)
+				if (teleport_spot(x, y, 2, 6)) { bx = x; by = y; }
+		if (bx < 0 || !teleport_island_site(bx, by, &ax, &ay)) return;
+		layer.teleport_island = true;
+	}
+	layer.teleport_x[0] = ax; layer.teleport_y[0] = ay;
+	layer.teleport_x[1] = bx; layer.teleport_y[1] = by;
+	layer.nteleports = 1;
+	for (int k = 0; k < 2; ++k)
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) reserved[layer.teleport_y[k] + dy][layer.teleport_x[k] + dx] = 1;
+}
+
+/* The teleport's island, once the rest stands: its 3x3, its data on the
+ * corner farthest from the pad it is seen from; nothing where it would
+ * leave the map too big for the game's tile map. */
+static void carve_teleport_island(int rise) {
+	int mx = layer.teleport_x[0], my = layer.teleport_y[0];
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	if (!fits(rise)) {
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		layer.nteleports = 0;
+		layer.teleport_island = false;
+		return;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	int cx = mx + (mx >= layer.teleport_x[1] ? 1 : -1), cy = my + (my >= layer.teleport_y[1] ? 1 : -1);
+	NetObj *o = add_obj(OBJ_MYSTERY, cx, cy);
+	if (o) o->param = 1;
+}
+
+/* ---- Obstacles (issue #42) ----
+ * BN6's Link Navi obstacles stand in the mouth of a pocket that holds one
+ * thing (SubMemory, Attack+1, HP+100, a purple data), seen from the way.
+ * A pocket's mouth is a walkway's first panel off a wider floor, off the
+ * way; closed, it cuts off six to forty panels and nothing the way or a
+ * service needs; its one thing a blue data where it ends. */
+static uint8_t pocket[MAP_H][MAP_W];
+
+/* The floor that panel (wx, wy) closed off cuts from the arrival, marked in
+ * `pocket`; how much, or -1 where it holds what must stay reachable. */
+static int pocket_of(int wx, int wy) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static uint8_t seen[MAP_H][MAP_W];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	memset(seen, 0, sizeof seen);
+	int h = 0, t = 0, sx = (int)layer.obj[0].x, sy = (int)layer.obj[0].y;
+	seen[sy][sx] = 1;
+	seen[wy][wx] = 1;
+	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (!floor_cell(nx, ny) || seen[ny][nx]) continue;
+			seen[ny][nx] = 1;
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	int n = 0;
+	memset(pocket, 0, sizeof pocket);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (!floor_cell(x, y) || seen[y][x]) continue;
+			if (way_band[y][x] == 2 || layer.level[y][x] || reserved[y][x] || object_at(x, y) || near_stair(x, y) || in_arena(x, y)) return -1;
+			pocket[y][x] = 1;
+			++n;
+		}
+	return n;
+}
+
+/* Whether (x, y), entered from the floor behind it towards `d`, is a
+ * walkway's first panel off a wider floor, off the way. */
+static bool pocket_mouth(int x, int y, int d) {
+	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4], bx = x - dir_dx[d], by = y - dir_dy[d];
+	if (!floor_cell(x, y) || !floor_cell(bx, by) || way_band[y][x] == 2 || layer.level[y][x] || layer.level[by][bx]) return false;
+	if (floor_cell(x + sx, y + sy) || floor_cell(x - sx, y - sy)) return false;
+	return (floor_cell(bx + sx, by + sy) || floor_cell(bx - sx, by - sy)) && cell_free(bx, by) && !navi_near(x, y);
+}
+
+static void plan_obstacle(int kind) {
+	int best = -1, bx = 0, by = 0, bd = 0;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x)
+			for (int d = 0; d < 4; ++d) {
+				if (!pocket_mouth(x, y, d)) continue;
+				int n = pocket_of(x, y);
+				if (n < 6 || n > 40) continue;
+				/* (seen from the way: its mouth near it; a pad in it) */
+				int score = 20 - (detour[y][x] < 20 ? detour[y][x] : 20) + (n >= 9 && n <= 20 ? 5 : 0);
+				if (score > best) { best = score; bx = x; by = y; bd = d; }
+			}
+	if (best < 0 || layer.nblocks >= MAX_BLOCKS) return;
+	pocket_of(bx, by);
+	/* its one thing where it ends: the farthest panel from the mouth */
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static int16_t dist[MAP_H][MAP_W];
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) dist[y][x] = -1;
+	int h = 0, t = 0, rx = bx, ry = by;
+	dist[by][bx] = 0;
+	qx[t] = (int16_t)bx; qy[t++] = (int16_t)by;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		if (dist[y][x] > dist[ry][rx]) { rx = x; ry = y; }
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + dir_dx[k], ny = y + dir_dy[k];
+			if (!floor_cell(nx, ny) || dist[ny][nx] >= 0 || !pocket[ny][nx]) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	pad_middle(&rx, &ry);
+	layer.block[layer.nblocks++] = (NetBlock){ bx, by, bd, kind, rx, ry };
+	/* (nothing else in the pocket, its mouth or the floor before it) */
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (pocket[y][x]) reserved[y][x] = 1;
+	reserved[by][bx] = 1;
+	reserved[by - dir_dy[bd]][bx - dir_dx[bd]] = 1;
+	hush(bx, by);
+}
+
+/* A cube's lock (layer_cube_kind): a number door asks how many braziers
+ * burn on the layer, so one with fewer than two asks a P-Code instead (a
+ * skull door the Net Dealer did not plan for would want a WWW-ID he never
+ * stocked; issue #47). */
+static int cube_kind(int depth, int biome, int kind) {
+	layer.braziers = 0;
+	for (int i = 0; i < layer.nprops; ++i) layer.braziers += layer.props[i].kind == PROP_SPRITE && layer.props[i].look == LOOK_BRAZIER;
+	int k = layer_cube_kind(depth, biome, kind);
+	return k == BLOCK_NUMBER && layer.braziers < 2 ? BLOCK_PCODE : k;
+}
+
+/* The layer's security cube asking a P-Code (issue #45), -1 none. */
+static int pcode_cube(void) {
+	for (int i = 0; i < layer.nblocks; ++i)
+		if (layer.block[i].kind == BLOCK_PCODE) return i;
+	return -1;
+}
+
+/* Whether a bystander may stand at (x, y): two panels at least from what
+ * else stands there. */
+static bool apart(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2) return false;
+	return true;
+}
+
+static bool add_teller(int x, int y) {
+	NetObj *o = add_obj(OBJ_NPC, x, y);
+	if (!o) return false;
+	o->param = rng_range(0, 5);
+	o->npc_line = rng_range(0, 255);
+	layer.teller = layer.nobj;
+	return true;
+}
+
+/* Whether the P-Code's teller may stand at (x, y): apart from what else
+ * stands there, off the set pieces' quiet, and a walk from the cube (the
+ * key on another way than the lock: one beside it told it at once). */
+#define TELLER_WALK 8
+static bool teller_ok(int x, int y, const NetBlock *b) {
+	return apart(x, y) && !hushed[y][x] && walk_between(b->x, b->y, x, y) >= TELLER_WALK;
+}
+
+/* A free floor panel off the way with floor all round it. */
+static bool open_floor(int x, int y) {
+	return cell_free(x, y) && !way_band[y][x] && !behind_gap(x, y) && !beside_narrow(x, y) && !by_walkway(x, y) && floor_cell(x + 1, y) &&
+		floor_cell(x - 1, y) && floor_cell(x, y + 1) && floor_cell(x, y - 1) && !cuts_way(x, y);
+}
+
+/* The navi who knows the P-Code: a bystander in a room a walk from the
+ * cube; else on any free floor off the way; else the cube takes a toll
+ * instead (a lock no one can open would close its pocket for good). */
+static void place_teller(const int *order, int n) {
+	int x, y, c = pcode_cube();
+	if (c < 0) return;
+	const NetBlock *b = &layer.block[c];
+	for (int tries = 0; tries < 16 && n; ++tries) {
+		const Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
+		if (room_spot_in(r, &x, &y, true) && teller_ok(x, y, b) && add_teller(x, y)) return;
+	}
+	for (y = 1; y < MAP_H - 1; ++y)
+		for (x = 1; x < MAP_W - 1; ++x)
+			if (open_floor(x, y) && teller_ok(x, y, b) && add_teller(x, y)) return;
+	layer.block[c].kind = BLOCK_TOLL;
+}
+
+/* The pocket's one thing, once the rest stands: a blue data of the best
+ * quality (a Cross is the key; a lock never pays less than the open data). */
+static void place_block_rewards(void) {
+	for (int i = 0; i < layer.nblocks; ++i) {
+		NetObj *o = add_obj(OBJ_MYSTERY, layer.block[i].rx, layer.block[i].ry);
+		if (o) o->param = 2;
+	}
+}
+
+/* ---- Arrow lanes (issue #43; docs/LEVEL_DESIGN.md, Set pieces) ----
+ * BN6's arrow panels carry MegaMan one way, input held, until he is past
+ * them. A layer's lane is the quick way back: one wide, its panels across
+ * the void from where a long detour ends to the floor by the way, so the
+ * walk in is long and the ride out short. Walked against its arrows, its
+ * first panel carries MegaMan back, so it is never a way in. Planned and
+ * carved once the rest stands. */
+#define LANE_FAR 5     /* the detour it leaves from, at least */
+#define LANE_SAVES 5   /* the walk it saves, at least */
+#define LANE_MAX 5     /* its panels, at most */
+
+int layer_lane_dir(int x, int y) {
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		for (int k = 1; k <= l->len; ++k)
+			if (x == l->x + dir_dx[l->dir] * k && y == l->y + dir_dy[l->dir] * k) return l->dir;
+	}
+	return -1;
+}
+
+bool layer_step_ok(int x, int y, int nx, int ny) {
+	int from = layer_lane_dir(x, y), to = layer_lane_dir(nx, ny);
+	if (from >= 0 && (nx - x != dir_dx[from] || ny - y != dir_dy[from])) return false;
+	return to < 0 || (nx - x == dir_dx[to] && ny - y == dir_dy[to]);
+}
+
+/* The floor a walk from the arrival reaches (no island past a gap or a
+ * teleport's void). */
+static void reach_from_arrival(uint8_t reach[MAP_H][MAP_W]) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(reach, 0, MAP_W * MAP_H);
+	if (!layer.nobj) return;
+	int h = 0, t = 0;
+	qx[t] = (int16_t)layer.obj[0].x; qy[t++] = (int16_t)layer.obj[0].y;
+	reach[qy[0]][qx[0]] = 1;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + dir_dx[k], ny = y + dir_dy[k];
+			if (!floor_cell(nx, ny) || reach[ny][nx]) continue;
+			reach[ny][nx] = 1;
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+/* The void panels from (x, y) towards d with the void beside each, before
+ * the floor past them: 1 to LANE_MAX of them, nothing in the void there (a
+ * prop's sprite, a Rush gap); 0 where they don't lead to free ground floor. */
+static int lane_len(int x, int y, int d) {
+	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+	for (int k = 1; k <= LANE_MAX + 1; ++k) {
+		int cx = x + dir_dx[d] * k, cy = y + dir_dy[d] * k;
+		if (floor_cell(cx, cy))
+			return k > 1 && !layer.level[cy][cx] && cell_free(cx, cy) && !in_arena(cx, cy) && !near_stair(cx, cy) ? k - 1 : 0;
+		if (k > LANE_MAX || !void_cell(cx, cy) || !void_cell(cx + sx, cy + sy) || !void_cell(cx - sx, cy - sy) || prop_at_cell(cx, cy) ||
+			in_gap(cx, cy) || in_gap(cx + sx, cy + sy) || in_gap(cx - sx, cy - sy))
+			return 0;
+	}
+	return 0;
+}
+
+/* A lane from (x, y) towards d, scored: the walk it saves, from a detour
+ * LANE_FAR or more off the way to the floor 2 or less off it; -1 none. */
+static int lane_score(const uint8_t reach[MAP_H][MAP_W], int x, int y, int d, int *len) {
+	if (!(*len = lane_len(x, y, d))) return -1;
+	int ex = x + dir_dx[d] * (*len + 1), ey = y + dir_dy[d] * (*len + 1);
+	if (!reach[ey][ex] || detour[ey][ex] < 0 || detour[ey][ex] > 3) return -1;
+	int saved = walk_between(x, y, ex, ey) - (*len + 1);
+	return saved < LANE_SAVES ? -1 : saved * 4 - *len * 2 - detour[ey][ex];
+}
+
+/* The lane: from a free ground panel LANE_FAR or more off the way, in a
+ * way the area's maps draw arrows for, the walk it saves the most. */
+static bool plan_lane(const LayerKit *kit, NetLane *out) {
+	static uint8_t reach[MAP_H][MAP_W];
+	if (!kit || !kit->arrows) return false;
+	reach_from_arrival(reach);
+	int best = -1;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (!reach[y][x] || detour[y][x] < LANE_FAR || layer.level[y][x] || !cell_free(x, y) || in_arena(x, y)) continue;
+			for (int d = 0; d < 4; ++d) {
+				int len, score = kit->arrows >> d & 1 ? lane_score(reach, x, y, d, &len) : -1;
+				if (score > best) { best = score; *out = (NetLane){ x, y, d, len }; }
+			}
+		}
+	return best >= 0;
+}
+
+/* Its panels floor, and its ends kept clear: a navi at its far end would
+ * stop the ride with MegaMan's input held. */
+static void carve_lane(const NetLane *l) {
+	for (int k = 0; k <= l->len + 1; ++k) {
+		int cx = l->x + dir_dx[l->dir] * k, cy = l->y + dir_dy[l->dir] * k;
+		if (k >= 1 && k <= l->len) { layer.cell[cy][cx] = C_PATH; layer.level[cy][cx] = 0; }
+		reserved[cy][cx] = 1;
+	}
+	if (layer.nlanes < MAX_LANES) layer.lane[layer.nlanes++] = *l;
+}
+
+static void place_lane(const LayerKit *kit) {
+	NetLane lane;
+	if (plan_lane(kit, &lane)) carve_lane(&lane);
+}
+
+/* Bystander navis with a word to share, two panels at least from what else
+ * stands there (one beside a Mystery Data took MegaMan's A, and each A
+ * that closed his words opened them again). */
+static void place_bystanders(const int *order, int n) {
+	int x, y;
+	int npcs = npcs_for(2 + rng_range(0, 1));
+	for (int k = 0; k < npcs && n; ++k)
+		for (int tries = 0; tries < 4; ++tries) {
+			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
+			if (!room_spot_in(r, &x, &y, true)) continue;
+			if (!apart(x, y) || hushed[y][x]) continue;
+			NetObj *o = add_obj(OBJ_NPC, x, y);
+			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
+			break;
+		}
+}
+
+/* The set pieces placed once the rest stands: the islands past the void
+ * (a Rush gap's, a teleport's, an invisible path's), the pockets' data,
+ * an arrow lane, a P-Code's teller; and the emblems. */
+static void place_last(const GapSite *gap, unsigned pieces, int rise, const LayerKit *kit, const int *order, int n) {
+	if (gap->x >= 0) carve_gap(gap, rise);
+	if (layer.teleport_island) carve_teleport_island(rise);
+	if (pieces & PIECE_HIDDEN) place_hidden(rise);
+	place_block_rewards();
+	if (pieces & PIECE_ARROW) place_lane(kit);
+	place_teller(order, n);
+	emblems(kit);
+}
+
+void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
+	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
+	int rise = kit ? kit->rise : 0;
+	memset(&layer, 0, sizeof layer);
+	memset(reserved, 0, sizeof reserved);
+	memset(hushed, 0, sizeof hushed);
+	npcs_held = 0;
+	rng_seed(seed);
+	layer.biome = biome;
+	layer.kind = kind;
+	layer.boss_layer = kind == LAYER_NORMAL && is_boss_depth(depth);
+	if (kind == LAYER_SECRET) layer.boss_layer = !run.secret_cleared;
+	layer.arena = layer.ante = -1;
+	ArenaInfo arena = { -1, -1, 0, 0, 0 };
+
+	/* bigger layouts deeper into a cycle */
+	int p = (depth - 1) % CYCLE_LAYERS;
+	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
+	/* an act's three layers each in another of the area's layouts */
+	int planned = kind == LAYER_NORMAL
+		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / CYCLE_LAYERS * 7 + p / 3 + 1) * 0x9E3779B9u, layer_in_act(depth))
+		: layout_pick(biome);
+	build_layout(planned, biome, size, rise, &arena);
+	finish_rooms(seed, stair_dirs, rise);
+	place_ends(kind, biome, &arena);
+
+	Services s;
+	roll_services(&s, depth, biome, kind);
+	roll_gates(&s, seed, depth, kind);
+	int order[MAX_ROOMS], n = room_order(order), next = 0;
+	place_services(&s, depth, kind, kit, order, n, &next);
 	/* the area's props, set as the originals set theirs, before the loose
 	 * Mystery Data and bystanders fill the rooms: a landmark, rows and the
 	 * signs (docs/LEVEL_DESIGN.md, Props) */
@@ -1014,95 +1905,28 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		rows(kit, land, order, n);
 		signs(kit, land, order, n);
 	}
-	/* (ProtoMan on a pad apart where one has room, a ring off the way on;
-	 * else the next room; after the area's props, whose landmark needs a
-	 * bare room: before them he took it on a layer in a hundred) */
-	if (duel) {
-		bool placed = false;
-		for (int i = n - 1; i >= next && !placed; --i)
-			if (layer.rooms[order[i]].kind == ROOM_PAD && room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y))
-				placed = add_obj(OBJ_DUEL, x, y) != NULL;
-		if (!placed) { placed = PLACE(OBJ_DUEL) != NULL; ++next; }
-		/* (a small layer, its rooms all taken: in any room but the
-		 * exit's, apart from the others where it can be; an act 3 layer
-		 * of the Judge Tree Comp had no ProtoMan) */
-		for (int i = 0; i < n && !placed; ++i)
-			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
-		for (int i = 0; i < layer.nrooms && !placed; ++i)
-			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) placed = add_obj(OBJ_DUEL, x, y) != NULL;
+	if (s.duel) place_duel(order, n, &next);
+	if (s.official && s.duel) place_duel_gate(s.official_level, order, n, &next);
+	/* the act's set pieces (net_pieces.c): a Rush gap's stand kept clear,
+	 * its island carved once the rest stands */
+	GapSite gap = { -1, -1, 0, 0, -1 };
+	unsigned pieces = layer_pieces(depth, biome, kind);
+	measure_detours();
+	if (pieces & PIECE_RUSH) {
+		gap = plan_gap(layer_rush_len(depth, biome));
+		npcs_held = gap.x >= 0;
 	}
-	/* the official gate the duel opens, by ProtoMan: in his room, two
-	 * panels from him or more, else in a room a short walk from his (a
-	 * playtester found the gate alone across the layer, and his session
-	 * ran out looking for the rival); else anywhere with space (a small
-	 * endless layer with every room taken had its duel and no gate) */
-	if (official && duel) {
-		NetObj *g = NULL;
-		const NetObj *rival = NULL;
-		for (int i = 0; i < layer.nobj; ++i) if (layer.obj[i].type == OBJ_DUEL) rival = &layer.obj[i];
-		int home = -1;
-		for (int i = 0; rival && i < layer.nrooms && home < 0; ++i) {
-			const Room *r = &layer.rooms[i];
-			if (rival->x >= r->x && rival->x < r->x + r->w && rival->y >= r->y && rival->y < r->y + r->h) home = i;
-		}
-		int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
-		for (int i = -1; i < nn && !g && home >= 0; ++i) {
-			int room = i < 0 ? home : near[i];
-			if (room == layer.exit_room) continue;
-			for (int tries = 0; tries < 12 && !g; ++tries)
-				if (room_spot(&layer.rooms[room], &x, &y) && !near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2))
-					g = add_obj(OBJ_OFFICIAL, x, y);
-		}
-		if (!g) g = PLACE(OBJ_OFFICIAL);
-		for (int i = 0; !g && i < n; ++i)
-			if (room_spot(&layer.rooms[order[i]], &x, &y) && !near_talker(x, y)) g = add_obj(OBJ_OFFICIAL, x, y);
-		for (int i = 0; !g && i < layer.nrooms; ++i)
-			if (i != layer.exit_room && room_spot_in(&layer.rooms[i], &x, &y, true)) g = add_obj(OBJ_OFFICIAL, x, y);
-		if (g) g->param = official_level;
-		++next;
+	if ((pieces & PIECE_TELEPORT) && kit && kit->gem) {
+		plan_teleport();
+		npcs_held += layer.teleport_island;   /* (the island's data, placed last) */
 	}
-	/* Rooms holding better data, more of them deeper and in the Undernet
-	 * (a dark warp's, or the short net's dark way's act) */
-	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET);
-	for (int k = 0; k < rich; ++k, ++next) {
-		NetObj *o = PLACE(OBJ_MYSTERY);
-		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
-	}
-	/* Mystery data scattered through the rest, most at dead ends: the side
-	 * ways BN6 rewards exploring */
-	static int dx[256], dy[256];
-	int nde = dead_ends(dx, dy, 256), di = 0;
-	for (int i = nde - 1; i > 0; --i) {
-		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
-		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
-	}
-	int md = 3 + rng_range(0, 2) + size;
-	for (int k = 0; k < md; ++k) {
-		bool got = false;
-		if (rng_range(0, 99) < 70)
-			while (di < nde && !got) { x = dx[di]; y = dy[di++]; got = cell_free(x, y) && !behind_gap(x, y) && !cuts_way(x, y); }
-		if (!got && n) got = room_spot(&layer.rooms[order[rng_range(0, n - 1)]], &x, &y);
-		if (!got) continue;
-		NetObj *o = add_obj(OBJ_MYSTERY, x, y);
-		if (!o) break;
-		int roll = rng_range(0, 99);
-		o->param = roll < 70 ? 0 : roll < 92 ? 1 : 2;
-	}
-	/* Bystander navis with a word to share, two panels at least from what
-	 * else stands there (one beside a Mystery Data took MegaMan's A, and
-	 * each A that closed his words opened them again) */
-	int npcs = 2 + rng_range(0, 1);
-	for (int k = 0; k < npcs && n; ++k)
-		for (int tries = 0; tries < 4; ++tries) {
-			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
-			if (!room_spot_in(r, &x, &y, true)) continue;
-			bool near = false;
-			for (int i = 0; i < layer.nobj; ++i) near |= abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2;
-			if (near) continue;
-			NetObj *o = add_obj(OBJ_NPC, x, y);
-			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
-			break;
-		}
-	emblems(kit);
-#undef PLACE
+	int block = pieces & PIECE_OBSTACLE ? layer_block_kind(depth, biome) : -1;
+	if (block >= 0) plan_obstacle(block);
+	if (pieces & PIECE_CUBE) plan_obstacle(cube_kind(depth, biome, kind));
+	npcs_held += layer.nblocks + (pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
+	npcs_held += pieces & PIECE_HIDDEN ? 2 : 0;          /* (an invisible path's data and the navi who hints at it) */
+	place_data(depth, kind, biome, size, order, n, &next);
+	place_bystanders(order, n);
+	npcs_held = 0;
+	place_last(&gap, pieces, rise, kit, order, n);
 }

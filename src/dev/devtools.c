@@ -50,6 +50,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "veteran")) dev.veteran = true;
 		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
 		else if (!strncmp(t, "hp=", 3)) dev.hp = atoi(t + 3);
+		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
@@ -99,6 +100,11 @@ static void run_text(const uint8_t *b, int n) {
 	if (at) game_call(BN6_CHAT_RUN_SCRIPT, at, 0);
 }
 
+void devtools_zenny(void) {
+	static const uint8_t give[] = { 0xEF, 0x0E, 0x10, 0x27, 0x00, 0x00, 0xFF, 0xFF, 0xFF };   /* ts_check_give_zenny 10000 */
+	run_text(give, sizeof give);
+}
+
 /* The battle's objects on one side (0 MegaMan, 1 the enemies): HP to `hp`
  * (-1: to its max), only lowered unless `raise`. */
 static void battle_hp(int side, int hp, bool raise) {
@@ -138,13 +144,11 @@ static void act(int item, int dir) {
 		toast("HP full");
 		break;
 	}
-	case I_ZENNY: {
+	case I_ZENNY:
 		M.open = false;
-		static const uint8_t give[] = { 0xEF, 0x0E, 0x10, 0x27, 0x00, 0x00, 0xFF, 0xFF, 0xFF };   /* ts_check_give_zenny 10000 */
-		run_text(give, sizeof give);
+		devtools_zenny();
 		toast("+10000 zenny");
 		break;
-	}
 	case I_NEXT:
 		M.open = false;
 		toast(director_dev_next_layer() ? "Next layer" : "Only on the net");

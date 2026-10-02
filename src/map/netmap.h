@@ -45,7 +45,7 @@ const uint16_t *netmap_last_tiles(int *tw, int *th);
  * why (tiles_pick_why). */
 const uint8_t *netmap_last_seams(void);
 /* ... and the tiles set whole over what the classes picked (a bit each). */
-enum { NETMAP_PASTED_PAD = 1, NETMAP_PASTED_EMBLEM = 2, NETMAP_PASTED_STAIR = 4 };
+enum { NETMAP_PASTED_PAD = 1, NETMAP_PASTED_EMBLEM = 2, NETMAP_PASTED_STAIR = 4, NETMAP_PASTED_ARROW = 8 };
 const uint8_t *netmap_last_pasted(void);
 /* (dev) The last layer's floor as text, a row per grid y: '.' void, 'a'
  * platform floor, 'b' walkway floor, 's' walkway floor across a platform
@@ -70,6 +70,17 @@ void netmap_grid(int wx, int wy, double *x, double *y);
 bool netmap_floor_cell(int cx, int cy, int level);
 /* Whether wall cell (cx, cy) lies on a stair. */
 bool netmap_stair_cell(int cx, int cy);
+/* Rush's gaps (issue #14): for the walls a walkway, whose panels count as
+ * floor unless `shut`; the gap a wall cell lies in, 1 the layer's first, 0
+ * none. */
+void netmap_gaps_shut(bool shut);
+int netmap_gap_at(int cx, int cy);
+bool netmap_gap_any(void);
+/* A Link Navi obstacle's place in the world (issue #42): BN6's direction
+ * from the room into its walkway (0 +X, 1 +Y, 2 -X, 3 -Y), the edge along
+ * it where the walkway leaves the room, and the walkway's lower edge
+ * across. */
+void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side);
 /* The raised floor's world z, 0 when the layer is flat. */
 int netmap_rise(void);
 /* The layer's warp pads (the walls are written again with them). */

@@ -429,17 +429,21 @@ A map loads at most 12 compressed sprites and 0x8800 bytes of them (the
 game's loader); a prop whose sprite no longer fits is left out whole, not
 shown as noise.
 
-### Pads' centrepieces (built)
+### Pads' centrepieces: warps only (built)
 
-The originals' 3x3 pads carry a walkable ornament on their middle panel,
-second-layer art over the floor: the red gem (16 of them over the surface
-areas), the link ring and the cube on its round base, each 28 tiles, the
-same tiles in Central, Seaside, Green and Sky in each area's colours.
-`props_learn_ornament` finds them in an area's own maps by their tiles
-(0x379, 0x372, 0x375) and cuts each on the corner of the panel it lies
-on; `paste_ornaments` sets one on the middle of every pad at ground level
-with nothing standing there, the red gem three times in five, from the
-layer's seed (the floor and the layout unchanged).
+The originals' 3x3 pads carry art on their middle panel, second-layer tiles
+over the floor: the red gem, the link ring and the cube on its round base,
+each 28 tiles, the same tiles in Central, Seaside, Green and Sky in each
+area's colours. `props_learn_ornament` finds them in an area's own maps by
+their tiles (0x379, 0x372, 0x375) and cuts each on the corner of the panel
+it lies on. None of them is decoration: all 29 in BN6's net maps stand on a
+warp pad (the gem on a teleport within the map, always one of a pair; the
+cube on a link to a homepage; the ring on a link to a comp or another
+area). They were set on the middle of every pad, so most layers showed warps
+that did nothing, which players take for warps; the owner ruled it out. Now
+only a teleport pair's two pads carry the gem (`paste_ornaments`, Teleports
+below), and a pad without one keeps its plain floor, or its frame's empty
+recess, as BN6's pads without a warp do.
 
 ### Central's, Seaside's and Sky's framed pads (built)
 
@@ -500,3 +504,347 @@ takes a bridge's link look).
 
 The field pictures and a hub's centrepiece where the layout has a centre;
 each a stamp cut like the counters, set by the same rules.
+
+## Set pieces
+
+BN6's net areas hold more than floors and props: Rush's bone gaps, purple
+Mystery Data, the Link Navis' obstacles, arrow panels, security cubes,
+teleport pads. Each area repeats two or three of its own, the main route
+stays free, and each lock guards one thing on a spur, its reward following
+the detour. The research behind them (what each area holds, how the ROM
+runs each, the rules Capcom places them by) and the plan are in the epic,
+issue #49; what is built is below.
+
+The design is the run's dialectic, prepare or press on (docs/META.md), at
+the scale of a spur: a detour costs steps, and BN6's step counter rolls
+battles; a lock's key costs zenny or a Cross; what it pays is power for the
+act's guardian, or a shortcut that saves battles. Value that has nothing
+to do with its cost asks no decision, so the generator ties them together.
+
+### Detours and their data (built)
+
+`measure_detours` in `net_gen.c` walks from the way (the layer's shortest
+walk from the arrival to the exit or the guardian, `layer_on_way`) over
+the floor: each panel's detour is the panels walked to reach it from the
+way (`layer_detour`), and its branch the way's panel that walk leaves
+from, so a spur, a room off the way and everything past them share one.
+The guardian's arena is no detour (the way ends at him).
+
+Mystery Data follow BN6's colours, which say what a walk is worth:
+
+- **Blue data where the detours end**: 2 a layer, one more past depth 6
+  and in the Undernet; each the farthest free panel of a branch three
+  panels off the way or more, the farthest branches first, on a pad's
+  middle where the end is a pad (`detour_end`). The farthest is of the
+  best quality (a chip three tiers up, or an HPMemory) where it lies eight
+  panels off or more; the others three times in ten. A layer with too few
+  detours puts the rest in its rooms. The run's Spin lies in the best of
+  them.
+- **Green data loose**, 2-4 a layer (up to two more on bigger layouts), most at
+  dead ends: the commonest quality.
+
+Over 3000 layers of a first cycle the old roll gave every quality the same
+places, 7 panels off the way on average and a quarter of them within two
+panels of it, all drawn green; now the green data lie 6.1 panels off on
+average, the blue ones 8.2 and the best 11.8, 1-2% of them within two
+panels, and about as much in all (fewer of the middle quality, a fifth
+more of the best). The tests check that nine blue data in ten stand three
+panels off the way or more.
+
+### The act's plan (built)
+
+`layer_pieces` in `net_pieces.c` decides which set pieces a layer holds,
+from the run's seed and the depth alone, so a Net Dealer earlier in the act
+knows which keys to stock (`layer_pieces_ahead`):
+
+- **Budget by the act's rhythm.** None on the run's first layer or in the
+  Secret Area; one on an act's first layer (half of them), two on its
+  middle one (the dealer's: a choice of where to spend), one on the
+  guardian's (four in ten), one on a dark warp's layer (six in ten).
+- **Each area its own,** by weights from what its original maps hold
+  (purple data everywhere but the Secret Area, the most in the Graveyard
+  and the Undernet; Rush in Central, Seaside, Green, Sky, the Undernet and
+  ACDC's homepage), with a weight of nothing beside them, so an area with
+  few of BN6's pieces keeps them rare, as its maps do; never one piece
+  twice on a layer, and no Rush before a guardian.
+
+### Purple data (built, issue #41)
+
+BN6 sets none or one purple Mystery Data on a map (20 in Gregar), locked
+until an Unlocker opens it, holding what no shop sells: ElecSword E,
+Muramasa M, DreamAura U, a Spin; Central Area 3's lies beneath the statue.
+A layer does the same (`layer_purple`, `place_purple` in `net_gen.c`):
+
+- **Where:** at the landmark's foot, the panel in front of the giant tree,
+  the statue or the monument, else where the longest detour ends, first of
+  the layer's data.
+- **When:** from the run's seed and the depth alone, so a dealer earlier in
+  the act knows: on six in ten of an act's middle layers and three in ten
+  of its guardians', a quarter more in the Graveyard and the Undernet,
+  which hold the most of BN6's, and on half the dark warps' layers; never
+  on an act's first.
+- **What it holds:** a chip of the rarest tiers (`roll_chip`'s bonus 4, a
+  Mega now and then) in one of its letters, never one the layer's dealer
+  lists. The run's Spin lies in it where its layer holds one, as BN6 hid
+  SpinBlue in a purple data.
+- **The key:** BN6's own, the Unlocker. The Net Dealer stocks one for each
+  purple data the act holds from his layer on, at 600 zenny in act 1 and
+  300 more an act (BN6's 4000 is out of a run's reach: a key priced past
+  its use is never bought), and says so: "Word is, there's purple data
+  locked on this layer". Three layers in ten with a purple data hide an
+  Unlocker in one of their blue data instead, a lock and its key on one
+  layer. The game's own text asks for it and takes it.
+
+Over the tests' 300 layers, 46 hold a purple data, never on the way.
+
+### Rush's gaps (built, issue #14)
+
+BN6 lays 13 bone panels over 9 gaps (Central 2, Seaside 1, Green 1 and 2,
+Sky 1 to 3, Undernet 1, ACDC's homepage), 1 to 3 panels each: six are
+shortcuts, three lead to one Mystery Data. Press A at the edge with RushFood
+held, as many as the gap's panels, and Rush comes, eats one, and lies in
+the gap for good. The game runs all of it (docs/ROM_DATA.md, Rush's gaps);
+a layer gives it what its own maps do.
+
+- **The place** (`plan_gap`, `carve_gap` in `net_gen.c`): a walkway's tip
+  (else a platform's edge) off the way, at ground height, aimed across the
+  gap at a pad of its own, 1-3 panels on (the area's longest: Sky's 3,
+  Central's and the Undernet's 2, the rest 1), the gap's panels and the
+  pad void with void a panel round them and no prop, inside the camera's
+  window; the farthest off the way first. The stand and the panel behind
+  it are kept clear of what is placed after; the pad is carved last, as a
+  room of its own, and holds one blue Mystery Data, of the best quality
+  past one panel (two or three bones' worth).
+- **The map** (`netmap.c`, `coords.c`): for the walls the gap is a
+  walkway, walled along its sides; across its mouths the floor's edges
+  stand again with the flag byte 0xFF (the second gap's 0xFE), which Rush
+  lying there switches off. Its trigger strip is the lane's floor 24 units
+  in from the near mouth, where the engine's A probe lands (BN6's strip is
+  the mouth's row alone, its probe 8 ahead). Its tiles stay void.
+- **The objects** (`rush.c`): per panel Rush (handler 0x25, shown once
+  bridged) and the bones (OverworldMapObjects 0xD5 + g, shown until then).
+- **The key:** RushFood, sold by the Net Dealer where the act holds gaps
+  from his layer on (one for each gap, and as many more as the longest
+  needs held), at 300 zenny in act 1 and 100 more an act (BN6's seller asks
+  3000). The dealer names the gap, and MegaMan names it when he first
+  comes near its stand: what calls Rush and how many he needs, or, with
+  enough held, to press A at the edge (BN6 answers A without them with a
+  sound alone).
+
+Over the tests' 300 layers, 40 hold a gap, 55 panels in all (the act's
+budget shared with more kinds of piece since: 62 and 91 before the
+obstacles); the way never needs one, and each island is reached only
+across it, holding its one Mystery Data.
+
+### Teleports (built, issue #44)
+
+BN6's gem marks a teleport pad: step on it and MegaMan beams to its pair
+within the map, the camera scrolling along (warp-list departure 12; 18 gems
+in the surface maps, all in pairs: Green Area 1's four pairs, Sky's three,
+Central's one). A layer's pair (`plan_teleport`, `carve_teleport_island` in
+`net_gen.c`) is one of two things, in Green, Sky and Central, where the
+act's plan calls for one (`net_pieces.c`) and the area's maps give the gem's
+art:
+
+- **A quick way back:** one gem where a long detour ends (7 panels off the
+  way or more), the other 2 to 6 off the way, the walk between them 16
+  panels or more, so the long way in has a short way out.
+- **Else an island of its own,** as ACDC's homepage keeps an isolated square
+  reached by its teleport alone: a 3x3 pad past the void (two void panels
+  round it, inside the camera's window, the nearest such to the gem near
+  the way, so it is seen from there), one blue Mystery Data on its corner
+  away from its gem.
+
+Each gem stands on a panel with floor all round it (its art draws its own
+diamond over them) and never on or beside the way (its trigger reaches a
+cell into the panels round it): no one is warped walking by. The pads'
+triggers take warps 2 and 3, each leading to the other's middle
+(`mapslot_teleport`, the layer map's warp list). Over the tests' 300
+layers, 12 hold a pair, 11 of them to an island (21 before the obstacles
+shared the act's budget).
+
+### Link Navi obstacles (built, issue #42)
+
+BN6 sets 25 obstacles in its nets, each in the mouth of a pocket that holds
+one thing (a SubMemory, Attack+1, HP+100, Sky's purple data): a geyser of
+cyberwater, a cybertree, a pillar of flames, a cyclone or a cloud, which two
+of Gregar's Link Navis clear each. A layer sets one the same way:
+
+- **Its kind is its area's own** (`layer_block_kind` in `net_pieces.c`):
+  Seaside's geysers and cyclones, Green's trees, Sky's clouds, flames and
+  geysers, the Underground's clouds, cyclones and flames under the Nest,
+  all five in the Graveyard; none in Central, as in BN6.
+- **The run's Crosses are its keys:** the Cross brought (alone) or each
+  won from a guardian before this layer clears the obstacles its Navi
+  clears in Gregar. Four pockets in five take a kind the run can clear,
+  else one it can't, a hint for the next run's Cross; a run that can clear
+  none of the area's meets one two layers in five, else none (a pocket a
+  run can never open is dead weight). So the setup's Cross is a bet on the
+  net's locks as well as on its battles.
+- **Its pocket** (`plan_obstacle` in `net_gen.c`): a walkway's first panel
+  off a wider floor, off the way, whose closing cuts off 6 to 40 panels and
+  nothing the way, a service or the guardian needs; seen from the way
+  (its mouth near it). Nothing else is placed in it; its one thing, a blue
+  data of the best quality, lies where it ends.
+- **The map** (`blockers.c`, `netmap.c`): BN6's own obstacle (handler 3)
+  where BN6 sets one in a walkway's mouth, a line of wall cells across the
+  walkway flagged with its slot, and its check cells where the engine's A
+  probe lands from the floor before it; the check runs the layer's talk
+  from the map's own archive: MegaMan names it, and with the Cross, the
+  Navi's mugshot says "Leave it to me!" over his sound, and the obstacle
+  opens, for good (its present flag is kept in the run's state).
+
+Over the tests' 300 layers (their guardians Cross navis), 13 hold one.
+
+### Security cubes (built, issue #45)
+
+BN6's security cube (handler 3, sprite 7:0x03, its records looking the four
+ways) stands across a walkway and vanishes when its condition is met. A
+layer sets one where the act's plan calls for it, in every comp and
+homepage, Central and Seaside (`layer_cube_kind` in `net_pieces.c`), in a
+pocket's mouth as an obstacle stands (`plan_obstacle`), its one thing a
+blue data of the best quality:
+
+- **A P-Code** (comps, homepages, Central): four digits from the layer's
+  seed, which one bystander knows (`place_teller` in `net_gen.c`). He
+  stands a walk of eight panels or more from the cube and apart from
+  anything else, so the key lies on another way than the lock: at the cube
+  without it, MegaMan says somebody on this layer must know it, ask
+  around; told it, A at the cube enters it and the cube opens. A layer
+  with no such place for him takes a toll instead (a lock no one can open
+  would close its pocket for good).
+- **A toll** (Seaside): 200 zenny in act 1 and 100 more an act, half the
+  Net Dealer's answer chip: the run's dialectic, prepare or press on, in
+  zenny. The game's own zenny check takes it, or MegaMan says they don't
+  have that much.
+
+Two rules came from the cube and hold for every piece spoken to:
+
+- **No navi within three panels of a piece's A** (a cube's or an
+  obstacle's mouth, a Rush stand; `navi_near`, `hush`): the engine's A
+  turns to a navi within 52 units before a map's check, and a teller two
+  panels from his cube took the cube's A. A piece is planned away from the
+  navis standing, and the bystanders and the teller placed after it keep
+  off the panels round it.
+- **A mouth stays one panel wide:** the map's floor fix (`legal.c`), which
+  toggles cells for the tiles, widened a cube's mouth on a comp to three
+  panels, and MegaMan walked round the cube. The mouth, the void beside it
+  and the floor before and after it are locked (`lock_pieces` in
+  `netmap.c`).
+
+Over the tests' 300 layers, 10 hold a P-Code cube, each teller eight
+panels' walk or more from his, and 9 a toll; no navi stands within three
+panels of a piece's A.
+
+### Arrow lanes (built, issue #43)
+
+BN6's arrow panels carry MegaMan one way, input held, four units a frame,
+until he is past them: Seaside Area 2 is a field of them, Sky Area 3 rings
+a platform with one-way lanes, Green's and Seaside Area 1's are single
+panels set into a walkway. A layer's lane is the quick way back
+(`plan_lane`, `carve_lane` in `net_gen.c`):
+
+- **Where:** from a free ground panel five or more off the way (where a
+  long detour ends, by its data) straight across one to five void panels,
+  the void beside each, to free ground floor three or less off the way,
+  the walk it saves five panels or more, the most saved first. It is
+  carved last, once the rest stands: neither end on an island past a gap
+  or a teleport's void, in a pocket a lock closes or in the arena. So the
+  walk in is long and the ride out short; walked against its arrows, its
+  first panel carries MegaMan back, so it is never a way in.
+- **Which areas:** by the act's plan, Seaside's the most, then Green's,
+  the Undernet's, the Underground's under the Nest and the Judge Tree
+  comp's; Sky's seldom (its layers seldom leave a short gap from a far
+  floor back to the way: one in ten found room), none in Robot Control's
+  (two ways drawn, its layers too close).
+- **The art** (`props_learn_arrow` in `props.c`): each area's own arrow
+  panel for each way, cut from its maps where one closes a lane a panel
+  wide (the end cells on its far edge): the tiles of both layers whose
+  middle lies on its diamond. An area whose maps draw a way's panel alone
+  gets lanes that way only (`LayerKit.arrows`); Sky's and Green's also
+  come from Sky Area 3 and Green Area 2 (`net_area.arrow_maps`).
+- **The ride** (`lanes_place` in `netmap.c`) is BN6's own: three start
+  cells across the lane's near edge and three end cells across its far one
+  (docs/ROM_DATA.md, Arrow panels), as Robot Control Comp 1's lane has
+  them; the game's player update carries MegaMan from one to the other.
+  The lane, its ends and the void beside it are kept as generated
+  (`lock_pieces`).
+- **The way on** (`layer_step_ok`): the guide's walk and the autopilot's
+  step onto and along a lane only the way it runs.
+
+Over the tests' 300 layers, 20 hold a lane (of 36 planned), 35 panels in
+all.
+
+### Invisible paths (built, issue #46)
+
+BN6 hides floor drawn as void in Seaside Area 1, Sky Area 2, Underground 1
+and Undernet 2, from a stub's tip to a lonely pad: an HPMemory, MegaCannon
+S, AirShoes. A layer hides one the same way (`place_hidden`,
+`carve_hidden` in `net_gen.c`):
+
+- **Where:** a Rush gap's site (`plan_gap`: a walkway's tip, else a
+  platform's edge, off the way, aimed across one to three void panels at
+  a 3 x 3 pad of its own), planned once the islands stand; in Seaside,
+  Sky, the Undernet and the Nest, from the second act on, by the act's
+  plan. Its pad holds a blue data of the best kind.
+- **Drawn as void, walked as floor** (`path_panel` in `netmap.c`): its
+  panels stay void in the layout, so the tiles draw the void there, and
+  count as floor to the map's walls, as a Rush gap's do once Rush lies in
+  it, with no wall across its mouths; the legalizer leaves them as they
+  are (`lock_pieces`). The guide and the maps never show it.
+- **Its cue, never none:** the tip aimed at a lonely pad, and a navi two
+  to eight panels from it, off the way, who says he saw a Navi walk out to
+  that pad over nothing; where no navi may stand, there is no path.
+
+Laying it turned up a bug in `cuts`, which keeps a navi from cutting the
+floor: it counted every floor panel, so once any island stood (a Rush
+gap's, a teleport's, this one's) every navi placed after looked as if it
+cut the floor, and a P-Code's teller gave way to a toll. It now counts the
+floor reached before.
+
+With every layer made to hold one (`--dev pieces=64`), 59 of the tests'
+300 layers find a site and a navi for it.
+
+### The Undernet's doors (built, issue #47)
+
+BN6's Undernet locks its spurs with its own doors, the security cube's
+records with their own words (docs/ROM_DATA.md, Link Navi obstacles and
+security cubes): skull doors, which only a WWW-ID passes, and number
+doors, which ask a count the map itself holds ("count the flames of
+hatred": Undernet 2's braziers). A layer of the Undernet sets one where
+the act's plan calls for a cube (`layer_cube_kind` in `net_pieces.c`):
+
+- **A number door** on an act's first layer and on a dark warp's, else
+  half the time: it asks how many braziers burn on the layer, three
+  numbers in a row to pick from (the right one first, second or third, as
+  the layer's seed has it). MegaMan warns that a wrong number seals it;
+  B steps back to count. Wrong, it seals itself for the layer. The
+  Undernet's layers line rows of two or three braziers past their rooms'
+  rims (`brazier_row`), with the pair beside its statue six to nine in
+  all; a layer with fewer than two asks a P-Code instead.
+- **A skull door** otherwise: it opens for BN6's WWW-ID (key item 0x44),
+  one of which opens every skull door of a run. The act's Net Dealer
+  stocks it where a skull door lies ahead (at 2200 zenny in the Undernet's
+  act, two layers' worth) and says what it opens; never on an act's first
+  layer, before his. The keys now come before the SubChips on his list of
+  eight: an Unlocker had taken the last place and left the WWW-ID off.
+
+### Teaching them (issue #48, in part)
+
+A player meets each set piece without a manual, the lock and its key said
+together:
+
+- **At the piece:** a Link Navi obstacle, a cube and the Undernet's doors
+  name themselves and their key at A; Rush's bones are named when MegaMan
+  first comes near (`rush_hint`); an invisible path has its navi.
+- **From the dealer:** he names each key on his list and where its lock
+  lies (`dealer_keys`: the Unlocker, RushFood, the WWW-ID).
+- **From L** (`status_words`): on a layer's first L, MegaMan senses its set
+  pieces with its services ("I sense a Net Dealer, purple Mystery Data and
+  bone panels here!"), and the first time a profile meets a kind he says
+  what it is and what opens it (`piece_lessons`, `profile.pieces_taught`),
+  as he explains the map's violet marks once. Never an invisible path.
+
+Not built yet: the first layer of a run holding a kind holding its key
+too, and the 3DS map's marks on locks seen.
+
