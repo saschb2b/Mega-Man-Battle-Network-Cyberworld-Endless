@@ -9,6 +9,9 @@
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
+#ifdef CW_IOS
+#include "ios.h"
+#endif
 
 #include "buttons.h"
 #include "director.h"
@@ -75,6 +78,27 @@ void touch_release(void) {
 
 void touch_reset_art(void) { art_flush(); }
 
+#ifdef CW_IOS
+/* (an iPhone's notch, rounded corners and home indicator: each control
+ * moved in past what they cover, as Android's own layout leaves to the
+ * system) */
+static void safe_area(void) {
+	float top, left, bottom, right;
+	int ww = 0, wh = 0;
+	ios_safe_insets(P.window, &top, &left, &bottom, &right);
+	SDL_GetWindowSize(P.window, &ww, &wh);
+	if (ww <= 0) return;
+	float k = (float)P.screen_w / (float)ww;   /* (the screen's pixels to its points) */
+	for (int c = 0; c < TOUCH_CONTROLS; ++c) {
+		TouchBox *b = &lay.box[c];
+		float x0 = left * k + b->w / 2, x1 = (float)P.screen_w - right * k - b->w / 2;
+		float y0 = top * k + b->h / 2, y1 = (float)P.screen_h - bottom * k - b->h / 2;
+		if (x0 <= x1) b->cx = fminf(fmaxf(b->cx, x0), x1);
+		if (y0 <= y1) b->cy = fminf(fmaxf(b->cy, y0), y1);
+	}
+}
+
+#endif
 void touch_relayout(void) {
 	/* (the defaults until touch.ini is read: headless runs read none) */
 	if (!prefs_read) { touch_prefs_default(&prefs); prefs_read = true; }
@@ -87,6 +111,9 @@ void touch_relayout(void) {
 	scr.pw = CORE_W * P.scale;
 	scr.ph = CORE_H * P.scale;
 	touch_layout_for(&scr, &prefs, &lay);
+#ifdef CW_IOS
+	safe_area();
+#endif
 	warm = 0;
 }
 
@@ -116,7 +143,7 @@ static void save(void) {
 /* ---- haptics: a short tick under the thumb for each press ---- */
 
 static bool haptics_exist(void) {
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(CW_IOS)
 	return true;
 #elif defined(__EMSCRIPTEN__)
 	static int has = -1;
@@ -143,6 +170,8 @@ static void tick(void) {
 		(*env)->DeleteLocalRef(env, cls);
 	}
 	if (env && activity) (*env)->DeleteLocalRef(env, activity);
+#elif defined(CW_IOS)
+	ios_haptic();
 #elif defined(__EMSCRIPTEN__)
 	emscripten_run_script("navigator.vibrate(12)");
 #endif

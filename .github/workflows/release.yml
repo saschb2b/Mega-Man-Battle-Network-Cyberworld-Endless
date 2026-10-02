@@ -62,6 +62,18 @@ jobs:
           name: macos
           path: build/release/cyberworld-endless-macos.dmg
 
+  ios:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - run: python3 build.py ios
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: build/release/cyberworld-endless.ipa
+
   android:
     runs-on: ubuntu-latest
     steps:
@@ -111,7 +123,7 @@ jobs:
             build/3ds/cyberworld-endless.3dsx
 
   release:
-    needs: [flatpak, macos, android, n3ds]
+    needs: [flatpak, macos, ios, android, n3ds]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -143,6 +155,13 @@ jobs:
         with:
           name: n3ds
           path: build/release
+      - uses: actions/download-artifact@v4
+        with:
+          name: ios
+          path: build/release
+      # (AltStore's and SideStore's source, its address the latest release's)
+      - name: AltStore source
+        run: python3 tools/altstore_source.py "$TAG" build/release/cyberworld-endless.ipa > build/release/altstore-source.json
       # (none when the release has no APK)
       - uses: actions/download-artifact@v4
         continue-on-error: true
@@ -154,7 +173,8 @@ jobs:
         run: |
           ls cyberworld-endless-rocknix-portmaster.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
             cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-windows-x64-setup.exe \
-            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.apk cyberworld-endless.cia cyberworld-endless.3dsx \
+            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.ipa altstore-source.json \
+            cyberworld-endless.apk cyberworld-endless.cia cyberworld-endless.3dsx \
             cyberworld-endless-website.zip \
             2>/dev/null > FILES || true
           xargs sha256sum < FILES > SHA256SUMS.txt

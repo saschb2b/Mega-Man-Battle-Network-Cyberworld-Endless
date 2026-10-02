@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **The game on iPhone and iPad.** It comes through AltStore Classic or
+  SideStore, which install it with your own Apple ID and keep it up to
+  date: add the source the download page links, install Cyberworld
+  Endless, and choose your ROM in Files when it asks (or put it in Files,
+  On My iPhone › Cyberworld, beside your saves). Touch controls round the
+  picture with a tick under the thumb, clear of the notch and the home
+  indicator, or a controller; turning the phone moves them under the
+  picture or beside it. Sent to the background, it keeps your run where
+  MegaMan stands. iOS 14 and newer. It was built and started in the iOS
+  Simulator, not yet on an iPhone: reports are welcome.
 - **The Net Dealers name every guardian's weakness (issue #39).** They
   said SlashMan, EraseMan, TenguMan, GroundMan and DustMan had no weak
   element, but BN6 has a second wheel, as its Cross lessons teach:

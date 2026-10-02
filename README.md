@@ -97,7 +97,7 @@ game.
 Every system has its own download on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases): pick
 yours from the table. The project's
 [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/)
-opens on the system you visit it with. Each needs your own
+leads with the system you visit it with, and lists every other. Each needs your own
 ROM ([What you need](#what-you-need)); none contains game data.
 
 | You play on | Download | Steps |
@@ -107,6 +107,7 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A Linux PC, x86-64 | `cyberworld-endless-x86_64.AppImage`, `cyberworld-endless.flatpak`, `cyberworld-endless_amd64.deb` or `cyberworld-endless-linux-x86_64.tar.gz` | [On a Linux PC](#on-a-linux-pc) |
 | A Steam Deck | `cyberworld-endless.flatpak` | [On a Steam Deck](#on-a-steam-deck) |
 | An Android phone, tablet or handheld | `cyberworld-endless.apk` | [On Android](#on-android) |
+| An iPhone or iPad, iOS 14 or newer | through AltStore or SideStore: its source, `altstore-source.json`; or `cyberworld-endless.ipa` | [On an iPhone or iPad](#on-an-iphone-or-ipad) |
 | A handheld running ROCKNIX, through PortMaster | `cyberworld-endless-rocknix-portmaster.zip` | [On a ROCKNIX handheld](#on-a-rocknix-handheld) |
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
@@ -238,6 +239,29 @@ controller and the touch screen all work: the game draws touch controls
 round the picture until a controller's button is pressed, and Back asks
 before it quits. Uninstalling the app deletes its saves.
 
+### On an iPhone or iPad
+
+Apple's App Store has no place for a game that runs on a ROM, so the app
+comes through [AltStore Classic](https://altstore.io) or
+[SideStore](https://sidestore.io), which install apps with your own Apple
+ID and keep them up to date. Each needs a computer once, to set it up; on
+iOS 16 and newer, Developer Mode too.
+
+1. In AltStore or SideStore, open **Sources**, tap **+** and add
+   `https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/altstore-source.json`
+   (the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#ios)
+   has buttons that do it on the phone).
+2. Install **Cyberworld Endless** from the source. With a free Apple ID,
+   AltStore renews it every seven days, and offers each new version.
+3. Start it and press A: choose your ROM in Files. Or put the ROM in Files,
+   **On My iPhone › Cyberworld**, where the app keeps your saves too.
+
+Touch controls round the picture, or a controller (MFi, Xbox,
+PlayStation). `cyberworld-endless.ipa` on the releases page is the app
+alone, for another installer. The app was built and started in the iOS
+Simulator, not yet on an iPhone: reports are welcome.
+[ios/README.md](ios/README.md) has the rest.
+
 ### On a ROCKNIX handheld
 
 For a handheld running ROCKNIX with PortMaster (the game was made for
@@ -262,7 +286,7 @@ After that the title screen appears straight away.
 On a New 3DS, New 3DS XL or New 2DS XL with custom firmware (Luma3DS),
 open **FBI**, choose **Remote Install**, then **Scan QR Code**, and scan the
 code on the
-[download page's 3DS tab](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#3ds):
+[download page's 3DS entry](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#3ds):
 FBI downloads `cyberworld-endless.cia` from the newest release and installs
 it on the HOME Menu, with its icon and banner. Or copy the CIA to the SD
 card and install it from FBI's SD browser. `cyberworld-endless.3dsx` is the
