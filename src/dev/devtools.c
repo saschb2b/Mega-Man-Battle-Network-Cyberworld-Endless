@@ -50,6 +50,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "veteran")) dev.veteran = true;
 		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
 		else if (!strncmp(t, "hp=", 3)) dev.hp = atoi(t + 3);
+		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;

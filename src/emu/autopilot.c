@@ -37,7 +37,9 @@ static int search(int sx, int sy, int tx, int ty, bool avoid, int *nx, int *ny) 
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 		for (int k = 0; k < 4; ++k) {
 			int ax = x + d[k][0], ay = y + d[k][1];
-			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || (avoid && blocked(ax, ay) && (ax != tx || ay != ty))) continue;
+			if (ax < 0 || ay < 0 || ax >= MAP_W || ay >= MAP_H || prev[ay][ax] >= 0 || layer.cell[ay][ax] != C_PATH || (avoid && blocked(ax, ay) && (ax != tx || ay != ty)) ||
+				!layer_step_ok(x, y, ax, ay))
+				continue;
 			prev[ay][ax] = (int16_t)c;
 			q[t++] = (int16_t)(ay * MAP_W + ax);
 		}

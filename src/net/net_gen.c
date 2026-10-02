@@ -1614,6 +1614,119 @@ static void place_block_rewards(void) {
 	}
 }
 
+/* ---- Arrow lanes (issue #43; docs/LEVEL_DESIGN.md, Set pieces) ----
+ * BN6's arrow panels carry MegaMan one way, input held, until he is past
+ * them. A layer's lane is the quick way back: one wide, its panels across
+ * the void from where a long detour ends to the floor by the way, so the
+ * walk in is long and the ride out short. Walked against its arrows, its
+ * first panel carries MegaMan back, so it is never a way in. Planned and
+ * carved once the rest stands. */
+#define LANE_FAR 5     /* the detour it leaves from, at least */
+#define LANE_SAVES 5   /* the walk it saves, at least */
+#define LANE_MAX 5     /* its panels, at most */
+
+int layer_lane_dir(int x, int y) {
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		for (int k = 1; k <= l->len; ++k)
+			if (x == l->x + dir_dx[l->dir] * k && y == l->y + dir_dy[l->dir] * k) return l->dir;
+	}
+	return -1;
+}
+
+bool layer_step_ok(int x, int y, int nx, int ny) {
+	int from = layer_lane_dir(x, y), to = layer_lane_dir(nx, ny);
+	if (from >= 0 && (nx - x != dir_dx[from] || ny - y != dir_dy[from])) return false;
+	return to < 0 || (nx - x == dir_dx[to] && ny - y == dir_dy[to]);
+}
+
+static bool in_gap(int x, int y) {
+	for (int g = 0; g < layer.ngaps; ++g)
+		for (int k = 1; k <= layer.gap[g].len; ++k)
+			if (x == layer.gap[g].x + dir_dx[layer.gap[g].dir] * k && y == layer.gap[g].y + dir_dy[layer.gap[g].dir] * k) return true;
+	return false;
+}
+
+/* The floor a walk from the arrival reaches (no island past a gap or a
+ * teleport's void). */
+static void reach_from_arrival(uint8_t reach[MAP_H][MAP_W]) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(reach, 0, MAP_W * MAP_H);
+	if (!layer.nobj) return;
+	int h = 0, t = 0;
+	qx[t] = (int16_t)layer.obj[0].x; qy[t++] = (int16_t)layer.obj[0].y;
+	reach[qy[0]][qx[0]] = 1;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + dir_dx[k], ny = y + dir_dy[k];
+			if (!floor_cell(nx, ny) || reach[ny][nx]) continue;
+			reach[ny][nx] = 1;
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+/* The void panels from (x, y) towards d with the void beside each, before
+ * the floor past them: 1 to LANE_MAX of them, nothing in the void there (a
+ * prop's sprite, a Rush gap); 0 where they don't lead to free ground floor. */
+static int lane_len(int x, int y, int d) {
+	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+	for (int k = 1; k <= LANE_MAX + 1; ++k) {
+		int cx = x + dir_dx[d] * k, cy = y + dir_dy[d] * k;
+		if (floor_cell(cx, cy))
+			return k > 1 && !layer.level[cy][cx] && cell_free(cx, cy) && !in_arena(cx, cy) && !near_stair(cx, cy) ? k - 1 : 0;
+		if (k > LANE_MAX || !void_cell(cx, cy) || !void_cell(cx + sx, cy + sy) || !void_cell(cx - sx, cy - sy) || prop_at_cell(cx, cy) ||
+			in_gap(cx, cy))
+			return 0;
+	}
+	return 0;
+}
+
+/* A lane from (x, y) towards d, scored: the walk it saves, from a detour
+ * LANE_FAR or more off the way to the floor 2 or less off it; -1 none. */
+static int lane_score(const uint8_t reach[MAP_H][MAP_W], int x, int y, int d, int *len) {
+	if (!(*len = lane_len(x, y, d))) return -1;
+	int ex = x + dir_dx[d] * (*len + 1), ey = y + dir_dy[d] * (*len + 1);
+	if (!reach[ey][ex] || detour[ey][ex] < 0 || detour[ey][ex] > 3) return -1;
+	int saved = walk_between(x, y, ex, ey) - (*len + 1);
+	return saved < LANE_SAVES ? -1 : saved * 4 - *len * 2 - detour[ey][ex];
+}
+
+/* The lane: from a free ground panel LANE_FAR or more off the way, in a
+ * way the area's maps draw arrows for, the walk it saves the most. */
+static bool plan_lane(const LayerKit *kit, NetLane *out) {
+	static uint8_t reach[MAP_H][MAP_W];
+	if (!kit || !kit->arrows) return false;
+	reach_from_arrival(reach);
+	int best = -1;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (!reach[y][x] || detour[y][x] < LANE_FAR || layer.level[y][x] || !cell_free(x, y) || in_arena(x, y)) continue;
+			for (int d = 0; d < 4; ++d) {
+				int len, score = kit->arrows >> d & 1 ? lane_score(reach, x, y, d, &len) : -1;
+				if (score > best) { best = score; *out = (NetLane){ x, y, d, len }; }
+			}
+		}
+	return best >= 0;
+}
+
+/* Its panels floor, and its ends kept clear: a navi at its far end would
+ * stop the ride with MegaMan's input held. */
+static void carve_lane(const NetLane *l) {
+	for (int k = 0; k <= l->len + 1; ++k) {
+		int cx = l->x + dir_dx[l->dir] * k, cy = l->y + dir_dy[l->dir] * k;
+		if (k >= 1 && k <= l->len) { layer.cell[cy][cx] = C_PATH; layer.level[cy][cx] = 0; }
+		reserved[cy][cx] = 1;
+	}
+	if (layer.nlanes < MAX_LANES) layer.lane[layer.nlanes++] = *l;
+}
+
+static void place_lane(const LayerKit *kit) {
+	NetLane lane;
+	if (plan_lane(kit, &lane)) carve_lane(&lane);
+}
+
 /* Bystander navis with a word to share, two panels at least from what else
  * stands there (one beside a Mystery Data took MegaMan's A, and each A
  * that closed his words opened them again). */
@@ -1696,6 +1809,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (gap.x >= 0) carve_gap(&gap, rise);
 	if (layer.teleport_island) carve_teleport_island(rise);
 	place_block_rewards();
+	if (pieces & PIECE_ARROW) place_lane(kit);
 	place_teller(order, n);
 	emblems(kit);
 }

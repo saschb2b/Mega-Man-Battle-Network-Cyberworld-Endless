@@ -1729,8 +1729,9 @@ static void map_cells(char g[MAP_H][MAP_W + 1], int box[4]) {
 }
 
 /* ... and over them: ~ a Rush gap's panels, W a teleport, K a Link Navi
- * obstacle, * the arrow's walk, + where it aims, letters the objects, @
- * MegaMan at panel (cx, cy). */
+ * obstacle or a cube, > an arrow lane's panels, * the arrow's walk, + where
+ * it aims, letters the objects, @ MegaMan at panel (cx, cy); and each
+ * lane's ends in the world. */
 static void state_map(FILE *f, int cx, int cy) {
 	goal_way();
 	static char g[MAP_H][MAP_W + 1];
@@ -1740,6 +1741,8 @@ static void state_map(FILE *f, int cx, int cy) {
 		for (int j = 1; j <= layer.gap[k].len; ++j) g[layer.gap[k].y + dir_dy[layer.gap[k].dir] * j][layer.gap[k].x + dir_dx[layer.gap[k].dir] * j] = '~';
 	for (int k = 0; k < 2 && layer.nteleports; ++k) g[layer.teleport_y[k]][layer.teleport_x[k]] = 'W';
 	for (int k = 0; k < layer.nblocks; ++k) g[layer.block[k].y][layer.block[k].x] = 'K';
+	for (int k = 0; k < layer.nlanes; ++k)
+		for (int j = 1; j <= layer.lane[k].len; ++j) g[layer.lane[k].y + dir_dy[layer.lane[k].dir] * j][layer.lane[k].x + dir_dx[layer.lane[k].dir] * j] = '>';
 	for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 	if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
 	for (int i = 0; i < layer.nobj; ++i) {
@@ -1748,6 +1751,13 @@ static void state_map(FILE *f, int cx, int cy) {
 	}
 	g[cy][cx] = '@';
 	for (int y = box[1]; y <= box[3]; ++y) fprintf(f, "map %.*s\n", box[2] - box[0] + 1, &g[y][box[0]]);
+	for (int k = 0; k < layer.nlanes; ++k) {
+		const NetLane *l = &layer.lane[k];
+		int ax, ay, bx, by;
+		netmap_world(l->x, l->y, &ax, &ay);
+		netmap_world(l->x + dir_dx[l->dir] * (l->len + 1), l->y + dir_dy[l->dir] * (l->len + 1), &bx, &by);
+		fprintf(f, "lane %d panels from %d %d (world %d %d) to world %d %d\n", l->len, l->x, l->y, ax, ay, bx, by);
+	}
 }
 
 /* ... and after it, where building it began the act afresh */

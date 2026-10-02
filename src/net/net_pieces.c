@@ -20,22 +20,26 @@ int layer_cube_kind(int biome) { return biome == BIOME_SEASIDE ? BLOCK_TOLL : BL
  * of the area's own kinds (Seaside's water and cyclone, Green's trees,
  * Sky's clouds, flames and water, the Underground's under the Nest, all
  * five in the Graveyard, which keeps nearly all its data behind them;
- * none in Central). */
-static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds, cube; } area_pieces[BIOME_COUNT] = {
+ * none in Central); arrow lanes where BN6's maps lay arrow panels, the
+ * most in Seaside, whose second area is a field of them, few in Sky, whose
+ * layers seldom leave a short gap from a far floor back to the way (one
+ * in ten found room), none in Robot Control's (two ways drawn, its
+ * layers too close). */
+static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds, cube, arrow; } area_pieces[BIOME_COUNT] = {
 	[BIOME_CENTRAL] = { 2, 3, 2, 1, 0, 0, 2 },
-	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE, 1 },
-	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER },
-	[BIOME_GREEN] = { 2, 3, 1, 4, 2, 1 << BLOCK_TREE },
+	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE, 1, 3 },
+	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER, 0, 1 },
+	[BIOME_GREEN] = { 2, 3, 1, 4, 2, 1 << BLOCK_TREE, 0, 2 },
 	[BIOME_GRAVEYARD] = { 4, 0, 0, 0, 4, 0x1F },
-	[BIOME_UNDERNET] = { 4, 2, 2 },
+	[BIOME_UNDERNET] = { 4, 2, 2, 0, 0, 0, 0, 2 },
 	[BIOME_SECRET] = { 0, 0, 0 },
-	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES },
+	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES, 0, 2 },
 	[BIOME_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
 	[BIOME_HOMEPAGE] = { 2, 0, 0, 0, 0, 0, 3 },
 	[BIOME_COMP_B] = { 1, 0, 0, 0, 0, 0, 3 },
 	[BIOME_ROBOT_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
 	[BIOME_AQUARIUM_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
-	[BIOME_JUDGE_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_JUDGE_COMP] = { 1, 0, 0, 0, 0, 0, 3, 2 },
 	[BIOME_WEATHER_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
 	[BIOME_COPYBOT_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
 	[BIOME_ACDC_HP] = { 2, 2, 1, 0, 0, 0, 3 },
@@ -54,8 +58,26 @@ static uint32_t piece_hash(int depth, uint32_t salt) {
  * them), two on its middle one (the dealer's: a choice of where to spend),
  * one on the guardian's (four in ten), one on a dark warp's layer (six in
  * ten); each of the area's, picked by its weight, never twice. */
+unsigned layer_pieces_forced;
+
+/* The pieces an area has at all (a weight of its own). */
+static unsigned area_has(int biome) {
+	return (area_pieces[biome].purple ? PIECE_PURPLE : 0) | (area_pieces[biome].rush ? PIECE_RUSH : 0) |
+		(area_pieces[biome].teleport ? PIECE_TELEPORT : 0) | (area_pieces[biome].obstacle ? PIECE_OBSTACLE : 0) |
+		(area_pieces[biome].cube ? PIECE_CUBE : 0) | (area_pieces[biome].arrow ? PIECE_ARROW : 0);
+}
+
+static unsigned rolled_pieces(int depth, int biome, int kind);
+
 unsigned layer_pieces(int depth, int biome, int kind) {
 	if (depth <= 1 || kind == LAYER_SECRET || biome < 0 || biome >= BIOME_COUNT) return 0;
+	/* (--dev pieces=MASK: those of the area's every layer, for captures;
+	 * no Rush before a guardian still) */
+	unsigned forced = layer_pieces_forced & area_has(biome) & (kind == LAYER_NORMAL && is_boss_depth(depth) ? ~(unsigned)PIECE_RUSH : ~0u);
+	return rolled_pieces(depth, biome, kind) | forced;
+}
+
+static unsigned rolled_pieces(int depth, int biome, int kind) {
 	int in_act = layer_in_act(depth);
 	int chance = kind == LAYER_UNDERNET ? 60 : in_act == 0 ? 50 : in_act == 1 ? 90 : 40;
 	int budget = kind == LAYER_NORMAL && in_act == 1 ? 2 : 1;
@@ -66,14 +88,14 @@ unsigned layer_pieces(int depth, int biome, int kind) {
 	 * purple data) */
 	/* (no Rush before a guardian: his cutscene restarts every NPC script on
 	 * the map, the guardian's actors too) */
-	int w[6] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
-		area_pieces[biome].teleport, area_pieces[biome].obstacle, area_pieces[biome].cube, 2 };
-	unsigned bits[6] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, PIECE_CUBE, 0 }, got = 0;
+	int w[7] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
+		area_pieces[biome].teleport, area_pieces[biome].obstacle, area_pieces[biome].cube, area_pieces[biome].arrow, 2 };
+	unsigned bits[7] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, PIECE_CUBE, PIECE_ARROW, 0 }, got = 0;
 	for (int k = 0; k < budget; ++k) {
 		int total = 0;
-		for (int i = 0; i < 6; ++i) total += got & bits[i] ? 0 : w[i];
+		for (int i = 0; i < 7; ++i) total += got & bits[i] ? 0 : w[i];
 		int roll = (int)((h >> (8 + 8 * k)) % (uint32_t)total);
-		for (int i = 0; i < 6; ++i) {
+		for (int i = 0; i < 7; ++i) {
 			if (got & bits[i]) continue;
 			if (roll < w[i]) { got |= bits[i]; break; }
 			roll -= w[i];

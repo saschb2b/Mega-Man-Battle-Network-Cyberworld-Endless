@@ -16,6 +16,9 @@ static bool floor_at(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y <
  * walk's two ends */
 static uint8_t solid[MAP_H][MAP_W];
 static bool open_at(int x, int y) { return floor_at(x, y) && !solid[y][x]; }
+/* ... and stepped onto from (x, y): an arrow lane only the way it runs
+ * (issue #43) */
+static bool open_step(int x, int y, int nx, int ny) { return open_at(nx, ny) && layer_step_ok(x, y, nx, ny); }
 
 int route_grid_way(double dx, double dy) {
 	/* the pad's eight ways (its RIGHT is grid +x -y, its DOWN +x +y), not
@@ -142,7 +145,7 @@ int route_way(double px, double py, int tx, int ty, int *len) {
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 		for (int k = 0; k < 4; ++k) {
 			int nx = x + d[k][0], ny = y + d[k][1];
-			if (!floor_at(nx, ny) || prev[ny][nx] >= 0 || solid[ny][nx]) continue;
+			if (prev[ny][nx] >= 0 || !open_step(x, y, nx, ny)) continue;
 			prev[ny][nx] = (int16_t)(y * MAP_W + x);
 			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
 		}

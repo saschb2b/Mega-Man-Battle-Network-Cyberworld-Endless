@@ -57,6 +57,7 @@ typedef struct {
 	PropStamp bush[2];        /* Green's potted bushes, plain and in flower */
 	PropStamp emblem;         /* the emblem its floors carry (the Graveyard's crosses) */
 	PropStamp pad;            /* a whole pad of its maps, for its layers' (Central's framed pads) */
+	PropStamp arrow[4];       /* an arrow panel of its maps for each of BN6's ways (0 +X, 1 +Y, 2 -X, 3 -Y; issue #43) */
 	uint8_t rebank[2];        /* RomLayout.net_area[].rebank */
 	uint8_t rebank_to[128];   /* the first-layer tiles its maps draw in rebank[1] (a bit each) */
 	bool pads_seen;           /* its maps have pads, whose look its layers' pads take */
@@ -202,6 +203,13 @@ static void learn_report(int area, const Learned *L) {
 	for (int d = 0; d < STAIR_DIRS; ++d)
 		fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
 			L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
+	for (int d = 0; d < 4; ++d) fprintf(stderr, "arrow panel area %d way %d ok %d tiles %d\n", area, d, L->arrow[d].ok, L->arrow[d].ntiles);
+}
+
+/* Map a's arrow panels, the ways not learned yet (BN6's maps alone: another
+ * game's sections are its own). */
+static void learn_arrows(const AreaSrc *a, const NetAreaDef *na, Learned *L) {
+	for (int d = 0; d < 4 && !na->xrom; ++d) props_learn_arrow(a, d, &L->arrow[d]);
 }
 
 static void learn_more(const AreaSrc *grid, int area, Learned *L) {
@@ -217,6 +225,14 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
 		if (na->pad_hues && aligned(grid, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
+		if (aligned(grid, &b)) learn_arrows(&b, na, L);
+		area_src_free(&b);
+	}
+	/* (and the arrow panels of its maps listed for them alone) */
+	for (int k = 0; k < 2 && na->arrow_maps[k][0]; ++k) {
+		AreaSrc b;
+		if (!load_map(na, na->arrow_maps[k][0], na->arrow_maps[k][1], &b)) continue;
+		if (aligned(grid, &b)) learn_arrows(&b, na, L);
 		area_src_free(&b);
 	}
 }
@@ -241,6 +257,7 @@ static bool learn(int area, Learned *L) {
 	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
 	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
+	learn_arrows(&a, na, L);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];
 	rebank_seen(&a, na->rebank[1], L);
@@ -632,6 +649,29 @@ static void paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
+/* The arrow lanes' panels (issue #43), each its area's arrow panel for its
+ * way, in place of the walkway the classes drew there. */
+static void paste_arrows(const Learned *L, uint16_t *map, int tw, int th) {
+	size_t cells = (size_t)tw * th;
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		const PropStamp *st = &L->arrow[(l->dir + 1) & 3];
+		for (int k = 1; k <= l->len && st->ok; ++k) {
+			int A, B;
+			grid_to_panel(l->x + dir_dx[l->dir] * k, l->y + dir_dy[l->dir] * k, &A, &B);
+			int px0 = area_px(tw, place.ex + 32 * A, place.ey + 32 * B), py0 = area_py(th, place.ex + 32 * A, place.ey + 32 * B);
+			for (int t = 0; t < st->ntiles; ++t) {
+				int px = px0 + st->tiles[t].px, py = py0 + st->tiles[t].py;
+				if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+				size_t at = (size_t)(py / 8) * tw + px / 8;
+				map[at] = st->tiles[t].e0;
+				map[cells + at] = st->tiles[t].e1;
+				if (last.pasted) last.pasted[at] |= NETMAP_PASTED_ARROW;
+			}
+		}
+	}
+}
+
 /* Green's potted bushes in the gaps between parallel planks, as its maps
  * set them: in a void panel with floor on both sides along one axis and
  * void on the other two, every second panel along the gap, the plain and
@@ -737,6 +777,7 @@ static bool write_tilemap(const Learned *L) {
 	paste_pads(L, map, tw, th);
 	paste_ornaments(L, map, tw, th);
 	paste_emblems(L, map, tw, th);
+	paste_arrows(L, map, tw, th);
 	paste_bushes(L, map, tw, th);
 	/* how the classes' picks went, where they are drawn: not under what
 	 * was set whole over them */
@@ -864,6 +905,30 @@ static void gaps_place(void) {
 				if (depth > 0 && depth < 32 && netmap_floor_cell(cx, cy, 0))
 					add_extra(3, (CoordCell){ (int16_t)(cx * 8), (int16_t)(cy * 8), 0, (uint8_t)(0x30 + 2 * g), 8, 0x11 });
 			}
+	}
+}
+
+/* The arrow lanes' trigger cells (section 3, issue #43), as BN6's ring a
+ * lane a panel wide: across its first panel's near edge the start cells
+ * (0x48 + BN6's way), across its last panel's far edge the end cells (0x4C
+ * + the way), three to an edge between its corners, each centred on the
+ * edge; the ride runs from one to the other. Their shape is the way's
+ * (+X 0x13, +Y 0x15, -X 0x12, -Y 0x14), as every original's. */
+static void lanes_place(void) {
+	static const uint8_t shape[4] = { 0x13, 0x15, 0x12, 0x14 };
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		int d = (l->dir + 1) & 3, ux = d == 0 ? 1 : d == 2 ? -1 : 0, uy = d == 1 ? 1 : d == 3 ? -1 : 0;
+		for (int end = 0; end < 2; ++end) {
+			int k = end ? l->len : 1, A, B;
+			grid_to_panel(l->x + dir_dx[l->dir] * k, l->y + dir_dy[l->dir] * k, &A, &B);
+			int X0 = place.ex + 32 * A, Y0 = place.ey + 32 * B;
+			/* (the near edge against the way, the far one along it) */
+			int sign = end ? 1 : -1, X = ux ? X0 + 16 + 16 * ux * sign : 0, Y = uy ? Y0 + 16 + 16 * uy * sign : 0;
+			for (int c = 0; c < 3; ++c)
+				add_extra(3, (CoordCell){ (int16_t)(ux ? X - 4 : X0 + 4 + 8 * c), (int16_t)(uy ? Y - 4 : Y0 + 4 + 8 * c), 0,
+					(uint8_t)((end ? 0x4C : 0x48) + d), 8, shape[d] });
+		}
 	}
 }
 
@@ -1054,6 +1119,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	build_extra(L);
 	gaps_place();
 	blocks_place();
+	lanes_place();
 	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &extra);
 }
 
@@ -1080,6 +1146,9 @@ void netmap_kit(int area, LayerKit *kit) {
 	kit->looks = na->looks;
 	kit->emblem = learned[area].emblem.ok;
 	kit->gem = learned[area].ornament[0].ok;
+	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
+	 * world +Y, grid y world -X) */
+	for (int g = 0; g < 4; ++g) kit->arrows |= (unsigned)learned[area].arrow[(g + 1) & 3].ok << g;
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */
@@ -1097,6 +1166,10 @@ static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int m
  * the tiles). */
 static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
 	for (int k = 0; k < 2 && layer.nteleports; ++k) lock(locked, layer.teleport_x[k] - 1, layer.teleport_y[k] - 1, 3, 3, 0);
+	/* (an arrow lane, its ends and the void beside it as generated) */
+	for (int i = 0; i < layer.nlanes; ++i)
+		for (int k = 0; k <= layer.lane[i].len + 1; ++k)
+			lock(locked, layer.lane[i].x + dir_dx[layer.lane[i].dir] * k, layer.lane[i].y + dir_dy[layer.lane[i].dir] * k, 1, 1, 1);
 	for (int k = 0; k < layer.nblocks; ++k) {
 		const NetBlock *b = &layer.block[k];
 		bool along_x = !(b->dir & 1);

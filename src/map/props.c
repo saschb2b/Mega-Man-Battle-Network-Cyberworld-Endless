@@ -460,6 +460,53 @@ void props_mirror_walls(const AreaSrc *a, AreaSrc *m) {
 	}
 }
 
+/* ---- Arrow panels (issue #43) ---- */
+
+static const int8_t arrow_ux[4] = { 1, 0, -1, 0 }, arrow_uy[4] = { 0, 1, 0, -1 };
+
+/* The panel an end cell (section 3, 0x4C + d) closes: the cell's middle
+ * lies on the edge past it. True where it lies in a lane one panel wide,
+ * floor before and after it and void on its two sides. */
+static bool arrow_panel(const AreaSrc *a, int d, const CoordCell *c, int *A, int *B) {
+	int ux = arrow_ux[d], uy = arrow_uy[d];
+	*A = floordiv(c->x + 4 - 16 * ux - a->ex, PANEL);
+	*B = floordiv(c->y + 4 - 16 * uy - a->ey, PANEL);
+	int X = a->ex + PANEL * *A + 16, Y = a->ey + PANEL * *B + 16;
+	/* (its middle 16 back from the edge, along it within the panel) */
+	if (ux ? abs(c->y + 4 - Y) >= 16 : abs(c->x + 4 - X) >= 16) return false;
+	return area_src_walled_floor(a, X, Y) == 1 && area_src_walled_floor(a, X - PANEL * ux, Y - PANEL * uy) == 1 &&
+		area_src_walled_floor(a, X + PANEL * ux, Y + PANEL * uy) == 1 && area_src_walled_floor(a, X + PANEL * uy, Y + PANEL * ux) == 0 &&
+		area_src_walled_floor(a, X - PANEL * uy, Y - PANEL * ux) == 0;
+}
+
+bool props_learn_arrow(const AreaSrc *a, int d, PropStamp *out) {
+	if (out->ok) return true;
+	memset(out, 0, sizeof *out);
+	for (int i = 0; a->sec[3] && i < a->nsec[3]; ++i) {
+		const CoordCell *c = &a->sec[3][i];
+		int A, B;
+		if (c->value != 0x4C + d || !arrow_panel(a, d, c, &A, &B)) continue;
+		/* the tiles whose middle lies on its diamond, at its floor's
+		 * height, drawn 4 below its edges: both layers */
+		int X0 = a->ex + PANEL * A, Y0 = a->ey + PANEL * B;
+		int ax = area_px(a->tw, X0, Y0), ay = area_py(a->th, X0, Y0) - c->z;
+		out->tiles = calloc(64, sizeof *out->tiles);
+		if (!out->tiles) return false;
+		for (int ty = floordiv(ay - 16, 8); ty * 8 <= ay + 24; ++ty)
+			for (int tx = floordiv(ax, 8); tx * 8 <= ax + 64; ++tx) {
+				int mx = tx * 8 + 4 - (ax + 32), my = ty * 8 + 4 - (ay + 4);
+				if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || abs(mx) * 16 + abs(my) * 32 > 32 * 16 || out->ntiles >= 64) continue;
+				size_t t = (size_t)ty * a->tw + tx;
+				out->tiles[out->ntiles++] = (StairTile){ .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay),
+					.e0 = a->tile[0][t], .e1 = a->layers > 1 ? a->tile[1][t] : 0 };
+			}
+		out->len = 1;
+		out->ok = out->ntiles > 0;
+		return out->ok;
+	}
+	return false;
+}
+
 void props_free(PropStamp *p) {
 	free(p->tiles);
 	free(p->walls);

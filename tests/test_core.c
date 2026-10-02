@@ -158,7 +158,7 @@ static bool beside_narrow(int x, int y) {
 
 /* A kit as the surface areas' (stairs both ways, a two-panel counter each
  * way) with every sprite prop, and one with none of them. */
-static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu, true, true };
+static const LayerKit kit = { 3u, 32, { 2, 2 }, 0xFFu, true, true, 0xFu };
 static const LayerKit flat = { 0u, 0, { 0, 0 }, 0u, false };
 
 /* A counter's cells: the aisle behind it (d 0), its own (1) and the floor
@@ -365,6 +365,47 @@ static void gaps_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][M
 	}
 }
 
+/* An arrow lane (issue #43): from free ground floor a long detour off the
+ * way, its panels floor with the void beside each, to free ground floor by
+ * the way, where the ride ends; never on the way, and the way never needs
+ * it; one way only (layer_step_ok). */
+static int lane_layers, lane_panels, lane_saved, lane_planned;
+
+static void lanes_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
+	for (int i = 0; i < layer.nlanes; ++i) {
+		const NetLane *l = &layer.lane[i];
+		int sx = dir_dx[(l->dir + 1) % 4], sy = dir_dy[(l->dir + 1) % 4];
+		int ex = l->x + dir_dx[l->dir] * (l->len + 1), ey = l->y + dir_dy[l->dir] * (l->len + 1);
+		++lane_layers;
+		lane_panels += l->len;
+		CHECK(l->len >= 1 && l->len <= 5, "seed %u: a lane of %d panels", seed, l->len);
+		CHECK(layer.cell[l->y][l->x] == C_PATH && layer.cell[ey][ex] == C_PATH && !layer.level[l->y][l->x] && !layer.level[ey][ex],
+			"seed %u: a lane's ends off the ground floor", seed);
+		CHECK(layer_detour(l->x, l->y) >= 5 && layer_detour(ex, ey) <= 3, "seed %u: a lane from %d off the way to %d", seed,
+			layer_detour(l->x, l->y), layer_detour(ex, ey));
+		for (int o = 0; o < layer.nobj; ++o) {
+			int ox = (int)layer.obj[o].x, oy = (int)layer.obj[o].y;
+			CHECK(!(ox == ex && oy == ey) && !(ox == l->x && oy == l->y), "seed %u: something stands at a lane's end", seed);
+		}
+		for (int k = 1; k <= l->len; ++k) {
+			int cx = l->x + dir_dx[l->dir] * k, cy = l->y + dir_dy[l->dir] * k;
+			CHECK(layer.cell[cy][cx] == C_PATH && layer.cell[cy + sy][cx + sx] == C_VOID && layer.cell[cy - sy][cx - sx] == C_VOID,
+				"seed %u: a lane's panel not one wide", seed);
+			CHECK(!layer_on_way(cx, cy) && layer_lane_dir(cx, cy) == l->dir, "seed %u: a lane on the way", seed);
+			CHECK(layer_step_ok(cx - dir_dx[l->dir], cy - dir_dy[l->dir], cx, cy) && !layer_step_ok(cx, cy, cx - dir_dx[l->dir], cy - dir_dy[l->dir]),
+				"seed %u: a lane walked both ways", seed);
+			layer.cell[cy][cx] = C_VOID;
+		}
+		reachable_cells((int)start->x, (int)start->y, seen);
+		for (int o = 0; o < layer.nobj; ++o) {
+			const NetObj *ob = &layer.obj[o];
+			if (ob->type == OBJ_EXIT || ob->type == OBJ_RETURN || ob->type == OBJ_BOSS) CHECK(seen[(int)ob->y][(int)ob->x], "seed %u: the way needs a lane", seed);
+		}
+		lane_saved += layer_detour(l->x, l->y) - layer_detour(ex, ey);
+		for (int k = 1; k <= l->len; ++k) layer.cell[l->y + dir_dy[l->dir] * k][l->x + dir_dx[l->dir] * k] = C_PATH;
+	}
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
@@ -424,6 +465,8 @@ static void test_generation(void) {
 		gaps_check(seed, start, seen);
 		teleports_check(seed);
 		blocks_check(seed, start, seen);
+		lanes_check(seed, start, seen);
+		lane_planned += (layer_pieces(depth, biome, kind) & PIECE_ARROW) != 0;
 		gaps_bridge(true);
 		int cells = 0;
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cells += layer.cell[y][x] == C_PATH;
@@ -654,6 +697,8 @@ static void test_generation(void) {
 		block_layers, block_kinds[0], block_kinds[1], block_kinds[2], block_kinds[3], block_kinds[4], block_kinds[BLOCK_PCODE], tellers, block_kinds[BLOCK_TOLL]);
 	CHECK(tellers == block_kinds[BLOCK_PCODE], "%d P-Code cubes, %d navis to tell their codes", block_kinds[BLOCK_PCODE], tellers);
 	printf("  P-Code tellers a walk of %d at least from their cubes\n", teller_walk_min);
+	printf("  arrow lanes on %d layers of %d planned, %d panels in all, from %.1f panels off the way on average\n", lane_layers, lane_planned,
+		lane_panels, (double)lane_saved / (lane_layers ? lane_layers : 1));
 	CHECK(!pieces_crowded, "%d set pieces with a navi within 3 panels of their A", pieces_crowded);
 	CHECK(!tellers_near, "%d P-Code tellers under 8 panels' walk from their cubes", tellers_near);
 	CHECK(purples * 10 >= layers && purples * 2 <= layers, "purple data on %d of %d layers", purples, layers);
@@ -678,6 +723,20 @@ static uint32_t fnv(uint32_t h, const void *p, size_t n) {
 }
 
 static uint32_t mix(uint32_t h, int v) { int32_t w = v; return fnv(h, &w, sizeof w); }
+
+/* (the set pieces, epic #49: a gap, an obstacle, a teleport or a lane the
+ * sample's seeds hold) */
+static uint32_t set_pieces_hash(uint32_t h) {
+	h = mix(h, layer.ngaps);
+	for (int i = 0; i < layer.ngaps; ++i) h = mix(mix(mix(mix(h, layer.gap[i].x), layer.gap[i].y), layer.gap[i].dir), layer.gap[i].len);
+	h = mix(mix(h, layer.nblocks), layer.teller);
+	for (int i = 0; i < layer.nblocks; ++i) h = mix(mix(mix(mix(h, layer.block[i].x), layer.block[i].y), layer.block[i].dir), layer.block[i].kind);
+	h = mix(mix(h, layer.nteleports), layer.teleport_island);
+	for (int i = 0; i < 2 && layer.nteleports; ++i) h = mix(mix(h, layer.teleport_x[i]), layer.teleport_y[i]);
+	h = mix(h, layer.nlanes);
+	for (int i = 0; i < layer.nlanes; ++i) h = mix(mix(mix(mix(h, layer.lane[i].x), layer.lane[i].y), layer.lane[i].dir), layer.lane[i].len);
+	return h;
+}
 
 static void test_layer_make(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
@@ -712,6 +771,7 @@ static void test_layer_make(void) {
 			const NetProp *p = &layer.props[i];
 			h = mix(mix(mix(mix(mix(mix(h, p->kind), p->faces), p->x), p->y), p->len), p->look);
 		}
+		h = set_pieces_hash(h);
 	}
 	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
 		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Arrow lanes (issue #43).** BN6's arrow panels now carry MegaMan across
+  a short lane from the end of a long detour back toward the way: walk the
+  long way in, ride out. Each area draws its own (Seaside's blue panels,
+  Green's magenta blocks, the Undernet's chevrons, the Judge Tree's
+  bricks), and as in BN6, walked from the far end they push him back.
 - **Security cubes (issue #45).** Comps, homepages and Central now lock a
   pocket with BN6's security cube, its one good Mystery Data behind it.
   The cube wants a P-Code: one navi on the layer knows it, a walk away

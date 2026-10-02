@@ -104,6 +104,12 @@ enum { BLOCK_WATER, BLOCK_TREE, BLOCK_FLAMES, BLOCK_CYCLONE, BLOCK_CLOUD, BLOCK_
 typedef struct { int x, y, dir, kind, rx, ry; } NetBlock;
 #define MAX_BLOCKS 2
 
+/* A lane of arrow panels (issue #43): BN6's own, which carry MegaMan one
+ * way, input held, until he is past them. From the floor at (x, y) its
+ * `len` panels run towards dir (DIR_*) to the floor past them. */
+typedef struct { int x, y, dir, len; } NetLane;
+#define MAX_LANES 1
+
 typedef struct {
 	uint8_t cell[MAP_H][MAP_W];
 	uint8_t level[MAP_H][MAP_W];   /* 1: a raised room's floor */
@@ -133,6 +139,8 @@ typedef struct {
 	int teleport_x[2], teleport_y[2];   /* a teleport pair's two panels, when nteleports is 1 (issue #44): */
 	int nteleports;                     /* the first a pad of its own past the void when teleport_island */
 	bool teleport_island;
+	NetLane lane[MAX_LANES];
+	int nlanes;
 } Layer;
 
 extern Layer layer;
@@ -148,6 +156,7 @@ typedef struct {
 	unsigned looks;   /* the sprite props its maps have (bit per LOOK_*) */
 	bool emblem;      /* its maps set an emblem in their floors */
 	bool gem;         /* its maps mark their teleport pads with BN6's gem (issue #44) */
+	unsigned arrows;  /* the ways its maps draw an arrow panel (bit per DIR_*, issue #43) */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */
@@ -173,6 +182,12 @@ bool layer_on_way(int x, int y);
 /* How many panels a walk from the way to (x, y) takes, -1 off the floor
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);
+/* The DIR_* an arrow lane's panel (x, y) carries MegaMan towards, -1 none
+ * (issue #43); and whether a walk may step from panel (x, y) to the panel
+ * beside it (nx, ny): onto a lane and along it only the way its arrows run
+ * (against them, its first panel carries him back). */
+int layer_lane_dir(int x, int y);
+bool layer_step_ok(int x, int y, int nx, int ny);
 /* A purple Mystery Data's param: locked until an Unlocker opens it, the
  * best a layer holds (issue #41). */
 #define MD_PURPLE 3
@@ -180,8 +195,10 @@ int layer_detour(int x, int y);
  * from the run's seed and the depth alone. How many of the act's layers
  * from `depth` on hold `piece` (a Net Dealer stocks its key); a Rush gap's
  * length in panels. */
-enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8, PIECE_CUBE = 16 };
+enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8, PIECE_CUBE = 16, PIECE_ARROW = 32 };
 unsigned layer_pieces(int depth, int biome, int kind);
+/* (dev: --dev pieces=MASK) set pieces every layer of an area that has them holds */
+extern unsigned layer_pieces_forced;
 /* The Crosses MegaMan holds as layer `depth` begins (a bit per navi 1-5),
  * which of them clear obstacle `kind` (BLOCK_*), and the obstacle a
  * layer's pocket takes (BLOCK_*, -1 none): the area's own kinds, mostly
