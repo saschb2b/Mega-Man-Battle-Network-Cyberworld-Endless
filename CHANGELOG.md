@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **CircusMan's tent marker stays on the field (issue #52).** The yellow
+  mark on the panel his tent is about to drop on was drawn over the Custom
+  screen's chips when it opened. It now hides while the Custom screen
+  covers the field, and shows again when you press SELECT to hide the
+  window and check the field.
 - **A split offers two guardians.** After a guardian, the second way on
   could name the same guardian as the act ahead (SpoutMan for both Green
   Area and Aquarium Comp, about one split in seventy). It now always offers

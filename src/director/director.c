@@ -861,7 +861,7 @@ static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_
  * drawn, and a read of the game then waits for it (the bottom screen's map
  * took 14 ms so, a frame lost six times a second; the duel's clock every
  * frame of its battle). */
-static struct { int px, py; bool on_map, battle; uint32_t timer; int tent_x, tent_y; } seen;
+static struct { int px, py; bool on_map, battle, custom; uint32_t timer; int tent_x, tent_y; } seen;
 
 /* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
  * lights the panel MegaMan stands on for a few frames, under his feet,
@@ -869,8 +869,9 @@ static struct { int px, py; bool on_map, battle; uint32_t timer; int tent_x, ten
  * it, and 36 frames in he is held (measured in god mode, a step at each
  * delay: the fade the briefing named came 6 frames before the hold, and a
  * playtester lost to him five times). The panel is marked over the picture
- * for those 36 frames of the battle's clock (it holds on the Custom
- * screen). */
+ * for those 36 frames of the battle's clock, which holds on the Custom
+ * screen: not while its window covers the field (it was drawn over the
+ * chips, issue #52), and again as SELECT hides the window to see it. */
 #define TENT_ACTION 0x0C
 #define TENT_FRAMES 36
 static void see_tent(void) {
@@ -898,6 +899,7 @@ void director_see(void) {
 	seen.on_map = on_map();
 	seen.battle = emu_read8(BN6_GAMESTATE) == BN6_SUB_BATTLE;
 	seen.timer = emu_read32(BN6_BATTLE_TIMER);
+	seen.custom = seen.battle && emu_read8(BN6_CUSTOM_WINDOW);
 	see_tent();
 }
 
@@ -905,7 +907,7 @@ void director_see(void) {
  * panel of the field (40 by 24, its first row 72 down the picture) in the
  * game's warning yellow, steady. */
 void director_draw_tent(void) {
-	if (!seen.tent_x) return;
+	if (!seen.tent_x || seen.custom) return;
 	int x = P.core_x + (seen.tent_x - 1) * 40, y = P.core_y + 72 + (seen.tent_y - 1) * 24;
 	SDL_Color c = rgba(255, 232, 0, 255);
 	fill_rect(x + 2, y + 2, 36, 20, rgba(255, 232, 0, 96));
