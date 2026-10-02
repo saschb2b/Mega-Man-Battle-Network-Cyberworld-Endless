@@ -163,12 +163,16 @@ int navicust_color(int program) {
 	return n ? colors[rng_range(0, n - 1)] : 0;
 }
 
-bool navicust_shape(int variant, NaviShape *out) {
+bool navicust_shape(int variant, NaviShape *out) { return navicust_shape_as(variant, false, out); }
+
+bool navicust_shape_as(int variant, bool compressed, NaviShape *out) {
 	/* the record's +1 the kind, +3 the colour, +8 a pointer to the shape:
-	 * 49 bytes, a row of seven after another (docs/ROM_DATA.md) */
+	 * 49 bytes, a row of seven after another, +0xC to the compressed one
+	 * (docs/ROM_DATA.md) */
 	if (!R.data || !R.layout || !R.layout->navicust_programs || variant <= 0 || variant >= 47 * 4) return false;
-	const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)variant * 16;
-	uint32_t at = (uint32_t)rec[8] | (uint32_t)rec[9] << 8 | (uint32_t)rec[10] << 16 | (uint32_t)rec[11] << 24;
+	const uint8_t *rec = R.data + R.layout->navicust_programs + (uint32_t)variant * 16, *p = rec + (compressed ? 12 : 8);
+	uint32_t at = (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+	if (compressed && ((at >> 25) != 4 || (at & 0x1FFFFFF) + 49 > ROM_SIZE)) return navicust_shape_as(variant, false, out);
 	if (rec[3] < 1 || rec[3] > 6 || (at >> 25) != 4 || (at & 0x1FFFFFF) + 49 > ROM_SIZE) return false;
 	const uint8_t *g = R.data + (at & 0x1FFFFFF);
 	int cells = 0;

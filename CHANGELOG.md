@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Compressed programs count as compressed (issue #54).** MegaMan judged
+  the NaviCust's room by a program's full shape even after its
+  compression code was entered, so he called a second compressed Custom1,
+  or an UnderSht beside two of them, a program that would not fit. He now
+  reads each program's shape as the PET has it, and counts every copy of
+  a program already on the board.
 - **L tells what the set pieces are (issue #48).** On a layer's first L,
   MegaMan now senses its set pieces along with its services: purple
   Mystery Data, bone panels, teleport pads, arrow panels, obstacles,

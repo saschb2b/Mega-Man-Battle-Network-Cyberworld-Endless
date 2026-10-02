@@ -51,7 +51,10 @@ typedef struct {
  * 1-6 in out[k].color); fewer than three where not enough fit. Without a
  * ROM as navicust_draft, colours left 0. */
 int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uint8_t *have, int nhave, int w, int h);
-/* The shape of variant `variant` from the ROM; false without one. */
+/* The shape of variant `variant` from the ROM; false without one. As it
+ * stands once compressed by its code (`compressed`), the record's smaller
+ * shape (issue #54); navicust_shape, as it comes. */
+bool navicust_shape_as(int variant, bool compressed, NaviShape *out);
 bool navicust_shape(int variant, NaviShape *out);
 /* Whether `n` shapes fit a `w` x `h` board together without a bug: all on
  * it, none over another, the command line (the third row) under every

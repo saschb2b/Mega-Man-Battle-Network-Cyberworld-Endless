@@ -972,7 +972,15 @@ static int board_programs(uint8_t *out, int max) {
 	return n;
 }
 
-/* Whether variant `v` fits the board beside the programs placed on it. */
+/* A program variant's shape as the PET has it: compressed where its code
+ * was entered (BN6's flags BN6_FLAG_COMPRESSED + variant, which the
+ * NaviCust's shapes read; a playtester's two compressed Custom1 fit, and
+ * MegaMan said the second would not: issue #54). Not the draft's, made
+ * with the layer before a CONTINUE's state is back. */
+static bool shape_now(int v, NaviShape *out) { return navicust_shape_as(v, flag_get(BN6_FLAG_COMPRESSED + v), out); }
+
+/* Whether variant `v` fits the board beside the programs placed on it,
+ * copies of it among them (a second Custom1 beside the first: issue #54). */
 static bool fits_beside_placed(int v) {
 	int w, h, ns = 0;
 	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
@@ -980,9 +988,9 @@ static bool fits_beside_placed(int v) {
 	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX && ns < 9; ++e) {
 		int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
 		if (!id) break;
-		if (id != v && navicust_shape(id, &s[ns])) ++ns;
+		if (shape_now(id, &s[ns])) ++ns;
 	}
-	if (!navicust_shape(v, &s[ns])) return true;
+	if (!shape_now(v, &s[ns])) return true;
 	return navicust_pack(s, ns + 1, w, h);
 }
 
@@ -2477,7 +2485,7 @@ static const char *bug_cause(void) {
 static bool fits_as_it_stands(int v) {
 	NaviShape s;
 	int n = read_board(), w, h;
-	if (!R.data || !R.layout || !R.layout->navicust_programs || !navicust_shape(v, &s)) return true;
+	if (!R.data || !R.layout || !R.layout->navicust_programs || !shape_now(v, &s)) return true;
 	navicust_board(key_item(SCRIPTS_EXP_MEMORY), &w, &h);
 	return navicust_fits_free(board_grid, board_parts, n, &s, w, h);
 }

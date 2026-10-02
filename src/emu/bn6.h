@@ -106,6 +106,7 @@
 
 /* Event flags */
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
+#define BN6_FLAG_COMPRESSED   0x2660      /* + a NaviCust program's variant: compressed by its code (docs/ROM_DATA.md, NaviCust) */
 /* The PET menu (docs/ROM_DATA.md, the PET): ePETMenuData, +0 its state, +4
  * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the entry the engine's
  * hook on its input took (7 Save); the state table's pointer to its input
