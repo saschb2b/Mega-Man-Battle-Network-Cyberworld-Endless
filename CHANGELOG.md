@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 (2026-10-02)
 
 - **MegaMan speaks of NaviCust bugs only when the board changes (issue
   #25).** After every trade at a Chip Trader, a player heard MegaMan say
