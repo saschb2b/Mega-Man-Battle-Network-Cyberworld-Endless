@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **The game on iPhone and iPad.** It comes through AltStore Classic or
+  SideStore, which install it with your own Apple ID and keep it up to
+  date: add the source the download page links, install Cyberworld
+  Endless, and choose your ROM in Files when it asks (or put it in Files,
+  On My iPhone › Cyberworld, beside your saves). Touch controls round the
+  picture with a tick under the thumb, clear of the notch and the home
+  indicator, or a controller; turning the phone moves them under the
+  picture or beside it. Sent to the background, it keeps your run where
+  MegaMan stands. iOS 14 and newer. It was built and started in the iOS
+  Simulator, not yet on an iPhone: reports are welcome.
+- **The download page shows every system at once.** Nine tabs showed one
+  system at a time; on a phone they took four rows and pushed the first
+  download under the browser's toolbar. The page now leads with the best
+  pick for your device, its steps open, and lists every system below in
+  four groups (computer, phone and tablet, handheld and console, no
+  install), each with its main file, its other formats and how to install
+  it. The PortMaster port is named for every firmware that runs PortMaster
+  (AmberELEC, ArkOS, Knulli, muOS, ROCKNIX and others), not ROCKNIX alone:
+  its file is now `cyberworld-endless-portmaster.zip`.
 - **The Net Dealers name every guardian's weakness (issue #39).** They
   said SlashMan, EraseMan, TenguMan, GroundMan and DustMan had no weak
   element, but BN6 has a second wheel, as its Cross lessons teach:

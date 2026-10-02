@@ -15,6 +15,9 @@
 #include "emu.h"
 #include "gfx.h"
 #include "touch.h"
+#ifdef CW_IOS
+#include "ios.h"
+#endif
 
 Platform P;
 
@@ -86,7 +89,9 @@ static float density(void) {
 	if (forced_dpi > 0) return forced_dpi / 160;
 	int short_side = P.screen_w < P.screen_h ? P.screen_w : P.screen_h;
 	float dp = 0;
-#ifdef __EMSCRIPTEN__
+	/* (the browser's pixels to its CSS pixels; an iPhone's to its points,
+	 * a 163rd of an inch, which SDL's DPI table knows not for every model) */
+#if defined(__EMSCRIPTEN__) || defined(CW_IOS)
 	int ww = 0, wh = 0;
 	SDL_GetWindowSize(P.window, &ww, &wh);
 	if (ww > 0) dp = (float)P.screen_w / (float)ww;
@@ -124,6 +129,20 @@ static float fill_scale(void) {
 #endif
 }
 
+/* The top of an iPhone's safe area, in the screen's pixels: under its notch
+ * or Dynamic Island, held upright; 0 elsewhere. */
+static int safe_top(void) {
+#ifdef CW_IOS
+	float top, left, bottom, right;
+	int ww = 0, wh = 0;
+	ios_safe_insets(P.window, &top, &left, &bottom, &right);
+	SDL_GetWindowSize(P.window, &ww, &wh);
+	return ww > 0 ? (int)(top * (float)P.screen_w / (float)ww + 0.5f) : 0;
+#else
+	return 0;
+#endif
+}
+
 static void layout_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
@@ -140,6 +159,8 @@ static void layout_canvas(void) {
 	/* on a tall screen the touch controls take the room under the picture,
 	 * which moves up clear of the status bar */
 	int top = touch_shown() ? touch_picture_top(P.screen_w, P.screen_h, P.dp, P.scale) : -1;
+	/* (and clear of an iPhone's notch or island, which a status bar's room is not) */
+	if (top >= 0 && top < safe_top()) top = safe_top();
 	if (top >= 0) {
 		int oy = (P.screen_h - P.h * P.scale) / 2, y = (top - oy + P.scale - 1) / P.scale;
 		if (y >= 0 && y + CORE_H <= P.h) P.core_y = y;
@@ -203,6 +224,105 @@ static void set_fullscreen(bool on) {
 }
 #endif
 
+#ifdef CW_IOS
+static bool own_taps;
+static int tap_x = -1, tap_y = -1;
+
+void platform_own_taps(bool on) {
+	own_taps = on;
+	if (touch_show(!on)) layout_canvas();
+}
+
+bool platform_tap(int *x, int *y) {
+	if (tap_x < 0) return false;
+	*x = tap_x;
+	*y = tap_y;
+	tap_x = tap_y = -1;
+	return true;
+}
+
+/* A finger lifted on a screen that takes its own taps: where on the canvas */
+static void own_tap(const SDL_Event *e) {
+	if (e->type != SDL_FINGERUP) return;
+	float k = P.fill > 0 ? P.fill : (float)P.scale;
+	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
+	tap_x = (int)((e->tfinger.x * (float)P.screen_w - ox) / k);
+	tap_y = (int)((e->tfinger.y * (float)P.screen_h - oy) / k);
+}
+#endif
+
+#ifndef __3DS__
+/* A finger on the screen: the touch controls', or on iOS a screen's own tap */
+static void finger(const SDL_Event *e) {
+#ifdef CW_IOS
+	if (own_taps) { own_tap(e); return; }
+#endif
+	if (touch_event(e)) layout_canvas();
+}
+#endif
+
+/* A phone's own, before SDL starts: Android's and the iPhone's hints. */
+static void phone_hints(void) {
+#ifdef __ANDROID__
+	/* a phone turns (the touch controls go under the picture or beside it),
+	 * and Back is Escape (the quit prompt), not the end of the app */
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait PortraitUpsideDown");
+	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+	/* (a phone's tilt is no controller) */
+	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
+#ifdef CW_IOS
+	/* an iPhone turns as an Android phone does; the home indicator fades
+	 * till a swipe at the screen's foot (two swipes to leave), and the
+	 * phone's tilt is no controller */
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait");
+	SDL_SetHint(SDL_HINT_IOS_HIDE_HOME_INDICATOR, "2");
+	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
+}
+
+/* ... and its window's flags: SDL locks a window that cannot resize to
+ * the way the phone is held at the start, whatever the hint allows; on
+ * iOS, the screen's own pixels, not its points */
+static Uint32 phone_window_flags(void) {
+#if defined(__ANDROID__)
+	return SDL_WINDOW_RESIZABLE;
+#elif defined(CW_IOS)
+	return SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+#else
+	return 0;
+#endif
+}
+
+#ifdef CW_IOS
+/* The app sent to the background and back, as it happens (an event watch,
+ * as iOS wants these: the app may be held right after them): main.c's
+ * loop keeps the run and draws nothing meanwhile */
+static int app_moved(void *user, SDL_Event *e) {
+	(void)user;
+	if (e->type == SDL_APP_WILLENTERBACKGROUND) P.background = true;
+	else if (e->type == SDL_APP_DIDENTERFOREGROUND) P.background = false;
+	return 0;
+}
+#endif
+
+/* ... and once its window is up: the buttons from the start, until a
+ * controller's first press (a handheld's own controls: its first START);
+ * a keyboard with arrow keys counts as a controller here, so its presence
+ * decides nothing */
+static void phone_controls(void) {
+#if defined(__ANDROID__) || defined(CW_IOS)
+	if (touch_show(true)) layout_canvas();
+#endif
+#ifdef __ANDROID__
+	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
+	for (int i = 0; i < SDL_NumJoysticks(); ++i) SDL_Log("controller %d: %s%s", i, SDL_JoystickNameForIndex(i), SDL_IsGameController(i) ? " (a gamepad)" : "");
+#endif
+#ifdef CW_IOS
+	SDL_AddEventWatch(app_moved, NULL);
+#endif
+}
+
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
 	keys_default();
@@ -213,14 +333,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		SDL_setenv("SDL_AUDIODRIVER", "dummy", 1);
 	}
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-#ifdef __ANDROID__
-	/* a phone turns (the touch controls go under the picture or beside it),
-	 * and Back is Escape (the quit prompt), not the end of the app */
-	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait PortraitUpsideDown");
-	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
-	/* (a phone's tilt is no controller) */
-	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
-#endif
+	phone_hints();
 #ifdef CW_DESKTOP
 	/* the window's class is the application ID, which the .desktop file names */
 #ifndef _WIN32
@@ -253,11 +366,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		}
 	}
 	P.fullscreen = fullscreen && !headless;
-#ifdef __ANDROID__
-	/* (SDL locks a window that cannot resize to the way the phone is held
-	 * at the start, whatever the hint allows) */
-	flags |= SDL_WINDOW_RESIZABLE;
-#endif
+	flags |= phone_window_flags();
 	P.window = SDL_CreateWindow("Mega Man Battle Network: Cyberworld Endless",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, flags);
 	if (!P.window) { fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
@@ -294,14 +403,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	layout_canvas();
 	SDL_ShowCursor(P.fullscreen || headless ? SDL_DISABLE : SDL_ENABLE);
 	open_pads();
-#ifdef __ANDROID__
-	/* the buttons from the start, until a controller's first press (a
-	 * handheld's own controls: its first START); a keyboard with arrow keys
-	 * counts as a controller here, so its presence decides nothing */
-	if (touch_show(true)) layout_canvas();
-	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
-	for (int i = 0; i < SDL_NumJoysticks(); ++i) SDL_Log("controller %d: %s%s", i, SDL_JoystickNameForIndex(i), SDL_IsGameController(i) ? " (a gamepad)" : "");
-#endif
+	phone_controls();
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(P.renderer, &info);
 	printf("display %dx%d renderer %s canvas %dx%d at %s\n", P.screen_w, P.screen_h, info.name, P.w, P.h, scale_words());
@@ -524,7 +626,7 @@ void platform_poll(void) {
 #ifndef __3DS__
 			/* (the 3DS's touch screen is its bottom one, apart from the
 			 * picture: not the phone's controls round it) */
-			if (touch_event(&e)) layout_canvas();
+			finger(&e);
 #endif
 			break;
 		case SDL_KEYDOWN: {

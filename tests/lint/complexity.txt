@@ -2,9 +2,9 @@
 # none may join and none may grow: split one, then build.py lint --update
 src/audio/audio.c:track_tick 55 76
 src/core/loot.c:from_formations 59 79
-src/core/main.c:main 179 264
+src/core/main.c:main 173 263
 src/core/meta.c:meta_run_over 38 49
-src/core/platform.c:platform_init 35 67
+src/core/platform.c:platform_init 28 63
 src/core/platform.c:platform_poll 44 66
 src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
@@ -24,7 +24,7 @@ src/gfx/gfx.c:text_code 30 30
 src/gfx/minifont.c:minifont_glyph 57 60
 src/layer/guardian_objs.c:guardian_scripts 46 107
 src/layer/guardians.c:guardian_intro 35 36
-src/layer/layer_objs.c:layer_objs_install 164 355
+src/layer/layer_objs.c:layer_objs_install 160 352
 src/layer/shop.c:answer 30 25
 src/layer/text.c:code_of 29 15
 src/layer/text.c:wrap 40 44

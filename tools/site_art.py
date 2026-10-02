@@ -239,6 +239,20 @@ kkkkkkkkkkkk
 ..kskssssk..
 ..kssssssk..
 ..kkkkkkkk..""",
+    # a wide handheld, two sticks beside its screen: the Steam Deck
+    'wide': """
+............
+............
+.kkkkkkkkkk.
+kssskkkksssk
+kskskbcksssk
+kssskcbksrsk
+kssskbbksksk
+kssskkkksssk
+.kk......kk.
+............
+............
+............""",
     # a New 3DS, open: two screens over the hinge, the Circle Pad and A
     '3ds': """
 .kkkkkkkkkk.

@@ -19,7 +19,7 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 
 <p align="center">
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml"><img src="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-<img src="https://img.shields.io/badge/ROCKNIX-PortMaster-c0392b" alt="ROCKNIX handhelds through PortMaster">
+<img src="https://img.shields.io/badge/handhelds-PortMaster-c0392b" alt="Handhelds through PortMaster">
 <img src="https://img.shields.io/badge/Linux-AppImage%20%C2%B7%20.deb-2f6fb5" alt="Linux: AppImage and .deb">
 <img src="https://img.shields.io/badge/browser-WebAssembly-6a4fb5" alt="In the browser, as WebAssembly">
 <img src="https://img.shields.io/badge/New%203DS-CIA%20%C2%B7%203DSX-d12228" alt="New 3DS: a CIA and a 3DSX">
@@ -60,8 +60,9 @@ around it, one layer at a time, and keeps the run going.
 <img src="docs/screenshots/area-clear.png" width="240" alt="Robot Control Comp: AREA CLEAR, BlastMan deleted">
 </p>
 
-It runs on ROCKNIX handhelds through PortMaster and was made for the Retroid
-Nova (4:3) and the Retroid Pocket Flip 2 (16:9). The same game plays on
+It runs on handhelds through PortMaster (AmberELEC, ArkOS, Knulli, muOS,
+ROCKNIX and more) and was made on the Retroid Nova (4:3) and the Retroid
+Pocket Flip 2 (16:9). The same game plays on
 Android phones, tablets and handhelds, in a window on a Linux or Windows PC or
 a Mac, in a browser at
 [saschb2b.github.io](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/),
@@ -69,7 +70,8 @@ on a phone too, and on a New 3DS from its HOME Menu.
 
 ## What you need
 
-- A handheld running ROCKNIX with PortMaster installed, a Steam Deck, an
+- A handheld with PortMaster installed (AmberELEC, ArkOS, Knulli, muOS,
+  ROCKNIX and others), a Steam Deck, an
   x86-64 Linux PC (glibc 2.34 or newer: Ubuntu 22.04, Debian 12, Fedora 35
   and later), a 64-bit Windows 10 or 11 PC, a Mac with macOS 11 or newer
   (Apple silicon or Intel), an Android 5 or newer phone, tablet or
@@ -97,7 +99,7 @@ game.
 Every system has its own download on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases): pick
 yours from the table. The project's
 [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/)
-opens on the system you visit it with. Each needs your own
+leads with the system you visit it with, and lists every other. Each needs your own
 ROM ([What you need](#what-you-need)); none contains game data.
 
 | You play on | Download | Steps |
@@ -107,13 +109,15 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A Linux PC, x86-64 | `cyberworld-endless-x86_64.AppImage`, `cyberworld-endless.flatpak`, `cyberworld-endless_amd64.deb` or `cyberworld-endless-linux-x86_64.tar.gz` | [On a Linux PC](#on-a-linux-pc) |
 | A Steam Deck | `cyberworld-endless.flatpak` | [On a Steam Deck](#on-a-steam-deck) |
 | An Android phone, tablet or handheld | `cyberworld-endless.apk` | [On Android](#on-android) |
-| A handheld running ROCKNIX, through PortMaster | `cyberworld-endless-rocknix-portmaster.zip` | [On a ROCKNIX handheld](#on-a-rocknix-handheld) |
+| An iPhone or iPad, iOS 14 or newer | through AltStore or SideStore: its source, `altstore-source.json`; or `cyberworld-endless.ipa` | [On an iPhone or iPad](#on-an-iphone-or-ipad) |
+| A handheld with PortMaster | `cyberworld-endless-portmaster.zip` | [On a PortMaster handheld](#on-a-portmaster-handheld) |
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
 
-Releases up to 0.4.0 named the ROCKNIX port `cyberworld.zip`, the
-Windows installer `cyberworld-endless-setup-x64.exe` and the website's
-files `cyberworld-endless-web.zip`.
+Releases up to 0.6.0 named the PortMaster port
+`cyberworld-endless-rocknix-portmaster.zip`; up to 0.4.0 it was
+`cyberworld.zip`, the Windows installer `cyberworld-endless-setup-x64.exe`
+and the website's files `cyberworld-endless-web.zip`.
 
 ### On Windows
 
@@ -238,18 +242,43 @@ controller and the touch screen all work: the game draws touch controls
 round the picture until a controller's button is pressed, and Back asks
 before it quits. Uninstalling the app deletes its saves.
 
-### On a ROCKNIX handheld
+### On an iPhone or iPad
 
-For a handheld running ROCKNIX with PortMaster (the game was made for
-the Retroid Nova and the Retroid Pocket Flip 2). On a PC, a Mac or an
+Apple's App Store has no place for a game that runs on a ROM, so the app
+comes through [AltStore Classic](https://altstore.io) or
+[SideStore](https://sidestore.io), which install apps with your own Apple
+ID and keep them up to date. Each needs a computer once, to set it up; on
+iOS 16 and newer, Developer Mode too.
+
+1. In AltStore or SideStore, open **Sources**, tap **+** and add
+   `https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/altstore-source.json`
+   (the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#ios)
+   has buttons that do it on the phone).
+2. Install **Cyberworld Endless** from the source. With a free Apple ID,
+   AltStore renews it every seven days, and offers each new version.
+3. Start it and press A: choose your ROM in Files. Or put the ROM in Files,
+   **On My iPhone › Cyberworld**, where the app keeps your saves too.
+
+Touch controls round the picture, or a controller (MFi, Xbox,
+PlayStation). `cyberworld-endless.ipa` on the releases page is the app
+alone, for another installer. The app was built and started in the iOS
+Simulator, not yet on an iPhone: reports are welcome.
+[ios/README.md](ios/README.md) has the rest.
+
+### On a PortMaster handheld
+
+For a handheld whose firmware runs PortMaster: AmberELEC, ArkOS, Knulli,
+muOS, ROCKNIX and others (the game was made on a Retroid Nova and a
+Retroid Pocket Flip 2). On a PC, a Mac or an
 Android device, take that system's download from the table above.
 
-1. Download `cyberworld-endless-rocknix-portmaster.zip` from the
+1. Download `cyberworld-endless-portmaster.zip` from the
    [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases) and unpack it (or build it with
    `python3 build.py package`, which writes it to `build/release/`, see
    [Building](#building)).
 2. Copy `cyberworld/` and `Cyberworld Endless.sh` into the handheld's
-   `ports` folder (on ROCKNIX: `/storage/roms/ports/`).
+   `ports` folder, where PortMaster keeps its ports (on ROCKNIX:
+   `/storage/roms/ports/`).
 3. Copy your ROM into `ports/cyberworld/rom/`. The file name does not matter;
    the game checks the contents.
 4. Refresh the game list and start **Cyberworld Endless**.
@@ -262,7 +291,7 @@ After that the title screen appears straight away.
 On a New 3DS, New 3DS XL or New 2DS XL with custom firmware (Luma3DS),
 open **FBI**, choose **Remote Install**, then **Scan QR Code**, and scan the
 code on the
-[download page's 3DS tab](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#3ds):
+[download page's 3DS entry](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/#3ds):
 FBI downloads `cyberworld-endless.cia` from the newest release and installs
 it on the HOME Menu, with its icon and banner. Or copy the CIA to the SD
 card and install it from FBI's SD browser. `cyberworld-endless.3dsx` is the
@@ -575,7 +604,7 @@ site and the browser version and serves them on `http://localhost:8080`;
 records the site's short videos (WebM and MP4, `docs/clips`, and a GIF of
 the guardian for this README) the same way. `python3 build.py release`
 writes the release files to `build/release/`, each named for its system:
-`cyberworld-endless-rocknix-portmaster.zip` for PortMaster; for Linux the
+`cyberworld-endless-portmaster.zip` for PortMaster; for Linux the
 AppImage (with its `.zsync` for updates), the `.deb` and the tar.gz; and
 `cyberworld-endless-website.zip`, the site and the player to host
 elsewhere. Each target builds in its own Docker image

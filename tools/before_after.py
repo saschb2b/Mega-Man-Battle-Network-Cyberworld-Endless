@@ -47,6 +47,9 @@ SCENES = [
     ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '3', '--seed', '11', '--dev', 'quiet'], {}, 300),
     # (the Cybeast Nest and the void beside it)
     ('nest', ['--scene', 'emu', '--run-depth', '19', '--dev', 'quiet', '--net-biome', '7', '--seed', '3'], WEAK, 620),
+    # (the Net Dealer's word on TenguMan before his arena, its third page)
+    ('dealer', ['--scene', 'emu', '--run-depth', '9', '--seed', '1', '--guardian', '8', '--talk', 'shop:430', '--dev', 'quiet',
+                '--input', '500:,4:A,100:,4:A,100:,4:A,160:'], {}, 860),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 

@@ -1,89 +1,76 @@
-// The downloads: one system at a time, the visitor's first (as Godot and OBS
-// pick theirs), its best build on top and the others under it, with what to
-// do next; a system in the address (download/#3ds) opens on it. Their
-// links go to the newest GitHub release, an alpha's pre-release too
-// (without a release they keep pointing at the releases page). Without
-// script every row shows.
+// The downloads: every system on one page, in four groups (computer, phone
+// and tablet, handheld and console, no install), each with its main file,
+// its others and how to install it; above them the best pick for the
+// visitor's device, its steps open, as Blender's and Telegram's pages lead
+// with one, a guess the list below always answers. A system in the address
+// (download/#3ds, the home page's button) is the pick. The links go to the
+// newest GitHub release, an alpha's pre-release too (without a release they
+// keep pointing at the releases page). Without script, the list alone shows.
 'use strict';
 
+// whose device the best pick names
+const BEST_FOR = {
+	windows: 'For your Windows PC', macos: 'For your Mac', linux: 'For Linux', deck: 'For your Steam Deck', android: 'For your Android device',
+	ios: 'For your iPhone or iPad', handheld: 'For your handheld', '3ds': 'For your New 3DS', browser: 'No install, any device',
+};
+
+// The best pick: the system's entry copied above the list, its steps open,
+// its downloads counted as the pick's (data-umami-event-slot).
+function pickBest(os) {
+	const best = document.getElementById('best');
+	const entry = document.getElementById(os);
+	if (!best || !entry) return;
+	const copy = entry.cloneNode(true);
+	copy.removeAttribute('id');
+	copy.classList.add('lit');
+	for (const d of copy.querySelectorAll('details')) d.open = true;
+	for (const a of copy.querySelectorAll('[data-umami-event]')) a.dataset.umamiEventSlot = 'best';
+	best.querySelector('.slot').replaceChildren(copy);
+	best.dataset.os = os;
+	document.getElementById('best-for').textContent = BEST_FOR[os] || 'Best pick';
+	best.hidden = false;
+}
+
 (() => {
-	const list = document.querySelector('.platforms');
-	if (!list) return;
-	const tabs = [...list.querySelectorAll('[role="tab"]')];
-	const rows = [...document.querySelectorAll('#downloads > li')];
-	const thens = [...document.querySelectorAll('.shop .then')];
-	const picked = document.getElementById('picked');
-	const mine = detectPlatform();
-	const asked = () => { const h = location.hash.slice(1); return PLATFORMS[h] ? h : null; };
-
-	let current = asked() || mine;
-	function show(os, focus) {
-		current = os;
-		// (the best pick, else the first build this release has)
-		const here = rows.filter((r) => os === 'all' || r.dataset.os.split(' ').includes(os));
-		const best = os === 'all' ? null : here.find((r) => (r.dataset.pick || '').split(' ').includes(os) && !r.dataset.missing)
-			|| here.find((r) => !r.dataset.missing);
-		for (const t of tabs) {
-			const on = t.dataset.os === os;
-			t.setAttribute('aria-selected', String(on));
-			t.tabIndex = on ? 0 : -1;
-			t.classList.toggle('on', on);
-			if (on && focus) t.focus();
+	// (every download says which system's entry it was taken from, the
+	// list's or the pick's)
+	for (const entry of document.querySelectorAll('#systems .entry')) {
+		for (const a of entry.querySelectorAll('[data-umami-event]')) {
+			a.dataset.umamiEventPlatform = entry.dataset.os;
+			a.dataset.umamiEventSlot = 'list';
 		}
-		for (const r of rows) {
-			const pick = r === best;
-			r.hidden = !here.includes(r);
-			r.classList.toggle('pick', pick);
-			let tag = r.querySelector('.tag');
-			if (pick && !tag) {
-				tag = document.createElement('span');
-				tag.className = 'tag';
-				tag.textContent = 'Best pick';
-				r.querySelector('.what b').append(tag);
-			} else if (!pick && tag) tag.remove();
-			// (a download's event names the system it was chosen for: under
-			// All, the row's own first)
-			const get = r.querySelector('[data-umami-event="download"]');
-			if (get) get.dataset.umamiEventPlatform = os === 'all' ? r.dataset.os.split(' ')[0] : os;
-		}
-		// (what to do next with the build that leads: the browser's words
-		// where a release has no Android app yet)
-		const next = (best?.dataset.pick || '').split(' ').find((k) => thens.some((p) => p.dataset.os === k)) || os;
-		for (const p of thens) p.classList.toggle('on', p.dataset.os === next);
-		picked.hidden = os !== mine || os === 'all';
-		picked.textContent = `Picked for this device: ${PLATFORMS[mine]}. Another system? Choose it above.`;
 	}
-
-	// a system chosen by hand: in the address, to share, and counted
-	function choose(os, focus) {
-		if (os === current) return;
-		show(os, focus);
-		history.replaceState(null, '', `#${os}`);
-		track('choose-platform', { platform: os, detected: mine });
-	}
-
-	list.hidden = false;
-	// (again once the release says which builds it has)
-	document.addEventListener('release', () => show(current, false));
-	for (const t of tabs) t.addEventListener('click', () => choose(t.dataset.os, false));
-	list.addEventListener('keydown', (e) => {
-		const i = tabs.indexOf(document.activeElement);
-		if (i < 0) return;
-		const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
-		const to = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : step ? (i + step + tabs.length) % tabs.length : -1;
-		if (to < 0) return;
-		e.preventDefault();
-		choose(tabs[to].dataset.os, true);
+	const asked = location.hash.slice(1);
+	const os = document.getElementById(asked)?.classList.contains('entry') ? asked : detectPlatform();
+	pickBest(os);
+	window.addEventListener('hashchange', () => {
+		const h = location.hash.slice(1);
+		if (document.getElementById(h)?.classList.contains('entry')) pickBest(h);
 	});
-	window.addEventListener('hashchange', () => { const os = asked(); if (os && os !== current) show(os, false); });
-	show(current, false);
 })();
+
+// ---- Copy: the ROM's checksum, the AltStore source's address ----
+
+document.addEventListener('click', async (e) => {
+	const button = e.target.closest('button.copy');
+	if (!button) return;
+	try {
+		await navigator.clipboard.writeText(button.dataset.copy);
+		button.textContent = 'Copied';
+	} catch (err) {
+		// (no clipboard: the text selected, to copy by hand)
+		const code = button.parentElement.querySelector('code');
+		if (code) getSelection().selectAllChildren(code);
+		button.textContent = 'Selected';
+	}
+	setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+});
 
 // ---- the files: the newest GitHub release, an alpha's pre-release too ----
 
 (async () => {
 	const repo = 'saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless';
-	const line = document.getElementById('release-line');
+	const hint = document.getElementById('release-hint');
 	let release;
 	try {
 		// (releases/latest skips pre-releases, and the 0.x alphas are ones:
@@ -93,48 +80,66 @@
 		release = (await res.json()).find((r) => !r.draft);
 		if (!release) throw new Error('none');
 	} catch (e) {
-		line.textContent = 'No release yet: build from the source.';
-		for (const a of document.querySelectorAll('[data-asset]')) a.setAttribute('aria-disabled', 'true');
+		hint.textContent = 'No release yet';
+		for (const a of document.querySelectorAll('[data-asset], [data-needs]')) a.setAttribute('aria-disabled', 'true');
 		return;
 	}
-	const date = new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-	line.textContent = `${release.name || release.tag_name} · ${date} · `;
-	const link = (href, text, to) => {
-		const a = document.createElement('a');
-		a.href = href;
-		a.textContent = text;
-		a.dataset.umamiEvent = 'outbound';
-		a.dataset.umamiEventTo = to;
-		return a;
-	};
-	line.append(link(release.html_url, 'All files and checksums', 'release'), ' · ', link(`https://github.com/${repo}/releases`, 'Older versions', 'releases'));
+	const date = new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+	hint.replaceChildren();
+	const notes = document.createElement('a');
+	notes.href = release.html_url;
+	notes.textContent = release.tag_name;
+	notes.dataset.umamiEvent = 'outbound';
+	notes.dataset.umamiEventTo = 'release';
+	hint.append(notes, ` · ${date}`);
+	const find = (names) => names.split(' ').map((n) => release.assets.find((x) => x.name === n)).find(Boolean);
 	for (const a of document.querySelectorAll('[data-asset]')) {
 		// (its names, newest first: a file renamed for the system it is for
 		// keeps its old name in the releases made before)
-		const names = a.dataset.asset.split(' ');
-		const asset = names.map((n) => release.assets.find((x) => x.name === n)).find(Boolean);
-		const info = document.createElement('span');
-		info.className = 'version';
+		const asset = find(a.dataset.asset);
+		const entry = a.closest('.entry');
+		const main = a.classList.contains('get');
 		if (!asset) {
 			a.setAttribute('aria-disabled', 'true');
 			a.removeAttribute('data-umami-event');
-			a.closest('li').dataset.missing = '1';
-			info.textContent = `Not in ${release.tag_name}`;
+			if (main && entry) entry.dataset.missing = '1';
 		} else {
 			a.href = asset.browser_download_url;
-			a.dataset.umamiEventFile = names[0];
+			a.dataset.umamiEventFile = asset.name;
 			a.dataset.umamiEventVersion = release.tag_name;
-			info.textContent = `${release.tag_name} · ${(asset.size / 1048576).toFixed(1)} MB`;
+			// (the SHA-256 GitHub keeps of each file, for whoever checks)
+			if (asset.digest) a.title = asset.digest;
 		}
-		a.closest('li').querySelector('.what').append(info);
+		if (main && entry) {
+			const info = document.createElement('span');
+			info.className = 'version';
+			info.textContent = asset ? `${release.tag_name} · ${(asset.size / 1048576).toFixed(1)} MB` : `Not in ${release.tag_name}`;
+			entry.querySelector('.what').append(info);
+		}
 	}
+	// (what needs a file without being its link: the AltStore source's buttons)
+	for (const a of document.querySelectorAll('[data-needs]')) {
+		if (find(a.dataset.needs)) continue;
+		a.setAttribute('aria-disabled', 'true');
+		a.removeAttribute('data-umami-event');
+		const entry = a.closest('.entry');
+		if (a.classList.contains('get') && entry && !entry.querySelector('.version')) {
+			entry.dataset.missing = '1';
+			const info = document.createElement('span');
+			info.className = 'version';
+			info.textContent = `Not in ${release.tag_name}`;
+			entry.querySelector('.what').append(info);
+		}
+	}
+	// (a pick this release has no file for, an iPhone's before its app or
+	// Android's without its APK: the browser, which needs none)
+	const best = document.getElementById('best');
+	if (!best.hidden && document.getElementById(best.dataset.os)?.dataset.missing) pickBest('browser');
 	// the 3DS title's link as a QR code, for FBI's Remote Install, which
 	// downloads a CIA and installs it on the HOME Menu
 	const cia = release.assets.find((x) => x.name === 'cyberworld-endless.cia');
-	const code = document.querySelector('#qr-3ds .code');
-	const modules = cia && code && typeof qr === 'function' ? qr(cia.browser_download_url) : null;
-	if (modules) code.replaceChildren(qrSvg(modules, `QR code of the 3DS title's link, ${release.tag_name}`));
-	document.dispatchEvent(new Event('release'));
+	const modules = cia && typeof qr === 'function' ? qr(cia.browser_download_url) : null;
+	if (modules) for (const code of document.querySelectorAll('.qr .code')) code.replaceChildren(qrSvg(modules, `QR code of the 3DS title's link, ${release.tag_name}`));
 })();
 
 // A QR code's modules as an SVG, dark on white with its quiet zone.

@@ -20,6 +20,11 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 the NDK and Gradle in `cyberworld-android`)
   python3 build.py macos        the macOS app in a .dmg (build/release), on a Mac:
                                 SDL2 and mGBA built by macos/deps.sh
+  python3 build.py ios          the iPhone and iPad app (build/release/
+                                cyberworld-endless.ipa, unsigned: AltStore or
+                                SideStore signs it), on a Mac with Xcode: SDL2
+                                and mGBA built by ios/deps.sh; --simulator for
+                                the iOS Simulator's app (CI's smoke test)
   python3 build.py flatpak      the Flatpak (linux/flatpak) built by flatpak-builder
                                 from this checkout and bundled in build/release
                                 (needs flatpak; see linux/flatpak/README.md)
@@ -172,7 +177,7 @@ def build(target):
 # the PortMaster port's plain cyberworld.zip for Windows): all but the
 # AppImage, whose name its update information points at, and the ones whose
 # kind says it (.dmg, .apk, .deb, .flatpak, .cia, .3dsx).
-PORT_ZIP = 'cyberworld-endless-rocknix-portmaster.zip'
+PORT_ZIP = 'cyberworld-endless-portmaster.zip'
 WEB_ZIP = 'cyberworld-endless-website.zip'
 
 
@@ -290,6 +295,63 @@ def macos_release():
                         '-format', 'UDZO', out]) != 0:
         sys.exit('hdiutil failed')
     print('released', out)
+
+
+IOS_IPA = 'cyberworld-endless.ipa'
+IOS_APP = 'CyberworldEndless.app'
+
+
+def ios_release(simulator=False):
+    """build/release/cyberworld-endless.ipa: the game for iPhone and iPad (iOS
+    14 on, arm64), signed ad hoc and no more: AltStore or SideStore signs it
+    again with the player's Apple ID as it installs it (ios/README.md). With
+    simulator, build/ios-iphonesimulator/CyberworldEndless.app for the iOS
+    Simulator, which CI starts. Runs on a Mac only, with Xcode and CMake: the
+    SDK is Apple's (CI's ios job builds it)."""
+    if sys.platform != 'darwin':
+        sys.exit('the iOS build runs on a Mac with Xcode (CI: the ios job)')
+    sdk = 'iphonesimulator' if simulator else 'iphoneos'
+    deps = os.path.join(ROOT, '.build', 'ios-deps', sdk)
+    if not os.path.exists(os.path.join(deps, 'lib', 'libmgba.a')):
+        subprocess.check_call(['sh', os.path.join(ROOT, 'ios', 'deps.sh'), deps, sdk])
+    werror = ['WERROR=1'] if os.environ.get('CI') else []
+    if subprocess.call(['make', 'TARGET=ios', f'IOS_SDK={sdk}', f'IOS_DEPS={deps}', f'VERSION={version()}',
+                        f'-j{os.cpu_count() or 4}', *werror], cwd=ROOT) != 0:
+        sys.exit('ios build failed')
+    out = os.path.join(ROOT, 'build', f'ios-{sdk}')
+    payload = os.path.join(out, 'Payload')
+    app = os.path.join(payload, IOS_APP)
+    shutil.rmtree(payload, ignore_errors=True)
+    os.makedirs(os.path.join(app, 'licenses'))
+    shutil.copy2(os.path.join(out, 'cyberworld-endless'), app)
+    short = '.'.join(file_version().split(',')[:3])
+    with open(os.path.join(ROOT, 'ios', 'Info.plist')) as f:
+        plist = f.read().replace('@SHORT_VERSION@', short).replace('@PLATFORM@', 'iPhoneSimulator' if simulator else 'iPhoneOS')
+    with open(os.path.join(app, 'Info.plist'), 'w') as f:
+        f.write(plist)
+    # (the icons Info.plist names, at the bundle's top: no asset catalog)
+    for name in os.listdir(os.path.join(ROOT, 'ios', 'icons')):
+        if name.startswith('AppIcon') and '-1024' not in name:
+            shutil.copy2(os.path.join(ROOT, 'ios', 'icons', name), app)
+    shutil.copy2(os.path.join(ROOT, 'LICENSE'), os.path.join(app, 'licenses', 'LICENSE.txt'))
+    for name in ('mGBA.txt', 'SDL2.txt'):
+        shutil.copy2(os.path.join(deps, 'share', 'licenses', name), os.path.join(app, 'licenses'))
+    # (ad hoc, no entitlements: Apple silicon's Simulator runs nothing
+    # unsigned, and AltStore checks the IPA's entitlements against its
+    # source's, none)
+    if subprocess.call(['codesign', '--force', '--sign', '-', '--timestamp=none', app]) != 0:
+        sys.exit('codesign failed')
+    if simulator:
+        print('built', app)
+        return
+    os.makedirs(RELEASE, exist_ok=True)
+    ipa = os.path.join(RELEASE, IOS_IPA)
+    if os.path.exists(ipa):
+        os.remove(ipa)
+    # (an IPA is a zip of Payload/; ditto keeps the bundle's attributes)
+    if subprocess.call(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', payload, ipa]) != 0:
+        sys.exit('ditto failed')
+    print('released', ipa)
 
 
 WINDOWS_ZIP = 'cyberworld-endless-windows-x64.zip'
@@ -623,7 +685,7 @@ def serve(port=8080):
 
 
 def port_release():
-    """build/release/cyberworld-endless-rocknix-portmaster.zip: the port laid out as PortMaster's
+    """build/release/cyberworld-endless-portmaster.zip: the port laid out as PortMaster's
     own zip of it (tools/build_release.py in PortMaster-New): the launcher, and cyberworld/
     with port.json, gameinfo.xml, the screenshot and the README as cyberworld.md beside the
     game (port.json keeps PortMaster's own name for it, cyberworld.zip)."""
@@ -1478,7 +1540,7 @@ def lint(update=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -1515,6 +1577,9 @@ def main():
         return
     if a.action == 'macos':
         macos_release()
+        return
+    if a.action == 'ios':
+        ios_release('--simulator' in a.rest)
         return
     if a.action == 'flatpak':
         sys.exit(flatpak())

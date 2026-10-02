@@ -31,6 +31,9 @@
 #include "meta.h"
 #include "touch.h"
 #include "emu.h"
+#ifdef CW_IOS
+#include "ios.h"
+#endif
 #ifdef __3DS__
 /* (libctru's parts, not <3ds.h>: its Friends service has a Profile too) */
 #include <3ds/types.h>
@@ -100,6 +103,11 @@ char g_data_dir[512] = ".";
 #define DESKTOP true
 #else
 #define DESKTOP false
+#endif
+#ifdef CW_IOS
+#define IOS true
+#else
+#define IOS false
 #endif
 
 /* mkdir -p */
@@ -233,11 +241,13 @@ static void error_draw(void) {
 		text_draw(P.w / 2, 70, error_msg, WHITE, TEXT_CENTER);
 		return;
 	}
+	/* (in the picture's place: a phone held upright has the canvas below
+	 * it for its controls) */
 	char lines[12][64];
-	int n = wrap_lines(error_msg, 54, lines, 12);
-	minifont_draw_centered(P.w / 2, 24, "CYBERWORLD ENDLESS", rgba(120, 200, 248, 255), 2);
-	for (int i = 0; i < n; ++i) minifont_draw_centered(P.w / 2, 56 + i * 8, lines[i], WHITE, 1);
-	minifont_draw_centered(P.w / 2, P.h - 20, "START OR B: QUIT", rgba(160, 170, 200, 255), 1);
+	int n = wrap_lines(error_msg, 54, lines, 12), x = P.core_x + CORE_W / 2;
+	minifont_draw_centered(x, P.core_y + 24, "CYBERWORLD ENDLESS", rgba(120, 200, 248, 255), 2);
+	for (int i = 0; i < n; ++i) minifont_draw_centered(x, P.core_y + 56 + i * 8, lines[i], WHITE, 1);
+	minifont_draw_centered(x, P.core_y + CORE_H - 20, "START OR B: QUIT", rgba(160, 170, 200, 255), 1);
 }
 
 static void error_update(void) {
@@ -305,6 +315,150 @@ static void norom_show(void) {
 	scene_set(&scene_norom);
 }
 #endif
+
+#ifdef CW_IOS
+/* ---- no ROM on an iPhone or iPad: A opens Files' picker (ios.m), which
+ * copies the file picked into the app's rom/; or Files puts it in the
+ * app's own folder (On My iPhone › Cyberworld), where the game
+ * looks again every three seconds. Found, the game starts in place, as
+ * nothing restarts an app on iOS. ---- */
+static int norom_t, norom_looks;
+static bool norom_picking;
+static char norom_msg[512];
+
+/* The ROM in the app's rom/ (where a pick lands), or at the top of its
+ * folder (where Files puts a file dropped on it). */
+static bool ios_rom_here(char *msg, size_t msglen) {
+	char dir[600], first[512];
+	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+	if (rom_find(dir, msg, msglen)) return true;
+	snprintf(first, sizeof first, "%s", msg);
+	if (rom_find(g_data_dir, msg, msglen)) return true;
+	/* (a .gba that is not the right one says so; else where to put it) */
+	if (strncmp(first, "Put your", 8)) snprintf(msg, msglen, "%s", first);
+	return false;
+}
+
+/* The game from the ROM just found, as main goes on from one found at the start. */
+static void ios_start(void) {
+	if (!gfx_init()) { error_show("The ROM could not be decoded."); return; }
+	printf("ROM: %s (%s)\n", R.layout->name, R.path);
+	save_init();
+	audio_init();
+	scene_set(&scene_title);
+}
+
+/* The screen's lines and button, laid out in the middle of the canvas, the
+ * whole screen and not the picture's 240 x 160 (whose 1x text was too small
+ * to read on a phone), the same for its update and its drawing: the title
+ * at 3x, the rest at 2x, and a button a thumb finds at once. */
+#define NOROM_LINE 15   /* (a 2x line, 10 pixels, and room between) */
+typedef struct {
+	char body[6][64], hint[4][64], note[5][64];
+	int nbody, nhint, nnote, y;
+	SDL_Rect button;
+} NoRom;
+
+static void norom_layout(NoRom *n) {
+	int cols = (P.w - 16) / 8;   /* (a 2x character is 8 pixels across) */
+	if (cols > 60) cols = 60;
+	n->nbody = wrap_lines("It runs on your own Mega Man Battle Network 6: Cybeast Gregar (USA), an unzipped .gba file.", cols, n->body, 6);
+	n->nhint = wrap_lines("Or put it in Files, On My iPhone (or iPad), in the Cyberworld folder.", cols, n->hint, 4);
+	/* (a pick that was not the ROM: what was found instead) */
+	n->nnote = norom_looks && norom_msg[0] ? wrap_lines(norom_msg, cols, n->note, 5) : 0;
+	int w = P.w - 24 < 220 ? P.w - 24 : 220, h = 30;
+	int total = 15 + 16 + n->nbody * NOROM_LINE + 14 + h + 18 + n->nhint * NOROM_LINE + (n->nnote ? 12 + n->nnote * NOROM_LINE : 0);
+	n->y = (P.h - total) / 2;
+	n->button = (SDL_Rect){ (P.w - w) / 2, n->y + 15 + 16 + n->nbody * NOROM_LINE + 14, w, h };
+}
+
+static void norom_enter(void) { platform_own_taps(true); }
+static void norom_leave(void) { platform_own_taps(false); }
+
+static void norom_update(void) {
+	++norom_t;
+	int picked = ios_pick_result();
+	if (picked) norom_picking = false;
+	NoRom n;
+	norom_layout(&n);
+	SDL_Point tap;
+	bool tapped = platform_tap(&tap.x, &tap.y) && SDL_PointInRect(&tap, &n.button);
+	if (!norom_picking && (tapped || btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
+		char dir[600];
+		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+		norom_picking = true;
+		ios_pick_rom(P.window, dir);
+	}
+	if (picked <= 0 && norom_t % 180) return;
+	if (picked > 0) ++norom_looks;
+	if (ios_rom_here(norom_msg, sizeof norom_msg)) ios_start();
+}
+
+static void norom_draw(void) {
+	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
+	SDL_RenderClear(P.renderer);
+	NoRom n;
+	norom_layout(&n);
+	SDL_Color blue = rgba(120, 200, 248, 255), grey = rgba(160, 170, 200, 255), gold = rgba(255, 214, 16, 255);
+	int x = P.w / 2, y = n.y;
+	minifont_draw_centered(x, y, "CYBERWORLD ENDLESS", blue, 3);
+	y += 15 + 16;
+	for (int i = 0; i < n.nbody; ++i, y += NOROM_LINE) minifont_draw_centered(x, y, n.body[i], WHITE, 2);
+	/* the button: gold edged, the PET's navy inside */
+	SDL_Rect b = n.button;
+	fill_rect(b.x, b.y, b.w, b.h, gold);
+	fill_rect(b.x + 2, b.y + 2, b.w - 4, b.h - 4, rgba(16, 54, 74, 255));
+	minifont_draw_centered(x, b.y + (b.h - 15) / 2, norom_picking ? "OPENING FILES" : "CHOOSE ROM", WHITE, 3);
+	y = b.y + b.h + 18;
+	for (int i = 0; i < n.nhint; ++i, y += NOROM_LINE) minifont_draw_centered(x, y, n.hint[i], grey, 2);
+	y += 12;
+	for (int i = 0; i < n.nnote; ++i, y += NOROM_LINE) minifont_draw_centered(x, y, n.note[i], rgba(247, 165, 0, 255), 2);
+}
+
+static const Scene scene_norom = { "norom", norom_enter, norom_update, norom_draw, norom_leave };
+
+#endif
+
+/* The data folder, where none is given, and its rom/: a desktop's in the
+ * user's data folders; iOS's the app's Documents, which Files shows as On
+ * My iPhone › Cyberworld (its display name), the ROM's place, beside the
+ * saves, which a player can copy off there; a handheld's the launcher's. */
+static void data_dir_setup(bool given) {
+	if (DESKTOP && !given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
+#ifdef CW_IOS
+	if (!given) {
+		const char *home = getenv("HOME");
+		snprintf(g_data_dir, sizeof g_data_dir, "%s/Documents", home && *home ? home : ".");
+	}
+#endif
+	if (DESKTOP || IOS) {
+		char rom[600];
+		snprintf(rom, sizeof rom, "%s/rom", g_data_dir);
+		make_dirs(rom);
+	}
+}
+
+#ifndef __3DS__
+/* The ROM at the start (the 3DS has its own places, main): --rom-dir's,
+ * else the desktop's, iOS's app folder, or ./rom on a handheld. */
+static bool start_rom(const char *rom_dir, char *msg, size_t msglen) {
+#ifdef CW_IOS
+	if (!rom_dir) return ios_rom_here(msg, msglen);
+#endif
+	return rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, msglen) : desktop_rom(msg, msglen);
+}
+#endif
+
+/* No ROM at the start: on iOS the screen that asks for it (but for a ROM
+ * given by --rom-dir that is not one); elsewhere the plain error. */
+static void rom_missing(const char *rom_dir, bool norom_scene, const char *msg) {
+#ifdef CW_IOS
+	if (!rom_dir || norom_scene) { scene_set(&scene_norom); return; }
+#else
+	(void)rom_dir; (void)norom_scene;
+#endif
+	error_show(msg);
+}
 
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
@@ -624,6 +778,20 @@ static bool blend_frames(void) {
 #ifndef __EMSCRIPTEN__
 /* The native loop: 60 game frames a second (as fast as it can headless). */
 static bool step(void) {
+#ifdef CW_IOS
+	/* (sent to the background: the run kept where MegaMan stands, as a
+	 * quit keeps it, for iOS may end the app there unasked; and nothing
+	 * drawn, which iOS refuses an app it cannot see, till it comes back) */
+	if (P.background) {
+		static bool kept;
+		if (!kept && current == &scene_emu) director_suspend();
+		kept = true;
+		SDL_Delay(50);
+		platform_poll();
+		if (!P.background) { kept = false; loop.last = SDL_GetPerformanceCounter(); loop.acc = 0; }
+		return true;
+	}
+#endif
 	if (!loop.headless && P.blend) {
 		loop.acc += elapsed();
 		uint64_t t0 = SDL_GetPerformanceCounter();
@@ -798,8 +966,7 @@ int main(int argc, char **argv) {
 	printf("%s\n", mem);
 #endif
 	if (headless && !force_w) { force_w = 1280; force_h = 960; }
-	if (DESKTOP && !data_dir_given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
-	if (DESKTOP) { char rom[600]; snprintf(rom, sizeof rom, "%s/rom", g_data_dir); make_dirs(rom); }
+	data_dir_setup(data_dir_given);
 	char msg[512];
 #ifdef __3DS__
 	/* (the game's own rom folder, then where 3DS players keep GBA ROMs: a
@@ -818,7 +985,7 @@ int main(int argc, char **argv) {
 		if (!rom_ok) snprintf(msg, sizeof msg, "%s", close[0] ? close : first);
 	}
 #else
-	bool rom_ok = rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, sizeof msg) : desktop_rom(msg, sizeof msg);
+	bool rom_ok = start_rom(rom_dir, msg, sizeof msg);
 #endif
 	/* ("--scene norom": the screen a desktop without its ROM shows, for a
 	 * capture) */
@@ -873,7 +1040,7 @@ int main(int argc, char **argv) {
 		if ((!headless && !rom_dir) || norom_scene) norom_show();
 		else
 #endif
-		error_show(msg);
+		rom_missing(rom_dir, norom_scene, msg);
 	} else if (!gfx_init()) {
 		error_show("The ROM could not be decoded.");
 	} else {

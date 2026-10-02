@@ -59,7 +59,7 @@ def main():
         x += 520
     centred(d, 400, 'A roguelike for Mega Man Battle Network 6', font(46), WHITE)
     centred(d, 470, 'A new net every run, on the real game from your own ROM', font(30), WHITE)
-    centred(d, 540, 'ROCKNIX  ·  Linux  ·  browser', font(30), GOLD)
+    centred(d, 540, 'PortMaster  ·  Linux  ·  browser', font(30), GOLD)
     out = os.path.join(ROOT, 'build', 'social-preview.png')
     os.makedirs(os.path.dirname(out), exist_ok=True)
     im.save(out, optimize=True)

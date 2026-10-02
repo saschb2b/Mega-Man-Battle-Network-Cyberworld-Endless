@@ -307,7 +307,7 @@ def compose():
     hero = Image.open(os.path.join(ROOT, 'linux', 'steam', 'hero.png')).convert('RGB')
     hero = hero.resize((round(hero.width * H / hero.height), H), Image.NEAREST)
     subtitle = small('A ROGUELIKE FOR MEGA MAN BATTLE NETWORK 6', 40, (255, 240, 160))
-    plats = small('WINDOWS  ·  MAC  ·  LINUX  ·  STEAM DECK  ·  ROCKNIX  ·  BROWSER', 34)
+    plats = small('WINDOWS  ·  MAC  ·  LINUX  ·  STEAM DECK  ·  PORTMASTER  ·  BROWSER', 34)
     free = chrome('FREE  ·  BRING YOUR OWN ROM', 60, slant=0.18)
     url = small('saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless', 30, (170, 220, 255))
     notice = small('Unofficial fan project, not affiliated with Capcom. Runs from your own Mega Man Battle Network 6: '

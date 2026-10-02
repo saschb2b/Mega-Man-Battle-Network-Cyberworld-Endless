@@ -8,6 +8,9 @@ CC_flatpak := gcc
 CC_web := emcc
 CC_windows := x86_64-w64-mingw32-gcc
 CC_macos := clang
+# (iOS: build.py ios, on a Mac with Xcode; the phone's SDK, or the Simulator's for CI's smoke test)
+IOS_SDK ?= iphoneos
+CC_ios := xcrun --sdk $(IOS_SDK) clang
 CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 PKG_linux := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
@@ -15,7 +18,7 @@ PKG_windows := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 PKG_3ds := PKG_CONFIG_PATH=/opt/sdl2/lib/pkgconfig
 CC := $(CC_$(TARGET))
 PKGCONF := $(PKG_$(TARGET)) pkg-config
-OUT := build/$(TARGET)
+OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))
 BIN_host := $(OUT)/cyberworld
 BIN_aarch64 := $(OUT)/cyberworld.aarch64
 BIN_asan := $(OUT)/cyberworld
@@ -24,6 +27,7 @@ BIN_flatpak := $(OUT)/cyberworld
 BIN_web := $(OUT)/cyberworld.js
 BIN_windows := $(OUT)/cyberworld-endless.exe
 BIN_macos := $(OUT)/cyberworld-endless
+BIN_ios := $(OUT)/cyberworld-endless
 BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
 
@@ -42,7 +46,7 @@ GEN := $(OUT)/gen
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -std=c11 -O2 -g $(WARN) $(if $(filter web macos,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
@@ -52,6 +56,9 @@ endif
 MGBA_TARGET := $(if $(filter aarch64 web windows 3ds,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
+endif
+ifeq ($(TARGET),ios)
+PKGCONF := true   # SDL2 comes from ios/deps.sh (sdl2-config), never the Mac's own
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
 MGBA_LICENSE := /opt/mgba/LICENSE
@@ -65,6 +72,18 @@ MGBA_LICENSE := $(MACOS_DEPS)/share/licenses/mGBA.txt
 MAC_ARCH := -arch arm64 -arch x86_64 -mmacosx-version-min=11.0
 CFLAGS += $(MAC_ARCH) $(patsubst -I%,-isystem %,$(shell $(MACOS_DEPS)/bin/sdl2-config --cflags))
 endif
+# iOS (build.py ios, on a Mac with Xcode): SDL2 and mGBA from ios/deps.sh for
+# IOS_SDK, static, arm64, iOS 14 on; ios.m is UIKit's (the ROM picker, the
+# main SDL hands to UIKit)
+ifeq ($(TARGET),ios)
+IOS_DEPS ?= .build/ios-deps/$(IOS_SDK)
+MGBA := $(IOS_DEPS)
+MGBA_LICENSE := $(IOS_DEPS)/share/licenses/mGBA.txt
+IOS_FLAGS := -arch arm64 -isysroot $(shell xcrun --sdk $(IOS_SDK) --show-sdk-path) \
+             $(if $(filter iphonesimulator,$(IOS_SDK)),-mios-simulator-version-min=14.0,-miphoneos-version-min=14.0)
+CFLAGS += $(IOS_FLAGS) -DCW_IOS $(patsubst -I%,-isystem %,$(shell $(IOS_DEPS)/bin/sdl2-config --cflags))
+OBJS += $(OUT)/obj/core/ios.o
+endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
 MGBA := /app
@@ -77,6 +96,9 @@ CFLAGS += -DCW_DESKTOP
 endif
 ifeq ($(TARGET),macos)
 LDLIBS := $(MGBA)/lib/libmgba.a $(shell $(MACOS_DEPS)/bin/sdl2-config --static-libs) $(MAC_ARCH)
+endif
+ifeq ($(TARGET),ios)
+LDLIBS := $(MGBA)/lib/libmgba.a $(shell $(IOS_DEPS)/bin/sdl2-config --static-libs) -framework UniformTypeIdentifiers $(IOS_FLAGS)
 endif
 # 64-bit Windows (docker/Dockerfile.windows, MinGW-w64): SDL2 and mGBA linked
 # in, one .exe with no console window; its icon, manifest and version
@@ -153,6 +175,11 @@ endif
 $(OUT)/obj/%.o: src/%.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -I$(GEN) -c -o $@ $<
+
+# (UIKit's, iOS alone: Objective-C with ARC)
+$(OUT)/obj/%.o: src/%.m | $(GEN)/version.h
+	@mkdir -p $(dir $@)
+	$(CC) $(filter-out -std=c11,$(CFLAGS)) -fobjc-arc -I$(GEN) -c -o $@ $<
 
 $(GEN)/version.h: FORCE
 	@mkdir -p $(GEN)
