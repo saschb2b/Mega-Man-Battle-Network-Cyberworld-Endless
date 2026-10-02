@@ -4,6 +4,7 @@
  * own tiles and colours, with its objects marked; a report line per layer
  * says how the tile picks went. */
 #include "atlas.h"
+#include "navstudy.h"
 #include "town.h"
 
 #include <SDL.h>
@@ -367,6 +368,8 @@ static void stair_layers(const char *dir, FILE *report, int b, int seeds) {
 }
 
 int atlas_run(const char *spec) {
+	/* ("nav": the way across BN6's own maps instead, navstudy.c) */
+	if (!strcmp(spec, "nav")) return navstudy_run();
 	/* DIR[:BIOMES[:SEEDS]]: BIOMES "all" or a comma list, SEEDS per layout */
 	char dir[512] = ".build/atlas", biomes[256] = "all";
 	int seeds = 1;

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Fewer narrow walkways on the way, as BN6's own maps have them.** The
+  way across a layer now crosses no more one-panel walkways than its
+  area's original maps do: wider ways in Seaside, Green, the Secret Area,
+  the Nest and Mr. Weather's comp, where layers had crossed up to three
+  times as many. Central keeps its glass bridges: its layers already cross
+  fewer than BN6's Central maps. This build makes layers differently, so a
+  CONTINUE starts the layer afresh.
 - **No long detour leads to nothing.** A branch five panels or more off
   the way that held nothing now ends in a green Mystery Data, moved from
   one lying loose by the way, and a wide band that reads as the way gets

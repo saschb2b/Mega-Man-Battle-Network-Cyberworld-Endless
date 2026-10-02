@@ -123,6 +123,35 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   platforms fell from 1.65 to 0.86 on average, and those past their
   area's count from 573 to 32 (`test_way_links` holds each area to 90%);
   the tile test's seams fell from 63.0 to 61.7 per hundred panels.
+- **Every one-wide walkway on the way counts too** (3 October 2026). The
+  cap above counts walkways between big platforms; a playtester lines up
+  at every mouth (session 59: three on one of Central's layers). Counted
+  the same way on BN6's own maps (`--nav-study`, `src/dev/navstudy.c`:
+  the floor their walls give, a panel at a time, and the walkways the
+  walk between a map's two farthest panels crosses, of any platforms),
+  and on the layers over their way across:
+
+  | Area | BN6's maps | Layers, before | Layers, now |
+  | --- | --- | --- | --- |
+  | Central | 3.3 (2, 6, 2) | 2.8 | 2.6 |
+  | Seaside | 1.0 (0, 3, 0) | 3.8 | 1.8 |
+  | Sky | 3.7 | 2.7 | 2.2 |
+  | Green | 1.5 (2, 1) | 4.3 | 2.6 |
+  | Undernet | 2.3 | 2.7 | 2.3 |
+  | Secret Area | 1.0 | 3.3 | 1.8 |
+  | Nest (Underground) | 3.0 | 4.2 | 3.7 |
+  | Mr. Weather Comp | 0.7 | 2.5 | 1.6 |
+
+  So past its originals' count (`narrow_cap`: Central 3, Seaside 1, Sky
+  4, Green 2, the Undernet 2, the Secret Area 1, the Nest 3, Robot
+  Control 3, the Aquarium 3, the Judge Tree 4, Mr. Weather 1, CopyBot's
+  3), the way's walkways widen as above, before those between big
+  platforms (one widened joins its platforms into a bigger one). Central's
+  layers cross fewer than BN6's Central maps already: its glass bridges
+  are its own. The comps' and homepages' originals are single small
+  rooms, nothing to hold a layer to, and the Graveyard's slabs cross
+  eight: those keep the cap between big platforms alone. `test_way_links`
+  holds each area to its count on eight ways in ten.
 
 Still apart from the originals: their dead ends. Capcom's maps have about
 twenty-five dead-end panels each (comb teeth on boardwalks, stubs, pads

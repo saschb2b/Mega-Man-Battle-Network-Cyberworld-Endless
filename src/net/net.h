@@ -185,7 +185,17 @@ void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
  * Navigation); and how many it crosses, from (sx, sy). */
 void layer_widen_way(int biome, int gx, int gy);
 int layer_way_runs(int sx, int sy, int gx, int gy);
+/* ... and every one-wide walkway the way crosses, between platforms of any
+ * size (each a mouth MegaMan lines up at) */
+int layer_way_narrows(int sx, int sy, int gx, int gy);
+/* The way across any floor (`cells`, w x h, nonzero floor): the walk
+ * between its two farthest panels; the one-wide walkways it crosses, those
+ * between big platforms into *big_links, its panels into *way_len. For
+ * BN6's own maps as for a layer (src/dev/navstudy.c, the unit tests). */
+int grid_way_narrows(const uint8_t *cells, int w, int h, int *big_links, int *way_len);
 int layer_way_cap(int biome);
+/* ... and of every one-wide walkway on it, whatever its platforms (0: none) */
+int layer_narrow_cap(int biome);
 /* Whether panel (x, y) lies on the layer's way from its arrival to its exit
  * or guardian, or beside it (net_gen.c: what stands keeps off it). */
 bool layer_by_way(int x, int y);

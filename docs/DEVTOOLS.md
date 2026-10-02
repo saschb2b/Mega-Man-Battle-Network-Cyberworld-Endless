@@ -140,6 +140,19 @@ SEEDS` prints every pair weighed for those tiles (tile x, y of the
 uncropped layer: pixel over 8, plus the offset in its `.box` file), after
 a `layer bXX_...` line for each layer.
 
+## Nav study: the way across BN6's own maps
+
+`build/linux/cyberworld --headless --rom-dir DIR --data-dir DIR --atlas nav`
+reads each area's original net maps (the maps whose random battles it
+fights, `NetAreaDef.battles`), lays the floor their walls give out a panel
+at a time, walks between each map's two farthest panels, and prints the
+one-wide walkways that walk crosses, of any platforms and between big
+ones, and its length: per map, then the area's average
+(`src/dev/navstudy.c`, the count `grid_way_narrows` in `net_way.c`, which
+the unit tests run on the layers too: `CW_WAY_STATS=1 build/host/test_core`
+prints them per area). The originals' counts set `narrow_cap`
+(docs/LEVEL_DESIGN.md, Navigation).
+
 ## Pacing report: every act's battles and guardians
 
 ```bash

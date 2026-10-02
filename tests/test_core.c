@@ -1385,21 +1385,39 @@ static void test_way_links(void) {
 	int over_all = 0, all = 0, worst_area = -1;
 	double worst = 0;
 	for (int b = 0; b < BIOME_COUNT; ++b) {
-		int over = 0, n = 0, sum = 0;
+		int over = 0, n = 0, sum = 0, narrows = 0, across = 0, across_big = 0, across_len = 0, over_narrow = 0;
 		for (uint32_t seed = 1; seed <= 60; ++seed) {
 			layer_generate(seed * 7919u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
 			const Room *g = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
 			int k = layer_way_runs(layer.rooms[0].ax, layer.rooms[0].ay, g->ax, g->ay);
+			int nw = layer_way_narrows(layer.rooms[0].ax, layer.rooms[0].ay, g->ax, g->ay);
+			narrows += nw;
+			over_narrow += layer_narrow_cap(b) && nw > layer_narrow_cap(b);
+			{
+				static uint8_t cells[MAP_W * MAP_H];
+				for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cells[y * MAP_W + x] = layer.cell[y][x] == C_PATH;
+				int big, len;
+				across += grid_way_narrows(cells, MAP_W, MAP_H, &big, &len);
+				across_big += big; across_len += len;
+			}
 			sum += k;
 			over += k > layer_way_cap(b);
 			++n;
 		}
-		double share = (double)over / n;
-		CHECK(share <= 0.1, "area %d: %d of %d ways cross more one-wide walkways than its cap %d", b, over, n, layer_way_cap(b));
+		/* (where the area holds every one-wide walkway on the way to its
+		 * originals' count, that count is the way's measure: a walkway it
+		 * widened joins two small platforms into a big one, whose links
+		 * the cap between big platforms then counts) */
+		double share = (double)(layer_narrow_cap(b) ? over_narrow : over) / n;
+		if (layer_narrow_cap(b))
+			CHECK(share <= 0.2, "area %d: %d of %d ways cross more one-wide walkways than its originals' %d", b, over_narrow, n, layer_narrow_cap(b));
+		else CHECK(share <= 0.1, "area %d: %d of %d ways cross more one-wide walkways than its cap %d", b, over, n, layer_way_cap(b));
 		if (share > worst) { worst = share; worst_area = b; }
-		over_all += over;
+		over_all += layer_narrow_cap(b) ? over_narrow : over;
 		all += n;
-		(void)sum;
+		if (getenv("CW_WAY_STATS"))
+			printf("  area %2d: %.2f big-platform links, %.2f one-wide walkways on the way (%d past %d); across: %.2f, %.2f between big platforms, a way of %d\n", b,
+				(double)sum / n, (double)narrows / n, over_narrow, layer_narrow_cap(b), (double)across / n, (double)across_big / n, across_len / n);
 	}
 	printf("  ways: %d of %d past their area's cap of one-wide walkways (the most in area %d, %.0f%%)\n", over_all, all, worst_area, 100 * worst);
 }
