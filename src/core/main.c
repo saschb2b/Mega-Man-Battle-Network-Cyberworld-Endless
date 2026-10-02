@@ -348,11 +348,42 @@ static void ios_start(void) {
 	scene_set(&scene_title);
 }
 
+/* The screen's lines and button, laid out in the middle of the canvas, the
+ * whole screen and not the picture's 240 x 160 (whose 1x text was too small
+ * to read on a phone), the same for its update and its drawing: the title
+ * at 3x, the rest at 2x, and a button a thumb finds at once. */
+#define NOROM_LINE 15   /* (a 2x line, 10 pixels, and room between) */
+typedef struct {
+	char body[6][64], hint[4][64], note[5][64];
+	int nbody, nhint, nnote, y;
+	SDL_Rect button;
+} NoRom;
+
+static void norom_layout(NoRom *n) {
+	int cols = (P.w - 16) / 8;   /* (a 2x character is 8 pixels across) */
+	if (cols > 60) cols = 60;
+	n->nbody = wrap_lines("It runs on your own Mega Man Battle Network 6: Cybeast Gregar (USA), an unzipped .gba file.", cols, n->body, 6);
+	n->nhint = wrap_lines("Or put it in Files, On My iPhone (or iPad), in the Cyberworld folder.", cols, n->hint, 4);
+	/* (a pick that was not the ROM: what was found instead) */
+	n->nnote = norom_looks && norom_msg[0] ? wrap_lines(norom_msg, cols, n->note, 5) : 0;
+	int w = P.w - 24 < 220 ? P.w - 24 : 220, h = 30;
+	int total = 15 + 16 + n->nbody * NOROM_LINE + 14 + h + 18 + n->nhint * NOROM_LINE + (n->nnote ? 12 + n->nnote * NOROM_LINE : 0);
+	n->y = (P.h - total) / 2;
+	n->button = (SDL_Rect){ (P.w - w) / 2, n->y + 15 + 16 + n->nbody * NOROM_LINE + 14, w, h };
+}
+
+static void norom_enter(void) { platform_own_taps(true); }
+static void norom_leave(void) { platform_own_taps(false); }
+
 static void norom_update(void) {
 	++norom_t;
 	int picked = ios_pick_result();
 	if (picked) norom_picking = false;
-	if (!norom_picking && (btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
+	NoRom n;
+	norom_layout(&n);
+	SDL_Point tap;
+	bool tapped = platform_tap(&tap.x, &tap.y) && SDL_PointInRect(&tap, &n.button);
+	if (!norom_picking && (tapped || btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
 		norom_picking = true;
@@ -366,33 +397,25 @@ static void norom_update(void) {
 static void norom_draw(void) {
 	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
 	SDL_RenderClear(P.renderer);
-	/* (in the picture's place, the controls around it) */
-	SDL_Color blue = rgba(120, 200, 248, 255), grey = rgba(160, 170, 200, 255);
-	int x = P.core_x + CORE_W / 2;
-	minifont_draw_centered(x, P.core_y + 10, "CYBERWORLD ENDLESS", blue, 2);
-	minifont_draw_centered(x, P.core_y + 28, "NO ROM YET", WHITE, 2);
-	static const char *const text[] = {
-		"IT RUNS ON YOUR OWN COPY OF",
-		"MEGA MAN BATTLE NETWORK 6: CYBEAST GREGAR (USA),",
-		"AN UNZIPPED .GBA FILE.",
-		"",
-		"PRESS A TO CHOOSE IT IN FILES,",
-		"OR PUT IT IN FILES, ON MY IPHONE (OR IPAD),",
-		"IN THE CYBERWORLD FOLDER.",
-	};
-	int y = P.core_y + 46;
-	for (unsigned i = 0; i < sizeof text / sizeof *text; ++i, y += 8) minifont_draw_centered(x, y, text[i], WHITE, 1);
-	/* (a pick that was not the ROM: what rom_find found instead) */
-	if (norom_looks && norom_msg[0]) {
-		char lines[3][64];
-		int n = wrap_lines(norom_msg, 56, lines, 3);
-		for (int i = 0; i < n; ++i, y += 8) minifont_draw_centered(x, y + 4, lines[i], blue, 1);
-	}
-	minifont_draw_centered(x, P.core_y + CORE_H - 26, norom_picking ? "CHOOSING IN FILES..." : "IT LOOKS AGAIN ON ITS OWN", grey, 1);
-	minifont_draw_centered(x, P.core_y + CORE_H - 14, "A: CHOOSE THE ROM", WHITE, 1);
+	NoRom n;
+	norom_layout(&n);
+	SDL_Color blue = rgba(120, 200, 248, 255), grey = rgba(160, 170, 200, 255), gold = rgba(255, 214, 16, 255);
+	int x = P.w / 2, y = n.y;
+	minifont_draw_centered(x, y, "CYBERWORLD ENDLESS", blue, 3);
+	y += 15 + 16;
+	for (int i = 0; i < n.nbody; ++i, y += NOROM_LINE) minifont_draw_centered(x, y, n.body[i], WHITE, 2);
+	/* the button: gold edged, the PET's navy inside */
+	SDL_Rect b = n.button;
+	fill_rect(b.x, b.y, b.w, b.h, gold);
+	fill_rect(b.x + 2, b.y + 2, b.w - 4, b.h - 4, rgba(16, 54, 74, 255));
+	minifont_draw_centered(x, b.y + (b.h - 15) / 2, norom_picking ? "OPENING FILES" : "CHOOSE ROM", WHITE, 3);
+	y = b.y + b.h + 18;
+	for (int i = 0; i < n.nhint; ++i, y += NOROM_LINE) minifont_draw_centered(x, y, n.hint[i], grey, 2);
+	y += 12;
+	for (int i = 0; i < n.nnote; ++i, y += NOROM_LINE) minifont_draw_centered(x, y, n.note[i], rgba(247, 165, 0, 255), 2);
 }
 
-static const Scene scene_norom = { "norom", NULL, norom_update, norom_draw, NULL };
+static const Scene scene_norom = { "norom", norom_enter, norom_update, norom_draw, norom_leave };
 
 #endif
 

@@ -224,6 +224,43 @@ static void set_fullscreen(bool on) {
 }
 #endif
 
+#ifdef CW_IOS
+static bool own_taps;
+static int tap_x = -1, tap_y = -1;
+
+void platform_own_taps(bool on) {
+	own_taps = on;
+	if (touch_show(!on)) layout_canvas();
+}
+
+bool platform_tap(int *x, int *y) {
+	if (tap_x < 0) return false;
+	*x = tap_x;
+	*y = tap_y;
+	tap_x = tap_y = -1;
+	return true;
+}
+
+/* A finger lifted on a screen that takes its own taps: where on the canvas */
+static void own_tap(const SDL_Event *e) {
+	if (e->type != SDL_FINGERUP) return;
+	float k = P.fill > 0 ? P.fill : (float)P.scale;
+	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
+	tap_x = (int)((e->tfinger.x * (float)P.screen_w - ox) / k);
+	tap_y = (int)((e->tfinger.y * (float)P.screen_h - oy) / k);
+}
+#endif
+
+#ifndef __3DS__
+/* A finger on the screen: the touch controls', or on iOS a screen's own tap */
+static void finger(const SDL_Event *e) {
+#ifdef CW_IOS
+	if (own_taps) { own_tap(e); return; }
+#endif
+	if (touch_event(e)) layout_canvas();
+}
+#endif
+
 /* A phone's own, before SDL starts: Android's and the iPhone's hints. */
 static void phone_hints(void) {
 #ifdef __ANDROID__
@@ -589,7 +626,7 @@ void platform_poll(void) {
 #ifndef __3DS__
 			/* (the 3DS's touch screen is its bottom one, apart from the
 			 * picture: not the phone's controls round it) */
-			if (touch_event(&e)) layout_canvas();
+			finger(&e);
 #endif
 			break;
 		case SDL_KEYDOWN: {
