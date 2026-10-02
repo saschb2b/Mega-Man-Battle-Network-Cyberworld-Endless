@@ -18,16 +18,18 @@ function track(name, data) {
 }
 document.addEventListener('DOMContentLoaded', () => { for (const [name, data] of queued.splice(0)) track(name, data); });
 
-const PLATFORMS = { windows: 'Windows', macos: 'macOS', linux: 'Linux', deck: 'Steam Deck', android: 'Android', handheld: 'Handhelds', '3ds': '3DS', browser: 'Browser', all: 'All' };
+const PLATFORMS = { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'ROCKNIX', '3ds': 'New 3DS', browser: 'Browser' };
 
-// the visitor's system, as far as the browser says (a Steam Deck's desktop
-// browser says Linux; an iPhone or iPad has no build, so the browser)
+// the visitor's system, as far as the browser says: a New 3DS's says it is
+// like an iPhone, an iPad's like a Mac (but with touch); a Steam Deck's
+// desktop browser says Linux, Steam's own adds "Valve Steam"
 function detectPlatform() {
 	const ua = navigator.userAgent || '';
 	const p = navigator.userAgentData?.platform || navigator.platform || '';
+	if (/nintendo 3ds/i.test(ua)) return '3ds';
 	if (/android/i.test(ua)) return 'android';
-	if (/iphone|ipad|ipod/i.test(ua) || (/mac/i.test(p) && navigator.maxTouchPoints > 1)) return 'browser';
-	if (/steamos|steam deck/i.test(ua)) return 'deck';
+	if (/iphone|ipad|ipod/i.test(ua) || (/mac/i.test(p) && navigator.maxTouchPoints > 1)) return 'ios';
+	if (/steamos|steam deck/i.test(ua) || (/valve steam/i.test(ua) && /linux|x11/i.test(ua))) return 'deck';
 	if (/win/i.test(p) || /windows/i.test(ua)) return 'windows';
 	if (/mac/i.test(p) || /mac os x/i.test(ua)) return 'macos';
 	if (/cros/i.test(ua)) return 'browser';

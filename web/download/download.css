@@ -1,48 +1,113 @@
-/* The downloads page's screens (site.css holds the PET's pieces). */
+/* The downloads page's screens (site.css holds the PET's pieces): what you
+ * need once, the best pick for this device lit as the PET's cursor lights a
+ * row, then every system in its group, each a slot with its main file, its
+ * others, and how to install it folded under it. */
 
-/* every way to play, with the ROM it needs: a platform at a time, its
- * best build first (lit as the PET's cursor lights a row), what to do next
- * in the navigator's box under them */
-.platforms { display: flex; flex-wrap: wrap; gap: 6px 2px; margin: 0 2px 10px; }
-.platforms[hidden] { display: none; }
-.platforms .plate { min-height: 40px; padding: 0 2px; font-size: 0.9rem; }
-.platforms .plate[aria-selected="true"] { border-image-source: url(../assets/ui/plate-on.png); color: #fffbd6; }
-.platforms .plate[aria-selected="true"]::before { content: ""; width: 9px; height: 12px; margin-right: -4px; background: var(--orange); clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.picked { margin: 0 4px 10px; font: 700 0.8rem/1.3 var(--caps); color: #d6f4ff; }
-.picked[hidden] { display: none; }
-.row[hidden] { display: none; }
-.shop .row.pick, .shop .row.pick:hover { order: -1; border-image-source: url(../assets/ui/slot-on.png); }
-.shop .tag { display: inline-block; margin-left: 10px; padding: 3px 7px 2px; background: var(--gold); color: #292929; font: 700 0.7rem/1 var(--caps); text-shadow: none; letter-spacing: 0.04em; text-transform: uppercase; vertical-align: 2px; }
-.shop .what small code { color: var(--gold); }
-.shop .then { display: none; margin: 12px 0 0; font-size: 1.02rem; }
-.shop .then.on { display: block; }
-.shop .then code { font-size: 0.95em; }
-.shop .release a { color: var(--gold); }
-/* the 3DS: its build's link as a QR code for FBI, beside where it goes */
-.shop .then.n3ds.on { display: flex; gap: 16px; align-items: flex-start; }
-.shop .qr { flex: none; width: 196px; margin: 0; }
-.shop .qr .code { display: grid; place-items: center; box-sizing: border-box; width: 196px; height: 196px; padding: 16px; background: #fff; font: 700 0.8rem/1.4 var(--caps); text-align: center; color: #214a52; }
-.shop .qr .code:has(svg) { padding: 0; }
-.shop .qr svg { display: block; width: 100%; height: 100%; }
-.shop .qr figcaption { margin-top: 6px; font: 700 0.72rem/1.3 var(--caps); text-align: center; }
-.shop .n3ds .steps { min-width: 0; }
-.shop .tip { margin: 8px 4px 2px; font: 400 0.95rem/1.4 var(--pixel); color: #d6f4ff; }
-.shop .tip a { color: var(--gold); }
+/* ---- what you need, once ---- */
 
-/* every way to play, with the ROM it needs */
-.shop .rom { margin: 2px 4px 14px; font-size: 1.05rem; }
-.shop .rom code { color: var(--gold); }
-.shop .row { grid-template-columns: 36px 1fr auto; cursor: default; }
-.shop .row:hover { border-image-source: url(../assets/ui/slot.png); }
-.shop .what b { display: block; font: 700 1.15rem/1.3 var(--pixel); }
-.shop .what small { display: block; font: 400 1rem/1.4 var(--pixel); color: #d6f4ff; }
-.shop .version { display: block; font: 700 0.75rem/1.4 var(--caps); color: var(--gold); }
-.shop .release { margin: 12px 4px 2px; font: 700 0.85rem/1.3 var(--caps); color: #d6f4ff; }
-.shop .release:empty { display: none; }
+.rom { margin: 0 0 18px; font-size: 1.05rem; }
+.rom details { margin-top: 6px; }
+.rom summary { cursor: pointer; font: 700 0.8rem/1.6 var(--caps); color: #0848a8; text-transform: uppercase; }
+.rom details p { margin-top: 6px; }
+.rom code { color: #9c3100; }
+
+.copy {
+	margin-left: 6px;
+	padding: 2px 8px 1px;
+	border: 0;
+	background: #214a52;
+	box-shadow: inset 0 0 0 var(--u) var(--cyan);
+	color: var(--white);
+	font: 700 0.72rem/1.5 var(--caps);
+	text-transform: uppercase;
+	cursor: pointer;
+	vertical-align: 1px;
+}
+.copy:hover, .copy:focus-visible { background: #10364a; outline: none; }
+
+/* ---- the best pick ---- */
+
+.best { margin: 0 0 22px; }
+.best[hidden] { display: none; }
+.best .who { margin: 0 0 6px 4px; background: var(--gold); color: #292929; }
+.best .elsewhere { margin: 10px 4px 2px; font: 700 0.85rem/1.3 var(--caps); color: #d6f4ff; }
+.best .elsewhere a { color: var(--gold); }
+.entry.lit, .entry.lit:hover { border-image-source: url(../assets/ui/slot-on.png); }
+.entry.lit .name { font-size: 1.4rem; }
+.entry.lit .get { font-size: 1.2rem; padding: 6px 14px; }
+
+/* ---- every system, in its group ---- */
+
+.systems .group { margin: 18px 6px 8px; }
+.systems .group:first-of-type { margin-top: 4px; }
+.systems .rows + .group { margin-top: 22px; }
+
+.entry {
+	grid-template-columns: 36px minmax(0, 1fr) auto;
+	grid-template-areas: "icon what get" ". how how";
+	align-items: start;
+	padding: 4px 6px;
+	cursor: default;
+}
+.entry:hover { border-image-source: url(../assets/ui/slot.png); }
+.entry > .icon { grid-area: icon; margin-top: 2px; }
+.entry > .what { grid-area: what; min-width: 0; }
+.entry > .get { grid-area: get; align-self: start; white-space: nowrap; }
+.entry > .how, .entry > .n3ds { grid-area: how; }
+.entry .name { display: block; font: 700 1.2rem/1.3 var(--pixel); }
+.entry small { display: block; font: 400 1rem/1.4 var(--pixel); color: #d6f4ff; }
+.entry small a, .entry .also a, .entry .how a { color: var(--gold); }
+.entry .also { display: block; margin-top: 2px; font: 400 0.95rem/1.4 var(--pixel); color: #d6f4ff; }
+.entry .also a[aria-disabled="true"], .entry small a[aria-disabled="true"] { color: #8fb3bd; text-decoration: line-through; pointer-events: none; }
+.entry .version { display: block; margin-top: 3px; font: 700 0.75rem/1.4 var(--caps); color: var(--gold); }
+.entry .version a { color: var(--gold); }
+.entry code { color: var(--gold); }
+
+/* how to install: folded under its file, open in the best pick */
+.how summary {
+	width: fit-content;
+	cursor: pointer;
+	font: 700 0.78rem/1.8 var(--caps);
+	color: var(--gold);
+	text-transform: uppercase;
+	list-style: none;
+}
+.how summary::-webkit-details-marker { display: none; }
+.how summary::before { content: "▸ "; }
+.how[open] summary::before { content: "▾ "; }
+.how ol, .n3ds ol { margin: 4px 0 6px; padding-left: 1.6em; font: 400 1rem/1.45 var(--pixel); }
+.how li, .n3ds li { margin: 3px 0; }
+.how li::marker, .n3ds li::marker { color: var(--gold); font-weight: 700; }
+.how b, .n3ds b { color: #fffbd6; }
+.how .source { display: block; margin-top: 4px; }
+.how .source code { overflow-wrap: anywhere; }
+
+/* the 3DS: its title's link as a QR code for FBI, beside the steps, always shown */
+.n3ds { display: flex; gap: 16px; align-items: flex-start; margin: 6px 0 4px; }
+.n3ds ol { min-width: 0; margin-top: 0; }
+.qr { flex: none; width: 180px; margin: 0; }
+.qr .code { display: grid; place-items: center; box-sizing: border-box; width: 180px; height: 180px; padding: 14px; background: #fff; font: 700 0.75rem/1.4 var(--caps); text-align: center; color: #214a52; text-shadow: none; }
+.qr .code:has(svg) { padding: 0; }
+.qr svg { display: block; width: 100%; height: 100%; }
+.qr figcaption { margin-top: 6px; font: 700 0.7rem/1.3 var(--caps); text-align: center; text-shadow: none; color: #d6f4ff; }
+
+/* the release's line, and the tips */
+.release { margin: 14px 4px 2px; font: 700 0.85rem/1.5 var(--caps); color: #214a52; }
+.release a { color: #0848a8; }
+.tip { margin: 8px 4px 2px; font: 400 0.95rem/1.4 var(--pixel); color: #214a52; }
+.band .hint a { color: var(--gold); }
 .exit.small { font-size: 1rem; padding: 0 8px; }
+.exit::before { flex: none; }
+
+/* a phone: the file under the text, the pick's button the screen's width */
 @media (max-width: 640px) {
-	.shop .then.n3ds.on { flex-direction: column; align-items: center; }
-	.platforms .plate { min-height: 36px; font-size: 0.78rem; }
-	.shop .row { grid-template-columns: 36px 1fr; }
-	.shop .exit { grid-column: 2; justify-self: start; }
+	.rom { font-size: 0.95rem; line-height: 1.45; }
+	.band .hint { font-size: 0.7rem; line-height: 1.3; }
+	.entry { grid-template-columns: 36px minmax(0, 1fr); grid-template-areas: "icon what" "get get" "how how"; }
+	.entry > .get { justify-self: start; }
+	.entry > .get { white-space: normal; }
+	.entry.lit > .get { justify-self: stretch; justify-content: center; min-height: 48px; font-size: 1rem; letter-spacing: 0.04em; }
+	.n3ds { flex-direction: column; align-items: center; }
+	.qr, .qr .code { width: 200px; }
+	.qr .code { height: 200px; }
 }

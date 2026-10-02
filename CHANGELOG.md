@@ -12,6 +12,13 @@
   picture or beside it. Sent to the background, it keeps your run where
   MegaMan stands. iOS 14 and newer. It was built and started in the iOS
   Simulator, not yet on an iPhone: reports are welcome.
+- **The download page shows every system at once.** Nine tabs showed one
+  system at a time; on a phone they took four rows and pushed the first
+  download under the browser's toolbar. The page now leads with the best
+  pick for your device, its steps open, and lists every system below in
+  four groups (computer, phone and tablet, handheld and console, no
+  install), each with its main file, its other formats and how to install
+  it.
 - **The Net Dealers name every guardian's weakness (issue #39).** They
   said SlashMan, EraseMan, TenguMan, GroundMan and DustMan had no weak
   element, but BN6 has a second wheel, as its Cross lessons teach:
