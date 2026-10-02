@@ -944,7 +944,7 @@ SCREENSHOTS = [
     # (seed 7's layer 3 walks straight to BlastMan's arena, then layer 4's
     # first battle; retimed for 0.6.0's layers)
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(240, 'net'), (1400, 'guardian'), (1540, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
+     [(240, 'net'), (1400, 'guardian'), (1600, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
       (2900, 'reward'), (2950, 'restored'), (3500, 'area-clear'), (5150, 'custom'), (5540, 'battle')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
@@ -983,7 +983,7 @@ SCREENSHOTS = [
     # layer's map on the bottom one, a Net Dealer and a Recovery Mr. Prog
     # met on the way to BlastMan's arena)
     ('3ds', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(1000, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
+     [(1040, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
 ]
 
 
