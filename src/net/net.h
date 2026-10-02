@@ -126,6 +126,11 @@ typedef struct {
 
 /* Generation is deterministic for a given seed and kit. */
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit);
+/* The game runs at most 16 NPCs on a map (BN6_NPC_COUNT) and leaves the
+ * rest of a map's list out without a word; every object but the warp-in
+ * takes one, the guardian two (himself and his data). The layer's count. */
+#define LAYER_NPC_MAX 16
+int layer_npcs(void);
 /* Lifts dead-end rooms onto stairs (net_height.c). */
 void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
 /* The one-wide walkways the way from the arrival to (gx, gy) crosses, past

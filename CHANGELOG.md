@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Every navi on a layer shows.** BN6 runs at most sixteen NPCs on a map
+  (Mystery Data, services, gates and bystanders each take one) and leaves
+  the rest of a map's list out without a word. One layer in sixteen held
+  more: its last bystanders never appeared, and on one in two hundred an
+  official gate or ProtoMan's duel was missing. A layer now places its
+  Mystery Data and bystanders only in the places the game will run. A
+  run saved by 0.7.0 continues its current layer afresh.
+
 ## 0.7.0 (2026-10-02)
 
 - **The game on iPhone and iPad.** It comes through AltStore Classic or

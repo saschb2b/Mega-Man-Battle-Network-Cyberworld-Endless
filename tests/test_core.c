@@ -238,6 +238,9 @@ static void test_generation(void) {
 			CHECK(w >= 0 && w <= 12, "seed %u: the heal before the arena a walk of %d", seed, w);
 		}
 		CHECK(layer.nrooms >= 3, "seed %u: only %d rooms", seed, layer.nrooms);
+		/* (the game runs 16 NPCs on a map and leaves the rest out: the last
+		 * bystanders, and an official gate or ProtoMan, never showed) */
+		CHECK(layer_npcs() <= LAYER_NPC_MAX, "seed %u: %d NPCs, the game runs %d", seed, layer_npcs(), LAYER_NPC_MAX);
 		NetObj *start = &layer.obj[0];
 		CHECK(start->type == OBJ_WARP_IN, "seed %u: first object is the arrival warp", seed);
 		int cells = 0;

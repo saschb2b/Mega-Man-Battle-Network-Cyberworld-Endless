@@ -1080,13 +1080,29 @@ static void place_duel_gate(int level, const int *order, int n, int *next) {
 	++*next;
 }
 
+int layer_npcs(void) {
+	int n = 0;
+	for (int i = 0; i < layer.nobj; ++i) n += layer.obj[i].type == OBJ_WARP_IN ? 0 : layer.obj[i].type == OBJ_BOSS ? 2 : 1;
+	return n;
+}
+
+/* What the NPCs the game runs leave for `want` more, the services and
+ * gates placed first: the Mystery Data take what is left, the bystanders
+ * the rest (on one layer in sixteen the last bystanders, and on one in
+ * two hundred an official gate or ProtoMan, were past the sixteenth and
+ * never showed). */
+static int npcs_for(int want) {
+	int left = LAYER_NPC_MAX - layer_npcs();
+	return want < left ? want : left > 0 ? left : 0;
+}
+
 /* Rooms holding better data, more of them deeper and in the Undernet (a
  * dark warp's, or the short net's dark way's act); then Mystery data
  * scattered through the rest, most at dead ends: the side ways BN6
  * rewards exploring. */
 static void place_data(int depth, int kind, int biome, int size, const int *order, int n, int *next) {
 	int x, y;
-	int rich = 1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET);
+	int rich = npcs_for(1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET));
 	for (int k = 0; k < rich; ++k, ++*next) {
 		NetObj *o = PLACE(OBJ_MYSTERY);
 		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
@@ -1098,6 +1114,7 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
 	}
 	int md = 3 + rng_range(0, 2) + size;
+	md = npcs_for(md);
 	for (int k = 0; k < md; ++k) {
 		bool got = false;
 		if (rng_range(0, 99) < 70)
@@ -1118,7 +1135,7 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
  * that closed his words opened them again). */
 static void place_bystanders(const int *order, int n) {
 	int x, y;
-	int npcs = 2 + rng_range(0, 1);
+	int npcs = npcs_for(2 + rng_range(0, 1));
 	for (int k = 0; k < npcs && n; ++k)
 		for (int tries = 0; tries < 4; ++tries) {
 			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
