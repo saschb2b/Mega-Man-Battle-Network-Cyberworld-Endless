@@ -101,6 +101,8 @@ static void wait_frame(void);
 bool emu_ready(void) { return core != NULL; }
 void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply(); } }
 
+bool emu_hook(uint32_t addr, EmuHook fn, void *user) { wait_frame(); return core && hook_add(addr, fn, user); }
+
 void emu_audio_rate(int rate) {
 	wait_frame();
 	out_rate = rate;

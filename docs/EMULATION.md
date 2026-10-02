@@ -69,7 +69,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | --- | --- | --- |
 | `+0x0000` | Warp record and warp list for direct warps | `gamecall.c` |
 | `+0x0100` | Call stub: runs one game routine with r0-r2, sets `BN6_ENGINE_MARK` and leaves the routine's r0, r1 at `BN6_ENGINE_RET` (`0x0203FFF4`, past the game's EWRAM as the mark is) | `gamecall.c` |
-| `+0x0180` | Encounter roll wrapper and trampoline | `encounter.c` |
+| `+0x0180` | Free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
 | `+0x0300` | The PET's input step: A on Save taken for the engine, then the game's own handler (docs/PET.md) | `pet.c` |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |

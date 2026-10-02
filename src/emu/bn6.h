@@ -213,6 +213,13 @@
 #define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags) */
 #define BN6_WARP_DEPART_JACK_OUT 0x080059B5u /* warp departure 8: the jack-out cutscene, then warp */
 #define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: the engine borrows it for a frame */
+/* Random battles (src/director/encounter.c): bn6f checkThenStartBattle
+ * (0x08005A8C, Gregar's as Falzar's) tests MegaMan on the map, then the
+ * flags, fades and chat that hold a battle, calls the roll (0x080ABD30)
+ * and branches on the flags it leaves; then StartBattle */
+#define BN6_ENCOUNTER_CHECK   0x08005A98u /* its first test after the map's */
+#define BN6_ENCOUNTER_ROLLED  0x08005AE2u /* the beq after the roll's bl: r0 the roll's BattleSettings* */
+#define BN6_ENCOUNTER_START   0x08005AE5u /* movs r1,#1; bl StartBattle, r0 the record (Thumb) */
 
 
 /* Main modes (main_subsystemJumpTable) and game-state sub-modes */

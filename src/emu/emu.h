@@ -49,6 +49,10 @@ void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
 
+/* A hook on the game's code (hook.h; docs/EMULATION.md, Hooks), set
+ * between frames: on the Thumb instruction at addr. */
+bool emu_hook(uint32_t addr, EmuHook fn, void *user);
+
 /* Save states in the data directory (made on the device, never shipped). */
 bool emu_save_state(const char *path);
 bool emu_load_state(const char *path);
