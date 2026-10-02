@@ -280,6 +280,22 @@ static bool official_duel_prize(int level) {
 	return layer_has(OBJ_DUEL) && !layer_objs_duel_later && rival_clearance() >= level;
 }
 
+/* The best of the layer's Mystery Data, the first of them (the farthest
+ * detour's: net_gen.c places those first), among the 16 the map holds; -1
+ * none. */
+static int best_mystery(void) {
+	int best = -1;
+	for (int i = 0, k = 0; i < layer.nobj && k < 16; ++i)
+		if (layer.obj[i].type == OBJ_MYSTERY) {
+			if (best < 0 || layer.obj[i].param > layer.obj[best].param) best = i;
+			++k;
+		}
+	return best;
+}
+
+/* Blue where a detour ends, as BN6 keeps its better data; green loose. */
+static int mystery_colour(const NetObj *o) { return o->param >= 1 ? MYSTERY_BLUE : MYSTERY_GREEN; }
+
 /* The Net Dealer's word on the act's guardian, `navi`, by his list
  * (`stock`, n of them): the element he can't stand (of either wheel:
  * TenguMan's Sword, issue #39) and the pick of it, first on the list; for
@@ -339,11 +355,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int said = 0;   /* bystanders so far: each says another line */
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE, fragment_placed = false;
-	/* the run's Spin, in the last Mystery Data of one layer of 4-8 (docs/
+	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * META.md: one a run, a colour the profile lacks, kept for good) */
-	int spin_md = -1, spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
-	for (int i = 0, k = 0; spin_colour && i < layer.nobj && k < 16; ++i)
-		if (layer.obj[i].type == OBJ_MYSTERY) { spin_md = i; ++k; }
+	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0, spin_md = spin_colour ? best_mystery() : -1;
 	bool spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
@@ -397,7 +411,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				md[nmd].x = wx;
 				md[nmd].y = wy;
 				md[nmd].z = wz;
-				md[nmd].type = MYSTERY_GREEN;
+				md[nmd].type = mystery_colour(o);
 				if (i == spin_md) {
 					md[nmd].type = MYSTERY_BLUE;
 					spin_content(md[nmd].content, spin_colour);

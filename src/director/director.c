@@ -1681,6 +1681,14 @@ static void act_note_read(void) {
 	if (act_note_ok) D.dealer_act = act_note.dealer;
 }
 
+/* An object's letter on the state's map (D a Navi gate, V a vault, Y the
+ * rival, O an official gate; m a green Mystery Data, M a blue one), 0 none. */
+static char state_mark(const NetObj *o) {
+	static const char mark[] = "IXMSHTTBUGNCPRFDVYO";
+	if (o->type == OBJ_MYSTERY && !o->param) return 'm';
+	return o->type >= 0 && o->type < (int)sizeof mark - 1 ? mark[o->type] : 0;
+}
+
 /* ... and after it, where building it began the act afresh */
 static void act_note_apply(void) {
 	D.act_resumed = !act_note_ok || act_note.unknown;
@@ -1826,10 +1834,9 @@ void director_describe(FILE *f) {
 						}
 					for (int i = 0; i < route_walk_len; ++i) g[route_walk[i] / MAP_W][route_walk[i] % MAP_W] = '*';
 					if (route_walk_aim >= 0) g[route_walk_aim / MAP_W][route_walk_aim % MAP_W] = '+';
-					static const char mark[] = "IXMSHTTBUGNCPRFDVYO";   /* (D a Navi gate, V a vault, Y the rival, O an official gate) */
 					for (int i = 0; i < layer.nobj; ++i) {
 						int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
-						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && layer.obj[i].type < (int)sizeof mark - 1) g[oy][ox] = mark[layer.obj[i].type];
+						if (ox >= 0 && oy >= 0 && ox < MAP_W && oy < MAP_H && state_mark(&layer.obj[i])) g[oy][ox] = state_mark(&layer.obj[i]);
 					}
 					g[cy][cx] = '@';
 					for (int y = y0; y <= y1; ++y) fprintf(f, "map %.*s\n", x1 - x0 + 1, &g[y][x0]);

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Mystery Data say what the walk is worth.** Blue data now lie where the
+  detours end: at the far end of a spur, on its pad, in the room farthest
+  off the way, the best of them where the walk is longest. Green data lie
+  loose. Before, a Mystery Data's worth was rolled wherever it landed, a
+  quarter of the good ones right beside the way, and all were drawn green.
+  About as much is found in all (epic #49, issue #40).
 - **Every navi on a layer shows.** BN6 runs at most sixteen NPCs on a map
   (Mystery Data, services, gates and bystanders each take one) and leaves
   the rest of a map's list out without a word. One layer in sixteen held

@@ -144,6 +144,9 @@ int layer_way_cap(int biome);
 bool layer_by_way(int x, int y);
 /* ... on the way itself. */
 bool layer_on_way(int x, int y);
+/* How many panels a walk from the way to (x, y) takes, -1 off the floor
+ * (once the layer's data are placed: net_gen.c, Detours). */
+int layer_detour(int x, int y);
 int biome_for_depth(int depth);
 bool is_boss_depth(int depth);
 /* The layer's place in its act, 0-2 (the Nest counts as a first). */

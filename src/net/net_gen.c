@@ -275,6 +275,93 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 
 static bool room_spot(const Room *r, int *ox, int *oy) { return room_spot_in(r, ox, oy, false); }
 
+/* ---- Detours (docs/LEVEL_DESIGN.md, Set pieces) ----
+ * How far each floor cell lies off the way, in panels walked (0 on it, -1
+ * where no walk reaches), and the way's cell its walk leaves from: the
+ * cells of a spur, a room off the way and what lies past them share it, a
+ * branch. The originals' blue data lie at a branch's far end, and what a
+ * detour holds follows its length. */
+static int16_t detour[MAP_H][MAP_W], branch[MAP_H][MAP_W];
+/* (a blue data's detour at least, three panels there and three back; the
+ * long walk that holds the best) */
+#define DETOUR_BLUE 3
+#define DETOUR_FAR 8
+
+/* (the guardian's arena is no detour: the way ends at him, in its middle) */
+static bool in_arena(int x, int y) {
+	if (layer.arena < 0) return false;
+	const Room *a = &layer.rooms[layer.arena];
+	return x >= a->x && x < a->x + a->w && y >= a->y && y < a->y + a->h;
+}
+
+static void measure_detours(void) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	int h = 0, t = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			detour[y][x] = branch[y][x] = -1;
+			if (way_band[y][x] != 2 || layer.cell[y][x] != C_PATH || in_arena(x, y)) continue;
+			detour[y][x] = 0;
+			branch[y][x] = (int16_t)(y * MAP_W + x);
+			qx[t] = (int16_t)x; qy[t++] = (int16_t)y;
+		}
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || layer.cell[ny][nx] != C_PATH || detour[ny][nx] >= 0 || in_arena(nx, ny)) continue;
+			detour[ny][nx] = (int16_t)(detour[y][x] + 1);
+			branch[ny][nx] = branch[y][x];
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+int layer_detour(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H ? detour[y][x] : -1; }
+
+/* A pad's middle where (x, y) lies on a pad: the originals set a pad's data
+ * there; else (x, y). */
+static void pad_middle(int *x, int *y) {
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		if (r->kind != ROOM_PAD || *x < r->x || *x >= r->x + r->w || *y < r->y || *y >= r->y + r->h) continue;
+		int mx = r->x + r->w / 2, my = r->y + r->h / 2;
+		if (cell_free(mx, my) && !cuts_way(mx, my)) { *x = mx; *y = my; }
+		return;
+	}
+}
+
+/* The far end of a detour: the farthest free cell, `min` panels off the
+ * way or more, of a branch not `taken` yet (which it then takes); false
+ * where none is left. One at a time, as each object placed changes where
+ * the next may stand. */
+typedef struct { int x, y, d; } DetourEnd;
+
+static bool detour_end(int min, uint8_t *taken, DetourEnd *out) {
+	enum { MAX_D = 160 };
+	static int16_t cells[MAP_W * MAP_H];
+	int count[MAX_D + 1] = { 0 }, start[MAX_D + 1], total = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (detour[y][x] >= min) { ++count[detour[y][x] < MAX_D ? detour[y][x] : MAX_D]; ++total; }
+	/* (by distance, farthest first; in a distance, in the grid's order) */
+	for (int d = MAX_D, at = 0; d >= 0; --d) { start[d] = at; at += count[d]; }
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (detour[y][x] >= min) cells[start[detour[y][x] < MAX_D ? detour[y][x] : MAX_D]++] = (int16_t)(y * MAP_W + x);
+	for (int i = 0; i < total; ++i) {
+		int x = cells[i] % MAP_W, y = cells[i] / MAP_W, b = branch[y][x];
+		if (taken[b] || !cell_free(x, y) || behind_gap(x, y) || near_talker(x, y) || cuts_way(x, y)) continue;
+		taken[b] = 1;
+		out->d = detour[y][x];
+		pad_middle(&x, &y);
+		out->x = x; out->y = y;
+		return true;
+	}
+	return false;
+}
+
 /* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
 
 static bool object_at(int x, int y);
@@ -1096,16 +1183,27 @@ static int npcs_for(int want) {
 	return want < left ? want : left > 0 ? left : 0;
 }
 
-/* Rooms holding better data, more of them deeper and in the Undernet (a
- * dark warp's, or the short net's dark way's act); then Mystery data
- * scattered through the rest, most at dead ends: the side ways BN6
- * rewards exploring. */
+/* Blue data where the detours end, more of them deeper and in the Undernet
+ * (a dark warp's, or the short net's dark way's act), the farthest a tier
+ * up where it is a long walk; in a room where the layer has too few
+ * detours. Then green data loose through the rest, most at dead ends. The
+ * colour says what a walk there is worth, as BN6's do: where the old roll
+ * gave any data any tier, most of the good ones lay by the way, all green
+ * (docs/LEVEL_DESIGN.md, Set pieces). */
 static void place_data(int depth, int kind, int biome, int size, const int *order, int n, int *next) {
 	int x, y;
-	int rich = npcs_for(1 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET));
-	for (int k = 0; k < rich; ++k, ++*next) {
-		NetObj *o = PLACE(OBJ_MYSTERY);
-		if (o) o->param = rng_range(0, 99) < 50 ? 1 : 2;
+	static uint8_t taken[MAP_W * MAP_H];
+	memset(taken, 0, sizeof taken);
+	measure_detours();
+	int rich = npcs_for(2 + (depth > 6) + (kind == LAYER_UNDERNET || biome == BIOME_UNDERNET));
+	for (int k = 0; k < rich; ++k) {
+		DetourEnd end;
+		bool far = detour_end(DETOUR_BLUE, taken, &end);
+		NetObj *o = far ? add_obj(OBJ_MYSTERY, end.x, end.y) : PLACE(OBJ_MYSTERY);
+		if (!far) ++*next;
+		/* (the best three times in ten besides: what the old roll gave the
+		 * rich data, about as much in all) */
+		if (o) o->param = k == 0 && far && end.d >= DETOUR_FAR ? 2 : rng_range(0, 99) < 30 ? 2 : 1;
 	}
 	static int dx[256], dy[256];
 	int nde = dead_ends(dx, dy, 256), di = 0;
@@ -1113,8 +1211,7 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
 		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
 	}
-	int md = 3 + rng_range(0, 2) + size;
-	md = npcs_for(md);
+	int md = npcs_for(2 + rng_range(0, 2) + size);
 	for (int k = 0; k < md; ++k) {
 		bool got = false;
 		if (rng_range(0, 99) < 70)
@@ -1123,8 +1220,7 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		if (!got) continue;
 		NetObj *o = add_obj(OBJ_MYSTERY, x, y);
 		if (!o) break;
-		int roll = rng_range(0, 99);
-		o->param = roll < 70 ? 0 : roll < 92 ? 1 : 2;
+		o->param = 0;
 	}
 }
 

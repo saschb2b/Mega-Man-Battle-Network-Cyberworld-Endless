@@ -500,3 +500,49 @@ takes a bridge's link look).
 
 The field pictures and a hub's centrepiece where the layout has a centre;
 each a stamp cut like the counters, set by the same rules.
+
+## Set pieces
+
+BN6's net areas hold more than floors and props: Rush's bone gaps, purple
+Mystery Data, the Link Navis' obstacles, arrow panels, security cubes,
+teleport pads. Each area repeats two or three of its own, the main route
+stays free, and each lock guards one thing on a spur, its reward following
+the detour. The research behind them (what each area holds, how the ROM
+runs each, the rules Capcom places them by) and the plan are in the epic,
+issue #49; what is built is below.
+
+The design is the run's dialectic, prepare or press on (docs/META.md), at
+the scale of a spur: a detour costs steps, and BN6's step counter rolls
+battles; a lock's key costs zenny or a Cross; what it pays is power for the
+act's guardian, or a shortcut that saves battles. Value that has nothing
+to do with its cost asks no decision, so the generator ties them together.
+
+### Detours and their data (built)
+
+`measure_detours` in `net_gen.c` walks from the way (the layer's shortest
+walk from the arrival to the exit or the guardian, `layer_on_way`) over
+the floor: each panel's detour is the panels walked to reach it from the
+way (`layer_detour`), and its branch the way's panel that walk leaves
+from, so a spur, a room off the way and everything past them share one.
+The guardian's arena is no detour (the way ends at him).
+
+Mystery Data follow BN6's colours, which say what a walk is worth:
+
+- **Blue data where the detours end**: 2 a layer, one more past depth 6
+  and in the Undernet; each the farthest free panel of a branch three
+  panels off the way or more, the farthest branches first, on a pad's
+  middle where the end is a pad (`detour_end`). The farthest is of the
+  best quality (a chip three tiers up, or an HPMemory) where it lies eight
+  panels off or more; the others three times in ten. A layer with too few
+  detours puts the rest in its rooms. The run's Spin lies in the best of
+  them.
+- **Green data loose**, 2-4 a layer (up to two more on bigger layouts), most at
+  dead ends: the commonest quality.
+
+Over 3000 layers of a first cycle the old roll gave every quality the same
+places, 7 panels off the way on average and a quarter of them within two
+panels of it, all drawn green; now the green data lie 6.1 panels off on
+average, the blue ones 8.2 and the best 11.8, 1-2% of them within two
+panels, and about as much in all (fewer of the middle quality, a fifth
+more of the best). The tests check that nine blue data in ten stand three
+panels off the way or more.
