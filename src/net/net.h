@@ -110,6 +110,12 @@ typedef struct { int x, y, dir, kind, rx, ry; } NetBlock;
 typedef struct { int x, y, dir, len; } NetLane;
 #define MAX_LANES 1
 
+/* An invisible path (issue #46): BN6's floor drawn as void, from a
+ * walkway's tip `len` panels on to a lonely pad holding one thing; a gap's
+ * shape (NetGap), its panels void in cell[] (drawn so) and floor to the
+ * map's walls. */
+#define MAX_PATHS 1
+
 typedef struct {
 	uint8_t cell[MAP_H][MAP_W];
 	uint8_t level[MAP_H][MAP_W];   /* 1: a raised room's floor */
@@ -141,6 +147,9 @@ typedef struct {
 	bool teleport_island;
 	NetLane lane[MAX_LANES];
 	int nlanes;
+	NetGap path[MAX_PATHS];
+	int npaths;
+	int hinter;        /* the navi who hints at an invisible path: its object + 1, 0 none */
 } Layer;
 
 extern Layer layer;
@@ -195,7 +204,7 @@ bool layer_step_ok(int x, int y, int nx, int ny);
  * from the run's seed and the depth alone. How many of the act's layers
  * from `depth` on hold `piece` (a Net Dealer stocks its key); a Rush gap's
  * length in panels. */
-enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8, PIECE_CUBE = 16, PIECE_ARROW = 32 };
+enum { PIECE_PURPLE = 1, PIECE_RUSH = 2, PIECE_TELEPORT = 4, PIECE_OBSTACLE = 8, PIECE_CUBE = 16, PIECE_ARROW = 32, PIECE_HIDDEN = 64 };
 unsigned layer_pieces(int depth, int biome, int kind);
 /* (dev: --dev pieces=MASK) set pieces every layer of an area that has them holds */
 extern unsigned layer_pieces_forced;

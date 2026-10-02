@@ -24,16 +24,17 @@ int layer_cube_kind(int biome) { return biome == BIOME_SEASIDE ? BLOCK_TOLL : BL
  * most in Seaside, whose second area is a field of them, few in Sky, whose
  * layers seldom leave a short gap from a far floor back to the way (one
  * in ten found room), none in Robot Control's (two ways drawn, its
- * layers too close). */
-static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds, cube, arrow; } area_pieces[BIOME_COUNT] = {
+ * layers too close); invisible paths where BN6's maps hide one (Seaside
+ * 1, Sky 2, Underground 1, Undernet 2), from the second act on. */
+static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds, cube, arrow, hidden; } area_pieces[BIOME_COUNT] = {
 	[BIOME_CENTRAL] = { 2, 3, 2, 1, 0, 0, 2 },
-	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE, 1, 3 },
-	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER, 0, 1 },
+	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE, 1, 3, 1 },
+	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER, 0, 1, 1 },
 	[BIOME_GREEN] = { 2, 3, 1, 4, 2, 1 << BLOCK_TREE, 0, 2 },
 	[BIOME_GRAVEYARD] = { 4, 0, 0, 0, 4, 0x1F },
-	[BIOME_UNDERNET] = { 4, 2, 2, 0, 0, 0, 0, 2 },
+	[BIOME_UNDERNET] = { 4, 2, 2, 0, 0, 0, 0, 2, 2 },
 	[BIOME_SECRET] = { 0, 0, 0 },
-	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES, 0, 2 },
+	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES, 0, 2, 2 },
 	[BIOME_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
 	[BIOME_HOMEPAGE] = { 2, 0, 0, 0, 0, 0, 3 },
 	[BIOME_COMP_B] = { 1, 0, 0, 0, 0, 0, 3 },
@@ -64,7 +65,7 @@ unsigned layer_pieces_forced;
 static unsigned area_has(int biome) {
 	return (area_pieces[biome].purple ? PIECE_PURPLE : 0) | (area_pieces[biome].rush ? PIECE_RUSH : 0) |
 		(area_pieces[biome].teleport ? PIECE_TELEPORT : 0) | (area_pieces[biome].obstacle ? PIECE_OBSTACLE : 0) |
-		(area_pieces[biome].cube ? PIECE_CUBE : 0) | (area_pieces[biome].arrow ? PIECE_ARROW : 0);
+		(area_pieces[biome].cube ? PIECE_CUBE : 0) | (area_pieces[biome].arrow ? PIECE_ARROW : 0) | (area_pieces[biome].hidden ? PIECE_HIDDEN : 0);
 }
 
 static unsigned rolled_pieces(int depth, int biome, int kind);
@@ -88,14 +89,17 @@ static unsigned rolled_pieces(int depth, int biome, int kind) {
 	 * purple data) */
 	/* (no Rush before a guardian: his cutscene restarts every NPC script on
 	 * the map, the guardian's actors too) */
-	int w[7] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
-		area_pieces[biome].teleport, area_pieces[biome].obstacle, area_pieces[biome].cube, area_pieces[biome].arrow, 2 };
-	unsigned bits[7] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, PIECE_CUBE, PIECE_ARROW, 0 }, got = 0;
+	/* (an invisible path from the second act on: a secret for a player who
+	 * knows the net by then) */
+	int w[8] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
+		area_pieces[biome].teleport, area_pieces[biome].obstacle, area_pieces[biome].cube, area_pieces[biome].arrow,
+		depth > 3 ? area_pieces[biome].hidden : 0, 2 };
+	unsigned bits[8] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, PIECE_CUBE, PIECE_ARROW, PIECE_HIDDEN, 0 }, got = 0;
 	for (int k = 0; k < budget; ++k) {
 		int total = 0;
-		for (int i = 0; i < 7; ++i) total += got & bits[i] ? 0 : w[i];
+		for (int i = 0; i < 8; ++i) total += got & bits[i] ? 0 : w[i];
 		int roll = (int)((h >> (8 + 8 * k)) % (uint32_t)total);
-		for (int i = 0; i < 7; ++i) {
+		for (int i = 0; i < 8; ++i) {
 			if (got & bits[i]) continue;
 			if (roll < w[i]) { got |= bits[i]; break; }
 			roll -= w[i];

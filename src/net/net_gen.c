@@ -70,24 +70,11 @@ static bool cell_free(int x, int y) {
 	return true;
 }
 
-/* Whether solid objects at the n cells would cut the floor: MegaMan cannot
- * pass a navi or a Mystery Data (their radius keeps him about half a panel
- * off), so with the cells blocked, and the cells of the solid objects
- * already placed, every other floor cell must still be reached from the
- * arrival. */
-static bool cuts(int n, const int *xs, const int *ys) {
-	static uint8_t blocked[MAP_H][MAP_W];
+/* The open floor a walk from the arrival reaches, marked 2; how much. */
+static int reach_marked(uint8_t blocked[MAP_H][MAP_W]) {
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
-	if (!layer.nobj) return false;
-	memset(blocked, 0, sizeof blocked);
-	int open = 0;
-	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].solid) blocked[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
-	for (int i = 0; i < n; ++i) blocked[ys[i]][xs[i]] = 1;
-	for (int cy = 0; cy < MAP_H; ++cy)
-		for (int cx = 0; cx < MAP_W; ++cx) open += layer.cell[cy][cx] == C_PATH && !blocked[cy][cx];
 	int sx = (int)layer.obj[0].x, sy = (int)layer.obj[0].y, h = 0, t = 0;
-	if (blocked[sy][sx]) return true;
+	if (blocked[sy][sx]) return 0;
 	blocked[sy][sx] = 2;
 	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
 	while (h < t) {
@@ -100,7 +87,29 @@ static bool cuts(int n, const int *xs, const int *ys) {
 			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
 		}
 	}
-	return t < open;
+	return t;
+}
+
+/* Whether solid objects at the n cells would cut the floor: MegaMan cannot
+ * pass a navi or a Mystery Data (their radius keeps him about half a panel
+ * off), so with the cells blocked, and the cells of the solid objects
+ * already placed, every floor cell reached before must still be reached
+ * from the arrival (an island past a gap or a teleport's void is reached
+ * neither way: counted as cut, it turned every navi placed after it away,
+ * a P-Code's teller and an invisible path's). */
+static bool cuts(int n, const int *xs, const int *ys) {
+	static uint8_t blocked[MAP_H][MAP_W];
+	if (!layer.nobj) return false;
+	memset(blocked, 0, sizeof blocked);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].solid) blocked[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
+	int before = reach_marked(blocked), taken = 0;
+	for (int i = 0; i < n; ++i) taken += blocked[ys[i]][xs[i]] == 2;
+	for (int cy = 0; cy < MAP_H; ++cy)
+		for (int cx = 0; cx < MAP_W; ++cx)
+			if (blocked[cy][cx] == 2) blocked[cy][cx] = 0;
+	for (int i = 0; i < n; ++i) blocked[ys[i]][xs[i]] = 1;
+	return reach_marked(blocked) < before - taken;
 }
 
 static bool cuts_way(int x, int y) { return cuts(1, &x, &y); }
@@ -1291,6 +1300,17 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
  * and no prop, inside the camera's window. */
 typedef struct { int x, y, d, len, score; } GapSite;
 
+/* Whether panel (x, y) is a Rush gap's or an invisible path's: void in
+ * cell[], floor to the map. */
+static bool in_gap_of(const NetGap *g, int n, int x, int y) {
+	for (int i = 0; i < n; ++i)
+		for (int k = 1; k <= g[i].len; ++k)
+			if (x == g[i].x + dir_dx[g[i].dir] * k && y == g[i].y + dir_dy[g[i].dir] * k) return true;
+	return false;
+}
+
+static bool in_gap(int x, int y) { return in_gap_of(layer.gap, layer.ngaps, x, y) || in_gap_of(layer.path, layer.npaths, x, y); }
+
 static bool gap_fits(int x, int y, int d, int len) {
 	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
 	for (int k = 1; k <= len + 4; ++k)
@@ -1298,7 +1318,7 @@ static bool gap_fits(int x, int y, int d, int len) {
 			if (k < len && abs(s) > 1) continue;
 			int i = x + dir_dx[d] * k + sx * s, j = y + dir_dy[d] * k + sy * s;
 			bool island = k > len && k <= len + 3 && abs(s) <= 1;
-			if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || layer.cell[j][i] != C_VOID || prop_at_cell(i, j)) return false;
+			if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || layer.cell[j][i] != C_VOID || prop_at_cell(i, j) || in_gap(i, j)) return false;
 			if ((island || (k <= len && !s)) && !win_in(i, j)) return false;
 		}
 	return true;
@@ -1347,6 +1367,65 @@ static void carve_gap(const GapSite *g, int rise) {
 	layer.gap[layer.ngaps++] = (NetGap){ g->x, g->y, g->d, g->len, true };
 	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
 	if (o) o->param = g->len >= 2 ? 2 : 1;
+}
+
+/* ---- Invisible paths (issue #46; docs/LEVEL_DESIGN.md, Set pieces) ----
+ * BN6's floor drawn as void (Seaside Area 1, Sky Area 2, Underground 1,
+ * Undernet 2): a walkway's tip aimed across the void at a lonely pad, the
+ * floor between drawn as void, its pad holding what a player who walks on
+ * finds. Its site is a Rush gap's (plan_gap), planned once the islands
+ * stand; a navi near the tip says what he saw. */
+#define PATH_LEN 3   /* its panels, at most */
+
+static bool apart(int x, int y);
+
+/* Where the navi who hints may stand: two to eight panels from the tip,
+ * the nearest, apart from what else stands there, off the way and beside
+ * it and out of walkways' mouths; false where none may (no path without
+ * its cue). */
+static bool hinter_spot(const GapSite *g, int *hx, int *hy) {
+	for (int r = 2; r <= 8; ++r)
+		for (int dy = -r; dy <= r; ++dy)
+			for (int dx = -r; dx <= r; ++dx) {
+				int x = g->x + dx, y = g->y + dy;
+				if ((abs(dx) != r && abs(dy) != r) || x < 1 || y < 1 || x >= MAP_W - 1 || y >= MAP_H - 1) continue;
+				if (!cell_free(x, y) || way_band[y][x] || layer.level[y][x] || hushed[y][x] || beside_narrow(x, y) || by_walkway(x, y) ||
+					!apart(x, y) || cuts_way(x, y))
+					continue;
+				*hx = x;
+				*hy = y;
+				return true;
+			}
+	return false;
+}
+
+/* The path across the void from the site, its pad and its one thing (the
+ * best kind: an HPMemory now and then, else a chip three tiers up), and
+ * the navi who hints at it; none where the pad would leave the map too
+ * big for the game's tile map, or where no navi may stand to hint. */
+static void carve_hidden(const GapSite *g, int rise) {
+	int mx = g->x + dir_dx[g->d] * (g->len + 2), my = g->y + dir_dy[g->d] * (g->len + 2), hx, hy;
+	if (layer.npaths >= MAX_PATHS || !hinter_spot(g, &hx, &hy)) return;
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	if (!fits(rise)) {
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		return;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	layer.path[layer.npaths++] = (NetGap){ g->x, g->y, g->d, g->len, true };
+	NetObj *o = add_obj(OBJ_MYSTERY, mx, my);
+	if (o) o->param = 2;
+	if ((o = add_obj(OBJ_NPC, hx, hy))) {
+		o->param = rng_range(0, 5);
+		o->npc_line = rng_range(0, 255);
+		layer.hinter = layer.nobj;
+	}
+}
+
+static void place_hidden(int rise) {
+	GapSite site = plan_gap(PATH_LEN);
+	if (site.x >= 0) carve_hidden(&site, rise);
 }
 
 /* ---- Teleports (issue #44) ----
@@ -1640,13 +1719,6 @@ bool layer_step_ok(int x, int y, int nx, int ny) {
 	return to < 0 || (nx - x == dir_dx[to] && ny - y == dir_dy[to]);
 }
 
-static bool in_gap(int x, int y) {
-	for (int g = 0; g < layer.ngaps; ++g)
-		for (int k = 1; k <= layer.gap[g].len; ++k)
-			if (x == layer.gap[g].x + dir_dx[layer.gap[g].dir] * k && y == layer.gap[g].y + dir_dy[layer.gap[g].dir] * k) return true;
-	return false;
-}
-
 /* The floor a walk from the arrival reaches (no island past a gap or a
  * teleport's void). */
 static void reach_from_arrival(uint8_t reach[MAP_H][MAP_W]) {
@@ -1677,7 +1749,7 @@ static int lane_len(int x, int y, int d) {
 		if (floor_cell(cx, cy))
 			return k > 1 && !layer.level[cy][cx] && cell_free(cx, cy) && !in_arena(cx, cy) && !near_stair(cx, cy) ? k - 1 : 0;
 		if (k > LANE_MAX || !void_cell(cx, cy) || !void_cell(cx + sx, cy + sy) || !void_cell(cx - sx, cy - sy) || prop_at_cell(cx, cy) ||
-			in_gap(cx, cy))
+			in_gap(cx, cy) || in_gap(cx + sx, cy + sy) || in_gap(cx - sx, cy - sy))
 			return 0;
 	}
 	return 0;
@@ -1744,6 +1816,19 @@ static void place_bystanders(const int *order, int n) {
 		}
 }
 
+/* The set pieces placed once the rest stands: the islands past the void
+ * (a Rush gap's, a teleport's, an invisible path's), the pockets' data,
+ * an arrow lane, a P-Code's teller; and the emblems. */
+static void place_last(const GapSite *gap, unsigned pieces, int rise, const LayerKit *kit, const int *order, int n) {
+	if (gap->x >= 0) carve_gap(gap, rise);
+	if (layer.teleport_island) carve_teleport_island(rise);
+	if (pieces & PIECE_HIDDEN) place_hidden(rise);
+	place_block_rewards();
+	if (pieces & PIECE_ARROW) place_lane(kit);
+	place_teller(order, n);
+	emblems(kit);
+}
+
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
 	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
 	int rise = kit ? kit->rise : 0;
@@ -1803,13 +1888,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	if (block >= 0) plan_obstacle(block);
 	if (pieces & PIECE_CUBE) plan_obstacle(layer_cube_kind(biome));
 	npcs_held += layer.nblocks + (pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
+	npcs_held += pieces & PIECE_HIDDEN ? 2 : 0;          /* (an invisible path's data and the navi who hints at it) */
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
 	npcs_held = 0;
-	if (gap.x >= 0) carve_gap(&gap, rise);
-	if (layer.teleport_island) carve_teleport_island(rise);
-	place_block_rewards();
-	if (pieces & PIECE_ARROW) place_lane(kit);
-	place_teller(order, n);
-	emblems(kit);
+	place_last(&gap, pieces, rise, kit, order, n);
 }

@@ -838,9 +838,22 @@ int netmap_gap_at(int cx, int cy) {
 	return gap_panel(floordiv(cx * 8 + 4 - place.ex, 32), floordiv(cy * 8 + 4 - place.ey, 32)) + 1;
 }
 
+/* Whether panel (A, B) is an invisible path's (issue #46): void as drawn,
+ * floor to the walls, never shut. */
+static bool path_panel(int A, int B) {
+	for (int i = 0; i < layer.npaths; ++i)
+		for (int k = 1; k <= layer.path[i].len; ++k) {
+			int pA, pB;
+			grid_to_panel(layer.path[i].x + dir_dx[layer.path[i].dir] * k, layer.path[i].y + dir_dy[layer.path[i].dir] * k, &pA, &pB);
+			if (pA == A && pB == B) return true;
+		}
+	return false;
+}
+
 static bool floor_level(int A, int B, int level) {
 	int k = kind_at(A, B);
 	if (!level && !gaps_shut && ngap_panels && gap_panel(A, B) >= 0) return true;
+	if (!level && layer.npaths && path_panel(A, B)) return true;
 	return k == K_STAIR || k == (level ? K_RAISED : K_FLOOR);
 }
 
@@ -1178,6 +1191,11 @@ static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
 	}
 	for (int g = 0; g < layer.ngaps; ++g) {
 		const NetGap *p = &layer.gap[g];
+		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
+	}
+	/* (an invisible path's tip, its void panels and the void beside them) */
+	for (int i = 0; i < layer.npaths; ++i) {
+		const NetGap *p = &layer.path[i];
 		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);
 	}
 }

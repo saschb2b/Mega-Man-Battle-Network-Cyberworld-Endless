@@ -257,8 +257,9 @@ HP with it whenever the game moves the max: a later act's guardian, which
 a headless start meets at 100 HP, fought at a playtester's HP), and
 `pieces=MASK` (the set pieces in MASK on every layer whose area has them,
 where they find room: 1 purple data, 2 a Rush gap, 4 teleports, 8 a Link
-Navi obstacle, 16 a security cube, 32 an arrow lane; `pieces=32` to look
-at an area's arrow lane and ride it; docs/LEVEL_DESIGN.md, Set pieces).
+Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible
+path; `pieces=32` to look at an area's arrow lane and ride it;
+docs/LEVEL_DESIGN.md, Set pieces).
 
 ## How the switches work
 

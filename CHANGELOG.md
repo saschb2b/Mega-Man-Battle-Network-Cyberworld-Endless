@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Invisible paths (issue #46).** From the second act on, Seaside, Sky,
+  the Undernet and the Nest can hide floor drawn as void, as BN6 does:
+  from a walkway's tip or a platform's edge straight out to a lonely pad
+  with a good Mystery Data on it. A navi nearby tells you he saw someone
+  walk out there over nothing.
+- **P-Code tellers stay put.** On a layer that also had a Rush island or a
+  teleport island, the navi who tells a cube's P-Code could find no place
+  to stand, and the cube asked for a toll instead.
 - **Arrow lanes (issue #43).** BN6's arrow panels now carry MegaMan across
   a short lane from the end of a long detour back toward the way: walk the
   long way in, ride out. Each area draws its own (Seaside's blue panels,

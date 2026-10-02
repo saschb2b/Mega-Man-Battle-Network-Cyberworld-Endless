@@ -224,6 +224,10 @@ static void gaps_bridge(bool on) {
 	for (int g = 0; g < layer.ngaps; ++g)
 		for (int k = 1; k <= layer.gap[g].len; ++k)
 			layer.cell[layer.gap[g].y + dir_dy[layer.gap[g].dir] * k][layer.gap[g].x + dir_dx[layer.gap[g].dir] * k] = on ? C_PATH : C_VOID;
+	/* (an invisible path's panels are floor to the map, issue #46) */
+	for (int g = 0; g < layer.npaths; ++g)
+		for (int k = 1; k <= layer.path[g].len; ++k)
+			layer.cell[layer.path[g].y + dir_dy[layer.path[g].dir] * k][layer.path[g].x + dir_dx[layer.path[g].dir] * k] = on ? C_PATH : C_VOID;
 	if (!layer.teleport_island) return;
 	int x = layer.teleport_x[1], y = layer.teleport_y[1], tx = layer.teleport_x[0], ty = layer.teleport_y[0];
 	while (x != tx || y != ty) {
@@ -239,8 +243,8 @@ static void gaps_bridge(bool on) {
 /* Whether room r is a Rush gap's island, or a teleport's. */
 static bool island_room(int r) {
 	if (layer.teleport_island && layer.rooms[r].ax == layer.teleport_x[0] && layer.rooms[r].ay == layer.teleport_y[0]) return true;
-	for (int g = 0; g < layer.ngaps; ++g) {
-		const NetGap *p = &layer.gap[g];
+	for (int g = 0; g < layer.ngaps + layer.npaths; ++g) {
+		const NetGap *p = g < layer.ngaps ? &layer.gap[g] : &layer.path[g - layer.ngaps];
 		int mx = p->x + dir_dx[p->dir] * (p->len + 2), my = p->y + dir_dy[p->dir] * (p->len + 2);
 		if (layer.rooms[r].ax == mx && layer.rooms[r].ay == my) return true;
 	}
@@ -313,7 +317,7 @@ static void blocks_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H]
 				held += o->type == OBJ_MYSTERY ? 1 : 100;
 		}
 		/* (a teleport's island or a Rush island holds its own) */
-		if (!layer.ngaps && !layer.teleport_island) CHECK(held == 1, "seed %u: an obstacle's pocket holds %d", seed, held);
+		if (!layer.ngaps && !layer.npaths && !layer.teleport_island) CHECK(held == 1, "seed %u: an obstacle's pocket holds %d", seed, held);
 	}
 }
 
@@ -406,6 +410,34 @@ static void lanes_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][
 	}
 }
 
+/* An invisible path (issue #46): from a walkway's tip, its panels void in
+ * cell[] (drawn so), to a pad reached only across it, holding its one
+ * thing; a navi near the tip hints at it; the way never needs it. */
+static int path_layers;
+
+static void paths_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
+	if (!layer.npaths) return;
+	++path_layers;
+	reachable_cells((int)start->x, (int)start->y, seen);
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS) CHECK(seen[(int)o->y][(int)o->x], "seed %u: the way needs an invisible path", seed);
+	}
+	for (int g = 0; g < layer.npaths; ++g) {
+		const NetGap *p = &layer.path[g];
+		CHECK(layer.cell[p->y][p->x] == C_PATH && !layer.level[p->y][p->x], "seed %u: an invisible path from no floor", seed);
+		for (int k = 1; k <= p->len; ++k)
+			CHECK(layer.cell[p->y + dir_dy[p->dir] * k][p->x + dir_dx[p->dir] * k] == C_VOID, "seed %u: an invisible path drawn", seed);
+		int mx = p->x + dir_dx[p->dir] * (p->len + 2), my = p->y + dir_dy[p->dir] * (p->len + 2), held = 0;
+		CHECK(!seen[my][mx], "seed %u: an invisible path's pad reached without it", seed);
+		for (int i = 0; i < layer.nobj; ++i)
+			if (abs((int)layer.obj[i].x - mx) <= 1 && abs((int)layer.obj[i].y - my) <= 1) held += layer.obj[i].type == OBJ_MYSTERY ? 1 : 100;
+		CHECK(held == 1, "seed %u: an invisible path's pad holds %d", seed, held);
+		const NetObj *h = layer.hinter ? &layer.obj[layer.hinter - 1] : NULL;
+		CHECK(h && h->type == OBJ_NPC && abs((int)h->x - p->x) <= 8 && abs((int)h->y - p->y) <= 8, "seed %u: no navi hints at an invisible path", seed);
+	}
+}
+
 static void test_generation(void) {
 	static uint8_t seen[MAP_H][MAP_W];
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
@@ -439,7 +471,8 @@ static void test_generation(void) {
 			const NetObj *o = &layer.obj[i];
 			if (o->type != OBJ_MYSTERY) continue;
 			int d = layer_detour((int)o->x, (int)o->y);
-			if (o->param == MD_PURPLE) continue;
+			/* (an island's, past a gap or an invisible path, keeps its own rule) */
+			if (o->param == MD_PURPLE || d < 0) continue;
 			if (o->param >= 1) { ++blue; blue_walk += d; blue_far += d >= 3; }
 			else { ++green; green_walk += d; }
 		}
@@ -466,6 +499,7 @@ static void test_generation(void) {
 		teleports_check(seed);
 		blocks_check(seed, start, seen);
 		lanes_check(seed, start, seen);
+		paths_check(seed, start, seen);
 		lane_planned += (layer_pieces(depth, biome, kind) & PIECE_ARROW) != 0;
 		gaps_bridge(true);
 		int cells = 0;
@@ -697,6 +731,7 @@ static void test_generation(void) {
 		block_layers, block_kinds[0], block_kinds[1], block_kinds[2], block_kinds[3], block_kinds[4], block_kinds[BLOCK_PCODE], tellers, block_kinds[BLOCK_TOLL]);
 	CHECK(tellers == block_kinds[BLOCK_PCODE], "%d P-Code cubes, %d navis to tell their codes", block_kinds[BLOCK_PCODE], tellers);
 	printf("  P-Code tellers a walk of %d at least from their cubes\n", teller_walk_min);
+	printf("  invisible paths on %d layers\n", path_layers);
 	printf("  arrow lanes on %d layers of %d planned, %d panels in all, from %.1f panels off the way on average\n", lane_layers, lane_planned,
 		lane_panels, (double)lane_saved / (lane_layers ? lane_layers : 1));
 	CHECK(!pieces_crowded, "%d set pieces with a navi within 3 panels of their A", pieces_crowded);
