@@ -247,17 +247,60 @@ static bool island_room(int r) {
 	return false;
 }
 
-static int gap_layers, gap_panels, teleport_layers, teleport_islands, block_layers, block_kinds[BLOCK_KINDS];
+static int gap_layers, gap_panels, teleport_layers, teleport_islands, block_layers, block_kinds[BLOCK_TOLL + 1], tellers;
 
 /* A Link Navi obstacle (issue #42): in a walkway's first panel off the way;
  * closed, the exit is still reached and the pocket behind it holds its one
  * Mystery Data and nothing else. */
+/* Whether a navi stands within `reach` panels of (x, y): near a set
+ * piece's A (a cube's or an obstacle's mouth, a Rush stand), the engine's
+ * A turned to him (it turns to a navi within 52 units first; a P-Code's
+ * teller beside its cube took the cube's A). */
+static bool talker_near(int x, int y, int reach) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		int t = layer.obj[i].type;
+		if (t == OBJ_WARP_IN || t == OBJ_EXIT || t == OBJ_MYSTERY || t == OBJ_UNDERNET || t == OBJ_RETURN) continue;
+		if (abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
+	}
+	return false;
+}
+
+/* The walk from (sx, sy) to (tx, ty) in panels, -1 none. */
+static int walk_between(int sx, int sy, int tx, int ty) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H], dist[MAP_H][MAP_W];
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) dist[y][x] = -1;
+	int h = 0, t = 0;
+	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
+	dist[sy][sx] = 0;
+	while (h < t) {
+		int x = qx[h], y = qy[h++];
+		if (x == tx && y == ty) return dist[y][x];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + dir_dx[k], ny = y + dir_dy[k];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || dist[ny][nx] >= 0 || layer.cell[ny][nx] != C_PATH) continue;
+			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+	return -1;
+}
+
+static int pieces_crowded, teller_walk_min = 1 << 20, tellers_near;
+
 static void blocks_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
 	if (!layer.nblocks) return;
 	++block_layers;
+	tellers += layer.teller > 0;
 	for (int b = 0; b < layer.nblocks; ++b) {
 		const NetBlock *k = &layer.block[b];
 		block_kinds[k->kind]++;
+		pieces_crowded += talker_near(k->x, k->y, 3);
+		if (k->kind == BLOCK_PCODE && layer.teller > 0) {
+			const NetObj *t = &layer.obj[layer.teller - 1];
+			int w = walk_between(k->x, k->y, (int)t->x, (int)t->y);
+			if (w < teller_walk_min) teller_walk_min = w;
+			tellers_near += w < 8;
+		}
 		CHECK(!layer_on_way(k->x, k->y), "seed %u: an obstacle on the way", seed);
 		layer.cell[k->y][k->x] = C_VOID;
 		reachable_cells((int)start->x, (int)start->y, seen);
@@ -311,6 +354,7 @@ static void gaps_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][M
 	for (int g = 0; g < layer.ngaps; ++g) {
 		const NetGap *p = &layer.gap[g];
 		gap_panels += p->len;
+		pieces_crowded += talker_near(p->x, p->y, 3);
 		CHECK(p->len >= 1 && p->len <= 3, "seed %u: a gap of %d panels", seed, p->len);
 		CHECK(!layer_on_way(p->x, p->y), "seed %u: a gap's stand on the way", seed);
 		int mx = p->x + dir_dx[p->dir] * (p->len + 2), my = p->y + dir_dy[p->dir] * (p->len + 2), held = 0;
@@ -606,8 +650,12 @@ static void test_generation(void) {
 	CHECK(blue_far * 10 >= blue * 9, "only %d of %d blue data where a detour ends", blue_far, blue);
 	printf("  purple data on %d of %d layers; Rush gaps on %d, %d panels in all; teleport pairs on %d, %d to an island\n", purples, layers, gap_layers,
 		gap_panels, teleport_layers, teleport_islands);
-	printf("  Link Navi obstacles on %d layers: water %d, tree %d, flames %d, cyclone %d, cloud %d\n", block_layers, block_kinds[0], block_kinds[1],
-		block_kinds[2], block_kinds[3], block_kinds[4]);
+	printf("  Link Navi obstacles and cubes on %d layers: water %d, tree %d, flames %d, cyclone %d, cloud %d; P-Code cubes %d (%d told), tolls %d\n",
+		block_layers, block_kinds[0], block_kinds[1], block_kinds[2], block_kinds[3], block_kinds[4], block_kinds[BLOCK_PCODE], tellers, block_kinds[BLOCK_TOLL]);
+	CHECK(tellers == block_kinds[BLOCK_PCODE], "%d P-Code cubes, %d navis to tell their codes", block_kinds[BLOCK_PCODE], tellers);
+	printf("  P-Code tellers a walk of %d at least from their cubes\n", teller_walk_min);
+	CHECK(!pieces_crowded, "%d set pieces with a navi within 3 panels of their A", pieces_crowded);
+	CHECK(!tellers_near, "%d P-Code tellers under 8 panels' walk from their cubes", tellers_near);
 	CHECK(purples * 10 >= layers && purples * 2 <= layers, "purple data on %d of %d layers", purples, layers);
 	/* (a Mystery Data a playtester saw beside his walkway was a walk round) */
 	CHECK(hidden * 100 <= approached, "%d of %d objects stand behind a hidden gap", hidden, approached);

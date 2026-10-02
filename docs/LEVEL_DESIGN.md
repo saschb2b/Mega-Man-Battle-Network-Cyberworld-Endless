@@ -631,9 +631,10 @@ a layer gives it what its own maps do.
   enough held, to press A at the edge (BN6 answers A without them with a
   sound alone).
 
-Over the tests' 300 layers, 62 hold a gap, 91 panels in all; the way
-never needs one, and each island is reached only across it, holding its
-one Mystery Data.
+Over the tests' 300 layers, 40 hold a gap, 55 panels in all (the act's
+budget shared with more kinds of piece since: 62 and 91 before the
+obstacles); the way never needs one, and each island is reached only
+across it, holding its one Mystery Data.
 
 ### Teleports (built, issue #44)
 
@@ -659,7 +660,8 @@ diamond over them) and never on or beside the way (its trigger reaches a
 cell into the panels round it): no one is warped walking by. The pads'
 triggers take warps 2 and 3, each leading to the other's middle
 (`mapslot_teleport`, the layer map's warp list). Over the tests' 300
-layers, 21 hold a pair, 17 of them to an island.
+layers, 12 hold a pair, 11 of them to an island (21 before the obstacles
+shared the act's budget).
 
 ### Link Navi obstacles (built, issue #42)
 
@@ -692,5 +694,45 @@ of Gregar's Link Navis clear each. A layer sets one the same way:
   Navi's mugshot says "Leave it to me!" over his sound, and the obstacle
   opens, for good (its present flag is kept in the run's state).
 
-Over the tests' 300 layers (their guardians Cross navis), 10 hold one.
+Over the tests' 300 layers (their guardians Cross navis), 13 hold one.
+
+### Security cubes (built, issue #45)
+
+BN6's security cube (handler 3, sprite 7:0x03, its records looking the four
+ways) stands across a walkway and vanishes when its condition is met. A
+layer sets one where the act's plan calls for it, in every comp and
+homepage, Central and Seaside (`layer_cube_kind` in `net_pieces.c`), in a
+pocket's mouth as an obstacle stands (`plan_obstacle`), its one thing a
+blue data of the best quality:
+
+- **A P-Code** (comps, homepages, Central): four digits from the layer's
+  seed, which one bystander knows (`place_teller` in `net_gen.c`). He
+  stands a walk of eight panels or more from the cube and apart from
+  anything else, so the key lies on another way than the lock: at the cube
+  without it, MegaMan says somebody on this layer must know it, ask
+  around; told it, A at the cube enters it and the cube opens. A layer
+  with no such place for him takes a toll instead (a lock no one can open
+  would close its pocket for good).
+- **A toll** (Seaside): 200 zenny in act 1 and 100 more an act, half the
+  Net Dealer's answer chip: the run's dialectic, prepare or press on, in
+  zenny. The game's own zenny check takes it, or MegaMan says they don't
+  have that much.
+
+Two rules came from the cube and hold for every piece spoken to:
+
+- **No navi within three panels of a piece's A** (a cube's or an
+  obstacle's mouth, a Rush stand; `navi_near`, `hush`): the engine's A
+  turns to a navi within 52 units before a map's check, and a teller two
+  panels from his cube took the cube's A. A piece is planned away from the
+  navis standing, and the bystanders and the teller placed after it keep
+  off the panels round it.
+- **A mouth stays one panel wide:** the map's floor fix (`legal.c`), which
+  toggles cells for the tiles, widened a cube's mouth on a comp to three
+  panels, and MegaMan walked round the cube. The mouth, the void beside it
+  and the floor before and after it are locked (`lock_pieces` in
+  `netmap.c`).
+
+Over the tests' 300 layers, 10 hold a P-Code cube, each teller eight
+panels' walk or more from his, and 9 a toll; no navi stands within three
+panels of a piece's A.
 

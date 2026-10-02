@@ -82,6 +82,14 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
  * no choice); else it asks for his SP, flag set on Yes, and says the gate
  * is quiet once it has been. */
 int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int needed);
+/* A security cube (issue #45). One asking a P-Code: once a navi of the
+ * layer has told it (flag `told`), A opens it (clears flag `present`); else
+ * MegaMan says to ask around. One taking a toll: `price` zenny to pass,
+ * asked, and paid, it opens. And the navi who tells the P-Code (sets
+ * `told`). */
+int ta_cube_pcode(TextArchive *t, int present, int told, const char *code);
+int ta_cube_toll(TextArchive *t, int present, int price);
+int ta_pcode_teller(TextArchive *t, int face, const char *code, int told);
 /* A Navi gate's win: his SP chip. */
 int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_name, int code);
 /* A collector's vault (docs/META.md, gates): its three chips (`code`

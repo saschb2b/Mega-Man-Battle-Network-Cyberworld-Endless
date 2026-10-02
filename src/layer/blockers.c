@@ -22,7 +22,10 @@
 #include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
+#include "pacing.h"
 #include "run.h"
+#include "layer_objs.h"
+#include "scripts.h"
 
 #define H3_LITERAL   0x080A66D4u   /* handler 3's records' literal (Gregar) */
 #define H3_TABLE     0x080A6144u   /* ... BN6's 86 (ids 0x00-0x55) */
@@ -49,7 +52,16 @@ static const uint8_t templates[VARIANTS][10] = {
 	{ 0x1C, 0x4B, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 },    /* the cyclone (0x37) */
 	{ 0x1C, 0x20, 0, 0, 0, 0, 2, 0xFF, 0x74, 0 },    /* the cloud (0x3B) */
 };
-static const int variant_of[BLOCK_KINDS] = { V_WATER, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD };
+/* A block's variant: the obstacle's, or the cube looking along its
+ * walkway (animation 0 for +X, 1 for -Y, 2 for -X, 3 for +Y). */
+static int variant_of(const NetBlock *b) {
+	static const int obstacle[BLOCK_KINDS] = { V_WATER, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD };
+	if (b->kind < BLOCK_KINDS) return obstacle[b->kind];
+	int dir, edge, side;
+	netmap_block_edges(b, &dir, &edge, &side);
+	static const int look[4] = { 0, 3, 2, 1 };
+	return V_CUBE + look[dir];
+}
 
 void blockers_install(void) {
 	/* the records once a core, fixed per slot: a live object reads its
@@ -75,7 +87,7 @@ void blockers_install(void) {
 }
 
 void blocker_sprite(int b, int *category, int *index) {
-	const uint8_t *t = templates[variant_of[layer.block[b].kind]];
+	const uint8_t *t = templates[variant_of(&layer.block[b])];
 	*category = t[0] / 4;
 	*index = t[1];
 }
@@ -87,6 +99,14 @@ void blocker_sprite(int b, int *category, int *index) {
 static void spot(int dir, int kind, int edge, int side, int *x, int *y) {
 	static const int8_t along[2][BLOCK_KINDS] = { { 18, 22, 20, 22, 22 }, { -28, -24, -24, -24, -24 } };
 	static const int8_t across[BLOCK_KINDS] = { 20, 16, 16, 18, 18 };
+	/* (the cube: +X (8, 4), -X (-10, 32), -Y (22, -8), +Y (-8, 8)) */
+	static const int8_t cube[4][2] = { { 8, 4 }, { -8, 8 }, { -10, 32 }, { 22, -8 } };
+	if (kind >= BLOCK_KINDS) {
+		bool along_x = !(dir & 1);
+		*x = along_x ? edge + cube[dir][0] : side + cube[dir][0];
+		*y = along_x ? side + cube[dir][1] : edge + cube[dir][1];
+		return;
+	}
 	if (dir == 0 || dir == 2) {
 		*x = edge + along[dir == 2][kind];
 		*y = side + across[kind];
@@ -108,7 +128,7 @@ int blockers_objects(uint8_t *recs, int n, int max) {
 		r[1] = 3;
 		put32(r + 4, (uint32_t)(x * 65536));
 		put32(r + 8, (uint32_t)(y * 65536));
-		put32(r + 16, (uint32_t)(BLOCK_ID0 + variant_of[b->kind] * BLOCK_SLOTS + k));
+		put32(r + 16, (uint32_t)(BLOCK_ID0 + variant_of(b) * BLOCK_SLOTS + k));
 	}
 	return n;
 }
@@ -124,8 +144,18 @@ static const struct { int navi, mugshot, sound; const char *name, *deed; } helpe
 	{ 5, 0x4F, 0xE4, "ChargeMan", "ram" },
 };
 
+const char *blockers_pcode(void) {
+	static char code[8];
+	snprintf(code, sizeof code, "%04u", (unsigned)(run.layer_seed >> 7) % 9000u + 1000u);
+	return code;
+}
+
 static int talk(TextArchive *t, int k) {
 	const NetBlock *b = &layer.block[k];
+	/* (a security cube's: a P-Code told on the layer, or a toll, 200
+	 * zenny in act 1 and 100 more an act: half the Net Dealer's answer) */
+	if (b->kind == BLOCK_PCODE) return ta_cube_pcode(t, BLOCK_PRESENT_FLAG + k, LAYER_PCODE_FLAG, blockers_pcode());
+	if (b->kind == BLOCK_TOLL) return ta_cube_toll(t, BLOCK_PRESENT_FLAG + k, 200 + 100 * (pacing_act(run.depth) + 7 * pacing_loop(run.depth)));
 	unsigned can = block_openers(b->kind), held = layer_crosses(run.depth) & can;
 	int i = ta_script(t);
 	bool first = true;

@@ -1091,9 +1091,18 @@ static void lock(uint8_t locked[MAP_H][MAP_W], int x, int y, int w, int h, int m
 
 /* The set pieces as generated: a teleport's panels with the floor round
  * them (the gem's), a Rush gap's stand and the floor behind it, and its
- * void panels with the void beside them. */
+ * void panels with the void beside them; an obstacle's or a cube's mouth,
+ * one panel wide: the void beside it and the floor before and after it
+ * (widened, MegaMan walked round the cube: issue #45; the corners left to
+ * the tiles). */
 static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
 	for (int k = 0; k < 2 && layer.nteleports; ++k) lock(locked, layer.teleport_x[k] - 1, layer.teleport_y[k] - 1, 3, 3, 0);
+	for (int k = 0; k < layer.nblocks; ++k) {
+		const NetBlock *b = &layer.block[k];
+		bool along_x = !(b->dir & 1);
+		lock(locked, b->x - along_x, b->y - !along_x, 1 + 2 * along_x, 1 + 2 * !along_x, 0);
+		lock(locked, b->x - !along_x, b->y - along_x, 1 + 2 * !along_x, 1 + 2 * along_x, 0);
+	}
 	for (int g = 0; g < layer.ngaps; ++g) {
 		const NetGap *p = &layer.gap[g];
 		for (int k = -1; k <= p->len; ++k) lock(locked, p->x + dir_dx[p->dir] * k, p->y + dir_dy[p->dir] * k, 1, 1, 1);

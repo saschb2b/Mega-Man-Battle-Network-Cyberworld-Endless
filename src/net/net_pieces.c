@@ -6,36 +6,41 @@
 #include "net.h"
 #include "run.h"
 
+/* (Seaside's toll, as its Area 2 takes 100 zenny a pass; elsewhere a
+ * P-Code, as BN6's comps and homepages ask) */
+int layer_cube_kind(int biome) { return biome == BIOME_SEASIDE ? BLOCK_TOLL : BLOCK_PCODE; }
+
 /* What each area's original maps hold, as weights (BN6's own placements:
  * the epic's Research 1): purple data in every area but the Secret Area,
  * the most in the Graveyard and the Undernet; Rush's bone gaps in
  * Central, Seaside, Green, Sky, the Undernet and ACDC's homepage, the
  * longest in Sky; teleport pairs where their gem marks them, Green's four
- * in Green Area 1, Sky's three, Central's one; the Link Navis' obstacles
+ * in Green Area 1, Sky's three, Central's one; security cubes in every
+ * comp and homepage, Central and Seaside; the Link Navis' obstacles
  * of the area's own kinds (Seaside's water and cyclone, Green's trees,
  * Sky's clouds, flames and water, the Underground's under the Nest, all
  * five in the Graveyard, which keeps nearly all its data behind them;
  * none in Central). */
-static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds; } area_pieces[BIOME_COUNT] = {
-	[BIOME_CENTRAL] = { 2, 3, 2, 1 },
-	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE },
+static const struct { uint8_t purple, rush, rush_len, teleport, obstacle, kinds, cube; } area_pieces[BIOME_COUNT] = {
+	[BIOME_CENTRAL] = { 2, 3, 2, 1, 0, 0, 2 },
+	[BIOME_SEASIDE] = { 2, 2, 1, 0, 2, 1 << BLOCK_WATER | 1 << BLOCK_CYCLONE, 1 },
 	[BIOME_SKY] = { 2, 3, 3, 3, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_FLAMES | 1 << BLOCK_WATER },
 	[BIOME_GREEN] = { 2, 3, 1, 4, 2, 1 << BLOCK_TREE },
 	[BIOME_GRAVEYARD] = { 4, 0, 0, 0, 4, 0x1F },
 	[BIOME_UNDERNET] = { 4, 2, 2 },
 	[BIOME_SECRET] = { 0, 0, 0 },
 	[BIOME_NEST] = { 1, 0, 0, 0, 3, 1 << BLOCK_CLOUD | 1 << BLOCK_CYCLONE | 1 << BLOCK_FLAMES },
-	[BIOME_COMP] = { 1, 0, 0 },
-	[BIOME_HOMEPAGE] = { 2, 0, 0 },
-	[BIOME_COMP_B] = { 1, 0, 0 },
-	[BIOME_ROBOT_COMP] = { 1, 0, 0 },
-	[BIOME_AQUARIUM_COMP] = { 1, 0, 0 },
-	[BIOME_JUDGE_COMP] = { 1, 0, 0 },
-	[BIOME_WEATHER_COMP] = { 1, 0, 0 },
-	[BIOME_COPYBOT_COMP] = { 1, 0, 0 },
-	[BIOME_ACDC_HP] = { 2, 2, 1 },
-	[BIOME_GREEN_HP] = { 2, 0, 0 },
-	[BIOME_SKY_HP] = { 2, 0, 0 },
+	[BIOME_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_HOMEPAGE] = { 2, 0, 0, 0, 0, 0, 3 },
+	[BIOME_COMP_B] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_ROBOT_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_AQUARIUM_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_JUDGE_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_WEATHER_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_COPYBOT_COMP] = { 1, 0, 0, 0, 0, 0, 3 },
+	[BIOME_ACDC_HP] = { 2, 2, 1, 0, 0, 0, 3 },
+	[BIOME_GREEN_HP] = { 2, 0, 0, 0, 0, 0, 3 },
+	[BIOME_SKY_HP] = { 2, 0, 0, 0, 0, 0, 3 },
 };
 
 static uint32_t piece_hash(int depth, uint32_t salt) {
@@ -61,14 +66,14 @@ unsigned layer_pieces(int depth, int biome, int kind) {
 	 * purple data) */
 	/* (no Rush before a guardian: his cutscene restarts every NPC script on
 	 * the map, the guardian's actors too) */
-	int w[5] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
-		area_pieces[biome].teleport, area_pieces[biome].obstacle, 2 };
-	unsigned bits[5] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, 0 }, got = 0;
+	int w[6] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
+		area_pieces[biome].teleport, area_pieces[biome].obstacle, area_pieces[biome].cube, 2 };
+	unsigned bits[6] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, PIECE_CUBE, 0 }, got = 0;
 	for (int k = 0; k < budget; ++k) {
 		int total = 0;
-		for (int i = 0; i < 5; ++i) total += got & bits[i] ? 0 : w[i];
+		for (int i = 0; i < 6; ++i) total += got & bits[i] ? 0 : w[i];
 		int roll = (int)((h >> (8 + 8 * k)) % (uint32_t)total);
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < 6; ++i) {
 			if (got & bits[i]) continue;
 			if (roll < w[i]) { got |= bits[i]; break; }
 			roll -= w[i];

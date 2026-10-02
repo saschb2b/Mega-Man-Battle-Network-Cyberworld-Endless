@@ -440,6 +440,28 @@ static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock
 	}
 }
 
+/* The first bystander on an act's first layer passes on the net's word
+ * about its guardian, where MegaMan has never battled him: who he is and a
+ * rumor, no moves (docs/META.md, what MegaMan knows; MegaMan himself had
+ * said it, and how could he know?). His script, -1 none. */
+static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
+	static char rumor[200];
+	int navi = run.boss_order[run.biome];
+	/* (a list-6 navi's face has its sprite's number) */
+	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || !guardian_rumor(navi) ||
+		out->nchoices >= LAYER_MAX_CHOICES)
+		return -1;
+	snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
+		guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
+	/* (heard, MegaMan names him for the rest of the act: the director
+	 * watches the flag as a choice) */
+	int flag = LAYER_FLAG_BASE + out->nchoices;
+	out->choice[out->nchoices].type = OBJ_NPC;
+	out->choice[out->nchoices++].flag = flag;
+	flag_clear(flag);
+	return ta_say_flag(text, face, rumor, flag);
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -543,25 +565,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			 * same line on an act's first and third layers) */
 			if (!said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
 			tk.sprite = layer_objs_bystander;
-			/* the first on an act's first layer passes on the net's word
-			 * about its guardian, where MegaMan has never battled him: who
-			 * he is and a rumor, no moves (docs/META.md, what MegaMan
-			 * knows; MegaMan himself had said it, and how could he know?) */
-			static char rumor[200];
-			int navi = run.boss_order[run.biome];
-			/* (a list-6 navi's face has its sprite's number) */
-			if (!said && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 && navi && !guardian_known(navi) && guardian_rumor(navi) &&
-				out->nchoices < LAYER_MAX_CHOICES) {
-				snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
-					guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
-				/* (heard, MegaMan names him for the rest of the act: the
-				 * director watches the flag as a choice) */
-				int flag = LAYER_FLAG_BASE + out->nchoices;
-				out->choice[out->nchoices].type = OBJ_NPC;
-				out->choice[out->nchoices++].flag = flag;
-				flag_clear(flag);
-				tk.script = ta_say_flag(&text, tk.sprite, rumor, flag);
-			} else tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
+			int rumor = said ? -1 : rumor_talk(&text, out, tk.sprite);
+			if (rumor >= 0) tk.script = rumor;
+			else if (i == layer.teller - 1) tk.script = ta_pcode_teller(&text, tk.sprite, blockers_pcode(), LAYER_PCODE_FLAG);
+			else tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
 			++said;
 			break;
 		}

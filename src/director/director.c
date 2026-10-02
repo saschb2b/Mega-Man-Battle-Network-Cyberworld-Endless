@@ -1084,7 +1084,7 @@ static int layer_song(int tiles, int song) {
  * what its gates gave. */
 static void layer_flags_clear(void) {
 	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
-		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG };
+		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG };
 	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
 }
 
@@ -2779,6 +2779,7 @@ bool director_resume(void) {
 			flag_clear(LAYER_OFFICIAL_FLAG);
 			flag_clear(LAYER_DUEL_CALLED_FLAG);
 			flag_clear(LAYER_RUSH_TOLD_FLAG);
+			flag_clear(LAYER_PCODE_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);
@@ -3000,9 +3001,11 @@ static bool follow_exit_warp(void) {
  * undernet gate; intro defeat reward for its guardian; status for L;
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
 /* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
- * wants ten), an Unlocker, three RushFood (the set pieces' keys). */
+ * wants ten), an Unlocker, three RushFood (the set pieces' keys), 10000
+ * zenny (a cube's toll). */
 static bool dev_gift(const char *name) {
 	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
+	else if (!strcmp(name, "zenny")) devtools_zenny();
 	else if (!strcmp(name, "keys")) game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1);
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
 	else return false;

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Security cubes (issue #45).** Comps, homepages and Central now lock a
+  pocket with BN6's security cube, its one good Mystery Data behind it.
+  The cube wants a P-Code: one navi on the layer knows it, a walk away
+  from the cube, so ask around. Seaside's cubes take a toll instead, 200
+  zenny in act 1 and 100 more an act.
+- **Obstacles and cubes can't be walked round.** The map's floor could
+  widen the one-panel walkway an obstacle or a cube stands in, leaving room
+  to pass it; their mouths now stay one panel wide.
+- **A at a set piece reaches it.** A navi standing a step or two from an
+  obstacle, a cube or Rush's bones took the A meant for them; navis now
+  keep three panels away.
 - **Link Navi obstacles (issue #42).** BN6's cybertrees, flames, cyclones,
   clouds and geysers of cyberwater now stand in the mouths of pockets off
   the way, each the area's own kind, each pocket holding one good Mystery

@@ -26,6 +26,9 @@ void blocker_sprite(int b, int *category, int *index);
 void blockers_talks(TextArchive *t, int scripts[2]);
 void blockers_checks(int group, int number, const TextArchive *t, const int scripts[2]);
 
+/* A P-Code cube's code (four digits from the layer's seed). */
+const char *blockers_pcode(void);
+
 /* Appends the obstacles' spawn records to `recs` from record n, `max` at
  * most; the new count. */
 int blockers_objects(uint8_t *recs, int n, int max);

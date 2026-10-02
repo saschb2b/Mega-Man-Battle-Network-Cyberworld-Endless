@@ -43,6 +43,12 @@ static NetObj *add_obj(int type, int x, int y) {
 /* A set piece's panels, kept clear of what is placed after it is planned
  * (a Rush gap's stand and the walk to it). */
 static uint8_t reserved[MAP_H][MAP_W];
+/* ... and the panels round where it is spoken to (a Rush stand, an
+ * obstacle's or a cube's mouth), kept clear of navis: the engine's A turns
+ * to a navi within 52 units before a map's check (a P-Code's teller two
+ * panels from his cube took its A; issue #45). */
+#define PIECE_QUIET 3
+static uint8_t hushed[MAP_H][MAP_W];
 
 static bool cell_free(int x, int y) {
 	if (layer.cell[y][x] != C_PATH || reserved[y][x]) return false;
@@ -250,6 +256,22 @@ static bool near_talker(int x, int y) {
 		if (talks && abs((int)layer.obj[i].x - x) <= reach && abs((int)layer.obj[i].y - y) <= reach) return true;
 	}
 	return false;
+}
+
+/* Whether a navi of any kind stands within PIECE_QUIET panels of (x, y). */
+static bool navi_near(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		int t = layer.obj[i].type;
+		bool navi = t != OBJ_WARP_IN && t != OBJ_EXIT && t != OBJ_MYSTERY && t != OBJ_UNDERNET && t != OBJ_RETURN;
+		if (navi && abs((int)layer.obj[i].x - x) <= PIECE_QUIET && abs((int)layer.obj[i].y - y) <= PIECE_QUIET) return true;
+	}
+	return false;
+}
+
+static void hush(int x, int y) {
+	for (int j = y - PIECE_QUIET; j <= y + PIECE_QUIET; ++j)
+		for (int i = x - PIECE_QUIET; i <= x + PIECE_QUIET; ++i)
+			if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) hushed[j][i] = 1;
 }
 
 static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
@@ -1285,7 +1307,7 @@ static bool gap_fits(int x, int y, int d, int len) {
 static bool stand_ok(int x, int y, int d) {
 	int bx = x - dir_dx[d], by = y - dir_dy[d];
 	return floor_cell(x, y) && floor_cell(bx, by) && !layer.level[y][x] && !layer.level[by][bx] && !layer_on_way(x, y) &&
-		!in_arena(x, y) && detour[y][x] >= 1 && cell_free(x, y) && cell_free(bx, by) && !near_talker(x, y);
+		!in_arena(x, y) && detour[y][x] >= 1 && cell_free(x, y) && cell_free(bx, by) && !navi_near(x, y);
 }
 
 /* The best stand for a gap `want` panels long, else shorter; the farthest
@@ -1305,6 +1327,7 @@ static GapSite plan_gap(int want) {
 	if (best.x >= 0) {
 		reserved[best.y][best.x] = 1;
 		reserved[best.y - dir_dy[best.d]][best.x - dir_dx[best.d]] = 1;
+		hush(best.x, best.y);
 	}
 	return best;
 }
@@ -1482,7 +1505,7 @@ static bool pocket_mouth(int x, int y, int d) {
 	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4], bx = x - dir_dx[d], by = y - dir_dy[d];
 	if (!floor_cell(x, y) || !floor_cell(bx, by) || way_band[y][x] == 2 || layer.level[y][x] || layer.level[by][bx]) return false;
 	if (floor_cell(x + sx, y + sy) || floor_cell(x - sx, y - sy)) return false;
-	return (floor_cell(bx + sx, by + sy) || floor_cell(bx - sx, by - sy)) && cell_free(bx, by) && !near_talker(bx, by);
+	return (floor_cell(bx + sx, by + sy) || floor_cell(bx - sx, by - sy)) && cell_free(bx, by) && !navi_near(x, y);
 }
 
 static void plan_obstacle(int kind) {
@@ -1524,6 +1547,62 @@ static void plan_obstacle(int kind) {
 			if (pocket[y][x]) reserved[y][x] = 1;
 	reserved[by][bx] = 1;
 	reserved[by - dir_dy[bd]][bx - dir_dx[bd]] = 1;
+	hush(bx, by);
+}
+
+/* The layer's security cube asking a P-Code (issue #45), -1 none. */
+static int pcode_cube(void) {
+	for (int i = 0; i < layer.nblocks; ++i)
+		if (layer.block[i].kind == BLOCK_PCODE) return i;
+	return -1;
+}
+
+/* Whether a bystander may stand at (x, y): two panels at least from what
+ * else stands there. */
+static bool apart(int x, int y) {
+	for (int i = 0; i < layer.nobj; ++i)
+		if (abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2) return false;
+	return true;
+}
+
+static bool add_teller(int x, int y) {
+	NetObj *o = add_obj(OBJ_NPC, x, y);
+	if (!o) return false;
+	o->param = rng_range(0, 5);
+	o->npc_line = rng_range(0, 255);
+	layer.teller = layer.nobj;
+	return true;
+}
+
+/* Whether the P-Code's teller may stand at (x, y): apart from what else
+ * stands there, off the set pieces' quiet, and a walk from the cube (the
+ * key on another way than the lock: one beside it told it at once). */
+#define TELLER_WALK 8
+static bool teller_ok(int x, int y, const NetBlock *b) {
+	return apart(x, y) && !hushed[y][x] && walk_between(b->x, b->y, x, y) >= TELLER_WALK;
+}
+
+/* A free floor panel off the way with floor all round it. */
+static bool open_floor(int x, int y) {
+	return cell_free(x, y) && !way_band[y][x] && !behind_gap(x, y) && !beside_narrow(x, y) && !by_walkway(x, y) && floor_cell(x + 1, y) &&
+		floor_cell(x - 1, y) && floor_cell(x, y + 1) && floor_cell(x, y - 1) && !cuts_way(x, y);
+}
+
+/* The navi who knows the P-Code: a bystander in a room a walk from the
+ * cube; else on any free floor off the way; else the cube takes a toll
+ * instead (a lock no one can open would close its pocket for good). */
+static void place_teller(const int *order, int n) {
+	int x, y, c = pcode_cube();
+	if (c < 0) return;
+	const NetBlock *b = &layer.block[c];
+	for (int tries = 0; tries < 16 && n; ++tries) {
+		const Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
+		if (room_spot_in(r, &x, &y, true) && teller_ok(x, y, b) && add_teller(x, y)) return;
+	}
+	for (y = 1; y < MAP_H - 1; ++y)
+		for (x = 1; x < MAP_W - 1; ++x)
+			if (open_floor(x, y) && teller_ok(x, y, b) && add_teller(x, y)) return;
+	layer.block[c].kind = BLOCK_TOLL;
 }
 
 /* The pocket's one thing, once the rest stands: a blue data of the best
@@ -1545,9 +1624,7 @@ static void place_bystanders(const int *order, int n) {
 		for (int tries = 0; tries < 4; ++tries) {
 			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
 			if (!room_spot_in(r, &x, &y, true)) continue;
-			bool near = false;
-			for (int i = 0; i < layer.nobj; ++i) near |= abs((int)layer.obj[i].x - x) <= 2 && abs((int)layer.obj[i].y - y) <= 2;
-			if (near) continue;
+			if (!apart(x, y) || hushed[y][x]) continue;
 			NetObj *o = add_obj(OBJ_NPC, x, y);
 			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
 			break;
@@ -1559,6 +1636,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	int rise = kit ? kit->rise : 0;
 	memset(&layer, 0, sizeof layer);
 	memset(reserved, 0, sizeof reserved);
+	memset(hushed, 0, sizeof hushed);
 	npcs_held = 0;
 	rng_seed(seed);
 	layer.biome = biome;
@@ -1609,15 +1687,15 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 		npcs_held += layer.teleport_island;   /* (the island's data, placed last) */
 	}
 	int block = pieces & PIECE_OBSTACLE ? layer_block_kind(depth, biome) : -1;
-	if (block >= 0) {
-		plan_obstacle(block);
-		npcs_held += layer.nblocks;   /* (the pocket's data, placed last) */
-	}
+	if (block >= 0) plan_obstacle(block);
+	if (pieces & PIECE_CUBE) plan_obstacle(layer_cube_kind(biome));
+	npcs_held += layer.nblocks + (pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
 	place_data(depth, kind, biome, size, order, n, &next);
 	place_bystanders(order, n);
 	npcs_held = 0;
 	if (gap.x >= 0) carve_gap(&gap, rise);
 	if (layer.teleport_island) carve_teleport_island(rise);
 	place_block_rewards();
+	place_teller(order, n);
 	emblems(kit);
 }
