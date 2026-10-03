@@ -488,8 +488,13 @@ static void parse_script(const char *spec) {
 	for (char *tok = strtok(copy, ","); tok && script_len < 512; tok = strtok(NULL, ",")) {
 		char *colon = strchr(tok, ':');
 		memset(&script[script_len], 0, sizeof script[script_len]);
-		script[script_len].frames = atoi(tok);
-		script[script_len].buttons = colon ? parse_buttons(colon + 1) : 0;
+		InputStep *s = &script[script_len];
+		s->frames = atoi(tok);
+		/* (remote play's dev steps too, as "0:place X Y FACE" and "0:flags
+		 * FROM TO 1|0": a scripted capture of a set piece puts MegaMan at it) */
+		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
+		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
+		else s->buttons = colon ? parse_buttons(colon + 1) : 0;
 		++script_len;
 	}
 	free(copy);
