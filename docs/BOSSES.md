@@ -48,11 +48,19 @@ shut, flag `0x16F1` keeps its warp from starting.
 Mugshots share their index with the Navi's overworld sprite in list 6:
 HeatMan 0x47, ElecMan 0x49, SlashMan 0x4B, ChargeMan 0x4F, EraseMan 0x50,
 BlastMan 0x51, DiveMan 0x52, Colonel 0x53, CircusMan 0x54, JudgeMan 0x55,
-ElementMan 0x56, ProtoMan 0x3B, MegaMan 0x37. Gregar has neither for
-Falzar's Navis (SpoutMan, TomahawkMan, TenguMan, GroundMan, DustMan), who
-speak with a HeelNavi's face (0x43) and stand as a HeelNavi on the net, as
-do BlastMan and ElementMan (no overworld sprite); at a first meeting Lan
-and MegaMan take any of them for a copy the Nest made badly.
+ElementMan 0x56, ProtoMan 0x3B, MegaMan 0x37. Every guardian stands on
+the net in his own shape (`guardian_body`):
+
+- Gregar's overworld sprite where it has one that faces every way.
+- BlastMan's and ElementMan's, which Gregar draws only facing right
+  through down-left (animations 2-5; its story never turns them from the
+  camera), turned down-right or down-left where the arena would face them
+  up into the screen.
+- Falzar's Navis (SpoutMan, TomahawkMan, TenguMan, GroundMan, DustMan),
+  whom Gregar has no overworld sprite or face of, in their battle sprites
+  (sprite list 0, `0x2E` + the navi), standing in animation 0, logging in
+  by BN6's battle warp-in (their animation 3) and mirrored to face right.
+  They speak without a face.
 
 A guardian's navi index is its ai in the enemy table: HeatMan 1 .. ElementMan
 16, and Colonel 18. Index 17 (and 0, 22) is an unnamed navi with 4000 HP at

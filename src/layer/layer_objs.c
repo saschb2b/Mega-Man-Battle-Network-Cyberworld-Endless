@@ -938,7 +938,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	}
 	uint32_t archive = commit_text(&text, group, number);
 	out->archive = archive;
-	if (out->guardian.navi) guardian_actors(&npcs, archive, guardian_sprite(out->guardian.navi), &out->guardian);
+	if (out->guardian.navi) guardian_actors(&npcs, archive, &out->guardian);
 	for (int i = 0; i < ntalk && npcs.n < 32; ++i) {
 		const Talker *t = &talkers[i];
 		uint32_t a = t->archive ? t->archive : archive;

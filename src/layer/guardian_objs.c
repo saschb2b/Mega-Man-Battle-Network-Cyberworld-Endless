@@ -172,11 +172,9 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	flag_clear(LAYER_ROUTE_DARK_FLAG);
 }
 
-void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const GuardianStage *g) {
-	const Guardian *gd = guardian(g->navi);
-	bool known = sprite != GUARDIAN_HEEL_SPRITE;
-	if (npcs->n < 32)
-		npcs->script[npcs->n++] = npc_guardian(sprite, g->x, g->y, g->z, g->face, known ? gd->pose : -1, known, &flags);
+void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {
+	NpcBody body = guardian_body(g->navi, g->face);
+	if (npcs->n < 32) npcs->script[npcs->n++] = npc_guardian(&body, g->x, g->y, g->z, &flags);
 	if (npcs->n < 32)
 		npcs->script[npcs->n++] = npc_guardian_data(g->x, g->y, g->z, MD_ANIM_GUARDIAN, archive, g->reward, &flags);
 }

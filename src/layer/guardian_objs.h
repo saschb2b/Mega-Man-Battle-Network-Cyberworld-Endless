@@ -27,8 +27,8 @@ typedef struct {
 
 /* The guardian object `o` at world (wx, wy, wz): its scripts into `text`. */
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g);
-/* Its actors, once `archive` holds the scripts: the guardian (overworld
- * sprite `sprite`) and the Guardian Data it leaves. */
-void guardian_actors(NpcList *npcs, uint32_t archive, int sprite, const GuardianStage *g);
+/* Its actors, once `archive` holds the scripts: the guardian in his own
+ * shape (guardian_body) and the Guardian Data he leaves. */
+void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g);
 
 #endif

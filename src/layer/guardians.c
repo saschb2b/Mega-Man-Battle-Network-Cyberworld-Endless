@@ -255,26 +255,41 @@ static const char *const replies[] = {
 };
 
 /* How MegaMan and Lan take a guardian they have never met: BN6's Link Navis
- * and ProtoMan as friends in copied form, its villains, and the Navis of
- * the other Cybeast's version, whose copies came out in a HeelNavi's shape. */
+ * and ProtoMan as friends in copied form, and the rest as the Nest's
+ * copies of foes. */
 static bool friendly(int navi) { return (navi >= 1 && navi <= 3) || navi == 5 || navi == 11; }
 int guardian_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
-		{ 11, 0x3B }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 },            /* Proto, Dive, Circus, Judge */
-		{ 18, 0x53 },                                                        /* Colonel */
+		{ 11, 0x3B }, { 12, 0x51 }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 }, /* Proto, Blast, Dive, Circus, Judge */
+		{ 16, 0x56 }, { 18, 0x53 },                                          /* Element, Colonel */
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
 	return GUARDIAN_HEEL_SPRITE;
 }
 
-/* the navis who stand in a HeelNavi's shape */
-static bool misshapen(int navi) { return guardian_sprite(navi) == GUARDIAN_HEEL_SPRITE; }
+/* Every guardian in his own shape (they had stood in a HeelNavi's body,
+ * seven of seventeen, the copies "that didn't come out right"; the owner
+ * asked for their personality back):
+ *   Gregar's own overworld sprite where it has one, which faces every way;
+ *   BlastMan's and ElementMan's, which Gregar draws only facing right
+ *   through down-left (its story never turns them away from the camera):
+ *   turned down-right or down-left where the arena would face them into
+ *   the screen, as they stood invisible there;
+ *   Falzar's Navis, whom Gregar has no overworld sprite of, in their
+ *   battle sprites (list 0, 0x2E + the navi, each uncompressed), which face
+ *   left as they fight, mirrored to face right, standing in animation 0
+ *   and logging in by BN6's warp-in, their animation 3 (docs/ROM_DATA.md). */
+NpcBody guardian_body(int navi, int face) {
+	NpcBody b = { 6, guardian_sprite(navi), face, false, NPC_ANIM_LOG_IN, guardian(navi)->pose };
+	if (navi == 12 || navi == 16) b.anim = face == 1 ? 3 : face == 7 ? 5 : face;
+	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1 };
+	return b;
+}
 
-/* A HeelNavi-shaped copy speaks without a face: the voice is his, the body
- * not ("That voice... it's SpoutMan!"), and the HeelNavi's face is the
- * bystanders' (a playtester read SpoutMan's lines as a bystander's) */
+/* Falzar's Navis speak without a face, which Gregar lacks: the HeelNavi's
+ * is the bystanders' (a playtester read SpoutMan's lines as a bystander's) */
 int guardian_face(int navi) {
 	const Guardian *g = guardian(navi);
 	return g->mugshot == GUARDIAN_NO_MUGSHOT ? FACE_NONE : g->mugshot;
@@ -301,12 +316,11 @@ const char *guardian_intro(int navi, int version, int biome) {
 	/* the first meeting: who MegaMan and Lan see */
 	if (!r->megaman_won && !r->navi_won && !r->met) {
 		if (friendly(navi)) ADD("@M %s?! ...No. You're one of the Nest's copies!|", name);
-		else if (misshapen(navi)) ADD("@M That voice... it's %s! But that's a HeelNavi's body!|@L The Nest's copy didn't come out right!|", name);
 		else ADD("@L That's %s! Or a copy the Nest made of him...|", name);
 	}
-	/* and at every meeting after, who that HeelNavi's body is (a
-	 * playtester who had met SpoutMan three times asked who was talking) */
-	else if (misshapen(navi)) ADD("@L %s's copy, in that HeelNavi body again!|", name);
+	/* and at every meeting after, who speaks without a face (a playtester
+	 * who had met SpoutMan three times asked who was talking) */
+	else if (guardian(navi)->mugshot == GUARDIAN_NO_MUGSHOT) ADD("@L %s's copy again!|", name);
 	/* the Nest's own guardian knows what it is */
 	if (biome == BIOME_NEST) ADD("The Nest built me from every battle you have fought.|");
 	ADD("%s", s);

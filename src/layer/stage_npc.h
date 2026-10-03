@@ -13,11 +13,20 @@ typedef struct {
 	int taken;    /* ... and has been taken */
 } StageFlags;
 
-/* The guardian: overworld sprite `sprite` (list 6) at world (x, y, z)
- * facing `face`; on `appear` it logs in (its materializing animation when
- * `logs_in`) and strikes animation `pose` (-1 none); on `gone` it fades
- * out and leaves. Nobody can talk to it. */
-uint32_t npc_guardian(int sprite, int x, int y, int z, int face, int pose, bool logs_in, const StageFlags *f);
+/* A guardian's body on the net: a sprite (its list and number), the
+ * animation it stands in, mirrored or not, the animation it logs in by and
+ * the pose it strikes for the title card (-1 none). */
+typedef struct {
+	int list, index, anim;
+	bool mirror;
+	int log_in, pose;
+} NpcBody;
+#define NPC_ANIM_LOG_IN 25   /* every Navi's overworld sprite: materializing */
+
+/* The guardian: body `b` at world (x, y, z); on `appear` it logs in and
+ * strikes its pose; on `gone` it fades out and leaves. Nobody can talk to
+ * it. */
+uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f);
 /* The Guardian Data it leaves: a Mystery Data crystal (animation `anim`)
  * that shows on `reward` and runs text `script` of `archive` when checked,
  * which should set `taken`. */

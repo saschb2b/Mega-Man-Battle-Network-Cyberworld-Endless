@@ -2,8 +2,8 @@
  * the commands): each waits hidden for an event flag the director sets,
  * then plays its part. Commands used here beyond npc.c's: 0x04 jump if
  * flag set, 0x09 active but invisible, 0x0D/0x0E talking on/off, 0x1F/0x20
- * collision off/on, 0x28 play sound, 0x2A wait for the animation's end
- * (0xC0), 0x31 alpha (0x10 opaque .. 0x02, 0 off). */
+ * collision off/on, 0x26 mirror the sprite, 0x28 play sound, 0x2A wait for
+ * the animation's end (0xC0), 0x31 alpha (0x10 opaque .. 0x02, 0 off). */
 #include "stage_npc.h"
 
 #include <string.h>
@@ -16,7 +16,6 @@
 #define SOUND_LOG_IN   0x77
 #define SOUND_LOG_OUT  0x76
 #define SOUND_APPEAR   0x94
-#define ANIM_LOG_IN    25   /* every Navi's overworld sprite: materializing */
 
 /* A script under construction, with jumps to labels resolved once its
  * address is known. */
@@ -59,18 +58,19 @@ static uint32_t commit(Script *s) {
 
 enum { L_SHOW, L_IDLE, L_LEAVE };
 
-uint32_t npc_guardian(int sprite, int x, int y, int z, int face, int pose, bool logs_in, const StageFlags *f) {
+uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f) {
 	Script s = { .n = 0 };
-	OP(&s, 0x09, 0x25, (uint8_t)sprite, 6 * 4, 0x16, (uint8_t)face, 0x0E, 0x13);
+	OP(&s, 0x09, 0x25, (uint8_t)b->index, (uint8_t)(b->list * 4), 0x16, (uint8_t)b->anim, 0x0E, 0x13);
+	if (b->mirror) OP(&s, 0x26);   /* (the sprite turned the other way) */
 	coords(&s, x, y, z);
 	wait_flag(&s, f->appear, L_SHOW);
 	mark(&s, L_SHOW);
 	/* logs in where it stands, then strikes its pose for the title card */
 	sound(&s, SOUND_LOG_IN);
-	if (logs_in) OP(&s, 0x16, ANIM_LOG_IN, 0x08, 0x2A, 0xC0);
+	if (b->log_in >= 0) OP(&s, 0x16, (uint8_t)b->log_in, 0x08, 0x2A, 0xC0);
 	else OP(&s, 0x08);
-	if (pose >= 0) OP(&s, 0x16, (uint8_t)pose, 0x10, 90);
-	OP(&s, 0x16, (uint8_t)face);
+	if (b->pose >= 0) OP(&s, 0x16, (uint8_t)b->pose, 0x10, 90);
+	OP(&s, 0x16, (uint8_t)b->anim);
 	mark(&s, L_IDLE);
 	wait_flag(&s, f->gone, L_LEAVE);
 	mark(&s, L_LEAVE);

@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "stage_npc.h"
+
 #define GUARDIAN_NO_MUGSHOT -1
 
 typedef struct {
@@ -51,12 +53,16 @@ const char *guardian_rumor(int navi);
  * run (rivals.sav). Before that he names him nowhere, and briefs none of
  * his moves. */
 bool guardian_known(int navi);
-/* A guardian's overworld sprite (list 6): its own where Gregar has one,
- * else a HeelNavi's (Falzar's Navis, BlastMan, ElementMan). */
+/* A guardian's overworld sprite (list 6), where Gregar has one; else a
+ * HeelNavi's (Falzar's Navis, who stand in their battle sprites instead:
+ * guardian_body). */
 #define GUARDIAN_HEEL_SPRITE 0x43
 int guardian_sprite(int navi);
-/* The face a guardian speaks with (a HeelNavi's for the copies of the
- * Navis Gregar has no face of). */
+/* How guardian `navi` stands on the net facing `face` (the overworld's
+ * eighths: 1 up-right, 3 down-right, 5 down-left, 7 up-left). */
+NpcBody guardian_body(int navi, int face);
+/* The face a guardian speaks with (none for Falzar's Navis, whose faces
+ * Gregar lacks). */
 int guardian_face(int navi);
 
 /* The area a guardian keeps, for the title card ("Central Area"). */

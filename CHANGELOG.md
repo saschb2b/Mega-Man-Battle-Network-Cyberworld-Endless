@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Every guardian in his own shape.** Seven of the seventeen stood on the
+  net as a HeelNavi, "the Nest's copy didn't come out right". BlastMan and
+  ElementMan now stand in Gregar's own sprites of them (turned toward the
+  camera where they would face away, as Gregar draws them no other way),
+  and Falzar's Navis, SpoutMan, TomahawkMan, TenguMan, GroundMan and
+  DustMan, whom Gregar has no overworld sprite of, in their battle sprites:
+  each warps in as in battle and faces MegaMan.
 - **A guardian's battle pays zenny, not a second copy of his chip.** His
   Guardian Data gives his Navi chip, and his battle's own reward, at a
   good Busting Level, gave another, which no folder can hold (one Mega
