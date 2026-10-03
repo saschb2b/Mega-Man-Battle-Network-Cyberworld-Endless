@@ -70,6 +70,40 @@ ROM in memory, and shows its battle screens.
    (mGBA's copy and the engine's) with little room left: there another
    game's data would be taken in as a run needs it, its ROM not kept.
 
+## Guest battles
+
+Where BN5 dresses an area and the build can run a second core (desktop,
+Android, iOS, PortMaster; not the 3DS, which keeps one ROM, nor the
+browser), the layer's random battles are BN5's own, fought in BN5's
+engine (`src/emu/guest.c`, epic #57):
+
+- **When**: BN6's roll decides there is a battle, as on any layer; the
+  hook gives BN6 none (`encounter_guest`), and the director begins a
+  guest battle. BN6's core waits while the guest runs; the screen and the
+  sound are the guest's.
+- **Which**: the area's own maps' records in BN5's numbers (ACDC Area
+  0x90:0, 0x90:1 and 0x86:0 for an act's first, middle and guardian's
+  layers; End Area 0x93:0, 0x86:3, 0x93:1; Nebula Area 0x86:6, 0x94:3,
+  0x86:7), one picked from the layer's seed and the battle's count.
+- **MegaMan as the run has him**: his HP and max HP, and the run's folder,
+  each chip as BN5's chip of the same name with its own code (the names
+  read from both ROMs; 114 of BN6's 313 chips pair), owned in BN5's marks.
+  A chip BN5 has none of sits out, its slot empty (a Standard folder keeps
+  26 of its 30). His buster and NaviCust are BN5's boot state's for now.
+- **The record's copy**: past BN5's 8 MB in the guest's ROM copy, without
+  its GAME OVER bit, so a loss ends on the map with BN5's result 2 and the
+  run ends as BN6's would (the deletion shown in BN5's battle).
+- **The end**: BN5's result (won, lost, escaped) and the HP the battle
+  left (its BattleState's copy, as BN5 copies it back to its NaviStats
+  only on its own maps' terms) go back into the run. The results screen's
+  reward goes into BN6: a chip as BN6's chip of the same name, to the Pack
+  (GiveChips), zenny as zenny (GiveZenny). Before each battle, its
+  enemies' reward rows are rewritten where a chip has no BN6 chip of its
+  name: 200 zenny instead, so the screen never shows a chip the run won't
+  get.
+- **Still to come**: DarkChips by BN5's rule (#64), the switch framed and
+  named (#65), the buster and programs in, BN5's chips registered in BN6.
+
 ## Status
 
 - [x] Battle Network 5: Team Colonel (USA): its map and coordinate
@@ -116,5 +150,7 @@ ROM in memory, and shows its battle screens.
   turns and speaks as BN6's own bystanders do. Its Net Dealers and other
   Navis could follow at the free numbers left.
 - [ ] Its towns.
+- [x] Its random battles in its own engine, on a second core, in the
+  areas it dresses (Guest battles, above).
 - [ ] Its guardians, in battles in its own engine.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

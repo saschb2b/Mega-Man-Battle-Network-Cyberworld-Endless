@@ -49,8 +49,8 @@ typedef struct {
 	uint8_t xnavi;           /* its bystanders' Navi, a list-6 sprite and mugshot of its own game (0: BN6's) */
 	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
 	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
-	uint8_t xbattles[2];     /* (another game's) the map group and number whose battle records its random battles take, fought in its own
-	                          * engine on the guest core (guest.h); 0: its layers fight BN6's battles */
+	uint8_t xbattles[3][2];  /* (another game's) per layer of an act, the map (group, number) whose battle records its random battles take,
+	                          * fought in its own engine on the guest core (guest.h); group 0: its layers fight BN6's battles */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
@@ -149,6 +149,8 @@ uint8_t *lz77_decompress(const uint8_t *src, size_t avail, size_t *out_len);
 
 /* Decode a text-archive entry into ASCII using the game's character table. */
 void rom_text(uint32_t archive, int index, char *out, size_t outlen);
+/* ... the same in extra ROM `xrom` (rom.h, XR), "" where it is not there */
+void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen);
 /* A description's text (a chip's): script `index` of `archive` past its
  * box commands, its lines joined by spaces. */
 void rom_desc(uint32_t archive, int index, char *out, size_t outlen);

@@ -13,6 +13,8 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "data.h"
+#include "debug.h"
 #include "emu.h"
 #include "rom.h"
 
@@ -57,17 +59,42 @@ uint32_t guest_record(int xrom, int group, int number, int i) {
 #include "compat.h"
 #include "game.h"
 
+/* ---- the run's chips as its game's: by name, from both ROMs ---- */
+
+#define BN6_CHIPS 314   /* BN6's standard, Mega and Giga chips, those a folder holds */
+static uint16_t to_bn5[BN6_CHIPS], from_bn5[BN5_CHIPS];
+
+/* Pairs BN6's chips with BN5's of the same name; how many paired. */
+static int chips_pair(int xrom) {
+	static char names[BN5_CHIPS][16];
+	for (int i = 1; i < BN5_CHIPS; ++i)
+		xrom_text(xrom, i < 256 ? BN5_CHIP_NAMES_LOW : BN5_CHIP_NAMES_HIGH, i < 256 ? i : i - 256, names[i], sizeof names[i]);
+	int paired = 0;
+	for (int id = 1; id < BN6_CHIPS; ++id) {
+		ChipInfo ci;
+		chip_info(id, &ci);
+		to_bn5[id] = 0;
+		for (int j = 1; j < BN5_CHIPS && ci.name[0] && !to_bn5[id]; ++j)
+			if (!strcmp(names[j], ci.name)) to_bn5[id] = (uint16_t)j;
+		if (to_bn5[id] && !from_bn5[to_bn5[id]]) from_bn5[to_bn5[id]] = (uint16_t)id;
+		paired += to_bn5[id] != 0;
+	}
+	return paired;
+}
+
 static struct mCore *core;
 static bool ready, failed, active, result_due;
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
 static int frames;
-/* a battle's course: asked for, begun, its GAME OVER playing */
-enum { PH_IDLE, PH_ASKED, PH_BATTLE, PH_OVER };
+/* a battle's course: asked for, begun */
+enum { PH_IDLE, PH_ASKED, PH_BATTLE };
 static int phase;
 
 static uint8_t rd8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
+static uint16_t rd16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1); }
 static uint32_t rd32(uint32_t a) { return core->rawRead32(core, a, -1); }
+static void wr16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
 static int main_mode(void) { return rd8(rd32(BN5_TOOLKIT)); }
 static int sub_mode(void) { return rd8(BN5_GAMESTATE); }
 static bool on_map(void) { return main_mode() == BN5_MODE_GAME && sub_mode() == BN5_SUB_MAP; }
@@ -162,16 +189,80 @@ bool guest_start(int xrom) {
 	patch_roll(0);
 	failed = false;
 	ready = true;
-	printf("guest: %s ready for battles\n", XR[xrom].layout->tag);
+	int paired = chips_pair(xrom);
+	printf("guest: %s ready for battles, %d of BN6's chips by name\n", XR[xrom].layout->tag, paired);
 	return true;
 }
 
-bool guest_battle(uint32_t record) {
+/* `record` copied past BN5's ROM without its GAME OVER: a loss ends the
+ * battle on the map with the result 2, and the run's own GAME OVER follows
+ * (BN6's); its copy's address. Its entities stay the original's. */
+/* The zenny a reward row's chip pays where BN6 has none of its name: the
+ * results screen shows what the run gets (docs/MULTIROM.md, Guest
+ * battles) */
+#define REWARD_ZENNY 200
+
+/* The reward rows of the enemies in `record` rewritten where a chip has no
+ * BN6 chip of its name: zenny instead (its game's own encoding, as BN6's
+ * rewards are). Its entities follow the record's pointer at +0xC, four
+ * bytes each (0x11 an enemy, its id in the last two), 0xF0 ending them. */
+static void rows_fit(uint32_t record) {
+	uint32_t e = rd32(record + 0xC);
+	for (int k = 0; k < 16 && e >= 0x08000000u && e < 0x08800000u; ++k, e += 4) {
+		uint8_t kind = rd8(e);
+		if (kind == 0xF0) break;
+		if (kind != 0x11) continue;
+		int id = rd16(e + 2);
+		if (id <= 0 || id >= 0x200) continue;
+		for (uint32_t i = 0; i < 20; ++i) {
+			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i;
+			uint16_t v = rd16(a);
+			if (v == 0xFFFF || v >> 14 || (int)(v & 0x1FF) >= BN5_CHIPS || from_bn5[v & 0x1FF]) continue;
+			wr16(a, (uint16_t)(1u << 14 | REWARD_ZENNY));
+		}
+	}
+}
+
+static uint32_t record_copy(uint32_t record) {
+	for (uint32_t i = 0; i < 16; i += 2) {
+		uint16_t v = rd16(record + i);
+		if (i == 8) v = (uint16_t)(v & ~BN5_OPT_GAME_OVER);
+		wr16(BN5_FREE + i, v);
+	}
+	return BN5_FREE;
+}
+
+/* The run's folder as the guest's first, each chip as its game's of the
+ * same name (its own code), owned; a chip it has none of sits out, its
+ * slot empty. How many went in. */
+static int folder_in(const uint16_t *folder) {
+	uint32_t folders = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIPS), marks = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIP_MARKS);
+	if (folders < 0x02000000u || folders >= 0x02040000u || marks < 0x02000000u || marks >= 0x02040000u) return 0;
+	int in = 0;
+	for (uint32_t i = 0; i < 30; ++i) {
+		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0;
+		core->rawWrite16(core, folders + 2 * i, -1, x ? (uint16_t)(x | (folder[i] >> 9) << 9) : 0xFFFF);
+		if (!x) continue;
+		core->rawWrite8(core, marks + (uint32_t)x, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + (uint32_t)x) ^ BN5_CHIP_KEY_XOR));
+		++in;
+	}
+	core->rawWrite8(core, BN5_NAVI_FOLDER, -1, 0);
+	return in;
+}
+
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) {
 	if (!ready || active || !record) return false;
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
-	/* (from where its boot left it: a GAME OVER put it back on its title) */
 	if (!on_map() && !load_boot()) return false;
-	patch_roll(record);
+	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
+	 * whose options carry 0x40, as its random battles' do) */
+	wr16(BN5_NAVI_BASE_MAX_HP, (uint16_t)max_hp);
+	wr16(BN5_NAVI_MAX_HP, (uint16_t)max_hp);
+	wr16(BN5_NAVI_HP, (uint16_t)(hp < 1 ? 1 : hp > max_hp ? max_hp : hp));
+	int in = folder ? folder_in(folder) : 0;
+	rows_fit(record);
+	if (emu_debug_on()) fprintf(stderr, "guest: battle %08X, HP %d/%d, %d of the folder's 30 in\n", record, hp, max_hp, in);
+	patch_roll(record_copy(record));
 	active = true;
 	phase = PH_ASKED;
 	frames = 0;
@@ -180,12 +271,23 @@ bool guest_battle(uint32_t record) {
 
 bool guest_active(void) { return active; }
 
+bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_CUSTOM; }
+
 static void finish(int outcome) {
+	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0 };
+	/* (what its results screen gave, as the run's: a chip by its name, or
+	 * zenny) */
+	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0;
+	if (v && v >> 14 == 1) result.zenny = v & 0x3FFF;
+	else if (v && v >> 14 == 0 && (v & 0x1FF) < BN5_CHIPS) {
+		result.chip = from_bn5[v & 0x1FF];
+		result.code = v >> 9 & 0x1F;
+		if (!result.chip) result.zenny = REWARD_ZENNY;
+	}
+	result_due = true;
 	patch_roll(0);
 	active = false;
 	phase = PH_IDLE;
-	result = (GuestResult){ outcome, frames };
-	result_due = true;
 }
 
 void guest_frame(uint32_t keys) {
@@ -198,10 +300,18 @@ void guest_frame(uint32_t keys) {
 	if (phase == PH_ASKED && (sub == BN5_SUB_BATTLE_INIT || sub == BN5_SUB_BATTLE)) {
 		phase = PH_BATTLE;
 		core->rawWrite32(core, BN5_ROLL + 8, -1, 0);   /* (one battle: the roll answers none again) */
-	} else if (phase == PH_ASKED && frames > 600) finish(GUEST_WON);   /* (never began: nothing lost) */
-	else if (phase == PH_BATTLE && mode == BN5_MODE_GAME_OVER) phase = PH_OVER;
-	else if (phase == PH_BATTLE && mode == BN5_MODE_GAME && sub == BN5_SUB_MAP) finish(GUEST_WON);
-	else if (phase == PH_OVER && mode != BN5_MODE_GAME_OVER) finish(GUEST_LOST);
+		core->rawWrite8(core, BN5_BATTLE_RESULT + 1, -1, 0);
+		wr16(BN5_REWARD, 0);
+	} else if (phase == PH_ASKED && frames > 600) finish(GUEST_ESCAPED);   /* (never began: nothing happened) */
+	/* (back on the map: how it ended, from BN5's own result, and MegaMan's
+	 * HP as the battle left it: BN5 copies it back to his NaviStats only on
+	 * its own maps' terms, which a forced battle does not meet) */
+	else if (phase == PH_BATTLE && mode == BN5_MODE_GAME && sub == BN5_SUB_MAP) {
+		int r = rd8(BN5_BATTLE_RESULT + 1), hp = rd16(BN5_BATTLE_HP);
+		finish(r == BN5_RESULT_LOST || hp == 0 ? GUEST_LOST : r == BN5_RESULT_ESCAPED ? GUEST_ESCAPED : GUEST_WON);
+	}
+	/* (a GAME OVER all the same: its records' copies leave it out) */
+	else if (phase == PH_BATTLE && mode == BN5_MODE_GAME_OVER) finish(GUEST_LOST);
 }
 
 const uint32_t *guest_video(void) { return video; }
@@ -216,8 +326,9 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS, the browser) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record) { (void)record; return false; }
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) { (void)record; (void)hp; (void)max_hp; (void)folder; return false; }
 bool guest_active(void) { return false; }
+bool guest_custom_screen(void) { return false; }
 void guest_frame(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
 bool guest_take_result(GuestResult *out) { (void)out; return false; }

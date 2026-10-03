@@ -15,20 +15,29 @@
 bool guest_start(int xrom);
 
 /* Begins a battle from BattleSettings record `record`, an address in the
- * guest's ROM (its own game's records: BN5_BATTLE_TABLES): from the next
- * guest frame the guest runs and BN6's core waits. */
-bool guest_battle(uint32_t record);
+ * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan at
+ * `hp` of `max_hp` and the run's `folder` (30 BN6 entries, chip | code <<
+ * 9; NULL: the guest's own), each chip as its game's of the same name:
+ * from the next guest frame the guest runs and BN6's core waits. */
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder);
+
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);
+/* ... and its Custom screen is up (the autopilot's chips and OK) */
+bool guest_custom_screen(void);
 /* One frame of the guest with these keys held (GBA key bits). */
 void guest_frame(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
 const uint32_t *guest_video(void);
 
-enum { GUEST_WON, GUEST_LOST };
+enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
 typedef struct {
-	int outcome;   /* GUEST_WON or GUEST_LOST (MegaMan deleted: its GAME OVER played out) */
+	int outcome;   /* GUEST_WON, GUEST_LOST (MegaMan deleted) or GUEST_ESCAPED */
 	int frames;    /* how long it ran */
+	int hp;        /* MegaMan's HP at its end */
+	int chip;      /* (won) the reward: BN6's chip of its name, and its code (A=0, *=26); 0 none */
+	int code;
+	int zenny;     /* ... or zenny */
 } GuestResult;
 /* Once a battle has ended (guest_active false again): its result, once. */
 bool guest_take_result(GuestResult *out);

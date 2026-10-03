@@ -11,6 +11,31 @@
 #define BN5_BATTLE_TABLES 0x0801C968u /* two pointers, the real world's map groups and the net's (group - 0x80): per group a pointer per map,
                                        * per map 16-byte BattleSettings records, byte 0 0xFF ending them, +7 a condition */
 
+#define BN5_NAVI_STATS    0x020052A8u /* MegaMan's NaviStats (eToolkit +0x74): 0x60 bytes, as BN6's 0x64 laid out */
+#define BN5_NAVI_BASE_MAX_HP (BN5_NAVI_STATS + 0x3E) /* u16: the max HP before HPMemory and programs */
+#define BN5_NAVI_HP       (BN5_NAVI_STATS + 0x40) /* u16 CurHP, then +0x42 MaxHP */
+#define BN5_NAVI_MAX_HP   (BN5_NAVI_STATS + 0x42)
+#define BN5_BATTLE_RESULT 0x0200AEE8u /* +1 how the last battle ended: 1 won, 2 lost, 4 escaped (BN6's 0x0200A008) */
+#define BN5_REWARD        (BN5_BATTLE_RESULT + 4) /* u16: what the results screen gave, as BN6's rewards are (bits 14-15: 0 a chip, its id and code << 9; 1 zenny) */
+#define BN5_REWARD_ROWS   0x081100D4u /* the reward rows: 20 u16 per enemy id, 0x28 apart, as BN6's are (its chooser 0x0810FB18 matches BN6's 0x080AC150) */
+#define BN5_RESULT_WON     1
+#define BN5_RESULT_LOST    2
+#define BN5_RESULT_ESCAPED 4
+#define BN5_OPT_GAME_OVER  0x100   /* BattleSettings +8 options: a loss plays GAME OVER (GetBattleEffects 0x0802B3F2) */
+#define BN5_FREE          0x08800000u /* the guest's ROM copy past BN5's 8 MB: its record copies */
+#define BN5_NAVI_FOLDER   (BN5_NAVI_STATS + 0x2D) /* u8: the folder MegaMan fights with (0 the first) */
+#define BN5_TOOLKIT_CHIPS 0x48        /* eToolkit +0x48: the folders (0x02002DF4), 30 u16 each (chip | code << 9), 0x3C apart */
+#define BN5_TOOLKIT_CHIP_MARKS 0x80   /* eToolkit +0x80 (0x02005CC4): a byte per chip id, its key XOR BN5_CHIP_KEY_XOR where owned */
+#define BN5_CHIP_KEYS     0x02001440u /* a key byte per chip id */
+#define BN5_CHIP_KEY_XOR  0x81
+#define BN5_CHIP_NAMES_LOW  0x736084u /* (ROM offsets) the chip names' text archives: ids 0-255, */
+#define BN5_CHIP_NAMES_HIGH 0x736AB8u /* ... and 256 on */
+#define BN5_CHIPS         424         /* its chip ids */
+
+#define BN5_BATTLE_STATE  0x02034A90u /* BattleState: +1 the battle's phase (8 the Custom screen, 0xC fighting, 0x10 over) */
+#define BN5_PHASE_CUSTOM  0x08
+#define BN5_BATTLE_HP     (BN5_BATTLE_STATE + 0x34) /* u16: MegaMan's HP as the battle ends, to copy back (0 deleted) */
+
 #define BN5_MODE_GAME      0x04
 #define BN5_MODE_GAME_OVER 0x14
 #define BN5_SUB_MAP        0x04

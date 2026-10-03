@@ -102,15 +102,20 @@ static void after_frame(void) {
 }
 
 /* The keys a guest battle gets (guest.h): the player's, or the autopilot's
- * pattern, which reads none of the guest's memory: A for the Custom
- * screen's chips and its OK and to throw them, L for the next Custom
- * screen, the buster between */
+ * pattern: on the Custom screen two chips, START to its OK and A; in the
+ * fight A to throw them, R for the next Custom screen once its gauge is
+ * full, the buster between (L on the screen asks to run, which the last
+ * pattern pressed there, over and over) */
 static uint32_t guest_keys(void) {
 	static unsigned t;
 	if (!autopilot_on()) return keys_from_buttons();
 	++t;
-	if (t % 30 < 4) return KEY_A;
-	if (t % 90 >= 40 && t % 90 < 44) return KEY_L;
+	if (guest_custom_screen()) {
+		unsigned s = t % 80;
+		return s < 4 || (s >= 16 && s < 20) || (s >= 48 && s < 52) ? KEY_A : s >= 32 && s < 36 ? KEY_START : 0;
+	}
+	if (t % 45 < 4) return KEY_A;
+	if (t % 90 >= 40 && t % 90 < 44) return KEY_R;
 	return t % 10 < 5 ? KEY_B : 0;
 }
 

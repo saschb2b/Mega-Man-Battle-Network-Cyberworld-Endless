@@ -150,16 +150,27 @@ static const char *glyph(uint8_t c) {
 	return "";
 }
 
-void rom_text(uint32_t archive, int index, char *out, size_t outlen) {
-	uint32_t p = archive + rom_u16(archive + 2 * index);
+/* Entry `index` of the text archive at offset `archive` of ROM `data`
+ * (ROM_SIZE bytes), in ASCII: BN5 spells its text as BN6 does. */
+static void text_of(const uint8_t *data, uint32_t archive, int index, char *out, size_t outlen) {
 	size_t o = 0;
-	for (int i = 0; i < 64; ++i) {
-		uint8_t c = R.data[p + i];
-		if (c >= 0xE5) break;
-		const char *g = glyph(c);
-		for (; *g && o + 1 < outlen; ++g) out[o++] = *g;
+	uint32_t at = archive + 2u * (uint32_t)index;
+	if (at + 2 <= ROM_SIZE) {
+		uint32_t p = archive + (uint32_t)(data[at] | data[at + 1] << 8);
+		for (uint32_t i = 0; i < 64 && p + i < ROM_SIZE; ++i) {
+			uint8_t c = data[p + i];
+			if (c >= 0xE5) break;
+			for (const char *g = glyph(c); *g && o + 1 < outlen; ++g) out[o++] = *g;
+		}
 	}
 	out[o] = 0;
+}
+
+void rom_text(uint32_t archive, int index, char *out, size_t outlen) { text_of(R.data, archive, index, out, outlen); }
+
+void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen) {
+	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { if (outlen) out[0] = 0; return; }
+	text_of(XR[xrom].data, archive, index, out, outlen);
 }
 
 void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {
@@ -240,19 +251,28 @@ bool rom_find_close;
 
 /* ---- Extra ROMs (docs/MULTIROM.md) ---- */
 
-/* Battle Network 5's net areas (docs/MULTIROM.md): its whole internet is
- * group 0x90, named as BN5's own map labels name it. Each takes over a map
- * whose group keeps the descriptor's palette: the Undernet's, the
- * Graveyard's and the Underground's set their own over it. */
+/* Battle Network 5's net areas (docs/MULTIROM.md): their maps' descriptors
+ * lie one after another from group 0x90's (0x90:0-1 ACDC Area 1-2, then the
+ * next groups' as 0x90:2 on), named as BN5's own map labels name them.
+ * Each takes over a map whose group keeps the descriptor's palette: the
+ * Undernet's, the Graveyard's and the Underground's set their own over it.
+ * Their battles are BN5's own maps' by its game's numbers (0x91 Oran Area,
+ * 0x92 SciLab, 0x93 End Area, 0x94 the Undernet and Nebula Area, 0x86 the
+ * rest of each), an act's layers through the area's maps in BN5's order
+ * (docs/ROM_DATA.md, BN5 guest battles). */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
-		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xbg = 8 },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
+		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xbg = 8,
+		.xbattles = { { 0x90, 0 }, { 0x90, 1 }, { 0x86, 0 } } },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
 	{ 0x90, 4, 0x9020, 0x8050, false, 0x13, 0, 0, 0, { { 0x90, 5 }, { 0x90, 6 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x94, 1 }, .like = 2,
-		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60, .xbg = 10, .held = true },   /* SciLab 1, 2 and 4: its circuit paths' panels turn green and cyan by turns, so by hue half of them were platform floor and its rooms came out in pale blotches: told by shape (TILES_BY_SHAPE), among its own hues (pale green and grey platforms, green and cyan paths). Held out of runs: its maps hold no platform bigger than a 3x3 pad, and Sky Area's rooms drawn in it meet their pale middles with no frame */
+		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60, .xbg = 10, .held = true,
+		.xbattles = { { 0x92, 0 }, { 0x92, 1 }, { 0x86, 2 } } },   /* SciLab 1, 2 and 4: its circuit paths' panels turn green and cyan by turns, so by hue half of them were platform floor and its rooms came out in pale blotches: told by shape (TILES_BY_SHAPE), among its own hues (pale green and grey platforms, green and cyan paths). Held out of runs: its maps hold no platform bigger than a 3x3 pad, and Sky Area's rooms drawn in it meet their pale middles with no frame */
 	{ 0x90, 7, 0x1002, 0, false, 0x13, 0, 0, 0, { { 0x90, 8 }, { 0x90, 9 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x91, 1 }, .like = 1,
-		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xbg = 15 },
+		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xbg = 15,
+		.xbattles = { { 0x93, 0 }, { 0x86, 3 }, { 0x93, 1 } } },
 	{ 0x90, 13, 0x8980, 0x8440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
-		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25 },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows */
+		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25,
+		.xbattles = { { 0x86, 6 }, { 0x94, 3 }, { 0x86, 7 } } },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows */
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {

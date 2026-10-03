@@ -241,6 +241,7 @@
 #define BN6_GIVE_ITEM         0x0803CD6Cu /* GiveItem (Falzar 0x0803CD98): r0 the key item, r1 how many */
 #define BN6_CHAT_RUN_SCRIPT   0x08040359u /* chatbox_runScript (archive, script index) */
 #define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags) */
+#define BN6_GIVE_ZENNY        0x0803CFCDu /* GiveZenny (amount): ProtectedZenny and its checks, capped at 999999 (Falzar 0x0803CFF9) */
 #define BN6_WARP_DEPART_JACK_OUT 0x080059B5u /* warp departure 8: the jack-out cutscene, then warp */
 #define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: a hook runs the engine's calls in its place */
 /* Random battles (src/director/encounter.c): bn6f checkThenStartBattle

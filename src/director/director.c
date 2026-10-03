@@ -1467,10 +1467,11 @@ static void layer_host(int tiles, int *group, int *number) {
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
 	/* (and its battles, where its own engine can fight them on the guest
 	 * core: its game's records for the map, guest.c) */
+	const uint8_t *xb = a->xbattles[layer_in_act(run.depth)];
 	D.guest_xrom = a->xrom - 1;
-	D.guest_group = a->xbattles[0];
-	D.guest_number = a->xbattles[1];
-	encounter_guest = a->xrom > 0 && a->xbattles[0] && guest_start(a->xrom - 1) && guest_records(D.guest_xrom, D.guest_group, D.guest_number) > 0;
+	D.guest_group = xb[0];
+	D.guest_number = xb[1];
+	encounter_guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1) && guest_records(D.guest_xrom, D.guest_group, D.guest_number) > 0;
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;
 	*number = a->host ? a->host - 1 : a->number;
@@ -3781,13 +3782,26 @@ static void end_run(void) {
 void director_guest_done(const GuestResult *r) {
 	if (!D.active) return;
 	++D.battles;
-	/* (deleted in the guest's battle: its GAME OVER has played, the run
-	 * ends as BN6's would) */
+	if (emu_debug_on()) fprintf(stderr, "guest: %s in %d frames, HP %d\n", r->outcome == GUEST_LOST ? "lost" : r->outcome == GUEST_ESCAPED ? "escaped" : "won",
+		r->frames, r->hp);
+	/* (deleted in the guest's battle, its deletion shown there: the run ends
+	 * as BN6's would) */
 	if (r->outcome == GUEST_LOST) {
 		D.gameover = true;
 		D.lost_to = 0;
 		end_run();
+		return;
 	}
+	/* (MegaMan's HP as the battle left it) */
+	int max = emu_read16(BN6_NAVI_MAX_HP);
+	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
+	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
+	/* (what its results screen gave: BN6's chip of the same name to the
+	 * Pack, or zenny) */
+	uint32_t out[2];
+	if (r->chip) game_call_ret(BN6_GIVE_CHIPS, (uint32_t)r->chip, (uint32_t)r->code, 1, out);
+	if (r->zenny) game_call(BN6_GIVE_ZENNY, (uint32_t)r->zenny, 0);
+	if (emu_debug_on()) fprintf(stderr, "guest: MegaMan back at %d/%d HP, chip %d code %d, %d zenny\n", hp, max, r->chip, r->code, r->zenny);
 }
 
 /* The short net won: its Nest's guardian fell and MegaMan stepped on its
@@ -3926,7 +3940,13 @@ static void exit_flag(bool entered) {
 static void guest_begin(void) {
 	int n = guest_records(D.guest_xrom, D.guest_group, D.guest_number);
 	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
-	if (n > 0) guest_battle(guest_record(D.guest_xrom, D.guest_group, D.guest_number, (int)((h >> 16) % (uint32_t)n)));
+	/* (MegaMan with his HP and the run's folder) */
+	uint16_t folder[BN6_FOLDER_ENTRIES] = { 0 };
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	for (int i = 0; data >= BN6_EWRAM && data < BN6_EWRAM_END && i < BN6_FOLDER_ENTRIES; ++i) folder[i] = emu_read16(data + 2u * (uint32_t)i);
+	if (n > 0)
+		guest_battle(guest_record(D.guest_xrom, D.guest_group, D.guest_number, (int)((h >> 16) % (uint32_t)n)), emu_read16(BN6_NAVI_HP),
+			emu_read16(BN6_NAVI_MAX_HP), folder);
 }
 
 /* What the hooks saw in the frames since the last update (events.h). */
