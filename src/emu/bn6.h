@@ -68,17 +68,41 @@
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31) */
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
+#define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
+#define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
+#define BN6_PHASE_CUSTOM      0x08
+#define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
+#define BN6_CUSTOM_HAND       (BN6_CUSTOM_SCREEN + 0x06) /* the chips it offers, the first of BN6_BATTLE_DECK */
+#define BN6_CUSTOM_CURSOR     (BN6_CUSTOM_SCREEN + 0x07) /* the slot under the cursor, 0-4 the top row, BN6_CUSTOM_OK on OK */
+#define BN6_CUSTOM_PICKED     (BN6_CUSTOM_SCREEN + 0x08) /* the chips picked */
+#define BN6_CUSTOM_OK         10
+#define BN6_BATTLE_DECK       0x0203CDB0u /* the battle's folder as it is drawn, u16 chip | code << 9 (26 *); used chips leave it, 0xFFFF after the rest */
+#define BN6_FIELD_PANELS      0x02039AE0u /* the field's panels (bn6f PanelData), 8 a row from column 0, rows 0-4, each: */
+#define BN6_PANEL_SIZE        0x20
+#define BN6_PANEL_TYPE        0x02        /* Type: 1 a hole, 2 a plain panel, 4 poison, 0x0B and 0x0C a conveyor left and right */
+#define BN6_PANEL_ALLIANCE    0x03        /* Alliance: 0 MegaMan's side, 1 the enemies' */
+#define BN6_PANEL_FLAGS       0x14        /* Flags, u32: BN6_PANEL_STRUCK while an enemy's attack is on it (BN6 lights it yellow) */
+#define BN6_PANEL_HOLE        1
+#define BN6_PANEL_PLAIN       2
+#define BN6_PANEL_POISON      4
+#define BN6_PANEL_STRUCK      0x40000000u
 #define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/ROM_DATA.md) */
 #define BN6_T1_OBJECTS        0x0203A9B0u /* eT1BattleObject0: viruses and navis in a battle (BattleObject), */
 #define BN6_T1_SIZE           0xD8        /* ... each this long, its fields from its start: */
 #define BN6_T1_COUNT          0x20
 #define BN6_T1_IN_PLAY        0x00        /* bit 0 in play */
-#define BN6_T1_ACTION         0x09        /* CurAction */
+#define BN6_T1_ACTION         0x09        /* CurAction: MegaMan's BN6_MEGAMAN_READY when he can act, 0x10 a step, 0x12-0x16 a chip */
+#define BN6_MEGAMAN_READY     0x08
 #define BN6_T1_PANEL_X        0x12        /* PanelX and PanelY: its column and row, 0 off the field */
 #define BN6_T1_PANEL_Y        0x13
+#define BN6_T1_FUTURE_X       0x14        /* FuturePanelX and Y: the panel it is headed for (a thrown attack's landing), 0 none */
+#define BN6_T1_FUTURE_Y       0x15
 #define BN6_T1_ALLIANCE       0x16        /* Alliance: 0 MegaMan's side, 1 the enemies' */
 #define BN6_T1_HP             0x24        /* HP and MaxHP, u16 */
 #define BN6_T1_MAX_HP         0x26
+#define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
+#define BN6_T3_OBJECTS        0x0203CFE0u /* eT3BattleObject0: the battle's attacks and effects, BN6_T1_SIZE each, its fields as T1's */
+#define BN6_T3_COUNT          0x20
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's (NaviStats) */
 #define BN6_NAVI_HP           (BN6_NAVI_STATS + 0x40) /* CurHP and MaxHP, u16 */
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)

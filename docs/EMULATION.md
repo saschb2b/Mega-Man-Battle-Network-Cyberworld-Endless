@@ -386,8 +386,18 @@ it with the address and undefined-behaviour sanitizers, as CI does.
 ## Testing
 
 `CYBERWORLD_AUTOPILOT=1` walks MegaMan to each exit (into a guardian's arena
-and to its Guardian Data first) and presses through battles; `CYBERWORLD_AUTOPILOT=weak` also keeps
-enemies at 1 HP, so what follows a won guardian battle can be tested.
+and to its Guardian Data first; by the layer's heal when he is hurt, once a
+layer, then below half his HP or with the guardian next) and fights its
+battles from their state (docs/ROM_DATA.md, the autopilot's fight): on the
+Custom screen the chips that go together worth the most, each used from a
+panel where it reaches an enemy, off poison and away from the attacks it
+can read (a lit panel, a shot coming down the row, a mine's landing panel),
+the buster charged in between. Over seeds 1-12 and 30000 frames it won 43
+of 44 virus battles and reached act 1's guardian in 11 runs, but beat him
+once: 400-600 HP against MegaMan's 100. `CYBERWORLD_AUTOPILOT=weak` keeps
+the first autopilot's blind button rhythm and walk, which the docs'
+pictures are timed by, and keeps enemies at 1 HP, so what follows a won
+guardian battle can be tested.
 `tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position,
 map and the hooks' hits so far every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.
