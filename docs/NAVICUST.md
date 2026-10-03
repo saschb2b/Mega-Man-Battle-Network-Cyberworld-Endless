@@ -281,6 +281,13 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   first draft says how the board works.
 - ExpMemry at the act 2 and act 4 guardians: the board grows to 5x4, then
   5x5 (checked on the NaviCust screen).
+- The bug note: at the RUN itself, the PET still open, a red note over the
+  screen names the bug's cause for five seconds ("A bug! Attack+1 is a
+  plus part on the command line: plus parts go anywhere else."): BN6's
+  RUN lists errors only and says "RUN complete!" over a bug, which a
+  playtester read as clean twice (sessions 60 and 61). It follows the
+  counts while the PET's pages are open (main mode 0x28), changed from
+  what they were as it opened and held ten frames.
 - The bug line: as the map is back, before a step, MegaMan names each bug
   that changed and what it does. BN6's RUN says OK over a part left past
   the board's edge, which does bug; the line is the only place the player

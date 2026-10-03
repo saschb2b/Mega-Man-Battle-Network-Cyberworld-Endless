@@ -22,6 +22,8 @@ void director_see(void);
 void director_draw_map(void);
 /* The layer's Mystery Data counters over the picture, a few seconds after L. */
 void director_draw_counts(void);
+/* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
+void director_draw_bug_note(void);
 /* The second screen (the 3DS's bottom one, issue #9): the layer's map in
  * w x h, always open on the net; false where there is none to show. */
 bool director_draw_second_screen(int w, int h);

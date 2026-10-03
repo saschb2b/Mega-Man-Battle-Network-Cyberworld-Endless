@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **A NaviCust bug is named at the RUN.** BN6's RUN lists only errors and
+  says "RUN complete!" even over a bug, and MegaMan named the bug only once
+  the PET had closed. A red note over the NaviCust screen now names the
+  cause the moment you RUN ("A bug! Attack+1 is a plus part on the command
+  line..."), and MegaMan still explains it on the map.
 - **Green's ladders cross in one line.** Green Area's ladder layers, four
   or five parallel one-panel planks, had their rungs at random, so the way
   turned onto a new rung at almost every plank, a lane to line up each:

@@ -881,6 +881,8 @@ static struct {
 	int md_taken[3], md_known[3];   /* the layer's Mystery Data MegaMan knows of, by colour (green, blue, purple): taken, known */
 	int counts_a;                   /* L's overlay of them: its alpha, 0 hidden */
 	uint16_t md_marked;             /* the ones the map marks, a bit each: untaken, on a panel it shows, or purple with an Unlocker held */
+	char bug_note[160];             /* the NaviCust's bug as its RUN leaves it, over the PET a few seconds */
+	int bug_note_t;
 } seen;
 
 /* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
@@ -976,6 +978,61 @@ static void l_taken(void) {
 	D.counts_t = COUNTS_AFTER;
 }
 
+/* The NaviCust's RUN with a bug, the PET still open: a note over it naming
+ * the bug's cause for five seconds. BN6's RUN lists errors only, and says
+ * "RUN complete!" whatever the colours: a playtester read it as clean, and
+ * MegaMan named the bug only once the PET had closed (sessions 60 and 61).
+ * The game counts the bugs as it runs the board, in passes over frames:
+ * counts changed in the PET and calm BUG_CALM frames are its RUN's. */
+#define PET_MODE 0x28   /* the main mode of the PET's pages */
+#define NOTE_CALM 10    /* (as bug_watch's BUG_CALM) */
+static const char *bug_cause(void);
+static void see_bug_note(void) {
+	static uint8_t at_open[NAVICUST_BUGS], last[NAVICUST_BUGS];
+	static bool open;
+	static int calm;
+	if (seen.bug_note_t > 0) --seen.bug_note_t;
+	if (!D.active || D.town || main_mode() != PET_MODE) { open = false; seen.bug_note_t = 0; return; }
+	uint8_t now[NAVICUST_BUGS];
+	for (int t = 0; t < NAVICUST_BUGS; ++t) now[t] = emu_read8(BN6_NAVICUST_BUGS + (uint32_t)t);
+	if (!open) { open = true; memcpy(at_open, now, sizeof now); memcpy(last, now, sizeof now); calm = 0; return; }
+	calm = memcmp(now, last, sizeof now) ? 0 : calm + 1;
+	memcpy(last, now, sizeof now);
+	if (calm != NOTE_CALM || !memcmp(now, at_open, sizeof now)) return;
+	memcpy(at_open, now, sizeof now);
+	bool bug = false;
+	for (int t = 1; t < NAVICUST_BUGS; ++t) bug |= now[t] != 0;
+	const char *cause = bug ? bug_cause() : NULL;
+	if (!bug) return;
+	snprintf(seen.bug_note, sizeof seen.bug_note, "A bug! %s", cause ? cause : "Two programs of one colour touch, or one breaks the board's rules.");
+	seen.bug_note_t = 300;
+}
+
+/* The note over the PET (see_bug_note), wrapped in a box at the top */
+void director_draw_bug_note(void) {
+	if (seen.bug_note_t <= 0) return;
+	char lines[4][64];
+	int n = 0, x0 = P.core_x + 4, y0 = P.core_y + 4, w = 232;
+	const char *s = seen.bug_note;
+	while (*s && n < 4) {
+		int len = (int)strlen(s), cut = len;
+		char buf[64];
+		/* (as many words as fit the box's width) */
+		for (int k = 1; k <= len && k < 63; ++k) {
+			snprintf(buf, sizeof buf, "%.*s", k, s);
+			if (text_width(buf) > w - 8) { cut = k - 1; break; }
+		}
+		if (cut < len) { int b = cut; while (b > 0 && s[b] != ' ') --b; if (b > 0) cut = b; }
+		snprintf(lines[n++], sizeof lines[0], "%.*s", cut, s);
+		s += cut;
+		while (*s == ' ') ++s;
+	}
+	int a = seen.bug_note_t < 16 ? seen.bug_note_t * 255 / 16 : 255, h = n * TEXT_H + 6;
+	fill_rect(x0, y0, w, h, rgba(40, 0, 16, (Uint8)(220 * a / 255)));
+	fill_rect(x0, y0 + h - 1, w, 1, rgba(255, 110, 110, (Uint8)(220 * a / 255)));
+	for (int i = 0; i < n; ++i) text_draw(x0 + 4, y0 + 3 + i * TEXT_H, lines[i], rgba(255, 230, 230, (Uint8)a), TEXT_LEFT);
+}
+
 void director_see(void) {
 	seen.px = bn6_player_x();
 	seen.py = bn6_player_y();
@@ -985,6 +1042,7 @@ void director_see(void) {
 	seen.custom = seen.battle && emu_read8(BN6_CUSTOM_WINDOW);
 	see_tent();
 	see_counts();
+	see_bug_note();
 }
 
 /* The panel BN6 lights under MegaMan's feet, marked over his sprite: a
