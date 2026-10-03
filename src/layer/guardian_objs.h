@@ -16,6 +16,7 @@
 #define LAYER_EXIT_OPEN_FLAG     0x144C   /* the exit pad shows */
 #define LAYER_ROUTE_FLAG         0x1452   /* the Guardian Data's second way on was taken (docs/META.md, routes) */
 #define LAYER_ROUTE_DARK_FLAG    0x1454   /* ... or its third, the dark way into the Undernet */
+#define LAYER_DRAFT_FIT_FLAG     0x1467   /* (+k) the draft's k-th program fits the board's free space as it stands (the director keeps them) */
 
 typedef struct {
 	int navi;                  /* 0: the layer has no guardian */
@@ -23,6 +24,7 @@ typedef struct {
 	int x, y, z, face;         /* where it stands (world) and its animation */
 	int intro, defeat, reward; /* its scripts in the layer's archive */
 	int prelude, hush, theme;  /* music: the boss prelude, silence, the area's */
+	uint8_t draft[3];          /* the draft's programs (variants), 0 none: LAYER_DRAFT_FIT_FLAG + k says whether each fits */
 } GuardianStage;
 
 /* The guardian object `o` at world (wx, wy, wz): its scripts into `text`. */

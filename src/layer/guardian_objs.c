@@ -43,6 +43,58 @@ static const Guardian *guardian_faced(int navi) {
 	return guardian(navi);
 }
 
+/* A way on as the split's menu names it: "CircusMan (Sky Area)", or
+ * without the brackets where a row has no room for them (a menu's row
+ * holds OPTION_CHARS letters beside its cursor). */
+#define OPTION_CHARS 21
+static void way_option(char *out, size_t n, const char *navi, const char *area) {
+	snprintf(out, n, "%s (%s)", navi, area);
+	if (strlen(out) > OPTION_CHARS) snprintf(out, n, "%s %s", navi, area);
+}
+
+/* The NaviCust's draft after a normal layer's guardian (docs/NAVICUST.md):
+ * an ExpMemry at the second and fourth acts' guardians, and three programs,
+ * or none for BugFrags. */
+static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
+	draft->expmemry = !navicust_expmemry(run.depth) ? 0 : run.depth <= 6 ? 1 : 2;
+	/* (programs that fit beside those on MegaMan's board as the layer
+	 * was made, on the board this Guardian Data leaves: its ExpMemry
+	 * comes first) */
+	NaviProgram pick[NAVICUST_DRAFT];
+	int have = 0, w, h;
+	while (have < (int)sizeof run.programs && run.programs[have]) ++have;
+	navicust_board((run.depth >= 6) + (run.depth >= 12), &w, &h);
+	int n = navicust_draft_fitting(run.depth, pick, run.programs, have, w, h);
+	if (run.threat >= 8 && n > 2) n = 2;   /* (threat 8, docs/META.md) */
+	if (emu_debug_on()) {
+		fprintf(stderr, "draft: a %dx%d board beside", w, h);
+		for (int i = 0; i < have; ++i) fprintf(stderr, " %d/%d", run.programs[i] / 4, run.programs[i] % 4);
+		fprintf(stderr, ":");
+		for (int k = 0; k < NAVICUST_DRAFT && k < n; ++k) fprintf(stderr, " %d (colour %d)", pick[k].program, pick[k].color);
+		fprintf(stderr, "\n");
+	}
+	bool colored = n > 0;
+	for (int k = 0; k < NAVICUST_DRAFT && k < n && colored; ++k) {
+		int c = pick[k].color ? pick[k].color : navicust_color(pick[k].program);
+		draft->program[k] = (uint8_t)(pick[k].program * 4);
+		draft->color[k] = (uint8_t)c;
+		draft->about[k] = navicust_about(pick[k].program);
+		colored = c > 0;
+	}
+	if (colored) {
+		draft->n = n;
+		draft->skip_frags = navicust_skip_frags(run.depth);
+		/* (the player's first draft ever: a run from an older build met
+		 * its first past act 1's, without it) */
+		draft->teach = !profile.navicust_taught;
+		/* (and whether each fits the board as it stands, said before the
+		 * pick: two playtesters took a program MegaMan then said would not
+		 * fit, session 63) */
+		draft->fit_flag = LAYER_DRAFT_FIT_FLAG;
+		for (int k = 0; k < NAVICUST_DRAFT && k < n; ++k) g->draft[k] = draft->program[k];
+	}
+}
+
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g) {
 	const Guardian *gd = guardian_faced(o->param);
 	Encounter e = make_boss(run.depth, run.biome, o->param);
@@ -66,47 +118,13 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		if (!held && memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
 		code = c == '*' ? 26 : c - 'A';
 	}
-	/* the NaviCust's part (docs/NAVICUST.md): an ExpMemry at the second
-	 * and fourth acts' guardians, and a draft of three programs, or none
-	 * for BugFrags (only a normal layer's guardian; a side layer's is its
-	 * own reward) */
+	/* the NaviCust's part (only a normal layer's guardian; a side layer's
+	 * is its own reward) */
 	ScriptsDraft draft = { 0 };
+	memset(g->draft, 0, sizeof g->draft);
 	/* (the run's last guardian: none, nothing more to run with) */
 	bool last = run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth);
-	if (run.side_kind == LAYER_NORMAL && !last) {
-		draft.expmemry = !navicust_expmemry(run.depth) ? 0 : run.depth <= 6 ? 1 : 2;
-		/* (programs that fit beside those on MegaMan's board as the layer
-		 * was made, on the board this Guardian Data leaves: its ExpMemry
-		 * comes first) */
-		NaviProgram pick[NAVICUST_DRAFT];
-		int have = 0, w, h;
-		while (have < (int)sizeof run.programs && run.programs[have]) ++have;
-		navicust_board((run.depth >= 6) + (run.depth >= 12), &w, &h);
-		int n = navicust_draft_fitting(run.depth, pick, run.programs, have, w, h);
-		if (run.threat >= 8 && n > 2) n = 2;   /* (threat 8, docs/META.md) */
-		if (emu_debug_on()) {
-			fprintf(stderr, "draft: a %dx%d board beside", w, h);
-			for (int i = 0; i < have; ++i) fprintf(stderr, " %d/%d", run.programs[i] / 4, run.programs[i] % 4);
-			fprintf(stderr, ":");
-			for (int k = 0; k < n; ++k) fprintf(stderr, " %d (colour %d)", pick[k].program, pick[k].color);
-			fprintf(stderr, "\n");
-		}
-		bool colored = n > 0;
-		for (int k = 0; k < n && colored; ++k) {
-			int c = pick[k].color ? pick[k].color : navicust_color(pick[k].program);
-			draft.program[k] = (uint8_t)(pick[k].program * 4);
-			draft.color[k] = (uint8_t)c;
-			draft.about[k] = navicust_about(pick[k].program);
-			colored = c > 0;
-		}
-		if (colored) {
-			draft.n = n;
-			draft.skip_frags = navicust_skip_frags(run.depth);
-			/* (the player's first draft ever: a run from an older build met
-			 * its first past act 1's, without it) */
-			draft.teach = !profile.navicust_taught;
-		}
-	}
+	if (run.side_kind == LAYER_NORMAL && !last) draft_make(&draft, g);
 	/* the way on (docs/META.md, routes): after an act's guardian, the next
 	 * act's area or another of its tier, each named with its guardian
 	 * where MegaMan has battled him (else as one never battled, the way
@@ -129,16 +147,14 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
 			/* (his element of either wheel: TenguMan's Wind as HeatMan's Fire) */
 			el[k] = enemy_element(enemy_id(1, n[k], 0));
-			if (guardian_known(n[k])) {
-				snprintf(option[k], sizeof option[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
-				snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
-			} else {
-				/* (a Navi as the known ones are, where it waits beside it:
-				 * a playtester read "Aquarium Comp" beside "EraseMan" as a
-				 * place against a Navi) */
-				snprintf(option[k], sizeof option[k], "??? (%s)", guardian_area_short(b[k]));
-				snprintf(who[k], sizeof who[k], "a Navi we've never battled");
-			}
+			/* (each way its Navi, "???" for one never battled, and where
+			 * he waits: a playtester read "Aquarium Comp" beside "EraseMan"
+			 * as a place against a Navi, and two missed the areas, which
+			 * only the words before named; his element stays in those) */
+			bool known = guardian_known(n[k]);
+			way_option(option[k], sizeof option[k], known ? guardian(n[k])->name : "???", guardian_area_short(b[k]));
+			if (known) snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
+			else snprintf(who[k], sizeof who[k], "a Navi we've never battled");
 			route.option[k] = option[k];
 			snprintf(then[k], sizeof then[k], "%c%s it is! The exit pad will take us there.", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
 			route.then[k] = then[k];

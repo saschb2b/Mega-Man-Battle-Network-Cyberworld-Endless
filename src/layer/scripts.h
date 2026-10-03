@@ -57,6 +57,7 @@ typedef struct {
 	const char *about[3];
 	int skip_frags;
 	bool teach;
+	int fit_flag;   /* event flag + k set where program k fits the board's free space as it stands; 0 none */
 } ScriptsDraft;
 
 /* The way on after an act's guardian (docs/META.md, routes): MegaMan's

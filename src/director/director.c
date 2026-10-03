@@ -2925,6 +2925,21 @@ static bool fits_free_as(int v, bool compressed) {
 
 static bool fits_as_it_stands(int v) { return fits_free_as(v, flag_get(BN6_FLAG_COMPRESSED + v)); }
 
+/* Whether each program of the guardian's draft fits the board's free
+ * space as it stands, in the flags its Guardian Data's lines read
+ * (LAYER_DRAFT_FIT_FLAG + k), kept while it waits: said before the pick,
+ * where two playtesters took a program MegaMan then said would not fit
+ * (session 63). */
+static void draft_fit_watch(void) {
+	if (!D.objs.guardian.navi || boss_done() || D.frame % 16) return;
+	for (int k = 0; k < 3; ++k) {
+		int v = D.objs.guardian.draft[k];
+		bool fits = v && fits_free_as(v, false);
+		if (fits && !flag_get(LAYER_DRAFT_FIT_FLAG + k)) flag_set(LAYER_DRAFT_FIT_FLAG + k);
+		else if (!fits && flag_get(LAYER_DRAFT_FIT_FLAG + k)) flag_clear(LAYER_DRAFT_FIT_FLAG + k);
+	}
+}
+
 /* MegaMan's word on a program's compression code where it is the way to fit
  * the program (issue #50): a code entered in an earlier run, not in this
  * one, whose shape fits beside the board's programs (`as_it_stands`: in its
@@ -2943,11 +2958,17 @@ static const char *code_words(int v, bool as_it_stands) {
  * fits the board only once others move: said at once, where a playtester
  * met it in the NaviCust and moved two programs to fit Custom1 (session
  * 55); NULL for none. */
+static bool in_draft(int v) {
+	for (int k = 0; k < 3; ++k) if (v && D.objs.guardian.draft[k] == v) return true;
+	return false;
+}
+
 static const char *cramped_words(void) {
 	static char words[360];
 	int v = 0;
 	const char *off = program_off_board(&v);
-	if (!off || !*off || !fits_beside_placed(v) || fits_as_it_stands(v)) return NULL;
+	/* (a Guardian Data's program: its draft has said so, before the pick) */
+	if (!off || !*off || !fits_beside_placed(v) || fits_as_it_stands(v) || in_draft(v)) return NULL;
 	snprintf(words, sizeof words, "@M %s won't fit in our board's free space as it stands, Lan. In the NaviCust we'll have to move a program "
 		"or two to make room.%s", off, code_words(v, true));
 	return words;
@@ -3937,7 +3958,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); }
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		int sub = emu_read8(BN6_GAMESTATE);
