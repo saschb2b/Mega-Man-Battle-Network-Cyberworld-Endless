@@ -1852,3 +1852,50 @@ TagChip text stated a Reg memory limit BN6 does not have, and the
 persona reported the game breaking it. Before a line names a BN6 rule
 (a limit, a cost, a condition), find the rule in the game's own text or
 the disassembly and cite it in the commit.
+
+## Session 61: three at once on 0.8.0 (kai 8/10, kai2 7/10, kai3 7/10; all would keep playing and recommend)
+
+The first iteration with parallel instances (the owner's ask at 0.8.0's
+release): kai continued run 9, kai2 (a copy of kai's profile) began run 10
+on Blade with SlashCross, kai3 played as a newcomer on a fresh profile.
+
+kai deleted SpoutMan in 0:12.23 on a plan the game handed him (the
+dealer's pick, MegaMan's battle data, the Regular Thunder): his best
+guardian fight. kai2's first battle made LifeSword from a tagged pair the
+BBS had hinted at. kai3 lost to SpoutMan on run 1 and began run 2, the
+death remembered by Dad's backup and MegaMan's battle data.
+
+Confirmed: the counters (header and L), the map's rings and arrowheads,
+the BBS, the PA whispers, TagChips under 60 MB (a pair dealt together),
+the split naming its areas, CONTINUE's fresh layer, no empty detours.
+
+Raised and fixed in the iteration: the counters counted data never on
+screen, with no way to find it (all three: the map now marks seen,
+untaken data); a chip bought went to the Pack unseen (kai3: MegaMan says
+so once); battlefield data explained only after the first battle that had
+one (kai3: a first-act navi says it before); "Cyberworld" against "Endless
+Net" (kai3); the summary's garbled goal (kai3); MegaMan's + chip rule
+backwards (kai2, from my own session-60 fix).
+
+Open: Green's ladder lattice (kai ~24 calls of stops; its rungs at random
+turn the way at every plank; an aligned line of rungs did not come out
+whole and is reverted: measure turns on one-panel walkways first); act 1
+with no set piece to solve (kai2); a first guardian that is an HP wall
+for a newcomer's folder (kai3; the owner's call); the NaviCust's bug said
+only after RUN (kai, twice now); purple data without a direction though
+its key was bought (kai2); navis standing on the way (kai2); a whisper
+navi falling back to a tip (kai2).
+
+Misreads: the lab-coat man "with the girl's face" (A spoke to the girl
+beside him); the tagged pair "never together" (untagged copies of the
+same chips drawn); GolmHit3's reach (BN6's own text).
+
+Cost: 836 calls in about an hour and a half of wall clock, three agents.
+
+Loop change: **run the instances from different starting points and
+triage them together.** The newcomer found what the veteran no longer
+sees (the Pack, the battlefield data, the two names), the fresh run found
+what a continued one skips (act 1's set pieces), and all three agreeing on
+the counters made that fix the iteration's first. A fix I wrote from a
+persona's statement of a BN6 rule (the + chip) was wrong: verify rules in
+the game, as the session-60 entry said, before writing them.
