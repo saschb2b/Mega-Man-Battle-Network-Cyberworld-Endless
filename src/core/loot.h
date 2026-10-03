@@ -50,6 +50,8 @@ void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]);
  * 5 under 20 MB, 4, 3, 2, 1 from 50): a dealer's pick of it is of no use. */
 void loot_folder_counts(const uint16_t *folder, int n);
 bool loot_folder_full(int id);
+/* How many of chip `id` the folder holds, as loot_folder_counts was given it. */
+int loot_folder_copies(int id);
 /* What the random battles remember of the last one (none of its virus
  * families next), kept beside the run's save: a CONTINUE had forgotten it
  * and brought the last session's pair back first thing. */

@@ -50,6 +50,7 @@
 #include "run.h"
 #include "runlog.h"
 #include "meta.h"
+#include "rumors.h"
 #include "save.h"
 #include "save_blob.h"
 #include "scripts.h"
@@ -3228,6 +3229,15 @@ static bool dev_gift(const char *name) {
 	return true;
 }
 
+/* A dev talk said in the engine's own words: L's (status), the layer's
+ * rumor (rumor, rumors.c); false for another. */
+static bool dev_say(const char *name) {
+	if (!strcmp(name, "status")) talk_start(status_words(), FACE_MEGAMAN);
+	else if (!strcmp(name, "rumor")) { if (rumors_line()) talk_start(rumors_line(), FACE_NAVI); }
+	else return false;
+	return true;
+}
+
 static void dev_talks(void) {
 	static unsigned done;
 	static uint32_t layer_of;
@@ -3255,8 +3265,7 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
-		else if (!strcmp(name, "status")) { talk_start(status_words(), FACE_MEGAMAN); return; }
-		else if (dev_gift(name)) return;
+		else if (dev_say(name) || dev_gift(name)) return;
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
 			int k = D.objs.trader_kind;

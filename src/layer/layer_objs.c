@@ -26,6 +26,7 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "rumors.h"
 #include "rush.h"
 #include "blockers.h"
 #include "save.h"
@@ -504,14 +505,17 @@ static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 
 /* A bystander's talk with a part to play: the first's rumor of the act's
  * guardian (`first` >= 0), a P-Code's teller's, an invisible path's
- * hint (issue #46); -1 for his own line. */
-static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first) {
+ * hint (issue #46), the second's whisper (`said`, rumors.c); -1 for his
+ * own line. */
+static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said) {
 	int rumor = first >= 0 ? rumor_talk(text, out, layer_objs_bystander) : -1;
 	if (rumor >= 0) return rumor;
 	if (i == layer.teller - 1) return ta_pcode_teller(text, layer_objs_bystander, blockers_pcode(), LAYER_PCODE_FLAG);
 	if (i == layer.hinter - 1)
 		return ta_say(text, layer_objs_bystander, "See that little pad out in the void, all by itself?|I saw a Navi walk out to it. Right over nothing!");
-	return -1;
+	const char *whisper = said == 1 ? rumors_line() : NULL;
+	if (whisper && emu_debug_on()) fprintf(stderr, "rumor: %s\n", whisper);
+	return whisper ? ta_say(text, layer_objs_bystander, whisper) : -1;
 }
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {
@@ -617,7 +621,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			 * same line on an act's first and third layers) */
 			if (!said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
 			tk.sprite = layer_objs_bystander;
-			tk.script = bystander_talk(&text, out, i, said ? -1 : base + said);
+			tk.script = bystander_talk(&text, out, i, said ? -1 : base + said, said);
 			if (tk.script < 0) tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
 			++said;
 			break;

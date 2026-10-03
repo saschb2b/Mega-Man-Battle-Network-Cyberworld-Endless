@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The net's rumors.** One navi on each layer now whispers the way a
+  schoolyard did: a Program Advance from BN6's own table, picked for chips
+  in your folder ("Sword H, WideSwrd H and LongSwrd H, in that order...
+  LifeSrd!"), or a hint at a secret you haven't found yet, never its
+  answer. Every rumor is true.
 - **Fewer narrow walkways on the way, as BN6's own maps have them.** The
   way across a layer now crosses no more one-panel walkways than its
   area's original maps do: wider ways in Seaside, Green, the Secret Area,

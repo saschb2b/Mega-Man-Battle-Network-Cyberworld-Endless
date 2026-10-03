@@ -193,7 +193,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 `--marks HEX` the title's marks, `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen and `--dpi N` its density), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
-undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader; intro, defeat, reward for the guardian; status for L;
+undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader; intro, defeat, reward for the guardian; status for L; rumor for the layer's whisper (rumors.c);
 fragment for MegaMan's words at a ScrtData; bugfrags gives 50 BugFrags, keys an Unlocker, rushfood three RushFood, wwwid a WWW-ID, zenny 10000 zenny, regup a RegUP3). `--input "FRAMES:BUTTONS,..."` scripts the
 buttons (`UP+RIGHT`, `A`), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames (the canvas; `--screen-shot FRAME:PATH,...` the whole screen, the touch controls on it; `--second-shot FRAME:PATH,...` the second screen, the 3DS's bottom one with the layer's map), and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet

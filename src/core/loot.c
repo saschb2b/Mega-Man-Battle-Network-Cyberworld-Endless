@@ -607,6 +607,8 @@ void loot_folder_counts(const uint16_t *folder, int n) {
 		if (folder_copies[folder[i] & 0x1FF] < 255) ++folder_copies[folder[i] & 0x1FF];
 }
 
+int loot_folder_copies(int id) { return id >= 0 && id < 512 ? folder_copies[id] : 0; }
+
 bool loot_folder_full(int id) {
 	if (id < 0 || id >= 512 || !folder_copies[id]) return false;
 	ChipInfo ci;

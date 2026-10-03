@@ -528,6 +528,32 @@ with the game-design skill:
   for its RegUp read as a chore (one a layer, in the place that pays
   anyway).
 
+## Rumors (3 October 2026)
+
+What a schoolyard passed around about Battle Network, the net's navis pass
+around about the Endless Net: one bystander a layer, the second, has a
+rumor where one is left to tell (`src/layer/rumors.c`), and every one is
+true, as every bystander's line is (a tip that misled a playtester taught
+that).
+
+- **The dialectic** is discovery against guidance: a rumor points at a
+  secret and leaves the finding to the player, as the schoolyard's did
+  (Pokémon's, Tunic's manual pages, Hollow Knight's hints).
+- **Program Advances, as a friend told them:** BN6's own, read from its
+  table (docs/ROM_DATA.md), the recipe picked for the chips the folder
+  holds as the layer is made, in codes they come in: "Psst! My operator
+  sent Sword H, WideSwrd H and LongSwrd H, in that order... And they turned
+  into LifeSrd! A Program Advance!" BN6 never names its Program Advances
+  in play; players learned them from each other.
+- **Secrets, said only while the profile has yet to find them, never the
+  answer:** that a NaviCust program shrinks by a secret pattern of buttons
+  (until a compression code is entered), that a Spin hides deeper in each
+  dive (until all six are held), that Chaud teaches a trick to whoever
+  beats ProtoMan's time (until his first clearance), that some floor can't
+  be seen (from the second act), that every layer before a guardian hides a
+  RegUp (until the first is found).
+- A secret one layer in three while one is left, a recipe else.
+
 ## What MegaMan knows (29 September 2026)
 
 Read through the resonance lens (describe the loop without its fiction,
