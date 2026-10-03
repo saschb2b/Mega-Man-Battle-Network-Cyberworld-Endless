@@ -2306,7 +2306,9 @@ static void save_checkpoint(void) {
 }
 
 bool director_can_suspend(void) {
-	return D.active && !D.town && !D.gameover && on_map() && !emu_read8(BN6_CHATBOX) && !talk_busy() && !D.warping &&
+	/* (not through a guest battle: BN6 stands on the map while it runs, and
+	 * a quit there skipped the battle) */
+	return D.active && !D.town && !D.gameover && on_map() && !guest_active() && !emu_read8(BN6_CHATBOX) && !talk_busy() && !D.warping &&
 		emu_read8(BN6_WARP_PENDING) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
 		flag_get(BN6_FLAG_PLAYER_CAN_MOVE);
 }
