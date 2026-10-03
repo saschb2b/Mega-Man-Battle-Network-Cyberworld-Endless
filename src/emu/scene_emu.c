@@ -119,9 +119,20 @@ static uint32_t guest_keys(void) {
 	return t % 10 < 5 ? KEY_B : 0;
 }
 
+/* A flash as the guest's battle takes the screen, frames left (the switch
+ * of engines, framed as BN6's own battles open with one; issue #65) */
+#define GUEST_FLASH 20
+static int guest_flash, guest_wait;   /* (and frames the guest has run before its battle shows: BN6's frame fades to white) */
+
 /* A battle on the guest core: its frames in BN6's place, BN6's core
  * waiting, and its result into the run as it ends */
 static bool guest_update(void) {
+	static bool was;
+	bool shown = guest_on_screen();
+	if (shown && !was) guest_flash = GUEST_FLASH;
+	else if (guest_flash > 0) --guest_flash;
+	guest_wait = guest_active() && !shown ? guest_wait + 1 : 0;
+	was = shown;
 	if (!guest_active()) return false;
 	uint32_t keys = guest_keys();
 	for (int i = 0; i < dev.speed && guest_active(); ++i) guest_frame(keys);
@@ -178,7 +189,9 @@ static void draw(void) {
 	}
 	/* mGBA keeps layer flags in the top byte; GL renderers read it as alpha */
 	static uint32_t px[EMU_W * EMU_H];
-	bool guest = guest_active();
+	/* (the guest's battle once it is on its screen: before, BN6's last
+	 * frame, where its opening drew the room its boot left it in) */
+	bool guest = guest_on_screen();
 	const uint32_t *v = guest ? guest_video() : emu_video();
 #ifdef __3DS__
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = 0xFF000000u | (v[i] & 0xFF00u) | (v[i] & 0xFFu) << 16 | (v[i] >> 16 & 0xFFu);
@@ -191,10 +204,18 @@ static void draw(void) {
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
-	if (guest) return;   /* (another game's battle: its own screen, none of the layer's marks) */
+	/* (another game's battle: its own screen, none of the layer's marks) */
+	if (guest) {
+		if (guest_flash > 0) fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_flash * 255 / GUEST_FLASH)));
+		return;
+	}
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	director_draw_map();
+	if (guest_wait > 0) {
+		fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_wait >= GUEST_FLASH ? 255 : guest_wait * 255 / GUEST_FLASH)));
+		return;
+	}
 	director_draw_counts();
 	director_draw_bug_note();
 	director_draw_duel();

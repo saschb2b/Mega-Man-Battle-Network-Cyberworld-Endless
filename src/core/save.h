@@ -73,6 +73,7 @@ typedef struct {
 	uint8_t reg_taught, tag_taught;
 	uint8_t bbs_seen;         /* the Endless Net BBS's posts when its mail was last marked NEW (rumors) */
 	uint8_t pack_taught;      /* MegaMan has said a chip bought or traded goes to the Pack */
+	uint8_t guest_taught;     /* ... and what an older net's battle is (docs/MULTIROM.md, Guest battles) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };

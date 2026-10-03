@@ -25,6 +25,9 @@ bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder);
 bool guest_active(void);
 /* ... and its Custom screen is up (the autopilot's chips and OK) */
 bool guest_custom_screen(void);
+/* ... and its battle is on its screen (its game state's battle, not the
+ * room its boot left it in, which the battle's opening showed) */
+bool guest_on_screen(void);
 /* One frame of the guest with these keys held (GBA key bits). */
 void guest_frame(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
@@ -38,6 +41,7 @@ typedef struct {
 	int chip;      /* (won) the reward: BN6's chip of its name, and its code (A=0, *=26); 0 none */
 	int code;
 	int zenny;     /* ... or zenny */
+	int sat_out;   /* the folder's chips its game has none of */
 } GuestResult;
 /* Once a battle has ended (guest_active false again): its result, once. */
 bool guest_take_result(GuestResult *out);

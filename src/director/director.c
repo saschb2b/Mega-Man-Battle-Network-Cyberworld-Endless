@@ -142,6 +142,7 @@ static struct {
 	int heard_act;         /* 1 + the act whose guardian a bystander has named, 0 none (kept across a CONTINUE: act_note) */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
+	int guest_due;         /* 1 + the chips that sat out of an older net's first battle, its words due (once a profile) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
@@ -3796,6 +3797,7 @@ void director_guest_done(const GuestResult *r) {
 	int max = emu_read16(BN6_NAVI_MAX_HP);
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
+	if (!profile.guest_taught) D.guest_due = 1 + r->sat_out;
 	/* (what its results screen gave: BN6's chip of the same name to the
 	 * Pack, or zenny) */
 	uint32_t out[2];
@@ -3998,6 +4000,24 @@ static void rush_hint(void) {
 	if (talk_start(words, FACE_MEGAMAN)) flag_set(LAYER_RUSH_TOLD_FLAG);
 }
 
+/* MegaMan's words after a profile's first battle in an older net's own
+ * engine (docs/MULTIROM.md, Guest battles; issue #65): what it was, and
+ * why chips sat out. A BN5 battle opened with no word of why the screen,
+ * the chips' art and their rules changed. */
+static void guest_words(void) {
+	if (!D.guest_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
+	char words[320];
+	int out = D.guest_due - 1, k = snprintf(words, sizeof words, "@M Lan, that battle ran on an older net's system! The Nest copied that "
+		"net too, battles and all.|@M Its viruses fight the old way, and our chips work as the old net knew them.");
+	if (out > 0)
+		snprintf(words + k, sizeof words - (size_t)k, " %d of ours didn't exist back then, so they sat out.", out);
+	if (talk_start(words, FACE_MEGAMAN)) {
+		D.guest_due = 0;
+		profile.guest_taught = 1;
+		profile_save();
+	}
+}
+
 /* The Navi gate's SP chip, given; Rush's gap, named. */
 /* where a chip come to the pack went, the first time (pack_due) */
 static void pack_words(void) {
@@ -4015,6 +4035,7 @@ static void words_due(void) {
 	gate_and_rush_words();
 	pack_watch();
 	pack_words();
+	guest_words();
 }
 
 static void gate_and_rush_words(void) {

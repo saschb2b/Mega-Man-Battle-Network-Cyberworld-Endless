@@ -86,7 +86,7 @@ static struct mCore *core;
 static bool ready, failed, active, result_due;
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
-static int frames;
+static int frames, sat_out;
 /* a battle's course: asked for, begun */
 enum { PH_IDLE, PH_ASKED, PH_BATTLE };
 static int phase;
@@ -259,7 +259,9 @@ bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) {
 	wr16(BN5_NAVI_BASE_MAX_HP, (uint16_t)max_hp);
 	wr16(BN5_NAVI_MAX_HP, (uint16_t)max_hp);
 	wr16(BN5_NAVI_HP, (uint16_t)(hp < 1 ? 1 : hp > max_hp ? max_hp : hp));
-	int in = folder ? folder_in(folder) : 0;
+	int in = folder ? folder_in(folder) : 0, held = 0;
+	for (int i = 0; folder && i < 30; ++i) held += (folder[i] & 0x1FF) != 0;
+	sat_out = held - in;
 	rows_fit(record);
 	if (emu_debug_on()) fprintf(stderr, "guest: battle %08X, HP %d/%d, %d of the folder's 30 in\n", record, hp, max_hp, in);
 	patch_roll(record_copy(record));
@@ -273,8 +275,10 @@ bool guest_active(void) { return active; }
 
 bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_CUSTOM; }
 
+bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
+
 static void finish(int outcome) {
-	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0 };
+	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out };
 	/* (what its results screen gave, as the run's: a chip by its name, or
 	 * zenny) */
 	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0;
@@ -329,6 +333,7 @@ bool guest_start(int xrom) { (void)xrom; return false; }
 bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) { (void)record; (void)hp; (void)max_hp; (void)folder; return false; }
 bool guest_active(void) { return false; }
 bool guest_custom_screen(void) { return false; }
+bool guest_on_screen(void) { return false; }
 void guest_frame(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
 bool guest_take_result(GuestResult *out) { (void)out; return false; }
