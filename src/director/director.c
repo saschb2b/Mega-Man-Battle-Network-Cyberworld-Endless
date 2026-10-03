@@ -2479,11 +2479,12 @@ static void reg_watch(void) {
 	int reg = emu_read8(BN6_NAVI_REG);
 	if (D.reg_due && !profile.reg_taught)
 		snprintf(words, sizeof words, "@M A RegUp, Lan! Our Reg memory's %d MB now.|@M In the folder's EDIT, SELECT chooses a Regular Chip "
-			"of %d MB or less: it starts every battle in our hand. Every dive starts at 4 MB again, so keep an eye out for RegUps!", reg, reg);
+			"of %d MB or less: it starts every battle in our hand. An attack's best: a + chip like Atk+10 needs an attack picked after it.|"
+			"@M Every dive starts at 4 MB again, so keep an eye out for RegUps!", reg, reg);
 	else if (D.reg_due) snprintf(words, sizeof words, "@M Reg memory up: %d MB now, Lan!", reg);
 	else if (rival_clearance() >= 1 && !profile.tag_taught)
 		snprintf(words, sizeof words, "@M Lan, Chaud's clearance comes with the TagChip system! In the folder's EDIT, SELECT, then Choose "
-			"TagChip: two chips tagged come to our hand together, if our Reg memory holds both. It's %d MB now.", reg);
+			"TagChip: two chips tagged come to our hand together, as long as they add up to less than 60 MB.");
 	else return;
 	if (!talk_start(words, FACE_MEGAMAN)) return;
 	if (D.reg_due) profile.reg_taught = 1;
@@ -3079,7 +3080,7 @@ static void duel_verdict(bool won) {
 		ADD("@C You've earned my first clearance, Lan. The official Chip Orders open for you now.|");
 		/* (and the TagChip system, for good: issue #51) */
 		ADD("@C And a NetBattler's trick: the TagChip system. Tag two chips in your folder's EDIT with SELECT, and they'll come to your "
-			"hand together, as long as your Reg memory holds both.|");
+			"hand together, as long as they add up to less than 60 MB.|");
 		profile.tag_taught = 1;
 		profile_save();
 	}

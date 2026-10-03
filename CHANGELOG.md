@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **TagChips, said right.** MegaMan and the PET's mail said a tagged pair
+  had to fit in the Reg memory; BN6's rule is a pair under 60 MB, whatever
+  the Reg memory, and they now say so. A first-act navi now says the Net
+  Dealers set up shop on an area's first layers, and MegaMan's word on the
+  first RegUp adds that a + chip like Atk+10 needs an attack after it.
 - **The Endless Net BBS.** A new mail in the PET collects the netizens'
   threads about the net: tips, sightings and the odd myth, with more
   posts the deeper you've been.

@@ -488,12 +488,13 @@ entered, kept and also found on the net, all known from the start),
 
 ## Reg memory and TagChips (3 October 2026)
 
-BN6's Regular Chip starts every battle in the first hand, and its
-TagChips, two chips tagged together, come to the hand together: both are
-limited by MegaMan's Reg memory (a chip's MB, the tagged pair's summed),
-which starts at 4 MB and grows by BN6's RegUP1-3 items (+1, +2, +3 MB),
-hidden in its blue Mystery Data; the TagChip system is a key item of its
-own. A run is a fresh game: 4 MB, which only 4 of the 200 standard chips
+BN6's Regular Chip starts every battle in the first hand, limited by
+MegaMan's Reg memory (the chip's MB), which starts at 4 MB and grows by
+BN6's RegUP1-3 items (+1, +2, +3 MB), hidden in its blue Mystery Data.
+Its TagChips, two chips tagged together, come to the hand together, the
+pair under 60 MB, whatever the Reg memory (BN6's own mail on the system
+says so, and its folder code checks it: bn6f `sub_81349E8`, 0x3C less the
+partner's MB); the TagChip system is a key item of its own. A run is a fresh game: 4 MB, which only 4 of the 200 standard chips
 fit, and no TagChips (issue #51). The owner chose, of the ways reasoned
 with the game-design skill:
 
@@ -514,7 +515,7 @@ with the game-design skill:
   his first clearance (a first duel won, docs/RIVAL.md) brings it, and
   every run after starts with BN6's TagChip key item, which adds "Choose
   TagChip" to the folder EDIT's SELECT. Variety, not power: two chips of
-  the folder drawn together, inside the same Reg memory.
+  the folder drawn together, the pair under 60 MB.
 - **Teaching:** the first RegUp found in any run, MegaMan says what Reg
   memory does and where it is set ("In the folder's EDIT, SELECT chooses a
   Regular Chip of 6 MB or less: it starts every battle in our hand. Every
