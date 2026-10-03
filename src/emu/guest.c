@@ -49,6 +49,15 @@ uint32_t guest_record(int xrom, int group, int number, int i) {
 	return i >= 0 && i < guest_records(xrom, group, number) ? records_at(xrom, group, number) + 16u * (uint32_t)i : 0;
 }
 
+bool guest_dev_worried;
+
+const char *guest_dark_name(int k) {
+	static char name[16];
+	if (k < 0 || k >= GUEST_DARK_KINDS) return "";
+	xrom_text(XROM_BN5_COLONEL_US, BN5_CHIP_NAMES_LOW, BN5_DARK_FIRST + k, name, sizeof name);
+	return name;
+}
+
 #ifdef CW_GUEST
 
 #include <mgba/core/blip_buf.h>
@@ -87,6 +96,9 @@ static bool ready, failed, active, result_due;
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
 static int frames, sat_out;
+static uint8_t dark_in[GUEST_DARK_KINDS];   /* the run's DarkChips as the battle began */
+static bool dark_used;                       /* ... and one was used in it (latched from BN5_DARK_USED) */
+
 /* a battle's course: asked for, begun */
 enum { PH_IDLE, PH_ASKED, PH_BATTLE };
 static int phase;
@@ -95,6 +107,53 @@ static uint8_t rd8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
 static uint16_t rd16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1); }
 static uint32_t rd32(uint32_t a) { return core->rawRead32(core, a, -1); }
 static void wr16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
+
+/* The deck's compaction, replaced (BN5_COMPACT): as BN5's, the live chips
+ * to the front, 0xFFFF after; but a DarkChip stays live only where BN5's
+ * worried rule could have put it (at the hand's end while MegaMan is
+ * worried or dark, or in the hand after the battle's first Custom screen),
+ * the others shelved behind the padding, where no draw reaches and the
+ * rule, which reads all 30, still finds them: DarkChips come only by its
+ * rule (docs/META.md). Thumb, its literals 0x08012705 (emotion(side)),
+ * the deck 0x0203C830 and 0xFFFF; called with r5 the Custom screen's state
+ * and sl the toolkit, as BN5's (written and tested in romlab: the worried
+ * MegaMan offered the shelved DarkCirc in his hand's last slot, the calm
+ * one none). */
+static const uint8_t shelf[188] = {
+	0xf0, 0xb5, 0x84, 0xb0, 0x50, 0x46, 0x80, 0x69, 0xc1, 0x79, 0x00, 0x22, 0x01, 0x29, 0x00, 0xd9, 0x01, 0x22, 0x03, 0x92, 0x40, 0x7b,
+	0x26, 0x4b, 0x00, 0xf0, 0x49, 0xf8, 0x01, 0x28, 0x01, 0xd0, 0x05, 0x28, 0x03, 0xd1, 0x03, 0x9a, 0x02, 0x21, 0x0a, 0x43, 0x03, 0x92,
+	0xab, 0x79, 0x5b, 0x00, 0x20, 0x4c, 0x00, 0x26, 0x00, 0x27, 0x00, 0x20, 0x02, 0x90, 0xa0, 0x5b, 0x1e, 0x49, 0x88, 0x42, 0x1b, 0xd0,
+	0xc1, 0x05, 0xc9, 0x0d, 0xbb, 0x29, 0x15, 0xd3, 0xc6, 0x29, 0x13, 0xd8, 0x03, 0x9a, 0x9e, 0x42, 0x04, 0xd3, 0x06, 0xd1, 0x02, 0x21,
+	0x0a, 0x42, 0x0c, 0xd1, 0x02, 0xe0, 0x01, 0x21, 0x0a, 0x42, 0x08, 0xd1, 0x02, 0x99, 0x04, 0x29, 0x05, 0xd2, 0x4a, 0x00, 0x01, 0x31,
+	0x02, 0x91, 0x69, 0x46, 0x88, 0x52, 0x01, 0xe0, 0xe0, 0x53, 0x02, 0x37, 0x02, 0x36, 0x3c, 0x2e, 0xdc, 0xd3, 0x02, 0x99, 0x1e, 0x22,
+	0x52, 0x1a, 0x52, 0x00, 0x0b, 0x48, 0x97, 0x42, 0x02, 0xd2, 0xe0, 0x53, 0x02, 0x37, 0xfa, 0xe7, 0x00, 0x26, 0x02, 0x98, 0x40, 0x00,
+	0x86, 0x42, 0x05, 0xd2, 0x69, 0x46, 0x88, 0x5b, 0xe0, 0x53, 0x02, 0x37, 0x02, 0x36, 0xf5, 0xe7, 0x04, 0xb0, 0xf0, 0xbd, 0x18, 0x47,
+	0x05, 0x27, 0x01, 0x08, 0x30, 0xc8, 0x03, 0x02, 0xff, 0xff, 0x00, 0x00,
+};
+#define SHELF_AT (BN5_FREE + 0x100)
+
+/* BN5's compaction pointed at the shelf (ldr r3, =shelf + 1; bx r3; nop) */
+static void shelf_install(void) {
+	for (uint32_t i = 0; i < sizeof shelf; i += 2) core->rawWrite16(core, SHELF_AT + i, -1, (uint16_t)(shelf[i] | shelf[i + 1] << 8));
+	static const uint16_t jump[3] = { 0x4B01, 0x4718, 0x46C0 };
+	for (uint32_t i = 0; i < 3; ++i) core->rawWrite16(core, BN5_COMPACT + 2 * i, -1, jump[i]);
+	core->rawWrite32(core, BN5_COMPACT + 6, -1, SHELF_AT + 1);
+}
+
+/* the run's DarkChips into the guest's folder (three at most, one of each,
+ * as BN5's folder takes them), each in its own code, where chips sat out:
+ * one empty slot stays, the shelf's edge */
+static void dark_in_folder(uint32_t folders, uint32_t marks) {
+	static const uint16_t entry[GUEST_DARK_KINDS] = { 0x22BB, 0x32BC, 0x10BD, 0x34BE, 0x2CBF, 0x26C0, 0x18C1, 0x0EC2, 0x0AC3, 0x06C4, 0x26C5, 0x08C6 };
+	int empty[30], ne = 0, put = 0;
+	for (int i = 29; i >= 0; --i) if (rd16(folders + 2u * (uint32_t)i) == 0xFFFF) empty[ne++] = i;
+	for (int k = 0; k < GUEST_DARK_KINDS && put < 3 && put + 1 < ne; ++k) {
+		if (!dark_in[k]) continue;
+		wr16(folders + 2u * (uint32_t)empty[put++], entry[k]);
+		uint32_t id = entry[k] & 0x1FF;
+		core->rawWrite8(core, marks + id, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + id) ^ BN5_CHIP_KEY_XOR));
+	}
+}
 static int main_mode(void) { return rd8(rd32(BN5_TOOLKIT)); }
 static int sub_mode(void) { return rd8(BN5_GAMESTATE); }
 static bool on_map(void) { return main_mode() == BN5_MODE_GAME && sub_mode() == BN5_SUB_MAP; }
@@ -187,6 +246,7 @@ bool guest_start(int xrom) {
 		return false;
 	}
 	patch_roll(0);
+	shelf_install();
 	failed = false;
 	ready = true;
 	int paired = chips_pair(xrom);
@@ -247,11 +307,13 @@ static int folder_in(const uint16_t *folder) {
 		++in;
 	}
 	core->rawWrite8(core, BN5_NAVI_FOLDER, -1, 0);
+	dark_in_folder(folders, marks);
 	return in;
 }
 
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) {
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS]) {
 	if (!ready || active || !record) return false;
+	memcpy(dark_in, dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
@@ -259,6 +321,13 @@ bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) {
 	wr16(BN5_NAVI_BASE_MAX_HP, (uint16_t)max_hp);
 	wr16(BN5_NAVI_MAX_HP, (uint16_t)max_hp);
 	wr16(BN5_NAVI_HP, (uint16_t)(hp < 1 ? 1 : hp > max_hp ? max_hp : hp));
+	/* (calm at its start, as each of the run's battles begins: BN5's dark
+	 * meter and mood would carry its last DarkChip's darkness on) */
+	core->rawWrite8(core, BN5_NAVI_MOOD, -1, 0x80);
+	wr16(BN5_NAVI_METER, 500);
+	uint32_t check = rd32(BN5_TOOLKIT + BN5_TOOLKIT_METER_CHECK);
+	if (check >= 0x02000000u && check < 0x02040000u) core->rawWrite32(core, check, -1, 500u ^ rd32(BN5_METER_KEY));
+	dark_used = false;
 	int in = folder ? folder_in(folder) : 0, held = 0;
 	for (int i = 0; folder && i < 30; ++i) held += (folder[i] & 0x1FF) != 0;
 	sat_out = held - in;
@@ -278,7 +347,9 @@ bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
 
 static void finish(int outcome) {
-	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out };
+	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out, false, { 0 } };
+	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
+	result.dark_used = dark_used;
 	/* (what its results screen gave, as the run's: a chip by its name, or
 	 * zenny) */
 	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0;
@@ -307,6 +378,10 @@ void guest_frame(uint32_t keys) {
 		core->rawWrite8(core, BN5_BATTLE_RESULT + 1, -1, 0);
 		wr16(BN5_REWARD, 0);
 	} else if (phase == PH_ASKED && frames > 600) finish(GUEST_ESCAPED);   /* (never began: nothing happened) */
+	/* (a DarkChip used: latched while its battle runs, as leaving it wipes
+	 * the counter) */
+	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_DARK_USED + 8u * rd8(BN5_BATTLE_SIDE))) dark_used = true;
+	if (guest_dev_worried && phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_MOOD) > 0x40) core->rawWrite8(core, BN5_BATTLE_MOOD, -1, 0x20);
 	/* (back on the map: how it ended, from BN5's own result, and MegaMan's
 	 * HP as the battle left it: BN5 copies it back to his NaviStats only on
 	 * its own maps' terms, which a forced battle does not meet) */
@@ -330,7 +405,10 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS, the browser) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder) { (void)record; (void)hp; (void)max_hp; (void)folder; return false; }
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS]) {
+	(void)record; (void)hp; (void)max_hp; (void)folder; (void)dark;
+	return false;
+}
 bool guest_active(void) { return false; }
 bool guest_custom_screen(void) { return false; }
 bool guest_on_screen(void) { return false; }

@@ -42,6 +42,10 @@
 #define LAYER_PCODE_FLAG       0x1465
 /* A number door of the layer was answered wrong, and sealed (issue #47). */
 #define LAYER_NUMBER_SEALED_FLAG 0x1466
+/* The layer's flame of darkness gave its DarkChip, and left (docs/META.md,
+ * DarkChips in BN5 territory). (0x1467-0x1469: the draft's fit flags,
+ * guardian_objs.h) */
+#define LAYER_DARK_TAKEN_FLAG  0x146D
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -57,6 +61,7 @@ typedef struct {
 	int script_of[OBJ_OFFICIAL + 1];   /* each kind's first talker's script, -1 none (for --talk); OBJ_OFFICIAL the last kind */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	int trader_kind;           /* the layer's trader's script in the game's trader archive (TraderKind), -1 none (for --talk) */
+	int dark_flame;            /* the flame of darkness's script, -1 none (for --talk) */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
 	int ndealer, nprograms;
 	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour and layer.obj index (its flag MAPSLOT_MD_FLAG + its index) */
@@ -87,6 +92,13 @@ extern int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
 extern int layer_objs_bystander;
 /* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
 extern int layer_objs_official_level;
+/* Set before layer_objs_install on a BN5 layer that holds a flame of
+ * darkness: its list-7 sprite (-1: none), the DarkChip in it, and whether
+ * MegaMan says all of its price (a profile's first). It stands in its
+ * last bystander's place. */
+extern int layer_objs_dark_flame;
+extern const char *layer_objs_dark_chip;
+extern bool layer_objs_dark_first;
 extern bool layer_objs_duel_later;
 
 #endif

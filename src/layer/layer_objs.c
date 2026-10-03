@@ -56,6 +56,9 @@ int layer_objs_official_level;
 bool layer_objs_duel_later;
 
 int layer_objs_bystander = LAYER_BYSTANDER;   /* (EvilNavi) */
+int layer_objs_dark_flame = -1;
+const char *layer_objs_dark_chip = "";
+bool layer_objs_dark_first;
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -516,6 +519,39 @@ static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
  * guardian (`first` >= 0), a P-Code's teller's, an invisible path's
  * hint (issue #46), the second's whisper (`said`, rumors.c); -1 for his
  * own line. */
+/* The layer's last bystander, whose place a flame of darkness takes (the
+ * P-Code teller and the invisible path's hinter keep theirs): its object
+ * index, -1 for none. */
+static int last_bystander(void) {
+	int last = -1;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_NPC && i != layer.teller - 1 && i != layer.hinter - 1) last = i;
+	return last;
+}
+
+static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said);
+
+/* A bystander's talker (Normal Navis and pink navis), or the flame of
+ * darkness in the last one's place (docs/META.md) */
+static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int *said) {
+	static int base;
+	if (layer_objs_dark_flame >= 0 && i == last_bystander()) {
+		tk->cat = 7;
+		tk->sprite = layer_objs_dark_flame;
+		tk->script = out->dark_flame = ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first);
+		tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
+		return;
+	}
+	/* (the next four of the pool each layer, from where the run's seed
+	 * starts it: a bystander's random pick had a playtester hear the same
+	 * line on an act's first and third layers) */
+	if (!*said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
+	tk->sprite = layer_objs_bystander;
+	tk->script = bystander_talk(text, out, i, *said ? -1 : base + *said, *said);
+	if (tk->script < 0) tk->script = ta_say(text, tk->sprite, npc_line(run.depth, base + *said));
+	++*said;
+}
+
 static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said) {
 	int rumor = first >= 0 ? rumor_talk(text, out, layer_objs_bystander) : -1;
 	if (rumor >= 0) return rumor;
@@ -547,6 +583,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	out->trader_kind = -1;
+	out->dark_flame = -1;
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
@@ -622,19 +659,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				++nmd;
 			}
 			break;
-		case OBJ_NPC: {
-			/* Normal Navis and pink navis */
-			static int base;
-			/* (the next four of the pool each layer, from where the run's seed
-			 * starts it: a bystander's random pick had a playtester hear the
-			 * same line on an act's first and third layers) */
-			if (!said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
-			tk.sprite = layer_objs_bystander;
-			tk.script = bystander_talk(&text, out, i, said ? -1 : base + said, said);
-			if (tk.script < 0) tk.script = ta_say(&text, tk.sprite, npc_line(run.depth, base + said));
-			++said;
-			break;
-		}
+		case OBJ_NPC: bystander(&text, out, &tk, i, &said); break;
 		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG); break;
 		case OBJ_TRADER:
 		case OBJ_BUGTRADER: {

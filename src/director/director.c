@@ -31,6 +31,7 @@
 #include "gamecall.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "darkchips.h"
 #include "guest.h"
 #include "layer_objs.h"
 #include "layer_make.h"
@@ -143,6 +144,9 @@ static struct {
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
 	int guest_due;         /* 1 + the chips that sat out of an older net's first battle, its words due (once a profile) */
+	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
+	bool dark_given;       /* ... and the run holds it */
+	char dark_words[200];  /* MegaMan's words on a DarkChip's price, due ("" none) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
@@ -446,6 +450,7 @@ static void spins_sync(void);
  * once a board size (the next grows it), not on every layer; the words, or
  * NULL when said already. */
 static int no_room_told = -1;   /* the board size it was said for (a new run or a CONTINUE forgets) */
+static bool dark_price_told;    /* MegaMan has said all of a DarkChip's price (a new run or a CONTINUE forgets) */
 
 static const char *no_room_words(const char *name, int v) {
 	static char words[360];
@@ -1453,8 +1458,37 @@ static int layer_song(int tiles, int song) {
  * what its gates gave. */
 static void layer_flags_clear(void) {
 	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
-		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG };
+		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG, LAYER_DARK_TAKEN_FLAG };
 	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
+}
+
+/* A flame of darkness on the middle layer of a BN5 act whose battles are
+ * BN5's (docs/META.md, DarkChips in BN5 territory): a DarkChip the run
+ * lacks, from the run's seed and the act, in its last bystander's place
+ * (layer_objs_dark_flame); none where the run holds every one. */
+static void dark_flame_setup(void) {
+	layer_objs_dark_flame = -1;
+	D.dark_kind = -1;
+	D.dark_given = false;
+	if (!encounter_guest || run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1) return;
+	int k0 = (int)(((run.seed ^ (uint32_t)run.depth * 2654435761u) >> 8) % DARK_KINDS);
+	for (int j = 0; j < DARK_KINDS && D.dark_kind < 0; ++j)
+		if (!dark_count((k0 + j) % DARK_KINDS)) D.dark_kind = (k0 + j) % DARK_KINDS;
+	if (D.dark_kind < 0 || !*guest_dark_name(D.dark_kind)) return;
+	layer_objs_dark_flame = xnavi_dark_flame();
+	static char chip[16];
+	snprintf(chip, sizeof chip, "%s", guest_dark_name(D.dark_kind));
+	layer_objs_dark_chip = chip;
+	layer_objs_dark_first = !profile.dark_taught;
+	if (emu_debug_on()) fprintf(stderr, "dark: a flame of darkness with %s, list 7 %d\n", chip, layer_objs_dark_flame);
+}
+
+/* ... and taken: the run holds it (its flag, from the flame's Yes) */
+static void dark_flame_watch(void) {
+	if (D.dark_given || D.dark_kind < 0 || layer_objs_dark_flame < 0 || !flag_get(LAYER_DARK_TAKEN_FLAG)) return;
+	D.dark_given = true;
+	dark_give(D.dark_kind);
+	if (!profile.dark_taught) { profile.dark_taught = 1; profile_save(); }
 }
 
 /* The map an area's layers take over, the Navi their bystanders are
@@ -1473,6 +1507,7 @@ static void layer_host(int tiles, int *group, int *number) {
 	D.guest_group = xb[0];
 	D.guest_number = xb[1];
 	encounter_guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1) && guest_records(D.guest_xrom, D.guest_group, D.guest_number) > 0;
+	dark_flame_setup();
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;
 	*number = a->host ? a->host - 1 : a->number;
@@ -1692,9 +1727,11 @@ static void forget_heard(void) { D.heard_act = D.dealer_act = 0; D.mail_quiet = 
 
 bool director_start_run(void) {
 	drop_events();
+	dark_new_run(run.seed);
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
+	dark_price_told = false;
 	off_board_forget();
 	forget_heard();
 	if (emu_debug_on()) {
@@ -2303,6 +2340,7 @@ static void save_checkpoint(void) {
 	save_write_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen);
 	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
 	act_note_save();
+	dark_save();
 }
 
 bool director_can_suspend(void) {
@@ -3340,12 +3378,14 @@ static void town_update(void) {
 bool director_start_layer(void) {
 	drop_events();
 	no_room_told = -1;
+	dark_price_told = false;
 	off_board_forget();
 	forget_heard();
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
-	 * have set it) */
-	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); }
+	 * have set it, and no DarkChips but the dev flag's) */
+	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); dark_new_run(run.seed); }
+	else dark_begin(run.seed);
 	/* (and the Cross it brought at any depth, as a run has it there) */
 	powers_bring(run.cross);
 	note_folder_codes();
@@ -3424,6 +3464,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 bool director_resume(void) {
 	drop_events();
 	no_room_told = -1;
+	dark_price_told = false;
 	off_board_forget();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
@@ -3432,6 +3473,7 @@ bool director_resume(void) {
 	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	act_note_read();
+	dark_load(run.seed);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
 	char path[600];
@@ -3748,6 +3790,7 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
+		else if (!strcmp(name, "dark")) script = D.objs.dark_flame;
 		else if (dev_say(name) || dev_gift(name)) return;
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
@@ -3787,6 +3830,29 @@ static void end_run(void) {
 	scene_set(&scene_title);
 }
 
+/* A battle a DarkChip was used in: one HPMemory of max HP, for the rest of
+ * the run (the owner's price, docs/META.md), from the base the game counts
+ * HPMemory into, so the NaviCust's next RUN keeps it; MegaMan says so, the
+ * whole of it the first time in a session (dark_price_told). */
+static void dark_price(void) {
+	int base = emu_read16(BN6_NAVI_BASE_MAX_HP), max = emu_read16(BN6_NAVI_MAX_HP), hp = emu_read16(BN6_NAVI_HP);
+	uint16_t v[3];
+	v[0] = (uint16_t)(base > DARK_PRICE + 10 ? base - DARK_PRICE : 10);
+	v[2] = (uint16_t)(max - (base - v[0]));
+	v[1] = (uint16_t)(hp > v[2] ? v[2] : hp);
+	emu_write(BN6_NAVI_BASE_MAX_HP, &v[0], 2);
+	emu_write(BN6_NAVI_HP, &v[1], 2);
+	emu_write(BN6_NAVI_MAX_HP, &v[2], 2);
+	if (emu_debug_on()) fprintf(stderr, "dark: a DarkChip used: max HP %d -> %d (base %d -> %d), HP %d\n", max, v[2], base, v[0], v[1]);
+	char words[200];
+	if (!dark_price_told)
+		snprintf(words, sizeof words, "@M That DarkChip took something from me, Lan... My max HP fell by %d, and it won't come back this dive.",
+			base - v[0]);
+	else snprintf(words, sizeof words, "@M The DarkChip took %d more max HP, Lan.", base - v[0]);
+	snprintf(D.dark_words, sizeof D.dark_words, "%s", words);
+	dark_price_told = true;
+}
+
 void director_guest_done(const GuestResult *r) {
 	if (!D.active) return;
 	++D.battles;
@@ -3805,6 +3871,8 @@ void director_guest_done(const GuestResult *r) {
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
 	if (!profile.guest_taught) D.guest_due = 1 + r->sat_out;
+	dark_set_counts(r->dark);
+	if (r->dark_used) dark_price();
 	/* (what its results screen gave: BN6's chip of the same name to the
 	 * Pack, or zenny) */
 	uint32_t out[2];
@@ -3953,9 +4021,13 @@ static void guest_begin(void) {
 	uint16_t folder[BN6_FOLDER_ENTRIES] = { 0 };
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	for (int i = 0; data >= BN6_EWRAM && data < BN6_EWRAM_END && i < BN6_FOLDER_ENTRIES; ++i) folder[i] = emu_read16(data + 2u * (uint32_t)i);
+	/* (and the run's DarkChips, which BN5 brings into its Custom screen when
+	 * he worries: docs/META.md) */
+	uint8_t dark[GUEST_DARK_KINDS];
+	for (int k = 0; k < GUEST_DARK_KINDS; ++k) dark[k] = (uint8_t)dark_count(k);
 	if (n > 0)
 		guest_battle(guest_record(D.guest_xrom, D.guest_group, D.guest_number, (int)((h >> 16) % (uint32_t)n)), emu_read16(BN6_NAVI_HP),
-			emu_read16(BN6_NAVI_MAX_HP), folder);
+			emu_read16(BN6_NAVI_MAX_HP), folder, dark);
 }
 
 /* What the hooks saw in the frames since the last update (events.h). */
@@ -4043,6 +4115,9 @@ static void words_due(void) {
 	pack_watch();
 	pack_words();
 	guest_words();
+	dark_flame_watch();
+	if (D.dark_words[0] && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && talk_start(D.dark_words, FACE_MEGAMAN))
+		D.dark_words[0] = 0;
 }
 
 static void gate_and_rush_words(void) {

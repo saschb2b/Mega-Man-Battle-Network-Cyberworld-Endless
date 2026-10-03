@@ -8,6 +8,13 @@
   written over it, and the game, unpacking it on arrival, wrote over all
   of its memory: a black screen at the exit pad that only a restart left.
   Now such a layer gives the map its own talk back.
+- **DarkChips in BN5's areas, at a price.** On the middle layer of an act
+  whose battles are BN5's, a purple flame of darkness holds a DarkChip
+  (issue #64). MegaMan names its price before you take it: each battle
+  one is used in costs him 20 max HP, one HPMemory, for the rest of the
+  run. A DarkChip comes to BN5's Custom screen only as BN5 offers it,
+  when MegaMan worries; BN6's battles never offer one. Nothing of them
+  carries over to the next run.
 - **BN5's areas fight BN5's own battles.** Where Battle Network 5: Team
   Colonel sits beside BN6's ROM and dresses an area (ACDC Area, End Area,
   Nebula Area), that area's random battles are BN5's, in BN5's own engine

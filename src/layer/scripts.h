@@ -80,6 +80,11 @@ typedef struct {
  * carries over: his chip, for the Library. */
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code, bool last,
                        int taken_flag, int hp_memories, const ScriptsDraft *draft, const ScriptsRoute *route);
+/* A flame of darkness (docs/META.md, DarkChips in BN5 territory): MegaMan
+ * names its DarkChip `chip` and its price (all of it the `first` time),
+ * then asks, starting on No; Yes sets event flag `flag`, which it leaves
+ * by. */
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first);
 /* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
  * guardian, any runs) is short of `needed`, its words say so (flag -1:
  * no choice); else it asks for his SP, flag set on Yes, and says the gate

@@ -584,10 +584,15 @@ decisions).
   hefty price": each battle a DarkChip is used in lowers MegaMan's max HP
   by 20, one HPMemory, for the rest of the run. BN5's own -1 is nothing
   at a run's HP.
-- **Where a run gets them:** BN5's purple ghost-flame objects (its Dark
-  Holes), standing on BN5's layers in the original's look, taken from the
-  player's BN5 ROM as its HeelNavi is. MegaMan names the price before the
-  first is taken, and the player chooses.
+- **Where a run gets them:** a flame of darkness, BN5's (Nebula Area's
+  flames, copied from the player's BN5 ROM as its HeelNavi is, and turned
+  purple: the owner's "dark purple ghost flame"), stands in a bystander's
+  place on the middle layer of each act whose battles are BN5's, holding
+  a DarkChip the run lacks (from the run's seed and the act). MegaMan
+  names the price before it is taken, all of it the first time a profile
+  meets one, and asks, starting on No; Yes gives the chip, and the flame
+  goes. A run holds one of each, at most three going into a battle, as
+  BN5's folder takes them.
 - **Variety, not power, across runs:** nothing of them carries over, not
   the chips, not their price; a new run starts with none.
 - **Only in BN5 territory:** BN6's battles have no code for them and never

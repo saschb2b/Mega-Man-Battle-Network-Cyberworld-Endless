@@ -9,12 +9,14 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "darkchips.h"
 #include "director.h"
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "guest.h"
 #include "mapslot.h"
 #include "net.h"
 #include "platform.h"
@@ -52,6 +54,8 @@ void devtools_parse(const char *spec) {
 		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
 		else if (!strncmp(t, "hp=", 3)) dev.hp = atoi(t + 3);
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
+		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);
+		else if (!strcmp(t, "worried")) guest_dev_worried = true;
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;

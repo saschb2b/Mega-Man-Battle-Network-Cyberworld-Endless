@@ -8,6 +8,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
+#define GUEST_DARK_KINDS 12   /* BN5's DarkChips (darkchips.h) */
+
 /* Makes the guest core for extra ROM `xrom` (rom.h, XR) where the build
  * and the ROMs allow it, and boots it to a playable state (its title, NEW
  * GAME and intro, pressed through once and kept as a state in the data
@@ -16,10 +19,11 @@ bool guest_start(int xrom);
 
 /* Begins a battle from BattleSettings record `record`, an address in the
  * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan at
- * `hp` of `max_hp` and the run's `folder` (30 BN6 entries, chip | code <<
- * 9; NULL: the guest's own), each chip as its game's of the same name:
- * from the next guest frame the guest runs and BN6's core waits. */
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder);
+ * `hp` of `max_hp`, the run's `folder` (30 BN6 entries, chip | code << 9;
+ * NULL: the guest's own), each chip as its game's of the same name, and
+ * its DarkChips (`dark`, counts by kind): from the next guest frame the
+ * guest runs and BN6's core waits. */
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS]);
 
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);
@@ -33,7 +37,6 @@ void guest_frame(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
 const uint32_t *guest_video(void);
 
-enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
 typedef struct {
 	int outcome;   /* GUEST_WON, GUEST_LOST (MegaMan deleted) or GUEST_ESCAPED */
 	int frames;    /* how long it ran */
@@ -42,9 +45,18 @@ typedef struct {
 	int code;
 	int zenny;     /* ... or zenny */
 	int sat_out;   /* the folder's chips its game has none of */
+	bool dark_used;   /* a DarkChip was used in it */
+	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
 } GuestResult;
 /* Once a battle has ended (guest_active false again): its result, once. */
 bool guest_take_result(GuestResult *out);
+
+/* (dev: MegaMan worried through every guest battle, for captures of a
+ * DarkChip offered: --dev worried) */
+extern bool guest_dev_worried;
+
+/* DarkChip `k`'s name in BN5 (0-11, ids 187-198), "" without BN5 */
+const char *guest_dark_name(int k);
 
 /* Its game's battle records for net map (group, number): how many, and the
  * i-th's address; read from the ROM file, no core needed. */

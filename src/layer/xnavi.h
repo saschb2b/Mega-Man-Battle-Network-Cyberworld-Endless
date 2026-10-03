@@ -21,4 +21,9 @@ uint32_t xnavi_sprite_len(const uint8_t *hdr, uint32_t n);
  * place in every session; again where the core's ROM copy was made anew. */
 int xnavi_slot(int xrom, int navi, int fallback);
 
+/* BN5's flame of darkness (its list 7, 0x68; docs/ROM_DATA.md) in BN6,
+ * its palette turned purple: the DarkChips' (docs/META.md); the list-7
+ * number that shows it, -1 where it cannot be (no BN5, no free number). */
+int xnavi_dark_flame(void);
+
 #endif

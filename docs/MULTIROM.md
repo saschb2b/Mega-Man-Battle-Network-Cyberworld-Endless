@@ -106,10 +106,26 @@ engine (`src/emu/guest.c`, epic #57):
   flashes in once its battle is on its screen; after a profile's first,
   MegaMan says what it was and how many chips sat out.
 - **For tests**: `--talk guest:FRAME` begins a guest battle at once on such
-  a layer (`--net-biome x0`, ACDC Area); `CYBERWORLD_EMU_DEBUG=1` names
-  each battle, its folder's chips in, and its end.
-- **Still to come**: DarkChips by BN5's rule (#64), the buster and
-  programs in, BN5's chips registered in BN6.
+  a layer (`--net-biome x0`, ACDC Area), `--talk dark:FRAME` opens the
+  flame of darkness's talk (a middle layer: `--run-depth 2`), `--dev
+  darkchips=MASK` starts a run holding DarkChips (bit k BN5's id 187 + k)
+  and `--dev worried` keeps MegaMan worried in guest battles;
+  `CYBERWORLD_EMU_DEBUG=1` names each battle, its folder's chips in, its
+  end, the flame and a DarkChip's price.
+- **DarkChips** (docs/META.md, issue #64): the run's go into the guest's
+  folder (three at most, one of each, as BN5's folder editor allows, in
+  slots where chips sat out). BN5 draws them as any chip; the guest's
+  deck compaction at each Custom screen (`0x080250EA`) is replaced by one
+  that shelves a DarkChip behind the deck's end except where BN5's own
+  worried rule put it, so one comes only when MegaMan worries (or is
+  dark), as the rule offers it. Used in a battle, BN5 keeps it, and the
+  run pays: 20 max HP, from the base HPMemory counts into. Each battle
+  starts calm (BN5's mood and dark meter reset), as the run's battles
+  share no darkness. A flame of darkness on the middle layer of such an
+  act holds one the run lacks: BN5's flame, copied from its ROM and
+  turned purple, in a bystander's place.
+- **Still to come**: the buster and programs in, BN5's chips registered
+  in BN6.
 
 ## Status
 

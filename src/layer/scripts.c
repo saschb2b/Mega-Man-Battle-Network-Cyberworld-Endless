@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "darkchips.h"
 #include "data.h"
 #include "emu.h"
 #include "navicust.h"
@@ -158,6 +159,30 @@ int ta_challenge(TextArchive *t, int flag, const char *prize) {
 	snprintf(ask, sizeof ask, "It pays %s.\nTake it on?\n", prize && *prize ? prize : "a good chip");
 	ask_in(t, FACE_MEGAMAN, ask, no, true, true);
 	flag_set(t, flag);
+	ta_end(t);
+	return i;
+}
+
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
+	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be, Lan.");
+	int i = ta_script(t);
+	/* (the price named before the bargain, the whole of it a profile's
+	 * first time: docs/META.md, issue #65) */
+	char words[400];
+	if (first)
+		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, like the chips Nebula spread. There's a DarkChip in it: %s!|"
+			"@M A DarkChip comes to me only in the old net's battles, and only when I'm hurt. It's real power...|"
+			"@M But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.", chip, DARK_PRICE);
+	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s. Every battle I use one in costs %d max HP.",
+		chip, DARK_PRICE);
+	bool open = true;
+	ta_pages(t, words, FACE_MEGAMAN, &open);
+	ask_in(t, FACE_MEGAMAN, "Take the DarkChip?\n", no, true, true);
+	flag_set(t, flag);
+	char got[48];
+	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
+	ta_page(t, FACE_NONE, got, false);
+	ta_page(t, FACE_MEGAMAN, "It's ours, Lan. It'll come when I'm hurt... and take its price.", false);
 	ta_end(t);
 	return i;
 }

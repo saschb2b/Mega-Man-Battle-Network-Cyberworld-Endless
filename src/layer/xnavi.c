@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bytes.h"
@@ -101,6 +102,82 @@ static void copy_in(int xrom, int navi) {
 		if (emu_debug_on()) fprintf(stderr, "xnavi: navi %d of %s at %d, %u bytes so far\n", navi, XR[xrom].layout->name, s, X.next - XNAVI_AT);
 		return;
 	}
+}
+
+/* ---- BN5's flame of darkness, a DarkChip's (docs/META.md) ---- */
+
+#define LIST_OBJECTS 7                     /* sprite lists: the overworld's objects */
+#define BN5_FLAME    0x68                  /* its list-7 number in BN5 (compressed: bit 31 of its pointer) */
+/* (Gregar's list-7 numbers that point at the placeholder sprite
+ * 0x084DC040, which no layer lists, docs/ROM_DATA.md) */
+static const uint8_t free_objects[] = { 0xA0, 0x92, 0x8A, 0x87, 0x7D };
+#define OBJECT_PLACEHOLDER 0x084DC040u
+
+static struct { uint32_t sprite; int slot; bool tried; } F;
+
+/* a palette colour (BGR555) turned purple: blue lends red, green fades
+ * but in the whites (the flame was blue, the owner's "dark purple ghost
+ * flame") */
+static uint16_t purple(uint16_t c) {
+	int r = c & 31, g = c >> 5 & 31, b = c >> 10 & 31, m = r < g ? (r < b ? r : b) : (g < b ? g : b);
+	int r2 = (b * 7 + r * 3) / 10;
+	r = r2 > r ? r2 : r;
+	g = m + (g - m) * 35 / 100;
+	return (uint16_t)(r | g << 5 | b << 10 | (c & 0x8000));
+}
+
+/* every palette its frames name, turned purple in place, each once (frames
+ * share them; `b` the sprite past its 4-byte header, `m` its bytes) */
+static void tint(uint8_t *b, uint32_t m) {
+	uint32_t anims = get32(b) / 4, done[32];
+	int ndone = 0;
+	for (uint32_t a = 0; a < anims && 4 * a + 4 <= m; ++a)
+		for (uint32_t f = get32(b + 4 * a), k = 0; k < 256 && f + 20 <= m; ++k, f += 20) {
+			uint32_t at = get32(b + f + 4), len = at + 4 <= m ? get32(b + at) : 0;
+			bool again = false;
+			for (int j = 0; j < ndone; ++j) again |= done[j] == at;
+			if (!again && ndone < 32) done[ndone++] = at;
+			for (uint32_t i = 0; !again && at + 4 + len <= m && i + 2 <= len && i < 512; i += 2) {
+				uint32_t o = at + 4 + i;
+				uint16_t c = (uint16_t)(b[o] | b[o + 1] << 8);
+				c = purple(c);
+				b[o] = (uint8_t)c; b[o + 1] = (uint8_t)(c >> 8);
+			}
+			if (b[f + 18] & 0x80) break;
+		}
+}
+
+int xnavi_dark_flame(void) {
+	if (!R.data || !R.layout || !R.layout->sprite_lists) return -1;
+	uint32_t own = R.layout->sprite_lists;
+	/* (the core's ROM copy made anew: copied again) */
+	if (F.slot > 0 && emu_read32(BUS + list_entry(own, LIST_OBJECTS, F.slot)) != F.sprite) memset(&F, 0, sizeof F);
+	if (F.tried) return F.sprite ? F.slot : -1;
+	F.tried = true;
+	int x = XROM_BN5_COLONEL_US;
+	if (!XR[x].data || !XR[x].layout->sprite_lists) return -1;
+	xnavi_slot(x, 0, 0);   /* (the Navis first: their place stays the same in every session) */
+	const uint8_t *xr = XR[x].data;
+	uint32_t at = get32(xr + XR[x].layout->sprite_lists + LIST_OBJECTS * 4) - BUS + BN5_FLAME * 4, p = at + 4 <= ROM_SIZE ? get32(xr + at) : 0;
+	if (!(p & 0x80000000u) || (p & 0x7FFFFFFFu) - BUS >= ROM_SIZE) return -1;
+	/* (decompressed: a size word, then the sprite as a plain one is, its
+	 * 4-byte header first: copied whole, the walk only to check it) */
+	size_t n = 0;
+	uint8_t *d = lz77_decompress(xr + ((p & 0x7FFFFFFFu) - BUS), ROM_SIZE - ((p & 0x7FFFFFFFu) - BUS), &n);
+	uint32_t len = d && n > 8 && xnavi_sprite_len(d + 4, (uint32_t)n - 4) ? (uint32_t)n - 4 : 0;
+	for (unsigned k = 0; len && k < sizeof free_objects && !F.sprite; ++k) {
+		int s = free_objects[k];
+		if (get32(R.data + list_entry(own, LIST_OBJECTS, s)) != OBJECT_PLACEHOLDER || X.next + len > XNAVI_END) continue;
+		tint(d + 8, len - 4);
+		F.sprite = X.next;
+		emu_write(F.sprite, d + 4, len);
+		X.next = (F.sprite + len + 3) & ~3u;
+		F.slot = s;
+		emu_write32(BUS + list_entry(own, LIST_OBJECTS, s), F.sprite);
+		if (emu_debug_on()) fprintf(stderr, "xnavi: BN5's flame of darkness at list 7 %d, %u bytes\n", s, len);
+	}
+	free(d);
+	return F.sprite ? F.slot : -1;
 }
 
 static int slot_of(int xrom, int navi) {
