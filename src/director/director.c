@@ -136,9 +136,10 @@ static struct {
 	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the town's port is and how to jack in */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
+	bool more_told;        /* ... and, at a second L, what else the layer holds */
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
-	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
+	int heard_act;         /* 1 + the act whose guardian a bystander has named, 0 none (kept across a CONTINUE: act_note) */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
@@ -2058,26 +2059,35 @@ bool director_draw_second_screen(int w, int h) {
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
 /* What the director knows of the act a checkpoint is in, saved beside its
- * state: the viruses deleted before the act began, its frames, and the act
- * whose Net Dealer has spoken. A CONTINUE takes it back, where an act
- * continued from a save had no count on its AREA CLEAR card and its next
- * Net Dealer greeted MegaMan as new (a playtester's, both). */
+ * state: the viruses deleted before the act began, its frames, the act
+ * whose Net Dealer has spoken, and the act whose guardian a bystander has
+ * named. A CONTINUE takes it back, where an act continued from a save had
+ * no count on its AREA CLEAR card and its next Net Dealer greeted MegaMan
+ * as new (a playtester's, both), and the guardian a rumor had named on
+ * the act's first layer was "one we've never faced" again (session 63).
+ * (A note from before `heard` reads it as 0.) */
 #define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
-typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown; } ActNote;
+typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where; } ActNote;
+enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
+static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
 static ActNote act_note;
 static bool act_note_ok;
 
 static void act_note_save(void) {
 	/* (an act already continued without one has no whole count to keep) */
-	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed };
+	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed, D.heard_act,
+		suspending ? SAVED_LEFT : D.checkpoint_here ? SAVED_HERE : D.checkpoint_data ? SAVED_DATA : SAVED_START };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
 
 /* on CONTINUE, before the layer is built: its dealer's greeting reads it */
 static void act_note_read(void) {
-	act_note_ok = save_read_blob("run.act", ACT_NOTE_MAGIC, &act_note, sizeof act_note) && act_note.seed == run.seed &&
+	act_note_ok = save_read_blob_upto("run.act", ACT_NOTE_MAGIC, &act_note, sizeof act_note) && act_note.seed == run.seed &&
 		act_note.act == (run.depth - 1) / 3;
-	if (act_note_ok) D.dealer_act = act_note.dealer;
+	if (act_note_ok) {
+		D.dealer_act = act_note.dealer;
+		D.heard_act = act_note.heard;
+	}
 }
 
 /* An object's letter on the state's map (D a Navi gate, V a vault, Y the
@@ -2176,6 +2186,14 @@ static void state_map(FILE *f, int cx, int cy) {
 	}
 }
 
+/* CONTINUE's word on where the run goes on from: a playtester's two chips,
+ * bought after the layer's checkpoint, were gone with no word why
+ * (session 63) */
+static void resume_note(void) {
+	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off" };
+	if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_LEFT) cinema_note(from[act_note.where], 240);
+}
+
 /* ... and after it, where building it began the act afresh */
 static void act_note_apply(void) {
 	D.act_resumed = !act_note_ok || act_note.unknown;
@@ -2218,7 +2236,9 @@ void director_save_here(void) {
 
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
+	suspending = true;
 	save_checkpoint();
+	suspending = false;
 	return true;
 }
 
@@ -3391,6 +3411,7 @@ bool director_resume(void) {
 		begin_area(false);
 		act_note_apply();
 		D.beat[0] = 0;
+		resume_note();
 		return true;
 	}
 	/* no state (a run from before the game engine): enter the layer fresh */
