@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Schoolyard talk in town.** The townsfolk now trade the old rumors: a
+  Giga chip under Central Town's bus (the bus stop knows better), the
+  Academy's hunt for Program Advances, Higsby's back room, Mr. Famous's
+  boasts, Dr. Wily blamed for everything, and the NaviCust's secret
+  buttons.
 - **The net's rumors.** One navi on each layer now whispers the way a
   schoolyard did: a Program Advance from BN6's own table, picked for chips
   in your folder ("Sword H, WideSwrd H and LongSwrd H, in that order...
