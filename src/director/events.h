@@ -10,6 +10,7 @@ enum {
 	EV_MAP_ENTER,          /* EnterMap: a map entered, its flags cleared */
 	EV_CHOICE,             /* SetEventFlag on a layer's choice flag: r0 the flag */
 	EV_ITEM_GIVEN,         /* GiveItem: r0 the key item, r1 how many */
+	EV_GUEST_BATTLE,       /* the encounter roll gave a battle on a layer whose battles are the guest's (encounter_guest) */
 };
 
 /* The hooks for the map, flag and key item events, once the core is up

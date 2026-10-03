@@ -43,6 +43,10 @@ extern int emu_draw_waits;
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */
 const uint32_t *emu_video(void);
+/* Another core's sound (a struct mCore: the guest's, guest.c) into the
+ * same ring BN6's plays from, and the rate it is played at. */
+void emu_audio_from(void *core);
+int emu_audio_out_rate(void);
 
 /* Bus access (ROM, EWRAM, IWRAM, IO, palette, VRAM, OAM). */
 uint8_t emu_read8(uint32_t addr);

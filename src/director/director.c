@@ -31,6 +31,7 @@
 #include "gamecall.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "guest.h"
 #include "layer_objs.h"
 #include "layer_make.h"
 #include "mapslot.h"
@@ -104,6 +105,7 @@ static struct {
 	Encounter next;        /* that battle */
 	Encounter rolled[2];   /* the battles in the two records the roll hands out (encounter.c) */
 	int battles;           /* random battles fought on this layer */
+	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -1344,6 +1346,12 @@ static void layer_host(int tiles, int *group, int *number) {
 	if (!a) a = net_area_def(0);
 	layer_objs_bystander = a->xrom > 0 && a->xnavi ? xnavi_slot(a->xrom - 1, a->xnavi, LAYER_BYSTANDER) : LAYER_BYSTANDER;
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
+	/* (and its battles, where its own engine can fight them on the guest
+	 * core: its game's records for the map, guest.c) */
+	D.guest_xrom = a->xrom - 1;
+	D.guest_group = a->xbattles[0];
+	D.guest_number = a->xbattles[1];
+	encounter_guest = a->xrom > 0 && a->xbattles[0] && guest_start(a->xrom - 1) && guest_records(D.guest_xrom, D.guest_group, D.guest_number) > 0;
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;
 	*number = a->host ? a->host - 1 : a->number;
@@ -3596,6 +3604,18 @@ static void end_run(void) {
 	scene_set(&scene_title);
 }
 
+void director_guest_done(const GuestResult *r) {
+	if (!D.active) return;
+	++D.battles;
+	/* (deleted in the guest's battle: its GAME OVER has played, the run
+	 * ends as BN6's would) */
+	if (r->outcome == GUEST_LOST) {
+		D.gameover = true;
+		D.lost_to = 0;
+		end_run();
+	}
+}
+
 /* The short net won: its Nest's guardian fell and MegaMan stepped on its
  * exit. The run ends on the title's summary of a win, and what it opened
  * for the next (docs/META.md). */
@@ -3725,6 +3745,16 @@ static void exit_flag(bool entered) {
 	else flag_clear(BN6_FLAG_WARP_OFF + 1);
 }
 
+/* A battle the roll gave on a layer whose battles are the guest's: one of
+ * its own game's records for the map, picked from the layer's seed and
+ * its battles so far; the roll found the moment free (no chat, fade or
+ * cutscene), so it begins at once (guest.c) */
+static void guest_begin(void) {
+	int n = guest_records(D.guest_xrom, D.guest_group, D.guest_number);
+	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
+	if (n > 0) guest_battle(guest_record(D.guest_xrom, D.guest_group, D.guest_number, (int)((h >> 16) % (uint32_t)n)));
+}
+
 /* What the hooks saw in the frames since the last update (events.h). */
 static void take_events(void) {
 	HookEvent ev[32];
@@ -3741,6 +3771,7 @@ static void take_events(void) {
 				if (D.objs.choice[k].flag == (int)ev[i].r[0] && flag_get(D.objs.choice[k].flag)) D.choices_due |= 1u << k;
 			break;
 		case EV_ITEM_GIVEN: if (on_layer) item_given((int)ev[i].r[0]); break;
+		case EV_GUEST_BATTLE: if (on_layer) guest_begin(); break;
 		}
 }
 

@@ -15,6 +15,7 @@
 #include "emu.h"
 #include "events.h"
 #include "gamecall.h"
+#include "guest.h"
 #include "idle.h"
 #include "game.h"
 #include "gfx.h"
@@ -100,8 +101,33 @@ static void after_frame(void) {
 	emu_debug_frame();
 }
 
+/* The keys a guest battle gets (guest.h): the player's, or the autopilot's
+ * pattern, which reads none of the guest's memory: A for the Custom
+ * screen's chips and its OK and to throw them, L for the next Custom
+ * screen, the buster between */
+static uint32_t guest_keys(void) {
+	static unsigned t;
+	if (!autopilot_on()) return keys_from_buttons();
+	++t;
+	if (t % 30 < 4) return KEY_A;
+	if (t % 90 >= 40 && t % 90 < 44) return KEY_L;
+	return t % 10 < 5 ? KEY_B : 0;
+}
+
+/* A battle on the guest core: its frames in BN6's place, BN6's core
+ * waiting, and its result into the run as it ends */
+static bool guest_update(void) {
+	if (!guest_active()) return false;
+	uint32_t keys = guest_keys();
+	for (int i = 0; i < dev.speed && guest_active(); ++i) guest_frame(keys);
+	GuestResult r;
+	if (guest_take_result(&r)) director_guest_done(&r);
+	return true;
+}
+
 static void update(void) {
 	emu_drawing = false;
+	if (guest_update()) return;
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();
@@ -147,7 +173,8 @@ static void draw(void) {
 	}
 	/* mGBA keeps layer flags in the top byte; GL renderers read it as alpha */
 	static uint32_t px[EMU_W * EMU_H];
-	const uint32_t *v = emu_video();
+	bool guest = guest_active();
+	const uint32_t *v = guest ? guest_video() : emu_video();
 #ifdef __3DS__
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = 0xFF000000u | (v[i] & 0xFF00u) | (v[i] & 0xFFu) << 16 | (v[i] >> 16 & 0xFFu);
 #else
@@ -159,6 +186,7 @@ static void draw(void) {
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
+	if (guest) return;   /* (another game's battle: its own screen, none of the layer's marks) */
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	director_draw_map();

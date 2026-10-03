@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "guest.h"
+
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
 bool director_start_layer(void);
 /* A new run: Lan in the town, the first layer built for the port's jack-in. */
@@ -57,6 +59,8 @@ void director_dev_reveal(void);
 uint32_t director_keys(uint32_t keys);
 /* Rebuilds the saved run's layer and restores the game at its checkpoint. */
 bool director_resume(void);
+/* A battle on the guest core has ended (guest.h): its result into the run. */
+void director_guest_done(const GuestResult *r);
 /* Once a frame, after the game's frame: exits and encounters. */
 void director_update(void);
 /* Where the test autopilot heads (grid panel): the guardian, to talk to

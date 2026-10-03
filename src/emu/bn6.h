@@ -250,6 +250,7 @@
 #define BN6_ENCOUNTER_CHECK   0x08005A98u /* its first test after the map's */
 #define BN6_ENCOUNTER_ROLLED  0x08005AE2u /* the beq after the roll's bl: r0 the roll's BattleSettings* */
 #define BN6_ENCOUNTER_START   0x08005AE5u /* movs r1,#1; bl StartBattle, r0 the record (Thumb) */
+#define BN6_ENCOUNTER_SKIP    0x08005AF3u /* the check's pop {r5,pc}: its battle not begun (Thumb) */
 /* Battles, by hook (src/director/encounter.c; Gregar's as Falzar's where
  * not said) */
 #define BN6_START_BATTLE      0x08005BC8u /* StartBattle: r0 the BattleSettings*, every battle's */

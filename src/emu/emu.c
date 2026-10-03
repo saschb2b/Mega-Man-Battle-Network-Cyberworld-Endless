@@ -115,8 +115,9 @@ void emu_audio_rate(int rate) {
 	blip_set_rates(core->getAudioChannel(core, 1), core->frequency(core), rate);
 }
 
-static void pull_audio(void) {
-	blip_t *l = core->getAudioChannel(core, 0), *r = core->getAudioChannel(core, 1);
+/* (a core's sound into the ring: BN6's, or the guest's while it runs) */
+static void pull_audio_from(struct mCore *c) {
+	blip_t *l = c->getAudioChannel(c, 0), *r = c->getAudioChannel(c, 1);
 	int16_t tmp[1024 * 2];
 	int got;
 	while ((got = blip_samples_avail(l)) > 0) {
@@ -140,9 +141,17 @@ static void pull_audio(void) {
 	double adj = 1.0 - 0.02 * (fill - LAT_TARGET) / LAT_TARGET;
 	if (adj < 0.97) adj = 0.97;
 	if (adj > 1.03) adj = 1.03;
-	blip_set_rates(l, core->frequency(core), out_rate * adj);
-	blip_set_rates(r, core->frequency(core), out_rate * adj);
+	blip_set_rates(l, c->frequency(c), out_rate * adj);
+	blip_set_rates(r, c->frequency(c), out_rate * adj);
 }
+
+static void pull_audio(void) { pull_audio_from(core); }
+
+void emu_audio_from(void *other) {
+	if (other && ring_lock) pull_audio_from(other);
+}
+
+int emu_audio_out_rate(void) { return out_rate; }
 
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
 int emu_core_unshown;

@@ -35,6 +35,7 @@ static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE;
  * the record, and whether a battle starts now. */
 static uint32_t record;
 static bool forcing;
+bool encounter_guest;
 /* Whether each record is a guardian's battle, and the battle on is one
  * (emu_encounter_started): his Guardian Data gives his chip, and his
  * battle's own reward gave a second, which no folder can hold (one Mega
@@ -46,7 +47,15 @@ static bool boss_record[2], boss_on;
  * roll gave (its own step counter and chance) becomes the engine's record. */
 static HookAct rolled(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[0]) r->r[0] = record;
+	if (!r->r[0]) return HOOK_CONTINUE;
+	/* (a layer whose battles are the guest's: none begun here, the
+	 * director starts the guest's, guest.c) */
+	if (encounter_guest) {
+		hook_post(r, EV_GUEST_BATTLE);
+		r->r[12] = BN6_ENCOUNTER_SKIP;
+		return HOOK_JUMP;
+	}
+	r->r[0] = record;
 	return HOOK_CONTINUE;
 }
 

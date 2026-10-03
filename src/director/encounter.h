@@ -22,6 +22,10 @@ extern int encounter_song[2];
 /* The background a battle's record names: -1 for its area's own, as BN6
  * rolls them, or another game's (xbackdrop_install), as the layer sets it. */
 extern int encounter_backdrop;
+/* Set by the director on a layer whose random battles are another game's,
+ * on the guest core (guest.h): a battle the roll gives begins none in BN6
+ * and queues EV_GUEST_BATTLE. */
+extern bool encounter_guest;
 /* The record the last emu_encounter_set wrote (0 or 1), and which one a
  * battle's BattleSettings pointer (EV_BATTLE_START's r0) is: -1 another,
  * a story or test battle's. */
