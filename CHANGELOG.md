@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Rumors tell the folder's Program Advances only (issue #56).** BN6's
+  table also holds the BattleChip Gate's recipes, made with the Japan-only
+  reader of physical chips, and a navi whispered one: Cannon, Cannon and
+  TankCan1 for GigaCannon, where the folder's is Cannon A, B and C.
 - **Where a bought chip went.** A chip bought or traded goes to the Pack,
   as in BN6, and with a full folder it never shows in battle: a first-time
   playtester's chip, bought for the guardian, sat there unknown. The first

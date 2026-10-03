@@ -30,10 +30,17 @@ static int pa_read(Pa *out) {
 	if (!R.data || !R.layout || !R.layout->program_advances) return 0;
 	uint32_t at = R.layout->program_advances;
 	int k = 0;
+	bool rows = false;
 	while (k < PA_MAX && at + 12 <= ROM_SIZE) {
 		const uint8_t *p = R.data + at;
 		int n = p[0], kind = p[1], res = p[2] | p[3] << 8;
 		if (!n || n > 4 || (kind != 0 && kind != 4) || res < 256 || res >= 512) break;
+		/* (the listed recipes past the codes-in-a-row block are the
+		 * BattleChip Gate's, the Japan-only reader's: Cannon, Cannon,
+		 * TankCan1 for GigaCannon, where the folder's is Cannon A, B, C;
+		 * a whisper told that one, issue #56) */
+		if (kind == 4 && rows) break;
+		rows |= kind == 0;
 		Pa *a = &out[k++];
 		a->result = res; a->kind = kind; a->n = n;
 		if (kind == 4) {
