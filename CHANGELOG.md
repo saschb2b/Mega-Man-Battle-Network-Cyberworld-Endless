@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A guardian's battle pays zenny, not a second copy of his chip.** His
+  Guardian Data gives his Navi chip, and his battle's own reward, at a
+  good Busting Level, gave another, which no folder can hold (one Mega
+  chip of a kind): a playtester got two SpoutMan *. Where his battle's
+  reward would be his chip, it is now an Unlocker's price in zenny (600 in
+  the first act, 900 in the second, and so on).
 - **SlipRunr says what it does.** BN6's SlipRunr makes B slide MegaMan in
   place of running, faster, and he keeps going until something stops him,
   past turns and onto pads. The program pick said only "hold B to slide

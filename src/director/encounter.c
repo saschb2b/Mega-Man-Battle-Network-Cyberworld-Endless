@@ -15,6 +15,7 @@
 #include "emu.h"
 #include "events.h"
 #include "loot.h"
+#include "pacing.h"
 #include "rom.h"
 #include "run.h"
 
@@ -34,6 +35,11 @@ static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE;
  * the record, and whether a battle starts now. */
 static uint32_t record;
 static bool forcing;
+/* Whether each record is a guardian's battle, and the battle on is one
+ * (emu_encounter_started): his Guardian Data gives his chip, and his
+ * battle's own reward gave a second, which no folder can hold (one Mega
+ * chip of a kind), so zenny comes in its place. */
+static bool boss_record[2], boss_on;
 
 /* The overworld's check (bn6f checkThenStartBattle) calls the roll once a
  * frame, then branches on the flags it leaves: on that branch, a battle the
@@ -120,6 +126,7 @@ void emu_encounter_set(const Encounter *e) {
 		emu_write(0x08000000u + R.layout->battle_gem_rewards + (uint32_t)next * 16, row, sizeof row);
 	}
 	*p++ = 0xF0;
+	boss_record[next] = e->boss;
 	slot = next;
 	uint32_t settings = settings_of(slot);
 	emu_write(settings + 0x20, list, (size_t)(p - list));
@@ -143,6 +150,18 @@ int emu_encounter_record(uint32_t settings) {
 	return settings == settings_of(0) ? 0 : settings == settings_of(1) ? 1 : -1;
 }
 
+void emu_encounter_started(uint32_t settings) {
+	int s = emu_encounter_record(settings);
+	boss_on = s >= 0 && boss_record[s];
+}
+
+/* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,
+ * add_keys), so busting him well pays the act's lock. */
+static uint16_t boss_zenny(void) {
+	int act = pacing_act(run.depth) + 7 * pacing_loop(run.depth), z = 100 * (6 + 3 * act);
+	return (uint16_t)(1 << 14 | (z > 0x3FFF ? 0x3FFF : z));
+}
+
 /* One enemy's reward row in the folder's codes, half the time (docs/
  * META.md). BN6 picks the reward as the battle ends: one of the enemies
  * spawned, then one of its row's 20 entries by the busting level, a coin
@@ -151,8 +170,9 @@ int emu_encounter_record(uint32_t settings) {
  * second of each, rewritten from the ROM's own in the core's copy, comes in
  * one of the folder's codes where the chip does, so a chip reward leans
  * half the time, as Mystery Data's; a Navi's chip, in either entry, in its
- * * off the folder's codes. (From a hook: the player's ROM and the run's
- * codes are only read, and loot_fit_code rolls nothing when always.) */
+ * * off the folder's codes, and in his own guardian's battle zenny
+ * (boss_on). (From a hook: the player's ROM and the run's codes are only
+ * read, and loot_fit_code rolls nothing when always.) */
 static void lean_row(int id) {
 	if (id <= 0 || id >= 0x200) return;
 	uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
@@ -160,6 +180,10 @@ static void lean_row(int id) {
 		uint16_t v = rom_u16(row + 2 * k);
 		if (v == 0xFFFF || v >> 14) continue;
 		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
+		if (boss_on && chip_family(chip) == CHIP_FAMILY_NAVI) {
+			hook_write16(0x08000000u + row + 2 * k, boss_zenny());
+			continue;
+		}
 		char c = code >= 26 ? '*' : (char)('A' + code);
 		if (k & 1) c = loot_fit_code(chip, c, true);
 		/* (a Navi's chip in its * where the folder holds not its letter,

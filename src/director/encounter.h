@@ -27,6 +27,10 @@ extern int encounter_backdrop;
  * a story or test battle's. */
 int emu_encounter_slot(void);
 int emu_encounter_record(uint32_t settings);
+/* The battle StartBattle was given (EV_BATTLE_START's r0), told between
+ * frames: a guardian's pays zenny where his row has his chip, which his
+ * Guardian Data gives. */
+void emu_encounter_started(uint32_t settings);
 /* The next battle watched, until emu_battle_unwatch (the duel's: docs/
  * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, and the first enemy
  * to spawn given `hp_cap` HP at most (0: its own). */

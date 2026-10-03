@@ -3732,7 +3732,7 @@ static void take_events(void) {
 	bool on_layer = D.active && !D.town;
 	for (int i = 0; i < n; ++i)
 		switch (ev[i].kind) {
-		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; break;
+		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; emu_encounter_started(ev[i].r[0]); break;
 		case EV_MEGAMAN_HIT: D.duel_hit = true; break;
 		case EV_MAP_ENTER: if (on_layer) exit_flag(true); break;
 		case EV_CHOICE:
