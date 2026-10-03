@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 (2026-10-03)
 
 - **A teleport island's data is in reach.** MegaMan lands on the rim of
   the island's gem, and the island's Mystery Data sat across it: the way
