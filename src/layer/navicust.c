@@ -38,7 +38,7 @@ static const struct {
 	{ 13, 0, BUILD_GUARD, "UnderSht: a hit that would delete me leaves me 1 HP instead." },
 	{ 14, 4, BUILD_HAND, "ChpShufl: one reshuffle in the Custom screen." },
 	{ 21, 2, BUILD_FIELD, "Collect: viruses drop their chips more often." },
-	{ 25, 0, BUILD_FIELD, "SlipRunr: hold B to slide along the net." },
+	{ 25, 0, BUILD_FIELD, "SlipRunr: with B, I slide instead of running: faster, but I keep going till something stops me." },
 	{ 26, 2, BUILD_FIELD, "AutoHeal: a little HP back after every battle." },
 	{ 27, 2, BUILD_BUSTER, "BustPack: buster attack, speed and charge up three each." },
 	{ 28, 4, BUILD_GUARD, "BodyPack: SuperArmor, FlotShoe, AirShoes and UnderSht in one." },

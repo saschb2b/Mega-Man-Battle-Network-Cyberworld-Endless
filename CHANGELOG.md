@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **SlipRunr says what it does.** BN6's SlipRunr makes B slide MegaMan in
+  place of running, faster, and he keeps going until something stops him,
+  past turns and onto pads. The program pick said only "hold B to slide
+  along the net", and a playtester slid past his junction and onto a
+  layer's exit pad. It now says so.
 - **Purple Mystery Data holds a rare chip or better.** Its Unlocker costs
   about a layer's zenny, yet a third of purple data held a common or
   uncommon chip: a playtester carried an Unlocker over two sessions and
