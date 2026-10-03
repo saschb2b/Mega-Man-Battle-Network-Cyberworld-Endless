@@ -16,6 +16,7 @@
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "autopilot.h"
+#include "blockers.h"
 #include "boss.h"
 #include "chip_pool.h"
 #include "bytes.h"
@@ -395,18 +396,24 @@ static const char *lie_and_walk(int wx, int wy, int *far, bool *winds) {
 	return lies;
 }
 
-/* Where ProtoMan waits, for L's words: the lie of his pink mark, how far
- * the walk to him is, and whether it winds (as the crow flies, "close by"
- * named him across a gap); NULL while no duel waits. */
-static const char *rival_where(void) {
+/* Where world (wx, wy) is, for L's words, in buf: its lie, how far the
+ * walk there is, and whether it winds (as the crow flies, "close by" named
+ * ProtoMan across a gap). */
+static const char *spot_where(int wx, int wy, char *buf, size_t n) {
 	static const char *const dist[3] = { "close by", "a ways off", "far off" };
-	static char buf[96];
-	int wx, wy, far;
+	int far;
 	bool winds;
-	if (!duel_waiting(&wx, &wy)) return NULL;
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	snprintf(buf, sizeof buf, "%s, %s%s", lies, dist[far], winds ? ", though the way there winds" : "");
+	snprintf(buf, n, "%s, %s%s", lies, dist[far], winds ? ", though the way there winds" : "");
 	return buf;
+}
+
+/* Where ProtoMan waits, for L's words: the lie of his pink mark, how far
+ * the walk to him is, and whether it winds; NULL while no duel waits. */
+static const char *rival_where(void) {
+	static char buf[96];
+	int wx, wy;
+	return duel_waiting(&wx, &wy) ? spot_where(wx, wy, buf, sizeof buf) : NULL;
 }
 
 /* MegaMan below three quarters of his HP (at 220 of 240 the heal led L's
@@ -773,18 +780,21 @@ static int goal_words(char *buf, int k, int size, bool to_heal, bool told) {
 
 static bool md_on_map(int k);
 static bool md_known(int k, bool taken);
+static bool lock_shut(int k);
 
 /* Where a set piece keeps Mystery Data k, as L says it ("behind the
  * security cube"), or NULL: the counters count data MegaMan senses there,
  * and a playtester's read 0/1 with nothing in sight and no word of where
- * (session 63). */
-static const char *prize_where(int k) {
+ * (session 63). The lock it is behind in *lock (layer.block[]), -1 none. */
+static const char *prize_where(int k, int *lock) {
 	const NetObj *o = &layer.obj[D.objs.md_obj[k]];
 	int x = (int)o->x, y = (int)o->y;
+	*lock = -1;
 	if (!o->prize) return NULL;
 	for (int i = 0; i < layer.nblocks; ++i) {
 		const NetBlock *b = &layer.block[i];
 		if (b->rx != x || b->ry != y) continue;
+		*lock = i;
 		return b->kind < BLOCK_KINDS ? "behind the Link Navi's obstacle" : b->kind == BLOCK_SKULL ? "behind the skull door"
 			: b->kind == BLOCK_NUMBER ? "behind the number door" : "behind the security cube";
 	}
@@ -795,17 +805,36 @@ static const char *prize_where(int k) {
 	return NULL;
 }
 
+/* Where lock `lock` stands while it is shut, for L's words after the data
+ * he senses behind it, as his words on ProtoMan and the heal point (a
+ * playtester heard "behind the security cube", was told its P-Code by a
+ * navi and never found the cube, session 64): appended to `buf` at `k`,
+ * the new length. */
+static int lock_words(char *buf, int k, int size, int lock) {
+	if (lock < 0 || !lock_shut(lock)) return k;
+	const NetBlock *b = &layer.block[lock];
+	const char *what = b->kind < BLOCK_KINDS ? "obstacle" : b->kind == BLOCK_SKULL || b->kind == BLOCK_NUMBER ? "door" : "cube";
+	char where[96];
+	int wx, wy;
+	netmap_world(b->x, b->y, &wx, &wy);
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The %s's %s: the violet mark on the map.|", what,
+		spot_where(wx, wy, where, sizeof where));
+}
+
 /* The data MegaMan senses but has not seen, said where it lies (two at
- * most), appended to `buf` at `k`; the new length. */
+ * most), and the locks it is behind, appended to `buf` at `k`; the new
+ * length. */
 static int prize_note(char *buf, int k, int size) {
 	const char *where[2];
-	int n = 0;
+	int n = 0, lock[2] = { -1, -1 };
 	for (int i = 0; i < D.objs.nmd && n < 2; ++i) {
-		const char *w = flag_get(MAPSLOT_MD_FLAG + i) || md_on_map(i) || !md_known(i, false) ? NULL : prize_where(i);
-		if (w && !(n && !strcmp(w, where[0]))) where[n++] = w;
+		int at = -1;
+		const char *w = flag_get(MAPSLOT_MD_FLAG + i) || md_on_map(i) || !md_known(i, false) ? NULL : prize_where(i, &at);
+		if (w && !(n && !strcmp(w, where[0]))) { lock[n] = at; where[n++] = w; }
 	}
-	if (n == 2) return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s, and %s!|", where[0], where[1]);
-	if (n == 1) return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s!|", where[0]);
+	if (n == 2) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s, and %s!|", where[0], where[1]);
+	else if (n == 1) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s!|", where[0]);
+	for (int j = 0; j < n; ++j) k = lock_words(buf, k, size, lock[j]);
 	return k;
 }
 
@@ -1037,6 +1066,7 @@ static struct {
 	int md_taken[3], md_known[3];   /* the layer's Mystery Data MegaMan knows of, by colour (green, blue, purple): taken, known */
 	int counts_a;                   /* L's overlay of them: its alpha, 0 hidden */
 	uint16_t md_marked;             /* the ones the map marks, a bit each: untaken, on a panel it shows, or purple with an Unlocker held */
+	uint8_t locks;                  /* the layer's locks still shut (layer.block[k], a bit each): the map marks them */
 	char bug_note[160];             /* the NaviCust's bug as its RUN leaves it, over the PET a few seconds */
 	int bug_note_t;
 } seen;
@@ -1128,6 +1158,17 @@ static void see_counts(void) {
 /* (any Mystery Data MegaMan knows of on the layer: the counters show) */
 static bool counts_any(void) { return seen.md_known[0] + seen.md_known[1] + seen.md_known[2] > 0; }
 
+/* Whether the layer's lock k (a Link Navi obstacle, a security cube, a
+ * skull or number door: layer.block[k]) still stands: its present flag,
+ * cleared as it opens (blockers.c). */
+static bool lock_shut(int k) { return D.active && !D.town && k < layer.nblocks && flag_get(BLOCK_PRESENT_FLAG + k); }
+
+static void see_locks(void) {
+	seen.locks = 0;
+	for (int k = 0; k < layer.nblocks && k < 8; ++k)
+		if (lock_shut(k)) seen.locks |= (uint8_t)(1u << k);
+}
+
 /* L heard on the map: a press kept is spent, and the counters show */
 static void l_taken(void) {
 	D.l_kept = 0;
@@ -1198,6 +1239,7 @@ void director_see(void) {
 	seen.custom = seen.battle && emu_read8(BN6_CUSTOM_WINDOW);
 	see_tent();
 	see_counts();
+	see_locks();
 	see_bug_note();
 }
 
@@ -1895,22 +1937,26 @@ static bool map_counted(int i) {
 	return false;
 }
 
+/* panel (x, y) taken into the bounds, as its u = x - y and v = x + y */
+static void bounds_take(int x, int y, int *umin, int *umax, int *vmin, int *vmax) {
+	int u = x - y, v = x + y;
+	if (u < *umin) *umin = u;
+	if (u > *umax) *umax = u;
+	if (v < *vmin) *vmin = v;
+	if (v > *vmax) *vmax = v;
+}
+
 /* the step as large as lets the floor seen so far fit (8 on the second
  * screen's larger frame, 6 over the picture, 4 at the least), on the
  * seen floor's middle, or on MegaMan when it fits at none */
 /* the panels seen, and what MegaMan senses but has not reached (a ring
  * where it stands: off the frame, a playtester read its pip on the edge
- * as standing there, session 59); the exit and the guardian stay hidden */
+ * as standing there, session 59), a lock still shut among it; the exit and
+ * the guardian stay hidden */
 static void map_bounds(int *umin, int *umax, int *vmin, int *vmax) {
 	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x) {
-			if (!D.seen[y][x] || layer.cell[y][x] == C_VOID) continue;   /* (a counter's panels are floor too) */
-			int u = x - y, v = x + y;
-			if (u < *umin) *umin = u;
-			if (u > *umax) *umax = u;
-			if (v < *vmin) *vmin = v;
-			if (v > *vmax) *vmax = v;
-		}
+		for (int x = 0; x < MAP_W; ++x)
+			if (D.seen[y][x] && layer.cell[y][x] != C_VOID) bounds_take(x, y, umin, umax, vmin, vmax);   /* (a counter's panels are floor too) */
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int x = (int)o->x, y = (int)o->y;
@@ -1918,12 +1964,10 @@ static void map_bounds(int *umin, int *umax, int *vmin, int *vmax) {
 		    o->type == OBJ_BOSS))
 			continue;
 		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || D.seen[y][x]) continue;
-		int u = x - y, v = x + y;
-		if (u < *umin) *umin = u;
-		if (u > *umax) *umax = u;
-		if (v < *vmin) *vmin = v;
-		if (v > *vmax) *vmax = v;
+		bounds_take(x, y, umin, umax, vmin, vmax);
 	}
+	for (int k = 0; k < layer.nblocks; ++k)
+		if (seen.locks >> k & 1 && !D.seen[layer.block[k].y][layer.block[k].x]) bounds_take(layer.block[k].x, layer.block[k].y, umin, umax, vmin, vmax);
 }
 
 static void map_view(MapView *m) {
@@ -2042,6 +2086,16 @@ static void map_marks(const MapView *m, int *gx, int *gy, SDL_Color *gc) {
 	}
 }
 
+/* the layer's locks still shut, in its walkways' mouths, as the gates are
+ * marked: an Event, a ring while MegaMan only senses one (L names each
+ * among what he senses); gone once open. A playtester heard L sense
+ * Mystery Data "behind the security cube" and a navi tell its P-Code, and
+ * found the cube nowhere on the map (session 64). */
+static void map_locks(const MapView *m) {
+	for (int k = 0; k < layer.nblocks; ++k)
+		if (seen.locks >> k & 1) map_mark(m, -1 /* (no object's type) */, layer.block[k].x, layer.block[k].y, map_key[MAP_EVENT].c);
+}
+
 /* the goal while it is unseen: where the ray from MegaMan to it leaves
  * the frame */
 static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
@@ -2054,7 +2108,7 @@ static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
  * holds; the gaps close up until it fits the width, then "You" goes,
  * whose mark pulses (ProtoMan's name ran off the picture) */
 static void draw_map_key(int kx, int ky, int width) {
-	bool has[MAP_KEYS] = { [MAP_YOU] = true, [MAP_EXIT] = true, [MAP_BOSS] = D.objs.guardian.navi != 0 };
+	bool has[MAP_KEYS] = { [MAP_YOU] = true, [MAP_EXIT] = true, [MAP_BOSS] = D.objs.guardian.navi != 0, [MAP_EVENT] = seen.locks != 0 };
 	for (int i = 0; i < layer.nobj; ++i) {
 		int kind = map_kind(layer.obj[i].type);
 		if (kind > MAP_EXIT && kind != MAP_BOSS && !map_left_out(layer.obj[i].type)) has[kind] = true;
@@ -2116,7 +2170,8 @@ static int md_counts(int x, int y, int a) {
  * where it stands (the counters had counted data a playtester had seen
  * near him but not on the screen, and he had "no idea where", session 61;
  * what the header counts as seen, the map now shows). Data only sensed
- * behind a set piece stays unmarked: L names those without pointing. */
+ * behind a set piece stays unmarked: L names those, and the map marks the
+ * lock before them (map_locks), not what it keeps. */
 static void map_mystery(const MapView *m) {
 	/* (the header's tones, the blue lighter: on the map's blue floor it faded) */
 	static const SDL_Color tone[3] = { { 70, 230, 110, 255 }, { 160, 220, 255, 255 }, { 200, 110, 255, 255 } };
@@ -2169,6 +2224,7 @@ static void draw_map(int x0, int y0, int w, int h) {
 	SDL_Color gc = map_key[MAP_EXIT].c;
 	map_mystery(&m);
 	map_marks(&m, &gx, &gy, &gc);
+	map_locks(&m);
 	map_goal(&m, gx, gy, gc);
 	/* MegaMan, always there, his border pulsing */
 	int ms = map_x(&m, m.mx, m.my), mt = map_y(&m, m.mx, m.my);

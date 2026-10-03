@@ -11,6 +11,13 @@
   hear it!" for the rest. Where L had spoken on the layer before the
   save, the first L after a CONTINUE said the rest at once, a dozen
   boxes, and nothing of where you were.
+- **The map marks a layer's locks, and L says where they stand.** A
+  security cube, a Link Navi's obstacle or the Undernet's doors show on
+  the map (SELECT, and the 3DS's bottom screen) as a violet Event mark,
+  like the gates: a ring until you have seen it, gone once it opens.
+  Where L senses Mystery Data behind one, he now says which way it is:
+  "The cube's straight down, close by: the violet mark on the map." A
+  cube you had heard of and had its P-Code for was nowhere on the map.
 - **No random battle on the way into a guardian's arena.** From the room
   where MegaMan says the arena is just ahead, across the bridge into it,
   no random battle starts while the guardian waits; one began three

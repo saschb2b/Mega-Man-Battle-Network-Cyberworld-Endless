@@ -901,7 +901,15 @@ together:
   bone panels here!"), and the first time a profile meets a kind he says
   what it is and what opens it (`piece_lessons`, `profile.pieces_taught`),
   as he explains the map's violet marks once. Never an invisible path.
+  Where he senses Mystery Data behind a lock, he says where the lock
+  stands, as he does ProtoMan and the heal ("The cube's straight down,
+  far off, though the way there winds: the violet mark on the map.").
+- **On the map** (`map_locks`, SELECT's and the 3DS's bottom screen): every
+  lock still shut, an obstacle, a cube or a door, is an Event mark as the
+  gates are, a ring until its panel is seen, gone once it opens; the data
+  behind it stays unmarked until seen (a playtester heard of a cube's data
+  and was told its P-Code, and found the cube nowhere, session 64).
 
 Not built yet: the first layer of a run holding a kind holding its key
-too, and the 3DS map's marks on locks seen.
+too.
 
