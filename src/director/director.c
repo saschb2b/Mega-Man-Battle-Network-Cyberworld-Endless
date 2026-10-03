@@ -2381,21 +2381,30 @@ static void print_near(int id, int x, int y, void *ctx) {
 	if (abs(x - px) < 48 && abs(y - py) < 48) fprintf(ctx, "near %s %d %d\n", id < 0 ? "folk" : "object", x, y);
 }
 
-void director_describe(FILE *f) {
-	if (!D.active) { fprintf(f, "where none\n"); return; }
-	int mode = main_mode(), sub = emu_read8(BN6_GAMESTATE);
-	const char *doing = mode == BN6_MODE_GAME_OVER ? "gameover"
-		: mode != BN6_MODE_GAME ? "menu"
-		: sub == BN6_SUB_MAP ? "map" : sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT ? "battle" : "other";
-	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
-		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
-	/* (in a battle the HUD's HP is MegaMan's battle object's) */
-	int hp = emu_read16(BN6_NAVI_HP), max = emu_read16(BN6_NAVI_MAX_HP);
+/* What the game is doing, for a state, and MegaMan's HP there: in a
+ * battle the HUD's is his battle object's, and in an older net's battle
+ * the guest's (BN6 stands on the map meanwhile, at the battle's start's) */
+static const char *state_doing(int *hp, int *max) {
+	if (guest_fight_hp(hp, max)) return "battle (the older net's)";
+	*hp = emu_read16(BN6_NAVI_HP);
+	*max = emu_read16(BN6_NAVI_MAX_HP);
 	if (!on_map())
 		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { hp = emu_read16(o + BN6_T1_HP); max = emu_read16(o + BN6_T1_MAX_HP); break; }
+			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { *hp = emu_read16(o + BN6_T1_HP); *max = emu_read16(o + BN6_T1_MAX_HP); break; }
 		}
+	int mode = main_mode(), sub = emu_read8(BN6_GAMESTATE);
+	return mode == BN6_MODE_GAME_OVER ? "gameover"
+		: mode != BN6_MODE_GAME ? "menu"
+		: sub == BN6_SUB_MAP ? "map" : sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT ? "battle" : "other";
+}
+
+void director_describe(FILE *f) {
+	if (!D.active) { fprintf(f, "where none\n"); return; }
+	int sub = emu_read8(BN6_GAMESTATE), hp, max;
+	const char *doing = state_doing(&hp, &max);
+	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
+		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);

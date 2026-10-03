@@ -346,6 +346,13 @@ bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_
 
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
 
+bool guest_fight_hp(int *hp, int *max) {
+	if (!guest_on_screen()) return false;
+	*hp = rd16(BN5_FIGHT_HP);
+	*max = rd16(BN5_FIGHT_HP + 2);
+	return true;
+}
+
 static void finish(int outcome) {
 	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out, false, { 0 } };
 	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
@@ -412,6 +419,7 @@ bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, c
 bool guest_active(void) { return false; }
 bool guest_custom_screen(void) { return false; }
 bool guest_on_screen(void) { return false; }
+bool guest_fight_hp(int *hp, int *max) { (void)hp; (void)max; return false; }
 void guest_frame(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
 bool guest_take_result(GuestResult *out) { (void)out; return false; }

@@ -27,6 +27,9 @@ bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, c
 
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);
+/* ... and its battle is on the screen: MegaMan's HP and max HP in it (a
+ * state's); false before and after. */
+bool guest_fight_hp(int *hp, int *max);
 /* ... and its Custom screen is up (the autopilot's chips and OK) */
 bool guest_custom_screen(void);
 /* ... and its battle is on its screen (its game state's battle, not the
