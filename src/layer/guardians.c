@@ -421,3 +421,35 @@ const char *guardian_area_motto(int biome) {
 	};
 	return biome >= 0 && biome < BIOME_COUNT && mottos[biome] ? mottos[biome] : "";
 }
+
+/* (where no way's guardian has been battled, it is said once: "A Navi
+ * we've never battled guards Aquarium HP, and a Navi we've never battled
+ * guards Judge Tree Comp." read to a playtester as the sentence repeating
+ * itself, session 64; a second of three is "another") */
+void guardian_way_question(char *out, size_t n, const char *const who[3], const char *const area[3], int dark) {
+	static const char sealed[] = "|@M A dark way leads down into the Undernet too, but it's sealed. Clearing the Secret Area would open it. "
+		"Which way?";
+	int ways = dark == 2 ? 3 : 2, unknown = 0;
+	for (int k = 0; k < ways; ++k) unknown += !who[k];
+	if (unknown == ways && ways == 3) {
+		snprintf(out, n, "@M The net splits below us, Lan! Navis we've never battled guard all three ways: %s, %s, and a dark way down "
+			"into the Undernet. Which way?", area[0], area[1]);
+		return;
+	}
+	if (unknown == ways) {
+		snprintf(out, n, "@M The net splits below us, Lan! Navis we've never battled guard both ways: %s and %s.%s", area[0], area[1],
+			dark ? sealed : " Which way?");
+		return;
+	}
+	char said[3][48];
+	for (int k = 0, told = 0; k < ways; ++k)
+		snprintf(said[k], sizeof said[k], "%s", who[k] ? who[k] : told++ ? "another we've never battled" : "a Navi we've never battled");
+	/* (the first names a sentence's start) */
+	if ('a' <= said[0][0] && said[0][0] <= 'z') said[0][0] = (char)(said[0][0] - 32);
+	if (ways == 3)
+		snprintf(out, n, "@M The net splits below us, Lan! %s guards %s,|@M %s guards %s, and a dark way leads down into the Undernet, "
+			"where %s waits. Which way?", said[0], area[0], said[1], area[1], said[2]);
+	else
+		snprintf(out, n, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s.%s", said[0], area[0], said[1], area[1],
+			dark ? sealed : " Which way?");
+}

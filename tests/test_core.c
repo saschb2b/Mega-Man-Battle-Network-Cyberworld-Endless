@@ -1224,16 +1224,26 @@ static void test_talk(void) {
 			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. %s guards the end of it, word is.", area, guardian(navi)->name);
 			check_talk(what, line);
 		}
+		/* (the way on's question, each way's guardian battled or never,
+		 * with no dark way, a sealed one and an open one, to every other
+		 * area; one never battled is said once, not once a way: session
+		 * 64. The area's name copied first: the next call writes over it) */
+		char here[32];
+		snprintf(here, sizeof here, "%s", area);
 		for (int other = 0; other < BIOME_COUNT; ++other) {
-			snprintf(line, sizeof line, "@M The net splits below us, Lan! A Navi we've never battled guards %s,|@M and a Navi we've "
-				"never battled guards %s.|@M A dark way leads down into the Undernet too, but it's sealed. Clearing the Secret Area "
-				"would open it. Which way?", area, guardian_area_in_text(other, LAYER_NORMAL));
-			snprintf(what, sizeof what, "the way on from area %d to %d", biome, other);
-			check_talk(what, line);
-			snprintf(line, sizeof line, "@M The net splits below us, Lan! A Navi we've never battled guards %s,|@M a Navi we've never "
-				"battled guards %s, and a dark way leads down into the Undernet, where a Navi we've never battled waits. Which way?",
-				area, guardian_area_in_text(other, LAYER_NORMAL));
-			check_talk(what, line);
+			char there[32], q[400];
+			snprintf(there, sizeof there, "%s", guardian_area_in_text(other, LAYER_NORMAL));
+			const char *areas[3] = { here, there, "the Undernet" };
+			for (int dark = 0; dark <= 2; ++dark)
+				for (int known = 0; known < 8; ++known) {
+					const char *who[3];
+					for (int k = 0; k < 3; ++k) who[k] = known >> k & 1 ? "TomahawkMan (Breaker)" : NULL;
+					guardian_way_question(q, sizeof q, who, areas, dark);
+					snprintf(what, sizeof what, "the way on from area %d to %d (dark way %d, battled %d)", biome, other, dark, known);
+					check_talk(what, q);
+					const char *once = strstr(q, "Navi we've never battled");
+					CHECK(!once || !strstr(once + 1, "Navi we've never battled"), "%s: one never battled named twice: \"%s\"", what, q);
+				}
 		}
 		/* (the way's option, alone on its line in the choice) */
 		CHECK(strlen(guardian_area_name(biome)) <= 18, "area %d's name is long for the way on's choice", biome);

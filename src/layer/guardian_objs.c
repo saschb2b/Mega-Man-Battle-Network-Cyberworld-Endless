@@ -143,6 +143,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		int nways = dark_open ? 3 : 2;
 		int b[3] = { run.biome_order[next], alt, dark }, n[3] = { run.boss_order[run.biome_order[next]], alt_navi, dark_navi }, el[3];
 		static char option[3][32];
+		const char *named[3] = { NULL, NULL, NULL }, *areas[3] = { area[0], area[1], area[2] };
 		for (int k = 0; k < nways; ++k) {
 			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
 			/* (his element of either wheel: TenguMan's Wind as HeatMan's Fire) */
@@ -154,24 +155,13 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			bool known = guardian_known(n[k]);
 			way_option(option[k], sizeof option[k], known ? guardian(n[k])->name : "???", guardian_area_short(b[k]));
 			if (known) snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
-			else snprintf(who[k], sizeof who[k], "a Navi we've never battled");
+			named[k] = known ? who[k] : NULL;
 			route.option[k] = option[k];
 			snprintf(then[k], sizeof then[k], "%c%s it is! The exit pad will take us there.", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
 			route.then[k] = then[k];
 		}
-		/* (the first names a sentence's start) */
-		if ('a' <= who[0][0] && who[0][0] <= 'z') who[0][0] = (char)(who[0][0] - 32);
 		/* (two boxes: five had named the ways) */
-		if (dark_open)
-			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M %s guards %s, and a dark way "
-				"leads down into the Undernet, where %s waits. Which way?", who[0], area[0], who[1], area[1], who[2]);
-		else if (dark >= 0)
-			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s.|@M A dark way "
-				"leads down into the Undernet too, but it's sealed. Clearing the Secret Area would open it. Which way?",
-				who[0], area[0], who[1], area[1]);
-		else
-			snprintf(question, sizeof question, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s. Which way?",
-				who[0], area[0], who[1], area[1]);
+		guardian_way_question(question, sizeof question, named, areas, dark_open ? 2 : dark >= 0);
 		route.question = question;
 		route.n = nways;
 		route.flag = LAYER_ROUTE_FLAG;

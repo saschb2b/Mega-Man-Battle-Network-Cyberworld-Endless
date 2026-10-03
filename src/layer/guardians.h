@@ -77,5 +77,12 @@ const char *guardian_area_in_text(int biome, int side);
 const char *guardian_area_short(int biome);
 /* A line under an area's name on its title card. */
 const char *guardian_area_motto(int biome);
+/* MegaMan's question where the net splits past an act's guardian
+ * (docs/META.md, routes): each way's guardian as `who[k]` names him
+ * ("HeatMan (Fire)"), NULL for one never battled, and the area he guards,
+ * `area[k]` in a sentence; `dark` 0 for no dark way, 1 for one sealed, 2
+ * for one open, the third way (who[2]). Chat boxes split by '|', as
+ * ta_talk reads them, into `out`. */
+void guardian_way_question(char *out, size_t n, const char *const who[3], const char *const area[3], int dark);
 
 #endif
