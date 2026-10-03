@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Green's ladders cross in one line.** Green Area's ladder layers, four
+  or five parallel one-panel planks, had their rungs at random, so the way
+  turned onto a new rung at almost every plank, a lane to line up each:
+  some twenty calls of stops for a playtester. Each ladder now has one line
+  of rungs straight across every plank, which the way crosses in one leg,
+  and a rung or two more a pair to wander by. Services and navis also keep
+  off the way more often. This build makes layers differently, so a
+  CONTINUE starts the layer afresh.
 - **An Unlocker shows its lock.** While MegaMan holds an Unlocker, the map
   marks every purple Mystery Data on the layer, seen or not, as the Net
   Dealer who sold it said where it lies. A playtester bought one and never

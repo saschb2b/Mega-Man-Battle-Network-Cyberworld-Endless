@@ -314,11 +314,26 @@ static void ladder(int biome, int size) {
 		if (r == 0) teeth(x, y, along, len, (along + 1) % 4 == across ? -1 : 1);
 		if (r == rails - 1) teeth(x, y, along, len, (along + 1) % 4 == across ? 1 : -1);
 	}
-	/* rungs where neighbouring planks overlap */
+	/* rungs where neighbouring planks overlap: one line of them straight
+	 * across every plank near the ladder's middle, where the window is
+	 * widest and every plank reaches (the ladder's golden path: the way
+	 * crosses it in one leg, where rungs only at random had turned it at
+	 * every plank, a lane to line up on a one-panel walkway each, some
+	 * twenty calls of stops for a playtester, sessions 60 and 61), then one
+	 * or two more a pair at random, to wander by */
+	int lo_all = start[0], hi_all = start[0];
+	for (int r = 1; r < rails; ++r) {
+		if (start[r] > lo_all) lo_all = start[r];
+		if (start[r] < hi_all) hi_all = start[r];
+	}
+	hi_all += len - 1;
+	int line = rng_range(-2, 2);
+	if (line < lo_all + 1) line = lo_all + 1;
+	if (line > hi_all - 2) line = hi_all - 2;
 	for (int r = 0; r + 1 < rails; ++r)
 		for (int k = 0; k < 2 + rng_range(0, 1); ++k) {
 			int lo = start[r] > start[r + 1] ? start[r] : start[r + 1];
-			int t = lo + rng_range(1, len - 3);
+			int t = k == 0 ? line : lo + rng_range(1, len - 3);
 			int o = base + 3 * r;
 			for (int s = 1; s <= 2; ++s)
 				put(WIN_C + dir_dx[along] * t + dir_dx[across] * (o + s), WIN_C + dir_dy[along] * t + dir_dy[across] * (o + s));

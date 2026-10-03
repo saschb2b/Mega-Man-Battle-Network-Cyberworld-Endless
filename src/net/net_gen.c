@@ -288,7 +288,10 @@ static bool room_spot_in(const Room *r, int *ox, int *oy, bool open) {
 		int x = r->x + rng_range(0, r->w - 1), y = r->y + rng_range(0, r->h - 1);
 		if ((tries < 30 || open) && x == r->ax && y == r->ay) continue;
 		if ((tries < 34 || open) && in_way_line(x, y)) continue;
-		if (tries < 20 && way_band[y][x]) continue;
+		/* (off the way and its band most of the tries: navis by the way
+		 * stood in a playtester's, the Chip Trader on layer 2's and a
+		 * bystander square on the way to an arena, session 61) */
+		if (tries < 24 && way_band[y][x]) continue;
 		if (tries < 32 && gap_on_way(x, y)) continue;
 		if (tries < 30 && near_talker(x, y)) continue;
 		/* (a bystander, who may stay away, never at one, nor corner to
