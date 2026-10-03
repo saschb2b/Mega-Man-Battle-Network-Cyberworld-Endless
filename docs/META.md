@@ -274,7 +274,10 @@ them a use.
 Built as planned, with these particulars:
 
 - The setup screen is skipped on a profile's very first run, and remembers
-  the last run's choices.
+  the last run's choices. A run given up for a NEW GAME counts no run and
+  has no summary, but what it opened opens the setup, marked NEW: a first
+  run that deleted ElecMan, given up, had jacked in with no setup, so
+  neither his Cross nor the Blade folder could be chosen.
 - The two folders to unlock are Blade, once any guardian falls, and
   Storm, once an Aqua guardian (DiveMan, SpoutMan) does, in any run. They
   first opened with SlashMan and ElecMan, whom the net brings in act 3 or

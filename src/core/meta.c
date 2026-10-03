@@ -201,6 +201,41 @@ void meta_run_begun(void) {
 	profile_save();
 }
 
+/* a folder, once its milestone is reached in any run: open, and NEW in
+ * the setup (`tell`: said on the summary too) */
+static void open_folders(bool tell) {
+	for (int f = 1; f < FOLDER_COUNT; ++f) {
+		if ((profile.folders_open >> f & 1) || !earned(f)) continue;
+		profile.folders_open |= (uint16_t)(1u << f);
+		if (tell) say("the %s folder", folders[f].name);
+		profile.setup_new |= SETUP_NEW_FOLDER;
+	}
+}
+
+/* a Cross start, once its navi falls as a guardian */
+static void open_crosses(bool tell) {
+	for (int n = 1; n <= 5; ++n) {
+		if ((profile.crosses_open >> n & 1) || !cross_earned(n)) continue;
+		profile.crosses_open |= (uint8_t)(1u << n);
+		if (tell) say("the %s start", powers_cross_name(n));
+		profile.setup_new |= SETUP_NEW_CROSS;
+	}
+}
+
+void meta_unlocks_unsaid(void) {
+	open_folders(false);
+	open_crosses(false);
+}
+
+bool meta_setup_has_choice(void) {
+	if (meta_endless_open() || meta_threat_open() > 0) return true;
+	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f)
+		if (meta_folder_open(f)) return true;
+	for (int n = 1; n <= 5; ++n)
+		if (meta_cross_open(n)) return true;
+	return false;
+}
+
 void meta_run_over(bool won) {
 	nsaid = 0;
 	marks_new = 0;
@@ -215,26 +250,14 @@ void meta_run_over(bool won) {
 		say("%s", rung);
 		profile.setup_new |= SETUP_NEW_THREAT;
 	}
-	/* a folder, once its milestone is reached in any run */
-	for (int f = 1; f < FOLDER_COUNT; ++f) {
-		if ((profile.folders_open >> f & 1) || !earned(f)) continue;
-		profile.folders_open |= (uint16_t)(1u << f);
-		say("the %s folder", folders[f].name);
-		profile.setup_new |= SETUP_NEW_FOLDER;
-	}
+	open_folders(true);
 	/* the Spin this run found (the NaviCust's, for good) */
 	if (profile.spin_run == run.seed && profile.spin_colour >= 1 && profile.spin_colour <= 6) {
 		static char spin[24];
 		snprintf(spin, sizeof spin, "the %s Spin", meta_spin_name(profile.spin_colour));
 		say("%s", spin);
 	}
-	/* a Cross start, once its navi falls as a guardian */
-	for (int n = 1; n <= 5; ++n) {
-		if ((profile.crosses_open >> n & 1) || !cross_earned(n)) continue;
-		profile.crosses_open |= (uint8_t)(1u << n);
-		say("the %s start", powers_cross_name(n));
-		profile.setup_new |= SETUP_NEW_CROSS;
-	}
+	open_crosses(true);
 	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark"),
 	 * said last: the setup's new options matter more to the next run */
 	static const struct { int bit; const char *what; } marks[] = {

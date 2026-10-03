@@ -306,6 +306,11 @@ static void enter(void) {
 
 static void jack_in(void);
 
+/* (a first run starts as the net comes: nothing to choose yet. A run
+ * given up for a NEW GAME counts as none, but what it opened is there: a
+ * first run deleted ElecMan, and the setup with his Cross never came) */
+static bool setup_wanted(void) { return profile.runs > 0 || meta_setup_has_choice(); }
+
 /* ---- the title's marks (docs/META.md): BN6's own sprites, where its title
  * draws them, loaded with the copyright line (tiles from OBJ tile 0x180,
  * palettes from OBJ bank 5: docs/ROM_DATA.md) ---- */
@@ -350,6 +355,7 @@ static int row_new(int row) {
 static void setup_open(void) {
 	S.setup = true;
 	S.row = ROW_GO;
+	meta_unlocks_unsaid();
 	/* (on the row of what the last run opened, as a new unlock is spent
 	 * here: a playtester's A went through a setup that showed none of his
 	 * new SlashCross start, the cursor on JACK IN!; else JACK IN!, for the
@@ -602,8 +608,7 @@ static void update(void) {
 	}
 	S.choice = S.cursor;
 	S.net = RUN_SHORT;
-	if (S.choice == 0 && profile.runs > 0) {
-		/* (a first run starts as the net comes: nothing to choose yet) */
+	if (S.choice == 0 && setup_wanted()) {
 		setup_open();
 		audio_sfx(SFX_SELECT);
 		return;

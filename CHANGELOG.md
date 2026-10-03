@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **What a given-up run opened is yours to choose.** A guardian deleted
+  opens his Cross start (and the Blade folder) at once, but a first run
+  given up through NEW GAME jacked straight in without the setup screen,
+  so there was nothing to choose them from. The setup now opens whenever
+  something is open, marked NEW.
 - **The arrow's way turns less.** Across a lattice of walkways the
   arrow's shortest way turned at nearly every crossing, a stop and a new
   direction each. Of the shortest ways it now takes the one that turns

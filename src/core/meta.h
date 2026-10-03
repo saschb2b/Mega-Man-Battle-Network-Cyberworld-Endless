@@ -73,6 +73,12 @@ int meta_vault_need(int depth);
 /* The setup's rows with news since the last summary (profile.setup_new):
  * the setup opens on the first, marked NEW, until the next jack-in. */
 enum { SETUP_NEW_NET = 1, SETUP_NEW_FOLDER = 2, SETUP_NEW_CROSS = 4, SETUP_NEW_THREAT = 8 };
+/* What a run opened that no summary announced (a run given up for a NEW
+ * GAME): open, and NEW in the setup. */
+void meta_unlocks_unsaid(void);
+/* Whether the setup has a choice to offer: a folder, a Cross, a threat
+ * rung or the endless net open. */
+bool meta_setup_has_choice(void);
 
 /* A new run's start: what earlier runs opened is no news on its summary
  * (a folder earned in a run that never reached one was announced late, as
