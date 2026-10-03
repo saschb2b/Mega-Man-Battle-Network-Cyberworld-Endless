@@ -23,11 +23,13 @@
   table also holds the BattleChip Gate's recipes, made with the Japan-only
   reader of physical chips, and a navi whispered one: Cannon, Cannon and
   TankCan1 for GigaCannon, where the folder's is Cannon A, B and C.
-- **Where a bought chip went.** A chip bought or traded goes to the Pack,
-  as in BN6, and with a full folder it never shows in battle: a first-time
-  playtester's chip, bought for the guardian, sat there unknown. The first
-  time, MegaMan now says where it went and how to swap it in (PET, Folder,
-  EDIT).
+- **Where a new chip went.** A chip bought, traded, found in Mystery Data
+  or won in battle goes to the Pack, as in BN6, and with a full folder it
+  never shows in battle: a first-time playtester's chip, bought for the
+  guardian, sat there unknown, and another swapped six found chips in by
+  himself before a purchase taught him. The first time a chip comes, from
+  anywhere, MegaMan now says where it went and how to swap it in (PET,
+  Folder, EDIT).
 - **A first-act navi warns about battlefield Mystery Data:** any hit breaks
   it, even yours; win with it whole and it's yours. MegaMan said so only
   after the first battle that had one.

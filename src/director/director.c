@@ -138,7 +138,7 @@ static struct {
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
-	bool pack_due;         /* a shop or a trader closed with a chip more in the pack: MegaMan says where it went (once) */
+	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
@@ -2419,21 +2419,32 @@ static int pack_total(void) {
 	return n;
 }
 
+/* A chip come to the pack, as BN6 gives every chip but the folder's own,
+ * where a full folder never sees it (a playtester's chip bought for the
+ * guardian sat there unknown, session 61; another swapped six found chips
+ * in by himself before a purchase taught it, session 62): the pack's count
+ * as MegaMan stands on the map, risen by a Mystery Data, a battle, a shop
+ * or a trader. The PET's EDIT moves chips in and out, so the count is
+ * taken afresh as it closes. */
+static void pack_watch(void) {
+	static int count = -1;
+	static bool in_pet;
+	if (profile.pack_taught) return;
+	if (main_mode() == PET_MODE) in_pet = true;
+	if (!on_map()) return;
+	int n = pack_total();
+	if (n > count && count >= 0 && !in_pet) D.pack_due = true;
+	count = n;
+	in_pet = false;
+}
+
 static uint32_t shop_guard(uint32_t keys) {
-	static int chat_recent, guard, last_mode = -1, pack_before = -1;
+	static int chat_recent, guard, last_mode = -1;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
 	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) {
 		guard = A_GUARD;
 		shop_first = true;
-		pack_before = pack_total();
-	}
-	/* (a chip bought or traded goes to the pack, as in BN6, where a full
-	 * folder never sees it: a playtester's chip bought for the guardian sat
-	 * there unknown, session 61) */
-	if (mode == BN6_MODE_GAME && last_mode != BN6_MODE_GAME && pack_before >= 0) {
-		D.pack_due |= !profile.pack_taught && pack_total() > pack_before;
-		pack_before = -1;
 	}
 	if (mode == BN6_MODE_GAME) shop_first = false;
 	last_mode = mode;
@@ -3735,7 +3746,7 @@ static void rush_hint(void) {
 }
 
 /* The Navi gate's SP chip, given; Rush's gap, named. */
-/* where a chip bought or traded went, the first time (pack_due) */
+/* where a chip come to the pack went, the first time (pack_due) */
 static void pack_words(void) {
 	if (!D.pack_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
 	if (talk_start("@M That chip went to our Pack, Lan. To fight with it, swap it into our folder: PET, Folder, then EDIT!", FACE_MEGAMAN)) {
@@ -3749,6 +3760,7 @@ static void gate_and_rush_words(void);
 
 static void words_due(void) {
 	gate_and_rush_words();
+	pack_watch();
 	pack_words();
 }
 
