@@ -2495,12 +2495,20 @@ static uint32_t shop_guard(uint32_t keys) {
  * A's paced through the Net Dealer's five to eight boxes, 50 frames apart,
  * still chose the list's first row and bought it (Kai, session 41). A
  * press carried over from the words then cancels, where it had spent the
- * zenny; a buy chosen after that starts on Yes, as BN6's do. */
+ * zenny; a buy chosen after that starts on Yes, as BN6's do. The shop's
+ * "Leaving already?", which B asks, keeps BN6's Yes every time: it had
+ * started on No only where it came first, and a playtester's blind LEFT,
+ * A stayed in the shop twice (session 63). */
 static uint32_t choice_guard(uint32_t keys) {
 	static int age;
+	static uint32_t last;   /* the last of A and B pressed */
+	static uint32_t held;
+	uint32_t ab = keys & (KEY_A | KEY_B);
+	if (ab & ~held) last = ab & ~held & KEY_B ? KEY_B : KEY_A;
+	held = ab;
 	bool choice = emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2;
 	age = choice ? age + 1 : 0;
-	if (choice && age == 1 && shop_first && main_mode() != BN6_MODE_GAME) {
+	if (choice && age == 1 && shop_first && last != KEY_B && main_mode() != BN6_MODE_GAME) {
 		shop_first = false;
 		emu_write8(BN6_CHATBOX_CURSOR, 1);
 	}
