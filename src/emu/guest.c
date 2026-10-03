@@ -385,9 +385,12 @@ void guest_frame(uint32_t keys) {
 		core->rawWrite8(core, BN5_BATTLE_RESULT + 1, -1, 0);
 		wr16(BN5_REWARD, 0);
 	} else if (phase == PH_ASKED && frames > 600) finish(GUEST_ESCAPED);   /* (never began: nothing happened) */
-	/* (a DarkChip used: latched while its battle runs, as leaving it wipes
-	 * the counter) */
-	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_DARK_USED + 8u * rd8(BN5_BATTLE_SIDE))) dark_used = true;
+	/* (a DarkChip used: latched while its battle is fought, as leaving it
+	 * wipes the flag; not in the battle's first frames, which hold the last
+	 * battle's bytes until BN5 clears them: every battle had cost 20 max HP) */
+	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_FIGHT &&
+		rd8(BN5_DARK_USED + 8u * rd8(BN5_BATTLE_SIDE)))
+		dark_used = true;
 	if (guest_dev_worried && phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_MOOD) > 0x40) core->rawWrite8(core, BN5_BATTLE_MOOD, -1, 0x20);
 	/* (back on the map: how it ended, from BN5's own result, and MegaMan's
 	 * HP as the battle left it: BN5 copies it back to his NaviStats only on
