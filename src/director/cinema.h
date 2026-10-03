@@ -52,6 +52,9 @@ void cinema_card(const char *small, const char *big, const char *line1, const ch
 /* A short note in the picture's top right corner for `frames` on the
  * map ("Run saved"). */
 void cinema_note(const char *text, int frames);
+/* The height the corner note takes while it shows, its gap below too (a
+ * box stacked under it), 0 none. */
+int cinema_note_height(void);
 /* Its box with `text`, `t` frames into its `len` (fading in and out), in
  * the corner of the picture at (x0, y0): the map's notes, and the title's
  * "BN5 found". */

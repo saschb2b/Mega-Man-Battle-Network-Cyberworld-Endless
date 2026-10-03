@@ -403,7 +403,10 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	} else if (mystery_content(o, m->content)) {
 		m->type = MYSTERY_BLUE;
 	}
-	if (out->nmd < 16) out->md_colour[out->nmd++] = (uint8_t)m->type;
+	if (out->nmd < 16) {
+		out->md_obj[out->nmd] = (uint8_t)i;
+		out->md_colour[out->nmd++] = (uint8_t)m->type;
+	}
 }
 
 /* The Net Dealer's word on the act's guardian, `navi`, by his list

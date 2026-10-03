@@ -55,6 +55,8 @@ void cinema_arrow_turn(int dir) { C.arrow_dir = dir & 7; }
 int cinema_arrow_dir(void) { return C.arrow_dir; }
 void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note, "%s", text); C.note_t = 0; C.note_len = frames; }
 
+int cinema_note_height(void) { return C.note_len && !C.off_map ? TEXT_H + 6 : 0; }
+
 static void card(int kind, const char *top, const char *name, const char *l1, const char *l2, SDL_Color accent, int frames) {
 	C.card = kind;
 	C.card_t = 0;

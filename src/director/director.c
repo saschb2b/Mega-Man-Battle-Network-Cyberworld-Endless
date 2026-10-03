@@ -608,10 +608,19 @@ static int off_board_note(char *buf, int k, int size) {
 	return k;
 }
 
+static bool counts_any(void);
+
 /* The map's violet marks L has not explained yet, explained (once a
- * profile), appended to `buf` at `k`; the new length. */
+ * profile), appended to `buf` at `k`; the new length. And its counters,
+ * the first time they show over L's words: they count what MegaMan knows,
+ * so "2/2" is not read as the layer's all. */
 static int mark_lessons(char *buf, int k, int size, int fresh) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	if (!(profile.marks_taught & MARK_COUNTS) && counts_any()) {
+		ADD("@M The crystals up top count this layer's Mystery Data: what we've taken, of what we've seen or sensed. "
+			"There could be more out there!|");
+		fresh |= MARK_COUNTS;
+	}
 	if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
 	if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
 	if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
@@ -868,8 +877,8 @@ static struct {
 	bool on_map, battle, custom;
 	uint32_t timer;
 	int tent_x, tent_y;
-	int md_taken[3], md_total[3];   /* the layer's Mystery Data by colour (green, blue, purple): taken, placed */
-	bool counts;                    /* L's overlay of them shows */
+	int md_taken[3], md_known[3];   /* the layer's Mystery Data MegaMan knows of, by colour (green, blue, purple): taken, known */
+	int counts_a;                   /* L's overlay of them: its alpha, 0 hidden */
 } seen;
 
 /* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
@@ -902,23 +911,49 @@ static void see_tent(void) {
 	if (seen.timer - start < TENT_FRAMES) { seen.tent_x = tx; seen.tent_y = ty; }
 }
 
-/* The layer's Mystery Data, taken and placed, by colour: the counters on
- * the map's header, and over the picture a few seconds after L (the
- * owner's: a collector's count of what is left before the one-way exit,
- * where a playtester's sensed Rush gap and its prize were lost with the
- * layer, session 60). They hold through MegaMan's words, then count down. */
+/* Whether MegaMan knows of the layer's Mystery Data k: taken, on a panel
+ * the map shows (4 around where he has been: the picture shows no farther,
+ * a panel 64 pixels across), or a set piece's he senses (L names them: a purple's lock,
+ * a Rush gap's island, a teleport's, a lock's pocket); the invisible
+ * path's pad not until seen, a secret whose navi's hint is its cue. A
+ * count of all the layer holds had announced that secret, and made every
+ * layer a checklist (the owner's, reasoned with the game-design skill). */
+static bool md_known(int k, bool taken) {
+	const NetObj *o = &layer.obj[D.objs.md_obj[k]];
+	int x = (int)o->x, y = (int)o->y;
+	if (taken || (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && D.seen[y][x]) || o->param == MD_PURPLE) return true;
+	for (int p = 0; o->prize && p < layer.npaths; ++p) {
+		const NetGap *g = &layer.path[p];
+		if (x == g->x + dir_dx[g->dir] * (g->len + 2) && y == g->y + dir_dy[g->dir] * (g->len + 2)) return false;
+	}
+	return o->prize;
+}
+
+/* The layer's Mystery Data MegaMan knows of, taken and known, by colour:
+ * the counters on the map's header, and over the picture a few seconds
+ * after L (the owner's: a collector's count of what is left before the
+ * one-way exit, where a playtester's sensed Rush gap and its prize were
+ * lost with the layer, session 60). They hold through MegaMan's words,
+ * then count down. */
 #define COUNTS_AFTER 180
+
 static void see_counts(void) {
 	memset(seen.md_taken, 0, sizeof seen.md_taken);
-	memset(seen.md_total, 0, sizeof seen.md_total);
+	memset(seen.md_known, 0, sizeof seen.md_known);
 	for (int k = 0; D.active && !D.town && k < D.objs.nmd; ++k) {
+		bool taken = flag_get(MAPSLOT_MD_FLAG + k);
+		if (!md_known(k, taken)) continue;
 		int c = D.objs.md_colour[k] == MYSTERY_GREEN ? 0 : D.objs.md_colour[k] == MYSTERY_BLUE ? 1 : 2;
-		seen.md_total[c]++;
-		seen.md_taken[c] += flag_get(MAPSLOT_MD_FLAG + k);
+		seen.md_known[c]++;
+		seen.md_taken[c] += taken;
 	}
 	if (D.counts_t > 0 && !talk_busy()) --D.counts_t;
-	seen.counts = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown;
+	bool shown = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown;
+	seen.counts_a = !shown ? 0 : D.counts_t < 16 ? D.counts_t * 255 / 16 : 255;
 }
+
+/* (any Mystery Data MegaMan knows of on the layer: the counters show) */
+static bool counts_any(void) { return seen.md_known[0] + seen.md_known[1] + seen.md_known[2] > 0; }
 
 /* L heard on the map: a press kept is spent, and the counters show */
 static void l_taken(void) {
@@ -1756,11 +1791,11 @@ static void draw_map_key(int kx, int ky, int width) {
 }
 
 /* A Mystery Data crystal, 7 pixels across, its upper left face lit; dark
- * once all of its colour are taken */
-static void crystal(int x, int y, SDL_Color c, bool done) {
+ * once all of its colour are taken; at alpha a */
+static void crystal(int x, int y, SDL_Color c, bool done, int a) {
 	static const int half[7] = { 0, 1, 2, 3, 2, 1, 0 };
-	SDL_Color base = done ? rgba(c.r / 3, c.g / 3, c.b / 3, 255) : c;
-	SDL_Color lit = done ? base : rgba(c.r + (255 - c.r) / 2, c.g + (255 - c.g) / 2, c.b + (255 - c.b) / 2, 255);
+	SDL_Color base = done ? rgba(c.r / 3, c.g / 3, c.b / 3, (Uint8)a) : rgba(c.r, c.g, c.b, (Uint8)a);
+	SDL_Color lit = done ? base : rgba(c.r + (255 - c.r) / 2, c.g + (255 - c.g) / 2, c.b + (255 - c.b) / 2, (Uint8)a);
 	for (int r = 0; r < 7; ++r) {
 		fill_rect(x + 3 - half[r], y + r, 2 * half[r] + 1, 1, base);
 		if (r > 0 && r < 4) fill_rect(x + 3 - half[r], y + r, half[r], 1, lit);
@@ -1768,39 +1803,38 @@ static void crystal(int x, int y, SDL_Color c, bool done) {
 }
 
 /* The layer's Mystery Data counters from (x, y): a crystal of each colour
- * the layer holds and "taken/placed" beside it, dim once all are taken
- * (what is left draws the eye); their width, drawn only with `draw`. */
-static int md_counts(int x, int y, bool draw) {
+ * MegaMan knows of and "taken/known" beside it, dim once all are taken
+ * (what is left draws the eye), at alpha a; their width, drawn only where
+ * a > 0. */
+static int md_counts(int x, int y, int a) {
 	static const SDL_Color tone[3] = { { 70, 230, 110, 255 }, { 80, 170, 255, 255 }, { 200, 110, 255, 255 } };
 	int w = 0;
 	for (int c = 0; c < 3; ++c) {
-		if (!seen.md_total[c]) continue;
+		if (!seen.md_known[c]) continue;
 		char t[12];
-		snprintf(t, sizeof t, "%d/%d", seen.md_taken[c], seen.md_total[c]);
-		bool done = seen.md_taken[c] >= seen.md_total[c];
+		snprintf(t, sizeof t, "%d/%d", seen.md_taken[c], seen.md_known[c]);
+		bool done = seen.md_taken[c] >= seen.md_known[c];
 		if (w) w += 7;
-		if (draw) {
-			crystal(x + w, y + 3, tone[c], done);
-			text_draw(x + w + 9, y, t, done ? rgba(100, 120, 150, 255) : rgba(200, 225, 255, 255), TEXT_LEFT);
+		if (a > 0) {
+			crystal(x + w, y + 3, tone[c], done, a);
+			text_draw(x + w + 9, y, t, done ? rgba(100, 120, 150, (Uint8)a) : rgba(200, 225, 255, (Uint8)a), TEXT_LEFT);
 		}
 		w += 9 + text_width(t);
 	}
 	return w;
 }
 
-/* L's overlay of the counters, at the picture's top right, through its
- * words and a few seconds after (seen.counts) */
+/* L's overlay of the counters, through its words and a few seconds after
+ * (seen.counts_a): in the corner note's box, the HP's opposite, and under
+ * the note while one shows ("Run saved" stands there as a layer begins,
+ * when L is pressed first) */
 void director_draw_counts(void) {
-	int w = seen.counts ? md_counts(0, 0, false) : 0;
+	int a = seen.counts_a, w = a ? md_counts(0, 0, 0) + 8 : 0;
 	if (!w) return;
-	int x = P.core_x + 240 - 6 - w, y = P.core_y + 5;
-	SDL_Color edge = rgba(120, 200, 255, 220);
-	fill_rect(x - 4, y - 3, w + 8, TEXT_H + 5, rgba(0, 8, 28, 230));
-	fill_rect(x - 5, y - 4, w + 10, 1, edge);
-	fill_rect(x - 5, y + TEXT_H + 2, w + 10, 1, edge);
-	fill_rect(x - 5, y - 3, 1, TEXT_H + 5, edge);
-	fill_rect(x + w + 4, y - 3, 1, TEXT_H + 5, edge);
-	md_counts(x, y, true);
+	int x = P.core_x + 240 - w - 3, y = P.core_y + 3 + cinema_note_height();
+	fill_rect(x, y, w, TEXT_H + 4, rgba(0, 16, 40, (Uint8)(170 * a / 255)));
+	fill_rect(x, y + TEXT_H + 3, w, 1, rgba(120, 248, 255, (Uint8)(200 * a / 255)));
+	md_counts(x + 4, y + 2, a);
 }
 
 /* The layer's map in w x h from (x0, y0): SELECT's over the picture, and
@@ -1814,7 +1848,7 @@ static void draw_map(int x0, int y0, int w, int h) {
 	fill_rect(m.bx - 2, m.by - 2, 1, m.bh + 4, edge);
 	fill_rect(m.bx + m.bw + 1, m.by - 2, 1, m.bh + 4, edge);
 	text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
-	md_counts(m.bx + m.bw - md_counts(0, 0, false), y0 + 3, true);
+	md_counts(m.bx + m.bw - md_counts(0, 0, 0), y0 + 3, 255);
 	int px = seen.px, py = seen.py;
 	if (!netmap_panel(px, py, &m.mx, &m.my)) return;
 	map_view(&m);

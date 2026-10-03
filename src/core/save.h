@@ -22,7 +22,7 @@ typedef struct {
 	 * profile reads them as 0) */
 	uint8_t first_guardian;   /* the last new run's act 1 guardian, navi + 1 */
 	uint8_t navicust_taught;  /* a Guardian Data's draft has said how the NaviCust's board works */
-	uint8_t marks_taught;     /* the map's violet marks L has explained (MARK_*) */
+	uint8_t marks_taught;     /* the map's violet marks and its counters L has explained (MARK_*) */
 	/* the meta layer (docs/META.md): the highest threat rung open to a new
 	 * run, the starting folders unlocked (a bit each), short nets won */
 	uint8_t threat_open;
@@ -74,7 +74,7 @@ typedef struct {
 	uint8_t bbs_seen;         /* the Endless Net BBS's posts when its mail was last marked NEW (rumors) */
 } Profile;
 
-enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };
+enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };
 
 extern Profile profile;
 
