@@ -46,6 +46,9 @@ def main():
     calls, frame = len(lines), frames[-1] if frames else 0
     state = dict(l.split(' ', 1) for l in read(os.path.join(h, 'state.txt')).splitlines() if ' ' in l)
     doing, hp = state.get('doing', '?'), state.get('hp', '?')
+    # (one word for the log: an older net's battle, "battle (the older
+    # net's)", is a battle too, and its spaces broke the log's columns)
+    kind = 'battle' if doing.startswith('battle') else (doing.split() or ['?'])[0]
     alive = os.path.exists(os.path.join(h, 'pid'))
     hist_age = (now - os.path.getmtime(os.path.join(h, 'history.txt'))) / 60 if os.path.exists(os.path.join(h, 'history.txt')) else 0
     notes = sorted(glob.glob(os.path.join(h, 'notes-s*.md')), key=os.path.getmtime)
@@ -60,11 +63,13 @@ def main():
     snaps = []
     for l in read(log).splitlines():
         p = l.split()
-        if len(p) >= 4:
+        try:
             snaps.append((float(p[0]), int(p[1]), int(p[2]), p[3], int(p[5]) if len(p) >= 6 else -1))
-    snaps.append((now, calls, frame, doing, done))
+        except (IndexError, ValueError):
+            continue
+    snaps.append((now, calls, frame, kind, done))
     with open(log, 'a') as f:
-        f.write(f'{now:.0f} {calls} {frame} {doing} {hp} {done}\n')
+        f.write(f'{now:.0f} {calls} {frame} {kind} {hp} {done}\n')
     start = None
     for s in reversed(snaps):
         if s[3] != 'battle' or s[4] != done:
@@ -85,7 +90,7 @@ def main():
     if calls:
         print(f'  on the map: about {100 * walk // calls}% of the calls')
     want = []
-    if start and doing == 'battle':
+    if start and kind == 'battle':
         mins, n = (now - start[0]) / 60, calls - start[1]
         print(f'  this battle: {n} calls, {frame - start[2]} frames, {mins:.0f} min so far')
         if mins > 15 or n > 40:
