@@ -176,8 +176,10 @@ static int talk(TextArchive *t, int k) {
 	}
 	int h = 0;
 	while (!(held >> helpers[h].navi & 1)) ++h;
-	snprintf(s, sizeof s, "%s blocks the way, Lan!|We carry %s's Cross data. Let's ask him to %s it!", block_names[b->kind], helpers[h].name,
-		helpers[h].deed);
+	/* (HeatMan takes a fire in, where he burns a tree: "burn it" before a
+	 * pillar of flames read as a fire set on fire, session 64) */
+	const char *deed = helpers[h].navi == 1 && b->kind == BLOCK_FLAMES ? "swallow" : helpers[h].deed;
+	snprintf(s, sizeof s, "%s blocks the way, Lan!|We carry %s's Cross data. Let's ask him to %s it!", block_names[b->kind], helpers[h].name, deed);
 	ta_pages(t, s, FACE_MEGAMAN, &first);
 	ta_page(t, helpers[h].mugshot, "Leave it to me!", false);
 	/* (his sound, a moment, and the present flag cleared: the obstacle
