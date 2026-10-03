@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **ProtoMan's race is named a race.** L said "ProtoMan's waiting for our
+  duel!" where Chaud's call sets a race against ProtoMan's time, and a
+  playtester skipped it, unsure whether walking up started a fight. L now
+  says "our race against his time", and "our netbattle" where ProtoMan
+  fights MegaMan himself.
 - **A NaviCust bug is named at the RUN.** BN6's RUN lists only errors and
   says "RUN complete!" even over a bug, and MegaMan named the bug only once
   the PET had closed. A red note over the NaviCust screen now names the

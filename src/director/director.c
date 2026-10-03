@@ -578,7 +578,9 @@ static int family_words(char *buf, int k, int size) {
 /* What MegaMan senses on the layer (`here`, n of them), appended to `buf`
  * at `k`, then the rival, whose call has said why (docs/RIVAL.md), apart:
  * in the list, "ProtoMan, waiting for our duel and an official gate" read
- * as waiting for the gate too (a playtester's). The new length. */
+ * as waiting for the gate too (a playtester's). His race named a race, as
+ * Chaud's call does: "our duel" read as a fight a playtester skipped
+ * (session 62). The new length. */
 static int sense_words(char *buf, int k, int size, const char *const *here, int n, bool duel) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	if (n) {
@@ -586,7 +588,8 @@ static int sense_words(char *buf, int k, int size, const char *const *here, int 
 		for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
 		ADD(" here!|");
 	}
-	if (duel) ADD(n ? "@M And ProtoMan's waiting for our duel!|" : "@M ProtoMan's waiting for our duel here!|");
+	const char *what = layer_objs_duel_rung == 2 ? "our netbattle" : "our race against his time";
+	if (duel) ADD(n ? "@M And ProtoMan's waiting for %s!|" : "@M ProtoMan's waiting for %s here!|", what);
 	#undef ADD
 	return k;
 }
