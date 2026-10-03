@@ -450,8 +450,10 @@ static void note_more(int cx, int y, char lines[][48], int n) {
 static void setup_draw(int x0, int y0) {
 	SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255), dim = rgba(120, 140, 170, 255);
 	SDL_Color on = rgba(120, 255, 140, 255), orange = rgba(255, 170, 40, 255);
-	fill_rect(x0 + 8, y0 + 6, CORE_W - 16, CORE_H - 12, rgba(66, 198, 231, 255));
-	fill_rect(x0 + 10, y0 + 8, CORE_W - 20, CORE_H - 16, rgba(16, 60, 90, 245));
+	/* (four pixels wider each side than it was: "Storm: delete an Aqua
+	 * guardian" ran from edge to edge, a playtester's) */
+	fill_rect(x0 + 4, y0 + 6, CORE_W - 8, CORE_H - 12, rgba(66, 198, 231, 255));
+	fill_rect(x0 + 6, y0 + 8, CORE_W - 12, CORE_H - 16, rgba(16, 60, 90, 245));
 	int cx = x0 + CORE_W / 2, lx = x0 + 26, vx = x0 + 150;
 	text_draw(cx, y0 + 12, "JACK-IN SETUP", gold, TEXT_CENTER);
 	char v[48];
