@@ -2772,15 +2772,19 @@ static uint32_t shop_guard(uint32_t keys) {
 
 /* A choice, BN6's or ours: a playtester's A's, pressed through a Net
  * Dealer's words, landed twice on the shop's "Are you sure? > Yes" (BN6's
- * default) and bought what he had not chosen. B still answers No. And the
- * first "Are you sure?" in a shop its keeper's words opened starts on No:
- * A's paced through the Net Dealer's five to eight boxes, 50 frames apart,
- * still chose the list's first row and bought it (Kai, session 41). A
- * press carried over from the words then cancels, where it had spent the
- * zenny; a buy chosen after that starts on Yes, as BN6's do. The shop's
- * "Leaving already?", which B asks, keeps BN6's Yes every time: it had
- * started on No only where it came first, and a playtester's blind LEFT,
- * A stayed in the shop twice (session 63). */
+ * default) and bought what he had not chosen. B still answers No. And
+ * every "Are you sure?" in a shop starts on No, as our own questions with
+ * a cost do (ask_in's risky ones): A's paced through the Net Dealer's five
+ * to eight boxes, 50 frames apart, still chose the list's first row and
+ * bought it (Kai, session 41), which no wait stops, only a press other
+ * than A, so a press carried over from the words cancels. Only the first
+ * had started on No, the rest on BN6's own Yes (ts_select's first option),
+ * and two playtesters' LEFT, A, learned on the first, answered No to the
+ * next (session 64). The shop's "Leaving already?", which B asks, keeps
+ * BN6's Yes every time: it had started on No only where it came first,
+ * and a playtester's blind LEFT, A stayed in the shop twice (session 63).
+ * Another screen its keeper's words opened (a Chip Trader's) starts its
+ * first question on No. */
 static uint32_t choice_guard(uint32_t keys) {
 	static int age;
 	static uint32_t last;   /* the last of A and B pressed */
@@ -2790,7 +2794,8 @@ static uint32_t choice_guard(uint32_t keys) {
 	held = ab;
 	bool choice = emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2;
 	age = choice ? age + 1 : 0;
-	if (choice && age == 1 && shop_first && last != KEY_B && main_mode() != BN6_MODE_GAME) {
+	int mode = main_mode();
+	if (choice && age == 1 && (shop_first || mode == BN6_MODE_SHOP) && last != KEY_B && mode != BN6_MODE_GAME) {
 		shop_first = false;
 		emu_write8(BN6_CHATBOX_CURSOR, 1);
 	}

@@ -29,6 +29,10 @@
   which a CONTINUE brings back as you quit, so a layer's "pair of viruses
   in 0:12.00" could come back as "three viruses in 0:14.50". Now the
   layer alone decides them.
+- **Every "Are you sure?" in a shop starts on No,** as MegaMan's own
+  questions with a cost do. Only a visit's first purchase had; the rest
+  started on Yes, so a LEFT, A learned on the first answered No to the
+  next. "Leaving already?" still starts on Yes.
 - **A layer no longer turns black as MegaMan arrives.** A layer with a
   Link Navi obstacle left its talk on the game map it used; a later layer
   on the same map without one kept pointing at it after newer layers had
