@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""persona_prompt.py N LAST NOTES GOALS: the persona's prompt for session N.
+"""persona_prompt.py N LAST NOTES GOALS [NAME]: the persona's prompt for session N.
 
 persona.md below its line, with {{ORDINAL}}, {{N}} and {{N-1}} filled in and
 the three {{...}} blocks (the last session, the patch notes, the goals) taken
 from the files LAST, NOTES and GOALS. Prints the prompt; fails where a
-placeholder is left.
+placeholder is left. NAME (kai2, kai3, ...) runs another instance beside
+kai: its play.py session and its folder in .build/play/ are NAME's.
 """
 import os
 import re
@@ -17,10 +18,13 @@ def ordinal(n):
 
 
 def main():
-    if len(sys.argv) != 5:
+    if len(sys.argv) not in (5, 6):
         sys.exit(__doc__.strip().splitlines()[0])
     n = int(sys.argv[1])
     last, notes, goals = (open(p).read().strip() for p in sys.argv[2:5])
+    name = sys.argv[5] if len(sys.argv) == 6 else 'kai'
+    if not re.fullmatch(r'kai\d*', name):
+        sys.exit('NAME is kai, kai2, kai3, ...')
     here = os.path.dirname(os.path.abspath(__file__))
     persona = open(os.path.join(here, '..', 'persona.md')).read()
     body = persona.split('\n---\n', 1)[1]
@@ -32,6 +36,9 @@ def main():
     left = re.findall(r'\{\{[^}]*\}\}', body)
     if left:
         sys.exit(f'left unfilled: {left}')
+    if name != 'kai':
+        body = body.replace('.build/play/kai/', f'.build/play/{name}/')
+        body = re.sub(r'(play\.py (?:start|do|stop|replay)) kai\b', lambda m: f'{m.group(1)} {name}', body)
     print(body.strip())
 
 
