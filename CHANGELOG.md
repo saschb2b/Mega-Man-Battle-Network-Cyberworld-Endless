@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The arrow's way turns less.** Across a lattice of walkways the
+  arrow's shortest way turned at nearly every crossing, a stop and a new
+  direction each. Of the shortest ways it now takes the one that turns
+  least: along one walkway and on along the next.
 - **TagChips, said right.** MegaMan and the PET's mail said a tagged pair
   had to fit in the Reg memory; BN6's rule is a pair under 60 MB, whatever
   the Reg memory, and they now say so. A first-act navi now says the Net

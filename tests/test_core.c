@@ -1369,6 +1369,7 @@ static void test_walks(void) {
 		for (int k = 0; k < 2; ++k) {
 			double avg = n[k] ? legs[k] / n[k] : 0;
 			CHECK(avg < 11, "area %d: the walk to the %s takes %.1f legs", b, k ? "guardian" : "exit", avg);
+			if (getenv("CW_WAY_STATS")) printf("  legs area %2d %s: %.2f\n", b, k ? "guardian" : "exit", avg);
 			if (avg > most) { most = avg; most_area = b; }
 		}
 	}

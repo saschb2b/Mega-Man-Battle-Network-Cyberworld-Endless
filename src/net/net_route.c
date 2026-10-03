@@ -106,9 +106,60 @@ static int walk_aim(double px, double py, int sx, int sy, const int16_t *path, i
 	return n ? path[n - 1] : sy * MAP_W + sx;
 }
 
+/* The walk from (sx, sy) to (tx, ty) into route_walk, backwards from the
+ * target: the shortest, and of the shortest the one that turns least
+ * (MegaMan walks as BN6 does, a direction held at a time: across a
+ * lattice of walkways the shortest walk had turned at every crossing, a
+ * stop and a new direction each, and a playtester nudged ten calls to a
+ * tree; turning once, it runs along a walkway and on along another).
+ * A state is a panel and the way it was entered (panel * 4 + way). */
+enum { LT_STATES = MAP_W * MAP_H * 4 };
+static int16_t lt_prev[LT_STATES], lt_dist[LT_STATES], lt_turns[LT_STATES], lt_q[LT_STATES];
+static int lt_tail;
+static const int lt_d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+
+/* state s's step `k` onward, where it is open: a new state queued, or one
+ * of the next level reached with fewer turns */
+static void lt_relax(int s, int k, int sx, int sy) {
+	int x = s / 4 % MAP_W, y = s / 4 / MAP_W, nx = x + lt_d[k][0], ny = y + lt_d[k][1];
+	if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || (nx == sx && ny == sy) || !open_step(x, y, nx, ny)) return;
+	int n = (ny * MAP_W + nx) * 4 + k, nt = lt_turns[s] + (k != s % 4);
+	if (lt_dist[n] < 0) {
+		lt_dist[n] = (int16_t)(lt_dist[s] + 1); lt_turns[n] = (int16_t)nt; lt_prev[n] = (int16_t)s;
+		lt_q[lt_tail++] = (int16_t)n;
+	} else if (lt_dist[n] == lt_dist[s] + 1 && nt < lt_turns[n]) { lt_turns[n] = (int16_t)nt; lt_prev[n] = (int16_t)s; }
+}
+
+/* Its length, -1 where none reaches it. */
+static int least_turns(int sx, int sy, int tx, int ty) {
+	memset(lt_dist, 0xFF, sizeof lt_dist);
+	int h = 0, best = -1;
+	lt_tail = 0;
+	for (int k = 0; k < 4; ++k) {
+		int nx = sx + lt_d[k][0], ny = sy + lt_d[k][1];
+		if (!open_step(sx, sy, nx, ny)) continue;
+		int s = (ny * MAP_W + nx) * 4 + k;
+		lt_dist[s] = 1; lt_turns[s] = 0; lt_prev[s] = -1;
+		lt_q[lt_tail++] = (int16_t)s;
+	}
+	while (h < lt_tail) {
+		int s = lt_q[h++];
+		if (best >= 0 && lt_dist[s] >= lt_dist[best]) break;   /* (the target's level done) */
+		if (s / 4 == ty * MAP_W + tx) { if (best < 0 || lt_turns[s] < lt_turns[best]) best = s; continue; }
+		for (int k = 0; k < 4; ++k) lt_relax(s, k, sx, sy);
+	}
+	/* (the target's other states of its level, reached after the first) */
+	for (int k = 0; k < 4 && best >= 0; ++k) {
+		int s = (ty * MAP_W + tx) * 4 + k;
+		if (lt_dist[s] == lt_dist[best] && lt_turns[s] < lt_turns[best]) best = s;
+	}
+	if (best < 0) return -1;
+	int n = 0;
+	for (int s = best; s >= 0; s = lt_prev[s]) route_walk[n++] = (int16_t)(s / 4);
+	return n;
+}
+
 int route_way(double px, double py, int tx, int ty, int *len) {
-	static int16_t prev[MAP_H][MAP_W];
-	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
 	int sx = (int)lround(px), sy = (int)lround(py);
 	route_walk_len = 0;
 	route_walk_aim = -1;
@@ -136,29 +187,10 @@ int route_way(double px, double py, int tx, int ty, int *len) {
 		sy = by;
 	}
 	solid[sy][sx] = 0;
-	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) prev[y][x] = -1;
-	int h = 0, t = 0;
-	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
-	prev[sy][sx] = (int16_t)(sy * MAP_W + sx);
-	while (h < t && prev[ty][tx] < 0) {
-		int x = qx[h], y = qy[h++];
-		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-		for (int k = 0; k < 4; ++k) {
-			int nx = x + d[k][0], ny = y + d[k][1];
-			if (prev[ny][nx] >= 0 || !open_step(x, y, nx, ny)) continue;
-			prev[ny][nx] = (int16_t)(y * MAP_W + x);
-			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
-		}
-	}
-	if (prev[ty][tx] < 0) return -1;
 	/* the walk, backwards from the target */
-	int n = 0, cx = tx, cy = ty;
+	int n = sx == tx && sy == ty ? 0 : least_turns(sx, sy, tx, ty);
+	if (n < 0) return -1;
 	int16_t *path = route_walk;
-	while (!(cx == sx && cy == sy)) {
-		path[n++] = (int16_t)(cy * MAP_W + cx);
-		int p = prev[cy][cx];
-		cx = p % MAP_W; cy = p / MAP_W;
-	}
 	*len = n;
 	bool across;
 	int aim = walk_aim(px, py, sx, sy, path, n, &across);
