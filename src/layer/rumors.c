@@ -56,18 +56,30 @@ static int pa_read(Pa *out) {
 
 static bool has_code(const ChipInfo *ci, char c) { return memchr(ci->codes, c, (size_t)ci->ncodes) != NULL; }
 
-/* The code to tell it in: kind 4, a letter every chip of it comes in; kind
- * 0, the first of three letters in a row its chip comes in; 0 none. */
+/* Whether it can be told in code c: kind 4, every chip of it comes in c;
+ * kind 0, its chip comes in c and the two letters after it. */
+static bool pa_fits(const Pa *a, const ChipInfo *ci, char c) {
+	if (c < 'A' || c > 'Z') return false;
+	if (a->kind != 4) return c <= 'X' && has_code(&ci[0], c) && has_code(&ci[0], (char)(c + 1)) && has_code(&ci[0], (char)(c + 2));
+	for (int i = 0; i < a->n; ++i)
+		if (!has_code(&ci[i], c)) return false;
+	return true;
+}
+
+/* The code to tell it in, the folder's own first (run.codes; for kind 0, a
+ * row of three letters holding one of them): a whisper told LifeSword in H
+ * to a folder of Sword S and WideSwrd S, and all three come in S (session
+ * 62); else the first that fits; 0 none. */
 static char pa_code(const Pa *a) {
 	ChipInfo ci[4];
 	for (int i = 0; i < (a->kind == 4 ? a->n : 1); ++i) chip_info(a->chip[i], &ci[i]);
-	for (char c = 'A'; c <= 'Z'; ++c) {
-		bool all = true;
-		if (a->kind == 4)
-			for (int i = 0; i < a->n && all; ++i) all = has_code(&ci[i], c);
-		else all = c <= 'X' && has_code(&ci[0], c) && has_code(&ci[0], (char)(c + 1)) && has_code(&ci[0], (char)(c + 2));
-		if (all) return c;
+	for (int k = 0; k < 3 && run.codes[k]; ++k) {
+		char f = (char)('A' + run.codes[k] - 1);
+		for (char c = a->kind == 4 ? f : (char)(f - 2); c <= f; ++c)
+			if (pa_fits(a, ci, c)) return c;
 	}
+	for (char c = 'A'; c <= 'Z'; ++c)
+		if (pa_fits(a, ci, c)) return c;
 	return 0;
 }
 

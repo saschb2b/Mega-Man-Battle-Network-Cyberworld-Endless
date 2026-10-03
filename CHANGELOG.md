@@ -45,7 +45,10 @@
 - **Rumors tell the folder's Program Advances only (issue #56).** BN6's
   table also holds the BattleChip Gate's recipes, made with the Japan-only
   reader of physical chips, and a navi whispered one: Cannon, Cannon and
-  TankCan1 for GigaCannon, where the folder's is Cannon A, B and C.
+  TankCan1 for GigaCannon, where the folder's is Cannon A, B and C. A
+  whisper now also names the recipe in the folder's own code where its
+  chips come in it: LifeSword in S to a folder of Sword S and WideSwrd S,
+  not in H.
 - **Where a new chip went.** A chip bought, traded, found in Mystery Data
   or won in battle goes to the Pack, as in BN6, and with a full folder it
   never shows in battle: a first-time playtester's chip, bought for the
