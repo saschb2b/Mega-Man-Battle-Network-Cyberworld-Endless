@@ -3694,6 +3694,8 @@ static bool follow_exit_warp(void) {
 /* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
  * wants ten), an Unlocker, three RushFood, a WWW-ID (the set pieces'
  * keys), 10000 zenny (a cube's toll), a RegUP3 (+3 MB of Reg memory). */
+static void guest_begin(void);
+
 static bool dev_gift(const char *name) {
 	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
 	else if (!strcmp(name, "zenny")) devtools_zenny();
@@ -3701,6 +3703,9 @@ static bool dev_gift(const char *name) {
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
 	else if (!strcmp(name, "wwwid")) game_call(BN6_GIVE_ITEM | 1u, ITEM_WWW_ID, 1);
 	else if (!strcmp(name, "regup")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_REG_UP1 + 2, 1);
+	/* (a battle in the older net's own engine at once, on a layer whose
+	 * battles are its: docs/MULTIROM.md, Guest battles) */
+	else if (!strcmp(name, "guest") && encounter_guest) guest_begin();
 	else return false;
 	return true;
 }

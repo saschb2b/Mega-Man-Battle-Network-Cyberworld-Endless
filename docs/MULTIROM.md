@@ -101,8 +101,15 @@ engine (`src/emu/guest.c`, epic #57):
   enemies' reward rows are rewritten where a chip has no BN6 chip of its
   name: 200 zenny instead, so the screen never shows a chip the run won't
   get.
-- **Still to come**: DarkChips by BN5's rule (#64), the switch framed and
-  named (#65), the buster and programs in, BN5's chips registered in BN6.
+- **The switch**: BN6's frame fades to white while BN5's battle opens (its
+  opening drew the room its boot state stands in), and BN5's picture
+  flashes in once its battle is on its screen; after a profile's first,
+  MegaMan says what it was and how many chips sat out.
+- **For tests**: `--talk guest:FRAME` begins a guest battle at once on such
+  a layer (`--net-biome x0`, ACDC Area); `CYBERWORLD_EMU_DEBUG=1` names
+  each battle, its folder's chips in, and its end.
+- **Still to come**: DarkChips by BN5's rule (#64), the buster and
+  programs in, BN5's chips registered in BN6.
 
 ## Status
 
