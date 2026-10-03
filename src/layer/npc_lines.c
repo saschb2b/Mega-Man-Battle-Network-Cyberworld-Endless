@@ -4,6 +4,7 @@
 #include "npc_lines.h"
 
 #include "run.h"
+#include "save.h"
 
 #define N(a) (int)(sizeof a / sizeof *a)
 
@@ -48,6 +49,12 @@ static const char *const again[] = {
 	"Every time the Nest falls, it builds the net again. How deep does it go?",
 };
 
+/* (the first areas' lines a profile's first runs need, which ring false
+ * after: on a playtester's tenth, a bystander's word on green and blue
+ * Mystery Data, session 63) */
+static const bool early_basic[N(early)] = { [4] = true, [6] = true, [7] = true };
+#define VETERAN_RUNS 3   /* runs played (profile.runs), from which the basics are left out */
+
 /* anywhere */
 static const char *const tips[] = {
 	"Chips that share a code can be sent together. Stack them in your folder!",
@@ -64,9 +71,17 @@ const char *npc_line(int depth, int i) {
 	int n = place < 6 ? N(early) : place < 12 ? N(mid) : N(deep);
 	/* in a rebuilt net every other bystander remembers */
 	if (depth > CYCLE_LAYERS && i % 2 == 0) return again[((i / 2) % N(again) + N(again)) % N(again)];
-	/* (the beginner's tips in the first act only: deeper, a bystander
-	 * telling a playtester how the Custom Gauge works rang false) */
-	int nt = place < 3 ? N(tips) : 0;
+	bool veteran = profile.runs >= VETERAN_RUNS;
+	/* (the beginner's tips in a newcomer's first act only: deeper, a
+	 * bystander telling a playtester how the Custom Gauge works rang
+	 * false) */
+	int nt = place < 3 && !veteran ? N(tips) : 0;
+	if (veteran && tier == early) {
+		const char *kept[N(early)];
+		int m = 0;
+		for (int j = 0; j < N(early); ++j) if (!early_basic[j]) kept[m++] = early[j];
+		return kept[((i % m) + m) % m];
+	}
 	int k = ((i % (n + nt)) + n + nt) % (n + nt);
 	return k < n ? tier[k] : tips[k - n];
 }

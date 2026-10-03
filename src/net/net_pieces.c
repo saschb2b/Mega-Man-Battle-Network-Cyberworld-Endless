@@ -119,6 +119,8 @@ static unsigned rolled_pieces(int depth, int biome, int kind) {
 
 bool layer_purple(int depth, int biome, int kind) { return layer_pieces(depth, biome, kind) & PIECE_PURPLE; }
 
+bool layer_area_hides(int biome) { return biome >= 0 && biome < BIOME_COUNT && area_pieces[biome].hidden > 0; }
+
 int layer_pieces_ahead(int depth, unsigned piece) {
 	int n = 0;
 	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d)

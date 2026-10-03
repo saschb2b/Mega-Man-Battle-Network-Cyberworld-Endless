@@ -136,7 +136,9 @@ static const char *secret_line(uint32_t seed) {
 		say[n++] = "Word is, a blue Mystery Data deeper in this net hides a Spin, a colour nobody's found yet, a new one every dive!";
 	if (rival_clearance() == 0 && depth >= 2)
 		say[n++] = "Somebody said Chaud teaches a NetBattler's trick to anyone who beats ProtoMan's time. Wonder what it is...";
-	if (depth >= 4 && pacing_loop(depth) == 0)
+	/* (in an area whose layers hide one: in Green HP, which hides none, a
+	 * playtester looked for it and found nothing, session 63) */
+	if (depth >= 4 && pacing_loop(depth) == 0 && layer_area_hides(run.biome))
 		say[n++] = "I swear I saw a Navi walk off the end of a walkway, right out over nothing!|Some floor down here just can't be seen.";
 	if (!profile.reg_taught && pacing_loop(depth) == 0 && !is_boss_depth(depth))
 		say[n++] = "Every layer before a guardian hides a RegUp somewhere off the way.|More Reg memory, a bigger Regular Chip!";

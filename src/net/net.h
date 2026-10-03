@@ -235,6 +235,8 @@ int layer_block_kind(int depth, int biome);
 /* The security cube an area's layers set (BLOCK_PCODE or BLOCK_TOLL). */
 int layer_cube_kind(int depth, int biome, int kind);
 bool layer_purple(int depth, int biome, int kind);
+/* Whether `biome`'s layers may hide an invisible path (from the second act). */
+bool layer_area_hides(int biome);
 int layer_pieces_ahead(int depth, unsigned piece);
 int layer_rush_len(int depth, int biome);
 /* The layer's RegUp (issue #51, docs/META.md): the MB of Reg memory its
