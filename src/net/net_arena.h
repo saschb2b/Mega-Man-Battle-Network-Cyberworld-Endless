@@ -15,4 +15,9 @@ typedef struct {
  * room for; its room index, or -1 (nothing carved) when none fits. */
 int arena_attach(int n, ArenaInfo *out);
 
+/* Whether panel (x, y) is on the layer's way into its arena: in the
+ * antechamber's box, or on the bridge from it (the arena's own panels
+ * not); false on a layer without an arena. */
+bool arena_approach(int x, int y);
+
 #endif

@@ -11,6 +11,12 @@
   hear it!" for the rest. Where L had spoken on the layer before the
   save, the first L after a CONTINUE said the rest at once, a dozen
   boxes, and nothing of where you were.
+- **No random battle on the way into a guardian's arena.** From the room
+  where MegaMan says the arena is just ahead, across the bridge into it,
+  no random battle starts while the guardian waits; one began three
+  panels short of the arena, right after MegaMan's "there's no running
+  from a guardian!". That room, with its Net Dealer, is the last place
+  to get ready.
 - **ProtoMan's record on a layer stays the same through a CONTINUE.** His
   squad and his time to beat leaned on the last battles you had fought,
   which a CONTINUE brings back as you quit, so a layer's "pair of viruses

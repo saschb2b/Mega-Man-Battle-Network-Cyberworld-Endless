@@ -6,6 +6,7 @@
 
 #include "game.h"
 #include "net.h"
+#include "net_arena.h"
 #include "net_layouts.h"
 #include "net_route.h"
 #include "net_shapes.h"
@@ -121,18 +122,38 @@ static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
 	return n;
 }
 
+/* The arena's way in quiet back to its antechamber (boss.c's door_quiet
+ * holds random battles off arena_approach's panels while the guardian
+ * waits: a playtester met one on the bridge, session 64): every panel of
+ * the bridge from the arena's door (wx, wy) back into the antechamber's
+ * box is on it, and the arena's own are not. */
+static void check_approach(uint32_t seed, int wx, int wy) {
+	const Room *r = &layer.rooms[layer.ante], *a = &layer.rooms[layer.arena];
+	int back = (layer.arena_dir + 2) % 4, x = wx, y = wy, steps = 0;
+	#define ON_MAP(x, y) ((x) >= 0 && (y) >= 0 && (x) < MAP_W && (y) < MAP_H)
+	while (ON_MAP(x, y) && layer.cell[y][x] == C_PATH && !(x >= r->x && x < r->x + r->w && y >= r->y && y < r->y + r->h) && steps++ < 16) {
+		CHECK(arena_approach(x, y), "seed %u: the bridge's panel %d %d is off the arena's approach", seed, x, y);
+		x += dir_dx[back];
+		y += dir_dy[back];
+	}
+	CHECK(ON_MAP(x, y) && layer.cell[y][x] == C_PATH && arena_approach(x, y), "seed %u: the bridge does not lead back into the antechamber", seed);
+	#undef ON_MAP
+	CHECK(!arena_approach(a->ax, a->ay), "seed %u: the arena's middle is on its approach", seed);
+}
+
 /* A guardian's arena: one way in, the guardian in its middle, the exit
  * inside it, and nothing else there. */
 static void check_arena(uint32_t seed) {
 	const Room *a = &layer.rooms[layer.arena];
-	int ways = 0;
+	int ways = 0, wx = -1, wy = -1;
 	for (int y = a->y - 1; y <= a->y + a->h; ++y)
 		for (int x = a->x - 1; x <= a->x + a->w; ++x) {
 			bool inside = x >= a->x && x < a->x + a->w && y >= a->y && y < a->y + a->h;
 			bool corner = (x < a->x || x >= a->x + a->w) && (y < a->y || y >= a->y + a->h);
-			if (!inside && !corner && layer.cell[y][x] == C_PATH) ++ways;
+			if (!inside && !corner && layer.cell[y][x] == C_PATH) { ++ways; wx = x; wy = y; }
 		}
 	CHECK(ways == 1, "seed %u: the arena has %d ways in", seed, ways);
+	if (ways == 1 && layer.ante >= 0) check_approach(seed, wx, wy);
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		bool inside = (int)o->x >= a->x && (int)o->x < a->x + a->w && (int)o->y >= a->y && (int)o->y < a->y + a->h;

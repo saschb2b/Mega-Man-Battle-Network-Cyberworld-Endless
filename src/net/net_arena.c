@@ -78,3 +78,19 @@ int arena_attach(int n, ArenaInfo *out) {
 	out->exit_y = layer.rooms[a].ay + dir_dy[best_d] * (n / 2);
 	return a;
 }
+
+bool arena_approach(int x, int y) {
+	if (layer.arena < 0 || layer.ante < 0) return false;
+	const Room *r = &layer.rooms[layer.ante], *a = &layer.rooms[layer.arena];
+	if (x >= r->x && x < r->x + r->w && y >= r->y && y < r->y + r->h) return true;
+	/* the bridge meets the middle of the arena's near side (arena_box):
+	 * on that line, between the two boxes (where it starts inside the
+	 * antechamber's box, that box holds it) */
+	int d = layer.arena_dir;
+	if (d == DIR_E || d == DIR_W) {
+		int from = d == DIR_E ? r->x + r->w : a->x + a->w, to = d == DIR_E ? a->x : r->x;
+		return y == a->ay && x >= from && x < to;
+	}
+	int from = d == DIR_S ? r->y + r->h : a->y + a->h, to = d == DIR_S ? a->y : r->y;
+	return x == a->ax && y >= from && y < to;
+}

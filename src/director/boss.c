@@ -21,6 +21,7 @@
 #include "guardians.h"
 #include "loot.h"
 #include "net.h"
+#include "net_arena.h"
 #include "netmap.h"
 #include "powers.h"
 #include "rivals.h"
@@ -96,11 +97,19 @@ static bool entered(void) { return near_arena(0); }
 
 /* No random battle on the step into the arena: the game rolls one as he
  * steps in, before the staging can hold it, and the staging waited on a
- * virus battle (issue #38; the walk's steps, issue #24). Held a panel out
- * around the arena while its guardian waits, lifted again away from it. */
+ * virus battle (issue #38; the walk's steps, issue #24). Nor on the way
+ * there, the antechamber and its bridge: MegaMan's last words before the
+ * arena are said as he steps into the antechamber ("Once we're in,
+ * there's no running from a guardian!"), and a playtester met a random
+ * battle right after them, on the bridge three panels short of the arena:
+ * the pair that had taken him from 320 to 10 HP a layer before (session
+ * 64). The antechamber, where its dealer stands, is the last place to get
+ * ready. Held a panel out around the arena and on its way in while its
+ * guardian waits, lifted again away from them. */
 static void door_quiet(void) {
 	static bool held;
-	bool near = near_arena(1);
+	int x, y;
+	bool near = near_arena(1) || (megaman_panel(&x, &y) && arena_approach(x, y));
 	if (near) flag_set(BN6_FLAG_NO_ENCOUNTERS);
 	else if (held) flag_clear(BN6_FLAG_NO_ENCOUNTERS);
 	held = near;
