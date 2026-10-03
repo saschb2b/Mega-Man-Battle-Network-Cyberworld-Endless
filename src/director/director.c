@@ -307,11 +307,17 @@ static const char *const ways[8] = {
 	"to the left", "up and to the left", "straight up", "up and to the right",
 };
 
+/* How far `panels` is in L's words: close under five, a long way from
+ * twenty-five. A homepage's whole walk from its arrival to its exit is
+ * sixteen to twenty panels, the other areas' thirty to forty-five; from
+ * fourteen, "a long way yet" named a homepage's exit eight panels on
+ * (session 62). */
+static int far_of(int panels) { return panels < 5 ? 0 : panels < 25 ? 1 : 2; }
+
 static const char *way_to(int tx, int ty, int *far) {
 	int px = bn6_player_x(), py = bn6_player_y();
 	int dx = tx - px, dy = ty - py;
-	int panels = (abs(dx) + abs(dy)) / 32;
-	*far = panels < 5 ? 0 : panels < 14 ? 1 : 2;
+	*far = far_of((abs(dx) + abs(dy)) / 32);
 	/* (on the grid, whose +x is the world's +Y and +y its -X: the pad's
 	 * ways, net_route.c) */
 	way_dir = route_grid_way(dy / 32.0, -dx / 32.0);
@@ -355,7 +361,7 @@ static const char *route_to(int tx, int ty, int *far) {
 	if (!netmap_panel(tx, ty, &ex, &ey)) return NULL;
 	int w = route_way(gx, gy, ex, ey, &len);
 	if (w < 0) return NULL;
-	*far = len < 5 ? 0 : len < 14 ? 1 : 2;
+	*far = far_of(len);
 	way_dir = w;
 	return ways[w];
 }
@@ -366,11 +372,15 @@ static const char *route_to(int tx, int ty, int *far) {
 static const char *lie_and_walk(int wx, int wy, int *far, bool *winds) {
 	int keep = way_dir, walk_far;
 	const char *lies = way_to(wx, wy, far);
-	int lies_dir = way_dir;
+	int lies_dir = way_dir, seen_far = *far;
 	const char *walk = route_to(wx, wy, &walk_far);
 	int apart = walk ? abs(way_dir - lies_dir) : 0;
 	if (apart > 4) apart = 8 - apart;
 	if (walk) *far = walk_far;
+	/* (a walk longer in words than the line to it: how far it stands, and
+	 * that the way winds; "far off" named ProtoMan four panels from
+	 * MegaMan on the screen, session 62) */
+	if (walk && walk_far > seen_far) { *far = seen_far; apart = 2; }
 	*winds = apart >= 2;
 	way_dir = keep;
 	return lies;
@@ -408,10 +418,10 @@ static bool heal_spot(int *wx, int *wy) {
  * at 180 HP heard which way it was, and the arrow led to the exit). */
 static void goal_way(void) {
 	int far;
-	if (D.town) { town_way(&far); return; }
+	if (D.town) { cinema_arrow_heal(false); town_way(&far); return; }
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
-	if (hurt_now()) heal_spot(&gx, &gy);
+	cinema_arrow_heal(hurt_now() && heal_spot(&gx, &gy));
 	if (!route_to(gx, gy, &far)) way_to(gx, gy, &far);
 }
 
@@ -543,12 +553,17 @@ static int heal_note(char *buf, int k, int size, bool heal) {
 	for (int i = 0; i < layer.nobj; ++i) {
 		if (layer.obj[i].type != (heal ? OBJ_HEAL : OBJ_SHOP)) continue;
 		int wx, wy, hf;
+		bool winds;
 		netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &wx, &wy);
-		/* (where it lies: the way's first leg pointed off from it) */
-		const char *hw = way_to(wx, wy, &hf);
+		/* (where it lies: the way's first leg pointed off from it; and
+		 * that the way winds where it does, as the arrow follows it: "it's
+		 * straight down" under an arrow pointing up and to the left read as
+		 * two ways, session 62) */
+		const char *hw = lie_and_walk(wx, wy, &hf, &winds);
+		const char *wind = winds ? ", though the way there winds" : "";
 		k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0,
-			heal ? "@M The Recovery Mr. Prog can patch us up. It's %s, %s: the arrow leads there first.|"
-			     : "@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s.|", hw, near_far[hf]);
+			heal ? "@M The Recovery Mr. Prog can patch us up. It's %s, %s%s: the arrow turns green and leads there first.|"
+			     : "@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s%s.|", hw, near_far[hf], wind);
 		break;
 	}
 	return k;
@@ -684,6 +699,36 @@ static int piece_lessons(char *buf, int k, int size, int fresh) {
 	return k;
 }
 
+/* L's last words, the way on, appended to `buf` at `k`; the new length:
+ * along the floor where MegaMan can walk it (the arrow's way); where the
+ * walk sets off well away from where the goal lies, where it lies, which
+ * holds still as the walk winds; after the heal's words (`to_heal`, the
+ * arrow leading there first), where the goal lies: "the way on" read as
+ * the arrow's, which led to the heal, and its first leg is from here, not
+ * from the heal (session 62). */
+static int goal_words(char *buf, int k, int size, bool to_heal, bool told) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	int far;
+	bool to_guardian = D.objs.guardian.navi && !boss_beaten();
+	int gx = D.objs.exit_x, gy = D.objs.exit_y;
+	if (to_guardian) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
+	const char *lies = way_to(gx, gy, &far), *what = to_guardian ? "guardian waits" : "exit lies";
+	int lies_dir = way_dir, seen_far = far;
+	const char *way = route_to(gx, gy, &far);
+	if (!way) way = way_to(gx, gy, &far);
+	int apart = to_heal ? 0 : abs(way_dir - lies_dir);
+	if (apart > 4) apart = 8 - apart;
+	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
+	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
+	/* (the words where it lies, the arrow the walk: say they part) */
+	else if (apart >= 2 && told) ADD("@M The %s %s, but the way winds. Follow the arrow!", what, lies);
+	else if (apart >= 2) ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", what, lies, how_far[far]);
+	else if (to_heal) ADD("@M After that, the %s %s. %s", what, lies, how_far[seen_far]);
+	else ADD("@M The way on goes %s. %s", way, how_far[far]);
+	#undef ADD
+	return k;
+}
+
 static const char *status_words(void) {
 	static char buf[1400];
 	int k = 0;
@@ -789,27 +834,7 @@ static const char *status_words(void) {
 	/* (and after that, where ProtoMan waits, while he does) */
 	const char *rival = told ? rival_where() : NULL;
 	if (rival) ADD("@M ProtoMan's waiting %s.|", rival);
-	/* the way on, as MegaMan senses it: along the floor where he can (the
-	 * arrow's way); where the walk sets off well away from where the goal
-	 * lies, where it lies, which holds still as the walk winds */
-	int far;
-	bool to_guardian = D.objs.guardian.navi && !boss_beaten();
-	int gx = D.objs.exit_x, gy = D.objs.exit_y;
-	if (to_guardian) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
-	const char *lies = way_to(gx, gy, &far);
-	int lies_dir = way_dir;
-	const char *way = route_to(gx, gy, &far);
-	if (!way) way = way_to(gx, gy, &far);
-	/* (the arrow leading to the heal: the exit's words without it) */
-	int apart = hurt && heal ? 0 : abs(way_dir - lies_dir);
-	if (apart > 4) apart = 8 - apart;
-	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
-	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
-	/* (the words where it lies, the arrow the walk: say they part) */
-	else if (apart >= 2 && told) ADD("@M The %s %s, but the way winds. Follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies);
-	else if (apart >= 2)
-		ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", to_guardian ? "guardian waits" : "exit lies", lies, how_far[far]);
-	else ADD("@M The way on goes %s. %s", way, how_far[far]);
+	k = goal_words(buf, k, (int)sizeof buf, hurt && heal, told);
 	#undef ADD
 	goal_way();   /* (the arrow's way, which the words that follow start) */
 	return buf;

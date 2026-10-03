@@ -28,6 +28,7 @@ static struct {
 	char top[48], name[48], line1[48], line2[48];
 	SDL_Color accent;
 	int arrow_dir, arrow_t, arrow_len;   /* the way-on arrow: screen direction 0-7, frames shown, of */
+	bool arrow_heal;                     /* it leads to the Recovery Mr. Prog: green, the map's Heal */
 	char note[24];
 	int note_t, note_len;                /* a corner note: frames shown, of */
 } C;
@@ -52,6 +53,7 @@ void cinema_arrow_extend(int frames) { if (C.arrow_len && C.arrow_len - C.arrow_
 bool cinema_arrow_on(void) { return C.arrow_len > 0; }
 int cinema_arrow_age(void) { return C.arrow_len ? C.arrow_t : 0; }
 void cinema_arrow_turn(int dir) { C.arrow_dir = dir & 7; }
+void cinema_arrow_heal(bool heal) { C.arrow_heal = heal; }
 int cinema_arrow_dir(void) { return C.arrow_dir; }
 void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note, "%s", text); C.note_t = 0; C.note_len = frames; }
 
@@ -192,7 +194,10 @@ static void tri(float ax, float ay, float bx, float by, float cx, float cy, SDL_
 
 /* The way on: an arrow a little off the middle of the picture, where the
  * camera keeps MegaMan, pointing along the route (0 right, then clockwise
- * in eighths), bobbing that way; it fades out at its end. */
+ * in eighths), bobbing that way; it fades out at its end. Green while it
+ * leads to the heal: a playtester told it led there first followed it,
+ * then heard the exit's way, and could not tell which it showed (session
+ * 62). */
 static void draw_arrow(int x0, int y0) {
 	if (!C.arrow_len || C.off_map) return;
 	int left = C.arrow_len - C.arrow_t;
@@ -210,7 +215,8 @@ static void draw_arrow(int x0, int y0) {
 		int ha = head ? a * 3 / 5 : a;
 		for (int pass = 0; pass < 2; ++pass) {
 			float s = pass ? 1.0f : 1.4f, w = pass ? 5.0f : 7.0f;
-			SDL_Color col = pass ? rgba(120, 248, 255, (Uint8)ha) : rgba(0, 24, 64, (Uint8)(ha * 3 / 4));
+			SDL_Color col = !pass ? rgba(0, 24, 64, (Uint8)(ha * 3 / 4))
+				: C.arrow_heal ? rgba(90, 255, 120, (Uint8)ha) : rgba(120, 248, 255, (Uint8)ha);
 			float tx = hx + ux * 8 * s, ty = hy + uy * 8 * s;
 			float bx = hx - ux * 4, by = hy - uy * 4;
 			tri(tx, ty, bx - uy * w, by + ux * w, bx + uy * w, by - ux * w, col);

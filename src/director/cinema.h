@@ -43,6 +43,8 @@ bool cinema_arrow_on(void);
 void cinema_arrow_turn(int dir);
 /* The way the arrow shows (screen eighths). */
 int cinema_arrow_dir(void);
+/* Whether the arrow leads to the heal (drawn green), else the way on. */
+void cinema_arrow_heal(bool heal);
 /* How long the arrow has shown, in frames. */
 int cinema_arrow_age(void);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */

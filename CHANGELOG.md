@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **L's directions agree with the screen.**
+  - "A long way yet" now means twenty-five panels or more. It started at
+    fourteen, and a homepage's whole walk to its exit is sixteen to twenty
+    panels: a playtester heard "a long way yet" and the layer ended eight
+    panels on. (The other areas' walks are thirty to forty-five.)
+  - Something close whose walk is long is named close, "though the way
+    there winds": "far off" named ProtoMan four panels away on the screen.
+  - While MegaMan is hurt and the arrow leads to the Recovery Mr. Prog,
+    the arrow turns green, the Heal colour of the map, and L says so. The
+    heal's words add "though the way there winds" where the arrow sets off
+    another way, and the exit's words after them say where it lies, not
+    which way the walk from here starts.
 - **ProtoMan's race is named a race.** L said "ProtoMan's waiting for our
   duel!" where Chaud's call sets a race against ProtoMan's time, and a
   playtester skipped it, unsure whether walking up started a fight. L now
