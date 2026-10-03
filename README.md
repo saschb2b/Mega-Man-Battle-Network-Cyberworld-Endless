@@ -55,7 +55,7 @@ around it, one layer at a time, and keeps the run going.
 <img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan, it's Dad. Have you got a minute?">
 <img src="docs/screenshots/act-card.png" width="240" alt="Act 1: RoboDog Comp, circuits of a home comp; its guardian not known yet">
 <img src="docs/screenshots/net.png" width="240" alt="MegaMan on a generated layer of Robot Control Comp">
-<img src="docs/screenshots/battle.png" width="240" alt="A battle against two OldStoves, a rock cube on the field between them">
+<img src="docs/screenshots/battle.png" width="240" alt="A battle against a Mettaur and a Gunner, MegaMan firing his buster with BusterUp">
 <img src="docs/screenshots/undernet.png" width="240" alt="MegaMan on a generated layer of the Undernet">
 <img src="docs/screenshots/area-clear.png" width="240" alt="Robot Control Comp: AREA CLEAR, BlastMan deleted">
 </p>

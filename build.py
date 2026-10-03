@@ -1003,11 +1003,11 @@ SCREENSHOTS = [
     # Secret Area, the top threat rung)
     ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
     ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
-    # (seed 7's layer 3 walks straight to BlastMan's arena, then layer 4's
-    # first battle; retimed for 0.6.0's layers)
+    # (seed 7's layer 3 walks straight to BlastMan's arena, then the first
+    # random battle, on layer 6 since 0.8.0's layers and autopilot)
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(240, 'net'), (1400, 'guardian'), (1600, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
-      (2900, 'reward'), (2950, 'restored'), (3500, 'area-clear'), (5150, 'custom'), (5540, 'battle')],
+     [(240, 'net'), (1400, 'guardian'), (1560, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
+      (2900, 'reward'), (2950, 'restored'), (3500, 'area-clear'), (7660, 'custom'), (7940, 'battle')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
     # (Chaud's first call on an act's duel layer, its second box)
@@ -1029,9 +1029,9 @@ SCREENSHOTS = [
     # (the PET's E-Mail on a profile that has met seven guardians: the list,
     # then Dad's Records mail on its second page)
     ('pet', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,veteran', '--input',
-             '300:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,6:A,6:,54:,120:,6:START,6:,50:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,'
+             '300:,' + '6:A,6:,54:,' * 10 + '60:,6:START,6:,50:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,'
              '6:A,6:,80:,6:DOWN,6:,6:A,6:,150:,6:A,6:,150:'],
-     [(885, 'pet-mail'), (1221, 'pet-records')], {}),
+     [(1221, 'pet-mail'), (1557, 'pet-records')], {}),
     # (a phone held sideways with the touch controls round the picture, a
     # thumb on the D-pad: the whole screen at a phone's pixels, halved)
     ('touch', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch', '--size', '2400x1080',
@@ -1046,6 +1046,76 @@ SCREENSHOTS = [
     # met on the way to BlastMan's arena)
     ('3ds', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(1040, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
+    # 0.8.0's notes (docs/releases/v0.8.0.md), each by its feature: MegaMan
+    # placed at it ("0:place X Y FACE"), flags set ("0:flags FROM TO 1"),
+    # the chats paged with A. (the setup's NEW marks: a veteran profile's
+    # guardians fell, and no summary said so)
+    ('setup-new', ['--scene', 'setup', '--dev', 'veteran', '--input', '60:,6:DOWN,20:,6:RIGHT,40:'], [(150, 'setup-new')], {}),
+    # (a RegUp in a layer's blue data, MegaMan's word on it, the folder's REG tag)
+    ('regup', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--input',
+               '200:,0:place 460 -140 3,200:,6:A,74:,6:A,154:,6:A,74:,6:A,134:,6:A,94:,6:A,124:,6:A,124:,6:A,124:,6:A,124:,'
+               '6:A,124:,6:A,124:,6:A,124:,6:A,84:,6:START,54:,6:A,54:,6:A,44:,6:A,64:,6:SELECT,44:,6:A,114:,6:A,54:,6:A,144:,6:A,64:'],
+     [(940, 'regup'), (1080, 'regup-words'), (2640, 'regup-folder')], {}),
+    # (Chaud's clearance brings the TagChip system; EDIT's SELECT; a tagged pair)
+    ('tagchip', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,veteran', '--input',
+                 '230:,6:A,134:,6:A,134:,6:A,134:,6:A,134:,6:A,134:,6:START,54:,6:A,54:,6:A,44:,6:A,64:,6:SELECT,66:,'
+                 '6:DOWN,16:,6:A,106:,6:A,66:,6:A,106:,6:A,46:,6:DOWN,26:,6:A,106:,6:A,66:'],
+     [(225, 'tagchip'), (1260, 'tagchip-menu'), (1820, 'tagchip-pair')], {}),
+    # (three programs' compression flags, as the NaviCust sets them on a code
+    # entered: the codebook keeps them, and Dad's Compression mail lists them)
+    ('codes', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--input',
+               '400:,6:A,74:,6:A,154:,6:A,74:,0:flags 0x2664 0x266B 1,0:flags 0x2694 0x2697 1,110:,6:A,144:,6:A,114:,6:A,74:,'
+               '6:START,54:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,12:,6:A,74:,6:DOWN,6:,6:DOWN,16:,6:A,134:,6:A,114:,6:A,114:,6:A,154:'],
+     [(1950, 'codes')], {}),
+    # (the Guardian Data's reward chat on layer 3, then the split's question:
+    # a veteran profile names both guardians)
+    ('split', ['--scene', 'emu', '--run-depth', '3', '--seed', '3', '--dev', 'quiet,veteran', '--talk', 'reward:100',
+               '--input', '301:,' + '6:A,134:,' * 26 + '6:A,106:'],
+     [(3790, 'split-question'), (4040, 'split')], {}),
+    ('rumor', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--net-biome', '3', '--dev', 'quiet', '--talk', 'rumor:100',
+               '--input', '230:,6:A,64:,6:A,134:'],
+     [(228, 'rumor'), (298, 'rumor-2'), (438, 'rumor-3')], {}),
+    # (Central Town's seed 6: Lan beside the Giga-chip kid before Dad's words)
+    ('schoolyard', ['--scene', 'town', '--seed', '6', '--input', '40:,0:place 178 86 3,10:,6:A,134:,6:A,94:'],
+     [(185, 'schoolyard'), (290, 'schoolyard-2')], {}),
+    ('bbs', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--input',
+             '400:,6:A,74:,6:A,154:,6:A,94:,6:START,54:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,12:,6:A,74:,6:DOWN,6:,6:DOWN,16:,'
+             '6:A,134:,6:A,114:,6:A,114:,6:A,114:,6:A,114:,6:A,114:'],
+     [(1340, 'bbs'), (1700, 'bbs-2')], {}),
+    # (the layer's first data taken, MegaMan by a green one: the map's
+    # counters, then L's in the corner)
+    ('counters', ['--scene', 'emu', '--run-depth', '1', '--seed', '2', '--dev', 'quiet', '--input',
+                  '400:,6:A,74:,6:A,154:,6:A,94:,0:flags 0x1400 0x1400 1,0:place -76 76 3,40:,60:SELECT,40:,6:L,154:,6:A,154:'],
+     [(810, 'counters-map'), (1000, 'counters-l')], {}),
+    ('hidden-hint', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '23', '--dev', 'quiet,pieces=64', '--input',
+                     '60:,' + '4:A,6:,' * 20 + '40:,0:place 76 164 1,30:,6:A,6:,160:,6:A,6:,160:'], [(640, 'hidden-hint')], {}),
+    # (the rush clip's run: two Rushes across the gap, then the island's data)
+    ('rush', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '0', '--seed', '4', '--dev', 'quiet,pieces=2', '--talk', 'rushfood:2',
+              '--input', '60:,' + '4:A,6:,' * 20 + '40:,0:place 404 -20 7,40:,6:A,6:,138:,6:B,34:,6:A,6:,243:,66:UP+LEFT+B,20:'],
+     [(666, 'rush-bridge'), (864, 'rush-island')], {}),
+    # (a security cube in Central, the navi who tells its P-Code, the code entered)
+    ('cube', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '0', '--seed', '4', '--dev', 'quiet,pieces=16', '--input',
+              '300:,0:place 116 76 1,30:,6:A,150:,6:A,150:,6:A,40:,0:place 244 -276 5,30:,6:A,120:,6:A,150:,6:A,40:,0:place 116 76 1,30:,6:A,150:'],
+     [(442, 'cube'), (962, 'cube-teller'), (1158, 'cube-code')], {}),
+    # (the Undernet's doors: a skull door, then the WWW-ID shown; a number
+    # door's question, two of the layer's braziers in view, the data beside
+    # it taken first)
+    ('doors-skull', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '5', '--seed', '2', '--dev', 'quiet,pieces=16', '--talk', 'wwwid:700',
+                     '--input', '300:,0:place 268 -268 7,30:,6:A,150:,6:A,150:,6:A,80:,6:A,150:,6:A,150:'],
+     [(466, 'doors-skull'), (852, 'doors-skull-open')], {}),
+    ('doors-number', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '5', '--seed', '3', '--dev', 'quiet,pieces=16', '--input',
+                      '300:,0:place 332 -140 3,30:,6:A,150:,6:A,150:,6:A,80:,0:place 332 -140 3,20:,6:A,150:,6:A,150:'],
+     [(1017, 'doors-number')], {}),
+    # (a purple data, locked; the Unlocker asked for; its chip)
+    ('purple', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '3', '--seed', '3', '--dev', 'quiet,pieces=1', '--talk', 'keys:100', '--input',
+                '300:,0:place 52 -212 5,30:,6:A,150:,6:A,150:,6:A,150:'],
+     [(450, 'purple'), (600, 'purple-unlock'), (740, 'purple-chip')], {}),
+    # (L names a set piece once it has explained it: teleport pads explained
+    # on layer 3, the dev menu's Next layer, then L on layer 4)
+    ('sense', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '3', '--seed', '10', '--dev', 'quiet,pieces=4', '--input',
+               '1:,119:,6:L,6:,88:,' + '6:A,6:,88:,' * 13 + '10:SELECT,6:SELECT+R,4:SELECT,20:,' + '6:DOWN,6:,' * 7 +
+               '10:,6:A,6:,388:,' + '6:A,6:,88:,' * 4 + '20:,6:L,6:,88:,6:A,6:,200:'],
+     [(2700, 'sense')], {}),
 ]
 
 
@@ -1112,13 +1182,16 @@ FFMPEG_IMAGE = 'linuxserver/ffmpeg:9.0-cli-ls82'
 # captures were timed: the areas' and guardians' draw has changed since)
 RUN_7 = ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12']
 AREA_WALK = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
+# (an act's first layer: the act's card and MegaMan's words paged with A)
+PAGED = '60:,' + '4:A,6:,' * 20 + '40:,'
 CLIPS = [
     ('title', ['--scene', 'title'], {}, None, 300, 780),
     ('net', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 150, 600),
-    # (layer 4's first battle, from BATTLE START to the RESULT window; the
+    # (the run's first random battle, on layer 6, from BATTLE START to the
+    # RESULT window and its chip; the
     # walk into BlastMan's arena and his card; the Undernet on its act's
     # third layer, where no call from Chaud comes)
-    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 5400, 5830),
+    ('battle', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 7800, 8270),
     ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1200, 1470),
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
@@ -1132,13 +1205,28 @@ CLIPS = [
     ('green', AREA_WALK + ['--net-biome', '3', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
     ('graveyard', AREA_WALK + ['--net-biome', '4', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
     ('acdc-bn5', AREA_WALK + ['--net-biome', '0', '--seed', '4'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 260, 580),
+    # (0.8.0's set pieces, each forced on an act's first layer, its arrival
+    # paged with A, MegaMan placed at it: Rush bridging a gap and the walk
+    # over him, a teleport pair, an arrow lane's ride, an invisible path)
+    ('rush', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '0', '--seed', '4', '--dev', 'quiet,pieces=2', '--talk', 'rushfood:2'], {},
+     PAGED + '0:place 404 -20 7,40:,6:A,6:,138:,6:B,34:,6:A,6:,243:,66:UP+LEFT+B,20:', 446, 864),
+    ('teleport', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '3', '--seed', '2', '--dev', 'quiet,pieces=4'], {},
+     PAGED + '0:place 276 -20 1,40:,70:UP+RIGHT,150:,40:DOWN,6:,6:A,6:,60:,6:A,6:,50:,6:A,6:,90:', 372, 800),
+    ('arrows', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '19', '--dev', 'quiet,pieces=32'], {},
+     PAGED + '0:place 76 260 3,20:,130:DOWN+RIGHT,80:DOWN+LEFT,60:', 376, 565),
+    ('hidden', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '23', '--dev', 'quiet,pieces=64'], {},
+     PAGED + '0:place -20 260 3,20:,170:DOWN+RIGHT,4:,6:A,12:,6:B,48:,6:A,6:,150:', 306, 650),
+    # (HeatCross brought, a cybertree in Green: "Leave it to me!")
+    ('obstacle', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '3', '--seed', '3', '--dev', 'quiet,pieces=8', '--setup', 'endless,0,0,0,1'], {},
+     '300:,0:place 20 108 5,20:,6:A,89:,6:A,134:,6:A,39:,6:A,60:,6:A,10:,70:DOWN+LEFT', 310, 729),
 ]
 
 
-# the clips the README shows as GIFs too (GitHub plays no video from the repository):
-# name, then its first seconds and frames a second (a walk's scrolling floor
-# makes a GIF of all of it 2 MB)
-README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12)}
+# the clips the README or a release's notes show as GIFs too (GitHub plays no
+# video from the repository): name, then its first seconds and frames a second
+# (a walk's scrolling floor makes a GIF of all of it 2 MB)
+README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
+               'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15)}
 
 
 def clips(only=None):

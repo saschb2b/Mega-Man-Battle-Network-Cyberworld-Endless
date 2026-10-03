@@ -33,6 +33,9 @@ import build  # noqa: E402
 
 WEAK = {'CYBERWORLD_AUTOPILOT': 'weak'}
 WALK = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
+# (an act's first layer: its card and MegaMan's words paged, then the map held from frame 730)
+MAP_HELD = '250:' + ',6:A,24:' * 14 + ',60:,40:SELECT'
+SEASIDE_4 = ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '2']
 # name, game options, environment, frame
 SCENES = [
     # (BlastMan's arena in the Robot Control Comp, as the autopilot walks in)
@@ -55,6 +58,12 @@ SCENES = [
     ('seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '3', '--seed', '11', '--dev', 'quiet'], {}, 300),
     # (the Cybeast Nest and the void beside it)
     ('nest', ['--scene', 'emu', '--run-depth', '19', '--dev', 'quiet', '--net-biome', '7', '--seed', '3'], WEAK, 620),
+    # (0.8.0's: a Seaside layer's map whole, its way on one-panel walkways
+    # and then on wide bands: f9b915e against 280ec53, --pick 4882961
+    # d35a835; and its services at the start, pips on the frame's edge and
+    # then rings where they stand: 1ee912d against 5bc7731)
+    ('narrow', SEASIDE_4 + ['--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('rings', SEASIDE_4 + ['--dev', 'quiet', '--input', MAP_HELD], {}, 755),
     # (the Net Dealer's word on TenguMan before his arena, its third page)
     ('dealer', ['--scene', 'emu', '--run-depth', '9', '--seed', '1', '--guardian', '8', '--talk', 'shop:430', '--dev', 'quiet',
                 '--input', '500:,4:A,100:,4:A,100:,4:A,160:'], {}, 860),
