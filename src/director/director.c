@@ -880,7 +880,7 @@ static struct {
 	int tent_x, tent_y;
 	int md_taken[3], md_known[3];   /* the layer's Mystery Data MegaMan knows of, by colour (green, blue, purple): taken, known */
 	int counts_a;                   /* L's overlay of them: its alpha, 0 hidden */
-	uint16_t md_marked;             /* the ones the map marks, a bit each: untaken, on a panel it shows */
+	uint16_t md_marked;             /* the ones the map marks, a bit each: untaken, on a panel it shows, or purple with an Unlocker held */
 } seen;
 
 /* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
@@ -950,10 +950,14 @@ static void see_counts(void) {
 	memset(seen.md_taken, 0, sizeof seen.md_taken);
 	memset(seen.md_known, 0, sizeof seen.md_known);
 	seen.md_marked = 0;
+	/* (an Unlocker held: its lock on the map, as the dealer who sold it
+	 * said where it lies; a playtester bought one and never found the
+	 * purple data, session 61, the owner's call) */
+	bool key = D.active && !D.town && key_item(SUB_UNLOCKER) > 0;
 	for (int k = 0; D.active && !D.town && k < D.objs.nmd; ++k) {
 		bool taken = flag_get(MAPSLOT_MD_FLAG + k);
 		if (!md_known(k, taken)) continue;
-		if (!taken && md_on_map(k)) seen.md_marked |= (uint16_t)(1u << k);
+		if (!taken && (md_on_map(k) || (key && D.objs.md_colour[k] == MYSTERY_PURPLE))) seen.md_marked |= (uint16_t)(1u << k);
 		int c = D.objs.md_colour[k] == MYSTERY_GREEN ? 0 : D.objs.md_colour[k] == MYSTERY_BLUE ? 1 : 2;
 		seen.md_known[c]++;
 		seen.md_taken[c] += taken;
@@ -1619,6 +1623,13 @@ static bool map_left_out(int type) {
 	return type == OBJ_DUEL && layer_objs_duel_later;
 }
 
+/* whether layer object i is a Mystery Data the map marks (seen.md_marked) */
+static bool map_counted(int i) {
+	for (int k = 0; k < D.objs.nmd; ++k)
+		if (D.objs.md_obj[k] == i) return seen.md_marked >> k & 1;
+	return false;
+}
+
 /* the step as large as lets the floor seen so far fit (8 on the second
  * screen's larger frame, 6 over the picture, 4 at the least), on the
  * seen floor's middle, or on MegaMan when it fits at none */
@@ -1638,9 +1649,10 @@ static void map_bounds(int *umin, int *umax, int *vmin, int *vmax) {
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int x = (int)o->x, y = (int)o->y;
-		if (map_kind(o->type) < 0 || map_left_out(o->type) || o->type == OBJ_EXIT || o->type == OBJ_RETURN || o->type == OBJ_BOSS ||
-		    x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || D.seen[y][x])
+		if (!map_counted(i) && (map_kind(o->type) < 0 || map_left_out(o->type) || o->type == OBJ_EXIT || o->type == OBJ_RETURN ||
+		    o->type == OBJ_BOSS))
 			continue;
+		if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || D.seen[y][x]) continue;
 		int u = x - y, v = x + y;
 		if (u < *umin) *umin = u;
 		if (u > *umax) *umax = u;
@@ -1846,9 +1858,13 @@ static void map_mystery(const MapView *m) {
 	for (int k = 0; k < D.objs.nmd; ++k) {
 		if (!(seen.md_marked >> k & 1)) continue;
 		const NetObj *o = &layer.obj[D.objs.md_obj[k]];
-		int sx = map_x(m, (int)o->x, (int)o->y), sy = map_y(m, (int)o->x, (int)o->y);
-		if (!map_inside(m, sx, sy, 3)) continue;
+		int sx = map_x(m, (int)o->x, (int)o->y), sy = map_y(m, (int)o->x, (int)o->y), ex, ey;
 		SDL_Color c = tone[D.objs.md_colour[k] == MYSTERY_GREEN ? 0 : D.objs.md_colour[k] == MYSTERY_BLUE ? 1 : 2];
+		if (!map_inside(m, sx, sy, 3)) {
+			/* (past the frame: an arrowhead its way, as a sensed service's) */
+			if (map_edge(m, sx, sy, 3, &ex, &ey)) map_arrowhead(m, ex, ey, 3, c);
+			continue;
+		}
 		for (int r = -3; r <= 3; ++r) fill_rect(sx - (3 - abs(r)), sy + r, 2 * (3 - abs(r)) + 1, 1, rgba(0, 8, 28, 255));
 		for (int r = -2; r <= 2; ++r) fill_rect(sx - (2 - abs(r)), sy + r, 2 * (2 - abs(r)) + 1, 1, c);
 	}

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **An Unlocker shows its lock.** While MegaMan holds an Unlocker, the map
+  marks every purple Mystery Data on the layer, seen or not, as the Net
+  Dealer who sold it said where it lies. A playtester bought one and never
+  found the purple data.
 - **Rumors tell the folder's Program Advances only (issue #56).** BN6's
   table also holds the BattleChip Gate's recipes, made with the Japan-only
   reader of physical chips, and a navi whispered one: Cannon, Cannon and
