@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **The Endless Net BBS.** A new mail in the PET collects the netizens'
+  threads about the net: tips, sightings and the odd myth, with more
+  posts the deeper you've been.
 - **Schoolyard talk in town.** The townsfolk now trade the old rumors: a
   Giga chip under Central Town's bus (the bus stop knows better), the
   Academy's hunt for Program Advances, Higsby's back room, Mr. Famous's

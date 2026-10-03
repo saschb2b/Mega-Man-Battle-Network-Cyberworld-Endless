@@ -209,7 +209,7 @@ static void item_set(int id, int count) {
 /* a guardian's mail: its id is the navi's (BN6's own mails 1-18 are the
  * story's, which a run never delivers); then the lab's two */
 static bool mail_of(int navi) { return navi >= 1 && navi <= 18 && navi != 17 && guardian_tip(navi); }
-enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21 };
+enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22 };
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,
  * a page's end waiting and clearing (E7 00 F2) as BN6's mails do, '\f'
@@ -345,6 +345,60 @@ static void codes_text(char *s, int size) {
 	#undef ADD
 }
 
+/* The Endless Net BBS (docs/META.md, Rumors): netizens' threads, a post
+ * a page or two, each with its poster's face (the townsfolk's for the
+ * kids: a person's face is its sprite less 0x20, town.c), more as the
+ * profile goes deeper; each true, or a joke that says so. */
+typedef struct { int face; const char *who, *what; } Post;
+
+static int bbs_posts(Post *out) {
+	int n = 0;
+	#define POST(f, w, t) (out[n++] = (Post){ (f), (w), (t) })
+	POST(0x14, "DiveKid", "Jacked in at the statue again. The paths were all different. AGAIN!");
+	POST(FACE_NAVI, "NetSurfer", "Every dive, kid. And it only goes down.");
+	POST(0x0F, "GigaHunter", "The kids say there's a Giga chip under the bus in Central Town!");
+	POST(FACE_HEEL, "BusStopper", "I checked. Gum wrapper.");
+	POST(0x0F, "GigaHunter", "...They said it only shows up at midnight.");
+	POST(FACE_TECH, "PAfan", "Sword, WideSwrd, LongSwrd. One code, that order. Trust me.");
+	POST(FACE_PROG, "Skeptic", "No way... LifeSrd! It's real!");
+	POST(0x0B, "FamousFan", "Mr. Famous says he finished the Endless Net blindfolded!");
+	POST(FACE_NAVI, "Realist", "It's endless. Nobody finishes it.");
+	if (profile.best_depth >= 3) POST(FACE_HEEL, "GuardianWatch", "The guardians down there fight like the real ones. Learn their moves!");
+	if (profile.best_depth >= 5) {
+		POST(0x0E, "Wanderer", "I swear I walked on nothing past a walkway. Some floor can't be seen!");
+		POST(0x16, "SeasideKid", "Look for a lonely pad out in the void.");
+	}
+	if (profile.spins) POST(FACE_TECH, "SpinCollector", "Found a Spin in a blue Mystery Data. Now my programs turn!");
+	if (profile.duel_won) POST(0x19, "ChaudFan", "Beat ProtoMan's time, and Chaud shows you TagChips. Worth it!");
+	if (profile.best_depth >= 10 || profile.nest_clears) POST(FACE_NAVI, "DeepDiver", "I reached the Nest. Something down there copies everything.");
+	#undef POST
+	return n;
+}
+
+/* The BBS's mail: each post in its poster's face, the box cleared between
+ * them (as a guardian's mail turns to MegaMan's) */
+static int bbs_body(uint8_t *out, int max) {
+	static Post post[24];
+	static const uint8_t end[] = { 0xE7, 0x00, 0xEE, 0xFF, 0x00, 0x00 };
+	int n = bbs_posts(post), k = 0;
+	char s[200];
+	for (int i = 0; i < n; ++i) {
+		const uint8_t open[] = { 0xFC, 0x06, 0xF5, 0x00, (uint8_t)post[i].face, 0xF5, 0x02, 0x01, 0xF5, 0x03, 0x00, 0xE8, 0x10 };
+		const uint8_t turn[] = { 0xE7, 0x00, 0xF2, 0xF5, 0x00, (uint8_t)post[i].face };
+		const uint8_t *head = i ? turn : open;
+		int hn = i ? (int)sizeof turn : (int)sizeof open;
+		if (k + hn + (int)sizeof end + 8 > max) return 0;
+		memcpy(out + k, head, (size_t)hn);
+		k += hn;
+		snprintf(s, sizeof s, "%s:\n%s", post[i].who, post[i].what);
+		int w = mail_pages(s, out + k, max - k - (int)sizeof end);
+		if (w < 0) return 0;
+		k += w;
+	}
+	memcpy(out + k, end, sizeof end);
+	return k + (int)sizeof end;
+}
+
 /* A guardian's mail: Dad's face and words, then MegaMan's, the warning as
  * he logged it (the briefing's: the tip's boxes, "|@M " apart), in BN6's
  * own mail form (a face set up with FC 06 and F5 02/03, the box opened
@@ -382,20 +436,20 @@ static void install_mails(void) {
 	uint8_t *senders = unpack(BN6_MAIL_TEXT, &slen), *bodies = unpack(BN6_MAIL_BODIES, &blen);
 	if (!senders || !bodies) { free(senders); free(bodies); return; }
 	int ns = u16at(senders, 0) / 2, nb = u16at(bodies, 0) / 2;
-	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[MAIL_CODES + 1][16], about[MAIL_CODES + 1][24], body[MAIL_CODES + 1][1400];
+	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[MAIL_BBS + 1][16], about[MAIL_BBS + 1][24], body[MAIL_BBS + 1][2000];
 	Script srep[512] = { 0 }, brep[256] = { 0 };
-	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_CODES + 1) || nb < MAIL_CODES + 1) { free(senders); free(bodies); return; }
+	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_BBS + 1) || nb < MAIL_BBS + 1) { free(senders); free(bodies); return; }
 	static const uint8_t tail[] = { 0xE7, 0x00, 0xE6 };
-	for (int m = 1; m <= MAIL_CODES; ++m) {
+	for (int m = 1; m <= MAIL_BBS; ++m) {
 		if (m >= MAIL_REPORT) {
-			static char text[1400];
-			static const char *const subjects[] = { "Dive report", "Records", "Compression" };
+			static char text[2000];
+			static const char *const subjects[] = { "Dive report", "Records", "Compression", "Endless Net" };
 			if (m == MAIL_REPORT) report_text(text, sizeof text);
 			else if (m == MAIL_RECORDS) records_text(text, sizeof text);
 			else codes_text(text, sizeof text);
-			srep[2 * m] = (Script){ from[m], words("Dad", tail, 3, from[m], sizeof from[m]) };
+			srep[2 * m] = (Script){ from[m], words(m == MAIL_BBS ? "NetBBS" : "Dad", tail, 3, from[m], sizeof from[m]) };
 			srep[2 * m + 1] = (Script){ about[m], words(subjects[m - MAIL_REPORT], tail, 3, about[m], sizeof about[m]) };
-			brep[m] = (Script){ body[m], dad_mail(text, body[m], sizeof body[m]) };
+			brep[m] = (Script){ body[m], m == MAIL_BBS ? bbs_body(body[m], sizeof body[m]) : dad_mail(text, body[m], sizeof body[m]) };
 			uint8_t row[4] = { 0x04, emu_read8(BN6_MAIL_TABLE + 4u * (uint32_t)m + 1), 0x08, (uint8_t)(0x20 + m) };
 			emu_write(BN6_MAIL_TABLE + 4u * (uint32_t)m, row, sizeof row);
 			continue;
@@ -485,8 +539,14 @@ int pet_text_refresh(void) {
 	int entered = profile_codes_entered();
 	bool codes_news = entered > profile.codes_mailed;
 	if (codes_news) { profile.codes_mailed = (uint8_t)entered; profile_save(); }
-	for (int m = entered ? MAIL_CODES : MAIL_RECORDS; m >= MAIL_REPORT; --m) {
-		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : codes_news;
+	/* (and the BBS's, last, NEW with each new post) */
+	static Post post[24];
+	int posts = bbs_posts(post);
+	bool bbs_news = posts > profile.bbs_seen;
+	if (bbs_news) { profile.bbs_seen = (uint8_t)posts; profile_save(); }
+	for (int m = MAIL_BBS; m >= MAIL_REPORT; --m) {
+		if (m == MAIL_CODES && !entered) continue;
+		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : m == MAIL_CODES ? codes_news : bbs_news;
 		mail_deliver(m);
 		if (news) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
 		mail_first(m);

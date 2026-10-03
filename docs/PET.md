@@ -41,6 +41,8 @@ again on each layer, read and never marked NEW:
   each code entered, a line each, the program as the NaviCust lists it and
   its ten buttons five and five ("Custom1  LBBRB AALRR"), after how to
   enter one; NEW with each new code (docs/META.md).
+- **Endless Net** (from NetBBS): netizens' threads about the net, more as
+  the profile goes deeper, NEW with each new post (docs/META.md, Rumors).
 
 They were once a screen of the engine's own behind Comm (the SciLab
 link), drawn over the PET: it held the game still, its music with it, and

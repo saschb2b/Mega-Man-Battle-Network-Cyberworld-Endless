@@ -553,6 +553,16 @@ that).
   be seen (from the second act), that every layer before a guardian hides a
   RegUp (until the first is found).
 - A secret one layer in three while one is left, a recipe else.
+- **The Endless Net BBS**, a mail in the PET (docs/PET.md): netizens'
+  threads, more as the profile goes deeper (a guardian met, the second
+  act, a Spin, a duel won, the Nest), NEW with each new post. Each is
+  true, or a joke that says so: the Giga chip under Central Town's bus
+  ("I checked. Gum wrapper."), Mr. Famous finishing the Endless Net
+  blindfolded ("It's endless. Nobody finishes it.").
+- **The towns** trade the same talk (`src/world/town.c`): the bus's Giga
+  chip, the Academy's hunt for Program Advances, Higsby's back room, Mr.
+  Famous's boasts, Dr. Wily blamed for everything, the NaviCust's secret
+  buttons.
 
 ## What MegaMan knows (29 September 2026)
 

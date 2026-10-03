@@ -71,6 +71,7 @@ typedef struct {
 	/* MegaMan has said what Reg memory is for (the first RegUp found) and
 	 * what the TagChip system Chaud's first clearance brings does (issue #51) */
 	uint8_t reg_taught, tag_taught;
+	uint8_t bbs_seen;         /* the Endless Net BBS's posts when its mail was last marked NEW (rumors) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16 };
