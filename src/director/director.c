@@ -764,6 +764,157 @@ static int goal_words(char *buf, int k, int size, bool to_heal, bool told) {
 	return k;
 }
 
+static bool md_on_map(int k);
+static bool md_known(int k, bool taken);
+
+/* Where a set piece keeps Mystery Data k, as L says it ("behind the
+ * security cube"), or NULL: the counters count data MegaMan senses there,
+ * and a playtester's read 0/1 with nothing in sight and no word of where
+ * (session 63). */
+static const char *prize_where(int k) {
+	const NetObj *o = &layer.obj[D.objs.md_obj[k]];
+	int x = (int)o->x, y = (int)o->y;
+	if (!o->prize) return NULL;
+	for (int i = 0; i < layer.nblocks; ++i) {
+		const NetBlock *b = &layer.block[i];
+		if (b->rx != x || b->ry != y) continue;
+		return b->kind < BLOCK_KINDS ? "behind the Link Navi's obstacle" : b->kind == BLOCK_SKULL ? "behind the skull door"
+			: b->kind == BLOCK_NUMBER ? "behind the number door" : "behind the security cube";
+	}
+	if (layer.nteleports && layer.teleport_island && abs(x - layer.teleport_x[0]) <= 3 && abs(y - layer.teleport_y[0]) <= 3)
+		return "past the teleport pads";
+	for (int g = 0; g < layer.ngaps; ++g)
+		if (layer.gap[g].island) return "across the gap by the bone panels";
+	return NULL;
+}
+
+/* The data MegaMan senses but has not seen, said where it lies (two at
+ * most), appended to `buf` at `k`; the new length. */
+static int prize_note(char *buf, int k, int size) {
+	const char *where[2];
+	int n = 0;
+	for (int i = 0; i < D.objs.nmd && n < 2; ++i) {
+		const char *w = flag_get(MAPSLOT_MD_FLAG + i) || md_on_map(i) || !md_known(i, false) ? NULL : prize_where(i);
+		if (w && !(n && !strcmp(w, where[0]))) where[n++] = w;
+	}
+	if (n == 2) return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s, and %s!|", where[0], where[1]);
+	if (n == 1) return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s!|", where[0]);
+	return k;
+}
+
+/* What stands on the layer, for L's words. */
+typedef struct {
+	bool shop, heal, programs, trader, bugtrader, challenge, warp, gate, navi_gate, vault, duel, official;
+	bool any;   /* anything L's second words would name */
+} Here;
+
+static void here_scan(Here *h) {
+	memset(h, 0, sizeof *h);
+	for (int i = 0; i < layer.nobj; ++i) {
+		int t = layer.obj[i].type;
+		h->duel |= t == OBJ_DUEL && !layer_objs_duel_later;
+		h->official |= t == OBJ_OFFICIAL;
+		h->shop |= t == OBJ_SHOP;
+		h->heal |= t == OBJ_HEAL;
+		h->programs |= t == OBJ_PROGRAMS;
+		h->trader |= t == OBJ_TRADER;
+		h->bugtrader |= t == OBJ_BUGTRADER;
+		h->challenge |= t == OBJ_CHALLENGE;
+		h->warp |= t == OBJ_UNDERNET;
+		h->gate |= t == OBJ_SECRET_GATE;
+		h->navi_gate |= t == OBJ_NAVI_GATE;
+		h->vault |= t == OBJ_VAULT;
+	}
+	h->any = h->duel || h->official || h->shop || h->heal || h->programs || h->trader || h->bugtrader || h->challenge || h->warp ||
+		h->gate || h->navi_gate || h->vault || pieces_sensed() || run.fragments != D.fragments_told || rival_where() ||
+		run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0;
+}
+
+/* L's first words on a layer: where they are and what guards it,
+ * appended to `buf` at `k`; the new length. */
+static int first_words(char *buf, int k, int size) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	const char *area = guardian_area_in_text(run.biome, run.side_kind);
+	ADD("@M Layer %d, Lan: %s.", run.depth, area);
+	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
+	/* (not after the act's arrival words, which spoke of him; a
+	 * CONTINUE does not say them again, and there he is spoken of) */
+	else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
+		int navi = run.boss_order[run.biome];
+		if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
+		else if (guardian_heard()) ADD(" %s guards the end of it, word is.|", guardian(navi)->name);
+		else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|");
+	}
+	else ADD("|");
+	#undef ADD
+	return k;
+}
+
+/* What L names among what is here: the services, then the map's violet
+ * marks once explained (`fresh` those not yet), then an official gate;
+ * their number. */
+static int here_names(const Here *h, const char **here, int *fresh) {
+	int n = 0;
+	if (h->shop) here[n++] = "a Net Dealer";
+	if (h->heal) here[n++] = "a Recovery Mr. Prog";
+	if (h->programs) here[n++] = "a NaviCust program shop";
+	if (h->trader) here[n++] = "a Chip Trader";
+	if (h->bugtrader) here[n++] = "a BugFrag Trader";
+	int marks = (h->challenge ? MARK_SERVER : 0) | (h->warp ? MARK_WARP : 0) | (h->gate ? MARK_GATE : 0) | (h->navi_gate ? MARK_NAVI_GATE : 0) |
+		(h->vault ? MARK_VAULT : 0);
+	int known = marks & profile.marks_taught;
+	*fresh = marks & ~profile.marks_taught;
+	if (known & MARK_SERVER) here[n++] = "a strong virus signal";
+	if (known & MARK_WARP) here[n++] = "a dark warp";
+	if (known & MARK_GATE) here[n++] = "the golden gate";
+	static char sealed[48];
+	if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
+	if (known & MARK_VAULT) here[n++] = "a collector's vault";
+	if (h->official && n < 8) here[n++] = "an official gate";
+	return n;
+}
+
+/* L's second words on a layer: the area's battlefields and viruses, the
+ * ScrtData carried, then what is here in one breath (a playtester paged
+ * eight boxes on arriving in act 3): the services (the map marks a trader
+ * as a shop, and L had said nothing of one), the map's violet marks, in
+ * full until explained (a playtester stood beside one and never found out
+ * what it was), named after that, the set pieces, the rival, a program off
+ * the board and the map's tip; appended to `buf` at `k`, the new length. */
+static int more_words(char *buf, int k, int size, const Here *h) {
+	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	/* (the area's battlefields, on its first layer: a playtester froze
+	 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
+	if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
+		ADD("@M The battlefields here are icy. An Aqua hit on ice freezes us, so keep off it when the viruses shoot water!|");
+	/* (and a homepage's conveyors and ice: a conveyor carried a
+	 * playtester off the row he stepped into, every time, and the ice
+	 * froze him twice in the next act) */
+	if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
+		ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
+	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) k = family_words(buf, k, size);
+	k = scrt_note(buf, k, size);
+	const char *here[16];
+	int fresh, n = here_names(h, here, &fresh);
+	int pieces = pieces_sensed();
+	n = piece_names(pieces & profile.pieces_taught, here, n, 16);
+	k = sense_words(buf, k, size, here, n, h->duel);
+	k = mark_lessons(buf, k, size, fresh);
+	k = piece_lessons(buf, k, size, pieces & ~profile.pieces_taught);
+	k = prize_note(buf, k, size);
+	/* (where the rival waits, and his mark: the map showed him as the
+	 * official gate's violet, and a playtester's session ran out at
+	 * the gate, alone, looking for him) */
+	const char *rw = rival_where();
+	if (rw) ADD("@M ProtoMan's %s: the pink mark on the map.|", rw);
+	k = off_board_note(buf, k, size);
+	/* (the map's tip on the run's first layers, until the map has been
+	 * held: a playtester who used it heard it again every run) */
+	if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
+	#undef ADD
+	return k;
+}
+
 static const char *status_words(void) {
 	static char buf[1400];
 	int k = 0;
@@ -777,99 +928,30 @@ static const char *status_words(void) {
 		D.port_told = true;
 		return buf;
 	}
-	/* where they are and what guards it the first time on a layer, then
-	 * only the way on */
+	/* where they are and what guards it, then the heal while hurt and the
+	 * way on; what else the layer holds at the next L (a playtester paged
+	 * twelve and thirteen boxes on arriving, and asked for the guardian,
+	 * the heal and the way first, session 63); then only the way on */
 	D.layer_told |= flag_get(LAYER_TOLD_FLAG);
-	if (!D.layer_told) {
-		const char *area = guardian_area_in_text(run.biome, run.side_kind);
-		ADD("@M Layer %d, Lan: %s.", run.depth, area);
-		if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, (int)sizeof buf);
-		/* (not after the act's arrival words, which spoke of him; a
-		 * CONTINUE does not say them again, and there he is spoken of) */
-		else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
-			int navi = run.boss_order[run.biome];
-			if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
-			else if (guardian_heard()) ADD(" %s guards the end of it, word is.|", guardian(navi)->name);
-			else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|");
-		}
-		else ADD("|");
-		/* (the area's battlefields, on its first layer: a playtester froze
-		 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
-		if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-			ADD("@M The battlefields here are icy. An Aqua hit on ice freezes us, so keep off it when the viruses shoot water!|");
-		/* (and a homepage's conveyors and ice: a conveyor carried a
-		 * playtester off the row he stepped into, every time, and the ice
-		 * froze him twice in the next act) */
-		if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-			ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
-		if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) k = family_words(buf, k, (int)sizeof buf);
-		k = scrt_note(buf, k, (int)sizeof buf);
+	bool told = D.layer_told, more = told && !D.more_told;
+	if (!told) k = first_words(buf, k, (int)sizeof buf);
+	Here h;
+	here_scan(&h);
+	if (more) {
+		k = more_words(buf, k, (int)sizeof buf, &h);
+		D.more_told = true;
 	}
-	/* the services here: all of them the first time, then only the heal
-	 * while he is hurt (it heals every time; the map's key names the rest,
-	 * and a later L is a box or two, not the briefing again) */
-	bool shop = false, heal = false, programs = false, trader = false, bugtrader = false, told = D.layer_told;
-	bool challenge = false, warp = false, gate = false, navi_gate = false, vault = false, duel = false, official = false;
-	for (int i = 0; i < layer.nobj; ++i) {
-		duel |= layer.obj[i].type == OBJ_DUEL && !layer_objs_duel_later;
-		official |= layer.obj[i].type == OBJ_OFFICIAL;
-		shop |= layer.obj[i].type == OBJ_SHOP;
-		heal |= layer.obj[i].type == OBJ_HEAL;
-		programs |= layer.obj[i].type == OBJ_PROGRAMS;
-		trader |= layer.obj[i].type == OBJ_TRADER;
-		bugtrader |= layer.obj[i].type == OBJ_BUGTRADER;
-		challenge |= layer.obj[i].type == OBJ_CHALLENGE;
-		warp |= layer.obj[i].type == OBJ_UNDERNET;
-		gate |= layer.obj[i].type == OBJ_SECRET_GATE;
-		navi_gate |= layer.obj[i].type == OBJ_NAVI_GATE;
-		vault |= layer.obj[i].type == OBJ_VAULT;
-	}
-	bool hurt = hurt_now();
 	if (!told) {
-		/* what is here, in one breath (a playtester paged eight boxes on
-		 * arriving in act 3): the services (the map marks a trader as a
-		 * shop, and L had said nothing of one), then the map's violet mark,
-		 * in full until it has been explained (a playtester stood beside one
-		 * and never found out what it was), named after that */
-		const char *here[16];
-		int n = 0;
-		if (shop) here[n++] = "a Net Dealer";
-		if (heal) here[n++] = "a Recovery Mr. Prog";
-		if (programs) here[n++] = "a NaviCust program shop";
-		if (trader) here[n++] = "a Chip Trader";
-		if (bugtrader) here[n++] = "a BugFrag Trader";
-		int marks = (challenge ? MARK_SERVER : 0) | (warp ? MARK_WARP : 0) | (gate ? MARK_GATE : 0) | (navi_gate ? MARK_NAVI_GATE : 0) |
-			(vault ? MARK_VAULT : 0);
-		int known = marks & profile.marks_taught, fresh = marks & ~profile.marks_taught;
-		if (known & MARK_SERVER) here[n++] = "a strong virus signal";
-		if (known & MARK_WARP) here[n++] = "a dark warp";
-		if (known & MARK_GATE) here[n++] = "the golden gate";
-		static char sealed[48];
-		if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
-		if (known & MARK_VAULT) here[n++] = "a collector's vault";
-		if (official && n < 8) here[n++] = "an official gate";
-		int pieces = pieces_sensed();
-		n = piece_names(pieces & profile.pieces_taught, here, n, 16);
-		k = sense_words(buf, k, (int)sizeof buf, here, n, duel);
-		k = mark_lessons(buf, k, (int)sizeof buf, fresh);
-		k = piece_lessons(buf, k, (int)sizeof buf, pieces & ~profile.pieces_taught);
-		/* (where the rival waits, and his mark: the map showed him as the
-		 * official gate's violet, and a playtester's session ran out at
-		 * the gate, alone, looking for him) */
-		const char *rw = rival_where();
-		if (rw) ADD("@M ProtoMan's %s: the pink mark on the map.|", rw);
-		k = off_board_note(buf, k, (int)sizeof buf);
-		/* (the map's tip on the run's first layers, until the map has been
-		 * held: a playtester who used it heard it again every run) */
-		if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
 	}
-	if (hurt && (heal || shop)) k = heal_note(buf, k, (int)sizeof buf, heal);
+	bool hurt = hurt_now();
+	if (hurt && (h.heal || h.shop)) k = heal_note(buf, k, (int)sizeof buf, h.heal);
 	/* (and after that, where ProtoMan waits, while he does) */
-	const char *rival = told ? rival_where() : NULL;
+	const char *rival = told && !more ? rival_where() : NULL;
 	if (rival) ADD("@M ProtoMan's waiting %s.|", rival);
-	k = goal_words(buf, k, (int)sizeof buf, hurt && heal, told);
+	k = goal_words(buf, k, (int)sizeof buf, hurt && h.heal, told);
+	if (!told && h.any) ADD("|@M There's more on this layer, Lan. Press L again to hear it!");
 	#undef ADD
 	goal_way();   /* (the arrow's way, which the words that follow start) */
 	return buf;
@@ -1471,7 +1553,7 @@ static bool build_layer(void) {
 	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
-	D.layer_told = false;
+	D.layer_told = D.more_told = false;
 	D.fragment_due = false;
 	D.spin_due = false;
 	D.duel = false;
