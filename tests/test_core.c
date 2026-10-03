@@ -1222,9 +1222,10 @@ static void test_talk(void) {
 /* Following the arrow gets MegaMan there: from the arrival and from each
  * room, walking the way it shows at a run's pace (a look every 5 frames, a
  * new way taken when two looks agree, as the director's arrow_update),
- * sliding along the floor's edges and turned into a walkway's mouth (the
- * director's unwedge), he reaches the guardian or the exit pad. (It led
- * past a turn, into a platform's corner, round in circles.) */
+ * sliding along the floor's edges as BN6 slides him, and stopped, turned
+ * towards the floor ahead, as a player would, he reaches the guardian or
+ * the exit pad. (It led past a turn, into a platform's corner, round in
+ * circles.) */
 static bool walk_floor(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
 
 /* whether a solid object (a Mystery Data, a navi) stands within MegaMan's
@@ -1239,17 +1240,32 @@ static bool walk_blocked(double x, double y, int gx, int gy) {
 	return false;
 }
 
-/* one frame's step from (x, y) by (dx, dy), or along one axis of it, short
- * of the objects but the goal (gx, gy) */
+/* Whether MegaMan stands on the floor at (x, y) as BN6 keeps him there: a
+ * panel's floor reaches 12.5 of its 32 units past its middle towards the
+ * void (the walls' cells, coords.c and netmap_floor_cell: a run into a
+ * corner stops him 12 past it, and a walkway takes him within 12 of its
+ * line and stops him 13 off it), on into a floor panel beside it, and
+ * into a corner where the three panels about it are floor. (Taken as a
+ * panel's whole width, the floor never stopped him: following the arrow,
+ * he never once failed to move, where three playtesters stopped about 35
+ * times a session at band mouths and junctions, session 63.) */
+static bool walk_on(double x, double y) {
+	const double m = 12.5 / 32;
+	int px = (int)lround(x), py = (int)lround(y);
+	double fx = x - px, fy = y - py;
+	int sx = fx > m ? 1 : fx < -m ? -1 : 0, sy = fy > m ? 1 : fy < -m ? -1 : 0;
+	return walk_floor(px, py) && walk_floor(px + sx, py) && walk_floor(px, py + sy) && walk_floor(px + sx, py + sy);
+}
+
+/* one frame's step from (x, y) by (dx, dy), or along one axis of it (BN6's
+ * walls push him out square: a way across the grid slides along an edge),
+ * short of the objects but the goal (gx, gy) */
 static bool walk_step(double *x, double *y, double dx, double dy, int gx, int gy) {
-	int cx = (int)lround(*x), cy = (int)lround(*y);
 	const double tries[3][2] = { { dx, dy }, { dx, 0 }, { 0, dy } };
 	for (int i = 0; i < 3; ++i) {
 		if (fabs(tries[i][0]) + fabs(tries[i][1]) < 1e-9) continue;
 		double nx = *x + tries[i][0], ny = *y + tries[i][1];
-		int ncx = (int)lround(nx), ncy = (int)lround(ny);
-		if (!walk_floor(ncx, ncy) || walk_blocked(nx, ny, gx, gy)) continue;
-		if (ncx != cx && ncy != cy && !walk_floor(ncx, cy) && !walk_floor(cx, ncy)) continue;
+		if (!walk_on(nx, ny) || walk_blocked(nx, ny, gx, gy)) continue;
 		*x = nx;
 		*y = ny;
 		return true;
@@ -1257,8 +1273,61 @@ static bool walk_step(double *x, double *y, double dx, double dy, int gx, int gy
 	return false;
 }
 
+/* The floor's width at panel (x, y) across a step (dx, dy) along one axis:
+ * the panels in a row through it, crosswise. */
+static int floor_across(int x, int y, int dx, int dy) {
+	int sx = dy ? 1 : 0, sy = dx ? 1 : 0, w = 1;
+	for (int s = -1; s <= 1; s += 2)
+		for (int k = 1; walk_floor(x + s * sx * k, y + s * sy * k); ++k) ++w;
+	return w;
+}
+
+/* a frame's step (*dx, *dy) on the grid holding the pad's way `way` (RIGHT
+ * +x -y, DOWN +x +y) */
+static void way_step(int way, double speed, double *dx, double *dy) {
+	double a = way * 3.14159265358979 / 4, right = cos(a), down = sin(a);
+	double x = (right + down) / 2, y = (down - right) / 2, n = sqrt(x * x + y * y);
+	*dx = fabs(x) < 1e-9 ? 0 : x / n * speed;
+	*dy = fabs(y) < 1e-9 ? 0 : y / n * speed;
+}
+
+/* frames to get beside (tx, ty) from (x, y) as a playtester holds the
+ * arrow's way: a look where he stands (the director turns the arrow at
+ * once as he stops), then that way held for a batch, `hold` frames on a
+ * straight run, half as long after each look that turns it, twice as long
+ * (up to `hold`) after each that keeps it; -1 never, and *stuck set where
+ * a look's way did not move him at all: he would stand there for good.
+ * *looks: the looks, *still: frames he held the way and did not move. */
+static int hold_arrow(double x, double y, int tx, int ty, int hold, int *looks, int *still, bool *stuck) {
+	int len, last = -1, h = hold;
+	*stuck = false;
+	if (route_way(x, y, tx, ty, &len) < 0) return -1;
+	for (int f = 0, budget = 400 + 96 * len; f < budget;) {
+		int w = route_way(x, y, tx, ty, &len), moved = 0;
+		double dx, dy;
+		h = last < 0 ? hold : w == last ? (h * 2 < hold ? h * 2 : hold) : (h / 2 > 4 ? h / 2 : 4);
+		last = w;
+		way_step(w, 2.0 / 32, &dx, &dy);
+		++*looks;
+		for (int k = 0; k < h; ++k, ++f) {
+			if (abs((int)lround(x) - tx) + abs((int)lround(y) - ty) <= 1) return f;
+			if (walk_step(&x, &y, dx, dy, tx, ty)) ++moved;
+			else ++*still;
+		}
+		if (!moved) { *stuck = true; return -1; }
+	}
+	return -1;
+}
+
 /* frames to get beside (tx, ty) from (x, y) following the arrow, -1 never */
 static int arrow_turns, arrow_frames, arrow_swings;
+/* (and how it walks: frames MegaMan, holding the way it shows, does not
+ * move, and the stops they make, each a new direction to find; of its
+ * looks, those where he stands on a walkway or band, floor two panels wide
+ * or less across the walk, and of those the ones that show a way across
+ * the grid, one of the screen's straight four, against the screen's
+ * diagonals the walkways run on) */
+static int arrow_stalls, arrow_stops, arrow_band_looks, arrow_band_diagonals;
 static int follow_arrow(double x, double y, int tx, int ty) {
 	const double speed = 2.0 / 32;   /* panels a frame */
 	int len, shown = route_way(x, y, tx, ty, &len), pending = shown, stuck = 0;
@@ -1276,19 +1345,30 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 				before = shown; turned_at = f; shown = w;
 			}
 			pending = w;
+			int fx = route_walk_len ? route_walk[route_walk_len - 1] % MAP_W - cx : 0, fy = route_walk_len ? route_walk[route_walk_len - 1] / MAP_W - cy : 0;
+			if (w >= 0 && abs(fx) + abs(fy) == 1 && floor_across(cx, cy, fx, fy) <= 2) {
+				++arrow_band_looks;
+				arrow_band_diagonals += shown % 2 == 0;
+			}
 		}
-		/* the pad's way on the grid (RIGHT +x -y, DOWN +x +y) */
-		double a = shown * 3.14159265358979 / 4, right = cos(a), down = sin(a);
-		double dx = (right + down) / 2, dy = (down - right) / 2, n = sqrt(dx * dx + dy * dy);
-		dx = fabs(dx) < 1e-9 ? 0 : dx / n * speed;
-		dy = fabs(dy) < 1e-9 ? 0 : dy / n * speed;
+		double dx, dy;
+		way_step(shown, speed, &dx, &dy);
 		if (walk_step(&x, &y, dx, dy, tx, ty)) { stuck = 0; continue; }
-		/* along one axis into an edge: towards the side the floor goes on */
+		++arrow_stalls;
+		arrow_stops += !stuck;
+		/* along one axis into an edge: off the lane of the floor ahead,
+		 * towards its line; at the floor's end, towards the side it goes
+		 * on */
 		if (++stuck >= 3 && (!dx || !dy)) {
 			int ax = dx > 0 ? 1 : dx < 0 ? -1 : 0, ay = dy > 0 ? 1 : dy < 0 ? -1 : 0;
+			if (walk_floor(cx + ax, cy + ay)) {
+				double s = (ax ? y - cy : x - cx) > 0 ? -speed : speed;
+				walk_step(&x, &y, ay ? s : 0, ax ? s : 0, tx, ty);
+				continue;
+			}
 			for (int s = -1; s <= 1; s += 2) {
 				int bx = ay ? s : 0, by = ax ? s : 0;
-				if (!walk_floor(cx + ax, cy + ay) && walk_floor(cx + bx, cy + by) && walk_floor(cx + ax + bx, cy + ay + by)) {
+				if (walk_floor(cx + bx, cy + by) && walk_floor(cx + ax + bx, cy + ay + by)) {
 					walk_step(&x, &y, bx * speed, by * speed, tx, ty);
 					break;
 				}
@@ -1296,6 +1376,36 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 		}
 	}
 	return -1;
+}
+
+/* Where the arrow leads on the layer: the guardian on a boss layer, else
+ * the exit (or the way back); false for none. */
+static bool arrow_goal(int *tx, int *ty) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		const NetObj *o = &layer.obj[i];
+		bool goal = layer.boss_layer ? o->type == OBJ_BOSS : o->type == OBJ_EXIT || o->type == OBJ_RETURN;
+		if (goal) { *tx = (int)o->x; *ty = (int)o->y; return true; }
+	}
+	return false;
+}
+
+/* Where MegaMan sets off for the goal (tx, ty) from room r (-1 the
+ * arrival): its middle, or beside what stands there, where he would (a
+ * Mystery Data on a pad's); false for a room reached only across Rush or a
+ * teleport, or one beside the goal. */
+static bool arrow_start(int r, int tx, int ty, int *x, int *y) {
+	if (r >= 0 && island_room(r)) return false;
+	int sx = r < 0 ? (int)layer.obj[0].x : layer.rooms[r].ax, sy = r < 0 ? (int)layer.obj[0].y : layer.rooms[r].ay;
+	for (int i = 1; i < layer.nobj; ++i) {
+		if (!layer.obj[i].solid || (int)layer.obj[i].x != sx || (int)layer.obj[i].y != sy) continue;
+		static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k)
+			if (layer.cell[sy + d4[k][1]][sx + d4[k][0]] == C_PATH) { sx += d4[k][0]; sy += d4[k][1]; break; }
+		break;
+	}
+	*x = sx;
+	*y = sy;
+	return abs(sx - tx) + abs(sy - ty) > 1;
 }
 
 static void test_arrow(void) {
@@ -1307,26 +1417,10 @@ static void test_arrow(void) {
 		int depth = 1 + (int)(seed % 25);
 		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
 		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, &kit);
-		int tx = -1, ty = -1;
-		for (int i = 0; i < layer.nobj; ++i) {
-			const NetObj *o = &layer.obj[i];
-			bool goal = layer.boss_layer ? o->type == OBJ_BOSS : o->type == OBJ_EXIT || o->type == OBJ_RETURN;
-			if (goal && tx < 0) { tx = (int)o->x; ty = (int)o->y; }
-		}
-		if (tx < 0) continue;
+		int tx, ty, sx, sy;
+		if (!arrow_goal(&tx, &ty)) continue;
 		for (int r = -1; r < layer.nrooms; ++r) {
-			if (r >= 0 && island_room(r)) continue;   /* (reached only across Rush) */
-			int sx = r < 0 ? (int)layer.obj[0].x : layer.rooms[r].ax, sy = r < 0 ? (int)layer.obj[0].y : layer.rooms[r].ay;
-			/* (from beside what stands on a room's middle, where MegaMan
-			 * would: a Mystery Data on a pad's) */
-			for (int i = 1; i < layer.nobj; ++i) {
-				if (!layer.obj[i].solid || (int)layer.obj[i].x != sx || (int)layer.obj[i].y != sy) continue;
-				static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-				for (int k = 0; k < 4; ++k)
-					if (layer.cell[sy + d4[k][1]][sx + d4[k][0]] == C_PATH) { sx += d4[k][0]; sy += d4[k][1]; break; }
-				break;
-			}
-			if (abs(sx - tx) + abs(sy - ty) <= 1) continue;
+			if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
 			++walks;
 			if (follow_arrow(sx, sy, tx, ty) >= 0) continue;
 			if (++lost <= 5) printf("  seed %u (depth %d): lost from %d,%d on the way to %d,%d\n", seed, depth, sx, sy, tx, ty);
@@ -1337,6 +1431,55 @@ static void test_arrow(void) {
 	 * swing; the director holds a way a little past its edge, 0.8 eighths,
 	 * which took a quarter off them) */
 	printf("  arrow: %d turns over %d frames of walking, %d swung back within a second\n", arrow_turns, arrow_frames, arrow_swings);
+}
+
+/* Following the arrow in every area, from the arrival and each room to the
+ * exit or the guardian (sixty layers each, as test_walks'): it never loses
+ * MegaMan, never shows a way across the grid on a walkway or band, and
+ * held a playtester's batch at a time, its way moves him wherever he
+ * stands; per area, how it walks him (CW_WAY_STATS). Three playtesters
+ * lost about 35 calls to MegaMan stopping at band mouths and junctions,
+ * Green HP's crossing bands and the Judge Tree's catwalks, where the arrow
+ * pointed straight across the screen on two-wide bands and flipped at
+ * their junctions (session 63). */
+static void test_arrow_areas(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	int all[8] = { 0 };   /* walks, lost, stops, band looks, across the grid, walks held there, their looks, stuck */
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int walks = 0, lost = 0, there = 0, looks = 0, still = 0, stuck = 0;
+		int frames = arrow_frames, stalls = arrow_stalls, stops = arrow_stops, turns = arrow_turns, swings = arrow_swings;
+		int band = arrow_band_looks, diagonals = arrow_band_diagonals;
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+			int tx, ty, sx, sy;
+			if (!arrow_goal(&tx, &ty)) continue;
+			for (int r = -1; r < layer.nrooms; ++r) {
+				if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
+				++walks;
+				lost += follow_arrow(sx, sy, tx, ty) < 0;
+				int n = 0, s = 0;
+				bool stood;
+				if (hold_arrow(sx, sy, tx, ty, 24, &n, &s, &stood) >= 0) { ++there; looks += n; still += s; }
+				if (stood && ++stuck <= 3) printf("  area %d seed %u: held, the arrow's way stood MegaMan still on the way from %d,%d to %d,%d\n", b, seed, sx, sy, tx, ty);
+			}
+		}
+		frames = arrow_frames - frames; stalls = arrow_stalls - stalls; stops = arrow_stops - stops; turns = arrow_turns - turns;
+		swings = arrow_swings - swings; band = arrow_band_looks - band; diagonals = arrow_band_diagonals - diagonals;
+		if (getenv("CW_WAY_STATS"))
+			printf("  arrow area %2d: %3d walks of %3.0f frames, %.2f stops (%d frames still) and %.2f turns a walk (%.2f swung back), %4.1f%% of %5d"
+				" looks on a band across the grid; held, %.1f looks a walk (%.1f%% of held frames still), %d stuck, %d out of time\n",
+				b, walks, (double)frames / walks, (double)stops / walks, stalls, (double)turns / walks, (double)swings / walks, 100.0 * diagonals / band,
+				band, (double)looks / there, 100.0 * still / (24.0 * looks), stuck, walks - there - stuck);
+		int now[8] = { walks, lost, stops, band, diagonals, there, looks, stuck };
+		for (int k = 0; k < 8; ++k) all[k] += now[k];
+	}
+	CHECK(all[1] == 0, "the arrow lost MegaMan on %d of %d walks in every area", all[1], all[0]);
+	CHECK(all[4] == 0, "the arrow pointed across the grid on a walkway or band at %d of %d looks", all[4], all[3]);
+	CHECK(all[7] == 0, "held, the arrow's way stood MegaMan still on %d of %d walks", all[7], all[0]);
+	printf("  arrow in every area: %d walks, %.3f stops a walk, %d of %d looks on a band across the grid; held, %.1f looks a walk, %d of the walks"
+		" not there in time\n", all[0], (double)all[2] / all[0], all[4], all[3], (double)all[6] / all[5], all[0] - all[5] - all[7]);
 }
 
 /* The walk from the arrival to the exit (or the guardian) in every area:
@@ -1841,6 +1984,7 @@ int main(void) {
 	test_layouts_build();
 	test_stairs();
 	test_arrow();
+	test_arrow_areas();
 	test_walks();
 	test_way_links();
 	test_navicust();

@@ -19,6 +19,14 @@
   flashes into BN5's battle, and after the first one MegaMan says what it
   was. Desktop, Android, iOS and PortMaster builds; the 3DS and the
   browser keep BN6's battles.
+- **On walkways and bands the arrow points the way they run.** It pointed
+  straight across the screen on bands two panels wide and flipped at
+  their junctions, and held along a band's line, its way ran MegaMan
+  into the corner where the band narrowed. Off a platform's middle it
+  now shows the walkways' diagonals alone: along the band, a turn once
+  MegaMan can take it, and first across onto the line of a narrower way
+  ahead where he stands off it. Inside a platform it still points as the
+  crow flies, and from a Mystery Data's corner it leads out first.
 - **The program pick says whether each program fits.** After a guardian,
   each program of the NaviCust's draft now says "fits now" or "fits if
   we move one" beside its colour, from your board as it stands; MegaMan
