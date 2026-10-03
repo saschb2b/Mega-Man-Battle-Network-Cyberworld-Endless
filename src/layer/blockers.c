@@ -23,6 +23,7 @@
 #include "net.h"
 #include "netmap.h"
 #include "pacing.h"
+#include "rom.h"
 #include "run.h"
 #include "layer_objs.h"
 #include "scripts.h"
@@ -219,10 +220,26 @@ static bool checks_write(int group, int number, const TextArchive *t, const int 
 	return true;
 }
 
+/* The map's own checks and text archive back, as the ROM has them: an
+ * earlier layer's on this map lie in a half of the layer space that a
+ * later layer overwrites, and the game decompresses the archive as it
+ * enters the map (garbage there ran the decompression over all of EWRAM:
+ * a black screen at the exit pad, session 64). */
+static void checks_restore(int group, int number) {
+	if (group < 0x80) return;
+	uint32_t g = (uint32_t)(group - 0x80) * 4, n = (uint32_t)number * 4;
+	uint32_t tables[2] = { emu_read32(NET_CHECKS + g), emu_read32(emu_read32(NET_ARCHIVES) + g) };
+	for (int i = 0; i < 2; ++i)
+		if (rom_is_ptr(tables[i]) && rom_is_ptr(tables[i] + n + 3))
+			emu_write32(tables[i] + n, get32(R.data + (tables[i] + n - 0x08000000u)));
+}
+
 void blockers_checks(int group, int number, const TextArchive *t, const int scripts[2]) {
-	if (!layer.nblocks) return;
+	if (!layer.nblocks) { checks_restore(group, number); return; }
 	/* (no talk, no obstacle: one that could never open would lock its
 	 * pocket for good) */
-	if (group < 0x80 || !checks_write(group, number, t, scripts))
+	if (group < 0x80 || !checks_write(group, number, t, scripts)) {
+		checks_restore(group, number);
 		for (int k = 0; k < layer.nblocks; ++k) flag_clear(BLOCK_PRESENT_FLAG + k);
+	}
 }

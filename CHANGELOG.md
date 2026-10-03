@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A layer no longer turns black as MegaMan arrives.** A layer with a
+  Link Navi obstacle left its talk on the game map it used; a later layer
+  on the same map without one kept pointing at it after newer layers had
+  written over it, and the game, unpacking it on arrival, wrote over all
+  of its memory: a black screen at the exit pad that only a restart left.
+  Now such a layer gives the map its own talk back.
 - **BN5's areas fight BN5's own battles.** Where Battle Network 5: Team
   Colonel sits beside BN6's ROM and dresses an area (ACDC Area, End Area,
   Nebula Area), that area's random battles are BN5's, in BN5's own engine
