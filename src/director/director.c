@@ -2717,11 +2717,6 @@ static uint32_t talk_walk(uint32_t keys) {
  * off for half a second and more, which read as input lag). */
 #define A_GUARD 12
 
-/* A shop's list opened by its keeper's last box: the A pressed to close
- * that box twice over bought the first item's "Are you sure?" (Kai, three
- * sessions running). */
-static bool shop_first;   /* a keeper's words opened the shop, and no "Are you sure?" has been asked in it */
-
 /* Every chip's copies in the pack, summed (a chip bought adds one to its
  * code's count, the record's first four bytes); -1 where the pack is out of
  * reach. The standard, mega and giga chips only, the ones a shop or a
@@ -2760,11 +2755,7 @@ static uint32_t shop_guard(uint32_t keys) {
 	static int chat_recent, guard, last_mode = -1;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
-	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) {
-		guard = A_GUARD;
-		shop_first = true;
-	}
-	if (mode == BN6_MODE_GAME) shop_first = false;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD;
 	last_mode = mode;
 	if (guard > 0) { --guard; keys &= ~KEY_A; }
 	return keys;
@@ -2772,33 +2763,16 @@ static uint32_t shop_guard(uint32_t keys) {
 
 /* A choice, BN6's or ours: a playtester's A's, pressed through a Net
  * Dealer's words, landed twice on the shop's "Are you sure? > Yes" (BN6's
- * default) and bought what he had not chosen. B still answers No. And
- * every "Are you sure?" in a shop starts on No, as our own questions with
- * a cost do (ask_in's risky ones): A's paced through the Net Dealer's five
- * to eight boxes, 50 frames apart, still chose the list's first row and
- * bought it (Kai, session 41), which no wait stops, only a press other
- * than A, so a press carried over from the words cancels. Only the first
- * had started on No, the rest on BN6's own Yes (ts_select's first option),
- * and two playtesters' LEFT, A, learned on the first, answered No to the
- * next (session 64). The shop's "Leaving already?", which B asks, keeps
- * BN6's Yes every time: it had started on No only where it came first,
- * and a playtester's blind LEFT, A stayed in the shop twice (session 63).
- * Another screen its keeper's words opened (a Chip Trader's) starts its
- * first question on No. */
+ * default) and bought what he had not chosen; an A in the question's first
+ * fifth of a second, pressed at what went before, is let go. B still
+ * answers No. Every question in a shop starts as BN6's does, on Yes (the
+ * owner's call: a visit's first had started on No and the rest on Yes, and
+ * two playtesters' LEFT, A, learned on the first, answered No to the next,
+ * session 64). */
 static uint32_t choice_guard(uint32_t keys) {
 	static int age;
-	static uint32_t last;   /* the last of A and B pressed */
-	static uint32_t held;
-	uint32_t ab = keys & (KEY_A | KEY_B);
-	if (ab & ~held) last = ab & ~held & KEY_B ? KEY_B : KEY_A;
-	held = ab;
 	bool choice = emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2;
 	age = choice ? age + 1 : 0;
-	int mode = main_mode();
-	if (choice && age == 1 && (shop_first || mode == BN6_MODE_SHOP) && last != KEY_B && mode != BN6_MODE_GAME) {
-		shop_first = false;
-		emu_write8(BN6_CHATBOX_CURSOR, 1);
-	}
 	if (choice && age <= A_GUARD) keys &= ~KEY_A;
 	return keys;
 }

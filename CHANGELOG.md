@@ -45,10 +45,11 @@
   been battled, MegaMan says "Navis we've never battled guard both ways:
   Aquarium HP and Judge Tree Comp." He had said "a Navi we've never
   battled" for each way.
-- **Every "Are you sure?" in a shop starts on No,** as MegaMan's own
-  questions with a cost do. Only a visit's first purchase had; the rest
-  started on Yes, so a LEFT, A learned on the first answered No to the
-  next. "Leaving already?" still starts on Yes.
+- **Every "Are you sure?" in a shop starts on Yes, as in BN6.** A visit's
+  first purchase had started on No and the rest on Yes, so a LEFT, A
+  learned on the first answered No to the next. An A pressed in the
+  question's first fifth of a second still does nothing, so one carried
+  over from the Net Dealer's words buys nothing.
 - **A layer no longer turns black as MegaMan arrives.** A layer with a
   Link Navi obstacle left its talk on the game map it used; a later layer
   on the same map without one kept pointing at it after newer layers had
