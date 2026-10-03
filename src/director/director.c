@@ -2595,7 +2595,7 @@ static void reg_watch(void) {
 	int reg = emu_read8(BN6_NAVI_REG);
 	if (D.reg_due && !profile.reg_taught)
 		snprintf(words, sizeof words, "@M A RegUp, Lan! Our Reg memory's %d MB now.|@M In the folder's EDIT, SELECT chooses a Regular Chip "
-			"of %d MB or less: it starts every battle in our hand. An attack's best: a + chip like Atk+10 needs an attack picked after it.|"
+			"of %d MB or less: it starts every battle in our hand. A + chip like Atk+10 adds to the attack we pick just before it.|"
 			"@M Every dive starts at 4 MB again, so keep an eye out for RegUps!", reg, reg);
 	else if (D.reg_due) snprintf(words, sizeof words, "@M Reg memory up: %d MB now, Lan!", reg);
 	else if (rival_clearance() >= 1 && !profile.tag_taught)

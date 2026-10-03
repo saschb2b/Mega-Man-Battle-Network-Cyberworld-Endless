@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **+ chips, said right.** MegaMan's word on the first RegUp said a + chip
+  like Atk+10 needs an attack picked after it. As in BN6, it adds to the
+  attack picked just before it.
+
 ## 0.8.0 (2026-10-03)
 
 - **A teleport island's data is in reach.** MegaMan lands on the rim of
