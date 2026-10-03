@@ -17,7 +17,7 @@ typedef struct {
 } ShopItem;
 
 #define SHOP_DEALER   0   /* shops the layers take over */
-#define SHOP_PROGRAMS 3   /* (its keeper's face is the technician navi's) */
+#define SHOP_PROGRAMS 3   /* (its keeper's face made the vendor's: shop_install) */
 #define SHOP_MAX_ITEMS 8
 
 /* SubChips (item ids, per the initial shops' prices: MiniEnrg 100 zenny,

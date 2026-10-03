@@ -211,6 +211,7 @@
 #define BN6_PET_MAP_NAMES_PTR 0x08120E9Cu /* the PET's PLACE line's literal: the same archive */
 #define BN6_MAP_NAMES_PTR     0x08033F34u /* RenderMapName's literal: the map-name label's archive (TextScriptMapNames, 244 names of 12) */
 #define BN6_SHOP_DESCS        0x08046B68u /* per shop: currency (0 zenny, 1 BugFrags, 2 Chip Order), text, data offset, entries */
+#define BN6_VENDOR_FACE       0x087F046Au /* shop 3's keeper text (LZ77 at 0x087F0420): the literal face byte of its first F5 00, which its other six copy (0x42) */
 #define BN6_SHOP_INIT         0x08047D70u /* the shop data a new game copies to ShopDataPtr */
 
 /* Chip Traders (src/layer/trader.c) */

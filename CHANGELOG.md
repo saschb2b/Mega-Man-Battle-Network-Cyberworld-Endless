@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **The program vendor keeps one face.** Her shop window showed BN6's
+  orange technician navi beside her own face in the chat and her sprite on
+  the map; it now shows hers.
 - **Every guardian in his own shape.** Seven of the seventeen stood on the
   net as a HeelNavi, "the Nest's copy didn't come out right". BlastMan and
   ElementMan now stand in Gregar's own sprites of them (turned toward the

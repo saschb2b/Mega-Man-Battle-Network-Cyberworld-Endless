@@ -18,6 +18,7 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "text.h"
 
 #define ORDER_SHOP 18   /* the Chip Order list: one entry per chip */
 
@@ -35,9 +36,21 @@ static void read_item(uint32_t a, ShopItem *it) {
 	it->price = rom_u16(o + 6);
 }
 
+/* The NaviCust vendor's shop window with her own face: BN6's shop 3 is
+ * kept by the orange technician navi (face 0x42), and the window showed
+ * him beside her chat's GirlNavi (0x45) and her sprite on the map (a
+ * playtester asked twice, sessions 1 and 2 of a first-time player). One
+ * literal byte of the keeper's compressed text, which its other six faces
+ * copy, in the core's copy of the ROM (docs/ROM_DATA.md). */
+static void vendor_face(void) {
+	uint32_t o = BN6_VENDOR_FACE - 0x08000000u;
+	if (R.data[o - 2] == 0xF5 && R.data[o - 1] == 0x00 && R.data[o] == 0x42) emu_write8(BN6_VENDOR_FACE, FACE_TECH);
+}
+
 bool shop_install(int shop, const ShopItem *items, int n, bool kept) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return false;
+	if (shop == SHOP_PROGRAMS) vendor_face();
 	uint32_t at = data + emu_read32(desc(shop) + 8);
 	int slots = (int)emu_read32(desc(shop) + 12);
 	uint8_t was[16][8] = { { 0 } };
