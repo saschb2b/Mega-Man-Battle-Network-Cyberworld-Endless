@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- **The program pick says whether each program fits.** After a guardian,
+  each program of the NaviCust's draft now says "fits now" or "fits if
+  we move one" beside its colour, from your board as it stands; MegaMan
+  had said a program would not fit only after you took it.
+- **MegaMan names a program left off the board once.** He said the same
+  boxes after every battle and in every briefing, even for a program you
+  had taken off yourself. Now he says it all once, then a line in L's
+  words where it fits as the board stands, and nothing for a program you
+  took off.
+- **The split names each way's Navi and area,** "CircusMan (Sky Area)";
+  the areas were only in the words before.
+- **A guardian's HPMemory, chip and heal take two boxes,** where they took
+  five.
+- **L's first words on a layer are the guardian, the heal and the way
+  on.** The rest (the area's viruses, what is here, the map's marks and
+  set pieces, ProtoMan) comes at a second L. Those words also say where
+  Mystery Data you sense but have not seen lies ("behind the security
+  cube"), as the counters count it.
+- **CONTINUE says where the run goes on from** ("From the layer's start",
+  "From where you saved", "From the Guardian Data", "From where you left
+  off"), and keeps a guardian a Navi on the net had named.
+- **"Leaving already?" starts on Yes every time.** It started on No where
+  it was a shop's first question.
+- **Bystanders keep the basics for your first runs,** and the rumor of
+  floor that can't be seen is told only where an area hides some.
+- **"Pack" with its capital,** as the PET writes it.
 - **Falzar's Navis have faces.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan, whom Gregar has no portrait of, spoke without a
   face. Each now speaks with a portrait from MegaMan's battle data: his
