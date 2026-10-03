@@ -295,13 +295,39 @@ static uint32_t record_copy(uint32_t record) {
 /* The run's folder as the guest's first, each chip as its game's of the
  * same name (its own code), owned; a chip it has none of sits out, its
  * slot empty. How many went in. */
+/* A chip's code as BN5's chip of its name has it: the same letter where it
+ * has that one, else its '*', else its first. BN5's Custom screen draws a
+ * chip with a code it lacks as nothing, which can be chosen and does
+ * nothing (a playtester's Storm folder had nine of them, its ElcPuls1 S
+ * among them: BN5's has B, L, P and *; session 65). */
+static int bn5_code(int x, int code) {
+	const uint8_t *rec = XR[XROM_BN5_COLONEL_US].data + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x;
+	for (int i = 0; i < 4; ++i)
+		if (rec[i] == code) return code;
+	for (int i = 0; i < 4; ++i)
+		if (rec[i] == 26) return 26;
+	return rec[0] <= 26 ? rec[0] : code;
+}
+
+/* ... and a chip won there as BN6's chip of its name has it, the same way */
+static int bn6_code(int id, int code) {
+	ChipInfo ci;
+	chip_info(id, &ci);
+	char want = code == 26 ? '*' : (char)('A' + code);
+	for (int i = 0; i < ci.ncodes; ++i)
+		if (ci.codes[i] == want) return code;
+	for (int i = 0; i < ci.ncodes; ++i)
+		if (ci.codes[i] == '*') return 26;
+	return ci.ncodes ? (ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A') : code;
+}
+
 static int folder_in(const uint16_t *folder) {
 	uint32_t folders = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIPS), marks = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIP_MARKS);
 	if (folders < 0x02000000u || folders >= 0x02040000u || marks < 0x02000000u || marks >= 0x02040000u) return 0;
 	int in = 0;
 	for (uint32_t i = 0; i < 30; ++i) {
 		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0;
-		core->rawWrite16(core, folders + 2 * i, -1, x ? (uint16_t)(x | (folder[i] >> 9) << 9) : 0xFFFF);
+		core->rawWrite16(core, folders + 2 * i, -1, x ? (uint16_t)(x | bn5_code(x, folder[i] >> 9) << 9) : 0xFFFF);
 		if (!x) continue;
 		core->rawWrite8(core, marks + (uint32_t)x, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + (uint32_t)x) ^ BN5_CHIP_KEY_XOR));
 		++in;
@@ -346,6 +372,10 @@ bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_
 
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
 
+int guest_custom_gauge(void) {
+	return guest_on_screen() && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_FIGHT ? rd16(BN5_CUSTOM_GAUGE) : -1;
+}
+
 bool guest_fight_hp(int *hp, int *max) {
 	if (!guest_on_screen()) return false;
 	*hp = rd16(BN5_FIGHT_HP);
@@ -363,7 +393,7 @@ static void finish(int outcome) {
 	if (v && v >> 14 == 1) result.zenny = v & 0x3FFF;
 	else if (v && v >> 14 == 0 && (v & 0x1FF) < BN5_CHIPS) {
 		result.chip = from_bn5[v & 0x1FF];
-		result.code = v >> 9 & 0x1F;
+		result.code = result.chip ? bn6_code(result.chip, v >> 9 & 0x1F) : 0;
 		if (!result.chip) result.zenny = REWARD_ZENNY;
 	}
 	result_due = true;
@@ -423,6 +453,7 @@ bool guest_active(void) { return false; }
 bool guest_custom_screen(void) { return false; }
 bool guest_on_screen(void) { return false; }
 bool guest_fight_hp(int *hp, int *max) { (void)hp; (void)max; return false; }
+int guest_custom_gauge(void) { return -1; }
 void guest_frame(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
 bool guest_take_result(GuestResult *out) { (void)out; return false; }

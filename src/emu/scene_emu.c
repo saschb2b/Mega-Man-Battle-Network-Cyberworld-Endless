@@ -106,9 +106,29 @@ static void after_frame(void) {
  * fight A to throw them, R for the next Custom screen once its gauge is
  * full, the buster between (L on the screen asks to run, which the last
  * pattern pressed there, over and over) */
+/* An L or R pressed before the Custom gauge filled, kept two and a half
+ * seconds and given as it fills (let go a frame first, so BN5 sees a
+ * press), again every 20 frames until the screen opens, as BN6's battles
+ * keep one (director.c): a playtester's R pressed a little early did
+ * nothing in BN5's battles, twice (session 65). */
+static uint32_t guest_custom_keep(uint32_t keys) {
+	static int kept, step;
+	static uint32_t was;
+	uint32_t lr = keys & (KEY_L | KEY_R), pressed = lr & ~was;
+	was = lr;
+	int gauge = guest_custom_gauge();
+	if (gauge < 0) { kept = step = 0; return keys; }
+	if (pressed) { kept = gauge >= 0x4000 ? 0 : 150; step = 0; return keys; }
+	if (kept <= 0) return keys;
+	--kept;
+	if (gauge < 0x4000) return keys;
+	int s = step++ % 20;
+	return s == 0 ? keys & ~(KEY_L | KEY_R) : s == 1 ? keys | KEY_R : keys;
+}
+
 static uint32_t guest_keys(void) {
 	static unsigned t;
-	if (!autopilot_on()) return keys_from_buttons();
+	if (!autopilot_on()) return guest_custom_keep(keys_from_buttons());
 	++t;
 	if (guest_custom_screen()) {
 		unsigned s = t % 80;

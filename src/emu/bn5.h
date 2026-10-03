@@ -31,6 +31,7 @@
 #define BN5_CHIP_NAMES_LOW  0x736084u /* (ROM offsets) the chip names' text archives: ids 0-255, */
 #define BN5_CHIP_NAMES_HIGH 0x736AB8u /* ... and 256 on */
 #define BN5_CHIPS         424         /* its chip ids */
+#define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
 /* its DarkChips (docs/ROM_DATA.md, BN5 guest battles; .build research):
  * ids 187-198, folder chips as any, at most three in a folder (one of each) */
 #define BN5_DARK_FIRST    187
@@ -46,6 +47,7 @@
 #define BN5_BATTLE_STATE  0x02034A90u /* BattleState: +1 the battle's phase (8 the Custom screen, 0xC fighting, 0x10 over) */
 #define BN5_PHASE_CUSTOM  0x08
 #define BN5_PHASE_FIGHT   0x0C
+#define BN5_CUSTOM_GAUGE  0x02035700u /* u16, the Custom gauge, full at 0x4000 (its SetCustGauge 0x0801A88E: 0x020356E0 + 0x20, as BN6's) */
 #define BN5_BATTLE_HP     (BN5_BATTLE_STATE + 0x34) /* u16: MegaMan's HP as the battle ends, to copy back (0 deleted) */
 #define BN5_FIGHT_HP      0x0203B224u /* u16: MegaMan's HP while the battle runs (his battle object's), then +2 its max (the worried rule reads them) */
 

@@ -30,6 +30,8 @@ bool guest_active(void);
 /* ... and its battle is on the screen: MegaMan's HP and max HP in it (a
  * state's); false before and after. */
 bool guest_fight_hp(int *hp, int *max);
+/* ... and its Custom gauge (0-0x4000) while it is fought, -1 otherwise */
+int guest_custom_gauge(void);
 /* ... and its Custom screen is up (the autopilot's chips and OK) */
 bool guest_custom_screen(void);
 /* ... and its battle is on its screen (its game state's battle, not the

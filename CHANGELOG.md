@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Every chip of the run's folder works in BN5's battles.** A chip whose
+  code BN5's chip of the same name never had came into BN5's Custom
+  screen as a blank, which could be picked and did nothing (nine of the
+  Storm folder's thirty). Each now goes in with a code BN5's chip has: the
+  same letter where it has it, else *, so the folder's codes still pick
+  together. A chip won there comes back with a code BN6's chip has.
+- **An early L or R is kept in BN5's battles,** as in BN6's: pressed up to
+  two and a half seconds before the Custom gauge fills, it opens the
+  Custom screen as it fills.
 - **The run saves at a guardian arena's door.** As MegaMan steps in, the
   run is saved; a quit during the fight goes on, at CONTINUE, from the
   arena's door with the HP he walked in with, where it went back to the
