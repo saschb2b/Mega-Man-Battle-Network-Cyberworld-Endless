@@ -571,6 +571,18 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 
 static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words);
 
+/* A chip's description as a sentence after its name: BN6's own, with a
+ * period where it ends without one ("A piercng thunder attack!" had gone
+ * on into "!.", session 64); "" where it is blank (a DarkChip's is, in
+ * Gregar). Its spaces are the wrap's to tidy. */
+static void chip_desc_line(char *out, size_t n, const char *name, int code, const char *desc) {
+	size_t len = strlen(desc);
+	while (len && desc[len - 1] == ' ') --len;
+	if (!len) { if (n) out[0] = 0; return; }
+	bool ends = strchr(".!?", desc[len - 1]) != NULL;
+	snprintf(out, n, "%s %c: %.*s%s", name, code == 26 ? '*' : 'A' + code, (int)len, desc, ends ? "" : ".");
+}
+
 int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v) {
 	char s[240];
 	if (have < need) {
@@ -597,10 +609,8 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 		take[k] = ta_script(t);
 		/* (what it does first, in BN6's own words: R showed nothing in the
 		 * list, and two playtesters picked by the names alone) */
-		if (v->desc[k][0]) {
-			snprintf(s, sizeof s, "%s %c: %s.", v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k], v->desc[k]);
-			ta_page(t, FACE_MEGAMAN, s, false);
-		}
+		chip_desc_line(s, sizeof s, v->name[k], v->code[k], v->desc[k]);
+		if (s[0]) ta_page(t, FACE_MEGAMAN, s, false);
 		snprintf(s, sizeof s, "%s %s %c?\nWe only get one!\n", verb, v->name[k], v->code[k] == 26 ? '*' : 'A' + v->code[k]);
 		ask_in(t, FACE_MEGAMAN, s, menu, true, true);
 		bool first = false;

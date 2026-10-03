@@ -29,6 +29,9 @@
   which a CONTINUE brings back as you quit, so a layer's "pair of viruses
   in 0:12.00" could come back as "three viruses in 0:14.50". Now the
   layer alone decides them.
+- **A chip's description ends with one stop** in an official Chip Order
+  and a vault: "A piercng thunder attack!", where "!." and ".." had
+  come (the spelling is BN6's own).
 - **A guardian's Cross data no longer sounds like an offer.** With a
   Cross brought, MegaMan says "We can only carry one Cross down here,
   Lan, so we keep our SlashCross." and that the next dive can start
