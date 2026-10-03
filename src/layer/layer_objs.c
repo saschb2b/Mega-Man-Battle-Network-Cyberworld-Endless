@@ -476,6 +476,18 @@ static bool skull_here(void) {
 	return false;
 }
 
+/* (Rush's gap, and how many RushFood call him there: he comes for as many
+ * as its panels and eats one, which only MegaMan said, at its bones; a
+ * playtester would have bought one of three, session 64) */
+static void dealer_rush(char *s, size_t n) {
+	int hold = layer.ngaps ? layer.gap[0].len : shop_rush_need(run.depth);
+	const char *where = layer.ngaps ? "on this layer" : "deeper in this act";
+	if (hold > 1)
+		snprintf(s, n, "|And there's a gap %s that Rush can bridge. He only comes when you hold %d RushFood, and he eats one. It's on my "
+			"list too!", where, hold);
+	else snprintf(s, n, "|And there's a gap %s that Rush can bridge for one RushFood. It's on my list too!", where);
+}
+
 /* (the keys he stocks, said: what each opens and where, issues #41, #14, #47) */
 static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock) {
 	for (int i = 0; i < nstock; ++i) {
@@ -485,8 +497,7 @@ static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock
 			snprintf(hello + k, n - k, "|Word is, there's purple data locked %s. An Unlocker opens it, and it's on my list!",
 				purple_here() ? "on this layer" : "deeper in this act");
 		else if (stock[i].id == ITEM_RUSH_FOOD)
-			snprintf(hello + k, n - k, "|And there's a gap %s that Rush can bridge. RushFood's on my list too!",
-				layer.ngaps ? "on this layer" : "deeper in this act");
+			dealer_rush(hello + k, n - k);
 		else if (stock[i].id == ITEM_WWW_ID)
 			snprintf(hello + k, n - k, "|The skull doors %s only open for WWW members. A WWW-ID gets you through every one!",
 				skull_here() ? "on this layer" : "deeper in the Undernet");
@@ -676,7 +687,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		case OBJ_SHOP: {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
-			char hello[520], word[280] = "";
+			char hello[720], word[280] = "";
 			int navi = run.boss_order[run.biome];
 			/* (the net's word comes back from an act's second layer: its
 			 * first keeps the mystery of a guardian never battled, but for

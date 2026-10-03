@@ -44,6 +44,10 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
  * (-1: a guardian of none, the hardest hitter), as a layer's roll picks it
  * (the pacing report samples it); -1 for none found. */
 int shop_dealer_answer(int depth, int counter, char *code);
+/* The RushFood Rush wants held at the longest gap the act holds from
+ * layer `depth` on (he comes for as many as its panels, and eats one); 0
+ * for none. */
+int shop_rush_need(int depth);
 int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]);
 /* Whether MegaMan has had `program` in any run (profile.programs_found). */
 bool shop_program_found(int program);

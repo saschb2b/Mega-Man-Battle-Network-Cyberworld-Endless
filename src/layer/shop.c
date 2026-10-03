@@ -146,6 +146,26 @@ static int skull_doors_ahead(int depth) {
 	return doors;
 }
 
+/* The Rush gaps the act holds from layer `depth` on, and the longest's
+ * panels in `longest`. */
+static int rush_gaps_ahead(int depth, int *longest) {
+	int gaps = 0;
+	*longest = 0;
+	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
+		int b = biome_for_depth(d);
+		if (!(layer_pieces(d, b, LAYER_NORMAL) & PIECE_RUSH)) continue;
+		++gaps;
+		if (layer_rush_len(d, b) > *longest) *longest = layer_rush_len(d, b);
+	}
+	return gaps;
+}
+
+int shop_rush_need(int depth) {
+	int longest;
+	rush_gaps_ahead(depth, &longest);
+	return longest;
+}
+
 /* The keys for the set pieces the act holds from here on, at about a
  * layer's zenny each (BN6's 4000 for an Unlocker and 3000 for RushFood
  * would keep them out of a run's reach, keys priced past their use):
@@ -164,13 +184,7 @@ static int add_keys(ShopItem *out, int n, int depth) {
 		key.price = (uint16_t)(6 + 3 * act);
 		out[n++] = key;
 	}
-	int gaps = 0, longest = 0;
-	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
-		int b = biome_for_depth(d);
-		if (!(layer_pieces(d, b, LAYER_NORMAL) & PIECE_RUSH)) continue;
-		++gaps;
-		if (layer_rush_len(d, b) > longest) longest = layer_rush_len(d, b);
-	}
+	int longest, gaps = rush_gaps_ahead(depth, &longest);
 	if (gaps && n < SHOP_MAX_ITEMS) {
 		ShopItem food = { 1, (uint8_t)(longest + gaps - 1), ITEM_RUSH_FOOD, 0xFF, (uint16_t)(3 + act) };
 		out[n++] = food;

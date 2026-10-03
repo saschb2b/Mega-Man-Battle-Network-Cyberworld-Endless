@@ -29,6 +29,10 @@
   which a CONTINUE brings back as you quit, so a layer's "pair of viruses
   in 0:12.00" could come back as "three viruses in 0:14.50". Now the
   layer alone decides them.
+- **The Net Dealer says how many RushFood Rush needs.** His word on a
+  Rush gap now says Rush only comes when you hold as many as its panels
+  ("when you hold 3 RushFood, and he eats one"); only MegaMan had said
+  so, at the bone panels, after you might have bought just one.
 - **The split says "never battled" once.** Where no way's guardian has
   been battled, MegaMan says "Navis we've never battled guard both ways:
   Aquarium HP and Judge Tree Comp." He had said "a Navi we've never
