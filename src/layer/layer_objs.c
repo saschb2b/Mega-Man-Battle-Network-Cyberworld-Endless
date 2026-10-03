@@ -867,7 +867,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					snprintf(terms, sizeof terms, "%sI busted %s here in %d:%02d.%02d. Beat that%s, MegaMan.|"
 						"@M Real viruses, Lan. If they delete us, the dive's over, so let's be at full HP.",
 						met ? "Back again, MegaMan? Chaud's watching.|" :
-						"MegaMan. So it's you diving the Cyberworld. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
+						"MegaMan. So it's you diving the Endless Net. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
 						count[nf], sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? ", without taking a hit" : "");
 				}
 				/* (he logs out as the duel begins: one a layer) */

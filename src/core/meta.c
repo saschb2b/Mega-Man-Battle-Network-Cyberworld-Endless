@@ -293,7 +293,7 @@ int meta_unlocked(const char **out, int max) {
 const char *meta_next_goal(void) {
 	static char goal[64];
 	/* (a line of the summary: 32 letters at most) */
-	if (!meta_endless_open()) return "Win the net for the endless net";
+	if (!meta_endless_open()) return "Win a short net: the endless net";
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (!meta_folder_open(f) && folders[f].opens) {
 			/* ("Delete an Aqua guardian: Storm") */

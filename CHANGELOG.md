@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Where a bought chip went.** A chip bought or traded goes to the Pack,
+  as in BN6, and with a full folder it never shows in battle: a first-time
+  playtester's chip, bought for the guardian, sat there unknown. The first
+  time, MegaMan now says where it went and how to swap it in (PET, Folder,
+  EDIT).
+- **A first-act navi warns about battlefield Mystery Data:** any hit breaks
+  it, even yours; win with it whole and it's yours. MegaMan said so only
+  after the first battle that had one.
+- **One name for the net.** Chaud and ProtoMan said "the Cyberworld" where
+  Dad and the BBS say "the Endless Net"; they now say the Endless Net too.
+- **The summary's next goal reads "Win a short net: the endless net".**
 - **The map marks the Mystery Data you've seen.** The counters counted
   data on panels the map shows, some of it never on the screen, and a
   playtester knew a green and a blue were left with no idea where. The

@@ -16,6 +16,7 @@ static const char *const early[] = {
 	"Green Mystery Data holds chips and Zenny. The blue ones hold rarer things!",
 	"Net Dealers set up shop on an area's first layers, and one waits by every guardian. Save some Zenny!",
 	"Hold B to charge your buster. A charged shot makes most viruses flinch.",
+	"A Mystery Data on a battlefield breaks at any hit, even ours. Win with it whole, and it's yours!",
 };
 
 /* the middle areas */

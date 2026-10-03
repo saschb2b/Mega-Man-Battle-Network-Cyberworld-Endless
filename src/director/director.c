@@ -138,6 +138,7 @@ static struct {
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named this session, 0 none */
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
+	bool pack_due;         /* a shop or a trader closed with a chip more in the pack: MegaMan says where it went (once) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
@@ -2328,11 +2329,38 @@ static uint32_t talk_walk(uint32_t keys) {
  * that box twice over bought the first item's "Are you sure?" (Kai, three
  * sessions running). */
 static bool shop_first;   /* a keeper's words opened the shop, and no "Are you sure?" has been asked in it */
+
+/* Every chip's copies in the pack, summed (a chip bought adds one to its
+ * code's count, the record's first four bytes); -1 where the pack is out of
+ * reach. The standard, mega and giga chips only, the ones a shop or a
+ * trader gives: past them lies other memory, a count of which a purchase
+ * moved the other way (a BblStar2 bought read as no change). */
+#define PACK_CHIPS 314   /* (chip_pool.c's LAST_CHIP + 1) */
+static int pack_total(void) {
+	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
+	if (pack < BN6_EWRAM || pack + 12u * PACK_CHIPS >= BN6_EWRAM_END) return -1;
+	int n = 0;
+	for (uint32_t id = 1; id < PACK_CHIPS; ++id)
+		for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + 12u * id + k);
+	return n;
+}
+
 static uint32_t shop_guard(uint32_t keys) {
-	static int chat_recent, guard, last_mode = -1;
+	static int chat_recent, guard, last_mode = -1, pack_before = -1;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
-	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD, shop_first = true;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) {
+		guard = A_GUARD;
+		shop_first = true;
+		pack_before = pack_total();
+	}
+	/* (a chip bought or traded goes to the pack, as in BN6, where a full
+	 * folder never sees it: a playtester's chip bought for the guardian sat
+	 * there unknown, session 61) */
+	if (mode == BN6_MODE_GAME && last_mode != BN6_MODE_GAME && pack_before >= 0) {
+		D.pack_due |= !profile.pack_taught && pack_total() > pack_before;
+		pack_before = -1;
+	}
 	if (mode == BN6_MODE_GAME) shop_first = false;
 	last_mode = mode;
 	if (guard > 0) { --guard; keys &= ~KEY_A; }
@@ -3525,7 +3553,7 @@ static const char *duel_call_words(void) {
 			: "@C Beat it, and the official gate beside him opens: an official Chip Order, three chips you've held, one to order.|";
 		snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
 			profile.duel_won + profile.duel_lost ? record :
-			"@C Lan. It's Chaud. I hear you're diving the Cyberworld.|@C The Nest copies Navis. ProtoMan's the real thing.|",
+			"@C Lan. It's Chaud. I hear you're diving the Endless Net.|@C The Nest copies Navis. ProtoMan's the real thing.|",
 			sec / 60, sec % 60, (f % 60) * 100 / 60,
 			/* (what a win earns, before the first: a playtester risked his
 			 * run for pride alone) */
@@ -3633,6 +3661,23 @@ static void rush_hint(void) {
 }
 
 /* The Navi gate's SP chip, given; Rush's gap, named. */
+/* where a chip bought or traded went, the first time (pack_due) */
+static void pack_words(void) {
+	if (!D.pack_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
+	if (talk_start("@M That chip went to our Pack, Lan. To fight with it, swap it into our folder: PET, Folder, then EDIT!", FACE_MEGAMAN)) {
+		D.pack_due = false;
+		profile.pack_taught = 1;
+		profile_save();
+	}
+}
+
+static void gate_and_rush_words(void);
+
+static void words_due(void) {
+	gate_and_rush_words();
+	pack_words();
+}
+
 static void gate_and_rush_words(void) {
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
 	rush_hint();
@@ -3830,7 +3875,7 @@ void director_update(void) {
 		profile.gem_taught = 1;
 		profile_save();
 	}
-	gate_and_rush_words();
+	words_due();
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
 		D.fragment_due = false;
 		D.fragments_told = run.fragments;
