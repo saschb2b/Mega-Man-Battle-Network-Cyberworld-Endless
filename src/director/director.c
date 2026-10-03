@@ -458,13 +458,39 @@ static const char *no_room_words(const char *name, int v) {
 	return words;
 }
 
+/* The programs seen on the board since the run went on (a variant a bit):
+ * one taken off since was the player's choice, and MegaMan told a
+ * playtester to install the SlipRunr he had just taken off, three times
+ * (session 63). And those MegaMan has said all about, off the board:
+ * after that, L's word is a line, and only where it fits as the board
+ * stands (another heard the same five boxes on HP+100, which needed a
+ * Spin, five times in two layers, after the PET, in L's words and after
+ * each battle). A new run or a CONTINUE forgets both. */
+static uint8_t placed_seen[47 * 4 / 8 + 1], off_explained[47 * 4 / 8 + 1];
+
+static bool bit_of(const uint8_t *set, int v) { return set[v >> 3] >> (v & 7) & 1; }
+static void bit_set(uint8_t *set, int v) { set[v >> 3] |= (uint8_t)(1 << (v & 7)); }
+
+static void placed_note(void) {
+	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
+		int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
+		if (!id) break;
+		if (id > 0 && id < 47 * 4) bit_set(placed_seen, id);
+	}
+}
+
+static void off_board_forget(void) {
+	memset(placed_seen, 0, sizeof placed_seen);
+	memset(off_explained, 0, sizeof off_explained);
+}
+
 static const char *program_off_board(int *variant) {
 	static char name[16];
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
 	*variant = 0;
 	for (int v = 4; v < 47 * 4; ++v) {
 		int owned = emu_read8(items + BN6_PROGRAM_ITEMS + (uint32_t)v), placed = 0;
-		if (!owned) continue;
+		if (!owned || bit_of(placed_seen, v)) continue;
 		for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
 			int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
 			if (!id) break;
@@ -620,11 +646,17 @@ static int off_board_note(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	int offv;
 	const char *off = run_won_here() || D.off_told ? NULL : program_off_board(&offv);
+	int k0 = k;
 	if (off && !fits_beside_placed(offv)) {
 		const char *w = no_room_words(*off ? off : "That program", offv);
 		if (w) ADD("%s|", w);
-	} else if (off && *off) ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
-	else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
+	} else if (off && *off && bit_of(off_explained, offv)) {
+		if (fits_as_it_stands(offv)) ADD("@M %s's still off our NaviCust's board, Lan.|", off);
+	} else if (off && *off) {
+		ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
+		bit_set(off_explained, offv);
+	} else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
+	if (k > k0) D.off_told = true;
 	#undef ADD
 	return k;
 }
@@ -1574,6 +1606,7 @@ bool director_start_run(void) {
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
+	off_board_forget();
 	forget_heard();
 	if (emu_debug_on()) {
 		fprintf(stderr, "run guardians:");
@@ -2826,6 +2859,8 @@ static const char *off_board_words(void) {
 	static char words[480];
 	if (!off || !*off) return NULL;
 	if (!fits_beside_placed(offv)) return no_room_words(off, offv);
+	if (bit_of(off_explained, offv)) return NULL;
+	bit_set(off_explained, offv);
 	/* (and whether it turns: a playtester pressed L and R on his gift's
 	 * SuperArmor with no Spin, and nothing said why; and whether it takes
 	 * moving others first, or its code) */
@@ -2980,6 +3015,7 @@ static void bug_watch(void) {
 	held_board = board;
 	held_size = size;
 	if (calm < BUG_CALM) return;
+	placed_note();
 	if (!D.bugs_known) {
 		memcpy(D.bugs, now, sizeof now);
 		D.board = board;
@@ -3173,6 +3209,7 @@ static void town_update(void) {
 bool director_start_layer(void) {
 	drop_events();
 	no_room_told = -1;
+	off_board_forget();
 	forget_heard();
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
@@ -3256,6 +3293,7 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 bool director_resume(void) {
 	drop_events();
 	no_room_told = -1;
+	off_board_forget();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
 	/* (the folder the layer was made with: none for a run saved before it
@@ -3894,10 +3932,11 @@ void director_update(void) {
 		}
 	}
 	/* (the PET's first menu is a screen of the game's own mode, its pages
-	 * other modes: either, and not a battle) */
+	 * and the shops other modes: either; not the way back to the map after
+	 * a battle or a warp, which had MegaMan name a program off the board
+	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
-	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER
-	    : screen != BN6_SUB_MAP && screen != BN6_SUB_BATTLE && screen != BN6_SUB_BATTLE_INIT) D.pet_seen = true;
+	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
 	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
