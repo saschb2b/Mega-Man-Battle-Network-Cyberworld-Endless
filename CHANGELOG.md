@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The map marks the Mystery Data you've seen.** The counters counted
+  data on panels the map shows, some of it never on the screen, and a
+  playtester knew a green and a blue were left with no idea where. The
+  map now marks each one not yet taken with a small crystal of its colour.
+  Data MegaMan only senses behind a set piece stays unmarked: L names
+  those without pointing.
 - **+ chips, said right.** MegaMan's word on the first RegUp said a + chip
   like Atk+10 needs an attack picked after it. As in BN6, it adds to the
   attack picked just before it.

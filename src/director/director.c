@@ -879,6 +879,7 @@ static struct {
 	int tent_x, tent_y;
 	int md_taken[3], md_known[3];   /* the layer's Mystery Data MegaMan knows of, by colour (green, blue, purple): taken, known */
 	int counts_a;                   /* L's overlay of them: its alpha, 0 hidden */
+	uint16_t md_marked;             /* the ones the map marks, a bit each: untaken, on a panel it shows */
 } seen;
 
 /* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
@@ -911,6 +912,13 @@ static void see_tent(void) {
 	if (seen.timer - start < TENT_FRAMES) { seen.tent_x = tx; seen.tent_y = ty; }
 }
 
+/* Whether Mystery Data k stands on a panel the map shows. */
+static bool md_on_map(int k) {
+	const NetObj *o = &layer.obj[D.objs.md_obj[k]];
+	int x = (int)o->x, y = (int)o->y;
+	return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && D.seen[y][x];
+}
+
 /* Whether MegaMan knows of the layer's Mystery Data k: taken, on a panel
  * the map shows (4 around where he has been: the picture shows no farther,
  * a panel 64 pixels across), or a set piece's he senses (L names them: a purple's lock,
@@ -921,7 +929,7 @@ static void see_tent(void) {
 static bool md_known(int k, bool taken) {
 	const NetObj *o = &layer.obj[D.objs.md_obj[k]];
 	int x = (int)o->x, y = (int)o->y;
-	if (taken || (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && D.seen[y][x]) || o->param == MD_PURPLE) return true;
+	if (taken || md_on_map(k) || o->param == MD_PURPLE) return true;
 	for (int p = 0; o->prize && p < layer.npaths; ++p) {
 		const NetGap *g = &layer.path[p];
 		if (x == g->x + dir_dx[g->dir] * (g->len + 2) && y == g->y + dir_dy[g->dir] * (g->len + 2)) return false;
@@ -940,9 +948,11 @@ static bool md_known(int k, bool taken) {
 static void see_counts(void) {
 	memset(seen.md_taken, 0, sizeof seen.md_taken);
 	memset(seen.md_known, 0, sizeof seen.md_known);
+	seen.md_marked = 0;
 	for (int k = 0; D.active && !D.town && k < D.objs.nmd; ++k) {
 		bool taken = flag_get(MAPSLOT_MD_FLAG + k);
 		if (!md_known(k, taken)) continue;
+		if (!taken && md_on_map(k)) seen.md_marked |= (uint16_t)(1u << k);
 		int c = D.objs.md_colour[k] == MYSTERY_GREEN ? 0 : D.objs.md_colour[k] == MYSTERY_BLUE ? 1 : 2;
 		seen.md_known[c]++;
 		seen.md_taken[c] += taken;
@@ -1824,6 +1834,25 @@ static int md_counts(int x, int y, int a) {
 	return w;
 }
 
+/* The Mystery Data the map shows, untaken: a small crystal of its colour
+ * where it stands (the counters had counted data a playtester had seen
+ * near him but not on the screen, and he had "no idea where", session 61;
+ * what the header counts as seen, the map now shows). Data only sensed
+ * behind a set piece stays unmarked: L names those without pointing. */
+static void map_mystery(const MapView *m) {
+	/* (the header's tones, the blue lighter: on the map's blue floor it faded) */
+	static const SDL_Color tone[3] = { { 70, 230, 110, 255 }, { 160, 220, 255, 255 }, { 200, 110, 255, 255 } };
+	for (int k = 0; k < D.objs.nmd; ++k) {
+		if (!(seen.md_marked >> k & 1)) continue;
+		const NetObj *o = &layer.obj[D.objs.md_obj[k]];
+		int sx = map_x(m, (int)o->x, (int)o->y), sy = map_y(m, (int)o->x, (int)o->y);
+		if (!map_inside(m, sx, sy, 3)) continue;
+		SDL_Color c = tone[D.objs.md_colour[k] == MYSTERY_GREEN ? 0 : D.objs.md_colour[k] == MYSTERY_BLUE ? 1 : 2];
+		for (int r = -3; r <= 3; ++r) fill_rect(sx - (3 - abs(r)), sy + r, 2 * (3 - abs(r)) + 1, 1, rgba(0, 8, 28, 255));
+		for (int r = -2; r <= 2; ++r) fill_rect(sx - (2 - abs(r)), sy + r, 2 * (2 - abs(r)) + 1, 1, c);
+	}
+}
+
 /* L's overlay of the counters, through its words and a few seconds after
  * (seen.counts_a): in the corner note's box, the HP's opposite, and under
  * the note while one shows ("Run saved" stands there as a layer begins,
@@ -1856,6 +1885,7 @@ static void draw_map(int x0, int y0, int w, int h) {
 	map_way(&m, px, py);
 	int gx = -1, gy = -1;
 	SDL_Color gc = map_key[MAP_EXIT].c;
+	map_mystery(&m);
 	map_marks(&m, &gx, &gy, &gc);
 	map_goal(&m, gx, gy, gc);
 	/* MegaMan, always there, his border pulsing */
