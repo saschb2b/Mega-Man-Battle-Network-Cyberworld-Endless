@@ -1487,6 +1487,16 @@ static void test_navicust(void) {
 	CHECK(navicust_pack(two, 2, 4, 4), "two squares of two colours share the command line");
 	NaviShape three[3] = { sq, two[1], plus };
 	CHECK(navicust_pack(three, 3, 4, 4), "a plus part above them");
+	/* (plus parts of one colour may not touch either, as BN6's compile
+	 * counts them: a 2x2 and a T, both blue, off a 5x4 board's command
+	 * line, session 64) */
+	NaviShape blue_sq = { .kind = NAVI_PLUS, .color = 5 }, blue_t = { .kind = NAVI_PLUS, .color = 5 };
+	for (int y = 0; y < 2; ++y) for (int x = 0; x < 2; ++x) blue_sq.cell[y][x] = 1;
+	blue_t.cell[0][0] = blue_t.cell[0][1] = blue_t.cell[0][2] = blue_t.cell[1][1] = 1;
+	NaviShape blues[2] = { blue_sq, blue_t };
+	CHECK(!navicust_pack(blues, 2, 5, 4), "two blue plus parts, a square and a T, find no clean place off a 5x4 board's command line");
+	blues[1].color = 1;
+	CHECK(navicust_pack(blues, 2, 5, 4), "a blue square and a white T do");
 	NaviShape tall = { .kind = NAVI_PART, .color = 4 };
 	for (int y = 0; y < 5; ++y) tall.cell[y][3] = 1;
 	CHECK(!navicust_pack(&tall, 1, 4, 4) && navicust_pack(&tall, 1, 5, 4), "five in a column: turned on a board five wide");

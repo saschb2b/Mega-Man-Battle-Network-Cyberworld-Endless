@@ -266,16 +266,20 @@ static void lift(const Turn *t, int ox, int oy) {
 	for (int i = 0; i < t->n; ++i) board[oy + t->y[i]][ox + t->x[i]] = -1;
 }
 
-/* (two program parts of one colour side by side: a bug) */
+/* (two programs of one colour side by side, program or plus parts alike:
+ * a bug. BN6's compile, bn6f sub_813BD24 and sub_813BE38, gathers each
+ * program's neighbours and counts every one of its colour, whatever its
+ * kind; plus parts were spared here, and a draft offered a blue ChargMAX
+ * beside a blue HP+100 on a 5x4 board, where no placement runs clean,
+ * session 64) */
 static bool touches_kin(const Piece *pieces, const Turn *t, int ox, int oy, int w, int h, int id) {
-	if (pieces[id].kind != NAVI_PART) return false;
 	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 	for (int i = 0; i < t->n; ++i)
 		for (int k = 0; k < 4; ++k) {
 			int x = ox + t->x[i] + d[k][0], y = oy + t->y[i] + d[k][1];
 			if (x < 0 || y < 0 || x >= w || y >= h) continue;
 			int o = board[y][x];
-			if (o >= 0 && o != id && pieces[o].kind == NAVI_PART && pieces[o].color == pieces[id].color) return true;
+			if (o >= 0 && o != id && pieces[o].color == pieces[id].color) return true;
 		}
 	return false;
 }
