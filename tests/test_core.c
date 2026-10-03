@@ -329,7 +329,9 @@ static void blocks_check(uint32_t seed, int depth, const NetObj *start, uint8_t 
 /* A teleport pair (issue #44): one panel where a long detour ends, or a pad
  * of its own past the void, and one two to six off the way, never on it;
  * floor all round each and nothing standing there (the gem's, the
- * trigger's), but the island's one data on a corner. */
+ * trigger's); the island's one data on its bottom corner, two panels below
+ * the gem, straight on from where MegaMan lands (anywhere round the gem,
+ * the way to it crossed the gem's trigger, which beamed him back). */
 static void teleports_check(uint32_t seed) {
 	if (!layer.nteleports) return;
 	++teleport_layers;
@@ -340,10 +342,14 @@ static void teleports_check(uint32_t seed) {
 			for (int dx = -1; dx <= 1; ++dx) {
 				CHECK(layer.cell[y + dy][x + dx] == C_PATH && !layer_on_way(x + dx, y + dy), "seed %u: a teleport without floor round it, or by the way", seed);
 				for (int i = 0; i < layer.nobj; ++i)
-					if ((int)layer.obj[i].x == x + dx && (int)layer.obj[i].y == y + dy) held += dx && dy && layer.obj[i].type == OBJ_MYSTERY ? 1 : 100;
+					if ((int)layer.obj[i].x == x + dx && (int)layer.obj[i].y == y + dy) ++held;
 			}
-		CHECK(held == (k == 0 && layer.teleport_island), "seed %u: a teleport's pad holds %d", seed, held);
+		CHECK(held == 0, "seed %u: a teleport's pad holds %d", seed, held);
 	}
+	bool data = false;
+	for (int i = 0; i < layer.nobj && layer.teleport_island; ++i)
+		data |= layer.obj[i].type == OBJ_MYSTERY && (int)layer.obj[i].x == layer.teleport_x[0] + 2 && (int)layer.obj[i].y == layer.teleport_y[0] + 2;
+	CHECK(data == layer.teleport_island, "seed %u: a teleport island without its data below the gem", seed);
 	int da = layer_detour(layer.teleport_x[0], layer.teleport_y[0]), db = layer_detour(layer.teleport_x[1], layer.teleport_y[1]);
 	CHECK((layer.teleport_island ? da < 0 : da >= 7) && db >= 2 && db <= 6, "seed %u: a teleport pair %d and %d off the way", seed, da, db);
 }

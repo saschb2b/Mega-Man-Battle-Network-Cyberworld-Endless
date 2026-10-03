@@ -703,10 +703,14 @@ art:
   way or more), the other 2 to 6 off the way, the walk between them 16
   panels or more, so the long way in has a short way out.
 - **Else an island of its own,** as ACDC's homepage keeps an isolated square
-  reached by its teleport alone: a 3x3 pad past the void (two void panels
+  reached by its teleport alone: a 4x4 pad past the void (two void panels
   round it, inside the camera's window, the nearest such to the gem near
-  the way, so it is seen from there), one blue Mystery Data on its corner
-  away from its gem.
+  the way, so it is seen from there), its gem a panel in from its top
+  corner and one blue Mystery Data on its bottom corner, straight below
+  where MegaMan lands. He lands on the gem's rim below it (the warp's
+  facing 4), still beside its trigger, so a step up and to either side
+  beams him back: on a 3x3 island every corner lay that way, its data
+  reached only round the gem's rim, half over the void.
 
 Each gem stands on a panel with floor all round it (its art draws its own
 diamond over them) and never on or beside the way (its trigger reaches a

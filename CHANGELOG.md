@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A teleport island's data is in reach.** MegaMan lands on the rim of
+  the island's gem, and the island's Mystery Data sat across it: the way
+  there stepped onto the gem's trigger and beamed him back, so it was
+  reached only round the rim, half over the void. The island is now a
+  4x4 with its data straight below where he lands. This build makes
+  layers differently, so a CONTINUE starts the layer afresh.
 - **Mystery Data counters.** The map (hold SELECT) now counts the
   Mystery Data MegaMan knows of by colour, green, blue and purple: taken,
   of those seen or sensed behind a set piece, dimmed once all are taken.

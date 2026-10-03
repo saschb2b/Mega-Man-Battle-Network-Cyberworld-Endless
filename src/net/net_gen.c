@@ -1572,19 +1572,21 @@ static bool teleport_spot(int x, int y, int lo, int hi) {
 }
 
 /* An island for a teleport's far pad, as ACDC's homepage has an isolated
- * square reached by its teleport alone: a 3x3 of void with void two
- * panels round it and no prop, inside the camera's window, the nearest
- * such to (bx, by), so it is seen from the pad that leads there. */
+ * square reached by its teleport alone: a 4x4 of void, its gem a panel in
+ * from its top corner, with void two panels round it and no prop, inside
+ * the camera's window, the nearest such to (bx, by), so it is seen from
+ * the pad that leads there. */
 static bool teleport_island_site(int bx, int by, int *ox, int *oy) {
 	int best = 1 << 30;
-	for (int y = 3; y < MAP_H - 3; ++y)
-		for (int x = 3; x < MAP_W - 3; ++x) {
+	for (int y = 3; y < MAP_H - 4; ++y)
+		for (int x = 3; x < MAP_W - 4; ++x) {
 			int d = abs(x - bx) + abs(y - by);
 			if (d >= best) continue;
 			bool ok = true;
-			for (int j = -3; j <= 3 && ok; ++j)
-				for (int i = -3; i <= 3 && ok; ++i)
-					ok = layer.cell[y + j][x + i] == C_VOID && !prop_at_cell(x + i, y + j) && (abs(i) > 1 || abs(j) > 1 || win_in(x + i, y + j));
+			for (int j = -3; j <= 4 && ok; ++j)
+				for (int i = -3; i <= 4 && ok; ++i)
+					ok = layer.cell[y + j][x + i] == C_VOID && !prop_at_cell(x + i, y + j) &&
+						(i < -1 || i > 2 || j < -1 || j > 2 || win_in(x + i, y + j));
 			if (ok) { best = d; *ox = x; *oy = y; }
 		}
 	return best < (1 << 30);
@@ -1621,22 +1623,25 @@ static void plan_teleport(void) {
 			for (int dx = -1; dx <= 1; ++dx) reserved[layer.teleport_y[k] + dy][layer.teleport_x[k] + dx] = 1;
 }
 
-/* The teleport's island, once the rest stands: its 3x3, its data on the
- * corner farthest from the pad it is seen from; nothing where it would
- * leave the map too big for the game's tile map. */
+/* The teleport's island, once the rest stands: a 4x4 with its gem a panel
+ * in from its top corner, and its data on the bottom corner, straight
+ * below where MegaMan lands; nothing where it would leave the map too big
+ * for the game's tile map. He lands on the gem's rim below it (the warp's
+ * facing 4), still beside its trigger: a step up and to either side
+ * beamed him back. On the 3x3 island every corner lay that way, its data
+ * reached only round the gem's rim, half over the void. */
 static void carve_teleport_island(int rise) {
 	int mx = layer.teleport_x[0], my = layer.teleport_y[0];
-	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 4, 4);
 	if (!fits(rise)) {
-		for (int j = my - 1; j <= my + 1; ++j)
-			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		for (int j = my - 1; j <= my + 2; ++j)
+			for (int i = mx - 1; i <= mx + 2; ++i) layer.cell[j][i] = C_VOID;
 		layer.nteleports = 0;
 		layer.teleport_island = false;
 		return;
 	}
-	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
-	int cx = mx + (mx >= layer.teleport_x[1] ? 1 : -1), cy = my + (my >= layer.teleport_y[1] ? 1 : -1);
-	NetObj *o = add_obj(OBJ_MYSTERY, cx, cy);
+	add_room(mx - 1, my - 1, 4, 4, ROOM_PAD);
+	NetObj *o = add_obj(OBJ_MYSTERY, mx + 2, my + 2);
 	if (o) { o->param = 1; o->prize = true; }
 }
 
