@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The run saves at a guardian arena's door.** As MegaMan steps in, the
+  run is saved; a quit during the fight goes on, at CONTINUE, from the
+  arena's door with the HP he walked in with, where it went back to the
+  layer's start before.
 - **A layer no longer turns black as MegaMan arrives.** A layer with a
   Link Navi obstacle left its talk on the game map it used; a later layer
   on the same map without one kept pointing at it after newer layers had

@@ -48,6 +48,7 @@ static struct {
 	int state, t;
 	bool chat_seen;
 	bool checkpoint;      /* the guardian fell: the run wants saving past it */
+	bool door, door_taken;   /* MegaMan stepped in: the run wants saving at the arena's door (once an approach) */
 	uint32_t archive;
 	GuardianStage g;
 } B;
@@ -105,10 +106,11 @@ static void door_quiet(void) {
 	held = near;
 }
 
-/* MegaMan in the arena, no chat open: the staging begins. */
+/* MegaMan in the arena, no chat open and no card showing (a CONTINUE at
+ * the arena's door shows the act's card first): the staging begins. */
 static bool steps_in(void) {
 	door_quiet();
-	return !emu_read8(BN6_CHATBOX) && entered();
+	return !emu_read8(BN6_CHATBOX) && !cinema_busy() && entered();
 }
 
 /* The pad keys that walk MegaMan towards world (x, y), 0 once he is within
@@ -141,6 +143,7 @@ static void title_card(void) {
 void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 	B.archive = archive;
 	B.g = *g;
+	B.door = B.door_taken = false;
 	to(g->navi ? B_WAIT : B_NONE);
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
@@ -155,18 +158,27 @@ static void enter_walk(void) {
 	cinema_walk(B.t < 60 ? walk_toward(B.g.x, B.g.y, WALK_NEAR) : 0);
 }
 
+/* The guardian waits: MegaMan steps in, the run is saved at the arena's
+ * door, and the staging begins on the next frame. */
+static void wait_update(void) {
+	if (!entered()) B.door_taken = false;   /* (out of the arena: the next step in is a new approach) */
+	if (!steps_in()) return;
+	/* the run saved at the arena's door first, on the last frame he is
+	 * free (the owner's: bigger RPGs save before a boss), so a quit in the
+	 * fight goes on from here, not from the layer's start */
+	if (!B.door_taken) { B.door = B.door_taken = true; return; }
+	/* the arena closes around MegaMan, who steps up to its middle */
+	cinema_input(CINEMA_WALK);
+	cinema_letterbox(true);
+	run_script(B.g.hush);
+	rival_met(B.g.navi);
+	to(B_ENTER);
+}
+
 void boss_update(void) {
 	++B.t;
 	switch (B.state) {
-	case B_WAIT:
-		if (!steps_in()) break;
-		/* the arena closes around MegaMan, who steps up to its middle */
-		cinema_input(CINEMA_WALK);
-		cinema_letterbox(true);
-		run_script(B.g.hush);
-		rival_met(B.g.navi);
-		to(B_ENTER);
-		break;
+	case B_WAIT: wait_update(); break;
 	case B_ENTER:
 		enter_walk();
 		if (B.t == 60) cinema_input(CINEMA_HOLD);
@@ -282,9 +294,17 @@ bool boss_take_checkpoint(void) {
 	return due;
 }
 
+bool boss_take_door(void) {
+	bool due = B.door;
+	B.door = false;
+	return due;
+}
+
 void boss_resume(void) {
-	/* (a run saved mid-layer: the guardian's flags are in the state) */
+	/* (a run saved mid-layer: the guardian's flags are in the state; saved
+	 * at the arena's door, he stands in it, and the staging begins) */
 	if (B.state != B_WAIT) return;
+	B.door_taken = entered();
 	if (flag_get(LAYER_EXIT_OPEN_FLAG)) to(B_DONE);
 	else if (flag_get(LAYER_REWARD_FLAG) && !flag_get(LAYER_REWARD_TAKEN_FLAG)) to(B_REWARD);
 }

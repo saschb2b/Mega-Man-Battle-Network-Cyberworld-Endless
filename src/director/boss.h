@@ -30,6 +30,10 @@ bool boss_idle(void);
 /* Whether the guardian has just fallen and the run wants a checkpoint
  * (once: the call clears it). */
 bool boss_take_checkpoint(void);
+/* Whether MegaMan has just stepped into the arena and the run wants saving
+ * at its door, this frame, before the staging takes him (once an approach:
+ * the call clears it; the staging begins on the next frame). */
+bool boss_take_door(void);
 /* After a run saved mid-layer is loaded: the guardian's state from its
  * flags. */
 void boss_resume(void);

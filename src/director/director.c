@@ -152,6 +152,7 @@ static struct {
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
 	bool checkpoint_data;  /* the checkpoint due is the Guardian Data's ... */
 	bool checkpoint_here;  /* ... or the PET's Save's, where MegaMan stands */
+	bool checkpoint_door;  /* the checkpoint being saved is the arena's door's */
 	const char *saved_at;  /* where the run was last saved, for the quit prompt */
 	bool beat_guardian;    /* the arrival's words (beat) name the act's guardian ... */
 	bool guardian_named;   /* ... and have been said on this layer */
@@ -2193,7 +2194,7 @@ bool director_draw_second_screen(int w, int h) {
  * (A note from before `heard` reads it as 0.) */
 #define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
 typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where; } ActNote;
-enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
+enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
 static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
 static ActNote act_note;
 static bool act_note_ok;
@@ -2201,7 +2202,7 @@ static bool act_note_ok;
 static void act_note_save(void) {
 	/* (an act already continued without one has no whole count to keep) */
 	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed, D.heard_act,
-		suspending ? SAVED_LEFT : D.checkpoint_here ? SAVED_HERE : D.checkpoint_data ? SAVED_DATA : SAVED_START };
+		suspending ? SAVED_LEFT : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE : D.checkpoint_data ? SAVED_DATA : SAVED_START };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
 
@@ -2315,8 +2316,9 @@ static void state_map(FILE *f, int cx, int cy) {
  * bought after the layer's checkpoint, were gone with no word why
  * (session 63) */
 static void resume_note(void) {
-	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off" };
-	if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_LEFT) cinema_note(from[act_note.where], 240);
+	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off",
+		"From the arena's door" };
+	if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_DOOR) cinema_note(from[act_note.where], 240);
 }
 
 /* ... and after it, where building it began the act afresh */
@@ -2360,6 +2362,29 @@ void director_save_here(void) {
 	if (D.town) { cinema_note("Saves begin on layer 1", 150); return; }
 	D.checkpoint = true;
 	D.checkpoint_here = true;
+}
+
+/* The arena's door (the owner's: bigger RPGs save before a boss): the run
+ * saved on the last frame MegaMan is free before the guardian's staging,
+ * so a quit in the fight goes on from the door with the HP he walked in
+ * with, where it went back to the layer's start before (a playtester's
+ * free retry, session 64) */
+static void arena_door_save(void) {
+	if (talk_busy() || emu_read8(BN6_CHATBOX) || emu_read8(BN6_DIALOGUE_LOCK) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE) || D.warping) return;
+	D.checkpoint_door = true;
+	save_checkpoint();
+	D.checkpoint_door = false;
+	D.saved_at = "Run saved at the arena's door";
+	cinema_note("Run saved", 150);
+}
+
+/* The guardian's course, and its door's save the frame he steps in (not
+ * before the arrival's card: a CONTINUE at the door showed the act's card
+ * cut short by the guardian's) */
+static void guardian_update(void) {
+	if (D.area_card && boss_idle()) return;
+	boss_update();
+	if (boss_take_door()) arena_door_save();
 }
 
 bool director_suspend(void) {
@@ -4333,7 +4358,7 @@ void director_update(void) {
 		D.fragments_told = run.fragments;
 	}
 	exit_flag(false);
-	boss_update();
+	guardian_update();
 	/* (after the last card: the area cleared on the way here) */
 	if (D.area_card && ++D.arrived >= AREA_CARD_AT && !cinema_busy()) {
 		D.area_card = false;
