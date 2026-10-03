@@ -20,6 +20,8 @@ bool director_on_layer(void);
 void director_see(void);
 /* The layer's map over the picture while SELECT is held (drawing only). */
 void director_draw_map(void);
+/* The layer's Mystery Data counters over the picture, a few seconds after L. */
+void director_draw_counts(void);
 /* The second screen (the 3DS's bottom one, issue #9): the layer's map in
  * w x h, always open on the net; false where there is none to show. */
 bool director_draw_second_screen(int w, int h);

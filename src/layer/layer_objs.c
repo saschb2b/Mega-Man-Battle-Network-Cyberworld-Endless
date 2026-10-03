@@ -403,6 +403,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	} else if (mystery_content(o, m->content)) {
 		m->type = MYSTERY_BLUE;
 	}
+	if (out->nmd < 16) out->md_colour[out->nmd++] = (uint8_t)m->type;
 }
 
 /* The Net Dealer's word on the act's guardian, `navi`, by his list
@@ -533,7 +534,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->challenge_reward = -1;
 	out->fragment_found = -1;
 	out->spin_found = -1;
-	out->spin_colour = 0;
+	out->spin_colour = out->nmd = 0;
 	for (int i = 0; i <= OBJ_OFFICIAL; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;

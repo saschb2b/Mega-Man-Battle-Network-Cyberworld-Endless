@@ -59,6 +59,8 @@ typedef struct {
 	int trader_kind;           /* the layer's trader's script in the game's trader archive (TraderKind), -1 none (for --talk) */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
 	int ndealer, nprograms;
+	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour (its flag MAPSLOT_MD_FLAG + its index) */
+	uint8_t md_colour[16];
 } LayerObjs;
 
 /* The layer's shop stock written (again after a state load, whose RAM

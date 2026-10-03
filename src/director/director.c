@@ -123,6 +123,7 @@ static struct {
 	bool chat_was_open;            /* the game's chat box was open last frame */
 	int a_quiet;                   /* frames an A is not passed on after a chat on the map closed */
 	int l_kept;                    /* frames an L pressed while busy is kept */
+	int counts_t;                  /* frames L's Mystery Data counters stay once its words are gone */
 	int walk_to, walk_t;           /* the NPC slot MegaMan walks up to after an A short of it, frames left */
 	bool dir_held;         /* a direction is held this frame */
 	bool map_shown;        /* SELECT is held on a layer's map: the map shows */
@@ -862,7 +863,14 @@ static bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_
  * drawn, and a read of the game then waits for it (the bottom screen's map
  * took 14 ms so, a frame lost six times a second; the duel's clock every
  * frame of its battle). */
-static struct { int px, py; bool on_map, battle, custom; uint32_t timer; int tent_x, tent_y; } seen;
+static struct {
+	int px, py;
+	bool on_map, battle, custom;
+	uint32_t timer;
+	int tent_x, tent_y;
+	int md_taken[3], md_total[3];   /* the layer's Mystery Data by colour (green, blue, purple): taken, placed */
+	bool counts;                    /* L's overlay of them shows */
+} seen;
 
 /* CircusMan's tent: as his object's action turns to it (+0x09, 0x0C), BN6
  * lights the panel MegaMan stands on for a few frames, under his feet,
@@ -894,6 +902,30 @@ static void see_tent(void) {
 	if (seen.timer - start < TENT_FRAMES) { seen.tent_x = tx; seen.tent_y = ty; }
 }
 
+/* The layer's Mystery Data, taken and placed, by colour: the counters on
+ * the map's header, and over the picture a few seconds after L (the
+ * owner's: a collector's count of what is left before the one-way exit,
+ * where a playtester's sensed Rush gap and its prize were lost with the
+ * layer, session 60). They hold through MegaMan's words, then count down. */
+#define COUNTS_AFTER 180
+static void see_counts(void) {
+	memset(seen.md_taken, 0, sizeof seen.md_taken);
+	memset(seen.md_total, 0, sizeof seen.md_total);
+	for (int k = 0; D.active && !D.town && k < D.objs.nmd; ++k) {
+		int c = D.objs.md_colour[k] == MYSTERY_GREEN ? 0 : D.objs.md_colour[k] == MYSTERY_BLUE ? 1 : 2;
+		seen.md_total[c]++;
+		seen.md_taken[c] += flag_get(MAPSLOT_MD_FLAG + k);
+	}
+	if (D.counts_t > 0 && !talk_busy()) --D.counts_t;
+	seen.counts = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown;
+}
+
+/* L heard on the map: a press kept is spent, and the counters show */
+static void l_taken(void) {
+	D.l_kept = 0;
+	D.counts_t = COUNTS_AFTER;
+}
+
 void director_see(void) {
 	seen.px = bn6_player_x();
 	seen.py = bn6_player_y();
@@ -902,6 +934,7 @@ void director_see(void) {
 	seen.timer = emu_read32(BN6_BATTLE_TIMER);
 	seen.custom = seen.battle && emu_read8(BN6_CUSTOM_WINDOW);
 	see_tent();
+	see_counts();
 }
 
 /* The panel BN6 lights under MegaMan's feet, marked over his sprite: a
@@ -1722,6 +1755,54 @@ static void draw_map_key(int kx, int ky, int width) {
 	}
 }
 
+/* A Mystery Data crystal, 7 pixels across, its upper left face lit; dark
+ * once all of its colour are taken */
+static void crystal(int x, int y, SDL_Color c, bool done) {
+	static const int half[7] = { 0, 1, 2, 3, 2, 1, 0 };
+	SDL_Color base = done ? rgba(c.r / 3, c.g / 3, c.b / 3, 255) : c;
+	SDL_Color lit = done ? base : rgba(c.r + (255 - c.r) / 2, c.g + (255 - c.g) / 2, c.b + (255 - c.b) / 2, 255);
+	for (int r = 0; r < 7; ++r) {
+		fill_rect(x + 3 - half[r], y + r, 2 * half[r] + 1, 1, base);
+		if (r > 0 && r < 4) fill_rect(x + 3 - half[r], y + r, half[r], 1, lit);
+	}
+}
+
+/* The layer's Mystery Data counters from (x, y): a crystal of each colour
+ * the layer holds and "taken/placed" beside it, dim once all are taken
+ * (what is left draws the eye); their width, drawn only with `draw`. */
+static int md_counts(int x, int y, bool draw) {
+	static const SDL_Color tone[3] = { { 70, 230, 110, 255 }, { 80, 170, 255, 255 }, { 200, 110, 255, 255 } };
+	int w = 0;
+	for (int c = 0; c < 3; ++c) {
+		if (!seen.md_total[c]) continue;
+		char t[12];
+		snprintf(t, sizeof t, "%d/%d", seen.md_taken[c], seen.md_total[c]);
+		bool done = seen.md_taken[c] >= seen.md_total[c];
+		if (w) w += 7;
+		if (draw) {
+			crystal(x + w, y + 3, tone[c], done);
+			text_draw(x + w + 9, y, t, done ? rgba(100, 120, 150, 255) : rgba(200, 225, 255, 255), TEXT_LEFT);
+		}
+		w += 9 + text_width(t);
+	}
+	return w;
+}
+
+/* L's overlay of the counters, at the picture's top right, through its
+ * words and a few seconds after (seen.counts) */
+void director_draw_counts(void) {
+	int w = seen.counts ? md_counts(0, 0, false) : 0;
+	if (!w) return;
+	int x = P.core_x + 240 - 6 - w, y = P.core_y + 5;
+	SDL_Color edge = rgba(120, 200, 255, 220);
+	fill_rect(x - 4, y - 3, w + 8, TEXT_H + 5, rgba(0, 8, 28, 230));
+	fill_rect(x - 5, y - 4, w + 10, 1, edge);
+	fill_rect(x - 5, y + TEXT_H + 2, w + 10, 1, edge);
+	fill_rect(x - 5, y - 3, 1, TEXT_H + 5, edge);
+	fill_rect(x + w + 4, y - 3, 1, TEXT_H + 5, edge);
+	md_counts(x, y, true);
+}
+
 /* The layer's map in w x h from (x0, y0): SELECT's over the picture, and
  * the second screen's (the 3DS's bottom one, issue #9). */
 static void draw_map(int x0, int y0, int w, int h) {
@@ -1733,6 +1814,7 @@ static void draw_map(int x0, int y0, int w, int h) {
 	fill_rect(m.bx - 2, m.by - 2, 1, m.bh + 4, edge);
 	fill_rect(m.bx + m.bw + 1, m.by - 2, 1, m.bh + 4, edge);
 	text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
+	md_counts(m.bx + m.bw - md_counts(0, 0, false), y0 + 3, true);
 	int px = seen.px, py = seen.py;
 	if (!netmap_panel(px, py, &m.mx, &m.my)) return;
 	map_view(&m);
@@ -2369,7 +2451,7 @@ uint32_t director_keys(uint32_t keys) {
 		else if (!talk_busy() && !cinema_busy() && !D.beat[0]) --D.l_kept;
 	}
 	if (pressed && can_l) {
-		D.l_kept = 0;
+		l_taken();
 		/* (the arrow shows through the words and a few seconds after) */
 		if (talk_start(status_words(), FACE_MEGAMAN) && (D.town || !D.objs.guardian.navi || !boss_beaten() || boss_done())) {
 			D.arrow_pending = true;

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Mystery Data counters.** The map (hold SELECT) now counts the
+  layer's Mystery Data by colour, green, blue and purple, taken of
+  placed, and dims a colour once all of it is taken. L shows the same
+  counters at the top right for a few seconds, so you know what's left
+  before the one-way exit pad. They count; they don't point.
 - **What a given-up run opened is yours to choose.** A guardian deleted
   opens his Cross start (and the Blade folder) at once, but a first run
   given up through NEW GAME jacked straight in without the setup screen,
