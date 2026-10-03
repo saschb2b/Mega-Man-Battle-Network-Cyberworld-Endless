@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Falzar's Navis have faces.** SpoutMan, TomahawkMan, TenguMan,
+  GroundMan and DustMan, whom Gregar has no portrait of, spoke without a
+  face. Each now speaks with a portrait from MegaMan's battle data: his
+  own battle sprite, framed as a BN6 face on his title card's colour.
 - **"BN5 found" says what it lends:** "BN5 found: its net joins ours".
 - **The program vendor keeps one face.** Her shop window showed BN6's
   orange technician navi beside her own face in the chat and her sprite on

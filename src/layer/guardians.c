@@ -288,11 +288,20 @@ NpcBody guardian_body(int navi, int face) {
 	return b;
 }
 
-/* Falzar's Navis speak without a face, which Gregar lacks: the HeelNavi's
- * is the bystanders' (a playtester read SpoutMan's lines as a bystander's) */
+/* Falzar's Navis, whose faces Gregar lacks, speak with the portrait set
+ * for them where the layer made one, else without a face: the HeelNavi's
+ * is the bystanders' (a playtester read SpoutMan's lines as a
+ * bystander's) */
+static int set_face[NGUARDIANS];   /* the face + 1, 0 for none */
+
+void guardian_set_face(int navi, int face) {
+	if (navi > 0 && navi < NGUARDIANS) set_face[navi] = face < 0 ? 0 : face + 1;
+}
+
 int guardian_face(int navi) {
 	const Guardian *g = guardian(navi);
-	return g->mugshot == GUARDIAN_NO_MUGSHOT ? FACE_NONE : g->mugshot;
+	if (g->mugshot != GUARDIAN_NO_MUGSHOT) return g->mugshot;
+	return navi > 0 && navi < NGUARDIANS && set_face[navi] ? set_face[navi] - 1 : FACE_NONE;
 }
 
 const char *guardian_intro(int navi, int version, int biome) {
@@ -320,7 +329,7 @@ const char *guardian_intro(int navi, int version, int biome) {
 	}
 	/* and at every meeting after, who speaks without a face (a playtester
 	 * who had met SpoutMan three times asked who was talking) */
-	else if (guardian(navi)->mugshot == GUARDIAN_NO_MUGSHOT) ADD("@L %s's copy again!|", name);
+	else if (guardian_face(navi) == FACE_NONE) ADD("@L %s's copy again!|", name);
 	/* the Nest's own guardian knows what it is */
 	if (biome == BIOME_NEST) ADD("The Nest built me from every battle you have fought.|");
 	ADD("%s", s);

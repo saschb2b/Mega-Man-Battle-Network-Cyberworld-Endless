@@ -60,7 +60,9 @@ the net in his own shape (`guardian_body`):
   whom Gregar has no overworld sprite or face of, in their battle sprites
   (sprite list 0, `0x2E` + the navi), standing in animation 0, logging in
   by BN6's battle warp-in (their animation 3) and mirrored to face right.
-  They speak without a face.
+  They speak with a portrait from MegaMan's battle data (`portrait.c`): a
+  40 x 48 window of the same battle sprite, in the frame of a BN6 face, on
+  a ground of their title card's colour.
 
 A guardian's navi index is its ai in the enemy table: HeatMan 1 .. ElementMan
 16, and Colonel 18. Index 17 (and 0, 22) is an unnamed navi with 4000 HP at

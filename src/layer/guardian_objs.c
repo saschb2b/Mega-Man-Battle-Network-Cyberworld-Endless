@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "flags.h"
 #include "guardians.h"
+#include "portrait.h"
 #include "rivals.h"
 #include "loot.h"
 #include "meta.h"
@@ -35,8 +36,15 @@ static int facing(int d) {
 	return anim[d & 3];
 }
 
+/* Guardian `navi`, a face made for him first where Gregar has none of
+ * him (portrait.c), before any of his words name it */
+static const Guardian *guardian_faced(int navi) {
+	guardian_set_face(navi, portrait_face(navi));
+	return guardian(navi);
+}
+
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g) {
-	const Guardian *gd = guardian(o->param);
+	const Guardian *gd = guardian_faced(o->param);
 	Encounter e = make_boss(run.depth, run.biome, o->param);
 	g->navi = o->param;
 	g->version = e.foes[0].version;

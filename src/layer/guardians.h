@@ -61,9 +61,11 @@ int guardian_sprite(int navi);
 /* How guardian `navi` stands on the net facing `face` (the overworld's
  * eighths: 1 up-right, 3 down-right, 5 down-left, 7 up-left). */
 NpcBody guardian_body(int navi, int face);
-/* The face a guardian speaks with (none for Falzar's Navis, whose faces
- * Gregar lacks). */
+/* The face a guardian speaks with: his mugshot, or the one set for him
+ * (Falzar's Navis, whose faces Gregar lacks: a portrait, portrait.c), else
+ * none. */
 int guardian_face(int navi);
+void guardian_set_face(int navi, int face);
 
 /* The area a guardian keeps, for the title card ("Central Area"). */
 const char *guardian_area_name(int biome);
