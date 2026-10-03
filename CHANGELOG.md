@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **"BN5 found" says what it lends:** "BN5 found: its net joins ours".
 - **The program vendor keeps one face.** Her shop window showed BN6's
   orange technician navi beside her own face in the chat and her sprite on
   the map; it now shows hers.

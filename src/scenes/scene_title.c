@@ -685,16 +685,20 @@ static const char *version_words(char *v, size_t n) {
  * the map's "Run saved" box, and gone (nothing had said whether Team
  * Colonel was found) */
 static void found_draw(int x0, int y0) {
-	int t = entries == 1 ? S.t - FOUND_AT : 0;
-	char s[32] = "";
+	int t = entries == 1 ? S.t - FOUND_AT : 0, n = 0;
+	char s[64] = "";
 	for (int i = 0; i < XROM_COUNT; ++i)
 		if (XR[i].data) {
 			size_t m = strlen(s);
 			snprintf(s + m, sizeof s - m, "%s%s", m ? " + " : "", XR[i].layout->tag);
+			++n;
 		}
 	if (t <= 0 || t >= FOUND_LEN || !s[0]) return;
+	/* (and what it lends: "BN5 found" told a playtester nothing of his
+	 * run, session 62; its areas, towns, songs and Navis join the net's,
+	 * docs/MULTIROM.md) */
 	size_t m = strlen(s);
-	snprintf(s + m, sizeof s - m, " found");
+	snprintf(s + m, sizeof s - m, n > 1 ? " found: their nets join ours" : " found: its net joins ours");
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
 }
 
