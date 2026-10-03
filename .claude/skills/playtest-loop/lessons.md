@@ -1813,3 +1813,42 @@ and the session judged the epic on nothing. Before a session that is to
 judge new content, place the persona where it stands (`--dev pieces=` on
 a fresh run, or name a layer and act in the goals), or say where it is
 in the patch notes.
+
+## Session 60: 7/10 (keep playing: yes; recommend: yes)
+
+Run 9 continued (Endless / Storm / HeatCross / threat 1 / HP+) on the
+RegUp and TagChip build: layers 4 and 5 in Green Area, act 2. HeatMan
+burned a cybertree and the blue data past it held RegUP3 (Reg memory 7
+MB); ProtoMan's race won on time but lost on a hit (Chaud 4-9). Stopped
+on layer 5, 140/300 HP.
+
+Confirmed: RegUps in set pieces; the Regular Chip in slot 1 with BN6's
+REG tag and messages; the TagChip intro once; Link Navi obstacles in a
+walkway's mouth, named by MegaMan; L naming set pieces; CONTINUE on a
+fresh layout; MegaMan's NaviCust check of a part on the command line.
+
+Raised: the exit pad warps without asking, and a sensed Rush gap and
+dark warp were lost with it (owner's call: a question at the pad, while
+a sensed set piece is unvisited?); TagChip pairs "over the Reg memory"
+and "no pair fits" (misreads our words made: BN6's rule is a pair under
+60 MB, whatever the Reg memory, sub_81349E8; MegaMan and the mail said
+otherwise, fixed); the dealer tip naming an area's middle layer (fixed:
+its first layers); stops at every crossing of a 2-wide walkway grid
+(fixed: the arrow's way, of the shortest, turns least; legs per walk
+5.47 to 4.87); a + chip as the Regular wasted in slot 1 (MegaMan's
+first RegUp words now say a + chip needs an attack after it). Misread:
+the dark warp "vanishing" as MegaMan walked up (the sprite budget while
+walking). BN6's own: the NaviCust menus' cost.
+
+Beside the loop: the owner's restart after a one-hit guardian win found
+no Cross: a first run given up for a NEW GAME never opened the setup
+(fixed, e5a4006).
+
+Cost: 290 calls.
+
+Loop change: **a rule we state is checked against BN6 before it is
+written.** Two of the session's problems were our own words: the
+TagChip text stated a Reg memory limit BN6 does not have, and the
+persona reported the game breaking it. Before a line names a BN6 rule
+(a limit, a cost, a condition), find the rule in the game's own text or
+the disassembly and cite it in the commit.
