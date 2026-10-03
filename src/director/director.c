@@ -969,12 +969,16 @@ static void area_card(void) {
 	else snprintf(act, sizeof act, "Act %d", act_no);
 	/* the guardian ahead, from the start, so the folder can be set for it
 	 * (as Slay the Spire shows each act's boss), where MegaMan has battled
-	 * him: else "???", as nothing yet says who (docs/META.md, what MegaMan
-	 * knows; his element alone gave SpoutMan away) */
+	 * him, with a "?" where only a Navi on the net has named him (a
+	 * playtester's card said "???" after a CONTINUE past the rumor,
+	 * session 63): else "???", as nothing yet says who (docs/META.md, what
+	 * MegaMan knows; his element alone gave SpoutMan away) */
 	char ahead[48] = "";
 	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer)) {
 		int navi = run.boss_order[biome];
-		snprintf(ahead, sizeof ahead, "Guardian: %s", guardian_known(navi) ? guardian(navi)->name : "???");
+		bool heard = run.side_kind == LAYER_NORMAL && guardian_heard();
+		snprintf(ahead, sizeof ahead, "Guardian: %s%s", guardian_known(navi) || heard ? guardian(navi)->name : "???",
+			!guardian_known(navi) && heard ? "?" : "");
 	}
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())
