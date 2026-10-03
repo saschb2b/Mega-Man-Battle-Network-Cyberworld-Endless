@@ -256,7 +256,7 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Seven more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Eight more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: `tools/trailer.py` plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
@@ -272,7 +272,9 @@ a headless start meets at 100 HP, fought at a playtester's HP), and
 where they find room: 1 purple data, 2 a Rush gap, 4 teleports, 8 a Link
 Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible
 path; `pieces=32` to look at an area's arrow lane and ride it;
-docs/LEVEL_DESIGN.md, Set pieces).
+docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
+as if every panel were seen: a capture of the map and its way, as
+`tools/before_after.py` compares two builds' with it).
 
 ## How the switches work
 

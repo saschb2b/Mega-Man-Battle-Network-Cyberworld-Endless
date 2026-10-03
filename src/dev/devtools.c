@@ -48,6 +48,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "powers")) dev.powers = true;
 		else if (!strcmp(t, "gem")) dev.gem = true;
 		else if (!strcmp(t, "veteran")) dev.veteran = true;
+		else if (!strcmp(t, "mapall")) dev.mapall = true;
 		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
 		else if (!strncmp(t, "hp=", 3)) dev.hp = atoi(t + 3);
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
@@ -183,6 +184,7 @@ uint32_t devtools_keys(uint32_t keys) {
 
 void devtools_update(void) {
 	if (dev.quiet) flag_set(BN6_FLAG_NO_ENCOUNTERS);
+	if (dev.mapall) director_dev_reveal();
 	if (dev.god) {
 		uint16_t max = emu_read16(BN6_NAVI_MAX_HP);
 		if (max && emu_read16(BN6_NAVI_HP) < max) {

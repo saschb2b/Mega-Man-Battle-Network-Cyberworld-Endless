@@ -12,6 +12,14 @@ so a pair shows one spot drawn twice.
 
   python3 tools/before_after.py v0.5.3 --new 0.6.0
   python3 tools/before_after.py v0.5.3 --new 0.6.0 sky nest
+
+OLD may be any commit, and NEW too (--new-ref): a pair then isolates one
+change on a layer both draw alike (a change of LAYER_MAKE between them
+moves the layouts). --pick SHA applies a commit to each older tree before
+it is built, as 4882961's dev steps in --input that a scene's "0:place"
+needs.
+
+  python3 tools/before_after.py 1a0f974 --old-label before --new 0.8.0 --pick 4882961 way
 """
 import argparse
 import os
@@ -54,13 +62,17 @@ SCENES = [
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
 
-def old_binary(tag):
-    """OLD's host binary, built in a worktree of its tag the first time."""
+def old_binary(tag, picks=()):
+    """OLD's host binary, built in a worktree of its tag the first time (the
+    commits `picks` applied to it first, where it lacks them)."""
     tree = os.path.join(ROOT, '.build', 'before', tag)
     binary = os.path.join(tree, 'build', 'host', 'cyberworld')
     if not os.path.exists(binary):
         if not os.path.exists(tree):
             subprocess.run(['git', '-C', ROOT, 'worktree', 'add', '--detach', tree, tag], check=True)
+        for sha in picks:
+            if subprocess.run(['git', '-C', tree, 'merge-base', '--is-ancestor', sha, 'HEAD']).returncode:
+                subprocess.run(['git', '-C', tree, 'cherry-pick', '--no-commit', sha], check=True)
         subprocess.run([sys.executable, os.path.join(tree, 'build.py'), 'host'], check=True)
     return os.path.relpath(binary, ROOT)
 
@@ -105,12 +117,15 @@ def pair(old, new, old_label, new_label):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument('old', help='the release to compare with, its tag (v0.5.3)')
+    ap.add_argument('old', help='the release to compare with, its tag (v0.5.3), or a commit')
     ap.add_argument('--new', default='now', help="this build's label (0.6.0)")
+    ap.add_argument('--old-label', help="OLD's label (its tag without the v)")
+    ap.add_argument('--new-ref', help='a commit to build as NEW, in place of this build')
+    ap.add_argument('--pick', action='append', default=[], help='a commit applied to an older tree before it is built')
     ap.add_argument('names', nargs='*', help='scenes (all)')
     a = ap.parse_args()
-    old = old_binary(a.old)
-    new = os.path.join('build', 'host', 'cyberworld')
+    old = old_binary(a.old, a.pick)
+    new = old_binary(a.new_ref, a.pick) if a.new_ref else os.path.join('build', 'host', 'cyberworld')
     if not os.path.exists(os.path.join(ROOT, new)):
         sys.exit('build this build first: python3 build.py host')
     out = os.path.join(ROOT, 'docs', 'screenshots')
@@ -118,7 +133,7 @@ def main():
         if a.names and name not in a.names:
             continue
         path = os.path.join(out, f'compare-{name}.png')
-        pair(frame(old, args, env, at, name), frame(new, args, env, at, name), a.old.lstrip('v'), a.new).save(path, optimize=True)
+        pair(frame(old, args, env, at, name), frame(new, args, env, at, name), a.old_label or a.old.lstrip('v'), a.new).save(path, optimize=True)
         print('compared', name)
 
 

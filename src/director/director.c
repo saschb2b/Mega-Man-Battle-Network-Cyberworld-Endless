@@ -3014,6 +3014,10 @@ bool director_dev_next_layer(void) {
 	return director_start_layer();
 }
 
+void director_dev_reveal(void) {
+	if (D.active && !D.town) memset(D.seen, 1, sizeof D.seen);
+}
+
 void director_dev_place(int x, int y, int face) {
 	/* (a test's step: MegaMan put down at world (x, y), facing 0-7) */
 	if (!director_on_map()) return;
