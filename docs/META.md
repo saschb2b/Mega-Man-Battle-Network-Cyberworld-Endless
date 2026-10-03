@@ -568,6 +568,31 @@ that).
   Famous's boasts, Dr. Wily blamed for everything, the NaviCust's secret
   buttons.
 
+## DarkChips in BN5 territory (3 October 2026)
+
+Where BN5 dresses an area its battles are BN5's own (docs/MULTIROM.md,
+Guest battles), and BN5's DarkChips come with them, by its own rule:
+power for a run, at a price the run carries (issue #64, the owner's
+decisions).
+
+- **The dialectic** is survival now against strength later: a DarkChip
+  comes into BN5's Custom screen only when MegaMan worries, his HP low
+  after hits, and wins the battle he might have lost, while the act's
+  guardian, a BN6 fight where DarkChips do nothing, waits for him weaker.
+- **The pattern** is a bonus with a drawback (costed power forces
+  commitment, docs/design: principles): the price is the owner's, "a
+  hefty price": each battle a DarkChip is used in lowers MegaMan's max HP
+  by 20, one HPMemory, for the rest of the run. BN5's own -1 is nothing
+  at a run's HP.
+- **Where a run gets them:** BN5's purple ghost-flame objects (its Dark
+  Holes), standing on BN5's layers in the original's look, taken from the
+  player's BN5 ROM as its HeelNavi is. MegaMan names the price before the
+  first is taken, and the player chooses.
+- **Variety, not power, across runs:** nothing of them carries over, not
+  the chips, not their price; a new run starts with none.
+- **Only in BN5 territory:** BN6's battles have no code for them and never
+  offer them.
+
 ## What MegaMan knows (29 September 2026)
 
 Read through the resonance lens (describe the loop without its fiction,
