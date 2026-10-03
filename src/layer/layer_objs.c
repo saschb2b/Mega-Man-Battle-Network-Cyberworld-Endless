@@ -343,14 +343,17 @@ static bool purple_here(void) {
 
 /* A purple data's: what no dealer sells, a chip of the rarest tiers in
  * one of its letters (BN6's hold ElecSword E, Muramasa M, DreamAura U),
- * never one the layer's dealer lists (issue #41). */
+ * never one the layer's dealer lists (issue #41), and never a common or
+ * uncommon one: its Unlocker costs about a layer's zenny, and a
+ * playtester's opened on CrakShot G, which the dealer sells for less
+ * (session 62). */
 static void purple_content(uint8_t out[8], const ShopItem *stock, int nstock) {
 	char code = '*';
 	int id = roll_chip(run.depth, 4, &code);
-	for (int t = 0; t < 8; ++t) {
+	for (int t = 0; t < 16; ++t) {
 		bool sold = false;
 		for (int k = 0; k < nstock; ++k) sold |= stock[k].kind == 2 && stock[k].id == id;
-		if (code != '*' && !sold) break;
+		if (code != '*' && !sold && chip_pool_tier(id) != 0 && chip_pool_tier(id) != 1) break;
 		id = roll_chip(run.depth, 4, &code);
 	}
 	const uint8_t c[8] = { 1, 0x20, 0xFF, (uint8_t)(code == '*' ? 26 : code - 'A'), (uint8_t)id, (uint8_t)(id >> 8), 0, 0 };
@@ -396,6 +399,8 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 		fragment_content(m->content);
 	} else if (o->param == MD_PURPLE) {
 		purple_content(m->content, p->stock, p->nstock);
+		if (emu_debug_on()) fprintf(stderr, "purple: chip %d code %d (tier %d) in the Mystery Data at %d %d\n", m->content[4] | m->content[5] << 8,
+			m->content[3], chip_pool_tier(m->content[4] | m->content[5] << 8), m->x, m->y);
 	} else if (p->key_here && o->param >= 1) {
 		static const uint8_t key[8] = { 4, 0x20, 0xFF, 0xFF, SUB_UNLOCKER, 0, 0, 0 };
 		p->key_here = false;

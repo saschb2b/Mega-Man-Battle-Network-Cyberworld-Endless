@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Purple Mystery Data holds a rare chip or better.** Its Unlocker costs
+  about a layer's zenny, yet a third of purple data held a common or
+  uncommon chip: a playtester carried an Unlocker over two sessions and
+  opened CrakShot G, which the Net Dealer sells for less. Purple data now
+  holds a rare chip, a Mega chip or, deep in a run, a Giga chip. This
+  build makes layers differently, so a CONTINUE starts the layer afresh.
 - **L's directions agree with the screen.**
   - "A long way yet" now means twenty-five panels or more. It started at
     fourteen, and a homepage's whole walk to its exit is sixteen to twenty
