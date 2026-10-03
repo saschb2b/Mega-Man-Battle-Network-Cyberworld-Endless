@@ -1947,3 +1947,67 @@ the code picked by the folder's chips but told the recipe in any code,
 and the newcomer held us to the note. Before a line goes into the notes,
 find the check that showed it (a capture, a replay, a test's number) and
 say no more than that check did.
+
+## Session 63: three at once (kai 8/10, kai2 7/10, kai3 8/10; all would keep playing and recommend, each with a warning)
+
+kai continued run 9 through TenguMan ("the best guardian fight of this
+run", won with the dealer's buys and BlastMan's chip from act 1) into act
+4 in Sky Area; kai2 continued run 10 through Green HP and beat HeatMan
+with SpoutMan's chip, as the dealer's tip said; kai3, the newcomer, beat
+BlastMan in run 2 by learning him over two sessions ("exactly the 'I got
+better' a roguelike should give") and reached act 2 in Aquarium HP.
+
+Confirmed: guardians in their own shape (BlastMan's portrait and lines,
+TenguMan in his battle form), a guardian's battle paying zenny for a
+second copy of his chip, L's distances and "though the way there winds",
+the green arrow to the heal and the exit's words after it, SlipRunr's
+text, the confirmations on No, CONTINUE's layer made afresh, the title's
+BN5 badge, "You" in the map's legend, Chaud's running score.
+
+Raised and fixed in the iteration: the NaviCust reminder five times in
+two layers (kai3), for a program taken off on purpose (kai2), and again
+after the NaviCust (kai): the way back to the map after a battle counted
+as the PET, L's note never marked the layer told, and every reminder
+was the whole speech; now once, then a line where it fits, never for a
+program taken off. A program's fit said only after the pick (kai, kai3:
+the draft now says "fits now" or "fits if we move one" per program,
+from flags the director keeps). The split's menu without its areas
+(kai, kai3: "CircusMan (Sky Area)"). "Leaving already?" starting on No
+where it came first (kai, kai2: our guard for the first purchase took
+it; B's question keeps BN6's Yes). L's arrival words at twelve boxes and
+the post-guardian chain at fourteen calls (kai: L's first words are the
+guardian, the heal and the way, the rest at a second L; HPMemory, chip
+and heal in two boxes). The counter counting data behind a set piece
+with no word of where (kai: L's second words say where). CONTINUE
+forgetting a rumor's guardian, and saying nothing of where it went on
+from (kai3). A beginner's tip on a tenth run, and an invisible-floor
+rumor in an area that hides none (kai2). Faces for Falzar's five came
+in a0c02fb, after kai's pinned build.
+
+Open: walkway junctions, raised by all three (kai2: about 35 calls at
+Green HP's band crossings and one-panel connectors; kai: Judge Tree's
+grid, the arrow flipping at junctions); act 2 in a homepage with little
+to solve (kai2 again, major: the homepages' kit is purple data and
+cubes, and the owner's slow ramp); random fights at a quarter of kai2's
+calls for a Sword folder against back-row viruses; TenguMan's battle
+sprite twice MegaMan's height (kai liked it); the exit pad needing a
+second step (kai3, again).
+
+Misreads: kai2's ScrtData "counted twice" (CONTINUE put the run back at
+the layer's start, count 1, and the same data made it 2 again: right);
+kai3's run tip (L alone on the Custom screen asks to run, BN6's own);
+kai2's fire hits in SlashCross (a Cross breaks on its own weakness,
+Breaker for SlashCross; vanilla); kai3's 1000z for BlastMan (BN6's own
+row pays zenny at a lower Busting Level; ours replaces only his chip
+entries); "homepages are small" (our note, wrong: two playtesters walked
+them as far as any area).
+
+Cost: 829 calls (kai 248, kai2 298, kai3 283), three agents; kai2 and
+kai3 ran past the budget and needed a pace note each.
+
+Loop change: **pick a session's pictures by time, not by number.**
+play.py's picture numbers go on across `--fresh` starts of the same
+name, and a check that took a sheet by index read the previous
+session's pictures (the old reward boxes, after the change), which
+looked like the change failing. Sheets now sort a session's shots by
+modification time and take the newest.
