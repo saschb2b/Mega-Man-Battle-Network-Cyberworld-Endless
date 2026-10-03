@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **BN5's areas fight BN5's own battles.** Where Battle Network 5: Team
+  Colonel sits beside BN6's ROM and dresses an area (ACDC Area, End Area,
+  Nebula Area), that area's random battles are BN5's, in BN5's own engine
+  on a second core: its viruses and their AI, its battle screens. MegaMan
+  goes in with the run's HP and folder, each chip as BN5's chip of the
+  same name (a chip BN5 has none of sits out), and comes back with the HP
+  the battle left and its reward: a chip as BN6's chip of the same name,
+  or zenny. A loss there ends the run. The switch fades to white and
+  flashes into BN5's battle, and after the first one MegaMan says what it
+  was. Desktop, Android, iOS and PortMaster builds; the 3DS and the
+  browser keep BN6's battles.
 - **The program pick says whether each program fits.** After a guardian,
   each program of the NaviCust's draft now says "fits now" or "fits if
   we move one" beside its colour, from your board as it stands; MegaMan
