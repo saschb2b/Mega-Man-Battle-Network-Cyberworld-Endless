@@ -346,8 +346,8 @@ Built so far: the codes (the Net Dealers, the gift and the Chip Traders
 always, Mystery Data and battles half the time; read from the game's first folder as a layer is made,
 kept in the run) and Cross starts (the setup's Cross row, open with that
 Navi's first defeat as a guardian, announced on the summary like a folder;
-the brought Cross's flag is set as the run begins, and a Cross Navi
-deleted later says his data won't fit beside it), and the Library (the
+the brought Cross's flag is set as the run begins, and where a Cross
+Navi is deleted later, MegaMan says the run keeps it), and the Library (the
 profile keeps a bit per chip; the game's Library flags are set from it as
 a run begins and read back at every checkpoint and at the run's end; the
 summary's Library row counts the run's new entries; STD, MEGA and GIGA

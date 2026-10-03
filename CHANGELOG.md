@@ -29,6 +29,11 @@
   which a CONTINUE brings back as you quit, so a layer's "pair of viruses
   in 0:12.00" could come back as "three viruses in 0:14.50". Now the
   layer alone decides them.
+- **A guardian's Cross data no longer sounds like an offer.** With a
+  Cross brought, MegaMan says "We can only carry one Cross down here,
+  Lan, so we keep our SlashCross." and that the next dive can start
+  with the new one; "It won't fit beside our SlashCross" had read as
+  a swap that never came.
 - **The Net Dealer says how many RushFood Rush needs.** His word on a
   Rush gap now says Rush only comes when you hold as many as its panels
   ("when you hold 3 RushFood, and he eats one"); only MegaMan had said

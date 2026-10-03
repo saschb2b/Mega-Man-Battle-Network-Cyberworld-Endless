@@ -81,9 +81,12 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
 		 * the game's word in MegaMan's mouth; a first win opens its start
 		 * for good, said here, where a playtester read "won't fit" as
-		 * lost, and found the start in the setup) */
-		else ADD("%s@M %s's Cross data... It won't fit beside our %s, Lan. We can only carry one Cross down here!%s", k ? "|" : "",
-			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But it's ours now. Next dive, we can start with it!");
+		 * lost, and found the start in the setup; and said as settled,
+		 * the brought one kept: "It won't fit beside our SlashCross" read
+		 * to a playtester as an offer to swap, which never came, session
+		 * 64) */
+		else ADD("%s@M %s's Cross data... We can only carry one Cross down here, Lan, so we keep our %s.%s", k ? "|" : "",
+			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive, we can start with his Cross!");
 	}
 	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
 	 * MegaMan, and Dad lets him use it (once a run) */
