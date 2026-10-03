@@ -1406,6 +1406,54 @@ static int encounter_hp(const Encounter *e) {
 	return total;
 }
 
+/* The rival's duel on the layer being built (docs/RIVAL.md): its squad,
+ * rolled aside from the layer's own rolls, and ProtoMan's time for it. The
+ * squad is the layer seed's alone, not the last battles fought: they steer
+ * a random battle away from their viruses, and a CONTINUE brings them back
+ * as the quit left them, not as MegaMan arrived (a playtester's ProtoMan
+ * "busted a pair of viruses here in 0:12.00", and after a CONTINUE on the
+ * same layer three in 0:14.50, session 64). Its rung and time read the
+ * record, which only a duel's verdict moves, and the layer's duel is done
+ * after one (issue #20). */
+static void duel_roll(void) {
+	uint32_t saved = rng_state();
+	LootMemory fought, none = { -1, -1, 0, 0, 0 };
+	loot_memory(&fought);
+	loot_memory_set(&none);
+	rng_seed(run.layer_seed ^ 0xD0E15EEDu);
+	/* (rung 2: no race, ProtoMan himself, from the third act, where
+	 * MegaMan can stand his hits: his attacks are his 1800 HP version's,
+	 * his HP the act's guardian band at most; before it, he names the act) */
+	layer_objs_duel_rung = profile.duel_won % 3;
+	layer_objs_duel_later = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 && pacing_act(run.depth) < 2;
+	/* (a race's squad is one of the act's own battles: its time is the
+	 * test, not its strength; one above the band deleted a playtester at
+	 * 100 of 140 HP on layer 2, his run over) */
+	D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_NORMAL);
+	/* (and none a race can't hurry: a Quaker is out of reach in the air
+	 * until it lands, so the clock times its hops, not the player; three of
+	 * a playtester's four duels were Quakers, "a Quaker lottery") */
+	for (int tries = 0; layer_objs_duel_rung != 2 && tries < 8 && !duel_race_fair(&D.duel_enc); ++tries)
+		D.duel_enc = make_encounter(run.depth, run.biome, ENC_NORMAL);
+	layer_objs_duel_foes = D.duel_enc.nfoes;
+	if (emu_debug_on()) {
+		fprintf(stderr, "duel squad (rung %d):", layer_objs_duel_rung);
+		for (int k = 0; k < D.duel_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.duel_enc.foes[k].kind, D.duel_enc.foes[k].family, D.duel_enc.foes[k].version);
+		fprintf(stderr, "\n");
+	}
+	/* (the netbattle's ProtoMan: half the act's guardian band's top at
+	 * most, as his attacks stay his 1800 HP version's, ten times a
+	 * guardian's damage a second: at the top, 1000 in act 3, a playtester's
+	 * MegaMan ran after one hand, docs/RIVAL.md) */
+	int lo, hi;
+	pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
+	D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
+	loot_memory_set(&fought);
+	rng_seed(saved);
+	layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
+	D.duel_call_due = true;
+}
+
 /* A layer takes a second to make on a New 3DS, seconds more where a new
  * area's tiles are learned: where the last took long, the next one's
  * making is named over the still picture as MegaMan leaves a layer, or the
@@ -1533,46 +1581,9 @@ static bool build_layer(void) {
 	D.layer_act = run.side_kind == LAYER_NORMAL ? (run.depth - 1) / 3 + 1 : 0;
 	layer_objs_dealer_again = D.layer_act && D.dealer_act == D.layer_act;
 	navicust_set_spins(meta_spins());   /* (the draft fits what turns) */
-	/* the rival's duel (docs/RIVAL.md): its squad, rolled aside from the
-	 * layer's own rolls, and ProtoMan's time for it */
 	D.duel_call_due = false;
 	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].type == OBJ_DUEL) {
-			uint32_t saved = rng_state();
-			rng_seed(run.layer_seed ^ 0xD0E15EEDu);
-			/* (rung 2: no race, ProtoMan himself, from the third act, where
-			 * MegaMan can stand his hits: his attacks are his 1800 HP
-			 * version's, his HP the act's guardian band at most; before it,
-			 * he names the act) */
-			layer_objs_duel_rung = profile.duel_won % 3;
-			layer_objs_duel_later = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 && pacing_act(run.depth) < 2;
-			/* (a race's squad is one of the act's own battles: its time is
-			 * the test, not its strength; one above the band deleted a
-			 * playtester at 100 of 140 HP on layer 2, his run over) */
-			D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_NORMAL);
-			/* (and none a race can't hurry: a Quaker is out of reach in the
-			 * air until it lands, so the clock times its hops, not the
-			 * player; three of a playtester's four duels were Quakers, "a
-			 * Quaker lottery") */
-			for (int tries = 0; layer_objs_duel_rung != 2 && tries < 8 && !duel_race_fair(&D.duel_enc); ++tries)
-				D.duel_enc = make_encounter(run.depth, run.biome, ENC_NORMAL);
-			layer_objs_duel_foes = D.duel_enc.nfoes;
-			if (emu_debug_on()) {
-				fprintf(stderr, "duel squad (rung %d):", layer_objs_duel_rung);
-				for (int k = 0; k < D.duel_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.duel_enc.foes[k].kind, D.duel_enc.foes[k].family, D.duel_enc.foes[k].version);
-				fprintf(stderr, "\n");
-			}
-			/* (the netbattle's ProtoMan: half the act's guardian band's top
-			 * at most, as his attacks stay his 1800 HP version's, ten times
-			 * a guardian's damage a second: at the top, 1000 in act 3, a
-			 * playtester's MegaMan ran after one hand, docs/RIVAL.md) */
-			int lo, hi;
-			pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
-			D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
-			rng_seed(saved);
-			layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
-			D.duel_call_due = true;
-		}
+		if (layer.obj[i].type == OBJ_DUEL) duel_roll();
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
 	D.chosen = D.choices_due = 0;

@@ -11,6 +11,11 @@
   hear it!" for the rest. Where L had spoken on the layer before the
   save, the first L after a CONTINUE said the rest at once, a dozen
   boxes, and nothing of where you were.
+- **ProtoMan's record on a layer stays the same through a CONTINUE.** His
+  squad and his time to beat leaned on the last battles you had fought,
+  which a CONTINUE brings back as you quit, so a layer's "pair of viruses
+  in 0:12.00" could come back as "three viruses in 0:14.50". Now the
+  layer alone decides them.
 - **A layer no longer turns black as MegaMan arrives.** A layer with a
   Link Navi obstacle left its talk on the game map it used; a later layer
   on the same map without one kept pointing at it after newer layers had

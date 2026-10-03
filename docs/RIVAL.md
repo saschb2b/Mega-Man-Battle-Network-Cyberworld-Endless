@@ -76,9 +76,13 @@ clearance opens), which only matter to a player who plays on.
    delete us, the dive's over, so let's be at full HP."). The choice
    starts on No. ProtoMan greets MegaMan as the old rival he is.
 3. **The squad.** One of the act's own formations, in its band: the same
-   viruses ProtoMan busted, fixed by the layer's seed. The time is the
-   test, not the squad's strength (one above the band deleted a
-   playtester at 100 of 140 HP on layer 2, his run over).
+   viruses ProtoMan busted, fixed by the layer's seed alone. Not by the
+   battles fought before it, which keep the random battles from
+   repeating themselves: a CONTINUE brings those back as the quit left
+   them, and a playtester's "pair of viruses in 0:12.00" came back as
+   three in 0:14.50 (session 64). The time is the test, not the squad's
+   strength (one above the band deleted a playtester at 100 of 140 HP on
+   layer 2, his run over).
 4. **ProtoMan's time.** Set from the squad's HP so that a good hand beats
    it and a slow one does not (4 s and one for each 20 HP: a playtester's
    act 1 hand took 27.5 s to the 11 s of 3 s and one for each 30), then
