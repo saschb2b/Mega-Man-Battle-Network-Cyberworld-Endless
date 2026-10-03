@@ -6,6 +6,11 @@
   run is saved; a quit during the fight goes on, at CONTINUE, from the
   arena's door with the HP he walked in with, where it went back to the
   layer's start before.
+- **L starts over after a CONTINUE.** Its first words are again where
+  you are, the guardian, the heal and the way on, then "Press L again to
+  hear it!" for the rest. Where L had spoken on the layer before the
+  save, the first L after a CONTINUE said the rest at once, a dozen
+  boxes, and nothing of where you were.
 - **A layer no longer turns black as MegaMan arrives.** A layer with a
   Link Navi obstacle left its talk on the game map it used; a later layer
   on the same map without one kept pointing at it after newer layers had

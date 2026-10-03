@@ -167,9 +167,10 @@ the layer's flags and Mystery Data picks cleared (its RAM would not match
 this build's objects). `battle.sav` keeps what the random battles
 remember of the last two (their virus families, loot.h), so the first after
 a CONTINUE brings none of them either. `run.seen` beside it keeps the map's panels seen so
-far, and event flag `0x144E` in the state that L has told where they are
-(`0x144F`: that the Net Dealer has said his words, so a later talk is a
-line and the list; `0x1450` the same for the NaviCust vendor, `0x1451` for a
+far, and event flag `0x144E` in the state that L has told where they are,
+which CONTINUE clears so that L starts over (`0x144F`: that the Net
+Dealer has said his words, so a later talk is a line and the list;
+`0x1450` the same for the NaviCust vendor, `0x1451` for a
 Recovery Mr. Prog, whose heal is then one box; `0x1452` that the Guardian
 Data's second way on was taken, which the exit pad's warp reads; `0x1453`
 that the layer's collector's vault gave its chip; `0x1454` that the

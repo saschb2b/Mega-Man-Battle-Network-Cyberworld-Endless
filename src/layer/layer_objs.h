@@ -17,8 +17,8 @@
 #define LAYER_MAX_CHOICES 8
 /* The first layer's gift was chosen. */
 #define LAYER_GIFT_FLAG 0x144D
-/* L has told where they are on this layer (in the saved RAM, so a CONTINUE
- * mid-layer does not tell it all again). */
+/* L has told where they are on this layer, so its next L says the rest
+ * (a CONTINUE clears it: L starts over there). */
 #define LAYER_TOLD_FLAG 0x144E
 /* The Net Dealer has said his words on this layer (a later talk is a line
  * and the list). */

@@ -3525,6 +3525,11 @@ bool director_resume(void) {
 		layer_objs_shops(&D.objs, same);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
 		official_sync(true);
+		/* L starts over, its first words and then the rest at a second L:
+		 * the state kept that L had spoken, and a playtester's first L
+		 * after a CONTINUE said the rest at once, a dozen boxes with no
+		 * word of where they were (session 64) */
+		flag_clear(LAYER_TOLD_FLAG);
 		if (!same) {
 			/* another build's layer: its flags and Mystery Data picks
 			 * forgotten, and in from the start */
