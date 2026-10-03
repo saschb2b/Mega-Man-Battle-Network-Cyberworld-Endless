@@ -1899,3 +1899,51 @@ what a continued one skips (act 1's set pieces), and all three agreeing on
 the counters made that fix the iteration's first. A fix I wrote from a
 persona's statement of a BN6 rule (the + chip) was wrong: verify rules in
 the game, as the session-60 entry said, before writing them.
+
+## Session 62: three at once again (kai 6/10, kai2 7/10, kai3 8/10; all would keep playing and recommend, kai with a warning)
+
+kai continued run 9 into act 3 (Judge Tree Comp's catwalks, TenguMan's
+layer); kai2 continued run 10 through SpoutMan ("the best fight in
+weeks": the briefing taught the fight and the fight paid it back) into
+act 2 in Green HP; kai3, the newcomer, began run 2 and reached BlastMan
+at 276/400 when his calls ran out.
+
+Confirmed: the map's crystals for seen data, the Unlocker's purple mark,
+the Pack line after a purchase, a + chip after its attack, the split
+naming its areas, the guardian revealed by signal, rumour and hedge.
+
+Raised and fixed in the iteration: found and won chips went to the Pack
+in silence (kai3: the line now comes at the first chip from anywhere); a
+whisper told LifeSword in H to a folder of S codes (kai3: the folder's
+code first); two SpoutMan * from one guardian (kai2: his battle pays an
+Unlocker's price in zenny instead); purple data opened on CrakShot G
+(kai2: rare chips and better only); "a long way yet" for a homepage's
+whole walk, "far off" for ProtoMan four panels away (kai2, kai3: far from
+25 panels, a winding walk named); the arrow led to the heal unmarked
+(kai: green, and the exit's words after it say where it lies); "our
+duel" for a race (kai); SlipRunr's pick text (kai2: BN6's slide is
+vanilla, the text now says so); the vendor's two faces, the setup's
+frame, "BN5 found" (kai3, kai). Beside them, at the owner's ask, every
+guardian now stands in his own shape (seven had stood as a HeelNavi).
+
+Open: Judge Tree's catwalk maze (kai: 33 calls four panels from the
+exit, a one-panel link from a 2x2 joint to the exit's platform); L's
+arrival briefing at about 16 boxes on a veteran's layer (kai); act 2 in a
+homepage with only purple data (kai2: the homepages' own kit and the
+owner's slow ramp, said in the notes); the split's pick taken by a batched
+A (kai2); a tip navi on a narrow corner of the way (kai3); faces for
+Falzar's five, whom Gregar has none of.
+
+Misreads: layer 4's "early" pad was its real exit (a homepage's walk is
+16 to 20 panels); CONTINUE resuming mid-layer (the patch note's restart
+was a one-time note); "Are you sure?" starting on No (our guard against
+A's paced through the dealer's words).
+
+Cost: 844 calls (kai 290, kai2 254, kai3 300), three agents.
+
+Loop change: **a patch note claims only what was checked in the game.**
+The notes said "Rumors tell only Program Advances your folder can make";
+the code picked by the folder's chips but told the recipe in any code,
+and the newcomer held us to the note. Before a line goes into the notes,
+find the check that showed it (a capture, a replay, a test's number) and
+say no more than that check did.
