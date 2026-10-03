@@ -2011,3 +2011,59 @@ name, and a check that took a sheet by index read the previous
 session's pictures (the old reward boxes, after the change), which
 looked like the change failing. Sheets now sort a session's shots by
 modification time and take the newest.
+
+## Session 64: three at once (kai 6/10, kai2 7/10, kai3 9/10; all would keep playing and recommend, kai and kai2 with a warning)
+
+kai continued run 9 through layers 10 and 11 (ChargMAX "does exactly
+what its line says", HeatMan's Cross burning the way to a RegUP3, the
+cleanest duel of the run, Chaud's vault) and lost all of layer 11 to a
+black screen at its exit pad; restarted, it reached CircusMan EX and
+called his tent's cage (105 HP, no way out) and his 1200 HP a wall.
+kai2 continued run 10 through act 3 in Aquarium HP (a purple lock, the
+dark warp into the Undernet's copy, a P-Code), met the same black screen
+leaving that copy, lost 11 calls at one band junction, and stopped at
+TomahawkMan at 740 HP after the rumor chain ("can't stand Fire chips")
+paid off in a doubled FireHit2. kai3, the newcomer, beat SpoutMan with a
+plan three sessions long (the first dealer's tip, Chaud's clearance and
+Chip Order, DolThdr2 for 300): its best session, 9/10.
+
+Confirmed: L's first words split on fresh layers ("Press L again to hear
+it!") and the second L saying where unseen data lies ("behind the Link
+Navi's obstacle", "across the gap by the bone panels"); no NaviCust
+reminder after battles or for a program taken off; "Leaving already?" on
+Yes; "Pack"; the red bug note at the RUN; the split's areas; HPMemory,
+chip and heal in two boxes; Falzar's Navis with portraits; "From the
+layer's start".
+
+Raised and fixed in the iteration: the black screen (kai, kai2: both one
+bug). A layer with a Link Navi obstacle pointed its map's text archive
+and check table into a half of the layer space; a later layer on that
+map without one left them, the half was overwritten, and the game's
+decompression of the archive on arrival ran 15 MB through EWRAM. Found
+by replaying kai2's boot on a throwaway build of the pinned commit that
+printed, each frame of the warp, the PC, registers, stack and then the
+pointers the map load reads.
+
+Open: walkway bands and junctions (all three again, about 25 calls each;
+the arrow's change for bands came after the pinned build); CircusMan
+EX's tent and HP for a threat-1 run (kai); a Navi chip winning
+ProtoMan's race by freezing the clock (kai3); quitting a guardian fight
+as a free retry (kai, unverified); the reusable heal taking the
+pressure off HP (kai3); "Good job, Lan!" after the RUN's red note.
+
+Misreads and old saves: ChargMAX could not fit beside HP+100 (true: two
+blue plus parts off the command line always touch on a 5x4 board; the
+pick's fit counts it since 38550c6, after the pinned build); SlipRunr's
+reminder for a program kai2 took off on the build before the director
+tracked removals; "piercng" is BN6's own description.
+
+Cost: 862 calls (kai 274, kai2 298, kai3 290), three agents.
+
+Loop change: **a black screen is replayed on a trace build before any
+guess.** Both crashes looked like "after a battle" and were not: the
+trace (a worktree at the pinned commit, a TRACE block in
+director_update printing `emu_debug_reg` and the stack per frame of a
+warp) showed the BIOS decompressing the map's text archive from a
+garbage header, and the table entry behind it. And "it worked after a
+restart" points at state accumulated in the ROM copy, which a CONTINUE
+builds afresh: look there first.
