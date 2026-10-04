@@ -155,6 +155,12 @@ static uint16_t rd16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1)
 static uint32_t rd32(uint32_t a) { return core->rawRead32(core, a, -1); }
 static void wr16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
 
+uint8_t guest_read8(uint32_t a) { return core ? rd8(a) : 0; }
+uint16_t guest_read16(uint32_t a) { return core ? rd16(a) : 0; }
+uint32_t guest_read32(uint32_t a) { return core ? rd32(a) : 0; }
+void guest_write16(uint32_t a, uint16_t v) { if (core) wr16(a, v); }
+int guest_chip_bn6(int id) { return id > 0 && id < BN5_CHIPS ? from_bn5[id] : 0; }
+
 /* The deck's compaction, replaced (BN5_COMPACT): as BN5's, the live chips
  * to the front, 0xFFFF after; but a DarkChip stays live only where BN5's
  * worried rule could have put it (at the hand's end while MegaMan is
@@ -489,8 +495,6 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 
 bool guest_active(void) { return active; }
 
-bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_CUSTOM; }
-
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
 
 int guest_custom_gauge(void) {
@@ -601,7 +605,6 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 }
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }
 bool guest_active(void) { return false; }
-bool guest_custom_screen(void) { return false; }
 bool guest_on_screen(void) { return false; }
 bool guest_fight_hp(int *hp, int *max) { (void)hp; (void)max; return false; }
 int guest_custom_gauge(void) { return -1; }
@@ -609,5 +612,10 @@ void guest_frame(uint32_t keys) { (void)keys; }
 void guest_frame_quiet(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
 bool guest_take_result(GuestResult *out) { (void)out; return false; }
+uint8_t guest_read8(uint32_t a) { (void)a; return 0; }
+uint16_t guest_read16(uint32_t a) { (void)a; return 0; }
+uint32_t guest_read32(uint32_t a) { (void)a; return 0; }
+void guest_write16(uint32_t a, uint16_t v) { (void)a; (void)v; }
+int guest_chip_bn6(int id) { (void)id; return 0; }
 
 #endif

@@ -431,7 +431,15 @@ of 44 virus battles and reached act 1's guardian in 11 runs, but beat him
 once: 400-600 HP against MegaMan's 100. `CYBERWORLD_AUTOPILOT=weak` keeps
 the first autopilot's blind button rhythm and walk, which the docs'
 pictures are timed by, and keeps enemies at 1 HP, so what follows a won
-guardian battle can be tested.
+guardian battle can be tested. In a battle on the guest core (docs/
+MULTIROM.md, Guest battles) both fight as in BN6's, from BN5's memory,
+which lays the battle out as BN6's does at its own addresses
+(`src/emu/bn5.h`, docs/ROM_DATA.md); the autopilot never picks a
+DarkChip. Over seeds 1-12 in ACDC Area, End Area and Nebula Area
+(`--net-biome x0`, `x2`, `x3`, 15000 frames) it won 99 of 100 guest
+battles (a BugTank in the back column outlasted it on a grass field),
+where the button pattern it pressed there before was deleted in seed 1's
+first; `weak`, BN5's viruses at 1 HP, won all 144 of its own.
 `tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position,
 map and the hooks' hits so far every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.

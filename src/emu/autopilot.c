@@ -3,24 +3,64 @@
  * hurt, and holds the pad toward the next panel's centre. In battles it
  * reads the fight: the chips that go together on the Custom screen, each
  * used from a panel where it reaches an enemy, attacks stepped away from,
- * the buster charged in between. In text it taps A. Testing only. */
+ * the buster charged in between; in an older net's battle on the guest
+ * core the same, from its game's memory (bn5.h). In text it taps A.
+ * Testing only. */
 #include "autopilot.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn5.h"
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "data.h"
 #include "director.h"
 #include "emu.h"
+#include "guest.h"
 #include "net.h"
 #include "netmap.h"
 #include "run.h"
 #include "town.h"
 
 bool autopilot_on(void) { return getenv("CYBERWORLD_AUTOPILOT") != NULL; }
+
+/* A battle's memory as the fight reads it: BN6's on its own core, or BN5's
+ * on the guest's, which lays its battle out as BN6's (its objects' fields,
+ * its Custom screen's, its deck's) at its own addresses, its panels 0x24
+ * long with their flags further in, and only 16 viruses (bn5.h) */
+typedef struct {
+	uint8_t (*r8)(uint32_t);
+	uint16_t (*r16)(uint32_t);
+	uint32_t (*r32)(uint32_t);
+	void (*w16)(uint32_t, uint16_t);
+	int (*chip)(int id);   /* a chip id of its game as BN6's (the guest's by name), 0 for none */
+	uint32_t gamestate, phase, timer, gauge;
+	uint32_t window;       /* the Custom screen's window as it slides in; 0: its slide counted in frames (CUSTOM_SLIDE) */
+	uint32_t hand, cursor, picked, deck;
+	uint32_t panels, panel_size, panel_flags;
+	uint32_t t1, t1_count, t3, t3_count;
+	int ready;             /* MegaMan's action when he can act */
+} Battle;
+
+static void bn6_write16(uint32_t a, uint16_t v) {
+	uint8_t b[2] = { (uint8_t)v, (uint8_t)(v >> 8) };
+	emu_write(a, b, 2);
+}
+static int same_chip(int id) { return id; }
+
+static const Battle BN6_BATTLE = {
+	emu_read8, emu_read16, emu_read32, bn6_write16, same_chip, BN6_GAMESTATE, BN6_BATTLE_PHASE, BN6_BATTLE_TIMER, BN6_CUSTOM_GAUGE, 0,
+	BN6_CUSTOM_HAND, BN6_CUSTOM_CURSOR, BN6_CUSTOM_PICKED, BN6_BATTLE_DECK, BN6_FIELD_PANELS, BN6_PANEL_SIZE, BN6_PANEL_FLAGS,
+	BN6_T1_OBJECTS, BN6_T1_COUNT, BN6_T3_OBJECTS, BN6_T3_COUNT, BN6_MEGAMAN_READY,
+};
+static const Battle BN5_BATTLE = {
+	guest_read8, guest_read16, guest_read32, guest_write16, guest_chip_bn6, BN5_GAMESTATE, BN5_BATTLE_PHASE, BN5_BATTLE_TIMER, BN5_CUSTOM_GAUGE,
+	BN5_CUSTOM_WINDOW, BN5_CUSTOM_HAND, BN5_CUSTOM_CURSOR, BN5_CUSTOM_PICKED, BN5_BATTLE_DECK, BN5_FIELD_PANELS, BN5_PANEL_SIZE, BN5_PANEL_FLAGS,
+	BN5_T1_OBJECTS, BN5_T1_COUNT, BN5_T3_OBJECTS, BN5_T3_COUNT, BN5_MEGAMAN_READY,
+};
+static const Battle *B = &BN6_BATTLE;
 
 /* a solid object (a talker) stands on the panel */
 static bool blocked(int x, int y) {
@@ -65,9 +105,11 @@ static int next_panel(int sx, int sy, int tx, int ty, int *nx, int *ny) {
 
 /* CYBERWORLD_AUTOPILOT=weak: enemies keep 1 HP, so every battle is won and
  * what follows a win (a guardian's reward, the exit opening) can be tested. */
-#define T1_OBJECTS BN6_T1_OBJECTS
 #define T1_SIZE    BN6_T1_SIZE
-#define T1_COUNT   BN6_T1_COUNT
+#define T1_MOST    BN6_T1_COUNT   /* (the most of either game's) */
+
+/* battle object i, of the virus kind (T1) */
+static uint32_t t1(uint32_t i) { return B->t1 + i * T1_SIZE; }
 
 static bool weak(void) {
 	const char *how = getenv("CYBERWORLD_AUTOPILOT");
@@ -75,17 +117,17 @@ static bool weak(void) {
 }
 
 /* A battle object that is in play: flag bit 0 of its header, HP left. */
-static bool alive(uint32_t o) { return (emu_read8(o) & 1) && emu_read16(o + BN6_T1_HP) > 0; }
+static bool alive(uint32_t o) { return (B->r8(o) & 1) && B->r16(o + BN6_T1_HP) > 0; }
 
 /* Up or down to MegaMan's row towards the nearest enemy's, 0 when aligned
  * (PanelY at +0x13, Alliance at +0x16). */
 static uint32_t toward_enemy_row(void) {
 	int mine = -1, theirs = -1;
-	for (uint32_t i = 0; i < T1_COUNT; ++i) {
-		uint32_t o = T1_OBJECTS + i * T1_SIZE;
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
 		if (!alive(o)) continue;
-		int row = emu_read8(o + BN6_T1_PANEL_Y);
-		if (emu_read8(o + BN6_T1_ALLIANCE) == 0) { if (mine < 0) mine = row; }
+		int row = B->r8(o + BN6_T1_PANEL_Y);
+		if (B->r8(o + BN6_T1_ALLIANCE) == 0) { if (mine < 0) mine = row; }
 		else if (theirs < 0 || abs(row - mine) < abs(theirs - mine)) theirs = row;
 	}
 	if (mine < 0 || theirs < 0 || mine == theirs) return 0;
@@ -101,18 +143,13 @@ static uint32_t toward_enemy_row(void) {
 static uint32_t battle_frames;   /* off the map in a row */
 
 static void weaken_enemies(bool finish) {
-	for (uint32_t i = 0; i < T1_COUNT; ++i) {
-		uint32_t o = T1_OBJECTS + i * T1_SIZE;
-		if (!(emu_read8(o) & 1)) continue;
-		int alliance = emu_read8(o + BN6_T1_ALLIANCE), hp = emu_read16(o + BN6_T1_HP), max = emu_read16(o + BN6_T1_MAX_HP);
-		uint8_t v[2] = { 1, 0 };
-		if (alliance == 0 && hp > 0 && hp < 60) {
-			int full = max > hp ? max : 100;
-			v[0] = (uint8_t)full; v[1] = (uint8_t)(full >> 8);
-			emu_write(o + BN6_T1_HP, v, 2);
-		}
-		if (alliance == 1 && finish) { v[0] = 0; emu_write(o + BN6_T1_HP, v, 2); }
-		else if (alliance == 1 && hp > 1) emu_write(o + BN6_T1_HP, v, 2);
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		if (!(B->r8(o) & 1)) continue;
+		int alliance = B->r8(o + BN6_T1_ALLIANCE), hp = B->r16(o + BN6_T1_HP), max = B->r16(o + BN6_T1_MAX_HP);
+		if (alliance == 0 && hp > 0 && hp < 60) B->w16(o + BN6_T1_HP, (uint16_t)(max > hp ? max : 100));
+		if (alliance == 1 && finish) B->w16(o + BN6_T1_HP, 0);
+		else if (alliance == 1 && hp > 1) B->w16(o + BN6_T1_HP, 1);
 	}
 }
 
@@ -148,20 +185,20 @@ static uint32_t rhythm_keys(uint32_t frame) {
 
 /* MegaMan's battle object, 0 if none is in play */
 static uint32_t megaman(void) {
-	for (uint32_t i = 0; i < T1_COUNT; ++i) {
-		uint32_t o = T1_OBJECTS + i * T1_SIZE;
-		if (alive(o) && emu_read8(o + BN6_T1_ALLIANCE) == 0) return o;
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		if (alive(o) && B->r8(o + BN6_T1_ALLIANCE) == 0) return o;
 	}
 	return 0;
 }
 
-static uint32_t panel(int x, int y) { return BN6_FIELD_PANELS + (uint32_t)(y * 8 + x) * BN6_PANEL_SIZE; }
+static uint32_t panel(int x, int y) { return B->panels + (uint32_t)(y * 8 + x) * B->panel_size; }
 
 /* Panel (x, y) for MegaMan: 0 not his side's or a hole, 1 his, 2 his and
  * poison, which drains him while he stands on it */
 static int panel_of(int x, int y) {
-	if (x < 1 || x > 6 || y < 1 || y > 3 || emu_read8(panel(x, y) + BN6_PANEL_ALLIANCE) != 0) return 0;
-	int type = emu_read8(panel(x, y) + BN6_PANEL_TYPE);
+	if (x < 1 || x > 6 || y < 1 || y > 3 || B->r8(panel(x, y) + BN6_PANEL_ALLIANCE) != 0) return 0;
+	int type = B->r8(panel(x, y) + BN6_PANEL_TYPE);
 	return type <= BN6_PANEL_HOLE ? 0 : type == BN6_PANEL_POISON ? 2 : 1;
 }
 
@@ -184,13 +221,13 @@ static bool chip_reach(int kind, int *lo, int *hi, int *rows) {
 }
 
 /* The frames each battle object has stood on its panel */
-static uint16_t foe_still[T1_COUNT];
-static uint8_t foe_at[T1_COUNT];
+static uint16_t foe_still[T1_MOST];
+static uint8_t foe_at[T1_MOST];
 
 static void watch_still(void) {
-	for (uint32_t i = 0; i < T1_COUNT; ++i) {
-		uint32_t o = T1_OBJECTS + i * T1_SIZE;
-		uint8_t at = (uint8_t)(emu_read8(o + BN6_T1_PANEL_Y) << 4 | emu_read8(o + BN6_T1_PANEL_X));
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		uint8_t at = (uint8_t)(B->r8(o + BN6_T1_PANEL_Y) << 4 | B->r8(o + BN6_T1_PANEL_X));
 		foe_still[i] = at == foe_at[i] && alive(o) ? (uint16_t)(foe_still[i] < 0xFFFF ? foe_still[i] + 1 : foe_still[i]) : 0;
 		foe_at[i] = at;
 	}
@@ -202,10 +239,10 @@ static void watch_still(void) {
 static bool reaches(int x, int y, int lo, int hi, int rows, bool settled, bool *in_row) {
 	bool hit = false;
 	*in_row = false;
-	for (uint32_t i = 0; i < T1_COUNT; ++i) {
-		uint32_t o = T1_OBJECTS + i * T1_SIZE;
-		if (!alive(o) || emu_read8(o + BN6_T1_ALLIANCE) == 0) continue;
-		int dx = emu_read8(o + BN6_T1_PANEL_X) - x, dy = emu_read8(o + BN6_T1_PANEL_Y) - y;
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		if (!alive(o) || B->r8(o + BN6_T1_ALLIANCE) == 0) continue;
+		int dx = B->r8(o + BN6_T1_PANEL_X) - x, dy = B->r8(o + BN6_T1_PANEL_Y) - y;
 		if (dy == 0) *in_row = true;
 		if (dx >= lo && dx <= hi && abs(dy) <= rows && (!settled || foe_still[i] >= SETTLED)) hit = true;
 	}
@@ -223,15 +260,15 @@ static bool reaches(int x, int y, int lo, int hi, int rows, bool settled, bool *
 #define DANGER_FAR  20
 
 static int danger(int x, int y) {
-	if (emu_read32(panel(x, y) + BN6_PANEL_FLAGS) & BN6_PANEL_STRUCK) return DANGER_ON;
+	if (B->r32(panel(x, y) + B->panel_flags) & BN6_PANEL_STRUCK) return DANGER_ON;
 	int d = 0;
 	for (int ax = x + 1; ax <= 6; ++ax)
-		if (emu_read32(panel(ax, y) + BN6_PANEL_FLAGS) & BN6_PANEL_STRUCK) { d = ax - x <= 2 ? DANGER_NEAR : DANGER_FAR; break; }
-	for (uint32_t i = 0; i < BN6_T3_COUNT; ++i) {
-		uint32_t o = BN6_T3_OBJECTS + i * T1_SIZE;
-		int ox = emu_read8(o + BN6_T1_PANEL_X), oy = emu_read8(o + BN6_T1_PANEL_Y);
-		if (!(emu_read8(o) & 1) || emu_read8(o + BN6_T1_ALLIANCE) == 0 || ox < 1 || ox > 6) continue;
-		if ((ox == x && oy == y) || (emu_read8(o + BN6_T1_FUTURE_X) == x && emu_read8(o + BN6_T1_FUTURE_Y) == y)) return DANGER_ON;
+		if (B->r32(panel(ax, y) + B->panel_flags) & BN6_PANEL_STRUCK) { d = ax - x <= 2 ? DANGER_NEAR : DANGER_FAR; break; }
+	for (uint32_t i = 0; i < B->t3_count; ++i) {
+		uint32_t o = B->t3 + i * T1_SIZE;
+		int ox = B->r8(o + BN6_T1_PANEL_X), oy = B->r8(o + BN6_T1_PANEL_Y);
+		if (!(B->r8(o) & 1) || B->r8(o + BN6_T1_ALLIANCE) == 0 || ox < 1 || ox > 6) continue;
+		if ((ox == x && oy == y) || (B->r8(o + BN6_T1_FUTURE_X) == x && B->r8(o + BN6_T1_FUTURE_Y) == y)) return DANGER_ON;
 		int near = ox < x ? 0 : oy == y ? (ox - x <= 2 ? DANGER_NEAR : DANGER_FAR) : abs(oy - y) == 1 && ox - x <= 1 ? DANGER_NEAR : 0;
 		if (near > d) d = near;
 	}
@@ -262,7 +299,7 @@ static bool spot(int kind, int col, int row, bool bold, int *tx, int *ty) {
 			bool in_row, hit = aims && reaches(x, y, lo, hi, rows, x != col || y != row, &in_row);
 			if (!aims) reaches(x, y, 1, 5, 0, false, &in_row);
 			int d = danger(x, y), cost = abs(x - col) + abs(y - row) + (bold && hit && d < DANGER_ON ? 0 : d);
-			cost += p == 2 ? 1000 : emu_read8(panel(x, y) + BN6_PANEL_TYPE) != BN6_PANEL_PLAIN ? 200 : 0;
+			cost += p == 2 ? 1000 : B->r8(panel(x, y) + BN6_PANEL_TYPE) != BN6_PANEL_PLAIN ? 200 : 0;
 			if (!hit) cost += 100 + (in_row ? 40 : 0) + x * 2;
 			if (best < 0 || cost < best) { best = cost; *tx = x; *ty = y; strike = hit; }
 		}
@@ -308,16 +345,27 @@ static int chip_worth(int id, int hurt) {
  * enemies never came near for stood a whole battle); a grab first, then
  * the attacks (those that hit from anywhere before those that need a
  * column), the Atk+ after them, a recovery last */
+/* The hand's chip i as BN6's (chip | code << 9; the guest's by name, in
+ * its own code), 0xFFFF for none, and for one BN6 has none of: an older
+ * net's DarkChip is never picked, as it costs the run max HP (docs/
+ * META.md) */
+static int hand_chip(int i) {
+	int c = B->r16(B->deck + 2 * (uint32_t)i);
+	if (c == 0xFFFF) return c;
+	int id = B->chip(c & 0x1FF);
+	return id || !(c & 0x1FF) ? (c & ~0x1FF) | id : 0xFFFF;
+}
+
 static int plan_picks(int *slots) {
-	int n = emu_read8(BN6_CUSTOM_HAND), hurt = 0, best = 0, nbest = 0;
+	int n = B->r8(B->hand), hurt = 0, best = 0, nbest = 0;
 	uint32_t me = megaman();
 	if (n > 5) n = 5;   /* (the top row) */
-	if (me) hurt = emu_read16(me + BN6_T1_MAX_HP) - emu_read16(me + BN6_T1_HP);
+	if (me) hurt = B->r16(me + BN6_T1_MAX_HP) - B->r16(me + BN6_T1_HP);
 	for (int g = 0; g < 26 + n; ++g) {
 		int bucket[5][5], k[5] = { 0 }, value = 0, plus = 0, lo, hi, rows;
-		int name = g < 26 ? -1 : emu_read16(BN6_BATTLE_DECK + 2 * (uint32_t)(g - 26)) & 0x1FF;
+		int name = g < 26 ? -1 : hand_chip(g - 26) & 0x1FF;
 		for (int i = 0; i < n; ++i) {
-			int c = emu_read16(BN6_BATTLE_DECK + 2 * (uint32_t)i), id = c & 0x1FF, code = c >> 9, kind = chip_kind(id), at;
+			int c = hand_chip(i), id = c & 0x1FF, code = c >> 9, kind = chip_kind(id), at;
 			if (c == 0xFFFF || (g < 26 ? code != g && code != 26 : id != name)) continue;
 			if (kind == CK_ATKPLUS) { plus += chip_def(id)->param; at = 3; }
 			else if (kind == CK_AREAGRAB) at = 0;
@@ -348,12 +396,12 @@ static uint32_t custom_keys(uint32_t n) {
 	if (n == CUSTOM_SLIDE) {
 		nplan = plan_picks(plan);
 		next = tries = 0;
-		picked = emu_read8(BN6_CUSTOM_PICKED);
+		picked = B->r8(B->picked);
 	}
-	int now = emu_read8(BN6_CUSTOM_PICKED);
+	int now = B->r8(B->picked);
 	if (now > picked || tries >= 2) { ++next; tries = 0; }
 	picked = now;
-	int target = next < nplan ? plan[next] : BN6_CUSTOM_OK, cursor = emu_read8(BN6_CUSTOM_CURSOR);
+	int target = next < nplan ? plan[next] : BN6_CUSTOM_OK, cursor = B->r8(B->cursor);
 	if (cursor == target) { key = KEY_A; ++tries; }
 	else key = cursor > target ? KEY_LEFT : KEY_RIGHT;
 	return key;
@@ -362,9 +410,9 @@ static uint32_t custom_keys(uint32_t n) {
 /* A navi in the fight: the charged shot's 10 is not worth a step into his
  * row, where his attacks go */
 static bool navi_fight(void) {
-	for (uint32_t i = 0; i < T1_COUNT; ++i) {
-		uint32_t o = T1_OBJECTS + i * T1_SIZE;
-		if (alive(o) && emu_read8(o + BN6_T1_ALLIANCE) != 0 && emu_read16(o + BN6_T1_MAX_HP) >= NAVI_HP) return true;
+	for (uint32_t i = 0; i < B->t1_count; ++i) {
+		uint32_t o = t1(i);
+		if (alive(o) && B->r8(o + BN6_T1_ALLIANCE) != 0 && B->r16(o + BN6_T1_MAX_HP) >= NAVI_HP) return true;
 	}
 	return false;
 }
@@ -386,16 +434,16 @@ static uint32_t fight_frame(uint32_t me, uint32_t frame) {
 	static uint32_t held_for;
 	static int held = -1, hp;
 	watch_still();
-	int chip = emu_read16(me + BN6_T1_CHIP), col = emu_read8(me + BN6_T1_PANEL_X), row = emu_read8(me + BN6_T1_PANEL_Y), tx, ty;
+	int chip = B->r16(me + BN6_T1_CHIP), col = B->r8(me + BN6_T1_PANEL_X), row = B->r8(me + BN6_T1_PANEL_Y), tx, ty;
 	if (chip != held) { held = chip; held_for = 0; }
-	if (emu_read16(me + BN6_T1_HP) < hp) charge = 0;   /* (a hit ends the charge) */
-	hp = emu_read16(me + BN6_T1_HP);
+	if (B->r16(me + BN6_T1_HP) < hp) charge = 0;   /* (a hit ends the charge) */
+	hp = B->r16(me + BN6_T1_HP);
 	/* (A and R once he can act: an A pressed in a step was taken as the
 	 * step ended, wherever that left him) */
-	bool has = chip != 0xFFFF, ready = emu_read8(me + BN6_T1_ACTION) == BN6_MEGAMAN_READY, pulse = frame % (2 * PRESS) < PRESS;
-	if (!has && emu_read16(BN6_CUSTOM_GAUGE) >= 0x4000) { charge = 0; return ready && pulse ? KEY_R : 0; }
+	bool has = chip != 0xFFFF, ready = B->r8(me + BN6_T1_ACTION) == B->ready, pulse = frame % (2 * PRESS) < PRESS;
+	if (!has && B->r16(B->gauge) >= 0x4000) { charge = 0; return ready && pulse ? KEY_R : 0; }
 	bool waited = has && ++held_for > CHIP_PATIENCE;
-	int kind = has ? chip_kind(chip) : charge >= CHARGE && !navi_fight() ? CK_CANNON : -1;
+	int kind = has ? chip_kind(B->chip(chip)) : charge >= CHARGE && !navi_fight() ? CK_CANNON : -1;
 	bool strike = spot(kind, col, row, waited, &tx, &ty);
 	if (has && held_for > 2 * CHIP_PATIENCE && !strike) { strike = true; tx = col; ty = row; }
 	uint32_t buster = has ? 0 : KEY_B;
@@ -408,12 +456,19 @@ static uint32_t fight_frame(uint32_t me, uint32_t frame) {
 
 static uint32_t fight_keys(uint32_t frame) {
 	static uint32_t custom, clock;
-	if (emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { custom = 0; return frame % 20 < PRESS ? KEY_A : 0; }
-	if (emu_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM) { charge = 0; return custom_keys(custom++); }
+	if (B->r8(B->gamestate) != BN6_SUB_BATTLE) { custom = 0; return frame % 20 < PRESS ? KEY_A : 0; }
+	if (B->r8(B->phase) == BN6_PHASE_CUSTOM) {
+		charge = 0;
+		/* (counted from its window open where it is read: BN5's first
+		 * opens a second after the phase, as its viruses appear, and its
+		 * cursor took none of the picks before; BN5_CUSTOM_WINDOW) */
+		if (B->window && B->r8(B->window) < BN5_WINDOW_OPEN) { custom = 0; return 0; }
+		return custom_keys(custom++);
+	}
 	custom = 0;
 	/* (the clock holds through BATTLE START!, the results and a chat: A) */
 	uint32_t was = clock, me = megaman();
-	clock = emu_read32(BN6_BATTLE_TIMER);
+	clock = B->r32(B->timer);
 	if (clock == was || !me) { charge = 0; return frame % 20 < PRESS ? KEY_A : 0; }
 	return fight_frame(me, frame);
 }
@@ -504,4 +559,22 @@ uint32_t autopilot_keys(void) {
 		if (d > best) { best = d; k = dirs[i].k; }
 	}
 	return k;
+}
+
+/* A battle on the guest core (guest.h): fought as BN6's, from its game's
+ * memory; weak keeps its viruses at 1 HP and plays the rhythm, as in BN6's.
+ * Nothing before its battle is on its screen, nor after: A on BN5's map
+ * could start a talk there, under the white. */
+uint32_t autopilot_guest_keys(void) {
+	static uint32_t frame, fought;
+	++frame;
+	if (!guest_on_screen()) { fought = 0; return 0; }
+	B = &BN5_BATTLE;
+	uint32_t keys;
+	if (weak()) {
+		weaken_enemies(++fought > WEAK_FRAMES);
+		keys = rhythm_keys(frame);
+	} else keys = fight_keys(frame);
+	B = &BN6_BATTLE;
+	return keys;
 }

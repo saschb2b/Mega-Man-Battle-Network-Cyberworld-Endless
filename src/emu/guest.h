@@ -45,11 +45,18 @@ bool guest_active(void);
 bool guest_fight_hp(int *hp, int *max);
 /* ... and its Custom gauge (0-0x4000) while it is fought, -1 otherwise */
 int guest_custom_gauge(void);
-/* ... and its Custom screen is up (the autopilot's chips and OK) */
-bool guest_custom_screen(void);
 /* ... and its battle is on its screen (its game state's battle, not the
  * room its boot left it in, which the battle's opening showed) */
 bool guest_on_screen(void);
+/* ... its memory, bus addresses (its battle as bn5.h names it: the
+ * autopilot's and the dev switches'); 0 without a guest */
+uint8_t guest_read8(uint32_t addr);
+uint16_t guest_read16(uint32_t addr);
+uint32_t guest_read32(uint32_t addr);
+void guest_write16(uint32_t addr, uint16_t v);
+/* BN6's chip of the same name as its game's chip `id`, 0 for none (its
+ * DarkChips) */
+int guest_chip_bn6(int id);
 /* One frame of the guest with these keys held (GBA key bits). */
 void guest_frame(uint32_t keys);
 /* ... unseen and unheard: a frame run ahead while its battle opens behind

@@ -32,6 +32,13 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **The autopilot fights BN5's battles (issue #61).** It played them by a
+  blind button pattern, which lost the first one of seed 1's ACDC Area at
+  0 HP; it now reads BN5's battle as it reads BN6's (the Custom screen's
+  hand and cursor, the panels and the attacks on them, the viruses), picks
+  the chips that go together, and never a DarkChip. Over seeds 1-12 in
+  ACDC Area, End Area and Nebula Area it won 99 of 100, and `weak`, which
+  keeps BN5's viruses at 1 HP as it keeps BN6's, all 144 of its own.
 - **`CYBERWORLD_EMU_DEBUG=1` follows a battle in BN5's engine (issue
   #61).** Every 30 of its frames a line gives its game mode and sub-mode,
   the battle's phase, MegaMan's HP, the Custom gauge and the battle's

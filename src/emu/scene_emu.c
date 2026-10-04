@@ -102,11 +102,8 @@ static void after_frame(void) {
 	emu_debug_frame();
 }
 
-/* The keys a guest battle gets (guest.h): the player's, or the autopilot's
- * pattern: on the Custom screen two chips, START to its OK and A; in the
- * fight A to throw them, R for the next Custom screen once its gauge is
- * full, the buster between (L on the screen asks to run, which the last
- * pattern pressed there, over and over) */
+/* The keys a guest battle gets (guest.h): the player's, or the autopilot's,
+ * which reads its battle as it reads BN6's (autopilot.c) */
 /* An L or R pressed before the Custom gauge filled, kept two and a half
  * seconds and given as it fills (let go a frame first, so BN5 sees a
  * press), again every 20 frames until the screen opens, as BN6's battles
@@ -128,16 +125,7 @@ static uint32_t guest_custom_keep(uint32_t keys) {
 }
 
 static uint32_t guest_keys(void) {
-	static unsigned t;
-	if (!autopilot_on()) return guest_custom_keep(keys_from_buttons());
-	++t;
-	if (guest_custom_screen()) {
-		unsigned s = t % 80;
-		return s < 4 || (s >= 16 && s < 20) || (s >= 48 && s < 52) ? KEY_A : s >= 32 && s < 36 ? KEY_START : 0;
-	}
-	if (t % 45 < 4) return KEY_A;
-	if (t % 90 >= 40 && t % 90 < 44) return KEY_R;
-	return t % 10 < 5 ? KEY_B : 0;
+	return autopilot_on() ? autopilot_guest_keys() : guest_custom_keep(keys_from_buttons());
 }
 
 /* A flash as the guest's battle takes the screen, frames left (the switch
