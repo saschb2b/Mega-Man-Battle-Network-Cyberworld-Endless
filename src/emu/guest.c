@@ -83,6 +83,7 @@ uint32_t guest_record(int xrom, int group, int number, int i) {
 }
 
 bool guest_dev_worried;
+int guest_backdrop = -1;
 
 const char *guest_dark_name(int k) {
 	static char name[16];
@@ -316,8 +317,6 @@ static void rows_fit(uint32_t record) {
 		}
 	}
 }
-
-int guest_backdrop = -1;
 
 /* (and its background the dressed area's where it leaves it to the map:
  * every guest battle stood in front of the room its boot state stands in,
