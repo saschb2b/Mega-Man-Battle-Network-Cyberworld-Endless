@@ -88,6 +88,8 @@ static struct {
 	 * way (a hit taken, the DeleteTime), and Chaud's words due: his call
 	 * as the layer begins, his verdict after */
 	Encounter duel_enc;
+	Encounter server_enc;  /* the layer's Server's battle, rolled with the layer (its words name a Navi) */
+	bool server_rolled;
 	bool duel, duel_hit, duel_call_due, duel_verdict_due;
 	int duel_time;
 	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none */
@@ -1460,6 +1462,41 @@ static int encounter_hp(const Encounter *e) {
  * same layer three in 0:14.50, session 64). Its rung and time read the
  * record, which only a duel's verdict moves, and the layer's duel is done
  * after one (issue #20). */
+/* The layer's Server's battle, rolled as the layer is built, aside from
+ * its own rolls as the duel's is, so its words can name what it holds: a
+ * Navi's signal said as one, his name where MegaMan has battled him (a
+ * playtester's "strong virus signal" held ElementMan SP, session 65), and
+ * the same battle after a CONTINUE. */
+static void server_roll(void) {
+	static char words[96];
+	layer_objs_server_navi = "";
+	D.server_rolled = false;
+	uint32_t saved = rng_state();
+	LootMemory fought, none = { -1, -1, 0, 0, 0 };
+	loot_memory(&fought);
+	loot_memory_set(&none);
+	rng_seed(run.layer_seed ^ 0x5E4FE4C5u);
+	D.server_enc = make_encounter(run.depth, run.biome, ENC_CHALLENGE);
+	D.server_rolled = true;
+	loot_memory_set(&fought);
+	rng_seed(saved);
+	if (emu_debug_on()) {
+		fprintf(stderr, "server battle:");
+		for (int k = 0; k < D.server_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.server_enc.foes[k].kind, D.server_enc.foes[k].family, D.server_enc.foes[k].version);
+		fprintf(stderr, "\n");
+	}
+	for (int k = 0; k < D.server_enc.nfoes; ++k) {
+		const Foe *f = &D.server_enc.foes[k];
+		if (f->kind != FOE_NAVI) continue;
+		static const char *const suffix[4] = { "", " EX", " SP", " DS" };
+		bool known = f->family >= 1 && f->family < RIVAL_NAVIS && (guardian_known(f->family) || rival(f->family)->met);
+		if (known) snprintf(words, sizeof words, "It's %s%s!", guardian(f->family)->name, suffix[f->version & 3]);
+		else snprintf(words, sizeof words, "One we've never battled.");
+		layer_objs_server_navi = words;
+		break;
+	}
+}
+
 static void duel_roll(void) {
 	uint32_t saved = rng_state();
 	LootMemory fought, none = { -1, -1, 0, 0, 0 };
@@ -1630,6 +1667,10 @@ static bool build_layer(void) {
 	D.duel_call_due = false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_DUEL) duel_roll();
+	layer_objs_server_navi = "";
+	D.server_rolled = false;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_CHALLENGE) { server_roll(); break; }
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
 	D.chosen = D.choices_due = 0;
@@ -3725,7 +3766,7 @@ static bool act_on_choices(void) {
 		D.chosen |= 1u << i;
 		switch (D.objs.choice[i].type) {
 		case OBJ_CHALLENGE: {
-			Encounter e = make_encounter(run.depth, run.biome, ENC_CHALLENGE);
+			Encounter e = D.server_rolled ? D.server_enc : make_encounter(run.depth, run.biome, ENC_CHALLENGE);
 			set_encounter(&e, true);
 			D.challenge = true;
 			return true;

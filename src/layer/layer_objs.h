@@ -98,6 +98,10 @@ extern int layer_objs_official_level;
  * last bystander's place. */
 extern int layer_objs_dark_flame;
 extern const char *layer_objs_dark_chip;
+/* Set before layer_objs_install where the layer's Server holds a Navi (its
+ * battle rolled with the layer): the words its signal is named by ("" for
+ * viruses). */
+extern const char *layer_objs_server_navi;
 extern bool layer_objs_dark_first;
 extern bool layer_objs_duel_later;
 

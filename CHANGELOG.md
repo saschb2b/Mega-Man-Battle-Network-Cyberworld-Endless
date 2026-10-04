@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A Server that holds a Navi says so.** "A strong virus signal! Its
+  viruses outclass this layer" held ElementMan SP for a playtester on a
+  guardian's layer. A Server's battle is now rolled with its layer, so
+  MegaMan names a Navi's signal as one before you choose ("It's
+  ElementMan SP!", or "One we've never battled"), and it holds the same
+  battle after a CONTINUE.
 - **BN5's battles keep to the act's difficulty.** Its areas fought their
   own maps' viruses whatever the act: End Area dressing a run's first act
   threw Whirlies at a starting MegaMan, who was deleted in his first

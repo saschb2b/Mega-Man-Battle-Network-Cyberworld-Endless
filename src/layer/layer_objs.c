@@ -58,6 +58,7 @@ bool layer_objs_duel_later;
 int layer_objs_bystander = LAYER_BYSTANDER;   /* (EvilNavi) */
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
+const char *layer_objs_server_navi = "";
 bool layer_objs_dark_first;
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
@@ -915,7 +916,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				tk.gone_flag = flag;
 			}
 			tk.script = o->type == OBJ_DUEL ? ta_duel(&text, flag, guardian_face(11), terms)
-				: o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag, prize)
+				: o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag, prize, layer_objs_server_navi)
 				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag, run.biome == BIOME_UNDERNET)
 				: o->type == OBJ_NAVI_GATE ? ta_navi_gate(&text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 				: ta_secret_gate(&text, flag);

@@ -39,7 +39,7 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 
 /* Choices: Yes sets event flag `flag`, which the director acts on. A
  * challenge answers only once; the gate first wants three ScrtData. */
-int ta_challenge(TextArchive *t, int flag, const char *prize);
+int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi);
 int ta_undernet(TextArchive *t, int flag, bool deeper);
 int ta_secret_gate(TextArchive *t, int flag);
 /* Plays song `song` (0xFF stops the music, SCRIPTS_AREA_MUSIC the map's

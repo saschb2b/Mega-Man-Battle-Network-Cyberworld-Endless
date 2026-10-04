@@ -143,7 +143,7 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 	return i;
 }
 
-int ta_challenge(TextArchive *t, int flag, const char *prize) {
+int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) {
 	int quiet = ta_say(t, FACE_MEGAMAN, "The virus signal's gone quiet, Lan.");
 	int no = closing(t);
 	int i = ta_script(t);
@@ -152,7 +152,12 @@ int ta_challenge(TextArchive *t, int flag, const char *prize) {
 	/* how strong, before the choice (a playtester took one on at 100 HP,
 	 * not knowing, and came out at 10) */
 	bool first = true;
-	ta_pages(t, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.", FACE_MEGAMAN, &first);
+	/* (a Navi's signal named as one: a playtester's "strong virus signal"
+	 * held ElementMan SP, session 65) */
+	char signal[160];
+	if (navi && *navi) snprintf(signal, sizeof signal, "Lan, a Navi's signal, and a strong one! %s It outclasses this layer.", navi);
+	else snprintf(signal, sizeof signal, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.");
+	ta_pages(t, signal, FACE_MEGAMAN, &first);
 	/* (and what it pays: "a good chip" left a playtester guessing whether
 	 * the risk was worth it) */
 	char ask[64];
