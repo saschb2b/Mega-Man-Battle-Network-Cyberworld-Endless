@@ -97,7 +97,7 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	netmap_build_layer(area, seed);
 	int ms = (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
 	tiles_measure = true;
-	if (getenv("CYBERWORLD_TILE_AT")) fprintf(stderr, "layer b%02d_l%d_d%d_s%u\n", biome, layout, depth, seed);
+	if (getenv("CYBERWORLD_TILE_AT")) fprintf(stderr, "layer b%02d_l%d_d%d_s%u\n", area, layout, depth, seed);
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
 	memset(&tiles_stats, 0, sizeof tiles_stats);
 	bool built = netmap_build_layer(area, seed);
@@ -122,7 +122,7 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	 * them, framed and listed (build.py cuts close-ups of them), but under
 	 * a pad or a stair set whole over them */
 	char path[600];
-	snprintf(path, sizeof path, "%s/offs_b%02d_l%d_d%d_s%u.txt", dir, biome, layout, depth, seed);
+	snprintf(path, sizeof path, "%s/offs_b%02d_l%d_d%d_s%u.txt", dir, area, layout, depth, seed);
 	FILE *offs = fopen(path, "w");
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
@@ -155,11 +155,11 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 		int z = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
 		dot(px, W, H, area_px(tw, X, Y), area_py(th, X, Y) - z, o->type == OBJ_MYSTERY ? 2 : 4, marker(o->type));
 	}
-	snprintf(path, sizeof path, "%s/b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
+	snprintf(path, sizeof path, "%s/b%02d_l%d_d%d_s%u.bmp", dir, area, layout, depth, seed);
 	save_bmp(path, px, W, H);
-	snprintf(path, sizeof path, "%s/seams_b%02d_l%d_d%d_s%u.bmp", dir, biome, layout, depth, seed);
+	snprintf(path, sizeof path, "%s/seams_b%02d_l%d_d%d_s%u.bmp", dir, area, layout, depth, seed);
 	save_bmp(path, sp, W, H);
-	write_cells(dir, biome, layout, depth, seed);
+	write_cells(dir, area, layout, depth, seed);
 	free(sp);
 	free(px);
 	int floor = 0;
@@ -182,13 +182,32 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	}
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1;
 	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d\n",
-		biome, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
+		area, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
 		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.off_near, tiles_stats.off_edge,
 		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths);
 }
 
-/* The area's own maps as the game draws them, to hold the layers against. */
+/* A view of an area's map: its panels as the tiles learn them (as text,
+ * read before the void is filled in: the panels' test reads its pixels),
+ * then its picture. */
+static void source_view(const char *dir, const NetAreaDef *na, int biome, int group, int number, AreaSrc *v) {
+	char path[600], tag[16] = "";
+	if (v->level) snprintf(tag, sizeof tag, "_z%d", v->level);
+	snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d%s.txt", dir, biome, group, number, tag);
+	FILE *f = fopen(path, "w");
+	if (f) {
+		tiles_src_text(v, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, f);
+		fclose(f);
+	}
+	int W = v->tw * 8, H = v->th * 8;
+	for (int i = 0; i < W * H; ++i) if (!(v->px[i] >> 24)) v->px[i] = VOID_ARGB;
+	snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
+	save_bmp(path, v->px, W, H);
+}
+
+/* The area's own maps as the game draws them, to hold the layers against,
+ * each floor height in a view of its own, as the tiles learn them. */
 static void sources(const char *dir, int biome) {
 	const NetAreaDef *na = net_area_def(biome);
 	for (int k = -1; na && k < NET_MORE_MAPS; ++k) {
@@ -196,17 +215,15 @@ static void sources(const char *dir, int biome) {
 		if (k >= 0 && !group) break;
 		AreaSrc a;
 		if (!(na->xrom ? area_src_load_x(na->xrom - 1, group, number, &a) : area_src_load(group, number, &a))) continue;
-		int W = a.tw * 8, H = a.th * 8;
-		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
-		char path[600];
-		snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d.bmp", dir, biome, group, number);
-		save_bmp(path, a.px, W, H);
-		snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d.txt", dir, biome, group, number);
-		FILE *f = fopen(path, "w");
-		if (f) {
-			tiles_src_text(&a, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, f);
-			fclose(f);
+		int count[256] = { 0 };
+		for (int i = 0; a.hz && i < a.hw * a.hh; ++i) count[a.hz[i]]++;
+		for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
+			AreaSrc r;
+			if (count[z] < NETMAP_LEVEL_MIN_CELLS || !area_src_raise(&a, z, &r)) continue;
+			source_view(dir, na, biome, group, number, &r);
+			area_src_free(&r);
 		}
+		source_view(dir, na, biome, group, number, &a);
 		area_src_free(&a);
 	}
 }
@@ -283,22 +300,33 @@ static void xrom_sources(const char *dir, int xrom) {
 	}
 }
 
-/* Another game's net area N (docs/MULTIROM.md): its maps as learned, and
- * layers in its tiles, laid out by the rules of the BN6 area it is like. */
+static void stair_layers(const char *dir, FILE *report, int biome, int area, int seeds);
+
+/* An area's layers, a BN6 biome's or another game's (laid out by the rules
+ * of the BN6 area it is like, docs/MULTIROM.md): every layout at depth 2,
+ * its guardian's layer in the layout its act plans and layers that climb a
+ * stair where it has one, its original maps beside them. */
+static void area_layers(const char *dir, FILE *report, int area, int seeds) {
+	int b = area < NET_AREAS ? area : net_area_def(area)->like;
+	sources(dir, area);
+	for (int l = 0; l < LAYOUT_COUNT; ++l) {
+		if (!layout_weight(b, l)) continue;
+		for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, l, 2, (uint32_t)(s * 7919 + area * 131));
+	}
+	for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, -1, 3, (uint32_t)(s * 104729 + area));
+	stair_layers(dir, report, b, area, seeds);
+}
+
+/* Another game's net area N alone. */
 static void xrom_area(const char *dir, int n, int seeds) {
 	xrom_find_beside();
 	int area = NET_AREAS + n;
-	const NetAreaDef *na = net_area_def(area);
-	if (!na) { printf("area %d: its game's ROM is not beside %s\n", area, R.path); return; }
+	if (!net_area_def(area)) { printf("area %d: its game's ROM is not beside %s\n", area, R.path); return; }
 	char path[600];
 	snprintf(path, sizeof path, "%s/report.txt", dir);
 	FILE *report = fopen(path, "w");
 	if (!report) return;
-	sources(dir, area);
-	for (int l = 0; l < LAYOUT_COUNT; ++l) {
-		if (!layout_weight(na->like, l)) continue;
-		for (int s = 1; s <= seeds; ++s) one(dir, report, na->like, area, l, 2, (uint32_t)(s * 7919 + area * 131));
-	}
+	area_layers(dir, report, area, seeds);
 	fclose(report);
 }
 
@@ -348,21 +376,21 @@ static void towns(const char *dir, int seeds) {
 	}
 }
 
-/* Layers of area `b` that climb a stair, where it has one (`seeds` of
- * them): none of the layers above happened to raise a room, and players
- * saw the Undernet's ramps broken. */
-static void stair_layers(const char *dir, FILE *report, int b, int seeds) {
+/* Layers of `area` that climb a stair, where it has one (`seeds` of them),
+ * laid out by biome `b`'s rules: none of the layers above happened to raise
+ * a room, and players saw the Undernet's ramps broken. */
+static void stair_layers(const char *dir, FILE *report, int b, int area, int seeds) {
 	LayerKit kit;
-	netmap_kit(b, &kit);
+	netmap_kit(area, &kit);
 	for (int s = 1, found = 0; kit.stair_dirs && s <= 300 && found < seeds; ++s) {
-		uint32_t seed = (uint32_t)(s * 7919 + b * 131 + 17);
+		uint32_t seed = (uint32_t)(s * 7919 + area * 131 + 17);
 		run_new(seed);
 		run.depth = 5;
 		run.biome = b;
 		layout_forced = -1;
 		layer_generate(seed, 5, b, LAYER_NORMAL, &kit);
 		if (!layer.nstairs) continue;
-		one(dir, report, b, b, -1, 5, seed);
+		one(dir, report, b, area, -1, 5, seed);
 		++found;
 	}
 }
@@ -388,17 +416,12 @@ int atlas_run(const char *spec) {
 	snprintf(path, sizeof path, "%s/report.txt", dir);
 	FILE *report = fopen(path, "w");
 	if (!report) { fprintf(stderr, "atlas: cannot write %s\n", path); return 1; }
-	for (int b = 0; b < BIOME_COUNT; ++b) {
-		if (!want[b]) continue;
-		sources(dir, b);
-		for (int l = 0; l < LAYOUT_COUNT; ++l) {
-			if (!layout_weight(b, l)) continue;
-			for (int s = 1; s <= seeds; ++s) one(dir, report, b, b, l, 2, (uint32_t)(s * 7919 + b * 131));
-		}
-		/* and its guardian's layer, in the layout its act plans */
-		for (int s = 1; s <= seeds; ++s) one(dir, report, b, b, -1, 3, (uint32_t)(s * 104729 + b));
-		stair_layers(dir, report, b, seeds);
-	}
+	for (int b = 0; b < BIOME_COUNT; ++b)
+		if (want[b]) area_layers(dir, report, b, seeds);
+	/* (and every area another game beside BN6's lends a run, numbered after
+	 * BN6's: docs/MULTIROM.md) */
+	for (int k = 0; k < XAREAS_MAX && !strcmp(biomes, "all"); ++k)
+		if (net_area_def(NET_AREAS + k)) area_layers(dir, report, NET_AREAS + k, seeds);
 	fclose(report);
 	layout_forced = -1;
 	printf("atlas written to %s\n", dir);

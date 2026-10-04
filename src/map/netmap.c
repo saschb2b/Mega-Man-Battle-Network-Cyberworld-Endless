@@ -124,8 +124,6 @@ static void learn_view(const AreaSrc *src, const AreaSrc *grid_of, int area, Lea
 	area_src_free(&m);
 }
 
-#define LEVEL_MIN_CELLS 144   /* nine panels of floor at a height to learn it */
-
 /* ... at each of its floor heights: raised floors are drawn higher, so each
  * is learned in a view that brings it down to the ground. */
 static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Learned *L) {
@@ -133,7 +131,7 @@ static void learn_map(const AreaSrc *src, const AreaSrc *grid_of, int area, Lear
 	for (int i = 0; src->hz && i < src->hw * src->hh; ++i) count[src->hz[i]]++;
 	learn_view(src, grid_of, area, L);
 	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
-		if (count[z] < LEVEL_MIN_CELLS) continue;
+		if (count[z] < NETMAP_LEVEL_MIN_CELLS) continue;
 		AreaSrc r;
 		if (!area_src_raise(src, z, &r)) continue;
 		learn_view(&r, grid_of, area, L);

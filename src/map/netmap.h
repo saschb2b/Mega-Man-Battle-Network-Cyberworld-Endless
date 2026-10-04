@@ -26,6 +26,10 @@ typedef struct {
 	int nprops;
 } NetLayout;
 
+/* How many wall cells of floor (nine panels) a map has at a height for its
+ * tiles there to be learned, in a view that brings it down to the ground. */
+#define NETMAP_LEVEL_MIN_CELLS 144
+
 /* Builds the layer from biome `area`'s original map (RomLayout.net_area),
  * writes its tile map and walls into the free ROM space and points that map
  * at them. The map is (group, number) of the area, entered with emu_warp. */

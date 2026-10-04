@@ -21,7 +21,9 @@ Output in `.build/atlas`:
 - `sheet_bXX.png`: one sheet per area, each layer small next to a 2x crop of
   its densest part.
 - `src_bXX_GG_N.png`: the area's original maps (group, number), the second
-  tile layer over the first as well, to hold the layers against.
+  tile layer over the first as well, to hold the layers against; with
+  `_zZ`, the view of its floor at height Z brought down to the ground, in
+  which the tiles of a raised floor are learned.
 - `bXX_lL_dD_sS.png`: each layer whole, at 1x, for zooming in.
 - `seams_bXX_...png`: the same with the seams marked in red: tile edges
   along the floor's edges where two tiles meet as no original map shows
@@ -61,8 +63,13 @@ arrival, green the exit, red the guardian, yellow shops and program
 traders, pink the heal pad, white Mystery Data.
 
 `BIOMES` is `all` or a comma list of area numbers (`0,5,13`); `SEEDS` the
-number of seeds per layout (default 1). `gNN` draws every map of group
-0xNN instead (`src_gNN_N.png`), for choosing the maps an area learns from.
+number of seeds per layout (default 1). `all` also draws the areas another
+game lends a run, where its ROM sits beside BN6's (docs/MULTIROM.md),
+numbered after BN6's 19 in the order `src/core/rom.c` lists them (BN5's
+from 19), each laid out by the rules of the BN6 area it dresses, its
+guardian's layer too; `aN` draws another game's area N alone. `gNN` draws
+every map of group 0xNN instead (`src_gNN_N.png`), for choosing the maps
+an area learns from.
 
 The atlas is also the tiles' regression check: each layer's near misses,
 fallbacks, seams, inexact panels, tiles in other colours and tiles drawn off
