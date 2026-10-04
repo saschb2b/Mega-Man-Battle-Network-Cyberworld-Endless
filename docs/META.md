@@ -689,7 +689,8 @@ decisions).
 - **The dialectic** is survival now against strength later: a DarkChip
   comes into BN5's Custom screen only when MegaMan worries, his HP low
   after hits, and wins the battle he might have lost, while the act's
-  guardian, a BN6 fight where DarkChips do nothing, waits for him weaker.
+  guardian, a BN6 fight where the run's DarkChips sit out, waits for him
+  weaker.
 - **The pattern** is a bonus with a drawback (costed power forces
   commitment, docs/design: principles): the price is the owner's, "a
   hefty price": each battle a DarkChip is used in lowers MegaMan's max HP
@@ -709,11 +710,11 @@ decisions).
   BN5's folder takes them.
 - **Variety, not power, across runs:** nothing of them carries over, not
   the chips, not their price; a new run starts with none.
-- **Only in BN5 territory, for now:** BN6's battles never offer them. That
-  BN6 "has no code for them" was assumed, and wrong: a player showed that
-  BN6 keeps five DarkChips from the Japan-only Beast Link Gate, priced in
-  BugFrags (docs/SOURCES.md; issue #70 brings them to BN6's battles and
-  the 3DS).
+- **Only in BN5 territory, as built:** BN6's battles never offer them.
+  BN6 does keep five of BN5's twelve with their code (a player's lead,
+  verified: docs/SOURCES.md), which the proposal below would bring into
+  BN6's battles (BN6's own DarkChips, issue #70). That BN6 "has no code
+  for them" had been assumed, and was wrong.
 - **When he falls after using one** (seen in session 68): BN5 gets
   MegaMan up at 1 HP, and the darkness fights with his body a while, out
   of the player's hands. MegaMan says it might at the flame, the first
