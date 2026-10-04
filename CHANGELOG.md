@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The split names BN5's areas as the older net's.** MegaMan says "the
+  older net's Oran Area" where BN5's area takes a way's place, and "The
+  older net's Oran Area it is!" as you choose: two playtesters could not
+  tell which way led into BN5's net.
 - **MegaMan says, before BN5's first battle, that the older net had no
   Crosses.** On the first layer a profile reaches whose battles are BN5's,
   he says so once, after his arrival words: a playtester's HeatCross was

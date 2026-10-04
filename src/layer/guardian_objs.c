@@ -145,7 +145,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		static char option[3][32];
 		const char *named[3] = { NULL, NULL, NULL }, *areas[3] = { area[0], area[1], area[2] };
 		for (int k = 0; k < nways; ++k) {
-			snprintf(area[k], sizeof area[k], "%s", guardian_area_in_text(b[k], LAYER_NORMAL));
+			snprintf(area[k], sizeof area[k], "%s", guardian_way_area(b[k]));
 			/* (his element of either wheel: TenguMan's Wind as HeatMan's Fire) */
 			el[k] = enemy_element(enemy_id(1, n[k], 0));
 			/* (each way its Navi, "???" for one never battled, and where
