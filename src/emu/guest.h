@@ -17,14 +17,20 @@ enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
  * directory); true once it is ready. */
 bool guest_start(int xrom);
 
+/* MegaMan as the run has him, into a guest battle */
+typedef struct {
+	int hp, max_hp;
+	const uint16_t *folder;           /* the run's (30 BN6 entries, chip | code << 9), each chip as its game's of the same name; NULL: the guest's own */
+	uint8_t dark[GUEST_DARK_KINDS];   /* his DarkChips, counts by kind */
+	uint8_t buster[3];                /* his buster's Attack, Speed and Charge as BN6's NaviCust makes them (BN6_NAVI_ATTACK: 0-4, levels 1-5) */
+	bool star;                        /* the All * helper: every chip in *, the rewards too */
+} GuestMegaMan;
+
 /* Begins a battle from BattleSettings record `record`, an address in the
- * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan at
- * `hp` of `max_hp`, the run's `folder` (30 BN6 entries, chip | code << 9;
- * NULL: the guest's own), each chip as its game's of the same name, and
- * its DarkChips (`dark`, counts by kind); with `star` (the All * helper)
- * every chip in *, the rewards too: from the next guest frame the guest
- * runs and BN6's core waits. */
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS], bool star);
+ * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan as
+ * `mm` has him: from the next guest frame the guest runs and BN6's core
+ * waits. */
+bool guest_battle(uint32_t record, const GuestMegaMan *mm);
 
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);

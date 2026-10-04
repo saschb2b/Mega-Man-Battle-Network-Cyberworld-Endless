@@ -115,6 +115,9 @@
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)
 #define BN6_NAVI_BASE_MAX_HP  (BN6_NAVI_STATS + 0x3E) /* MaxBaseHP, u16: HPMemory counts into it, programs on top (bn6f NaviStats) */
 #define BN6_NAVI_REG          (BN6_NAVI_STATS + 0x09) /* RegUP: Reg memory in MB, made again from the RegUP items as one is given */
+#define BN6_NAVI_ATTACK       (BN6_NAVI_STATS + 0x01) /* Attack, Speed and Charge: the buster's levels less one (0-4), as the NaviCust's RUN */
+#define BN6_NAVI_SPEED        (BN6_NAVI_STATS + 0x02) /* makes them (bn6f applyNavicustPrograms_813C684: Attack+1 to ChargMAX, BustPack, */
+#define BN6_NAVI_CHARGE       (BN6_NAVI_STATS + 0x03) /* each capped at 4); a battle reads its copy's (a shot's damage Attack + 1, sub_801265A) */
 #define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
 #define BN6_NAVICUST_PLACED   0x02004190u /* the programs on the NaviCust's board, 8 bytes each: +0 u16 program * 4 + colour variant, +3 column, +4 row, +5 turns; 0 ends */
 #define BN6_NAVICUST_PLACED_MAX 25

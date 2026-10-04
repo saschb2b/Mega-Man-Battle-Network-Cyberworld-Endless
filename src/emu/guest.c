@@ -130,6 +130,7 @@ static int frames, sat_out;
 static int recoded, recode_ex[3];   /* chips that went in with another code, and the first: BN6 id, code, its code there */
 static uint8_t dark_in[GUEST_DARK_KINDS];   /* the run's DarkChips as the battle began */
 static bool dark_used;                       /* ... and one was used in it (latched from BN5_DARK_USED) */
+static bool buster_told;                     /* (debug) its battle's buster was printed */
 
 /* a battle's course: asked for, begun */
 enum { PH_IDLE, PH_ASKED, PH_BATTLE };
@@ -397,17 +398,37 @@ static int folder_in(const uint16_t *folder) {
 	return in;
 }
 
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS], bool star) {
+/* His buster as the run's NaviCust makes it: BN5's boot state's fired 1 a
+ * shot and 10 a charge, whatever programs the run had run */
+static void buster_in(const uint8_t buster[3]) {
+	static const uint32_t at[3] = { BN5_NAVI_ATTACK, BN5_NAVI_SPEED, BN5_NAVI_CHARGE };
+	for (int i = 0; i < 3; ++i) core->rawWrite8(core, at[i], -1, buster[i] > BN5_BUSTER_MAX ? BN5_BUSTER_MAX : buster[i]);
+	buster_told = !emu_debug_on();
+}
+
+/* (debug: the buster the battle took, from its own copy, once its Custom
+ * screen is up) */
+static void buster_tell(void) {
+	if (buster_told || phase != PH_BATTLE || sub_mode() != BN5_SUB_BATTLE || rd8(BN5_BATTLE_STATE + 1) != BN5_PHASE_CUSTOM) return;
+	buster_told = true;
+	uint32_t s = BN5_BATTLE_NAVI + BN5_BATTLE_NAVI_SIZE * rd8(BN5_BATTLE_SIDE);
+	fprintf(stderr, "guest: its battle's buster Attack %d, Speed %d, Charge %d\n", rd8(s + (BN5_NAVI_ATTACK - BN5_NAVI_STATS)) + 1,
+		rd8(s + (BN5_NAVI_SPEED - BN5_NAVI_STATS)) + 1, rd8(s + (BN5_NAVI_CHARGE - BN5_NAVI_STATS)) + 1);
+}
+
+bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	if (!ready || active || !record) return false;
-	memcpy(dark_in, dark, sizeof dark_in);
+	memcpy(dark_in, mm->dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
-	star_records(star);
+	star_records(mm->star);
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
 	 * whose options carry 0x40, as its random battles' do) */
+	int hp = mm->hp, max_hp = mm->max_hp;
 	wr16(BN5_NAVI_BASE_MAX_HP, (uint16_t)max_hp);
 	wr16(BN5_NAVI_MAX_HP, (uint16_t)max_hp);
 	wr16(BN5_NAVI_HP, (uint16_t)(hp < 1 ? 1 : hp > max_hp ? max_hp : hp));
+	buster_in(mm->buster);
 	/* (calm at its start, as each of the run's battles begins: BN5's dark
 	 * meter and mood would carry its last DarkChip's darkness on) */
 	core->rawWrite8(core, BN5_NAVI_MOOD, -1, 0x80);
@@ -415,11 +436,14 @@ bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, c
 	uint32_t check = rd32(BN5_TOOLKIT + BN5_TOOLKIT_METER_CHECK);
 	if (check >= 0x02000000u && check < 0x02040000u) core->rawWrite32(core, check, -1, 500u ^ rd32(BN5_METER_KEY));
 	dark_used = false;
+	const uint16_t *folder = mm->folder;
 	int in = folder ? folder_in(folder) : 0, held = 0;
 	for (int i = 0; folder && i < 30; ++i) held += (folder[i] & 0x1FF) != 0;
 	sat_out = held - in;
 	rows_fit(record);
-	if (emu_debug_on()) fprintf(stderr, "guest: battle %08X, HP %d/%d, %d of the folder's 30 in\n", record, hp, max_hp, in);
+	if (emu_debug_on())
+		fprintf(stderr, "guest: battle %08X, HP %d/%d, %d of the folder's 30 in, buster Attack %d, Speed %d, Charge %d\n", record, hp, max_hp, in,
+			rd8(BN5_NAVI_ATTACK) + 1, rd8(BN5_NAVI_SPEED) + 1, rd8(BN5_NAVI_CHARGE) + 1);
 	patch_roll(record_copy(record));
 	active = true;
 	phase = PH_ASKED;
@@ -477,6 +501,7 @@ static void step(uint32_t keys, bool quiet) {
 	if (quiet) emu_audio_drop_from(core);
 	else emu_audio_from(core);
 	++frames;
+	buster_tell();
 	int mode = main_mode(), sub = sub_mode();
 	if (phase == PH_ASKED && (sub == BN5_SUB_BATTLE_INIT || sub == BN5_SUB_BATTLE)) {
 		phase = PH_BATTLE;
@@ -514,8 +539,8 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS, the browser) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS], bool star) {
-	(void)record; (void)hp; (void)max_hp; (void)folder; (void)dark; (void)star;
+bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
+	(void)record; (void)mm;
 	return false;
 }
 bool guest_active(void) { return false; }

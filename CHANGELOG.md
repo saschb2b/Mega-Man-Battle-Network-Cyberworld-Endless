@@ -6,6 +6,12 @@
   act's card reads "Act 1 - older net battles", and L's first words name
   the area "where battles run the older net's way", so a territory is
   known before its first battle (issue #65).
+- **BN5's battles fire your buster as your NaviCust makes it (issue
+  #62).** MegaMan went into BN5's battles with BN5's starting buster, 1
+  a shot and 10 a charged shot, whatever Attack+1, Speed+1, Charge+1 or
+  BustPack the run had installed. Its Attack, Speed and Charge now go in
+  as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
+  BN5's Mettaurs. The NaviCust's other programs still sit out.
 - **BN5's areas bring their battles as BN6's areas do.** BN6's chance of
   a battle rises with the walk since the last one, and only entering the
   map a battle returns to set it back: a battle in BN5's engine never

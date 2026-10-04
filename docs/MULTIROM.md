@@ -109,7 +109,13 @@ engine (`src/emu/guest.c`, epic #57):
   `tests/test_core.c` runs on made-up tables; 114 of BN6's 313 chips
   pair), owned in BN5's marks.
   A chip BN5 has none of sits out, its slot empty (a Standard folder keeps
-  26 of its 30). His buster and NaviCust are BN5's boot state's for now.
+  26 of its 30). His buster is the run's: its Attack, Speed and Charge as
+  BN6's NaviCust makes them (Attack+1 to ChargMAX, BustPack), written into
+  BN5's NaviStats before each battle, which keeps them at the same five
+  levels and reads them with BN6's own code (a shot Attack + 1, a charged
+  shot ten times that); BN5's boot state fired 1 a shot and 10 a charge
+  whatever the run's programs. The NaviCust's other programs sit out:
+  parity, no power of BN5's own.
 - **The record's copy**: past BN5's 8 MB in the guest's ROM copy, without
   its GAME OVER bit, so a loss ends on the map with BN5's result 2 and the
   run ends as BN6's would (the deletion shown in BN5's battle).
@@ -140,8 +146,10 @@ engine (`src/emu/guest.c`, epic #57):
   flame of darkness's talk (a middle layer: `--run-depth 2`), `--dev
   darkchips=MASK` starts a run holding DarkChips (bit k BN5's id 187 + k)
   and `--dev worried` keeps MegaMan worried in guest battles;
-  `CYBERWORLD_EMU_DEBUG=1` names each battle, its folder's chips in, its
-  end, the flame and a DarkChip's price.
+  `CYBERWORLD_EMU_DEBUG=1` names each battle, its folder's chips in, the
+  buster it goes in with and the one its battle took ("guest: its battle's
+  buster Attack 2, Speed 1, Charge 1"), its end, the flame and a
+  DarkChip's price.
 - **DarkChips** (docs/META.md, issue #64): the run's go into the guest's
   folder (three at most, one of each, as BN5's folder editor allows, in
   slots where chips sat out). BN5 draws them as any chip; the guest's
@@ -154,8 +162,8 @@ engine (`src/emu/guest.c`, epic #57):
   share no darkness. A flame of darkness on the middle layer of such an
   act holds one the run lacks: BN5's flame, copied from its ROM and
   turned purple, in a bystander's place.
-- **Still to come**: the buster and programs in, BN5's chips registered
-  in BN6.
+- **Still to come**: the NaviCust's other programs in (those both games
+  have, as BN5's battle reads them), BN5's chips registered in BN6.
 
 ## Status
 

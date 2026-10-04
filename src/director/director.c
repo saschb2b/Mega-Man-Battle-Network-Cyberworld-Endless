@@ -4426,14 +4426,16 @@ static uint32_t guest_pick(uint32_t h) {
 
 static void guest_begin(void) {
 	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
-	/* (MegaMan with his HP and the run's folder) */
+	/* (MegaMan with his HP, the run's folder and his buster as the run's
+	 * NaviCust makes it: parity, no power of BN5's own) */
 	uint16_t folder[BN6_FOLDER_ENTRIES] = { 0 };
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	for (int i = 0; data >= BN6_EWRAM && data < BN6_EWRAM_END && i < BN6_FOLDER_ENTRIES; ++i) folder[i] = emu_read16(data + 2u * (uint32_t)i);
+	GuestMegaMan mm = { emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, { 0 },
+		{ emu_read8(BN6_NAVI_ATTACK), emu_read8(BN6_NAVI_SPEED), emu_read8(BN6_NAVI_CHARGE) }, run_all_star() };
 	/* (and the run's DarkChips, which BN5 brings into its Custom screen when
 	 * he worries: docs/META.md) */
-	uint8_t dark[GUEST_DARK_KINDS];
-	for (int k = 0; k < GUEST_DARK_KINDS; ++k) dark[k] = (uint8_t)dark_count(k);
+	for (int k = 0; k < GUEST_DARK_KINDS; ++k) mm.dark[k] = (uint8_t)dark_count(k);
 	uint32_t record = guest_pick(h);
 	int hp = 0, dmg = 0;
 	D.guest_foes = guest_record_strength(D.guest_xrom, record, &hp, &dmg);
@@ -4441,7 +4443,7 @@ static void guest_begin(void) {
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
 		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);
 	}
-	if (record) guest_battle(record, emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, dark, run_all_star());
+	if (record) guest_battle(record, &mm);
 }
 
 #define DUEL_GRACE 60   /* frames of a duel's fight before a hit counts against its no-hit rung */
