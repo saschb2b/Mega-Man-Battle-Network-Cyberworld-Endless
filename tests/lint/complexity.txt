@@ -5,13 +5,13 @@ src/core/loot.c:from_formations 59 79
 src/core/main.c:main 172 263
 src/core/meta.c:meta_run_over 32 39
 src/core/platform.c:platform_init 28 63
-src/core/platform.c:platform_poll 43 66
+src/core/platform.c:platform_poll 42 66
 src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
 src/core/touch_layout.c:touch_prefs_parse 38 29
 src/dev/atlas.c:one 56 95
-src/director/boss.c:boss_update 28 67
-src/director/director.c:director_describe 44 62
+src/director/boss.c:boss_update 26 64
+src/director/director.c:director_describe 39 55
 src/director/director.c:director_keys 70 77
 src/director/director.c:director_update 166 203
 src/director/director.c:follow_exit_warp 28 38
