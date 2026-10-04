@@ -174,8 +174,9 @@ The browser build (`__EMSCRIPTEN__`) has no threads: the page drives one
 game frame per 1/60 s (`emscripten_set_main_loop`), and writes reach
 IndexedDB through `platform_persist()`, which saves and states call. Keep
 the frame loop free of blocking waits. `build.py serve` also serves the
-developer's ROM at `/.dev/rom.gba` for tests in a local browser; the page
-itself only takes a ROM the player chooses.
+developer's ROMs, told by their SHA-1, for tests in a local browser:
+BN6's at `/.dev/rom.gba`, BN5's at `/.dev/bn5.gba`; the page itself only
+takes the ROMs the player chooses.
 
 CI runs without a ROM: it builds every target with `-Werror`
 (`WERROR=1`, set when `CI` is), runs `build.py lint` and
