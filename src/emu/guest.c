@@ -984,7 +984,7 @@ static void step(uint32_t keys, bool quiet) {
 	/* (back on the map: how it ended, from BN5's own result, and MegaMan's
 	 * HP as the battle left it: BN5 copies it back to his NaviStats only on
 	 * its own maps' terms, which a forced battle does not meet) */
-	else if (phase == PH_BATTLE && mode == BN5_MODE_GAME && sub == BN5_SUB_MAP) {
+	if (phase == PH_BATTLE && mode == BN5_MODE_GAME && sub == BN5_SUB_MAP) {
 		int r = rd8(BN5_BATTLE_RESULT + 1), hp = rd16(BN5_BATTLE_HP);
 		finish(r == BN5_RESULT_LOST || hp == 0 ? GUEST_LOST : r == BN5_RESULT_ESCAPED ? GUEST_ESCAPED : GUEST_WON);
 	}
