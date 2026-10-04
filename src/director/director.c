@@ -113,6 +113,7 @@ static struct {
 	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
 	int guest_foes;        /* the viruses its battle under way set, counted as deleted for a win */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
+	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -269,6 +270,28 @@ static void map_label(void) {
  * guardian falls (1 for the first cycle). */
 static int net_version(void) { return (run.depth - 1) / CYCLE_LAYERS + 1; }
 
+/* Arriving where the layer's battles are an older net's, the first time a
+ * profile does: that its battles run without the run's Crosses, said
+ * before one (owner's call, 4 October 2026: a playtester's HeatCross
+ * vanished in BN5's battle without a word, session 65; a Soul of BN5's
+ * may stand in later, issue #69). After the arrival's own words. */
+static void older_net_words(void) {
+	D.beat_cross = encounter_guest && !profile.cross_old_told;
+	if (!D.beat_cross) return;
+	size_t k = strlen(D.beat);
+	snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old way. There "
+		"were no Crosses back then, so ours can't come into them.|@L Then it's you and our chips in there, MegaMan!", k ? "|" : "");
+}
+
+/* The arrival's words begun: the Nest shakes, the guardian they name is
+ * named, and the older net's word is said for the profile. */
+static void beat_said(void) {
+	if (run.biome == BIOME_NEST) cinema_shake(30, 3);
+	D.guardian_named = D.beat_guardian;
+	D.beat[0] = 0;
+	if (D.beat_cross) { profile.cross_old_told = 1; profile_save(); }
+}
+
 /* What MegaMan and Lan (and Dad) say on arriving somewhere new: the first
  * layer, a new cycle, the Undernet, the Graveyard, the Nest, the side
  * layers. Empty for the rest. */
@@ -311,6 +334,7 @@ static void arrival_words(void) {
 				"we've never faced down here.|@L Then let's find out who. Let's go!", area);
 		D.beat_guardian = true;
 	}
+	older_net_words();
 }
 
 /* What MegaMan says when L is pressed: where they are, what is ahead. */
@@ -4624,11 +4648,8 @@ void director_update(void) {
 	 * Secret Area's guardian is done */
 	talk_update();
 	if (!D.area_card && !cinema_busy() && !boss_cinematic() && !boss_fighting() && !talk_busy()) {
-		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) {
-			if (run.biome == BIOME_NEST) cinema_shake(30, 3);
-			D.guardian_named = D.beat_guardian;
-			D.beat[0] = 0;
-		} else if (D.secret_call && boss_done() &&
+		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) beat_said();
+		else if (D.secret_call && boss_done() &&
 			talk_start("@C Lan, it's Chaud. ProtoMan hasn't left my PET all day.|@C Whatever you just beat down there was a copy. Watch yourself.|"
 				"@M The Nest can even copy ProtoMan...|@L Then we'd better keep our guard up!", FACE_MEGAMAN)) {
 			D.secret_call = false;

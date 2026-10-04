@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **MegaMan says, before BN5's first battle, that the older net had no
+  Crosses.** On the first layer a profile reaches whose battles are BN5's,
+  he says so once, after his arrival words: a playtester's HeatCross was
+  gone in BN5's battle without a word. A BN5 Soul may stand in later.
 - **A run continued without BN5's ROM starts its layer again.** A layer
   BN5's area drew is laid out otherwise than the BN6 area's own, so a run
   saved with BN5's ROM beside BN6's and continued without it (on the 3DS
