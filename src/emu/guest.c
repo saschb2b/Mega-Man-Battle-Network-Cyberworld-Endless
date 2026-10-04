@@ -53,20 +53,41 @@ static bool xenemy(const uint8_t *d, int id, int *hp, int *damage) {
 	return true;
 }
 
-int guest_record_foes(int xrom, uint32_t record, int *ids, int max) {
+/* BN5's viruses by family: the id of family `ai` (its ids table's AI
+ * index, type 0) at version `v`, 0 for none */
+static int family_id(const uint8_t *d, int ai, int v) {
+	for (uint32_t i = 1; i < 0x200; ++i) {
+		const uint8_t *e = d + (BN5_ENEMY_IDS - 0x08000000u) + 3u * i;
+		if (e[1] == 0 && e[2] == ai && e[0] == v) return (int)i;
+	}
+	return 0;
+}
+
+/* Enemy `id` scaled: `up` versions up, to the scale's vcap at most and
+ * never below its own; itself where its family has no such version */
+static int version_up(const uint8_t *d, int id, GuestScale sc) {
+	if (sc.up <= 0 || id <= 0 || id >= 0x200) return id;
+	const uint8_t *e = d + (BN5_ENEMY_IDS - 0x08000000u) + 3u * (uint32_t)id;
+	if (e[1] != 0) return id;
+	int top = sc.vcap > e[0] ? sc.vcap : e[0], v = e[0] + sc.up > top ? top : e[0] + sc.up;
+	int r = v != e[0] ? family_id(d, e[2], v) : id;
+	return r ? r : id;
+}
+
+int guest_record_foes_scaled(int xrom, uint32_t record, GuestScale sc, int *ids, int max) {
 	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || record < 0x08000000u || record - 0x08000000u + 16 > ROM_SIZE) return 0;
 	const uint8_t *d = XR[xrom].data;
 	int n = 0;
 	for (uint32_t a = rom32(d, record + 12), k = 0; a && k < 16 && a - 0x08000000u + 4 <= ROM_SIZE && d[a - 0x08000000u] != 0xF0; a += 4, ++k) {
 		const uint8_t *e = d + (a - 0x08000000u);
-		if (e[0] == 0x11 && n < max) ids[n++] = e[2] | e[3] << 8;
+		if (e[0] == 0x11 && n < max) ids[n++] = version_up(d, e[2] | e[3] << 8, sc);
 	}
 	return n;
 }
 
-int guest_record_strength(int xrom, uint32_t record, int *hp, int *damage) {
+int guest_record_scaled(int xrom, uint32_t record, GuestScale sc, int *hp, int *damage) {
 	*hp = *damage = 0;
-	int ids[16] = { 0 }, n = guest_record_foes(xrom, record, ids, 16);
+	int ids[16] = { 0 }, n = guest_record_foes_scaled(xrom, record, sc, ids, 16);
 	const uint8_t *d = n ? XR[xrom].data : NULL;
 	if (!d || d[record - 0x08000000u + 7]) return 0;
 	for (int i = 0; i < n; ++i) {
@@ -89,44 +110,79 @@ uint32_t guest_record(int xrom, int group, int number, int i) {
 	return i >= 0 && i < guest_records(xrom, group, number) ? records_at(xrom, group, number) + 16u * (uint32_t)i : 0;
 }
 
-/* the records of `maps` within the band, in their order, after the n in out */
-static int records_fit(int xrom, const uint8_t (*maps)[2], int nmaps, int hp_cap, int dmg_cap, uint32_t *out, int n, int max) {
+/* The most versions up (0-3) at which record r stays under the band's cap
+ * (its HP to `hi`, its strongest hit to `cap`), the fewest that make it so
+ * strong (past the band's vcap a version more changes nothing), -1 none;
+ * *hp its HP so */
+static int scale_fit(int xrom, uint32_t r, const GuestBand *band, int *hp) {
+	int best = -1, last = -1;
+	for (int up = 0; up <= 3; ++up) {
+		int h, dmg;
+		if (!guest_record_scaled(xrom, r, (GuestScale){ up, band->vcap }, &h, &dmg) || h > band->hi || dmg > band->cap) break;
+		if (h != last) { best = up; *hp = h; }
+		last = h;
+	}
+	return best;
+}
+
+/* the records of `maps` under the band's cap, each at its most versions
+ * up, and from its floor where `floor` (inside the band), in their order,
+ * after the n in out */
+static int records_fit(int xrom, const uint8_t (*maps)[2], int nmaps, const GuestBand *band, bool floor, uint32_t *out, uint8_t *ups, int n,
+                       int max) {
 	for (int m = 0; m < nmaps && n < max; ++m)
 		for (int i = 0, k = guest_records(xrom, maps[m][0], maps[m][1]); i < k && n < max; ++i) {
 			uint32_t r = guest_record(xrom, maps[m][0], maps[m][1], i);
-			int hp, dmg;
-			if (guest_record_strength(xrom, r, &hp, &dmg) && hp <= hp_cap && dmg <= dmg_cap) out[n++] = r;
+			bool had = false;
+			for (int j = 0; j < n && !had; ++j) had = out[j] == r;
+			int hp, up = had ? -1 : scale_fit(xrom, r, band, &hp);
+			if (up < 0 || (floor && hp < band->lo)) continue;
+			out[n] = r;
+			ups[n++] = (uint8_t)up;
 		}
 	return n;
 }
 
-int guest_pool(int xrom, const NetAreaDef *area, int group, int number, int hp_cap, int dmg_cap, uint32_t *out, int max, bool *fits) {
+#define GUEST_POOL_LEAST 4   /* records a battle is picked from before other maps' join */
+
+/* the maps of `area` (pass 0) or of every area game `xrom` lends (pass 1) */
+static int area_maps(int xrom, const NetAreaDef *area, int pass, uint8_t (*maps)[2]) {
+	int nm = 0;
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *x = net_area_def(NET_AREAS + k);
+		if (!x || x->xrom - 1 != xrom || (pass == 0 && x != area)) continue;
+		for (int j = 0; j < 3; ++j)
+			if (x->xbattles[j][0]) { maps[nm][0] = x->xbattles[j][0]; maps[nm][1] = x->xbattles[j][1]; ++nm; }
+	}
+	return nm;
+}
+
+int guest_pool(int xrom, const NetAreaDef *area, int group, int number, const GuestBand *band, uint32_t *out, uint8_t *ups, int max, bool *fits) {
 	const uint8_t own[1][2] = { { (uint8_t)group, (uint8_t)number } };
-	int n = records_fit(xrom, own, 1, hp_cap, dmg_cap, out, 0, max);
-	for (int pass = 0; pass < 2 && !n; ++pass) {
-		/* (the area's other maps, then every area its game lends) */
-		uint8_t maps[3 * XAREAS_MAX][2];
-		int nm = 0;
-		for (int k = 0; k < XAREAS_MAX; ++k) {
-			const NetAreaDef *x = net_area_def(NET_AREAS + k);
-			if (!x || x->xrom - 1 != xrom || (pass == 0 && x != area)) continue;
-			for (int j = 0; j < 3; ++j)
-				if (x->xbattles[j][0]) { maps[nm][0] = x->xbattles[j][0]; maps[nm][1] = x->xbattles[j][1]; ++nm; }
-		}
-		n = records_fit(xrom, (const uint8_t (*)[2])maps, nm, hp_cap, dmg_cap, out, 0, max);
+	uint8_t maps[3 * XAREAS_MAX][2];
+	int n = 0;
+	/* (inside the band, its floor too, first: the map's own, then, while
+	 * fewer than four, its area's and its game's too; none inside at all,
+	 * the same under the floor. ACDC Area's own at act 2 held two records
+	 * inside, which would come every battle) */
+	for (int floor = 1; floor >= 0 && !n; --floor) {
+		n = records_fit(xrom, own, 1, band, floor, out, ups, 0, max);
+		for (int pass = 0; pass < 2 && n < GUEST_POOL_LEAST; ++pass)
+			n = records_fit(xrom, (const uint8_t (*)[2])maps, area_maps(xrom, area, pass, maps), band, floor, out, ups, n, max);
 	}
 	if (fits) *fits = n > 0;
 	if (n || max < 1) return n;
-	/* (nothing fits: the map's own weakest) */
+	/* (nothing under the cap: the map's own weakest, as it is) */
 	uint32_t best = 0;
 	int least = 1 << 30;
 	for (int i = 0, k = guest_records(xrom, group, number); i < k; ++i) {
 		uint32_t r = guest_record(xrom, group, number, i);
 		int hp, dmg;
-		if (guest_record_strength(xrom, r, &hp, &dmg) && hp < least) { least = hp; best = r; }
+		if (guest_record_scaled(xrom, r, (GuestScale){ 0, 0 }, &hp, &dmg) && hp < least) { least = hp; best = r; }
 	}
 	if (!best) return 0;
 	out[0] = best;
+	ups[0] = 0;
 	return 1;
 }
 
@@ -397,18 +453,14 @@ static uint16_t row_coded(uint16_t v, uint32_t row) {
 	return (uint16_t)(x | xchips_fit(other, bn6, fit_codes, v >> 9 & 0x1F, (int)row) << 9);
 }
 
-static void rows_fit(uint32_t record) {
+static void rows_fit(const int *ids, int n) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
-	uint32_t e = rd32(record + 0xC);
-	for (int k = 0; k < 16 && e >= 0x08000000u && e < 0x08800000u; ++k, e += 4) {
-		uint8_t kind = rd8(e);
-		if (kind == 0xF0) break;
-		if (kind != 0x11) continue;
-		/* (a byte at a time: a list can start at an odd address, and a
-		 * halfword read there takes the even one below, the entry's
-		 * panel byte for its id's low half; CanGard's MrkCan1 S showed on
-		 * a playtester's results screen, came back as zenny, session 66) */
-		int id = rd8(e + 2) | rd8(e + 3) << 8;
+	for (int k = 0; k < n; ++k) {
+		/* (its enemies read a byte at a time, guest_record_foes: a list can
+		 * start at an odd address, and a halfword read there takes the even
+		 * one below; CanGard's MrkCan1 S showed on a playtester's results
+		 * screen, came back as zenny, session 66; scaled as the battle is) */
+		int id = ids[k];
 		if (emu_debug_on()) fprintf(stderr, "guest: the reward rows of enemy %#x fitted\n", id);
 		if (id <= 0 || id >= 0x200) continue;
 		for (uint32_t i = 0; i < 20; ++i) {
@@ -423,13 +475,28 @@ static void rows_fit(uint32_t record) {
 /* (and its background the dressed area's where it leaves it to the map:
  * every guest battle stood in front of the room its boot state stands in,
  * yellow rings for each area) */
-static uint32_t record_copy(uint32_t record) {
+#define ENTITIES_AT (BN5_FREE + 0x20)   /* a scaled record's entity list, 16 entries and the 0xF0 at most */
+
+static uint32_t record_copy(uint32_t record, GuestScale sc) {
 	for (uint32_t i = 0; i < 16; i += 2) {
 		uint16_t v = rd16(record + i);
 		if (i == 8) v = (uint16_t)(v & ~BN5_OPT_GAME_OVER);
 		if (i == BN5_RECORD_BACKDROP && (v & 0xFF) == 0xFF && guest_backdrop >= 0) v = (uint16_t)((v & 0xFF00) | (guest_backdrop & 0xFF));
 		wr16(BN5_FREE + i, v);
 	}
+	/* (and its entities, a byte at a time, each virus at its scaled version:
+	 * the copy pointed at them) */
+	if (sc.up <= 0) return BN5_FREE;
+	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
+	uint32_t from = rd32(record + 0xC), k = 0;
+	for (; k < 16 && from - 0x08000000u + 4u * k + 4 <= ROM_SIZE && d[from - 0x08000000u + 4u * k] != 0xF0; ++k) {
+		const uint8_t *e = d + (from - 0x08000000u) + 4u * k;
+		int id = e[0] == 0x11 ? version_up(d, e[2] | e[3] << 8, sc) : e[2] | e[3] << 8;
+		const uint8_t to[4] = { e[0], e[1], (uint8_t)id, (uint8_t)(id >> 8) };
+		for (uint32_t j = 0; j < 4; ++j) core->rawWrite8(core, ENTITIES_AT + 4u * k + j, -1, to[j]);
+	}
+	core->rawWrite8(core, ENTITIES_AT + 4u * k, -1, 0xF0);
+	core->rawWrite32(core, BN5_FREE + 0xC, -1, ENTITIES_AT);
 	return BN5_FREE;
 }
 
@@ -512,7 +579,7 @@ static void buster_tell(void) {
 		rd8(s + (BN5_NAVI_SPEED - BN5_NAVI_STATS)) + 1, rd8(s + (BN5_NAVI_CHARGE - BN5_NAVI_STATS)) + 1);
 }
 
-bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
 	if (!ready || active || !record) return false;
 	memcpy(dark_in, mm->dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
@@ -537,14 +604,15 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	dark_used = false;
 	const uint16_t *folder = mm->folder;
 	int in = folder ? folder_in(folder) : 0;
-	rows_fit(record);
+	int ids[16], n = guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, sc, ids, 16);
+	rows_fit(ids, n);
 	if (emu_debug_on()) {
 		fprintf(stderr, "guest: battle %08X, HP %d/%d, mood %#x, %d of the folder's 30 in, buster Attack %d, Speed %d, Charge %d\n", record, hp, max_hp,
 			start_mood, in,
 			rd8(BN5_NAVI_ATTACK) + 1, rd8(BN5_NAVI_SPEED) + 1, rd8(BN5_NAVI_CHARGE) + 1);
 		out_tell(folder);
 	}
-	patch_roll(record_copy(record));
+	patch_roll(record_copy(record, sc));
 	active = true;
 	phase = PH_ASKED;
 	frames = 0;
@@ -657,8 +725,8 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS, the browser) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
-	(void)record; (void)mm;
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
+	(void)record; (void)sc; (void)mm;
 	return false;
 }
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }

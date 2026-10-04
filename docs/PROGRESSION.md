@@ -280,6 +280,50 @@ with the last one is a third as likely as it would be (six of a
 playtester's seven act 1 battles in the RoboDog Comp held Gunners): the
 area keeps its viruses, but not the same ones fight after fight.
 
+### BN5's battles: one band, floor and cap (4 October 2026)
+
+Where Battle Network 5's areas dress an act, its random battles are BN5's
+own records, fought in BN5's engine (docs/MULTIROM.md, Guest battles).
+They were held to the act's band from above only: a record's viruses' HP
+together at most the band's top, its strongest hit at most the cap. BN5
+places its records by its story, so from act 2 its early areas fell far
+under the band: ACDC Area's own at act 2 were 80 to 200 HP against 150 to
+280, Oran Area's at act 3 100 to 230 against 200 to 360. The owner's call:
+a band with a floor and a cap, as BN6's battles have.
+
+What scaling means here, measured on both games' data:
+
+- **BN6 scales by choice, not by multiplying.** The engine never raises a
+  virus's numbers. Depth sets the act; the act sets the band (HP from its
+  floor to its top, a cap on one hit) and the versions allowed (V1 to V3,
+  one more on later cycles and from threat 1). Each formation an area
+  offers is taken at the highest version that keeps it under the band, and
+  those that reach the floor are preferred: the formation and its viruses
+  stay BN6's own; only which of BN6's own versions comes changes.
+- **BN5's viruses come in families of versions too.** Its ids table gives
+  each enemy its version, type and AI index, as BN6's does: one AI index
+  is one family, six versions each, its ids in a row (the Mettaur's 1 to
+  6: 40, 70, 100, 150, 200 and 300 HP, hits of 10 to 200). A record is a
+  formation whose viruses can be taken up their families the same way.
+- **So BN5's battles scale as BN6's.** Each record of the map's is taken
+  at the most versions up (to the act's version, never below its own)
+  that keep it under the band's top and cap; those that reach its floor
+  are the pool; fewer than four there, the area's other maps' and then
+  BN5's other areas' join, each record once; none inside the band at all,
+  the same three under the floor; nothing under the cap anywhere, the
+  map's own weakest. The battle's copy of the record carries the raised
+  viruses (their ids in a copied entity list), so its results screen's
+  rewards are theirs. Nothing is multiplied: every virus is one of BN5's
+  own, at a version BN5 has.
+- **The dialectic** stays BN6's fair challenge against the area's
+  identity: a territory's battles are its own formations first, grown to
+  the act, and only a thin pool borrows from BN5's other maps.
+
+`build.py pacing` measures it: every act's guest battles, with how many
+fall under the floor (none, at threat 0, over every territory and cycle)
+and how many versions they went up (none in acts 1 and 2 at threat 0,
+whose version is V1; about one from act 3).
+
 ### Choosing areas
 
 Areas fall into three tiers by their own battles:
@@ -446,6 +490,7 @@ Fixed on the way:
 | Area order, guardian pools | `src/core/run.c` (`run_new`) |
 | Act and guardian layers | `src/net/net_gen.c` (`biome_for_depth`, `is_boss_depth`) |
 | Formation pick, versions inside the band | `src/core/loot.c` (`make_encounter`) |
+| BN5's records inside the band, their viruses' versions | `src/emu/guest.c` (`guest_pool`), `src/director/director.c` (`guest_pick`) |
 | Guardian version | `src/core/loot.c` (`make_boss`) |
 | Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |

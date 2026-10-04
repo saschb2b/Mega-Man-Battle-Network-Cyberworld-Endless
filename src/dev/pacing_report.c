@@ -85,31 +85,39 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 /* The territories (docs/MULTIROM.md, Guest battles): where another game's
  * area dresses the BN6 area an act visits, its random battles are its own
  * game's records, from the pool the director picks from (guest_pool, each
- * record as likely): their viruses' HP together (lowest / median /
- * highest), the strongest hit, the pool's size and where it came from;
- * returns its records past the band (only where none fits and the map's
- * weakest stands in). */
+ * record as likely, its viruses taken up to the act's version): their HP
+ * together (lowest / median / highest), the strongest hit, how many under
+ * the band's floor, the versions they went up, the pool's size and where
+ * it came from; returns its records past the cap (only where none fits and
+ * the map's weakest stands in). */
 static int guest_battles(FILE *out, int depth, const NetAreaDef *x, int xrom, bool opening) {
-	PacingBand band = pacing_band(depth, false, opening);
+	PacingBand b = pacing_band(depth, false, opening);
+	int vlo, vhi;
+	pacing_virus_versions(depth, false, &vlo, &vhi);
+	GuestBand band = { b.lo, b.hi, b.cap, vhi };
 	const uint8_t *xb = x->xbattles[layer_in_act(depth)];
 	if (!xb[0]) return 0;
 	static uint32_t pool[192];
+	static uint8_t ups[192];
 	static int hps[192];
 	bool fits = false;
-	int n = guest_pool(xrom, x, xb[0], xb[1], band.hi, band.cap, pool, 192, &fits), over = 0, maxdmg = 0, own = 0;
+	int n = guest_pool(xrom, x, xb[0], xb[1], &band, pool, ups, 192, &fits), over = 0, under = 0, maxdmg = 0, own = 0, up = 0;
 	uint32_t first = guest_record(xrom, xb[0], xb[1], 0), end = first + 16u * (uint32_t)guest_records(xrom, xb[0], xb[1]);
 	for (int i = 0; i < n; ++i) {
 		int hp, dmg;
-		guest_record_strength(xrom, pool[i], &hp, &dmg);
+		guest_record_scaled(xrom, pool[i], (GuestScale){ ups[i], band.vcap }, &hp, &dmg);
 		hps[i] = hp;
 		if (dmg > maxdmg) maxdmg = dmg;
 		if (hp > band.hi || dmg > band.cap) ++over;
+		under += hp < band.lo;
+		up += ups[i];
 		own += pool[i] >= first && pool[i] < end;
 	}
 	qsort(hps, (size_t)n, sizeof *hps, cmp_int);
-	fprintf(out, "  depth %2d %-9s band %3d-%3d cap %3d | hp %3d / %3d / %3d  hit %3d  %d records of %s (map %02x:%d)%s\n", depth,
-		opening ? "opening" : "guest", band.lo, band.hi, band.cap, n ? hps[0] : 0, n ? hps[n / 2] : 0, n ? hps[n - 1] : 0, maxdmg, n,
-		!fits ? "its weakest, none fitting" : own == n ? "its map" : "other maps", xb[0], xb[1], over ? "  OVER" : "");
+	fprintf(out, "  depth %2d %-9s band %3d-%3d cap %3d | hp %3d / %3d / %3d  hit %3d  %d records of %s (map %02x:%d), %d under the floor, "
+		"%.1f versions up%s\n", depth, opening ? "opening" : "guest", band.lo, band.hi, band.cap, n ? hps[0] : 0, n ? hps[n / 2] : 0,
+		n ? hps[n - 1] : 0, maxdmg, n, !fits ? "its weakest, none fitting" : own == n ? "its map" : "other maps", xb[0], xb[1], under,
+		n ? (double)up / n : 0.0, over ? "  OVER" : "");
 	return over;
 }
 

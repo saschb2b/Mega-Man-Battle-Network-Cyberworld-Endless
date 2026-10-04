@@ -19,6 +19,13 @@ enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
  * directory); true once it is ready. */
 bool guest_start(int xrom);
 
+/* A battle's scaling to the act (docs/PROGRESSION.md, BN5's battles): its
+ * record's viruses `up` versions up, each to version `vcap` at most (0 V1,
+ * 3 its Omega) and never below its own, as BN6's battles take the act's
+ * version (pacing.c): within a family (BN5's ids table, version and AI
+ * index) the formation stays, its viruses grow. */
+typedef struct { int up, vcap; } GuestScale;
+
 /* MegaMan as the run has him, into a guest battle */
 typedef struct {
 	int hp, max_hp;
@@ -33,7 +40,7 @@ typedef struct {
  * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan as
  * `mm` has him: from the next guest frame the guest runs and BN6's core
  * waits. */
-bool guest_battle(uint32_t record, const GuestMegaMan *mm);
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm);
 
 /* The chips of `folder` (30 BN6 entries) that sit out of its battles, its
  * game having none of their names: each once, in the folder's order, the
@@ -98,29 +105,35 @@ extern bool guest_dev_worried;
 /* DarkChip `k`'s name in BN5 (0-11, ids 187-198), "" without BN5 */
 const char *guest_dark_name(int k);
 
-/* A record's strength, to hold its battles to the run's pacing: its
- * viruses' HP together and the strongest one's damage, from its game's
- * enemy tables (the ROM file, no core needed); how many viruses it sets
- * (a win counts them as the run's deleted), 0 for one the run never
- * draws: a battle its game keeps for a story's condition (its byte 7), a
- * Navi's, or none at all. */
-int guest_record_strength(int xrom, uint32_t record, int *hp, int *damage);
-/* ... and its enemies by its game's ids, the first `max` into `ids`; how
- * many (a Navi, a story's battle among them) */
-int guest_record_foes(int xrom, uint32_t record, int *ids, int max);
+/* A record's strength with its viruses scaled (GuestScale; { 0, 0 } as
+ * its game has it), to hold its battles to the run's pacing: its viruses'
+ * HP together and the strongest one's damage, from its game's enemy tables
+ * (the ROM file, no core needed); how many viruses it sets (a win counts
+ * them as the run's deleted), 0 for one the run never draws: a battle its
+ * game keeps for a story's condition (its byte 7), a Navi's, or none at
+ * all. */
+int guest_record_scaled(int xrom, uint32_t record, GuestScale sc, int *hp, int *damage);
+/* ... and its enemies by its game's ids, so scaled, the first `max` into
+ * `ids`; how many (a Navi, a story's battle among them) */
+int guest_record_foes_scaled(int xrom, uint32_t record, GuestScale sc, int *ids, int max);
 
 /* Its game's battle records for net map (group, number): how many, and the
  * i-th's address; read from the ROM file, no core needed. */
 int guest_records(int xrom, int group, int number);
 uint32_t guest_record(int xrom, int group, int number, int i);
 
+/* The act's band for a guest battle (pacing.c): its viruses' HP together
+ * from `lo` (the floor) to `hi` (the cap), their strongest hit `cap` at
+ * most, their versions `vcap` at most */
+typedef struct { int lo, hi, cap, vcap; } GuestBand;
 /* The records a battle on net map (group, number) of `area` (an area of
- * game `xrom`) is picked from, held to a band (its viruses' HP together at
- * most `hp_cap`, their strongest hit `dmg_cap`, guest_record_strength):
- * the map's own that fit, else those of the area's maps, else those of
- * every area its game lends, else the map's own weakest alone (*fits
- * false); into out, how many (0: none at all). Read from the ROM file, no
- * core needed: the director's pick and the pacing report's. */
-int guest_pool(int xrom, const NetAreaDef *area, int group, int number, int hp_cap, int dmg_cap, uint32_t *out, int max, bool *fits);
+ * game `xrom`) is picked from, each at the most versions up (ups[i], to
+ * the band's vcap) that keep it under the band's cap: inside the band (HP
+ * from its floor) the map's own, else the area's maps', else every area
+ * its game lends; none inside anywhere, the same three under the floor;
+ * else the map's own weakest alone (*fits false). Into out and ups, how
+ * many (0: none at all). Read from the ROM file, no core needed: the
+ * director's pick and the pacing report's. */
+int guest_pool(int xrom, const NetAreaDef *area, int group, int number, const GuestBand *band, uint32_t *out, uint8_t *ups, int max, bool *fits);
 
 #endif

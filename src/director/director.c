@@ -4463,18 +4463,32 @@ static void exit_flag(bool entered) {
  * its own game's records for the map, picked from the layer's seed and
  * its battles so far; the roll found the moment free (no chat, fade or
  * cutscene), so it begins at once (guest.c) */
-/* The older net's battles held to the act's band, as BN6's are (pacing.c):
- * the area's own records that fit, else those of its other maps, else
- * those of its game's other areas that fit, else the area's own weakest
- * (End Area dresses an opening act, and its viruses outclassed a run's
- * first battle: a playtester's MegaMan was deleted there, session 65;
- * guest_pool, which build.py pacing reads too). Its game's story battles
- * (its roaming Navis at 2000 HP) never. */
-static uint32_t guest_pick(uint32_t h) {
-	static uint32_t pool[192];
+/* The older net's battles held to the act's band, floor and cap, as BN6's
+ * are (pacing.c, docs/PROGRESSION.md): a record's viruses taken up to the
+ * act's version, as BN6's formations are, inside the band from the area's
+ * own records, else its other maps', else its game's other areas'; only
+ * then under the band's floor, the same way; else the area's own weakest.
+ * End Area dressing an opening act outclassed a run's first battle, a
+ * playtester deleted there (session 65), and from act 2 ACDC Area's and
+ * Oran Area's own fell far under the band (guest_pool, which build.py
+ * pacing reads too). Its game's story battles (its roaming Navis at 2000
+ * HP) never. */
+static GuestBand guest_band(void) {
 	PacingBand b = pacing_band(run.depth, false, D.battles == 0);
-	int n = guest_pool(D.guest_xrom, D.guest_area, D.guest_group, D.guest_number, b.hi, b.cap, pool, 192, NULL);
-	return n ? pool[(h >> 16) % (uint32_t)n] : 0;
+	int vlo, vhi;
+	pacing_virus_versions(run.depth, false, &vlo, &vhi);
+	return (GuestBand){ b.lo, b.hi, b.cap, vhi };
+}
+
+static uint32_t guest_pick(uint32_t h, GuestScale *sc) {
+	static uint32_t pool[192];
+	static uint8_t ups[192];
+	GuestBand band = guest_band();
+	int n = guest_pool(D.guest_xrom, D.guest_area, D.guest_group, D.guest_number, &band, pool, ups, 192, NULL);
+	if (!n) return 0;
+	uint32_t k = (h >> 16) % (uint32_t)n;
+	*sc = (GuestScale){ ups[k], band.vcap };
+	return pool[k];
 }
 
 static void guest_begin(void) {
@@ -4489,17 +4503,20 @@ static void guest_begin(void) {
 	 * he worries: docs/META.md) */
 	for (int k = 0; k < GUEST_DARK_KINDS; ++k) mm.dark[k] = (uint8_t)dark_count(k);
 	memcpy(mm.codes, run.codes, sizeof mm.codes);
-	uint32_t record = guest_pick(h);
+	GuestScale sc = { 0, 0 };
+	uint32_t record = guest_pick(h, &sc);
 	int hp = 0, dmg = 0;
-	D.guest_foes = guest_record_strength(D.guest_xrom, record, &hp, &dmg);
+	D.guest_foes = guest_record_scaled(D.guest_xrom, record, sc, &hp, &dmg);
 	D.map_shown = false;   /* (SELECT's map, held as it began, drawn under its opening's white) */
 	if (emu_debug_on()) {
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
-		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);
+		fprintf(stderr, "guest: record %08X, %d versions up, its viruses %d HP, %d a hit at most (the act's band %d-%d HP, %d a hit)\n", record,
+			sc.up, hp, dmg, b.lo, b.hi, b.cap);
 	}
-	/* (in the run log as BN6's battles are, its viruses by BN5's ids) */
-	int ids[16] = { 0 }, n = guest_record_foes(D.guest_xrom, record, ids, 16);
-	if (record && guest_battle(record, &mm)) runlog_guest_start(record, ids, n, hp);
+	/* (in the run log as BN6's battles are, its viruses by BN5's ids, as
+	 * scaled) */
+	int ids[16] = { 0 }, n = guest_record_foes_scaled(D.guest_xrom, record, sc, ids, 16);
+	if (record && guest_battle(record, sc, &mm)) runlog_guest_start(record, ids, n, hp);
 }
 
 #define DUEL_GRACE 60   /* frames of a duel's fight before a hit counts against its no-hit rung */

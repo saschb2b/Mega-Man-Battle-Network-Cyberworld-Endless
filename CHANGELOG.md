@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **BN5's battles keep to the act's band from below too.** BN5 places its
+  battles by its story, so from act 2 its early areas fought far under
+  the act: ACDC Area's two Mettaurs at 80 HP where BN6's battles start at
+  150. A battle in BN5's areas now comes from the act's band, floor and
+  cap, as BN6's do: its own viruses taken up their versions (Mettaur to
+  Mettaur2, as BN5 has them) until the battle fits, and where the area's
+  own still fall short, from BN5's other areas.
 - **About half of BN5's chip rewards come in your folder's codes (issue
   #63),** as BN6's do: where both games' chip has one of the folder's
   codes, BN5's own results screen shows it in that code, and that is the
