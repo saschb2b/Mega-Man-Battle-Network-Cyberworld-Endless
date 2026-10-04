@@ -22,7 +22,9 @@ Commands, apart by ';':
   mash BTN N      press BTN every 10 frames for N frames
   shot            a picture now (one is always taken at the end)
 Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
-flags set, then back as they were). NAME/bin.pin keeps the session's
+flags set, then back as they were), battle (the layer's next random
+battle, as soon as MegaMan is free on its map: on a layer whose battles
+are an older net's, a guest battle). NAME/bin.pin keeps the session's
 build across starts.
 BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT).
 The keyboard's layout is the handheld's buttons: A talks and confirms, B
@@ -47,6 +49,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
+DEV_STEPS = ('place', 'flags', 'battle')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -86,8 +89,10 @@ def steps(commands):
                 out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
             elif op == 'flags':
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
+            elif op == 'battle':
+                out.append(('battle',))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -97,7 +102,7 @@ def split_every(seq, every):
     """Pictures every `every` frames through the steps."""
     out, since = [], 0
     for s in seq:
-        if s != 'shot' and s[0] in ('place', 'flags'):
+        if s != 'shot' and s[0] in DEV_STEPS:
             out.append(s)
             continue
         if s == 'shot':
@@ -243,7 +248,7 @@ def cmd_do(name, rest):
     seq = steps(commands)
     if every:
         # at most MAX_SHOTS pictures: a longer batch spaces them out
-        frames = sum(s[0] for s in seq if s != 'shot' and s[0] not in ('place', 'flags'))
+        frames = sum(s[0] for s in seq if s != 'shot' and s[0] not in DEV_STEPS)
         every = max(every, -(-frames // MAX_SHOTS))
         seq = split_every(seq, every)
     while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
@@ -261,6 +266,8 @@ def cmd_do(name, rest):
             items.append(f'place {s[1]} {s[2]} {s[3]}')
         elif s[0] == 'flags':
             items.append(f'flags {s[1]} {s[2]} {s[3]}')
+        elif s[0] == 'battle':
+            items.append('battle')
         else:
             items.append(f'{s[0]} {s[1]}'.strip())
     state = os.path.join(h, 'state.txt')

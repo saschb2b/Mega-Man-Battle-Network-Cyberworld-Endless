@@ -296,6 +296,30 @@ Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
 same in a battle on the guest core: on BN5's battle objects, laid out as
 BN6's (`src/emu/bn5.h`), after each of its frames.
 
+## A battle on demand
+
+```bash
+CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --net-biome x0 --dev quiet --input "300:battle" --shot 1100:/src/.build/a.bmp
+python3 tools/play.py do NAME "battle; wait 200"
+```
+
+The `battle` step (`--input`'s `0:battle`, which `300:battle` waits 300
+frames before; play.py's `battle`, beside `place` and `flags`) starts the
+layer's next random battle at the first moment MegaMan stands free on its
+map: no chat, the director's words or a scene, no warp, no guardian's
+staging or challenge under way. It waits that long: an act's arrival
+words must be paged first (the autopilot pages them above; A in the
+script does too).
+On a layer whose battles are BN5's (its territory, docs/MULTIROM.md) it is
+a battle in BN5's engine on the guest core; elsewhere BN6's own, the
+record the roll would have handed out next, forced past the roll as the
+guardians' are (with `--dev quiet` too). `--talk guest:FRAME` begins a
+guest battle at a frame of the layer instead. With
+`CYBERWORLD_EMU_DEBUG=1`, a guest battle prints the record it starts from,
+its folder, a line every 30 of its frames (its game mode and sub-mode, the
+battle's phase, MegaMan's HP, the Custom gauge, the battle's clock) and
+its end; play.py's state says `battle (the older net's)` while it runs.
+
 ## How the switches work
 
 - **Random battles** sets event flag 0x1700 every frame, one of the flags

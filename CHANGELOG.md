@@ -32,6 +32,11 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **A battle on demand: the `battle` step (issue #61).** A capture's
+  `--input "300:battle"` and play.py's `battle` start the layer's next
+  random battle as soon as MegaMan is free on its map: on BN5 territory a
+  battle in BN5's engine, elsewhere BN6's. play.py's state says a battle
+  in BN5's engine runs from its first frame to its last.
 - **`--dev god`, `onehit` and `fragile` and the dev menu work in BN5's
   battles (issue #61).** They held only BN6's battle objects; BN5's are
   laid out alike, and the menu opens over its battle too, which holds

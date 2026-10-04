@@ -55,6 +55,10 @@ bool director_arrived(void);
 void director_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
+/* Dev (the battle step): the layer's next random battle, at the first
+ * moment MegaMan is free on its map; the guest's on a layer whose battles
+ * are an older net's. */
+void director_dev_battle(void);
 /* A dev step's: every panel of the layer seen, for the map (--dev mapall). */
 void director_dev_reveal(void);
 /* The pad's keys on their way to the game: on the map L is MegaMan's

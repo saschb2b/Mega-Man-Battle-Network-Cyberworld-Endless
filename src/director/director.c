@@ -112,6 +112,7 @@ static struct {
 	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
 	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
 	int guest_foes;        /* the viruses its battle under way set, counted as deleted for a win */
+	bool battle_due;       /* (dev: the battle step) the next random battle, at the first free moment on the map */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
 	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
 	int astray;            /* frames MegaMan has spent on another map */
@@ -2727,6 +2728,8 @@ static const char *state_doing(int *hp, int *max) {
 	if (guest_fight_hp(hp, max)) return "battle (the older net's)";
 	*hp = emu_read16(BN6_NAVI_HP);
 	*max = emu_read16(BN6_NAVI_MAX_HP);
+	/* (its opening and its end, the screen white or BN5's: still its) */
+	if (guest_active()) return "battle (the older net's, beginning or ending)";
 	if (!on_map())
 		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
@@ -4156,6 +4159,34 @@ static void dev_talks(void) {
 	}
 }
 
+/* The battle step (a capture's "0:battle", play.py's battle): the layer's
+ * next random battle at once, at the first moment MegaMan stands free on
+ * its map (no chat, talk, scene or warp, no guardian's staging, challenge
+ * or forced battle under way): on a layer whose battles are an older
+ * net's, its battle on the guest core (docs/MULTIROM.md, Guest battles),
+ * else BN6's own, forced past its roll as the guardians' are. */
+void director_dev_battle(void) {
+	if (D.active && !D.town) D.battle_due = true;
+	else printf("battle: only on a layer\n");
+}
+
+static void dev_battle(void) {
+	if (!D.battle_due || !on_map() || guest_active() || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping ||
+		emu_read8(BN6_WARP_PENDING) || !boss_idle() || D.challenge || emu_battle_forcing())
+		return;
+	D.battle_due = false;
+	if (emu_debug_on()) fprintf(stderr, "battle: the step's, %s\n", encounter_guest ? "the guest's" : "BN6's");
+	if (encounter_guest) { guest_begin(); return; }
+	Encounter e = D.next;
+	set_encounter(&e, true);
+}
+
+/* the dev talks and the battle step, a frame on the layer */
+static void dev_steps(void) {
+	dev_talks();
+	dev_battle();
+}
+
 static void end_run(void) {
 	/* what the summary tells: where, and by whom */
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
@@ -4833,7 +4864,7 @@ void director_update(void) {
 			D.secret_call = false;
 		}
 	}
-	dev_talks();
+	dev_steps();
 	if (act_on_choices()) return;
 	/* (never with a chat box open: a state would keep it, and the talk
 	 * slot's text is not in a state) */
