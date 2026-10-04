@@ -401,7 +401,16 @@ to hold, a few reads while a chat is open, and runs as game calls.
 routines called and their results stored, with a hook of every kind on
 them, an ARM-state one, an event posted from an answer hook, the board's
 `BKPT #1` passed on, the hooks taken off again, one in RAM written again
-after a reset, and a halt from a hook. `build.py test` runs
+after a reset, and a halt from a hook. Then two cores side by side, run in
+turn as BN6's and the guest's are (issue #61): BN6's made by `emu_init`
+with a hook on it, the other as `src/emu/guest.c` makes one, from a copy
+of the ROM that also plays a tone. BN6's hook runs in BN6's frames alone;
+the guest's copy of the code stays unpatched, and a `BKPT #0xCE` written
+into it goes to its own board, which skips it, never to BN6's hooks (the
+hook table is BN6's core's: the guest has none); each one's RAM is its
+own; the guest's tone reaches the ring BN6's silence fills, and a frame of
+it let go (`emu_audio_drop_from`) does not; its state saves and loads with
+BN6's RAM untouched. `build.py test` runs
 it with the address and undefined-behaviour sanitizers, as CI does.
 
 ## Testing

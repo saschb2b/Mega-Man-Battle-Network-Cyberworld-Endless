@@ -204,12 +204,14 @@ build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
 
-# the hooks on mGBA itself (tests/test_emu.c: a ROM of the test's own bytes)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h
+# the hooks on mGBA itself (tests/test_emu.c: a ROM of the test's own bytes),
+# and two cores side by side, BN6's through emu.c (its sound's ring)
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/core/compat.c
+TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -isystem $(MGBA)/include \
-		-o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a -lpthread -lm
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
+		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
 
 test: build/host/test_core build/host/test_emu
 	build/host/test_core
@@ -222,8 +224,8 @@ LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))
 LINT_TEST_EMU_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_EMU_SRCS))
 build/lint/test/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include -ffunction-sections -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
-	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a -lpthread -lm
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm

@@ -32,6 +32,14 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **`tests/test_emu.c` runs two cores side by side (issues #58, #61).**
+  BN6's core as `emu_init` makes it, with a hook on it, and a second as
+  the guest core is made, on a ROM of the test's own bytes that plays a
+  tone: BN6's hook runs in BN6's frames alone, a breakpoint written into
+  the guest's code goes to its own board and never to BN6's hooks, each
+  one's RAM stays its own, the guest's tone reaches the sound ring BN6's
+  silence fills, and its state saves and loads. CI runs it under the
+  sanitizers.
 - **BN5's areas bring their battles as BN6's areas do.** BN6's chance of
   a battle rises with the walk since the last one, and only entering the
   map a battle returns to set it back: a battle in BN5's engine never

@@ -1,7 +1,10 @@
 /* Hooks (src/emu/hook.c) on mGBA, without the game's ROM: a ROM of our own
  * bytes that calls three routines and stores what they return, run for a
  * frame with hooks of every kind on them (issue #27), an event posted from
- * an answer hook and a halt from one (issues #30, #35).
+ * an answer hook and a halt from one (issues #30, #35). Then two cores side
+ * by side, as BN6's and the guest's run (issue #61): BN6's made by
+ * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
+ * it, without, on a ROM that also sounds a tone.
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -10,18 +13,31 @@
  *   E2 bkpt #1 (the cheat device's: the board's, a no-op here)
  *   E4 movs r2,#3;  str r2,[r1,#8]
  *   E8 movs r0,#9;  bl 100 (r0 += 30); str r0,[r1,#12]
- *   F0 b F0 */
+ *   F0 b F0
+ * The guest's: its branch at 0 to 0x110 first, ARM code that turns the
+ * sound on and plays a square wave on channel 2, then on to 0xC0. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <mgba/core/blip_buf.h>
 #include <mgba/core/config.h>
 #include <mgba/core/core.h>
+#include <mgba/core/serialize.h>
 #include <mgba/internal/arm/arm.h>
 #include <mgba/internal/gba/gba.h>
 #include <mgba-util/vfs.h>
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/lsan_interface.h>
+#endif
 
+#include "emu.h"
 #include "hook.h"
+#include "platform.h"
+
+/* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
+Platform P;
+void platform_persist(void) {}
 
 #define ROM_SIZE 0x400
 #define IWRAM 0x03000000u
@@ -71,6 +87,29 @@ static void make_rom(uint8_t *rom) {
 	put16(rom, 0x106, 0x4770);
 }
 
+/* ... and the guest's: the sound on first (SOUNDCNT_X, then its volumes and
+ * channels, channel 2 a square wave at 256 Hz, full and steady) */
+static void make_sound_rom(uint8_t *rom) {
+	make_rom(rom);
+	put32(rom, 0x00, 0xEA000042);   /* b 0x110 */
+	put32(rom, 0x110, 0xE59F3028);  /* ldr r3,=0x04000060 */
+	put32(rom, 0x114, 0xE3A00080);  /* mov r0,#0x80 */
+	put32(rom, 0x118, 0xE1C302B4);  /* strh r0,[r3,#0x24]: SOUNDCNT_X, on */
+	put32(rom, 0x11C, 0xE59F0020);  /* ldr r0,=0xFF77 */
+	put32(rom, 0x120, 0xE1C302B0);  /* strh r0,[r3,#0x20]: SOUNDCNT_L, every channel both sides */
+	put32(rom, 0x124, 0xE3A00002);  /* mov r0,#2 */
+	put32(rom, 0x128, 0xE1C302B2);  /* strh r0,[r3,#0x22]: SOUNDCNT_H, the tones at full */
+	put32(rom, 0x12C, 0xE59F0014);  /* ldr r0,=0xF080 */
+	put32(rom, 0x130, 0xE1C300B8);  /* strh r0,[r3,#8]: SOUND2CNT_L, volume 15, half duty */
+	put32(rom, 0x134, 0xE59F0010);  /* ldr r0,=0x8600 */
+	put32(rom, 0x138, 0xE1C300BC);  /* strh r0,[r3,#0xC]: SOUND2CNT_H, 256 Hz, started */
+	put32(rom, 0x13C, 0xEAFFFFDF);  /* b 0xC0 */
+	put32(rom, 0x140, 0x04000060);
+	put32(rom, 0x144, 0x0000FF77);
+	put32(rom, 0x148, 0x0000F080);
+	put32(rom, 0x14C, 0x00008600);
+}
+
 /* the hooks: one of each kind */
 static HookAct doubled(HookRegs *r, void *user) { (void)user; r->r[0] *= 2; return HOOK_CONTINUE; }
 /* (and an event of its own, with the registers it met) */
@@ -81,6 +120,140 @@ static HookAct counted(HookRegs *r, void *user) { (void)r; ++*(int *)user; retur
 static HookAct halting(HookRegs *r, void *user) { (void)r; ++*(int *)user; hook_halt(); return HOOK_CONTINUE; }
 
 static uint32_t stored(struct mCore *core, int i) { return core->rawRead32(core, IWRAM + 4u * (uint32_t)i, -1); }
+
+/* ---- two cores (issue #61) ---- */
+
+/* A second core as src/emu/guest.c makes one: from its own copy of the
+ * ROM, its sound at the rate BN6's plays at, no hooks of ours */
+static struct mCore *guest_core(const uint8_t *rom, uint32_t *video) {
+	struct VFile *vf = VFileMemChunk(rom, ROM_SIZE);
+	struct mCore *c = vf ? mCoreFindVF(vf) : NULL;
+	if (!c || !c->init(c)) return NULL;
+	mCoreInitConfig(c, NULL);
+	c->setVideoBuffer(c, (color_t *)video, 240);
+	if (!c->loadROM(c, vf)) return NULL;
+	c->loadSave(c, VFileMemChunk(NULL, 0));
+	c->setAudioBufferSize(c, 1024);
+	blip_set_rates(c->getAudioChannel(c, 0), c->frequency(c), emu_audio_out_rate());
+	blip_set_rates(c->getAudioChannel(c, 1), c->frequency(c), emu_audio_out_rate());
+	c->reset(c);
+	return c;
+}
+
+static void guest_run(struct mCore *g, int frames) {
+	for (int i = 0; i < frames; ++i) {
+		g->runFrame(g);
+		emu_audio_from(g);
+	}
+}
+
+/* the ring emptied; the stereo frames it held, and how far apart their
+ * samples lay (a tone, not silence) */
+static int ring_drain(int *swing) {
+	int16_t buf[2048];
+	int total = 0, n, lo = 32767, hi = -32768;
+	while ((n = emu_audio_read(buf, 1024)) > 0) {
+		for (int i = 0; i < 2 * n; ++i) {
+			if (buf[i] < lo) lo = buf[i];
+			if (buf[i] > hi) hi = buf[i];
+		}
+		total += n;
+	}
+	if (swing) *swing = total > 0 ? hi - lo : 0;
+	return total;
+}
+
+static void two_cores(void) {
+	static uint8_t rom[ROM_SIZE], tone[ROM_SIZE];
+	static uint32_t video[240 * 160];
+	make_rom(rom);
+	make_sound_rom(tone);
+	/* BN6's, as the game makes it, its hooks through emu.c; it lives as long
+	 * as the program, as the game's does (mGBA keeps some of what it holds
+	 * in memory it maps itself, which LeakSanitizer does not look through) */
+#ifdef __SANITIZE_ADDRESS__
+	__lsan_disable();
+#endif
+	bool made = emu_init(rom, ROM_SIZE);
+#ifdef __SANITIZE_ADDRESS__
+	__lsan_enable();
+#endif
+	if (!made) { ++failures; printf("FAIL: emu_init on the test ROM\n"); return; }
+	struct mCore *g = guest_core(tone, video);
+	if (!g) { ++failures; printf("FAIL: no guest core for the test ROM\n"); return; }
+	CHECK(emu_hook(0x080000F8, doubled, NULL), "BN6's hook at 0xF8");
+	emu_frame(0);
+	emu_frame(0);
+	guest_run(g, 2);
+	/* each runs its own code: BN6's hook in BN6's, none in the guest's */
+	CHECK(emu_read32(IWRAM) == 20, "BN6's core: %u, not 20 (its hook)", emu_read32(IWRAM));
+	CHECK(stored(g, 0) == 15 && stored(g, 1) == 27 && stored(g, 3) == 39, "the guest's: %u %u %u, not 15 27 39", stored(g, 0), stored(g, 1), stored(g, 3));
+	CHECK(emu_read16(0x080000F8) == 0xBECE && g->rawRead16(g, 0x080000F8, -1) == 0x300A, "the BKPT in BN6's copy alone: %04x, the guest's %04x",
+		emu_read16(0x080000F8), g->rawRead16(g, 0x080000F8, -1));
+	/* run in turn, each from its reset (its code once through 0xF8): the
+	 * hook's hits come with BN6's frames, never the guest's */
+	uint32_t hits = hook_hits, strays = hook_strays;
+	g->reset(g);
+	guest_run(g, 2);
+	CHECK(hook_hits == hits, "%u hits in the guest's frames", hook_hits - hits);
+	emu_reset();
+	emu_frame(0);
+	emu_frame(0);
+	emu_sync();
+	CHECK(hook_hits == hits + 1, "%u hits in BN6's frames, not 1", hook_hits - hits);
+	g->reset(g);
+	guest_run(g, 2);
+	CHECK(hook_hits == hits + 1 && stored(g, 0) == 15, "the guest after BN6's: %u hits, %u", hook_hits - hits, stored(g, 0));
+	/* a BKPT of ours in the guest's code (none of its own hooks are) runs
+	 * no hook of BN6's: the guest's board takes it, a no-op, so its add is
+	 * skipped (5), where BN6's hook would have doubled it first (20) */
+	hits = hook_hits;
+	g->rawWrite16(g, 0x080000F8, -1, 0xBECE);
+	g->reset(g);
+	guest_run(g, 1);
+	CHECK(hook_hits == hits && hook_strays == strays, "the guest's BKPT: %u hits, %u strays", hook_hits - hits, hook_strays - strays);
+	CHECK(stored(g, 0) == 5, "the guest's BKPT: %u, not 5", stored(g, 0));
+	g->rawWrite16(g, 0x080000F8, -1, 0x300A);
+	/* their RAM apart */
+	emu_write32(0x02000000, 0xB6B6B6B6);
+	g->rawWrite32(g, 0x02000000, -1, 0xB5B5B5B5);
+	CHECK(emu_read32(0x02000000) == 0xB6B6B6B6 && g->rawRead32(g, 0x02000000, -1) == 0xB5B5B5B5, "EWRAM shared: %08x %08x",
+		emu_read32(0x02000000), g->rawRead32(g, 0x02000000, -1));
+	/* the guest's sound into BN6's ring: its tone; and none let go */
+	g->reset(g);
+	ring_drain(NULL);   /* (what the guest's frames above put there) */
+	emu_frame(0);
+	emu_sync();
+	int swing = 0;
+	ring_drain(&swing);
+	CHECK(swing < 256, "BN6's core, its sound off, in the ring: its samples %d apart", swing);
+	guest_run(g, 4);
+	int got = ring_drain(&swing);
+	CHECK(got > 1000 && swing > 4096, "the guest's tone in the ring: %d frames, its samples %d apart", got, swing);
+	/* (a frame run ahead unheard: its sound let go before the next pull) */
+	g->runFrame(g);
+	emu_audio_drop_from(g);
+	emu_audio_from(g);
+	CHECK(ring_drain(NULL) == 0, "a frame's sound let go reached the ring");
+	/* its state saved and loaded, BN6's core untouched */
+	g->rawWrite32(g, 0x02000000, -1, 0xB5B5B5B5);
+	struct VFile *state = VFileMemChunk(NULL, 0);
+	CHECK(state && mCoreSaveStateNamed(g, state, SAVESTATE_SAVEDATA), "the guest's state saved");
+	g->rawWrite32(g, 0x02000000, -1, 0x12345678);
+	guest_run(g, 1);
+	if (state) {
+		state->seek(state, 0, SEEK_SET);
+		CHECK(mCoreLoadStateNamed(g, state, SAVESTATE_SAVEDATA), "the guest's state loaded");
+		state->close(state);
+	}
+	CHECK(g->rawRead32(g, 0x02000000, -1) == 0xB5B5B5B5, "the guest's state: %08x, not B5B5B5B5", g->rawRead32(g, 0x02000000, -1));
+	CHECK(emu_read32(0x02000000) == 0xB6B6B6B6, "BN6's EWRAM moved with the guest's state: %08x", emu_read32(0x02000000));
+	emu_frame(0);
+	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's state: %u", emu_read32(IWRAM));
+	emu_unhook(0x080000F8);
+	mCoreConfigDeinit(&g->config);
+	g->deinit(g);
+}
 
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -167,7 +340,9 @@ int main(void) {
 	hook_remove(0x080000F0);
 	mCoreConfigDeinit(&core->config);
 	core->deinit(core);
+
+	two_cores();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed\n");
+	printf("all hook checks passed, the two cores kept apart\n");
 	return 0;
 }

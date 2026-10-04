@@ -49,7 +49,7 @@ the site.
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
 | `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers; the game's events from its hooks (`events.h`: battles in `encounter.c`, maps, choices and key items in `events.c`), taken up after each frame |
 | `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
-| `tests/test_core.c` | ROM-free unit tests; `tests/test_emu.c` the hooks on mGBA, with a ROM of its own bytes; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
+| `tests/test_core.c` | ROM-free unit tests; `tests/test_emu.c` the hooks on mGBA, and two cores side by side as BN6's and the guest's run (each one's hooks, RAM, sound and state its own), with ROMs of its own bytes; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
