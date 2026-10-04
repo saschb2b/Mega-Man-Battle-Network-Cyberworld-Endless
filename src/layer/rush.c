@@ -33,7 +33,7 @@
 static const uint32_t table_literals[3] = { 0x0809DF70u, 0x0809DFB8u, 0x0809DFF0u };
 #define RUSH_OBJ_LITERAL 0x080AB42Cu      /* handler 0x25's records' literal */
 #define RUSH_OBJ_TABLE  0x080AB334u       /* ... BN6's 13 */
-#define BONES_D6_PRIORITY 0x080A5887u     /* OverworldMapObjects 0xD6's priority (2; 0xD5's is 3) */
+#define BONES_D6_PRIORITY 0x080A5C87u     /* OverworldMapObjects 0xD6's priority (2; 0xD5's is 3) */
 
 #define RUSH_OWN 13                       /* the layer's first record in handler 0x25's list */
 #define FLAG_RUSH_KNOWN 0x224
