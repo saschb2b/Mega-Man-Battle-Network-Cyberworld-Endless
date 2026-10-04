@@ -2220,3 +2220,50 @@ feature is: the seed scanned for it (`--scene emu --run-depth 1 --setup
 ...` with `--seed`, the area read from the state, a guardian's coin
 computed from run.c, as the state hides his name till he is met), the
 run it leaves kept beside it (`data-runN`).
+
+## Session 68: one at a time (kai4 7/10; would keep playing and recommend it, with a warning)
+
+kai4 began a new run the developers seeded into BN5's ACDC Area with one
+of BN5's Navis at the act's end (seed 31, `--scene emu`; the run it left,
+headed into BN6's Lab Comps, kept as `data-run3`). The act told itself
+well: L's "one we've never faced down here", the dealers' rumours, a
+whispered P-Code that opened a cube, and "The Nest copied its Navis too"
+in the arena. The DarkChip came at last: MegaMan's face worried at 60 of
+200, DrkSonic dealt at 40. KnightMan, in BN5's engine at 600 HP, deleted
+MegaMan at 298 left; kai4 started another run at once.
+
+Confirmed: the DarkChip dealt when he worries; a BN5 Navi guarding the act
+in BN5's engine with no Cross, the run's folder, buster and DarkChip all
+working; L with no battle data on him; AreaGrab in BN5's battles; the
+rumour chain; "Are you sure?" on Yes.
+
+Raised and fixed in the iteration: KnightMan a wall for act 1 (BN5's
+guardians at three quarters of BN6's band, no Cross coming into their
+engine; the dealer names his opening); BN5's dark rescue at 0 HP, twenty
+seconds of the darkness fighting with MegaMan's body and no word of it
+(said at the flame, and after such a battle); the flame's words giving the
+rule only a profile's first time, its question starting on No (both every
+time now, on Yes); the run's chips that sit out unnamed (once a run now);
+MegaMan's panel missing from the state in BN5's battles (the playtester
+misread rows against KnightMan and died charging in his row); "BN5 found"
+over the summary's first lines.
+
+Open: no sign when a hit bounces off KnightMan's armour (BN5's own); the
+Regular Chip ignored in BN5's battles; BN5's battles paying zenny four
+times of four; two things "the violet mark" on one layer; walkway mouths
+(10 calls, fewer than before); a second R on BN5's Custom screen opening
+its chip help (our kept press, perhaps).
+
+Misreads: none of the player's. One of ours, again: the patch notes said
+the sitting-out chips are named before the first battle and after it, but
+both were once a profile, and kai4's profile had heard them in session 66.
+"Your last dive ended early" was the harness's doing: the run set aside
+counted as ended.
+
+Cost: about 286 calls of one persona.
+
+Loop change: **patch notes are checked against the persona's profile, not
+only the build.** A once-a-profile line (save.h's `profile.*_told`,
+`*_taught`) cannot be promised to a profile that has heard it: read the
+flags in the profile's save before writing a note, and say "once a
+profile" where it is.
