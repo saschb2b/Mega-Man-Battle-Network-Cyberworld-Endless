@@ -4488,6 +4488,7 @@ static void guest_begin(void) {
 	/* (and the run's DarkChips, which BN5 brings into its Custom screen when
 	 * he worries: docs/META.md) */
 	for (int k = 0; k < GUEST_DARK_KINDS; ++k) mm.dark[k] = (uint8_t)dark_count(k);
+	memcpy(mm.codes, run.codes, sizeof mm.codes);
 	uint32_t record = guest_pick(h);
 	int hp = 0, dmg = 0;
 	D.guest_foes = guest_record_strength(D.guest_xrom, record, &hp, &dmg);

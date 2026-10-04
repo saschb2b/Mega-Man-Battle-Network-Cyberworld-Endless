@@ -44,3 +44,16 @@ int xchips_out(const uint16_t *folder, int n, const uint16_t *to_x, int n6, uint
 	}
 	return k;
 }
+
+static int has(const uint8_t codes[4], int code) {
+	for (int i = 0; i < 4; ++i)
+		if (codes[i] == code) return 1;
+	return 0;
+}
+
+int xchips_fit(const uint8_t other[4], const uint8_t bn6[4], const uint8_t folder[3], int code, int row) {
+	if (!(row & 1)) return code;
+	for (int k = 0; k < 3 && folder[k]; ++k)
+		if (has(other, folder[k] - 1) && has(bn6, folder[k] - 1)) return folder[k] - 1;
+	return code;
+}

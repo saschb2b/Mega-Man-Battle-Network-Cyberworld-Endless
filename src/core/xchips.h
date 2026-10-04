@@ -28,4 +28,11 @@ int xchips_code(const uint8_t codes[4], int code);
  * the folder's order, the first `max` into `out`; how many there are. */
 int xchips_out(const uint16_t *folder, int n, const uint16_t *to_x, int n6, uint16_t *out, int max);
 
+/* A reward in one of the folder's codes (folder: three, 1 + the letter, 0
+ * none) where both games' records of the chip have it (bn6 and other: four
+ * codes each, as xchips_code's), on every other `row` of a virus's rows (a
+ * reward's row comes of the busting level): about half the chips a battle
+ * gives, as BN6's rewards lean to the folder; `code` itself elsewhere. */
+int xchips_fit(const uint8_t other[4], const uint8_t bn6[4], const uint8_t folder[3], int code, int row);
+
 #endif

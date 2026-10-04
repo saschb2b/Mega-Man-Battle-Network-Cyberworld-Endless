@@ -381,6 +381,22 @@ bool guest_start(int xrom) {
  * chip as the run gets it), else as its ROM has them. Its entities follow
  * the record's pointer at +0xC, four bytes each (0x11 an enemy, its id in
  * the last two), 0xF0 ending them. */
+static uint8_t fit_codes[3];   /* the folder's codes for this battle's rewards (GuestMegaMan.codes) */
+
+/* Chip entry v of a reward row in one of the folder's codes where both
+ * BN5's chip and BN6's of its name have it, on every other row (xchips_fit,
+ * issue #63), so BN5's own results screen shows it as the run gets it. */
+static uint16_t row_coded(uint16_t v, uint32_t row) {
+	int x = v & 0x1FF;
+	if (starred || !from_bn5[x]) return v;
+	uint8_t other[4], bn6[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
+	for (uint32_t i = 0; i < 4; ++i) other[i] = rd8(0x08000000u + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x + i);
+	ChipInfo ci;
+	chip_info(from_bn5[x], &ci);
+	for (int i = 0; i < ci.ncodes && i < 4; ++i) bn6[i] = ci.codes[i] == '*' ? 26 : (uint8_t)(ci.codes[i] - 'A');
+	return (uint16_t)(x | xchips_fit(other, bn6, fit_codes, v >> 9 & 0x1F, (int)row) << 9);
+}
+
 static void rows_fit(uint32_t record) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
 	uint32_t e = rd32(record + 0xC);
@@ -399,7 +415,7 @@ static void rows_fit(uint32_t record) {
 			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i, o = a - 0x08000000u;
 			uint16_t v = (uint16_t)(d[o] | d[o + 1] << 8);
 			if (v == 0xFFFF || v >> 14 || (int)(v & 0x1FF) >= BN5_CHIPS) continue;
-			wr16(a, !from_bn5[v & 0x1FF] ? (uint16_t)(1u << 14 | REWARD_ZENNY) : starred ? chip_entry_star(v) : v);
+			wr16(a, !from_bn5[v & 0x1FF] ? (uint16_t)(1u << 14 | REWARD_ZENNY) : starred ? chip_entry_star(v) : row_coded(v, i));
 		}
 	}
 }
@@ -502,6 +518,7 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
 	star_records(mm->star);
+	memcpy(fit_codes, mm->codes, sizeof fit_codes);
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
 	 * whose options carry 0x40, as its random battles' do) */
 	int hp = mm->hp, max_hp = mm->max_hp;

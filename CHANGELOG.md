@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **About half of BN5's chip rewards come in your folder's codes (issue
+  #63),** as BN6's do: where both games' chip has one of the folder's
+  codes, BN5's own results screen shows it in that code, and that is the
+  chip you get.
 - **A DarkChip comes when MegaMan is hurt.** BN5 worries him by hits,
   and every battle in its areas opened him calm, so it took seven hits in
   one battle to bring a DarkChip, whatever his HP: a playtester at 10 of

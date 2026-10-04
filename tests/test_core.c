@@ -2287,6 +2287,16 @@ static void test_xchips(void) {
 	int n = xchips_out(folder, 8, to_x, 6, out, 2);
 	CHECK(n == 3 && out[0] == 2 && out[1] == 5, "xchips: three of the folder's chips sit out, WhiCapsl and HiCannon first (%d: %d %d)", n, out[0], out[1]);
 	CHECK(!xchips_out(folder, 1, to_x, 6, out, 2), "xchips: a folder of paired chips has none out");
+	/* (a reward in the first of the folder's S, A and B both records
+	 * have, on odd rows only: Cannon in A, Thunder in B, a chip with none
+	 * of them as it was) */
+	const uint8_t sab[3] = { 19, 1, 2 }, cannon6[4] = { 0, 1, 2, 26 };
+	CHECK(xchips_fit(cannon, cannon6, sab, 2, 1) == 0, "xchips: an odd row's Cannon in the folder's A (%d)", xchips_fit(cannon, cannon6, sab, 2, 1));
+	CHECK(xchips_fit(cannon, cannon6, sab, 2, 2) == 2, "xchips: an even row's Cannon as it was (%d)", xchips_fit(cannon, cannon6, sab, 2, 2));
+	CHECK(xchips_fit(thunder, cannon6, sab, 11, 3) == 1, "xchips: Thunder in B, which both have (%d)", xchips_fit(thunder, cannon6, sab, 11, 3));
+	CHECK(xchips_fit(two, cannon6, sab, 3, 5) == 3, "xchips: no code of the folder in both: as it was (%d)", xchips_fit(two, cannon6, sab, 3, 5));
+	const uint8_t nofolder[3] = { 0, 0, 0 };
+	CHECK(xchips_fit(cannon, cannon6, nofolder, 2, 1) == 2, "xchips: a folder of no codes leaves it (%d)", xchips_fit(cannon, cannon6, nofolder, 2, 1));
 }
 
 int main(void) {

@@ -26,6 +26,7 @@ typedef struct {
 	uint8_t dark[GUEST_DARK_KINDS];   /* his DarkChips, counts by kind */
 	uint8_t buster[3];                /* his buster's Attack, Speed and Charge as BN6's NaviCust makes them (BN6_NAVI_ATTACK: 0-4, levels 1-5) */
 	bool star;                        /* the All * helper: every chip in *, the rewards too */
+	uint8_t codes[3];                 /* the folder's codes (run.codes: 1 + the letter, 0 none): half of BN5's chip rewards come in one, as BN6's do */
 } GuestMegaMan;
 
 /* Begins a battle from BattleSettings record `record`, an address in the

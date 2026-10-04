@@ -126,7 +126,10 @@ engine (`src/emu/guest.c`, epic #57):
   (GiveChips), zenny as zenny (GiveZenny). Before each battle, its
   enemies' reward rows are rewritten where a chip has no BN6 chip of its
   name: 200 zenny instead, so the screen never shows a chip the run won't
-  get. An HP+N its screen gives (a row's kind 2, as BN6's) is in the HP
+  get; and on every other row (a reward's row comes of the busting level)
+  a chip both games have is put in the first of the folder's codes both
+  games' records of it have (`xchips_fit`), so about half the chips come
+  in the folder's codes, as BN6's rewards lean to them. An HP+N its screen gives (a row's kind 2, as BN6's) is in the HP
   that comes back. `runlog.txt` has a line for each, as for BN6's battles,
   with its record, its viruses by BN5's ids and the reward as the run got
   it (docs/DEVTOOLS.md).
