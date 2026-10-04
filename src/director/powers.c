@@ -10,6 +10,7 @@
 #include "net.h"
 #include "run.h"
 #include "save.h"
+#include "souls.h"
 
 /* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, what MegaMan
  * feels of each, the attacks that hit it twice as hard and what it gives
@@ -101,6 +102,9 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 void powers_after_boss(int navi, int biome) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
+	/* BN5's guardians their Soul, for the run's BN5 battles (docs/META.md,
+	 * Souls in BN5 territory) */
+	soul_give(navi);
 	/* the Graveyard's guardian wakes the Cybeast */
 	if (biome == BIOME_GRAVEYARD) flag_set(BN6_FLAG_BEAST_OUT);
 }

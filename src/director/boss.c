@@ -187,6 +187,15 @@ static void wait_update(void) {
 	to(B_ENTER);
 }
 
+/* What the Guardian Data, taken, has told once: the draft the board's rules,
+ * BN5's guardian's what a Soul does (docs/META.md, Souls) */
+static void reward_taught(void) {
+	bool soul = guardian_older(B.g.navi) && !profile.soul_taught, board = !profile.navicust_taught && run.side_kind == LAYER_NORMAL;
+	if (soul) profile.soul_taught = 1;
+	if (board) profile.navicust_taught = 1;
+	if (soul || board) profile_save();
+}
+
 /* No question after his words: the battle begins, the player's again. */
 static void fight_begin(void) {
 	cinema_input(CINEMA_FREE);
@@ -263,11 +272,7 @@ void boss_update(void) {
 		break;
 	case B_REWARD:
 		if (!flag_get(LAYER_REWARD_TAKEN_FLAG) || emu_read8(BN6_CHATBOX)) break;
-		/* (the Guardian Data's draft has told the board's rules once) */
-		if (!profile.navicust_taught && run.side_kind == LAYER_NORMAL) {
-			profile.navicust_taught = 1;
-			profile_save();
-		}
+		reward_taught();
 		flag_set(LAYER_EXIT_OPEN_FLAG);
 		cinema_shake(12, 2);
 		to(B_OPEN);

@@ -1,8 +1,10 @@
 /* Another game's Navis as a territory's guardians (xguardian.h). */
 #include "xguardian.h"
 
+#include <stdio.h>
 #include <string.h>
 
+#include "bn5.h"
 #include "data.h"
 #include "guardians.h"
 #include "guest.h"
@@ -10,6 +12,8 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "save.h"
+#include "souls.h"
 #include "xnavi.h"
 
 #define XROM XROM_BN5_COLONEL_US
@@ -70,6 +74,48 @@ int xguardian_chip(int navi, uint32_t seed, int *code) {
 	if (!held && memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
 	*code = c == '*' ? 26 : c - 'A';
 	return id;
+}
+
+/* BN5's DarkChip of chip kind `kind` (0-11, its id less BN5_DARK_FIRST), -1
+ * none: the one that unites with a Soul of that kind */
+static int dark_of_kind(int kind) {
+	const uint8_t *d = XR[XROM].data;
+	for (int k = 0; d && k < GUEST_DARK_KINDS; ++k)
+		if (d[BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)(BN5_DARK_FIRST + k) + BN5_CHIP_KIND] == kind) return k;
+	return -1;
+}
+
+const char *xguardian_soul_words(int navi) {
+	static char s[720];
+	/* (the kinds by BN5_CHIP_KIND, as MegaMan says them) */
+	static const char *const kinds[12] = { "Fire", "Aqua", "Elec", "Wood", "Recovery", "Plus", "Sword", "Invisible", "Cursor", "obstacle",
+		"Wind", "Break" };
+	const char *name = guardian(navi)->name;
+	int kind = xguardian_kind(navi), dark = kind >= 0 ? dark_of_kind(kind) : -1;
+	if (kind < 0 || kind >= 12) return NULL;
+	/* (held already, won from him in an earlier act or cycle: the layer's
+	 * words are made with the run's Souls as its checkpoint keeps them, so
+	 * a CONTINUE before his battle says it as the first time did) */
+	if (soul_held(navi)) {
+		snprintf(s, sizeof s, "@M %s's Soul data... We carry his Soul already, Lan.", name);
+		return s;
+	}
+	/* (one of BN6's chips of his kind, as the Guardian Data's chip may be) */
+	uint16_t ids[64];
+	ChipInfo ci = { .name = "" };
+	if (guest_kind_chips(kind, ids, 64) > 0) chip_info(ids[0], &ci);
+	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
+	if (profile.soul_taught)
+		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul, Lan! In the older net's battles, our %s chips unite us: UNITE on the Custom screen.", kinds[kind]);
+	else {
+		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me, Lan! It only wakes in the older net's battles.|@M There, pick one of our %s "
+			"chips%s%s, then UNITE on the Custom screen: I'll fight with his Soul for a few turns. Once a battle, and only while I'm calm.", name,
+			kinds[kind], ci.name[0] ? ", like " : "", ci.name);
+		if (dark >= 0 && k < (int)sizeof s)
+			snprintf(s + k, sizeof s - (size_t)k, "|@M His kind of DarkChip, %s, unites us too, darker: Chaos Unison. Out here in our net, his Soul sleeps.",
+				guest_dark_name(dark));
+	}
+	return s;
 }
 
 int xguardian_slot(int navi) {

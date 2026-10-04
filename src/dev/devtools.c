@@ -24,6 +24,7 @@
 #include "rivals.h"
 #include "run.h"
 #include "save.h"
+#include "souls.h"
 #include "text.h"
 
 DevFlags dev = { .speed = 1, .duels = -1 };
@@ -57,6 +58,7 @@ void devtools_parse(const char *spec) {
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);
 		else if (!strcmp(t, "worried")) guest_dev_worried = true;
+		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;

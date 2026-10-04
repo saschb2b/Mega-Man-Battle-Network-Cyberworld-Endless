@@ -13,6 +13,15 @@
   gives what BN6's guardians' do, and in place of a Navi chip BN6 lacks, a
   chip of his kind: KnightMan's JustcOne, ToadMan's BblWrap. Nebula Area
   keeps BN6's guardians. A run without BN5's ROM meets BN6's, as before.
+- **A BN5 guardian beaten gives his Soul for the run's BN5 battles (issue
+  #69).** His Guardian Data says what it does: from then on, in BN5's
+  battles, pick a chip of his Soul's kind and UNITE on the Custom screen,
+  and MegaMan fights with his Soul for a few turns, as BN5 has it: once a
+  battle, and only while he is calm. His kind of DarkChip, offered when
+  MegaMan is hurt and kept to a calmer turn, unites too: Chaos Unison,
+  which costs no max HP, as BN5 counts it no DarkChip used. Every Soul won
+  stays to the end of the run, through CONTINUE; none carries over to the
+  next run, and on BN6's net they do nothing.
 - **Upright on a phone, the picture fills the screen's width.** It was
   drawn at the largest whole scale: 960 pixels wide on a 1080-wide phone,
   with black bars at its sides, small over the touch controls. It now

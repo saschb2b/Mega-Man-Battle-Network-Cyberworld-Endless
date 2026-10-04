@@ -77,6 +77,7 @@ typedef struct {
 	uint8_t dark_taught;      /* ... and all of a DarkChip's price, at the first flame of darkness (docs/META.md) */
 	uint8_t recode_taught;    /* ... and that the older net reads chip codes its own way: 1 going in, 2 coming back */
 	uint8_t cross_old_told;   /* ... and, arriving where its battles are, that the older net had no Crosses */
+	uint8_t soul_taught;      /* ... and what a Soul of the older net does, at the first Guardian Data that gave one (docs/META.md, Souls) */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };

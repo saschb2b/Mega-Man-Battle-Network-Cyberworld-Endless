@@ -66,6 +66,13 @@ static int guardian_chip(const GuardianStage *g, int *code) {
 	return chip;
 }
 
+/* What his Guardian Data says of the power it gives: a Cross's words
+ * (powers.c), or BN5's guardian's Soul, for the run's BN5 battles
+ * (docs/META.md, Souls in BN5 territory) */
+static const char *reward_power(int navi) {
+	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
+}
+
 /* Guardian `navi` of act `act` in area `b`, as the split names him: BN5's
  * where he guards it (run_xguardian_at), else `navi` */
 static int way_guardian(int act, int b, int navi) {
@@ -193,7 +200,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	}
 	/* (a first battle with this Navi, in any run: its battle data comes
 	 * with the Guardian Data, and the next briefing reads it) */
-	const char *power = powers_reward_text(g->navi, layer.biome, run.depth);
+	const char *power = reward_power(g->navi);
 	static char with_data[640];
 	if (!guardian_known(g->navi)) {
 		snprintf(with_data, sizeof with_data, "%s%s@M And his battle data, Lan. Next time, we'll know how he fights!", power ? power : "", power ? "|" : "");

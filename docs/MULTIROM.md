@@ -166,7 +166,10 @@ the layer's random battles are BN5's own, fought in BN5's engine
   worried in guest battles; `--guardian 24` to `29` puts one of BN5's
   Navis (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan)
   in every act BN5 dresses (`--net-biome x0 --run-depth 3 --guardian 28`:
-  KnightMan at ACDC Area's first act); `--dev god`, `onehit` and `fragile` and the
+  KnightMan at ACDC Area's first act), and `--dev souls=MASK` starts a
+  run holding Souls (bit k Team Colonel's Soul 7 + k: 1 Colonel's, 2
+  ShadowMan's, 4 NumberMan's, 8 TomahawkMan's, 0x10 KnightMan's, 0x20
+  ToadMan's); `--dev god`, `onehit` and `fragile` and the
   dev menu work in them as in BN6's. `CYBERWORLD_AUTOPILOT=1` fights them
   as it fights BN6's, from BN5's memory (`src/emu/bn5.h`: its Custom
   screen's picks, its panels, its viruses and their attacks; never a
@@ -174,10 +177,12 @@ the layer's random battles are BN5's own, fought in BN5's engine
   for each (`guest`, its record, its reward). `CYBERWORLD_EMU_DEBUG=1` names each
   battle, its folder's chips in and those that sat out, slot by slot
   ("guest: 4 sat out: CrakShot A, ..."), the buster it goes in with and the
-  one its battle took, a line every 30 of its frames, its end,
-  the flame and a DarkChip's price; `build.py pacing` lists every act's
-  guest battles against its band, and `tests/test_emu.c` runs two cores
-  side by side.
+  one its battle took, a line every 30 of its frames (MegaMan's mood
+  among them), its end, the flame and a DarkChip's price, and with Souls
+  held whether UNITE stood on the first Custom screen and each unison
+  ("guest: MegaMan united with Soul 9, Chaos Unison"); `build.py pacing`
+  lists every act's guest battles against its band, and
+  `tests/test_emu.c` runs two cores side by side.
 - **DarkChips** (docs/META.md, issue #64): the run's go into the guest's
   folder (three at most, one of each, as BN5's folder editor allows, in
   slots where chips sat out). BN5 draws them as any chip; the guest's
@@ -229,6 +234,24 @@ the layer's random battles are BN5's own, fought in BN5's engine
   (`0x02` set: his V1 records leave it off), his reward rows paying an
   Unlocker's price, as BN6's guardians' do. Won, his staging goes on as
   BN6's (his last word, his Guardian Data); lost, the run ends by him.
+- **Souls** (docs/META.md, Souls in BN5 territory; issue #69): a guardian
+  of BN5's, beaten, gives his Soul with his Guardian Data; the run holds
+  it to its end, kept beside its checkpoint (`run.souls`,
+  `src/director/souls.c`), and a new run holds none. Before each guest
+  battle the run's Souls go into BN5's own event flags (eToolkit +0x44):
+  Double Soul's (0x0000) and Chaos Unison's (0x0236) while it holds one,
+  and each Soul's own (0x0008 + k, Colonel's first); BN5's boot state,
+  early in its story, holds none of them, so a run with no Soul fights as
+  before. BN5's Custom screen then offers them by its own rule: UNITE
+  stands under OK while MegaMan is neither worried nor dark as the screen
+  opens, lights when the last chip picked is of a held Soul's kind (a
+  DarkChip of it for Chaos Unison), and each Soul unites once a battle,
+  its Chaos Unison once besides. Given up for Chaos Unison, a DarkChip is
+  no DarkChip used (BN5's use flag stays clear): no max HP for it. A
+  DarkChip comes only while MegaMan worries and UNITE stands only while he
+  does not, so Chaos Unison asks for one offered hurt and kept in the hand
+  to a calmer turn; the shelf (DarkChips, above) keeps a DarkChip once in
+  the hand, worried or not. On BN6's net a Soul does nothing.
 - **Still to come**: the NaviCust's other programs in (those both games
   have, as BN5's battle reads them), BN5's chips registered in BN6.
 
@@ -376,4 +399,7 @@ the layer's random battles are BN5's own, fought in BN5's engine
 - [x] Its guardians, in battles in its own engine: KnightMan, ShadowMan,
   TomahawkMan, NumberMan, ToadMan and Colonel guard the acts of the areas
   BN5 sets them in, in half the runs (Guest battles, above; docs/BOSSES.md).
+- [x] Their Souls: beaten, each gives his for the run's BN5 battles, Soul
+  Unison and Chaos Unison on BN5's Custom screen by its own rule (Guest
+  battles, Souls; docs/META.md).
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

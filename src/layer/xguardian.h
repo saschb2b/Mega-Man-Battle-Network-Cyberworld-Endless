@@ -30,6 +30,14 @@ int guardian_weakness(int navi);
  * 0 none */
 int xguardian_chip(int navi, uint32_t seed, int *code);
 
+/* What his Guardian Data says of his Soul (docs/META.md, Souls in BN5
+ * territory): that MegaMan got it, the chips it takes, UNITE, once a
+ * battle, his kind of DarkChip, and that it works in the older net's
+ * battles alone; all of it the first time a profile wins one
+ * (profile.soul_taught), the Soul and its chips after that, and that the
+ * run holds it already where it does. Chat boxes split by '|'. */
+const char *xguardian_soul_words(int navi);
+
 /* The list-6 number he stands in and speaks with, his sprite and face
  * copied in from his game (xnavi_guardian); -1 where they cannot be */
 int xguardian_slot(int navi);

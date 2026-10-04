@@ -49,6 +49,8 @@ typedef struct {
 	uint8_t buster[3];                /* his buster's Attack, Speed and Charge as BN6's NaviCust makes them (BN6_NAVI_ATTACK: 0-4, levels 1-5) */
 	bool star;                        /* the All * helper: every chip in *, the rewards too */
 	uint8_t codes[3];                 /* the folder's codes (run.codes: 1 + the letter, 0 none): half of BN5's chip rewards come in one, as BN6's do */
+	uint8_t souls;                    /* the run's Souls (souls.h), bit k Team Colonel's Soul 7 + k: offered on its Custom screen as its own rule
+	                                   * offers them (UNITE), Chaos Unison with a DarkChip of their kind (docs/META.md) */
 } GuestMegaMan;
 
 /* Begins a battle from BattleSettings record `record`, an address in the

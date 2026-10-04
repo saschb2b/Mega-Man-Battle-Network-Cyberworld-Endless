@@ -758,18 +758,25 @@ to turn.
 
 - **When**, BN5's own: the UNITE button stands under OK only while
   MegaMan is neither worried nor dark as the Custom screen opens, and
-  each Soul unites once a battle, for the turns BN5 gives it.
+  each Soul unites once a battle, for the turns BN5 gives it (three for
+  NumberMan's), its Chaos Unison once besides (BN5 keeps a bit for
+  each).
 - **Chaos Unison**, BN5's own: a DarkChip of the Soul's kind given up in
   the chip's place, where BN5's chaos flag is set, which the run sets
   while it holds a Soul. A DarkChip comes into the hand only while
   MegaMan worries (above), and UNITE stands only while he does not, so
   Chaos Unison asks for a DarkChip offered when hurt and kept to a calmer
-  turn (a heal, a counter hit's Full Synchro). Its charged shot is the
-  DarkChip's attack (seen: KnightMan's Soul with DarkDril fired a drill).
+  turn (a counter hit's Full Synchro, a virus deleted: each lifts his
+  mood); a DarkChip once in the hand stays there, worried or not (the
+  shelf, docs/MULTIROM.md). Its charged shot is the DarkChip's attack
+  (seen: KnightMan's Soul with DarkDril fired a drill). Seen in the game:
+  DarkPlus offered worried, kept, and picked on a calm turn united
+  MegaMan with NumberMan's Soul in Chaos Unison.
 - **No price for it** (*proposal*, as BN5 has it): BN5 counts a DarkChip
   given up for Chaos Unison as no DarkChip used (its use flag stays
-  clear), and the run follows it: no 20 max HP. The DarkChip still leaves
-  the hand for the battle. The owner may want it priced as a use.
+  clear), and the run follows it: no 20 max HP (seen in the game: none
+  taken after that Chaos Unison). The DarkChip still leaves the hand for
+  the battle. The owner may want it priced as a use.
 - **A Soul's span** (*proposal*): the rest of the run, in BN5's battles
   only, as a Cross serves BN6's; out on BN6's net it does nothing, and
   MegaMan says so. A run holds every Soul it wins, as BN5's MegaMan holds
@@ -785,8 +792,9 @@ to turn.
   Soul unites from the next battle on.
 - **Said where it happens:** at his Guardian Data MegaMan names the Soul,
   the chips it takes, UNITE, once a battle, and that it works only in the
-  older net's battles; all of it the first time a profile wins a Soul,
-  the Soul and its chips after that.
+  older net's battles; all of it the first time a profile wins a Soul
+  (`profile.soul_taught`), the Soul and its chips after that, and "We
+  carry his Soul already" where the run holds it.
 - **How it is kept:** which Souls the run holds, beside its checkpoint as
   its DarkChips are (`run.souls`), for the run whose seed it names; a new
   run holds none. Before each BN5 battle the guest's flags are set from

@@ -96,6 +96,18 @@
 #define BN5_CHIP_KIND     6        /* a chip record's +6: its kind, 0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Recovery, 5 Plus, 6 Sword, 7 Invisible,
                                     * 8 Cursor, 9 Obstacle, 10 Wind, 11 Break, 12 none */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
+/* Its Souls (docs/META.md, Souls in BN5 territory; docs/ROM_DATA.md, BN5's
+ * Souls): the Custom screen's UNITE command, its Double Soul */
+#define BN5_UNITE_CHECK   0x08024B2Cu /* the check of the last chip picked: its kind (BN5_CHIP_KIND) a Soul's, that Soul's flag set, not used this battle */
+#define BN5_SOUL_FLAGS    0x08024BF4u /* a byte per Soul 1-12: its event flag, 0xFF none (Team ProtoMan's six in this version) */
+#define BN5_TOOLKIT_FLAGS 0x44        /* eToolkit +0x44: its event flags (0x020029F8), flag f in byte f >> 3, bit 0x80 >> (f & 7) */
+#define BN5_FLAG_DOUBLE_SOUL 0x0000   /* Double Soul learned: UNITE stands under OK (0x08023C8C), while MegaMan is neither worried nor dark */
+#define BN5_FLAG_SOUL     0x0008      /* + k: Team Colonel's Soul k held (0 Colonel's .. 5 ToadMan's: BN5_SOUL_FLAGS' 7-12) */
+#define BN5_FLAG_CHAOS    0x0236      /* Chaos Unison: a DarkChip of a held Soul's kind unites too (the check at 0x08024B80) */
+#define BN5_SOULS_USED    0x02034E10u /* u32: bit k Soul k united this battle, bit 16 + k its Chaos Unison (each once a battle) */
+#define BN5_CUSTOM_UNITE  0x02036C94u /* the Custom screen's UNITE (its element 0xB, 12 bytes): +0 2 where it stands, +5 the Soul the last chip picked
+                                       * unites, +6 1 for Chaos Unison, +7 0 ready, 1 grey, 2 chosen */
+#define BN5_BATTLE_SOUL   (BN5_BATTLE_NAVI + 0x2C) /* u8, MegaMan's side's: the Soul he is united with (its Navi's AI index), 0 none */
 /* Team Colonel's Navis, by AI index: their Souls are the six its MegaMan
  * unites with (BN5_SOUL_FLAGS) */
 enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN };

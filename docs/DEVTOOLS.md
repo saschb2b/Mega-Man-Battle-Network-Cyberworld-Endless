@@ -301,7 +301,10 @@ Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible
 path; `pieces=32` to look at an area's arrow lane and ride it;
 docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
-`tools/before_after.py` compares two builds' with it).
+`tools/before_after.py` compares two builds' with it). BN5's battles
+have three of their own (docs/MULTIROM.md, Guest battles, For tests):
+`darkchips=MASK`, `worried` and `souls=MASK` (a new run holding BN5's
+Souls, bit k Team Colonel's Soul 7 + k).
 
 Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
 same in a battle on the guest core: on BN5's battle objects, laid out as
@@ -328,8 +331,10 @@ guardians' are (with `--dev quiet` too). `--talk guest:FRAME` begins a
 guest battle at a frame of the layer instead. With
 `CYBERWORLD_EMU_DEBUG=1`, a guest battle prints the record it starts from,
 its folder, a line every 30 of its frames (its game mode and sub-mode, the
-battle's phase, MegaMan's HP, the Custom gauge, the battle's clock) and
-its end; play.py's state says `battle (the older net's)` while it runs.
+battle's phase, MegaMan's HP, the Custom gauge, the battle's clock, his
+mood) and its end, and with Souls held whether UNITE stood on its first
+Custom screen and each unison; play.py's state says `battle (the older
+net's)` while it runs.
 
 ## How the switches work
 

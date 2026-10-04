@@ -102,7 +102,11 @@ the encounter roll (its answer), the deck's compaction (a jump to the
 shelf), its chips' records and reward rows (All *, the rewards' codes and
 zenny), and for a guardian of BN5's (docs/BOSSES.md, BN5's Navis) his
 stats row's HP word at his version, capped to the act's band before his
-battle and its own written back as it ends.
+battle and its own written back as it ends. Of its event flags (eToolkit
++0x44, `0x020029F8`) it sets the run's Souls' before each battle, and
+clears those the run lacks: Double Soul's (0x0000), Chaos Unison's
+(0x0236) and each Soul's own (0x0008-0x000D; docs/META.md, Souls in BN5
+territory).
 
 A battle with a green Mystery Data on the field also rewrites the reward
 row its record names (rows 0 and 1, one per record, of the table at

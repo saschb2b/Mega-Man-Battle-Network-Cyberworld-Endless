@@ -58,6 +58,7 @@
 #include "save_blob.h"
 #include "scripts.h"
 #include "shop.h"
+#include "souls.h"
 #include "talk.h"
 #include "trader.h"
 #include "text.h"
@@ -2024,6 +2025,7 @@ static void forget_heard(void) { D.heard_act = D.dealer_act = 0; D.mail_quiet = 
 bool director_start_run(void) {
 	drop_events();
 	dark_new_run(run.seed);
+	souls_new_run(run.seed);
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	no_room_told = -1;
@@ -2662,6 +2664,7 @@ static void save_checkpoint(void) {
 	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
 	act_note_save();
 	dark_save();
+	souls_save();
 	off_board_save();
 }
 
@@ -3716,8 +3719,8 @@ bool director_start_layer(void) {
 	D.town = false;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it, and no DarkChips but the dev flag's) */
-	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); dark_new_run(run.seed); }
-	else dark_begin(run.seed);
+	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); dark_new_run(run.seed); souls_new_run(run.seed); }
+	else { dark_begin(run.seed); souls_begin(run.seed); }
 	/* (and the Cross it brought at any depth, as a run has it there, and
 	 * its chips in * with the All * helper) */
 	powers_bring(run.cross);
@@ -3824,6 +3827,7 @@ bool director_resume(void) {
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	act_note_read();
 	dark_load(run.seed);
+	souls_load(run.seed);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
 	char path[600];
@@ -4515,6 +4519,7 @@ static GuestMegaMan guest_megaman(uint16_t folder[BN6_FOLDER_ENTRIES]) {
 		{ emu_read8(BN6_NAVI_ATTACK), emu_read8(BN6_NAVI_SPEED), emu_read8(BN6_NAVI_CHARGE) }, run_all_star(), { 0 } };
 	for (int k = 0; k < GUEST_DARK_KINDS; ++k) mm.dark[k] = (uint8_t)dark_count(k);
 	memcpy(mm.codes, run.codes, sizeof mm.codes);
+	mm.souls = (uint8_t)souls_held();   /* (the run's Souls, offered by its own rule: docs/META.md) */
 	return mm;
 }
 

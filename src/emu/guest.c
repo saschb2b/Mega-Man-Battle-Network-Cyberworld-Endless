@@ -724,6 +724,47 @@ static void out_tell(const uint16_t *folder) {
 	if (n) fprintf(stderr, "guest: %d sat out: %s\n", n, line);
 }
 
+/* One of its event flags set or cleared (BN5_TOOLKIT_FLAGS) */
+static void flag_put(uint32_t flag, bool on) {
+	uint32_t flags = rd32(BN5_TOOLKIT + BN5_TOOLKIT_FLAGS);
+	if (flags < 0x02000000u || flags >= 0x02040000u) return;
+	uint32_t a = flags + (flag >> 3);
+	uint8_t bit = (uint8_t)(0x80u >> (flag & 7)), v = rd8(a);
+	core->rawWrite8(core, a, -1, (uint8_t)(on ? v | bit : v & ~bit));
+}
+
+/* The run's Souls as its game's own (docs/META.md, Souls in BN5 territory):
+ * each one's flag, and Double Soul and Chaos Unison learned while it holds
+ * one, so its Custom screen offers UNITE by its own rule; its boot state,
+ * early in its story, holds none of them */
+static int souls_seen;   /* (debug) frames its Custom screen has been up, -1 told */
+static void souls_in(uint8_t souls) {
+	flag_put(BN5_FLAG_DOUBLE_SOUL, souls != 0);
+	flag_put(BN5_FLAG_CHAOS, souls != 0);
+	for (uint32_t k = 0; k < 6; ++k) flag_put(BN5_FLAG_SOUL + k, souls >> k & 1);
+	souls_seen = souls && emu_debug_on() ? 0 : -1;
+}
+
+/* (debug: once a battle with Souls held, whether UNITE stood on its first
+ * Custom screen, half a second up, as its opening sets it up; and each
+ * unison as it begins) */
+static void souls_tell(void) {
+	static uint8_t united;
+	static uint32_t used;   /* (the unisons told: a Chaos Unison is the one whose bit is new) */
+	if (phase != PH_BATTLE || sub_mode() != BN5_SUB_BATTLE) { united = 0; used = 0; return; }
+	if (souls_seen >= 0 && rd8(BN5_BATTLE_PHASE) == BN5_PHASE_CUSTOM && ++souls_seen == 30) {
+		fprintf(stderr, "guest: UNITE %s on its first Custom screen\n", rd8(BN5_CUSTOM_UNITE) == 2 ? "stands" : "does not stand");
+		souls_seen = -1;
+	}
+	uint8_t soul = rd8(BN5_BATTLE_SOUL + BN5_BATTLE_NAVI_SIZE * rd8(BN5_BATTLE_SIDE));
+	if (soul != united && soul && emu_debug_on()) {
+		uint32_t now = rd32(BN5_SOULS_USED);
+		fprintf(stderr, "guest: MegaMan united with Soul %d%s\n", soul, (now & ~used) >> (16 + soul) & 1 ? ", Chaos Unison" : "");
+		used = now;
+	}
+	united = soul;
+}
+
 /* His buster as the run's NaviCust makes it: BN5's boot state's fired 1 a
  * shot and 10 a charge, whatever programs the run had run */
 static void buster_in(const uint8_t buster[3]) {
@@ -751,6 +792,7 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	boss_id = boss ? navi_id(XR[XROM_BN5_COLONEL_US].data, boss->ai, boss->version) : 0;
 	boss_zenny = boss ? boss->zenny : 0;
 	if (boss) boss_cap(boss);
+	souls_in(mm->souls);
 	star_records(mm->star);
 	memcpy(fit_codes, mm->codes, sizeof fit_codes);
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
@@ -897,9 +939,9 @@ static void finish(int outcome) {
  * the battle's clock */
 static void debug_line(int mode, int sub) {
 	if (frames % 30 || !emu_debug_on()) return;
-	fprintf(stderr, "guest t%d mode %02x sub %02x phase %02x hp %d/%d gauge %d%% timer %u\n", frames, mode, sub, rd8(BN5_BATTLE_PHASE),
+	fprintf(stderr, "guest t%d mode %02x sub %02x phase %02x hp %d/%d gauge %d%% timer %u mood %02x\n", frames, mode, sub, rd8(BN5_BATTLE_PHASE),
 		rd16(BN5_T1_OBJECTS + BN6_T1_HP), rd16(BN5_T1_OBJECTS + BN6_T1_MAX_HP), rd16(BN5_CUSTOM_GAUGE) * 100 / 0x4000,
-		(unsigned)rd32(BN5_BATTLE_TIMER));
+		(unsigned)rd32(BN5_BATTLE_TIMER), rd8(BN5_BATTLE_MOOD));
 }
 
 static void step(uint32_t keys, bool quiet);
@@ -922,6 +964,7 @@ static void step(uint32_t keys, bool quiet) {
 	else emu_audio_from(core);
 	++frames;
 	buster_tell();
+	souls_tell();
 	int mode = main_mode(), sub = sub_mode();
 	debug_line(mode, sub);
 	if (phase == PH_ASKED && (sub == BN5_SUB_BATTLE_INIT || sub == BN5_SUB_BATTLE)) {
