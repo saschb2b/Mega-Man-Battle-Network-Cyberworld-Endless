@@ -982,15 +982,23 @@ void platform_persist(void) {
 
 static SecondScreen second;
 
-void platform_second_screen(SecondScreen draw) { second = draw; }
+void platform_second_screen(SecondScreen draw) {
+	second = draw;
+	/* (none: black at once, the scene that drew it gone; the title keeps
+	 * it dark, where the 3DS had kept the run's last map) */
+	if (draw) return;
+#if defined(__3DS__)
+	present3ds_bottom_show(false);
+#endif
+}
 
-/* The second screen drawn into memory (RGBA8888, `pitch` bytes a row):
- * whether it holds a picture. (Through the software renderer, and read
- * back, the map took 20 ms on a New 3DS, a frame lost every redraw.) */
-static bool draw_second(uint32_t *px, int pitch) {
+/* The second screen drawn into memory, w x h (RGBA8888, `pitch` bytes a
+ * row): whether it holds a picture. (Through the software renderer, and
+ * read back, the map took 20 ms on a New 3DS, a frame lost every redraw.) */
+static bool draw_second(uint32_t *px, int w, int h, int pitch) {
 	if (!second) return false;
-	gfx_draw_into(px, SECOND_W, SECOND_H, pitch);
-	bool drew = second(SECOND_W, SECOND_H);
+	gfx_draw_into(px, w, h, pitch);
+	bool drew = second(w, h);
 	gfx_draw_into(NULL, 0, 0, 0);
 	return drew;
 }
@@ -998,7 +1006,7 @@ static bool draw_second(uint32_t *px, int pitch) {
 bool platform_save_second_screen(const char *path) {
 	static uint32_t px[SECOND_W * SECOND_H];
 	memset(px, 0, sizeof px);
-	if (!draw_second(px, SECOND_W * 4)) return false;
+	if (!draw_second(px, SECOND_W, SECOND_H, SECOND_W * 4)) return false;
 	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, SECOND_W, SECOND_H, 32, SECOND_W * 4, SDL_PIXELFORMAT_RGBA8888);
 	bool ok = s && SDL_SaveBMP(s, path) == 0;
 	if (s) SDL_FreeSurface(s);
@@ -1016,7 +1024,7 @@ void platform_second_screen_draw(void) {
 	int pitch;
 	uint32_t *px = present3ds_bottom(&pitch);
 	uint64_t t0 = SDL_GetPerformanceCounter();
-	bool on = px && draw_second(px, pitch);
+	bool on = px && draw_second(px, SECOND_W, SECOND_H, pitch);
 	part_second += SDL_GetPerformanceCounter() - t0;
 	++part_seconds;
 	present3ds_bottom_show(on);

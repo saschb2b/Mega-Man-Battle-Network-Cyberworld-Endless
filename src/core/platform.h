@@ -100,7 +100,8 @@ bool platform_tap(int *x, int *y);
 void platform_shot_screen(const char *path);
 /* The second screen (the 3DS's bottom one, issue #9): `draw` fills
  * SECOND_W x SECOND_H at a frame's end every few frames, false for black;
- * NULL for none. Elsewhere it is drawn only for --second-shot. */
+ * NULL for none, which blacks the screen. Elsewhere it is drawn only for
+ * --second-shot. */
 #define SECOND_W 320
 #define SECOND_H 240
 typedef bool (*SecondScreen)(int w, int h);

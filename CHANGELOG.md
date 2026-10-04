@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **The 3DS's bottom screen goes black when a run ends,** as the title
+  keeps it; it had kept the run's last map.
 - **What the project has mapped of BN6 and BN5, open for anyone to use.**
   docs/symbols holds, per ROM, a symbol file that mGBA's and no$gba's
   debuggers load, and the same symbols as JSON and CSV: every address the
