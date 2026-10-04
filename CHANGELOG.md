@@ -70,6 +70,15 @@
   (three Cannons make GigaCan1, where BN6 itself takes one \* in such a
   row). Off by default and chosen per run; the run's summary and Dad's
   dive report name it, and like the other helpers it counts for unlocks.
+- **Beside a walkway's mouth, the arrow shows the way that walks MegaMan
+  in.** Standing off a walkway's line at its mouth, the arrow pointed
+  across onto the line. Held briefly, that moved him a few steps along
+  the edge with the arrow unchanged, so the walkway's own way seemed the
+  next thing to try, and it stood him still; held long, it carried him
+  past the line and the arrow flipped back. It now points straight left,
+  right, up or down, between the two: holding it slides MegaMan along the
+  edge onto the line and on into the walkway, as BN6 moves him, and no
+  hold, however long, carries him past.
 - **CircusMan's battle data says how fast his tent falls:** half a
   second after our panel lights, with no way out once down, so no long
   chip while he crackles on his panel.

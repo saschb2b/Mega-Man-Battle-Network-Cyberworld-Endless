@@ -95,9 +95,9 @@ static int step_lane(int x0, int y0, int x1, int y1, double *lo, double *hi) {
  * (step_lane; at 0.35 of a panel the arrow pointed back from a corner at
  * every turn, session 55). Where the mouth is his own panel, *across is
  * set: the arrow points across to the walk's line, not back to the
- * panel's middle. */
-static int mouth_aim(double px, double py, const int16_t *path, int n, bool *across) {
-	int sx = (int)lround(px), sy = (int)lround(py), cx = sx, cy = sy, fx = 0, fy = 0;
+ * panel's middle. (sx, sy): the panel the walk sets off from. */
+static int mouth_aim(double px, double py, int sx, int sy, const int16_t *path, int n, bool *across) {
+	int cx = sx, cy = sy, fx = 0, fy = 0;
 	bool ahead = true;
 	*across = false;
 	for (int k = 1; k <= 4 && k <= n; ++k) {
@@ -127,6 +127,71 @@ static bool open_floor(int x, int y) {
 	return true;
 }
 
+/* Whether MegaMan stands at (x, y) as BN6 keeps him on the floor: a
+ * panel's floor reaches 12.5 of its 32 units past its middle towards the
+ * void (12 went in, 13 was stopped), on into a floor panel beside it, and
+ * into a corner where the three panels about it are floor; clear of what
+ * stands on it, circles smaller than a panel (he stands in the corner of
+ * a Mystery Data's panel). */
+static bool stands(double x, double y) {
+	const double m = 12.5 / 32;
+	int px = (int)lround(x), py = (int)lround(y);
+	double fx = x - px, fy = y - py;
+	int ex = fx > m ? 1 : fx < -m ? -1 : 0, ey = fy > m ? 1 : fy < -m ? -1 : 0;
+	if (!floor_at(px, py) || !floor_at(px + ex, py) || !floor_at(px, py + ey) || !floor_at(px + ex, py + ey)) return false;
+	for (int j = -1; j <= 1; ++j)
+		for (int i = -1; i <= 1; ++i)
+			if (floor_at(px + i, py + j) && solid[py + j][px + i] && (fx - i) * (fx - i) + (fy - j) * (fy - j) < 0.45 * 0.45) return false;
+	return true;
+}
+
+/* Whether MegaMan, holding the grid way (dx, dy) (each -1, 0 or 1, a unit
+ * of a panel's 32 along each a step; held into an edge, along the other
+ * alone, as BN6's wall shapes push him out square), walks from (x, y)
+ * into panel (wx, wy) within `steps`. */
+static bool held_into(double x, double y, int dx, int dy, int wx, int wy, int steps) {
+	static const int part[3][2] = { { 1, 1 }, { 1, 0 }, { 0, 1 } };
+	for (int f = 0; f < steps; ++f) {
+		if (lround(x) == wx && lround(y) == wy) return true;
+		int k = 0;
+		while (k < 3 && ((dx * part[k][0] == 0 && dy * part[k][1] == 0) || !stands(x + dx * part[k][0] / 32.0, y + dy * part[k][1] / 32.0))) ++k;
+		if (k == 3) return false;
+		x += dx * part[k][0] / 32.0;
+		y += dy * part[k][1] / 32.0;
+	}
+	return lround(x) == wx && lround(y) == wy;
+}
+
+/* The floor's width at panel (x, y) crosswise to a step (dx, dy) along
+ * one axis: two panels or less is a walkway or band, whose way the arrow
+ * shows (open_floor). */
+static int width_across(int x, int y, int dx, int dy) {
+	int ux = dy != 0, uy = dx != 0, w = 1;
+	for (int s = -1; s <= 1; s += 2)
+		for (int k = 1; floor_at(x + s * ux * k, y + s * uy * k); ++k) ++w;
+	return w;
+}
+
+/* MegaMan off the lane of a mouth (mouth_aim's) that is his own panel or
+ * the walk's next: the screen's straight way across onto the lane and
+ * along it, where holding it walks him in (BN6 slides him along the edge
+ * till he is on the lane, then in, and the lane's sides keep him there);
+ * -1 for none. The way across alone took a hold just long enough: held
+ * on, it carried him over the lane where the floor went on, and the arrow
+ * flipped back; held short, it moved him a few units with the arrow
+ * unchanged, and two playtesters took the lane's way too soon and stood
+ * still at the mouth, where LEFT, RIGHT or UP walked them in (session 65).
+ * Not on a walkway or band, where the arrow shows the grid's ways. */
+static int slide_way(double px, double py, int sx, int sy, const int16_t *path, int n, int mouth) {
+	int w = mouth == sy * MAP_W + sx && n >= 1 ? path[n - 1] : n >= 2 && mouth == path[n - 1] ? path[n - 2] : -1;
+	if (w < 0 || width_across(sx, sy, path[n - 1] % MAP_W - sx, path[n - 1] / MAP_W - sy) <= 2) return -1;
+	int mx = mouth % MAP_W, my = mouth / MAP_W, ax = w % MAP_W - mx, ay = w / MAP_W - my;
+	/* (across: towards the lane, from the mouth's middle) */
+	int t = (ax ? py - my : px - mx) > 0 ? -1 : 1, tx = ax ? 0 : t, ty = ax ? t : 0;
+	if (!held_into(px, py, ax + tx, ay + ty, w % MAP_W, w / MAP_W, 96)) return -1;
+	return route_grid_way(ax + tx, ay + ty);
+}
+
 /* Where the arrow aims on the walk (n panels, from the target back): a
  * walkway's or band's mouth while MegaMan stands off its lane (off open
  * floor, across to the walk's line where the mouth lies straight ahead);
@@ -135,9 +200,10 @@ static bool open_floor(int x, int y) {
  * walkways said neither), and off open floor always, its first step a
  * turn only once its lane is open; else at the farthest of the next four
  * panels he can walk to in a straight line over the floor (three along,
- * as the crow flies, cut corners over drops). */
-static int walk_aim(double px, double py, int sx, int sy, const int16_t *path, int n, bool axes, bool *across) {
-	int mouth = mouth_aim(px, py, path, n, across), leg = 0;
+ * as the crow flies, cut corners over drops). `mouth` and *across are
+ * mouth_aim's. */
+static int walk_aim(int sx, int sy, const int16_t *path, int n, int mouth, bool axes, bool *across) {
+	int leg = 0;
 	if (n) {
 		int dx = path[n - 1] % MAP_W - sx, dy = path[n - 1] / MAP_W - sy;
 		while (leg < 4 && leg < n && path[n - 1 - leg] % MAP_W == sx + dx * (leg + 1) && path[n - 1 - leg] / MAP_W == sy + dy * (leg + 1)) ++leg;
@@ -206,34 +272,39 @@ static int least_turns(int sx, int sy, int tx, int ty) {
 	return n;
 }
 
+/* What stands on the floor, into solid, but the target (tx, ty): the walk
+ * goes round it (it keeps every panel in reach, test_core.c), as the
+ * arrow led into a Mystery Data at a walkway's mouth. MegaMan beside one,
+ * in its panel's corner: the walk from the free panel nearest him, *sx
+ * and *sy (from the object's own it led through it, and he pushed into it
+ * for good). */
+static void floor_objects(double px, double py, int tx, int ty, int *sx, int *sy) {
+	memset(solid, 0, sizeof solid);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].solid && floor_at((int)layer.obj[i].x, (int)layer.obj[i].y)) solid[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
+	solid[ty][tx] = 0;
+	if (solid[*sy][*sx]) {
+		double best = 1e9;
+		int bx = *sx, by = *sy;
+		for (int k = 0; k < 8; ++k) {
+			static const int d[8][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
+			int x = *sx + d[k][0], y = *sy + d[k][1];
+			if (!floor_at(x, y) || solid[y][x]) continue;
+			double dist = (x - px) * (x - px) + (y - py) * (y - py);
+			if (dist < best) { best = dist; bx = x; by = y; }
+		}
+		*sx = bx;
+		*sy = by;
+	}
+	solid[*sy][*sx] = 0;
+}
+
 int route_way(double px, double py, int tx, int ty, int *len) {
 	int sx = (int)lround(px), sy = (int)lround(py);
 	route_walk_len = 0;
 	route_walk_aim = -1;
 	if (!floor_at(sx, sy) || !floor_at(tx, ty)) return -1;
-	/* around what stands on the floor (it keeps every panel in reach,
-	 * test_core.c): the arrow led into a Mystery Data at a walkway's mouth */
-	memset(solid, 0, sizeof solid);
-	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].solid && floor_at((int)layer.obj[i].x, (int)layer.obj[i].y)) solid[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
-	solid[ty][tx] = 0;
-	/* MegaMan beside a Mystery Data, in its panel's corner: the walk from
-	 * the free panel nearest him (from the object's own it led through it,
-	 * and he pushed into it for good) */
-	if (solid[sy][sx]) {
-		double best = 1e9;
-		int bx = sx, by = sy;
-		for (int k = 0; k < 8; ++k) {
-			static const int d[8][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
-			int x = sx + d[k][0], y = sy + d[k][1];
-			if (!floor_at(x, y) || solid[y][x]) continue;
-			double dist = (x - px) * (x - px) + (y - py) * (y - py);
-			if (dist < best) { best = dist; bx = x; by = y; }
-		}
-		sx = bx;
-		sy = by;
-	}
-	solid[sy][sx] = 0;
+	floor_objects(px, py, tx, ty, &sx, &sy);
 	/* the walk, backwards from the target */
 	int n = sx == tx && sy == ty ? 0 : least_turns(sx, sy, tx, ty);
 	if (n < 0) return -1;
@@ -242,9 +313,12 @@ int route_way(double px, double py, int tx, int ty, int *len) {
 	/* (in a Mystery Data's panel, out to the one the walk sets off from:
 	 * aimed along the walk from there, the arrow led into the data) */
 	bool across = false, out = sx != (int)lround(px) || sy != (int)lround(py), axes = n && !out && !open_floor(sx, sy);
-	int aim = out ? sy * MAP_W + sx : walk_aim(px, py, sx, sy, path, n, axes, &across);
+	int mouth = out ? -1 : mouth_aim(px, py, sx, sy, path, n, &across);
+	int slide = axes && mouth >= 0 ? slide_way(px, py, sx, sy, path, n, mouth) : -1;
+	int aim = out ? sy * MAP_W + sx : walk_aim(sx, sy, path, n, mouth, axes, &across);
 	route_walk_len = n;
 	route_walk_aim = aim;
+	if (slide >= 0) return slide;
 	double ax = aim % MAP_W - px, ay = aim / MAP_W - py;
 	/* (a walkway along x is lined up on y) */
 	if (across && path[n - 1] / MAP_W == aim / MAP_W) ax = 0;

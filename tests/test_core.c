@@ -1355,14 +1355,64 @@ static int hold_arrow(double x, double y, int tx, int ty, int hold, int *looks, 
 	return -1;
 }
 
+/* Where MegaMan at (x, y) stands at the mouth of the lane the walk enters
+ * from his panel or from its next one (floor two panels wide or less
+ * crosswise, a walkway or band), stopped: outside its ends (12.5 units
+ * past its end panels' middles) and against the edge, where the lane's
+ * way does not move him (BN6 stops him there). The mouth panel (*mx, *my),
+ * the lane's first (*wx, *wy), its ends crosswise from the mouth's middle
+ * (*lo, *hi) and whether it runs along x. As of the last route_way; false
+ * for none. */
+static bool lane_off(double x, double y, int *mx, int *my, int *wx, int *wy, double *lo, double *hi, bool *along_x) {
+	int n = route_walk_len, cx = (int)lround(x), cy = (int)lround(y);
+	for (int k = 1; k <= 2 && k <= n; ++k) {
+		int ax = k == 1 ? cx : route_walk[n - 1] % MAP_W, ay = k == 1 ? cy : route_walk[n - 1] / MAP_W;
+		int bx = route_walk[n - k] % MAP_W, by = route_walk[n - k] / MAP_W, ux = by != ay, uy = bx != ax, a = 0, b = 0;
+		while (walk_floor(ax - (a + 1) * ux, ay - (a + 1) * uy) && walk_floor(bx - (a + 1) * ux, by - (a + 1) * uy)) ++a;
+		while (walk_floor(ax + (b + 1) * ux, ay + (b + 1) * uy) && walk_floor(bx + (b + 1) * ux, by + (b + 1) * uy)) ++b;
+		double off = bx != ax ? y - ay : x - ax, l = -a - 12.5 / 32, h = b + 12.5 / 32;
+		if (abs(bx - ax) + abs(by - ay) != 1 || a + b + 1 > 2 || (off > l && off < h)) continue;
+		/* (and stopped there: the lane's way held moves him less than a
+		 * few units) */
+		double sx = x, sy = y;
+		for (int f = 0; f < 8; ++f) walk_step(&sx, &sy, (bx - ax) / 32.0, (by - ay) / 32.0, -1, -1);
+		if (fabs(sx - x) + fabs(sy - y) > 4.0 / 32) continue;
+		*mx = ax; *my = ay; *wx = bx; *wy = by; *lo = l; *hi = h; *along_x = bx != ax;
+		return true;
+	}
+	return false;
+}
+
+/* MegaMan standing off a lane's mouth (lane_off): whether the arrow's way
+ * `way`, held, walks him into the lane, or leaves him standing on its line
+ * (its way then walks him in), not past it or short of it. */
+static bool held_onto_lane(double x, double y, int way, int tx, int ty) {
+	int mx, my, wx, wy;
+	double lo, hi, dx, dy;
+	bool along_x;
+	if (!lane_off(x, y, &mx, &my, &wx, &wy, &lo, &hi, &along_x)) return true;
+	way_step(way, 2.0 / 32, &dx, &dy);
+	/* (in: past the mouth, on either panel of a lane two wide; on its line:
+	 * inside its ends, which are the floor's edge too, where he stops) */
+	double off = along_x ? y - my : x - mx;
+	for (int f = 0; f < 48; ++f) {
+		bool on = off >= lo - 1e-9 && off <= hi + 1e-9;
+		if (on && (along_x ? lround(x) == wx : lround(y) == wy)) return true;
+		if (!walk_step(&x, &y, dx, dy, tx, ty)) return on;
+		off = along_x ? y - my : x - mx;
+	}
+	return false;
+}
+
 /* frames to get beside (tx, ty) from (x, y) following the arrow, -1 never */
 static int arrow_turns, arrow_frames, arrow_swings;
 /* (and how it walks: frames MegaMan, holding the way it shows, does not
  * move, and the stops they make, each a new direction to find; of its
  * looks, those where he stands on a walkway or band, floor two panels wide
- * or less across the walk, and of those the ones that show a way across
- * the grid, one of the screen's straight four, against the screen's
- * diagonals the walkways run on) */
+ * or less across the walk, and of those the ones whose way is across the
+ * grid, one of the screen's straight four, against the screen's diagonals
+ * the walkways run on: the way it turns to, as the slide off a lane's
+ * mouth, straight, shows on a look or two into the lane) */
 static int arrow_stalls, arrow_stops, arrow_band_looks, arrow_band_diagonals;
 static int follow_arrow(double x, double y, int tx, int ty) {
 	const double speed = 2.0 / 32;   /* panels a frame */
@@ -1384,7 +1434,7 @@ static int follow_arrow(double x, double y, int tx, int ty) {
 			int fx = route_walk_len ? route_walk[route_walk_len - 1] % MAP_W - cx : 0, fy = route_walk_len ? route_walk[route_walk_len - 1] / MAP_W - cy : 0;
 			if (w >= 0 && abs(fx) + abs(fy) == 1 && floor_across(cx, cy, fx, fy) <= 2) {
 				++arrow_band_looks;
-				arrow_band_diagonals += shown % 2 == 0;
+				arrow_band_diagonals += w % 2 == 0;
 			}
 		}
 		double dx, dy;
@@ -1516,6 +1566,100 @@ static void test_arrow_areas(void) {
 	CHECK(all[7] == 0, "held, the arrow's way stood MegaMan still on %d of %d walks", all[7], all[0]);
 	printf("  arrow in every area: %d walks, %.3f stops a walk, %d of %d looks on a band across the grid; held, %.1f looks a walk, %d of the walks"
 		" not there in time\n", all[0], (double)all[2] / all[0], all[4], all[3], (double)all[6] / all[5], all[0] - all[5] - all[7]);
+}
+
+/* (not where something solid stands by the mouth or in his panel: the
+ * arrow leads him out of a Mystery Data's panel first, and BN6 takes him
+ * round its circle, which walk_step does not) */
+static bool mouth_clear(int mx, int my, int ax, int ay, double x, double y) {
+	for (int i = 1; i < layer.nobj; ++i) {
+		int ox = (int)layer.obj[i].x, oy = (int)layer.obj[i].y;
+		if (layer.obj[i].solid && ((abs(ox - mx) <= 1 && abs(oy - my) <= 1) || (abs(ox - mx - ax) <= 1 && abs(oy - my - ay) <= 1) ||
+			(ox == (int)lround(x) && oy == (int)lround(y)))) return false;
+	}
+	return true;
+}
+
+/* MegaMan at offset o crosswise from the mouth (mx, my) of a lane the walk
+ * enters along (ax, ay), walked along it to the edge and stopped there: 0
+ * where he is not on the floor or not off the lane (lane_off), 2 where he
+ * stands on a walkway or band, else 1 where the arrow's way (*way), held,
+ * walks him onto the lane, -1 where not. */
+static int mouth_spot(int mx, int my, int ax, int ay, double o, int tx, int ty, int *way) {
+	double x = mx + (ay ? o : 0), y = my + (ax ? o : 0);
+	if (!walk_on(x, y) || walk_blocked(x, y, tx, ty)) return 0;
+	for (int k = 0; k < 32 && walk_on(x + ax / 32.0, y + ay / 32.0) && !walk_blocked(x + ax / 32.0, y + ay / 32.0, tx, ty); ++k) {
+		x += ax / 32.0;
+		y += ay / 32.0;
+	}
+	int len, lx, ly, wx, wy;
+	double lo, hi;
+	bool along_x;
+	*way = route_way(x, y, tx, ty, &len);
+	if (*way < 0 || !mouth_clear(mx, my, ax, ay, x, y) || !lane_off(x, y, &lx, &ly, &wx, &wy, &lo, &hi, &along_x)) return 0;
+	int cx = (int)lround(x), cy = (int)lround(y), fx = route_walk[route_walk_len - 1] % MAP_W - cx, fy = route_walk[route_walk_len - 1] / MAP_W - cy;
+	if (abs(fx) + abs(fy) == 1 && floor_across(cx, cy, fx, fy) <= 2) return 2;
+	return held_onto_lane(x, y, *way, tx, ty) ? 1 : -1;
+}
+
+/* MegaMan stopped at the mouth of each walkway or band the walk from the
+ * arrival and each room enters (two panels wide or less crosswise; sixty
+ * layers of every area, as test_arrow_areas'), against the edge beside it
+ * and off its lane, every two units out to a panel and a half on either
+ * side: off a walkway or band himself, the arrow's way, held, walks him
+ * onto the lane (held_onto_lane). Two playtesters stood still at such
+ * mouths for about 35 calls (session 65): the arrow's way across, held
+ * short, moved him a few units with the arrow unchanged, and held on,
+ * carried him over the lane where the floor went on past it. On a walkway
+ * or band the arrow shows its way (test_arrow_areas); those spots are
+ * counted apart. */
+static void test_arrow_mouths(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	static int16_t walk[MAP_W * MAP_H];
+	static uint8_t done[MAP_H][MAP_W][4];
+	int spots = 0, misses = 0, bands = 0;
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int area_spots = spots, area_misses = misses;
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+			int tx, ty, sx, sy, len;
+			if (!arrow_goal(&tx, &ty)) continue;
+			memset(done, 0, sizeof done);
+			for (int r = -1; r < layer.nrooms; ++r) {
+				if (!arrow_start(r, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) continue;
+				int n = route_walk_len;
+				memcpy(walk, route_walk, sizeof walk[0] * (size_t)n);
+				/* (each step from walk[i], the mouth, into walk[i - 1], the lane's first panel) */
+				for (int i = n - 1; i >= 1; --i) {
+					int mx = walk[i] % MAP_W, my = walk[i] / MAP_W, ax = walk[i - 1] % MAP_W - mx, ay = walk[i - 1] / MAP_W - my;
+					int d = ax > 0 ? 0 : ax < 0 ? 1 : ay > 0 ? 2 : 3, ux = ay != 0, uy = ax != 0, lo = 0, hi = 0;
+					if (done[my][mx][d]) continue;
+					done[my][mx][d] = 1;
+					while (walk_floor(mx - (lo + 1) * ux, my - (lo + 1) * uy) && walk_floor(mx + ax - (lo + 1) * ux, my + ay - (lo + 1) * uy)) ++lo;
+					while (walk_floor(mx + (hi + 1) * ux, my + (hi + 1) * uy) && walk_floor(mx + ax + (hi + 1) * ux, my + ay + (hi + 1) * uy)) ++hi;
+					if (lo + hi + 1 > 2) continue;
+					/* (whole units off the end panels' middles, as BN6 places him) */
+					for (int s = -1; s <= 1; s += 2)
+						for (int k = 13; k <= 60; k += 2) {
+							double o = s < 0 ? -lo - k / 32.0 : hi + k / 32.0;
+							int way, got = mouth_spot(mx, my, ax, ay, o, tx, ty, &way);
+							spots += got == 1 || got == -1;
+							bands += got == 2;
+							if (got >= 0) continue;
+							if (++misses <= 5)
+								printf("  area %d seed %u: stopped at %.3f,%.3f off the mouth %d,%d, the arrow's way %d held did not walk MegaMan onto its lane\n", b,
+									seed, mx + (ay ? o : 0), my + (ax ? o : 0), mx, my, way);
+						}
+				}
+			}
+		}
+		if (getenv("CW_WAY_STATS")) printf("  mouths area %2d: %d of %d spots stopped off a lane, the arrow's way held not onto it\n", b, misses - area_misses, spots - area_spots);
+	}
+	CHECK(misses == 0, "stopped off a lane's mouth, the arrow's way held did not walk MegaMan onto the lane at %d of %d spots", misses, spots);
+	printf("  mouths: %d spots stopped off a lane's mouth (and %d on a walkway or band), %d where the arrow's way held did not walk MegaMan onto it\n",
+		spots, bands, misses);
 }
 
 /* The walk from the arrival to the exit (or the guardian) in every area:
@@ -2066,6 +2210,7 @@ int main(void) {
 	test_stairs();
 	test_arrow();
 	test_arrow_areas();
+	test_arrow_mouths();
 	test_walks();
 	test_way_links();
 	test_navicust();
