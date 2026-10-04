@@ -22,7 +22,7 @@ inside BN6 (it calls its own game's addresses).
 | Towns | The same, from its real-world maps | moderate |
 | Music, sounds | Its MP2K songs and their voice groups into BN6's song table | low |
 | NPCs, mugshots | Its sprites as bystanders and dealers | low to moderate |
-| Chips | Where BN6 has the behaviour (most standard chips); its own (Navi chips, seven of its twelve DarkChips) have no code in BN6, which keeps the other five DarkChips with theirs (docs/ROM_DATA.md, BN6's own DarkChips) | limited |
+| Chips | Where BN6 has the behaviour (most standard chips); its own (Navi chips, seven of its twelve DarkChips) have no code in BN6, which keeps the other five DarkChips with theirs, four of which play in BN6's battles (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md) | limited |
 | Viruses | The families both games have; its own need their AI. BN5 shares 5 of its 33 with BN6 (Mettaur, Catack, Champy, WindBox, Trumpy, by the first name of each family in both games' tables), and its areas' battles are mostly its own (ACDC Area's CanGards and Powies), so a mix from its data alone would take the BN5 out of them | limited |
 | Guardians | Its Navis need their AI: a battle in its own engine | high |
 
@@ -194,7 +194,12 @@ the layer's random battles are BN5's own, fought in BN5's engine
   starts calm (BN5's mood and dark meter reset), as the run's battles
   share no darkness. A flame of darkness on the middle layer of such an
   act holds one the run lacks: BN5's flame, copied from its ROM and
-  turned purple, in a bystander's place.
+  turned purple, in a bystander's place. Four kinds BN6 keeps too
+  (DrkSword, DarkThnd, DrkRecov, DarkInvs; docs/META.md, BN6's own
+  DarkChips) play in BN6's battles from its folder: a kind is one chip
+  in both nets, and one in BN6's folder never goes into the guest's as a
+  chip beside the run's copy; BN5's rule brings it, first among the
+  run's three.
 - **In the browser** (issue #68): the page runs one frame at a time with
   no threads, so the guest's frames take BN6's frames' place, never both
   in one 1/60 s, and no frame blocks. Its first boot (7210 frames) runs a

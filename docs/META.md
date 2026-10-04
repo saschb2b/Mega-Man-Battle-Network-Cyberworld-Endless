@@ -710,11 +710,14 @@ decisions).
   BN5's folder takes them.
 - **Variety, not power, across runs:** nothing of them carries over, not
   the chips, not their price; a new run starts with none.
-- **Only in BN5 territory, as built:** BN6's battles never offer them.
-  BN6 does keep five of BN5's twelve with their code (a player's lead,
-  verified: docs/SOURCES.md), which the proposal below would bring into
-  BN6's battles (BN6's own DarkChips, issue #70). That BN6 "has no code
-  for them" had been assumed, and was wrong.
+- **In BN6's battles too, since issue #70:** BN6 keeps five of BN5's
+  twelve with their code (a player's lead, verified: docs/SOURCES.md),
+  and four of them now play in BN6's battles from the folder, a BN6 flame
+  offering them where BN5 never dresses (BN6's own DarkChips, below). A
+  kind of those four held is one chip in both nets: BN5's flame of one
+  says so ("our net knows this one too"), and BN6's chip of it goes to
+  the Pack. That BN6 "has no code for them" had been assumed, and was
+  wrong.
 - **When he falls after using one** (seen in session 68): BN5 gets
   MegaMan up at 1 HP, and the darkness fights with his body a while, out
   of the player's hands. MegaMan says it might at the flame, the first
@@ -739,7 +742,7 @@ DarkChips). They pair with BN5's of the same names (`src/core/xchips.c`),
 so these five could serve a run in both nets and on every build, the
 3DS's with its one ROM too. First what BN6 does with them, then the
 design, reasoned with the game-design skill and approved by the owner as
-recommended (4 October 2026); building it is issue #70's next step.
+recommended (4 October 2026), then what was built (As built, below).
 
 **What BN6's battles do with them** (verified):
 
@@ -928,6 +931,78 @@ counted by the engine.
    BN6's battles.
 5. The words: MegaMan at the flame and after the first dark battle, BN6's
    two lines, the honest power.
+
+### As built (4 October 2026)
+
+Every build meets them, the 3DS's and a run without BN5's ROM too: BN6's
+own code runs them, our part is the run around it (`src/director/darkbn6.c`,
+`darkchips.c`; docs/ROM_DATA.md, BN6's own DarkChips in a run).
+
+- **The price, one in every net.** A hook where BN6 runs a chip's
+  after-effects (`0x0800B79A`), which a DarkChip's id reaches only where
+  its dark power ran, a BugFrag paid, marks the battle; back on the map,
+  20 max HP go as BN5's battles take them (`dark_price`), once a battle
+  however many uses. BN6's own price comes on top, by its own code: the
+  BugFrag at each use, from the save and the battle's count, and the
+  NaviCust's HP bug for the rest of that battle. A use that ran as its
+  base chip for want of a BugFrag costs nothing. BN5's battles keep their
+  rule, and Chaos Unison stays free.
+- **The source.** On the middle layer of every act whose battles are
+  BN6's, in a bystander's place as BN5's flame stands, a flame of
+  BN6's own: its blue flame of sprite list 7, copied into the core's free
+  space and turned purple as BN5's is (never a committed asset), holding
+  one of DrkSword, DarkThnd, DrkRecov and DarkInvs the run lacks, from
+  the run's seed and the act (`dark_flame_pick`, its seed mixed first so
+  that seeds apart in their low bits alone pick apart too). The layer
+  keeps its flame: a CONTINUE on it finds the same kind, held by then
+  where it was taken before the save, and gives nothing twice (before,
+  by the code, a CONTINUE on a layer the PET's Save kept after its BN5
+  flame was taken picked the next kind and gave it at once; read, not
+  seen in play). An install-time actor: no layer's generation changed.
+- **The chips.** Taken, the chip goes to the Pack in *, and EDIT puts it
+  in. The run holds one of each kind, shared with BN5's DarkChips of the
+  same names: from either net's flame BN6's chip of a kind its battles
+  play goes to the Pack, and each layer gives the Pack one the run holds
+  that neither the Pack nor the folder has (a run saved by an earlier
+  build, holding BN5's DrkSword, gets BN6's as it continues: the same
+  path a run begun with `--dev darkchips` takes, seen; an earlier build's
+  save itself not tried). DarkPlus stays out of BN6's Pack and battles.
+- **The folder.** BN6's own rule, by its DarkChip flag set in the core's
+  copy: three at most, refused in MegaMan's own NAVIGATOR line ("You can
+  use only 3 of the same DarkChips."). It held only once their sort keys
+  were set too: the US version left them 0, and the editor took any two
+  DarkChips for one chip and let one in for another past the three.
+- **The look.** Their icons, pictures and palettes are their base chips'
+  (Sword, Thunder, Recov10, Invisibl), on BN6's purple DarkChip card in
+  the folder and the pack (seen). BN6 puts the Custom screen's cursor on a
+  DarkChip in the hand, as BN5 does (seen); the screen's fade and music
+  for one under the cursor, which its code holds, did not show in our
+  captures.
+- **Honest power.** The four records' power is the one that lands: their
+  own while the BugFrags held are one or more, their base chip's with
+  none ("DrkSword 80" over Sword's picture), and their base chip's for the
+  rest of a battle whose last BugFrag a DarkChip spent (BN6 reads the
+  record anew at each Custom screen: seen; a chip already picked keeps
+  the power it was picked with, read in the code, not seen).
+- **The words.** MegaMan at a BN6 flame: what its dark power does, the
+  BugFrag a use burns, the bug for the battle, the base chip without one,
+  the 20 max HP, all of it a profile's first time and the rule after, then
+  the question on Yes, and where it goes. After a profile's first battle
+  its dark power ran in, what it took: the BugFrags, the bug gone with
+  the battle, the max HP that stays gone; then as BN5's battles say it.
+  After a battle where one ran as its base chip, once a session: "With
+  none to burn, that DrkSword was only a Sword." BN6's own words, run
+  from the player's ROM: on a flame's layer the first bystander free of
+  a part to play says its BBS's post on DarkChips ("A dar...DarkChip!?
+  Those are against the law!"), and the folder's NAVIGATOR line is
+  MegaMan's.
+- **In BN5's battles,** a DarkChip of BN6's folder is the run's one of its
+  kind: it never goes into BN5's folder as a chip beside the run's copy;
+  BN5's rule brings it, shelved behind the deck until MegaMan worries,
+  and first among the run's three there. BN5's price, no BugFrag. Both
+  nets' rules stay whole: three DarkChips at most in each folder, one of
+  each kind, a BugFrag a use only in BN6's.
+- **The autopilot** never picks a DarkChip, BN6's or BN5's.
 
 ## Souls in BN5 territory (4 October 2026, issue #69)
 

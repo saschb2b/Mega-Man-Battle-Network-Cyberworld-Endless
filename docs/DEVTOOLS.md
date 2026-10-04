@@ -304,7 +304,14 @@ as if every panel were seen: a capture of the map and its way, as
 `tools/before_after.py` compares two builds' with it). BN5's battles
 have three of their own (docs/MULTIROM.md, Guest battles, For tests):
 `darkchips=MASK`, `worried` and `souls=MASK` (a new run holding BN5's
-Souls, bit k Team Colonel's Soul 7 + k).
+Souls, bit k Team Colonel's Soul 7 + k). `darkchips=MASK` holds BN6's
+own DarkChips of those kinds too (0x2 DrkSword, 0x4 DarkInvs, 0x40
+DarkThnd, 0x80 DrkRecov: 0xC6 all four), which the first layer puts in
+BN6's Pack (docs/META.md, BN6's own DarkChips). `folder=ID` makes the
+run's folder thirty of chip ID in * (`folder=286`: every hand DrkSword,
+for a capture of one chip in BN6's battles), `folder=ID/N` its first N
+entries alone; `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags`
+gives fifty (a DarkChip's last).
 
 Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
 same in a battle on the guest core: on BN5's battle objects, laid out as

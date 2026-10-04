@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- **BN6's own DarkChips play in BN6's battles, on every build (issue
+  #70).** BN6 keeps four of BN5's DarkChips with their code: DrkSword,
+  DarkThnd, DrkRecov and DarkInvs. On the middle layer of every act whose
+  battles are BN6's, a purple flame of darkness holds one the run lacks,
+  on the 3DS and without BN5's ROM too. Taken, it goes to the Pack, and
+  EDIT puts it in the folder: three DarkChips at most, as BN6's own rule
+  has it, MegaMan saying so in his own words. Each use burns a BugFrag for
+  its dark power (a 400 cut over the six panels ahead, a 200 Thunder that
+  paralyzes, 1000 HP back, or eight seconds where nothing touches MegaMan
+  and the darkness fights for him), and bugs him for the rest of the
+  battle as a NaviCust bug does; with no BugFrag it is only its base chip,
+  and the Custom screen says so: DrkSword 80 over Sword's picture. Every
+  battle its dark power runs in costs 20 max HP, as BN5's battles take
+  it. A bystander on the flame's layer says BN6's own words on them.
+- **A DarkChip is one chip in both nets.** BN5's flame of one of those four
+  says our net plays it too, and BN6's chip of it goes to the Pack. In
+  BN5's battles, a DarkChip of BN6's folder comes by BN5's own rule, when
+  MegaMan worries, first among the run's three, never twice.
+- **A CONTINUE on a flame's layer finds the flame the layer was made
+  with,** and one taken before the save stays taken: by its code a
+  CONTINUE after the PET's Save there would have offered, and given, the
+  next DarkChip too.
+
 - **A Recovery Mr. Prog patches MegaMan once on his layer: half of his
   max HP, and to full before the arena** (issue #71, from ChaseThe3nd's
   proposal in discussion #5). He healed fully as often as asked, so every

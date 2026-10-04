@@ -85,6 +85,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x1A0000`-`+0x260000` | Other games' songs (docs/MULTIROM.md): each song's sequence with its pointers moved, the voices it selects, their key splits, drum kits, samples and waves (a piece two songs share once); BN6's empty song slots from 0x26 point at them. Every song the other games' areas play is copied the first time one is needed, in the areas' order, then their games' battle themes, so each has the same place in every session (a checkpoint's state holds the music player's pointers into it) | `xsong.c` |
 | `+0x260000`-`+0x2A0000` | Other games' Navis (docs/MULTIROM.md): an overworld sprite and its mugshot each, copied whole (their offsets are their own); Gregar's list 6 and mugshots point at them from a number Falzar's Navis have there (72, 74, 76-78). Copied, as the songs are, all at once in the areas' order. After them the other games' map objects (sprites of their list 7), all at once the first time one is needed, each at a list-7 number of its own that points at the placeholder `0x084DC040`: BN5's flame of darkness (a DarkChip's, docs/META.md) at 160, decompressed and its palette turned purple, its Security Cube at 146, its wall of dark flames at 138, decompressed, a dark hole at 135. Its last `0x12000` bytes (from `+0x28E000`) hold a guardian of another game's (docs/BOSSES.md, BN5's Navis): his sprite and face, copied anew on each layer he guards and listed at Gregar's 78, which no area's Navi takes | `xnavi.c` |
 | `+0x2A0000`-`+0x2E0000` | Other games' battle backgrounds (docs/MULTIROM.md): each one's BGAnimData record, its tiles and map (LZ77 encoded again), palette, animation scripts and the tiles and lists their frames name; then copies of BN6's three background tables (records, animations, scroll entries) with them after BN6's 22, which the loader's literals point at. Copied all at once in the areas' order | `xbackdrop.c` |
+| `+0x2E0000`-`+0x2E1000` | BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue flame of sprite list 7 (`0x3C`, 1612 bytes) copied whole, its palette turned purple as BN5's flame is, and listed at Gregar's list-7 `0x54`, which points at the placeholder in the player's ROM; a place of its own, the same with or without another game's ROM, copied once a core | `xnavi.c` |
 | `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
@@ -128,6 +129,20 @@ such a run begins, the folder's 30 entries go to * and each chip's four
 pack counts to its first. A guest battle in BN5's core does the same to
 BN5's copy (its records at `0x01E210`, its check at `0x080252B2`), and
 puts the folder's chips, DarkChips and reward rows in *.
+
+BN6's own DarkChips (docs/META.md, docs/ROM_DATA.md; issue #70): as each
+layer is made, the records of DrkSword, DarkThnd, DrkRecov and DarkInvs
+(ids 286-289) are made whole in the core's copy: effect flag 0x20 set
+(BN6's DarkChip class: three in a folder, MegaMan's NAVIGATOR line, the
+purple card), library flag 0x20 cleared (the pack lists them), their
+icon, picture and palette pointers their base chips' (Sword, Thunder,
+Recov10, Invisibl), and their sort keys (IDSortPos their id,
+AlphabetSortPos among the names before theirs), which the US version left
+0 and by which the folder editor took any two DarkChips for one chip.
+Their attack power is written as the BugFrags held say, on the map and as
+a battle begins: their own with one or more, their base chip's with none,
+and the base chip's for the rest of a battle whose last BugFrag a
+DarkChip spent. DarkPlus's record is left as it is, out of the pack.
 
 After a battle in BN5's core, BN6's encounter walk (eToolkit `+0x40`,
 bn6f S2001c04: `+0x12` the distance walked since the last battle, `+0x14`
@@ -381,6 +396,8 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x08005A98`, `0x08005AE2` | checkThenStartBattle: its first test, the branch after the roll | answer: a forced battle, the engine's record (issue #29) | once a frame on the map |
 | `0x08005BC8` | StartBattle | event: the record the battle starts from | once a battle |
 | `0x080AC180` | the reward pick (bn6f `sub_80AA910`) | answer: its enemies' reward rows rewritten first | once a battle, as it ends |
+| `0x08010D58` | every chip use's DarkChip check (bn6f `sub_8010D58`, `src/director/darkbn6.c`) | answer, posting an event (`hook_post`) where a DarkChip of MegaMan's runs as its base chip, no BugFrag in the battle's count | once a chip used |
+| `0x0800B79A` | a chip's after-effects as it runs (bn6f `sub_800B79A`) | answer, posting an event where a DarkChip's dark power ran for MegaMan (its id 0x11E-0x122 reaches it only then): its price after the battle | once a chip used |
 | `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
 | `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
 | `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
