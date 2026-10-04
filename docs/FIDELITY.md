@@ -32,6 +32,7 @@ use.
 | Choices (challenge, Undernet, Secret Area) | Original text and flags | Yes sets an event flag the engine acts on |
 | Layer changes | Original warp pads | The game's jack-out and jack-in, with the next layer built while MegaMan jacks out |
 | Screen | Adapted | 240x160 at a whole-number scale with black borders; filled with sharp scaling where a whole scale leaves it a quarter smaller (640x480), and across a phone's width held upright |
+| Layer map | Adapted | Drawn by the engine (rectangles and the game's font): the floor MegaMan has seen, the way on, the services and gates he has come near and marks for what he senses. SELECT opens it over the picture; a second screen keeps it open, the 3DS's bottom one and on Android a display beside the game's (the AYN Thor's lower screen), at a whole scale there |
 
 ## Known gaps
 

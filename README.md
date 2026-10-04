@@ -251,7 +251,10 @@ files, hold the app's icon and tap **ROMs** (Android 7.1 and later) to add
 BN5. A handheld's own controls, a Bluetooth or USB
 controller and the touch screen all work: the game draws touch controls
 round the picture until a controller's button is pressed, and Back asks
-before it quits. Uninstalling the app deletes its saves.
+before it quits. On a handheld with a second screen, such as the AYN
+Thor, the lower one keeps the layer's map open, as on a 3DS
+([android/README.md](android/README.md#the-second-screen)). Uninstalling
+the app deletes its saves.
 
 ### On an iPhone or iPad
 
