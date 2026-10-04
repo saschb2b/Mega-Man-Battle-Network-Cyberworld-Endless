@@ -6,6 +6,7 @@
 #include "scripts.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bn6.h"
@@ -184,7 +185,7 @@ int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) 
 	return i;
 }
 
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool ours) {
 	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be, Lan.");
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
@@ -193,15 +194,19 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
 	 * "when I'm hurt badly", session 68; and what BN5 does when MegaMan
 	 * falls after using one, seen there: he rose at 1 HP and the darkness
 	 * fought with his body a while) */
-	char words[640];
+	/* (and a kind BN6 keeps too, `ours`: in our net's battles a chip of our
+	 * folder that burns a BugFrag a use, docs/META.md, BN6's own DarkChips) */
+	char words[800];
 	if (first)
 		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, like the chips Nebula spread. There's a DarkChip in it: %s!|"
-			"@M A DarkChip comes to me only in the old net's battles, and only when I'm worried: down to a quarter of my HP, or hit again and again. "
-			"You'll see it on my face. A COUNTER calms me down again.|"
+			"@M %s, and only when I'm worried: down to a quarter of my HP, or hit again and again. You'll see it on my face. A COUNTER calms me down again.|%s"
 			"@M It's real power... But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.|"
-			"@M And if I fall after using one, the darkness might get me back up, and fight with my body for a while. Not our way.", chip, DARK_PRICE);
+			"@M And if I fall after using one, the darkness might get me back up, and fight with my body for a while. Not our way.", chip,
+			ours ? "In the old net's battles it comes to me" : "A DarkChip comes to me only in the old net's battles",
+			ours ? "@M Our net knows this one too: in our battles it's a chip of our folder, and each use burns a BugFrag.|" : "", DARK_PRICE);
 	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s.|@M It comes in the old net's battles when I'm worried: "
-		"a quarter of my HP, or hit again and again. Every battle I use one in costs %d max HP.", chip, DARK_PRICE);
+		"a quarter of my HP, or hit again and again.%s Every battle I use one in costs %d max HP.", chip,
+		ours ? "|@M In ours it's a folder chip that burns a BugFrag." : "", DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
 	/* (on Yes: holding one costs nothing till it's used, and a paging A
@@ -212,7 +217,61 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, "It's ours, Lan. When I'm worried, it'll come... and take its price.", false);
+	ta_page(t, FACE_MEGAMAN, ours ? "It's ours, Lan. In the old net it comes when I'm worried, and out here it's in our Pack. Either way it takes its price."
+		: "It's ours, Lan. When I'm worried, it'll come... and take its price.", false);
+	ta_end(t);
+	return i;
+}
+
+int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
+	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be, Lan.");
+	int i = ta_script(t);
+	/* (all of it a profile's first BN6 flame: what it does, the BugFrag it
+	 * burns, the NaviCust's bug for the battle, its base chip, the max HP;
+	 * the rule every time after, as BN5's flame says its own) */
+	char words[720];
+	const char *an = strchr("AEIOU", d->base[0]) && d->base[0] ? "an" : "a";
+	if (d->first)
+		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, and there's a DarkChip in it: %s!|"
+			"@M In our net its darkness feeds on bugs. Each use burns one of our BugFrags for %s.|"
+			"@M Then the darkness bugs me for the rest of that battle, as a NaviCust bug would. With no BugFrags left, it's only %s %s.|"
+			"@M And every battle its darkness runs in eats away at me: %d max HP, gone for the rest of this dive.",
+			d->chip, d->does, an, d->base, DARK_PRICE);
+	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s.|@M Each use burns a BugFrag for %s. "
+		"Then it bugs me for the battle. With none, it's %s %s.|@M Every battle its darkness runs in costs %d max HP.", d->chip, d->does, an, d->base,
+		DARK_PRICE);
+	bool open = true;
+	ta_pages(t, words, FACE_MEGAMAN, &open);
+	/* (on Yes, as BN5's flame asks: holding one costs nothing till it is
+	 * used) */
+	ask_in(t, FACE_MEGAMAN, "Take the DarkChip?\n", no, true, false);
+	flag_set(t, flag);
+	char got[48];
+	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", d->chip);
+	ta_page(t, FACE_NONE, got, false);
+	ta_page(t, FACE_MEGAMAN, "It went to our Pack, Lan. To fight with it: PET, Folder, then EDIT. Three DarkChips at most in a folder.", false);
+	ta_end(t);
+	return i;
+}
+
+int ta_dark_rumor(TextArchive *t, int face) {
+	static uint8_t line[320];
+	static int len = -1;
+	if (len < 0) {
+		len = 0;
+		uint32_t at = BN6_BBS_ARCHIVES - 0x08000000u + 4u * BN6_BBS_DARK_ARCHIVE, off = R.data && at + 4 <= ROM_SIZE ? rom_u32(at) - 0x08000000u : ROM_SIZE;
+		size_t n = 0;
+		/* (an archive of the ROM's, LZ77, its scripts past the four bytes
+		 * BN6's unpacking skips) */
+		uint8_t *a = off < ROM_SIZE && R.data[off] == 0x10 ? lz77_decompress(R.data + off, ROM_SIZE - off, &n) : NULL;
+		if (a && n > 4) len = ta_rom_pages(a + 4, (int)n - 4, BN6_BBS_DARK_SCRIPT, line, (int)sizeof line);
+		free(a);
+	}
+	if (!len) return -1;
+	int i = ta_script(t);
+	if (face >= 0) ta_mugshot(t, face);
+	ta_open(t);
+	ta_bytes(t, line, len);
 	ta_end(t);
 	return i;
 }

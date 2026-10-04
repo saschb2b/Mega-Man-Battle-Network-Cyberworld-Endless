@@ -83,10 +83,28 @@ typedef struct {
 int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code, bool last,
                        int taken_flag, int hp_memories, const ScriptsDraft *draft, const ScriptsRoute *route);
 /* A flame of darkness (docs/META.md, DarkChips in BN5 territory): MegaMan
- * names its DarkChip `chip` and its price (all of it the `first` time),
- * then asks, starting on No; Yes sets event flag `flag`, which it leaves
- * by. */
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first);
+ * names its DarkChip `chip` and its price (all of it the `first` time), and
+ * where BN6 keeps that kind too (`ours`), that our net's battles play it
+ * from the folder for a BugFrag; then asks, starting on Yes; Yes sets event
+ * flag `flag`, which it leaves by. */
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool ours);
+/* A flame of darkness of BN6's own (docs/META.md, BN6's own DarkChips): its
+ * DarkChip, its base chip BN6 plays it as without a BugFrag, what its dark
+ * power does in MegaMan's words, and whether he says all of its price (a
+ * profile's first). */
+typedef struct {
+	const char *chip, *base, *does;
+	bool first;
+} ScriptsDark6;
+/* MegaMan names it, the BugFrag a use burns, the NaviCust's bug for the
+ * battle, the base chip, the max HP (all of it the `first` time, the rule
+ * after), then asks, starting on Yes; Yes sets event flag `flag`, which it
+ * leaves by. */
+int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d);
+/* BN6's own words on DarkChips, a post of its BBS run from the player's
+ * ROM (docs/ROM_DATA.md), said by a bystander with `face` on a flame's
+ * layer; -1 where the ROM's text is not as expected. */
+int ta_dark_rumor(TextArchive *t, int face);
 /* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
  * guardian, any runs) is short of `needed`, its words say so (flag -1:
  * no choice); else it asks for his SP, flag set on Yes, and says the gate

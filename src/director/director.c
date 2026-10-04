@@ -1747,33 +1747,66 @@ static void layer_flags_clear(void) {
 	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
 }
 
-/* A flame of darkness on the middle layer of a BN5 act whose battles are
- * BN5's (docs/META.md, DarkChips in BN5 territory): a DarkChip the run
- * lacks, from the run's seed and the act, in its last bystander's place
- * (layer_objs_dark_flame); none where the run holds every one. */
+/* A flame of BN6's own (docs/META.md, BN6's own DarkChips): BN6's blue
+ * flame turned purple, holding kind `k`, one of the four BN6's battles
+ * play, its words naming what its dark power does, the BugFrag it burns and
+ * its base chip, from the ROM. */
+static void dark6_flame_setup(int k) {
+	static char chip[20], base[20], does[100];
+	static ScriptsDark6 words;
+	int id = dark_bn6_id(k), from = darkbn6_base(id);
+	layer_objs_dark_flame = id && from ? xnavi_bn6_flame() : -1;
+	if (layer_objs_dark_flame < 0) return;
+	ChipInfo ci;
+	chip_info(id, &ci);
+	snprintf(chip, sizeof chip, "%s", ci.name);
+	chip_info(from, &ci);
+	snprintf(base, sizeof base, "%s", ci.name);
+	darkbn6_does(id, does, sizeof does);
+	words = (ScriptsDark6){ chip, base, does, !(profile.dark6_taught & DARK6_FLAME_TAUGHT) };
+	layer_objs_dark6 = &words;
+	layer_objs_dark_chip = chip;
+	if (emu_debug_on()) fprintf(stderr, "dark: BN6's flame of darkness with %s (%s without a BugFrag), list 7 %d\n", chip, base, layer_objs_dark_flame);
+}
+
+/* A flame of darkness on the middle layer of each act (docs/META.md,
+ * DarkChips in BN5 territory and BN6's own): a DarkChip the run lacks, from
+ * the run's seed and the act, in its last bystander's place
+ * (layer_objs_dark_flame): BN5's flame where the act's battles are BN5's,
+ * BN6's own where they are BN6's; none where the run holds every one. A
+ * CONTINUE on its layer finds the flame it was made with (dark_flame_of). */
 static void dark_flame_setup(void) {
 	layer_objs_dark_flame = -1;
+	layer_objs_dark6 = NULL;
 	D.dark_kind = -1;
 	D.dark_given = false;
-	if (!encounter_guest || run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1) return;
-	int k0 = (int)(((run.seed ^ (uint32_t)run.depth * 2654435761u) >> 8) % DARK_KINDS);
-	for (int j = 0; j < DARK_KINDS && D.dark_kind < 0; ++j)
-		if (!dark_count((k0 + j) % DARK_KINDS)) D.dark_kind = (k0 + j) % DARK_KINDS;
-	if (D.dark_kind < 0 || !*guest_dark_name(D.dark_kind)) return;
+	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1) return;
+	D.dark_kind = dark_flame_of(run.seed, run.depth, run.side_kind, !encounter_guest);
+	if (D.dark_kind < 0) return;
+	if (!encounter_guest) { dark6_flame_setup(D.dark_kind); return; }
+	if (!*guest_dark_name(D.dark_kind)) return;
 	layer_objs_dark_flame = xnavi_object(XOBJ_DARK_FLAME);
 	static char chip[16];
 	snprintf(chip, sizeof chip, "%s", guest_dark_name(D.dark_kind));
 	layer_objs_dark_chip = chip;
 	layer_objs_dark_first = !profile.dark_taught;
+	layer_objs_dark_ours = dark_bn6_id(D.dark_kind) != 0;
 	if (emu_debug_on()) fprintf(stderr, "dark: a flame of darkness with %s, list 7 %d\n", chip, layer_objs_dark_flame);
 }
 
-/* ... and taken: the run holds it (its flag, from the flame's Yes) */
+/* ... and taken: the run holds it (its flag, from the flame's Yes), and
+ * BN6's chip of its kind goes to the Pack (dark_pack: a BN6 flame's words
+ * say where, and how it goes in the folder); one held already was taken
+ * before a CONTINUE on its layer */
 static void dark_flame_watch(void) {
 	if (D.dark_given || D.dark_kind < 0 || layer_objs_dark_flame < 0 || !flag_get(LAYER_DARK_TAKEN_FLAG)) return;
 	D.dark_given = true;
+	if (dark_count(D.dark_kind)) return;
 	dark_give(D.dark_kind);
-	if (!profile.dark_taught) { profile.dark_taught = 1; profile_save(); }
+	D.dark_pack_due = true;
+	if (layer_objs_dark6) { profile.dark6_taught |= DARK6_FLAME_TAUGHT; profile.pack_taught = 1; }
+	else profile.dark_taught = 1;
+	profile_save();
 }
 
 /* The map an area's layers take over, the Navi their bystanders are

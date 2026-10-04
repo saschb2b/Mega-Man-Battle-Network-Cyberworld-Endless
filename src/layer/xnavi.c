@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
@@ -214,6 +215,31 @@ int xnavi_object(int which) {
 			if (XR[objects[k].xrom].data && XR[objects[k].xrom].layout->sprite_lists) object_in(k, own);
 	}
 	return O.sprite[which] ? objects[which].slot : -1;
+}
+
+/* ---- BN6's own flame of darkness (docs/META.md, BN6's own DarkChips) ---- */
+
+#define FLAME_AT  (EMU_FREE + 0x2E0000)   /* (docs/EMULATION.md: its own place, the same with or without another game's ROM) */
+#define FLAME_END (EMU_FREE + 0x2E1000)
+
+int xnavi_bn6_flame(void) {
+	if (!R.data || !R.layout || !R.layout->sprite_lists) return -1;
+	uint32_t own = R.layout->sprite_lists, entry = BUS + list_entry(own, LIST_OBJECTS, BN6_FLAME_SLOT);
+	/* (copied once a core's ROM copy, which a state does not hold) */
+	if (emu_read32(entry) == FLAME_AT) return BN6_FLAME_SLOT;
+	if (get32(R.data + list_entry(own, LIST_OBJECTS, BN6_FLAME_SLOT)) != OBJECT_PLACEHOLDER) return -1;
+	uint32_t p = get32(R.data + list_entry(own, LIST_OBJECTS, BN6_FLAME_SPRITE));
+	if (p < BUS || p - BUS >= ROM_SIZE) return -1;   /* (a plain sprite: bit 31 of a compressed one's pointer is set) */
+	uint32_t len = xnavi_sprite_len(R.data + (p - BUS), ROM_SIZE - (p - BUS));
+	uint8_t *d = len && FLAME_AT + len <= FLAME_END ? malloc(len) : NULL;
+	if (!d) return -1;
+	memcpy(d, R.data + (p - BUS), len);
+	tint(d + 4, len - 4);
+	emu_write(FLAME_AT, d, len);
+	free(d);
+	emu_write32(entry, FLAME_AT);
+	if (emu_debug_on()) fprintf(stderr, "xnavi: BN6's list 7 %#x, purple, at list 7 %#x, %u bytes\n", BN6_FLAME_SPRITE, BN6_FLAME_SLOT, len);
+	return BN6_FLAME_SLOT;
 }
 
 static int slot_of(int xrom, int navi) {

@@ -46,4 +46,11 @@ enum {
  * Navis; again where the core's ROM copy was made anew. */
 int xnavi_object(int which);
 
+/* BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue
+ * flame of sprite list 7 copied into a place of its own, its palette turned
+ * purple as BN5's flame is, and listed at a list-7 number Gregar leaves on
+ * its placeholder; that number, -1 where it cannot be. No other game's ROM
+ * is needed (the 3DS's runs meet it too). */
+int xnavi_bn6_flame(void);
+
 #endif

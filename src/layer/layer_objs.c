@@ -61,8 +61,12 @@ int layer_objs_bystander = LAYER_BYSTANDER, layer_objs_bystander2 = LAYER_BYSTAN
 unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
+const ScriptsDark6 *layer_objs_dark6;
+/* (a layer with a flame: its first bystander free of a part to play runs
+ * BN6's own words on DarkChips, a rumor before the find) */
+static bool dark_rumor_due;
 const char *layer_objs_server_navi = "";
-bool layer_objs_dark_first;
+bool layer_objs_dark_first, layer_objs_dark_ours;
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -592,7 +596,8 @@ static int flame_host(void) {
 static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
 	tk->cat = 7;
 	tk->sprite = layer_objs_dark_flame;
-	tk->script = out->dark_flame = ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first);
+	tk->script = out->dark_flame = layer_objs_dark6 ? ta_dark_flame6(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark6)
+		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first, layer_objs_dark_ours);
 	tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
 	out->dark_flame_obj = i;
 	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
@@ -610,7 +615,10 @@ static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int 
 	/* (the next four of the pool each layer, from where the run's seed
 	 * starts it: a bystander's random pick had a playtester hear the same
 	 * line on an act's first and third layers) */
-	if (!*said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
+	if (!*said) {
+		base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
+		dark_rumor_due = layer_objs_dark_flame >= 0;
+	}
 	/* (the first of them from the layer's seed) */
 	tk->sprite = ((run.layer_seed * 2654435761u >> 28) + (unsigned)*said) & 1 ? layer_objs_bystander2 : layer_objs_bystander;
 	if (emu_debug_on()) fprintf(stderr, "bystander %d: list 6 %d at %d %d\n", *said, tk->sprite, tk->x, tk->y);
@@ -625,6 +633,10 @@ static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, i
 	if (i == layer.teller - 1) return ta_pcode_teller(text, who, blockers_pcode(), LAYER_PCODE_FLAG);
 	if (i == layer.hinter - 1)
 		return ta_say(text, who, "See that little pad out in the void, all by itself?|I saw a Navi walk out to it. Right over nothing!");
+	int dark = dark_rumor_due ? ta_dark_rumor(text, who) : -1;
+	dark_rumor_due = false;
+	if (dark >= 0 && emu_debug_on()) fprintf(stderr, "rumor: BN6's own words on DarkChips, bystander %d\n", said);
+	if (dark >= 0) return dark;
 	const char *whisper = said == 1 ? rumors_line() : NULL;
 	if (whisper && emu_debug_on()) fprintf(stderr, "rumor: %s\n", whisper);
 	return whisper ? ta_say(text, who, whisper) : -1;

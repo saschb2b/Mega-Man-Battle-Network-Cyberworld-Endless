@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "guardian_objs.h"
+#include "scripts.h"
 #include "shop.h"
 
 /* A Navi gate's code: its Navi deleted this many times as a guardian, in
@@ -102,17 +103,21 @@ extern int layer_objs_bystander, layer_objs_bystander2;
 extern unsigned layer_objs_xlooks;
 /* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
 extern int layer_objs_official_level;
-/* Set before layer_objs_install on a BN5 layer that holds a flame of
- * darkness: its list-7 sprite (-1: none), the DarkChip in it, and whether
- * MegaMan says all of its price (a profile's first). It stands in its
- * last bystander's place. */
+/* Set before layer_objs_install on a layer that holds a flame of darkness:
+ * its list-7 sprite (-1: none), the DarkChip in it, and for BN5's flame
+ * whether MegaMan says all of its price (a profile's first) and whether
+ * BN6's battles play its kind too (layer_objs_dark_first, _ours). It
+ * stands in its last bystander's place. */
 extern int layer_objs_dark_flame;
 extern const char *layer_objs_dark_chip;
+/* ... a flame of BN6's own (docs/META.md, BN6's own DarkChips): its words'
+ * pieces, NULL for BN5's */
+extern const ScriptsDark6 *layer_objs_dark6;
 /* Set before layer_objs_install where the layer's Server holds a Navi (its
  * battle rolled with the layer): the words its signal is named by ("" for
  * viruses). */
 extern const char *layer_objs_server_navi;
-extern bool layer_objs_dark_first;
+extern bool layer_objs_dark_first, layer_objs_dark_ours;
 extern bool layer_objs_duel_later;
 
 #endif
