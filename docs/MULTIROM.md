@@ -206,9 +206,12 @@ engine (`src/emu/guest.c`, epic #57):
   friend's homepage in its ACDC Area until MegaMan has that friend's
   P-Code, stands for the security cubes of ACDC Area's and End Area's
   layers (`blockers.c`), and opens as BN5's does; it asks what BN6's
-  asks there, a P-Code or a toll. Copied whole into BN6's free space and
-  listed at a list-7 number Gregar leaves empty, as the flame of darkness
-  is. Its net maps hold few map objects besides: the laser barrier with
+  asks there, a P-Code or a toll. Its wall of dark flames, which bars
+  Nebula Area 6 until its flames of darkness' Navis are beaten, stands
+  for the pillar of flames on Nebula Area's layers, across the walkway
+  either way, and burns out when HeatMan's or ChargeMan's Cross clears
+  it. Each is copied into BN6's free space and listed at a list-7 number
+  Gregar leaves empty, as the flame of darkness is. Its net maps hold few map objects besides: the laser barrier with
   a skull is BN6's cube's own sprite.
 - [ ] Its towns.
 - [x] Its random battles in its own engine, on a second core, in the

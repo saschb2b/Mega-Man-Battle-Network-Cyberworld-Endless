@@ -750,6 +750,10 @@ of Gregar's Link Navis clear each. A layer sets one the same way:
   from the map's own archive: MegaMan names it, and with the Cross, the
   Navi's mugshot says "Leave it to me!" over his sound, and the obstacle
   opens, for good (its present flag is kept in the run's state).
+- **Another game's look**: on Nebula Area's layers (BN5's, docs/MULTIROM.md)
+  the pillar of flames is BN5's wall of dark flames, standing across the
+  walkway either way, "A wall of dark flames" in MegaMan's words; the same
+  Crosses clear it, and it burns out as BN5's does.
 
 Over the tests' 300 layers (their guardians Cross navis), 13 hold one.
 

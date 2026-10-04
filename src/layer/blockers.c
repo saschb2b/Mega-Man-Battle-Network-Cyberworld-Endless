@@ -42,10 +42,11 @@
 
 /* The variants: the cube looking each of four ways (issue #45), then the
  * five obstacles, then another game's looks for them (docs/MULTIROM.md):
- * BN5's Security Cube; bytes 6-15 of their records as BN6's own (sprite
+ * BN5's Security Cube, its wall of dark flames across a walkway along
+ * world Y and along X; bytes 6-15 of their records as BN6's own (sprite
  * list, sprite, idle and open animations, a sprite field, palette,
  * priority, a spare, sound 0x74) */
-enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, VARIANTS };
+enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, V_XWALL, VARIANTS = V_XWALL + 2 };
 static const uint8_t templates[V_XCUBE][10] = {
 	{ 0x1C, 0x03, 0, 0, 0x38, 0, 2, 0xFF, 0x74, 0 },
 	{ 0x1C, 0x03, 1, 1, 0x38, 0, 2, 0xFF, 0x74, 0 },
@@ -59,25 +60,32 @@ static const uint8_t templates[V_XCUBE][10] = {
 };
 /* Variant v's record bytes 6-15: another game's look with its sprite's
  * number in BN6 (xnavi.c), or BN6's own look where it was not copied
- * (BN5's Security Cube standing, then opening, its sound BN6's cubes') */
+ * (BN5's Security Cube standing, then opening; its wall of dark flames
+ * standing across a walkway along world Y or X, then burning out; their
+ * sound BN6's cubes' and obstacles') */
 static void template_of(int v, uint8_t out[10]) {
-	static const uint8_t xcube[10] = { 0x1C, 0, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 };
-	int slot = v == V_XCUBE ? xnavi_object(XOBJ_CUBE) : -1;
-	if (v < V_XCUBE || slot < 0) { memcpy(out, templates[v < V_XCUBE ? v : V_CUBE], 10); return; }
-	memcpy(out, xcube, 10);
+	static const uint8_t xlook[3][10] = {
+		{ 0x1C, 0, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 },
+		{ 0x1C, 0, 0, 2, 0, 0, 2, 0xFF, 0x74, 0 },
+		{ 0x1C, 0, 1, 3, 0, 0, 2, 0xFF, 0x74, 0 },
+	};
+	int slot = v < V_XCUBE ? -1 : xnavi_object(v == V_XCUBE ? XOBJ_CUBE : XOBJ_DARK_WALL);
+	if (slot < 0) { memcpy(out, templates[v < V_XCUBE ? v : v == V_XCUBE ? V_CUBE : V_FLAMES], 10); return; }
+	memcpy(out, xlook[v - V_XCUBE], 10);
 	out[1] = (uint8_t)slot;
 }
 
 /* A block's variant: the obstacle's, or the cube looking along its
  * walkway (animation 0 for +X, 1 for -Y, 2 for -X, 3 for +Y), or the look
  * another game's area lends it: BN5's Security Cube for a P-Code's cube
- * or a toll's. */
+ * or a toll's, its wall of dark flames for the pillar of flames. */
 static int variant_of(const NetBlock *b) {
 	static const int obstacle[BLOCK_KINDS] = { V_WATER, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD };
-	if (b->kind < BLOCK_KINDS) return obstacle[b->kind];
-	if ((b->kind == BLOCK_PCODE || b->kind == BLOCK_TOLL) && (layer_objs_xlooks & XLOOK_CUBE) && xnavi_object(XOBJ_CUBE) >= 0) return V_XCUBE;
 	int dir, edge, side;
 	netmap_block_edges(b, &dir, &edge, &side);
+	if (b->kind == BLOCK_FLAMES && (layer_objs_xlooks & XLOOK_DARK_WALL) && xnavi_object(XOBJ_DARK_WALL) >= 0) return V_XWALL + !(dir & 1);
+	if (b->kind < BLOCK_KINDS) return obstacle[b->kind];
+	if ((b->kind == BLOCK_PCODE || b->kind == BLOCK_TOLL) && (layer_objs_xlooks & XLOOK_CUBE) && xnavi_object(XOBJ_CUBE) >= 0) return V_XCUBE;
 	static const int look[4] = { 0, 3, 2, 1 };
 	return V_CUBE + look[dir];
 }
@@ -159,6 +167,8 @@ int blockers_objects(uint8_t *recs, int n, int max) {
 /* Each kind: what MegaMan calls it, and per Link Navi who clears it (Gregar's
  * pairs) his name, his mugshot, his sound and what he does */
 static const char *const block_names[BLOCK_KINDS] = { "A geyser of cyberwater", "A cybertree", "A pillar of flames", "A cyclone", "A cloud" };
+/* ... or, in another game's look, what it is there */
+static const char *block_name(const NetBlock *b) { return variant_of(b) >= V_XWALL ? "A wall of dark flames" : block_names[b->kind]; }
 static const struct { int navi, mugshot, sound; const char *name, *deed; } helpers[] = {
 	{ 1, 0x47, 0xF7, "HeatMan", "burn" },
 	{ 2, 0x49, 0xC6, "ElecMan", "short out" },
@@ -190,7 +200,7 @@ static int talk(TextArchive *t, int k) {
 	for (int h = 0, n = 0; h < 5; ++h) if (can >> helpers[h].navi & 1 && n < 2) who[n++] = helpers[h].name;
 	if (!held) {
 		/* (the hint for the next run's Cross, said as it is) */
-		snprintf(s, sizeof s, "%s blocks the way, Lan.|%s's or %s's Cross data could clear it... but we don't carry either.", block_names[b->kind],
+		snprintf(s, sizeof s, "%s blocks the way, Lan.|%s's or %s's Cross data could clear it... but we don't carry either.", block_name(b),
 			who[0], who[1]);
 		ta_pages(t, s, FACE_MEGAMAN, &first);
 		ta_end(t);
@@ -201,7 +211,7 @@ static int talk(TextArchive *t, int k) {
 	/* (HeatMan takes a fire in, where he burns a tree: "burn it" before a
 	 * pillar of flames read as a fire set on fire, session 64) */
 	const char *deed = helpers[h].navi == 1 && b->kind == BLOCK_FLAMES ? "swallow" : helpers[h].deed;
-	snprintf(s, sizeof s, "%s blocks the way, Lan!|We carry %s's Cross data. Let's ask him to %s it!", block_names[b->kind], helpers[h].name, deed);
+	snprintf(s, sizeof s, "%s blocks the way, Lan!|We carry %s's Cross data. Let's ask him to %s it!", block_name(b), helpers[h].name, deed);
 	ta_pages(t, s, FACE_MEGAMAN, &first);
 	ta_page(t, helpers[h].mugshot, "Leave it to me!", false);
 	/* (his sound, a moment, and the present flag cleared: the obstacle

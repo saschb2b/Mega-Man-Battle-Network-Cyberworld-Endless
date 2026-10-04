@@ -27,6 +27,7 @@ int xnavi_slot(int xrom, int navi, int fallback);
 enum {
 	XOBJ_DARK_FLAME,   /* BN5's flame of darkness, its palette turned purple: the DarkChips' (docs/META.md) */
 	XOBJ_CUBE,         /* BN5's Security Cube, its P-Codes' lock: standing (animation 0), opening (1) */
+	XOBJ_DARK_WALL,    /* BN5's wall of dark flames, across a walkway along world Y or X (0, 1), burning out (2, 3) */
 	XOBJ_COUNT
 };
 
