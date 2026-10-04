@@ -2067,3 +2067,65 @@ warp) showed the BIOS decompressing the map's text archive from a
 garbage header, and the table entry behind it. And "it worked after a
 restart" points at state accumulated in the ROM copy, which a CONTINUE
 builds afresh: look there first.
+
+## Session 65: four at once (kai 7/10, kai2 8/10, kai3 7/10, kai4 6/10; all would keep playing, three recommend it with a warning)
+
+kai took run 9's last layer (six finds, a folder it built) to CircusMan
+EX and dealt 910 of his 1200 before his second tent dropped while
+MegaMan was locked in MachGun2's animation; it began run 10 at once.
+kai2 beat TomahawkMan with the rumor chain's FireHit2 (280 for his last
+280), went into act 4's Sky Area and lost all 580 HP to two Breakers in
+one random battle; it began run 11 from Green Town. kai3 had its best
+fights and its best reward chain (the bigger board fitting HP+100, the
+Chip Trader's SlashMan S, ProtoMan's no-hit duel) and never reached act
+3's guardian: a Heel Navi stood in the one-panel neck on the way. kai4,
+the side profile sent into BN5's areas, met its first BN5 battle on
+layer 1: three of five chips blank, no Cross, a buster of 10, two
+Whirlies against 100 HP; deleted, it never saw the flame of darkness.
+
+Confirmed: the arrow on bands (kai2: walking 40 calls with 6 of probing,
+from 65 with 25); L starting over after a CONTINUE; the NaviCust line
+said once after a Save; the fit labels at the Guardian Data's pick; "From
+where you left off"; Chaud's call carrying into a new run; the run
+summary ("We'll get further next time!").
+
+Raised and fixed in the iteration: the free retry after quitting a
+guardian fight (the owner's call: the run saves at the arena's door);
+BN5's blanks (chips BN5 has, under codes it lacks: re-read to the same
+letter, else *, and MegaMan names the re-read as the old net's codes,
+the owner's idea); BN5's battles held to the act's band; an early L or R
+kept in BN5's battles; the white opening from 2.5 s to half a second;
+bystanders off the way on (LAYER_MAKE 85, counted over 300 layers); a
+Server's battle rolled with its layer and a Navi's signal named as one;
+CircusMan's briefing on how fast his tent falls; the no-hit duel's first
+second forgiven; the Undernet's copy told apart from the Undernet; the
+duel's line at full HP; a program's reminder kept across CONTINUE;
+shops' "Are you sure?" on Yes (BN6's default, the owner's call); BN5's
+areas moving and standing as in BN5 (backdrops, animations, the Security
+Cube, the wall of dark flames, the dark hole, the orange Navi).
+
+Open: CircusMan EX's tent (no dodge once a long chip plays; needs a
+change to his AI, an owner question); no Cross in BN5's battles (the
+owner); band corners where the arrow's diagonal does not move MegaMan
+(kai2, kai3: an agent on it); Mystery Data giving another chip after a
+rebuilt layer (kai, unverified); the town walk to the port (17 calls);
+the split not saying which net a way belongs to; L briefing BN6's
+viruses in a BN5 area; "Viruses deleted 0" after a BN5 battle;
+SpoutMan's sprite on his Guardian Data for a frame at CONTINUE; Dad's
+first words after a deletion naming a past win; two Breakers' 500 HP in
+one battle (kai2: "not a request to nerf").
+
+Misreads and old saves: "chips BN5 never had" were chips with a BN6
+code; "Are you sure?" on No was the pinned build (fixed); kai3's RUN
+listing "None / Custom1 / None" is BN6's own list.
+
+Cost: 1051 calls (kai 252, kai2 252, kai3 287, kai4 260), four agents;
+the API's rate limit ended kai4 at 258.
+
+Loop change: **a detector is checked with its negative control.** The
+DarkChip price was "verified" by a battle that printed the price, and
+the line came from stale bytes at the battle's start, so every battle
+in BN5 would have taken 20 max HP. A check of anything that reacts to
+an event (a price, a reward, a reminder) now runs the battle or the
+step without the event too, and passes only when that one prints
+nothing; ROM_DATA's verify notes say both.
