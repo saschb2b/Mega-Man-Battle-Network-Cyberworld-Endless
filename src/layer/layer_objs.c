@@ -471,6 +471,18 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 			elem_name(counter));
 }
 
+/* What the layer's Recovery Mr. Prog gives, once (issue #71, the owner's
+ * call on a player's proposal): half of MegaMan's max HP, as the layer is
+ * built, away from the arena, so a detour's HP carries on; to full before
+ * the arena (0), where the guardian is met as his band assumes; the Heals
+ * helper's, to full as often as asked (-1). */
+static int heal_amount(void) {
+	if (run.helpers & HELP_HEALS) return -1;
+	if (layer.boss_layer) return 0;
+	int half = emu_read16(BN6_NAVI_MAX_HP) / 2;
+	return half > 0 ? half : 1;
+}
+
 /* The obstacles' sprites, first: one that could not load would stand as
  * noise in its pocket's mouth. */
 static void blocker_sprites(NpcList *npcs) {
@@ -754,7 +766,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		}
 		case OBJ_MYSTERY: mystery_or_flame(&text, out, &tk, i, md, &nmd, &npcs, &plan); break;
 		case OBJ_NPC: bystander(&text, out, &tk, i, &said); break;
-		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG); break;
+		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, heal_amount()); break;
 		case OBJ_TRADER:
 		case OBJ_BUGTRADER: {
 			/* the game's own machine and lines; deeper, some are Specials */

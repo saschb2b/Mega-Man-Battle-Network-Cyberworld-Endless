@@ -21,10 +21,12 @@
  * a kanji ("ProtoMn" and one came out of a Mystery Data). */
 void chat_marks_install(void);
 
-/* Service NPCs on the game's own commands: a recovery Mr. Prog heals to
- * full HP (`variant` picks his words). (Chip Traders speak the game's own
- * lines, see trader.h.) */
-int ta_heal(TextArchive *t, int variant, int told_flag);
+/* Service NPCs on the game's own commands: a recovery Mr. Prog heals
+ * (`variant` picks his words) once on his layer, `amount` HP (0: to full),
+ * then says his patch is spent; `amount` < 0, the Heals helper's: to full,
+ * as often as asked (issue #71). `told_flag` marks it given. (Chip Traders
+ * speak the game's own lines, see trader.h.) */
+int ta_heal(TextArchive *t, int variant, int told_flag, int amount);
 /* Words that set `flag` as they are said (a bystander's news the director
  * keeps: docs/META.md, what MegaMan knows). */
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag);

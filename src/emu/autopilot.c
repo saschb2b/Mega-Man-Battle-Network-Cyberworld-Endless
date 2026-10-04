@@ -18,7 +18,9 @@
 #include "data.h"
 #include "director.h"
 #include "emu.h"
+#include "flags.h"
 #include "guest.h"
+#include "layer_objs.h"
 #include "net.h"
 #include "netmap.h"
 #include "run.h"
@@ -473,13 +475,15 @@ static uint32_t fight_keys(uint32_t frame) {
 	return fight_frame(me, frame);
 }
 
-/* The layer's heal (it restores every HP each time it is talked to) when
- * MegaMan is hurt; once he has been healed on a layer, only when he is
- * down to half his HP or the guardian is next: walked back to after every
- * scratch, a heal far from the exit met new battles both ways (seed 12
- * fought eight on its second layer) */
+/* The layer's heal when MegaMan is hurt; once he has been healed on a
+ * layer, only when he is down to half his HP or the guardian is next:
+ * walked back to after every scratch, a heal far from the exit met new
+ * battles both ways (seed 12 fought eight on its second layer). A Prog's
+ * one patch a layer given (issue #71), never again: the Heals helper's
+ * heal as often as asked. */
 static bool heal_panel(bool guardian, int *x, int *y) {
 	static int healed_on = -1, going = -1;
+	if (!(run.helpers & HELP_HEALS) && flag_get(LAYER_HEAL_TOLD_FLAG)) return false;
 	int hp = emu_read16(BN6_NAVI_HP), max = emu_read16(BN6_NAVI_MAX_HP);
 	if (hp >= max) {
 		if (going == run.depth) healed_on = run.depth;

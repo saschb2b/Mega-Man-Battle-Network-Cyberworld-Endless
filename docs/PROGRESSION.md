@@ -50,8 +50,14 @@ are listed in [Where it is decided](#where-it-is-decided).
 - **Guardian version:** V1 on layers 3-9, EX on 12-18, SP in the Nest, the
   Secret Area and every later cycle. HP is the game's value for that version.
 - **Healing:** a Recovery Mr. Prog on 30% of layers, and always in the room
-  before an arena. HP carries over between layers; nothing heals after a
-  battle or a guardian.
+  before an arena. He patches MegaMan once on his layer: half of his max
+  HP, to full before the arena (issue #71, the owner's call on a player's
+  proposal in discussion #5: a heal as often as asked refunded every
+  detour's HP, and the run's dialectic, prepare or press on, lost its
+  price). Asked again, he points to the Net Dealer's MiniEnrg, and L and
+  the arrow stop leading to him. The Heals helper's Prog heals to full as
+  often as asked. HP carries over between layers; a won guardian heals
+  fully.
 - **Growth:** 3 HPMemory (+60 max HP) per guardian, one HPMemory in each Net
   Dealer at `(10 + 2 × depth) × 100` zenny, a Cross from five of the Navis,
   Beast Out from the Graveyard's guardian. Guardians drop no chip.

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **A Recovery Mr. Prog patches MegaMan once on his layer: half of his
+  max HP, and to full before the arena** (issue #71, from ChaseThe3nd's
+  proposal in discussion #5). He healed fully as often as asked, so every
+  detour's HP came back at the next Prog and the Net Dealer's MiniEnrg had
+  little use. Asked again, he says his patch is spent and points to the
+  dealer's MiniEnrg; L and the arrow no longer lead to him. A won guardian
+  still heals fully, and the Heals helper keeps full heals as often as
+  asked.
 - **BN5's guardians are fought at three quarters of BN6's guardians' HP.**
   They fight in BN5's engine, where the run's Cross never comes and the
   buster is the NaviCust's alone: KnightMan at 600 HP, behind armor that

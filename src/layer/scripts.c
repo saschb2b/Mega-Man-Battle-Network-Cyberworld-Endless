@@ -86,24 +86,40 @@ static int closing(TextArchive *t) {
 
 static const uint8_t full_hp[] = { 0xFC, 0x03, 0x13, 0x00 };  /* ts_call_set_full_h_p */
 
-int ta_heal(TextArchive *t, int variant, int told_flag) {
+int ta_heal(TextArchive *t, int variant, int told_flag, int amount) {
 	static const char *const hello[] = {
 		"I'M A RECOVERY PROGRAM FROM SCILAB! HOLD STILL, MEGAMAN...",
 		"DR. HIKARI SENT ME TO PATCH YOU UP! HERE GOES...",
 		"RECOVERY PROGRAM, RUNNING! THIS WON'T TAKE A SECOND!",
 	};
-	/* once he has spoken on this layer (flag set): the heal in one box (an
-	 * A too many after "fully restored" talked to him again, two boxes) */
+	/* once he has patched MegaMan on this layer (flag set): one patch a
+	 * layer (issue #71: a heal as often as asked refunded every detour's
+	 * HP), so his word that it is spent and where MiniEnrg is; the Heals
+	 * helper's (amount < 0) heals again, in one box (an A too many after
+	 * "fully restored" talked to him again, two boxes) */
 	int back = ta_script(t);
-	ta_bytes(t, full_hp, sizeof full_hp);
-	ta_page(t, FACE_PROG, "ALL PATCHED UP! COME BACK ANYTIME!", true);
+	if (amount < 0) {
+		ta_bytes(t, full_hp, sizeof full_hp);
+		ta_page(t, FACE_PROG, "ALL PATCHED UP! COME BACK ANYTIME!", true);
+	} else ta_page(t, FACE_PROG, "MY PATCH DATA'S SPENT ON THIS LAYER! THE NET DEALER SELLS MINIENRG!", true);
 	ta_end(t);
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, check, sizeof check);
 	ta_page(t, FACE_PROG, hello[(unsigned)variant % 3], true);
-	ta_bytes(t, full_hp, sizeof full_hp);
-	ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+	if (amount > 0) {
+		/* (half of max HP, away from the arena: ts_start_heal, BN6's own,
+		 * no higher than his max) */
+		uint8_t heal[] = { 0xFB, 0x08, (uint8_t)amount, (uint8_t)(amount >> 8) };
+		ta_bytes(t, heal, sizeof heal);
+		char got[48];
+		snprintf(got, sizeof got, "MegaMan recovered\nup to %d HP!", amount);
+		ta_page(t, FACE_NONE, got, false);
+	} else {
+		ta_bytes(t, full_hp, sizeof full_hp);
+		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+	}
+	if (amount >= 0) ta_page(t, FACE_PROG, "THAT'S MY ONE PATCH FOR THIS LAYER! MAKE IT COUNT!", false);
 	flag_set(t, told_flag);
 	ta_end(t);
 	return i;

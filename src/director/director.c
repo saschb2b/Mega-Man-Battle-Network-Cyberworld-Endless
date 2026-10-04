@@ -522,7 +522,12 @@ static bool hurt_now(void) { return emu_read16(BN6_NAVI_HP) * 4 < emu_read16(BN6
 
 /* Where the layer's Recovery Mr. Prog stands, in the world; false for
  * none. */
+/* (his one patch given on this layer, issue #71; the Heals helper's heals
+ * as often as asked) */
+static bool heal_spent(void) { return !(run.helpers & HELP_HEALS) && flag_get(LAYER_HEAL_TOLD_FLAG); }
+
 static bool heal_spot(int *wx, int *wy) {
+	if (heal_spent()) return false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_HEAL) { netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, wx, wy); return true; }
 	return false;
@@ -993,7 +998,7 @@ static void here_scan(Here *h) {
 		h->duel |= t == OBJ_DUEL && !layer_objs_duel_later;
 		h->official |= t == OBJ_OFFICIAL;
 		h->shop |= t == OBJ_SHOP;
-		h->heal |= t == OBJ_HEAL;
+		h->heal |= t == OBJ_HEAL && !heal_spent();
 		h->programs |= t == OBJ_PROGRAMS;
 		h->trader |= t == OBJ_TRADER;
 		h->bugtrader |= t == OBJ_BUGTRADER;
