@@ -1644,14 +1644,15 @@ static void dark_flame_watch(void) {
 }
 
 /* The map an area's layers take over, the Navi their bystanders are
- * (layer_objs_bystander) and their battles' background
- * (encounter_backdrop): another game's area its own, copied into BN6
- * (docs/MULTIROM.md), where they can be. */
+ * (layer_objs_bystander), their battles' background (encounter_backdrop)
+ * and the map's backdrop and animations: another game's area its own,
+ * copied into BN6 (docs/MULTIROM.md), where they can be. */
 static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
 	if (!a) a = net_area_def(0);
 	layer_objs_bystander = a->xrom > 0 && a->xnavi ? xnavi_slot(a->xrom - 1, a->xnavi, LAYER_BYSTANDER) : LAYER_BYSTANDER;
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
+	xbackdrop_map(tiles);
 	/* (and its battles, where its own engine can fight them on the guest
 	 * core: its game's records for the map, guest.c) */
 	const uint8_t *xb = a->xbattles[layer_in_act(run.depth)];

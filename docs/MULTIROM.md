@@ -52,6 +52,12 @@ ROM in memory, and shows its battle screens.
    (`+0x170000`, docs/EMULATION.md), and the taken-over map's descriptor
    points at them. BN5's tile sets fill the same VRAM as BN6's (their
    first block at 0, the second after it: 31200 bytes against 30496).
+   The map's backdrop and animations come with them (`xbackdrop_map`):
+   the learned map's backdrop (its record, tiles, map and palette) and
+   its GFXAnim scripts (colour cycles, the backdrop's turning tiles) are
+   copied into `+0x310000`, and the taken-over map's entries in its
+   group's three tables (animation list, backdrop record, scroll
+   callbacks) point at them; a layer of BN6's own puts BN6's back.
 4. **Pools by source**: each area, town, song and bystander is an entry
    with the game it came from; BN6 alone is today's game.
 5. **Runs follow the games there**: an area of another game dresses the BN6
@@ -163,6 +169,12 @@ engine (`src/emu/guest.c`, epic #57):
   palette), each tuned over the atlas's layers (`--atlas DIR:aN:3`);
   Nebula Area's floors told by shape among its hues, its cobbles turning
   purple and teal stone by stone.
+- [x] Its net maps' backdrops and animations: each dressed area's layers
+  stand on its learned map's own backdrop, scrolled as in BN5, with that
+  map's tile animation and colour cycles (ACDC Area's blinking diamonds,
+  End Area's red field of diamonds, Nebula Area's flickering static and
+  pulsing emblems), where they stood on the BN6 map's backdrop with its
+  cycles running over BN5's colours (`xbackdrop_map`, docs/ROM_DATA.md).
 - [ ] SciLab (maps 4-6, dressing Sky Area): drawn (`--net-biome x1`) but
   held out of runs (`held`): its maps hold no platform bigger than a 3x3
   pad, and Sky Area's rooms drawn in its tiles meet their pale middles

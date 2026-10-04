@@ -86,6 +86,8 @@ typedef struct {
 	uint32_t battle_bg_anims;  /* their tile and palette animation scripts */
 	uint32_t battle_bg_scroll; /* their scroll callbacks, 16 bytes each */
 	uint32_t battle_bg_refs[3];   /* the loader's literals naming those three tables: BGAnimData, animations, scroll */
+	uint32_t map_enters;       /* the internet map groups' EnterMapGroup routines, one a group from 0x80 (docs/ROM_DATA.md) */
+	uint32_t map_anims;        /* ... and their LoadGFXAnims routines: through both, a net map's backdrop and animation tables */
 } RomLayout;
 
 typedef struct {
@@ -112,6 +114,7 @@ typedef struct {
 	uint32_t sprite_lists;                  /* the ten sprite lists, as BN6's */
 	uint8_t battle_songs[2];                /* the songs its random battles and its bosses' name in their BattleSettings */
 	uint32_t battle_bgs, battle_bg_anims, battle_bg_scroll;   /* its battle backgrounds' tables, as BN6's */
+	uint32_t map_enters, map_anims;         /* its internet map groups' EnterMapGroup and LoadGFXAnims routines, as BN6's */
 	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
 } XRomLayout;
 typedef struct {

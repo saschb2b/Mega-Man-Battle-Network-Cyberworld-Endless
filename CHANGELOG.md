@@ -20,6 +20,15 @@
   Undernet itself", opened by clearing the Secret Area past the gate.
 - **MegaMan's word before ProtoMan's duel fits any HP:** "let's heal up
   first if we're hurt", where "let's be at full HP" was said at full HP.
+- **BN5's areas move as they do in BN5.** Where Battle Network 5: Team
+  Colonel dresses an area, its layers now stand on that area's own
+  background, moving as in BN5: ACDC Area's black net of blue diamonds
+  blinking as it drifts, End Area's dark red field of green and red
+  diamonds, Nebula Area's flickering static; and their lights and
+  emblems pulse in BN5's own colours. They stood on the BN6 area's
+  background (Central Area's portholes, Seaside Area's bubbles, Green
+  Area's rings), with that area's colour cycles running over BN5's
+  colours.
 - **A Server that holds a Navi says so.** "A strong virus signal! Its
   viruses outclass this layer" held ElementMan SP for a playtester on a
   guardian's layer. A Server's battle is now rolled with its layer, so

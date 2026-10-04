@@ -1,4 +1,4 @@
-/* Another game's battle backgrounds: BN5 keeps them as BN6 does (bn6f
+/* Another game's backgrounds: BN5 keeps them as BN6 does (bn6f
  * sub_8080DA0, docs/ROM_DATA.md), a BGAnimData record (tiles, their VRAM,
  * map, its offset, palette, its RAM, its size), a list of GFXAnim scripts
  * and an entry of scroll callbacks per number. Tiles and map are LZ77,
@@ -6,7 +6,9 @@
  * then colours; a tile animation's frames are lists of tile numbers (flips
  * in bits 10-11) in a sheet of tiles, a palette animation's frames
  * colours. Callbacks are code: an entry is BN6's own whose callbacks do
- * the same. */
+ * the same. Its battle backgrounds go after BN6's 22; its net maps'
+ * backdrops and animations, the same three things a map, into the map its
+ * area's layers take over (Net maps, below). */
 #include "xbackdrop.h"
 
 #include <stdbool.h>
@@ -22,10 +24,12 @@
 
 #define XBG_AT   (EMU_FREE + 0x2A0000)   /* (docs/EMULATION.md) */
 #define XBG_END  (EMU_FREE + 0x2E0000)
+#define XMAP_AT  (EMU_FREE + 0x310000)   /* the net maps' (docs/EMULATION.md) */
+#define XMAP_END (EMU_FREE + 0x320000)
 #define BUS      0x08000000u
 #define BN6_BGS  22                      /* BN6's own, 0x00-0x15 */
 #define XBGS_MAX 8                       /* room after them in the tables' copies */
-#define SCRIPTS_MAX 4
+#define SCRIPTS_MAX 12                   /* (a battle background's lists hold 2 at most, a net map's 10) */
 #define FRAMES_MAX  64
 #define SHAPE_MAX   64
 /* The staging buffer a tile animation names (bn6f off_8001AB8, the same
@@ -37,21 +41,25 @@
 #define STAGE_SMALL_TILES 50
 #define STAGE_BIG_TILES   72
 
+typedef struct { uint32_t next, end; } Space;   /* a range of the free space, filled from `next` */
+
 static struct {
 	bool ready;
-	uint32_t next, tables[3];   /* the copies: BGAnimData pointers, animation lists, scroll entries */
+	Space sp;
+	uint32_t tables[3];   /* the copies: BGAnimData pointers, animation lists, scroll entries */
 	int n;
 	struct { int rom, bg, id; } bg[XBGS_MAX];
 } X;
 
 static const uint8_t *xr;   /* the ROM a background comes from */
+static Space *space;        /* the range being filled: the battle backgrounds' or the net maps' */
 
 /* `len` bytes into the free space, at a word; 0 where it is full. */
 static uint32_t put(const void *src, uint32_t len) {
-	if (!len || X.next + len > XBG_END) return 0;
-	uint32_t at = X.next;
+	if (!len || space->next + len > space->end) return 0;
+	uint32_t at = space->next;
 	emu_write(at, src, len);
-	X.next = (at + len + 3) & ~3u;
+	space->next = (at + len + 3) & ~3u;
 	return at;
 }
 
@@ -140,7 +148,7 @@ static uint32_t copy_script(uint32_t s, uint32_t pal_move) {
 	if (term == 2) {
 		uint32_t jump = get32(h + 16 + 8 * nf);
 		if (jump < s + 12 || jump >= s + 12 + 8 * nf) return 0;
-		put32(out + 16 + 8 * nf, X.next + (jump - s));
+		put32(out + 16 + 8 * nf, space->next + (jump - s));
 	}
 	return put(out, len);
 }
@@ -246,7 +254,7 @@ static void copy_all(void) {
 		put32(anims + 4 * id, an);
 		memcpy(scroll + 16 * id, R.data + R.layout->battle_bg_scroll + 16 * (uint32_t)scroll_like(xr + l->battle_bg_scroll + 16u * a->xbg), 16);
 		X.bg[X.n++] = (__typeof__(X.bg[0])){ xi, a->xbg, id };
-		if (emu_debug_on()) fprintf(stderr, "xbackdrop: background %d of %s as %#x, %u bytes so far\n", a->xbg, l->name, id, X.next - XBG_AT);
+		if (emu_debug_on()) fprintf(stderr, "xbackdrop: background %d of %s as %#x, %u bytes so far\n", a->xbg, l->name, id, X.sp.next - XBG_AT);
 	}
 	if (!X.n) return;
 	uint32_t n = BN6_BGS + (uint32_t)X.n;
@@ -263,10 +271,183 @@ int xbackdrop_install(int xrom, int bg, int fallback) {
 	if (X.n && emu_read32(BUS + R.layout->battle_bg_refs[0]) != X.tables[0]) memset(&X, 0, sizeof X);
 	if (!X.ready) {
 		X.ready = true;
-		X.next = XBG_AT;
+		X.sp = (Space){ XBG_AT, XBG_END };
+		space = &X.sp;
 		copy_all();
 	}
 	for (int i = 0; i < X.n; ++i)
 		if (X.bg[i].rom == xrom && X.bg[i].bg == bg) return X.bg[i].id;
 	return fallback;
+}
+
+/* ---- Net maps ----
+ * A net map's look past its tile set and colours is what its group's
+ * routines take from three tables, an entry a map, as it is entered (bn6f
+ * EnterMap): the GFXAnim scripts its LoadGFXAnims starts (a list), and the
+ * backdrop its EnterMapGroup loads first, through its LoadBGAnim (a
+ * BGAnimData record; 16 bytes of two scroll callbacks, the HBlank's and
+ * the display bits). BN5's groups keep them so, and its maps move by them:
+ * palette banks cycling, the backdrop's tiles turning (docs/ROM_DATA.md).
+ * A layer in another game's tiles has its learned map's three, copied, in
+ * the BN6 map it takes over; every other layer BN6's own there. */
+
+typedef struct { uint32_t lists, scroll, records; } MapTables;   /* bus addresses */
+typedef struct { uint16_t v, mask; } Op;                         /* an instruction: its halfword & mask is v */
+
+static struct {
+	bool ready;
+	Space sp;
+	uint32_t check;   /* the first copy's first word, gone where the core's ROM copy was made anew */
+	struct {
+		bool ok;
+		uint32_t list_at, record_at, scroll_at;   /* the taken-over map's three entries (BN6 ROM offsets) */
+		uint32_t list, record;                    /* the copies they point at for the other game's map */
+		uint8_t scroll[16];
+	} area[XAREAS_MAX];
+} M;
+
+/* a group's LoadGFXAnims: push {lr}; lsls r1, r1, #2; ldr r0, [pc, #n] (its lists); ldr r0, [r0, r1] */
+static const Op group_anims[] = { { 0xB500, 0xFFFF }, { 0x0089, 0xFFFF }, { 0x4800, 0xFF00 }, { 0x5840, 0xFFFF } };
+/* its LoadBGAnim: push {r4-r7, lr}; mov r5, r10; ldr r5, [r5, #0x3C] (the game state); ldrb r1, [r5, #5] (the
+ * map's number); lsls r1, r1, #4; ldr r7, [pc, #n] (its scroll entries) */
+static const Op group_bg[] = { { 0xB5F0, 0xFFFF }, { 0x4655, 0xFFFF }, { 0x6BED, 0xFFFF }, { 0x7969, 0xFFFF }, { 0x0109, 0xFFFF }, { 0x4F00, 0xFF00 } };
+/* ... and further on: ldr r0, [pc, #n] (its BGAnimData records); ldrb r1, [r5, #5]; lsls r1, r1, #2; ldr r0, [r0, r1] */
+static const Op group_records[] = { { 0x4800, 0xFF00 }, { 0x7969, 0xFFFF }, { 0x0089, 0xFFFF }, { 0x5840, 0xFFFF } };
+
+static bool code_is(const uint8_t *rom, uint32_t at, const Op *op, int n) {
+	if (at > ROM_SIZE - 2u * (uint32_t)n) return false;
+	for (int i = 0; i < n; ++i)
+		if ((get16(rom + at + 2u * (uint32_t)i) & op[i].mask) != op[i].v) return false;
+	return true;
+}
+
+/* The word the Thumb `ldr rN, [pc, #imm]` at ROM offset `at` loads. */
+static uint32_t pc_load(const uint8_t *rom, uint32_t at) {
+	uint32_t lit = ((at + 4) & ~3u) + (get16(rom + at) & 0xFFu) * 4;
+	return lit <= ROM_SIZE - 4 ? get32(rom + lit) : 0;
+}
+
+/* Where the Thumb BL at ROM offset `at` calls (a ROM offset); 0 where none is. */
+static uint32_t bl_dest(const uint8_t *rom, uint32_t at) {
+	uint16_t hi = get16(rom + at), lo = get16(rom + at + 2);
+	if ((hi & 0xF800) != 0xF000 || (lo & 0xF800) != 0xF800) return 0;
+	int32_t off = (int32_t)((uint32_t)(hi & 0x7FF) << 12 | (uint32_t)(lo & 0x7FF) << 1);
+	if (off & 0x400000) off -= 0x800000;
+	int64_t to = (int64_t)at + 4 + off;
+	return to > 0 && to < ROM_SIZE ? (uint32_t)to : 0;
+}
+
+/* The `i`th word of the table at bus address `t`; 0 past the ROM. */
+static uint32_t entry_at(const uint8_t *rom, uint32_t t, uint32_t i) {
+	return xptr(t, 4 * i + 4) ? get32(rom + (t - BUS) + 4 * i) : 0;
+}
+
+/* A map group's three tables, through its routines in the game's two
+ * lists of them (EnterMapGroup's and LoadGFXAnims', a group from 0x80);
+ * false where the routines are not shaped as above. */
+static bool map_tables(const uint8_t *rom, uint32_t enters, uint32_t anims, int group, MapTables *t) {
+	if (group < 0x80 || !enters || !anims) return false;
+	uint32_t g = (uint32_t)(group - 0x80), la = entry_at(rom, BUS + anims, g), en = entry_at(rom, BUS + enters, g), lb = 0;
+	if (!xptr(la & ~1u, 8) || !xptr(en & ~1u, 64)) return false;
+	la = (la & ~1u) - BUS;
+	en = (en & ~1u) - BUS;
+	/* (its EnterMapGroup's first call is its LoadBGAnim) */
+	for (uint32_t k = 0; k < 64 && !lb; k += 2) lb = bl_dest(rom, en + k);
+	if (!code_is(rom, la, group_anims, 4) || !lb || !code_is(rom, lb, group_bg, 6)) return false;
+	t->lists = pc_load(rom, la + 4);
+	t->scroll = pc_load(rom, lb + 10);
+	t->records = 0;
+	for (uint32_t k = 12; k < 64 && !t->records; k += 2)
+		if (code_is(rom, lb + k, group_records, 4)) t->records = pc_load(rom, lb + k);
+	return xptr(t->lists, 4) && xptr(t->scroll, 16) && xptr(t->records, 4);
+}
+
+/* The map whose descriptor lies at ROM offset `desc`, in its game's own
+ * numbers: in the group whose list of descriptors starts nearest before
+ * it (BN5's internet groups' lists follow each other, and the engine's
+ * numbers 0x90:n run on into the next groups': docs/ROM_DATA.md). */
+static bool own_map(const XRomLayout *l, uint32_t desc, int *group, int *number) {
+	uint32_t best = UINT32_MAX;
+	for (int g = 0; g < l->net_groups; ++g) {
+		uint32_t start = get32(xr + l->map_table + 4u * (uint32_t)g);
+		if (!xptr(start, 12) || start - BUS > desc || (desc - (start - BUS)) % 12 || desc - (start - BUS) >= best) continue;
+		best = desc - (start - BUS);
+		*group = 0x80 + g;
+		*number = (int)(best / 12);
+	}
+	return best != UINT32_MAX;
+}
+
+/* The scroll entry the taken-over map's (`host`, BN6's) becomes for the
+ * other game's (`theirs`): each callback the host's one that does the
+ * same (the backdrop still, or scrolled alike), else the host's own; the
+ * HBlank's the host's (IWRAM code); the display bits theirs. */
+static void scroll_entry(const uint8_t *theirs, const uint8_t *host, uint8_t out[16]) {
+	memcpy(out, host, 16);
+	for (uint32_t c = 0; c < 2; ++c)
+		for (uint32_t o = 0; o < 2; ++o)
+			if (same_code(xr, get32(theirs + 4 * c), R.data, get32(host + 4 * o))) put32(out + 4 * c, get32(host + 4 * o));
+	put32(out + 12, get32(theirs + 12));
+}
+
+/* Area `k`'s map look copied: the backdrop record, animation list and
+ * scroll entry of the map it learns from, for the map it takes over. */
+static void copy_map(int k, const NetAreaDef *a) {
+	const XRomLayout *l = XR[a->xrom - 1].layout;
+	xr = XR[a->xrom - 1].data;
+	MapTables theirs, own;
+	int group = 0, number = 0;
+	uint32_t descs = a->group >= 0x80 ? entry_at(xr, BUS + l->map_table, (uint32_t)(a->group - 0x80)) : 0;
+	if (!xptr(descs, 12) || !own_map(l, descs - BUS + 12u * a->number, &group, &number)
+		|| !map_tables(xr, l->map_enters, l->map_anims, group, &theirs)
+		|| !map_tables(R.data, R.layout->map_enters, R.layout->map_anims, a->over[0], &own)) return;
+	uint32_t m = (uint32_t)number, h = a->over[1];
+	uint32_t rec = entry_at(xr, theirs.records, m), host_rec = entry_at(R.data, own.records, h);
+	if (!xptr(rec, 28) || !xptr(host_rec, 28) || !xptr(theirs.scroll, 16 * m + 16) || !xptr(own.scroll, 16 * h + 16)) return;
+	const uint8_t *hr = R.data + (host_rec - BUS), *tr = xr + (rec - BUS);
+	/* (their scripts' palette RAM moved to BN6's as the two records name
+	 * theirs: BN5's 0x03003960, BN6's 0x03001960) */
+	if (!get32(hr + 16) || !get32(tr + 16)) return;
+	uint32_t to = copy_record(rec, hr), list = to ? copy_anims(entry_at(xr, theirs.lists, m), get32(hr + 20) - get32(tr + 20)) : 0;
+	if (!list) return;
+	__typeof__(M.area[0]) *e = &M.area[k];
+	e->list_at = own.lists - BUS + 4 * h;
+	e->record_at = own.records - BUS + 4 * h;
+	e->scroll_at = own.scroll - BUS + 16 * h;
+	e->list = list;
+	e->record = to;
+	scroll_entry(xr + (theirs.scroll - BUS) + 16 * m, R.data + e->scroll_at, e->scroll);
+	e->ok = true;
+	if (emu_debug_on())
+		fprintf(stderr, "xbackdrop: %s map %#x:%d's backdrop and animations for %#x:%d, %u bytes so far\n", l->name, (unsigned)group, number,
+			(unsigned)a->over[0], a->over[1], M.sp.next - XMAP_AT);
+}
+
+/* Area `k`'s taken-over map's three entries: pointed at its copies
+ * (`theirs`), or BN6's own again. */
+static void map_point(int k, bool theirs) {
+	const __typeof__(M.area[0]) *e = &M.area[k];
+	emu_write32(BUS + e->list_at, theirs ? e->list : rom_u32(e->list_at));
+	emu_write32(BUS + e->record_at, theirs ? e->record : rom_u32(e->record_at));
+	for (uint32_t i = 0; i < 16; i += 4) emu_write32(BUS + e->scroll_at + i, theirs ? get32(e->scroll + i) : rom_u32(e->scroll_at + i));
+}
+
+void xbackdrop_map(int area) {
+	if (!R.data || !R.layout || !R.layout->map_anims) return;
+	/* (the core's ROM copy made anew: the copies went with the old) */
+	if (M.ready && M.sp.next > XMAP_AT && emu_read32(XMAP_AT) != M.check) memset(&M, 0, sizeof M);
+	if (!M.ready) {
+		M.ready = true;
+		M.sp = (Space){ XMAP_AT, XMAP_END };
+		space = &M.sp;
+		for (int k = 0; k < XAREAS_MAX; ++k) {
+			const NetAreaDef *a = net_area_def(NET_AREAS + k);
+			if (a && a->xrom > 0 && a->xrom <= XROM_COUNT && XR[a->xrom - 1].data) copy_map(k, a);
+		}
+		M.check = emu_read32(XMAP_AT);
+	}
+	for (int k = 0; k < XAREAS_MAX; ++k)
+		if (M.area[k].ok) map_point(k, false);
+	int k = area - NET_AREAS;
+	if (k >= 0 && k < XAREAS_MAX && M.area[k].ok) map_point(k, true);
 }
