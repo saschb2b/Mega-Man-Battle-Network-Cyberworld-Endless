@@ -144,6 +144,18 @@ static uint32_t guest_keys(void) {
 #define GUEST_FLASH 20
 static int guest_flash, guest_wait;   /* (and frames the guest has run before its battle shows: BN6's frame fades to white) */
 
+/* The guest's last frame plain white (a few pixels across it) */
+static bool guest_white(void) {
+	const uint32_t *v = guest_video();
+	if (!v) return false;
+	static const int at[6][2] = { { 8, 8 }, { 120, 20 }, { 232, 40 }, { 60, 80 }, { 180, 120 }, { 120, 152 } };
+	for (int k = 0; k < 6; ++k) {
+		uint32_t c = v[at[k][1] * EMU_W + at[k][0]];
+		if ((c & 0xF0) < 0xF0 || (c >> 8 & 0xF0) < 0xF0 || (c >> 16 & 0xF0) < 0xF0) return false;
+	}
+	return true;
+}
+
 /* A battle on the guest core: its frames in BN6's place, BN6's core
  * waiting, and its result into the run as it ends */
 static bool guest_update(void) {
@@ -155,7 +167,13 @@ static bool guest_update(void) {
 	was = shown;
 	if (!guest_active()) return false;
 	uint32_t keys = guest_keys();
-	for (int i = 0; i < dev.speed && guest_active(); ++i) guest_frame(keys);
+	/* (while its battle opens on a plain white screen, or before it shows:
+	 * four of its frames a frame, unheard; BN5's opening held the white two
+	 * and a half seconds, which a playtester read as a hang, session 65) */
+	if (!shown || guest_white())
+		for (int i = 0; i < 4 * dev.speed && guest_active() && (!guest_on_screen() || guest_white()); ++i) guest_frame_quiet(keys);
+	else
+		for (int i = 0; i < dev.speed && guest_active(); ++i) guest_frame(keys);
 	GuestResult r;
 	if (guest_take_result(&r)) director_guest_done(&r);
 	return true;

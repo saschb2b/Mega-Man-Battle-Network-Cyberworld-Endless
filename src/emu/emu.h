@@ -46,6 +46,8 @@ const uint32_t *emu_video(void);
 /* Another core's sound (a struct mCore: the guest's, guest.c) into the
  * same ring BN6's plays from, and the rate it is played at. */
 void emu_audio_from(void *core);
+/* ... or its sound let go, for frames run ahead unseen */
+void emu_audio_drop_from(void *core);
 int emu_audio_out_rate(void);
 
 /* Bus access (ROM, EWRAM, IWRAM, IO, palette, VRAM, OAM). */

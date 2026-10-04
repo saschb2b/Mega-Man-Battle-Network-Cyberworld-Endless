@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **BN5's battles open in half a second, not two and a half.** Its
+  battle opens on a plain white screen, which held long enough to read as
+  a hang; those frames now run four at a time, unheard, and the field
+  fades in as before.
 - **CircusMan's battle data says how fast his tent falls:** half a
   second after our panel lights, with no way out once down, so no long
   chip while he crackles on his panel.

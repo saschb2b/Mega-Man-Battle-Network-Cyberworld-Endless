@@ -39,6 +39,9 @@ bool guest_custom_screen(void);
 bool guest_on_screen(void);
 /* One frame of the guest with these keys held (GBA key bits). */
 void guest_frame(uint32_t keys);
+/* ... unseen and unheard: a frame run ahead while its battle opens behind
+ * the white */
+void guest_frame_quiet(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
 const uint32_t *guest_video(void);
 

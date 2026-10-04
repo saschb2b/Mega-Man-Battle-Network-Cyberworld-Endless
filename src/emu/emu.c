@@ -151,6 +151,13 @@ void emu_audio_from(void *other) {
 	if (other && ring_lock) pull_audio_from(other);
 }
 
+void emu_audio_drop_from(void *other) {
+	struct mCore *c = other;
+	if (!c) return;
+	blip_clear(c->getAudioChannel(c, 0));
+	blip_clear(c->getAudioChannel(c, 1));
+}
+
 int emu_audio_out_rate(void) { return out_rate; }
 
 uint64_t emu_core_ticks, emu_core_unshown_ticks;

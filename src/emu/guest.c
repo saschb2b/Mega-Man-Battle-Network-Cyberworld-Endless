@@ -416,7 +416,7 @@ bool guest_fight_hp(int *hp, int *max) {
 	if (!guest_on_screen()) return false;
 	*hp = rd16(BN5_FIGHT_HP);
 	*max = rd16(BN5_FIGHT_HP + 2);
-	return true;
+	return *max > 0;   /* (0/0 in the battle's first frames, before it sets MegaMan) */
 }
 
 static void finish(int outcome) {
@@ -440,11 +440,17 @@ static void finish(int outcome) {
 	phase = PH_IDLE;
 }
 
-void guest_frame(uint32_t keys) {
+static void step(uint32_t keys, bool quiet);
+
+void guest_frame(uint32_t keys) { step(keys, false); }
+void guest_frame_quiet(uint32_t keys) { step(keys, true); }
+
+static void step(uint32_t keys, bool quiet) {
 	if (!active) return;
 	core->setKeys(core, keys);
 	core->runFrame(core);
-	emu_audio_from(core);
+	if (quiet) emu_audio_drop_from(core);
+	else emu_audio_from(core);
 	++frames;
 	int mode = main_mode(), sub = sub_mode();
 	if (phase == PH_ASKED && (sub == BN5_SUB_BATTLE_INIT || sub == BN5_SUB_BATTLE)) {
@@ -493,6 +499,7 @@ bool guest_on_screen(void) { return false; }
 bool guest_fight_hp(int *hp, int *max) { (void)hp; (void)max; return false; }
 int guest_custom_gauge(void) { return -1; }
 void guest_frame(uint32_t keys) { (void)keys; }
+void guest_frame_quiet(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
 bool guest_take_result(GuestResult *out) { (void)out; return false; }
 
