@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The Android app: RomActivity asks once for the player's ROM and keeps a
-     copy in the app's files; GameActivity is SDL's activity running the game.
+<!-- The Android app: RomActivity asks once for the folder the player's ROMs
+     are in (or the files) and keeps copies of BN6's and BN5's in the app's
+     files; the icon's ROMs shortcut opens it again. GameActivity is SDL's
+     activity running the game.
      Controllers (a handheld's own, Bluetooth, USB) and a touch screen are
      both optional. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -31,6 +33,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
 
         <activity

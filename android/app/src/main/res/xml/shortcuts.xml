@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app icon's shortcut (hold the icon: ROMs, Android 7.1 and later):
+     RomActivity's page again, with the ROMs kept, both choices and Play.
+     A player who chose the files, not a folder, adds BN5 here later. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="roms"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/roms_short"
+        android:shortcutLongLabel="@string/roms_long">
+        <intent
+            android:action="io.github.saschb2b.cyberworldendless.ROMS"
+            android:targetPackage="io.github.saschb2b.cyberworldendless"
+            android:targetClass="io.github.saschb2b.cyberworldendless.RomActivity" />
+    </shortcut>
+</shortcuts>

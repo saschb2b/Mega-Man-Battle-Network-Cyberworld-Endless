@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cyberworld Endless</string>
+    <!-- the app icon's shortcut to the ROM page (res/xml/shortcuts.xml) -->
+    <string name="roms_short">ROMs</string>
+    <string name="roms_long">ROMs: BN6 and BN5</string>
 </resources>

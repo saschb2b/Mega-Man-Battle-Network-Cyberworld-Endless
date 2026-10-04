@@ -200,6 +200,19 @@ int rng_range(int lo, int hi) {
 	return lo + (int)(rng_next() % (uint32_t)(hi - lo + 1));
 }
 
+/* The ROMs read, said at the start: BN6's, and the other games' found
+ * beside it (Android's log takes SDL_Log, not stdout). */
+static void say_roms(void) {
+	printf("ROM: %s (%s)\n", R.layout->name, R.path);
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (XR[i].data) printf("%s found: %s (%s)\n", XR[i].layout->tag, XR[i].layout->name, XR[i].path);
+#ifdef __ANDROID__
+	SDL_Log("ROM: %s (%s)", R.layout->name, R.path);
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (XR[i].data) SDL_Log("%s found: %s (%s)", XR[i].layout->tag, XR[i].layout->name, XR[i].path);
+#endif
+}
+
 /* ---- error scene: shown when no usable ROM is present ---- */
 static char error_msg[512];
 
@@ -1049,7 +1062,7 @@ int main(int argc, char **argv) {
 	} else if (!gfx_init()) {
 		error_show("The ROM could not be decoded.");
 	} else {
-		printf("ROM: %s (%s)\n", R.layout->name, R.path);
+		say_roms();
 		save_init();
 		devtools_veteran();
 		if (marks_spec >= 0) profile.marks = (uint16_t)marks_spec;

@@ -6,9 +6,19 @@ activity (`org.libsdl.app.SDLActivity`, from SDL2's own source) runs the
 game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
 
 - `RomActivity` starts the game when the player's ROM is kept, else asks
-  for it once with Android's own file picker (no storage permission), checks
-  its size and SHA-1 and copies it into the app's files. It never leaves
-  the device; saves are kept beside it (`files/data`).
+  for the folder the ROMs are in with Android's own folder picker
+  (`ACTION_OPEN_DOCUMENT_TREE`, no storage permission), or the files in one
+  picker (`EXTRA_ALLOW_MULTIPLE`, for Download itself, which Android 11 and
+  later keep from the folder picker). It opens only `.gba` files, tells
+  each by its header's game code, checks BN6 Cybeast Gregar's and BN5 Team
+  Colonel's by their SHA-1 and copies those two alone into the app's files
+  (`files/rom/bn6g.gba`, `bn5c.gba`), where the game finds BN5 beside BN6;
+  every other `.gba` is named with why it was refused. The folder is kept
+  (a persisted, read-only grant) and looked in again at each start while
+  BN5 is missing; a file seen before (its document, size and date) is not
+  opened again. The app icon's **ROMs** shortcut (`res/xml/shortcuts.xml`)
+  opens the page again. Nothing leaves the device; saves are kept beside
+  the ROMs (`files/data`).
 - `GameActivity` is SDL's activity with the ROM and data folders as its
   arguments; it keeps the screen on.
 - A controller (a handheld's own controls, Bluetooth or USB) works as on the
@@ -63,6 +73,13 @@ means players reinstall (and lose their saves) to update.
 
 Copy the APK to the device and open it (Android asks once to allow installs
 from the file manager or browser), or with a cable: `adb install -r
-cyberworld-endless.apk`. The first start asks for the ROM: Mega Man Battle
-Network 6: Cybeast Gregar (USA), unmodified, the same file every other build
-takes.
+cyberworld-endless.apk`. The first start asks for the folder the ROMs are
+in: Mega Man Battle Network 6: Cybeast Gregar (USA), unmodified, the same
+file every other build takes, and optionally Mega Man Battle Network 5:
+Team Colonel (USA).
+
+To try it in the emulator, push copies of the ROMs into its storage, for
+instance `adb push bn6g.gba /sdcard/Download/ROMs/`, then choose
+Download/ROMs; `adb logcat -s Cyberworld SDL/APP` shows each look (`looked in
+ROMs: 2 .gba, kept BN6 Cybeast Gregar (USA), BN5 Team Colonel (USA)`) and
+the game's own line, `BN5 found: ...`.
