@@ -126,7 +126,10 @@ engine (`src/emu/guest.c`, epic #57):
   (GiveChips), zenny as zenny (GiveZenny). Before each battle, its
   enemies' reward rows are rewritten where a chip has no BN6 chip of its
   name: 200 zenny instead, so the screen never shows a chip the run won't
-  get.
+  get. An HP+N its screen gives (a row's kind 2, as BN6's) is in the HP
+  that comes back. `runlog.txt` has a line for each, as for BN6's battles,
+  with its record, its viruses by BN5's ids and the reward as the run got
+  it (docs/DEVTOOLS.md).
 - **The world's reason**: the Nest's copy of the old net reads our data
   as it knew it, one rule for every seam of the translation. Chips it
   never had sit out; a chip whose code its chip of that name lacks fights

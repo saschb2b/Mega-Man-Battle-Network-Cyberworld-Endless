@@ -65,6 +65,7 @@ typedef struct {
 	int chip;      /* (won) the reward: BN6's chip of its name, and its code (A=0, *=26); 0 none */
 	int code;
 	int zenny;     /* ... or zenny */
+	int heal;      /* ... or the HP its results screen restored (HP+50: hp counts it already) */
 	bool dark_used;   /* a DarkChip was used in it */
 	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
 	int recoded;      /* the folder's chips that fought with another code (its game's chip lacked theirs) */
@@ -94,6 +95,9 @@ const char *guest_dark_name(int k);
  * draws: a battle its game keeps for a story's condition (its byte 7), a
  * Navi's, or none at all. */
 int guest_record_strength(int xrom, uint32_t record, int *hp, int *damage);
+/* ... and its enemies by its game's ids, the first `max` into `ids`; how
+ * many (a Navi, a story's battle among them) */
+int guest_record_foes(int xrom, uint32_t record, int *ids, int max);
 
 /* Its game's battle records for net map (group, number): how many, and the
  * i-th's address; read from the ROM file, no core needed. */

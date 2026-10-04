@@ -4234,6 +4234,20 @@ static void recode_words(char *out, size_t size) {
 			"The old net's chips come home in codes our net knows.", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
 }
 
+/* What a guest battle's results screen gave, as the run got it ("Cannon
+ * A", "200 zenny", "HP+50", "none") */
+static const char *guest_reward_words(const GuestResult *r) {
+	static char s[40];
+	ChipInfo ci;
+	if (r->chip) {
+		chip_info(r->chip, &ci);
+		snprintf(s, sizeof s, "%s %c", ci.name, code_letter(r->code));
+	} else if (r->zenny) snprintf(s, sizeof s, "%d zenny", r->zenny);
+	else if (r->heal) snprintf(s, sizeof s, "HP+%d", r->heal);
+	else snprintf(s, sizeof s, "none");
+	return s;
+}
+
 /* BN6's encounter walk cleared, as BN6 clears it entering the map a
  * battle returns to: an older net's battle never left BN6's map, so its
  * chance stayed at the walk's top, and a playtester met five battles on
@@ -4275,8 +4289,12 @@ void director_guest_done(const GuestResult *r) {
 	uint32_t out[2];
 	if (r->chip) game_call_ret(BN6_GIVE_CHIPS, (uint32_t)r->chip, (uint32_t)r->code, 1, out);
 	if (r->zenny) game_call(BN6_GIVE_ZENNY, (uint32_t)r->zenny, 0);
-	if (emu_debug_on()) fprintf(stderr, "guest: MegaMan back at %d/%d HP, chip %d code %d, %d zenny; %d viruses deleted in the run\n", hp, max, r->chip, r->code, r->zenny,
-		run.viruses_deleted);
+	/* (and in the run log, its reward as the run got it) */
+	runlog_guest_end(r->outcome == GUEST_WON, guest_reward_words(r));
+	if (emu_debug_on())
+		fprintf(stderr, "guest: MegaMan back at %d/%d HP, reward %s (folder codes %c%c%c); %d viruses deleted in the run\n", hp, max,
+			r->outcome == GUEST_WON ? guest_reward_words(r) : "none", run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-',
+			run.codes[2] ? 'A' + run.codes[2] - 1 : '-', run.viruses_deleted);
 }
 
 /* The short net won: its Nest's guardian fell and MegaMan stepped on its
@@ -4476,7 +4494,9 @@ static void guest_begin(void) {
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
 		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);
 	}
-	if (record) guest_battle(record, &mm);
+	/* (in the run log as BN6's battles are, its viruses by BN5's ids) */
+	int ids[16] = { 0 }, n = guest_record_foes(D.guest_xrom, record, ids, 16);
+	if (record && guest_battle(record, &mm)) runlog_guest_start(record, ids, n, hp);
 }
 
 #define DUEL_GRACE 60   /* frames of a duel's fight before a hit counts against its no-hit rung */

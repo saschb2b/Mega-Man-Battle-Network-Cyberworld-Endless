@@ -52,21 +52,27 @@ static bool xenemy(const uint8_t *d, int id, int *hp, int *damage) {
 	return true;
 }
 
+int guest_record_foes(int xrom, uint32_t record, int *ids, int max) {
+	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || record < 0x08000000u || record - 0x08000000u + 16 > ROM_SIZE) return 0;
+	const uint8_t *d = XR[xrom].data;
+	int n = 0;
+	for (uint32_t a = rom32(d, record + 12), k = 0; a && k < 16 && a - 0x08000000u + 4 <= ROM_SIZE && d[a - 0x08000000u] != 0xF0; a += 4, ++k) {
+		const uint8_t *e = d + (a - 0x08000000u);
+		if (e[0] == 0x11 && n < max) ids[n++] = e[2] | e[3] << 8;
+	}
+	return n;
+}
+
 int guest_record_strength(int xrom, uint32_t record, int *hp, int *damage) {
 	*hp = *damage = 0;
-	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || record < 0x08000000u || record - 0x08000000u + 16 > ROM_SIZE) return 0;
-	const uint8_t *d = XR[xrom].data, *rec = d + (record - 0x08000000u);
-	if (rec[7]) return 0;
-	uint32_t ents = rom32(d, record + 12);
-	int n = 0;
-	for (uint32_t a = ents, k = 0; a && k < 16 && a - 0x08000000u + 4 <= ROM_SIZE && d[a - 0x08000000u] != 0xF0; a += 4, ++k) {
-		const uint8_t *e = d + (a - 0x08000000u);
+	int ids[16] = { 0 }, n = guest_record_foes(xrom, record, ids, 16);
+	const uint8_t *d = n ? XR[xrom].data : NULL;
+	if (!d || d[record - 0x08000000u + 7]) return 0;
+	for (int i = 0; i < n; ++i) {
 		int h = 0, dm = 0;
-		if (e[0] != 0x11) continue;
-		if (!xenemy(d, e[2] | e[3] << 8, &h, &dm)) return 0;
+		if (!xenemy(d, ids[i], &h, &dm)) return 0;
 		*hp += h;
 		if (dm > *damage) *damage = dm;
-		++n;
 	}
 	return n;
 }
@@ -493,9 +499,10 @@ static void finish(int outcome) {
 	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
 	result.dark_used = dark_used;
 	/* (what its results screen gave, as the run's: a chip by its name, or
-	 * zenny) */
+	 * zenny; HP+N it gave there, in the HP above) */
 	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0;
 	if (v && v >> 14 == 1) result.zenny = v & 0x3FFF;
+	else if (v && v >> 14 == BN5_REWARD_HP) result.heal = v & 0x3FFF;
 	else if (v && v >> 14 == 0 && (v & 0x1FF) < BN5_CHIPS) {
 		result.chip = from_bn5[v & 0x1FF];
 		result.code = result.chip ? bn6_code(result.chip, v >> 9 & 0x1F) : 0;

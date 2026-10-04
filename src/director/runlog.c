@@ -63,6 +63,24 @@ void runlog_battle_end(bool won) {
 	append(L.line);
 }
 
+/* (a battle as BN6's lines have it, "guest" and its record after the HP,
+ * its enemies as "x" and that game's id) */
+void runlog_guest_start(uint32_t record, const int *ids, int n, int foehp) {
+	int k = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d battle hp %d/%d guest %08x", (unsigned)run.seed, run.depth, run.biome,
+		megaman_hp(), megaman_max(), (unsigned)record);
+	for (int i = 0; i < n && k < (int)sizeof L.line - 16; ++i) k += snprintf(L.line + k, sizeof L.line - (size_t)k, " x%d", ids[i]);
+	if (k < (int)sizeof L.line - 16) k += snprintf(L.line + k, sizeof L.line - (size_t)k, " foehp %d", foehp);
+	L.len = k < (int)sizeof L.line ? k : (int)sizeof L.line - 1;
+	L.open = true;
+}
+
+void runlog_guest_end(bool won, const char *reward) {
+	if (!L.open) return;
+	L.open = false;
+	snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> %s hp %d%s%s", won ? "won" : "left", megaman_hp(), won ? " reward " : "", won ? reward : "");
+	append(L.line);
+}
+
 void runlog_run_end(void) {
 	if (L.open) {
 		L.open = false;

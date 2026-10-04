@@ -6,6 +6,12 @@
   act's card reads "Act 1 - older net battles", and L's first words name
   the area "where battles run the older net's way", so a territory is
   known before its first battle (issue #65).
+- **The run log records BN5's battles, and what each gave (issue #63).**
+  `runlog.txt` in the data folder had a line for every BN6 battle and
+  none for a battle in BN5's engine. Each now has one, with its viruses
+  by BN5's numbers and the reward as the run got it: `reward Wind *`
+  (BN6's Wind, in the Pack), `reward 200 zenny` (for a chip BN6 lacks),
+  `reward HP+50`.
 - **MegaMan names the chips that sit out of BN5's battles (issue #62).**
   He said "4 of ours didn't exist back then, so they sat out" after the
   first BN5 battle, and a playtester asked which. Arriving where BN5's

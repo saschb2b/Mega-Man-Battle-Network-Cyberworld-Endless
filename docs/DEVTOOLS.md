@@ -189,8 +189,14 @@ Every battle and every finished run is appended to `runlog.txt` in the data
 folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
 area, what kind of battle, MegaMan's HP and max HP before, each foe as
 family.version, the foes' HP together, and MegaMan's HP after (or
-"deleted"). A last line gives where the run ended. Past 512 KB the log moves
-to `runlog.old`. Collected from real runs, it shows where runs are lost.
+"deleted"). A battle in BN5's engine (docs/MULTIROM.md, Guest battles) has
+`guest` and its record in BN5's ROM after MegaMan's HP, its viruses as `x`
+and BN5's enemy id, and after MegaMan's HP at its end the reward as the
+run got it: `... battle hp 300/300 guest 08121188 x1 x1 x1 foehp 120 ->
+won hp 260 reward 30 zenny` (a chip as BN6's of its name, `reward Wind *`;
+`reward HP+50`, which the HP after counts; `left` for an escape). A last
+line gives where the run ended. Past 512 KB the log moves to
+`runlog.old`. Collected from real runs, it shows where runs are lost.
 
 ## Frame log: pacing on a player's machine
 
