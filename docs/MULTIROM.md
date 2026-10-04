@@ -101,6 +101,16 @@ engine (`src/emu/guest.c`, epic #57):
   enemies' reward rows are rewritten where a chip has no BN6 chip of its
   name: 200 zenny instead, so the screen never shows a chip the run won't
   get.
+- **The world's reason**: the Nest's copy of the old net reads our data
+  as it knew it, one rule for every seam of the translation. Chips it
+  never had sit out; a chip whose code its chip of that name lacks fights
+  with one it has (the same letter, else its *, else its first: BN5 draws
+  a chip with a code it lacks as nothing); DarkChips are its own; a chip
+  won there crosses back in a code our net knows. MegaMan names each the
+  first time a profile meets it, with the chip ("Huh? In there our
+  Thunder S was Thunder *!"), and says out here the codes are ours again:
+  a quirk of two engines told as the net's own law, which a player can
+  use (a folder of codes the old net lacks fights with wildcards there).
 - **The switch**: BN6's frame fades to white while BN5's battle opens (its
   opening drew the room its boot state stands in), and BN5's picture
   flashes in once its battle is on its screen; after a profile's first,

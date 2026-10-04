@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **MegaMan explains the old net's codes.** The first time a chip of
+  yours fights in BN5's battles with another code (BN5's chip of the
+  name never had yours), Lan notices ("Huh? In there our Thunder S was
+  Thunder *!") and MegaMan says why: the old net reads chip codes its own
+  way, a wildcard where it can, and out here they're ours again. A chip
+  won there that comes back re-coded is named the same way, once.
 - **Every chip of the run's folder works in BN5's battles.** A chip whose
   code BN5's chip of the same name never had came into BN5's Custom
   screen as a blank, which could be picked and did nothing (nine of the

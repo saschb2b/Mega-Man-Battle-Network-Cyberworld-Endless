@@ -75,6 +75,7 @@ typedef struct {
 	uint8_t pack_taught;      /* MegaMan has said a chip bought or traded goes to the Pack */
 	uint8_t guest_taught;     /* ... and what an older net's battle is (docs/MULTIROM.md, Guest battles) */
 	uint8_t dark_taught;      /* ... and all of a DarkChip's price, at the first flame of darkness (docs/META.md) */
+	uint8_t recode_taught;    /* ... and that the older net reads chip codes its own way: 1 going in, 2 coming back */
 } Profile;
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };

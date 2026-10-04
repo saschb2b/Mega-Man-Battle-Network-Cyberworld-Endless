@@ -96,6 +96,7 @@ static bool ready, failed, active, result_due;
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
 static int frames, sat_out;
+static int recoded, recode_ex[3];   /* chips that went in with another code, and the first: BN6 id, code, its code there */
 static uint8_t dark_in[GUEST_DARK_KINDS];   /* the run's DarkChips as the battle began */
 static bool dark_used;                       /* ... and one was used in it (latched from BN5_DARK_USED) */
 
@@ -325,10 +326,12 @@ static int folder_in(const uint16_t *folder) {
 	uint32_t folders = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIPS), marks = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIP_MARKS);
 	if (folders < 0x02000000u || folders >= 0x02040000u || marks < 0x02000000u || marks >= 0x02040000u) return 0;
 	int in = 0;
+	recoded = 0;
 	for (uint32_t i = 0; i < 30; ++i) {
-		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0;
-		core->rawWrite16(core, folders + 2 * i, -1, x ? (uint16_t)(x | bn5_code(x, folder[i] >> 9) << 9) : 0xFFFF);
+		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0, code = folder[i] >> 9, there = x ? bn5_code(x, code) : code;
+		core->rawWrite16(core, folders + 2 * i, -1, x ? (uint16_t)(x | there << 9) : 0xFFFF);
 		if (!x) continue;
+		if (there != code && !recoded++) { recode_ex[0] = id; recode_ex[1] = code; recode_ex[2] = there; }
 		core->rawWrite8(core, marks + (uint32_t)x, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + (uint32_t)x) ^ BN5_CHIP_KEY_XOR));
 		++in;
 	}
@@ -384,7 +387,8 @@ bool guest_fight_hp(int *hp, int *max) {
 }
 
 static void finish(int outcome) {
-	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out, false, { 0 } };
+	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out, false, { 0 },
+		recoded, recode_ex[0], recode_ex[1], recode_ex[2], -1 };
 	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
 	result.dark_used = dark_used;
 	/* (what its results screen gave, as the run's: a chip by its name, or
@@ -394,6 +398,7 @@ static void finish(int outcome) {
 	else if (v && v >> 14 == 0 && (v & 0x1FF) < BN5_CHIPS) {
 		result.chip = from_bn5[v & 0x1FF];
 		result.code = result.chip ? bn6_code(result.chip, v >> 9 & 0x1F) : 0;
+		if (result.chip && result.code != (v >> 9 & 0x1F)) result.reward_from = v >> 9 & 0x1F;
 		if (!result.chip) result.zenny = REWARD_ZENNY;
 	}
 	result_due = true;

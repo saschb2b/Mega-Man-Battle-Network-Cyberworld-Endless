@@ -145,6 +145,8 @@ static struct {
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
 	int guest_due;         /* 1 + the chips that sat out of an older net's first battle, its words due (once a profile) */
+	int recode_due;        /* ... it read a chip's code its own way: 1 going in, 2 the reward coming back (once a profile each) */
+	int recode_chip, recode_from, recode_to;   /* the chip, and its codes out here and in there */
 	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
 	bool dark_given;       /* ... and the run holds it */
 	char dark_words[200];  /* MegaMan's words on a DarkChip's price, due ("" none) */
@@ -3938,6 +3940,36 @@ static void dark_price(void) {
 	dark_price_told = true;
 }
 
+/* The older net reads our data as it knew it (the world's own reason for
+ * the guest's translation, docs/MULTIROM.md): a chip whose code its chip
+ * of that name lacked fought with one it had, and a chip won there came
+ * back with a code ours has. MegaMan names each the first time, with the
+ * chip (a quirk said in the world's terms, as the owner asked). */
+static void guest_recode_note(const GuestResult *r) {
+	if (r->recoded && !(profile.recode_taught & 1) && !D.recode_due) {
+		D.recode_due = 1;
+		D.recode_chip = r->recode_chip; D.recode_from = r->recode_from; D.recode_to = r->recode_to;
+	} else if (r->chip && r->reward_from >= 0 && !(profile.recode_taught & 2) && !D.recode_due) {
+		D.recode_due = 2;
+		D.recode_chip = r->chip; D.recode_from = r->code; D.recode_to = r->reward_from;
+	}
+}
+
+static char code_letter(int code) { return code == 26 ? '*' : (char)('A' + (code >= 0 && code < 26 ? code : 0)); }
+
+/* ... and the words, after the older net's own if both are due */
+static void recode_words(char *out, size_t size) {
+	ChipInfo ci;
+	chip_info(D.recode_chip, &ci);
+	if (D.recode_due == 1)
+		snprintf(out, size, "@L Huh? In there our %s %c was %s %c!|@M The old net reads chip codes its own way, Lan: a code it never knew "
+			"for a chip comes through as one it knows, a wildcard where it can.|@M They're still our chips, and out here their codes are ours again.",
+			ci.name, code_letter(D.recode_from), ci.name, code_letter(D.recode_to));
+	else
+		snprintf(out, size, "@L Wait, it showed %s %c, and our Pack got %s %c!|@M Our net read its code our way as it crossed back, Lan. "
+			"The old net's chips come home in codes our net knows.", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
+}
+
 void director_guest_done(const GuestResult *r) {
 	if (!D.active) return;
 	++D.battles;
@@ -3956,6 +3988,7 @@ void director_guest_done(const GuestResult *r) {
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
 	if (!profile.guest_taught) D.guest_due = 1 + r->sat_out;
+	guest_recode_note(r);
 	dark_set_counts(r->dark);
 	if (r->dark_used) dark_price();
 	/* (what its results screen gave: BN6's chip of the same name to the
@@ -4169,15 +4202,23 @@ static void rush_hint(void) {
  * why chips sat out. A BN5 battle opened with no word of why the screen,
  * the chips' art and their rules changed. */
 static void guest_words(void) {
-	if (!D.guest_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
-	char words[320];
-	int out = D.guest_due - 1, k = snprintf(words, sizeof words, "@M Lan, that battle ran on an older net's system! The Nest copied that "
-		"net too, battles and all.|@M Its viruses fight the old way, and our chips work as the old net knew them.");
-	if (out > 0)
-		snprintf(words + k, sizeof words - (size_t)k, " %d of ours didn't exist back then, so they sat out.", out);
+	if ((!D.guest_due && !D.recode_due) || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
+	char words[720];
+	int k = 0;
+	if (D.guest_due) {
+		int out = D.guest_due - 1;
+		k = snprintf(words, sizeof words, "@M Lan, that battle ran on an older net's system! The Nest copied that "
+			"net too, battles and all.|@M Its viruses fight the old way, and our chips work as the old net knew them.");
+		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, " %d of ours didn't exist back then, so they sat out.", out);
+	}
+	if (D.recode_due) {
+		if (k) k += snprintf(words + k, sizeof words - (size_t)k, "|");
+		recode_words(words + k, sizeof words - (size_t)k);
+	}
 	if (talk_start(words, FACE_MEGAMAN)) {
-		D.guest_due = 0;
-		profile.guest_taught = 1;
+		if (D.guest_due) profile.guest_taught = 1;
+		if (D.recode_due) profile.recode_taught |= (uint8_t)D.recode_due;
+		D.guest_due = D.recode_due = 0;
 		profile_save();
 	}
 }

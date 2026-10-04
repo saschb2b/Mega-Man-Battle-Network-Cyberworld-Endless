@@ -52,6 +52,9 @@ typedef struct {
 	int sat_out;   /* the folder's chips its game has none of */
 	bool dark_used;   /* a DarkChip was used in it */
 	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
+	int recoded;      /* the folder's chips that fought with another code (its game's chip lacked theirs) */
+	int recode_chip, recode_from, recode_to;   /* the first of them: its BN6 id, its code, the code it fought with */
+	int reward_from;  /* the code the reward chip had there, where it came back with another; -1 none */
 } GuestResult;
 /* Once a battle has ended (guest_active false again): its result, once. */
 bool guest_take_result(GuestResult *out);
