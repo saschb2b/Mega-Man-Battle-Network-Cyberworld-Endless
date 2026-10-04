@@ -709,9 +709,12 @@ static void found_draw(int x0, int y0) {
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
 }
 
-/* the top: the marks (not over a run's summary), and the note over them */
+/* the top: the marks and the note over them, neither over a run's summary
+ * (a start whose title first showed a summary drew "BN5 found" over
+ * "MegaMan was deleted", session 68) */
 static void top_draw(int x0, int y0) {
-	if (!S.summary) marks_draw(x0, y0);
+	if (S.summary) return;
+	marks_draw(x0, y0);
 	found_draw(x0, y0);
 }
 
