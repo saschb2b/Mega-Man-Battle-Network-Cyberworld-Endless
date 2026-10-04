@@ -199,10 +199,10 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool o
 	char words[800];
 	if (first)
 		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, like the chips Nebula spread. There's a DarkChip in it: %s!|"
-			"@M %s, and only when I'm worried: down to a quarter of my HP, or hit again and again. You'll see it on my face. A COUNTER calms me down again.|%s"
+			"@M %s when I'm worried: down to a quarter of my HP, or hit again and again. You'll see it on my face. A COUNTER calms me down again.|%s"
 			"@M It's real power... But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.|"
 			"@M And if I fall after using one, the darkness might get me back up, and fight with my body for a while. Not our way.", chip,
-			ours ? "In the old net's battles it comes to me" : "A DarkChip comes to me only in the old net's battles",
+			ours ? "In the old net's battles it comes to me only" : "A DarkChip comes to me only in the old net's battles, and only",
 			ours ? "@M Our net knows this one too: in our battles it's a chip of our folder, and each use burns a BugFrag.|" : "", DARK_PRICE);
 	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s.|@M It comes in the old net's battles when I'm worried: "
 		"a quarter of my HP, or hit again and again.%s Every battle I use one in costs %d max HP.", chip,
