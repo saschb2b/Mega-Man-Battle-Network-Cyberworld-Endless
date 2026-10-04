@@ -92,7 +92,9 @@ clearance opens), which only matter to a player who plays on.
    rung whether MegaMan has been hit), hidden while BN6's clock holds.
 5. **The terms, by rung** (the rivalry's wins, in any run):
    - rung 0: beat his time;
-   - rung 1: beat his time without taking a hit;
+   - rung 1: beat his time without taking a hit (a hit in the fight's
+     first second doesn't count: a virus can ram MegaMan as BATTLE START
+     leaves the screen, before the player can act);
    - rung 2: the netbattle: ProtoMan faces MegaMan himself (below);
    - after it, the rungs again, tighter.
 6. **The verdict.** BN6's results screen shows the DeleteTime; then

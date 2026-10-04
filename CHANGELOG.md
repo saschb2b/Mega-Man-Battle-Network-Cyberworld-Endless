@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **CircusMan's battle data says how fast his tent falls:** half a
+  second after our panel lights, with no way out once down, so no long
+  chip while he crackles on his panel.
+- **ProtoMan's no-hit duel forgives the fight's first second.** A virus
+  could ram MegaMan as BATTLE START left the screen, losing the rule
+  before you could act.
 - **A program's reminder stays said across CONTINUE.** MegaMan said all
   of a program left off the board once, but a CONTINUE forgot that he had
   (and which programs had stood on the board), so its whole reminder came

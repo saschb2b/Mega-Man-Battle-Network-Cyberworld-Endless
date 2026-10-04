@@ -4263,6 +4263,8 @@ static void guest_begin(void) {
 	if (record) guest_battle(record, emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, dark);
 }
 
+#define DUEL_GRACE 60   /* frames of a duel's fight before a hit counts against its no-hit rung */
+
 /* What the hooks saw in the frames since the last update (events.h). */
 static void take_events(void) {
 	HookEvent ev[32];
@@ -4271,7 +4273,10 @@ static void take_events(void) {
 	for (int i = 0; i < n; ++i)
 		switch (ev[i].kind) {
 		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; emu_encounter_started(ev[i].r[0]); break;
-		case EV_MEGAMAN_HIT: D.duel_hit = true; break;
+		/* (not in the fight's first second: a Chumpy rammed a playtester at
+		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
+		 * lost before he could act, session 65) */
+		case EV_MEGAMAN_HIT: if (emu_read32(BN6_BATTLE_TIMER) >= DUEL_GRACE) D.duel_hit = true; break;
 		case EV_MAP_ENTER: if (on_layer) exit_flag(true); break;
 		case EV_CHOICE:
 			/* (still set: one the layer's setup cleared was a story's) */

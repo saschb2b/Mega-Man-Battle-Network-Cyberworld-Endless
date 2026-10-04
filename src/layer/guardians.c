@@ -89,9 +89,13 @@ const char *guardian_tip(int navi) {
 	 * there; his fade came 6 frames before MegaMan was held, so the panel,
 	 * marked over MegaMan by the director, is the tell. A chip used while
 	 * he is away finds no target, and a playtester's HeatDrgn rose beside
-	 * the tent as it deleted him) */
+	 * the tent as it deleted him; another's: the panel lit about half a
+	 * second, the tent fell in 10 frames and hit 5 every 9-10 frames for
+	 * 220-250, 120 in all, mashing no shorter, and one cage fell while his
+	 * MachGun2 still fired, session 65) */
 	case 14: return "CircusMan claps down on a lit column, and his lion leaps through a burning hoop down its row. "
-		"When the panel under us lights up, his tent is about to drop on it: step off at once!|@M He keeps to the back: "
+		"When the panel under us lights up, his tent is about to drop on it: step off at once!|@M It drops in half a second, "
+		"with no way out once it's down: no long chip while he crackles on his panel!|@M He keeps to the back: "
 		"bring chips that reach it, and hold them while he's gone from the field!";
 	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!|@M He stands right in front of us while he cracks his whip: swing then!";
 	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "
