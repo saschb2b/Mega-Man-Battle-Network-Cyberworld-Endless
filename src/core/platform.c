@@ -320,6 +320,9 @@ static void phone_controls(void) {
 #endif
 #ifdef CW_IOS
 	SDL_AddEventWatch(app_moved, NULL);
+	/* (a Battle Network ROM the start's look refused beside BN6's, said
+	 * over the game: ios.m) */
+	ios_rom_note(P.window);
 #endif
 }
 

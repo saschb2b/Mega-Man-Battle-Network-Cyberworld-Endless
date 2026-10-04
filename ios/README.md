@@ -28,10 +28,18 @@ has notarized: it refuses the source with "missing a marketplaceID"
 2. Install **Cyberworld Endless** from the source. A free Apple ID's apps
    last seven days; SideStore and AltStore renew them, and offer each new
    release the source lists.
-3. Start it. Without a ROM it asks for one: **CHOOSE ROM** (or A) opens
-   Files' picker, which copies the file picked into the app. Or put the
-   ROM in Files, **On My iPhone › Cyberworld** (the app's Documents
-   folder), any file name; the app looks again every three seconds.
+3. Start it. Without a ROM it asks for the folder the ROMs are in:
+   **CHOOSE FOLDER** (or A) opens Files' picker for a folder. The app
+   opens only its `.gba` files (and those of the folders directly in
+   it), copies Mega Man Battle Network 6: Cybeast Gregar (USA) and, if
+   it is there, Mega Man Battle Network 5: Team Colonel (USA) in, each checked by
+   its SHA-1, and names every other `.gba` with why it was refused. The
+   folder is kept (a bookmark) and looked in again at each start, so BN5
+   put there later comes in by itself. **CHOOSE FILES** (down, then A)
+   picks the files instead, more than one at once. Or put the ROMs in
+   Files, **On My iPhone › Cyberworld** (the app's Documents folder),
+   any file name; the app looks there, and in the folder chosen, every
+   three seconds.
 
 `cyberworld-endless.ipa` on the releases page is the app alone, for
 another installer (it is signed ad hoc: the installer signs it again).
@@ -39,7 +47,8 @@ another installer (it is signed ad hoc: the installer signs it again).
 ## What it keeps where
 
 The app's Documents folder, which Files shows as **On My iPhone ›
-Cyberworld**, holds the ROM (`rom/`), the saves and `settings.ini`,
+Cyberworld**, holds the ROMs' copies (`rom/bn6g.gba`, `rom/bn5c.gba`),
+the saves and `settings.ini`,
 `keys.ini` and `touch.ini`, as a desktop's data folder does; a player can
 copy the saves off there. Uninstalling the app deletes it.
 
@@ -54,7 +63,8 @@ Both need Xcode and CMake. The first build runs `ios/deps.sh`: SDL2 and
 the GBA core as static arm64 libraries for the SDK (`iphoneos`, or
 `iphonesimulator` for an Apple silicon Mac's Simulator) into
 `.build/ios-deps/`. `make TARGET=ios` builds the game's C and
-`src/core/ios.m` (the Files picker, the haptics, the safe area, and the
+`src/core/ios.m` (the Files pickers and the ROM folder's looks, the
+haptics, the safe area, and the
 `main` that hands SDL's to UIKit); `build.py` makes the bundle from
 `ios/Info.plist` and the icons in `ios/icons/` (`tools/app_icon.py`), signs
 it ad hoc and zips `Payload/` into the IPA.
@@ -67,8 +77,12 @@ xcrun simctl install booted build/ios-iphonesimulator/Payload/CyberworldEndless.
 xcrun simctl launch --console-pty booted io.github.saschb2b.cyberworldendless
 ```
 
-and drag a ROM onto the Simulator's Files app, or into the app's Documents
+and drag the ROMs onto the Simulator's Files app (a folder of BN6's and
+BN5's, one with only a wrong `.gba`, and BN5 added to the folder after the
+first start), or into the app's Documents
 (`xcrun simctl get_app_container booted io.github.saschb2b.cyberworldendless data`).
+The console (`--console-pty`) shows each look: `ROM look in ROMs: 2 .gba,
+kept 3, ...` (bit 1 BN6's, bit 2 BN5's) and the game's `BN5 found: ...`.
 
 CI's `ios` job builds both, checks the IPA (arm64, iOS 14, only iOS's own
 frameworks, the bundle signed) and starts the Simulator's app, which must
