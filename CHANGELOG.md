@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Bystanders keep off the way.** A Navi standing beside a two-wide neck
+  before the walkway down to an arena walled it off, and a playtester
+  never reached the guardian. Bystanders now never stand by the way from
+  a layer's arrival to its exit or arena (146 did over the tests' 300
+  layers, none now); CONTINUE starts a saved layer afresh.
 - **MegaMan explains the old net's codes.** The first time a chip of
   yours fights in BN5's battles with another code (BN5's chip of the
   name never had yours), Lan notices ("Huh? In there our Thunder S was

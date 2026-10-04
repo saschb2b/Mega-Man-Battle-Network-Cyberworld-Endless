@@ -504,7 +504,7 @@ static void test_generation(void) {
 	int boss_layers = 0, arenas = 0, mouths = 0, standing = 0, hidden = 0, approached = 0, dealers = 0, counters = 0, sprites = 0, holes = 0,
 		landmarks = 0, statues = 0, undernet_layers = 0, layers = 0, emblems = 0, corners = 0, navi_corners = 0, in_line = 0, beside_line = 0, near_pairs = 0,
 		talk_pairs = 0, talk_touch = 0, duel_layers = 0, gate_by_duel = 0, heal_far = 0, blue = 0, blue_far = 0, green = 0, purples = 0,
-		branches = 0, empty = 0, empty_wide = 0;
+		branches = 0, empty = 0, empty_wide = 0, navis_by_way = 0;
 	long blue_walk = 0, green_walk = 0;
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 5);   /* (Cross navis: the obstacles a run's Crosses clear) */
@@ -665,6 +665,7 @@ static void test_generation(void) {
 				}
 				beside_line += beside;
 				near_pairs += near;
+				navis_by_way += beside && o->type == OBJ_NPC && i != layer.teller - 1 && i != layer.hinter - 1;
 			}
 			/* (two to talk to within two panels: an A for the heal Prog
 			 * opened the Net Dealer beside him, twice) */
@@ -775,6 +776,9 @@ static void test_generation(void) {
 	 * an arena; a gap on the way where the room is small) */
 	CHECK(beside_line * 4 <= standing, "%d of %d services and navis stand by the way on", beside_line, standing);
 	CHECK(near_pairs * 16 <= standing, "%d of %d services and navis leave a panel's gap on the way", near_pairs, standing);
+	/* (a bystander never: one beside a neck before an arena's walkway walled
+	 * it off, session 65) */
+	CHECK(navis_by_way == 0, "%d bystanders stand by the way on", navis_by_way);
 	CHECK(talk_touch == 0, "%d pairs of navis to talk to stand side by side, or beside a counter's front", talk_touch);
 	/* (the duel's official gate by ProtoMan: a playtester found it alone,
 	 * across the layer from him) */

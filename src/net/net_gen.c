@@ -1922,15 +1922,18 @@ static void place_lane(const LayerKit *kit) {
 
 /* Bystander navis with a word to share, two panels at least from what else
  * stands there (one beside a Mystery Data took MegaMan's A, and each A
- * that closed his words opened them again). */
+ * that closed his words opened them again), and never by the way on: they
+ * may stay away (one beside a two-wide neck before the walkway down to an
+ * arena walled it off, and a playtester never reached the guardian,
+ * session 65). */
 static void place_bystanders(const int *order, int n) {
 	int x, y;
 	int npcs = npcs_for(2 + rng_range(0, 1));
 	for (int k = 0; k < npcs && n; ++k)
-		for (int tries = 0; tries < 4; ++tries) {
+		for (int tries = 0; tries < 12; ++tries) {
 			Room *r = &layer.rooms[order[rng_range(0, n - 1)]];
 			if (!room_spot_in(r, &x, &y, true)) continue;
-			if (!apart(x, y) || hushed[y][x]) continue;
+			if (!apart(x, y) || hushed[y][x] || layer_by_way(x, y)) continue;
 			NetObj *o = add_obj(OBJ_NPC, x, y);
 			if (o) { o->param = rng_range(0, 5); o->npc_line = rng_range(0, 255); }
 			break;
