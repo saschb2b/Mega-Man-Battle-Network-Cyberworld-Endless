@@ -36,8 +36,10 @@
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- (in a process of its own, ended with the session: GameActivity) -->
         <activity
             android:name=".GameActivity"
+            android:process=":game"
             android:exported="false"
             android:alwaysRetainTaskState="true"
             android:launchMode="singleTask"

@@ -21,6 +21,17 @@ public class GameActivity extends SDLActivity {
         runOnUiThread(() -> getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY));
     }
 
+    /* A session ends with its process (the manifest's ":game", apart from
+     * RomActivity's): SDL runs the game's C main again in a process Android
+     * kept, with the last session's statics, its quit among them, and a game
+     * opened again after a quit (or Play after the icon's ROMs shortcut)
+     * closed at once. */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isFinishing()) System.exit(0);
+    }
+
     @Override
     protected String[] getLibraries() {
         return new String[] { "SDL2", "main" };
