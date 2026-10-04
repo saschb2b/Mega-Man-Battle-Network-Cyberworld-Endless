@@ -708,6 +708,15 @@ decisions).
   the chips, not their price; a new run starts with none.
 - **Only in BN5 territory:** BN6's battles have no code for them and never
   offer them.
+- **When he worries** (4 October 2026): BN5 worries MegaMan by hits, 10
+  off his mood each, and opened every battle calm, so it took seven hits
+  in one battle, whatever his HP: a playtester at 10 of 120 HP never saw
+  his DarkChip. A battle now opens as worried as his HP says: worried
+  from the start at a quarter of his HP or less, else as much calmer as
+  he is whole, BN5's hits doing the rest. BN5 deals it into the hand the
+  next time chips are drawn while he worries; a counter hit's Full
+  Synchro calms him first, as in BN5. MegaMan says so at the flame:
+  "down to a quarter of my HP, or hit again and again".
 
 ## What MegaMan knows (29 September 2026)
 

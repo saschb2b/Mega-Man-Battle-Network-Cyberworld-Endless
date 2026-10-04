@@ -280,7 +280,9 @@ has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 words naming the third act before it, `duels=1` opens the official gates
 of level 1; docs/RIVAL.md), and `hp=N` (MegaMan's max HP made N, and his
 HP with it whenever the game moves the max: a later act's guardian, which
-a headless start meets at 100 HP, fought at a playtester's HP), and
+a headless start meets at 100 HP, fought at a playtester's HP; `hp=N/H`
+holds his HP at H through the run's first 600 frames, a battle begun
+hurt), and
 `pieces=MASK` (the set pieces in MASK on every layer whose area has them,
 where they find room: 1 purple data, 2 a Rush gap, 4 teleports, 8 a Link
 Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible

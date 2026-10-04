@@ -52,7 +52,7 @@ void devtools_parse(const char *spec) {
 		else if (!strcmp(t, "veteran")) dev.veteran = true;
 		else if (!strcmp(t, "mapall")) dev.mapall = true;
 		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
-		else if (!strncmp(t, "hp=", 3)) dev.hp = atoi(t + 3);
+		else if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);
 		else if (!strcmp(t, "worried")) guest_dev_worried = true;
@@ -197,8 +197,13 @@ void devtools_update(void) {
 		}
 		battle_hp(0, -1, true);
 	}
-	if (dev.hp > 0 && dev.hp <= 9999 && emu_read16(BN6_NAVI_MAX_HP) != dev.hp) {
-		uint8_t v[4] = { (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8), (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8) };
+	/* (hp=N/H: his HP H through the run's first 600 frames, past the
+	 * heals of its start, then left to the battles) */
+	static int now_frames;
+	bool set_now = dev.hp_now > 0 && dev.hp_now <= dev.hp && now_frames++ < 600 && emu_read16(BN6_NAVI_HP) != dev.hp_now;
+	if (dev.hp > 0 && dev.hp <= 9999 && (emu_read16(BN6_NAVI_MAX_HP) != dev.hp || set_now)) {
+		int now = set_now ? dev.hp_now : dev.hp;
+		uint8_t v[4] = { (uint8_t)now, (uint8_t)(now >> 8), (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8) };
 		emu_write(BN6_NAVI_HP, v, sizeof v);
 	}
 	if (dev.onehit) battle_hp(1, 1, false);

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A DarkChip comes when MegaMan is hurt.** BN5 worries him by hits,
+  and every battle in its areas opened him calm, so it took seven hits in
+  one battle to bring a DarkChip, whatever his HP: a playtester at 10 of
+  120 HP never saw his. A battle in BN5's areas now opens as worried as
+  his HP says: at a quarter of his HP or less his DarkChip comes as soon
+  as his hand is dealt again. MegaMan says so at the flame.
 - **An act's card and L say where battles are BN5's.** In BN5's areas the
   act's card reads "Act 1 - older net battles", and L's first words name
   the area "where battles run the older net's way", so a territory is

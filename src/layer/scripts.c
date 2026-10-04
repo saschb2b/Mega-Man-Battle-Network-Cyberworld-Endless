@@ -176,7 +176,7 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
 	char words[400];
 	if (first)
 		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, like the chips Nebula spread. There's a DarkChip in it: %s!|"
-			"@M A DarkChip comes to me only in the old net's battles, and only when I'm hurt. It's real power...|"
+			"@M A DarkChip comes to me only in the old net's battles, and only when I'm hurt: down to a quarter of my HP, or hit again and again. It's real power...|"
 			"@M But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.", chip, DARK_PRICE);
 	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s. Every battle I use one in costs %d max HP.",
 		chip, DARK_PRICE);
@@ -187,7 +187,7 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, "It's ours, Lan. It'll come when I'm hurt... and take its price.", false);
+	ta_page(t, FACE_MEGAMAN, "It's ours, Lan. It'll come when I'm hurt badly... and take its price.", false);
 	ta_end(t);
 	return i;
 }

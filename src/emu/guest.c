@@ -141,6 +141,13 @@ static bool buster_told;                     /* (debug) its battle's buster was 
 /* a battle's course: asked for, begun */
 enum { PH_IDLE, PH_ASKED, PH_BATTLE };
 static int phase;
+/* MegaMan's mood as a battle opens, from his HP: a battle begun calm, 0x80,
+ * needed seven hits, each 10 off, to worry him (1-0x40), so a playtester at
+ * 10 of 120 HP never saw his DarkChip (session 67). Worried from the start
+ * at a quarter of his HP or less, else as much calmer as he is whole. BN5
+ * sets 0x80 itself as the opening runs, so it is written over then. */
+static int start_mood = 0x80;
+static int mood_of(int hp, int max_hp) { return max_hp <= 0 ? 0x80 : hp * 4 <= max_hp ? 0x30 : 0x40 + 0x40 * hp / max_hp; }
 
 static uint8_t rd8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
 static uint16_t rd16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1); }
@@ -455,8 +462,10 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	wr16(BN5_NAVI_HP, (uint16_t)(hp < 1 ? 1 : hp > max_hp ? max_hp : hp));
 	buster_in(mm->buster);
 	/* (calm at its start, as each of the run's battles begins: BN5's dark
-	 * meter and mood would carry its last DarkChip's darkness on) */
+	 * meter and mood would carry its last DarkChip's darkness on; then, as
+	 * its opening runs, as worried as his HP says, start_mood) */
 	core->rawWrite8(core, BN5_NAVI_MOOD, -1, 0x80);
+	start_mood = mood_of(hp, max_hp);
 	wr16(BN5_NAVI_METER, 500);
 	uint32_t check = rd32(BN5_TOOLKIT + BN5_TOOLKIT_METER_CHECK);
 	if (check >= 0x02000000u && check < 0x02040000u) core->rawWrite32(core, check, -1, 500u ^ rd32(BN5_METER_KEY));
@@ -465,7 +474,8 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	int in = folder ? folder_in(folder) : 0;
 	rows_fit(record);
 	if (emu_debug_on()) {
-		fprintf(stderr, "guest: battle %08X, HP %d/%d, %d of the folder's 30 in, buster Attack %d, Speed %d, Charge %d\n", record, hp, max_hp, in,
+		fprintf(stderr, "guest: battle %08X, HP %d/%d, mood %#x, %d of the folder's 30 in, buster Attack %d, Speed %d, Charge %d\n", record, hp, max_hp,
+			start_mood, in,
 			rd8(BN5_NAVI_ATTACK) + 1, rd8(BN5_NAVI_SPEED) + 1, rd8(BN5_NAVI_CHARGE) + 1);
 		out_tell(folder);
 	}
@@ -517,6 +527,13 @@ static void finish(int outcome) {
 
 static void step(uint32_t keys, bool quiet);
 
+/* (the battle's opening: its mood as worried as his HP says, start_mood,
+ * over the calm BN5 sets as it runs) */
+static void mood_open(int sub) {
+	if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_INTRO && rd8(BN5_BATTLE_MOOD) > start_mood)
+		core->rawWrite8(core, BN5_BATTLE_MOOD, -1, (uint8_t)start_mood);
+}
+
 void guest_frame(uint32_t keys) { step(keys, false); }
 void guest_frame_quiet(uint32_t keys) { step(keys, true); }
 
@@ -541,6 +558,7 @@ static void step(uint32_t keys, bool quiet) {
 	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_FIGHT &&
 		rd8(BN5_DARK_USED + 8u * rd8(BN5_BATTLE_SIDE)))
 		dark_used = true;
+	mood_open(sub);
 	if (guest_dev_worried && phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_MOOD) > 0x40) core->rawWrite8(core, BN5_BATTLE_MOOD, -1, 0x20);
 	/* (back on the map: how it ended, from BN5's own result, and MegaMan's
 	 * HP as the battle left it: BN5 copies it back to his NaviStats only on

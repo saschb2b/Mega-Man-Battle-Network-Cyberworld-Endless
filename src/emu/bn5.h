@@ -56,6 +56,7 @@
 #define BN5_BATTLE_MOOD   0x0203C88Eu /* u8: MegaMan's mood in battle (side 1's 0x60 on): 1-0x40 worried, 0 dark, 0xFF Full Synchro */
 
 #define BN5_BATTLE_STATE  0x02034A90u /* BattleState: +1 the battle's phase (8 the Custom screen, 0xC fighting, 0x10 over) */
+#define BN5_PHASE_INTRO   0x00        /* (the battle's opening, which sets the mood to 0x80, calm, once its first frames are done) */
 #define BN5_PHASE_CUSTOM  0x08
 #define BN5_PHASE_FIGHT   0x0C
 #define BN5_CUSTOM_GAUGE  0x02035700u /* u16, the Custom gauge, full at 0x4000 (its SetCustGauge 0x0801A88E: 0x020356E0 + 0x20, as BN6's) */
