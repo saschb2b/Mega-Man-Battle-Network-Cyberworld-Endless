@@ -33,6 +33,7 @@ the site.
 | The PET's entries in a run: Save, E-Mail (the lab's mails), KeyItem | [docs/PET.md](docs/PET.md) |
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/RIVAL.md](docs/RIVAL.md) |
 | Other games' ROMs (Battle Network 5 first): what they can lend a run, and how | [docs/MULTIROM.md](docs/MULTIROM.md) |
+| What the original games have, do and lack: the sources to look in first, how a claim is verified, what players taught us | [docs/SOURCES.md](docs/SOURCES.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout
@@ -71,6 +72,12 @@ the site.
 
 ## Rules
 
+- A claim about the original games (what BN6 or BN5 has, does or lacks)
+  is looked up in docs/SOURCES.md's sources before it shapes a design,
+  a doc or code, and written as verified (how) or assumed; a negative
+  one names the search that came up empty. Hardcore players know the
+  games better than we do: a player's claim is a lead to verify and
+  credit there.
 - Read data from the ROM through `RomLayout` offsets or the addresses in
   `src/emu/bn6.h`. Do not embed or generate files containing Capcom
   graphics, text, samples or sequences (sprites, tiles, palettes, fonts,
