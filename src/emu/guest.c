@@ -302,6 +302,7 @@ static int frames;
 static int recoded, recode_ex[3];   /* chips that went in with another code, and the first: BN6 id, code, its code there */
 static uint8_t dark_in[GUEST_DARK_KINDS];   /* the run's DarkChips as the battle began */
 static bool dark_used;                       /* ... and one was used in it (latched from BN5_DARK_USED) */
+static bool fell;                            /* ... and MegaMan's HP stood at 0 while it was fought on */
 static bool buster_told;                     /* (debug) its battle's buster was printed */
 
 /* a battle's course: waiting for the guest's boot (the browser's), asked
@@ -810,7 +811,7 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	wr16(BN5_NAVI_METER, 500);
 	uint32_t check = rd32(BN5_TOOLKIT + BN5_TOOLKIT_METER_CHECK);
 	if (check >= 0x02000000u && check < 0x02040000u) core->rawWrite32(core, check, -1, 500u ^ rd32(BN5_METER_KEY));
-	dark_used = false;
+	dark_used = fell = false;
 	const uint16_t *folder = mm->folder;
 	int in = folder ? folder_in(folder) : 0;
 	int ids[16], n = guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, sc, ids, 16);
@@ -915,6 +916,7 @@ static void finish(int outcome) {
 		.recode_chip = recode_ex[0], .recode_from = recode_ex[1], .recode_to = recode_ex[2], .reward_from = -1 };
 	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
 	result.dark_used = dark_used;
+	result.dark_rose = fell && outcome != GUEST_LOST;
 	/* (what its results screen gave, as the run's: a chip by its name, or
 	 * zenny; HP+N it gave there, in the HP above) */
 	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0;
@@ -945,6 +947,13 @@ static void debug_line(int mode, int sub) {
 }
 
 static void step(uint32_t keys, bool quiet);
+
+/* (MegaMan at 0 HP while his battle is fought on: BN5 gets him up again,
+ * at 1 HP, after a DarkChip was used, the darkness fighting with his body
+ * a while: seen in a playtest, session 68; MegaMan says so after it) */
+static void fall_watch(int sub) {
+	if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && dark_used && rd16(BN5_T1_OBJECTS + BN6_T1_HP) == 0) fell = true;
+}
 
 /* (the battle's opening: its mood as worried as his HP says, start_mood,
  * over the calm BN5 sets as it runs) */
@@ -979,6 +988,7 @@ static void step(uint32_t keys, bool quiet) {
 	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_PHASE) == BN5_PHASE_FIGHT &&
 		rd8(BN5_DARK_USED + 8u * rd8(BN5_BATTLE_SIDE)))
 		dark_used = true;
+	fall_watch(sub);
 	mood_open(sub);
 	if (guest_dev_worried && phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_MOOD) > 0x40) core->rawWrite8(core, BN5_BATTLE_MOOD, -1, 0x20);
 	/* (back on the map: how it ended, from BN5's own result, and MegaMan's

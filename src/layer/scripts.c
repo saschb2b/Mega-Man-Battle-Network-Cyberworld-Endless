@@ -173,21 +173,30 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first) {
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
 	 * first time: docs/META.md, issue #65) */
-	char words[400];
+	/* (when it comes, said every time: a returning playtester heard only
+	 * "when I'm hurt badly", session 68; and what BN5 does when MegaMan
+	 * falls after using one, seen there: he rose at 1 HP and the darkness
+	 * fought with his body a while) */
+	char words[640];
 	if (first)
 		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, like the chips Nebula spread. There's a DarkChip in it: %s!|"
-			"@M A DarkChip comes to me only in the old net's battles, and only when I'm hurt: down to a quarter of my HP, or hit again and again. It's real power...|"
-			"@M But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.", chip, DARK_PRICE);
-	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s. Every battle I use one in costs %d max HP.",
-		chip, DARK_PRICE);
+			"@M A DarkChip comes to me only in the old net's battles, and only when I'm worried: down to a quarter of my HP, or hit again and again. "
+			"You'll see it on my face. A COUNTER calms me down again.|"
+			"@M It's real power... But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.|"
+			"@M And if I fall after using one, the darkness might get me back up, and fight with my body for a while. Not our way.", chip, DARK_PRICE);
+	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s.|@M It comes in the old net's battles when I'm worried: "
+		"a quarter of my HP, or hit again and again. Every battle I use one in costs %d max HP.", chip, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
-	ask_in(t, FACE_MEGAMAN, "Take the DarkChip?\n", no, true, true);
+	/* (on Yes: holding one costs nothing till it's used, and a paging A
+	 * that said No twice, sessions 67 and 68, sent a playtester through
+	 * the whole chat again) */
+	ask_in(t, FACE_MEGAMAN, "Take the DarkChip?\n", no, true, false);
 	flag_set(t, flag);
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, "It's ours, Lan. It'll come when I'm hurt badly... and take its price.", false);
+	ta_page(t, FACE_MEGAMAN, "It's ours, Lan. When I'm worried, it'll come... and take its price.", false);
 	ta_end(t);
 	return i;
 }

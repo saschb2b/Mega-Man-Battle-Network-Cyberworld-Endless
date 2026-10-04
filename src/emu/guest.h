@@ -122,6 +122,7 @@ typedef struct {
 	int zenny;     /* ... or zenny */
 	int heal;      /* ... or the HP its results screen restored (HP+50: hp counts it already) */
 	bool dark_used;   /* a DarkChip was used in it */
+	bool dark_rose;   /* ... and MegaMan fell in it and rose again (BN5's own: at 1 HP, the darkness fighting with his body a while) */
 	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
 	int recoded;      /* the folder's chips that fought with another code (its game's chip lacked theirs) */
 	int recode_chip, recode_from, recode_to;   /* the first of them: its BN6 id, its code, the code it fought with */

@@ -8,6 +8,13 @@
   turns every blow but while he swings or leaps, outlasted a playtester's
   whole first act. He now comes at 450 in act 1, and the Net Dealer's word
   on the act's layers names his opening.
+- **The DarkChip's words say when it comes, every time,** not only a
+  profile's first: when MegaMan is worried, down to a quarter of his HP or
+  hit again and again, his face showing it. The question to take it
+  starts on Yes, as holding one costs nothing till it is used. And if he
+  falls after using one, BN5's darkness may get him up and fight with his
+  body a while: MegaMan says it might at the flame, and says what it was
+  after a battle where it did.
 - **The browser plays its sound sooner, played by keyboard.** Its menus'
   sounds came late: the page kept the handhelds' longer sound buffer (1024
   samples, which the browser's script processor plays a buffer behind). A

@@ -701,13 +701,24 @@ decisions).
   place on the middle layer of each act whose battles are BN5's, holding
   a DarkChip the run lacks (from the run's seed and the act). MegaMan
   names the price before it is taken, all of it the first time a profile
-  meets one, and asks, starting on No; Yes gives the chip, and the flame
-  goes. A run holds one of each, at most three going into a battle, as
+  meets one, and when it comes every time (a returning playtester heard
+  only "when I'm hurt badly", session 68), and asks, starting on Yes:
+  holding one costs nothing till it is used, and a paging A that said No
+  twice (sessions 67 and 68) sent a playtester through the whole chat
+  again. Yes gives the chip, and the flame goes. A run holds one of each, at most three going into a battle, as
   BN5's folder takes them.
 - **Variety, not power, across runs:** nothing of them carries over, not
   the chips, not their price; a new run starts with none.
-- **Only in BN5 territory:** BN6's battles have no code for them and never
-  offer them.
+- **Only in BN5 territory, for now:** BN6's battles never offer them. That
+  BN6 "has no code for them" was assumed, and wrong: a player showed that
+  BN6 keeps five DarkChips from the Japan-only Beast Link Gate, priced in
+  BugFrags (docs/SOURCES.md; issue #70 brings them to BN6's battles and
+  the 3DS).
+- **When he falls after using one** (seen in session 68): BN5 gets
+  MegaMan up at 1 HP, and the darkness fights with his body a while, out
+  of the player's hands. MegaMan says it might at the flame, the first
+  time; after a battle where it happened, he says what it was, before the
+  price.
 - **When he worries** (4 October 2026): BN5 worries MegaMan by hits, 10
   off his mood each, and opened every battle calm, so it took seven hits
   in one battle, whatever his HP: a playtester at 10 of 120 HP never saw

@@ -160,7 +160,7 @@ static struct {
 	int recode_chip, recode_from, recode_to;   /* the chip, and its codes out here and in there */
 	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
 	bool dark_given;       /* ... and the run holds it */
-	char dark_words[200];  /* MegaMan's words on a DarkChip's price, due ("" none) */
+	char dark_words[360];  /* MegaMan's words on a DarkChip's price (and a fall it rose from), due ("" none) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */
@@ -4246,6 +4246,18 @@ static void dark_price(void) {
 	dark_price_told = true;
 }
 
+/* MegaMan fell in an older net's battle after a DarkChip, and BN5 got him
+ * up and fought with his body a while (session 68: twenty seconds out of a
+ * playtester's hands, and no word of it): said before the price. */
+static void dark_rose_said(void) {
+	char words[sizeof D.dark_words + 128];
+	int n = snprintf(words, sizeof words, "@M Lan... I fell back there. Something dark got me up again and fought with my body. That wasn't us.%s%s",
+		D.dark_words[0] ? "|" : "", D.dark_words);
+	size_t len = n < 0 ? 0 : (size_t)n < sizeof D.dark_words ? (size_t)n : sizeof D.dark_words - 1;
+	memcpy(D.dark_words, words, len);
+	D.dark_words[len] = 0;
+}
+
 /* The older net reads our data as it knew it (the world's own reason for
  * the guest's translation, docs/MULTIROM.md): a chip whose code its chip
  * of that name lacked fought with one it had, and a chip won there came
@@ -4331,6 +4343,7 @@ void director_guest_done(const GuestResult *r) {
 	guest_recode_note(r);
 	dark_set_counts(r->dark);
 	if (r->dark_used) dark_price();
+	if (r->dark_rose) dark_rose_said();
 	/* (what its results screen gave: BN6's chip of the same name to the
 	 * Pack, or zenny) */
 	uint32_t out[2];
