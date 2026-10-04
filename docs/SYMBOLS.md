@@ -144,7 +144,7 @@ Made from bn6f at commit `d57c196`.
 | Graphics | 83 of 83 (100.0%) | 74 of 83 (89.2%) |
 | Chips and folders | 18 of 18 (100.0%) | 17 of 18 (94.4%) |
 
-- BN6 Gregar: 39 times an address of ours names a bn6f function or label the matcher located: 30 at the same place, 6 inside the function or structure, 2 a field of the structure it is, 1 elsewhere.
+- BN6 Gregar: 39 times an address of ours names a bn6f function or label the matcher located: 30 at the same place, 7 inside the function or structure, 2 a field of the structure it is, 0 elsewhere.
 - BN6 Gregar: of the 895 RAM labels the located functions' literals hold, 895 read bn6f's (Falzar's) address.
 - BN6 Gregar: 13,162 located functions laid out as in Falzar, 0 lying over another; 0 that a located reference names elsewhere.
 - BN5 Team Colonel: 8 times an address of ours names a bn6f function or label the matcher located: 3 at the same place, 5 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
