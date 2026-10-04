@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **A program's reminder stays said across CONTINUE.** MegaMan said all
+  of a program left off the board once, but a CONTINUE forgot that he had
+  (and which programs had stood on the board), so its whole reminder came
+  back each session. Both are now kept with the run's save.
 - **The Undernet's copy and the Undernet itself are told apart.** The
   ScrtData's words put the golden gate "in the Undernet", the split's
   sealed dark way led "into the Undernet" and opened after the Secret

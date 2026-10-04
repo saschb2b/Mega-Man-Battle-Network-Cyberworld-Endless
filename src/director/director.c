@@ -485,7 +485,7 @@ static const char *no_room_words(const char *name, int v) {
  * after that, L's word is a line, and only where it fits as the board
  * stands (another heard the same five boxes on HP+100, which needed a
  * Spin, five times in two layers, after the PET, in L's words and after
- * each battle). A new run or a CONTINUE forgets both. */
+ * each battle). A new run forgets both; a CONTINUE takes them back. */
 static uint8_t placed_seen[47 * 4 / 8 + 1], off_explained[47 * 4 / 8 + 1];
 
 static bool bit_of(const uint8_t *set, int v) { return set[v >> 3] >> (v & 7) & 1; }
@@ -502,6 +502,27 @@ static void placed_note(void) {
 static void off_board_forget(void) {
 	memset(placed_seen, 0, sizeof placed_seen);
 	memset(off_explained, 0, sizeof off_explained);
+}
+
+/* ... kept beside the checkpoint, for the run whose seed it names: a
+ * CONTINUE had forgotten both, and a playtester heard a program's whole
+ * reminder again after each one (session 65) */
+#define BOARD_NOTE_MAGIC 0x42524431u   /* "BRD1" */
+typedef struct { uint32_t seed; uint8_t placed[sizeof placed_seen], explained[sizeof off_explained]; } BoardNote;
+
+static void off_board_save(void) {
+	BoardNote b = { run.seed, { 0 }, { 0 } };
+	memcpy(b.placed, placed_seen, sizeof b.placed);
+	memcpy(b.explained, off_explained, sizeof b.explained);
+	save_write_blob("run.board", BOARD_NOTE_MAGIC, &b, sizeof b);
+}
+
+static void off_board_load(void) {
+	BoardNote b;
+	off_board_forget();
+	if (!save_read_blob("run.board", BOARD_NOTE_MAGIC, &b, sizeof b) || b.seed != run.seed) return;
+	memcpy(placed_seen, b.placed, sizeof placed_seen);
+	memcpy(off_explained, b.explained, sizeof off_explained);
 }
 
 static const char *program_off_board(int *variant) {
@@ -2455,6 +2476,7 @@ static void save_checkpoint(void) {
 	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
 	act_note_save();
 	dark_save();
+	off_board_save();
 }
 
 bool director_can_suspend(void) {
@@ -3590,7 +3612,7 @@ bool director_resume(void) {
 	drop_events();
 	no_room_told = -1;
 	dark_price_told = false;
-	off_board_forget();
+	off_board_load();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
 	/* (the folder the layer was made with: none for a run saved before it
