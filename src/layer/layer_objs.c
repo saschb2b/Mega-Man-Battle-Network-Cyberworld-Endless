@@ -56,7 +56,7 @@ int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
 int layer_objs_official_level;
 bool layer_objs_duel_later;
 
-int layer_objs_bystander = LAYER_BYSTANDER;   /* (EvilNavi) */
+int layer_objs_bystander = LAYER_BYSTANDER, layer_objs_bystander2 = LAYER_BYSTANDER;   /* (EvilNavi) */
 unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
@@ -583,10 +583,11 @@ static int last_bystander(void) {
 	return last;
 }
 
-static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said);
+static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said, int who);
 
-/* A bystander's talker (Normal Navis and pink navis), or the flame of
- * darkness in the last one's place (docs/META.md) */
+/* A bystander's talker (Normal Navis and pink navis, or the two Navis
+ * another game's area lends, taking turns), or the flame of darkness in
+ * the last one's place (docs/META.md) */
 static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int *said) {
 	static int base;
 	if (layer_objs_dark_flame >= 0 && i == last_bystander()) {
@@ -601,21 +602,23 @@ static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int 
 	 * starts it: a bystander's random pick had a playtester hear the same
 	 * line on an act's first and third layers) */
 	if (!*said) base = (int)(run.seed % 97u) + (run.depth - 1) * 4;
-	tk->sprite = layer_objs_bystander;
-	tk->script = bystander_talk(text, out, i, *said ? -1 : base + *said, *said);
+	/* (the first of them from the layer's seed) */
+	tk->sprite = ((run.layer_seed * 2654435761u >> 28) + (unsigned)*said) & 1 ? layer_objs_bystander2 : layer_objs_bystander;
+	if (emu_debug_on()) fprintf(stderr, "bystander %d: list 6 %d at %d %d\n", *said, tk->sprite, tk->x, tk->y);
+	tk->script = bystander_talk(text, out, i, *said ? -1 : base + *said, *said, tk->sprite);
 	if (tk->script < 0) tk->script = ta_say(text, tk->sprite, npc_line(run.depth, base + *said));
 	++*said;
 }
 
-static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said) {
-	int rumor = first >= 0 ? rumor_talk(text, out, layer_objs_bystander) : -1;
+static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said, int who) {
+	int rumor = first >= 0 ? rumor_talk(text, out, who) : -1;
 	if (rumor >= 0) return rumor;
-	if (i == layer.teller - 1) return ta_pcode_teller(text, layer_objs_bystander, blockers_pcode(), LAYER_PCODE_FLAG);
+	if (i == layer.teller - 1) return ta_pcode_teller(text, who, blockers_pcode(), LAYER_PCODE_FLAG);
 	if (i == layer.hinter - 1)
-		return ta_say(text, layer_objs_bystander, "See that little pad out in the void, all by itself?|I saw a Navi walk out to it. Right over nothing!");
+		return ta_say(text, who, "See that little pad out in the void, all by itself?|I saw a Navi walk out to it. Right over nothing!");
 	const char *whisper = said == 1 ? rumors_line() : NULL;
 	if (whisper && emu_debug_on()) fprintf(stderr, "rumor: %s\n", whisper);
-	return whisper ? ta_say(text, layer_objs_bystander, whisper) : -1;
+	return whisper ? ta_say(text, who, whisper) : -1;
 }
 
 bool layer_objs_install(int group, int number, LayerObjs *out) {

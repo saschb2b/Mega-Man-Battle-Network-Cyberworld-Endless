@@ -1652,6 +1652,7 @@ static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
 	if (!a) a = net_area_def(0);
 	layer_objs_bystander = a->xrom > 0 && a->xnavi ? xnavi_slot(a->xrom - 1, a->xnavi, LAYER_BYSTANDER) : LAYER_BYSTANDER;
+	layer_objs_bystander2 = a->xrom > 0 && a->xnavi2 ? xnavi_slot(a->xrom - 1, a->xnavi2, layer_objs_bystander) : layer_objs_bystander;
 	layer_objs_xlooks = a->xrom > 0 ? a->xlooks : 0;
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
 	xbackdrop_map(tiles);

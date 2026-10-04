@@ -69,6 +69,10 @@
 - **An early L or R is kept in BN5's battles,** as in BN6's: pressed up to
   two and a half seconds before the Custom gauge fills, it opens the
   Custom screen as it fills.
+- **BN5's orange Navi among the bystanders of ACDC Area and End Area.**
+  Where Team Colonel dresses those areas, its orange Navi takes turns
+  with its purple HeelNavi as the Navis standing about a layer, as both
+  do in BN5's own net, each speaking with its own face.
 - **Dark holes in Nebula Area.** About half of Nebula Area's layers show
   one of BN5's dark holes, the purple vortex its Nebula Area stands past
   a platform's edge, past the back of the layer's biggest room.

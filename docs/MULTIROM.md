@@ -198,8 +198,13 @@ engine (`src/emu/guest.c`, epic #57):
 - [x] Its bystanders on its areas' layers: its purple HeelNavi, sprite
   and face, copied into BN6's free space and listed at a number Gregar
   leaves empty in both (`src/layer/xnavi.c`, docs/ROM_DATA.md); it stands,
-  turns and speaks as BN6's own bystanders do. Its Net Dealers and other
-  Navis could follow at the free numbers left.
+  turns and speaks as BN6's own bystanders do. On ACDC Area's and End
+  Area's layers its orange Navi takes turns with it (`xnavi2`), as both
+  stand in those areas in BN5 (Nebula Area's are HeelNavis alone). Its
+  Net Dealers are its green NormalNavi, the art of BN6's own Net Dealer
+  already (and in Nebula Area a HeelNavi, left out so the dealer stands
+  apart from the bystanders); its Mr. Progs are BN6's. Three free numbers
+  are left.
 - [x] Its map objects in the place of BN6's on its areas' layers
   (`NetAreaDef.xlooks`, `src/layer/xnavi.c`, docs/ROM_DATA.md): its
   Security Cube, the green cube with X eyes that bars the way to a

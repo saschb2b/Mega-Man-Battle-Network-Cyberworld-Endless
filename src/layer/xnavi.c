@@ -226,7 +226,9 @@ int xnavi_slot(int xrom, int navi, int fallback) {
 		for (int k = 0; k < XAREAS_MAX; ++k) {
 			const NetAreaDef *x = net_area_def(NET_AREAS + k);
 			int xi = x ? x->xrom - 1 : -1;
-			if (xi >= 0 && xi < XROM_COUNT && x->xnavi && XR[xi].data && XR[xi].layout->sprite_lists && slot_of(xi, x->xnavi) < 0) copy_in(xi, x->xnavi);
+			if (xi < 0 || xi >= XROM_COUNT || !XR[xi].data || !XR[xi].layout->sprite_lists) continue;
+			if (x->xnavi && slot_of(xi, x->xnavi) < 0) copy_in(xi, x->xnavi);
+			if (x->xnavi2 && slot_of(xi, x->xnavi2) < 0) copy_in(xi, x->xnavi2);
 		}
 	}
 	int slot = slot_of(xrom, navi);

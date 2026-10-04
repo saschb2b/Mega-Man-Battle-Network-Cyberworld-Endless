@@ -87,9 +87,11 @@ extern bool layer_objs_dealer_named;
  * for a later act (ProtoMan then names it, and asks nothing). */
 extern int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
 /* The bystanders' Navi, its list-6 sprite and mugshot: BN6's HeelNavi,
- * or another game's on its area's layers (set before layer_objs_install). */
+ * or another game's on its area's layers, and the one they take turns
+ * with (the same, or another the area lends; set before
+ * layer_objs_install). */
 #define LAYER_BYSTANDER 67
-extern int layer_objs_bystander;
+extern int layer_objs_bystander, layer_objs_bystander2;
 /* The map objects another game's area lends its layers (NetAreaDef.xlooks,
  * XLOOK_*: its look for BN6's set pieces and props), 0 on BN6's own (set
  * before layer_objs_install). */

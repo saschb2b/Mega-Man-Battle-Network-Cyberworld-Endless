@@ -17,8 +17,9 @@ uint32_t xnavi_sprite_len(const uint8_t *hdr, uint32_t n);
 /* Navi `navi` (its number in list 6 of extra ROM `xrom`) in BN6: the
  * list-6 number that shows it, its mugshot the same, or `fallback` where
  * it cannot be. The first call copies in every Navi the other games'
- * areas bring (NetAreaDef.xnavi), in their order, so each has the same
- * place in every session; again where the core's ROM copy was made anew. */
+ * areas bring (NetAreaDef.xnavi and xnavi2), in their order, so each has
+ * the same place in every session; again where the core's ROM copy was
+ * made anew. */
 int xnavi_slot(int xrom, int navi, int fallback);
 
 /* Another game's map objects in BN6 (docs/MULTIROM.md): sprites of its list

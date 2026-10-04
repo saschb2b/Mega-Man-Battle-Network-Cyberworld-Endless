@@ -54,6 +54,7 @@ typedef struct {
 	const char *name, *short_name, *motto;   /* what a run calls it: in full, in nine letters, on its act's card */
 	uint8_t xsong;           /* its theme in its own game's song table (0: `song`, BN6's) */
 	uint8_t xnavi;           /* its bystanders' Navi, a list-6 sprite and mugshot of its own game (0: BN6's) */
+	uint8_t xnavi2;          /* ... and another they take turns with (0: none) */
 	uint8_t xlooks;          /* its own map objects in BN6's place, XLOOK_* */
 	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
 	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
