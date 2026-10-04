@@ -186,6 +186,18 @@ int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothe
 	return best;
 }
 
+/* An older net's guardian's band: three quarters of BN6's guardians'. He
+ * is fought in his own game's engine, where the run's Cross never comes
+ * and the buster is the NaviCust's alone (10 a charged shot in act 1):
+ * KnightMan at BN6's 600 outlasted a playtester's whole act-1 kit by half,
+ * where act 1's BN6 guardian, fought with HeatCross, fell in 28 seconds
+ * (sessions 67 and 68). */
+void pacing_xguardian_band(int act, int *lo, int *hi) {
+	pacing_guardian_band(act, lo, hi);
+	*lo = *lo * 3 / 4;
+	*hi = *hi * 3 / 4;
+}
+
 int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early) {
 	if (loop > 0 || act >= 6) return 3;
 	/* (BN5's versions are finer than BN6's V1, EX and SP: its six V1s lie at
@@ -193,7 +205,7 @@ int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early) 
 	 * HP reaches the band's floor, which the cap then holds under its top:
 	 * else the strongest) */
 	int lo, hi, first = act >= 3 || (ex_early && act >= 1) ? 1 : 0, best = -1;
-	pacing_guardian_band(act, &lo, &hi);
+	pacing_xguardian_band(act, &lo, &hi);
 	for (int v = first; v <= 2; ++v) {
 		if (hp[v] < 0) continue;
 		best = v;
@@ -205,7 +217,7 @@ int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early) 
 int pacing_xguardian_hp(int hp, int act, int loop) {
 	if (loop > 0 || act >= 6) return hp;
 	int lo, hi;
-	pacing_guardian_band(act, &lo, &hi);
+	pacing_xguardian_band(act, &lo, &hi);
 	return hp > hi ? hi : hp;
 }
 

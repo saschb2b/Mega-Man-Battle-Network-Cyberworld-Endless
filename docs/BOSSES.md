@@ -145,22 +145,29 @@ there, as its layers come in BN6's own tiles.
 **His band**. BN5's story holds a record for each of them at
 V1, V2 and V3, its net one at SP (docs/ROM_DATA.md, BN5's Navis). He is
 taken by choice, as BN5's random battles are (their viruses taken up their
-versions, docs/PROGRESSION.md): the lowest of V1 to V3 whose HP reaches the
-act's band, V2 at least from act 4 (as BN6's guardians fight EX there) and
-from act 2 on threat 4; SP on later cycles. His HP above the band's top is
+versions, docs/PROGRESSION.md): the lowest of V1 to V3 whose HP reaches his
+band, V2 at least from act 4 (as BN6's guardians fight EX there) and from
+act 2 on threat 4; SP on later cycles. His HP above the band's top is
 capped there as he spawns, as the netbattle caps ProtoMan's (docs/
 RIVAL.md), never raised: the version brings the attacks, the cap holds the
-fight's length. So every first-cycle guardian lies in his band
-(`build.py pacing`):
+fight's length. His band is three quarters of BN6's guardians'
+(`pacing_xguardian_band`): he is fought in his own engine, where the run's
+Cross never comes and the buster is the NaviCust's alone, 10 a charged shot
+in act 1. At BN6's band KnightMan, 600 HP behind armor that turns every
+blow but while he swings or leaps, outlasted a playtester's whole act-1 kit
+by half (session 68), where the act's BN6 guardian, fought with HeatCross,
+had fallen in 28 seconds (session 67). The Net Dealer's word on the act's
+layers names KnightMan's opening. So every first-cycle guardian lies in his
+band (`build.py pacing`):
 
 | Guardian | Act (band) | Version, BN5's HP | Fought at |
 | --- | --- | --- | --- |
-| KnightMan | 1 (400-600), 2 (600-700) | V1, 600 | 600 |
-| NumberMan | 1, 2 | V1, 600 | 600 |
-| ToadMan | 1 / 2 | V1, 700 | 600 / 700 |
-| ShadowMan | 2 / 3 (800-1000) | V2, 700 / V3, 1200 | 700 / 1000 |
-| TomahawkMan | 3 / 4 (1000-1300) | V2, 900 / V3, 1400 | 900 / 1300 |
-| Colonel | 5 (1100-1500) | V2, 1200 | 1200 |
+| KnightMan | 1 (300-450), 2 (450-525) | V1, 600 | 450 / 525 |
+| NumberMan | 1, 2 | V1, 600 | 450 / 525 |
+| ToadMan | 1 / 2 | V1, 700 | 450 / 525 |
+| ShadowMan | 2 / 3 (600-750) | V1, 500 / V2, 700 | 500 / 700 |
+| TomahawkMan | 3 / 4 (750-975) | V1, 700 / V2, 900 | 700 / 900 |
+| Colonel | 5 (825-1125) | V2, 1200 | 1125 |
 
 BN5's HUD names his version as BN5 does: Colonel's V2 is its DarkCol.
 

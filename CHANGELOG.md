@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **BN5's guardians are fought at three quarters of BN6's guardians' HP.**
+  They fight in BN5's engine, where the run's Cross never comes and the
+  buster is the NaviCust's alone: KnightMan at 600 HP, behind armor that
+  turns every blow but while he swings or leaps, outlasted a playtester's
+  whole first act. He now comes at 450 in act 1, and the Net Dealer's word
+  on the act's layers names his opening.
 - **The browser plays its sound sooner, played by keyboard.** Its menus'
   sounds came late: the page kept the handhelds' longer sound buffer (1024
   samples, which the browser's script processor plays a buffer behind). A

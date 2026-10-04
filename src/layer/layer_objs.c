@@ -459,8 +459,13 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 			"first on the list. %s", guardian(navi)->name, elem_name(counter), brought);
 		return;
 	}
-	int k = snprintf(word, n, "|Word is, %s %s. Hit hard: my pick for the job's first on the list. %s", guardian(navi)->name,
-		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" : "has no weak element", brought);
+	/* (KnightMan's armor turns every blow but while he swings or leaps: a
+	 * playtester learned it over three Custom screens, session 68) */
+	bool knight = guardian_older(navi) && guardian_older_ai(navi) == BN5_NAVI_KNIGHTMAN;
+	int k = snprintf(word, n, "|Word is, %s %s. Hit hard%s: my pick for the job's first on the list. %s", guardian(navi)->name,
+		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" :
+		knight ? "has no weak element, and his armor turns every blow but while he swings or leaps" : "has no weak element",
+		knight ? " then" : "", brought);
 	if (listed && k > 0 && (size_t)k < n)
 		snprintf(word + k, n - (size_t)k, "|The viruses around here can't stand %s chips, though. I've got one of those too!",
 			elem_name(counter));

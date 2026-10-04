@@ -288,7 +288,7 @@ static int older_guardians(FILE *out) {
 			for (int act = 0; act < 6; ++act) {
 				if (!(acts >> act & 1)) continue;
 				int lo, hi, v = pacing_xguardian_version(hp, act, 0, false), v4 = pacing_xguardian_version(hp, act, 0, true);
-				pacing_guardian_band(act, &lo, &hi);
+				pacing_xguardian_band(act, &lo, &hi);
 				int fought = pacing_xguardian_hp(hp[v], act, 0), fought4 = pacing_xguardian_hp(hp[v4], act, 0);
 				bool outside = fought < lo || fought > hi || fought4 < lo || fought4 > hi;
 				fprintf(out, "  %-12s %-11s act %d (%4d-%4d): V%d %4d, fought at %4d; threat 4 V%d %4d, at %4d%s\n", x->name, guardian(navi)->name,

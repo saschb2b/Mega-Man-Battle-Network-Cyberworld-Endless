@@ -61,6 +61,9 @@ int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothe
  * else the strongest; at least V2 from act 4, as BN6's guardians fight EX
  * there, and from act 2 where `ex_early` (threat 4); SP on later cycles
  * and in the Nest. */
+/* An older net's guardian's band for `act`: three quarters of BN6's
+ * guardians' (pacing_guardian_band), as no Cross comes into his engine */
+void pacing_xguardian_band(int act, int *lo, int *hi);
 int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early);
 /* ... and the HP he is fought at: his own, capped at the act's band's top
  * (as he spawns), never raised; his own on later cycles and in the Nest */
