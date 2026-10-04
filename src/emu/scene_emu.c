@@ -145,6 +145,24 @@ static bool guest_white(void) {
 	return true;
 }
 
+/* (the guest's boot, which a battle waits for where it still runs, the
+ * browser's: a slice each frame, in BN6's frame's place; the page's frame
+ * keeps the rest of its 1/60 s) */
+#define GUEST_BOOT_MS 12
+
+/* ... and on the white the switch fades to meanwhile, what it is and how
+ * far (once a browser: its state is kept) */
+static void guest_boot_note(void) {
+	int pc = guest_boot_progress();
+	if (pc < 0) return;
+	int x = P.core_x + CORE_W / 2, y = P.core_y + CORE_H / 2 - 20, w = 120;
+	SDL_Color ink = rgba(16, 54, 74, 255);
+	text_drawf(x, y, ink, TEXT_CENTER, "Waking the older net... %d%%", pc);
+	fill_rect(x - w / 2, y + 16, w, 6, rgba(16, 54, 74, 60));
+	fill_rect(x - w / 2, y + 16, w * pc / 100, 6, rgba(33, 115, 140, 255));
+	text_draw(x, y + 28, "BN5 starts once in this browser", rgba(70, 100, 120, 255), TEXT_CENTER);
+}
+
 /* A battle on the guest core: its frames in BN6's place, BN6's core
  * waiting, and its result into the run as it ends */
 static bool guest_update(void) {
@@ -158,10 +176,13 @@ static bool guest_update(void) {
 	/* (the dev menu over it too: it holds still while the menu is open) */
 	uint32_t keys = devtools_keys(guest_keys());
 	if (devtools_open()) return true;
+	/* (its boot first, where the battle waits for it: a slice a frame,
+	 * behind a note, guest_boot_note) */
+	if (guest_boot_progress() >= 0) guest_boot_slice(GUEST_BOOT_MS);
 	/* (while its battle opens on a plain white screen, or before it shows:
 	 * four of its frames a frame, unheard; BN5's opening held the white two
 	 * and a half seconds, which a playtester read as a hang, session 65) */
-	if (!shown || guest_white())
+	else if (!shown || guest_white())
 		for (int i = 0; i < 4 * dev.speed && guest_active() && (!guest_on_screen() || guest_white()); ++i) guest_frame_quiet(keys);
 	else
 		for (int i = 0; i < dev.speed && guest_active(); ++i) {
@@ -252,6 +273,7 @@ static void draw(void) {
 	director_draw_map();
 	if (guest_wait > 0) {
 		fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_wait >= GUEST_FLASH ? 255 : guest_wait * 255 / GUEST_FLASH)));
+		if (guest_wait >= GUEST_FLASH) guest_boot_note();
 		return;
 	}
 	director_draw_counts();

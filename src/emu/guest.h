@@ -1,7 +1,7 @@
 /* Another game's battles on a second core beside BN6's (docs/MULTIROM.md,
  * Guest battles): BN5's, on the layers BN5's areas dress, in BN5's own
- * engine. Desktop, Android, iOS and PortMaster builds; the 3DS keeps one
- * ROM, and the browser reads no other. */
+ * engine. Desktop, Android, iOS, PortMaster and browser builds; the 3DS
+ * keeps one ROM. */
 #ifndef CW_GUEST_H
 #define CW_GUEST_H
 
@@ -16,8 +16,23 @@ enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
 /* Makes the guest core for extra ROM `xrom` (rom.h, XR) where the build
  * and the ROMs allow it, and boots it to a playable state (its title, NEW
  * GAME and intro, pressed through once and kept as a state in the data
- * directory); true once it is ready. */
+ * directory); true once it is ready. In the browser, whose page runs one
+ * frame at a time, true as its boot begins: a slice of it runs each frame
+ * (guest_boot_slice), and a battle asked meanwhile waits for it. */
 bool guest_start(int xrom);
+/* How far its boot is, 0-99 (percent), while one runs; -1 none */
+int guest_boot_progress(void);
+/* Its boot run on for about `ms` milliseconds, where one runs (the
+ * browser's): at its end the guest is ready, and a battle that waited for
+ * it begins. */
+void guest_boot_slice(int ms);
+#ifdef __EMSCRIPTEN__
+/* The browser's frames where BN6's core does not run (the title and its
+ * setup): BN5's first boot begun where BN5's ROM is there and its state is
+ * not, and run on for about `ms` milliseconds, so a battle seldom waits
+ * for it. */
+void guest_warm(int ms);
+#endif
 
 /* A battle's scaling to the act (docs/PROGRESSION.md, BN5's battles): its
  * record's viruses `up` versions up, each to version `vcap` at most (0 V1,
@@ -39,13 +54,14 @@ typedef struct {
 /* Begins a battle from BattleSettings record `record`, an address in the
  * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan as
  * `mm` has him: from the next guest frame the guest runs and BN6's core
- * waits. */
+ * waits (first for the guest's boot, where it still runs: the browser's,
+ * guest_boot_progress). */
 bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm);
 
 /* The chips of `folder` (30 BN6 entries) that sit out of its battles, its
  * game having none of their names: each once, in the folder's order, the
  * first `max` into `out` (BN6 ids); how many there are, 0 before the guest
- * is ready. */
+ * is made (guest_start; its boot may still run). */
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max);
 
 /* A guest battle runs: the scene shows and steers the guest. */

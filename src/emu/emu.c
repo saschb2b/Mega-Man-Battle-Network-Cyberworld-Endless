@@ -45,11 +45,13 @@ static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va
 }
 static struct mLogger logger = { .log = quiet };
 
+void emu_log_quiet(void) { mLogSetDefaultLogger(&logger); }
+
 static void start_worker(void);
 
 bool emu_init(const uint8_t *rom, size_t len) {
 	if (core) return true;
-	mLogSetDefaultLogger(&logger);
+	emu_log_quiet();
 	/* the copy is padded to EMU_ROM_SIZE: the space past the game is free for
 	 * the engine's hooks and generated data (EMU_FREE) */
 	if (len > EMU_ROM_SIZE) return false;

@@ -173,7 +173,10 @@ to play a change; the headless `shot` stays the way to capture one.
 The browser build (`__EMSCRIPTEN__`) has no threads: the page drives one
 game frame per 1/60 s (`emscripten_set_main_loop`), and writes reach
 IndexedDB through `platform_persist()`, which saves and states call. Keep
-the frame loop free of blocking waits. `build.py serve` also serves the
+the frame loop free of blocking waits: BN5's guest core runs its frames in
+BN6's frames' place, and its first boot a slice a frame (`guest_warm` at
+the title, `guest_boot_slice` behind a note when a battle waits for it;
+docs/MULTIROM.md, Guest battles). `build.py serve` also serves the
 developer's ROMs, told by their SHA-1, for tests in a local browser:
 BN6's at `/.dev/rom.gba`, BN5's at `/.dev/bn5.gba`; the page itself only
 takes the ROMs the player chooses.

@@ -31,6 +31,9 @@
 #include "meta.h"
 #include "touch.h"
 #include "emu.h"
+#ifdef __EMSCRIPTEN__
+#include "guest.h"
+#endif
 #ifdef CW_IOS
 #include "ios.h"
 #endif
@@ -839,6 +842,11 @@ static bool game_frame(void) {
 	taps_tick();
 	/* (the touch controls' menu pauses the game under it) */
 	if (current && current->update && !touch_paused()) current->update();
+#ifdef __EMSCRIPTEN__
+	/* (BN5's first boot, the browser's, in frames BN6's core does not run:
+	 * the title's and its setup's, a slice each; guest.h) */
+	if (current != &scene_emu) guest_warm(8);
+#endif
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();

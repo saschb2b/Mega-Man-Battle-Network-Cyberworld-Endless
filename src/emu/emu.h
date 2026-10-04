@@ -23,6 +23,10 @@ enum {
 /* Starts the core on a private copy of the ROM (writes to ROM space patch
  * only that copy) and resets it to power-on. */
 bool emu_init(const uint8_t *rom, size_t len);
+/* mGBA's log for every core, quiet (emu_init sets it; the guest's core,
+ * made first in the browser, guest.c, too): its debug lines cost the
+ * page a console line each */
+void emu_log_quiet(void);
 bool emu_ready(void);
 void emu_reset(void);
 

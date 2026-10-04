@@ -235,10 +235,11 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 			R.version = (RomVersion)i;
 			R.layout = &layouts[i];
 			snprintf(R.path, sizeof R.path, "%s", path);
-#if !defined(__3DS__) && !defined(__EMSCRIPTEN__)
+#if !defined(__3DS__)
 			/* (other games' ROMs beside it lend a run their areas,
-			 * docs/MULTIROM.md: a 3DS has no memory for another, and a
-			 * browser holds only the file chosen) */
+			 * docs/MULTIROM.md: a 3DS has no memory for another; a
+			 * browser holds the files chosen on its page, BN5's beside
+			 * BN6's in its storage) */
 			xrom_find_beside();
 #endif
 			return true;
