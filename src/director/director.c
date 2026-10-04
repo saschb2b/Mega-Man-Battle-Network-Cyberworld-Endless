@@ -111,6 +111,7 @@ static struct {
 	int battles;           /* random battles fought on this layer */
 	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
 	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
+	int guest_foes;        /* the viruses its battle under way set, counted as deleted for a win */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -652,6 +653,9 @@ static int family_words(char *buf, int k, int size) {
 		{ FAMILY_STARFISH, "@M We may meet StarFish here again: their bubbles soak up our shots and trap us if we touch one. "
 			"A chip that drops from above gets past them!|" },
 	};
+	/* (none where the area's battles are another game's: L warned of
+	 * StarFish in End Area, whose battle was BN5's Whirlies, session 65) */
+	if (encounter_guest) return k;
 	uint32_t fams = loot_families_here(run.depth, run.biome);
 	for (unsigned i = 0; i < sizeof warn / sizeof *warn; ++i)
 		if (fams & (1u << warn[i].family) && profile_family_fought(warn[i].family))
@@ -4056,6 +4060,7 @@ void director_guest_done(const GuestResult *r) {
 	int max = emu_read16(BN6_NAVI_MAX_HP);
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
+	if (r->outcome == GUEST_WON) run.viruses_deleted += D.guest_foes;
 	if (!profile.guest_taught) D.guest_due = 1 + r->sat_out;
 	guest_recode_note(r);
 	dark_set_counts(r->dark);
@@ -4065,7 +4070,8 @@ void director_guest_done(const GuestResult *r) {
 	uint32_t out[2];
 	if (r->chip) game_call_ret(BN6_GIVE_CHIPS, (uint32_t)r->chip, (uint32_t)r->code, 1, out);
 	if (r->zenny) game_call(BN6_GIVE_ZENNY, (uint32_t)r->zenny, 0);
-	if (emu_debug_on()) fprintf(stderr, "guest: MegaMan back at %d/%d HP, chip %d code %d, %d zenny\n", hp, max, r->chip, r->code, r->zenny);
+	if (emu_debug_on()) fprintf(stderr, "guest: MegaMan back at %d/%d HP, chip %d code %d, %d zenny; %d viruses deleted in the run\n", hp, max, r->chip, r->code, r->zenny,
+		run.viruses_deleted);
 }
 
 /* The short net won: its Nest's guardian fell and MegaMan stepped on its
@@ -4258,10 +4264,10 @@ static void guest_begin(void) {
 	uint8_t dark[GUEST_DARK_KINDS];
 	for (int k = 0; k < GUEST_DARK_KINDS; ++k) dark[k] = (uint8_t)dark_count(k);
 	uint32_t record = guest_pick(h);
+	int hp = 0, dmg = 0;
+	D.guest_foes = guest_record_strength(D.guest_xrom, record, &hp, &dmg);
 	if (emu_debug_on()) {
-		int hp = 0, dmg = 0;
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
-		guest_record_strength(D.guest_xrom, record, &hp, &dmg);
 		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);
 	}
 	if (record) guest_battle(record, emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, dark);

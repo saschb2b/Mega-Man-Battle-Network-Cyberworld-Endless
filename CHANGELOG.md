@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A win in BN5's battles counts its viruses.** The run summary said
+  "Viruses deleted 0" after battles won in BN5's areas: only BN6's
+  battles were counted. A BN5 battle won now adds the viruses it set.
+- **L warns of BN6's viruses only where BN6's battles are.** In End
+  Area, L said "We may meet StarFish here again", and the battle was
+  BN5's Whirlies: BN6's viruses never fight in BN5's areas.
+
 - **BN5's battles open in half a second, not two and a half.** Its
   battle opens on a plain white screen, which held long enough to read as
   a hang; those frames now run four at a time, unheard, and the field

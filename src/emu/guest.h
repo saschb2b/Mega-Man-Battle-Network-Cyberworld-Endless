@@ -71,10 +71,11 @@ const char *guest_dark_name(int k);
 
 /* A record's strength, to hold its battles to the run's pacing: its
  * viruses' HP together and the strongest one's damage, from its game's
- * enemy tables (the ROM file, no core needed); false for one the run never
+ * enemy tables (the ROM file, no core needed); how many viruses it sets
+ * (a win counts them as the run's deleted), 0 for one the run never
  * draws: a battle its game keeps for a story's condition (its byte 7), a
  * Navi's, or none at all. */
-bool guest_record_strength(int xrom, uint32_t record, int *hp, int *damage);
+int guest_record_strength(int xrom, uint32_t record, int *hp, int *damage);
 
 /* Its game's battle records for net map (group, number): how many, and the
  * i-th's address; read from the ROM file, no core needed. */

@@ -52,23 +52,23 @@ static bool xenemy(const uint8_t *d, int id, int *hp, int *damage) {
 	return true;
 }
 
-bool guest_record_strength(int xrom, uint32_t record, int *hp, int *damage) {
+int guest_record_strength(int xrom, uint32_t record, int *hp, int *damage) {
 	*hp = *damage = 0;
-	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || record < 0x08000000u || record - 0x08000000u + 16 > ROM_SIZE) return false;
+	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || record < 0x08000000u || record - 0x08000000u + 16 > ROM_SIZE) return 0;
 	const uint8_t *d = XR[xrom].data, *rec = d + (record - 0x08000000u);
-	if (rec[7]) return false;
+	if (rec[7]) return 0;
 	uint32_t ents = rom32(d, record + 12);
 	int n = 0;
 	for (uint32_t a = ents, k = 0; a && k < 16 && a - 0x08000000u + 4 <= ROM_SIZE && d[a - 0x08000000u] != 0xF0; a += 4, ++k) {
 		const uint8_t *e = d + (a - 0x08000000u);
 		int h = 0, dm = 0;
 		if (e[0] != 0x11) continue;
-		if (!xenemy(d, e[2] | e[3] << 8, &h, &dm)) return false;
+		if (!xenemy(d, e[2] | e[3] << 8, &h, &dm)) return 0;
 		*hp += h;
 		if (dm > *damage) *damage = dm;
 		++n;
 	}
-	return n > 0;
+	return n;
 }
 
 int guest_records(int xrom, int group, int number) {
