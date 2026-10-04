@@ -399,18 +399,21 @@ static void star_records(bool on) {
 }
 
 /* the run's DarkChips into the guest's folder (three at most, one of each,
- * as BN5's folder takes them), each in its own code (in * with All *),
- * where chips sat out: one empty slot stays, the shelf's edge */
-static void dark_in_folder(uint32_t folders, uint32_t marks) {
+ * as BN5's folder takes them), the kinds in `first` (BN6's folder holds
+ * them: docs/META.md, BN6's own DarkChips) before the rest, each in its own
+ * code (in * with All *), where chips sat out: one empty slot stays, the
+ * shelf's edge */
+static void dark_in_folder(uint32_t folders, uint32_t marks, unsigned first) {
 	static const uint16_t entry[GUEST_DARK_KINDS] = { 0x22BB, 0x32BC, 0x10BD, 0x34BE, 0x2CBF, 0x26C0, 0x18C1, 0x0EC2, 0x0AC3, 0x06C4, 0x26C5, 0x08C6 };
 	int empty[30], ne = 0, put = 0;
 	for (int i = 29; i >= 0; --i) if (rd16(folders + 2u * (uint32_t)i) == 0xFFFF) empty[ne++] = i;
-	for (int k = 0; k < GUEST_DARK_KINDS && put < 3 && put + 1 < ne; ++k) {
-		if (!dark_in[k]) continue;
-		wr16(folders + 2u * (uint32_t)empty[put++], starred ? chip_entry_star(entry[k]) : entry[k]);
-		uint32_t id = entry[k] & 0x1FF;
-		core->rawWrite8(core, marks + id, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + id) ^ BN5_CHIP_KEY_XOR));
-	}
+	for (int pass = 0; pass < 2; ++pass)
+		for (int k = 0; k < GUEST_DARK_KINDS && put < 3 && put + 1 < ne; ++k) {
+			if (!dark_in[k] || (int)(first >> k & 1) == pass) continue;
+			wr16(folders + 2u * (uint32_t)empty[put++], starred ? chip_entry_star(entry[k]) : entry[k]);
+			uint32_t id = entry[k] & 0x1FF;
+			core->rawWrite8(core, marks + id, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + id) ^ BN5_CHIP_KEY_XOR));
+		}
 }
 static int main_mode(void) { return rd8(rd32(BN5_TOOLKIT)); }
 static int sub_mode(void) { return rd8(BN5_GAMESTATE); }
@@ -693,9 +696,19 @@ static int folder_in(const uint16_t *folder) {
 	uint32_t folders = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIPS), marks = rd32(BN5_TOOLKIT + BN5_TOOLKIT_CHIP_MARKS);
 	if (folders < 0x02000000u || folders >= 0x02040000u || marks < 0x02000000u || marks >= 0x02040000u) return 0;
 	int in = 0;
+	unsigned dark = 0;
 	recoded = 0;
 	for (uint32_t i = 0; i < 30; ++i) {
-		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0, code = folder[i] >> 9, there = x ? bn5_code(x, code) : code;
+		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0, code = folder[i] >> 9;
+		/* (a DarkChip of BN6's folder, one of BN6's own: the run's one of
+		 * its kind, which comes by BN5's own rule, first among the run's,
+		 * never as a folder chip beside it; docs/META.md) */
+		if (x >= BN5_DARK_FIRST && x < BN5_DARK_FIRST + GUEST_DARK_KINDS) {
+			dark_in[x - BN5_DARK_FIRST] = 1;
+			dark |= 1u << (x - BN5_DARK_FIRST);
+			x = 0;
+		}
+		int there = x ? bn5_code(x, code) : code;
 		core->rawWrite16(core, folders + 2 * i, -1, x ? (uint16_t)(x | there << 9) : 0xFFFF);
 		if (!x) continue;
 		if (there != code && !recoded++) { recode_ex[0] = id; recode_ex[1] = code; recode_ex[2] = there; }
@@ -703,7 +716,8 @@ static int folder_in(const uint16_t *folder) {
 		++in;
 	}
 	core->rawWrite8(core, BN5_NAVI_FOLDER, -1, 0);
-	dark_in_folder(folders, marks);
+	dark_in_folder(folders, marks, dark);
+	if (dark && emu_debug_on()) fprintf(stderr, "guest: the DarkChips of BN6's folder come by BN5's own rule, first: kinds %#x\n", dark);
 	return in;
 }
 
