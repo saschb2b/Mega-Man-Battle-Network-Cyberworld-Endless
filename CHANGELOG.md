@@ -15,6 +15,9 @@
   falls after using one, BN5's darkness may get him up and fight with his
   body a while: MegaMan says it might at the flame, and says what it was
   after a battle where it did.
+- **Each run names its chips that sit out** of the older net's battles on
+  its first such layer, after a profile's first time; a playtester's new
+  run's CrakShot and Atk+10 went unnamed.
 - **The browser plays its sound sooner, played by keyboard.** Its menus'
   sounds came late: the page kept the handhelds' longer sound buffer (1024
   samples, which the browser's script processor plays a buffer behind). A

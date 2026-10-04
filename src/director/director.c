@@ -118,6 +118,7 @@ static struct {
 	bool battle_due;       /* (dev: the battle step) the next random battle, at the first free moment on the map */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
 	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
+	bool beat_out;         /* ... or, to a profile told that, the chips that sit out, once a run */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -310,10 +311,19 @@ static int out_names(char *s, size_t n) {
  * had (they sit out). After the arrival's own words. */
 static void older_net_words(void) {
 	D.beat_cross = encounter_guest && !profile.cross_old_told;
-	if (!D.beat_cross) return;
 	char out[96];
 	int n = out_names(out, sizeof out);
 	size_t k = strlen(D.beat);
+	/* (a profile told already: the run's own chips that sit out, named on
+	 * its first such layer, as its folder is its own; a playtester's new
+	 * run's CrakShot and Atk+10 went unnamed, session 68) */
+	D.beat_out = encounter_guest && !D.beat_cross && n > 0 && !flag_get(RUN_OUT_NAMED_FLAG);
+	if (D.beat_out) {
+		snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older net's battles again, Lan. Our %s didn't exist back then, so %s'll sit out.",
+			k ? "|" : "", out, n == 1 ? "it" : "they");
+		return;
+	}
+	if (!D.beat_cross) return;
 	/* (a guardian of ours keeps his fight ours; one of the older net's own
 	 * Navis fights the old way: docs/BOSSES.md, BN5's Navis) */
 	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old "
@@ -332,6 +342,7 @@ static void beat_said(void) {
 	D.guardian_named = D.beat_guardian;
 	D.beat[0] = 0;
 	if (D.beat_cross) { profile.cross_old_told = 1; profile_save(); }
+	if (D.beat_cross || D.beat_out) flag_set(RUN_OUT_NAMED_FLAG);
 }
 
 /* What MegaMan and Lan (and Dad) say on arriving somewhere new: the first

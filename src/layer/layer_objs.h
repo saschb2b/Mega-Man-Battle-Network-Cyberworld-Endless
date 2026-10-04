@@ -46,6 +46,9 @@
  * DarkChips in BN5 territory). (0x1467-0x1469: the draft's fit flags,
  * guardian_objs.h) */
 #define LAYER_DARK_TAKEN_FLAG  0x146D
+/* The run's chips that sit out of the older net's battles were named
+ * (a run's, never cleared by a layer; a new run starts without it). */
+#define RUN_OUT_NAMED_FLAG     0x146E
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */

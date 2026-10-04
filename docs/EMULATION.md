@@ -210,7 +210,9 @@ that the layer's collector's vault gave its chip; `0x1454` that the
 Guardian Data's dark way into the Undernet was taken; `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
-docs/RIVAL.md).
+docs/RIVAL.md; `0x146E`, never cleared by a layer, that the run's chips
+that sit out of the older net's battles were named on its first such
+layer).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 
