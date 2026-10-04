@@ -43,10 +43,11 @@
 /* The variants: the cube looking each of four ways (issue #45), then the
  * five obstacles, then another game's looks for them (docs/MULTIROM.md):
  * BN5's Security Cube, its wall of dark flames across a walkway along
- * world Y and along X; bytes 6-15 of their records as BN6's own (sprite
- * list, sprite, idle and open animations, a sprite field, palette,
- * priority, a spare, sound 0x74) */
-enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, V_XWALL, VARIANTS = V_XWALL + 2 };
+ * world Y and along X, and its dark hole, a prop that never opens; bytes
+ * 6-15 of their records as BN6's own (sprite list, sprite, idle and open
+ * animations, a sprite field, palette, priority, a spare, sound 0x74) */
+enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, V_XWALL, V_XHOLE = V_XWALL + 2, VARIANTS };
+#define XPROP_SLOT 7   /* the slot of another game's prop: its present flag set while it stands, its walls and check named by no cell */
 static const uint8_t templates[V_XCUBE][10] = {
 	{ 0x1C, 0x03, 0, 0, 0x38, 0, 2, 0xFF, 0x74, 0 },
 	{ 0x1C, 0x03, 1, 1, 0x38, 0, 2, 0xFF, 0x74, 0 },
@@ -61,17 +62,19 @@ static const uint8_t templates[V_XCUBE][10] = {
 /* Variant v's record bytes 6-15: another game's look with its sprite's
  * number in BN6 (xnavi.c), or BN6's own look where it was not copied
  * (BN5's Security Cube standing, then opening; its wall of dark flames
- * standing across a walkway along world Y or X, then burning out; their
- * sound BN6's cubes' and obstacles') */
+ * standing across a walkway along world Y or X, then burning out; its
+ * dark hole turning, behind the floor's front; their sound BN6's cubes'
+ * and obstacles') */
 static void template_of(int v, uint8_t out[10]) {
-	static const uint8_t xlook[3][10] = {
-		{ 0x1C, 0, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 },
-		{ 0x1C, 0, 0, 2, 0, 0, 2, 0xFF, 0x74, 0 },
-		{ 0x1C, 0, 1, 3, 0, 0, 2, 0xFF, 0x74, 0 },
+	static const struct { int obj, bn6; uint8_t rec[10]; } xlook[] = {
+		{ XOBJ_CUBE, V_CUBE, { 0x1C, 0, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 } },
+		{ XOBJ_DARK_WALL, V_FLAMES, { 0x1C, 0, 0, 2, 0, 0, 2, 0xFF, 0x74, 0 } },
+		{ XOBJ_DARK_WALL, V_FLAMES, { 0x1C, 0, 1, 3, 0, 0, 2, 0xFF, 0x74, 0 } },
+		{ XOBJ_DARK_HOLE, V_FLAMES, { 0x1C, 0, 0, 0, 0, 0, 3, 0xFF, 0x74, 0 } },
 	};
-	int slot = v < V_XCUBE ? -1 : xnavi_object(v == V_XCUBE ? XOBJ_CUBE : XOBJ_DARK_WALL);
-	if (slot < 0) { memcpy(out, templates[v < V_XCUBE ? v : v == V_XCUBE ? V_CUBE : V_FLAMES], 10); return; }
-	memcpy(out, xlook[v - V_XCUBE], 10);
+	int slot = v < V_XCUBE ? -1 : xnavi_object(xlook[v - V_XCUBE].obj);
+	if (slot < 0) { memcpy(out, templates[v < V_XCUBE ? v : xlook[v - V_XCUBE].bn6], 10); return; }
+	memcpy(out, xlook[v - V_XCUBE].rec, 10);
 	out[1] = (uint8_t)slot;
 }
 
@@ -144,6 +147,19 @@ static void spot(int dir, int kind, int edge, int side, int *x, int *y) {
 	}
 }
 
+int blockers_xprop(uint8_t *recs, int n, int max, int x, int y) {
+	if (n >= max || xnavi_object(XOBJ_DARK_HOLE) < 0) return n;
+	flag_set(BLOCK_PRESENT_FLAG + XPROP_SLOT);
+	uint8_t *r = recs + n++ * 20;
+	memset(r, 0, 20);
+	r[0] = 5;
+	r[1] = 3;
+	put32(r + 4, (uint32_t)(x * 65536));
+	put32(r + 8, (uint32_t)(y * 65536));
+	put32(r + 16, (uint32_t)(BLOCK_ID0 + V_XHOLE * BLOCK_SLOTS + XPROP_SLOT));
+	return n;
+}
+
 int blockers_objects(uint8_t *recs, int n, int max) {
 	for (int k = 0; k < layer.nblocks && n < max; ++k) {
 		const NetBlock *b = &layer.block[k];
@@ -168,7 +184,7 @@ int blockers_objects(uint8_t *recs, int n, int max) {
  * pairs) his name, his mugshot, his sound and what he does */
 static const char *const block_names[BLOCK_KINDS] = { "A geyser of cyberwater", "A cybertree", "A pillar of flames", "A cyclone", "A cloud" };
 /* ... or, in another game's look, what it is there */
-static const char *block_name(const NetBlock *b) { return variant_of(b) >= V_XWALL ? "A wall of dark flames" : block_names[b->kind]; }
+static const char *block_name(const NetBlock *b) { int v = variant_of(b); return v == V_XWALL || v == V_XWALL + 1 ? "A wall of dark flames" : block_names[b->kind]; }
 static const struct { int navi, mugshot, sound; const char *name, *deed; } helpers[] = {
 	{ 1, 0x47, 0xF7, "HeatMan", "burn" },
 	{ 2, 0x49, 0xC6, "ElecMan", "short out" },

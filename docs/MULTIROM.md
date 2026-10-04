@@ -237,8 +237,9 @@ engine (`src/emu/guest.c`, epic #57):
   its layers have such a room), as scenery the layer was made without:
   a run continued without BN5 has the same layer. Each is copied into
   BN6's free space and listed at a list-7 number Gregar leaves empty, as
-  the flame of darkness is; the dark hole is a map object of an id of the
-  engine's (`layer_objs.c`). Its net maps hold few map objects besides: the laser barrier with
+  the flame of darkness is; the dark hole stands as one of handler 3's
+  objects that never opens (`blockers.c`), as BN6's map-object table has
+  no room for an id of the engine's. Its net maps hold few map objects besides: the laser barrier with
   a skull is BN6's cube's own sprite.
 - [ ] Its towns.
 - [x] Its random battles in its own engine, on a second core, in the

@@ -74,8 +74,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x0180` | Free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
 | `+0x0300` | Free (the PET's input step until a hook on the game's own handler took its place, issue #33) | |
-| `+0x0700`-`+0x1260` | Map-object handler 3's records (issue #42): BN6's 86, then the engine's Link Navi obstacles and cubes, 12 variants of 8 slots each (the last three another game's looks: BN5's Security Cube and its wall of dark flames two ways, docs/MULTIROM.md); its literal points here, written once a core | `blockers.c` |
-| `+0x1300`-`+0x2300` | Map-object handler 0's records (OverworldMapObjects): BN6's 244, then the engine's ids from 0xF4, another game's props (BN5's dark hole, docs/MULTIROM.md); handler 0's literal points here, written once a core, the first time a layer stands one | `layer_objs.c` |
+| `+0x0700`-`+0x12E0` | Map-object handler 3's records (issue #42): BN6's 86, then the engine's Link Navi obstacles and cubes, 13 variants of 8 slots each (the last four another game's looks: BN5's Security Cube, its wall of dark flames two ways and its dark hole, a prop that never opens, docs/MULTIROM.md); its literal points here, written once a core | `blockers.c` |
 | `+0x0400`-`+0x0640` | Rush's gaps (issue #14): the gap table from group 0x80 that the check's literals point at, a group's empty map list, the layer's group's maps, the layer's gap records, and handler 0x25's records (BN6's 13, then the layer's two) | `rush.c` |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
 | `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |

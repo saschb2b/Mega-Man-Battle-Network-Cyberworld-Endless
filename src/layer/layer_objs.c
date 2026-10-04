@@ -176,43 +176,17 @@ static const struct { uint8_t look; uint8_t id; int8_t dx, dy; int16_t dz; } pro
 
 #define RUSH_OBJECTS_MAX 12   /* Rush and its bones in each panel of two gaps */
 
-/* Another game's props (docs/MULTIROM.md): map objects of handler 0 at ids
- * past BN6's 244, in a copy of its OverworldMapObjects that handler 0's
- * literal is pointed at, once a core (BN6's own ids read the same) */
-#define OW_MAP_OBJECTS_LIT 0x080A5E8Cu   /* handler 0's literal naming them (Gregar) */
-#define OW_MAP_OBJECTS_N   244
-#define OW_COPY_AT         (EMU_FREE + 0x1300)   /* (docs/EMULATION.md) */
-#define XPROP_DARK_HOLE    0xF4                  /* the engine's id: BN5's dark hole, list 7's `slot` */
-
-static void xprops_install(int slot) {
-	static bool done;
-	if (done) return;
-	done = true;
-	static uint8_t table[256 * 16];
-	memcpy(table, R.data + OW_MAP_OBJECTS, OW_MAP_OBJECTS_N * 16);
-	const uint8_t hole[16] = { 0x1C, (uint8_t)slot, 0, 0xFF };   /* (list 7, its animation 0, priority from the map's floor) */
-	memcpy(table + XPROP_DARK_HOLE * 16, hole, 16);
-	emu_write(OW_COPY_AT, table, sizeof table);
-	emu_write32(OW_MAP_OBJECTS_LIT, OW_COPY_AT);
-}
-
 /* BN5's dark hole on Nebula Area's layers (XLOOK_DARK_HOLE): a vortex in
  * the void past the back rim of the layer's best room, where its own maps
  * stand theirs past a platform's edge, the Graveyard's monument's place;
- * the layer itself unchanged */
+ * the layer itself unchanged (a handler-3 object of blockers.c's, as
+ * BN6's map objects' table has no room for an id of the engine's) */
 static int xprops_objects(uint8_t *recs, int n, int max) {
-	int slot = layer_objs_xlooks & XLOOK_DARK_HOLE ? xnavi_object(XOBJ_DARK_HOLE) : -1, x, y, cx, cy;
-	if (slot < 0 || n >= max || !layer_landmark_void(&x, &y)) return n;
-	xprops_install(slot);
+	int x, y, cx, cy;
+	if (!(layer_objs_xlooks & XLOOK_DARK_HOLE) || xnavi_object(XOBJ_DARK_HOLE) < 0 || !layer_landmark_void(&x, &y)) return n;
 	netmap_world(x, y, &cx, &cy);
-	uint8_t *r = recs + n++ * 20;
-	memset(r, 0, 20);
-	r[0] = 5;
-	put32(r + 4, (uint32_t)(cx * 65536));
-	put32(r + 8, (uint32_t)(cy * 65536));
-	put32(r + 16, XPROP_DARK_HOLE);
 	if (emu_debug_on()) fprintf(stderr, "prop: BN5's dark hole at %d,%d (world %d,%d)\n", x, y, cx, cy);
-	return n;
+	return blockers_xprop(recs, n, max, cx, cy);
 }
 
 static uint32_t props_objects(NpcList *npcs) {
