@@ -235,8 +235,8 @@ static void draw(void) {
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = v[i] | 0xFF000000u;
 #endif
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
-	int dx, dy;
-	cinema_offset(&dx, &dy);
+	int dx = 0, dy = 0;
+	if (!guest) cinema_offset(&dx, &dy);   /* (a shake under way as it began holds still while it runs) */
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }

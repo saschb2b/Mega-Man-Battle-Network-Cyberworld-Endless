@@ -3727,7 +3727,9 @@ bool director_start_layer(void) {
 
 /* ---- dev tools (src/dev/devtools.c) ---- */
 
-bool director_on_map(void) { return D.active && on_map(); }
+/* (not through a guest battle, which BN6 waits out on its map: the touch
+ * controls' D-pad keeps to four ways in its battle, as in BN6's) */
+bool director_on_map(void) { return D.active && on_map() && !guest_active(); }
 
 void director_stop(void) { D.active = false; }
 
@@ -4489,6 +4491,7 @@ static void guest_begin(void) {
 	uint32_t record = guest_pick(h);
 	int hp = 0, dmg = 0;
 	D.guest_foes = guest_record_strength(D.guest_xrom, record, &hp, &dmg);
+	D.map_shown = false;   /* (SELECT's map, held as it began, drawn under its opening's white) */
 	if (emu_debug_on()) {
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
 		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);

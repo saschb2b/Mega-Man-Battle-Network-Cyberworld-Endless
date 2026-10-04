@@ -32,6 +32,11 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **BN5's battles keep the touch controls' D-pad to four ways (issue
+  #60).** BN6 stands on its map while BN5's battle runs, and the D-pad
+  took that for the map, where it steers eight ways; in BN6's battles it
+  keeps to four. Nor does the map held open with SELECT, or a shake under
+  way, carry into BN5's battle.
 - **`build.py pacing` lists BN5's battles too (issue #60).** For every act
   whose area BN5's dresses, it reads the records each layer's battles are
   picked from against the act's band, as the director picks them: none
