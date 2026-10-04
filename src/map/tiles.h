@@ -97,6 +97,11 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * lying on its fields, laid as pieces at its field's edges and middles,
  * half domes at the ends of its solar panels' bands. */
 #define SKIP_PALE 0x4000
+/* ... and with SKIP_OFF_PADS, none on the map's pads (small platforms on
+ * spurs), whatever their hue: BN5's Oran Area runs one look of walkway to
+ * its octagon hubs, brown planks in the hubs' own colours beside its olive
+ * circuits, and one look is learned, the hubs whole. */
+#define SKIP_OFF_PADS 0x2000
 /* (told by shape, a hue named in `styles` or `walk_styles` keeps it to
  * those hues: a panel of another is neither floor, as BN5's Nebula Area's
  * pale arrows on its paths) */

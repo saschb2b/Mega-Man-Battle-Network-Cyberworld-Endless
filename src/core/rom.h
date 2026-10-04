@@ -47,6 +47,7 @@ typedef struct {
 	uint8_t rebank[2];       /* first-layer tiles in palette bank rebank[0] drawn in bank rebank[1] where its maps use the same tile in that bank too: one shade of floor (the Graveyard's pale platforms, bank 2, among its dark slabs, bank 1); { 0, 0 } none */
 	uint8_t host;            /* its layers take over map (group, host - 1) of the same tiles, where the learned one draws sprites behind the second tile layer (0: the learned map; docs/ROM_DATA.md) */
 	uint8_t arrow_maps[2][2];   /* more maps (group, number) in the same tiles whose arrow panels it learns, beside its own and `more` (issue #43; 0: none) */
+	uint32_t recolour;       /* its maps' tiles in one palette bank read as another's, before anything is learned: pairs of nibbles (from, then to), the lowest first (area_src_load_as; 0: none) */
 	/* (another game's area) */
 	int8_t xrom;             /* the game its maps are in: 0 BN6, 1 + XRomId another's */
 	uint8_t over[2];         /* the BN6 map its layers take over (group, number) */

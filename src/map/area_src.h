@@ -50,6 +50,14 @@ bool area_src_load_x(int xrom, int group, int number, AreaSrc *a);
 /* Map (group, number)'s descriptor (tile set, palette, tile map: ROM
  * offsets of its 12 bytes) and its coordinate data's pointer. */
 bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot);
+/* A map of BN6 (rom 0) or another game's (1 + XRomId) as an area reads it
+ * (NetAreaDef.recolour): loaded, then its tiles of both layers in palette
+ * bank `from` read as bank `to` and the map drawn again, `recolour`
+ * holding pairs of nibbles (from, then to), the lowest first (0x21: bank 2
+ * as bank 1; 0: as it is). A game whose colour banks run alike draws one
+ * surface in another's shades: BN5's Undernet its raised courts' pale
+ * stone and purple slime, its plates' mauve stone and lava. */
+bool area_src_load_as(int rom, int group, int number, uint32_t recolour, AreaSrc *a);
 void area_src_free(AreaSrc *a);
 /* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip.
  * False, and `m` empty, where the memory for it could not be had. */

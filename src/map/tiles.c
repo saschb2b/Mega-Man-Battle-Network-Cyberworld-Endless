@@ -105,6 +105,7 @@ typedef struct {
 	int8_t *state;   /* SPAN x SPAN panel states, -1 until measured */
 	int8_t *drawn;   /* ... whether each is floor of this view at all */
 	bool inner_walls;   /* rings of walls inside the floor ring no holes (TILES_INNER_WALLS) */
+	const uint8_t *pads;   /* its pads (find_pads), once found: SKIP_OFF_PADS spares them */
 } Src;
 
 /* Whether panel (A, B) is floor of this view at all. */
@@ -624,6 +625,8 @@ static bool pad_look(const Src *s, const uint8_t *pads, int A, int B) {
 /* Whether panel (A, B) is floor whose tiles are not learned. */
 static bool skipped(const Src *s, int A, int B) {
 	if (!s->skip_styles || !drawn_cached(s, A, B)) return false;
+	if (s->skip_styles & SKIP_OFF_PADS && s->pads && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 &&
+		s->pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]) return false;
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	if (s->skip_styles & SKIP_PALE) return src_panel(s, A, B) == TILE_A && !beside_walkway(s, A, B) &&
@@ -925,6 +928,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	Src src;
 	src_open(&src, a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, styles & TILES_INNER_WALLS);
 	uint8_t *pads = find_pads(&src);
+	src.pads = pads;
 	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0, false };
 	calibrate(a, &src, &g);
 	out->dv = g.dv;

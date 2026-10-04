@@ -104,7 +104,7 @@ static bool aligned(const AreaSrc *a, const AreaSrc *b) {
 
 /* A map of the area's own game, BN6's or another's (docs/MULTIROM.md). */
 static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
-	return na->xrom ? area_src_load_x(na->xrom - 1, group, number, a) : area_src_load(group, number, a);
+	return area_src_load_as(na->xrom, group, number, na->recolour, a);
 }
 
 /* Learns the tiles of map `src` and its mirror image, where their tiles

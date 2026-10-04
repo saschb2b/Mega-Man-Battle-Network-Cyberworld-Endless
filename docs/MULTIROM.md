@@ -89,14 +89,16 @@ engine (`src/emu/guest.c`, epic #57):
   sound are the guest's.
 - **Which**: the area's own maps' records in BN5's numbers (ACDC Area
   0x90:0, 0x90:1 and 0x86:0 for an act's first, middle and guardian's
-  layers; End Area 0x93:0, 0x86:3, 0x93:1; Nebula Area 0x86:6, 0x94:3,
-  0x86:7), one picked from the layer's seed and the battle's count, held
-  to the act's band as BN6's battles are (pacing.c: their viruses' HP
-  together and the strongest one's damage, from BN5's own enemy tables):
-  the area's own records that fit, else its other maps', else those of
-  BN5's other areas that fit (End Area in an opening act fights ACDC
-  Area's viruses), else its own weakest. BN5's story battles (a record's
-  byte 7 set, its roaming Navis at 2000 HP among them) never.
+  layers; Oran Area 0x91:0, 0x91:1, 0x86:1; SciLab 0x92:0, 0x92:1, 0x86:2;
+  End Area 0x93:0, 0x86:3, 0x93:1; the Undernet 0x94:0, 0x94:1, 0x86:5;
+  Nebula Area 0x86:6, 0x94:3, 0x86:7), one picked from the layer's seed
+  and the battle's count, held to the act's band as BN6's battles are
+  (pacing.c: their viruses' HP together and the strongest one's damage,
+  from BN5's own enemy tables): the area's own records that fit, else its
+  other maps', else those of BN5's other areas that fit (End Area in an
+  opening act fights ACDC Area's viruses), else its own weakest. BN5's
+  story battles (a record's byte 7 set, its roaming Navis at 2000 HP among
+  them) never.
 - **MegaMan as the run has him**: his HP and max HP, and the run's folder,
   each chip as BN5's chip of the same name with its own code (the names
   read from both ROMs; 114 of BN6's 313 chips pair), owned in BN5's marks.
@@ -175,35 +177,63 @@ engine (`src/emu/guest.c`, epic #57):
   End Area's red field of diamonds, Nebula Area's flickering static and
   pulsing emblems), where they stood on the BN6 map's backdrop with its
   cycles running over BN5's colours (`xbackdrop_map`, docs/ROM_DATA.md).
-- [ ] SciLab (maps 4-6, dressing Sky Area): drawn (`--net-biome x1`) but
-  held out of runs (`held`): its maps hold no platform bigger than a 3x3
-  pad, and Sky Area's rooms drawn in its tiles meet their pale middles
-  with no frame. A layout of paths and small pads would fit it, but a
-  layer's layout must not depend on another ROM being there (a run
-  continued without it would break).
-- [ ] Oran Area (2-3: three walkway looks, two of platforms) and its
-  Undernet (10-12), which the same tuning left at twice the seams.
-- [x] Its areas' themes, from its own map-music lists: ACDC Area, SciLab
-  and End Area its net theme (song 0x13), Nebula Area its Undernet's
-  (0x14). Its lists name no other song for any of its net areas: 0x13
-  for ACDC Area, the other areas' maps group 0x86 holds (ACDC Area 3,
-  Oran Area 3, SciLab 3, End Area 2 and 5), its homepages and its object
-  comps, 0x14 for the Undernet and Nebula Area, 0x10 for its first comp
-  (group 0x80). Oran Area, SciLab and End Area's own groups (0x91-0x93)
-  are in no list: a warp into them stops the music (song 0x63, as in
-  BN6), and how BN5's own ways between its areas keep a theme playing
-  there is not traced; End Area's maps that are listed (2 and 5) play
-  0x13, its theme here. The rest of its music its scripts and code start
-  (direct calls play 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23; its
+- [x] SciLab (maps 4-6) dresses Sky Area, with Sky's layouts as they
+  are: its maps hold no platform bigger than a 3 x 3 octagon hub with
+  ears at its corners, and Sky's rooms drawn in its tiles met their pale
+  middles with no frame, so every room up to 64 panels and the guardian's
+  arena are drawn in its hubs' look (`pad_rooms`): their rims and ears
+  frame them. Sky's octagon rooms come out as twin-hub outlines; a big
+  room of an odd shape can keep a rim line inside it.
+- [x] Oran Area (2-3) dresses Green Area: orange octagon hubs and olive
+  circuits, told by shape. Its first map's raised cream platforms and
+  green walkways are drawn in other colour banks of the same ramps, so
+  their tiles are read as the hubs' and circuits' banks (`recolour`);
+  off its hubs, its brown planks and its arrow panels lend no tiles
+  (`SKIP_OFF_PADS`): one walkway look. Its rooms are drawn as its hubs,
+  as SciLab's are.
+- [x] Its Undernet (10-12) dresses the Undernet: mauve stone plates with
+  lava at their corners on cobbled paths, told by shape; its raised
+  courts' pale stone and purple slime read as the plates' bank; its
+  plates' purple cross its emblem; BN6's statue and braziers stand on it,
+  which the number doors count. Named the Undernet, as BN6's is.
+  Over the atlas's layers (`--atlas DIR:aN:3`: 3 seeds a layout and the
+  guardian's layers; `build.py tiles` lists them too), seams per 100
+  panels:
+  ACDC Area 132, SciLab 126 (192 before, held), End Area 172, Oran Area
+  168 (480 to 500 as first tuned), the Undernet 167 (310 to 440),
+  Nebula Area 205.
+- [ ] A dressed layer laid out as the BN6 area's own would be: the layer
+  generator takes the kit of the area it draws in (`netmap_kit`: stairs,
+  arrow lanes, the teleports' gem, the Net Dealer's counter, scenery),
+  and BN5's areas learn no stairs, arrow panels, gem or counter, so their
+  layers have no raised rooms, arrow lanes, teleports or counter where
+  the BN6 area's would, and a run saved with BN5's ROM beside BN6's and
+  continued without it builds its layer afresh, not the same.
+- [x] Its areas' themes, from its own map-music lists: ACDC Area, Oran
+  Area, SciLab and End Area its net theme (song 0x13), its Undernet and
+  Nebula Area its Undernet's (0x14). Its lists name no other song for any
+  of its net areas: 0x13 for ACDC Area, the other areas' maps group 0x86
+  holds (ACDC Area 3, Oran Area 3, SciLab 3, End Area 2 and 5), its
+  homepages and its object comps, 0x14 for the Undernet and Nebula Area,
+  0x10 for its first comp (group 0x80). Oran Area, SciLab and End Area's
+  own groups (0x91-0x93) are in no list: a warp into them stops the music
+  (song 0x63, as in BN6), and how BN5's own ways between its areas keep a
+  theme playing there is not traced; End Area's maps that are listed (2
+  and 5) play 0x13, its theme here. The rest of its music its scripts and
+  code start (direct calls play 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23; its
   Liberation Missions' among them, not traced).
 - [x] Its battle music: its random battles' theme and its bosses' (songs
   0x15 and 0x16, named in its battle records as BN6's are), copied after
   its areas' themes and named in the records of battles on its areas'
   layers, guardians and ProtoMan's netbattle with the boss theme.
-- [x] Its battle backgrounds: each area's own (ACDC Area's, SciLab's, End
-  Area's, Nebula Area's), its record, tiles, map, palette and animations
-  copied after BN6's 22 backgrounds, in copies of BN6's tables the
-  game's loader is pointed at (`src/gfx/xbackdrop.c`).
+- [x] Its battle backgrounds: each area's own (ACDC Area's, Oran Area's,
+  SciLab's, End Area's, its Undernet's, Nebula Area's), its record,
+  tiles, map, palette and animations copied after BN6's 22 backgrounds,
+  in copies of BN6's tables the game's loader is pointed at
+  (`src/gfx/xbackdrop.c`), for the battles fought in BN6's engine there
+  (guardians, ProtoMan's netbattle). A guest battle stands in front of
+  the background BN5 gives the map its boot state stands on (yellow
+  rings), its record's background byte being 0xFF (the map's).
 - [ ] Its towns' music. Its lists name ACDC Town's (group 0x00): the
   town 0x03, its houses (maps 1-6) 0x04, map 7 0x05, maps 8-11 0x0C;
   group 0x01's maps 0x05 and 0x0C; in one story state (its third list)
@@ -241,7 +271,21 @@ engine (`src/emu/guest.c`, epic #57):
   objects that never opens (`blockers.c`), as BN6's map-object table has
   no room for an id of the engine's. Its net maps hold few map objects besides: the laser barrier with
   a skull is BN6's cube's own sprite.
-- [ ] Its towns.
+- [ ] Its towns. Its real world is groups 0x00-0x05: ACDC Town (0x00:0,
+  132 x 72 tiles of 256 colours: Lan's, Mayl's and Dex's houses,
+  Higsby's shop, the park with the squirrel statue, the school), Oran
+  Isle (0x02:0, beach, mine and dock), the harbour (0x03:0, a raised
+  quay and the ship), a castle town on stone terraces (0x04:0) and a
+  base's room (0x05:0). ACDC Town is the place BN6's own ACDC Town style
+  already is (BN6's prologue map, docs/OVERWORLD.md). Its version would
+  take: its tile set and 256 colours copied into a free range of their
+  own (the town is built while the first layer's tiles may be another
+  game's, at `XGFX_AT`), BN6's interface colours (208-255) kept; the map
+  copied whole with its own walls and heights, as Seaside Town is (to be
+  cut and stretched, its materials need a colour table of their own);
+  its jack-in points, where Lan steps out and the checks' lines for its
+  buildings. Oran Isle, the harbour and the castle town would come as
+  Seaside and Green Town do, copied whole.
 - [x] Its random battles in its own engine, on a second core, in the
   areas it dresses (Guest battles, above).
 - [ ] Its guardians, in battles in its own engine.

@@ -117,6 +117,22 @@ bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot)
 	return true;
 }
 
+/* Draws the map as the game shows it, the second layer (BG2, priority 2)
+ * in front of the first (BG1, priority 3): the real world's ground under
+ * what stands on it, the internet's floors under what the originals set in
+ * front of them (bridges, stairs, spikes, the floors that overlap others
+ * on screen); and the first layer alone (its pixels allocated, cleared). */
+static bool draw_map(AreaSrc *a, uint32_t ts, uint32_t pal) {
+	uint32_t colors[256];
+	uint8_t *vram = map_gfx(ts, pal, colors);
+	if (!vram) return false;
+	bool rw = a->group < RW_GROUPS;
+	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, a->px, a->front, a->idx, rw);
+	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, a->px0, NULL, NULL, rw);
+	free(vram);
+	return true;
+}
+
 static bool decode_tiles(AreaSrc *a) {
 	uint32_t ts, pal, tm;
 	if (!map_desc(a->group, a->number, &a->desc, &ts, &pal, &tm)) return false;
@@ -134,24 +150,12 @@ static bool decode_tiles(AreaSrc *a) {
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)(m[(l * cells + i) * 2] | m[(l * cells + i) * 2 + 1] << 8);
 	}
 	free(m);
-	/* draw it as the game shows it, the second layer (BG2, priority 2) in
-	 * front of the first (BG1, priority 3): the real world's ground under
-	 * what stands on it, the internet's floors under what the originals set
-	 * in front of them (bridges, stairs, spikes, the floors that overlap
-	 * others on screen); and the first layer alone */
-	uint32_t colors[256];
 	a->px = calloc(cells * 64, 4);
 	a->px0 = calloc(cells * 64, 4);
 	a->front = calloc(cells * 64, 1);
 	a->idx = calloc(cells * 64, 1);
 	if (!a->px || !a->px0 || !a->front || !a->idx) return false;
-	uint8_t *vram = map_gfx(ts, pal, colors);
-	if (!vram) return false;
-	bool rw = a->group < RW_GROUPS;
-	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, a->px, a->front, a->idx, rw);
-	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, a->px0, NULL, NULL, rw);
-	free(vram);
-	return true;
+	return draw_map(a, ts, pal);
 }
 
 uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles, int tw, int th) {
@@ -401,6 +405,33 @@ bool area_src_load_x(int xrom, int group, int number, AreaSrc *a) {
 	bool ok = load(group, number, a);
 	a->rom = (int8_t)(xrom + 1);
 	return ok;
+}
+
+/* Map a's tiles in one palette bank read as another's, the map drawn again
+ * (area_src_load_as). */
+static bool recolour(AreaSrc *a, uint32_t pairs) {
+	if (!pairs) return true;
+	uint8_t to[16];
+	for (int k = 0; k < 16; ++k) to[k] = (uint8_t)k;
+	for (uint32_t p = pairs; p; p >>= 8) to[p >> 4 & 15] = (uint8_t)(p & 15);
+	size_t cells = (size_t)a->tw * a->th;
+	for (int l = 0; l < a->layers; ++l)
+		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)((a->tile[l][i] & 0x0FFF) | to[a->tile[l][i] >> 12] << 12);
+	use_rom(a->rom - 1);
+	uint32_t desc, ts, pal, tm;
+	if (!map_desc(a->group, a->number, &desc, &ts, &pal, &tm)) return false;
+	memset(a->px, 0, cells * 64 * 4);
+	memset(a->px0, 0, cells * 64 * 4);
+	memset(a->front, 0, cells * 64);
+	memset(a->idx, 0, cells * 64);
+	return draw_map(a, ts, pal);
+}
+
+bool area_src_load_as(int rom, int group, int number, uint32_t pairs, AreaSrc *a) {
+	if (!(rom ? area_src_load_x(rom - 1, group, number, a) : area_src_load(group, number, a))) return false;
+	if (recolour(a, pairs)) return true;
+	area_src_free(a);
+	return false;
 }
 
 void area_src_free(AreaSrc *a) {

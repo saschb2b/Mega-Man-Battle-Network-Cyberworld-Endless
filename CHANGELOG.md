@@ -92,6 +92,16 @@
   green cube with X eyes that bars the way to a friend's homepage in its
   ACDC Area. It asks the same P-Code or toll as before, and opens as it
   does in BN5, its eyes popping open before it flickers out.
+- **Three more of Battle Network 5's net areas join runs.** With Team
+  Colonel's ROM beside BN6's, Oran Area turns up in place of Green
+  Area, SciLab in place of Sky Area and BN5's Undernet in place of the
+  Undernet, each in about half the runs that come there, in BN5's own
+  tiles, music, bystanders and battles, as ACDC Area, End Area and
+  Nebula Area do. Their maps hold only small octagon hubs, so the
+  layers' rooms are drawn as those hubs, framed by their rims; Oran
+  Area's raised floors and BN5's Undernet's pale courts come in their
+  areas' main colours. The Undernet's statue and braziers stand there
+  as in BN6's, for its number doors.
 - **The run saves at a guardian arena's door.** As MegaMan steps in, the
   run is saved; a quit during the fight goes on, at CONTINUE, from the
   arena's door with the HP he walked in with, where it went back to the

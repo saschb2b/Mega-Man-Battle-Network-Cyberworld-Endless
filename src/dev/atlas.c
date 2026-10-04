@@ -214,7 +214,7 @@ static void sources(const char *dir, int biome) {
 		int group = k < 0 ? na->group : na->more[k][0], number = k < 0 ? na->number : na->more[k][1];
 		if (k >= 0 && !group) break;
 		AreaSrc a;
-		if (!(na->xrom ? area_src_load_x(na->xrom - 1, group, number, &a) : area_src_load(group, number, &a))) continue;
+		if (!area_src_load_as(na->xrom, group, number, na->recolour, &a)) continue;
 		int count[256] = { 0 };
 		for (int i = 0; a.hz && i < a.hw * a.hh; ++i) count[a.hz[i]]++;
 		for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
