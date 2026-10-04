@@ -21,9 +21,9 @@
 #define BN5_REWARD        (BN5_BATTLE_RESULT + 4) /* u16: what the results screen gave, as BN6's rewards are (bits 14-15: 0 a chip, its id and code << 9; 1 zenny; */
 #define BN5_REWARD_HP     2           /* ... 2 HP restored on the results screen, into BattleState +0x34 too: "HP+50") */
 #define BN5_REWARD_ROWS   0x081100D4u /* the reward rows: 20 u16 per enemy id, 0x28 apart, as BN6's are (its chooser 0x0810FB18 matches BN6's 0x080AC150) */
-#define BN5_RESULT_WON     1
-#define BN5_RESULT_LOST    2
-#define BN5_RESULT_ESCAPED 4
+#define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
+#define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
+#define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */
 #define BN5_OPT_GAME_OVER  0x100   /* BattleSettings +8 options: a loss plays GAME OVER (GetBattleEffects 0x0802B3F2) */
 #define BN5_RECORD_BACKDROP 4      /* BattleSettings +4: its background's number, 0xFF the map's (its routine 0x0808CAE8, a byte per map at 0x0808CB1C) */
 #define BN5_FREE          0x08800000u /* the guest's ROM copy past BN5's 8 MB: its record copies */
@@ -31,13 +31,13 @@
 #define BN5_NAVI_ATTACK   (BN5_NAVI_STATS + 0x01) /* u8 Attack, Speed and Charge: the buster's levels less one (0-4), as BN6's (BN6_NAVI_ATTACK): */
 #define BN5_NAVI_SPEED    (BN5_NAVI_STATS + 0x02) /* a shot does Attack + 1 (0x0800F538), a charged one ten times that (0x0800F5B4); Charge picks */
 #define BN5_NAVI_CHARGE   (BN5_NAVI_STATS + 0x03) /* the charge's frames, 100 down to 60 (0x08010682, its table 0x0801CA68); its boot state 0, 0, 0 */
-#define BN5_BUSTER_MAX    4
+#define BN5_BUSTER_MAX    4           /* the buster's highest level less one */
 #define BN5_BATTLE_NAVI   0x0203C880u /* the battle's copies of the NaviStats, BN5_BATTLE_NAVI_SIZE a side (0x08010D18), made from them as it begins: */
 #define BN5_BATTLE_NAVI_SIZE 0x60     /* ... its buster read from there (0x08010DEE, the object's side), its fields at the NaviStats' offsets */
 #define BN5_TOOLKIT_CHIPS 0x48        /* eToolkit +0x48: the folders (0x02002DF4), 30 u16 each (chip | code << 9), 0x3C apart */
 #define BN5_TOOLKIT_CHIP_MARKS 0x80   /* eToolkit +0x80 (0x02005CC4): a byte per chip id, its key XOR BN5_CHIP_KEY_XOR where owned */
 #define BN5_CHIP_KEYS     0x02001440u /* a key byte per chip id */
-#define BN5_CHIP_KEY_XOR  0x81
+#define BN5_CHIP_KEY_XOR  0x81        /* the marks' XOR (BN6's 0x17) */
 #define BN5_CHIP_NAMES_LOW  0x736084u /* (ROM offsets) the chip names' text archives: ids 0-255, */
 #define BN5_CHIP_NAMES_HIGH 0x736AB8u /* ... and 256 on */
 #define BN5_CHIPS         424         /* its chip ids */
@@ -51,15 +51,15 @@
 #define BN5_NAVI_MOOD     (BN5_NAVI_STATS + 0x0E) /* u8: the mood a battle starts from where 0xFF; 0x80 calm */
 #define BN5_NAVI_METER    (BN5_NAVI_STATS + 0x44) /* u16: the dark meter, 500 neutral (below 470 battles start dark) */
 #define BN5_TOOLKIT_METER_CHECK 0x94  /* eToolkit +0x94: the meter XOR the u32 at BN5_METER_KEY, or the meter resets to 500 */
-#define BN5_METER_KEY     0x02002338u
+#define BN5_METER_KEY     0x02002338u /* the u32 the meter's check is XORed with */
 #define BN5_BATTLE_SIDE   (BN5_BATTLE_STATE + 0x0D) /* u8: MegaMan's side */
 #define BN5_BATTLE_MOOD   0x0203C88Eu /* u8: MegaMan's mood in battle (side 1's 0x60 on): 1-0x40 worried, 0 dark, 0xFF Full Synchro */
 
 #define BN5_BATTLE_STATE  0x02034A90u /* BattleState: +1 the battle's phase (8 the Custom screen, 0xC fighting, 0x10 over) */
-#define BN5_BATTLE_PHASE  (BN5_BATTLE_STATE + 0x01)
-#define BN5_PHASE_INTRO   0x00        /* (the battle's opening, which sets the mood to 0x80, calm, once its first frames are done) */
-#define BN5_PHASE_CUSTOM  0x08
-#define BN5_PHASE_FIGHT   0x0C
+#define BN5_BATTLE_PHASE  (BN5_BATTLE_STATE + 0x01) /* the battle's phase: 8 the Custom screen, 0xC fighting, 0x10 over */
+#define BN5_PHASE_INTRO   0x00        /* BN5_BATTLE_PHASE: the battle's opening, which sets the mood to 0x80, calm, once its first frames are done */
+#define BN5_PHASE_CUSTOM  0x08        /* BN5_BATTLE_PHASE: the Custom screen */
+#define BN5_PHASE_FIGHT   0x0C        /* BN5_BATTLE_PHASE: fighting */
 #define BN5_CUSTOM_GAUGE  0x02035700u /* u16, the Custom gauge, full at 0x4000 (its SetCustGauge 0x0801A88E: 0x020356E0 + 0x20, as BN6's) */
 #define BN5_BATTLE_HP     (BN5_BATTLE_STATE + 0x34) /* u16: MegaMan's HP as the battle ends, to copy back (0 deleted) */
 #define BN5_FIGHT_HP      0x0203B224u /* u16: MegaMan's HP while the battle runs (his battle object's), then +2 its max (the worried rule reads them) */
@@ -71,7 +71,7 @@
 #define BN5_T1_OBJECTS    0x0203B200u /* its viruses and MegaMan (BattleObject, BN6_T1_SIZE each, BN6_T1_* its fields; MegaMan the first), */
 #define BN5_T1_COUNT      0x10        /* ... 16 of them where BN6 keeps 32 (its list's descriptor at 0x080032E4) */
 #define BN5_T3_OBJECTS    0x0203CA40u /* its attacks and effects (BN6_T3_OBJECTS), BN6_T1_SIZE each, */
-#define BN5_T3_COUNT      0x20
+#define BN5_T3_COUNT      0x20        /* 32 of them */
 #define BN5_MEGAMAN_READY 0x06        /* MegaMan's action (BN6_T1_ACTION) when he can act, BN6's 0x08 (0x10 a step, 0x14 a chip, 0x03 hit); his chip (BN6_T1_CHIP) is 0xFFFF as its use begins */
 #define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
 #define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */
@@ -81,18 +81,18 @@
 #define BN5_CUSTOM_CURSOR (BN5_CUSTOM_SCREEN + 0x07) /* the slot under the cursor, 0-4 the top row, BN6_CUSTOM_OK on OK */
 #define BN5_CUSTOM_PICKED (BN5_CUSTOM_SCREEN + 0x08) /* the chips picked */
 #define BN5_CUSTOM_WINDOW 0x020356F2u /* 0x020356E0 + 0x12: the Custom screen's window as it slides in, 0 to BN5_WINDOW_OPEN (BN6_CUSTOM_WINDOW) */
-#define BN5_WINDOW_OPEN   0x78
+#define BN5_WINDOW_OPEN   0x78        /* BN5_CUSTOM_WINDOW: open */
 #define BN5_BATTLE_DECK   0x0203C830u /* the battle's folder as it is drawn, u16 chip | code << 9 (BN6_BATTLE_DECK) */
 
 /* Its Navis as a territory's guardians (docs/BOSSES.md, BN5's Navis;
  * docs/ROM_DATA.md, BN5's Navis): a Navi is type BN5_NAVI_TYPE in the ids
  * table, his AI index a family of six versions (V1, V2, V3, SP, DS, a
  * sixth), each with its 6-byte stats row (BN5_ENEMY_STATS) */
-#define BN5_NAVI_TYPE     1
+#define BN5_NAVI_TYPE     1           /* a Navi's type in the ids table */
 #define BN5_STORY_BATTLES 0x08113CD8u /* its story's battle records by number, 16 bytes each (its Navis' V1-V3 among them: KnightMan V1 0x21) */
-#define BN5_STORY_BATTLE_COUNT 0x69
+#define BN5_STORY_BATTLE_COUNT 0x69 /* the records there */
 #define BN5_OPT_RESULTS   0x02     /* BattleSettings +8 options: its results screen and reward after a win (a V1 story record lacks it) */
-#define BN5_OPT_RUN       0x20     /* ... running allowed (its random battles), as BN6's */
+#define BN5_OPT_RUN       0x20     /* BattleSettings +8 options: running allowed (its random battles), as BN6's */
 #define BN5_CHIP_KIND     6        /* a chip record's +6: its kind, 0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Recovery, 5 Plus, 6 Sword, 7 Invisible,
                                     * 8 Cursor, 9 Obstacle, 10 Wind, 11 Break, 12 none */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
@@ -112,10 +112,10 @@
  * unites with (BN5_SOUL_FLAGS) */
 enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN };
 
-#define BN5_MODE_GAME      0x04
-#define BN5_MODE_GAME_OVER 0x14
-#define BN5_SUB_MAP        0x04
-#define BN5_SUB_BATTLE_INIT 0x08
-#define BN5_SUB_BATTLE     0x0C
+#define BN5_MODE_GAME      0x04   /* BN5_TOOLKIT: the game (the main mode, the index eToolkit +0 points at) */
+#define BN5_MODE_GAME_OVER 0x14   /* BN5_TOOLKIT: its GAME OVER */
+#define BN5_SUB_MAP        0x04   /* BN5_GAMESTATE: on the map */
+#define BN5_SUB_BATTLE_INIT 0x08  /* BN5_GAMESTATE: a battle beginning */
+#define BN5_SUB_BATTLE     0x0C   /* BN5_GAMESTATE: in battle */
 
 #endif

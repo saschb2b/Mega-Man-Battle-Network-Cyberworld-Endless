@@ -11,9 +11,9 @@
 #define BN6_TOOLKIT_CHIPS     0x48        /* eToolkit +0x48: the chips' data (0x02002178): folders of 30 u16 from +0, 0x3C each (bn6f sub_8021AB4) */
 #define BN6_TOOLKIT_STEPS     0x40        /* eToolkit S2001c04_Ptr: the encounter roll's walk (bn6f sub_80AA4C0): +0x12 the distance walked since the
                                              last battle (its chance rises with it, a check each 0x40), +0x14 where it last checked; both cleared as a map is entered */
-#define BN6_STEPS_WALKED      0x12
-#define BN6_STEPS_CHECKED     0x14
-#define BN6_FOLDER_ENTRIES    30
+#define BN6_STEPS_WALKED      0x12        /* S2001c04 +0x12: the distance walked since the last battle */
+#define BN6_STEPS_CHECKED     0x14        /* S2001c04 +0x14: where the roll last checked */
+#define BN6_FOLDER_ENTRIES    30          /* the chips in a folder */
 /* each enemy id's reward row in ROM, 20 u16 entries (docs/ROM_DATA.md) */
 #define BN6_DROP_ROWS         0x080AC718u
 #define BN6_BATTLE_REWARD     0x0200A00Cu /* the reward picked as the battle ended (u16, a row's entry) */
@@ -71,35 +71,35 @@
 #define BN6_NPC_Z16           0x2E
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31) */
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
-#define BN6_MUSIC_STOPPED     (1u << 31)
+#define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
-#define BN6_PHASE_CUSTOM      0x08
+#define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
 #define BN6_CUSTOM_HAND       (BN6_CUSTOM_SCREEN + 0x06) /* the chips it offers, the first of BN6_BATTLE_DECK */
 #define BN6_CUSTOM_CURSOR     (BN6_CUSTOM_SCREEN + 0x07) /* the slot under the cursor, 0-4 the top row, BN6_CUSTOM_OK on OK */
 #define BN6_CUSTOM_PICKED     (BN6_CUSTOM_SCREEN + 0x08) /* the chips picked */
-#define BN6_CUSTOM_OK         10
+#define BN6_CUSTOM_OK         10          /* BN6_CUSTOM_CURSOR: on OK */
 #define BN6_BATTLE_DECK       0x0203CDB0u /* the battle's folder as it is drawn, u16 chip | code << 9 (26 *); used chips leave it, 0xFFFF after the rest */
 #define BN6_PA_STAR_LIMIT     0x08029606u /* bn6f sub_80295C8, a Program Advance of one chip in codes in a row: cmp r2, #1 (0x2A01), one * of its three at most */
 #define BN6_PA_STAR_ANY       0x2A03      /* ... cmp r2, #3: three *, the All * helper's (docs/ROM_DATA.md) */
 #define BN6_FIELD_PANELS      0x02039AE0u /* the field's panels (bn6f PanelData), 8 a row from column 0, rows 0-4, each: */
-#define BN6_PANEL_SIZE        0x20
+#define BN6_PANEL_SIZE        0x20        /* a panel's size */
 #define BN6_PANEL_TYPE        0x02        /* Type: 1 a hole, 2 a plain panel, 4 poison, 0x0B and 0x0C a conveyor left and right */
 #define BN6_PANEL_ALLIANCE    0x03        /* Alliance: 0 MegaMan's side, 1 the enemies' */
 #define BN6_PANEL_FLAGS       0x14        /* Flags, u32: BN6_PANEL_STRUCK while an enemy's attack is on it (BN6 lights it yellow) */
-#define BN6_PANEL_HOLE        1
-#define BN6_PANEL_PLAIN       2
-#define BN6_PANEL_POISON      4
-#define BN6_PANEL_STRUCK      0x40000000u
+#define BN6_PANEL_HOLE        1           /* BN6_PANEL_TYPE: a hole */
+#define BN6_PANEL_PLAIN       2           /* BN6_PANEL_TYPE: a plain panel */
+#define BN6_PANEL_POISON      4           /* BN6_PANEL_TYPE: poison */
+#define BN6_PANEL_STRUCK      0x40000000u /* BN6_PANEL_FLAGS: an enemy's attack on the panel */
 #define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/ROM_DATA.md) */
 #define BN6_T1_OBJECTS        0x0203A9B0u /* eT1BattleObject0: viruses and navis in a battle (BattleObject), */
 #define BN6_T1_SIZE           0xD8        /* ... each this long, its fields from its start: */
-#define BN6_T1_COUNT          0x20
+#define BN6_T1_COUNT          0x20        /* 32 of them */
 #define BN6_T1_IN_PLAY        0x00        /* bit 0 in play */
 #define BN6_T1_ACTION         0x09        /* CurAction: MegaMan's BN6_MEGAMAN_READY when he can act, 0x10 a step, 0x12-0x16 a chip */
-#define BN6_MEGAMAN_READY     0x08
+#define BN6_MEGAMAN_READY     0x08        /* BN6_T1_ACTION: MegaMan's when he can act */
 #define BN6_T1_PANEL_X        0x12        /* PanelX and PanelY: its column and row, 0 off the field */
 #define BN6_T1_PANEL_Y        0x13
 #define BN6_T1_FUTURE_X       0x14        /* FuturePanelX and Y: the panel it is headed for (a thrown attack's landing), 0 none */
@@ -109,18 +109,18 @@
 #define BN6_T1_MAX_HP         0x26
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
 #define BN6_T3_OBJECTS        0x0203CFE0u /* eT3BattleObject0: the battle's attacks and effects, BN6_T1_SIZE each, its fields as T1's */
-#define BN6_T3_COUNT          0x20
+#define BN6_T3_COUNT          0x20        /* 32 of them */
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's (NaviStats) */
 #define BN6_NAVI_HP           (BN6_NAVI_STATS + 0x40) /* CurHP and MaxHP, u16 */
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)
 #define BN6_NAVI_BASE_MAX_HP  (BN6_NAVI_STATS + 0x3E) /* MaxBaseHP, u16: HPMemory counts into it, programs on top (bn6f NaviStats) */
 #define BN6_NAVI_REG          (BN6_NAVI_STATS + 0x09) /* RegUP: Reg memory in MB, made again from the RegUP items as one is given */
-#define BN6_NAVI_ATTACK       (BN6_NAVI_STATS + 0x01) /* Attack, Speed and Charge: the buster's levels less one (0-4), as the NaviCust's RUN */
-#define BN6_NAVI_SPEED        (BN6_NAVI_STATS + 0x02) /* makes them (bn6f applyNavicustPrograms_813C684: Attack+1 to ChargMAX, BustPack, */
-#define BN6_NAVI_CHARGE       (BN6_NAVI_STATS + 0x03) /* each capped at 4); a battle reads its copy's (a shot's damage Attack + 1, sub_801265A) */
+#define BN6_NAVI_ATTACK       (BN6_NAVI_STATS + 0x01) /* Attack, Speed and Charge: the buster's levels less one (0-4), as the NaviCust's RUN ... */
+#define BN6_NAVI_SPEED        (BN6_NAVI_STATS + 0x02) /* ... makes them (bn6f applyNavicustPrograms_813C684: Attack+1 to ChargMAX, BustPack, ... */
+#define BN6_NAVI_CHARGE       (BN6_NAVI_STATS + 0x03) /* ... each capped at 4); a battle reads its copy's (a shot's damage Attack + 1, sub_801265A) */
 #define BN6_NAVICUST_BUGS     0x0200431Cu /* the NaviCust's bug counts, one byte per type 0-15 (docs/NAVICUST.md) */
 #define BN6_NAVICUST_PLACED   0x02004190u /* the programs on the NaviCust's board, 8 bytes each: +0 u16 program * 4 + colour variant, +3 column, +4 row, +5 turns; 0 ends */
-#define BN6_NAVICUST_PLACED_MAX 25
+#define BN6_NAVICUST_PLACED_MAX 25        /* the most programs the board holds */
 #define BN6_NAVICUST_SLOTS    49          /* the list's room, as the game's compile walks it (holes where a program was taken off) */
 #define BN6_NAVICUST_GRID     0x0200414Cu /* the board as a 7x7 grid, a byte a cell: its placed program's index + 1, 0 none (bn6f sub_813B9B4; docs/NAVICUST.md) */
 #define BN6_PROGRAM_ITEMS     0x90        /* key item 0x90 + program * 4 + variant: how many of it MegaMan has, on the board or not */
@@ -148,39 +148,39 @@
  * hook on its input took (7 Save); the state table's pointer to its input
  * handler, and that handler; the grey's store to Save's colour */
 #define BN6_PET_MENU          0x0200DF20u
-#define BN6_PET_CURSOR        (BN6_PET_MENU + 0x04)
-#define BN6_PET_MENU_OPEN     (BN6_PET_MENU + 0x05)
+#define BN6_PET_CURSOR        (BN6_PET_MENU + 0x04) /* the cursor: 6 Comm, 7 Save */
+#define BN6_PET_MENU_OPEN     (BN6_PET_MENU + 0x05) /* bit 0 open */
 #define BN6_PET_HOLD          (BN6_PET_MENU + 0x09) /* a count that holds its input off */
-#define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F)
+#define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F) /* the entry the engine's hook on its input took (7 Save) */
 #define BN6_KEYS_PRESSED      0x0200A272u           /* eJoypad +2: the keys just pressed (u16, the GBA's bits) */
-#define BN6_PET_INPUT_PTR     0x08120B1Cu
-#define BN6_PET_INPUT         0x08120B91u
-#define BN6_PET_GREY_SAVE     0x08120F26u
+#define BN6_PET_INPUT_PTR     0x08120B1Cu /* the state table's pointer to its input handler */
+#define BN6_PET_INPUT         0x08120B91u /* that handler (Thumb) */
+#define BN6_PET_GREY_SAVE     0x08120F26u /* the grey's store to Save's colour */
 /* The KeyItem screen's words (docs/ROM_DATA.md, the PET): the names'
  * archive (uncompressed, an entry per id) and the literals that point at
  * it (the KeyItem screen's, the text scripts', the shop's, SubChip's); the
  * descriptions' (LZ77) and the literal the screen runs them through */
-#define BN6_KEY_NAMES         0x0873B938u
-#define BN6_KEY_NAMES_PTRS    { 0x08042034u, 0x0804761Cu, 0x081265FCu, 0x0812A870u }
-#define BN6_KEY_DESCS         0x0873BD88u
-#define BN6_KEY_DESC_PTR      0x0812A9C4u
+#define BN6_KEY_NAMES         0x0873B938u /* the key items' names: an archive, uncompressed, an entry per id */
+#define BN6_KEY_NAMES_PTRS    { 0x08042034u, 0x0804761Cu, 0x081265FCu, 0x0812A870u } /* the literals that point at it: the KeyItem screen's, the text scripts', the shop's, SubChip's */
+#define BN6_KEY_DESCS         0x0873BD88u /* their descriptions' archive (LZ77) */
+#define BN6_KEY_DESC_PTR      0x0812A9C4u /* the literal the screen runs them through */
 /* The E-Mail screen's (docs/ROM_DATA.md, the PET): senders (script 2n) and
  * subjects (2n + 1), and bodies (n), both LZ77, each read through a literal
  * holding its unpacked buffer; a row of 4 bytes a mail (its icon, bit 7 Lan's
  * HP, its places in the sorts); the list of mail ids, newest first, and its
  * count; the flags per mail: received, unread, read */
-#define BN6_MAIL_TEXT         0x086D10D8u
-#define BN6_MAIL_TEXT_PTR     0x08129E90u
-#define BN6_MAIL_TEXT_BUF     0x02025700u
-#define BN6_MAIL_BODIES       0x086CE598u
-#define BN6_MAIL_BODY_PTR     0x0812A12Cu
-#define BN6_MAIL_BODY_BUF     0x0201C700u
-#define BN6_MAIL_TABLE        0x0812A2F8u
-#define BN6_MAIL_LIST         0x02006530u
-#define BN6_MAIL_COUNT        0x02001140u
-#define BN6_FLAG_MAIL_GOT     0x1CA0
-#define BN6_FLAG_MAIL_NEW     0x1D20
-#define BN6_FLAG_MAIL_READ    0x1DA0
+#define BN6_MAIL_TEXT         0x086D10D8u /* the senders (script 2n) and subjects (2n + 1), LZ77 */
+#define BN6_MAIL_TEXT_PTR     0x08129E90u /* the literal they are read through */
+#define BN6_MAIL_TEXT_BUF     0x02025700u /* their unpacked buffer */
+#define BN6_MAIL_BODIES       0x086CE598u /* the bodies (script n), LZ77 */
+#define BN6_MAIL_BODY_PTR     0x0812A12Cu /* the literal they are read through */
+#define BN6_MAIL_BODY_BUF     0x0201C700u /* their unpacked buffer */
+#define BN6_MAIL_TABLE        0x0812A2F8u /* a row of 4 bytes a mail: its icon (bit 7 Lan's HP), its places in the sorts */
+#define BN6_MAIL_LIST         0x02006530u /* the mail ids, newest first */
+#define BN6_MAIL_COUNT        0x02001140u /* their count */
+#define BN6_FLAG_MAIL_GOT     0x1CA0      /* + mail: received */
+#define BN6_FLAG_MAIL_NEW     0x1D20      /* + mail: unread */
+#define BN6_FLAG_MAIL_READ    0x1DA0      /* + mail: read */
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
 #define BN6_FLAG_WARP_OFF     0x16F0      /* + n: the map's warp trigger n does nothing */
 #define BN6_FLAG_NO_ENCOUNTERS 0x1700     /* checkThenStartBattle skips random battles while set (a BBS request sets it); cleared on entering a map */
@@ -192,11 +192,11 @@
 #define BN6_TOOLKIT_PACK      0x4C        /* eToolkit: the pack, 12 bytes a chip id: a count (99 at most) per code of its record's four */
 #define BN6_CHIP_KEYS         0x020008A0u /* a key byte per chip id */
 #define BN6_CHIP_KEY_XOR      0x17        /* (Gregar; Falzar 0x81) */
-#define BN6_FLAG_HEAT_CROSS   0x00E2      /* CROSSSELECT entries, Gregar's five */
-#define BN6_FLAG_ELEC_CROSS   0x00E3
-#define BN6_FLAG_SLASH_CROSS  0x00E4
-#define BN6_FLAG_ERASE_CROSS  0x00E5
-#define BN6_FLAG_CHARGE_CROSS 0x00E6
+#define BN6_FLAG_HEAT_CROSS   0x00E2      /* CROSSSELECT entries, Gregar's five: HeatCross */
+#define BN6_FLAG_ELEC_CROSS   0x00E3      /* ElecCross */
+#define BN6_FLAG_SLASH_CROSS  0x00E4      /* SlashCross */
+#define BN6_FLAG_ERASE_CROSS  0x00E5      /* EraseCross */
+#define BN6_FLAG_CHARGE_CROSS 0x00E6      /* ChargeCross */
 
 /* Per internet group tables (index group - 0x80) */
 #define BN6_NPC_LISTS         0x080347E0u /* NPCList_maps80: per-map lists of NPC script pointers */
@@ -204,7 +204,7 @@
 #define BN6_ENTER_GROUP       0x0803093Cu /* EnterMap_InternetMapGroupJumptable: per-group map loaders */
 #define BN6_OBJ_SPAWNERS      0x0803483Cu /* InternetSpawnMapObjectJumptable: per-group spawn routines */
 #define BN6_MAP_MUSIC         0x080360E4u /* per chapter (GameState+7): (group, per-map song bytes) entries of 8 bytes, ending 0xFF */
-#define BN6_MAP_MUSIC_LISTS   3
+#define BN6_MAP_MUSIC_LISTS   3           /* its lists, one a chapter */
 #define BN6_MYSTERY_DATA      0x080A484Cu /* InternetMysteryDataMapGroupEntries: (group, per-map lists), ends with 1 */
 #define BN6_MYSTERY_PICKS     0x02004348u /* per flag 0x1400+n: chosen placement and content */
 
@@ -212,9 +212,9 @@
 #define BN6_CHAT_FONT         0x086AACACu /* the chat box's font: 16x12 4bpp glyphs, 0x60 bytes per character code */
 #define BN6_CHAT_FONT_WIDTHS  0x08043C74u /* ... its widths in pixels, a byte per code */
 #define BN6_TALK_PROBES       0x0809F164u /* the player's 8 facing probes (bn6f byte_809DC2C): s32 x, y, z offsets (16.16), u8 radius, u8 z reach, flags; 24 bytes each */
-#define BN6_TALK_PROBE_SIZE   24
-#define BN6_TALK_PROBE_Y      4
-#define BN6_TALK_PROBE_RADIUS 12
+#define BN6_TALK_PROBE_SIZE   24          /* a probe's size */
+#define BN6_TALK_PROBE_Y      4           /* its y offset (s32, 16.16) */
+#define BN6_TALK_PROBE_RADIUS 12          /* its radius (u8) */
 #define BN6_DIALOGUE_LOCK     0x0200ACE0u /* eStruct200ace0 +0: 1 while a non-NPC dialogue holds the player (no talking to NPCs) */
 #define BN6_FLAG_PLAYER_CAN_MOVE 0x1714  /* EVENT_PLAYER_CAN_MOVE */
 #define BN6_FLAG_DIALOGUE_1718   0x1718  /* set by the game's non-NPC dialogue lock */
@@ -295,24 +295,24 @@
                                              in the battle's count it spends one (0x0800F4B2), with none the base chip runs */
 #define BN6_DARK_BASES        0x08010D98u /* ... the base chips' routines, 10 bytes each, by DarkChipID: push {lr}; movs r0,#chip (Sword 0x47, Thunder
                                              0x1E, Recov10 0x9A, Invisibl 0xB1, Atk+10 0xC0) */
-#define BN6_DARK_BASE_STEP    10
+#define BN6_DARK_BASE_STEP    10          /* the bytes from one base chip's routine to the next in BN6_DARK_BASES */
 #define BN6_BATTLE_BUGFRAGS   0x0203F7E0u /* the battle's BugFrags, u32 a side (+ alliance x 4), the save's copied as it begins (bn6f dword_203F7E0) */
 #define BN6_RECOVERY_AMOUNTS  0x080EDBB0u /* u16 by a recovery chip's subfamily: 10, 30 .. 300, 1000 (DrkRecov's, the ninth) */
 #define BN6_BBS_ARCHIVES      0x0813FE2Cu /* the BBS's text archives (bn6f off_813E04C), 12 words; the fourth, LZ77 (Falzar's CompText87E9578), */
-#define BN6_BBS_DARK_ARCHIVE  3
+#define BN6_BBS_DARK_ARCHIVE  3           /* the fourth of BN6_BBS_ARCHIVES, the DarkChip post's */
 #define BN6_BBS_DARK_SCRIPT   27          /* ... its script 27 a post on DarkChips, "A dar...DarkChip!?" */
 #define BN6_FLAME_SPRITE      0x3C        /* sprite list 7's blue flame (uncompressed, 1612 bytes), which no map object lists */
 #define BN6_FLAME_SLOT        0x54        /* ... and a list-7 number Gregar leaves on its placeholder sprite, the purple copy's */
 
 
 /* Main modes (main_subsystemJumpTable) and game-state sub-modes */
-#define BN6_MODE_START_SCREEN 0x00
-#define BN6_MODE_GAME         0x04
-#define BN6_MODE_GAME_OVER    0x14
-#define BN6_SUB_MAP           0x04
-#define BN6_SUB_BATTLE_INIT   0x08
-#define BN6_SUB_BATTLE        0x0C
-#define BN6_SUB_PET           0x18   /* the PET's menu, opened by START on the map (bn6f sub_8005AF4) */
+#define BN6_MODE_START_SCREEN 0x00   /* BN6_TOOLKIT: the start screen (the main mode, the index eToolkit +0 points at) */
+#define BN6_MODE_GAME         0x04   /* BN6_TOOLKIT: the game */
+#define BN6_MODE_GAME_OVER    0x14   /* BN6_TOOLKIT: its GAME OVER */
+#define BN6_SUB_MAP           0x04   /* BN6_GAMESTATE: on the map */
+#define BN6_SUB_BATTLE_INIT   0x08   /* BN6_GAMESTATE: a battle beginning */
+#define BN6_SUB_BATTLE        0x0C   /* BN6_GAMESTATE: in battle */
+#define BN6_SUB_PET           0x18   /* BN6_GAMESTATE: the PET's menu, opened by START on the map (bn6f sub_8005AF4) */
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
