@@ -185,7 +185,17 @@ engine (`src/emu/guest.c`, epic #57):
   Undernet (10-12), which the same tuning left at twice the seams.
 - [x] Its areas' themes, from its own map-music lists: ACDC Area, SciLab
   and End Area its net theme (song 0x13), Nebula Area its Undernet's
-  (0x14).
+  (0x14). Its lists name no other song for any of its net areas: 0x13
+  for ACDC Area, the other areas' maps group 0x86 holds (ACDC Area 3,
+  Oran Area 3, SciLab 3, End Area 2 and 5), its homepages and its object
+  comps, 0x14 for the Undernet and Nebula Area, 0x10 for its first comp
+  (group 0x80). Oran Area, SciLab and End Area's own groups (0x91-0x93)
+  are in no list: a warp into them stops the music (song 0x63, as in
+  BN6), and how BN5's own ways between its areas keep a theme playing
+  there is not traced; End Area's maps that are listed (2 and 5) play
+  0x13, its theme here. The rest of its music its scripts and code start
+  (direct calls play 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23; its
+  Liberation Missions' among them, not traced).
 - [x] Its battle music: its random battles' theme and its bosses' (songs
   0x15 and 0x16, named in its battle records as BN6's are), copied after
   its areas' themes and named in the records of battles on its areas'
@@ -194,7 +204,13 @@ engine (`src/emu/guest.c`, epic #57):
   Area's, Nebula Area's), its record, tiles, map, palette and animations
   copied after BN6's 22 backgrounds, in copies of BN6's tables the
   game's loader is pointed at (`src/gfx/xbackdrop.c`).
-- [ ] Its towns' music.
+- [ ] Its towns' music. Its lists name ACDC Town's (group 0x00): the
+  town 0x03, its houses (maps 1-6) 0x04, map 7 0x05, maps 8-11 0x0C;
+  group 0x01's maps 0x05 and 0x0C; in one story state (its third list)
+  0x0C throughout both. Its other real-world groups play what their
+  scripts start. Each of its music songs (0x01-0x24, 0x0A empty) is one
+  xsong.c can copy (sequences of 368 to 8324 bytes, no MEMACC, all on
+  voice group `0x081547A8`); waiting on a town of its own for the run.
 - [x] Its bystanders on its areas' layers: its purple HeelNavi, sprite
   and face, copied into BN6's free space and listed at a number Gregar
   leaves empty in both (`src/layer/xnavi.c`, docs/ROM_DATA.md); it stands,
