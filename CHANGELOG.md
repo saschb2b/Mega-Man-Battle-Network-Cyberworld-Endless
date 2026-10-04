@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A chip BN5's results screen shows is the chip you get.** Where a
+  battle's list of viruses started at an odd address in BN5's ROM, the
+  reward rows were fitted for the wrong viruses: a playtester's results
+  screen showed MrkCan1 S, a chip BN6 has none of, and it came back as
+  200 zenny without a word. Such rewards now show as zenny on BN5's own
+  screen, as the others do.
 - **The split names BN5's areas as the older net's.** MegaMan says "the
   older net's Oran Area" where BN5's area takes a way's place, and "The
   older net's Oran Area it is!" as you choose: two playtesters could not

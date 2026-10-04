@@ -329,7 +329,12 @@ static void rows_fit(uint32_t record) {
 		uint8_t kind = rd8(e);
 		if (kind == 0xF0) break;
 		if (kind != 0x11) continue;
-		int id = rd16(e + 2);
+		/* (a byte at a time: a list can start at an odd address, and a
+		 * halfword read there takes the even one below, the entry's
+		 * panel byte for its id's low half; CanGard's MrkCan1 S showed on
+		 * a playtester's results screen, came back as zenny, session 66) */
+		int id = rd8(e + 2) | rd8(e + 3) << 8;
+		if (emu_debug_on()) fprintf(stderr, "guest: the reward rows of enemy %#x fitted\n", id);
 		if (id <= 0 || id >= 0x200) continue;
 		for (uint32_t i = 0; i < 20; ++i) {
 			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i, o = a - 0x08000000u;
