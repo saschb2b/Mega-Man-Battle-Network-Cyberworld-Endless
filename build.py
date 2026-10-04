@@ -67,13 +67,19 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
+  python3 build.py symbols      what the project has mapped of BN6 Gregar and
+                                BN5 Team Colonel, in docs/symbols (a symbol
+                                file for mGBA and no$gba, JSON and CSV per ROM;
+                                docs/SYMBOLS.md), from the sources
+                                (tools/symbols.py)
   python3 build.py lint [--update]
                                 the code's checks (issue #19): GCC's analyzer,
                                 the functions no build reaches, lizard's
                                 complexity, the ROM offsets docs/ROM_DATA.md
-                                names and the files git tracks, each against
-                                its baseline in tests/lint (--update writes
-                                them anew); a new finding fails
+                                names, the files git tracks, each against its
+                                baseline in tests/lint (--update writes them
+                                anew), and docs/symbols as tools/symbols.py
+                                writes it; a new finding fails
   python3 build.py package      build/port/cyberworld (for PortMaster-New) and the port's zip
 """
 import argparse
@@ -1629,10 +1635,24 @@ def lint_offsets(update):
                         'this list only shrinks: build.py lint --update after naming one', Counter(found), update)
 
 
+def lint_symbols():
+    """docs/symbols and SYMBOLS.md's numbers as tools/symbols.py writes them from
+    the headers, rom.c and ROM_DATA.md, and every name in bn6.h and bn5.h
+    described (docs/SYMBOLS.md)."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
+
+
+def symbols():
+    """docs/symbols from the sources (tools/symbols.py)."""
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py')])
+
+
 def lint(update=False):
     ok = lint_files()
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
+    ok = lint_symbols() and ok
     ok = lint_complexity(update) and ok
     ok = lint_analyzer(update) and ok
     ok = lint_dead(update) and ok
@@ -1641,7 +1661,7 @@ def lint(update=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world', 'symbols'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -1657,6 +1677,8 @@ def main():
     if a.action == 'lint':
         ensure_image()
         sys.exit(lint('--update' in a.rest))
+    if a.action == 'symbols':
+        sys.exit(symbols())
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))
