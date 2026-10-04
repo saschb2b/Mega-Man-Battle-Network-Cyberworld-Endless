@@ -67,11 +67,15 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
-  python3 build.py symbols      what the project has mapped of BN6 Gregar and
+  python3 build.py symbols [--bn6f DIR [--roms DIR]]
+                                what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
                                 file for mGBA and no$gba, JSON and CSV per ROM;
                                 docs/SYMBOLS.md), from the sources
-                                (tools/symbols.py)
+                                (tools/symbols.py); with a bn6f checkout, the
+                                full map with bn6f's functions located in the
+                                ROMs too, in .build/symbols, never committed
+                                (tools/bn6f_match.py)
   python3 build.py lint [--update]
                                 the code's checks (issue #19): GCC's analyzer,
                                 the functions no build reaches, lizard's
@@ -1638,14 +1642,27 @@ def lint_offsets(update):
 def lint_symbols():
     """docs/symbols and SYMBOLS.md's numbers as tools/symbols.py writes them from
     the headers, rom.c and ROM_DATA.md, and every name in bn6.h and bn5.h
-    described (docs/SYMBOLS.md)."""
+    described (docs/SYMBOLS.md); needs no bn6f."""
     sys.stdout.flush()
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
 
 
-def symbols():
-    """docs/symbols from the sources (tools/symbols.py)."""
-    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py')])
+def symbols(rest=()):
+    """docs/symbols from the sources (tools/symbols.py). With --bn6f DIR, a
+    checkout of the bn6f disassembly, the full map too: tools/bn6f_match.py
+    locates its functions in the ROMs (--roms DIR, else the usual ROM
+    folder; a few minutes, on the host), then tools/symbols.py --full writes
+    .build/symbols and SYMBOLS.md's counts. bn6f's names stay out of git
+    (docs/SYMBOLS.md)."""
+    ap = argparse.ArgumentParser(prog='build.py symbols')
+    ap.add_argument('--bn6f', metavar='DIR', help='a checkout of github.com/dism-exe/bn6f: the full map in .build/symbols too')
+    ap.add_argument('--roms', metavar='DIR', default=default_rom_dir(), help='the ROMs, told by their SHA-1')
+    a = ap.parse_args(rest)
+    tools = os.path.join(ROOT, 'tools')
+    if not a.bn6f:
+        return subprocess.call([sys.executable, os.path.join(tools, 'symbols.py')])
+    code = subprocess.call([sys.executable, os.path.join(tools, 'bn6f_match.py'), '--bn6f', a.bn6f, '--roms', a.roms])
+    return code or subprocess.call([sys.executable, os.path.join(tools, 'symbols.py'), '--full'])
 
 
 def lint(update=False):
@@ -1678,7 +1695,7 @@ def main():
         ensure_image()
         sys.exit(lint('--update' in a.rest))
     if a.action == 'symbols':
-        sys.exit(symbols())
+        sys.exit(symbols(a.rest))
     if a.action == 'tour':
         build('host')
         sys.exit(tour(*a.rest[:1]))

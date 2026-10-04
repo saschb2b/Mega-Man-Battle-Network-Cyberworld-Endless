@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""symbols.py [--check]: what this project has mapped of Mega Man Battle
-Network 6: Cybeast Gregar (USA) and Battle Network 5: Team Colonel (USA),
-written for others to use (docs/SYMBOLS.md): per ROM a symbol file that
-mGBA's and no$gba's debuggers load, and the same symbols as JSON and CSV.
+"""symbols.py [--check | --full]: what this project has mapped of Mega Man
+Battle Network 6: Cybeast Gregar (USA) and Battle Network 5: Team Colonel
+(USA), written for others to use (docs/SYMBOLS.md): per ROM a symbol file
+that mGBA's and no$gba's debuggers load, and the same symbols as JSON and
+CSV.
 
 Read from what the engine already keeps, so the files follow it:
 src/emu/bn6.h and bn5.h (RAM and code addresses, the fields of the game's
@@ -11,11 +12,23 @@ offsets of RomLayout and XRomLayout in src/core/rom.c (rom.h's comments
 say what each is) and docs/ROM_DATA.md (each table: where, how it was
 found, how to verify it). Needs no ROM.
 
+With --full, also the full map, for this machine only: the same files with
+the bn6f disassembly's functions and labels that tools/bn6f_match.py
+located in the ROMs (its tables in .build/symbols/match), written to
+.build/symbols with a report of what was located; and SYMBOLS.md's numbers
+of it, numbers only. bn6f states no license, so nothing of its names goes
+into git (docs/SYMBOLS.md).
+
   python3 tools/symbols.py           write docs/symbols/ and SYMBOLS.md's numbers
   python3 tools/symbols.py --check   write nothing: fail where a name in bn6.h or
-                                     bn5.h has no description, or a file differs
-                                     from what it would write (build.py lint)
+                                     bn5.h has no description, or a file in
+                                     docs/symbols differs from what it would write
+                                     (build.py lint; needs no bn6f)
+  python3 tools/symbols.py --full    docs/symbols as above, and .build/symbols
+                                     (build.py symbols --bn6f DIR runs the matcher first)
 """
+import bisect
+import copy
 import csv
 import io
 import json
@@ -25,16 +38,19 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = 'docs/symbols'
+FULL = '.build/symbols'           # the full map: never committed
+MATCH = '.build/symbols/match'    # tools/bn6f_match.py's tables
 DOC = 'docs/SYMBOLS.md'
 ROM_DATA = 'docs/ROM_DATA.md'
 
 # The two ROMs: the header with their addresses, rom.c's layout and its
-# entry, the files' stem, the game as the tables name it and its short title.
+# entry, the files' stem, the game as the tables name it and its short
+# title, tools/bn6f_match.py's table.
 GAMES = (
     dict(key='bn6', stem='bn6-gregar-us', header='src/emu/bn6.h', layout=('RomLayout', 'layouts', 'ROM_BN6_GREGAR_US'),
-         game='BN6 Cybeast Gregar (USA)', title='BN6 Gregar'),
+         game='BN6 Cybeast Gregar (USA)', title='BN6 Gregar', match='bn6f-gregar.csv'),
     dict(key='bn5', stem='bn5-colonel-us', header='src/emu/bn5.h', layout=('XRomLayout', 'xlayouts', 'XROM_BN5_COLONEL_US'),
-         game='BN5 Team Colonel (USA)', title='BN5 Team Colonel'),
+         game='BN5 Team Colonel (USA)', title='BN5 Team Colonel', match='bn6f-bn5.csv'),
 )
 
 # The game's structures whose fields the headers name by their offset alone:
@@ -66,9 +82,11 @@ SIZE_OF = {'BN6_EVENT_FLAG_BYTES': 'BN6_EVENT_FLAGS'}
 REGIONS = ((0x02000000, 0x02040000, 'ram'), (0x03000000, 0x03008000, 'ram'), (0x04000000, 0x04000400, 'io'),
            (0x08000000, 0x08800000, 'rom'))
 
-# the tables' columns
+# the tables' columns; the full map's add bn6f's name, its Falzar address
+# and how it was located
 COLUMNS = ('game', 'rom_sha1', 'name', 'kind', 'address', 'base', 'offset', 'size', 'count', 'value', 'description',
            'verified', 'how', 'source')
+FULL_COLUMNS = COLUMNS + ('bn6f', 'falzar', 'confidence')
 
 
 def read(path):
@@ -235,7 +253,7 @@ def header_symbols(game):
     syms = {}
     for it in items:
         name, value, desc = it['name'], known[it['name']], it['description']
-        s = dict(name=name, description=desc, source=f"{it['path']}:{it['line']}", origin='header')
+        s = dict(name=name, description=desc, source=f"{it['path']}:{it['line']}", origin='header', own=it['comment'])
         syms[name] = s
         m_field = re.fullmatch(r'\(\s*(BN[56]_\w+)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)\s*\)', it['value'])
         m_value = re.match(r'(BN[56]_\w+)(?: \(its \+\w+\))?:', desc or '')
@@ -557,20 +575,146 @@ def rom_data_symbols(game, rows, taken):
         kind = next((kd for a, b, kd in REGIONS if a <= address < b), 'constant')
         syms[name] = dict(name=name, kind=kind, address=address, written=e['written'],
                           description=f"{row['title']}: {label}" if label and label != name else row['title'],
-                          source=f"{ROM_DATA}:{row['line']}", origin='rom_data')
+                          source=f"{ROM_DATA}:{row['line']}", origin='rom_data', given=given(e))
     return syms
+
+
+# ---- tools/bn6f_match.py's tables (the full map) ----
+
+def match_rows(game):
+    """A ROM's table in .build/symbols/match and the bn6f commit it was made
+    from; None where there is none."""
+    path = os.path.join(ROOT, MATCH, game['match'])
+    if not os.path.exists(path):
+        return None, ''
+    with open(path, encoding='utf-8', newline='') as f:
+        rows = list(csv.DictReader(f))
+    commit = next((r['name'] for r in rows if r['kind'] == '# bn6f'), '')
+    return [r for r in rows if not r['kind'].startswith('#')], commit
+
+
+class Functions:
+    """The located functions of a ROM, sorted, for finding the one an address is in."""
+
+    def __init__(self, rows):
+        self.items = sorted((int(r['address'], 16), int(r['size'] or 0), r['name'], pools(r['pools']))
+                            for r in rows if r['kind'] == 'function' and r['address'] and r['size'])
+        self.starts = [i[0] for i in self.items]
+
+    def find(self, a):
+        k = bisect.bisect_right(self.starts, a) - 1
+        if k >= 0 and a < self.items[k][0] + self.items[k][1]:
+            return self.items[k]
+        return None
+
+
+def pools(text):
+    out = []
+    for part in filter(None, (text or '').split(';')):
+        p, q = part.split('-')
+        out.append((int(p, 16), int(q, 16)))
+    return out
+
+
+def match_record(r, a):
+    """A row of tools/bn6f_match.py's table as a symbol: bn6f's name, its
+    Falzar address, its line in bn6f, how it was located and how many
+    references agree."""
+    what = dict(function='', data="bn6f's label: data the located functions name",
+                ram="bn6f's RAM label" if r['confidence'] != 'moved' else
+                "bn6f's RAM label, read here by code that matches bn6f's (falzar: its address there)")
+    refs = int(r['refs']) if r['refs'] else 0
+    return dict(name=r['name'], kind=r['kind'], address=a, size=int(r['size']) if r['size'] else None, mode=r['mode'] or None,
+                description=what[r['kind']], source=f"bn6f {r['source']}" if r['source'] else 'bn6f', origin='match',
+                bn6f=r['name'], falzar=r['falzar'], confidence=r['confidence'], refs=refs,
+                verified=(f'{refs} references agree' if refs > 1 else '1 reference agrees') if refs else '', how='')
+
+
+# what a confidence of tools/bn6f_match.py's tables says
+CONFIDENCE = (
+    ('bytes', "its bytes (bn6f's, made at its Falzar address, what depends on where things are masked) found once in the ROM"),
+    ('calls+bytes', 'its bytes found more than once; the calls, branches and pointers of located functions name this place'),
+    ('neighbours', 'its bytes at the shift from Falzar the located functions before and after it in its file share'),
+    ('calls', "named by the calls, branches and pointers of located functions, all agreeing; its own bytes differ from Falzar's"),
+    ('shift', "estimated: at its neighbours' shift, where most of its known bits (the percentage) are Falzar's"),
+)
+
+
+def bn6f_names(s):
+    """The bn6f names a symbol's source gives it: "bn6f NAME", a name its
+    description opens with (GiveChips (chip, ...), eToolkit: ...), the name
+    beside it in ROM_DATA.md. A define's own comment only: the words it
+    shares with the defines its "..." continues name what they are."""
+    desc = (s.get('own') or '') if s['origin'] == 'header' else s.get('description') or ''
+    names = re.findall(r'bn6f `?([A-Za-z_]\w*)`?', desc)
+    m = re.match(r'([A-Za-z_][A-Za-z0-9_]*)(?=[:,]| \(| \+|$)', desc)
+    if m and re.search(r'[A-Z_0-9]', m.group(1)[1:]):
+        names.append(m.group(1))
+    if s.get('origin') == 'rom_data':
+        names.append(s['name'])
+        if s.get('given'):
+            names.append(s['given'])
+    return list(dict.fromkeys(names))
+
+
+def crosscheck(syms, matches):
+    """Each of our addresses that names a bn6f function or label as what it
+    is or lies in, against where tools/bn6f_match.py put that: the same
+    place; inside the function, or the structure at the offset our comment
+    gives ("eJoypad +2"); a field of the structure the label is; or
+    another place (a disagreement to look into: where it lies instead)."""
+    table = {r['name']: r for r in matches if r['address']}
+    functions = Functions(matches)
+    out = []
+    for s in syms.values():
+        if s['origin'] not in ('header', 'rom_data', 'layout') or 'address' not in s:
+            continue
+        rom = s['kind'] in ('function', 'code', 'rom') or (s['kind'] == 'data' and s['address'] >> 24 == 8)
+        for n in bn6f_names(s):
+            r = table.get(n)
+            if r is None or (r['kind'] == 'function') != (s['kind'] in ('function', 'code', 'rom')):
+                continue   # (a RAM field's comment naming the code that reads it says nothing of where it is)
+            g, size = int(r['address'], 16), int(r['size'] or 0)
+            a = s['address'] & ~1 if r['kind'] == 'function' else s['address']
+            base = syms.get(s.get('base') or '', {})
+            plus = re.search(re.escape(n) + r' ?\+ ?(0x[0-9A-Fa-f]+|\d+)', s.get('description') or '')
+            if a == g:
+                verdict = 'same'
+            elif r['kind'] == 'function' and g <= a < g + size:
+                verdict = 'inside'
+            elif plus and a - g == int(plus.group(1), 0):
+                verdict = 'inside'
+            elif s['kind'] == 'field' and base.get('address') == g:
+                verdict = 'field'
+            else:
+                verdict = 'other'
+            lies = functions.find(a) if rom and verdict == 'other' else None
+            out.append(dict(name=s['name'], address=s['address'], bn6f=n, at=g, verdict=verdict, source=s['source'],
+                            lies=lies[2] if lies else None))
+    return out
 
 
 # ---- the ROM's symbols together ----
 
-def rom_kind(s):
-    """A ROM address's kind, by its comment: code, data, or not told."""
+def rom_kind(s, functions):
+    """A ROM address's kind: a function's entry, code inside one, or data, by
+    the functions located in the ROM (the full map); else by its comment:
+    code, data, or not told. With the function it lies in."""
+    a = s['address'] & ~1
+    f = functions.find(a)
+    if f is not None:
+        start, size, name, inner = f
+        if a == start:
+            return 'function', name
+        if any(p <= a - start < q for p, q in inner):
+            return 'data', name
+        return 'code', name
     desc = s.get('description') or ''
     if s['address'] & 1 and s.get('origin') == 'header' or re.search(CODE_WORDS, desc):
-        return 'code'
+        return 'code', None
     if re.search(DATA_WORDS, desc):
-        return 'data'
-    return 'rom'
+        return 'data', None
+    return 'rom', None
 
 
 # what says a ROM address is code: an instruction, a register argument, a
@@ -583,9 +727,10 @@ DATA_WORDS = (r'\b(tables?|archives?|records?|rows?|lists?|literals?|pointers?|f
 
 
 def build(game, rows):
-    """A ROM's symbols: the header's, RomLayout's and ROM_DATA.md's; each
-    address once, the header's name first; each with the rows of
-    docs/ROM_DATA.md that verify it."""
+    """A ROM's symbols from this project's own sources: the header's,
+    RomLayout's and ROM_DATA.md's; each address once, the header's name
+    first; each with the rows of docs/ROM_DATA.md that verify it. A ROM
+    address whose source does not say what it is stays 'rom' (finish)."""
     header, missing = header_symbols(game)
     info, layout = layout_symbols(game)
     syms = dict(header)
@@ -648,11 +793,46 @@ def build(game, rows):
         if s['kind'] == 'field' and 'address' not in s and base and 'address' in base and not base.get('count') \
                 and base['kind'] != 'field' and isinstance(s.get('offset'), int):
             s['address'] = base['address'] + s['offset']
+    return info, syms, missing
+
+
+def finish(syms, matches=()):
+    """The symbols as a file holds them: each ROM address's kind (rom_kind)
+    and each one's part of the game. With tools/bn6f_match.py's table (the
+    full map), the disassembly's functions and labels located in the ROM
+    join, each at an address none of ours names; where one of ours is, it
+    carries bn6f's name."""
+    syms = copy.deepcopy(syms)
+    functions = Functions(matches)
     for s in syms.values():
         if s['kind'] == 'rom':
-            s['kind'] = rom_kind(s)
+            s['kind'], inside = rom_kind(s, functions)
+            if inside:
+                s['in_function'] = inside
+    at = {}
+    for s in syms.values():
+        if 'address' in s and s['kind'] in ADDRESS_KINDS:
+            # (a Thumb routine's address may carry its bit 0; data and RAM never do)
+            at.setdefault(s['address'] & ~1 if s['kind'] in ('function', 'code', 'rom') else s['address'], []).append(s)
+    for r in matches:
+        if not r['address']:
+            continue
+        a = int(r['address'], 16)
+        ours = [o for o in at.get(a, []) if (o['kind'] in ('function', 'code')) == (r['kind'] == 'function')]
+        if ours:
+            for o in ours:
+                o.update(bn6f=r['name'], falzar=r['falzar'], confidence=r['confidence'])
+                if r['kind'] == 'function':
+                    o.update(mode=r['mode'], size=o.get('size') or (int(r['size']) if r['size'] else None))
+                    o['kind'] = 'function' if o['kind'] in ('rom', 'code') else o['kind']
+                elif o['kind'] == 'rom':
+                    o['kind'] = 'data'
+            continue
+        if r['name'] not in syms:
+            syms[r['name']] = match_record(r, a)
+    for s in syms.values():
         s['system'] = system_of(s)
-    return info, syms, missing
+    return syms
 
 
 # the kinds of symbol that are a place on the bus
@@ -678,8 +858,36 @@ SYSTEMS = (
 
 
 def system_of(s):
+    if s['origin'] == 'match':
+        return file_system(s['source'])
     text = s['name'] if s['origin'] == 'header' else f"{s['name']} {s.get('description') or ''}"
     return next(name for name, rx in SYSTEMS if re.search(rx, text))
+
+
+# bn6f's files by what most of their code does (read from the names bn6f
+# gives their functions; a file holds more than one thing), for the full map
+FILE_SYSTEMS = {
+    'start': 'Engine core', 'main': 'Engine core', 'asm00_0': 'Engine core', 'sprite': 'Graphics', 'asm38': 'Engine core',
+    'asm00_1': 'Battle', 'object': 'Battle', 'asm00_2': 'Battle', 'asm01': 'Battle', 'asm03_0': 'Battle', 'asm29': 'Battle',
+    'asm30_0': 'Battle', 'asm31': 'Battle', 'asm32': 'Battle',
+    'asm02': 'Chips and folders', 'asm03_2': 'Shops and traders', 'chatbox': 'Text and fonts', 'asm37_0': 'NaviCust',
+    'asm03_1_0': 'Maps and the overworld', 'map_script_cutscene': 'Maps and the overworld', 'ow_player': 'Maps and the overworld',
+    'npc': 'Maps and the overworld', 'asm28_0': 'Maps and the overworld', 'asm28_1': 'Maps and the overworld',
+    'asm21': 'Maps and the overworld', 'asm22': 'Maps and the overworld', 'asm23': 'Maps and the overworld',
+    'asm24': 'Maps and the overworld', 'asm25': 'Maps and the overworld', 'asm26': 'Maps and the overworld',
+    'asm27': 'Maps and the overworld', 'asm03_1_1': 'Menus and screens', 'asm33': 'Menus and screens', 'asm34': 'Menus and screens',
+    'asm35': 'Menus and screens', 'asm36': 'Menus and screens', 'reqBBS': 'Menus and screens',
+    'asm37_1': 'Minigames and their maps', 'libs': 'Sound and libraries (m4a, link cable, wireless)',
+}
+
+
+def file_system(source):
+    m = re.search(r'(?:^|\s)(asm|data|maps)/([\w/]+)\.s', source or '')
+    if not m:
+        return 'Other'
+    if m.group(1) == 'maps' or re.fullmatch(r'dat2[1-8]', m.group(2)):
+        return 'Maps and the overworld'
+    return FILE_SYSTEMS.get(m.group(2), 'Other')
 
 
 # ---- the files ----
@@ -717,7 +925,9 @@ def tree(syms):
 
 def entry(s):
     """A symbol as the JSON writes it: the rows of docs/ROM_DATA.md that
-    verify it by their lines (the file's rom_data_rows says what each is)."""
+    verify it by their lines (the file's rom_data_rows says what each is);
+    in the full map, what bn6f calls it, its Falzar address, how it was
+    located and how many references agree."""
     e = dict(name=s['name'], kind=s['kind'])
     if 'address' in s:
         e['address'] = hx(s['address'])
@@ -733,6 +943,9 @@ def entry(s):
     if s.get('rows'):
         e['verified'] = s['rows']
     e['source'] = s['source']
+    for k in ('in_function', 'bn6f', 'falzar', 'confidence', 'refs'):
+        if s.get(k) and not (k == 'bn6f' and s[k] == s['name']):
+            e[k] = s[k]
     if s.get('aliases'):
         e['aliases'] = s['aliases']
     if s.get('alias_of'):
@@ -740,7 +953,7 @@ def entry(s):
     return e
 
 
-def as_json(game, info, syms, rows):
+def as_json(game, info, syms, rows, about):
     """The JSON: the ROM, the rows of docs/ROM_DATA.md its symbols cite
     (each row's title and its words on how to verify it, once), then a
     symbol a line (its fields within it), no spaces between the parts of a
@@ -748,7 +961,7 @@ def as_json(game, info, syms, rows):
     top, types, rest = tree(syms)
     cited = sorted({n for s in syms.values() for n in s.get('rows', [])})
     by_line = {r['line']: r for r in rows}
-    head = dict(game=info['name'], code=info['code'], sha1=info['sha1'], written_by='tools/symbols.py', about=ABOUT,
+    head = dict(game=info['name'], code=info['code'], sha1=info['sha1'], written_by='tools/symbols.py', about=about,
                 counts=counts(syms),
                 rom_data_rows={str(n): dict(title=by_line[n]['title'], how=by_line[n]['how']) for n in cited})
 
@@ -768,42 +981,57 @@ def as_json(game, info, syms, rows):
 ABOUT = ('Addresses, names and descriptions only: facts about the ROM, read from Cyberworld Endless\'s own sources '
          '(src/emu/*.h, src/core/rom.c, docs/ROM_DATA.md). No graphics, text, sound or code of the game. '
          'See docs/SYMBOLS.md.')
+FULL_ABOUT = ('The full map, written on this machine by tools/symbols.py --full: Cyberworld Endless\'s own symbols '
+              '(docs/symbols) and the functions and labels of the bn6f disassembly (github.com/dism-exe/bn6f, commit {}) '
+              'that tools/bn6f_match.py located in this ROM, under bn6f\'s names. bn6f states no license, so its names '
+              'are not redistributed: this file is for use here, not for sharing (docs/SYMBOLS.md). Addresses, names '
+              'and descriptions only; no graphics, text, sound or code of the game.')
 
 
-def as_csv(game, info, syms):
+def as_csv(game, info, syms, columns=COLUMNS):
     out = io.StringIO()
     w = csv.writer(out, lineterminator='\n')
-    w.writerow(COLUMNS)
+    w.writerow(columns)
     for s in sorted(syms.values(), key=lambda s: ('address' not in s, s.get('address', 0), s.get('base') or '',
                                                   s.get('offset') or 0, s['kind'], s['name'])):
         row = dict(game=game['game'], rom_sha1=info['sha1'], name=s['name'], kind=s['kind'], address=fmt(s.get('address'), 8),
                    base=s.get('base') or s.get('of') or '', offset=fmt(s.get('offset')), size=s.get('size') or '',
                    count=s.get('count') or '', value=fmt(s.get('value')) if isinstance(s.get('value'), int) else '',
                    description=s.get('description') or '', verified=s.get('verified') or '', how=s.get('how') or '',
-                   source=s.get('source') or '')
-        w.writerow([row[c] for c in COLUMNS])
+                   source=s.get('source') or '', bn6f=s.get('bn6f') if s.get('bn6f') != s['name'] else '',
+                   falzar=s.get('falzar') or '', confidence=s.get('confidence') or '')
+        w.writerow([row[c] for c in columns])
     return out.getvalue()
 
 
-def as_sym(game, info, syms):
+SYM_HEAD = ('; Written by tools/symbols.py from Cyberworld Endless (github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless):',
+            '; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:',
+            '; beside the ROM with its name (game.gba, game.sym), or mGBA\'s debugger command load-symbols FILE.')
+FULL_SYM_HEAD = ('; The full map, written on this machine by tools/symbols.py --full: Cyberworld Endless\'s own symbols and the',
+                 '; bn6f disassembly\'s functions and labels located in this ROM (tools/bn6f_match.py, bn6f commit {}), bn6f\'s',
+                 '; name after ours where both name one address. bn6f states no license: for use here, not for sharing',
+                 '; (docs/SYMBOLS.md). Beside the ROM with its name (game.gba, game.sym), or mGBA\'s load-symbols FILE.')
+
+
+def as_sym(game, info, syms, head=SYM_HEAD):
     """The no$gba symbol file (problemkaputt.de/gbahlp.htm, "Symbolic Debug
     Info"), which mGBA reads too (src/debugger/symbols.c,
     mDebuggerLoadARMIPSSymbols): an eight-digit address, a space, the name;
-    ; opens a comment. no$gba's .thumb marks Thumb code (mGBA skips what
-    opens with a dot)."""
-    lines = [f'; {info["name"]}, SHA-1 {info["sha1"]} (header code {info["code"]})',
-             '; Written by tools/symbols.py from Cyberworld Endless (github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless):',
-             '; addresses, names and descriptions only. docs/SYMBOLS.md says what is here and how to load it:',
-             '; beside the ROM with its name (game.gba, game.sym), or mGBA\'s debugger command load-symbols FILE.', '']
+    ; opens a comment. no$gba's .thumb and .arm mark a function's code (mGBA
+    skips what opens with a dot). In the full map, a function or label of
+    bn6f's at one of our addresses carries its name after ours."""
+    lines = [f'; {info["name"]}, SHA-1 {info["sha1"]} (header code {info["code"]})', *head, '']
     out = []
     for s in syms.values():
         if 'address' not in s or s['kind'] not in ADDRESS_KINDS:
             continue
         a = s['address'] & ~1 if s['kind'] in ('function', 'code') else s['address']
+        names = [s['name']] + ([s['bn6f']] if s.get('bn6f') and s['bn6f'] != s['name'] else [])
         mode = s.get('mode') or ('thumb' if s['kind'] == 'code' and s['address'] & 1 else None)
         if s['kind'] == 'function' and mode:
             out.append((a, 0, '.' + mode))
-        out.append((a, 1, s['name']))
+        for k, n in enumerate(names):
+            out.append((a, 1 + k, n))
     for a, k, n in sorted(set(out)):
         lines.append(f'{a:08X} {n}')
     return '\n'.join(lines) + '\n'
@@ -820,6 +1048,13 @@ def counts(syms):
 
 MARK = '<!-- tools/symbols.py writes this part: {} -->'
 END = '<!-- end of what tools/symbols.py writes -->'
+# bn6f's names made of an address (IDA's), and names that end in one
+AUTO_NAME = re.compile(r'(sub|nullsub|dead|unk)_[0-9A-Fa-f]+$')
+ADDRESS_END = re.compile(r'_[0-9A-Fa-f]{6,8}$')
+
+
+def pct(n, total):
+    return f'{n:,} of {total:,} ({100 * n / total:.1f}%)' if total else '0'
 
 
 def holdings(results):
@@ -845,6 +1080,97 @@ def holdings(results):
     return '\n'.join(out)
 
 
+def coverage(located, by_file=False):
+    """bn6f's functions located in each ROM: in all, by how, named ones
+    apart, by part of the game; by bn6f's file in the local report. The
+    numbers only: no name of bn6f's."""
+    every = [r for r in located[0][2] if r['kind'] == 'function']   # (Gregar's table lists every function)
+    found = {g['key']: {r['name']: r for r in m if r['kind'] == 'function' and r['address']} for g, w, m, c, k in located}
+    games = [g for g, *_ in located]
+    out = ['| bn6f\'s functions | ' + ' | '.join(g['title'] + (' (partial)' if g['key'] == 'bn5' else '') for g in games) + ' |',
+           '| --- | ' + ' | '.join('---:' for _ in games) + ' |']
+
+    def row(title, subset):
+        cells = [pct(sum(1 for r in subset if r['name'] in found[g['key']]), len(subset)) for g in games]
+        out.append(f'| {title} | ' + ' | '.join(cells) + ' |')
+    row('All (thumb_func_start, thumb_local_start, arm_func_start, arm_local_start)', every)
+    row('... global (thumb_func_start, arm_func_start)', [r for r in every if r['scope'] == 'global'])
+    named = [r for r in every if not AUTO_NAME.match(r['name'])]
+    row('... named by bn6f (not sub_ and an address)', named)
+    row('... of them with no address in the name', [r for r in named if not ADDRESS_END.search(r['name'])])
+    for how, words in CONFIDENCE:
+        cells = [f'{sum(1 for r in found[g["key"]].values() if r["confidence"].split()[0] == how):,}' for g in games]
+        out.append(f'| Located by `{how}` | ' + ' | '.join(cells) + ' |')
+    for kind, title, ok in (('data', 'Data labels the located functions name', ('calls', 'bytes', 'neighbours', 'calls+bytes')),
+                            ('ram', "RAM labels their literals hold at Falzar's address", ('calls',)),
+                            ('ram', 'RAM labels their literals hold elsewhere', ('moved',))):
+        cells = [f'{sum(1 for r in m if r["kind"] == kind and r["address"] and r["confidence"] in ok):,}' for g, w, m, c, k in located]
+        out.append(f'| {title} | ' + ' | '.join(cells) + ' |')
+    groups = [('Part of the game (bn6f\'s files)', lambda r: file_system(r['source']))]
+    if by_file:
+        groups.append(('bn6f\'s file', lambda r: '`' + r['source'].split(':')[0] + '`'))
+    for title, key in groups:
+        out += ['', f'| {title} | ' + ' | '.join(g['title'] for g in games) + ' |', '| --- | ' + ' | '.join('---:' for _ in games) + ' |']
+        parts = {}
+        for r in every:
+            parts.setdefault(key(r), []).append(r)
+        for part in (sorted(parts, key=lambda p: -len(parts[p])) if not by_file or title.startswith('Part') else parts):
+            cells = [pct(sum(1 for r in parts[part] if r['name'] in found[g['key']]), len(parts[part])) for g in games]
+            out.append(f'| {part} | ' + ' | '.join(cells) + ' |')
+    return '\n'.join(out)
+
+
+def crosschecks(located, named=False):
+    """Our addresses that name a bn6f function or label, against the matcher;
+    and the match tables' own checks: RAM as Falzar's, no two functions
+    over each other, no reference naming another place. Counts only; with
+    named (the local report), which ones."""
+    out = []
+    for g, whole, m, cross, commit in located:
+        verdicts = {}
+        for c in cross:
+            verdicts[c['verdict']] = verdicts.get(c['verdict'], 0) + 1
+        out.append(f'- {g["title"]}: {len(cross)} times an address of ours names a bn6f function or label the matcher '
+                   f'located: {verdicts.get("same", 0)} at the same place, {verdicts.get("inside", 0)} inside the function or '
+                   f'structure, {verdicts.get("field", 0)} a field of the structure it is, {verdicts.get("other", 0)} elsewhere.')
+        for c in cross if named else ():
+            out.append(f'  - `{c["name"]}` ({c["source"]}) at {hx(c["address"])} names {c["bn6f"]}: {c["verdict"]}'
+                       + (f', the matcher put it at {hx(c["at"])}' if c['verdict'] == 'other' else '')
+                       + (f'; the address lies in {c["lies"]}' if c['lies'] else '') + '.')
+        ram = [r for r in m if r['kind'] == 'ram' and r['address']]
+        moved = [r for r in ram if r['confidence'] == 'moved']
+        if g['key'] == 'bn6':
+            out.append(f'- {g["title"]}: of the {len(ram):,} RAM labels the located functions\' literals hold, '
+                       f'{len(ram) - len(moved):,} read bn6f\'s (Falzar\'s) address'
+                       + (': ' + ', '.join(f'`{r["name"]}` at {r["address"]}, not {r["falzar"]}' for r in moved) if named and moved else '')
+                       + '.')
+        spans = sorted((int(r['address'], 16), int(r['address'], 16) + int(r['size']), r['name']) for r in m
+                       if r['kind'] == 'function' and r['address'] and r['size'] and int(r['address'], 16) >> 24 == 8)
+        over = [(a, b) for a, b in zip(spans, spans[1:]) if b[0] < a[1]]
+        against = [r for r in m if r['kind'] == 'function' and r['against']]
+        out.append(f'- {g["title"]}: {len(spans):,} located functions laid out as in Falzar, {len(over)} lying over another; '
+                   f'{len(against)} that a located reference names elsewhere'
+                   + (': ' + ', '.join(f'`{r["name"]}` ({r["against"]})' for r in against) if named and against else '') + '.')
+    return '\n'.join(out)
+
+
+def located_block(located):
+    """SYMBOLS.md's numbers of the full map: what was located, and the checks."""
+    commits = {commit for *_, commit in located if commit}
+    made = f'Made from bn6f at commit `{min(commits)[:7]}`.' if len(commits) == 1 else 'Made from bn6f.'
+    return made + '\n\n' + coverage(located) + '\n\n' + crosschecks(located)
+
+
+def report(located):
+    """The full map's report, for this machine: the numbers by bn6f's file,
+    and each check by name."""
+    commits = sorted({commit for *_, commit in located if commit})
+    return ('# The full map: what tools/bn6f_match.py located\n\n'
+            'Written by `tools/symbols.py --full` from bn6f ' + (', '.join(commits) or '(commit not known)') + '. '
+            'It names bn6f\'s functions and labels, so it stays on this machine (docs/SYMBOLS.md).\n\n'
+            + coverage(located, by_file=True) + '\n\n' + crosschecks(located, named=True) + '\n')
+
+
 def doc_with(text, blocks):
     """The page with each of its marked parts written anew; None where a mark is missing."""
     for name, block in blocks.items():
@@ -857,18 +1183,53 @@ def doc_with(text, blocks):
     return text
 
 
+def full_map(results, rows, files, problems):
+    """The full map into files (.build/symbols): each ROM's symbols with
+    tools/bn6f_match.py's table merged in, and the report. Returns
+    SYMBOLS.md's block of its numbers, or None where Gregar's table is
+    missing."""
+    located = []
+    for g, info, raw, syms in results:
+        matches, commit = match_rows(g)
+        if matches is None:   # (BN5's ROM is not everyone's: its map is left out, Gregar's is not)
+            note = f'{MATCH}/{g["match"]}: none, as its ROM was not found (python3 build.py symbols --bn6f DIR makes it)'
+            if g['key'] == 'bn6':
+                problems.append(note)
+            else:
+                print(f'  {note}')
+            continue
+        whole = finish(raw, matches)
+        located.append((g, whole, matches, crosscheck(whole, matches), commit))
+        files[f'{FULL}/{g["stem"]}.sym'] = as_sym(g, info, whole, tuple(h.format(commit[:7]) for h in FULL_SYM_HEAD))
+        files[f'{FULL}/{g["stem"]}.json'] = as_json(g, info, whole, rows, FULL_ABOUT.format(commit[:7]))
+        files[f'{FULL}/{g["stem"]}.csv'] = as_csv(g, info, whole, FULL_COLUMNS)
+    if not located or located[0][0]['key'] != 'bn6':
+        return None
+    files[f'{FULL}/located.md'] = report(located)
+    for g, whole, m, cross, commit in located:
+        print(f'{g["stem"]} (full map): {len(whole)} symbols; cross-check: {sum(c["verdict"] != "other" for c in cross)} agree, '
+              f'{sum(c["verdict"] == "other" for c in cross)} not')
+    return located_block(located)
+
+
 def main():
-    check = '--check' in sys.argv[1:]
+    check, full = '--check' in sys.argv[1:], '--full' in sys.argv[1:]
     rows = rom_data_rows()
     files, problems, results = {}, [], []
     for g in GAMES:
-        info, syms, missing = build(g, rows)
+        info, raw, missing = build(g, rows)
         problems += missing
-        results.append((g, info, syms))
+        syms = finish(raw)
+        results.append((g, info, raw, syms))
         files[f'{OUT}/{g["stem"]}.sym'] = as_sym(g, info, syms)
-        files[f'{OUT}/{g["stem"]}.json'] = as_json(g, info, syms, rows)
+        files[f'{OUT}/{g["stem"]}.json'] = as_json(g, info, syms, rows, ABOUT)
         files[f'{OUT}/{g["stem"]}.csv'] = as_csv(g, info, syms)
-    doc = doc_with(read(DOC), dict(holdings=holdings(results))) if os.path.exists(os.path.join(ROOT, DOC)) else None
+    blocks = dict(holdings=holdings([(g, info, syms) for g, info, raw, syms in results]))
+    if full and not check:
+        block = full_map(results, rows, files, problems)
+        if block is not None:
+            blocks['located'] = block
+    doc = doc_with(read(DOC), blocks) if os.path.exists(os.path.join(ROOT, DOC)) else None
     if doc is None:
         problems.append(f'{DOC} lacks the marks between which tools/symbols.py writes its numbers')
     else:
@@ -880,14 +1241,14 @@ def main():
                  if not os.path.exists(os.path.join(ROOT, path)) or read(path) != text]
         for path in stale:
             print(f'  {path} differs from what tools/symbols.py writes: python3 tools/symbols.py')
-        print(f'symbols: {sum(len(s) for _, _, s in results)} in {len(files)} files, {len(problems)} problems, '
+        print(f'symbols: {sum(len(r[3]) for r in results)} in {len(files)} files, {len(problems)} problems, '
               f'{len(stale)} stale')
         return 1 if problems or stale else 0
-    os.makedirs(os.path.join(ROOT, OUT), exist_ok=True)
     for path, text in files.items():
+        os.makedirs(os.path.dirname(os.path.join(ROOT, path)), exist_ok=True)
         with open(os.path.join(ROOT, path), 'w', encoding='utf-8', newline='\n') as f:
             f.write(text)
-    for g, info, syms in results:
+    for g, info, raw, syms in results:
         print(f'{g["stem"]}: {len(syms)} symbols ({", ".join(f"{n} {k}" for k, n in counts(syms).items())})')
     return 1 if problems else 0
 
