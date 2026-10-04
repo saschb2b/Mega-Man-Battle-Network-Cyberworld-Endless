@@ -98,17 +98,18 @@ bool platform_tap(int *x, int *y);
  * controls on it (--screen-shot), where the canvas's shots have the game
  * alone. */
 void platform_shot_screen(const char *path);
-/* The second screen (the 3DS's bottom one, issue #9): `draw` fills
- * SECOND_W x SECOND_H at a frame's end every few frames, false for black;
- * NULL for none, which blacks the screen. Elsewhere it is drawn only for
- * --second-shot. */
+/* The second screen (the 3DS's bottom one, issue #9; on Android a display
+ * beside the game's, the AYN Thor's lower screen): `draw` fills w x h every
+ * few frames, SECOND_W x SECOND_H on the 3DS and at least that on Android,
+ * false for black; NULL for none, which blacks the screen. Elsewhere it is
+ * drawn only for --second-shot. */
 #define SECOND_W 320
 #define SECOND_H 240
 typedef bool (*SecondScreen)(int w, int h);
 void platform_second_screen(SecondScreen draw);
-/* Draws it where it is shown (the 3DS's bottom screen, every few frames):
- * at a frame's update, before the game is read, where the core's own
- * thread still runs the GBA's frame. */
+/* Draws it where it is shown (the 3DS's bottom screen, Android's second
+ * display), every few frames: at a frame's update, before the game is
+ * read, where the core's own thread still runs the GBA's frame. */
 void platform_second_screen_draw(void);
 /* The second screen's picture now, into a BMP (--second-shot). */
 bool platform_save_second_screen(const char *path);

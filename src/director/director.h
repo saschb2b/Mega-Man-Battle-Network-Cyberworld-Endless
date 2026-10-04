@@ -29,8 +29,9 @@ void director_draw_map(void);
 void director_draw_counts(void);
 /* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
 void director_draw_bug_note(void);
-/* The second screen (the 3DS's bottom one, issue #9): the layer's map in
- * w x h, always open on the net; false where there is none to show. */
+/* The second screen (the 3DS's bottom one, issue #9; Android's second
+ * display): the layer's map in w x h, always open on the net; false where
+ * there is none to show. */
 bool director_draw_second_screen(int w, int h);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);

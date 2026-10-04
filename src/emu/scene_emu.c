@@ -49,7 +49,8 @@ static bool started;   /* (the core on its own thread: a frame begun since enter
 static void enter(void) {
 	revealed = 0;
 	started = false;
-	/* (the layer's map on the second screen, the 3DS's bottom one) */
+	/* (the layer's map on the second screen: the 3DS's bottom one, a
+	 * display beside an Android handheld's) */
 	platform_second_screen(director_draw_second_screen);
 	/* (making a run's net takes a while on a slow machine: twenty seconds
 	 * of black on a 3DS read as a hang) */

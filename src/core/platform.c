@@ -1,5 +1,6 @@
 #include "platform.h"
 #include "present_3ds.h"
+#include "second_android.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -989,6 +990,8 @@ void platform_second_screen(SecondScreen draw) {
 	if (draw) return;
 #if defined(__3DS__)
 	present3ds_bottom_show(false);
+#elif defined(__ANDROID__)
+	second_android_dark();
 #endif
 }
 
@@ -1019,7 +1022,7 @@ bool platform_save_second_screen(const char *path) {
  * its own core and this one would wait for it anyway (drawn with the
  * present, it made that frame late, 2 ms of 3DS time six times a second) */
 void platform_second_screen_draw(void) {
-#ifdef __3DS__
+#if defined(__3DS__)
 	if (P.frame % 10) return;
 	int pitch;
 	uint32_t *px = present3ds_bottom(&pitch);
@@ -1028,6 +1031,19 @@ void platform_second_screen_draw(void) {
 	part_second += SDL_GetPerformanceCounter() - t0;
 	++part_seconds;
 	present3ds_bottom_show(on);
+#elif defined(__ANDROID__)
+	/* (a display beside the game's, the AYN Thor's lower screen: every
+	 * fifth frame, so MegaMan's mark keeps up with his walk, at the size
+	 * picked for the display, handed to Java to show; drawn in 0.15 ms and
+	 * handed over in 0.1 in the emulator, on a desktop's core) */
+	if (P.frame % 5) return;
+	int w, h;
+	uint32_t *px = second_android_begin(&w, &h);
+	if (!px) return;
+	uint64_t t0 = SDL_GetPerformanceCounter();
+	second_android_end(draw_second(px, w, h, w * 4));
+	part_second += SDL_GetPerformanceCounter() - t0;
+	++part_seconds;
 #endif
 }
 

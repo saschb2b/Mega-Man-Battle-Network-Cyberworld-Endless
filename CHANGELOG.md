@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **The AYN Thor's lower screen keeps the layer's map open,** as the 3DS's
+  bottom screen does, and so does a second display beside any Android
+  handheld's: the floor MegaMan has seen, the way on, what he has come
+  near or senses. The game draws it every fifth frame at a size the
+  screen shows whole (413 x 360 at 3x on the Thor's 1240 x 1080, black
+  round it), and that screen never takes the focus: the controller, Back
+  and the touch controls stay with the game, and a touch on the map does
+  nothing. The map leaves with the game for the background, giving the
+  lower screen its launcher back, and follows a display plugged in or
+  out. A phone without a second display plays as before; from Android 12
+  a TV on HDMI goes on mirroring the game. Tried in the emulator with a
+  display the size of the Thor's lower screen, not yet on a Thor: reports
+  are welcome.
 - **The 3DS's bottom screen goes black when a run ends,** as the title
   keeps it; it had kept the run's last map.
 - **What the project has mapped of BN6 and BN5, open for anyone to use.**
