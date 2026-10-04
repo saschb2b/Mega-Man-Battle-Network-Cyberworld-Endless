@@ -2760,6 +2760,29 @@ static const char *state_doing(int *hp, int *max) {
 		: sub == BN6_SUB_MAP ? "map" : sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT ? "battle" : "other";
 }
 
+/* In a battle, the panel MegaMan stands on, from the left and the top: a
+ * player sees it at a glance, a playtester reading stills misread it turn
+ * after turn, as BN6 draws him half a row above his panel. In an older
+ * net's battle too, with its gauge (a playtester misread rows against
+ * KnightMan and held a charge in his row, session 68; MegaMan is its first
+ * object, bn5.h). */
+static void battle_describe(FILE *f) {
+	if (guest_on_screen() && guest_read8(BN5_T1_OBJECTS + BN6_T1_PANEL_X)) {
+		int g = guest_custom_gauge();
+		if (g >= 0) fprintf(f, "custom gauge %d%%\n", g * 100 / 0x4000);
+		fprintf(f, "megaman stands column %d row %d\n", guest_read8(BN5_T1_OBJECTS + BN6_T1_PANEL_X), guest_read8(BN5_T1_OBJECTS + BN6_T1_PANEL_Y));
+		return;
+	}
+	if (on_map()) return;
+	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0 && emu_read8(o + BN6_T1_PANEL_X)) {
+			fprintf(f, "megaman stands column %d row %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
+			return;
+		}
+	}
+}
+
 void director_describe(FILE *f) {
 	if (!D.active) { fprintf(f, "where none\n"); return; }
 	int sub = emu_read8(BN6_GAMESTATE), hp, max;
@@ -2769,17 +2792,7 @@ void director_describe(FILE *f) {
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
-	/* (in a battle, the panel MegaMan stands on, from the left and the top:
-	 * a player sees it at a glance, a playtester reading stills misread it
-	 * turn after turn, as BN6 draws him half a row above his panel) */
-	if (!on_map())
-		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
-			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0 && emu_read8(o + BN6_T1_PANEL_X)) {
-				fprintf(f, "megaman stands column %d row %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
-				break;
-			}
-		}
+	battle_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) {
 		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", bn6_player_x(),
