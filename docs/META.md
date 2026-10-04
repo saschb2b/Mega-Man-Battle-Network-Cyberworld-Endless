@@ -718,6 +718,87 @@ decisions).
   Synchro calms him first, as in BN5. MegaMan says so at the flame:
   "down to a quarter of my HP, or hit again and again".
 
+## Souls in BN5 territory (4 October 2026, issue #69)
+
+A BN5 Navi beaten as a territory's guardian (docs/BOSSES.md, BN5's Navis)
+gives his Soul for the run's BN5 battles: BN5's Soul Unison, which its US
+version calls Double Soul and its Custom screen UNITE, and with a
+DarkChip, its Chaos Unison (the owner's call). Reasoned with the
+game-design skill; each point marked *proposal* is mine, for the owner
+to turn.
+
+- **The dialectic** is the meta layer's, what you bring against what you
+  find: the Soul is found, and the folder brought decides how often it
+  unites, since each Soul takes chips of one kind. Inside a battle it
+  restates the run's own tension, prepare or press on: a chip of the hand
+  given up now for a few turns of the Soul.
+- **The loop layers:** the moment (UNITE on BN5's Custom screen, the turns
+  it lasts), the session (a territory layer's battles), the run (which
+  Souls it carries into its later territories). None reaches the meta
+  loop.
+- **The patterns:** costed power (each unison costs a chip and comes once
+  a battle), nested progression (BN5's Souls beside BN6's Crosses, each
+  serving only its own engine's battles), bonus with drawback (Chaos
+  Unison), meta as variety, not power.
+- **What each needs**, BN5's own rule as its ROM has it (docs/ROM_DATA.md,
+  BN5's Souls): the last chip picked on the Custom screen of the Soul's
+  kind, given up for it. Team Colonel's MegaMan unites with the Souls of
+  Colonel's team alone (the other team's six are never offered in this
+  version). In BN6's chips that cross into BN5's battles (by name,
+  docs/MULTIROM.md):
+
+  | Soul | Its kind | BN6's chips of it | Chaos Unison with |
+  | --- | --- | --- | --- |
+  | Colonel's | Obstacle | RockCube, TimeBom1-3, Fanfare, Discord, Timpani, Silence, VDoll, Guardian, Anubis, Otenko, WhiCapsl | DrkSonic |
+  | ShadowMan's | Invisible | Invisibl, Mine, AntiDmg | DarkInvs |
+  | NumberMan's | Plus | BusterUp, ColorPt, DblPoint | DarkPlus |
+  | TomahawkMan's | Wood | Boomer, Lance, Snake | DrkLance |
+  | KnightMan's | Break | JustcOne, BigHook, MetrKnuk | DarkDril |
+  | ToadMan's | Aqua | BblWrap | DarkWide |
+
+- **When**, BN5's own: the UNITE button stands under OK only while
+  MegaMan is neither worried nor dark as the Custom screen opens, and
+  each Soul unites once a battle, for the turns BN5 gives it.
+- **Chaos Unison**, BN5's own: a DarkChip of the Soul's kind given up in
+  the chip's place, where BN5's chaos flag is set, which the run sets
+  while it holds a Soul. A DarkChip comes into the hand only while
+  MegaMan worries (above), and UNITE stands only while he does not, so
+  Chaos Unison asks for a DarkChip offered when hurt and kept to a calmer
+  turn (a heal, a counter hit's Full Synchro). Its charged shot is the
+  DarkChip's attack (seen: KnightMan's Soul with DarkDril fired a drill).
+- **No price for it** (*proposal*, as BN5 has it): BN5 counts a DarkChip
+  given up for Chaos Unison as no DarkChip used (its use flag stays
+  clear), and the run follows it: no 20 max HP. The DarkChip still leaves
+  the hand for the battle. The owner may want it priced as a use.
+- **A Soul's span** (*proposal*): the rest of the run, in BN5's battles
+  only, as a Cross serves BN6's; out on BN6's net it does nothing, and
+  MegaMan says so. A run holds every Soul it wins, as BN5's MegaMan holds
+  his: one per BN5 guardian, five at most in a cycle; a second cycle's
+  guardian whose Soul the run holds already adds nothing. Nothing carries
+  over to the next run, and no Soul is brought at setup: a Soul start
+  would be worth nothing in a run the older net never dresses, and it
+  would be power across runs.
+- **The key with the lock** (*proposal*): two kinds have few chips in BN6
+  (ToadMan's Aqua only BblWrap, KnightMan's Break JustcOne and two
+  Gigas), so his Guardian Data gives a chip of his Soul's kind in the
+  place of the Navi chip BN6's guardians give (docs/BOSSES.md), and his
+  Soul unites from the next battle on.
+- **Said where it happens:** at his Guardian Data MegaMan names the Soul,
+  the chips it takes, UNITE, once a battle, and that it works only in the
+  older net's battles; all of it the first time a profile wins a Soul,
+  the Soul and its chips after that.
+- **How it is kept:** which Souls the run holds, beside its checkpoint as
+  its DarkChips are (`run.souls`), for the run whose seed it names; a new
+  run holds none. Before each BN5 battle the guest's flags are set from
+  it: BN5's Double Soul flag and its chaos flag while the run holds one,
+  and each Soul's own.
+- **What could go wrong:** the strongest Soul for a folder taken every
+  time it is offered (each costs a chip and comes once a battle);
+  Chaos Unison as the one right play for a DarkChip (its window is narrow:
+  offered worried, united calm); five Souls stacking power within a run
+  (each still once a battle, each a chip given up); a Soul that reads as
+  a Cross in BN6's battles (MegaMan says where it works).
+
 ## What MegaMan knows (29 September 2026)
 
 Read through the resonance lens (describe the loop without its fiction,

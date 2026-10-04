@@ -74,3 +74,102 @@ the area's pool the Navis whose HP at the act's version lies in the act's
 band (400-600 in act 1 up to 1200-2000 in act 6), else another Navi in the
 band, else the pool's nearest. Acts 1-3 fight V1, acts 4-6 EX where it
 fits, the Nest, the Secret Area and later cycles SP.
+
+## BN5's Navis (4 October 2026, issue #69)
+
+Where Battle Network 5: Team Colonel dresses an area its random battles
+are BN5's own, fought on the guest core (docs/MULTIROM.md, Guest
+battles). The owner's call: BN5's Navis guard some of those acts, fought
+in BN5's engine; beaten, a Navi gives his Soul for the run's BN5 battles
+(docs/META.md, Souls in BN5 territory). Standing beside it: no Cross in
+BN5's battles (MegaMan says so arriving), while a BN6 guardian's fight
+there keeps the Cross; DarkChips cost 20 max HP per battle used; no power
+creep across runs. What follows was reasoned with the game-design skill;
+each point marked *proposal* is mine, for the owner to turn.
+
+- **The dialectic** is the meta layer's, what you bring against what you
+  find, met at an act's end: the guardian's Soul is found, and the folder
+  brought decides how much it is worth, as it unites with chips of one
+  kind. It feeds the progression loop (the act's last fight, in the
+  territory's own engine, so the territory stays whole from its first
+  battle to its guardian) and the run loop (the Souls a run carries into
+  its later territories).
+- **The patterns:** nested progression, Souls being BN5's axis beside
+  BN6's Crosses, each serving only its own engine's battles (augment, not
+  replace); the honest telegraph, the territory's look, words and card
+  already saying whose battles these are; meta as variety, nothing of it
+  carried to the next run.
+- **What to watch:** a Soul the folder cannot use (see the table: two
+  kinds have few chips in BN6), answered by the chip his Guardian Data
+  gives; a guardian fight that is only harder for a BN6 folder (chips sit
+  out, no Cross), answered by the act's band and the Soul it pays; a Soul
+  won with no BN5 battle left to serve, answered by where they stand.
+
+**Which Navis, where** (*proposal*). BN5's own data places its Navis: its
+net maps' battle records list each Navi's SP version on the maps he
+roams once its story is over (docs/ROM_DATA.md, BN5's Navis). Of the six
+whose Souls Team Colonel's MegaMan unites with, each guards the area BN5
+sets him in:
+
+| BN5's area (it dresses) | His record roams | Guardian | His Soul unites with (BN5's kind) |
+| --- | --- | --- | --- |
+| ACDC Area (Central Area) | ACDC Area 1 | KnightMan | Break chips |
+| End Area (Seaside Area) | End Area 3, 4 | NumberMan or ToadMan (the run's seed) | Plus chips, Aqua chips |
+| Oran Area (Green Area) | Oran Area 1 | ShadowMan | Invisible chips |
+| SciLab (Sky Area) | SciLab 4 | TomahawkMan | Wood chips |
+| Undernet (Undernet) | Undernet 3 | Colonel | Obstacle chips |
+| Nebula Area (Graveyard) | (Bass) | none: BN6's guardians | |
+
+Nebula Area keeps BN6's guardians: BN5 lists none of the six there, its
+act is the last before the Nest (a Soul won there would serve no BN5
+battle in the cycle), and the Graveyard's guardian is the one whose fall
+wakes the Cybeast in MegaMan for the Nest.
+
+**How often** (*proposal*): on the guardian layer of an act whose area
+BN5 dresses, in half the runs (a coin of the run's seed for each area, of
+its own beside the dress's), where the build can run the guest. Not the
+short net's last act (its Nest is BN6's: no BN5 battle would follow the
+Soul), the Nest, the Secret Area or an Undernet detour. Else BN6's
+guardian, as before. Nothing is saved for it: a run continued without
+BN5's ROM, or on a build without the second core, meets BN6's guardian
+there, as its layers come in BN6's own tiles.
+
+**His band** (*proposal*). BN5's story holds a record for each of them at
+V1, V2 and V3, its net one at SP (docs/ROM_DATA.md). He is taken as BN6's
+guardians are: in acts 1-3 at V1 or V2, in acts 4-6 at V3 or V2 (V3
+first, as BN6's EX), the first whose HP lies in the act's band, else the
+nearer; SP on later cycles; on threat 4 at least V2 from act 2, as BN6's
+fight EX. His HP above the band's top is capped there as he spawns, as
+ProtoMan's is in the netbattle (docs/RIVAL.md), never raised: the
+project's scaling is by choice, not by multiplying. So:
+
+| Guardian | Act | Version, BN5's HP | Fought at |
+| --- | --- | --- | --- |
+| KnightMan | 1 (400-600), 2 (600-700) | V1, 600 | 600 |
+| NumberMan | 1, 2 | V1, 600 | 600 |
+| ToadMan | 1 / 2 | V1, 700 | 600 / 700 |
+| ShadowMan | 2 / 3 (800-1000) | V2, 700 | 700 / 700 |
+| TomahawkMan | 3 / 4 (1000-1300) | V2, 900 / V3, 1400 | 900 / 1300 |
+| Colonel | 5 (1100-1500) | V2, 1200 | 1200 |
+
+**The fight.** Staged as BN6's: the arena, the door's save, his log-in,
+title card and intro in our own words (BN5's text is never copied), his
+moves briefed from battle data once met in any run (docs/META.md, what
+MegaMan knows), the rival record his own (beside BN6's Colonel and
+TomahawkMan, who are other Navis' copies). He stands in his own BN5
+overworld sprite and speaks with his own BN5 face, copied in from the
+player's BN5 ROM as its bystanders are. The battle is BN5's, from BN5's
+own record for him at that version, with its boss theme and the area's
+background: MegaMan as the run has him (HP, folder in BN5's chips, buster,
+DarkChips), no running, his results screen paying the zenny BN6's
+guardians pay where their row holds their chip. Lost, the run ends as at
+any guardian.
+
+**His Guardian Data** (*proposal*): his Soul with MegaMan's words, five
+HPMemory, a full heal, the NaviCust's draft and the way on, as BN6's;
+and in his Navi chip's place (BN6 has none of his) a chip of his Soul's
+kind that BN6 has, in the folder's code or *, so the Soul unites from
+the next battle on: KnightMan's JustcOne, ToadMan's BblWrap, one of
+ShadowMan's Invisibl, Mine or AntiDmg, of NumberMan's BusterUp, ColorPt or
+DblPoint, of TomahawkMan's Boomer, Lance or Snake, of Colonel's obstacle
+chips (RockCube, the TimeBoms, Fanfare and the rest).
