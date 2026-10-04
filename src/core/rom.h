@@ -22,8 +22,9 @@ enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
 /* NetAreaDef.xlooks: what of another game's map objects its area's layers
  * stand in BN6's place (src/layer/xnavi.c, docs/MULTIROM.md): its Security
  * Cube for the security cubes, its wall of dark flames for the pillar of
- * flames. */
-enum { XLOOK_CUBE = 1, XLOOK_DARK_WALL = 2 };
+ * flames, a dark hole past the rim of the layer's best room (the
+ * landmark's place). */
+enum { XLOOK_CUBE = 1, XLOOK_DARK_WALL = 2, XLOOK_DARK_HOLE = 4 };
 
 /* The original area a net biome borrows (docs/ROM_DATA.md): BN6's, or
  * another Battle Network game's (docs/MULTIROM.md). */

@@ -210,8 +210,14 @@ engine (`src/emu/guest.c`, epic #57):
   Nebula Area 6 until its flames of darkness' Navis are beaten, stands
   for the pillar of flames on Nebula Area's layers, across the walkway
   either way, and burns out when HeatMan's or ChargeMan's Cross clears
-  it. Each is copied into BN6's free space and listed at a list-7 number
-  Gregar leaves empty, as the flame of darkness is. Its net maps hold few map objects besides: the laser barrier with
+  it. A dark hole, the purple vortex BN5's Nebula Area and Undernet stand
+  past a platform's edge, stands past the back rim of a Nebula Area
+  layer's best room, where the Graveyard's monument would (about half of
+  its layers have such a room), as scenery the layer was made without:
+  a run continued without BN5 has the same layer. Each is copied into
+  BN6's free space and listed at a list-7 number Gregar leaves empty, as
+  the flame of darkness is; the dark hole is a map object of an id of the
+  engine's (`layer_objs.c`). Its net maps hold few map objects besides: the laser barrier with
   a skull is BN6's cube's own sprite.
 - [ ] Its towns.
 - [x] Its random battles in its own engine, on a second core, in the

@@ -204,6 +204,11 @@ bool layer_on_way(int x, int y);
 /* How many panels a walk from the way to (x, y) takes, -1 off the floor
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);
+/* The void panel past the back rim of the layer's best room for a
+ * landmark, as the Graveyard's monument stands, on the layer as built:
+ * read only, for a prop the map side adds to the layer (another game's,
+ * docs/MULTIROM.md); false where none fits. */
+bool layer_landmark_void(int *x, int *y);
 /* The way's cell a walk to (x, y) leaves the way from (its branch: the
  * cells of a spur, a room off the way and what lies past them share it),
  * as y * MAP_W + x; -1 off the floor. */

@@ -458,6 +458,13 @@ A map loads at most 12 compressed sprites and 0x8800 bytes of them (the
 game's loader); a prop whose sprite no longer fits is left out whole, not
 shown as noise.
 
+On Nebula Area's layers (BN5's, docs/MULTIROM.md), whose own maps set no
+props of BN6's, BN5's dark hole stands where the Graveyard's monument would:
+in the void past the back rim of the best room, by the landmark's rules,
+read off the layer once it is made (`layer_landmark_void`), so the layer
+is the same with BN5 or without it. It keeps out of a Rush gap's and an
+invisible path's panels.
+
 ### Pads' centrepieces: warps only (built)
 
 The originals' 3x3 pads carry art on their middle panel, second-layer tiles

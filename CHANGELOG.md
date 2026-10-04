@@ -69,6 +69,9 @@
 - **An early L or R is kept in BN5's battles,** as in BN6's: pressed up to
   two and a half seconds before the Custom gauge fills, it opens the
   Custom screen as it fills.
+- **Dark holes in Nebula Area.** About half of Nebula Area's layers show
+  one of BN5's dark holes, the purple vortex its Nebula Area stands past
+  a platform's edge, past the back of the layer's biggest room.
 - **BN5's wall of dark flames in Nebula Area.** On Nebula Area's layers
   the pillar of flames is BN5's own wall of dark flames, standing across
   the walkway. HeatMan's or ChargeMan's Cross clears it as before, and it

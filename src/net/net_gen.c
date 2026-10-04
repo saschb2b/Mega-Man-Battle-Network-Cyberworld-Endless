@@ -932,6 +932,42 @@ static int landmark(const LayerKit *kit) {
 	return -1;
 }
 
+/* Whether void panel (x, y) is a set piece's: a Rush gap's or an
+ * invisible path's, which a prop past a rim must keep out of. */
+static bool piece_void(int x, int y) {
+	const NetGap *runs[MAX_GAPS + MAX_PATHS];
+	int n = 0;
+	for (int k = 0; k < layer.ngaps; ++k) runs[n++] = &layer.gap[k];
+	for (int k = 0; k < layer.npaths; ++k) runs[n++] = &layer.path[k];
+	for (int k = 0; k < n; ++k)
+		for (int j = 0; j <= runs[k]->len + 1; ++j)
+			if (abs(runs[k]->x + dir_dx[runs[k]->dir] * j - x) <= 1 && abs(runs[k]->y + dir_dy[runs[k]->dir] * j - y) <= 1) return true;
+	return false;
+}
+
+bool layer_landmark_void(int *x, int *y) {
+	/* (the monument's place, read off the layer as built: the best room's
+	 * back rim, its middle off the way, the void a panel past it) */
+	route_distances();
+	int best = -1, best_x = 0, best_y = 0;
+	for (int r = 1; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		if (r == layer.exit_room || r == layer.arena || m->kind == ROOM_PAD || m->w * m->h < 12 || !room_bare(m)) continue;
+		for (int s = 0; s < 2; ++s) {
+			Rim rim = back_rim(m, s);
+			int ex, ey, px, py;
+			if (rim.len < 3) continue;
+			edge_cell(m, s, rim.u0 + rim.len / 2, &ex, &ey);
+			past_cell(m, s, rim.u0 + rim.len / 2, 1, &px, &py);
+			int away = far_from_way(ex, ey), score = m->w * m->h * 4 + rim.len * 8 + (away > 6 ? 6 : away) * 10;
+			if (away < 1 || piece_void(px, py) || score <= best) continue;
+			best = score; best_x = px; best_y = py;
+		}
+	}
+	*x = best_x; *y = best_y;
+	return best >= 0;
+}
+
 /* Rows of three a panel apart, as the originals line up their trees past a
  * rim and their gravestones in one walled hole of three panels. */
 /* A row of three trees past a room's back rim, as Green's originals line

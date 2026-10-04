@@ -273,7 +273,7 @@ static const NetAreaDef bn5_areas[] = {
 		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xbg = 15, .xlooks = XLOOK_CUBE,
 		.xbattles = { { 0x93, 0 }, { 0x86, 3 }, { 0x93, 1 } } },
 	{ 0x90, 13, 0x8980, 0x8440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
-		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25, .xlooks = XLOOK_DARK_WALL,
+		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25, .xlooks = XLOOK_DARK_WALL | XLOOK_DARK_HOLE,
 		.xbattles = { { 0x86, 6 }, { 0x94, 3 }, { 0x86, 7 } } },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows */
 };
 

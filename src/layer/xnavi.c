@@ -116,6 +116,7 @@ static const struct { int xrom; uint8_t index, slot; bool purple; } objects[XOBJ
 	[XOBJ_DARK_FLAME] = { XROM_BN5_COLONEL_US, 0x68, 0xA0, true },   /* Nebula Area 6's flames of darkness (compressed) */
 	[XOBJ_CUBE] = { XROM_BN5_COLONEL_US, 0x01, 0x92, false },        /* ACDC Area's Security Cubes */
 	[XOBJ_DARK_WALL] = { XROM_BN5_COLONEL_US, 0x5D, 0x8A, false },   /* Nebula Area 6's and End Area 5's walls of dark flames (compressed) */
+	[XOBJ_DARK_HOLE] = { XROM_BN5_COLONEL_US, 0x69, 0x87, false },   /* the dark holes of Nebula Areas 1, 3, 4 and 6 and Undernet 2 */
 };
 
 static struct { bool ready; uint32_t sprite[XOBJ_COUNT]; } O;
