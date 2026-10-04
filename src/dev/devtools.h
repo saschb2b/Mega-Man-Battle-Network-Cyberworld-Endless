@@ -37,6 +37,9 @@ bool devtools_open(void);
 void devtools_zenny(void);
 /* After each game frame: the switches' effects. */
 void devtools_update(void);
+/* ... and after each frame of a battle on the guest core (guest.h): god,
+ * onehit and fragile on its battle's objects. */
+void devtools_guest_update(void);
 void devtools_draw(void);
 
 /* A frame to save after the next draw (the tour sets it); "" for none. */

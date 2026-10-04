@@ -246,8 +246,9 @@ collision problems show up here that the atlas cannot show.
 
 ## Dev menu: shorter test runs
 
-Hold **Select** and press **R**, in battle or on the net. The game holds
-still while the menu is open; **B** or Select+R closes it.
+Hold **Select** and press **R**, in battle or on the net, a battle in
+BN5's engine too (docs/MULTIROM.md, Guest battles). The game holds still
+while the menu is open; **B** or Select+R closes it.
 
 | Item | Effect |
 | --- | --- |
@@ -290,6 +291,10 @@ path; `pieces=32` to look at an area's arrow lane and ride it;
 docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
 `tools/before_after.py` compares two builds' with it).
+
+Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
+same in a battle on the guest core: on BN5's battle objects, laid out as
+BN6's (`src/emu/bn5.h`), after each of its frames.
 
 ## How the switches work
 

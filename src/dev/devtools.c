@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn5.h"
 #include "bn6.h"
 #include "darkchips.h"
 #include "director.h"
@@ -111,17 +112,33 @@ void devtools_zenny(void) {
 }
 
 /* The battle's objects on one side (0 MegaMan, 1 the enemies): HP to `hp`
- * (-1: to its max), only lowered unless `raise`. */
+ * (-1: to its max), only lowered unless `raise`; BN6's, or the guest's
+ * while its battle is on its screen (BN5's objects, laid out as BN6's:
+ * bn5.h), which BN6's core waits beside. */
+static bool on_guest;
+static uint8_t battle_read8(uint32_t a) { return on_guest ? guest_read8(a) : emu_read8(a); }
+static uint16_t battle_read16(uint32_t a) { return on_guest ? guest_read16(a) : emu_read16(a); }
+
 static void battle_hp(int side, int hp, bool raise) {
-	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
-		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-		if (!(emu_read8(o) & 1) || emu_read8(o + BN6_T1_ALLIANCE) != side) continue;
-		int cur = emu_read16(o + BN6_T1_HP), max = emu_read16(o + BN6_T1_MAX_HP);
+	on_guest = guest_on_screen();
+	uint32_t objects = on_guest ? BN5_T1_OBJECTS : BN6_T1_OBJECTS, count = on_guest ? BN5_T1_COUNT : BN6_T1_COUNT;
+	for (uint32_t i = 0; i < count; ++i) {
+		uint32_t o = objects + i * BN6_T1_SIZE;
+		if (!(battle_read8(o) & 1) || battle_read8(o + BN6_T1_ALLIANCE) != side) continue;
+		int cur = battle_read16(o + BN6_T1_HP), max = battle_read16(o + BN6_T1_MAX_HP);
 		int want = hp < 0 ? max : hp;
 		if (cur <= 0 || want == cur || (!raise && want > cur) || (raise && want < cur)) continue;
 		uint8_t v[2] = { (uint8_t)want, (uint8_t)(want >> 8) };
-		emu_write(o + BN6_T1_HP, v, 2);
+		if (on_guest) guest_write16(o + BN6_T1_HP, (uint16_t)want);
+		else emu_write(o + BN6_T1_HP, v, 2);
 	}
+}
+
+void devtools_guest_update(void) {
+	if (!guest_on_screen()) return;
+	if (dev.god) battle_hp(0, -1, true);
+	if (dev.onehit) battle_hp(1, 1, false);
+	if (dev.fragile) battle_hp(0, 1, false);
 }
 
 static void act(int item, int dir) {

@@ -155,14 +155,19 @@ static bool guest_update(void) {
 	guest_wait = guest_active() && !shown ? guest_wait + 1 : 0;
 	was = shown;
 	if (!guest_active()) return false;
-	uint32_t keys = guest_keys();
+	/* (the dev menu over it too: it holds still while the menu is open) */
+	uint32_t keys = devtools_keys(guest_keys());
+	if (devtools_open()) return true;
 	/* (while its battle opens on a plain white screen, or before it shows:
 	 * four of its frames a frame, unheard; BN5's opening held the white two
 	 * and a half seconds, which a playtester read as a hang, session 65) */
 	if (!shown || guest_white())
 		for (int i = 0; i < 4 * dev.speed && guest_active() && (!guest_on_screen() || guest_white()); ++i) guest_frame_quiet(keys);
 	else
-		for (int i = 0; i < dev.speed && guest_active(); ++i) guest_frame(keys);
+		for (int i = 0; i < dev.speed && guest_active(); ++i) {
+			guest_frame(keys);
+			devtools_guest_update();
+		}
 	GuestResult r;
 	if (guest_take_result(&r)) director_guest_done(&r);
 	return true;
@@ -235,9 +240,11 @@ static void draw(void) {
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
-	/* (another game's battle: its own screen, none of the layer's marks) */
+	/* (another game's battle: its own screen, none of the layer's marks;
+	 * the dev menu's alone) */
 	if (guest) {
 		if (guest_flash > 0) fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_flash * 255 / GUEST_FLASH)));
+		devtools_draw();
 		return;
 	}
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }

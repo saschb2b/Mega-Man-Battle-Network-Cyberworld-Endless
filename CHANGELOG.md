@@ -32,6 +32,10 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **`--dev god`, `onehit` and `fragile` and the dev menu work in BN5's
+  battles (issue #61).** They held only BN6's battle objects; BN5's are
+  laid out alike, and the menu opens over its battle too, which holds
+  still under it.
 - **The autopilot fights BN5's battles (issue #61).** It played them by a
   blind button pattern, which lost the first one of seed 1's ACDC Area at
   0 HP; it now reads BN5's battle as it reads BN6's (the Custom screen's
