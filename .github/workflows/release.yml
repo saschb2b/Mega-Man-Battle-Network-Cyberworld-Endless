@@ -51,7 +51,7 @@ jobs:
 
   # the macOS app, on a Mac (Apple's SDK)
   macos:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,7 +63,7 @@ jobs:
           path: build/release/cyberworld-endless-macos.dmg
 
   ios:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:

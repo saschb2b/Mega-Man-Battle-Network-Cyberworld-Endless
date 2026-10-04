@@ -189,14 +189,14 @@ jobs:
 
   macos:
     name: macOS
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       # (SDL2 and mGBA, universal and static: rebuilt when macos/deps.sh changes)
       - uses: actions/cache@v4
         with:
           path: .build/macos-deps
-          key: macos-deps-${{ hashFiles('macos/deps.sh') }}
+          key: macos-deps-macos15-${{ hashFiles('macos/deps.sh') }}
       - run: python3 build.py macos
       - name: One app for Apple silicon and Intel that starts
         run: |
@@ -219,13 +219,13 @@ jobs:
 
   ios:
     name: iOS
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
         with:
           path: .build/ios-deps
-          key: ios-deps-${{ hashFiles('ios/deps.sh') }}
+          key: ios-deps-macos15-${{ hashFiles('ios/deps.sh') }}
       - name: The IPA for iPhone and iPad
         run: python3 build.py ios
       - name: One arm64 app for iOS 14 on that links only iOS's own frameworks
