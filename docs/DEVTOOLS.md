@@ -179,9 +179,20 @@ answers: per act and element, the chips 300 layers list first, with a `+`
 on those over the act's cap (stocked one, not two). The whole report takes
 about a minute.
 
+Where BN5's ROM is beside BN6's, each area one of its areas dresses
+(docs/MULTIROM.md) is followed by that area's battles in BN5's own engine:
+for every layer of the act, the records its first battle (`opening`, the
+band's lower half) and its others (`guest`) are picked from, as the
+director picks them (`guest_pool`, `src/emu/guest.c`: the layer's map's
+records that fit the band, else the area's other maps', else those of
+BN5's other areas, else the map's weakest alone), each as likely: their
+viruses' HP together (lowest, median, highest), the strongest hit, how many
+records and where they came from, and OVER on any past the band.
+
 Output: `.build/pacing.txt`. It needs the ROM, and prints how many
-battles and guardians were past their band; after a change to the bands,
-the areas or the encounter code, that number should stay 0.
+battles and guardians were past their band, the territories' included;
+after a change to the bands, the areas or the encounter code, that number
+should stay 0.
 
 ## Run log
 

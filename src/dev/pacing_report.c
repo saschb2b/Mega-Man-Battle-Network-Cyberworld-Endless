@@ -11,7 +11,9 @@
 #include "data.h"
 #include "game.h"
 #include "guardians.h"
+#include "guest.h"
 #include "loot.h"
+#include "net.h"
 #include "navicust.h"
 #include "pacing.h"
 #include "rom.h"
@@ -78,6 +80,70 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	for (int f = 1; f < 32; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);
 	fprintf(out, "%s\n", over ? "  OVER" : "");
 	return over;
+}
+
+/* The territories (docs/MULTIROM.md, Guest battles): where another game's
+ * area dresses the BN6 area an act visits, its random battles are its own
+ * game's records, from the pool the director picks from (guest_pool, each
+ * record as likely): their viruses' HP together (lowest / median /
+ * highest), the strongest hit, the pool's size and where it came from;
+ * returns its records past the band (only where none fits and the map's
+ * weakest stands in). */
+static int guest_battles(FILE *out, int depth, const NetAreaDef *x, int xrom, bool opening) {
+	PacingBand band = pacing_band(depth, false, opening);
+	const uint8_t *xb = x->xbattles[layer_in_act(depth)];
+	if (!xb[0]) return 0;
+	static uint32_t pool[192];
+	static int hps[192];
+	bool fits = false;
+	int n = guest_pool(xrom, x, xb[0], xb[1], band.hi, band.cap, pool, 192, &fits), over = 0, maxdmg = 0, own = 0;
+	uint32_t first = guest_record(xrom, xb[0], xb[1], 0), end = first + 16u * (uint32_t)guest_records(xrom, xb[0], xb[1]);
+	for (int i = 0; i < n; ++i) {
+		int hp, dmg;
+		guest_record_strength(xrom, pool[i], &hp, &dmg);
+		hps[i] = hp;
+		if (dmg > maxdmg) maxdmg = dmg;
+		if (hp > band.hi || dmg > band.cap) ++over;
+		own += pool[i] >= first && pool[i] < end;
+	}
+	qsort(hps, (size_t)n, sizeof *hps, cmp_int);
+	fprintf(out, "  depth %2d %-9s band %3d-%3d cap %3d | hp %3d / %3d / %3d  hit %3d  %d records of %s (map %02x:%d)%s\n", depth,
+		opening ? "opening" : "guest", band.lo, band.hi, band.cap, n ? hps[0] : 0, n ? hps[n / 2] : 0, n ? hps[n - 1] : 0, maxdmg, n,
+		!fits ? "its weakest, none fitting" : own == n ? "its map" : "other maps", xb[0], xb[1], over ? "  OVER" : "");
+	return over;
+}
+
+/* ... for every act's areas another game's area dresses, where its ROM is
+ * beside BN6's (run_dress: each in about half the runs that come there);
+ * each layer's first battle from the band's lower half, as the director
+ * picks it */
+static int territories(FILE *out, int act, int loop, int biome) {
+	int flagged = 0;
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *x = net_area_def(NET_AREAS + k);
+		if (!x || x->held || x->like != biome || x->xrom <= 0) continue;
+		fprintf(out, "  %s's battles in its own engine where it dresses it:\n", x->name);
+		int first = loop * CYCLE_LAYERS + act * 3 + 1, last = act == 6 ? first : first + 2;
+		for (int d = first; d <= last; ++d) {
+			flagged += guest_battles(out, d, x, x->xrom - 1, true);
+			flagged += guest_battles(out, d, x, x->xrom - 1, false);
+		}
+	}
+	return flagged;
+}
+
+/* One area in one act of a cycle: its random battles rolled (from `seed`),
+ * then its territory's, where another game's area dresses it; how many
+ * past their band */
+static int act_area(FILE *out, int act, int loop, int b, uint32_t seed) {
+	int flagged = 0, first = loop * CYCLE_LAYERS + act * 3 + 1, last = act == 6 ? first : first + 2;
+	fprintf(out, "\nact %d cycle %d  %s\n", act + 1, loop + 1, guardian_area_name(b));
+	rng_seed(seed);
+	for (int d = first; d <= last; ++d) flagged += battles(out, d, b, ENC_NORMAL, "battle");
+	flagged += battles(out, first, b, ENC_EASY, "opening");
+	if (first == 1) flagged += battles(out, first, b, ENC_FIRST, "first");
+	if (act < 6) flagged += battles(out, first + 1, b, ENC_CHALLENGE, "challenge");
+	return flagged + territories(out, act, loop, b);
 }
 
 /* A variant of `program` in colour `color` (program * 4 + v), 0 for none. */
@@ -174,20 +240,13 @@ int pacing_report_run(const char *path) {
 	};
 	int flagged = 0;
 	fprintf(out, "Random battles: HP of the viruses together (lowest / median / highest of %d rolls), the strongest hit,\n"
-		"the highest version in each battle; OVER when a battle lies past the band or the cap.\n", ROLLS);
+		"the highest version in each battle; OVER when a battle lies past the band or the cap. Where another game's\n"
+		"area dresses one (its ROM beside BN6's), its battles in its own engine after it: the records a layer's\n"
+		"first battle (opening) and the others (guest) are picked from, each as likely.\n", ROLLS);
 	for (int loop = 0; loop < 2; ++loop)
-		for (unsigned a = 0; a < sizeof acts / sizeof *acts; ++a) {
-			for (int k = 0; k < 8 && acts[a].biomes[k] >= 0; ++k) {
-				int b = acts[a].biomes[k];
-				fprintf(out, "\nact %d cycle %d  %s\n", acts[a].act + 1, loop + 1, guardian_area_name(b));
-				int first = loop * CYCLE_LAYERS + acts[a].act * 3 + 1, last = acts[a].act == 6 ? first : first + 2;
-				rng_seed(0xC0FFEEu + (uint32_t)(a * 97 + k));
-				for (int d = first; d <= last; ++d) flagged += battles(out, d, b, ENC_NORMAL, "battle");
-				flagged += battles(out, first, b, ENC_EASY, "opening");
-				if (first == 1) flagged += battles(out, first, b, ENC_FIRST, "first");
-				if (acts[a].act < 6) flagged += battles(out, first + 1, b, ENC_CHALLENGE, "challenge");
-			}
-		}
+		for (unsigned a = 0; a < sizeof acts / sizeof *acts; ++a)
+			for (int k = 0; k < 8 && acts[a].biomes[k] >= 0; ++k)
+				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
 	/* the guardians a first cycle draws, over many runs */
 	fprintf(out, "\nGuardians of the first cycle over 500 runs: navi, version and HP, how often.\n");

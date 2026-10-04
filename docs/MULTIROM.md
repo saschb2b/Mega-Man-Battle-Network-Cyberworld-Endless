@@ -150,16 +150,25 @@ engine (`src/emu/guest.c`, epic #57):
   room its boot state stands in), and BN5's picture flashes in once its
   battle is on its screen; after a profile's first, MegaMan says what it
   was and names the chips that sat out, the same way.
-- **For tests**: `--talk guest:FRAME` begins a guest battle at once on such
-  a layer (`--net-biome x0`, ACDC Area), `--talk dark:FRAME` opens the
-  flame of darkness's talk (a middle layer: `--run-depth 2`), `--dev
-  darkchips=MASK` starts a run holding DarkChips (bit k BN5's id 187 + k)
-  and `--dev worried` keeps MegaMan worried in guest battles;
-  `CYBERWORLD_EMU_DEBUG=1` names each battle, its folder's chips in and
-  those that sat out, slot by slot ("guest: 4 sat out: CrakShot A, ..."),
-  the buster it goes in with and the one its battle took ("guest: its battle's
-  buster Attack 2, Speed 1, Charge 1"), its end, the flame and a
-  DarkChip's price.
+- **For tests** (issue #61, docs/DEVTOOLS.md): the battle step
+  (`--input "300:battle"`, play.py's `battle`) starts the layer's next
+  random battle once MegaMan is free on its map, a guest battle on such a
+  layer (`--net-biome x0`, ACDC Area), and `--talk guest:FRAME` one at a
+  frame; `--talk dark:FRAME` opens the flame of darkness's talk (a middle
+  layer: `--run-depth 2`), `--dev darkchips=MASK` starts a run holding
+  DarkChips (bit k BN5's id 187 + k) and `--dev worried` keeps MegaMan
+  worried in guest battles; `--dev god`, `onehit` and `fragile` and the
+  dev menu work in them as in BN6's. `CYBERWORLD_AUTOPILOT=1` fights them
+  as it fights BN6's, from BN5's memory (`src/emu/bn5.h`: its Custom
+  screen's picks, its panels, its viruses and their attacks; never a
+  DarkChip), `weak` keeping their viruses at 1 HP; the run log has a line
+  for each (`guest`, its record, its reward). `CYBERWORLD_EMU_DEBUG=1` names each
+  battle, its folder's chips in and those that sat out, slot by slot
+  ("guest: 4 sat out: CrakShot A, ..."), the buster it goes in with and the
+  one its battle took, a line every 30 of its frames, its end,
+  the flame and a DarkChip's price; `build.py pacing` lists every act's
+  guest battles against its band, and `tests/test_emu.c` runs two cores
+  side by side.
 - **DarkChips** (docs/META.md, issue #64): the run's go into the guest's
   folder (three at most, one of each, as BN5's folder editor allows, in
   slots where chips sat out). BN5 draws them as any chip; the guest's

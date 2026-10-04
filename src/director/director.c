@@ -4465,46 +4465,14 @@ static void exit_flag(bool entered) {
  * the area's own records that fit, else those of its other maps, else
  * those of its game's other areas that fit, else the area's own weakest
  * (End Area dresses an opening act, and its viruses outclassed a run's
- * first battle: a playtester's MegaMan was deleted there, session 65).
- * Its game's story battles (its roaming Navis at 2000 HP) never. */
-static int guest_fit(const uint8_t maps[][2], int nmaps, PacingBand b, uint32_t *out, int max) {
-	int n = 0;
-	for (int m = 0; m < nmaps && n < max; ++m)
-		for (int i = 0, k = guest_records(D.guest_xrom, maps[m][0], maps[m][1]); i < k && n < max; ++i) {
-			uint32_t r = guest_record(D.guest_xrom, maps[m][0], maps[m][1], i);
-			int hp, dmg;
-			if (guest_record_strength(D.guest_xrom, r, &hp, &dmg) && hp <= b.hi && dmg <= b.cap) out[n++] = r;
-		}
-	return n;
-}
-
+ * first battle: a playtester's MegaMan was deleted there, session 65;
+ * guest_pool, which build.py pacing reads too). Its game's story battles
+ * (its roaming Navis at 2000 HP) never. */
 static uint32_t guest_pick(uint32_t h) {
-	static uint32_t fit[192];
+	static uint32_t pool[192];
 	PacingBand b = pacing_band(run.depth, false, D.battles == 0);
-	const uint8_t own[1][2] = { { (uint8_t)D.guest_group, (uint8_t)D.guest_number } };
-	int n = guest_fit(own, 1, b, fit, 192);
-	for (int pass = 0; pass < 2 && !n; ++pass) {
-		/* (the area's other maps, then every area its game lends) */
-		uint8_t maps[3 * XAREAS_MAX][2];
-		int nm = 0;
-		for (int k = 0; k < XAREAS_MAX; ++k) {
-			const NetAreaDef *x = net_area_def(NET_AREAS + k);
-			if (!x || x->xrom - 1 != D.guest_xrom || (pass == 0 && x != D.guest_area)) continue;
-			for (int j = 0; j < 3; ++j)
-				if (x->xbattles[j][0]) { maps[nm][0] = x->xbattles[j][0]; maps[nm][1] = x->xbattles[j][1]; ++nm; }
-		}
-		n = guest_fit((const uint8_t (*)[2])maps, nm, b, fit, 192);
-	}
-	if (n) return fit[(h >> 16) % (uint32_t)n];
-	/* (nothing fits: the area's own weakest) */
-	uint32_t best = 0;
-	int least = 1 << 30;
-	for (int i = 0, k = guest_records(D.guest_xrom, D.guest_group, D.guest_number); i < k; ++i) {
-		uint32_t r = guest_record(D.guest_xrom, D.guest_group, D.guest_number, i);
-		int hp, dmg;
-		if (guest_record_strength(D.guest_xrom, r, &hp, &dmg) && hp < least) { least = hp; best = r; }
-	}
-	return best;
+	int n = guest_pool(D.guest_xrom, D.guest_area, D.guest_group, D.guest_number, b.hi, b.cap, pool, 192, NULL);
+	return n ? pool[(h >> 16) % (uint32_t)n] : 0;
 }
 
 static void guest_begin(void) {

@@ -89,6 +89,47 @@ uint32_t guest_record(int xrom, int group, int number, int i) {
 	return i >= 0 && i < guest_records(xrom, group, number) ? records_at(xrom, group, number) + 16u * (uint32_t)i : 0;
 }
 
+/* the records of `maps` within the band, in their order, after the n in out */
+static int records_fit(int xrom, const uint8_t (*maps)[2], int nmaps, int hp_cap, int dmg_cap, uint32_t *out, int n, int max) {
+	for (int m = 0; m < nmaps && n < max; ++m)
+		for (int i = 0, k = guest_records(xrom, maps[m][0], maps[m][1]); i < k && n < max; ++i) {
+			uint32_t r = guest_record(xrom, maps[m][0], maps[m][1], i);
+			int hp, dmg;
+			if (guest_record_strength(xrom, r, &hp, &dmg) && hp <= hp_cap && dmg <= dmg_cap) out[n++] = r;
+		}
+	return n;
+}
+
+int guest_pool(int xrom, const NetAreaDef *area, int group, int number, int hp_cap, int dmg_cap, uint32_t *out, int max, bool *fits) {
+	const uint8_t own[1][2] = { { (uint8_t)group, (uint8_t)number } };
+	int n = records_fit(xrom, own, 1, hp_cap, dmg_cap, out, 0, max);
+	for (int pass = 0; pass < 2 && !n; ++pass) {
+		/* (the area's other maps, then every area its game lends) */
+		uint8_t maps[3 * XAREAS_MAX][2];
+		int nm = 0;
+		for (int k = 0; k < XAREAS_MAX; ++k) {
+			const NetAreaDef *x = net_area_def(NET_AREAS + k);
+			if (!x || x->xrom - 1 != xrom || (pass == 0 && x != area)) continue;
+			for (int j = 0; j < 3; ++j)
+				if (x->xbattles[j][0]) { maps[nm][0] = x->xbattles[j][0]; maps[nm][1] = x->xbattles[j][1]; ++nm; }
+		}
+		n = records_fit(xrom, (const uint8_t (*)[2])maps, nm, hp_cap, dmg_cap, out, 0, max);
+	}
+	if (fits) *fits = n > 0;
+	if (n || max < 1) return n;
+	/* (nothing fits: the map's own weakest) */
+	uint32_t best = 0;
+	int least = 1 << 30;
+	for (int i = 0, k = guest_records(xrom, group, number); i < k; ++i) {
+		uint32_t r = guest_record(xrom, group, number, i);
+		int hp, dmg;
+		if (guest_record_strength(xrom, r, &hp, &dmg) && hp < least) { least = hp; best = r; }
+	}
+	if (!best) return 0;
+	out[0] = best;
+	return 1;
+}
+
 bool guest_dev_worried;
 int guest_backdrop = -1;
 

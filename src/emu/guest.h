@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "rom.h"
+
 enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
 #define GUEST_DARK_KINDS 12   /* BN5's DarkChips (darkchips.h) */
 
@@ -110,5 +112,14 @@ int guest_record_foes(int xrom, uint32_t record, int *ids, int max);
  * i-th's address; read from the ROM file, no core needed. */
 int guest_records(int xrom, int group, int number);
 uint32_t guest_record(int xrom, int group, int number, int i);
+
+/* The records a battle on net map (group, number) of `area` (an area of
+ * game `xrom`) is picked from, held to a band (its viruses' HP together at
+ * most `hp_cap`, their strongest hit `dmg_cap`, guest_record_strength):
+ * the map's own that fit, else those of the area's maps, else those of
+ * every area its game lends, else the map's own weakest alone (*fits
+ * false); into out, how many (0: none at all). Read from the ROM file, no
+ * core needed: the director's pick and the pacing report's. */
+int guest_pool(int xrom, const NetAreaDef *area, int group, int number, int hp_cap, int dmg_cap, uint32_t *out, int max, bool *fits);
 
 #endif

@@ -32,6 +32,14 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **`build.py pacing` lists BN5's battles too (issue #60).** For every act
+  whose area BN5's dresses, it reads the records each layer's battles are
+  picked from against the act's band, as the director picks them: none
+  lies past it.
+- **Each battle in BN5's engine has its line in the run log (issue
+  #60).** It wrote none: a run ended in one showed only "run over". The
+  line names the record, its viruses, their HP and MegaMan's before and
+  after.
 - **A battle on demand: the `battle` step (issue #61).** A capture's
   `--input "300:battle"` and play.py's `battle` start the layer's next
   random battle as soon as MegaMan is free on its map: on BN5 territory a

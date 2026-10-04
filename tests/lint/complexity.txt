@@ -10,7 +10,7 @@ src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
 src/core/touch_layout.c:touch_prefs_parse 38 29
 src/dev/atlas.c:one 56 95
-src/dev/pacing_report.c:pacing_report_run 38 85
+src/dev/pacing_report.c:pacing_report_run 34 78
 src/director/boss.c:boss_update 28 72
 src/director/director.c:director_describe 44 62
 src/director/director.c:director_keys 70 77
