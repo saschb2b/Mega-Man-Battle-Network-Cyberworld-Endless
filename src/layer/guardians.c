@@ -427,8 +427,8 @@ const char *guardian_area_motto(int biome) {
  * guards Judge Tree Comp." read to a playtester as the sentence repeating
  * itself, session 64; a second of three is "another") */
 void guardian_way_question(char *out, size_t n, const char *const who[3], const char *const area[3], int dark) {
-	static const char sealed[] = "|@M A dark way leads down into the Undernet too, but it's sealed. Clearing the Secret Area would open it. "
-		"Which way?";
+	static const char sealed[] = "|@M A dark way leads down into the Undernet itself too, but it's sealed. Clearing the Secret Area, past the "
+		"golden gate, would open it. Which way?";
 	int ways = dark == 2 ? 3 : 2, unknown = 0;
 	for (int k = 0; k < ways; ++k) unknown += !who[k];
 	if (unknown == ways && ways == 3) {

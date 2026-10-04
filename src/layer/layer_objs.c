@@ -907,7 +907,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					static const char *const count[] = { "", "a lone virus", "a pair of viruses", "three viruses", "four viruses" };
 					int nf = layer_objs_duel_foes >= 1 && layer_objs_duel_foes <= 4 ? layer_objs_duel_foes : 3;
 					snprintf(terms, sizeof terms, "%sI busted %s here in %d:%02d.%02d. Beat that%s, MegaMan.|"
-						"@M Real viruses, Lan. If they delete us, the dive's over, so let's be at full HP.",
+						"@M Real viruses, Lan. If they delete us, the dive's over, so let's heal up first if we're hurt.",
 						met ? "Back again, MegaMan? Chaud's watching.|" :
 						"MegaMan. So it's you diving the Endless Net. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
 						count[nf], sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? ", without taking a hit" : "");
@@ -948,9 +948,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	 * stands, which a playtester holding three asked) */
 	if (plan.fragment_placed) {
 		static const char *const found[3] = {
-			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area, in the Undernet. Let's find two more!",
-			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens. It stands in the Undernet!",
-			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now. It stands in the Undernet: the next dark warp leads there!",
+			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area, in the Undernet's copy a dark warp leads to. Let's find two more!",
+			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens. It stands in the Undernet's copy!",
+			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now. It stands in the Undernet's copy: the next dark warp leads there!",
 		};
 		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
 	}

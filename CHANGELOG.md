@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The Undernet's copy and the Undernet itself are told apart.** The
+  ScrtData's words put the golden gate "in the Undernet", the split's
+  sealed dark way led "into the Undernet" and opened after the Secret
+  Area: which was inside which? The gate now stands in "the Undernet's
+  copy a dark warp leads to", and the split's way goes "into the
+  Undernet itself", opened by clearing the Secret Area past the gate.
+- **MegaMan's word before ProtoMan's duel fits any HP:** "let's heal up
+  first if we're hurt", where "let's be at full HP" was said at full HP.
 - **A Server that holds a Navi says so.** "A strong virus signal! Its
   viruses outclass this layer" held ElementMan SP for a playtester on a
   guardian's layer. A Server's battle is now rolled with its layer, so
