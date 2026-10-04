@@ -191,10 +191,18 @@ static const char *scale_words(void) {
 	return s;
 }
 
+/* The screen as the renderer's target, its viewport the whole of it (a
+ * turn's, taken up here rather than by SDL: turns_here). */
+static void screen_target(void) {
+	SDL_SetRenderTarget(P.renderer, NULL);
+	SDL_RenderSetViewport(P.renderer, NULL);
+}
+
 /* The window's new size (resized, or in or out of fullscreen): the canvas
  * follows at the largest whole scale. */
 static void resized(void) {
 	if (P.forced) return;
+	screen_target();
 	SDL_GetRendererOutputSize(P.renderer, &P.screen_w, &P.screen_h);
 	layout_canvas();
 }
@@ -306,6 +314,26 @@ static int app_moved(void *user, SDL_Event *e) {
 }
 #endif
 
+#ifdef __ANDROID__
+/* Android sends a turned phone's new size from Java's thread, and SDL's
+ * renderer took it up there, under the game's own drawing: it switched the
+ * renderer's targets mid-frame, and a turn left the game laid out 240
+ * pixels wide in a corner (the canvas's size read as the screen's) or the
+ * screen black till the app was closed, the emulator's from its first
+ * turn. Kept from that thread, a turn waits for the game's own
+ * (follow_screen, resized). */
+static SDL_threadID game_thread;
+static SDL_atomic_t turned;
+
+static int SDLCALL turns_here(void *user, SDL_Event *e) {
+	(void)user;
+	if (e->type != SDL_WINDOWEVENT || SDL_ThreadID() == game_thread) return 1;
+	if (e->window.event != SDL_WINDOWEVENT_SIZE_CHANGED && e->window.event != SDL_WINDOWEVENT_RESIZED) return 1;
+	SDL_AtomicSet(&turned, 1);
+	return 0;
+}
+#endif
+
 /* ... and once its window is up: the buttons from the start, until a
  * controller's first press (a handheld's own controls: its first START);
  * a keyboard with arrow keys counts as a controller here, so its presence
@@ -315,6 +343,8 @@ static void phone_controls(void) {
 	if (touch_show(true)) layout_canvas();
 #endif
 #ifdef __ANDROID__
+	game_thread = SDL_ThreadID();
+	SDL_SetEventFilter(turns_here, NULL);
 	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
 	for (int i = 0; i < SDL_NumJoysticks(); ++i) SDL_Log("controller %d: %s%s", i, SDL_JoystickNameForIndex(i), SDL_IsGameController(i) ? " (a gamepad)" : "");
 #endif
@@ -615,10 +645,18 @@ static uint32_t stick_bits(void) {
 
 void platform_inject(uint32_t buttons) { injected = buttons; }
 
-void platform_poll(void) {
-#ifdef __EMSCRIPTEN__
+/* The screen's size followed before a frame's events: a page's canvas
+ * (follow_page), or a phone's turn kept from Java's thread (turns_here). */
+static void follow_screen(void) {
+#if defined(__EMSCRIPTEN__)
 	follow_page();
+#elif defined(__ANDROID__)
+	if (SDL_AtomicSet(&turned, 0)) resized();
 #endif
+}
+
+void platform_poll(void) {
+	follow_screen();
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A turned Android phone keeps the game whole.** Turning the phone
+  between upright and on its side could leave the game drawn 240 pixels
+  wide in a corner, or the screen black till the app was closed (in the
+  emulator from the first turn): SDL took Android's new size up on Java's
+  own thread, switching the renderer's targets in the middle of the
+  game's frame. The game now takes a turn up on its own thread: 54 turns
+  in a row in the emulator each laid it out right.
 - **BN5's battles keep to the act's band from below too.** BN5 places its
   battles by its story, so from act 2 its early areas fought far under
   the act: ACDC Area's two Mettaurs at 80 HP where BN6's battles start at
