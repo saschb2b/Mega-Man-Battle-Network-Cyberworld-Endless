@@ -2588,10 +2588,14 @@ static void state_map(FILE *f, int cx, int cy) {
 /* CONTINUE's word on where the run goes on from: a playtester's two chips,
  * bought after the layer's checkpoint, were gone with no word why
  * (session 63) */
-static void resume_note(void) {
+static void resume_note(bool restarted) {
 	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off",
 		"From the arena's door" };
-	if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_DOOR) cinema_note(from[act_note.where], 240);
+	/* (a layer made otherwise, by this build or without the ROM that drew
+	 * it, starts again: "From where you left off" over the layer's start
+	 * misled a playtester, session 67) */
+	if (restarted) cinema_note(from[SAVED_START], 240);
+	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_DOOR) cinema_note(from[act_note.where], 240);
 }
 
 /* ... and after it, where building it began the act afresh */
@@ -3855,7 +3859,7 @@ bool director_resume(void) {
 		begin_area(false);
 		act_note_apply();
 		D.beat[0] = 0;
-		resume_note();
+		resume_note(!same);
 		return true;
 	}
 	/* no state (a run from before the game engine): enter the layer fresh */
