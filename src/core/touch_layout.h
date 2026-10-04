@@ -55,7 +55,12 @@ typedef struct {
 int touch_fit_scale(int sw, int sh, float dp, int scale);
 /* Upright with room under the picture at `scale`: its top in screen
  * pixels, clear of the status bar; else -1 (it stays in the middle). */
-int touch_picture_top(int sw, int sh, float dp, int scale);
+int touch_picture_top(int sw, int sh, float dp, float scale);
+/* ... and there, the scale past the whole `scale` that fills the screen's
+ * width, as far as the controls under it keep their size (sharp scaling:
+ * platform.c); 0 where the whole scale stays (on its side, no room, or a
+ * few pixels short of the width) */
+float touch_upright_fill(int sw, int sh, float dp, int scale);
 /* The controls for screen s as arranged in p. */
 void touch_layout_for(const TouchScreen *s, const TouchPrefs *p, TouchLayout *t);
 /* The control a finger at (x, y) reaches, or -1. Each reaches past its art

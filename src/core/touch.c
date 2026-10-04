@@ -102,14 +102,17 @@ static void safe_area(void) {
 void touch_relayout(void) {
 	/* (the defaults until touch.ini is read: headless runs read none) */
 	if (!prefs_read) { touch_prefs_default(&prefs); prefs_read = true; }
-	int ox = (P.screen_w - P.w * P.scale) / 2, oy = (P.screen_h - P.h * P.scale) / 2;
+	/* (the picture where it lands: at a whole scale, or filling a phone's
+	 * width upright) */
+	float k = P.fill > 0 ? P.fill : (float)P.scale;
+	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
 	scr.w = P.screen_w;
 	scr.h = P.screen_h;
 	scr.dp = P.dp;
-	scr.px = ox + P.core_x * P.scale;
-	scr.py = oy + P.core_y * P.scale;
-	scr.pw = CORE_W * P.scale;
-	scr.ph = CORE_H * P.scale;
+	scr.px = (int)(ox + (float)P.core_x * k);
+	scr.py = (int)(oy + (float)P.core_y * k);
+	scr.pw = (int)((float)CORE_W * k);
+	scr.ph = (int)((float)CORE_H * k);
 	touch_layout_for(&scr, &prefs, &lay);
 #ifdef CW_IOS
 	safe_area();

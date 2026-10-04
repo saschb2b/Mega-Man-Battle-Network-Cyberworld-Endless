@@ -30,7 +30,7 @@ use.
 | Boss navis | Original sprites and battles | HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan, ProtoMan, DiveMan, CircusMan, JudgeMan and Colonel wait before the exit and ask to fight; BlastMan and ElementMan stand in Gregar's overworld sprites too, and Falzar's Navis, whom Gregar has no overworld sprite of, in their battle sprites. Chosen by HP for their act; each leaves five HPMemory and its own Navi chip (the game's items) and heals MegaMan |
 | Choices (challenge, Undernet, Secret Area) | Original text and flags | Yes sets an event flag the engine acts on |
 | Layer changes | Original warp pads | The game's jack-out and jack-in, with the next layer built while MegaMan jacks out |
-| Screen | Adapted | 240x160 at a whole-number scale with black borders |
+| Screen | Adapted | 240x160 at a whole-number scale with black borders; filled with sharp scaling where a whole scale leaves it a quarter smaller (640x480), and across a phone's width held upright |
 
 ## Known gaps
 

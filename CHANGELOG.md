@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Upright on a phone, the picture fills the screen's width.** It was
+  drawn at the largest whole scale: 960 pixels wide on a 1080-wide phone,
+  with black bars at its sides, small over the touch controls. It now
+  fills the width with sharp scaling, as on a 640x480 handheld (each
+  pixel's edge a little soft, none wider than the next): 1080x720 there,
+  in the Android and iPhone apps and on the browser's page. The touch
+  controls under it keep their size; on its side, and where a whole scale
+  falls only a few pixels short, the picture stays whole. `screen = whole`
+  in `settings.ini` keeps whole pixels.
 - **A turned Android phone keeps the game whole.** Turning the phone
   between upright and on its side could leave the game drawn 240 pixels
   wide in a corner, or the screen black till the app was closed (in the

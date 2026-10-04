@@ -1976,11 +1976,35 @@ static void touch_screen_for(int sw, int sh, float dpi, TouchScreen *s) {
 	int sx = sw / 240, sy = sh / 160, scale = sx < sy ? sx : sy;
 	float dp = dpi / 160;
 	scale = touch_fit_scale(sw, sh, dp, scale < 1 ? 1 : scale);
-	int w = sw / scale, h = sh / scale, ox = (sw - w * scale) / 2, oy = (sh - h * scale) / 2;
-	int cx = (w - 240) / 2, cy = (h - 160) / 2, top = touch_picture_top(sw, sh, dp, scale);
-	if (top >= 0 && (top - oy + scale - 1) / scale + 160 <= h) cy = (top - oy + scale - 1) / scale;
-	TouchScreen t = { sw, sh, dp, ox + cx * scale, oy + cy * scale, 240 * scale, 160 * scale };
+	float fill = touch_upright_fill(sw, sh, dp, scale), k = fill > 0 ? fill : (float)scale;
+	int w = fill > 0 ? (int)(sw / fill) : sw / scale, h = fill > 0 ? (int)(sh / fill) : sh / scale;
+	if (w < 240) w = 240;
+	float ox = (sw - w * k) / 2, oy = (sh - h * k) / 2;
+	int cx = (w - 240) / 2, cy = (h - 160) / 2, top = touch_picture_top(sw, sh, dp, k);
+	int y = (int)((top - oy) / k + 0.999f);
+	if (top >= 0 && y + 160 <= h) cy = y;
+	TouchScreen t = { sw, sh, dp, (int)(ox + cx * k), (int)(oy + cy * k), (int)(240 * k), (int)(160 * k) };
 	*s = t;
+}
+
+/* Upright, the picture fills a phone's width (the gap at its sides, in
+ * pixels, `gap` at most), and the controls keep their size under it */
+static void check_upright_fill(const char *what, int sw, int sh, float dpi, int gap) {
+	TouchScreen s;
+	touch_screen_for(sw, sh, dpi, &s);
+	CHECK(sw - s.pw <= gap, "%s: the picture is %d wide of %d", what, s.pw, sw);
+	int sx = sw / 240, sy = sh / 160, scale = touch_fit_scale(sw, sh, dpi / 160, sx < sy ? sx : sy);
+	TouchScreen whole = s;
+	whole.py = (int)(6.5f * 6.3f * dpi / 160);
+	whole.pw = 240 * scale;
+	whole.ph = 160 * scale;
+	TouchPrefs p;
+	touch_prefs_default(&p);
+	TouchLayout a, b;
+	touch_layout_for(&s, &p, &a);
+	touch_layout_for(&whole, &p, &b);
+	CHECK(a.box[TOUCH_DPAD].w >= b.box[TOUCH_DPAD].w - 0.5f, "%s: filling the width shrank the D-pad from %.0f to %.0f", what,
+		b.box[TOUCH_DPAD].w, a.box[TOUCH_DPAD].w);
 }
 
 static void check_touch(const char *what, int sw, int sh, float dpi, int shape) {
@@ -2042,6 +2066,13 @@ static void check_touch(const char *what, int sw, int sh, float dpi, int shape) 
 }
 
 static void test_touch(void) {
+	check_upright_fill("a phone upright (1080x2400)", 1080, 2400, 420, 0);
+	check_upright_fill("an iPhone upright (1179x2556)", 1179, 2556, 460, 0);
+	check_upright_fill("a phone upright (1344x2992)", 1344, 2992, 480, 0);
+	check_upright_fill("a phone upright (1440x3200, 6x)", 1440, 3200, 560, 0);
+	check_upright_fill("a phone upright (1220x2712, 5x of 5.08)", 1220, 2712, 440, 20);
+	check_upright_fill("a 4:3 tablet upright (1536x2048)", 1536, 2048, 320, 0);
+	check_upright_fill("a foldable open (1812x2176, 7x)", 1812, 2176, 420, 132);
 	check_touch("a phone upright (1080x2400)", 1080, 2400, 420, TOUCH_BELOW);
 	check_touch("a phone upright (1170x2532)", 1170, 2532, 480, TOUCH_BELOW);
 	check_touch("a phone upright (720x1600)", 720, 1600, 280, TOUCH_BELOW);

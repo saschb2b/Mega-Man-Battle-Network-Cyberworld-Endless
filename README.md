@@ -594,7 +594,10 @@ pixel's edge a little soft: on a 640x480 screen (an RG35XX Pro, an RG35XX
 Plus) it is 640x427 rather than 480x320. `screen = whole` in `settings.ini`
 in the data folder keeps whole pixels everywhere, `screen = fill` fills
 every screen, and `screen = auto` is the default. On a PC the window keeps
-the same rules as it is resized.
+the same rules as it is resized. A phone held upright shows the picture as
+wide as its screen the same way, over the touch controls (1080x720 on a
+1080-wide phone, rather than 960x640), wherever the controls keep their
+size; on its side the picture keeps its whole scale beside them.
 
 The game runs at the GBA's 60 frames a second. A 60 or 120 Hz screen shows
 every frame for the same time; a 90, 144 or 165 Hz one (a Steam Deck OLED,

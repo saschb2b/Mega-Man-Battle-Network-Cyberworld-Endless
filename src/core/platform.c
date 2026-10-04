@@ -115,14 +115,19 @@ static int screen_mode = SCREEN_AUTO;
 #endif
 #define FILL_GAIN 1.25f
 
-/* The scale the canvas fills the screen at, or 0 at a whole one: never
- * under the touch controls, which lay out by whole scales, nor on the 3DS
- * (present_3ds.c fills its top screen) or a page (which sizes its canvas). */
+/* The scale the canvas fills the screen at, or 0 at a whole one: under the
+ * touch controls only a phone's width, held upright (touch_upright_fill: a
+ * 1080-wide screen drew the picture 960 wide, and the owner, playing the
+ * APK upright, found it small); never on the 3DS (present_3ds.c fills its
+ * top screen), nor on a page that sizes its canvas (all but a phone's). */
 static float fill_scale(void) {
-#if defined(__3DS__) || defined(__EMSCRIPTEN__)
+#if defined(__3DS__)
 	return 0;
+#elif defined(__EMSCRIPTEN__)
+	return touch_shown() ? touch_upright_fill(P.screen_w, P.screen_h, P.dp, P.scale) : 0;
 #else
-	if (screen_mode == SCREEN_WHOLE || touch_shown()) return 0;
+	if (screen_mode == SCREEN_WHOLE) return 0;
+	if (touch_shown()) return touch_upright_fill(P.screen_w, P.screen_h, P.dp, P.scale);
 	float fx = (float)P.screen_w / CORE_W, fy = (float)P.screen_h / CORE_H, f = fx < fy ? fx : fy;
 	if (f <= (float)P.scale || (screen_mode == SCREEN_AUTO && f < (float)P.scale * FILL_GAIN)) return 0;
 	return f;
@@ -158,11 +163,13 @@ static void layout_canvas(void) {
 	P.core_y = (P.h - CORE_H) / 2;
 	/* on a tall screen the touch controls take the room under the picture,
 	 * which moves up clear of the status bar */
-	int top = touch_shown() ? touch_picture_top(P.screen_w, P.screen_h, P.dp, P.scale) : -1;
+	float k = P.fill > 0 ? P.fill : (float)P.scale;
+	int top = touch_shown() ? touch_picture_top(P.screen_w, P.screen_h, P.dp, k) : -1;
 	/* (and clear of an iPhone's notch or island, which a status bar's room is not) */
 	if (top >= 0 && top < safe_top()) top = safe_top();
 	if (top >= 0) {
-		int oy = (P.screen_h - P.h * P.scale) / 2, y = (top - oy + P.scale - 1) / P.scale;
+		float oy = ((float)P.screen_h - (float)P.h * k) / 2;
+		int y = (int)(((float)top - oy) / k + 0.999f);
 		if (y >= 0 && y + CORE_H <= P.h) P.core_y = y;
 	}
 	touch_relayout();
@@ -176,8 +183,8 @@ static void layout_canvas(void) {
 	if (P.sharp) SDL_DestroyTexture(P.sharp);
 	P.sharp = NULL;
 	if (P.fill > 0) {
-		int k = (int)P.fill + 1;   /* (the whole scale just over the fill) */
-		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * k, P.h * k);
+		int whole = (int)P.fill + 1;   /* (the whole scale just over the fill) */
+		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * whole, P.h * whole);
 		if (P.sharp) SDL_SetTextureScaleMode(P.sharp, SDL_ScaleModeLinear);
 		else P.fill = 0;   /* (no memory for it: the canvas at the whole scale, a little wide) */
 	}

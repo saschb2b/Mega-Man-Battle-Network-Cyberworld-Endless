@@ -89,7 +89,11 @@ the site.
   where a whole scale leaves the picture a quarter smaller or more than
   filling would (640x480: 2x against 2.67x, issue #36), which fill it with
   sharp scaling (whole-scaled, then smoothly to size) by default, and
-  `screen = whole` or `fill` in `settings.ini` sets it either way.
+  `screen = whole` or `fill` in `settings.ini` sets it either way; and a
+  phone or tablet held upright, its touch controls under the picture,
+  which fills the screen's width the same way (1080 wide: 4.5x against
+  4x) as far as the controls keep their size, `screen = whole` keeping
+  whole scales there too.
 - MegaMan walks as BN6 walks him, always: no lining-up help, no sliding
   onto a walkway, no movement assist of any kind (one was removed by the
   owner's choice, docs/FIDELITY.md). Where walking drags (walkway mouths,

@@ -41,11 +41,25 @@ static float maxf(float a, float b) { return a > b ? a : b; }
 static float fit_below(float w, float h, float bottom) { return minf((w - 2 * EDGE) / 57.f, (h - FOOT - bottom - 2 * GAP) / 63.f); }
 static float fit_side(float h, float col) { return minf((col - 2 * GAP) / DPAD_D, (h / 2 - 6.f) / 26.f); }
 
-int touch_picture_top(int sw, int sh, float dp, int scale) {
+int touch_picture_top(int sw, int sh, float dp, float scale) {
 	if (sh <= sw || dp <= 0) return -1;
 	float mm = dp * MM, top = TOP * mm;
 	if (fit_below(sw / mm, sh / mm, (top + PIC_H * scale) / mm) < FIT_MIN) return -1;
 	return (int)(top + 0.5f);
+}
+
+/* (a fill that gains less over the whole scale keeps it whole: a 1220-wide
+ * screen's 5.08x against 5x, its pixels softened for 20 of them) */
+#define FILL_GAIN 1.04f
+
+float touch_upright_fill(int sw, int sh, float dp, int scale) {
+	if (touch_picture_top(sw, sh, dp, (float)scale) < 0) return 0;
+	float mm = dp * MM, top = TOP * mm, h = sh / mm;
+	/* (the controls keep the size they have under the whole scale, their
+	 * full size at most: the picture takes only the room left over them) */
+	float keep = minf(fit_below(sw / mm, h, (top + PIC_H * scale) / mm), 1.f);
+	float f = minf((float)sw / PIC_W, ((h - FOOT - 2 * GAP - 63.f * keep) * mm - top) / PIC_H);
+	return f >= scale * FILL_GAIN ? f : 0;
 }
 
 int touch_fit_scale(int sw, int sh, float dp, int scale) {
