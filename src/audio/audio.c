@@ -15,6 +15,7 @@
 #include <SDL.h>
 
 #include "rom.h"
+#include "touch.h"
 
 #define OUT_RATE 48000
 #define GBA_FPS 59.7275
@@ -539,9 +540,15 @@ bool audio_init(void) {
 	want.format = AUDIO_S16SYS;
 	want.channels = 2;
 	/* (a desktop's half as long: sound a frame and a half sooner after
-	 * what makes it; a handheld and the browser keep the longer, safer one) */
+	 * what makes it; a handheld and a phone keep the longer, safer one. A
+	 * browser played by keys takes the half too, its menus' sounds heard
+	 * late; the core's ring stays at 32 ms there (emu.c), as two of these
+	 * reads can come between two frames on the page's one thread; a phone's
+	 * page keeps the longer.) */
 #if defined(CW_DESKTOP)
 	want.samples = 512;
+#elif defined(__EMSCRIPTEN__)
+	want.samples = touch_shown() ? 1024 : 512;
 #else
 	want.samples = 1024;
 #endif

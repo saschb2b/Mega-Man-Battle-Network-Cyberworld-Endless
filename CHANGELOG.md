@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The browser plays its sound sooner, played by keyboard.** Its menus'
+  sounds came late: the page kept the handhelds' longer sound buffer (1024
+  samples, which the browser's script processor plays a buffer behind). A
+  page played by keyboard now takes the desktop's half (512 samples),
+  about 10 to 20 ms sooner; the GBA core's ring stays at 32 ms there, as
+  two of the shorter reads can fall between two frames of the page's one
+  thread. A phone's page keeps the longer buffer. Measured in Chrome on
+  Linux, the browser and the system add about 75 ms of their own (64 ms
+  of it the system's output), which no page can shorten.
 - **BN5's own Navis guard its areas, fought in BN5's engine (issue
   #69).** Where BN5 dresses an area, its guardian was always one of BN6's.
   Now, in half the runs, BN5's own Navi waits in the arena where BN5 sets
