@@ -640,7 +640,9 @@ the other way.
 - **It counts toward unlocks,** as decision 3 has every helper count:
   unlocks are options, never power, and a helper that shut its player out
   of the meta loop would be the judging mode Celeste renamed Assist to
-  avoid. Dad's dive report names it, as it names every helper.
+  avoid. The run's summary and Dad's dive report name it, as they name
+  every helper: a small line over the summary's title ("HELP: HP+ ALL
+  *"), where nothing else stands.
 - **Program Advances still form, all of BN6's.** BN6 checks one two ways
   (bn6f `sub_8029520`): a recipe that lists its chips (LifeSrd: Sword,
   WideSwrd, LongSwrd) compares the chips alone, the Custom screen having
