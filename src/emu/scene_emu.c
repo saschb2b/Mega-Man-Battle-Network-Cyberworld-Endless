@@ -193,6 +193,9 @@ static void update(void) {
 		if (devtools_open()) { frame_keys(); return; }
 		for (int i = 0; i < dev.speed; ++i) {
 			if (started) after_frame();
+			/* (a guest battle begun from it: BN6's next frame waits for its
+			 * end, as on the main thread, where it had run a frame further) */
+			if (guest_active()) { started = false; break; }
 			emu_frame(cinema_keys(frame_keys()));
 			started = true;
 		}
@@ -201,8 +204,9 @@ static void update(void) {
 	}
 	uint32_t keys = frame_keys();
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
-	/* (fast-forwarded: several game frames to one shown) */
-	for (int i = 0; i < dev.speed; ++i) {
+	/* (fast-forwarded: several game frames to one shown; none past a guest
+	 * battle begun from one) */
+	for (int i = 0; i < dev.speed && !guest_active(); ++i) {
 		emu_frame(cinema_keys(keys));
 		after_frame();
 	}

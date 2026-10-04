@@ -32,6 +32,12 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **With the core on its own thread, a battle in BN5's engine holds BN6
+  where it was (issue #60).** BN6's next frame had already been started
+  as the battle began, so BN6 walked one frame further into the battle's
+  moment, and a run with `CYBERWORLD_EMU_THREAD=1` went another way than
+  the same run on one thread. Several frames played at once
+  (`--dev speed=4`) stop at the battle too.
 - **`tests/test_emu.c` runs two cores side by side (issues #58, #61).**
   BN6's core as `emu_init` makes it, with a hook on it, and a second as
   the guest core is made, on a ROM of the test's own bytes that plays a

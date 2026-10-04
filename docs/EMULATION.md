@@ -245,6 +245,10 @@ director's logic takes in each frame whole, as on the main thread. The emu
 scene's update takes the frame done in and then starts the next, which runs
 while the frame done is drawn from a copy of its picture; keys, frames and
 the logic keep their order, and the autopilot's run log comes out the same.
+A battle on the guest core (docs/MULTIROM.md, Guest battles) begun from a
+frame's logic holds BN6's next frame until it ends, as on the main thread:
+started at once, BN6 had walked one frame further into the battle's
+moment, and the run went another way from there.
 `CYBERWORLD_EMU_THREAD=1` runs it so on a computer, to test it. With the
 core on its own thread, mGBA's threaded video draws its picture on one
 more (`threadedVideo`), beside the emulation; the worker waits for it at
