@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **BN5's battles keep to the act's difficulty.** Its areas fought their
+  own maps' viruses whatever the act: End Area dressing a run's first act
+  threw Whirlies at a starting MegaMan, who was deleted in his first
+  battle. A BN5 battle is now held to the act's band as BN6's are, from
+  the area's own battles where they fit and BN5's other areas' where they
+  don't, and BN5's story battles (its roaming Navis) never come.
 - **Bystanders keep off the way.** A Navi standing beside a two-wide neck
   before the walkway down to an arena walled it off, and a playtester
   never reached the guardian. Bystanders now never stand by the way from

@@ -84,7 +84,13 @@ engine (`src/emu/guest.c`, epic #57):
 - **Which**: the area's own maps' records in BN5's numbers (ACDC Area
   0x90:0, 0x90:1 and 0x86:0 for an act's first, middle and guardian's
   layers; End Area 0x93:0, 0x86:3, 0x93:1; Nebula Area 0x86:6, 0x94:3,
-  0x86:7), one picked from the layer's seed and the battle's count.
+  0x86:7), one picked from the layer's seed and the battle's count, held
+  to the act's band as BN6's battles are (pacing.c: their viruses' HP
+  together and the strongest one's damage, from BN5's own enemy tables):
+  the area's own records that fit, else its other maps', else those of
+  BN5's other areas that fit (End Area in an opening act fights ACDC
+  Area's viruses), else its own weakest. BN5's story battles (a record's
+  byte 7 set, its roaming Navis at 2000 HP among them) never.
 - **MegaMan as the run has him**: his HP and max HP, and the run's folder,
   each chip as BN5's chip of the same name with its own code (the names
   read from both ROMs; 114 of BN6's 313 chips pair), owned in BN5's marks.

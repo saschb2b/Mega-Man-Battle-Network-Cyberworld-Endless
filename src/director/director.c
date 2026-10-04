@@ -108,6 +108,7 @@ static struct {
 	Encounter rolled[2];   /* the battles in the two records the roll hands out (encounter.c) */
 	int battles;           /* random battles fought on this layer */
 	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
+	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -1597,6 +1598,7 @@ static void layer_host(int tiles, int *group, int *number) {
 	 * core: its game's records for the map, guest.c) */
 	const uint8_t *xb = a->xbattles[layer_in_act(run.depth)];
 	D.guest_xrom = a->xrom - 1;
+	D.guest_area = a;
 	D.guest_group = xb[0];
 	D.guest_number = xb[1];
 	encounter_guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1) && guest_records(D.guest_xrom, D.guest_group, D.guest_number) > 0;
@@ -4132,8 +4134,53 @@ static void exit_flag(bool entered) {
  * its own game's records for the map, picked from the layer's seed and
  * its battles so far; the roll found the moment free (no chat, fade or
  * cutscene), so it begins at once (guest.c) */
+/* The older net's battles held to the act's band, as BN6's are (pacing.c):
+ * the area's own records that fit, else those of its other maps, else
+ * those of its game's other areas that fit, else the area's own weakest
+ * (End Area dresses an opening act, and its viruses outclassed a run's
+ * first battle: a playtester's MegaMan was deleted there, session 65).
+ * Its game's story battles (its roaming Navis at 2000 HP) never. */
+static int guest_fit(const uint8_t maps[][2], int nmaps, PacingBand b, uint32_t *out, int max) {
+	int n = 0;
+	for (int m = 0; m < nmaps && n < max; ++m)
+		for (int i = 0, k = guest_records(D.guest_xrom, maps[m][0], maps[m][1]); i < k && n < max; ++i) {
+			uint32_t r = guest_record(D.guest_xrom, maps[m][0], maps[m][1], i);
+			int hp, dmg;
+			if (guest_record_strength(D.guest_xrom, r, &hp, &dmg) && hp <= b.hi && dmg <= b.cap) out[n++] = r;
+		}
+	return n;
+}
+
+static uint32_t guest_pick(uint32_t h) {
+	static uint32_t fit[192];
+	PacingBand b = pacing_band(run.depth, false, D.battles == 0);
+	const uint8_t own[1][2] = { { (uint8_t)D.guest_group, (uint8_t)D.guest_number } };
+	int n = guest_fit(own, 1, b, fit, 192);
+	for (int pass = 0; pass < 2 && !n; ++pass) {
+		/* (the area's other maps, then every area its game lends) */
+		uint8_t maps[3 * XAREAS_MAX][2];
+		int nm = 0;
+		for (int k = 0; k < XAREAS_MAX; ++k) {
+			const NetAreaDef *x = net_area_def(NET_AREAS + k);
+			if (!x || x->xrom - 1 != D.guest_xrom || (pass == 0 && x != D.guest_area)) continue;
+			for (int j = 0; j < 3; ++j)
+				if (x->xbattles[j][0]) { maps[nm][0] = x->xbattles[j][0]; maps[nm][1] = x->xbattles[j][1]; ++nm; }
+		}
+		n = guest_fit((const uint8_t (*)[2])maps, nm, b, fit, 192);
+	}
+	if (n) return fit[(h >> 16) % (uint32_t)n];
+	/* (nothing fits: the area's own weakest) */
+	uint32_t best = 0;
+	int least = 1 << 30;
+	for (int i = 0, k = guest_records(D.guest_xrom, D.guest_group, D.guest_number); i < k; ++i) {
+		uint32_t r = guest_record(D.guest_xrom, D.guest_group, D.guest_number, i);
+		int hp, dmg;
+		if (guest_record_strength(D.guest_xrom, r, &hp, &dmg) && hp < least) { least = hp; best = r; }
+	}
+	return best;
+}
+
 static void guest_begin(void) {
-	int n = guest_records(D.guest_xrom, D.guest_group, D.guest_number);
 	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
 	/* (MegaMan with his HP and the run's folder) */
 	uint16_t folder[BN6_FOLDER_ENTRIES] = { 0 };
@@ -4143,9 +4190,14 @@ static void guest_begin(void) {
 	 * he worries: docs/META.md) */
 	uint8_t dark[GUEST_DARK_KINDS];
 	for (int k = 0; k < GUEST_DARK_KINDS; ++k) dark[k] = (uint8_t)dark_count(k);
-	if (n > 0)
-		guest_battle(guest_record(D.guest_xrom, D.guest_group, D.guest_number, (int)((h >> 16) % (uint32_t)n)), emu_read16(BN6_NAVI_HP),
-			emu_read16(BN6_NAVI_MAX_HP), folder, dark);
+	uint32_t record = guest_pick(h);
+	if (emu_debug_on()) {
+		int hp = 0, dmg = 0;
+		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
+		guest_record_strength(D.guest_xrom, record, &hp, &dmg);
+		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);
+	}
+	if (record) guest_battle(record, emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, dark);
 }
 
 /* What the hooks saw in the frames since the last update (events.h). */

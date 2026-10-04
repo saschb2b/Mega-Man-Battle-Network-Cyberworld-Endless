@@ -8,6 +8,8 @@
 #define BN5_TOOLKIT_GAMESTATE 0x3C    /* eToolkit +0x3C: the game state */
 #define BN5_GAMESTATE     0x02002940u /* +0 the sub-mode: 4 on the map, 8 a battle beginning, 0xC in battle; +0x1C the battle's record */
 #define BN5_ROLL          0x0810F6B4u /* the encounter roll the check calls each frame on a net map: returns a BattleSettings* (0 none) */
+#define BN5_ENEMY_IDS     0x08014C8Cu /* (version, type, AI) per enemy id, 3 bytes, as BN6's GetVerActorTyAndAIIdx table: read by the routine before it (0x08014C7C) */
+#define BN5_ENEMY_STATS   0x0800D17Cu /* per type a pointer, per AI a pointer, per version 6 bytes: u16 element << 12 | HP, version, flags, u16 element << 12 | damage */
 #define BN5_BATTLE_TABLES 0x0801C968u /* two pointers, the real world's map groups and the net's (group - 0x80): per group a pointer per map,
                                        * per map 16-byte BattleSettings records, byte 0 0xFF ending them, +7 a condition */
 

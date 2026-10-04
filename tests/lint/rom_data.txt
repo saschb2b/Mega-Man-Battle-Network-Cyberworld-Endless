@@ -8,7 +8,6 @@ RomLayout bg_tiles
 RomLayout copy_pal
 RomLayout copy_tiles
 RomLayout encounters
-RomLayout enemy_ids
 RomLayout menu_pal
 RomLayout navicust_programs
 RomLayout song_table
