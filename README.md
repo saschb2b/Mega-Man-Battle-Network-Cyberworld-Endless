@@ -91,7 +91,8 @@ on a phone too, and on a New 3DS from its HOME Menu.
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
   iPhones and iPads (there, choose the folder that holds both ROMs, or
-  put BN5 in it later); not on the 3DS or in the browser yet.
+  put BN5 in it later) and in the browser (choose it on the player's page
+  beside BN6, or add it later); not on the 3DS.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -329,9 +330,16 @@ The older 3DS and 2DS are too slow for it.
 ### In a browser
 
 Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** and choose your ROM file, or drop it on
-the page. The page checks it and keeps it, with your saves, in the
-browser's own storage (IndexedDB); it is never uploaded. Next time **Play**
-starts straight away. **Forget ROM and saves** removes both.
+the page; Battle Network 5: Team Colonel's beside it if you have it (both
+at once, or BN5 later with **Add BN5 Team Colonel**). The page checks each
+file by its SHA-1, says why it refuses one, and keeps them, with your
+saves, in the browser's own storage (IndexedDB); they are never uploaded.
+Next time **Jack in** starts straight away. **Forget ROMs and saves**
+removes them all. BN5's battles run on a second emulator core in the
+page: the first time, BN5 starts up while the title shows (about 20
+seconds on a recent laptop, a slice of each frame), and a battle in its
+areas that comes before it is done waits behind a short note, once per
+browser.
 
 On a phone or tablet the game fills the screen and draws its own buttons
 round the picture, sized for a thumb: a D-pad, A, B, L, R, Start and

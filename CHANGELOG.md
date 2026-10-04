@@ -13,6 +13,17 @@
   #63),** as BN6's do: where both games' chip has one of the folder's
   codes, BN5's own results screen shows it in that code, and that is the
   chip you get.
+- **The browser takes BN5 too (issue #68).** The player's page takes
+  Battle Network 5: Team Colonel (USA) beside BN6's ROM, both at once or
+  BN5 later (**Add BN5 Team Colonel**), checks each by its SHA-1 and keeps
+  it in the browser's storage with BN6's; a wrong file is refused with its
+  reason ("BN5 Team ProtoMan, not Team Colonel"). BN5's areas then dress
+  runs and fight their random battles in BN5's own engine, as on the other
+  builds but the 3DS. The page runs BN5's frames in BN6's place, never both
+  at once; BN5's first start runs a slice of each frame while the title
+  shows, and a battle that comes before it is done waits behind a short
+  note, once per browser. **Forget ROM and saves** is now **Forget ROMs
+  and saves**.
 - **A DarkChip comes when MegaMan is hurt.** BN5 worries him by hits,
   and every battle in its areas opened him calm, so it took seven hits in
   one battle to bring a DarkChip, whatever his HP: a playtester at 10 of
@@ -349,8 +360,8 @@
   the battle left and its reward: a chip as BN6's chip of the same name,
   or zenny. A loss there ends the run. The switch fades to white and
   flashes into BN5's battle, and after the first one MegaMan says what it
-  was. Desktop, Android, iOS and PortMaster builds; the 3DS and the
-  browser keep BN6's battles.
+  was. Desktop, Android, iOS, PortMaster and browser builds; the 3DS keeps
+  BN6's battles.
 - **On walkways and bands the arrow points the way they run.** It pointed
   straight across the screen on bands two panels wide and flipped at
   their junctions, and held along a band's line, its way ran MegaMan

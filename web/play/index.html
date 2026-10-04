@@ -58,22 +58,24 @@
 				<h1 class="label">Game Pak</h1>
 				<p>Mega Man Battle Network 6: Cybeast Gregar (USA), an unmodified <code>.gba</code>.
 					It stays in this browser and is never uploaded.</p>
+				<p class="optional">Optional beside it: Mega Man Battle Network 5: Team Colonel (USA). Its net then joins ours:
+					BN5's areas, their battles in BN5's own engine.</p>
 				<p id="status">Loading…</p>
 				<div class="actions">
 					<button id="play" class="exit" type="button" hidden>Jack in</button>
 					<label id="pick" class="plate" hidden>
-						<input id="rom" type="file" accept=".gba,application/octet-stream">
-						<i class="icon i-chip" aria-hidden="true"></i><span id="pick-label">Choose ROM file</span>
+						<input id="rom" type="file" accept=".gba,application/octet-stream" multiple>
+						<i class="icon i-chip" aria-hidden="true"></i><span id="pick-label">Choose ROM files</span>
 					</label>
 				</div>
-				<p class="drop">or drop the file on this page</p>
+				<p class="drop">or drop the files on this page</p>
 				<p class="touch-note">On this screen the game draws its own buttons round the picture; a controller or keyboard puts them away.</p>
 			</section>
 		</div>
 		<div class="bar">
 			<button id="fullscreen" class="pill" type="button" data-umami-event="fullscreen">Fullscreen</button>
 			<button id="smooth" class="pill" type="button" aria-pressed="false" title="For 90, 144 or 165 Hz screens: even motion, a little blurred">Smooth motion: off</button>
-			<button id="forget" class="pill gold" type="button">Forget ROM and saves</button>
+			<button id="forget" class="pill gold" type="button">Forget ROMs and saves</button>
 		</div>
 	</div>
 
@@ -100,7 +102,7 @@
 			<span class="who">Saves</span>
 			<div class="textbox">
 				<p>The run is saved in this browser on every new layer. CONTINUE on the title picks it up.</p>
-				<p><em>Forget ROM and saves</em>, or clearing this site's data, deletes both.</p>
+				<p><em>Forget ROMs and saves</em>, or clearing this site's data, deletes them all.</p>
 				<p>Also for Windows, macOS, Linux, the Steam Deck, Android, handhelds and the 3DS: <a href="../download/" data-umami-event="go-download" data-umami-event-from="play">the downloads</a>.</p>
 			</div>
 		</div>

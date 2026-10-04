@@ -59,7 +59,8 @@ body.touch-play #canvas {
 #gate h1 { margin: 0; font-size: 1.8rem; letter-spacing: 0.12em; }
 #gate p { max-width: 560px; margin: 0; font-size: 1.1rem; }
 #gate code { color: var(--gold); }
-#status { color: var(--gold); min-height: 1.5em; font: 700 1rem/1.5 var(--caps); }
+#status { color: var(--gold); min-height: 1.5em; font: 700 1rem/1.5 var(--caps); white-space: pre-line; }
+#gate p.optional { font-size: 1rem; color: #9ce0f4; }
 #gate .drop { font-size: 0.95rem; color: #9ce0f4; }
 
 .actions { display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap; }

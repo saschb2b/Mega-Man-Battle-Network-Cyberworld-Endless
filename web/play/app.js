@@ -1,7 +1,7 @@
 // The page around the browser build (cyberworld.js, from `build.py web`).
-// The player's ROM and the game's saves live in IndexedDB under
+// The player's ROMs and the game's saves live in IndexedDB under
 // /cyberworld-endless (its own name: every project page of a github.io user
-// shares one origin): the ROM file is read here, checked, written there and
+// shares one origin): each ROM file is read here, checked, written there and
 // never leaves the browser.
 'use strict';
 
@@ -9,8 +9,31 @@ const ROM_SIZE = 8 * 1024 * 1024;
 // (the engine's build, which build.py fills in: its .wasm fetched by it, so
 // a browser never pairs a kept one with a new cyberworld.js)
 const ENGINE_VERSION = '';
-const ROM_SHA1 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6';   // BN6 Cybeast Gregar (USA)
 const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
+// The ROMs the game takes, each told by its header's game code, checked by
+// its SHA-1 and kept under its own name in ROM_DIR, where the game finds
+// BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
+// optional, whose net areas and their battles in BN5's own engine then
+// join runs (docs/MULTIROM.md). The names and words of Android's ROM page.
+const ROMS = {
+	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: 'BN6 Cybeast Gregar (USA)' },
+	bn5: { code: 'BRKE', sha1: '5f472f78d8de2df01d5039e045c043cb40969a39', file: 'bn5c.gba', tag: 'BN5 Team Colonel (USA)' },
+};
+// Battle Network 6's and 5's other versions, by their game code: a player
+// who has one is told which it is
+const OTHERS = {
+	BR6E: 'BN6 Cybeast Falzar, not Gregar',
+	BR6P: 'BN6 Cybeast Falzar (Europe), not Gregar (USA)',
+	BR6J: 'Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)',
+	BR5P: 'BN6 Cybeast Gregar (Europe), not the USA version',
+	BR5J: 'Rockman EXE 6 Gregar (Japan), not the USA version',
+	BRBE: 'BN5 Team ProtoMan, not Team Colonel',
+	BRBP: 'BN5 Team ProtoMan (Europe), not Team Colonel (USA)',
+	BRBJ: 'Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)',
+	BRKP: 'BN5 Team Colonel (Europe), not the USA version',
+	BRKJ: 'Rockman EXE 5 Team of Colonel (Japan), not the USA version',
+};
+const OTHER_GAME = 'not BN6 Gregar or BN5 Team Colonel';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('canvas'), stage = $('stage'), gate = $('gate'), statusLine = $('status');
@@ -57,24 +80,34 @@ var Module = {
 	onAbort: (what) => { say('The engine stopped: ' + what); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
 };
 
-function storedRom() {
-	try { return Module.FS.readdir(ROM_DIR).find((n) => /\.gba$/i.test(n)) || null; } catch (e) { return null; }
+// whether ROM `id` (ROMS) is kept in this browser
+function kept(id) {
+	try { return Module.FS.stat(ROM_DIR + '/' + ROMS[id].file).size === ROM_SIZE; } catch (e) { return false; }
 }
 
-// Play when a ROM is stored, else ask for one.
-function offer() {
-	const rom = storedRom();
+// What is kept, in words
+function keptWords() {
+	if (kept('bn6') && kept('bn5')) return 'BN6 and BN5 are ready in this browser: BN5\'s net joins ours.';
+	if (kept('bn6')) return 'Your ROM is ready in this browser. BN5 can join it: choose it or drop it here.';
+	if (kept('bn5')) return ROMS.bn5.tag + ' is kept, for when BN6 is here. Choose your BN6 ROM to begin.';
+	return 'Choose your ROM to begin.';
+}
+
+// Play when BN6 is kept, else ask for it; BN5 asked for beside it. `note`,
+// where files were refused, says why in place of what is kept.
+function offer(note) {
+	const six = kept('bn6'), five = kept('bn5');
 	$('pick').hidden = false;
-	$('play').hidden = !rom;
-	$('pick-label').textContent = rom ? 'Use a different ROM' : 'Choose ROM file';
-	say(rom ? 'Your ROM is ready in this browser.' : 'Choose your ROM to begin.');
-	if (rom) $('play').focus();
+	$('play').hidden = !six;
+	$('pick-label').textContent = !six ? 'Choose ROM files' : five ? 'Use different ROMs' : 'Add BN5 Team Colonel';
+	say(note || keptWords());
+	if (six) $('play').focus();
 }
 
 function start() {
-	if (!ready || started || !storedRom()) return;
+	if (!ready || started || !kept('bn6')) return;
 	started = true;
-	track('game-start', { input: touchPlay ? 'touch' : 'keys' });
+	track('game-start', { input: touchPlay ? 'touch' : 'keys', bn5: kept('bn5') ? 'yes' : 'no' });
 	gate.hidden = true;
 	if (touchPlay) {
 		// (the canvas takes its size from the page: SDL follows it, rotations too)
@@ -97,46 +130,73 @@ async function keepAwake() {
 }
 document.addEventListener('visibilitychange', () => { if (started && touchPlay && document.visibilityState === 'visible') keepAwake(); });
 
-// ---- the ROM ----
+// ---- the ROMs ----
 
 async function sha1(bytes) {
 	const digest = await crypto.subtle.digest('SHA-1', bytes);
 	return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function takeRom(file) {
-	if (!file || started) return;
-	if (!ready) { say('One moment: the engine is still loading.'); return; }
-	say('Checking ' + file.name + '…');
+// One file, told by its header's game code: BN6's or BN5's kept once its
+// size and SHA-1 are right ({ id }), anything else refused ({ why, reason })
+async function checkRom(file) {
+	if (/\.(zip|7z|rar)$/i.test(file.name)) return { zipped: true, reason: 'zipped' };
+	const head = new Uint8Array(await file.slice(0, 0xB0).arrayBuffer());
+	if (head.length < 0xB0) return { why: 'not a GBA ROM', reason: 'other-game' };
+	const code = String.fromCharCode(...head.subarray(0xAC, 0xB0));
+	const id = Object.keys(ROMS).find((k) => ROMS[k].code === code);
+	if (!id) return { why: OTHERS[code] || OTHER_GAME, reason: OTHERS[code] ? 'version' : 'other-game' };
+	const changed = ROMS[id].tag + ', but changed: patched, trimmed or a bad dump';
+	if (file.size !== ROM_SIZE) return { why: changed, reason: 'size' };
 	const bytes = new Uint8Array(await file.arrayBuffer());
-	if (bytes.length !== ROM_SIZE) {
-		say(file.name + ' is not an 8 MB GBA ROM. You need Mega Man Battle Network 6: Cybeast Gregar (USA).');
-		track('rom-rejected', { reason: 'size' });
-		return;
-	}
-	if (crypto.subtle && (await sha1(bytes)) !== ROM_SHA1) {
-		say(file.name + ' is a different version or was changed. Only the unmodified Cybeast Gregar (USA) works.');
-		track('rom-rejected', { reason: 'version' });
-		return;
-	}
+	if (crypto.subtle && (await sha1(bytes)) !== ROMS[id].sha1) return { why: changed, reason: 'changed' };
+	// (BN6's in place of any .gba but BN5's: the page kept one ROM before)
 	const FS = Module.FS;
-	for (const name of FS.readdir(ROM_DIR)) if (name !== '.' && name !== '..') FS.unlink(ROM_DIR + '/' + name);
-	FS.writeFile(ROM_DIR + '/bn6g.gba', bytes);
-	persist();
-	track('rom-accepted');
-	start();
+	for (const name of FS.readdir(ROM_DIR))
+		if (name === ROMS[id].file || (id === 'bn6' && /\.gba$/i.test(name) && name !== ROMS.bn5.file)) FS.unlink(ROM_DIR + '/' + name);
+	FS.writeFile(ROM_DIR + '/' + ROMS[id].file, bytes);
+	return { id };
 }
 
-$('rom').addEventListener('change', (e) => takeRom(e.target.files[0]));
+// The files chosen or dropped: each kept or refused, and why; the game
+// starts once BN6 is kept, unless a file was refused, whose reason stays
+// to be read (Jack in then starts it)
+let checking = false;
+async function takeRoms(files) {
+	if (!files.length || started || checking) return;
+	if (!ready) { say('One moment: the engine is still loading.'); return; }
+	checking = true;
+	say('Checking ' + (files.length === 1 ? files[0].name : files.length + ' files') + '…');
+	const refused = [];
+	let took = 0;
+	for (const file of files) {
+		const r = await checkRom(file).catch(() => ({ why: 'could not be read', reason: 'unreadable' }));
+		if (r.id) {
+			++took;
+			track('rom-accepted', { rom: r.id });
+			continue;
+		}
+		refused.push(r.zipped ? file.name + ' is zipped: unzip it first.' : file.name + ': ' + r.why + '.');
+		track('rom-rejected', { reason: r.reason });
+	}
+	checking = false;
+	if (took) persist();
+	if (!refused.length && kept('bn6')) { start(); return; }
+	const lines = refused.slice(0, 4);
+	if (refused.length > 4) lines.push('and ' + (refused.length - 4) + ' more.');
+	offer(lines.concat(keptWords()).join('\n'));
+}
+
+$('rom').addEventListener('change', (e) => { takeRoms(Array.from(e.target.files)); e.target.value = ''; });
 $('play').addEventListener('click', start);
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => {
 	e.preventDefault();
-	if (e.dataTransfer.files.length) takeRom(e.dataTransfer.files[0]);
+	takeRoms(Array.from(e.dataTransfer.files));
 });
 
 $('forget').addEventListener('click', () => {
-	if (!confirm('Remove your ROM and all saves from this browser?')) return;
+	if (!confirm('Remove your ROMs and all saves from this browser?')) return;
 	track('forget-rom');
 	const req = indexedDB.deleteDatabase(DATA);
 	req.onsuccess = req.onerror = req.onblocked = () => location.reload();

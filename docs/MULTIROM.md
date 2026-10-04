@@ -75,17 +75,20 @@ ROM in memory, and shows its battle screens.
 6. **Platforms**: desktop first. Phones keep copies: Android's
    `RomActivity` and iOS's ROM screen (`src/core/ios.m`) copy BN5's ROM
    beside BN6's from the folder the player chose, and look in it again at
-   each start, so BN5 put there later comes in (issue #66). A New 3DS's
-   96 MB heap holds BN6 twice (mGBA's copy and the engine's) with little
-   room left: there another game's data would be taken in as a run needs
-   it, its ROM not kept.
+   each start, so BN5 put there later comes in (issue #66). The browser's
+   play page (`web/play/app.js`) takes BN5's file beside BN6's, either
+   told by its header's game code and checked by its SHA-1, and keeps it
+   in IndexedDB beside BN6's (`rom/bn5c.gba`), where `xrom_find_beside`
+   reads it (issue #68). A New 3DS's 96 MB heap holds BN6 twice (mGBA's
+   copy and the engine's) with little room left: there another game's
+   data would be taken in as a run needs it, its ROM not kept.
 
 ## Guest battles
 
 Where BN5 dresses an area and the build can run a second core (desktop,
-Android, iOS, PortMaster; not the 3DS, which keeps one ROM, nor the
-browser), the layer's random battles are BN5's own, fought in BN5's
-engine (`src/emu/guest.c`, epic #57):
+Android, iOS, PortMaster, the browser; not the 3DS, which keeps one ROM),
+the layer's random battles are BN5's own, fought in BN5's engine
+(`src/emu/guest.c`, epic #57):
 
 - **When**: BN6's roll decides there is a battle, as on any layer; the
   hook gives BN6 none (`encounter_guest`), and the director begins a
@@ -184,6 +187,30 @@ engine (`src/emu/guest.c`, epic #57):
   share no darkness. A flame of darkness on the middle layer of such an
   act holds one the run lacks: BN5's flame, copied from its ROM and
   turned purple, in a bystander's place.
+- **In the browser** (issue #68): the page runs one frame at a time with
+  no threads, so the guest's frames take BN6's frames' place, never both
+  in one 1/60 s, and no frame blocks. Its first boot (7210 frames) runs a
+  slice of each frame where BN6's core does not run, the title and its
+  setup (`guest_warm`, 8 ms a frame), and the state it keeps goes into
+  IndexedDB (`platform_persist`); a battle that comes before it is done
+  waits behind a note ("Waking the older net... 40%", `guest_boot_slice`,
+  12 ms a frame), BN6's frame faded to white as for any guest battle.
+  The boot runs the same frames in the same order everywhere (its keys a
+  function of the frame, `boot_keys`), so its game state is the desktop's.
+  Measured in Chrome 152 (headless, agent-browser) on an Intel Core Ultra
+  X7 358H: at the title the boot took 9.2 s of BN5's frames (1.3 ms a
+  frame) over 19 s; behind the note 7.3 s over 9.5 s; the page's frames
+  kept 16.7 ms throughout, the longest 16.8 ms, and in guest battles the
+  same (making a layer pauses the page as before). The page's WebAssembly
+  memory, 97 MB on a first layer with BN6 alone, was 153 MB on BN5's
+  first layer with the guest booted (BN5's ROM, 8 MB, and the guest core's
+  ROM copy, which mGBA copies to 32 MB at its first patch, as it does
+  BN6's), and 197 MB at most, after a move from Central Area into End
+  Area (the BN5 maps its tiles are learned from); it never shrinks. The
+  JavaScript heap was 21 MB (14 MB with BN6 alone), beside the two ROM
+  files the page keeps in memory. A phone's browser would need about
+  250 MB for the page, and its slower WebAssembly (three or four times)
+  about a minute of the title for the boot; untested on a phone.
 - **Still to come**: the NaviCust's other programs in (those both games
   have, as BN5's battle reads them), BN5's chips registered in BN6.
 
@@ -201,7 +228,7 @@ engine (`src/emu/guest.c`, epic #57):
   the ROMs there: no save changes, and a run continued without it goes on
   in Central Area's tiles), named on the act's card, in MegaMan's words,
   L's and the PET's. Read where BN6's ROM is, on every build but the 3DS's
-  and the browser's.
+  (the browser's from the files its page took, issue #68).
 - [x] End Area (7-9, dressing Seaside Area) and Nebula Area (13-14, the
   Graveyard, under Green Area's map: the Graveyard's group sets its own
   palette), each tuned over the atlas's layers (`--atlas DIR:aN:3`);
