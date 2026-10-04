@@ -737,9 +737,9 @@ DarkThnd, DrkRecov, DarkInvs and DarkPlus (a player's lead, verified by
 the code and in play: docs/SOURCES.md; docs/ROM_DATA.md, BN6's own
 DarkChips). They pair with BN5's of the same names (`src/core/xchips.c`),
 so these five could serve a run in both nets and on every build, the
-3DS's with its one ROM too. Nothing is built. First what BN6 does with
-them, then a *proposal*, reasoned with the game-design skill, for the
-owner's calls.
+3DS's with its one ROM too. First what BN6 does with them, then the
+design, reasoned with the game-design skill and approved by the owner as
+recommended (4 October 2026); building it is issue #70's next step.
 
 **What BN6's battles do with them** (verified):
 
@@ -769,7 +769,7 @@ owner's calls.
   BugFrag, a Sword without (read in the code; a bystander's rumor in BN6's
   text says the same).
 
-### The design (*proposal*)
+### The design (approved)
 
 - **The experience:** the dark power is there when a fight turns, and the
   run remembers what it took. A player on a 3DS meets the same temptation
@@ -916,14 +916,14 @@ counted by the engine.
   share of them; BugFrag income against what darkness, the BugFrag Trader
   and the vendor take.
 
-#### The owner's calls
+#### The owner's calls (4 October 2026: each as recommended)
 
-1. The price: B recommended (A, C, D, E).
+1. The price: B, 20 max HP for every battle a DarkChip's dark power ran
+   in, in either net; BN6's BugFrag and HP bug on top; the base chip's
+   fallback free.
 2. Where they come from: a BN6 flame on the middle layer of every act
-   whose battles are BN6's, recommended (the trader, a Graveyard
-   guardian, purple Mystery Data).
-3. The look: the base chips' pictures and icons with BN6's purple card,
-   recommended (blank, BN5's where present, darkened copies).
+   whose battles are BN6's (the 3DS's runs too).
+3. The look: the base chips' pictures and icons with BN6's purple card.
 4. The folder: BN6's three and the run's one of each; DarkPlus out of
    BN6's battles.
 5. The words: MegaMan at the flame and after the first dark battle, BN6's
