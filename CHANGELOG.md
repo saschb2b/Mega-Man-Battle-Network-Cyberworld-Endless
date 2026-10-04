@@ -102,6 +102,10 @@
   Area's raised floors and BN5's Undernet's pale courts come in their
   areas' main colours. The Undernet's statue and braziers stand there
   as in BN6's, for its number doors.
+- **BN5's battles stand in front of their own area's background.** A
+  random battle in one of BN5's areas showed yellow rings wherever it
+  was fought; now ACDC Area's are blue diamonds, Oran Area's red ones,
+  the Undernet's static, each area's own as BN5 draws it.
 - **The run saves at a guardian arena's door.** As MegaMan steps in, the
   run is saved; a quit during the fight goes on, at CONTINUE, from the
   arena's door with the HP he walked in with, where it went back to the

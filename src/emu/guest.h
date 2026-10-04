@@ -62,6 +62,12 @@ typedef struct {
 /* Once a battle has ended (guest_active false again): its result, once. */
 bool guest_take_result(GuestResult *out);
 
+/* The background its battles stand in front of, by its own game's number
+ * (NetAreaDef.xbg: the dressed area's), where a record leaves it to the
+ * map (0xFF), which would be the map its boot state stands on; -1 the
+ * map's. */
+extern int guest_backdrop;
+
 /* (dev: MegaMan worried through every guest battle, for captures of a
  * DarkChip offered: --dev worried) */
 extern bool guest_dev_worried;

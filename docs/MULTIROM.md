@@ -231,9 +231,10 @@ engine (`src/emu/guest.c`, epic #57):
   tiles, map, palette and animations copied after BN6's 22 backgrounds,
   in copies of BN6's tables the game's loader is pointed at
   (`src/gfx/xbackdrop.c`), for the battles fought in BN6's engine there
-  (guardians, ProtoMan's netbattle). A guest battle stands in front of
-  the background BN5 gives the map its boot state stands on (yellow
-  rings), its record's background byte being 0xFF (the map's).
+  (guardians, ProtoMan's netbattle); a guest battle's record copy names
+  the area's own by BN5's number (its byte +4, which BN5's records leave
+  at 0xFF, the map's: the room the guest's boot state stands in, yellow
+  rings in every area).
 - [ ] Its towns' music. Its lists name ACDC Town's (group 0x00): the
   town 0x03, its houses (maps 1-6) 0x04, map 7 0x05, maps 8-11 0x0C;
   group 0x01's maps 0x05 and 0x0C; in one story state (its third list)

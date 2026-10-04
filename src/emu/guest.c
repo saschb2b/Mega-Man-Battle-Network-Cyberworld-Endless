@@ -317,10 +317,16 @@ static void rows_fit(uint32_t record) {
 	}
 }
 
+int guest_backdrop = -1;
+
+/* (and its background the dressed area's where it leaves it to the map:
+ * every guest battle stood in front of the room its boot state stands in,
+ * yellow rings for each area) */
 static uint32_t record_copy(uint32_t record) {
 	for (uint32_t i = 0; i < 16; i += 2) {
 		uint16_t v = rd16(record + i);
 		if (i == 8) v = (uint16_t)(v & ~BN5_OPT_GAME_OVER);
+		if (i == BN5_RECORD_BACKDROP && (v & 0xFF) == 0xFF && guest_backdrop >= 0) v = (uint16_t)((v & 0xFF00) | (guest_backdrop & 0xFF));
 		wr16(BN5_FREE + i, v);
 	}
 	return BN5_FREE;

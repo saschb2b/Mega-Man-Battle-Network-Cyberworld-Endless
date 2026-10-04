@@ -1659,6 +1659,7 @@ static void layer_host(int tiles, int *group, int *number) {
 	layer_objs_bystander2 = a->xrom > 0 && a->xnavi2 ? xnavi_slot(a->xrom - 1, a->xnavi2, layer_objs_bystander) : layer_objs_bystander;
 	layer_objs_xlooks = a->xrom > 0 ? a->xlooks : 0;
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
+	guest_backdrop = a->xrom > 0 && a->xbg ? a->xbg : -1;   /* (its own number, in its own game's tables) */
 	xbackdrop_map(tiles);
 	/* (and its battles, where its own engine can fight them on the guest
 	 * core: its game's records for the map, guest.c) */
