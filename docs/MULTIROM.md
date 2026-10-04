@@ -105,7 +105,9 @@ engine (`src/emu/guest.c`, epic #57):
   them) never.
 - **MegaMan as the run has him**: his HP and max HP, and the run's folder,
   each chip as BN5's chip of the same name with its own code (the names
-  read from both ROMs; 114 of BN6's 313 chips pair), owned in BN5's marks.
+  read from both ROMs and paired by `src/core/xchips.c`, which
+  `tests/test_core.c` runs on made-up tables; 114 of BN6's 313 chips
+  pair), owned in BN5's marks.
   A chip BN5 has none of sits out, its slot empty (a Standard folder keeps
   26 of its 30). His buster and NaviCust are BN5's boot state's for now.
 - **The record's copy**: past BN5's 8 MB in the guest's ROM copy, without

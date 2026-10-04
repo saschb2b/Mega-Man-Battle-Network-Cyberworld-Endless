@@ -101,28 +101,25 @@ const char *guest_dark_name(int k) {
 
 #include "compat.h"
 #include "game.h"
+#include "xchips.h"
 
 /* ---- the run's chips as its game's: by name, from both ROMs ---- */
 
 #define BN6_CHIPS 314   /* BN6's standard, Mega and Giga chips, those a folder holds */
 static uint16_t to_bn5[BN6_CHIPS], from_bn5[BN5_CHIPS];
 
-/* Pairs BN6's chips with BN5's of the same name; how many paired. */
+/* Pairs BN6's chips with BN5's of the same name (xchips.c); how many
+ * paired. */
 static int chips_pair(int xrom) {
-	static char names[BN5_CHIPS][16];
+	static char names5[BN5_CHIPS][XCHIP_NAME], names6[BN6_CHIPS][XCHIP_NAME];
 	for (int i = 1; i < BN5_CHIPS; ++i)
-		xrom_text(xrom, i < 256 ? BN5_CHIP_NAMES_LOW : BN5_CHIP_NAMES_HIGH, i < 256 ? i : i - 256, names[i], sizeof names[i]);
-	int paired = 0;
+		xrom_text(xrom, i < 256 ? BN5_CHIP_NAMES_LOW : BN5_CHIP_NAMES_HIGH, i < 256 ? i : i - 256, names5[i], sizeof names5[i]);
 	for (int id = 1; id < BN6_CHIPS; ++id) {
 		ChipInfo ci;
 		chip_info(id, &ci);
-		to_bn5[id] = 0;
-		for (int j = 1; j < BN5_CHIPS && ci.name[0] && !to_bn5[id]; ++j)
-			if (!strcmp(names[j], ci.name)) to_bn5[id] = (uint16_t)j;
-		if (to_bn5[id] && !from_bn5[to_bn5[id]]) from_bn5[to_bn5[id]] = (uint16_t)id;
-		paired += to_bn5[id] != 0;
+		snprintf(names6[id], sizeof names6[id], "%s", ci.name);
 	}
-	return paired;
+	return xchips_pair((const char (*)[XCHIP_NAME])names6, BN6_CHIPS, (const char (*)[XCHIP_NAME])names5, BN5_CHIPS, to_bn5, from_bn5);
 }
 
 static struct mCore *core;
@@ -370,23 +367,16 @@ static int bn5_code(int x, int code) {
 	/* (its record as its ROM copy has it: in * alone with All *) */
 	uint8_t rec[4];
 	for (uint32_t i = 0; i < 4; ++i) rec[i] = rd8(0x08000000u + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x + i);
-	for (int i = 0; i < 4; ++i)
-		if (rec[i] == code) return code;
-	for (int i = 0; i < 4; ++i)
-		if (rec[i] == 26) return 26;
-	return rec[0] <= 26 ? rec[0] : code;
+	return xchips_code(rec, code);
 }
 
 /* ... and a chip won there as BN6's chip of its name has it, the same way */
 static int bn6_code(int id, int code) {
 	ChipInfo ci;
 	chip_info(id, &ci);
-	char want = code == 26 ? '*' : (char)('A' + code);
-	for (int i = 0; i < ci.ncodes; ++i)
-		if (ci.codes[i] == want) return code;
-	for (int i = 0; i < ci.ncodes; ++i)
-		if (ci.codes[i] == '*') return 26;
-	return ci.ncodes ? (ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A') : code;
+	uint8_t rec[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
+	for (int i = 0; i < ci.ncodes && i < 4; ++i) rec[i] = ci.codes[i] == '*' ? 26 : (uint8_t)(ci.codes[i] - 'A');
+	return xchips_code(rec, code);
 }
 
 static int folder_in(const uint16_t *folder) {

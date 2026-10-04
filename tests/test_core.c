@@ -29,6 +29,7 @@
 #include "townmath.h"
 #include "touch_layout.h"
 #include "buttons.h"
+#include "xchips.h"
 #include "xnavi.h"
 #include "xsong.h"
 #include "debug.h"
@@ -2254,6 +2255,40 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
+/* Another game's chips as BN6's (src/core/xchips.c; docs/MULTIROM.md,
+ * Guest battles), on made-up tables: paired by name each way (a name the
+ * other game gives two chips comes back from either; a chip it lacks, or
+ * a nameless one, pairs none); a code re-read as the other game's chip of
+ * that name has it, the same letter, else its *, else its first (a
+ * playtester's ElcPuls1 S went in as BN5's ElcPuls1 *, which has no S);
+ * the folder's chips that sit out, each once, in its order. */
+static void test_xchips(void) {
+	static const char names6[6][XCHIP_NAME] = { "", "Cannon", "WhiCapsl", "Sword", "", "HiCannon" };
+	static const char namesx[6][XCHIP_NAME] = { "", "Sword", "Cannon", "DarkSwrd", "Cannon", "" };
+	uint16_t to_x[6], from_x[6];
+	int paired = xchips_pair(names6, 6, namesx, 6, to_x, from_x);
+	CHECK(paired == 2, "xchips: two of BN6's chips pair by name (%d)", paired);
+	CHECK(to_x[1] == 2 && to_x[3] == 1 && !to_x[0] && !to_x[2] && !to_x[4] && !to_x[5], "xchips: Cannon as the other's 2 (its first), Sword as its 1, "
+		"WhiCapsl, HiCannon and a nameless chip as none (%d %d %d %d %d)", to_x[1], to_x[3], to_x[2], to_x[4], to_x[5]);
+	CHECK(from_x[1] == 3 && from_x[2] == 1 && from_x[4] == 1 && !from_x[0] && !from_x[3] && !from_x[5], "xchips: back, both Cannons as BN6's Cannon, "
+		"DarkSwrd and a nameless chip as none (%d %d %d %d %d)", from_x[1], from_x[2], from_x[4], from_x[3], from_x[5]);
+	static const uint8_t cannon[4] = { 0, 1, 2, 26 }, elcpuls1[4] = { 1, 11, 15, 26 }, two[4] = { 3, 5, 0xFF, 0xFF },
+		star[4] = { 26, 0xFF, 0xFF, 0xFF }, none[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
+	CHECK(xchips_code(cannon, 1) == 1 && xchips_code(cannon, 26) == 26 && xchips_code(two, 5) == 5, "xchips: a code the record has kept");
+	CHECK(xchips_code(cannon, 18) == 26 && xchips_code(elcpuls1, 18) == 26, "xchips: a code it lacks as its * (Cannon S, ElcPuls1 S: %d %d)",
+		xchips_code(cannon, 18), xchips_code(elcpuls1, 18));
+	CHECK(xchips_code(two, 18) == 3, "xchips: without a *, as its first code (%d)", xchips_code(two, 18));
+	CHECK(xchips_code(star, 0) == 26, "xchips: the All * helper's record, every code in * (%d)", xchips_code(star, 0));
+	CHECK(xchips_code(none, 7) == 7, "xchips: a record of no codes leaves the code (%d)", xchips_code(none, 7));
+	/* (WhiCapsl twice, HiCannon, an empty slot both ways, and an id past
+	 * the table: three sit out, the first two named) */
+	const uint16_t folder[8] = { 1 | 0 << 9, 2 | 26 << 9, 2 | 26 << 9, 5 | 7 << 9, 0xFFFF, 0, 400 | 1 << 9, 3 | 4 << 9 };
+	uint16_t out[2] = { 0, 0 };
+	int n = xchips_out(folder, 8, to_x, 6, out, 2);
+	CHECK(n == 3 && out[0] == 2 && out[1] == 5, "xchips: three of the folder's chips sit out, WhiCapsl and HiCannon first (%d: %d %d)", n, out[0], out[1]);
+	CHECK(!xchips_out(folder, 1, to_x, 6, out, 2), "xchips: a folder of paired chips has none out");
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -2277,6 +2312,7 @@ int main(void) {
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();
+	test_xchips();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;
