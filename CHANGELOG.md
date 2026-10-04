@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A run continued without BN5's ROM starts its layer again.** A layer
+  BN5's area drew is laid out otherwise than the BN6 area's own, so a run
+  saved with BN5's ROM beside BN6's and continued without it (on the 3DS
+  or in the browser, or with the ROM taken away) put MegaMan's saved
+  place on another layer, and the screen stayed black while the music
+  played a copy of BN5's song that was no longer there. CONTINUE now
+  starts such a layer from its arrival, in BN6's area, as after an update.
 - **A layer's Mystery Data hold the same after a CONTINUE.** Each of a
   layer's objects now rolls from its own share of the layer's seed: the
   Chip Trader's prize, the program list and an official Chip Order read

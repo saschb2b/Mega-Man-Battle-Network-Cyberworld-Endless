@@ -208,7 +208,10 @@ engine (`src/emu/guest.c`, epic #57):
   and BN5's areas learn no stairs, arrow panels, gem or counter, so their
   layers have no raised rooms, arrow lanes, teleports or counter where
   the BN6 area's would, and a run saved with BN5's ROM beside BN6's and
-  continued without it builds its layer afresh, not the same.
+  continued without it builds its layer afresh, not the same. Such a
+  CONTINUE starts that layer again from its arrival (the checkpoint keeps
+  the area it was drawn in, `run.area`, and stops the saved song, which
+  can be a copy of BN5's); the owner's call, 4 October 2026.
 - [x] Its areas' themes, from its own map-music lists: ACDC Area, Oran
   Area, SciLab and End Area its net theme (song 0x13), its Undernet and
   Nebula Area its Undernet's (0x14). Its lists name no other song for any

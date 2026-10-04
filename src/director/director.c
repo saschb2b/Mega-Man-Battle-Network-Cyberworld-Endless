@@ -112,6 +112,7 @@ static struct {
 	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
 	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
 	int guest_foes;        /* the viruses its battle under way set, counted as deleted for a win */
+	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */
@@ -1678,6 +1679,7 @@ static void layer_host(int tiles, int *group, int *number) {
 static bool build_layer(void) {
 	int biome = layer_biome(), tiles = layer_area(&biome);
 	run.biome = biome;
+	D.layer_tiles = tiles;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
 	LayerKit kit;
 	netmap_kit(tiles, &kit);
@@ -2324,6 +2326,7 @@ bool director_draw_second_screen(int w, int h) {
 
 /* (LAYER_MAKE: layer_make.h, beside its hash) */
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
+#define LAYER_AREA_MAGIC 0x43415231u   /* "CAR1" */
 #define LAYER_SEEN_MAGIC 0x43534E31u   /* "CSN1" */
 
 /* What the director knows of the act a checkpoint is in, saved beside its
@@ -2480,6 +2483,7 @@ static void save_checkpoint(void) {
 	emu_save_state(path);
 	int make = LAYER_MAKE;
 	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
+	save_write_blob("run.area", LAYER_AREA_MAGIC, &D.layer_tiles, sizeof D.layer_tiles);
 	/* the map's panels seen so far, beside the state they go with */
 	save_write_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen);
 	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
@@ -3617,6 +3621,20 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 	return false;
 }
 
+/* Whether the layer just rebuilt is the one the checkpoint saved: made by
+ * this build's generation, and drawn in the same area. A layer another
+ * game's area drew, continued without that game's ROM, is laid out as
+ * BN6's own, and the state's place and picks would land on another layer:
+ * it starts again (owner's call, 4 October 2026). */
+static bool same_layer(void) {
+	int make = 0, drawn = -1;
+	bool same = save_read_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make) && make == LAYER_MAKE;
+	if (save_read_blob("run.area", LAYER_AREA_MAGIC, &drawn, sizeof drawn) && drawn != D.layer_tiles) same = false;
+	if (!same && emu_debug_on()) fprintf(stderr, "resume: the layer was made by another build or drawn in area %d, now %d: from its start\n",
+		drawn, D.layer_tiles);
+	return same;
+}
+
 bool director_resume(void) {
 	drop_events();
 	no_room_told = -1;
@@ -3634,8 +3652,7 @@ bool director_resume(void) {
 	if (!new_layer(false)) return false;
 	char path[600];
 	save_state_path(path, sizeof path);
-	int make = 0;
-	bool same = save_read_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make) && make == LAYER_MAKE;
+	bool same = same_layer();
 	if (emu_load_state(path)) {
 		lock_run();
 		spins_sync();
@@ -3671,6 +3688,12 @@ bool director_resume(void) {
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);
+			/* (and the music stopped: the state's song can be a copy of
+			 * another game's in the free space this build's layer fills
+			 * with something else, and the driver ran its bytes as tracks
+			 * every frame, the screen black: a run BN5's ACDC Area drew,
+			 * continued without BN5's ROM; the map plays its own) */
+			emu_write32(BN6_MUSIC_STATUS, emu_read32(BN6_MUSIC_STATUS) | BN6_MUSIC_STOPPED);
 		}
 		/* a state saved while the jack-in still held MegaMan (runs from
 		 * before the checkpoint waited for him): the game's own release
