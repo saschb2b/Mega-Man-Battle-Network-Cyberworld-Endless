@@ -90,6 +90,10 @@ extern int layer_objs_duel_frames, layer_objs_duel_rung, layer_objs_duel_foes;
  * or another game's on its area's layers (set before layer_objs_install). */
 #define LAYER_BYSTANDER 67
 extern int layer_objs_bystander;
+/* The map objects another game's area lends its layers (NetAreaDef.xlooks,
+ * XLOOK_*: its look for BN6's set pieces and props), 0 on BN6's own (set
+ * before layer_objs_install). */
+extern unsigned layer_objs_xlooks;
 /* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
 extern int layer_objs_official_level;
 /* Set before layer_objs_install on a BN5 layer that holds a flame of

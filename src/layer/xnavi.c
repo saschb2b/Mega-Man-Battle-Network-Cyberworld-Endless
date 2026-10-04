@@ -104,16 +104,20 @@ static void copy_in(int xrom, int navi) {
 	}
 }
 
-/* ---- BN5's flame of darkness, a DarkChip's (docs/META.md) ---- */
+/* ---- Another game's map objects: sprites of its list 7 ---- */
 
 #define LIST_OBJECTS 7                     /* sprite lists: the overworld's objects */
-#define BN5_FLAME    0x68                  /* its list-7 number in BN5 (compressed: bit 31 of its pointer) */
-/* (Gregar's list-7 numbers that point at the placeholder sprite
- * 0x084DC040, which no layer lists, docs/ROM_DATA.md) */
-static const uint8_t free_objects[] = { 0xA0, 0x92, 0x8A, 0x87, 0x7D };
-#define OBJECT_PLACEHOLDER 0x084DC040u
+#define OBJECT_PLACEHOLDER 0x084DC040u     /* (Gregar's list-7 numbers that point at it are free: no layer lists them, docs/ROM_DATA.md) */
 
-static struct { uint32_t sprite; int slot; bool tried; } F;
+/* Each: its game, its list-7 number there (bit 31 of the pointer: LZ77,
+ * copied decompressed), the free Gregar number it is listed at, and
+ * whether its palette is turned purple */
+static const struct { int xrom; uint8_t index, slot; bool purple; } objects[XOBJ_COUNT] = {
+	[XOBJ_DARK_FLAME] = { XROM_BN5_COLONEL_US, 0x68, 0xA0, true },   /* Nebula Area 6's flames of darkness (compressed) */
+	[XOBJ_CUBE] = { XROM_BN5_COLONEL_US, 0x01, 0x92, false },        /* ACDC Area's Security Cubes */
+};
+
+static struct { bool ready; uint32_t sprite[XOBJ_COUNT]; } O;
 
 /* a palette colour (BGR555) turned purple: blue lends red, green fades
  * but in the whites (the flame was blue, the owner's "dark purple ghost
@@ -147,37 +151,61 @@ static void tint(uint8_t *b, uint32_t m) {
 		}
 }
 
-int xnavi_dark_flame(void) {
-	if (!R.data || !R.layout || !R.layout->sprite_lists) return -1;
-	uint32_t own = R.layout->sprite_lists;
-	/* (the core's ROM copy made anew: copied again) */
-	if (F.slot > 0 && emu_read32(BUS + list_entry(own, LIST_OBJECTS, F.slot)) != F.sprite) memset(&F, 0, sizeof F);
-	if (F.tried) return F.sprite ? F.slot : -1;
-	F.tried = true;
-	int x = XROM_BN5_COLONEL_US;
-	if (!XR[x].data || !XR[x].layout->sprite_lists) return -1;
-	xnavi_slot(x, 0, 0);   /* (the Navis first: their place stays the same in every session) */
-	const uint8_t *xr = XR[x].data;
-	uint32_t at = get32(xr + XR[x].layout->sprite_lists + LIST_OBJECTS * 4) - BUS + BN5_FLAME * 4, p = at + 4 <= ROM_SIZE ? get32(xr + at) : 0;
-	if (!(p & 0x80000000u) || (p & 0x7FFFFFFFu) - BUS >= ROM_SIZE) return -1;
-	/* (decompressed: a size word, then the sprite as a plain one is, its
-	 * 4-byte header first: copied whole, the walk only to check it) */
+/* Object k's sprite as it is copied (its 4-byte header first, *len bytes:
+ * decompressed, a size word before it, where its pointer's bit 31 says
+ * LZ77; the walk only to check it), malloc'd; NULL where it cannot be. */
+static uint8_t *object_bytes(int k, uint32_t *len) {
+	const uint8_t *xr = XR[objects[k].xrom].data;
+	uint32_t at = get32(xr + XR[objects[k].xrom].layout->sprite_lists + LIST_OBJECTS * 4) - BUS + objects[k].index * 4u;
+	uint32_t p = at + 4 <= ROM_SIZE ? get32(xr + at) : 0, off = (p & 0x7FFFFFFFu) - BUS;
+	*len = 0;
+	if ((p & 0x7FFFFFFFu) < BUS || off >= ROM_SIZE) return NULL;
+	if (!(p & 0x80000000u)) {
+		uint32_t n = xnavi_sprite_len(xr + off, ROM_SIZE - off);
+		uint8_t *d = n ? malloc(n) : NULL;
+		if (d) { memcpy(d, xr + off, n); *len = n; }
+		return d;
+	}
 	size_t n = 0;
-	uint8_t *d = lz77_decompress(xr + ((p & 0x7FFFFFFFu) - BUS), ROM_SIZE - ((p & 0x7FFFFFFFu) - BUS), &n);
-	uint32_t len = d && n > 8 && xnavi_sprite_len(d + 4, (uint32_t)n - 4) ? (uint32_t)n - 4 : 0;
-	for (unsigned k = 0; len && k < sizeof free_objects && !F.sprite; ++k) {
-		int s = free_objects[k];
-		if (get32(R.data + list_entry(own, LIST_OBJECTS, s)) != OBJECT_PLACEHOLDER || X.next + len > XNAVI_END) continue;
-		tint(d + 8, len - 4);
-		F.sprite = X.next;
-		emu_write(F.sprite, d + 4, len);
-		X.next = (F.sprite + len + 3) & ~3u;
-		F.slot = s;
-		emu_write32(BUS + list_entry(own, LIST_OBJECTS, s), F.sprite);
-		if (emu_debug_on()) fprintf(stderr, "xnavi: BN5's flame of darkness at list 7 %d, %u bytes\n", s, len);
+	uint8_t *d = lz77_decompress(xr + off, ROM_SIZE - off, &n);
+	if (!d || n <= 8 || !xnavi_sprite_len(d + 4, (uint32_t)n - 4)) { free(d); return NULL; }
+	memmove(d, d + 4, n - 4);
+	*len = (uint32_t)n - 4;
+	return d;
+}
+
+/* Object k copied in after what is there and listed at its number (one
+ * that still points at the placeholder in the player's ROM) */
+static void object_in(int k, uint32_t own) {
+	int s = objects[k].slot;
+	uint32_t len;
+	if (get32(R.data + list_entry(own, LIST_OBJECTS, s)) != OBJECT_PLACEHOLDER) return;
+	uint8_t *d = object_bytes(k, &len);
+	if (d && X.next + len <= XNAVI_END) {
+		if (objects[k].purple) tint(d + 4, len - 4);
+		O.sprite[k] = X.next;
+		emu_write(O.sprite[k], d, len);
+		X.next = (O.sprite[k] + len + 3) & ~3u;
+		emu_write32(BUS + list_entry(own, LIST_OBJECTS, s), O.sprite[k]);
+		if (emu_debug_on())
+			fprintf(stderr, "xnavi: list 7 %#x of %s at list 7 %d, %u bytes\n", objects[k].index, XR[objects[k].xrom].layout->name, s, len);
 	}
 	free(d);
-	return F.sprite ? F.slot : -1;
+}
+
+int xnavi_object(int which) {
+	if (which < 0 || which >= XOBJ_COUNT || !R.data || !R.layout || !R.layout->sprite_lists) return -1;
+	uint32_t own = R.layout->sprite_lists;
+	/* (the core's ROM copy made anew: copied again) */
+	for (int k = 0; k < XOBJ_COUNT; ++k)
+		if (O.sprite[k] && emu_read32(BUS + list_entry(own, LIST_OBJECTS, objects[k].slot)) != O.sprite[k]) { memset(&O, 0, sizeof O); break; }
+	if (!O.ready) {
+		O.ready = true;
+		xnavi_slot(XROM_BN5_COLONEL_US, 0, 0);   /* (the Navis first: their place stays the same in every session) */
+		for (int k = 0; k < XOBJ_COUNT; ++k)
+			if (XR[objects[k].xrom].data && XR[objects[k].xrom].layout->sprite_lists) object_in(k, own);
+	}
+	return O.sprite[which] ? objects[which].slot : -1;
 }
 
 static int slot_of(int xrom, int navi) {

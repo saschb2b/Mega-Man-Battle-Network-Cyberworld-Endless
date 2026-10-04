@@ -775,6 +775,11 @@ blue data of the best quality:
   zenny. The game's own zenny check takes it, or MegaMan says they don't
   have that much.
 
+Where BN5 dresses the area (docs/MULTIROM.md), the cube is BN5's Security
+Cube, ACDC Area's lock on a friend's homepage: a green cube with X eyes in
+the walkway's mouth, centred on it as BN6's obstacles are, that opens its
+eyes and flickers out. Only the look changes: the same lock, the same key.
+
 Two rules came from the cube and hold for every piece spoken to:
 
 - **No navi within three panels of a piece's A** (a cube's or an

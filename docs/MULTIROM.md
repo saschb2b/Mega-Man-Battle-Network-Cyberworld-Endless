@@ -200,6 +200,16 @@ engine (`src/emu/guest.c`, epic #57):
   leaves empty in both (`src/layer/xnavi.c`, docs/ROM_DATA.md); it stands,
   turns and speaks as BN6's own bystanders do. Its Net Dealers and other
   Navis could follow at the free numbers left.
+- [x] Its map objects in the place of BN6's on its areas' layers
+  (`NetAreaDef.xlooks`, `src/layer/xnavi.c`, docs/ROM_DATA.md): its
+  Security Cube, the green cube with X eyes that bars the way to a
+  friend's homepage in its ACDC Area until MegaMan has that friend's
+  P-Code, stands for the security cubes of ACDC Area's and End Area's
+  layers (`blockers.c`), and opens as BN5's does; it asks what BN6's
+  asks there, a P-Code or a toll. Copied whole into BN6's free space and
+  listed at a list-7 number Gregar leaves empty, as the flame of darkness
+  is. Its net maps hold few map objects besides: the laser barrier with
+  a skull is BN6's cube's own sprite.
 - [ ] Its towns.
 - [x] Its random battles in its own engine, on a second core, in the
   areas it dresses (Guest battles, above).

@@ -21,9 +21,19 @@ uint32_t xnavi_sprite_len(const uint8_t *hdr, uint32_t n);
  * place in every session; again where the core's ROM copy was made anew. */
 int xnavi_slot(int xrom, int navi, int fallback);
 
-/* BN5's flame of darkness (its list 7, 0x68; docs/ROM_DATA.md) in BN6,
- * its palette turned purple: the DarkChips' (docs/META.md); the list-7
- * number that shows it, -1 where it cannot be (no BN5, no free number). */
-int xnavi_dark_flame(void);
+/* Another game's map objects in BN6 (docs/MULTIROM.md): sprites of its list
+ * 7, each listed at one of Gregar's list-7 numbers that point at a
+ * placeholder no layer lists (docs/ROM_DATA.md). */
+enum {
+	XOBJ_DARK_FLAME,   /* BN5's flame of darkness, its palette turned purple: the DarkChips' (docs/META.md) */
+	XOBJ_CUBE,         /* BN5's Security Cube, its P-Codes' lock: standing (animation 0), opening (1) */
+	XOBJ_COUNT
+};
+
+/* Object `which` (XOBJ_*) in BN6: the list-7 number that shows it, -1
+ * where it cannot be (its game's ROM not read, no room). The first call
+ * copies in every one whose game's ROM is read, in their order after the
+ * Navis; again where the core's ROM copy was made anew. */
+int xnavi_object(int which);
 
 #endif

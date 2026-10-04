@@ -69,6 +69,11 @@
 - **An early L or R is kept in BN5's battles,** as in BN6's: pressed up to
   two and a half seconds before the Custom gauge fills, it opens the
   Custom screen as it fills.
+- **BN5's Security Cube on its ACDC Area and End Area layers.** Where
+  Team Colonel dresses an area, a layer's security cube is BN5's own: the
+  green cube with X eyes that bars the way to a friend's homepage in its
+  ACDC Area. It asks the same P-Code or toll as before, and opens as it
+  does in BN5, its eyes popping open before it flickers out.
 - **The run saves at a guardian arena's door.** As MegaMan steps in, the
   run is saved; a quit during the fight goes on, at CONTINUE, from the
   arena's door with the HP he walked in with, where it went back to the

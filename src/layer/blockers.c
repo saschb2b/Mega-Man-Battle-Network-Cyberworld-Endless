@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "bytes.h"
+#include "debug.h"
 #include "emu.h"
 #include "flags.h"
 #include "lz.h"
@@ -28,6 +29,7 @@
 #include "layer_objs.h"
 #include "scripts.h"
 #include "shop.h"
+#include "xnavi.h"
 
 #define H3_LITERAL   0x080A66D4u   /* handler 3's records' literal (Gregar) */
 #define H3_TABLE     0x080A6144u   /* ... BN6's 86 (ids 0x00-0x55) */
@@ -39,11 +41,12 @@
 #define NET_ARCHIVES 0x08040798u   /* per internet group from 0x80, per map: its LZ77 text archive */
 
 /* The variants: the cube looking each of four ways (issue #45), then the
- * five obstacles; bytes 6-15 of their records as BN6's own (sprite list,
- * sprite, idle and open animations, a sprite field, palette, priority, a
- * spare, sound 0x74) */
-enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, VARIANTS };
-static const uint8_t templates[VARIANTS][10] = {
+ * five obstacles, then another game's looks for them (docs/MULTIROM.md):
+ * BN5's Security Cube; bytes 6-15 of their records as BN6's own (sprite
+ * list, sprite, idle and open animations, a sprite field, palette,
+ * priority, a spare, sound 0x74) */
+enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, VARIANTS };
+static const uint8_t templates[V_XCUBE][10] = {
 	{ 0x1C, 0x03, 0, 0, 0x38, 0, 2, 0xFF, 0x74, 0 },
 	{ 0x1C, 0x03, 1, 1, 0x38, 0, 2, 0xFF, 0x74, 0 },
 	{ 0x1C, 0x03, 2, 2, 0x38, 0, 2, 0xFF, 0x74, 0 },
@@ -54,11 +57,25 @@ static const uint8_t templates[VARIANTS][10] = {
 	{ 0x1C, 0x4B, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 },    /* the cyclone (0x37) */
 	{ 0x1C, 0x20, 0, 0, 0, 0, 2, 0xFF, 0x74, 0 },    /* the cloud (0x3B) */
 };
+/* Variant v's record bytes 6-15: another game's look with its sprite's
+ * number in BN6 (xnavi.c), or BN6's own look where it was not copied
+ * (BN5's Security Cube standing, then opening, its sound BN6's cubes') */
+static void template_of(int v, uint8_t out[10]) {
+	static const uint8_t xcube[10] = { 0x1C, 0, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 };
+	int slot = v == V_XCUBE ? xnavi_object(XOBJ_CUBE) : -1;
+	if (v < V_XCUBE || slot < 0) { memcpy(out, templates[v < V_XCUBE ? v : V_CUBE], 10); return; }
+	memcpy(out, xcube, 10);
+	out[1] = (uint8_t)slot;
+}
+
 /* A block's variant: the obstacle's, or the cube looking along its
- * walkway (animation 0 for +X, 1 for -Y, 2 for -X, 3 for +Y). */
+ * walkway (animation 0 for +X, 1 for -Y, 2 for -X, 3 for +Y), or the look
+ * another game's area lends it: BN5's Security Cube for a P-Code's cube
+ * or a toll's. */
 static int variant_of(const NetBlock *b) {
 	static const int obstacle[BLOCK_KINDS] = { V_WATER, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD };
 	if (b->kind < BLOCK_KINDS) return obstacle[b->kind];
+	if ((b->kind == BLOCK_PCODE || b->kind == BLOCK_TOLL) && (layer_objs_xlooks & XLOOK_CUBE) && xnavi_object(XOBJ_CUBE) >= 0) return V_XCUBE;
 	int dir, edge, side;
 	netmap_block_edges(b, &dir, &edge, &side);
 	static const int look[4] = { 0, 3, 2, 1 };
@@ -80,7 +97,7 @@ void blockers_install(void) {
 				put16(r, (uint32_t)(BLOCK_PRESENT_FLAG + k));
 				put16(r + 2, (uint32_t)(0x1640 + k));
 				put16(r + 4, (uint32_t)(0x16C0 + k));
-				memcpy(r + 6, templates[v], 10);
+				template_of(v, r + 6);
 			}
 		emu_write(BLOCKERS_AT, rec, sizeof rec);
 		emu_write32(H3_LITERAL, BLOCKERS_AT);
@@ -89,7 +106,8 @@ void blockers_install(void) {
 }
 
 void blocker_sprite(int b, int *category, int *index) {
-	const uint8_t *t = templates[variant_of(&layer.block[b])];
+	uint8_t t[10];
+	template_of(variant_of(&layer.block[b]), t);
 	*category = t[0] / 4;
 	*index = t[1];
 }
@@ -123,7 +141,10 @@ int blockers_objects(uint8_t *recs, int n, int max) {
 		const NetBlock *b = &layer.block[k];
 		int dir, edge, side, x, y;
 		netmap_block_edges(b, &dir, &edge, &side);
-		spot(dir, b->kind, edge, side, &x, &y);
+		/* (BN5's Security Cube stands in the walkway's middle, as BN6's
+		 * obstacles do: its sprite is drawn about its spot as theirs) */
+		spot(dir, variant_of(b) == V_XCUBE ? BLOCK_FLAMES : b->kind, edge, side, &x, &y);
+		if (emu_debug_on()) fprintf(stderr, "blockers: lock %d, kind %d, variant %d, at world %d,%d facing %d\n", k, b->kind, variant_of(b), x, y, dir);
 		uint8_t *r = recs + n++ * 20;
 		memset(r, 0, 20);
 		r[0] = 5;

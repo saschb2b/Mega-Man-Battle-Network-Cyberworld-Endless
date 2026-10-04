@@ -1627,7 +1627,7 @@ static void dark_flame_setup(void) {
 	for (int j = 0; j < DARK_KINDS && D.dark_kind < 0; ++j)
 		if (!dark_count((k0 + j) % DARK_KINDS)) D.dark_kind = (k0 + j) % DARK_KINDS;
 	if (D.dark_kind < 0 || !*guest_dark_name(D.dark_kind)) return;
-	layer_objs_dark_flame = xnavi_dark_flame();
+	layer_objs_dark_flame = xnavi_object(XOBJ_DARK_FLAME);
 	static char chip[16];
 	snprintf(chip, sizeof chip, "%s", guest_dark_name(D.dark_kind));
 	layer_objs_dark_chip = chip;
@@ -1644,13 +1644,15 @@ static void dark_flame_watch(void) {
 }
 
 /* The map an area's layers take over, the Navi their bystanders are
- * (layer_objs_bystander), their battles' background (encounter_backdrop)
- * and the map's backdrop and animations: another game's area its own,
- * copied into BN6 (docs/MULTIROM.md), where they can be. */
+ * (layer_objs_bystander), the map objects it lends them (layer_objs_xlooks),
+ * their battles' background (encounter_backdrop) and the map's backdrop and
+ * animations: another game's area its own, copied into BN6
+ * (docs/MULTIROM.md), where they can be. */
 static void layer_host(int tiles, int *group, int *number) {
 	const NetAreaDef *a = net_area_def(tiles);
 	if (!a) a = net_area_def(0);
 	layer_objs_bystander = a->xrom > 0 && a->xnavi ? xnavi_slot(a->xrom - 1, a->xnavi, LAYER_BYSTANDER) : LAYER_BYSTANDER;
+	layer_objs_xlooks = a->xrom > 0 ? a->xlooks : 0;
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
 	xbackdrop_map(tiles);
 	/* (and its battles, where its own engine can fight them on the guest

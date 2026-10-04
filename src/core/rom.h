@@ -19,6 +19,11 @@ typedef enum { ROM_BN6_GREGAR_US } RomVersion;
  * floor: the pads, or the platforms (all but the walkways; src/map/tilemap.c). */
 enum { NET_APART_NONE, NET_APART_PADS, NET_APART_PLATFORMS };
 
+/* NetAreaDef.xlooks: what of another game's map objects its area's layers
+ * stand in BN6's place (src/layer/xnavi.c, docs/MULTIROM.md): its Security
+ * Cube for the security cubes. */
+enum { XLOOK_CUBE = 1 };
+
 /* The original area a net biome borrows (docs/ROM_DATA.md): BN6's, or
  * another Battle Network game's (docs/MULTIROM.md). */
 typedef struct {
@@ -47,6 +52,7 @@ typedef struct {
 	const char *name, *short_name, *motto;   /* what a run calls it: in full, in nine letters, on its act's card */
 	uint8_t xsong;           /* its theme in its own game's song table (0: `song`, BN6's) */
 	uint8_t xnavi;           /* its bystanders' Navi, a list-6 sprite and mugshot of its own game (0: BN6's) */
+	uint8_t xlooks;          /* its own map objects in BN6's place, XLOOK_* */
 	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
 	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
 	uint8_t xbattles[3][2];  /* (another game's) per layer of an act, the map (group, number) whose battle records its random battles take,

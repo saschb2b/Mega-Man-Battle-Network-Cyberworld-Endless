@@ -56,6 +56,7 @@ int layer_objs_official_level;
 bool layer_objs_duel_later;
 
 int layer_objs_bystander = LAYER_BYSTANDER;   /* (EvilNavi) */
+unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
 const char *layer_objs_server_navi = "";
@@ -552,6 +553,7 @@ static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int 
 		tk->sprite = layer_objs_dark_flame;
 		tk->script = out->dark_flame = ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first);
 		tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
+		if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
 		return;
 	}
 	/* (the next four of the pool each layer, from where the run's seed
