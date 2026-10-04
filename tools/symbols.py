@@ -538,6 +538,32 @@ def is_name(label, address=None):
     return bool(IDENT.match(label)) and bool(re.search(r'[A-Z_0-9]', label[1:]) or label[0].isupper())
 
 
+# Our own names for addresses docs/ROM_DATA.md cites by another project's
+# label (dism-exe/bn6f's, which carries no licence: docs/SYMBOLS.md) or by a
+# chip's name (the owner's call, 5 October 2026). A label of that kind not
+# listed here is never a name: the row's words and the address are.
+OWN_NAMES = {
+    ('bn6', 0x080003A0): 'frame_wait',
+    ('bn6', 0x08005148): 'map_enter',
+    ('bn6', 0x08005A8C): 'battle_check_start',
+    ('bn6', 0x08030904): 'real_world_map_jumps',
+    ('bn6', 0x08032598): 'mugshot_sprites',
+    ('bn6', 0x0803461C): 'check_tables',
+    ('bn6', 0x08034638): 'real_world_npc_lists',
+    ('bn6', 0x08040794): 'map_text_archive_table',
+    ('bn6', 0x080A4F24): 'map_object_table',
+    ('bn6', 0x086C92AC): 'map_name_texts',
+    ('bn6', 0x080127FC): 'chip_use_dark_id_read',
+    ('bn6', 0x02036120): 'dark_invis_state',
+    ('bn6', 0x0802E4B8): 'dark_invis_control',
+    ('bn6', 0x0802E4E4): 'dark_invis_start',
+    ('bn6', 0x080EA908): 'time_freeze_object',
+    ('bn6', 0x080EAAC4): 'time_freeze_dark_invis',
+    ('bn5', 0x080054F6): 'battle_start',
+    ('bn5', 0x080AD930): 'map_object_table',
+}
+
+
 def rom_data_symbols(game, rows, taken):
     """The addresses docs/ROM_DATA.md gives that the header and RomLayout do
     not: named by the word the row gives one where it is a name (EnterMap,
@@ -563,7 +589,14 @@ def rom_data_symbols(game, rows, taken):
     syms = {}
     for address, row, e in picked:
         label, words = e['label'], slug(e['label'])
-        if is_name(label, address) or given(e):
+        own = OWN_NAMES.get((game['key'], address))
+        foreign_label = is_name(label, address) and address >> 24 != 4 and not given(e)
+        foreign = bool(own) or foreign_label
+        if own:
+            name = own
+        elif foreign:
+            name = f"{slug(row['title'].split(':')[0], 3)}.at_{address:08x}"
+        elif is_name(label, address) or given(e):
             name = label if is_name(label, address) else given(e)
         elif '_' in words and plain[words] == 1 and not words[0].isdigit():
             name = words
@@ -574,7 +607,7 @@ def rom_data_symbols(game, rows, taken):
             name, k = f'{base}_{k}', k + 1
         kind = next((kd for a, b, kd in REGIONS if a <= address < b), 'constant')
         syms[name] = dict(name=name, kind=kind, address=address, written=e['written'],
-                          description=f"{row['title']}: {label}" if label and label != name else row['title'],
+                          description=f"{row['title']}: {label}" if label and label != name and not foreign_label else row['title'],
                           source=f"{ROM_DATA}:{row['line']}", origin='rom_data', given=given(e))
     return syms
 

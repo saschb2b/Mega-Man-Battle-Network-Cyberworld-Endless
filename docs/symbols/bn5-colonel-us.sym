@@ -50,7 +50,7 @@
 0203E542 BN5_DARK_USED
 080043CC map_object_handlers
 080053FC encounter_check
-080054F6 StartBattle
+080054F6 battle_start
 0800D17C BN5_ENEMY_STATS
 08012704 bn5_souls.emotion
 08012705 bn5_darkchips.emotion
@@ -80,7 +80,7 @@
 0808C39C XRomLayout.battle_bg_scroll
 0808C5E8 XRomLayout.battle_bgs
 0808C9DC XRomLayout.battle_bg_anims
-080AD930 OverworldMapObjects
+080AD930 map_object_table
 080AE2FC handler_3_records
 080F2488 navis_stats
 0810F6B4 BN5_ROLL
