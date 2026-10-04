@@ -280,7 +280,8 @@ static void older_net_words(void) {
 	if (!D.beat_cross) return;
 	size_t k = strlen(D.beat);
 	snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old way. There "
-		"were no Crosses back then, so ours can't come into them.|@L Then it's you and our chips in there, MegaMan!", k ? "|" : "");
+		"were no Crosses back then, so ours can't come into them. A guardian's fight is still ours, Cross and all.|@L Then it's you and our chips "
+		"in there, MegaMan!", k ? "|" : "");
 }
 
 /* The arrival's words begun: the Nest shakes, the guardian they name is
