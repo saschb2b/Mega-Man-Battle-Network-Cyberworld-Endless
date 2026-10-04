@@ -799,10 +799,12 @@ static bool write_tilemap(const Learned *L) {
 		FILE *f = emu_debug_file("gen_tilemap.bin");
 		if (f) { fwrite(out, 1, 12, f); fwrite(map, 2, cells * 2, f); fclose(f); }
 	}
-	/* (a host of the same group shares the tile set and colours: set them
-	 * anyway; another game's are set with its own copies) */
-	if (L->desc != L->src_desc && !L->other)
-		for (uint32_t k = 0; k < 8; k += 4) emu_write32(0x08000000u + L->desc + k, emu_read32(0x08000000u + L->src_desc + k));
+	/* (the learned map's tile set and colours as BN6's ROM has them: a host
+	 * of the same group shares them, and another game's area that took the
+	 * map over in an earlier run of the session left its own there; another
+	 * game's are set with its own copies) */
+	if (!L->other)
+		for (uint32_t k = 0; k < 8; k += 4) emu_write32(0x08000000u + L->desc + k, rom_u32(L->src_desc + k));
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
 	if (L->other && !install_gfx(L)) { free(out); return false; }
 	free(out);

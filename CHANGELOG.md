@@ -29,6 +29,10 @@
   background (Central Area's portholes, Seaside Area's bubbles, Green
   Area's rings), with that area's colour cycles running over BN5's
   colours.
+- **Central Area and Green Area draw in their own tiles after a BN5
+  run.** Where BN5's ACDC Area or Nebula Area had dressed a run, a later
+  run in the same sitting drew Central Area's or Green Area's floors
+  from BN5's tiles, a jumble of pieces, until the game was restarted.
 - **A Server that holds a Navi says so.** "A strong virus signal! Its
   viruses outclass this layer" held ElementMan SP for a playtester on a
   guardian's layer. A Server's battle is now rolled with its layer, so
