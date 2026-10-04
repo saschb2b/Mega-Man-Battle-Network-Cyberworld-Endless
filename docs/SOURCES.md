@@ -20,16 +20,24 @@ Gate; the disassembly agreed, and our own notes had listed the records as
    What the game does is settled there.
 2. **The disassemblies.** [dism-exe/bn6f](https://github.com/dism-exe/bn6f)
    (Cybeast Falzar; local at `~/.cache/mmbn-ref/bn6f`; Gregar's addresses
-   are shifted, so find the same bytes): code in `asm/`, structures in
+   are shifted: `python3 build.py symbols --bn6f ~/.cache/mmbn-ref/bn6f`
+   locates 98% of its functions in Gregar by their bytes and writes the
+   full map, each function's Gregar address beside its Falzar one, to
+   `.build/symbols/`, docs/SYMBOLS.md): code in `asm/`, structures in
    `include/rom_structs/` (`ChipData.inc` names every field of a chip
    record), constants in `constants/`, every text script in
-   `data/textscript/`. Its reverse engineers keep their notes in
+   `data/textscript/`. Its names are its contributors' (luckytyphlosion,
+   LanHikari22 and others) and it carries no license: credit it, name a
+   bn6f function in a comment or a doc where a claim rests on it, and
+   commit no list of its names (the full map stays in `.build/`). Its
+   reverse engineers keep their notes in
    [dism-exe/dism-exe-notes](https://github.com/dism-exe/dism-exe-notes)
    (an Obsidian vault for the MMBN games) and talk on the pret Discord
    linked from bn6f's README; modding notes in
    [lan22h/bn6f-modding](https://codeberg.org/lan22h/bn6f-modding). BN5 has
    no disassembly here: its code is found by BN6's shapes
-   (docs/ROM_DATA.md, BN5 guest battles).
+   (docs/ROM_DATA.md, BN5 guest battles), and a third of bn6f's functions
+   in it by their bytes (the full map's `bn5-colonel-us` files).
 3. **The community's references.**
    - [The Cutting Room Floor](https://tcrf.net/Mega_Man_Battle_Network_6):
      unused and cut content (chips, text, graphics, music).

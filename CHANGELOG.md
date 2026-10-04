@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **What the project has mapped of BN6 and BN5, open for anyone to use.**
+  docs/symbols holds, per ROM, a symbol file that mGBA's and no$gba's
+  debuggers load, and the same symbols as JSON and CSV: every address the
+  engine uses (RAM, the routines it calls and hooks, the tables it reads,
+  the fields of the game's structures, event flags), each with what it is
+  and how it was verified, all from the project's own headers and notes.
+  `tools/bn6f_match.py` locates the functions of the bn6f disassembly,
+  made from Cybeast Falzar, in Cybeast Gregar by their bytes: 13,386 of
+  its 13,646 (98.1%), and 4,329 (31.7%) in BN5 Team Colonel, which has no
+  public disassembly. bn6f carries no license, so its names are not
+  redistributed: `build.py symbols --bn6f DIR` makes that full map from a
+  local bn6f checkout, kept out of git. docs/SYMBOLS.md says how it was
+  all found and checked, how to load the files and what may be reused;
+  `build.py lint` keeps them in step with the engine's headers.
 - **BN6's own DarkChips play in BN6's battles, on every build (issue
   #70).** BN6 keeps four of BN5's DarkChips with their code: DrkSword,
   DarkThnd, DrkRecov and DarkInvs. On the middle layer of every act whose
@@ -24,7 +38,6 @@
   with,** and one taken before the save stays taken: by its code a
   CONTINUE after the PET's Save there would have offered, and given, the
   next DarkChip too.
-
 - **A Recovery Mr. Prog patches MegaMan once on his layer: half of his
   max HP, and to full before the arena** (issue #71, from ChaseThe3nd's
   proposal in discussion #5). He healed fully as often as asked, so every
