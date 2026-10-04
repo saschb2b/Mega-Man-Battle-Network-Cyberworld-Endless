@@ -310,7 +310,7 @@ Android device, take that system's download from the table above.
 4. Refresh the game list and start **Cyberworld Endless**.
 
 The first start records the game's boot once, which takes a few seconds.
-After that the title screen appears straight away.
+After that the game starts straight away.
 
 ### On a New 3DS
 
@@ -357,6 +357,10 @@ it opens full screen like an app.
 player as files, for hosting them yourself; playing needs none of it.
 
 ## Playing
+
+Each start opens with the developer's boot screen and a note from MegaMan
+on where to report bugs and ideas: the project's GitHub page, with a QR
+code for a phone's camera. Any button skips them.
 
 On the title screen, press Start and choose **NEW GAME** or **CONTINUE**.
 CONTINUE shows how deep your saved run is; the corner shows your best depth.

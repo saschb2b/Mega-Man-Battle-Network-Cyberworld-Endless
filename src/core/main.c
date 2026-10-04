@@ -387,7 +387,7 @@ static void ios_start(void) {
 	save_init();
 	audio_init();
 	ios_rom_note(P.window);
-	scene_set(&scene_title);
+	scene_set(&scene_intro);
 }
 
 /* The screen's words: BN6 needed, BN5 optional with what it lends (the
@@ -794,10 +794,20 @@ static bool shot_option(const char *a, const char *v) {
 }
 
 static const Scene *scene_by_name(const char *n) {
-	const Scene *all[] = { &scene_title, &scene_gallery, &scene_emu };
+	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
 	return NULL;
+}
+
+/* The first scene: the intro, then the title, at a plain start; a scene
+ * asked for (--scene) and a headless run begin where they did, so scripted
+ * captures and playtests keep their frames. */
+static bool scene_given;
+
+static const Scene *first_scene(const Scene *s, bool headless) {
+	if (!s) s = &scene_title;
+	return s == &scene_title && !scene_given && !headless ? &scene_intro : s;
 }
 
 /* ---- the frame loop ---- */
@@ -1022,7 +1032,7 @@ int main(int argc, char **argv) {
 			if (sscanf(v, "%llu:%llu:%199s", &ra, &rb, range_prefix) == 3) { range_a = ra; range_b = rb; }
 			++i;
 		}
-		else if (!strcmp(a, "--scene") && v) { start_scene = v; ++i; }
+		else if (!strcmp(a, "--scene") && v) { start_scene = v; scene_given = true; ++i; }
 		else if (!strcmp(a, "--seed") && v) { seed = (uint32_t)strtoul(v, NULL, 0); ++i; }
 		else if (!strcmp(a, "--render-song") && v) { render_spec = v; ++i; }
 		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
@@ -1271,7 +1281,7 @@ int main(int argc, char **argv) {
 		/* (later NEW GAMEs take the next seeds, so a session replays) */
 		title_seed = !seed ? 0 : !s || s == &scene_title ? seed : seed + 1;
 		if (town) emu_start_in_town = true;
-		scene_set(s ? s : &scene_title);
+		scene_set(first_scene(s, headless));
 	}
 
 #if defined(_WIN32)

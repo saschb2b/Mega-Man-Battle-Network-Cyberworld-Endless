@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Each start opens with the developer's boot screen and a word from
+  MegaMan on where to report bugs.** saschb2b's name drops down a Game
+  Boy's green screen to a chime, both made for this project (letters
+  drawn by the engine, two square-wave notes it synthesizes; no
+  Nintendo logo or sound). Then MegaMan asks, in the game's chat box,
+  for bugs and ideas on the project's GitHub page, whose address stands
+  above him in letters and as a QR code a phone's camera takes from the
+  screen, beside what helps: a star, a follow, a report. Then the title.
+  About six seconds in all, and any button skips each part; a scripted or
+  headless start (`--scene`, play.py) still begins at the title, and
+  `--scene intro` captures the start.
 - **The AYN Thor's lower screen keeps the layer's map open,** as the 3DS's
   bottom screen does, and so does a second display beside any Android
   handheld's: the floor MegaMan has seen, the way on, what he has come

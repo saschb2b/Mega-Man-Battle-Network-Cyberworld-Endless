@@ -464,6 +464,31 @@ static void mix(float *out, int frames) {
 	}
 }
 
+/* The intro's chime: a short note and a ringing one a fifth above it
+ * (B5, F#6), square waves, the second's volume falling in fifteen steps
+ * as a Game Boy's envelope falls; not one of the ROM's songs, so it
+ * mixes in beside them. */
+#define CHIME_FIRST (OUT_RATE * 9 / 100)    /* samples of the first note */
+#define CHIME_STEP (OUT_RATE * 55 / 1000)   /* ... of each step down */
+static const double chime_hz[2] = { 987.77, 1479.98 };
+static long chime_t = -1;   /* samples since it began, -1 silent */
+static double chime_phase;
+
+static void chime_mix(float *out, int frames) {
+	float sv = sfx_volume / 10.0f * 0.75f;
+	for (int f = 0; f < frames && chime_t >= 0; ++f, ++chime_t) {
+		int second = chime_t >= CHIME_FIRST;
+		long into = second ? chime_t - CHIME_FIRST : chime_t;
+		int level = 15 - (int)(into / CHIME_STEP);
+		if (level <= 0) { chime_t = -1; break; }
+		chime_phase += chime_hz[second] / OUT_RATE;
+		if (chime_phase >= 1.0) chime_phase -= 1.0;
+		float s = (chime_phase < 0.5 ? 0.22f : -0.22f) * (float)level / 15.0f * sv;
+		out[f * 2] += s;
+		out[f * 2 + 1] += s;
+	}
+}
+
 static void render(int16_t *o, int frames) {
 	static float buf[4096 * 2];
 	const double per_frame = OUT_RATE / GBA_FPS;
@@ -479,6 +504,7 @@ static void render(int16_t *o, int frames) {
 		if (n > 4096) n = 4096;
 		memset(buf, 0, sizeof(float) * (size_t)n * 2);
 		mix(buf, n);
+		if (chime_t >= 0) chime_mix(buf, n);
 		for (int i = 0; i < n * 2; ++i) {
 			float v = buf[i];
 			/* soft clip keeps loud passages from crackling */
@@ -607,6 +633,14 @@ void audio_sfx(Sfx s) {
 }
 
 uint64_t audio_log_frame;
+
+void audio_chime(void) {
+	if (!dev && !offline) return;
+	lock();
+	chime_t = 0;
+	chime_phase = 0;
+	unlock();
+}
 
 void audio_music_id(int id) {
 	if (getenv("CYBERWORLD_SFX_LOG")) fprintf(stderr, "music %llu %#x\n", (unsigned long long)audio_log_frame, id);

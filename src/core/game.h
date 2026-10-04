@@ -17,6 +17,7 @@ void scene_set(const Scene *s);
 
 extern const Scene scene_error;
 extern const Scene scene_title;
+extern const Scene scene_intro;   /* the start: the boot screen and the GitHub notice, then the title */
 extern const Scene scene_gallery;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern bool emu_resume_requested; /* scene_emu continues the saved run */

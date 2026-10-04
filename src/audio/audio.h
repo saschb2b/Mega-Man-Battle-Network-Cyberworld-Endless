@@ -31,6 +31,9 @@ void audio_external(AudioSource src);
 void audio_frame(void);
 bool audio_offline(void);
 void audio_sfx(Sfx s);
+/* The intro's chime (scene_intro.c), ours: two square-wave notes, the
+ * second ringing out, at the effects' volume. */
+void audio_chime(void);
 void audio_music(Music m);
 void audio_set_volume(int music, int sfx); /* 0-10 */
 /* Play a song-table entry directly (music replaces, effects mix). */
