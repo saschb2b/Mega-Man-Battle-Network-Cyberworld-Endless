@@ -151,6 +151,7 @@ static struct {
 	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
 	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
 	int guest_due;         /* 1 + the chips that sat out of an older net's first battle, its words due (once a profile) */
+	char guest_out[96];    /* ... those chips, named (out_names) */
 	int recode_due;        /* ... it read a chip's code its own way: 1 going in, 2 the reward coming back (once a profile each) */
 	int recode_chip, recode_from, recode_to;   /* the chip, and its codes out here and in there */
 	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
@@ -270,18 +271,51 @@ static void map_label(void) {
  * guardian falls (1 for the first cycle). */
 static int net_version(void) { return (run.depth - 1) / CYCLE_LAYERS + 1; }
 
+/* The run's folder as the game holds it (30 entries, chip | code << 9;
+ * zeros where its data is not there) */
+static void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	bool there = data >= BN6_EWRAM && data < BN6_EWRAM_END;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder[i] = there ? emu_read16(data + 2u * (uint32_t)i) : 0;
+}
+
+/* The folder's chips the older net never had (guest.c), named as MegaMan
+ * says them: three or fewer by name (the Storm folder's "ElcPuls1,
+ * DolThdr1 and Atk+10"), more as two and how many others ("ElcPuls1,
+ * DolThdr1 and 2 more"), "" for none; how many chips sit out. A
+ * playtester was told how many sat out and asked which (session 66). */
+static int out_names(char *s, size_t n) {
+	uint16_t folder[BN6_FOLDER_ENTRIES], out[3];
+	folder_now(folder);
+	int k = guest_sitting_out(folder, out, 3);
+	ChipInfo ci[3];
+	memset(ci, 0, sizeof ci);
+	for (int i = 0; i < k && i < 3; ++i) chip_info(out[i], &ci[i]);
+	if (k > 3) snprintf(s, n, "%s, %s and %d more", ci[0].name, ci[1].name, k - 2);
+	else if (k == 3) snprintf(s, n, "%s, %s and %s", ci[0].name, ci[1].name, ci[2].name);
+	else if (k == 2) snprintf(s, n, "%s and %s", ci[0].name, ci[1].name);
+	else snprintf(s, n, "%s", ci[0].name);
+	return k;
+}
+
 /* Arriving where the layer's battles are an older net's, the first time a
  * profile does: that its battles run without the run's Crosses, said
  * before one (owner's call, 4 October 2026: a playtester's HeatCross
  * vanished in BN5's battle without a word, session 65; a Soul of BN5's
- * may stand in later, issue #69). After the arrival's own words. */
+ * may stand in later, issue #69), and which of the folder's chips it never
+ * had (they sit out). After the arrival's own words. */
 static void older_net_words(void) {
 	D.beat_cross = encounter_guest && !profile.cross_old_told;
 	if (!D.beat_cross) return;
+	char out[96];
+	int n = out_names(out, sizeof out);
 	size_t k = strlen(D.beat);
-	snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old way. There "
-		"were no Crosses back then, so ours can't come into them. A guardian's fight is still ours, Cross and all.|@L Then it's you and our chips "
-		"in there, MegaMan!", k ? "|" : "");
+	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old "
+		"way. There were no Crosses back then, so ours can't come into them. A guardian's fight is still ours, Cross and all.", k ? "|" : "");
+	if (n > 0 && k < sizeof D.beat)
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M Our %s didn't exist back then either, so %s'll sit out.", out, n == 1 ? "it" : "they");
+	if (k < sizeof D.beat)
+		snprintf(D.beat + k, sizeof D.beat - k, "|@L Then it's you and %s in there, MegaMan!", n > 0 ? "the rest of our chips" : "our chips");
 }
 
 /* The arrival's words begun: the Nest shakes, the guardian they name is
@@ -4232,7 +4266,7 @@ void director_guest_done(const GuestResult *r) {
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
 	if (r->outcome == GUEST_WON) run.viruses_deleted += D.guest_foes;
 	steps_cleared();
-	if (!profile.guest_taught) D.guest_due = 1 + r->sat_out;
+	if (!profile.guest_taught) D.guest_due = 1 + out_names(D.guest_out, sizeof D.guest_out);
 	guest_recode_note(r);
 	dark_set_counts(r->dark);
 	if (r->dark_used) dark_price();
@@ -4428,9 +4462,8 @@ static void guest_begin(void) {
 	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
 	/* (MegaMan with his HP, the run's folder and his buster as the run's
 	 * NaviCust makes it: parity, no power of BN5's own) */
-	uint16_t folder[BN6_FOLDER_ENTRIES] = { 0 };
-	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
-	for (int i = 0; data >= BN6_EWRAM && data < BN6_EWRAM_END && i < BN6_FOLDER_ENTRIES; ++i) folder[i] = emu_read16(data + 2u * (uint32_t)i);
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	folder_now(folder);
 	GuestMegaMan mm = { emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, { 0 },
 		{ emu_read8(BN6_NAVI_ATTACK), emu_read8(BN6_NAVI_SPEED), emu_read8(BN6_NAVI_CHARGE) }, run_all_star() };
 	/* (and the run's DarkChips, which BN5 brings into its Custom screen when
@@ -4512,7 +4545,7 @@ static void guest_words(void) {
 		int out = D.guest_due - 1;
 		k = snprintf(words, sizeof words, "@M Lan, that battle ran on an older net's system! The Nest copied that "
 			"net too, battles and all.|@M Its viruses fight the old way, and our chips work as the old net knew them.");
-		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, " %d of ours didn't exist back then, so they sat out.", out);
+		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, " Our %s didn't exist back then, so %s sat out.", D.guest_out, out == 1 ? "it" : "they");
 	}
 	if (D.recode_due) {
 		if (k) k += snprintf(words + k, sizeof words - (size_t)k, "|");

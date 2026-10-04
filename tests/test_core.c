@@ -2260,8 +2260,8 @@ static void test_all_star(void) {
  * other game gives two chips comes back from either; a chip it lacks, or
  * a nameless one, pairs none); a code re-read as the other game's chip of
  * that name has it, the same letter, else its *, else its first (a
- * playtester's ElcPuls1 S went in as BN5's ElcPuls1 *, which has no S);
- * the folder's chips that sit out, each once, in its order. */
+ * playtester's Thunder S went in as BN5's Thunder *, which has B, L, P
+ * and *); the folder's chips that sit out, each once, in its order. */
 static void test_xchips(void) {
 	static const char names6[6][XCHIP_NAME] = { "", "Cannon", "WhiCapsl", "Sword", "", "HiCannon" };
 	static const char namesx[6][XCHIP_NAME] = { "", "Sword", "Cannon", "DarkSwrd", "Cannon", "" };
@@ -2272,11 +2272,11 @@ static void test_xchips(void) {
 		"WhiCapsl, HiCannon and a nameless chip as none (%d %d %d %d %d)", to_x[1], to_x[3], to_x[2], to_x[4], to_x[5]);
 	CHECK(from_x[1] == 3 && from_x[2] == 1 && from_x[4] == 1 && !from_x[0] && !from_x[3] && !from_x[5], "xchips: back, both Cannons as BN6's Cannon, "
 		"DarkSwrd and a nameless chip as none (%d %d %d %d %d)", from_x[1], from_x[2], from_x[4], from_x[3], from_x[5]);
-	static const uint8_t cannon[4] = { 0, 1, 2, 26 }, elcpuls1[4] = { 1, 11, 15, 26 }, two[4] = { 3, 5, 0xFF, 0xFF },
+	static const uint8_t cannon[4] = { 0, 1, 2, 26 }, thunder[4] = { 1, 11, 15, 26 }, two[4] = { 3, 5, 0xFF, 0xFF },
 		star[4] = { 26, 0xFF, 0xFF, 0xFF }, none[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
 	CHECK(xchips_code(cannon, 1) == 1 && xchips_code(cannon, 26) == 26 && xchips_code(two, 5) == 5, "xchips: a code the record has kept");
-	CHECK(xchips_code(cannon, 18) == 26 && xchips_code(elcpuls1, 18) == 26, "xchips: a code it lacks as its * (Cannon S, ElcPuls1 S: %d %d)",
-		xchips_code(cannon, 18), xchips_code(elcpuls1, 18));
+	CHECK(xchips_code(cannon, 18) == 26 && xchips_code(thunder, 18) == 26, "xchips: a code it lacks as its * (Cannon S, Thunder S: %d %d)",
+		xchips_code(cannon, 18), xchips_code(thunder, 18));
 	CHECK(xchips_code(two, 18) == 3, "xchips: without a *, as its first code (%d)", xchips_code(two, 18));
 	CHECK(xchips_code(star, 0) == 26, "xchips: the All * helper's record, every code in * (%d)", xchips_code(star, 0));
 	CHECK(xchips_code(none, 7) == 7, "xchips: a record of no codes leaves the code (%d)", xchips_code(none, 7));

@@ -137,17 +137,24 @@ engine (`src/emu/guest.c`, epic #57):
   Thunder S was Thunder *!"), and says out here the codes are ours again:
   a quirk of two engines told as the net's own law, which a player can
   use (a folder of codes the old net lacks fights with wildcards there).
-- **The switch**: BN6's frame fades to white while BN5's battle opens (its
-  opening drew the room its boot state stands in), and BN5's picture
-  flashes in once its battle is on its screen; after a profile's first,
-  MegaMan says what it was and how many chips sat out.
+- **The switch**: arriving where the battles are BN5's, the first time a
+  profile does, MegaMan says the older net had no Crosses and names the
+  folder's chips it never had, which will sit out (three or fewer by name,
+  more as two and how many others: the Storm folder's "Our ElcPuls1,
+  DolThdr1 and Atk+10 didn't exist back then either, so they'll sit
+  out.", the Standard's CrakShot and Atk+10, the Blade's Atk+10). BN6's
+  frame fades to white while BN5's battle opens (its opening drew the
+  room its boot state stands in), and BN5's picture flashes in once its
+  battle is on its screen; after a profile's first, MegaMan says what it
+  was and names the chips that sat out, the same way.
 - **For tests**: `--talk guest:FRAME` begins a guest battle at once on such
   a layer (`--net-biome x0`, ACDC Area), `--talk dark:FRAME` opens the
   flame of darkness's talk (a middle layer: `--run-depth 2`), `--dev
   darkchips=MASK` starts a run holding DarkChips (bit k BN5's id 187 + k)
   and `--dev worried` keeps MegaMan worried in guest battles;
-  `CYBERWORLD_EMU_DEBUG=1` names each battle, its folder's chips in, the
-  buster it goes in with and the one its battle took ("guest: its battle's
+  `CYBERWORLD_EMU_DEBUG=1` names each battle, its folder's chips in and
+  those that sat out, slot by slot ("guest: 4 sat out: CrakShot A, ..."),
+  the buster it goes in with and the one its battle took ("guest: its battle's
   buster Attack 2, Speed 1, Charge 1"), its end, the flame and a
   DarkChip's price.
 - **DarkChips** (docs/META.md, issue #64): the run's go into the guest's

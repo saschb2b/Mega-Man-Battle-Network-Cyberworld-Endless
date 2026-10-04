@@ -6,6 +6,14 @@
   act's card reads "Act 1 - older net battles", and L's first words name
   the area "where battles run the older net's way", so a territory is
   known before its first battle (issue #65).
+- **MegaMan names the chips that sit out of BN5's battles (issue #62).**
+  He said "4 of ours didn't exist back then, so they sat out" after the
+  first BN5 battle, and a playtester asked which. Arriving where BN5's
+  battles are, he now names them before the first one, beside the
+  Crosses: "Our CrakShot and Atk+10 didn't exist back then either, so
+  they'll sit out." (the Standard folder; the Storm folder's ElcPuls1,
+  DolThdr1 and Atk+10), and names them again after it. More than three
+  come as two names and how many more.
 - **BN5's battles fire your buster as your NaviCust makes it (issue
   #62).** MegaMan went into BN5's battles with BN5's starting buster, 1
   a shot and 10 a charged shot, whatever Attack+1, Speed+1, Charge+1 or

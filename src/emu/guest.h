@@ -32,6 +32,12 @@ typedef struct {
  * waits. */
 bool guest_battle(uint32_t record, const GuestMegaMan *mm);
 
+/* The chips of `folder` (30 BN6 entries) that sit out of its battles, its
+ * game having none of their names: each once, in the folder's order, the
+ * first `max` into `out` (BN6 ids); how many there are, 0 before the guest
+ * is ready. */
+int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max);
+
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);
 /* ... and its battle is on the screen: MegaMan's HP and max HP in it (a
@@ -59,7 +65,6 @@ typedef struct {
 	int chip;      /* (won) the reward: BN6's chip of its name, and its code (A=0, *=26); 0 none */
 	int code;
 	int zenny;     /* ... or zenny */
-	int sat_out;   /* the folder's chips its game has none of */
 	bool dark_used;   /* a DarkChip was used in it */
 	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
 	int recoded;      /* the folder's chips that fought with another code (its game's chip lacked theirs) */

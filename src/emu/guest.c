@@ -126,7 +126,7 @@ static struct mCore *core;
 static bool ready, failed, active, result_due;
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
-static int frames, sat_out;
+static int frames;
 static int recoded, recode_ex[3];   /* chips that went in with another code, and the first: BN6 id, code, its code there */
 static uint8_t dark_in[GUEST_DARK_KINDS];   /* the run's DarkChips as the battle began */
 static bool dark_used;                       /* ... and one was used in it (latched from BN5_DARK_USED) */
@@ -362,8 +362,9 @@ static uint32_t record_copy(uint32_t record) {
 /* A chip's code as BN5's chip of its name has it: the same letter where it
  * has that one, else its '*', else its first. BN5's Custom screen draws a
  * chip with a code it lacks as nothing, which can be chosen and does
- * nothing (a playtester's Storm folder had nine of them, its ElcPuls1 S
- * among them: BN5's has B, L, P and *; session 65). */
+ * nothing (a playtester's Storm folder had nine of them, its Thunder S
+ * among them: BN5's Thunder, its chip 19, has B, L, P and *; session 65;
+ * the Storm folder's ElcPuls1 and DolThdr1 BN5 has none of). */
 static int bn5_code(int x, int code) {
 	/* (its record as its ROM copy has it: in * alone with All *) */
 	uint8_t rec[4];
@@ -396,6 +397,24 @@ static int folder_in(const uint16_t *folder) {
 	core->rawWrite8(core, BN5_NAVI_FOLDER, -1, 0);
 	dark_in_folder(folders, marks);
 	return in;
+}
+
+int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) {
+	return ready ? xchips_out(folder, 30, to_bn5, BN6_CHIPS, out, max) : 0;
+}
+
+/* (debug: the folder's chips that sat out, slot by slot) */
+static void out_tell(const uint16_t *folder) {
+	char line[600];
+	int k = 0, n = 0;
+	for (int i = 0; folder && i < 30 && k < (int)sizeof line - 24; ++i) {
+		int id = folder[i] & 0x1FF, code = folder[i] >> 9;
+		if (!id || (id < BN6_CHIPS && to_bn5[id])) continue;
+		ChipInfo ci;
+		chip_info(id, &ci);
+		k += snprintf(line + k, sizeof line - (size_t)k, "%s%s %c", n++ ? ", " : "", ci.name, code == 26 ? '*' : code < 26 ? 'A' + code : '?');
+	}
+	if (n) fprintf(stderr, "guest: %d sat out: %s\n", n, line);
 }
 
 /* His buster as the run's NaviCust makes it: BN5's boot state's fired 1 a
@@ -437,13 +456,13 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	if (check >= 0x02000000u && check < 0x02040000u) core->rawWrite32(core, check, -1, 500u ^ rd32(BN5_METER_KEY));
 	dark_used = false;
 	const uint16_t *folder = mm->folder;
-	int in = folder ? folder_in(folder) : 0, held = 0;
-	for (int i = 0; folder && i < 30; ++i) held += (folder[i] & 0x1FF) != 0;
-	sat_out = held - in;
+	int in = folder ? folder_in(folder) : 0;
 	rows_fit(record);
-	if (emu_debug_on())
+	if (emu_debug_on()) {
 		fprintf(stderr, "guest: battle %08X, HP %d/%d, %d of the folder's 30 in, buster Attack %d, Speed %d, Charge %d\n", record, hp, max_hp, in,
 			rd8(BN5_NAVI_ATTACK) + 1, rd8(BN5_NAVI_SPEED) + 1, rd8(BN5_NAVI_CHARGE) + 1);
+		out_tell(folder);
+	}
 	patch_roll(record_copy(record));
 	active = true;
 	phase = PH_ASKED;
@@ -469,8 +488,8 @@ bool guest_fight_hp(int *hp, int *max) {
 }
 
 static void finish(int outcome) {
-	result = (GuestResult){ outcome, frames, phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), 0, 0, 0, sat_out, false, { 0 },
-		recoded, recode_ex[0], recode_ex[1], recode_ex[2], -1 };
+	result = (GuestResult){ .outcome = outcome, .frames = frames, .hp = phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), .recoded = recoded,
+		.recode_chip = recode_ex[0], .recode_from = recode_ex[1], .recode_to = recode_ex[2], .reward_from = -1 };
 	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
 	result.dark_used = dark_used;
 	/* (what its results screen gave, as the run's: a chip by its name, or
@@ -543,6 +562,7 @@ bool guest_battle(uint32_t record, const GuestMegaMan *mm) {
 	(void)record; (void)mm;
 	return false;
 }
+int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }
 bool guest_active(void) { return false; }
 bool guest_custom_screen(void) { return false; }
 bool guest_on_screen(void) { return false; }
