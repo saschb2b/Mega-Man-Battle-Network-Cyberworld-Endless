@@ -724,8 +724,8 @@ A BN5 Navi beaten as a territory's guardian (docs/BOSSES.md, BN5's Navis)
 gives his Soul for the run's BN5 battles: BN5's Soul Unison, which its US
 version calls Double Soul and its Custom screen UNITE, and with a
 DarkChip, its Chaos Unison (the owner's call). Reasoned with the
-game-design skill; each point marked *proposal* is mine, for the owner
-to turn.
+game-design skill; the owner approved all of it (4 October 2026), the
+points first marked as proposals among them.
 
 - **The dialectic** is the meta layer's, what you bring against what you
   find: the Soul is found, and the folder brought decides how often it
@@ -772,12 +772,12 @@ to turn.
   (seen: KnightMan's Soul with DarkDril fired a drill). Seen in the game:
   DarkPlus offered worried, kept, and picked on a calm turn united
   MegaMan with NumberMan's Soul in Chaos Unison.
-- **No price for it** (*proposal*, as BN5 has it): BN5 counts a DarkChip
+- **No price for it** (as BN5 has it): BN5 counts a DarkChip
   given up for Chaos Unison as no DarkChip used (its use flag stays
   clear), and the run follows it: no 20 max HP (seen in the game: none
   taken after that Chaos Unison). The DarkChip still leaves the hand for
-  the battle. The owner may want it priced as a use.
-- **A Soul's span** (*proposal*): the rest of the run, in BN5's battles
+  the battle. The owner kept it unpriced.
+- **A Soul's span**: the rest of the run, in BN5's battles
   only, as a Cross serves BN6's; out on BN6's net it does nothing, and
   MegaMan says so. A run holds every Soul it wins, as BN5's MegaMan holds
   his: one per BN5 guardian, five at most in a cycle; a second cycle's
@@ -785,7 +785,7 @@ to turn.
   over to the next run, and no Soul is brought at setup: a Soul start
   would be worth nothing in a run the older net never dresses, and it
   would be power across runs.
-- **The key with the lock** (*proposal*): two kinds have few chips in BN6
+- **The key with the lock**: two kinds have few chips in BN6
   (ToadMan's Aqua only BblWrap, KnightMan's Break JustcOne and two
   Gigas), so his Guardian Data gives a chip of his Soul's kind in the
   place of the Navi chip BN6's guardians give (docs/BOSSES.md), and his

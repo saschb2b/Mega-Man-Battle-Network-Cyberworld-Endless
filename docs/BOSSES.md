@@ -91,8 +91,9 @@ in BN5's engine; beaten, a Navi gives his Soul for the run's BN5 battles
 (docs/META.md, Souls in BN5 territory). Standing beside it: no Cross in
 BN5's battles (MegaMan says so arriving), while a BN6 guardian's fight
 there keeps the Cross; DarkChips cost 20 max HP per battle used; no power
-creep across runs. What follows was reasoned with the game-design skill;
-each point marked *proposal* is mine, for the owner to turn.
+creep across runs. What follows was reasoned with the game-design skill,
+and the owner approved all of it (4 October 2026), the points first
+marked as proposals among them.
 
 - **The dialectic** is the meta layer's, what you bring against what you
   find, met at an act's end: the guardian's Soul is found, and the folder
@@ -112,7 +113,7 @@ each point marked *proposal* is mine, for the owner to turn.
   out, no Cross), answered by the act's band and the Soul it pays; a Soul
   won with no BN5 battle left to serve, answered by where they stand.
 
-**Which Navis, where** (*proposal*). BN5's own data places its Navis: its
+**Which Navis, where**. BN5's own data places its Navis: its
 net maps' battle records list each Navi's SP version on the maps he
 roams once its story is over (docs/ROM_DATA.md, BN5's Navis). Of the six
 whose Souls Team Colonel's MegaMan unites with, each guards the area BN5
@@ -132,7 +133,7 @@ act is the last before the Nest (a Soul won there would serve no BN5
 battle in the cycle), and the Graveyard's guardian is the one whose fall
 wakes the Cybeast in MegaMan for the Nest.
 
-**How often** (*proposal*): on the guardian layer of an act whose area
+**How often**: on the guardian layer of an act whose area
 BN5 dresses, in half the runs (a coin of the run's seed for each area, of
 its own beside the dress's), where the build can run the guest. Not the
 short net's last act (its Nest is BN6's: no BN5 battle would follow the
@@ -141,7 +142,7 @@ guardian, as before. Nothing is saved for it: a run continued without
 BN5's ROM, or on a build without the second core, meets BN6's guardian
 there, as its layers come in BN6's own tiles.
 
-**His band** (*proposal*). BN5's story holds a record for each of them at
+**His band**. BN5's story holds a record for each of them at
 V1, V2 and V3, its net one at SP (docs/ROM_DATA.md, BN5's Navis). He is
 taken by choice, as BN5's random battles are (their viruses taken up their
 versions, docs/PROGRESSION.md): the lowest of V1 to V3 whose HP reaches the
@@ -176,7 +177,7 @@ DarkChips), no running, his results screen paying the zenny BN6's
 guardians pay where their row holds their chip. Lost, the run ends as at
 any guardian.
 
-**His Guardian Data** (*proposal*): his Soul with MegaMan's words, five
+**His Guardian Data**: his Soul with MegaMan's words, five
 HPMemory, a full heal, the NaviCust's draft and the way on, as BN6's;
 and in his Navi chip's place (BN6 has none of his) a chip of his Soul's
 kind that BN6 has, in the folder's code or *, so the Soul unites from
