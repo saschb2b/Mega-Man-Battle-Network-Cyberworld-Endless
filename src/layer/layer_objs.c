@@ -595,6 +595,36 @@ static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, i
 	return whisper ? ta_say(text, who, whisper) : -1;
 }
 
+/* What a Spin does, and that it stays: the first also how they are
+ * found, one deeper in each dive. */
+static int spin_words(TextArchive *text, int colour, bool first) {
+	static char words[400];
+	const char *c = meta_spin_name(colour);
+	int held = 0;
+	for (int k = 0; k < 6; ++k) held += meta_spins() >> k & 1;
+	if (first)
+		snprintf(words, sizeof words, "A Spin for %s programs, Lan! Now we can turn %s programs on the NaviCust's board: "
+			"hold one and press L or R.|And it stays with us, in every dive from now on. Every dive hides one more deeper in, "
+			"a color we don't have yet!", c, c);
+	else if (held >= 5)
+		snprintf(words, sizeof words, "A Spin for %s programs, Lan! That's all six: every program on our board turns now, "
+			"in every dive!", c);
+	else
+		snprintf(words, sizeof words, "A Spin for %s programs, Lan! %c%s programs turn with L and R on the NaviCust's board now, "
+			"in every dive from here on.", c, c[0] - 'a' + 'A', c + 1);
+	return ta_say(text, FACE_MEGAMAN, words);
+}
+
+/* Each of the layer's rolls from a stream of its own, the layer seed's
+ * and `salt`'s, so that what one object draws never moves another's. A
+ * Chip Trader's prize new to the Library, the program list the profile's
+ * programs lead and an official order of the Library's chips read the
+ * profile, which play changes after the layer's save: their draws moved
+ * every roll after them, and a CONTINUE found other chips in the same
+ * Mystery Data (a playtester's MachGun2 S, Vulcan3 A the session before;
+ * session 65). */
+static void rolls_of(uint32_t salt) { rng_seed(run.layer_seed ^ (salt + 1u) * 0x9E3779B9u); }
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
@@ -622,6 +652,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	int counter = counter_element(run.depth, run.biome, run.boss_order[run.biome]);
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
+	rolls_of(0x100);
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
@@ -634,14 +665,17 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	ShopItem stock[SHOP_MAX_ITEMS];
 	int navi_of_act = run.boss_order[run.biome];
 	bool weakless = navi_of_act > 0 && enemy_weakness(enemy_id(1, navi_of_act, 0)) <= 0;
+	rolls_of(0x101);
 	int nstock = shop_dealer_stock(run.depth, weakless ? -1 : counter, weakless ? counter : 0, stock);
 	plan.stock = stock;
 	plan.nstock = nstock;
 	/* (a purple data's key in a blue one, three layers in ten: a lock and
 	 * its key on one layer) */
+	rolls_of(0x102);
 	plan.key_here = purple_here() && rng_range(0, 99) < 30;
 	/* the program vendor's, before his words too (he names the programs
 	 * MegaMan has had in earlier runs, which lead his list) */
+	rolls_of(0x103);
 	out->nprograms = shop_program_stock(run.depth, out->programs);
 	const char *brought = nstock && stock[0].stock == 1 ? "It's the only one I've got, so make it count!" : "I brought two, and they go fast!";
 	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
@@ -650,6 +684,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		? "|Its needles drop where he's standing a moment later, so fire when he stops!" : "";
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
+		rolls_of((uint32_t)i);
 		int wx, wy;
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
 		/* in a raised room, on its floor */
@@ -946,6 +981,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		if (tk.script >= 0 && !tk.archive && out->script_of[o->type] < 0) out->script_of[o->type] = tk.script;
 		if (tk.script >= 0 && ntalk < 16) talkers[ntalk++] = tk;
 	}
+	rolls_of(0x1FF);
 	/* the shops' stock, in the game's shop data */
 	if (emu_debug_on())
 		for (int i = 0; i < nstock; ++i)
@@ -974,25 +1010,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		};
 		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
 	}
-	/* (what a Spin does, and that it stays: the first also how they are
-	 * found, one deeper in each dive) */
-	if (out->spin_colour) {
-		static char words[400];
-		const char *c = meta_spin_name(out->spin_colour);
-		int held = 0;
-		for (int k = 0; k < 6; ++k) held += meta_spins() >> k & 1;
-		if (spin_first)
-			snprintf(words, sizeof words, "A Spin for %s programs, Lan! Now we can turn %s programs on the NaviCust's board: "
-				"hold one and press L or R.|And it stays with us, in every dive from now on. Every dive hides one more deeper in, "
-				"a color we don't have yet!", c, c);
-		else if (held >= 5)
-			snprintf(words, sizeof words, "A Spin for %s programs, Lan! That's all six: every program on our board turns now, "
-				"in every dive!", c);
-		else
-			snprintf(words, sizeof words, "A Spin for %s programs, Lan! %c%s programs turn with L and R on the NaviCust's board now, "
-				"in every dive from here on.", c, c[0] - 'a' + 'A', c + 1);
-		out->spin_found = ta_say(&text, FACE_MEGAMAN, words);
-	}
+	if (out->spin_colour) out->spin_found = spin_words(&text, out->spin_colour, spin_first);
 	uint32_t archive = commit_text(&text, group, number);
 	out->archive = archive;
 	if (out->guardian.navi) guardian_actors(&npcs, archive, &out->guardian);

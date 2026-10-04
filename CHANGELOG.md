@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A layer's Mystery Data hold the same after a CONTINUE.** Each of a
+  layer's objects now rolls from its own share of the layer's seed: the
+  Chip Trader's prize, the program list and an official Chip Order read
+  the Library and the programs found, which grow as you play, and their
+  draws moved the rolls after them, so a layer rebuilt by CONTINUE could
+  hold other chips in the same Mystery Data. Layers are made anew in this
+  build: a CONTINUE starts the layer again from its arrival.
 - **A win in BN5's battles counts its viruses.** The run summary said
   "Viruses deleted 0" after battles won in BN5's areas: only BN6's
   battles were counted. A BN5 battle won now adds the viruses it set.

@@ -1504,7 +1504,7 @@ static void server_roll(void) {
 	D.server_enc = make_encounter(run.depth, run.biome, ENC_CHALLENGE);
 	D.server_rolled = true;
 	loot_memory_set(&fought);
-	rng_seed(saved);
+	rng_restore(saved);
 	if (emu_debug_on()) {
 		fprintf(stderr, "server battle:");
 		for (int k = 0; k < D.server_enc.nfoes; ++k) fprintf(stderr, " %d/%d/%d", D.server_enc.foes[k].kind, D.server_enc.foes[k].family, D.server_enc.foes[k].version);
@@ -1556,7 +1556,7 @@ static void duel_roll(void) {
 	pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 	D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
 	loot_memory_set(&fought);
-	rng_seed(saved);
+	rng_restore(saved);
 	layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
 	D.duel_call_due = true;
 }
