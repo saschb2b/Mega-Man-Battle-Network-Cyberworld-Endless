@@ -34,7 +34,7 @@ static const struct { int navi, flag; const char *name, *feel, *weak, *strong, *
  * Cross is MegaMan's already). */
 static bool beaten_before(int navi, int depth) {
 	for (int d = 1; d < depth; ++d)
-		if (is_boss_depth(d) && run.boss_order[biome_for_depth(d)] == navi) return true;
+		if (is_boss_depth(d) && run_guardian(biome_for_depth(d)) == navi) return true;
 	return false;
 }
 

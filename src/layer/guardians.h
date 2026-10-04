@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "bn5.h"
 #include "stage_npc.h"
 
 #define GUARDIAN_NO_MUGSHOT -1
@@ -21,6 +22,18 @@ typedef struct {
 
 /* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel) */
 const Guardian *guardian(int navi);
+/* Another game's Navis as a territory's guardians (docs/BOSSES.md, BN5's
+ * Navis): BN5's Team Colonel by their AI index there (bn5.h BN5_NAVI_*,
+ * Colonel 7 .. ToadMan 12) as navis 24-29 here, each with his own rival
+ * record (BN6's Colonel and TomahawkMan are other Navis' copies) */
+#define GUARDIAN_OLDER_FIRST 24
+#define GUARDIAN_OLDER_LAST  29
+static inline bool guardian_older(int navi) { return navi >= GUARDIAN_OLDER_FIRST && navi <= GUARDIAN_OLDER_LAST; }
+static inline int guardian_older_ai(int navi) { return navi - GUARDIAN_OLDER_FIRST + BN5_NAVI_COLONEL; }
+static inline int guardian_of_older(int ai) { return ai - BN5_NAVI_COLONEL + GUARDIAN_OLDER_FIRST; }
+/* His overworld sprite and mugshot in his game's lists 6 and 8 (the same
+ * number), 0 for none */
+int guardian_older_sprite(int navi);
 /* ElementMan, whose element changes as he fights: none of his answers his
  * every form (bn6f: no element in his stats or traits) */
 #define GUARDIAN_ELEMENTMAN 16

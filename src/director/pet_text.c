@@ -279,7 +279,7 @@ static void report_text(char *s, int size) {
 	else ADD("Layer %d, ", run.depth);
 	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD("act %d: %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
 	else ADD("%s.", area);
-	int navi = run.side_kind == LAYER_NORMAL ? run.boss_order[run.biome] : 0;
+	int navi = run.side_kind == LAYER_NORMAL ? run_guardian(run.biome) : 0;
 	/* (made again as his battle ends: a playtester read "guards this
 	 * act's end" after deleting the Nest's last guardian) */
 	bool down = navi && is_boss_depth(run.depth) && boss_done();

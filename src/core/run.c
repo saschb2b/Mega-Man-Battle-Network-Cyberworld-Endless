@@ -7,6 +7,9 @@
 #include "game.h"
 #include "pacing.h"
 #include "rivals.h"
+#include "guardians.h"
+#include "guest.h"
+#include "net.h"
 
 Run run;
 
@@ -35,12 +38,52 @@ static const uint8_t pools[BIOME_COUNT][4] = {
 };
 static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 
+int run_debug_xguardian, run_debug_area = -1;
+
 int run_dress(int biome) {
+	/* (--net-biome xN's area for its BN6 area, whatever the seed says: its
+	 * names and guardian with its look) */
+	const NetAreaDef *d = run_debug_area >= NET_AREAS ? net_area_def(run_debug_area) : NULL;
+	if (d && d->like == biome) return run_debug_area;
 	for (int k = 0; k < XAREAS_MAX; ++k) {
 		const NetAreaDef *x = net_area_def(NET_AREAS + k);
 		if (x && !x->held && x->like == biome && (run.seed * 2654435761u) >> (16 + k) & 1) return NET_AREAS + k;
 	}
 	return biome;
+}
+
+int run_xguardian_at(int act, int biome) {
+	int a = run_dress(biome);
+	const NetAreaDef *x = a >= NET_AREAS ? net_area_def(a) : NULL;
+	if (!x || x->xrom <= 0 || !x->xguard[0] || !guest_possible(x->xrom - 1)) return 0;
+	if (guardian_older(run_debug_xguardian)) return run_debug_xguardian;
+	/* (not the short net's last act, whose Nest is BN6's: his Soul would
+	 * serve no battle of his game's after him) */
+	if (act < 0 || act > 5 || (run.mode == RUN_SHORT && act >= 2)) return 0;
+	/* (a coin of its own per area, beside the dress's: half the runs) */
+	uint32_t h = (run.seed ^ 0x47524431u) * 2654435761u;   /* "GRD1" */
+	int k = a - NET_AREAS;
+	if (!(h >> (8 + k) & 1)) return 0;
+	return guardian_of_older(x->xguard[1] && (h >> (20 + k) & 1) ? x->xguard[1] : x->xguard[0]);
+}
+
+int run_guardian(int biome) {
+	int acts = run.mode == RUN_SHORT ? 3 : 6, act = -1;
+	for (int a = 0; a < acts && act < 0; ++a)
+		if (run.biome_order[a] == biome) act = a;
+	/* (a test's area of another game, laid out as the BN6 area it is like,
+	 * which the run's order need not hold: the layer's act) */
+	int p = (run.depth - 1) % CYCLE_LAYERS;
+	if (act < 0 && biome == run.biome && p < 18) act = p / 3;
+	int x = act >= 0 && biome >= 0 && biome < BIOME_COUNT ? run_xguardian_at(act, biome) : 0;
+	return x ? x : biome >= 0 && biome < MAX_BIOMES ? run.boss_order[biome] : 0;
+}
+
+int run_layer_guardian(void) { return run.side_kind == LAYER_NORMAL ? run_guardian(run.biome) : run.boss_order[run.biome]; }
+
+void run_debug_guardian(int navi) {
+	if (guardian_older(navi)) run_debug_xguardian = navi;
+	else for (int b = 0; b < MAX_BIOMES; ++b) run.boss_order[b] = (uint8_t)navi;
 }
 
 void run_new(uint32_t seed) {

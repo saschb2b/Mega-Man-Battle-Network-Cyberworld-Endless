@@ -42,8 +42,10 @@ static int failures;
 char g_data_dir[512] = ".";
 Run run;
 Profile profile;
-/* (no ROM, so no other game's areas: each BN6 area draws itself) */
+/* (no ROM, so no other game's areas: each BN6 area draws itself, and its
+ * guardian is the run's pick) */
 int run_dress(int biome) { return biome; }
+int run_guardian(int biome) { return run.boss_order[biome]; }
 static uint32_t rng_s = 1;
 /* (as the game's: the seed mixed first) */
 void rng_seed(uint32_t s) {
@@ -1040,6 +1042,23 @@ static void test_pacing(void) {
 	CHECK(pacing_guardian_version(18, 3, 0, false, fake_navi_hp) == 0, "Colonel V1 in the fourth act");
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
 	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
+	/* BN5's guardians (docs/BOSSES.md, BN5's Navis): the lowest version
+	 * whose HP reaches the act's band, V2 at least from act 4, and their HP
+	 * capped at the band's top, never raised (BN5's own HP: KnightMan
+	 * 600/900/1600/1800, ShadowMan 500/700/1200/1600, ToadMan 700/900/1200/
+	 * 1500, TomahawkMan 700/900/1400/1800, Colonel 400/1200/1800/2000) */
+	const int knight[4] = { 600, 900, 1600, 1800 }, shadow[4] = { 500, 700, 1200, 1600 }, toad[4] = { 700, 900, 1200, 1500 },
+		tomahawk[4] = { 700, 900, 1400, 1800 }, colonel[4] = { 400, 1200, 1800, 2000 };
+	CHECK(pacing_xguardian_version(knight, 0, 0, false) == 0 && pacing_xguardian_version(knight, 1, 0, false) == 0, "KnightMan V1 in acts 1-2");
+	CHECK(pacing_xguardian_version(knight, 1, 0, true) == 1 && pacing_xguardian_hp(900, 1, 0) == 700, "threat 4's V2 from act 2, capped at 700");
+	CHECK(pacing_xguardian_version(toad, 0, 0, false) == 0 && pacing_xguardian_hp(700, 0, 0) == 600, "ToadMan V1 in act 1, held to 600");
+	CHECK(pacing_xguardian_version(shadow, 1, 0, false) == 1 && pacing_xguardian_version(shadow, 2, 0, false) == 2 &&
+		pacing_xguardian_hp(1200, 2, 0) == 1000, "ShadowMan V2 in act 2, V3 at 1000 in act 3");
+	CHECK(pacing_xguardian_hp(500, 2, 0) == 500, "never raised to the band's floor");
+	CHECK(pacing_xguardian_version(tomahawk, 2, 0, false) == 1 && pacing_xguardian_version(tomahawk, 3, 0, false) == 2 &&
+		pacing_xguardian_hp(1400, 3, 0) == 1300, "TomahawkMan V2 in act 3, V3 at 1300 in act 4");
+	CHECK(pacing_xguardian_version(colonel, 4, 0, false) == 1, "Colonel V2 in the Undernet's act");
+	CHECK(pacing_xguardian_version(colonel, 4, 1, false) == 3 && pacing_xguardian_hp(2000, 4, 1) == 2000, "SP, his own HP, on a later cycle");
 	/* heals: the middle layer of each act on the first two cycles, and the
 	 * run's first layer */
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&

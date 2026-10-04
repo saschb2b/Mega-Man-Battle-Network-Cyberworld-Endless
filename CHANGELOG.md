@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **BN5's own Navis guard its areas, fought in BN5's engine (issue
+  #69).** Where BN5 dresses an area, its guardian was always one of BN6's.
+  Now, in half the runs, BN5's own Navi waits in the arena where BN5 sets
+  him roaming: KnightMan in ACDC Area, ShadowMan in Oran Area,
+  TomahawkMan in SciLab, NumberMan or ToadMan in End Area, Colonel in its
+  Undernet. He stands in his own BN5 sprite, speaks with his own face, and
+  his battle is BN5's, from BN5's own record for him at the version the
+  act's band takes, his HP capped at the band's top. His Guardian Data
+  gives what BN6's guardians' do, and in place of a Navi chip BN6 lacks, a
+  chip of his kind: KnightMan's JustcOne, ToadMan's BblWrap. Nebula Area
+  keeps BN6's guardians. A run without BN5's ROM meets BN6's, as before.
 - **Upright on a phone, the picture fills the screen's width.** It was
   drawn at the largest whole scale: 960 pixels wide on a 1080-wide phone,
   with black bars at its sides, small over the touch controls. It now

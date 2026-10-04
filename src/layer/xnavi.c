@@ -19,12 +19,14 @@
 
 #define XNAVI_AT   (EMU_FREE + 0x260000)   /* (docs/EMULATION.md) */
 #define XNAVI_END  (EMU_FREE + 0x2A0000)
+#define XNAVI_GUARD_AT (XNAVI_END - 0x12000)   /* (a guardian of another game's, one at a time: KnightMan's, the largest, 68033 bytes) */
 #define BUS        0x08000000u
 #define LIST_NAVIS 6                       /* sprite lists: the Navis and Mr. Progs */
 #define LIST_FACES 8                       /* the mugshots */
 /* (Gregar's list-6 numbers for Falzar's Navis: a placeholder sprite and
  * the black mugshot, docs/ROM_DATA.md; no guardian takes them) */
 static const uint8_t free_slots[] = { 72, 74, 76, 77, 78 };
+#define GUARD_SLOT 78                      /* (the last of them: a guardian's, no area's Navi) */
 #define EMPTY_SPRITE 48                    /* one of them, to compare with */
 #define EMPTY_FACE   0x07
 
@@ -68,20 +70,24 @@ static struct {
 
 static uint32_t list_entry(uint32_t lists, int list, int i) { return get32(R.data + lists + (uint32_t)list * 4) - BUS + (uint32_t)i * 4; }
 
-/* A sprite of the other ROM's list `list`, copied: its address, 0 where it
- * cannot be (a compressed one, which a Navi's never is, among them). */
-static uint32_t copy_sprite(const uint8_t *xr, uint32_t lists, int list, int i) {
+/* A sprite of the other ROM's list `list`, copied to *next (moved past it),
+ * before `end`: its address, 0 where it cannot be (a compressed one, which
+ * a Navi's never is, among them). */
+static uint32_t copy_sprite_at(const uint8_t *xr, uint32_t lists, int list, int i, uint32_t *next, uint32_t end) {
 	uint32_t at = get32(xr + lists + (uint32_t)list * 4) - BUS + (uint32_t)i * 4;
 	if (at + 4 > ROM_SIZE) return 0;
 	uint32_t p = get32(xr + at);
 	if (p < BUS || p - BUS >= ROM_SIZE) return 0;
 	uint32_t len = xnavi_sprite_len(xr + (p - BUS), ROM_SIZE - (p - BUS));
-	if (!len || X.next + len > XNAVI_END) return 0;
-	uint32_t to = X.next;
+	if (!len || *next + len > end) return 0;
+	uint32_t to = *next;
 	emu_write(to, xr + (p - BUS), len);
-	X.next = (to + len + 3) & ~3u;
+	*next = (to + len + 3) & ~3u;
 	return to;
 }
+
+/* ... after the Navis and objects copied so far */
+static uint32_t copy_sprite(const uint8_t *xr, uint32_t lists, int list, int i) { return copy_sprite_at(xr, lists, list, i, &X.next, XNAVI_GUARD_AT); }
 
 /* Navi `navi` of ROM `xrom` copied in and listed at the next free slot */
 static void copy_in(int xrom, int navi) {
@@ -90,7 +96,7 @@ static void copy_in(int xrom, int navi) {
 	uint32_t empty = get32(R.data + list_entry(own, LIST_NAVIS, EMPTY_SPRITE)), black = get32(R.data + list_entry(own, LIST_FACES, EMPTY_FACE));
 	for (unsigned k = 0; k < sizeof free_slots; ++k) {
 		int s = free_slots[k];
-		bool taken = false;
+		bool taken = s == GUARD_SLOT;
 		for (int i = 0; i < X.n; ++i) taken |= X.navi[i].slot == s;
 		/* (not taken, and still a placeholder in the player's ROM) */
 		if (taken || get32(R.data + list_entry(own, LIST_NAVIS, s)) != empty || get32(R.data + list_entry(own, LIST_FACES, s)) != black) continue;
@@ -183,7 +189,7 @@ static void object_in(int k, uint32_t own) {
 	uint32_t len;
 	if (get32(R.data + list_entry(own, LIST_OBJECTS, s)) != OBJECT_PLACEHOLDER) return;
 	uint8_t *d = object_bytes(k, &len);
-	if (d && X.next + len <= XNAVI_END) {
+	if (d && X.next + len <= XNAVI_GUARD_AT) {
 		if (objects[k].purple) tint(d + 4, len - 4);
 		O.sprite[k] = X.next;
 		emu_write(O.sprite[k], d, len);
@@ -233,4 +239,21 @@ int xnavi_slot(int xrom, int navi, int fallback) {
 	}
 	int slot = slot_of(xrom, navi);
 	return slot < 0 ? fallback : slot;
+}
+
+int xnavi_guardian(int xrom, int navi) {
+	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->sprite_lists || !R.data || !R.layout || !R.layout->sprite_lists)
+		return -1;
+	uint32_t own = R.layout->sprite_lists, lists = XR[xrom].layout->sprite_lists;
+	uint32_t empty = get32(R.data + list_entry(own, LIST_NAVIS, EMPTY_SPRITE)), black = get32(R.data + list_entry(own, LIST_FACES, EMPTY_FACE));
+	/* (still a placeholder in the player's ROM) */
+	if (get32(R.data + list_entry(own, LIST_NAVIS, GUARD_SLOT)) != empty || get32(R.data + list_entry(own, LIST_FACES, GUARD_SLOT)) != black) return -1;
+	uint32_t next = XNAVI_GUARD_AT;
+	uint32_t sprite = copy_sprite_at(XR[xrom].data, lists, LIST_NAVIS, navi, &next, XNAVI_END);
+	uint32_t face = sprite ? copy_sprite_at(XR[xrom].data, lists, LIST_FACES, navi, &next, XNAVI_END) : 0;
+	if (!face) return -1;
+	emu_write32(BUS + list_entry(own, LIST_NAVIS, GUARD_SLOT), sprite);
+	emu_write32(BUS + list_entry(own, LIST_FACES, GUARD_SLOT), face);
+	if (emu_debug_on()) fprintf(stderr, "xnavi: guardian %d of %s at %d, %u bytes\n", navi, XR[xrom].layout->name, GUARD_SLOT, next - XNAVI_GUARD_AT);
+	return GUARD_SLOT;
 }

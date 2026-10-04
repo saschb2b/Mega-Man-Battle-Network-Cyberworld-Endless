@@ -22,6 +22,13 @@ uint32_t xnavi_sprite_len(const uint8_t *hdr, uint32_t n);
  * made anew. */
 int xnavi_slot(int xrom, int navi, int fallback);
 
+/* A guardian of another game (docs/BOSSES.md, BN5's Navis): Navi `navi`
+ * of ROM `xrom` (list 6 and its mugshot) copied into a place of its own,
+ * past the other Navis and objects, and listed at a number Gregar leaves
+ * empty that no area's Navi takes; that number, -1 where it cannot be.
+ * Each call copies him anew: one guardian at a time. */
+int xnavi_guardian(int xrom, int navi);
+
 /* Another game's map objects in BN6 (docs/MULTIROM.md): sprites of its list
  * 7, each listed at one of Gregar's list-7 numbers that point at a
  * placeholder no layer lists (docs/ROM_DATA.md). */

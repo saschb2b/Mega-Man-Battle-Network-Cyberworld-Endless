@@ -65,14 +65,18 @@ void runlog_battle_end(bool won) {
 
 /* (a battle as BN6's lines have it, "guest" and its record after the HP,
  * its enemies as "x" and that game's id) */
-void runlog_guest_start(uint32_t record, const int *ids, int n, int foehp) {
-	int k = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d battle hp %d/%d guest %08x", (unsigned)run.seed, run.depth, run.biome,
+static void guest_start_line(const char *kind, uint32_t record, const int *ids, int n, int foehp) {
+	int k = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d %s hp %d/%d guest %08x", (unsigned)run.seed, run.depth, run.biome, kind,
 		megaman_hp(), megaman_max(), (unsigned)record);
 	for (int i = 0; i < n && k < (int)sizeof L.line - 16; ++i) k += snprintf(L.line + k, sizeof L.line - (size_t)k, " x%d", ids[i]);
 	if (k < (int)sizeof L.line - 16) k += snprintf(L.line + k, sizeof L.line - (size_t)k, " foehp %d", foehp);
 	L.len = k < (int)sizeof L.line ? k : (int)sizeof L.line - 1;
 	L.open = true;
 }
+
+void runlog_guest_start(uint32_t record, const int *ids, int n, int foehp) { guest_start_line("battle", record, ids, n, foehp); }
+
+void runlog_guest_guardian_start(uint32_t record, int id, int foehp) { guest_start_line("guardian", record, &id, 1, foehp); }
 
 void runlog_guest_end(bool won, const char *reward) {
 	if (!L.open) return;

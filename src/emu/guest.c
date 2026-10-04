@@ -189,6 +189,67 @@ int guest_pool(int xrom, const NetAreaDef *area, int group, int number, const Gu
 	return 1;
 }
 
+/* ---- its Navis, from the ROM file (docs/BOSSES.md, BN5's Navis) ---- */
+
+/* the ids table's id of Navi `ai` at version `v`, 0 none */
+static int navi_id(const uint8_t *d, int ai, int v) {
+	for (uint32_t i = 1; i < 0x200; ++i) {
+		const uint8_t *e = d + (BN5_ENEMY_IDS - 0x08000000u) + 3u * i;
+		if (e[1] == BN5_NAVI_TYPE && e[2] == ai && e[0] == v) return (int)i;
+	}
+	return 0;
+}
+
+/* Navi `ai`'s stats row at version `v` (BN5_ENEMY_STATS: a u16 element <<
+ * 12 | HP first), its ROM offset, 0 none */
+static uint32_t navi_stats(const uint8_t *d, int ai, int v) {
+	uint32_t types = rom32(d, BN5_ENEMY_STATS + 4u * BN5_NAVI_TYPE), ais = types && ai > 0 && ai < 0x40 ? rom32(d, types + 4u * (uint32_t)ai) : 0;
+	if (!ais || v < 0 || v > 5 || ais - 0x08000000u + 6u * (uint32_t)v + 6 > ROM_SIZE) return 0;
+	return ais - 0x08000000u + 6u * (uint32_t)v;
+}
+
+int guest_navi_hp(int xrom, int ai, int version, int *element) {
+	if (element) *element = 0;
+	const uint8_t *d = xrom == XROM_BN5_COLONEL_US ? XR[xrom].data : NULL;
+	uint32_t at = d ? navi_stats(d, ai, version) : 0;
+	if (!at) return -1;
+	int w = d[at] | d[at + 1] << 8;
+	if (element) *element = w >> 12 <= 4 ? w >> 12 : 0;
+	return w & 0xFFF;
+}
+
+int guest_soul_kind(int xrom, int ai) {
+	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || ai < 1 || ai > 12) return -1;
+	return XR[xrom].data[BN5_SOUL_KINDS - 0x08000000u + (uint32_t)(ai - 1)];
+}
+
+/* Whether record `r` sets enemy `id` and no other */
+static bool record_alone(const uint8_t *d, uint32_t r, int id) {
+	if (r < 0x08000000u || r - 0x08000000u + 16 > ROM_SIZE) return false;
+	int n = 0, found = 0;
+	for (uint32_t a = rom32(d, r + 12), k = 0; a && k < 16 && a - 0x08000000u + 4 <= ROM_SIZE && d[a - 0x08000000u] != 0xF0; a += 4, ++k) {
+		const uint8_t *e = d + (a - 0x08000000u);
+		if (e[0] != 0x11) continue;
+		++n;
+		found += (e[2] | e[3] << 8) == id;
+	}
+	return n == 1 && found == 1;
+}
+
+uint32_t guest_navi_record(int xrom, int ai, int version) {
+	const uint8_t *d = xrom == XROM_BN5_COLONEL_US ? XR[xrom].data : NULL;
+	int id = d ? navi_id(d, ai, version) : 0;
+	if (!id) return 0;
+	for (uint32_t i = 0; i < BN5_STORY_BATTLE_COUNT; ++i)
+		if (record_alone(d, BN5_STORY_BATTLES + 16u * i, id)) return BN5_STORY_BATTLES + 16u * i;
+	/* (his SP: the net maps' records, where he roams once its story is over) */
+	for (int g = 0x80; g < 0x80 + XR[xrom].layout->net_groups; ++g)
+		for (int m = 0; m < 16; ++m)
+			for (int i = 0, k = guest_records(xrom, g, m); i < k; ++i)
+				if (record_alone(d, guest_record(xrom, g, m, i), id)) return guest_record(xrom, g, m, i);
+	return 0;
+}
+
 bool guest_dev_worried;
 int guest_backdrop = -1;
 
@@ -215,6 +276,7 @@ const char *guest_dark_name(int k) {
 /* ---- the run's chips as its game's: by name, from both ROMs ---- */
 
 #define BN6_CHIPS 314   /* BN6's standard, Mega and Giga chips, those a folder holds */
+#define BN6_STANDARD_CHIPS 203   /* ... its standard ones, 1-202 */
 static uint16_t to_bn5[BN6_CHIPS], from_bn5[BN5_CHIPS];
 
 /* Pairs BN6's chips with BN5's of the same name (xchips.c); how many
@@ -251,6 +313,7 @@ static int phase;
 static uint32_t pend_record;
 static GuestScale pend_sc;   /* ... its scaling to the act */
 static GuestMegaMan pend_mm;
+static GuestBoss pend_boss;   /* ... a guardian's, his (ai 0: none) */
 static uint16_t pend_folder[30];
 /* MegaMan's mood as a battle opens, from his HP: a battle begun calm, 0x80,
  * needed seven hits, each 10 off, to worry him (1-0x40), so a playtester at
@@ -264,6 +327,18 @@ static uint8_t rd8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
 static uint16_t rd16(uint32_t a) { return (uint16_t)core->rawRead16(core, a, -1); }
 static uint32_t rd32(uint32_t a) { return core->rawRead32(core, a, -1); }
 static void wr16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
+
+bool guest_possible(int xrom) { return xrom == XROM_BN5_COLONEL_US && XR[xrom].data && (ready || !failed); }
+
+int guest_kind_chips(int kind, uint16_t *out, int max) {
+	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
+	if (!d || !R.data || kind < 0) return 0;
+	if (!paired) paired = chips_pair(XROM_BN5_COLONEL_US);
+	int n = 0;
+	for (int id = 1; id < BN6_STANDARD_CHIPS && n < max; ++id)
+		if (to_bn5[id] && d[BN5_CHIP_RECORDS + 0x2Cu * to_bn5[id] + BN5_CHIP_KIND] == kind) out[n++] = (uint16_t)id;
+	return n;
+}
 
 uint8_t guest_read8(uint32_t a) { return core ? rd8(a) : 0; }
 uint16_t guest_read16(uint32_t a) { return core ? rd16(a) : 0; }
@@ -510,6 +585,11 @@ static uint16_t row_coded(uint16_t v, uint32_t row) {
 	return (uint16_t)(x | xchips_fit(other, bn6, fit_codes, v >> 9 & 0x1F, (int)row) << 9);
 }
 
+/* A guardian's battle under way (guest_boss_battle): his id, and the zenny
+ * his reward rows' chips pay (BN6's guardians' battles pay so where their
+ * row holds their chip, which their Guardian Data gives) */
+static int boss_id, boss_zenny;
+
 static void rows_fit(const int *ids, int n) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
 	for (int k = 0; k < n; ++k) {
@@ -524,9 +604,32 @@ static void rows_fit(const int *ids, int n) {
 			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i, o = a - 0x08000000u;
 			uint16_t v = (uint16_t)(d[o] | d[o + 1] << 8);
 			if (v == 0xFFFF || v >> 14 || (int)(v & 0x1FF) >= BN5_CHIPS) continue;
-			wr16(a, !from_bn5[v & 0x1FF] ? (uint16_t)(1u << 14 | REWARD_ZENNY) : starred ? chip_entry_star(v) : row_coded(v, i));
+			if (id == boss_id && boss_zenny > 0) wr16(a, (uint16_t)(1u << 14 | (boss_zenny > 0x3FFF ? 0x3FFF : boss_zenny)));
+			else wr16(a, !from_bn5[v & 0x1FF] ? (uint16_t)(1u << 14 | REWARD_ZENNY) : starred ? chip_entry_star(v) : row_coded(v, i));
 		}
 	}
+}
+
+/* A guardian's HP held to his act's band: his stats row's HP written in the
+ * ROM copy before his battle, as he spawns from it (seen in romlab:
+ * KnightMan's V1 row written 450 spawned him at 450 of 450), and its own
+ * written back as the battle ends */
+static uint32_t capped_at;
+static uint16_t capped_was;
+
+static void boss_uncap(void) {
+	if (capped_at) wr16(capped_at, capped_was);
+	capped_at = 0;
+}
+
+static void boss_cap(const GuestBoss *b) {
+	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
+	uint32_t at = navi_stats(d, b->ai, b->version);
+	uint16_t w = at ? (uint16_t)(d[at] | d[at + 1] << 8) : 0;
+	if (!at || b->hp_cap <= 0 || (w & 0xFFF) <= b->hp_cap) return;
+	capped_at = 0x08000000u + at;
+	capped_was = w;
+	wr16(capped_at, (uint16_t)((w & 0xF000) | (b->hp_cap & 0xFFF)));
 }
 
 /* (and its background the dressed area's where it leaves it to the map:
@@ -538,6 +641,9 @@ static uint32_t record_copy(uint32_t record, GuestScale sc) {
 	for (uint32_t i = 0; i < 16; i += 2) {
 		uint16_t v = rd16(record + i);
 		if (i == 8) v = (uint16_t)(v & ~BN5_OPT_GAME_OVER);
+		/* (a guardian's: no running from him, as from BN6's, and his results
+		 * screen on, which his V1 story records leave off) */
+		if (i == 8 && boss_id) v = (uint16_t)((v & ~BN5_OPT_RUN) | BN5_OPT_RESULTS);
 		if (i == BN5_RECORD_BACKDROP && (v & 0xFF) == 0xFF && guest_backdrop >= 0) v = (uint16_t)((v & 0xFF00) | (guest_backdrop & 0xFF));
 		wr16(BN5_FREE + i, v);
 	}
@@ -636,10 +742,15 @@ static void buster_tell(void) {
 		rd8(s + (BN5_NAVI_SPEED - BN5_NAVI_STATS)) + 1, rd8(s + (BN5_NAVI_CHARGE - BN5_NAVI_STATS)) + 1);
 }
 
-static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
+static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
 	memcpy(dark_in, mm->dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
+	/* (a guardian's: his band, his rows' zenny, his options; none else) */
+	boss_uncap();
+	boss_id = boss ? navi_id(XR[XROM_BN5_COLONEL_US].data, boss->ai, boss->version) : 0;
+	boss_zenny = boss ? boss->zenny : 0;
+	if (boss) boss_cap(boss);
 	star_records(mm->star);
 	memcpy(fit_codes, mm->codes, sizeof fit_codes);
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
@@ -675,14 +786,15 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm)
 	return true;
 }
 
-bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
+/* (begun at once, or, its boot still under way, the browser's, waiting
+ * for it, BN6's core with it: guest_boot_slice) */
+static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
 	if (active || !record) return false;
-	if (boot_at < 0) return ready && battle_begin(record, sc, mm);
-	/* (its boot still under way, the browser's: the battle waits for it,
-	 * BN6's core with it, guest_boot_slice) */
+	if (boot_at < 0) return ready && battle_begin(record, sc, mm, boss);
 	pend_record = record;
 	pend_sc = sc;
 	pend_mm = *mm;
+	pend_boss = boss ? *boss : (GuestBoss){ 0 };
 	if (mm->folder) {
 		memcpy(pend_folder, mm->folder, sizeof pend_folder);
 		pend_mm.folder = pend_folder;
@@ -690,6 +802,16 @@ bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
 	active = true;
 	phase = PH_BOOT;
 	return true;
+}
+
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) { return battle_ask(record, sc, mm, NULL); }
+
+bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm) {
+	uint32_t record = guest_navi_record(XROM_BN5_COLONEL_US, boss->ai, boss->version);
+	if (emu_debug_on())
+		fprintf(stderr, "guest: guardian %d at version %d, record %08X, his HP %d, at most %d, his rows %d zenny\n", boss->ai, boss->version, record,
+			guest_navi_hp(XROM_BN5_COLONEL_US, boss->ai, boss->version, NULL), boss->hp_cap, boss->zenny);
+	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss);
 }
 
 int guest_boot_progress(void) { return boot_at < 0 ? -1 : boot_at * 100 / BOOT_FRAMES; }
@@ -708,7 +830,7 @@ void guest_boot_slice(int ms) {
 	if (phase != PH_BOOT) return;
 	active = false;
 	phase = PH_IDLE;
-	if (ready && battle_begin(pend_record, pend_sc, &pend_mm)) return;
+	if (ready && battle_begin(pend_record, pend_sc, &pend_mm, pend_boss.ai ? &pend_boss : NULL)) return;
 	result = (GuestResult){ .outcome = GUEST_ESCAPED, .hp = pend_mm.hp, .reward_from = -1 };
 	memcpy(result.dark, pend_mm.dark, sizeof result.dark);
 	result_due = true;
@@ -764,6 +886,8 @@ static void finish(int outcome) {
 	}
 	result_due = true;
 	patch_roll(0);
+	boss_uncap();
+	boss_id = boss_zenny = 0;
 	active = false;
 	phase = PH_IDLE;
 }
@@ -843,6 +967,9 @@ bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
 }
 int guest_boot_progress(void) { return -1; }
 void guest_boot_slice(int ms) { (void)ms; }
+bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm) { (void)boss; (void)mm; return false; }
+bool guest_possible(int xrom) { (void)xrom; return false; }
+int guest_kind_chips(int kind, uint16_t *out, int max) { (void)kind; (void)out; (void)max; return 0; }
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }
 bool guest_active(void) { return false; }
 bool guest_on_screen(void) { return false; }

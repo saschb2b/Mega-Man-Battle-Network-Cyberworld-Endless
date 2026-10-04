@@ -35,6 +35,9 @@ int emu_encounter_record(uint32_t settings);
  * frames: a guardian's pays zenny where his row has his chip, which his
  * Guardian Data gives. */
 void emu_encounter_started(uint32_t settings);
+/* The zenny a guardian's battle pays where his reward row holds his chip,
+ * which his Guardian Data gives: an Unlocker's price in his act */
+int encounter_boss_zenny(void);
 /* The next battle watched, until emu_battle_unwatch (the duel's: docs/
  * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, and the first enemy
  * to spawn given `hp_cap` HP at most (0: its own). */

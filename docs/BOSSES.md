@@ -63,9 +63,16 @@ the net in his own shape (`guardian_body`):
   They speak with a portrait from MegaMan's battle data (`portrait.c`): a
   40 x 48 window of the same battle sprite, in the frame of a BN6 face, on
   a ground of their title card's colour.
+- BN5's Navis (below), in their own BN5 overworld sprites and faces, copied
+  in from the player's BN5 ROM at Gregar's list-6 and mugshot number 78,
+  one guardian at a time (`xnavi_guardian`); their sprites lay out their
+  animations as Gregar's Navis' do, so they log in by animation 25 and
+  strike their pose, 24, for the title card.
 
 A guardian's navi index is its ai in the enemy table: HeatMan 1 .. ElementMan
-16, and Colonel 18. Index 17 (and 0, 22) is an unnamed navi with 4000 HP at
+16, and Colonel 18. BN5's take 24-29 (Colonel, ShadowMan, NumberMan,
+TomahawkMan, KnightMan, ToadMan: their AI index in BN5's table, 7-12, plus
+17), each with a rival record of his own. Index 17 (and 0, 22) is an unnamed navi with 4000 HP at
 V1, which the Graveyard's SP battle uses; runs saved before Colonel moved
 to 18 have their 17 changed on loading, and his rival record follows.
 
@@ -135,22 +142,26 @@ BN5's ROM, or on a build without the second core, meets BN6's guardian
 there, as its layers come in BN6's own tiles.
 
 **His band** (*proposal*). BN5's story holds a record for each of them at
-V1, V2 and V3, its net one at SP (docs/ROM_DATA.md). He is taken as BN6's
-guardians are: in acts 1-3 at V1 or V2, in acts 4-6 at V3 or V2 (V3
-first, as BN6's EX), the first whose HP lies in the act's band, else the
-nearer; SP on later cycles; on threat 4 at least V2 from act 2, as BN6's
-fight EX. His HP above the band's top is capped there as he spawns, as
-ProtoMan's is in the netbattle (docs/RIVAL.md), never raised: the
-project's scaling is by choice, not by multiplying. So:
+V1, V2 and V3, its net one at SP (docs/ROM_DATA.md, BN5's Navis). He is
+taken by choice, as BN5's random battles are (their viruses taken up their
+versions, docs/PROGRESSION.md): the lowest of V1 to V3 whose HP reaches the
+act's band, V2 at least from act 4 (as BN6's guardians fight EX there) and
+from act 2 on threat 4; SP on later cycles. His HP above the band's top is
+capped there as he spawns, as the netbattle caps ProtoMan's (docs/
+RIVAL.md), never raised: the version brings the attacks, the cap holds the
+fight's length. So every first-cycle guardian lies in his band
+(`build.py pacing`):
 
-| Guardian | Act | Version, BN5's HP | Fought at |
+| Guardian | Act (band) | Version, BN5's HP | Fought at |
 | --- | --- | --- | --- |
 | KnightMan | 1 (400-600), 2 (600-700) | V1, 600 | 600 |
 | NumberMan | 1, 2 | V1, 600 | 600 |
 | ToadMan | 1 / 2 | V1, 700 | 600 / 700 |
-| ShadowMan | 2 / 3 (800-1000) | V2, 700 | 700 / 700 |
+| ShadowMan | 2 / 3 (800-1000) | V2, 700 / V3, 1200 | 700 / 1000 |
 | TomahawkMan | 3 / 4 (1000-1300) | V2, 900 / V3, 1400 | 900 / 1300 |
 | Colonel | 5 (1100-1500) | V2, 1200 | 1200 |
+
+BN5's HUD names his version as BN5 does: Colonel's V2 is its DarkCol.
 
 **The fight.** Staged as BN6's: the arena, the door's save, his log-in,
 title card and intro in our own words (BN5's text is never copied), his

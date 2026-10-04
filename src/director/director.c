@@ -63,6 +63,7 @@
 #include "text.h"
 #include "town.h"
 #include "xbackdrop.h"
+#include "xguardian.h"
 #include "xnavi.h"
 #include "xsong.h"
 
@@ -112,6 +113,7 @@ static struct {
 	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
 	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
 	int guest_foes;        /* the viruses its battle under way set, counted as deleted for a win */
+	int guest_guardian;    /* ... or the guardian of the older net it is (guardians.h, guardian_older), 0 none */
 	bool battle_due;       /* (dev: the battle step) the next random battle, at the first free moment on the map */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
 	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
@@ -127,7 +129,7 @@ static struct {
 	bool town_seen;        /* ... and has got there */
 	int town_frames;       /* frames on the town's map */
 	bool intro_said;       /* Lan and MegaMan have spoken there */
-	char beat[640];        /* what they say on arriving, once the card has gone */
+	char beat[900];        /* what they say on arriving, once the card has gone */
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held, a_held;   /* L, R and A were down last frame */
@@ -311,8 +313,11 @@ static void older_net_words(void) {
 	char out[96];
 	int n = out_names(out, sizeof out);
 	size_t k = strlen(D.beat);
+	/* (a guardian of ours keeps his fight ours; one of the older net's own
+	 * Navis fights the old way: docs/BOSSES.md, BN5's Navis) */
 	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old "
-		"way. There were no Crosses back then, so ours can't come into them. A guardian's fight is still ours, Cross and all.", k ? "|" : "");
+		"way. There were no Crosses back then, so ours can't come into them.|@M A guardian of ours still fights our way, Cross and all. "
+		"One of the old net's own Navis would fight the old way too.", k ? "|" : "");
 	if (n > 0 && k < sizeof D.beat)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M Our %s didn't exist back then either, so %s'll sit out.", out, n == 1 ? "it" : "they");
 	if (k < sizeof D.beat)
@@ -362,7 +367,7 @@ static void arrival_words(void) {
 		/* a new act: where they are now, and whose copy waits at its end,
 		 * named where they have battled him: else a signal MegaMan does
 		 * not know (docs/META.md, what MegaMan knows) */
-		int navi = run.boss_order[run.biome];
+		int navi = run_guardian(run.biome);
 		if (guardian_known(navi))
 			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
 		else
@@ -1002,7 +1007,7 @@ static int first_words(char *buf, int k, int size) {
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */
 	else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
-		int navi = run.boss_order[run.biome];
+		int navi = run_guardian(run.biome);
 		if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
 		else if (guardian_heard()) ADD(" %s guards the end of it, word is.|", guardian(navi)->name);
 		else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|");
@@ -1139,7 +1144,7 @@ static void area_card(void) {
 	 * MegaMan knows; his element alone gave SpoutMan away) */
 	char ahead[48] = "";
 	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer)) {
-		int navi = run.boss_order[biome];
+		int navi = run.side_kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
 		bool heard = run.side_kind == LAYER_NORMAL && guardian_heard();
 		snprintf(ahead, sizeof ahead, "Guardian: %s%s", guardian_known(navi) || heard ? guardian(navi)->name : "???",
 			!guardian_known(navi) && heard ? "?" : "");
@@ -1689,7 +1694,7 @@ static void building_word(void) {
  * game (docs/MULTIROM.md), laid out as the BN6 area it is like, which then
  * is the layer's biome. */
 void director_net_biome_arg(const char *v) {
-	if (v[0] == 'x') director_debug_area = NET_AREAS + atoi(v + 1);
+	if (v[0] == 'x') director_debug_area = run_debug_area = NET_AREAS + atoi(v + 1);
 	else director_debug_biome = atoi(v);
 }
 
@@ -2028,7 +2033,7 @@ bool director_start_run(void) {
 	if (emu_debug_on()) {
 		fprintf(stderr, "run guardians:");
 		for (int a = 0; a < 4; ++a) {
-			int g = run.boss_order[run.biome_order[a]];
+			int g = run_guardian(run.biome_order[a]);
 			fprintf(stderr, " %s%s", guardian(g)->name, guardian_known(g) || rival(g)->met ? "" : "(new)");
 		}
 		fprintf(stderr, " nest %s\n", guardian(run.boss_order[BIOME_NEST])->name);
@@ -4296,14 +4301,19 @@ static void steps_cleared(void) {
 
 void director_guest_done(const GuestResult *r) {
 	if (!D.active) return;
-	++D.battles;
+	/* (a guardian's of the older net: his end goes to his staging, boss.c,
+	 * as BN6's guardians' battles' do) */
+	int guardian_navi = D.guest_guardian;
+	D.guest_guardian = 0;
+	if (!guardian_navi) ++D.battles;
 	if (emu_debug_on()) fprintf(stderr, "guest: %s in %d frames, HP %d\n", r->outcome == GUEST_LOST ? "lost" : r->outcome == GUEST_ESCAPED ? "escaped" : "won",
 		r->frames, r->hp);
 	/* (deleted in the guest's battle, its deletion shown there: the run ends
-	 * as BN6's would) */
+	 * as BN6's would, by him where a guardian deleted him) */
 	if (r->outcome == GUEST_LOST) {
 		D.gameover = true;
-		D.lost_to = 0;
+		D.lost_to = guardian_navi;
+		if (guardian_navi) boss_lost();
 		end_run();
 		return;
 	}
@@ -4311,7 +4321,7 @@ void director_guest_done(const GuestResult *r) {
 	int max = emu_read16(BN6_NAVI_MAX_HP);
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
-	if (r->outcome == GUEST_WON) run.viruses_deleted += D.guest_foes;
+	if (r->outcome == GUEST_WON && !guardian_navi) run.viruses_deleted += D.guest_foes;
 	steps_cleared();
 	if (!profile.guest_taught) D.guest_due = 1 + out_names(D.guest_out, sizeof D.guest_out);
 	guest_recode_note(r);
@@ -4328,6 +4338,10 @@ void director_guest_done(const GuestResult *r) {
 		fprintf(stderr, "guest: MegaMan back at %d/%d HP, reward %s (folder codes %c%c%c); %d viruses deleted in the run\n", hp, max,
 			r->outcome == GUEST_WON ? guest_reward_words(r) : "none", run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-',
 			run.codes[2] ? 'A' + run.codes[2] - 1 : '-', run.viruses_deleted);
+	if (guardian_navi) {
+		boss_battle_over(r->outcome == GUEST_WON);
+		D.pet_refreshed = false;   /* (Dad's mails made again: the Records, the report) */
+	}
 }
 
 /* The short net won: its Nest's guardian fell and MegaMan stepped on its
@@ -4491,18 +4505,44 @@ static uint32_t guest_pick(uint32_t h, GuestScale *sc) {
 	return pool[k];
 }
 
-static void guest_begin(void) {
-	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
-	/* (MegaMan with his HP, the run's folder and his buster as the run's
-	 * NaviCust makes it: parity, no power of BN5's own) */
-	uint16_t folder[BN6_FOLDER_ENTRIES];
+/* MegaMan as the run has him, into a guest battle: his HP, the run's
+ * folder (into `folder`) and his buster as the run's NaviCust makes it
+ * (parity, no power of BN5's own), and the run's DarkChips, which BN5
+ * brings into its Custom screen when he worries (docs/META.md) */
+static GuestMegaMan guest_megaman(uint16_t folder[BN6_FOLDER_ENTRIES]) {
 	folder_now(folder);
 	GuestMegaMan mm = { emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, { 0 },
-		{ emu_read8(BN6_NAVI_ATTACK), emu_read8(BN6_NAVI_SPEED), emu_read8(BN6_NAVI_CHARGE) }, run_all_star() };
-	/* (and the run's DarkChips, which BN5 brings into its Custom screen when
-	 * he worries: docs/META.md) */
+		{ emu_read8(BN6_NAVI_ATTACK), emu_read8(BN6_NAVI_SPEED), emu_read8(BN6_NAVI_CHARGE) }, run_all_star(), { 0 } };
 	for (int k = 0; k < GUEST_DARK_KINDS; ++k) mm.dark[k] = (uint8_t)dark_count(k);
 	memcpy(mm.codes, run.codes, sizeof mm.codes);
+	return mm;
+}
+
+bool director_guest_guardian(int navi, int version) {
+	if (!guardian_older(navi) || !D.active) return false;
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	GuestMegaMan mm = guest_megaman(folder);
+	/* (his HP held to the act's band as he spawns, and his results screen
+	 * paying an Unlocker's price, as BN6's guardians' battles do) */
+	GuestBoss boss = { guardian_older_ai(navi), version, xguardian_hp_fought(navi, version, run.depth), encounter_boss_zenny() };
+	D.map_shown = false;
+	if (!guest_boss_battle(&boss, &mm)) {
+		if (emu_debug_on()) fprintf(stderr, "guest: guardian %s could not be fought in its engine\n", guardian(navi)->name);
+		return false;
+	}
+	D.guest_guardian = navi;
+	/* (in the run log as a guest battle, "guardian", his id by his game's) */
+	int ids[1] = { 0 };
+	uint32_t record = guest_navi_record(XROM_BN5_COLONEL_US, boss.ai, version);
+	guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, (GuestScale){ 0, 0 }, ids, 1);
+	runlog_guest_guardian_start(record, ids[0], boss.hp_cap);
+	return true;
+}
+
+static void guest_begin(void) {
+	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	GuestMegaMan mm = guest_megaman(folder);
 	GuestScale sc = { 0, 0 };
 	uint32_t record = guest_pick(h, &sc);
 	int hp = 0, dmg = 0;

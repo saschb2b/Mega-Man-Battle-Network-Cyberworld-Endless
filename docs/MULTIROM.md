@@ -163,7 +163,10 @@ the layer's random battles are BN5's own, fought in BN5's engine
   frame; `--talk dark:FRAME` opens the flame of darkness's talk (a middle
   layer: `--run-depth 2`), `--dev darkchips=MASK` starts a run holding
   DarkChips (bit k BN5's id 187 + k) and `--dev worried` keeps MegaMan
-  worried in guest battles; `--dev god`, `onehit` and `fragile` and the
+  worried in guest battles; `--guardian 24` to `29` puts one of BN5's
+  Navis (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan)
+  in every act BN5 dresses (`--net-biome x0 --run-depth 3 --guardian 28`:
+  KnightMan at ACDC Area's first act); `--dev god`, `onehit` and `fragile` and the
   dev menu work in them as in BN6's. `CYBERWORLD_AUTOPILOT=1` fights them
   as it fights BN6's, from BN5's memory (`src/emu/bn5.h`: its Custom
   screen's picks, its panels, its viruses and their attacks; never a
@@ -211,6 +214,21 @@ the layer's random battles are BN5's own, fought in BN5's engine
   files the page keeps in memory. A phone's browser would need about
   250 MB for the page, and its slower WebAssembly (three or four times)
   about a minute of the title for the boot; untested on a phone.
+- **Its guardians** (docs/BOSSES.md, BN5's Navis; issue #69): on the
+  guardian layer of an act such an area dresses, in half the runs, one of
+  BN5's own Navis guards it, where BN5's net maps set him roaming
+  (`NetAreaDef.xguard`: KnightMan ACDC Area, ShadowMan Oran Area,
+  TomahawkMan SciLab, NumberMan or ToadMan End Area, Colonel its
+  Undernet), decided from the seed and the ROMs present (`run_guardian`),
+  never on the short net's last act. He stands in his own BN5 sprite and
+  face (copied in at Gregar's 78) and is staged as BN6's guardians are; his
+  battle is BN5's, from BN5's own record for him at the version the act's
+  band takes (the story's V1-V3, the net's SP), his stats row's HP in the
+  guest's ROM copy capped at the band's top as he spawns, the record's
+  copy with no running (options `0x20` cleared) and its results screen on
+  (`0x02` set: his V1 records leave it off), his reward rows paying an
+  Unlocker's price, as BN6's guardians' do. Won, his staging goes on as
+  BN6's (his last word, his Guardian Data); lost, the run ends by him.
 - **Still to come**: the NaviCust's other programs in (those both games
   have, as BN5's battle reads them), BN5's chips registered in BN6.
 
@@ -355,5 +373,7 @@ the layer's random battles are BN5's own, fought in BN5's engine
   Seaside and Green Town do, copied whole.
 - [x] Its random battles in its own engine, on a second core, in the
   areas it dresses (Guest battles, above).
-- [ ] Its guardians, in battles in its own engine.
+- [x] Its guardians, in battles in its own engine: KnightMan, ShadowMan,
+  TomahawkMan, NumberMan, ToadMan and Colonel guard the acts of the areas
+  BN5 sets them in, in half the runs (Guest battles, above; docs/BOSSES.md).
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

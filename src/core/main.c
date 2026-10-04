@@ -1266,7 +1266,7 @@ int main(int argc, char **argv) {
 			 * run as the areas' draw changes) */
 			int p = (run.depth - 1) % CYCLE_LAYERS;
 			if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
-			if (guardian_navi > 0) for (int b = 0; b < MAX_BIOMES; ++b) run.boss_order[b] = (uint8_t)guardian_navi;
+			if (guardian_navi > 0) run_debug_guardian(guardian_navi);
 		}
 		/* (later NEW GAMEs take the next seeds, so a session replays) */
 		title_seed = !seed ? 0 : !s || s == &scene_title ? seed : seed + 1;

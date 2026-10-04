@@ -67,6 +67,27 @@ void run_new(uint32_t seed);
  * another game's like it (docs/MULTIROM.md), where that game's ROM is
  * there and the run's seed picks it, in half the runs. */
 int run_dress(int biome);
+/* The guardian of the run's act in area `biome` (a normal layer's): one of
+ * another game's Navis where his game dresses the area and guards it in
+ * this run (run_xguardian_at), else the run's own pick, run.boss_order.
+ * The navi numbers guardians.h names. */
+int run_guardian(int biome);
+/* ... and the guardian of the layer MegaMan stands on: a side layer's
+ * (an Undernet detour, the Secret Area) is run.boss_order's */
+int run_layer_guardian(void);
+/* Another game's Navi guarding act `act` (0-based) in area `biome`, 0 for
+ * none (docs/BOSSES.md, BN5's Navis): where an area of his game dresses it
+ * and names him (NetAreaDef.xguard), the build can fight its battles, and
+ * the run's seed says so, in half the runs, never on the short net's last
+ * act. From the seed and the ROMs present: nothing is saved. */
+int run_xguardian_at(int act, int biome);
+/* (dev: --guardian N with one of another game's Navis, who then guards
+ * every area his game dresses; --net-biome xN's area, which draws its BN6
+ * area whatever the seed says) */
+extern int run_debug_xguardian, run_debug_area;
+/* (dev: --guardian N, navi N guarding every area, or one of another
+ * game's Navis every area his game dresses) */
+void run_debug_guardian(int navi);
 /* The setup chosen for the run just made: in the short net its Nest's
  * guardian is picked as a fourth act's. */
 void run_setup(int mode, int folder, int threat, int helpers, int cross);

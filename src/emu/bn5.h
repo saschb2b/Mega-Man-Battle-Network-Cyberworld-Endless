@@ -84,6 +84,22 @@
 #define BN5_WINDOW_OPEN   0x78
 #define BN5_BATTLE_DECK   0x0203C830u /* the battle's folder as it is drawn, u16 chip | code << 9 (BN6_BATTLE_DECK) */
 
+/* Its Navis as a territory's guardians (docs/BOSSES.md, BN5's Navis;
+ * docs/ROM_DATA.md, BN5's Navis): a Navi is type BN5_NAVI_TYPE in the ids
+ * table, his AI index a family of six versions (V1, V2, V3, SP, DS, a
+ * sixth), each with its 6-byte stats row (BN5_ENEMY_STATS) */
+#define BN5_NAVI_TYPE     1
+#define BN5_STORY_BATTLES 0x08113CD8u /* its story's battle records by number, 16 bytes each (its Navis' V1-V3 among them: KnightMan V1 0x21) */
+#define BN5_STORY_BATTLE_COUNT 0x69
+#define BN5_OPT_RESULTS   0x02     /* BattleSettings +8 options: its results screen and reward after a win (a V1 story record lacks it) */
+#define BN5_OPT_RUN       0x20     /* ... running allowed (its random battles), as BN6's */
+#define BN5_CHIP_KIND     6        /* a chip record's +6: its kind, 0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Recovery, 5 Plus, 6 Sword, 7 Invisible,
+                                    * 8 Cursor, 9 Obstacle, 10 Wind, 11 Break, 12 none */
+#define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
+/* Team Colonel's Navis, by AI index: their Souls are the six its MegaMan
+ * unites with (BN5_SOUL_FLAGS) */
+enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN };
+
 #define BN5_MODE_GAME      0x04
 #define BN5_MODE_GAME_OVER 0x14
 #define BN5_SUB_MAP        0x04

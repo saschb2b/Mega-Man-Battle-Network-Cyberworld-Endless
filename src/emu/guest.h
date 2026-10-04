@@ -58,6 +58,26 @@ typedef struct {
  * guest_boot_progress). */
 bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm);
 
+/* A territory's guardian from its game (docs/BOSSES.md, BN5's Navis): Navi
+ * `ai` (his ids table's AI index, bn5.h BN5_NAVI_*) at `version` (0 V1 ..
+ * 3 SP), his HP `hp_cap` at most as he spawns (0: his own), his results
+ * screen paying `zenny` for each chip of his reward rows, as BN6's
+ * guardians' battles pay where their row holds their chip */
+typedef struct { int ai, version, hp_cap, zenny; } GuestBoss;
+/* Begins his battle as guest_battle begins one, from his game's own record
+ * for him at that version (guest_navi_record): no running, its results
+ * screen on; false where it cannot be. */
+bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm);
+/* Whether battles of game `xrom` can be fought here: the build runs a
+ * second core, its ROM is read, and the guest has not failed to boot (one
+ * not booted yet counts). */
+bool guest_possible(int xrom);
+/* BN6's standard chips whose namesake in the guest's game is of kind
+ * `kind` (its chip records' BN5_CHIP_KIND), their ids into `out`, in BN6's
+ * order; how many (0 before the names are paired: guest_start, or a first
+ * call with both ROMs read) */
+int guest_kind_chips(int kind, uint16_t *out, int max);
+
 /* The chips of `folder` (30 BN6 entries) that sit out of its battles, its
  * game having none of their names: each once, in the folder's order, the
  * first `max` into `out` (BN6 ids); how many there are, 0 before the guest
@@ -132,6 +152,18 @@ int guest_record_scaled(int xrom, uint32_t record, GuestScale sc, int *hp, int *
 /* ... and its enemies by its game's ids, so scaled, the first `max` into
  * `ids`; how many (a Navi, a story's battle among them) */
 int guest_record_foes_scaled(int xrom, uint32_t record, GuestScale sc, int *ids, int max);
+
+/* Its game's own battle record for Navi `ai` at `version` (0 V1 .. 3 SP):
+ * its story's first that sets him alone, else its net maps' (his SP, where
+ * he roams); 0 none. Read from the ROM file, no core needed. */
+uint32_t guest_navi_record(int xrom, int ai, int version);
+/* Navi `ai`'s HP at `version` in its game's stats, -1 none; his element
+ * into *element where it is not NULL (BN6's numbering, ELEM_*: 0 none, 1
+ * Fire, 2 Aqua, 3 Elec, 4 Wood) */
+int guest_navi_hp(int xrom, int ai, int version, int *element);
+/* The chip kind (BN5_CHIP_KIND) Navi `ai`'s Soul unites with in its game,
+ * -1 none */
+int guest_soul_kind(int xrom, int ai);
 
 /* Its game's battle records for net map (group, number): how many, and the
  * i-th's address; read from the ROM file, no core needed. */

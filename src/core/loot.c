@@ -9,6 +9,7 @@
 #include "pacing.h"
 #include "run.h"
 #include "rom.h"
+#include "xguardian.h"
 
 #define NAVI_CHALLENGE 40   /* % of challenges from the fourth act on against one of the area's SP navis */
 
@@ -168,7 +169,7 @@ static void weak_kinds_here(int depth, int biome, uint16_t weak[32]);
  * and planes: the area's most common element over all its battles had
  * been three kinds of Fire among nine elemental. */
 int counter_element(int depth, int biome, int navi) {
-	int w = navi > 0 ? enemy_weakness(enemy_id(1, navi, 0)) : -1;
+	int w = navi > 0 ? guardian_weakness(navi) : -1;
 	if (w > 0) return w;
 	uint16_t weak[32] = { 0 };
 	weak_kinds_here(depth, biome, weak);

@@ -1,6 +1,7 @@
 #include "rom.h"
 
 #include "net.h"   /* LOOK_* */
+#include "bn5.h"   /* BN5_NAVI_* */
 
 #include <dirent.h>
 #include <stdio.h>
@@ -262,29 +263,31 @@ bool rom_find_close;
  * Their battles are BN5's own maps' by its game's numbers (0x91 Oran Area,
  * 0x92 SciLab, 0x93 End Area, 0x94 the Undernet and Nebula Area, 0x86 the
  * rest of each), an act's layers through the area's maps in BN5's order
- * (docs/ROM_DATA.md, BN5 guest battles). */
+ * (docs/ROM_DATA.md, BN5 guest battles). Their guardians may be BN5's own
+ * Navis where its net maps' records have them roam (xguard: docs/BOSSES.md,
+ * BN5's Navis); Nebula Area's are BN6's. */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
 		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 8, .xlooks = XLOOK_CUBE,
-		.xbattles = { { 0x90, 0 }, { 0x90, 1 }, { 0x86, 0 } } },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
+		.xbattles = { { 0x90, 0 }, { 0x90, 1 }, { 0x86, 0 } }, .xguard = { BN5_NAVI_KNIGHTMAN } },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
 	{ 0x90, 5, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { 0x90, 4 }, { 0x90, 6 } }, .pad_rooms = 64, .apart = NET_APART_PLATFORMS, .skip_styles = 0x2006,
 		.xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x94, 1 }, .like = 2,
 		.name = "SciLab Area", .short_name = "SciLab", .motto = "The net Dad's lab once ran", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 10, .xlooks = XLOOK_CUBE,
-		.xbattles = { { 0x92, 0 }, { 0x92, 1 }, { 0x86, 2 } } },   /* SciLab 2, 1 and 4: green circuits in cyan lips and pale octagon hubs, ears at their corners, told by shape (TILES_BY_SHAPE: its paths' panels turn green and cyan by turns); its maps hold no platform bigger than a 3x3 hub, so every room up to 64 panels and the arena are drawn as its hubs (pad_rooms), their rims and ears framing them; its orange exit paths left out off the hubs (SKIP_OFF_PADS | hue buckets 1-2) */
+		.xbattles = { { 0x92, 0 }, { 0x92, 1 }, { 0x86, 2 } }, .xguard = { BN5_NAVI_TOMAHAWKMAN } },   /* SciLab 2, 1 and 4: green circuits in cyan lips and pale octagon hubs, ears at their corners, told by shape (TILES_BY_SHAPE: its paths' panels turn green and cyan by turns); its maps hold no platform bigger than a 3x3 hub, so every room up to 64 panels and the arena are drawn as its hubs (pad_rooms), their rims and ears framing them; its orange exit paths left out off the hubs (SKIP_OFF_PADS | hue buckets 1-2) */
 	{ 0x90, 7, 0x1002, 0, false, 0x13, 0, 0, 0, { { 0x90, 8 }, { 0x90, 9 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x91, 1 }, .like = 1,
 		.name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 15, .xlooks = XLOOK_CUBE,
-		.xbattles = { { 0x93, 0 }, { 0x86, 3 }, { 0x93, 1 } } },
+		.xbattles = { { 0x93, 0 }, { 0x86, 3 }, { 0x93, 1 } }, .xguard = { BN5_NAVI_NUMBERMAN, BN5_NAVI_TOADMAN } },
 	{ 0x90, 13, 0x8980, 0x8440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4,
 		.name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25, .xlooks = XLOOK_DARK_WALL | XLOOK_DARK_HOLE,
 		.xbattles = { { 0x86, 6 }, { 0x94, 3 }, { 0x86, 7 } } },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows */
 	{ 0x90, 3, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { 0x90, 2 } }, .pad_rooms = 64, .apart = NET_APART_PLATFORMS, .skip_styles = 0x21C1, .recolour = 0x524231,
 		.xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 1 }, .like = 3,
 		.name = "Oran Area", .short_name = "Oran Area", .motto = "The net of Oran Isle's mines", .xsong = 0x13, .xnavi = 60, .xbg = 9,
-		.xbattles = { { 0x91, 0 }, { 0x91, 1 }, { 0x86, 1 } } },   /* Oran Area 2 and 1: olive circuits in grey lips and orange octagon hubs, ears at their corners, told by shape; Oran Area 1's raised cream platforms and green walkways in its hubs' and circuits' shades (banks 3 and 4 as 1 and 2, its mint ones as 2: recolour); every room up to 64 panels and the arena drawn as its hubs (pad_rooms); off the hubs, its brown planks and its blue and purple arrow panels left out (SKIP_OFF_PADS | hue buckets 0, 6-8): one walkway look */
+		.xbattles = { { 0x91, 0 }, { 0x91, 1 }, { 0x86, 1 } }, .xguard = { BN5_NAVI_SHADOWMAN } },   /* Oran Area 2 and 1: olive circuits in grey lips and orange octagon hubs, ears at their corners, told by shape; Oran Area 1's raised cream platforms and green walkways in its hubs' and circuits' shades (banks 3 and 4 as 1 and 2, its mint ones as 2: recolour); every room up to 64 panels and the arena drawn as its hubs (pad_rooms); off the hubs, its brown planks and its blue and purple arrow panels left out (SKIP_OFF_PADS | hue buckets 0, 6-8): one walkway look */
 	{ 0x90, 11, 0x8000, 0x8000, false, 0x14, 0, 0, 0, { { 0x90, 12 } }, .apart = NET_APART_PLATFORMS, .looks = 1u << LOOK_STATUE | 1u << LOOK_BRAZIER, .emblem = 0x7D37,
 		.recolour = 0x21, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 5,
 		.name = "Undernet", .short_name = "Undernet", .motto = "The old depths, still burning", .xsong = 0x14, .xnavi = 60, .xbg = 24,
-		.xbattles = { { 0x94, 0 }, { 0x94, 1 }, { 0x86, 5 } } },   /* Undernet 2 and 3: mauve stone plates with a radial seam and lava at their corners, on cobbled paths, told by shape; their raised courts' pale stone and purple slime in the plates' shades (bank 2 as bank 1: recolour); its plates' purple cross its emblem; BN6's statue and braziers, which its number doors count (docs/LEVEL_DESIGN.md) */
+		.xbattles = { { 0x94, 0 }, { 0x94, 1 }, { 0x86, 5 } }, .xguard = { BN5_NAVI_COLONEL } },   /* Undernet 2 and 3: mauve stone plates with a radial seam and lava at their corners, on cobbled paths, told by shape; their raised courts' pale stone and purple slime in the plates' shades (bank 2 as bank 1: recolour); its plates' purple cross its emblem; BN6's statue and braziers, which its number doors count (docs/LEVEL_DESIGN.md) */
 };
 
 static const XRomLayout xlayouts[XROM_COUNT] = {

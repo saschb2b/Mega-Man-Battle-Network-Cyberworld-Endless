@@ -17,6 +17,9 @@ void runlog_battle_end(bool won);
 /* A battle in another game's engine begins (guest.c): its record there,
  * its `n` enemies by that game's ids, their HP together ... */
 void runlog_guest_start(uint32_t record, const int *ids, int n, int foehp);
+/* ... a guardian's of that game (guest_boss_battle): the same, "guardian"
+ * for "battle", his id there and the HP he is fought at */
+void runlog_guest_guardian_start(uint32_t record, int id, int foehp);
 /* ... and ends: won or left, and what its results screen gave ("Cannon A",
  * "200 zenny", "HP+50", "none"); a deletion ends it as runlog_run_end. */
 void runlog_guest_end(bool won, const char *reward);

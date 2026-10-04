@@ -186,6 +186,29 @@ int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothe
 	return best;
 }
 
+int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early) {
+	if (loop > 0 || act >= 6) return 3;
+	/* (BN5's versions are finer than BN6's V1, EX and SP: its six V1s lie at
+	 * 400-700 HP, its V2s at 700-1200, its V3s at 1200-1800. The lowest whose
+	 * HP reaches the band's floor, which the cap then holds under its top:
+	 * else the strongest) */
+	int lo, hi, first = act >= 3 || (ex_early && act >= 1) ? 1 : 0, best = -1;
+	pacing_guardian_band(act, &lo, &hi);
+	for (int v = first; v <= 2; ++v) {
+		if (hp[v] < 0) continue;
+		best = v;
+		if (hp[v] >= lo) break;
+	}
+	return best < 0 ? first : best;
+}
+
+int pacing_xguardian_hp(int hp, int act, int loop) {
+	if (loop > 0 || act >= 6) return hp;
+	int lo, hi;
+	pacing_guardian_band(act, &lo, &hi);
+	return hp > hi ? hi : hp;
+}
+
 bool pacing_heal_certain(int depth) {
 	int p = (depth - 1) % CYCLE_LAYERS;
 	/* the middle layer of each act, until the third cycle takes it away;

@@ -19,6 +19,7 @@
 #include "rom.h"
 #include "run.h"
 #include "shop.h"
+#include "xguardian.h"
 
 #define ROLLS 300
 
@@ -222,13 +223,82 @@ static void elements_report(FILE *out) {
 		}
 	}
 	fprintf(out, "\n\nGuardians' elements and weaknesses:");
+	/* (BN5's by their own stats: guardian_element, its first wheel) */
 	for (int n = 1; n < 32; ++n) {
-		int id = enemy_id(1, n, 0);
-		if (id < 0 || !guardian(n)->name || guardian(n)->name[0] == '?') continue;
-		int e = enemy_element(id), w = enemy_weakness(id);
-		fprintf(out, " %s %s/%s", guardian(n)->name, e > 0 ? elem_name(e) : "-", w > 0 ? elem_name(w) : "-");
+		if ((!guardian_older(n) && enemy_id(1, n, 0) < 0) || (guardian_older(n) && xguardian_hp(n, 0) < 0) || guardian(n)->name[0] == '?') continue;
+		int e = guardian_element(n), w = guardian_weakness(n);
+		fprintf(out, " %s%s %s/%s", guardian(n)->name, guardian_older(n) ? " (BN5)" : "", e > 0 ? elem_name(e) : "-", w > 0 ? elem_name(w) : "-");
 	}
 	fprintf(out, "\n");
+}
+
+/* The guardians a first cycle draws, over many runs (BN6's: run_new's
+ * picks); how many outside their act's band */
+static int first_cycle_guardians(FILE *out) {
+	int flagged = 0;
+	fprintf(out, "\nGuardians of the first cycle over 500 runs: navi, version and HP, how often.\n");
+	for (int act = 0; act < 7; ++act) {
+		int lo, hi, seen[32][3] = { { 0 } }, outside = 0;
+		pacing_guardian_band(act, &lo, &hi);
+		for (uint32_t seed = 1; seed <= 500; ++seed) {
+			run_new(seed * 2654435761u);
+			int b = act < 6 ? run.biome_order[act] : BIOME_NEST, navi = run.boss_order[b];
+			int v = pacing_guardian_version(navi, act, 0, b == BIOME_NEST, navi_hp), hp = navi_hp(navi, v);
+			if (navi >= 0 && navi < 32) seen[navi][v]++;
+			if (act < 6 && (hp < lo || hp > hi)) ++outside;
+		}
+		fprintf(out, "act %d (band %d-%d):", act + 1, lo, act < 6 ? hi : 0);
+		for (int n = 0; n < 32; ++n)
+			for (int v = 0; v < 3; ++v)
+				if (seen[n][v]) fprintf(out, " %s%s %d (%d)", guardian(n)->name, v == 1 ? "EX" : v == 2 ? "SP" : "", navi_hp(n, v), seen[n][v]);
+		fprintf(out, "%s\n", outside ? "  OUTSIDE" : "");
+		flagged += outside;
+	}
+	return flagged;
+}
+
+/* The acts (a bit each, 0-based) BN6 area `biome` can come in on the first
+ * cycle: the four of the surface by their pools (pacing_area_pool), the
+ * Undernet's and the Graveyard's */
+static unsigned area_acts(int biome) {
+	unsigned acts = 0;
+	for (int act = 0; act < 4; ++act) {
+		uint8_t pool[PACING_AREA_POOL];
+		int n = pacing_area_pool(act, pool);
+		for (int i = 0; i < n; ++i) acts |= (unsigned)(pool[i] == biome) << act;
+	}
+	return acts | (unsigned)(biome == BIOME_UNDERNET) << 4 | (unsigned)(biome == BIOME_GRAVEYARD) << 5;
+}
+
+/* BN5's guardians (docs/BOSSES.md, BN5's Navis): each in every act his
+ * area's BN6 area can come in, his version, his own HP there and the HP he
+ * is fought at, against the act's band (threat 4's version beside it);
+ * how many fought outside it */
+static int older_guardians(FILE *out) {
+	int flagged = 0;
+	fprintf(out, "\nGuardians of the older net, where its ROM is beside BN6's (half the runs its areas dress): navi, act, the band, version,\n"
+		"his own HP and as fought (capped at the band's top), on threat 4 too; OUTSIDE when fought outside the band.\n");
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *x = net_area_def(NET_AREAS + k);
+		if (!x || x->held || x->xrom <= 0) continue;
+		for (int j = 0; j < 2 && x->xguard[j]; ++j) {
+			int navi = guardian_of_older(x->xguard[j]), hp[4];
+			for (int v = 0; v < 4; ++v) hp[v] = xguardian_hp(navi, v);
+			unsigned acts = area_acts(x->like);
+			for (int act = 0; act < 6; ++act) {
+				if (!(acts >> act & 1)) continue;
+				int lo, hi, v = pacing_xguardian_version(hp, act, 0, false), v4 = pacing_xguardian_version(hp, act, 0, true);
+				pacing_guardian_band(act, &lo, &hi);
+				int fought = pacing_xguardian_hp(hp[v], act, 0), fought4 = pacing_xguardian_hp(hp[v4], act, 0);
+				bool outside = fought < lo || fought > hi || fought4 < lo || fought4 > hi;
+				fprintf(out, "  %-12s %-11s act %d (%4d-%4d): V%d %4d, fought at %4d; threat 4 V%d %4d, at %4d%s\n", x->name, guardian(navi)->name,
+					act + 1, lo, hi, v + 1, hp[v], fought, v4 + 1, hp[v4], fought4, outside ? "  OUTSIDE" : "");
+				flagged += outside;
+			}
+			fprintf(out, "  %-12s %-11s later cycles: SP %d\n", x->name, guardian(navi)->name, hp[3]);
+		}
+	}
+	return flagged;
 }
 
 int pacing_report_run(const char *path) {
@@ -256,25 +326,7 @@ int pacing_report_run(const char *path) {
 			for (int k = 0; k < 8 && acts[a].biomes[k] >= 0; ++k)
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
-	/* the guardians a first cycle draws, over many runs */
-	fprintf(out, "\nGuardians of the first cycle over 500 runs: navi, version and HP, how often.\n");
-	for (int act = 0; act < 7; ++act) {
-		int lo, hi, seen[32][3] = { { 0 } }, outside = 0;
-		pacing_guardian_band(act, &lo, &hi);
-		for (uint32_t seed = 1; seed <= 500; ++seed) {
-			run_new(seed * 2654435761u);
-			int b = act < 6 ? run.biome_order[act] : BIOME_NEST, navi = run.boss_order[b];
-			int v = pacing_guardian_version(navi, act, 0, b == BIOME_NEST, navi_hp), hp = navi_hp(navi, v);
-			if (navi >= 0 && navi < 32) seen[navi][v]++;
-			if (act < 6 && (hp < lo || hp > hi)) ++outside;
-		}
-		fprintf(out, "act %d (band %d-%d):", act + 1, lo, act < 6 ? hi : 0);
-		for (int n = 0; n < 32; ++n)
-			for (int v = 0; v < 3; ++v)
-				if (seen[n][v]) fprintf(out, " %s%s %d (%d)", guardian(n)->name, v == 1 ? "EX" : v == 2 ? "SP" : "", navi_hp(n, v), seen[n][v]);
-		fprintf(out, "%s\n", outside ? "  OUTSIDE" : "");
-		flagged += outside;
-	}
+	flagged += first_cycle_guardians(out) + older_guardians(out);
 	elements_report(out);
 	/* what the Net Dealers answer each act with, per element (every one a
 	 * straight hit; a "+" is over the act's cap, the lightest found) */

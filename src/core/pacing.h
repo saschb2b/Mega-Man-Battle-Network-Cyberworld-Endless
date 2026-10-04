@@ -55,6 +55,17 @@ int pacing_guardian_miss(int navi, int act, int loop, bool always_sp, int (*hp)(
 int pacing_guardian_pick(const uint8_t pool[4], const uint8_t *others, int nothers, int act, int loop,
                          bool always_sp, int (*hp)(int navi, int version));
 
+/* The version (0 V1, 1 V2, 2 V3, 3 SP) another game's Navi guards act
+ * `act` at (docs/BOSSES.md, BN5's Navis), from his HP at each (hp[v], -1
+ * none): the lowest of V1-V3 whose HP reaches the act's band (its floor),
+ * else the strongest; at least V2 from act 4, as BN6's guardians fight EX
+ * there, and from act 2 where `ex_early` (threat 4); SP on later cycles
+ * and in the Nest. */
+int pacing_xguardian_version(const int hp[4], int act, int loop, bool ex_early);
+/* ... and the HP he is fought at: his own, capped at the act's band's top
+ * (as he spawns), never raised; his own on later cycles and in the Nest */
+int pacing_xguardian_hp(int hp, int act, int loop);
+
 /* The layer of an act (0-2) that always has a heal and the Net Dealer, and
  * whether the heal is still certain on this cycle. */
 bool pacing_heal_certain(int depth);

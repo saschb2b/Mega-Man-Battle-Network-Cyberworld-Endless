@@ -33,6 +33,7 @@
 #include "scripts.h"
 #include "shop.h"
 #include "trader.h"
+#include "xguardian.h"
 #include "xnavi.h"
 
 /* Overworld objects (sprite list 7) */
@@ -443,7 +444,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
  * so none answers him for long. */
 static void dealer_word(char *word, size_t n, int navi, int counter, const ShopItem *stock, int nstock, const char *brought,
                         const char *lands) {
-	bool weak = counter > 0 && enemy_weakness(enemy_id(1, navi, 0)) > 0, listed = false;
+	bool weak = counter > 0 && guardian_weakness(navi) > 0, listed = false;
 	for (int i = 0; i < nstock; ++i)
 		if (stock[i].kind == 2 && counter > 0 && chip_hits_with(stock[i].id) == counter && (i == 0 || !weak)) listed = true;
 	if (weak && listed) {
@@ -527,7 +528,7 @@ static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock
  * said it, and how could he know?). His script, -1 none. */
 static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	static char rumor[200];
-	int navi = run.boss_order[run.biome];
+	int navi = run_layer_guardian();
 	/* (a list-6 navi's face has its sprite's number) */
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || !guardian_rumor(navi) ||
 		out->nchoices >= LAYER_MAX_CHOICES)
@@ -679,7 +680,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
-	int counter = counter_element(run.depth, run.biome, run.boss_order[run.biome]);
+	int counter = counter_element(run.depth, run.biome, run_layer_guardian());
 	/* ScrtData lie in deep layers until three are out there */
 	int said = 0;   /* bystanders so far: each says another line */
 	rolls_of(0x100);
@@ -693,8 +694,8 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
 	ShopItem stock[SHOP_MAX_ITEMS];
-	int navi_of_act = run.boss_order[run.biome];
-	bool weakless = navi_of_act > 0 && enemy_weakness(enemy_id(1, navi_of_act, 0)) <= 0;
+	int navi_of_act = run_layer_guardian();
+	bool weakless = navi_of_act > 0 && guardian_weakness(navi_of_act) <= 0;
 	rolls_of(0x101);
 	int nstock = shop_dealer_stock(run.depth, weakless ? -1 : counter, weakless ? counter : 0, stock);
 	plan.stock = stock;
@@ -765,7 +766,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (and a word on the element that answers this act, which the
 			 * stock carries a chip of) */
 			char hello[720], word[280] = "";
-			int navi = run.boss_order[run.biome];
+			int navi = run_layer_guardian();
 			/* (the net's word comes back from an act's second layer: its
 			 * first keeps the mystery of a guardian never battled, but for
 			 * a bystander's rumor, sought out; a playtester's dealer named

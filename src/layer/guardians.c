@@ -32,6 +32,15 @@ static const Guardian guardians[] = {
 	[15] = { "JudgeMan", "Voice of Verdict", 0x55, -1, 88, 104, 216 },
 	[16] = { "ElementMan", "Lord of Elements", 0x56, -1, 176, 136, 232 },
 	[18] = { "Colonel", "The Iron Strategist", 0x53, -1, 120, 168, 136 },
+	/* BN5's (docs/BOSSES.md, BN5's Navis): their faces and sprites copied in
+	 * from its ROM as they are met (guardian_set_face), their pose its own
+	 * animation 24, as Gregar's Navis' */
+	[24] = { "Colonel", "Commander of the Old Net", GUARDIAN_NO_MUGSHOT, 24, 96, 184, 176 },
+	[25] = { "ShadowMan", "Blade of the Shadows", GUARDIAN_NO_MUGSHOT, 24, 160, 96, 224 },
+	[26] = { "NumberMan", "Master of the Odds", GUARDIAN_NO_MUGSHOT, 24, 176, 216, 80 },
+	[27] = { "TomahawkMan", "Spirit of the Totem", GUARDIAN_NO_MUGSHOT, 24, 232, 88, 72 },
+	[28] = { "KnightMan", "The Iron Fortress", GUARDIAN_NO_MUGSHOT, 24, 152, 136, 200 },
+	[29] = { "ToadMan", "Maestro of the Marsh", GUARDIAN_NO_MUGSHOT, 24, 104, 200, 104 },
 };
 #define NGUARDIANS ((int)(sizeof guardians / sizeof *guardians))
 
@@ -106,6 +115,21 @@ const char *guardian_tip(int navi) {
 	case 18: return "Colonel sends his soldiers at us: clear them out. When our panels light in a zigzag, he warps in and slashes across them. "
 		"Step off the yellow panels!|@M Our hits glance off him while he readies a slash, and he stays beside us a moment after it: swing back then!|"
 		"@M When he lands in our row and the screen goes dark, his cape sweeps the row: get out of it before the dark comes!";
+	/* BN5's, as their own battles were watched in its engine (romlab, a
+	 * frame every 20 over a minute of each, MegaMan standing in his
+	 * middle panel; issue #69) */
+	case 24: return "The old net's Colonel lights a slant of our panels, then warps in and slashes across them: step off the yellow! "
+		"When he hefts his cannon, its blast runs down his row: get out of it.|@M Right after his slash he stands close: swing then!";
+	case 25: return "ShadowMan floats over his panels and splits into copies. His pillars of fire rush down our row: get out of it! "
+		"His shuriken rain down on the lit panels: step off the yellow!|@M He lands to throw them: strike then!";
+	case 26: return "NumberMan's numbered balls roll at us down every row, and each one's number is its HP: break the one in our row with a shot or two!|"
+		"@M His dice land on our side and blow up around where they fall: get clear of them!|@M He stands still at the back while his balls roll: strike then!";
+	case 27: return "The old net's TomahawkMan throws his axe across our row, and it swings back. The totem pole at his back drops fire "
+		"on the lit panels: step off the yellow!|@M He holds still while his totem calls the fire: strike then!";
+	case 28: return "KnightMan stands in his stone armor, and our hits glance off it. When he swings, his wrecking ball drops on the lit panel.|"
+		"@M Rocks fall where shadows open under us, and he leaps and crashes down, cracking our panels.|@M He's open while his ball swings: strike then!";
+	case 29: return "ToadMan hops between his lily pads. His music notes drift at us, and their shock stuns: keep out of their way! "
+		"His frogs leap over to our side.|@M He sits still on his pad while he plays: strike then!";
 	default: return NULL;
 	}
 }
@@ -138,6 +162,13 @@ const char *guardian_rumor(int navi) {
 	case 15: return "he passes sentence with a whip.";
 	case 16: return "he's never the same element twice.";
 	case 18: return "he commands an army, and ends fights with a single stroke.";
+	/* (BN5's: the older net's Navis, as the net tells of them) */
+	case 24: return "the old net's Colonel runs his ground like a battlefield.";
+	case 25: return "he strikes from the dark and is gone before you turn.";
+	case 26: return "he lets the dice decide, and the dice like him.";
+	case 27: return "the old net's spirits fight at his side.";
+	case 28: return "no attack has ever dented his armor.";
+	case 29: return "his music leaves Navis unable to move.";
 	default: return NULL;
 	}
 }
@@ -242,6 +273,38 @@ static const struct { const char *first, *rematch, *revenge, *stronger, *defeat;
 		"The last campaign was mine. So is this one.",
 		"My forces have doubled. Your odds have not.",
 		"A strategic... retreat..." },
+	/* BN5's: the Nest's copies of the older net's Navis (our words; BN5's
+	 * own text is never copied) */
+	[24] = { "This sector of the old net is under my command.|Stand down, or be removed by force!",
+		"You broke my line once. I have drawn a new one.",
+		"Retreat was your wisest move last time. It still is.",
+		"Reinforcements have arrived. The odds are mine now.",
+		"Outmaneuvered... The sector... is yours..." },
+	[25] = { "A target walks into the dark. How careless.|My blades are already moving!",
+		"You slipped my shadow once. Not twice.",
+		"The shadows took you last time. They are hungry again.",
+		"My shadow has grown. You cannot see all of me now.",
+		"The shadow... fades..." },
+	[26] = { "Calculating... Your odds of winning: zero point zero!|Let's roll the numbers!",
+		"An error in my last calculation. Corrected!",
+		"My numbers said you'd lose, and you did! Let's check them again!",
+		"Bigger numbers, better odds! It all adds up to your defeat!",
+		"Does not... compute..." },
+	[27] = { "The old net's spirits watch this ground.|Show them your courage, stranger!",
+		"You stood your ground once. Stand again!",
+		"The spirits chose me last time. They choose me still.",
+		"The totem burns brighter now!",
+		"The spirits... have spoken..." },
+	[28] = { "Halt! None pass this gate while I stand!|No blow has ever broken my armor!",
+		"You dented my armor once. It has been forged anew.",
+		"You fell before my iron ball. Kneel again!",
+		"Thicker armor, a heavier swing. Despair!",
+		"My armor... broken..." },
+	[29] = { "Ribbit! A new audience for my concert!|Let the music play, and you dance!",
+		"You stopped my song last time. Encore, ribbit!",
+		"Ribbit ribbit! My song put you to sleep last time!",
+		"A whole new symphony, ribbit! Louder than ever!",
+		"The concert... is over... ribbit..." },
 };
 #define NLINES ((int)(sizeof lines / sizeof *lines))
 
@@ -262,6 +325,13 @@ static const char *const replies[] = {
  * and ProtoMan as friends in copied form, and the rest as the Nest's
  * copies of foes. */
 static bool friendly(int navi) { return (navi >= 1 && navi <= 3) || navi == 5 || navi == 11; }
+
+/* Falzar's Navis, whose faces Gregar lacks, speak with the portrait set
+ * for them where the layer made one, else without a face: the HeelNavi's
+ * is the bystanders' (a playtester read SpoutMan's lines as a
+ * bystander's); BN5's with their own, copied in (xnavi_guardian) */
+static int set_face[NGUARDIANS];   /* the face + 1, 0 for none */
+
 int guardian_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
@@ -270,7 +340,15 @@ int guardian_sprite(int navi) {
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
+	/* (BN5's: his own, copied in at the face's number, guardian_set_face) */
+	if (guardian_older(navi) && set_face[navi]) return set_face[navi] - 1;
 	return GUARDIAN_HEEL_SPRITE;
+}
+
+int guardian_older_sprite(int navi) {
+	/* (BN5's lists 6 and 8: docs/ROM_DATA.md, BN5's Navis) */
+	static const uint8_t numbers[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1] = { 69, 75, 71, 72, 73, 74 };
+	return guardian_older(navi) ? numbers[navi - GUARDIAN_OLDER_FIRST] : 0;
 }
 
 /* Every guardian in his own shape (they had stood in a HeelNavi's body,
@@ -292,12 +370,6 @@ NpcBody guardian_body(int navi, int face) {
 	return b;
 }
 
-/* Falzar's Navis, whose faces Gregar lacks, speak with the portrait set
- * for them where the layer made one, else without a face: the HeelNavi's
- * is the bystanders' (a playtester read SpoutMan's lines as a
- * bystander's) */
-static int set_face[NGUARDIANS];   /* the face + 1, 0 for none */
-
 void guardian_set_face(int navi, int face) {
 	if (navi > 0 && navi < NGUARDIANS) set_face[navi] = face < 0 ? 0 : face + 1;
 }
@@ -306,6 +378,17 @@ int guardian_face(int navi) {
 	const Guardian *g = guardian(navi);
 	if (g->mugshot != GUARDIAN_NO_MUGSHOT) return g->mugshot;
 	return navi > 0 && navi < NGUARDIANS && set_face[navi] ? set_face[navi] - 1 : FACE_NONE;
+}
+
+/* How MegaMan and Lan take guardian `navi`, `name`, at the first meeting:
+ * a friend's copy, a foe's, or a Navi of the older net (BN5's, copied with
+ * it) */
+static const char *first_sight(int navi, const char *name) {
+	static char s[128];
+	if (guardian_older(navi)) snprintf(s, sizeof s, "@L That's %s, from the older net!|@M The Nest copied its Navis too, Lan!|", name);
+	else if (friendly(navi)) snprintf(s, sizeof s, "@M %s?! ...No. You're one of the Nest's copies!|", name);
+	else snprintf(s, sizeof s, "@L That's %s! Or a copy the Nest made of him...|", name);
+	return s;
 }
 
 const char *guardian_intro(int navi, int version, int biome) {
@@ -327,10 +410,7 @@ const char *guardian_intro(int navi, int version, int biome) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	/* the first meeting: who MegaMan and Lan see */
-	if (!r->megaman_won && !r->navi_won && !r->met) {
-		if (friendly(navi)) ADD("@M %s?! ...No. You're one of the Nest's copies!|", name);
-		else ADD("@L That's %s! Or a copy the Nest made of him...|", name);
-	}
+	if (!r->megaman_won && !r->navi_won && !r->met) ADD("%s", first_sight(navi, name));
 	/* and at every meeting after, who speaks without a face (a playtester
 	 * who had met SpoutMan three times asked who was talking) */
 	else if (guardian_face(navi) == FACE_NONE) ADD("@L %s's copy again!|", name);

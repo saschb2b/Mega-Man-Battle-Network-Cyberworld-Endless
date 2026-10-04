@@ -1173,7 +1173,9 @@ static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 		}
 		NetObj *b = add_obj(OBJ_BOSS, bx, by);
 		if (b) {
-			layer.boss_navi = run.boss_order[biome];
+			/* (an act's: BN5's own Navi where his game dresses the area and
+			 * guards it, run_guardian; a side layer's the run's pick) */
+			layer.boss_navi = kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
 			b->param = layer.boss_navi;
 		}
 		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);

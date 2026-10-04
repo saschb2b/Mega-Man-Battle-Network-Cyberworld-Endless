@@ -61,6 +61,8 @@ typedef struct {
 	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
 	uint8_t xbattles[3][2];  /* (another game's) per layer of an act, the map (group, number) whose battle records its random battles take,
 	                          * fought in its own engine on the guest core (guest.h); group 0: its layers fight BN6's battles */
+	uint8_t xguard[2];       /* (another game's) the Navis of its game (their ids table's AI index) who may guard its acts, as its own net maps
+	                          * set them (docs/BOSSES.md, BN5's Navis); 0 none: BN6's guardians */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */

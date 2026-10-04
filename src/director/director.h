@@ -68,6 +68,11 @@ uint32_t director_keys(uint32_t keys);
 bool director_resume(void);
 /* A battle on the guest core has ended (guest.h): its result into the run. */
 void director_guest_done(const GuestResult *r);
+/* The layer's guardian, one of another game's Navis (guardians.h:
+ * guardian_older), begins his battle on the guest core at `version`, his
+ * HP held to the act's band (docs/BOSSES.md, BN5's Navis); false where it
+ * cannot (its end then comes through director_guest_done, to boss.c) */
+bool director_guest_guardian(int navi, int version);
 /* Once a frame, after the game's frame: exits and encounters. */
 void director_update(void);
 /* Where the test autopilot heads (grid panel): the guardian, to talk to

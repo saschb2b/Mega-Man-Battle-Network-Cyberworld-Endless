@@ -162,7 +162,7 @@ unsigned layer_crosses(int depth) {
 	unsigned held = 0;
 	for (int d = 1; d < depth; ++d)
 		if (is_boss_depth(d)) {
-			int navi = run.boss_order[biome_for_depth(d)];
+			int navi = run_guardian(biome_for_depth(d));
 			if (navi >= 1 && navi <= 5) held |= 1u << navi;
 		}
 	return held;

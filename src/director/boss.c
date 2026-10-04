@@ -13,6 +13,7 @@
 #include "bn6_fields.h"
 #include "cinema.h"
 #include "debug.h"
+#include "director.h"
 #include "emu.h"
 #include "encounter.h"
 #include "flags.h"
@@ -142,9 +143,11 @@ static uint32_t walk_toward(int x, int y, int near) {
 
 static void title_card(void) {
 	const Guardian *gd = guardian(B.g.navi);
-	static const char *const suffix[3] = { "", " EX", " SP" };
+	static const char *const suffix[3] = { "", " EX", " SP" }, *const older[4] = { "", " V2", " V3", " SP" };
 	char name[40], top[48];
-	snprintf(name, sizeof name, "%s%s", gd->name, suffix[B.g.version < 0 || B.g.version > 2 ? 0 : B.g.version]);
+	/* (BN5's by its own versions' names) */
+	if (guardian_older(B.g.navi)) snprintf(name, sizeof name, "%s%s", gd->name, older[B.g.version < 0 || B.g.version > 3 ? 0 : B.g.version]);
+	else snprintf(name, sizeof name, "%s%s", gd->name, suffix[B.g.version < 0 || B.g.version > 2 ? 0 : B.g.version]);
 	snprintf(top, sizeof top, "Guardian of %s", guardian_area_in_text(layer.biome, run.side_kind));
 	cinema_title(top, name, gd->epithet, rgba(gd->r, gd->g, gd->b, 255), 170);
 }
@@ -184,6 +187,23 @@ static void wait_update(void) {
 	to(B_ENTER);
 }
 
+/* No question after his words: the battle begins, the player's again. */
+static void fight_begin(void) {
+	cinema_input(CINEMA_FREE);
+	cinema_letterbox(false);
+	/* (BN5's in BN5's engine, on the guest core: docs/BOSSES.md, BN5's
+	 * Navis; its end comes back through director_guest_done) */
+	if (guardian_older(B.g.navi) && director_guest_guardian(B.g.navi, B.g.version)) return;
+	/* (else BN6's battle: the area's own guardian where the guest cannot
+	 * fight his) */
+	Encounter e = make_boss(run.depth, run.biome, guardian_older(B.g.navi) ? run.boss_order[run.biome] : B.g.navi);
+	/* (no running from a guardian, as from BN6's story bosses: a
+	 * playtester ran from CircusMan at 5 HP, healed beside the arena and
+	 * came back to a fresh fight) */
+	e.held = true;
+	emu_battle_force(&e);
+}
+
 void boss_update(void) {
 	++B.t;
 	switch (B.state) {
@@ -203,20 +223,11 @@ void boss_update(void) {
 		run_script(B.g.intro);
 		to(B_TALK);
 		break;
-	case B_TALK: {
+	case B_TALK:
 		if (!chat_done()) break;
-		/* no question: the battle begins, the player's again */
-		cinema_input(CINEMA_FREE);
-		cinema_letterbox(false);
-		Encounter e = make_boss(run.depth, run.biome, B.g.navi);
-		/* (no running from a guardian, as from BN6's story bosses: a
-		 * playtester ran from CircusMan at 5 HP, healed beside the arena
-		 * and came back to a fresh fight) */
-		e.held = true;
-		emu_battle_force(&e);
+		fight_begin();
 		to(B_FIGHT);
 		break;
-	}
 	case B_FIGHT:
 	case B_NONE:
 	case B_DONE:
