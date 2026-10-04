@@ -530,7 +530,9 @@ behind is options. From the second run, NEW GAME opens a setup:
   programs, four HPMemory a guardian, a second guardian below the short
   net's Nest), each opened by winning on the one below.
 - **Help:** two more HPMemory at the start, a heal on every layer, gentler
-  battles. Helped runs count for everything.
+  battles, and All *: every chip of the run in *, the wildcard, so any five
+  go in a hand and every Program Advance forms from its chips in order.
+  Helped runs count for everything.
 
 Every chip MegaMan holds joins the Library, BN6's own, which every run's
 PET shows whole: a Chip Trader's prize is new to it first, and the summary

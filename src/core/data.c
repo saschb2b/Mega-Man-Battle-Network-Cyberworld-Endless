@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "rom.h"
+#include "run.h"
 
 /* rom id, behaviour, parameter, tier (0 common - 4 legendary), price (x100 z) */
 const ChipDef chip_defs[] = {
@@ -143,6 +144,12 @@ void chip_info(int rom_id, ChipInfo *out) {
 		if (c == 0xFF) continue;
 		out->codes[out->ncodes++] = c == 26 ? '*' : (char)('A' + c);
 	}
+	/* (the All * helper: in * alone, as the game's record then has it, so
+	 * every reward, stock and prize the engine rolls comes in *) */
+	if (run_all_star() && out->ncodes) {
+		out->codes[0] = '*';
+		out->ncodes = 1;
+	}
 	out->codes[out->ncodes] = 0;
 	const ChipDef *d = chip_def(rom_id);
 	/* (a Navi chip's power is 1000 and a tenth of it, in its V1, EX and SP
@@ -154,6 +161,23 @@ void chip_info(int rom_id, ChipInfo *out) {
 void chip_desc(int rom_id, char *out, size_t outlen) {
 	if (rom_id < 256) rom_desc(R.layout->chip_descs[0], rom_id, out, outlen);
 	else rom_desc(R.layout->chip_descs[1], rom_id - 256, out, outlen);
+}
+
+uint16_t chip_entry_star(uint16_t entry) {
+	return entry == 0xFFFF || !(entry & 0x1FF) ? entry : (uint16_t)((entry & 0x1FF) | CHIP_CODE_STAR << 9);
+}
+
+void chip_pack_star(uint8_t e[CHIP_PACK_ENTRY]) {
+	int n = e[0];
+	for (int k = 1; k < 4; ++k) {
+		/* (its order stamp, where the first code had none: the stamps
+		 * after the counts, BN6's pack sorts by them) */
+		if (e[k] && !n) { e[4] = e[4 + 2 * k]; e[5] = e[5 + 2 * k]; }
+		n += e[k];
+		e[k] = 0;
+		e[4 + 2 * k] = e[5 + 2 * k] = 0;
+	}
+	e[0] = (uint8_t)(n > 99 ? 99 : n);
 }
 
 /* family, biomes, first depth. Biomes: bit 0 Central, 1 Seaside, 2 Sky,

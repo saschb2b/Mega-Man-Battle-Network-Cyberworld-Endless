@@ -101,7 +101,19 @@ battle.
 
 As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
 0x28) are rewritten in the folder's codes, half the time, by a hook on the
-reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md).
+reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md);
+with the All * helper every chip entry in *.
+
+While a run has the All * helper (docs/META.md, issue #18), every chip
+record of ids 1-313 holds * alone (its four codes at `0x021DA8` + id x
+0x2C written `1A FF FF FF`), and the Program Advance check's `cmp r2, #1`
+at `0x08029606` is `cmp r2, #3`; each new layer writes them as the run's
+helpers have them, and the ROM's own back before the game's own NEW GAME
+boots (the folder it gives is counted in the pack by the records). As
+such a run begins, the folder's 30 entries go to * and each chip's four
+pack counts to its first. A guest battle in BN5's core does the same to
+BN5's copy (its records at `0x01E210`, its check at `0x080252B2`), and
+puts the folder's chips, DarkChips and reward rows in *.
 
 In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
 given the act's guardian band at most as he spawns, where his own 1800 is

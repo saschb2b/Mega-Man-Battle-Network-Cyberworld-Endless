@@ -366,14 +366,14 @@ static bool purple_here(void) {
  * never one the layer's dealer lists (issue #41), and never a common or
  * uncommon one: its Unlocker costs about a layer's zenny, and a
  * playtester's opened on CrakShot G, which the dealer sells for less
- * (session 62). */
+ * (session 62). (With the All * helper every chip is in *, its too.) */
 static void purple_content(uint8_t out[8], const ShopItem *stock, int nstock) {
 	char code = '*';
 	int id = roll_chip(run.depth, 4, &code);
 	for (int t = 0; t < 16; ++t) {
 		bool sold = false;
 		for (int k = 0; k < nstock; ++k) sold |= stock[k].kind == 2 && stock[k].id == id;
-		if (code != '*' && !sold && chip_pool_tier(id) != 0 && chip_pool_tier(id) != 1) break;
+		if ((code != '*' || run_all_star()) && !sold && chip_pool_tier(id) != 0 && chip_pool_tier(id) != 1) break;
 		id = roll_chip(run.depth, 4, &code);
 	}
 	const uint8_t c[8] = { 1, 0x20, 0xFF, (uint8_t)(code == '*' ? 26 : code - 'A'), (uint8_t)id, (uint8_t)(id >> 8), 0, 0 };

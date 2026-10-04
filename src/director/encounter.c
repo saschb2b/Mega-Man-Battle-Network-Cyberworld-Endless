@@ -180,8 +180,9 @@ static uint16_t boss_zenny(void) {
  * one of the folder's codes where the chip does, so a chip reward leans
  * half the time, as Mystery Data's; a Navi's chip, in either entry, in its
  * * off the folder's codes, and in his own guardian's battle zenny
- * (boss_on). (From a hook: the player's ROM and the run's codes are only
- * read, and loot_fit_code rolls nothing when always.) */
+ * (boss_on); with the All * helper every chip in *. (From a hook: the
+ * player's ROM and the run's codes are only read, and loot_fit_code rolls
+ * nothing when always.) */
 static void lean_row(int id) {
 	if (id <= 0 || id >= 0x200) return;
 	uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
@@ -193,7 +194,7 @@ static void lean_row(int id) {
 			hook_write16(0x08000000u + row + 2 * k, boss_zenny());
 			continue;
 		}
-		char c = code >= 26 ? '*' : (char)('A' + code);
+		char c = code >= 26 || run_all_star() ? '*' : (char)('A' + code);   /* (every chip in * with All *) */
 		if (k & 1) c = loot_fit_code(chip, c, true);
 		/* (a Navi's chip in its * where the folder holds not its letter,
 		 * as his Guardian Data gives it, from both entries of a pair: a

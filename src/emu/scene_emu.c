@@ -71,6 +71,7 @@ static void enter(void) {
 		events_install();
 		director_resume();
 	} else {
+		director_before_boot();
 		emu_boot();
 		emu_encounters_install();
 		events_install();

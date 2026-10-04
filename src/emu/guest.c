@@ -175,16 +175,35 @@ static void shelf_install(void) {
 	core->rawWrite32(core, BN5_COMPACT + 6, -1, SHELF_AT + 1);
 }
 
+/* The All * helper in the guest (docs/META.md): its chips' records hold *
+ * alone in its ROM copy, as BN6's then do, so the run's chips come into its
+ * Custom screen in * (a code its record lacks it draws as nothing), and its
+ * check of a Program Advance of codes in a row takes three * (as BN6's,
+ * BN5_PA_STAR_LIMIT); else its ROM's own again, where a run before had it. */
+static bool starred;
+static void star_records(bool on) {
+	if (on == starred) return;
+	starred = on;
+	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
+	static const uint8_t star[4] = { CHIP_CODE_STAR, 0xFF, 0xFF, 0xFF };
+	for (uint32_t x = 1; x < BN5_CHIPS; ++x)
+		for (uint32_t i = 0, rec = BN5_CHIP_RECORDS + 0x2Cu * x; i < 4; ++i)
+			core->rawWrite8(core, 0x08000000u + rec + i, -1, on ? star[i] : d[rec + i]);
+	uint32_t at = BN5_PA_STAR_LIMIT - 0x08000000u;
+	uint16_t limit = (uint16_t)(d[at] | d[at + 1] << 8);
+	wr16(BN5_PA_STAR_LIMIT, on && limit == 0x2A01 ? 0x2A03 : limit);
+}
+
 /* the run's DarkChips into the guest's folder (three at most, one of each,
- * as BN5's folder takes them), each in its own code, where chips sat out:
- * one empty slot stays, the shelf's edge */
+ * as BN5's folder takes them), each in its own code (in * with All *),
+ * where chips sat out: one empty slot stays, the shelf's edge */
 static void dark_in_folder(uint32_t folders, uint32_t marks) {
 	static const uint16_t entry[GUEST_DARK_KINDS] = { 0x22BB, 0x32BC, 0x10BD, 0x34BE, 0x2CBF, 0x26C0, 0x18C1, 0x0EC2, 0x0AC3, 0x06C4, 0x26C5, 0x08C6 };
 	int empty[30], ne = 0, put = 0;
 	for (int i = 29; i >= 0; --i) if (rd16(folders + 2u * (uint32_t)i) == 0xFFFF) empty[ne++] = i;
 	for (int k = 0; k < GUEST_DARK_KINDS && put < 3 && put + 1 < ne; ++k) {
 		if (!dark_in[k]) continue;
-		wr16(folders + 2u * (uint32_t)empty[put++], entry[k]);
+		wr16(folders + 2u * (uint32_t)empty[put++], starred ? chip_entry_star(entry[k]) : entry[k]);
 		uint32_t id = entry[k] & 0x1FF;
 		core->rawWrite8(core, marks + id, -1, (uint8_t)(rd8(BN5_CHIP_KEYS + id) ^ BN5_CHIP_KEY_XOR));
 	}
@@ -299,9 +318,12 @@ bool guest_start(int xrom) {
 
 /* The reward rows of the enemies in `record` rewritten where a chip has no
  * BN6 chip of its name: zenny instead (its game's own encoding, as BN6's
- * rewards are). Its entities follow the record's pointer at +0xC, four
- * bytes each (0x11 an enemy, its id in the last two), 0xF0 ending them. */
+ * rewards are); with All * the others in * (its results screen shows the
+ * chip as the run gets it), else as its ROM has them. Its entities follow
+ * the record's pointer at +0xC, four bytes each (0x11 an enemy, its id in
+ * the last two), 0xF0 ending them. */
 static void rows_fit(uint32_t record) {
+	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
 	uint32_t e = rd32(record + 0xC);
 	for (int k = 0; k < 16 && e >= 0x08000000u && e < 0x08800000u; ++k, e += 4) {
 		uint8_t kind = rd8(e);
@@ -310,10 +332,10 @@ static void rows_fit(uint32_t record) {
 		int id = rd16(e + 2);
 		if (id <= 0 || id >= 0x200) continue;
 		for (uint32_t i = 0; i < 20; ++i) {
-			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i;
-			uint16_t v = rd16(a);
-			if (v == 0xFFFF || v >> 14 || (int)(v & 0x1FF) >= BN5_CHIPS || from_bn5[v & 0x1FF]) continue;
-			wr16(a, (uint16_t)(1u << 14 | REWARD_ZENNY));
+			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i, o = a - 0x08000000u;
+			uint16_t v = (uint16_t)(d[o] | d[o + 1] << 8);
+			if (v == 0xFFFF || v >> 14 || (int)(v & 0x1FF) >= BN5_CHIPS) continue;
+			wr16(a, !from_bn5[v & 0x1FF] ? (uint16_t)(1u << 14 | REWARD_ZENNY) : starred ? chip_entry_star(v) : v);
 		}
 	}
 }
@@ -340,7 +362,9 @@ static uint32_t record_copy(uint32_t record) {
  * nothing (a playtester's Storm folder had nine of them, its ElcPuls1 S
  * among them: BN5's has B, L, P and *; session 65). */
 static int bn5_code(int x, int code) {
-	const uint8_t *rec = XR[XROM_BN5_COLONEL_US].data + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x;
+	/* (its record as its ROM copy has it: in * alone with All *) */
+	uint8_t rec[4];
+	for (uint32_t i = 0; i < 4; ++i) rec[i] = rd8(0x08000000u + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x + i);
 	for (int i = 0; i < 4; ++i)
 		if (rec[i] == code) return code;
 	for (int i = 0; i < 4; ++i)
@@ -378,11 +402,12 @@ static int folder_in(const uint16_t *folder) {
 	return in;
 }
 
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS]) {
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS], bool star) {
 	if (!ready || active || !record) return false;
 	memcpy(dark_in, dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
+	star_records(star);
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
 	 * whose options carry 0x40, as its random battles' do) */
 	wr16(BN5_NAVI_BASE_MAX_HP, (uint16_t)max_hp);
@@ -494,8 +519,8 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS, the browser) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS]) {
-	(void)record; (void)hp; (void)max_hp; (void)folder; (void)dark;
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS], bool star) {
+	(void)record; (void)hp; (void)max_hp; (void)folder; (void)dark; (void)star;
 	return false;
 }
 bool guest_active(void) { return false; }

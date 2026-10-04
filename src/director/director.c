@@ -1770,11 +1770,16 @@ static bool build_layer(void) {
 	return true;
 }
 
+static void star_records(bool on);
+
 /* build_layer timed (build_ms), named first where MegaMan leaves a layer */
 static bool new_layer(bool leaving) {
 	if (leaving) building_word();
 	/* (no battle watched: a duel's, left by a battle never finished) */
 	emu_battle_unwatch();
+	/* (the chip records as the run's helpers have them, in the ROM copy,
+	 * which a state does not hold) */
+	star_records(run_all_star());
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	bool ok = build_layer();
 	build_ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -1801,6 +1806,12 @@ static void own_folder_chips(void) {
 		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
 	}
 }
+
+/* The chips a folder holds, the standard, mega and giga ones, the ones a
+ * shop or a trader gives: past them in the pack lies other memory, a count
+ * of which a purchase moved the other way (a BblStar2 bought read as no
+ * change). */
+#define PACK_CHIPS 314   /* (chip_pool.c's LAST_CHIP + 1) */
 
 /* A folder entry's count in the pack (bn6f getOffsetToQuantityOfChipCode:
  * the code's place among the chip record's four, else the first) */
@@ -1836,6 +1847,51 @@ static void set_start_folder(void) {
 		flag_set(BN6_FLAG_LIBRARY + (chips[i] & 0x1FF));   /* (in the Library, as GiveFolder puts them) */
 	}
 	own_folder_chips();
+}
+
+/* The All * helper in the game (docs/META.md, issue #18): every chip's
+ * record holds * alone in the core's ROM copy, so the pack keeps a chip in
+ * * whatever code it was given in (bn6f getOffsetToQuantityOfChipCode
+ * counts a code the record lacks as its first), the folder's EDIT moves it
+ * in in *, and the check of a Program Advance of one chip in codes in a
+ * row takes all three in * (BN6's own takes one). Without it the ROM's own
+ * again, where a run before had it: the copy lasts the session. */
+static void star_records(bool on) {
+	uint32_t first = R.layout->chip_data + 0x2Cu;   /* (Cannon's: A B C *) */
+	uint16_t limit = rom_u16(BN6_PA_STAR_LIMIT - 0x08000000u);
+	if (on && limit == 0x2A01) limit = BN6_PA_STAR_ANY;
+	if (emu_read8(0x08000000u + first) == (on ? CHIP_CODE_STAR : R.data[first]) && emu_read16(BN6_PA_STAR_LIMIT) == limit) return;
+	static const uint8_t star[4] = { CHIP_CODE_STAR, 0xFF, 0xFF, 0xFF };
+	for (uint32_t id = 1; id < PACK_CHIPS; ++id) {
+		uint32_t rec = R.layout->chip_data + 0x2Cu * id;
+		emu_write(0x08000000u + rec, on ? star : R.data + rec, sizeof star);
+	}
+	uint8_t b[2] = { (uint8_t)limit, (uint8_t)(limit >> 8) };
+	emu_write(BN6_PA_STAR_LIMIT, b, sizeof b);
+}
+
+/* (before the game's own NEW GAME, which counts the folder it gives in the
+ * pack by the records, and a boot state keeps it) */
+void director_before_boot(void) { star_records(false); }
+
+/* ... and the run's folder and pack in * as it begins (the folder it
+ * brought, the pack BN6's NEW GAME counted it in): each entry's code *,
+ * each chip's counts in its one code's */
+static void star_folder_pack(void) {
+	if (!run_all_star()) return;
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
+	for (uint32_t i = 0; data >= BN6_EWRAM && data < BN6_EWRAM_END && i < BN6_FOLDER_ENTRIES; ++i) {
+		uint16_t e = chip_entry_star(emu_read16(data + 2 * i));
+		uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
+		emu_write(data + 2 * i, b, sizeof b);
+	}
+	if (pack < BN6_EWRAM || pack + CHIP_PACK_ENTRY * PACK_CHIPS >= BN6_EWRAM_END) return;
+	for (uint32_t id = 1; id < PACK_CHIPS; ++id) {
+		uint8_t e[CHIP_PACK_ENTRY], was[CHIP_PACK_ENTRY];
+		for (uint32_t k = 0; k < CHIP_PACK_ENTRY; ++k) e[k] = was[k] = emu_read8(pack + CHIP_PACK_ENTRY * id + k);
+		chip_pack_star(e);
+		if (memcmp(e, was, sizeof e)) emu_write(pack + CHIP_PACK_ENTRY * id, e, sizeof e);
+	}
 }
 
 /* The profile's Library (docs/META.md) in the run's game: the PET's Library
@@ -1900,6 +1956,7 @@ bool director_start_run(void) {
 	set_start_folder();
 	library_to_game();
 	powers_bring(run.cross);
+	star_folder_pack();
 	note_folder_codes();
 	town_after_abandon = save_exists();
 	save_delete();
@@ -2823,10 +2880,7 @@ static uint32_t talk_walk(uint32_t keys) {
 
 /* Every chip's copies in the pack, summed (a chip bought adds one to its
  * code's count, the record's first four bytes); -1 where the pack is out of
- * reach. The standard, mega and giga chips only, the ones a shop or a
- * trader gives: past them lies other memory, a count of which a purchase
- * moved the other way (a BblStar2 bought read as no change). */
-#define PACK_CHIPS 314   /* (chip_pool.c's LAST_CHIP + 1) */
+ * reach. The standard, mega and giga chips only (PACK_CHIPS). */
 static int pack_total(void) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (pack < BN6_EWRAM || pack + 12u * PACK_CHIPS >= BN6_EWRAM_END) return -1;
@@ -3570,8 +3624,10 @@ bool director_start_layer(void) {
 	 * have set it, and no DarkChips but the dev flag's) */
 	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); dark_new_run(run.seed); }
 	else dark_begin(run.seed);
-	/* (and the Cross it brought at any depth, as a run has it there) */
+	/* (and the Cross it brought at any depth, as a run has it there, and
+	 * its chips in * with the All * helper) */
 	powers_bring(run.cross);
+	star_folder_pack();
 	note_folder_codes();
 	if (!new_layer(false)) return false;
 	lock_run();
@@ -3687,6 +3743,7 @@ bool director_resume(void) {
 		 * restocked both shops); another build's layer, afresh */
 		layer_objs_shops(&D.objs, same);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
+		star_folder_pack();
 		official_sync(true);
 		/* L starts over, its first words and then the rest at a second L:
 		 * the state kept that L had spoken, and a playtester's first L
@@ -4318,7 +4375,7 @@ static void guest_begin(void) {
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
 		fprintf(stderr, "guest: record %08X, its viruses %d HP, %d a hit at most (the act's band %d HP, %d a hit)\n", record, hp, dmg, b.hi, b.cap);
 	}
-	if (record) guest_battle(record, emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, dark);
+	if (record) guest_battle(record, emu_read16(BN6_NAVI_HP), emu_read16(BN6_NAVI_MAX_HP), folder, dark, run_all_star());
 }
 
 #define DUEL_GRACE 60   /* frames of a duel's fight before a hit counts against its no-hit rung */

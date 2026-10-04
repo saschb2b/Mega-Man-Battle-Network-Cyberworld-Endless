@@ -35,6 +35,7 @@
 #define BN5_CHIP_NAMES_HIGH 0x736AB8u /* ... and 256 on */
 #define BN5_CHIPS         424         /* its chip ids */
 #define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
+#define BN5_PA_STAR_LIMIT 0x080252B2u /* a Program Advance of one chip in codes in a row: cmp r2, #1, one * of its three at most, as BN6's (BN6_PA_STAR_LIMIT) */
 /* its DarkChips (docs/ROM_DATA.md, BN5 guest battles; .build research):
  * ids 187-198, folder chips as any, at most three in a folder (one of each) */
 #define BN5_DARK_FIRST    187

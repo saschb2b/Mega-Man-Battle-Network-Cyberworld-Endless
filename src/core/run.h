@@ -51,9 +51,16 @@ typedef struct {
 enum { RUN_ENDLESS, RUN_SHORT };
 #define SHORT_LAYERS 10
 #define THREAT_MAX 10
-enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4 };
+/* The helpers (docs/META.md), a bit each in run.helpers: two more
+ * HPMemory, a heal on every layer, gentler battles, every chip in * */
+enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4, HELP_ALL_STAR = 8 };
+#define HELPERS 4
 
 extern Run run;
+
+/* Whether every chip of the run comes in * alone (the All * helper): in
+ * the game, whose chip records then hold * alone, and in chip_info. */
+static inline bool run_all_star(void) { return (run.helpers & HELP_ALL_STAR) != 0; }
 
 void run_new(uint32_t seed);
 /* The net area that draws BN6 area `biome` in this run: its own, or

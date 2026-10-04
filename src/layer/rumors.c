@@ -69,8 +69,11 @@ static bool pa_fits(const Pa *a, const ChipInfo *ci, char c) {
 /* The code to tell it in, the folder's own first (run.codes; for kind 0, a
  * row of three letters holding one of them): a whisper told LifeSword in H
  * to a folder of Sword S and WideSwrd S, and all three come in S (session
- * 62); else the first that fits; 0 none. */
+ * 62); else the first that fits; 0 none. With the All * helper, *: every
+ * chip comes in it, and three of one in a row make kind 0's (the run's
+ * check takes three *, docs/META.md). */
 static char pa_code(const Pa *a) {
+	if (run_all_star()) return '*';
 	ChipInfo ci[4];
 	for (int i = 0; i < (a->kind == 4 ? a->n : 1); ++i) chip_info(a->chip[i], &ci[i]);
 	for (int k = 0; k < 3 && run.codes[k]; ++k) {
@@ -108,13 +111,13 @@ static const char *pa_line(uint32_t seed) {
 	for (int k = 0; k < n && pick < 0; ++k)
 		if (pa_code(&pa[k]) && pa_score(&pa[k]) == best && want-- == 0) pick = k;
 	const Pa *a = &pa[pick];
-	char c = pa_code(a);
+	char c = pa_code(a), c1 = c == '*' ? c : (char)(c + 1), c2 = c == '*' ? c : (char)(c + 2);
 	ChipInfo r, ci[4];
 	chip_info(a->result, &r);
 	for (int i = 0; i < (a->kind == 4 ? a->n : 1); ++i) chip_info(a->chip[i], &ci[i]);
 	if (a->kind == 0)
 		snprintf(line, sizeof line, "Psst! My operator sent %s %c, %s %c and %s %c, in that order...|And they turned into %s! A Program "
-			"Advance!", ci[0].name, c, ci[0].name, c + 1, ci[0].name, c + 2, r.name);
+			"Advance!", ci[0].name, c, ci[0].name, c1, ci[0].name, c2, r.name);
 	else if (a->n == 3)
 		snprintf(line, sizeof line, "Psst! My operator sent %s %c, %s %c and %s %c, in that order...|And they turned into %s! A Program "
 			"Advance!", ci[0].name, c, ci[1].name, c, ci[2].name, c, r.name);

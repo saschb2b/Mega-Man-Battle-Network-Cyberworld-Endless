@@ -110,6 +110,19 @@ const char *meta_threat_rule(int rung) {
 	return rung >= 1 && rung <= THREAT_MAX ? rules[rung - 1] : "";
 }
 
+const HelperInfo *meta_helper(int h) {
+	/* (All *: every chip in *, the wildcard, so a hand takes any chips
+	 * together and a Program Advance only its chips in their order,
+	 * docs/META.md; issue #18, a player put off by hunting codes) */
+	static const HelperInfo helpers[HELPERS] = {
+		{ "HP+", "Two more HPMemory at start", NULL },
+		{ "Heals", "A heal Prog on every layer", NULL },
+		{ "Gentle", "Gentler battles all along", NULL },
+		{ "All *", "Every chip in *: any five go in a hand", "P.A.s from their chips in order" },
+	};
+	return &helpers[h >= 0 && h < HELPERS ? h : 0];
+}
+
 
 static const char *said[6];
 static uint16_t marks_new;

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "data.h"
 #include "game.h"
 #include "net.h"
 #include "net_arena.h"
@@ -2011,6 +2012,51 @@ static void test_xsong(void) {
 	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
 }
 
+/* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
+ * view of a record (chip_info, which every reward, stock and prize takes
+ * its code from) holds * alone while the helper is on, and the record's own
+ * codes otherwise; a folder entry goes to *; a pack entry's four counts go
+ * to the first code's (the record's one, *), 99 at most, with an order stamp
+ * where the first had none. Records in a made-up ROM. */
+static void test_all_star(void) {
+	static RomLayout layout;
+	layout.chip_data = 0x1000;
+	layout.chip_names[0] = layout.chip_names[1] = 0x2000;
+	R.data = calloc(ROM_SIZE, 1);
+	R.layout = &layout;
+	if (!R.data) { CHECK(false, "all star: no memory for a made-up ROM"); return; }
+	static const uint8_t codes[3][4] = { { 0, 1, 2, 26 }, { 1, 3, 5, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF } };   /* Cannon's A B C *, B D F, none */
+	for (int i = 0; i < 3; ++i) memcpy(R.data + 0x1000 + 0x2C * (i + 1), codes[i], 4);
+	static const char *const own[3] = { "ABC*", "BDF", "" }, *const star[3] = { "*", "*", "" };
+	uint8_t was = run.helpers;
+	for (int on = 0; on < 2; ++on) {
+		run.helpers = (uint8_t)(on ? HELP_ALL_STAR | HELP_GENTLE : HELP_GENTLE);
+		for (int i = 0; i < 3; ++i) {
+			ChipInfo ci;
+			chip_info(i + 1, &ci);
+			const char *want = on ? star[i] : own[i];
+			CHECK(!strcmp(ci.codes, want) && ci.ncodes == (int)strlen(want), "all star %s: chip %d in \"%s\", not \"%s\"", on ? "on" : "off", i + 1,
+				ci.codes, want);
+		}
+	}
+	run.helpers = was;
+	free(R.data);
+	R.data = NULL;
+	R.layout = NULL;
+	CHECK(chip_entry_star(1 | 0 << 9) == (1 | 26 << 9) && chip_entry_star(72 | 18 << 9) == (72 | 26 << 9), "all star: a folder entry in *");
+	CHECK(chip_entry_star(0xFFFF) == 0xFFFF && chip_entry_star(0) == 0 && chip_entry_star(1 | 26 << 9) == (1 | 26 << 9), "all star: an empty entry, or one in *, kept");
+	uint8_t a[CHIP_PACK_ENTRY] = { 2, 1, 0, 3, 0x10, 0x7F, 0x20, 0x7F, 0, 0, 0x30, 0x7F };
+	chip_pack_star(a);
+	static const uint8_t a_want[CHIP_PACK_ENTRY] = { 6, 0, 0, 0, 0x10, 0x7F, 0, 0, 0, 0, 0, 0 };
+	CHECK(!memcmp(a, a_want, sizeof a), "all star: a pack entry's counts in its first code's, its stamp kept (%d %d %d %d)", a[0], a[1], a[2], a[3]);
+	uint8_t b[CHIP_PACK_ENTRY] = { 0, 0, 4, 0, 0, 0, 0, 0, 0x34, 0x12, 0, 0 };
+	chip_pack_star(b);
+	CHECK(b[0] == 4 && b[2] == 0 && b[4] == 0x34 && b[5] == 0x12 && !b[8] && !b[9], "all star: an empty first code takes the stamp of the code it takes");
+	uint8_t c[CHIP_PACK_ENTRY] = { 60, 50, 0, 0 };
+	chip_pack_star(c);
+	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -2031,6 +2077,7 @@ int main(void) {
 	test_xsong();
 	test_bug_cause();
 	test_xnavi();
+	test_all_star();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

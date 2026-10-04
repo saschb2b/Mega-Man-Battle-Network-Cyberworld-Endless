@@ -292,10 +292,9 @@ static void report_text(char *s, int size) {
 	ADD(" ScrtData: %d of 3%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ", the gate open" : "");
 	ADD(" You brought the %s folder%s", meta_folder(run.folder)->name, cross_words());
 	ADD(" Threat %d.", run.threat);
-	static const char *const helpers[3] = { "HP+", "Heals", "Gentle" };
-	if (run.helpers & 7) {
+	if (run.helpers & ((1 << HELPERS) - 1)) {
 		ADD(" Help:");
-		for (int h = 0; h < 3; ++h) if (run.helpers >> h & 1) ADD(" %s", helpers[h]);
+		for (int h = 0; h < HELPERS; ++h) if (run.helpers >> h & 1) ADD(" %s", meta_helper(h)->name);
 		ADD(".");
 	}
 	#undef ADD

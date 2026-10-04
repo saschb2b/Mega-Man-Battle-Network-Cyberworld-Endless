@@ -35,6 +35,16 @@
   battle opens on a plain white screen, which held long enough to read as
   a hang; those frames now run four at a time, unheard, and the field
   fades in as before.
+- **A fourth helper, All \*: every chip in \* (issue #18).** For players
+  who like the battles but not the hunt for codes: the JACK-IN SETUP's
+  Help row has All \* beside HP+, Heals and Gentle. With it every chip of
+  the run comes in \*, the wildcard: the starting folder, rewards, Mystery
+  Data, the Net Dealers' stock, trades, gifts, vaults and prizes, and the
+  chips in BN5's battles. Any five chips go in a hand, and every Program
+  Advance forms from its chips in order, the codes-in-a-row ones too
+  (three Cannons make GigaCan1, where BN6 itself takes one \* in such a
+  row). Off by default and chosen per run; Dad's dive report names it,
+  and like the other helpers it counts for unlocks.
 - **CircusMan's battle data says how fast his tent falls:** half a
   second after our panel lights, with no way out once down, so no long
   chip while he crackles on his panel.

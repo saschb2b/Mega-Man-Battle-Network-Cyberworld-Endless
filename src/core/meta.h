@@ -28,6 +28,16 @@ int meta_threat_open(void);
 /* What rung `rung` (1-THREAT_MAX) adds, a line. */
 const char *meta_threat_rule(int rung);
 
+typedef struct {
+	const char *name;    /* on the setup's Help row, the summary and Dad's dive report */
+	const char *about;   /* what it does, a line */
+	const char *more;    /* what else to know, a line under it, or NULL */
+} HelperInfo;
+
+/* Helper `h` (0 .. HELPERS-1: the bit 1 << h of run.helpers). The helpers
+ * are open from the start, off by default: an accessibility dial. */
+const HelperInfo *meta_helper(int h);
+
 /* The title's marks, BN6's own (its GetTitleScreenIconCount bits, drawn
  * with its sprites): each for a milestone here, never power. */
 enum {

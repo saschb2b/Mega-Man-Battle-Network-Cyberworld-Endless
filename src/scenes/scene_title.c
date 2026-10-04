@@ -340,10 +340,6 @@ static void marks_draw(int x0, int y0) {
  * to start from ---- */
 
 enum { ROW_NET, ROW_FOLDER, ROW_CROSS, ROW_THREAT, ROW_HELPERS, ROW_GO, ROWS };
-static const char *const helper_names[3] = { "HP+", "Heals", "Gentle" };
-static const char *const helper_about[3] = {
-	"Two more HPMemory at start", "A heal Prog on every layer", "Gentler battles all along",
-};
 
 /* the rows the last summary's unlocks are on (profile.setup_new) */
 static int row_new(int row) {
@@ -365,7 +361,7 @@ static void setup_open(void) {
 	S.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
 	S.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
 	S.threat = profile.last_threat <= meta_threat_open() ? profile.last_threat : meta_threat_open();
-	S.helpers = profile.last_helpers & 7;
+	S.helpers = profile.last_helpers & ((1 << HELPERS) - 1);
 	S.helper = 0;
 }
 
@@ -388,7 +384,7 @@ static void setup_update(void) {
 				if (!c || meta_cross_open(c)) { S.cross = c; break; }
 			}
 		if (S.row == ROW_THREAT) S.threat = (S.threat + d + meta_threat_open() + 1) % (meta_threat_open() + 1);
-		if (S.row == ROW_HELPERS) S.helper = (S.helper + d + 3) % 3;
+		if (S.row == ROW_HELPERS) S.helper = (S.helper + d + HELPERS) % HELPERS;
 		int now = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_CROSS ? S.cross : S.row == ROW_THREAT ? S.threat : S.helper;
 		if (now != was) audio_sfx(SFX_CURSOR);
 	}
@@ -447,9 +443,23 @@ static void note_more(int cx, int y, char lines[][48], int n) {
 	for (int i = 0; i < n; ++i, y += 12) text_draw(cx, y, lines[i], rgba(120, 140, 170, 255), TEXT_CENTER);
 }
 
+/* the helpers, each on or off (green or dim) along the Help row, the one
+ * the cursor is on underlined while the row is chosen */
+static void helpers_draw(int x0, int y, bool chosen) {
+	SDL_Color on = rgba(120, 255, 140, 255), dim = rgba(120, 140, 170, 255), orange = rgba(255, 170, 40, 255);
+	/* (each name's middle: four in the row from "Help" to the frame's edge,
+	 * All * beside Gentle, 8 pixels apart and 10 after "Help") */
+	static const int hxs[HELPERS] = { 78, 117, 167, 214 };
+	text_draw(x0 + 26, y, "Help", WHITE, TEXT_LEFT);
+	for (int h = 0; h < HELPERS; ++h) {
+		int hx = x0 + hxs[h];
+		text_draw(hx, y, meta_helper(h)->name, S.helpers >> h & 1 ? on : dim, TEXT_CENTER);
+		if (chosen && S.helper == h) fill_rect(hx - 16, y + 11, 32, 1, orange);
+	}
+}
+
 static void setup_draw(int x0, int y0) {
-	SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255), dim = rgba(120, 140, 170, 255);
-	SDL_Color on = rgba(120, 255, 140, 255), orange = rgba(255, 170, 40, 255);
+	SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255), orange = rgba(255, 170, 40, 255);
 	/* (four pixels wider each side than it was: "Storm: delete an Aqua
 	 * guardian" ran from edge to edge, a playtester's) */
 	fill_rect(x0 + 4, y0 + 6, CORE_W - 8, CORE_H - 12, rgba(66, 198, 231, 255));
@@ -481,15 +491,7 @@ static void setup_draw(int x0, int y0) {
 			static const char *const label[] = { "Net", "Folder", "Cross", "Threat" };
 			text_draw(lx + text_width(label[r]) + 6, y0 + ry[r], "NEW", gold, TEXT_LEFT);
 		}
-	/* the helpers, each on or off */
-	text_draw(lx, y0 + ry[ROW_HELPERS], "Help", WHITE, TEXT_LEFT);
-	static const int hxs[3] = { 100, 146, 196 };
-	for (int h = 0; h < 3; ++h) {
-		int hx = x0 + hxs[h];
-		bool set = S.helpers >> h & 1;
-		text_draw(hx, y0 + ry[ROW_HELPERS], helper_names[h], set ? on : dim, TEXT_CENTER);
-		if (S.row == ROW_HELPERS && S.helper == h) fill_rect(hx - 16, y0 + ry[ROW_HELPERS] + 11, 32, 1, orange);
-	}
+	helpers_draw(x0, y0 + ry[ROW_HELPERS], S.row == ROW_HELPERS);
 	/* jack in */
 	text_draw(cx, y0 + ry[ROW_GO], "JACK IN!", S.row == ROW_GO ? gold : WHITE, TEXT_CENTER);
 	/* the cursor: the PET's orange arrow */
@@ -530,7 +532,12 @@ static void setup_draw(int x0, int y0) {
 		if (!S.threat) note = meta_threat_open() ? "The net as it comes" : "The net as it comes. Win it for threat 1";
 		else note = meta_threat_rule(S.threat);
 		break;
-	case ROW_HELPERS: snprintf(buf, sizeof buf, "%s. A: on or off", helper_about[S.helper]); note = buf; break;
+	case ROW_HELPERS:
+		snprintf(buf, sizeof buf, "%s. A: on or off", meta_helper(S.helper)->about);
+		note = buf;
+		/* (and what else it changes: All *'s Program Advances) */
+		if (meta_helper(S.helper)->more) snprintf(locked[nlocked++], sizeof locked[0], "%s", meta_helper(S.helper)->more);
+		break;
 	default: note = "A: jack in. B: back"; break;
 	}
 	note_more(cx, y0 + 99 + note_line(cx, y0 + 97, note, sky) * 12, locked, nlocked);

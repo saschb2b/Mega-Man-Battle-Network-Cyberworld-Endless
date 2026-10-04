@@ -21,9 +21,10 @@ bool guest_start(int xrom);
  * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan at
  * `hp` of `max_hp`, the run's `folder` (30 BN6 entries, chip | code << 9;
  * NULL: the guest's own), each chip as its game's of the same name, and
- * its DarkChips (`dark`, counts by kind): from the next guest frame the
- * guest runs and BN6's core waits. */
-bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS]);
+ * its DarkChips (`dark`, counts by kind); with `star` (the All * helper)
+ * every chip in *, the rewards too: from the next guest frame the guest
+ * runs and BN6's core waits. */
+bool guest_battle(uint32_t record, int hp, int max_hp, const uint16_t *folder, const uint8_t dark[GUEST_DARK_KINDS], bool star);
 
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);

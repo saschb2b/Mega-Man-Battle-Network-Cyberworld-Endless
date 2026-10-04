@@ -67,9 +67,21 @@ extern const ChipDef chip_defs[];
 extern const int chip_def_count;
 const ChipDef *chip_def(int rom_id);
 
+/* Chip `rom_id`'s record: its name, power, elements and codes (with the All
+ * * helper, run_all_star, its * alone, as the game's record then has it). */
 void chip_info(int rom_id, ChipInfo *out);
 /* Chip `rom_id`'s description in BN6's words ("Cannon to attack 1 enemy"). */
 void chip_desc(int rom_id, char *out, size_t outlen);
+
+/* The All * helper's chips (docs/META.md), in BN6's own layouts: a folder
+ * entry (chip | code << 9) in *, an empty one as it is; and a pack entry
+ * (a count per code of the record's four, then four u16 order stamps), its
+ * counts in the first code's, 99 at most: with * the record's one code,
+ * the pack's every chip is counted there. */
+#define CHIP_CODE_STAR 26
+#define CHIP_PACK_ENTRY 12
+uint16_t chip_entry_star(uint16_t entry);
+void chip_pack_star(uint8_t e[CHIP_PACK_ENTRY]);
 /* Whether a chip strikes an enemy outright: the record's lock-on setting
  * (0xF) is 1 for Cannon, the swords, bombs and the like, 0 for traps,
  * counters and the ones that need a stunned or paralysed enemy

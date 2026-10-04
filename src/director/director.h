@@ -12,6 +12,9 @@
 bool director_start_layer(void);
 /* A new run: Lan in the town, the first layer built for the port's jack-in. */
 bool director_start_run(void);
+/* The core's ROM copy as the game's own NEW GAME needs it (before its boot):
+ * the chip records the All * helper changed for a run before, put back. */
+void director_before_boot(void);
 /* Lan is still in the town. */
 bool director_in_town(void);
 /* A run is under way on the layers (it has been saved). */
