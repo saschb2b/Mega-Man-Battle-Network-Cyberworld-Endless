@@ -2172,3 +2172,51 @@ pointed at nothing. Likewise a rate that feels wrong (battles) is
 traced on a build of the session's own commit, printing the game's
 counter at each event, before any tuning. And patch notes state a
 change's limits as plainly as the change.
+
+## Session 67: one at a time (kai4 7/10; would keep playing and recommend it, with a warning)
+
+kai4 CONTINUEd its side run on layer 2 of BN5's ACDC Area (the layer
+laid out anew, 40/100) and played to the act's end: L named the flame of
+darkness with its way and the map marked it, so it was found in minutes
+and DrkSonic taken; three BN5 battles came 3000 to 3500 frames apart; the
+Net Dealer's Aqua tip (TrnArrw3) won the BN6 guardian, BlastMan, in his
+own engine with HeatCross back. Saved beside layer 3's exit pad, 220/320,
+the split answered Lab Comps (SpoutMan) by a paging A.
+
+Confirmed: the flame always stands and is named and marked; BN5's
+encounter walk starts over after each battle (last session's back to
+back battles gone); MegaMan's older-net and no-Crosses line; L and the
+arrow straight to the exit pad after the Guardian Data; CONTINUE
+restarting the layer with HP, folder and zenny kept; BN5 results' zenny
+as paid.
+
+Raised and fixed in the iteration: the DarkChip that never came at 10 of
+120 HP (BN5 opened every battle calm, its mood set back by BN5 at the
+battle's intro; a battle now opens as worried as his HP says, and the
+flame's words say when); the banner's "From where you left off" over a
+restarted layer (it now says the layer started over); the no-Crosses
+line before a guardian fought with HeatCross (MegaMan now says the
+guardians fight in BN6's own engine); the split answered by a paging A
+(a persona note: page the Guardian Data's chat to its choices with the
+menu in view). Beside them, from s66: the chips that sit out named
+before the first battle, the run's buster in BN5's battles.
+
+Open: DiveMan D's waves through a hovering BlastMan for 0 (to check in
+BN6 itself before anything); walkway mouths and band corners (14 calls);
+the flame's question repeating its six boxes on a No; L's second words
+repeating the first's heal and exit; BN5's battles paying zenny three
+times running (half its chip rewards now come in the folder's codes).
+
+Misreads: none.
+
+Cost: 275 calls of one persona.
+
+Loop change: **the headline's ground is checked against the save's way
+on, not only its layer.** kai4's run left BN5 territory at the split:
+CONTINUE leads into Lab Comps, BN6's, where none of the BN5 work of the
+next iteration (its guardians and Souls, the DarkChip's worry) can show.
+A side profile kept for one feature starts its next run where the
+feature is: the seed scanned for it (`--scene emu --run-depth 1 --setup
+...` with `--seed`, the area read from the state, a guardian's coin
+computed from run.c, as the state hides his name till he is met), the
+run it leaves kept beside it (`data-runN`).
