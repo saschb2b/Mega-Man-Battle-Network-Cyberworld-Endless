@@ -8,6 +8,7 @@
 
 int16_t route_walk[MAP_W * MAP_H];
 int route_walk_len, route_walk_aim = -1;
+uint64_t route_gone;
 static double way_eighths;   /* the last way, in eighths, not rounded */
 
 static bool floor_at(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
@@ -272,16 +273,17 @@ static int least_turns(int sx, int sy, int tx, int ty) {
 	return n;
 }
 
-/* What stands on the floor, into solid, but the target (tx, ty): the walk
- * goes round it (it keeps every panel in reach, test_core.c), as the
- * arrow led into a Mystery Data at a walkway's mouth. MegaMan beside one,
- * in its panel's corner: the walk from the free panel nearest him, *sx
- * and *sy (from the object's own it led through it, and he pushed into it
- * for good). */
+/* What stands on the floor (but what is gone, route_gone), into solid,
+ * but the target (tx, ty): the walk goes round it (it keeps every panel in
+ * reach, test_core.c), as the arrow led into a Mystery Data at a walkway's
+ * mouth. MegaMan beside one, in its panel's corner: the walk from the free
+ * panel nearest him, *sx and *sy (from the object's own it led through
+ * it, and he pushed into it for good). */
 static void floor_objects(double px, double py, int tx, int ty, int *sx, int *sy) {
 	memset(solid, 0, sizeof solid);
 	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].solid && floor_at((int)layer.obj[i].x, (int)layer.obj[i].y)) solid[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
+		if (layer.obj[i].solid && !(route_gone >> i & 1) && floor_at((int)layer.obj[i].x, (int)layer.obj[i].y))
+			solid[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
 	solid[ty][tx] = 0;
 	if (solid[*sy][*sx]) {
 		double best = 1e9;

@@ -15,6 +15,11 @@
 /* The pad's way of a step (dx, dy) on the grid. */
 int route_grid_way(double dx, double dy);
 
+/* The layer's objects gone from its floor (bit i: layer.obj[i]), as a
+ * Mystery Data taken: route_way walks through their panels. Whoever asks
+ * for the way sets it first; 0 takes every object as standing. */
+extern uint64_t route_gone;
+
 /* The way along the floor from MegaMan at (px, py) to panel (tx, ty),
  * around the layer's solid objects; -1 when either is off the floor. *len:
  * the walk's panels. */

@@ -70,6 +70,13 @@
   (three Cannons make GigaCan1, where BN6 itself takes one \* in such a
   row). Off by default and chosen per run; the run's summary and Dad's
   dive report name it, and like the other helpers it counts for unlocks.
+- **Once the Guardian Data is taken, the arrow and L lead straight to the
+  exit pad.** The way on still went round the panel where the guardian
+  had stood: three panels from the new pad, on the same floor, L said
+  "the exit lies down and to the left, but the way winds" and the arrow
+  pointed up. The way now goes through panels left empty: a guardian's
+  once his Guardian Data is taken, and a Mystery Data's once it is
+  opened.
 - **Beside a walkway's mouth, the arrow shows the way that walks MegaMan
   in.** Standing off a walkway's line at its mouth, the arrow pointed
   across onto the line. Held briefly, that moved him a few steps along

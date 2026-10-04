@@ -392,6 +392,21 @@ static const char *town_way(int *far) {
 	return way;
 }
 
+/* What is gone from the layer's floor, for the walk round what stands on
+ * it (route_gone): each Mystery Data taken, and the guardian once his
+ * Guardian Data, where he stood, is taken. The walk went round his empty
+ * panel to the exit pad shown behind it: the arrow pointed up, away from
+ * a pad three panels down on the same floor, and L said the way wound
+ * (session 65). */
+static void route_floor(void) {
+	uint64_t gone = 0;
+	for (int k = 0; k < D.objs.nmd; ++k)
+		if (flag_get(MAPSLOT_MD_FLAG + k)) gone |= 1ull << D.objs.md_obj[k];
+	for (int i = 0; i < layer.nobj && boss_done(); ++i)
+		if (layer.obj[i].type == OBJ_BOSS) gone |= 1ull << i;
+	route_gone = gone;
+}
+
 /* The way on along the floor, not as the crow flies (net_route.c), and
  * how far that walk is. NULL when either end is off the floor. */
 static const char *route_to(int tx, int ty, int *far) {
@@ -400,6 +415,7 @@ static const char *route_to(int tx, int ty, int *far) {
 	int ex, ey, len;
 	netmap_grid(px, py, &gx, &gy);
 	if (!netmap_panel(tx, ty, &ex, &ey)) return NULL;
+	route_floor();
 	int w = route_way(gx, gy, ex, ey, &len);
 	if (w < 0) return NULL;
 	*far = far_of(len);
@@ -2176,6 +2192,7 @@ static void map_way(const MapView *m, int px, int py) {
 	if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
 	double wx, wy;
 	netmap_grid(px, py, &wx, &wy);
+	route_floor();
 	if (!netmap_panel(tx, ty, &ex, &ey) || route_way(wx, wy, ex, ey, &len) < 0) return;
 	int cx = m->mx, cy = m->my, k = route_walk_len - 1;
 	while (k >= 0) {

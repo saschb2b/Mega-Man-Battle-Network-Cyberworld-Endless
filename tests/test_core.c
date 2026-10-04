@@ -1662,6 +1662,59 @@ static void test_arrow_mouths(void) {
 		spots, bands, misses);
 }
 
+/* eighths apart of two of the pad's ways (0-4) */
+static int ways_apart(int a, int b) {
+	int d = abs(a - b) % 8;
+	return d > 4 ? 8 - d : d;
+}
+
+/* The guardian's Guardian Data taken, the exit pad shows behind where he
+ * stood (sixty guardian layers of every area): from beside his panel,
+ * where MegaMan stands having taken it, and where a straight line over
+ * the floor reaches the pad, the arrow's way keeps within an eighth of
+ * the line to it, so L does not say the way winds, once the guardian is
+ * gone from the floor (route_gone). The walk went round his empty panel:
+ * L said "The exit lies down and to the left, but the way winds", and the
+ * arrow pointed up, the pad three panels down on the arena's floor
+ * (session 65). */
+static void test_guardian_gone(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	static const int d8[8][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
+	int spots = 0, winds = 0, wound = 0;   /* (wound: as if he still stood there) */
+	for (int b = 0; b < BIOME_COUNT; ++b)
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			layer_generate(seed * 104729u + (uint32_t)b, 6, b, LAYER_NORMAL, &kit);
+			int gi = -1, ex = -1, ey = -1;
+			for (int i = 0; i < layer.nobj; ++i) {
+				if (layer.obj[i].type == OBJ_BOSS) gi = i;
+				if (layer.obj[i].type == OBJ_EXIT || layer.obj[i].type == OBJ_RETURN) { ex = (int)layer.obj[i].x; ey = (int)layer.obj[i].y; }
+			}
+			if (gi < 0 || ex < 0) continue;
+			int gx = (int)layer.obj[gi].x, gy = (int)layer.obj[gi].y;
+			for (int k = 0; k < 8; ++k) {
+				double x = gx + 0.6 * d8[k][0], y = gy + 0.6 * d8[k][1];
+				int len, cx = (int)lround(x), cy = (int)lround(y), lie = route_grid_way(ex - x, ey - y);
+				if (!walk_on(x, y) || walk_blocked(x, y, gx, gy) || abs(cx - ex) + abs(cy - ey) <= 1) continue;
+				route_gone = 0;
+				int stood = route_way(x, y, ex, ey, &len);
+				route_gone = 1ull << gi;
+				int gone = route_way(x, y, ex, ey, &len);
+				bool line = gone >= 0 && route_floor_line(cx, cy, ex, ey);
+				route_gone = 0;
+				if (stood < 0 || !line) continue;
+				++spots;
+				wound += ways_apart(stood, lie) >= 2;
+				if (ways_apart(gone, lie) >= 2 && ++winds <= 5)
+					printf("  area %d seed %u: at %.1f,%.1f beside the guardian's panel, the arrow's way %d against the line %d to the exit pad\n", b, seed, x, y,
+						gone, lie);
+			}
+		}
+	CHECK(winds == 0, "the guardian gone, the way to the exit pad winds from beside his panel at %d of %d spots", winds, spots);
+	printf("  guardian gone: %d spots beside his panel in a straight line to the exit pad, the way winding at %d (him standing: %d)\n", spots, winds, wound);
+}
+
 /* The walk from the arrival to the exit (or the guardian) in every area:
  * its legs, the straight runs of two panels or more, fewer than eleven on
  * average. The Aquarium's and Judge Tree's catwalk mazes took 16 against
@@ -2211,6 +2264,7 @@ int main(void) {
 	test_arrow();
 	test_arrow_areas();
 	test_arrow_mouths();
+	test_guardian_gone();
 	test_walks();
 	test_way_links();
 	test_navicust();
