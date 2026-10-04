@@ -15,6 +15,7 @@
 #include "layer_make.h"
 #include "navicust.h"
 #include "pacing.h"
+#include "qr.h"
 #include "rom.h"
 #include "run.h"
 #include "area_src.h"
@@ -2416,6 +2417,36 @@ static void test_darkchips(void) {
  * ta_rom_pages; a BBS post of BN6's said by a bystander, docs/META.md): its
  * BBS positioning left out, its characters, breaks, waits and clears kept to
  * its hold; anything else, or no hold, refused. A made-up archive. */
+/* The intro's QR code (scene_intro.c): the project's address in version 4,
+ * its finders and timing where the standard puts them, and module for
+ * module the code the site's qr.js makes (the hashes are of qr.js's
+ * modules: a 3DS release link takes version 6, two blocks); a text too
+ * long for version 10 makes none. */
+static uint32_t qr_hash(const uint8_t *m, int n) {
+	uint32_t h = 2166136261u;
+	for (int i = 0; i < n * n; ++i) { h ^= m[i]; h *= 16777619u; }
+	return h;
+}
+
+static void test_qr(void) {
+	static uint8_t m[QR_MAX * QR_MAX];
+	int n = qr_make("https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless", m);
+	CHECK(n == 33, "the repository's address in %d modules a side, not version 4's 33", n);
+	for (int i = 0; i < 7 && n == 33; ++i) {
+		bool ring = i == 0 || i == 6;
+		CHECK(m[i] == 1 && m[i * n] == 1 && m[i * n + n - 1] == 1, "a finder's outer ring broken at %d", i);
+		CHECK(m[n + i] == ring, "the top-left finder's second row wrong at %d", i);
+	}
+	for (int i = 8; i < n - 8 && n == 33; ++i) CHECK(m[6 * n + i] == (i % 2 == 0), "the timing row wrong at %d", i);
+	CHECK(qr_hash(m, n) == 0x14B2F150u, "the repository's code differs from qr.js's: %08X", qr_hash(m, n));
+	n = qr_make("https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/cyberworld-endless.cia", m);
+	CHECK(n == 41 && qr_hash(m, n) == 0xEEADAA46u, "a release link's code differs from qr.js's: %d, %08X", n, qr_hash(m, n));
+	char longer[300];
+	memset(longer, 'x', sizeof longer - 1);
+	longer[sizeof longer - 1] = 0;
+	CHECK(qr_make(longer, m) == 0, "299 bytes fit no version up to 10");
+}
+
 static void test_rom_pages(void) {
 	const uint8_t arch[] = {
 		4, 0, 6, 0,                                      /* two scripts, at 4 and 6 */
@@ -2456,6 +2487,7 @@ int main(void) {
 	test_talk();
 	test_touch();
 	test_xsong();
+	test_qr();
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();
