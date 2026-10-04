@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **An act's card and L say where battles are BN5's.** In BN5's areas the
+  act's card reads "Act 1 - older net battles", and L's first words name
+  the area "where battles run the older net's way", so a territory is
+  known before its first battle (issue #65).
 - **BN5's areas bring their battles as BN6's areas do.** BN6's chance of
   a battle rises with the walk since the last one, and only entering the
   map a battle returns to set it back: a battle in BN5's engine never

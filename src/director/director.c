@@ -961,7 +961,7 @@ static void here_scan(Here *h) {
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	ADD("@M Layer %d, Lan: %s.", run.depth, area);
+	ADD("@M Layer %d, Lan: %s%s.", run.depth, area, encounter_guest ? ", where battles run the older net's way" : "");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */
@@ -1086,7 +1086,7 @@ static const char *status_words(void) {
 }
 
 static void area_card(void) {
-	char act[32];
+	char act[48];
 	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
 	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "Through a dark warp");
 	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "Beyond the sealed gate");
@@ -1111,6 +1111,13 @@ static void area_card(void) {
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())
 		snprintf(ahead, sizeof ahead, "%s deleted", guardian(D.objs.guardian.navi)->name);
+	/* (and where its battles are another game's, so: the owner's call for
+	 * issue #65, the card and L saying it, no card of its own at the
+	 * switch) */
+	if (encounter_guest) {
+		size_t k = strlen(act);
+		snprintf(act + k, sizeof act - k, " - older net battles");
+	}
 	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), ahead[0] ? ahead : NULL, rgba(120, 200, 248, 255), 200);
 }
 
