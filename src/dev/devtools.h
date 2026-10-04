@@ -20,6 +20,8 @@ typedef struct {
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
 	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a guest battle begun hurt); 0 the max */
 	bool mapall;    /* the layer's map whole, as if every panel were seen (a capture of the map: tools/before_after.py) */
+	int folder;     /* folder=ID: the run's folder all chip ID in * (a capture of one chip's battles, the first hand all of it); 0 none */
+	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
 } DevFlags;
 
 extern DevFlags dev;

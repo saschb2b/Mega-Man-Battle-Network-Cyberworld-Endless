@@ -57,6 +57,11 @@ void devtools_parse(const char *spec) {
 		else if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);
+		else if (!strncmp(t, "folder=", 7)) {
+			char *end;
+			dev.folder = (int)strtol(t + 7, &end, 0);
+			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
+		}
 		else if (!strcmp(t, "worried")) guest_dev_worried = true;
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
 	}

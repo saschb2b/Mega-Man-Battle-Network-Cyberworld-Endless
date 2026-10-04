@@ -58,6 +58,14 @@ void ta_pages(TextArchive *t, const char *boxes, int face, bool *first);
 int ta_talk(TextArchive *t, const char *boxes, int face);
 /* The same, one box (or as many as `s` fills). */
 int ta_say(TextArchive *t, int face, const char *s);
+/* Script `i` of one of the game's own text archives (`a`, `n` bytes: u16
+ * offsets, then the scripts) as a chat box on the map says it, read from
+ * the player's ROM, never written into the code: its characters, line
+ * breaks, waits and page clears into `out` (`max` bytes at most), the
+ * positioning it has for another screen (ts_position_text and _arrow, a
+ * BBS post's) left out, to its hold (ts_wait_hold); how many bytes, 0
+ * where it holds anything else or overruns. */
+int ta_rom_pages(const uint8_t *a, int n, int i, uint8_t *out, int max);
 /* The archive's bytes (u16 offsets, then the scripts) into `out`
  * (TEXT_ARCHIVE_MAX bytes); returns their length. */
 #define TEXT_ARCHIVE_MAX (TEXT_MAX_SCRIPTS * 2 + TEXT_MAX_BYTES)

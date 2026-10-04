@@ -8,8 +8,9 @@
 #include "foes.h"
 
 /* Makes the game's encounter roll return the engine's battle settings, and
- * hooks its battles: their start (EV_BATTLE_START, events.h) and their
- * rewards, picked in the folder's codes half the time (docs/META.md). */
+ * hooks its battles: their start (EV_BATTLE_START, events.h), their
+ * rewards, picked in the folder's codes half the time, and a DarkChip's
+ * dark power as it runs (darkbn6.h; docs/META.md). */
 void emu_encounters_install(void);
 /* The battle the next encounter starts: enemies, area background and music. */
 void emu_encounter_set(const Encounter *e);

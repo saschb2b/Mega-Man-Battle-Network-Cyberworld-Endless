@@ -32,6 +32,7 @@
 #include "gamecall.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "darkbn6.h"
 #include "darkchips.h"
 #include "guest.h"
 #include "layer_objs.h"
@@ -161,6 +162,7 @@ static struct {
 	int recode_chip, recode_from, recode_to;   /* the chip, and its codes out here and in there */
 	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
 	bool dark_given;       /* ... and the run holds it */
+	bool dark_pack_due;    /* BN6's chips of the run's DarkChips are looked for in its Pack and folder, given where missing (dark_pack) */
 	char dark_words[360];  /* MegaMan's words on a DarkChip's price (and a fall it rose from), due ("" none) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
@@ -1880,8 +1882,11 @@ static bool new_layer(bool leaving) {
 	/* (no battle watched: a duel's, left by a battle never finished) */
 	emu_battle_unwatch();
 	/* (the chip records as the run's helpers have them, in the ROM copy,
-	 * which a state does not hold) */
+	 * which a state does not hold; BN6's own DarkChips' made whole there,
+	 * and looked for in the Pack once on the map) */
 	star_records(run_all_star());
+	darkbn6_records();
+	D.dark_pack_due = true;
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	bool ok = build_layer();
 	build_ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -1907,6 +1912,17 @@ static void own_folder_chips(void) {
 		int id = emu_read16(data + 2u * (uint32_t)i) & 0x1FF;
 		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
 	}
+}
+
+/* (dev: folder=ID, the run's folder all chip ID in *, owned as the folder's
+ * chips are: a capture of one chip's battles, the first hand all of it;
+ * folder=ID/N its first N entries) */
+static void dev_folder(void) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (dev.folder <= 0 || dev.folder >= 0x200 || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
+	uint8_t e[2] = { (uint8_t)dev.folder, (uint8_t)(dev.folder >> 8 | CHIP_CODE_STAR << 1) };
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && (int)i < dev.folder_n; ++i) emu_write(data + 2 * i, e, sizeof e);
+	own_folder_chips();
 }
 
 /* The chips a folder holds, the standard, mega and giga ones, the ones a
@@ -2059,6 +2075,7 @@ bool director_start_run(void) {
 	set_start_folder();
 	library_to_game();
 	powers_bring(run.cross);
+	dev_folder();
 	star_folder_pack();
 	note_folder_codes();
 	town_after_abandon = save_exists();
@@ -3753,6 +3770,7 @@ bool director_start_layer(void) {
 	/* (and the Cross it brought at any depth, as a run has it there, and
 	 * its chips in * with the All * helper) */
 	powers_bring(run.cross);
+	dev_folder();
 	star_folder_pack();
 	note_folder_codes();
 	if (!new_layer(false)) return false;
@@ -4130,12 +4148,14 @@ static bool follow_exit_warp(void) {
  * undernet gate; intro defeat reward for its guardian; status for L;
  * fragment, what MegaMan says as its ScrtData is picked up), for captures. */
 /* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
- * wants ten), an Unlocker, three RushFood, a WWW-ID (the set pieces'
- * keys), 10000 zenny (a cube's toll), a RegUP3 (+3 MB of Reg memory). */
+ * wants ten) or one (a DarkChip's last, BN6's own), an Unlocker, three
+ * RushFood, a WWW-ID (the set pieces' keys), 10000 zenny (a cube's toll), a
+ * RegUP3 (+3 MB of Reg memory). */
 static void guest_begin(void);
 
 static bool dev_gift(const char *name) {
 	if (!strcmp(name, "bugfrags")) game_call(BN6_GIVE_BUGFRAGS, 50, 0);
+	else if (!strcmp(name, "bugfrag")) game_call(BN6_GIVE_BUGFRAGS, 1, 0);
 	else if (!strcmp(name, "zenny")) devtools_zenny();
 	else if (!strcmp(name, "keys")) game_call(BN6_GIVE_ITEM | 1u, SUB_UNLOCKER, 1);
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
@@ -4252,27 +4272,79 @@ static void end_run(void) {
 	scene_set(&scene_title);
 }
 
-/* A battle a DarkChip was used in: one HPMemory of max HP, for the rest of
- * the run (the owner's price, docs/META.md), from the base the game counts
- * HPMemory into, so the NaviCust's next RUN keeps it; MegaMan says so, the
- * whole of it the first time in a session (dark_price_told). */
-static void dark_price(void) {
-	int base = emu_read16(BN6_NAVI_BASE_MAX_HP), max = emu_read16(BN6_NAVI_MAX_HP), hp = emu_read16(BN6_NAVI_HP);
-	uint16_t v[3];
-	v[0] = (uint16_t)(base > DARK_PRICE + 10 ? base - DARK_PRICE : 10);
-	v[2] = (uint16_t)(max - (base - v[0]));
-	v[1] = (uint16_t)(hp > v[2] ? v[2] : hp);
-	emu_write(BN6_NAVI_BASE_MAX_HP, &v[0], 2);
-	emu_write(BN6_NAVI_HP, &v[1], 2);
-	emu_write(BN6_NAVI_MAX_HP, &v[2], 2);
-	if (emu_debug_on()) fprintf(stderr, "dark: a DarkChip used: max HP %d -> %d (base %d -> %d), HP %d\n", max, v[2], base, v[0], v[1]);
-	char words[200];
-	if (!dark_price_told)
+/* A battle a DarkChip's dark power ran in, in either net: one HPMemory of
+ * max HP, for the rest of the run (the owner's price, docs/META.md), from
+ * the base the game counts HPMemory into, so the NaviCust's next RUN keeps
+ * it; MegaMan says so, the whole of it the first time in a session
+ * (dark_price_told), and after a profile's first such battle of BN6's own
+ * (`bn6`) what BN6's darkness took besides: the BugFrags it burnt, the bug
+ * gone with the battle. */
+static void dark_price(bool bn6) {
+	int base = emu_read16(BN6_NAVI_BASE_MAX_HP), max = emu_read16(BN6_NAVI_MAX_HP), hp = emu_read16(BN6_NAVI_HP), v[3];
+	dark_price_hp(base, max, hp, v);
+	uint16_t w[3] = { (uint16_t)v[0], (uint16_t)v[1], (uint16_t)v[2] };
+	emu_write(BN6_NAVI_BASE_MAX_HP, &w[0], 2);
+	emu_write(BN6_NAVI_HP, &w[2], 2);
+	emu_write(BN6_NAVI_MAX_HP, &w[1], 2);
+	if (emu_debug_on()) fprintf(stderr, "dark: a DarkChip used: max HP %d -> %d (base %d -> %d), HP %d\n", max, v[1], base, v[0], v[2]);
+	char words[300];
+	if (bn6 && !(profile.dark6_taught & DARK6_PRICE_TAUGHT)) {
+		snprintf(words, sizeof words, "@M That DarkChip burned a BugFrag each time, Lan, and its darkness bugged me till the battle ended. "
+			"That bug's gone now.|@M But it took something that stays: my max HP fell by %d, and it won't come back this dive.", base - v[0]);
+		profile.dark6_taught |= DARK6_PRICE_TAUGHT;
+		profile_save();
+	} else if (!dark_price_told)
 		snprintf(words, sizeof words, "@M That DarkChip took something from me, Lan... My max HP fell by %d, and it won't come back this dive.",
 			base - v[0]);
 	else snprintf(words, sizeof words, "@M The DarkChip took %d more max HP, Lan.", base - v[0]);
 	snprintf(D.dark_words, sizeof D.dark_words, "%s", words);
 	dark_price_told = true;
+}
+
+/* After a BN6 battle (docs/META.md, BN6's own DarkChips): where a
+ * DarkChip's dark power ran, its price; else, where one ran as its base
+ * chip for want of a BugFrag, MegaMan says so, once a session (a Sword's
+ * 80 where the card had read DrkSword's 400 from the battle's start, or
+ * since its last BugFrag). */
+static bool dark_base_told;
+static void dark6_after_battle(void) {
+	unsigned ran = darkbn6_ran_take(), base = darkbn6_base_take();
+	if (ran) { dark_price(true); return; }
+	if (!base || dark_base_told) return;
+	int d = 0;
+	while (d < DARK_BN6_COUNT - 1 && !(base >> d & 1)) ++d;
+	ChipInfo dc, bc;
+	chip_info(DARK_BN6_FIRST + d, &dc);
+	chip_info(darkbn6_base(DARK_BN6_FIRST + d), &bc);
+	snprintf(D.dark_words, sizeof D.dark_words, "@M We had no BugFrags, Lan... With none to burn, that %s was only a %s.", dc.name, bc.name);
+	dark_base_told = true;
+}
+
+/* A chip's copies in the Pack and the folder, -1 where they cannot be read */
+static int chip_held(int id) {
+	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (pack < BN6_EWRAM || pack + 12u * PACK_CHIPS >= BN6_EWRAM_END || data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;
+	int n = 0;
+	for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + 12u * (uint32_t)id + k);
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) n += (emu_read16(data + 2 * i) & 0x1FF) == (uint32_t)id;
+	return n;
+}
+
+/* BN6's chips of the run's DarkChips (docs/META.md, BN6's own DarkChips):
+ * one a flame of either net gave, a dev run's, or one a run held from
+ * before BN6's own came in, given to the Pack where neither it nor the
+ * folder holds it; once on the map, with no chat open. DarkPlus stays out
+ * of BN6's battles. */
+static void dark_pack(void) {
+	if (!D.dark_pack_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy()) return;
+	D.dark_pack_due = false;
+	for (int k = 0; k < DARK_KINDS; ++k) {
+		int id = dark_bn6_id(k);
+		if (!id || !dark_count(k) || chip_held(id) != 0) continue;
+		uint32_t out[2];
+		game_call_ret(BN6_GIVE_CHIPS, (uint32_t)id, CHIP_CODE_STAR, 1, out);
+		if (emu_debug_on()) fprintf(stderr, "dark: BN6's DarkChip %d to the Pack\n", id);
+	}
 }
 
 /* MegaMan fell in an older net's battle after a DarkChip, and BN5 got him
@@ -4371,7 +4443,7 @@ void director_guest_done(const GuestResult *r) {
 	if (!profile.guest_taught) D.guest_due = 1 + out_names(D.guest_out, sizeof D.guest_out);
 	guest_recode_note(r);
 	dark_set_counts(r->dark);
-	if (r->dark_used) dark_price();
+	if (r->dark_used) dark_price(false);
 	if (r->dark_rose) dark_rose_said();
 	/* (what its results screen gave: BN6's chip of the same name to the
 	 * Pack, or zenny) */
@@ -4615,7 +4687,10 @@ static void take_events(void) {
 	bool on_layer = D.active && !D.town;
 	for (int i = 0; i < n; ++i)
 		switch (ev[i].kind) {
-		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; emu_encounter_started(ev[i].r[0]); break;
+		case EV_BATTLE_START: D.battle_record = ev[i].r[0]; emu_encounter_started(ev[i].r[0]); darkbn6_battle_begins(); break;
+		/* (a DarkChip's dark power, or its base chip, in a BN6 battle: its
+		 * price after it, docs/META.md) */
+		case EV_DARK_RAN: case EV_DARK_BASE: darkbn6_event(&ev[i]); break;
 		/* (not in the fight's first second: a Chumpy rammed a playtester at
 		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
 		 * lost before he could act, session 65) */
@@ -4631,10 +4706,13 @@ static void take_events(void) {
 		}
 }
 
-/* The events queued before the run (the boot's), dropped. */
+/* The events queued before the run (the boot's), dropped, and a last run's
+ * battle's dark power (a GAME OVER never came back to the map to pay it). */
 static void drop_events(void) {
 	HookEvent ev[32];
 	while (emu_hook_events(ev, 32) == 32) {}
+	darkbn6_battle_begins();
+	dark_base_told = false;
 }
 
 /* Rush's gap (issue #14), named the first time MegaMan comes near its
@@ -4705,6 +4783,11 @@ static void words_due(void) {
 	pack_words();
 	guest_words();
 	dark_flame_watch();
+	/* (BN6's own DarkChips: in the Pack, their power as the BugFrags held
+	 * say, the price of a battle their dark power ran in) */
+	dark_pack();
+	darkbn6_sync();
+	dark6_after_battle();
 	if (D.dark_words[0] && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && talk_start(D.dark_words, FACE_MEGAMAN))
 		D.dark_words[0] = 0;
 }

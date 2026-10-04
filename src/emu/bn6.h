@@ -270,6 +270,40 @@
 #define BN6_SUBTRACT_HP       0x0800E2D8u /* object_subtractHP: r5 the BattleObject, r0 the damage (every object's, every frame, mostly 0) */
 #define BN6_REWARD_PICK       0x080AC180u /* bn6f sub_80AA910 (Falzar + 0x1870), as a battle ends: r0 the enemies' u16 ids, r1 their count */
 
+/* BN6's own DarkChips (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md;
+ * issue #70): a chip record's fields (RomLayout.chip_data, 0x2C bytes an
+ * id; bn6f ChipData), the routines every chip use runs, the battle's
+ * BugFrags (Gregar's as Falzar's) */
+#define BN6_CHIP_RECORD_SIZE  0x2C
+#define BN6_CHIP_EFFECT_FLAGS 0x09        /* EffectFlags: BN6_CHIP_DARK_CLASS makes a DarkChip (the folder's three, MegaMan's NAVIGATOR line, the purple card) */
+#define BN6_CHIP_SUBFAMILY    0x0C        /* AttackSubFamily: a recovery chip's amount (BN6_RECOVERY_AMOUNTS), a sword's area */
+#define BN6_CHIP_LIBRARY_FLAGS 0x16       /* LibraryFlags: BN6_CHIP_UNLISTED keeps a chip out of the pack's list (bn6f sub_811FE7C) */
+#define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
+#define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
+#define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f
+                                             sub_811FCB8, sub_811FE7C); 0 on the five DarkChips, so it took any two for one chip and skipped its limits */
+#define BN6_CHIP_DARK_ID      0x1F        /* DarkChipID: 0-4 BN6's five DarkChips, 0xFF any other chip */
+#define BN6_CHIP_ICON_PTR     0x20        /* ChipIconPtr, then ChipImagePtr and ChipPalettePtr: the hand's icon, the card's picture */
+#define BN6_CHIP_IMAGE_PTR    0x24
+#define BN6_CHIP_PALETTE_PTR  0x28
+#define BN6_CHIP_DARK_CLASS   0x20
+#define BN6_CHIP_UNLISTED     0x20
+#define BN6_DARK_FIRST_ID     0x11E       /* DrkSword, DarkThnd, DrkRecov, DarkInvs, DarkPlus: chips 0x11E-0x122 */
+#define BN6_DARK_AFTER        0x0800B79Au /* bn6f sub_800B79A, a chip's after-effects as it runs: r0 the chip that ran (a DarkChip's id only where
+                                             its dark power ran, a BugFrag paid), r5 its user; the NaviCust's HP bug its table at 0x0800B7BC adds */
+#define BN6_DARK_CHECK        0x08010D58u /* bn6f sub_8010D58, every chip use: r0 its record's DarkChipID (0xFF for most), r5 its user; with a BugFrag
+                                             in the battle's count it spends one (0x0800F4B2), with none the base chip runs */
+#define BN6_DARK_BASES        0x08010D98u /* ... the base chips' routines, 10 bytes each, by DarkChipID: push {lr}; movs r0,#chip (Sword 0x47, Thunder
+                                             0x1E, Recov10 0x9A, Invisibl 0xB1, Atk+10 0xC0) */
+#define BN6_DARK_BASE_STEP    10
+#define BN6_BATTLE_BUGFRAGS   0x0203F7E0u /* the battle's BugFrags, u32 a side (+ alliance x 4), the save's copied as it begins (bn6f dword_203F7E0) */
+#define BN6_RECOVERY_AMOUNTS  0x080EDBB0u /* u16 by a recovery chip's subfamily: 10, 30 .. 300, 1000 (DrkRecov's, the ninth) */
+#define BN6_BBS_ARCHIVES      0x0813FE2Cu /* the BBS's text archives (bn6f off_813E04C), 12 words; the fourth, LZ77 (Falzar's CompText87E9578), */
+#define BN6_BBS_DARK_ARCHIVE  3
+#define BN6_BBS_DARK_SCRIPT   27          /* ... its script 27 a post on DarkChips, "A dar...DarkChip!?" */
+#define BN6_FLAME_SPRITE      0x3C        /* sprite list 7's blue flame (uncompressed, 1612 bytes), which no map object lists */
+#define BN6_FLAME_SLOT        0x54        /* ... and a list-7 number Gregar leaves on its placeholder sprite, the purple copy's */
+
 
 /* Main modes (main_subsystemJumpTable) and game-state sub-modes */
 #define BN6_MODE_START_SCREEN 0x00

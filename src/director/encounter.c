@@ -11,6 +11,7 @@
 
 #include "bn6.h"
 #include "bytes.h"
+#include "darkbn6.h"
 #include "data.h"
 #include "emu.h"
 #include "events.h"
@@ -80,6 +81,7 @@ void emu_encounters_install(void) {
 	emu_hook(BN6_ENCOUNTER_CHECK, forced, NULL);
 	emu_hook_event(BN6_START_BATTLE, EV_BATTLE_START);
 	emu_hook(BN6_REWARD_PICK, picking, NULL);
+	darkbn6_install();   /* (BN6's own DarkChips' uses: docs/META.md) */
 }
 
 void emu_battle_force(const Encounter *e) {

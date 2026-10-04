@@ -192,6 +192,20 @@ int ta_talk(TextArchive *t, const char *boxes, int face) {
 
 int ta_say(TextArchive *t, int face, const char *s) { return ta_talk(t, s, face); }
 
+int ta_rom_pages(const uint8_t *a, int n, int i, uint8_t *out, int max) {
+	if (i < 0 || 2 * i + 2 > n) return 0;
+	int p = a[2 * i] | a[2 * i + 1] << 8, len = 0;
+	while (p + 1 < n && len + 2 <= max) {
+		uint8_t c = a[p];
+		if (c == 0xF7 && (a[p + 1] == 0x02 || a[p + 1] == 0x04)) p += a[p + 1] == 0x02 ? 5 : 4;   /* (ts_position_text, ts_position_arrow) */
+		else if (c == 0xEE) return a[p + 1] == 0xFF && len ? len : 0;   /* (ts_wait_hold: its end) */
+		else if (c == 0xE7) { out[len++] = c; out[len++] = a[p + 1]; p += 2; }   /* (ts_key_wait) */
+		else if (c < 0xE5 || c == 0xE9 || c == 0xF2) { out[len++] = c; ++p; }   /* (a character, a line's break, ts_clear_msg) */
+		else return 0;
+	}
+	return 0;
+}
+
 int ta_build(const TextArchive *t, uint8_t *out) {
 	int head = t->n * 2;
 	for (int i = 0; i < t->n; ++i) {

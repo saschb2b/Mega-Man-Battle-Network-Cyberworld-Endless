@@ -15,6 +15,7 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "bn6_fields.h"
+#include "darkchips.h"
 #include "data.h"
 #include "director.h"
 #include "emu.h"
@@ -348,14 +349,14 @@ static int chip_worth(int id, int hurt) {
  * the attacks (those that hit from anywhere before those that need a
  * column), the Atk+ after them, a recovery last */
 /* The hand's chip i as BN6's (chip | code << 9; the guest's by name, in
- * its own code), 0xFFFF for none, and for one BN6 has none of: an older
- * net's DarkChip is never picked, as it costs the run max HP (docs/
- * META.md) */
+ * its own code), 0xFFFF for none, and for one BN6 has none of: a DarkChip,
+ * an older net's or BN6's own, is never picked, as it costs the run max
+ * HP (docs/META.md) */
 static int hand_chip(int i) {
 	int c = B->r16(B->deck + 2 * (uint32_t)i);
 	if (c == 0xFFFF) return c;
 	int id = B->chip(c & 0x1FF);
-	return id || !(c & 0x1FF) ? (c & ~0x1FF) | id : 0xFFFF;
+	return (id || !(c & 0x1FF)) && dark_bn6_kind(id) < 0 ? (c & ~0x1FF) | id : 0xFFFF;
 }
 
 static int plan_picks(int *slots) {

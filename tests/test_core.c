@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "darkchips.h"
 #include "data.h"
 #include "game.h"
 #include "net.h"
@@ -62,6 +63,7 @@ int rng_range(int lo, int hi) { return hi <= lo ? lo : lo + (int)(rng_next() % (
 void flag_set(int flag) { (void)flag; }
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
+bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
 /* (another game's songs: no core to copy them into) */
 void emu_write(uint32_t addr, const void *data, size_t len) { (void)addr; (void)data; (void)len; }
@@ -2351,6 +2353,89 @@ static void test_xchips(void) {
 	CHECK(xchips_fit(cannon, cannon6, nofolder, 2, 1) == 2, "xchips: a folder of no codes leaves it (%d)", xchips_fit(cannon, cannon6, nofolder, 2, 1));
 }
 
+/* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
+ * DarkChips, issue #70): BN6's five as BN5's kinds of their names and back
+ * (DarkPlus out of BN6's battles); a flame's pick, BN5's as it was, BN6's
+ * among the four its battles play and never one held; the flame a layer
+ * was made with kept for a CONTINUE on it, its kind taken by then; the
+ * price on max HP, its floor and the HP held to the new max. */
+static void test_darkchips(void) {
+	static const int kinds[DARK_BN6_COUNT] = { 1, 6, 7, 2, 3 };   /* (BN5's DrkSword 188, DarkThnd 193, DrkRecov 194, DarkInvs 189, DarkPlus 190) */
+	for (int i = 0; i < DARK_BN6_COUNT; ++i)
+		CHECK(dark_bn6_kind(DARK_BN6_FIRST + i) == kinds[i], "dark: BN6's chip %d as BN5's kind %d (%d)", DARK_BN6_FIRST + i, kinds[i],
+			dark_bn6_kind(DARK_BN6_FIRST + i));
+	CHECK(dark_bn6_kind(DARK_BN6_FIRST - 1) < 0 && dark_bn6_kind(DARK_BN6_FIRST + DARK_BN6_COUNT) < 0 && dark_bn6_kind(0x47) < 0,
+		"dark: other chips are no DarkChip of BN6's");
+	CHECK(dark_bn6_id(1) == 286 && dark_bn6_id(6) == 287 && dark_bn6_id(7) == 288 && dark_bn6_id(2) == 289, "dark: the four kinds as BN6's chips");
+	CHECK(!dark_bn6_id(3) && !dark_bn6_id(0) && !dark_bn6_id(11), "dark: DarkPlus and BN5's own seven are none of BN6's battles' (%d %d %d)",
+		dark_bn6_id(3), dark_bn6_id(0), dark_bn6_id(11));
+	uint8_t held[DARK_KINDS] = { 0 };
+	int bn6_seen = 0, bad = 0;
+	for (uint32_t seed = 1; seed < 400; ++seed)
+		for (int depth = 2; depth < 30; depth += 3) {
+			int k5 = dark_flame_pick(seed, depth, false, held), was = (int)(((seed ^ (uint32_t)depth * 2654435761u) >> 8) % DARK_KINDS);
+			int k6 = dark_flame_pick(seed, depth, true, held);
+			bad += k5 != was || dark_bn6_id(k6) == 0;
+			if (k6 >= 0) bn6_seen |= 1 << k6;
+		}
+	CHECK(!bad, "dark: %d picks off BN5's rule as it was, or off the four BN6's battles play", bad);
+	CHECK(bn6_seen == (1 << 1 | 1 << 6 | 1 << 7 | 1 << 2), "dark: a BN6 flame offers each of the four over the seeds (%#x)", bn6_seen);
+	/* (seeds apart in their low bits alone, a test's, start apart too) */
+	int small = 0, kinds_small = 0;
+	for (uint32_t seed = 1; seed <= 12; ++seed) small |= 1 << dark_flame_pick(seed, 2, true, held);
+	for (int k = 0; k < DARK_KINDS; ++k) kinds_small += small >> k & 1;
+	CHECK(kinds_small >= 3, "dark: seeds 1 to 12 on layer 2 offer %d of BN6's four kinds, three at least", kinds_small);
+	held[1] = held[6] = held[7] = 1;
+	bad = 0;
+	for (uint32_t seed = 1; seed < 200; ++seed) bad += dark_flame_pick(seed, 5, true, held) != 2;
+	CHECK(!bad, "dark: with three held, a BN6 flame offers the fourth, DarkInvs (%d seeds off)", bad);
+	held[2] = 1;
+	CHECK(dark_flame_pick(7, 5, true, held) < 0, "dark: with the four held, no BN6 flame, BN5's kinds lacked or not");
+	CHECK(dark_flame_pick(7, 5, false, held) >= 0 && !held[dark_flame_pick(7, 5, false, held)], "dark: ... while BN5's offers a kind the run lacks");
+	/* (the layer's flame kept: a CONTINUE on it after it was taken finds the
+	 * same, not the next kind lacked) */
+	dark_new_run(99);
+	int k = dark_flame_of(99, 5, 0, true);
+	CHECK(k >= 0 && dark_bn6_id(k), "dark: a new run's BN6 flame holds one of the four (%d)", k);
+	dark_give(k);
+	CHECK(dark_flame_of(99, 5, 0, true) == k, "dark: the layer's flame the same after its chip was taken (%d)", dark_flame_of(99, 5, 0, true));
+	int k8 = dark_flame_of(99, 8, 0, true);
+	CHECK(k8 >= 0 && k8 != k, "dark: the next act's flame another kind (%d, %d)", k8, k);
+	CHECK(dark_flame_of(99, 8, 0, false) >= 0, "dark: BN5's flame on that layer picked anew, not BN6's kept");
+	dark_new_run(99);
+	int v[3];
+	dark_price_hp(100, 120, 50, v);
+	CHECK(v[0] == 80 && v[1] == 100 && v[2] == 50, "dark: 20 max HP off the base and the max (%d %d %d)", v[0], v[1], v[2]);
+	dark_price_hp(100, 120, 115, v);
+	CHECK(v[2] == 100, "dark: HP held to the new max (%d)", v[2]);
+	dark_price_hp(25, 45, 45, v);
+	CHECK(v[0] == 10 && v[1] == 30 && v[2] == 30, "dark: the base never under 10 (%d %d %d)", v[0], v[1], v[2]);
+}
+
+/* A script of the game's own text run as a chat says it (src/layer/text.c,
+ * ta_rom_pages; a BBS post of BN6's said by a bystander, docs/META.md): its
+ * BBS positioning left out, its characters, breaks, waits and clears kept to
+ * its hold; anything else, or no hold, refused. A made-up archive. */
+static void test_rom_pages(void) {
+	const uint8_t arch[] = {
+		4, 0, 6, 0,                                      /* two scripts, at 4 and 6 */
+		0xE6, 0xE6,                                      /* 0: an end */
+		0xF7, 0x02, 0x18, 0x44, 0x03, 0xF7, 0x04, 0xD2, 0x6C,   /* 1: the BBS's positioning */
+		0x0B, 0x00, 0x26, 0xE9, 0x26, 0xE7, 0x00, 0xF2, 0x2A, 0xA2, 0xE7, 0x00, 0xEE, 0xFF, 0x00, 0x00,
+	};
+	const uint8_t want[] = { 0x0B, 0x00, 0x26, 0xE9, 0x26, 0xE7, 0x00, 0xF2, 0x2A, 0xA2, 0xE7, 0x00 };
+	uint8_t out[64];
+	int n = ta_rom_pages(arch, (int)sizeof arch, 1, out, (int)sizeof out);
+	CHECK(n == (int)sizeof want && !memcmp(out, want, sizeof want), "rom pages: the post's text and pages, its positioning left out (%d bytes)", n);
+	CHECK(!ta_rom_pages(arch, (int)sizeof arch, 0, out, (int)sizeof out), "rom pages: a script with no hold refused");
+	CHECK(!ta_rom_pages(arch, (int)sizeof arch, 1, out, 8), "rom pages: one that overruns refused");
+	CHECK(!ta_rom_pages(arch, (int)sizeof arch, 2, out, (int)sizeof out), "rom pages: a script past the archive refused");
+	uint8_t face[sizeof arch];
+	memcpy(face, arch, sizeof arch);
+	face[15] = 0xF5;   /* (a mugshot command in the text) */
+	CHECK(!ta_rom_pages(face, (int)sizeof face, 1, out, (int)sizeof out), "rom pages: a command it does not know refused");
+}
+
 int main(void) {
 	test_sha1();
 	test_lz77();
@@ -2375,6 +2460,8 @@ int main(void) {
 	test_xnavi();
 	test_all_star();
 	test_xchips();
+	test_darkchips();
+	test_rom_pages();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;
