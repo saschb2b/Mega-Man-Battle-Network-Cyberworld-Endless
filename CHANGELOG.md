@@ -32,6 +32,10 @@
   BustPack the run had installed. Its Attack, Speed and Charge now go in
   as the PET's STATUS shows them: with Attack LV 2, a shot takes 2 from
   BN5's Mettaurs. The NaviCust's other programs still sit out.
+- **`CYBERWORLD_EMU_DEBUG=1` follows a battle in BN5's engine (issue
+  #61).** Every 30 of its frames a line gives its game mode and sub-mode,
+  the battle's phase, MegaMan's HP, the Custom gauge and the battle's
+  clock, as BN6's core's line does.
 - **With the core on its own thread, a battle in BN5's engine holds BN6
   where it was (issue #60).** BN6's next frame had already been started
   as the battle began, so BN6 walked one frame further into the battle's

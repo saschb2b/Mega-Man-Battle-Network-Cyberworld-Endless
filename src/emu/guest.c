@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "bn6.h"
 #include "data.h"
 #include "debug.h"
 #include "emu.h"
@@ -493,7 +494,7 @@ bool guest_custom_screen(void) { return active && phase == PH_BATTLE && rd8(BN5_
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
 
 int guest_custom_gauge(void) {
-	return guest_on_screen() && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_FIGHT ? rd16(BN5_CUSTOM_GAUGE) : -1;
+	return guest_on_screen() && rd8(BN5_BATTLE_PHASE) == BN5_PHASE_FIGHT ? rd16(BN5_CUSTOM_GAUGE) : -1;
 }
 
 bool guest_fight_hp(int *hp, int *max) {
@@ -525,6 +526,16 @@ static void finish(int outcome) {
 	phase = PH_IDLE;
 }
 
+/* CYBERWORLD_EMU_DEBUG's line every 30 of its frames, as BN6's core's
+ * (debug.c): its modes, its battle's phase, MegaMan's HP, the gauge and
+ * the battle's clock */
+static void debug_line(int mode, int sub) {
+	if (frames % 30 || !emu_debug_on()) return;
+	fprintf(stderr, "guest t%d mode %02x sub %02x phase %02x hp %d/%d gauge %d%% timer %u\n", frames, mode, sub, rd8(BN5_BATTLE_PHASE),
+		rd16(BN5_T1_OBJECTS + BN6_T1_HP), rd16(BN5_T1_OBJECTS + BN6_T1_MAX_HP), rd16(BN5_CUSTOM_GAUGE) * 100 / 0x4000,
+		(unsigned)rd32(BN5_BATTLE_TIMER));
+}
+
 static void step(uint32_t keys, bool quiet);
 
 /* (the battle's opening: its mood as worried as his HP says, start_mood,
@@ -546,6 +557,7 @@ static void step(uint32_t keys, bool quiet) {
 	++frames;
 	buster_tell();
 	int mode = main_mode(), sub = sub_mode();
+	debug_line(mode, sub);
 	if (phase == PH_ASKED && (sub == BN5_SUB_BATTLE_INIT || sub == BN5_SUB_BATTLE)) {
 		phase = PH_BATTLE;
 		core->rawWrite32(core, BN5_ROLL + 8, -1, 0);   /* (one battle: the roll answers none again) */
@@ -555,7 +567,7 @@ static void step(uint32_t keys, bool quiet) {
 	/* (a DarkChip used: latched while its battle is fought, as leaving it
 	 * wipes the flag; not in the battle's first frames, which hold the last
 	 * battle's bytes until BN5 clears them: every battle had cost 20 max HP) */
-	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_STATE + 1) == BN5_PHASE_FIGHT &&
+	else if (phase == PH_BATTLE && sub == BN5_SUB_BATTLE && rd8(BN5_BATTLE_PHASE) == BN5_PHASE_FIGHT &&
 		rd8(BN5_DARK_USED + 8u * rd8(BN5_BATTLE_SIDE)))
 		dark_used = true;
 	mood_open(sub);

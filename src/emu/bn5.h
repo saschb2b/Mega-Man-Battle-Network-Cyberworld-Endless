@@ -46,7 +46,7 @@
 /* its DarkChips (docs/ROM_DATA.md, BN5 guest battles; .build research):
  * ids 187-198, folder chips as any, at most three in a folder (one of each) */
 #define BN5_DARK_FIRST    187
-#define BN5_COMPACT       0x080250EAu /* the deck's compaction at each Custom screen, after the worried rule (0x08025118): replaced by the shelf */
+#define BN5_COMPACT       0x080250EAu /* the deck's compaction at each Custom screen, after the worried rule (0x08025118): replaced by the shelf (its deck BN5_BATTLE_DECK) */
 #define BN5_DARK_USED     0x0203E542u /* + side * 8: set to 1 as a DarkChip is used, cleared at battle start; gone as the battle leaves (latched) */
 #define BN5_NAVI_MOOD     (BN5_NAVI_STATS + 0x0E) /* u8: the mood a battle starts from where 0xFF; 0x80 calm */
 #define BN5_NAVI_METER    (BN5_NAVI_STATS + 0x44) /* u16: the dark meter, 500 neutral (below 470 battles start dark) */
@@ -56,12 +56,33 @@
 #define BN5_BATTLE_MOOD   0x0203C88Eu /* u8: MegaMan's mood in battle (side 1's 0x60 on): 1-0x40 worried, 0 dark, 0xFF Full Synchro */
 
 #define BN5_BATTLE_STATE  0x02034A90u /* BattleState: +1 the battle's phase (8 the Custom screen, 0xC fighting, 0x10 over) */
+#define BN5_BATTLE_PHASE  (BN5_BATTLE_STATE + 0x01)
 #define BN5_PHASE_INTRO   0x00        /* (the battle's opening, which sets the mood to 0x80, calm, once its first frames are done) */
 #define BN5_PHASE_CUSTOM  0x08
 #define BN5_PHASE_FIGHT   0x0C
 #define BN5_CUSTOM_GAUGE  0x02035700u /* u16, the Custom gauge, full at 0x4000 (its SetCustGauge 0x0801A88E: 0x020356E0 + 0x20, as BN6's) */
 #define BN5_BATTLE_HP     (BN5_BATTLE_STATE + 0x34) /* u16: MegaMan's HP as the battle ends, to copy back (0 deleted) */
 #define BN5_FIGHT_HP      0x0203B224u /* u16: MegaMan's HP while the battle runs (his battle object's), then +2 its max (the worried rule reads them) */
+
+/* Its battle as the autopilot and the dev switches read it (docs/ROM_DATA.md,
+ * BN5's battle for the autopilot): BN6's structures (bn6.h's fields), at its
+ * own addresses, but where named here */
+#define BN5_BATTLE_TIMER  (BN5_BATTLE_STATE + 0x40) /* u32, the frames fought: held on the Custom screen, through BATTLE START! and the results (BN6_BATTLE_TIMER) */
+#define BN5_T1_OBJECTS    0x0203B200u /* its viruses and MegaMan (BattleObject, BN6_T1_SIZE each, BN6_T1_* its fields; MegaMan the first), */
+#define BN5_T1_COUNT      0x10        /* ... 16 of them where BN6 keeps 32 (its list's descriptor at 0x080032E4) */
+#define BN5_T3_OBJECTS    0x0203CA40u /* its attacks and effects (BN6_T3_OBJECTS), BN6_T1_SIZE each, */
+#define BN5_T3_COUNT      0x20
+#define BN5_MEGAMAN_READY 0x06        /* MegaMan's action (BN6_T1_ACTION) when he can act, BN6's 0x08 (0x10 a step, 0x14 a chip, 0x03 hit); his chip (BN6_T1_CHIP) is 0xFFFF as its use begins */
+#define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
+#define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */
+#define BN5_PANEL_FLAGS   0x18        /* ... and its flags here, u32 (BN6's at +0x14), BN6_PANEL_STRUCK while an enemy's attack is on it */
+#define BN5_CUSTOM_SCREEN 0x02036B10u /* the Custom screen's state, BN6_CUSTOM_SCREEN's: */
+#define BN5_CUSTOM_HAND   (BN5_CUSTOM_SCREEN + 0x06) /* the chips it offers, the first of BN5_BATTLE_DECK */
+#define BN5_CUSTOM_CURSOR (BN5_CUSTOM_SCREEN + 0x07) /* the slot under the cursor, 0-4 the top row, BN6_CUSTOM_OK on OK */
+#define BN5_CUSTOM_PICKED (BN5_CUSTOM_SCREEN + 0x08) /* the chips picked */
+#define BN5_CUSTOM_WINDOW 0x020356F2u /* 0x020356E0 + 0x12: the Custom screen's window as it slides in, 0 to BN5_WINDOW_OPEN (BN6_CUSTOM_WINDOW) */
+#define BN5_WINDOW_OPEN   0x78
+#define BN5_BATTLE_DECK   0x0203C830u /* the battle's folder as it is drawn, u16 chip | code << 9 (BN6_BATTLE_DECK) */
 
 #define BN5_MODE_GAME      0x04
 #define BN5_MODE_GAME_OVER 0x14
