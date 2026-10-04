@@ -36,7 +36,22 @@
 - **L warns of BN6's viruses only where BN6's battles are.** In End
   Area, L said "We may meet StarFish here again", and the battle was
   BN5's Whirlies: BN6's viruses never fight in BN5's areas.
-
+- **Phones take Battle Network 5 too: the first start asks for the folder
+  your ROMs are in (issue #66).** Android and iOS took one file, BN6's, so
+  BN5's areas never came to a phone. The app now opens only the folder's
+  `.gba` files, copies in BN6 Cybeast Gregar and BN5 Team Colonel (USA),
+  each checked by its SHA-1, and looks in the folder again at each start,
+  so BN5 put there later comes in by itself. Every other `.gba` is named with why it was refused ("BN6
+  Cybeast Falzar, not Gregar", "BN5 Team ProtoMan, not Team Colonel"), and
+  a zipped one is told to be unzipped. Android keeps apps out of Download
+  itself: **Choose the files instead** takes BN6 and BN5 in one picker,
+  and the app icon's **ROMs** shortcut opens the page again to add BN5
+  later. On iOS, Files' **On My iPhone › Cyberworld** is looked in too.
+- **The game opens again on Android after a quit.** Quitting with Back,
+  then opening the game while Android still kept it in memory, closed it
+  at once: SDL ran the game a second time with the first session's state,
+  its quit among it. The game now runs in a process of its own that ends
+  with the session.
 - **BN5's battles open in half a second, not two and a half.** Its
   battle opens on a plain white screen, which held long enough to read as
   a hang; those frames now run four at a time, unheard, and the field

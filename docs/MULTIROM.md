@@ -72,9 +72,13 @@ ROM in memory, and shows its battle screens.
    backgrounds (`encounter_backdrop`). The run's seed picks it,
    with the ROMs present, so nothing is saved: a run continued without
    the other ROM goes on in the BN6 area's tiles.
-6. **Platforms**: desktop first. A New 3DS's 96 MB heap holds BN6 twice
-   (mGBA's copy and the engine's) with little room left: there another
-   game's data would be taken in as a run needs it, its ROM not kept.
+6. **Platforms**: desktop first. Phones keep copies: Android's
+   `RomActivity` and iOS's ROM screen (`src/core/ios.m`) copy BN5's ROM
+   beside BN6's from the folder the player chose, and look in it again at
+   each start, so BN5 put there later comes in (issue #66). A New 3DS's
+   96 MB heap holds BN6 twice (mGBA's copy and the engine's) with little
+   room left: there another game's data would be taken in as a run needs
+   it, its ROM not kept.
 
 ## Guest battles
 

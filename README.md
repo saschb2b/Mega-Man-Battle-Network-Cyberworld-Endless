@@ -86,11 +86,12 @@ on a phone too, and on a New 3DS from its HOME Menu.
   `5f472f78d8de2df01d5039e045c043cb40969a39`). Its net areas then turn up
   in runs, in place of the BN6 areas they resemble (ACDC Area, Oran
   Area, SciLab, End Area, its Undernet and Nebula Area), each in about
-  half the runs that come
-  there, in BN5's own tiles, music and bystanders. A note in the title's
-  top right corner says "BN5 found" as the game starts. On Linux, macOS,
-  Windows, the Steam Deck and PortMaster handhelds; not on the 3DS,
-  Android or in the browser yet.
+  half the runs that come there, in BN5's own tiles, music and
+  bystanders, their random battles fought in BN5's own engine. A note in
+  the title's top right corner says "BN5 found" as the game starts. On
+  Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
+  iPhones and iPads (there, choose the folder that holds both ROMs, or
+  put BN5 in it later); not on the 3DS or in the browser yet.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -236,9 +237,17 @@ SteamOS updates.
 Download `cyberworld-endless.apk` from the
 [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
 on the phone, tablet or handheld and open it (Android asks once to allow
-installs from your browser or file manager). The first start asks for your
-ROM with Android's own file picker; the app checks it and keeps a copy in its
-own storage, beside your saves. A handheld's own controls, a Bluetooth or USB
+installs from your browser or file manager). The first start asks for the
+folder your ROMs are in, with Android's own folder picker: the app opens
+only the `.gba` files there and keeps copies of BN6's and, if it is there,
+BN5's in its own storage, beside your saves. It names any `.gba` it refuses,
+and why ("BN6 Cybeast Falzar, not Gregar"). Android 11 and later keep apps
+out of Download itself: put the ROMs in a folder in it, such as
+Download/ROMs, or tap **Choose the files instead** and pick BN6 and BN5
+together (hold one to select both). The folder is looked in again at each
+start, so BN5 put there later comes in by itself; after choosing the
+files, hold the app's icon and tap **ROMs** (Android 7.1 and later) to add
+BN5. A handheld's own controls, a Bluetooth or USB
 controller and the touch screen all work: the game draws touch controls
 round the picture until a controller's button is pressed, and Back asks
 before it quits. Uninstalling the app deletes its saves.
@@ -263,9 +272,14 @@ marketplaceID").
    has a button that does it on the phone).
 3. Install **Cyberworld Endless** from the source. With a free Apple ID an
    app lasts seven days: SideStore renews it, and offers each new version.
-4. Start it and tap **CHOOSE ROM**: pick your ROM in Files. Or put the ROM
-   in Files, **On My iPhone › Cyberworld**, where the app keeps your saves
-   too.
+4. Start it and tap **CHOOSE FOLDER**: pick the folder your ROMs are in,
+   in Files. The app opens only the `.gba` files there, copies BN6's and,
+   if it is there, BN5's in, and looks in the folder again at each start,
+   so BN5 put there later comes in by itself. A file in iCloud Drive that
+   is not on the phone yet is downloaded first (in a big folder, download
+   BN6's in Files yourself). Or tap **CHOOSE FILES** and pick the ROMs, or
+   put them in Files, **On My iPhone › Cyberworld**, where the app keeps
+   your saves too and looks at every start.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
 PlayStation). `cyberworld-endless.ipa` on the releases page is the app
