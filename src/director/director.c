@@ -911,9 +911,27 @@ static int prize_note(char *buf, int k, int size) {
 
 /* What stands on the layer, for L's words. */
 typedef struct {
-	bool shop, heal, programs, trader, bugtrader, challenge, warp, gate, navi_gate, vault, duel, official;
+	bool shop, heal, programs, trader, bugtrader, challenge, warp, gate, navi_gate, vault, duel, official, flame;
 	bool any;   /* anything L's second words would name */
 } Here;
+
+/* The flame of darkness still burning on the layer (docs/META.md): L
+ * names it and where, and the map marks it, an Event; a playtester walked
+ * two layers of ACDC Area past one, L naming every service but it, the
+ * map marking only ProtoMan (session 66). */
+static bool flame_here(void) { return D.objs.dark_flame_obj >= 0 && !flag_get(LAYER_DARK_TAKEN_FLAG); }
+
+static int flame_words(char *buf, int k, int size) {
+	if (!flame_here()) return k;
+	static const char *const near_far[3] = { "close by", "a ways off", "far off" };
+	const NetObj *o = &layer.obj[D.objs.dark_flame_obj];
+	int wx, wy, far;
+	bool winds;
+	netmap_world((int)o->x, (int)o->y, &wx, &wy);
+	const char *lies = lie_and_walk(wx, wy, &far, &winds);
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame of darkness burns %s, %s%s: the violet mark on the map.|",
+		lies, near_far[far], winds ? ", though the way there winds" : "");
+}
 
 static void here_scan(Here *h) {
 	memset(h, 0, sizeof *h);
@@ -932,7 +950,8 @@ static void here_scan(Here *h) {
 		h->navi_gate |= t == OBJ_NAVI_GATE;
 		h->vault |= t == OBJ_VAULT;
 	}
-	h->any = h->duel || h->official || h->shop || h->heal || h->programs || h->trader || h->bugtrader || h->challenge || h->warp ||
+	h->flame = flame_here();
+	h->any = h->duel || h->official || h->flame || h->shop || h->heal || h->programs || h->trader || h->bugtrader || h->challenge || h->warp ||
 		h->gate || h->navi_gate || h->vault || pieces_sensed() || run.fragments != D.fragments_told || rival_where() ||
 		run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0;
 }
@@ -977,6 +996,7 @@ static int here_names(const Here *h, const char **here, int *fresh) {
 	static char sealed[48];
 	if (known & MARK_NAVI_GATE) { snprintf(sealed, sizeof sealed, "a gate with %s's code", guardian(D.objs.gate_navi)->name); here[n++] = sealed; }
 	if (known & MARK_VAULT) here[n++] = "a collector's vault";
+	if (h->flame && n < 8) here[n++] = "a flame of darkness";
 	if (h->official && n < 8) here[n++] = "an official gate";
 	return n;
 }
@@ -1006,6 +1026,7 @@ static int more_words(char *buf, int k, int size, const Here *h) {
 	int pieces = pieces_sensed();
 	n = piece_names(pieces & profile.pieces_taught, here, n, 16);
 	k = sense_words(buf, k, size, here, n, h->duel);
+	k = flame_words(buf, k, size);
 	k = mark_lessons(buf, k, size, fresh);
 	k = piece_lessons(buf, k, size, pieces & ~profile.pieces_taught);
 	k = prize_note(buf, k, size);
@@ -2269,6 +2290,8 @@ static void map_marks(const MapView *m, int *gx, int *gy, SDL_Color *gc) {
 static void map_locks(const MapView *m) {
 	for (int k = 0; k < layer.nblocks; ++k)
 		if (seen.locks >> k & 1) map_mark(m, -1 /* (no object's type) */, layer.block[k].x, layer.block[k].y, map_key[MAP_EVENT].c);
+	/* (and the flame of darkness while it burns, as L names it) */
+	if (flame_here()) map_mark(m, -1, (int)layer.obj[D.objs.dark_flame_obj].x, (int)layer.obj[D.objs.dark_flame_obj].y, map_key[MAP_EVENT].c);
 }
 
 /* the goal while it is unseen: where the ray from MegaMan to it leaves

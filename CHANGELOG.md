@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The flame of darkness is named, marked and always stands.** L names
+  it among what he senses and says where it burns, and the map marks it
+  an Event until its DarkChip is taken. Where a layer's services and data
+  left no bystander, the flame had nowhere to stand: it now takes a green
+  Mystery Data's place. A playtester walked two layers of ACDC Area and
+  never met one.
 - **A chip BN5's results screen shows is the chip you get.** Where a
   battle's list of viruses started at an odd address in BN5's ROM, the
   reward rows were fitted for the wrong viruses: a playtester's results

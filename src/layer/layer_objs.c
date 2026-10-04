@@ -559,17 +559,34 @@ static int last_bystander(void) {
 
 static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said, int who);
 
+/* Where the flame of darkness stands (docs/META.md): in the last
+ * bystander's place, else, where the services and data took all the map's
+ * talkers, in its last green Mystery Data's (never the best, the Spin's): a
+ * playtester walked a layer of ACDC Area whose flame had nowhere to stand
+ * (session 66). -1 none. */
+static int flame_host(void) {
+	int b = last_bystander(), best = best_mystery();
+	for (int i = layer.nobj - 1; b < 0 && i >= 0; --i)
+		if (layer.obj[i].type == OBJ_MYSTERY && layer.obj[i].param == 0 && i != best) b = i;
+	return b;
+}
+
+static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
+	tk->cat = 7;
+	tk->sprite = layer_objs_dark_flame;
+	tk->script = out->dark_flame = ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first);
+	tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
+	out->dark_flame_obj = i;
+	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
+}
+
 /* A bystander's talker (Normal Navis and pink navis, or the two Navis
  * another game's area lends, taking turns), or the flame of darkness in
- * the last one's place (docs/META.md) */
+ * the last one's place */
 static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int *said) {
 	static int base;
-	if (layer_objs_dark_flame >= 0 && i == last_bystander()) {
-		tk->cat = 7;
-		tk->sprite = layer_objs_dark_flame;
-		tk->script = out->dark_flame = ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first);
-		tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
-		if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
+	if (layer_objs_dark_flame >= 0 && i == flame_host()) {
+		flame_stand(text, out, tk, i);
 		return;
 	}
 	/* (the next four of the pool each layer, from where the run's seed
@@ -615,6 +632,19 @@ static int spin_words(TextArchive *text, int colour, bool first) {
 	return ta_say(text, FACE_MEGAMAN, words);
 }
 
+/* Layer object i, a Mystery Data: the map's next one (16 at most), or
+ * the flame of darkness standing in its place (flame_host). */
+static void mystery_or_flame(TextArchive *text, LayerObjs *out, Talker *tk, int i, MysteryData *md, int *nmd, NpcList *npcs, MysteryPlan *plan) {
+	if (layer_objs_dark_flame >= 0 && i == flame_host()) { flame_stand(text, out, tk, i); return; }
+	if (*nmd >= 16 || npcs->n >= 32) return;
+	md[*nmd].x = tk->x;
+	md[*nmd].y = tk->y;
+	md[*nmd].z = tk->z;
+	fill_mystery(&md[*nmd], &layer.obj[i], i, plan, out);
+	npcs->script[npcs->n++] = npc_mystery(*nmd);
+	++*nmd;
+}
+
 /* Each of the layer's rolls from a stream of its own, the layer seed's
  * and `salt`'s, so that what one object draws never moves another's. A
  * Chip Trader's prize new to the Library, the program list the profile's
@@ -645,7 +675,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	out->trader_kind = -1;
-	out->dark_flame = -1;
+	out->dark_flame = out->dark_flame_obj = -1;
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
@@ -716,16 +746,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					: npc_prop(7, pad, wx, wy, wz, 0);
 			break;
 		}
-		case OBJ_MYSTERY:
-			if (nmd < 16 && npcs.n < 32) {
-				md[nmd].x = wx;
-				md[nmd].y = wy;
-				md[nmd].z = wz;
-				fill_mystery(&md[nmd], o, i, &plan, out);
-				npcs.script[npcs.n++] = npc_mystery(nmd);
-				++nmd;
-			}
-			break;
+		case OBJ_MYSTERY: mystery_or_flame(&text, out, &tk, i, md, &nmd, &npcs, &plan); break;
 		case OBJ_NPC: bystander(&text, out, &tk, i, &said); break;
 		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG); break;
 		case OBJ_TRADER:
