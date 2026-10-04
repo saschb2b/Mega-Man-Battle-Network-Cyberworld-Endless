@@ -2129,3 +2129,46 @@ in BN5 would have taken 20 max HP. A check of anything that reacts to
 an event (a price, a reward, a reminder) now runs the battle or the
 step without the event too, and passes only when that one prints
 nothing; ROM_DATA's verify notes say both.
+
+## Session 66: one at a time (kai4 6/10; kai, kai2 and kai3 stopped at the owner's word: "it eats my tokens")
+
+Four personas were launched; the owner asked for fewer, and kai, kai2
+and kai3 were stopped within twenty calls, their profiles put back. kai4
+alone played a new side run in BN5's ACDC Area: eight BN5 battles in
+under two layers (no blank chips, gentle viruses, every early R kept,
+the white opening short), the dealer's Aqua tip, ProtoMan's challenge in
+person; it never found the flame of darkness, the session's goal for the
+second time, and saved on layer 2 at 40 HP.
+
+Confirmed: chips under BN5's codes (no blanks), BN5's battles held to
+the act's band, early L or R kept (six times), the half-second opening,
+no BN6 virus briefing in BN5's areas, "Are you sure?" on Yes, CONTINUE
+restarting the layer.
+
+Raised and fixed in the iteration: the flame (there was none to find:
+the flame takes the last bystander's place, and that layer's services
+had left no talker for one; it now takes a green Mystery Data's place,
+and L names it with its way, the map marks it); eight battles (BN6's
+encounter walk never cleared around a guest battle, so each came at the
+top chance; it starts over after each); MrkCan1 S shown, zenny paid (an
+enemy list at an odd address read by halfwords); the silent Cross (the
+owner's call: MegaMan says so before the first BN5 battle).
+
+Open: the chips that sit out, unnamed and said after the battle (the
+patch notes had said every chip goes in); L naming an official gate
+with no way to it; BN5's 10-damage charged buster making battles long
+(the Cross question, a BN5 Soul later, issue #69).
+
+Misreads: none; one overstatement of ours: "every chip of your folder
+goes in" was true of chips BN5 has under another code, not of chips it
+never had.
+
+Cost: about 280 calls of one persona, plus three stopped launches.
+
+Loop change: **a feature "not found" is first looked for in the replay's
+own log.** The flame's setup line printed, its placement line did not:
+it was never on the layer, and better signposting alone would have
+pointed at nothing. Likewise a rate that feels wrong (battles) is
+traced on a build of the session's own commit, printing the game's
+counter at each event, before any tuning. And patch notes state a
+change's limits as plainly as the change.
