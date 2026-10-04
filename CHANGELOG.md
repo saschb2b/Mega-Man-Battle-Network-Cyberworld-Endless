@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **BN5's areas bring their battles as BN6's areas do.** BN6's chance of
+  a battle rises with the walk since the last one, and only entering the
+  map a battle returns to set it back: a battle in BN5's engine never
+  left BN6's map, so after the first one each came at the walk's top
+  chance, every one to three checks. A playtester met eight battles in
+  under two layers. The walk now starts over after each.
 - **The flame of darkness is named, marked and always stands.** L names
   it among what he senses and says where it burns, and the map marks it
   an Event until its DarkChip is taken. Where a layer's services and data

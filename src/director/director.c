@@ -4188,6 +4188,19 @@ static void recode_words(char *out, size_t size) {
 			"The old net's chips come home in codes our net knows.", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
 }
 
+/* BN6's encounter walk cleared, as BN6 clears it entering the map a
+ * battle returns to: an older net's battle never left BN6's map, so its
+ * chance stayed at the walk's top, and a playtester met five battles on
+ * one layer, one every 600 frames of walking (session 66). */
+static void steps_cleared(void) {
+	uint32_t steps = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_STEPS);
+	if (steps < BN6_EWRAM || steps >= BN6_EWRAM_END) return;
+	if (emu_debug_on()) fprintf(stderr, "guest: BN6's encounter walk %u cleared\n", (unsigned)emu_read16(steps + BN6_STEPS_WALKED));
+	uint16_t z = 0;
+	emu_write(steps + BN6_STEPS_WALKED, &z, sizeof z);
+	emu_write(steps + BN6_STEPS_CHECKED, &z, sizeof z);
+}
+
 void director_guest_done(const GuestResult *r) {
 	if (!D.active) return;
 	++D.battles;
@@ -4206,6 +4219,7 @@ void director_guest_done(const GuestResult *r) {
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
 	if (r->outcome == GUEST_WON) run.viruses_deleted += D.guest_foes;
+	steps_cleared();
 	if (!profile.guest_taught) D.guest_due = 1 + r->sat_out;
 	guest_recode_note(r);
 	dark_set_counts(r->dark);

@@ -115,6 +115,12 @@ pack counts to its first. A guest battle in BN5's core does the same to
 BN5's copy (its records at `0x01E210`, its check at `0x080252B2`), and
 puts the folder's chips, DarkChips and reward rows in *.
 
+After a battle in BN5's core, BN6's encounter walk (eToolkit `+0x40`,
+bn6f S2001c04: `+0x12` the distance walked since the last battle, `+0x14`
+where the roll last checked) is cleared, as BN6 clears it entering the map
+its own battles return to: the roll's chance rises with that walk, and
+BN6's map is never left around a guest battle.
+
 In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
 given the act's guardian band at most as he spawns, where his own 1800 is
 above it: a hook lowers the value BN6's spawn sets both from.

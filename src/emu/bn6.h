@@ -9,6 +9,10 @@
 #define BN6_EWRAM_END         0x02040000u
 #define BN6_TOOLKIT           0x020093B0u /* eToolkit: +0 points at the main mode (subsystem) index */
 #define BN6_TOOLKIT_CHIPS     0x48        /* eToolkit +0x48: the chips' data (0x02002178): folders of 30 u16 from +0, 0x3C each (bn6f sub_8021AB4) */
+#define BN6_TOOLKIT_STEPS     0x40        /* eToolkit S2001c04_Ptr: the encounter roll's walk (bn6f sub_80AA4C0): +0x12 the distance walked since the
+                                             last battle (its chance rises with it, a check each 0x40), +0x14 where it last checked; both cleared as a map is entered */
+#define BN6_STEPS_WALKED      0x12
+#define BN6_STEPS_CHECKED     0x14
 #define BN6_FOLDER_ENTRIES    30
 /* each enemy id's reward row in ROM, 20 u16 entries (docs/ROM_DATA.md) */
 #define BN6_DROP_ROWS         0x080AC718u
