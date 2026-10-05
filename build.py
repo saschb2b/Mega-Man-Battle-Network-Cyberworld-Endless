@@ -1053,6 +1053,14 @@ FIT_PAGES = '300:,' + '6:A,134:,' * 4 + '2230:,' + '6:A,174:,' * 12
 # Screenshots of the running game for the site and the README
 # (docs/screenshots): name, game options, (frame, shot name) pairs, env.
 # Screenshots are fine to publish; files extracted from the ROM are not.
+# (the second screen's, issue #72: seed 7's Green Area layer 2, its
+# arrival's chats paged with A; and 0.10.0's notes' run there: the map, a
+# battle's Custom screen, its cards and picks, the fight's hand as the
+# first Cannon counters the Mettaur into Full Synchro)
+SECOND_7 = ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet']
+PAGED_7 = '600:,' + '4:A,6:,' * 110
+SECOND_HERO = (PAGED_7 + '30:,40:UP,0:battle,215:,6:A,24:,6:RIGHT,24:,6:RIGHT,24:,6:A,24:,6:START,36:,6:A,150:,'
+               '6:DOWN,12:,6:A,70:')
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1243,13 +1251,24 @@ SCREENSHOTS = [
     # (the second screen following the game, issue #72: seed 7's Green Area
     # layer 2, its arrival's chats paged; the Custom screen's chip as a
     # card, the folder editor's whole folder, the NaviCustomizer's program)
-    ('second-battle', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet',
-                       '--input', '600:,' + '4:A,6:,' * 110 + '60:,0:battle,400:'], [(2230, 'second-battle')], {}, '3ds'),
-    ('second-folder', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet',
-                       '--input', '600:,' + '4:A,6:,' * 110 + '60:,6:START,40:,6:A,60:,6:A,60:,6:A,60:,6:DOWN,30:'], [(2080, 'second-folder')], {}, '3ds'),
-    ('second-navicust', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet,programs=8',
-                         '--input', '600:,' + '4:A,6:,' * 110 + '60:,6:START,40:' + ',6:DOWN,8:' * 3 + ',6:A,60:,6:A,90:,6:DOWN,30:'],
+    ('second-battle', SECOND_7 + ['--input', PAGED_7 + '60:,0:battle,400:'], [(2230, 'second-battle')], {}, '3ds'),
+    ('second-folder', SECOND_7 + ['--input', PAGED_7 + '60:,6:START,40:,6:A,60:,6:A,60:,6:A,60:,6:DOWN,30:'], [(2080, 'second-folder')], {}, '3ds'),
+    ('second-navicust', SECOND_7[:-1] + ['quiet,programs=8',
+                         '--input', PAGED_7 + '60:,6:START,40:' + ',6:DOWN,8:' * 3 + ',6:A,60:,6:A,90:,6:DOWN,30:'],
      [(2070, 'second-navicust')], {}, '3ds'),
+    # (0.10.0's notes: the fight's hand, a Counter's Full Synchro; the PET
+    # at home in the town, MegaMan's status and the Library from the PET's
+    # menu; a shop's card; the Custom screen's card on an AYN Thor's lower
+    # display, 413 x 360, the second screen alone)
+    ('second-fight', SECOND_7 + ['--input', SECOND_HERO], [(2380, 'second-fight')], {}, '3ds'),
+    ('second-town', ['--scene', 'town', '--seed', '2'], [(280, 'second-town')], {}, '3ds'),
+    ('second-status', SECOND_7 + ['--input', PAGED_7 + '60:,6:START,40:,6:DOWN,8:,6:DOWN,8:,6:DOWN,8:,6:A,60:'],
+     [(1912, 'second-status')], {}, '3ds'),
+    ('second-library', SECOND_7 + ['--input', PAGED_7 + '60:,6:START,40:,6:DOWN,8:,6:DOWN,8:,6:A,90:'],
+     [(1925, 'second-library')], {}, '3ds'),
+    ('second-shop', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet', '--talk', 'shop:430',
+                     '--input', '500:' + ',4:A,96:' * 8 + ',4:A,56:' * 6 + ',6:DOWN,24:' * 2 + ',60:'], [(1740, 'second-shop')], {}, '3ds'),
+    ('second-thor', SECOND_7 + ['--second-size', '413x360', '--input', PAGED_7 + '60:,0:battle,400:'], [(2230, 'second-thor')], {}, 'second'),
     # (the layer's map on a second screen, the guardian's mark on it)
     ('second-screen', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(1250, 'second-screen')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
@@ -1280,7 +1299,8 @@ def two_screens(top, bottom):
 def screenshots(only=None):
     """docs/screenshots/NAME.png: the 240x160 picture of chosen frames (or the
     whole screen, shrunk by the entry's last number; or '3ds', the picture
-    and the second screen as a New 3DS shows them)."""
+    and the second screen as a New 3DS shows them; or 'second', the second
+    screen alone)."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
@@ -1291,10 +1311,10 @@ def screenshots(only=None):
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'data'))
         shots = ','.join(f'{f}:/src/.build/screenshots/{n}.bmp' for f, n in frames)
-        dual = whole == ['3ds']
+        dual, alone = whole == ['3ds'], whole == ['second']
         # (the whole screen, the touch controls on it, where the canvas has the game alone)
-        shot = '--screen-shot' if whole and not dual else '--shot'
-        second = ['--second-shot', ','.join(f'{f}:/src/.build/screenshots/{n}-second.bmp' for f, n in frames)] if dual else []
+        shot = '--screen-shot' if whole and not dual and not alone else '--shot'
+        second = ['--second-shot', ','.join(f'{f}:/src/.build/screenshots/{n}-second.bmp' for f, n in frames)] if dual or alone else []
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
@@ -1310,6 +1330,11 @@ def screenshots(only=None):
         for _, n in frames:
             im = Image.open(os.path.join(tmp, f'{n}.bmp')).convert('RGB')
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
+            if alone:
+                im = Image.open(os.path.join(tmp, f'{n}-second.bmp')).convert('RGB')
+                im.save(os.path.join(out, f'{n}.png'), optimize=True)
+                print('screenshot', n)
+                continue
             if not whole or dual:
                 im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
             elif whole[0] > 1:
@@ -1379,6 +1404,8 @@ CLIPS = [
     ('bn5-wait', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,slowboot=12'], {'CYBERWORLD_AUTOPILOT': '1'}, '300:battle', 340, 820),
     # (0.9.0's start: the developer's boot screen, MegaMan's word on GitHub, the title)
     ('intro', ['--scene', 'intro'], {}, None, 1, 380),
+    # (0.10.0's: the second screen following the game, as a New 3DS shows it)
+    ('two-screens', SECOND_7, {}, SECOND_HERO, 1735, 2410, '3ds'),
 ]
 
 
@@ -1388,7 +1415,7 @@ CLIPS = [
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
-               'intro': (None, 15)}
+               'intro': (None, 15), 'two-screens': (None, 12)}
 
 
 def clips(only=None):
