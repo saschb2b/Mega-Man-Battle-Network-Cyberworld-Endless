@@ -134,10 +134,21 @@ static int cross_at(int row, int form) {
 	return 0;
 }
 
+/* The picks sent: on OK BN6 marks their entries in the deck used
+ * (0xFFFF) while the screen slides away, 60 frames (watched: its mode
+ * 0x08, then 0x14), where the deck no longer holds what was picked */
+static bool picks_sent(void) {
+	for (int k = 0; k < emu_read8(BN6_CUSTOM_PICKED) && k < 5; ++k)
+		if (emu_read16(BN6_BATTLE_DECK + 2u * emu_read8(BN6_CUSTOM_PICKS + (uint32_t)k)) == 0xFFFF) return true;
+	return false;
+}
+
 /* The Custom screen: its hand, the card it shows (the chip under the
  * cursor, CROSSSELECT's Cross, Beast Out on its emblem, the picks on OK)
- * and the picks in order */
+ * and the picks in order; once sent, as they were (a garbled chip, "*
+ * 65132", stood in for them as the screen slid away) */
 static void read_custom(void) {
+	if (picks_sent()) return;
 	S2.nhand = emu_read8(BN6_CUSTOM_HAND);
 	if (S2.nhand > 10) S2.nhand = 10;
 	for (int i = 0; i < S2.nhand; ++i) S2.hand[i] = emu_read16(BN6_BATTLE_DECK + 2u * (uint32_t)i);
