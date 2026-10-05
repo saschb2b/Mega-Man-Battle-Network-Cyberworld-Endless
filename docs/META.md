@@ -243,7 +243,10 @@ them a use.
    own walls and heights, since each stands on several; Sky Town would
    come the same way (docs/OVERWORLD.md, further towns). The town as hub
    (the setup's choices made in the town, at its people and shops) waits
-   on the playtests: the setup screen has raised no complaint.
+   on the playtests: the setup screen has raised no complaint. The town
+   as home between acts (5 October 2026, docs/HOME.md) keeps the setup a
+   screen and gives the town the run's act ends instead: its ports, its
+   people's jobs, its shop.
 
 ## Decisions (28 September 2026)
 

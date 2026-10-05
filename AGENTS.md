@@ -27,6 +27,7 @@ the site.
 | Player experience, controls, install | [README.md](README.md) |
 | How the engine drives the game, and the memory it writes | [docs/EMULATION.md](docs/EMULATION.md) |
 | The real world and the town | [docs/OVERWORLD.md](docs/OVERWORLD.md) |
+| The town in a run: home after every act, its ports, its people's jobs, its shop, a town that remembers | [docs/HOME.md](docs/HOME.md) |
 | Where ROM data lives and how it was found | [docs/ROM_DATA.md](docs/ROM_DATA.md) |
 | What is original, generated or adapted | [docs/FIDELITY.md](docs/FIDELITY.md) |
 | What carries over between runs: unlocks, the run's setup, threat | [docs/META.md](docs/META.md) |
