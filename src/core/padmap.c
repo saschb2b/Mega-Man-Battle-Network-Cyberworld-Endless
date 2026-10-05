@@ -169,9 +169,11 @@ const char *padmap_preset_about(int family, int style, int preset) {
 	static char s[96];
 	if (preset < 0 || preset >= padmap_presets(family)) return "A and B set by hand";
 	const char *a = padmap_label(style, presets[family][preset].a), *b = padmap_label(style, presets[family][preset].b);
-	if (family == PAD_FAMILY_XBOX && preset == 1) snprintf(s, sizeof s, "B on %s, left of %s, as the GBA's B sits", b, a);
-	else if (family == PAD_FAMILY_XBOX && preset == 2) snprintf(s, sizeof s, "A on %s, B on %s: the places a Nintendo pad has", a, b);
-	else if (preset == 1) snprintf(s, sizeof s, "A on %s, B on %s: for a pad that reads them swapped", a, b);
+	/* (one line under the rows: the preset's own name says which buttons,
+	 * and a PlayStation pad's labels are long) */
+	if (family == PAD_FAMILY_XBOX && preset == 1) snprintf(s, sizeof s, "B left of A, as on a GBA");
+	else if (family == PAD_FAMILY_XBOX && preset == 2) snprintf(s, sizeof s, "A and B as on a Nintendo pad");
+	else if (preset == 1) snprintf(s, sizeof s, "For pads that swap A and B");
 	else snprintf(s, sizeof s, "A on %s, B on %s", a, b);
 	return s;
 }
