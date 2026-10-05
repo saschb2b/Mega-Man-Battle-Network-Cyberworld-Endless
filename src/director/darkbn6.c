@@ -33,11 +33,11 @@ void darkbn6_does(int id, char *out, size_t n) {
 	uint32_t rec = record(id);
 	int power = rom_u16(rec + BN6_CHIP_ATTACK_POWER), sub = R.data[rec + BN6_CHIP_SUBFAMILY];
 	switch (id - DARK_BN6_FIRST) {
-	case 0: snprintf(out, n, "a %d cut over the six panels in front of us", power); break;
+	case 0: snprintf(out, n, "a %d slash on the six panels ahead", power); break;
 	case 1: snprintf(out, n, "a %d Thunder that paralyzes", power); break;
 	/* (a recovery chip's amount by its subfamily: DrkRecov's the ninth) */
 	case 2: snprintf(out, n, "%d HP back", sub < 10 ? rom_u16(BN6_RECOVERY_AMOUNTS - BUS + 2u * (uint32_t)sub) : 0); break;
-	case 3: snprintf(out, n, "eight seconds where nothing touches us, and the darkness fights for us"); break;
+	case 3: snprintf(out, n, "eight safe seconds,with the darkness fighting for us"); break;
 	default: snprintf(out, n, "a puff of darkness"); break;
 	}
 }

@@ -97,7 +97,7 @@ static struct {
 	int duel_time;
 	int duel_cap;       /* the netbattle's ProtoMan at most this HP (half the act's guardian band's top), 0 none */
 	bool lost_duel;     /* MegaMan deleted in the rival's duel (the summary says so) */
-	char duel_verdict[400];
+	char duel_verdict[512];
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	bool fragment_due;     /* ... once a talk can start */
 	bool spin_due;         /* the run's Spin picked up: MegaMan says what it does once a talk can start */
@@ -298,8 +298,8 @@ static int out_names(char *s, size_t n) {
 	ChipInfo ci[3];
 	memset(ci, 0, sizeof ci);
 	for (int i = 0; i < k && i < 3; ++i) chip_info(out[i], &ci[i]);
-	if (k > 3) snprintf(s, n, "%s, %s and %d more", ci[0].name, ci[1].name, k - 2);
-	else if (k == 3) snprintf(s, n, "%s, %s and %s", ci[0].name, ci[1].name, ci[2].name);
+	if (k > 3) snprintf(s, n, "%s,%s and %d more", ci[0].name, ci[1].name, k - 2);
+	else if (k == 3) snprintf(s, n, "%s,%s and %s", ci[0].name, ci[1].name, ci[2].name);
 	else if (k == 2) snprintf(s, n, "%s and %s", ci[0].name, ci[1].name);
 	else snprintf(s, n, "%s", ci[0].name);
 	return k;
@@ -321,20 +321,19 @@ static void older_net_words(void) {
 	 * run's CrakShot and Atk+10 went unnamed, session 68) */
 	D.beat_out = encounter_guest && !D.beat_cross && n > 0 && !flag_get(RUN_OUT_NAMED_FLAG);
 	if (D.beat_out) {
-		snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older net's battles again, Lan. Our %s didn't exist back then, so %s'll sit out.",
-			k ? "|" : "", out, n == 1 ? "it" : "they");
+		snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older net's battles again,Lan.|@M %s didn't exist back then.|@L Then %s out. Got it!",
+			k ? "|" : "", out, n == 1 ? "it sits" : "they sit");
 		return;
 	}
 	if (!D.beat_cross) return;
 	/* (a guardian of ours keeps his fight ours; one of the older net's own
 	 * Navis fights the old way: docs/BOSSES.md, BN5's Navis) */
-	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan, this whole net is a copy of an older one!|@M Its battles will run the old "
-		"way. There were no Crosses back then, so ours can't come into them.|@M A guardian of ours still fights our way, Cross and all. "
-		"One of the old net's own Navis would fight the old way too.", k ? "|" : "");
+	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This net's a copy of an older one!|@M Its battles run the old way.|"
+		"@L The old way? There were no Crosses then!|@M Right. So our Cross can't come in...|@M Except against a guardian from our net!", k ? "|" : "");
 	if (n > 0 && k < sizeof D.beat)
-		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M Our %s didn't exist back then either, so %s'll sit out.", out, n == 1 ? "it" : "they");
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M %s didn't exist then either.|@M So %s'll sit out.", out, n == 1 ? "it" : "they");
 	if (k < sizeof D.beat)
-		snprintf(D.beat + k, sizeof D.beat - k, "|@L Then it's you and %s in there, MegaMan!", n > 0 ? "the rest of our chips" : "our chips");
+		snprintf(D.beat + k, sizeof D.beat - k, "|@L Then it's you and %s,MegaMan!", n > 0 ? "the other chips" : "our chips");
 }
 
 /* The arrival's words begun: the Nest shakes, the guardian they name is
@@ -356,37 +355,40 @@ static void arrival_words(void) {
 	D.beat[0] = 0;
 	D.beat_guardian = D.guardian_named = false;
 	if (run.side_kind == LAYER_UNDERNET)
-		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke, Lan.|@L Stay sharp. The exit pad leads back to the main path.");
+		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke,Lan.|@L Stay sharp! The exit pad leads back,right?|"
+			"@M Right. Back to the main path!");
 	else if (run.side_kind == LAYER_SECRET)
-		snprintf(D.beat, sizeof D.beat, "@M The gate opened, Lan... This must be the Secret Area.|@M Something strong is waiting in here. I can feel it.");
+		snprintf(D.beat, sizeof D.beat, "@M Whoa... So this is the Secret Area.|@M Something strong is in here. I can feel it...|@L *gulp* Let's go,MegaMan!");
 	else if (run.depth == 1 && profile.runs >= 2)
-		snprintf(D.beat, sizeof D.beat, "@M %s this time, Lan. Let's find the exit pad!", area);
+		snprintf(D.beat, sizeof D.beat, "@M %s this time,Lan!|@L Alright! Let's find the exit pad!", area);
 	else if (run.depth == 1)
-		snprintf(D.beat, sizeof D.beat, "@M Lan, it looks just like %s... But it's all copied data!|@L Dad was right. Let's find the exit pad and head down!", area);
+		snprintf(D.beat, sizeof D.beat, "@M Whoa... It looks just like %s!|@M But it's all copied data,Lan.|@L Dad was right... Let's find the exit pad!", area);
 	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
-		snprintf(D.beat, sizeof D.beat, "@D Lan! The Endless Net just rebuilt itself, all of it!|@D The same areas, but stronger data. It's Net V%d now!|@M Then we keep going, Lan!", net_version());
+		snprintf(D.beat, sizeof D.beat, "@D Lan,it's Dad! The Endless Net just rebuilt itself!|@D Same areas,but stronger data. It's Net V%d now.|"
+			"@L Stronger,huh? Bring it on!", net_version());
 	else if (run.biome == BIOME_NEST && run_short_nest(run.depth) && !run_short_last(run.depth))
 		/* (threat 10: said before the first of the two, docs/META.md) */
-		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest. Something down here is copying everything.|@B Grrrr...|"
-			"@M And it's not alone. I can feel a second guardian further down.|@L Then we beat them both, MegaMan!");
+		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest.|@M Something down here is copying everything...|@B Grrrr...|"
+			"@M And it's not alone. A second guardian waits below!|@L Then we beat them both,MegaMan!");
 	else if (run.biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS)
-		snprintf(D.beat, sizeof D.beat, "@M Below the Nest... The second guardian's here, Lan.|@B Grrrr...|@L The last one, MegaMan. Let's finish this!");
+		snprintf(D.beat, sizeof D.beat, "@M Below the Nest... The second guardian's here,Lan.|@B Grrrr...|@L The last one,MegaMan! Let's finish this!");
 	else if (run.biome == BIOME_NEST)
-		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest. Something down here is copying everything.|@B Grrrr...|@L Hang on, MegaMan! Whatever it is, we'll find it!");
+		snprintf(D.beat, sizeof D.beat, "@M Lan... This is it. The Nest.|@M Something down here is copying everything...|@B Grrrr...|"
+			"@L Hang on,MegaMan! Whatever it is,we'll find it!");
 	else if (first_of_act && run.biome == BIOME_UNDERNET)
-		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied... Stay sharp, Lan.");
+		snprintf(D.beat, sizeof D.beat, "@M Even the Undernet got copied...|@L Then stay sharp,MegaMan!");
 	else if (first_of_act && run.biome == BIOME_GRAVEYARD)
-		snprintf(D.beat, sizeof D.beat, "@M So much deleted data... Lan, I think the bottom is close.");
+		snprintf(D.beat, sizeof D.beat, "@M So much deleted data...|@L Creepy... Is the bottom close?|@M I think so,Lan.");
 	else if (first_of_act && run.depth > 1) {
 		/* a new act: where they are now, and whose copy waits at its end,
 		 * named where they have battled him: else a signal MegaMan does
 		 * not know (docs/META.md, what MegaMan knows) */
 		int navi = run_guardian(run.biome);
 		if (guardian_known(navi))
-			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
+			snprintf(D.beat, sizeof D.beat, "@M We're through to %s,Lan!|@L %s's copy guards this one. Let's go!", area, guardian(navi)->name);
 		else
-			snprintf(D.beat, sizeof D.beat, "@M We're through to %s, Lan! A strong Navi's signal waits at its end, one "
-				"we've never faced down here.|@L Then let's find out who. Let's go!", area);
+			snprintf(D.beat, sizeof D.beat, "@M We're through to %s,Lan!|@M A strong Navi's signal waits deeper in.|@M ...I don't recognize it.|"
+				"@L Then let's go find out who!", area);
 		D.beat_guardian = true;
 	}
 	older_net_words();
@@ -399,8 +401,8 @@ static void arrival_words(void) {
 static int way_dir;   /* the index of the last way_to: 0 right, then clockwise */
 static bool map_used;   /* the layer's map has been held (SELECT) since the game started */
 static const char *const ways[8] = {
-	"to the right", "down and to the right", "straight down", "down and to the left",
-	"to the left", "up and to the left", "straight up", "up and to the right",
+	"to the right", "to the lower right", "straight down", "to the lower left",
+	"to the left", "to the upper left", "straight up", "to the upper right",
 };
 
 /* How far `panels` is in L's words: close under five, a long way from
@@ -500,13 +502,15 @@ static const char *lie_and_walk(int wx, int wy, int *far, bool *winds) {
 
 /* Where world (wx, wy) is, for L's words, in buf: its lie, how far the
  * walk there is, and whether it winds (as the crow flies, "close by" named
- * ProtoMan across a gap). */
+ * ProtoMan across a gap). The winding said in a box of its own (WINDS),
+ * which the words around end. */
+#define WINDS ".|@M It's a winding walk"
 static const char *spot_where(int wx, int wy, char *buf, size_t n) {
 	static const char *const dist[3] = { "close by", "a ways off", "far off" };
 	int far;
 	bool winds;
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	snprintf(buf, n, "%s, %s%s", lies, dist[far], winds ? ", though the way there winds" : "");
+	snprintf(buf, n, "%s,%s%s", lies, dist[far], winds ? WINDS : "");
 	return buf;
 }
 
@@ -573,9 +577,9 @@ static const char *no_room_words(const char *name, int v) {
 	if (no_room_told == board) return NULL;
 	no_room_told = board;
 	if (board < 2)
-		snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board yet, Lan. It'll keep in the PET until the board grows.%s", name,
+		snprintf(words, sizeof words, "@M Hmm... %s won't fit beside the others yet.|@M It'll keep in the PET till the board grows,Lan.%s", name,
 			code_words(v, false));
-	else snprintf(words, sizeof words, "@M %s won't fit beside the programs on our board, Lan. To use it, we'd have to take another off.%s", name,
+	else snprintf(words, sizeof words, "@M Hmm... %s won't fit beside the others,Lan.|@M To use it,we'd have to take one off the board.%s", name,
 		code_words(v, false));
 	return words;
 }
@@ -678,21 +682,20 @@ static int guardian_words(char *buf, int k, int size) {
 	int navi = D.objs.guardian.navi;
 	const char *tip = guardian_tip(navi);
 	if (guardian_known(navi)) {
-		ADD(" %s waits at its end!|", guardian(navi)->name);
-		if (tip) ADD("@M We've got battle data on him from before:|@M %s|", tip);
-		else ADD("@M Watch the yellow panels: they light where an attack will land!|");
+		ADD("|@M %s waits at the end!|", guardian(navi)->name);
+		if (tip) ADD("@M We've got battle data on him!|@M %s|", tip);
+		else ADD("@M Watch the yellow panels! Attacks land there!|");
 	} else {
 		/* (what a Navi on the net said, as hearsay) */
-		if (guardian_heard()) ADD(" %s waits at its end, if the word on the net is right.|@M We've got no battle data on him, Lan.",
-			guardian(navi)->name);
-		else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|@M We've got no battle data on it, Lan.");
-		ADD(" Watch the yellow panels: they light where an attack will land!|");
+		if (guardian_heard()) ADD("|@M Word is,%s waits at the end!|@M We've got no battle data on him,Lan.|", guardian(navi)->name);
+		else ADD("|@M A strong Navi's signal waits at the end...|@M We've got no battle data on it,Lan.|");
+		ADD("@M Watch the yellow panels! Attacks land there!|");
 	}
 	/* (EraseCross on a Navi, which the setup has no room for: a playtester
 	 * saw BlastMan's HP drain after a Vulcan, and only patch notes had
 	 * said why) */
 	if (flag_get(BN6_FLAG_ERASE_CROSS))
-		ADD("@M And in EraseCross, a plain chip that hits him while his HP has a 4 in it bugs him: his HP drains, slowly, for the rest of the fight!|");
+		ADD("@M In EraseCross,watch his HP for a 4!|@M Then a plain chip bugs him,Lan.|@M His HP drains for the rest of the fight!|");
 	#undef ADD
 	return k;
 }
@@ -709,9 +712,9 @@ static int scrt_note(char *buf, int k, int size) {
 	static const char *const counts[] = { "one", "two" };
 	char n[12];
 	snprintf(n, sizeof n, "%d", run.fragments);
-	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M We're carrying %s ScrtData. %s|", run.fragments <= 2 ? counts[run.fragments - 1] : n,
-		run.fragments < 3 ? "Three open the golden gate to the Secret Area, in the Undernet!"
-		                  : "The golden gate to the Secret Area will open for us! It stands in the Undernet, through a dark warp.");
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M We've got %s ScrtData,Lan!|@M %s|", run.fragments <= 2 ? counts[run.fragments - 1] : n,
+		run.fragments < 3 ? "Three open the Secret Area's golden gate.|@M It's in the Undernet!"
+		                  : "The Secret Area's golden gate will open for us!|@M It's in the Undernet,through a dark warp.");
 }
 
 /* L's word on a heal while MegaMan is hurt, appended to `buf` at `k`; the
@@ -731,10 +734,10 @@ static int heal_note(char *buf, int k, int size, bool heal) {
 		 * straight down" under an arrow pointing up and to the left read as
 		 * two ways, session 62) */
 		const char *hw = lie_and_walk(wx, wy, &hf, &winds);
-		const char *wind = winds ? ", though the way there winds" : "";
+		const char *wind = winds ? WINDS : "";
 		k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0,
-			heal ? "@M The Recovery Mr. Prog can patch us up. It's %s, %s%s: the arrow turns green and leads there first.|"
-			     : "@M The Net Dealer has MiniEnrg to patch us up. He's %s, %s%s.|", hw, near_far[hf], wind);
+			heal ? "@M Let's visit the Recovery Mr.Prog!|@M He's %s,%s%s.|@M The arrow turns green and leads there!|"
+			     : "@M The Net Dealer sells MiniEnrg,Lan!|@M He's %s,%s%s.|", hw, near_far[hf], wind);
 		break;
 	}
 	return k;
@@ -749,10 +752,10 @@ static int heal_note(char *buf, int k, int size, bool heal) {
  * a WideSht and a Navi chip's fire while it took 350.) */
 static int family_words(char *buf, int k, int size) {
 	static const struct { int family; const char *words; } warn[] = {
-		{ FAMILY_SCARCROW, "@M We may meet ScarCrows here again: they call down lightning to heal, and Elec chips heal them too! Hit them hard, with anything but Elec.|" },
-		{ FAMILY_DARKMECH, "@M We may meet DarkMechs here again. They warp right beside us to slash, so keep moving and strike as they appear!|" },
-		{ FAMILY_STARFISH, "@M We may meet StarFish here again: their bubbles soak up our shots and trap us if we touch one. "
-			"A chip that drops from above gets past them!|" },
+		{ FAMILY_SCARCROW, "@M We might meet ScarCrows again!|@M Their lightning heals them. So do Elec chips!|@M Hit them hard with anything but Elec!|" },
+		{ FAMILY_DARKMECH, "@M We might meet DarkMechs again!|@M They warp right beside us to slash.|@M Keep moving,and strike as they appear!|" },
+		{ FAMILY_STARFISH, "@M We might meet StarFish again!|@M Their bubbles soak up our shots.|@M Touch one,and it traps us!|"
+			"@M A chip that drops from above gets past them!|" },
 	};
 	/* (none where the area's battles are another game's: L warned of
 	 * StarFish in End Area, whose battle was BN5's Whirlies, session 65) */
@@ -772,10 +775,13 @@ static int family_words(char *buf, int k, int size) {
  * (session 62). The new length. */
 static int sense_words(char *buf, int k, int size, const char *const *here, int n, bool duel) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	if (n) {
-		ADD("@M I sense");
-		for (int i = 0; i < n; ++i) ADD("%s %s", i == 0 ? "" : i == n - 1 ? " and" : ",", here[i]);
-		ADD(" here!|");
+	/* (in boxes that keep to their three lines, as BN6's never page on: a
+	 * box closes where its next name would pass them, the next "And ...") */
+	for (int i = 0, len = 0, box = 0; i < n; ++i) {
+		bool first = !len, last = i == n - 1 || len + (int)(strlen(here[i]) + strlen(here[i + 1])) > 36;
+		ADD("%s%s%s", first ? (box ? "@M And " : "@M I sense ") : last ? " and " : ",", here[i], !last ? "" : box ? "!|" : " here!|");
+		len = last ? 0 : len + (int)strlen(here[i]) + 1;
+		box += last;
 	}
 	const char *what = layer_objs_duel_rung == 2 ? "our netbattle" : "our race against his time";
 	if (duel) ADD(n ? "@M And ProtoMan's waiting for %s!|" : "@M ProtoMan's waiting for %s here!|", what);
@@ -797,11 +803,11 @@ static int off_board_note(char *buf, int k, int size) {
 		const char *w = no_room_words(*off ? off : "That program", offv);
 		if (w) ADD("%s|", w);
 	} else if (off && *off && bit_of(off_explained, offv)) {
-		if (fits_as_it_stands(offv)) ADD("@M %s's still off our NaviCust's board, Lan.|", off);
+		if (fits_as_it_stands(offv)) ADD("@M Lan,%s is still off our board!|", off);
 	} else if (off && *off) {
-		ADD("@M Lan, %s isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust. %s|", off, navicust_turn_words(offv));
+		ADD("@M Lan,%s isn't on our NaviCust board yet!|@M In the PET,go to MegaMan,then NaviCust!|@M %s|", off, navicust_turn_words(offv));
 		bit_set(off_explained, offv);
-	} else if (off) ADD("@M Lan, a program isn't on our NaviCust's board yet! PET: MegaMan, then NaviCust.|");
+	} else if (off) ADD("@M Lan,a program isn't on our NaviCust board yet!|@M In the PET,go to MegaMan,then NaviCust!|");
 	if (k > k0) D.off_told = true;
 	#undef ADD
 	return k;
@@ -816,17 +822,17 @@ static bool counts_any(void);
 static int mark_lessons(char *buf, int k, int size, int fresh) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	if (!(profile.marks_taught & MARK_COUNTS) && counts_any()) {
-		ADD("@M The crystals up top count this layer's Mystery Data: what we've taken, of what we've seen or sensed. "
-			"There could be more out there!|");
+		ADD("@M The crystals up top count our Mystery Data!|@M What we've taken,out of what we've seen or sensed.|"
+			"@M There could be more out there!|");
 		fresh |= MARK_COUNTS;
 	}
-	if (fresh & MARK_SERVER) ADD("@M A strong virus signal, the violet mark on the map! Its Server offers a hard battle for a good chip.|");
-	if (fresh & MARK_WARP) ADD("@M A dark warp into the Undernet, the violet mark on the map! Tougher viruses in there, and richer data.|");
-	if (fresh & MARK_GATE) ADD("@M The golden gate to the Secret Area, the violet mark on the map!|");
+	if (fresh & MARK_SERVER) ADD("@M A strong virus signal,marked violet on the map!|@M Its Server offers a hard battle for a good chip!|");
+	if (fresh & MARK_WARP) ADD("@M A dark warp,marked violet on the map!|@M It leads to the Undernet.|@M Tougher viruses in there,but richer data!|");
+	if (fresh & MARK_GATE) ADD("@M The Secret Area's golden gate,marked violet on the map!|");
 	if (fresh & MARK_NAVI_GATE)
-		ADD("@M A gate sealed with %s's code, the violet mark on the map! His code opens it for good, and his SP waits inside.|",
+		ADD("@M A gate sealed with %s's code!|@M It's marked violet on the map.|@M His code opens it for good. His SP waits inside!|",
 			guardian(D.objs.gate_navi)->name);
-	if (fresh & MARK_VAULT) ADD("@M A collector's vault, the violet mark on the map! A big enough Library opens it, and it holds rare chips.|");
+	if (fresh & MARK_VAULT) ADD("@M A collector's vault,marked violet on the map!|@M A big enough Library opens it. Rare chips inside!|");
 	if (fresh) { profile.marks_taught |= (uint8_t)fresh; profile_save(); }
 	#undef ADD
 	return k;
@@ -852,14 +858,14 @@ static int pieces_sensed(void) {
  * and his words the first time a profile meets it: the lock and its key,
  * as the bone panels' were (BN6 says nothing of RushFood at its bones). */
 static const struct { int bit; const char *name, *lesson; } piece_talk[] = {
-	{ SENSED_PURPLE, "purple Mystery Data", "@M Purple Mystery Data, locked tight! An Unlocker opens it, and a Net Dealer might sell one.|" },
-	{ SENSED_RUSH, "bone panels", "@M Bone panels by a gap! Rush can bridge it, if we carry RushFood.|" },
-	{ SENSED_TELEPORT, "teleport pads", "@M A pair of teleport pads! Step on one, and we beam to the other.|" },
-	{ SENSED_ARROWS, "arrow panels", "@M Arrow panels! They carry us one way only, the way they point.|" },
-	{ SENSED_OBSTACLE, "a Link Navi's obstacle", "@M Something blocks a walkway, the kind a Link Navi clears. The right Cross would do it!|" },
-	{ SENSED_CUBE, "a security cube", "@M A security cube! It wants a P-Code somebody here knows, or a toll.|" },
-	{ SENSED_SKULL, "a skull door", "@M A skull door! Only a WWW-ID gets us past one.|" },
-	{ SENSED_NUMBER, "a number door", "@M A number door! Its answer is something we can count on this layer.|" },
+	{ SENSED_PURPLE, "purple Mystery Data", "@M Purple Mystery Data,locked tight!|@M An Unlocker opens it. A Net Dealer might sell one!|" },
+	{ SENSED_RUSH, "bone panels", "@M Bone panels by a gap!|@M Rush can bridge it,if we've got RushFood!|" },
+	{ SENSED_TELEPORT, "teleport pads", "@M Teleport pads! Step on one,and we beam to the other!|" },
+	{ SENSED_ARROWS, "arrow panels", "@M Arrow panels! They only carry us the way they point.|" },
+	{ SENSED_OBSTACLE, "a Link Navi's obstacle", "@M Something's blocking a walkway!|@M A Link Navi could clear it. Or the right Cross!|" },
+	{ SENSED_CUBE, "a security cube", "@M A security cube!|@M It wants a P-Code someone here knows. Or a toll!|" },
+	{ SENSED_SKULL, "a skull door", "@M A skull door! Only a WWW-ID gets us past.|" },
+	{ SENSED_NUMBER, "a number door", "@M A number door!|@M We'll find its answer by counting something here.|" },
 };
 
 /* The `known` pieces' names added to here[] (n of them, max at most); the
@@ -892,19 +898,19 @@ static int goal_words(char *buf, int k, int size, bool to_heal, bool told) {
 	bool to_guardian = D.objs.guardian.navi && !boss_beaten();
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (to_guardian) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
-	const char *lies = way_to(gx, gy, &far), *what = to_guardian ? "guardian waits" : "exit lies";
+	const char *lies = way_to(gx, gy, &far), *what = to_guardian ? "guardian" : "exit";
 	int lies_dir = way_dir, seen_far = far;
 	const char *way = route_to(gx, gy, &far);
 	if (!way) way = way_to(gx, gy, &far);
 	int apart = to_heal ? 0 : abs(way_dir - lies_dir);
 	if (apart > 4) apart = 8 - apart;
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
-	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's take its Guardian Data, Lan!");
+	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's grab the Guardian Data,Lan!");
 	/* (the words where it lies, the arrow the walk: say they part) */
-	else if (apart >= 2 && told) ADD("@M The %s %s, but the way winds. Follow the arrow!", what, lies);
-	else if (apart >= 2) ADD("@M The %s %s.|@M %s The way winds, so follow the arrow!", what, lies, how_far[far]);
-	else if (to_heal) ADD("@M After that, the %s %s. %s", what, lies, how_far[seen_far]);
-	else ADD("@M The way on goes %s. %s", way, how_far[far]);
+	else if (apart >= 2 && told) ADD("@M The %s's %s!|@M It's a winding walk. Follow the arrow!", what, lies);
+	else if (apart >= 2) ADD("@M The %s's %s. %s|@M It's a winding walk. Follow the arrow!", what, lies, how_far[far]);
+	else if (to_heal) ADD("@M Then the %s's %s. %s", what, lies, how_far[seen_far]);
+	else ADD("@M Let's head %s! %s", way, how_far[far]);
 	#undef ADD
 	return k;
 }
@@ -948,7 +954,7 @@ static int lock_words(char *buf, int k, int size, int lock) {
 	char where[96];
 	int wx, wy;
 	netmap_world(b->x, b->y, &wx, &wy);
-	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The %s's %s: the violet mark on the map.|", what,
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The %s's %s!|@M It's the violet mark on the map.|", what,
 		spot_where(wx, wy, where, sizeof where));
 }
 
@@ -963,7 +969,7 @@ static int prize_note(char *buf, int k, int size) {
 		const char *w = flag_get(MAPSLOT_MD_FLAG + i) || md_on_map(i) || !md_known(i, false) ? NULL : prize_where(i, &at);
 		if (w && !(n && !strcmp(w, where[0]))) { lock[n] = at; where[n++] = w; }
 	}
-	if (n == 2) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s, and %s!|", where[0], where[1]);
+	if (n == 2) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s!|@M And more %s!|", where[0], where[1]);
 	else if (n == 1) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M I sense Mystery Data %s!|", where[0]);
 	for (int j = 0; j < n; ++j) k = lock_words(buf, k, size, lock[j]);
 	return k;
@@ -989,8 +995,8 @@ static int flame_words(char *buf, int k, int size) {
 	bool winds;
 	netmap_world((int)o->x, (int)o->y, &wx, &wy);
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame of darkness burns %s, %s%s: the violet mark on the map.|",
-		lies, near_far[far], winds ? ", though the way there winds" : "");
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame's %s,%s%s!|@M It's the violet mark on the map.|",
+		lies, near_far[far], winds ? WINDS : "");
 }
 
 static void here_scan(Here *h) {
@@ -1021,15 +1027,15 @@ static void here_scan(Here *h) {
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	ADD("@M Layer %d, Lan: %s%s.", run.depth, area, encounter_guest ? ", where battles run the older net's way" : "");
+	ADD("@M Layer %d,Lan. We're in %s!%s", run.depth, area, encounter_guest ? "|@M Battles here run the older net's way." : "");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */
 	else if (!D.objs.guardian.navi && run.side_kind == LAYER_NORMAL && !D.guardian_named) {
 		int navi = run_guardian(run.biome);
-		if (guardian_known(navi)) ADD(" %s guards the end of it.|", guardian(navi)->name);
-		else if (guardian_heard()) ADD(" %s guards the end of it, word is.|", guardian(navi)->name);
-		else ADD(" A strong Navi's signal waits at its end, one we've never faced down here.|");
+		if (guardian_known(navi)) ADD("|@M %s's copy guards this area!|", guardian(navi)->name);
+		else if (guardian_heard()) ADD("|@M Word is,%s guards this area!|", guardian(navi)->name);
+		else ADD("|@M A strong Navi's signal waits deeper in...|");
 	}
 	else ADD("|");
 	#undef ADD
@@ -1042,7 +1048,7 @@ static int first_words(char *buf, int k, int size) {
 static int here_names(const Here *h, const char **here, int *fresh) {
 	int n = 0;
 	if (h->shop) here[n++] = "a Net Dealer";
-	if (h->heal) here[n++] = "a Recovery Mr. Prog";
+	if (h->heal) here[n++] = "a Recovery Mr.Prog";
 	if (h->programs) here[n++] = "a NaviCust program shop";
 	if (h->trader) here[n++] = "a Chip Trader";
 	if (h->bugtrader) here[n++] = "a BugFrag Trader";
@@ -1073,12 +1079,12 @@ static int more_words(char *buf, int k, int size, const Here *h) {
 	/* (the area's battlefields, on its first layer: a playtester froze
 	 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
 	if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-		ADD("@M The battlefields here are icy. An Aqua hit on ice freezes us, so keep off it when the viruses shoot water!|");
+		ADD("@M Brr... The battlefields here are icy,Lan.|@M An Aqua hit on ice freezes us!|@M Keep off the ice when viruses shoot water.|");
 	/* (and a homepage's conveyors and ice: a conveyor carried a
 	 * playtester off the row he stepped into, every time, and the ice
 	 * froze him twice in the next act) */
 	if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-		ADD("@M The battlefields here have conveyor and ice panels. The arrows carry us along, and an Aqua hit on ice freezes us. Mind where we stand!|");
+		ADD("@M The battlefields here have conveyors and ice!|@M The arrows carry us along.|@M And an Aqua hit on ice freezes us. Careful!|");
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) == 0) k = family_words(buf, k, size);
 	k = scrt_note(buf, k, size);
 	const char *here[16];
@@ -1094,11 +1100,11 @@ static int more_words(char *buf, int k, int size, const Here *h) {
 	 * official gate's violet, and a playtester's session ran out at
 	 * the gate, alone, looking for him) */
 	const char *rw = rival_where();
-	if (rw) ADD("@M ProtoMan's %s: the pink mark on the map.|", rw);
+	if (rw) ADD("@M ProtoMan's %s!|@M He's the pink mark on the map.|", rw);
 	k = off_board_note(buf, k, size);
 	/* (the map's tip on the run's first layers, until the map has been
 	 * held: a playtester who used it heard it again every run) */
-	if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT to see the map of where we've been.|");
+	if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT for a map of where we've been!|");
 	#undef ADD
 	return k;
 }
@@ -1111,8 +1117,8 @@ static const char *status_words(void) {
 		int far;
 		const char *way = town_way(&far);
 		/* all of it the first time, then only the way (a box each) */
-		if (!D.port_told) ADD("@M The port's %s, by the %s!|@M Stand next to it and press R to jack me in!", way, town_info()->landmark);
-		else ADD("@M The port's %s, Lan!", way);
+		if (!D.port_told) ADD("@M The port's %s,by the %s!|@M Stand next to it,press R,and jack me in!", way, town_info()->landmark);
+		else ADD("@M The port's %s,Lan!", way);
 		D.port_told = true;
 		return buf;
 	}
@@ -1137,9 +1143,9 @@ static const char *status_words(void) {
 	if (hurt && (h.heal || h.shop)) k = heal_note(buf, k, (int)sizeof buf, h.heal);
 	/* (and after that, where ProtoMan waits, while he does) */
 	const char *rival = told && !more ? rival_where() : NULL;
-	if (rival) ADD("@M ProtoMan's waiting %s.|", rival);
+	if (rival) ADD("@M ProtoMan's waiting %s!|", rival);
 	k = goal_words(buf, k, (int)sizeof buf, hurt && h.heal, told);
-	if (!told && h.any) ADD("|@M There's more on this layer, Lan. Press L again to hear it!");
+	if (!told && h.any) ADD("|@M There's more here,Lan. Press L again!");
 	#undef ADD
 	goal_way();   /* (the arrow's way, which the words that follow start) */
 	return buf;
@@ -3240,11 +3246,11 @@ uint32_t director_keys(uint32_t keys) {
 		 * the walk to the front's middle wound round the basin and turned
 		 * from "up and to the left" to "straight down" a step apart) */
 		if (near >= 0 && near < 128 * 128)
-			snprintf(buf, sizeof buf, "@M Almost, Lan! Step up to the %s, %s, and press R.", town_info()->landmark, way_to(nx, ny, &far));
+			snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step up to it and press R!", town_info()->landmark, way_to(nx, ny, &far));
 		else if (dx * dx + dy * dy < 128 * 128)
-			snprintf(buf, sizeof buf, "@M Almost, Lan! The %s is %s.|@M Step right up to it and press R.", town_info()->landmark, way);
+			snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step right up to it and press R!", town_info()->landmark, way);
 		else
-			snprintf(buf, sizeof buf, "@M There's no port here, Lan.|@M It's by the %s!", town_info()->landmark_at);
+			snprintf(buf, sizeof buf, "@M No port here,Lan!|@M It's by the %s!", town_info()->landmark_at);
 		talk_start(buf, FACE_MEGAMAN);
 		D.arrow_pending = true;
 		cinema_arrow(way_dir, 600);
@@ -3376,13 +3382,13 @@ static void reg_watch(void) {
 	char words[400];
 	int reg = emu_read8(BN6_NAVI_REG);
 	if (D.reg_due && !profile.reg_taught)
-		snprintf(words, sizeof words, "@M A RegUp, Lan! Our Reg memory's %d MB now.|@M In the folder's EDIT, SELECT chooses a Regular Chip "
-			"of %d MB or less: it starts every battle in our hand. A + chip like Atk+10 adds to the attack we pick just before it.|"
-			"@M Every dive starts at 4 MB again, so keep an eye out for RegUps!", reg, reg);
-	else if (D.reg_due) snprintf(words, sizeof words, "@M Reg memory up: %d MB now, Lan!", reg);
+		snprintf(words, sizeof words, "@M A RegUp,Lan! Our Reg memory's %d MB now!|@M A Regular Chip starts every battle in our hand!|"
+			"@M SELECT picks one in the Folder's EDIT. Up to %d MB!|@M A + chip like Atk+10 powers up the chip picked before it.|"
+			"@M Each dive starts at 4 MB,so watch for RegUps!", reg, reg);
+	else if (D.reg_due) snprintf(words, sizeof words, "@M Reg memory up! It's %d MB now,Lan!", reg);
 	else if (rival_clearance() >= 1 && !profile.tag_taught)
-		snprintf(words, sizeof words, "@M Lan, Chaud's clearance comes with the TagChip system! In the folder's EDIT, SELECT, then Choose "
-			"TagChip: two chips tagged come to our hand together, as long as they add up to less than 60 MB.");
+		snprintf(words, sizeof words, "@M Lan! Chaud's clearance comes with the TagChip system!|@M Press SELECT in the Folder's EDIT,|"
+			"@M then pick Choose TagChip.|@M Two tagged chips come to our hand together.|@M As long as they total under 60 MB!");
 	else return;
 	if (!talk_start(words, FACE_MEGAMAN)) return;
 	if (D.reg_due) profile.reg_taught = 1;
@@ -3408,7 +3414,7 @@ static void code_watch(void) {
 	const char *about = D.code_due ? navicust_about(D.code_due) : NULL;
 	if (!about || D.pet_seen || !free_to_speak()) return;
 	char words[200];
-	snprintf(words, sizeof words, "@M %.*s's compressed, Lan! Dad's lab keeps its code for us now, for every dive: it's in his Compression mail.",
+	snprintf(words, sizeof words, "@M %.*s's compressed,Lan!|@M Dad's lab keeps its code for every dive now.|@M It's in his Compression mail!",
 		(int)strcspn(about, ":"), about);
 	if (talk_start(words, FACE_MEGAMAN)) D.code_due = 0;
 }
@@ -3427,8 +3433,8 @@ static const char *off_board_words(void) {
 	 * SuperArmor with no Spin, and nothing said why; and whether it takes
 	 * moving others first, or its code) */
 	bool stands = fits_as_it_stands(offv);
-	snprintf(words, sizeof words, "@M Lan, %s isn't on our NaviCust's board! It does nothing until it's placed: PET, MegaMan, then NaviCust.|@M %s%s%s",
-		off, stands ? "" : "There's no room for it as the board stands: we'll have to move a program or two. ", navicust_turn_words(offv),
+	snprintf(words, sizeof words, "@M Lan,%s isn't on our board!|@M It does nothing till it's placed.|@M In the PET,go to MegaMan,then NaviCust!|@M %s%s%s",
+		off, stands ? "" : "There's no room for it as the board stands.|@M We'll have to move a program or two.|@M ", navicust_turn_words(offv),
 		stands ? "" : code_words(offv, true));
 	return words;
 }
@@ -3512,7 +3518,7 @@ static const char *code_words(int v, bool as_it_stands) {
 	char code[12];
 	if (!profile_code_entered(v / 4) || flag_get(BN6_FLAG_COMPRESSED + v) || !navicust_code(v / 4, code)) return "";
 	if (as_it_stands ? !fits_free_as(v, true) : !fits_beside_as(v, true)) return "";
-	snprintf(words, sizeof words, "|@M Or we compress it! In the NaviCust, hold RIGHT on it and press\n%s", code);
+	snprintf(words, sizeof words, "|@M Or we compress it!|@M In the NaviCust,hold RIGHT on it,|@M then press\n%s", code);
 	return words;
 }
 
@@ -3531,8 +3537,8 @@ static const char *cramped_words(void) {
 	const char *off = program_off_board(&v);
 	/* (a Guardian Data's program: its draft has said so, before the pick) */
 	if (!off || !*off || !fits_beside_placed(v) || fits_as_it_stands(v) || in_draft(v)) return NULL;
-	snprintf(words, sizeof words, "@M %s won't fit in our board's free space as it stands, Lan. In the NaviCust we'll have to move a program "
-		"or two to make room.%s", off, code_words(v, true));
+	snprintf(words, sizeof words, "@M Hmm... %s won't fit in our free space,Lan.|@M We'll have to move a program or two to make room.%s", off,
+		code_words(v, true));
 	return words;
 }
 
@@ -3628,7 +3634,7 @@ static void bug_watch(void) {
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
 	/* (a board placed anew is the NaviCust's RUN; an ExpMemry only grows it) */
 	const char *words = navicust_bug_words(now, board != D.board, bug_cause());
-	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Our NaviCust runs clean now, Lan!", FACE_MEGAMAN)) {
+	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Phew! Our NaviCust runs clean now,Lan!", FACE_MEGAMAN)) {
 		memcpy(D.bugs, now, sizeof now);
 		D.board = board;
 		D.board_size = size;
@@ -4016,13 +4022,13 @@ static int verdict_result(char *out, size_t n, bool won, bool beat, int rung, in
 	char a[16], b[16];
 	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
 	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
-	if (!won && rung == 2) return snprintf(out, n, "@C Out of the netbattle, Lan? Better than deleted. That's a loss.|@C ProtoMan will be back.|");
-	if (!won) return snprintf(out, n, "@C Out of the duel, Lan? That's a loss.|");
-	if (rung == 2) return snprintf(out, n, "@C ...Log out, ProtoMan. You beat him, Lan.|");
-	if (beat && rung == 1) return snprintf(out, n, "@C %s, and not a scratch. ...Not bad, Lan.|@C ProtoMan, we train harder.|", a);
-	if (beat) return snprintf(out, n, "@C %s. ProtoMan's was %s. ...Not bad, Lan.|@C We'll be faster next time.|", a, b);
-	if (mine < his) return snprintf(out, n, "@C %s, but MegaMan took a hit. A clean bust or nothing, Lan.|", a);
-	return snprintf(out, n, "@C %s. ProtoMan's was %s. Too slow, Lan.|", a, b);
+	if (!won && rung == 2) return snprintf(out, n, "@C Hmph. You ran,Lan?|@C Better than deleted. But it's a loss.|@C ProtoMan will be back.|");
+	if (!won) return snprintf(out, n, "@C Hmph. You ran from the duel?|@C That's a loss,Lan.|");
+	if (rung == 2) return snprintf(out, n, "@C ...Jack out,ProtoMan.|@C You beat him,Lan.|");
+	if (beat && rung == 1) return snprintf(out, n, "@C %s,and not a scratch.|@C ...Not bad,Lan.|@C ProtoMan,we train harder.|", a);
+	if (beat) return snprintf(out, n, "@C %s. ProtoMan's was %s.|@C ...Not bad,Lan.|@C We'll be faster next time.|", a, b);
+	if (mine < his) return snprintf(out, n, "@C %s,but MegaMan took a hit.|@C A clean bust or nothing,Lan.|", a);
+	return snprintf(out, n, "@C %s. ProtoMan's was %s.|@C Too slow,Lan.|", a, b);
 }
 
 static void duel_verdict(bool won) {
@@ -4041,32 +4047,32 @@ static void duel_verdict(bool won) {
 	/* (what his respect opens: docs/RIVAL.md) */
 	int after = rival_clearance();
 	if (after > before && after == 1) {
-		ADD("@C You've earned my first clearance, Lan. The official Chip Orders open for you now.|");
+		ADD("@C You've earned my first clearance,Lan.|@C The official Chip Orders are open to you now.|");
 		/* (and the TagChip system, for good: issue #51) */
-		ADD("@C And a NetBattler's trick: the TagChip system. Tag two chips in your folder's EDIT with SELECT, and they'll come to your "
-			"hand together, as long as they add up to less than 60 MB.|");
+		ADD("@C And a NetBattler's trick. The TagChip system.|@C Tag two chips with SELECT in your Folder's EDIT.|"
+			"@C They'll come to your hand together.|@C As long as they total under 60 MB.|");
 		profile.tag_taught = 1;
 		profile_save();
 	}
-	else if (after > before) ADD("@C My full clearance, Lan. Every official gate opens for you now.|");
+	else if (after > before) ADD("@C My full clearance,Lan.|@C Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
 	/* (and the next rung, the door it leads to: a playtester's second win
 	 * read as for the record alone) */
-	if (beat && rung == 1 && after < 2) ADD("|@C Next time, no race: ProtoMan faces MegaMan himself. Beat him, and my full clearance is yours.");
+	if (beat && rung == 1 && after < 2) ADD("|@C Next time,no race. ProtoMan faces MegaMan himself.|@C Beat him,and my full clearance is yours.");
 	/* (Lan answers a win too: a playtester's first, after five losses, met
 	 * silence where every loss had had his "Next time, Chaud!") */
-	if (beat) ADD("|@L %s", rung == 2 ? "Good battle, ProtoMan! See you next time, Chaud!"
-		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time, MegaMan! See you next time, Chaud!"
-		: "Yes! See you next time, Chaud!");
+	if (beat) ADD("|@L %s", rung == 2 ? "Good battle,ProtoMan! See ya,Chaud!"
+		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time!! See ya,Chaud!"
+		: "Yes!! See ya,Chaud!");
 	/* (and the gate beside the duel opens at once to its winner: the prize
 	 * where it was offered) */
 	bool opened = beat && layer_objs_official_level && after >= layer_objs_official_level;
 	if (opened) {
 		flag_set(LAYER_CLEARED_FLAG);
-		ADD("|@M Lan! The official gate on this layer will open for us now!");
+		ADD("|@M Lan! The official gate here opens for us now!");
 	}
 	/* (Lan answers a loss, as he took the duel: Chaud had the last word) */
-	if (!beat) ADD("|@L Next time, Chaud!");
+	if (!beat) ADD("|@L Grr... Next time,Chaud!");
 	#undef ADD
 	D.duel_verdict_due = true;
 }
@@ -4322,14 +4328,13 @@ static void dark_price(bool bn6) {
 	if (emu_debug_on()) fprintf(stderr, "dark: a DarkChip used: max HP %d -> %d (base %d -> %d), HP %d\n", max, v[1], base, v[0], v[2]);
 	char words[300];
 	if (bn6 && !(profile.dark6_taught & DARK6_PRICE_TAUGHT)) {
-		snprintf(words, sizeof words, "@M That DarkChip burned a BugFrag each time, Lan, and its darkness bugged me till the battle ended. "
-			"That bug's gone now.|@M But it took something that stays: my max HP fell by %d, and it won't come back this dive.", base - v[0]);
+		snprintf(words, sizeof words, "@M That DarkChip burned a BugFrag each time,Lan.|@M Its darkness bugged me till the battle ended.|"
+			"@M That bug's gone now. But something stays...|@M My max HP fell by %d,for this whole dive.", base - v[0]);
 		profile.dark6_taught |= DARK6_PRICE_TAUGHT;
 		profile_save();
 	} else if (!dark_price_told)
-		snprintf(words, sizeof words, "@M That DarkChip took something from me, Lan... My max HP fell by %d, and it won't come back this dive.",
-			base - v[0]);
-	else snprintf(words, sizeof words, "@M The DarkChip took %d more max HP, Lan.", base - v[0]);
+		snprintf(words, sizeof words, "@M Ngh... That DarkChip took something from me,Lan.|@M My max HP fell by %d,for this whole dive.", base - v[0]);
+	else snprintf(words, sizeof words, "@M Ngh... The DarkChip took %d more max HP.", base - v[0]);
 	snprintf(D.dark_words, sizeof D.dark_words, "%s", words);
 	dark_price_told = true;
 }
@@ -4349,7 +4354,7 @@ static void dark6_after_battle(void) {
 	ChipInfo dc, bc;
 	chip_info(DARK_BN6_FIRST + d, &dc);
 	chip_info(darkbn6_base(DARK_BN6_FIRST + d), &bc);
-	snprintf(D.dark_words, sizeof D.dark_words, "@M We had no BugFrags, Lan... With none to burn, that %s was only a %s.", dc.name, bc.name);
+	snprintf(D.dark_words, sizeof D.dark_words, "@M We had no BugFrags,Lan...|@M So that %s was only a %s.", dc.name, bc.name);
 	dark_base_told = true;
 }
 
@@ -4385,7 +4390,7 @@ static void dark_pack(void) {
  * playtester's hands, and no word of it): said before the price. */
 static void dark_rose_said(void) {
 	char words[sizeof D.dark_words + 128];
-	int n = snprintf(words, sizeof words, "@M Lan... I fell back there. Something dark got me up again and fought with my body. That wasn't us.%s%s",
+	int n = snprintf(words, sizeof words, "@M Lan... I fell back there.|@M Something dark got me up... and fought with my body.|@M That wasn't us...%s%s",
 		D.dark_words[0] ? "|" : "", D.dark_words);
 	size_t len = n < 0 ? 0 : (size_t)n < sizeof D.dark_words ? (size_t)n : sizeof D.dark_words - 1;
 	memcpy(D.dark_words, words, len);
@@ -4414,12 +4419,12 @@ static void recode_words(char *out, size_t size) {
 	ChipInfo ci;
 	chip_info(D.recode_chip, &ci);
 	if (D.recode_due == 1)
-		snprintf(out, size, "@L Huh? In there our %s %c was %s %c!|@M The old net reads chip codes its own way, Lan: a code it never knew "
-			"for a chip comes through as one it knows, a wildcard where it can.|@M They're still our chips, and out here their codes are ours again.",
+		snprintf(out, size, "@L Huh? In there our %s %c was %s %c!|@M The old net reads chip codes its own way,Lan.|"
+			"@M A code it never knew becomes one it knows.|@M Out here,they're our codes again!",
 			ci.name, code_letter(D.recode_from), ci.name, code_letter(D.recode_to));
 	else
-		snprintf(out, size, "@L Wait, it showed %s %c, and our Pack got %s %c!|@M Our net read its code our way as it crossed back, Lan. "
-			"The old net's chips come home in codes our net knows.", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
+		snprintf(out, size, "@L Wait! It showed %s %c...|@L But our Pack got %s %c!|@M Our net read the code its own way coming back,Lan.|"
+			"@M Chips from the old net come home in our codes!", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
 }
 
 /* What a guest battle's results screen gave, as the run got it ("Cannon
@@ -4522,16 +4527,15 @@ static void win_run(void) {
  * with 1150 zenny unspent. Stepping into the room before the arena,
  * MegaMan names those not yet used, once, and which way each is. */
 /* (where a service lies from MegaMan, as L and the map give it, and how
- * far the walk there is: "right here, to the left", "down and to the
- * right", "a long way back, straight up"; where the walk sets off another
+ * far the walk there is: "right here,to the left", "to the lower right",
+ * "a long way back,straight up"; where the walk sets off another
  * way, that it winds: the walk's first step, "up and to the right", named
  * a heal that L and the map put up and to the left) */
 static const char *service_where(int wx, int wy, char *buf, size_t n) {
 	int far;
 	bool winds;
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	snprintf(buf, n, far == 0 ? "right here, %s%s" : far == 1 ? "%s%s" : "a long way back, %s%s", lies,
-		winds ? ", though the way there winds" : "");
+	snprintf(buf, n, far == 0 ? "right here,%s%s" : far == 1 ? "%s%s" : "a long way back,%s%s", lies, winds ? WINDS : "");
 	return buf;
 }
 
@@ -4542,48 +4546,49 @@ static const char *duel_call_words(void) {
 	static char call[400];
 	/* (the record said: Chaud remembers every duel) */
 	char record[64];
-	snprintf(record, sizeof record, "@C Lan, it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
+	snprintf(record, sizeof record, "@C Lan,it's Chaud. It's %d-%d between us.|", profile.duel_won, profile.duel_lost);
 	/* (where, as the net goes, and what for: "the third act" was the
 	 * game's word, and a playtester asked what the netbattle would pay;
 	 * the rung comes after two wins, whose clearance he holds: "every
 	 * official gate" read as if he had none) */
-	static const char *const full = "Beat him, and my full clearance is yours: the official vaults open too.";
+	static const char *const full = "Beat him,and my full clearance is yours.|@C The official vaults open with it.";
 	if (layer_objs_duel_later)
-		snprintf(call, sizeof call, "@C Lan, it's Chaud. No more races: ProtoMan wants a netbattle with MegaMan himself.|"
-			"@C He'll be waiting past the next %s. %s", pacing_act(run.depth) == 0 ? "two guardians" : "guardian",
+		snprintf(call, sizeof call, "@C Lan,it's Chaud. No more races.|@C ProtoMan wants a netbattle with MegaMan himself.|"
+			"@C He'll be waiting past the next %s.|@C %s", pacing_act(run.depth) == 0 ? "two guardians" : "guardian",
 			rival_clearance() < 2 ? full : "Get MegaMan ready.");
 	else if (layer_objs_duel_rung == 2)
-		snprintf(call, sizeof call, "@C Lan, it's Chaud. ProtoMan's on this layer, and this time it's no race.|"
-			"@C He'll face MegaMan himself. %s%s", rival_clearance() < 2 ? full : "He hasn't forgotten the last time.",
-			rival_clearance() < 2 && layer_objs_official_level >= 2 ? "|@C There's one on this layer, beside him: three Mega chips." : "");
+		snprintf(call, sizeof call, "@C Lan,it's Chaud. ProtoMan's on this layer.|@C This time it's no race. He'll face MegaMan himself.|"
+			"@C %s%s", rival_clearance() < 2 ? full : "He hasn't forgotten the last time.",
+			rival_clearance() < 2 && layer_objs_official_level >= 2 ? "|@C There's one beside him on this layer. Three Mega chips." : "");
 	else {
 		/* (what a win opens for one already cleared: the gate beside
 		 * him, whose prize the duel is) */
 		const char *stake = !layer_objs_official_level ? ""
-			: rival_clearance() < layer_objs_official_level ? "@C The official vault beside him takes my full clearance: three wins, the last against ProtoMan himself.|"
-			: layer_objs_official_level >= 2 ? "@C Beat it, and the official vault beside him opens: three Mega chips.|"
-			: "@C Beat it, and the official gate beside him opens: an official Chip Order, three chips you've held, one to order.|";
-		snprintf(call, sizeof call, "%s@C ProtoMan's on this layer. He busted its viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
+			: rival_clearance() < layer_objs_official_level ? "@C The official vault beside him needs my full clearance.|@C Three wins. The last against ProtoMan himself.|"
+			: layer_objs_official_level >= 2 ? "@C Beat it,and the official vault beside him opens.|@C Three Mega chips.|"
+			: "@C Beat it,and the official gate beside him opens.|@C Inside,order one of three chips you've held.|";
+		snprintf(call, sizeof call, "%s@C ProtoMan busted this layer's viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
 			profile.duel_won + profile.duel_lost ? record :
-			"@C Lan. It's Chaud. I hear you're diving the Endless Net.|@C The Nest copies Navis. ProtoMan's the real thing.|",
+			"@C Lan. It's Chaud.|@C I hear you're diving the Endless Net.|@C The Nest copies Navis. ProtoMan's the real thing.|",
 			sec / 60, sec % 60, (f % 60) * 100 / 60,
 			/* (what a win earns, before the first: a playtester risked his
 			 * run for pride alone) */
 			/* (and what the gate holds: a playtester, five duels lost, took
 			 * the gates for scenery, their prize never named) */
-			profile.duel_won ? stake : layer_objs_official_level ? "@C Beat it, and you'll have my first clearance: the official Chip Orders open for it. There's one on this layer, three chips you've held, one to order.|"
-			: "@C Beat it, and you'll have my first clearance: the official Chip Orders open for it.|",
-			layer_objs_duel_rung == 1 ? ", without a hit" : "");
+			profile.duel_won ? stake : layer_objs_official_level ? "@C Beat it,and you'll have my first clearance.|@C The official Chip Orders open with it.|"
+				"@C One's on this layer,with three chips you've held.|"
+			: "@C Beat it,and you'll have my first clearance.|@C The official Chip Orders open with it.|",
+			layer_objs_duel_rung == 1 ? ",without a hit" : "");
 	}
 	/* (Lan answers: a call no one answered read as a message left, the
 	 * netbattle's too) */
 	size_t n = strlen(call);
-	snprintf(call + n, sizeof call - n, "|@L %s", layer_objs_duel_later ? "We'll be ready, Chaud!"
-		: profile.duel_won + profile.duel_lost ? "You're on, Chaud!" : "Chaud?! ...You're on!");
+	snprintf(call + n, sizeof call - n, "|@L %s", layer_objs_duel_later ? "We'll be ready,Chaud!"
+		: profile.duel_won + profile.duel_lost ? "You're on,Chaud!" : "Chaud!? ...You're on!");
 	return call;
 }
 
-#define NO_RUNNING "Once we're in, there's no running from a guardian!"
+#define NO_RUNNING "Once we're in,there's no running!"
 static void last_stop(int cx, int cy) {
 	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
 	const Room *a = &layer.rooms[layer.ante];
@@ -4603,13 +4608,13 @@ static void last_stop(int cx, int cy) {
 	if (!dealer && !heal) return;
 	static char buf[400];
 	int k = guardian_known(D.objs.guardian.navi) || guardian_heard()
-		? snprintf(buf, sizeof buf, "@M %s's arena is just ahead, Lan!|@M ", guardian(D.objs.guardian.navi)->name)
-		: snprintf(buf, sizeof buf, "@M The guardian's arena is just ahead, Lan!|@M ");
+		? snprintf(buf, sizeof buf, "@M %s's arena is just ahead,Lan!|@M ", guardian(D.objs.guardian.navi)->name)
+		: snprintf(buf, sizeof buf, "@M The guardian's arena is just ahead,Lan!|@M ");
 	/* (and no running once in, as from BN6's story bosses: a playtester
 	 * at 1 HP tried L and R, which only BN6's random battles answer) */
-	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, and a Recovery Mr. Prog's %s, if we want to get ready first.|@M %s", dealer, heal, NO_RUNNING);
-	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "The Net Dealer's %s, if we want to get ready first.|@M %s", dealer, NO_RUNNING);
-	else snprintf(buf + k, sizeof buf - (size_t)k, "A Recovery Mr. Prog's %s, if we want to heal up first.|@M %s", heal, NO_RUNNING);
+	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.|@M %s", dealer, heal, NO_RUNNING);
+	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.|@M %s", dealer, NO_RUNNING);
+	else snprintf(buf + k, sizeof buf - (size_t)k, "Want to heal up first?|@M A Recovery Mr.Prog's %s.|@M %s", heal, NO_RUNNING);
 	talk_start(buf, FACE_MEGAMAN);
 }
 
@@ -4762,11 +4767,11 @@ static void rush_hint(void) {
 	int held = items >= BN6_EWRAM && items < BN6_EWRAM_END ? emu_read8(items + ITEM_RUSH_FOOD) : 0;
 	char words[260];
 	if (held >= layer.gap[0].len)
-		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush can bridge this gap. Let's toss him some RushFood: A at the edge!");
+		snprintf(words, sizeof words, "@M Bone panels,Lan! Rush can bridge this gap!|@M Press A at the edge to toss him RushFood!");
 	else if (layer.gap[0].len == 1)
-		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush could bridge this gap for one RushFood.|@M A Net Dealer might have some.");
+		snprintf(words, sizeof words, "@M Bone panels,Lan! Rush could bridge this gap!|@M He needs one RushFood.|@M A Net Dealer might have some.");
 	else
-		snprintf(words, sizeof words, "@M Bone panels, Lan! Rush could bridge this gap with RushFood: he comes when we hold %d, and eats one.|"
+		snprintf(words, sizeof words, "@M Bone panels,Lan! Rush could bridge this gap!|@M He comes when we hold %d RushFood,and eats one.|"
 			"@M A Net Dealer might have some.", layer.gap[0].len);
 	if (talk_start(words, FACE_MEGAMAN)) flag_set(LAYER_RUSH_TOLD_FLAG);
 }
@@ -4781,9 +4786,10 @@ static void guest_words(void) {
 	int k = 0;
 	if (D.guest_due) {
 		int out = D.guest_due - 1;
-		k = snprintf(words, sizeof words, "@M Lan, that battle ran on an older net's system! The Nest copied that "
-			"net too, battles and all.|@M Its viruses fight the old way, and our chips work as the old net knew them.");
-		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, " Our %s didn't exist back then, so %s sat out.", D.guest_out, out == 1 ? "it" : "they");
+		k = snprintf(words, sizeof words, "@M Lan,that battle ran on an older net's system!|@L The Nest copied that net too!?|"
+			"@M Battles and all. Its viruses fight the old way.|@M And our chips work the way it knew them.");
+		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, "|@M %s didn't exist back then...|@M So %s had to sit out.", D.guest_out,
+			out == 1 ? "it" : "they");
 	}
 	if (D.recode_due) {
 		if (k) k += snprintf(words + k, sizeof words - (size_t)k, "|");
@@ -4801,7 +4807,7 @@ static void guest_words(void) {
 /* where a chip come to the pack went, the first time (pack_due) */
 static void pack_words(void) {
 	if (!D.pack_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
-	if (talk_start("@M That chip went to our Pack, Lan. To fight with it, swap it into our folder: PET, Folder, then EDIT!", FACE_MEGAMAN)) {
+	if (talk_start("@M That chip went to our Pack,Lan!|@M To fight with it,add it to our Folder.|@M In the PET,go to Folder,then EDIT!", FACE_MEGAMAN)) {
 		D.pack_due = false;
 		profile.pack_taught = 1;
 		profile_save();
@@ -4878,12 +4884,12 @@ void director_update(void) {
 				!talk_busy() && !cinema_busy() && !D.warping &&
 				/* (the arrival's growl answered, Dad's voice, and the endless
 				 * net's hook: a playtester's first win ended on two lines) */
-				talk_start("@M That was the Nest's last guardian, Lan... The whole net has gone quiet.|"
+				talk_start("@M That was the Nest's last guardian,Lan...|@M The whole net's gone quiet.|"
 					"@B Grrrr......|"
-					"@M ...Almost. Something deeper down is still awake, Lan. The Nest was only its den.|"
-					"@D Lan, MegaMan, it's Dad! I watched it all from the lab. You did it!|"
-					"@D Whatever is growling down there, we'll be ready for it. Now jack out and come home, you two.|"
-					"@L We did it, MegaMan! The exit's open. Let's jack out!", FACE_MEGAMAN))
+					"@M ...Almost. Something deeper down is still awake.|@M The Nest was only its den...|"
+					"@D Lan,MegaMan,it's Dad! I watched it all. You did it!|"
+					"@D Whatever's growling down there,we'll be ready.|@D Now jack out and come home,you two.|"
+					"@L We did it!! The exit's open. Let's jack out!", FACE_MEGAMAN))
 				D.final_told = true;
 		}
 	}
@@ -5000,7 +5006,7 @@ void director_update(void) {
 	if (D.mail_due && !D.reward_due && !D.gem_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic()) {
 		char words[160];
-		snprintf(words, sizeof words, "@M Mail from Dad, Lan! He sorted out our battle data on %s. It's in the PET's E-Mail.",
+		snprintf(words, sizeof words, "@M Lan,you've got mail from Dad!|@M Our battle data on %s! It's in the PET's E-Mail.",
 			guardian(D.mail_due)->name);
 		if (talk_start(words, FACE_MEGAMAN)) D.mail_due = 0;
 	}
@@ -5017,8 +5023,8 @@ void director_update(void) {
 			flag_set(LAYER_DUEL_CALLED_FLAG);
 		}
 	}
-	if (D.gem_due && !D.reward_due && talk_start("@M Mystery Data on the battlefield, Lan! Any hit breaks it, theirs or ours.|"
-		"@M But if it's still there when we win, its data is ours!", FACE_MEGAMAN)) {
+	if (D.gem_due && !D.reward_due && talk_start("@M Lan! Mystery Data on the battlefield!|@M Any hit breaks it,theirs or ours.|"
+		"@M If it's still there when we win,it's ours!", FACE_MEGAMAN)) {
 		D.gem_due = false;
 		profile.gem_taught = 1;
 		profile_save();
@@ -5051,8 +5057,8 @@ void director_update(void) {
 	if (!D.area_card && !cinema_busy() && !boss_cinematic() && !boss_fighting() && !talk_busy()) {
 		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) beat_said();
 		else if (D.secret_call && boss_done() &&
-			talk_start("@C Lan, it's Chaud. ProtoMan hasn't left my PET all day.|@C Whatever you just beat down there was a copy. Watch yourself.|"
-				"@M The Nest can even copy ProtoMan...|@L Then we'd better keep our guard up!", FACE_MEGAMAN)) {
+			talk_start("@C Lan,it's Chaud.|@C That wasn't ProtoMan. He's been in my PET all day.|@C You beat a copy. Watch yourself.|"
+				"@M The Nest can even copy ProtoMan...|@L Then we'd better stay on guard!", FACE_MEGAMAN)) {
 			D.secret_call = false;
 		}
 	}

@@ -38,7 +38,7 @@ unsigned darkbn6_base_take(void);
  * read from its own routines; 0 where they are not as expected. */
 int darkbn6_base(int id);
 /* What DarkChip `id`'s dark power does, in MegaMan's words, its numbers
- * the ROM's ("a 400 cut over the six panels in front of us"). */
+ * the ROM's ("a 400 slash on the six panels ahead"). */
 void darkbn6_does(int id, char *out, size_t n);
 
 #endif

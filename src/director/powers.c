@@ -18,17 +18,17 @@
  * that don't dim the screen; a playtester chose a Cross by its weakness
  * alone, the setup naming no strength) */
 static const struct { int navi, flag; const char *name, *feel, *weak, *strong, *navis; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! My chest is burning up, Lan!", "Aqua", "Fire chips +50, buster +1" },
-	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling all through me!", "Wood", "Elec chips +50" },
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! I'm all fired up,Lan!", "Aqua", "Fire chips +50, buster +1" },
+	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling through me!", "Wood", "Elec chips +50" },
 	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", "Sword chips +50" },
 	/* (BN6's EraseCross: an elementless chip that doesn't dim the screen
 	 * deletes a virus whose HP has a 4 in it, and bugs a Navi, whose HP
 	 * then drains; two playtesters had found it by chance and taken it for
 	 * counters, and a third saw DiveMan's HP fall with nothing hitting;
 	 * a fourth, told only of viruses, met a Navi's bug unexplained) */
-	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold, Lan. But it's power.", "Wind", "A 4 in HP: plain chips erase",
+	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold,Lan. But strong.", "Wind", "A 4 in HP: plain chips erase",
 	  "Navis: a bug drains their HP" },
-	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Full steam ahead, Lan!", "Aqua", "One more chip each turn" },
+	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Choo,choo! Full steam ahead!", "Aqua", "One more chip each turn" },
 };
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its
@@ -76,9 +76,9 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 	const char *brought = powers_cross_name(run.cross);
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i) {
 		if (crosses[i].navi != navi || beaten_before(navi, depth)) continue;
-		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s|@M But %s attacks hit me twice as hard in it, Lan.", k ? "|" : "", crosses[i].name, crosses[i].feel,
+		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s|@M But in it,%s attacks hit me twice as hard!", k ? "|" : "", crosses[i].name, crosses[i].feel,
 			crosses[i].weak);
-		else if (run.cross == navi) ADD("%s@M %s's Cross data... We brought his Cross along already, Lan!", k ? "|" : "", guardian(navi)->name);
+		else if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
 		 * the game's word in MegaMan's mouth; a first win opens its start
 		 * for good, said here, where a playtester read "won't fit" as
@@ -86,15 +86,15 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 		 * the brought one kept: "It won't fit beside our SlashCross" read
 		 * to a playtester as an offer to swap, which never came, session
 		 * 64) */
-		else ADD("%s@M %s's Cross data... We can only carry one Cross down here, Lan, so we keep our %s.%s", k ? "|" : "",
-			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive, we can start with his Cross!");
+		else ADD("%s@M %s's Cross data...|@M We can only carry one Cross down here.|@M So we keep our %s,Lan.%s", k ? "|" : "",
+			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive,we can start with his Cross!");
 	}
 	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
 	 * MegaMan, and Dad lets him use it (once a run) */
 	if (biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS)
-		ADD("%s@B Grrrr...!|@M Lan... The Nest is calling to the Cybeast inside me!|"
-			"@D Lan, it's Dad! I'm unlocking the Cybeast Button in your PET.|"
-			"@D BeastOut is strong, but don't let the beast take over!|@N MegaMan can now BeastOut!", k ? "|" : "");
+		ADD("%s@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|"
+			"@D Lan,it's Dad! I'm unlocking your PET's CybeastButton.|"
+			"@D BeastOut is powerful...|@D But don't let the beast take over,OK?|@N MegaMan can now BeastOut!", k ? "|" : "");
 	#undef ADD
 	return k ? text : NULL;
 }

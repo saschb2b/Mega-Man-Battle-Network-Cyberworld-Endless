@@ -1239,20 +1239,20 @@ static void test_talk(void) {
 	for (int biome = 0; biome < BIOME_COUNT; ++biome) {
 		const char *area = guardian_area_in_text(biome, LAYER_NORMAL);
 		char line[400];
-		snprintf(line, sizeof line, "@M We're through to %s, Lan! A strong Navi's signal waits at its end. I don't recognize "
-			"it.|@L Then let's find out who. Let's go!", area);
+		snprintf(line, sizeof line, "@M We're through to %s,Lan!|@M A strong Navi's signal waits deeper in.|@M ...I don't recognize it.|"
+			"@L Then let's go find out who!", area);
 		snprintf(what, sizeof what, "the arrival's words in area %d", biome);
 		check_talk(what, line);
 		snprintf(what, sizeof what, "the briefing in area %d", biome);
-		snprintf(line, sizeof line, "@M Layer 19, Lan: %s. A strong Navi's signal waits at its end. I don't recognize it.|@M We've got "
-			"no battle data on it, Lan. Watch the yellow panels: they light where an attack will land!", area);
+		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Battles here run the older net's way.|@M A strong Navi's signal waits at "
+			"the end...|@M We've got no battle data on it,Lan.|@M Watch the yellow panels! Attacks land there!", area);
 		check_talk(what, line);
 		for (int navi = 1; navi <= 18; ++navi) {
 			if (navi == 17) continue;
-			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. %s waits at its end, if the word on the net is right.|@M We've got no "
-				"battle data on him, Lan. Watch the yellow panels: they light where an attack will land!", area, guardian(navi)->name);
+			snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Word is,%s waits at the end!|@M We've got no battle data on him,"
+				"Lan.|@M Watch the yellow panels! Attacks land there!", area, guardian(navi)->name);
 			check_talk(what, line);
-			snprintf(line, sizeof line, "@M Layer 19, Lan: %s. %s guards the end of it, word is.", area, guardian(navi)->name);
+			snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Word is,%s guards this area!", area, guardian(navi)->name);
 			check_talk(what, line);
 		}
 		/* (the way on's question, each way's guardian battled or never,
