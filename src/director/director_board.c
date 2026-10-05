@@ -9,6 +9,8 @@
 #include "board_words.h"
 #include "boss.h"
 #include "cinema.h"
+#include "devtools.h"
+#include "director.h"
 #include "director_folder.h"
 #include "director_state.h"
 #include "emu.h"
@@ -126,6 +128,25 @@ int board_programs(uint8_t *out, int max) {
 		}
 	}
 	return n;
+}
+
+/* --dev programs=N: a copy of each of the first N programs, in the first
+ * of its colours the ROM draws, given as BN6 gives one (its check beside
+ * its count: the NaviCust lists no other); the NaviCustomizer's list, for
+ * a capture */
+void dev_programs(void) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
+	if (dev.programs <= 0 || items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
+	for (int p = 1, given = 0; p < 47 && given < dev.programs; ++p)
+		for (int v = p * 4; v < p * 4 + 4; ++v) {
+			NaviShape s;
+			if (!navicust_shape(v, &s) || !s.color) continue;
+			uint32_t id = BN6_PROGRAM_ITEMS + (uint32_t)v;
+			if (!emu_read8(items + id)) emu_write8(items + id, 1);
+			emu_write8(check + id, (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + id) ^ 0x55));
+			++given;
+			break;
+		}
 }
 
 /* A program variant's shape as the PET has it: compressed where its code
@@ -294,6 +315,10 @@ bool fits_free_as(int v, bool compressed) {
 }
 
 bool fits_as_it_stands(int v) { return fits_free_as(v, flag_get(BN6_FLAG_COMPRESSED + v)); }
+
+const char *director_board_bug(void) { return bug_cause(); }
+
+bool director_board_fits(int v) { return fits_as_it_stands(v); }
 
 /* Whether each program of the guardian's draft fits the board's free
  * space as it stands, in the flags its Guardian Data's lines read

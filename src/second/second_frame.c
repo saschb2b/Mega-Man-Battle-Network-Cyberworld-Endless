@@ -6,6 +6,7 @@
 #include "second_frame.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "second_state.h"
 
@@ -68,4 +69,36 @@ SDL_Rect second_frame(int w, int h, const char *title, int slide) {
 	fill_rects(edge, 4, PET_CYAN);
 	fill_rect(3, BODY_Y - 1, w - 6, 1, PET_CYAN_HI);
 	return body;
+}
+
+int second_wrap(const char *text, int w, char lines[][SECOND_WRAP], int most) {
+	int n = 0;
+	char line[SECOND_WRAP] = "";
+	for (const char *p = text; *p && n < most;) {
+		if (*p == '|') {
+			snprintf(lines[n++], SECOND_WRAP, "%s", line);
+			*line = 0;
+			++p;
+			continue;
+		}
+		while (*p == ' ') ++p;
+		size_t k = strcspn(p, " |");
+		if (!k) continue;
+		char next[SECOND_WRAP * 2];
+		snprintf(next, sizeof next, "%s%s%.*s", line, *line ? " " : "", (int)(k < SECOND_WRAP ? k : SECOND_WRAP - 1), p);
+		p += k;
+		if (*line && text_width(next) > w) {
+			snprintf(lines[n++], SECOND_WRAP, "%s", line);
+			snprintf(line, sizeof line, "%.*s", (int)(k < SECOND_WRAP ? k : SECOND_WRAP - 1), p - k);
+		} else snprintf(line, sizeof line, "%.*s", SECOND_WRAP - 1, next);
+	}
+	if (*line && n < most) snprintf(lines[n++], SECOND_WRAP, "%s", line);
+	return n;
+}
+
+int second_wrapped(const char *text, int x, int y, int w, int most, SDL_Color c) {
+	char lines[8][SECOND_WRAP];
+	int n = second_wrap(text, w, lines, most < 8 ? most : 8);
+	for (int i = 0; i < n; ++i) text_draw(x, y + i * SECOND_LINE_H, lines[i], c, TEXT_LEFT);
+	return y + n * SECOND_LINE_H;
 }

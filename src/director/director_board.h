@@ -26,5 +26,6 @@ bool fits_as_it_stands(int v);
 void draft_fit_watch(void);
 bool in_draft(int v);
 void bug_watch(void);
+void dev_programs(void);
 
 #endif

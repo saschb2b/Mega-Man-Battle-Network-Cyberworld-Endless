@@ -167,6 +167,11 @@ void enemy_name(int name_id, char *out, size_t outlen) {
 	rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
 }
 
+void program_name(int program, char *out, size_t outlen) {
+	if (R.layout->navicust_names) rom_text(R.layout->navicust_names, program, out, outlen);
+	else if (outlen) *out = 0;
+}
+
 uint16_t chip_entry_star(uint16_t entry) {
 	return entry == 0xFFFF || !(entry & 0x1FF) ? entry : (uint16_t)((entry & 0x1FF) | CHIP_CODE_STAR << 9);
 }

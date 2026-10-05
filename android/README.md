@@ -35,8 +35,9 @@ below its 1920 x 1080 screen), the second one is the PET beside the game,
 as the 3DS's bottom screen is: framed like BN6's PET screens, with HP,
 Zenny and BugFrags, on the net the layer's map, always open (the floor
 MegaMan has seen, the way on, what he has come near or senses), in the
-folder editor the whole folder, and in a battle the Custom screen's chip
-and the fight.
+folder editor the whole folder, in a battle the Custom screen's chip and
+the fight, and in the NaviCustomizer the program under the cursor and
+what RUN would bring.
 The town and the title leave it black. A phone without a second display
 plays as before.
 

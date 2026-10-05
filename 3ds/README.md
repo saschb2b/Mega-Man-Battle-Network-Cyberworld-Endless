@@ -37,8 +37,11 @@ GBA core alone takes longer than a frame there.
   battle it shows the chip under the Custom screen's cursor as a large
   card with its Library text, CROSSSELECT's Cross and Beast Out with
   what each gives, and while MegaMan fights, his chips in order, his
-  Cross, Beast Out and Full Synchro, and the enemies with their HP. The
-  town and the title leave the bottom screen dark.
+  Cross, Beast Out and Full Synchro, and the enemies with their HP. In
+  the NaviCustomizer it shows the program under the cursor (its shape,
+  whether it fits, whether it turns, what it does) and what RUN would
+  bring as the board stands. The town and the title leave the bottom
+  screen dark.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad

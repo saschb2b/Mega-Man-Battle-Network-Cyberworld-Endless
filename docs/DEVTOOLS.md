@@ -320,8 +320,11 @@ run's folder thirty of chip ID in * (`folder=286`: every hand DrkSword,
 for a capture of one chip in BN6's battles), `folder=ID/N` its first N
 entries alone; `pack=N` puts a copy of each of the first N chips in the
 Pack, in its first code (the folder editor's Pack and its scroll on the
-second screen, issue #75); `--talk bugfrag:FRAME` gives one BugFrag, as
-`bugfrags` gives fifty (a DarkChip's last).
+second screen, issue #75); `programs=N` gives a copy of each of the first
+N NaviCust programs, in the first of its colours the ROM draws, with the
+check BN6 lists them by (the NaviCustomizer on the second screen, issue
+#76); `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags` gives fifty
+(a DarkChip's last).
 
 Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
 same in a battle on the guest core: on BN5's battle objects, laid out as

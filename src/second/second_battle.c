@@ -25,43 +25,6 @@
 #define CARD_H    (48 * ART_SCALE + 4)   /* the card's height, its picture's frame */
 #define ROW_H     18                     /* a chip's line */
 #define FOE_H     16                     /* an enemy's line */
-#define LINE_H    13                     /* a line of text */
-#define WRAP_CHARS  96
-
-/* `text` broken into lines no wider than `w` (a '|' breaks one too), at
- * most `most` of them into `lines`: how many */
-static int wrap(const char *text, int w, char lines[][WRAP_CHARS], int most) {
-	int n = 0;
-	char line[WRAP_CHARS] = "";
-	for (const char *p = text; *p && n < most;) {
-		if (*p == '|') {
-			snprintf(lines[n++], WRAP_CHARS, "%s", line);
-			*line = 0;
-			++p;
-			continue;
-		}
-		while (*p == ' ') ++p;
-		size_t k = strcspn(p, " |");
-		if (!k) continue;
-		char next[WRAP_CHARS * 2];
-		snprintf(next, sizeof next, "%s%s%.*s", line, *line ? " " : "", (int)(k < WRAP_CHARS ? k : WRAP_CHARS - 1), p);
-		p += k;
-		if (*line && text_width(next) > w) {
-			snprintf(lines[n++], WRAP_CHARS, "%s", line);
-			snprintf(line, sizeof line, "%.*s", (int)(k < WRAP_CHARS ? k : WRAP_CHARS - 1), p - k);
-		} else snprintf(line, sizeof line, "%.*s", WRAP_CHARS - 1, next);
-	}
-	if (*line && n < most) snprintf(lines[n++], WRAP_CHARS, "%s", line);
-	return n;
-}
-
-/* `text` wrapped from (x, y) in `w`, at most `most` lines: the y under it */
-static int wrapped(const char *text, int x, int y, int w, int most, SDL_Color c) {
-	char lines[8][WRAP_CHARS];
-	int n = wrap(text, w, lines, most < 8 ? most : 8);
-	for (int i = 0; i < n; ++i) text_draw(x, y + i * LINE_H, lines[i], c, TEXT_LEFT);
-	return y + n * LINE_H;
-}
 
 /* The chip under the cursor as a card: its picture twice as large, its
  * name, code, element and power beside it, its text under them */
@@ -83,13 +46,13 @@ static void card_chip(uint16_t e, int x, int y, int w) {
 	}
 	char desc[160];
 	chip_desc(chip, desc, sizeof desc);
-	wrapped(desc, tx, y + 52, x + w - tx - 4, 3, PET_WHITE);
+	second_wrapped(desc, tx, y + 52, x + w - tx - 4, 3, PET_WHITE);
 }
 
 /* A card of words alone: its name twice as large, its lines under it */
 static void card_words(const char *name, const char *lines, int x, int y, int w) {
 	text_draw_scaled(x + 2, y + 2, name, PET_GOLD, TEXT_LEFT, 2);
-	wrapped(lines, x + 2, y + 34, w - 4, 5, PET_WHITE);
+	second_wrapped(lines, x + 2, y + 34, w - 4, 5, PET_WHITE);
 }
 
 /* a chip's power as the HUD writes it, with what Atk+ chips add ("80",
@@ -180,9 +143,9 @@ static int hand(int x, int y, int w) {
 static int megaman(int x, int y) {
 	SecondStateLine s[3];
 	int n = second_state_lines(S2.form, S2.beast_turns, S2.beast, S2.synchro, s, 3);
-	for (int i = 0; i < n; ++i, y += 2 * LINE_H + 4) {
+	for (int i = 0; i < n; ++i, y += 2 * SECOND_LINE_H + 4) {
 		text_draw(x, y, s[i].name, PET_GOLD, TEXT_LEFT);
-		text_draw(x, y + LINE_H, s[i].line, PET_WHITE, TEXT_LEFT);
+		text_draw(x, y + SECOND_LINE_H, s[i].line, PET_WHITE, TEXT_LEFT);
 	}
 	return y;
 }
@@ -190,18 +153,18 @@ static int megaman(int x, int y) {
 /* What MegaMan knows of the guardian, from `y` down to `bottom`: his
  * boxes, those whole ones that fit */
 static void tip(int x, int y, int w, int bottom) {
-	if (!S2.tip || y + 2 * LINE_H > bottom) return;
+	if (!S2.tip || y + 2 * SECOND_LINE_H > bottom) return;
 	text_draw(x, y, "MegaMan knows", PET_GOLD, TEXT_LEFT);
-	y += LINE_H + 2;
-	char box[WRAP_CHARS * 3], lines[6][WRAP_CHARS];
+	y += SECOND_LINE_H + 2;
+	char box[SECOND_WRAP * 3], lines[6][SECOND_WRAP];
 	for (const char *p = S2.tip; *p;) {
 		size_t k = strcspn(p, "|");
 		const char *t = k > 3 && p[0] == '@' && p[2] == ' ' ? p + 3 : p;
 		snprintf(box, sizeof box, "%.*s", (int)(p + k - t), t);
 		p += k + (p[k] == '|');
-		int n = wrap(box, w, lines, 6);
-		if (y + n * LINE_H > bottom) break;
-		for (int i = 0; i < n; ++i, y += LINE_H) text_draw(x, y, lines[i], PET_WHITE, TEXT_LEFT);
+		int n = second_wrap(box, w, lines, 6);
+		if (y + n * SECOND_LINE_H > bottom) break;
+		for (int i = 0; i < n; ++i, y += SECOND_LINE_H) text_draw(x, y, lines[i], PET_WHITE, TEXT_LEFT);
 	}
 }
 

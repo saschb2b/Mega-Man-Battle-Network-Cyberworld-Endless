@@ -22,6 +22,11 @@ bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
 int director_guardian_battle(void);
+/* The NaviCust's board as it stands (the second screen, issue #76): why
+ * RUN would bug, in MegaMan's words, or NULL; whether program variant `v`
+ * (program * 4 + its colour's) fits its free cells as they stand */
+const char *director_board_bug(void);
+bool director_board_fits(int v);
 /* What the drawing reads of the game, taken after each frame, before the
  * update: on a 3DS the next frame runs on another core while this one is
  * drawn, and a read of the game then waits for it. */

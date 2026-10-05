@@ -19,6 +19,13 @@
 #define PET_WHITE     rgba(247, 255, 247, 255)
 #define PET_DIM       rgba(107, 156, 173, 255)   /* what has passed: a chip used */
 
+/* Text in lines no wider than `w` (a '|' breaks one too), at most `most`
+ * of them, each SECOND_WRAP long at most: how many it made */
+#define SECOND_WRAP   96
+#define SECOND_LINE_H 13
+int second_wrap(const char *text, int w, char lines[][SECOND_WRAP], int most);
+/* ... drawn from (x, y), at most `most` lines (8): the y under them */
+int second_wrapped(const char *text, int x, int y, int w, int most, SDL_Color c);
 /* A dark slot, BN6's for a value, w x h from (x, y) */
 void second_slot(int x, int y, int w, int h);
 /* The frame in w x h: the header with `title` on its left (`slide` pixels

@@ -362,6 +362,20 @@
 #define BN6_EDIT_SCROLL       0x24   /* ... and the list's scroll: the entry under the cursor is their sum */
 #define BN6_EDIT_PACK_ROW     0x2A   /* ... the pack's cursor row and its scroll (its list by chip ID, as BN6 sorts it first) */
 #define BN6_EDIT_PACK_SCROLL  0x2E   /* ... the pack list's scroll: its entry under the cursor is row + scroll */
+#define BN6_NCMENU_MODE       0x02   /* the NaviCustomizer's state: +2 what its cursor does, BN6_NCMENU_* (bn6f sub_81357C4's jump table) */
+#define BN6_NCMENU_LIST       0x04   /* BN6_NCMENU_MODE: on the list of programs */
+#define BN6_NCMENU_BOARD      0x08   /* BN6_NCMENU_MODE: on the board, nothing held */
+#define BN6_NCMENU_TAKE       0x10   /* BN6_NCMENU_MODE: a program taken from the list, then BN6_NCMENU_HELD */
+#define BN6_NCMENU_HELD       0x14   /* BN6_NCMENU_MODE: a program from the list held over the board */
+#define BN6_NCMENU_PLACED     0x1C   /* BN6_NCMENU_MODE: a placed program's move or remove */
+#define BN6_NCMENU_MOVE       0x20   /* BN6_NCMENU_MODE: a placed program taken up, then BN6_NCMENU_MOVED */
+#define BN6_NCMENU_MOVED      0x24   /* BN6_NCMENU_MODE: a placed program held over the board */
+#define BN6_NCMENU_ROW        0x20   /* ... the list's cursor row on the screen, u16 */
+#define BN6_NCMENU_SCROLL     0x24   /* ... the list's scroll, u16: the entry under the cursor is their sum (bn6f sub_8136218) */
+#define BN6_NCMENU_X          0x2A   /* ... the board's cursor, or the program held, on the 7x7 grid (BN6_NAVICUST_GRID): its column, u16 */
+#define BN6_NCMENU_Y          0x2E   /* ... its row, u16 */
+#define BN6_NCMENU_ENTRIES    0x0201DA80u /* the NaviCustomizer's list, 4 bytes an entry (bn6f word_201DA80): +0 its key item, BN6_PROGRAM_ITEMS + variant, or BN6_NCMENU_RUN; +2 the copies left to place */
+#define BN6_NCMENU_RUN        0x14C  /* BN6_NCMENU_ENTRIES' item: RUN, the list's last */
 #define BN6_SUB_MAP           0x04   /* BN6_GAMESTATE: on the map */
 #define BN6_SUB_BATTLE_INIT   0x08   /* BN6_GAMESTATE: a battle beginning */
 #define BN6_SUB_BATTLE        0x0C   /* BN6_GAMESTATE: in battle */

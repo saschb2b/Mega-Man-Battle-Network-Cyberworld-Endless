@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "navicust.h"
 
 /* The screen the player is on, as BN6's state tells it (docs/ROM_DATA.md,
  * the second screen's contexts) */
@@ -34,6 +35,10 @@ typedef enum {
 /* What the Custom screen's card shows: the chip under the cursor, the
  * Cross under CROSSSELECT's, Beast Out on its emblem, the picks on OK */
 typedef enum { CARD_CHIP, CARD_CROSS, CARD_BEAST, CARD_PICKS } SecondCard;
+
+/* What the NaviCustomizer's cursor is on: a program in the list, RUN, a
+ * program on the board, one held over it; or none of them */
+typedef enum { NC_NONE, NC_LIST, NC_RUN, NC_PLACED, NC_HELD } SecondNaviOn;
 
 typedef struct {
 	SecondContext context;
@@ -71,6 +76,17 @@ typedef struct {
 	const char *tip;              /* ... what MegaMan knows of him, chat boxes; NULL none */
 	struct { uint16_t name; int hp, max_hp, element; } foe[8];
 	int nfoes;
+	/* the NaviCustomizer (issue #76) */
+	SecondNaviOn nc_on;           /* what its cursor is on */
+	int nc_variant;               /* ... the program (program * 4 + its colour's variant), 0 none */
+	char nc_name[16];             /* ... its name */
+	int nc_copies;                /* ... in the list: the copies left to place */
+	bool nc_fits;                 /* ... it fits the board's free cells as they stand */
+	bool nc_turns;                /* ... L and R turn it (its colour's Spin) */
+	NaviShape nc_shape;           /* ... its shape as the PET has it */
+	char nc_bug[128];             /* why RUN would bug as the board stands, "" for none */
+	struct { char name[16]; int color; } nc_board[8];   /* on RUN: the programs on the board */
+	int nc_nboard;
 } SecondState;
 
 extern SecondState S2;

@@ -419,6 +419,7 @@ bool director_start_run(void) {
 	library_to_game();
 	powers_bring(run.cross);
 	dev_folder();
+	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
 	town_after_abandon = save_exists();
@@ -462,6 +463,7 @@ bool director_start_layer(void) {
 	 * its chips in * with the All * helper) */
 	powers_bring(run.cross);
 	dev_folder();
+	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
 	if (!new_layer(false)) return false;

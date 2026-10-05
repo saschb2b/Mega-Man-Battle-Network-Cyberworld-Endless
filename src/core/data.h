@@ -74,6 +74,9 @@ void chip_info(int rom_id, ChipInfo *out);
 void chip_desc(int rom_id, char *out, size_t outlen);
 /* A battle object's name by its NameID (BN6_T1_NAME_ID): "Mettaur" */
 void enemy_name(int name_id, char *out, size_t outlen);
+/* A NaviCust program's name (program 1-46, as BN6_PROGRAM_ITEMS counts
+ * them in fours): "Custom1" */
+void program_name(int program, char *out, size_t outlen);
 
 /* The All * helper's chips (docs/META.md), in BN6's own layouts: a folder
  * entry (chip | code << 9) in *, an empty one as it is; and a pack entry

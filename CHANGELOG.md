@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The NaviCustomizer on the second screen** (issue #76). The program
+  the cursor is on, in the list, on the board or held over it, is a card:
+  its shape in its colour, its name, what kind of part it is and where
+  that goes, the copies left or where it stands, whether it fits the
+  board's free cells as they are, whether L and R turn it (its colour's
+  Spin), and what it does in MegaMan's words. Under it, what RUN would
+  bring as the board stands: no bug, or its cause, the same truth a step
+  before RUN tells it; and the board's rules in a line. On RUN, the
+  programs on the board.
 - **Battles on the second screen** (issue #74). On the Custom screen the
   chip under the cursor is a large card, as the DS games drew their
   chips: its picture twice as large, its code, element and power, and its

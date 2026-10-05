@@ -9,7 +9,10 @@
 
 #include <stdio.h>
 
+#include <string.h>
+
 #include "bn6.h"
+#include "navicust.h"
 #include "powers.h"
 
 void second_cross_lines(int navi, char *out, size_t n) {
@@ -56,4 +59,30 @@ int second_state_lines(int form, int turns, bool beast, bool synchro, SecondStat
 		++k;
 	}
 	return k;
+}
+
+void second_program_lines(const SecondState *s, char *out, size_t n) {
+	static const char *const kinds[] = { [NAVI_PART] = "program part|Goes on the command line",
+		[NAVI_PLUS] = "plus part|Stays off the command line", [NAVI_EITHER] = "part|On the command line or off it" };
+	const char *color = navicust_color_name(s->nc_shape.color);
+	char where[40];
+	if (s->nc_on == NC_LIST) snprintf(where, sizeof where, "%d to place%s", s->nc_copies, s->nc_fits ? ": it fits" : ": no room now");
+	else snprintf(where, sizeof where, "%s", s->nc_on == NC_PLACED ? "On the board" : s->nc_fits ? "Held: it fits" : "Held: no room now");
+	snprintf(out, n, "%c%s %s|%s|%s", *color ? *color - 'a' + 'A' : ' ', *color ? color + 1 : "",
+		kinds[s->nc_shape.kind <= NAVI_EITHER ? s->nc_shape.kind : NAVI_EITHER], where,
+		s->nc_turns ? "L and R turn it" : "No Spin of its colour: won't turn");
+}
+
+const char *second_program_does(int program) {
+	static char does[160];
+	const char *about = navicust_about(program), *colon = about ? strchr(about, ':') : NULL;
+	snprintf(does, sizeof does, "%s", colon ? colon + 1 + (colon[1] == ' ') : "");
+	if (*does >= 'a' && *does <= 'z') *does = (char)(*does - 'a' + 'A');
+	return does;
+}
+
+const char *second_run_line(bool bug) { return bug ? "RUN now would bring a bug:" : "RUN now: no bug"; }
+
+const char *second_board_rules(void) {
+	return "Program parts on the command line, plus parts off it, no colour beside its own";
 }
