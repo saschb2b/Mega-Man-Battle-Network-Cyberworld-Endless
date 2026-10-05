@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 
-extern int way_dir;
+int way_last(void);
 extern const char *const ways[8];
 const char *way_to(int tx, int ty, int *far);
 bool duel_waiting(int *wx, int *wy);

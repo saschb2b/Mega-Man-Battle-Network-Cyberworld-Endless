@@ -5,7 +5,6 @@
 #include "director_keys.h"
 
 #include <math.h>
-#include <stdio.h>
 
 #include "autopilot.h"
 #include "bn6_fields.h"
@@ -17,6 +16,7 @@
 #include "director_see.h"
 #include "director_state.h"
 #include "director_way.h"
+#include "lesson_words.h"
 #include "talk.h"
 #include "town.h"
 
@@ -259,21 +259,38 @@ static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
 	return keys;
 }
 
-uint32_t director_keys(uint32_t keys) {
-	talk_only_update();
-	if (D.active) keys = choice_guard(shop_guard(keys));
-	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
-	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
-	bool a = (keys & KEY_A) != 0, a_pressed = a && !D.a_held;
-	D.l_held = l;
-	D.r_held = r;
-	D.a_held = a;
-	D.dir_held = (keys & PAD_KEYS) != 0;
-	D.map_shown = false;
-	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
-	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
-	/* (A ends the arrival's card early: its words wait on it) */
-	if (D.arrival_hold && a_pressed && cinema_card_age() >= CARD_SKIP) cinema_card_yield();
+/* R in the town away from the port: a step short of a jack-in cell, the
+ * step taken; else MegaMan's word on where the port is, and the arrow its
+ * way. The keys as they go on to the game. */
+static uint32_t town_r(uint32_t keys) {
+	int px = bn6_player_x(), py = bn6_player_y();
+	int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
+	int near = town_port_near(px, py, &nx, &ny);
+	/* (a step short of a jack-in cell: he takes it, and R jacks in; a
+	 * playtester stood at the mermaid fountain's rim a step off its
+	 * ring and pressed R five times) */
+	if (near >= 0 && near <= PORT_STEP * PORT_STEP) {
+		emu_write32(BN6_PLAYER_X, (uint32_t)nx << 16);
+		emu_write32(BN6_PLAYER_Y, (uint32_t)ny << 16);
+		cinema_arrow(0, 0);
+		D.arrow_pending = false;
+		return keys;
+	}
+	const char *way = town_way(&far);
+	/* (close by: which way to its nearest cell, as the crow flies, where
+	 * the walk to the front's middle wound round the basin and turned
+	 * from "up and to the left" to "straight down" a step apart) */
+	int how = near >= 0 && near < 128 * 128 ? PORT_ALMOST_CELL : dx * dx + dy * dy < 128 * 128 ? PORT_ALMOST : PORT_AWAY;
+	talk_start(port_words(how, how == PORT_ALMOST_CELL ? way_to(nx, ny, &far) : way), FACE_MEGAMAN);
+	D.arrow_pending = true;
+	cinema_arrow(way_last(), 600);
+	return keys & ~KEY_R;
+}
+
+/* A on the map: let go a fifth of a second after a chat closes, else
+ * turned to what it would talk to, or walked up to it; the keys as they go
+ * on to the game */
+static uint32_t a_keys(uint32_t keys, bool a_pressed) {
 	/* (no A a fifth of a second after a chat closes: a playtester's A
 	 * pressed through a chat's last box talked to the gift Prog beside him
 	 * again, twice a session) */
@@ -297,50 +314,12 @@ uint32_t director_keys(uint32_t keys) {
 			keys = talk_walk(keys & ~KEY_A);
 		}
 	}
-	/* SELECT on a layer: the map, while it is held */
-	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_used |= D.map_shown; keys &= ~KEY_SELECT; }
-	/* R on the port: the jack-in, which the arrow does not follow into its
-	 * flash and tunnel (a playtester saw it drawn over them) */
-	if (D.town && r_pressed && town_on_port(bn6_player_x(), bn6_player_y())) {
-		cinema_arrow(0, 0);
-		D.arrow_pending = false;
-	}
-	/* R in the town away from the port: MegaMan says where it is (the game
-	 * itself does nothing there) */
-	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP_PENDING) == 0 &&
-		!town_on_port(bn6_player_x(), bn6_player_y())) {
-		static char buf[160];
-		int px = bn6_player_x(), py = bn6_player_y();
-		int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
-		int near = town_port_near(px, py, &nx, &ny);
-		/* (a step short of a jack-in cell: he takes it, and R jacks in; a
-		 * playtester stood at the mermaid fountain's rim a step off its
-		 * ring and pressed R five times) */
-		if (near >= 0 && near <= PORT_STEP * PORT_STEP) {
-			emu_write32(BN6_PLAYER_X, (uint32_t)nx << 16);
-			emu_write32(BN6_PLAYER_Y, (uint32_t)ny << 16);
-			cinema_arrow(0, 0);
-			D.arrow_pending = false;
-			return keys;
-		}
-		const char *way = town_way(&far);
-		/* (close by: which way to its nearest cell, as the crow flies, where
-		 * the walk to the front's middle wound round the basin and turned
-		 * from "up and to the left" to "straight down" a step apart) */
-		if (near >= 0 && near < 128 * 128)
-			snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step up to it and press R!", town_info()->landmark, way_to(nx, ny, &far));
-		else if (dx * dx + dy * dy < 128 * 128)
-			snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step right up to it and press R!", town_info()->landmark, way);
-		else
-			snprintf(buf, sizeof buf, "@M No port here,Lan!|@M It's by the %s!", town_info()->landmark_at);
-		talk_start(buf, FACE_MEGAMAN);
-		D.arrow_pending = true;
-		cinema_arrow(way_dir, 600);
-		return keys & ~KEY_R;
-	}
-	/* on the map L is MegaMan's word on where they are: the game's own
-	 * has no lines for this story */
-	keys &= ~KEY_L;
+	return keys;
+}
+
+/* L on the map (`pressed` this frame): MegaMan's briefing, kept a while
+ * where it cannot be said yet */
+static void l_keys(bool pressed) {
 	/* (not while a warp or the jack-in departs, nor through a guardian's
 	 * staging or the battle it has armed; an L pressed as a chat closes is
 	 * kept half a second, as the first press after one went unheard) */
@@ -359,9 +338,44 @@ uint32_t director_keys(uint32_t keys) {
 		/* (the arrow shows through the words and a few seconds after) */
 		if (talk_start(status_words(), FACE_MEGAMAN) && (D.town || !D.objs.guardian.navi || !boss_beaten() || boss_done())) {
 			D.arrow_pending = true;
-			cinema_arrow(way_dir, 600);
+			cinema_arrow(way_last(), 600);
 		}
 	}
+}
+
+uint32_t director_keys(uint32_t keys) {
+	talk_only_update();
+	if (D.active) keys = choice_guard(shop_guard(keys));
+	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
+	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;
+	bool a = (keys & KEY_A) != 0, a_pressed = a && !D.a_held;
+	D.l_held = l;
+	D.r_held = r;
+	D.a_held = a;
+	D.dir_held = (keys & PAD_KEYS) != 0;
+	D.map_shown = false;
+	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
+	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
+	/* (A ends the arrival's card early: its words wait on it) */
+	if (D.arrival_hold && a_pressed && cinema_card_age() >= CARD_SKIP) cinema_card_yield();
+	keys = a_keys(keys, a_pressed);
+	/* SELECT on a layer: the map, while it is held */
+	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_note_held(D.map_shown); keys &= ~KEY_SELECT; }
+	/* R on the port: the jack-in, which the arrow does not follow into its
+	 * flash and tunnel (a playtester saw it drawn over them) */
+	if (D.town && r_pressed && town_on_port(bn6_player_x(), bn6_player_y())) {
+		cinema_arrow(0, 0);
+		D.arrow_pending = false;
+	}
+	/* R in the town away from the port: MegaMan says where it is (the game
+	 * itself does nothing there) */
+	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP_PENDING) == 0 &&
+		!town_on_port(bn6_player_x(), bn6_player_y()))
+		return town_r(keys);
+	/* on the map L is MegaMan's word on where they are: the game's own
+	 * has no lines for this story */
+	keys &= ~KEY_L;
+	l_keys(pressed);
 	return keys;
 }
 

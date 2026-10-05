@@ -16,13 +16,10 @@ duplicate src/net/net_gen.c 13
 includes src/core/main.c 24
 includes src/director/director.c 36
 includes src/director/director_layer.c 33
-includes src/director/director_save.c 21
 includes src/emu/scene_emu.c 23
 includes src/layer/layer_objs.c 32
 nesting src/audio/audio.c:mix 6
 nesting src/core/touch_art.c:rasterize 6
-nesting src/director/director.c:director_update 6
-nesting src/director/director_describe.c:director_describe 6
 nesting src/gfx/gfx.c:raw_text 6
 nesting src/layer/layer_objs.c:layer_objs_install 6
 nesting src/map/area_src.c:draw_layers 6
@@ -75,11 +72,6 @@ size src/map/netmap.c 1288
 size src/map/tiles.c 1599
 size src/net/net_gen.c 2059
 size src/world/town.c 1096
-words src/director/director.c 11
-words src/director/director_board.c 8
-words src/director/director_dark.c 5
-words src/director/director_duel.c 11
-words src/director/director_keys.c 3
 words src/director/powers.c 9
 words src/emu/guest_wait.c 3
 words src/layer/blockers.c 3

@@ -152,37 +152,18 @@ void duel_verdict(bool won) {
 	profile.duel_depth = (uint16_t)run.depth;
 	profile.duel_beat = beat;
 	profile_save();
-	int size = (int)sizeof D.duel_verdict, k = verdict_result(D.duel_verdict, sizeof D.duel_verdict, won, beat, rung, mine, his);
-	#define ADD(...) (k += snprintf(D.duel_verdict + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	/* (what his respect opens: docs/RIVAL.md) */
+	/* (what his respect opens: docs/RIVAL.md; the first clearance brings
+	 * the TagChip system, for good: issue #51) */
 	int after = rival_clearance();
 	if (after > before && after == 1) {
-		ADD("@C You've earned my first clearance,Lan.|@C The official Chip Orders are open to you now.|");
-		/* (and the TagChip system, for good: issue #51) */
-		ADD("@C And a NetBattler's trick. The TagChip system.|@C Tag two chips with SELECT in your Folder's EDIT.|"
-			"@C They'll come to your hand together.|@C As long as they total under 60 MB.|");
 		profile.tag_taught = 1;
 		profile_save();
 	}
-	else if (after > before) ADD("@C My full clearance,Lan.|@C Every official gate opens for you now.|");
-	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
-	/* (and the next rung, the door it leads to: a playtester's second win
-	 * read as for the record alone) */
-	if (beat && rung == 1 && after < 2) ADD("|@C Next time,no race. ProtoMan faces MegaMan himself.|@C Beat him,and my full clearance is yours.");
-	/* (Lan answers a win too: a playtester's first, after five losses, met
-	 * silence where every loss had had his "Next time, Chaud!") */
-	if (beat) ADD("|@L %s", rung == 2 ? "Good battle,ProtoMan! See ya,Chaud!"
-		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time!! See ya,Chaud!"
-		: "Yes!! See ya,Chaud!");
 	/* (and the gate beside the duel opens at once to its winner: the prize
 	 * where it was offered) */
 	bool opened = beat && layer_objs_official_level && after >= layer_objs_official_level;
-	if (opened) {
-		flag_set(LAYER_CLEARED_FLAG);
-		ADD("|@M Lan! The official gate here opens for us now!");
-	}
-	/* (Lan answers a loss, as he took the duel: Chaud had the last word) */
-	if (!beat) ADD("|@L Grr... Next time,Chaud!");
-	#undef ADD
+	if (opened) flag_set(LAYER_CLEARED_FLAG);
+	DuelVerdict v = { won, beat, opened, rung, mine, his, before, after };
+	verdict_words(D.duel_verdict, (int)sizeof D.duel_verdict, &v);
 	D.duel_verdict_due = true;
 }

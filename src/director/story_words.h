@@ -6,5 +6,8 @@ void beat_said(void);
 void arrival_words(void);
 void area_card(void);
 void clear_card(void);
+const char *final_words(void);
+const char *mail_words(int navi);
+const char *secret_call_words(void);
 
 #endif

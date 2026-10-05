@@ -12,6 +12,7 @@
 #include "netmap.h"
 #include "save.h"
 #include "talk.h"
+#include "town.h"
 
 /* Rush's gap (issue #14), named the first time MegaMan comes near its
  * stand on a layer: BN6 answers A there without RushFood by a sound alone,
@@ -44,4 +45,25 @@ void pack_words(void) {
 		profile.pack_taught = 1;
 		profile_save();
 	}
+}
+
+/* What the Mystery Data on a battlefield was, said the first time, after
+ * it was met, kept or broken, not before */
+const char *gem_words(void) {
+	return "@M Lan! Mystery Data on the battlefield!|@M Any hit breaks it,theirs or ours.|"
+		"@M If it's still there when we win,it's ours!";
+}
+
+/* MegaMan's word on R pressed in the town away from the port: almost at a
+ * jack-in cell (`way` the way to it), close to the port (`way` the walk's),
+ * or nowhere near it */
+const char *port_words(int how, const char *way) {
+	static char buf[160];
+	if (how == PORT_ALMOST_CELL)
+		snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step up to it and press R!", town_info()->landmark, way);
+	else if (how == PORT_ALMOST)
+		snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step right up to it and press R!", town_info()->landmark, way);
+	else
+		snprintf(buf, sizeof buf, "@M No port here,Lan!|@M It's by the %s!", town_info()->landmark_at);
+	return buf;
 }

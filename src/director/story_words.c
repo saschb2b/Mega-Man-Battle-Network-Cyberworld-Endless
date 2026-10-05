@@ -123,3 +123,31 @@ void clear_card(void) {
 	/* (an act continued from a checkpoint has no whole count) */
 	cinema_card(guardian_area_name(run.biome), "AREA CLEAR", who, D.act_resumed ? NULL : stats, rgba(248, 208, 88, 255), 220);
 }
+
+/* The short net won and its exit open: its end said on the map, before
+ * the pad (the win went from the pad straight to the title's summary),
+ * the arrival's growl answered, Dad's voice, and the endless net's hook (a
+ * playtester's first win ended on two lines). */
+const char *final_words(void) {
+	return "@M That was the Nest's last guardian,Lan...|@M The whole Net's gone quiet.|"
+		"@B Grrrr......|"
+		"@M ...Almost. Something deeper down is still awake.|@M The Nest was only its den...|"
+		"@D Lan,MegaMan,it's Dad! I watched it all. You did it!|"
+		"@D Whatever's growling down there,we'll be ready.|@D Now jack out and come home,you two.|"
+		"@L We did it!! The exit's open. Let's jack out!";
+}
+
+/* Dad's mail with guardian `navi`'s battle data, said once the arrival's
+ * card and words are done */
+const char *mail_words(int navi) {
+	static char words[160];
+	snprintf(words, sizeof words, "@M Lan,you've got mail from Dad!|@M Our battle data on %s! It's in the PET's E-Mail.",
+		guardian(navi)->name);
+	return words;
+}
+
+/* Chaud's call once the Secret Area's guardian is done */
+const char *secret_call_words(void) {
+	return "@C Lan,it's Chaud.|@C That wasn't ProtoMan. He's been in my PET all day.|@C You beat a copy. Watch yourself.|"
+		"@M The Nest can even copy ProtoMan...|@L Then we'd better stay on guard!";
+}

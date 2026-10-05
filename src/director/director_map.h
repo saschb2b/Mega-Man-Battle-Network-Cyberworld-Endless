@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 
-extern bool map_used;
+void map_note_held(bool held);
+bool map_was_held(void);
 
 #endif

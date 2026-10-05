@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "cinema.h"
+#include "dark_words.h"
 #include "darkbn6.h"
 #include "darkchips.h"
 #include "data.h"
@@ -20,7 +21,7 @@
 #include "talk.h"
 #include "xnavi.h"
 
-bool dark_price_told;    /* MegaMan has said all of a DarkChip's price (a new run or a CONTINUE forgets) */
+static bool dark_price_told;    /* MegaMan has said all of a DarkChip's price (a new run or a CONTINUE forgets) */
 
 /* A flame of BN6's own (docs/META.md, BN6's own DarkChips): BN6's blue
  * flame turned purple, holding kind `k`, one of the four BN6's battles
@@ -99,16 +100,12 @@ void dark_price(bool bn6) {
 	emu_write(BN6_NAVI_HP, &w[2], 2);
 	emu_write(BN6_NAVI_MAX_HP, &w[1], 2);
 	if (emu_debug_on()) fprintf(stderr, "dark: a DarkChip used: max HP %d -> %d (base %d -> %d), HP %d\n", max, v[1], base, v[0], v[2]);
-	char words[300];
-	if (bn6 && !(profile.dark6_taught & DARK6_PRICE_TAUGHT)) {
-		snprintf(words, sizeof words, "@M That DarkChip burned a BugFrag each time,Lan.|@M Its darkness bugged me till the battle ended.|"
-			"@M That bug's gone now. But something stays...|@M My max HP fell by %d,for this whole dive.", base - v[0]);
+	int kind = bn6 && !(profile.dark6_taught & DARK6_PRICE_TAUGHT) ? DARK_PRICE_BN6 : !dark_price_told ? DARK_PRICE_FIRST : DARK_PRICE_MORE;
+	if (kind == DARK_PRICE_BN6) {
 		profile.dark6_taught |= DARK6_PRICE_TAUGHT;
 		profile_save();
-	} else if (!dark_price_told)
-		snprintf(words, sizeof words, "@M Ngh... That DarkChip took something from me,Lan.|@M My max HP fell by %d,for this whole dive.", base - v[0]);
-	else snprintf(words, sizeof words, "@M Ngh... The DarkChip took %d more max HP.", base - v[0]);
-	snprintf(D.dark_words, sizeof D.dark_words, "%s", words);
+	}
+	snprintf(D.dark_words, sizeof D.dark_words, "%s", dark_price_words(kind, base - v[0]));
 	dark_price_told = true;
 }
 
@@ -117,7 +114,7 @@ void dark_price(bool bn6) {
  * chip for want of a BugFrag, MegaMan says so, once a session (a Sword's
  * 80 where the card had read DrkSword's 400 from the battle's start, or
  * since its last BugFrag). */
-bool dark_base_told;
+static bool dark_base_told;
 void dark6_after_battle(void) {
 	unsigned ran = darkbn6_ran_take(), base = darkbn6_base_take();
 	if (ran) { dark_price(true); return; }
@@ -127,7 +124,7 @@ void dark6_after_battle(void) {
 	ChipInfo dc, bc;
 	chip_info(DARK_BN6_FIRST + d, &dc);
 	chip_info(darkbn6_base(DARK_BN6_FIRST + d), &bc);
-	snprintf(D.dark_words, sizeof D.dark_words, "@M We had no BugFrags,Lan...|@M So that %s was only a %s.", dc.name, bc.name);
+	dark_base_words(D.dark_words, sizeof D.dark_words, dc.name, bc.name);
 	dark_base_told = true;
 }
 
@@ -156,4 +153,11 @@ void dark_pack(void) {
 		game_call_ret(BN6_GIVE_CHIPS, (uint32_t)id, CHIP_CODE_STAR, 1, out);
 		if (emu_debug_on()) fprintf(stderr, "dark: BN6's DarkChip %d to the Pack\n", id);
 	}
+}
+
+/* What MegaMan has said of DarkChips this session, forgotten by a run
+ * begun or continued (with the hooks' events, drop_events) */
+void dark_forget(void) {
+	dark_price_told = false;
+	dark_base_told = false;
 }

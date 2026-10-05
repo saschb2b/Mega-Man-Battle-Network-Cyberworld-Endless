@@ -19,11 +19,6 @@
 
 static bool free_to_speak(void);
 
-/* A program left off the board that cannot fit beside those on it: said
- * once a board size (the next grows it), not on every layer; the words, or
- * NULL when said already. */
-int no_room_told = -1;   /* the board size it was said for (a new run or a CONTINUE forgets) */
-
 /* The programs seen on the board since the run went on (a variant a bit):
  * one taken off since was the player's choice, and MegaMan told a
  * playtester to install the SlipRunr he had just taken off, three times
@@ -33,10 +28,14 @@ int no_room_told = -1;   /* the board size it was said for (a new run or a CONTI
  * Spin, five times in two layers, after the PET, in L's words and after
  * each battle). A new run forgets both; a CONTINUE takes them back. */
 static uint8_t placed_seen[47 * 4 / 8 + 1];
-uint8_t off_explained[47 * 4 / 8 + 1];
+static uint8_t off_explained[47 * 4 / 8 + 1];
 
-bool bit_of(const uint8_t *set, int v) { return set[v >> 3] >> (v & 7) & 1; }
-void bit_set(uint8_t *set, int v) { set[v >> 3] |= (uint8_t)(1 << (v & 7)); }
+static bool bit_of(const uint8_t *set, int v) { return set[v >> 3] >> (v & 7) & 1; }
+static void bit_set(uint8_t *set, int v) { set[v >> 3] |= (uint8_t)(1 << (v & 7)); }
+
+/* Whether MegaMan has said all about program variant v off the board */
+bool off_board_explained(int v) { return bit_of(off_explained, v); }
+void off_board_explain(int v) { bit_set(off_explained, v); }
 
 static void placed_note(void) {
 	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
@@ -47,6 +46,7 @@ static void placed_note(void) {
 }
 
 void off_board_forget(void) {
+	no_room_forget();
 	memset(placed_seen, 0, sizeof placed_seen);
 	memset(off_explained, 0, sizeof off_explained);
 }
@@ -220,18 +220,12 @@ void spin_watch(void) {
  * PET's return has calmed, as code_watch's. */
 void reg_watch(void) {
 	if (D.pet_seen || !free_to_speak()) return;
-	char words[400];
-	int reg = emu_read8(BN6_NAVI_REG);
-	if (D.reg_due && !profile.reg_taught)
-		snprintf(words, sizeof words, "@M A RegUp,Lan! Our Reg memory's %d MB now!|@M A Regular Chip starts every battle in our hand!|"
-			"@M SELECT picks one in the Folder's EDIT. Up to %d MB!|@M A + chip like Atk+10 powers up the chip picked before it.|"
-			"@M Each dive starts at 4 MB,so watch for RegUps!", reg, reg);
-	else if (D.reg_due) snprintf(words, sizeof words, "@M Reg memory up! It's %d MB now,Lan!", reg);
-	else if (rival_clearance() >= 1 && !profile.tag_taught)
-		snprintf(words, sizeof words, "@M Lan! Chaud's clearance comes with the TagChip system!|@M Press SELECT in the Folder's EDIT,|"
-			"@M then pick Choose TagChip.|@M Two tagged chips come to our hand together.|@M As long as they total under 60 MB!");
+	int reg = emu_read8(BN6_NAVI_REG), kind;
+	if (D.reg_due && !profile.reg_taught) kind = REG_LESSON;
+	else if (D.reg_due) kind = REG_UP;
+	else if (rival_clearance() >= 1 && !profile.tag_taught) kind = REG_TAGCHIP;
 	else return;
-	if (!talk_start(words, FACE_MEGAMAN)) return;
+	if (!talk_start(reg_words(kind, reg), FACE_MEGAMAN)) return;
 	if (D.reg_due) profile.reg_taught = 1;
 	else profile.tag_taught = 1;
 	D.reg_due = false;
@@ -254,10 +248,7 @@ void code_watch(void) {
 	 * the PET closed, the box was drawn over its fading screen, garbled) */
 	const char *about = D.code_due ? navicust_about(D.code_due) : NULL;
 	if (!about || D.pet_seen || !free_to_speak()) return;
-	char words[200];
-	snprintf(words, sizeof words, "@M %.*s's compressed,Lan!|@M Dad's lab keeps its code for every dive now.|@M It's in his Compression mail!",
-		(int)strcspn(about, ":"), about);
-	if (talk_start(words, FACE_MEGAMAN)) D.code_due = 0;
+	if (talk_start(compressed_words(about), FACE_MEGAMAN)) D.code_due = 0;
 }
 
 static NaviPart board_parts[BN6_NAVICUST_SLOTS];
@@ -430,7 +421,7 @@ void bug_watch(void) {
 	for (int t = 0; t < NAVICUST_BUGS; ++t) had |= D.bugs[t] != 0;
 	/* (a board placed anew is the NaviCust's RUN; an ExpMemry only grows it) */
 	const char *words = navicust_bug_words(now, board != D.board, bug_cause());
-	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start("@M Phew! Our NaviCust runs clean now,Lan!", FACE_MEGAMAN)) {
+	if (*words ? talk_start(words, FACE_MEGAMAN) : !had || talk_start(clean_words(), FACE_MEGAMAN)) {
 		memcpy(D.bugs, now, sizeof now);
 		D.board = board;
 		D.board_size = size;

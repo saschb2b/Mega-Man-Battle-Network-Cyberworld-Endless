@@ -19,7 +19,10 @@
 #include "platform.h"
 #include "save.h"
 
-bool map_used;   /* the layer's map has been held (SELECT) since the game started */
+static bool map_used;   /* the layer's map has been held (SELECT) since the game started */
+
+void map_note_held(bool held) { map_used |= held; }
+bool map_was_held(void) { return map_used; }
 
 /* ProtoMan's mark on the layer's map, and its key's */
 #define RIVAL_MARK { 255, 96, 176, 255 }

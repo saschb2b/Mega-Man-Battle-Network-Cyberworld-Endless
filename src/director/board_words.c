@@ -3,6 +3,7 @@
 #include "board_words.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "director_board.h"
 #include "director_folder.h"
@@ -10,6 +11,13 @@
 #include "save.h"
 
 static const char *code_words(int v, bool as_it_stands);
+
+/* A program left off the board that cannot fit beside those on it: said
+ * once a board size (the next grows it), not on every layer; the words, or
+ * NULL when said already. */
+static int no_room_told = -1;   /* the board size it was said for (a new run or a CONTINUE forgets) */
+
+void no_room_forget(void) { no_room_told = -1; }
 
 const char *no_room_words(const char *name, int v) {
 	static char words[360];
@@ -32,8 +40,8 @@ const char *off_board_words(void) {
 	static char words[480];
 	if (!off || !*off) return NULL;
 	if (!fits_beside_placed(offv)) return no_room_words(off, offv);
-	if (bit_of(off_explained, offv)) return NULL;
-	bit_set(off_explained, offv);
+	if (off_board_explained(offv)) return NULL;
+	off_board_explain(offv);
 	/* (and whether it turns: a playtester pressed L and R on his gift's
 	 * SuperArmor with no Spin, and nothing said why; and whether it takes
 	 * moving others first, or its code) */
@@ -68,3 +76,31 @@ const char *cramped_words(void) {
 		code_words(v, true));
 	return words;
 }
+
+/* MegaMan's words on Reg memory (issue #51), `reg` MB of it: a RegUp's
+ * lesson, the first in any run; a RegUp after that; and the TagChip
+ * system, for a profile whose Chaud's clearance came before it did */
+const char *reg_words(int kind, int reg) {
+	static char words[400];
+	if (kind == REG_LESSON)
+		snprintf(words, sizeof words, "@M A RegUp,Lan! Our Reg memory's %d MB now!|@M A Regular Chip starts every battle in our hand!|"
+			"@M SELECT picks one in the Folder's EDIT. Up to %d MB!|@M A + chip like Atk+10 powers up the chip picked before it.|"
+			"@M Each dive starts at 4 MB,so watch for RegUps!", reg, reg);
+	else if (kind == REG_UP) snprintf(words, sizeof words, "@M Reg memory up! It's %d MB now,Lan!", reg);
+	else
+		snprintf(words, sizeof words, "@M Lan! Chaud's clearance comes with the TagChip system!|@M Press SELECT in the Folder's EDIT,|"
+			"@M then pick Choose TagChip.|@M Two tagged chips come to our hand together.|@M As long as they total under 60 MB!");
+	return words;
+}
+
+/* A program's compression code entered the first time in any run (issue
+ * #50; `about` its NaviCust words, "Name: ..."): where Dad keeps it */
+const char *compressed_words(const char *about) {
+	static char words[200];
+	snprintf(words, sizeof words, "@M %.*s's compressed,Lan!|@M Dad's lab keeps its code for every dive now.|@M It's in his Compression mail!",
+		(int)strcspn(about, ":"), about);
+	return words;
+}
+
+/* The NaviCust's bugs gone */
+const char *clean_words(void) { return "@M Phew! Our NaviCust runs clean now,Lan!"; }

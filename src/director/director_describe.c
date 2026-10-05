@@ -166,6 +166,53 @@ static void battle_describe(FILE *f) {
 	}
 }
 
+/* For the developer reproducing a playtest (CYBERWORLD_STATE_POS): where
+ * Lan or MegaMan is, the floor around him, the layer drawn in letters
+ * (=map), and the game's NPC objects near him */
+static void describe_pos(FILE *f) {
+	fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", bn6_player_x(),
+		bn6_player_y(), bn6_player_z(), emu_read8(BN6_PLAYER_LOCKED),
+		emu_read8(BN6_PLAYER_STATE), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
+		flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
+	if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
+	else {
+		int ns = 0, nf = 0;
+		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) { ns += D.seen[y][x]; nf += D.seen[y][x] && layer.cell[y][x] == C_PATH; }
+		fprintf(f, "seen %d floor %d\n", ns, nf);
+		fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
+			D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
+		/* the floor around him, panels (x across, y down; @ he, # floor) */
+		int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
+		if (netmap_panel(px, py, &cx, &cy)) {
+			int wx, wy;
+			netmap_world(cx, cy, &wx, &wy);
+			fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
+			goal_way();
+			fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
+			for (int y = cy - 4; y <= cy + 4; ++y) {
+				fprintf(f, "cells ");
+				for (int x = cx - 4; x <= cx + 4; ++x)
+					fputc(x == cx && y == cy ? '@' : x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH ? '#' : '.', f);
+				fputc('\n', f);
+			}
+			/* (CYBERWORLD_STATE_POS=map: the whole layer, with its objects
+			 * and the arrow's walk: * the walk, + where the arrow aims,
+			 * letters the objects, ^ raised floor, , the floor of the
+			 * room before a guardian's arena) */
+			if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) state_map(f, cx, cy);
+		}
+	}
+	/* the game's NPC objects near him: flags, state, radius, lock, text */
+	int px = bn6_player_x(), py = bn6_player_y();
+	for (int i = 0; i < 16; ++i) {
+		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
+		int x = (int16_t)emu_read16(o + BN6_NPC_X16), y = (int16_t)emu_read16(o + BN6_NPC_Y16), z = (int16_t)emu_read16(o + BN6_NPC_Z16);
+		if (!(emu_read8(o) & 1) || ((abs(x - px) > 64 || abs(y - py) > 64) && !getenv("CYBERWORLD_STATE_ALLNPC"))) continue;
+		fprintf(f, "npc %d flags %02x state %02x radius %d zreach %d locked %d text %d at %d %d %d\n", i, emu_read8(o),
+			emu_read8(o + BN6_NPC_STATE), emu_read8(o + BN6_NPC_RADIUS), emu_read8(o + BN6_NPC_Z_REACH), emu_read8(o + BN6_NPC_LOCKED), emu_read8(o + BN6_NPC_SCRIPT), x, y, z);
+	}
+}
+
 void director_describe(FILE *f) {
 	if (!D.active) { fprintf(f, "where none\n"); return; }
 	int sub = emu_read8(BN6_GAMESTATE), hp, max;
@@ -177,49 +224,7 @@ void director_describe(FILE *f) {
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
 	battle_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
-	if (getenv("CYBERWORLD_STATE_POS")) {
-		fprintf(f, "pos %d %d %d locked %d jt %02x ace0 %d canmove %d f1718 %d f1719 %d cinema %d\n", bn6_player_x(),
-			bn6_player_y(), bn6_player_z(), emu_read8(BN6_PLAYER_LOCKED),
-			emu_read8(BN6_PLAYER_STATE), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
-			flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
-		if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
-		else {
-			int ns = 0, nf = 0;
-			for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) { ns += D.seen[y][x]; nf += D.seen[y][x] && layer.cell[y][x] == C_PATH; }
-			fprintf(f, "seen %d floor %d\n", ns, nf);
-			fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
-				D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
-			/* the floor around him, panels (x across, y down; @ he, # floor) */
-			int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
-			if (netmap_panel(px, py, &cx, &cy)) {
-				int wx, wy;
-				netmap_world(cx, cy, &wx, &wy);
-				fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
-				goal_way();
-				fprintf(f, "way %d %s\n", way_dir, ways[way_dir]);
-				for (int y = cy - 4; y <= cy + 4; ++y) {
-					fprintf(f, "cells ");
-					for (int x = cx - 4; x <= cx + 4; ++x)
-						fputc(x == cx && y == cy ? '@' : x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH ? '#' : '.', f);
-					fputc('\n', f);
-				}
-				/* (CYBERWORLD_STATE_POS=map: the whole layer, with its objects
-				 * and the arrow's walk: * the walk, + where the arrow aims,
-				 * letters the objects, ^ raised floor, , the floor of the
-				 * room before a guardian's arena) */
-				if (!strcmp(getenv("CYBERWORLD_STATE_POS"), "map")) state_map(f, cx, cy);
-			}
-		}
-		/* the game's NPC objects near him: flags, state, radius, lock, text */
-		int px = bn6_player_x(), py = bn6_player_y();
-		for (int i = 0; i < 16; ++i) {
-			uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
-			int x = (int16_t)emu_read16(o + BN6_NPC_X16), y = (int16_t)emu_read16(o + BN6_NPC_Y16), z = (int16_t)emu_read16(o + BN6_NPC_Z16);
-			if (!(emu_read8(o) & 1) || ((abs(x - px) > 64 || abs(y - py) > 64) && !getenv("CYBERWORLD_STATE_ALLNPC"))) continue;
-			fprintf(f, "npc %d flags %02x state %02x radius %d zreach %d locked %d text %d at %d %d %d\n", i, emu_read8(o),
-				emu_read8(o + BN6_NPC_STATE), emu_read8(o + BN6_NPC_RADIUS), emu_read8(o + BN6_NPC_Z_REACH), emu_read8(o + BN6_NPC_LOCKED), emu_read8(o + BN6_NPC_SCRIPT), x, y, z);
-		}
-	}
+	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
 	/* (named as the game shows him: a playtester reads this; a dev's

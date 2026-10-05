@@ -5,10 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern int no_room_told;
-extern uint8_t off_explained[47 * 4 / 8 + 1];
-bool bit_of(const uint8_t *set, int v);
-void bit_set(uint8_t *set, int v);
+bool off_board_explained(int v);
+void off_board_explain(int v);
 void off_board_forget(void);
 void off_board_save(void);
 void off_board_load(void);

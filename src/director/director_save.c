@@ -13,14 +13,12 @@
 #include "debug.h"
 #include "director.h"
 #include "director_board.h"
-#include "director_dark.h"
 #include "director_duel.h"
 #include "director_folder.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "gamecall.h"
 #include "layer_make.h"
-#include "loot.h"
 #include "netmap.h"
 #include "save.h"
 #include "save_blob.h"
@@ -97,7 +95,7 @@ void save_checkpoint(void) {
 	save_write_blob("run.area", LAYER_AREA_MAGIC, &D.layer_tiles, sizeof D.layer_tiles);
 	/* the map's panels seen so far, beside the state they go with */
 	save_write_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen);
-	save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made);
+	folder_made_save();
 	act_note_save();
 	dark_save();
 	souls_save();
@@ -161,15 +159,10 @@ static bool same_layer(void) {
 
 bool director_resume(void) {
 	drop_events();
-	no_room_told = -1;
-	dark_price_told = false;
 	off_board_load();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
-	/* (the folder the layer was made with: none for a run saved before it
-	 * was kept, which made its stock without it) */
-	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
-	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
+	folder_made_load();
 	act_note_read();
 	dark_load(run.seed);
 	souls_load(run.seed);

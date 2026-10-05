@@ -405,8 +405,6 @@ bool director_start_run(void) {
 	souls_new_run(run.seed);
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
-	no_room_told = -1;
-	dark_price_told = false;
 	off_board_forget();
 	forget_heard();
 	if (emu_debug_on()) {
@@ -453,8 +451,6 @@ bool director_start_run(void) {
 
 bool director_start_layer(void) {
 	drop_events();
-	no_room_told = -1;
-	dark_price_told = false;
 	off_board_forget();
 	forget_heard();
 	D.town = false;

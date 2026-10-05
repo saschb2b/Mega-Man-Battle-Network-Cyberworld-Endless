@@ -180,11 +180,11 @@ static int off_board_note(char *buf, int k, int size) {
 	if (off && !fits_beside_placed(offv)) {
 		const char *w = no_room_words(*off ? off : "That program", offv);
 		if (w) ADD("%s|", w);
-	} else if (off && *off && bit_of(off_explained, offv)) {
+	} else if (off && *off && off_board_explained(offv)) {
 		if (fits_as_it_stands(offv)) ADD("@M Lan,%s is still off our board!|", off);
 	} else if (off && *off) {
 		ADD("@M Lan,%s isn't on our NaviCust board yet!|@M In the PET,go to MegaMan,then NaviCust!|@M %s|", off, navicust_turn_words(offv));
-		bit_set(off_explained, offv);
+		off_board_explain(offv);
 	} else if (off) ADD("@M Lan,a program isn't on our NaviCust board yet!|@M In the PET,go to MegaMan,then NaviCust!|");
 	if (k > k0) D.off_told = true;
 	#undef ADD
@@ -275,10 +275,10 @@ static int goal_words(char *buf, int k, int size, bool to_heal, bool told) {
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (to_guardian) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
 	const char *lies = way_to(gx, gy, &far), *what = to_guardian ? "guardian" : "exit";
-	int lies_dir = way_dir, seen_far = far;
+	int lies_dir = way_last(), seen_far = far;
 	const char *way = route_to(gx, gy, &far);
 	if (!way) way = way_to(gx, gy, &far);
-	int apart = to_heal ? 0 : abs(way_dir - lies_dir);
+	int apart = to_heal ? 0 : abs(way_last() - lies_dir);
 	if (apart > 4) apart = 8 - apart;
 	static const char *const how_far[3] = { "It's close!", "It's a ways off.", "It's a long way yet." };
 	if (D.objs.guardian.navi && !boss_done() && boss_beaten()) ADD("@M Let's grab the Guardian Data,Lan!");
@@ -476,7 +476,7 @@ static int more_words(char *buf, int k, int size, const Here *h) {
 	k = off_board_note(buf, k, size);
 	/* (the map's tip on the run's first layers, until the map has been
 	 * held: a playtester who used it heard it again every run) */
-	if (run.depth <= 2 && !map_used) ADD("@M Hold SELECT for a map of where we've been!|");
+	if (run.depth <= 2 && !map_was_held()) ADD("@M Hold SELECT for a map of where we've been!|");
 	#undef ADD
 	return k;
 }

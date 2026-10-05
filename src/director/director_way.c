@@ -19,7 +19,7 @@
 /* Which way the exit pad lies from MegaMan, as the screen shows it (the
  * d-pad's UP moves +X -Y, RIGHT +X +Y: a world step (dx, dy) goes
  * dx + dy across and (dy - dx) / 2 down), and how far. */
-int way_dir;   /* the index of the last way_to: 0 right, then clockwise */
+static int way_dir;   /* the index of the last way_to: 0 right, then clockwise */
 const char *const ways[8] = {
 	"to the right", "to the lower right", "straight down", "to the lower left",
 	"to the left", "to the upper left", "straight up", "to the upper right",
@@ -30,6 +30,9 @@ const char *const ways[8] = {
  * sixteen to twenty panels, the other areas' thirty to forty-five; from
  * fourteen, "a long way yet" named a homepage's exit eight panels on
  * (session 62). */
+/* The last way found (way_to, route_to, goal_way): 0 right, then clockwise */
+int way_last(void) { return way_dir; }
+
 static int far_of(int panels) { return panels < 5 ? 0 : panels < 25 ? 1 : 2; }
 
 const char *way_to(int tx, int ty, int *far) {

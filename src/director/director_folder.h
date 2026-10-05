@@ -8,10 +8,8 @@
 #include "flags.h"
 
 void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]);
-extern uint16_t folder_made[BN6_FOLDER_ENTRIES];
-
-#define FOLDER_MADE_MAGIC 0x43464C44u   /* "CFLD" */
-
+void folder_made_save(void);
+void folder_made_load(void);
 void note_folder_codes(void);
 void own_folder_chips(void);
 void dev_folder(void);

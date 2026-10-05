@@ -11,7 +11,7 @@
 
 /* Chaud's first words on a duel's end, with both times as the results
  * screen shows them: the netbattle, a win, a hit taken, a time too slow. */
-int verdict_result(char *out, size_t n, bool won, bool beat, int rung, int mine, int his) {
+static int verdict_result(char *out, size_t n, bool won, bool beat, int rung, int mine, int his) {
 	char a[16], b[16];
 	snprintf(a, sizeof a, "%d:%02d.%02d", mine / 3600, mine / 60 % 60, (mine % 60) * 100 / 60);
 	snprintf(b, sizeof b, "%d:%02d.%02d", his / 3600, his / 60 % 60, (his % 60) * 100 / 60);
@@ -71,4 +71,33 @@ const char *duel_call_words(void) {
 	snprintf(call + n, sizeof call - n, "|@L %s", layer_objs_duel_later ? "We'll be ready,Chaud!"
 		: profile.duel_won + profile.duel_lost ? "You're on,Chaud!" : "Chaud!? ...You're on!");
 	return call;
+}
+
+/* Chaud's words on a duel's end (duel_verdict), with both times as the
+ * results screen shows them, into `out` (`size` bytes) */
+void verdict_words(char *out, int size, const DuelVerdict *v) {
+	int k = verdict_result(out, (size_t)size, v->won, v->beat, v->rung, v->mine, v->his);
+	#define ADD(...) (k += snprintf(out + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	/* (what his respect opens: docs/RIVAL.md) */
+	if (v->after > v->before && v->after == 1) {
+		ADD("@C You've earned my first clearance,Lan.|@C The official Chip Orders are open to you now.|");
+		/* (and the TagChip system, for good: issue #51) */
+		ADD("@C And a NetBattler's trick. The TagChip system.|@C Tag two chips with SELECT in your Folder's EDIT.|"
+			"@C They'll come to your hand together.|@C As long as they total under 60 MB.|");
+	}
+	else if (v->after > v->before) ADD("@C My full clearance,Lan.|@C Every official gate opens for you now.|");
+	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);
+	/* (and the next rung, the door it leads to: a playtester's second win
+	 * read as for the record alone) */
+	if (v->beat && v->rung == 1 && v->after < 2) ADD("|@C Next time,no race. ProtoMan faces MegaMan himself.|@C Beat him,and my full clearance is yours.");
+	/* (Lan answers a win too: a playtester's first, after five losses, met
+	 * silence where every loss had had his "Next time, Chaud!") */
+	if (v->beat) ADD("|@L %s", v->rung == 2 ? "Good battle,ProtoMan! See ya,Chaud!"
+		: profile.duel_won == 1 && profile.duel_lost ? "We finally beat his time!! See ya,Chaud!"
+		: "Yes!! See ya,Chaud!");
+	/* (the gate beside the duel, opened to its winner) */
+	if (v->opened) ADD("|@M Lan! The official gate here opens for us now!");
+	/* (Lan answers a loss, as he took the duel: Chaud had the last word) */
+	if (!v->beat) ADD("|@L Grr... Next time,Chaud!");
+	#undef ADD
 }

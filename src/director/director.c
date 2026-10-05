@@ -329,7 +329,7 @@ void drop_events(void) {
 	HookEvent ev[32];
 	while (emu_hook_events(ev, 32) == 32) {}
 	darkbn6_battle_begins();
-	dark_base_told = false;
+	dark_forget();
 }
 
 static void words_due(void) {
@@ -353,13 +353,9 @@ static void gate_and_rush_words(void) {
 	rush_hint();
 }
 
-void director_update(void) {
-	take_events();
-	if (!D.active) return;
-	if (D.town) { town_update(); return; }
-	++D.frame;
-	++D.act_frames;
-	/* MegaMan deleted: the game plays its GAME OVER, then the run ends */
+/* MegaMan deleted: the game plays its GAME OVER, then the run ends; true
+ * while it plays */
+static bool gameover_update(void) {
 	int mode = main_mode();
 	if (mode == BN6_MODE_GAME_OVER && !D.gameover) {
 		D.gameover = true;
@@ -373,122 +369,118 @@ void director_update(void) {
 	}
 	if (D.gameover) {
 		if (mode == BN6_MODE_START_SCREEN) end_run();
-		return;
+		return true;
 	}
-	if (follow_exit_warp()) return;
-	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
-	arrow_update();
-	if (on_map()) {
-		/* what MegaMan has come near, for the map */
-		int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
-		if (netmap_panel(px, py, &cx, &cy)) {
-			for (int y = cy - 4; y <= cy + 4; ++y)
-				for (int x = cx - 4; x <= cx + 4; ++x)
-					if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
-			/* a platform he stands on, all of it */
-			for (int i = 0; i < layer.nrooms; ++i) {
-				const Room *r = &layer.rooms[i];
-				if (cx < r->x || cy < r->y || cx >= r->x + r->w || cy >= r->y + r->h) continue;
-				for (int y = r->y - 1; y <= r->y + r->h; ++y)
-					for (int x = r->x - 1; x <= r->x + r->w; ++x)
-						if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
-			}
-			last_stop(cx, cy);
-			/* the short net's last guardian fallen and its exit open: the
-			 * run's end said on the map, before the pad (the win went from
-			 * the pad straight to the title's summary) */
-			if (!D.final_told && run.biome == BIOME_NEST && run_short_last(run.depth) && boss_done() && !emu_read8(BN6_CHATBOX) &&
-				!talk_busy() && !cinema_busy() && !D.warping &&
-				/* (the arrival's growl answered, Dad's voice, and the endless
-				 * net's hook: a playtester's first win ended on two lines) */
-				talk_start("@M That was the Nest's last guardian,Lan...|@M The whole Net's gone quiet.|"
-					"@B Grrrr......|"
-					"@M ...Almost. Something deeper down is still awake.|@M The Nest was only its den...|"
-					"@D Lan,MegaMan,it's Dad! I watched it all. You did it!|"
-					"@D Whatever's growling down there,we'll be ready.|@D Now jack out and come home,you two.|"
-					"@L We did it!! The exit's open. Let's jack out!", FACE_MEGAMAN))
-				D.final_told = true;
-		}
+	return false;
+}
+
+/* The short net's last guardian fallen and its exit open: the run's end
+ * said on the map, before the pad (the win went from the pad straight to
+ * the title's summary) */
+static void final_update(void) {
+	if (!D.final_told && run.biome == BIOME_NEST && run_short_last(run.depth) && boss_done() && !emu_read8(BN6_CHATBOX) &&
+		!talk_busy() && !cinema_busy() && !D.warping && talk_start(final_words(), FACE_MEGAMAN))
+		D.final_told = true;
+}
+
+/* MegaMan on the map: what he has come near, for the map; the last stop
+ * before a guardian's arena; the short net's end */
+static void map_update(void) {
+	/* what MegaMan has come near, for the map */
+	int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
+	if (!netmap_panel(px, py, &cx, &cy)) return;
+	for (int y = cy - 4; y <= cy + 4; ++y)
+		for (int x = cx - 4; x <= cx + 4; ++x)
+			if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
+	/* a platform he stands on, all of it */
+	for (int i = 0; i < layer.nrooms; ++i) {
+		const Room *r = &layer.rooms[i];
+		if (cx < r->x || cy < r->y || cx >= r->x + r->w || cy >= r->y + r->h) continue;
+		for (int y = r->y - 1; y <= r->y + r->h; ++y)
+			for (int x = r->x - 1; x <= r->x + r->w; ++x)
+				if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
 	}
-	/* (the PET's first menu is a screen of the game's own mode, its pages
-	 * and the shops other modes: either; not the way back to the map after
-	 * a battle or a warp, which had MegaMan name a program off the board
-	 * after every fight) */
-	int screen = emu_read8(BN6_GAMESTATE);
-	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); }
-	cinema_on_map(on_map());
-	if (!on_map()) {
-		int sub = emu_read8(BN6_GAMESTATE);
-		if (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE) {
-			emu_battle_release();   /* the forced battle has begun */
-			if (!D.in_battle) {
-				bool guardian = boss_fighting();
-				D.record_known = guardian;
-				if (!guardian && !D.challenge) ++D.battles;
-				if (guardian) runlog_battle_start(NULL, "guardian");
-			}
-			D.in_battle = true;
-			/* the duel's time: the results screen's DeleteTime (its hits
-			 * come as events: docs/RIVAL.md) */
-			if (D.duel && sub == BN6_SUB_BATTLE) {
-				int t = (int)emu_read32(BN6_BATTLE_TIMER);
-				if (t > D.duel_time) D.duel_time = t;
-			}
-			/* the battle the game was handed, once StartBattle has named
-			 * its record (a re-roll may have come between its roll and
-			 * now) */
-			if (!D.record_known) {
-				int s = D.battle_record ? emu_encounter_record(D.battle_record) : -2;
-				if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
-				if (s != -2) {
-					D.record_known = true;
-					loot_battle_fought(&D.next);
-					runlog_battle_start(&D.next, D.challenge ? "challenge" : "battle");
-				}
-				if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);
-			}
-			/* (where the game put MegaMan, once a battle) */
-			if (emu_debug_on() && !D.placed_told)
-				for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
-					uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-					if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) {
-						fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
-						D.placed_told = true;
-						break;
-					}
-				}
-		}
-		return;
+	last_stop(cx, cy);
+	final_update();
+}
+
+/* A battle under way, the game off its map: its start counted, the duel's
+ * time, the battle the game was handed */
+static void battle_update(void) {
+	int sub = emu_read8(BN6_GAMESTATE);
+	if (sub != BN6_SUB_BATTLE_INIT && sub != BN6_SUB_BATTLE) return;
+	emu_battle_release();   /* the forced battle has begun */
+	if (!D.in_battle) {
+		bool guardian = boss_fighting();
+		D.record_known = guardian;
+		if (!guardian && !D.challenge) ++D.battles;
+		if (guardian) runlog_battle_start(NULL, "guardian");
 	}
-	if (D.in_battle) {
-		/* back from a battle: count the deleted viruses (a navi counts below) */
-		D.in_battle = false;
-		D.placed_told = false;
-		D.battle_record = 0;
-		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-		runlog_battle_end(won);
-		/* the PET's battle data on the viruses just fought */
-		if (!boss_fighting()) {
-			for (int i = 0; i < D.next.nfoes; ++i)
-				if (D.next.foes[i].kind == FOE_VIRUS) profile_family_note(D.next.foes[i].family);
-			profile_save();
-			/* (and, the first time, what the Mystery Data on its field
-			 * was: said after it was met, kept or broken, not before) */
-			for (int i = 0; i < D.next.nobj; ++i) D.gem_due |= D.next.obj[i].kind >> 4 == FIELD_GEM && !profile.gem_taught;
-		}
-		if (emu_debug_on() && won) {
-			int r = emu_read16(BN6_BATTLE_REWARD);
-			if (r >> 14 == 0 && r != 0xFFFF) {
-				ChipInfo ci;
-				chip_info(r & 0x1FF, &ci);
-				fprintf(stderr, "battle reward %s %c (folder codes %c%c%c)\n", ci.name, (r >> 9 & 0x1F) >= 26 ? '*' : 'A' + (r >> 9 & 0x1F),
-					run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-', run.codes[2] ? 'A' + run.codes[2] - 1 : '-');
-			} else fprintf(stderr, "battle reward %04x\n", r);
-		}
-		if (won && !boss_fighting()) run.viruses_deleted += D.foes;
-		if (!D.challenge && !boss_fighting()) roll_encounter();
+	D.in_battle = true;
+	/* the duel's time: the results screen's DeleteTime (its hits
+	 * come as events: docs/RIVAL.md) */
+	if (D.duel && sub == BN6_SUB_BATTLE) {
+		int t = (int)emu_read32(BN6_BATTLE_TIMER);
+		if (t > D.duel_time) D.duel_time = t;
 	}
+	/* the battle the game was handed, once StartBattle has named
+	 * its record (a re-roll may have come between its roll and
+	 * now) */
+	if (!D.record_known) {
+		int s = D.battle_record ? emu_encounter_record(D.battle_record) : -2;
+		if (s >= 0) { D.next = D.rolled[s]; D.foes = D.next.nfoes; }
+		if (s != -2) {
+			D.record_known = true;
+			loot_battle_fought(&D.next);
+			runlog_battle_start(&D.next, D.challenge ? "challenge" : "battle");
+		}
+		if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);
+	}
+	/* (where the game put MegaMan, once a battle) */
+	if (emu_debug_on() && !D.placed_told)
+		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) {
+				fprintf(stderr, "megaman on panel %d %d\n", emu_read8(o + BN6_T1_PANEL_X), emu_read8(o + BN6_T1_PANEL_Y));
+				D.placed_told = true;
+				break;
+			}
+		}
+}
+
+/* Back on the map from a battle: its viruses counted, the PET's battle
+ * data, the next battle rolled */
+static void after_battle(void) {
+	/* back from a battle: count the deleted viruses (a navi counts below) */
+	D.in_battle = false;
+	D.placed_told = false;
+	D.battle_record = 0;
+	bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
+	runlog_battle_end(won);
+	/* the PET's battle data on the viruses just fought */
+	if (!boss_fighting()) {
+		for (int i = 0; i < D.next.nfoes; ++i)
+			if (D.next.foes[i].kind == FOE_VIRUS) profile_family_note(D.next.foes[i].family);
+		profile_save();
+		/* (and, the first time, what the Mystery Data on its field
+		 * was: said after it was met, kept or broken, not before) */
+		for (int i = 0; i < D.next.nobj; ++i) D.gem_due |= D.next.obj[i].kind >> 4 == FIELD_GEM && !profile.gem_taught;
+	}
+	if (emu_debug_on() && won) {
+		int r = emu_read16(BN6_BATTLE_REWARD);
+		if (r >> 14 == 0 && r != 0xFFFF) {
+			ChipInfo ci;
+			chip_info(r & 0x1FF, &ci);
+			fprintf(stderr, "battle reward %s %c (folder codes %c%c%c)\n", ci.name, (r >> 9 & 0x1F) >= 26 ? '*' : 'A' + (r >> 9 & 0x1F),
+				run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-', run.codes[2] ? 'A' + run.codes[2] - 1 : '-');
+		} else fprintf(stderr, "battle reward %04x\n", r);
+	}
+	if (won && !boss_fighting()) run.viruses_deleted += D.foes;
+	if (!D.challenge && !boss_fighting()) roll_encounter();
+}
+
+/* Back from the guardian's battle, or a challenge */
+static void after_forced(void) {
 	/* back from the guardian's battle */
 	if (boss_fighting() && !emu_battle_forcing()) {
 		boss_battle_over(emu_read8(BN6_BATTLE_RESULT) == 1);
@@ -505,10 +497,10 @@ void director_update(void) {
 		D.gate_fight = false;
 		roll_encounter();
 	}
-	/* (as a talk, MegaMan held: run straight off, the A paging its first
-	 * box talked to the Server he faced, whose own words took the box, and
-	 * the prize was never named) */
-	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
+}
+
+/* The PET's words, and Dad's mail once the arrival is done */
+static void mail_update(void) {
 	/* the PET's words that count (the codes, the Library), the profile's
 	 * key items and Dad's mail, once a layer is under way (after a
 	 * CONTINUE's state, which holds what the run had) */
@@ -522,11 +514,12 @@ void director_update(void) {
 	 * lost under them) */
 	if (D.mail_due && !D.reward_due && !D.gem_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic()) {
-		char words[160];
-		snprintf(words, sizeof words, "@M Lan,you've got mail from Dad!|@M Our battle data on %s! It's in the PET's E-Mail.",
-			guardian(D.mail_due)->name);
-		if (talk_start(words, FACE_MEGAMAN)) D.mail_due = 0;
+		if (talk_start(mail_words(D.mail_due), FACE_MEGAMAN)) D.mail_due = 0;
 	}
+}
+
+/* Chaud's verdict and call */
+static void rival_update(void) {
 	/* the rival (docs/RIVAL.md): Chaud's verdict after the duel, his call
 	 * once the layer's arrival has been said */
 	if (D.duel_verdict_due && on_map() && !cinema_busy() && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
@@ -540,8 +533,19 @@ void director_update(void) {
 			flag_set(LAYER_DUEL_CALLED_FLAG);
 		}
 	}
-	if (D.gem_due && !D.reward_due && talk_start("@M Lan! Mystery Data on the battlefield!|@M Any hit breaks it,theirs or ours.|"
-		"@M If it's still there when we win,it's ours!", FACE_MEGAMAN)) {
+}
+
+/* What waits for its moment on the map: the Server's prize, the PET's words
+ * and Dad's mail, Chaud's verdict and call, the battlefield's Mystery
+ * Data, the lessons, a ScrtData's */
+static void talks_due(void) {
+	/* (as a talk, MegaMan held: run straight off, the A paging its first
+	 * box talked to the Server he faced, whose own words took the box, and
+	 * the prize was never named) */
+	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
+	mail_update();
+	rival_update();
+	if (D.gem_due && !D.reward_due && talk_start(gem_words(), FACE_MEGAMAN)) {
 		D.gem_due = false;
 		profile.gem_taught = 1;
 		profile_save();
@@ -551,8 +555,11 @@ void director_update(void) {
 		D.fragment_due = false;
 		D.fragments_told = run.fragments;
 	}
-	exit_flag(false);
-	guardian_update();
+}
+
+/* The arrival's cards and MegaMan's words after them, as one beat; Chaud's
+ * call once the Secret Area's guardian is done */
+static void arrival_update(void) {
 	/* (after the last card: the area cleared on the way here) */
 	if (D.area_card && ++D.arrived >= AREA_CARD_AT && !cinema_busy()) {
 		D.area_card = false;
@@ -573,14 +580,14 @@ void director_update(void) {
 	talk_update();
 	if (!D.area_card && !cinema_busy() && !boss_cinematic() && !boss_fighting() && !talk_busy()) {
 		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) beat_said();
-		else if (D.secret_call && boss_done() &&
-			talk_start("@C Lan,it's Chaud.|@C That wasn't ProtoMan. He's been in my PET all day.|@C You beat a copy. Watch yourself.|"
-				"@M The Nest can even copy ProtoMan...|@L Then we'd better stay on guard!", FACE_MEGAMAN)) {
+		else if (D.secret_call && boss_done() && talk_start(secret_call_words(), FACE_MEGAMAN)) {
 			D.secret_call = false;
 		}
 	}
-	dev_steps();
-	if (act_on_choices()) return;
+}
+
+/* The checkpoint due, saved once MegaMan is free */
+static void checkpoint_update(void) {
 	/* (never with a chat box open: a state would keep it, and the talk
 	 * slot's text is not in a state) */
 	/* (nor while the arrival still holds him: the jack-in and the warp pad
@@ -598,15 +605,54 @@ void director_update(void) {
 		cinema_note("Run saved", 150);
 		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}
-	/* on another map (a story warp the run does not use): back to the layer */
+}
+
+/* On another map (a story warp the run does not use): back to the layer;
+ * true while astray */
+static bool astray_update(void) {
 	if (emu_read8(BN6_MAP_GROUP) != D.group || emu_read8(BN6_MAP_NUMBER) != D.number) {
 		if (++D.astray > ASTRAY_FRAMES) {
 			D.astray = 0;
 			emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
 		}
-		return;
+		return true;
 	}
 	D.astray = 0;
+	return false;
+}
+
+void director_update(void) {
+	take_events();
+	if (!D.active) return;
+	if (D.town) { town_update(); return; }
+	++D.frame;
+	++D.act_frames;
+	if (gameover_update() || follow_exit_warp()) return;
+	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
+	arrow_update();
+	if (on_map()) map_update();
+	/* (the PET's first menu is a screen of the game's own mode, its pages
+	 * and the shops other modes: either; not the way back to the map after
+	 * a battle or a warp, which had MegaMan name a program off the board
+	 * after every fight) */
+	int screen = emu_read8(BN6_GAMESTATE);
+	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); }
+	cinema_on_map(on_map());
+	if (!on_map()) {
+		battle_update();
+		return;
+	}
+	if (D.in_battle) after_battle();
+	after_forced();
+	talks_due();
+	exit_flag(false);
+	guardian_update();
+	arrival_update();
+	dev_steps();
+	if (act_on_choices()) return;
+	checkpoint_update();
+	if (astray_update()) return;
 	/* (not over a battle that is about to start) */
 	if (D.frame % REROLL_FRAMES == 0 && !emu_battle_forcing()) roll_encounter();
 }

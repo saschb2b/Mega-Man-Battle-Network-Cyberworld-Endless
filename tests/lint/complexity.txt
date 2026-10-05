@@ -11,10 +11,7 @@ src/core/touch_layout.c:touch_prefs_parse 38 29
 src/dev/atlas.c:one 56 95
 src/director/boss.c:boss_update 26 64
 src/director/briefing_words.c:last_stop 30 26
-src/director/director.c:director_update 166 203
 src/director/director.c:follow_exit_warp 28 38
-src/director/director_describe.c:director_describe 39 55
-src/director/director_keys.c:director_keys 70 77
 src/emu/autopilot.c:autopilot_keys 31 56
 src/gfx/gfx.c:text_code 30 30
 src/layer/guardian_objs.c:guardian_scripts 26 61

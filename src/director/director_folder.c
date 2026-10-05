@@ -19,6 +19,7 @@
 #include "loot.h"
 #include "meta.h"
 #include "save.h"
+#include "save_blob.h"
 #include "trader.h"
 
 /* The run's folder as the game holds it (30 entries, chip | code << 9;
@@ -32,7 +33,17 @@ void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]) {
 /* The folder as the layer was made: its codes are the run's (run.codes),
  * its copies of each chip beside the checkpoint ("run.folder"), so a
  * CONTINUE makes the same stock before the game's memory is back. */
-uint16_t folder_made[BN6_FOLDER_ENTRIES];
+static uint16_t folder_made[BN6_FOLDER_ENTRIES];
+#define FOLDER_MADE_MAGIC 0x43464C44u   /* "CFLD" */
+
+/* ... saved beside the checkpoint, and back on CONTINUE (none for a run
+ * saved before it was kept, which made its stock without it) */
+void folder_made_save(void) { save_write_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made); }
+
+void folder_made_load(void) {
+	if (!save_read_blob("run.folder", FOLDER_MADE_MAGIC, folder_made, sizeof folder_made)) memset(folder_made, 0, sizeof folder_made);
+	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
+}
 
 /* The folder's codes, for the layer about to be made (loot_fit_code): read
  * from the game as MegaMan moves on, kept with the run, so a checkpoint
