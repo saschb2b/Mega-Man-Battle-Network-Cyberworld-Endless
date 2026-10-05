@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The second screen's polish** (issue #81). The NaviCust programs'
+  blocks wear BN6's own colours, measured from its preview of a program of
+  each; every panel lays out at an Android display's larger sizes too
+  (the AYN Thor's 413 x 360 and up), which captures check with
+  `--second-size WxH`; the README shows the battle's, the folder editor's
+  and the NaviCustomizer's panels beside BN6's screens, and
+  docs/FIDELITY.md says what the second screen is and whose its pictures
+  and words are.
 - **Shops and traders on the second screen** (issue #78). At the Net
   Dealer and the NaviCust vendor the entry under the cursor is a card (a
   chip's picture, code, element, power and text; a program's shape, kind

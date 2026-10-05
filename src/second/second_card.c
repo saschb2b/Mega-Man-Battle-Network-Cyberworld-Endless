@@ -31,14 +31,13 @@ void second_chip_card(uint16_t e, int x, int y, int w) {
 	second_wrapped(desc, tx, y + 52, x + w - tx - 4, 3, PET_WHITE);
 }
 
-/* BN6's program colours 1-6 as its blocks draw them, a face and its shade:
- * the blue measured from the NaviCustomizer's preview (16, 99, 255 on 0,
- * 57, 214), the others BN6's hues until the art pass measures them (issue
- * #81) */
-static const SDL_Color face[7] = { { 0, 0, 0, 255 }, { 239, 239, 239, 255 }, { 255, 214, 0, 255 },
-	{ 255, 115, 198, 255 }, { 255, 57, 41, 255 }, { 16, 99, 255, 255 }, { 41, 206, 57, 255 } };
-static const SDL_Color shade[7] = { { 0, 0, 0, 255 }, { 165, 173, 189, 255 }, { 206, 148, 0, 255 },
-	{ 206, 57, 148, 255 }, { 189, 16, 16, 255 }, { 0, 57, 214, 255 }, { 8, 148, 33, 255 } };
+/* BN6's program colours 1-6 as its blocks draw them, a face and its
+ * shade: measured from the NaviCustomizer's preview of a program of each
+ * colour (white, yellow, pink, red, blue, green) */
+static const SDL_Color face[7] = { { 0, 0, 0, 255 }, { 255, 255, 255, 255 }, { 239, 247, 0, 255 },
+	{ 255, 148, 231, 255 }, { 231, 0, 0, 255 }, { 16, 99, 255, 255 }, { 0, 239, 16, 255 } };
+static const SDL_Color shade[7] = { { 0, 0, 0, 255 }, { 206, 206, 214, 255 }, { 214, 198, 0, 255 },
+	{ 214, 99, 165, 255 }, { 189, 0, 0, 255 }, { 0, 57, 214, 255 }, { 0, 189, 8, 255 } };
 
 void second_program_shape(const NaviShape *s, int x, int y) {
 	int c = s->color >= 1 && s->color <= 6 ? s->color : 0;

@@ -72,11 +72,21 @@ static bool draw_second(uint32_t *px, int w, int h, int pitch) {
 	return drew;
 }
 
+/* (a shot's size: the 3DS's, or an Android display's, --second-size) */
+#define SHOT_MAX_W (SECOND_W * 2)
+#define SHOT_MAX_H (SECOND_H * 2)
+static int shot_w = SECOND_W, shot_h = SECOND_H;
+
+void platform_second_shot_size(int w, int h) {
+	shot_w = w < SECOND_W ? SECOND_W : w > SHOT_MAX_W ? SHOT_MAX_W : w;
+	shot_h = h < SECOND_H ? SECOND_H : h > SHOT_MAX_H ? SHOT_MAX_H : h;
+}
+
 bool platform_save_second_screen(const char *path) {
-	static uint32_t px[SECOND_W * SECOND_H];
+	static uint32_t px[SHOT_MAX_W * SHOT_MAX_H];
 	memset(px, 0, sizeof px);
-	if (!draw_second(px, SECOND_W, SECOND_H, SECOND_W * 4)) return false;
-	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, SECOND_W, SECOND_H, 32, SECOND_W * 4, SDL_PIXELFORMAT_RGBA8888);
+	if (!draw_second(px, shot_w, shot_h, shot_w * 4)) return false;
+	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, shot_w, shot_h, 32, shot_w * 4, SDL_PIXELFORMAT_RGBA8888);
 	bool ok = s && SDL_SaveBMP(s, path) == 0;
 	if (s) SDL_FreeSurface(s);
 	return ok;

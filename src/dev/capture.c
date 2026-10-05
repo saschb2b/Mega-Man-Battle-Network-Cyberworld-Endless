@@ -284,13 +284,18 @@ static const char *pad_kind;
 
 /* --shot FRAME:PATH,... saves the canvas; --screen-shot the screen as the
  * player sees it, the touch controls on it; --second-shot the second
- * screen, the 3DS's bottom one (on any target, for a check); --pad */
+ * screen, the 3DS's bottom one (on any target, for a check), at
+ * --second-size's WxH (an Android display's); --pad */
 static bool test_option(const char *a, const char *v) {
 	if (!strcmp(a, "--pad")) pad_kind = v;
 	else if (!strcmp(a, "--shot")) parse_shots(v, shots, &shot_count, 64);
 	else if (!strcmp(a, "--screen-shot")) parse_shots(v, screen_shots, &screen_shot_count, 16);
 	else if (!strcmp(a, "--second-shot")) parse_shots(v, second_shots, &second_shot_count, 16);
-	else return false;
+	else if (!strcmp(a, "--second-size")) {
+		int w = SECOND_W, h = SECOND_H;
+		sscanf(v, "%dx%d", &w, &h);
+		platform_second_shot_size(w, h);
+	} else return false;
 	return true;
 }
 

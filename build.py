@@ -1240,6 +1240,16 @@ SCREENSHOTS = [
      [(900, 'voice-banter')], {}),
     ('falzar-face', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '8'],
      [(1348, 'guardian-tenguman'), (1600, 'falzar-face')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (the second screen following the game, issue #72: seed 7's Green Area
+    # layer 2, its arrival's chats paged; the Custom screen's chip as a
+    # card, the folder editor's whole folder, the NaviCustomizer's program)
+    ('second-battle', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet',
+                       '--input', '600:,' + '4:A,6:,' * 110 + '60:,0:battle,400:'], [(2230, 'second-battle')], {}, '3ds'),
+    ('second-folder', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet',
+                       '--input', '600:,' + '4:A,6:,' * 110 + '60:,6:START,40:,6:A,60:,6:A,60:,6:A,60:,6:DOWN,30:'], [(2080, 'second-folder')], {}, '3ds'),
+    ('second-navicust', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet,programs=8',
+                         '--input', '600:,' + '4:A,6:,' * 110 + '60:,6:START,40:' + ',6:DOWN,8:' * 3 + ',6:A,60:,6:A,90:,6:DOWN,30:'],
+     [(2070, 'second-navicust')], {}, '3ds'),
     # (the layer's map on a second screen, the guardian's mark on it)
     ('second-screen', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(1250, 'second-screen')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),

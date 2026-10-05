@@ -252,7 +252,7 @@ BN5. A handheld's own controls, a Bluetooth or USB
 controller (two Joy-Cons as one) and the touch screen all work: the game
 draws touch controls round the picture until a controller's button is
 pressed, and Back asks before it quits. On a handheld with a second
-screen, such as the AYN Thor, the lower one keeps the layer's map open, as
+screen, such as the AYN Thor, the lower one is the PET beside the game, as
 on a 3DS ([android/README.md](android/README.md#the-second-screen)).
 Uninstalling the app deletes its saves.
 
@@ -335,6 +335,10 @@ under the cursor, and in the town and on the title the PET at home with
 MegaMan's face.
 The older 3DS and 2DS are too slow for it.
 [3ds/README.md](3ds/README.md) has the rest.
+
+<img src="docs/screenshots/second-battle.png" width="208" alt="A New 3DS's two screens in a battle: BN6's Custom screen on top, the Cannon under its cursor as a large card below with its text, and the enemies' HP">
+<img src="docs/screenshots/second-folder.png" width="208" alt="The folder editor on top; below, the whole folder as BN6's chip icons with its codes, elements and Megas">
+<img src="docs/screenshots/second-navicust.png" width="208" alt="The NaviCustomizer on top; below, Custom1 as a card: its blue shape, where it goes, whether it fits, and what RUN would bring">
 
 ### In a browser
 

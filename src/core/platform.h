@@ -140,8 +140,11 @@ void platform_second_screen_draw(void);
 /* ... at the next frame too, whatever its pace (a new panel, its title's
  * slide). */
 void platform_second_screen_soon(void);
-/* The second screen's picture now, into a BMP (--second-shot). */
+/* The second screen's picture now, into a BMP (--second-shot), at the
+ * 3DS's size or the one set (--second-size WxH: an Android display's, to
+ * 640 x 480) */
 bool platform_save_second_screen(const char *path);
+void platform_second_shot_size(int w, int h);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */
