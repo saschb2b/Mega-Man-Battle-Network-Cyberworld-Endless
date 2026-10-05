@@ -4,7 +4,8 @@
  * an answer hook and a halt from one (issues #30, #35). Then two cores side
  * by side, as BN6's and the guest's run (issue #61): BN6's made by
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
- * it, without, on a ROM that also sounds a tone.
+ * it, without, on a ROM that also sounds a tone; and the guest's made and
+ * run on a thread of its own while BN6's frames run, as its boot is.
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -20,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <SDL.h>
 #include <mgba/core/blip_buf.h>
 #include <mgba/core/config.h>
 #include <mgba/core/core.h>
@@ -255,6 +257,79 @@ static void two_cores(void) {
 	g->deinit(g);
 }
 
+/* ---- the guest's boot on a thread of its own (guest.c's boot_main) ---- */
+
+typedef struct {
+	const uint8_t *rom;
+	uint32_t *video;
+	int frames;
+	struct mCore *core;
+	SDL_atomic_t done;
+} BootJob;
+
+/* its core made and its frames run on the thread, as the boot's are: no
+ * sound pulled, nothing of BN6's touched */
+static int boot_thread(void *arg) {
+	BootJob *b = arg;
+	b->core = guest_core(b->rom, b->video);
+	for (int i = 0; b->core && i < b->frames; ++i) b->core->runFrame(b->core);
+	SDL_AtomicSet(&b->done, 1);
+	return 0;
+}
+
+/* a core's memory, a word at a time, as a sum (two cores alike or not) */
+static uint32_t ram_sum(struct mCore *c, uint32_t base, uint32_t size) {
+	uint32_t sum = 0;
+	for (uint32_t a = 0; a < size; a += 4) sum = sum * 31u + c->rawRead32(c, base + a, -1);
+	return sum;
+}
+
+static void two_threads(void) {
+	static uint8_t tone[ROM_SIZE];
+	static uint32_t video[240 * 160], video2[240 * 160];
+	make_sound_rom(tone);
+	CHECK(emu_hook(0x080000F8, doubled, NULL), "BN6's hook at 0xF8 again");
+	/* BN6's frames on this thread while the guest's core is made and runs
+	 * on its own: each of BN6's from its reset (its code once through 0xF8,
+	 * a hit each), none of the guest's frames a hit */
+	uint32_t hits = hook_hits, strays = hook_strays;
+	BootJob job = { .rom = tone, .video = video, .frames = 600 };
+	SDL_AtomicSet(&job.done, 0);
+	SDL_Thread *t = SDL_CreateThread(boot_thread, "guest boot", &job);
+	CHECK(t != NULL, "no thread for the guest's boot");
+	uint32_t ours = 0;
+	while (t && !SDL_AtomicGet(&job.done)) {
+		emu_reset();
+		emu_frame(0);
+		emu_sync();
+		++ours;
+	}
+	if (t) SDL_WaitThread(t, NULL);
+	struct mCore *g = job.core;
+	CHECK(g != NULL, "no guest core made on its thread");
+	if (!g) return;
+	CHECK(ours > 0, "no frame of BN6's ran beside the guest's thread");
+	CHECK(hook_hits - hits == ours && hook_strays == strays, "BN6's hook: %u hits in its %u frames beside the guest's thread, %u strays", hook_hits - hits,
+		ours, hook_strays - strays);
+	CHECK(emu_read32(IWRAM) == 20, "BN6's core beside the guest's thread: %u, not 20", emu_read32(IWRAM));
+	CHECK(stored(g, 0) == 15 && stored(g, 1) == 27 && stored(g, 3) == 39, "the guest's on its thread: %u %u %u, not 15 27 39", stored(g, 0), stored(g, 1),
+		stored(g, 3));
+	/* the same frames on this thread come to the same memory: what the
+	 * thread made is the game's, wherever it ran */
+	struct mCore *g2 = guest_core(tone, video2);
+	CHECK(g2 != NULL, "no second guest core");
+	if (g2) {
+		for (int i = 0; i < job.frames; ++i) g2->runFrame(g2);
+		CHECK(ram_sum(g, IWRAM, 0x8000) == ram_sum(g2, IWRAM, 0x8000) && ram_sum(g, 0x02000000, 0x40000) == ram_sum(g2, 0x02000000, 0x40000),
+			"the guest's memory after its frames on a thread differs from the same frames' here");
+		mCoreConfigDeinit(&g2->config);
+		g2->deinit(g2);
+	}
+	emu_unhook(0x080000F8);
+	mCoreConfigDeinit(&g->config);
+	g->deinit(g);
+}
+
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	static uint8_t rom[ROM_SIZE];
@@ -342,7 +417,8 @@ int main(void) {
 	core->deinit(core);
 
 	two_cores();
+	two_threads();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart\n");
+	printf("all hook checks passed, the two cores kept apart, on one thread and on two\n");
 	return 0;
 }

@@ -45,7 +45,12 @@ static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va
 }
 static struct mLogger logger = { .log = quiet };
 
-void emu_log_quiet(void) { mLogSetDefaultLogger(&logger); }
+/* (once: the guest's boot thread may be reading it when BN6's core is made) */
+void emu_log_quiet(void) {
+	static bool set;
+	if (!set) mLogSetDefaultLogger(&logger);
+	set = true;
+}
 
 static void start_worker(void);
 

@@ -2,12 +2,13 @@
  * ROM, read beside BN6's (rom.c, XR), padded to EMU_ROM_SIZE as BN6's copy
  * is, in an mGBA core of its own. It boots once to a playable state (its
  * title, NEW GAME, and the intro pressed through to Lan's room) kept in
- * the data directory, and runs only while BN6's core waits, on the main
- * thread and without hooks: its encounter roll, patched in its ROM copy,
- * returns the record a battle is given, and the battle's end is read from
- * its game state (docs/ROM_DATA.md, BN5 guest battles). In the browser,
- * whose page runs one frame at a time, its boot runs a slice a frame
- * (guest_boot_slice). */
+ * the data directory, in the background from the title on: on a thread of
+ * its own on native builds, a slice of each frame's spare time in the
+ * browser, whose page runs one frame at a time (guest_tick). Its battles
+ * run only while BN6's core waits, on the main thread and without hooks:
+ * its encounter roll, patched in its ROM copy, returns the record a battle
+ * is given, and the battle's end is read from its game state
+ * (docs/ROM_DATA.md, BN5 guest battles). */
 #include "guest.h"
 
 #include <stdio.h>
@@ -251,6 +252,7 @@ uint32_t guest_navi_record(int xrom, int ai, int version) {
 }
 
 bool guest_dev_worried;
+int guest_dev_slowboot;
 int guest_backdrop = -1;
 
 const char *guest_dark_name(int k) {
@@ -293,9 +295,12 @@ static int chips_pair(int xrom) {
 	return xchips_pair((const char (*)[XCHIP_NAME])names6, BN6_CHIPS, (const char (*)[XCHIP_NAME])names5, BN5_CHIPS, to_bn5, from_bn5);
 }
 
+/* (the core is its boot's alone while that runs, on its thread where it
+ * has one: the main thread touches it only once it is ready, or where the
+ * boot runs in its own frames' slices) */
 static struct mCore *core;
 static bool ready, failed, active, result_due;
-static int paired;   /* BN6's chips paired by name with its game's (chips_pair), as the core is made */
+static int paired;   /* BN6's chips paired by name with its game's (chips_pair), on the main thread */
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
 static int frames;
@@ -305,8 +310,7 @@ static bool dark_used;                       /* ... and one was used in it (latc
 static bool fell;                            /* ... and MegaMan's HP stood at 0 while it was fought on */
 static bool buster_told;                     /* (debug) its battle's buster was printed */
 
-/* a battle's course: waiting for the guest's boot (the browser's), asked
- * for, begun */
+/* a battle's course: waiting for the guest's boot, asked for, begun */
 enum { PH_IDLE, PH_BOOT, PH_ASKED, PH_BATTLE };
 static int phase;
 /* (the battle that waits for the boot: its record, and MegaMan with his
@@ -331,20 +335,27 @@ static void wr16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
 
 bool guest_possible(int xrom) { return xrom == XROM_BN5_COLONEL_US && XR[xrom].data && (ready || !failed); }
 
+/* The chips of both games paired by name, once, where both ROMs are read:
+ * on the main thread, before any boot (the director's words read them) */
+static void pair(void) {
+	if (!paired && XR[XROM_BN5_COLONEL_US].data && R.data) paired = chips_pair(XROM_BN5_COLONEL_US);
+}
+
 int guest_kind_chips(int kind, uint16_t *out, int max) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
 	if (!d || !R.data || kind < 0) return 0;
-	if (!paired) paired = chips_pair(XROM_BN5_COLONEL_US);
+	pair();
 	int n = 0;
 	for (int id = 1; id < BN6_STANDARD_CHIPS && n < max; ++id)
 		if (to_bn5[id] && d[BN5_CHIP_RECORDS + 0x2Cu * to_bn5[id] + BN5_CHIP_KIND] == kind) out[n++] = (uint16_t)id;
 	return n;
 }
 
-uint8_t guest_read8(uint32_t a) { return core ? rd8(a) : 0; }
-uint16_t guest_read16(uint32_t a) { return core ? rd16(a) : 0; }
-uint32_t guest_read32(uint32_t a) { return core ? rd32(a) : 0; }
-void guest_write16(uint32_t a, uint16_t v) { if (core) wr16(a, v); }
+/* (0 until it is ready: the autopilot reads its battle while one waits) */
+uint8_t guest_read8(uint32_t a) { return ready ? rd8(a) : 0; }
+uint16_t guest_read16(uint32_t a) { return ready ? rd16(a) : 0; }
+uint32_t guest_read32(uint32_t a) { return ready ? rd32(a) : 0; }
+void guest_write16(uint32_t a, uint16_t v) { if (ready) wr16(a, v); }
 int guest_chip_bn6(int id) { return id > 0 && id < BN5_CHIPS ? from_bn5[id] : 0; }
 
 /* The deck's compaction, replaced (BN5_COMPACT): as BN5's, the live chips
@@ -442,7 +453,12 @@ static bool load_boot(void) {
 
 /* ---- its boot: its title, NEW GAME, then A pressed through the intro
  * until Lan stands in his room, the same frames every time (emulation is
- * deterministic), once; then a state ---- */
+ * deterministic), once; then a state. It runs in the background, never in
+ * a frame's way: on a thread of its own on native builds (boot_main), which
+ * alone touches the guest core until it is ready and nothing of BN6's (the
+ * chips are paired, the logger set and the sound's rate read before it
+ * starts), or in slices of the frames' spare time where there is none (the
+ * browser's, or --dev slowboot), guest_tick ---- */
 
 /* Its frames: the title's 600, START tapped six times 70 frames apart, A
  * once and 130 frames, A every 50 frames through the intro 120 times, and
@@ -458,24 +474,44 @@ static uint32_t boot_keys(int f) {
 	return 0;
 }
 
-static int boot_at = -1;      /* its next frame while it runs, -1 none */
-static uint64_t boot_ticks;   /* (the time its frames took, for its line) */
+enum { BOOT_NONE, BOOT_THREAD, BOOT_SLICES };   /* how it runs (the main thread's word) */
+enum { BOOT_RUNNING, BOOT_READY, BOOT_FAILED };  /* how the thread's run ended */
+static int boot_how;
+static int boot_at = -1;          /* its next frame while it runs (its runner's), -1 none */
+static uint64_t boot_ticks;       /* (the time its frames took, for its line) */
+static SDL_atomic_t boot_seen;    /* its frames run, as the main thread reads them */
+static uint64_t boot_t0;          /* when it began, for its pace (the main thread's) */
+static int boot_slices, boot_sliced;   /* (in slices: the frames that ran one, and its frames they ran) */
+#ifndef __EMSCRIPTEN__
+static SDL_Thread *boot_thread;
+static SDL_atomic_t boot_end;     /* the thread's last word, BOOT_RUNNING until then */
+static SDL_atomic_t boot_stop;    /* the main thread's to it: stop (the game ends) */
+static int boot_rate;             /* the sound's rate, read for it */
+#endif
+
+static bool boot_stopped(void) {
+#ifndef __EMSCRIPTEN__
+	return SDL_AtomicGet(&boot_stop) != 0;
+#else
+	return false;
+#endif
+}
 
 /* Its frames from boot_at on, until the performance counter's `until` (0:
- * all); true once all have run */
-static bool boot_frames(uint64_t until) {
+ * no end) or `count` of them (-1: no end); true once all have run */
+static bool boot_frames(uint64_t until, int count) {
 	uint64_t t0 = SDL_GetPerformanceCounter();
-	while (boot_at < BOOT_FRAMES && (!until || SDL_GetPerformanceCounter() < until)) {
+	while (boot_at < BOOT_FRAMES && count-- != 0 && (!until || SDL_GetPerformanceCounter() < until) && !boot_stopped()) {
 		core->setKeys(core, boot_keys(boot_at));
 		core->runFrame(core);
-		++boot_at;
+		SDL_AtomicSet(&boot_seen, ++boot_at);
 	}
 	boot_ticks += SDL_GetPerformanceCounter() - t0;
 	return boot_at >= BOOT_FRAMES;
 }
 
-/* Its end: Lan stands in his room, kept as the state (in the browser's
- * storage too); false where he does not */
+/* Its end: Lan stands in his room, kept as the state; false where he does
+ * not */
 static bool boot_kept(void) {
 	if (!on_map()) return false;
 	char path[600], tmp[640];
@@ -488,16 +524,13 @@ static bool boot_kept(void) {
 		if (ok) cw_rename(tmp, path);
 		else remove(tmp);
 	}
-	platform_persist();
 	printf("guest: booted in %d frames, %.2f s of its frames' time\n", BOOT_FRAMES, (double)boot_ticks / (double)SDL_GetPerformanceFrequency());
 	return true;
 }
 
 /* The core for extra ROM `xrom`: its copy padded to EMU_ROM_SIZE as BN6's
- * is, its picture and its sound at the rate BN6's plays; and the chips of
- * both games paired by name */
-static bool core_make(int xrom) {
-	emu_log_quiet();   /* (made before BN6's core in the browser, guest_warm) */
+ * is, its picture, and its sound at `rate` (BN6's) */
+static bool core_make(int xrom, int rate) {
 	uint8_t *copy = malloc(EMU_ROM_SIZE);
 	if (!copy) return false;
 	memcpy(copy, XR[xrom].data, ROM_SIZE);
@@ -512,52 +545,42 @@ static bool core_make(int xrom) {
 	if (!core->loadROM(core, vf)) { core->deinit(core); core = NULL; return false; }
 	core->loadSave(core, VFileMemChunk(NULL, 0));
 	core->setAudioBufferSize(core, 1024);
-	blip_set_rates(core->getAudioChannel(core, 0), core->frequency(core), emu_audio_out_rate());
-	blip_set_rates(core->getAudioChannel(core, 1), core->frequency(core), emu_audio_out_rate());
+	blip_set_rates(core->getAudioChannel(core, 0), core->frequency(core), rate);
+	blip_set_rates(core->getAudioChannel(core, 1), core->frequency(core), rate);
 	core->reset(core);
-	paired = chips_pair(xrom);
 	return true;
 }
 
 /* Booted: its roll answers no battle until one is asked, and the deck's
- * shelf is in (after its boot, which runs its ROM as it is) */
-static void boot_done(void) {
-	boot_at = -1;
+ * shelf is in (after its boot, which runs its ROM as it is). The first
+ * write copies the ROM (mGBA's copy on write: 32 MB mapped, a while on a
+ * handheld, two frames' time at the browser's title): written by its thread
+ * where it has one, else as its first battle begins, behind the switch's
+ * white. */
+static bool patched;
+static void boot_patch(void) {
 	patch_roll(0);
 	shelf_install();
-	ready = true;
-	printf("guest: %s ready for battles, %d of BN6's chips by name\n", XR[XROM_BN5_COLONEL_US].layout->tag, paired);
+	patched = true;
 }
 
-bool guest_start(int xrom) {
-	if (ready || failed) return ready;
-	if (boot_at >= 0) return true;   /* (its boot under way, the browser's) */
-	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data) return false;
-	failed = true;
-	if (!core_make(xrom)) return false;
-	failed = false;
-	if (load_boot()) {
-		boot_done();
-		return true;
+#ifndef __EMSCRIPTEN__
+/* The thread: the core made, its kept state loaded or its frames run and
+ * kept, its patches written; its last word in boot_end. Its priority low:
+ * where cores are few, BN6's frames come first. */
+static int boot_main(void *arg) {
+	SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
+	bool ok = core_make((int)(intptr_t)arg, boot_rate);
+	if (ok && !load_boot()) {
+		core->reset(core);
+		boot_at = 0;
+		ok = boot_frames(0, -1) && boot_kept();
 	}
-	core->reset(core);
-	boot_at = 0;
-	boot_ticks = 0;
-#ifdef __EMSCRIPTEN__
-	/* (the page runs one frame at a time: its boot a slice a frame,
-	 * guest_boot_slice, which a battle waits for) */
-	return true;
-#else
-	if (boot_frames(0) && boot_kept()) {
-		boot_done();
-		return true;
-	}
-	boot_at = -1;
-	failed = true;
-	fprintf(stderr, "guest: %s did not reach its map\n", XR[xrom].layout->tag);
-	return false;
-#endif
+	if (ok) boot_patch();
+	SDL_AtomicSet(&boot_end, ok ? BOOT_READY : BOOT_FAILED);
+	return 0;
 }
+#endif
 
 /* `record` copied past BN5's ROM without its GAME OVER: a loss ends the
  * battle on the map with the result 2, and the run's own GAME OVER follows
@@ -722,6 +745,7 @@ static int folder_in(const uint16_t *folder) {
 }
 
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) {
+	pair();
 	return paired ? xchips_out(folder, 30, to_bn5, BN6_CHIPS, out, max) : 0;
 }
 
@@ -802,6 +826,7 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	memcpy(dark_in, mm->dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
+	if (!patched) boot_patch();
 	/* (a guardian's: his band, his rows' zenny, his options; none else) */
 	boss_uncap();
 	boss_id = boss ? navi_id(XR[XROM_BN5_COLONEL_US].data, boss->ai, boss->version) : 0;
@@ -843,11 +868,148 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	return true;
 }
 
-/* (begun at once, or, its boot still under way, the browser's, waiting
- * for it, BN6's core with it: guest_boot_slice) */
+/* ---- its boot from the main thread: begun, taken in at its end ---- */
+
+/* Its end, on the main thread: ready for battles (its state kept in the
+ * browser's storage too) or failed; and the battle that waited for it
+ * begins, or, where it cannot, ends unfought, MegaMan as he went in */
+static void boot_over(bool ok) {
+	boot_how = BOOT_NONE;
+	boot_at = -1;
+	ready = ok;
+	failed = !ok;
+	platform_persist();
+	if (ok) printf("guest: %s ready for battles, %d of BN6's chips by name\n", XR[XROM_BN5_COLONEL_US].layout->tag, paired);
+	else fprintf(stderr, "guest: %s did not reach its map\n", XR[XROM_BN5_COLONEL_US].layout->tag);
+	if (phase != PH_BOOT) return;
+	active = false;
+	phase = PH_IDLE;
+	if (ready && battle_begin(pend_record, pend_sc, &pend_mm, pend_boss.ai ? &pend_boss : NULL)) return;
+	result = (GuestResult){ .outcome = GUEST_ESCAPED, .hp = pend_mm.hp, .reward_from = -1 };
+	memcpy(result.dark, pend_mm.dark, sizeof result.dark);
+	result_due = true;
+}
+
+#ifndef __EMSCRIPTEN__
+/* Its thread ended (stopped, where `stop`) and waited for: its end taken
+ * in, where it ran to one */
+static void boot_join(bool stop) {
+	if (boot_how != BOOT_THREAD) return;
+	if (stop) SDL_AtomicSet(&boot_stop, 1);
+	SDL_WaitThread(boot_thread, NULL);
+	boot_thread = NULL;
+	if (stop) { boot_how = BOOT_NONE; return; }
+	boot_over(SDL_AtomicGet(&boot_end) == BOOT_READY);
+}
+#endif
+
+/* Its boot begun: on a thread of its own where it can be, else on this
+ * one, its core made and its kept state loaded at once, or its frames
+ * begun, a slice of each frame from then on (guest_tick) */
+static bool boot_begin(int xrom) {
+	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data) return false;
+	emu_log_quiet();   /* (the logger every core reads: set here, before any thread) */
+	pair();
+	SDL_AtomicSet(&boot_seen, 0);
+	boot_ticks = 0;
+	boot_t0 = SDL_GetPerformanceCounter();
+	boot_slices = boot_sliced = 0;
+#ifndef __EMSCRIPTEN__
+	if (guest_dev_slowboot <= 0) {
+		boot_rate = emu_audio_out_rate();
+		SDL_AtomicSet(&boot_end, BOOT_RUNNING);
+		SDL_AtomicSet(&boot_stop, 0);
+		boot_thread = SDL_CreateThread(boot_main, "guest boot", (void *)(intptr_t)xrom);
+		if (boot_thread) {
+			boot_how = BOOT_THREAD;
+			printf("guest: %s boots on a thread of its own\n", XR[xrom].layout->tag);
+			return true;
+		}
+	}
+#endif
+	failed = true;
+	if (!core_make(xrom, emu_audio_out_rate())) return false;
+	failed = false;
+	if (load_boot()) {
+		boot_over(true);
+		return true;
+	}
+	core->reset(core);
+	boot_at = 0;
+	boot_how = BOOT_SLICES;
+	printf("guest: %s boots a slice a frame\n", XR[xrom].layout->tag);
+	return true;
+}
+
+bool guest_start(int xrom) {
+	if (ready || failed) return ready;
+	if (boot_how != BOOT_NONE) return true;   /* (its boot under way) */
+	return boot_begin(xrom);
+}
+
+void guest_warm(void) {
+	static bool looked;
+	if (looked) return;
+	looked = true;
+	if (!XR[XROM_BN5_COLONEL_US].data || ready || failed || boot_how != BOOT_NONE) return;
+#ifdef __EMSCRIPTEN__
+	/* (kept already: a layer loads it, as quick as a state loads, and the
+	 * page's memory stays BN6's until then) */
+	char path[600];
+	state_path(path, sizeof path);
+	FILE *f = fopen(path, "rb");
+	if (f) { fclose(f); return; }
+#endif
+	guest_start(XROM_BN5_COLONEL_US);
+}
+
+void guest_tick(int ms) {
+#ifndef __EMSCRIPTEN__
+	if (boot_how == BOOT_THREAD && SDL_AtomicGet(&boot_end) != BOOT_RUNNING) boot_join(false);
+#endif
+	if (boot_how != BOOT_SLICES) return;
+	int before = boot_at;
+	bool done = guest_dev_slowboot > 0 ? boot_frames(0, guest_dev_slowboot)
+		: ms > 0 && boot_frames(SDL_GetPerformanceCounter() + SDL_GetPerformanceFrequency() * (uint64_t)ms / 1000, -1);
+	if (boot_at > before) { ++boot_slices; boot_sliced += boot_at - before; }
+	if (done) boot_over(boot_kept());
+}
+
+void guest_quit(void) {
+#ifndef __EMSCRIPTEN__
+	boot_join(true);
+#endif
+}
+
+int guest_boot_progress(void) {
+	if (boot_how == BOOT_NONE) return -1;
+	int pc = SDL_AtomicGet(&boot_seen) * 100 / BOOT_FRAMES;
+	return pc > 99 ? 99 : pc;
+}
+
+int guest_boot_left_ms(void) {
+	int done = SDL_AtomicGet(&boot_seen);
+	if (boot_how == BOOT_NONE) return -1;
+	if (done < 60) return 0;   /* (its pace not known yet) */
+	double left = BOOT_FRAMES - done;
+	/* (in slices by the frames' pace, in the game's 1/60 s; on its thread
+	 * by the clock's) */
+	if (boot_how == BOOT_SLICES) return boot_sliced ? (int)(left * boot_slices / boot_sliced * 1000.0 / 60.0) : 0;
+	double secs = (double)(SDL_GetPerformanceCounter() - boot_t0) / (double)SDL_GetPerformanceFrequency();
+	return (int)(left * secs / done * 1000.0);
+}
+
+bool guest_boot_waiting(void) { return active && phase == PH_BOOT; }
+
+/* (begun at once, or, its boot still under way, waiting for it, BN6's core
+ * with it: guest_tick; a headless run waits for a thread's then and there,
+ * its frames the same from run to run, as tools/play.py's replays need) */
 static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
 	if (active || !record) return false;
-	if (boot_at < 0) return ready && battle_begin(record, sc, mm, boss);
+#ifndef __EMSCRIPTEN__
+	if (P.headless) boot_join(false);
+#endif
+	if (boot_how == BOOT_NONE) return ready && battle_begin(record, sc, mm, boss);
 	pend_record = record;
 	pend_sc = sc;
 	pend_mm = *mm;
@@ -870,45 +1032,6 @@ bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm) {
 			guest_navi_hp(XROM_BN5_COLONEL_US, boss->ai, boss->version, NULL), boss->hp_cap, boss->zenny);
 	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss);
 }
-
-int guest_boot_progress(void) { return boot_at < 0 ? -1 : boot_at * 100 / BOOT_FRAMES; }
-
-void guest_boot_slice(int ms) {
-	if (boot_at < 0) return;
-	if (!boot_frames(SDL_GetPerformanceCounter() + SDL_GetPerformanceFrequency() * (uint64_t)ms / 1000)) return;
-	if (boot_kept()) boot_done();
-	else {
-		boot_at = -1;
-		failed = true;
-		fprintf(stderr, "guest: %s did not reach its map\n", XR[XROM_BN5_COLONEL_US].layout->tag);
-	}
-	/* (the battle that waited begins; where it cannot, it ends unfought,
-	 * MegaMan as he went in) */
-	if (phase != PH_BOOT) return;
-	active = false;
-	phase = PH_IDLE;
-	if (ready && battle_begin(pend_record, pend_sc, &pend_mm, pend_boss.ai ? &pend_boss : NULL)) return;
-	result = (GuestResult){ .outcome = GUEST_ESCAPED, .hp = pend_mm.hp, .reward_from = -1 };
-	memcpy(result.dark, pend_mm.dark, sizeof result.dark);
-	result_due = true;
-}
-
-#ifdef __EMSCRIPTEN__
-void guest_warm(int ms) {
-	static bool looked;
-	if (!looked) {
-		looked = true;
-		char path[600];
-		state_path(path, sizeof path);
-		FILE *f = XR[XROM_BN5_COLONEL_US].data ? fopen(path, "rb") : NULL;
-		if (f) fclose(f);
-		/* (kept already: a layer loads it, as quick as a state loads) */
-		if (f || !XR[XROM_BN5_COLONEL_US].data || !guest_start(XROM_BN5_COLONEL_US)) return;
-		printf("guest: its first boot begun, a slice a frame\n");
-	}
-	if (!active) guest_boot_slice(ms);
-}
-#endif
 
 bool guest_active(void) { return active; }
 
@@ -1032,8 +1155,12 @@ bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
 	(void)record; (void)sc; (void)mm;
 	return false;
 }
+void guest_warm(void) {}
+void guest_tick(int ms) { (void)ms; }
+void guest_quit(void) {}
 int guest_boot_progress(void) { return -1; }
-void guest_boot_slice(int ms) { (void)ms; }
+int guest_boot_left_ms(void) { return -1; }
+bool guest_boot_waiting(void) { return false; }
 bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm) { (void)boss; (void)mm; return false; }
 bool guest_possible(int xrom) { (void)xrom; return false; }
 int guest_kind_chips(int kind, uint16_t *out, int max) { (void)kind; (void)out; (void)max; return 0; }

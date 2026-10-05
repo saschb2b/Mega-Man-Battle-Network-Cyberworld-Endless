@@ -146,13 +146,8 @@ static bool guest_white(void) {
 	return true;
 }
 
-/* (the guest's boot, which a battle waits for where it still runs, the
- * browser's: a slice each frame, in BN6's frame's place; the page's frame
- * keeps the rest of its 1/60 s) */
-#define GUEST_BOOT_MS 12
-
-/* ... and on the white the switch fades to meanwhile, what it is and how
- * far (once a browser: its state is kept) */
+/* (the guest's boot, which a battle waits for where it still runs: on the
+ * white the switch fades to meanwhile, what it is and how far) */
 static void guest_boot_note(void) {
 	int pc = guest_boot_progress();
 	if (pc < 0) return;
@@ -173,24 +168,27 @@ static bool guest_update(void) {
 	else if (guest_flash > 0) --guest_flash;
 	guest_wait = guest_active() && !shown ? guest_wait + 1 : 0;
 	was = shown;
+	GuestResult r;
+	/* (one that waited for a boot that failed ended unfought, as the boot
+	 * did, between the frames: guest_tick) */
+	if (!guest_active() && guest_take_result(&r)) director_guest_done(&r);
 	if (!guest_active()) return false;
 	/* (the dev menu over it too: it holds still while the menu is open) */
 	uint32_t keys = devtools_keys(guest_keys());
 	if (devtools_open()) return true;
-	/* (its boot first, where the battle waits for it: a slice a frame,
-	 * behind a note, guest_boot_note) */
-	if (guest_boot_progress() >= 0) guest_boot_slice(GUEST_BOOT_MS);
+	/* (its boot first, where the battle waits for it: it runs in the
+	 * background, guest_tick, which begins the battle at its end) */
+	if (guest_boot_waiting()) return true;
 	/* (while its battle opens on a plain white screen, or before it shows:
 	 * four of its frames a frame, unheard; BN5's opening held the white two
 	 * and a half seconds, which a playtester read as a hang, session 65) */
-	else if (!shown || guest_white())
+	if (!shown || guest_white())
 		for (int i = 0; i < 4 * dev.speed && guest_active() && (!guest_on_screen() || guest_white()); ++i) guest_frame_quiet(keys);
 	else
 		for (int i = 0; i < dev.speed && guest_active(); ++i) {
 			guest_frame(keys);
 			devtools_guest_update();
 		}
-	GuestResult r;
 	if (guest_take_result(&r)) director_guest_done(&r);
 	return true;
 }

@@ -31,9 +31,7 @@
 #include "meta.h"
 #include "touch.h"
 #include "emu.h"
-#ifdef __EMSCRIPTEN__
 #include "guest.h"
-#endif
 #ifdef CW_IOS
 #include "ios.h"
 #endif
@@ -837,6 +835,21 @@ static void quit_prompt_draw(void) {
 		rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
+/* The frame's spare time for BN5's boot where it runs a slice a frame
+ * (guest_tick: the browser's), in milliseconds: the frame's work and the
+ * slice within FRAME_WORK_MS of its 1/60 s together, the rest left to the
+ * display and the page (8 ms slices at the title and 12 ms behind a waiting
+ * battle's note kept the page's frames at 16.7 ms, docs/MULTIROM.md); more
+ * while a battle waits for it, the frame having nothing else to do; none
+ * in a frame played unshown */
+#define FRAME_WORK_MS 10
+#define FRAME_WAIT_MS 12
+static int boot_spare_ms(uint64_t t0) {
+	if (P.skip_present) return 0;
+	int used = (int)((SDL_GetPerformanceCounter() - t0) * 1000 / SDL_GetPerformanceFrequency()), most = guest_boot_waiting() ? FRAME_WAIT_MS : FRAME_WORK_MS;
+	return used < most ? most - used : 0;
+}
+
 /* One game frame: scenes, input, update, sound, drawing. False once the
  * frame budget of a headless run is spent. */
 static bool game_frame(void) {
@@ -852,11 +865,8 @@ static bool game_frame(void) {
 	taps_tick();
 	/* (the touch controls' menu pauses the game under it) */
 	if (current && current->update && !touch_paused()) current->update();
-#ifdef __EMSCRIPTEN__
-	/* (BN5's first boot, the browser's, in frames BN6's core does not run:
-	 * the title's and its setup's, a slice each; guest.h) */
-	if (current != &scene_emu) guest_warm(8);
-#endif
+	/* (BN5's boot begun at the title, as early as it can be: guest.h) */
+	if (current != &scene_emu) guest_warm();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
@@ -876,6 +886,9 @@ static bool game_frame(void) {
 		platform_save_canvas(path);
 	}
 	platform_frame_parts(t1 - t0, SDL_GetPerformanceCounter() - t1);
+	/* (and BN5's boot in the frame's spare time where it runs a slice a
+	 * frame; where it has a thread, its end taken in) */
+	guest_tick(boot_spare_ms(t0));
 	platform_end_frame();
 	return !(loop.max_frames && P.frame >= loop.max_frames);
 }
@@ -969,6 +982,13 @@ static void web_frame(void) {
 #endif
 
 #ifndef __EMSCRIPTEN__
+/* The game's end: BN5's boot stopped where its thread still runs, and
+ * BN6's core's thread (emu.c) */
+static void cores_quit(void) {
+	guest_quit();
+	emu_quit();
+}
+
 /* SIGTERM or SIGINT (a launcher closing the port, a terminal's Ctrl+C):
  * the loop ends at a frame's end and the run is kept */
 static volatile sig_atomic_t quit_signal;
@@ -1306,7 +1326,7 @@ int main(int argc, char **argv) {
 	while (!P.quit && !quit_signal && step()) {}
 	/* a run on a layer is kept where MegaMan stands */
 	if (current == &scene_emu) director_suspend();
-	emu_quit();
+	cores_quit();
 #endif
 	platform_shutdown();
 	return 0;

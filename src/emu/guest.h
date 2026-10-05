@@ -16,23 +16,36 @@ enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
 /* Makes the guest core for extra ROM `xrom` (rom.h, XR) where the build
  * and the ROMs allow it, and boots it to a playable state (its title, NEW
  * GAME and intro, pressed through once and kept as a state in the data
- * directory); true once it is ready. In the browser, whose page runs one
- * frame at a time, true as its boot begins: a slice of it runs each frame
- * (guest_boot_slice), and a battle asked meanwhile waits for it. */
+ * directory; that state loaded later) in the background, never in a
+ * frame's way: on a thread of its own on native builds, else a slice of
+ * each frame's spare time (guest_tick: the browser's). True once it is
+ * ready or as its boot begins: a layer's battles are its game's either way
+ * (what a layer makes never hangs on the boot), and a battle asked before
+ * the boot is done waits for it (guest_boot_waiting). False where it
+ * cannot be. */
 bool guest_start(int xrom);
+/* The title's frames: BN5's boot begun as early as it can be, where BN5's
+ * ROM is there (in the browser only where its state is not kept: a layer
+ * loads that quickly), so a battle seldom waits for it. */
+void guest_warm(void);
+/* Each frame, after its drawing: the boot run on for about `ms`
+ * milliseconds (the frame's spare time) where it runs a slice a frame, or
+ * its end taken in where its thread is done. At its end the guest is
+ * ready, and a battle that waited for it begins. */
+void guest_tick(int ms);
+/* Its boot's thread stopped and waited for, as the game ends */
+void guest_quit(void);
 /* How far its boot is, 0-99 (percent), while one runs; -1 none */
 int guest_boot_progress(void);
-/* Its boot run on for about `ms` milliseconds, where one runs (the
- * browser's): at its end the guest is ready, and a battle that waited for
- * it begins. */
-void guest_boot_slice(int ms);
-#ifdef __EMSCRIPTEN__
-/* The browser's frames where BN6's core does not run (the title and its
- * setup): BN5's first boot begun where BN5's ROM is there and its state is
- * not, and run on for about `ms` milliseconds, so a battle seldom waits
- * for it. */
-void guest_warm(int ms);
-#endif
+/* ... and about how long it has left at the pace it has kept, in
+ * milliseconds; 0 while that pace is not known yet, -1 none */
+int guest_boot_left_ms(void);
+/* A battle waits for its boot (guest_battle asked before it was done) */
+bool guest_boot_waiting(void);
+/* (dev: its boot at this many of its frames a frame, on the main thread,
+ * the same frames every run, so a battle waits for it behind its screen:
+ * --dev slowboot=N) */
+extern int guest_dev_slowboot;
 
 /* A battle's scaling to the act (docs/PROGRESSION.md, BN5's battles): its
  * record's viruses `up` versions up, each to version `vcap` at most (0 V1,
@@ -56,8 +69,8 @@ typedef struct {
 /* Begins a battle from BattleSettings record `record`, an address in the
  * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan as
  * `mm` has him: from the next guest frame the guest runs and BN6's core
- * waits (first for the guest's boot, where it still runs: the browser's,
- * guest_boot_progress). */
+ * waits (first for the guest's boot, where it still runs:
+ * guest_boot_waiting; a headless run's waits for it at once). */
 bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm);
 
 /* A territory's guardian from its game (docs/BOSSES.md, BN5's Navis): Navi
@@ -76,14 +89,14 @@ bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm);
 bool guest_possible(int xrom);
 /* BN6's standard chips whose namesake in the guest's game is of kind
  * `kind` (its chip records' BN5_CHIP_KIND), their ids into `out`, in BN6's
- * order; how many (0 before the names are paired: guest_start, or a first
- * call with both ROMs read) */
+ * order; how many (the names paired at the first call with both ROMs read,
+ * 0 without its ROM) */
 int guest_kind_chips(int kind, uint16_t *out, int max);
 
 /* The chips of `folder` (30 BN6 entries) that sit out of its battles, its
  * game having none of their names: each once, in the folder's order, the
- * first `max` into `out` (BN6 ids); how many there are, 0 before the guest
- * is made (guest_start; its boot may still run). */
+ * first `max` into `out` (BN6 ids); how many there are, 0 without its ROM
+ * (its boot may still run). */
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max);
 
 /* A guest battle runs: the scene shows and steers the guest. */
