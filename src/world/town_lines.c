@@ -24,7 +24,7 @@ static const Folk central_folk[] = {
 	{ 18, 290, FACE_SW, 5, 0x39, "My,my... Aren't the flowers lovely here?" },
 	{ -146, -184, FACE_SE, 5, 0x3A, "Oh dear... The road to the Expo Site is closed.|And I so wanted to see the pavilions!" },
 	{ 132, 180, FACE_SE, 5, 0x2D, "Phew! Long day at the lab...|Nothing beats a nice walk!", 10 },
-	{ -12, -164, FACE_NE, 5, 0x28, "Ack! I'm late for the Academy's NetBattle club!|Everyone's hunting for Program Advances!|"
+	{ -12, -164, FACE_NE, 5, 0x31, "Ack! I'm late for the Academy's NetBattle club!|Everyone's hunting for Program Advances!|"
 		"Three chips in the right order make a new one!", 10 },
 };
 
@@ -87,7 +87,7 @@ static const Folk seaside_folk[] = {
 	{ -132, -150, FACE_NW, 5, 0x2E, "The Aquarium's Net copied itself overnight!|Grandpa says it's Dr.Wily...|He says that about everything!" },
 	{ -140, -60, FACE_NE, 5, 0x39, "I come here to watch the boats...|And that whale never gets old!" },
 	{ -60, -20, FACE_SE, 5, 0x30, "Lan! You took the LevBus to Seaside?|Good luck down there!" },
-	{ -108, -44, FACE_NE, 5, 0x38, "The mermaid looks out over the sea...|Lovely,isn't she?", 10 },
+	{ -108, -44, FACE_NE, 5, 0x2F, "The mermaid looks out over the sea...|Lovely,isn't she?", 10 },
 };
 
 /* What its checks say: the fountain (0), the fish shop (2, 3); the others
@@ -111,7 +111,7 @@ static const Folk green_folk[] = {
 	{ -180, -236, FACE_NW, 5, 0x2E, "The JudgeTree was here long before the town.|They say its roots reach all the way into the Net!" },
 	{ 68, -124, FACE_SW, 5, 0x30, "Lan! You took the LevBus to Green Town?|Good luck down there!" },
 	{ -60, -204, FACE_SE, 5, 0x39, "I jacked in at the knight yesterday...|Today the paths were all new! It really is endless!" },
-	{ -132, -108, FACE_NE, 5, 0x38, "Ahh... Green Town's air is so clean!|Even the Net feels fresher here!", 10 },
+	{ -132, -108, FACE_NE, 5, 0x32, "Ahh... Green Town's air is so clean!|Even the Net feels fresher here!", 10 },
 };
 
 /* What its checks say: the stump's table of books (0, 4), the flower shop

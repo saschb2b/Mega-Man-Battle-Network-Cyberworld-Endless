@@ -9,7 +9,10 @@ enum { FACE_NE = 1, FACE_SE = 3, FACE_SW = 5, FACE_NW = 7 };
 
 /* Someone in the town: where (source world units, moved with the piece
  * there), which way, what they say, and how far they pace that way and
- * back (0: they stand). */
+ * back (0: they stand). A walker needs a sprite whose four walks
+ * (animations 9-15) are drawn: of the game's people in list 5, 0x2B-0x32
+ * and 0x34-0x36 (0x38's and 0x3A-0x3C's are empty, so they vanish as
+ * they walk; 0x28's and 0x33's south ones a still frame or none). */
 typedef struct {
 	int x, y, face, cat, sprite;
 	const char *words;

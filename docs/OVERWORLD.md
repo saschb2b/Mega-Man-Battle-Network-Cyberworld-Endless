@@ -109,7 +109,9 @@ about the place (the game's generic people, never its story's, each out
 one run in four; a Mr. Prog explains the jack-in), a few
 pace a sidewalk up and back as the game's own walkers do (NPC command
 `0x38` sets a direction, speed and number of steps, `0x39` walks on or
-back), and everything answers A: the original's checks (section
+back; a walker's sprite needs all four of its walks, animations 9-15,
+drawn: sprite `0x38`'s are empty, and Seaside's and Green Town's
+walker vanished whenever he walked), and everything answers A: the original's checks (section
 3 triggers `0xF0` + n in front of houses, shops, signs and statues) keep
 their cells and say the town's own lines. Standing on one and pressing A,
 the game skips it if event flag `0x16C0` + n is set (the town clears them),

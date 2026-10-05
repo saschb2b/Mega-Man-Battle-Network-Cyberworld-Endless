@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Townsfolk who walk stay drawn as they walk.** Seaside's and Green
+  Town's walker vanished the moment he set off and came back when he
+  stopped: his sprite's walks are empty in BN6's data. Both walk as
+  other people now, and Central Town's late Academy kid, who glided on
+  her way back (one still frame facing south), walks both ways.
+
 ## 0.10.0 (2026-10-05)
 
 - **The second screen's polish** (issue #81). The NaviCust programs'
