@@ -108,8 +108,9 @@ What differs from the other builds:
   build/3ds`) and scan a QR code of `http://THIS-PC:8766/cyberworld-endless.cia`
   (the page's `web/assets/qr.js` draws one in node too).
 - `frame_log = on` in `settings.ini` writes a line a second: frames shown and
-  played, and a frame's update (the GBA's share, with and without its
-  picture), drawing and present.
+  played, a frame's update (the GBA's share, with and without its
+  picture), drawing and present, and the second's longest update and
+  drawing.
 - **3dslink** (`/opt/devkitpro/tools/bin/3dslink -a 3DS-ADDRESS FILE.3dsx`,
   Y in the Homebrew Launcher) sends the build and shows its output here.
 - Luma3DS keeps crash dumps in `sdmc:/luma/dumps/arm11/`: registers at 40

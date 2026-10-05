@@ -791,6 +791,7 @@ void platform_apply_effects(void) {
 /* (the frame log's split: the game's update and its drawing, summed over
  * the frames played, and the present, over those shown) */
 static uint64_t part_update, part_draw, part_present;
+static uint64_t part_longest;   /* (the longest frame's update and drawing together: a hitch the means hide) */
 static int part_played;
 /* (and the second screen's picture, where one is drawn: the 3DS's map) */
 static uint64_t part_second;
@@ -799,6 +800,7 @@ static int part_seconds;
 void platform_frame_parts(uint64_t update, uint64_t draw) {
 	part_update += update;
 	part_draw += draw;
+	if (update + draw > part_longest) part_longest = update + draw;
 	++part_played;
 }
 
@@ -832,16 +834,17 @@ static void log_present(void) {
 			emu_draw_waits = 0;
 		}
 		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
-			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms%s\n",
+			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"
+			" the longest update and drawing %.1f ms%s\n",
 			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",
 			part_update * ms / played, drawn > 0 ? (emu_core_ticks - emu_core_unshown_ticks) * ms / drawn : 0.0,
 			emu_core_unshown ? emu_core_unshown_ticks * ms / emu_core_unshown : 0.0, emu_core_unshown,
-			part_draw * ms / played, part_present * ms / shown, bottom);
+			part_draw * ms / played, part_present * ms / shown, part_longest * ms, bottom);
 		emu_core_ticks = emu_core_unshown_ticks = 0;
 		emu_core_unshown = 0;
 		fflush(stdout);
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
-		part_update = part_draw = part_present = part_second = 0;
+		part_update = part_draw = part_present = part_second = part_longest = 0;
 		part_played = part_seconds = 0;
 		second = now;
 	}
