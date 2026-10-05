@@ -55,6 +55,9 @@ void anim_draw(const Anim *a, int x, int y, bool flip, int pal, int fx);
 extern int gfx_obj_mosaic;
 extern int gfx_obj_alpha;
 void sprite_draw_frame(Sprite *s, int anim, int frame, int x, int y, bool flip, int pal, int fx);
+/* ... drawn into memory (gfx_draw_into's), `scale` times as large, its
+ * origin at (x, y): a face on the second screen */
+void sprite_draw_into(Sprite *s, int anim, int frame, int x, int y, int pal, int scale);
 
 /* A tile reference for LZ77 block `lz` (add the offset into its data,
  * which starts with the game's 4-byte size word) for rom_tiles. */

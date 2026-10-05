@@ -78,6 +78,8 @@ bool director_on_layer(void) { return D.active && !D.town; }
 
 int director_guardian_battle(void) { return D.active && boss_fighting() ? D.objs.guardian.navi : 0; }
 
+int director_guardian_waiting(void) { return D.active && !D.town && D.objs.guardian.navi && !boss_exit_open() ? D.objs.guardian.navi : 0; }
+
 /* The guardian's course, and its door's save the frame he steps in (not
  * before the arrival's card: a CONTINUE at the door showed the act's card
  * cut short by the guardian's) */

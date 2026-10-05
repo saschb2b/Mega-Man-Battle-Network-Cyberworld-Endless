@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **The PET at home and its screens on the second screen** (issues #79,
+  #77). In the town the second screen is no longer dark: MegaMan's face
+  from the ROM, twice as large, beside where R jacks him in and the run's
+  setup; on a layer the PET's menu and its KeyItem, SubChip, E-Mail, Comm
+  and Save screens show the same home with the layer's next step (its
+  guardian, or the exit pad). MegaMan's status adds the run's record (the
+  layer, the guardians beaten, the viruses deleted, his max HP and what
+  the NaviCust's programs add to it, the Cross brought) and the programs
+  on his board; the Library, its classes against what a run can hold and
+  the chips this run added. On the title the PET is at rest: the
+  profile's record (runs, best layer, guardians beaten, viruses deleted,
+  short nets won) and whether BN5's ROM was found beside BN6's.
 - **The NaviCustomizer on the second screen** (issue #76). The program
   the cursor is on, in the list, on the board or held over it, is a card:
   its shape in its colour, its name, what kind of part it is and where

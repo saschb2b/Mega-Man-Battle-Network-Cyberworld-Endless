@@ -26,11 +26,16 @@
 int second_wrap(const char *text, int w, char lines[][SECOND_WRAP], int most);
 /* ... drawn from (x, y), at most `most` lines (8): the y under them */
 int second_wrapped(const char *text, int x, int y, int w, int most, SDL_Color c);
+/* A row of the PET's on a slot from (x, y), w wide: `name` in gold, `value` in white */
+void second_row(int x, int y, int w, const char *name, const char *value);
+#define SECOND_ROW_H 18
 /* A dark slot, BN6's for a value, w x h from (x, y) */
 void second_slot(int x, int y, int w, int h);
 /* The frame in w x h: the header with `title` on its left (`slide` pixels
  * short of its place, as it slides in) and the place on its right, the
  * strip of HP, Zenny and BugFrags under it; the body left for the panel */
 SDL_Rect second_frame(int w, int h, const char *title, int slide);
+/* ... without a run: the header with `title` and `where`, no strip */
+SDL_Rect second_frame_rest(int w, int h, const char *title, const char *where);
 
 #endif

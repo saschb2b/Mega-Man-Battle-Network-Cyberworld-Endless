@@ -20,14 +20,19 @@ void second_slot(int x, int y, int w, int h) {
 	fill_rect(x + 1, y + 1, w - 2, h - 2, PET_SLOT);
 }
 
-/* the place: the layer's area and its number, or the town's name */
-static void place(int w) {
-	char layer[16] = "";
-	if (!S2.town) snprintf(layer, sizeof layer, "Layer %d", S2.depth);
-	int lw = text_width(layer), aw = text_width(S2.area), gap = lw && aw ? 8 : 0;
+void second_row(int x, int y, int w, const char *name, const char *value) {
+	second_slot(x, y, w, SECOND_ROW_H - 2);
+	text_draw(x + 5, y + 2, name, PET_GOLD, TEXT_LEFT);
+	text_draw(x + w - 5, y + 2, value, PET_WHITE, TEXT_RIGHT);
+}
+
+/* the place on its slot: `area` (the layer's, the town's name) and
+ * `layer` (its number), either "" */
+static void place(int w, const char *area, const char *layer) {
+	int lw = text_width(layer), aw = text_width(area), gap = lw && aw ? 8 : 0;
 	int x = w - 4 - (lw + gap + aw) - 12;
 	second_slot(x, 2, w - 4 - x, HEAD_H - 4);
-	text_draw(x + 6, 4, S2.area, PET_CYAN_HI, TEXT_LEFT);
+	text_draw(x + 6, 4, area, PET_CYAN_HI, TEXT_LEFT);
 	text_draw(w - 10, 4, layer, PET_WHITE, TEXT_RIGHT);
 }
 
@@ -48,26 +53,41 @@ static void strip(int w) {
 	}
 }
 
-SDL_Rect second_frame(int w, int h, const char *title, int slide) {
+/* The band with `title`, the green round the body from `top` down and
+ * the body's cyan edge: the body */
+static SDL_Rect frame(int w, int h, const char *title, int slide, int top) {
 	/* (each pixel filled once: the panel fills the body, on a 3DS's time) */
 	fill_rect(0, 0, w, HEAD_H, PET_DARK);
 	fill_rect(0, HEAD_H, w, 1, PET_LINE);
-	fill_rect(0, HEAD_H + 1, w, BODY_Y - 3 - HEAD_H, PET_GREEN);
-	fill_rect(0, BODY_Y - 2, 2, h - BODY_Y + 2, PET_GREEN);
-	fill_rect(w - 2, BODY_Y - 2, 2, h - BODY_Y + 2, PET_GREEN);
+	fill_rect(0, HEAD_H + 1, w, top - 3 - HEAD_H, PET_GREEN);
+	fill_rect(0, top - 2, 2, h - top + 2, PET_GREEN);
+	fill_rect(w - 2, top - 2, 2, h - top + 2, PET_GREEN);
 	fill_rect(2, h - 2, w - 4, 2, PET_GREEN);
 	text_draw(8 - slide, 3, title, PET_WHITE, TEXT_LEFT);
 	/* (BN6's three light stripes after a screen's name, slanting up) */
 	int sx = 8 - slide + text_width(title) + 10;
 	for (int k = 0; k < 3; ++k)
 		for (int y = 0; y < 12; ++y) fill_rect(sx + k * 6 + (11 - y) / 2, 4 + y, 2, 1, PET_LINE);
-	place(w);
-	strip(w);
 	/* the body's cyan edge, two pixels, lit along its top */
-	SDL_Rect body = { 4, BODY_Y, w - 8, h - BODY_Y - 4 };
-	SDL_Rect edge[4] = { { 2, BODY_Y - 2, w - 4, 2 }, { 2, h - 4, w - 4, 2 }, { 2, BODY_Y, 2, body.h }, { w - 4, BODY_Y, 2, body.h } };
+	SDL_Rect body = { 4, top, w - 8, h - top - 4 };
+	SDL_Rect edge[4] = { { 2, top - 2, w - 4, 2 }, { 2, h - 4, w - 4, 2 }, { 2, top, 2, body.h }, { w - 4, top, 2, body.h } };
 	fill_rects(edge, 4, PET_CYAN);
-	fill_rect(3, BODY_Y - 1, w - 6, 1, PET_CYAN_HI);
+	fill_rect(3, top - 1, w - 6, 1, PET_CYAN_HI);
+	return body;
+}
+
+SDL_Rect second_frame(int w, int h, const char *title, int slide) {
+	SDL_Rect body = frame(w, h, title, slide, BODY_Y);
+	char layer[16] = "";
+	if (!S2.town) snprintf(layer, sizeof layer, "Layer %d", S2.depth);
+	place(w, S2.area, layer);
+	strip(w);
+	return body;
+}
+
+SDL_Rect second_frame_rest(int w, int h, const char *title, const char *where) {
+	SDL_Rect body = frame(w, h, title, 0, HEAD_H + 6);
+	place(w, where, "");
 	return body;
 }
 

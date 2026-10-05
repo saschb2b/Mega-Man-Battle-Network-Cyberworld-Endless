@@ -36,4 +36,29 @@ const char *second_run_line(bool bug);
 /* The board's rules, in a line */
 const char *second_board_rules(void);
 
+/* The town's next step: where R jacks MegaMan in (`landmark_at`, the
+ * town's "bird statue on the plaza"), into `out` */
+void second_home_next(const char *landmark_at, char *out, size_t n);
+/* The run's setup in a line ("Short net, threat 2, HeatCross"), into `out` */
+void second_home_setup(char *out, size_t n);
+/* A row of the PET's: its name and its value */
+typedef struct { const char *name; char value[24]; } SecondRow;
+/* The profile's record: how many rows of `most` */
+int second_record(SecondRow *out, int most);
+/* The run's record for MegaMan's status: the layer, the guardians
+ * beaten, the viruses deleted, the max HP and its parts (`max_hp`,
+ * `base_hp`: HPMemory counts into the base, programs on top), the Cross
+ * brought: how many rows of `most` */
+int second_status(SecondRow *out, int most, int max_hp, int base_hp);
+/* The Library's classes against what a run can hold, and the chips new
+ * this run: how many rows of `most` */
+int second_library(SecondRow *out, int most);
+/* What the Library is to a run, a line */
+const char *second_library_line(void);
+/* A layer's next step: the guardian its exit waits on (navi, 0 none) or
+ * the exit pad, into `out` */
+void second_layer_next(int guardian, char *out, size_t n);
+/* Whether BN5's ROM was found beside BN6's, in a line */
+const char *second_bn5_line(bool found);
+
 #endif

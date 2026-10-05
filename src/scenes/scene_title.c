@@ -28,6 +28,7 @@
 #include "meta.h"
 #include "powers.h"
 #include "save.h"
+#include "second.h"
 #include "text.h"
 
 #include "version.h"   /* CW_VERSION, from the build (Makefile) */
@@ -293,6 +294,9 @@ static void enter(void) {
 	S.summary = title_summary;
 	title_summary = false;
 	S.first = true;
+	/* (the second screen: the PET at rest, issue #79) */
+	platform_second_screen(second_title_draw, second_title_changed);
+	platform_second_screen_soon();
 	if (S.summary) show_area(run.biome);
 	else if (S.saved_depth) show_area(saved.biome);
 	else show_next();
@@ -911,4 +915,10 @@ static void draw(void) {
 	if (S.leaving) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, S.leaving * 255 / LEAVE_WHITE));
 }
 
-const Scene scene_title = { "title", enter, update, draw, NULL };
+/* (the second screen's PET at its pace, then the title's frame) */
+static void tick(void) {
+	platform_second_screen_draw();
+	update();
+}
+
+const Scene scene_title = { "title", enter, tick, draw, NULL };

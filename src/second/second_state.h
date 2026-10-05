@@ -44,6 +44,11 @@ typedef struct {
 	SecondContext context;
 	int since;                    /* frames since it came */
 	bool town;                    /* in the real world (else on a layer) */
+	char home_next[96];           /* ... the run's next step there (issue #79) */
+	char home_setup[96];          /* ... and its setup */
+	/* MegaMan's status (issue #77): his max HP and its base, the programs on the board */
+	int st_max_hp, st_base_hp;
+	char st_programs[128];
 	int hp, max_hp;
 	unsigned zenny, bugfrags;
 	int depth;                    /* the run's layer */

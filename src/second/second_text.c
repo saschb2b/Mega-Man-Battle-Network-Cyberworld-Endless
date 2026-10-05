@@ -12,8 +12,13 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "chip_pool.h"
+#include "guardians.h"
+#include "meta.h"
 #include "navicust.h"
 #include "powers.h"
+#include "run.h"
+#include "save.h"
 
 void second_cross_lines(int navi, char *out, size_t n) {
 	const char *strong = powers_cross_strength(navi), *navis = powers_cross_on_navis(navi);
@@ -86,3 +91,67 @@ const char *second_run_line(bool bug) { return bug ? "RUN now would bring a bug:
 const char *second_board_rules(void) {
 	return "Program parts on the command line, plus parts off it, no colour beside its own";
 }
+
+void second_home_next(const char *landmark_at, char *out, size_t n) {
+	snprintf(out, n, "R at the %s jacks MegaMan in", landmark_at && *landmark_at ? landmark_at : "port");
+}
+
+void second_home_setup(char *out, size_t n) {
+	const FolderInfo *f = meta_folder(run.folder);
+	int k = snprintf(out, n, "%s net", run.mode == RUN_SHORT ? "Short" : "Endless");
+	if (k > 0 && (size_t)k < n && run.threat) k += snprintf(out + k, n - (size_t)k, ", threat %d", run.threat);
+	if (k > 0 && (size_t)k < n && f && f->name) k += snprintf(out + k, n - (size_t)k, "|%s folder", f->name);
+	if (k > 0 && (size_t)k < n && powers_cross_name(run.cross)) snprintf(out + k, n - (size_t)k, ", %s", powers_cross_name(run.cross));
+}
+
+/* rows' values as numbers */
+static int rows_of(SecondRow *out, int most, const char *const *names, const int *values, int n, int keep) {
+	int k = 0;
+	for (int i = 0; i < n && k < most; ++i)
+		if (values[i] || i < keep) {
+			out[k].name = names[i];
+			snprintf(out[k++].value, sizeof out[0].value, "%d", values[i]);
+		}
+	return k;
+}
+
+int second_record(SecondRow *out, int most) {
+	static const char *const names[] = { "Runs", "Best layer", "Guardians beaten", "Viruses deleted", "Short nets won" };
+	const int values[] = { profile.runs, profile.best_depth, profile.bosses, profile.viruses, profile.short_wins };
+	return rows_of(out, most, names, values, 5, 2);
+}
+
+int second_status(SecondRow *out, int most, int max_hp, int base_hp) {
+	static const char *const names[] = { "Layer", "Guardians beaten", "Viruses deleted", "Max HP", "Programs' HP" };
+	const int values[] = { run.depth, run.bosses_beaten, run.viruses_deleted, max_hp, max_hp - base_hp };
+	int k = rows_of(out, most, names, values, 5, 4);
+	if (k && !strcmp(out[k - 1].name, "Programs' HP")) snprintf(out[k - 1].value, sizeof out[0].value, "+%d", max_hp - base_hp);
+	if (k < most && powers_cross_name(run.cross)) {
+		out[k].name = "Cross brought";
+		snprintf(out[k++].value, sizeof out[0].value, "%s", powers_cross_name(run.cross));
+	}
+	return k;
+}
+
+int second_library(SecondRow *out, int most) {
+	static const char *const cls[] = { "Standard chips", "Mega chips", "Giga chips" };
+	int k = 0;
+	for (int c = 0; c < 3 && k < most; ++c) {
+		out[k].name = cls[c];
+		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", meta_library_count(c), chip_pool_class_count(c));
+	}
+	if (k < most) {
+		out[k].name = "New this run";
+		snprintf(out[k++].value, sizeof out[0].value, "%d", meta_library_new());
+	}
+	return k;
+}
+
+const char *second_library_line(void) { return "Every chip MegaMan held in any run stays in the Library, and each run begins with it"; }
+
+void second_layer_next(int guardian_navi, char *out, size_t n) {
+	if (guardian_navi) snprintf(out, n, "The exit opens once %s is deleted", guardian(guardian_navi)->name);
+	else snprintf(out, n, "Find the exit pad");
+}
+
+const char *second_bn5_line(bool found) { return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6"; }

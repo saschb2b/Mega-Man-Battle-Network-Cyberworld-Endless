@@ -22,6 +22,9 @@ bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
 int director_guardian_battle(void);
+/* The guardian the layer's exit waits on (his navi index), 0 where it
+ * opens without one or he is beaten (the second screen's next step) */
+int director_guardian_waiting(void);
 /* The NaviCust's board as it stands (the second screen, issue #76): why
  * RUN would bug, in MegaMan's words, or NULL; whether program variant `v`
  * (program * 4 + its colour's) fits its free cells as they stand */

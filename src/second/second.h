@@ -15,5 +15,9 @@ bool second_draw(int w, int h);
 /* Whether its picture would differ from the last drawn (the map's always
  * may: MegaMan's mark pulses on it). */
 bool second_changed(void);
+/* The title's: the PET at rest, the profile's record (second_home.c,
+ * issue #79); its picture changes only as the title is entered again. */
+bool second_title_draw(int w, int h);
+bool second_title_changed(void);
 
 #endif

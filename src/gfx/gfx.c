@@ -17,11 +17,15 @@
  * object is 5 bytes: tile, x, y, size|hflip<<6|vflip<<7, shape|bank<<4.
  * Compressed sprites (pointer bit 31) are LZ77 with a 4-byte prefix. */
 
+/* CachedFrame's part for a whole frame kept as pixels, for memory */
+#define RAW_PART (-1)
+
 typedef struct CachedFrame {
 	uint32_t frame_off;
 	int pal;
 	int part;         /* 0 whole frame, n: only its object n-1 */
 	SDL_Texture *tex;
+	uint32_t *raw;    /* ... or, drawn into memory (sprite_draw_into), its RGBA8888 pixels */
 	int ox, oy, w, h; /* bounds relative to origin */
 	struct CachedFrame *next;
 } CachedFrame;
@@ -118,6 +122,26 @@ static void blit_obj(uint32_t *px, int W, const uint8_t *o, int x, int y, const 
 	}
 }
 
+/* A frame's objects' bounds (object part - 1 alone where part > 0): how
+ * many objects it has */
+static int frame_bounds(const uint8_t *obj, int part, int *minx, int *miny, int *maxx, int *maxy) {
+	int count = 0, seen = 0;
+	*minx = *miny = 1 << 20;
+	*maxx = *maxy = -(1 << 20);
+	for (const uint8_t *o = obj; !(o[0] == 0xFF && o[1] == 0xFF) && seen < 128; o += 5, ++seen) {
+		int shape = o[4] & 3, size = o[3] & 3;
+		if (shape > 2 || (part > 0 && seen != part - 1)) continue;
+		++count;
+		int x = (int8_t)o[1], y = (int8_t)o[2];
+		int w = obj_dims[shape][size][0], h = obj_dims[shape][size][1];
+		if (x < *minx) *minx = x;
+		if (y < *miny) *miny = y;
+		if (x + w > *maxx) *maxx = x + w;
+		if (y + h > *maxy) *maxy = y + h;
+	}
+	return count;
+}
+
 static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) {
 	const uint8_t *b = s->base;
 	const uint8_t *tiles = b + le32(f);
@@ -131,20 +155,7 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 	const uint8_t *objtab = b + le32(f + 12);
 	const uint8_t *obj = objtab + le32(objtab + list * 4);
 
-	int minx = 1 << 20, miny = 1 << 20, maxx = -(1 << 20), maxy = -(1 << 20);
-	int count = 0;
-	int seen = 0;
-	for (const uint8_t *o = obj; !(o[0] == 0xFF && o[1] == 0xFF) && seen < 128; o += 5, ++seen) {
-		int shape = o[4] & 3, size = o[3] & 3;
-		if (shape > 2 || (part && seen != part - 1)) continue;
-		++count;
-		int x = (int8_t)o[1], y = (int8_t)o[2];
-		int w = obj_dims[shape][size][0], h = obj_dims[shape][size][1];
-		if (x < minx) minx = x;
-		if (y < miny) miny = y;
-		if (x + w > maxx) maxx = x + w;
-		if (y + h > maxy) maxy = y + h;
-	}
+	int minx, miny, maxx, maxy, count = frame_bounds(obj, part, &minx, &miny, &maxx, &maxy);
 	CachedFrame *cf = calloc(1, sizeof *cf);
 	if (!cf) return NULL;
 	cf->frame_off = (uint32_t)(f - b);
@@ -158,17 +169,24 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 	if (banks < 1) banks = 1;
 	int k = 0;
 	for (const uint8_t *o = obj; !(o[0] == 0xFF && o[1] == 0xFF); o += 5, ++k) {
-		if ((o[4] & 3) > 2 || (part && k != part - 1)) continue;
+		if ((o[4] & 3) > 2 || (part > 0 && k != part - 1)) continue;
 		int bank = ((o[4] >> 4) + pal) % banks;
 		const uint8_t *pl = pal >= SPRITE_ROM_PAL && pal != SPRITE_WHITE ? R.data + (pal - SPRITE_ROM_PAL) : pals + bank * 32;
 		blit_obj(px, W, o, (int8_t)o[1] - minx, (int8_t)o[2] - miny, tiles, tiles_len, pal == SPRITE_WHITE ? NULL : pl);
+	}
+	cf->ox = minx; cf->oy = miny; cf->w = W; cf->h = H;
+	/* (kept as pixels for memory: ARGB to RGBA, colour 0 left 0) */
+	if (part == RAW_PART) {
+		for (int i = 0; i < W * H; ++i)
+			if (px[i]) px[i] = px[i] << 8 | 0xFF;
+		cf->raw = px;
+		return cf;
 	}
 	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(px, W, H, 32, W * 4, SDL_PIXELFORMAT_ARGB8888);
 	cf->tex = SDL_CreateTextureFromSurface(P.renderer, surf);
 	SDL_SetTextureBlendMode(cf->tex, SDL_BLENDMODE_BLEND);
 	SDL_FreeSurface(surf);
 	free(px);
-	cf->ox = minx; cf->oy = miny; cf->w = W; cf->h = H;
 	return cf;
 }
 
@@ -448,6 +466,22 @@ static void raw_tile(uint32_t tile, uint32_t pal, int x, int y, int flip) {
 }
 
 static bool raw_tile_on(void) { return raw.px != NULL; }
+
+void sprite_draw_into(Sprite *s, int anim, int frame, int x, int y, int pal, int scale) {
+	CachedFrame *c = raw.px ? get_frame_part(s, anim, frame, pal, RAW_PART) : NULL;
+	if (!c || !c->raw) return;
+	x += c->ox * scale;
+	y += c->oy * scale;
+	for (int j = 0; j < c->h * scale; ++j) {
+		int qy = y + j;
+		if (qy < 0 || qy >= raw.h) continue;
+		for (int i = 0; i < c->w * scale; ++i) {
+			int qx = x + i;
+			uint32_t v = c->raw[(j / scale) * c->w + i / scale];
+			if (v && qx >= 0 && qx < raw.w) raw.px[qy * raw.stride + qx] = v;
+		}
+	}
+}
 
 void gfx_draw_into(uint32_t *px, int w, int h, int pitch) {
 	raw.px = px;
