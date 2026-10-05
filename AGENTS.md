@@ -35,6 +35,7 @@ the site.
 | Other games' ROMs (Battle Network 5 first): what they can lend a run, and how | [docs/MULTIROM.md](docs/MULTIROM.md) |
 | What the original games have, do and lack: the sources to look in first, how a claim is verified, what players taught us | [docs/SOURCES.md](docs/SOURCES.md) |
 | What the project has mapped of BN6 and BN5, written out for others: symbol files for debuggers, tables, how they stay in step; bn6f's functions located in Gregar and BN5, its names kept out of git | [docs/SYMBOLS.md](docs/SYMBOLS.md) |
+| Every line a character says (MegaMan, Lan, Mr.Prog, the shops, bystanders, guardians, townsfolk): how BN6's script talks, measured, and the rules | [docs/VOICE.md](docs/VOICE.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Layout
