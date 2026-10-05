@@ -25,6 +25,13 @@ extern uint64_t route_gone;
  * the walk's panels. */
 int route_way(double px, double py, int tx, int ty, int *len);
 
+/* The walk alone, as route_way's (route_walk, route_walk_len), from a
+ * search kept while the target, `key` (the layer's) and route_gone stand:
+ * the second screen's map, drawn again as MegaMan walks; its turns as
+ * least_turns' (the arrow's own search, route_way, stays as it was). 0,
+ * or -1 where none reaches the target. */
+int route_walk_kept(double px, double py, int tx, int ty, uint32_t key, int *len);
+
 /* Whether MegaMan walks from panel (sx, sy) to (ax, ay) in a straight line
  * over the floor, clear of what stands on it (as of the last route_way). */
 bool route_floor_line(int sx, int sy, int ax, int ay);

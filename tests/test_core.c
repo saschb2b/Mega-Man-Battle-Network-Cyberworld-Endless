@@ -1546,6 +1546,50 @@ static void test_arrow(void) {
 	printf("  arrow: %d turns over %d frames of walking, %d swung back within a second\n", arrow_turns, arrow_frames, arrow_swings);
 }
 
+/* a walk's turns as MegaMan holds its ways, from panel (sx, sy) on along
+ * route_walk (its target first): each change of way after the first step */
+static int walk_turns(int sx, int sy) {
+	int turns = 0, last = -1, cx = sx, cy = sy;
+	for (int i = route_walk_len - 1; i >= 0; --i) {
+		int x = route_walk[i] % MAP_W, y = route_walk[i] / MAP_W, way = (x - cx) * 3 + (y - cy);
+		turns += last >= 0 && way != last;
+		last = way;
+		cx = x; cy = y;
+	}
+	return turns;
+}
+
+/* The map's kept walk (route_walk_kept, the second screen's way on, issue
+ * #81) against the arrow's own search, from the arrival and each room to
+ * the exit or the guardian: as short, as few turns, each step to a panel
+ * beside the last, the target at its end. */
+static void test_kept_walk(void) {
+	int walks = 0, off = 0;
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	for (uint32_t seed = 1; seed <= 120; ++seed) {
+		int depth = 1 + (int)(seed % 25);
+		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		layer_generate(seed * 7919u, depth, biome_for_depth(depth), kind, &kit);
+		int tx, ty, sx, sy, len;
+		if (!arrow_goal(&tx, &ty)) continue;
+		route_gone = 0;
+		for (int r = -1; r < layer.nrooms; ++r) {
+			if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
+			if (route_way(sx, sy, tx, ty, &len) < 0) continue;
+			int n = route_walk_len, turns = walk_turns(sx, sy), from = n ? route_walk[n - 1] : -1;
+			bool ok = route_walk_kept(sx, sy, tx, ty, seed, &len) == 0 && route_walk_len == n && walk_turns(sx, sy) == turns;
+			for (int i = 0; ok && i + 1 < route_walk_len; ++i)
+				ok = abs(route_walk[i] % MAP_W - route_walk[i + 1] % MAP_W) + abs(route_walk[i] / MAP_W - route_walk[i + 1] / MAP_W) == 1;
+			ok = ok && (!n || (route_walk[0] == ty * MAP_W + tx && abs(route_walk[n - 1] % MAP_W - from % MAP_W) + abs(route_walk[n - 1] / MAP_W - from / MAP_W) <= 2));
+			++walks;
+			if (!ok && ++off <= 5) printf("  seed %u (depth %d): the kept walk from %d,%d to %d,%d is not the arrow's match\n", seed, depth, sx, sy, tx, ty);
+		}
+	}
+	CHECK(off == 0, "the map's kept walk differed from the arrow's search on %d of %d walks", off, walks);
+}
+
 /* Following the arrow in every area, from the arrival and each room to the
  * exit or the guardian (sixty layers each, as test_walks'): it never loses
  * MegaMan, never shows a way across the grid on a walkway or band, and
@@ -2565,6 +2609,7 @@ int main(void) {
 	test_layouts_build();
 	test_stairs();
 	test_arrow();
+	test_kept_walk();
 	test_arrow_areas();
 	test_arrow_mouths();
 	test_guardian_gone();

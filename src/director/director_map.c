@@ -198,7 +198,7 @@ static int seen_count(void) {
 static void way_legs(double wx, double wy, int mx, int my, int ex, int ey) {
 	int len;
 	way.n = 0;
-	if (route_way(wx, wy, ex, ey, &len) < 0) return;
+	if (route_walk_kept(wx, wy, ex, ey, run.layer_seed, &len) < 0) return;
 	int cx = mx, cy = my, k = route_walk_len - 1;
 	while (k >= 0 && way.n < WAY_LEGS) {
 		int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;

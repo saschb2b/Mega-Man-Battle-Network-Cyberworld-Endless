@@ -301,6 +301,77 @@ static void floor_objects(double px, double py, int tx, int ty, int *sx, int *sy
 	solid[*sy][*sx] = 0;
 }
 
+/* The walk to one target from every panel, kept while the target, the
+ * layer and what is gone stand (the second screen's map draws the way on
+ * six times a second while MegaMan walks; least_turns at each panel he
+ * stepped on had been most of its time on a 3DS, issue #81): a search
+ * backwards from the target over least_turns' states, each one's steps to
+ * the target, its turns on the way and the state it steps to next. */
+static int16_t kept_next[LT_STATES], kept_dist[LT_STATES], kept_turns[LT_STATES];
+static struct { int tx, ty; uint32_t key; uint64_t gone; bool made; } kept;
+
+static void kept_objects(int tx, int ty) {
+	memset(solid, 0, sizeof solid);
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].solid && !(route_gone >> i & 1) && floor_at((int)layer.obj[i].x, (int)layer.obj[i].y))
+			solid[(int)layer.obj[i].y][(int)layer.obj[i].x] = 1;
+	solid[ty][tx] = 0;
+}
+
+/* state s2's predecessors, the states that step into it, each with its
+ * turns on to the target (fewest among the least steps) */
+static void kept_relax(int s2, int *tail) {
+	int k2 = s2 % 4, x2 = s2 / 4 % MAP_W, y2 = s2 / 4 / MAP_W, x = x2 - lt_d[k2][0], y = y2 - lt_d[k2][1];
+	if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || !open_at(x, y) || !layer_step_ok(x, y, x2, y2)) return;
+	for (int k = 0; k < 4; ++k) {
+		int s = (y * MAP_W + x) * 4 + k, t = kept_turns[s2] + (k2 != k);
+		if (kept_dist[s] < 0) {
+			kept_dist[s] = (int16_t)(kept_dist[s2] + 1); kept_turns[s] = (int16_t)t; kept_next[s] = (int16_t)s2;
+			lt_q[(*tail)++] = (int16_t)s;
+		} else if (kept_dist[s] == kept_dist[s2] + 1 && t < kept_turns[s]) { kept_turns[s] = (int16_t)t; kept_next[s] = (int16_t)s2; }
+	}
+}
+
+static void kept_make(int tx, int ty) {
+	kept_objects(tx, ty);
+	memset(kept_dist, 0xFF, sizeof kept_dist);
+	int h = 0, tail = 0;
+	for (int k = 0; k < 4; ++k) {
+		int s = (ty * MAP_W + tx) * 4 + k;
+		kept_dist[s] = 0; kept_turns[s] = 0; kept_next[s] = -1;
+		lt_q[tail++] = (int16_t)s;
+	}
+	while (h < tail) kept_relax(lt_q[h++], &tail);
+}
+
+int route_walk_kept(double px, double py, int tx, int ty, uint32_t key, int *len) {
+	int sx = (int)lround(px), sy = (int)lround(py), best = -1, n = 0;
+	route_walk_len = 0;
+	route_walk_aim = -1;
+	if (!floor_at(sx, sy) || !floor_at(tx, ty)) return -1;
+	if (!kept.made || kept.tx != tx || kept.ty != ty || kept.key != key || kept.gone != route_gone) {
+		kept_make(tx, ty);
+		kept.tx = tx; kept.ty = ty; kept.key = key; kept.gone = route_gone; kept.made = true;
+	}
+	floor_objects(px, py, tx, ty, &sx, &sy);
+	*len = 0;
+	if (sx == tx && sy == ty) return 0;
+	/* (the first step: the least steps on, then the fewest turns, as
+	 * least_turns sets off) */
+	for (int k = 0; k < 4; ++k) {
+		int nx = sx + lt_d[k][0], ny = sy + lt_d[k][1], s = (ny * MAP_W + nx) * 4 + k;
+		if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || !open_step(sx, sy, nx, ny) || kept_dist[s] < 0) continue;
+		if (best < 0 || kept_dist[s] < kept_dist[best] || (kept_dist[s] == kept_dist[best] && kept_turns[s] < kept_turns[best])) best = s;
+	}
+	if (best < 0) return -1;
+	/* (the target first, as least_turns leaves the walk) */
+	n = kept_dist[best] + 1;
+	for (int s = best, i = n - 1; s >= 0 && i >= 0; s = kept_next[s], --i) route_walk[i] = (int16_t)(s / 4);
+	route_walk_len = n;
+	*len = n;
+	return 0;
+}
+
 int route_way(double px, double py, int tx, int ty, int *len) {
 	int sx = (int)lround(px), sy = (int)lround(py);
 	route_walk_len = 0;
