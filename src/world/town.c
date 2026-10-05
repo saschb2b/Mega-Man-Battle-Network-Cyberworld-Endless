@@ -774,6 +774,23 @@ bool town_walk(int x, int y, int steps, int *wx, int *wy, int *cells) {
 	return true;
 }
 
+bool town_home_spot(int *x, int *y, int *face) {
+	int cells = 0;
+	/* (where no walk on one floor joins them, as Green Town's heights
+	 * part its start from its knight: where Lan starts) */
+	if (!town_walk(T.info.start_x, T.info.start_y, 0, x, y, &cells) ||
+		!town_walk(T.info.start_x, T.info.start_y, cells > 2 ? cells - 2 : 0, x, y, NULL)) {
+		*x = T.info.start_x;
+		*y = T.info.start_y;
+		*face = T.info.start_face;
+		return true;
+	}
+	/* (the game's facings: 1 +x, 3 +y, 5 -x, 7 -y) */
+	int dx = T.info.port_x - *x, dy = T.info.port_y - *y;
+	*face = abs(dx) > abs(dy) ? (dx > 0 ? 1 : 5) : (dy > 0 ? 3 : 7);
+	return true;
+}
+
 uint32_t *town_render(int *w, int *h) {
 	if (!T.tiles) return NULL;
 	*w = T.info.tw * 8;

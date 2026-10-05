@@ -47,6 +47,11 @@ int town_triggers(const CoordCell **cells);
 /* The run before this one was left unfinished (NEW GAME over CONTINUE):
  * the town's first words do not speak of how it ended. */
 extern bool town_after_abandon;
+/* Where Lan stands coming home when he never jacked in here (a run begun
+ * in the net): two cells short of the port on the way from where he
+ * starts, facing it (the game's warp facing); where he starts when no
+ * walk on one floor joins them. */
+bool town_home_spot(int *x, int *y, int *face);
 /* Whether world position (x, y) is a jack-in cell (R jacks in there). */
 bool town_on_port(int x, int y);
 /* The middle of the jack-in cell nearest (x, y), in world units; its

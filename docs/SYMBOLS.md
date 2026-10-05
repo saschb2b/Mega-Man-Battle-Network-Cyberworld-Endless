@@ -84,23 +84,23 @@ how to verify it.
 | ROM, code or data not told | 72 | 19 |
 | RAM (variables, structures) | 53 | 21 |
 | I/O registers | 3 | 0 |
-| Fields of structures | 100 | 26 |
-| Event flags | 21 | 3 |
+| Fields of structures | 105 | 26 |
+| Event flags | 22 | 3 |
 | Values of fields | 40 | 12 |
 | Constants, sizes and counts | 64 | 22 |
-| All | 465 | 126 |
+| All | 471 | 126 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| PET, mail and key items | 39 | 1 |
+| PET, mail and key items | 40 | 1 |
 | Shops and traders | 24 | 0 |
 | NaviCust | 17 | 0 |
 | Chips and folders | 68 | 12 |
 | Battle | 101 | 86 |
 | Text and fonts | 26 | 1 |
 | Sound | 8 | 2 |
-| Maps and the overworld | 103 | 15 |
-| Events and progress | 21 | 2 |
+| Maps and the overworld | 104 | 15 |
+| Events and progress | 25 | 2 |
 | Engine core | 58 | 7 |
 
 <!-- end of what tools/symbols.py writes -->

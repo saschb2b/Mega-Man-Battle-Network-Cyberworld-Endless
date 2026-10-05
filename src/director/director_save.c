@@ -15,6 +15,7 @@
 #include "director_board.h"
 #include "director_duel.h"
 #include "director_folder.h"
+#include "director_home.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "gamecall.h"
@@ -40,7 +41,7 @@
  * (A note from before `heard` reads it as 0.) */
 #define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
 typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where; } ActNote;
-enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
+enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
 static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
 static ActNote act_note;
 static bool act_note_ok;
@@ -48,7 +49,8 @@ static bool act_note_ok;
 static void act_note_save(void) {
 	/* (an act already continued without one has no whole count to keep) */
 	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed, D.heard_act,
-		suspending ? SAVED_LEFT : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE : D.checkpoint_data ? SAVED_DATA : SAVED_START };
+		suspending ? SAVED_LEFT : D.town ? SAVED_HOME : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE :
+		D.checkpoint_data ? SAVED_DATA : SAVED_START };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
 
@@ -67,12 +69,12 @@ static void act_note_read(void) {
  * (session 63) */
 static void resume_note(bool restarted) {
 	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off",
-		"From the arena's door" };
+		"From the arena's door", "From home" };
 	/* (a layer made otherwise, by this build or without the ROM that drew
 	 * it, starts again: "From where you left off" over the layer's start
 	 * misled a playtester, session 67) */
 	if (restarted) cinema_note(from[SAVED_START], 240);
-	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_DOOR) cinema_note(from[act_note.where], 240);
+	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_HOME) cinema_note(from[act_note.where], 240);
 }
 
 /* ... and after it, where building it began the act afresh */
@@ -135,6 +137,12 @@ void arena_door_save(void) {
 	cinema_note("Run saved", 150);
 }
 
+void home_save(void) {
+	save_checkpoint();
+	D.saved_at = "Run saved at home";
+	cinema_note("Run saved", 150);
+}
+
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
 	suspending = true;
@@ -157,6 +165,29 @@ static bool same_layer(void) {
 	return same;
 }
 
+/* choices made before the checkpoint stay made */
+static void resume_choices(void) {
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (flag_get(D.objs.choice[i].flag)) {
+			D.chosen |= 1u << i;
+			if (D.objs.choice[i].type == OBJ_NPC) D.heard_act = D.layer_act;
+		}
+}
+
+/* CONTINUE at home: the town entered where Lan stood, its words said */
+static bool resume_home(void) {
+	spins_sync();
+	run.fragments = key_item(SCRIPTS_SECRET_DATA);
+	own_folder_chips();
+	star_folder_pack();
+	official_sync(true);
+	home_resume();
+	act_note_apply();
+	D.beat[0] = 0;
+	resume_note(false);
+	return true;
+}
+
 bool director_resume(void) {
 	drop_events();
 	off_board_load();
@@ -168,11 +199,14 @@ bool director_resume(void) {
 	souls_load(run.seed);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
+	/* (saved at home: the town's too, the layer behind its port) */
+	bool home = act_note_ok && act_note.where == SAVED_HOME && home_rebuild();
 	char path[600];
 	save_state_path(path, sizeof path);
 	bool same = same_layer();
 	if (emu_load_state(path)) {
 		lock_run();
+		if (home) return resume_home();
 		spins_sync();
 		/* (the ScrtData the state holds, as the game counts them) */
 		run.fragments = key_item(SCRIPTS_SECRET_DATA);
@@ -226,12 +260,7 @@ bool director_resume(void) {
 		/* the map as far as it was seen (none for another build's layer) */
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
 		resume_duel();
-		/* choices made before the checkpoint stay made */
-		for (int i = 0; i < D.objs.nchoices; ++i)
-			if (flag_get(D.objs.choice[i].flag)) {
-				D.chosen |= 1u << i;
-				if (D.objs.choice[i].type == OBJ_NPC) D.heard_act = D.layer_act;
-			}
+		resume_choices();
 		/* enter the map again where MegaMan stood: the game reloads its NPCs
 		 * and tiles from this build's tables, which a state does not hold */
 		int x = bn6_player_x(), y = bn6_player_y();

@@ -26,6 +26,11 @@
 #define BN6_MAP_NUMBER        (BN6_GAMESTATE + 0x05) /* MapNumber: the two read as a u16 are MapId */
 #define BN6_MAP_ID            BN6_MAP_GROUP          /* (MapId: MapGroup and MapNumber as a u16) */
 #define BN6_LAST_MAP          (BN6_GAMESTATE + 0x0C) /* LastMapGroup and its number, a u16 map id */
+#define BN6_SAVED_X           (BN6_GAMESTATE + 0x34) /* SavedRealWorldX: where Lan jacked in, 16.16, which BN6's jack-out returns him to */
+#define BN6_SAVED_Y           (BN6_GAMESTATE + 0x38) /* SavedRealWorldY, 16.16 */
+#define BN6_SAVED_Z           (BN6_GAMESTATE + 0x3C) /* SavedRealWorldZ, 16.16 */
+#define BN6_SAVED_FACING      (BN6_GAMESTATE + 0x40) /* SavedRealWorldFacingDirection: his facing there */
+#define BN6_SAVED_MAP         (BN6_GAMESTATE + 0x44) /* SavedRealWorldMapId: its group, then its number */
 #define BN6_SONG_PLAYING      (BN6_GAMESTATE + 0x0F) /* BGMusicIndicator */
 #define BN6_ZENNY             (BN6_GAMESTATE + 0x5C) /* ProtectedZenny, u32 */
 #define BN6_BUGFRAGS          (BN6_GAMESTATE + 0x60) /* ProtectedBugfrags, u32 */
@@ -158,7 +163,7 @@
 #define BN6_WARP              0x02011BB0u /* Warp2011bb0: the next map's warp data */
 #define BN6_WARP_PENDING      (BN6_WARP + 0x10)    /* Unk_10: 1 while a trigger's warp is under way */
 #define BN6_WARP_INDEX        (BN6_WARP + 0x11)    /* WarpIndex */
-#define BN6_WARP_GROUP_KIND   (BN6_WARP + 0x12)    /* MapGroupTransitionType */
+#define BN6_WARP_GROUP_KIND   (BN6_WARP + 0x12)    /* MapGroupTransitionType: 1 internet to real world, to BN6_SAVED_X's place */
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState */
 #define BN6_CUTSCENE_POS      (BN6_CUTSCENE + 0x1C) /* CutsceneScriptPos */
 #define BN6_CUTSCENE_POS0     (BN6_CUTSCENE + 0x40) /* originalCutsceneScriptPos_40 */
@@ -213,6 +218,7 @@
 #define BN6_FLAG_MAIL_NEW     0x1D20      /* + mail: unread */
 #define BN6_FLAG_MAIL_READ    0x1DA0      /* + mail: read */
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
+#define BN6_FLAG_NAVI_IN_PET  0x171D      /* EVENT_PET_NAVI_ACTIVE: MegaMan is in the PET; clear, a jack-in says "MegaMan isn't in the PET..." (bn6f CompText87385CC), and only BN6's own jack-out sets it again */
 #define BN6_FLAG_WARP_OFF     0x16F0      /* + n: the map's warp trigger n does nothing */
 #define BN6_FLAG_NO_ENCOUNTERS 0x1700     /* checkThenStartBattle skips random battles while set (a BBS request sets it); cleared on entering a map */
 
@@ -336,7 +342,6 @@
 #define BN6_BBS_DARK_SCRIPT   27          /* ... its script 27 a post on DarkChips, "A dar...DarkChip!?" */
 #define BN6_FLAME_SPRITE      0x3C        /* sprite list 7's blue flame (uncompressed, 1612 bytes), which no map object lists */
 #define BN6_FLAME_SLOT        0x54        /* ... and a list-7 number Gregar leaves on its placeholder sprite, the purple copy's */
-
 
 /* Main modes (main_subsystemJumpTable) and game-state sub-modes */
 #define BN6_MODE_START_SCREEN 0x00   /* BN6_TOOLKIT: the start screen (the main mode, the index eToolkit +0 points at) */

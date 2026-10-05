@@ -4,5 +4,8 @@
 
 void save_checkpoint(void);
 void arena_door_save(void);
+/* Home's checkpoint (docs/HOME.md): the run saved in the town between
+ * acts, a CONTINUE going on there. */
+void home_save(void);
 
 #endif

@@ -198,6 +198,13 @@ the director builds the next layer meanwhile and points warp 1 at its start,
 so the game jacks him in there. A guardian keeps the pad hidden and shut
 (flag `0x16F1`) until its Guardian Data is taken (docs/BOSSES.md). A Yes to the Undernet or the Secret Area
 starts the same departure (`0x080059B5`) to a side layer built at once.
+On an act's last layer the pad leads home instead (docs/HOME.md,
+`director_home.c`): the next layer is built as ever, the run's town is
+installed with that layer behind its port, and the warp's transition type
+is set to internet-to-real-world, so the game's map-enter code sets Lan
+down where he last jacked in (GameState's saved real-world place);
+MegaMan is put back in the PET (flag `0x171D`), as BN6's own jack-out
+does, or the next jack-in would say he isn't there.
 
 `director.c` then watches the game: the exit pad's warp, choices made in text (event flags set by
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER

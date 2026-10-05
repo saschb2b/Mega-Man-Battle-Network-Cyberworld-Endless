@@ -127,6 +127,18 @@ then the Nest; in the endless net, one an act. BN6 makes MegaMan's HP
 full at a jack-out; the guardian has already healed him, so home changes
 no balance.
 
+As built (issue #85): the exit's warp turns to the town by BN6's own
+transition, internet to real world, which sets Lan down where he last
+jacked in (docs/EMULATION.md); a run begun in the net (a headless
+`--scene emu`) has him two cells short of the port, or at the town's
+start where no walk on one floor joins them (Green Town). The act's AREA
+CLEAR card shows over the town while Lan is held (A ends it, as on a
+layer), then MegaMan and Lan say a word by how far the run has come
+(`home_words.c`), and the run is saved ("From home" on a CONTINUE). The
+short net's Nest (its win, and on threat 10 the way down to its second
+guardian) and side layers lead on into the net as before; the endless
+net comes home after its Nest too, "The Net's rebuilding".
+
 ### 2. The ports are the ways
 
 The act's ways (two, or three with the dark way) are ports in town, each

@@ -25,6 +25,7 @@
 #include "director_duel.h"
 #include "director_folder.h"
 #include "director_guest.h"
+#include "director_home.h"
 #include "director_keys.h"
 #include "director_layer.h"
 #include "director_save.h"
@@ -46,7 +47,6 @@
 #include "save.h"
 #include "story_words.h"
 #include "talk.h"
-#include "town.h"
 
 static void win_run(void);
 static void gate_and_rush_words(void);
@@ -94,33 +94,7 @@ static void guardian_update(void) {
 bool director_arrived(void) {
 	if (!D.active || !on_map()) return false;
 	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER);
-	return D.town ? group == town_info()->group && number == town_info()->number : group == D.group && number == D.number;
-}
-
-/* In the town: nothing to watch but the jack-in, whose arrival on the
- * layer's map starts the run as a layer's warp does. */
-static void town_update(void) {
-	map_label();
-	arrow_update();
-	if (on_map()) unwedge();
-	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER);
-	if (group == town_info()->group && number == town_info()->number) D.town_seen = true;
-	talk_update();
-	/* Lan and MegaMan's words (Dad's call, the first time), once Lan is
-	 * out and the map has settled */
-	if (D.town_seen && on_map() && !D.intro_said && emu_read8(BN6_WARP_PENDING) == 0 && ++D.town_frames > 40 &&
-		talk_script(town_info()->talk_archive, town_info()->intro)) {
-		D.intro_said = true;
-		if (!profile.seen_intro) { profile.seen_intro = true; profile_save(); }
-	}
-	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
-		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
-	if (!arrived) return;
-	D.town = false;
-	D.frame = 0;
-	D.checkpoint = true;
-	lock_run();
-	mapslot_music_forget_town();
+	return D.town ? home_map(group, number) : group == D.group && number == D.number;
 }
 
 /* ---- dev tools (src/dev/devtools.c) ---- */
@@ -193,6 +167,22 @@ static bool act_on_choices(void) {
 	return false;
 }
 
+/* The Guardian Data's second way on, where it was taken (docs/META.md,
+ * routes): the next act in that area, under its guardian; or its dark way,
+ * into the Undernet */
+static void take_route(void) {
+	if (run.side_kind != LAYER_NORMAL || !is_boss_depth(run.depth)) return;
+	int act = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, navi = 0, b = -1;
+	if (flag_get(LAYER_ROUTE_FLAG)) b = run_route_alt(act, &navi);
+	else if (flag_get(LAYER_ROUTE_DARK_FLAG) && run_route_alt(act, &alt_navi) >= 0) b = run_route_dark(act, alt_navi, &navi);
+	if (b >= 0) {
+		run.biome_order[act] = (uint8_t)b;
+		run.boss_order[b] = (uint8_t)navi;
+	}
+	flag_clear(LAYER_ROUTE_FLAG);
+	flag_clear(LAYER_ROUTE_DARK_FLAG);
+}
+
 /* MegaMan stepped on the exit pad: the game plays its warp (jack out, fade,
  * jack in) to warp 1. While it jacks out, the next layer is built and warp 1
  * pointed at its start; nothing else happens until MegaMan has arrived. */
@@ -210,35 +200,20 @@ static bool follow_exit_warp(void) {
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_last(run.depth)) { win_run(); return true; }
 	if (boss_beaten() && run.biome == BIOME_NEST && run_short_nest(run.depth)) run.boss_order[BIOME_NEST] = (uint8_t)run_nest_second();
 	if (boss_beaten()) clear_card();
+	/* (an act's last layer: home, docs/HOME.md) */
+	bool home = home_due();
+	const char *beaten = D.act_guardian;
 	/* past the endless net's Nest guardian: the net rebuilds (the next
 	 * arrival says so; counted with the next checkpoint, which a CONTINUE
 	 * cannot undo) */
 	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) D.nest_cleared = true;
-	/* the Guardian Data's second way on, where it was taken (docs/META.md,
-	 * routes): the next act in that area, under its guardian */
-	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth) && flag_get(LAYER_ROUTE_FLAG)) {
-		int act = (run.depth % CYCLE_LAYERS) / 3, navi = 0, b = run_route_alt(act, &navi);
-		if (b >= 0) {
-			run.biome_order[act] = (uint8_t)b;
-			run.boss_order[b] = (uint8_t)navi;
-		}
-		flag_clear(LAYER_ROUTE_FLAG);
-	}
-	/* ... or its dark way, into the Undernet */
-	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth) && flag_get(LAYER_ROUTE_DARK_FLAG)) {
-		int act = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, navi = 0;
-		int b = run_route_alt(act, &alt_navi) >= 0 ? run_route_dark(act, alt_navi, &navi) : -1;
-		if (b >= 0) {
-			run.biome_order[act] = (uint8_t)b;
-			run.boss_order[b] = (uint8_t)navi;
-		}
-		flag_clear(LAYER_ROUTE_DARK_FLAG);
-	}
+	take_route();
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
 	note_folder_codes();
 	if (!new_layer(true)) return false;
+	if (home && home_begin(beaten)) return true;
 	D.warping = true;
 	D.checkpoint = true;
 	return true;
@@ -630,7 +605,7 @@ static bool astray_update(void) {
 void director_update(void) {
 	take_events();
 	if (!D.active) return;
-	if (D.town) { town_update(); return; }
+	if (D.town) { home_update(); return; }
 	++D.frame;
 	++D.act_frames;
 	if (gameover_update() || follow_exit_warp()) return;

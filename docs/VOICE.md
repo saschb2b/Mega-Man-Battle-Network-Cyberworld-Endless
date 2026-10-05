@@ -315,6 +315,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | Locks: security cubes, skull and number doors, the P-Code's teller, a Link Navi's obstacle | `src/layer/lock_words.c` |
 | Bystanders' small talk; the net's whispers | `src/layer/npc_lines.c`; `src/layer/rumor_lines.c` |
 | The towns' folk, their checks, the start's words | `src/world/town_lines.c` |
+| MegaMan and Lan coming home after an act | `src/director/home_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
 
 ## Before you commit a line

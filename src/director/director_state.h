@@ -65,6 +65,9 @@ typedef struct {
 	int act_frames;        /* frames spent in the act */
 	const char *act_guardian;  /* the guardian beaten on the way out */
 	bool town;             /* Lan is in the town; the first layer waits for his jack-in */
+	bool home;             /* ... come home after an act (docs/HOME.md), not the run's start */
+	const char *home_beaten;   /* ... the guardian deleted on the way */
+	bool home_saved;       /* ... and the run saved there */
 	bool town_seen;        /* ... and has got there */
 	int town_frames;       /* frames on the town's map */
 	bool intro_said;       /* Lan and MegaMan have spoken there */

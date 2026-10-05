@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Home after every act** (issue #85, the town's epic #84). An act's
+  guardian deleted, his exit no longer leads straight to the next act:
+  MegaMan jacks out the way BN6's own jack-out goes, and Lan stands in
+  the run's town where he jacked in, the act's AREA CLEAR card over it.
+  MegaMan and Lan say a word about the act ("Phew! We're home,Lan!"),
+  the run is saved at home, and R at the port takes them on to the next
+  act. A short net comes home three times before the Nest; the endless
+  net after every act, its Nest too. docs/HOME.md has the design: next,
+  the act's ways as ports, the townsfolk's jobs, a shop at home, and a
+  town that remembers.
 - **Townsfolk who walk stay drawn as they walk.** Seaside's and Green
   Town's walker vanished the moment he set off and came back when he
   stopped: his sprite's walks are empty in BN6's data. Both walk as
