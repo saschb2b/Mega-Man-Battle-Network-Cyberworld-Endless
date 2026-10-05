@@ -205,7 +205,13 @@ static bool button_event(const SDL_ControllerButtonEvent *b, bool down) {
 
 bool pads_event(const SDL_Event *e) {
 	switch (e->type) {
-	case SDL_JOYDEVICEADDED:
+	case SDL_JOYDEVICEADDED: {
+		pads_open();
+		/* (one SDL makes no controller of goes unread: said, for a player's report) */
+		const char *name = SDL_JoystickNameForIndex(e->jdevice.which);
+		if (!SDL_IsGameController(e->jdevice.which)) say("joystick: %s, no controller to SDL: not read", name ? name : "(no name)");
+		return false;
+	}
 	case SDL_CONTROLLERDEVICEADDED:
 		pads_open();
 		return false;
