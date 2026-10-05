@@ -104,7 +104,29 @@ PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
           WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds',
           PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
-CONTEXT = os.environ.get('DOCKER_CONTEXT_NAME', 'desktop-linux')
+
+
+def engine_context():
+    """The Docker engine builds run on: DOCKER_CONTEXT_NAME's where it is
+    set (CI's "", the runner's own); else Linux's own engine where it
+    answers, whose bind mounts are this machine's own files; else Docker
+    Desktop's. Desktop runs containers in a VM and shares the repository
+    into it, and that share hung under heavy writes (a Gradle build,
+    thousands of pictures) with the VM frozen until Desktop was restarted,
+    five times by 5 October 2026."""
+    if 'DOCKER_CONTEXT_NAME' in os.environ:
+        return os.environ['DOCKER_CONTEXT_NAME']
+    if os.path.exists('/var/run/docker.sock'):
+        try:
+            probe = subprocess.run(['docker', '--context', 'default', 'info'], capture_output=True, timeout=15)
+            if probe.returncode == 0:
+                return 'default'
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    return 'desktop-linux'
+
+
+CONTEXT = engine_context()
 RELEASE = os.path.join(ROOT, 'build', 'release')
 LINUX_NAME = 'cyberworld-endless-linux-x86_64'
 APP_ID = 'io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless'   # src/core/platform.h, linux/
