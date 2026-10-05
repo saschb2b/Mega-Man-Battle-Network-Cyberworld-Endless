@@ -153,14 +153,22 @@ the layer's random battles are BN5's own, fought in BN5's engine
   DolThdr1 and Atk+10 didn't exist back then either, so they'll sit
   out.", the Standard's CrakShot and Atk+10, the Blade's Atk+10). BN6's
   frame fades to white while BN5's battle opens (its opening drew the
-  room its boot state stands in), and BN5's picture flashes in once its
-  battle is on its screen; after a profile's first, MegaMan says what it
-  was and names the chips that sat out, the same way.
+  room its boot state stands in), breaking into blocks wider than tall
+  as it goes, as BN6's own battle switch draws the map (16 pixels across
+  at most, captured in a BN6 battle), and BN5's picture flashes in once
+  its battle is on its screen; after a profile's first, MegaMan says what
+  it was and names the chips that sat out, the same way.
 - **For tests** (issue #61, docs/DEVTOOLS.md): the battle step
   (`--input "300:battle"`, play.py's `battle`) starts the layer's next
   random battle once MegaMan is free on its map, a guest battle on such a
   layer (`--net-biome x0`, ACDC Area), and `--talk guest:FRAME` one at a
-  frame; `--talk dark:FRAME` opens the flame of darkness's talk (a middle
+  frame; a headless run waits for the boot's thread at its first such
+  battle, and `--dev slowboot=N` runs BN5's first boot at N of its frames
+  a frame on the main thread instead (the same frames every run), so a
+  fresh data folder's first BN5 battle waits behind the older net's wait
+  (`--dev quiet,slowboot=12 --input "300:battle"`, the autopilot paging
+  the arrival's words: open from frame 370, the battle at about 640);
+  `--talk dark:FRAME` opens the flame of darkness's talk (a middle
   layer: `--run-depth 2`), `--dev darkchips=MASK` starts a run holding
   DarkChips (bit k BN5's id 187 + k) and `--dev worried` keeps MegaMan
   worried in guest battles; `--guardian 24` to `29` puts one of BN5's
@@ -200,30 +208,98 @@ the layer's random battles are BN5's own, fought in BN5's engine
   in both nets, and one in BN6's folder never goes into the guest's as a
   chip beside the run's copy; BN5's rule brings it, first among the
   run's three.
+- **Its boot** (the owner's Retroid Nova froze five seconds entering a
+  run's first BN5 area, 5 October 2026: "guest: booted in 7210 frames,
+  5.01 s of its frames' time", the whole boot inside one frame of the
+  layer's setup): BN5's first boot (7210 of its frames, kept as the state
+  `guest-bn5-1.state` in the data folder) begins at the title where BN5's
+  ROM is there (`guest_warm`) and runs in the background, never in a
+  frame's way. On native builds (desktop, Android, iOS, PortMaster) it
+  runs on a thread of its own at a low priority (`boot_main`), which alone
+  touches the guest core until it is ready and nothing of BN6's: the chips
+  of both games are paired, mGBA's logger set and the sound's rate read on
+  the main thread before it starts, mGBA 0.10.5's GBA core shares nothing
+  else between cores (read in its source: the default logger's pointer,
+  its thread logger's key made once, constant tables), the core's first
+  write to its ROM (mGBA copies the ROM to 32 MB then) is the thread's, and
+  the main thread takes its end in at a frame's end (`guest_tick`, a join),
+  `guest_read*` answering 0 until then. `tests/test_emu.c` makes and runs a
+  guest core on a thread while BN6's frames run with their hook, under the
+  sanitizers. The browser, without threads, runs it in each frame's spare
+  time (`guest_tick`: the frame's work and the slice within 10 ms of its
+  1/60 s, 12 ms while a battle waits for it), from the title through the
+  town and the layers, its first write to the ROM held for the first
+  battle's white; there a kept state loads as a layer is made, the page's
+  memory BN6's until then. A layer never waits for the boot or hangs on
+  it: its battles are BN5's wherever BN5's ROM is read and the build runs
+  a second core (`guest_possible`, a boot that failed aside), finished or
+  not, so a run stays the same from its seed whenever the boot ends.
+  A headless run (the captures, the autopilot, `tools/play.py`) waits for
+  a thread's boot at the battle that needs it, without frames, so its
+  frames are the same from run to run: the autopilot over BN5's ACDC Area
+  (seeds 1-3, fresh data folders, and 1-2 with the state kept) gave run
+  logs and frames byte for byte the old build's, which booted inside the
+  layer's setup, and the state the thread keeps is the same file the old
+  boot kept. The boot runs the same frames in the same order everywhere
+  (its keys a function of the frame, `boot_keys`). Measured on an Intel
+  Core Ultra X7 358H (headless, in Docker): the thread's boot took 3.4 to
+  3.6 s of its frames' time; BN6's frames on a layer beside it 0.4 ms of
+  the GBA's and at most 0.8 ms of update and drawing in each second, as
+  after it, where the old build stopped 3.44 s in the layer's setup. On
+  the Nova (untested there yet) its 5.01 s, on a core of its own, would end
+  before a player who presses NEW GAME at once is through the town, its
+  main thread keeping its GBA frames of about 3 ms. In Chrome 152
+  (headless, agent-browser, on a loaded machine): at the title the boot
+  took 8.5 s of its frames and ended 15 s after Jack in, the page's frames
+  16.8 ms at most from the game's first second on; on ACDC Area's first
+  layer it ran in BN6's frames' spare time through the arrival's words to
+  87% when the battle came, which waited about 2 s behind the older net's
+  wait (below), every frame at 16.8 ms at most from the layer's first
+  second (making it paused the page 0.3 s, as before).
+- **The older net's wait** (`src/emu/guest_wait.c`): where a battle comes
+  before the boot is done (a fast player, a slow device, a phone's
+  browser), it waits on the white the switch fades to, as BN6's own
+  battle switch holds white. Designed through the game-design skill's
+  interface layer: a rare loading screen in the encounter's seam, the
+  moment loop's, which must never add time (the frequency-as-budget
+  rule: the switch is seen every battle, the wait at most once a data
+  folder), so it opens only where the wait needs it (the white held 12
+  frames with more than 0.7 s of the boot left at its pace, or 45 frames
+  whatever is left) and closes as the boot ends, the battle opening
+  behind it. Immersion against information is settled in the game's own
+  channels: MegaMan says what happens in BN6's chat box (diegetic: the
+  PET), his mugshot and the chat font from the player's ROM, typed a
+  character a frame, three pages as the wait goes on ("Hold on, Lan! / The
+  older net's system / is still starting up...", "It only has to start
+  up / this once. After that, / it'll always be ready!", from 85% "Almost
+  there, Lan... / Just a moment more!"); how far it is shows in the battle
+  HUD's own form, where BN6's stands, so BN5's own HUD takes its places as
+  the battle opens: a gauge drawn to the measure of BN6's Custom gauge
+  (its rim, track, fill and pins, captured in a battle as chatbox.c's
+  frame was in a chat), labelled OLD NET where BN6's says CUSTOM, filling
+  with the boot and never ahead of it (an honest telegraph: the boot's
+  frames take about the same time each), and the percent in a box drawn
+  to its HP box's, in the battle font from the ROM. Between them the net's
+  light streams over the white in the chat box's blues, as a jack-in's
+  does. The box opens as BN6's does (three frames from its middle row
+  out), the HUD drops in from the top; no flashes, no sound (the switch's
+  silence). The browser's note it replaces said "Waking the older net...
+  40%" in plain text. Captured with `--dev slowboot=12` (For tests).
 - **In the browser** (issue #68): the page runs one frame at a time with
-  no threads, so the guest's frames take BN6's frames' place, never both
-  in one 1/60 s, and no frame blocks. Its first boot (7210 frames) runs a
-  slice of each frame where BN6's core does not run, the title and its
-  setup (`guest_warm`, 8 ms a frame), and the state it keeps goes into
-  IndexedDB (`platform_persist`); a battle that comes before it is done
-  waits behind a note ("Waking the older net... 40%", `guest_boot_slice`,
-  12 ms a frame), BN6's frame faded to white as for any guest battle.
-  The boot runs the same frames in the same order everywhere (its keys a
-  function of the frame, `boot_keys`), so its game state is the desktop's.
-  Measured in Chrome 152 (headless, agent-browser) on an Intel Core Ultra
-  X7 358H: at the title the boot took 9.2 s of BN5's frames (1.3 ms a
-  frame) over 19 s; behind the note 7.3 s over 9.5 s; the page's frames
-  kept 16.7 ms throughout, the longest 16.8 ms, and in guest battles the
-  same (making a layer pauses the page as before). The page's WebAssembly
-  memory, 97 MB on a first layer with BN6 alone, was 153 MB on BN5's
-  first layer with the guest booted (BN5's ROM, 8 MB, and the guest core's
-  ROM copy, which mGBA copies to 32 MB at its first patch, as it does
-  BN6's), and 197 MB at most, after a move from Central Area into End
-  Area (the BN5 maps its tiles are learned from); it never shrinks. The
-  JavaScript heap was 21 MB (14 MB with BN6 alone), beside the two ROM
-  files the page keeps in memory. A phone's browser would need about
-  250 MB for the page, and its slower WebAssembly (three or four times)
-  about a minute of the title for the boot; untested on a phone.
+  no threads, so the guest's battle frames take BN6's frames' place, never
+  both in one 1/60 s, and its boot's slices fill what a frame leaves
+  (above); the state it keeps goes into IndexedDB (`platform_persist`).
+  The page's WebAssembly memory, 97 MB on a first layer with BN6 alone,
+  was 153 MB on BN5's first layer with the guest booted (BN5's ROM, 8 MB,
+  and the guest core's ROM copy, which mGBA copies to 32 MB at its first
+  patch, as it does BN6's), and 197 MB at most, after a move from Central
+  Area into End Area (the BN5 maps its tiles are learned from); it never
+  shrinks. The JavaScript heap was 21 MB (14 MB with BN6 alone), beside
+  the two ROM files the page keeps in memory. A phone's browser would
+  need about 250 MB for the page, and its slower WebAssembly (three or
+  four times) the title, the town and the first layers' spare time for
+  the boot, else a while behind the older net's wait; untested on a
+  phone.
 - **Its guardians** (docs/BOSSES.md, BN5's Navis; issue #69): on the
   guardian layer of an act such an area dresses, in half the runs, one of
   BN5's own Navis guards it, where BN5's net maps set him roaming

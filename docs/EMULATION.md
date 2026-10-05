@@ -286,6 +286,14 @@ more (`threadedVideo`), beside the emulation; the worker waits for it at
 each frame's end, so the picture copied is whole. On the 3DS that thread
 is on the main core, which waits most of a frame for the emulation.
 
+BN5's guest core boots on a thread of its own on native builds, from the
+title on (docs/MULTIROM.md, Guest battles: its boot): a core the main
+thread leaves alone until the thread is joined at a frame's end, beside
+BN6's on whichever thread BN6's runs. In the browser its boot fills each
+frame's spare time instead: the frame's work and its slice within 10 ms
+of the 1/60 s (12 ms while a battle waits for it), none in a frame
+played unshown (`boot_spare_ms`, `guest_tick`).
+
 ## The core's time
 
 Measured on a computer (issue #35), with a build that sampled the GBA's PC

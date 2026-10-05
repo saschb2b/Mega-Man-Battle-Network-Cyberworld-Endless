@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **No freeze entering BN5's areas.** BN5's first boot froze the game
+  for about five seconds on a handheld (3.4 on a fast computer) as a run's
+  first BN5 area was made. It now begins as the game starts and runs in
+  the background: on a thread of its own on every native build (desktop,
+  Android, iOS, PortMaster), in each frame's spare time in the browser,
+  never in a frame's way. Layers are made and runs play the same whether
+  it has finished or not, and once done it is kept, so it runs once.
+- **The older net's wait.** Where a BN5 battle comes before the boot is
+  done (a fast player, a slow device, a phone's browser), it waits on the
+  battle switch's white behind a screen in BN6's own look: MegaMan in
+  BN6's chat box saying the older net's system is still starting up, and
+  that it only has to once; a gauge in the Custom gauge's place and form
+  filling as it goes, its percent beside it in the HP box's; the net's
+  light streaming past. It opens only where the wait needs it and closes
+  as the battle opens behind it. It replaces the browser's plain "Waking
+  the older net..." note.
+- **The switch to a BN5 battle breaks the map into blocks as it fades to
+  white,** as BN6's own battle switch does; it faded plainly.
+- **The frame log names each second's longest frame** (`frame_log = on`
+  in `settings.ini`), the hitch an average hides.
 - **Each start opens with the developer's boot screen and a word from
   MegaMan on where to report bugs.** On white, Saschb2b comes up in two
   pieces on the two tones of a chime, each out of a GBA-style mosaic:

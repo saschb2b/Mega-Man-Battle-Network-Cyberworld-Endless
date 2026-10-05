@@ -305,9 +305,14 @@ path; `pieces=32` to look at an area's arrow lane and ride it;
 docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
 `tools/before_after.py` compares two builds' with it). BN5's battles
-have three of their own (docs/MULTIROM.md, Guest battles, For tests):
-`darkchips=MASK`, `worried` and `souls=MASK` (a new run holding BN5's
-Souls, bit k Team Colonel's Soul 7 + k). `darkchips=MASK` holds BN6's
+have four of their own (docs/MULTIROM.md, Guest battles, For tests):
+`darkchips=MASK`, `worried`, `souls=MASK` (a new run holding BN5's
+Souls, bit k Team Colonel's Soul 7 + k) and `slowboot=N` (BN5's first
+boot at N of its frames a frame on the main thread, the same frames every
+run, so a fresh data dir's first BN5 battle waits behind the older net's
+screen: with `CYBERWORLD_AUTOPILOT=1` paging the arrival's words,
+`--net-biome x0 --dev quiet,slowboot=12 --input "300:battle"` opens it at
+frame 370 and the battle at about 640). `darkchips=MASK` holds BN6's
 own DarkChips of those kinds too (0x2 DrkSword, 0x4 DarkInvs, 0x40
 DarkThnd, 0x80 DrkRecov: 0xC6 all four), which the first layer puts in
 BN6's Pack (docs/META.md, BN6's own DarkChips). `folder=ID` makes the
