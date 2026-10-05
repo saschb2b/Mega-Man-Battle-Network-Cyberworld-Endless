@@ -391,12 +391,12 @@ one alone is a small one held sideways.
 opens it (the line under the menu names the button it is on); on a phone
 or tablet with a controller, so does **CONTROLLER** in the touch controls'
 menu, mid-run too. **A and B** has presets: as labeled; **B on X**, left of
-A as on the GBA (Square on a PlayStation pad; a Nintendo pad has B there
-already); and A and B swapped, for a pad that reads them the other way
-round. Choose A, B, L, R, Start or
-Select and press the button (or, on a PC or in a browser, the key) you
-want there; a button another one had goes over to it in exchange.
-**Defaults** brings them all back, and **Done** asks you to press the new
+A as on the GBA (Square on a PlayStation pad; a Nintendo pad has its B
+there already); and A and B swapped, for a pad that reads them the other
+way round. Choose A, B, L, R, Start or Select and press the button (or, on
+a PC or in a browser, the key) you want for it; one that this leaves with
+no button takes the old one in exchange. **Defaults** brings them all back, and
+**Done** asks you to press the new
 A to keep them: if you do not within ten seconds, the old ones stay. The
 screen itself always takes the controller's own A, B and D-pad, the
 keyboard and taps, whatever the buttons are set to. Nintendo's pads keep
