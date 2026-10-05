@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.0 (2026-10-05)
 
 - **The second screen's polish** (issue #81). The NaviCust programs'
   blocks wear BN6's own colours, measured from its preview of a program of
