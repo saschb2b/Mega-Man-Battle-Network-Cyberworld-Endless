@@ -270,10 +270,10 @@ the layer's random battles are BN5's own, fought in BN5's engine
   behind it. Immersion against information is settled in the game's own
   channels: MegaMan says what happens in BN6's chat box (diegetic: the
   PET), his mugshot and the chat font from the player's ROM, typed a
-  character a frame, three pages as the wait goes on ("Hold on, Lan! / The
-  older net's system / is still starting up...", "It only has to start
-  up / this once. After that, / it'll always be ready!", from 85% "Almost
-  there, Lan... / Just a moment more!"); how far it is shows in the battle
+  character a frame, three pages as the wait goes on ("Hold on,Lan! / The
+  older Net's / still starting up...", "It only starts up / this once,Lan.
+  / Then it stays ready!", from 85% "Almost there,Lan... / Just a moment
+  more!", in BN6's voice, docs/VOICE.md); how far it is shows in the battle
   HUD's own form, where BN6's stands, so BN5's own HUD takes its places as
   the battle opens: a gauge drawn to the measure of BN6's Custom gauge
   (its rim, track, fill and pins, captured in a battle as chatbox.c's

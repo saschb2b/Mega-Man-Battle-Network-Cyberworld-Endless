@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Everyone talks like BN6 now.** A player wrote that our dialogue felt
+  like "reading a summary of a regular sentence", and it did: our boxes
+  held nine to eleven words, packed facts together with colons and rarely
+  showed a feeling. BN6's whole script, read character by character
+  (docs/VOICE.md), holds about six words a box and leads with a reaction.
+  Every line was rewritten to it: MegaMan teases and worries and calls Lan
+  by name, Lan answers and decides, Mr.Prog speaks in capitals, Chaud in
+  "Hmph."s, the bystanders gossip, and each guardian has his habit of
+  speech, ChargeMan's "Choo,choo!", SpoutMan's "drip", DiveMan's
+  "Awooga!", EraseMan's cackle. The same facts are said, one to a box,
+  and written as BN6 writes them ("Lan,look!", Mr.Prog, the Net, Buster,
+  the LevBus).
 - **No freeze entering BN5's areas.** BN5's first boot froze the game
   for about five seconds on a handheld (3.4 on a fast computer) as a run's
   first BN5 area was made. It now begins as the game starts and runs in
