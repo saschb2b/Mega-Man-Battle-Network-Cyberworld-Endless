@@ -116,14 +116,14 @@ static const char *pa_line(uint32_t seed) {
 	chip_info(a->result, &r);
 	for (int i = 0; i < (a->kind == 4 ? a->n : 1); ++i) chip_info(a->chip[i], &ci[i]);
 	if (a->kind == 0)
-		snprintf(line, sizeof line, "Psst! My operator sent %s %c, %s %c and %s %c, in that order...|And they turned into %s! A Program "
-			"Advance!", ci[0].name, c, ci[0].name, c1, ci[0].name, c2, r.name);
+		snprintf(line, sizeof line, "Psst! My operator sent these,in order!|%s %c,\n%s %c,\n%s %c...|Then... %s!\nA Program "
+			"Advance!!", ci[0].name, c, ci[0].name, c1, ci[0].name, c2, r.name);
 	else if (a->n == 3)
-		snprintf(line, sizeof line, "Psst! My operator sent %s %c, %s %c and %s %c, in that order...|And they turned into %s! A Program "
-			"Advance!", ci[0].name, c, ci[1].name, c, ci[2].name, c, r.name);
+		snprintf(line, sizeof line, "Psst! My operator sent these,in order!|%s %c,\n%s %c,\n%s %c...|Then... %s!\nA Program "
+			"Advance!!", ci[0].name, c, ci[1].name, c, ci[2].name, c, r.name);
 	else
-		snprintf(line, sizeof line, "Psst! My operator sent %s %c, %s %c, %s %c and %s %c, in that order...|And they turned into %s! A "
-			"Program Advance!", ci[0].name, c, ci[1].name, c, ci[2].name, c, ci[3].name, c, r.name);
+		snprintf(line, sizeof line, "Psst! My operator sent these,in order!|%s %c,\n%s %c,|%s %c,\n%s %c...|Then... %s!\nA "
+			"Program Advance!!", ci[0].name, c, ci[1].name, c, ci[2].name, c, ci[3].name, c, r.name);
 	return line;
 }
 
@@ -133,18 +133,18 @@ static const char *secret_line(uint32_t seed) {
 	int n = 0;
 	int depth = run.depth;
 	if (!profile_codes_entered() && depth >= 2)
-		say[n++] = "They say a NaviCust program shrinks if you hold RIGHT on it in the NaviCust and press a secret pattern of "
-			"buttons.|Nobody I know has a pattern, though!";
+		say[n++] = "Did you hear? NaviCust programs can shrink!|Hold RIGHT on one and press a secret pattern!|"
+			"Nobody I know has it,though...";
 	if (meta_spins() != 0x3F && depth >= 2 && depth <= 8)
-		say[n++] = "Word is, a blue Mystery Data deeper in this net hides a Spin, a colour nobody's found yet, a new one every dive!";
+		say[n++] = "I heard a blue Mystery Data down deep hides a Spin!|A color nobody's found yet! A new one every dive!";
 	if (rival_clearance() == 0 && depth >= 2)
-		say[n++] = "Somebody said Chaud teaches a NetBattler's trick to anyone who beats ProtoMan's time. Wonder what it is...";
+		say[n++] = "Beat ProtoMan's time,and Chaud teaches you a trick!|Or so they say... What could it be?";
 	/* (in an area whose layers hide one: in Green HP, which hides none, a
 	 * playtester looked for it and found nothing, session 63) */
 	if (depth >= 4 && pacing_loop(depth) == 0 && layer_area_hides(run.biome))
-		say[n++] = "I swear I saw a Navi walk off the end of a walkway, right out over nothing!|Some floor down here just can't be seen.";
+		say[n++] = "I swear a Navi walked off a walkway's end!|Right over nothing! Some floor here can't be seen!";
 	if (!profile.reg_taught && pacing_loop(depth) == 0 && !is_boss_depth(depth))
-		say[n++] = "Every layer before a guardian hides a RegUp somewhere off the way.|More Reg memory, a bigger Regular Chip!";
+		say[n++] = "Every layer before a guardian hides a RegUp,off the path!|More Reg memory,a bigger Regular Chip!";
 	return n ? say[seed % (uint32_t)n] : NULL;
 }
 

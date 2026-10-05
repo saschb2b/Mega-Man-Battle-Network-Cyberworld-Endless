@@ -284,19 +284,20 @@ static void design_central(void) {
 /* Its people: at the statue, the shop, the school gate, the bus stop, the
  * houses, the closed road to the Expo. */
 static const Folk central_folk[] = {
-	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear? The port by the bird statue opens into a brand new net!" },
-	{ 100, -52, 0, 7, 0x11, "Woof! Woof!" },   /* (the robot dog: one animation) */
-	{ 60, -96, FACE_SE, 7, 0x0F, "I'M THE PLAZA'S PORT GUIDE PROGRAM!|STAND BEFORE THE STATUE AND PRESS R TO JACK IN!" },
-	{ 44, -20, FACE_NE, 5, 0x2E, "I jacked in there yesterday. Today the paths were all different!|It really does go on forever down there." },
-	{ -172, -4, FACE_NW, 5, 0x2C, "Aster Land just got new chips in! I could look at them all day." },
-	{ -108, -36, FACE_NE, 5, 0x2B, "My dad parks here every Sunday. Aster Land is the best!" },
-	{ 130, 150, FACE_NE, 5, 0x2F, "The kids from the Academy swear there's a Giga chip hidden under the bus.|One of them's been waiting all week for it to drive off!" },
-	{ 84, -180, FACE_SE, 5, 0x34, "Hey, Lan! No class today...|Are you diving into the Endless Net too?" },
-	{ -164, 196, FACE_NE, 5, 0x38, "Heading out, Lan? Be careful on the net!" },
-	{ 18, 290, FACE_SW, 5, 0x39, "The flowers on this street are something, aren't they?" },
-	{ -146, -184, FACE_SE, 5, 0x3A, "The road to the Expo site is closed today.|Such a shame. I wanted to see the pavilions." },
-	{ 132, 180, FACE_SE, 5, 0x2D, "Nothing beats a walk after a long day at the lab.", 10 },
-	{ -12, -164, FACE_NE, 5, 0x28, "Do you go to the Cyber Academy too? I'm late for NetBattle club!|Everyone's hunting for new Program Advances. Three chips in the right order make a whole new one!", 10 },
+	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear?|The bird statue's port opens into a brand new net!" },
+	{ 100, -52, 0, 7, 0x11, "*wag,wag* Woof! Woof!!" },   /* (the robot dog: one animation) */
+	{ 60, -96, FACE_SE, 7, 0x0F, "HELLO! I'M THE PLAZA'S PORT GUIDE!|PRESS R BY THE STATUE TO JACK IN!" },
+	{ 44, -20, FACE_NE, 5, 0x2E, "I jacked in yesterday. Today the paths were all new!|Wow... It really does go on forever!" },
+	{ -172, -4, FACE_NW, 5, 0x2C, "Ooh! AsterLand got new chips in!|I could look at 'em all day..." },
+	{ -108, -36, FACE_NE, 5, 0x2B, "My dad parks here every Sunday!|AsterLand's the best!" },
+	{ 130, 150, FACE_NE, 5, 0x2F, "The Academy kids swear a GigaChip's under the LevBus!|One's waited a week for it to drive off!" },
+	{ 84, -180, FACE_SE, 5, 0x34, "Hey,Lan! No class today!|You diving into the Endless Net too?" },
+	{ -164, 196, FACE_NE, 5, 0x38, "Heading out,Lan?|Be careful on the net,OK?" },
+	{ 18, 290, FACE_SW, 5, 0x39, "My,my... Aren't the flowers lovely here?" },
+	{ -146, -184, FACE_SE, 5, 0x3A, "Oh dear... The road to the Expo Site is closed.|And I so wanted to see the pavilions!" },
+	{ 132, 180, FACE_SE, 5, 0x2D, "Phew! Long day at the lab...|Nothing beats a nice walk!", 10 },
+	{ -12, -164, FACE_NE, 5, 0x28, "Ack! I'm late for the Academy's NetBattle club!|Everyone's hunting for Program Advances!|"
+		"Three chips in the right order make a new one!", 10 },
 };
 
 /* What its checks (triggers 0xF0 + n, in front of each thing) say: the
@@ -304,17 +305,17 @@ static const Folk central_folk[] = {
  * bed, the bus stop, Aster Land's door, the Expo gates' signs and road, the
  * Academy's gate, the statue, Aster Land's window. */
 static const char *const central_checks[16] = {
-	"@L Home sweet home. Mom's making curry tonight!|@M Then let's be back in time for dinner, Lan!",
+	"@L Home sweet home! Mom's making curry tonight!|@M Yum! Let's be back for dinner,Lan!",
 	"A pink house. The curtains are drawn.",
 	"Someone is watering the plants on the roof terrace.",
-	"Two gray houses, side by side. It's quiet in there.",
+	"Two gray houses,side by side. It's quiet in there.",
 	"The flowers are in full bloom.",
-	"The bus stop.|\"Next bus: ACDC Town\"|No Giga chip under here. Just a gum wrapper.",
-	"@M Aster Land! Let's go shopping later, Lan. The net's waiting!",
+	"The LevBus stop.|\"Next bus: ACDC Town\"|No GigaChip under here. Just a gum wrapper.",
+	"@M AsterLand! We'll shop later,Lan. The net's waiting!",
 	"EXPO\nThe sign lists the pavilions on show.",
 	"Cyber Academy. The gate is closed for the day.",
-	"A statue of a blue bird. Its port leads into the Endless Net.",
-	"The road to the Expo site. It's closed off today.",
+	"A statue of a blue bird.|Its port leads into the Endless Net.",
+	"The road to the Expo Site. It's closed off today.",
 	"EXPO\nA map of the site. It's huge!",
 	"Chips and PETs line the shelves in the window.",
 	NULL, NULL, NULL,
@@ -369,28 +370,28 @@ static void design_acdc(void) {
 /* Its people: kids in the park, the chip shop, the Metroline, the
  * mansion, the houses, the promenade. */
 static const Folk acdc_folk[] = {
-	{ -196, -20, FACE_SE, 5, 0x2B, "Meet you at the squirrel! Last one there's a Mettaur!" },
-	{ -180, -4, FACE_NW, 5, 0x34, "Lan! You came all the way from Central Town?|The squirrel's port goes into the Endless Net too!" },
+	{ -196, -20, FACE_SE, 5, 0x2B, "Meet you at the squirrel!|Last one there's a Mettaur!" },
+	{ -180, -4, FACE_NW, 5, 0x34, "Lan! All the way from Central Town?|The squirrel's port goes to the Endless Net too!" },
 	{ -204, -4, FACE_NE, 5, 0x37, "Squirrel! Squirrel!" },
-	{ -180, -44, FACE_SE, 7, 0x0F, "I'M THE PARK'S PORT GUIDE PROGRAM!|STAND BESIDE THE SQUIRREL STATUE AND PRESS R TO JACK IN!" },
-	{ -188, -92, FACE_NE, 5, 0x2D, "Higsby's got rare chips in... but have you seen the prices?|They say his rarest ones sit in a back room, and he won't sell them for any price!" },
-	{ 4, -132, FACE_SW, 5, 0x30, "The Metroline runs straight to Central Town. So handy!" },
-	{ 252, -28, FACE_SW, 5, 0x2E, "That's the Ayano mansion. They say it has its own garden inside!" },
+	{ -180, -44, FACE_SE, 7, 0x0F, "WELCOME! I'M THE PARK'S PORT GUIDE!|PRESS R BY THE SQUIRREL TO JACK IN!" },
+	{ -188, -92, FACE_NE, 5, 0x2D, "Higsby's got rare chips... but those prices!|They say his rarest never leave the back room!" },
+	{ 4, -132, FACE_SW, 5, 0x30, "The Metroline goes right to Central Town. So handy!" },
+	{ 252, -28, FACE_SW, 5, 0x2E, "That's the Ayanokoji mansion!|They say there's a whole garden inside!" },
 	{ 100, 36, FACE_SE, 5, 0x36, "Nobody lives in that house anymore...|But somebody still waters the flowers." },
-	{ 60, 164, FACE_SW, 5, 0x39, "Mr. Famous says he once busted a whole virus pack with nothing but his buster.|Nobody's ever seen him do it, though!" },
-	{ 124, -84, FACE_SW, 5, 0x38, "The boy who lives here practices NetBattles day and night. So noisy!" },
-	{ -60, 164, FACE_NE, 5, 0x2C, "Every morning I walk the promenade, then dive a few layers!", 12 },
+	{ 60, 164, FACE_SW, 5, 0x39, "Mr.Famous says he busted a virus pack with no chips!|Nobody's seen him do it,though! Hahaha!" },
+	{ 124, -84, FACE_SW, 5, 0x38, "The boy here NetBattles day and night...|So noisy! Geez..." },
+	{ -60, 164, FACE_NE, 5, 0x2C, "Every morning I walk the promenade...|Then I dive a few layers!", 12 },
 };
 
 static const char *const acdc_checks[16] = {
-	"@L Our old house... It feels like only yesterday we lived here.|@M We had so many adventures in ACDC Town, Lan.",
+	"@L Our old house... Feels like only yesterday.|@M Lan,we had so many adventures here...",
 	"The hedge is neatly trimmed.",
-	"Mayl's house. Piano music drifts out of the window.|@M Mayl's practicing again, Lan!",
+	"Mayl's house. Piano music drifts out the window.|@M Lan,Mayl's practicing again!",
 	"The squirrel statue! Its port leads into the Endless Net.",
 	"Higsby's chip shop.|\"Rare chips in stock!\"",
-	"A blue house. The mailbox says \"Oyama.\"|@L Dex is probably NetBattling again...",
-	"A tall wall runs around the Ayano mansion.",
-	"The Ayano mansion. The gate is shut tight.",
+	"A blue house. The mailbox says \"Oyama.\"|@L I bet Dex is NetBattling again...",
+	"A tall wall runs around the Ayanokoji mansion.",
+	"The Ayanokoji mansion. The gate is shut tight.",
 	"A Chip Trader. It's out of order today.",
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
@@ -410,20 +411,20 @@ static void design_seaside(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
 /* Its people, on the plaza's height (they stand at 0): by the fountain,
  * the fish shop, the way down to the aquarium. */
 static const Folk seaside_folk[] = {
-	{ -60, -44, FACE_SW, 5, 0x31, "The mermaid fountain has a port, you know.|Stand beside it and press R to jack in!" },
-	{ -44, -108, FACE_SW, 5, 0x36, "The mermaid's port opens into a brand new net, they say.|The sea air makes me want to dive in!" },
-	{ -92, -156, FACE_NW, 5, 0x2C, "Fish sticks, fresh from the sea! I buy a dozen every Sunday." },
-	{ -132, -150, FACE_NW, 5, 0x2E, "They say the aquarium's net copied itself overnight...|My grandpa says it must be Dr. Wily. He says that about everything!" },
-	{ -140, -60, FACE_NE, 5, 0x39, "I come here to watch the boats. The whale never gets old, either." },
-	{ -60, -20, FACE_SE, 5, 0x30, "Lan! Did you ride the train out to Seaside? Good luck down there!" },
-	{ -108, -44, FACE_NE, 5, 0x38, "The fountain's mermaid looks out over the sea. Lovely, isn't she?", 10 },
+	{ -60, -44, FACE_SW, 5, 0x31, "The mermaid fountain has a port,you know.|Press R beside it to jack in!" },
+	{ -44, -108, FACE_SW, 5, 0x36, "They say the mermaid's port goes to a new net!|Ahh,the sea air! I wanna dive in!" },
+	{ -92, -156, FACE_NW, 5, 0x2C, "Fish sticks,fresh from the sea!|I buy a dozen every Sunday!" },
+	{ -132, -150, FACE_NW, 5, 0x2E, "The Aquarium's net copied itself overnight!|Grandpa says it's Dr.Wily...|He says that about everything!" },
+	{ -140, -60, FACE_NE, 5, 0x39, "I come here to watch the boats...|And that whale never gets old!" },
+	{ -60, -20, FACE_SE, 5, 0x30, "Lan! You took the LevBus to Seaside?|Good luck down there!" },
+	{ -108, -44, FACE_NE, 5, 0x38, "The mermaid looks out over the sea...|Lovely,isn't she?", 10 },
 };
 
 /* What its checks say: the fountain (0), the fish shop (2, 3); the others
  * say nothing (1 and 7 round the plaza's east corner, 4 to 6 up on the
  * station's walkway). */
 static const char *const seaside_checks[16] = {
-	"A mermaid over the fountain, gazing out to sea. Her port leads into the Endless Net.",
+	"A mermaid over the fountain,gazing out to sea.|Her port leads into the Endless Net.",
 	NULL,
 	"The fish shop.|\"FISH STICKS! Fresh every morning!\"",
 	"Fish of every color swim in the shop's window.",
@@ -441,13 +442,13 @@ static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
 /* Its people, on the ground at 0: by the knight statue, up the paths to
  * the flower shop and the Judge Tree, round the pond. */
 static const Folk green_folk[] = {
-	{ -60, -156, FACE_SE, 5, 0x31, "The knight statue has a port, you know.|Stand beside it and press R to jack in!" },
-	{ -20, -268, FACE_SW, 5, 0x36, "The flower shop's roses are in full bloom!|Take a look before you dive in." },
-	{ -196, -172, FACE_SE, 5, 0x2C, "My friend says the right buttons in the NaviCust make a program smaller.|He won't tell me which ones!" },
-	{ -180, -236, FACE_NW, 5, 0x2E, "The Judge Tree was here long before the town.|They say its roots reach all the way into the net." },
-	{ 68, -124, FACE_SW, 5, 0x30, "Lan! Did you ride the bus out to Green Town? Good luck down there!" },
-	{ -60, -204, FACE_SE, 5, 0x39, "I jacked in at the knight yesterday. Today the paths were all different!|It really does go on forever down there." },
-	{ -132, -108, FACE_NE, 5, 0x38, "Green Town keeps its air clean. Even its net feels fresher!", 10 },
+	{ -60, -156, FACE_SE, 5, 0x31, "The knight statue has a port,you know.|Press R beside it to jack in!" },
+	{ -20, -268, FACE_SW, 5, 0x36, "The flower shop's roses are in full bloom!|Take a peek before you dive in!" },
+	{ -196, -172, FACE_SE, 5, 0x2C, "My friend says the right buttons shrink NaviCust programs!|But he won't tell me which ones! Hmph!" },
+	{ -180, -236, FACE_NW, 5, 0x2E, "The JudgeTree was here long before the town.|They say its roots reach all the way into the net!" },
+	{ 68, -124, FACE_SW, 5, 0x30, "Lan! You took the LevBus to Green Town?|Good luck down there!" },
+	{ -60, -204, FACE_SE, 5, 0x39, "I jacked in at the knight yesterday...|Today the paths were all new! It really is endless!" },
+	{ -132, -108, FACE_NE, 5, 0x38, "Ahh... Green Town's air is so clean!|Even the net feels fresher here!", 10 },
 };
 
 /* What its checks say: the stump's table of books (0, 4), the flower shop
@@ -455,11 +456,11 @@ static const Folk green_folk[] = {
  * (7); 8, by the plaza's east arm, has nothing to see, and the knight's
  * own (2) lies under his pedestal, which keeps Lan from reaching it. */
 static const char *const green_checks[16] = {
-	"A table of books on a tree stump. Someone left them out to read in the sun.",
+	"A table of books on a tree stump.|Someone left them out to read in the sun.",
 	"The flower shop.|\"FRESH FLOWERS! Picked this morning!\"",
 	NULL,
-	"Stumps cut smooth for stools. The whole town sits on its trees.",
-	"A table of books on a tree stump. Someone left them out to read in the sun.",
+	"Stumps cut smooth for stools.|The whole town sits on its trees.",
+	"A table of books on a tree stump.|Someone left them out to read in the sun.",
 	"Flower boxes in rows. The whole plaza smells sweet.",
 	"Stools round a stump table. A nice spot for lunch.",
 	"Lilies float on the pond. A frog watches from a leaf.",
@@ -474,15 +475,15 @@ static const Style styles[] = {
 	  "Central Town", "bird statue", "bird statue on the plaza", NULL },
 	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW, FOLK(acdc_folk), acdc_checks,
 	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } }, false,
-	  "ACDC Town", "squirrel statue", "squirrel statue in the park", "@M The Metroline got us to ACDC Town in no time, Lan!|" },
+	  "ACDC Town", "squirrel statue", "squirrel statue in the park", "@M ACDC Town,Lan! The Metroline's so fast!|" },
 	/* (none of its own ports: the fountain is the landmark) */
 	{ 0x03, 0x00, 0x06, 0, { -8, -15, -6, -8 }, { -18, -16, -9, -7 }, seaside_mat, design_seaside, 4, -100, FACE_SW, FOLK(seaside_folk), seaside_checks,
 	  { { 4, -100 }, { -100, -100 }, { -120, -170 }, { 40, -70 }, { 150, 40 }, { 300, 0 } }, true,
-	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza", "@M The train got us out to Seaside Town, Lan! Smell that sea air!|" },
+	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza", "@M Seaside Town,Lan! Smell that sea air!|" },
 	/* (its port the original's own, round the knight statue) */
 	{ 0x04, 0x00, 0x08, 1 << 0, { -7, -22, -1, -16 }, { -5, -22, -1, -18 }, green_mat, design_green, 40, -100, FACE_SW, FOLK(green_folk), green_checks,
 	  { { 40, -100 }, { -60, -204 }, { -20, -268 }, { -196, -172 }, { -32, 24 }, { -64, 312 } }, true,
-	  "Green Town", "knight statue", "knight statue on the flower plaza", "@M The bus got us out to Green Town, Lan! Smell those flowers!|" },
+	  "Green Town", "knight statue", "knight statue on the flower plaza", "@M Green Town,Lan! Smell those flowers!|" },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
 _Static_assert(sizeof central_folk / sizeof *central_folk <= MAX_FOLK && sizeof acdc_folk / sizeof *acdc_folk <= MAX_FOLK &&
@@ -967,46 +968,48 @@ static const char *intro(void) {
 	if (T.style->arrival) ADD("%s", T.style->arrival);
 	/* (the net's name is the Endless Net, but a short run goes to its Nest:
 	 * "The Endless Net again" read odd to a playtester who chose Short) */
-	const char *again = run.mode == RUN_SHORT ? "@L Down to the Nest again... I wonder what's changed on the way."
-		: "@L The Endless Net again... I wonder what's changed down there.";
+	const char *again = run.mode == RUN_SHORT ? "@L Down to the Nest again... I wonder what's new?"
+		: "@L The Endless Net again... I wonder what's new?";
 	if (!profile.seen_intro) {
-		ADD("@D Lan, it's Dad. Have you got a minute?|"
-			"@D A new stretch of net just opened up under town. Its paths change every time someone jacks in.|"
-			"@D And it only goes down. The Navis are calling it the Endless Net.|"
-			"@M The Endless Net... Lan, that sounds like an adventure!|"
-			"@D Everything down there is copied data. Nothing you find will come back out with you.|"
-			"@D Something at the very bottom is doing the copying. We're calling it the Nest.|"
-			"@D And if MegaMan gets deleted, my backup program will bring him home safe.|"
-			"@D So dive as deep as you can, and send me your readings!|"
-			"@L Leave it to us, Dad!|"
-			"@M The port's by the %s. Let's go, Lan!", port);
+		ADD("@D Lan,it's Dad. Got a minute?|"
+			"@D A new net just opened up under town.|"
+			"@D Its paths change every time someone jacks in.|"
+			"@D And it only goes down. They call it the Endless Net.|"
+			"@M The Endless Net... Lan,that sounds like an adventure!|"
+			"@D It's all copied data down there.|"
+			"@D Nothing you find comes back out with you.|"
+			"@D Something at the very bottom is copying it all.|"
+			"@D We call it the Nest.|"
+			"@D If MegaMan's deleted,my backup brings him home.|"
+			"@D So dive as deep as you can,and send me your readings!|"
+			"@L Leave it to us,Dad!|"
+			"@M The port's by the %s,Lan!", port);
 	} else if (profile.nest_clears > 0 && profile.runs % 2) {
 		/* (after a win, the ending's hook: "reached" undersold it to a
 		 * playtester who had won) */
 		if (profile.short_wins > 0)
-			ADD("@D Lan, MegaMan brought the Nest down before, but something below it is still awake.|"
-				"@D The net's changed all over again since then. Be careful down there!|@L Got it, Dad!");
+			ADD("@D You two brought the Nest down,Lan.|@D But something below it is still awake...|"
+				"@D The net's changed again. Be careful!|@L Got it,Dad!");
 		else
-			ADD("@D Lan, MegaMan has reached the Nest before. The net's changed all over again since then.|"
-				"@D Be careful down there!|@L Got it, Dad!");
+			ADD("@D Lan,you two reached the Nest before.|@D But it's all changed again. Be careful!|@L Got it,Dad!");
 	} else if (town_after_abandon) {
-		ADD("@L We never finished that last dive...|@M Then let's start a fresh one, Lan! The port's by the %s.", port);
+		ADD("@L We never finished that last dive...|@M Then let's start a fresh one!|@M The port's by the %s,Lan!", port);
 	} else if (profile.runs == 0) {
 		/* (the call heard, but no run over yet: no best to speak of) */
-		ADD("%s|@M Let's find out, Lan! The port's by the %s.", again, port);
+		ADD("%s|@M Let's find out,Lan!|@M The port's by the %s!", again, port);
 	} else {
 		/* (the short net ends on its Nest: its goal, not a depth to beat) */
 		bool nest_goal = run.mode == RUN_SHORT && profile.best_depth >= SHORT_LAYERS - 1;
 		switch (profile.runs % 3) {
 		case 0:
-			if (nest_goal) ADD("@M Ready for another dive, Lan? The Nest is waiting at the bottom!|@L This time we'll bring it down!");
-			else ADD("@M Ready for another dive, Lan? Our best is layer %d!|@L This time we'll go even deeper!", profile.best_depth);
+			if (nest_goal) ADD("@M Ready,Lan? The Nest is waiting!|@L This time we'll bring it down!");
+			else ADD("@M Ready,Lan? Our best is layer %d!|@L This time we'll go even deeper!", profile.best_depth);
 			break;
 		case 1:
-			if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Good! Let's reach the Nest today!");
-			else ADD("@M Dad's backup got me home safe last time.|@L Good! Let's beat layer %d today!", profile.best_depth);
+			if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's reach the Nest today!");
+			else ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's beat layer %d today!", profile.best_depth);
 			break;
-		default: ADD("%s|@M Let's find out, Lan! The port's by the %s.", again, port); break;
+		default: ADD("%s|@M Let's find out,Lan!|@M The port's by the %s!", again, port); break;
 		}
 	}
 	#undef ADD

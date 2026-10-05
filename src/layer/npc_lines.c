@@ -10,43 +10,43 @@
 
 /* the first two areas */
 static const char *const early[] = {
-	"My operator jacked me in at the statue too. These paths weren't here yesterday!",
-	"Everything down here is copied data. Even the viruses!|They still hurt, though.",
-	"The exit pad only goes down. Nobody's found a way back up yet!",
-	"Each area's last layer has a guardian. The exit pad stays shut until it's deleted.",
-	"Green Mystery Data holds chips and Zenny. The blue ones hold rarer things!",
-	"Net Dealers set up shop on an area's first layers, and one waits by every guardian. Save some Zenny!",
-	"Hold B to charge your buster. A charged shot makes most viruses flinch.",
-	"A Mystery Data on a battlefield breaks at any hit, even ours. Win with it whole, and it's yours!",
+	"Hey! You jacked in at the statue too?|These paths weren't here yesterday!",
+	"It's all copied data down here. Even the viruses!|They still hurt,though... Ow.",
+	"The exit pads only go down...|Nobody's found a way back up yet!",
+	"Did you hear? Every area ends with a guardian!|Its exit pad stays shut until it's deleted!",
+	"Green Mystery Data has chips and Zenny inside!|The blue ones? Even rarer stuff!",
+	"Net Dealers sell on each area's first layers!|There's one by every guardian! Save up!",
+	"My operator holds B to charge my Buster!|A charged shot makes most viruses flinch!",
+	"Careful! Mystery Data in battle breaks at any hit!|Even your own! Win with it whole,and it's yours!",
 };
 
 /* the middle areas */
 static const char *const mid[] = {
-	"I fought a guardian that looked just like HeatMan...|It knew every move I had!",
-	"From here on, dark warps show up on some layers: a side trip into a copy of the Undernet, and back.",
-	"There's a sealed gate in the Undernet copy. They say three ScrtData open it.",
-	"ScrtData hide in blue Mystery Data on the deeper layers. Keep your eyes open!",
-	"A strong virus signal is a tough fight, but the chip it leaves is worth it.",
-	"A NaviCust program does nothing until it's installed. In the PET: MegaMan, then NaviCust!",
-	"A deleted guardian leaves its HPMemory behind. More HP, more chances!",
+	"Ugh... I fought a guardian just like HeatMan...|It knew every move I had!",
+	"Did you hear? Dark warps show up from here on!|A side trip to an Undernet copy,and back!",
+	"There's a sealed gate in the Undernet copy...|They say three ScrtData open it!",
+	"ScrtData hide in blue Mystery Data down deep!|Keep your eyes open!",
+	"A strong virus signal? Tough fight...|But the chip it leaves is worth it!",
+	"My new program did nothing until I installed it!|In the PET,pick MegaMan,then NaviCust!",
+	"A deleted guardian drops an HPMemory!|More HP,more chances!",
 };
 
 /* the Undernet, the Graveyard and the Nest */
 static const char *const deep[] = {
-	"Something at the very bottom is copying the whole net. My operator calls it the Nest.",
-	"I heard a Cybeast roar from below...|My operator says it's just data. Right?",
-	"Some navis down here don't answer. They just say the same thing over and over.|Copies, I guess...",
-	"The BugFrag Trader takes BugFrags, not chips. The Undernet's full of them.",
-	"Heal up before a guardian. There's always a Mr. Prog by the arena.",
-	"My operator wants to jack me out. But I have to see what's at the bottom!",
+	"Something at the very bottom copies the whole net...|My operator calls it the Nest.",
+	"I heard a Cybeast roar down below...|My operator says it's just data. R-Right?",
+	"Some Navis down here just say the same thing...|Over and over. Copies,I guess...",
+	"The BugFrag Trader wants BugFrags,not chips!|And the Undernet's full of 'em!",
+	"Phew... I always heal up before a guardian.|There's a Mr.Prog by every arena!",
+	"My operator wants to jack me out...|But I've gotta see what's at the bottom!",
 };
 
 /* a net the Nest has rebuilt */
 static const char *const again[] = {
-	"Wait... Haven't we met? The Nest rebuilt everything. Maybe even me.",
-	"The Nest went down, and the net came right back. Same areas, stronger data.",
-	"The guardians came back tougher. It's like they learned from last time.",
-	"Every time the Nest falls, it builds the net again. How deep does it go?",
+	"Wait... Haven't we met before?|The Nest rebuilt everything. Maybe even me...",
+	"The Nest fell,and the net came right back!|Same areas,but stronger data. Yikes...",
+	"Ugh,the guardians came back tougher!|Like they learned from last time...",
+	"Every time the Nest falls,it builds the net again.|How deep does this go...?",
 };
 
 /* (the first areas' lines a profile's first runs need, which ring false
@@ -57,12 +57,12 @@ static const bool early_basic[N(early)] = { [4] = true, [6] = true, [7] = true }
 
 /* anywhere */
 static const char *const tips[] = {
-	"Chips that share a code can be sent together. Stack them in your folder!",
-	"Chip Traders swap three of your chips for one. Good for clearing out junk.",
-	"When the Custom Gauge fills, press L or R to pick new chips right away.",
-	"AreaGrab steals the enemy's front column. More room to move, less room to hide!",
-	"A fight going badly? An operator can try to pull their Navi out: L on the Custom screen. It doesn't always work!",
-	"Something coming at you while you pick chips? SELECT on the Custom screen hides it for a look at the field!",
+	"Did you know?|Chips of one code can be sent together!|Stack 'em in your Folder!",
+	"Got junk chips? Try a Chip Trader!|Three chips in,one chip out!",
+	"Custom Gauge full? My operator hits L or R!|New chips right away! Neat,huh?",
+	"AreaGrab steals the enemy's front column!|More room to move,less room to hide!",
+	"My operator pulls me out of bad fights!|L on the Custom Screen! It doesn't always work!",
+	"Something coming at you while picking chips?|Press SELECT! The Custom Screen hides for a peek!",
 };
 
 const char *npc_line(int depth, int i) {
