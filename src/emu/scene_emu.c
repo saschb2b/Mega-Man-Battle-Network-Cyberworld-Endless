@@ -16,6 +16,7 @@
 #include "events.h"
 #include "gamecall.h"
 #include "guest.h"
+#include "guest_wait.h"
 #include "idle.h"
 #include "game.h"
 #include "gfx.h"
@@ -146,19 +147,6 @@ static bool guest_white(void) {
 	return true;
 }
 
-/* (the guest's boot, which a battle waits for where it still runs: on the
- * white the switch fades to meanwhile, what it is and how far) */
-static void guest_boot_note(void) {
-	int pc = guest_boot_progress();
-	if (pc < 0) return;
-	int x = P.core_x + CORE_W / 2, y = P.core_y + CORE_H / 2 - 20, w = 120;
-	SDL_Color ink = rgba(16, 54, 74, 255);
-	text_drawf(x, y, ink, TEXT_CENTER, "Waking the older net... %d%%", pc);
-	fill_rect(x - w / 2, y + 16, w, 6, rgba(16, 54, 74, 60));
-	fill_rect(x - w / 2, y + 16, w * pc / 100, 6, rgba(33, 115, 140, 255));
-	text_draw(x, y + 28, "BN5 starts once in this browser", rgba(70, 100, 120, 255), TEXT_CENTER);
-}
-
 /* A battle on the guest core: its frames in BN6's place, BN6's core
  * waiting, and its result into the run as it ends */
 static bool guest_update(void) {
@@ -168,6 +156,9 @@ static bool guest_update(void) {
 	else if (guest_flash > 0) --guest_flash;
 	guest_wait = guest_active() && !shown ? guest_wait + 1 : 0;
 	was = shown;
+	/* (where the battle waits for the guest's boot, the older net's wait
+	 * on the white: guest_wait.c) */
+	guest_wait_update(guest_boot_waiting(), guest_wait >= GUEST_FLASH);
 	GuestResult r;
 	/* (one that waited for a boot that failed ended unfought, as the boot
 	 * did, between the frames: guest_tick) */
@@ -264,6 +255,7 @@ static void draw(void) {
 	 * the dev menu's alone) */
 	if (guest) {
 		if (guest_flash > 0) fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_flash * 255 / GUEST_FLASH)));
+		guest_wait_draw(P.core_x, P.core_y);   /* (closing over its battle's own white, where one waited) */
 		devtools_draw();
 		return;
 	}
@@ -272,7 +264,7 @@ static void draw(void) {
 	director_draw_map();
 	if (guest_wait > 0) {
 		fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_wait >= GUEST_FLASH ? 255 : guest_wait * 255 / GUEST_FLASH)));
-		if (guest_wait >= GUEST_FLASH) guest_boot_note();
+		guest_wait_draw(P.core_x, P.core_y);
 		return;
 	}
 	director_draw_counts();
