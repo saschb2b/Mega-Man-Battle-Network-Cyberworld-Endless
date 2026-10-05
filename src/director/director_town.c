@@ -18,6 +18,7 @@
 #include "flags.h"
 #include "home_words.h"
 #include "lan_house.h"
+#include "lesson_words.h"
 #include "lanhp.h"
 #include "mapslot.h"
 #include "run.h"
@@ -54,6 +55,28 @@ void home_entered(void) {
 	home_ways(&n, &sealed);
 	lanhp_lit(n);
 	flag_clear(BN6_FLAG_NO_JACK);
+}
+
+const char *home_way(int *far) {
+	int x, y, number = emu_read8(BN6_MAP_NUMBER);
+	if (home_in_hp()) {
+		lanhp_portal_spot(0, &x, &y);
+		return way_to(x, y, far);
+	}
+	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number) && lan_house_goal(number, &x, &y)) return way_to(x, y, far);
+	return town_way(far);
+}
+
+const char *home_status(void) {
+	int far, number = emu_read8(BN6_MAP_NUMBER);
+	const char *way = home_way(&far);
+	if (home_in_hp()) {
+		const char *words = home_hp_status(way, !D.port_told);
+		D.port_told = true;
+		return words;
+	}
+	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) return port_words(number == LAN_ROOM ? PORT_ROOM : PORT_HOUSE, way);
+	return port_words(PORT_HOME, way);
 }
 
 /* home: Lan held while the act's card shows, A ending it early, as on a

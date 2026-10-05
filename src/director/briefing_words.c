@@ -12,6 +12,7 @@
 #include "cinema.h"
 #include "director_board.h"
 #include "director_folder.h"
+#include "director_home.h"
 #include "director_layer.h"
 #include "director_map.h"
 #include "director_see.h"
@@ -486,6 +487,8 @@ const char *status_words(void) {
 	static char buf[1400];
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
+	/* (home's own way on, docs/HOME.md: no landmark's port there) */
+	if (D.town && town_is_home()) return home_status();
 	if (D.town) {
 		int far;
 		const char *way = town_way(&far);

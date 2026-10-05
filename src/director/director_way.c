@@ -9,6 +9,7 @@
 #include "boss.h"
 #include "cinema.h"
 #include "director_folder.h"
+#include "director_home.h"
 #include "director_state.h"
 #include "net_route.h"
 #include "netmap.h"
@@ -143,7 +144,7 @@ static bool heal_spot(int *wx, int *wy) {
  * at 180 HP heard which way it was, and the arrow led to the exit). */
 void goal_way(void) {
 	int far;
-	if (D.town) { cinema_arrow_heal(false); town_way(&far); return; }
+	if (D.town) { cinema_arrow_heal(false); home_way(&far); return; }
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
 	cinema_arrow_heal(hurt_now() && heal_spot(&gx, &gy));

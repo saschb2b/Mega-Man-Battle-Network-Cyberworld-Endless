@@ -19,5 +19,8 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed);
 const char *home_portal_name(int k);
 /* MegaMan in Lan's HP the run's first time there. */
 const char *home_hp_words(void);
+/* L in Lan's HP: the pink pad `way` from MegaMan, and the first time how
+ * to jack out. */
+const char *home_hp_status(const char *way, bool first);
 
 #endif

@@ -38,6 +38,13 @@ bool home_in_hp(void);
 /* The place's name for the map's label: Lan's HP, his house or room, or
  * the town's. */
 const char *home_place_name(void);
+/* The way on at home from where Lan or MegaMan stands (way_to's word,
+ * way_last its direction, `far` how far): the PC in Lan's room, the room
+ * up the house's stairs, home from the town (a town not home: its port),
+ * the pink pad in Lan's HP. */
+const char *home_way(int *far);
+/* L at home: MegaMan's word on that way. */
+const char *home_status(void);
 /* The home's frame: Lan's and MegaMan's words, the portals, and the next
  * layer's arrival; home_entered after the game enters a map (its portals'
  * flags). */

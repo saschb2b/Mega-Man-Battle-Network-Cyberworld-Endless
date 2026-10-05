@@ -83,6 +83,13 @@ const char *home_portal_name(int k) {
 	return k >= 0 && k < (int)(sizeof names / sizeof *names) ? names[k] : "link";
 }
 
+const char *home_hp_status(const char *way, bool first) {
+	static char words[160];
+	if (first) snprintf(words, sizeof words, "@M The pink pad's %s,Lan!|@M Or press R,and I'll jack out.", way);
+	else snprintf(words, sizeof words, "@M The pink pad's %s,Lan!", way);
+	return words;
+}
+
 const char *home_hp_words(void) {
 	return "@M Our HP,Lan! Home sweet home!|@M The Endless Net's linked in here now...|@M The pink pad leads into it!";
 }
