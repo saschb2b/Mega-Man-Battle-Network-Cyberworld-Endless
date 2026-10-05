@@ -25,6 +25,7 @@
 #define SCRATCH      (EMU_FREE + 0x3000)
 #define SCRATCH_HALF 0x6800
 #define WARP_LIST    (EMU_FREE + 0x2F00)  /* the layer map's warps: entry 1 is the exit */
+#define NO_MYSTERY   (EMU_FREE + 0x0180)  /* an empty Mystery Data list, for the maps the layers left */
 #define TOWN_ARENA   (EMU_FREE + 0x140000) /* the town's data, apart from the layers' */
 #define TOWN_SIZE    0x8000
 
@@ -200,6 +201,26 @@ static uint32_t mystery_slot(int group, int number) {
 	return 0;
 }
 
+/* `slot` given the layer's list at `md_at`, and every other map a layer
+ * took an empty one. BN6 rolls every net map's green Mystery Data again at
+ * each jack-in (bn6f sub_8033FDC calls sub_809F9DC, docs/ROM_DATA.md), and
+ * a map a layer left kept its list in the half a later layer has written
+ * over: a jack-in from home read one and crashed the game. (An empty
+ * list, not none: the roll ends a group's maps at a null.) */
+static void mystery_only(uint32_t slot, uint32_t md_at) {
+	static uint32_t slots[64];   /* (more than the maps the areas take) */
+	static int n;
+	static const uint8_t none[12] = { 0 };
+	emu_write(NO_MYSTERY, none, sizeof none);
+	bool known = false;
+	for (int i = 0; i < n; ++i) {
+		known |= slots[i] == slot;
+		if (slots[i] != slot) emu_write32(slots[i], NO_MYSTERY);
+	}
+	if (!known && n < (int)(sizeof slots / sizeof slots[0])) slots[n++] = slot;
+	emu_write32(slot, md_at);
+}
+
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd) {
 	bool rw = real_world(group);
 	uint32_t g = rw ? (uint32_t)group : (uint32_t)(group - 0x80);
@@ -278,7 +299,7 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	memset(entries + nmd * 12, 0, 12);
 	uint32_t md_at = mapslot_alloc(entries, (nmd + 1) * 12);
 	uint32_t slot = mystery_slot(group, number);
-	if (slot) emu_write32(slot, md_at);
+	if (slot) mystery_only(slot, md_at);
 	return true;
 }
 
