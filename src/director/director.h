@@ -95,7 +95,7 @@ extern int director_debug_biome;
 extern int director_debug_area;
 /* --net-biome's value: a biome, or xN another game's area N. */
 void director_net_biome_arg(const char *v);
-/* --talk: chats to open at given frames (director.c) */
+/* --talk: chats to open at given frames (director_dev.c) */
 extern const char *director_dev_talks;
 
 #endif

@@ -62,7 +62,7 @@ typedef struct {
 	uint32_t duel_run;
 	uint16_t duel_depth;
 	uint8_t duel_beat;
-	uint8_t pieces_taught;    /* the set pieces L has explained (SENSED_*, director.c; issue #48) */
+	uint8_t pieces_taught;    /* the set pieces L has explained (SENSED_*, briefing_words.c; issue #48) */
 	/* the NaviCust programs whose compression code was entered in any run,
 	 * a bit each (issue #50: Dad's Compression mail lists them), and how
 	 * many that mail showed when last marked NEW */

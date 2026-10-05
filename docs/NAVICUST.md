@@ -264,7 +264,7 @@ each was found go into `docs/ROM_DATA.md` as the parts are built.
 ## Status
 
 Built (`src/layer/navicust.c`, the Guardian Data script in
-`src/layer/scripts.c`, the bug watch in `src/director/director.c`):
+`src/layer/scripts.c`, the bug watch in `src/director/director_board.c`):
 
 - The pool of 34 programs with their tiers and builds, and MegaMan's
   words for each.

@@ -231,7 +231,7 @@
 #define BN6_TRADER_KINDS      0x0809B7E4u /* 6 x (map key, u8 trader script): which lines the trade screen shows */
 #define BN6_TRADER_MODES      0x0804BDCCu /* 2 weights: the prize one the Library has (192) or a new one (64) */
 /* the BugFrag Trader's trade, which BN6's trader machine makes on the
- * Undernet's map (bn6f sub_809A078; director.c bugfrag_trade) */
+ * Undernet's map (bn6f sub_809A078; director_folder.c bugfrag_trade) */
 #define BN6_TRADER_STATE      0x0200AC80u /* eS200AC80 */
 #define BN6_TRADER_STATE_PRIZE (BN6_TRADER_STATE + 0x04) /* the prize's chip, then its code (u16 each) */
 #define BN6_TRADER_STATE_30   (BN6_TRADER_STATE + 0x30) /* u16 the machine clears with the prize after a trade */

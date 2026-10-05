@@ -109,7 +109,7 @@ static void after_frame(void) {
 /* An L or R pressed before the Custom gauge filled, kept two and a half
  * seconds and given as it fills (let go a frame first, so BN5 sees a
  * press), again every 20 frames until the screen opens, as BN6's battles
- * keep one (director.c): a playtester's R pressed a little early did
+ * keep one (director_keys.c custom_buffer): a playtester's R pressed a little early did
  * nothing in BN5's battles, twice (session 65). */
 static uint32_t guest_custom_keep(uint32_t keys) {
 	static int kept, step;

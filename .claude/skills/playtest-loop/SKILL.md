@@ -127,7 +127,7 @@ python3 tools/play.py stop rp
 
 `pos X Y Z` in the state is MegaMan's world position: compare before and
 after to settle "my input was eaten". To watch memory the state doesn't
-show, print it next to `pos` in `director.c` for the replay only (a
+show, print it next to `pos` in `director_describe.c` for the replay only (a
 throwaway line; the RNG seed is `0x020013F0`), and remove it before
 committing.
 

@@ -496,9 +496,9 @@ Fixed on the way:
 | Area order, guardian pools | `src/core/run.c` (`run_new`) |
 | Act and guardian layers | `src/net/net_gen.c` (`biome_for_depth`, `is_boss_depth`) |
 | Formation pick, versions inside the band | `src/core/loot.c` (`make_encounter`) |
-| BN5's records inside the band, their viruses' versions | `src/emu/guest.c` (`guest_pool`), `src/director/director.c` (`guest_pick`) |
+| BN5's records inside the band, their viruses' versions | `src/emu/guest.c` (`guest_pool`), `src/director/director_guest.c` (`guest_pick`) |
 | Guardian version | `src/core/loot.c` (`make_boss`) |
 | Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |
-| Opening battles, challenge and its reward | `src/director/director.c` |
+| `src/director/director_layer.c` (roll_encounter), `src/director/director.c` (act_on_choices) | `src/director/director.c` |
 | Guardian rewards, the start gift | `src/layer/scripts.c`, `src/layer/guardian_objs.c`, `src/director/powers.c` |

@@ -50,7 +50,7 @@ the site.
 | `src/emu/` | The mGBA core, calls into the game through hooks (`gamecall.c`: warps, chat), hooks on its code (`hook.c`), its wait for VBlank halted (`idle.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
 | `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
-| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers; the game's events from its hooks (`events.h`: battles in `encounter.c`, maps, choices and key items in `events.c`), taken up after each frame |
+| `src/director/` | The run on the game: the town, layers, warps, encounters, bosses, checkpoints, powers; the game's events from its hooks (`events.h`: battles in `encounter.c`, maps, choices and key items in `events.c`), taken up after each frame. `director.c` is the frame's course and the state its parts share (`director_state.h`); its parts are `director_*.c` (layers made and entered, the run's chips, checkpoints, what the drawing reads, the map, the way on, the pad, the NaviCust's board, the duel, DarkChips, the older net's battles, dev steps, the state in words), and what they say is in `*_words.c` (L's briefing, the story's beats, Chaud, the NaviCust, DarkChips, the older net, lessons) |
 | `src/world/` | The real world: the town where a run begins, learned from Central Town's tiles and planned per run (`docs/OVERWORLD.md`) |
 | `tests/test_core.c` | ROM-free unit tests; `tests/test_emu.c` the hooks on mGBA, and two cores side by side as BN6's and the guest's run (each one's hooks, RAM, sound and state its own), with ROMs of its own bytes; `tests/test_add_to_steam.py` runs `linux/steam/add-to-steam.py` against a made-up Steam folder; `tests/lint/` the baselines `build.py lint` checks against |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
@@ -138,9 +138,10 @@ the site.
 
 - One thing per file, named for it. Past 1000 lines (a header 400) a file
   holds more than one thing, and is split by what each part does. A module
-  of several files shares its state through a header of its own; each
-  part's header declares what the other parts use, and what the rest of
-  the game uses stays in the module's public header.
+  of several files shares its state through a header of its own
+  (`src/director/director_state.h` holds the director's `D`); each part's
+  header declares what the other parts use, and what the rest of the game
+  uses stays in the module's public header (`director.h`).
 - What characters say lives apart from the logic that decides when it is
   said, in the feature's words file beside it: `*_words.c` (lines composed
   from the run's facts), `*_lines.c` (tables of lines), `*_text.c` (the
