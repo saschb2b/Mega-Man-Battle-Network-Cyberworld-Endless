@@ -697,6 +697,10 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	out->nchoices = 0;
 	layer_objs_dealer_named = false;
 	out->guardian.navi = 0;
+	/* (and its scripts none: a layer without a guardian kept the last
+	 * guardian layer's numbers, which --talk intro ran into this layer's
+	 * archive) */
+	out->guardian.intro = out->guardian.defeat = out->guardian.reward = -1;
 	out->challenge_reward = -1;
 	out->fragment_found = -1;
 	out->spin_found = -1;
