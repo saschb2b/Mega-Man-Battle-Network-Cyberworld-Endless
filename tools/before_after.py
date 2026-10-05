@@ -67,6 +67,12 @@ SCENES = [
     # (the Net Dealer's word on TenguMan before his arena, its third page)
     ('dealer', ['--scene', 'emu', '--run-depth', '9', '--seed', '1', '--guardian', '8', '--talk', 'shop:430', '--dev', 'quiet',
                 '--input', '500:,4:A,100:,4:A,100:,4:A,160:'], {}, 860),
+    # (0.9.0's: a phone held upright, the whole screen at a third of its
+    # pixels, a thumb on the D-pad: the picture 960 wide between black bars,
+    # then filling the width; the entry's last number shrinks the screen)
+    ('phone-upright', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '3', '--dev', 'quiet', '--touch',
+                       '--size', '1080x2400', '--dpi', '420', '--input', '60:,' + '4:A,6:,' * 20 + '40:',
+                       '--taps', '330:315,1881>435,2001'], {}, 348, 3),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -86,8 +92,9 @@ def old_binary(tag, picks=()):
     return os.path.relpath(binary, ROOT)
 
 
-def frame(binary, args, env, at, out):
-    """Frame `at` of a headless run of `binary` (relative to ROOT), the game's 240 x 160."""
+def frame(binary, args, env, at, out, whole=0):
+    """Frame `at` of a headless run of `binary` (relative to ROOT), the game's 240 x 160;
+    or with `whole`, the whole screen (--screen-shot: the touch controls on it), shrunk by it."""
     from PIL import Image
     tmp = os.path.join(ROOT, '.build', 'before', 'shot')
     shutil.rmtree(tmp, ignore_errors=True)
@@ -96,7 +103,8 @@ def frame(binary, args, env, at, out):
     os.environ.update(env)
     try:
         code = build.docker(binary, '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/before/shot/data', *args,
-                            '--frames', str(at + 1), '--shot', f'{at}:/src/.build/before/shot/f.bmp', mounts=build.docs_rom_mounts())
+                            '--frames', str(at + 1), '--screen-shot' if whole else '--shot', f'{at}:/src/.build/before/shot/f.bmp',
+                            mounts=build.docs_rom_mounts())
     finally:
         for k, v in saved.items():
             if v is None:
@@ -107,20 +115,25 @@ def frame(binary, args, env, at, out):
         sys.exit(f'{out}: the run failed')
     im = Image.open(os.path.join(tmp, 'f.bmp')).convert('RGB')
     w, h = im.size
+    if whole:
+        return im.resize((w // whole, h // whole), Image.LANCZOS)
     return im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
 
 
 def pair(old, new, old_label, new_label):
-    """Both frames at 2x with whole pixels, each under its version."""
+    """Both frames at 2x with whole pixels (a whole screen as it came), each under its version."""
     from PIL import Image, ImageDraw, ImageFont
     gap, bar = 8, 30
-    im = Image.new('RGB', (2 * 480 + gap, bar + 320), (16, 24, 40))
+    if old.size == (240, 160):
+        old, new = old.resize((480, 320), Image.NEAREST), new.resize((480, 320), Image.NEAREST)
+    w, h = old.size
+    im = Image.new('RGB', (2 * w + gap, bar + h), (16, 24, 40))
     d = ImageDraw.Draw(im)
     font = ImageFont.truetype(FONT, 18) if os.path.exists(FONT) else ImageFont.load_default()
     for i, (frame_im, label, colour) in enumerate(((old, old_label, (170, 180, 200)), (new, new_label, (120, 248, 255)))):
-        x = i * (480 + gap)
-        im.paste(frame_im.resize((480, 320), Image.NEAREST), (x, bar))
-        d.text((x + 240, bar // 2), label, fill=colour, font=font, anchor='mm')
+        x = i * (w + gap)
+        im.paste(frame_im, (x, bar))
+        d.text((x + w // 2, bar // 2), label, fill=colour, font=font, anchor='mm')
     return im
 
 
@@ -138,11 +151,12 @@ def main():
     if not os.path.exists(os.path.join(ROOT, new)):
         sys.exit('build this build first: python3 build.py host')
     out = os.path.join(ROOT, 'docs', 'screenshots')
-    for name, args, env, at in SCENES:
+    for name, args, env, at, *whole in SCENES:
         if a.names and name not in a.names:
             continue
         path = os.path.join(out, f'compare-{name}.png')
-        pair(frame(old, args, env, at, name), frame(new, args, env, at, name), a.old_label or a.old.lstrip('v'), a.new).save(path, optimize=True)
+        pair(frame(old, args, env, at, name, *whole), frame(new, args, env, at, name, *whole), a.old_label or a.old.lstrip('v'),
+             a.new).save(path, optimize=True)
         print('compared', name)
 
 

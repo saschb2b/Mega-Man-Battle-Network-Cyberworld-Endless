@@ -1016,6 +1016,18 @@ def tour(biomes='all'):
     return 0
 
 
+# 0.9.0's program pick (program-fit): the run's gift Custom1 taken and put on
+# the NaviCust where it comes first (PET, MegaMan, NaviCust, A, A, RUN, out),
+# the dev menu's Next guardian to BlastMan's arena on layer 3, its arrival
+# words paged, then his Guardian Data's words (--talk reward, past layer 1's
+# frames: on a layer without a guardian it opens another chat)
+FIT_GIFT = ('60:,' + '4:A,6:,' * 20 + '40:,10:,6:A,64:,6:A,94:,6:A,94:,6:A,84:,6:DOWN,14:,6:DOWN,14:,6:A,174:,6:A,134:,'
+            '6:A,134:,')
+FIT_INSTALL = ('6:START,54:,6:DOWN,14:,6:DOWN,14:,6:DOWN,24:,6:A,60:,6:A,60:,6:A,40:,6:A,40:,6:DOWN,30:,6:A,500:,'
+               '6:A,100:,6:A,100:,6:B,100:,6:A,100:,6:B,100:,6:B,100:,')
+FIT_NEXT = '10:SELECT,6:SELECT+R,4:SELECT,20:,' + '6:DOWN,6:,' * 8 + '10:,6:A,6:,'
+FIT_PAGES = '300:,' + '6:A,134:,' * 4 + '2230:,' + '6:A,174:,' * 12
+
 # Screenshots of the running game for the site and the README
 # (docs/screenshots): name, game options, (frame, shot name) pairs, env.
 # Screenshots are fine to publish; files extracted from the ROM are not.
@@ -1177,6 +1189,43 @@ SCREENSHOTS = [
     ('dark-chip', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,darkchips=0x2,folder=286/3', '--talk', 'bugfrags:420',
                    '--input', '100:,' + '4:A,6:,' * 30 + '40:,0:battle,220:,6:A,20:,6:START,20:,6:A,120:,6:RIGHT,20:,6:A,200:,6:A,60:,6:A,60:,6:A,60:,6:A,150:,'
                    + '6:A,100:,' * 10], [(650, 'dark-chip-custom'), (882, 'dark-chip'), (2160, 'dark-chip-price')], {}),
+    # 0.9.0's notes, each by its feature. (MegaMan's word on GitHub, typed out)
+    ('notice', ['--scene', 'intro'], [(230, 'notice')], {}),
+    # (SELECT on the title: the controls screen, an Xbox pad attached)
+    ('controls', ['--scene', 'title', '--pad', 'xbox', '--input', '60:,4:SELECT,40:'], [(100, 'controls')], {}),
+    # (a Recovery Mr. Prog on an act's middle layer, MegaMan held at 40 HP:
+    # half his max back, his one patch; asked again, spent)
+    ('heal-once', ['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=100/40', '--talk', 'heal:620,heal:1150',
+                   '--input', '60:,' + '4:A,6:,' * 40 + '40:,290:,6:A,134:,6:A,134:,6:A,214:,6:A,94:'],
+     [(900, 'heal-once'), (1060, 'heal-once-2'), (1270, 'heal-spent'), (1380, 'heal-spent-2')], {}),
+    # (the setup's Help row on All *, turned on)
+    ('all-star', ['--scene', 'setup', '--input', '60:,6:UP,20:,6:RIGHT,10:,6:RIGHT,10:,6:RIGHT,30:,6:A,60:'], [(200, 'all-star')], {}),
+    # (a Seaside layer with a security cube and a Link Navi obstacle: SELECT's
+    # map whole, both violet and the data's crystals; and as the layer
+    # begins, the cube a ring until seen)
+    ('map-marks', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '1', '--seed', '11', '--dev', 'quiet,pieces=24,mapall',
+                   '--input', '300:,60:SELECT,20:'], [(340, 'map-marks')], {}),
+    ('map-marks-start', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '1', '--seed', '11', '--dev', 'quiet,pieces=24',
+                         '--input', '300:,60:SELECT,20:'], [(340, 'map-marks-start')], {}),
+    # (seed 7's walk into BlastMan's arena: "Run saved" at its door, then
+    # BlastMan in Gregar's own sprite; TenguMan in his battle sprite, and
+    # his words with a face made from it)
+    ('arena-save', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
+     [(1306, 'arena-save'), (1348, 'guardian-blastman')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    ('falzar-face', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '8'],
+     [(1348, 'guardian-tenguman'), (1568, 'falzar-face')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (the layer's map on a second screen, the guardian's mark on it)
+    ('second-screen', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
+     [(1250, 'second-screen')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
+    # (a phone held upright, a thumb on the D-pad: the whole screen at a third)
+    ('phone-upright', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch',
+                       '--size', '1080x2400', '--dpi', '420', '--input', '60:,' + '4:A,6:,' * 20 + '40:',
+                       '--taps', '330:315,1881>435,2001'], [(348, 'phone-upright')], {}, 3),
+    # (the program pick after BlastMan, Custom1 on the board: UnderSht fits
+    # now, HP+100 once Custom1 moves)
+    ('program-fit', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--talk', 'reward:2950',
+                     '--input', (FIT_GIFT + FIT_INSTALL + FIT_NEXT + FIT_PAGES).rstrip(',')],
+     [(7372, 'program-fit-now'), (7720, 'program-fit-move')], {}),
 ]
 
 
@@ -1292,6 +1341,8 @@ CLIPS = [
     # (the older net's wait, BN5's first boot slowed to 12 of its frames a
     # frame: the switch, the wait filling, the battle opening behind it)
     ('bn5-wait', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,slowboot=12'], {'CYBERWORLD_AUTOPILOT': '1'}, '300:battle', 340, 820),
+    # (0.9.0's start: the developer's boot screen, MegaMan's word on GitHub, the title)
+    ('intro', ['--scene', 'intro'], {}, None, 1, 380),
 ]
 
 
@@ -1300,7 +1351,8 @@ CLIPS = [
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
-               'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15)}
+               'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
+               'intro': (None, 15)}
 
 
 def clips(only=None):
