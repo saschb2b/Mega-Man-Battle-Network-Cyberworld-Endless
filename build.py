@@ -1393,20 +1393,25 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
 
 def clips(only=None):
     """docs/clips/NAME.webm, .mp4 and .png: frames of scripted runs, 4x, 30 fps (and
-    NAME.gif, 2x, at the rate README_GIFS gives, for those in it)."""
+    NAME.gif, 2x, at the rate README_GIFS gives, for those in it); a clip
+    marked '3ds' as a New 3DS shows it, the second screen under the
+    picture (two_screens), 2x and its GIF 1x."""
     from PIL import Image
     out = os.path.join(ROOT, 'docs', 'clips')
     tmp = os.path.join(ROOT, '.build', 'clips')
     os.makedirs(out, exist_ok=True)
-    for name, args, env, script, first, last in CLIPS:
+    for name, args, env, script, first, last, *mode in CLIPS:
         if only and name not in only:
             continue
+        dual = mode == ['3ds']
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'data'))
         os.makedirs(os.path.join(tmp, 'png'))
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         extra = ['--input', script] if script else []
+        if dual:
+            extra += ['--second-shot-range', f'{first}:{last}:/src/.build/clips/s']
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
                       *args, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f',
                       mounts=docs_rom_mounts(bn5='bn5' in name))
@@ -1422,13 +1427,17 @@ def clips(only=None):
             im = Image.open(os.path.join(tmp, f'f{f:05d}.bmp')).convert('RGB')
             w, h = im.size   # the canvas: the game's 240 x 160 in the middle
             im = im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+            if dual:
+                im = two_screens(im, Image.open(os.path.join(tmp, f's{f:05d}.bmp')).convert('RGB'))
             if n == 0:
                 im.save(os.path.join(out, f'{name}.png'), optimize=True)
             im.save(os.path.join(tmp, 'png', f'{n:05d}.png'))
             n += 1
-        # 4x with whole pixels (and the colour planes' 2x2 blocks inside them)
+        # 4x with whole pixels (and the colour planes' 2x2 blocks inside them; two screens 2x)
+        w, h = im.size
+        big = f'{2 * w}:{2 * h}' if dual else f'{4 * w}:{4 * h}'
         common = ['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png',
-                  '-vf', 'scale=960:640:flags=neighbor', '-an']
+                  '-vf', f'scale={big}:flags=neighbor', '-an']
         encodes = [common + ['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-pix_fmt', 'yuv420p', f'/out/{name}.webm'],
                    common + ['-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
                              f'/out/{name}.mp4']]
@@ -1436,7 +1445,7 @@ def clips(only=None):
         if name in README_GIFS:
             secs, fps = README_GIFS[name]
             encodes.append(['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png', '-vf',
-                            (f'trim=duration={secs},' if secs else '') + f'fps={fps},scale=480:320:flags=neighbor,split[a][b];'
+                            (f'trim=duration={secs},' if secs else '') + f'fps={fps},scale={w if dual else 2 * w}:{h if dual else 2 * h}:flags=neighbor,split[a][b];'
                             '[a]palettegen=max_colors=128:stats_mode=full[p];[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
         for enc in encodes:
             cmd = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + [

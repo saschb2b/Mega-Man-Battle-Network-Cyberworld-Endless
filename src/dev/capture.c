@@ -263,8 +263,22 @@ void capture_input(void) {
 typedef struct { uint64_t frame; char path[256]; } Shot;
 static Shot shots[64], screen_shots[16], second_shots[16];
 static int shot_count, screen_shot_count, second_shot_count;
-static uint64_t range_a = 1, range_b = 0;   /* --shot-range A:B:PREFIX */
-static char range_prefix[200];
+/* --shot-range A:B:PREFIX: frames A to B, each into PREFIX's file of its
+ * number; --second-shot-range the second screen's alike (a clip of both) */
+typedef struct { uint64_t a, b; char prefix[200]; } Range;
+static Range range = { 1, 0, "" }, second_range = { 1, 0, "" };
+
+static void parse_range(const char *spec, Range *r) {
+	unsigned long long ra = 0, rb = 0;
+	if (sscanf(spec, "%llu:%llu:%199s", &ra, &rb, r->prefix) == 3) { r->a = ra; r->b = rb; }
+}
+
+/* the range's file for this frame, false outside it */
+static bool range_path(const Range *r, char *path, size_t n) {
+	if (P.frame < r->a || P.frame > r->b) return false;
+	snprintf(path, n, "%s%05llu.bmp", r->prefix, (unsigned long long)P.frame);
+	return true;
+}
 
 static void parse_shots(const char *spec, Shot *into, int *count, int most) {
 	char *copy = strdup(spec);
@@ -306,10 +320,8 @@ static const char *remote_dir;   /* --remote: remote play's pipes' folder */
 bool capture_option(const char *a, const char *v) {
 	if (!strcmp(a, "--input")) parse_script(v);
 	else if (!strcmp(a, "--taps")) parse_taps(v);
-	else if (!strcmp(a, "--shot-range")) {
-		unsigned long long ra = 0, rb = 0;
-		if (sscanf(v, "%llu:%llu:%199s", &ra, &rb, range_prefix) == 3) { range_a = ra; range_b = rb; }
-	}
+	else if (!strcmp(a, "--shot-range")) parse_range(v, &range);
+	else if (!strcmp(a, "--second-shot-range")) parse_range(v, &second_range);
 #if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
 	else if (!strcmp(a, "--remote")) remote_dir = v;
 #endif
@@ -332,11 +344,9 @@ void capture_shots(void) {
 		if (screen_shots[i].frame == P.frame) platform_shot_screen(screen_shots[i].path);
 	for (int i = 0; i < second_shot_count; ++i)
 		if (second_shots[i].frame == P.frame) platform_save_second_screen(second_shots[i].path);
-	if (P.frame >= range_a && P.frame <= range_b) {
-		char path[256];
-		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
-		platform_save_canvas(path);
-	}
+	char path[256];
+	if (range_path(&range, path, sizeof path)) platform_save_canvas(path);
+	if (range_path(&second_range, path, sizeof path)) platform_save_second_screen(path);
 }
 
 const char *capture_pad_kind(void) { return pad_kind; }
