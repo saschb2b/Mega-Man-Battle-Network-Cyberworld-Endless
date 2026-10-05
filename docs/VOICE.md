@@ -112,7 +112,12 @@ Mr.Prog does it in capitals. MegaMan reminds, he doesn't lecture.
 
 - A comma has no space after it: `Lan,let's go!`
 - `Mr.Prog`, `Zenny`, `NetBattle`, `NaviCust`, `BugFrag`, `HPMemory`,
-  `Pack`, `Folder`, `PET` are written as BN6 writes them.
+  `Pack`, `Folder`, `PET`, `Buster`, `Custom Screen`, `GigaChip`,
+  `LevBus` are written as BN6 writes them, and so is `the Net`, with its
+  capital (172 times against 4 in BN6's script): "the older Net", "down
+  in the Net".
+- Directions are words, never hyphens: "to the lower left", "up ahead",
+  "straight down".
 - "!!" for big moments, "!?" for shocked questions, "..." for pauses,
   trails and silence, stretched vowels for shouts ("Laaaan!").
 - Stutters with a hyphen: "W-Wait!", "I-I'm fine..."
