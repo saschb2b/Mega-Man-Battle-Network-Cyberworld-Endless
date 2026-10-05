@@ -167,6 +167,11 @@ void enemy_name(int name_id, char *out, size_t outlen) {
 	rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
 }
 
+void item_name(int id, char *out, size_t outlen) {
+	if (R.layout->item_names) rom_text(R.layout->item_names, id, out, outlen);
+	else if (outlen) *out = 0;
+}
+
 void program_name(int program, char *out, size_t outlen) {
 	if (R.layout->navicust_names) rom_text(R.layout->navicust_names, program, out, outlen);
 	else if (outlen) *out = 0;

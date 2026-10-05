@@ -23,13 +23,14 @@
 #include "second_navicust.h"
 #include "second_pet.h"
 #include "second_read.h"
+#include "second_shop.h"
 #include "second_state.h"
 #include "town.h"
 
 SecondState S2;
 
 /* What the second screen draws: a panel, which several screens may share */
-typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY } Panel;
+typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY, PANEL_SHOP, PANEL_TRADER } Panel;
 static Panel panel;
 static int panel_since;
 
@@ -64,6 +65,9 @@ static SecondContext context_now(void) {
 	int sub = emu_read8(BN6_GAMESTATE);
 	if (sub == BN6_SUB_PET) return SECOND_PET;
 	if (sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT) return SECOND_BATTLE;
+	/* (a trader talks on the map, from BN6's trader archive: a BugFrag
+	 * Trader's whole trade, a Chip Trader's before its screen) */
+	if (emu_read8(BN6_CHATBOX) && emu_read32(BN6_CHATBOX_ARCHIVE) == BN6_TRADER_TEXT) return SECOND_TRADER;
 	return director_in_town() ? SECOND_TOWN : SECOND_NET;
 }
 
@@ -75,6 +79,8 @@ static Panel panel_for(SecondContext c) {
 	case SECOND_NAVICUST: return PANEL_NAVICUST;
 	case SECOND_STATUS: return PANEL_STATUS;
 	case SECOND_LIBRARY: return PANEL_LIBRARY;
+	case SECOND_SHOP: return PANEL_SHOP;
+	case SECOND_TRADER: return PANEL_TRADER;
 	case SECOND_PET: case SECOND_MAIL: case SECOND_KEYITEM: case SECOND_SUBCHIP: case SECOND_COMM: case SECOND_SAVE: return PANEL_HOME;
 	case SECOND_DARK: return PANEL_DARK;
 	/* (an older net's battle runs in BN5's memory: the map then) */
@@ -101,6 +107,8 @@ void second_update(void) {
 	if (p == PANEL_NAVICUST) second_read_navicust();
 	if (p == PANEL_HOME) second_read_home();
 	if (p == PANEL_STATUS) second_read_status();
+	if (p == PANEL_SHOP) second_read_shop();
+	if (p == PANEL_TRADER) second_read_trader();
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
@@ -112,7 +120,7 @@ void second_update(void) {
  * home stands in for it */
 static const char *panel_title(void) {
 	static const char *const title[] = { [PANEL_MAP] = "NET", [PANEL_FOLDER] = "FOLDER", [PANEL_BATTLE] = "BATTLE", [PANEL_NAVICUST] = "NAVICUST",
-		[PANEL_HOME] = "PET", [PANEL_STATUS] = "MEGAMAN", [PANEL_LIBRARY] = "LIBRARY" };
+		[PANEL_HOME] = "PET", [PANEL_STATUS] = "MEGAMAN", [PANEL_LIBRARY] = "LIBRARY", [PANEL_SHOP] = "SHOP", [PANEL_TRADER] = "TRADER" };
 	switch (S2.context) {
 	case SECOND_EDIT: return "FOLDER EDIT";
 	case SECOND_MAIL: return "E-MAIL";
@@ -146,6 +154,8 @@ bool second_draw(int w, int h) {
 	else if (panel == PANEL_HOME) second_home_draw(body);
 	else if (panel == PANEL_STATUS) second_status_draw(body);
 	else if (panel == PANEL_LIBRARY) second_library_draw(body);
+	else if (panel == PANEL_SHOP) second_shop_draw(body);
+	else if (panel == PANEL_TRADER) second_trader_draw(body);
 	else director_draw_layer_map(body.x, body.y, body.w, body.h);
 	return true;
 }

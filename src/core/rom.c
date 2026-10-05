@@ -35,6 +35,7 @@ static const RomLayout layouts[] = {
 		.element_icon_pal = 0x6E2360,
 		.enemy_names = { 0x6EE400, 0x6EED00 },
 		.navicust_names = 0x73C98C,
+		.item_names = 0x73B938,
 		.title = { 0x7F3040, 0x7F7CFC, 0x7F2E40, 0x7F1EBC, 0x7F216C, 0x7F218C, 0x7F21EC, 0x7F2C20, 0x6A280C, 0x6A344C },
 		.net_area = {
 			{ 0x90, 0, 0x100018, 0x0040, false, 0x13, 0x90, 0, 3, { { 0x90, 1 } }, .counter = { 0x94, 2, -300, -144 }, .looks = L(TREE) | L(SIGN), .pad_hues = 0x0040 },     /* Central Area 1 (its framed pads, their blue recess, cut whole); battles of Central 1-3; the Net Dealer's capsule is Sky Area 3's, in the same tiles as Central Area 2's (bank 3), in Central's colours */

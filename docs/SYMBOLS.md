@@ -82,18 +82,18 @@ how to verify it.
 | Code (routines, hooks, instructions) | 29 | 2 |
 | ROM data (tables, text, literals) | 83 | 21 |
 | ROM, code or data not told | 72 | 19 |
-| RAM (variables, structures) | 52 | 21 |
+| RAM (variables, structures) | 53 | 21 |
 | I/O registers | 3 | 0 |
-| Fields of structures | 97 | 26 |
+| Fields of structures | 100 | 26 |
 | Event flags | 21 | 3 |
 | Values of fields | 40 | 12 |
-| Constants, sizes and counts | 60 | 22 |
-| All | 457 | 126 |
+| Constants, sizes and counts | 64 | 22 |
+| All | 465 | 126 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | PET, mail and key items | 39 | 1 |
-| Shops and traders | 16 | 0 |
+| Shops and traders | 24 | 0 |
 | NaviCust | 17 | 0 |
 | Chips and folders | 68 | 12 |
 | Battle | 101 | 86 |

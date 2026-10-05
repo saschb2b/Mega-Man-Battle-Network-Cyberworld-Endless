@@ -330,8 +330,9 @@ screen. The bottom screen is the PET beside the game, framed like BN6's
 own PET screens, with HP, Zenny and BugFrags; on the net it shows the
 layer's map, always open, in the folder editor the whole folder, in a
 battle the Custom screen's chip and the fight, in the NaviCustomizer the
-program under the cursor and what RUN would bring, and in the town and
-on the title the PET at home with MegaMan's face.
+program under the cursor and what RUN would bring, in a shop the entry
+under the cursor, and in the town and on the title the PET at home with
+MegaMan's face.
 The older 3DS and 2DS are too slow for it.
 [3ds/README.md](3ds/README.md) has the rest.
 

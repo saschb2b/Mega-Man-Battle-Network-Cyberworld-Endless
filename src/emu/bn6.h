@@ -35,6 +35,7 @@
 #define BN6_CHATBOX_STATE     (BN6_CHATBOX + 0x04)  /* TextScriptState_04 */
 #define BN6_CHATBOX_OPEN      (BN6_CHATBOX + 0x10)  /* OpenState_10 */
 #define BN6_CHATBOX_JUMP      (BN6_CHATBOX + 0x11)  /* JumpTableOffset_11 */
+#define BN6_CHATBOX_ARCHIVE   (BN6_CHATBOX + 0x30)  /* TextScriptPtr: the archive its script runs from (a trader's, BN6_TRADER_TEXT) */
 #define BN6_CHATBOX_OPTIONS   (BN6_CHATBOX + 0x12)  /* the options on the page so far (bn6f's ts_option counts them; a page clears it): 2 and up, a choice is shown */
 #define BN6_CHATBOX_CURSOR    (BN6_CHATBOX + 0x13)  /* the choice's option under the cursor, 0 first (bn6f ChoiceCursorPos) */
 #define BN6_CHATBOX_SCRIPT_AT (BN6_CHATBOX + 0x2C)  /* TextScriptCursorPtr: where the script reads */
@@ -343,6 +344,14 @@
 #define BN6_MODE_GAME_OVER    0x14   /* BN6_TOOLKIT: its GAME OVER */
 #define BN6_MODE_SUBMENU      0x28   /* BN6_TOOLKIT: a PET screen (bn6f SubMenuControl), which BN6_SUBMENU's first byte names */
 #define BN6_MODE_SHOP         0x2C   /* BN6_TOOLKIT: a shop (bn6f ShopControl) */
+#define BN6_SHOP_STATE        0x02011C10u /* a shop's screen (bn6f ShopControl's state): */
+#define BN6_SHOP_ROW          (BN6_SHOP_STATE + 0x14) /* ... the cursor's row on the screen, u16 */
+#define BN6_SHOP_SCROLL       (BN6_SHOP_STATE + 0x18) /* ... the list's scroll, u16: the entry under the cursor is their sum */
+#define BN6_SHOP_DESC         (BN6_SHOP_STATE + 0x1C) /* ... its shop's entry in BN6_SHOP_DESCS, u32: +0 the currency, +8 its stock's offset in the shop data, +12 its entries */
+#define BN6_SHOP_ENTRY        8      /* a stock entry: +0 its kind (BN6_SHOP_KIND_*), +1 the stock, +2 its id u16, +4 a chip's code or a program's colour, +6 the price u16 */
+#define BN6_SHOP_KIND_ITEM    1      /* BN6_SHOP_ENTRY's kind: a key item (HPMemory 0x70) */
+#define BN6_SHOP_KIND_CHIP    2      /* ... a chip in its code */
+#define BN6_SHOP_KIND_PROGRAM 3      /* ... a NaviCust program, its id program * 4 */
 #define BN6_MODE_TRADER       0x34   /* BN6_TOOLKIT: the Chip Trader (bn6f ChipTraderControl) */
 #define BN6_MODE_MAIL         0x48   /* BN6_TOOLKIT: E-Mail on its own (bn6f HandleEmailMenu81279F8) */
 #define BN6_TOOLKIT_SUBMENU   0x34   /* eToolkit SubmenuPtr: the PET screen's state (0x02009A30), its first byte the screen: */

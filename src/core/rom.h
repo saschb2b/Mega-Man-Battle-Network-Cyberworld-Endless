@@ -87,6 +87,7 @@ typedef struct {
 	uint32_t element_icon_pal; /* ... their palette */
 	uint32_t enemy_names[2];  /* text archives: the viruses' names by BN6_T1_NAME_ID, the Navis' past 0xFF */
 	uint32_t navicust_names;  /* text archive: the NaviCust programs' names, entry n program n (the text command FA 00 n 05's) */
+	uint32_t item_names;      /* text archive: the key items' names by their id (the text command FA's first) */
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */

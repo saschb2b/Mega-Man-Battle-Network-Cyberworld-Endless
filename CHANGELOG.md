@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Shops and traders on the second screen** (issue #78). At the Net
+  Dealer and the NaviCust vendor the entry under the cursor is a card (a
+  chip's picture, code, element, power and text; a program's shape, kind
+  and what it does; an item's name and, for the run's own, what it does)
+  with what the run holds of it: the copies in the folder and the Pack, a
+  program's held and on the board. A Chip, Special or BugFrag Trader says
+  what it takes (BN6's own terms) and that it gives a chip new to the
+  Library, and how many chips the Pack holds. Outside the folder editor
+  BN6 counts the folder's chips in the Pack too; the second screen leaves
+  them out, as the editor and the traders do, and `--dev pack=N` adds its
+  chips to those counts.
 - **The PET at home and its screens on the second screen** (issues #79,
   #77). In the town the second screen is no longer dark: MegaMan's face
   from the ROM, twice as large, beside where R jacks him in and the run's

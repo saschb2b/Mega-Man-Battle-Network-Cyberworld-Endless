@@ -9,48 +9,22 @@
  * names after RUN, a step sooner) and the rules in a line. */
 #include "second_navicust.h"
 
+#include "second_card.h"
 #include "second_frame.h"
 #include "second_state.h"
 #include "second_text.h"
 
-#define CELL    8    /* a block of a program's shape */
-#define SHAPE_W (7 * CELL + 4)
-
-/* BN6's program colours 1-6 as its blocks draw them, a face and its shade:
- * the blue measured from the NaviCustomizer's preview (16, 99, 255 on 0,
- * 57, 214), the others BN6's hues until the art pass measures them (issue
- * #81) */
-static const SDL_Color face[7] = { { 0, 0, 0, 255 }, { 239, 239, 239, 255 }, { 255, 214, 0, 255 },
-	{ 255, 115, 198, 255 }, { 255, 57, 41, 255 }, { 16, 99, 255, 255 }, { 41, 206, 57, 255 } };
-static const SDL_Color shade[7] = { { 0, 0, 0, 255 }, { 165, 173, 189, 255 }, { 206, 148, 0, 255 },
-	{ 206, 57, 148, 255 }, { 189, 16, 16, 255 }, { 0, 57, 214, 255 }, { 8, 148, 33, 255 } };
-
-/* A program's shape on its own 7 x 7 grid, from (x, y) */
-static void shape(const NaviShape *s, int x, int y) {
-	int c = s->color >= 1 && s->color <= 6 ? s->color : 0;
-	fill_rect(x, y, SHAPE_W, SHAPE_W, PET_SLOT_EDGE);
-	for (int r = 0; r < 7; ++r)
-		for (int k = 0; k < 7; ++k) {
-			int bx = x + 2 + k * CELL, by = y + 2 + r * CELL;
-			if (!s->cell[r][k] || !c) {
-				fill_rect(bx, by, CELL - 1, CELL - 1, PET_SLOT);
-				continue;
-			}
-			fill_rect(bx, by, CELL, CELL, shade[c]);
-			fill_rect(bx, by, CELL - 1, CELL - 1, face[c]);
-		}
-}
 
 /* The program's card: its shape, its name twice as large, its kind and
  * where it goes, its place and fit, its turn; what it does under them */
 static void card(int x, int y, int w) {
-	shape(&S2.nc_shape, x, y);
-	int tx = x + SHAPE_W + 10;
+	second_program_shape(&S2.nc_shape, x, y);
+	int tx = x + SECOND_SHAPE_W + 10;
 	text_draw_scaled(tx, y, S2.nc_name, PET_GOLD, TEXT_LEFT, 2);
 	char about[200];
 	second_program_lines(&S2, about, sizeof about);
 	int under = second_wrapped(about, tx, y + 26, x + w - tx, 4, PET_WHITE);
-	second_wrapped(second_program_does(S2.nc_variant / 4), x, (under > y + SHAPE_W ? under : y + SHAPE_W) + 4, w, 2, PET_CYAN_HI);
+	second_wrapped(second_program_does(S2.nc_variant / 4), x, (under > y + SECOND_SHAPE_W ? under : y + SECOND_SHAPE_W) + 4, w, 2, PET_CYAN_HI);
 }
 
 /* RUN's verdict as the board stands, and the rules, at the bottom of `b` */
@@ -66,10 +40,9 @@ static void verdict(SDL_Rect b) {
 /* On RUN: the programs on the board, two to a line, each by its colour */
 static void board_list(int x, int y, int w) {
 	for (int i = 0; i < S2.nc_nboard; ++i) {
-		int cx = x + (i % 2) * (w / 2), cy = y + (i / 2) * (SECOND_LINE_H + 3), c = S2.nc_board[i].color;
-		fill_rect(cx, cy + 1, CELL + 1, CELL + 1, shade[c >= 1 && c <= 6 ? c : 0]);
-		fill_rect(cx, cy + 1, CELL, CELL, face[c >= 1 && c <= 6 ? c : 0]);
-		text_draw(cx + CELL + 6, cy, S2.nc_board[i].name, PET_WHITE, TEXT_LEFT);
+		int cx = x + (i % 2) * (w / 2), cy = y + (i / 2) * (SECOND_LINE_H + 3);
+		second_color_swatch(S2.nc_board[i].color, cx, cy + 1, SECOND_SHAPE_CELL);
+		text_draw(cx + SECOND_SHAPE_CELL + 6, cy, S2.nc_board[i].name, PET_WHITE, TEXT_LEFT);
 	}
 }
 

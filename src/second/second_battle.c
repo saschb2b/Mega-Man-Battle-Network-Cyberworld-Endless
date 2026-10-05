@@ -17,37 +17,13 @@
 #include "data.h"
 #include "powers.h"
 #include "second_art.h"
+#include "second_card.h"
 #include "second_frame.h"
 #include "second_state.h"
 #include "second_text.h"
 
-#define ART_SCALE 2
-#define CARD_H    (48 * ART_SCALE + 4)   /* the card's height, its picture's frame */
 #define ROW_H     18                     /* a chip's line */
 #define FOE_H     16                     /* an enemy's line */
-
-/* The chip under the cursor as a card: its picture twice as large, its
- * name, code, element and power beside it, its text under them */
-static void card_chip(uint16_t e, int x, int y, int w) {
-	int chip = e & 0x1FF;
-	ChipInfo ci;
-	chip_info(chip, &ci);
-	fill_rect(x, y, 56 * ART_SCALE + 4, CARD_H, PET_SLOT_EDGE);
-	second_chip_art(chip, x + 2, y + 2, ART_SCALE);
-	int tx = x + 56 * ART_SCALE + 12;
-	text_draw(tx, y + 2, ci.name, PET_WHITE, TEXT_LEFT);
-	char s[16];
-	snprintf(s, sizeof s, "%c", (e >> 9) >= 26 ? '*' : 'A' + (e >> 9));
-	text_draw_scaled(tx, y + 18, s, PET_GOLD, TEXT_LEFT, 2);
-	second_element_icon(second_chip_element(chip), tx + 24, y + 22);
-	if (ci.power > 0) {
-		snprintf(s, sizeof s, "%d", ci.power);
-		text_draw_scaled(x + w - 4, y + 18, s, PET_WHITE, TEXT_RIGHT, 2);
-	}
-	char desc[160];
-	chip_desc(chip, desc, sizeof desc);
-	second_wrapped(desc, tx, y + 52, x + w - tx - 4, 3, PET_WHITE);
-}
 
 /* A card of words alone: its name twice as large, its lines under it */
 static void card_words(const char *name, const char *lines, int x, int y, int w) {
@@ -109,7 +85,7 @@ static void picks_row(int x, int y) {
 static void custom(int x, int y, int w) {
 	char lines[200];
 	switch (S2.card) {
-	case CARD_CHIP: card_chip(S2.hand[S2.cursor], x, y, w); break;
+	case CARD_CHIP: second_chip_card(S2.hand[S2.cursor], x, y, w); break;
 	case CARD_CROSS:
 		second_cross_lines(S2.cross_under, lines, sizeof lines);
 		card_words(powers_cross_name(S2.cross_under), lines, x, y, w);
@@ -120,7 +96,7 @@ static void custom(int x, int y, int w) {
 		break;
 	case CARD_PICKS: card_picks(x, y, w); return;
 	}
-	picks_row(x, y + CARD_H + 6);
+	picks_row(x, y + SECOND_CARD_H + 6);
 }
 
 /* MegaMan's hand while he fights: the turn's chips in their order, each

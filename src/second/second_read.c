@@ -19,6 +19,26 @@
 #include "second_text.h"
 #include "town.h"
 
+/* The Pack's chips (chip | code << 9) and their copies, up to `most`:
+ * outside the folder editor BN6's counts hold the folder's copies too,
+ * which the editor takes out while it is open (watched: the folder's four
+ * Cannons read 2 and 2 on the map, 0 and 0 in the editor) */
+static int pack_now(uint16_t *entry, uint8_t *count, int most, bool editing) {
+	static uint16_t all[400];
+	static uint8_t copies[400];
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	int n = director_pack_now(all, copies, 400), k = 0;
+	if (!editing) director_folder_now(folder);
+	for (int i = 0; i < n && k < most; ++i) {
+		int c = copies[i];
+		for (int f = 0; !editing && f < BN6_FOLDER_ENTRIES; ++f) c -= folder[f] == all[i];
+		if (c <= 0) continue;
+		entry[k] = all[i];
+		count[k++] = (uint8_t)c;
+	}
+	return k;
+}
+
 /* an entry of the folder's (0xFF none) as an index, -1 for none */
 static int entry_of(int v) { return v < BN6_FOLDER_ENTRIES ? v : -1; }
 
@@ -36,7 +56,7 @@ void second_read_folder(void) {
 	S2.pack_side = editing && emu_read8(edit + BN6_EDIT_SIDE) == BN6_EDIT_PACK;
 	S2.entry = editing && !S2.pack_side ? entry_of(emu_read8(edit + BN6_EDIT_SCROLL) + emu_read8(edit + BN6_EDIT_ROW)) : -1;
 	S2.pack_entry = S2.pack_side ? emu_read8(edit + BN6_EDIT_PACK_SCROLL) + emu_read8(edit + BN6_EDIT_PACK_ROW) : -1;
-	if (S2.since % 15 == 0) S2.npack = director_pack_now(S2.pack, S2.pack_count, (int)(sizeof S2.pack / sizeof *S2.pack));
+	if (S2.since % 15 == 0) S2.npack = pack_now(S2.pack, S2.pack_count, (int)(sizeof S2.pack / sizeof *S2.pack), editing);
 }
 
 /* What the NaviCustomizer's cursor is on in `mode`, its state at `m`: a
@@ -196,4 +216,81 @@ void second_read_status(void) {
 		p += k;
 		left -= (size_t)k;
 	}
+}
+
+/* a key item's count, as the PET holds it */
+static int key_count(int id) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	return items >= BN6_EWRAM && items < BN6_EWRAM_END ? emu_read8(items + (uint32_t)id) : 0;
+}
+
+/* the Pack's chips, and the copies of `entry` among them (0xFFFF none):
+ * on BN6's trade screen its counts are the Pack's alone, as in the folder
+ * editor (watched: 12 given, the folder's two Cannon A out) */
+static int pack_of(uint16_t entry, int *copies) {
+	static uint16_t pack[400];
+	static uint8_t count[400];
+	bool trading = emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_TRADER;
+	int n = pack_now(pack, count, 400, trading), all = 0;
+	*copies = 0;
+	for (int i = 0; i < n; ++i) {
+		all += count[i];
+		if (pack[i] == entry) *copies = count[i];
+	}
+	return all;
+}
+
+/* A shop's chip: its copies in the folder and the pack (read every
+ * quarter second: the pack's 314 chips) */
+static void shop_chip(uint16_t entry) {
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	director_folder_now(folder);
+	S2.sh_folder = 0;
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) S2.sh_folder += folder[i] == entry;
+	if (S2.since % 15 == 0 || S2.since < 2) S2.pack_chips = pack_of(entry, &S2.sh_pack);
+}
+
+/* A shop's program: the variant of its colour, its shape and name, the
+ * copies MegaMan has and those on the board */
+static void shop_program(int program, int color) {
+	S2.sh_variant = 0;
+	memset(&S2.sh_shape, 0, sizeof S2.sh_shape);
+	for (int v = program * 4; v < program * 4 + 4 && !S2.sh_variant; ++v)
+		if (navicust_shape(v, &S2.sh_shape) && S2.sh_shape.color == color) S2.sh_variant = v;
+	program_name(program, S2.sh_name, sizeof S2.sh_name);
+	S2.sh_held = S2.sh_variant ? key_count(BN6_PROGRAM_ITEMS + S2.sh_variant) : 0;
+	S2.sh_placed = 0;
+	for (int e = 0; e < BN6_NAVICUST_PLACED_MAX; ++e) {
+		int v = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
+		if (!v) break;
+		S2.sh_placed += v == S2.sh_variant;
+	}
+}
+
+/* A shop: the entry under its cursor (its kind, id, code, the shop's
+ * currency) and what the run holds of it */
+void second_read_shop(void) {
+	uint32_t desc = emu_read32(BN6_SHOP_DESC), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
+	int at = emu_read16(BN6_SHOP_SCROLL) + emu_read16(BN6_SHOP_ROW);
+	S2.sh_kind = 0;
+	*S2.sh_name = 0;
+	if (desc >> 24 != 0x08 || data < BN6_EWRAM || data >= BN6_EWRAM_END || at >= (int)emu_read32(desc + 12)) return;
+	uint32_t e = data + emu_read32(desc + 8) + BN6_SHOP_ENTRY * (uint32_t)at;
+	S2.sh_kind = emu_read8(e);
+	S2.sh_id = emu_read16(e + 2);
+	S2.sh_code = emu_read8(e + 4);
+	S2.sh_currency = (int)emu_read32(desc);
+	if (S2.sh_kind == BN6_SHOP_KIND_CHIP) shop_chip((uint16_t)(S2.sh_id | S2.sh_code << 9));
+	else if (S2.sh_kind == BN6_SHOP_KIND_PROGRAM) shop_program(S2.sh_id / 4, S2.sh_code);
+	else if (S2.sh_kind == BN6_SHOP_KIND_ITEM) {
+		item_name(S2.sh_id, S2.sh_name, sizeof S2.sh_name);
+		S2.sh_held = key_count(S2.sh_id);
+	}
+}
+
+/* A trader: the layer's kind, and the chips in the pack it takes from */
+void second_read_trader(void) {
+	int none;
+	S2.trader = director_trader_kind();
+	if (S2.since % 15 == 0 || S2.since < 2) S2.pack_chips = pack_of(0xFFFF, &none);
 }

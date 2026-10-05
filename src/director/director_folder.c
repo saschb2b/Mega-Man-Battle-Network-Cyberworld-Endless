@@ -82,12 +82,15 @@ void own_folder_chips(void) {
 }
 
 /* --dev pack=N: a copy of each of the first N chips in the pack, in its
- * first code */
+ * first code (one more: outside the folder editor the counts hold the
+ * folder's copies too) */
 static void dev_pack(void) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if (dev.pack <= 0 || pack < BN6_EWRAM || pack + CHIP_PACK_ENTRY * PACK_CHIPS >= BN6_EWRAM_END) return;
-	for (uint32_t id = 1; (int)id <= dev.pack && id < PACK_CHIPS; ++id)
-		if (!emu_read8(pack + CHIP_PACK_ENTRY * id)) emu_write8(pack + CHIP_PACK_ENTRY * id, 1);
+	for (uint32_t id = 1; (int)id <= dev.pack && id < PACK_CHIPS; ++id) {
+		int c = emu_read8(pack + CHIP_PACK_ENTRY * id);
+		if (c < 99) emu_write8(pack + CHIP_PACK_ENTRY * id, (uint8_t)(c + 1));
+	}
 }
 
 /* (dev: folder=ID, the run's folder all chip ID in *, owned as the folder's

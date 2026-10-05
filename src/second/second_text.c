@@ -19,6 +19,8 @@
 #include "powers.h"
 #include "run.h"
 #include "save.h"
+#include "shop.h"
+#include "trader.h"
 
 void second_cross_lines(int navi, char *out, size_t n) {
 	const char *strong = powers_cross_strength(navi), *navis = powers_cross_on_navis(navi);
@@ -155,3 +157,33 @@ void second_layer_next(int guardian_navi, char *out, size_t n) {
 }
 
 const char *second_bn5_line(bool found) { return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6"; }
+
+void second_held_lines(const SecondState *s, char *out, size_t n) {
+	if (s->sh_kind == BN6_SHOP_KIND_CHIP) snprintf(out, n, "In the folder: %d|In the pack: %d", s->sh_folder, s->sh_pack);
+	else if (s->sh_kind == BN6_SHOP_KIND_PROGRAM) snprintf(out, n, "Held: %d|On the board: %d", s->sh_held, s->sh_placed);
+	else if (s->sh_kind == BN6_SHOP_KIND_ITEM) snprintf(out, n, "Held: %d", s->sh_held);
+	else if (n) *out = 0;
+}
+
+/* (BN6's own trader lines: "Insert 3 BtlChips?", the Special's 10, the
+ * BugFrag Trader's 10 BugFrags, each from the Pack; the prize a chip new
+ * to the Library, trader.c) */
+const char *second_trader_name(int kind) {
+	return kind == TRADER_BUGFRAG ? "BugFrag Trader" : kind == TRADER_SPECIAL ? "Chip Trader Special" : "Chip Trader";
+}
+
+void second_trader_lines(int kind, int pack_chips, char *out, size_t n) {
+	if (kind == TRADER_BUGFRAG) snprintf(out, n, "Takes 10 BugFrags|Gives a chip new to the Library");
+	else snprintf(out, n, "Takes %d chips from the Pack|Gives a chip new to the Library|The Pack holds %d", kind == TRADER_SPECIAL ? 10 : 3, pack_chips);
+}
+
+/* (the run's own: docs/PROGRESSION.md's 20-HP HPMemory, shop.h's keys) */
+const char *second_item_does(int id) {
+	switch (id) {
+	case 0x70: return "Max HP +20, kept for the run";
+	case ITEM_RUSH_FOOD: return "Calls Rush over a gap: one held for each of its panels, one eaten";
+	case ITEM_WWW_ID: return "Opens every skull door of the Undernet";
+	case SUB_UNLOCKER: return "Opens a purple Mystery Data";
+	default: return "";
+	}
+}

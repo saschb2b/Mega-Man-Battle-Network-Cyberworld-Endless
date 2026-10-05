@@ -22,6 +22,9 @@ bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
 int director_guardian_battle(void);
+/* The layer's Chip or BugFrag Trader's kind (TraderKind, trader.h), -1
+ * for none */
+int director_trader_kind(void);
 /* The guardian the layer's exit waits on (his navi index), 0 where it
  * opens without one or he is beaten (the second screen's next step) */
 int director_guardian_waiting(void);

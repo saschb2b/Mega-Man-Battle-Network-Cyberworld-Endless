@@ -58,6 +58,16 @@ const char *second_library_line(void);
 /* A layer's next step: the guardian its exit waits on (navi, 0 none) or
  * the exit pad, into `out` */
 void second_layer_next(int guardian, char *out, size_t n);
+/* What the run holds of the shop's entry under the cursor (s->sh_*):
+ * lines apart by '|', into `out` */
+void second_held_lines(const SecondState *s, char *out, size_t n);
+/* What a key item a shop sells does in the run, a line; "" where the
+ * PET's own description says it */
+const char *second_item_does(int id);
+/* A trader of `kind` (TraderKind): its name, and what it takes and gives
+ * (and the chips the pack holds, `pack_chips`), lines apart by '|' */
+const char *second_trader_name(int kind);
+void second_trader_lines(int kind, int pack_chips, char *out, size_t n);
 /* Whether BN5's ROM was found beside BN6's, in a line */
 const char *second_bn5_line(bool found);
 

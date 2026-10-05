@@ -46,6 +46,15 @@ typedef struct {
 	bool town;                    /* in the real world (else on a layer) */
 	char home_next[96];           /* ... the run's next step there (issue #79) */
 	char home_setup[96];          /* ... and its setup */
+	/* a shop (issue #78): the entry under its cursor, what the run holds of it */
+	int sh_kind, sh_id, sh_code, sh_currency;
+	int sh_variant;               /* ... a program's: the variant of its colour */
+	char sh_name[16];             /* ... a program's or an item's name */
+	int sh_folder, sh_pack;       /* ... a chip's copies in the folder and the pack */
+	int sh_held, sh_placed;       /* ... a program's copies and those on the board; an item's count */
+	NaviShape sh_shape;
+	int trader;                   /* a trader's kind (TraderKind), -1 none */
+	int pack_chips;               /* ... the chips in the pack */
 	/* MegaMan's status (issue #77): his max HP and its base, the programs on the board */
 	int st_max_hp, st_base_hp;
 	char st_programs[128];

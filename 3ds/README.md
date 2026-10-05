@@ -42,7 +42,9 @@ GBA core alone takes longer than a frame there.
   whether it fits, whether it turns, what it does) and what RUN would
   bring as the board stands. In the town and on the PET's menu it is the
   PET at home: MegaMan's face, the run's next step and its setup;
-  MegaMan's status adds the run's record, the Library its collection; on
+  MegaMan's status adds the run's record, the Library its collection; in
+  a shop it shows the entry under the cursor with what the run holds of
+  it, at a trader what it takes and gives; on
   the title, the PET at rest with the profile's record and whether BN5
   was found.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
