@@ -29,10 +29,13 @@ void director_draw_map(void);
 void director_draw_counts(void);
 /* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
 void director_draw_bug_note(void);
-/* The second screen (the 3DS's bottom one, issue #9; Android's second
- * display): the layer's map in w x h, always open on the net; false where
- * there is none to show. */
-bool director_draw_second_screen(int w, int h);
+/* The layer's map in w x h from (x, y), for the second screen (issue #73),
+ * whose frame names the layer; nothing off a layer. */
+void director_draw_layer_map(int x, int y, int w, int h);
+/* MegaMan's HP as the top screen shows it: the Navi's on the map, his
+ * battle object's in a battle, the guest's in an older net's battle (true
+ * then). */
+bool director_megaman_hp(int *hp, int *max);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);
 /* CircusMan's tent: the panel BN6 lights under MegaMan's feet, where it

@@ -1,6 +1,7 @@
 #include "debug.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "bn6.h"
 #include "bn6_fields.h"
@@ -10,6 +11,51 @@
 
 bool emu_debug_on(void) { return getenv("CYBERWORLD_EMU_DEBUG") != NULL; }
 
+/* CYBERWORLD_WATCH=ADDR:LEN,...: bytes of the game's memory (hex
+ * addresses), printed with the frame's count each time they change; *ADDR
+ * reads the pointer at ADDR first (*020093E4:16, the PET's submenu): a menu's
+ * cursor found by moving it */
+#define WATCH_MAX 8
+#define WATCH_LEN 64
+static struct {
+	uint32_t addr;
+	bool ptr, seen;
+	int len;
+	uint8_t last[WATCH_LEN];
+} watch[WATCH_MAX];
+static int nwatch = -1;
+
+static void watch_parse(void) {
+	nwatch = 0;
+	for (const char *s = getenv("CYBERWORLD_WATCH"); s && *s && nwatch < WATCH_MAX; s = strchr(s, ',') ? strchr(s, ',') + 1 : NULL) {
+		bool ptr = *s == '*';
+		char *end;
+		uint32_t a = (uint32_t)strtoul(s + ptr, &end, 16);
+		int len = *end == ':' ? atoi(end + 1) : 4;
+		watch[nwatch].addr = a;
+		watch[nwatch].ptr = ptr;
+		watch[nwatch++].len = len < 1 ? 1 : len > WATCH_LEN ? WATCH_LEN : len;
+	}
+}
+
+static void watch_frame(int t) {
+	if (nwatch < 0) watch_parse();
+	for (int i = 0; i < nwatch; ++i) {
+		uint32_t base = watch[i].ptr ? emu_read32(watch[i].addr) : watch[i].addr;
+		bool same = watch[i].seen;
+		for (int k = 0; k < watch[i].len; ++k) {
+			uint8_t b = emu_read8(base + (uint32_t)k);
+			same = same && watch[i].last[k] == b;
+			watch[i].last[k] = b;
+		}
+		if (same) continue;
+		watch[i].seen = true;
+		fprintf(stderr, "watch t%d %08x:", t, (unsigned)base);
+		for (int k = 0; k < watch[i].len; ++k) fprintf(stderr, " %02x", watch[i].last[k]);
+		fputc('\n', stderr);
+	}
+}
+
 FILE *emu_debug_file(const char *name) {
 	char path[600];
 	snprintf(path, sizeof path, "%s/%s", g_data_dir, name);
@@ -18,7 +64,13 @@ FILE *emu_debug_file(const char *name) {
 
 void emu_debug_frame(void) {
 	static int t;
-	if (!emu_debug_on()) return;
+	static int watching = -1;
+	if (watching < 0) watching = getenv("CYBERWORLD_WATCH") != NULL;
+	if (watching) watch_frame(t + 1);
+	if (!emu_debug_on()) {
+		t += watching;
+		return;
+	}
 	++t;
 	if (t % 30 == 0)
 		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x hooks %u\n", t, run.depth,

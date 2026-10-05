@@ -368,16 +368,20 @@ void director_draw_counts(void) {
 }
 
 /* The layer's map in w x h from (x0, y0): SELECT's over the picture, and
- * the second screen's (the 3DS's bottom one, issue #9). */
-static void draw_map(int x0, int y0, int w, int h) {
+ * the second screen's (the 3DS's bottom one, issue #9), whose frame names
+ * the layer (`titled` false). */
+static void draw_map(int x0, int y0, int w, int h, bool titled) {
 	fill_rect(x0, y0, w, h, rgba(0, 8, 28, 255));
-	MapView m = { .bx = x0 + 6, .by = y0 + 18, .bw = w - 12, .bh = h - 38 };
+	/* (its top line for the layer's name and the Mystery Data's counts;
+	 * the second screen's frame names the layer) */
+	int top = titled || md_counts(0, 0, 0) ? 18 : 8;
+	MapView m = { .bx = x0 + 6, .by = y0 + top, .bw = w - 12, .bh = h - top - 20 };
 	SDL_Color edge = rgba(120, 200, 255, 220);
 	fill_rect(m.bx - 2, m.by - 2, m.bw + 4, 1, edge);
 	fill_rect(m.bx - 2, m.by + m.bh + 1, m.bw + 4, 1, edge);
 	fill_rect(m.bx - 2, m.by - 2, 1, m.bh + 4, edge);
 	fill_rect(m.bx + m.bw + 1, m.by - 2, 1, m.bh + 4, edge);
-	text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
+	if (titled) text_drawf(m.bx, y0 + 3, rgba(170, 220, 255, 255), TEXT_LEFT, "Layer %d", run.depth);
 	md_counts(m.bx + m.bw - md_counts(0, 0, 0), y0 + 3, 255);
 	int px = seen.px, py = seen.py;
 	if (!netmap_panel(px, py, &m.mx, &m.my)) return;
@@ -407,12 +411,9 @@ static void draw_map(int x0, int y0, int w, int h) {
  * lies. */
 void director_draw_map(void) {
 	if (!D.active || D.town || !D.map_shown || !seen.on_map) return;
-	draw_map(P.core_x, P.core_y, 240, 160);
+	draw_map(P.core_x, P.core_y, 240, 160, true);
 }
 
-bool director_draw_second_screen(int w, int h) {
-	/* (on the net, in battle too: the town and the title keep it dark) */
-	if (!D.active || D.town) return false;
-	draw_map(0, 0, w, h);
-	return true;
+void director_draw_layer_map(int x, int y, int w, int h) {
+	if (director_on_layer()) draw_map(x, y, w, h, false);
 }

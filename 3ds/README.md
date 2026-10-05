@@ -25,11 +25,14 @@ GBA core alone takes longer than a frame there.
 - The picture fills the top screen's height (1.5x, its pixels mixed at their
   edges). `screen = whole` in `settings.ini` shows it sharp at 1x in the
   middle.
-- The bottom screen shows the layer's map, always open: the floor MegaMan
-  has seen, the way on to the exit or the guardian, the services and gates
-  he has come near, and a mark on the frame's edge for those he senses. It
-  is SELECT's map, larger; SELECT still opens it over the picture. The
-  town and the title leave the bottom screen dark.
+- The bottom screen is the PET beside the game (issue #72), framed like
+  BN6's own PET screens: the screen's name and the place in its header,
+  HP, Zenny and BugFrags under it. On the net it shows the layer's map,
+  always open: the floor MegaMan has seen, the way on to the exit or the
+  guardian, the services and gates he has come near, and a mark on the
+  frame's edge for those he senses. It is SELECT's map, larger; SELECT
+  still opens it over the picture. The town and the title leave the
+  bottom screen dark.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
@@ -68,9 +71,10 @@ What differs from the other builds:
   240 x 160 canvas into memory the GPU reads; the GPU's copy engine moves it
   into a texture and citro2d draws it. SDL's own present copied and turned
   every pixel on the CPU.
-- **The bottom screen** (`src/core/platform.c`): every tenth frame the
-  director draws the layer's map (`director_draw_second_screen`) straight
-  into the memory the GPU copies from (`gfx_draw_into`: its rectangles and
+- **The bottom screen** (`src/core/platform.c`): every tenth frame, and at
+  once when its panel changes, the second screen (`src/second/`) draws
+  the PET's frame and its panel straight into the memory the GPU copies
+  from (`gfx_draw_into`: its rectangles and
   text, blended as the software renderer blends them), and `present_3ds.c`
   draws it on the bottom screen once for each of the screen's two buffers,
   then leaves it until the next. Through the software renderer and read

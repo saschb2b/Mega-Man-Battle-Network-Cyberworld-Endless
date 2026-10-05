@@ -126,17 +126,23 @@ static void print_near(int id, int x, int y, void *ctx) {
 /* What the game is doing, for a state, and MegaMan's HP there: in a
  * battle the HUD's is his battle object's, and in an older net's battle
  * the guest's (BN6 stands on the map meanwhile, at the battle's start's) */
-static const char *state_doing(int *hp, int *max) {
-	if (guest_fight_hp(hp, max)) return "battle (the older net's)";
+bool director_megaman_hp(int *hp, int *max) {
+	if (guest_fight_hp(hp, max)) return true;
 	*hp = emu_read16(BN6_NAVI_HP);
 	*max = emu_read16(BN6_NAVI_MAX_HP);
+	/* (an older net's battle beginning or ending: the Navi's still) */
+	if (guest_active() || on_map()) return false;
+	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { *hp = emu_read16(o + BN6_T1_HP); *max = emu_read16(o + BN6_T1_MAX_HP); break; }
+	}
+	return false;
+}
+
+static const char *state_doing(int *hp, int *max) {
+	if (director_megaman_hp(hp, max)) return "battle (the older net's)";
 	/* (its opening and its end, the screen white or BN5's: still its) */
 	if (guest_active()) return "battle (the older net's, beginning or ending)";
-	if (!on_map())
-		for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
-			uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
-			if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { *hp = emu_read16(o + BN6_T1_HP); *max = emu_read16(o + BN6_T1_MAX_HP); break; }
-		}
 	int mode = main_mode(), sub = emu_read8(BN6_GAMESTATE);
 	return mode == BN6_MODE_GAME_OVER ? "gameover"
 		: mode != BN6_MODE_GAME ? "menu"

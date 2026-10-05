@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The second screen is the PET beside the game** (issue #73). On a 3DS
+  and on an Android handheld with a second display, the bottom screen
+  wears the PET's frame now, as BN5 DS's and Operate Shooting Star's did:
+  the screen's name and the place in its header, HP, Zenny and BugFrags
+  under it, and on the net the layer's map, always open. It knows which
+  of BN6's screens the player is on, the first step of the second screen
+  that follows the game (#72): battles, the folder editor, the
+  NaviCustomizer and the PET's other screens get panels of their own
+  next.
 - **The code keeps its shape.** `build.py lint` now counts the code's
   smells against `tests/lint/smells.txt`, where none may join and none
   may grow: a file past 1000 lines (a header past 400), a `.c` file

@@ -408,6 +408,11 @@ static SDL_Texture *font_tex;
 static uint8_t font_w[256];
 /* the atlas's pixels (ARGB8888), kept for drawing into memory */
 static uint32_t font_px[16 * 16 * 128];
+/* ... and each glyph's drawn texels in their order (ty << 4 | tx, 0x100
+ * for the shade), glyph ch's from glyph_first[ch]: drawing into memory
+ * walks these alone, not each glyph's 256 (the 3DS's bottom screen) */
+static uint16_t glyph_texels[16 * 16 * 128];
+static uint16_t glyph_first[129];
 
 int text_code(unsigned char ch) {
 	if (ch >= 1 && ch <= 5) return 0x40 + ch - 1; /* version marks */
@@ -467,6 +472,16 @@ static void build_font(void) {
 		}
 		font_w[ch] = (uint8_t)(code == 0 ? 4 : maxx);
 	}
+	int n = 0;
+	for (int ch = 0; ch < 128; ++ch) {
+		glyph_first[ch] = (uint16_t)n;
+		for (int ty = 0; ty < 16; ++ty)
+			for (int tx = 0; tx < 16; ++tx) {
+				uint32_t t = font_px[ty * 16 * 128 + ch * 16 + tx];
+				if (t) glyph_texels[n++] = (uint16_t)((t == 0xFFFFFFFFu ? 0 : 0x100) | ty << 4 | tx);
+			}
+	}
+	glyph_first[128] = (uint16_t)n;
 	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(font_px, 16 * 128, 16, 32, 16 * 128 * 4, SDL_PIXELFORMAT_ARGB8888);
 	font_tex = SDL_CreateTextureFromSurface(P.renderer, s);
 	SDL_SetTextureBlendMode(font_tex, SDL_BLENDMODE_BLEND);
@@ -504,24 +519,28 @@ void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int s
 /* the atlas's texels times the text's colour, as SDL's blit modulates
  * and blends them */
 static void raw_text(int x, int y, const char *s, SDL_Color c, int scale) {
+	/* (the atlas's two tones, white and the shade 0x182040, times the
+	 * colour; every texel drawn is opaque) */
+	unsigned sa = c.a;
+	if (!sa) return;
+	unsigned tone[2][3] = { { c.r, c.g, c.b }, { 0x18 * c.r / 255u, 0x20 * c.g / 255u, 0x40 * c.b / 255u } };
+	if (sa < 255)
+		for (int k = 0; k < 2; ++k)
+			for (int i = 0; i < 3; ++i) tone[k][i] = tone[k][i] * sa / 255;
 	for (; *s; ++s) {
 		unsigned char ch = (unsigned char)*s;
 		if ((ch < 32 && ch > 5) || ch >= 128) continue;
-		for (int ty = 0; ty < 16; ++ty)
-			for (int tx = 0; tx < 16; ++tx) {
-				uint32_t t = font_px[ty * 16 * 128 + ch * 16 + tx];
-				unsigned sa = (t >> 24) * c.a / 255;
-				if (!sa) continue;
-				unsigned sr = (t >> 16 & 0xFF) * c.r / 255, sg = (t >> 8 & 0xFF) * c.g / 255, sb = (t & 0xFF) * c.b / 255;
-				if (sa < 255) { sr = sr * sa / 255; sg = sg * sa / 255; sb = sb * sa / 255; }
-				for (int j = 0; j < scale; ++j)
-					for (int i = 0; i < scale; ++i) {
-						int px = x + tx * scale + i, py = y + ty * scale + j;
-						if (px < 0 || py < 0 || px >= raw.w || py >= raw.h) continue;
-						uint32_t *d = raw.px + py * raw.stride + px;
-						*d = sa == 255 ? sr << 24 | sg << 16 | sb << 8 | 255 : raw_blend(*d, sr, sg, sb, sa);
-					}
-			}
+		for (int k = glyph_first[ch]; k < glyph_first[ch + 1]; ++k) {
+			int tx = glyph_texels[k] & 15, ty = glyph_texels[k] >> 4 & 15;
+			const unsigned *t = tone[glyph_texels[k] >> 8];
+			for (int j = 0; j < scale; ++j)
+				for (int i = 0; i < scale; ++i) {
+					int px = x + tx * scale + i, py = y + ty * scale + j;
+					if (px < 0 || py < 0 || px >= raw.w || py >= raw.h) continue;
+					uint32_t *d = raw.px + py * raw.stride + px;
+					*d = sa == 255 ? t[0] << 24 | t[1] << 16 | t[2] << 8 | 255 : raw_blend(*d, t[0], t[1], t[2], sa);
+				}
+		}
 		x += font_w[ch] * scale;
 	}
 }

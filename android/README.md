@@ -21,8 +21,8 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   the ROMs (`files/data`).
 - `GameActivity` is SDL's activity with the ROM and data folders as its
   arguments; it keeps the screen on. Where a display stands beside the
-  game's, such as the AYN Thor's lower screen, `SecondScreen` keeps the
-  layer's map open on it ([below](#the-second-screen)).
+  game's, such as the AYN Thor's lower screen, `SecondScreen` shows the
+  PET beside the game on it ([below](#the-second-screen)).
 - A controller (a handheld's own controls, Bluetooth or USB) works as on the
   desktop builds. Without one the game draws its touch controls from the
   start; a controller's button puts them away, a touch brings them back.
@@ -31,10 +31,12 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
 ## The second screen
 
 On a handheld with a second display, above all the AYN Thor (1240 x 1080
-below its 1920 x 1080 screen), the layer's map stays open on the second
-one, as on the 3DS's bottom screen: the floor MegaMan has seen, the way
-on, what he has come near or senses. The town and the title leave it
-black. A phone without a second display plays as before.
+below its 1920 x 1080 screen), the second one is the PET beside the game,
+as the 3DS's bottom screen is: framed like BN6's PET screens, with HP,
+Zenny and BugFrags, and on the net the layer's map, always open (the
+floor MegaMan has seen, the way on, what he has come near or senses).
+The town and the title leave it black. A phone without a second display
+plays as before.
 
 - **The display:** one of Android's presentation displays, in the order
   the system lists them (wireless, cabled, overlay, virtual, then
@@ -57,16 +59,16 @@ black. A phone without a second display plays as before.
   back while the game is away. After the screen was off it is made again
   0.7 seconds after the game returns: one shown as the screen woke could
   stay black for good (chrono-duo found it on a Thor Lite).
-- **The picture:** every fifth frame the game draws the map
-  (`director_draw_second_screen`, the 3DS's own) into memory at the
-  display's size at the largest whole scale that still fits the 3DS's
-  320 x 240 (the Thor's lower screen: 413 x 360, shown at 3x), turns it
-  into Android's byte order and hands it over in a direct `ByteBuffer`
-  (`src/core/second_android.c`). Java's main thread copies it into a
-  `Bitmap` and shows it with sharp pixels, black round it; the next
+- **The picture:** every fifth frame, and at once when its panel changes,
+  the game draws the second screen (`src/second/`, the 3DS's own) into
+  memory at the display's size at the largest whole scale that still fits
+  the 3DS's 320 x 240 (the Thor's lower screen: 413 x 360, shown at 3x),
+  turns it into Android's byte order and hands it over in a direct
+  `ByteBuffer` (`src/core/second_android.c`). Java's main thread copies it
+  into a `Bitmap` and shows it with sharp pixels, black round it; the next
   picture waits for that copy, and none allocates anything. In the
-  emulator, on a desktop's core, drawing took 0.15 ms, the hand-over
-  0.1 ms and Java's copy 0.1 ms.
+  emulator, on a desktop's core, drawing took 0.15 ms, the hand-over 0.1
+  ms and Java's copy 0.1 ms.
 
 To try it in the emulator, add a display the size of the Thor's lower
 screen beside the phone's with `adb emu multidisplay add 1 1240 1080 240

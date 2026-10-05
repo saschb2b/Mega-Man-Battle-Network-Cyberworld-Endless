@@ -309,6 +309,21 @@
 #define BN6_MODE_START_SCREEN 0x00   /* BN6_TOOLKIT: the start screen (the main mode, the index eToolkit +0 points at) */
 #define BN6_MODE_GAME         0x04   /* BN6_TOOLKIT: the game */
 #define BN6_MODE_GAME_OVER    0x14   /* BN6_TOOLKIT: its GAME OVER */
+#define BN6_MODE_SUBMENU      0x28   /* BN6_TOOLKIT: a PET screen (bn6f SubMenuControl), which BN6_SUBMENU's first byte names */
+#define BN6_MODE_SHOP         0x2C   /* BN6_TOOLKIT: a shop (bn6f ShopControl) */
+#define BN6_MODE_TRADER       0x34   /* BN6_TOOLKIT: the Chip Trader (bn6f ChipTraderControl) */
+#define BN6_MODE_MAIL         0x48   /* BN6_TOOLKIT: E-Mail on its own (bn6f HandleEmailMenu81279F8) */
+#define BN6_TOOLKIT_SUBMENU   0x34   /* eToolkit SubmenuPtr: the PET screen's state (0x02009A30), its first byte the screen: */
+#define BN6_SUBMENU_FOLDERS   0x00   /* ... the ChipFolder list (bn6f HandleChipFolderMenu8123434) */
+#define BN6_SUBMENU_SUBCHIP   0x04   /* ... SubChip */
+#define BN6_SUBMENU_LIBRARY   0x08   /* ... the Library */
+#define BN6_SUBMENU_STATUS    0x0C   /* ... MegaMan's status */
+#define BN6_SUBMENU_MAIL      0x10   /* ... E-Mail */
+#define BN6_SUBMENU_KEYITEM   0x14   /* ... KeyItem */
+#define BN6_SUBMENU_COMM      0x18   /* ... Comm */
+#define BN6_SUBMENU_SAVE      0x1C   /* ... Save */
+#define BN6_SUBMENU_EDIT      0x20   /* ... the folder editor (bn6f sub_8133200) */
+#define BN6_SUBMENU_NAVICUST  0x24   /* ... the NaviCustomizer (bn6f sub_81356D4) */
 #define BN6_SUB_MAP           0x04   /* BN6_GAMESTATE: on the map */
 #define BN6_SUB_BATTLE_INIT   0x08   /* BN6_GAMESTATE: a battle beginning */
 #define BN6_SUB_BATTLE        0x0C   /* BN6_GAMESTATE: in battle */

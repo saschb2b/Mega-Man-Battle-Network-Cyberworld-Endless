@@ -1,6 +1,6 @@
 #include "platform.h"
+#include "platform_second.h"
 #include "present_3ds.h"
-#include "second_android.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -872,9 +872,6 @@ void platform_apply_effects(void) {
 static uint64_t part_update, part_draw, part_present;
 static uint64_t part_longest;   /* (the longest frame's update and drawing together: a hitch the means hide) */
 static int part_played;
-/* (and the second screen's picture, where one is drawn: the 3DS's map) */
-static uint64_t part_second;
-static int part_seconds;
 
 void platform_frame_parts(uint64_t update, uint64_t draw) {
 	part_update += update;
@@ -905,7 +902,9 @@ static void log_present(void) {
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
 		char bottom[160] = "";
-		if (part_seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's map %.1f ms of it, %d times)", part_second * ms / part_seconds, part_seconds);
+		uint64_t second_ticks;
+		int seconds = platform_second_parts(&second_ticks);
+		if (seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's picture %.1f ms of it, %d times)", second_ticks * ms / seconds, seconds);
 		/* (and reads of the game that waited, drawing, for the next frame) */
 		if (emu_draw_waits) {
 			size_t k = strlen(bottom);
@@ -923,8 +922,8 @@ static void log_present(void) {
 		emu_core_unshown = 0;
 		fflush(stdout);
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
-		part_update = part_draw = part_present = part_second = part_longest = 0;
-		part_played = part_seconds = 0;
+		part_update = part_draw = part_present = part_longest = 0;
+		part_played = 0;
 		second = now;
 	}
 }
@@ -1058,74 +1057,6 @@ void platform_persist(void) {
 #ifdef __EMSCRIPTEN__
 	/* the browser's files live in memory until they are synced to IndexedDB */
 	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
-#endif
-}
-
-/* ---- the second screen (issue #9) ---- */
-
-static SecondScreen second;
-
-void platform_second_screen(SecondScreen draw) {
-	second = draw;
-	/* (none: black at once, the scene that drew it gone; the title keeps
-	 * it dark, where the 3DS had kept the run's last map) */
-	if (draw) return;
-#if defined(__3DS__)
-	present3ds_bottom_show(false);
-#elif defined(__ANDROID__)
-	second_android_dark();
-#endif
-}
-
-/* The second screen drawn into memory, w x h (RGBA8888, `pitch` bytes a
- * row): whether it holds a picture. (Through the software renderer, and
- * read back, the map took 20 ms on a New 3DS, a frame lost every redraw.) */
-static bool draw_second(uint32_t *px, int w, int h, int pitch) {
-	if (!second) return false;
-	gfx_draw_into(px, w, h, pitch);
-	bool drew = second(w, h);
-	gfx_draw_into(NULL, 0, 0, 0);
-	return drew;
-}
-
-bool platform_save_second_screen(const char *path) {
-	static uint32_t px[SECOND_W * SECOND_H];
-	memset(px, 0, sizeof px);
-	if (!draw_second(px, SECOND_W, SECOND_H, SECOND_W * 4)) return false;
-	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, SECOND_W, SECOND_H, 32, SECOND_W * 4, SDL_PIXELFORMAT_RGBA8888);
-	bool ok = s && SDL_SaveBMP(s, path) == 0;
-	if (s) SDL_FreeSurface(s);
-	return ok;
-}
-
-/* The bottom screen's picture, every tenth frame (the pace MegaMan's mark
- * on it pulses), drawn straight into the memory the GPU copies from; the
- * scene calls it as its update begins, where the GBA's frame still runs on
- * its own core and this one would wait for it anyway (drawn with the
- * present, it made that frame late, 2 ms of 3DS time six times a second) */
-void platform_second_screen_draw(void) {
-#if defined(__3DS__)
-	if (P.frame % 10) return;
-	int pitch;
-	uint32_t *px = present3ds_bottom(&pitch);
-	uint64_t t0 = SDL_GetPerformanceCounter();
-	bool on = px && draw_second(px, SECOND_W, SECOND_H, pitch);
-	part_second += SDL_GetPerformanceCounter() - t0;
-	++part_seconds;
-	present3ds_bottom_show(on);
-#elif defined(__ANDROID__)
-	/* (a display beside the game's, the AYN Thor's lower screen: every
-	 * fifth frame, so MegaMan's mark keeps up with his walk, at the size
-	 * picked for the display, handed to Java to show; drawn in 0.15 ms and
-	 * handed over in 0.1 in the emulator, on a desktop's core) */
-	if (P.frame % 5) return;
-	int w, h;
-	uint32_t *px = second_android_begin(&w, &h);
-	if (!px) return;
-	uint64_t t0 = SDL_GetPerformanceCounter();
-	second_android_end(draw_second(px, w, h, w * 4));
-	part_second += SDL_GetPerformanceCounter() - t0;
-	++part_seconds;
 #endif
 }
 

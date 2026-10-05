@@ -7,21 +7,16 @@
 #include "debug.h"
 #include "devtools.h"
 #include "pet.h"
-#include "pet_text.h"
 #include "director.h"
-#include "npc.h"
-#include "scripts.h"
-#include "encounter.h"
 #include "emu.h"
-#include "events.h"
-#include "gamecall.h"
 #include "guest.h"
 #include "guest_wait.h"
-#include "idle.h"
 #include "game.h"
+#include "game_hooks.h"
 #include "gfx.h"
 #include "platform.h"
 #include "rom.h"
+#include "second.h"
 #include "tour.h"
 
 static SDL_Texture *tex;
@@ -50,9 +45,9 @@ static bool started;   /* (the core on its own thread: a frame begun since enter
 static void enter(void) {
 	revealed = 0;
 	started = false;
-	/* (the layer's map on the second screen: the 3DS's bottom one, a
-	 * display beside an Android handheld's) */
-	platform_second_screen(director_draw_second_screen);
+	/* (the second screen, issue #72: the 3DS's bottom one, a display
+	 * beside an Android handheld's) */
+	platform_second_screen(second_draw);
 	/* (making a run's net takes a while on a slow machine: twenty seconds
 	 * of black on a 3DS read as a hang) */
 	platform_begin_frame();
@@ -60,23 +55,16 @@ static void enter(void) {
 	text_draw(P.w / 2, P.h / 2 - 8, "Building the net...", WHITE, TEXT_CENTER);
 	platform_present_now();
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
-	gamecall_install();
-	idle_install();
-	npc_reach_install();
-	chat_marks_install();
-	pet_install();
-	pet_text_install();
+	game_hooks_install();
 	cinema_reset();
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
-		emu_encounters_install();
-		events_install();
+		game_hooks_after_boot();
 		director_resume();
 	} else {
 		director_before_boot();
 		emu_boot();
-		emu_encounters_install();
-		events_install();
+		game_hooks_after_boot();
 		if (emu_start_in_town) director_start_run();
 		else director_start_layer();
 		emu_start_in_town = false;
@@ -101,6 +89,7 @@ static void after_frame(void) {
 	devtools_update();
 	tour_update();
 	cinema_update();
+	second_update();
 	emu_debug_frame();
 }
 
@@ -186,7 +175,12 @@ static bool guest_update(void) {
 
 static void update(void) {
 	emu_drawing = false;
-	if (guest_update()) return;
+	/* (an older net's battle: BN6's frame waits, the second screen still
+	 * follows) */
+	if (guest_update()) {
+		second_update();
+		return;
+	}
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();

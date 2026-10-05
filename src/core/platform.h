@@ -134,6 +134,9 @@ void platform_second_screen(SecondScreen draw);
  * display), every few frames: at a frame's update, before the game is
  * read, where the core's own thread still runs the GBA's frame. */
 void platform_second_screen_draw(void);
+/* ... at the next frame too, whatever its pace (a new panel, its title's
+ * slide). */
+void platform_second_screen_soon(void);
 /* The second screen's picture now, into a BMP (--second-shot). */
 bool platform_save_second_screen(const char *path);
 /* Inject buttons for scripted tests; merged with real input. */
