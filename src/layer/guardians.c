@@ -113,6 +113,8 @@ static const NetAreaDef *dressed(int biome) {
 	return a >= NET_AREAS ? net_area_def(a) : NULL;
 }
 
+bool guardian_area_older(int biome) { return dressed(biome) != NULL; }
+
 /* BN6's own name for the area */
 static const char *own_name(int biome) {
 	static const char *const names[BIOME_COUNT] = {
@@ -159,15 +161,6 @@ const char *guardian_area_in_text(int biome, int side) {
 	return buf;
 }
 
-/* ... as the split names a way: another game's area as the older net's,
- * which two playtesters could not tell from BN6's own (session 65) */
-const char *guardian_way_area(int biome) {
-	static char buf[48];
-	const char *name = guardian_area_in_text(biome, LAYER_NORMAL);
-	if (!dressed(biome)) return name;
-	snprintf(buf, sizeof buf, "the older Net's %s", strncmp(name, "the ", 4) ? name : name + 4);
-	return buf;
-}
 
 const char *guardian_area_motto(int biome) {
 	const NetAreaDef *x = dressed(biome);

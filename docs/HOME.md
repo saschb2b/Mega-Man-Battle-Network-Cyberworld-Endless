@@ -200,11 +200,15 @@ act's (two, or three with the dark way: the act's own area, the other
 way, the Undernet once the Secret Area is cleared, as `run_ways` gives
 them today), each Nest the next Net's first, and each lights up as
 MegaMan arrives; the HP grows a room as its portals outgrow it, so the
-run's progress is a place. Standing on a portal, MegaMan says where it
-leads and who waits there (the guardian named as on the act's card, where
-MegaMan has battled him); stepping on it takes him there. Its portals
-are this run's: a new run starts with the HP bare. The second screen
-lists them (piece 9).
+run's progress is a place. Beside a portal, MegaMan says what he reads
+through the link, never where it leads: he has not been there (the
+owner, after the first build: "megaman does not know the next layer
+yet"). He reads its data ("Whoa,salty data! Like the sea!", "The data
+over there is old!" for the older net's) and a strong Navi's signal,
+which he names only where he has battled that Navi; the act's card is
+the reveal, as on a layer. Stepping on a portal takes him there. Its
+portals are this run's: a new run starts with the HP bare. The second
+screen lists them as MegaMan reads them (piece 9).
 
 Built first as ports in town (issue #86): the ways were the town's
 jack-in points and the ground before its checks, MegaMan's words at each
@@ -228,8 +232,8 @@ so a lit portal is BN6's open link and an unlit one BN6's locked link
 each frame). The act's exit lands MegaMan on the blue pad, the act's card
 over the HP, his word on the act and the ways open ("Two ways are open
 this time! The pink pad,and the link up top!"), and the run saved there
-("From Lan's HP"); within reach of a lit portal he names where it leads
-and who waits there, once a visit. Stepping on one plays BN6's link
+("From Lan's HP"); within reach of a lit portal he says what he reads
+through it (its data, the signal), once a visit. Stepping on one plays BN6's link
 warp; the first way's layer was built at the exit, another way's is built
 as the link plays. R asks BN6's "MegaMan, jack out?", and its yes (or the
 blue pad) takes Lan to where he last jacked in; the town's jack-in takes
@@ -308,9 +312,11 @@ at every hour before it ships; docs/FIDELITY.md names it.
 
 ### 9. The second screen at home
 
-The PET at home (issue #79) and in Lan's HP lists the portals (area,
-guardian, the clock's notch for going back), the job taken and how far
-along it is, and the visit's hour.
+The PET at home (issue #79) and in Lan's HP lists the portals as MegaMan
+reads them (their data, the guardian's signal named where he knows it;
+the areas gone back to by name, as he has been there; the clock's notch
+for going back), the job taken and how far along it is, and the visit's
+hour.
 
 ## What must not move home
 

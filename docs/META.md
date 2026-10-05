@@ -368,11 +368,11 @@ Area became a third opening area, and a new run avoids the last one's act
 
 After an act's guardian, MegaMan comes home to Lan's HP (docs/HOME.md),
 and the next act's ways are its portals: the next act's area at its pink
-pad, another of its tier the run has not taken at a link square, each
-named by MegaMan as he comes near it, with its guardian where MegaMan has
-battled him, else "a Navi we've never battled" ("This one goes to Green
-Area,Lan. CircusMan waits there!": what MegaMan knows); stepping on it
-takes it. The
+pad, another of its tier the run has not taken at a link square. Beside
+one MegaMan says what he reads through it, never its name, as he has not
+been there: its data ("Wild data,growing everywhere!") and a strong
+Navi's signal, named where he has battled that Navi ("That signal...
+It's CircusMan!": what MegaMan knows); stepping on it takes it. The
 choice restates the dialectic at the act's scale: bring the folder to the
 guardian it answers, or take the one it does not. Both guardians fit the
 act's band, and neither is another act's (or the short net's Nest's). The
@@ -1121,8 +1121,8 @@ the PET's battle data on a copy exists once they have fought it.
   Aqua guardian is all but SpoutMan by name. The act's card says
   "Guardian: ???", L "A strong Navi's signal waits at its end. I don't
   recognize it.", the arena's approach "The guardian's arena is just
-  ahead", a portal in Lan's HP "This one goes to Aquarium HP,Lan. A
-  Navi we've never battled waits there...", and the briefing on his layer
+  ahead", a portal in Lan's HP its data and "And a strong Navi's
+  signal...", and the briefing on his layer
   that they have no battle data on it: watch the yellow panels, the
   net's own telegraph for every attack. The arena's card is the reveal.
   What can be learned before is what Navis who live on the net say: the

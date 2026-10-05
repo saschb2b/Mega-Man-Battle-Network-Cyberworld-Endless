@@ -10,9 +10,11 @@
   portals lit as BN6 shows an open link, and the run saved ("From Lan's
   HP" on a CONTINUE). The Guardian Data no longer asks "Which way?": the
   act's own area is the pink pad, the other way and the dark way into
-  the Undernet (sealed until the Secret Area has been cleared) are links,
-  and MegaMan names where each leads and who waits there as he comes
-  near. R asks BN6's "MegaMan, jack out?" and takes Lan back to the town,
+  the Undernet (sealed until the Secret Area has been cleared) are links.
+  MegaMan can't know where a link leads before taking it, so beside one
+  he says what he reads through it ("Whoa,salty data! Like the sea!")
+  and the strong Navi's signal, naming it only where he has battled him.
+  R asks BN6's "MegaMan, jack out?" and takes Lan back to the town,
   whose jack-in brings him back to the HP. A run begins in the town, as
   before, and jacks in to Lan's HP. docs/HOME.md has the design: next,
   Central Town as home, going back through older portals priced by the

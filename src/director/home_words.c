@@ -35,19 +35,46 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 	return words;
 }
 
+/* What MegaMan reads of an area through a link he has not taken: its data,
+ * never its name (docs/META.md, what MegaMan knows) */
+static const char *area_feel(int biome) {
+	static const struct { int biome; const char *line; } feels[] = {
+		{ BIOME_CENTRAL, "@M Busy data over there,Lan." },
+		{ BIOME_SEASIDE, "@M Whoa,salty data! Like the sea!" },
+		{ BIOME_SKY, "@M The data's so light... Like wind!" },
+		{ BIOME_GREEN, "@M Wild data,growing everywhere!" },
+		{ BIOME_GRAVEYARD, "@M Brr... Cold,deleted data." },
+		{ BIOME_UNDERNET, "@M Lan... Dark,rough data. Careful." },
+		{ BIOME_SECRET, "@M Something really strong is over there..." },
+		{ BIOME_NEST, "@M Lan... This one goes way down.|@M It has to be the Nest!" },
+		{ BIOME_COMP, "@M Circuit data. A comp,maybe?" },
+		{ BIOME_HOMEPAGE, "@M Friendly data... Someone's homepage?" },
+		{ BIOME_COMP_B, "@M Hmm... Humming machines over there." },
+		{ BIOME_ROBOT_COMP, "@M Machine data... Robots,maybe?" },
+		{ BIOME_AQUARIUM_COMP, "@M Water data... And fish!?" },
+		{ BIOME_JUDGE_COMP, "@M Hmm... Old data,deep as roots." },
+		{ BIOME_WEATHER_COMP, "@M Brr! Snowy,cloudy data..." },
+		{ BIOME_COPYBOT_COMP, "@M Huh? The same data,over and over..." },
+	};
+	if (biome >= 0 && biome < BIOME_COUNT && guardian_area_older(biome)) return "@M Whoa... The data over there is old!";
+	for (size_t i = 0; i < sizeof feels / sizeof *feels; ++i)
+		if (feels[i].biome == biome) return feels[i].line;
+	/* (the towns' homepages, and what no line reads) */
+	return biome >= BIOME_ACDC_HP && biome <= BIOME_SKY_HP ? "@M Cozy data... A town's homepage?" : "@M Hmm... I can't read much from here.";
+}
+
 const char *home_port_words(int biome, int navi, bool dark, bool sealed) {
-	static char words[200];
-	const char *area = guardian_way_area(biome);
+	static char words[240];
 	if (navi && !guardian_known(navi)) navi = 0;
+	char signal[64];
+	if (navi) snprintf(signal, sizeof signal, "@M That signal... It's %s!", guardian(navi)->name);
+	else snprintf(signal, sizeof signal, "@M And a strong Navi's signal...");
 	if (sealed)
 		snprintf(words, sizeof words, "@M A dark way leads down here...|@M It's sealed. Clearing the Secret Area would open it.");
 	else if (dark)
-		snprintf(words, sizeof words, "@M Lan... This one leads into the Undernet.|@M %s waits down there!",
-			navi ? guardian(navi)->name : "A Navi we've never battled");
-	else if (navi)
-		snprintf(words, sizeof words, "@M This one goes to %s,Lan.|@M %s waits there!", area, guardian(navi)->name);
+		snprintf(words, sizeof words, "@M Lan... This one's dark. Really dark.|@M It feels like the Undernet...|%s", signal);
 	else
-		snprintf(words, sizeof words, "@M This one goes to %s,Lan.|@M A Navi we've never battled waits there...", area);
+		snprintf(words, sizeof words, "%s|%s", area_feel(biome), signal);
 	return words;
 }
 

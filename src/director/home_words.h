@@ -10,9 +10,10 @@
  * `ports[0..ways)` the portals' names ("pink pad"), and `sealed` where a
  * dark way's stands shut (NULL none). */
 const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed);
-/* MegaMan at a portal (docs/HOME.md): where it leads, area `biome` and
- * `navi` its guardian (named where MegaMan has battled him); `dark` the
- * dark way into the Undernet, `sealed` that way still shut. */
+/* MegaMan at a portal (docs/HOME.md): what he reads through the link of
+ * area `biome` (its data, never its name: he has not been there) and of
+ * `navi` its guardian (his signal named where MegaMan has battled him);
+ * `dark` the dark way into the Undernet, `sealed` that way still shut. */
 const char *home_port_words(int biome, int navi, bool dark, bool sealed);
 /* Lan's HP's portal `k` (lanhp.h) as MegaMan names it, after "the". */
 const char *home_portal_name(int k);
