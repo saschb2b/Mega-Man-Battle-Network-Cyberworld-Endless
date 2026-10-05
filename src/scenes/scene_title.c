@@ -726,7 +726,7 @@ static void found_draw(int x0, int y0) {
 	 * run, session 62; its areas, towns, songs and Navis join the net's,
 	 * docs/MULTIROM.md) */
 	size_t m = strlen(s);
-	snprintf(s + m, sizeof s - m, n > 1 ? " found: their nets join ours" : " found: its net joins ours");
+	snprintf(s + m, sizeof s - m, n > 1 ? " found: their Nets join ours" : " found: its Net joins ours");
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
 }
 

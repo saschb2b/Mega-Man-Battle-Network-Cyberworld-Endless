@@ -809,7 +809,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (nor does he deny the bystanders' rumor: a playtester heard it
 			 * two platforms before his "No word yet") */
 			if (navi > 0 && !tells)
-				snprintf(word, sizeof word, "|Nobody's come back from the end of %s!|There's talk on the net... "
+				snprintf(word, sizeof word, "|Nobody's come back from the end of %s!|There's talk on the Net... "
 					"But I don't sell talk!|Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
 			else if (navi > 0)
 				dealer_word(word, sizeof word, navi, counter, stock, nstock, brought, lands);

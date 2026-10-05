@@ -1244,7 +1244,7 @@ static void test_talk(void) {
 		snprintf(what, sizeof what, "the arrival's words in area %d", biome);
 		check_talk(what, line);
 		snprintf(what, sizeof what, "the briefing in area %d", biome);
-		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Battles here run the older net's way.|@M A strong Navi's signal waits at "
+		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Battles here run the older Net's way.|@M A strong Navi's signal waits at "
 			"the end...|@M We've got no battle data on it,Lan.|@M Watch the yellow panels! Attacks land there!", area);
 		check_talk(what, line);
 		for (int navi = 1; navi <= 18; ++navi) {

@@ -387,7 +387,7 @@ int guardian_face(int navi) {
  * it) */
 static const char *first_sight(int navi, const char *name) {
 	static char s[128];
-	if (guardian_older(navi)) snprintf(s, sizeof s, "@L No way! That's %s!|@M The Nest copied the older net's Navis too!|", name);
+	if (guardian_older(navi)) snprintf(s, sizeof s, "@L No way! That's %s!|@M The Nest copied the older Net's Navis too!|", name);
 	else if (friendly(navi)) snprintf(s, sizeof s, "@M %s!? ...No,wait.|@M You're one of the Nest's copies!|", name);
 	else snprintf(s, sizeof s, "@L That's %s!|@M Or a copy the Nest made of him...|", name);
 	return s;
@@ -502,7 +502,7 @@ const char *guardian_way_area(int biome) {
 	static char buf[48];
 	const char *name = guardian_area_in_text(biome, LAYER_NORMAL);
 	if (!dressed(biome)) return name;
-	snprintf(buf, sizeof buf, "the older net's %s", strncmp(name, "the ", 4) ? name : name + 4);
+	snprintf(buf, sizeof buf, "the older Net's %s", strncmp(name, "the ", 4) ? name : name + 4);
 	return buf;
 }
 
@@ -534,12 +534,12 @@ void guardian_way_question(char *out, size_t n, const char *const who[3], const 
 	int ways = dark == 2 ? 3 : 2, unknown = 0;
 	for (int k = 0; k < ways; ++k) unknown += !who[k];
 	if (unknown == ways && ways == 3) {
-		snprintf(out, n, "@M Lan,the net splits three ways!|@M Navis we've never battled guard them all.|@M One to %s,one to %s,|"
+		snprintf(out, n, "@M Lan,the Net splits three ways!|@M Navis we've never battled guard them all.|@M One to %s,one to %s,|"
 			"@M and a dark way into the Undernet. Which way?", area[0], area[1]);
 		return;
 	}
 	if (unknown == ways) {
-		snprintf(out, n, "@M Lan,the net splits below us!|@M Navis we've never battled guard both ways.|@M One to %s,one to %s.%s", area[0], area[1],
+		snprintf(out, n, "@M Lan,the Net splits below us!|@M Navis we've never battled guard both ways.|@M One to %s,one to %s.%s", area[0], area[1],
 			dark ? sealed : "|@M Which way?");
 		return;
 	}
@@ -549,9 +549,9 @@ void guardian_way_question(char *out, size_t n, const char *const who[3], const 
 	/* (the first names a sentence's start) */
 	if ('a' <= said[0][0] && said[0][0] <= 'z') said[0][0] = (char)(said[0][0] - 32);
 	if (ways == 3)
-		snprintf(out, n, "@M Lan,the net splits three ways!|@M %s guards %s.|@M %s guards %s.|@M And a dark way leads into the Undernet.|"
+		snprintf(out, n, "@M Lan,the Net splits three ways!|@M %s guards %s.|@M %s guards %s.|@M And a dark way leads into the Undernet.|"
 			"@M %s waits there! Which way?", said[0], area[0], said[1], area[1], said[2]);
 	else
-		snprintf(out, n, "@M Lan,the net splits below us!|@M %s guards %s.|@M %s guards %s.%s", said[0], area[0], said[1], area[1],
+		snprintf(out, n, "@M Lan,the Net splits below us!|@M %s guards %s.|@M %s guards %s.%s", said[0], area[0], said[1], area[1],
 			dark ? sealed : "|@M Which way?");
 }

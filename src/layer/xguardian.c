@@ -106,14 +106,14 @@ const char *xguardian_soul_words(int navi) {
 	if (guest_kind_chips(kind, ids, 64) > 0) chip_info(ids[0], &ci);
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
 	if (profile.soul_taught)
-		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan!|@M Our %s chips unite us in the older net's battles.|@M Pick one,then UNITE on the Custom screen!",
+		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan!|@M Our %s chips unite us in the older Net's battles.|@M Pick one,then UNITE on the Custom screen!",
 			kinds[kind]);
 	else {
-		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It only wakes in the older net's battles.|@M There,pick one of our %s "
+		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It only wakes in the older Net's battles.|@M There,pick one of our %s "
 			"chips%s%s.|@M Then UNITE on the Custom screen!|@M I'll fight with his Soul for a few turns.|@M Once a battle,and only while I'm calm.", name,
 			kinds[kind], ci.name[0] ? ",like " : "", ci.name);
 		if (dark >= 0 && k < (int)sizeof s)
-			snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...|@M Darker. That's Chaos Unison.|@M Out here in our net,his Soul sleeps.",
+			snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...|@M Darker. That's Chaos Unison.|@M Out here in our Net,his Soul sleeps.",
 				guest_dark_name(dark));
 	}
 	return s;

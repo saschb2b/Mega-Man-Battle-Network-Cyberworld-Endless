@@ -321,14 +321,14 @@ static void older_net_words(void) {
 	 * run's CrakShot and Atk+10 went unnamed, session 68) */
 	D.beat_out = encounter_guest && !D.beat_cross && n > 0 && !flag_get(RUN_OUT_NAMED_FLAG);
 	if (D.beat_out) {
-		snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older net's battles again,Lan.|@M %s didn't exist back then.|@L Then %s out. Got it!",
+		snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older Net's battles again,Lan.|@M %s didn't exist back then.|@L Then %s out. Got it!",
 			k ? "|" : "", out, n == 1 ? "it sits" : "they sit");
 		return;
 	}
 	if (!D.beat_cross) return;
 	/* (a guardian of ours keeps his fight ours; one of the older net's own
 	 * Navis fights the old way: docs/BOSSES.md, BN5's Navis) */
-	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This net's a copy of an older one!|@M Its battles run the old way.|"
+	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This Net's a copy of an older one!|@M Its battles run the old way.|"
 		"@L The old way? There were no Crosses then!|@M Right. So our Cross can't come in...|@M Except against a guardian from our Net!", k ? "|" : "");
 	if (n > 0 && k < sizeof D.beat)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M %s didn't exist then either.|@M So %s'll sit out.", out, n == 1 ? "it" : "they");
@@ -1158,7 +1158,7 @@ static void area_card(void) {
 	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "Beyond the sealed gate");
 	else if (biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS) snprintf(act, sizeof act, "Below the Nest");
 	else if (biome == BIOME_NEST && net_version() > 1) snprintf(act, sizeof act, "The bottom of Net V%d", net_version());
-	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "The bottom of the net");
+	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "The bottom of the Net");
 	else if (net_version() > 1) snprintf(act, sizeof act, "Net V%d - Act %d", net_version(), act_no);
 	else snprintf(act, sizeof act, "Act %d", act_no);
 	/* the guardian ahead, from the start, so the folder can be set for it
@@ -1182,7 +1182,7 @@ static void area_card(void) {
 	 * switch) */
 	if (encounter_guest) {
 		size_t k = strlen(act);
-		snprintf(act + k, sizeof act - k, " - older net battles");
+		snprintf(act + k, sizeof act - k, " - older Net battles");
 	}
 	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), ahead[0] ? ahead : NULL, rgba(120, 200, 248, 255), 200);
 }
@@ -4419,11 +4419,11 @@ static void recode_words(char *out, size_t size) {
 	ChipInfo ci;
 	chip_info(D.recode_chip, &ci);
 	if (D.recode_due == 1)
-		snprintf(out, size, "@L Huh? In there our %s %c was %s %c!|@M The old net reads chip codes its own way,Lan.|"
+		snprintf(out, size, "@L Huh? In there our %s %c was %s %c!|@M The old Net reads chip codes its own way,Lan.|"
 			"@M A code it never knew becomes one it knows.|@M Out here,they're our codes again!",
 			ci.name, code_letter(D.recode_from), ci.name, code_letter(D.recode_to));
 	else
-		snprintf(out, size, "@L Wait! It showed %s %c...|@L But our Pack got %s %c!|@M Our net read the code its own way coming back,Lan.|"
+		snprintf(out, size, "@L Wait! It showed %s %c...|@L But our Pack got %s %c!|@M Our Net read the code its own way coming back,Lan.|"
 			"@M Chips from the old Net come home in our codes!", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
 }
 
@@ -4786,7 +4786,7 @@ static void guest_words(void) {
 	int k = 0;
 	if (D.guest_due) {
 		int out = D.guest_due - 1;
-		k = snprintf(words, sizeof words, "@M Lan,that battle ran on an older net's system!|@L The Nest copied that net too!?|"
+		k = snprintf(words, sizeof words, "@M Lan,that battle ran on an older Net's system!|@L The Nest copied that Net too!?|"
 			"@M Battles and all. Its viruses fight the old way.|@M And our chips work the way it knew them.");
 		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, "|@M %s didn't exist back then...|@M So %s had to sit out.", D.guest_out,
 			out == 1 ? "it" : "they");
