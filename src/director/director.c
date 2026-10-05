@@ -223,6 +223,8 @@ void end_run(void) {
 	/* (a first run is no record to beat) */
 	title_new_best = profile.runs > 0 && run_reached() > profile.best_depth;
 	title_won = false;
+	profile.last_lost_to = (uint8_t)D.lost_to;
+	profile.last_won = 0;
 	runlog_run_end();
 	library_from_game();
 	programs_from_game();
@@ -243,6 +245,8 @@ static void win_run(void) {
 	title_learned[0] = 0;
 	title_new_best = run.depth > profile.best_depth;
 	title_won = true;
+	profile.last_lost_to = 0;
+	profile.last_won = 1;
 	runlog_run_end();
 	library_from_game();
 	programs_from_game();

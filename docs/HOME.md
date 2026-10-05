@@ -388,6 +388,24 @@ seller** stands beside it, as BN6 has one in each town.
 - **The news**: a board or the TV reports the net (the guardians deleted,
   the depth, Lan's name beside the best layer).
 
+As built (issue #87): Central Town's plaza Mr.Prog, who explained the old
+statue's port, calls the Net's news in a Mr.Prog's capitals: at a run's
+start how the last run ended ("BLASTMAN'S COPY DELETED MEGAMAN! ON LAYER
+3!", the Nest brought down, or the layer it reached; the very first run
+the new Net under town), after an act the guardian just deleted and
+where. Four people have lines of the run's (`town_words.c`, one line a
+person, each visit its own): Lan's classmate ("Lan! You beat BlastMan's
+copy? No way!", then the guardians counted), the neighbor (the threat,
+then "Back home already?"), the man from the lab (the best layer Dad keeps
+looking at, then the readings coming in) and the gossip by the statue (a
+guardian MegaMan has beaten three times or more, else the Net that copies
+every battle); the rest say what is said at their place. At each visit a
+different one in four is out and the standing people trade places
+(`town_folk.c`: from the run's depth, so a CONTINUE finds them where they
+were; a walker keeps his walk, the Mr.Prog and the robot dog theirs).
+The profile keeps how the last run ended (`last_lost_to`, `last_won`).
+Not yet: more of them walking, and the TV in Lan's house.
+
 ### 8. Time of day by act
 
 Morning at the start, afternoon after act 1, evening after act 2, night

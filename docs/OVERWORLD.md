@@ -102,13 +102,18 @@ crossing and its landing stay at the corner of their block. Lan comes up
 the Metroline's stairs, and jacks in beside the squirrel statue or at the
 doghouse (the original's second point, made the first's).
 
-Once Lan is out, he and MegaMan talk over the PET: on the very first run
-Dad calls about the new net under the town, later runs have a word of
-their own (and, after the Nest has fallen, of the net rebuilding). In
-both, the townsfolk stand where they belong, each with their own face in
-the chat box and saying something
-about the place (the game's generic people, never its story's, each out
-one run in four; a Mr. Prog explains the jack-in), a few
+As a run begins Lan and MegaMan talk over the PET in Lan's room: on the
+very first run Dad calls about the new net under the town, later runs
+have a word of their own (and, after the Nest has fallen, of the net
+rebuilding). In the town the townsfolk stand at the town's places, each
+with their own face in the chat box and saying something about the place
+(the game's generic people, never its story's). At home they remember
+(docs/HOME.md, a town that remembers): at each visit a different few are
+out, one in four, and the others stand at one another's places
+(`town_folk.c`, from the run's depth, so a CONTINUE finds them where they
+were); the plaza's Mr. Prog calls the Net's news, and Lan's classmate,
+the neighbor, the man from the lab and the gossip by the statue speak of
+the run and the runs (`town_words.c`), the rest of the place. A few
 pace a sidewalk up and back as the game's own walkers do (NPC command
 `0x38` sets a direction, speed and number of steps, `0x39` walks on or
 back; a walker's sprite needs all four of its walks, animations 9-15,

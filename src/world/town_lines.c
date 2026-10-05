@@ -10,11 +10,13 @@
 #include "town.h"
 
 /* Its people: at the statue, the shop, the school gate, the bus stop, the
- * houses, the closed road to the Expo. */
+ * houses, the closed road to the Expo. Some have lines of the run's at
+ * home (town_words.c); at each visit they stand elsewhere (town_folk.c). */
 static const Folk central_folk[] = {
-	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear?|The bird statue's port opens into a brand new Net!" },
+	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear?|The Net under town copies every battle!" },
 	{ 100, -52, 0, 7, 0x11, "*wag,wag* Woof! Woof!!" },   /* (the robot dog: one animation) */
-	{ 60, -96, FACE_SE, 7, 0x0F, "HELLO! I'M THE PLAZA'S PORT GUIDE!|PRESS R BY THE STATUE TO JACK IN!" },
+	/* (the plaza's Mr.Prog calls the Net's news: town_words.c) */
+	{ 60, -96, FACE_SE, 7, 0x0F, "NET NEWS! NET NEWS!|A NEW NET OPENED UNDER TOWN!" },
 	{ 44, -20, FACE_NE, 5, 0x2E, "I jacked in yesterday. Today the paths were all new!|Wow... It really does go on forever!" },
 	{ -172, -4, FACE_NW, 5, 0x2C, "Ooh! AsterLand got new chips in!|I could look at 'em all day..." },
 	{ -108, -36, FACE_NE, 5, 0x2B, "My dad parks here every Sunday!|AsterLand's the best!" },
@@ -42,7 +44,7 @@ static const char *const central_checks[16] = {
 	"@M AsterLand! We'll shop later,Lan. The Net's waiting!",
 	"EXPO\nThe sign lists the pavilions on show.",
 	"Cyber Academy. The gate is closed for the day.",
-	"A statue of a blue bird.|Its port leads into the Endless Net.",
+	"A statue of a blue bird.|It looks ready to fly off.",
 	"The road to the Expo Site. It's closed off today.",
 	"EXPO\nA map of the site. It's huge!",
 	"Chips and PETs line the shelves in the window.",

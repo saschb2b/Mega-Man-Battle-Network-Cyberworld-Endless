@@ -28,8 +28,10 @@
 #include "npc.h"
 #include "rom.h"
 #include "text.h"
+#include "town_folk.h"
 #include "town_lines.h"
 #include "town_ports.h"
+#include "town_words.h"
 #include "townmath.h"
 #include "lan_house.h"
 #include "townsrc.h"
@@ -92,6 +94,7 @@ static struct {
 	uint16_t *tiles;
 	uint8_t *miss;
 	uint32_t rng;
+	uint32_t seed;        /* the plan's, for each visit's townsfolk (town_folk.c) */
 } T;
 
 static uint32_t rnd(void) {
@@ -663,7 +666,8 @@ bool town_is_home(void) { return T.style && T.style->door; }
 
 static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
-	/* the style, its source learned once (town_style_for the same) */
+	T.seed = seed;
+	/* the style (home's, docs/HOME.md), its source learned once */
 	int si = env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];
@@ -745,10 +749,8 @@ static int plan_once(uint32_t seed) {
 	for (int i = 0; i < T.lines->nfolk; ++i) {
 		int fx, fy;
 		T.folk_at[i][0] = T.folk_at[i][1] = 1 << 20;
-		/* some people are out today (the Mr. Prog who explains the jack-in
-		 * and the robot dog never) */
-		bool out = T.lines->folk[i].cat == 5 && rnd_range(0, 3) == 0;
-		if (out || !moved(T.lines->folk[i].x, T.lines->folk[i].y, &fx, &fy)) continue;
+		/* (who is out is each visit's: town_folk.c) */
+		if (!moved(T.lines->folk[i].x, T.lines->folk[i].y, &fx, &fy)) continue;
 		/* on walkable ground, the nearest cell to where they belong */
 		for (int r = 0; r <= 3 && T.folk_at[i][0] == 1 << 20; ++r)
 			for (int dy = -r; dy <= r && T.folk_at[i][0] == 1 << 20; ++dy)
@@ -901,6 +903,38 @@ static bool town_warps(int g, int n) {
 	return list != 0;
 }
 
+/* This visit's townsfolk (town_folk.c: who stands where, town_words.c:
+ * what they say) and what Lan and MegaMan say stepping out, in the town's
+ * text archive, which it returns; the people into `npcs` */
+static uint32_t install_folk(NpcList *npcs) {
+	static TextArchive text;
+	ta_begin(&text);
+	/* (this visit's: who stands where and what they say, town_folk.c and
+	 * town_words.c) */
+	FolkVisit fv;
+	town_folk_visit(T.lines, T.seed, town_is_home(), &fv);
+	int script[MAX_FOLK];
+	for (int i = 0; i < T.lines->nfolk; ++i) {
+		const Folk *who = &T.lines->folk[fv.who[i]];
+		script[i] = ta_talk(&text, town_folk_words(who->cat, who->sprite, T.lines->folk[i].words), folk_face(who));
+	}
+	/* what Lan and MegaMan say when they step out (the director runs it) */
+	T.info.intro = ta_talk(&text, town_intro(T.lines->arrival), FACE_MEGAMAN);
+	uint32_t archive = ta_commit(&text);
+	T.info.talk_archive = archive;
+	if (emu_debug_on()) fprintf(stderr, "town text hash %08x\n", ta_hash(&text));
+	for (int i = 0; i < T.lines->nfolk && npcs->n < 16; ++i) {
+		const Folk *f = &T.lines->folk[i], *who = &T.lines->folk[fv.who[i]];
+		if (getenv("CYBERWORLD_TOWN_DEBUG"))
+			fprintf(stderr, "town: this visit %d:%02x at %d,%d%s\n", who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], fv.out[i] ? " (out)" : "");
+		if (T.folk_at[i][0] == 1 << 20 || fv.out[i]) continue;
+		need_sprite(npcs, who->cat, who->sprite);
+		npcs->script[npcs->n++] = f->walk ? npc_walker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], f->face, f->walk, archive, script[i]) :
+			npc_talker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], 0, f->face, archive, script[i], -1, false);
+	}
+	return archive;
+}
+
 bool town_install(int to_group, int to_number, int x, int y) {
 	if (!T.tiles || (T.style->door && !lan_house_bn6_warps(0))) return false;
 	uint32_t desc, coord_slot;
@@ -931,22 +965,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	mapslot_town(true);
 	NpcList npcs;
 	memset(&npcs, 0, sizeof npcs);
-	static TextArchive text;
-	ta_begin(&text);
-	int script[MAX_FOLK];
-	for (int i = 0; i < T.lines->nfolk; ++i) script[i] = ta_talk(&text, T.lines->folk[i].words, folk_face(&T.lines->folk[i]));
-	/* what Lan and MegaMan say when they step out (the director runs it) */
-	T.info.intro = ta_talk(&text, town_intro(T.lines->arrival), FACE_MEGAMAN);
-	uint32_t archive = ta_commit(&text);
-	T.info.talk_archive = archive;
-	if (emu_debug_on()) fprintf(stderr, "town text hash %08x\n", ta_hash(&text));
-	for (int i = 0; i < T.lines->nfolk && npcs.n < 16; ++i) {
-		if (T.folk_at[i][0] == 1 << 20) continue;
-		const Folk *f = &T.lines->folk[i];
-		need_sprite(&npcs, f->cat, f->sprite);
-		npcs.script[npcs.n++] = f->walk ? npc_walker(f->cat, f->sprite, T.folk_at[i][0], T.folk_at[i][1], f->face, f->walk, archive, script[i]) :
-			npc_talker(f->cat, f->sprite, T.folk_at[i][0], T.folk_at[i][1], 0, f->face, archive, script[i], -1, false);
-	}
+	uint32_t archive = install_folk(&npcs);
 	/* the checks' words: the map's own text archive */
 	TextArchive words;
 	ta_begin(&words);

@@ -80,6 +80,11 @@ typedef struct {
 	uint8_t soul_taught;      /* ... and what a Soul of the older net does, at the first Guardian Data that gave one (docs/META.md, Souls) */
 	uint8_t dark6_taught;     /* ... and BN6's own DarkChips (docs/META.md): all of a BN6 flame's words, all of their price after a battle (DARK6_*) */
 	uint8_t back_taught;      /* ... and what a trip back costs, the Net's clock, at the first older portal (docs/HOME.md) */
+	/* how the last run ended, for the town's news (docs/HOME.md, a town
+	 * that remembers): the guardian who deleted MegaMan (navi, 0 none), or
+	 * the Nest won */
+	uint8_t last_lost_to;
+	uint8_t last_won;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **A town that remembers** (issue #87, the epic #84). Central Town's
+  plaza Mr.Prog calls the Net's news: at a run's start how the last run
+  ended ("BLASTMAN'S COPY DELETED MEGAMAN! ON LAYER 3!"), after each act
+  the guardian just deleted and where. Lan's classmate, the neighbor, the
+  man from the lab and the gossip by the statue speak of the run and the
+  runs before it ("Lan! You beat BlastMan's copy? No way!"), one line
+  each, new at each visit. And the crowd moves: at each visit a different
+  few are out, and the others stand at one another's places. The lines
+  that still sent Lan to the bird statue's port are gone.
 - **Going back, priced by the Net's clock** (issue #95, the epic #84).
   In Lan's HP two more links go back to the last two areas the run has
   won: one layer of the area at its act's tier, with the Net Dealer and a
