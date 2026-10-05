@@ -1139,6 +1139,44 @@ SCREENSHOTS = [
                '1:,119:,6:L,6:,88:,' + '6:A,6:,88:,' * 13 + '10:SELECT,6:SELECT+R,4:SELECT,20:,' + '6:DOWN,6:,' * 7 +
                '10:,6:A,6:,388:,' + '6:A,6:,88:,' * 4 + '20:,6:L,6:,88:,6:A,6:,200:'],
      [(2700, 'sense')], {}),
+    # 0.9.0's notes: Battle Network 5 beside BN6 (a name with "bn5" in it
+    # gets the whole ROM folder, docs_rom_mounts). (BN5's areas on their
+    # acts' third layers, MegaMan's first words of the older net paged
+    # with A; Nebula Area's dark hole by MegaMan, placed beside it)
+    ('bn5-oran', ['--scene', 'emu', '--net-biome', 'x4', '--run-depth', '3', '--seed', '3', '--dev', 'quiet', '--input', '100:,' + '4:A,6:,' * 30 + '300:'],
+     [(620, 'bn5-oran')], {}),
+    ('bn5-scilab', ['--scene', 'emu', '--net-biome', 'x1', '--run-depth', '3', '--seed', '4', '--dev', 'quiet', '--input', '100:,' + '4:A,6:,' * 30 + '300:'],
+     [(620, 'bn5-scilab')], {}),
+    ('bn5-undernet', ['--scene', 'emu', '--net-biome', 'x5', '--run-depth', '3', '--seed', '3', '--dev', 'quiet', '--input', '100:,' + '4:A,6:,' * 30 + '300:'],
+     [(620, 'bn5-undernet')], {}),
+    ('bn5-nebula', ['--scene', 'emu', '--net-biome', 'x3', '--run-depth', '3', '--seed', '5', '--dev', 'quiet', '--input',
+                    '100:,' + '4:A,6:,' * 30 + '20:,0:place 20 172 3,200:'], [(560, 'bn5-nebula')], {}),
+    # (KnightMan guarding ACDC Area's first act: the autopilot walks to
+    # his arena, his card, his BN5 sprite, his own face in the chat, his
+    # wrecking ball in BN5's battle; not the weak one, which holds him at 1 HP)
+    ('bn5-guardian', ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '3', '--seed', '3', '--guardian', '28', '--dev', 'quiet'],
+     [(1552, 'bn5-guardian-card'), (1576, 'bn5-guardian'), (1636, 'bn5-guardian-talk'), (2400, 'bn5-guardian-battle')],
+     {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (NumberMan's Guardian Data giving his Soul, End Area; then a run
+    # holding his Soul: BusterUp picked on BN5's Custom screen, UNITE, the
+    # unison as the turn begins)
+    ('bn5-soul', ['--scene', 'emu', '--net-biome', 'x2', '--run-depth', '3', '--seed', '3', '--guardian', '26', '--dev', 'quiet', '--talk', 'reward:420',
+                  '--input', '100:,' + '4:A,6:,' * 30 + '100:,' + '6:A,94:,' * 12], [(700, 'bn5-soul'), (1080, 'bn5-soul-words')], {}),
+    ('bn5-unite', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,souls=4', '--input',
+                   '100:,' + '4:A,6:,' * 30 + '0:battle,160:,6:RIGHT,10:,6:RIGHT,10:,6:A,40:,6:RIGHT,8:,6:RIGHT,8:,6:RIGHT,10:,6:DOWN,40:,6:A,60:,6:UP,14:,6:A,500:'],
+     [(710, 'bn5-unite'), (1040, 'bn5-unison')], {}),
+    # (the older net's wait: BN5's first boot slowed, a battle at once)
+    ('bn5-wait', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,slowboot=4', '--input', '300:battle'],
+     [(480, 'bn5-wait'), (1050, 'bn5-wait-2'), (1650, 'bn5-wait-3')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (BN6's own DarkChips, on BN6's ROM alone: a flame on Central's middle
+    # layer, Chaud's call paged, MegaMan placed by it and speaking to it;
+    # DrkSword drawn in a battle's first hand, a BugFrag burnt for its 400,
+    # then the 20 max HP it took)
+    ('dark-flame', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet', '--input',
+                    '100:,' + '4:A,6:,' * 30 + '20:,0:place 20 -20 1,40:,6:A,140:,6:A,94:'], [(440, 'dark-flame'), (700, 'dark-flame-words')], {}),
+    ('dark-chip', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,darkchips=0x2,folder=286/3', '--talk', 'bugfrags:420',
+                   '--input', '100:,' + '4:A,6:,' * 30 + '40:,0:battle,220:,6:A,20:,6:START,20:,6:A,120:,6:RIGHT,20:,6:A,200:,6:A,60:,6:A,60:,6:A,60:,6:A,150:,'
+                   + '6:A,100:,' * 10], [(650, 'dark-chip-custom'), (882, 'dark-chip'), (2160, 'dark-chip-price')], {}),
 ]
 
 
@@ -1176,7 +1214,7 @@ def screenshots(only=None):
         os.environ.update(env)
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
                       *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
-                      mounts=docs_rom_mounts())
+                      mounts=docs_rom_mounts(bn5='bn5' in name))
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -1242,6 +1280,18 @@ CLIPS = [
     # (HeatCross brought, a cybertree in Green: "Leave it to me!")
     ('obstacle', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '3', '--seed', '3', '--dev', 'quiet,pieces=8', '--setup', 'endless,0,0,0,1'], {},
      '300:,0:place 20 108 5,20:,6:A,89:,6:A,134:,6:A,39:,6:A,60:,6:A,10:,70:DOWN+LEFT', 310, 729),
+    # (0.9.0's: a random battle in BN5's engine on ACDC Area, from the
+    # switch out of BN6's map through its first turn, the autopilot
+    # fighting; UNITE with NumberMan's Soul on BN5's Custom screen to the
+    # unison; DrkSword from a BN6 battle's first hand, its dark slash)
+    ('bn5-battle', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet'], {'CYBERWORLD_AUTOPILOT': '1'}, '460:battle', 436, 916),
+    ('bn5-unite', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,souls=4'], {},
+     '100:,' + '4:A,6:,' * 30 + '0:battle,160:,6:RIGHT,10:,6:RIGHT,10:,6:A,40:,6:RIGHT,8:,6:RIGHT,8:,6:RIGHT,10:,6:DOWN,40:,6:A,60:,6:UP,14:,6:A,500:', 550, 1030),
+    ('dark-chip', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,darkchips=0x2,folder=286/3', '--talk', 'bugfrags:420'], {},
+     '100:,' + '4:A,6:,' * 30 + '40:,0:battle,220:,6:A,20:,6:START,20:,6:A,120:,6:RIGHT,20:,6:A,200:', 606, 966),
+    # (the older net's wait, BN5's first boot slowed to 12 of its frames a
+    # frame: the switch, the wait filling, the battle opening behind it)
+    ('bn5-wait', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,slowboot=12'], {'CYBERWORLD_AUTOPILOT': '1'}, '300:battle', 340, 820),
 ]
 
 
@@ -1249,7 +1299,8 @@ CLIPS = [
 # video from the repository): name, then its first seconds and frames a second
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
-               'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15)}
+               'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
+               'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15)}
 
 
 def clips(only=None):
@@ -1270,7 +1321,7 @@ def clips(only=None):
         extra = ['--input', script] if script else []
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
                       *args, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f',
-                      mounts=docs_rom_mounts(bn5=name.endswith('-bn5')))
+                      mounts=docs_rom_mounts(bn5='bn5' in name))
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
