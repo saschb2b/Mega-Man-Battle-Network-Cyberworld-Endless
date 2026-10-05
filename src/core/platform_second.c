@@ -23,6 +23,13 @@ int platform_second_parts(uint64_t *ticks) {
 }
 
 static SecondScreen second;
+/* (the 3DS's bottom screen draws into the same memory each time, which
+ * the GPU copies from and leaves as it was; Android's is turned to Java's
+ * byte order in place, a shot's is new) */
+static bool drawing_kept;
+
+bool platform_second_screen_kept(void) { return drawing_kept; }
+
 #if defined(__3DS__) || defined(__ANDROID__)
 static SecondChanged second_changed;
 static bool second_soon;   /* a draw at the next frame (platform_second_screen_soon) */
@@ -103,9 +110,13 @@ void platform_second_screen_draw(void) {
 	second_soon = false;
 	drawn_at = P.frame;
 	int pitch;
+	static uint32_t *kept;
 	uint32_t *px = present3ds_bottom(&pitch);
 	uint64_t t0 = SDL_GetPerformanceCounter();
+	drawing_kept = px && px == kept;
 	bool on = px && draw_second(px, SECOND_W, SECOND_H, pitch);
+	kept = on ? px : NULL;
+	drawing_kept = false;
 	part_second += SDL_GetPerformanceCounter() - t0;
 	++part_seconds;
 	present3ds_bottom_show(on);

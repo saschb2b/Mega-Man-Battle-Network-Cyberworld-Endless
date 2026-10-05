@@ -133,6 +133,10 @@ typedef bool (*SecondScreen)(int w, int h);
  * the last one drawn: where not, none is drawn (but once a second) */
 typedef bool (*SecondChanged)(void);
 void platform_second_screen(SecondScreen draw, SecondChanged changed);
+/* Whether the memory the second screen draws into now still holds the
+ * last picture drawn there (the 3DS's bottom screen's): what did not
+ * change need not be drawn again */
+bool platform_second_screen_kept(void);
 /* Draws it where it is shown (the 3DS's bottom screen, Android's second
  * display), every few frames: at a frame's update, before the game is
  * read, where the core's own thread still runs the GBA's frame. */

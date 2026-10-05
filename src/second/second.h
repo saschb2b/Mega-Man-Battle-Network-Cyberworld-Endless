@@ -18,6 +18,8 @@ bool second_changed(void);
 /* The title's: the PET at rest, the profile's record (second_home.c,
  * issue #79); its picture changes only as the title is entered again. */
 bool second_title_draw(int w, int h);
+/* (the title drew over the run's frame: it is drawn whole next time) */
+void second_frame_forget(void);
 bool second_title_changed(void);
 
 #endif

@@ -76,6 +76,8 @@ static SDL_Rect frame(int w, int h, const char *title, int slide, int top) {
 	return body;
 }
 
+SDL_Rect second_frame_body(int w, int h) { return (SDL_Rect){ 4, BODY_Y, w - 8, h - BODY_Y - 4 }; }
+
 SDL_Rect second_frame(int w, int h, const char *title, int slide) {
 	SDL_Rect body = frame(w, h, title, slide, BODY_Y);
 	char layer[16] = "";

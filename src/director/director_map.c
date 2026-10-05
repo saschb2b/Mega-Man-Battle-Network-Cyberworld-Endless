@@ -17,6 +17,7 @@
 #include "net_route.h"
 #include "netmap.h"
 #include "platform.h"
+#include "run.h"
 #include "save.h"
 
 static bool map_used;   /* the layer's map has been held (SELECT) since the game started */
@@ -168,21 +169,38 @@ static void map_panels(const MapView *m) {
 	for (int k = 0; k < 2; ++k) fill_rects(rows[k], n[k], colour[k]);
 }
 
+/* The way's legs as last worked out, panel to panel, and what they were
+ * worked out from: MegaMan's panel, the goal's, the layer, the floor seen
+ * (which only grows on a layer) and the data taken. The floor's search at
+ * each picture had been most of a map's time on the 3DS's bottom screen
+ * (issue #81). */
+#define WAY_LEGS 64
+static struct {
+	int mx, my, ex, ey, seen;
+	uint32_t layer;
+	uint64_t gone;
+	int n;
+	int16_t leg[WAY_LEGS][4];
+} way = { .mx = -1 };
+
+static int seen_count(void) {
+	int n = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) n += D.seen[y][x] != 0;
+	return n;
+}
+
 /* the way on, over the panels he has come near, up to the first he
  * hasn't: marks he earned (a V in a comp's maze read as a dead end, the
  * arm on to the exit nowhere on the map); in straight runs as far as a
  * straight line over the floor goes (the walk's steps zig-zagged across a
- * platform) */
-static void map_way(const MapView *m, int px, int py) {
-	int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey, len;
-	SDL_Color tc = rgba(255, 230, 60, 200);
-	if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
-	double wx, wy;
-	netmap_grid(px, py, &wx, &wy);
-	route_floor();
-	if (!netmap_panel(tx, ty, &ex, &ey) || route_way(wx, wy, ex, ey, &len) < 0) return;
-	int cx = m->mx, cy = m->my, k = route_walk_len - 1;
-	while (k >= 0) {
+ * platform): into `way`, from MegaMan's panel (mx, my) */
+static void way_legs(double wx, double wy, int mx, int my, int ex, int ey) {
+	int len;
+	way.n = 0;
+	if (route_way(wx, wy, ex, ey, &len) < 0) return;
+	int cx = mx, cy = my, k = route_walk_len - 1;
+	while (k >= 0 && way.n < WAY_LEGS) {
 		int x = route_walk[k] % MAP_W, y = route_walk[k] / MAP_W, far = k;
 		if (!D.seen[y][x]) break;
 		for (int j = k - 1; j >= 0 && j >= k - 12; --j) {
@@ -190,14 +208,38 @@ static void map_way(const MapView *m, int px, int py) {
 			if (!D.seen[jy][jx]) break;
 			if (route_floor_line(cx, cy, jx, jy)) far = j;
 		}
-		int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W, steps = abs(fx - cx) + abs(fy - cy);
-		int ax = map_x(m, cx, cy), ay = map_y(m, cx, cy), bx = map_x(m, fx, fy), by = map_y(m, fx, fy);
+		int fx = route_walk[far] % MAP_W, fy = route_walk[far] / MAP_W;
+		int16_t *l = way.leg[way.n++];
+		l[0] = (int16_t)cx; l[1] = (int16_t)cy; l[2] = (int16_t)fx; l[3] = (int16_t)fy;
+		cx = fx; cy = fy;
+		k = far - 1;
+	}
+}
+
+/* the way on to the exit, or to the guardian while he stands, worked out
+ * again where what it was worked out from changed */
+static void map_way(const MapView *m, int px, int py) {
+	int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey;
+	SDL_Color tc = rgba(255, 230, 60, 200);
+	if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
+	double wx, wy;
+	netmap_grid(px, py, &wx, &wy);
+	route_floor();
+	if (!netmap_panel(tx, ty, &ex, &ey)) return;
+	int nseen = seen_count();
+	if (way.mx != m->mx || way.my != m->my || way.ex != ex || way.ey != ey || way.seen != nseen || way.layer != run.layer_seed || way.gone != route_gone) {
+		way_legs(wx, wy, m->mx, m->my, ex, ey);
+		way.mx = m->mx; way.my = m->my; way.ex = ex; way.ey = ey;
+		way.seen = nseen; way.layer = run.layer_seed; way.gone = route_gone;
+	}
+	for (int i = 0; i < way.n; ++i) {
+		const int16_t *l = way.leg[i];
+		int steps = abs(l[2] - l[0]) + abs(l[3] - l[1]);
+		int ax = map_x(m, l[0], l[1]), ay = map_y(m, l[0], l[1]), bx = map_x(m, l[2], l[3]), by = map_y(m, l[2], l[3]);
 		for (int t = 1; t <= steps; ++t) {
 			int lx = ax + (bx - ax) * t / steps, ly = ay + (by - ay) * t / steps;
 			if (map_inside(m, lx, ly, 3)) fill_rect(lx - (m->s - 1) / 2, ly, m->s - 1, 1, tc);
 		}
-		cx = fx; cy = fy;
-		k = far - 1;
 	}
 }
 

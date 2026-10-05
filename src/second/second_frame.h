@@ -35,6 +35,8 @@ void second_slot(int x, int y, int w, int h);
  * short of its place, as it slides in) and the place on its right, the
  * strip of HP, Zenny and BugFrags under it; the body left for the panel */
 SDL_Rect second_frame(int w, int h, const char *title, int slide);
+/* ... its body alone, the frame drawn before and left as it was */
+SDL_Rect second_frame_body(int w, int h);
 /* ... without a run: the header with `title` and `where`, no strip */
 SDL_Rect second_frame_rest(int w, int h, const char *title, const char *where);
 

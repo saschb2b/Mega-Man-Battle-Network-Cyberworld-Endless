@@ -40,6 +40,7 @@ void second_home_draw(SDL_Rect b) {
 }
 
 bool second_title_draw(int w, int h) {
+	second_frame_forget();
 	SDL_Rect b = second_frame_rest(w, h, "PET", "Home");
 	fill_rect(b.x, b.y, b.w, b.h, PET_NAVY);
 	int x = b.x + 6, y = b.y + 6, tx = x + SLOT_W + 10, rw = b.x + b.w - 6 - tx;

@@ -132,6 +132,30 @@ static const char *panel_title(void) {
 	}
 }
 
+/* The PET's frame, its body left for the panel; where the memory keeps
+ * the last picture and the frame's facts are as they were, it stands as
+ * drawn (a third of the map's draw on the 3DS's bottom screen) */
+typedef struct { int w, h, slide, hp, max_hp, depth; unsigned zenny, bugfrags; bool town; const char *title; char area[32]; } FrameFacts;
+static bool framed;   /* the memory holds a frame second_draw drew (not the title's) */
+
+void second_frame_forget(void) { framed = false; }
+
+static SDL_Rect frame(int w, int h) {
+	static FrameFacts was;
+	FrameFacts now;
+	memset(&now, 0, sizeof now);
+	now.w = w; now.h = h;
+	now.slide = panel_since == 0 ? 24 : panel_since == 1 ? 8 : 0;
+	now.hp = S2.hp; now.max_hp = S2.max_hp; now.depth = S2.depth;
+	now.zenny = S2.zenny; now.bugfrags = S2.bugfrags; now.town = S2.town;
+	now.title = panel_title();
+	memcpy(now.area, S2.area, sizeof now.area);
+	bool same = framed && platform_second_screen_kept() && !memcmp(&now, &was, sizeof now);
+	was = now;
+	framed = true;
+	return same ? second_frame_body(w, h) : second_frame(w, h, now.title, now.slide);
+}
+
 /* what the last picture showed: the panel and the state it drew from */
 static Panel drawn_panel;
 static SecondState drawn;
@@ -147,7 +171,7 @@ bool second_draw(int w, int h) {
 	drawn_panel = panel;
 	drawn = S2;
 	if (panel == PANEL_DARK) return false;
-	SDL_Rect body = second_frame(w, h, panel_title(), panel_since == 0 ? 24 : panel_since == 1 ? 8 : 0);
+	SDL_Rect body = frame(w, h);
 	if (panel == PANEL_FOLDER) second_folder_draw(body);
 	else if (panel == PANEL_BATTLE) second_battle_draw(body);
 	else if (panel == PANEL_NAVICUST) second_navicust_draw(body);
