@@ -47,7 +47,7 @@ static void enter(void) {
 	started = false;
 	/* (the second screen, issue #72: the 3DS's bottom one, a display
 	 * beside an Android handheld's) */
-	platform_second_screen(second_draw);
+	platform_second_screen(second_draw, second_changed);
 	/* (making a run's net takes a while on a slow machine: twenty seconds
 	 * of black on a 3DS read as a hang) */
 	platform_begin_frame();
@@ -74,7 +74,7 @@ static void enter(void) {
 
 static void leave(void) {
 	audio_external(NULL);
-	platform_second_screen(NULL);
+	platform_second_screen(NULL, NULL);
 }
 
 static uint32_t frame_keys(void) {

@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **Battles on the second screen** (issue #74). On the Custom screen the
+  chip under the cursor is a large card, as the DS games drew their
+  chips: its picture twice as large, its code, element and power, and its
+  text from the Library, the chips picked so far under it and, on OK,
+  their list in order. In CROSSSELECT the Cross under the cursor says
+  what hits MegaMan twice as hard in it and what it gives; on the Beast
+  Out emblem, the turns the EmotionCounter leaves (or that MegaMan is
+  tired, when a Beast Out ends in BeastOver) and the Cybeast's Attack+30.
+  While MegaMan fights: the turn's chips in order with their power as
+  the HUD writes it, the used ones dim and the next lit; his Cross and its
+  weakness, Beast Out's turns left and Full Synchro; every enemy by name
+  with its HP; and against a guardian MegaMan has met before, his element
+  and what MegaMan told of him at the arena. A panel the game's state
+  leaves as it was is not drawn again.
 - **The folder editor shows the whole folder on the second screen**
   (issue #75), as BN5 DS's does: its thirty chips as BN6's own icons, each
   framed by its rank (grey standard, blue Mega, red Giga, purple Dark) and

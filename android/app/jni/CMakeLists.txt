@@ -11,7 +11,7 @@ add_subdirectory(${SDL2_SRC} sdl2)
 
 set(GAME ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(MGBA /opt/mgba/android/${ANDROID_ABI})
-file(GLOB SRCS ${GAME}/src/*/*.c)
+file(GLOB SRCS CONFIGURE_DEPENDS ${GAME}/src/*/*.c)
 file(GLOB DIRS LIST_DIRECTORIES true ${GAME}/src/*)
 file(WRITE ${CMAKE_BINARY_DIR}/gen/version.h "#define CW_VERSION \"${CW_VERSION}\"\n")
 

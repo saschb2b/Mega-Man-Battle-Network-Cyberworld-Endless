@@ -363,6 +363,23 @@ void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int fli
 		}
 }
 
+static void raw_tile_scaled(uint32_t tile, uint32_t pal, int x, int y, int scale);
+
+void rom_tiles_scaled(uint32_t first, uint32_t pal, int x, int y, int w, int h, int scale) {
+	for (int ty = 0; ty < h; ++ty)
+		for (int tx = 0; tx < w; ++tx) {
+			uint32_t tile = first + (uint32_t)(ty * w + tx) * 32;
+			int dx = x + tx * 8 * scale, dy = y + ty * 8 * scale;
+			if (raw_tile_on()) {
+				raw_tile_scaled(tile, pal, dx, dy, scale);
+				continue;
+			}
+			SDL_Texture *t = tile_texture(tile, pal, 0);
+			SDL_Rect d = { dx, dy, 8 * scale, 8 * scale };
+			if (t) SDL_RenderCopy(P.renderer, t, NULL, &d);
+		}
+}
+
 /* ------------------------------------------------------------------ */
 /* Drawing into memory (gfx_draw_into): RGBA8888 pixels, blended as SDL's
  * software renderer blends them, so the picture is its own to the pixel. */
@@ -401,6 +418,21 @@ static const uint32_t *raw_tile_px(uint32_t tile, uint32_t pal, int flip) {
 	raw_tiles[h].used = true;
 	++raw_tiles_used;
 	return px;
+}
+
+/* ... `scale` times as large, a block of pixels each */
+static void raw_tile_scaled(uint32_t tile, uint32_t pal, int x, int y, int scale) {
+	const uint32_t *px = raw_tile_px(tile, pal, 0);
+	if (!px) return;
+	for (int j = 0; j < 8 * scale; ++j) {
+		int qy = y + j;
+		if (qy < 0 || qy >= raw.h) continue;
+		for (int i = 0; i < 8 * scale; ++i) {
+			int qx = x + i;
+			uint32_t c = px[(j / scale) * 8 + i / scale];
+			if (c && qx >= 0 && qx < raw.w) raw.px[qy * raw.stride + qx] = c;
+		}
+	}
 }
 
 /* A ROM tile into memory: its colours in RGBA8888, colour 0 left as it was */

@@ -85,6 +85,7 @@ typedef struct {
 	uint32_t chip_icon_pal;   /* the chips' icons' palette (their tiles: each record's BN6_CHIP_ICON_PTR) */
 	uint32_t element_icons;   /* 16x16 element icons, 2x2 tiles each, by a record's BN6_CHIP_ELEMENT */
 	uint32_t element_icon_pal; /* ... their palette */
+	uint32_t enemy_names[2];  /* text archives: the viruses' names by BN6_T1_NAME_ID, the Navis' past 0xFF */
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */

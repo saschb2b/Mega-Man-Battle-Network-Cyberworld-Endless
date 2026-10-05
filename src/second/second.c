@@ -7,14 +7,18 @@
 #include "second.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "bn6.h"
 #include "director.h"
 #include "emu.h"
+#include "flags.h"
 #include "guardians.h"
 #include "guest.h"
 #include "platform.h"
+#include "powers.h"
 #include "run.h"
+#include "second_battle.h"
 #include "second_folder.h"
 #include "second_frame.h"
 #include "second_state.h"
@@ -22,7 +26,7 @@
 SecondState S2;
 
 /* What the second screen draws: a panel, which several screens may share */
-typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER } Panel;
+typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE } Panel;
 static Panel panel;
 static int panel_since;
 
@@ -64,6 +68,8 @@ static SecondContext context_now(void) {
  * map on a layer, dark in the town */
 static Panel panel_for(SecondContext c) {
 	if (c == SECOND_FOLDERS || c == SECOND_EDIT) return PANEL_FOLDER;
+	/* (an older net's battle runs in BN5's memory: the map then) */
+	if (c == SECOND_BATTLE && !guest_active()) return PANEL_BATTLE;
 	return c == SECOND_DARK || S2.town ? PANEL_DARK : PANEL_MAP;
 }
 
@@ -87,6 +93,72 @@ static void read_folder(void) {
 	if (S2.since % 15 == 0) S2.npack = director_pack_now(S2.pack, S2.pack_count, (int)(sizeof S2.pack / sizeof *S2.pack));
 }
 
+/* The Cross under CROSSSELECT's cursor at `row`: the Crosses MegaMan has,
+ * in Gregar's order, less the one he is in (`form`); 0 for none */
+static int cross_at(int row, int form) {
+	for (int navi = 1; navi <= 5; ++navi) {
+		if (!powers_cross_owned(navi) || navi == form) continue;
+		if (row-- == 0) return navi;
+	}
+	return 0;
+}
+
+/* The Custom screen: its hand, the card it shows (the chip under the
+ * cursor, CROSSSELECT's Cross, Beast Out on its emblem, the picks on OK)
+ * and the picks in order */
+static void read_custom(void) {
+	S2.nhand = emu_read8(BN6_CUSTOM_HAND);
+	if (S2.nhand > 10) S2.nhand = 10;
+	for (int i = 0; i < S2.nhand; ++i) S2.hand[i] = emu_read16(BN6_BATTLE_DECK + 2u * (uint32_t)i);
+	int mode = emu_read8(BN6_CUSTOM_MODE);
+	bool crossing = mode == BN6_MODE_CROSS_OPEN || mode == BN6_MODE_CROSS || mode == BN6_MODE_CROSS_SHUT || mode == BN6_MODE_CROSS_TAKEN;
+	S2.cross_under = crossing ? cross_at(emu_read8(BN6_CUSTOM_CROSS_ROW), S2.form) : 0;
+	S2.cursor = emu_read8(BN6_CUSTOM_CURSOR);
+	S2.card = S2.cross_under ? CARD_CROSS : S2.cursor == BN6_CUSTOM_EMBLEM ? CARD_BEAST : S2.cursor < S2.nhand ? CARD_CHIP : CARD_PICKS;
+	S2.npicks = 0;
+	for (int k = 0; k < emu_read8(BN6_CUSTOM_PICKED) && k < 5; ++k) {
+		int slot = emu_read8(BN6_CUSTOM_PICKS + (uint32_t)k);
+		if (slot < S2.nhand) S2.picks[S2.npicks++] = slot;
+	}
+}
+
+/* The fight: MegaMan's Cross or Beast Out and his emotion, the chips he
+ * holds after OK, the enemies in play, and the guardian's */
+static void read_fight(void) {
+	S2.form = emu_read8(BN6_BATTLE_FORM);
+	S2.beast_turns = emu_read8(BN6_BATTLE_BEAST_TURNS);
+	S2.beast = flag_get(BN6_FLAG_BEAST_OUT);
+	S2.synchro = emu_read8(BN6_BATTLE_MOOD) == BN6_MOOD_SYNCHRO;
+	S2.queue_at = emu_read8(BN6_BATTLE_HAND + BN6_HAND_AT);
+	for (S2.nqueue = 0; S2.nqueue < BN6_HAND_MAX; ++S2.nqueue) {
+		uint16_t id = emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + 2u * (uint32_t)S2.nqueue);
+		if (id == 0xFFFF) break;
+		S2.queue[S2.nqueue] = id;
+		S2.queue_power[S2.nqueue] = emu_read16(BN6_BATTLE_HAND + BN6_HAND_POWERS + 2u * (uint32_t)S2.nqueue);
+		S2.queue_bonus[S2.nqueue] = emu_read16(BN6_BATTLE_HAND + BN6_HAND_BONUS + 2u * (uint32_t)S2.nqueue);
+	}
+	S2.nfoes = 0;
+	for (uint32_t i = 0; i < BN6_T1_COUNT && S2.nfoes < (int)(sizeof S2.foe / sizeof *S2.foe); ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		/* (an enemy with HP: a guardian's helpers have none, "TestVirs") */
+		if (!(emu_read8(o + BN6_T1_IN_PLAY) & 1) || emu_read8(o + BN6_T1_ALLIANCE) != 1 || !emu_read16(o + BN6_T1_HP)) continue;
+		S2.foe[S2.nfoes].name = emu_read16(o + BN6_T1_NAME_ID);
+		S2.foe[S2.nfoes].hp = emu_read16(o + BN6_T1_HP);
+		S2.foe[S2.nfoes].element = emu_read8(o + BN6_T1_ELEMENT);
+		S2.foe[S2.nfoes++].max_hp = emu_read16(o + BN6_T1_MAX_HP);
+	}
+	/* (what MegaMan told at the arena, where he knows the guardian) */
+	S2.guardian = director_guardian_battle();
+	S2.tip = S2.guardian && guardian_known(S2.guardian) ? guardian_tip(S2.guardian) : NULL;
+}
+
+/* The battle: the Custom screen while it is open, and the fight */
+static void read_battle(void) {
+	S2.custom = emu_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM;
+	read_fight();
+	if (S2.custom) read_custom();
+}
+
 void second_update(void) {
 	SecondContext c = context_now();
 	if (c != S2.context) S2.since = 0;
@@ -100,6 +172,7 @@ void second_update(void) {
 	snprintf(S2.area, sizeof S2.area, "%s", S2.town ? "" : guardian_area_in_text(run.biome, run.side_kind));
 	Panel p = panel_for(c);
 	if (p == PANEL_FOLDER) read_folder();
+	if (p == PANEL_BATTLE) read_battle();
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
@@ -107,12 +180,26 @@ void second_update(void) {
 	if (panel_since < 2) platform_second_screen_soon();
 }
 
+/* what the last picture showed: the panel and the state it drew from */
+static Panel drawn_panel;
+static SecondState drawn;
+
+bool second_changed(void) {
+	if (panel == PANEL_MAP || panel != drawn_panel || panel_since < 2) return true;
+	SecondState now = S2;
+	now.since = drawn.since;
+	return memcmp(&now, &drawn, sizeof now) != 0;
+}
+
 bool second_draw(int w, int h) {
+	drawn_panel = panel;
+	drawn = S2;
 	if (panel == PANEL_DARK) return false;
-	static const char *const title[] = { [PANEL_MAP] = "NET", [PANEL_FOLDER] = "FOLDER" };
+	static const char *const title[] = { [PANEL_MAP] = "NET", [PANEL_FOLDER] = "FOLDER", [PANEL_BATTLE] = "BATTLE" };
 	const char *t = S2.context == SECOND_EDIT ? "FOLDER EDIT" : title[panel];
 	SDL_Rect body = second_frame(w, h, t, panel_since == 0 ? 24 : panel_since == 1 ? 8 : 0);
 	if (panel == PANEL_FOLDER) second_folder_draw(body);
+	else if (panel == PANEL_BATTLE) second_battle_draw(body);
 	else director_draw_layer_map(body.x, body.y, body.w, body.h);
 	return true;
 }

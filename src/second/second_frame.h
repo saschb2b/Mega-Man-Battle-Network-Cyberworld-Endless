@@ -17,7 +17,10 @@
 #define PET_EXIT      rgba(0, 49, 74, 255)
 #define PET_GOLD      rgba(255, 214, 16, 255)
 #define PET_WHITE     rgba(247, 255, 247, 255)
+#define PET_DIM       rgba(107, 156, 173, 255)   /* what has passed: a chip used */
 
+/* A dark slot, BN6's for a value, w x h from (x, y) */
+void second_slot(int x, int y, int w, int h);
 /* The frame in w x h: the header with `title` on its left (`slide` pixels
  * short of its place, as it slides in) and the place on its right, the
  * strip of HP, Zenny and BugFrags under it; the body left for the panel */

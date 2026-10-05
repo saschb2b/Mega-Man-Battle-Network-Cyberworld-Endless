@@ -31,6 +31,10 @@ typedef enum {
 	SECOND_CONTEXTS
 } SecondContext;
 
+/* What the Custom screen's card shows: the chip under the cursor, the
+ * Cross under CROSSSELECT's, Beast Out on its emblem, the picks on OK */
+typedef enum { CARD_CHIP, CARD_CROSS, CARD_BEAST, CARD_PICKS } SecondCard;
+
 typedef struct {
 	SecondContext context;
 	int since;                    /* frames since it came */
@@ -49,6 +53,24 @@ typedef struct {
 	uint16_t pack[64];            /* the pack's chips (chip | code << 9) ... */
 	uint8_t pack_count[64];       /* ... their copies */
 	int npack;
+	/* a battle (issue #74): its Custom screen, MegaMan's hand, the enemies */
+	bool custom;                  /* the Custom screen open */
+	SecondCard card;              /* ... the card it shows */
+	uint16_t hand[10];            /* ... its chips (chip | code << 9) */
+	int nhand;
+	int cursor;                   /* ... the slot under its cursor (a chip's card) */
+	int cross_under;              /* ... CROSSSELECT's Cross under its cursor (navi 1-5) */
+	int picks[5], npicks;         /* ... the slots picked, in order */
+	uint16_t queue[BN6_HAND_MAX], queue_power[BN6_HAND_MAX], queue_bonus[BN6_HAND_MAX];   /* the chips held after OK */
+	int nqueue, queue_at;         /* ... and the one up next */
+	int form;                     /* MegaMan's Cross or Beast Out (BN6_BATTLE_FORM) */
+	int beast_turns;              /* ... the EmotionCounter */
+	bool beast;                   /* ... Beast Out his (BN6_FLAG_BEAST_OUT) */
+	bool synchro;                 /* ... Full Synchro */
+	int guardian;                 /* the guardian fought (navi), 0 none */
+	const char *tip;              /* ... what MegaMan knows of him, chat boxes; NULL none */
+	struct { uint16_t name; int hp, max_hp, element; } foe[8];
+	int nfoes;
 } SecondState;
 
 extern SecondState S2;

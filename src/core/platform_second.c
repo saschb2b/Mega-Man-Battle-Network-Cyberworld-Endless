@@ -24,15 +24,33 @@ int platform_second_parts(uint64_t *ticks) {
 
 static SecondScreen second;
 #if defined(__3DS__) || defined(__ANDROID__)
+static SecondChanged second_changed;
 static bool second_soon;   /* a draw at the next frame (platform_second_screen_soon) */
+static uint64_t drawn_at;  /* the frame of the last draw */
 
 void platform_second_screen_soon(void) { second_soon = true; }
+
+/* Whether a draw is due at this frame: asked for, or the pace's frame and
+ * a picture that changed since the last (or a second old: Android makes
+ * its display's window again after the screen was off). A battle's or the
+ * folder's panel changes as rarely as the game's state does, and its draw
+ * then costs nothing, nor the copy to the screen. */
+static bool second_due(unsigned pace) {
+	if (second_soon) return true;
+	if (P.frame % pace) return false;
+	return !second_changed || second_changed() || P.frame - drawn_at >= 60;
+}
 #else
 void platform_second_screen_soon(void) {}
 #endif
 
-void platform_second_screen(SecondScreen draw) {
+void platform_second_screen(SecondScreen draw, SecondChanged changed) {
 	second = draw;
+#if defined(__3DS__) || defined(__ANDROID__)
+	second_changed = changed;
+#else
+	(void)changed;
+#endif
 	/* (none: black at once, the scene that drew it gone; the title keeps
 	 * it dark, where the 3DS had kept the run's last map) */
 	if (draw) return;
@@ -71,8 +89,9 @@ bool platform_save_second_screen(const char *path) {
  * present, it made that frame late, 2 ms of 3DS time six times a second) */
 void platform_second_screen_draw(void) {
 #if defined(__3DS__)
-	if (P.frame % 10 && !second_soon) return;
+	if (!second_due(10)) return;
 	second_soon = false;
+	drawn_at = P.frame;
 	int pitch;
 	uint32_t *px = present3ds_bottom(&pitch);
 	uint64_t t0 = SDL_GetPerformanceCounter();
@@ -85,8 +104,9 @@ void platform_second_screen_draw(void) {
 	 * fifth frame, so MegaMan's mark keeps up with his walk, at the size
 	 * picked for the display, handed to Java to show; drawn in 0.15 ms and
 	 * handed over in 0.1 in the emulator, on a desktop's core) */
-	if (P.frame % 5 && !second_soon) return;
+	if (!second_due(5)) return;
 	second_soon = false;
+	drawn_at = P.frame;
 	int w, h;
 	uint32_t *px = second_android_begin(&w, &h);
 	if (!px) return;

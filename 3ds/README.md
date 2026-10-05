@@ -33,7 +33,11 @@ GBA core alone takes longer than a frame there.
   frame's edge for those he senses. It is SELECT's map, larger; SELECT
   still opens it over the picture. In the folder editor it shows the
   whole folder as BN6's chip icons, the cursor's chip lit, with the
-  folder's codes, elements and Mega and Giga chips, and the pack. The
+  folder's codes, elements and Mega and Giga chips, and the pack. In a
+  battle it shows the chip under the Custom screen's cursor as a large
+  card with its Library text, CROSSSELECT's Cross and Beast Out with
+  what each gives, and while MegaMan fights, his chips in order, his
+  Cross, Beast Out and Full Synchro, and the enemies with their HP. The
   town and the title leave the bottom screen dark.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
@@ -73,14 +77,17 @@ What differs from the other builds:
   240 x 160 canvas into memory the GPU reads; the GPU's copy engine moves it
   into a texture and citro2d draws it. SDL's own present copied and turned
   every pixel on the CPU.
-- **The bottom screen** (`src/core/platform.c`): every tenth frame, and at
-  once when its panel changes, the second screen (`src/second/`) draws
-  the PET's frame and its panel straight into the memory the GPU copies
+- **The bottom screen** (`src/core/platform_second.c`): every tenth frame,
+  and at once when its panel changes, the second screen (`src/second/`)
+  draws the PET's frame and its panel straight into the memory the GPU copies
   from (`gfx_draw_into`: its rectangles and
   text, blended as the software renderer blends them), and `present_3ds.c`
   draws it on the bottom screen once for each of the screen's two buffers,
-  then leaves it until the next. Through the software renderer and read
-  back, the map had taken 20 ms, a frame lost at each redraw.
+  then leaves it until the next. A panel the game's state left as it was
+  (a battle's, the folder's: not the map, where MegaMan's mark pulses) is
+  not drawn again, nor copied, but once a second. Through the software
+  renderer and read back, the map had taken 20 ms, a frame lost at each
+  redraw.
   `--second-shot FRAME:PATH` saves the same picture on any build, and
   `frame_log`'s lines give the map's own time.
 - **The GBA core** (`src/emu/emu.c`) runs on the New 3DS's third core where

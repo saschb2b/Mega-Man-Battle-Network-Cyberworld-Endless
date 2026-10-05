@@ -12,5 +12,8 @@
 void second_update(void);
 /* The second screen in w x h (platform_second_screen's): false for dark. */
 bool second_draw(int w, int h);
+/* Whether its picture would differ from the last drawn (the map's always
+ * may: MegaMan's mark pulses on it). */
+bool second_changed(void);
 
 #endif

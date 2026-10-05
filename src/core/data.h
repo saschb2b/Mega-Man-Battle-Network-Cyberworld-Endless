@@ -72,6 +72,8 @@ const ChipDef *chip_def(int rom_id);
 void chip_info(int rom_id, ChipInfo *out);
 /* Chip `rom_id`'s description in BN6's words ("Cannon to attack 1 enemy"). */
 void chip_desc(int rom_id, char *out, size_t outlen);
+/* A battle object's name by its NameID (BN6_T1_NAME_ID): "Mettaur" */
+void enemy_name(int name_id, char *out, size_t outlen);
 
 /* The All * helper's chips (docs/META.md), in BN6's own layouts: a folder
  * entry (chip | code << 9) in *, an empty one as it is; and a pack entry

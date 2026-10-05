@@ -19,6 +19,9 @@ void director_before_boot(void);
 bool director_in_town(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
+/* The guardian whose battle runs (his navi index, guardians.h), 0 in any
+ * other battle or none. */
+int director_guardian_battle(void);
 /* What the drawing reads of the game, taken after each frame, before the
  * update: on a 3DS the next frame runs on another core while this one is
  * drawn, and a read of the game then waits for it. */

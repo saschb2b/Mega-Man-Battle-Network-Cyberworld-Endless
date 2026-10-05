@@ -14,8 +14,7 @@
 #define STRIP_H 16
 #define BODY_Y  44   /* the body, to the bottom */
 
-/* A dark slot, BN6's for a value */
-static void slot(int x, int y, int w, int h) {
+void second_slot(int x, int y, int w, int h) {
 	fill_rect(x, y, w, h, PET_SLOT_EDGE);
 	fill_rect(x + 1, y + 1, w - 2, h - 2, PET_SLOT);
 }
@@ -26,7 +25,7 @@ static void place(int w) {
 	if (!S2.town) snprintf(layer, sizeof layer, "Layer %d", S2.depth);
 	int lw = text_width(layer), aw = text_width(S2.area), gap = lw && aw ? 8 : 0;
 	int x = w - 4 - (lw + gap + aw) - 12;
-	slot(x, 2, w - 4 - x, HEAD_H - 4);
+	second_slot(x, 2, w - 4 - x, HEAD_H - 4);
 	text_draw(x + 6, 4, S2.area, PET_CYAN_HI, TEXT_LEFT);
 	text_draw(w - 10, 4, layer, PET_WHITE, TEXT_RIGHT);
 }
@@ -42,7 +41,7 @@ static void strip(int w) {
 	int sw = (w - 16) / 3;
 	for (int i = 0; i < 3; ++i) {
 		int x = 4 + i * (sw + 4);
-		slot(x, STRIP_Y, sw, STRIP_H);
+		second_slot(x, STRIP_Y, sw, STRIP_H);
 		text_draw(x + 5, STRIP_Y + 2, name[i], PET_GOLD, TEXT_LEFT);
 		text_draw(x + sw - 5, STRIP_Y + 2, v[i], PET_WHITE, TEXT_RIGHT);
 	}

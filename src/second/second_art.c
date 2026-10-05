@@ -14,6 +14,7 @@
 
 #define ELEMENTS 11      /* Fire .. Null: BN6_CHIP_ELEMENT's values */
 #define ICON_BYTES 128   /* 2 x 2 tiles of 4 bits a pixel */
+#define ART_TILES 42     /* a card's picture: 7 x 6 tiles, uncompressed, in its record's palette */
 
 /* the chip's record, NULL past the ROM */
 static const uint8_t *record(int chip) {
@@ -41,6 +42,14 @@ void second_chip_icon(int chip, int x, int y) {
 	uint32_t at = get32(r + BN6_CHIP_ICON_PTR);
 	if (at < 0x08000000u || at - 0x08000000u + ICON_BYTES > ROM_SIZE) return;
 	rom_tiles(at - 0x08000000u, R.layout->chip_icon_pal, x, y, 2, 2, 0);
+}
+
+void second_chip_art(int chip, int x, int y, int scale) {
+	const uint8_t *r = record(chip);
+	if (!r) return;
+	uint32_t art = get32(r + BN6_CHIP_IMAGE_PTR), pal = get32(r + BN6_CHIP_PALETTE_PTR);
+	if (art < 0x08000000u || pal < 0x08000000u || art - 0x08000000u + ART_TILES * 32 > ROM_SIZE || pal - 0x08000000u + 32 > ROM_SIZE) return;
+	rom_tiles_scaled(art - 0x08000000u, pal - 0x08000000u, x, y, 7, 6, scale);
 }
 
 void second_element_icon(int element, int x, int y) {

@@ -34,8 +34,9 @@ On a handheld with a second display, above all the AYN Thor (1240 x 1080
 below its 1920 x 1080 screen), the second one is the PET beside the game,
 as the 3DS's bottom screen is: framed like BN6's PET screens, with HP,
 Zenny and BugFrags, on the net the layer's map, always open (the floor
-MegaMan has seen, the way on, what he has come near or senses), and in
-the folder editor the whole folder.
+MegaMan has seen, the way on, what he has come near or senses), in the
+folder editor the whole folder, and in a battle the Custom screen's chip
+and the fight.
 The town and the title leave it black. A phone without a second display
 plays as before.
 
@@ -60,8 +61,10 @@ plays as before.
   back while the game is away. After the screen was off it is made again
   0.7 seconds after the game returns: one shown as the screen woke could
   stay black for good (chrono-duo found it on a Thor Lite).
-- **The picture:** every fifth frame, and at once when its panel changes,
-  the game draws the second screen (`src/second/`, the 3DS's own) into
+- **The picture:** every fifth frame where it changed (the map's always
+  may; a battle's or the folder's panel only with the game's state, and
+  once a second all the same), and at once when its panel changes, the
+  game draws the second screen (`src/second/`, the 3DS's own) into
   memory at the display's size at the largest whole scale that still fits
   the 3DS's 320 x 240 (the Thor's lower screen: 413 x 360, shown at 3x),
   turns it into Android's byte order and hands it over in a direct

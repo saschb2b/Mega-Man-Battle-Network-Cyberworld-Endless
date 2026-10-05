@@ -15,5 +15,7 @@ int second_chip_element(int chip);
 void second_chip_icon(int chip, int x, int y);
 /* An element's icon, 16 x 16 from (x, y), as the folder's list shows it */
 void second_element_icon(int element, int x, int y);
+/* A chip's picture, its card's (56 x 48), `scale` times as large */
+void second_chip_art(int chip, int x, int y, int scale);
 
 #endif

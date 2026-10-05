@@ -163,6 +163,10 @@ void chip_desc(int rom_id, char *out, size_t outlen) {
 	else rom_desc(R.layout->chip_descs[1], rom_id - 256, out, outlen);
 }
 
+void enemy_name(int name_id, char *out, size_t outlen) {
+	rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
+}
+
 uint16_t chip_entry_star(uint16_t entry) {
 	return entry == 0xFFFF || !(entry & 0x1FF) ? entry : (uint16_t)((entry & 0x1FF) | CHIP_CODE_STAR << 9);
 }

@@ -81,6 +81,14 @@
 #define BN6_CUSTOM_CURSOR     (BN6_CUSTOM_SCREEN + 0x07) /* the slot under the cursor, 0-4 the top row, BN6_CUSTOM_OK on OK */
 #define BN6_CUSTOM_PICKED     (BN6_CUSTOM_SCREEN + 0x08) /* the chips picked */
 #define BN6_CUSTOM_OK         10          /* BN6_CUSTOM_CURSOR: on OK */
+#define BN6_CUSTOM_EMBLEM     11          /* BN6_CUSTOM_CURSOR: on the Beast Out emblem under OK */
+#define BN6_CUSTOM_MODE       (BN6_CUSTOM_SCREEN + 0x01) /* what it shows: BN6_MODE_CHIPS, CROSSSELECT (BN6_MODE_CROSS_*), 0x48 Beast Out chosen */
+#define BN6_MODE_CHIPS        0x04        /* BN6_CUSTOM_MODE: the chips */
+#define BN6_MODE_CROSS_OPEN   0x4C        /* BN6_CUSTOM_MODE: CROSSSELECT sliding open, ... */
+#define BN6_MODE_CROSS_SHUT   0x50        /* ... sliding shut, */
+#define BN6_MODE_CROSS        0x54        /* ... open, */
+#define BN6_MODE_CROSS_TAKEN  0x5C        /* ... a Cross chosen in it */
+#define BN6_CUSTOM_CROSS_ROW  (BN6_CUSTOM_SCREEN + 0x1B) /* CROSSSELECT's cursor: its row, of the Crosses MegaMan has in Gregar's order (BN6_FLAG_HEAT_CROSS on), less the one he is in */
 #define BN6_BATTLE_DECK       0x0203CDB0u /* the battle's folder as it is drawn, u16 chip | code << 9 (26 *); used chips leave it, 0xFFFF after the rest */
 #define BN6_PA_STAR_LIMIT     0x08029606u /* bn6f sub_80295C8, a Program Advance of one chip in codes in a row: cmp r2, #1 (0x2A01), one * of its three at most */
 #define BN6_PA_STAR_ANY       0x2A03      /* ... cmp r2, #3: three *, the All * helper's (docs/ROM_DATA.md) */
@@ -108,6 +116,23 @@
 #define BN6_T1_HP             0x24        /* HP and MaxHP, u16 */
 #define BN6_T1_MAX_HP         0x26
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
+#define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
+#define BN6_T1_ELEMENT        0x0E        /* Element */
+#define BN6_BATTLE_HAND       0x020349C0u /* MegaMan's hand after OK (bn6f getBattleHandAddr_8010018; the enemies' 0x50 on): */
+#define BN6_HAND_AT           0x00        /* ... the chip up next, an index */
+#define BN6_HAND_CHIPS        0x02        /* ... the chips' ids, u16, six at most, 0xFFFF after them */
+#define BN6_HAND_POWERS       0x0E        /* ... their powers, u16 */
+#define BN6_HAND_BONUS        0x1A        /* ... the power Atk+ chips add to each, u16 (the HUD's "Sword 80+10") */
+#define BN6_HAND_MAX          6           /* ... six chips at most */
+#define BN6_CUSTOM_PICKS      0x02036508u /* the Custom screen's chips picked: their slots in its hand, in order (BN6_CUSTOM_PICKED of them) */
+#define BN6_BATTLE_NAVI       0x0203CE00u /* eBattleNaviStats0: MegaMan's NaviStats as a battle copies them (bn6f GetBattleNaviStatsAddr), */
+#define BN6_BATTLE_MOOD       (BN6_BATTLE_NAVI + 0x0E) /* Mood: BN6_MOOD_SYNCHRO Full Synchro, 0 dark (bn6f's emotion getter, Falzar 0x08015B64) */
+#define BN6_MOOD_SYNCHRO      0xFF        /* BN6_BATTLE_MOOD: Full Synchro, the next chip's power x2 (BN6's tutorial) */
+#define BN6_BATTLE_BEAST_TURNS (BN6_BATTLE_NAVI + 0x21) /* BeastOutCounter: the EmotionCounter, 3 as a battle starts, one less each Beast Out turn; 0 tired */
+#define BN6_BATTLE_FORM       (BN6_BATTLE_NAVI + 0x2C) /* Transformation: 0 none, 1-5 Gregar's Crosses (BN6_FLAG_HEAT_CROSS's order), BN6_FORM_BEAST, a Cross's Beast Out, BN6_FORM_BEAST_OVER */
+#define BN6_FORM_BEAST        11          /* BN6_BATTLE_FORM: Beast Out; 12 + a Cross: Beast Out in that Cross */
+#define BN6_FORM_CROSS_BEAST  12          /* BN6_BATTLE_FORM: this + the Cross (1-5), Beast Out in a Cross */
+#define BN6_FORM_BEAST_OVER   23          /* BN6_BATTLE_FORM: BeastOver, the Cybeast's power out of hand */
 #define BN6_T3_OBJECTS        0x0203CFE0u /* eT3BattleObject0: the battle's attacks and effects, BN6_T1_SIZE each, its fields as T1's */
 #define BN6_T3_COUNT          0x20        /* 32 of them */
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's (NaviStats) */

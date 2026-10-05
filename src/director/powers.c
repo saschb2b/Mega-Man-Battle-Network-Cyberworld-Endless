@@ -63,6 +63,12 @@ const char *powers_cross_weakness(int navi) {
 	return NULL;
 }
 
+bool powers_cross_owned(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) return flag_get(crosses[i].flag);
+	return false;
+}
+
 void powers_bring(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi) flag_set(crosses[i].flag);

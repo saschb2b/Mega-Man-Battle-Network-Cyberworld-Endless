@@ -61,6 +61,8 @@ void sprite_draw_frame(Sprite *s, int anim, int frame, int x, int y, bool flip, 
 uint32_t gfx_lz_ref(uint32_t lz);
 /* A block of consecutive tiles (w x h tiles, row-major, as sprites use). */
 void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int flip);
+/* ... `scale` times as large, unflipped (a chip's card on the second screen) */
+void rom_tiles_scaled(uint32_t first, uint32_t pal, int x, int y, int w, int h, int scale);
 /* The game's character code for a byte of text (1-5 the version marks),
  * -1 where it has none; the battle and chat fonts share the codes. */
 int text_code(unsigned char ch);
