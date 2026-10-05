@@ -226,6 +226,8 @@ void home_resume(void) {
 	D.portal_taken = false;
 }
 
+void director_dev_hush_home(void) { D.intro_said = D.hp_said = true; }
+
 void director_dev_home(void) {
 	if (!home_begin(NULL)) return;
 	int x, y;

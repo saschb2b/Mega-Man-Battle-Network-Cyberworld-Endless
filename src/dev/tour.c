@@ -173,6 +173,19 @@ static void town_spot(int i, int *x, int *y) {
 
 static void town_update(void) {
 	if (!director_in_town()) { T.t = 0; return; }
+	/* (from Lan's room, where a run begins, into the town's first place:
+	 * no words of home's as it goes) */
+	director_dev_hush_home();
+	if (T.spot == 0 && !T.entered) {
+		/* (once the run's own warp into the room has played) */
+		if (++T.t < 30 || !director_on_map()) return;
+		int x, y;
+		town_spot(0, &x, &y);
+		emu_warp(town_info()->group, town_info()->number, x, y, 2);
+		T.entered = true;
+		T.t = 0;
+		return;
+	}
 	if (++T.t < 120) return;
 	snprintf(devtools_shot, sizeof devtools_shot, "%s/town_%d.bmp", T.dir, T.spot);
 	if (++T.spot >= TOWN_SPOTS) { T.on = false; P.quit = true; return; }
