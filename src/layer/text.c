@@ -217,6 +217,13 @@ int ta_build(const TextArchive *t, uint8_t *out) {
 	return head + t->len;
 }
 
+uint32_t ta_hash(const TextArchive *t) {
+	uint32_t h = 2166136261u;
+	for (int i = 0; i < t->len; ++i) h = (h ^ t->buf[i]) * 16777619u;
+	for (int i = 0; i < t->n; ++i) h = (h ^ t->off[i]) * 16777619u;
+	return h;
+}
+
 uint32_t ta_commit(TextArchive *t) {
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	return mapslot_alloc(out, ta_build(t, out));

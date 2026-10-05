@@ -70,6 +70,9 @@ int ta_rom_pages(const uint8_t *a, int n, int i, uint8_t *out, int max);
  * (TEXT_ARCHIVE_MAX bytes); returns their length. */
 #define TEXT_ARCHIVE_MAX (TEXT_MAX_SCRIPTS * 2 + TEXT_MAX_BYTES)
 int ta_build(const TextArchive *t, uint8_t *out);
+/* The archive's bytes as a hash (FNV-1a), for the debug log: a change that
+ * should leave the chats as they were shows whether it did. */
+uint32_t ta_hash(const TextArchive *t);
 /* Writes the archive; bus address or 0. */
 uint32_t ta_commit(TextArchive *t);
 

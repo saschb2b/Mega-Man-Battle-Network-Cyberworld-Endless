@@ -22,6 +22,7 @@
 #include "bn6.h"
 #include "bytes.h"
 #include "coords.h"
+#include "debug.h"
 #include "emu.h"
 #include "lz.h"
 #include "mapslot.h"
@@ -1057,6 +1058,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	T.info.intro = ta_talk(&text, intro(), FACE_MEGAMAN);
 	uint32_t archive = ta_commit(&text);
 	T.info.talk_archive = archive;
+	if (emu_debug_on()) fprintf(stderr, "town text hash %08x\n", ta_hash(&text));
 	for (int i = 0; i < T.style->nfolk && npcs.n < 16; ++i) {
 		if (T.folk_at[i][0] == 1 << 20) continue;
 		const Folk *f = &T.style->folk[i];
@@ -1073,6 +1075,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 		if (T.style->checks[n]) check_script[n] = (uint8_t)ta_talk(&words, T.style->checks[n], FACE_NONE);
 	static uint8_t archive_bytes[TEXT_ARCHIVE_MAX];
 	int archive_len = ta_build(&words, archive_bytes);
+	if (emu_debug_on()) fprintf(stderr, "town checks hash %08x\n", ta_hash(&words));
 	/* trees and the statue: the game's own objects (20-byte spawn records) */
 	uint8_t objs[(MAX_OBJS + 1) * 20];
 	for (int i = 0; i < T.nobj; ++i) {

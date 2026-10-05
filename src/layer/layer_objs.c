@@ -504,6 +504,7 @@ static uint32_t commit_text(TextArchive *text, int group, int number) {
 	int block_talk[2];
 	blockers_talks(text, block_talk);
 	uint32_t archive = text->n ? ta_commit(text) : 0;
+	if (emu_debug_on()) fprintf(stderr, "layer text hash %08x\n", ta_hash(text));
 	blockers_install();
 	blockers_checks(group, number, text, block_talk);
 	return archive;
