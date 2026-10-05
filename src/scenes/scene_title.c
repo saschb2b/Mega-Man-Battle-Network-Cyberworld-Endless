@@ -13,6 +13,7 @@
 
 #include "touch.h"
 #include "audio.h"
+#include "controls.h"
 #include "backdrop.h"
 #include "chatbox.h"
 #include "cinema.h"
@@ -306,6 +307,29 @@ static void enter(void) {
 
 static void jack_in(void);
 
+/* SELECT, on the title and its menu: the controls screen (issue #37; the
+ * 3DS's buttons are the console's own); with L held, the developer's
+ * sprite gallery, which SELECT alone opened before. True when it took
+ * the press. */
+static bool select_pressed(void) {
+	if (!btn_pressed(BTN_SELECT)) return false;
+#ifndef __3DS__
+	if (!btn_held(BTN_L)) {
+		controls_open();
+		audio_sfx(SFX_SELECT);
+		return true;
+	}
+#endif
+	scene_set(&scene_gallery);
+	return true;
+}
+
+/* PRESS START: START or A (after a moment), or SELECT */
+static void press_start(void) {
+	if (S.t > 20 && (btn_pressed(BTN_START) || btn_pressed(BTN_A))) { S.pressed = S.t; audio_sfx(SFX_SELECT); }
+	select_pressed();
+}
+
 /* (a first run starts as the net comes: nothing to choose yet. A run
  * given up for a NEW GAME counts as none, but what it opened is there: a
  * first run deleted ElecMan, and the setup with his Cross never came) */
@@ -575,11 +599,7 @@ static void update(void) {
 		}
 		return;
 	}
-	if (!S.pressed) {
-		if (S.t > 20 && (btn_pressed(BTN_START) || btn_pressed(BTN_A))) { S.pressed = S.t; audio_sfx(SFX_SELECT); }
-		if (btn_pressed(BTN_SELECT)) scene_set(&scene_gallery);
-		return;
-	}
+	if (!S.pressed) { press_start(); return; }
 	if (!S.menu) {
 		if (S.t - S.pressed >= MENU_AFTER) S.menu = S.t;
 		return;
@@ -602,6 +622,7 @@ static void update(void) {
 		if (!ok) return;
 		S.confirm = false;
 	} else {
+		if (select_pressed()) return;
 		int items = S.has_save ? 2 : 1;
 		if (items > 1 && (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN))) { S.cursor ^= 1; audio_sfx(SFX_CURSOR); }
 		if (!ok) return;
@@ -707,6 +728,21 @@ static void found_draw(int x0, int y0) {
 	size_t m = strlen(s);
 	snprintf(s + m, sizeof s - m, n > 1 ? " found: their nets join ours" : " found: its net joins ours");
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
+}
+
+/* The word under the picture: (a keyboard's Start, where no controller is:
+ * a PC player had no word of which key it is) ENTER before the menu, and
+ * with the menu where the controls are set, on the player's own SELECT
+ * (controls_word: "R", "Minus", "SELECT") */
+static void hint_draw(int x0, int y0) {
+	SDL_Color grey = rgba(150, 160, 190, 255);
+	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
+#ifndef __3DS__
+	if (!S.menu || S.confirm) return;
+	char hint[48];
+	snprintf(hint, sizeof hint, "%s: Controls", controls_word(BTN_SELECT));
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, hint, grey, 1);
+#endif
 }
 
 /* the top: the marks and the note over them, neither over a run's summary
@@ -837,9 +873,7 @@ static void draw(void) {
 		for (int i = 0; i < 4; ++i) rom_tiles(text + (uint32_t)(1 + i * 8) * 32, T.text_pal, x0 + 52 + i * 32, y0 + 120, 4, 2, 0);
 		rom_tiles(text + 33u * 32, T.text_pal, x0 + 180, y0 + 120, 1, 2, 0);
 	}
-	/* (a keyboard's Start, where no controller is: a PC player had no word
-	 * of which key it is) */
-	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", rgba(150, 160, 190, 255), 1);
+	hint_draw(x0, y0);
 	if (S.menu) {
 		/* NEW GAME (tiles 35-54) and CONTINUE (55-74): 32x16, 32x16, 16x16 */
 		int n = S.has_save ? 2 : 1;

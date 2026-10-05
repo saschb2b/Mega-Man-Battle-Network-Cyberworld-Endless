@@ -30,6 +30,8 @@
 #include "minifont.h"
 #include "meta.h"
 #include "touch.h"
+#include "controls.h"
+#include "pads.h"
 #include "emu.h"
 #include "guest.h"
 #ifdef CW_IOS
@@ -630,7 +632,7 @@ static void taps_tick(void) {
 		int len = t->drag ? 20 : 6, f = (int)P.frame - t->frame;
 		if (f < 0 || f > len) continue;
 		uint32_t type = f == 0 ? SDL_FINGERDOWN : f == len ? SDL_FINGERUP : SDL_FINGERMOTION;
-		touch_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * (float)f / len, t->y0 + (t->y1 - t->y0) * (float)f / len);
+		platform_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * (float)f / len, t->y0 + (t->y1 - t->y0) * (float)f / len);
 	}
 }
 
@@ -863,8 +865,10 @@ static bool game_frame(void) {
 	script_tick();
 	platform_poll();
 	taps_tick();
-	/* (the touch controls' menu pauses the game under it) */
-	if (current && current->update && !touch_paused()) current->update();
+	/* (the touch controls' menu and the controls screen pause the game
+	 * under them) */
+	if (controls_shown()) controls_update();
+	else if (current && current->update && !touch_paused()) current->update();
 	/* (BN5's boot begun as the game starts, at its boot screen or title,
 	 * as early as it can be: guest.h) */
 	if (current != &scene_emu) guest_warm();
@@ -873,6 +877,7 @@ static bool game_frame(void) {
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
+	controls_draw();
 	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	for (int i = 0; i < shot_count; ++i)
@@ -981,6 +986,23 @@ static void web_frame(void) {
 	}
 }
 #endif
+
+/* The player's files in the data folder, none headless (a test's input is
+ * its own): the keys, the controllers' map, the settings, the touch
+ * controls */
+static void player_files(bool headless, int smooth_arg) {
+	char path[600];
+	if (headless) return;
+	snprintf(path, sizeof path, "%s/pad.ini", g_data_dir);
+	pads_load(path);
+	snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
+	platform_load_keys(path);
+	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+	platform_load_settings(path);
+	snprintf(path, sizeof path, "%s/touch.ini", g_data_dir);
+	touch_load(path);
+	if (smooth_arg >= 0) P.blend = smooth_arg;
+}
 
 #ifndef __EMSCRIPTEN__
 /* The game's end: BN5's boot stopped where its thread still runs, and
@@ -1171,16 +1193,7 @@ int main(int argc, char **argv) {
 	(void)screen_given;   /* (the handheld fills its screen, the page its canvas) */
 #endif
 	if (!platform_init(force_w, force_h, headless, fullscreen)) return 1;
-	if (!headless) {
-		char keys[600];
-		snprintf(keys, sizeof keys, "%s/keys.ini", g_data_dir);
-		platform_load_keys(keys);
-		snprintf(keys, sizeof keys, "%s/settings.ini", g_data_dir);
-		platform_load_settings(keys);
-		snprintf(keys, sizeof keys, "%s/touch.ini", g_data_dir);
-		touch_load(keys);
-		if (smooth_arg >= 0) P.blend = smooth_arg;
-	}
+	player_files(headless, smooth_arg);
 	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
 
 	if (!rom_ok) {

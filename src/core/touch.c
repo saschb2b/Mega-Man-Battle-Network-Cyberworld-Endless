@@ -14,7 +14,9 @@
 #endif
 
 #include "buttons.h"
+#include "controls.h"
 #include "director.h"
+#include "pads.h"
 #include "platform.h"
 #include "touch_art.h"
 
@@ -232,12 +234,6 @@ static void finger_at(int k, float x, float y, bool down) {
 static void open_menu(void);
 static void menu_finger(uint32_t type, int k, float x, float y);
 
-bool touch_event(const SDL_Event *e) {
-	/* (a touchpad's fingers move a pointer: they touch no screen) */
-	if (SDL_GetTouchDeviceType(e->tfinger.touchId) != SDL_TOUCH_DEVICE_DIRECT) return false;
-	return touch_finger(e->type, e->tfinger.fingerId, e->tfinger.x * P.screen_w, e->tfinger.y * P.screen_h);
-}
-
 bool touch_finger(uint32_t type, SDL_FingerID id, float x, float y) {
 	int k = 0;
 	while (k < FINGERS && !(fingers[k].on && fingers[k].id == id)) ++k;
@@ -289,7 +285,7 @@ uint32_t touch_taken(void) {
 /* The widgets, placed afresh for each use (the screen turns, the rows
  * change): what they are and where. */
 enum {
-	U_NONE, U_SIZE, U_OPACITY, U_HAPTICS_ON, U_HAPTICS_OFF, U_EDIT, U_RESUME,
+	U_NONE, U_SIZE, U_OPACITY, U_HAPTICS_ON, U_HAPTICS_OFF, U_EDIT, U_RESUME, U_PAD,
 	U_CSIZE, U_CALPHA, U_DEFAULT, U_LARGE, U_LEFT, U_COMPACT, U_RESET, U_CANCEL, U_DONE,
 };
 enum { K_SLIDER, K_CHIP, K_BUTTON, K_MAIN };
@@ -336,8 +332,9 @@ static int shape_places(void) {
 static void place_ui(void) {
 	nui = 0;
 	float D = lay.dp, W = (float)scr.w, H = (float)scr.h;
-	bool edit = page == PAGE_EDIT;
-	int rows = edit ? 3 : haptics_exist() ? 3 : 2;
+	/* (a controller's buttons where one is there: the controls screen, issue #37) */
+	bool edit = page == PAGE_EDIT, pad_row = !edit && pads_present();
+	int rows = (edit ? 3 : haptics_exist() ? 3 : 2) + pad_row;
 	float pad = 14 * D, title = 40 * D, name = edit ? 28 * D : 0, buttons = 52 * D;
 	row_h = 46 * D;
 	float pw = fminf(W - 24 * D, 420 * D), ph = pad + title + name + rows * row_h + buttons + pad;
@@ -387,6 +384,10 @@ static void place_ui(void) {
 		static const int ids[] = { U_HAPTICS_ON, U_HAPTICS_OFF };
 		static const char *const names[] = { "ON", "OFF" };
 		chips(x0 + label_w, y + (row_h - chip_h) / 2, x1 - x0 - label_w, chip_h, ids, names, 2);
+		y += row_h;
+	}
+	if (pad_row) {
+		add(U_PAD, K_BUTTON, x0, y + (row_h - chip_h) / 2, x1 - x0, chip_h, "CONTROLLER");
 		y += row_h;
 	}
 	/* the way out */
@@ -478,6 +479,7 @@ static void press(int id) {
 		sel = -1;
 		break;
 	case U_RESUME: close_menu(); return;
+	case U_PAD: close_menu(); controls_open(); return;
 	/* presets: a size and a hand, this arrangement laid out afresh */
 	case U_DEFAULT: prefs.size = prefs.opacity = 100; prefs.left_handed = false; clear_shape(); sel = -1; break;
 	case U_LARGE: prefs.size = 125; clear_shape(); break;

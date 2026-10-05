@@ -31,6 +31,11 @@ typedef struct {
 	float dp;          /* screen pixels to a dp (a 160th of an inch): the touch controls' sizes */
 	uint32_t held, pressed, released, repeat;
 	int repeat_timer[16];
+	/* The same for a screen that must never lock (the controls screen):
+	 * the pads' own buttons (pads_menu_held), never their map, with the
+	 * keys, the touch controls and scripted input as above. */
+	uint32_t menu_held, menu_pressed, menu_repeat;
+	int menu_timer[16];
 	bool quit;
 	bool headless;
 	bool forced;       /* a fixed size (--size, headless): the window never relays out */
@@ -62,6 +67,24 @@ void platform_poll(void);
  * (keys.ini in the data folder), which is written with the defaults when
  * it does not exist yet. */
 void platform_load_keys(const char *path);
+/* The keyboard's map for the controls screen: per key (scancode) its GBA
+ * buttons (BTN_*). Got, the defaults, a key made a GBA button's only one
+ * (padmap_bind's swap: a button left with none takes the keys `gba` had),
+ * put in play and written to keys.ini; a GBA button's keys in words ("J,
+ * X"; NULL: the map in play). Escape and F11 are no button's. */
+typedef struct { uint32_t bits[SDL_NUM_SCANCODES]; } KeyMap;
+void platform_keys_get(KeyMap *k);
+void platform_keys_default(KeyMap *k);
+void platform_keys_bind(KeyMap *k, int gba, int scancode);
+void platform_keys_set(const KeyMap *k);
+void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n);
+bool platform_key_free(int scancode);
+/* This frame's keys pressed (scancodes, at most `most`): "press a key"
+ * on the controls screen. */
+int platform_keys_pressed(int *out, int most);
+/* A finger at screen pixel (x, y): to the controls screen while it is
+ * open, else the touch controls (platform_poll's, and --taps' in tests). */
+void platform_finger(uint32_t type, SDL_FingerID id, float x, float y);
 void platform_begin_frame(void);
 void platform_end_frame(void);
 /* Apply fx_mosaic and fx_fade to the canvas (called once the scene has drawn). */

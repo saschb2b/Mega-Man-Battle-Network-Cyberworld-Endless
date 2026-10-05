@@ -24,11 +24,9 @@ void touch_always(void);
 /* Every finger let go: the app lost the screen (a notification shade, the
  * home screen), whose fingers never send their lifting. */
 void touch_release(void);
-/* A finger event (SDL_FINGERDOWN, MOTION or UP) from platform_poll; true
- * when it showed the controls (the first touch only shows them). */
-bool touch_event(const SDL_Event *e);
-/* The same for a finger at screen pixel (x, y) (touch_event's own, and
- * --taps' in tests). */
+/* A finger (SDL_FINGERDOWN, MOTION or UP) at screen pixel (x, y), from
+ * platform_poll (platform_finger) or --taps in tests; true when it showed
+ * the controls (the first touch only shows them). */
 bool touch_finger(uint32_t type, SDL_FingerID id, float x, float y);
 /* The buttons fingers hold now, and those pressed since the last call
  * (a tap shorter than a frame counts). */

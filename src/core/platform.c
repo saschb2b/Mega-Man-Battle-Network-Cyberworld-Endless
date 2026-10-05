@@ -13,8 +13,10 @@
 #include "app_icon.h"
 #endif
 #include "audio.h"
+#include "controls.h"
 #include "emu.h"
 #include "gfx.h"
+#include "pads.h"
 #include "touch.h"
 #ifdef CW_IOS
 #include "ios.h"
@@ -28,22 +30,12 @@ Platform P;
  * under a title card) */
 #define CANVAS_FORMAT SDL_PIXELFORMAT_ARGB8888
 
-static SDL_GameController *pads[4];
 static uint32_t injected;
-static uint32_t pad_bits, key_bits;
+static uint32_t key_bits;
 static void keys_default(void);
-static uint32_t tapped;   /* pressed since the last poll: a tap released in the same frame still counts */
+static uint32_t key_tapped;   /* pressed since the last poll: a tap released in the same frame still counts */
 
-static void open_pads(void) {
-	for (int i = 0; i < SDL_NumJoysticks() && i < 4; ++i) {
-		if (!pads[i] && SDL_IsGameController(i)) pads[i] = SDL_GameControllerOpen(i);
-	}
-}
-
-bool platform_pad_present(void) {
-	for (int i = 0; i < 4; ++i) if (pads[i]) return true;
-	return false;
-}
+bool platform_pad_present(void) { return pads_present(); }
 
 /* Smooth motion (settings.ini): the game's two latest frames, each kept
  * whole as it ends, mixed at each refresh of the display by how far the
@@ -240,6 +232,14 @@ static void set_fullscreen(bool on) {
 }
 #endif
 
+/* A point on the screen (its pixels) as the canvas pixel under it */
+static void canvas_point(float sx, float sy, int *x, int *y) {
+	float k = P.fill > 0 ? P.fill : (float)P.scale;
+	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
+	*x = (int)((sx - ox) / k);
+	*y = (int)((sy - oy) / k);
+}
+
 #ifdef CW_IOS
 static bool own_taps;
 static int tap_x = -1, tap_y = -1;
@@ -256,24 +256,33 @@ bool platform_tap(int *x, int *y) {
 	tap_x = tap_y = -1;
 	return true;
 }
-
-/* A finger lifted on a screen that takes its own taps: where on the canvas */
-static void own_tap(const SDL_Event *e) {
-	if (e->type != SDL_FINGERUP) return;
-	float k = P.fill > 0 ? P.fill : (float)P.scale;
-	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
-	tap_x = (int)((e->tfinger.x * (float)P.screen_w - ox) / k);
-	tap_y = (int)((e->tfinger.y * (float)P.screen_h - oy) / k);
-}
 #endif
+
+void platform_finger(uint32_t type, SDL_FingerID id, float x, float y) {
+#ifdef CW_IOS
+	/* (a screen that takes its own taps: where on the canvas a finger lifted) */
+	if (own_taps) {
+		if (type == SDL_FINGERUP) canvas_point(x, y, &tap_x, &tap_y);
+		return;
+	}
+#endif
+	/* (the controls screen takes the fingers while it is open) */
+	if (controls_shown()) {
+		int cx, cy;
+		canvas_point(x, y, &cx, &cy);
+		controls_finger(type, id, cx, cy);
+		return;
+	}
+	if (touch_finger(type, id, x, y)) layout_canvas();
+}
 
 #ifndef __3DS__
-/* A finger on the screen: the touch controls', or on iOS a screen's own tap */
+/* A finger on the screen: the touch controls', the controls screen's, or
+ * on iOS a screen's own tap (a touchpad's fingers move a pointer: they
+ * touch no screen) */
 static void finger(const SDL_Event *e) {
-#ifdef CW_IOS
-	if (own_taps) { own_tap(e); return; }
-#endif
-	if (touch_event(e)) layout_canvas();
+	if (SDL_GetTouchDeviceType(e->tfinger.touchId) != SDL_TOUCH_DEVICE_DIRECT) return;
+	platform_finger(e->type, e->tfinger.fingerId, e->tfinger.x * (float)P.screen_w, e->tfinger.y * (float)P.screen_h);
 }
 #endif
 
@@ -354,7 +363,6 @@ static void phone_controls(void) {
 	game_thread = SDL_ThreadID();
 	SDL_SetEventFilter(turns_here, NULL);
 	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
-	for (int i = 0; i < SDL_NumJoysticks(); ++i) SDL_Log("controller %d: %s%s", i, SDL_JoystickNameForIndex(i), SDL_IsGameController(i) ? " (a gamepad)" : "");
 #endif
 #ifdef CW_IOS
 	SDL_AddEventWatch(app_moved, NULL);
@@ -443,7 +451,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	if (force_w && force_h) { P.screen_w = force_w; P.screen_h = force_h; }
 	layout_canvas();
 	SDL_ShowCursor(P.fullscreen || headless ? SDL_DISABLE : SDL_ENABLE);
-	open_pads();
+	pads_open();
 	phone_controls();
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(P.renderer, &info);
@@ -452,7 +460,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 }
 
 void platform_shutdown(void) {
-	for (int i = 0; i < 4; ++i) if (pads[i]) SDL_GameControllerClose(pads[i]);
+	pads_close();
 	blend_reset();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
@@ -483,9 +491,10 @@ static const struct { const char *name; uint32_t bit; const char *keys; } key_de
 	{ "SELECT", BTN_SELECT, "R, Backspace" },
 };
 static uint32_t key_map[SDL_NUM_SCANCODES];
+static char keys_path[600];
 
 /* "J, X" -> the button on each key; false and a message for an unknown name */
-static bool bind_keys(uint32_t bit, const char *list, const char *where) {
+static bool bind_keys(uint32_t *map, uint32_t bit, const char *list, const char *where) {
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", list);
 	bool ok = true;
@@ -502,15 +511,87 @@ static bool bind_keys(uint32_t bit, const char *list, const char *where) {
 			ok = false;
 			continue;
 		}
-		key_map[sc] |= bit;
+		map[sc] |= bit;
 	}
 	return ok;
 }
 
-static void keys_default(void) {
-	memset(key_map, 0, sizeof key_map);
+static void defaults_into(uint32_t *map) {
+	memset(map, 0, sizeof key_map);
 	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
-		bind_keys(key_defaults[i].bit, key_defaults[i].keys, "defaults");
+		bind_keys(map, key_defaults[i].bit, key_defaults[i].keys, "defaults");
+}
+
+static void keys_default(void) { defaults_into(key_map); }
+
+void platform_keys_get(KeyMap *k) { memcpy(k->bits, key_map, sizeof key_map); }
+void platform_keys_default(KeyMap *k) { defaults_into(k->bits); }
+
+bool platform_key_free(int sc) {
+	if (sc <= SDL_SCANCODE_UNKNOWN || sc >= SDL_NUM_SCANCODES || sc == SDL_SCANCODE_ESCAPE || sc == SDL_SCANCODE_F11 || sc == SDL_SCANCODE_AC_BACK) return false;
+	/* (a name keys.ini can say back: "Keypad ," would split its list) */
+	const char *name = SDL_GetScancodeName((SDL_Scancode)sc);
+	return name[0] && !strchr(name, ',');
+}
+
+void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n) {
+	const uint32_t *map = k ? k->bits : key_map;
+	out[0] = 0;
+	for (int sc = 0; sc < SDL_NUM_SCANCODES && gba >= 0 && gba < 10; ++sc) {
+		const char *name = SDL_GetScancodeName((SDL_Scancode)sc);
+		if (!(map[sc] >> gba & 1) || !name[0]) continue;
+		size_t m = strlen(out);
+		snprintf(out + m, n - m, "%s%s", m ? ", " : "", name);
+	}
+}
+
+void platform_keys_bind(KeyMap *k, int gba, int sc) {
+	if (gba < 0 || gba >= 10 || !platform_key_free(sc)) return;
+	static bool had[SDL_NUM_SCANCODES];   /* (the keys `gba` had) */
+	uint32_t bit = 1u << gba, others = k->bits[sc] & ~bit;
+	for (int s = 0; s < SDL_NUM_SCANCODES; ++s) {
+		had[s] = k->bits[s] & bit;
+		k->bits[s] &= ~bit;
+	}
+	k->bits[sc] = bit;
+	/* (a button the key was taken from, left with none, takes them: the two swap) */
+	for (int g = 0; g < 10; ++g) {
+		bool any = false;
+		if (!(others >> g & 1)) continue;
+		for (int s = 0; s < SDL_NUM_SCANCODES && !any; ++s) any = k->bits[s] >> g & 1;
+		for (int s = 0; s < SDL_NUM_SCANCODES && !any; ++s)
+			if (had[s] && s != sc) k->bits[s] |= 1u << g;
+	}
+}
+
+static const char keys_header[] =
+	"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
+	"# button its keys, separated by commas. Keys are named as on a US\n"
+	"# keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return, Backspace, Tab,\n"
+	"# Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad Enter...) and mean\n"
+	"# that position: on an AZERTY keyboard W is the key marked Z. Escape (quit)\n"
+	"# and F11 (fullscreen) are taken. The controls screen (SELECT on the title\n"
+	"# screen) sets A, B, L, R, START and SELECT too. Delete this file for the\n"
+	"# defaults.\n\n";
+
+/* keys.ini as the map in play has them */
+static void keys_write(void) {
+	if (!keys_path[0]) return;
+	FILE *f = fopen(keys_path, "w");
+	if (!f) return;
+	fputs(keys_header, f);
+	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i) {
+		char list[256];
+		platform_keys_label(NULL, (int)i, list, sizeof list);
+		fprintf(f, "%-6s = %s\n", key_defaults[i].name, list);
+	}
+	fclose(f);
+	platform_persist();
+}
+
+void platform_keys_set(const KeyMap *k) {
+	memcpy(key_map, k->bits, sizeof key_map);
+	keys_write();
 }
 
 bool platform_frame_log;
@@ -575,21 +656,10 @@ void platform_load_settings(const char *path) {
 
 void platform_load_keys(const char *path) {
 	keys_default();
+	snprintf(keys_path, sizeof keys_path, "%s", path);
 	FILE *f = fopen(path, "r");
 	if (!f) {
-		f = fopen(path, "w");
-		if (!f) return;
-		fprintf(f,
-			"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
-			"# button its keys, separated by commas. Keys are named as on a US\n"
-			"# keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return, Backspace, Tab,\n"
-			"# Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad Enter...) and mean\n"
-			"# that position: on an AZERTY keyboard W is the key marked Z. Escape (quit)\n"
-			"# and F11 (fullscreen) are taken. Delete this file for the defaults.\n\n");
-		for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
-			fprintf(f, "%-6s = %s\n", key_defaults[i].name, key_defaults[i].keys);
-		fclose(f);
-		platform_persist();
+		keys_write();
 		return;
 	}
 	char line[256];
@@ -610,45 +680,13 @@ void platform_load_keys(const char *path) {
 		if (i == sizeof key_defaults / sizeof *key_defaults) { fprintf(stderr, "%s: no button called \"%s\"\n", where, name); continue; }
 		/* the file's keys replace the defaults for this button */
 		for (int sc = 0; sc < SDL_NUM_SCANCODES; ++sc) key_map[sc] &= ~key_defaults[i].bit;
-		bind_keys(key_defaults[i].bit, eq + 1, where);
+		bind_keys(key_map, key_defaults[i].bit, eq + 1, where);
 	}
 	fclose(f);
 }
 
 static uint32_t key_button(SDL_Scancode sc) {
 	return (unsigned)sc < SDL_NUM_SCANCODES ? key_map[sc] : 0;
-}
-
-static uint32_t pad_button(Uint8 b) {
-	switch (b) {
-	case SDL_CONTROLLER_BUTTON_DPAD_UP: return BTN_UP;
-	case SDL_CONTROLLER_BUTTON_DPAD_DOWN: return BTN_DOWN;
-	case SDL_CONTROLLER_BUTTON_DPAD_LEFT: return BTN_LEFT;
-	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return BTN_RIGHT;
-	case SDL_CONTROLLER_BUTTON_A: return BTN_A;
-	case SDL_CONTROLLER_BUTTON_B: return BTN_B;
-	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER: return BTN_L;
-	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: return BTN_R;
-	case SDL_CONTROLLER_BUTTON_START: return BTN_START;
-	case SDL_CONTROLLER_BUTTON_BACK: return BTN_SELECT;
-	default: return 0;
-	}
-}
-
-static uint32_t stick_bits(void) {
-	uint32_t bits = 0;
-	for (int i = 0; i < 4; ++i) {
-		if (!pads[i]) continue;
-		int x = SDL_GameControllerGetAxis(pads[i], SDL_CONTROLLER_AXIS_LEFTX);
-		int y = SDL_GameControllerGetAxis(pads[i], SDL_CONTROLLER_AXIS_LEFTY);
-		if (x < -16000) bits |= BTN_LEFT;
-		if (x > 16000) bits |= BTN_RIGHT;
-		if (y < -16000) bits |= BTN_UP;
-		if (y > 16000) bits |= BTN_DOWN;
-		if (SDL_GameControllerGetAxis(pads[i], SDL_CONTROLLER_AXIS_TRIGGERLEFT) > 16000) bits |= BTN_L;
-		if (SDL_GameControllerGetAxis(pads[i], SDL_CONTROLLER_AXIS_TRIGGERRIGHT) > 16000) bits |= BTN_R;
-	}
-	return bits;
 }
 
 void platform_inject(uint32_t buttons) { injected = buttons; }
@@ -663,92 +701,133 @@ static void follow_screen(void) {
 #endif
 }
 
-void platform_poll(void) {
-	follow_screen();
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
-		case SDL_QUIT: P.quit = true; printf("quit: the window closed, or the system asked\n"); break;
-		case SDL_FINGERDOWN:
-		case SDL_FINGERMOTION:
-		case SDL_FINGERUP:
-#ifndef __3DS__
-			/* (the 3DS's touch screen is its bottom one, apart from the
-			 * picture: not the phone's controls round it) */
-			finger(&e);
-#endif
-			break;
-		case SDL_KEYDOWN: {
-			uint32_t b = key_button(e.key.keysym.scancode);
-			/* Alt+Enter is fullscreen, not Start */
-			if (e.key.keysym.mod & KMOD_ALT) b &= ~BTN_START;
-			if (!e.key.repeat) { key_bits |= b; tapped |= b; if (b) P.keyboard_last = true; }
-			/* the keyboard's hands put the touch controls away */
-			if (b && !e.key.repeat && touch_show(false)) layout_canvas();
+/* This frame's keys pressed (the controls screen's "press a key") */
+static int keys_pressed[8], nkeys_pressed;
+
+int platform_keys_pressed(int *out, int most) {
+	int n = nkeys_pressed < most ? nkeys_pressed : most;
+	memcpy(out, keys_pressed, (size_t)n * sizeof *out);
+	return n;
+}
+
 #ifndef __EMSCRIPTEN__
-			/* (in a browser the page keeps Escape and fullscreen; Android's
-			 * Back is Escape) */
-			if ((e.key.keysym.scancode == SDL_SCANCODE_ESCAPE || e.key.keysym.scancode == SDL_SCANCODE_AC_BACK) && !e.key.repeat) {
-				/* the touch controls' menu closes first; the first Escape
-				 * asks, the second within two seconds quits */
-				if (touch_back()) {}
-				else if (P.quit_prompt > 0) P.quit = true;
-				else { P.quit_prompt = 120; P.quit_pad = false; }
-			}
-			/* F11 or Alt+Enter: fullscreen and back */
-			if (!e.key.repeat && !P.headless && (e.key.keysym.sym == SDLK_F11 ||
-				(e.key.keysym.sym == SDLK_RETURN && (e.key.keysym.mod & KMOD_ALT))))
-				set_fullscreen(!P.fullscreen);
+/* Escape, or Android's Back: the touch controls' menu and the controls
+ * screen close first; the first asks, the second within two seconds quits */
+static void escape(void) {
+	if (touch_back() || controls_back()) return;
+	if (P.quit_prompt > 0) P.quit = true;
+	else { P.quit_prompt = 120; P.quit_pad = false; }
+}
 #endif
-			break;
-		}
-		case SDL_WINDOWEVENT:
-			if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
-			/* keys let go of in another window would stay held, and fingers
-			 * lifted over another app's */
-			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) { key_bits = 0; touch_release(); }
-			break;
-		case SDL_APP_WILLENTERBACKGROUND: key_bits = 0; touch_release(); break;
-		/* (the renderer's textures lost: the controls' art is made again) */
-		case SDL_RENDER_DEVICE_RESET: touch_reset_art(); break;
-		case SDL_KEYUP: key_bits &= ~key_button(e.key.keysym.scancode); break;
-		case SDL_CONTROLLERBUTTONDOWN:
-			pad_bits |= pad_button(e.cbutton.button);
-			tapped |= pad_button(e.cbutton.button);
+
+static void key_down(const SDL_KeyboardEvent *k) {
+	if (k->repeat) return;
+	uint32_t b = key_button(k->keysym.scancode);
+	/* Alt+Enter is fullscreen, not Start */
+	if (k->keysym.mod & KMOD_ALT) b &= ~BTN_START;
+	key_bits |= b;
+	key_tapped |= b;
+	if (b) P.keyboard_last = true;
+	if (nkeys_pressed < (int)(sizeof keys_pressed / sizeof *keys_pressed)) keys_pressed[nkeys_pressed++] = k->keysym.scancode;
+	/* the keyboard's hands put the touch controls away */
+	if (b && touch_show(false)) layout_canvas();
+#ifndef __EMSCRIPTEN__
+	/* (in a browser the page keeps Escape and fullscreen; Android's Back
+	 * is Escape) */
+	if (k->keysym.scancode == SDL_SCANCODE_ESCAPE || k->keysym.scancode == SDL_SCANCODE_AC_BACK) escape();
+	/* F11 or Alt+Enter: fullscreen and back */
+	if (!P.headless && (k->keysym.sym == SDLK_F11 || (k->keysym.sym == SDLK_RETURN && (k->keysym.mod & KMOD_ALT))))
+		set_fullscreen(!P.fullscreen);
+#endif
+}
+
+/* keys let go of in another window would stay held, and fingers lifted
+ * over another app's */
+static void let_go(void) {
+	key_bits = 0;
+	touch_release();
+}
+
+static void poll_event(const SDL_Event *e) {
+	switch (e->type) {
+	case SDL_QUIT: P.quit = true; printf("quit: the window closed, or the system asked\n"); break;
+	case SDL_FINGERDOWN:
+	case SDL_FINGERMOTION:
+	case SDL_FINGERUP:
+#ifndef __3DS__
+		/* (the 3DS's touch screen is its bottom one, apart from the
+		 * picture: not the phone's controls round it) */
+		finger(e);
+#endif
+		break;
+	case SDL_KEYDOWN: key_down(&e->key); break;
+	case SDL_KEYUP:
+		key_bits &= ~key_button(e->key.keysym.scancode);
+		break;
+	case SDL_WINDOWEVENT:
+		if (e->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
+		if (e->window.event == SDL_WINDOWEVENT_FOCUS_LOST) let_go();
+		break;
+	case SDL_APP_WILLENTERBACKGROUND: let_go(); break;
+	/* (the renderer's textures lost: the controls' art is made again) */
+	case SDL_RENDER_DEVICE_RESET: touch_reset_art(); break;
+	default:
+		/* a controller's: one coming or going, a button (a press puts the
+		 * touch controls away) */
+		if (pads_event(e)) {
 			P.keyboard_last = false;
 			if (touch_show(false)) layout_canvas();
-			break;
-		case SDL_CONTROLLERBUTTONUP: pad_bits &= ~pad_button(e.cbutton.button); break;
-		case SDL_CONTROLLERDEVICEADDED: open_pads(); break;
-		default: break;
 		}
+		break;
 	}
-	if (P.quit_prompt > 0) --P.quit_prompt;
+}
+
+/* a controller's Escape: Back and Start held a second asks, and held again
+ * while it asks quits (a handheld's Steam Deck or a pad on the couch has no
+ * keyboard; PortMaster's own hotkey is the same pair): the pad's own two,
+ * whatever its map, or SELECT and START as mapped */
+static void quit_chord(void) {
 #ifndef __EMSCRIPTEN__
-	/* a controller's Escape: SELECT and START held a second asks, and
-	 * held again while it asks quits (a handheld's Steam Deck or a pad on
-	 * the couch has no keyboard; PortMaster's own hotkey is the same pair) */
 	static int pair_held;
-	if ((pad_bits & (BTN_SELECT | BTN_START)) == (BTN_SELECT | BTN_START)) {
+	uint32_t both = BTN_SELECT | BTN_START;
+	if (pads_quit_held() || (pads_held() & both) == both) {
 		if (++pair_held == 60) {
 			if (P.quit_prompt > 0 && P.quit_pad) P.quit = true;
 			else { P.quit_prompt = 180; P.quit_pad = true; }
 		}
 	} else pair_held = 0;
 #endif
-	tapped |= touch_taken();
-	uint32_t now = key_bits | pad_bits | stick_bits() | injected | tapped | touch_held();
-	tapped = 0;
-	P.pressed = now & ~P.held;
-	P.released = P.held & ~now;
-	P.held = now;
-	P.repeat = P.pressed;
+}
+
+/* Held now: pressed since the last frame, and pressed or held long enough
+ * to repeat (menus) */
+static void press_state(uint32_t now, uint32_t *held, uint32_t *pressed, uint32_t *repeat, int *timer) {
+	*pressed = now & ~*held;
+	*held = now;
+	*repeat = *pressed;
 	for (int i = 0; i < 10; ++i) {
 		uint32_t b = 1u << i;
-		if (!(now & b)) { P.repeat_timer[i] = 0; continue; }
-		int t = ++P.repeat_timer[i];
-		if (t > 18 && (t - 18) % 5 == 0) P.repeat |= b;
+		if (!(now & b)) { timer[i] = 0; continue; }
+		int t = ++timer[i];
+		if (t > 18 && (t - 18) % 5 == 0) *repeat |= b;
 	}
+}
+
+void platform_poll(void) {
+	follow_screen();
+	pads_begin();
+	nkeys_pressed = 0;
+	SDL_Event e;
+	while (SDL_PollEvent(&e)) poll_event(&e);
+	pads_poll();
+	if (P.quit_prompt > 0) --P.quit_prompt;
+	quit_chord();
+	uint32_t touched = touch_taken() | touch_held(), keys = key_bits | key_tapped | injected;
+	key_tapped = 0;
+	uint32_t now = keys | touched | pads_held() | pads_taken();
+	P.released = P.held & ~now;
+	press_state(now, &P.held, &P.pressed, &P.repeat, P.repeat_timer);
+	press_state(keys | touched | pads_menu_held() | pads_menu_taken(), &P.menu_held, &P.menu_pressed, &P.menu_repeat, P.menu_timer);
 }
 
 void platform_begin_frame(void) {
