@@ -30,6 +30,7 @@
 #include "text.h"
 #include "townmath.h"
 #include "touch_layout.h"
+#include "padmap.h"
 #include "buttons.h"
 #include "xchips.h"
 #include "xnavi.h"
@@ -2181,6 +2182,94 @@ static void test_touch(void) {
 	CHECK(t.size_max >= 130 && fabsf(t.box[TOUCH_A].w - def.box[TOUCH_A].w * 1.3f) < 1, "a tablet's A at 130%% did not grow (%d%% fits)", t.size_max);
 }
 
+/* An SDL mapping's fields (after its GUID and name) each an SDL name with
+ * a joystick input: "a:b1", "lefty:a0~", "+leftx:h0.2" */
+static bool mapping_fields_ok(const char *m, char *bad, size_t n) {
+	const char *f = strchr(m, ',');
+	for (f = f ? f + 1 : NULL; f && *f; ) {
+		const char *end = strchr(f, ','), *colon = strchr(f, ':');
+		if (!end || !colon || colon > end) { snprintf(bad, n, "%s", f); return false; }
+		char key[24], val[16];
+		snprintf(key, sizeof key, "%.*s", (int)(colon - f), f);
+		snprintf(val, sizeof val, "%.*s", (int)(end - colon - 1), colon + 1);
+		static const char *const axes[] = { "leftx", "lefty", "rightx", "righty", "lefttrigger", "righttrigger" };
+		bool known = padmap_input(key) != PAD_NONE;
+		for (size_t i = 0; i < sizeof axes / sizeof *axes; ++i) known |= !strcmp(key, axes[i]);
+		if (!known || (val[0] != 'b' && val[0] != 'a' && val[0] != 'h')) { snprintf(bad, n, "%s:%s", key, val); return false; }
+		f = end + 1;
+	}
+	return true;
+}
+
+/* The controllers' map (issue #37): the defaults, SDL's names both ways,
+ * a binding's swap, the presets, pad.ini written and read back (and its
+ * mistakes said), the labels, Android's Joy-Con mappings. */
+static void test_padmap(void) {
+	PadMap m, back;
+	padmap_default(&m);
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_A && padmap_bits(&m, PAD_FAMILY_NINTENDO, PAD_B) == BTN_B, "a and b are not A and B");
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_AXIS(1, false)) == BTN_UP && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_DPUP) == BTN_UP, "the stick and the D-pad do not both go up");
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_LEFTTRIGGER) == BTN_L && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_RIGHTSHOULDER) == BTN_R, "a trigger or shoulder is not L or R");
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_BACK) == BTN_SELECT && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_START) == BTN_START, "back and start are not SELECT and START");
+	CHECK(!padmap_bits(&m, PAD_FAMILY_XBOX, PAD_X) && !padmap_bits(&m, PAD_FAMILY_XBOX, PAD_GUIDE), "x or guide does something by default");
+	/* SDL's names, both ways, either case; a trigger has no other way */
+	for (int i = 0; i < PAD_INPUTS; ++i)
+		if (padmap_name(i)) CHECK(padmap_input(padmap_name(i)) == i, "%s does not name input %d", padmap_name(i), i);
+	CHECK(padmap_input("LeftShoulder") == PAD_LEFTSHOULDER && padmap_input("+lefttrigger") == PAD_LEFTTRIGGER, "a name in capitals or a + on a trigger is refused");
+	CHECK(padmap_input("-lefttrigger") == PAD_NONE && padmap_input("start2") == PAD_NONE && padmap_input("") == PAD_NONE, "a name SDL has not is taken");
+	CHECK(padmap_gba("select") == 9 && padmap_gba("UP") == 0 && padmap_gba("Z") < 0, "the GBA's buttons are misnamed");
+	/* B on x: B gives up b, nobody else changes; then A on x: they swap */
+	padmap_bind(&m, PAD_FAMILY_XBOX, 5, PAD_X);
+	CHECK(m.in[PAD_FAMILY_XBOX][5][0] == PAD_X && m.in[PAD_FAMILY_XBOX][5][1] == PAD_NONE && !padmap_bits(&m, PAD_FAMILY_XBOX, PAD_B), "B on x kept b");
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_A && padmap_bits(&m, PAD_FAMILY_NINTENDO, PAD_B) == BTN_B, "binding one family's B moved another's");
+	padmap_bind(&m, PAD_FAMILY_XBOX, 4, PAD_X);
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_X) == BTN_A && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_B, "A taking B's x left B without A's a");
+	/* every GBA button keeps one input whatever is bound */
+	for (int k = 0; k < 200; ++k) padmap_bind(&m, k & 1, 4 + k % 6, (k * 7) % PAD_INPUTS == 29 ? PAD_Y : (k * 7) % PAD_INPUTS);
+	for (int f = 0; f < PAD_FAMILIES; ++f)
+		for (int g = 0; g < PAD_GBA; ++g) CHECK(m.in[f][g][0] != PAD_NONE, "GBA button %s lost all its inputs", padmap_gba_name(g));
+	/* the presets for A and B */
+	padmap_default(&m);
+	CHECK(padmap_preset_of(&m, PAD_FAMILY_XBOX) == 0 && padmap_presets(PAD_FAMILY_XBOX) == 3 && padmap_presets(PAD_FAMILY_NINTENDO) == 2, "the presets are off");
+	padmap_preset_apply(&m, PAD_FAMILY_XBOX, 1);
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_X) == BTN_B && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_A && !padmap_bits(&m, PAD_FAMILY_XBOX, PAD_B), "B on X is not");
+	CHECK(padmap_preset_of(&m, PAD_FAMILY_XBOX) == 1 && !strcmp(padmap_preset_name(PAD_FAMILY_XBOX, PAD_STYLE_PLAYSTATION, 1), "B on Square"), "B on X not told as itself");
+	padmap_preset_apply(&m, PAD_FAMILY_XBOX, 2);
+	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_B) == BTN_A && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_B && !padmap_bits(&m, PAD_FAMILY_XBOX, PAD_X), "swapped is not");
+	padmap_preset_apply(&m, PAD_FAMILY_XBOX, 0);
+	padmap_default(&back);
+	CHECK(padmap_same(&m, &back), "the presets there and back left the map changed");
+	padmap_bind(&m, PAD_FAMILY_NINTENDO, 5, PAD_Y);
+	CHECK(padmap_preset_of(&m, PAD_FAMILY_NINTENDO) == -1 && !strcmp(padmap_preset_name(PAD_FAMILY_NINTENDO, PAD_STYLE_NINTENDO, -1), "Custom"), "a hand-set B told as a preset");
+	/* pad.ini: written, read back the same, nothing said */
+	static char text[8192], errors[1024];
+	padmap_bind(&m, PAD_FAMILY_XBOX, 6, PAD_AXIS(3, false));
+	int n = padmap_format(&m, text, sizeof text);
+	CHECK(n > 0 && n < (int)sizeof text - 1 && strstr(text, "[nintendo]") && strstr(text, "L      = -righty"), "pad.ini written wrong:\n%s", text);
+	CHECK(padmap_parse(text, &back, errors, sizeof errors) == 0 && padmap_same(&m, &back), "pad.ini read back differs: %s", errors);
+	/* a hand-written one: lines without a section are [pad]'s, a button left out keeps its default, mistakes are said */
+	CHECK(padmap_parse("A = x, y\n[nintendo]\nb = y\nZ = a\nSTART = hat\n[snes]\nA = b\n", &back, errors, sizeof errors) == 3, "pad.ini's mistakes not counted: %s", errors);
+	CHECK(padmap_bits(&back, PAD_FAMILY_XBOX, PAD_X) == BTN_A && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_Y) == BTN_A && !padmap_bits(&back, PAD_FAMILY_XBOX, PAD_A), "A = x, y not read");
+	CHECK(padmap_bits(&back, PAD_FAMILY_NINTENDO, PAD_Y) == BTN_B && padmap_bits(&back, PAD_FAMILY_NINTENDO, PAD_A) == BTN_A, "[nintendo]'s line went elsewhere");
+	CHECK(padmap_bits(&back, PAD_FAMILY_NINTENDO, PAD_START) == 0 && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_B) == BTN_B, "a bad line or an unknown section's changed the map");
+	CHECK(strstr(errors, "line 4") && strstr(errors, "\"Z\"") && strstr(errors, "\"hat\"") && strstr(errors, "\"snes\""), "pad.ini's mistakes not said: %s", errors);
+	/* the words on the buttons */
+	CHECK(!strcmp(padmap_label(PAD_STYLE_PLAYSTATION, PAD_A), "Cross") && !strcmp(padmap_label(PAD_STYLE_NINTENDO, PAD_LEFTTRIGGER), "ZL") &&
+		!strcmp(padmap_label(PAD_STYLE_XBOX, PAD_LEFTSHOULDER), "LB") && !strcmp(padmap_label(PAD_STYLE_GENERIC, PAD_BACK), "Select") &&
+		!strcmp(padmap_label(PAD_STYLE_NINTENDO, PAD_AXIS(0, false)), "L stick left") && !strcmp(padmap_label(PAD_STYLE_XBOX, PAD_INPUTS), "?"), "a button's words are wrong");
+	/* Android's Joy-Cons: a mapping each, alone or as a pair, of SDL's names */
+	char bad[64];
+	for (int pair = 0; pair < 2; ++pair)
+		for (int product = 0x2006; product <= 0x2007; ++product) {
+			const char *jc = padmap_joycon(product, pair);
+			CHECK(jc && mapping_fields_ok(jc, bad, sizeof bad), "Joy-Con %x (pair %d): field %s", product, pair, jc ? bad : "none");
+		}
+	CHECK(strstr(padmap_joycon(0x2006, true), "back:b4") && strstr(padmap_joycon(0x2006, true), "dpup:b11") && strstr(padmap_joycon(0x2006, true), "leftx:a0,lefty:a1"),
+		"the left half lacks Minus, the D-pad or its stick as the left");
+	CHECK(strstr(padmap_joycon(0x2007, true), "a:b1,b:b0,x:b2,y:b3") && strstr(padmap_joycon(0x2007, true), "rightx:a0"), "the right half's labels or stick are wrong");
+	CHECK(strstr(padmap_joycon(0x2006, false), "leftx:a1") && strstr(padmap_joycon(0x2007, false), "lefty:a0") && !padmap_joycon(0x2009, true), "a lone Joy-Con is not held sideways");
+}
+
 /* Why BN6's board bugs (navicust_bug_cause), from its 7x7 grid: each
  * rule caught and named, and a clean board none. */
 static void test_bug_cause(void) {
@@ -2486,6 +2575,7 @@ int main(void) {
 	test_town_moves();
 	test_talk();
 	test_touch();
+	test_padmap();
 	test_xsong();
 	test_qr();
 	test_bug_cause();
