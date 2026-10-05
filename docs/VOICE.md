@@ -289,6 +289,34 @@ Check for these before committing a line:
 - **Hedging and politeness padding:** "it seems that", "you might want
   to". BN6's people say it straight.
 
+## Where the lines live
+
+Every line lives in a words file beside the code that decides when it is
+said (AGENTS.md, Code structure): `*_words.c` where a feature composes its
+lines from the run's facts, `*_lines.c` for tables of lines, `*_text.c`
+for the PET's. The code around them holds none, and `build.py lint` counts
+any that creep back (`words` in `tests/lint/smells.txt`).
+
+| Who speaks, and when | File |
+| --- | --- |
+| L's briefing: where they are, what is here, the way on; the last stop before an arena | `src/director/briefing_words.c` |
+| Arriving somewhere new, Dad's calls and mail, the act's cards, the short net's end, Chaud after the Secret Area | `src/director/story_words.c` |
+| Chaud's duel call and verdict | `src/director/duel_words.c` |
+| MegaMan on the NaviCust: programs off the board, no room, compression, Reg memory | `src/director/board_words.c`, `src/layer/navicust_words.c` (what each program does, which turn, its bugs) |
+| MegaMan on DarkChips | `src/director/dark_words.c` |
+| The older net's battles, its codes, the chips that sit out | `src/director/guest_words.c`; its wait screen `src/emu/guest_wait_lines.c` |
+| One-time lessons: the Pack, Rush's bones, a battlefield's Mystery Data, R in the town | `src/director/lesson_words.c` |
+| A Cross won, one the run can't carry, the Cybeast's call | `src/director/powers_words.c` |
+| The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |
+| The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls, the split's question | `src/layer/guardian_lines.c` |
+| The Net Dealer, the NaviCust vendor, ProtoMan's terms, a rumor, the invisible path's hint, a ScrtData, a Spin | `src/layer/layer_words.c` |
+| Services' chats: Mr.Prog's heal, shops, a Server, flames of darkness, the duel, dark warps, the golden gate | `src/layer/service_words.c` |
+| Rewards' chats: Guardian Data and its draft, a Navi gate, a vault, an official gate, the gift | `src/layer/reward_words.c` |
+| Locks: security cubes, skull and number doors, the P-Code's teller, a Link Navi's obstacle | `src/layer/lock_words.c` |
+| Bystanders' small talk; the net's whispers | `src/layer/npc_lines.c`; `src/layer/rumor_lines.c` |
+| The towns' folk, their checks, the start's words | `src/world/town_lines.c` |
+| The title's summary of a run | `src/scenes/title_lines.c` |
+
 ## Before you commit a line
 
 1. Read it aloud as the character. If it sounds like a manual or a news

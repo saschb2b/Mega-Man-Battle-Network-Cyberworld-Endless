@@ -101,4 +101,9 @@ const char *guardian_area_motto(int biome);
  * ta_talk reads them, into `out`. */
 void guardian_way_question(char *out, size_t n, const char *const who[3], const char *const area[3], int dark);
 
+/* (guardian_lines.c) A first battle's Guardian Data with his battle data,
+ * after `power` (or NULL); and MegaMan on an older net guardian's Soul */
+const char *guardian_data_words(const char *power);
+const char *guardian_soul_words(int navi, int kind, bool held, const char *chip, const char *dark);
+
 #endif

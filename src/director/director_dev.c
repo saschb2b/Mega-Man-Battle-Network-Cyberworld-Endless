@@ -19,7 +19,7 @@
 #include "encounter.h"
 #include "gamecall.h"
 #include "netmap.h"
-#include "rumors.h"
+#include "rumor_lines.h"
 #include "save.h"
 #include "talk.h"
 #include "trader.h"
@@ -106,7 +106,7 @@ static bool dev_gift(const char *name) {
 }
 
 /* A dev talk said in the engine's own words: L's (status), the layer's
- * rumor (rumor, rumors.c); false for another. */
+ * rumor (rumor, rumor_lines.c); false for another. */
 static bool dev_say(const char *name) {
 	if (!strcmp(name, "status")) talk_start(status_words(), FACE_MEGAMAN);
 	else if (!strcmp(name, "rumor")) { if (rumors_line()) talk_start(rumors_line(), FACE_NAVI); }

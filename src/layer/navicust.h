@@ -73,6 +73,8 @@ bool navicust_pack(const NaviShape *shapes, int n, int w, int h);
  * navicust_pack turns only those; the others lie as their records draw
  * them. All six until set. */
 void navicust_set_spins(unsigned mask);
+/* ... and the Spins set so (navicust_words.c, what turns) */
+unsigned navicust_spins(void);
 /* The board's size after `expmemry` ExpMemry (0-2): 4x4, 5x4, 5x5. */
 void navicust_board(int expmemry, int *w, int *h);
 /* BugFrags a guardian's draft pays when none is taken, at `depth`. */

@@ -73,15 +73,24 @@ typedef struct {
 	int n, flag, dark_flag;
 } ScriptsRoute;
 
-/* A guardian's Guardian Data, checked: `power` (what a Cross or BeastOut
- * brings, ta_talk's boxes; NULL for none), then HPMemory through the game's
- * own item (+20 max HP each, `hp_memories` of them), its navi chip (`chip` 0 for none; `code`
- * A=0 .. *=26), a full heal, the NaviCust's `draft` (NULL for none), then
- * event flag `taken_flag` (on every branch of the draft), and last the
- * `route` on (NULL for none). The run's `last` guardian gives only what
- * carries over: his chip, for the Library. */
-int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int chip, const char *chip_name, int code, bool last,
-                       int taken_flag, int hp_memories, const ScriptsDraft *draft, const ScriptsRoute *route);
+/* What a guardian's Guardian Data gives (ta_guardian_reward). */
+typedef struct {
+	const char *name;        /* the navi */
+	const char *power;       /* what a Cross or BeastOut brings, ta_talk's boxes; NULL for none */
+	int chip, code;          /* his navi chip, 0 for none; its code A=0 .. *=26 */
+	const char *chip_name;
+	bool last;               /* the run's last guardian: only what carries over */
+	int taken_flag;          /* event flag set on every branch of the draft */
+	int hp_memories;         /* HPMemory through the game's own item, +20 max HP each */
+	const ScriptsDraft *draft;   /* the NaviCust's draft, NULL for none */
+	const ScriptsRoute *route;   /* the way on, NULL for none */
+} ScriptsReward;
+
+/* A guardian's Guardian Data, checked: his power, then the HPMemory, his
+ * navi chip, a full heal, the NaviCust's draft, then the taken flag, and
+ * last the way on. The run's last guardian gives only what carries over:
+ * his chip, for the Library. */
+int ta_guardian_reward(TextArchive *t, const ScriptsReward *r);
 /* A flame of darkness (docs/META.md, DarkChips in BN5 territory): MegaMan
  * names its DarkChip `chip` and its price (all of it the `first` time), and
  * where BN6 keeps that kind too (`ours`), that our net's battles play it
@@ -144,12 +153,21 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
-/* The run's first layer: Dr. Hikari's dive support Mr. Prog offers one of
- * two HPMemory, a chip (`power`: what it hits for) or a NaviCust program
- * (`program` in `color`, named by the game; `about`: what it does, or
- * NULL), once (event flag `flag`); with `comfort`, after a run lost
- * early, an HPMemory more first. */
-int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start, int chip, const char *chip_name, int power, int code, int program, int color,
-            const char *about);
+/* What Dr. Hikari's dive support Mr. Prog offers on the run's first layer
+ * (ta_gift). */
+typedef struct {
+	int flag;                /* event flag: taken */
+	bool comfort;            /* after a run lost early: an HPMemory more first */
+	bool brief;              /* a returning player: one page, not three */
+	bool head_start;         /* the head-start helper's two HPMemory first */
+	int chip, code, power;   /* the chip, its code A=0 .. *=26, what it hits for */
+	const char *chip_name;
+	int program, color;      /* the NaviCust program, named by the game */
+	const char *about;       /* what the program does, or NULL */
+} ScriptsGift;
+
+/* The run's first layer: the dive support Mr. Prog offers one of two
+ * HPMemory, the chip or the NaviCust program, once. */
+int ta_gift(TextArchive *t, const ScriptsGift *g);
 
 #endif

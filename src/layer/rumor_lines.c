@@ -4,7 +4,7 @@
  * friend: Sword, WideSwrd and LongSwrd in one code); or a word on a secret
  * the profile has not found yet, which never gives its answer away (that a
  * compression code exists, not the code). Every line is true. */
-#include "rumors.h"
+#include "rumor_lines.h"
 
 #include <stdio.h>
 #include <string.h>

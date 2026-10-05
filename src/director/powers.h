@@ -3,6 +3,8 @@
 #ifndef CW_POWERS_H
 #define CW_POWERS_H
 
+#include <stdbool.h>
+
 /* After a won boss battle against `navi` (navi index) in `biome`. */
 void powers_after_boss(int navi, int biome);
 /* The Cross of `navi` (HeatMan 1 .. ChargeMan 5), NULL for a navi with none. */
@@ -20,5 +22,10 @@ void powers_bring(int navi);
  * a Cross MegaMan did not have yet, BeastOut in the first Graveyard), or
  * NULL. */
 const char *powers_reward_text(int navi, int biome, int depth);
+
+/* (powers_words.c) MegaMan's words after guardian `navi`'s battle: his
+ * Cross, where it is new to the run (`cross`), and the Cybeast's waking
+ * (`beast`); NULL for none */
+const char *powers_reward_words(int navi, bool cross, bool beast);
 
 #endif

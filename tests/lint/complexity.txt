@@ -14,9 +14,6 @@ src/director/briefing_words.c:last_stop 30 26
 src/director/director.c:follow_exit_warp 28 38
 src/emu/autopilot.c:autopilot_keys 31 56
 src/gfx/gfx.c:text_code 30 30
-src/layer/guardian_objs.c:guardian_scripts 26 61
-src/layer/guardians.c:guardian_intro 33 32
-src/layer/layer_objs.c:layer_objs_install 140 307
 src/layer/shop.c:answer 30 25
 src/layer/text.c:code_of 29 15
 src/layer/text.c:wrap 40 44
@@ -42,6 +39,6 @@ src/scenes/scene_title.c:setup_draw 36 68
 src/scenes/scene_title.c:setup_update 32 36
 src/scenes/scene_title.c:update 42 73
 src/world/town.c:carry 62 86
-src/world/town.c:plan_once 56 112
+src/world/town.c:plan_once 50 109
 src/world/town.c:town_walk 31 33
 src/world/townsrc.c:townsrc_synth 88 125

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bn6.h"
+#include "blockers.h"
 #include "bytes.h"
 #include "chip_pool.h"
 #include "data.h"
@@ -13,25 +13,18 @@
 #include "flags.h"
 #include "game.h"
 #include "guardians.h"
+#include "layer_words.h"
 #include "loot.h"
-#include "rivals.h"
-#include "mapslot.h"
 #include "meta.h"
-#include "net.h"
 #include "navicust.h"
 #include "netmap.h"
-#include "stage_npc.h"
 #include "npc.h"
 #include "npc_lines.h"
-#include "pacing.h"
+#include "rivals.h"
 #include "rom.h"
-#include "run.h"
-#include "rumors.h"
+#include "rumor_lines.h"
 #include "rush.h"
-#include "blockers.h"
 #include "save.h"
-#include "scripts.h"
-#include "shop.h"
 #include "trader.h"
 #include "xguardian.h"
 #include "xnavi.h"
@@ -296,14 +289,6 @@ static bool layer_has(int type) {
 	return false;
 }
 
-/* ProtoMan's words where his netbattle waits for a later act: where, as
- * the net goes ("the third act" was the game's word, not his). */
-static const char *netbattle_later_words(void) {
-	return pacing_act(run.depth) == 0
-		? "Enough racing.|Our next duel is a NetBattle. You and me.|Not here. I'll wait past the next two guardians."
-		: "Enough racing.|Our next duel is a NetBattle. You and me.|Not here. I'll wait past the next guardian.";
-}
-
 /* Whether the official gate is the prize of ProtoMan's duel beside it (it
  * opens to the winner); where the duel waits for a later act, it opens to
  * the clearance, as any other (it had stayed sealed, a duel's prize with
@@ -439,42 +424,6 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	}
 }
 
-/* The Net Dealer's word on the act's guardian, `navi`, by his list
- * (`stock`, n of them): the element he can't stand (of either wheel:
- * TenguMan's Sword, issue #39) and the pick of it, first on the list; for
- * one weak to none, the hardest hit, and the viruses' weakness besides
- * where the list has a chip of it (an element-less guardian's act is
- * answered for its viruses). ElementMan's element changes as he fights,
- * so none answers him for long. */
-static void dealer_word(char *word, size_t n, int navi, int counter, const ShopItem *stock, int nstock, const char *brought,
-                        const char *lands) {
-	bool weak = counter > 0 && guardian_weakness(navi) > 0, listed = false;
-	for (int i = 0; i < nstock; ++i)
-		if (stock[i].kind == 2 && counter > 0 && chip_hits_with(stock[i].id) == counter && (i == 0 || !weak)) listed = true;
-	if (weak && listed) {
-		snprintf(word, n, "|Word is,%s can't stand %s chips!|My pick's first on the list.|%s%s", guardian(navi)->name,
-			elem_name(counter), brought, lands);
-		return;
-	}
-	/* (a weakness he found no chip of, as a few layers' rolls of Cursor
-	 * chips came to: the hardest hit, shop_dealer_stock) */
-	if (weak) {
-		snprintf(word, n, "|Word is,%s can't stand %s chips!|But I couldn't find any. Sorry!|Hit hard,then! My pick's "
-			"first on the list.|%s", guardian(navi)->name, elem_name(counter), brought);
-		return;
-	}
-	/* (KnightMan's armor turns every blow but while he swings or leaps: a
-	 * playtester learned it over three Custom screens, session 68) */
-	bool knight = guardian_older(navi) && guardian_older_ai(navi) == BN5_NAVI_KNIGHTMAN;
-	int k = snprintf(word, n, "|Word is,%s %s.|Hit hard%s! My pick's first on the list.|%s", guardian(navi)->name,
-		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" :
-		knight ? "has no weak element.|His armor blocks all,but not when he swings or leaps" : "has no weak element",
-		knight ? ",then" : "", brought);
-	if (listed && k > 0 && (size_t)k < n)
-		snprintf(word + k, n - (size_t)k, "|The viruses here hate %s chips,though!|I've got one of those,too!",
-			elem_name(counter));
-}
-
 /* What the layer's Recovery Mr. Prog gives, once (issue #71, the owner's
  * call on a player's proposal): half of MegaMan's max HP, as the layer is
  * built, away from the arena, so a detour's HP carries on; to full before
@@ -516,60 +465,25 @@ static bool skull_here(void) {
 	return false;
 }
 
-/* (Rush's gap, and how many RushFood call him there: he comes for as many
- * as its panels and eats one, which only MegaMan said, at its bones; a
- * playtester would have bought one of three, session 64) */
-static void dealer_rush(char *s, size_t n) {
-	int hold = layer.ngaps ? layer.gap[0].len : shop_rush_need(run.depth);
-	const char *where = layer.ngaps ? "on this layer" : "deeper in";
-	if (hold > 1)
-		snprintf(s, n, "|And there's a gap %s!|Rush can bridge it.|He comes when you hold %d RushFood.|He eats one. It's on my "
-			"list,too!", where, hold);
-	else snprintf(s, n, "|And there's a gap %s!|Rush bridges it for one RushFood.|It's on my list,too!", where);
-}
-
-/* (the keys he stocks, said: what each opens and where, issues #41, #14, #47) */
-static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock) {
-	for (int i = 0; i < nstock; ++i) {
-		size_t k = strlen(hello);
-		if (stock[i].kind != 1 || k >= n) continue;
-		if (stock[i].id == SUB_UNLOCKER)
-			snprintf(hello + k, n - k, "|Word is,there's purple data locked %s!|An Unlocker opens it. It's on my list!",
-				purple_here() ? "on this layer" : "deeper in");
-		else if (stock[i].id == ITEM_RUSH_FOOD)
-			dealer_rush(hello + k, n - k);
-		else if (stock[i].id == ITEM_WWW_ID)
-			snprintf(hello + k, n - k, "|Skull doors %s only let WWW members by.|A WWW-ID opens every one!",
-				skull_here() ? "on this layer" : "deeper in the Undernet");
-	}
-}
-
 /* The first bystander on an act's first layer passes on the net's word
  * about its guardian, where MegaMan has never battled him: who he is and a
  * rumor, no moves (docs/META.md, what MegaMan knows; MegaMan himself had
  * said it, and how could he know?). His script, -1 none. */
 static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
-	static char rumor[200];
 	int navi = run_layer_guardian();
 	/* (a list-6 navi's face has its sprite's number) */
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || !guardian_rumor(navi) ||
 		out->nchoices >= LAYER_MAX_CHOICES)
 		return -1;
-	snprintf(rumor, sizeof rumor, "Did you hear?|A copy of %s guards the end of %s!|Word is,%s", guardian(navi)->name,
-		guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
 	/* (heard, MegaMan names him for the rest of the act: the director
 	 * watches the flag as a choice) */
 	int flag = LAYER_FLAG_BASE + out->nchoices;
 	out->choice[out->nchoices].type = OBJ_NPC;
 	out->choice[out->nchoices++].flag = flag;
 	flag_clear(flag);
-	return ta_say_flag(text, face, rumor, flag);
+	return ta_say_flag(text, face, rumor_words(navi), flag);
 }
 
-/* A bystander's talk with a part to play: the first's rumor of the act's
- * guardian (`first` >= 0), a P-Code's teller's, an invisible path's
- * hint (issue #46), the second's whisper (`said`, rumors.c); -1 for his
- * own line. */
 /* The layer's last bystander, whose place a flame of darkness takes (the
  * P-Code teller and the invisible path's hinter keep theirs): its object
  * index, -1 for none. */
@@ -604,11 +518,34 @@ static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
 	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
 }
 
+/* What a layer's objects are installed with (layer_objs_install): its map
+ * and where they go, its text, the map's NPCs, the talkers and the Mystery
+ * Data, the Net Dealer's stock and what the data hold beyond their rolls */
+typedef struct {
+	int group, number;
+	LayerObjs *out;
+	TextArchive *text;
+	NpcList npcs;
+	Talker talkers[16];
+	int ntalk;
+	MysteryData md[16];
+	int nmd;
+	int counter;       /* the element that answers this act */
+	int said;          /* bystanders so far: each says another line */
+	bool spin_first;   /* the run's Spin is the profile's first */
+	ShopItem stock[SHOP_MAX_ITEMS];   /* the Net Dealer's */
+	int nstock;
+	MysteryPlan plan;
+} Install;
+
 /* A bystander's talker (Normal Navis and pink navis, or the two Navis
  * another game's area lends, taking turns), or the flame of darkness in
  * the last one's place */
-static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int *said) {
+static void bystander(Install *in, Talker *tk, int i) {
 	static int base;
+	TextArchive *text = in->text;
+	LayerObjs *out = in->out;
+	int *said = &in->said;
 	if (layer_objs_dark_flame >= 0 && i == flame_host()) {
 		flame_stand(text, out, tk, i);
 		return;
@@ -628,12 +565,16 @@ static void bystander(TextArchive *text, LayerObjs *out, Talker *tk, int i, int 
 	++*said;
 }
 
+/* A bystander's talk with a part to play: the first's rumor of the act's
+ * guardian (`first` >= 0), a P-Code's teller's, an invisible path's
+ * hint (issue #46), the second's whisper (`said`, rumor_lines.c); -1 for his
+ * own line. */
 static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, int said, int who) {
 	int rumor = first >= 0 ? rumor_talk(text, out, who) : -1;
 	if (rumor >= 0) return rumor;
 	if (i == layer.teller - 1) return ta_pcode_teller(text, who, blockers_pcode(), LAYER_PCODE_FLAG);
 	if (i == layer.hinter - 1)
-		return ta_say(text, who, "See that lonely pad out in the void?|I saw a Navi walk right out to it!|Over nothing at all!");
+		return ta_say(text, who, hinter_words());
 	int dark = dark_rumor_due ? ta_dark_rumor(text, who) : -1;
 	dark_rumor_due = false;
 	if (dark >= 0 && emu_debug_on()) fprintf(stderr, "rumor: BN6's own words on DarkChips, bystander %d\n", said);
@@ -643,37 +584,18 @@ static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, i
 	return whisper ? ta_say(text, who, whisper) : -1;
 }
 
-/* What a Spin does, and that it stays: the first also how they are
- * found, one deeper in each dive. */
-static int spin_words(TextArchive *text, int colour, bool first) {
-	static char words[400];
-	const char *c = meta_spin_name(colour);
-	int held = 0;
-	for (int k = 0; k < 6; ++k) held += meta_spins() >> k & 1;
-	if (first)
-		snprintf(words, sizeof words, "Lan,look! A Spin for %s programs!|Now we can turn %s programs on the NaviCust!|"
-			"Hold one,then press L or R.|And it stays with us,in every dive!|Each dive hides one more,deeper in.|"
-			"A color we don't have yet!", c, c);
-	else if (held >= 5)
-		snprintf(words, sizeof words, "A Spin for %s programs,Lan!|That's all six! Every program turns now!|"
-			"In every dive!", c);
-	else
-		snprintf(words, sizeof words, "A Spin for %s programs,Lan!|%c%s programs turn with L and R now!|"
-			"In every dive from here on!", c, c[0] - 'a' + 'A', c + 1);
-	return ta_say(text, FACE_MEGAMAN, words);
-}
-
 /* Layer object i, a Mystery Data: the map's next one (16 at most), or
  * the flame of darkness standing in its place (flame_host). */
-static void mystery_or_flame(TextArchive *text, LayerObjs *out, Talker *tk, int i, MysteryData *md, int *nmd, NpcList *npcs, MysteryPlan *plan) {
-	if (layer_objs_dark_flame >= 0 && i == flame_host()) { flame_stand(text, out, tk, i); return; }
-	if (*nmd >= 16 || npcs->n >= 32) return;
-	md[*nmd].x = tk->x;
-	md[*nmd].y = tk->y;
-	md[*nmd].z = tk->z;
-	fill_mystery(&md[*nmd], &layer.obj[i], i, plan, out);
-	npcs->script[npcs->n++] = npc_mystery(*nmd);
-	++*nmd;
+static void mystery_or_flame(Install *in, Talker *tk, int i) {
+	if (layer_objs_dark_flame >= 0 && i == flame_host()) { flame_stand(in->text, in->out, tk, i); return; }
+	if (in->nmd >= 16 || in->npcs.n >= 32) return;
+	MysteryData *m = &in->md[in->nmd];
+	m->x = tk->x;
+	m->y = tk->y;
+	m->z = tk->z;
+	fill_mystery(m, &layer.obj[i], i, &in->plan, in->out);
+	in->npcs.script[in->npcs.n++] = npc_mystery(in->nmd);
+	++in->nmd;
 }
 
 /* Each of the layer's rolls from a stream of its own, the layer seed's
@@ -686,15 +608,11 @@ static void mystery_or_flame(TextArchive *text, LayerObjs *out, Talker *tk, int 
  * session 65). */
 static void rolls_of(uint32_t salt) { rng_seed(run.layer_seed ^ (salt + 1u) * 0x9E3779B9u); }
 
-bool layer_objs_install(int group, int number, LayerObjs *out) {
-	mapslot_reset();
-	NpcList npcs = { { 0 }, 0, { 0 }, { 0 }, 0 };
-	static TextArchive text;
-	ta_begin(&text);
-	Talker talkers[16];
-	int ntalk = 0;
-	MysteryData md[16];
-	int nmd = 0;
+/* The layer's objects begun: no choices or scripts yet, the act's answer,
+ * whether a ScrtData and the run's Spin lie here, and the Net Dealer's and
+ * the program vendor's stock, each from rolls of its own */
+static void install_begin(Install *in) {
+	LayerObjs *out = in->out;
 	out->nchoices = 0;
 	layer_objs_dealer_named = false;
 	/* (no guardian, and no scripts of his: a layer without one kept the
@@ -713,368 +631,366 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
-	int counter = counter_element(run.depth, run.biome, run_layer_guardian());
+	in->counter = counter_element(run.depth, run.biome, run_layer_guardian());
 	/* ScrtData lie in deep layers until three are out there */
-	int said = 0;   /* bystanders so far: each says another line */
 	rolls_of(0x100);
 	bool fragment = !run.secret_cleared && run.fragments < 3 &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * META.md: one a run, a colour the profile lacks, kept for good) */
 	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
-	MysteryPlan plan = { spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
-	bool spin_first = meta_spins() == 0;
+	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
+	in->spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */
-	ShopItem stock[SHOP_MAX_ITEMS];
 	int navi_of_act = run_layer_guardian();
 	bool weakless = navi_of_act > 0 && guardian_weakness(navi_of_act) <= 0;
 	rolls_of(0x101);
-	int nstock = shop_dealer_stock(run.depth, weakless ? -1 : counter, weakless ? counter : 0, stock);
-	plan.stock = stock;
-	plan.nstock = nstock;
+	in->nstock = shop_dealer_stock(run.depth, weakless ? -1 : in->counter, weakless ? in->counter : 0, in->stock);
+	in->plan.stock = in->stock;
+	in->plan.nstock = in->nstock;
 	/* (a purple data's key in a blue one, three layers in ten: a lock and
 	 * its key on one layer) */
 	rolls_of(0x102);
-	plan.key_here = purple_here() && rng_range(0, 99) < 30;
+	in->plan.key_here = purple_here() && rng_range(0, 99) < 30;
 	/* the program vendor's, before his words too (he names the programs
 	 * MegaMan has had in earlier runs, which lead his list) */
 	rolls_of(0x103);
 	out->nprograms = shop_program_stock(run.depth, out->programs);
-	const char *brought = nstock && stock[0].stock == 1 ? "It's my only one. Make it count!" : "I brought two. They go fast!";
-	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
-	 * a hopping BlastMan two times in three) */
-	const char *lands = nstock && stock[0].kind == 2 && chip_family(stock[0].id) == 50
-		? "|Its needles drop a moment late.|So fire when he stops!" : "";
-	for (int i = 0; i < layer.nobj; ++i) {
-		const NetObj *o = &layer.obj[i];
-		rolls_of((uint32_t)i);
-		int wx, wy;
-		netmap_world((int)o->x, (int)o->y, &wx, &wy);
-		/* in a raised room, on its floor */
-		int wz = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
-		Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, 0, false, 0, 0, 0 };
-		/* a navi behind a counter stands in its aisle, facing its front
-		 * (screen down-right or down-left: the game's facings 3 and 5) */
-		if (o->prop >= 0 && netmap_prop_navi(o->prop, &tk.x, &tk.y, &tk.sx, &tk.sy)) {
-			tk.behind = true;
-			tk.anim = layer.props[o->prop].faces == FACES_X ? 3 : 5;
-		}
-		bool asks = false;   /* a Yes/No the director acts on */
-		char prize[24] = "";   /* (a Server's chip, named in its offer) */
-		switch (o->type) {
-		case OBJ_WARP_IN:
-			out->start_x = wx; out->start_y = wy;
-			break;
-		case OBJ_EXIT:
-		case OBJ_RETURN: {
-			int pad = o->type == OBJ_EXIT ? SPR_EXIT_PAD : SPR_RETURN_PAD;
-			out->exit_x = wx; out->exit_y = wy;
-			/* the game's own warp pad: trigger cells taking warp 1; and a
-			 * teleport pair's, warps 2 and 3 to each other */
-			set_pads(group, number, wx, wy);
-			need_sprite(&npcs, 7, pad);
-			/* a guardian's exit shows once the guardian is beaten */
-			if (npcs.n < 32)
-				npcs.script[npcs.n++] = layer.boss_layer ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG)
-					: npc_prop(7, pad, wx, wy, wz, 0);
-			break;
-		}
-		case OBJ_MYSTERY: mystery_or_flame(&text, out, &tk, i, md, &nmd, &npcs, &plan); break;
-		case OBJ_NPC: bystander(&text, out, &tk, i, &said); break;
-		case OBJ_HEAL: tk.script = ta_heal(&text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, heal_amount()); break;
-		case OBJ_TRADER:
-		case OBJ_BUGTRADER: {
-			/* the game's own machine and lines; deeper, some are Specials */
-			TraderKind kind = o->type == OBJ_BUGTRADER ? TRADER_BUGFRAG
-				: (run.depth - 1) % CYCLE_LAYERS >= SPECIAL_FROM && run.layer_seed % 100 < SPECIAL_CHANCE ? TRADER_SPECIAL : TRADER_CHIPS;
-			trader_install(group, number, kind, run.depth);
-			out->trader_kind = kind;
-			tk.cat = 7; tk.sprite = SPR_CHIP_TRADER;
-			tk.archive = BN6_TRADER_TEXT;
-			tk.script = kind;
-			break;
-		}
-		case OBJ_SHOP: {
-			/* (and a word on the element that answers this act, which the
-			 * stock carries a chip of) */
-			char hello[720], word[280] = "";
-			int navi = run_layer_guardian();
-			/* (the net's word comes back from an act's second layer: its
-			 * first keeps the mystery of a guardian never battled, but for
-			 * a bystander's rumor, sought out; a playtester's dealer named
-			 * one two minutes into the act) */
-			bool tells = navi > 0 && (guardian_known(navi) || layer_in_act(run.depth) > 0);
-			layer_objs_dealer_named = tells;
-			/* (nor does he deny the bystanders' rumor: a playtester heard it
-			 * two platforms before his "No word yet") */
-			if (navi > 0 && !tells)
-				snprintf(word, sizeof word, "|Nobody's come back from the end of %s!|There's talk on the Net... "
-					"But I don't sell talk!|Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
-			else if (navi > 0)
-				dealer_word(word, sizeof word, navi, counter, stock, nstock, brought, lands);
-			/* (and that his chips come in the folder's codes, loot_fit_code) */
-			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
-				? run.codes[0] ? "Welcome! Chips for sale!|In your Folder's codes,when I can!"
-					: "Welcome! Chips for sale!"
-				: run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth)
-					/* (the run's last layer has no "from here": a playtester heard it there) */
-					? "The bottom of the Net,MegaMan!|Stock up! My last stop,and yours!"
-					: "Still at it,MegaMan?|Stock up! It only gets tougher from here!", word);
-			/* (met in this act already: the pick, in a line) */
-			if (layer_objs_dealer_again && tells)
-				snprintf(hello, sizeof hello, "Back again,MegaMan!|My pick for %s is first on the list!|%s", guardian(navi)->name, brought);
-			dealer_keys(hello, sizeof hello, stock, nstock);
-			tk.sprite = SPR_DEALER;
-			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!",
-				"Sold out,MegaMan!|You bought every chip I had!", LAYER_DEALER_TOLD_FLAG);
-			break;
-		}
-		case OBJ_PROGRAMS: {
-			/* (programs from earlier runs, by name: the reason they lead;
-			 * not one MegaMan has on him now, which the vendor's "brought
-			 * it along" offered a playtester who had SuperArmor installed) */
-			char names[2][16], hello[300], again[140] = "";
-			int nnames = 0;
-			for (int k = 0; k < out->nprograms && nnames < 2; ++k) {
-				const char *about = navicust_about(out->programs[k].id / 4);
-				if (!about || !shop_program_found(out->programs[k].id / 4) || program_had(out->programs[k].id / 4)) continue;
-				snprintf(names[nnames++], sizeof names[0], "%.*s", (int)strcspn(about, ":"), about);
-			}
-			if (nnames == 1) snprintf(again, sizeof again, "|I hear you've used %s before!|So I brought it along!", names[0]);
-			else if (nnames == 2)
-				snprintf(again, sizeof again, "|I hear you've used %s and %s!|So I brought them along!", names[0], names[1]);
-			snprintf(hello, sizeof hello, "NaviCust programs!|Fresh from my workbench!%s|Install them in the PET.|Pick MegaMan,then NaviCust!",
-				again);
-			tk.sprite = SPR_TECH;
-			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH, hello, "More programs? Take a look!",
-				"Sold out!|Every program I brought is yours!", LAYER_VENDOR_TOLD_FLAG);
-			break;
-		}
-		case OBJ_CHALLENGE: {
-			asks = true; tk.cat = 7; tk.sprite = SPR_SERVER;
-			/* a win pays with a chip well past Mystery Data, the hardest
-			 * hitting of a dozen from where the Net Dealer finds his picks,
-			 * two layers deeper (a WhiCapsl, a FireBrn1 for 120 HP, then an
-			 * M-Cannon beside his DolThdr2 were poor prizes for the risk) */
-			char code = '*';
-			ChipInfo ci;
-			int chip = roll_chip(run.depth + 2, 4, &code), best_power = -1;
-			bool best_fits = false, best_new = false;
-			for (int tries = 0; tries < 12; ++tries) {
-				char c = '*';
-				int id = tries ? roll_chip(run.depth + 2, 4, &c) : chip;
-				chip_info(id, &ci);
-				int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
-				/* (one the folder can play first, in its codes or *: a Blade
-				 * folder's won HeatManEX H; and first of all one the layer's
-				 * Net Dealer doesn't sell, from the same pool: a playtester
-				 * won a third MoonBld A beside the two he had just bought) */
-				bool fits = loot_folder_code(id, true) != 0, fresh = true;
-				for (int s = 0; s < nstock; ++s) fresh &= !(stock[s].kind == 2 && stock[s].id == id);
-				if ((fresh && !best_new) || (fresh == best_new && ((fits && !best_fits) || (fits == best_fits && power > best_power)))) {
-					best_power = power; best_fits = fits; best_new = fresh; chip = id; if (tries) code = c;
-				}
-			}
-			chip_info(chip, &ci);
-			/* (in the folder's code, or its * where it has none of them, for
-			 * any folder: an M-Cannon R went with nothing a playtester
-			 * carried) */
-			char fit = loot_folder_code(chip, true);
-			if (fit) code = fit;
-			else if (strchr(ci.codes, '*')) code = '*';
-			out->challenge_reward = ta_challenge_reward(&text, chip, ci.name, code == '*' ? 26 : code - 'A');
-			snprintf(prize, sizeof prize, "%s %c", ci.name, code);
-			break;
-		}
-		case OBJ_GIFT: {
-			char code = '*';
-			ChipInfo ci;
-			/* a chip that hits hard (the tier's traps and supports are
-			 * little help to a starting folder) */
-			int chip = -1;
-			for (int tries = 0; tries < 24; ++tries) {
-				int c = chip_pool_pick(2);
-				if (c <= 0) break;
-				chip_info(c, &ci);
-				chip = c;
-				/* (not a recovery chip, whose power is what it heals: Recov150
-				 * was offered as hitting for 150) */
-				if (ci.power >= 60 && ci.ncodes && chip_def(c)->kind != CK_RECOVER) break;
-			}
-			if (chip <= 0) chip = roll_chip(run.depth, 3, &code);
-			chip_info(chip, &ci);
-			code = loot_fit_code(chip, ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*', true);
-			ShopItem program = { 3, 1, 0, 0, 0 };
-			const char *about = shop_pick_gift_program(&program);
-			/* a run lost before its first guardian earns a little more */
-			bool comfort = profile.last_depth >= 1 && profile.last_depth <= 3;
-			if (emu_debug_on()) fprintf(stderr, "gift: chip %d \"%s\" %c, program %d color %d\n", chip, ci.name, code, program.id, program.code);
-			tk.script = ta_gift(&text, LAYER_GIFT_FLAG, comfort, profile.runs >= 2, (run.helpers & HELP_HEAD_START) != 0, chip, ci.name, ci.power, code == '*' ? 26 : code - 'A', program.id,
-				program.code, about);
-			/* (and logs out once it is taken: he stood beside the arrival,
-			 * and a playtester's A pressed through the last box talked to
-			 * him again, two sessions running) */
-			tk.gone_flag = LAYER_GIFT_FLAG;
-			flag_clear(LAYER_GIFT_FLAG);
-			break;
-		}
-		case OBJ_UNDERNET: asks = true; tk.cat = 7; tk.sprite = SPR_DARK_WARP; break;
-		case OBJ_DUEL:
-			/* the real ProtoMan (docs/RIVAL.md), in his own body: the Nest's
-			 * copies are the guardians; a netbattle not yet due, he names
-			 * where it will be */
-			asks = !layer_objs_duel_later;
-			tk.cat = 6;
-			tk.sprite = guardian_sprite(11);
-			need_sprite(&npcs, 6, tk.sprite);
-			if (layer_objs_duel_later) tk.script = ta_say(&text, guardian_face(11), netbattle_later_words());
-			if (emu_debug_on()) fprintf(stderr, "duel: ProtoMan at %d %d, his time %d frames\n", wx, wy, layer_objs_duel_frames);
-			break;
-		case OBJ_SECRET_GATE: asks = true; tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true; break;
-		case OBJ_NAVI_GATE: {
-			/* sealed until his code is earned (docs/META.md, gates): its
-			 * talk then says how, else it asks for his SP and pays his SP
-			 * chip */
-			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
-			int navi = o->param, won = rival(navi)->megaman_won;
-			const char *name = guardian(navi)->name;
-			asks = won >= GATE_CODE;
-			out->gate_navi = navi;
-			if (!asks) tk.script = ta_navi_gate(&text, -1, name, won, GATE_CODE);
-			else {
-				int chip = navi_chip(navi, 2), code = 26;
-				ChipInfo ci = { 0 };
-				if (chip > 0) {
-					chip_info(chip, &ci);
-					if (ci.ncodes) code = ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A';
-				}
-				out->gate_reward = chip > 0 ? ta_gate_reward(&text, name, chip, ci.name, code) : -1;
-			}
-			break;
-		}
-		case OBJ_OFFICIAL: {
-			/* an official gate (docs/RIVAL.md): sealed until Chaud's
-			 * clearance reaches its level; open, three chips to take one:
-			 * at level 1 an official Chip Order, standard chips the
-			 * Library holds (held in any run), as BN6's Chip Order orders
-			 * them; at level 2 Mega chips */
-			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
-			int level = o->param >= 2 ? 2 : 1;
-			layer_objs_official_level = level;
-			ScriptsVault v = { 0 };
-			official_picks(level, &v);
-			tk.script = ta_official(&text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, official_duel_prize(level), &v);
-			break;
-		}
-		case OBJ_VAULT: {
-			/* a collector's vault (docs/META.md, gates): sealed until the
-			 * profile's Library holds enough chips, its talk then says how
-			 * many; open, three rare chips, one to take, in the folder's
-			 * codes where they come in them */
-			tk.cat = 7; tk.sprite = SPR_GATE; tk.floor = true;
-			int need = meta_vault_need(run.depth), have = meta_library_count(-1);
-			ScriptsVault v = { 0 };
-			for (int k = 0; k < 3; ++k) {
-				char code = '*';
-				int id = 0;
-				for (int tries = 0; tries < 12; ++tries) {
-					id = roll_chip(run.depth + 2, 4, &code);
-					bool again = false;
-					for (int j = 0; j < k; ++j) again |= v.chip[j] == id;
-					if (!again) break;
-				}
-				vault_chip(&v, k, id, code);
-			}
-			tk.script = ta_vault(&text, LAYER_VAULT_FLAG, need, have, &v);
-			break;
-		}
-		case OBJ_BOSS:
-			/* the guardian's own actors and scripts (guardian_objs.c) */
-			guardian_scripts(&text, o, wx, wy, wz, &out->guardian);
-			break;
-		default:
-			break;
-		}
-		if (asks && out->nchoices < LAYER_MAX_CHOICES) {
-			int flag = LAYER_FLAG_BASE + out->nchoices;
-			out->choice[out->nchoices].type = o->type;
-			out->choice[out->nchoices++].flag = flag;
-			static char terms[GUARDIAN_TERMS_MAX];
-			if (o->type == OBJ_DUEL) {
-				/* his terms: the time to beat, as the results screen shows a
-				 * DeleteTime (seconds and hundredths, cut), and the rung's
-				 * rule; the first duel says who he is */
-				int f = layer_objs_duel_frames, sec = f / 60, cs = (f % 60) * 100 / 60;
-				int met = profile.duel_won + profile.duel_lost;
-				if (layer_objs_duel_rung == 2) guardian_netbattle_terms(terms, sizeof terms);
-				else
-				{
-					/* (the squad and the stake said before the choice, as
-					 * docs/RIVAL.md promises: a playtester took it at 100 HP,
-					 * nothing saying it was a real fight; and the two are old
-					 * rivals, not strangers) */
-					static const char *const count[] = { "", "a lone virus", "a pair of viruses", "three viruses", "four viruses" };
-					int nf = layer_objs_duel_foes >= 1 && layer_objs_duel_foes <= 4 ? layer_objs_duel_foes : 3;
-					snprintf(terms, sizeof terms, "%sI busted %s here in %d:%02d.%02d.|Beat that%s.|"
-						"@M Real viruses,Lan!|@M If they delete us,the dive's over.|@M Let's heal up first if we're hurt.",
-						met ? "Back again,MegaMan? Chaud's watching.|" :
-						"MegaMan... So it's you,diving the Endless Net.|The Nest copies Navis,they say.|I'm no copy.|Chaud wants to see your skill.|",
-						count[nf], sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? " without taking a hit" : "");
-				}
-				/* (he logs out as the duel begins: one a layer) */
-				tk.gone_flag = flag;
-			}
-			tk.script = o->type == OBJ_DUEL ? ta_duel(&text, flag, guardian_face(11), terms)
-				: o->type == OBJ_CHALLENGE ? ta_challenge(&text, flag, prize, layer_objs_server_navi)
-				: o->type == OBJ_UNDERNET ? ta_undernet(&text, flag, run.biome == BIOME_UNDERNET)
-				: o->type == OBJ_NAVI_GATE ? ta_navi_gate(&text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
-				: ta_secret_gate(&text, flag);
-			/* not chosen yet */
-			flag_clear(flag);
-		}
-		if (tk.script >= 0 && !tk.archive && out->script_of[o->type] < 0) out->script_of[o->type] = tk.script;
-		if (tk.script >= 0 && ntalk < 16) talkers[ntalk++] = tk;
+}
+
+/* The exit (or return) pad: the game's own warp pad, trigger cells taking
+ * warp 1, and a teleport pair's, warps 2 and 3 to each other; a guardian's
+ * exit shows once the guardian is beaten */
+static void install_exit(Install *in, const NetObj *o, int wx, int wy, int wz) {
+	int pad = o->type == OBJ_EXIT ? SPR_EXIT_PAD : SPR_RETURN_PAD;
+	in->out->exit_x = wx; in->out->exit_y = wy;
+	set_pads(in->group, in->number, wx, wy);
+	need_sprite(&in->npcs, 7, pad);
+	if (in->npcs.n < 32)
+		in->npcs.script[in->npcs.n++] = layer.boss_layer ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG)
+			: npc_prop(7, pad, wx, wy, wz, 0);
+}
+
+/* A Chip or BugFrag Trader: the game's own machine and lines; deeper, some
+ * are Specials */
+static void install_trader(Install *in, const NetObj *o, Talker *tk) {
+	TraderKind kind = o->type == OBJ_BUGTRADER ? TRADER_BUGFRAG
+		: (run.depth - 1) % CYCLE_LAYERS >= SPECIAL_FROM && run.layer_seed % 100 < SPECIAL_CHANCE ? TRADER_SPECIAL : TRADER_CHIPS;
+	trader_install(in->group, in->number, kind, run.depth);
+	in->out->trader_kind = kind;
+	tk->cat = 7; tk->sprite = SPR_CHIP_TRADER;
+	tk->archive = BN6_TRADER_TEXT;
+	tk->script = kind;
+}
+
+/* The Net Dealer, and his word on the element that answers this act, which
+ * his stock carries a chip of (layer_words.c) */
+static void install_dealer(Install *in, Talker *tk) {
+	int navi = run_layer_guardian();
+	/* (the net's word comes back from an act's second layer: its
+	 * first keeps the mystery of a guardian never battled, but for
+	 * a bystander's rumor, sought out; a playtester's dealer named
+	 * one two minutes into the act) */
+	bool tells = navi > 0 && (guardian_known(navi) || layer_in_act(run.depth) > 0);
+	layer_objs_dealer_named = tells;
+	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
+	ShopWords w = dealer_words(&talk);
+	tk->sprite = SPR_DEALER;
+	tk->script = ta_shop(in->text, SHOP_DEALER, FACE_NAVI, w.hello, w.again, w.sold_out, LAYER_DEALER_TOLD_FLAG);
+}
+
+/* The NaviCust vendor: programs from earlier runs, by name, the reason
+ * they lead; not one MegaMan has on him now, which the vendor's "brought it
+ * along" offered a playtester who had SuperArmor installed */
+static void install_vendor(Install *in, Talker *tk) {
+	const LayerObjs *out = in->out;
+	char names[2][16];
+	int nnames = 0;
+	for (int k = 0; k < out->nprograms && nnames < 2; ++k) {
+		const char *about = navicust_about(out->programs[k].id / 4);
+		if (!about || !shop_program_found(out->programs[k].id / 4) || program_had(out->programs[k].id / 4)) continue;
+		snprintf(names[nnames++], sizeof names[0], "%.*s", (int)strcspn(about, ":"), about);
 	}
+	ShopWords w = vendor_words(names, nnames);
+	tk->sprite = SPR_TECH;
+	tk->script = ta_shop(in->text, SHOP_PROGRAMS, FACE_TECH, w.hello, w.again, w.sold_out, LAYER_VENDOR_TOLD_FLAG);
+}
+
+/* A Server: a win pays with a chip well past Mystery Data, the hardest
+ * hitting of a dozen from where the Net Dealer finds his picks, two layers
+ * deeper (a WhiCapsl, a FireBrn1 for 120 HP, then an M-Cannon beside his
+ * DolThdr2 were poor prizes for the risk); the chip, named in its offer,
+ * into `prize` */
+static void install_server(Install *in, Talker *tk, char *prize, size_t n) {
+	tk->cat = 7; tk->sprite = SPR_SERVER;
+	char code = '*';
+	ChipInfo ci;
+	int chip = roll_chip(run.depth + 2, 4, &code), best_power = -1;
+	bool best_fits = false, best_new = false;
+	for (int tries = 0; tries < 12; ++tries) {
+		char c = '*';
+		int id = tries ? roll_chip(run.depth + 2, 4, &c) : chip;
+		chip_info(id, &ci);
+		int power = chip_direct(id) ? ci.power : 0;   /* (a MchnSwrd's 200 needs a paralysed enemy) */
+		/* (one the folder can play first, in its codes or *: a Blade
+		 * folder's won HeatManEX H; and first of all one the layer's
+		 * Net Dealer doesn't sell, from the same pool: a playtester
+		 * won a third MoonBld A beside the two he had just bought) */
+		bool fits = loot_folder_code(id, true) != 0, fresh = true;
+		for (int s = 0; s < in->nstock; ++s) fresh &= !(in->stock[s].kind == 2 && in->stock[s].id == id);
+		if ((fresh && !best_new) || (fresh == best_new && ((fits && !best_fits) || (fits == best_fits && power > best_power)))) {
+			best_power = power; best_fits = fits; best_new = fresh; chip = id; if (tries) code = c;
+		}
+	}
+	chip_info(chip, &ci);
+	/* (in the folder's code, or its * where it has none of them, for
+	 * any folder: an M-Cannon R went with nothing a playtester
+	 * carried) */
+	char fit = loot_folder_code(chip, true);
+	if (fit) code = fit;
+	else if (strchr(ci.codes, '*')) code = '*';
+	in->out->challenge_reward = ta_challenge_reward(in->text, chip, ci.name, code == '*' ? 26 : code - 'A');
+	snprintf(prize, n, "%s %c", ci.name, code);
+}
+
+/* The first layer's gift: a chip that hits hard (the tier's traps and
+ * supports are little help to a starting folder) and a program */
+static void install_gift(Install *in, Talker *tk) {
+	char code = '*';
+	ChipInfo ci;
+	int chip = -1;
+	for (int tries = 0; tries < 24; ++tries) {
+		int c = chip_pool_pick(2);
+		if (c <= 0) break;
+		chip_info(c, &ci);
+		chip = c;
+		/* (not a recovery chip, whose power is what it heals: Recov150
+		 * was offered as hitting for 150) */
+		if (ci.power >= 60 && ci.ncodes && chip_def(c)->kind != CK_RECOVER) break;
+	}
+	if (chip <= 0) chip = roll_chip(run.depth, 3, &code);
+	chip_info(chip, &ci);
+	code = loot_fit_code(chip, ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*', true);
+	ShopItem program = { 3, 1, 0, 0, 0 };
+	const char *about = shop_pick_gift_program(&program);
+	/* a run lost before its first guardian earns a little more */
+	bool comfort = profile.last_depth >= 1 && profile.last_depth <= 3;
+	if (emu_debug_on()) fprintf(stderr, "gift: chip %d \"%s\" %c, program %d color %d\n", chip, ci.name, code, program.id, program.code);
+	ScriptsGift gift = { .flag = LAYER_GIFT_FLAG, .comfort = comfort, .brief = profile.runs >= 2, .head_start = (run.helpers & HELP_HEAD_START) != 0,
+		.chip = chip, .code = code == '*' ? 26 : code - 'A', .power = ci.power, .chip_name = ci.name, .program = program.id, .color = program.code,
+		.about = about };
+	tk->script = ta_gift(in->text, &gift);
+	/* (and logs out once it is taken: he stood beside the arrival,
+	 * and a playtester's A pressed through the last box talked to
+	 * him again, two sessions running) */
+	tk->gone_flag = LAYER_GIFT_FLAG;
+	flag_clear(LAYER_GIFT_FLAG);
+}
+
+/* The real ProtoMan (docs/RIVAL.md), in his own body: the Nest's copies
+ * are the guardians; a netbattle not yet due, he names where it will be.
+ * True where his duel is a choice. */
+static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
+	tk->cat = 6;
+	tk->sprite = guardian_sprite(11);
+	need_sprite(&in->npcs, 6, tk->sprite);
+	if (layer_objs_duel_later) tk->script = ta_say(in->text, guardian_face(11), netbattle_later_words());
+	if (emu_debug_on()) fprintf(stderr, "duel: ProtoMan at %d %d, his time %d frames\n", wx, wy, layer_objs_duel_frames);
+	return !layer_objs_duel_later;
+}
+
+/* A Navi gate, sealed until his code is earned (docs/META.md, gates): its
+ * talk then says how, else it asks for his SP and pays his SP chip. True
+ * where it asks. */
+static bool install_navi_gate(Install *in, const NetObj *o, Talker *tk) {
+	tk->cat = 7; tk->sprite = SPR_GATE; tk->floor = true;
+	int navi = o->param, won = rival(navi)->megaman_won;
+	const char *name = guardian(navi)->name;
+	bool asks = won >= GATE_CODE;
+	in->out->gate_navi = navi;
+	if (!asks) tk->script = ta_navi_gate(in->text, -1, name, won, GATE_CODE);
+	else {
+		int chip = navi_chip(navi, 2), code = 26;
+		ChipInfo ci = { 0 };
+		if (chip > 0) {
+			chip_info(chip, &ci);
+			if (ci.ncodes) code = ci.codes[0] == '*' ? 26 : ci.codes[0] - 'A';
+		}
+		in->out->gate_reward = chip > 0 ? ta_gate_reward(in->text, name, chip, ci.name, code) : -1;
+	}
+	return asks;
+}
+
+/* An official gate (docs/RIVAL.md): sealed until Chaud's clearance reaches
+ * its level; open, three chips to take one: at level 1 an official Chip
+ * Order, standard chips the Library holds (held in any run), as BN6's Chip
+ * Order orders them; at level 2 Mega chips */
+static void install_official(Install *in, const NetObj *o, Talker *tk) {
+	tk->cat = 7; tk->sprite = SPR_GATE; tk->floor = true;
+	int level = o->param >= 2 ? 2 : 1;
+	layer_objs_official_level = level;
+	ScriptsVault v = { 0 };
+	official_picks(level, &v);
+	tk->script = ta_official(in->text, LAYER_OFFICIAL_FLAG, LAYER_CLEARED_FLAG, level, profile.duel_won, official_duel_prize(level), &v);
+}
+
+/* A collector's vault (docs/META.md, gates): sealed until the profile's
+ * Library holds enough chips, its talk then says how many; open, three
+ * rare chips, one to take, in the folder's codes where they come in them */
+static void install_vault(Install *in, Talker *tk) {
+	tk->cat = 7; tk->sprite = SPR_GATE; tk->floor = true;
+	int need = meta_vault_need(run.depth), have = meta_library_count(-1);
+	ScriptsVault v = { 0 };
+	for (int k = 0; k < 3; ++k) {
+		char code = '*';
+		int id = 0;
+		for (int tries = 0; tries < 12; ++tries) {
+			id = roll_chip(run.depth + 2, 4, &code);
+			bool again = false;
+			for (int j = 0; j < k; ++j) again |= v.chip[j] == id;
+			if (!again) break;
+		}
+		vault_chip(&v, k, id, code);
+	}
+	tk->script = ta_vault(in->text, LAYER_VAULT_FLAG, need, have, &v);
+}
+
+/* A Yes/No the director acts on (out->choice): its flag, not chosen yet,
+ * and its script; ProtoMan's terms said before his */
+static void install_choice(Install *in, const NetObj *o, Talker *tk, const char *prize) {
+	LayerObjs *out = in->out;
+	int flag = LAYER_FLAG_BASE + out->nchoices;
+	out->choice[out->nchoices].type = o->type;
+	out->choice[out->nchoices++].flag = flag;
+	static char terms[GUARDIAN_TERMS_MAX];
+	if (o->type == OBJ_DUEL) {
+		/* his terms: the time to beat and the rung's rule (layer_words.c);
+		 * the netbattle's, his own */
+		if (layer_objs_duel_rung == 2) guardian_netbattle_terms(terms, sizeof terms);
+		else duel_terms(terms, sizeof terms, profile.duel_won + profile.duel_lost, layer_objs_duel_foes, layer_objs_duel_frames,
+			layer_objs_duel_rung);
+		/* (he logs out as the duel begins: one a layer) */
+		tk->gone_flag = flag;
+	}
+	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms)
+		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, prize, layer_objs_server_navi)
+		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET)
+		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
+		: ta_secret_gate(in->text, flag);
+	/* not chosen yet */
+	flag_clear(flag);
+}
+
+/* Layer object i on the map: its talker and script, and its choice */
+/* What stands on the layer without a chat: where MegaMan comes in, the
+ * ways out, the guardian (its own actors and scripts: guardian_objs.c). */
+static bool install_place(Install *in, const NetObj *o, int wx, int wy, int wz) {
+	switch (o->type) {
+	case OBJ_WARP_IN:
+		in->out->start_x = wx; in->out->start_y = wy;
+		return true;
+	case OBJ_EXIT:
+	case OBJ_RETURN: install_exit(in, o, wx, wy, wz); return true;
+	case OBJ_BOSS: guardian_scripts(in->text, o, wx, wy, wz, &in->out->guardian); return true;
+	default: return false;
+	}
+}
+
+/* Who speaks for an object, where it stands: a navi behind a counter in its
+ * aisle, facing its front (screen down-right or down-left: the game's
+ * facings 3 and 5). */
+static Talker talker_at(const NetObj *o, int wx, int wy, int wz) {
+	Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, 0, false, 0, 0, 0 };
+	if (o->prop >= 0 && netmap_prop_navi(o->prop, &tk.x, &tk.y, &tk.sx, &tk.sy)) {
+		tk.behind = true;
+		tk.anim = layer.props[o->prop].faces == FACES_X ? 3 : 5;
+	}
+	return tk;
+}
+
+/* The object's chat; true where it ends on a Yes/No the director acts on
+ * (a Server names its chip in `prize`). */
+static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i, char *prize, size_t size) {
+	switch (o->type) {
+	case OBJ_MYSTERY: mystery_or_flame(in, tk, i); return false;
+	case OBJ_NPC: bystander(in, tk, i); return false;
+	case OBJ_HEAL: tk->script = ta_heal(in->text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, heal_amount()); return false;
+	case OBJ_TRADER:
+	case OBJ_BUGTRADER: install_trader(in, o, tk); return false;
+	case OBJ_SHOP: install_dealer(in, tk); return false;
+	case OBJ_PROGRAMS: install_vendor(in, tk); return false;
+	case OBJ_CHALLENGE: install_server(in, tk, prize, size); return true;
+	case OBJ_GIFT: install_gift(in, tk); return false;
+	case OBJ_UNDERNET: tk->cat = 7; tk->sprite = SPR_DARK_WARP; return true;
+	case OBJ_DUEL: return install_duel(in, tk, tk->x, tk->y);
+	case OBJ_SECRET_GATE: tk->cat = 7; tk->sprite = SPR_GATE; tk->floor = true; return true;
+	case OBJ_NAVI_GATE: return install_navi_gate(in, o, tk);
+	case OBJ_OFFICIAL: install_official(in, o, tk); return false;
+	case OBJ_VAULT: install_vault(in, tk); return false;
+	default: return false;
+	}
+}
+
+static void install_object(Install *in, int i) {
+	const NetObj *o = &layer.obj[i];
+	rolls_of((uint32_t)i);
+	int wx, wy;
+	netmap_world((int)o->x, (int)o->y, &wx, &wy);
+	/* in a raised room, on its floor */
+	int wz = layer.level[(int)o->y][(int)o->x] ? layer.rise : 0;
+	if (install_place(in, o, wx, wy, wz)) return;
+	Talker tk = talker_at(o, wx, wy, wz);
+	char prize[24] = "";
+	bool asks = install_talk(in, o, &tk, i, prize, sizeof prize);
+	if (asks && in->out->nchoices < LAYER_MAX_CHOICES) install_choice(in, o, &tk, prize);
+	if (tk.script >= 0 && !tk.archive && in->out->script_of[o->type] < 0) in->out->script_of[o->type] = tk.script;
+	if (tk.script >= 0 && in->ntalk < 16) in->talkers[in->ntalk++] = tk;
+}
+
+bool layer_objs_install(int group, int number, LayerObjs *out) {
+	mapslot_reset();
+	static TextArchive text;
+	ta_begin(&text);
+	static Install in;
+	memset(&in, 0, sizeof in);
+	in.group = group;
+	in.number = number;
+	in.out = out;
+	in.text = &text;
+	install_begin(&in);
+	for (int i = 0; i < layer.nobj; ++i) install_object(&in, i);
 	rolls_of(0x1FF);
 	/* the shops' stock, in the game's shop data */
 	if (emu_debug_on())
-		for (int i = 0; i < nstock; ++i)
-			if (stock[i].kind == 2) {
+		for (int i = 0; i < in.nstock; ++i)
+			if (in.stock[i].kind == 2) {
 				ChipInfo ci;
-				chip_info(stock[i].id, &ci);
-				fprintf(stderr, "shop chip %s %c %dz\n", ci.name, stock[i].code == 26 ? '*' : 'A' + stock[i].code, stock[i].price * 100);
+				chip_info(in.stock[i].id, &ci);
+				fprintf(stderr, "shop chip %s %c %dz\n", ci.name, in.stock[i].code == 26 ? '*' : 'A' + in.stock[i].code, in.stock[i].price * 100);
 			}
-	for (int i = 0; i < nstock; ++i) out->dealer[i] = stock[i];
-	out->ndealer = nstock;
+	for (int i = 0; i < in.nstock; ++i) out->dealer[i] = in.stock[i];
+	out->ndealer = in.nstock;
 	layer_objs_shops(out, false);
-	blocker_sprites(&npcs);
-	for (int i = 0; i < ntalk; ++i)
-		if (talkers[i].cat == 7) need_sprite(&npcs, 7, talkers[i].sprite);
-	npcs.objects = props_objects(&npcs);
+	NpcList *npcs = &in.npcs;
+	blocker_sprites(npcs);
+	for (int i = 0; i < in.ntalk; ++i)
+		if (in.talkers[i].cat == 7) need_sprite(npcs, 7, in.talkers[i].sprite);
+	npcs->objects = props_objects(npcs);
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
-	/* (what a ScrtData is for, said as it is picked up: a playtester was
-	 * told a layer later, then on every layer after; and where its gate
-	 * stands, which a playtester holding three asked) */
-	if (plan.fragment_placed) {
-		static const char *const found[3] = {
-			"Lan,look! A ScrtData!|Three open the golden gate to the Secret Area.|It stands in the Undernet's copy.|A dark warp leads there.|Let's find two more!",
-			"Our second ScrtData!|One more,and the Secret Area's gate opens!|It's in the Undernet's copy!",
-			"That's three ScrtData,Lan!|Now the Secret Area's golden gate opens!|It's in the Undernet's copy.|The next dark warp leads there!",
-		};
-		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
-	}
-	if (out->spin_colour) out->spin_found = spin_words(&text, out->spin_colour, spin_first);
+	/* (what a ScrtData is for, said as it is picked up: layer_words.c) */
+	if (in.plan.fragment_placed) out->fragment_found = ta_say(&text, FACE_MEGAMAN, fragment_words(run.fragments));
+	if (out->spin_colour) out->spin_found = spin_words(&text, out->spin_colour, in.spin_first);
 	uint32_t archive = commit_text(&text, group, number);
 	out->archive = archive;
-	if (out->guardian.navi) guardian_actors(&npcs, archive, &out->guardian);
-	for (int i = 0; i < ntalk && npcs.n < 32; ++i) {
-		const Talker *t = &talkers[i];
+	if (out->guardian.navi) guardian_actors(npcs, archive, &out->guardian);
+	for (int i = 0; i < in.ntalk && npcs->n < 32; ++i) {
+		const Talker *t = &in.talkers[i];
 		uint32_t a = t->archive ? t->archive : archive;
-		npcs.script[npcs.n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
+		npcs->script[npcs->n++] = t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
 			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
 	}
 	rush_install(group, number);
-	return mapslot_install(group, number, &npcs, md, nmd);
+	return mapslot_install(group, number, npcs, in.md, in.nmd);
 }

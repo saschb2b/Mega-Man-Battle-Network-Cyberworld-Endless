@@ -540,7 +540,7 @@ with the game-design skill:
 
 What a schoolyard passed around about Battle Network, the net's navis pass
 around about the Endless Net: one bystander a layer, the second, has a
-rumor where one is left to tell (`src/layer/rumors.c`), and every one is
+rumor where one is left to tell (`src/layer/rumor_lines.c`), and every one is
 true, as every bystander's line is (a tip that misled a playtester taught
 that).
 

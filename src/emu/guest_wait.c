@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "guest_wait_lines.h"
 #include "chatbox.h"
 #include "gfx.h"
 #include "guest.h"
@@ -53,21 +54,12 @@ static struct {
 	int stream;   /* how far the light has streamed, in 1/16 pixels */
 } W;
 
-/* MegaMan's words, pages of up to three lines as wide as BN6's own (the
- * widest 167 of the box's 183 pixels in its chat font), each after the
- * last has been read a while: what happens, that it happens once, and,
- * once the boot is that far, that it is almost done */
-static const char *const words[3][3] = {
-	{ "Hold on,Lan!", "The older Net's", "still starting up..." },
-	{ "It only starts up", "this once,Lan.", "Then it stays ready!" },
-	{ "Almost there,Lan...", "Just a moment more!", "" },
-};
 #define READ_FRAMES 100   /* a page typed, then read */
 #define LAST_AT 85        /* the boot's percent the last page waits for */
 
 static int page_len(int page) {
 	int n = 0;
-	for (int i = 0; i < 3; ++i) n += (int)strlen(words[page][i]);
+	for (int i = 0; i < 3; ++i) n += (int)strlen(guest_wait_lines[page][i]);
 	return n;
 }
 
@@ -206,7 +198,7 @@ static void box(int x0, int y0, int t, bool closing) {
 	if (face) sprite_draw_frame(face, 0, 0, x0 + CHATBOX_FACE_X, y0 + CHATBOX_FACE_Y, false, 0, 0);
 	int n = W.typed;
 	for (int i = 0; i < 3 && n > 0; ++i) {
-		const char *line = words[W.page][i];
+		const char *line = guest_wait_lines[W.page][i];
 		chatbox_text(x0 + CHATBOX_TEXT_X, y0 + CHATBOX_TEXT_Y + i * CHATBOX_LINE, line, n);
 		n -= (int)strlen(line);
 	}

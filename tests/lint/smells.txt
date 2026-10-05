@@ -8,7 +8,6 @@
 # fix one, then build.py lint --update
 duplicate src/core/save_legacy.c 17
 duplicate src/gfx/gfx.c src/layer/text.c 21
-duplicate src/layer/navicust.c 11
 duplicate src/map/mapslot.c 13
 duplicate src/map/netmap.c 28
 duplicate src/map/tiles.c 11
@@ -17,11 +16,10 @@ includes src/core/main.c 24
 includes src/director/director.c 36
 includes src/director/director_layer.c 33
 includes src/emu/scene_emu.c 23
-includes src/layer/layer_objs.c 32
+includes src/layer/layer_objs.c 25
 nesting src/audio/audio.c:mix 6
 nesting src/core/touch_art.c:rasterize 6
 nesting src/gfx/gfx.c:raw_text 6
-nesting src/layer/layer_objs.c:layer_objs_install 6
 nesting src/map/area_src.c:draw_layers 6
 nesting src/map/decor.c:decor_learn 6
 nesting src/map/legal.c:legal_fix 7
@@ -40,14 +38,10 @@ params src/emu/guest.c:records_fit 8
 params src/gfx/gfx.c:blit_obj 8
 params src/gfx/gfx.c:blit_tile 8
 params src/gfx/gfx.c:sprite_draw_frame 8
-params src/layer/layer_objs.c:dealer_word 8
-params src/layer/layer_objs.c:mystery_or_flame 8
 params src/layer/npc.c:npc_counter_talker 10
 params src/layer/npc.c:npc_talker 10
 params src/layer/npc.c:npc_walker 8
 params src/layer/npc.c:talker 13
-params src/layer/scripts.c:ta_gift 12
-params src/layer/scripts.c:ta_guardian_reward 11
 params src/map/area_src.c:draw_layers 10
 params src/map/props.c:cut_tiles 9
 params src/map/tilemap.c:pick_all 8
@@ -66,21 +60,6 @@ params src/world/townsrc.c:townsrc_synth 9
 size src/core/main.c 1381
 size src/core/platform.c 1141
 size src/emu/guest.c 1182
-size src/layer/layer_objs.c 1079
-size src/layer/scripts.c 1014
 size src/map/netmap.c 1288
 size src/map/tiles.c 1599
 size src/net/net_gen.c 2059
-size src/world/town.c 1096
-words src/director/powers.c 9
-words src/emu/guest_wait.c 3
-words src/layer/blockers.c 3
-words src/layer/guardian_objs.c 1
-words src/layer/guardians.c 165
-words src/layer/layer_objs.c 36
-words src/layer/navicust.c 8
-words src/layer/rumors.c 8
-words src/layer/scripts.c 79
-words src/layer/xguardian.c 5
-words src/scenes/scene_title.c 2
-words src/world/town.c 72

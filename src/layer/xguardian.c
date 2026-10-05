@@ -86,37 +86,17 @@ static int dark_of_kind(int kind) {
 }
 
 const char *xguardian_soul_words(int navi) {
-	static char s[720];
-	/* (the kinds by BN5_CHIP_KIND, as MegaMan says them) */
-	static const char *const kinds[12] = { "Fire", "Aqua", "Elec", "Wood", "Recovery", "Plus", "Sword", "Invisible", "Cursor", "obstacle",
-		"Wind", "Break" };
-	const char *name = guardian(navi)->name;
 	int kind = xguardian_kind(navi), dark = kind >= 0 ? dark_of_kind(kind) : -1;
 	if (kind < 0 || kind >= 12) return NULL;
 	/* (held already, won from him in an earlier act or cycle: the layer's
 	 * words are made with the run's Souls as its checkpoint keeps them, so
 	 * a CONTINUE before his battle says it as the first time did) */
-	if (soul_held(navi)) {
-		snprintf(s, sizeof s, "@M %s's Soul data... We already have his Soul!", name);
-		return s;
-	}
+	if (soul_held(navi)) return guardian_soul_words(navi, kind, true, "", NULL);
 	/* (one of BN6's chips of his kind, as the Guardian Data's chip may be) */
 	uint16_t ids[64];
 	ChipInfo ci = { .name = "" };
 	if (guest_kind_chips(kind, ids, 64) > 0) chip_info(ids[0], &ci);
-	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
-	if (profile.soul_taught)
-		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan!|@M Our %s chips unite us in the older Net's battles.|@M Pick one,then UNITE on the Custom screen!",
-			kinds[kind]);
-	else {
-		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It only wakes in the older Net's battles.|@M There,pick one of our %s "
-			"chips%s%s.|@M Then UNITE on the Custom screen!|@M I'll fight with his Soul for a few turns.|@M Once a battle,and only while I'm calm.", name,
-			kinds[kind], ci.name[0] ? ",like " : "", ci.name);
-		if (dark >= 0 && k < (int)sizeof s)
-			snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...|@M Darker. That's Chaos Unison.|@M Out here in our Net,his Soul sleeps.",
-				guest_dark_name(dark));
-	}
-	return s;
+	return guardian_soul_words(navi, kind, false, ci.name, dark >= 0 ? guest_dark_name(dark) : NULL);
 }
 
 int xguardian_slot(int navi) {

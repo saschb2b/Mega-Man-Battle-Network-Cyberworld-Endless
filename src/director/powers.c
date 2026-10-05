@@ -12,23 +12,23 @@
 #include "save.h"
 #include "souls.h"
 
-/* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5, what MegaMan
- * feels of each, the attacks that hit it twice as hard and what it gives
+/* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5 (what MegaMan
+ * feels of each: powers_words.c), the attacks that hit it twice as hard and what it gives
  * (BN6's own Cross tutorials, CompText86D0614: its chips' +50 is theirs
  * that don't dim the screen; a playtester chose a Cross by its weakness
  * alone, the setup naming no strength) */
-static const struct { int navi, flag; const char *name, *feel, *weak, *strong, *navis; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! I'm all fired up,Lan!", "Aqua", "Fire chips +50, Buster +1" },
-	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling through me!", "Wood", "Elec chips +50" },
-	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", "Sword chips +50" },
+static const struct { int navi, flag; const char *name, *weak, *strong, *navis; } crosses[] = {
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "Aqua", "Fire chips +50, Buster +1" },
+	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "Wood", "Elec chips +50" },
+	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "Breaker", "Sword chips +50" },
 	/* (BN6's EraseCross: an elementless chip that doesn't dim the screen
 	 * deletes a virus whose HP has a 4 in it, and bugs a Navi, whose HP
 	 * then drains; two playtesters had found it by chance and taken it for
 	 * counters, and a third saw DiveMan's HP fall with nothing hitting;
 	 * a fourth, told only of viruses, met a Navi's bug unexplained) */
-	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "EraseMan's Cross data... It's cold,Lan. But strong.", "Wind", "A 4 in HP: plain chips erase",
+	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "Wind", "A 4 in HP: plain chips erase",
 	  "Navis: a bug drains their HP" },
-	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "ChargeMan's Cross data! Choo,choo! Full steam ahead!", "Aqua", "One more chip each turn" },
+	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "Aqua", "One more chip each turn" },
 };
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its
@@ -69,34 +69,10 @@ void powers_bring(int navi) {
 }
 
 const char *powers_reward_text(int navi, int biome, int depth) {
-	static char text[512];
-	int k = 0;
-	#define ADD(...) (k += snprintf(text + k, k < (int)sizeof text ? sizeof text - (size_t)k : 0, __VA_ARGS__))
-	/* (a run that brought a Cross keeps it alone: the choice's cost) */
-	const char *brought = powers_cross_name(run.cross);
-	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i) {
-		if (crosses[i].navi != navi || beaten_before(navi, depth)) continue;
-		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s|@M But in it,%s attacks hit me twice as hard!", k ? "|" : "", crosses[i].name, crosses[i].feel,
-			crosses[i].weak);
-		else if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
-		/* (said as the net's fact, not a rule's: "One Cross a run!" put
-		 * the game's word in MegaMan's mouth; a first win opens its start
-		 * for good, said here, where a playtester read "won't fit" as
-		 * lost, and found the start in the setup; and said as settled,
-		 * the brought one kept: "It won't fit beside our SlashCross" read
-		 * to a playtester as an offer to swap, which never came, session
-		 * 64) */
-		else ADD("%s@M %s's Cross data...|@M We can only carry one Cross down here.|@M So we keep our %s,Lan.%s", k ? "|" : "",
-			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive,we can start with his Cross!");
-	}
-	/* the Graveyard sits over the Nest: its call wakes the Cybeast in
-	 * MegaMan, and Dad lets him use it (once a run) */
-	if (biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS)
-		ADD("%s@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|"
-			"@D Lan,it's Dad! I'm unlocking your PET's CybeastButton.|"
-			"@D BeastOut is powerful...|@D But don't let the beast take over,OK?|@N MegaMan can now BeastOut!", k ? "|" : "");
-	#undef ADD
-	return k ? text : NULL;
+	/* (a run that brought a Cross keeps it alone: the choice's cost; the
+	 * Graveyard sits over the Nest: its call wakes the Cybeast in MegaMan,
+	 * and Dad lets him use it, once a run) */
+	return powers_reward_words(navi, powers_cross_name(navi) && !beaten_before(navi, depth), biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS);
 }
 
 void powers_after_boss(int navi, int biome) {

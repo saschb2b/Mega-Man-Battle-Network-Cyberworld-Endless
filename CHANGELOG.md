@@ -10,6 +10,15 @@
   repeated, and lines a character says outside a words file (`*_words.c`,
   `*_lines.c`, `*_text.c`). Every header must compile on its own and come
   first in its own `.c` file. AGENTS.md's Code structure says why.
+- **Every line a character says lives in a words file.** The director,
+  which ran the run in one 5095-line file with its dialogue among its
+  logic, is fourteen files of one domain each (`director_*.c`), what they
+  say in seven words files beside them; the layer's objects, its chats, the guardians, the
+  NaviCust, the towns, the Crosses, the BN5 wait and the run summary
+  likewise. docs/VOICE.md's "Where the lines live" names the file for
+  each speaker, so a voice pass reads every line in one place. Nothing a
+  player sees or hears changed: the same scenarios gave the same pictures
+  and the same words, line for line, before and after each step.
 
 ## 0.9.0 (2026-10-05)
 

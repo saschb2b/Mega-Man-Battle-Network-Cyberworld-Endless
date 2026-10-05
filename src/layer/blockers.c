@@ -27,6 +27,7 @@
 #include "rom.h"
 #include "run.h"
 #include "layer_objs.h"
+#include "lock_words.h"
 #include "scripts.h"
 #include "shop.h"
 #include "xnavi.h"
@@ -211,14 +212,11 @@ static int talk(TextArchive *t, int k) {
 	unsigned can = block_openers(b->kind), held = layer_crosses(run.depth) & can;
 	int i = ta_script(t);
 	bool first = true;
-	char s[240];
 	const char *who[2] = { NULL, NULL };
 	for (int h = 0, n = 0; h < 5; ++h) if (can >> helpers[h].navi & 1 && n < 2) who[n++] = helpers[h].name;
 	if (!held) {
 		/* (the hint for the next run's Cross, said as it is) */
-		snprintf(s, sizeof s, "%s blocks the way,Lan.|%s's or %s's Cross could clear it...|But we don't have either.", block_name(b),
-			who[0], who[1]);
-		ta_pages(t, s, FACE_MEGAMAN, &first);
+		ta_pages(t, obstacle_stuck_words(block_name(b), who[0], who[1]), FACE_MEGAMAN, &first);
 		ta_end(t);
 		return i;
 	}
@@ -227,9 +225,8 @@ static int talk(TextArchive *t, int k) {
 	/* (HeatMan takes a fire in, where he burns a tree: "burn it" before a
 	 * pillar of flames read as a fire set on fire, session 64) */
 	const char *deed = helpers[h].navi == 1 && b->kind == BLOCK_FLAMES ? "swallow" : helpers[h].deed;
-	snprintf(s, sizeof s, "%s blocks the way!|We've got %s's Cross data!|Let's ask him to %s it!", block_name(b), helpers[h].name, deed);
-	ta_pages(t, s, FACE_MEGAMAN, &first);
-	ta_page(t, helpers[h].mugshot, "Leave it to me!", false);
+	ta_pages(t, obstacle_cross_words(block_name(b), helpers[h].name, deed), FACE_MEGAMAN, &first);
+	ta_page(t, helpers[h].mugshot, obstacle_answer_words(), false);
 	/* (his sound, a moment, and the present flag cleared: the obstacle
 	 * plays its opening while the box is still open) */
 	int sound = h == 2 && b->kind == BLOCK_CYCLONE ? 0x164 : helpers[h].sound;
