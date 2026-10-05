@@ -184,10 +184,10 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 			 * only the words before named; his element stays in those) */
 			bool known = guardian_known(n[k]);
 			way_option(option[k], sizeof option[k], known ? guardian(n[k])->name : "???", guardian_area_short(b[k]));
-			if (known) snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s (%s)" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
+			if (known) snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s the %s Navi" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
 			named[k] = known ? who[k] : NULL;
 			route.option[k] = option[k];
-			snprintf(then[k], sizeof then[k], "%c%s it is! The exit pad will take us there.", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
+			snprintf(then[k], sizeof then[k], "%c%s it is! To the exit pad!", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
 			route.then[k] = then[k];
 		}
 		/* (two boxes: five had named the ways) */
@@ -203,7 +203,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	const char *power = reward_power(g->navi);
 	static char with_data[640];
 	if (!guardian_known(g->navi)) {
-		snprintf(with_data, sizeof with_data, "%s%s@M And his battle data, Lan. Next time, we'll know how he fights!", power ? power : "", power ? "|" : "");
+		snprintf(with_data, sizeof with_data, "%s%s@M And his battle data,Lan!|@M Next time,we'll know how he fights!", power ? power : "", power ? "|" : "");
 		power = with_data;
 	}
 	g->reward = ta_guardian_reward(text, gd->name, power, chip, ci.name, code, last,

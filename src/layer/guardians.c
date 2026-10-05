@@ -46,53 +46,51 @@ static const Guardian guardians[] = {
 
 const char *guardian_tip(int navi) {
 	switch (navi) {
-	/* (a second box, "|@M ", for when a sword lands, where a guardian's
+	/* (the last box, "|@M ", for when a sword lands, where a guardian's
 	 * warps made swords miss:
 	 * watched in god mode, HeatMan stands at the back through his tower
 	 * and his flame, SpoutMan in his front column through his bubbles,
 	 * SlashMan beside MegaMan some 40 frames after his slash, EraseMan at
 	 * the back while his ghosts drift, and so on for each below; Colonel's
 	 * dark-screen slash, unannounced, deleted a standing MegaMan) */
-	case 1: return "HeatMan's fire tower crawls at us unlit and turns into our row: sidestep it late. His flamethrower sweeps the lit row. "
-		"When a shadow opens under us, he's leaping there: clear the yellow!|@M He stands still at the back while his tower and flame play out: strike then!";
-	case 2: return "ElecMan's current runs straight down our row, his lightning strikes the yellow panels, "
-		"and he warps in close to slash. Keep moving!|@M He stands still while his lightning comes down: strike then!";
-	case 3: return "SlashMan leaps in beside us to slash the lit panel, then spins across the whole field. "
-		"Step off the yellow panel when he lands! Blades he leaves stuck in our side fly back across their rows.|@M He stays beside us a moment after his slash: swing back then!";
-	case 4: return "EraseMan's ghosts soak up our shots and drift across the rows: dodge up and down. "
-		"If our HP runs low he erases us in one blow, so heal before we face him!|@M He holds still at the back while his ghosts drift at us: strike then, with something that reaches him!";
+	case 1: return "His fire tower gives no yellow warning!|@M It turns into our row. Sidestep it late!|@M His flamethrower sweeps the lit row.|"
+		"@M A shadow under us? He's leaping there. Move!|@M He stays back while his fire burns. Strike!";
+	case 2: return "His current runs straight down our row!|@M His lightning strikes the yellow panels.|@M He warps in close to slash. Keep moving!|"
+		"@M Strike while his lightning falls!";
+	case 3: return "He leaps beside us to slash the lit panel!|@M Step off it when he lands!|@M Then he spins across the whole field.|"
+		"@M Blades left on our side fly back down their rows!|@M After his slash,he stays close. Swing!";
+	case 4: return "His ghosts soak up our shots!|@M They drift across the rows. Dodge up and down!|@M Low on HP? He erases us in one blow!|"
+		"@M Heal up before we face him!|@M He stays back as his ghosts drift. Shoot!";
 	/* (watched: the cars come with him down the other two rows, a column
 	 * or two behind; a playtester stepped into another row as the train
 	 * passed and ran into a car, twice deleted by him on layer 9) */
-	case 5: return "ChargeMan rams down our row like a train, and his coal bombs burst on the lit panels.|@M When his freight cars come "
-		"too, they roll down the other two rows a column or two behind him and block our chips.|@M Once he's passed, step into his "
-		"row behind him: the cars never follow there. Hit him as he pulls back in at the back!";
+	case 5: return "He rams down our row like a train!|@M His coal bombs burst on the lit panels.|@M His freight cars follow in the other rows,blocking chips!|"
+		"@M Once he passes,step into his row. Cars never follow!|@M Hit him as he pulls back in!";
 	/* (watched: landed beside us, he lights the panels at his sides alone, and
 	 * his arms sweep the rows above and below them too: a playtester a
 	 * panel up and over, off every lit one, was deleted there, session 57) */
-	case 6: return "SpoutMan's bubbles burst over our panels, and his hose sprays water down the lit ones. Step off the yellow panels!|"
-		"@M When he jumps onto our side and whirls, his arms reach the panels at his corners too, though only those at his sides light up: "
-		"get two panels away from him!|@M He stands still in front of us while he blows bubbles: swing then!";
-	case 7: return "TomahawkMan's eagle swoops down a lit row, and he steps in close to swing his axe wide. "
-		"Step off the yellow panels, and keep our distance!|@M He stands still while his eagle swoops, and stays close a moment after his axe: strike then!";
-	case 8: return "TenguMan dashes down a lit row, and his whirlwinds tear holes in our panels. "
-		"Step off the yellow panels, and watch our footing!|@M He hovers right in front of us between his dashes: swing then!";
-	case 9: return "GroundMan bursts up from under the lit panel with his drill, and his drill missiles run down the rows in their shadows. "
-		"The panels he drills through crack: keep moving!|@M When he bursts up on our side, he stays there a moment: hit him then!";
-	case 10: return "DustMan drops scrap onto the lit panels and hurls our broken panels back at us, and their first hit stuns. "
-		"When he breathes in, he pulls us up close for a big punch. Keep a Recover chip ready!|@M He stands a while right in front of us between throws: swing then!";
+	case 6: return "His bubbles burst over our panels!|@M His hose sprays the lit ones. Step off!|@M When he whirls on our side,get two panels away!|"
+		"@M His arms reach his corners too. Those don't light!|@M He blows bubbles up close. Swing!";
+	case 7: return "His eagle swoops down a lit row!|@M He steps in close to swing his axe wide.|@M Step off the yellow and keep our distance!|"
+		"@M His eagle and axe leave him open. Strike!";
+	case 8: return "He dashes down a lit row!|@M His whirlwinds tear holes in our panels.|@M Step off the yellow and watch our footing!|"
+		"@M Between dashes,he hovers close. Swing!";
+	case 9: return "He drills up under the lit panel!|@M His drill missiles run down their shadows' rows.|@M Panels he drills through crack. Keep moving!|"
+		"@M When he bursts up on our side,hit him!";
+	case 10: return "He drops scrap on the lit panels!|@M He throws our broken panels back. The first hit stuns!|"
+		"@M When he breathes in,he pulls us close to punch!|@M Keep a Recover chip ready!|@M Between throws,he stands close. Swing!";
 	/* (every shape his panels light, and the one that tells less than it
 	 * hits: in a playtester's netbattle the cross, a diagonal and a row
 	 * lit where he slashed, and one lit panel, his, stood for a WideSword
 	 * down its whole column; shots met his shield, a lock-on chip and Navi
 	 * chips got through) */
-	case 11: return "ProtoMan's shield stops our shots. When panels light up, he dashes in to slash them: step off every lit one.|"
-		"@M If only ours lights, his WideSword takes that whole column: get out of the column, not just off the panel!|"
-		"@M Chips that lock on to him, and Navi chips, get past his shield!";
-	case 12: return "BlastMan's bombs roll down our row and burst, his flames dash along it, and a wall of fire sweeps across our side, a column at a time. "
-		"Step off the yellow panels!|@M He hovers still while he throws his bombs: strike then!";
-	case 13: return "DiveMan moves unseen under the water: hold our chips until he surfaces, then strike! "
-		"When his wave lights our panels, stand in our back column. His torpedoes run in their shadows' row.";
+	case 11: return "His shield stops our shots.|@M When panels light,he slashes them. Step off every one!|"
+		"@M If only ours lights,his WideSword hits that column!|@M Get out of the column,not just off the panel!|"
+		"@M Lock-on and Navi chips get through!";
+	case 12: return "His bombs roll down our row and burst!|@M His flames dash along it too.|@M His fire wall sweeps our side,column by column!|"
+		"@M Step off the yellow panels!|@M He hovers still to throw bombs. Strike!";
+	case 13: return "He moves unseen under the water!|@M His wave lights our panels? Get to our back column!|@M His torpedoes run down their shadows' rows.|"
+		"@M Wait till he surfaces. Then strike!";
 	/* (watched: the panel under MegaMan lights for a few frames, which his
 	 * feet hide, then CircusMan fades from his panel and the tent drops
 	 * there; his fade came 6 frames before MegaMan was held, so the panel,
@@ -102,41 +100,41 @@ const char *guardian_tip(int navi) {
 	 * second, the tent fell in 10 frames and hit 5 every 9-10 frames for
 	 * 220-250, 120 in all, mashing no shorter, and one cage fell while his
 	 * MachGun2 still fired, session 65) */
-	case 14: return "CircusMan claps down on a lit column, and his lion leaps through a burning hoop down its row. "
-		"When the panel under us lights up, his tent is about to drop on it: step off at once!|@M It drops in half a second, "
-		"with no way out once it's down: no long chip while he crackles on his panel!|@M He keeps to the back: "
-		"bring chips that reach it, and hold them while he's gone from the field!";
-	case 15: return "JudgeMan's whip cracks down a lit row, and his books slam across the field. Step off the yellow panels!|@M He stands right in front of us while he cracks his whip: swing then!";
-	case 16: return "ElementMan changes his element as he fights: whirlwinds run down our rows, and in green, logs burst up under us as grass spreads. "
-		"Hard hits work whatever he is!|@M He stands right in front of us while he calls his whirlwinds: swing then!";
+	case 14: return "He claps down on a lit column!|@M His lion leaps down the burning hoop's row.|@M The panel under us lights? His tent's coming. Move!|"
+		"@M It falls in half a second. No escape after!|@M No chips that keep firing while he crackles!|"
+		"@M He stays back. Bring chips that reach!|@M Never attack while he's gone!";
+	case 15: return "His whip cracks down a lit row!|@M His books slam across the field.|@M Step off the yellow panels!|"
+		"@M He whips right in front of us. Swing!";
+	case 16: return "His element changes as he fights!|@M His whirlwinds run down our rows.|@M In green,logs burst up under us as grass spreads!|"
+		"@M Hard hits work whatever he is!|@M He calls whirlwinds up close. Swing!";
 	/* (what a playtester's first fight against him met unwarned: his
 	 * Cannons turned aside while he readied a slash, and his cape's sweep
 	 * along the row he landed in, with only his own panel lit) */
-	case 18: return "Colonel sends his soldiers at us: clear them out. When our panels light in a zigzag, he warps in and slashes across them. "
-		"Step off the yellow panels!|@M Our hits glance off him while he readies a slash, and he stays beside us a moment after it: swing back then!|"
-		"@M When he lands in our row and the screen goes dark, his cape sweeps the row: get out of it before the dark comes!";
+	case 18: return "He sends soldiers at us. Clear them out!|@M Zigzag panels light? He warps in to slash. Step off!|"
+		"@M Our hits glance off while he readies a slash.|@M He stays beside us after it. Swing back then!|"
+		"@M In the dark,his cape sweeps the row he's in!|@M Leave his row before the dark comes!";
 	/* BN5's, as their own battles were watched in its engine (romlab, a
 	 * frame every 20 over a minute of each, MegaMan standing in his
 	 * middle panel; issue #69) */
-	case 24: return "The old net's Colonel lights a slant of our panels, then warps in and slashes across them: step off the yellow! "
-		"When he hefts his cannon, its blast runs down his row: get out of it.|@M Right after his slash he stands close: swing then!";
-	case 25: return "ShadowMan floats over his panels and splits into copies. His pillars of fire rush down our row: get out of it! "
-		"His shuriken rain down on the lit panels: step off the yellow!|@M He lands to throw them: strike then!";
-	case 26: return "NumberMan's numbered balls roll at us down every row, and each one's number is its HP: break the one in our row with a shot or two!|"
-		"@M His dice land on our side and blow up around where they fall: get clear of them!|@M He stands still at the back while his balls roll: strike then!";
-	case 27: return "The old net's TomahawkMan throws his axe across our row, and it swings back. The totem pole at his back drops fire "
-		"on the lit panels: step off the yellow!|@M He holds still while his totem calls the fire: strike then!";
-	case 28: return "KnightMan stands in his stone armor, and our hits glance off it. When he swings, his wrecking ball drops on the lit panel.|"
-		"@M Rocks fall where shadows open under us, and he leaps and crashes down, cracking our panels.|@M He's open while his ball swings: strike then!";
-	case 29: return "ToadMan hops between his lily pads. His music notes drift at us, and their shock stuns: keep out of their way! "
-		"His frogs leap over to our side.|@M He sits still on his pad while he plays: strike then!";
+	case 24: return "A slant of panels lights? He warps in to slash!|@M Step off the yellow!|@M He hefts his cannon? Get out of his row!|"
+		"@M He stays close after his slash. Swing!";
+	case 25: return "He floats and splits into copies!|@M His fire pillars rush down our row. Get out!|@M His shuriken rain on the lit panels. Step off!|"
+		"@M He lands to throw shuriken. Strike!";
+	case 26: return "His numbered balls roll down every row!|@M Each number is its HP. Break ours with a shot!|"
+		"@M His dice blow up around where they land. Get clear!|@M He stays back while his balls roll. Strike!";
+	case 27: return "His axe flies down our row,then swings back!|@M His totem pole drops fire on the lit panels.|@M Step off the yellow!|"
+		"@M He holds still as his totem burns. Strike!";
+	case 28: return "Our hits glance off his stone armor!|@M His wrecking ball drops on the lit panel!|"
+		"@M Rocks fall where shadows open under us!|@M He leaps and crashes down,cracking our panels.|@M He's open while his ball swings. Strike!";
+	case 29: return "He hops between his lily pads.|@M His music notes stun! Keep out of their way!|@M His frogs leap over to our side!|"
+		"@M He sits still while he plays. Strike!";
 	default: return NULL;
 	}
 }
 
 int guardian_netbattle_terms(char *out, size_t n) {
-	return snprintf(out, n, "Enough racing, MegaMan.|Chaud says you're ready. This time, you face me.|"
-		"@M He won't hold back, Lan. %s|@M If ProtoMan deletes us, the dive's over. We can run if it goes bad.", guardian_tip(11));
+	return snprintf(out, n, "Enough,MegaMan. No more racing.|Chaud says you're ready. Face me.|"
+		"@M %s|@M If he deletes us,our dive's over!|@L We can still run if it goes bad.", guardian_tip(11));
 }
 
 /* (a first meeting's hint: the net's gossip, which lives in that world and
@@ -145,30 +143,30 @@ int guardian_netbattle_terms(char *out, size_t n) {
  * danger said as a danger: an erase at low HP had come with no word) */
 const char *guardian_rumor(int navi) {
 	switch (navi) {
-	case 1: return "his fire never runs out.";
-	case 2: return "his lightning comes out of a clear sky.";
-	case 3: return "you never see him coming, only his claws.";
+	case 1: return "his fire never goes out!";
+	case 2: return "his lightning strikes out of nowhere!";
+	case 3: return "you never see him coming. Just his claws!";
 	case 4: return "he deletes Navis outright. Don't face him weak!";
-	case 5: return "he runs down anything in his path.";
-	case 6: return "he floods the whole field.";
-	case 7: return "he never fights alone: something circles overhead.";
-	case 8: return "he moves like the wind itself.";
-	case 9: return "he comes up from below.";
-	case 10: return "he turns your own panels against you.";
-	case 11: return "his shield stops everything, and his sword is faster than sight.";
-	case 12: return "he leaves nothing but craters.";
-	case 13: return "he hunts from under the water.";
-	case 14: return "he runs his show from the back of the ring.";
-	case 15: return "he passes sentence with a whip.";
-	case 16: return "he's never the same element twice.";
-	case 18: return "he commands an army, and ends fights with a single stroke.";
+	case 5: return "he flattens anything on his tracks!";
+	case 6: return "he floods the whole field!";
+	case 7: return "he never fights alone. Watch the sky!";
+	case 8: return "he's as fast as the wind!";
+	case 9: return "he comes up from below!";
+	case 10: return "he turns your own panels against you!";
+	case 11: return "his shield stops everything,and his sword's a blur!";
+	case 12: return "he leaves nothing but craters!";
+	case 13: return "he hunts from under the water!";
+	case 14: return "he runs his show from the back!";
+	case 15: return "he passes sentence with a whip!";
+	case 16: return "he's never the same element twice!";
+	case 18: return "his army is huge. One stroke ends it!";
 	/* (BN5's: the older net's Navis, as the net tells of them) */
-	case 24: return "the old net's Colonel runs his ground like a battlefield.";
-	case 25: return "he strikes from the dark and is gone before you turn.";
-	case 26: return "he lets the dice decide, and the dice like him.";
-	case 27: return "the old net's spirits fight at his side.";
-	case 28: return "no attack has ever dented his armor.";
-	case 29: return "his music leaves Navis unable to move.";
+	case 24: return "the old net's Colonel runs it like a war!";
+	case 25: return "he strikes from the dark,then he's gone!";
+	case 26: return "he lets the dice decide,and they like him!";
+	case 27: return "the old net's spirits fight at his side!";
+	case 28: return "no attack has ever dented his armor!";
+	case 29: return "his music freezes Navis in place!";
 	default: return NULL;
 	}
 }
@@ -188,131 +186,135 @@ const Guardian *guardian(int navi) {
  * are the Nest's copies (docs/BOSSES.md), built from every battle the net
  * has seen: they remember. */
 static const struct { const char *first, *rematch, *revenge, *stronger, *defeat; } lines[] = {
-	[1] = { "So you're the one diving through this net. Let's see if you can take the heat!",
-		"You put out my fire last time. Now I'll burn twice as hot!",
-		"Back for more burns? You never learn, do you?",
-		"The Nest stoked my flames even hotter. Burn to ash!",
-		"Tch... My fire... went out..." },
-	[2] = { "The current down here answers to me. One jolt is all it takes!",
-		"Last time was a fluke. I'm fully recharged!",
-		"You felt my voltage before. Feel it again!",
-		"A million volts more than before! Brace yourself!",
-		"Short circuit... Impossible..." },
-	[3] = { "Heh. Fresh prey came crawling in. My claws will split you apart!",
-		"You got lucky. The Swift Claw never misses twice!",
-		"Still in one piece? Let me fix that.",
-		"I'm faster than you can see now!",
-		"Too... slow...? Not me..." },
-	[4] = { "Target confirmed: MegaMan.EXE. Commencing deletion.",
-		"Deletion failed last time. That will not repeat.",
-		"I deleted you once. Doing it again is a formality.",
-		"Deletion program upgraded. You will not escape.",
-		"Error... Target... not... deleted..." },
-	[5] = { "Full steam ahead! Who's on my tracks?|All aboard for your last ride!",
-		"You derailed me once. Not again! Choo choo!",
-		"Heh, got run over last time, huh? Next stop: you!",
-		"Engine overhauled! Top speed! Out of my way!",
-		"Engine... stalled... End of the line..." },
-	[6] = { "Splash! Water is my element! I'll wash you right out!",
-		"You made waves last time. Now I'll sink you!",
-		"Glub glub! Back for another swim?",
-		"The tide is rising! Nothing can stop it!",
-		"Bloop... I'm all dried up..." },
-	[7] = { "A warrior walks into my path. Face me with honor!",
-		"Your spirit beat mine once. My axe remembers.",
-		"My axe felled you before. It will again.",
-		"My spirit burns stronger now!",
-		"You fight... with true honor..." },
-	[8] = { "Hohoho! A guest! Let my wind carry you off!",
-		"You rode out my storm once. Not this time!",
-		"Hohoho! Blown away before, blown away again!",
-		"This gale could topple mountains!",
-		"The wind... has turned..." },
-	[9] = { "Rumble rumble! You're standing on my turf!|I'll drill you into the floor!",
-		"You dug me up last time. I'm going deeper!",
-		"Buried you once! I'll bury you again!",
-		"New drill bit! Nothing is too hard now!",
-		"Drill... jammed..." },
-	[10] = { "Scrap! Junk! You'll make a fine addition to my heap!",
-		"You slipped out of my heap. It won't happen again!",
-		"You made such nice junk last time!",
-		"My heap has grown! It'll crush you!",
-		"Just... junk... after all..." },
-	[11] = { "MegaMan. Show me your strength. Draw your weapon.",
-		"You bested me once. My blade has been honed.",
-		"You fell to my blade before. Rise higher.",
-		"I have surpassed my limits. Come.",
+	/* (each in his habit of speech, docs/VOICE.md; DiveMan's "Awooga!",
+	 * JudgeMan's "thou" and ElementMan's beeps as BN6's script gives them
+	 * in their own boxes, faces 0x52, 0x55 and 0x56: verified there, where
+	 * the guide's table has Capt'n Blackbeard's "matey" for DiveMan) */
+	[1] = { "Hoo! I'm all fired up!|C'mon,MegaMan! Take the heat!",
+		"You put out my fire once!|Now I burn twice as hot! C'mon!",
+		"Back for more burns,huh?|C'mon! I'll toast you again!",
+		"The Nest stoked my flames!|I'm hotter than ever! Burn!",
+		"Ngh... My fire... went out..." },
+	[2] = { "...tzz. I have been waiting.|One jolt will be enough.",
+		"That loss was a fluke...tzz.|I am fully recharged.",
+		"You felt my voltage before.|...tzz. Shall we repeat it?",
+		"...tzz,tzz. My voltage has doubled.|Brace yourself.",
+		"Tzz...zz... A short circuit...?" },
+	[3] = { "Slaaash! Fresh prey!|My claws will cut you to ribbons!",
+		"You got lucky last time.|Slash! I won't miss twice!",
+		"Still in one piece?|Slaaash! Let me fix that!",
+		"I'm faster than ever now!|Slash! You won't even see me!",
+		"Too... slow...? Me...?" },
+	[4] = { "Hyahaha! There you are!|My scythe wants to delete you!",
+		"You slipped away last time...|My scythe won't miss! Hyahaha!",
+		"Hyahaha! I deleted you once!|Let's do it again!",
+		"My scythe got sharper!|One swing,and you're gone! Hyahaha!",
+		"Hya...ha...? Me... deleted...?" },
+	[5] = { "Choo,choo!! Departure time!|Next stop,your deletion!",
+		"You derailed me last time!|Not again! Choo,choooo!!",
+		"Choo,choo! Back on my tracks?|Please stand clear of the train!",
+		"Engine overhauled! Top speed!|Choo,choo! Clear the line!",
+		"Choo...oo... End of the line..." },
+	[6] = { "D-Don't come closer,drip!|I-I'll wash you away!",
+		"Y-You beat me last time...|N-Not again,drip!",
+		"Drip! You came back!?|I'll wash you out again!",
+		"The tide is rising,drip!|I-I'm not scared anymore!",
+		"Driiip...! I'm all dried up..." },
+	[7] = { "Yo! A warrior,huh?|There's a saying... \"The bold win!\"",
+		"You beat me fair and square.|But they say,\"Fall seven,rise eight!\"",
+		"My axe got you before!|As they say,\"Old habits die hard!\"",
+		"They say spirit grows in battle!|Mine's burning bright now!",
+		"Ngh... You fight with honor..." },
+	[8] = { "Hmph! A guest on my wind...|Show me your skill,grasshopper!",
+		"Hmph. You rode out my storm once.|Do not expect it twice!",
+		"Blown away last time,grasshopper!|Have you trained at all?",
+		"Hmmmph!! My gale has grown!|It could topple mountains!",
+		"Nngh... The wind... has turned..." },
+	[9] = { "Whiiiir! Yo,this is my turf!|I'll drill ya right under!",
+		"Ya dug me up last time.|Whiiir! Now I'm goin' deeper!",
+		"Buried ya once,didn't I?|Whiiiir! Let's do it again!",
+		"Got me a new drill bit!|Whiiiir! Nothin's too hard now!",
+		"Whii...rrr... Drill's jammed..." },
+	[10] = { "Gahaha! Fresh scrap!|Into the trash with ya!",
+		"Ya slipped outta my heap!|Gahaha! I'll suck ya right up!",
+		"Gahahaha! Ya made fine junk!|Back for the scrap heap?",
+		"My vacuum's twice as strong!|Gahahaha! Nothin' escapes!",
+		"Gah... I'm the junk... now..." },
+	[11] = { "...MegaMan.|Draw your weapon. Show me.",
+		"You bested me once.|My blade is sharper now.",
+		"You fell to my blade before.|...Rise higher.",
+		"I have surpassed my limits.|...Come.",
 		"...Well done. Go on ahead." },
-	[12] = { "KABOOM! Came for the show?|Then watch me blow it all up!",
-		"Your last trick was explosive. Mine are bigger!",
-		"Haha! Want to go up in smoke again?",
-		"Bigger booms! Hotter blasts! My best show yet!",
-		"The show's... over...?" },
-	[13] = { "Dive! Dive! Intruder in the deep!|Torpedoes ready... Fire!",
-		"You sank my plans once. Full power this time!",
-		"Surfaced again, did you? Back down you go!",
-		"Hull reinforced! I can't be sunk!",
-		"Taking on water... Abandon ship..." },
-	[14] = { "Welcome, welcome! The show is about to begin...|...and you're the main act!",
-		"The crowd wants a rematch! Let's not disappoint!",
-		"Encore! Encore! Let's make you cry again!",
-		"A brand new act, even scarier than the last!",
-		"The curtain... falls..." },
-	[15] = { "Order! The court is in session.|The defendant, MegaMan, stands accused!",
-		"The verdict was overturned once. Not on appeal!",
-		"Guilty then, guilty now! The sentence stands!",
-		"The law has been rewritten in my favor!",
-		"Court... is... adjourned..." },
-	[16] = { "Fire, water, wood, lightning. All the elements obey me!",
-		"You broke my harmony once. I have rebalanced.",
-		"The elements rejected you. They still do.",
-		"I have mastered every element!",
-		"The elements... abandon me..." },
-	[18] = { "Soldier. This position is held by me. Your advance stops here!",
-		"You took this position once. I have revised my strategy.",
-		"The last campaign was mine. So is this one.",
-		"My forces have doubled. Your odds have not.",
-		"A strategic... retreat..." },
+	[12] = { "Kwohohoho... A visitor!|I'll burn you to cinders!",
+		"You got lucky,brat.|Kwohohoho... Not twice!",
+		"Kwohohoho! Back for more?|You'll go up in smoke again!",
+		"The Nest fed my flames...|Kwohohoho! Nothing will be left!",
+		"Gwaah! Me... in ashes...!?" },
+	[13] = { "Awooga! Awooga! Intruder!|Dive! Dive! Torpedoes ready!",
+		"You sank me last time.|Full power now! Awooga!",
+		"Surfaced again,did you?|Back to the depths! Awooga!",
+		"Hull reinforced! Awooga!|Nothing can sink me now!",
+		"Taking on water...! Awoo...ga..." },
+	[14] = { "Ahoo,hoo,hoo! Welcome,welcome!|You're the star of my show!",
+		"The crowd wants a rematch!|Ahoo,hoo,hoo! Showtime!",
+		"Encore! Encore!|Let's make you cry again! Ahoo,hoo!",
+		"A brand new act!|Even scarier! Ahoo,hoo,hoo!",
+		"Ahoo...hoo... Curtain call..." },
+	[15] = { "Order! Order!|MegaMan,thou art accused!",
+		"Thou hast won the last trial.|This appeal shall go my way!",
+		"Guilty then,guilty now!|Thy sentence stands!",
+		"The law now favors me!|Thou hast no defense!",
+		"Court... is adjourned...!?" },
+	[16] = { "PIKIRARA... PIKIRI!|Fire,water,wood... All obey me.",
+		"PIRIRA... You broke my harmony once.|It is whole again.",
+		"The elements rejected you.|PIKIRI... They still do.",
+		"KIRAPIRA!! I have mastered every element!",
+		"PIKIRAAAA!! The elements... leave me..." },
+	[18] = { "Halt,MegaMan.|Your advance ends here.",
+		"You took this ground once.|I have revised my strategy.",
+		"The last battle was mine.|So is this one.",
+		"My forces have doubled.|Your odds have not.",
+		"Ngh... A strategic... retreat..." },
 	/* BN5's: the Nest's copies of the older net's Navis (our words; BN5's
 	 * own text is never copied) */
-	[24] = { "This sector of the old net is under my command.|Stand down, or be removed by force!",
-		"You broke my line once. I have drawn a new one.",
-		"Retreat was your wisest move last time. It still is.",
-		"Reinforcements have arrived. The odds are mine now.",
-		"Outmaneuvered... The sector... is yours..." },
-	[25] = { "A target walks into the dark. How careless.|My blades are already moving!",
-		"You slipped my shadow once. Not twice.",
-		"The shadows took you last time. They are hungry again.",
-		"My shadow has grown. You cannot see all of me now.",
+	[24] = { "This sector is under my command.|Stand down,or be removed!",
+		"You broke my line once.|I have drawn a new one.",
+		"Retreat was wise last time.|It still is.",
+		"Reinforcements have arrived.|The odds are mine now.",
+		"Outmaneuvered... The sector is yours..." },
+	[25] = { "...A careless target.|My blades are already moving.",
+		"You slipped my shadow once.|Not twice.",
+		"The shadows took you before.|They hunger again.",
+		"My shadow has grown.|You cannot see all of me.",
 		"The shadow... fades..." },
-	[26] = { "Calculating... Your odds of winning: zero point zero!|Let's roll the numbers!",
-		"An error in my last calculation. Corrected!",
-		"My numbers said you'd lose, and you did! Let's check them again!",
-		"Bigger numbers, better odds! It all adds up to your defeat!",
+	[26] = { "Calculating... Your odds are zero!|Let's roll the numbers!",
+		"My last calculation had an error!|Now it's corrected!",
+		"My numbers said you'd lose!|Let's check them again!",
+		"Bigger numbers,better odds!|It all adds up to your defeat!",
 		"Does not... compute..." },
-	[27] = { "The old net's spirits watch this ground.|Show them your courage, stranger!",
-		"You stood your ground once. Stand again!",
-		"The spirits chose me last time. They choose me still.",
+	[27] = { "The spirits watch this ground.|Show them your courage!",
+		"You stood your ground once.|Stand again!",
+		"The spirits chose me last time.|They choose me still.",
 		"The totem burns brighter now!",
 		"The spirits... have spoken..." },
-	[28] = { "Halt! None pass this gate while I stand!|No blow has ever broken my armor!",
-		"You dented my armor once. It has been forged anew.",
-		"You fell before my iron ball. Kneel again!",
-		"Thicker armor, a heavier swing. Despair!",
-		"My armor... broken..." },
-	[29] = { "Ribbit! A new audience for my concert!|Let the music play, and you dance!",
-		"You stopped my song last time. Encore, ribbit!",
-		"Ribbit ribbit! My song put you to sleep last time!",
-		"A whole new symphony, ribbit! Louder than ever!",
+	[28] = { "Halt,young knight!|None pass while I stand guard!",
+		"You dented my armor once.|It has been forged anew.",
+		"You fell to my iron ball.|Kneel once more,if you please!",
+		"Thicker armor,a heavier swing!|Despair,young knight!",
+		"My armor... broken... Well fought..." },
+	[29] = { "Ribbit! A new audience!|Let the music play! Now dance!",
+		"You stopped my song last time.|Encore,ribbit!",
+		"Ribbit ribbit! My song stunned you!|Shall I play it again?",
+		"A whole new symphony,ribbit!|Louder than ever!",
 		"The concert... is over... ribbit..." },
 };
 #define NLINES ((int)(sizeof lines / sizeof *lines))
 
 /* Rematches after many of MegaMan's wins: grudging respect. */
 static const char *const respect[] = {
-	"You again. You keep getting stronger...|This time I won't hold back!",
-	"How many times must we fight?|Until one of us stops standing!",
-	"I've studied every move you've made.|Let's see what you've learned!",
+	"You again... Stronger every time.|This time,I won't hold back!",
+	"How many times must we fight!?|Until one of us falls!",
+	"I've studied all your moves.|Show me what you've learned!",
 };
 
 /* MegaMan's answer, for the lines that give him one ("I'm ready this
@@ -385,9 +387,9 @@ int guardian_face(int navi) {
  * it) */
 static const char *first_sight(int navi, const char *name) {
 	static char s[128];
-	if (guardian_older(navi)) snprintf(s, sizeof s, "@L That's %s, from the older net!|@M The Nest copied its Navis too, Lan!|", name);
-	else if (friendly(navi)) snprintf(s, sizeof s, "@M %s?! ...No. You're one of the Nest's copies!|", name);
-	else snprintf(s, sizeof s, "@L That's %s! Or a copy the Nest made of him...|", name);
+	if (guardian_older(navi)) snprintf(s, sizeof s, "@L No way! That's %s!|@M The Nest copied the older net's Navis too!|", name);
+	else if (friendly(navi)) snprintf(s, sizeof s, "@M %s!? ...No,wait.|@M You're one of the Nest's copies!|", name);
+	else snprintf(s, sizeof s, "@L That's %s!|@M Or a copy the Nest made of him...|", name);
 	return s;
 }
 
@@ -406,16 +408,16 @@ const char *guardian_intro(int navi, int version, int biome) {
 		else if (r->megaman_won >= 3) s = respect[r->megaman_won % 3];
 		else s = lines[navi].rematch;
 	}
-	if (!s) s = "The way on is through me. Prepare yourself!";
+	if (!s) s = "You want through? Beat me first!";
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	/* the first meeting: who MegaMan and Lan see */
 	if (!r->megaman_won && !r->navi_won && !r->met) ADD("%s", first_sight(navi, name));
 	/* and at every meeting after, who speaks without a face (a playtester
 	 * who had met SpoutMan three times asked who was talking) */
-	else if (guardian_face(navi) == FACE_NONE) ADD("@L %s's copy again!|", name);
+	else if (guardian_face(navi) == FACE_NONE) ADD("@L It's %s's copy again!|", name);
 	/* the Nest's own guardian knows what it is */
-	if (biome == BIOME_NEST) ADD("The Nest built me from every battle you have fought.|");
+	if (biome == BIOME_NEST) ADD("The Nest built me from all your battles!|");
 	ADD("%s", s);
 	/* MegaMan answers now and then, never over a first meeting */
 	/* (after a loss the record in it: "I'm ready this time!" before every
@@ -423,8 +425,8 @@ const char *guardian_intro(int navi, int version, int biome) {
 	static const char *const times[] = { "", "", "twice", "three times", "four times" };
 	static const char *const next[] = { "", "", "a third", "a fourth", "a fifth" };
 	if (r->met && r->last == RIVAL_NAVI_WON && r->navi_won >= 2 && r->navi_won <= 4)
-		ADD("|@M %s has beaten us %s. Not %s time!", name, times[r->navi_won], next[r->navi_won]);
-	else if (r->met && r->last == RIVAL_NAVI_WON && r->navi_won > 4) ADD("|@M %d times %s has beaten us. Not this time!", r->navi_won, name);
+		ADD("|@M %s beat us %s... Not %s time!", name, times[r->navi_won], next[r->navi_won]);
+	else if (r->met && r->last == RIVAL_NAVI_WON && r->navi_won > 4) ADD("|@M %d losses to %s... Not this time!", r->navi_won, name);
 	else if (r->met && r->last == RIVAL_NAVI_WON) ADD("|@M I'm ready this time!");
 	else if (r->met && r->met % 3 != 1) ADD("|@M %s", replies[r->met % 3]);
 	/* and, from battle data, when to strike, just before the fight: the
@@ -432,8 +434,8 @@ const char *guardian_intro(int navi, int version, int biome) {
 	 * who asked for it again at the arena */
 	const char *tip = guardian_known(navi) ? guardian_tip(navi) : NULL, *when = NULL;
 	for (const char *p = tip; p && (p = strstr(p, "|@M ")) != NULL; p += 4) when = p + 4;
-	if (when && *when) ADD("|@M Remember our battle data, Lan: %c%s", *when >= 'A' && *when <= 'Z' ? *when - 'A' + 'a' : *when, when + 1);
-	ADD("|@L Battle routine, set!|@M Execute!");
+	if (when && *when) ADD("|@M Lan,remember... %c%s", *when >= 'A' && *when <= 'Z' ? *when - 'A' + 'a' : *when, when + 1);
+	ADD("|@L Battle routine,set!|@M Execute!!");
 	#undef ADD
 	return buf;
 }
@@ -527,29 +529,29 @@ const char *guardian_area_motto(int biome) {
  * guards Judge Tree Comp." read to a playtester as the sentence repeating
  * itself, session 64; a second of three is "another") */
 void guardian_way_question(char *out, size_t n, const char *const who[3], const char *const area[3], int dark) {
-	static const char sealed[] = "|@M A dark way leads down into the Undernet itself too, but it's sealed. Clearing the Secret Area, past the "
-		"golden gate, would open it. Which way?";
+	static const char sealed[] = "|@M A dark way leads down too,but it's sealed.|@M Clearing the Secret Area would open it.|"
+		"@M It's past the golden gate. Which way?";
 	int ways = dark == 2 ? 3 : 2, unknown = 0;
 	for (int k = 0; k < ways; ++k) unknown += !who[k];
 	if (unknown == ways && ways == 3) {
-		snprintf(out, n, "@M The net splits below us, Lan! Navis we've never battled guard all three ways: %s, %s, and a dark way down "
-			"into the Undernet. Which way?", area[0], area[1]);
+		snprintf(out, n, "@M Lan,the net splits three ways!|@M Navis we've never battled guard them all.|@M One to %s,one to %s,|"
+			"@M and a dark way into the Undernet. Which way?", area[0], area[1]);
 		return;
 	}
 	if (unknown == ways) {
-		snprintf(out, n, "@M The net splits below us, Lan! Navis we've never battled guard both ways: %s and %s.%s", area[0], area[1],
-			dark ? sealed : " Which way?");
+		snprintf(out, n, "@M Lan,the net splits below us!|@M Navis we've never battled guard both ways.|@M One to %s,one to %s.%s", area[0], area[1],
+			dark ? sealed : "|@M Which way?");
 		return;
 	}
 	char said[3][48];
 	for (int k = 0, told = 0; k < ways; ++k)
-		snprintf(said[k], sizeof said[k], "%s", who[k] ? who[k] : told++ ? "another we've never battled" : "a Navi we've never battled");
+		snprintf(said[k], sizeof said[k], "%s", who[k] ? who[k] : told++ ? "Another we've never battled" : "A Navi we've never battled");
 	/* (the first names a sentence's start) */
 	if ('a' <= said[0][0] && said[0][0] <= 'z') said[0][0] = (char)(said[0][0] - 32);
 	if (ways == 3)
-		snprintf(out, n, "@M The net splits below us, Lan! %s guards %s,|@M %s guards %s, and a dark way leads down into the Undernet, "
-			"where %s waits. Which way?", said[0], area[0], said[1], area[1], said[2]);
+		snprintf(out, n, "@M Lan,the net splits three ways!|@M %s guards %s.|@M %s guards %s.|@M And a dark way leads into the Undernet.|"
+			"@M %s waits there! Which way?", said[0], area[0], said[1], area[1], said[2]);
 	else
-		snprintf(out, n, "@M The net splits below us, Lan! %s guards %s,|@M and %s guards %s.%s", said[0], area[0], said[1], area[1],
-			dark ? sealed : " Which way?");
+		snprintf(out, n, "@M Lan,the net splits below us!|@M %s guards %s.|@M %s guards %s.%s", said[0], area[0], said[1], area[1],
+			dark ? sealed : "|@M Which way?");
 }

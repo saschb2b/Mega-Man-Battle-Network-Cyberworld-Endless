@@ -97,7 +97,7 @@ const char *xguardian_soul_words(int navi) {
 	 * words are made with the run's Souls as its checkpoint keeps them, so
 	 * a CONTINUE before his battle says it as the first time did) */
 	if (soul_held(navi)) {
-		snprintf(s, sizeof s, "@M %s's Soul data... We carry his Soul already, Lan.", name);
+		snprintf(s, sizeof s, "@M %s's Soul data... We already have his Soul!", name);
 		return s;
 	}
 	/* (one of BN6's chips of his kind, as the Guardian Data's chip may be) */
@@ -106,13 +106,14 @@ const char *xguardian_soul_words(int navi) {
 	if (guest_kind_chips(kind, ids, 64) > 0) chip_info(ids[0], &ci);
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
 	if (profile.soul_taught)
-		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul, Lan! In the older net's battles, our %s chips unite us: UNITE on the Custom screen.", kinds[kind]);
+		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan!|@M Our %s chips unite us in the older net's battles.|@M Pick one,then UNITE on the Custom screen!",
+			kinds[kind]);
 	else {
-		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me, Lan! It only wakes in the older net's battles.|@M There, pick one of our %s "
-			"chips%s%s, then UNITE on the Custom screen: I'll fight with his Soul for a few turns. Once a battle, and only while I'm calm.", name,
-			kinds[kind], ci.name[0] ? ", like " : "", ci.name);
+		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It only wakes in the older net's battles.|@M There,pick one of our %s "
+			"chips%s%s.|@M Then UNITE on the Custom screen!|@M I'll fight with his Soul for a few turns.|@M Once a battle,and only while I'm calm.", name,
+			kinds[kind], ci.name[0] ? ",like " : "", ci.name);
 		if (dark >= 0 && k < (int)sizeof s)
-			snprintf(s + k, sizeof s - (size_t)k, "|@M His kind of DarkChip, %s, unites us too, darker: Chaos Unison. Out here in our net, his Soul sleeps.",
+			snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...|@M Darker. That's Chaos Unison.|@M Out here in our net,his Soul sleeps.",
 				guest_dark_name(dark));
 	}
 	return s;

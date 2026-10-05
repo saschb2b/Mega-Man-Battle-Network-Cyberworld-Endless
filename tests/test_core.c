@@ -1268,7 +1268,7 @@ static void test_talk(void) {
 			for (int dark = 0; dark <= 2; ++dark)
 				for (int known = 0; known < 8; ++known) {
 					const char *who[3];
-					for (int k = 0; k < 3; ++k) who[k] = known >> k & 1 ? "TomahawkMan (Breaker)" : NULL;
+					for (int k = 0; k < 3; ++k) who[k] = known >> k & 1 ? "TomahawkMan the Breaker Navi" : NULL;
 					guardian_way_question(q, sizeof q, who, areas, dark);
 					snprintf(what, sizeof what, "the way on from area %d to %d (dark way %d, battled %d)", biome, other, dark, known);
 					check_talk(what, q);
