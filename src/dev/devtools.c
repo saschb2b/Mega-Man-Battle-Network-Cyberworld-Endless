@@ -62,6 +62,7 @@ void devtools_parse(const char *spec) {
 			dev.folder = (int)strtol(t + 7, &end, 0);
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
+		else if (!strncmp(t, "pack=", 5)) dev.pack = atoi(t + 5);
 		else if (!strcmp(t, "worried")) guest_dev_worried = true;
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
 		else if (!strncmp(t, "slowboot=", 9)) guest_dev_slowboot = atoi(t + 9);

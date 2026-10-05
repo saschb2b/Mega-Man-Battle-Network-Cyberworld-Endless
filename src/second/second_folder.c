@@ -123,9 +123,13 @@ static void ranks_line(int x, int y) {
 	text_draw(x, y, s, PET_WHITE, TEXT_LEFT);
 }
 
-/* the pack: its chips as the folder's, their copies beside their codes */
+/* the pack: its chips as the folder's, their copies beside their codes,
+ * as many as fit around the cursor's */
 static void pack_row(int x, int y, int right) {
-	for (int i = 0; i < S2.npack && x + CELL_W <= right; ++i, x += CELL_W) cell(x + 1, y, S2.pack[i], S2.pack_count[i], false, 0);
+	int fit = (right - x) / CELL_W, first = S2.pack_entry - fit / 2;
+	if (first > S2.npack - fit) first = S2.npack - fit;
+	if (first < 0) first = 0;
+	for (int i = first; i < S2.npack && i < first + fit; ++i, x += CELL_W) cell(x + 1, y, S2.pack[i], S2.pack_count[i], i == S2.pack_entry, 0);
 }
 
 void second_folder_draw(SDL_Rect b) {

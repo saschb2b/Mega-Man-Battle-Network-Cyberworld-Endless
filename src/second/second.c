@@ -83,6 +83,7 @@ static void read_folder(void) {
 	bool editing = S2.context == SECOND_EDIT;
 	S2.pack_side = editing && emu_read8(edit + BN6_EDIT_SIDE) == BN6_EDIT_PACK;
 	S2.entry = editing && !S2.pack_side ? entry_of(emu_read8(edit + BN6_EDIT_SCROLL) + emu_read8(edit + BN6_EDIT_ROW)) : -1;
+	S2.pack_entry = S2.pack_side ? emu_read8(edit + BN6_EDIT_PACK_SCROLL) + emu_read8(edit + BN6_EDIT_PACK_ROW) : -1;
 	if (S2.since % 15 == 0) S2.npack = director_pack_now(S2.pack, S2.pack_count, (int)(sizeof S2.pack / sizeof *S2.pack));
 }
 
