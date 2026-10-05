@@ -249,12 +249,12 @@ together (hold one to select both). The folder is looked in again at each
 start, so BN5 put there later comes in by itself; after choosing the
 files, hold the app's icon and tap **ROMs** (Android 7.1 and later) to add
 BN5. A handheld's own controls, a Bluetooth or USB
-controller and the touch screen all work: the game draws touch controls
-round the picture until a controller's button is pressed, and Back asks
-before it quits. On a handheld with a second screen, such as the AYN
-Thor, the lower one keeps the layer's map open, as on a 3DS
-([android/README.md](android/README.md#the-second-screen)). Uninstalling
-the app deletes its saves.
+controller (two Joy-Cons as one) and the touch screen all work: the game
+draws touch controls round the picture until a controller's button is
+pressed, and Back asks before it quits. On a handheld with a second
+screen, such as the AYN Thor, the lower one keeps the layer's map open, as
+on a 3DS ([android/README.md](android/README.md#the-second-screen)).
+Uninstalling the app deletes its saves.
 
 ### On an iPhone or iPad
 
@@ -379,24 +379,47 @@ hand uses chips and the buster.
 | Start | Enter | Keypad Enter |
 | Select | R | Backspace |
 
-Keys are positions, so on an AZERTY keyboard you move with Z Q S D.
-`keys.ini` in the save folder (`~/.local/share/cyberworld-endless/` on Linux,
-`savedata/` on the handheld) changes them; it is written with these defaults
-on the first start. F11 or Alt+Enter switches to fullscreen; Escape twice
-quits. Controllers use their own buttons (A, B, shoulders, Start, Back);
-holding Back and Start for a second, twice, quits. A touch screen shows the
-buttons on it from its first touch (a Steam Deck's too), until a key or a
-controller is used again. The D-pad takes diagonals where MegaMan walks
-(the net's walkways run along them) and four directions in battles and
-menus. Their **MENU** button pauses the game and opens their menu:
-**SIZE** and **OPACITY** of them all, **HAPTICS** (a tick under the thumb,
-on Android and in browsers that can), and **EDIT LAYOUT**: tap a button to
-choose it, drag it where your thumb wants it, pinch it or drag a corner to
-size it, give it its own opacity, or take a preset (**DEFAULT**,
-**LEFT-HANDED**, **COMPACT**, and **LARGE** where the screen has room);
-**DONE** keeps them, **CANCEL** leaves them as they were. The phone
-upright and on its side keep an arrangement each (`touch.ini` in the save
-folder).
+Keys are positions, so on an AZERTY keyboard you move with Z Q S D. F11 or
+Alt+Enter switches to fullscreen; Escape twice quits. A controller's D-pad
+and left stick move, its A and B are A and B (on a Nintendo pad the buttons
+marked so), its shoulders and triggers L and R, Start is Start and Back
+(Minus) is Select; holding Back and Start for a second, twice, quits,
+whatever they are set to. Two Joy-Cons are one controller, on a phone too;
+one alone is a small one held sideways.
+
+**The controls screen** sets the buttons. **Select** on the title screen
+opens it (the line under the menu names the button it is on); on a phone
+or tablet with a controller, so does **CONTROLLER** in the touch controls'
+menu, mid-run too. **A and B** has presets: as labeled; **B on X**, left of
+A as on the GBA (Square on a PlayStation pad; a Nintendo pad has B there
+already); and A and B swapped, for a pad that reads them the other way
+round. Choose A, B, L, R, Start or
+Select and press the button (or, on a PC or in a browser, the key) you
+want there; a button another one had goes over to it in exchange.
+**Defaults** brings them all back, and **Done** asks you to press the new
+A to keep them: if you do not within ten seconds, the old ones stay. The
+screen itself always takes the controller's own A, B and D-pad, the
+keyboard and taps, whatever the buttons are set to. Nintendo's pads keep
+their buttons apart from the others', as their A sits where the others'
+B does. The screen writes `pad.ini` and `keys.ini` in the save folder
+(`~/.local/share/cyberworld-endless/` on Linux, `savedata/` on the
+handheld), made with these defaults on the first start; by hand they set
+the D-pad and the sticks too (`pad.ini` names a controller's buttons as
+SDL does: `a`, `leftshoulder`, `lefttrigger`, `-lefty`).
+
+A touch screen shows the buttons on it from its first touch (a Steam
+Deck's too), until a key or a controller is used again. The D-pad takes
+diagonals where MegaMan walks (the net's walkways run along them) and four
+directions in battles and menus. Their **MENU** button pauses the game and
+opens their menu: **SIZE** and **OPACITY** of them all, **HAPTICS** (a tick
+under the thumb, on Android and in browsers that can), **CONTROLLER** (the
+controls screen, where a controller is connected) and **EDIT LAYOUT**: tap
+a button to choose it, drag it where your thumb wants it, pinch it or drag
+a corner to size it, give it its own opacity, or take a preset
+(**DEFAULT**, **LEFT-HANDED**, **COMPACT**, and **LARGE** where the screen
+has room); **DONE** keeps them, **CANCEL** leaves them as they were. The
+phone upright and on its side keep an arrangement each (`touch.ini` in the
+save folder).
 
 | Button | In the net | In battle |
 | --- | --- | --- |

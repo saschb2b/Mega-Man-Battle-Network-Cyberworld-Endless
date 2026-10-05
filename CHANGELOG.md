@@ -22,6 +22,35 @@
   white,** as BN6's own battle switch does; it faded plainly.
 - **The frame log names each second's longest frame** (`frame_log = on`
   in `settings.ini`), the hitch an average hides.
+- **The controls screen: a controller's buttons, and the keys, set in the
+  game, on every build but the 3DS (issue #37).** Select on the title
+  screen opens it, the line under the menu naming the button it is on; on
+  a phone or tablet with a controller, CONTROLLER in the touch controls'
+  menu opens it mid-run. A and B take a preset (as labeled; B on X, left
+  of A as on the GBA, which CybeastID asked for on an Xbox pad; or A and B
+  swapped), or each of A, B, L, R, Start and Select takes the button or
+  key pressed for it, the button it had going to whoever lost theirs.
+  Defaults brings them back. Done asks for the new A within ten seconds,
+  else the old controls stay, and the screen itself works on the pad's own
+  A, B and D-pad, the keyboard and taps whatever is set, so no choice
+  locks a player out. Nintendo's pads keep a map of their own (their A
+  sits where the others' B does), in `pad.ini` beside `keys.ini`, which
+  names the buttons as SDL does and sets the D-pad and sticks by hand.
+  Back and Start held still quits, whatever they are set to.
+- **Joy-Cons work on Android (issue #37, Pink5G's report).** A left
+  Joy-Con has no A, B, X or Y, so SDL 2 made it no controller and the game
+  never opened it: SDL sent its Minus on as Escape, which asked to quit,
+  its L as nothing, and dropped its stick, while a right one's stick did
+  the moving. Both now get a mapping of their own, each its half of one
+  controller in a pair and a small one held sideways alone, with A where
+  it is marked, and the left one's arrows, which Android leaves without a
+  key code, reach the game as its D-pad. Seen in the Android emulator with
+  virtual Joy-Cons as Linux reports them: Minus opens the controls screen,
+  the stick and the arrows walk Lan through the town, L asks MegaMan the
+  way.
+- **A controller plugged in or paired while the game runs is picked up,
+  and one taken away is let go.** A pad that left kept its place, and one
+  coming after it at the same place was never opened.
 - **Each start opens with the developer's boot screen and a word from
   MegaMan on where to report bugs.** On white, Saschb2b comes up in two
   pieces on the two tones of a chime, each out of a GBA-style mosaic:
