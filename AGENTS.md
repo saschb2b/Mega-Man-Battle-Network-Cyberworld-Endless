@@ -117,8 +117,9 @@ the site.
   function no build reaches, no function joins or grows past CCN 25 or 120
   lines, no ROM offset without its name in `docs/ROM_DATA.md`, no field of
   the game's structures as a bare offset outside `src/emu/bn6.h` (issue
-  #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), and no ROM,
-  save, state or large file in git outside `docs/`. A baseline only
+  #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), no new code smell and
+  no header that is not whole on its own (Code structure, below), and no
+  ROM, save, state or large file in git outside `docs/`. A baseline only
   shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the
   layer before it loads `run.state`, so generation and object placement
@@ -132,6 +133,26 @@ the site.
   fail on `LAYER_MAKE_HASH` beside it and name the new hash to set with
   it. Emulator states (`boot-3.state`, `run.state`) are made on the device
   and never committed.
+
+## Code structure
+
+- One thing per file, named for it. Past 1000 lines (a header 400) a file
+  holds more than one thing, and is split by what each part does. A module
+  of several files shares its state through a header of its own; each
+  part's header declares what the other parts use, and what the rest of
+  the game uses stays in the module's public header.
+- What characters say lives apart from the logic that decides when it is
+  said, in the feature's words file beside it: `*_words.c` (lines composed
+  from the run's facts), `*_lines.c` (tables of lines), `*_text.c` (the
+  PET's text). A voice pass (docs/VOICE.md) reads every line there, and
+  the logic reads without them.
+- `build.py lint` lists the code's smells in `tests/lint/smells.txt`, none
+  of which may join or grow: a file past its lines, a `.c` file including
+  more than 20 of `src/`'s headers, a function taking more than 7
+  parameters or indented past 5 levels, a block of 10 lines or more
+  repeated, and lines of speech outside a words file. Every header has its
+  guard and compiles on its own, and a `.c` file includes its own header
+  first. A change that touches a listed smell takes it down where it can.
 
 ## Game design
 

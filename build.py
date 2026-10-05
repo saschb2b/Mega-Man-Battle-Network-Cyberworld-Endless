@@ -1619,18 +1619,34 @@ def lint_rom_data(update):
                         'this list only shrinks: build.py lint --update after naming one', Counter(missing), update)
 
 
-def lint_complexity(update):
-    """lizard over src/: a function past CCN LINT_CCN or LINT_NLOC lines of code is new,
-    or a listed one grew."""
-    import csv
+def lizard(*args):
+    """lizard over src/ in the build image (its output)."""
     out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
-                         ['run', '--rm', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE, 'lizard', '--csv', 'src'],
+                         ['run', '--rm', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE, 'lizard', *args, 'src'],
                          capture_output=True, text=True)
     if out.returncode not in (0, 1) or not out.stdout:
         sys.exit('lizard failed in the build image: one made before it came in? docker rmi cyberworld-build, then again\n'
                  + out.stderr[-400:])
+    return out.stdout
+
+
+_lizard_rows = []
+
+
+def lizard_rows():
+    """Each function's row of lizard's CSV (nloc, ccn, tokens, params, length, location, file, name, long name,
+    start, end), read once."""
+    import csv
+    if not _lizard_rows:
+        _lizard_rows.extend(csv.reader(lizard('--csv').splitlines()))
+    return _lizard_rows
+
+
+def lint_complexity(update):
+    """lizard over src/: a function past CCN LINT_CCN or LINT_NLOC lines of code is new,
+    or a listed one grew."""
     now = {}
-    for row in csv.reader(out.stdout.splitlines()):
+    for row in lizard_rows():
         nloc, ccn, file, name = int(row[0]), int(row[1]), row[6], row[7]
         if ccn > LINT_CCN or nloc > LINT_NLOC:
             key = f'{file}:{name}'
@@ -1754,6 +1770,178 @@ def lint_symbols():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
 
 
+# ---- the code's smells (AGENTS.md, Code structure) ----
+
+SMELL_LINES = {'.c': 1000, '.m': 1000, '.h': 400}   # a file past this many lines holds more than one thing
+SMELL_INCLUDES = 20     # a .c file including more of src/'s headers reaches into too many others
+SMELL_PARAMS = 7        # a function taking more parameters wants a struct
+SMELL_NESTING = 5       # a function's body indented deeper than this many levels wants a function of its own
+SMELL_DUPLICATE = 10    # lines of a block repeated elsewhere (lizard -Eduplicate) want one function
+# what characters say lives in its own files, apart from what decides when (docs/VOICE.md)
+WORDS_FILES = ('_words.c', '_lines.c', '_text.c')
+SMELLS = {
+    'size': f'a file past {SMELL_LINES[".c"]} lines (.c) or {SMELL_LINES[".h"]} (.h): split it by what it does',
+    'words': 'lines of speech outside a words file (*_words.c, *_lines.c, *_text.c): move them to the feature\'s words file',
+    'includes': f'a .c file including more than {SMELL_INCLUDES} of src/\'s headers: it does too much; split it',
+    'params': f'a function taking more than {SMELL_PARAMS} parameters: pass a struct',
+    'nesting': f'a function indented past {SMELL_NESTING} levels: give the inner part a function of its own',
+    'duplicate': f'blocks of {SMELL_DUPLICATE} lines or more repeated between two files (or in one): one function for both',
+}
+SPEECH_LITERAL = re.compile(r'"((?:[^"\\]|\\.)*)"')
+SPEECH_CALL = re.compile(r'\bta_(?:say|talk|page|pages|say_flag)\s*\(')
+
+
+def generated(path):
+    """A file a tool writes (its first lines name it), which no smell counts."""
+    with open(path, errors='replace') as f:
+        head = ''.join(f.readline() for _ in range(3))
+    return re.search(r'(written|drawn|made) by tools/', head) is not None
+
+
+def speech_lines(path):
+    """The lines of `path` holding a line a character says: a literal with a
+    speaker's mark (@M ), chat boxes split by |, BN6's comma (\"Lan,look!\"),
+    or words given to a chat (ta_say and the like)."""
+    n = 0
+    with open(path, errors='replace') as f:
+        for line in f:
+            s = line.strip()
+            if s.startswith(('/*', '*', '//')):
+                continue
+            for m in SPEECH_LITERAL.finditer(line):
+                lit = m.group(1)
+                if '*.' in lit:   # (a file dialog's pattern)
+                    continue
+                if (re.search(r'@[A-Z] ', lit) or re.search(r'[A-Za-z!?.]\|[A-Za-z@*.]', lit) or
+                        (re.search(r'[a-z!.?],[A-Z][a-z]', lit) and ' ' in lit) or
+                        (SPEECH_CALL.search(line) and re.search(r'[A-Za-z]{2,} [A-Za-z]', lit))):
+                    n += 1
+                    break
+    return n
+
+
+def nesting(path, start, end):
+    """How deep the body of the function on lines start-end is indented (its
+    statements are level 1), its comments and preprocessor lines aside."""
+    with open(os.path.join(ROOT, path), errors='replace') as f:
+        lines = f.read().split('\n')[start - 1:end]
+    base, deep = len(lines[0]) - len(lines[0].lstrip('\t')), 0
+    for line in lines[1:]:
+        s = line.lstrip('\t')
+        if s.strip() and not s.lstrip().startswith(('/*', '*', '#', '//')):
+            deep = max(deep, len(line) - len(s) - base)
+    return deep
+
+
+def smells_found():
+    """Each smell found, as "kind where" -> its measure."""
+    import glob
+    found = {}
+    files = sorted(glob.glob(os.path.join(ROOT, 'src', '*', '*.[chm]')))
+    made = {os.path.relpath(p, ROOT) for p in files if generated(p)}
+    for path in files:
+        rel = os.path.relpath(path, ROOT)
+        if rel in made:
+            continue
+        with open(path, errors='replace') as f:
+            text = f.read()
+        lines = text.count('\n')
+        if lines > SMELL_LINES[os.path.splitext(rel)[1]]:
+            found[f'size {rel}'] = lines
+        if rel.endswith('.c'):
+            n = len(re.findall(r'^#include "', text, re.M))
+            if n > SMELL_INCLUDES:
+                found[f'includes {rel}'] = n
+            if not rel.endswith(WORDS_FILES):
+                n = speech_lines(path)
+                if n:
+                    found[f'words {rel}'] = n
+    for row in lizard_rows():
+        file, name, params, start, end = row[6], row[7], int(row[3]), int(row[9]), int(row[10])
+        if file in made:
+            continue
+        if params > SMELL_PARAMS:
+            found[f'params {file}:{name}'] = max(found.get(f'params {file}:{name}', 0), params)
+        deep = nesting(file, start, end)
+        if deep > SMELL_NESTING:
+            found[f'nesting {file}:{name}'] = max(found.get(f'nesting {file}:{name}', 0), deep)
+    for block in lizard('-Eduplicate').split('Duplicate block:')[1:]:
+        # (code only: in headers lizard takes one long enum for another)
+        spans = [(f, int(a), int(b)) for f, a, b in re.findall(r'(src/\S+):(\d+) ~ (\d+)', block) if f not in made and f.endswith('.c')]
+        if len(spans) < 2:
+            continue
+        length = max(b - a + 1 for _, a, b in spans)
+        if length < SMELL_DUPLICATE:
+            continue
+        pair = ' '.join(sorted({f for f, _, _ in spans})) if len({f for f, _, _ in spans}) > 1 else spans[0][0]
+        found[f'duplicate {pair}'] = found.get(f'duplicate {pair}', 0) + length
+    return found
+
+
+def lint_smells(update):
+    """The code's smells against tests/lint/smells.txt: none may join, and
+    none listed may grow (a file longer, a function deeper, more lines of
+    speech where they do not belong)."""
+    now = smells_found()
+    note = ('the code\'s smells (build.py lint, AGENTS.md): "kind where measure"; none may join and none may grow:\n' +
+            '\n'.join(f'  {k}: {v}' for k, v in SMELLS.items()) +
+            '\nfix one, then build.py lint --update')
+    if update:
+        lint_write('smells.txt', note, [f'{k} {v}' for k, v in now.items()])
+        print(f'smells: {len(now)} listed in tests/lint/smells.txt')
+        return True
+    base = {}
+    for line in lint_baseline('smells.txt'):
+        key, v = line.rsplit(' ', 1)
+        base[key] = int(v)
+    bad = 0
+    for key, v in sorted(now.items()):
+        if key not in base:
+            print(f'  new: {key} ({v}): {SMELLS[key.split()[0]]}')
+            bad += 1
+        elif v > base[key]:
+            print(f'  grew: {key} {base[key]} -> {v}')
+            bad += 1
+    fixed = [k for k in base if k not in now or now[k] < base[k]]
+    if fixed:
+        print(f'  ({len(fixed)} smaller or gone since the baseline: build.py lint --update takes them down)')
+    print(f'smells: {len(now)}, {bad} new or grown')
+    return not bad
+
+
+def lint_headers():
+    """Every header guarded and whole on its own (it compiles alone, as the
+    host build compiles), and every .c file's own header the first it
+    includes, so that it is checked so too."""
+    import glob
+    bad = []
+    for h in sorted(glob.glob(os.path.join(ROOT, 'src', '*', '*.h'))):
+        with open(h, errors='replace') as f:
+            text = f.read()
+        if not re.search(r'^#ifndef (\w+)\n#define \1$', text, re.M) and '#pragma once' not in text:
+            bad.append(f'{os.path.relpath(h, ROOT)}: no include guard')
+    for c in sorted(glob.glob(os.path.join(ROOT, 'src', '*', '*.c'))):
+        own = os.path.basename(c)[:-2] + '.h'
+        if not os.path.exists(os.path.join(os.path.dirname(c), own)):
+            continue
+        with open(c, errors='replace') as f:
+            first = next((line.strip() for line in f if line.startswith('#include')), '')
+        if first != f'#include "{own}"':
+            bad.append(f'{os.path.relpath(c, ROOT)}: includes {first or "nothing"} before its own {own}')
+    build('host')   # (its version.h)
+    script = ('for h in src/*/*.h; do gcc -std=c11 -fsyntax-only -D_DEFAULT_SOURCE -DCW_DESKTOP '
+              '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
+              '-isystem /opt/mgba/host/include -Wno-pragma-once-outside-header -x c "$h" 2>&1 | grep -q "error" && echo "$h"; done; true')
+    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
+                         ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+                          'sh', '-c', script], capture_output=True, text=True).stdout
+    bad += [f'{h}: does not compile on its own' for h in out.split()]
+    for b in bad:
+        print(f'  refused: {b}')
+    print(f'headers: {len(bad)} refused')
+    return not bad
+
+
 def symbols(rest=()):
     """docs/symbols from the sources (tools/symbols.py). With --bn6f DIR, a
     checkout of the bn6f disassembly, the full map too: tools/bn6f_match.py
@@ -1778,6 +1966,8 @@ def lint(update=False):
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
     ok = lint_complexity(update) and ok
+    ok = lint_smells(update) and ok
+    ok = lint_headers() and ok
     ok = lint_analyzer(update) and ok
     ok = lint_dead(update) and ok
     return 0 if ok else 1

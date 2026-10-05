@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **The code keeps its shape.** `build.py lint` now counts the code's
+  smells against `tests/lint/smells.txt`, where none may join and none
+  may grow: a file past 1000 lines (a header past 400), a `.c` file
+  reaching into more than 20 of the game's headers, a function taking
+  more than 7 parameters or indented past 5 levels, a block of 10 lines
+  repeated, and lines a character says outside a words file (`*_words.c`,
+  `*_lines.c`, `*_text.c`). Every header must compile on its own and come
+  first in its own `.c` file. AGENTS.md's Code structure says why.
+
 ## 0.9.0 (2026-10-05)
 
 - **Everyone talks like BN6 now.** A player wrote that our dialogue felt

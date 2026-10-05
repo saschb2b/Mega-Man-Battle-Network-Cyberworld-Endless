@@ -1,0 +1,89 @@
+# the code's smells (build.py lint, AGENTS.md): "kind where measure"; none may join and none may grow:
+#   size: a file past 1000 lines (.c) or 400 (.h): split it by what it does
+#   words: lines of speech outside a words file (*_words.c, *_lines.c, *_text.c): move them to the feature's words file
+#   includes: a .c file including more than 20 of src/'s headers: it does too much; split it
+#   params: a function taking more than 7 parameters: pass a struct
+#   nesting: a function indented past 5 levels: give the inner part a function of its own
+#   duplicate: blocks of 10 lines or more repeated between two files (or in one): one function for both
+# fix one, then build.py lint --update
+duplicate src/core/save_legacy.c 17
+duplicate src/gfx/gfx.c src/layer/text.c 21
+duplicate src/layer/navicust.c 11
+duplicate src/map/mapslot.c 13
+duplicate src/map/netmap.c 28
+duplicate src/map/tiles.c 11
+duplicate src/net/net_gen.c 13
+includes src/core/main.c 24
+includes src/director/director.c 57
+includes src/emu/scene_emu.c 23
+includes src/layer/layer_objs.c 32
+nesting src/audio/audio.c:mix 6
+nesting src/core/touch_art.c:rasterize 6
+nesting src/director/director.c:director_describe 6
+nesting src/director/director.c:director_update 6
+nesting src/gfx/gfx.c:raw_text 6
+nesting src/layer/layer_objs.c:layer_objs_install 6
+nesting src/map/area_src.c:draw_layers 6
+nesting src/map/decor.c:decor_learn 6
+nesting src/map/legal.c:legal_fix 7
+nesting src/map/legal.c:pieces 6
+nesting src/map/tilemap.c:pick_all 6
+nesting src/map/tiles.c:best 6
+nesting src/net/net_gen.c:teleport_island_site 6
+nesting src/world/town.c:carry 6
+nesting src/world/town.c:plan_once 6
+nesting src/world/townsrc.c:townsrc_synth 6
+params src/audio/xsong.c:xsong_walk 8
+params src/core/loot.c:weigh 8
+params src/core/touch_art.c:mask_shape_in 8
+params src/emu/guest.c:guest_pool 9
+params src/emu/guest.c:records_fit 8
+params src/gfx/gfx.c:blit_obj 8
+params src/gfx/gfx.c:blit_tile 8
+params src/gfx/gfx.c:sprite_draw_frame 8
+params src/layer/layer_objs.c:dealer_word 8
+params src/layer/layer_objs.c:mystery_or_flame 8
+params src/layer/npc.c:npc_counter_talker 10
+params src/layer/npc.c:npc_talker 10
+params src/layer/npc.c:npc_walker 8
+params src/layer/npc.c:talker 13
+params src/layer/scripts.c:ta_gift 12
+params src/layer/scripts.c:ta_guardian_reward 11
+params src/map/area_src.c:draw_layers 10
+params src/map/props.c:cut_tiles 9
+params src/map/tilemap.c:pick_all 8
+params src/map/tilemap.c:tilemap_pick 8
+params src/map/tiles.c:best 16
+params src/map/tiles.c:expect 9
+params src/map/tiles.c:expect_look 8
+params src/map/tiles.c:learn_shapes 8
+params src/map/tiles.c:src_open 8
+params src/map/tiles.c:tiles_pick 13
+params src/map/tiles.c:why_off 14
+params src/scenes/scene_title.c:stamp 10
+params src/world/town.c:tile 8
+params src/world/townmath.h:town_move_tile 10
+params src/world/townsrc.c:townsrc_synth 9
+size src/core/main.c 1381
+size src/core/platform.c 1141
+size src/director/director.c 5095
+size src/emu/guest.c 1182
+size src/layer/layer_objs.c 1079
+size src/layer/scripts.c 1014
+size src/map/netmap.c 1288
+size src/map/tiles.c 1599
+size src/net/net_gen.c 2059
+size src/world/town.c 1096
+words src/director/director.c 166
+words src/director/powers.c 9
+words src/emu/guest_wait.c 3
+words src/layer/blockers.c 3
+words src/layer/guardian_objs.c 1
+words src/layer/guardians.c 165
+words src/layer/layer_objs.c 36
+words src/layer/navicust.c 8
+words src/layer/rumors.c 8
+words src/layer/scripts.c 79
+words src/layer/xguardian.c 5
+words src/scenes/scene_title.c 2
+words src/world/town.c 72
