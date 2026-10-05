@@ -230,6 +230,8 @@
 0804CDE0 BN6_TRADER_POOLS
 0804F274 warp_list
 0804F5D0 central_town
+0804F874 lan_room_jack_table
+0806CE90 lan_hp_warp_list
 08072410 for_central
 08081EEC RomLayout.battle_bg_refs.1
 08081EF0 RomLayout.battle_bg_refs.2

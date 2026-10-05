@@ -69,7 +69,7 @@ static void act_note_read(void) {
  * (session 63) */
 static void resume_note(bool restarted) {
 	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off",
-		"From the arena's door", "From home" };
+		"From the arena's door", "From Lan's HP" };
 	/* (a layer made otherwise, by this build or without the ROM that drew
 	 * it, starts again: "From where you left off" over the layer's start
 	 * misled a playtester, session 67) */

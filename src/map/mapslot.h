@@ -35,8 +35,13 @@ typedef struct {
 #define MYSTERY_GREEN  5
 
 /* Clears map (group, number) of the original's NPCs, scripts, objects and
- * Mystery Data, and installs the layer's (or the town's, in the real world). */
+ * Mystery Data, and installs the layer's (or the town's, in the real world;
+ * with `md` NULL a net map of the run's own, as Lan's HP, with none, the
+ * layers' lists left as they are). */
 bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryData *md, int nmd);
+/* The object spawns map (group, number) has now (BN6's own until a layer or
+ * the town takes it over), for NpcList.objects. */
+uint32_t mapslot_objects(int group, int number);
 
 /* Where the layer's exit pad (warp 1) leads: world (x, y) of map (group,
  * number), facing `facing`. */
@@ -48,21 +53,29 @@ void mapslot_teleport(int entry, int group, int number, int x, int y, int facing
 
 /* The map's theme: every chapter's map music list plays `song` there. The
  * lists hold one real-world map (the town) and one internet map (the
- * layer) at a time. */
+ * layer) at a time, and Lan's HP beside them (mapslot_music_hp). */
 bool mapslot_music(int group, int number, int song);
+bool mapslot_music_hp(int group, int number, int song);
 void mapslot_music_forget_town(void);
 
 /* Jacking in from real-world map (group, number) at trigger 0x40 takes
  * MegaMan to world (x, y) of (to_group, to_number), with the game's own
  * jack-in (one of its 20-byte destinations is taken over). */
 bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, int y, int facing);
-/* ... and where its jack-in leads now, mapslot_jack_in's table kept (a
- * town's port taking another way, docs/HOME.md) */
-void mapslot_jack_to(int to_group, int to_number, int x, int y, int facing);
 
 /* The town's warp list: every entry leads back to its own world (x, y),
  * so no trigger left in it can take Lan anywhere else. */
 bool mapslot_town_warps(int group, int number, int x, int y, int facing);
+/* ... any map's, as the town's, its bus address returned (0: none), for
+ * mapslot_warp to point an entry (1-16, its triggers' value) elsewhere:
+ * world (x, y) of map (group, number), BN6's net link departure (8). */
+uint32_t mapslot_own_warps(int group, int number, int x, int y, int facing);
+/* The warp list map (group, number) has now (BN6's own until taken over). */
+uint32_t mapslot_warps(int group, int number);
+void mapslot_warp(uint32_t list, int entry, int group, int number, int x, int y, int facing);
+/* BN6's jack-in destination `index` (bn6f byte_80984C8): its map and
+ * world (x, y); false for none, or the one the town rewrites. */
+bool mapslot_jack_record(int index, int *group, int *number, int *x, int *y);
 
 /* What the map's checks say (section-3 triggers 0xF0 + n, answered by A):
  * script[n] of `archive` (a text archive's bytes; 0xFF none). The archive
@@ -70,8 +83,10 @@ bool mapslot_town_warps(int group, int number, int x, int y, int facing);
 bool mapslot_checks(int group, int number, const uint8_t script[16], const uint8_t *archive, int len);
 
 /* Allocation from the town's own space (on) or the layers' (off): the
- * layers' halves are reused while the town still runs. */
+ * layers' halves are reused while the town still runs. Lan's HP has a space
+ * of its own as well. */
 void mapslot_town(bool on);
+void mapslot_hp(bool on);
 
 /* Space in the free ROM for NPC scripts; returns the bus address. A reset
  * starts the next layer in the other half of the space. */

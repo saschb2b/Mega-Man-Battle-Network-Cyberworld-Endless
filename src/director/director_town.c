@@ -1,11 +1,13 @@
-/* director_home.h's town frame (the trip home and the ways:
- * director_home.c). The town at a run's start and at home between acts
- * (docs/HOME.md): Lan's words, the act's card held over the town, the
- * run saved there, MegaMan at each port, and the next layer's arrival
- * after the jack-in. */
+/* director_home.h's home frame (the trip home and the ways:
+ * director_home.c). Lan's HP after each act and at every jack-in, and the
+ * town at a run's start and whenever Lan jacks out (docs/HOME.md): Lan's
+ * and MegaMan's words, the act's card held over Lan's HP, the run saved
+ * there, MegaMan at each portal, the portal taken, and the next layer's
+ * arrival. */
 #include "director_home.h"
 
 #include "bn6.h"
+#include "bn6_fields.h"
 #include "cinema.h"
 #include "director_keys.h"
 #include "director_layer.h"
@@ -15,14 +17,37 @@
 #include "emu.h"
 #include "flags.h"
 #include "home_words.h"
+#include "lanhp.h"
 #include "mapslot.h"
 #include "run.h"
 #include "save.h"
 #include "talk.h"
-#include "text.h"
 #include "town.h"
 
-bool home_map(int group, int number) { return group == town_info()->group && number == town_info()->number; }
+#define PORTAL_REACH 20   /* world units from a portal's cells MegaMan names it from */
+
+static bool map_is(int group, int number) { return emu_read8(BN6_MAP_GROUP) == group && emu_read8(BN6_MAP_NUMBER) == number; }
+
+bool home_in_hp(void) { return D.town && map_is(LANHP_GROUP, LANHP_NUMBER); }
+
+const char *home_place_name(void) { return home_in_hp() ? "Lan's HP" : town_info()->name ? town_info()->name : "Town"; }
+
+bool home_map(int group, int number) {
+	return (group == town_info()->group && number == town_info()->number) || (group == LANHP_GROUP && number == LANHP_NUMBER);
+}
+
+/* In Lan's HP: its open portals on, every frame (BN6's own homepage sets
+ * the warp-off flags of the links its story has not opened, after the
+ * game enters it), and R asks BN6's "jack out?" (the run's lock had
+ * stopped it) */
+void home_entered(void) {
+	if (!home_in_hp()) return;
+	int n = 1;
+	bool sealed = false;
+	home_ways(&n, &sealed);
+	lanhp_lit(n);
+	flag_clear(BN6_FLAG_NO_JACK);
+}
 
 /* home: Lan held while the act's card shows, A ending it early, as on a
  * layer */
@@ -33,62 +58,94 @@ static void home_hold(void) {
 	D.arrival_hold = hold;
 }
 
-/* MegaMan and Lan coming home: the act done, and the ports open */
+/* MegaMan coming home: the act done, and the portals lit */
 static const char *arrival_words(void) {
 	int open = 1;
 	bool sealed = false;
 	home_ways(&open, &sealed);
-	const char *ports[TOWN_PORTS];
-	for (int k = 0; k < TOWN_PORTS; ++k) ports[k] = town_port_name(k) ? town_port_name(k) : "port";
-	return home_words(D.home_beaten, open, ports, sealed ? ports[2] : NULL);
+	const char *names[LANHP_PORTALS];
+	for (int k = 0; k < LANHP_PORTALS; ++k) names[k] = home_portal_name(k);
+	return home_words(D.home_beaten, open, names, sealed ? names[2] : NULL);
 }
 
-/* Lan and MegaMan's words (Dad's call, the first time; at home, the act
- * just done), once Lan is out, the map has settled and the card gone */
-static void town_words(void) {
-	if (!D.town_seen || !on_map() || D.intro_said || emu_read8(BN6_WARP_PENDING) != 0 || ++D.town_frames <= 40 || cinema_busy()) return;
-	if (!(D.home ? talk_start(arrival_words(), FACE_MEGAMAN) : talk_script(town_info()->talk_archive, town_info()->intro))) return;
+/* the map settled: Lan or MegaMan out, the warp done, the card gone */
+static bool settled(void) {
+	return D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 && D.town_frames > 40 && !cinema_busy();
+}
+
+/* Their words (in the town at the run's start, Dad's call the first time;
+ * in Lan's HP the act just done, or what it is the run's first time
+ * there), once a place */
+static void home_talk(void) {
+	if (!settled()) return;
+	if (home_in_hp()) {
+		if (D.home ? D.intro_said : D.hp_said) return;
+		if (!talk_start(D.home ? arrival_words() : home_hp_words(), FACE_MEGAMAN)) return;
+		if (D.home) D.intro_said = true;
+		else D.hp_said = true;
+		return;
+	}
+	if (D.home || D.intro_said || !talk_script(town_info()->talk_archive, town_info()->intro)) return;
 	D.intro_said = true;
-	if (!D.home && !profile.seen_intro) { profile.seen_intro = true; profile_save(); }
+	if (!profile.seen_intro) { profile.seen_intro = true; profile_save(); }
 }
 
-/* home's checkpoint, once its words are said and Lan is free */
+/* home's checkpoint in Lan's HP, once its words are said and MegaMan is
+ * free */
 static void home_checkpoint(void) {
-	if (!D.home || !D.intro_said || D.home_saved || !on_map() || talk_busy() || emu_read8(BN6_CHATBOX) ||
+	if (!D.home || !home_in_hp() || !D.intro_said || D.home_saved || !on_map() || talk_busy() || emu_read8(BN6_CHATBOX) ||
 		emu_read8(BN6_DIALOGUE_LOCK) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) return;
 	D.home_saved = true;
 	home_save();
 }
 
-/* MegaMan at a port, once a visit each: where it leads and who waits
+/* MegaMan beside a portal, once a visit each: where it leads and who waits
  * there; the dark way's sealed (docs/HOME.md) */
-static void port_words(void) {
-	if (!D.home || !D.intro_said || !on_map() || talk_busy() || emu_read8(BN6_CHATBOX)) return;
-	int n = 1, port = town_port_at((int)emu_read32(BN6_PLAYER_X) >> 16, (int)emu_read32(BN6_PLAYER_Y) >> 16);
+static void portal_words(void) {
+	if (!home_in_hp() || !settled() || talk_busy() || emu_read8(BN6_CHATBOX)) return;
+	int n = 1, k = lanhp_portal_near(bn6_player_x(), bn6_player_y(), PORTAL_REACH);
 	bool sealed = false;
 	const RunWay *w = home_ways(&n, &sealed);
-	if (port < 0 || D.home_told >> port & 1 || (port >= n && !(port == 2 && sealed))) return;
-	bool shut = port >= n;
-	if (talk_start(home_port_words(shut ? 0 : w[port].biome, shut ? 0 : w[port].meets, port == 2, shut), FACE_MEGAMAN)) D.home_told |= 1u << port;
+	if (k < 0 || D.home_told >> k & 1 || (k >= n && !(k == 2 && sealed))) return;
+	bool shut = k >= n;
+	if (talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut), FACE_MEGAMAN)) D.home_told |= 1u << k;
 }
 
-/* In the town: nothing to watch but the jack-in, whose arrival on the
- * layer's map starts the run (or the next act) as a layer's warp does. */
+/* MegaMan on a portal: its way's first layer built (another way's than the
+ * one built at the exit) while BN6's link plays, and the run locked again */
+static void portal_taken(void) {
+	if (!home_in_hp() || D.portal_taken || emu_read8(BN6_WARP_PENDING) != 1) return;
+	int k = lanhp_portal_of(emu_read8(BN6_WARP_INDEX));
+	if (k < 0) return;
+	D.portal_taken = true;
+	home_take_way(k);
+	lock_run();
+}
+
+/* At home: nothing to watch but the portals and the jack-out, whose
+ * arrival on the layer's map starts the act as a layer's warp does. */
 void home_update(void) {
+	static bool was_hp;
 	map_label();
 	arrow_update();
 	if (on_map()) unwedge();
-	if (home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) D.town_seen = true;
+	bool hp = home_in_hp();
+	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
+	if (hp) home_entered();
+	was_hp = hp;
+	if (on_map() && home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) { D.town_seen = true; ++D.town_frames; }
 	talk_update();
 	home_hold();
-	town_words();
+	home_talk();
 	home_checkpoint();
-	port_words();
+	portal_words();
+	portal_taken();
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
 		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
 	if (!arrived) return;
 	D.town = false;
 	D.home = false;
+	D.portal_taken = false;
 	D.frame = 0;
 	D.checkpoint = true;
 	lock_run();

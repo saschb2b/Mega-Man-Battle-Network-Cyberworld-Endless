@@ -26,7 +26,6 @@ typedef struct {
 	int nfolk;
 	const char *const *checks;
 	const char *arrival;
-	const char *ports[2];   /* where the act's second and third ways' ports are (docs/HOME.md): "the" goes before each */
 } TownLines;
 #define TOWN_LINES 4
 extern const TownLines town_lines[TOWN_LINES];

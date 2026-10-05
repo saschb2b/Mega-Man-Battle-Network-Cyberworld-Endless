@@ -246,23 +246,25 @@ original's points lie a few cells from the statue, with the statue's own
 check between, where a player walks up and presses R. Every cell is value
 `0x40`; its table
 points n = 0 at destination 42, and the engine rewrites destination 42
-(a comp the run never visits) to the first layer's arrival. When MegaMan
-arrives there, the run goes on as from any layer (docs/EMULATION.md).
+(a comp the run never visits) to Lan's HP's arrival, its blue pad, where
+BN6's own jack-in from Lan's PC lands (docs/HOME.md): the first layer
+waits behind its portal. From Lan's HP, BN6's jack-out sets Lan down
+where he jacked in.
 
-At home after an act (docs/HOME.md) the town's other points and two
-checks are the ports of the act's other ways (`town_ports.c`): Central
-Town's second point, in front of AsterLand (`0x41`), and the ground
-before its Expo road check (`0xFA`); ACDC Town's doghouse (`0x41`) and
-the ground before its mansion gate (`0xF7`); Seaside Town's own two;
-Green Town's ground before the flower shop (`0xF1`) and round the lily
-pond nearest the knight (`0xF7`). A check's own cells lie on what it
-shows (a pond, a gate), so its port is the walkable cells beside them.
-Every port's cells are point n = 0, written as whole cells (height 8,
-shape `0x11`: AsterLand's own were shape `0x0C`, where BN6's R never
-jacked Lan in), and R on one has the engine rewrite destination 42 for
-its way (`mapslot_jack_to`) before the game reads it. A port whose way is
-not open that visit keeps no trigger on a check's ground, and BN6's own
-points jack in to the landmark's way.
+The town keeps more ports than its landmark's (`town_ports.c`, first the
+act's other ways, issue #86; now for the jobs' errands into BN6's own
+comps, docs/HOME.md): Central Town's second point, in front of AsterLand
+(`0x41`), and the ground before its Expo road check (`0xFA`); ACDC Town's
+doghouse (`0x41`) and the ground before its mansion gate (`0xF7`);
+Seaside Town's own two; Green Town's ground before the flower shop
+(`0xF1`) and round the lily pond nearest the knight (`0xF7`). A check's
+own cells lie on what it shows (a pond, a gate), so its port is the
+walkable cells beside them, round its part nearest the landmark. Every
+jack-in cell is point n = 0, written whole (height 8, shape `0x11`:
+AsterLand's own were shape `0x0C`, where BN6's R never jacked Lan in).
+Until a job opens one, a check's ground holds no trigger and BN6's own
+points jack in to Lan's HP, as the landmark's. `build.py town` counts
+each port's cells Lan reaches on foot.
 
 A new run plans another town than the last run did (`town_style_for`,
 in `run_new_varied`, which also keeps the first area and guardian off the

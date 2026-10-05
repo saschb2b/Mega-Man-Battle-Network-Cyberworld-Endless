@@ -366,21 +366,23 @@ Area became a third opening area, and a new run avoids the last one's act
 
 ### Routes (phase three, begun)
 
-After an act's guardian, Lan comes home (docs/HOME.md), and the next
-act's ways are the town's ports: the next act's area at the landmark's,
-another of its tier the run has not taken at a second port, each named by
-MegaMan as Lan steps onto it, with its guardian where MegaMan has battled
-him, else "a Navi we've never battled" ("This port goes to Green Area,
-Lan. CircusMan waits there!": what MegaMan knows); R there takes it. The
+After an act's guardian, MegaMan comes home to Lan's HP (docs/HOME.md),
+and the next act's ways are its portals: the next act's area at its pink
+pad, another of its tier the run has not taken at a link square, each
+named by MegaMan as he comes near it, with its guardian where MegaMan has
+battled him, else "a Navi we've never battled" ("This one goes to Green
+Area,Lan. CircusMan waits there!": what MegaMan knows); stepping on it
+takes it. The
 choice restates the dialectic at the act's scale: bring the folder to the
 guardian it answers, or take the one it does not. Both guardians fit the
 act's band, and neither is another act's (or the short net's Nest's). The
-other way is drawn from the run's seed and its areas, so a CONTINUE at
-home offers the same; its port builds the act's first layer for it.
+other way is drawn from the run's seed and its areas, so a CONTINUE in
+Lan's HP offers the same; its portal builds the act's first layer for it.
 Acts 2 and 3 in the short net; 2 to 4 in the endless net, where the
 Undernet and the Graveyard stay fixed. (Until issue #86 the Guardian Data
 asked "Which way?" and event flag `0x1452` carried the answer to the exit
-pad.) New branches come later.
+pad; issue #86 made the ways ports in town, issue #93 portals in Lan's
+HP.) New branches come later.
 
 ### Gates (phase three, begun)
 
@@ -410,17 +412,17 @@ Library, so a CONTINUE offers the same three; the lock reads the Library
 as it stood when the layer was made.
 
 And a branch behind a code: the short net's dark way. After act 2's
-guardian, home has a third port once the Secret Area has been cleared in
-any run (the title's S): "Lan... This one leads into the Undernet.
-SlashMan waits down there!". Until then MegaMan says something dark waits
-at that port, and at it that the way is sealed and what opens it, the
-telegraph a run or more before the key. The
+guardian, Lan's HP lights a third portal once the Secret Area has been
+cleared in any run (the title's S): "Lan... This one leads into the
+Undernet. SlashMan waits down there!". Until then MegaMan says something
+dark waits at that link, and beside it that the way is sealed and what
+opens it, the telegraph a run or more before the key. The
 Undernet as the last act before the Nest restates the dialectic at the
 act's scale: its battles keep act 3's band but hit at its cap and come
 from sixteen virus families, against a surface area's five to ten, and
 its layers hold one rich Mystery Data more; its guardian is one of the
 Undernet's own (ProtoMan, SlashMan, HeatMan) that fits the act, drawn from
-the run's seed, none of the acts' nor the other way's (its port, as the
+the run's seed, none of the acts' nor the other way's (its portal, as the
 second way's, builds the act's first layer for it; event flag `0x1454`
 carried the Guardian Data's answer until issue #86).
 
@@ -1119,8 +1121,8 @@ the PET's battle data on a copy exists once they have fought it.
   Aqua guardian is all but SpoutMan by name. The act's card says
   "Guardian: ???", L "A strong Navi's signal waits at its end. I don't
   recognize it.", the arena's approach "The guardian's arena is just
-  ahead", a port at home "This port goes to Aquarium HP,Lan. A Navi
-  we've never battled waits there...", and the briefing on his layer
+  ahead", a portal in Lan's HP "This one goes to Aquarium HP,Lan. A
+  Navi we've never battled waits there...", and the briefing on his layer
   that they have no battle data on it: watch the yellow panels, the
   net's own telegraph for every attack. The arena's card is the reveal.
   What can be learned before is what Navis who live on the net say: the

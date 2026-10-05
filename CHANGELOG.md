@@ -2,26 +2,22 @@
 
 ## Unreleased
 
-- **Home after every act** (issue #85, the town's epic #84). An act's
-  guardian deleted, his exit no longer leads straight to the next act:
-  MegaMan jacks out the way BN6's own jack-out goes, and Lan stands in
-  the run's town where he jacked in, the act's AREA CLEAR card over it.
-  MegaMan and Lan say a word about the act ("Phew! We're home,Lan!"),
-  the run is saved at home, and R at the port takes them on to the next
-  act. A short net comes home three times before the Nest; the endless
-  net after every act, its Nest too. docs/HOME.md has the design: next,
-  the townsfolk's jobs, a shop at home, and a town that remembers.
-- **The act's ways are ports at home** (issue #86). The Guardian Data
-  no longer asks "Which way?": coming home, MegaMan names the ports that
-  are open ("Two ports are open this time! The squirrel statue,and the
-  doghouse!"), and standing on one he says where it leads and who waits
-  there. R at a port takes its way. Each town has its landmark's port
-  and two more from BN6's own jack-in points and its sights: AsterLand's
-  door and the Expo road in Central Town, the doghouse and the mansion
-  gate in ACDC Town, the fish shop and the plaza's east edge in Seaside
-  Town, the flower shop and the lily pond in Green Town. The dark way
-  into the Undernet is the third port, sealed until the Secret Area has
-  been cleared; the Nest's visit has its one port.
+- **Lan's HP, the warp zone** (issues #85, #86 and #93, the epic #84).
+  Every jack-in now arrives in BN6's own Lan's HP, MegaMan's homepage,
+  and its pink pad and link squares are the run's ways on. An act's
+  guardian deleted, his exit takes MegaMan there: the act's AREA CLEAR
+  card, a word on the act ("Phew! We're home,Lan!"), the next act's
+  portals lit as BN6 shows an open link, and the run saved ("From Lan's
+  HP" on a CONTINUE). The Guardian Data no longer asks "Which way?": the
+  act's own area is the pink pad, the other way and the dark way into
+  the Undernet (sealed until the Secret Area has been cleared) are links,
+  and MegaMan names where each leads and who waits there as he comes
+  near. R asks BN6's "MegaMan, jack out?" and takes Lan back to the town,
+  whose jack-in brings him back to the HP. A run begins in the town, as
+  before, and jacks in to Lan's HP. docs/HOME.md has the design: next,
+  Central Town as home, going back through older portals priced by the
+  Net's clock, the townsfolk's jobs, a shop at home, and a town that
+  remembers.
 - **Townsfolk who walk stay drawn as they walk.** Seaside's and Green
   Town's walker vanished the moment he set off and came back when he
   stopped: his sprite's walks are empty in BN6's data. Both walk as

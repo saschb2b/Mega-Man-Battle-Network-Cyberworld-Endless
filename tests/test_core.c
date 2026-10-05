@@ -1269,11 +1269,14 @@ static void test_talk(void) {
 	}
 }
 
-/* Coming home (docs/HOME.md): MegaMan and Lan's words after each act of
- * either net, the ports open named by the towns' longest names, a dark
- * way sealed or open. */
+/* Coming home (docs/HOME.md): MegaMan and Lan's words in Lan's HP after
+ * each act of either net, its portals named (every name, the longest ones
+ * together), a dark way sealed or open; and what Lan's HP is, the run's
+ * first time there. */
 static void test_home_words(void) {
-	static const char *const ports[3] = { "mermaid fountain", "door to AsterLand", "plaza's east edge" };
+	const char *ports[3] = { home_portal_name(0), home_portal_name(2), home_portal_name(4) };
+	for (int k = 0; k < 5; ++k) CHECK(home_portal_name(k)[0], "portal %d has a name", k);
+	check_talk("Lan's HP's first time", home_hp_words());
 	for (int mode = RUN_SHORT; mode <= RUN_ENDLESS; ++mode)
 		for (int depth = 4; depth <= 20; depth += 3) {
 			run.mode = (uint8_t)mode;

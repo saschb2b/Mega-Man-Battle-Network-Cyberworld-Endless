@@ -64,11 +64,13 @@ typedef struct {
 	int act_viruses;       /* viruses deleted when the act began */
 	int act_frames;        /* frames spent in the act */
 	const char *act_guardian;  /* the guardian beaten on the way out */
-	bool town;             /* Lan is in the town; the first layer waits for his jack-in */
+	bool town;             /* home: the town or Lan's HP; the next layer waits behind a portal */
 	bool home;             /* ... come home after an act (docs/HOME.md), not the run's start */
+	bool hp_said;          /* ... MegaMan has said what Lan's HP is, this run */
+	bool portal_taken;     /* ... a portal's way is under way */
 	const char *home_beaten;   /* ... the guardian deleted on the way */
 	bool home_saved;       /* ... and the run saved there */
-	unsigned home_told;    /* ... the ports MegaMan has named this visit, a bit each */
+	unsigned home_told;    /* ... the portals MegaMan has named this visit, a bit each */
 	bool town_seen;        /* ... and has got there */
 	int town_frames;       /* frames on the town's map */
 	bool intro_said;       /* Lan and MegaMan have spoken there */

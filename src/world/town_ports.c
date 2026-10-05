@@ -25,15 +25,11 @@ static struct {
 	int n;
 	int x[PORT_CELLS], y[PORT_CELLS], value[PORT_CELLS];
 } P[TOWN_PORTS];
-static const char *names[TOWN_PORTS];
 static int open_ways = 1;
 
-void ports_begin(const char *landmark, const char *second, const char *third) {
+void ports_begin(void) {
 	memset(P, 0, sizeof P);
 	memset(region, 0, sizeof region);
-	names[0] = landmark;
-	names[1] = second;
-	names[2] = third;
 }
 
 bool ports_cell(int port, int x, int y, int value) {
@@ -113,4 +109,3 @@ int town_port_at(int x, int y) {
 	return cell_at(x, y, NULL);
 }
 
-const char *town_port_name(int port) { return port >= 0 && port < TOWN_PORTS ? names[port] : NULL; }

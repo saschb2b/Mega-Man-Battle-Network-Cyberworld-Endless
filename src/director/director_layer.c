@@ -18,6 +18,7 @@
 #include "director_dark.h"
 #include "director_duel.h"
 #include "director_folder.h"
+#include "director_home.h"
 #include "director_state.h"
 #include "emu.h"
 #include "encounter.h"
@@ -35,7 +36,6 @@
 #include "souls.h"
 #include "story_words.h"
 #include "talk.h"
-#include "town.h"
 #include "xbackdrop.h"
 #include "xnavi.h"
 #include "xsong.h"
@@ -103,7 +103,7 @@ static int label_archive(const char *label, uint8_t *out, int max) {
 void map_label(void) {
 	static char last[16];
 	char name[16];
-	if (D.town) snprintf(name, sizeof name, "%s", town_info()->name ? town_info()->name : "Town");
+	if (D.town) snprintf(name, sizeof name, "%s", home_place_name());
 	else if (run.side_kind == LAYER_UNDERNET) snprintf(name, sizeof name, "Undernet");
 	else if (run.side_kind == LAYER_SECRET) snprintf(name, sizeof name, "Secret Area");
 	else if (run.biome == BIOME_NEST) snprintf(name, sizeof name, "Cybeast Nest");
@@ -422,32 +422,16 @@ bool director_start_run(void) {
 	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
-	town_after_abandon = save_exists();
+	bool abandoned = save_exists();
 	save_delete();
-	/* the first layer, entered through the town's port; the town itself
-	 * (its seed apart from the layers') */
+	/* the first layer, behind Lan's HP's portal, which the town's port
+	 * reaches (director_home.c) */
 	if (!new_layer(false)) return false;
-	town_ways(1);   /* (the run's first act: one port) */
-	if (!town_plan(town_seed(run.seed)) || !town_install(D.group, D.number, D.start_x, D.start_y)) {
-		fprintf(stderr, "town: not built; starting in the net\n");
-		lock_run();
-		emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
-		D.checkpoint = true;
-		return true;
-	}
-	/* R jacks in there; the PET's own Save stays off */
-	flag_clear(BN6_FLAG_NO_JACK);
-	flag_set(BN6_FLAG_NO_PET_SAVE);
-	flag_set(BN6_FLAG_NAVICUST);
-	const TownInfo *ti = town_info();
-	emu_warp(ti->group, ti->number, ti->start_x, ti->start_y, ti->start_face);
-	D.town = true;
-	D.town_seen = false;
-	D.town_frames = 0;
-	D.intro_said = false;
-	D.port_told = false;
-	D.free_x = town_info()->start_x;
-	D.free_y = town_info()->start_y;
+	if (home_run_start(abandoned)) return true;
+	fprintf(stderr, "town: not built; starting in the net\n");
+	lock_run();
+	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	D.checkpoint = true;
 	return true;
 }
 

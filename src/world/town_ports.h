@@ -6,9 +6,8 @@
 
 #include "area_src.h"
 
-/* A new plan: no ports yet; the names of the landmark's and the two more
- * (NULL where the style has none). */
-void ports_begin(const char *landmark, const char *second, const char *third);
+/* A new plan: no ports yet. */
+void ports_begin(void);
 /* A cell (world units) of port 1 or 2, and its trigger in the original:
  * one of the original's jack-in points (0x40 + n), or 0 for the ground
  * before a check made a port; false where the port holds no more. */

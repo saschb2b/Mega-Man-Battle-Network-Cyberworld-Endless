@@ -15,8 +15,12 @@ bool director_start_run(void);
 /* The core's ROM copy as the game's own NEW GAME needs it (before its boot):
  * the chip records the All * helper changed for a run before, put back. */
 void director_before_boot(void);
-/* Lan is still in the town. */
+/* Lan is in the town (at the run's start, or jacked out from Lan's HP);
+ * MegaMan is in Lan's HP. */
 bool director_in_town(void);
+bool director_in_hp(void);
+/* Where Lan or MegaMan is at home: "Lan's HP", or the town's name. */
+const char *director_place_name(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any

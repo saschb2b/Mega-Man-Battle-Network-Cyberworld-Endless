@@ -191,10 +191,10 @@ const char *town_intro(const char *landmark_at, const char *arrival) {
 #define FOLK(list) list, (int)(sizeof list / sizeof *list)
 
 const TownLines town_lines[TOWN_LINES] = {
-	{ FOLK(central_folk), central_checks, NULL, { "door to AsterLand", "Expo road" } },
-	{ FOLK(acdc_folk), acdc_checks, "@M ACDC Town,Lan! The Metroline's so fast!|", { "doghouse", "mansion gate" } },
-	{ FOLK(seaside_folk), seaside_checks, "@M Seaside Town,Lan! Smell that sea air!|", { "fish shop", "plaza's east edge" } },
-	{ FOLK(green_folk), green_checks, "@M Green Town,Lan! Smell those flowers!|", { "flower shop", "lily pond" } },
+	{ FOLK(central_folk), central_checks, NULL },
+	{ FOLK(acdc_folk), acdc_checks, "@M ACDC Town,Lan! The Metroline's so fast!|" },
+	{ FOLK(seaside_folk), seaside_checks, "@M Seaside Town,Lan! Smell that sea air!|" },
+	{ FOLK(green_folk), green_checks, "@M Green Town,Lan! Smell those flowers!|" },
 };
 
 _Static_assert(sizeof central_folk / sizeof *central_folk <= MAX_FOLK && sizeof acdc_folk / sizeof *acdc_folk <= MAX_FOLK &&

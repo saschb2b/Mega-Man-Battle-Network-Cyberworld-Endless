@@ -89,6 +89,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
+| `+0x148000`-`+0x150000` | Lan's HP's (docs/HOME.md): its empty NPC list and map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
 | `+0x152000`-`+0x153000` | The map-name label's archive: a copy of the game's with its 244 names pointed at where the run is ("Layer 12", "ACDC Town"); its other scripts (the PET's HP, zenny and BugFrags, 0xF0-0xF2) kept | `director_layer.c` |
 | `+0x153000`-`+0x154000` | The PET's PLACE: the same copy, its names pointed at the area and the layer ("JudgeTree 14") | `director_layer.c` |
@@ -199,12 +200,16 @@ so the game jacks him in there. A guardian keeps the pad hidden and shut
 (flag `0x16F1`) until its Guardian Data is taken (docs/BOSSES.md). A Yes to the Undernet or the Secret Area
 starts the same departure (`0x080059B5`) to a side layer built at once.
 On an act's last layer the pad leads home instead (docs/HOME.md,
-`director_home.c`): the next layer is built as ever, the run's town is
-installed with that layer behind its port, and the warp's transition type
-is set to internet-to-real-world, so the game's map-enter code sets Lan
-down where he last jacked in (GameState's saved real-world place);
-MegaMan is put back in the PET (flag `0x171D`), as BN6's own jack-out
-does, or the next jack-in would say he isn't there.
+`director_home.c`): the next layer is built as ever, Lan's HP is
+installed (`lanhp.c`) with that layer behind its first portal, and warp 1
+points at its arrival, BN6's blue pad, where Lan's PC's jack-in lands. In
+Lan's HP the director holds the open links' story flags every frame (BN6's
+link markers lock the others), and a portal's warp, seen pending as it
+starts, builds its way's layer where another's was built and points the
+portal's own warp entry at it before the game reads it. The run's town
+stays installed, its jack-in to Lan's HP's arrival, and GameState's saved
+real-world place at its port, so BN6's own jack-out from Lan's HP (R, or
+the blue pad's warp) sets Lan down there.
 
 `director.c` then watches the game: the exit pad's warp, choices made in text (event flags set by
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER

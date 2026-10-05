@@ -8,7 +8,6 @@
 # fix one, then build.py lint --update
 duplicate src/core/save_legacy.c 17
 duplicate src/gfx/gfx.c src/layer/text.c 21
-duplicate src/map/mapslot.c 13
 duplicate src/map/tiles.c 11
 includes src/core/main.c 22
 includes src/director/director.c 36

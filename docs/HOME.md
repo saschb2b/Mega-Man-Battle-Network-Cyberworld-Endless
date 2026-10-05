@@ -210,8 +210,32 @@ Built first as ports in town (issue #86): the ways were the town's
 jack-in points and the ground before its checks, MegaMan's words at each
 (`home_port_words`) and their names in his arrival words. The words, the
 ways (`run_ways`) and the build of a way's first layer at its port
-(`home_take_way`) move to the HP's portals; the town's ports keep their
+(`home_take_way`) moved to the HP's portals; the town's ports keep their
 cells for the jobs' comps (piece 5).
+
+As built (issue #93): Lan's HP is BN6's own map whole (`lanhp.c`): its
+tiles, walls and link markers, its song (`0x13`, every homepage's), no
+people, map scripts or Mystery Data of BN6's, and a warp list of its own
+in a space of its own (docs/EMULATION.md). BN6's HP is a hub already: its
+blue pad, where the jack-in lands, is BN6's jack-out (warp entry 1,
+departure `0x10`), its pink pad links to Central Area 1 and four link
+squares on its floor to the town HPs (docs/ROM_DATA.md, Lan's HP). The
+run's portals are the pink pad (the act's own way) and the links (the
+other way, the dark way, the rest for going back, piece 3); a link square
+shows BN6's own marker, and its warp works, while its story flag is set,
+so a lit portal is BN6's open link and an unlit one BN6's locked link
+(the flags held every frame in the HP: BN6's markers lock their links
+each frame). The act's exit lands MegaMan on the blue pad, the act's card
+over the HP, his word on the act and the ways open ("Two ways are open
+this time! The pink pad,and the link up top!"), and the run saved there
+("From Lan's HP"); within reach of a lit portal he names where it leads
+and who waits there, once a visit. Stepping on one plays BN6's link
+warp; the first way's layer was built at the exit, another way's is built
+as the link plays. R asks BN6's "MegaMan, jack out?", and its yes (or the
+blue pad) takes Lan to where he last jacked in; the town's jack-in takes
+him back to the blue pad. A run's start goes the same way: the town, its
+jack-in, Lan's HP with one portal ("Our HP,Lan! Home sweet home!"), the
+first layer. The second screen shows the PET at home there.
 
 ### 3. Going back, and the Net's clock
 

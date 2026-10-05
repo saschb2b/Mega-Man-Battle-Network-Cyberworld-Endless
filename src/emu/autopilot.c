@@ -25,6 +25,7 @@
 #include "net.h"
 #include "netmap.h"
 #include "run.h"
+#include "lanhp.h"
 #include "town.h"
 
 bool autopilot_on(void) { return getenv("CYBERWORLD_AUTOPILOT") != NULL; }
@@ -502,6 +503,18 @@ static bool heal_panel(bool guardian, int *x, int *y) {
 	return false;
 }
 
+/* At home: in the town along the streets to its jack-in, then R there; in
+ * Lan's HP onto the first way's portal */
+enum { AWAY, HOME_WALK, HOME_KEYS };
+static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
+	if (director_in_hp()) { lanhp_portal_spot(0, wx, wy); return HOME_WALK; }
+	if (!director_in_town()) return AWAY;
+	const TownInfo *ti = town_info();
+	if (abs(px - ti->port_x) + abs(py - ti->port_y) < 6) { *keys = frame % 16 < 2 ? KEY_R : 0; return HOME_KEYS; }
+	if (!town_route(px, py, wx, wy)) { *wx = ti->port_x; *wy = ti->port_y; }
+	return HOME_WALK;
+}
+
 uint32_t autopilot_keys(void) {
 	static uint32_t frame;
 	++frame;
@@ -517,12 +530,10 @@ uint32_t autopilot_keys(void) {
 	int cx, cy, ex, ey, nx, ny;
 	bool talk = false;
 	int wx, wy;
-	if (director_in_town()) {
-		/* in the town: along the streets to the jack-in, then R */
-		const TownInfo *ti = town_info();
-		if (abs(px - ti->port_x) + abs(py - ti->port_y) < 6) return frame % 16 < 2 ? KEY_R : 0;
-		if (!town_route(px, py, &wx, &wy)) { wx = ti->port_x; wy = ti->port_y; }
-	} else {
+	uint32_t home_keys = 0;
+	int home = home_goal(px, py, frame, &wx, &wy, &home_keys);
+	if (home == HOME_KEYS) return home_keys;
+	if (home == AWAY) {
 		if (!netmap_panel(px, py, &cx, &cy) || !director_goal_panel(&ex, &ey, &talk)) return 0;
 		/* (weak walks as its pictures were timed, hurt or not) */
 		if (!weak() && heal_panel(talk, &ex, &ey)) talk = true;

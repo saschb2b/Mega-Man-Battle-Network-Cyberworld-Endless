@@ -25,7 +25,6 @@
 #include "second_read.h"
 #include "second_shop.h"
 #include "second_state.h"
-#include "town.h"
 
 SecondState S2;
 
@@ -52,7 +51,8 @@ static SecondContext pet_screen(int screen) {
 }
 
 static SecondContext context_now(void) {
-	if (!director_on_layer() && !director_in_town()) return SECOND_DARK;
+	bool home = director_in_town() || director_in_hp();
+	if (!director_on_layer() && !home) return SECOND_DARK;
 	if (guest_active()) return SECOND_BATTLE;
 	switch (emu_read8(emu_read32(BN6_TOOLKIT))) {
 	case BN6_MODE_SUBMENU: return pet_screen(emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU)));
@@ -68,7 +68,7 @@ static SecondContext context_now(void) {
 	/* (a trader talks on the map, from BN6's trader archive: a BugFrag
 	 * Trader's whole trade, a Chip Trader's before its screen) */
 	if (emu_read8(BN6_CHATBOX) && emu_read32(BN6_CHATBOX_ARCHIVE) == BN6_TRADER_TEXT) return SECOND_TRADER;
-	return director_in_town() ? SECOND_TOWN : SECOND_NET;
+	return home ? SECOND_TOWN : SECOND_NET;
 }
 
 /* The panel for a screen: its own where it has one; the PET at home on
@@ -95,12 +95,12 @@ void second_update(void) {
 	if (c != S2.context) S2.since = 0;
 	else if (S2.since < 1 << 20) ++S2.since;
 	S2.context = c;
-	S2.town = director_in_town();
+	S2.town = director_in_town() || director_in_hp();
 	director_megaman_hp(&S2.hp, &S2.max_hp);
 	S2.zenny = emu_read32(BN6_ZENNY);
 	S2.bugfrags = emu_read32(BN6_BUGFRAGS);
 	S2.depth = run.depth;
-	snprintf(S2.area, sizeof S2.area, "%s", S2.town ? town_info()->name : guardian_area_in_text(run.biome, run.side_kind));
+	snprintf(S2.area, sizeof S2.area, "%s", S2.town ? director_place_name() : guardian_area_in_text(run.biome, run.side_kind));
 	Panel p = panel_for(c);
 	if (p == PANEL_FOLDER) second_read_folder();
 	if (p == PANEL_BATTLE) second_read_battle();

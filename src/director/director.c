@@ -72,7 +72,11 @@ bool on_map(void) { return main_mode() == BN6_MODE_GAME && emu_read8(BN6_GAMESTA
 
 int key_item(int id) { return emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS) + (uint32_t)id); }
 
-bool director_in_town(void) { return D.active && D.town; }
+bool director_in_town(void) { return D.active && D.town && !home_in_hp(); }
+
+bool director_in_hp(void) { return D.active && home_in_hp(); }
+
+const char *director_place_name(void) { return home_place_name(); }
 
 bool director_on_layer(void) { return D.active && !D.town; }
 
@@ -276,7 +280,7 @@ static void take_events(void) {
 		 * 0:00.70, as BATTLE START left the screen, and the no-hit duel was
 		 * lost before he could act, session 65) */
 		case EV_MEGAMAN_HIT: if (emu_read32(BN6_BATTLE_TIMER) >= DUEL_GRACE) D.duel_hit = true; break;
-		case EV_MAP_ENTER: if (on_layer) exit_flag(true); break;
+		case EV_MAP_ENTER: if (on_layer) exit_flag(true); else if (D.active) home_entered(); break;
 		case EV_CHOICE:
 			/* (still set: one the layer's setup cleared was a story's) */
 			for (int k = 0; on_layer && k < D.objs.nchoices; ++k)

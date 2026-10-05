@@ -69,8 +69,6 @@ void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
 void town_ways(int open);
 /* The port whose cells hold world (x, y), open or closed; -1 none. */
 int town_port_at(int x, int y);
-/* Where it is, for MegaMan's words: "bird statue", "doghouse"; NULL none. */
-const char *town_port_name(int port);
 
 /* Installs the planned town in its original's map: tiles, walls, the
  * jack-in cells and checks and what they say, trees and statues, people

@@ -530,7 +530,7 @@ static void carry_triggers(const Piece *p, const AreaSrc *a, int dx, int dy) {
 /* The ports' names, and which cells of a check made a port are its: those
  * round its part nearest the landmark */
 static void plan_ports(const AreaSrc *a) {
-	ports_begin(T.style->landmark, T.lines->ports[0], T.lines->ports[1]);
+	ports_begin();
 	const int *st = T.style->statue;
 	for (int k = 0; k < 2; ++k) ports_region(a->sec[3], a->nsec[3], k + 1, T.style->port_src[k], (st[0] + st[2]) / 2, (st[1] + st[3]) / 2);
 }

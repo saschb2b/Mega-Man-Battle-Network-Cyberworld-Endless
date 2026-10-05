@@ -1,5 +1,6 @@
 /* home_words.h. Coming home after an act: MegaMan's relief and Lan's
- * answer, one beat a box (docs/VOICE.md), by how far the run has come. */
+ * answer, one beat a box (docs/VOICE.md), by how far the run has come;
+ * Lan's HP's portals and what MegaMan says of them. */
 #include "home_words.h"
 
 #include <stdio.h>
@@ -22,12 +23,12 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 		snprintf(words, sizeof words, "@M Whew... %s was tough.|@L But we won! Home sweet home!", who);
 	else
 		snprintf(words, sizeof words, "@M Home again,Lan!|@L Alright! Let's get set for the next dive!");
-	/* (the ports and where they are: docs/HOME.md) */
+	/* (the portals and where they are: docs/HOME.md) */
 	size_t k = strlen(words);
 	if (ways == 2)
-		snprintf(words + k, sizeof words - k, "|@M Two ports are open this time!|@M The %s,and the %s!", ports[0], ports[1]);
+		snprintf(words + k, sizeof words - k, "|@M Two ways are open this time!|@M The %s,and the %s!", ports[0], ports[1]);
 	else if (ways == 3)
-		snprintf(words + k, sizeof words - k, "|@M Three ports are open!|@M The %s,the %s...|@M And something dark at the %s.", ports[0],
+		snprintf(words + k, sizeof words - k, "|@M Three ways are open!|@M The %s,the %s...|@M And something dark at the %s.", ports[0],
 			ports[1], ports[2]);
 	k = strlen(words);
 	if (sealed) snprintf(words + k, sizeof words - k, "|@M Something dark waits at the %s too...", sealed);
@@ -44,8 +45,17 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed) {
 		snprintf(words, sizeof words, "@M Lan... This one leads into the Undernet.|@M %s waits down there!",
 			navi ? guardian(navi)->name : "A Navi we've never battled");
 	else if (navi)
-		snprintf(words, sizeof words, "@M This port goes to %s,Lan.|@M %s waits there!", area, guardian(navi)->name);
+		snprintf(words, sizeof words, "@M This one goes to %s,Lan.|@M %s waits there!", area, guardian(navi)->name);
 	else
-		snprintf(words, sizeof words, "@M This port goes to %s,Lan.|@M A Navi we've never battled waits there...", area);
+		snprintf(words, sizeof words, "@M This one goes to %s,Lan.|@M A Navi we've never battled waits there...", area);
 	return words;
+}
+
+const char *home_portal_name(int k) {
+	static const char *const names[] = { "pink pad", "link up top", "link on the right", "link on the left", "link down front" };
+	return k >= 0 && k < (int)(sizeof names / sizeof *names) ? names[k] : "link";
+}
+
+const char *home_hp_words(void) {
+	return "@M Our HP,Lan! Home sweet home!|@M The Endless Net's linked in here now...|@M The pink pad leads into it!";
 }
