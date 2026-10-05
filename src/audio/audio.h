@@ -31,9 +31,10 @@ void audio_external(AudioSource src);
 void audio_frame(void);
 bool audio_offline(void);
 void audio_sfx(Sfx s);
-/* The intro's chime (scene_intro.c), ours: two square-wave notes, the
- * second ringing out, at the effects' volume. */
-void audio_chime(void);
+/* A tone of our own beside the songs (the start's plucks and chord,
+ * intro_logo.c): hz, ringing out over `seconds`, at `level` (about 0.1)
+ * of the effects' volume, after `delay` seconds. */
+void audio_tone(double hz, double seconds, float level, double delay);
 void audio_music(Music m);
 void audio_set_volume(int music, int sfx); /* 0-10 */
 /* Play a song-table entry directly (music replaces, effects mix). */

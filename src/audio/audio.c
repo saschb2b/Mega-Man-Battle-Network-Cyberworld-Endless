@@ -464,28 +464,37 @@ static void mix(float *out, int frames) {
 	}
 }
 
-/* The intro's chime: a short note and a ringing one a fifth above it
- * (B5, F#6), square waves, the second's volume falling in fifteen steps
- * as a Game Boy's envelope falls; not one of the ROM's songs, so it
- * mixes in beside them. */
-#define CHIME_FIRST (OUT_RATE * 9 / 100)    /* samples of the first note */
-#define CHIME_STEP (OUT_RATE * 55 / 1000)   /* ... of each step down */
-static const double chime_hz[2] = { 987.77, 1479.98 };
-static long chime_t = -1;   /* samples since it began, -1 silent */
-static double chime_phase;
+/* Tones of our own beside the songs (the start's, intro_logo.c): a sine
+ * with a little of its octave, up in 5 ms, then dying away over its
+ * length, at the effects' volume. */
+#define TONES 12
+#define TONE_UP (OUT_RATE / 200)
+static struct { long t, len; double phase, step; float level, env, decay; } tones[TONES];
+static float sine[257];
 
-static void chime_mix(float *out, int frames) {
+static float sine_at(double p) {
+	double f = p * 256;
+	int i = (int)f;
+	return sine[i] + (sine[i + 1] - sine[i]) * (float)(f - i);
+}
+
+static void tones_mix(float *out, int frames) {
 	float sv = sfx_volume / 10.0f * 0.75f;
-	for (int f = 0; f < frames && chime_t >= 0; ++f, ++chime_t) {
-		int second = chime_t >= CHIME_FIRST;
-		long into = second ? chime_t - CHIME_FIRST : chime_t;
-		int level = 15 - (int)(into / CHIME_STEP);
-		if (level <= 0) { chime_t = -1; break; }
-		chime_phase += chime_hz[second] / OUT_RATE;
-		if (chime_phase >= 1.0) chime_phase -= 1.0;
-		float s = (chime_phase < 0.5 ? 0.22f : -0.22f) * (float)level / 15.0f * sv;
-		out[f * 2] += s;
-		out[f * 2 + 1] += s;
+	for (int k = 0; k < TONES; ++k) {
+		if (!tones[k].len) continue;
+		for (int f = 0; f < frames; ++f) {
+			long t = tones[k].t++;
+			if (t < 0) continue;
+			if (t >= tones[k].len) { tones[k].len = 0; break; }
+			double octave = tones[k].phase * 2 - floor(tones[k].phase * 2);
+			float up = t < TONE_UP ? (float)t / TONE_UP : 1.0f;
+			float s = (sine_at(tones[k].phase) + 0.3f * sine_at(octave)) * tones[k].env * up * tones[k].level * sv;
+			tones[k].env *= tones[k].decay;
+			tones[k].phase += tones[k].step;
+			if (tones[k].phase >= 1.0) tones[k].phase -= 1.0;
+			out[f * 2] += s;
+			out[f * 2 + 1] += s;
+		}
 	}
 }
 
@@ -504,7 +513,7 @@ static void render(int16_t *o, int frames) {
 		if (n > 4096) n = 4096;
 		memset(buf, 0, sizeof(float) * (size_t)n * 2);
 		mix(buf, n);
-		if (chime_t >= 0) chime_mix(buf, n);
+		tones_mix(buf, n);
 		for (int i = 0; i < n * 2; ++i) {
 			float v = buf[i];
 			/* soft clip keeps loud passages from crackling */
@@ -560,6 +569,7 @@ static const int music_ids[MUS_COUNT] = {
 
 bool audio_init(void) {
 	if (!R.data) return false;
+	for (int i = 0; i <= 256; ++i) sine[i] = (float)sin(i * 6.283185307179586 / 256);
 	if (SDL_WasInit(SDL_INIT_AUDIO) == 0 && SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) return false;
 	SDL_AudioSpec want = { 0 }, have;
 	want.freq = OUT_RATE;
@@ -634,11 +644,25 @@ void audio_sfx(Sfx s) {
 
 uint64_t audio_log_frame;
 
-void audio_chime(void) {
-	if (!dev && !offline) return;
+void audio_tone(double hz, double seconds, float level, double delay) {
+	if ((!dev && !offline) || seconds <= 0) return;
 	lock();
-	chime_t = 0;
-	chime_phase = 0;
+	/* a free voice, else the one furthest through its length */
+	int k = -1;
+	for (int i = 0; i < TONES && k < 0; ++i)
+		if (!tones[i].len) k = i;
+	if (k < 0) {
+		k = 0;
+		for (int i = 1; i < TONES; ++i)
+			if (tones[i].t * tones[k].len > tones[k].t * tones[i].len) k = i;
+	}
+	tones[k].t = -(long)(delay * OUT_RATE);
+	tones[k].len = (long)(seconds * OUT_RATE);
+	tones[k].phase = 0;
+	tones[k].step = hz / OUT_RATE;
+	tones[k].level = level;
+	tones[k].env = 1;
+	tones[k].decay = expf(-5.0f / (float)tones[k].len);
 	unlock();
 }
 

@@ -43,9 +43,9 @@ the site.
 | --- | --- |
 | `src/core/` | Entry point, platform (window, canvas, input, timing), ROM access and `RomLayout`, chip and virus data, loot, run state and saves |
 | `src/gfx/` | Sprite decoding and animation, ROM tiles, the font, the QR code (`qr.c`, as the site's `qr.js`) |
-| `src/audio/` | MP2K sequencer and mixer (title music and sounds, and the start's chime of our own); the core's sound during play |
+| `src/audio/` | MP2K sequencer and mixer (title music and sounds, and the tones of our own the start plays); the core's sound during play |
 | `src/net/` | Layer generation (rooms, walkways, objects) |
-| `src/scenes/` | The start (`scene_intro.c`: the developer's boot screen and MegaMan's word on GitHub, before the title at a plain start), the title (with the run summary) and the sprite gallery |
+| `src/scenes/` | The start (`scene_intro.c`: the developer's boot screen, `intro_logo.c`, and MegaMan's word on GitHub, before the title at a plain start), the title (with the run summary) and the sprite gallery |
 | `src/emu/` | The mGBA core, calls into the game through hooks (`gamecall.c`: warps, chat), hooks on its code (`hook.c`), its wait for VBlank halted (`idle.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
 | `src/map/` | Layers as game maps: tiles learned from the original maps, walls and warp-pad triggers, the map tables taken over |
 | `src/layer/` | What stands on a layer: NPC and text scripts, services, shops, choices, guardians |
