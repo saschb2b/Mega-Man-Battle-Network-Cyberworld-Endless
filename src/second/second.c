@@ -15,13 +15,14 @@
 #include "guest.h"
 #include "platform.h"
 #include "run.h"
+#include "second_folder.h"
 #include "second_frame.h"
 #include "second_state.h"
 
 SecondState S2;
 
 /* What the second screen draws: a panel, which several screens may share */
-typedef enum { PANEL_DARK, PANEL_MAP } Panel;
+typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER } Panel;
 static Panel panel;
 static int panel_since;
 
@@ -59,9 +60,30 @@ static SecondContext context_now(void) {
 	return director_in_town() ? SECOND_TOWN : SECOND_NET;
 }
 
-/* The panel for a screen: the map on a layer, dark in the town */
+/* The panel for a screen: the folder's in the folders' screens; else the
+ * map on a layer, dark in the town */
 static Panel panel_for(SecondContext c) {
+	if (c == SECOND_FOLDERS || c == SECOND_EDIT) return PANEL_FOLDER;
 	return c == SECOND_DARK || S2.town ? PANEL_DARK : PANEL_MAP;
+}
+
+/* an entry of the folder's (0xFF none) as an index, -1 for none */
+static int entry_of(int v) { return v < BN6_FOLDER_ENTRIES ? v : -1; }
+
+/* The folder, its limits and its marks; in the editor its cursor, and the
+ * pack (read every quarter second: 314 chips' counts) */
+static void read_folder(void) {
+	director_folder_now(S2.folder);
+	S2.mega_level = emu_read8(BN6_NAVI_MEGA_LEVEL);
+	S2.giga_level = emu_read8(BN6_NAVI_GIGA_LEVEL);
+	S2.reg = entry_of(emu_read8(BN6_NAVI_FOLDER1_REG));
+	S2.tag[0] = entry_of(emu_read8(BN6_NAVI_FOLDER1_TAG));
+	S2.tag[1] = entry_of(emu_read8(BN6_NAVI_FOLDER1_TAG2));
+	uint32_t edit = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU);
+	bool editing = S2.context == SECOND_EDIT;
+	S2.pack_side = editing && emu_read8(edit + BN6_EDIT_SIDE) == BN6_EDIT_PACK;
+	S2.entry = editing && !S2.pack_side ? entry_of(emu_read8(edit + BN6_EDIT_SCROLL) + emu_read8(edit + BN6_EDIT_ROW)) : -1;
+	if (S2.since % 15 == 0) S2.npack = director_pack_now(S2.pack, S2.pack_count, (int)(sizeof S2.pack / sizeof *S2.pack));
 }
 
 void second_update(void) {
@@ -76,6 +98,7 @@ void second_update(void) {
 	S2.depth = run.depth;
 	snprintf(S2.area, sizeof S2.area, "%s", S2.town ? "" : guardian_area_in_text(run.biome, run.side_kind));
 	Panel p = panel_for(c);
+	if (p == PANEL_FOLDER) read_folder();
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
@@ -85,7 +108,10 @@ void second_update(void) {
 
 bool second_draw(int w, int h) {
 	if (panel == PANEL_DARK) return false;
-	SDL_Rect body = second_frame(w, h, "NET", panel_since == 0 ? 24 : panel_since == 1 ? 8 : 0);
-	director_draw_layer_map(body.x, body.y, body.w, body.h);
+	static const char *const title[] = { [PANEL_MAP] = "NET", [PANEL_FOLDER] = "FOLDER" };
+	const char *t = S2.context == SECOND_EDIT ? "FOLDER EDIT" : title[panel];
+	SDL_Rect body = second_frame(w, h, t, panel_since == 0 ? 24 : panel_since == 1 ? 8 : 0);
+	if (panel == PANEL_FOLDER) second_folder_draw(body);
+	else director_draw_layer_map(body.x, body.y, body.w, body.h);
 	return true;
 }

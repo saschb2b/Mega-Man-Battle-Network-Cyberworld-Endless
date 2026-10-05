@@ -32,6 +32,12 @@ void director_draw_bug_note(void);
 /* The layer's map in w x h from (x, y), for the second screen (issue #73),
  * whose frame names the layer; nothing off a layer. */
 void director_draw_layer_map(int x, int y, int w, int h);
+/* The run's folder as the game holds it: BN6_FOLDER_ENTRIES entries,
+ * chip | code << 9 (zeros where the game's memory is not there) */
+void director_folder_now(uint16_t *folder);
+/* The pack's chips as the game holds them: up to `most` of them (chip |
+ * code << 9) and their counts, by chip and its record's codes; how many */
+int director_pack_now(uint16_t *entry, uint8_t *count, int most);
 /* MegaMan's HP as the top screen shows it: the Navi's on the map, his
  * battle object's in a battle, the guest's in an older net's battle (true
  * then). */

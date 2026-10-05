@@ -253,10 +253,12 @@ history. Each start copies the current build into the session's `bin/`;
 with `NAME/bin.pin` present its restarts keep that copy, so a rebuild
 during a playtest leaves its CONTINUE alone. Dev steps beside the
 player's: `place X Y FACING` puts MegaMan somewhere, `flags FROM TO 1`
-sets a block of event flags and `flags FROM TO 0` puts them back, and
+sets a block of event flags and `flags FROM TO 0` puts them back,
 `battle` starts the layer's next random battle once he is free on its
 map (a guest battle on BN5 territory; the state then says `battle (the
-older net's)`).
+older net's)`), `second` saves the second screen's picture beside the
+top one's, and `dump NAME` the video memory in romlab's format for
+`tools/romlab/labtrace.py`.
 
 `tools/romlab` runs the plain ROM in libmgba for research: scripted input,
 memory peeks and pokes, states and recordings. `labtrace.py` traces captured

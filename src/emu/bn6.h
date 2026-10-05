@@ -115,6 +115,11 @@
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)
 #define BN6_NAVI_BASE_MAX_HP  (BN6_NAVI_STATS + 0x3E) /* MaxBaseHP, u16: HPMemory counts into it, programs on top (bn6f NaviStats) */
 #define BN6_NAVI_REG          (BN6_NAVI_STATS + 0x09) /* RegUP: Reg memory in MB, made again from the RegUP items as one is given */
+#define BN6_NAVI_MEGA_LEVEL   (BN6_NAVI_STATS + 0x0B) /* MegaLevel and GigaLevel: the Megas and Gigas a folder may hold ("You can use only N MegaChips.", bn6f CompText86CF1A8) */
+#define BN6_NAVI_GIGA_LEVEL   (BN6_NAVI_STATS + 0x0C)
+#define BN6_NAVI_FOLDER1_REG  (BN6_NAVI_STATS + 0x2E) /* Folder1Reg: the first folder's Regular chip, its entry; 0xFF none */
+#define BN6_NAVI_FOLDER1_TAG  (BN6_NAVI_STATS + 0x56) /* Folder1Tag1 and Tag2: its TagChips, their entries; 0xFF none */
+#define BN6_NAVI_FOLDER1_TAG2 (BN6_NAVI_STATS + 0x57)
 #define BN6_NAVI_ATTACK       (BN6_NAVI_STATS + 0x01) /* Attack, Speed and Charge: the buster's levels less one (0-4), as the NaviCust's RUN ... */
 #define BN6_NAVI_SPEED        (BN6_NAVI_STATS + 0x02) /* ... makes them (bn6f applyNavicustPrograms_813C684: Attack+1 to ChargMAX, BustPack, ... */
 #define BN6_NAVI_CHARGE       (BN6_NAVI_STATS + 0x03) /* ... each capped at 4); a battle reads its copy's (a shot's damage Attack + 1, sub_801265A) */
@@ -275,6 +280,8 @@
  * id; bn6f ChipData), the routines every chip use runs, the battle's
  * BugFrags (Gregar's as Falzar's) */
 #define BN6_CHIP_RECORD_SIZE  0x2C
+#define BN6_CHIP_ELEMENT      0x06        /* ChipElement: its icon's element (0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Plus, 5 Sword, 6 Cursor, 7 Break, 8 Wind, 9 Obstacle, 10 Null) */
+#define BN6_CHIP_LIBRARY_TYPE 0x07        /* LibraryType: 0 standard, 1 Mega, 2 Giga, 3 secret, 4 a Program Advance */
 #define BN6_CHIP_EFFECT_FLAGS 0x09        /* EffectFlags: BN6_CHIP_DARK_CLASS makes a DarkChip (the folder's three, MegaMan's NAVIGATOR line, the purple card) */
 #define BN6_CHIP_SUBFAMILY    0x0C        /* AttackSubFamily: a recovery chip's amount (BN6_RECOVERY_AMOUNTS), a sword's area */
 #define BN6_CHIP_LIBRARY_FLAGS 0x16       /* LibraryFlags: BN6_CHIP_UNLISTED keeps a chip out of the pack's list (bn6f sub_811FE7C) */
@@ -324,6 +331,10 @@
 #define BN6_SUBMENU_SAVE      0x1C   /* ... Save */
 #define BN6_SUBMENU_EDIT      0x20   /* ... the folder editor (bn6f sub_8133200) */
 #define BN6_SUBMENU_NAVICUST  0x24   /* ... the NaviCustomizer (bn6f sub_81356D4) */
+#define BN6_EDIT_SIDE         0x03   /* the folder editor's state: the side, BN6_EDIT_PACK the pack's, 0 the folder's */
+#define BN6_EDIT_PACK         0x04
+#define BN6_EDIT_ROW          0x20   /* ... the cursor's row on the screen (0-6) */
+#define BN6_EDIT_SCROLL       0x24   /* ... and the list's scroll: the entry under the cursor is their sum */
 #define BN6_SUB_MAP           0x04   /* BN6_GAMESTATE: on the map */
 #define BN6_SUB_BATTLE_INIT   0x08   /* BN6_GAMESTATE: a battle beginning */
 #define BN6_SUB_BATTLE        0x0C   /* BN6_GAMESTATE: in battle */

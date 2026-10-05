@@ -21,10 +21,13 @@ Commands, apart by ';':
   wait N          N frames without input
   mash BTN N      press BTN every 10 frames for N frames
   shot            a picture now (one is always taken at the end)
+  second          ... and of the second screen (the 3DS's bottom one)
 Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
 flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map: on a layer whose battles
-are an older net's, a guest battle). NAME/bin.pin keeps the session's
+are an older net's, a guest battle), dump NAME (the video memory into
+NAME/NAMEv.bin, p, i and o.bin in the session's folder, for
+tools/romlab/labtrace.py). NAME/bin.pin keeps the session's
 build across starts.
 BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT);
 pad.NAME holds a virtual controller's input by SDL's name (pad.x, pad.-lefty;
@@ -52,7 +55,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'dump', 'second')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -88,14 +91,18 @@ def steps(commands):
                     out += [(4, buttons(args[0])), (6, '')]
             elif op == 'shot':
                 out.append('shot')
+            elif op == 'second':
+                out.append(('second',))
             elif op == 'place':
                 out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
             elif op == 'flags':
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
             elif op == 'battle':
                 out.append(('battle',))
+            elif op == 'dump':
+                out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -258,7 +265,7 @@ def cmd_do(name, rest):
         seq.remove('shot')
     if not seq or seq[-1] != 'shot':
         seq.append('shot')
-    shots, items = [], []
+    shots, items, seconds = [], [], []
     n = len(os.listdir(os.path.join(h, 'shots')))
     for s in seq:
         if s == 'shot':
@@ -271,6 +278,12 @@ def cmd_do(name, rest):
             items.append(f'flags {s[1]} {s[2]} {s[3]}')
         elif s[0] == 'battle':
             items.append('battle')
+        elif s[0] == 'second':
+            seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
+            items.append(f'second {seconds[-1]}')
+        elif s[0] == 'dump':
+            os.makedirs(os.path.join(h, s[1]), exist_ok=True)
+            items.append(f'dump {os.path.join(h, s[1], s[1])}')
         else:
             items.append(f'{s[0]} {s[1]}'.strip())
     state = os.path.join(h, 'state.txt')
@@ -287,6 +300,13 @@ def cmd_do(name, rest):
     picture(shots, out)
     print(open(state).read().strip())
     print(f'picture {out}')
+    for i, p in enumerate(seconds):
+        if os.path.exists(p):
+            from PIL import Image
+            png = os.path.join(h, 'shots', f'{n:04d}-second{i}.png')
+            im = Image.open(p).convert('RGB')
+            im.resize((im.width * 2, im.height * 2), Image.NEAREST).save(png)
+            print(f'second screen {png}')
     if not answer.startswith('ok'):
         print('answer:', answer)
 

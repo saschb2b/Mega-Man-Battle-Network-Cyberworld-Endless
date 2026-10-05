@@ -82,6 +82,9 @@ typedef struct {
 	uint32_t navicust_codes;  /* NaviCust compression codes: ten buttons a program (docs/ROM_DATA.md) */
 	uint32_t program_advances; /* the Program Advances: their results and the chips that make them (docs/ROM_DATA.md) */
 	uint32_t battle_gem_rewards; /* the in-battle Mystery Data's rewards: 8 tiers of 8 u16 (docs/ROM_DATA.md) */
+	uint32_t chip_icon_pal;   /* the chips' icons' palette (their tiles: each record's BN6_CHIP_ICON_PTR) */
+	uint32_t element_icons;   /* 16x16 element icons, 2x2 tiles each, by a record's BN6_CHIP_ELEMENT */
+	uint32_t element_icon_pal; /* ... their palette */
 	struct {                  /* the title screen (docs/ROM_DATA.md) */
 		uint32_t bg_tiles;       /* LZ77: 8bpp tiles as loaded to 0x06000000 */
 		uint32_t bg_map;         /* 32x20 map entries */

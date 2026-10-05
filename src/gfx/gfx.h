@@ -78,9 +78,9 @@ void fill_rect(int x, int y, int w, int h, SDL_Color c);
 /* n rectangles of one colour in one call (a call each costs on a 3DS) */
 void fill_rects(const SDL_Rect *r, int n, SDL_Color c);
 /* Drawing into memory instead of through the renderer: fill_rect,
- * fill_rects and text_draw write RGBA8888 pixels, w x h, `pitch` bytes a
- * row, at px, blended as the software renderer blends, until px is NULL.
- * Nothing else draws there. (The 3DS's bottom screen: the renderer's calls
+ * fill_rects, text_draw and rom_tiles write RGBA8888 pixels, w x h,
+ * `pitch` bytes a row, at px, blended as the software renderer blends,
+ * until px is NULL. Nothing else draws there. (The 3DS's bottom screen: the renderer's calls
  * and reading its pixels back took more than a frame there, issue #9.) */
 void gfx_draw_into(uint32_t *px, int w, int h, int pitch);
 

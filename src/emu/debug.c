@@ -56,6 +56,22 @@ static void watch_frame(int t) {
 	}
 }
 
+static bool dump_part(const char *prefix, char part, uint32_t addr, uint32_t len) {
+	char path[600];
+	snprintf(path, sizeof path, "%s%c.bin", prefix, part);
+	FILE *f = fopen(path, "wb");
+	if (!f) return false;
+	for (uint32_t a = 0; a < len; ++a) fputc(emu_read8(addr + a), f);
+	return fclose(f) == 0;
+}
+
+bool emu_debug_dump(const char *prefix) {
+	bool ok = dump_part(prefix, 'v', 0x06000000, 0x18000);
+	ok = dump_part(prefix, 'p', 0x05000000, 0x400) && ok;
+	ok = dump_part(prefix, 'i', 0x04000000, 0x60) && ok;
+	return dump_part(prefix, 'o', 0x07000000, 0x400) && ok;
+}
+
 FILE *emu_debug_file(const char *name) {
 	char path[600];
 	snprintf(path, sizeof path, "%s/%s", g_data_dir, name);

@@ -31,8 +31,10 @@ GBA core alone takes longer than a frame there.
   always open: the floor MegaMan has seen, the way on to the exit or the
   guardian, the services and gates he has come near, and a mark on the
   frame's edge for those he senses. It is SELECT's map, larger; SELECT
-  still opens it over the picture. The town and the title leave the
-  bottom screen dark.
+  still opens it over the picture. In the folder editor it shows the
+  whole folder as BN6's chip icons, the cursor's chip lit, with the
+  folder's codes, elements and Mega and Giga chips, and the pack. The
+  town and the title leave the bottom screen dark.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad

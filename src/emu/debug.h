@@ -12,5 +12,9 @@ bool emu_debug_on(void);
 void emu_debug_frame(void);
 /* A file in the data directory for dumps ("wb"); NULL when it cannot be made. */
 FILE *emu_debug_file(const char *name);
+/* The video memory now, as romlab's captures (tools/romlab/labtrace.py):
+ * PREFIXv.bin VRAM, PREFIXp.bin the palettes, PREFIXi.bin the IO
+ * registers, PREFIXo.bin OAM; false where one was not written */
+bool emu_debug_dump(const char *prefix);
 
 #endif

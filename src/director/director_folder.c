@@ -214,6 +214,28 @@ void programs_from_game(void) {
 	if (added) profile_save();
 }
 
+void director_folder_now(uint16_t *folder) { folder_now(folder); }
+
+int director_pack_now(uint16_t *entry, uint8_t *count, int most) {
+	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
+	if (pack < BN6_EWRAM || pack + CHIP_PACK_ENTRY * PACK_CHIPS >= BN6_EWRAM_END) return 0;
+	int n = 0;
+	for (uint32_t id = 1; id < PACK_CHIPS && n < most; ++id) {
+		ChipInfo ci;
+		bool known = false;
+		for (uint32_t k = 0; k < 4 && n < most; ++k) {
+			int c = emu_read8(pack + CHIP_PACK_ENTRY * id + k);
+			if (!c) continue;
+			if (!known) chip_info((int)id, &ci);
+			known = true;
+			int code = (int)k < ci.ncodes ? (ci.codes[k] == '*' ? 26 : ci.codes[k] - 'A') : 26;
+			entry[n] = (uint16_t)(id | (unsigned)code << 9);
+			count[n++] = (uint8_t)c;
+		}
+	}
+	return n;
+}
+
 /* Every chip's copies in the pack, summed (a chip bought adds one to its
  * code's count, the record's first four bytes); -1 where the pack is out of
  * reach. The standard, mega and giga chips only (PACK_CHIPS). */

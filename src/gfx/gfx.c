@@ -340,8 +340,15 @@ static SDL_Texture *tile_texture(uint32_t tile, uint32_t pal, int flip) {
 	return NULL;
 }
 
+static void raw_tile(uint32_t tile, uint32_t pal, int x, int y, int flip);
+static bool raw_tile_on(void);
+
 /* One 8x8 ROM tile with a ROM palette. flip: bit 0 horizontal, bit 1 vertical. */
 static void rom_tile(uint32_t tile, uint32_t pal, int x, int y, int flip) {
+	if (raw_tile_on()) {
+		raw_tile(tile, pal, x, y, flip);
+		return;
+	}
 	SDL_Texture *t = tile_texture(tile, pal, flip);
 	if (!t) return;
 	SDL_Rect d = { x, y, 8, 8 };
@@ -361,6 +368,54 @@ void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int fli
  * software renderer blends them, so the picture is its own to the pixel. */
 
 static struct { uint32_t *px; int w, h, stride; } raw;
+
+/* ROM tiles as drawn into memory, decoded once: RGBA8888, 0 for colour 0
+ * (a second screen's thirty chip icons decoded at each draw were 2 ms of a
+ * New 3DS's) */
+#define RAW_TILES 1024
+static struct { uint32_t tile, pal; int flip; bool used; uint32_t px[64]; } raw_tiles[RAW_TILES];
+static int raw_tiles_used;
+
+static const uint32_t *raw_tile_px(uint32_t tile, uint32_t pal, int flip) {
+	uint32_t h = (tile * 2654435761u ^ pal * 40503u ^ (uint32_t)flip) & (RAW_TILES - 1);
+	for (;; h = (h + 1) & (RAW_TILES - 1)) {
+		if (raw_tiles[h].used && raw_tiles[h].tile == tile && raw_tiles[h].pal == pal && raw_tiles[h].flip == flip) return raw_tiles[h].px;
+		if (!raw_tiles[h].used) break;
+	}
+	/* (full past three quarters: begun again) */
+	if (raw_tiles_used >= RAW_TILES * 3 / 4) {
+		memset(raw_tiles, 0, sizeof raw_tiles);
+		raw_tiles_used = 0;
+		h = (tile * 2654435761u ^ pal * 40503u ^ (uint32_t)flip) & (RAW_TILES - 1);
+	}
+	const uint8_t *pb = pal_bytes(pal), *td = tile_data(tile);
+	if (!td || !pb) return NULL;
+	uint32_t *px = raw_tiles[h].px;
+	memset(px, 0, sizeof raw_tiles[h].px);
+	blit_tile(px, 8, 0, 0, td, pb, flip & 1, flip & 2);
+	for (int i = 0; i < 64; ++i)
+		if (px[i]) px[i] = px[i] << 8 | 0xFF;
+	raw_tiles[h].tile = tile;
+	raw_tiles[h].pal = pal;
+	raw_tiles[h].flip = flip;
+	raw_tiles[h].used = true;
+	++raw_tiles_used;
+	return px;
+}
+
+/* A ROM tile into memory: its colours in RGBA8888, colour 0 left as it was */
+static void raw_tile(uint32_t tile, uint32_t pal, int x, int y, int flip) {
+	const uint32_t *px = raw_tile_px(tile, pal, flip);
+	if (!px) return;
+	for (int j = 0; j < 8; ++j)
+		for (int i = 0; i < 8; ++i) {
+			int qx = x + i, qy = y + j;
+			uint32_t c = px[j * 8 + i];
+			if (c && qx >= 0 && qy >= 0 && qx < raw.w && qy < raw.h) raw.px[qy * raw.stride + qx] = c;
+		}
+}
+
+static bool raw_tile_on(void) { return raw.px != NULL; }
 
 void gfx_draw_into(uint32_t *px, int w, int h, int pitch) {
 	raw.px = px;

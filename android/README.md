@@ -33,8 +33,9 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
 On a handheld with a second display, above all the AYN Thor (1240 x 1080
 below its 1920 x 1080 screen), the second one is the PET beside the game,
 as the 3DS's bottom screen is: framed like BN6's PET screens, with HP,
-Zenny and BugFrags, and on the net the layer's map, always open (the
-floor MegaMan has seen, the way on, what he has come near or senses).
+Zenny and BugFrags, on the net the layer's map, always open (the floor
+MegaMan has seen, the way on, what he has come near or senses), and in
+the folder editor the whole folder.
 The town and the title leave it black. A phone without a second display
 plays as before.
 

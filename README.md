@@ -328,7 +328,7 @@ keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
 name works. The first NEW GAME boots BN6 once, about 15 seconds of black
 screen. The bottom screen is the PET beside the game, framed like BN6's
 own PET screens, with HP, Zenny and BugFrags; on the net it shows the
-layer's map, always open.
+layer's map, always open, and in the folder editor the whole folder.
 The older 3DS and 2DS are too slow for it.
 [3ds/README.md](3ds/README.md) has the rest.
 

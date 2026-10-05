@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The folder editor shows the whole folder on the second screen**
+  (issue #75), as BN5 DS's does: its thirty chips as BN6's own icons, each
+  framed by its rank (grey standard, blue Mega, red Giga, purple Dark) and
+  marked where it is the Regular chip or a TagChip, the cursor's chip lit
+  in gold; under them the folder's makeup, its chips by code (the Custom
+  screen deals by code), by element, and its Megas and Gigas against the
+  folder's limits; then the pack. The top screen keeps BN6's own card of
+  the chip under the cursor.
 - **The second screen is the PET beside the game** (issue #73). On a 3DS
   and on an Android handheld with a second display, the bottom screen
   wears the PET's frame now, as BN5 DS's and Operate Shooting Star's did:
