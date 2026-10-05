@@ -329,7 +329,7 @@ static void older_net_words(void) {
 	/* (a guardian of ours keeps his fight ours; one of the older net's own
 	 * Navis fights the old way: docs/BOSSES.md, BN5's Navis) */
 	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This net's a copy of an older one!|@M Its battles run the old way.|"
-		"@L The old way? There were no Crosses then!|@M Right. So our Cross can't come in...|@M Except against a guardian from our net!", k ? "|" : "");
+		"@L The old way? There were no Crosses then!|@M Right. So our Cross can't come in...|@M Except against a guardian from our Net!", k ? "|" : "");
 	if (n > 0 && k < sizeof D.beat)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M %s didn't exist then either.|@M So %s'll sit out.", out, n == 1 ? "it" : "they");
 	if (k < sizeof D.beat)
@@ -1027,7 +1027,7 @@ static void here_scan(Here *h) {
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	ADD("@M Layer %d,Lan. We're in %s!%s", run.depth, area, encounter_guest ? "|@M Battles here run the older net's way." : "");
+	ADD("@M Layer %d,Lan. We're in %s!%s", run.depth, area, encounter_guest ? "|@M Battles here run the older Net's way." : "");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */
@@ -4424,7 +4424,7 @@ static void recode_words(char *out, size_t size) {
 			ci.name, code_letter(D.recode_from), ci.name, code_letter(D.recode_to));
 	else
 		snprintf(out, size, "@L Wait! It showed %s %c...|@L But our Pack got %s %c!|@M Our net read the code its own way coming back,Lan.|"
-			"@M Chips from the old net come home in our codes!", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
+			"@M Chips from the old Net come home in our codes!", ci.name, code_letter(D.recode_to), ci.name, code_letter(D.recode_from));
 }
 
 /* What a guest battle's results screen gave, as the run got it ("Cannon
@@ -4884,7 +4884,7 @@ void director_update(void) {
 				!talk_busy() && !cinema_busy() && !D.warping &&
 				/* (the arrival's growl answered, Dad's voice, and the endless
 				 * net's hook: a playtester's first win ended on two lines) */
-				talk_start("@M That was the Nest's last guardian,Lan...|@M The whole net's gone quiet.|"
+				talk_start("@M That was the Nest's last guardian,Lan...|@M The whole Net's gone quiet.|"
 					"@B Grrrr......|"
 					"@M ...Almost. Something deeper down is still awake.|@M The Nest was only its den...|"
 					"@D Lan,MegaMan,it's Dad! I watched it all. You did it!|"

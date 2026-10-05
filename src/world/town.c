@@ -284,7 +284,7 @@ static void design_central(void) {
 /* Its people: at the statue, the shop, the school gate, the bus stop, the
  * houses, the closed road to the Expo. */
 static const Folk central_folk[] = {
-	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear?|The bird statue's port opens into a brand new net!" },
+	{ 108, -68, FACE_SW, 5, 0x36, "Did you hear?|The bird statue's port opens into a brand new Net!" },
 	{ 100, -52, 0, 7, 0x11, "*wag,wag* Woof! Woof!!" },   /* (the robot dog: one animation) */
 	{ 60, -96, FACE_SE, 7, 0x0F, "HELLO! I'M THE PLAZA'S PORT GUIDE!|PRESS R BY THE STATUE TO JACK IN!" },
 	{ 44, -20, FACE_NE, 5, 0x2E, "I jacked in yesterday. Today the paths were all new!|Wow... It really does go on forever!" },
@@ -292,7 +292,7 @@ static const Folk central_folk[] = {
 	{ -108, -36, FACE_NE, 5, 0x2B, "My dad parks here every Sunday!|AsterLand's the best!" },
 	{ 130, 150, FACE_NE, 5, 0x2F, "The Academy kids swear a GigaChip's under the LevBus!|One's waited a week for it to drive off!" },
 	{ 84, -180, FACE_SE, 5, 0x34, "Hey,Lan! No class today!|You diving into the Endless Net too?" },
-	{ -164, 196, FACE_NE, 5, 0x38, "Heading out,Lan?|Be careful on the net,OK?" },
+	{ -164, 196, FACE_NE, 5, 0x38, "Heading out,Lan?|Be careful on the Net,OK?" },
 	{ 18, 290, FACE_SW, 5, 0x39, "My,my... Aren't the flowers lovely here?" },
 	{ -146, -184, FACE_SE, 5, 0x3A, "Oh dear... The road to the Expo Site is closed.|And I so wanted to see the pavilions!" },
 	{ 132, 180, FACE_SE, 5, 0x2D, "Phew! Long day at the lab...|Nothing beats a nice walk!", 10 },
@@ -311,7 +311,7 @@ static const char *const central_checks[16] = {
 	"Two gray houses,side by side. It's quiet in there.",
 	"The flowers are in full bloom.",
 	"The LevBus stop.|\"Next bus: ACDC Town\"|No GigaChip under here. Just a gum wrapper.",
-	"@M AsterLand! We'll shop later,Lan. The net's waiting!",
+	"@M AsterLand! We'll shop later,Lan. The Net's waiting!",
 	"EXPO\nThe sign lists the pavilions on show.",
 	"Cyber Academy. The gate is closed for the day.",
 	"A statue of a blue bird.|Its port leads into the Endless Net.",
@@ -412,9 +412,9 @@ static void design_seaside(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
  * the fish shop, the way down to the aquarium. */
 static const Folk seaside_folk[] = {
 	{ -60, -44, FACE_SW, 5, 0x31, "The mermaid fountain has a port,you know.|Press R beside it to jack in!" },
-	{ -44, -108, FACE_SW, 5, 0x36, "They say the mermaid's port goes to a new net!|Ahh,the sea air! I wanna dive in!" },
+	{ -44, -108, FACE_SW, 5, 0x36, "They say the mermaid's port goes to a new Net!|Ahh,the sea air! I wanna dive in!" },
 	{ -92, -156, FACE_NW, 5, 0x2C, "Fish sticks,fresh from the sea!|I buy a dozen every Sunday!" },
-	{ -132, -150, FACE_NW, 5, 0x2E, "The Aquarium's net copied itself overnight!|Grandpa says it's Dr.Wily...|He says that about everything!" },
+	{ -132, -150, FACE_NW, 5, 0x2E, "The Aquarium's Net copied itself overnight!|Grandpa says it's Dr.Wily...|He says that about everything!" },
 	{ -140, -60, FACE_NE, 5, 0x39, "I come here to watch the boats...|And that whale never gets old!" },
 	{ -60, -20, FACE_SE, 5, 0x30, "Lan! You took the LevBus to Seaside?|Good luck down there!" },
 	{ -108, -44, FACE_NE, 5, 0x38, "The mermaid looks out over the sea...|Lovely,isn't she?", 10 },
@@ -445,10 +445,10 @@ static const Folk green_folk[] = {
 	{ -60, -156, FACE_SE, 5, 0x31, "The knight statue has a port,you know.|Press R beside it to jack in!" },
 	{ -20, -268, FACE_SW, 5, 0x36, "The flower shop's roses are in full bloom!|Take a peek before you dive in!" },
 	{ -196, -172, FACE_SE, 5, 0x2C, "My friend says the right buttons shrink NaviCust programs!|But he won't tell me which ones! Hmph!" },
-	{ -180, -236, FACE_NW, 5, 0x2E, "The JudgeTree was here long before the town.|They say its roots reach all the way into the net!" },
+	{ -180, -236, FACE_NW, 5, 0x2E, "The JudgeTree was here long before the town.|They say its roots reach all the way into the Net!" },
 	{ 68, -124, FACE_SW, 5, 0x30, "Lan! You took the LevBus to Green Town?|Good luck down there!" },
 	{ -60, -204, FACE_SE, 5, 0x39, "I jacked in at the knight yesterday...|Today the paths were all new! It really is endless!" },
-	{ -132, -108, FACE_NE, 5, 0x38, "Ahh... Green Town's air is so clean!|Even the net feels fresher here!", 10 },
+	{ -132, -108, FACE_NE, 5, 0x38, "Ahh... Green Town's air is so clean!|Even the Net feels fresher here!", 10 },
 };
 
 /* What its checks say: the stump's table of books (0, 4), the flower shop
@@ -972,7 +972,7 @@ static const char *intro(void) {
 		: "@L The Endless Net again... I wonder what's new?";
 	if (!profile.seen_intro) {
 		ADD("@D Lan,it's Dad. Got a minute?|"
-			"@D A new net just opened up under town.|"
+			"@D A new Net just opened up under town.|"
 			"@D Its paths change every time someone jacks in.|"
 			"@D And it only goes down. They call it the Endless Net.|"
 			"@M The Endless Net... Lan,that sounds like an adventure!|"
@@ -989,7 +989,7 @@ static const char *intro(void) {
 		 * playtester who had won) */
 		if (profile.short_wins > 0)
 			ADD("@D You two brought the Nest down,Lan.|@D But something below it is still awake...|"
-				"@D The net's changed again. Be careful!|@L Got it,Dad!");
+				"@D The Net's changed again. Be careful!|@L Got it,Dad!");
 		else
 			ADD("@D Lan,you two reached the Nest before.|@D But it's all changed again. Be careful!|@L Got it,Dad!");
 	} else if (town_after_abandon) {

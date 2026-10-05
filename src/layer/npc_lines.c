@@ -33,7 +33,7 @@ static const char *const mid[] = {
 
 /* the Undernet, the Graveyard and the Nest */
 static const char *const deep[] = {
-	"Something at the very bottom copies the whole net...|My operator calls it the Nest.",
+	"Something at the very bottom copies the whole Net...|My operator calls it the Nest.",
 	"I heard a Cybeast roar down below...|My operator says it's just data. R-Right?",
 	"Some Navis down here just say the same thing...|Over and over. Copies,I guess...",
 	"The BugFrag Trader wants BugFrags,not chips!|And the Undernet's full of 'em!",
@@ -44,9 +44,9 @@ static const char *const deep[] = {
 /* a net the Nest has rebuilt */
 static const char *const again[] = {
 	"Wait... Haven't we met before?|The Nest rebuilt everything. Maybe even me...",
-	"The Nest fell,and the net came right back!|Same areas,but stronger data. Yikes...",
+	"The Nest fell,and the Net came right back!|Same areas,but stronger data. Yikes...",
 	"Ugh,the guardians came back tougher!|Like they learned from last time...",
-	"Every time the Nest falls,it builds the net again.|How deep does this go...?",
+	"Every time the Nest falls,it builds the Net again.|How deep does this go...?",
 };
 
 /* (the first areas' lines a profile's first runs need, which ring false

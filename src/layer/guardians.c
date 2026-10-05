@@ -161,10 +161,10 @@ const char *guardian_rumor(int navi) {
 	case 16: return "he's never the same element twice!";
 	case 18: return "his army is huge. One stroke ends it!";
 	/* (BN5's: the older net's Navis, as the net tells of them) */
-	case 24: return "the old net's Colonel runs it like a war!";
+	case 24: return "the old Net's Colonel runs it like a war!";
 	case 25: return "he strikes from the dark,then he's gone!";
 	case 26: return "he lets the dice decide,and they like him!";
-	case 27: return "the old net's spirits fight at his side!";
+	case 27: return "the old Net's spirits fight at his side!";
 	case 28: return "no attack has ever dented his armor!";
 	case 29: return "his music freezes Navis in place!";
 	default: return NULL;
@@ -510,7 +510,7 @@ const char *guardian_area_motto(int biome) {
 	const NetAreaDef *x = dressed(biome);
 	if (x) return x->motto;
 	static const char *const mottos[BIOME_COUNT] = {
-		[BIOME_CENTRAL] = "Where every net path begins", [BIOME_SEASIDE] = "Currents of the aquarium net",
+		[BIOME_CENTRAL] = "Where every Net path begins", [BIOME_SEASIDE] = "Currents of the aquarium Net",
 		[BIOME_SKY] = "Above the clouds of data", [BIOME_GREEN] = "Wild data, overgrown",
 		[BIOME_GRAVEYARD] = "Where deleted data rests", [BIOME_UNDERNET] = "The lawless depths",
 		[BIOME_SECRET] = "Where the strongest wait", [BIOME_NEST] = "Lair of the Cybeasts",

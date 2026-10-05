@@ -39,7 +39,7 @@
 #define SIDE_X 100
 
 /* MegaMan's three lines, typed in the chat box */
-static const char *const said[3] = { "Lan,this net's still", "growing! Bugs? Ideas?", "Tell Saschb2b there!" };
+static const char *const said[3] = { "Lan,this Net's still", "growing! Bugs? Ideas?", "Tell Saschb2b there!" };
 
 static struct {
 	int t;

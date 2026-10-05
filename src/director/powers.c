@@ -18,7 +18,7 @@
  * that don't dim the screen; a playtester chose a Cross by its weakness
  * alone, the setup naming no strength) */
 static const struct { int navi, flag; const char *name, *feel, *weak, *strong, *navis; } crosses[] = {
-	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! I'm all fired up,Lan!", "Aqua", "Fire chips +50, buster +1" },
+	{ 1, BN6_FLAG_HEAT_CROSS, "HeatCross", "HeatMan's Cross data! I'm all fired up,Lan!", "Aqua", "Fire chips +50, Buster +1" },
 	{ 2, BN6_FLAG_ELEC_CROSS, "ElecCross", "ElecMan's Cross data! It's crackling through me!", "Wood", "Elec chips +50" },
 	{ 3, BN6_FLAG_SLASH_CROSS, "SlashCross", "SlashMan's Cross data! I feel faster already!", "Breaker", "Sword chips +50" },
 	/* (BN6's EraseCross: an elementless chip that doesn't dim the screen

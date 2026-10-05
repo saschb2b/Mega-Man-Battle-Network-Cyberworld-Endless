@@ -284,10 +284,10 @@ static void report_text(char *s, int size) {
 	 * act's end" after deleting the Nest's last guardian) */
 	bool down = navi && is_boss_depth(run.depth) && boss_done();
 	if (down && run.mode == RUN_SHORT && run_short_last(run.depth))
-		ADD("\f%s is deleted! The whole net has gone quiet.\fJack out and come home,Lan!", guardian(navi)->name);
+		ADD("\f%s is deleted! The whole Net has gone quiet.\fJack out and come home,Lan!", guardian(navi)->name);
 	else if (down) ADD("\f%s is deleted. The way on is open!", guardian(navi)->name);
 	else if (navi && guardian_known(navi)) ADD("\f%s guards this act's end. MegaMan knows him.", guardian(navi)->name);
-	else if (navi && director_guardian_heard()) ADD("\fThe net says %s guards this act.", guardian(navi)->name);
+	else if (navi && director_guardian_heard()) ADD("\fThe Net says %s guards this act.", guardian(navi)->name);
 	else if (navi) ADD("\fA strong Navi guards this act's end. We don't know who yet.");
 	ADD("\fYou've found %d of 3 ScrtData%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ",and the gate's open" : "");
 	ADD("\fYou brought the %s folder%s", meta_folder(run.folder)->name, cross_words());

@@ -815,7 +815,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					: "Welcome! Chips for sale!"
 				: run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth)
 					/* (the run's last layer has no "from here": a playtester heard it there) */
-					? "The bottom of the net,MegaMan!|Stock up! My last stop,and yours!"
+					? "The bottom of the Net,MegaMan!|Stock up! My last stop,and yours!"
 					: "Still at it,MegaMan?|Stock up! It only gets tougher from here!", word);
 			/* (met in this act already: the pick, in a line) */
 			if (layer_objs_dealer_again && tells)

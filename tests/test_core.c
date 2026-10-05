@@ -1947,7 +1947,7 @@ static void test_navicust(void) {
 	bugs[7] = 5;
 	bugs[11] = 1;
 	const char *w = navicust_bug_words(bugs, false, NULL);
-	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
+	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad Buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
 	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
 	/* (the cause where the board shows it, in place of the rules) */
 	w = navicust_bug_words(bugs, false, "HP+100 is a plus part on the command line! Those go anywhere else.");

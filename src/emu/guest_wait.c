@@ -58,7 +58,7 @@ static struct {
  * last has been read a while: what happens, that it happens once, and,
  * once the boot is that far, that it is almost done */
 static const char *const words[3][3] = {
-	{ "Hold on,Lan!", "The older net's", "still starting up..." },
+	{ "Hold on,Lan!", "The older Net's", "still starting up..." },
 	{ "It only starts up", "this once,Lan.", "Then it stays ready!" },
 	{ "Almost there,Lan...", "Just a moment more!", "" },
 };

@@ -40,16 +40,16 @@ static const struct {
 	{ 21, 2, BUILD_FIELD, "Collect: viruses drop their chips more often." },
 	{ 25, 0, BUILD_FIELD, "SlipRunr: with B,I slide! Faster,but I keep going till something stops me." },
 	{ 26, 2, BUILD_FIELD, "AutoHeal: a little HP back after every battle." },
-	{ 27, 2, BUILD_BUSTER, "BustPack: buster attack,speed and charge up three each." },
+	{ 27, 2, BUILD_BUSTER, "BustPack: Buster attack,speed and charge up three each." },
 	{ 28, 4, BUILD_GUARD, "BodyPack: SuperArmor and FlotShoe,AirShoes and UnderSht,all in one!" },
 	{ 29, 2, BUILD_HAND, "FldrPak1: Custom1 and MegFldr1 in one." },
 	{ 30, 4, BUILD_HAND, "FldrPak2: Custom2 and MegFldr2 in one." },
 	{ 31, 4, BUILD_FIELD, "BugStop: no bug can touch our NaviCust." },
-	{ 35, 0, BUILD_BUSTER, "Attack+1: a stronger buster." },
-	{ 36, 0, BUILD_BUSTER, "Speed+1: a faster buster." },
+	{ 35, 0, BUILD_BUSTER, "Attack+1: a stronger Buster." },
+	{ 36, 0, BUILD_BUSTER, "Speed+1: a faster Buster." },
 	{ 37, 0, BUILD_BUSTER, "Charge+1: a quicker charge shot." },
-	{ 38, 4, BUILD_BUSTER, "AttckMAX: my buster's attack at its highest." },
-	{ 39, 2, BUILD_BUSTER, "SpeedMAX: my buster's speed at its highest." },
+	{ 38, 4, BUILD_BUSTER, "AttckMAX: my Buster's attack at its highest." },
+	{ 39, 2, BUILD_BUSTER, "SpeedMAX: my Buster's speed at its highest." },
 	{ 40, 2, BUILD_BUSTER, "ChargMAX: my charge shot at its quickest." },
 	{ 41, 0, BUILD_HP, "HP+50: fifty more max HP." },
 	{ 42, 0, BUILD_HP, "HP+100: a hundred more max HP." },
@@ -476,7 +476,7 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 	 * level is the count, up to 3) and what each does, in MegaMan's words */
 	static const char *const name[NAVICUST_BUGS] = {
 		[1] = "moving", [2] = "emotion", [3] = "panel", [4] = "Custom", [5] = "encounter", [6] = "reward",
-		[7] = "buster", [9] = "HP",
+		[7] = "Buster", [9] = "HP",
 	};
 	/* (the named ones a box of their own after the bug's name; the colours'
 	 * capitalised as said) */
@@ -487,7 +487,7 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 		[4] = "I'll get fewer chips as a battle goes on",
 		[5] = "More viruses will find us",
 		[6] = "Battles will pay Zenny,not chips",
-		[7] = "My buster may misfire",
+		[7] = "My Buster may misfire",
 		[9] = "I'll lose HP in battle,faster with every hit",
 		[11] = "five colors! Each battle will start with something odd",
 		[12] = "six colors! Each battle will start with something odd,for longer",
