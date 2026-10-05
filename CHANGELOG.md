@@ -13,12 +13,23 @@
 - **Every line a character says lives in a words file.** The director,
   which ran the run in one 5095-line file with its dialogue among its
   logic, is fourteen files of one domain each (`director_*.c`), what they
-  say in seven words files beside them; the layer's objects, its chats, the guardians, the
-  NaviCust, the towns, the Crosses, the BN5 wait and the run summary
-  likewise. docs/VOICE.md's "Where the lines live" names the file for
+  say in seven words files beside them; the layer's objects, its chats,
+  the guardians, the NaviCust, the towns, the Crosses, the BN5 wait and
+  the run summary likewise. docs/VOICE.md's "Where the lines live" names the file for
   each speaker, so a voice pass reads every line in one place. Nothing a
   player sees or hears changed: the same scenarios gave the same pictures
   and the same words, line for line, before and after each step.
+- **The longest files are split by what they do.** The layer generator
+  (2059 lines) is its driver and three parts: the detours, the landmarks,
+  where the set pieces stand. The tile picker (1599) is its checks, what
+  it learns from the original maps and how it picks; the map maker (1288)
+  its course, what it learns, what it pastes and the set pieces' cells.
+  The entry point (1381) keeps the command line and the frame loop; the
+  start's folder and ROMs, the 3DS's own start, the screens without a ROM,
+  the headless runs' input and pictures and the dev tools have files of
+  their own. Two files stay past 1000 lines, listed in
+  `tests/lint/smells.txt`: the platform and the older net's core. The
+  same layers, maps, pictures and logs came out before and after.
 
 ## 0.9.0 (2026-10-05)
 

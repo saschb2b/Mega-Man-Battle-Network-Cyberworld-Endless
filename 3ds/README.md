@@ -58,7 +58,7 @@ seconds of the trailer's music (`tools/trailer_music.py --seconds 2.9 --rate
 
 What differs from the other builds:
 
-- **Memory** (`src/core/main.c`): the app splits its memory itself before
+- **Memory** (`src/core/start_3ds.c`): the app splits its memory itself before
   `main`, the heap as large as its 96 MB area takes, the linear heap (the
   screens' and the sound's buffers) the rest; a heap of all but the linear
   heap's share passed the area. mGBA's 3DS setup, linked in, copies the ROM

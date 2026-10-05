@@ -1,828 +1,45 @@
+/* The game's start and its frame loop: the command line, the platform
+ * and the ROMs set up, the first scene, and each frame's scenes, input,
+ * update, sound and drawing, at the GBA's pace. */
+#include "game.h"
+
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
-#elif !defined(_WIN32)
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #endif
 
-#include "compat.h"
-
-#include "game.h"
+#include "audio.h"
+#include "capture.h"
+#include "controls.h"
+#include "desktop.h"
+#include "devtools.h"
+#include "director.h"
+#include "emu.h"
 #include "gfx.h"
+#include "guest.h"
+#include "meta.h"
+#include "net_layouts.h"
 #include "platform.h"
 #include "rom.h"
-#include "save.h"
 #include "run.h"
-#include "audio.h"
-#include "atlas.h"
-#include "pacing_report.h"
-#include "devtools.h"
-#include "tour.h"
-#include "director.h"
-#include "flags.h"
-#include "net_layouts.h"
-#include "desktop.h"
-#include "minifont.h"
-#include "meta.h"
+#include "save.h"
+#include "scene_norom.h"
+#include "start_3ds.h"
+#include "startup.h"
+#include "tools.h"
 #include "touch.h"
-#include "controls.h"
-#include "pads.h"
-#include "emu.h"
-#include "guest.h"
-#ifdef CW_IOS
-#include "ios.h"
-#endif
-#ifdef __3DS__
-/* (libctru's parts, not <3ds.h>: its Friends service has a Profile too) */
-#include <3ds/types.h>
-#include <3ds/os.h>
-#include <3ds/services/soc.h>
-#include <3ds/3dslink.h>
-#include <3ds/env.h>
-#include <3ds/svc.h>
-#include <3ds/result.h>
-#include <3ds/allocator/mappable.h>
-#include <3ds/services/apt.h>
-#include <3ds/services/ptmsysm.h>
-#include <3ds/thread.h>
-#include <malloc.h>
-
-/* (the main thread's stack: libctru's 32 KB is tight for the game's
- * deepest calls, a layer's making; the browser build's is 1 MB too) */
-u32 __stacksize__ = 1u << 20;
-
-/* (whether the New 3DS's third core takes a thread of the game's: emu.c
- * runs the GBA core there) */
-static void core2_probe(void *arg) { *(volatile bool *)arg = true; }
-
-/* The app's memory, split before main in place of libctru's split (and
- * mGBA's fixed sizes): the heap takes all its area holds, 96 MB, the
- * linear heap (the screens' and the sound's buffers) what is left, at
- * least 8 MB. The Homebrew Launcher gives a New 3DS app 124 MB, a 3DS 64:
- * a heap of all but the linear heap's share passed the area on the one,
- * a fixed 36 MB was too small for the game's ROM copies on both. */
-void __system_allocateHeaps(void);   /* (libctru's, replaced) */
-void __system_allocateHeaps(void) {
-	extern char *fake_heap_start, *fake_heap_end;
-	extern u32 __ctru_heap, __ctru_linear_heap;
-	/* (the sizes env.h reads in its own accessors, written here) */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-	extern u32 __ctru_heap_size, __ctru_linear_heap_size;
-#pragma GCC diagnostic pop
-	Handle limit = 0;
-	s64 most = 0, used = 0;
-	ResourceLimitType commit = RESLIMIT_COMMIT;
-	if (R_FAILED(svcGetResourceLimit(&limit, CUR_PROCESS_HANDLE))) svcBreak(USERBREAK_PANIC);
-	svcGetResourceLimitLimitValues(&most, limit, &commit, 1);
-	svcGetResourceLimitCurrentValues(&used, limit, &commit, 1);
-	svcCloseHandle(limit);
-	u32 left = (u32)(most - used) & ~0xFFFu, linear = 8u << 20;
-	if (left <= linear) svcBreak(USERBREAK_PANIC);
-	u32 heap = left - linear;
-	if (heap > OS_HEAP_AREA_END - OS_HEAP_AREA_BEGIN) heap = OS_HEAP_AREA_END - OS_HEAP_AREA_BEGIN;
-	__ctru_heap_size = heap;
-	__ctru_linear_heap_size = left - heap;
-	if (R_FAILED(svcControlMemory(&__ctru_heap, OS_HEAP_AREA_BEGIN, 0, heap, MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE))
-	    || R_FAILED(svcControlMemory(&__ctru_linear_heap, 0, 0, __ctru_linear_heap_size, MEMOP_ALLOC_LINEAR, MEMPERM_READ | MEMPERM_WRITE)))
-		svcBreak(USERBREAK_PANIC);
-	mappableInit(OS_MAP_AREA_BEGIN, OS_MAP_AREA_END);
-	fake_heap_start = (char *)__ctru_heap;
-	fake_heap_end = fake_heap_start + heap;
-}
-#endif
+#include "tour.h"
 
 char g_data_dir[512] = ".";
 
-/* The desktop builds (host, linux) open a window and keep their files in
- * the user's data folder; the handheld port fills the screen and keeps them
- * beside itself (its launcher passes --data-dir and --rom-dir). */
-#ifdef CW_DESKTOP
-#define DESKTOP true
-#else
-#define DESKTOP false
-#endif
-#ifdef CW_IOS
-#define IOS true
-#else
-#define IOS false
-#endif
-
-/* mkdir -p */
-static void make_dirs(const char *path) {
-	char p[600];
-	snprintf(p, sizeof p, "%s", path);
-	for (char *c = p + 1; *c; ++c)
-		if (*c == '/') { *c = 0; cw_mkdir(p); *c = '/'; }
-	cw_mkdir(p);
-}
-
-/* $XDG_DATA_HOME/cyberworld-endless, or ~/.local/share/cyberworld-endless;
- * on Windows %LOCALAPPDATA%\cyberworld-endless, on macOS
- * ~/Library/Application Support/cyberworld-endless */
-static void desktop_data_dir(char *out, size_t n) {
-#ifdef _WIN32
-	const char *local = getenv("LOCALAPPDATA");
-	if (local && *local) snprintf(out, n, "%s/cyberworld-endless", local);
-	else snprintf(out, n, ".");
-	for (char *c = out; *c; ++c)
-		if (*c == '\\') *c = '/';
-#elif defined(__APPLE__)
-	const char *home = getenv("HOME");
-	if (home && *home) snprintf(out, n, "%s/Library/Application Support/cyberworld-endless", home);
-	else snprintf(out, n, ".");
-#else
-	const char *xdg = getenv("XDG_DATA_HOME"), *home = getenv("HOME");
-	if (xdg && *xdg == '/') snprintf(out, n, "%s/cyberworld-endless", xdg);
-	else if (home && *home) snprintf(out, n, "%s/.local/share/cyberworld-endless", home);
-	else snprintf(out, n, ".");
-#endif
-}
-
-#ifndef __3DS__
-/* The ROM: in the data folder's rom/, beside the binary, or in ./rom. */
-static bool desktop_rom(char *msg, size_t msglen) {
-	char dirs[3][600], exe[512];
-	int n = 0;
-	snprintf(dirs[n++], sizeof dirs[0], "%s/rom", g_data_dir);
-	if (cw_exe_path(exe, sizeof exe)) {
-		char *slash = strrchr(exe, '/');
-		if (slash) { *slash = 0; snprintf(dirs[n++], sizeof dirs[0], "%s/rom", exe); }
-	}
-	snprintf(dirs[n++], sizeof dirs[0], "rom");
-	char first[512] = "";
-	for (int i = 0; i < n; ++i) {
-		if (rom_find(dirs[i], msg, msglen)) return true;
-		/* a .gba that is not the right one says so; else the data folder is the place */
-		if (!first[0] || strncmp(msg, "Put your", 8)) snprintf(first, sizeof first, "%s", msg);
-	}
-	snprintf(msg, msglen, "%s", first);
-	return false;
-}
-#endif
-
-#ifdef CW_DESKTOP
-/* ... and, looking again, where front ends and downloads keep theirs */
-static bool desktop_rom_anywhere(char *msg, size_t msglen) {
-	if (desktop_rom(msg, msglen)) return true;
-	char dir[600];
-	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-	return desktop_rom_elsewhere(dir, msg, msglen);
-}
-#endif
-
 static const Scene *current, *pending;
 
+const Scene *scene_current(void) { return current; }
+
 void scene_set(const Scene *s) { pending = s; }
-
-static uint32_t rng_s = 0x9E3779B9u;
-/* A seed goes through a mixer first: xorshift from seeds one apart gave
- * nearly the same first numbers, so runs started with consecutive seeds
- * (and their layers) came out alike. */
-void rng_seed(uint32_t s) {
-	s += 0x9E3779B9u;
-	s ^= s >> 16; s *= 0x85EBCA6Bu;
-	s ^= s >> 13; s *= 0xC2B2AE35u;
-	s ^= s >> 16;
-	rng_s = s ? s : 0x9E3779B9u;
-}
-void rng_restore(uint32_t s) { rng_s = s ? s : 0x9E3779B9u; }
-uint32_t rng_state(void) { return rng_s; }
-uint32_t rng_next(void) {
-	uint32_t x = rng_s;
-	x ^= x << 13; x ^= x >> 17; x ^= x << 5;
-	return rng_s = x;
-}
-int rng_range(int lo, int hi) {
-	if (hi <= lo) return lo;
-	return lo + (int)(rng_next() % (uint32_t)(hi - lo + 1));
-}
-
-/* The ROMs read, said at the start: BN6's, and the other games' found
- * beside it (Android's log takes SDL_Log, not stdout). */
-static void say_roms(void) {
-	printf("ROM: %s (%s)\n", R.layout->name, R.path);
-	for (int i = 0; i < XROM_COUNT; ++i)
-		if (XR[i].data) printf("%s found: %s (%s)\n", XR[i].layout->tag, XR[i].layout->name, XR[i].path);
-#ifdef __ANDROID__
-	SDL_Log("ROM: %s (%s)", R.layout->name, R.path);
-	for (int i = 0; i < XROM_COUNT; ++i)
-		if (XR[i].data) SDL_Log("%s found: %s (%s)", XR[i].layout->tag, XR[i].layout->name, XR[i].path);
-#endif
-}
-
-/* ---- error scene: shown when no usable ROM is present ---- */
-static char error_msg[512];
-
-void error_show(const char *msg) {
-	snprintf(error_msg, sizeof error_msg, "%s", msg);
-	scene_set(&scene_error);
-}
-
-/* Lines of `text` at most `cols` (under 64) characters wide, broken at
- * newlines, spaces, and after a slash, dot or hyphen (a long path breaks at
- * its folders, a Flatpak's at its app id's words); returns how many. */
-static int wrap_lines(const char *text, int cols, char out[][64], int max) {
-	int n = 0;
-	const char *p = text;
-	while (*p && n < max) {
-		while (*p == ' ') ++p;
-		if (!*p) break;
-		int len = 0, cut = 0;
-		while (p[len] && p[len] != '\n' && len < cols) ++len;
-		if (!p[len] || p[len] == '\n') cut = len;
-		else {
-			for (int i = len; i > 0 && !cut; --i) if (p[i] == ' ' || strchr("/.-", p[i - 1])) cut = i;
-			if (!cut) cut = len;
-		}
-		snprintf(out[n++], 64, "%.*s", cut, p);
-		p += cut;
-		if (*p == '\n') ++p;
-	}
-	return n;
-}
-
-/* The message, in the ROM's font when there is one, else in the engine's
- * own (a handheld without its ROM showed a row of bars). */
-static void error_draw(void) {
-	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
-	SDL_RenderClear(P.renderer);
-	if (R.data) {
-		text_draw(P.w / 2, 40, "Cyberworld Endless", WHITE, TEXT_CENTER);
-		text_draw(P.w / 2, 70, error_msg, WHITE, TEXT_CENTER);
-		return;
-	}
-	/* (in the picture's place: a phone held upright has the canvas below
-	 * it for its controls) */
-	char lines[12][64];
-	int n = wrap_lines(error_msg, 54, lines, 12), x = P.core_x + CORE_W / 2;
-	minifont_draw_centered(x, P.core_y + 24, "CYBERWORLD ENDLESS", rgba(120, 200, 248, 255), 2);
-	for (int i = 0; i < n; ++i) minifont_draw_centered(x, P.core_y + 56 + i * 8, lines[i], WHITE, 1);
-	minifont_draw_centered(x, P.core_y + CORE_H - 20, "START OR B: QUIT", rgba(160, 170, 200, 255), 1);
-}
-
-static void error_update(void) {
-	if (btn_pressed(BTN_START) || btn_pressed(BTN_B)) P.quit = true;
-}
-
-const Scene scene_error = { "error", NULL, error_update, error_draw, NULL };
-
-#ifdef CW_DESKTOP
-/* ---- no ROM on a desktop that can show no dialog: the game's own window
- * says where to put it, and looks again every three seconds and on A; once
- * it is there the game starts itself again (a Flatpak on the Steam Deck
- * has no dialog, and quit before its window opened) ---- */
-static char **g_argv;
-static int norom_t, norom_looks;
-static char norom_dir[600];
-
-static void norom_update(void) {
-	++norom_t;
-	if (btn_pressed(BTN_B) || btn_pressed(BTN_START)) { P.quit = true; return; }
-	if (!btn_pressed(BTN_A) && norom_t % 180) return;
-	++norom_looks;
-	char msg[512];
-	if (!desktop_rom_anywhere(msg, sizeof msg)) return;
-	/* (found: a fresh start sets everything up from it) */
-	platform_shutdown();
-	execv("/proc/self/exe", g_argv);
-	perror("restart");
-	exit(0);
-}
-
-static void norom_draw(void) {
-	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
-	SDL_RenderClear(P.renderer);
-	SDL_Color blue = rgba(120, 200, 248, 255), grey = rgba(160, 170, 200, 255);
-	minifont_draw_centered(P.w / 2, 10, "CYBERWORLD ENDLESS", blue, 2);
-	minifont_draw_centered(P.w / 2, 28, "NO ROM FOUND", WHITE, 2);
-	static const char *const text[] = {
-		"IT RUNS ON YOUR OWN COPY OF",
-		"MEGA MAN BATTLE NETWORK 6: CYBEAST GREGAR (USA),",
-		"AN UNZIPPED .GBA FILE.",
-		"",
-		"PUT IT IN YOUR DOWNLOADS FOLDER, IN EMULATION/ROMS/GBA",
-		"(EMUDECK) OR RETRODECK/ROMS/GBA, OR IN THIS FOLDER:",
-	};
-	int y = 46;
-	for (unsigned i = 0; i < sizeof text / sizeof *text; ++i, y += 8) minifont_draw_centered(P.w / 2, y, text[i], WHITE, 1);
-	char lines[4][64];
-	int n = wrap_lines(norom_dir, 56, lines, 4);
-	for (int i = 0; i < n; ++i, y += 8) minifont_draw_centered(P.w / 2, y + 2, lines[i], blue, 1);
-	char looked[64];
-	snprintf(looked, sizeof looked, norom_looks ? "LOOKED AGAIN: NOT THERE YET" : "IT LOOKS AGAIN ON ITS OWN");
-	minifont_draw_centered(P.w / 2, P.h - 26, looked, grey, 1);
-	minifont_draw_centered(P.w / 2, P.h - 14, "A: LOOK NOW    B: QUIT", WHITE, 1);
-}
-
-static const Scene scene_norom = { "norom", NULL, norom_update, norom_draw, NULL };
-
-static void norom_show(void) {
-	/* (the home folder as ~, a Flatpak's is long) */
-	const char *home = getenv("HOME");
-	size_t hl = home ? strlen(home) : 0;
-	if (hl > 1 && !strncmp(g_data_dir, home, hl) && g_data_dir[hl] == '/') snprintf(norom_dir, sizeof norom_dir, "~%s/rom", g_data_dir + hl);
-	else snprintf(norom_dir, sizeof norom_dir, "%s/rom", g_data_dir);
-	scene_set(&scene_norom);
-}
-#endif
-
-#ifdef CW_IOS
-/* ---- no ROM on an iPhone or iPad: CHOOSE FOLDER opens Files' picker for
- * the folder the ROMs are in, CHOOSE FILES for the files themselves
- * (ios.m); BN6's and BN5's ROMs there are copied into the app's rom/, and
- * the folder is kept and looked in again at each start, and here every
- * three seconds. Or Files puts them in the app's own folder (On My iPhone ›
- * Cyberworld), looked in as often. Found, the game starts in place, as
- * nothing restarts an app on iOS. ---- */
-static int norom_t, norom_focus;   /* (the button a controller's A presses: 0 the folder's) */
-static bool norom_picking;
-static char norom_msg[1024];
-
-/* The ROM in the app's rom/ (where a pick lands), or at the top of its
- * folder (where Files puts a file dropped on it); BN5 is read with it from
- * either. */
-static bool ios_rom_here(char *msg, size_t msglen) {
-	char dir[600], first[512];
-	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-	bool found = rom_find(dir, msg, msglen);
-	snprintf(first, sizeof first, "%s", msg);
-	if (!found) found = rom_find(g_data_dir, msg, msglen);
-	if (found) {
-		/* (beside BN6's it is read already; in the other folder too) */
-		xrom_find(dir);
-		xrom_find(g_data_dir);
-		return true;
-	}
-	/* (a .gba that is not the right one says so; else where to put it) */
-	if (strncmp(first, "Put your", 8)) snprintf(msg, msglen, "%s", first);
-	return false;
-}
-
-/* At the start: the ROMs kept, then the folder picked looked in for what
- * they lack (BN5 put there since, or BN6 where none is kept). */
-static bool ios_rom_start(char *msg, size_t msglen) {
-	char dir[600];
-	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-	bool found = ios_rom_here(msg, msglen);
-	unsigned want = 0;
-	if (!found) want |= IOS_ROM_BN6;
-	if (!XR[XROM_BN5_COLONEL_US].data) want |= IOS_ROM_BN5;
-	if (want && ios_rom_folder_look(dir, want, norom_msg, sizeof norom_msg) > 0) {
-		if (!found) found = ios_rom_here(msg, msglen);
-		else xrom_find(dir);
-	}
-	return found;
-}
-
-/* The game from the ROM just found, as main goes on from one found at the start. */
-static void ios_start(void) {
-	if (!gfx_init()) { error_show("The ROM could not be decoded."); return; }
-	say_roms();
-	save_init();
-	audio_init();
-	ios_rom_note(P.window);
-	scene_set(&scene_intro);
-}
-
-/* The screen's words: BN6 needed, BN5 optional with what it lends (the
- * title note's words), what the folder is for, and the other ways */
-#define NOROM_SIX "It runs on your own Mega Man Battle Network 6: Cybeast Gregar (USA), an unzipped .gba file."
-#define NOROM_FIVE "Optional beside it: Mega Man Battle Network 5: Team Colonel (USA), whose net then joins ours."
-#define NOROM_HOW "Looked in again at each start: BN5 can come later."
-#define NOROM_HINT "Or put them in Files: On My iPhone (or iPad), Cyberworld. Only .gba files are opened, only these two ROMs copied."
-
-/* The screen's lines and buttons, laid out in the middle of the canvas, the
- * whole screen and not the picture's 240 x 160 (whose 1x text was too small
- * to read on a phone), the same for its update and its drawing: the title
- * at 3x, the rest at 2x, and buttons a thumb finds at once; where that
- * does not fit (a phone on its side), the title and the folder's button at
- * 2x and the rest at 1x, then without the hint, then without the line
- * under the folder's button. */
-typedef struct {
-	char six[6][64], five[6][64], how[4][64], hint[6][64], note[12][64];
-	int nsix, nfive, nhow, nhint, nnote, s, line;
-	int y_title, y_six, y_five, y_how, y_hint, y_note;
-	SDL_Rect folder, files;
-} NoRom;
-
-/* The layout at text scale s, from `top`, with `parts` (bit 0 the hint,
- * bit 1 the folder's line); its height. */
-static int norom_fit(NoRom *n, int s, int parts, int top) {
-	int cols = (P.w - 16) / (4 * s), gap = 3 * s, w = s > 1 ? 220 : 130, y = top;
-	if (cols > 60) cols = 60;
-	if (w > P.w - 24) w = P.w - 24;
-	n->s = s;
-	n->line = s > 1 ? 15 : 8;
-	n->nsix = wrap_lines(NOROM_SIX, cols, n->six, 6);
-	n->nfive = wrap_lines(NOROM_FIVE, cols, n->five, 6);
-	n->nhow = parts & 2 ? wrap_lines(NOROM_HOW, cols, n->how, 4) : 0;
-	n->nhint = parts & 1 ? wrap_lines(NOROM_HINT, cols, n->hint, 6) : 0;
-	n->nnote = norom_msg[0] ? wrap_lines(norom_msg, cols, n->note, 12) : 0;
-	n->y_title = y;
-	y += 5 * (s + 1) + 8 * s;
-	n->y_six = y;
-	y += n->nsix * n->line + gap;
-	n->y_five = y;
-	y += n->nfive * n->line + 4 * gap;
-	n->folder = (SDL_Rect){ (P.w - w) / 2, y, w, 10 * s + 10 };
-	y += n->folder.h + gap;
-	n->y_how = y;
-	y += n->nhow * n->line + 2 * gap;
-	n->files = (SDL_Rect){ (P.w - w) / 2, y, w, 10 * s + 4 };
-	y += n->files.h + 3 * gap;
-	n->y_hint = y;
-	y += n->nhint * n->line;
-	n->y_note = y + (n->nhint ? 3 * gap : 0);
-	if (n->nnote) y = n->y_note + n->nnote * n->line;
-	return y - top;
-}
-
-static void norom_layout(NoRom *n) {
-	static const int tries[][2] = { { 2, 3 }, { 1, 3 }, { 1, 2 }, { 1, 0 } };
-	int k = 0;
-	while (k < 3 && norom_fit(n, tries[k][0], tries[k][1], 0) > P.h - 8) ++k;
-	int top = (P.h - norom_fit(n, tries[k][0], tries[k][1], 0)) / 2;
-	norom_fit(n, tries[k][0], tries[k][1], top < 4 ? 4 : top);
-}
-
-static void norom_enter(void) { platform_own_taps(true); }
-static void norom_leave(void) { platform_own_taps(false); }
-
-static void norom_update(void) {
-	++norom_t;
-	char dir[600], said[1024] = "";
-	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-	int picked = ios_pick_result(said, sizeof said);
-	if (picked) norom_picking = false;
-	if (picked > 0) snprintf(norom_msg, sizeof norom_msg, "%s", said);
-	NoRom n;
-	norom_layout(&n);
-	SDL_Point tap;
-	int press = -1;
-	if (platform_tap(&tap.x, &tap.y)) {
-		if (SDL_PointInRect(&tap, &n.folder)) press = IOS_PICK_FOLDER;
-		else if (SDL_PointInRect(&tap, &n.files)) press = IOS_PICK_FILES;
-	}
-	if (btn_pressed(BTN_UP) || btn_pressed(BTN_DOWN)) norom_focus ^= 1;
-	if (btn_pressed(BTN_A) || btn_pressed(BTN_START)) press = norom_focus ? IOS_PICK_FILES : IOS_PICK_FOLDER;
-	if (!norom_picking && press >= 0) {
-		norom_picking = true;
-		norom_focus = press == IOS_PICK_FILES;
-		ios_pick_roms(P.window, dir, press);
-	}
-	if (picked <= 0 && norom_t % 180) return;
-	/* (every three seconds the folder picked is looked in again: a ROM put
-	 * there meanwhile, or come down from iCloud) */
-	if (picked <= 0 && !norom_picking) ios_rom_folder_look(dir, IOS_ROM_BN6 | IOS_ROM_BN5, norom_msg, sizeof norom_msg);
-	char found[512];
-	if (ios_rom_here(found, sizeof found)) { ios_start(); return; }
-	/* (a .gba in the app's own folder that is not the right one, where no
-	 * look had more to say) */
-	if (!norom_msg[0] && strncmp(found, "Put your", 8)) snprintf(norom_msg, sizeof norom_msg, "%s", found);
-}
-
-/* A button: gold edged where a controller's A would press it, the PET's navy inside */
-static void norom_button(SDL_Rect b, const char *label, int scale, bool focus) {
-	fill_rect(b.x, b.y, b.w, b.h, focus ? rgba(255, 214, 16, 255) : rgba(110, 130, 170, 255));
-	fill_rect(b.x + 2, b.y + 2, b.w - 4, b.h - 4, rgba(16, 54, 74, 255));
-	minifont_draw_centered(b.x + b.w / 2, b.y + (b.h - 5 * scale) / 2, label, WHITE, scale);
-}
-
-static void norom_draw(void) {
-	SDL_SetRenderDrawColor(P.renderer, 8, 16, 48, 255);
-	SDL_RenderClear(P.renderer);
-	NoRom n;
-	norom_layout(&n);
-	SDL_Color blue = rgba(120, 200, 248, 255), soft = rgba(170, 200, 230, 255), grey = rgba(160, 170, 200, 255);
-	int x = P.w / 2, s = n.s;
-	minifont_draw_centered(x, n.y_title, "CYBERWORLD ENDLESS", blue, s + 1);
-	for (int i = 0; i < n.nsix; ++i) minifont_draw_centered(x, n.y_six + i * n.line, n.six[i], WHITE, s);
-	for (int i = 0; i < n.nfive; ++i) minifont_draw_centered(x, n.y_five + i * n.line, n.five[i], soft, s);
-	norom_button(n.folder, norom_picking && !norom_focus ? "OPENING FILES" : "CHOOSE FOLDER", s + 1, !norom_focus);
-	for (int i = 0; i < n.nhow; ++i) minifont_draw_centered(x, n.y_how + i * n.line, n.how[i], grey, s);
-	norom_button(n.files, norom_picking && norom_focus ? "OPENING FILES" : "CHOOSE FILES", s, norom_focus);
-	for (int i = 0; i < n.nhint; ++i) minifont_draw_centered(x, n.y_hint + i * n.line, n.hint[i], grey, s);
-	for (int i = 0; i < n.nnote; ++i) minifont_draw_centered(x, n.y_note + i * n.line, n.note[i], rgba(247, 165, 0, 255), s);
-}
-
-static const Scene scene_norom = { "norom", norom_enter, norom_update, norom_draw, norom_leave };
-
-#endif
-
-/* The data folder, where none is given, and its rom/: a desktop's in the
- * user's data folders; iOS's the app's Documents, which Files shows as On
- * My iPhone › Cyberworld (its display name), the ROM's place, beside the
- * saves, which a player can copy off there; a handheld's the launcher's. */
-static void data_dir_setup(bool given) {
-	if (DESKTOP && !given) desktop_data_dir(g_data_dir, sizeof g_data_dir);
-#ifdef CW_IOS
-	if (!given) {
-		const char *home = getenv("HOME");
-		snprintf(g_data_dir, sizeof g_data_dir, "%s/Documents", home && *home ? home : ".");
-	}
-#endif
-	if (DESKTOP || IOS) {
-		char rom[600];
-		snprintf(rom, sizeof rom, "%s/rom", g_data_dir);
-		make_dirs(rom);
-	}
-}
-
-#ifndef __3DS__
-/* The ROM at the start (the 3DS has its own places, main): --rom-dir's,
- * else the desktop's, iOS's app folder, or ./rom on a handheld. */
-static bool start_rom(const char *rom_dir, char *msg, size_t msglen) {
-#ifdef CW_IOS
-	if (!rom_dir) return ios_rom_start(msg, msglen);
-#endif
-	return rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, msglen) : desktop_rom(msg, msglen);
-}
-#endif
-
-/* No ROM at the start: on iOS the screen that asks for it (but for a ROM
- * given by --rom-dir that is not one); elsewhere the plain error. */
-static void rom_missing(const char *rom_dir, bool norom_scene, const char *msg) {
-#ifdef CW_IOS
-	if (!rom_dir || norom_scene) { scene_set(&scene_norom); return; }
-#else
-	(void)rom_dir; (void)norom_scene;
-#endif
-	error_show(msg);
-}
-
-/* ---- scripted input and captures for headless tests ---- */
-/* A step holds buttons for some frames; one of no frames takes a picture
- * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], state[160]; int place[3], flags[3]; bool placed, flagged, battle; } InputStep;
-static InputStep script[1024];
-static int script_len, script_pos, script_left;
-
-/* "UP+A": the GBA's buttons injected as held; "pad.x", "pad.-lefty" a
- * virtual controller's (--pad), and "key.K" a key, through SDL as a
- * player's are (the controls screen and the maps in tests) */
-static void parse_buttons(const char *s, InputStep *step) {
-	static const struct { const char *n; uint32_t b; } names[] = {
-		{ "UP", BTN_UP }, { "DOWN", BTN_DOWN }, { "LEFT", BTN_LEFT }, { "RIGHT", BTN_RIGHT },
-		{ "A", BTN_A }, { "B", BTN_B }, { "L", BTN_L }, { "R", BTN_R }, { "START", BTN_START }, { "SELECT", BTN_SELECT },
-	};
-	char buf[128];
-	snprintf(buf, sizeof buf, "%s", s);
-	char *save = NULL;
-	for (char *t = strtok_r(buf, "+", &save); t; t = strtok_r(NULL, "+", &save)) {
-		int in = !SDL_strncasecmp(t, "pad.", 4) ? padmap_input(t + 4) : PAD_NONE;
-		if (in != PAD_NONE) step->pad |= (uint64_t)1 << in;
-		if (!SDL_strncasecmp(t, "key.", 4)) step->key = SDL_GetScancodeFromName(t + 4);
-		for (size_t i = 0; i < sizeof names / sizeof *names; ++i)
-			if (!strcmp(t, names[i].n)) step->buttons |= names[i].b;
-	}
-}
-
-/* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
-static void parse_script(const char *spec) {
-	char *copy = strdup(spec);
-	for (char *tok = strtok(copy, ","); tok && script_len < 512; tok = strtok(NULL, ",")) {
-		char *colon = strchr(tok, ':');
-		memset(&script[script_len], 0, sizeof script[script_len]);
-		InputStep *s = &script[script_len];
-		s->frames = atoi(tok);
-		/* (remote play's dev steps too, as "0:place X Y FACE", "0:flags
-		 * FROM TO 1|0" and "0:battle": a scripted capture of a set piece puts
-		 * MegaMan at it, of a battle starts the layer's next; "300:battle"
-		 * waits its 300 frames first) */
-		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
-		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
-		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
-		else if (colon) parse_buttons(colon + 1, s);
-		if ((s->placed || s->flagged || s->battle) && s->frames > 0 && script_len + 1 < 512) {
-			script[script_len + 1] = *s;
-			script[script_len + 1].frames = 0;
-			*s = (InputStep){ .frames = s->frames };
-			++script_len;
-		}
-		++script_len;
-	}
-	free(copy);
-	script_left = script_len ? script[0].frames : 0;
-}
-
-/* --taps "FRAME:X,Y[>X2,Y2];...": a finger at screen pixel (X, Y) at
- * FRAME, held six frames, or dragged to (X2, Y2) over twenty, then lifted
- * (the touch controls, their menu and its editor in headless tests) */
-typedef struct { int frame, x0, y0, x1, y1; bool drag; } Tap;
-static Tap taps[32];
-static int ntaps;
-
-static void parse_taps(const char *spec) {
-	char *copy = strdup(spec), *save = NULL;
-	for (char *t = strtok_r(copy, ";", &save); t && ntaps < 32; t = strtok_r(NULL, ";", &save)) {
-		Tap *p = &taps[ntaps];
-		int n = sscanf(t, "%d:%d,%d>%d,%d", &p->frame, &p->x0, &p->y0, &p->x1, &p->y1);
-		if (n < 3) continue;
-		p->drag = n == 5;
-		if (!p->drag) { p->x1 = p->x0; p->y1 = p->y0; }
-		++ntaps;
-	}
-	free(copy);
-}
-
-static void taps_tick(void) {
-	for (int i = 0; i < ntaps; ++i) {
-		const Tap *t = &taps[i];
-		int len = t->drag ? 20 : 6, f = (int)P.frame - t->frame;
-		if (f < 0 || f > len) continue;
-		uint32_t type = f == 0 ? SDL_FINGERDOWN : f == len ? SDL_FINGERUP : SDL_FINGERMOTION;
-		platform_finger(type, 900 + i, t->x0 + (t->x1 - t->x0) * (float)f / len, t->y0 + (t->y1 - t->y0) * (float)f / len);
-	}
-}
-
-static uint32_t bot_seed;
-static uint32_t bot_buttons;
-
-/* Random-input bot for soak tests: never pauses, mashes everything else. */
-static void bot_tick(void) {
-	if (P.frame % 6 == 0) {
-		bot_seed = bot_seed * 1103515245u + 12345u;
-		uint32_t r = bot_seed >> 8;
-		bot_buttons = 0;
-		static const uint32_t dirs[8] = { BTN_UP, BTN_DOWN, BTN_LEFT, BTN_RIGHT, BTN_UP | BTN_RIGHT, BTN_DOWN | BTN_LEFT, 0, BTN_RIGHT };
-		bot_buttons |= dirs[r & 7];
-		if ((r >> 3) % 3 == 0) bot_buttons |= BTN_A;
-		if ((r >> 5) % 4 == 0) bot_buttons |= BTN_B;
-		if ((r >> 7) % 9 == 0) bot_buttons |= BTN_L;
-	}
-	platform_inject(bot_buttons);
-}
-
-/* What a player sees, in words (remote play's state file). */
-static void write_state(const char *path) {
-	FILE *f = fopen(path, "w");
-	if (!f) return;
-	fprintf(f, "frame %llu\nscene %s\n", (unsigned long long)P.frame, current ? current->name : "none");
-	if (current == &scene_emu) director_describe(f);
-	fclose(f);
-}
-
-/* The steps of no frames at the script's position: pictures, states. */
-static void script_actions(void) {
-	while (script_pos < script_len && script[script_pos].frames == 0) {
-		InputStep *s = &script[script_pos];
-		if (s->shot[0]) platform_save_canvas(s->shot);
-		if (s->state[0]) write_state(s->state);
-		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
-		if (s->battle && current == &scene_emu) director_dev_battle();
-		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
-		if (s->flagged && current == &scene_emu) {
-			static bool was[FLAG_COUNT];
-			for (int f = s->flags[0] < 0 ? 0 : s->flags[0]; f <= s->flags[1] && f < FLAG_COUNT; ++f)
-				if (s->flags[2]) { was[f] = flag_get(f); flag_set(f); }
-				else if (was[f]) flag_set(f);
-				else flag_clear(f);
-		}
-		if (++script_pos < script_len) script_left = script[script_pos].frames;
-	}
-}
-
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
-/* ---- remote play (tools/play.py): the game waits for batches of steps on
- * DIR/in and answers each on DIR/out once its frames have run ---- */
-static int remote_in = -1, remote_out = -1;
-static bool remote_answer;   /* a batch has run: answer before the next */
-
-static bool remote_open(const char *dir) {
-	char in[600], out[600];
-	snprintf(in, sizeof in, "%s/in", dir);
-	snprintf(out, sizeof out, "%s/out", dir);
-	mkfifo(in, 0600);
-	mkfifo(out, 0600);
-	/* (both ends read-write: no end of file between the client's calls) */
-	remote_in = open(in, O_RDWR);
-	remote_out = open(out, O_RDWR);
-	return remote_in >= 0 && remote_out >= 0;
-}
-
-/* One line: "N BUTTONS" holds them N frames, "shot PATH", "state PATH",
- * "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
- * "battle" (the layer's next random battle, director_dev_battle), "quit";
- * items apart by ';'. */
-static void remote_parse(char *line) {
-	script_len = script_pos = 0;
-	for (char *tok = strtok(line, ";\n"); tok && script_len < (int)(sizeof script / sizeof *script); tok = strtok(NULL, ";\n")) {
-		while (*tok == ' ') ++tok;
-		InputStep *s = &script[script_len];
-		memset(s, 0, sizeof *s);
-		if (!strncmp(tok, "shot ", 5)) snprintf(s->shot, sizeof s->shot, "%s", tok + 5);
-		else if (!strncmp(tok, "state ", 6)) snprintf(s->state, sizeof s->state, "%s", tok + 6);
-		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
-		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
-		else if (!strcmp(tok, "battle")) s->battle = true;
-		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
-		else {
-			char buttons[128] = "";
-			if (sscanf(tok, "%d %127s", &s->frames, buttons) < 1 || s->frames <= 0) continue;
-			parse_buttons(buttons, s);
-		}
-		++script_len;
-	}
-	script_left = script_len ? script[0].frames : 0;
-}
-
-/* Between batches: the answer to the last, then the next (blocking). */
-static void remote_tick(void) {
-	for (;;) {
-		script_actions();
-		if (script_pos < script_len || P.quit) return;
-		if (remote_answer) {
-			char ok[64];
-			int n = snprintf(ok, sizeof ok, "ok %llu\n", (unsigned long long)P.frame);
-			if (write(remote_out, ok, (size_t)n) < 0) { P.quit = true; return; }
-			remote_answer = false;
-		}
-		static char line[1 << 17];   /* (a sheet of pictures names every one) */
-		int n = 0;
-		while (n < (int)sizeof line - 1) {
-			char c;
-			if (read(remote_in, &c, 1) != 1) { P.quit = true; return; }
-			if (c == '\n') break;
-			line[n++] = c;
-		}
-		line[n] = 0;
-		remote_parse(line);
-		remote_answer = true;
-	}
-}
-#endif
-
-/* The script's key, held as SDL's events say a player's is */
-static void script_key(int key) {
-	static int held;
-	if (key == held) return;
-	SDL_Event e;
-	memset(&e, 0, sizeof e);
-	for (int k = 0; k < 2; ++k) {
-		int sc = k ? key : held;
-		if (!sc) continue;
-		e.type = k ? SDL_KEYDOWN : SDL_KEYUP;
-		e.key.state = k ? SDL_PRESSED : SDL_RELEASED;
-		e.key.keysym.scancode = (SDL_Scancode)sc;
-		e.key.keysym.sym = SDL_GetKeyFromScancode((SDL_Scancode)sc);
-		SDL_PushEvent(&e);
-	}
-	held = key;
-}
-
-static void script_tick(void) {
-	if (bot_seed) { bot_tick(); return; }
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
-	if (remote_in >= 0) remote_tick();
-#endif
-	script_actions();
-	bool done = script_pos >= script_len;
-	pads_virtual_hold(done ? 0 : script[script_pos].pad);
-	script_key(done ? 0 : script[script_pos].key);
-	if (done) { platform_inject(0); return; }
-	platform_inject(script[script_pos].buttons);
-	if (--script_left <= 0 && ++script_pos < script_len) script_left = script[script_pos].frames;
-}
-
-typedef struct { uint64_t frame; char path[256]; } Shot;
-static Shot shots[64], screen_shots[16], second_shots[16];
-static int shot_count, screen_shot_count, second_shot_count;
-static uint64_t range_a = 1, range_b = 0;   /* --shot-range A:B:PREFIX */
-static char range_prefix[200];
-
-static void parse_shots(const char *spec, Shot *into, int *count, int most) {
-	char *copy = strdup(spec);
-	for (char *tok = strtok(copy, ","); tok && *count < most; tok = strtok(NULL, ",")) {
-		char *colon = strchr(tok, ':');
-		if (!colon) continue;
-		into[*count].frame = strtoull(tok, NULL, 10);
-		snprintf(into[*count].path, sizeof into[*count].path, "%s", colon + 1);
-		++*count;
-	}
-	free(copy);
-}
-
-/* --pad KIND: a virtual controller (pads_virtual), and pad.ini in the
- * data folder read and written as a player's, headless too */
-static const char *pad_kind;
-
-/* --shot FRAME:PATH,... saves the canvas; --screen-shot the screen as the
- * player sees it, the touch controls on it; --second-shot the second
- * screen, the 3DS's bottom one (on any target, for a check); --pad */
-static bool test_option(const char *a, const char *v) {
-	if (!strcmp(a, "--pad")) pad_kind = v;
-	else if (!strcmp(a, "--shot")) parse_shots(v, shots, &shot_count, 64);
-	else if (!strcmp(a, "--screen-shot")) parse_shots(v, screen_shots, &screen_shot_count, 16);
-	else if (!strcmp(a, "--second-shot")) parse_shots(v, second_shots, &second_shot_count, 16);
-	else return false;
-	return true;
-}
 
 static const Scene *scene_by_name(const char *n) {
 	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu };
@@ -893,9 +110,9 @@ static bool game_frame(void) {
 		if (current->enter) current->enter();
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
-	script_tick();
+	capture_input();
 	platform_poll();
-	taps_tick();
+	capture_taps();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
 	if (controls_shown()) controls_update();
@@ -911,17 +128,7 @@ static bool game_frame(void) {
 	controls_draw();
 	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
-	for (int i = 0; i < shot_count; ++i)
-		if (shots[i].frame == P.frame) platform_save_canvas(shots[i].path);
-	for (int i = 0; i < screen_shot_count; ++i)
-		if (screen_shots[i].frame == P.frame) platform_shot_screen(screen_shots[i].path);
-	for (int i = 0; i < second_shot_count; ++i)
-		if (second_shots[i].frame == P.frame) platform_save_second_screen(second_shots[i].path);
-	if (P.frame >= range_a && P.frame <= range_b) {
-		char path[256];
-		snprintf(path, sizeof path, "%s%05llu.bmp", range_prefix, (unsigned long long)P.frame);
-		platform_save_canvas(path);
-	}
+	capture_shots();
 	platform_frame_parts(t1 - t0, SDL_GetPerformanceCounter() - t1);
 	/* (and BN5's boot in the frame's spare time where it runs a slice a
 	 * frame; where it has a thread, its end taken in) */
@@ -1018,26 +225,6 @@ static void web_frame(void) {
 }
 #endif
 
-/* The player's files in the data folder, none headless (a test's input is
- * its own): the keys, the controllers' map, the settings, the touch
- * controls; --pad's virtual controller with pad.ini, headless too */
-static void player_files(bool headless, int smooth_arg) {
-	char path[600];
-	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
-	if (!headless || pad_kind) {
-		snprintf(path, sizeof path, "%s/pad.ini", g_data_dir);
-		pads_load(path);
-	}
-	if (headless) return;
-	snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
-	platform_load_keys(path);
-	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
-	platform_load_settings(path);
-	snprintf(path, sizeof path, "%s/touch.ini", g_data_dir);
-	touch_load(path);
-	if (smooth_arg >= 0) P.blend = smooth_arg;
-}
-
 #ifndef __EMSCRIPTEN__
 /* The game's end: BN5's boot stopped where its thread still runs, and
  * BN6's core's thread (emu.c) */
@@ -1054,32 +241,76 @@ static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
 #endif
 #endif
 
-int main(int argc, char **argv) {
-#ifdef CW_DESKTOP
-	g_argv = argv;
-#endif
-	const char *rom_dir = NULL;
-	bool fullscreen = !DESKTOP, data_dir_given = false, screen_given = false;
-	const char *start_scene = "title";
-	int run_depth = 0, guardian_navi = 0;
-	int smooth_arg = -1;   /* --smooth-motion on|off, over settings.ini */
+/* What the command line asks for (main) */
+typedef struct {
+	const char *rom_dir;
+	bool fullscreen, data_dir_given, screen_given, headless;
+	const char *start_scene;
+	int run_depth, guardian_navi;
+	int smooth_arg;   /* --smooth-motion on|off, over settings.ini */
 	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
 	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
 	 * short net) for --scene town, the endless net otherwise */
-	const char *setup_spec = NULL;
-	int marks_spec = -1;
-	int force_w = 0, force_h = 0;
-	bool headless = false;
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
-	const char *remote_dir = NULL;
-#endif
-	uint64_t max_frames = 0;
-	uint32_t seed = 0;
-	const char *render_spec = NULL;
-	const char *sheet_spec = NULL;
-	const char *atlas_spec = NULL;
-	const char *pacing_spec = NULL;
+	const char *setup_spec;
+	int marks_spec;
+	int force_w, force_h;
+	uint64_t max_frames;
+	uint32_t seed;
+} Options;
+
+/* Each group of the command line's options takes argument `a` (its value
+ * `v`, NULL after the last) where it is one of its own: the arguments it
+ * took, else 0. Where the game runs, and for how long: */
+static int start_option(const char *a, const char *v, Options *o) {
+	if (!strcmp(a, "--headless")) { o->headless = true; return 1; }
+	if (!v) return 0;
+	if (!strcmp(a, "--rom-dir")) o->rom_dir = v;
+	else if (!strcmp(a, "--data-dir")) { snprintf(g_data_dir, sizeof g_data_dir, "%s", v); o->data_dir_given = true; }
+	else if (!strcmp(a, "--frames")) o->max_frames = strtoull(v, NULL, 10);
+	else return 0;
+	return 2;
+}
+
+/* ... the screen and the controls: */
+static int screen_option(const char *a, const char *v, Options *o) {
+	if (!strcmp(a, "--fullscreen") || !strcmp(a, "--window")) { o->fullscreen = a[2] == 'f'; o->screen_given = true; return 1; }
+	/* the touch controls from the start (the browser on a phone) */
+	if (!strcmp(a, "--touch")) { touch_always(); return 1; }
+	/* (the frame log without an environment: the 3DS over 3dslink) */
+	if (!strcmp(a, "--frame-log")) { platform_frame_log = true; return 1; }
+	if (!v) return 0;
+	if (!strcmp(a, "--size")) sscanf(v, "%dx%d", &o->force_w, &o->force_h);
+	else if (!strcmp(a, "--smooth-motion")) o->smooth_arg = !strcmp(v, "on");
+	/* (the screen's density for the touch controls, in dots per inch) */
+	else if (!strcmp(a, "--dpi")) platform_set_dpi((float)atof(v));
+	else return 0;
+	return 2;
+}
+
+/* ... the first scene and the run it starts on: */
+static int run_option(const char *a, const char *v, Options *o) {
+	if (!v) return 0;
+	if (!strcmp(a, "--scene")) { o->start_scene = v; scene_given = true; }
+	else if (!strcmp(a, "--seed")) o->seed = (uint32_t)strtoul(v, NULL, 0);
+	else if (!strcmp(a, "--run-depth")) o->run_depth = atoi(v);
+	else if (!strcmp(a, "--net-biome")) director_net_biome_arg(v);
+	else if (!strcmp(a, "--guardian")) o->guardian_navi = atoi(v);
+	else if (!strcmp(a, "--setup")) o->setup_spec = v;
+	/* --marks HEX: the title's marks as if earned, for a capture */
+	else if (!strcmp(a, "--marks")) o->marks_spec = (int)strtol(v, NULL, 16);
+	else if (!strcmp(a, "--talk")) director_dev_talks = v;
+	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
+	else if (!strcmp(a, "--dev")) devtools_parse(v);
+	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
+	else return 0;
+	return 2;
+}
+
+/* The command line into `o` (headless runs' own options, capture.c, and
+ * the dev tools', tools.c); -1 to go on, else the exit code: an unknown
+ * argument's, or the Steam shortcut's command's */
+static int parse_args(int argc, char **argv, Options *o) {
 	for (int i = 1; i < argc; ++i) {
 		const char *a = argv[i];
 		const char *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -1087,271 +318,148 @@ int main(int argc, char **argv) {
 		/* (linux/steam/add-to-steam.py, which the Linux builds carry) */
 		if (!strcmp(a, "--add-to-steam") || !strcmp(a, "--remove-from-steam")) return desktop_steam_command(a[2] == 'r');
 #endif
-		if (!strcmp(a, "--headless")) headless = true;
-		else if (!strcmp(a, "--rom-dir") && v) { rom_dir = v; ++i; }
-		else if (!strcmp(a, "--data-dir") && v) { snprintf(g_data_dir, sizeof g_data_dir, "%s", v); data_dir_given = true; ++i; }
-		else if (!strcmp(a, "--fullscreen")) { fullscreen = true; screen_given = true; }
-		else if (!strcmp(a, "--window")) { fullscreen = false; screen_given = true; }
-		else if (!strcmp(a, "--size") && v) { sscanf(v, "%dx%d", &force_w, &force_h); ++i; }
-		/* the touch controls from the start (the browser on a phone) */
-		else if (!strcmp(a, "--touch")) touch_always();
-		else if (!strcmp(a, "--frames") && v) { max_frames = strtoull(v, NULL, 10); ++i; }
-		else if (!strcmp(a, "--smooth-motion") && v) { smooth_arg = !strcmp(v, "on"); ++i; }
-		/* (the frame log without an environment: the 3DS over 3dslink) */
-		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
-		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
-		else if (!strcmp(a, "--taps") && v) { parse_taps(v); ++i; }
-		else if (v && test_option(a, v)) ++i;
-		/* (the screen's density for the touch controls, in dots per inch) */
-		else if (!strcmp(a, "--dpi") && v) { platform_set_dpi((float)atof(v)); ++i; }
-		else if (!strcmp(a, "--shot-range") && v) {
-			unsigned long long ra = 0, rb = 0;
-			if (sscanf(v, "%llu:%llu:%199s", &ra, &rb, range_prefix) == 3) { range_a = ra; range_b = rb; }
-			++i;
+		int took = start_option(a, v, o);
+		if (!took) took = screen_option(a, v, o);
+		if (!took) took = run_option(a, v, o);
+		if (!took && v && (capture_option(a, v) || tools_option(a, v))) took = 2;
+		if (!took) {
+			fprintf(stderr, "unknown argument %s\n", a);
+			return 2;
 		}
-		else if (!strcmp(a, "--scene") && v) { start_scene = v; scene_given = true; ++i; }
-		else if (!strcmp(a, "--seed") && v) { seed = (uint32_t)strtoul(v, NULL, 0); ++i; }
-		else if (!strcmp(a, "--render-song") && v) { render_spec = v; ++i; }
-		else if (!strcmp(a, "--sheet") && v) { sheet_spec = v; ++i; }
-		else if (!strcmp(a, "--run-depth") && v) { run_depth = atoi(v); ++i; }
-		else if (!strcmp(a, "--net-biome") && v) { director_net_biome_arg(v); ++i; }
-		else if (!strcmp(a, "--guardian") && v) { guardian_navi = atoi(v); ++i; }
-		else if (!strcmp(a, "--setup") && v) { setup_spec = v; ++i; }
-		/* --marks HEX: the title's marks as if earned, for a capture */
-		else if (!strcmp(a, "--marks") && v) { marks_spec = (int)strtol(v, NULL, 16); ++i; }
-		else if (!strcmp(a, "--talk") && v) { director_dev_talks = v; ++i; }
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
-		else if (!strcmp(a, "--remote") && v) { remote_dir = v; ++i; }
-#endif
-		else if (!strcmp(a, "--net-layout") && v) { layout_forced = atoi(v); ++i; }
-		else if (!strcmp(a, "--atlas") && v) { atlas_spec = v; ++i; }
-		else if (!strcmp(a, "--pacing") && v) { pacing_spec = v; ++i; }
-		else if (!strcmp(a, "--dev") && v) { devtools_parse(v); ++i; }
-		else if (!strcmp(a, "--tour") && v) { tour_parse(v); start_scene = "emu"; ++i; }
-		else if (!strcmp(a, "--bot") && v) { bot_seed = (uint32_t)strtoul(v, NULL, 0) | 1; ++i; }
-		else { fprintf(stderr, "unknown argument %s\n", a); return 2; }
+		i += took - 1;
 	}
-	setvbuf(stdout, NULL, _IOLBF, 0);
+	return -1;
+}
+
+/* The ROM at the start, `msg` where there is none */
+static bool rom_at_start(const Options *o, char *msg, size_t n) {
 #ifdef __3DS__
-	/* the 3DS (issue #9, 3ds/): the New 3DS's faster clock and cache, the
-	 * SD card's folder for the saves and the ROM, and stdout to the PC
-	 * that sent the game over 3dslink. (Whether ptm:sysm, which sets the
-	 * clock, answers is asked first for the log.) */
-	Result sysm = ptmSysmInit();
-	if (R_SUCCEEDED(sysm)) ptmSysmExit();
-	osSetSpeedupEnable(true);
-	volatile bool third = false;
-	union { volatile bool *c; void *v; } arg = { &third };   /* (the thread writes it through a volatile) */
-	Thread probe = threadCreate(core2_probe, arg.v, 0x1000, 0x30, 2, false);
-	if (probe) { threadJoin(probe, U64_MAX); threadFree(probe); }
-	bool n3ds = false;
-	APT_CheckNew3DS(&n3ds);
-	char mem[300];
-	snprintf(mem, sizeof mem, "3ds: %s, %s, heap %lu KB, linear heap %lu KB; the speedup %s; the third core %s",
-		n3ds ? "New 3DS" : "3DS", envIsHomebrew() ? "homebrew" : "title",
-		(unsigned long)(envGetHeapSize() / 1024), (unsigned long)(envGetLinearHeapSize() / 1024),
-		R_SUCCEEDED(sysm) ? "on" : "refused", third ? "free for the game" : probe ? "ran nothing" : "refused");
-	if (__3dslink_host.s_addr) {
-		u32 *soc = memalign(0x1000, 0x100000);
-		if (soc && socInit(soc, 0x100000) == 0) link3dsStdio();
-	}
-	if (!data_dir_given) snprintf(g_data_dir, sizeof g_data_dir, "sdmc:/3ds/cyberworld-endless");
-	static char rom_3ds[600];
-	snprintf(rom_3ds, sizeof rom_3ds, "%s/rom", g_data_dir);
-	mkdir("sdmc:/3ds", 0777);
-	mkdir(g_data_dir, 0777);
-	mkdir(rom_3ds, 0777);
-	/* (started from the Homebrew Launcher: the output into log.txt beside
-	 * the saves, as the handhelds' launcher keeps it) */
-	if (!__3dslink_host.s_addr) {
-		char log[600];
-		snprintf(log, sizeof log, "%s/log.txt", g_data_dir);
-		if (freopen(log, "w", stdout)) setvbuf(stdout, NULL, _IOLBF, 0);
-		freopen(log, "a", stderr);
-	}
-	printf("%s\n", mem);
-#endif
-	if (headless && !force_w) { force_w = 1280; force_h = 960; }
-	data_dir_setup(data_dir_given);
-	char msg[512];
-#ifdef __3DS__
-	/* (the game's own rom folder, then where 3DS players keep GBA ROMs: a
-	 * header check passes over the other games without reading them) */
-	bool rom_ok = false;
-	if (rom_dir) rom_ok = rom_find(rom_dir, msg, sizeof msg);
-	else {
-		const char *places[] = { rom_3ds, "sdmc:/roms/gba", "sdmc:/roms", "sdmc:/gba" };
-		char first[512] = "", close[512] = "";
-		for (size_t i = 0; !rom_ok && i < sizeof places / sizeof *places; ++i) {
-			rom_ok = rom_find(places[i], msg, sizeof msg);
-			if (!i) snprintf(first, sizeof first, "%s", msg);
-			if (!rom_ok && rom_find_close && !close[0]) snprintf(close, sizeof close, "%s", msg);
-		}
-		/* (a near miss, the wrong version found, says more than where to put one) */
-		if (!rom_ok) snprintf(msg, sizeof msg, "%s", close[0] ? close : first);
-	}
+	return start_3ds_rom(o->rom_dir, msg, n);
 #else
-	bool rom_ok = start_rom(rom_dir, msg, sizeof msg);
+	return start_rom(o->rom_dir, msg, n);
 #endif
-	/* ("--scene norom": the screen a desktop without its ROM shows, for a
-	 * capture) */
-	bool norom_scene = start_scene && !strcmp(start_scene, "norom");
-	if (norom_scene) rom_ok = false;
+}
+
 #ifdef CW_DESKTOP
-	bool big = !headless && desktop_big_screen();
-	if (!screen_given && big) fullscreen = true;
+/* A desktop's start, before its window: the big screen filled, the menu
+ * entry and Steam's offered, and the ROM looked for where front ends and
+ * downloads keep theirs, then asked for; -1 to go on, else the exit code
+ * (the dialog closed) */
+static int desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
+	bool big = !o->headless && desktop_big_screen();
+	if (!o->screen_given && big) o->fullscreen = true;
 	/* the desktop's dialogs come before the window, which would be marked
 	 * "not responding" while they wait (and Steam, not a menu entry, starts
 	 * the game on its big screen) */
-	if (!headless && !big) desktop_menu_entry(g_data_dir);
-	if (!headless && !big) desktop_steam_offer(g_data_dir);
-	if (!rom_ok && !headless && !rom_dir) {
+	if (!o->headless && !big) desktop_menu_entry(g_data_dir);
+	if (!o->headless && !big) desktop_steam_offer(g_data_dir);
+	if (!*rom_ok && !o->headless && !o->rom_dir) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
 		/* first where a Steam Deck keeps its ROMs: its Gaming Mode shows no
 		 * file chooser a pad can work */
-		rom_ok = desktop_rom_elsewhere(dir, msg, sizeof msg);
+		*rom_ok = desktop_rom_elsewhere(dir, msg, n);
 	}
 	/* the desktop's own dialog; none on the big screen, where a pad cannot
 	 * answer one, and none in a Flatpak on Wayland: the game's window asks
 	 * then (norom_show) */
-	if (!rom_ok && !headless && !rom_dir && !big) {
+	if (!*rom_ok && !o->headless && !o->rom_dir && !big) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
 		fprintf(stderr, "%s\n", msg);
-		int asked = desktop_rom_dialog(dir, desktop_rom_anywhere, msg, sizeof msg);
+		int asked = desktop_rom_dialog(dir, desktop_rom_anywhere, msg, n);
 		if (asked == 0) return 1;
-		rom_ok = asked > 0;
+		*rom_ok = asked > 0;
 	}
-#else
-	(void)screen_given;   /* (the handheld fills its screen, the page its canvas) */
+	return -1;
+}
 #endif
-	if (!platform_init(force_w, force_h, headless, fullscreen)) return 1;
-	player_files(headless, smooth_arg);
-	rng_seed(seed ? seed : (uint32_t)SDL_GetPerformanceCounter());
 
+/* The first scene, and the run it starts on: --scene's ("town" a new run
+ * from the town as NEW GAME starts one, "setup" the title's setup,
+ * "summary" a made-up run's), --setup's run, --run-depth, --guardian */
+static void start_scene(const Options *o) {
+	audio_init();
+	/* "town": a new run from the town, as NEW GAME starts one */
+	bool town = !strcmp(o->start_scene, "town");
+	const Scene *s = town ? &scene_emu : scene_by_name(o->start_scene);
+	int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;
+	if (o->setup_spec) {
+		net = !strncmp(o->setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
+		const char *c = strchr(o->setup_spec, ',');
+		if (c) sscanf(c + 1, "%d,%d,%d,%d", &folder, &threat, &helpers, &cross);
+	}
+	/* "setup": the title with the setup after NEW GAME open */
+	if (!strcmp(o->start_scene, "setup")) { title_setup = true; s = &scene_title; }
+	/* "summary": the title's summary of a made-up run lost at --run-depth,
+	 * or won with --setup short at layer 10 (11 on threat 10; its
+	 * unlocks said, and saved in --data-dir) */
+	if (!strcmp(o->start_scene, "summary")) {
+		run_new(o->seed ? o->seed : 1);
+		run_setup(net, folder, threat, helpers, cross);
+		run.depth = o->run_depth > 0 ? o->run_depth : 12;
+		run.viruses_deleted = run.depth * 6;
+		run.bosses_beaten = run.depth / 3;
+		title_new_best = run.depth > profile.best_depth;
+		title_won = run_short_last(run.depth);
+		if (title_won) {
+			snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
+			meta_run_over(true);
+		} else snprintf(title_cause, sizeof title_cause, "by HeatMan in the Graveyard");
+		title_summary = true;
+		s = &scene_title;
+	}
+	if (s == &scene_emu) {
+		run_new(o->seed ? o->seed : 1);
+		run_setup(net, folder, threat, helpers, cross);
+		if (o->run_depth > 0) run.depth = o->run_depth;
+		/* (the area its act's in the run too, whose draws read it, and
+		 * every area's guardian one navi: a scripted capture keeps its
+		 * run as the areas' draw changes) */
+		int p = (run.depth - 1) % CYCLE_LAYERS;
+		if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
+		if (o->guardian_navi > 0) run_debug_guardian(o->guardian_navi);
+	}
+	/* (later NEW GAMEs take the next seeds, so a session replays) */
+	title_seed = !o->seed ? 0 : !s || s == &scene_title ? o->seed : o->seed + 1;
+	if (town) emu_start_in_town = true;
+	scene_set(first_scene(s, o->headless));
+}
+
+/* The game on the ROM found (`rom_ok`, else `msg` says why): the no-ROM
+ * screen, the error, a dev tool, or the first scene; -1 to go on, else
+ * the exit code of a tool that ran */
+static int game_start(const Options *o, bool rom_ok, bool norom_scene, const char *msg) {
 	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);
 #ifdef CW_DESKTOP
 		/* (a ROM given by --rom-dir that is not one keeps the plain error) */
-		if ((!headless && !rom_dir) || norom_scene) norom_show();
+		if ((!o->headless && !o->rom_dir) || norom_scene) norom_show();
 		else
 #endif
-		rom_missing(rom_dir, norom_scene, msg);
-	} else if (!gfx_init()) {
-		error_show("The ROM could not be decoded.");
-	} else {
-		say_roms();
-		save_init();
-		devtools_veteran();
-		if (marks_spec >= 0) profile.marks = (uint16_t)marks_spec;
-		if (atlas_spec) {
-			int r = atlas_run(atlas_spec);
-			platform_shutdown();
-			return r;
-		}
-		if (pacing_spec) {
-			int r = pacing_report_run(pacing_spec);
-			platform_shutdown();
-			return r;
-		}
-		if (render_spec) {
-			int song = 0, secs = 20;
-			char out[256] = "song.wav";
-			sscanf(render_spec, "%i:%d:%255s", &song, &secs, out);
-			bool ok = audio_render_wav(song, secs, out);
-			printf("rendered song %d (%ds) to %s: %s\n", song, secs, out, ok ? "ok" : "failed");
-			platform_shutdown();
-			return ok ? 0 : 1;
-		}
-		if (sheet_spec && sheet_spec[0] == '@') {
-			/* --sheet @CAT:FIRST:COUNT:PATH  frame 0 of anim 0 of many sprites, 48x64 cells */
-			int cat = 0, first = 0, count = 64;
-			char out[256] = "sprites.bmp";
-			sscanf(sheet_spec + 1, "%i:%i:%i:%255s", &cat, &first, &count, out);
-			platform_begin_frame();
-			fill_rect(0, 0, P.w, P.h, rgba(96, 96, 96, 255));
-			/* 32 x 48 cells, or 96 x 128 when the canvas is wide enough to
-			 * show the big overworld objects whole (--size 479xH) */
-			int cw = P.w >= 384 ? 96 : 32, ch = P.w >= 384 ? 128 : 48, cols = P.w / cw;
-			for (int i = 0; i < count; ++i) {
-				int cx = (i % cols) * cw, cy = (i / cols) * ch;
-				Sprite *spr = sprite_get(cat, first + i);
-				fill_rect(cx + 1, cy + 1, cw - 2, ch - 2, rgba(40, 40, 60, 255));
-				if (spr) sprite_draw_frame(spr, 0, 0, cx + cw / 2, cy + ch - 8, false, 0, 0);
-				if (cw > 32 && R.data) text_drawf(cx + 2, cy + 1, WHITE, TEXT_LEFT, "%x", first + i);
-			}
-			platform_save_canvas(out);
-			platform_shutdown();
-			return 0;
-		}
-		if (sheet_spec) {
-			/* --sheet CAT:IDX:ANIM[:PAL]:PATH  every frame of one animation, 64x64 cells */
-			int cat = 0, idx = 0, anim = 0, pal = 0;
-			char out[256] = "sheet.bmp";
-			if (sscanf(sheet_spec, "%i:%i:%i:%i:%255s", &cat, &idx, &anim, &pal, out) < 5)
-				sscanf(sheet_spec, "%i:%i:%i:%255s", &cat, &idx, &anim, out);
-			Sprite *spr = sprite_get(cat, idx);
-			int n = sprite_frame_count(spr, anim);
-			platform_begin_frame();
-			fill_rect(0, 0, P.w, P.h, rgba(96, 96, 96, 255));
-			for (int f = 0; f < n && f < 12; ++f) {
-				int cx = (f % 4) * 64, cy = (f / 4) * 64;
-				fill_rect(cx + 1, cy + 1, 62, 62, rgba(40, 40, 60, 255));
-				sprite_draw_frame(spr, anim, f, cx + 32, cy + 48, false, pal, 0);
-			}
-			platform_save_canvas(out);
-			printf("sheet %d:%d:%d frames %d -> %s\n", cat, idx, anim, n, out);
-			platform_shutdown();
-			return 0;
-		}
-		audio_init();
-		/* "town": a new run from the town, as NEW GAME starts one */
-		bool town = !strcmp(start_scene, "town");
-		const Scene *s = town ? &scene_emu : scene_by_name(start_scene);
-		int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;
-		if (setup_spec) {
-			net = !strncmp(setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
-			const char *c = strchr(setup_spec, ',');
-			if (c) sscanf(c + 1, "%d,%d,%d,%d", &folder, &threat, &helpers, &cross);
-		}
-		/* "setup": the title with the setup after NEW GAME open */
-		if (!strcmp(start_scene, "setup")) { title_setup = true; s = &scene_title; }
-		/* "summary": the title's summary of a made-up run lost at --run-depth,
-		 * or won with --setup short at layer 10 (11 on threat 10; its
-		 * unlocks said, and saved in --data-dir) */
-		if (!strcmp(start_scene, "summary")) {
-			run_new(seed ? seed : 1);
-			run_setup(net, folder, threat, helpers, cross);
-			run.depth = run_depth > 0 ? run_depth : 12;
-			run.viruses_deleted = run.depth * 6;
-			run.bosses_beaten = run.depth / 3;
-			title_new_best = run.depth > profile.best_depth;
-			title_won = run_short_last(run.depth);
-			if (title_won) {
-				snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
-				meta_run_over(true);
-			} else snprintf(title_cause, sizeof title_cause, "by HeatMan in the Graveyard");
-			title_summary = true;
-			s = &scene_title;
-		}
-		if (s == &scene_emu) {
-			run_new(seed ? seed : 1);
-			run_setup(net, folder, threat, helpers, cross);
-			if (run_depth > 0) run.depth = run_depth;
-			/* (the area its act's in the run too, whose draws read it, and
-			 * every area's guardian one navi: a scripted capture keeps its
-			 * run as the areas' draw changes) */
-			int p = (run.depth - 1) % CYCLE_LAYERS;
-			if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
-			if (guardian_navi > 0) run_debug_guardian(guardian_navi);
-		}
-		/* (later NEW GAMEs take the next seeds, so a session replays) */
-		title_seed = !seed ? 0 : !s || s == &scene_title ? seed : seed + 1;
-		if (town) emu_start_in_town = true;
-		scene_set(first_scene(s, headless));
+		rom_missing(o->rom_dir, norom_scene, msg);
+		return -1;
 	}
+	if (!gfx_init()) {
+		error_show("The ROM could not be decoded.");
+		return -1;
+	}
+	say_roms();
+	save_init();
+	devtools_veteran();
+	if (o->marks_spec >= 0) profile.marks = (uint16_t)o->marks_spec;
+	int r = tools_run();
+	if (r >= 0) {
+		platform_shutdown();
+		return r;
+	}
+	start_scene(o);
+	return -1;
+}
 
+/* The frame loop, to its end: quit signals heard, remote play's pipes
+ * opened, and the run kept where MegaMan stands; the exit code */
+static int frame_loop(const Options *o) {
 #if defined(_WIN32)
 	signal(SIGTERM, on_quit_signal);
 	signal(SIGINT, on_quit_signal);
@@ -1362,10 +470,10 @@ int main(int argc, char **argv) {
 	sa.sa_handler = on_quit_signal;
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
-	if (remote_dir && !remote_open(remote_dir)) { fprintf(stderr, "--remote: cannot open the pipes in %s\n", remote_dir); return 1; }
 #endif
-	loop.headless = headless;
-	loop.max_frames = max_frames;
+	if (!capture_start()) return 1;
+	loop.headless = o->headless;
+	loop.max_frames = o->max_frames;
 	loop.last = SDL_GetPerformanceCounter();
 #ifdef __EMSCRIPTEN__
 	/* the browser calls in once per display frame */
@@ -1378,4 +486,34 @@ int main(int argc, char **argv) {
 #endif
 	platform_shutdown();
 	return 0;
+}
+
+int main(int argc, char **argv) {
+#ifdef CW_DESKTOP
+	g_argv = argv;
+#endif
+	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .marks_spec = -1 };
+	int code = parse_args(argc, argv, &o);
+	if (code >= 0) return code;
+	setvbuf(stdout, NULL, _IOLBF, 0);
+#ifdef __3DS__
+	start_3ds(o.data_dir_given);
+#endif
+	if (o.headless && !o.force_w) { o.force_w = 1280; o.force_h = 960; }
+	data_dir_setup(o.data_dir_given);
+	char msg[512];
+	bool rom_ok = rom_at_start(&o, msg, sizeof msg);
+	/* ("--scene norom": the screen a desktop without its ROM shows, for a
+	 * capture) */
+	bool norom_scene = o.start_scene && !strcmp(o.start_scene, "norom");
+	if (norom_scene) rom_ok = false;
+#ifdef CW_DESKTOP
+	code = desktop_start(&o, &rom_ok, msg, sizeof msg);
+	if (code >= 0) return code;
+#endif
+	if (!platform_init(o.force_w, o.force_h, o.headless, o.fullscreen)) return 1;
+	player_files(o.headless, o.smooth_arg);
+	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
+	code = game_start(&o, rom_ok, norom_scene, msg);
+	return code >= 0 ? code : frame_loop(&o);
 }

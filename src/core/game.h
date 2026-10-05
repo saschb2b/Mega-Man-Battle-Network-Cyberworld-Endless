@@ -14,6 +14,8 @@ typedef struct {
 } Scene;
 
 void scene_set(const Scene *s);
+/* The scene the frames run (main.c), NULL before the first */
+const Scene *scene_current(void);
 
 extern const Scene scene_error;
 extern const Scene scene_title;

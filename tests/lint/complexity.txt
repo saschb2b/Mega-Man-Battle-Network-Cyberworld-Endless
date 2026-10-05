@@ -2,7 +2,6 @@
 # none may join and none may grow: split one, then build.py lint --update
 src/audio/audio.c:track_tick 55 76
 src/core/loot.c:from_formations 59 79
-src/core/main.c:main 169 254
 src/core/meta.c:meta_run_over 32 39
 src/core/platform.c:platform_init 28 63
 src/core/touch.c:menu_finger 40 69
@@ -26,11 +25,11 @@ src/map/props.c:learn_art 29 54
 src/map/props.c:props_learn_counter 27 71
 src/map/props.c:props_learn_pad 52 70
 src/map/tilemap.c:pick_all 27 53
-src/map/tiles.c:best 56 72
-src/net/net_gen.c:counter 46 40
-src/net/net_gen.c:landmark 35 66
-src/net/net_gen.c:room_spot_in 33 17
-src/net/net_gen.c:route_distances 27 44
+src/map/tiles_pick.c:best 56 72
+src/net/net_gen.c:ng_room_spot_in 33 17
+src/net/net_gen.c:ng_route_distances 27 44
+src/net/net_landmarks.c:ng_counter 46 40
+src/net/net_landmarks.c:ng_landmark 35 66
 src/net/net_layouts.c:catwalks 27 40
 src/net/net_layouts.c:link 34 42
 src/net/net_shapes.c:carve_shape 27 51

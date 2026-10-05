@@ -18,7 +18,7 @@ inside BN6 (it calls its own game's addresses).
 
 | Pool | How another game fills it | Cost |
 | --- | --- | --- |
-| Net areas | Its maps learned as BN6's are (`tiles.c`), its tile set and palette copied into BN6's free space | moderate |
+| Net areas | Its maps learned as BN6's are (`tiles_learn.c`), its tile set and palette copied into BN6's free space | moderate |
 | Towns | The same, from its real-world maps | moderate |
 | Music, sounds | Its MP2K songs and their voice groups into BN6's song table | low |
 | NPCs, mugshots | Its sprites as bystanders and dealers | low to moderate |
@@ -40,7 +40,7 @@ ROM in memory, and shows its battle screens.
    (`xrom_find`). Each has its layout (`XRomLayout`): its tables, found by
    their structure (`tools/rom_tables.py`) and noted in docs/ROM_DATA.md.
 2. **A map from any of them** (`area_src_load_x`): the map reader takes
-   its maps from the game's ROM; what learns from a map (`tiles.c`,
+   its maps from the game's ROM; what learns from a map (`tiles_learn.c`,
    `props.c`, `decor.c`, `stairs.c`) works on the decoded map, whichever
    game it came from, and each map keeps where it was read (`AreaSrc.rom`).
 3. **Into BN6**: another game's areas (`XRomLayout.areas`, the same

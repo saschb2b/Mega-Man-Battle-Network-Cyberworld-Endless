@@ -398,7 +398,7 @@ NetCafe desk in Green (`RomLayout.net_area[].counter`, docs/ROM_DATA.md).
 `src/map/props.c` cuts it: its second-layer tiles from the floor it stands
 on, its ring of walls, its navi one cell behind the ring's back row and the
 navi's talk centre 8 towards the front; the map's mirror image gives the
-other way it can face. The generator (`counter` in `net_gen.c`) puts it one
+other way it can face. The generator (`ng_counter` in `net_landmarks.c`) puts it one
 panel in from a room's back edge, grid -x or -y, facing the camera: the
 aisle behind it on the platform's rim (void beyond) is walled off
 (`C_SOLID`), its own panels keep their floor under the ring (`C_PROPPED`),
@@ -421,7 +421,7 @@ panel's spot 14 and 18 in from the corner as the originals set theirs,
 spawned with the layer's map (docs/ROM_DATA.md, Map objects). The
 generator composes them after the services and before the loose Mystery
 Data and bystanders, as a map is built before it is filled
-(`landmark`, `rows`, `signs` in `net_gen.c`):
+(`ng_landmark`, `ng_rows`, `ng_signs` in `net_landmarks.c`):
 
 | Area | Landmark | Rows and signs |
 | --- | --- | --- |
@@ -529,8 +529,8 @@ beside a hole. `props_learn_floor_emblem` finds them by their colour
 (BGR555 0x56C0, which the floors show nowhere else) and cuts the tiles
 that draw one where it lies on a panel with floor all round; the
 generator sets `PROP_EMBLEM`s by that rule in every room, on ground floor
-with floor all round and nothing standing there (`emblems` in
-`net_gen.c`), and `paste_emblems` draws them in place of the floor there.
+with floor all round and nothing standing there (`ng_emblems` in
+`net_landmarks.c`), and `nm_paste_emblems` (`netmap_paste.c`) draws them in place of the floor there.
 The slabs' holes follow the originals too: a line along the middle rather
 than a grid, three panels apart where the originals keep two (the floor
 between two holes one panel apart reads as a walkway to the tiles, and
@@ -559,7 +559,7 @@ to do with its cost asks no decision, so the generator ties them together.
 
 ### Detours and their data (built)
 
-`measure_detours` in `net_gen.c` walks from the way (the layer's shortest
+`ng_measure_detours` in `net_detours.c` walks from the way (the layer's shortest
 walk from the arrival to the exit or the guardian, `layer_on_way`) over
 the floor: each panel's detour is the panels walked to reach it from the
 way (`layer_detour`), and its branch the way's panel that walk leaves
@@ -633,7 +633,7 @@ knows which keys to stock (`layer_pieces_ahead`):
 BN6 sets none or one purple Mystery Data on a map (20 in Gregar), locked
 until an Unlocker opens it, holding what no shop sells: ElecSword E,
 Muramasa M, DreamAura U, a Spin; Central Area 3's lies beneath the statue.
-A layer does the same (`layer_purple`, `place_purple` in `net_gen.c`):
+A layer does the same (`layer_purple` in `net_pieces.c`, `place_purple` in `net_gen.c`):
 
 - **Where:** at the landmark's foot, the panel in front of the giant tree,
   the statue or the monument, else where the longest detour ends, first of
@@ -666,7 +666,7 @@ held, as many as the gap's panels, and Rush comes, eats one, and lies in
 the gap for good. The game runs all of it (docs/ROM_DATA.md, Rush's gaps);
 a layer gives it what its own maps do.
 
-- **The place** (`plan_gap`, `carve_gap` in `net_gen.c`): a walkway's tip
+- **The place** (`ng_plan_gap`, `ng_carve_gap` in `net_set_pieces.c`): a walkway's tip
   (else a platform's edge) off the way, at ground height, aimed across the
   gap at a pad of its own, 1-3 panels on (the area's longest: Sky's 3,
   Central's and the Undernet's 2, the rest 1), the gap's panels and the
@@ -701,8 +701,8 @@ across it, holding its one Mystery Data.
 BN6's gem marks a teleport pad: step on it and MegaMan beams to its pair
 within the map, the camera scrolling along (warp-list departure 12; 18 gems
 in the surface maps, all in pairs: Green Area 1's four pairs, Sky's three,
-Central's one). A layer's pair (`plan_teleport`, `carve_teleport_island` in
-`net_gen.c`) is one of two things, in Green, Sky and Central, where the
+Central's one). A layer's pair (`ng_plan_teleport`, `ng_carve_teleport_island` in
+`net_set_pieces.c`) is one of two things, in Green, Sky and Central, where the
 act's plan calls for one (`net_pieces.c`) and the area's maps give the gem's
 art:
 
@@ -745,7 +745,7 @@ of Gregar's Link Navis clear each. A layer sets one the same way:
   none of the area's meets one two layers in five, else none (a pocket a
   run can never open is dead weight). So the setup's Cross is a bet on the
   net's locks as well as on its battles.
-- **Its pocket** (`plan_obstacle` in `net_gen.c`): a walkway's first panel
+- **Its pocket** (`ng_plan_obstacle` in `net_set_pieces.c`): a walkway's first panel
   off a wider floor, off the way, whose closing cuts off 6 to 40 panels and
   nothing the way, a service or the guardian needs; seen from the way
   (its mouth near it). Nothing else is placed in it; its one thing, a blue
@@ -774,7 +774,7 @@ pocket's mouth as an obstacle stands (`plan_obstacle`), its one thing a
 blue data of the best quality:
 
 - **A P-Code** (comps, homepages, Central): four digits from the layer's
-  seed, which one bystander knows (`place_teller` in `net_gen.c`). He
+  seed, which one bystander knows (`ng_place_teller` in `net_set_pieces.c`). He
   stands a walk of eight panels or more from the cube and apart from
   anything else, so the key lies on another way than the lock: at the cube
   without it, MegaMan says somebody on this layer must know it, ask
@@ -815,7 +815,7 @@ BN6's arrow panels carry MegaMan one way, input held, four units a frame,
 until he is past them: Seaside Area 2 is a field of them, Sky Area 3 rings
 a platform with one-way lanes, Green's and Seaside Area 1's are single
 panels set into a walkway. A layer's lane is the quick way back
-(`plan_lane`, `carve_lane` in `net_gen.c`):
+(`plan_lane`, `carve_lane` in `net_set_pieces.c`):
 
 - **Where:** from a free ground panel five or more off the way (where a
   long detour ends, by its data) straight across one to five void panels,
@@ -836,7 +836,7 @@ panels set into a walkway. A layer's lane is the quick way back
   middle lies on its diamond. An area whose maps draw a way's panel alone
   gets lanes that way only (`LayerKit.arrows`); Sky's and Green's also
   come from Sky Area 3 and Green Area 2 (`net_area.arrow_maps`).
-- **The ride** (`lanes_place` in `netmap.c`) is BN6's own: three start
+- **The ride** (`nm_lanes_place` in `netmap_extra.c`) is BN6's own: three start
   cells across the lane's near edge and three end cells across its far one
   (docs/ROM_DATA.md, Arrow panels), as Robot Control Comp 1's lane has
   them; the game's player update carries MegaMan from one to the other.
@@ -853,14 +853,14 @@ all.
 BN6 hides floor drawn as void in Seaside Area 1, Sky Area 2, Underground 1
 and Undernet 2, from a stub's tip to a lonely pad: an HPMemory, MegaCannon
 S, AirShoes. A layer hides one the same way (`place_hidden`,
-`carve_hidden` in `net_gen.c`):
+`carve_hidden` in `net_set_pieces.c`):
 
 - **Where:** a Rush gap's site (`plan_gap`: a walkway's tip, else a
   platform's edge, off the way, aimed across one to three void panels at
   a 3 x 3 pad of its own), planned once the islands stand; in Seaside,
   Sky, the Undernet and the Nest, from the second act on, by the act's
   plan. Its pad holds a blue data of the best kind.
-- **Drawn as void, walked as floor** (`path_panel` in `netmap.c`): its
+- **Drawn as void, walked as floor** (`path_panel` in `netmap_extra.c`): its
   panels stay void in the layout, so the tiles draw the void there, and
   count as floor to the map's walls, as a Rush gap's do once Rush lies in
   it, with no wall across its mouths; the legalizer leaves them as they
