@@ -121,10 +121,15 @@ bool layer_purple(int depth, int biome, int kind) { return layer_pieces(depth, b
 
 bool layer_area_hides(int biome) { return biome >= 0 && biome < BIOME_COUNT && area_pieces[biome].hidden > 0; }
 
+int layer_keys_last(int depth, int *kind) {
+	*kind = run.side_kind == LAYER_BACK ? LAYER_BACK : LAYER_NORMAL;
+	return *kind == LAYER_BACK ? depth : depth + 2;
+}
+
 int layer_pieces_ahead(int depth, unsigned piece) {
-	int n = 0;
-	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d)
-		n += (layer_pieces(d, biome_for_depth(d), LAYER_NORMAL) & piece) != 0;
+	int n = 0, kind, last = layer_keys_last(depth, &kind);
+	for (int d = depth; d <= last && (d == depth || layer_in_act(d) > 0); ++d)
+		n += (layer_pieces(d, biome_for_depth(d), kind) & piece) != 0;
 	return n;
 }
 
@@ -159,6 +164,8 @@ int layer_regup(int depth, int kind) {
  * guardian of navis 1-5 deleted before `depth` gives his) */
 unsigned layer_crosses(int depth) {
 	if (run.cross) return 1u << run.cross;
+	/* (a trip back holds what the run holds by now, docs/HOME.md) */
+	if (run.side_kind == LAYER_BACK && run.home_depth) depth = run.home_depth;
 	unsigned held = 0;
 	for (int d = 1; d < depth; ++d)
 		if (is_boss_depth(d)) {

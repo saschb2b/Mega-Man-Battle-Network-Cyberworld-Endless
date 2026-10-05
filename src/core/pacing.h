@@ -73,4 +73,16 @@ int pacing_xguardian_hp(int hp, int act, int loop);
  * whether the heal is still certain on this cycle. */
 bool pacing_heal_certain(int depth);
 
+/* The acts a trip back from home may go to before the layer at `depth`
+ * (docs/HOME.md, going back): the last two the run has won, newest first,
+ * the Nest's never; each as the depth of its second layer, whose band and
+ * area its trip takes. How many. */
+#define PACING_OLDER 2
+int pacing_older_acts(int depth, int out[PACING_OLDER]);
+/* A guardian's HP with the Net's clock at `clock` notches (docs/HOME.md,
+ * going back): RUN_CLOCK_PERCENT more a notch, at most PACING_HP_MOST (the
+ * 12 bits the games' stats rows hold). */
+#define PACING_HP_MOST 4095
+int pacing_clock_hp(int hp, int clock);
+
 #endif

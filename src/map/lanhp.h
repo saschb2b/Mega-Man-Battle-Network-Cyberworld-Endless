@@ -22,10 +22,10 @@ void lanhp_arrival(int *x, int *y);
 void lanhp_portal(int k, int group, int number, int x, int y, int facing);
 /* The portal a warp entry (BN6_WARP_INDEX) is; -1 the arrival or none. */
 int lanhp_portal_of(int entry);
-/* Portals 0 to `open` - 1 on, the rest off (BN6's warp-off flags, which
- * entering a map clears: again after each entry). The blue pad stays
- * BN6's jack-out. */
-void lanhp_lit(int open);
+/* The portals in `lit` on (bit k portal k), the rest off (BN6's warp-off
+ * flags, which entering a map clears: again after each entry). The blue
+ * pad stays BN6's jack-out. */
+void lanhp_lit(unsigned lit);
 /* Portal `k`'s spot: the middle of its cells (world units). */
 void lanhp_portal_spot(int k, int *x, int *y);
 /* The portal whose spot holds world (x, y), or lies within `reach` world

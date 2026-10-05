@@ -3,8 +3,11 @@
  * act's last layer takes MegaMan to Lan's HP, BN6's own homepage
  * (lanhp.c), where the next act's ways are portals; the next act's first
  * layer is built for the first way as he leaves, and again for another
- * way when he steps on its portal. From Lan's HP he jacks out to the run's
- * town, as BN6 does, and the town's jack-in takes him back there. */
+ * way when he steps on its portal. The older portals beside them go back
+ * to the areas the run has won, a trip of one layer each, once a visit,
+ * each a notch on the Net's clock; its exit leads home again. From Lan's
+ * HP he jacks out to Lan's room, as BN6 does, and the PC's jack-in takes
+ * him back there. */
 #include "director_home.h"
 
 #include <stdint.h>
@@ -23,18 +26,21 @@
 #include "mapslot.h"
 #include "meta.h"
 #include "net.h"
+#include "pacing.h"
 #include "run.h"
 #include "lan_house.h"
 #include "town.h"
 
-#define HOME_WAYS 3   /* run_ways's most: the act's own, the other way, the dark way */
+#define HOME_WAYS 3   /* run_ways's most: the act's own, the other way, the dark way; the older portals after them */
 #define ARRIVE_FACE 4
 
 /* The next act's ways (run_ways), worked out from the run's seed at home
- * and again on a CONTINUE there; the one whose first layer is built */
+ * and again on a CONTINUE there; the one whose first layer is built; and
+ * the older acts a trip back may go to (pacing_older_acts), newest first */
 static RunWay ways[HOME_WAYS];
 static int nways = 1, taken;
 static bool sealed;
+static int older[PACING_OLDER], nolder;
 
 /* the act the ways lead to, 0-based: the next layer's */
 static int next_act(void) { return (run.depth - 1) % CYCLE_LAYERS / 3; }
@@ -42,9 +48,51 @@ static int next_act(void) { return (run.depth - 1) % CYCLE_LAYERS / 3; }
 static void work_out_ways(void) {
 	nways = run_ways(next_act(), meta_dark_way_open(), ways, &sealed);
 	taken = 0;
-	if (emu_debug_on())
-		for (int k = 0; k < nways; ++k) fprintf(stderr, "home: way %d area %d guardian %d (meets %d)%s\n", k, ways[k].biome, ways[k].navi,
-			ways[k].meets, sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
+	nolder = pacing_older_acts(run.depth, older);
+	if (!emu_debug_on()) return;
+	for (int k = 0; k < nways; ++k) fprintf(stderr, "home: way %d area %d guardian %d (meets %d)%s\n", k, ways[k].biome, ways[k].navi,
+		ways[k].meets, sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
+	for (int j = 0; j < nolder; ++j) fprintf(stderr, "home: back %d to depth %d area %d%s\n", j, older[j], biome_for_depth(older[j]),
+		run.back_spent >> j & 1 ? ", taken this visit" : "");
+}
+
+unsigned home_lit(void) {
+	unsigned lit = (1u << nways) - 1;
+	for (int j = 0; j < nolder; ++j) if (!(run.back_spent >> j & 1)) lit |= 1u << (HOME_WAYS + j);
+	return lit;
+}
+
+int home_older(int k) {
+	int j = k - HOME_WAYS;
+	return j < 0 || j >= nolder || run.back_spent >> j & 1 ? -1 : biome_for_depth(older[j]);
+}
+
+int director_older_portal(void) {
+	for (int k = 0; k < LANHP_PORTALS; ++k) if (home_older(k) >= 0) return k;
+	return -1;
+}
+
+bool home_go_back(int k) {
+	if (home_older(k) < 0) return false;
+	int j = k - HOME_WAYS;
+	uint8_t was_spent = run.back_spent, was_clock = run.clock;
+	run.back_spent |= (uint8_t)(1u << j);
+	run.home_depth = (uint16_t)run.depth;
+	run.depth = older[j];
+	run.side_kind = LAYER_BACK;
+	if (run.clock < 250) ++run.clock;
+	if (emu_debug_on()) fprintf(stderr, "home: back to depth %d area %d, the Net's clock at %d\n", run.depth, biome_for_depth(run.depth), run.clock);
+	if (!new_layer(false)) {
+		/* (none made: the portal goes on leading home) */
+		run.depth = run.home_depth;
+		run.home_depth = 0;
+		run.side_kind = LAYER_NORMAL;
+		run.back_spent = was_spent;
+		run.clock = was_clock;
+		return false;
+	}
+	lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, ARRIVE_FACE);
+	return true;
 }
 
 const RunWay *home_ways(int *n, bool *dark_sealed) {
@@ -63,6 +111,7 @@ static bool hp_ready(void) {
 
 bool home_take_way(int k) {
 	if (k < 0 || k >= nways) return false;
+	run.back_spent = 0;   /* (the next visit's older portals open again) */
 	if (k == taken) return true;
 	int act = next_act();
 	run.biome_order[act] = (uint8_t)ways[k].biome;
@@ -125,7 +174,9 @@ bool home_run_start(bool abandoned) {
 	return true;
 }
 
-bool home_begin(const char *beaten) {
+/* home after an act or a trip back: Lan's HP and the town installed, the
+ * ways worked out, the exit's warp to Lan's HP */
+static bool home_arrive(const char *beaten, bool back) {
 	work_out_ways();
 	if (!home_install()) return false;
 	set_down_place();
@@ -140,12 +191,17 @@ bool home_begin(const char *beaten) {
 	D.town_frames = 0;
 	D.intro_said = false;
 	D.home_beaten = beaten;
+	D.home_back = back;
 	D.home_saved = false;
 	D.home_told = 0;
 	D.hp_said = true;
 	D.portal_taken = false;
 	return true;
 }
+
+bool home_begin(const char *beaten) { return home_arrive(beaten, false); }
+
+bool home_return(void) { return home_arrive(NULL, true); }
 
 bool home_rebuild(void) {
 	work_out_ways();

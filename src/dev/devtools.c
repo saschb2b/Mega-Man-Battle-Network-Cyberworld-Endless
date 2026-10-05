@@ -40,21 +40,30 @@ static struct {
 	int toast_t;
 } M = { false, 0, -1, "", 0 };
 
+/* A switch that sets a flag, or one that takes a number: true where `t`
+ * is one */
+static bool dev_switch(const char *t) {
+	static const struct { const char *name; bool *on; } flags[] = {
+		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
+		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &guest_dev_worried },
+	};
+	static const struct { const char *name; int *value; } numbers[] = {
+		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "clock=", &dev.clock },
+		{ "slowboot=", &guest_dev_slowboot },
+	};
+	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
+		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }
+	for (size_t i = 0; i < sizeof numbers / sizeof *numbers; ++i)
+		if (!strncmp(t, numbers[i].name, strlen(numbers[i].name))) { *numbers[i].value = atoi(t + strlen(numbers[i].name)); return true; }
+	return false;
+}
+
 void devtools_parse(const char *spec) {
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", spec);
 	for (char *t = strtok(buf, ","); t; t = strtok(NULL, ",")) {
-		if (!strcmp(t, "god")) dev.god = true;
-		else if (!strcmp(t, "onehit")) dev.onehit = true;
-		else if (!strcmp(t, "quiet")) dev.quiet = true;
-		else if (!strcmp(t, "fragile")) dev.fragile = true;
-		else if (!strncmp(t, "speed=", 6)) dev.speed = atoi(t + 6);
-		else if (!strcmp(t, "powers")) dev.powers = true;
-		else if (!strcmp(t, "gem")) dev.gem = true;
-		else if (!strcmp(t, "veteran")) dev.veteran = true;
-		else if (!strcmp(t, "mapall")) dev.mapall = true;
-		else if (!strncmp(t, "duels=", 6)) dev.duels = atoi(t + 6);
-		else if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
+		if (dev_switch(t)) continue;
+		if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);
 		else if (!strncmp(t, "folder=", 7)) {
@@ -62,11 +71,7 @@ void devtools_parse(const char *spec) {
 			dev.folder = (int)strtol(t + 7, &end, 0);
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
-		else if (!strncmp(t, "pack=", 5)) dev.pack = atoi(t + 5);
-		else if (!strncmp(t, "programs=", 9)) dev.programs = atoi(t + 9);
-		else if (!strcmp(t, "worried")) guest_dev_worried = true;
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
-		else if (!strncmp(t, "slowboot=", 9)) guest_dev_slowboot = atoi(t + 9);
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;

@@ -138,10 +138,10 @@ static int answer_most(int depth, int counter) {
  * #47): one WWW-ID opens them all, as BN6's HeelNavi sells one in the
  * Undernet. */
 static int skull_doors_ahead(int depth) {
-	int doors = 0;
-	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
+	int doors = 0, kind, last = layer_keys_last(depth, &kind);
+	for (int d = depth; d <= last && (d == depth || layer_in_act(d) > 0); ++d) {
 		int b = biome_for_depth(d);
-		doors += (layer_pieces(d, b, LAYER_NORMAL) & PIECE_CUBE) && layer_cube_kind(d, b, LAYER_NORMAL) == BLOCK_SKULL;
+		doors += (layer_pieces(d, b, kind) & PIECE_CUBE) && layer_cube_kind(d, b, kind) == BLOCK_SKULL;
 	}
 	return doors;
 }
@@ -149,11 +149,11 @@ static int skull_doors_ahead(int depth) {
 /* The Rush gaps the act holds from layer `depth` on, and the longest's
  * panels in `longest`. */
 static int rush_gaps_ahead(int depth, int *longest) {
-	int gaps = 0;
+	int gaps = 0, kind, last = layer_keys_last(depth, &kind);
 	*longest = 0;
-	for (int d = depth; d <= depth + 2 && (d == depth || layer_in_act(d) > 0); ++d) {
+	for (int d = depth; d <= last && (d == depth || layer_in_act(d) > 0); ++d) {
 		int b = biome_for_depth(d);
-		if (!(layer_pieces(d, b, LAYER_NORMAL) & PIECE_RUSH)) continue;
+		if (!(layer_pieces(d, b, kind) & PIECE_RUSH)) continue;
 		++gaps;
 		if (layer_rush_len(d, b) > *longest) *longest = layer_rush_len(d, b);
 	}

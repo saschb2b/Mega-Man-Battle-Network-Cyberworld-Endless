@@ -99,7 +99,7 @@ void second_update(void) {
 	director_megaman_hp(&S2.hp, &S2.max_hp);
 	S2.zenny = emu_read32(BN6_ZENNY);
 	S2.bugfrags = emu_read32(BN6_BUGFRAGS);
-	S2.depth = run.depth;
+	S2.depth = run_reached();
 	snprintf(S2.area, sizeof S2.area, "%s", S2.town ? director_place_name() : guardian_area_in_text(run.biome, run.side_kind));
 	Panel p = panel_for(c);
 	if (p == PANEL_FOLDER) second_read_folder();

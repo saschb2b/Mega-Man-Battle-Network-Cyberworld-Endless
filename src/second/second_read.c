@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "guardians.h"
+#include "lan_house.h"
 #include "navicust.h"
 #include "powers.h"
 #include "run.h"
@@ -208,12 +209,21 @@ void second_read_battle(void) {
 	S2.beast = S2.synchro = false;
 }
 
-/* The PET's home: the run's next step (in the town where R jacks MegaMan
- * in, on a layer its guardian or its exit) and its setup */
+/* where at home Lan or MegaMan stands, for its next step (second_home_next) */
+static int home_where(void) {
+	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER);
+	if (director_in_hp()) return SECOND_HOME_HP;
+	if (lan_house_map(group, number)) return number == LAN_ROOM ? SECOND_HOME_ROOM : SECOND_HOME_UP;
+	return town_is_home() ? SECOND_HOME_UP : SECOND_HOME_PORT;
+}
+
+/* The PET's home: the run's next step (at home where the way on is, on a
+ * layer its guardian or its exit) and its setup */
 void second_read_home(void) {
-	if (S2.town) second_home_next(town_info()->landmark_at, S2.home_next, sizeof S2.home_next);
+	if (S2.town) second_home_next(home_where(), town_info()->landmark_at, S2.home_next, sizeof S2.home_next);
 	else second_layer_next(director_guardian_waiting(), S2.home_next, sizeof S2.home_next);
 	second_home_setup(S2.home_setup, sizeof S2.home_setup);
+	second_home_clock(S2.home_clock, sizeof S2.home_clock);
 }
 
 /* MegaMan's status: his max HP and its base (HPMemory counts into it,

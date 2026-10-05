@@ -13,10 +13,10 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define RUN_MAGIC 0x43574537u /* "CWE7": the board's programs (docs/NAVICUST.md) */
+#define RUN_MAGIC 0x43574538u /* "CWE8": the Net's clock and a trip back (docs/HOME.md) */
 /* (Run is saved as it lies in memory: a change to it does not compile
  * until someone decides about the saves before it, issue #19) */
-_Static_assert(sizeof(Run) == 96, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
+_Static_assert(sizeof(Run) == 100, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
 	"previous one where it can carry over), then set this size");
 #define PROFILE_MAGIC 0x43575032u
 
@@ -182,8 +182,9 @@ void run_new_varied(uint32_t seed) {
 
 void profile_record_run(void) {
 	profile.runs++;
-	profile.last_depth = run.depth;
-	if (run.depth > profile.best_depth) profile.best_depth = run.depth;
+	/* (a run ended on a trip back reached its own layer: docs/HOME.md) */
+	profile.last_depth = run_reached();
+	if (run_reached() > profile.best_depth) profile.best_depth = run_reached();
 	profile.bosses += run.bosses_beaten;
 	profile.viruses += run.viruses_deleted;
 	if (run.secret_cleared) profile.secret_clears++;

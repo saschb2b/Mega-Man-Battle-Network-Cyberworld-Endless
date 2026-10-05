@@ -21,6 +21,9 @@ bool director_in_town(void);
 bool director_in_hp(void);
 /* Where Lan or MegaMan is at home: "Lan's HP", or the town's name. */
 const char *director_place_name(void);
+/* The first older portal open in Lan's HP (docs/HOME.md, going back): its
+ * number (lanhp.h), -1 none. */
+int director_older_portal(void);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any

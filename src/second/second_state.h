@@ -46,6 +46,7 @@ typedef struct {
 	bool town;                    /* in the real world (else on a layer) */
 	char home_next[96];           /* ... the run's next step there (issue #79) */
 	char home_setup[96];          /* ... and its setup */
+	char home_clock[48];          /* ... and the Net's clock, empty before a trip back (docs/HOME.md) */
 	/* a shop (issue #78): the entry under its cursor, what the run holds of it */
 	int sh_kind, sh_id, sh_code, sh_currency;
 	int sh_variant;               /* ... a program's: the variant of its colour */

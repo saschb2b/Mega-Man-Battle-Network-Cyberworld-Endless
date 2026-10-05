@@ -161,9 +161,11 @@ bool director_guest_guardian(int navi, int version) {
 	if (!guardian_older(navi) || !D.active) return false;
 	uint16_t folder[BN6_FOLDER_ENTRIES];
 	GuestMegaMan mm = guest_megaman(folder);
-	/* (his HP held to the act's band as he spawns, and his results screen
-	 * paying an Unlocker's price, as BN6's guardians' battles do) */
-	GuestBoss boss = { guardian_older_ai(navi), version, xguardian_hp_fought(navi, version, run.depth), encounter_boss_zenny() };
+	/* (his HP held to the act's band as he spawns, a tenth more each notch
+	 * of the Net's clock, docs/HOME.md, and his results screen paying an
+	 * Unlocker's price, as BN6's guardians' battles do) */
+	GuestBoss boss = { guardian_older_ai(navi), version, pacing_clock_hp(xguardian_hp_fought(navi, version, run.depth), run.clock),
+		encounter_boss_zenny() };
 	D.map_shown = false;
 	if (!guest_boss_battle(&boss, &mm)) {
 		if (emu_debug_on()) fprintf(stderr, "guest: guardian %s could not be fought in its engine\n", guardian(navi)->name);

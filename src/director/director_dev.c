@@ -28,6 +28,9 @@ const char *director_dev_talks;
 
 bool director_dev_next_layer(void) {
 	if (!director_on_map()) return false;
+	/* (from a trip back, the run's own next: docs/HOME.md) */
+	if (run.home_depth) run.depth = run.home_depth - 1;
+	run.home_depth = 0;
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
 	return director_start_layer();
@@ -58,6 +61,8 @@ bool director_dev_warp_cell(int x, int y) {
 bool director_dev_guardian(void) {
 	if (!director_on_map()) return false;
 	/* the next guardian's layer, arriving in the room before its arena */
+	if (run.home_depth) run.depth = run.home_depth - 1;
+	run.home_depth = 0;
 	do run.depth++; while (!is_boss_depth(run.depth));
 	run.side_kind = LAYER_NORMAL;
 	if (!director_start_layer()) return false;

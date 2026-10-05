@@ -461,9 +461,12 @@ act MegaMan comes back to it, and its pink pad and link squares light up
 as the ways on, the next act's areas. MegaMan has not been through them
 yet, so beside one he only says what he reads through it, the data's
 feel and a strong Navi's signal, naming the Navi once he has battled
-him. R there asks to jack out, back to Lan's PC; down the stairs and out
-of the front door is Central Town, Capcom's own, with shops, houses,
-townsfolk to talk to and signs to read.
+him. Two more links lead back to the areas already won: a layer of an
+old area to stock up in, each once a visit. But while MegaMan goes back,
+the Net keeps copying: every trip moves the Net's clock a notch, and each
+guardian after it has a tenth more HP. R there asks to jack out, back to
+Lan's PC; down the stairs and out of the front door is Central Town,
+Capcom's own, with shops, houses, townsfolk to talk to and signs to read.
 
 <p align="center">
 <img src="docs/screenshots/home-pc.png" width="240" alt="Lan at his PC in his room: Jack in! MegaMan, Execute!!">

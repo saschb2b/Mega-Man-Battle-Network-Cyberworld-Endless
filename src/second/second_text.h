@@ -36,11 +36,18 @@ const char *second_run_line(bool bug);
 /* The board's rules, in a line */
 const char *second_board_rules(void);
 
-/* The town's next step: where R jacks MegaMan in (`landmark_at`, the
- * town's "bird statue on the plaza"), into `out` */
-void second_home_next(const char *landmark_at, char *out, size_t n);
-/* The run's setup in a line ("Short net, threat 2, HeatCross"), into `out` */
+/* Home's next step where Lan or MegaMan stands (docs/HOME.md): in Lan's
+ * HP the pink pad, in his room his PC, in his house and home's town the PC
+ * up in his room, in a town not home its port (`landmark_at`, "bird statue
+ * on the plaza"); into `out` */
+enum { SECOND_HOME_HP, SECOND_HOME_ROOM, SECOND_HOME_UP, SECOND_HOME_PORT };
+void second_home_next(int where, const char *landmark_at, char *out, size_t n);
+/* The run's setup in lines ("Short net, threat 2|Standard folder,
+ * HeatCross"), into `out` */
 void second_home_setup(char *out, size_t n);
+/* The Net's clock (docs/HOME.md, going back): its notches and what they
+ * cost, empty before the first trip back; into `out` */
+void second_home_clock(char *out, size_t n);
 /* A row of the PET's: its name and its value */
 typedef struct { const char *name; char value[24]; } SecondRow;
 /* The profile's record: how many rows of `most` */

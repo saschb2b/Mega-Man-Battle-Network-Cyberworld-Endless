@@ -79,7 +79,10 @@ int run_guardian(int biome) {
 	return x ? x : biome >= 0 && biome < MAX_BIOMES ? run.boss_order[biome] : 0;
 }
 
-int run_layer_guardian(void) { return run.side_kind == LAYER_NORMAL ? run_guardian(run.biome) : run.boss_order[run.biome]; }
+int run_layer_guardian(void) {
+	if (run.side_kind == LAYER_BACK) return 0;
+	return run.side_kind == LAYER_NORMAL ? run_guardian(run.biome) : run.boss_order[run.biome];
+}
 
 void run_debug_guardian(int navi) {
 	if (guardian_older(navi)) run_debug_xguardian = navi;

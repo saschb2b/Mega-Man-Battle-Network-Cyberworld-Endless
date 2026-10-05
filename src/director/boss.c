@@ -210,6 +210,8 @@ static void fight_begin(void) {
 	 * playtester ran from CircusMan at 5 HP, healed beside the arena and
 	 * came back to a fresh fight) */
 	e.held = true;
+	/* (a tenth more HP each notch of the Net's clock, docs/HOME.md) */
+	emu_battle_clock(navi_hp(e.foes[0].family, e.foes[0].version));
 	emu_battle_force(&e);
 }
 

@@ -69,6 +69,7 @@ typedef struct {
 	bool hp_said;          /* ... MegaMan has said what Lan's HP is, this run */
 	bool portal_taken;     /* ... a portal's way is under way */
 	const char *home_beaten;   /* ... the guardian deleted on the way */
+	bool home_back;        /* ... home from a trip back (docs/HOME.md, going back), not an act */
 	bool home_saved;       /* ... and the run saved there */
 	unsigned home_told;    /* ... the portals MegaMan has named this visit, a bit each */
 	bool town_seen;        /* ... and has got there */

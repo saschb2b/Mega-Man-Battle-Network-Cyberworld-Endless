@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Going back, priced by the Net's clock** (issue #95, the epic #84).
+  In Lan's HP two more links go back to the last two areas the run has
+  won: one layer of the area at its act's tier, with the Net Dealer and a
+  Recovery Mr.Prog, its battles and Mystery Data, a new layout each time,
+  and its exit pad leads home again. Each link opens once a visit. The
+  price: while MegaMan goes back, the Net keeps copying, so every trip
+  moves the Net's clock a notch, and every guardian after it has a tenth
+  more HP (BlastMan's 400 is 520 after three trips; two trips cost about
+  an act of a guardian's HP). MegaMan says so beside the link before the
+  first trip, the trip's card and the second screen's home panel show the
+  clock, L names it in Lan's HP and before a guardian, and Dad's report
+  counts the trips. A trip holds no HPMemory, ScrtData or RegUp: what makes
+  MegaMan stronger stays where the run goes on. Also: L at home names the
+  way on from each place (the PC, the stairs, Lan's front door, the pink
+  pad) and the way-on arrow points there, and the second screen's home
+  panel says where to go at home.
 - **Lan's HP, the warp zone, and Central Town home** (issues #85, #86,
   #93 and #94, the epic #84).
   Every jack-in now arrives in BN6's own Lan's HP, MegaMan's homepage,

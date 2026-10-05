@@ -243,6 +243,9 @@ void director_describe(FILE *f) {
 	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	/* (a trip back, and the Net's clock: docs/HOME.md) */
+	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
+	if (run.clock) fprintf(f, "clock %d\n", run.clock);
 	/* (named as the game shows him: a playtester reads this; a dev's
 	 * state, CYBERWORLD_STATE_POS, names him always, as the scripts that
 	 * find a guardian's seed read it) */

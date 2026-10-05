@@ -74,7 +74,9 @@ static bool mystery_content(const NetObj *o, uint8_t out[8]) {
 	int roll = rng_range(0, 99);
 	char code = '*';
 	int kind = 3, value = 100;
-	if (o->param == 2 && run.depth >= 4 && rng_range(0, 99) < HP_MEMORY_CHANCE) {
+	/* (none on a trip back: the run's HPMemory lie where it goes on,
+	 * docs/HOME.md) */
+	if (o->param == 2 && run.depth >= 4 && run.side_kind != LAYER_BACK && rng_range(0, 99) < HP_MEMORY_CHANCE) {
 		const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_HP_MEMORY, 0, 0, 0 };
 		for (int i = 0; i < 8; ++i) out[i] = c[i];
 		return true;
@@ -632,9 +634,10 @@ static void install_begin(Install *in) {
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */
 	in->counter = counter_element(run.depth, run.biome, run_layer_guardian());
-	/* ScrtData lie in deep layers until three are out there */
+	/* ScrtData lie in deep layers until three are out there (none on a
+	 * trip back, docs/HOME.md) */
 	rolls_of(0x100);
-	bool fragment = !run.secret_cleared && run.fragments < 3 &&
+	bool fragment = !run.secret_cleared && run.fragments < 3 && run.side_kind != LAYER_BACK &&
 		(run.side_kind == LAYER_UNDERNET || run.depth >= 4) && rng_range(0, 99) < FRAGMENT_CHANCE;
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * META.md: one a run, a colour the profile lacks, kept for good) */

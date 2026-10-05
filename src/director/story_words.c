@@ -43,6 +43,9 @@ void arrival_words(void) {
 			"@M Right. Back to the main path!");
 	else if (run.side_kind == LAYER_SECRET)
 		snprintf(D.beat, sizeof D.beat, "@M Whoa... So this is the Secret Area.|@M Something strong is in here. I can feel it...|@L *gulp* Let's go,MegaMan!");
+	/* (a trip back from home, docs/HOME.md: an area already won) */
+	else if (run.side_kind == LAYER_BACK)
+		snprintf(D.beat, sizeof D.beat, "@M We're back in %s,Lan!|@M It feels easier now...|@L 'Cause we got stronger! Let's stock up!", area);
 	else if (run.depth == 1 && profile.runs >= 2)
 		snprintf(D.beat, sizeof D.beat, "@M %s this time,Lan!|@L Alright! Let's find the exit pad!", area);
 	else if (run.depth == 1)
@@ -83,6 +86,7 @@ void area_card(void) {
 	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
 	if (run.side_kind == LAYER_UNDERNET) snprintf(act, sizeof act, "Through a dark warp");
 	else if (run.side_kind == LAYER_SECRET) snprintf(act, sizeof act, "Beyond the sealed gate");
+	else if (run.side_kind == LAYER_BACK) snprintf(act, sizeof act, "A trip back");
 	else if (biome == BIOME_NEST && run_short_nest(run.depth) && run.depth > SHORT_LAYERS) snprintf(act, sizeof act, "Below the Nest");
 	else if (biome == BIOME_NEST && net_version() > 1) snprintf(act, sizeof act, "The bottom of Net V%d", net_version());
 	else if (biome == BIOME_NEST) snprintf(act, sizeof act, "The bottom of the Net");
@@ -104,6 +108,8 @@ void area_card(void) {
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())
 		snprintf(ahead, sizeof ahead, "%s deleted", guardian(D.objs.guardian.navi)->name);
+	/* (a trip back: what it has cost, docs/HOME.md) */
+	if (run.side_kind == LAYER_BACK) snprintf(ahead, sizeof ahead, "The Net's clock: %d", run.clock);
 	/* (and where its battles are another game's, so: the owner's call for
 	 * issue #65, the card and L saying it, no card of its own at the
 	 * switch) */

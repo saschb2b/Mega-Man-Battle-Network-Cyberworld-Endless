@@ -106,6 +106,7 @@ void map_label(void) {
 	if (D.town) snprintf(name, sizeof name, "%s", home_place_name());
 	else if (run.side_kind == LAYER_UNDERNET) snprintf(name, sizeof name, "Undernet");
 	else if (run.side_kind == LAYER_SECRET) snprintf(name, sizeof name, "Secret Area");
+	else if (run.side_kind == LAYER_BACK) snprintf(name, sizeof name, "%s", guardian_area_short(run.biome));
 	else if (run.biome == BIOME_NEST) snprintf(name, sizeof name, "Cybeast Nest");
 	else snprintf(name, sizeof name, "Layer %d", run.depth);
 	/* the PET's PLACE says where, beside the layer ("ACDC HP 8"): a
@@ -252,7 +253,8 @@ void director_net_biome_arg(const char *v) {
 
 static int layer_area(int *biome) {
 	const NetAreaDef *x = director_debug_area >= 0 ? net_area_def(director_debug_area) : NULL;
-	if (!x) return run.side_kind == LAYER_NORMAL ? run_dress(*biome) : *biome;
+	/* (a trip back as its act was dressed) */
+	if (!x) return run.side_kind == LAYER_NORMAL || run.side_kind == LAYER_BACK ? run_dress(*biome) : *biome;
 	*biome = x->like;
 	return director_debug_area;
 }
@@ -313,6 +315,8 @@ static bool build_layer(void) {
 	run.biome = biome;
 	D.layer_tiles = tiles;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
+	/* (each trip back another layer: the clock counts them) */
+	if (run.side_kind == LAYER_BACK) run.layer_seed ^= (uint32_t)run.clock * 0x9E3779B9u;
 	LayerKit kit;
 	netmap_kit(tiles, &kit);
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);

@@ -787,7 +787,7 @@ static void summary_draw(int x0, int y0) {
 	if (lan) sprite_draw_frame(lan, 0, 0, x0 + SUMMARY_FACE_X, y0 + SUMMARY_FACE_Y, false, 0, 0);
 	int lx = x0 + 70, rx = x0 + CORE_W - 14;
 	text_draw(lx, y0 + 40, "Reached", WHITE, TEXT_LEFT);
-	text_drawf(rx, y0 + 40, WHITE, TEXT_RIGHT, "Layer %d", run.depth);
+	text_drawf(rx, y0 + 40, WHITE, TEXT_RIGHT, "Layer %d", run_reached());
 	text_draw(lx, y0 + 52, "Viruses deleted", WHITE, TEXT_LEFT);
 	text_drawf(rx, y0 + 52, WHITE, TEXT_RIGHT, "%d", run.viruses_deleted);
 	text_draw(lx, y0 + 64, "Navis deleted", WHITE, TEXT_LEFT);
@@ -823,7 +823,7 @@ static void summary_draw(int x0, int y0) {
 		 * next briefing reads, before a new best, which "New best!"
 		 * says above; "We've got BlastMan's battle data now!" ran off
 		 * the screen's sides) */
-		int said = title_learned[0] ? SUMMARY_LEARNED : title_new_best ? SUMMARY_BEST : run.depth <= 2 ? SUMMARY_ROUGH : SUMMARY_FURTHER;
+		int said = title_learned[0] ? SUMMARY_LEARNED : title_new_best ? SUMMARY_BEST : run_reached() <= 2 ? SUMMARY_ROUGH : SUMMARY_FURTHER;
 		text_draw(x, y0 + 114 - 2 * up, summary_words(said), WHITE, TEXT_CENTER);
 	}
 	/* ... else the closest goal */

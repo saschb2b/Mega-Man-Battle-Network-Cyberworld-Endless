@@ -104,13 +104,14 @@ int lanhp_portal_of(int entry) {
 	return -1;
 }
 
-void lanhp_lit(int open) {
+void lanhp_lit(unsigned lit) {
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
 		int e = portal_entry[k];
-		if (k < open) flag_clear(BN6_FLAG_WARP_OFF + e);
+		bool on = lit >> k & 1;
+		if (on) flag_clear(BN6_FLAG_WARP_OFF + e);
 		else flag_set(BN6_FLAG_WARP_OFF + e);
 		if (e < FIRST_LINK) continue;
-		if (k < open) flag_set(LINK_OPEN + e - FIRST_LINK);
+		if (on) flag_set(LINK_OPEN + e - FIRST_LINK);
 		else flag_clear(LINK_OPEN + e - FIRST_LINK);
 	}
 }

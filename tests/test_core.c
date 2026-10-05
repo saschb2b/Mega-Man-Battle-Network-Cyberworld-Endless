@@ -1072,6 +1072,19 @@ static void test_pacing(void) {
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
 		!pacing_heal_certain(19) && !pacing_heal_certain(1 + CYCLE_LAYERS), "a heal on each act's middle layer and the first");
 	CHECK(pacing_heal_certain(2 + CYCLE_LAYERS) && !pacing_heal_certain(2 + 2 * CYCLE_LAYERS), "the third cycle drops it");
+	/* the Net's clock (docs/HOME.md, going back): a tenth more a notch on a
+	 * guardian's HP, the stats rows' top kept */
+	CHECK(pacing_clock_hp(400, 0) == 400 && pacing_clock_hp(400, 3) == 520 && pacing_clock_hp(4000, 2) == PACING_HP_MOST &&
+		pacing_clock_hp(-1, 2) == -1, "the clock's notches on a guardian's HP");
+	/* ... and the acts a trip back goes to: the last two won, newest first,
+	 * as their middle layers, never the Nest's */
+	int older[PACING_OLDER];
+	CHECK(pacing_older_acts(1, older) == 0 && pacing_older_acts(3, older) == 0, "no trip back before an act is won");
+	CHECK(pacing_older_acts(4, older) == 1 && older[0] == 2, "after act 1, its middle layer");
+	CHECK(pacing_older_acts(10, older) == 2 && older[0] == 8 && older[1] == 5, "before the short net's Nest, acts 3 and 2");
+	CHECK(pacing_older_acts(19, older) == 2 && older[0] == 17 && older[1] == 14, "before the endless Nest, the Graveyard and the Undernet");
+	CHECK(pacing_older_acts(20, older) == 2 && older[0] == 17 && older[1] == 14, "a new cycle: the last one's acts, not its Nest");
+	CHECK(pacing_older_acts(23, older) == 2 && older[0] == 21 && older[1] == 17, "and on into the cycle before");
 }
 
 /* The town's moves (src/world/townmath.h): a moved tile shows the same
@@ -1277,6 +1290,15 @@ static void test_home_words(void) {
 	const char *ports[3] = { home_portal_name(0), home_portal_name(2), home_portal_name(4) };
 	for (int k = 0; k < 5; ++k) CHECK(home_portal_name(k)[0], "portal %d has a name", k);
 	check_talk("Lan's HP's first time", home_hp_words());
+	/* (going back, docs/HOME.md: the older portals, the way home, L there) */
+	for (int clock = 0; clock <= 6; ++clock) {
+		char what[80];
+		snprintf(what, sizeof what, "home again at clock %d", clock);
+		check_talk(what, home_back_words(clock));
+		for (int first = 0; first <= 1; ++first) check_talk(what, home_hp_status("to the upper right", first, clock));
+		for (int b = 0; b < BIOME_COUNT; ++b)
+			for (int taught = 0; taught <= 1; ++taught) check_talk(what, home_back_portal_words(b, taught, clock));
+	}
 	for (int mode = RUN_SHORT; mode <= RUN_ENDLESS; ++mode)
 		for (int depth = 4; depth <= 20; depth += 3) {
 			run.mode = (uint8_t)mode;

@@ -637,10 +637,10 @@ static void rows_fit(const int *ids, int n) {
 	}
 }
 
-/* A guardian's HP held to his act's band: his stats row's HP written in the
- * ROM copy before his battle, as he spawns from it (seen in romlab:
- * KnightMan's V1 row written 450 spawned him at 450 of 450), and its own
- * written back as the battle ends */
+/* A guardian's HP held to his act's band, the Net's clock's on it: his
+ * stats row's HP written in the ROM copy before his battle, as he spawns
+ * from it (seen in romlab: KnightMan's V1 row written 450 spawned him at
+ * 450 of 450), and its own written back as the battle ends */
 static uint32_t capped_at;
 static uint16_t capped_was;
 
@@ -653,7 +653,7 @@ static void boss_cap(const GuestBoss *b) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
 	uint32_t at = navi_stats(d, b->ai, b->version);
 	uint16_t w = at ? (uint16_t)(d[at] | d[at + 1] << 8) : 0;
-	if (!at || b->hp_cap <= 0 || (w & 0xFFF) <= b->hp_cap) return;
+	if (!at || b->hp_cap <= 0 || (w & 0xFFF) == b->hp_cap) return;
 	capped_at = 0x08000000u + at;
 	capped_was = w;
 	wr16(capped_at, (uint16_t)((w & 0xF000) | (b->hp_cap & 0xFFF)));

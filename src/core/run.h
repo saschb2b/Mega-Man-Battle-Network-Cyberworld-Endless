@@ -43,6 +43,11 @@ typedef struct {
 	uint8_t codes[3];        /* the folder's codes as the layer was made, most held first: code + 1 (loot_fit_code) */
 	/* (new since the "CWE6" save) */
 	uint8_t programs[8];     /* the NaviCust programs on MegaMan's board as the layer was made (variant: program * 4 + v), 0 ends */
+	/* (new since the "CWE7" save) the Net's clock (docs/HOME.md, going
+	 * back): the trips back taken, each a notch on the guardians ahead */
+	uint8_t clock;
+	uint8_t back_spent;      /* the older portals taken on this visit home, a bit each (pacing_older_acts) */
+	uint16_t home_depth;     /* on a trip back, the run's own layer it comes home to (depth then the older act's), else 0 */
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */
@@ -73,7 +78,8 @@ int run_dress(int biome);
  * The navi numbers guardians.h names. */
 int run_guardian(int biome);
 /* ... and the guardian of the layer MegaMan stands on: a side layer's
- * (an Undernet detour, the Secret Area) is run.boss_order's */
+ * (an Undernet detour, the Secret Area) is run.boss_order's, a trip back's
+ * none (its guardian deleted, docs/HOME.md) */
 int run_layer_guardian(void);
 /* Another game's Navi guarding act `act` (0-based) in area `biome`, 0 for
  * none (docs/BOSSES.md, BN5's Navis): where an area of his game dresses it
@@ -110,6 +116,11 @@ int run_route_dark(int act, int avoid, int *navi);
  * The act after the net's last is the Nest's: the Nest its one way. */
 typedef struct { int biome, navi, meets; } RunWay;
 int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed);
+/* A guardian's HP more, in percent, each notch of the Net's clock
+ * (pacing_clock_hp, docs/HOME.md). */
+#define RUN_CLOCK_PERCENT 10
+/* The run's own depth: on a trip back, the layer it comes home to. */
+static inline int run_reached(void) { return run.home_depth ? run.home_depth : run.depth; }
 /* Whether depth is the short net's Nest, the run's last layer (on threat
  * 10 its last two: the first guardian leads down to a second). */
 static inline bool run_short_nest(int depth) { return run.mode == RUN_SHORT && depth >= SHORT_LAYERS; }

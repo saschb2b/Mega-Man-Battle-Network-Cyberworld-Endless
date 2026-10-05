@@ -257,6 +257,30 @@ static int first_cycle_guardians(FILE *out) {
 	return flagged;
 }
 
+/* The Net's clock (docs/HOME.md, going back): each act's guardians as the
+ * first cycle draws them, their median HP, at 0 to 6 notches (a trip back
+ * each), beside the next act's band: how many trips back make an act's
+ * guardian a next act's */
+static void clock_report(FILE *out) {
+	fprintf(out, "\nThe Net's clock: the median guardian's HP by act (500 runs) at 0-6 notches, %d%% more a notch; the next act's band.\n",
+		RUN_CLOCK_PERCENT);
+	for (int act = 0; act < 7; ++act) {
+		static int hps[500];
+		for (uint32_t seed = 1; seed <= 500; ++seed) {
+			run_new(seed * 2654435761u);
+			int b = act < 6 ? run.biome_order[act] : BIOME_NEST, navi = run.boss_order[b];
+			hps[seed - 1] = navi_hp(navi, pacing_guardian_version(navi, act, 0, b == BIOME_NEST, navi_hp));
+		}
+		qsort(hps, 500, sizeof *hps, cmp_int);
+		fprintf(out, "act %d:", act + 1);
+		for (int n = 0; n <= 6; ++n) fprintf(out, " %d", pacing_clock_hp(hps[250], n));
+		int lo, hi;
+		pacing_guardian_band(act + 1 < 7 ? act + 1 : 6, &lo, &hi);
+		if (act < 5) fprintf(out, "  (act %d's band %d-%d)", act + 2, lo, hi);
+		fprintf(out, "\n");
+	}
+}
+
 /* The acts (a bit each, 0-based) BN6 area `biome` can come in on the first
  * cycle: the four of the surface by their pools (pacing_area_pool), the
  * Undernet's and the Graveyard's */
@@ -327,6 +351,7 @@ int pacing_report_run(const char *path) {
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
 	flagged += first_cycle_guardians(out) + older_guardians(out);
+	clock_report(out);
 	elements_report(out);
 	/* what the Net Dealers answer each act with, per element (every one a
 	 * straight hit; a "+" is over the act's cap, the lightest found) */

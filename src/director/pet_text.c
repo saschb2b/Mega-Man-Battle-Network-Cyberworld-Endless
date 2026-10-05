@@ -267,6 +267,19 @@ static const char *cross_words(void) {
 	return buf;
 }
 
+/* The report's where: the layer and the act's area, or a trip back
+ * (docs/HOME.md); the new length */
+static int where_text(char *s, int k, int size, const char *area) {
+	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
+	if (run.side_kind == LAYER_BACK) return ADD("You went back to %s.", area);
+	if (run.mode == RUN_SHORT) ADD("You're on layer %d of %d.", run.depth, SHORT_LAYERS + (run.threat >= 10));
+	else ADD("You're on layer %d.", run.depth);
+	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD(" Act %d is %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
+	else ADD(" You're in %s.", area);
+	#undef ADD
+	return k;
+}
+
 /* The dive as the lab sees it: where, what waits, what was brought (the
  * SciLab link that Comm had opened, as Dad's mail: BN6's own screen, its
  * own music) */
@@ -275,10 +288,7 @@ static void report_text(char *s, int size) {
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	ADD("Lan,here's your dive as the lab sees it.\f");
 	const char *area = guardian_area_name(run.side_kind == LAYER_UNDERNET ? BIOME_UNDERNET : run.side_kind == LAYER_SECRET ? BIOME_SECRET : run.biome);
-	if (run.mode == RUN_SHORT) ADD("You're on layer %d of %d.", run.depth, SHORT_LAYERS + (run.threat >= 10));
-	else ADD("You're on layer %d.", run.depth);
-	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD(" Act %d is %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
-	else ADD(" You're in %s.", area);
+	k = where_text(s, k, size, area);
 	int navi = run.side_kind == LAYER_NORMAL ? run_guardian(run.biome) : 0;
 	/* (made again as his battle ends: a playtester read "guards this
 	 * act's end" after deleting the Nest's last guardian) */
@@ -290,6 +300,7 @@ static void report_text(char *s, int size) {
 	else if (navi && director_guardian_heard()) ADD("\fThe Net says %s guards this act.", guardian(navi)->name);
 	else if (navi) ADD("\fA strong Navi guards this act's end. We don't know who yet.");
 	ADD("\fYou've found %d of 3 ScrtData%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ",and the gate's open" : "");
+	if (run.clock) ADD("\fTrips back: %d. The Net kept copying: the guardians ahead are %d%% tougher.", run.clock, run.clock * RUN_CLOCK_PERCENT);
 	ADD("\fYou brought the %s folder%s", meta_folder(run.folder)->name, cross_words());
 	ADD("\fThe threat is %d.", run.threat);
 	if (run.helpers & ((1 << HELPERS) - 1)) {

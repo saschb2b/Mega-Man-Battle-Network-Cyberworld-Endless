@@ -37,7 +37,7 @@ typedef struct {
 	 * how many it held as the current run began */
 	uint8_t library[40];
 	uint16_t library_start;
-	uint8_t last_town;        /* the last new run's town, style + 1 (town_style_for) */
+	uint8_t last_town;        /* (unused since Central Town is home, docs/HOME.md: the last new run's town, style + 1) */
 	uint8_t programs_found[8];   /* NaviCust programs MegaMan has had in any run, a bit each (docs/NAVICUST.md, 7) */
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
@@ -79,6 +79,7 @@ typedef struct {
 	uint8_t cross_old_told;   /* ... and, arriving where its battles are, that the older net had no Crosses */
 	uint8_t soul_taught;      /* ... and what a Soul of the older net does, at the first Guardian Data that gave one (docs/META.md, Souls) */
 	uint8_t dark6_taught;     /* ... and BN6's own DarkChips (docs/META.md): all of a BN6 flame's words, all of their price after a battle (DARK6_*) */
+	uint8_t back_taught;      /* ... and what a trip back costs, the Net's clock, at the first older portal (docs/HOME.md) */
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

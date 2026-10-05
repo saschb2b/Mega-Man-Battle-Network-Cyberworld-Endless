@@ -80,7 +80,12 @@ typedef struct {
 	int kind;
 } Room;
 
-enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET };
+/* A layer's kind: the run's own, a side layer (an Undernet detour, the
+ * Secret Area), or a trip back from home to an area the run has won
+ * (docs/HOME.md, going back: as its act's second layer was, its services,
+ * battles and data, no guardian, duel, gate or dark warp; its exit leads
+ * home). */
+enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET, LAYER_BACK };
 
 /* Which way a stair climbs: towards grid -x or -y (see src/map/stairs.h). */
 enum { STAIR_UP_NX, STAIR_UP_NY };
@@ -242,6 +247,9 @@ int layer_cube_kind(int depth, int biome, int kind);
 bool layer_purple(int depth, int biome, int kind);
 /* Whether `biome`'s layers may hide an invisible path (from the second act). */
 bool layer_area_hides(int biome);
+/* The layers from `depth` a Net Dealer stocks keys for (the act's rest,
+ * or a trip back's own layer alone): the last one, and their kind. */
+int layer_keys_last(int depth, int *kind);
 int layer_pieces_ahead(int depth, unsigned piece);
 int layer_rush_len(int depth, int biome);
 /* The layer's RegUp (issue #51, docs/META.md): the MB of Reg memory its

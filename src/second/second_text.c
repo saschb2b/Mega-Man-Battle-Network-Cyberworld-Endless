@@ -94,8 +94,11 @@ const char *second_board_rules(void) {
 	return "Program parts on the command line, plus parts off it, no colour beside its own";
 }
 
-void second_home_next(const char *landmark_at, char *out, size_t n) {
-	snprintf(out, n, "R at the %s jacks MegaMan in", landmark_at && *landmark_at ? landmark_at : "port");
+void second_home_next(int where, const char *landmark_at, char *out, size_t n) {
+	if (where == SECOND_HOME_HP) snprintf(out, n, "The pink pad leads on. R jacks out to Lan's room");
+	else if (where == SECOND_HOME_ROOM) snprintf(out, n, "R at Lan's PC jacks MegaMan in");
+	else if (where == SECOND_HOME_UP) snprintf(out, n, "Lan's PC, up in his room, jacks MegaMan in");
+	else snprintf(out, n, "R at the %s jacks MegaMan in", landmark_at && *landmark_at ? landmark_at : "port");
 }
 
 void second_home_setup(char *out, size_t n) {
@@ -104,6 +107,11 @@ void second_home_setup(char *out, size_t n) {
 	if (k > 0 && (size_t)k < n && run.threat) k += snprintf(out + k, n - (size_t)k, ", threat %d", run.threat);
 	if (k > 0 && (size_t)k < n && f && f->name) k += snprintf(out + k, n - (size_t)k, "|%s folder", f->name);
 	if (k > 0 && (size_t)k < n && powers_cross_name(run.cross)) snprintf(out + k, n - (size_t)k, ", %s", powers_cross_name(run.cross));
+}
+
+void second_home_clock(char *out, size_t n) {
+	if (!run.clock) { if (n) out[0] = 0; return; }
+	snprintf(out, n, "%d notch%s: guardians' HP +%d%%", run.clock, run.clock == 1 ? "" : "es", run.clock * RUN_CLOCK_PERCENT);
 }
 
 /* rows' values as numbers */
@@ -125,7 +133,7 @@ int second_record(SecondRow *out, int most) {
 
 int second_status(SecondRow *out, int most, int max_hp, int base_hp) {
 	static const char *const names[] = { "Layer", "Guardians beaten", "Viruses deleted", "Max HP", "Programs' HP" };
-	const int values[] = { run.depth, run.bosses_beaten, run.viruses_deleted, max_hp, max_hp - base_hp };
+	const int values[] = { run_reached(), run.bosses_beaten, run.viruses_deleted, max_hp, max_hp - base_hp };
 	int k = rows_of(out, most, names, values, 5, 4);
 	if (k && !strcmp(out[k - 1].name, "Programs' HP")) snprintf(out[k - 1].value, sizeof out[0].value, "+%d", max_hp - base_hp);
 	if (k < most && powers_cross_name(run.cross)) {

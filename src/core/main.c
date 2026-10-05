@@ -417,6 +417,7 @@ static void start_scene(const Options *o) {
 		run_setup(net, folder, threat, helpers, cross);
 		if (o->run_depth > 0) run.depth = o->run_depth;
 		else if (home) run.depth = 4;
+		run.clock = (uint8_t)dev.clock;   /* (--dev clock=N, docs/HOME.md) */
 		/* (the area its act's in the run too, whose draws read it, and
 		 * every area's guardian one navi: a scripted capture keeps its
 		 * run as the areas' draw changes) */

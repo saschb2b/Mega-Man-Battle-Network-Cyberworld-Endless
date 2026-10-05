@@ -76,7 +76,8 @@ bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm);
 
 /* A territory's guardian from its game (docs/BOSSES.md, BN5's Navis): Navi
  * `ai` (his ids table's AI index, bn5.h BN5_NAVI_*) at `version` (0 V1 ..
- * 3 SP), his HP `hp_cap` at most as he spawns (0: his own), his results
+ * 3 SP), his HP `hp_cap` as he spawns (0: his own; the act's cap and the
+ * Net's clock already in it: director_guest.c), his results
  * screen paying `zenny` for each chip of his reward rows, as BN6's
  * guardians' battles pay where their row holds their chip */
 typedef struct { int ai, version, hp_cap, zenny; } GuestBoss;

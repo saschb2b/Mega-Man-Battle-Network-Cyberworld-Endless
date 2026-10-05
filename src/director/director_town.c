@@ -50,10 +50,7 @@ bool home_map(int group, int number) {
  * stopped it) */
 void home_entered(void) {
 	if (!home_in_hp()) return;
-	int n = 1;
-	bool sealed = false;
-	home_ways(&n, &sealed);
-	lanhp_lit(n);
+	lanhp_lit(home_lit());
 	flag_clear(BN6_FLAG_NO_JACK);
 }
 
@@ -71,7 +68,7 @@ const char *home_status(void) {
 	int far, number = emu_read8(BN6_MAP_NUMBER);
 	const char *way = home_way(&far);
 	if (home_in_hp()) {
-		const char *words = home_hp_status(way, !D.port_told);
+		const char *words = home_hp_status(way, !D.port_told, run.clock);
 		D.port_told = true;
 		return words;
 	}
@@ -88,8 +85,9 @@ static void home_hold(void) {
 	D.arrival_hold = hold;
 }
 
-/* MegaMan coming home: the act done, and the portals lit */
+/* MegaMan coming home: the act done, and the portals lit; or a trip back */
 static const char *arrival_words(void) {
+	if (D.home_back) return home_back_words(run.clock);
 	int open = 1;
 	bool sealed = false;
 	home_ways(&open, &sealed);
@@ -137,19 +135,29 @@ static void portal_words(void) {
 	int n = 1, k = lanhp_portal_near(bn6_player_x(), bn6_player_y(), PORTAL_REACH);
 	bool sealed = false;
 	const RunWay *w = home_ways(&n, &sealed);
-	if (k < 0 || D.home_told >> k & 1 || (k >= n && !(k == 2 && sealed))) return;
+	if (k < 0 || D.home_told >> k & 1) return;
+	/* (an older portal: where it goes back to, and its price) */
+	if (home_older(k) >= 0) {
+		if (!talk_start(home_back_portal_words(home_older(k), profile.back_taught, run.clock), FACE_MEGAMAN)) return;
+		D.home_told |= 1u << k;
+		if (!profile.back_taught) { profile.back_taught = 1; profile_save(); }
+		return;
+	}
+	if (k >= n && !(k == 2 && sealed)) return;
 	bool shut = k >= n;
 	if (talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut), FACE_MEGAMAN)) D.home_told |= 1u << k;
 }
 
 /* MegaMan on a portal: its way's first layer built (another way's than the
- * one built at the exit) while BN6's link plays, and the run locked again */
+ * one built at the exit), or an older portal's trip back, while BN6's link
+ * plays, and the run locked again */
 static void portal_taken(void) {
 	if (!home_in_hp() || D.portal_taken || emu_read8(BN6_WARP_PENDING) != 1) return;
 	int k = lanhp_portal_of(emu_read8(BN6_WARP_INDEX));
 	if (k < 0) return;
 	D.portal_taken = true;
-	home_take_way(k);
+	if (home_older(k) >= 0) home_go_back(k);
+	else home_take_way(k);
 	lock_run();
 }
 

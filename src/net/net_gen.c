@@ -648,13 +648,16 @@ static void roll_services(Services *s, int depth, int biome, int kind) {
 	 * first after the run's first (the guardian's zenny to spend on what the
 	 * new act calls for); docs/PROGRESSION.md */
 	int biome_layer = layer_in_act(depth);
-	s->shop = kind == LAYER_NORMAL && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
+	/* (a trip back as its act's middle layer: the dealer, the heal and the
+	 * vendor's chance, docs/HOME.md) */
+	bool own = kind == LAYER_NORMAL || kind == LAYER_BACK;
+	s->shop = own && (biome_layer == 1 || (biome_layer == 0 && depth > 1) || rng_range(0, 99) < (biome_layer == 0 ? 50 : 25));
 	/* (threat 2, docs/META.md: only the heals an act is sure of; the heals
 	 * helper: one on every layer) */
-	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (kind == LAYER_NORMAL && pacing_heal_certain(depth)) ||
+	s->heal = (rng_range(0, 99) < (layer.boss_layer ? 70 : 30) && run.threat < 2) || (own && pacing_heal_certain(depth)) ||
 		(run.helpers & HELP_HEALS);
 	s->trader = rng_range(0, 99) < (run.threat >= 7 ? 12 : 25);   /* (threat 7: half as often) */
-	s->programs = kind == LAYER_NORMAL && biome_layer == 1 && rng_range(0, 99) < 60;
+	s->programs = own && biome_layer == 1 && rng_range(0, 99) < 60;
 	s->bugtrader = kind == LAYER_UNDERNET || (biome == BIOME_GRAVEYARD && rng_range(0, 99) < 40);
 	s->trader &= !s->bugtrader;   /* the trade screen serves one trader per map */
 	s->challenge = depth > 1 && rng_range(0, 99) < 20 + depth;

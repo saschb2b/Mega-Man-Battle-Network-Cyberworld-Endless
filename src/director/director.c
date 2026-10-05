@@ -195,12 +195,16 @@ static bool follow_exit_warp(void) {
 	 * arrival says so; counted with the next checkpoint, which a CONTINUE
 	 * cannot undo) */
 	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) D.nest_cleared = true;
-	/* a side layer's exit leads one area deeper too */
-	run.depth++;
+	/* a side layer's exit leads one area deeper too; a trip back's home
+	 * (docs/HOME.md), the run's own layer made again for it */
+	bool back = run.side_kind == LAYER_BACK;
+	if (back) run.depth = run.home_depth;
+	else run.depth++;
+	run.home_depth = 0;
 	run.side_kind = LAYER_NORMAL;
 	note_folder_codes();
 	if (!new_layer(true)) return false;
-	if (home && home_begin(beaten)) return true;
+	if ((home && home_begin(beaten)) || (back && home_return())) return true;
 	D.warping = true;
 	D.checkpoint = true;
 	return true;
@@ -217,7 +221,7 @@ void end_run(void) {
 	const Rival *rv = D.lost_to ? rival(D.lost_to) : NULL;
 	snprintf(title_learned, sizeof title_learned, "%s", rv && rv->megaman_won + rv->navi_won == 1 ? guardian(D.lost_to)->name : "");
 	/* (a first run is no record to beat) */
-	title_new_best = profile.runs > 0 && run.depth > profile.best_depth;
+	title_new_best = profile.runs > 0 && run_reached() > profile.best_depth;
 	title_won = false;
 	runlog_run_end();
 	library_from_game();

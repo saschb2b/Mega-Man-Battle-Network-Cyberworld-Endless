@@ -221,6 +221,23 @@ int pacing_xguardian_hp(int hp, int act, int loop) {
 	return hp > hi ? hi : hp;
 }
 
+int pacing_older_acts(int depth, int out[PACING_OLDER]) {
+	int p = (depth - 1) % CYCLE_LAYERS, cycle = (depth - 1) / CYCLE_LAYERS, act = p >= 18 ? 6 : p / 3, n = 0;
+	/* (back from the act before, into the cycle before; never the Nest's,
+	 * act 6, one guardian's layer) */
+	for (int a = act - 1; n < PACING_OLDER && cycle >= 0; --a) {
+		if (a < 0) { a = 6; --cycle; continue; }
+		if (a < 6) out[n++] = cycle * CYCLE_LAYERS + a * 3 + 2;
+	}
+	return n;
+}
+
+int pacing_clock_hp(int hp, int clock) {
+	if (hp <= 0 || clock <= 0) return hp;
+	long more = (long)hp * (100 + RUN_CLOCK_PERCENT * clock) / 100;
+	return more > PACING_HP_MOST ? (hp > PACING_HP_MOST ? hp : PACING_HP_MOST) : (int)more;
+}
+
 bool pacing_heal_certain(int depth) {
 	int p = (depth - 1) % CYCLE_LAYERS;
 	/* the middle layer of each act, until the third cycle takes it away;

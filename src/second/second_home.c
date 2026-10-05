@@ -36,7 +36,8 @@ void second_home_draw(SDL_Rect b) {
 	second_face(x, y);
 	text_draw_scaled(tx, y, "MegaMan", PET_GOLD, TEXT_LEFT, 2);
 	y = item("Next", S2.home_next, tx, y + 30, w);
-	item("The run", S2.home_setup, tx, y, w);
+	y = item("The run", S2.home_setup, tx, y, w);
+	if (S2.home_clock[0]) item("The Net's clock", S2.home_clock, tx, y, w);
 }
 
 bool second_title_draw(int w, int h) {

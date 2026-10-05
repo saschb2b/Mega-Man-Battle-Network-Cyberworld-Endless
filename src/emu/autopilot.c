@@ -508,8 +508,23 @@ static bool heal_panel(bool guardian, int *x, int *y) {
  * stairs, in the town along the streets to its jack-in (home's: its front
  * door), R at a jack-in; in Lan's HP onto the first way's portal */
 enum { AWAY, HOME_WALK, HOME_KEYS };
+/* (CYBERWORLD_AUTOPILOT_BACK=N: N trips back first, through the older
+ * portals, docs/HOME.md) */
+static int trips_wanted(void) {
+	const char *v = getenv("CYBERWORLD_AUTOPILOT_BACK");
+	return v ? atoi(v) : 0;
+}
+
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
-	if (director_in_hp()) { lanhp_portal_spot(0, wx, wy); return HOME_WALK; }
+	if (director_in_hp()) {
+		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;
+		lanhp_portal_spot(k < 0 ? 0 : k, wx, wy);
+		/* (an older portal: out of the blue pad's alcove first, along +X,
+		 * as its walls stand between the pad and the links) */
+		lanhp_arrival(&ax, &ay);
+		if (k >= 0 && px < ax + 90) { *wx = ax + 100; *wy = ay + 14; }
+		return HOME_WALK;
+	}
 	if (!director_in_town()) return AWAY;
 	int number = emu_read8(BN6_MAP_NUMBER);
 	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) {

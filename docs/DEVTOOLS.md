@@ -176,8 +176,10 @@ its damage cap. A challenge that meets an SP Navi is counted apart. Then it
 draws 500 runs and lists the guardian each act met, with version and HP,
 marked OUTSIDE when one lies past the act's band, and the Net Dealers'
 answers: per act and element, the chips 300 layers list first, with a `+`
-on those over the act's cap (stocked one, not two). The whole report takes
-about a minute.
+on those over the act's cap (stocked one, not two). Last, the Net's clock
+(docs/HOME.md, going back): each act's median guardian HP at 0 to 6
+notches, beside the next act's band. The whole report takes about a
+minute.
 
 Where BN5's ROM is beside BN6's, each area one of its areas dresses
 (docs/MULTIROM.md) is followed by that area's battles in BN5's own engine:
@@ -324,7 +326,10 @@ second screen, issue #75); `programs=N` gives a copy of each of the first
 N NaviCust programs, in the first of its colours the ROM draws, with the
 check BN6 lists them by (the NaviCustomizer on the second screen, issue
 #76); `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags` gives fifty
-(a DarkChip's last).
+(a DarkChip's last). `clock=N` starts the run with the Net's clock at N
+notches (docs/HOME.md, going back): the guardians spawn with its HP, a
+tenth more a notch. `CYBERWORLD_AUTOPILOT_BACK=N` has the autopilot take
+N trips back from Lan's HP, through its older portals, before a way.
 
 Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
 same in a battle on the guest core: on BN5's battle objects, laid out as

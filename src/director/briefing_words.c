@@ -70,6 +70,8 @@ static int guardian_words(char *buf, int k, int size) {
 		else ADD("|@M A strong Navi's signal waits at the end...|@M We've got no battle data on it,Lan.|");
 		ADD("@M Watch the yellow panels! Attacks land there!|");
 	}
+	/* (the Net's clock: his copy a tenth stronger a notch, docs/HOME.md) */
+	if (run.clock) ADD("@M The Net kept copying while we went back...|@M %s tougher for it,Lan!|", guardian_known(navi) ? "He's" : "It's");
 	/* (EraseCross on a Navi, which the setup has no room for: a playtester
 	 * saw BlastMan's HP drain after a Vulcan, and only patch notes had
 	 * said why) */
@@ -400,7 +402,10 @@ static void here_scan(Here *h) {
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	ADD("@M Layer %d,Lan. We're in %s!%s", run.depth, area, encounter_guest ? "|@M Battles here run the older Net's way." : "");
+	/* (a trip back: its way home, docs/HOME.md) */
+	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.", area);
+	else ADD("@M Layer %d,Lan. We're in %s!", run.depth, area);
+	if (encounter_guest) ADD("|@M Battles here run the older Net's way.");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */

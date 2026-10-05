@@ -17,6 +17,9 @@ bool home_due(void);
  * arrival. False where they cannot be built (the warp goes on into the
  * net). */
 bool home_begin(const char *beaten);
+/* ... and after a trip back, its exit taken and the run's own layer made
+ * again (director.c): home with the trip's words. */
+bool home_return(void);
 /* ... and at a run's start, the first layer built: the town planned and
  * installed with Lan's house, his PC's jack-in to Lan's HP, the portal to
  * the layer, and Lan at the top of his room's stairs (`abandoned` that the
@@ -28,8 +31,20 @@ bool home_run_start(bool abandoned);
  * are open, and whether a dark way stands sealed. */
 const RunWay *home_ways(int *n, bool *dark_sealed);
 /* Portal `k` taken: its way's first layer built where it was another's,
- * and the portal pointed at it. */
+ * and the portal pointed at it; the older portals open again for the next
+ * visit. */
 bool home_take_way(int k);
+/* The portals lit in Lan's HP (a bit each, lanhp_lit): the ways, and the
+ * older portals not yet taken this visit. */
+unsigned home_lit(void);
+/* The area older portal `k` goes back to (docs/HOME.md, going back), -1
+ * where `k` is none, or taken this visit. */
+int home_older(int k);
+/* Older portal `k` taken: a notch on the Net's clock, the trip's layer
+ * built (the older act's band, LAYER_BACK) and the portal pointed at it;
+ * the run comes home to its own depth (run.home_depth). False where none
+ * could be made. */
+bool home_go_back(int k);
 /* Whether map (group, number) is home: the run's town, Lan's house or
  * room, or Lan's HP (director_town.c, as the rest below); whether MegaMan
  * is in Lan's HP. */

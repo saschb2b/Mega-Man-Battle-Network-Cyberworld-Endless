@@ -224,8 +224,9 @@ static HookAct picking(HookRegs *r, void *user) {
 }
 
 /* A watched battle (the duel's): MegaMan's hits, and the HP the first
- * enemy spawns with at most, which the spawn's hook clears once used. */
-static int cap;
+ * enemy spawns with at most, which the spawn's hook clears once used; and
+ * a guardian's HP raised, from his own to the clock's */
+static int cap, hp_from, hp_to;
 
 /* MegaMan's object: the first of the battle's objects in play on his side */
 static uint32_t megaman_object(void) {
@@ -245,12 +246,17 @@ static HookAct hurt(HookRegs *r, void *user) {
 }
 
 /* An enemy's spawn, as it is given its HP and MaxHP (r2): the first
- * enemy's at most the cap */
+ * enemy's at most the cap; the guardian's, his own HP, raised */
 static HookAct spawned(HookRegs *r, void *user) {
 	(void)user;
-	if (cap && hook_read8(r->r[5] + BN6_T1_ALLIANCE) == 1) {
+	if (hook_read8(r->r[5] + BN6_T1_ALLIANCE) != 1) return HOOK_CONTINUE;
+	if (cap) {
 		if (r->r[2] > (uint32_t)cap) r->r[2] = (uint32_t)cap;
 		cap = 0;
+	}
+	if (hp_from && r->r[2] == (uint32_t)hp_from) {
+		r->r[2] = (uint32_t)hp_to;
+		hp_from = 0;
 	}
 	return HOOK_CONTINUE;
 }
@@ -264,5 +270,13 @@ void emu_battle_watch(int hp_cap) {
 void emu_battle_unwatch(void) {
 	emu_unhook(BN6_SUBTRACT_HP);
 	emu_unhook(BN6_SPAWN_HP);
-	cap = 0;
+	cap = hp_from = 0;
+}
+
+void emu_battle_clock(int own) {
+	int more = pacing_clock_hp(own, run.clock);
+	if (own <= 0 || more == own) return;
+	emu_hook(BN6_SPAWN_HP, spawned, NULL);
+	hp_from = own;
+	hp_to = more;
 }

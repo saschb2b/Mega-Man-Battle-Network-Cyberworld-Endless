@@ -19,8 +19,14 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed);
 const char *home_portal_name(int k);
 /* MegaMan in Lan's HP the run's first time there. */
 const char *home_hp_words(void);
-/* L in Lan's HP: the pink pad `way` from MegaMan, and the first time how
- * to jack out. */
-const char *home_hp_status(const char *way, bool first);
+/* L in Lan's HP: the pink pad `way` from MegaMan, the first time how to
+ * jack out, and how far the Net's clock has run (`clock` its notches). */
+const char *home_hp_status(const char *way, bool first, int clock);
+/* MegaMan beside an older portal (docs/HOME.md, going back): where it
+ * leads (an area won, so named) and its price on the Net's clock, all of
+ * it until `taught`. */
+const char *home_back_portal_words(int biome, bool taught, int clock);
+/* Home again from a trip back, the Net's clock at `clock`. */
+const char *home_back_words(int clock);
 
 #endif

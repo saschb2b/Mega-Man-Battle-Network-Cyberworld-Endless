@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "guardians.h"
+#include "net.h"
 #include "run.h"
 
 const char *home_words(const char *beaten, int ways, const char *const ports[3], const char *sealed) {
@@ -83,11 +84,35 @@ const char *home_portal_name(int k) {
 	return k >= 0 && k < (int)(sizeof names / sizeof *names) ? names[k] : "link";
 }
 
-const char *home_hp_status(const char *way, bool first) {
-	static char words[160];
-	if (first) snprintf(words, sizeof words, "@M The pink pad's %s,Lan!|@M Or press R,and I'll jack out.", way);
-	else snprintf(words, sizeof words, "@M The pink pad's %s,Lan!", way);
+/* how far the Net's clock has run, in MegaMan's words */
+static const char *clock_feel(int clock) {
+	return clock >= 4 ? "|@M Lan... The Net's copying fast now." : clock >= 2 ? "|@M The Net's been copying a while..." :
+		clock == 1 ? "|@M The Net's had a little time to copy." : "";
+}
+
+const char *home_hp_status(const char *way, bool first, int clock) {
+	static char words[200];
+	if (first) snprintf(words, sizeof words, "@M The pink pad's %s,Lan!|@M Or press R,and I'll jack out.%s", way, clock_feel(clock));
+	else snprintf(words, sizeof words, "@M The pink pad's %s,Lan!%s", way, clock_feel(clock));
 	return words;
+}
+
+const char *home_back_portal_words(int biome, bool taught, int clock) {
+	static char words[240];
+	const char *area = guardian_area_in_text(biome, LAYER_NORMAL);
+	if (!taught)
+		snprintf(words, sizeof words, "@M This link leads back to %s!|@M We could stock up there,Lan.|@M But the Net's clock keeps running...|"
+			"@M Each trip back,the guardians ahead get tougher!", area);
+	else if (clock)
+		snprintf(words, sizeof words, "@M This one goes back to %s.|@M Another notch on the Net's clock,though...", area);
+	else
+		snprintf(words, sizeof words, "@M This one goes back to %s.|@M It'd cost a notch on the Net's clock.", area);
+	return words;
+}
+
+const char *home_back_words(int clock) {
+	if (clock >= 4) return "@M Home again,Lan...|@M The Net's copying fast now.|@L Then no more stalling! Let's dive!";
+	return "@M Home again,Lan!|@M The Net kept copying while we were away...|@L Then we'd better get moving!";
 }
 
 const char *home_hp_words(void) {

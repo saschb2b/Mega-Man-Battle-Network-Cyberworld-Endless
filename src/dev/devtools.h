@@ -24,6 +24,7 @@ typedef struct {
 	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
 	int pack;       /* pack=N: a copy of each of the first N chips in the pack, in its first code (the folder editor's pack, issue #75) */
 	int programs;   /* programs=N: a copy of each of the first N NaviCust programs, in a colour the ROM draws (the NaviCustomizer, issue #76) */
+	int clock;      /* clock=N: the Net's clock at N notches from the run's start (docs/HOME.md: its guardians' HP) */
 } DevFlags;
 
 extern DevFlags dev;
