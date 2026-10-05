@@ -3,6 +3,8 @@ package io.github.saschb2b.cyberworldendless;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import org.libsdl.app.SDLActivity;
@@ -17,6 +19,36 @@ public class GameActivity extends SDLActivity {
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!mBrokenLibraries) second = SecondScreen.open(this);
+    }
+
+    /** A left Joy-Con's arrow buttons, sent on as the D-pad's (issue #37).
+     *  Linux's hid-nintendo reports them as BTN_DPAD_UP..RIGHT (scan codes
+     *  0x220-0x223), which Android's generic key layout (Generic.kl) gives
+     *  no key code, so they came as KEYCODE_UNKNOWN and SDL 2's Android
+     *  driver dropped them (SDL 3 reads their scan codes instead,
+     *  libsdl-org/SDL#15508); the mapping pads.c gives the Joy-Con names
+     *  SDL's D-pad buttons. */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int dpad = event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN ? dpadOf(event) : 0;
+        if (dpad != 0) {
+            event = new KeyEvent(event.getDownTime(), event.getEventTime(), event.getAction(), dpad,
+                event.getRepeatCount(), event.getMetaState(), event.getDeviceId(), event.getScanCode(),
+                event.getFlags(), event.getSource());
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    private static int dpadOf(KeyEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_GAMEPAD) != InputDevice.SOURCE_GAMEPAD
+            && (event.getSource() & InputDevice.SOURCE_JOYSTICK) != InputDevice.SOURCE_JOYSTICK) return 0;
+        switch (event.getScanCode()) {
+        case 0x220: return KeyEvent.KEYCODE_DPAD_UP;
+        case 0x221: return KeyEvent.KEYCODE_DPAD_DOWN;
+        case 0x222: return KeyEvent.KEYCODE_DPAD_LEFT;
+        case 0x223: return KeyEvent.KEYCODE_DPAD_RIGHT;
+        default: return 0;
+        }
     }
 
     /** A short tick under the thumb as a touch control is pressed (touch.c
