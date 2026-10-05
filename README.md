@@ -52,10 +52,10 @@ around it, one layer at a time, and keeps the run going.
 </p>
 
 <p align="center">
-<img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan, it's Dad. Have you got a minute?">
+<img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan,it's Dad. Got a minute?">
 <img src="docs/screenshots/act-card.png" width="240" alt="Act 1: RoboDog Comp, circuits of a home comp; its guardian not known yet">
 <img src="docs/screenshots/net.png" width="240" alt="MegaMan on a generated layer of Robot Control Comp">
-<img src="docs/screenshots/battle.png" width="240" alt="A battle against a Mettaur and a Gunner, MegaMan firing his buster with BusterUp">
+<img src="docs/screenshots/battle.png" width="240" alt="A battle against a Champy, a Gunner and a Mettaur, MegaMan firing his Buster as the Gunner bursts">
 <img src="docs/screenshots/undernet.png" width="240" alt="MegaMan on a generated layer of the Undernet">
 <img src="docs/screenshots/area-clear.png" width="240" alt="Robot Control Comp: AREA CLEAR, BlastMan deleted">
 </p>
@@ -453,9 +453,9 @@ the knight on Green Town's flower plaza) and press R: Lan jacks MegaMan
 in, and the net begins.
 
 <p align="center">
-<img src="docs/screenshots/town-acdc.png" width="240" alt="Lan in ACDC Town beside Higsby's; MegaMan: The Metroline got us to ACDC Town in no time, Lan!">
-<img src="docs/screenshots/town-seaside.png" width="240" alt="Lan on Seaside Town's plaza by the station stairs; MegaMan: The train got us out to Seaside Town">
-<img src="docs/screenshots/town-green.png" width="240" alt="Lan in Green Town beside the knight statue on the flower plaza; MegaMan: The bus got us out to Green Town, Lan! Smell those flowers!">
+<img src="docs/screenshots/town-acdc.png" width="240" alt="Lan in ACDC Town beside Higsby's; MegaMan: ACDC Town,Lan! The Metroline's so fast!">
+<img src="docs/screenshots/town-seaside.png" width="240" alt="Lan on Seaside Town's plaza by the station stairs; MegaMan: Seaside Town,Lan! Smell that sea air!">
+<img src="docs/screenshots/town-green.png" width="240" alt="Lan in Green Town beside the knight statue on the flower plaza; MegaMan: Green Town,Lan! Smell those flowers!">
 </p>
 
 <p align="center">

@@ -1039,10 +1039,10 @@ SCREENSHOTS = [
     ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
     ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
     # (seed 7's layer 3 walks straight to BlastMan's arena, then the first
-    # random battle, on layer 6 since 0.8.0's layers and autopilot)
+    # random battle, on layer 5 since 0.9.0's shorter words)
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(240, 'net'), (1400, 'guardian'), (1560, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
-      (2900, 'reward'), (2950, 'restored'), (3500, 'area-clear'), (7660, 'custom'), (7940, 'battle')],
+     [(240, 'net'), (1400, 'guardian'), (1584, 'guardian-talk'), (1800, 'boss-custom'), (2500, 'result'),
+      (3100, 'reward'), (2900, 'restored'), (3500, 'area-clear'), (8190, 'custom'), (8450, 'battle')],
      {'CYBERWORLD_AUTOPILOT': 'weak'}),
     ('act', ['--scene', 'emu', '--seed', '11', '--net-biome', '8', '--guardian', '12', '--dev', 'quiet'], [(120, 'act-card')], {}),
     # (Chaud's first call on an act's duel layer, its second box)
@@ -1167,7 +1167,7 @@ SCREENSHOTS = [
     # his arena, his card, his BN5 sprite, his own face in the chat, his
     # wrecking ball in BN5's battle; not the weak one, which holds him at 1 HP)
     ('bn5-guardian', ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '3', '--seed', '3', '--guardian', '28', '--dev', 'quiet'],
-     [(1552, 'bn5-guardian-card'), (1576, 'bn5-guardian'), (1636, 'bn5-guardian-talk'), (2400, 'bn5-guardian-battle')],
+     [(1470, 'bn5-guardian-card'), (1545, 'bn5-guardian'), (1620, 'bn5-guardian-talk'), (2400, 'bn5-guardian-battle')],
      {'CYBERWORLD_AUTOPILOT': '1'}),
     # (NumberMan's Guardian Data giving his Soul, End Area; then a run
     # holding his Soul: BusterUp picked on BN5's Custom screen, UNITE, the
@@ -1212,8 +1212,12 @@ SCREENSHOTS = [
     # his words with a face made from it)
     ('arena-save', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(1306, 'arena-save'), (1348, 'guardian-blastman')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (0.9.0's dialogue in BN6's voice: Lan answering MegaMan as they
+    # arrive on the run's first layer)
+    ('voice-banter', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--input', '700:,6:A,70:,6:A,70:,6:A,70:'],
+     [(900, 'voice-banter')], {}),
     ('falzar-face', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '8'],
-     [(1348, 'guardian-tenguman'), (1568, 'falzar-face')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+     [(1348, 'guardian-tenguman'), (1600, 'falzar-face')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
     # (the layer's map on a second screen, the guardian's mark on it)
     ('second-screen', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
      [(1250, 'second-screen')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
@@ -1221,11 +1225,11 @@ SCREENSHOTS = [
     ('phone-upright', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--net-biome', '1', '--dev', 'quiet', '--touch',
                        '--size', '1080x2400', '--dpi', '420', '--input', '60:,' + '4:A,6:,' * 20 + '40:',
                        '--taps', '330:315,1881>435,2001'], [(348, 'phone-upright')], {}, 3),
-    # (the program pick after BlastMan, Custom1 on the board: UnderSht fits
-    # now, HP+100 once Custom1 moves)
+    # (the program pick after BlastMan: each program says whether it fits;
+    # SuperArmor fits now)
     ('program-fit', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--talk', 'reward:2950',
                      '--input', (FIT_GIFT + FIT_INSTALL + FIT_NEXT + FIT_PAGES).rstrip(',')],
-     [(7372, 'program-fit-now'), (7720, 'program-fit-move')], {}),
+     [(7375, 'program-fit-now')], {}),
 ]
 
 
