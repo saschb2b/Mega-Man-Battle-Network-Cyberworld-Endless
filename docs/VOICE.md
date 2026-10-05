@@ -308,14 +308,14 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | One-time lessons: the Pack, Rush's bones, a battlefield's Mystery Data, R in the town | `src/director/lesson_words.c` |
 | A Cross won, one the run can't carry, the Cybeast's call | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |
-| The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls, the split's question | `src/layer/guardian_lines.c` |
+| The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls | `src/layer/guardian_lines.c` |
 | The Net Dealer, the NaviCust vendor, ProtoMan's terms, a rumor, the invisible path's hint, a ScrtData, a Spin | `src/layer/layer_words.c` |
 | Services' chats: Mr.Prog's heal, shops, a Server, flames of darkness, the duel, dark warps, the golden gate | `src/layer/service_words.c` |
 | Rewards' chats: Guardian Data and its draft, a Navi gate, a vault, an official gate, the gift | `src/layer/reward_words.c` |
 | Locks: security cubes, skull and number doors, the P-Code's teller, a Link Navi's obstacle | `src/layer/lock_words.c` |
 | Bystanders' small talk; the net's whispers | `src/layer/npc_lines.c`; `src/layer/rumor_lines.c` |
 | The towns' folk, their checks, the start's words | `src/world/town_lines.c` |
-| MegaMan and Lan coming home after an act | `src/director/home_words.c` |
+| MegaMan and Lan coming home after an act; MegaMan at the town's ports | `src/director/home_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
 
 ## Before you commit a line

@@ -62,17 +62,6 @@ typedef struct {
 	int fit_flag;   /* event flag + k set where program k fits the board's free space as it stands; 0 none */
 } ScriptsDraft;
 
-/* The way on after an act's guardian (docs/META.md, routes): MegaMan's
- * `question` (ta_talk's boxes), the `n` ways (two, or three with the dark
- * way) as options, and what he says after each; the second sets event flag
- * `flag`, the third `dark_flag` (B takes the first). */
-typedef struct {
-	const char *question;
-	const char *option[3];
-	const char *then[3];
-	int n, flag, dark_flag;
-} ScriptsRoute;
-
 /* What a guardian's Guardian Data gives (ta_guardian_reward). */
 typedef struct {
 	const char *name;        /* the navi */
@@ -83,7 +72,6 @@ typedef struct {
 	int taken_flag;          /* event flag set on every branch of the draft */
 	int hp_memories;         /* HPMemory through the game's own item, +20 max HP each */
 	const ScriptsDraft *draft;   /* the NaviCust's draft, NULL for none */
-	const ScriptsRoute *route;   /* the way on, NULL for none */
 } ScriptsReward;
 
 /* A guardian's Guardian Data, checked: his power, then the HPMemory, his

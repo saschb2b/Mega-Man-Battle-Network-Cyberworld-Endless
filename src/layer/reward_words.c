@@ -11,36 +11,6 @@
 
 static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words);
 
-/* The way on: the question, the two ways in a column, a branch each (the
- * second sets the flag; B takes the first); the question's script. */
-static int route_scripts(TextArchive *t, const ScriptsRoute *r) {
-	int way[3] = { 0 }, n = r->n == 3 ? 3 : 2;
-	for (int k = 0; k < n; ++k) {
-		way[k] = ta_script(t);
-		if (k) ta_flag_set(t, k == 1 ? r->flag : r->dark_flag);
-		ta_page(t, FACE_MEGAMAN, r->then[k], true);
-		ta_end(t);
-	}
-	int q = ta_script(t);
-	bool first = false;   /* (the chat box is open: the Guardian Data's) */
-	ta_pages(t, r->question, FACE_MEGAMAN, &first);
-	ta_mugshot(t, FACE_MEGAMAN);
-	ta_clear(t);
-	/* (in a column, as the draft's: up and down move, left and right too
-	 * where two) */
-	static const uint8_t opt2[2][4] = { { 0xEB, 0x00, 0x00, 0x11 }, { 0xEB, 0x00, 0x11, 0x00 } };
-	static const uint8_t opt3[3][4] = { { 0xEB, 0x00, 0x00, 0x21 }, { 0xEB, 0x00, 0x11, 0x02 }, { 0xEB, 0x00, 0x22, 0x10 } };
-	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	for (int k = 0; k < n; ++k) {
-		ta_bytes(t, n == 3 ? opt3[k] : opt2[k], 4);
-		ta_bytes(t, space, sizeof space);
-		ta_text(t, r->option[k]);
-		if (k + 1 < n) ta_text(t, "\n");
-	}
-	ta_choose(t, way, n, way[0]);
-	return q;
-}
-
 /* the draft's branches: a program given, or BugFrags for none; each sets
  * `taken_flag` and ends, or goes on to the way on (`next`) */
 static int draft_take(TextArchive *t, int program, int color, bool teach, int taken_flag, int next) {
@@ -195,7 +165,7 @@ static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 	/* (the way on, then the draft's branches first: the choices jump to
 	 * them) */
-	int next = r->route ? route_scripts(t, r->route) : -1;
+	int next = -1;
 	int take[3] = { 0 }, skip = 0, n = r->draft ? r->draft->n : 0, lines = -1, fits0 = -1;
 	for (int k = 0; k < n; ++k) take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->draft->teach, r->taken_flag, next);
 	if (n) {

@@ -382,7 +382,10 @@ static void start_scene(const Options *o) {
 	audio_init();
 	/* "town": a new run from the town, as NEW GAME starts one */
 	bool town = !strcmp(o->start_scene, "town");
-	const Scene *s = town ? &scene_emu : scene_by_name(o->start_scene);
+	/* "home": a run at home before the act at --run-depth (4), as an act's
+	 * exit takes it (docs/HOME.md) */
+	bool home = !strcmp(o->start_scene, "home");
+	const Scene *s = town || home ? &scene_emu : scene_by_name(o->start_scene);
 	int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;
 	if (o->setup_spec) {
 		net = !strncmp(o->setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;
@@ -413,6 +416,7 @@ static void start_scene(const Options *o) {
 		run_new(o->seed ? o->seed : 1);
 		run_setup(net, folder, threat, helpers, cross);
 		if (o->run_depth > 0) run.depth = o->run_depth;
+		else if (home) run.depth = 4;
 		/* (the area its act's in the run too, whose draws read it, and
 		 * every area's guardian one navi: a scripted capture keeps its
 		 * run as the areas' draw changes) */
@@ -423,6 +427,7 @@ static void start_scene(const Options *o) {
 	/* (later NEW GAMEs take the next seeds, so a session replays) */
 	title_seed = !o->seed ? 0 : !s || s == &scene_title ? o->seed : o->seed + 1;
 	if (town) emu_start_in_town = true;
+	if (home) emu_start_at_home = true;
 	scene_set(first_scene(s, o->headless));
 }
 

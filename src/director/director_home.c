@@ -1,36 +1,71 @@
-/* director_home.h. Home after an act (docs/HOME.md): the exit pad of an
+/* director_home.h's trip home and the ways (the town's frame:
+ * director_town.c). Home after an act (docs/HOME.md): the exit pad of an
  * act's last layer jacks MegaMan out to the run's town, as BN6's own
  * jack-out does (its warp's transition type, internet to real world,
- * takes Lan back to where he jacked in), and the town's port leads to the
- * next act's first layer. */
+ * takes Lan back to where he jacked in), and the town's ports lead to the
+ * next act's ways, its first layer built for the one taken. */
 #include "director_home.h"
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "bn6.h"
 #include "boss.h"
-#include "cinema.h"
-#include "director_keys.h"
+#include "debug.h"
+#include "director.h"
 #include "director_layer.h"
-#include "director_save.h"
 #include "director_state.h"
-#include "director_way.h"
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"
-#include "home_words.h"
 #include "mapslot.h"
+#include "meta.h"
 #include "net.h"
 #include "run.h"
-#include "save.h"
-#include "talk.h"
-#include "text.h"
 #include "town.h"
 
 /* BN6_WARP_GROUP_KIND's internet to real world (bn6f
  * MAP_GROUP_TRANSITION_TYPE_INTERNET_TO_REAL_WORLD): the map-enter code
  * then sets Lan down at BN6_SAVED_X's place */
 enum { INTERNET_TO_REAL_WORLD = 1 };
+
+/* The next act's ways (run_ways), worked out from the run's seed at home
+ * and again on a CONTINUE there; the one whose first layer is built */
+static RunWay ways[TOWN_PORTS];
+static int nways = 1, taken;
+static bool sealed;
+
+/* the act the ways lead to, 0-based: the next layer's */
+static int next_act(void) { return (run.depth - 1) % CYCLE_LAYERS / 3; }
+
+static void work_out_ways(void) {
+	nways = run_ways(next_act(), meta_dark_way_open(), ways, &sealed);
+	taken = 0;
+	town_ways(nways);
+	if (emu_debug_on())
+		for (int k = 0; k < nways; ++k) fprintf(stderr, "home: way %d area %d guardian %d (meets %d)%s\n", k, ways[k].biome, ways[k].navi,
+			ways[k].meets, sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
+}
+
+const RunWay *home_ways(int *n, bool *dark_sealed) {
+	*n = nways;
+	*dark_sealed = sealed;
+	return ways;
+}
+
+bool home_take_way(int port) {
+	if (!D.home) return false;
+	if (port < 0 || port >= nways) port = 0;
+	if (port == taken) return true;
+	int act = next_act();
+	run.biome_order[act] = (uint8_t)ways[port].biome;
+	run.boss_order[ways[port].biome] = (uint8_t)ways[port].navi;
+	taken = port;
+	if (emu_debug_on()) fprintf(stderr, "home: way %d taken, area %d\n", port, ways[port].biome);
+	if (!new_layer(false)) return false;
+	mapslot_jack_to(D.group, D.number, D.start_x, D.start_y, 4);
+	return true;
+}
 
 bool home_due(void) {
 	return boss_beaten() && run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth) && !run_short_nest(run.depth);
@@ -52,6 +87,7 @@ static bool set_down_place(const TownInfo *ti) {
 }
 
 bool home_begin(const char *beaten) {
+	work_out_ways();
 	if (!town_plan(town_seed(run.seed)) || !town_install(D.group, D.number, D.start_x, D.start_y)) return false;
 	if (!set_down_place(town_info())) return false;
 	emu_write8(BN6_WARP_GROUP_KIND, INTERNET_TO_REAL_WORLD);
@@ -66,10 +102,12 @@ bool home_begin(const char *beaten) {
 	D.intro_said = false;
 	D.home_beaten = beaten;
 	D.home_saved = false;
+	D.home_told = 0;
 	return true;
 }
 
 bool home_rebuild(void) {
+	work_out_ways();
 	return town_plan(town_seed(run.seed)) && town_install(D.group, D.number, D.start_x, D.start_y);
 }
 
@@ -87,54 +125,11 @@ void home_resume(void) {
 	D.town_frames = 0;
 	D.intro_said = true;
 	D.home_saved = true;
+	D.home_told = 0;
 }
 
-bool home_map(int group, int number) { return group == town_info()->group && number == town_info()->number; }
-
-/* home: Lan held while the act's card shows, A ending it early, as on a
- * layer */
-static void home_hold(void) {
-	bool hold = D.home && D.town_seen && cinema_busy();
-	if (hold && cinema_input_mode() == CINEMA_FREE) cinema_input(CINEMA_HOLD);
-	else if (!hold && D.arrival_hold && cinema_input_mode() == CINEMA_HOLD) cinema_input(CINEMA_FREE);
-	D.arrival_hold = hold;
-}
-
-/* Lan and MegaMan's words (Dad's call, the first time; at home, the act
- * just done), once Lan is out, the map has settled and the card gone */
-static void town_words(void) {
-	if (!D.town_seen || !on_map() || D.intro_said || emu_read8(BN6_WARP_PENDING) != 0 || ++D.town_frames <= 40 || cinema_busy()) return;
-	if (!(D.home ? talk_start(home_words(D.home_beaten), FACE_MEGAMAN) : talk_script(town_info()->talk_archive, town_info()->intro))) return;
-	D.intro_said = true;
-	if (!D.home && !profile.seen_intro) { profile.seen_intro = true; profile_save(); }
-}
-
-/* home's checkpoint, once its words are said and Lan is free */
-static void home_checkpoint(void) {
-	if (!D.home || !D.intro_said || D.home_saved || !on_map() || talk_busy() || emu_read8(BN6_CHATBOX) ||
-		emu_read8(BN6_DIALOGUE_LOCK) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) return;
-	D.home_saved = true;
-	home_save();
-}
-
-/* In the town: nothing to watch but the jack-in, whose arrival on the
- * layer's map starts the run (or the next act) as a layer's warp does. */
-void home_update(void) {
-	map_label();
-	arrow_update();
-	if (on_map()) unwedge();
-	if (home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) D.town_seen = true;
-	talk_update();
-	home_hold();
-	town_words();
-	home_checkpoint();
-	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
-		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;
-	if (!arrived) return;
-	D.town = false;
-	D.home = false;
-	D.frame = 0;
-	D.checkpoint = true;
-	lock_run();
-	mapslot_music_forget_town();
+void director_dev_home(void) {
+	int x, y, face;
+	if (!home_begin(NULL) || !town_home_spot(&x, &y, &face)) return;
+	emu_warp(town_info()->group, town_info()->number, x, y, face);
 }

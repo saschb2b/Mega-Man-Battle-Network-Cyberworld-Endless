@@ -12,6 +12,7 @@
 #include "briefing_words.h"
 #include "cinema.h"
 #include "director.h"
+#include "director_home.h"
 #include "director_map.h"
 #include "director_see.h"
 #include "director_state.h"
@@ -343,6 +344,17 @@ static void l_keys(bool pressed) {
 	}
 }
 
+/* R on the port: the jack-in, which the arrow does not follow into its
+ * flash and tunnel (a playtester saw it drawn over them); at home its way
+ * taken (docs/HOME.md), where the game jacks in: not through a chat,
+ * where R did nothing but build a layer */
+static void port_r(void) {
+	cinema_arrow(0, 0);
+	D.arrow_pending = false;
+	if (!talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP_PENDING) == 0)
+		home_take_way(town_port_at(bn6_player_x(), bn6_player_y()));
+}
+
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
 	if (D.active) keys = choice_guard(shop_guard(keys));
@@ -361,12 +373,7 @@ uint32_t director_keys(uint32_t keys) {
 	keys = a_keys(keys, a_pressed);
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_note_held(D.map_shown); keys &= ~KEY_SELECT; }
-	/* R on the port: the jack-in, which the arrow does not follow into its
-	 * flash and tunnel (a playtester saw it drawn over them) */
-	if (D.town && r_pressed && town_on_port(bn6_player_x(), bn6_player_y())) {
-		cinema_arrow(0, 0);
-		D.arrow_pending = false;
-	}
+	if (D.town && r_pressed && town_on_port(bn6_player_x(), bn6_player_y())) port_r();
 	/* R in the town away from the port: MegaMan says where it is (the game
 	 * itself does nothing there) */
 	if (D.town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP_PENDING) == 0 &&

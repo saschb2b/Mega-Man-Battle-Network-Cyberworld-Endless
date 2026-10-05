@@ -79,6 +79,9 @@ bool director_arrived(void);
 void director_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
+/* A test's start at home (--scene home, docs/HOME.md): the layer just
+ * built behind the town's port, Lan by it, as an act's exit takes him. */
+void director_dev_home(void);
 /* Dev (the battle step): the layer's next random battle, at the first
  * moment MegaMan is free on its map; the guest's on a layer whose battles
  * are an older net's. */

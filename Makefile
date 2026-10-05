@@ -200,7 +200,7 @@ TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-fra
 TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c \
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c \
-	src/core/data.c src/core/xchips.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c
+	src/core/data.c src/core/xchips.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c
 build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm

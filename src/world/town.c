@@ -29,6 +29,7 @@
 #include "rom.h"
 #include "text.h"
 #include "town_lines.h"
+#include "town_ports.h"
 #include "townmath.h"
 #include "townsrc.h"
 
@@ -210,6 +211,8 @@ struct TownStyle {
 	bool whole;                         /* copied whole, with its own walls and heights (not the
 	                                     * plan's walls round flat walkable cells) */
 	const char *name, *landmark, *landmark_at;
+	int port_src[2];                    /* the act's second and third ways' ports: the original's
+	                                     * jack-in point (0x40 + n) or check (0xF0 + n) made one */
 };
 
 static int env_or(const char *name, int value) {
@@ -333,18 +336,18 @@ static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
 static const Style styles[] = {
 	{ 0x01, 0x00, 0x03, 1 << 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
 	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } }, false,
-	  "Central Town", "bird statue", "bird statue on the plaza" },
-	{ 0x00, 0x00, 0x24, 1 << 0 | 1 << 1, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW,
+	  "Central Town", "bird statue", "bird statue on the plaza", { 0x41, 0xFA } },
+	{ 0x00, 0x00, 0x24, 1 << 0, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW,
 	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } }, false,
-	  "ACDC Town", "squirrel statue", "squirrel statue in the park" },
-	/* (none of its own ports: the fountain is the landmark) */
+	  "ACDC Town", "squirrel statue", "squirrel statue in the park", { 0x41, 0xF7 } },
+	/* (its own two ports the act's other ways: the fountain is the landmark) */
 	{ 0x03, 0x00, 0x06, 0, { -8, -15, -6, -8 }, { -18, -16, -9, -7 }, seaside_mat, design_seaside, 4, -100, FACE_SW,
 	  { { 4, -100 }, { -100, -100 }, { -120, -170 }, { 40, -70 }, { 150, 40 }, { 300, 0 } }, true,
-	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza" },
+	  "Seaside Town", "mermaid fountain", "mermaid fountain on the plaza", { 0x40, 0x41 } },
 	/* (its port the original's own, round the knight statue) */
 	{ 0x04, 0x00, 0x08, 1 << 0, { -7, -22, -1, -16 }, { -5, -22, -1, -18 }, green_mat, design_green, 40, -100, FACE_SW,
 	  { { 40, -100 }, { -60, -204 }, { -20, -268 }, { -196, -172 }, { -32, 24 }, { -64, 312 } }, true,
-	  "Green Town", "knight statue", "knight statue on the flower plaza" },
+	  "Green Town", "knight statue", "knight statue on the flower plaza", { 0xF1, 0xF7 } },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
 _Static_assert(STYLES == TOWN_LINES, "each style its people and words (town_lines.c)");
@@ -445,12 +448,100 @@ static bool sec2_seen(int cx, int cy) {
 
 /* Section 2 (people drawn behind the front layer), the jack-in and the
  * trees and statue of every copied piece. */
+/* The act's other way (1, 2) whose port the original's trigger `value`
+ * is; 0 none */
+static int port_of(int value) {
+	for (int k = 0; k < 2; ++k)
+		if (value == T.style->port_src[k]) return k + 1;
+	return 0;
+}
+
+static bool on_trigger(int cx, int cy);
+
+/* A check made port `port`: the ground Lan stands on to look at it
+ * (source cell (cx, cy), the piece's move dx, dy), as a check's own cells
+ * lie on what it shows, where no one stands */
+static void port_before(int port, int cx, int cy, int dx, int dy) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4 && T.ntrig < MAX_TRIG; ++k) {
+		int sx = cx + d[k][0], sy = cy + d[k][1], x = (sx + dx) * 8, y = (sy + dy) * 8;
+		if (!townsrc_walk(T.book, sx, sy) || on_trigger(sx + dx, sy + dy) || !ports_cell(port, x, y, 0)) continue;
+		T.trig[T.ntrig++] = (CoordCell){ (int16_t)x, (int16_t)y, 0, JACK_IN_TRIGGER | 0x80, 8, 0x11 };
+	}
+}
+
+/* The landmark's front, and two cells all round its statue: R jacks in
+ * there (a player walks up to it from any side) */
+static bool front_cell(int cx, int cy) {
+	const int *f = T.style->front, *st = T.style->statue;
+	return (cx >= f[0] && cy >= f[1] && cx <= f[2] && cy <= f[3]) ||
+		(cx >= st[0] - 2 && cy >= st[1] - 2 && cx <= st[2] + 2 && cy <= st[3] + 2);
+}
+
+/* One of a copied piece's triggers (source cell c, the piece's move dx,
+ * dy): a jack-in point kept, a check in front of a thing, or the act's
+ * other way's port (town_ports.c); every point is the town's one, n = 0 */
+static void carry_trigger(const Piece *p, const CoordCell *c, int dx, int dy) {
+	int cx = fdiv(c->x, 8), cy = fdiv(c->y, 8);
+	int port = port_of(c->value);
+	bool jack = (port && c->value < CHECK_TRIGGER) || (c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 &&
+		(p->flags & F_JACK_IN) && (T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1));
+	bool check = c->value >= CHECK_TRIGGER && T.lines->checks[c->value - CHECK_TRIGGER];
+	bool front = front_cell(cx, cy) && townsrc_walk(T.book, cx, cy);
+	if (!(jack || check) || front || !in_source(p, cx, cy) || T.ntrig >= MAX_TRIG) return;
+	CoordCell o = *c;
+	o.x = (int16_t)(c->x + dx * 8);
+	o.y = (int16_t)(c->y + dy * 8);
+	/* (marked apart from the front, whose middle the autopilot heads for;
+	 * the whole cell, as the front's: AsterLand's own point was part
+	 * shape 0x0C, where BN6 never jacked Lan in) */
+	if (jack) { o.value = JACK_IN_TRIGGER | 0x80; o.height = 8; o.type = 0x11; }
+	/* (a port's cell only where the port keeps it: else R there would
+	 * take the landmark's way) */
+	if (jack && port && !ports_cell(port, o.x, o.y, c->value)) return;
+	T.trig[T.ntrig++] = o;
+	if (port && !jack && ports_in_region(port, cx, cy)) port_before(port, cx, cy, dx, dy);
+}
+
+/* The landmark's whole front jacks in (where a player stands to, the
+ * original has the statue's check), and its ring */
+static void carry_ring(const Piece *p, int dx, int dy) {
+	const int *f = T.style->front, *st = T.style->statue;
+	int x0 = f[0] < st[0] - 2 ? f[0] : st[0] - 2, y0 = f[1] < st[1] - 2 ? f[1] : st[1] - 2;
+	int x1 = f[2] > st[2] + 2 ? f[2] : st[2] + 2, y1 = f[3] > st[3] + 2 ? f[3] : st[3] + 2;
+	for (int cy = y0; cy <= y1; ++cy)
+		for (int cx = x0; cx <= x1; ++cx)
+			if (front_cell(cx, cy) && in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG) {
+				/* (the ring's own cells marked apart too: the front's middle
+				 * stays where the autopilot heads) */
+				bool in_front = cx >= f[0] && cy >= f[1] && cx <= f[2] && cy <= f[3];
+				T.trig[T.ntrig++] = (CoordCell){ (int16_t)((cx + dx) * 8), (int16_t)((cy + dy) * 8), 0,
+					in_front ? JACK_IN_TRIGGER : JACK_IN_TRIGGER | 0x80, 8, 0x11 };
+			}
+}
+
+/* A copied piece's triggers: its own (carry_trigger), then the landmark's
+ * front and ring */
+static void carry_triggers(const Piece *p, const AreaSrc *a, int dx, int dy) {
+	for (int k = 0; k < a->nsec[3]; ++k) carry_trigger(p, &a->sec[3][k], dx, dy);
+	if (p->flags & F_JACK_IN) carry_ring(p, dx, dy);
+}
+
+/* The ports' names, and which cells of a check made a port are its: those
+ * round its part nearest the landmark */
+static void plan_ports(const AreaSrc *a) {
+	ports_begin(T.style->landmark, T.lines->ports[0], T.lines->ports[1]);
+	const int *st = T.style->statue;
+	for (int k = 0; k < 2; ++k) ports_region(a->sec[3], a->nsec[3], k + 1, T.style->port_src[k], (st[0] + st[2]) / 2, (st[1] + st[3]) / 2);
+}
+
 static void carry(void) {
 	const AreaSrc *a = townsrc_area(T.book);
 	const int *part;
 	const TownFoot *foot;
 	townsrc_parts(T.book, &part, &foot);
 	T.nsec2 = T.ntrig = T.nobj = T.nwalls = T.nheights = 0;
+	plan_ports(a);
 	for (int i = 0; i < T.npieces; ++i) {
 		const Piece *p = &T.piece[i];
 		if (p->kind != P_COPY) continue;
@@ -486,43 +577,7 @@ static void carry(void) {
 			o.y = (int16_t)((cy + dy) * 8);
 			T.sec2[T.nsec2++] = o;
 		}
-		/* the jack-in points and the checks in front of things; the
-		 * landmark's whole front jacks in (where a player stands to, the
-		 * original has the statue's check), and every point is the town's
-		 * one: n = 0 */
-		const int *f = T.style->front;
-		/* (the front, and two cells all round the statue: a player walks up
-		 * to it from any side) */
-		const int *st = T.style->statue;
-		#define PORT_CELL(cx, cy) (((cx) >= f[0] && (cy) >= f[1] && (cx) <= f[2] && (cy) <= f[3]) || \
-			((cx) >= st[0] - 2 && (cy) >= st[1] - 2 && (cx) <= st[2] + 2 && (cy) <= st[3] + 2))
-		for (int k = 0; k < a->nsec[3]; ++k) {
-			const CoordCell *c = &a->sec[3][k];
-			int cx = fdiv(c->x, 8), cy = fdiv(c->y, 8);
-			bool jack = c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 && (p->flags & F_JACK_IN) &&
-				(T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1);
-			bool check = c->value >= CHECK_TRIGGER && T.lines->checks[c->value - CHECK_TRIGGER];
-			bool front = PORT_CELL(cx, cy) && townsrc_walk(T.book, cx, cy);
-			if (!(jack || check) || front || !in_source(p, cx, cy) || T.ntrig >= MAX_TRIG) continue;
-			CoordCell o = *c;
-			o.x = (int16_t)(c->x + dx * 8);
-			o.y = (int16_t)(c->y + dy * 8);
-			/* (marked apart from the front, whose middle the autopilot heads for) */
-			if (jack) o.value = JACK_IN_TRIGGER | 0x80;
-			T.trig[T.ntrig++] = o;
-		}
-		int x0 = f[0] < st[0] - 2 ? f[0] : st[0] - 2, y0 = f[1] < st[1] - 2 ? f[1] : st[1] - 2;
-		int x1 = f[2] > st[2] + 2 ? f[2] : st[2] + 2, y1 = f[3] > st[3] + 2 ? f[3] : st[3] + 2;
-		for (int cy = y0; cy <= y1 && (p->flags & F_JACK_IN); ++cy)
-			for (int cx = x0; cx <= x1; ++cx)
-				if (PORT_CELL(cx, cy) && in_source(p, cx, cy) && townsrc_walk(T.book, cx, cy) && T.ntrig < MAX_TRIG) {
-					/* (the ring's own cells marked apart too: the front's middle
-					 * stays where the autopilot heads) */
-					bool in_front = cx >= f[0] && cy >= f[1] && cx <= f[2] && cy <= f[3];
-					T.trig[T.ntrig++] = (CoordCell){ (int16_t)((cx + dx) * 8), (int16_t)((cy + dy) * 8), 0,
-						in_front ? JACK_IN_TRIGGER : JACK_IN_TRIGGER | 0x80, 8, 0x11 };
-				}
-		#undef PORT_CELL
+		carry_triggers(p, a, dx, dy);
 		/* trees and the statue: the game's own map objects */
 		for (int k = 0; k < T.nsrc_obj && T.nobj < MAX_OBJS; ++k) {
 			const uint8_t *r = T.src_obj[k];
@@ -601,7 +656,8 @@ static void debug_where(void) {
 	for (int i = 0; i < T.lines->nfolk; ++i)
 		if (T.folk_at[i][0] != 1 << 20) fprintf(stderr, "town: %d:%02x at %d,%d\n", T.lines->folk[i].cat, T.lines->folk[i].sprite, T.folk_at[i][0], T.folk_at[i][1]);
 	for (int i = 0; i < T.ntrig; ++i)
-		if ((T.trig[i].value & 0x7F) == JACK_IN_TRIGGER) fprintf(stderr, "town: jack-in cell at %d,%d\n", T.trig[i].x, T.trig[i].y);
+		fprintf(stderr, "town: %s cell at %d,%d (%02x, z %d, %d %02x)\n", (T.trig[i].value & 0x7F) == JACK_IN_TRIGGER ? "jack-in" : "trigger",
+			T.trig[i].x, T.trig[i].y, T.trig[i].value, T.trig[i].z, T.trig[i].height, T.trig[i].type);
 }
 
 static int plan_once(uint32_t seed) {
@@ -808,7 +864,8 @@ bool town_after_abandon;
 bool town_on_port(int x, int y) {
 	for (int i = 0; i < T.ntrig; ++i) {
 		const CoordCell *c = &T.trig[i];
-		if ((c->value & 0x7F) == JACK_IN_TRIGGER && x >= c->x && y >= c->y && x < c->x + 8 && y < c->y + 8) return true;
+		if ((c->value & 0x7F) == JACK_IN_TRIGGER && ports_value(c->x, c->y, JACK_IN_TRIGGER) == JACK_IN_TRIGGER &&
+			x >= c->x && y >= c->y && x < c->x + 8 && y < c->y + 8) return true;
 	}
 	return false;
 }
@@ -867,7 +924,15 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	free(out);
 	emu_write32(0x08000000u + desc + 8, TOWN_TILEMAP_AT);
 	/* walls around the walkable cells, the cells behind the art, the jack-in */
-	CoordExtra extra = { { T.walls, T.heights, T.sec2, T.trig }, { T.nwalls, T.nheights, T.nsec2, T.ntrig } };
+	/* (a closed port's ground before a check no trigger) */
+	static CoordCell trig[MAX_TRIG];
+	int ntrig = 0;
+	for (int i = 0; i < T.ntrig; ++i) {
+		trig[ntrig] = T.trig[i];
+		trig[ntrig].value = (uint8_t)ports_value(T.trig[i].x, T.trig[i].y, T.trig[i].value);
+		if (trig[ntrig].value) ++ntrig;
+	}
+	CoordExtra extra = { { T.walls, T.heights, T.sec2, trig }, { T.nwalls, T.nheights, T.nsec2, ntrig } };
 	if (!(T.style->whole ? coords_write_raw(coord_slot, &extra) : coords_write_town(coord_slot, walkable, &extra))) return false;
 	/* people and the trees, in the town's own space */
 	mapslot_town(true);

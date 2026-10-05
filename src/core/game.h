@@ -24,6 +24,7 @@ extern const Scene scene_gallery;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
+extern bool emu_start_at_home;    /* ... or at home before its first layer's act (--scene home) */
 extern bool title_summary;          /* the title opens on the finished run's summary */
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */

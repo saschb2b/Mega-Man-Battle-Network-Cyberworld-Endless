@@ -167,22 +167,6 @@ static bool act_on_choices(void) {
 	return false;
 }
 
-/* The Guardian Data's second way on, where it was taken (docs/META.md,
- * routes): the next act in that area, under its guardian; or its dark way,
- * into the Undernet */
-static void take_route(void) {
-	if (run.side_kind != LAYER_NORMAL || !is_boss_depth(run.depth)) return;
-	int act = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, navi = 0, b = -1;
-	if (flag_get(LAYER_ROUTE_FLAG)) b = run_route_alt(act, &navi);
-	else if (flag_get(LAYER_ROUTE_DARK_FLAG) && run_route_alt(act, &alt_navi) >= 0) b = run_route_dark(act, alt_navi, &navi);
-	if (b >= 0) {
-		run.biome_order[act] = (uint8_t)b;
-		run.boss_order[b] = (uint8_t)navi;
-	}
-	flag_clear(LAYER_ROUTE_FLAG);
-	flag_clear(LAYER_ROUTE_DARK_FLAG);
-}
-
 /* MegaMan stepped on the exit pad: the game plays its warp (jack out, fade,
  * jack in) to warp 1. While it jacks out, the next layer is built and warp 1
  * pointed at its start; nothing else happens until MegaMan has arrived. */
@@ -207,7 +191,6 @@ static bool follow_exit_warp(void) {
 	 * arrival says so; counted with the next checkpoint, which a CONTINUE
 	 * cannot undo) */
 	if (boss_beaten() && run.biome == BIOME_NEST && !run_short_nest(run.depth)) D.nest_cleared = true;
-	take_route();
 	/* a side layer's exit leads one area deeper too */
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;

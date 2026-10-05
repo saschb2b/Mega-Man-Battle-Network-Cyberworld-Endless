@@ -5,6 +5,8 @@
 
 #include <stdbool.h>
 
+#include "run.h"
+
 /* Whether the exit MegaMan steps on now leads home: an act's guardian
  * deleted, on the act's last layer (not the short net's Nest). */
 bool home_due(void);
@@ -15,7 +17,14 @@ bool home_due(void);
  * the net). */
 bool home_begin(const char *beaten);
 
-/* Whether map (group, number) is the run's town. */
+/* The next act's ways at home (its ports, docs/HOME.md): how many are
+ * open, and whether a dark way stands sealed. */
+const RunWay *home_ways(int *n, bool *dark_sealed);
+/* R at `port` (-1 a jack-in point no way's): its way taken, the next
+ * act's first layer built for it where it was another's. */
+bool home_take_way(int port);
+/* Whether map (group, number) is the run's town (director_town.c, as
+ * the rest below). */
 bool home_map(int group, int number);
 /* The town's frame, at the run's start and at home: Lan's words, the walk
  * to the port, and the next layer's arrival after his jack-in. */

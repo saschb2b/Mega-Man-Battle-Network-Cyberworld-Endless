@@ -186,6 +186,26 @@ int run_nest_second(void) {
 	return g;
 }
 
+int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed) {
+	/* (the Nest's act, after the net's last: its one way, the Nest) */
+	if (act >= ((run.mode == RUN_SHORT ? SHORT_LAYERS : CYCLE_LAYERS) - 1) / 3) {
+		int g = run.boss_order[BIOME_NEST];
+		way[0] = (RunWay){ BIOME_NEST, g, g };
+		*sealed = false;
+		return 1;
+	}
+	int alt_navi = 0, dark_navi = 0, alt = run_route_alt(act, &alt_navi);
+	int dark = alt >= 0 ? run_route_dark(act, alt_navi, &dark_navi) : -1;
+	int b[3] = { run.biome_order[act], alt, dark }, navi[3] = { run.boss_order[run.biome_order[act]], alt_navi, dark_navi };
+	int n = alt < 0 ? 1 : dark < 0 || !dark_open ? 2 : 3;
+	*sealed = dark >= 0 && !dark_open;
+	for (int k = 0; k < n; ++k) {
+		int x = run_xguardian_at(act, b[k]);
+		way[k] = (RunWay){ b[k], navi[k], x ? x : navi[k] };
+	}
+	return n;
+}
+
 int run_route_dark(int act, int avoid, int *navi) {
 	if (run.mode != RUN_SHORT || act != 2) return -1;
 	uint32_t keep = rng_state();

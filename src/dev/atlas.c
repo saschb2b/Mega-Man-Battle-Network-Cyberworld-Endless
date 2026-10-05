@@ -337,6 +337,20 @@ static void town_dot(int id, int x, int y, void *ctx) {
 	dot(d->px, d->W, d->H, area_px(d->tw, x, y), area_py(d->th, x, y), 2, id < 0 ? 0xFFFFE020u : id == 0x7D || id == 0x7E ? 0xFF20C020u : 0xFF3060FFu);
 }
 
+/* The town's ports (docs/HOME.md): how many cells each, and how many Lan
+ * reaches on foot from the landmark's */
+static void port_feet(char *out, size_t size) {
+	const CoordCell *trig;
+	int nt = town_triggers(&trig), cells[TOWN_PORTS] = { 0 }, feet[TOWN_PORTS] = { 0 };
+	for (int i = 0; i < nt; ++i) {
+		int x = trig[i].x + 4, y = trig[i].y + 4, k = town_port_at(x, y), wx, wy;
+		if ((trig[i].value & 0x7F) != 0x40 || k < 0) continue;
+		++cells[k];
+		feet[k] += town_walk(x, y, 0, &wx, &wy, NULL);
+	}
+	snprintf(out, size, "ports %d/%d, %d/%d, %d/%d on foot", feet[0], cells[0], feet[1], cells[1], feet[2], cells[2]);
+}
+
 /* The towns (src/world/town.c) runs of a few seeds start in, drawn with
  * their original's tiles; tiles no source tile matched are marked red, the
  * town's objects and people dotted. */
@@ -372,7 +386,9 @@ static void towns(const char *dir, int seeds) {
 		snprintf(path, sizeof path, "%s/town_s%02d.bmp", dir, s);
 		save_bmp(path, px, W, H);
 		free(px);
-		printf("town seed %d: %dx%d tiles, %d picks, %d misses\n", s, ti->tw, ti->th, ti->picks, ti->misses);
+		char feet[64];
+		port_feet(feet, sizeof feet);
+		printf("town seed %d: %dx%d tiles, %d picks, %d misses, %s\n", s, ti->tw, ti->th, ti->picks, ti->misses, feet);
 	}
 }
 

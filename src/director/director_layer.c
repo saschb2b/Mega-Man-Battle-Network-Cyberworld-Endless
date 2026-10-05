@@ -427,6 +427,7 @@ bool director_start_run(void) {
 	/* the first layer, entered through the town's port; the town itself
 	 * (its seed apart from the layers') */
 	if (!new_layer(false)) return false;
+	town_ways(1);   /* (the run's first act: one port) */
 	if (!town_plan(town_seed(run.seed)) || !town_install(D.group, D.number, D.start_x, D.start_y)) {
 		fprintf(stderr, "town: not built; starting in the net\n");
 		lock_run();

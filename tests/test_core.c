@@ -20,6 +20,7 @@
 #include "run.h"
 #include "area_src.h"
 #include "guardians.h"
+#include "home_words.h"
 #include "npc_lines.h"
 #include "powers.h"
 #include "rivals.h"
@@ -1256,30 +1257,35 @@ static void test_talk(void) {
 			snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Word is,%s guards this area!", area, guardian(navi)->name);
 			check_talk(what, line);
 		}
-		/* (the way on's question, each way's guardian battled or never,
-		 * with no dark way, a sealed one and an open one, to every other
-		 * area; one never battled is said once, not once a way: session
-		 * 64. The area's name copied first: the next call writes over it) */
-		char here[32];
-		snprintf(here, sizeof here, "%s", area);
-		for (int other = 0; other < BIOME_COUNT; ++other) {
-			char there[32], q[400];
-			snprintf(there, sizeof there, "%s", guardian_area_in_text(other, LAYER_NORMAL));
-			const char *areas[3] = { here, there, "the Undernet" };
-			for (int dark = 0; dark <= 2; ++dark)
-				for (int known = 0; known < 8; ++known) {
-					const char *who[3];
-					for (int k = 0; k < 3; ++k) who[k] = known >> k & 1 ? "TomahawkMan the Breaker Navi" : NULL;
-					guardian_way_question(q, sizeof q, who, areas, dark);
-					snprintf(what, sizeof what, "the way on from area %d to %d (dark way %d, battled %d)", biome, other, dark, known);
-					check_talk(what, q);
-					const char *once = strstr(q, "Navi we've never battled");
-					CHECK(!once || !strstr(once + 1, "Navi we've never battled"), "%s: one never battled named twice: \"%s\"", what, q);
-				}
+		/* (MegaMan at a port at home, docs/HOME.md: the way's area, its
+		 * guardian battled or never, the dark way's and its seal) */
+		for (int navi = 0; navi <= 18; ++navi) {
+			if (navi == 17) continue;
+			snprintf(what, sizeof what, "the port's words to area %d (guardian %d)", biome, navi);
+			check_talk(what, home_port_words(biome, navi, false, false));
+			check_talk(what, home_port_words(biome, navi, true, false));
 		}
-		/* (the way's option, alone on its line in the choice) */
-		CHECK(strlen(guardian_area_name(biome)) <= 18, "area %d's name is long for the way on's choice", biome);
+		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true));
 	}
+}
+
+/* Coming home (docs/HOME.md): MegaMan and Lan's words after each act of
+ * either net, the ports open named by the towns' longest names, a dark
+ * way sealed or open. */
+static void test_home_words(void) {
+	static const char *const ports[3] = { "mermaid fountain", "door to AsterLand", "plaza's east edge" };
+	for (int mode = RUN_SHORT; mode <= RUN_ENDLESS; ++mode)
+		for (int depth = 4; depth <= 20; depth += 3) {
+			run.mode = (uint8_t)mode;
+			run.depth = depth;
+			for (int ways = 1; ways <= 3; ++ways) {
+				char what[80];
+				snprintf(what, sizeof what, "home's words at layer %d (net %d, %d ways)", depth, mode, ways);
+				check_talk(what, home_words("TomahawkMan", ways, ports, ways == 2 ? ports[2] : NULL));
+				check_talk(what, home_words(NULL, ways, ports, NULL));
+			}
+		}
+	run.depth = 1;
 }
 
 /* Following the arrow gets MegaMan there: from the arrival and from each
@@ -2603,6 +2609,7 @@ static void test_rom_pages(void) {
 
 int main(void) {
 	test_sha1();
+	test_home_words();
 	test_lz77();
 	test_generation();
 	test_layer_make();

@@ -56,6 +56,9 @@ void mapslot_music_forget_town(void);
  * MegaMan to world (x, y) of (to_group, to_number), with the game's own
  * jack-in (one of its 20-byte destinations is taken over). */
 bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, int y, int facing);
+/* ... and where its jack-in leads now, mapslot_jack_in's table kept (a
+ * town's port taking another way, docs/HOME.md) */
+void mapslot_jack_to(int to_group, int to_number, int x, int y, int facing);
 
 /* The town's warp list: every entry leads back to its own world (x, y),
  * so no trigger left in it can take Lan anywhere else. */

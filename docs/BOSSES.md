@@ -185,7 +185,7 @@ guardians pay where their row holds their chip. Lost, the run ends as at
 any guardian.
 
 **His Guardian Data**: his Soul with MegaMan's words, five
-HPMemory, a full heal, the NaviCust's draft and the way on, as BN6's;
+HPMemory, a full heal and the NaviCust's draft, as BN6's;
 and in his Navi chip's place (BN6 has none of his) a chip of his Soul's
 kind that BN6 has, in the folder's code or *, so the Soul unites from
 the next battle on: KnightMan's JustcOne, ToadMan's BblWrap, one of

@@ -175,10 +175,11 @@ walls on one floor. So its plan is the original copied whole (cells
 -62..62: its roofs' and the whale's art stands on cells far up the
 picture), and it takes the original's own walls and heights (coordinate
 sections 0 and 1, `coords_write_raw`) instead of walls made round the
-walkable cells. Its own jack-in points (0x40 before the fish shop, 0x41
-round an object at the plaza's east edge) are left out: the port is the
-mermaid fountain's front and a ring round it, where its check ring (f0)
-stood. Lan starts at height 0, since the town's warp entry holds no
+walkable cells. The port is the mermaid fountain's front and a ring round
+it, where its check ring (f0) stood; its own jack-in points (0x40 before
+the fish shop, 0x41 round an object at the plaza's east edge) are the
+second and third ways' ports at home (docs/HOME.md), and lead to the
+landmark's way where their own is not open. Lan starts at height 0, since the town's warp entry holds no
 height.
 
 Its first trial typed every chat about sixty times slower than the other
@@ -247,6 +248,21 @@ check between, where a player walks up and presses R. Every cell is value
 points n = 0 at destination 42, and the engine rewrites destination 42
 (a comp the run never visits) to the first layer's arrival. When MegaMan
 arrives there, the run goes on as from any layer (docs/EMULATION.md).
+
+At home after an act (docs/HOME.md) the town's other points and two
+checks are the ports of the act's other ways (`town_ports.c`): Central
+Town's second point, in front of AsterLand (`0x41`), and the ground
+before its Expo road check (`0xFA`); ACDC Town's doghouse (`0x41`) and
+the ground before its mansion gate (`0xF7`); Seaside Town's own two;
+Green Town's ground before the flower shop (`0xF1`) and round the lily
+pond nearest the knight (`0xF7`). A check's own cells lie on what it
+shows (a pond, a gate), so its port is the walkable cells beside them.
+Every port's cells are point n = 0, written as whole cells (height 8,
+shape `0x11`: AsterLand's own were shape `0x0C`, where BN6's R never
+jacked Lan in), and R on one has the engine rewrite destination 42 for
+its way (`mapslot_jack_to`) before the game reads it. A port whose way is
+not open that visit keeps no trigger on a check's ground, and BN6's own
+points jack in to the landmark's way.
 
 A new run plans another town than the last run did (`town_style_for`,
 in `run_new_varied`, which also keeps the first area and guardian off the

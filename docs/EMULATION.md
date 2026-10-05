@@ -226,10 +226,11 @@ far, and event flag `0x144E` in the state that L has told where they are,
 which CONTINUE clears so that L starts over (`0x144F`: that the Net
 Dealer has said his words, so a later talk is a line and the list;
 `0x1450` the same for the NaviCust vendor, `0x1451` for a
-Recovery Mr. Prog, whose heal is then one box; `0x1452` that the Guardian
-Data's second way on was taken, which the exit pad's warp reads; `0x1453`
-that the layer's collector's vault gave its chip; `0x1454` that the
-Guardian Data's dark way into the Undernet was taken; `0x1455` that the
+Recovery Mr. Prog, whose heal is then one box; `0x1452` free (the Guardian
+Data's second way on, until the act's ways became ports at home, issue
+#86); `0x1453`
+that the layer's collector's vault gave its chip; `0x1454` free as
+`0x1452` (its dark way into the Undernet); `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
 docs/RIVAL.md; `0x146E`, never cleared by a layer, that the run's chips

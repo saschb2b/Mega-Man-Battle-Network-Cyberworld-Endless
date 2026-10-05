@@ -141,6 +141,13 @@ bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, 
 	return true;
 }
 
+void mapslot_jack_to(int to_group, int to_number, int x, int y, int facing) {
+	uint8_t rec[20] = { (uint8_t)to_group, (uint8_t)to_number, 0, (uint8_t)facing };
+	put32(rec + 4, (uint32_t)x << 16);
+	put32(rec + 8, (uint32_t)y << 16);
+	emu_write(JACK_IN_RECORDS + JACK_IN_RECORD * 20, rec, sizeof rec);
+}
+
 bool mapslot_town_warps(int group, int number, int x, int y, int facing) {
 	uint8_t list[16 * 16];
 	for (int i = 0; i < 16; ++i) {

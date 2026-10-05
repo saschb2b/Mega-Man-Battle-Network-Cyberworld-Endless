@@ -60,6 +60,18 @@ int town_port_near(int x, int y, int *px, int *py);
 /* The town's map objects (id) and people (id -1), in world units. */
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
 
+/* The ports (docs/HOME.md): the landmark's (0), then one for each of the
+ * act's other ways where the town has one (town_ports.c). */
+#define TOWN_PORTS 3
+/* How many of the act's ways a visit opens (1 to TOWN_PORTS), before
+ * town_install: the ports past them stand closed (a check made a port is a
+ * check again). */
+void town_ways(int open);
+/* The port whose cells hold world (x, y), open or closed; -1 none. */
+int town_port_at(int x, int y);
+/* Where it is, for MegaMan's words: "bird statue", "doghouse"; NULL none. */
+const char *town_port_name(int port);
+
 /* Installs the planned town in its original's map: tiles, walls, the
  * jack-in cells and checks and what they say, trees and statues, people
  * and their words, the music; jacking in takes MegaMan to world (x, y) of

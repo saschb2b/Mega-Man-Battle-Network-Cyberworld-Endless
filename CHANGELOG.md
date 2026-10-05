@@ -10,8 +10,18 @@
   the run is saved at home, and R at the port takes them on to the next
   act. A short net comes home three times before the Nest; the endless
   net after every act, its Nest too. docs/HOME.md has the design: next,
-  the act's ways as ports, the townsfolk's jobs, a shop at home, and a
-  town that remembers.
+  the townsfolk's jobs, a shop at home, and a town that remembers.
+- **The act's ways are ports at home** (issue #86). The Guardian Data
+  no longer asks "Which way?": coming home, MegaMan names the ports that
+  are open ("Two ports are open this time! The squirrel statue,and the
+  doghouse!"), and standing on one he says where it leads and who waits
+  there. R at a port takes its way. Each town has its landmark's port
+  and two more from BN6's own jack-in points and its sights: AsterLand's
+  door and the Expo road in Central Town, the doghouse and the mansion
+  gate in ACDC Town, the fish shop and the plaza's east edge in Seaside
+  Town, the flower shop and the lily pond in Green Town. The dark way
+  into the Undernet is the third port, sealed until the Secret Area has
+  been cleared; the Nest's visit has its one port.
 - **Townsfolk who walk stay drawn as they walk.** Seaside's and Green
   Town's walker vanished the moment he set off and came back when he
   stopped: his sprite's walks are empty in BN6's data. Both walk as

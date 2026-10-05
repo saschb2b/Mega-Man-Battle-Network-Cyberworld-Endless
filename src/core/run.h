@@ -101,6 +101,15 @@ int run_route_alt(int act, int *navi);
  * its guardian, fit for the act, no other act's and not `avoid` (the other
  * way's); -1 for none. */
 int run_route_dark(int act, int avoid, int *navi);
+/* The ways act `act` (0-based) may take once the act before it ends
+ * (docs/HOME.md: the town's ports): its own area, the other way's and the
+ * dark way's where the act has them, each with the guardian the run will
+ * set there (`navi`, run.boss_order's) and the one MegaMan meets (`meets`:
+ * an older net's own where its game guards the area); how many are open,
+ * the dark way only when `dark_open` (else `*sealed` where it would be).
+ * The act after the net's last is the Nest's: the Nest its one way. */
+typedef struct { int biome, navi, meets; } RunWay;
+int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed);
 /* Whether depth is the short net's Nest, the run's last layer (on threat
  * 10 its last two: the first guardian leads down to a second). */
 static inline bool run_short_nest(int depth) { return run.mode == RUN_SHORT && depth >= SHORT_LAYERS; }

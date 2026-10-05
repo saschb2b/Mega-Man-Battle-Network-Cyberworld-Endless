@@ -150,6 +150,34 @@ the town keeps them (ACDC Town's doghouse, Central Town's RoboDog,
 Seaside's aquarium and fish stick fryer), and a check made a port where
 it does not. The run's first act has one port, as today.
 
+As built (issue #86): the Guardian Data no longer asks "Which way?"; the
+ways (`run_ways`: the act's own area, the other way where the act has
+one, the dark way where it is open) are the town's ports, in that order:
+
+| Town | The landmark's | The second way's | The third way's |
+| --- | --- | --- | --- |
+| Central Town | bird statue | door to AsterLand (BN6's second point, `0x41`) | Expo road (check `0xFA`) |
+| ACDC Town | squirrel statue | doghouse (BN6's `0x41`) | mansion gate (check `0xF7`) |
+| Seaside Town | mermaid fountain | fish shop (BN6's `0x40`) | plaza's east edge (BN6's `0x41`) |
+| Green Town | knight statue | flower shop (check `0xF1`) | lily pond (check `0xF7`) |
+
+A check's own cells lie on what it shows, where no one stands, so a check
+made a port is the walkable ground beside it, and only round the part of
+it nearest the landmark (Green Town's lily ponds are two, a town apart,
+and one check). BN6's own points are written as whole cells (AsterLand's
+was a part shape, `0x0C`, where BN6 never jacked Lan in). Coming home,
+MegaMan names the open ports ("Two ports are open this time! The squirrel
+statue,and the doghouse!"), and a sealed dark way's ("Something dark waits
+at the mansion gate too..."); stepping onto one, he says where it leads
+and who waits there, once a visit ("This port goes to Green Area,Lan.
+CircusMan waits there!"; the guardian named as on the act's card, where
+MegaMan has battled him). R there takes its way: the exit built the next
+act's first layer for the landmark's, and another port's R builds it
+again for its own before the game jacks in. A port no way has this visit
+is no port: a check's ground holds no trigger, and BN6's own point jacks
+in to the landmark's way, as before the ports. The Nest's visit has one
+way, the Nest. The second screen does not list them yet (piece 7).
+
 ### 3. Jobs (the Request BBS)
 
 At each visit up to three townsfolk have a job for the next act, and Lan

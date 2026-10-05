@@ -73,22 +73,6 @@ static const char *reward_power(int navi) {
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
 
-/* Guardian `navi` of act `act` in area `b`, as the split names him: BN5's
- * where he guards it (run_xguardian_at), else `navi` */
-static int way_guardian(int act, int b, int navi) {
-	int x = run_xguardian_at(act, b);
-	return x ? x : navi;
-}
-
-/* A way on as the split's menu names it: "CircusMan (Sky Area)", or
- * without the brackets where a row has no room for them (a menu's row
- * holds OPTION_CHARS letters beside its cursor). */
-#define OPTION_CHARS 21
-static void way_option(char *out, size_t n, const char *navi, const char *area) {
-	snprintf(out, n, "%s (%s)", navi, area);
-	if (strlen(out) > OPTION_CHARS) snprintf(out, n, "%s %s", navi, area);
-}
-
 /* The NaviCust's draft after a normal layer's guardian (docs/NAVICUST.md):
  * an ExpMemry at the second and fourth acts' guardians, and three programs,
  * or none for BugFrags. */
@@ -132,53 +116,6 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 	}
 }
 
-/* The way on (docs/META.md, routes): after an act's guardian, the next
- * act's area or another of its tier, each named with its guardian where
- * MegaMan has battled him (else as one never battled, the way named by its
- * area: docs/META.md, what MegaMan knows); NULL after any other. */
-static const ScriptsRoute *way_on(void) {
-	static ScriptsRoute route;
-	static char question[400], then[3][96], area[3][32], who[3][48], option[3][32];
-	int next = (run.depth % CYCLE_LAYERS) / 3, alt_navi = 0, alt = -1, dark_navi = 0;
-	if (run.side_kind == LAYER_NORMAL && is_boss_depth(run.depth)) alt = run_route_alt(next, &alt_navi);
-	if (alt < 0) return NULL;
-	/* (the short net's last act before the Nest: the dark way into the
-	 * Undernet, open once the Secret Area has been cleared in any run, and
-	 * said to be sealed till then: docs/META.md, branches) */
-	int dark = run_route_dark(next, alt_navi, &dark_navi);
-	bool dark_open = dark >= 0 && meta_dark_way_open();
-	int nways = dark_open ? 3 : 2;
-	route = (ScriptsRoute){ 0 };
-	/* (each way's guardian as the act there will have him: BN5's own
-	 * where his game dresses its area and guards it) */
-	int b[3] = { run.biome_order[next], alt, dark }, el[3];
-	int n[3] = { way_guardian(next, b[0], run.boss_order[b[0]]), way_guardian(next, alt, alt_navi), way_guardian(next, dark, dark_navi) };
-	const char *named[3] = { NULL, NULL, NULL }, *areas[3] = { area[0], area[1], area[2] };
-	for (int k = 0; k < nways; ++k) {
-		snprintf(area[k], sizeof area[k], "%s", guardian_way_area(b[k]));
-		/* (his element of either wheel: TenguMan's Wind as HeatMan's Fire) */
-		el[k] = guardian_element(n[k]);
-		/* (each way its Navi, "???" for one never battled, and where
-		 * he waits: a playtester read "Aquarium Comp" beside "EraseMan"
-		 * as a place against a Navi, and two missed the areas, which
-		 * only the words before named; his element stays in those) */
-		bool known = guardian_known(n[k]);
-		way_option(option[k], sizeof option[k], known ? guardian(n[k])->name : "???", guardian_area_short(b[k]));
-		if (known) snprintf(who[k], sizeof who[k], el[k] > 0 ? "%s the %s Navi" : "%s%s", guardian(n[k])->name, elem_name(el[k]));
-		named[k] = known ? who[k] : NULL;
-		route.option[k] = option[k];
-		snprintf(then[k], sizeof then[k], "%c%s it is! To the exit pad!", area[k][0] - ('a' <= area[k][0] ? 32 : 0), area[k] + 1);
-		route.then[k] = then[k];
-	}
-	/* (two boxes: five had named the ways) */
-	guardian_way_question(question, sizeof question, named, areas, dark_open ? 2 : dark >= 0);
-	route.question = question;
-	route.n = nways;
-	route.flag = LAYER_ROUTE_FLAG;
-	route.dark_flag = LAYER_ROUTE_DARK_FLAG;
-	return &route;
-}
-
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g) {
 	const Guardian *gd = guardian_faced(o->param);
 	g->navi = o->param;
@@ -199,21 +136,18 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* (the run's last guardian: none, nothing more to run with) */
 	bool last = run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth);
 	if (run.side_kind == LAYER_NORMAL && !last) draft_make(&draft, g);
-	const ScriptsRoute *way = way_on();
 	/* (a first battle with this Navi, in any run: its battle data comes
 	 * with the Guardian Data, and the next briefing reads it) */
 	const char *power = reward_power(g->navi);
 	if (!guardian_known(g->navi)) power = guardian_data_words(power);
 	ScriptsReward reward = { .name = gd->name, .power = power, .chip = chip, .code = code, .chip_name = ci.name, .last = last,
 		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
-		.draft = &draft, .route = way };
+		.draft = &draft };
 	g->reward = ta_guardian_reward(text, &reward);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
 	for (int f = LAYER_BOSS_GONE_FLAG; f <= LAYER_EXIT_OPEN_FLAG; ++f) flag_clear(f);
-	flag_clear(LAYER_ROUTE_FLAG);
-	flag_clear(LAYER_ROUTE_DARK_FLAG);
 }
 
 void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {

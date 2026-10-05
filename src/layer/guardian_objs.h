@@ -14,8 +14,6 @@
 #define LAYER_REWARD_FLAG        0x144A   /* its Guardian Data shows */
 #define LAYER_REWARD_TAKEN_FLAG  0x144B   /* ... and was taken */
 #define LAYER_EXIT_OPEN_FLAG     0x144C   /* the exit pad shows */
-#define LAYER_ROUTE_FLAG         0x1452   /* the Guardian Data's second way on was taken (docs/META.md, routes) */
-#define LAYER_ROUTE_DARK_FLAG    0x1454   /* ... or its third, the dark way into the Undernet */
 #define LAYER_DRAFT_FIT_FLAG     0x1467   /* (+k) the draft's k-th program fits the board's free space as it stands (the director keeps them) */
 
 typedef struct {

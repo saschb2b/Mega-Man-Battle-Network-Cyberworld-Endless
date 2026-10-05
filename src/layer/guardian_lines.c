@@ -368,38 +368,6 @@ const char *guardian_defeat(int navi) {
 	return navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
 }
 
-/* (where no way's guardian has been battled, it is said once: "A Navi
- * we've never battled guards Aquarium HP, and a Navi we've never battled
- * guards Judge Tree Comp." read to a playtester as the sentence repeating
- * itself, session 64; a second of three is "another") */
-void guardian_way_question(char *out, size_t n, const char *const who[3], const char *const area[3], int dark) {
-	static const char sealed[] = "|@M A dark way leads down too,but it's sealed.|@M Clearing the Secret Area would open it.|"
-		"@M It's past the golden gate. Which way?";
-	int ways = dark == 2 ? 3 : 2, unknown = 0;
-	for (int k = 0; k < ways; ++k) unknown += !who[k];
-	if (unknown == ways && ways == 3) {
-		snprintf(out, n, "@M Lan,the Net splits three ways!|@M Navis we've never battled guard them all.|@M One to %s,one to %s,|"
-			"@M and a dark way into the Undernet. Which way?", area[0], area[1]);
-		return;
-	}
-	if (unknown == ways) {
-		snprintf(out, n, "@M Lan,the Net splits below us!|@M Navis we've never battled guard both ways.|@M One to %s,one to %s.%s", area[0], area[1],
-			dark ? sealed : "|@M Which way?");
-		return;
-	}
-	char said[3][48];
-	for (int k = 0, told = 0; k < ways; ++k)
-		snprintf(said[k], sizeof said[k], "%s", who[k] ? who[k] : told++ ? "Another we've never battled" : "A Navi we've never battled");
-	/* (the first names a sentence's start) */
-	if ('a' <= said[0][0] && said[0][0] <= 'z') said[0][0] = (char)(said[0][0] - 32);
-	if (ways == 3)
-		snprintf(out, n, "@M Lan,the Net splits three ways!|@M %s guards %s.|@M %s guards %s.|@M And a dark way leads into the Undernet.|"
-			"@M %s waits there! Which way?", said[0], area[0], said[1], area[1], said[2]);
-	else
-		snprintf(out, n, "@M Lan,the Net splits below us!|@M %s guards %s.|@M %s guards %s.%s", said[0], area[0], said[1], area[1],
-			dark ? sealed : "|@M Which way?");
-}
-
 /* A first battle's Guardian Data: its battle data comes with it, and the
  * next briefing reads it; after `power`, what else it gave (or NULL) */
 const char *guardian_data_words(const char *power) {

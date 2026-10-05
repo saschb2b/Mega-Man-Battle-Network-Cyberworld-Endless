@@ -23,7 +23,6 @@ nesting src/map/legal.c:pieces 6
 nesting src/map/tilemap.c:pick_all 6
 nesting src/map/tiles_pick.c:best 6
 nesting src/net/net_set_pieces.c:teleport_island_site 6
-nesting src/world/town.c:carry 6
 nesting src/world/town.c:plan_once 6
 nesting src/world/townsrc.c:townsrc_synth 6
 params src/audio/xsong.c:xsong_walk 8
