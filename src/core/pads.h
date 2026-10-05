@@ -51,4 +51,10 @@ void pads_set_map(const PadMap *m);
 void pads_load(const char *path);
 bool pads_save(void);
 
+/* Tests (--pad KIND, main.c): a virtual controller of a kind (xbox,
+ * playstation, nintendo, generic), its inputs held as a step says (bit n
+ * input n). False where SDL (before 2.24) has none. */
+bool pads_virtual(const char *kind);
+void pads_virtual_hold(uint64_t inputs);
+
 #endif

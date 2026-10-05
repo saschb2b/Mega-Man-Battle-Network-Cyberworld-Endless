@@ -351,6 +351,36 @@ mood) and its end, and with Souls held whether UNITE stood on its first
 Custom screen and each unison; play.py's state says `battle (the older
 net's)` while it runs.
 
+## Sprite gallery
+
+L and SELECT together on the title screen (SELECT alone opens the
+controls screen), or `--scene gallery`: every ROM sprite's animations, L
+and R the category, Left and Right the sprite, Up and Down the animation,
+A the palette, B back to the title.
+
+## A controller in a test
+
+```bash
+python3 build.py shot --scene title --pad xbox --input "60:,4:START,60:,4:pad.back,20:,4:pad.dpdown" --shot 200:/src/.build/a.bmp
+python3 build.py shot --scene emu --run-depth 1 --pad nintendo --input "420:,6:pad.a" --shot 460:/src/.build/a.bmp
+python3 tools/play.py start NAME -- --pad playstation
+python3 tools/play.py do NAME "press pad.back; press key.J"
+```
+
+`--pad KIND` (xbox, playstation, nintendo or generic) attaches one of
+SDL's virtual controllers, named and numbered as that kind is (an Xbox 360
+pad, a PS4 pad, a Switch Pro Controller), so the game opens and reads it
+as a player's (`pads.c`): its family and labels, the controls screen,
+`pad.ini`, which the data folder then holds headless too (written with
+the defaults where missing, and when the controls screen keeps a map).
+Steps of `--input` and play.py's commands take `pad.NAME`, that pad's input
+by SDL's name held for the step (`pad.a`, `pad.dpup`, `pad.lefttrigger`,
+`pad.-lefty`), and `key.NAME`, a key (`key.J`, `key.Return`), both through
+SDL's events as a player's, past any map; the GBA's own names (`A`,
+`UP+RIGHT`) still inject the buttons themselves. It needs SDL 2.24 (every
+build but the handhelds' PortMaster binary, linked against 2.0.14, where
+`--pad` says it has none).
+
 ## How the switches work
 
 - **Random battles** sets event flag 0x1700 every frame, one of the flags

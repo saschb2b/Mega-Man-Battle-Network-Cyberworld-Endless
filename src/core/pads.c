@@ -340,3 +340,55 @@ bool pads_save(void) {
 	platform_persist();
 	return ok;
 }
+
+/* ---- tests: a virtual controller ---- */
+
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+static SDL_Joystick *vjoy;
+
+bool pads_virtual(const char *kind) {
+	static const struct { const char *kind, *name; Uint16 vendor, product; } kinds[] = {
+		{ "xbox", "Xbox 360 Controller", 0x045e, 0x028e },
+		{ "playstation", "PS4 Controller", 0x054c, 0x09cc },
+		{ "nintendo", "Nintendo Switch Pro Controller", 0x057e, 0x2009 },
+		{ "generic", "Virtual Controller", 0, 0 },
+	};
+	size_t k = 0;
+	while (k < sizeof kinds / sizeof *kinds && strcmp(kinds[k].kind, kind)) ++k;
+	if (k == sizeof kinds / sizeof *kinds) return false;
+	SDL_VirtualJoystickDesc d;
+	SDL_zero(d);
+	d.version = SDL_VIRTUAL_JOYSTICK_DESC_VERSION;
+	d.type = SDL_JOYSTICK_TYPE_GAMECONTROLLER;
+	d.naxes = PAD_AXES;
+	d.nbuttons = PAD_BUTTONS;
+	d.vendor_id = kinds[k].vendor;
+	d.product_id = kinds[k].product;
+	d.name = kinds[k].name;
+	/* (headless, no window has the focus SDL wants before it passes on a
+	 * pad's press) */
+	SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+	int index = SDL_JoystickAttachVirtualEx(&d);
+	vjoy = index >= 0 ? SDL_JoystickOpen(index) : NULL;
+	pads_virtual_hold(0);
+	pads_open();
+	return vjoy != NULL;
+}
+
+void pads_virtual_hold(uint64_t inputs) {
+	if (!vjoy) return;
+	for (int b = 0; b < PAD_BUTTONS; ++b) SDL_JoystickSetVirtualButton(vjoy, b, (Uint8)(inputs >> b & 1));
+	for (int a = 0; a < PAD_AXES; ++a) {
+		/* (a trigger rests at the bottom of its axis) */
+		Sint16 v = (inputs & BIT(PAD_AXIS(a, true))) ? 32767 : (inputs & BIT(PAD_AXIS(a, false))) ? -32768 : a >= 4 ? -32768 : 0;
+		SDL_JoystickSetVirtualAxis(vjoy, a, v);
+	}
+}
+#else
+bool pads_virtual(const char *kind) {
+	(void)kind;
+	return false;
+}
+
+void pads_virtual_hold(uint64_t inputs) { (void)inputs; }
+#endif

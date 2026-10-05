@@ -134,3 +134,13 @@ instance `adb push bn6g.gba /sdcard/Download/ROMs/`, then choose
 Download/ROMs; `adb logcat -s Cyberworld SDL/APP` shows each look (`looked in
 ROMs: 2 .gba, kept BN6 Cybeast Gregar (USA), BN5 Team Colonel (USA)`) and
 the game's own line, `BN5 found: ...`.
+
+Joy-Cons can be tried there without the hardware: `tools/jc_uinput.c`
+(built with this image's NDK, the command in its first lines) makes a left
+and a right one on the emulator's uinput as Linux's hid-nintendo reports
+them, so Android's input stack (its generic key layout) and SDL's Android
+driver see what a phone paired with Joy-Cons gives them. On a Google APIs
+image, `adb root`, push it to `/data/local/tmp` and feed it lines such as
+`open L`, `open R`, `tap L 314 200` (Minus), `abs L 0 30000` (the left
+stick right) or `tap L 546 500` (the left arrow); logcat then says
+`controller: Joy-Con (L), a Nintendo pad` as the game opens each.

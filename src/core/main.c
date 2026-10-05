@@ -559,23 +559,28 @@ static void rom_missing(const char *rom_dir, bool norom_scene, const char *msg) 
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; char shot[160], state[160]; int place[3], flags[3]; bool placed, flagged, battle; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], state[160]; int place[3], flags[3]; bool placed, flagged, battle; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
-static uint32_t parse_buttons(const char *s) {
+/* "UP+A": the GBA's buttons injected as held; "pad.x", "pad.-lefty" a
+ * virtual controller's (--pad), and "key.K" a key, through SDL as a
+ * player's are (the controls screen and the maps in tests) */
+static void parse_buttons(const char *s, InputStep *step) {
 	static const struct { const char *n; uint32_t b; } names[] = {
 		{ "UP", BTN_UP }, { "DOWN", BTN_DOWN }, { "LEFT", BTN_LEFT }, { "RIGHT", BTN_RIGHT },
 		{ "A", BTN_A }, { "B", BTN_B }, { "L", BTN_L }, { "R", BTN_R }, { "START", BTN_START }, { "SELECT", BTN_SELECT },
 	};
-	uint32_t bits = 0;
 	char buf[128];
 	snprintf(buf, sizeof buf, "%s", s);
 	char *save = NULL;
-	for (char *t = strtok_r(buf, "+", &save); t; t = strtok_r(NULL, "+", &save))
+	for (char *t = strtok_r(buf, "+", &save); t; t = strtok_r(NULL, "+", &save)) {
+		int in = !SDL_strncasecmp(t, "pad.", 4) ? padmap_input(t + 4) : PAD_NONE;
+		if (in != PAD_NONE) step->pad |= (uint64_t)1 << in;
+		if (!SDL_strncasecmp(t, "key.", 4)) step->key = SDL_GetScancodeFromName(t + 4);
 		for (size_t i = 0; i < sizeof names / sizeof *names; ++i)
-			if (!strcmp(t, names[i].n)) bits |= names[i].b;
-	return bits;
+			if (!strcmp(t, names[i].n)) step->buttons |= names[i].b;
+	}
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -593,7 +598,7 @@ static void parse_script(const char *spec) {
 		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
-		else s->buttons = colon ? parse_buttons(colon + 1) : 0;
+		else if (colon) parse_buttons(colon + 1, s);
 		if ((s->placed || s->flagged || s->battle) && s->frames > 0 && script_len + 1 < 512) {
 			script[script_len + 1] = *s;
 			script[script_len + 1].frames = 0;
@@ -720,7 +725,7 @@ static void remote_parse(char *line) {
 		else {
 			char buttons[128] = "";
 			if (sscanf(tok, "%d %127s", &s->frames, buttons) < 1 || s->frames <= 0) continue;
-			s->buttons = parse_buttons(buttons);
+			parse_buttons(buttons, s);
 		}
 		++script_len;
 	}
@@ -753,13 +758,34 @@ static void remote_tick(void) {
 }
 #endif
 
+/* The script's key, held as SDL's events say a player's is */
+static void script_key(int key) {
+	static int held;
+	if (key == held) return;
+	SDL_Event e;
+	memset(&e, 0, sizeof e);
+	for (int k = 0; k < 2; ++k) {
+		int sc = k ? key : held;
+		if (!sc) continue;
+		e.type = k ? SDL_KEYDOWN : SDL_KEYUP;
+		e.key.state = k ? SDL_PRESSED : SDL_RELEASED;
+		e.key.keysym.scancode = (SDL_Scancode)sc;
+		e.key.keysym.sym = SDL_GetKeyFromScancode((SDL_Scancode)sc);
+		SDL_PushEvent(&e);
+	}
+	held = key;
+}
+
 static void script_tick(void) {
 	if (bot_seed) { bot_tick(); return; }
 #if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && !defined(__3DS__)
 	if (remote_in >= 0) remote_tick();
 #endif
 	script_actions();
-	if (script_pos >= script_len) { platform_inject(0); return; }
+	bool done = script_pos >= script_len;
+	pads_virtual_hold(done ? 0 : script[script_pos].pad);
+	script_key(done ? 0 : script[script_pos].key);
+	if (done) { platform_inject(0); return; }
 	platform_inject(script[script_pos].buttons);
 	if (--script_left <= 0 && ++script_pos < script_len) script_left = script[script_pos].frames;
 }
@@ -782,11 +808,16 @@ static void parse_shots(const char *spec, Shot *into, int *count, int most) {
 	free(copy);
 }
 
+/* --pad KIND: a virtual controller (pads_virtual), and pad.ini in the
+ * data folder read and written as a player's, headless too */
+static const char *pad_kind;
+
 /* --shot FRAME:PATH,... saves the canvas; --screen-shot the screen as the
  * player sees it, the touch controls on it; --second-shot the second
- * screen, the 3DS's bottom one (on any target, for a check) */
-static bool shot_option(const char *a, const char *v) {
-	if (!strcmp(a, "--shot")) parse_shots(v, shots, &shot_count, 64);
+ * screen, the 3DS's bottom one (on any target, for a check); --pad */
+static bool test_option(const char *a, const char *v) {
+	if (!strcmp(a, "--pad")) pad_kind = v;
+	else if (!strcmp(a, "--shot")) parse_shots(v, shots, &shot_count, 64);
 	else if (!strcmp(a, "--screen-shot")) parse_shots(v, screen_shots, &screen_shot_count, 16);
 	else if (!strcmp(a, "--second-shot")) parse_shots(v, second_shots, &second_shot_count, 16);
 	else return false;
@@ -989,12 +1020,15 @@ static void web_frame(void) {
 
 /* The player's files in the data folder, none headless (a test's input is
  * its own): the keys, the controllers' map, the settings, the touch
- * controls */
+ * controls; --pad's virtual controller with pad.ini, headless too */
 static void player_files(bool headless, int smooth_arg) {
 	char path[600];
+	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
+	if (!headless || pad_kind) {
+		snprintf(path, sizeof path, "%s/pad.ini", g_data_dir);
+		pads_load(path);
+	}
 	if (headless) return;
-	snprintf(path, sizeof path, "%s/pad.ini", g_data_dir);
-	pads_load(path);
 	snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
 	platform_load_keys(path);
 	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
@@ -1067,7 +1101,7 @@ int main(int argc, char **argv) {
 		else if (!strcmp(a, "--frame-log")) platform_frame_log = true;
 		else if (!strcmp(a, "--input") && v) { parse_script(v); ++i; }
 		else if (!strcmp(a, "--taps") && v) { parse_taps(v); ++i; }
-		else if (v && shot_option(a, v)) ++i;
+		else if (v && test_option(a, v)) ++i;
 		/* (the screen's density for the touch controls, in dots per inch) */
 		else if (!strcmp(a, "--dpi") && v) { platform_set_dpi((float)atof(v)); ++i; }
 		else if (!strcmp(a, "--shot-range") && v) {

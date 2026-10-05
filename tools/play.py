@@ -26,7 +26,10 @@ flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map: on a layer whose battles
 are an older net's, a guest battle). NAME/bin.pin keeps the session's
 build across starts.
-BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT).
+BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT);
+pad.NAME holds a virtual controller's input by SDL's name (pad.x, pad.-lefty;
+start with -- --pad xbox|playstation|nintendo|generic), key.NAME a key
+(key.J), both through SDL as a player's: the controls screen and pad.ini.
 The keyboard's layout is the handheld's buttons: A talks and confirms, B
 runs (hold) and cancels, START opens the PET, L and R open the Custom
 screen in battle.
@@ -59,7 +62,7 @@ def home(name):
 
 def buttons(spec):
     parts = [p.strip().upper() for p in spec.split('+')]
-    bad = [p for p in parts if p not in BUTTONS]
+    bad = [p for p in parts if p not in BUTTONS and not p.startswith(('PAD.', 'KEY.'))]
     if bad:
         sys.exit(f'unknown button {bad[0]} (buttons: {" ".join(sorted(BUTTONS))})')
     return '+'.join(parts)
