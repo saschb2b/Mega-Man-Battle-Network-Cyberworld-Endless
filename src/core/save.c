@@ -12,7 +12,6 @@
 #include "platform.h"
 #include "run.h"
 #include "save_blob.h"
-#include "town.h"
 
 #define RUN_MAGIC 0x43574537u /* "CWE7": the board's programs (docs/NAVICUST.md) */
 /* (Run is saved as it lies in memory: a change to it does not compile
@@ -159,27 +158,25 @@ void run_new_varied(uint32_t seed) {
 	/* (one retry left the same guardian a time in three: DiveMan guarded
 	 * two new runs running; and the same area: a playtester began in the
 	 * RoboDog Comp four runs running) */
-	/* (and the same town: a playtester began on Central Town's street by
-	 * Lan's house four or five runs running) */
+	/* (the town is home, the same every run since docs/HOME.md: no longer
+	 * one of them) */
 	/* (and, the first tries, not the run before's either: avoiding the last
 	 * alone let two of the three opening areas take turns, and a
 	 * playtester met the RoboDog Comp five runs in seven, the Seaside Area
 	 * never) */
-	int first = run.boss_order[run.biome_order[0]], area = run.biome_order[0], place = town_style_for(town_seed(run.seed));
+	int first = run.boss_order[run.biome_order[0]], area = run.biome_order[0];
 	for (int k = 1; k <= 32; ++k) {
-		bool again = profile.first_guardian == first + 1 || profile.first_area == area + 1 || profile.last_town == place + 1;
+		bool again = profile.first_guardian == first + 1 || profile.first_area == area + 1;
 		if (k <= 24) again |= profile.guardian_before == first + 1 || profile.area_before == area + 1;
 		if (!again) break;
 		run_new(seed * 2654435761u + 0x9E37u * (uint32_t)k);
 		first = run.boss_order[run.biome_order[0]];
 		area = run.biome_order[0];
-		place = town_style_for(town_seed(run.seed));
 	}
 	profile.guardian_before = profile.first_guardian;
 	profile.area_before = profile.first_area;
 	profile.first_guardian = (uint8_t)(first + 1);
 	profile.first_area = (uint8_t)(area + 1);
-	profile.last_town = (uint8_t)(place + 1);
 	profile_save();
 }
 

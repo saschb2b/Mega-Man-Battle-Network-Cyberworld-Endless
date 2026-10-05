@@ -59,7 +59,14 @@ const char *gem_words(void) {
  * or nowhere near it */
 const char *port_words(int how, const char *way) {
 	static char buf[160];
-	if (how == PORT_ALMOST_CELL)
+	if (how == PORT_ROOM)
+		snprintf(buf, sizeof buf, "@M The PC's %s,Lan!|@M Step up to it and press R!", way);
+	else if (how == PORT_HOUSE)
+		snprintf(buf, sizeof buf, "@M Your room's %s,Lan!|@M The PC's up there!", way);
+	else if (town_is_home())
+		snprintf(buf, sizeof buf, "%s", how == PORT_AWAY ? "@M No port here,Lan!|@M I jack in from your PC at home!" :
+			"@M Home's right here,Lan!|@M The PC's up in your room!");
+	else if (how == PORT_ALMOST_CELL)
 		snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step up to it and press R!", town_info()->landmark, way);
 	else if (how == PORT_ALMOST)
 		snprintf(buf, sizeof buf, "@M Almost,Lan! The %s's %s.|@M Step right up to it and press R!", town_info()->landmark, way);

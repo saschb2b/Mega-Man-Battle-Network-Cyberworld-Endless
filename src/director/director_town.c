@@ -17,6 +17,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "home_words.h"
+#include "lan_house.h"
 #include "lanhp.h"
 #include "mapslot.h"
 #include "run.h"
@@ -30,10 +31,16 @@ static bool map_is(int group, int number) { return emu_read8(BN6_MAP_GROUP) == g
 
 bool home_in_hp(void) { return D.town && map_is(LANHP_GROUP, LANHP_NUMBER); }
 
-const char *home_place_name(void) { return home_in_hp() ? "Lan's HP" : town_info()->name ? town_info()->name : "Town"; }
+const char *home_place_name(void) {
+	if (home_in_hp()) return "Lan's HP";
+	if (map_is(LAN_HOUSE_GROUP, LAN_HOUSE)) return "Lan's House";
+	if (map_is(LAN_HOUSE_GROUP, LAN_ROOM)) return "Lan's Room";
+	return town_info()->name ? town_info()->name : "Town";
+}
 
 bool home_map(int group, int number) {
-	return (group == town_info()->group && number == town_info()->number) || (group == LANHP_GROUP && number == LANHP_NUMBER);
+	return (group == town_info()->group && number == town_info()->number) || lan_house_map(group, number) ||
+		(group == LANHP_GROUP && number == LANHP_NUMBER);
 }
 
 /* In Lan's HP: its open portals on, every frame (BN6's own homepage sets
@@ -99,8 +106,9 @@ static void home_checkpoint(void) {
 	home_save();
 }
 
-/* MegaMan beside a portal, once a visit each: where it leads and who waits
- * there; the dark way's sealed (docs/HOME.md) */
+/* MegaMan beside a portal, once a visit each: what he reads through it
+ * (its data's feel, a strong Navi's signal); the dark way's sealed
+ * (docs/HOME.md) */
 static void portal_words(void) {
 	if (!home_in_hp() || !settled() || talk_busy() || emu_read8(BN6_CHATBOX)) return;
 	int n = 1, k = lanhp_portal_near(bn6_player_x(), bn6_player_y(), PORTAL_REACH);
@@ -132,6 +140,7 @@ void home_update(void) {
 	bool hp = home_in_hp();
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();
+	lan_house_frame(map_is(LAN_HOUSE_GROUP, LAN_HOUSE) ? LAN_HOUSE : -1);
 	was_hp = hp;
 	if (on_map() && home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) { D.town_seen = true; ++D.town_frames; }
 	talk_update();

@@ -58,7 +58,7 @@ static bool beside_region(int port, int cx, int cy) {
 }
 
 void ports_region(const CoordCell *c, int n, int port, int value, int sx, int sy) {
-	if (port < 1 || port >= TOWN_PORTS) return;
+	if (port < 1 || port >= TOWN_PORTS || !value) return;
 	int best = -1;
 	for (int i = 0; i < n; ++i) {
 		int d = abs(cell(c[i].x) - sx) + abs(cell(c[i].y) - sy);

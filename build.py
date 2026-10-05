@@ -1061,6 +1061,8 @@ SECOND_7 = ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', 
 PAGED_7 = '600:,' + '4:A,6:,' * 110
 SECOND_HERO = (PAGED_7 + '30:,40:UP,0:battle,215:,6:A,24:,6:RIGHT,24:,6:RIGHT,24:,6:A,24:,6:START,36:,6:A,150:,'
                '6:DOWN,12:,6:A,70:')
+# (a run's opening words paged in Lan's room, Lan free by frame 530)
+HOME_PAGED = '40:,' + '4:A,6:,' * 46 + '30:,'
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1078,11 +1080,15 @@ SCREENSHOTS = [
     # (Chaud's first call on an act's duel layer, its second box)
     ('rival', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '0', '--dev', 'quiet', '--input', '700:,6:A,60:'],
      [(840, 'rival')], {}),
-    # (the seed picks the town: build.py town lists which each gets)
-    ('town-central', ['--scene', 'town', '--seed', '2'], [(280, 'town-central')], {}),
-    ('town-acdc', ['--scene', 'town', '--seed', '3'], [(280, 'town-acdc')], {}),
-    ('town-seaside', ['--scene', 'town', '--seed', '5'], [(280, 'town-seaside')], {}),
-    ('town-green', ['--scene', 'town', '--seed', '9'], [(280, 'town-green')], {}),
+    # (home, docs/HOME.md: a run's start in Lan's room, Dad's call; his PC's
+    # jack-in; down the stairs and out of the front door into Central Town;
+    # Lan's HP after an act, MegaMan beside the lit link up top)
+    ('home-room', ['--scene', 'town', '--seed', '2'], [(280, 'home-room')], {}),
+    ('home-pc', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '0:place -40 -8 7,10:,6:R,100:'], [(616, 'home-pc')], {}),
+    ('town-central', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:'],
+     [(830, 'town-central')], {}),
+    ('home-hp', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--input', '600:,' + '6:A,94:,' * 8 + '0:place 68 -40 5,10:,6:UP,90:'],
+     [(1500, 'home-hp')], {}),
     # (the areas on their acts' third layers: ProtoMan's duel, and Chaud's
     # call with it, waits on the second)
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '3', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
@@ -1140,9 +1146,6 @@ SCREENSHOTS = [
     ('rumor', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--net-biome', '3', '--dev', 'quiet', '--talk', 'rumor:100',
                '--input', '230:,6:A,64:,6:A,134:'],
      [(228, 'rumor'), (298, 'rumor-2'), (438, 'rumor-3')], {}),
-    # (Central Town's seed 6: Lan beside the Giga-chip kid before Dad's words)
-    ('schoolyard', ['--scene', 'town', '--seed', '6', '--input', '40:,0:place 178 86 3,10:,6:A,134:,6:A,94:'],
-     [(185, 'schoolyard'), (290, 'schoolyard-2')], {}),
     ('bbs', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--input',
              '400:,6:A,74:,6:A,154:,6:A,94:,6:START,54:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,6:DOWN,6:,12:,6:A,74:,6:DOWN,6:,6:DOWN,16:,'
              '6:A,134:,6:A,114:,6:A,114:,6:A,114:,6:A,114:,6:A,114:'],

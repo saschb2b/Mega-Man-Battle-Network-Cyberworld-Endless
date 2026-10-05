@@ -5,8 +5,9 @@
 void rush_hint(void);
 void pack_words(void);
 const char *gem_words(void);
-/* how near the port R was pressed (port_words) */
-enum { PORT_ALMOST_CELL, PORT_ALMOST, PORT_AWAY };
+/* how near the port R was pressed (port_words); home's port is Lan's PC
+ * (docs/HOME.md): R in his house or room off it */
+enum { PORT_ALMOST_CELL, PORT_ALMOST, PORT_AWAY, PORT_HOUSE, PORT_ROOM };
 const char *port_words(int how, const char *way);
 
 #endif

@@ -236,10 +236,10 @@ this time! The pink pad,and the link up top!"), and the run saved there
 through it (its data, the signal), once a visit. Stepping on one plays BN6's link
 warp; the first way's layer was built at the exit, another way's is built
 as the link plays. R asks BN6's "MegaMan, jack out?", and its yes (or the
-blue pad) takes Lan to where he last jacked in; the town's jack-in takes
-him back to the blue pad. A run's start goes the same way: the town, its
-jack-in, Lan's HP with one portal ("Our HP,Lan! Home sweet home!"), the
-first layer. The second screen shows the PET at home there.
+blue pad) takes Lan to where he last jacked in, his PC since issue #94;
+the PC takes him back to the blue pad. A run's start goes the same way:
+Lan's room, his PC, Lan's HP with one portal ("Our HP,Lan! Home sweet
+home!"), the first layer. The second screen shows the PET at home there.
 
 ### 3. Going back, and the Net's clock
 
@@ -259,6 +259,24 @@ BN6 has them, and his PC is the run's jack-in. The other towns' plans
 stay for later uses (a job's trip by the Metroline), not as a run's
 home. A home is the same place every run, so the people who remember can
 be noticed.
+
+As built (issue #94): the town is Central Town at its original width,
+the same plan every run (`CYBERWORLD_TOWN_STYLE` and `_VARIANT` still
+pick another for a test). A run begins in Lan's room, at the top of its
+stairs where BN6 sets him down; the run's words play there, and R at his
+PC jacks MegaMan in to Lan's HP (`lan_house.c`). BN6's own jack-in from
+the PC (destination 1) runs a line of its story's that turns Lan back
+("Lan,let's check out the town first!"), so the room's table goes
+through the town's destination with Lan's plain "Jack in!". The house
+and the room are BN6's maps, their furniture, checks and song (`0x04`)
+kept, no people or story scripts; the room's stairs and the house's
+front door and stairs are BN6's doors, the bathroom's left out, and the
+front door lets Lan out where the planned town has it. The town keeps
+its houses, people and checks, and Lan's front door (its warp 1, carried
+with his house) is its only door; it has no jack-in of its own. R in the
+town, the house, or the room off the PC has MegaMan say where the PC is
+("Home's right here,Lan! The PC's up in your room!"). BN6's jack-out from
+Lan's HP sets Lan down at his PC.
 
 ### 5. Jobs (the Request BBS)
 

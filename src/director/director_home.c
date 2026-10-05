@@ -24,6 +24,7 @@
 #include "meta.h"
 #include "net.h"
 #include "run.h"
+#include "lan_house.h"
 #include "town.h"
 
 #define HOME_WAYS 3   /* run_ways's most: the act's own, the other way, the dark way */
@@ -78,26 +79,25 @@ bool home_due(void) {
 }
 
 /* Where BN6's jack-out from Lan's HP sets Lan down: where he jacked in,
- * when that was this town's port; else (a run begun in the net) short of
- * the port */
-static bool set_down_place(const TownInfo *ti) {
-	uint32_t town = (uint32_t)ti->group | (uint32_t)ti->number << 8;
-	if ((emu_read32(BN6_SAVED_MAP) & 0xFFFF) == town) return true;
-	int x, y, face;
-	if (!town_home_spot(&x, &y, &face)) return false;
+ * his room's PC (a run begun in the net never stood there) */
+static void set_down_place(void) {
+	uint32_t room = LAN_HOUSE_GROUP | LAN_ROOM << 8;
+	if ((emu_read32(BN6_SAVED_MAP) & 0xFFFF) == room) return;
+	int x, y;
+	if (!lan_house_goal(LAN_ROOM, &x, &y)) return;
 	emu_write32(BN6_SAVED_X, (uint32_t)x << 16);
 	emu_write32(BN6_SAVED_Y, (uint32_t)y << 16);
 	emu_write32(BN6_SAVED_Z, 0);
-	emu_write32(BN6_SAVED_FACING, (uint32_t)face);
-	emu_write32(BN6_SAVED_MAP, town);
-	return true;
+	emu_write32(BN6_SAVED_FACING, 7);
+	emu_write32(BN6_SAVED_MAP, room);
 }
 
-/* the town, its jack-in to Lan's HP, and Lan's HP with its portals */
+/* the town, Lan's house and room, and Lan's HP with its portals */
 static bool home_install(void) {
 	int x, y;
 	lanhp_arrival(&x, &y);
-	return town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
+	return town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) &&
+		lan_house_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
 }
 
 bool home_run_start(bool abandoned) {
@@ -105,12 +105,13 @@ bool home_run_start(bool abandoned) {
 	work_out_ways();
 	town_ways(1);   /* (the town's ports are no ways: docs/HOME.md) */
 	if (!home_install()) return false;
-	/* R jacks in there; the PET's own Save stays off */
+	/* R jacks in at his PC; the PET's own Save stays off */
 	flag_clear(BN6_FLAG_NO_JACK);
 	flag_set(BN6_FLAG_NO_PET_SAVE);
 	flag_set(BN6_FLAG_NAVICUST);
-	const TownInfo *ti = town_info();
-	emu_warp(ti->group, ti->number, ti->start_x, ti->start_y, ti->start_face);
+	int x, y, face;
+	lan_room_start(&x, &y, &face);
+	emu_warp(LAN_HOUSE_GROUP, LAN_ROOM, x, y, face);
 	D.town = true;
 	D.home = false;
 	D.hp_said = false;
@@ -119,14 +120,15 @@ bool home_run_start(bool abandoned) {
 	D.town_frames = 0;
 	D.intro_said = false;
 	D.port_told = false;
-	D.free_x = ti->start_x;
-	D.free_y = ti->start_y;
+	D.free_x = x;
+	D.free_y = y;
 	return true;
 }
 
 bool home_begin(const char *beaten) {
 	work_out_ways();
-	if (!home_install() || !set_down_place(town_info())) return false;
+	if (!home_install()) return false;
+	set_down_place();
 	/* the exit's warp (BN6's link departure, as every exit pad plays it)
 	 * to Lan's HP's arrival */
 	int x, y;

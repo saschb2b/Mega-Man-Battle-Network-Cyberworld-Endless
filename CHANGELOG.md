@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- **Lan's HP, the warp zone** (issues #85, #86 and #93, the epic #84).
+- **Lan's HP, the warp zone, and Central Town home** (issues #85, #86,
+  #93 and #94, the epic #84).
   Every jack-in now arrives in BN6's own Lan's HP, MegaMan's homepage,
   and its pink pad and link squares are the run's ways on. An act's
   guardian deleted, his exit takes MegaMan there: the act's AREA CLEAR
@@ -14,11 +15,14 @@
   MegaMan can't know where a link leads before taking it, so beside one
   he says what he reads through it ("Whoa,salty data! Like the sea!")
   and the strong Navi's signal, naming it only where he has battled him.
-  R asks BN6's "MegaMan, jack out?" and takes Lan back to the town,
-  whose jack-in brings him back to the HP. A run begins in the town, as
-  before, and jacks in to Lan's HP. docs/HOME.md has the design: next,
-  Central Town as home, going back through older portals priced by the
-  Net's clock, the townsfolk's jobs, a shop at home, and a town that
+  R asks BN6's "MegaMan, jack out?" and takes Lan back to his PC. Home
+  is Central Town, the same every run: a run begins in Lan's room (BN6's
+  own, his house too), and R at his PC jacks MegaMan in ("Jack in!
+  MegaMan, Execute!!"); down the stairs and out of the front door is the
+  town, its townsfolk and shops as before, no longer with a jack-in of
+  its own. The other towns are no longer a run's. docs/HOME.md has the
+  design: next, going back through older portals priced by the Net's
+  clock, the townsfolk's jobs, a shop at home, and a town that
   remembers.
 - **Townsfolk who walk stay drawn as they walk.** Seaside's and Green
   Town's walker vanished the moment he set off and came back when he

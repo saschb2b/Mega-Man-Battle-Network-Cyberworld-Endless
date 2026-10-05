@@ -132,9 +132,8 @@ static const char *const green_checks[16] = {
 
 /* What Lan and MegaMan say as a run begins: on the first dive ever, Dad's
  * call about the Endless Net; after that, a word about the last one. */
-const char *town_intro(const char *landmark_at, const char *arrival) {
+const char *town_intro(const char *arrival) {
 	static char buf[900];
-	const char *port = landmark_at;
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	if (arrival) ADD("%s", arrival);
@@ -155,7 +154,7 @@ const char *town_intro(const char *landmark_at, const char *arrival) {
 			"@D If MegaMan's deleted,my backup brings him home.|"
 			"@D So dive as deep as you can,and send me your readings!|"
 			"@L Leave it to us,Dad!|"
-			"@M The port's by the %s,Lan!", port);
+			"@M Let's jack in from your PC,Lan!");
 	} else if (profile.nest_clears > 0 && profile.runs % 2) {
 		/* (after a win, the ending's hook: "reached" undersold it to a
 		 * playtester who had won) */
@@ -165,10 +164,10 @@ const char *town_intro(const char *landmark_at, const char *arrival) {
 		else
 			ADD("@D Lan,you two reached the Nest before.|@D But it's all changed again. Be careful!|@L Got it,Dad!");
 	} else if (town_after_abandon) {
-		ADD("@L We never finished that last dive...|@M Then let's start a fresh one!|@M The port's by the %s,Lan!", port);
+		ADD("@L We never finished that last dive...|@M Then let's start a fresh one!|@M To the PC,Lan!");
 	} else if (profile.runs == 0) {
 		/* (the call heard, but no run over yet: no best to speak of) */
-		ADD("%s|@M Let's find out,Lan!|@M The port's by the %s!", again, port);
+		ADD("%s|@M Let's find out,Lan!|@M To the PC!", again);
 	} else {
 		/* (the short net ends on its Nest: its goal, not a depth to beat) */
 		bool nest_goal = run.mode == RUN_SHORT && profile.best_depth >= SHORT_LAYERS - 1;
@@ -181,7 +180,7 @@ const char *town_intro(const char *landmark_at, const char *arrival) {
 			if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's reach the Nest today!");
 			else ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's beat layer %d today!", profile.best_depth);
 			break;
-		default: ADD("%s|@M Let's find out,Lan!|@M The port's by the %s!", again, port); break;
+		default: ADD("%s|@M Let's find out,Lan!|@M To the PC!", again); break;
 		}
 	}
 	#undef ADD

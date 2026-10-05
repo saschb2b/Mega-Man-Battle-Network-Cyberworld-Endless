@@ -53,9 +53,11 @@ void mapslot_teleport(int entry, int group, int number, int x, int y, int facing
 
 /* The map's theme: every chapter's map music list plays `song` there. The
  * lists hold one real-world map (the town) and one internet map (the
- * layer) at a time, and Lan's HP beside them (mapslot_music_hp). */
+ * layer) at a time, and home's maps beside them (mapslot_music_home: k 0
+ * Lan's HP, 1 his house, 2 his room). */
+#define MAPSLOT_HOME_MAPS 3
 bool mapslot_music(int group, int number, int song);
-bool mapslot_music_hp(int group, int number, int song);
+bool mapslot_music_home(int k, int group, int number, int song);
 void mapslot_music_forget_town(void);
 
 /* Jacking in from real-world map (group, number) at trigger 0x40 takes
@@ -63,15 +65,17 @@ void mapslot_music_forget_town(void);
  * jack-in (one of its 20-byte destinations is taken over). */
 bool mapslot_jack_in(int group, int number, int to_group, int to_number, int x, int y, int facing);
 
-/* The town's warp list: every entry leads back to its own world (x, y),
- * so no trigger left in it can take Lan anywhere else. */
-bool mapslot_town_warps(int group, int number, int x, int y, int facing);
-/* ... any map's, as the town's, its bus address returned (0: none), for
- * mapslot_warp to point an entry (1-16, its triggers' value) elsewhere:
- * world (x, y) of map (group, number), BN6's net link departure (8). */
+/* A map's own warp list, every entry leading back to world (x, y) of it,
+ * so no trigger left in it takes Lan anywhere else (the town's, home's);
+ * its bus address returned (0: none), for mapslot_warp to point an entry
+ * (1-16, its triggers' value) elsewhere: world (x, y) of map (group,
+ * number), BN6's net link departure (8). */
 uint32_t mapslot_own_warps(int group, int number, int x, int y, int facing);
 /* The warp list map (group, number) has now (BN6's own until taken over). */
 uint32_t mapslot_warps(int group, int number);
+/* Entry `entry` of `list` made a copy of entry `from_entry` of list `from`
+ * (one of BN6's own doors, its departure and all). */
+void mapslot_copy_warp(uint32_t list, int entry, uint32_t from, int from_entry);
 void mapslot_warp(uint32_t list, int entry, int group, int number, int x, int y, int facing);
 /* BN6's jack-in destination `index` (bn6f byte_80984C8): its map and
  * world (x, y); false for none, or the one the town rewrites. */
@@ -84,9 +88,10 @@ bool mapslot_checks(int group, int number, const uint8_t script[16], const uint8
 
 /* Allocation from the town's own space (on) or the layers' (off): the
  * layers' halves are reused while the town still runs. Lan's HP has a space
- * of its own as well. */
+ * of its own as well, and Lan's house and room another. */
 void mapslot_town(bool on);
 void mapslot_hp(bool on);
+void mapslot_house(bool on);
 
 /* Space in the free ROM for NPC scripts; returns the bus address. A reset
  * starts the next layer in the other half of the space. */

@@ -61,7 +61,8 @@ static void use_arena(uint32_t base, uint32_t size) {
 }
 
 void mapslot_town(bool on) { use_arena(on ? TOWN_ARENA : 0, TOWN_SIZE); }
-void mapslot_hp(bool on) { use_arena(on ? HP_ARENA : 0, HP_SIZE); }
+void mapslot_hp(bool on) { use_arena(on ? HP_ARENA : 0, HP_SIZE / 2); }
+void mapslot_house(bool on) { use_arena(on ? HP_ARENA + HP_SIZE / 2 : 0, HP_SIZE / 2); }
 
 uint32_t mapslot_alloc(const void *bytes, int len) {
 	uint32_t at = next;
@@ -163,7 +164,13 @@ uint32_t mapslot_own_warps(int group, int number, int x, int y, int facing) {
 	return at;
 }
 
-bool mapslot_town_warps(int group, int number, int x, int y, int facing) { return mapslot_own_warps(group, number, x, y, facing) != 0; }
+
+void mapslot_copy_warp(uint32_t list, int entry, uint32_t from, int from_entry) {
+	if (!list || !from || entry < 1 || entry > 16 || from_entry < 1 || from_entry > 16) return;
+	uint8_t e[16];
+	for (int i = 0; i < 16; ++i) e[i] = emu_read8(from + 16u * (uint32_t)(from_entry - 1) + (uint32_t)i);
+	emu_write(list + 16u * (uint32_t)(entry - 1), e, sizeof e);
+}
 
 uint32_t mapslot_warps(int group, int number) {
 	uint32_t warps = warp_table(group);
@@ -354,9 +361,10 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 	return install_mystery(group, number, md, nmd);
 }
 
-/* the maps whose songs the lists hold: the town, the layer and Lan's HP */
-enum { SONGS_MAPS = 3 };
-static struct { int group, number, song; } songs_of[SONGS_MAPS] = { { -1 }, { -1 }, { -1 } };
+/* the maps whose songs the lists hold: the town, the layer, and home's
+ * (Lan's HP, his house and his room) */
+enum { SONGS_MAPS = 2 + MAPSLOT_HOME_MAPS };
+static struct { int group, number, song; } songs_of[SONGS_MAPS] = { { -1 }, { -1 }, { -1 }, { -1 }, { -1 } };
 
 static bool music_list(void);
 
@@ -370,11 +378,11 @@ bool mapslot_music(int group, int number, int song) {
 	return music_list();
 }
 
-bool mapslot_music_hp(int group, int number, int song) {
-	if (number < 0 || number >= 16) return false;
-	songs_of[2].group = group;
-	songs_of[2].number = number;
-	songs_of[2].song = song;
+bool mapslot_music_home(int k, int group, int number, int song) {
+	if (number < 0 || number >= 16 || k < 0 || k >= MAPSLOT_HOME_MAPS) return false;
+	songs_of[2 + k].group = group;
+	songs_of[2 + k].number = number;
+	songs_of[2 + k].song = song;
 	return music_list();
 }
 

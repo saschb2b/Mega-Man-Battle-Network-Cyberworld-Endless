@@ -25,6 +25,7 @@
 #include "net.h"
 #include "netmap.h"
 #include "run.h"
+#include "lan_house.h"
 #include "lanhp.h"
 #include "town.h"
 
@@ -503,13 +504,20 @@ static bool heal_panel(bool guardian, int *x, int *y) {
 	return false;
 }
 
-/* At home: in the town along the streets to its jack-in, then R there; in
- * Lan's HP onto the first way's portal */
+/* At home: in Lan's room onto the PC, then R there, in his house up the
+ * stairs, in the town along the streets to its jack-in (home's: its front
+ * door), R at a jack-in; in Lan's HP onto the first way's portal */
 enum { AWAY, HOME_WALK, HOME_KEYS };
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
 	if (director_in_hp()) { lanhp_portal_spot(0, wx, wy); return HOME_WALK; }
 	if (!director_in_town()) return AWAY;
+	int number = emu_read8(BN6_MAP_NUMBER);
+	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) {
+		if (number == LAN_ROOM && lan_room_on_pc(px, py)) { *keys = frame % 16 < 2 ? KEY_R : 0; return HOME_KEYS; }
+		return lan_house_goal(number, wx, wy) ? HOME_WALK : AWAY;
+	}
 	const TownInfo *ti = town_info();
+	if (town_is_home()) { *wx = ti->port_x; *wy = ti->port_y; return HOME_WALK; }
 	if (abs(px - ti->port_x) + abs(py - ti->port_y) < 6) { *keys = frame % 16 < 2 ? KEY_R : 0; return HOME_KEYS; }
 	if (!town_route(px, py, wx, wy)) { *wx = ti->port_x; *wy = ti->port_y; }
 	return HOME_WALK;

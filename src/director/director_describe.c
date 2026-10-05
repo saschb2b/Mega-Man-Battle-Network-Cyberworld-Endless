@@ -15,6 +15,7 @@
 #include "director_state.h"
 #include "director_way.h"
 #include "guardians.h"
+#include "lan_house.h"
 #include "net_route.h"
 #include "net_shapes.h"
 #include "netmap.h"
@@ -172,6 +173,14 @@ static void battle_describe(FILE *f) {
 	}
 }
 
+/* at home: in the house or the room the way on (the stairs up, the PC),
+ * in the town its objects and Lan's front door */
+static void describe_home(FILE *f) {
+	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER), x, y;
+	if (lan_house_map(group, number) && lan_house_goal(number, &x, &y)) fprintf(f, "goal %d %d\n", x, y);
+	else if (director_in_town()) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
+}
+
 /* For the developer reproducing a playtest (CYBERWORLD_STATE_POS): where
  * Lan or MegaMan is, the floor around him, the layer drawn in letters
  * (=map), and the game's NPC objects near him */
@@ -180,7 +189,7 @@ static void describe_pos(FILE *f) {
 		bn6_player_y(), bn6_player_z(), emu_read8(BN6_PLAYER_LOCKED),
 		emu_read8(BN6_PLAYER_STATE), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 		flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
-	if (D.town) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
+	if (D.town) describe_home(f);
 	else {
 		int ns = 0, nf = 0;
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) { ns += D.seen[y][x]; nf += D.seen[y][x] && layer.cell[y][x] == C_PATH; }
@@ -225,6 +234,7 @@ void director_describe(FILE *f) {
 	const char *doing = state_doing(&hp, &max);
 	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
+	if (D.town) fprintf(f, "place %s\n", director_place_name());
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);

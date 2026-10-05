@@ -31,6 +31,7 @@
 #include "town_lines.h"
 #include "town_ports.h"
 #include "townmath.h"
+#include "lan_house.h"
 #include "townsrc.h"
 
 #define TOWN_TILEMAP_AT (EMU_FREE + 0x100000) /* the town's tile map (LZ77) */
@@ -213,6 +214,8 @@ struct TownStyle {
 	const char *name, *landmark, *landmark_at;
 	int port_src[2];                    /* the act's second and third ways' ports: the original's
 	                                     * jack-in point (0x40 + n) or check (0xF0 + n) made one */
+	int door;                           /* the original's warp trigger into Lan's house, home's front door
+	                                     * (docs/HOME.md: Lan jacks in from his PC there); 0 none */
 };
 
 static int env_or(const char *name, int value) {
@@ -250,7 +253,7 @@ static int central_mat(int i) {
  * main road (x 5|6); the main road's near curb (row 10|11) splits that from
  * the houses', stretched through their court (x -22|-21). */
 static void design_central(void) {
-	int w = env_or("CYBERWORLD_TOWN_VARIANT", rnd_range(0, 1)) ? 8 : 0;
+	int w = env_or("CYBERWORLD_TOWN_VARIANT", 0) ? 8 : 0;   /* (home: the same each run) */
 	/* the gates' band */
 	copy(SX0, SY0, -5, -18, 0, 0, 0);
 	tile(-4, SY0, -5 + w, -18, -5, SY0, 1, -18 - SY0 + 1);
@@ -334,9 +337,9 @@ static int green_mat(int i) { return i == 0 ? TM_VOID : TM_EDGE; }
 static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
 
 static const Style styles[] = {
-	{ 0x01, 0x00, 0x03, 1 << 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
+	{ 0x01, 0x00, 0x03, 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
 	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } }, false,
-	  "Central Town", "bird statue", "bird statue on the plaza", { 0x41, 0xFA } },
+	  "Central Town", "bird statue", "bird statue on the plaza", { 0, 0 }, 1 },
 	{ 0x00, 0x00, 0x24, 1 << 0, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW,
 	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } }, false,
 	  "ACDC Town", "squirrel statue", "squirrel statue in the park", { 0x41, 0xF7 } },
@@ -350,6 +353,7 @@ static const Style styles[] = {
 	  "Green Town", "knight statue", "knight statue on the flower plaza", { 0xF1, 0xF7 } },
 };
 #define STYLES ((int)(sizeof styles / sizeof *styles))
+#define HOME_STYLE 0   /* Central Town, every run's (docs/HOME.md) */
 _Static_assert(STYLES == TOWN_LINES, "each style its people and words (town_lines.c)");
 
 /* ---- what the copied pieces bring ---- */
@@ -452,7 +456,7 @@ static bool sec2_seen(int cx, int cy) {
  * is; 0 none */
 static int port_of(int value) {
 	for (int k = 0; k < 2; ++k)
-		if (value == T.style->port_src[k]) return k + 1;
+		if (T.style->port_src[k] && value == T.style->port_src[k]) return k + 1;
 	return 0;
 }
 
@@ -486,7 +490,7 @@ static void carry_trigger(const Piece *p, const CoordCell *c, int dx, int dy) {
 	int port = port_of(c->value);
 	bool jack = (port && c->value < CHECK_TRIGGER) || (c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 &&
 		(p->flags & F_JACK_IN) && (T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1));
-	bool check = c->value >= CHECK_TRIGGER && T.lines->checks[c->value - CHECK_TRIGGER];
+	bool check = (c->value >= CHECK_TRIGGER && T.lines->checks[c->value - CHECK_TRIGGER]) || (T.style->door && c->value == T.style->door);
 	bool front = front_cell(cx, cy) && townsrc_walk(T.book, cx, cy);
 	if (!(jack || check) || front || !in_source(p, cx, cy) || T.ntrig >= MAX_TRIG) return;
 	CoordCell o = *c;
@@ -524,7 +528,7 @@ static void carry_ring(const Piece *p, int dx, int dy) {
  * front and ring */
 static void carry_triggers(const Piece *p, const AreaSrc *a, int dx, int dy) {
 	for (int k = 0; k < a->nsec[3]; ++k) carry_trigger(p, &a->sec[3][k], dx, dy);
-	if (p->flags & F_JACK_IN) carry_ring(p, dx, dy);
+	if ((p->flags & F_JACK_IN) && !T.style->door) carry_ring(p, dx, dy);
 }
 
 /* The ports' names, and which cells of a check made a port are its: those
@@ -642,14 +646,6 @@ static void hint_tiles(int tw, int th) {
 
 /* ---- planning ---- */
 
-int town_style_for(uint32_t seed) {
-	uint32_t keep = T.rng;
-	T.rng = seed * 2246822519u + 0x165667B1u;
-	int si = env_or("CYBERWORLD_TOWN_STYLE", rnd_range(0, STYLES - 1));
-	T.rng = keep;
-	return si < 0 || si >= STYLES ? 0 : si;
-}
-
 /* One plan and its tiles; the number of tiles no source tile matched. */
 /* CYBERWORLD_TOWN_DEBUG: where the folk and the jack-in cells came to be */
 static void debug_where(void) {
@@ -660,10 +656,15 @@ static void debug_where(void) {
 			T.trig[i].x, T.trig[i].y, T.trig[i].value, T.trig[i].z, T.trig[i].height, T.trig[i].type);
 }
 
+/* the trigger the town's port is: home's front door, else the jack-in */
+static int port_trigger(void) { return T.style->door ? T.style->door : JACK_IN_TRIGGER; }
+
+bool town_is_home(void) { return T.style && T.style->door; }
+
 static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
 	/* the style, its source learned once (town_style_for the same) */
-	int si = env_or("CYBERWORLD_TOWN_STYLE", rnd_range(0, STYLES - 1));
+	int si = env_or("CYBERWORLD_TOWN_STYLE", HOME_STYLE);
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];
 	T.lines = &town_lines[si];
@@ -738,7 +739,7 @@ static int plan_once(uint32_t seed) {
 	T.info.start_face = T.style->start_face;
 	int jx = 0, jy = 0, nj = 0;
 	for (int i = 0; i < T.ntrig; ++i)
-		if (T.trig[i].value == JACK_IN_TRIGGER) { jx += T.trig[i].x + 4; jy += T.trig[i].y + 4; ++nj; }
+		if (T.trig[i].value == port_trigger()) { jx += T.trig[i].x + 4; jy += T.trig[i].y + 4; ++nj; }
 	if (nj) { T.info.port_x = jx / nj; T.info.port_y = jy / nj; }
 	for (int i = 0; i < T.ntrig; ++i) if (T.trig[i].value == (JACK_IN_TRIGGER | 0x80)) T.trig[i].value = JACK_IN_TRIGGER;
 	for (int i = 0; i < T.lines->nfolk; ++i) {
@@ -830,23 +831,6 @@ bool town_walk(int x, int y, int steps, int *wx, int *wy, int *cells) {
 	return true;
 }
 
-bool town_home_spot(int *x, int *y, int *face) {
-	int cells = 0;
-	/* (where no walk on one floor joins them, as Green Town's heights
-	 * part its start from its knight: where Lan starts) */
-	if (!town_walk(T.info.start_x, T.info.start_y, 0, x, y, &cells) ||
-		!town_walk(T.info.start_x, T.info.start_y, cells > 2 ? cells - 2 : 0, x, y, NULL)) {
-		*x = T.info.start_x;
-		*y = T.info.start_y;
-		*face = T.info.start_face;
-		return true;
-	}
-	/* (the game's facings: 1 +x, 3 +y, 5 -x, 7 -y) */
-	int dx = T.info.port_x - *x, dy = T.info.port_y - *y;
-	*face = abs(dx) > abs(dy) ? (dx > 0 ? 1 : 5) : (dy > 0 ? 3 : 7);
-	return true;
-}
-
 uint32_t *town_render(int *w, int *h) {
 	if (!T.tiles) return NULL;
 	*w = T.info.tw * 8;
@@ -908,8 +892,17 @@ static void need_sprite(NpcList *npcs, int category, int index) {
 	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
 }
 
+/* The town's warp list: every entry back where Lan starts, but home's front
+ * door, BN6's own (lan_house.c, which read BN6's lists before the town took
+ * its map over) */
+static bool town_warps(int g, int n) {
+	uint32_t list = mapslot_own_warps(g, n, T.info.start_x, T.info.start_y, T.info.start_face);
+	if (list && T.style->door) mapslot_copy_warp(list, T.style->door, lan_house_bn6_warps(0), T.style->door);
+	return list != 0;
+}
+
 bool town_install(int to_group, int to_number, int x, int y) {
-	if (!T.tiles) return false;
+	if (!T.tiles || (T.style->door && !lan_house_bn6_warps(0))) return false;
 	uint32_t desc, coord_slot;
 	townsrc_slots(T.book, &desc, &coord_slot);
 	int tw = T.info.tw, th = T.info.th;
@@ -943,7 +936,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	int script[MAX_FOLK];
 	for (int i = 0; i < T.lines->nfolk; ++i) script[i] = ta_talk(&text, T.lines->folk[i].words, folk_face(&T.lines->folk[i]));
 	/* what Lan and MegaMan say when they step out (the director runs it) */
-	T.info.intro = ta_talk(&text, town_intro(T.style->landmark_at, T.lines->arrival), FACE_MEGAMAN);
+	T.info.intro = ta_talk(&text, town_intro(T.lines->arrival), FACE_MEGAMAN);
 	uint32_t archive = ta_commit(&text);
 	T.info.talk_archive = archive;
 	if (emu_debug_on()) fprintf(stderr, "town text hash %08x\n", ta_hash(&text));
@@ -978,7 +971,7 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	if (getenv("CYBERWORLD_TOWN_DEBUG")) fprintf(stderr, "town: %d objects at %08x, %d people, %d sprites loaded\n", T.nobj, npcs.objects, npcs.n, npcs.nsprites);
 	int g = T.style->group, n = T.style->number;
 	bool ok = archive && mapslot_install(g, n, &npcs, NULL, 0) &&
-		mapslot_town_warps(g, n, T.info.start_x, T.info.start_y, T.info.start_face) &&
+		town_warps(g, n) &&
 		mapslot_checks(g, n, check_script, archive_bytes, archive_len) &&
 		mapslot_jack_in(g, n, to_group, to_number, x, y, 4) &&
 		mapslot_music(g, n, T.style->song);

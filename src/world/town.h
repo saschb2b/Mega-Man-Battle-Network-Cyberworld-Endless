@@ -14,7 +14,7 @@ typedef struct {
 	int group, number;      /* the real-world map it is cut from and takes over */
 	int start_x, start_y;   /* where Lan arrives (world units) */
 	int start_face;         /* ... facing (the game's warp facing) */
-	int port_x, port_y;     /* the middle of the jack-in point */
+	int port_x, port_y;     /* the middle of the jack-in point (home's: its front door) */
 	int tw, th;             /* the tile map's size */
 	int misses;             /* picked tiles no source tile matched */
 	int picks;
@@ -31,9 +31,10 @@ static inline uint32_t town_seed(uint32_t run_seed) { return run_seed ^ 0x70776E
 
 /* Plans the town for `seed` and picks its tiles (no core needed). */
 bool town_plan(uint32_t seed);
-/* The town `seed` plans (0 Central Town, 1 ACDC Town), without planning. */
-int town_style_for(uint32_t seed);
 const TownInfo *town_info(void);
+/* Whether the planned town is home: Central Town with Lan's house, his PC
+ * the jack-in (docs/HOME.md), its port his front door. */
+bool town_is_home(void);
 /* Where the planned town's tiles matched no source tile. */
 const uint8_t *town_misses(void);
 
@@ -47,11 +48,6 @@ int town_triggers(const CoordCell **cells);
 /* The run before this one was left unfinished (NEW GAME over CONTINUE):
  * the town's first words do not speak of how it ended. */
 extern bool town_after_abandon;
-/* Where Lan stands coming home when he never jacked in here (a run begun
- * in the net): two cells short of the port on the way from where he
- * starts, facing it (the game's warp facing); where he starts when no
- * walk on one floor joins them. */
-bool town_home_spot(int *x, int *y, int *face);
 /* Whether world position (x, y) is a jack-in cell (R jacks in there). */
 bool town_on_port(int x, int y);
 /* The middle of the jack-in cell nearest (x, y), in world units; its

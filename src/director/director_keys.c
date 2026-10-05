@@ -16,6 +16,7 @@
 #include "director_see.h"
 #include "director_state.h"
 #include "director_way.h"
+#include "lan_house.h"
 #include "lesson_words.h"
 #include "talk.h"
 #include "town.h"
@@ -259,11 +260,25 @@ static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
 	return keys;
 }
 
-/* R in the town away from the port: a step short of a jack-in cell, the
- * step taken; else MegaMan's word on where the port is, and the arrow its
- * way. The keys as they go on to the game. */
+/* R in Lan's house, or in his room off the PC (on it, BN6's own jack-in):
+ * MegaMan says where the PC is */
+static uint32_t house_r(uint32_t keys, int number) {
+	int px = bn6_player_x(), py = bn6_player_y(), gx, gy, far;
+	if ((number == LAN_ROOM && lan_room_on_pc(px, py)) || !lan_house_goal(number, &gx, &gy)) return keys;
+	talk_start(port_words(number == LAN_ROOM ? PORT_ROOM : PORT_HOUSE, way_to(gx, gy, &far)), FACE_MEGAMAN);
+	D.arrow_pending = true;
+	cinema_arrow(way_last(), 600);
+	return keys & ~KEY_R;
+}
+
+/* R in the town away from the port (home's: Lan's front door): a step
+ * short of a port cell, the step taken; else MegaMan's word on where the
+ * port is, and the arrow its way; in Lan's house and room, house_r. The
+ * keys as they go on to the game. */
 static uint32_t town_r(uint32_t keys) {
 	int px = bn6_player_x(), py = bn6_player_y();
+	int number = emu_read8(BN6_MAP_NUMBER);
+	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) return house_r(keys, number);
 	int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
 	int near = town_port_near(px, py, &nx, &ny);
 	/* (a step short of a jack-in cell: he takes it, and R jacks in; a
@@ -350,6 +365,19 @@ static void port_r(void) {
 	D.arrow_pending = false;
 }
 
+/* R at home in the real world: on the town's port the jack-in, the arrow
+ * off; away from it (and in Lan's house and room, off his PC) MegaMan says
+ * where to jack in, the game itself doing nothing there: true then, `keys`
+ * as they go on */
+static bool home_r(uint32_t *keys) {
+	bool house = lan_house_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
+	bool on_port = !house && town_on_port(bn6_player_x(), bn6_player_y());
+	if (on_port) port_r();
+	if (on_port || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || emu_read8(BN6_WARP_PENDING) != 0) return false;
+	*keys = town_r(*keys);
+	return true;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
 	if (D.active) keys = choice_guard(shop_guard(keys));
@@ -368,13 +396,7 @@ uint32_t director_keys(uint32_t keys) {
 	keys = a_keys(keys, a_pressed);
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_note_held(D.map_shown); keys &= ~KEY_SELECT; }
-	bool town = director_in_town();
-	if (town && r_pressed && town_on_port(bn6_player_x(), bn6_player_y())) port_r();
-	/* R in the town away from the port: MegaMan says where it is (the game
-	 * itself does nothing there) */
-	if (town && r_pressed && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && emu_read8(BN6_WARP_PENDING) == 0 &&
-		!town_on_port(bn6_player_x(), bn6_player_y()))
-		return town_r(keys);
+	if (director_in_town() && r_pressed && home_r(&keys)) return keys;
 	/* on the map L is MegaMan's word on where they are: the game's own
 	 * has no lines for this story */
 	keys &= ~KEY_L;

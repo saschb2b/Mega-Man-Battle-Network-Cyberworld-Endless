@@ -228,8 +228,16 @@
 0804BDCC BN6_TRADER_MODES
 0804CAC4 BN6_TRADER_PRIZE
 0804CDE0 BN6_TRADER_POOLS
-0804F274 warp_list
+0804F210 lan_house_room.town
+0804F224 lan_house_room.town_2
+0804F274 lan_house_room.house
+0804F2A4 lan_house_room.room
+0804F4B0 central_town_map_loader
+0804F50C lan_house_room.literal
 0804F5D0 central_town
+0804F850 jack_tables
+0804F864 lan_house_room.town_3
+0804F86C lan_house_room.house_2
 0804F874 lan_room_jack_table
 0806CE90 lan_hp_warp_list
 08072410 for_central

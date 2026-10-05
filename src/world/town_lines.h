@@ -30,9 +30,9 @@ typedef struct {
 #define TOWN_LINES 4
 extern const TownLines town_lines[TOWN_LINES];
 
-/* What Lan and MegaMan say as a run begins: on the first dive ever, Dad's
- * call about the Endless Net; after that, a word about the last one; the
- * port by `landmark_at`, after the town's `arrival` */
-const char *town_intro(const char *landmark_at, const char *arrival);
+/* What Lan and MegaMan say as a run begins, in Lan's room: on the first
+ * dive ever, Dad's call about the Endless Net; after that, a word about
+ * the last one; and the jack-in from Lan's PC, after the town's `arrival` */
+const char *town_intro(const char *arrival);
 
 #endif

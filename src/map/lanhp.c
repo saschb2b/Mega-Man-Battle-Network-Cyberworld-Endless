@@ -82,7 +82,7 @@ bool lanhp_install(void) {
 	mapslot_hp(true);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
-		mapslot_music_hp(LANHP_GROUP, LANHP_NUMBER, SONG);
+		mapslot_music_home(0, LANHP_GROUP, LANHP_NUMBER, SONG);
 	mapslot_hp(false);
 	if (ok) emu_write(H.warps + 16u * (ARRIVAL_ENTRY - 1), H.jack_out, sizeof H.jack_out);
 	return ok;

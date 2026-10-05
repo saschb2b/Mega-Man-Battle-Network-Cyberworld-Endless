@@ -53,9 +53,11 @@ Town shows only some of them:
 
 ## The town
 
-A run's town is one of four styles, picked by its seed: Central Town
-(`0x01:0`) or ACDC Town (`0x00:0`), both 132 x 72 tiles, or Seaside Town
-(`0x03:0`) or Green Town (`0x04:0`), below. A cut style's town is
+The run's town is Central Town (`0x01:0`), home (docs/HOME.md), at its
+original width and the same every run; the other styles, ACDC Town
+(`0x00:0`), both 132 x 72 tiles, and Seaside Town (`0x03:0`) and Green
+Town (`0x04:0`), below, stay for later uses and for tests
+(`CYBERWORLD_TOWN_STYLE`). A cut style's town is
 its original cut into pieces and set out again, in the original's own map
 (its tables in the game, its music): the generator arranges Capcom's
 buildings and does not make new ones. `town.c` plans a town as a list of
@@ -266,13 +268,20 @@ Until a job opens one, a check's ground holds no trigger and BN6's own
 points jack in to Lan's HP, as the landmark's. `build.py town` counts
 each port's cells Lan reaches on foot.
 
-A new run plans another town than the last run did (`town_style_for`,
-in `run_new_varied`, which also keeps the first area and guardian off the
-last two runs' where it can): a playtester began on Central Town's street
-by Lan's house four or five runs running.
+Home's town has no jack-in of its own: a run begins in Lan's room, and
+his PC jacks in (docs/HOME.md, `lan_house.c`). Its port is Lan's front
+door: the original's warp 1, carried with his house, which BN6's own
+warp entry takes into the house; the rest of its warp list leads back to
+where Lan comes out. Lan's house (`0x01:1`) and room (`0x01:2`) are
+BN6's maps as they stand, their doors BN6's (the house's front door, its
+stairs to the room, the room's stairs down; not the bathroom's), their
+people and story scripts left out. The planned town keeps the first area
+and guardian off the last two runs' where it can (`run_new_varied`); the
+town itself is the same each run since it became home.
 
-`CYBERWORLD_AUTOPILOT` walks Lan along the streets to the landmark's front
-(a breadth-first path over the town's walkable cells) and presses R.
+`CYBERWORLD_AUTOPILOT` walks Lan to his PC and presses R; in the house
+up its stairs, in the town to his front door (a breadth-first path over
+the town's walkable cells).
 `python3 build.py town` draws the towns runs of seeds 1, 2, ... start in,
 tiles without a match marked red, objects and people dotted, and shows
 the game around the first; `CYBERWORLD_TOWN_STYLE` (0 Central, 1 ACDC, 2 Seaside, 3 Green) and

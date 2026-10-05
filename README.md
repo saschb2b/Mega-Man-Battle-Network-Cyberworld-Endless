@@ -52,7 +52,7 @@ around it, one layer at a time, and keeps the run going.
 </p>
 
 <p align="center">
-<img src="docs/screenshots/town-central.png" width="240" alt="Lan outside his house in Central Town; Dad calls: Lan,it's Dad. Got a minute?">
+<img src="docs/screenshots/home-room.png" width="240" alt="Lan in his room as a run begins; Dad calls: Lan,it's Dad. Got a minute?">
 <img src="docs/screenshots/act-card.png" width="240" alt="Act 1: RoboDog Comp, circuits of a home comp; its guardian not known yet">
 <img src="docs/screenshots/net.png" width="240" alt="MegaMan on a generated layer of Robot Control Comp">
 <img src="docs/screenshots/battle.png" width="240" alt="A battle against a Champy, a Gunner and a Mettaur, MegaMan firing his Buster as the Gunner bursts">
@@ -436,7 +436,7 @@ save folder).
 | A | Talk, open Mystery Data | Use a chip |
 | B | Run; in a chat, hold to fast-forward the text | Fire the buster |
 | L | Ask MegaMan where you are and what's ahead; the layer's Mystery Data counters show at the top right for a few seconds | Open the Custom screen; on it, try to run (never from a guardian) |
-| R | Jack in (at the town's statue) | Open the Custom screen; on it, describe the chip or Cross under the cursor |
+| R | Jack in (at Lan's PC); in Lan's HP, jack out | Open the Custom screen; on it, describe the chip or Cross under the cursor |
 | Start | Open the PET | Pause |
 | Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings where they stand, or arrowheads on the frame pointing their way), the way to the exit or guardian, and the Mystery Data MegaMan knows of by colour: taken, of those seen or sensed behind a set piece (dim once all are taken; there may be more out there), each one seen and not yet taken marked where it stands (and, while you hold an Unlocker, every purple one); let go, and the arrow shows the way on | On the Custom screen, hide it to see the field; again to bring it back |
 
@@ -454,18 +454,21 @@ from every battle MegaMan has fought. Something at the bottom keeps
 copying. Dad calls the first time; after that Lan and MegaMan talk it
 over as they go, and L asks MegaMan where they are.
 
-A run begins in town: Central Town or ACDC Town, Capcom's own, set out a
-little differently each run, or Seaside Town or Green Town as they
-stand, with shops, houses, townsfolk to talk to and signs to read. Walk
-to the town's landmark (the blue bird on Central Town's plaza, the
-squirrel in ACDC Town's park, the mermaid fountain by Seaside's whale,
-the knight on Green Town's flower plaza) and press R: Lan jacks MegaMan
-in, and the net begins.
+A run begins at home, in Lan's room in Central Town. Step up to his PC
+and press R: Lan jacks MegaMan in to their homepage, Lan's HP, and its
+pink pad leads into the net. Lan's HP is home on the net: after every
+act MegaMan comes back to it, and its pink pad and link squares light up
+as the ways on, the next act's areas. MegaMan has not been through them
+yet, so beside one he only says what he reads through it, the data's
+feel and a strong Navi's signal, naming the Navi once he has battled
+him. R there asks to jack out, back to Lan's PC; down the stairs and out
+of the front door is Central Town, Capcom's own, with shops, houses,
+townsfolk to talk to and signs to read.
 
 <p align="center">
-<img src="docs/screenshots/town-acdc.png" width="240" alt="Lan in ACDC Town beside Higsby's; MegaMan: ACDC Town,Lan! The Metroline's so fast!">
-<img src="docs/screenshots/town-seaside.png" width="240" alt="Lan on Seaside Town's plaza by the station stairs; MegaMan: Seaside Town,Lan! Smell that sea air!">
-<img src="docs/screenshots/town-green.png" width="240" alt="Lan in Green Town beside the knight statue on the flower plaza; MegaMan: Green Town,Lan! Smell those flowers!">
+<img src="docs/screenshots/home-pc.png" width="240" alt="Lan at his PC in his room: Jack in! MegaMan, Execute!!">
+<img src="docs/screenshots/home-hp.png" width="240" alt="MegaMan in Lan's HP beside a lit link: Hmm... Humming machines over there.">
+<img src="docs/screenshots/town-central.png" width="240" alt="Lan out of his front door in Central Town, his house's blue roof behind him">
 </p>
 
 <p align="center">
@@ -501,9 +504,10 @@ Step into the arena and the Navi logs in for the game's own boss
 battle. Once MegaMan has battled a guardian, in any run, he knows it:
 the card names it, and on its layer he warns you of its way of
 fighting from his battle data. Guardians remember how your earlier
-battles went. Their Guardian Data ends with the way on: two areas for
-the next act, each named with its guardian and his element where
-MegaMan knows him, so you choose the fight your folder answers.
+battles went. Their Guardian Data takes MegaMan home to Lan's HP,
+where two portals lead to the next act's areas; beside each he reads
+its data and its guardian's signal, naming him where he has battled
+him, so you choose the fight your folder answers.
 In the short net, once the Secret Area has been cleared in any run, act
 2's also offers a dark way: act 3 in the Undernet, with one of its own
 Navis, harder battles and richer data.
