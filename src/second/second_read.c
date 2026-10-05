@@ -174,7 +174,9 @@ static void read_fight(void) {
 	S2.queue_at = emu_read8(BN6_BATTLE_HAND + BN6_HAND_AT);
 	for (S2.nqueue = 0; S2.nqueue < BN6_HAND_MAX; ++S2.nqueue) {
 		uint16_t id = emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + 2u * (uint32_t)S2.nqueue);
-		if (id == 0xFFFF) break;
+		/* (as a battle opens the hand is cleared to 0 for some 18 frames
+		 * before BN6 ends it with 0xFFFF: six MegaBstr, chip 0, showed) */
+		if (id == 0xFFFF || id == 0) break;
 		S2.queue[S2.nqueue] = id;
 		S2.queue_power[S2.nqueue] = emu_read16(BN6_BATTLE_HAND + BN6_HAND_POWERS + 2u * (uint32_t)S2.nqueue);
 		S2.queue_bonus[S2.nqueue] = emu_read16(BN6_BATTLE_HAND + BN6_HAND_BONUS + 2u * (uint32_t)S2.nqueue);
@@ -194,11 +196,16 @@ static void read_fight(void) {
 	S2.tip = S2.guardian && guardian_known(S2.guardian) ? guardian_tip(S2.guardian) : NULL;
 }
 
-/* The battle: the Custom screen while it is open, and the fight */
+/* The battle: the Custom screen while it is open, and the fight; none
+ * of it as a battle begins, whose memory still holds the last battle's
+ * MegaMan and hand (its Recov10 used) until BN6 clears them */
 void second_read_battle(void) {
 	S2.custom = emu_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM;
 	read_fight();
 	if (S2.custom) read_custom();
+	if (emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE_INIT) return;
+	S2.form = S2.beast_turns = S2.nqueue = S2.nfoes = 0;
+	S2.beast = S2.synchro = false;
 }
 
 /* The PET's home: the run's next step (in the town where R jacks MegaMan
