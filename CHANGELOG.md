@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.0 (2026-10-05)
 
 - **Everyone talks like BN6 now.** A player wrote that our dialogue felt
   like "reading a summary of a regular sentence", and it did: our boxes
