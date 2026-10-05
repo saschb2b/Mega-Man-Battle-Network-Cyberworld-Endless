@@ -217,6 +217,19 @@ static void update(void) {
 	if (revealed || director_arrived()) ++revealed;
 }
 
+/* BN6's frame as the switch to a guest battle takes it, `t` frames in: in
+ * blocks growing wider than tall as it fades to white, as BN6's own battle
+ * switch draws the map (captured in a BN6 battle: 16 pixels wide at most) */
+static void switch_blocks(uint32_t *px, int t) {
+	int mx = 1 + t * 15 / GUEST_FLASH, my = 1 + t * 3 / GUEST_FLASH;
+	for (int y0 = 0; y0 < EMU_H; y0 += my)
+		for (int x0 = 0; x0 < EMU_W; x0 += mx) {
+			uint32_t c = px[y0 * EMU_W + x0];
+			for (int y = y0; y < y0 + my && y < EMU_H; ++y)
+				for (int x = x0; x < x0 + mx && x < EMU_W; ++x) px[y * EMU_W + x] = c;
+		}
+}
+
 static void draw(void) {
 	emu_drawing = true;   /* (until the next update: the second screen's too) */
 	fill_rect(0, 0, P.w, P.h, BLACK);
@@ -245,6 +258,7 @@ static void draw(void) {
 #else
 	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = v[i] | 0xFF000000u;
 #endif
+	if (!guest && guest_wait > 0 && guest_wait < GUEST_FLASH) switch_blocks(px, guest_wait);
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
 	int dx = 0, dy = 0;
 	if (!guest) cinema_offset(&dx, &dy);   /* (a shake under way as it began holds still while it runs) */
