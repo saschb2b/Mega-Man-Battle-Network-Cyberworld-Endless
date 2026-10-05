@@ -702,4 +702,6 @@ endorsed by Capcom. The code is MIT-licensed. The
 [bn6f disassembly](https://github.com/dism-exe/bn6f) was an invaluable map of
 the game's data; none of its files are included here. The game's own code
 runs on an embedded [mGBA](https://github.com/mgba-emu/mgba) core (0.10.5,
-MPL-2.0; its license ships in `licenses/`).
+MPL-2.0; its license ships in `licenses/`). The chime at the start is
+[UI Success Chime](https://pixabay.com/sound-effects/ui-success-chime-513565/)
+by SoundShelfStudio, from Pixabay (the Pixabay Content License).

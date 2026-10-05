@@ -43,7 +43,7 @@ the site.
 | --- | --- |
 | `src/core/` | Entry point, platform (window, canvas, input, timing), ROM access and `RomLayout`, chip and virus data, loot, run state and saves |
 | `src/gfx/` | Sprite decoding and animation, ROM tiles, the font, the QR code (`qr.c`, as the site's `qr.js`) |
-| `src/audio/` | MP2K sequencer and mixer (title music and sounds, and the tones of our own the start plays); the core's sound during play |
+| `src/audio/` | MP2K sequencer and mixer (title music and sounds, and the start's chime: `intro_chime.c`, a Pixabay sound `tools/intro_chime.py` converts); the core's sound during play |
 | `src/net/` | Layer generation (rooms, walkways, objects) |
 | `src/scenes/` | The start (`scene_intro.c`: the developer's boot screen, `intro_logo.c`, and MegaMan's word on GitHub, before the title at a plain start), the title (with the run summary) and the sprite gallery |
 | `src/emu/` | The mGBA core, calls into the game through hooks (`gamecall.c`: warps, chat), hooks on its code (`hook.c`), its wait for VBlank halted (`idle.c`), boot, event flags, debug output, the autopilot and the scene (`docs/EMULATION.md`); `bn6.h` names the game's addresses and the fields of its structures |
@@ -169,6 +169,7 @@ python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: th
 python3 tools/steam_art.py             # linux/steam: Steam's library artwork (capsules, hero, logo); 3ds/banner.png
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
 python3 tools/trailer.py [--keep]      # docs/clips/trailer.*: the 20-second trailer, its music by tools/trailer_music.py
+python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's chime (Pixabay's "UI Success Chime", kept out of git) and its two tones
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```

@@ -2,10 +2,10 @@
  * asking for word on GitHub. Each start, a few seconds, and any button
  * skips either.
  *
- * The boot screen is ours, a handheld's start made anew (intro_logo.c):
- * the name Saschb2b flies in letter by letter, a hop and a band of light
- * run through it, to plucks and a chord the engine synthesizes. No
- * Nintendo logo, no Nintendo sound. The notice has the title's net
+ * The boot screen is ours (intro_logo.c): the name Saschb2b in pixel
+ * letters, near-black on white, comes up as "Sasch" and "b2b" on the two
+ * tones of a chime from Pixabay (intro_chime.h). No Nintendo logo, no Nintendo sound. Out
+ * to white, from which the notice comes up. The notice has the title's net
  * behind MegaMan in the game's chat box (its frame, its font and his face
  * from the ROM; the words ours), and the project's address as a QR code
  * and in letters above him, where a phone's camera takes it from the
@@ -24,8 +24,8 @@
 
 #define REPO "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless"
 
-/* The notice: in from black, its words typed a character a frame, out to
- * black at NOTE_END, where the title fades in. */
+/* The notice: in from the boot screen's white, its words typed a
+ * character a frame, out to black at NOTE_END, where the title fades in. */
 #define NOTE_FADE 10
 #define NOTE_END 240
 
@@ -131,14 +131,15 @@ static void draw(void) {
 	SDL_Rect dst = { x0, y0, CORE_W, CORE_H };
 	SDL_RenderCopy(P.renderer, S.tex, NULL, &dst);
 	int fade = 0;
+	SDL_Color to = BLACK;
 	if (S.notice) {
 		side_draw(x0, y0);
 		chat_draw(x0, y0);
-		if (S.t < NOTE_FADE) fade = 16 - S.t * 16 / NOTE_FADE;
+		if (S.t < NOTE_FADE) { fade = 16 - S.t * 16 / NOTE_FADE; to = WHITE; }
 		else if (S.t > NOTE_END - NOTE_FADE) fade = (S.t - (NOTE_END - NOTE_FADE)) * 16 / NOTE_FADE;
 	} else if (S.t < INTRO_LOGO_IN) fade = 16 - S.t * 16 / INTRO_LOGO_IN;
-	else if (S.t > INTRO_LOGO_END - INTRO_LOGO_OUT) fade = (S.t - (INTRO_LOGO_END - INTRO_LOGO_OUT)) * 16 / INTRO_LOGO_OUT;
-	if (fade) { P.fx_fade = fade; P.fx_fade_color = BLACK; }
+	else if (S.t > INTRO_LOGO_END - INTRO_LOGO_OUT) { fade = (S.t - (INTRO_LOGO_END - INTRO_LOGO_OUT)) * 16 / INTRO_LOGO_OUT; to = WHITE; }
+	if (fade) { P.fx_fade = fade; P.fx_fade_color = to; }
 }
 
 const Scene scene_intro = { "intro", enter, update, draw, NULL };

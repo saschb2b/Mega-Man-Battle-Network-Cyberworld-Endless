@@ -3,11 +3,12 @@
 ## Unreleased
 
 - **Each start opens with the developer's boot screen and a word from
-  MegaMan on where to report bugs.** On a dark screen the letters of
-  Saschb2b fly in from all sides, turning as they spiral to their
-  places, then a hop runs through the word with a band of light, leaving
-  a glow and a few sparkles: our own letters, drawn smooth by the engine,
-  to plucks and a chord it synthesizes (no Nintendo logo or sound). Then
+  MegaMan on where to report bugs.** On white, Saschb2b comes up in two
+  pieces on the two tones of a chime, each out of a GBA-style mosaic:
+  "Sasch" on the first, "b2b" beside it on the second, and the name
+  glides to the middle. The letters are a bold pixel font of our own with
+  a light shadow; the chime is "UI Success Chime" by SoundShelfStudio,
+  from Pixabay (no Nintendo logo or sound). Then
   MegaMan asks, in the game's chat box, for bugs and ideas on the
   project's GitHub page, whose address stands above him in letters and as
   a QR code a phone's camera takes from the screen, beside what helps: a
