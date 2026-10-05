@@ -89,9 +89,9 @@ static const uint8_t full_hp[] = { 0xFC, 0x03, 0x13, 0x00 };  /* ts_call_set_ful
 
 int ta_heal(TextArchive *t, int variant, int told_flag, int amount) {
 	static const char *const hello[] = {
-		"I'M A RECOVERY PROGRAM FROM SCILAB! HOLD STILL, MEGAMAN...",
-		"DR. HIKARI SENT ME TO PATCH YOU UP! HERE GOES...",
-		"RECOVERY PROGRAM, RUNNING! THIS WON'T TAKE A SECOND!",
+		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
+		"DR.HIKARI SENT ME!\nHOLD STILL,NOW!",
+		"RECOVERY PROGRAM,GO!\nTHIS WON'T HURT!",
 	};
 	/* once he has patched MegaMan on this layer (flag set): one patch a
 	 * layer (issue #71: a heal as often as asked refunded every detour's
@@ -102,7 +102,7 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int amount) {
 	if (amount < 0) {
 		ta_bytes(t, full_hp, sizeof full_hp);
 		ta_page(t, FACE_PROG, "ALL PATCHED UP! COME BACK ANYTIME!", true);
-	} else ta_page(t, FACE_PROG, "MY PATCH DATA'S SPENT ON THIS LAYER! THE NET DEALER SELLS MINIENRG!", true);
+	} else ta_page(t, FACE_PROG, "OH NO,MY PATCH IS\nUSED UP HERE!\nTHE NET DEALER SELLS\nMINIENRG!", true);
 	ta_end(t);
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
@@ -120,7 +120,7 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int amount) {
 		ta_bytes(t, full_hp, sizeof full_hp);
 		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
 	}
-	if (amount >= 0) ta_page(t, FACE_PROG, "THAT'S MY ONE PATCH FOR THIS LAYER! MAKE IT COUNT!", false);
+	if (amount >= 0) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
 	flag_set(t, told_flag);
 	ta_end(t);
 	return i;
@@ -161,7 +161,7 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 }
 
 int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) {
-	int quiet = ta_say(t, FACE_MEGAMAN, "The virus signal's gone quiet, Lan.");
+	int quiet = ta_say(t, FACE_MEGAMAN, "The signal's quiet now,Lan.");
 	int no = closing(t);
 	int i = ta_script(t);
 	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };  /* ts_check_flag */
@@ -172,8 +172,8 @@ int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) 
 	/* (a Navi's signal named as one: a playtester's "strong virus signal"
 	 * held ElementMan SP, session 65) */
 	char signal[160];
-	if (navi && *navi) snprintf(signal, sizeof signal, "Lan, a Navi's signal, and a strong one! %s It outclasses this layer.", navi);
-	else snprintf(signal, sizeof signal, "Lan, a strong virus\nsignal! Its viruses\noutclass this layer.");
+	if (navi && *navi) snprintf(signal, sizeof signal, "Lan,careful! A strong Navi's signal!|%s|He outclasses anything here!", navi);
+	else snprintf(signal, sizeof signal, "Lan,careful! A strong virus signal!|Its viruses outclass anything here!");
 	ta_pages(t, signal, FACE_MEGAMAN, &first);
 	/* (and what it pays: "a good chip" left a playtester guessing whether
 	 * the risk was worth it) */
@@ -186,7 +186,7 @@ int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) 
 }
 
 int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool ours) {
-	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be, Lan.");
+	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
 	 * first time: docs/META.md, issue #65) */
@@ -198,15 +198,15 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool o
 	 * folder that burns a BugFrag a use, docs/META.md, BN6's own DarkChips) */
 	char words[800];
 	if (first)
-		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, like the chips Nebula spread. There's a DarkChip in it: %s!|"
-			"@M %s when I'm worried: down to a quarter of my HP, or hit again and again. You'll see it on my face. A COUNTER calms me down again.|%s"
-			"@M It's real power... But every battle I use one in eats away at me: %d max HP, gone for the rest of this dive.|"
-			"@M And if I fall after using one, the darkness might get me back up, and fight with my body for a while. Not our way.", chip,
-			ours ? "In the old net's battles it comes to me only" : "A DarkChip comes to me only in the old net's battles, and only",
-			ours ? "@M Our net knows this one too: in our battles it's a chip of our folder, and each use burns a BugFrag.|" : "", DARK_PRICE);
-	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s.|@M It comes in the old net's battles when I'm worried: "
-		"a quarter of my HP, or hit again and again.%s Every battle I use one in costs %d max HP.", chip,
-		ours ? "|@M In ours it's a folder chip that burns a BugFrag." : "", DARK_PRICE);
+		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!|%s.|But only when I'm worried!|"
+			"Down to a quarter HP,or hit again and again.|You'll see it on my face.|A COUNTER calms me down.|%s"
+			"It's real power... But it eats at me.|Each battle I use one in,I lose %d max HP.|For the rest of this dive!|"
+			"And if I fall after using one...|The darkness might get me up,and fight in my body.|...That's not our way,Lan.", chip,
+			ours ? "In the old net's battles,it comes to me" : "It comes only in the old net's battles",
+			ours ? "Our net knows this one,too!|In our battles,it's a Folder chip.|Each use burns a BugFrag.|" : "", DARK_PRICE);
+	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!|It comes in the old net's battles,when I'm worried.|"
+		"At a quarter HP,or hit again and again.%s|Each battle I use one in costs %d max HP.", chip,
+		ours ? "|In ours,it's a Folder chip.|Each use burns a BugFrag." : "", DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
 	/* (on Yes: holding one costs nothing till it's used, and a paging A
@@ -217,14 +217,14 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool o
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, ours ? "It's ours, Lan. In the old net it comes when I'm worried, and out here it's in our Pack. Either way it takes its price."
-		: "It's ours, Lan. When I'm worried, it'll come... and take its price.", false);
+	ta_page(t, FACE_MEGAMAN, ours ? "It's ours now,Lan.\nAnd in our Pack,too.\nEither way...\nit takes its price."
+		: "It's ours now,Lan...\nIt'll come when I'm\nworried. At a price.", false);
 	ta_end(t);
 	return i;
 }
 
 int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
-	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be, Lan.");
+	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
 	int i = ta_script(t);
 	/* (all of it a profile's first BN6 flame: what it does, the BugFrag it
 	 * burns, the NaviCust's bug for the battle, its base chip, the max HP;
@@ -232,13 +232,12 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 	char words[720];
 	const char *an = strchr("AEIOU", d->base[0]) && d->base[0] ? "an" : "a";
 	if (d->first)
-		snprintf(words, sizeof words, "@M Lan, that flame... It's dark data, and there's a DarkChip in it: %s!|"
-			"@M In our net its darkness feeds on bugs. Each use burns one of our BugFrags for %s.|"
-			"@M Then the darkness bugs me for the rest of that battle, as a NaviCust bug would. With no BugFrags left, it's only %s %s.|"
-			"@M And every battle its darkness runs in eats away at me: %d max HP, gone for the rest of this dive.",
+		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!|Its darkness feeds on bugs!|"
+			"Each use burns one of our BugFrags...|...for %s!|Then it bugs me,like a NaviCust bug.|For the rest of that battle!|"
+			"No BugFrags? Then it's only %s %s.|And each battle it runs in costs %d max HP.|For the rest of this dive...",
 			d->chip, d->does, an, d->base, DARK_PRICE);
-	else snprintf(words, sizeof words, "@M A flame of darkness, Lan. There's a DarkChip in it: %s.|@M Each use burns a BugFrag for %s. "
-		"Then it bugs me for the battle. With none, it's %s %s.|@M Every battle its darkness runs in costs %d max HP.", d->chip, d->does, an, d->base,
+	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!|Each use burns a BugFrag...|...for %s.|"
+		"Then it bugs me for the battle.|No BugFrags? Then it's %s %s.|Each battle it runs in costs %d max HP.", d->chip, d->does, an, d->base,
 		DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
@@ -249,7 +248,7 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", d->chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, "It went to our Pack, Lan. To fight with it: PET, Folder, then EDIT. Three DarkChips at most in a folder.", false);
+	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nTo use it,pick PET,\nFolder,then EDIT.\nThree DarkChips max\nin a Folder,though.", false);
 	ta_end(t);
 	return i;
 }
@@ -296,8 +295,8 @@ int ta_undernet(TextArchive *t, int flag, bool deeper) {
 	 * knowing what it was for): the Undernet's viruses, its richer Mystery
 	 * Data and BugFrag Trader, and where its exit leads */
 	bool first = true;
-	ta_pages(t, deeper ? "Tougher viruses still, and richer data!|Its exit leads back to the main path."
-		: "The Undernet: tougher viruses and richer data!|A BugFrag Trader too. Its exit leads to the next layer.",
+	ta_pages(t, deeper ? "Even tougher viruses down there!|And richer data,too!|Its exit leads back to the main path."
+		: "The Undernet,Lan!|Tougher viruses,and richer data!|A BugFrag Trader,too!|Its exit leads to the next layer.",
 		FACE_MEGAMAN, &first);
 	ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true, true);
 	flag_set(t, flag);
@@ -307,9 +306,9 @@ int ta_undernet(TextArchive *t, int flag, bool deeper) {
 
 int ta_secret_gate(TextArchive *t, int flag) {
 	/* how many ScrtData MegaMan holds, said at a closed gate */
-	int none = ta_say(t, FACE_MEGAMAN, "It's sealed tight, Lan.|Maybe that strange ScrtData could open it...");
-	int one = ta_say(t, FACE_MEGAMAN, "It's sealed tight. Our ScrtData is glowing a little...|I bet we need more of it!");
-	int two = ta_say(t, FACE_MEGAMAN, "Our two ScrtData are glowing brighter, Lan!|One more should open this gate!");
+	int none = ta_say(t, FACE_MEGAMAN, "It's sealed tight,Lan.|Maybe ScrtData could open it...");
+	int one = ta_say(t, FACE_MEGAMAN, "Our ScrtData's glowing a little...|I bet we need more!");
+	int two = ta_say(t, FACE_MEGAMAN, "Whoa! Our two ScrtData are glowing!|One more should open it!");
 	int no = closing(t);
 	/* ts_check_item07: item, amount, then the scripts for equal, more and
 	 * fewer (0xFF: on); fewer than three says how many */
@@ -448,7 +447,7 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	 * one off the board for two acts; and whether L and R turn it, which
 	 * a playtester looked for here) */
 	char install[200];
-	snprintf(install, sizeof install, "Let's install it, Lan! In the PET: MegaMan, then NaviCust. %s", navicust_color_turns(color));
+	snprintf(install, sizeof install, "Let's install it! In\nthe PET,MegaMan,then\nNaviCust!\n%s", navicust_color_turns(color));
 	ta_page(t, FACE_MEGAMAN, install, false);
 	(void)teach;
 	flag_set(t, taken_flag);
@@ -465,7 +464,7 @@ static void draft_about(TextArchive *t, const char *about, int color, const char
 	const char *colon = strchr(about, ':');
 	char line[180];
 	if (colon && *navicust_color_name(color))
-		snprintf(line, sizeof line, "%.*s (%s%s%s)%s", (int)(colon - about), about, navicust_color_name(color), *fit ? ", " : "", fit, colon);
+		snprintf(line, sizeof line, "%.*s (%s%s%s)%s", (int)(colon - about), about, navicust_color_name(color), *fit ? "," : "", fit, colon);
 	else snprintf(line, sizeof line, "%s", about);
 	ta_page(t, FACE_MEGAMAN, line, false);
 }
@@ -477,12 +476,12 @@ static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take
 	int s = ta_script(t), n = draft->n;
 	if (draft->teach) {
 		char rules[300];
-		snprintf(rules, sizeof rules, "Big programs need a block on the command line; plus parts go anywhere else. "
-			"Same colors touching or a block off the edge: a bug. %s", navicust_turn_words(0));
+		snprintf(rules, sizeof rules, "A program needs a\nblock on the command\nline!\nPlus parts go\nanywhere but the\ncommand line.\n"
+			"Same colors touching\nmake a bug. So does\ngoing off the edge!\n%s", navicust_turn_words(0));
 		ta_page(t, FACE_MEGAMAN, rules, false);
 	}
 	char none[96];
-	snprintf(none, sizeof none, "Or B takes none: the data breaks down into %d BugFrags.", draft->skip_frags);
+	snprintf(none, sizeof none, "Or B takes none,and\nwe get %d BugFrags!", draft->skip_frags);
 	ta_page(t, FACE_MEGAMAN, none, false);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
@@ -540,7 +539,7 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	uint8_t give[] = { 0xEF, 0x12, (uint8_t)frags, (uint8_t)(frags >> 8), 0, 0, 0xFF, 0xFF, 0xFF };   /* ts_check_give_bug_frags */
 	ta_bytes(t, give, sizeof give);
 	char line[96];
-	snprintf(line, sizeof line, "We'll travel light, Lan. The program data broke down into %d BugFrags!", frags);
+	snprintf(line, sizeof line, "Traveling light!\nThe data broke into\n%d BugFrags!", frags);
 	ta_page(t, FACE_MEGAMAN, line, false);
 	flag_set(t, taken_flag);
 	end_or(t, next);
@@ -563,7 +562,7 @@ static void reward_items(TextArchive *t, int chip, const char *chip_name, int co
 		snprintf(line, sizeof line, "MegaMan got:\n\"%sHPMemory\" and\n\"%s %c\"!!", hp, chip_name, code == 26 ? '*' : 'A' + code);
 		ta_page(t, FACE_NONE, line, *first);
 		*first = false;
-		ta_page(t, FACE_MEGAMAN, "The chip's in our Pack, Lan, and our HP's full again!", false);
+		ta_page(t, FACE_MEGAMAN, "Our HP's full again!\nAnd the chip's in\nour Pack,Lan!", false);
 		return;
 	}
 	if (!last) {
@@ -574,7 +573,7 @@ static void reward_items(TextArchive *t, int chip, const char *chip_name, int co
 		/* the navi's own chip, as Battle Network gives it (to the Pack) */
 		give_chip(t, chip, code, 1);
 		got_chip(t, chip_name, code, first);
-		ta_page(t, FACE_MEGAMAN, last ? "It goes in our Library for good, Lan!" : "It's in our Pack, Lan. Let's put it in our folder from the PET!", false);
+		ta_page(t, FACE_MEGAMAN, last ? "It's in our Library\nfor good,Lan!" : "Got it! It's in\nour Pack,Lan.\nLet's add it to the\nFolder in the PET!", false);
 	}
 	if (!last) {
 		ta_bytes(t, full_hp, sizeof full_hp);
@@ -609,7 +608,7 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 		got(t, "ExpMemry", &first);
 		/* (the board it grows to is the game's count, not the act's: a run
 		 * that passed act 2 on an older build gets its first here) */
-		ta_page(t, FACE_MEGAMAN, "Our NaviCust's board just grew, Lan! More room for programs.", false);
+		ta_page(t, FACE_MEGAMAN, "Whoa! Our NaviCust\nboard grew,Lan!\nMore room for\nprograms!", false);
 	}
 	if (!n) {
 		flag_set(t, taken_flag);
@@ -617,7 +616,7 @@ int ta_guardian_reward(TextArchive *t, const char *name, const char *power, int 
 		return i;
 	}
 	/* the draft: what each program does, then the choice (B: none) */
-	ta_page(t, FACE_MEGAMAN, "Program data too, Lan! Pick one for our NaviCust:", false);
+	ta_page(t, FACE_MEGAMAN, "Program data,too!\nLet's pick one for\nour NaviCust!", false);
 	draft_line(t, draft, 0, fits0, lines);
 	return i;
 }
@@ -626,19 +625,19 @@ int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int nee
 	char s[240];
 	if (beaten < needed) {
 		/* (the telegraph first: which code, and how far along) */
-		snprintf(s, sizeof s, "@M It's sealed with %s's code, Lan.|@M Deleting %s %s as a guardian, in any dive, would crack it. %s", navi, navi,
-			needed == 2 ? "twice" : "again", beaten >= 1 ? "Once more!" : "We haven't yet.");
+		snprintf(s, sizeof s, "@M It's sealed with %s's code,Lan.|@M If we delete %s %s as a guardian...|@M ...in any dive,it'd crack! %s", navi, navi,
+			needed == 2 ? "twice" : "again", beaten >= 1 ? "Just once more!" : "Not even once yet...");
 		return ta_say(t, FACE_MEGAMAN, s);
 	}
-	int quiet = ta_say(t, FACE_MEGAMAN, "The gate stands open, Lan. Nothing's left inside.");
+	int quiet = ta_say(t, FACE_MEGAMAN, "The gate's open,Lan.|Nothing's left inside.");
 	int no = closing(t);
 	int i = ta_script(t);
 	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, done, sizeof done);
 	bool first = true;
-	snprintf(s, sizeof s, "%s's code opens the gate! %s SP waits inside, the hardest fight on this layer.", navi, navi);
+	snprintf(s, sizeof s, "%s's code opens it!|%s SP waits inside!|The toughest fight on this layer!", navi, navi);
 	ta_pages(t, s, FACE_MEGAMAN, &first);
-	ask_in(t, FACE_MEGAMAN, "His SP chip is the prize.\nTake him on?\n", no, true, true);
+	ask_in(t, FACE_MEGAMAN, "His SP chip's the\nprize! Take him on?\n", no, true, true);
 	flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -648,12 +647,12 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 	int i = ta_script(t);
 	bool first = true;
 	char s[96];
-	snprintf(s, sizeof s, "%s SP's data is ours, Lan!", navi);
+	snprintf(s, sizeof s, "Alright! %s SP's data is ours!", navi);
 	ta_page(t, FACE_MEGAMAN, s, true);
 	first = false;
 	give_chip(t, chip, code, 1);
 	got_chip(t, chip_name, code, &first);
-	ta_page(t, FACE_MEGAMAN, "It's in our Pack. Let's put it in our folder, Lan!", false);
+	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nLet's add it to our\nFolder,Lan!", false);
 	ta_end(t);
 	return i;
 }
@@ -676,12 +675,12 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 	char s[240];
 	if (have < need) {
 		/* (the telegraph first: the count it wants, and ours) */
-		snprintf(s, sizeof s, "@M A vault, Lan, with a collector's lock. It opens for a Library of %d chips, and ours holds %d.|"
-			"@M Every chip we hold, in any dive, goes in the Library!", need, have);
+		snprintf(s, sizeof s, "@M A vault,Lan! With a collector's lock.|@M It opens for a Library of %d chips.|@M Ours has %d.|"
+			"@M Every chip we get counts,from any dive!", need, have);
 		return ta_say(t, FACE_MEGAMAN, s);
 	}
-	snprintf(s, sizeof s, "Our Library of %d opens the collector's lock!|Three rare chips inside, Lan. We can take one.", have);
-	return pick_three(t, flag, v, s, "Take", "The vault stands open, Lan. We took our pick.", "We'll leave them for now. The vault keeps.");
+	snprintf(s, sizeof s, "Our Library of %d opens the lock!|Three rare chips inside!|We can take one,Lan.", have);
+	return pick_three(t, flag, v, s, "Take", "The vault's open,Lan.|We took our pick.", "Let's leave them for now.|The vault will keep.");
 }
 
 /* Three chips, one to take (event flag `flag` set as it is, after which
@@ -705,7 +704,7 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 		bool first = false;
 		give_chip(t, v->chip[k], v->code[k], 1);
 		got_chip(t, v->name[k], v->code[k], &first);
-		ta_page(t, FACE_MEGAMAN, "It's in our Pack. Let's put it in our folder, Lan!", false);
+		ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nLet's add it to our\nFolder,Lan!", false);
 		flag_set(t, flag);
 		ta_end(t);
 	}
@@ -737,22 +736,22 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v) {
 	char s[300];
-	snprintf(s, sizeof s, level >= 2 ? "Chaud's full clearance opens it! The official vault, Lan: three Mega chips inside. We can take one."
-		: "Chaud's first clearance opens it! An official Chip Order, Lan: chips we've held before, delivered. We can order one.");
-	int open = pick_three(t, flag, v, s, level >= 2 ? "Take" : "Order", "The official gate stands open, Lan. We took our pick.", "We'll leave them for now. The gate keeps.");
+	snprintf(s, sizeof s, level >= 2 ? "Chaud's full clearance opens it!|The official vault,Lan!|Three Mega chips. We can take one."
+		: "Chaud's first clearance opens it!|An official Chip Order,Lan!|Chips we've held,delivered!|We can order one.");
+	int open = pick_three(t, flag, v, s, level >= 2 ? "Take" : "Order", "The gate's open,Lan.|We took our pick.", "Let's leave them for now.|The gate will keep.");
 	/* sealed until `open_flag`, which the director sets where Chaud's
 	 * clearance reaches the gate's level, as the layer begins or as a duel
 	 * on it is won (a gate beside the duel opens at once): the telegraph
 	 * first, whose clearance, and how far we are */
 	if (duel_prize)
-		snprintf(s, sizeof s, "@M ProtoMan's official gate, Lan. %s|@M It opens for the Netbattler who beats him here.",
-			level >= 2 ? "The official vault's behind it: three Mega chips." : "An official Chip Order's behind it: three chips we've held, one to order.");
+		snprintf(s, sizeof s, "@M ProtoMan's official gate,Lan.|@M %s|@M It opens if we beat him here!",
+			level >= 2 ? "The official vault's behind it.|@M Three Mega chips!" : "An official Chip Order's behind it!|@M Three chips we've held. We order one.");
 	else if (level >= 2)
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's full clearance. The official vault's behind it: three Mega chips.|"
-			"@M It takes three duel wins against ProtoMan, the last in a netbattle with him. We have %d.", won);
+		snprintf(s, sizeof s, "@M An official gate,Lan!|@M It needs Chaud's full clearance.|@M The official vault's behind it. Three Mega chips!|"
+			"@M That takes three duel wins against ProtoMan.|@M The last is a NetBattle with him. We have %d.", won);
 	else
-		snprintf(s, sizeof s, "@M An official gate, Lan, sealed for a Netbattler without Chaud's first clearance. An official Chip Order's behind it: three chips we've held, one to order.|"
-			"@M It opens once we've won a duel against ProtoMan. Not yet!");
+		snprintf(s, sizeof s, "@M An official gate,Lan!|@M It needs Chaud's first clearance.|@M A Chip Order's behind it. Three chips we've held!|"
+			"@M We get to order one.|@M One duel win against ProtoMan opens it.|@M Not yet,though!");
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)open_flag, (uint8_t)(open_flag >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, check, sizeof check);
@@ -765,11 +764,11 @@ int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, boo
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;
-	ta_page(t, FACE_MEGAMAN, "The virus signal left a chip behind, Lan!", true);
+	ta_page(t, FACE_MEGAMAN, "Look,Lan! The signal left a chip!", true);
 	first = false;
 	give_chip(t, chip, code, 1);
 	got_chip(t, chip_name, code, &first);
-	ta_page(t, FACE_MEGAMAN, "It's in our Pack. Let's put it in our folder, Lan!", false);
+	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nLet's add it to our\nFolder,Lan!", false);
 	ta_end(t);
 	return i;
 }
@@ -789,7 +788,7 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start,
             const char *about) {
 	/* what each choice gives, then the flag that it was chosen */
 	char line[64];
-	int thanks = ta_say(t, FACE_PROG, "GOOD LUCK DOWN THERE, MEGAMAN! DIVE AS DEEP AS YOU CAN!");
+	int thanks = ta_say(t, FACE_PROG, "GOOD LUCK,MEGAMAN!|DIVE AS DEEP AS YOU CAN!");
 	int hp = ta_script(t);
 	bool first = true;
 	give_hp_memory(t, 2);
@@ -801,7 +800,7 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start,
 	give_chip(t, chip, code, 1);
 	got_chip(t, chip_name, code, &first);
 	/* (a new chip goes to the pack, as in BN6: the folder is the player's) */
-	ta_page(t, FACE_PROG, "IT'S IN YOUR PACK! PUT IT IN YOUR FOLDER FROM THE PET'S CHIPFOLDER!", false);
+	ta_page(t, FACE_PROG, "IT'S IN YOUR PACK!\nADD IT TO YOUR\nFOLDER IN THE PET!", false);
 	flag_set(t, flag);
 	ta_end(t);
 	int programmed = ta_script(t);
@@ -814,7 +813,7 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start,
 	program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
-	ta_page(t, FACE_PROG, "INSTALL IT IN YOUR PET: MEGAMAN, THEN NAVICUST!", false);
+	ta_page(t, FACE_PROG, "TO INSTALL IT,OPEN\nMEGAMAN IN THE PET,\nTHEN NAVICUST!", false);
 	flag_set(t, flag);
 	ta_end(t);
 
@@ -827,30 +826,30 @@ int ta_gift(TextArchive *t, int flag, bool comfort, bool brief, bool head_start,
 	/* (the extras first, then the pick: given just before the options,
 	 * a head start's two HPMemory read as the first option given twice) */
 	bool extras = head_start || comfort;
-	if (brief) ta_pages(t, extras ? "WELCOME BACK, MEGAMAN!" : "WELCOME BACK, MEGAMAN! PICK YOUR GIFT: HPMEMORY X2, A CHIP OR A PROGRAM!",
+	if (brief) ta_pages(t, extras ? "YOU'RE BACK,MEGAMAN!" : "YOU'RE BACK,MEGAMAN!|PICK YOUR GIFT!",
 		FACE_PROG, &first);
-	else ta_pages(t, "HELLO, MEGAMAN! I'M DR. HIKARI'S DIVE SUPPORT PROGRAM!|"
-		"EVERY DIVE STARTS FROM SCRATCH, SO HERE'S A GIFT!", FACE_PROG, &first);
+	else ta_pages(t, "HELLO,MEGAMAN!|I'M DR.HIKARI'S DIVE SUPPORT PROGRAM!|"
+		"EVERY DIVE STARTS FROM SCRATCH...|SO HERE'S A GIFT!", FACE_PROG, &first);
 	if (head_start) {
 		/* the head-start helper (docs/META.md) */
-		ta_page(t, FACE_PROG, "YOU ASKED FOR A HEAD START, SO TAKE THESE FIRST!", false);
+		ta_page(t, FACE_PROG, "A HEAD START? SURE!\nTAKE THESE FIRST!", false);
 		give_hp_memory(t, 2);
 		got_hp(t, 2, &first);
 	}
 	if (comfort) {
 		/* the last dive ended early: a little more help */
-		ta_page(t, FACE_PROG, "YOUR LAST DIVE ENDED EARLY, SO TAKE THIS TOO!", false);
+		ta_page(t, FACE_PROG, "LAST DIVE ENDED\nEARLY,HUH? HERE,\nTAKE THIS,TOO!", false);
 		give_hp_memory(t, 1);
 		got_hp(t, 1, &first);
 	}
-	if (!brief) ta_page(t, FACE_PROG, "NOW PICK ONE: HPMEMORY X2, A CHIP OR A NAVICUST PROGRAM!", false);
-	else if (extras) ta_page(t, FACE_PROG, "NOW PICK YOUR GIFT: HPMEMORY X2, A CHIP OR A PROGRAM!", false);
+	if (!brief) ta_page(t, FACE_PROG, "NOW PICK ONE!\nHPMEMORY,A CHIP,OR\nA NAVICUST PROGRAM!", false);
+	else if (extras) ta_page(t, FACE_PROG, "NOW,PICK YOUR GIFT!", false);
 	/* what the chip and the program do, before the choice */
 	{
 		char said[160];
-		if (power > 0 && chip_def(chip)->kind == CK_RECOVER) snprintf(said, sizeof said, "THE CHIP IS %s: IT RESTORES %d HP!", chip_name, power);
-		else if (power > 0) snprintf(said, sizeof said, "THE CHIP IS %s: IT HITS FOR %d!", chip_name, power);
-		else snprintf(said, sizeof said, "THE CHIP IS %s!", chip_name);
+		if (power > 0 && chip_def(chip)->kind == CK_RECOVER) snprintf(said, sizeof said, "THE CHIP'S %s! IT HEALS %d HP!", chip_name, power);
+		else if (power > 0) snprintf(said, sizeof said, "THE CHIP'S %s! IT HITS FOR %d!", chip_name, power);
+		else snprintf(said, sizeof said, "THE CHIP'S %s!", chip_name);
 		for (char *c = said; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 		ta_page(t, FACE_PROG, said, false);
 		if (about) ta_page(t, FACE_PROG, about, false);
@@ -909,7 +908,7 @@ int ta_cube_pcode(TextArchive *t, int present, int told, const char *code) {
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told, (uint8_t)(told >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, check, sizeof check);
 	first = true;
-	ta_pages(t, "A security cube, Lan. It wants a P-Code...|Somebody on this layer must know it. Let's ask around!", FACE_MEGAMAN, &first);
+	ta_pages(t, "A security cube,Lan.|It wants a P-Code...|Someone here must know it.|Let's ask around!", FACE_MEGAMAN, &first);
 	ta_end(t);
 	return i;
 }
@@ -921,14 +920,14 @@ int ta_cube_toll(TextArchive *t, int present, int price) {
 	ta_end(t);
 	bool first = true;
 	int broke = ta_script(t);
-	ta_pages(t, "We don't have that much zenny, Lan.", FACE_MEGAMAN, &first);
+	ta_pages(t, "We don't have enough Zenny,Lan...", FACE_MEGAMAN, &first);
 	ta_end(t);
 	int no = closing(t);
 	int i = ta_script(t);
 	char q[64];
 	/* (a line at most 22 characters: TOLL: 200 ZENNY TO PASS. overran the
 	 * box, its first letters drawn over) */
-	snprintf(q, sizeof q, "Toll: %d zenny.\nPay to pass?\n", price);
+	snprintf(q, sizeof q, "Toll: %d Zenny.\nPay to pass?\n", price);
 	ask(t, FACE_NONE, q, no);
 	uint8_t take[] = { 0xEF, 0x0F, (uint8_t)price, (uint8_t)(price >> 8), (uint8_t)(price >> 16), (uint8_t)(price >> 24),
 		(uint8_t)paid, (uint8_t)broke, (uint8_t)broke };   /* ts_check_take_zenny */
@@ -945,7 +944,7 @@ int ta_cube_skull(TextArchive *t, int present, int id) {
 	ta_end(t);
 	bool first = true;
 	int shut = ta_script(t);
-	ta_pages(t, "A skull door, Lan. It only lets WWW members through...|Without a WWW-ID, we don't get past it.", FACE_MEGAMAN, &first);
+	ta_pages(t, "A skull door,Lan...|Only WWW members get through.|Without a WWW-ID,we're stuck!", FACE_MEGAMAN, &first);
 	ta_end(t);
 	int i = ta_script(t);
 	uint8_t has[] = { 0xEF, 0x07, (uint8_t)id, 1, (uint8_t)open, (uint8_t)open, (uint8_t)shut };   /* ts_check_item07 */
@@ -986,7 +985,7 @@ int ta_cube_number(TextArchive *t, int present, int sealed, int answer, unsigned
 	ta_end(t);
 	first = true;
 	int closed = ta_script(t);
-	ta_pages(t, "The door has sealed itself, Lan. We got its number wrong...", FACE_MEGAMAN, &first);
+	ta_pages(t, "The door sealed itself,Lan...|We got the number wrong.", FACE_MEGAMAN, &first);
 	ta_end(t);
 	int no = closing(t);
 	int i = ta_script(t);
@@ -994,7 +993,7 @@ int ta_cube_number(TextArchive *t, int present, int sealed, int answer, unsigned
 	ta_bytes(t, check, sizeof check);
 	first = true;
 	ta_pages(t, "NUMBER DOOR.|How many flames of hatred burn on this layer?|"
-		"@M The braziers' flames, Lan! Let's be sure of the count: a wrong number seals it.", FACE_NONE, &first);
+		"@M The braziers' flames,Lan!|@M Let's count carefully. A wrong number seals it!", FACE_NONE, &first);
 	static const uint8_t hide[] = { 0xF5, 0x01 };   /* (no face over the answers) */
 	ta_bytes(t, hide, sizeof hide);
 	ta_clear(t);
@@ -1007,7 +1006,7 @@ int ta_pcode_teller(TextArchive *t, int face, const char *code, int told) {
 	char s[160];
 	bool first = true;
 	int i = ta_script(t);
-	snprintf(s, sizeof s, "Psst, MegaMan. The security cube on this layer?|Its P-Code is %s. Don't tell anyone I told you!", code);
+	snprintf(s, sizeof s, "Psst! MegaMan!|That security cube here?|Its P-Code is %s.|Don't tell anyone I told you!", code);
 	ta_pages(t, s, face, &first);
 	flag_set(t, told);
 	ta_end(t);

@@ -133,12 +133,12 @@ static int codes_known(char *text, int size) {
 		++n;
 	}
 	if (!text) return n;
-	if (!n) snprintf(text, (size_t)size, "No guardian's code yet: delete one twice for his.");
+	if (!n) snprintf(text, (size_t)size, "No codes yet. Delete a guardian twice for his.");
 	else if (n == 1) snprintf(text, (size_t)size, "%s's code. It opens the gate sealed with it.", guardian(first)->name);
-	else if (n == 2) snprintf(text, (size_t)size, "%s's and %s's codes: each opens its gate.", guardian(first)->name, guardian(second)->name);
+	else if (n == 2) snprintf(text, (size_t)size, "%s's and %s's codes. Each opens its gate.", guardian(first)->name, guardian(second)->name);
 	/* (all of them in Dad's Records mail: a playtester asked whose the
 	 * other two of four were) */
-	else snprintf(text, (size_t)size, "%d codes, listed in Dad's Records mail.", n);
+	else snprintf(text, (size_t)size, "%d codes. Dad's Records mail lists them.", n);
 	return n;
 }
 
@@ -160,7 +160,7 @@ static void install_descriptions(void) {
 	 * place) */
 	/* (what a vault holds: a playtester saw its count move and knew
 	 * nothing else of it) */
-	snprintf(text, sizeof text, "Library: %d chips. Vaults open at %d, rare chips inside.", meta_library_count(-1), meta_vault_need(run.depth));
+	snprintf(text, sizeof text, "Library: %d chips. Vaults open at %d. Rare chips inside!", meta_library_count(-1), meta_vault_need(run.depth));
 	rep[ITEM_LIBRARY] = (Script){ library, description(v31, text, library, sizeof library) };
 	int size = rebuild(src, len, n, rep, out, sizeof out);
 	free(src);
@@ -260,9 +260,9 @@ static const char *cross_words(void) {
 	const char *navis = run.cross ? powers_cross_on_navis(run.cross) : NULL;
 	if (!run.cross) return ".";
 	if (weak && strong)
-		snprintf(buf, sizeof buf, " and %s (%c%s; %s%s%s attacks do 2x to it and break it).", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1,
-			navis ? navis : "", navis ? "; " : "", weak);
-	else if (weak) snprintf(buf, sizeof buf, " and %s: %s attacks do 2x to it and break it.", powers_cross_name(run.cross), weak);
+		snprintf(buf, sizeof buf, " and %s.\fIn it,%c%s.\f%s%s%s attacks do double to it,and break it.", powers_cross_name(run.cross), strong[0] - 'A' + 'a', strong + 1,
+			navis ? navis : "", navis ? ".\f" : "", weak);
+	else if (weak) snprintf(buf, sizeof buf, " and %s.\f%s attacks do double to it,and break it.", powers_cross_name(run.cross), weak);
 	else snprintf(buf, sizeof buf, " and %s.", powers_cross_name(run.cross));
 	return buf;
 }
@@ -273,27 +273,27 @@ static const char *cross_words(void) {
 static void report_text(char *s, int size) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	ADD("Lan, here's the dive as the lab sees it.\n");
+	ADD("Lan,here's your dive as the lab sees it.\f");
 	const char *area = guardian_area_name(run.side_kind == LAYER_UNDERNET ? BIOME_UNDERNET : run.side_kind == LAYER_SECRET ? BIOME_SECRET : run.biome);
-	if (run.mode == RUN_SHORT) ADD("Layer %d of %d, ", run.depth, SHORT_LAYERS + (run.threat >= 10));
-	else ADD("Layer %d, ", run.depth);
-	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD("act %d: %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
-	else ADD("%s.", area);
+	if (run.mode == RUN_SHORT) ADD("You're on layer %d of %d.", run.depth, SHORT_LAYERS + (run.threat >= 10));
+	else ADD("You're on layer %d.", run.depth);
+	if (run.side_kind == LAYER_NORMAL && run.biome != BIOME_NEST) ADD(" Act %d is %s.", ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1, area);
+	else ADD(" You're in %s.", area);
 	int navi = run.side_kind == LAYER_NORMAL ? run_guardian(run.biome) : 0;
 	/* (made again as his battle ends: a playtester read "guards this
 	 * act's end" after deleting the Nest's last guardian) */
 	bool down = navi && is_boss_depth(run.depth) && boss_done();
 	if (down && run.mode == RUN_SHORT && run_short_last(run.depth))
-		ADD(" %s is deleted, and the whole net has gone quiet. Jack out and come home, Lan!", guardian(navi)->name);
-	else if (down) ADD(" %s is deleted: the way on is open.", guardian(navi)->name);
-	else if (navi && guardian_known(navi)) ADD(" %s guards this act's end: MegaMan has battle data on him.", guardian(navi)->name);
-	else if (navi && director_guardian_heard()) ADD(" Word on the net: %s guards this act's end.", guardian(navi)->name);
-	else if (navi) ADD(" A strong Navi guards this act's end. We don't know who yet.");
-	ADD(" ScrtData: %d of 3%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ", the gate open" : "");
-	ADD(" You brought the %s folder%s", meta_folder(run.folder)->name, cross_words());
-	ADD(" Threat %d.", run.threat);
+		ADD("\f%s is deleted! The whole net has gone quiet.\fJack out and come home,Lan!", guardian(navi)->name);
+	else if (down) ADD("\f%s is deleted. The way on is open!", guardian(navi)->name);
+	else if (navi && guardian_known(navi)) ADD("\f%s guards this act's end. MegaMan knows him.", guardian(navi)->name);
+	else if (navi && director_guardian_heard()) ADD("\fThe net says %s guards this act.", guardian(navi)->name);
+	else if (navi) ADD("\fA strong Navi guards this act's end. We don't know who yet.");
+	ADD("\fYou've found %d of 3 ScrtData%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ",and the gate's open" : "");
+	ADD("\fYou brought the %s folder%s", meta_folder(run.folder)->name, cross_words());
+	ADD("\fThe threat is %d.", run.threat);
 	if (run.helpers & ((1 << HELPERS) - 1)) {
-		ADD(" Help:");
+		ADD(" Your helpers are");
 		for (int h = 0; h < HELPERS; ++h) if (run.helpers >> h & 1) ADD(" %s", meta_helper(h)->name);
 		ADD(".");
 	}
@@ -306,21 +306,21 @@ static void records_text(char *s, int size) {
 	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 	int k = 0, met = 0;
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	ADD("Lan, MegaMan's battle records, won and lost:\n");
+	ADD("Lan,MegaMan's battle records! Wins,then losses.\f");
 	for (unsigned i = 0; i < sizeof navis; ++i) {
 		const Rival *r = rival(navis[i]);
 		if (!r->met && !r->megaman_won && !r->navi_won) continue;
 		++met;
-		ADD("%s %d-%d%s\n", guardian(navis[i])->name, r->megaman_won, r->navi_won, r->megaman_won >= GATE_CODE ? ", code" : "");
+		ADD("%s %d-%d%s\n", guardian(navis[i])->name, r->megaman_won, r->navi_won, r->megaman_won >= GATE_CODE ? ",code" : "");
 	}
-	if (!met) ADD("No guardian met yet.\n");
+	if (!met) ADD("No guardians met yet.\n");
 	/* (what ", code" means, once one is held) */
 	for (unsigned i = 0; i < sizeof navis; ++i)
-		if (rival(navis[i])->megaman_won >= GATE_CODE) { ADD("\"code\": we hold his NaviCode.\n"); break; }
+		if (rival(navis[i])->megaman_won >= GATE_CODE) { ADD("\"code\" means we hold his NaviCode.\n"); break; }
 	/* (the rival's duels: docs/RIVAL.md) */
-	if (profile.duel_won + profile.duel_lost) ADD("Chaud and ProtoMan %d-%d\n", profile.duel_won, profile.duel_lost);
-	ADD("%d of %d guardians met. Best dive: layer %d", met, (int)sizeof navis, profile.best_depth);
-	if (profile.nest_clears) ADD(", the Nest won %d time%s", profile.nest_clears, profile.nest_clears == 1 ? "" : "s");
+	if (profile.duel_won + profile.duel_lost) ADD("ProtoMan duels %d-%d\n", profile.duel_won, profile.duel_lost);
+	ADD("\f%d of %d guardians met. Your best dive reached layer %d", met, (int)sizeof navis, profile.best_depth);
+	if (profile.nest_clears) ADD(",and you beat the Nest %d time%s", profile.nest_clears, profile.nest_clears == 1 ? "" : "s");
 	ADD(".");
 	#undef ADD
 }
@@ -331,8 +331,8 @@ static void records_text(char *s, int size) {
 static void codes_text(char *s, int size) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	ADD("Lan, here are the compression codes you've entered, kept for every dive. In the NaviCust, hold RIGHT on a program, "
-		"then press its code.\f");
+	ADD("Lan,your compression codes,kept for every dive.\f"
+		"In the NaviCust,hold RIGHT on a program. Then press its code.\f");
 	for (int p = 1; p < NAVICUST_PROGRAMS; ++p) {
 		const char *about = navicust_about(p);
 		char code[12];
@@ -354,13 +354,13 @@ static int bbs_posts(Post *out) {
 	int n = 0;
 	#define POST(f, w, t) (out[n++] = (Post){ (f), (w), (t) })
 	POST(0x14, "DiveKid", "Jacked in at the statue again. The paths were all different. AGAIN!");
-	POST(FACE_NAVI, "NetSurfer", "Every dive, kid. And it only goes down.");
+	POST(FACE_NAVI, "NetSurfer", "Every dive,kid. And it only goes down.");
 	POST(0x0F, "GigaHunter", "The kids say there's a Giga chip under the bus in Central Town!");
 	POST(FACE_HEEL, "BusStopper", "I checked. Gum wrapper.");
-	POST(0x0F, "GigaHunter", "...They said it only shows up at midnight.");
-	POST(FACE_TECH, "PAfan", "Sword, WideSwrd, LongSwrd. One code, that order. Trust me.");
+	POST(0x0F, "GigaHunter", "...They said it only shows at midnight.");
+	POST(FACE_TECH, "PAfan", "Sword,WideSwrd,then LongSwrd. One code,in that order. Trust me!");
 	POST(FACE_PROG, "Skeptic", "No way... LifeSrd! It's real!");
-	POST(0x0B, "FamousFan", "Mr. Famous says he finished the Endless Net blindfolded!");
+	POST(0x0B, "FamousFan", "Mr.Famous says he finished the Endless Net blindfolded! Wow!");
 	POST(FACE_NAVI, "Realist", "It's endless. Nobody finishes it.");
 	if (profile.best_depth >= 3) POST(FACE_HEEL, "GuardianWatch", "The guardians down there fight like the real ones. Learn their moves!");
 	if (profile.best_depth >= 5) {
@@ -368,8 +368,8 @@ static int bbs_posts(Post *out) {
 		POST(0x16, "SeasideKid", "Look for a lonely pad out in the void.");
 	}
 	if (profile.spins) POST(FACE_TECH, "SpinCollector", "Found a Spin in a blue Mystery Data. Now my programs turn!");
-	if (profile.duel_won) POST(0x19, "ChaudFan", "Beat ProtoMan's time, and Chaud shows you TagChips. Worth it!");
-	if (profile.best_depth >= 10 || profile.nest_clears) POST(FACE_NAVI, "DeepDiver", "I reached the Nest. Something down there copies everything.");
+	if (profile.duel_won) POST(0x19, "ChaudFan", "Beat ProtoMan's time,and Chaud shows you TagChips. Worth it!");
+	if (profile.best_depth >= 10 || profile.nest_clears) POST(FACE_NAVI, "DeepDiver", "I reached the Nest. Something down there copies everything... Spooky.");
 	#undef POST
 	return n;
 }
@@ -411,7 +411,7 @@ static int mail_body(int navi, uint8_t *out, int max) {
 	int k = 0, n;
 	#define PUT(b) do { if (k + (int)sizeof b > max) return 0; memcpy(out + k, b, sizeof b); k += (int)sizeof b; } while (0)
 	PUT(dad);
-	snprintf(s, sizeof s, "Lan, I sorted out MegaMan's battle data on %s's copy. Here it is, as he logged it.", guardian(navi)->name);
+	snprintf(s, sizeof s, "Lan,I sorted out MegaMan's data on %s's copy.\fHere it is,just as he logged it.", guardian(navi)->name);
 	if ((n = mail_pages(s, out + k, max - k)) < 0) return 0;
 	k += n;
 	PUT(turn);

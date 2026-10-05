@@ -300,8 +300,8 @@ static bool layer_has(int type) {
  * the net goes ("the third act" was the game's word, not his). */
 static const char *netbattle_later_words(void) {
 	return pacing_act(run.depth) == 0
-		? "Enough racing, MegaMan. Our next duel is a netbattle: you against me.|Not here. I'll be waiting past the next two guardians."
-		: "Enough racing, MegaMan. Our next duel is a netbattle: you against me.|Not here. I'll be waiting past the next guardian.";
+		? "Enough racing.|Our next duel is a NetBattle. You and me.|Not here. I'll wait past the next two guardians."
+		: "Enough racing.|Our next duel is a NetBattle. You and me.|Not here. I'll wait past the next guardian.";
 }
 
 /* Whether the official gate is the prize of ProtoMan's duel beside it (it
@@ -452,26 +452,26 @@ static void dealer_word(char *word, size_t n, int navi, int counter, const ShopI
 	for (int i = 0; i < nstock; ++i)
 		if (stock[i].kind == 2 && counter > 0 && chip_hits_with(stock[i].id) == counter && (i == 0 || !weak)) listed = true;
 	if (weak && listed) {
-		snprintf(word, n, "|Word is, %s can't stand %s chips.|My pick for the job's first on the list. %s%s", guardian(navi)->name,
+		snprintf(word, n, "|Word is,%s can't stand %s chips!|My pick's first on the list.|%s%s", guardian(navi)->name,
 			elem_name(counter), brought, lands);
 		return;
 	}
 	/* (a weakness he found no chip of, as a few layers' rolls of Cursor
 	 * chips came to: the hardest hit, shop_dealer_stock) */
 	if (weak) {
-		snprintf(word, n, "|Word is, %s can't stand %s chips, but I couldn't get my hands on any. Hit hard: my pick for the job's "
-			"first on the list. %s", guardian(navi)->name, elem_name(counter), brought);
+		snprintf(word, n, "|Word is,%s can't stand %s chips!|But I couldn't find any. Sorry!|Hit hard,then! My pick's "
+			"first on the list.|%s", guardian(navi)->name, elem_name(counter), brought);
 		return;
 	}
 	/* (KnightMan's armor turns every blow but while he swings or leaps: a
 	 * playtester learned it over three Custom screens, session 68) */
 	bool knight = guardian_older(navi) && guardian_older_ai(navi) == BN5_NAVI_KNIGHTMAN;
-	int k = snprintf(word, n, "|Word is, %s %s. Hit hard%s: my pick for the job's first on the list. %s", guardian(navi)->name,
+	int k = snprintf(word, n, "|Word is,%s %s.|Hit hard%s! My pick's first on the list.|%s", guardian(navi)->name,
 		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" :
-		knight ? "has no weak element, and his armor turns every blow but while he swings or leaps" : "has no weak element",
-		knight ? " then" : "", brought);
+		knight ? "has no weak element.|His armor blocks all,but not when he swings or leaps" : "has no weak element",
+		knight ? ",then" : "", brought);
 	if (listed && k > 0 && (size_t)k < n)
-		snprintf(word + k, n - (size_t)k, "|The viruses around here can't stand %s chips, though. I've got one of those too!",
+		snprintf(word + k, n - (size_t)k, "|The viruses here hate %s chips,though!|I've got one of those,too!",
 			elem_name(counter));
 }
 
@@ -520,11 +520,11 @@ static bool skull_here(void) {
  * playtester would have bought one of three, session 64) */
 static void dealer_rush(char *s, size_t n) {
 	int hold = layer.ngaps ? layer.gap[0].len : shop_rush_need(run.depth);
-	const char *where = layer.ngaps ? "on this layer" : "deeper in this act";
+	const char *where = layer.ngaps ? "on this layer" : "deeper in";
 	if (hold > 1)
-		snprintf(s, n, "|And there's a gap %s that Rush can bridge. He only comes when you hold %d RushFood, and he eats one. It's on my "
-			"list too!", where, hold);
-	else snprintf(s, n, "|And there's a gap %s that Rush can bridge for one RushFood. It's on my list too!", where);
+		snprintf(s, n, "|And there's a gap %s!|Rush can bridge it.|He comes when you hold %d RushFood.|He eats one. It's on my "
+			"list,too!", where, hold);
+	else snprintf(s, n, "|And there's a gap %s!|Rush bridges it for one RushFood.|It's on my list,too!", where);
 }
 
 /* (the keys he stocks, said: what each opens and where, issues #41, #14, #47) */
@@ -533,12 +533,12 @@ static void dealer_keys(char *hello, size_t n, const ShopItem *stock, int nstock
 		size_t k = strlen(hello);
 		if (stock[i].kind != 1 || k >= n) continue;
 		if (stock[i].id == SUB_UNLOCKER)
-			snprintf(hello + k, n - k, "|Word is, there's purple data locked %s. An Unlocker opens it, and it's on my list!",
-				purple_here() ? "on this layer" : "deeper in this act");
+			snprintf(hello + k, n - k, "|Word is,there's purple data locked %s!|An Unlocker opens it. It's on my list!",
+				purple_here() ? "on this layer" : "deeper in");
 		else if (stock[i].id == ITEM_RUSH_FOOD)
 			dealer_rush(hello + k, n - k);
 		else if (stock[i].id == ITEM_WWW_ID)
-			snprintf(hello + k, n - k, "|The skull doors %s only open for WWW members. A WWW-ID gets you through every one!",
+			snprintf(hello + k, n - k, "|Skull doors %s only let WWW members by.|A WWW-ID opens every one!",
 				skull_here() ? "on this layer" : "deeper in the Undernet");
 	}
 }
@@ -554,7 +554,7 @@ static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || !guardian_rumor(navi) ||
 		out->nchoices >= LAYER_MAX_CHOICES)
 		return -1;
-	snprintf(rumor, sizeof rumor, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
+	snprintf(rumor, sizeof rumor, "Did you hear?|A copy of %s guards the end of %s!|Word is,%s", guardian(navi)->name,
 		guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
 	/* (heard, MegaMan names him for the rest of the act: the director
 	 * watches the flag as a choice) */
@@ -632,7 +632,7 @@ static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, i
 	if (rumor >= 0) return rumor;
 	if (i == layer.teller - 1) return ta_pcode_teller(text, who, blockers_pcode(), LAYER_PCODE_FLAG);
 	if (i == layer.hinter - 1)
-		return ta_say(text, who, "See that little pad out in the void, all by itself?|I saw a Navi walk out to it. Right over nothing!");
+		return ta_say(text, who, "See that lonely pad out in the void?|I saw a Navi walk right out to it!|Over nothing at all!");
 	int dark = dark_rumor_due ? ta_dark_rumor(text, who) : -1;
 	dark_rumor_due = false;
 	if (dark >= 0 && emu_debug_on()) fprintf(stderr, "rumor: BN6's own words on DarkChips, bystander %d\n", said);
@@ -650,15 +650,15 @@ static int spin_words(TextArchive *text, int colour, bool first) {
 	int held = 0;
 	for (int k = 0; k < 6; ++k) held += meta_spins() >> k & 1;
 	if (first)
-		snprintf(words, sizeof words, "A Spin for %s programs, Lan! Now we can turn %s programs on the NaviCust's board: "
-			"hold one and press L or R.|And it stays with us, in every dive from now on. Every dive hides one more deeper in, "
-			"a color we don't have yet!", c, c);
+		snprintf(words, sizeof words, "Lan,look! A Spin for %s programs!|Now we can turn %s programs on the NaviCust!|"
+			"Hold one,then press L or R.|And it stays with us,in every dive!|Each dive hides one more,deeper in.|"
+			"A color we don't have yet!", c, c);
 	else if (held >= 5)
-		snprintf(words, sizeof words, "A Spin for %s programs, Lan! That's all six: every program on our board turns now, "
-			"in every dive!", c);
+		snprintf(words, sizeof words, "A Spin for %s programs,Lan!|That's all six! Every program turns now!|"
+			"In every dive!", c);
 	else
-		snprintf(words, sizeof words, "A Spin for %s programs, Lan! %c%s programs turn with L and R on the NaviCust's board now, "
-			"in every dive from here on.", c, c[0] - 'a' + 'A', c + 1);
+		snprintf(words, sizeof words, "A Spin for %s programs,Lan!|%c%s programs turn with L and R now!|"
+			"In every dive from here on!", c, c[0] - 'a' + 'A', c + 1);
 	return ta_say(text, FACE_MEGAMAN, words);
 }
 
@@ -737,11 +737,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	 * MegaMan has had in earlier runs, which lead his list) */
 	rolls_of(0x103);
 	out->nprograms = shop_program_stock(run.depth, out->programs);
-	const char *brought = nstock && stock[0].stock == 1 ? "It's the only one I've got, so make it count!" : "I brought two, and they go fast!";
+	const char *brought = nstock && stock[0].stock == 1 ? "It's my only one. Make it count!" : "I brought two. They go fast!";
 	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
 	 * a hopping BlastMan two times in three) */
 	const char *lands = nstock && stock[0].kind == 2 && chip_family(stock[0].id) == 50
-		? "|Its needles drop where he's standing a moment later, so fire when he stops!" : "";
+		? "|Its needles drop a moment late.|So fire when he stops!" : "";
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		rolls_of((uint32_t)i);
@@ -805,25 +805,25 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 			/* (nor does he deny the bystanders' rumor: a playtester heard it
 			 * two platforms before his "No word yet") */
 			if (navi > 0 && !tells)
-				snprintf(word, sizeof word, "|Nobody's come back from the end of %s to tell what guards it. There's talk on the net, "
-					"but I don't sell on talk. Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
+				snprintf(word, sizeof word, "|Nobody's come back from the end of %s!|There's talk on the net... "
+					"But I don't sell talk!|Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
 			else if (navi > 0)
 				dealer_word(word, sizeof word, navi, counter, stock, nstock, brought, lands);
 			/* (and that his chips come in the folder's codes, loot_fit_code) */
 			snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
-				? run.codes[0] ? "Welcome to the Net Dealer! Divers need chips, and I've got 'em, in your folder's codes when I can!"
-					: "Welcome to the Net Dealer! Divers need chips, and I've got 'em!"
+				? run.codes[0] ? "Welcome! Chips for sale!|In your Folder's codes,when I can!"
+					: "Welcome! Chips for sale!"
 				: run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth)
 					/* (the run's last layer has no "from here": a playtester heard it there) */
-					? "The bottom of the net, MegaMan! Stock up. This is my last stop, and yours!"
-					: "Still diving, MegaMan? Stock up. It only gets tougher from here!", word);
+					? "The bottom of the net,MegaMan!|Stock up! My last stop,and yours!"
+					: "Still at it,MegaMan?|Stock up! It only gets tougher from here!", word);
 			/* (met in this act already: the pick, in a line) */
 			if (layer_objs_dealer_again && tells)
-				snprintf(hello, sizeof hello, "Back again, MegaMan! My pick for %s is first on the list. %s", guardian(navi)->name, brought);
+				snprintf(hello, sizeof hello, "Back again,MegaMan!|My pick for %s is first on the list!|%s", guardian(navi)->name, brought);
 			dealer_keys(hello, sizeof hello, stock, nstock);
 			tk.sprite = SPR_DEALER;
 			tk.script = ta_shop(&text, SHOP_DEALER, FACE_NAVI, hello, "Back for more? Take a look!",
-				"Sold out, MegaMan! You bought every chip I brought.", LAYER_DEALER_TOLD_FLAG);
+				"Sold out,MegaMan!|You bought every chip I had!", LAYER_DEALER_TOLD_FLAG);
 			break;
 		}
 		case OBJ_PROGRAMS: {
@@ -837,14 +837,14 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 				if (!about || !shop_program_found(out->programs[k].id / 4) || program_had(out->programs[k].id / 4)) continue;
 				snprintf(names[nnames++], sizeof names[0], "%.*s", (int)strcspn(about, ":"), about);
 			}
-			if (nnames == 1) snprintf(again, sizeof again, "|I hear MegaMan's used %s before. I brought it along!", names[0]);
+			if (nnames == 1) snprintf(again, sizeof again, "|I hear you've used %s before!|So I brought it along!", names[0]);
 			else if (nnames == 2)
-				snprintf(again, sizeof again, "|I hear MegaMan's used %s and %s before. I brought them along!", names[0], names[1]);
-			snprintf(hello, sizeof hello, "NaviCust programs, fresh from my workbench!%s|Install them in your PET: MegaMan, then NaviCust.",
+				snprintf(again, sizeof again, "|I hear you've used %s and %s!|So I brought them along!", names[0], names[1]);
+			snprintf(hello, sizeof hello, "NaviCust programs!|Fresh from my workbench!%s|Install them in the PET.|Pick MegaMan,then NaviCust!",
 				again);
 			tk.sprite = SPR_TECH;
 			tk.script = ta_shop(&text, SHOP_PROGRAMS, FACE_TECH, hello, "More programs? Take a look!",
-				"Sold out! Every program I brought is yours now.", LAYER_VENDOR_TOLD_FLAG);
+				"Sold out!|Every program I brought is yours!", LAYER_VENDOR_TOLD_FLAG);
 			break;
 		}
 		case OBJ_CHALLENGE: {
@@ -1012,11 +1012,11 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 					 * rivals, not strangers) */
 					static const char *const count[] = { "", "a lone virus", "a pair of viruses", "three viruses", "four viruses" };
 					int nf = layer_objs_duel_foes >= 1 && layer_objs_duel_foes <= 4 ? layer_objs_duel_foes : 3;
-					snprintf(terms, sizeof terms, "%sI busted %s here in %d:%02d.%02d. Beat that%s, MegaMan.|"
-						"@M Real viruses, Lan. If they delete us, the dive's over, so let's heal up first if we're hurt.",
-						met ? "Back again, MegaMan? Chaud's watching.|" :
-						"MegaMan. So it's you diving the Endless Net. The Nest copies Navis, they say. I'm no copy.|Chaud wants to see what you've got.|",
-						count[nf], sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? ", without taking a hit" : "");
+					snprintf(terms, sizeof terms, "%sI busted %s here in %d:%02d.%02d.|Beat that%s.|"
+						"@M Real viruses,Lan!|@M If they delete us,the dive's over.|@M Let's heal up first if we're hurt.",
+						met ? "Back again,MegaMan? Chaud's watching.|" :
+						"MegaMan... So it's you,diving the Endless Net.|The Nest copies Navis,they say.|I'm no copy.|Chaud wants to see your skill.|",
+						count[nf], sec / 60, sec % 60, cs, layer_objs_duel_rung == 1 ? " without taking a hit" : "");
 				}
 				/* (he logs out as the duel begins: one a layer) */
 				tk.gone_flag = flag;
@@ -1055,9 +1055,9 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	 * stands, which a playtester holding three asked) */
 	if (plan.fragment_placed) {
 		static const char *const found[3] = {
-			"A ScrtData, Lan!|Three of these open the golden gate to the Secret Area, in the Undernet's copy a dark warp leads to. Let's find two more!",
-			"Our second ScrtData!|One more, and the golden gate to the Secret Area opens. It stands in the Undernet's copy!",
-			"That's three ScrtData, Lan!|The golden gate to the Secret Area will open for us now. It stands in the Undernet's copy: the next dark warp leads there!",
+			"Lan,look! A ScrtData!|Three open the golden gate to the Secret Area.|It stands in the Undernet's copy.|A dark warp leads there.|Let's find two more!",
+			"Our second ScrtData!|One more,and the Secret Area's gate opens!|It's in the Undernet's copy!",
+			"That's three ScrtData,Lan!|Now the Secret Area's golden gate opens!|It's in the Undernet's copy.|The next dark warp leads there!",
 		};
 		out->fragment_found = ta_say(&text, FACE_MEGAMAN, found[run.fragments < 3 ? run.fragments : 2]);
 	}

@@ -324,10 +324,10 @@ int shop_dealer_stock(int depth, int counter, int viruses, ShopItem out[SHOP_MAX
  * layer 1, room for a Mega chip beside a starting folder, took it only to
  * see the PET) */
 static const struct { uint8_t program; const char *about; } gifts[] = {
-	{ 1, "SUPERARMOR: NO FLINCHING WHEN YOU'RE HIT!" },
-	{ 2, "CUSTOM1: ONE MORE CHIP IN THE CUSTOM SCREEN!" },
-	{ 35, "ATTACK+1: A STRONGER BUSTER!" },
-	{ 37, "CHARGE+1: A QUICKER CHARGE SHOT!" },
+	{ 1, "THE PROGRAM'S SUPERARMOR! NO FLINCHING WHEN HIT!" },
+	{ 2, "THE PROGRAM'S CUSTOM1! ONE MORE CHIP EACH TURN!" },
+	{ 35, "THE PROGRAM'S ATTACK+1! A STRONGER BUSTER!" },
+	{ 37, "THE PROGRAM'S CHARGE+1! A QUICKER CHARGE SHOT!" },
 };
 
 const char *shop_pick_gift_program(ShopItem *out) {

@@ -26,22 +26,22 @@ static const struct {
 	{ 1, 0, BUILD_GUARD, "SuperArmor: I won't flinch when I'm hit." },
 	{ 2, 0, BUILD_HAND, "Custom1: one more chip each turn." },
 	{ 3, 4, BUILD_HAND, "Custom2: two more chips each turn." },
-	{ 4, 0, BUILD_HAND, "MegFldr1: room for one more Mega chip in the folder." },
-	{ 5, 2, BUILD_HAND, "MegFldr2: room for two more Mega chips in the folder." },
-	{ 6, 4, BUILD_HAND, "GigFldr1: room for a second Giga chip in the folder." },
-	{ 7, 0, BUILD_GUARD, "FstBarr: every battle starts with a Barrier on me." },
+	{ 4, 0, BUILD_HAND, "MegFldr1: one more Mega chip in the Folder." },
+	{ 5, 2, BUILD_HAND, "MegFldr2: two more Mega chips in the Folder." },
+	{ 6, 4, BUILD_HAND, "GigFldr1: a second Giga chip in the Folder." },
+	{ 7, 0, BUILD_GUARD, "FstBarr: I start every battle with a Barrier!" },
 	{ 8, 0, BUILD_GUARD, "Shield: B and Left raises a shield." },
 	{ 9, 2, BUILD_GUARD, "Reflect: B and Left raises a shield that shoots back." },
-	{ 10, 2, BUILD_GUARD, "AntiDmg: B and Left, and a hit becomes my counterattack." },
+	{ 10, 2, BUILD_GUARD, "AntiDmg: B and Left,and a hit turns into my counter!" },
 	{ 11, 2, BUILD_FIELD, "FlotShoe: panels can't hurt me or hold me." },
 	{ 12, 2, BUILD_FIELD, "AirShoes: I can stand over holes." },
-	{ 13, 0, BUILD_GUARD, "UnderSht: a hit that would delete me leaves me 1 HP instead." },
+	{ 13, 0, BUILD_GUARD, "UnderSht: a hit that would delete me leaves me at 1 HP!" },
 	{ 14, 4, BUILD_HAND, "ChpShufl: one reshuffle in the Custom screen." },
 	{ 21, 2, BUILD_FIELD, "Collect: viruses drop their chips more often." },
-	{ 25, 0, BUILD_FIELD, "SlipRunr: with B, I slide instead of running: faster, but I keep going till something stops me." },
+	{ 25, 0, BUILD_FIELD, "SlipRunr: with B,I slide! Faster,but I keep going till something stops me." },
 	{ 26, 2, BUILD_FIELD, "AutoHeal: a little HP back after every battle." },
-	{ 27, 2, BUILD_BUSTER, "BustPack: buster attack, speed and charge up three each." },
-	{ 28, 4, BUILD_GUARD, "BodyPack: SuperArmor, FlotShoe, AirShoes and UnderSht in one." },
+	{ 27, 2, BUILD_BUSTER, "BustPack: buster attack,speed and charge up three each." },
+	{ 28, 4, BUILD_GUARD, "BodyPack: SuperArmor and FlotShoe,AirShoes and UnderSht,all in one!" },
 	{ 29, 2, BUILD_HAND, "FldrPak1: Custom1 and MegFldr1 in one." },
 	{ 30, 4, BUILD_HAND, "FldrPak2: Custom2 and MegFldr2 in one." },
 	{ 31, 4, BUILD_FIELD, "BugStop: no bug can touch our NaviCust." },
@@ -390,8 +390,8 @@ const char *navicust_color_name(int c) { return c >= 1 && c <= 6 ? spin_names[c]
 const char *navicust_color_turns(int c) {
 	static char buf[120];
 	if (c < 1 || c > 6) return "";
-	if (spins >> (c - 1) & 1) snprintf(buf, sizeof buf, "L and R turn it as we place it: we hold the %s Spin.", spin_names[c]);
-	else snprintf(buf, sizeof buf, "L and R won't turn it: that takes the %s Spin, and we don't have it.", spin_names[c]);
+	if (spins >> (c - 1) & 1) snprintf(buf, sizeof buf, "Our %s Spin lets L and R turn it!", spin_names[c]);
+	else snprintf(buf, sizeof buf, "No %s Spin,so L and R won't turn it.", spin_names[c]);
 	return buf;
 }
 
@@ -402,13 +402,13 @@ const char *navicust_turn_words(int variant) {
 		c = R.data[R.layout->navicust_programs + (uint32_t)variant * 16 + 3];
 	if (c >= 1 && c <= 6) return navicust_color_turns(c);
 	for (int k = 1; k <= 6; ++k) held += spins >> (k - 1) & 1;
-	if (!held) return "A program turns with L and R only once we hold a Spin of its color, and we have none yet.";
-	if (held == 6) return "L and R turn a program as we place it from the list.";
-	int k = snprintf(buf, sizeof buf, "L and R turn only "), n = 0;
+	if (!held) return "L and R turn programs whose Spin we hold. None yet!";
+	if (held == 6) return "L and R turn any program as we place it!";
+	int k = snprintf(buf, sizeof buf, "L and R turn "), n = 0;
 	for (int i = 1; i <= 6; ++i)
 		if (spins >> (i - 1) & 1)
 			k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s", n++ == 0 ? "" : n == held ? " and " : ", ", spin_names[i]);
-	snprintf(buf + k, sizeof buf - (size_t)k, " programs as we place them: we hold %s.", held == 1 ? "that Spin" : "those Spins");
+	snprintf(buf + k, sizeof buf - (size_t)k, " programs.\n%s we hold!", held == 1 ? "That's the Spin" : "Those are the Spins");
 	return buf;
 }
 
@@ -447,9 +447,9 @@ static bool same_colors(const uint8_t *grid, const NaviPart *parts, int n, int *
 
 const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, int w, int h) {
 	static const char *const why[3] = {
-		" is a plus part on the command line: plus parts go anywhere else.",
-		" is off the command line: a program needs a block on it.",
-		" goes past the board's edge.",
+		" is a plus part on the command line! Those go anywhere else.",
+		" is off the command line! A program needs a block on it.",
+		" goes past the board's edge!",
 	};
 	static char buf[300];
 	int k = 0, said = 0;
@@ -464,7 +464,7 @@ const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID]
 	}
 	int a, b;
 	if (said < 2 && same_colors(grid, parts, n, &a, &b) && parts[a - 1].name && parts[b - 1].name) {
-		k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s and %s, both %s, touch.", k ? " " : "", parts[a - 1].name, parts[b - 1].name,
+		k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s and %s are both %s,and they touch!", k ? " " : "", parts[a - 1].name, parts[b - 1].name,
 			navicust_color_name(parts[a - 1].color));
 		++said;
 	}
@@ -478,17 +478,19 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 		[1] = "moving", [2] = "emotion", [3] = "panel", [4] = "Custom", [5] = "encounter", [6] = "reward",
 		[7] = "buster", [9] = "HP",
 	};
+	/* (the named ones a box of their own after the bug's name; the colours'
+	 * capitalised as said) */
 	static const char *const effect[NAVICUST_BUGS] = {
-		[1] = "every step slides me as far as I can go",
-		[2] = "my mood will swing in battle",
-		[3] = "panels may crack under me as I move",
-		[4] = "fewer chips each turn as a battle goes on",
-		[5] = "more viruses will find us",
-		[6] = "battles will pay zenny instead of chips",
-		[7] = "my buster may misfire",
-		[9] = "I'll lose HP in battle, faster with every hit",
-		[11] = "five colors: something odd happens at the start of every battle",
-		[12] = "six colors: something odd happens at the start of every battle, for longer",
+		[1] = "Every step slides me as far as I can go",
+		[2] = "My mood will swing in battle",
+		[3] = "Panels may crack under me as I move",
+		[4] = "I'll get fewer chips as a battle goes on",
+		[5] = "More viruses will find us",
+		[6] = "Battles will pay Zenny,not chips",
+		[7] = "My buster may misfire",
+		[9] = "I'll lose HP in battle,faster with every hit",
+		[11] = "five colors! Each battle will start with something odd",
+		[12] = "six colors! Each battle will start with something odd,for longer",
 	};
 	static char buf[800];
 	int k = 0, n = 0;
@@ -496,7 +498,7 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 	if (!n) return "";
 	/* (after the RUN: its "OK! RUN complete!" and "Good job, Lan!" are the
 	 * game's whatever the board, and a playtester read them as clean) */
-	k += snprintf(buf + k, sizeof buf - (size_t)k, "@M Lan, %s has %s!", after_run ? "the RUN says OK, but our NaviCust" : "our NaviCust",
+	k += snprintf(buf + k, sizeof buf - (size_t)k, "@M Lan,%s has %s!", after_run ? "the RUN says OK...|@M But our NaviCust" : "our NaviCust",
 		n == 1 ? "a bug" : "bugs");
 	for (int t = 1; t < NAVICUST_BUGS && k < (int)sizeof buf - 160; ++t) {
 		if (!counts[t] || !effect[t]) continue;
@@ -507,7 +509,7 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 		int level = counts[t] > 3 ? 3 : counts[t];
 		bool vowel = strchr("aeiouAEIOU", name[t][0]) || name[t][0] == 'H';   /* ("an HP bug") */
 		const char *article = level == 1 ? "A light" : level == 3 ? "A bad" : vowel ? "An" : "A";
-		k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s %s bug: %s.", article, name[t], effect[t]);
+		k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s %s bug!|@M %s.", article, name[t], effect[t]);
 	}
 	/* (where to look, from the game's rules: a playtester told only what a
 	 * bug did, of a program he had pushed over the edge, found the board
@@ -519,9 +521,9 @@ const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_r
 	if (placed && cause && k < (int)sizeof buf - 320) k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s", cause);
 	else if (placed && k < (int)sizeof buf - 220)
 		k += snprintf(buf + k, sizeof buf - (size_t)k,
-			"|@M Bugs come from a program over the board's edge or off the command line, a Plus part on it, "
-			"or two of one color side by side.");
+			"|@M Bugs come from going off the board,or off the command line.|"
+			"@M Or a plus part on it,or same colors side by side.");
 	if (k < (int)sizeof buf - 200)
-		snprintf(buf + k, sizeof buf - (size_t)k, "|@M We can rearrange it in the PET, or live with it. %s", navicust_turn_words(0));
+		snprintf(buf + k, sizeof buf - (size_t)k, "|@M We can fix it in the PET,or live with it.|@M %s", navicust_turn_words(0));
 	return buf;
 }

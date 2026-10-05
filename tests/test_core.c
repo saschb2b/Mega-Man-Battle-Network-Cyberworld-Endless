@@ -1201,7 +1201,7 @@ static void test_talk(void) {
 		if (guardian_rumor(navi))
 			for (int biome = 0; biome < BIOME_COUNT; ++biome) {
 				char line[256];
-				snprintf(line, sizeof line, "They say a copy of %s guards the end of %s.|Word is, %s", guardian(navi)->name,
+				snprintf(line, sizeof line, "Did you hear?|A copy of %s guards the end of %s!|Word is,%s", guardian(navi)->name,
 					guardian_area_in_text(biome, LAYER_NORMAL), guardian_rumor(navi));
 				snprintf(what, sizeof what, "guardian_rumor(%d) in area %d", navi, biome);
 				check_talk(what, line);
@@ -1950,19 +1950,19 @@ static void test_navicust(void) {
 	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
 	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
 	/* (the cause where the board shows it, in place of the rules) */
-	w = navicust_bug_words(bugs, false, "HP+100 is a plus part on the command line: plus parts go anywhere else.");
+	w = navicust_bug_words(bugs, false, "HP+100 is a plus part on the command line! Those go anywhere else.");
 	CHECK(strstr(w, "HP+100 is a plus part") && !strstr(w, "Bugs come from"), "a placement bug names its cause: %s", w);
 	memset(bugs, 0, sizeof bugs);
 	bugs[11] = 1;
 	CHECK(!strstr(navicust_bug_words(bugs, false, NULL), "command line"), "a colours' bug alone names itself");
-	CHECK(strstr(navicust_bug_words(bugs, true, NULL), "the RUN says OK, but") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true, NULL));
+	CHECK(strstr(navicust_bug_words(bugs, true, NULL), "the RUN says OK...|@M But our NaviCust") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true, NULL));
 	check_talk("navicust_bug_words", navicust_bug_words(bugs, true, NULL));
 	/* which programs turn: those whose colour's Spin is held */
 	navicust_set_spins(0);
-	CHECK(strstr(navicust_turn_words(0), "none yet") != NULL, "no Spin: %s", navicust_turn_words(0));
+	CHECK(strstr(navicust_turn_words(0), "None yet") != NULL, "no Spin: %s", navicust_turn_words(0));
 	check_talk("navicust_turn_words none", navicust_turn_words(0));
 	navicust_set_spins(1u << 2);
-	CHECK(strstr(navicust_turn_words(0), "only pink programs") && strstr(navicust_turn_words(0), "that Spin"), "the pink Spin: %s", navicust_turn_words(0));
+	CHECK(strstr(navicust_turn_words(0), "turn pink programs") && strstr(navicust_turn_words(0), "That's the Spin"), "the pink Spin: %s", navicust_turn_words(0));
 	navicust_set_spins(0x3F & ~(1u << 5));
 	CHECK(strstr(navicust_turn_words(0), "white, yellow, pink, red and blue programs") != NULL, "five Spins: %s", navicust_turn_words(0));
 	check_talk("navicust_turn_words five", navicust_turn_words(0));
@@ -2298,7 +2298,7 @@ static void test_bug_cause(void) {
 	g[1 * 7 + 1] = 1;
 	g[1 * 7 + 2] = g[2 * 7 + 2] = 2;
 	why = navicust_bug_cause(g, two, 2, 4, 4);
-	CHECK(why && strstr(why, "Attack+1 and HP+100, both pink, touch"), "bug cause: one colour side by side (%s)", why ? why : "none");
+	CHECK(why && strstr(why, "Attack+1 and HP+100 are both pink,and they touch"), "bug cause: one colour side by side (%s)", why ? why : "none");
 	/* (clean: the program part on the line, the plus part off it, apart) */
 	NaviPart clean[2] = { cust, hp };
 	memset(g, 0, sizeof g);

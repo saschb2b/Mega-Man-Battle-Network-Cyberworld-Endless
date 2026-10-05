@@ -41,7 +41,7 @@
 #define SUMMARY_FACE_Y 66
 #define SHOW_FRAMES 600  /* each backdrop's turn */
 #define SWAP_FRAMES 12   /* mosaic out and in between them */
-#define ASK_FIRST "Start a new run? We'd"   /* the question's first line */
+#define ASK_FIRST "Start over? We'd lose"   /* the question's first line */
 
 #define LOGO_UP 8        /* the logo stands higher than in the original picture */
 #define LOGO_BOTTOM 95   /* below: the CYBEAST GREGAR plate */
@@ -630,8 +630,8 @@ static void update(void) {
 			S.confirm = true;
 			S.yes = false;
 			S.asked = S.t;
-			if (S.saved_depth) snprintf(S.ask, sizeof S.ask, "lose our Layer %d run!", S.saved_depth);
-			else snprintf(S.ask, sizeof S.ask, "lose our saved run!");
+			if (S.saved_depth) snprintf(S.ask, sizeof S.ask, "our Layer %d run!", S.saved_depth);
+			else snprintf(S.ask, sizeof S.ask, "our saved run!");
 			audio_sfx(SFX_SELECT);
 			return;
 		}
@@ -806,8 +806,8 @@ static void summary_draw(int x0, int y0) {
 	/* Dad's backup, as his call promised, and Lan's word; a won run
 	 * jacks out */
 	if (title_won) {
-		text_draw(x, y0 + 102 - up, "MegaMan jacked out, victorious!", sky, TEXT_CENTER);
-		text_draw(x, y0 + 114 - 2 * up, "We did it, MegaMan!", WHITE, TEXT_CENTER);
+		text_draw(x, y0 + 102 - up, "MegaMan jacked out,victorious!", sky, TEXT_CENTER);
+		text_draw(x, y0 + 114 - 2 * up, "We did it,MegaMan!!", WHITE, TEXT_CENTER);
 	} else {
 		/* (a line the game's width holds: "brought MegaMan home." ran off
 		 * both sides where the screen shows no more than the game's 240
@@ -819,7 +819,7 @@ static void summary_draw(int x0, int y0) {
 		 * says above; "We've got BlastMan's battle data now!" ran off
 		 * the screen's sides) */
 		const char *said = title_learned[0] ? "We've got his battle data now!"
-			: title_new_best ? "Our deepest dive yet, MegaMan!"
+			: title_new_best ? "Our deepest dive yet,MegaMan!"
 			: run.depth <= 2 ? "That was rough... Let's try again!"
 			: "We'll get further next time!";
 		text_draw(x, y0 + 114 - 2 * up, said, WHITE, TEXT_CENTER);

@@ -58,9 +58,9 @@ static struct {
  * last has been read a while: what happens, that it happens once, and,
  * once the boot is that far, that it is almost done */
 static const char *const words[3][3] = {
-	{ "Hold on, Lan!", "The older net's system", "is still starting up..." },
-	{ "It only has to start up", "this once. After that,", "it'll always be ready!" },
-	{ "Almost there, Lan...", "Just a moment more!", "" },
+	{ "Hold on,Lan!", "The older net's", "still starting up..." },
+	{ "It only starts up", "this once,Lan.", "Then it stays ready!" },
+	{ "Almost there,Lan...", "Just a moment more!", "" },
 };
 #define READ_FRAMES 100   /* a page typed, then read */
 #define LAST_AT 85        /* the boot's percent the last page waits for */

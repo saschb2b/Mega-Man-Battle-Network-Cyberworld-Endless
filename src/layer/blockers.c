@@ -216,7 +216,7 @@ static int talk(TextArchive *t, int k) {
 	for (int h = 0, n = 0; h < 5; ++h) if (can >> helpers[h].navi & 1 && n < 2) who[n++] = helpers[h].name;
 	if (!held) {
 		/* (the hint for the next run's Cross, said as it is) */
-		snprintf(s, sizeof s, "%s blocks the way, Lan.|%s's or %s's Cross data could clear it... but we don't carry either.", block_name(b),
+		snprintf(s, sizeof s, "%s blocks the way,Lan.|%s's or %s's Cross could clear it...|But we don't have either.", block_name(b),
 			who[0], who[1]);
 		ta_pages(t, s, FACE_MEGAMAN, &first);
 		ta_end(t);
@@ -227,7 +227,7 @@ static int talk(TextArchive *t, int k) {
 	/* (HeatMan takes a fire in, where he burns a tree: "burn it" before a
 	 * pillar of flames read as a fire set on fire, session 64) */
 	const char *deed = helpers[h].navi == 1 && b->kind == BLOCK_FLAMES ? "swallow" : helpers[h].deed;
-	snprintf(s, sizeof s, "%s blocks the way, Lan!|We carry %s's Cross data. Let's ask him to %s it!", block_name(b), helpers[h].name, deed);
+	snprintf(s, sizeof s, "%s blocks the way!|We've got %s's Cross data!|Let's ask him to %s it!", block_name(b), helpers[h].name, deed);
 	ta_pages(t, s, FACE_MEGAMAN, &first);
 	ta_page(t, helpers[h].mugshot, "Leave it to me!", false);
 	/* (his sound, a moment, and the present flag cleared: the obstacle
