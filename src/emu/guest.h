@@ -24,9 +24,10 @@ enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
  * the boot is done waits for it (guest_boot_waiting). False where it
  * cannot be. */
 bool guest_start(int xrom);
-/* The title's frames: BN5's boot begun as early as it can be, where BN5's
- * ROM is there (in the browser only where its state is not kept: a layer
- * loads that quickly), so a battle seldom waits for it. */
+/* The frames before a run (the boot screen, the title): BN5's boot begun
+ * as early as it can be, where BN5's ROM is there (in the browser only
+ * where its state is not kept: a layer loads that quickly), so a battle
+ * seldom waits for it. */
 void guest_warm(void);
 /* Each frame, after its drawing: the boot run on for about `ms`
  * milliseconds (the frame's spare time) where it runs a slice a frame, or

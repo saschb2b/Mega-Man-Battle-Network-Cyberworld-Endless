@@ -2,9 +2,9 @@
  * ROM, read beside BN6's (rom.c, XR), padded to EMU_ROM_SIZE as BN6's copy
  * is, in an mGBA core of its own. It boots once to a playable state (its
  * title, NEW GAME, and the intro pressed through to Lan's room) kept in
- * the data directory, in the background from the title on: on a thread of
- * its own on native builds, a slice of each frame's spare time in the
- * browser, whose page runs one frame at a time (guest_tick). Its battles
+ * the data directory, in the background from the game's start on: on a
+ * thread of its own on native builds, a slice of each frame's spare time in
+ * the browser, whose page runs one frame at a time (guest_tick). Its battles
  * run only while BN6's core waits, on the main thread and without hooks:
  * its encounter roll, patched in its ROM copy, returns the record a battle
  * is given, and the battle's end is read from its game state

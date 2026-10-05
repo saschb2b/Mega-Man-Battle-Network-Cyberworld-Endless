@@ -865,7 +865,8 @@ static bool game_frame(void) {
 	taps_tick();
 	/* (the touch controls' menu pauses the game under it) */
 	if (current && current->update && !touch_paused()) current->update();
-	/* (BN5's boot begun at the title, as early as it can be: guest.h) */
+	/* (BN5's boot begun as the game starts, at its boot screen or title,
+	 * as early as it can be: guest.h) */
 	if (current != &scene_emu) guest_warm();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();

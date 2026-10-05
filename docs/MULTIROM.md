@@ -212,9 +212,9 @@ the layer's random battles are BN5's own, fought in BN5's engine
   run's first BN5 area, 5 October 2026: "guest: booted in 7210 frames,
   5.01 s of its frames' time", the whole boot inside one frame of the
   layer's setup): BN5's first boot (7210 of its frames, kept as the state
-  `guest-bn5-1.state` in the data folder) begins at the title where BN5's
-  ROM is there (`guest_warm`) and runs in the background, never in a
-  frame's way. On native builds (desktop, Android, iOS, PortMaster) it
+  `guest-bn5-1.state` in the data folder) begins as the game starts
+  (its boot screen, else the title: `guest_warm`) where BN5's ROM is
+  there and runs in the background, never in a frame's way. On native builds (desktop, Android, iOS, PortMaster) it
   runs on a thread of its own at a low priority (`boot_main`), which alone
   touches the guest core until it is ready and nothing of BN6's: the chips
   of both games are paired, mGBA's logger set and the sound's rate read on
@@ -249,8 +249,9 @@ the layer's random battles are BN5's own, fought in BN5's engine
   the Nova (untested there yet) its 5.01 s, on a core of its own, would end
   before a player who presses NEW GAME at once is through the town, its
   main thread keeping its GBA frames of about 3 ms. In Chrome 152
-  (headless, agent-browser, on a loaded machine): at the title the boot
-  took 8.5 s of its frames and ended 15 s after Jack in, the page's frames
+  (headless, agent-browser, on a loaded machine): at the title (measured
+  before the boot screen came in) the boot took 8.5 s of its frames and
+  ended 15 s after Jack in, the page's frames
   16.8 ms at most from the game's first second on; on ACDC Area's first
   layer it ran in BN6's frames' spare time through the arrival's words to
   87% when the battle came, which waited about 2 s behind the older net's
