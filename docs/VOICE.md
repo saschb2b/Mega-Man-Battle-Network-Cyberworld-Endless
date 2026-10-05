@@ -233,10 +233,10 @@ BN6 gives each Navi a habit of speech, and we keep it:
 | GroundMan | A drill: "Whiiir!", folksy | "Whiiir! I'll dig you right under!" |
 | DustMan | Laughs "Gahaha!", trash and vacuum puns | "Gahaha! Into the trash with ya!" |
 | BlastMan | Arrogant, "Kwohohoho...", ashes | "Kwohohoho... Burn to cinders!" |
-| DiveMan | A pirate: "ye", "matey", "Gahahaha!" | "Ye picked the wrong sea,matey!" |
+| DiveMan | A submarine: "Awooga!", "Dive! Dive!", "Roger,Capt'n!" (the pirate talk is his operator's) | "Awooga! Intruder in my waters!" |
 | CircusMan | A creepy clown: "Ahoo,hoo,hoo!" | "Ahoo,hoo,hoo! Showtime!" |
-| JudgeMan | A judge: court words, verdicts | "Order! I find you guilty!" |
-| ElementMan | Cold and grand, the four elements | "Fire,water,wood,lightning... Choose." |
+| JudgeMan | A judge of old: "thou", court words, verdicts | "Order! Thou art guilty!" |
+| ElementMan | Speaks in beeps ("PIKIRA..."), BN6 adds the meaning after them; we keep the beeps and say the meaning plainly in the next box | "PIKIRARA!" / "...You will be deleted." |
 | Colonel | A soldier: terse, commands | "Stand down. This ends here." |
 
 BN5's Navis (KnightMan, ShadowMan, NumberMan, ToadMan, TomahawkMan's BN5
