@@ -124,6 +124,7 @@
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
 #define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
 #define BN6_T1_ELEMENT        0x0E        /* Element */
+#define BN6_COLL_REGION       0x01        /* in its collision data (CollisionDataPtr +0x54, bn6f collision_data_struct), Region: the panels it is struck on and strikes, bn6f PanelOffsetListsPointerTable's index, 0 none (nothing touches it), 1 its own panel */
 #define BN6_BATTLE_HAND       0x020349C0u /* MegaMan's hand after OK (bn6f getBattleHandAddr_8010018; the enemies' 0x50 on): */
 #define BN6_HAND_AT           0x00        /* ... the chip up next, an index */
 #define BN6_HAND_CHIPS        0x02        /* ... the chips' ids, u16, six at most, 0xFFFF after them */
@@ -244,8 +245,7 @@
 /* ROM code */
 #define BN6_AWAIT_FRAME_LOOP  0x080003A6u /* bn6f main_awaitFrame (0x080003A0): its loop polling DISPSTAT for VBlank, ldrh r1,[r0] */
 #define BN6_ENTER_MAP_ON_WARP 0x08005C05u /* map_triggerEnterMapOnWarp (Thumb) */
-/* Map, flag and key item events, by hook (src/director/events.c; Gregar's
- * as Falzar's where not said) */
+/* Map, flag and key item events, by hook (src/director/events.c; Gregar's as Falzar's where not said) */
 #define BN6_ENTER_MAP         0x08005152u /* bn6f EnterMap (game state 0x00, 0x08005148) past its wait for the fade: once a map is entered, the map flags 0x1640-0x16FF cleared just after */
 #define BN6_SET_EVENT_FLAG    0x0802F114u /* SetEventFlag: r0 the flag (SetEventFlagFromImmediate, 0x0802F110, falls into it); the chat's EA 00 command calls it */
 #define BN6_GIVE_ITEM         0x0803CD6Cu /* GiveItem (Falzar 0x0803CD98): r0 the key item, r1 how many */
@@ -262,12 +262,12 @@
 #define BN6_ENCOUNTER_ROLLED  0x08005AE2u /* the beq after the roll's bl: r0 the roll's BattleSettings* */
 #define BN6_ENCOUNTER_START   0x08005AE5u /* movs r1,#1; bl StartBattle, r0 the record (Thumb) */
 #define BN6_ENCOUNTER_SKIP    0x08005AF3u /* the check's pop {r5,pc}: its battle not begun (Thumb) */
-/* Battles, by hook (src/director/encounter.c; Gregar's as Falzar's where
- * not said) */
+/* Battles, by hook (src/director/encounter.c, src/emu/protoman_cross.c; Gregar's as Falzar's where not said) */
 #define BN6_START_BATTLE      0x08005BC8u /* StartBattle: r0 the BattleSettings*, every battle's */
 #define BN6_SPAWN_HP          0x08007740u /* in an enemy's spawn (its entry sub_800768C branches to the body bn6f sub_80076A0 holds): strh r2,[r5,#0x24], r2 its HP and MaxHP, r5 its BattleObject */
 #define BN6_SUBTRACT_HP       0x0800E2D8u /* object_subtractHP: r5 the BattleObject, r0 the damage (every object's, every frame, mostly 0) */
 #define BN6_REWARD_PICK       0x080AC180u /* bn6f sub_80AA910 (Falzar + 0x1870), as a battle ends: r0 the enemies' u16 ids, r1 their count */
+#define BN6_PROTOMAN_CROSS_END 0x080FDFA0u /* ProtoMan landing from his cross (bn6f sub_80FCC4C + 0x2C; issue #55), his collision data just restored: strh r0,[r2,#0x2E], r2 his collision data */
 
 /* BN6's own DarkChips (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md;
  * issue #70): a chip record's fields (RomLayout.chip_data, 0x2C bytes an

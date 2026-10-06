@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **ProtoMan can be hit after his cross** (issue #55). A player found
+  ProtoMan untouchable after he dashed his X-shaped cross while Silence's
+  music played: every attack passed through him, with no clank of his
+  shield, turn after turn. It is BN6's own slip, seen in BN6 alone: during
+  each stroke of the X his hurtbox goes off whenever something touches him
+  and comes back in the next column, and the cross ends without bringing
+  it back. Silence's music touches him every few frames, so a touch after
+  the last column was likely; MegaMan standing where a stroke ends did it
+  too. He stayed that way until his next cross, which comes only with
+  MegaMan on the middle row's middle or front panel. Now attacks strike
+  him again as he lands from the cross, as BN6 has it after a cross cut
+  short, both as a guardian's copy and in the rival's netbattle
+  (docs/FIDELITY.md).
 - **The Library's card on the second screen** (issue #83). In the PET's
   Library the second screen shows the chip under the cursor as the Custom
   screen's card: its picture twice as large, its element, power and
