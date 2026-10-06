@@ -337,6 +337,88 @@ def icon(rows):
     return im
 
 
+# The player page's cartridges (web/play/): the shape the game's launcher
+# draws (src/launcher/launcher_art.c), pixel for pixel at its small size:
+# a shell after the Game Boy Advance's in its proportions, a grip along its
+# top, the label in a recess in its game's colours with light stripes, the
+# face's dark window (the page draws the game's face there from the ROM),
+# the connector's slot below. Never traced from a cartridge.
+CART_W, CART_H = 92, 58
+CART_OUTLINE = (24, 40, 56)
+CART_GRIP = (140, 165, 189)
+CART_RECESS = (60, 80, 100)
+CART_PIN = (198, 150, 40)
+CART_FACE = (16, 54, 74)
+CART_LABEL = {   # top, foot, stripes
+    'bn6': ((8, 189, 115), (0, 140, 82), (74, 231, 115)),
+    'bn5': ((49, 156, 222), (16, 99, 165), (107, 222, 255)),
+}
+LABEL_X, LABEL_Y, LABEL_W, LABEL_H, FACE = 6, 9, 80, 38, 34
+
+
+def cartridge(game):
+    w, h = CART_W, CART_H
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+
+    def inside(x, y):
+        if x < 0 or y < 0 or x >= w or y >= h:
+            return False
+        dx = x if x < w // 2 else w - 1 - x
+        return not ((y < 2 and dx + y < 2) or (y == h - 1 and dx == 0))
+
+    def box(x0, y0, bw, bh, c):
+        for y in range(y0, y0 + bh):
+            for x in range(x0, x0 + bw):
+                if 0 <= x < w and 0 <= y < h:
+                    im.putpixel((x, y), c + (255,))
+
+    for y in range(h):
+        for x in range(w):
+            if not inside(x, y):
+                continue
+            edge = not (inside(x - 1, y) and inside(x + 1, y) and inside(x, y - 1) and inside(x, y + 1))
+            c = CART_OUTLINE if edge else METAL
+            if not edge and (y == 1 or x == 1):
+                c = METAL_HI
+            if not edge and (y == h - 2 or x == w - 2):
+                c = METAL_LO
+            im.putpixel((x, y), c + (255,))
+    for x in range(w * 5 // 8, w - 5):
+        for y in range(2, 6):
+            im.putpixel((x, y), (METAL_LO if x & 1 else CART_GRIP) + (255,))
+    top, foot, stripe = CART_LABEL[game]
+    box(LABEL_X - 1, LABEL_Y - 1, LABEL_W + 2, LABEL_H + 2, CART_RECESS)
+    for y in range(LABEL_H):
+        for x in range(LABEL_W):
+            # (as C divides: toward zero)
+            c = stripe if (x + y) % 12 < 2 else tuple(a + int((b - a) * y / LABEL_H) for a, b in zip(top, foot))
+            im.putpixel((LABEL_X + x, LABEL_Y + y), c + (255,))
+    box(LABEL_X + 2, LABEL_Y + 2, FACE, FACE, CART_FACE)
+    floor = h - 8
+    box(3, floor - 1, w - 6, 1, METAL_LO)
+    box(w // 2 - 16, h - 5, 32, 4, CART_OUTLINE)
+    for x in range(w // 2 - 14, w // 2 + 14, 2):
+        box(x, h - 4, 1, 3, CART_PIN)
+    for r in range(3):
+        box(7 + r, floor + 1 + r, 5 - 2 * r, 1, METAL_LO)
+    return im
+
+
+def open_spot(colour):
+    """An open cartridge spot: the recess, its edge in dashes of three, a gap of two."""
+    w, h = CART_W, CART_H
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    for y in range(1, h - 1):
+        for x in range(1, w - 1):
+            im.putpixel((x, y), (10, 58, 80, 255))
+    edge = [(x, 0) for x in range(w)] + [(w - 1, y) for y in range(1, h)] + \
+        [(x, h - 1) for x in range(w - 2, -1, -1)] + [(0, y) for y in range(h - 2, 0, -1)]
+    for i, p in enumerate(edge):
+        if i % 5 < 3:
+            im.putpixel(p, colour + (255,))
+    return im
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     art = {
@@ -361,6 +443,10 @@ def main():
         'pill': pill(20, 13, [(1, CYAN_LO), (1, (CYAN_HI, CYAN))], CYAN),
         'pill-gold': pill(20, 13, [(1, GOLD_LO), (1, ((255, 247, 165), (247, 165, 0)))], (255, 198, 33)),
     }
+    art['cart-bn6'] = cartridge('bn6')
+    art['cart-bn5'] = cartridge('bn5')
+    art['cart-spot'] = open_spot(CYAN)
+    art['cart-spot-on'] = open_spot(GOLD)
     for name, im in art.items():
         im.save(os.path.join(OUT, f'{name}.png'), optimize=True)
     for name, rows in ICONS.items():

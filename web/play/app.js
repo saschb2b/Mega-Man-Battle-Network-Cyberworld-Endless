@@ -100,8 +100,93 @@ function offer(note) {
 	$('pick').hidden = false;
 	$('play').hidden = !six;
 	$('pick-label').textContent = !six ? 'Choose ROM files' : five ? 'Use different ROMs' : 'Add BN5 Team Colonel';
+	for (const id of Object.keys(ROMS)) showCart(id);
 	say(note || keptWords());
 	if (six) $('play').focus();
+}
+
+// ---- the cartridges: an open spot, or the cartridge with its game's face ----
+
+const FACES = {   // the label's mugshot: sprite list 8 (src/launcher/launcher_art.c, docs/ROM_DATA.md)
+	bn6: { lists: 0x031CC4, face: 0x37 },   // MegaMan
+	bn5: { lists: 0x03272C, face: 0x45 },   // Colonel
+};
+const drawn = {};
+
+function showCart(id) {
+	const cart = $('cart-' + id), here = kept(id);
+	cart.classList.toggle('in', here);
+	cart.setAttribute('aria-label', ROMS[id].tag + (here ? ': ready' : id === 'bn6' ? ': needed, choose it' : ': optional, choose it'));
+	if (!here || drawn[id]) return;
+	drawn[id] = true;
+	try {
+		face(Module.FS.readFile(ROM_DIR + '/' + ROMS[id].file), FACES[id], cart.querySelector('canvas'));
+	} catch (e) { /* (a label without its face) */ }
+}
+
+// GBA LZ77 (the BIOS's type 0x10), as src/core/rom.c reads it
+function lz77(d, at) {
+	if (d[at] !== 0x10) return null;
+	const n = d[at + 1] | d[at + 2] << 8 | d[at + 3] << 16, out = new Uint8Array(n);
+	let p = at + 4, o = 0;
+	while (o < n) {
+		let flags = d[p++];
+		for (let i = 0; i < 8 && o < n; ++i, flags <<= 1) {
+			if (flags & 0x80) {
+				const v = d[p] << 8 | d[p + 1];
+				p += 2;
+				const len = (v >> 12) + 3, dist = (v & 0xFFF) + 1;
+				if (dist > o) return null;
+				for (let k = 0; k < len && o < n; ++k, ++o) out[o] = out[o - dist];
+			} else out[o++] = d[p++];
+		}
+	}
+	return out;
+}
+
+// A mugshot's first frame into `canvas` (40 x 48), read from the ROM as
+// src/gfx/gfx.c reads a sprite: the list's pointer (compressed or not),
+// its animation's first frame, its objects' tiles in their palette
+function face(rom, where, canvas) {
+	const u32 = (b, o) => (b[o] | b[o + 1] << 8 | b[o + 2] << 16 | b[o + 3] << 24) >>> 0;
+	const list = u32(rom, where.lists + 8 * 4) - 0x08000000, ptr = u32(rom, list + where.face * 4);
+	let b;
+	if (ptr & 0x80000000) {
+		const d = lz77(rom, (ptr & 0x7FFFFFFF) - 0x08000000);
+		if (!d) return;
+		b = d.subarray(8);
+	} else b = rom.subarray(ptr - 0x08000000 + 4);
+	const f = u32(b, 0), tiles = u32(b, f), pals = u32(b, f + 4) + 4, mini = u32(b, f + 8), objtab = u32(b, f + 12);
+	const tdata = b.subarray(tiles + 4, tiles + 4 + u32(b, tiles));
+	const objs = objtab + u32(b, objtab + b[mini + u32(b, mini)] * 4);
+	const dims = [[[8, 8], [16, 16], [32, 32], [64, 64]], [[16, 8], [32, 8], [32, 16], [64, 32]], [[8, 16], [8, 32], [16, 32], [32, 64]]];
+	const parts = [];
+	for (let o = objs; !(b[o] === 0xFF && b[o + 1] === 0xFF) && parts.length < 64; o += 5) {
+		if ((b[o + 4] & 3) > 2) continue;
+		const [w, h] = dims[b[o + 4] & 3][b[o + 3] & 3];
+		parts.push({ tile: b[o], x: (b[o + 1] << 24) >> 24, y: (b[o + 2] << 24) >> 24, w, h, hf: b[o + 3] & 0x40, vf: b[o + 3] & 0x80, bank: b[o + 4] >> 4 });
+	}
+	if (!parts.length) return;
+	const minx = Math.min(...parts.map((p) => p.x)), miny = Math.min(...parts.map((p) => p.y));
+	const ctx = canvas.getContext('2d'), img = ctx.createImageData(canvas.width, canvas.height);
+	for (const p of parts)
+		for (let y = 0; y < p.h; ++y)
+			for (let x = 0; x < p.w; ++x) {
+				const t = p.tile + (y >> 3) * (p.w >> 3) + (x >> 3), at = t * 32 + (y & 7) * 4 + ((x & 7) >> 1);
+				const ci = at < tdata.length ? ((x & 1) ? tdata[at] >> 4 : tdata[at] & 15) : 0;
+				if (!ci) continue;
+				const c = b[pals + p.bank * 32 + ci * 2] | b[pals + p.bank * 32 + ci * 2 + 1] << 8;
+				const X = p.x - minx + (p.hf ? p.w - 1 - x : x), Y = p.y - miny + (p.vf ? p.h - 1 - y : y);
+				if (X < 0 || Y < 0 || X >= canvas.width || Y >= canvas.height) continue;
+				const k = (Y * canvas.width + X) * 4;
+				// (five bits to eight as src/gfx/gfx.h's bgr555 spreads them)
+				const r = c & 31, g = c >> 5 & 31, bl = c >> 10 & 31;
+				img.data[k] = r << 3 | r >> 2;
+				img.data[k + 1] = g << 3 | g >> 2;
+				img.data[k + 2] = bl << 3 | bl >> 2;
+				img.data[k + 3] = 255;
+			}
+	ctx.putImageData(img, 0, 0);
 }
 
 function start() {
@@ -160,7 +245,7 @@ async function checkRom(file) {
 
 // The files chosen or dropped: each kept or refused, and why; the game
 // starts once BN6 is kept, unless a file was refused, whose reason stays
-// to be read (Jack in then starts it)
+// to be read (Play then starts it)
 let checking = false;
 async function takeRoms(files) {
 	if (!files.length || started || checking) return;
@@ -189,10 +274,124 @@ async function takeRoms(files) {
 
 $('rom').addEventListener('change', (e) => { takeRoms(Array.from(e.target.files)); e.target.value = ''; });
 $('play').addEventListener('click', start);
+// (a cartridge's spot chooses its file, as the launcher's A does)
+for (const id of Object.keys(ROMS)) $('cart-' + id).addEventListener('click', () => { if (ready && !started) $('rom').click(); });
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => {
 	e.preventDefault();
 	takeRoms(Array.from(e.dataTransfer.files));
+});
+
+// ---- the saves in one file: src/core/backup.c's .cwsave, which the phone
+// apps take from the ROM folder too ----
+//   "CWSAVE1\n", u64 stamp, u32 count, then count times (u16 length, its
+//   name under the data folder, u32 size, its bytes), then an FNV-1a of it all
+
+const SAVES_FILE = 'cyberworld-endless.cwsave', SETTINGS = ['settings.ini', 'keys.ini', 'pad.ini', 'touch.ini'];
+
+function fnv(bytes, end) {
+	let h = 2166136261;
+	for (let i = 0; i < end; ++i) h = Math.imul(h ^ bytes[i], 16777619) >>> 0;
+	return h >>> 0;
+}
+
+function isFile(path) {
+	try { return Module.FS.isFile(Module.FS.stat(path).mode); } catch (e) { return false; }
+}
+
+// This browser's saves as a .cwsave's bytes, null where there are none
+function packSaves() {
+	const FS = Module.FS, names = [];
+	try {
+		for (const n of FS.readdir(DATA + '/savedata').sort())
+			if (!n.startsWith('.') && !n.endsWith('.tmp') && isFile(DATA + '/savedata/' + n)) names.push('savedata/' + n);
+	} catch (e) { /* no saves yet */ }
+	if (!names.includes('savedata/profile.sav')) return null;
+	for (const n of SETTINGS) if (isFile(DATA + '/' + n)) names.push(n);
+	const enc = new TextEncoder(), files = names.map((n) => [enc.encode(n), FS.readFile(DATA + '/' + n)]);
+	const size = 20 + files.reduce((t, [n, d]) => t + 6 + n.length + d.length, 0) + 4;
+	const out = new Uint8Array(size), view = new DataView(out.buffer);
+	out.set(enc.encode('CWSAVE1\n'), 0);
+	view.setBigUint64(8, BigInt(Math.floor(Date.now() / 1000)), true);
+	view.setUint32(16, files.length, true);
+	let at = 20;
+	for (const [n, d] of files) {
+		view.setUint16(at, n.length, true);
+		out.set(n, at + 2);
+		view.setUint32(at + 2 + n.length, d.length, true);
+		out.set(d, at + 6 + n.length);
+		at += 6 + n.length + d.length;
+	}
+	view.setUint32(at, fnv(out, at), true);
+	return out;
+}
+
+// A .cwsave's files ({ name, data }), its profile's runs and best layer;
+// null for bytes that are none, or damaged
+function readSaves(bytes) {
+	const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), dec = new TextDecoder();
+	if (bytes.length < 24 || dec.decode(bytes.subarray(0, 8)) !== 'CWSAVE1\n' || view.getUint32(bytes.length - 4, true) !== fnv(bytes, bytes.length - 4)) return null;
+	const files = [], count = view.getUint32(16, true);
+	let at = 20, runs = 0, best = 0;
+	for (let i = 0; i < count; ++i) {
+		if (at + 6 > bytes.length - 4) return null;
+		const len = view.getUint16(at, true), name = dec.decode(bytes.subarray(at + 2, at + 2 + len)), size = view.getUint32(at + 2 + len, true);
+		if (!len || at + 6 + len + size > bytes.length - 4) return null;
+		const data = bytes.slice(at + 6 + len, at + 6 + len + size);
+		// (the profile's blob: magic "CWP2", size, checksum, then runs and the best layer)
+		if (name === 'savedata/profile.sav' && size >= 20 && new DataView(data.buffer).getUint32(0, true) === 0x43575032) {
+			runs = new DataView(data.buffer).getInt32(12, true);
+			best = new DataView(data.buffer).getInt32(16, true);
+		}
+		files.push({ name, data });
+		at += 6 + len + size;
+	}
+	return at === bytes.length - 4 ? { files, runs, best } : null;
+}
+
+// ... into this browser: its savedata/ kept aside as savedata.old/ first
+function unpackSaves(saves) {
+	const FS = Module.FS, dir = DATA + '/savedata', old = DATA + '/savedata.old';
+	try { for (const n of FS.readdir(old)) if (isFile(old + '/' + n)) FS.unlink(old + '/' + n); FS.rmdir(old); } catch (e) { /* none */ }
+	try { FS.rename(dir, old); } catch (e) { /* none yet */ }
+	FS.mkdir(dir);
+	for (const f of saves.files) {
+		const bare = f.name.startsWith('savedata/') ? f.name.slice(9) : null;
+		if (bare ? !bare || bare.includes('/') || bare.startsWith('.') : !SETTINGS.includes(f.name)) continue;
+		FS.writeFile(DATA + '/' + f.name, f.data);
+	}
+}
+
+$('export').addEventListener('click', () => {
+	if (!ready) { say('One moment: the engine is still loading.'); return; }
+	const bytes = packSaves();
+	if (!bytes) { say('No saves in this browser yet.'); return; }
+	const a = document.createElement('a');
+	a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
+	a.download = SAVES_FILE;
+	document.body.appendChild(a);
+	a.click();
+	a.remove();
+	setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+	track('saves-export');
+});
+
+$('saves-file').addEventListener('change', async (e) => {
+	const file = e.target.files[0];
+	e.target.value = '';
+	if (!file) return;
+	if (!ready) { say('One moment: the engine is still loading.'); return; }
+	const saves = readSaves(new Uint8Array(await file.arrayBuffer()));
+	if (!saves) { say(file.name + ' is no saves backup, or it is damaged.'); return; }
+	const here = packSaves() ? readSaves(packSaves()) : null;
+	const what = saves.runs + ' runs, best Layer ' + saves.best;
+	if (here && !confirm('Replace this browser\'s saves (' + here.runs + ' runs, best Layer ' + here.best + ') with the backup\'s (' + what + ')? This browser\'s are kept aside.')) return;
+	unpackSaves(saves);
+	track('saves-import');
+	// (the game reads its saves as it starts: a running one starts again, once they are kept)
+	if (started) { Module.FS.syncfs(false, () => location.reload()); return; }
+	persist();
+	say('Saves brought back: ' + what + '.');
 });
 
 $('forget').addEventListener('click', () => {
