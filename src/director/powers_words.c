@@ -1,7 +1,8 @@
 /* What MegaMan says of the Crosses and the Cybeast (docs/META.md,
  * docs/VOICE.md): a Cross won from a guardian, how it feels and its
- * weakness; one the run cannot carry; the Graveyard's call. The Crosses
- * themselves, powers.c. */
+ * weakness; one the run cannot carry; the Graveyard's call; Dad's
+ * CybeastButton after the Cybeast's fall. The Crosses themselves,
+ * powers.c. */
 #include <stdio.h>
 
 #include "guardians.h"
@@ -41,15 +42,19 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 		else ADD("%s@M %s's Cross data...|@M We can only carry one Cross down here.|@M So we keep our %s,Lan.%s", k ? "|" : "",
 			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive,we can start with his Cross!");
 	}
-	/* (a run that brought BeastOut has had the CybeastButton from its
-	 * start: the Nest's call, and Lan's word, no unlocking) */
-	if (beast && run_beast_start())
+	/* (the Nest's call, and Lan's word, no unlocking: the beast stirs
+	 * here, and its power comes once MegaMan has beaten it at the Nest,
+	 * issue #109; a run that brought BeastOut hears the same) */
+	if (beast)
 		ADD("%s@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|"
 			"@L Easy,MegaMan! You've kept it in check all along!|@M ...Right. I won't let it take over,Lan.", k ? "|" : "");
-	else if (beast)
-		ADD("%s@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|"
-			"@D Lan,it's Dad! I'm unlocking your PET's CybeastButton.|"
-			"@D BeastOut is powerful...|@D But don't let the beast take over,OK?|@N MegaMan can now BeastOut!", k ? "|" : "");
 	#undef ADD
 	return k ? text : NULL;
+}
+
+/* Dad's word, said on in his call after the Cybeast's fall (story_words.c):
+ * beat the beast, then its power (issue #109) */
+const char *powers_beast_words(void) {
+	return "@D One more thing,Lan.|@D MegaMan beat the beast. Its power is his now.|@D I'm unlocking your PET's CybeastButton.|"
+		"@D Just don't let it take over,OK?|@M Leave it to me,Dad!|@N MegaMan can now BeastOut!";
 }

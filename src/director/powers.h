@@ -5,8 +5,9 @@
 
 #include <stdbool.h>
 
-/* After a won boss battle against `navi` (navi index) in `biome`. */
-void powers_after_boss(int navi, int biome);
+/* After a won boss battle against `navi` (navi index): his Cross, BN5's
+ * guardian's Soul, and BeastOut from the Cybeast (issue #109). */
+void powers_after_boss(int navi);
 /* The Cross of `navi` (HeatMan 1 .. ChargeMan 5), NULL for a navi with none. */
 const char *powers_cross_name(int navi);
 /* The attacks that hit MegaMan twice as hard in that Cross ("Aqua"). */
@@ -22,13 +23,21 @@ bool powers_cross_owned(int navi);
  * BeastOut with the BeastOut helper (issue #99). */
 void powers_bring(void);
 /* What the player is told after that battle at `depth` (ta_talk's boxes:
- * a Cross MegaMan did not have yet, BeastOut in the first Graveyard), or
- * NULL. */
+ * a Cross MegaMan did not have yet, the beast stirred in the first
+ * Graveyard), or NULL. */
 const char *powers_reward_text(int navi, int biome, int depth);
+/* Dad's word after the Cybeast's fall at `depth`, said on in his call
+ * (ta_talk's boxes): the PET's CybeastButton unlocked, where the fall
+ * gave the run BeastOut (the first Net's, a run that did not bring it),
+ * or NULL. */
+const char *powers_den_text(int depth);
 
 /* (powers_words.c) MegaMan's words after guardian `navi`'s battle: his
- * Cross, where it is new to the run (`cross`), and the Cybeast's waking
- * (`beast`), its call where the run brought BeastOut; NULL for none */
+ * Cross, where it is new to the run (`cross`), and the Nest's call to the
+ * Cybeast in him (`beast`), which unlocks nothing; NULL for none */
 const char *powers_reward_words(int navi, bool cross, bool beast);
+/* (powers_words.c) Dad's word that he unlocks the CybeastButton, MegaMan
+ * having beaten the beast */
+const char *powers_beast_words(void);
 
 #endif

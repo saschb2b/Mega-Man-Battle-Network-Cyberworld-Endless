@@ -377,7 +377,7 @@ void boss_battle_over(bool won) {
 	}
 	rival_result(B.g.navi, RIVAL_MEGAMAN_WON);
 	run.bosses_beaten++;
-	powers_after_boss(B.g.navi, run.biome);
+	powers_after_boss(B.g.navi);
 	if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
 	to(B_AFTER);
 }
