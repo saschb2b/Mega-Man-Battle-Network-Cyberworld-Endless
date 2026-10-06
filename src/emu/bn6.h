@@ -26,6 +26,8 @@
 #define BN6_MAP_NUMBER        (BN6_GAMESTATE + 0x05) /* MapNumber: the two read as a u16 are MapId */
 #define BN6_MAP_ID            BN6_MAP_GROUP          /* (MapId: MapGroup and MapNumber as a u16) */
 #define BN6_LAST_MAP          (BN6_GAMESTATE + 0x0C) /* LastMapGroup and its number, a u16 map id */
+#define BN6_MAP_PAUSED        (BN6_GAMESTATE + 0x0A) /* BattlePaused: the map's objects stand still, MegaMan too (none updates without its pause flag) */
+#define BN6_NPC_CHAT          (BN6_GAMESTATE + 0x10) /* Unk_10: 1 from A at an NPC till its chat ends (bn6f sub_809DF00, sub_809D7D8): START waits */
 #define BN6_SAVED_X           (BN6_GAMESTATE + 0x34) /* SavedRealWorldX: where Lan jacked in, 16.16, which BN6's jack-out returns him to */
 #define BN6_SAVED_Y           (BN6_GAMESTATE + 0x38) /* SavedRealWorldY, 16.16 */
 #define BN6_SAVED_Z           (BN6_GAMESTATE + 0x3C) /* SavedRealWorldZ, 16.16 */
@@ -44,13 +46,14 @@
 #define BN6_CHATBOX_OPTIONS   (BN6_CHATBOX + 0x12)  /* the options on the page so far (bn6f's ts_option counts them; a page clears it): 2 and up, a choice is shown */
 #define BN6_CHATBOX_CURSOR    (BN6_CHATBOX + 0x13)  /* the choice's option under the cursor, 0 first (bn6f ChoiceCursorPos) */
 #define BN6_CHATBOX_SCRIPT_AT (BN6_CHATBOX + 0x2C)  /* TextScriptCursorPtr: where the script reads */
-#define BN6_CHATBOX_ARCHIVE   (BN6_CHATBOX + 0x30)  /* TextScriptPtr: the archive it runs */
 #define BN6_CHATBOX_BOX_FLAGS (BN6_CHATBOX + 0x3E)  /* flags_3E (0x0100 the box hidden), u16 */
 #define BN6_CHATBOX_WORD0     (BN6_CHATBOX + 0x4C)  /* Unk_4C and ... */
 #define BN6_CHATBOX_WORD1     (BN6_CHATBOX + 0x50)  /* ... Unk_50: the words a script prints (a trader's prize chip and its code) */
-#define BN6_CHATBOX_FLAGS     0x02009F38u /* eFlags2009F38 */
+#define BN6_CHATBOX_FLAGS     0x02009F38u /* eFlags2009F38, u32 */
+#define BN6_CHAT_ACTIVE       0x80        /* BN6_CHATBOX_FLAGS: a chat under way (bn6f chatbox_mask_eFlags2009F38): START and the encounter roll wait */
 #define BN6_PLAYER            0x02009F40u /* the overworld player object (OverworldPlayerObject) */
-#define BN6_PLAYER_STATE      (BN6_PLAYER + 0x09)  /* JumptableIndex_09 */
+#define BN6_PLAYER_MAIN       (BN6_PLAYER + 0x08)  /* Unk_08: 0 just spawned, 4 once its update runs (bn6f owPlayer_main) */
+#define BN6_PLAYER_STATE      (BN6_PLAYER + 0x09)  /* JumptableIndex_09: 0 stands, 4 walks, 8 runs (the pad read), 0x0C and 0x10 a talk, 0x14 BN6's conveyor */
 #define BN6_PLAYER_FACING     (BN6_PLAYER + 0x10)  /* FacingDirection, 0-7 */
 #define BN6_PLAYER_ANIM       (BN6_PLAYER + 0x14)  /* AnimationSelect: the facing it is drawn with */
 #define BN6_PLAYER_LOCKED     (BN6_PLAYER + 0x17)  /* InteractionLocked */
@@ -59,6 +62,8 @@
 #define BN6_PLAYER_Z          (BN6_PLAYER + 0x24)
 #define BN6_PLAYER_NEXT_X     (BN6_PLAYER + 0x28)  /* NextX and NextY: where this frame's step goes */
 #define BN6_PLAYER_NEXT_Y     (BN6_PLAYER + 0x2C)
+#define BN6_PLAYER_PAD        (BN6_PLAYER + 0x4C)  /* Unk_4c, u16: the pad as BN6 took it this frame, BN6_PAD_STEP a walk or run; 0 while held (bn6f sub_809D9E0) */
+#define BN6_PAD_STEP          0x30        /* BN6_PLAYER_PAD: 0x10 a walk, 0x20 a run */
 /* The overworld's NPC objects (eOverworldNPCObjects): 16 of 0xD8 bytes,
  * fields from each one's start */
 #define BN6_NPC_OBJECTS       0x020057B0u
@@ -168,23 +173,23 @@
 #define BN6_CUTSCENE          0x02011C50u /* CutsceneState */
 #define BN6_CUTSCENE_POS      (BN6_CUTSCENE + 0x1C) /* CutsceneScriptPos */
 #define BN6_CUTSCENE_POS0     (BN6_CUTSCENE + 0x40) /* originalCutsceneScriptPos_40 */
+#define BN6_SCREEN_FADE       0x0200A440u /* eScreenFade, the map's (bn6f SetScreenFade's first): +0 1 while its routine runs (a fade out keeps the dark so) */
+#define BN6_FADE_ACTIVE       (BN6_SCREEN_FADE + 0x03) /* 1 while it fades (bn6f IsScreenFadeActive): the pad, START and EnterMap wait for it */
 
-/* A map's tile map decompresses to 0x02013A00 (12-byte header, then the
- * entries) and its coordinate data to 0x02027A00, which the game reads in
- * place: the raw entries may take up to here, not a byte more. */
+/* A map's tile map decompresses to 0x02013A00 (12-byte header, then the entries) and its coordinate
+ * data to 0x02027A00, which the game reads in place: the raw entries may take up to here, not a byte more. */
 #define BN6_TILEMAP_MAX       0x13FF4
-
-/* IWRAM */
-#define BN6_BG_PALETTE        0x03001960u /* the game's BG palette buffer */
+#define BN6_BG_PALETTE        0x03001960u /* IWRAM: the game's BG palette buffer */
 
 /* Event flags */
 #define BN6_FLAG_NO_PET_SAVE  0x1706      /* EVENT_PET_COMM_SAVE_DISABLED: the PET's Comm and Save buzz */
+#define BN6_FLAG_PET_OFF      0x1707      /* EVENT_PET_DISABLED: START opens nothing (EnterMap clears it) */
+#define BN6_FLAG_CONVEYOR     0x1717      /* EVENT_1717_PLAYER_ADVANCE_FORWARD: BN6's conveyor carries MegaMan (map triggers 0x48-0x4F), the pad and START off */
 #define BN6_FLAG_COMPRESSED   0x2660      /* + a NaviCust program's variant: compressed by its code (docs/ROM_DATA.md, NaviCust) */
 #define BN6_FLAG_NO_JACK      0x1727      /* R neither jacks in nor out (the jack routine's first check) */
 #define BN6_FLAG_NAVI_IN_PET  0x171D      /* EVENT_PET_NAVI_ACTIVE: MegaMan is in the PET; clear, a jack-in says "MegaMan isn't in the PET..." (bn6f CompText87385CC), and only BN6's own jack-out sets it again */
 #define BN6_FLAG_WARP_OFF     0x16F0      /* + n: the map's warp trigger n does nothing */
 #define BN6_FLAG_NO_ENCOUNTERS 0x1700     /* checkThenStartBattle skips random battles while set (a BBS request sets it); cleared on entering a map */
-
 #define BN6_FLAG_NAVICUST     0x00F2      /* MegaMan's STATUS in the PET offers the NaviCust (found by setting flags there) */
 #define BN6_FLAG_BEAST_OUT    0x00E0      /* Beast Out in the Custom screen (unless 0x163 is set) */
 #define BN6_FLAG_LIBRARY      0x1E20      /* + chip id: the chip is in the Library (docs/ROM_DATA.md) */
@@ -216,6 +221,7 @@
 #define BN6_TALK_PROBE_Y      4           /* its y offset (s32, 16.16) */
 #define BN6_TALK_PROBE_RADIUS 12          /* its radius (u8) */
 #define BN6_DIALOGUE_LOCK     0x0200ACE0u /* eStruct200ace0 +0: 1 while a non-NPC dialogue holds the player (no talking to NPCs) */
+#define BN6_SCRIPTED_WALK     (BN6_DIALOGUE_LOCK + 0x15) /* fixOWPlayerAnim_15: MegaMan walks by a cutscene's pad, not the player's (bn6f owPlayer_809E0FC; owPlayer_809E114 ends it) */
 #define BN6_FLAG_PLAYER_CAN_MOVE 0x1714  /* EVENT_PLAYER_CAN_MOVE */
 #define BN6_FLAG_DIALOGUE_1718   0x1718  /* set by the game's non-NPC dialogue lock */
 #define BN6_FLAG_DIALOGUE_1719   0x1719  /* cleared by its unlock */
@@ -322,6 +328,7 @@
 #define BN6_SHOP_KIND_PROGRAM 3      /* ... a NaviCust program, its id program * 4 */
 #define BN6_MODE_TRADER       0x34   /* BN6_TOOLKIT: the Chip Trader (bn6f ChipTraderControl) */
 #define BN6_MODE_MAIL         0x48   /* BN6_TOOLKIT: E-Mail on its own (bn6f HandleEmailMenu81279F8) */
+#define BN6_SUB_ENTER         0x00   /* BN6_GAMESTATE: a map being entered (bn6f EnterMap, which waits out a fade first) */
 #define BN6_SUB_MAP           0x04   /* BN6_GAMESTATE: on the map */
 #define BN6_SUB_BATTLE_INIT   0x08   /* BN6_GAMESTATE: a battle beginning */
 #define BN6_SUB_BATTLE        0x0C   /* BN6_GAMESTATE: in battle */

@@ -258,7 +258,8 @@ with `NAME/bin.pin` present its restarts keep that copy, so a rebuild
 during a playtest leaves its CONTINUE alone. Dev steps beside the
 player's: `place X Y FACING` puts MegaMan somewhere, `flags FROM TO 1`
 sets a block of event flags and `flags FROM TO 0` puts them back,
-`battle` starts the layer's next random battle once he is free on its
+`stuck NAME` saves the run with BN6 holding MegaMan so (a CONTINUE's
+recovery tested, issue #23), `battle` starts the layer's next random battle once he is free on its
 map (a guest battle on BN5 territory; the state then says `battle (the
 older net's)`), `sig` puts MegaMan in the layer's signature (the state
 names it and where it lies), `second` saves the second screen's picture beside the

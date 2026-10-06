@@ -1,6 +1,8 @@
 /* Checkpoints and CONTINUE: the run's state saved beside the emulator's,
  * what the director knows of the act kept with it, the quit's save, the
- * arena door's, and the layer rebuilt and the game restored. */
+ * arena door's, home's, and the layer rebuilt and the game restored. Each
+ * waits for MegaMan free as BN6 has him (director_hold.c, issue #23): a
+ * state written while BN6 held him came back held after a CONTINUE. */
 #include "director_save.h"
 
 #include <stdio.h>
@@ -15,6 +17,7 @@
 #include "director_board.h"
 #include "director_duel.h"
 #include "director_folder.h"
+#include "director_hold.h"
 #include "director_home.h"
 #include "director_layer.h"
 #include "director_state.h"
@@ -24,7 +27,6 @@
 #include "save.h"
 #include "save_blob.h"
 #include "souls.h"
-#include "talk.h"
 
 /* (LAYER_MAKE: layer_make.h, beside its hash) */
 #define LAYER_MAKE_MAGIC 0x434D4B31u   /* "CMK1" */
@@ -107,9 +109,7 @@ void save_checkpoint(void) {
 bool director_can_suspend(void) {
 	/* (not through a guest battle: BN6 stands on the map while it runs, and
 	 * a quit there skipped the battle) */
-	return D.active && !D.town && !D.gameover && on_map() && !guest_active() && !emu_read8(BN6_CHATBOX) && !talk_busy() && !D.warping &&
-		emu_read8(BN6_WARP_PENDING) == 0 && boss_idle() && !D.challenge && !emu_read8(BN6_DIALOGUE_LOCK) &&
-		flag_get(BN6_FLAG_PLAYER_CAN_MOVE);
+	return D.active && !D.town && !D.gameover && !guest_active() && !D.warping && boss_idle() && !D.challenge && hold_save_ok();
 }
 
 const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
@@ -121,12 +121,7 @@ void director_save_here(void) {
 	 * not saved, and "Saves begin on layer 1" told him so wrongly, session
 	 * 70) */
 	if (!D.active) return;
-	if (D.town && D.home) {
-		D.checkpoint_here = true;
-		home_save();
-		D.checkpoint_here = false;
-		return;
-	}
+	if (D.town && D.home) { D.home_save_due = true; return; }
 	if (D.town) { cinema_note("Saves begin on layer 1", 150); return; }
 	D.checkpoint = true;
 	D.checkpoint_here = true;
@@ -138,7 +133,7 @@ void director_save_here(void) {
  * with, where it went back to the layer's start before (a playtester's
  * free retry, session 64) */
 void arena_door_save(void) {
-	if (talk_busy() || emu_read8(BN6_CHATBOX) || emu_read8(BN6_DIALOGUE_LOCK) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE) || D.warping) return;
+	if (!hold_save_ok() || D.warping) return;
 	D.checkpoint_door = true;
 	save_checkpoint();
 	D.checkpoint_door = false;
@@ -146,10 +141,46 @@ void arena_door_save(void) {
 	cinema_note("Run saved", 150);
 }
 
-void home_save(void) {
+static void home_save(void) {
 	save_checkpoint();
 	D.saved_at = "Run saved at home";
 	cinema_note("Run saved", 150);
+}
+
+/* Home's saves once MegaMan (or Lan) is free: its checkpoint in Lan's HP,
+ * once its words are said, and the PET's Save */
+void home_saves(void) {
+	if (!hold_save_ok()) return;
+	if (D.home_save_due) {
+		D.home_save_due = false;
+		D.checkpoint_here = true;
+		home_save();
+		D.checkpoint_here = false;
+	}
+	if (D.home && home_in_hp() && D.intro_said && !D.home_saved) {
+		D.home_saved = true;
+		home_save();
+	}
+}
+
+#define CHECKPOINT_AFTER 60   /* frames after a layer is entered */
+
+/* The checkpoint due, saved once MegaMan is free (never with a chat box
+ * open: a state would keep it, and the talk slot's text is not in a state;
+ * nor while the arrival still holds him: the jack-in and the warp pad keep
+ * him for about 90 frames, and the release is not in the state) */
+void checkpoint_update(void) {
+	if (boss_take_checkpoint()) D.checkpoint = D.checkpoint_data = true;
+	if (!D.checkpoint || D.frame < CHECKPOINT_AFTER || !hold_save_ok()) return;
+	D.checkpoint = false;
+	save_checkpoint();
+	/* (said: a playtester who plays in short sessions asked where it is
+	 * safe to stop) */
+	D.saved_at = D.checkpoint_here ? "Run saved where you saved it" : D.checkpoint_data ? "Run saved at the Guardian Data" :
+		"Run saved at the layer's start";
+	D.checkpoint_data = D.checkpoint_here = false;
+	cinema_note("Run saved", 150);
+	if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 }
 
 bool director_suspend(void) {
@@ -174,6 +205,18 @@ static bool same_layer(void) {
 	return same;
 }
 
+/* MegaMan into the layer's map again, the game reloading its NPCs and
+ * tiles from this build's tables, which a state does not hold: where he
+ * stands (a build that lays the layer out otherwise may have no floor
+ * there any more: then its arrival), or at its start */
+void layer_reenter(bool at_start) {
+	int x = bn6_player_x(), y = bn6_player_y(), cx, cy;
+	if (at_start || !netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H ||
+	    (layer.cell[cy][cx] != C_PATH && layer.cell[cy][cx] != C_PROPPED))
+		x = D.start_x, y = D.start_y;
+	emu_warp(D.group, D.number, x, y, 4);
+}
+
 /* choices made before the checkpoint stay made */
 static void resume_choices(void) {
 	for (int i = 0; i < D.objs.nchoices; ++i)
@@ -191,6 +234,7 @@ static bool resume_home(void) {
 	star_folder_pack();
 	official_sync(true);
 	home_resume();
+	hold_watch_arm();
 	act_note_apply();
 	D.beat[0] = 0;
 	resume_note(false);
@@ -270,16 +314,9 @@ bool director_resume(void) {
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
 		resume_duel();
 		resume_choices();
-		/* enter the map again where MegaMan stood: the game reloads its NPCs
-		 * and tiles from this build's tables, which a state does not hold */
-		int x = bn6_player_x(), y = bn6_player_y();
-		/* (a build that lays the layer out otherwise may have no floor there
-		 * any more: then its arrival) */
-		int cx, cy;
-		if (!netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H ||
-		    (layer.cell[cy][cx] != C_PATH && layer.cell[cy][cx] != C_PROPPED))
-			x = D.start_x, y = D.start_y;
-		emu_warp(D.group, D.number, x, y, 4);
+		layer_reenter(false);
+		/* (and watched: a state saved while BN6 held him, issue #23) */
+		hold_watch_arm();
 		/* where they are, again; the arrival's words were said before */
 		begin_area(false);
 		act_note_apply();

@@ -63,7 +63,6 @@ bool run_won_here(void) {
 	return run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth) && boss_done();
 }
 
-#define CHECKPOINT_AFTER  60     /* frames after a layer is entered */
 #define ASTRAY_FRAMES     90     /* on another map this long: warp back */
 
 int main_mode(void) { return emu_read8(emu_read32(BN6_TOOLKIT)); }
@@ -567,27 +566,6 @@ static void arrival_update(void) {
 		else if (D.after_call && boss_done() && talk_start(D.objs.guardian.navi == SUPER_CYBEAST ? den_call_words() : secret_call_words(), FACE_MEGAMAN)) {
 			D.after_call = false;
 		}
-	}
-}
-
-/* The checkpoint due, saved once MegaMan is free */
-static void checkpoint_update(void) {
-	/* (never with a chat box open: a state would keep it, and the talk
-	 * slot's text is not in a state) */
-	/* (nor while the arrival still holds him: the jack-in and the warp pad
-	 * keep him for about 90 frames, and the release is not in the state) */
-	if (boss_take_checkpoint()) D.checkpoint = D.checkpoint_data = true;
-	if (D.checkpoint && D.frame >= CHECKPOINT_AFTER && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
-		!emu_read8(BN6_DIALOGUE_LOCK) && flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) {
-		D.checkpoint = false;
-		save_checkpoint();
-		/* (said: a playtester who plays in short sessions asked where it
-		 * is safe to stop) */
-		D.saved_at = D.checkpoint_here ? "Run saved where you saved it" : D.checkpoint_data ? "Run saved at the Guardian Data" :
-			"Run saved at the layer's start";
-		D.checkpoint_data = D.checkpoint_here = false;
-		cinema_note("Run saved", 150);
-		if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 	}
 }
 

@@ -27,7 +27,9 @@ flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map: on a layer whose battles
 are an older net's, a guest battle), sig (MegaMan in the layer's
 signature, the room it is remembered by: docs/LEVEL_DESIGN.md,
-Identity), dump NAME (the video memory into
+Identity), stuck NAME (the run saved with BN6 holding MegaMan so: fade,
+chat, lock, script, conveyor, npc, pet, paused or all, apart by commas;
+its CONTINUE lets him go, issue #23), dump NAME (the video memory into
 NAME/NAMEv.bin, p, i and o.bin in the session's folder, for
 tools/romlab/labtrace.py). NAME/bin.pin keeps the session's
 build across starts.
@@ -57,7 +59,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'sig', 'dump', 'second')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -103,10 +105,12 @@ def steps(commands):
                 out.append(('battle',))
             elif op == 'sig':
                 out.append(('sig',))
+            elif op == 'stuck':
+                out.append(('stuck', args[0]))
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, sig, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, sig, stuck, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -282,6 +286,8 @@ def cmd_do(name, rest):
             items.append(f'flags {s[1]} {s[2]} {s[3]}')
         elif s[0] in ('battle', 'sig'):
             items.append(s[0])
+        elif s[0] == 'stuck':
+            items.append(f'stuck {s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
             items.append(f'second {seconds[-1]}')

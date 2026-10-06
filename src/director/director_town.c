@@ -168,15 +168,6 @@ static void home_talk(void) {
 	if (run_beast_start() && !(profile.beast & BEAST_TAUGHT)) { profile.beast |= BEAST_TAUGHT; profile_save(); }
 }
 
-/* home's checkpoint in Lan's HP, once its words are said and MegaMan is
- * free */
-static void home_checkpoint(void) {
-	if (!D.home || !home_in_hp() || !D.intro_said || D.home_saved || !on_map() || talk_busy() || emu_read8(BN6_CHATBOX) ||
-		emu_read8(BN6_DIALOGUE_LOCK) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) return;
-	D.home_saved = true;
-	home_save();
-}
-
 /* MegaMan beside a portal, once a visit each: what he reads through it
  * (its data's feel, a strong Navi's signal); the dark way's sealed
  * (docs/HOME.md) */
@@ -249,7 +240,7 @@ void home_update(void) {
 	talk_update();
 	home_hold();
 	home_talk();
-	home_checkpoint();
+	home_saves();
 	portal_words();
 	portal_taken();
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
