@@ -403,14 +403,18 @@ bool ng_fits(int rise) {
 	return tw <= 255 && th <= 255 && tw * th * 4 <= BN6_TILEMAP_MAX;
 }
 
-/* MegaMan arrives at the pad nearest the top of the screen (least x + y),
- * which becomes room 0. */
+/* MegaMan arrives at the pad nearest the layer's side of the screen
+ * (layer.arrive_side: the top least x + y, the bottom most, the left
+ * least x - y, the right most; docs/LEVEL_DESIGN.md, Arrivals), which
+ * becomes room 0. */
 static void choose_arrival(void) {
 	int best = 0, bv = 1 << 30;
 	for (int i = 0; i < layer.nrooms; ++i) {
 		const Room *r = &layer.rooms[i];
-		int v = r->ax + r->ay - (r->kind == ROOM_PAD ? 6 : 0);
-		if (v < bv) { bv = v; best = i; }
+		int u = r->ax - r->ay, v = r->ax + r->ay;
+		int at = layer.arrive_side == SIDE_BOTTOM ? -v : layer.arrive_side == SIDE_LEFT ? u : layer.arrive_side == SIDE_RIGHT ? -u : v;
+		at -= r->kind == ROOM_PAD ? 6 : 0;
+		if (at < bv) { bv = at; best = i; }
 	}
 	Room t = layer.rooms[0];
 	layer.rooms[0] = layer.rooms[best];
@@ -545,8 +549,31 @@ static int layer_guardian_of(int biome, int kind) {
 	return kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
 }
 
+/* The way MegaMan faces as he arrives, BN6's (0-7, UP first): along the
+ * way's first leg, the grid's axis it runs along most over its first five
+ * panels (BN6's arrivals face along one of the world's axes, into the map:
+ * docs/LEVEL_DESIGN.md, Arrivals). Grid +x is world +Y, DOWN+RIGHT; grid +y
+ * world -X, DOWN+LEFT. */
+static int arrival_facing(void) {
+	int x = layer.rooms[0].ax, y = layer.rooms[0].ay, dx = 0, dy = 0;
+	static uint8_t seen[MAP_H][MAP_W];
+	memset(seen, 0, sizeof seen);
+	seen[y][x] = 1;
+	for (int step = 0; step < 5; ++step) {
+		int d = 0;
+		while (d < 4 && (!layer_on_way(x + dir_dx[d], y + dir_dy[d]) || seen[y + dir_dy[d]][x + dir_dx[d]])) ++d;
+		if (d == 4) break;
+		x += dir_dx[d]; y += dir_dy[d];
+		dx += dir_dx[d]; dy += dir_dy[d];
+		seen[y][x] = 1;
+	}
+	static const int face[4] = { 3, 5, 7, 1 };   /* DIR_E, DIR_S, DIR_W, DIR_N */
+	if (!dx && !dy) return face[DIR_S];
+	return abs(dx) >= abs(dy) ? face[dx > 0 ? DIR_E : DIR_W] : face[dy > 0 ? DIR_S : DIR_N];
+}
+
 /* The layer's ends: where MegaMan arrives, the exit and on a guardian's
- * layer the guardian; then the way between them. */
+ * layer the guardian; then the way between them, and the way he faces. */
 static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 	int cx = layer.rooms[0].ax, cy = layer.rooms[0].ay;
 	ng_add_obj(OBJ_WARP_IN, cx, cy);
@@ -573,6 +600,7 @@ static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 	} else {
 		ng_mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
 	}
+	layer.arrive_face = arrival_facing();
 }
 
 /* What a layer's rolls put on it: its services, gates and the rival. */
@@ -871,9 +899,12 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	int p = (depth - 1) % CYCLE_LAYERS;
 	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
 	/* an act's three layers each in another of the area's layouts and
-	 * signatures (docs/LEVEL_DESIGN.md, Identity) */
-	int planned, sig;
-	layer_plan(seed, depth, biome, kind, kit, &planned, &sig);
+	 * signatures (docs/LEVEL_DESIGN.md, Identity), */
+	LayerPlan plan;
+	layer_plan(seed, depth, biome, kind, kit, &plan);
+	int planned = plan.layout, sig = plan.sig;
+	/* ... arrived at from another side of the screen (Arrivals) */
+	layer.arrive_side = plan.side;
 	/* (a super boss's arena is bigger: docs/BOSSES.md, Super bosses) */
 	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
 	build_layout(planned, sig, biome, size, rise, arena_n, &arena);

@@ -575,7 +575,7 @@ static bool astray_update(void) {
 	if (emu_read8(BN6_MAP_GROUP) != D.group || emu_read8(BN6_MAP_NUMBER) != D.number) {
 		if (++D.astray > ASTRAY_FRAMES) {
 			D.astray = 0;
-			emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+			emu_warp(D.group, D.number, D.start_x, D.start_y, D.start_face);
 		}
 		return true;
 	}

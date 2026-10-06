@@ -36,6 +36,8 @@ WALK = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
 # (an act's first layer: its card and MegaMan's words paged, then the map held from frame 730)
 MAP_HELD = '250:' + ',6:A,24:' * 14 + ',60:,40:SELECT'
 SEASIDE_4 = ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '2']
+# (a layer's arrival words paged, MegaMan still where he arrived by frame 530)
+ARRIVED = '150:,' + '4:A,6:,' * 30 + '80:'
 # name, game options, environment, frame
 SCENES = [
     # (BlastMan's arena in the Robot Control Comp, as the autopilot walks in)
@@ -76,6 +78,13 @@ SCENES = [
     ('identity-green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
     ('identity-graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '4', '--seed', '5', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
     ('identity-undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    # (issue #106's arrivals: a Sky and an Undernet layer's map whole,
+    # MegaMan where he arrived, at the top before; then the arrival in the
+    # game, the way he faces, straight down before)
+    ('arrival-sky', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('arrival-undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('arrival-sky-in', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '1', '--dev', 'quiet', '--input', ARRIVED], {}, 530),
+    ('arrival-undernet-in', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '4', '--seed', '1', '--dev', 'quiet', '--input', ARRIVED], {}, 530),
     # (0.9.0's: a phone held upright, the whole screen at a third of its
     # pixels, a thumb on the D-pad: the picture 960 wide between black bars,
     # then filling the width; the entry's last number shrinks the screen)

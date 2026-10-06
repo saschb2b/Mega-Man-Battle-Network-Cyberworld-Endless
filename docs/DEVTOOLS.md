@@ -55,9 +55,10 @@ Output in `.build/atlas`:
   or a stair's stamp covers; `off near` and `off edge` are the magenta and
   yellow tiles, `at mouths` the services and navis
   beside a panel-wide stretch of the floor as drawn (the atlas fails on
-  any: they stand in the way on), and `signature` the room the layer is
+  any: they stand in the way on), `signature` the room the layer is
   remembered by (docs/LEVEL_DESIGN.md, Identity; `none` where its layout
-  found it no place).
+  found it no place), and `arrives` the side of the screen MegaMan arrives
+  at and the way he faces there (Arrivals).
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the
@@ -161,6 +162,16 @@ ones, and its length: per map, then the area's average
 the unit tests run on the layers too: `CW_WAY_STATS=1 build/host/test_core`
 prints them per area). The originals' counts set `narrow_cap`
 (docs/LEVEL_DESIGN.md, Navigation).
+
+`--atlas arrivals` reads where BN6's own maps put MegaMan as he arrives
+(the same file, `navstudy_arrivals`): every jack-in destination and every
+warp of another map (the real world's groups and the internet's, but a
+teleport within one map and a jack-out) onto each area's original maps,
+each place and facing once, the side of the map's floor on the screen it
+lies at (its edge within a quarter of the floor's box, else the middle) and
+whether the way it faces MegaMan points into the map; per map, per area,
+and over the net areas' own maps (groups 0x90-0x96) once each. They set the
+layers' arrivals (docs/LEVEL_DESIGN.md, Arrivals).
 
 ## Pacing report: every act's battles and guardians
 

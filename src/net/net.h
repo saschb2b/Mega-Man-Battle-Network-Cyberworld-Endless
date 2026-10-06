@@ -160,7 +160,15 @@ typedef struct {
 	int braziers;      /* the braziers its props hold: a number door's answer (issue #47) */
 	int sig;           /* its signature (SIG_*, net_signature.h: the room it is remembered by, issue #98) */
 	int sig_room;      /* ... that room, -1 where the layout found it no place */
+	int arrive_side;   /* the side of the screen MegaMan arrives at (SIDE_*, issue #106) */
+	int arrive_face;   /* ... and the way he faces there, BN6's (0-7, UP first): along the way on */
 } Layer;
+
+/* The sides of the screen a layer's arrival lies at (docs/LEVEL_DESIGN.md,
+ * Arrivals): top and bottom by x + y, left and right by x - y. */
+enum { SIDE_TOP, SIDE_BOTTOM, SIDE_LEFT, SIDE_RIGHT, SIDE_COUNT };
+/* The side every layer arrives at (tools and tests; -1: the plan's). */
+extern int arrive_forced;
 
 extern Layer layer;
 

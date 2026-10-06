@@ -205,6 +205,14 @@ static bool same_layer(void) {
 	return same;
 }
 
+/* The way MegaMan faces where a CONTINUE puts him at (x, y): as he stood
+ * there, or at the layer's start as he arrived, along the way on (issue
+ * #106). */
+static int resume_face(int x, int y) {
+	int face = emu_read8(BN6_PLAYER_FACING);
+	return (x == D.start_x && y == D.start_y) || face > 7 ? D.start_face : face;
+}
+
 /* MegaMan into the layer's map again, the game reloading its NPCs and
  * tiles from this build's tables, which a state does not hold: where he
  * stands (a build that lays the layer out otherwise may have no floor
@@ -214,7 +222,7 @@ void layer_reenter(bool at_start) {
 	if (at_start || !netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H ||
 	    (layer.cell[cy][cx] != C_PATH && layer.cell[cy][cx] != C_PROPPED))
 		x = D.start_x, y = D.start_y;
-	emu_warp(D.group, D.number, x, y, 4);
+	emu_warp(D.group, D.number, x, y, resume_face(x, y));
 }
 
 /* choices made before the checkpoint stay made */
@@ -325,7 +333,7 @@ bool director_resume(void) {
 		return true;
 	}
 	/* no state (a run from before the game engine): enter the layer fresh */
-	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	emu_warp(D.group, D.number, D.start_x, D.start_y, D.start_face);
 	D.checkpoint = true;
 	return true;
 }

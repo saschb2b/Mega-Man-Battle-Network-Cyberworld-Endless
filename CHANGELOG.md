@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **MegaMan arrives from any side of a layer** (issue #106). He arrived at
+  the top of the screen on nearly every layer, facing straight down, so
+  every layer was walked top to bottom. BN6's own maps, read from the ROM
+  (`--atlas arrivals`: every jack-in and every warp onto the net areas'
+  maps, 54 places), put him at the top, the bottom, the left and the right
+  about as often, always facing along one of the world's axes into the
+  map. Each layer now plans its side: an act's three layers arrive at three
+  sides, and an act never opens at the side the last one closed at.
+  MegaMan arrives on the pad nearest that side, facing along the way's
+  first leg, everywhere he enters a layer: from the last layer's exit pad,
+  through Lan's HP's portals, at a CONTINUE (at the start; elsewhere as he
+  stood). Over the study's runs he arrives at the top 32%, the bottom 29%,
+  the left 19% and the right 18% (88%, 0%, 9% and 2% before), facing into
+  the layer 97%; the way still runs through the signature (96%), and walks
+  from the left or right are a tenth shorter. The Aquarium's and Mr.
+  Weather's acts, one layout round one signature, no longer build one
+  layer three times: each is entered from another side. The atlas report
+  names each layer's arrival. This build makes layers differently, so a
+  CONTINUE starts the layer afresh.
 - **CONTINUE no longer comes back with MegaMan stuck** (issue #23). Runs
   continued from their saves came back on the map with MegaMan unable to
   walk or open the PET, while L, the map and the dev menu still worked: the

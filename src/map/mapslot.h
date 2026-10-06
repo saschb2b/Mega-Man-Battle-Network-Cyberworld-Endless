@@ -81,6 +81,9 @@ void mapslot_warp(uint32_t list, int entry, int group, int number, int x, int y,
 /* BN6's jack-in destination `index` (bn6f byte_80984C8): its map and
  * world (x, y); false for none, or the one the town rewrites. */
 bool mapslot_jack_record(int index, int *group, int *number, int *x, int *y);
+/* ... any of the 43 as the game has it, and the way it faces MegaMan
+ * (0-7, UP first; the arrivals study, docs/LEVEL_DESIGN.md). */
+bool mapslot_jack_original(int index, int *group, int *number, int *x, int *y, int *facing);
 
 /* What the map's checks say (section-3 triggers 0xF0 + n, answered by A):
  * script[n] of `archive` (a text archive's bytes; 0xFF none). The archive
