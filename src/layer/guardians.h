@@ -76,6 +76,9 @@ int guardian_sprite(int navi);
 /* How guardian `navi` stands on the net facing `face` (the overworld's
  * eighths: 1 up-right, 3 down-right, 5 down-left, 7 up-left). */
 NpcBody guardian_body(int navi, int face);
+/* ... and a super boss's (Bass, the Cybeast's beast; docs/BOSSES.md, Super
+ * bosses), with his pose and what he stands in after it */
+SuperBody super_body(int navi, int face);
 /* The face a guardian speaks with: his mugshot, or the one set for him
  * (Falzar's Navis, whose faces Gregar lacks: a portrait, portrait.c), else
  * none. */

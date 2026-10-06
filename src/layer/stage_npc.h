@@ -11,6 +11,8 @@ typedef struct {
 	int gone;     /* the guardian logs out, deleted */
 	int reward;   /* its Guardian Data shows */
 	int taken;    /* ... and has been taken */
+	int pose;     /* a super boss strikes his pose (npc_super) */
+	int seal;     /* Bass's stone shakes (npc_seal) */
 } StageFlags;
 
 /* A guardian's body on the net: a sprite (its list and number), the
@@ -34,5 +36,25 @@ uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int 
 /* A floor pad (sprite list `category`, `index`) that appears once
  * `open_flag` is set. */
 uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag);
+
+/* A super boss's body (docs/BOSSES.md, Super bosses): his sprite, the
+ * animation he stands in and his pose (NpcBody's; no log-in), how long the
+ * pose holds and what he stands in after it (Bass his cloak thrown off),
+ * and whether he fades slowly (the beast) */
+typedef struct {
+	NpcBody body;
+	int pose_frames, after;
+	bool slow;
+} SuperBody;
+/* A super boss at world (x, y, z): hidden until `appear`, when he stands
+ * there at once, out of the white; on `pose` his pose; on `gone` he fades
+ * away. Nobody can talk to him. */
+uint32_t npc_super(const SuperBody *b, int x, int y, int z, const StageFlags *f);
+/* Bass's dormant stone, BN6's own (sprite list 7 0x9B), its screen
+ * flickering where he sleeps: on `seal` it shakes with BN6's crack (sound
+ * 0xFE), on `appear` it lies in pieces, on `gone` its pieces fade with
+ * him. Nothing walks into it. */
+#define SEAL_SPRITE 0x9B
+uint32_t npc_seal(int x, int y, int z, const StageFlags *f);
 
 #endif

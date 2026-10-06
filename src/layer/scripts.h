@@ -54,6 +54,10 @@ int ta_secret_gate(TextArchive *t, int flag);
  * own) without opening the chat box. */
 #define SCRIPTS_AREA_MUSIC -1
 int ta_music(TextArchive *t, int song);
+/* Plays sound `sound` (BN6's ts_sound_play00), and fades the music out
+ * over `sixteenths` sixteen-frame steps, without opening the chat box. */
+int ta_sound(TextArchive *t, int sound);
+int ta_music_fade(TextArchive *t, int sixteenths);
 /* What a Guardian Data adds for the NaviCust (docs/NAVICUST.md): an
  * ExpMemry, then a draft of `n` programs (give ids and colours, with
  * MegaMan's words for each) or none for `skip_frags` BugFrags; `teach` adds
@@ -78,6 +82,7 @@ typedef struct {
 	int taken_flag;          /* event flag set on every branch of the draft */
 	int hp_memories;         /* HPMemory through the game's own item, +20 max HP each */
 	const ScriptsDraft *draft;   /* the NaviCust's draft, NULL for none */
+	const char *head;        /* its first line, NULL for "MegaMan downloaded NAME's Guardian Data!" (a super boss's own) */
 } ScriptsReward;
 
 /* A guardian's Guardian Data, checked: his power, then the HPMemory, his

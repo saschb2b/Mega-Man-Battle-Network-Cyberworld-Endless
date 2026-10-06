@@ -11,6 +11,7 @@
 
 #include "bn6.h"
 #include "bn6_fields.h"
+#include "boss_grand.h"
 #include "cinema.h"
 #include "debug.h"
 #include "director.h"
@@ -21,12 +22,10 @@
 #include "gamecall.h"
 #include "guardians.h"
 #include "loot.h"
-#include "net.h"
 #include "net_arena.h"
 #include "netmap.h"
 #include "powers.h"
 #include "rivals.h"
-#include "run.h"
 #include "save.h"
 
 #define WALK_NEAR 52   /* world units from the guardian MegaMan walks up to */
@@ -155,25 +154,33 @@ static void title_card(void) {
 void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 	B.archive = archive;
 	B.g = *g;
+	/* (a super boss's staging: boss_grand.c) */
+	if (super_boss(g->navi)) grand_begin(archive, g);
 	B.door = B.door_taken = false;
 	to(g->navi ? B_WAIT : B_NONE);
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
 }
 
-/* MegaMan's walk to the arena's middle, with no random battle from its
- * steps: one rolled as a player ran in, and it was fought under the
- * staging's bars (issue #24); the game lifts the flag as it enters the
- * next map. */
-static void enter_walk(void) {
+/* MegaMan's walk to the arena's middle, `frames` long and to `near`
+ * units of the guardian, with no random battle from its steps: one rolled
+ * as a player ran in, and it was fought under the staging's bars (issue
+ * #24); the game lifts the flag as it enters the next map. */
+static void enter_walk(int frames, int near) {
 	flag_set(BN6_FLAG_NO_ENCOUNTERS);
-	cinema_walk(B.t < 60 ? walk_toward(B.g.x, B.g.y, WALK_NEAR) : 0);
+	cinema_walk(B.t < frames ? walk_toward(B.g.x, B.g.y, near) : 0);
 }
 
 /* The guardian waits: MegaMan steps in, the run is saved at the arena's
  * door, and the staging begins on the next frame. */
 static void wait_update(void) {
 	if (!entered()) B.door_taken = false;   /* (out of the arena: the next step in is a new approach) */
+	/* (a super boss's approach: the theme fading near his arena, the
+	 * floor shaking before the Cybeast) */
+	if (super_boss(B.g.navi)) {
+		int x, y;
+		grand_approach(near_arena(0) || (megaman_panel(&x, &y) && arena_approach(x, y)));
+	}
 	if (!steps_in()) return;
 	/* the run saved at the arena's door first, on the last frame he is
 	 * free (the owner's: bigger RPGs save before a boss), so a quit in the
@@ -215,16 +222,56 @@ static void fight_begin(void) {
 	emu_battle_force(&e);
 }
 
+/* The entrance: MegaMan walks up, the prelude, the guardian's log-in with
+ * a shake, his card; a super boss's is boss_grand.c's, longer */
+static void enter_update(void) {
+	if (super_boss(B.g.navi)) {
+		enter_walk(GRAND_WALK_FRAMES, GRAND_WALK_NEAR);
+		if (B.t == GRAND_WALK_FRAMES) cinema_input(CINEMA_HOLD);
+		if (grand_enter(B.t)) to(B_TITLE);
+		return;
+	}
+	enter_walk(60, WALK_NEAR);
+	if (B.t == 60) cinema_input(CINEMA_HOLD);
+	if (B.t == 30) run_script(B.g.prelude);
+	if (B.t == 50) { flag_set(LAYER_BOSS_APPEAR_FLAG); cinema_shake(16, 3); }
+	if (B.t == 80) { title_card(); to(B_TITLE); }
+}
+
+/* His last word read: a guardian logs out in a flash (a super boss's fall
+ * boss_grand.c's) */
+static void last_word_done(void) {
+	cinema_input(CINEMA_HOLD);
+	cinema_letterbox(true);
+	if (!super_boss(B.g.navi)) {
+		flag_set(LAYER_BOSS_GONE_FLAG);
+		cinema_flash(20);
+	}
+	to(B_LOGOUT);
+}
+
+/* He fades out; then what he leaves behind shows, and MegaMan goes to take
+ * it, the area's theme back (after the Cybeast the Net stays quiet) */
+static void logout_update(void) {
+	bool grand = super_boss(B.g.navi);
+	if (grand ? !grand_fall(B.t) : B.t < 60) return;
+	flag_set(LAYER_REWARD_FLAG);
+	cinema_letterbox(false);
+	cinema_input(CINEMA_FREE);
+	if (!grand || grand_theme_after()) run_script(B.g.theme);
+	/* (a checkpoint here, which boss_resume takes up with the Guardian
+	 * Data waiting: a playtester quit in its talk after deleting HeatMan,
+	 * and his CONTINUE began the layer, and HeatMan, again) */
+	B.checkpoint = true;
+	to(B_REWARD);
+}
+
 void boss_update(void) {
 	++B.t;
 	switch (B.state) {
 	case B_WAIT: wait_update(); break;
 	case B_ENTER:
-		enter_walk();
-		if (B.t == 60) cinema_input(CINEMA_HOLD);
-		if (B.t == 30) run_script(B.g.prelude);
-		if (B.t == 50) { flag_set(LAYER_BOSS_APPEAR_FLAG); cinema_shake(16, 3); }
-		if (B.t == 80) { title_card(); to(B_TITLE); }
+		enter_update();
 		break;
 	case B_TITLE:
 		if (cinema_busy()) break;
@@ -252,25 +299,10 @@ void boss_update(void) {
 		to(B_LAST_WORD);
 		break;
 	case B_LAST_WORD:
-		if (!chat_done()) break;
-		cinema_input(CINEMA_HOLD);
-		cinema_letterbox(true);
-		flag_set(LAYER_BOSS_GONE_FLAG);
-		cinema_flash(20);
-		to(B_LOGOUT);
+		if (chat_done()) last_word_done();
 		break;
 	case B_LOGOUT:
-		if (B.t < 60) break;
-		/* what it leaves behind; MegaMan goes to take it */
-		flag_set(LAYER_REWARD_FLAG);
-		cinema_letterbox(false);
-		cinema_input(CINEMA_FREE);
-		run_script(B.g.theme);
-		/* (a checkpoint here, which boss_resume takes up with the Guardian
-		 * Data waiting: a playtester quit in its talk after deleting
-		 * HeatMan, and his CONTINUE began the layer, and HeatMan, again) */
-		B.checkpoint = true;
-		to(B_REWARD);
+		logout_update();
 		break;
 	case B_REWARD:
 		if (!flag_get(LAYER_REWARD_TAKEN_FLAG) || emu_read8(BN6_CHATBOX)) break;

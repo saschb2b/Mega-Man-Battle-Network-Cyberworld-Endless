@@ -103,6 +103,18 @@ NpcBody guardian_body(int navi, int face) {
 	return b;
 }
 
+/* The super bosses as they stand on the net (docs/BOSSES.md, Super
+ * bosses), in BN6's own sprites and animations as its scenes use them:
+ * Bass cloaked, drawn only towards the camera as BlastMan is (2 to 5),
+ * throwing his cloak open (26) to stand without it (25), as he fights;
+ * the Cybeast's beast crouching (28), rearing with a roar (29), its sprite
+ * drawn facing left, mirrored to face right. */
+SuperBody super_body(int navi, int face) {
+	if (navi == SUPER_BASS)
+		return (SuperBody){ { 6, guardian_sprite(navi), face == 1 ? 3 : face == 7 ? 5 : face, false, -1, 26 }, 16, 25, false };
+	return (SuperBody){ { 6, guardian_sprite(navi), 28, face >= 1 && face <= 3, -1, 29 }, 60, 28, true };
+}
+
 void guardian_set_face(int navi, int face) {
 	if (navi > 0 && navi < NGUARDIANS) set_face[navi] = face < 0 ? 0 : face + 1;
 }

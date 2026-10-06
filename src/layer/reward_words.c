@@ -174,7 +174,8 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 	int i = ta_script(t);
 	char head[64];
 	bool first = true;
-	snprintf(head, sizeof head, "MegaMan downloaded %s's Guardian Data!", r->name);
+	if (r->head) snprintf(head, sizeof head, "%s", r->head);
+	else snprintf(head, sizeof head, "MegaMan downloaded %s's Guardian Data!", r->name);
 	ta_page(t, FACE_NONE, head, first);
 	first = false;
 	if (r->power) ta_pages(t, r->power, FACE_NONE, &first);

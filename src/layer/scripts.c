@@ -178,3 +178,21 @@ void ta_flag_clear(TextArchive *t, int flag) {
 	uint8_t b[] = { 0xEA, 0x01, (uint8_t)flag, (uint8_t)(flag >> 8) };
 	ta_bytes(t, b, sizeof b);
 }
+
+int ta_sound(TextArchive *t, int sound) {
+	int i = ta_script(t);
+	uint8_t play[] = { 0xFD, 0x00, (uint8_t)sound, (uint8_t)(sound >> 8) };   /* ts_sound_play00 */
+	ta_bytes(t, play, sizeof play);
+	ta_end(t);
+	return i;
+}
+
+int ta_music_fade(TextArchive *t, int sixteenths) {
+	int i = ta_script(t);
+	/* ts_sound_fade_out on the music's slot, 0x1F, as BN6's own scenes
+	 * fade it */
+	uint8_t fade[] = { 0xFD, 0x05, 0x1F, (uint8_t)sixteenths };
+	ta_bytes(t, fade, sizeof fade);
+	ta_end(t);
+	return i;
+}
