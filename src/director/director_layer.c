@@ -348,11 +348,12 @@ static bool build_layer(void) {
 	roll_encounter();
 	D.start_x = D.objs.start_x;
 	D.start_y = D.objs.start_y;
+	D.start_face = layer.arrive_face;
 	D.free_x = D.start_x;
 	D.free_y = D.start_y;
 	D.wedged = 0;
 	/* until MegaMan takes it, the exit pad leads back to the layer's start */
-	mapslot_exit_to(D.group, D.number, D.start_x, D.start_y, 4);
+	mapslot_exit_to(D.group, D.number, D.start_x, D.start_y, D.start_face);
 	D.active = true;
 	D.frame = 0;
 	D.gameover = false;
@@ -434,7 +435,7 @@ bool director_start_run(void) {
 	if (home_run_start(abandoned)) return true;
 	fprintf(stderr, "town: not built; starting in the net\n");
 	lock_run();
-	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	emu_warp(D.group, D.number, D.start_x, D.start_y, D.start_face);
 	D.checkpoint = true;
 	return true;
 }
@@ -460,7 +461,7 @@ bool director_start_layer(void) {
 	note_folder_codes();
 	if (!new_layer(false)) return false;
 	lock_run();
-	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	emu_warp(D.group, D.number, D.start_x, D.start_y, D.start_face);
 	D.checkpoint = true;
 	return true;
 }

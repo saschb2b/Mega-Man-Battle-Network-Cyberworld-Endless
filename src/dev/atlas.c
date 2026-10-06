@@ -82,6 +82,11 @@ static void write_cells(const char *dir, int biome, int layout, int depth, uint3
 	}
 }
 
+/* (the report's: the side of the screen a layer arrives at, SIDE_*, and
+ * BN6's facings, UP first) */
+static const char *const side_names[SIDE_COUNT] = { "top", "bottom", "left", "right" };
+static const char *const face_names[8] = { "up", "up-right", "right", "down-right", "down", "down-left", "left", "up-left" };
+
 /* A layer of `area` (a BN6 biome's own, or another game's), laid out by
  * `biome`'s rules. */
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
@@ -182,11 +187,11 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 		}
 	}
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1;
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s\n",
 		area, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
 		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.off_near, tiles_stats.off_edge,
 		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
-		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig]);
+		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig], side_names[layer.arrive_side & 3], face_names[layer.arrive_face & 7]);
 }
 
 /* A view of an area's map: its panels as the tiles learn them (as text,
@@ -413,8 +418,10 @@ static void stair_layers(const char *dir, FILE *report, int b, int area, int see
 }
 
 int atlas_run(const char *spec) {
-	/* ("nav": the way across BN6's own maps instead, navstudy.c) */
+	/* ("nav": the way across BN6's own maps instead, navstudy.c; "arrivals"
+	 * where MegaMan arrives on them) */
 	if (!strcmp(spec, "nav")) return navstudy_run();
+	if (!strcmp(spec, "arrivals")) return navstudy_arrivals();
 	/* DIR[:BIOMES[:SEEDS]]: BIOMES "all" or a comma list, SEEDS per layout */
 	char dir[512] = ".build/atlas", biomes[256] = "all";
 	int seeds = 1;

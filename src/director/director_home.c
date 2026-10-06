@@ -93,7 +93,7 @@ bool home_go_back(int k) {
 		run.clock = was_clock;
 		return false;
 	}
-	lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, ARRIVE_FACE);
+	lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, D.start_face);
 	return true;
 }
 
@@ -119,7 +119,7 @@ const RunWay *home_ways(int *n, bool *dark_sealed) {
  * first way's) */
 static bool hp_ready(void) {
 	if (!lanhp_install()) return false;
-	for (int k = 0; k < nways; ++k) lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, ARRIVE_FACE);
+	for (int k = 0; k < nways; ++k) lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, D.start_face);
 	return true;
 }
 
@@ -133,7 +133,7 @@ bool home_take_way(int k) {
 	taken = k;
 	if (emu_debug_on()) fprintf(stderr, "home: way %d taken, area %d\n", k, ways[k].biome);
 	if (!new_layer(false)) return false;
-	lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, ARRIVE_FACE);
+	lanhp_portal(k, D.group, D.number, D.start_x, D.start_y, D.start_face);
 	return true;
 }
 

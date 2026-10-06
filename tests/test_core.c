@@ -916,6 +916,7 @@ static void test_layer_make(void) {
 		h = mix(mix(mix(mix(mix(h, layer.biome), layer.kind), layer.boss_layer), layer.boss_navi), layer.exit_room);
 		h = mix(mix(mix(mix(h, layer.arena), layer.ante), layer.arena_dir), layer.layout);
 		h = mix(mix(h, layer.sig), layer.sig_room);
+		h = mix(mix(h, layer.arrive_side), layer.arrive_face);
 		h = mix(h, layer.nprops);
 		for (int i = 0; i < layer.nprops; ++i) {
 			const NetProp *p = &layer.props[i];
@@ -2189,6 +2190,75 @@ static void test_identity(void) {
 	run = kept;
 }
 
+/* Which side of the layer's floor on the screen MegaMan arrives at (SIDE_*,
+ * SIDE_COUNT for the middle: none within a quarter of the box), and whether
+ * the way he faces points into the layer, towards its middle (a unit of
+ * x - y 16 pixels across, of x + y 8 down), as src/dev/navstudy.c classes
+ * BN6's own maps' arrivals. */
+static int arrival_side(bool *into) {
+	static const int fu[8] = { 0, 1, 2, 1, 0, -1, -2, -1 }, fv[8] = { -2, -1, 0, 1, 2, 1, 0, -1 };
+	double u0 = 1e9, u1 = -1e9, v0 = 1e9, v1 = -1e9;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (layer.cell[y][x] != C_VOID) {
+				u0 = fmin(u0, x - y); u1 = fmax(u1, x - y);
+				v0 = fmin(v0, x + y); v1 = fmax(v1, x + y);
+			}
+	double u = layer.obj[0].x - layer.obj[0].y, v = layer.obj[0].x + layer.obj[0].y;
+	double d[4] = { (v - v0) / (v1 - v0), (v1 - v) / (v1 - v0), (u - u0) / (u1 - u0), (u1 - u) / (u1 - u0) };
+	int side = 0, f = layer.arrive_face & 7;
+	for (int k = 1; k < 4; ++k) if (d[k] < d[side]) side = k;
+	*into = 4 * fu[f] * ((u0 + u1) / 2 - u) + fv[f] * ((v0 + v1) / 2 - v) > 0;
+	return d[side] > 0.25 ? SIDE_COUNT : side;
+}
+
+/* Arrivals (docs/LEVEL_DESIGN.md, Arrivals, issue #106): over the runs of
+ * test_identity, MegaMan arrives at every side of the screen (BN6's own maps
+ * at each about as often), facing along one of the world's axes into the
+ * layer; an act's three layers at three sides, and the act after it not
+ * opening at the side it closed at; and so no act repeats a layer, its
+ * layout, signature and side, though its area has one layout and one
+ * signature (the Aquarium's, Mr. Weather's). */
+static void test_arrivals(void) {
+	Run kept = run;
+	int layers = 0, sides[SIDE_COUNT + 1] = { 0 }, axes = 0, into_n = 0, act_repeats = 0, bound_repeats = 0, acts = 0, act_twins = 0;
+	for (uint32_t r = 1; r <= 40; ++r) {
+		memset(&run, 0, sizeof run);
+		run.seed = r * 2654435761u + 99u;
+		for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 5);
+		for (int a = 0; a < 6; ++a) run.biome_order[a] = (uint8_t)((r * 6 + (uint32_t)a) % BIOME_COUNT);
+		int act[3][3] = { { 0 } }, prev_side = -1;
+		for (int d = 1; d <= 18; ++d) {
+			int b = biome_for_depth(d), k = layer_in_act(d);
+			LayerKit kt = area_kit(b);
+			layer_generate(run.seed ^ (uint32_t)(d * 2654435761u), d, b, LAYER_NORMAL, &kt);
+			++layers;
+			bool into;
+			++sides[arrival_side(&into)];
+			into_n += into;
+			axes += layer.arrive_face % 2 == 1;
+			if (k == 0 && d > 1) bound_repeats += layer.arrive_side == prev_side;
+			act[k][0] = layer.layout; act[k][1] = layer.sig; act[k][2] = layer.arrive_side;
+			for (int j = 0; j < k; ++j) {
+				act_repeats += act[j][2] == act[k][2];
+				act_twins += act[j][0] == act[k][0] && act[j][1] == act[k][1] && act[j][2] == act[k][2];
+			}
+			acts += k == 2;
+			prev_side = layer.arrive_side;
+		}
+	}
+	for (int s = 0; s < SIDE_COUNT; ++s) CHECK(sides[s] * 100 >= layers * 12, "arrivals at side %d on %d of %d layers", s, sides[s], layers);
+	CHECK(sides[SIDE_TOP] * 100 <= layers * 45, "arrivals at the top on %d of %d layers", sides[SIDE_TOP], layers);
+	CHECK(axes == layers, "MegaMan facing along a world axis on %d of %d layers", axes, layers);
+	CHECK(into_n * 100 >= layers * 90, "MegaMan facing into the layer on %d of %d", into_n, layers);
+	CHECK(act_repeats == 0, "%d of an act's layers arrive at a side another of its layers did", act_repeats);
+	CHECK(bound_repeats == 0, "%d acts open at the side the act before closed at", bound_repeats);
+	CHECK(act_twins == 0, "%d of %d acts repeat a layer: its layout, signature and side", act_twins, acts);
+	printf("  arrivals: top %d, bottom %d, left %d, right %d, the middle %d of %d layers; facing into the layer on %d; %d acts repeating a layer\n",
+		sides[SIDE_TOP], sides[SIDE_BOTTOM], sides[SIDE_LEFT], sides[SIDE_RIGHT], sides[SIDE_COUNT], layers, into_n, act_twins);
+	run = kept;
+}
+
 /* The touch controls: on the screen, clear of the picture and of each
  * other where there is room, thumb sized, and what a finger holds. */
 static bool boxes_meet(const TouchBox *a, const TouchBox *b) {
@@ -3138,6 +3208,7 @@ int main(void) {
 	test_layer_make();
 	test_layouts_build();
 	test_identity();
+	test_arrivals();
 	test_stairs();
 	test_arrow();
 	test_kept_walk();

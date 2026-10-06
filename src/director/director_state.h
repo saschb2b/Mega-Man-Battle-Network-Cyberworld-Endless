@@ -18,6 +18,7 @@ typedef struct {
 	bool checkpoint;       /* save once MegaMan has arrived */
 	bool gameover;         /* the game's GAME OVER is playing */
 	int start_x, start_y;
+	int start_face;        /* the way MegaMan faces there: along the way on (layer.arrive_face, issue #106) */
 	LayerObjs objs;
 	unsigned chosen;       /* choices already acted on (bit per choice) */
 	bool challenge;        /* a challenge battle was started */

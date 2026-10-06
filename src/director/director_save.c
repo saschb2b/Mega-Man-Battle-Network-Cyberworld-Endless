@@ -183,6 +183,14 @@ static void resume_choices(void) {
 		}
 }
 
+/* The way MegaMan faces where a CONTINUE puts him at (x, y): as he stood
+ * there, or at the layer's start as he arrived, along the way on (issue
+ * #106). */
+static int resume_face(int x, int y) {
+	int face = emu_read8(BN6_PLAYER_FACING);
+	return (x == D.start_x && y == D.start_y) || face > 7 ? D.start_face : face;
+}
+
 /* CONTINUE at home: the town entered where Lan stood, its words said */
 static bool resume_home(void) {
 	spins_sync();
@@ -279,7 +287,7 @@ bool director_resume(void) {
 		if (!netmap_panel(x, y, &cx, &cy) || cx < 0 || cy < 0 || cx >= MAP_W || cy >= MAP_H ||
 		    (layer.cell[cy][cx] != C_PATH && layer.cell[cy][cx] != C_PROPPED))
 			x = D.start_x, y = D.start_y;
-		emu_warp(D.group, D.number, x, y, 4);
+		emu_warp(D.group, D.number, x, y, resume_face(x, y));
 		/* where they are, again; the arrival's words were said before */
 		begin_area(false);
 		act_note_apply();
@@ -288,7 +296,7 @@ bool director_resume(void) {
 		return true;
 	}
 	/* no state (a run from before the game engine): enter the layer fresh */
-	emu_warp(D.group, D.number, D.start_x, D.start_y, 4);
+	emu_warp(D.group, D.number, D.start_x, D.start_y, D.start_face);
 	D.checkpoint = true;
 	return true;
 }

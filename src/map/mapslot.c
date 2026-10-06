@@ -42,6 +42,7 @@
 #define MAP_TEXT_ARCHIVES 0x08040794u /* per map, its LZ77 text archive (bn6f mapPtrs80407C0: real world, internet) */
 #define JACK_IN_RECORDS 0x08099A00u /* 20-byte jack-in destinations (bn6f byte_80984C8) */
 #define JACK_IN_RECORD  42           /* the one the town rewrites (a comp the run never visits) */
+#define JACK_IN_RECORDS_N 43         /* (all of them) */
 
 static int half;
 static uint32_t arena;   /* the space allocation is from: 0 the layers' halves */
@@ -193,10 +194,16 @@ void mapslot_warp(uint32_t list, int entry, int group, int number, int x, int y,
 }
 
 bool mapslot_jack_record(int index, int *group, int *number, int *x, int *y) {
+	int facing;
+	return index < JACK_IN_RECORD && mapslot_jack_original(index, group, number, x, y, &facing);
+}
+
+bool mapslot_jack_original(int index, int *group, int *number, int *x, int *y, int *facing) {
 	uint32_t at = JACK_IN_RECORDS + (uint32_t)index * 20;
-	if (index < 0 || index >= JACK_IN_RECORD) return false;
+	if (index < 0 || index >= JACK_IN_RECORDS_N) return false;
 	*group = emu_read8(at);
 	*number = emu_read8(at + 1);
+	*facing = emu_read8(at + 3);
 	*x = (int32_t)emu_read32(at + 4) >> 16;
 	*y = (int32_t)emu_read32(at + 8) >> 16;
 	return true;
