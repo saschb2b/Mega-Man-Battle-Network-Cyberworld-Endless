@@ -81,27 +81,27 @@ how to verify it.
 | --- | ---: | ---: |
 | Code (routines, hooks, instructions) | 29 | 2 |
 | ROM data (tables, text, literals) | 93 | 22 |
-| ROM, code or data not told | 89 | 27 |
-| RAM (variables, structures) | 54 | 21 |
+| ROM, code or data not told | 89 | 37 |
+| RAM (variables, structures) | 56 | 23 |
 | I/O registers | 3 | 0 |
 | Fields of structures | 105 | 27 |
 | Event flags | 22 | 3 |
 | Values of fields | 40 | 13 |
-| Constants, sizes and counts | 64 | 25 |
-| All | 499 | 140 |
+| Constants, sizes and counts | 64 | 26 |
+| All | 501 | 153 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | PET, mail and key items | 40 | 1 |
 | Shops and traders | 31 | 0 |
 | NaviCust | 17 | 0 |
-| Chips and folders | 69 | 12 |
-| Battle | 102 | 91 |
+| Chips and folders | 69 | 13 |
+| Battle | 102 | 92 |
 | Text and fonts | 26 | 1 |
 | Sound | 8 | 2 |
 | Maps and the overworld | 111 | 15 |
 | Events and progress | 25 | 8 |
-| Engine core | 70 | 10 |
+| Engine core | 72 | 21 |
 
 <!-- end of what tools/symbols.py writes -->
 

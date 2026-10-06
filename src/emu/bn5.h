@@ -28,6 +28,12 @@
 #define BN5_FIND_ROWS     0x0801D62Cu /* the battlefield Mystery Data's finds: a row of eight u16 per its entity's byte 2 >> 4, one drawn by RNG & 0xE as it appears (0x080DB692) */
 #define BN5_FIND_ROW_COUNT 6          /* ... the rows its records name: 1000-3000 zenny, 1-3 BugFrags, from row 1 a chip or two */
 #define BN5_ENTITY_FIND   2           /* a BattleSettings entity's kind (byte 0 >> 4): a green Mystery Data, there where its byte 2 beats RNG % 15 (0x08006874) */
+#define BN5_RNG_PRIMARY   0x02001D40u /* u32, its random numbers (bn6f ePrimaryRngSeed, BN6's 0x020013F0): GetRNG 0x08001490 steps it, once a frame on a map
+                                       * and in battle (0x08004CA8); a battle keeps it as it begins (0x080098D8) and puts it back after its opening (0x08009A0A),
+                                       * its rolls from there: the Mystery Data and its find, the reward, the viruses (docs/ROM_DATA.md, BN5's random numbers) */
+#define BN5_RNG_SECONDARY 0x02001C94u /* u32, its second ones (bn6f eSecondaryRngSeed, BN6's 0x02001120): GetRNGSecondary 0x080014C0 steps it twice a
+                                       * frame (0x0800031C, 0x08004CAC); a battle's folder is shuffled from it as the battle begins (0x08008D82): the first hand */
+#define BN5_RNG_XOR       0x873CA9E5u /* both words' step: x = ((x rotl 1) + 1) ^ this; SeedRNG 0x08001488 sets the first to 0xA338244F at the start */
 #define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
 #define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
 #define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */

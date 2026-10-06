@@ -565,6 +565,47 @@ static void buster_tell(void) {
 		rd8(s + (BN5_NAVI_SPEED - BN5_NAVI_STATS)) + 1, rd8(s + (BN5_NAVI_CHARGE - BN5_NAVI_STATS)) + 1);
 }
 
+/* ---- its random numbers, the run's (docs/ROM_DATA.md, BN5's random
+ * numbers): its core began each session from its boot state, and every
+ * run's first battle in its engine drew alike, whatever the run's seed
+ * (issue #102) ---- */
+
+/* Its RNG's step (GetRNG 0x08001490, BN6's own) */
+static uint32_t rng_step(uint32_t x) { return ((x << 1 | x >> 31) + 1u) ^ BN5_RNG_XOR; }
+
+/* A state of an RNG word from seed s: s mixed (murmur3's finaliser), and
+ * off the step's shortest cycles, where every roll would come out alike.
+ * The step parts the 2^32 states into 21 cycles: two of one state and one
+ * of nine, the next shortest of 983, SeedRNG's own of 2,794,329,874. Those
+ * eleven states, their lowest bit flipped, lie on cycles of 170 million
+ * states or more. */
+static uint32_t rng_word(uint32_t s) {
+	s ^= s >> 16;
+	s *= 0x85EBCA6Bu;
+	s ^= s >> 13;
+	s *= 0xC2B2AE35u;
+	s ^= s >> 16;
+	uint32_t x = s;
+	for (int k = 0; k < 9; ++k)
+		if ((x = rng_step(x)) == s) return s ^ 1u;
+	return s;
+}
+
+/* The battle's seed (battle_ask), and both RNG words written from it as
+ * BN5 begins the battle (step), whatever frames its map took before: its
+ * opening runs the same frames from there, so the battle's rolls are the
+ * seed's, the first word's (kept as it begins and put back after its
+ * opening: the Mystery Data and its find, the reward, the viruses) and the
+ * second's (the folder's shuffle: the first hand). */
+static uint32_t battle_seed;
+
+static void rng_in(void) {
+	uint32_t first = rng_word(battle_seed), second = rng_word(battle_seed ^ 0x5EC0DA27u);
+	core->rawWrite32(core, BN5_RNG_PRIMARY, -1, first);
+	core->rawWrite32(core, BN5_RNG_SECONDARY, -1, second);
+	if (emu_debug_on()) fprintf(stderr, "guest: its random numbers from seed %08X: %08X and %08X\n", battle_seed, first, second);
+}
+
 static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
 	memcpy(dark_in, mm->dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
@@ -749,8 +790,9 @@ bool guest_boot_waiting(void) { return active && phase == PH_BOOT; }
 /* (begun at once, or, its boot still under way, waiting for it, BN6's core
  * with it: guest_tick; a headless run waits for a thread's then and there,
  * its frames the same from run to run, as tools/play.py's replays need) */
-static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
+static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss, uint32_t seed) {
 	if (active || !record) return false;
+	battle_seed = seed;
 #ifndef __EMSCRIPTEN__
 	if (P.headless) boot_join(false);
 #endif
@@ -768,14 +810,14 @@ static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, c
 	return true;
 }
 
-bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) { return battle_ask(record, sc, mm, NULL); }
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm, uint32_t seed) { return battle_ask(record, sc, mm, NULL, seed); }
 
-bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm) {
+bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t seed) {
 	uint32_t record = guest_navi_record(XROM_BN5_COLONEL_US, boss->ai, boss->version);
 	if (emu_debug_on())
 		fprintf(stderr, "guest: guardian %d at version %d, record %08X, his HP %d, at most %d, his rows %d zenny\n", boss->ai, boss->version, record,
 			guest_navi_hp(XROM_BN5_COLONEL_US, boss->ai, boss->version, NULL), boss->hp_cap, boss->zenny);
-	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss);
+	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss, seed);
 }
 
 bool guest_active(void) { return active; }
@@ -861,6 +903,7 @@ static void step(uint32_t keys, bool quiet) {
 		core->rawWrite8(core, BN5_BATTLE_RESULT + 1, -1, 0);
 		wr16(BN5_REWARD, 0);
 		wr16(BN5_REWARD_FIND, 0);
+		rng_in();   /* (its random numbers the run's, from the frame it began) */
 	} else if (phase == PH_ASKED && frames > 600) finish(GUEST_ESCAPED);   /* (never began: nothing happened) */
 	/* (a DarkChip used: latched while its battle is fought, as leaving it
 	 * wipes the flag; not in the battle's first frames, which hold the last
@@ -894,8 +937,8 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm) {
-	(void)record; (void)sc; (void)mm;
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm, uint32_t seed) {
+	(void)record; (void)sc; (void)mm; (void)seed;
 	return false;
 }
 void guest_warm(void) {}
@@ -904,7 +947,7 @@ void guest_quit(void) {}
 int guest_boot_progress(void) { return -1; }
 int guest_boot_left_ms(void) { return -1; }
 bool guest_boot_waiting(void) { return false; }
-bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm) { (void)boss; (void)mm; return false; }
+bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t seed) { (void)boss; (void)mm; (void)seed; return false; }
 bool guest_possible(int xrom) { (void)xrom; return false; }
 int guest_kind_chips(int kind, uint16_t *out, int max) { (void)kind; (void)out; (void)max; return 0; }
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }

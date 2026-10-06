@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **BN5's battles roll as the run does** (issue #102). Every run's first
+  battle in BN5's engine drew alike: BN5's random numbers began from its
+  core's boot state each session, whatever the run's seed, so seeds 1 to
+  4 all opened on the same hand. Each battle there now starts BN5's two
+  random number words from the run, on the frame BN5 begins it: a random
+  battle's from the layer's seed and its battles so far, a guardian's
+  from the layer's seed. Its first hand, its green Mystery Data and find
+  and its reward differ from run to run as BN6's do, and the same seed
+  fights the same battle again, after a CONTINUE too.
 - **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
   place of its own, never at random. The endless net's Nest is the
   Cybeast's den: no copied guardian at its end but Gregar itself, in
