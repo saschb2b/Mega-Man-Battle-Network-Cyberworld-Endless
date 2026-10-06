@@ -2359,3 +2359,44 @@ Loop change: **a save's resume is tested by resuming it.** The PET save
 at home looked right ("Run saved"), and only CONTINUE showed it resumed
 on the next layer: a change to what or where the game saves is checked
 by a stop, a start and a CONTINUE, reading where it lands.
+
+## Session 71: home's order counter, a CONTINUE at home, act 2's first comp layers (kai 6/10; would keep playing, and recommend it with a warning about comp mazes)
+
+A short session by the owner's wish (117 calls, 28 minutes). kai CONTINUEd
+run 12 in Lan's HP after act 1, crossed town to AsterLand with L's errands
+and found the Order Service's clerk for the first time (BN6's own supplier
+call, ElcPuls1 S ordered), took the NetBattler's vow, saved with the PET in
+AsterLand and CONTINUEd there with the order and the request kept, then
+played Judge Tree Comp's layers 4 and 5: Chaud's call, ProtoMan on the
+walkway, the dealer's Aqua tip.
+
+Confirmed: the clerk from a step before the counter, L in AsterLand naming
+both keepers, the PET save at home and its CONTINUE, L's errands naming
+AsterLand's door.
+
+Raised and fixed in the iteration: the SubChip seller's list empty after a
+CONTINUE at home (BN6's screen shows only entries matching the list's ROM
+copy, which the CONTINUE rebuilt before the state brought back the saved
+list; home's shops are now set again after the load, as a layer's are:
+replayed to a full list); Chaud's second call repeating his first's opener.
+
+Misreads (replayed): the arrow "flipping" at a junction on layer 4 (it
+pointed into the side walkway for 8 frames as MegaMan ran past with B,
+then back at the turn; the third session to read it so); L's "upper
+right" after the battle taken for the vow's dealer (it was the exit's way
+from there, the arrow's walk on the map the same).
+
+Vanilla BN6: "OK! Roger that!" in Lan's portrait after "MegaMan, jack
+out?" (bn6f CompText87388A8 scripts unk11 and unk12 both show mugshot 0,
+Lan's); A pressed before a box's heart shows only finishing its text.
+
+Open: comp layers' signatures are plain studded plazas (layers 4 and 5 did
+not read as places); blocks beside a walkway that look joined; the pink pad
+in Lan's HP wanting MegaMan on its middle; a townsperson on AsterLand's
+doormat line; the town's arrow still the way home after L's errands.
+
+Cost: 117 calls; the triage, replays and two fixes about an hour.
+
+Loop change: **a junction is walked, never run.** The arrow turns a panel
+before a junction, 8 frames at a run: persona.md's harness note now says to
+let go of B two panels before any junction the arrow or the map shows.
