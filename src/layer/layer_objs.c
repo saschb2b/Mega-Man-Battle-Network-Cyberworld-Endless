@@ -686,6 +686,7 @@ static void install_dealer(Install *in, Talker *tk) {
 	layer_objs_dealer_named = tells;
 	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
 	ShopWords w = dealer_words(&talk);
+	if (emu_debug_on()) fprintf(stderr, "dealer: %s\n", w.hello);
 	tk->sprite = SPR_DEALER;
 	tk->script = ta_shop(in->text, SHOP_DEALER, FACE_NAVI, w.hello, w.again, w.sold_out, LAYER_DEALER_TOLD_FLAG);
 }

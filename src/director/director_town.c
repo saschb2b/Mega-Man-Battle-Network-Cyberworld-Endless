@@ -80,6 +80,7 @@ void home_entered(void) {
 #define HP_MOUTH_Y (-14)
 #define HP_MOUTH_HALF 8      /* the line's half-width the arrow wants */
 #define HP_MOUTH_NEAR 64     /* how near in x it turns onto the line */
+#define ASTER_NEAR 80        /* L names AsterLand's door from farther than this (world units, x and y summed) */
 
 static const char *hp_way(int *far) {
 	int x, y, px = bn6_player_x(), py = bn6_player_y(), f;
@@ -114,8 +115,11 @@ const char *home_status(void) {
 	/* (in the town, once a visit: the requests posted, AsterLand's order) */
 	if (at == HOME_PLACE_NONE && !D.errands_told) {
 		D.errands_told = true;
+		/* (AsterLand's door unnamed where Lan stands at it: a playtester
+		 * heard which way it was, just out of it, session 73) */
 		int ax, ay;
-		words = home_errands_words(words, run.job.kind == JOB_NONE, home_order_open(), home_places_aster_front(&ax, &ay) ? lies_at(ax, ay) : NULL);
+		bool aster = home_places_aster_front(&ax, &ay) && abs(ax - bn6_player_x()) + abs(ay - bn6_player_y()) > ASTER_NEAR;
+		words = home_errands_words(words, run.job.kind == JOB_NONE, home_order_open(), aster ? lies_at(ax, ay) : NULL);
 	}
 	return home_jobs_status(words);
 }

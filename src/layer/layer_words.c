@@ -38,27 +38,26 @@ static void dealer_word(char *word, size_t n, const DealerTalk *d, const char *b
 	for (int i = 0; i < nstock; ++i)
 		if (stock[i].kind == 2 && counter > 0 && chip_hits_with(stock[i].id) == counter && (i == 0 || !weak)) listed = true;
 	if (weak && listed) {
-		snprintf(word, n, "|Word is,%s can't stand %s chips!|My pick's first on the list.|%s%s", guardian(navi)->name,
+		snprintf(word, n, "|Word is,%s can't stand %s chips!|My pick's first on the list.%s%s", guardian(navi)->name,
 			elem_name(counter), brought, lands);
 		return;
 	}
 	/* (a weakness he found no chip of, as a few layers' rolls of Cursor
 	 * chips came to: the hardest hit, shop_dealer_stock) */
 	if (weak) {
-		snprintf(word, n, "|Word is,%s can't stand %s chips!|But I couldn't find any. Sorry!|Hit hard,then! My pick's "
-			"first on the list.|%s", guardian(navi)->name, elem_name(counter), brought);
+		snprintf(word, n, "|Word is,%s can't stand %s chips!|But I couldn't find any. Hit hard,then!|My pick's "
+			"first on the list.%s", guardian(navi)->name, elem_name(counter), brought);
 		return;
 	}
 	/* (KnightMan's armor turns every blow but while he swings or leaps: a
 	 * playtester learned it over three Custom screens, session 68) */
 	bool knight = guardian_older(navi) && guardian_older_ai(navi) == BN5_NAVI_KNIGHTMAN;
-	int k = snprintf(word, n, "|Word is,%s %s.|Hit hard%s! My pick's first on the list.|%s", guardian(navi)->name,
+	int k = snprintf(word, n, "|Word is,%s %s.|Hit hard%s! My pick's first on the list.", guardian(navi)->name,
 		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" :
 		knight ? "has no weak element.|His armor blocks all,but not when he swings or leaps" : "has no weak element",
-		knight ? ",then" : "", brought);
+		knight ? ",then" : "");
 	if (listed && k > 0 && (size_t)k < n)
-		snprintf(word + k, n - (size_t)k, "|The viruses here hate %s chips,though!|I've got one of those,too!",
-			elem_name(counter));
+		snprintf(word + k, n - (size_t)k, "|The viruses here hate %s chips! I've got one!", elem_name(counter));
 }
 
 /* (Rush's gap, and how many RushFood call him there: he comes for as many
@@ -72,7 +71,7 @@ static void dealer_rush(char *s, size_t n) {
 	if (hold > 1)
 		snprintf(s, n, "|And there's a gap %s,%d panels wide!|Rush comes when you hold a RushFood|for each panel. He eats just one!|"
 			"It's on my list,too!", where, hold);
-	else snprintf(s, n, "|And there's a gap %s!|Rush bridges it for one RushFood.|It's on my list,too!", where);
+	else snprintf(s, n, "|And there's a gap %s!|Rush bridges it for a RushFood. I've got some!", where);
 }
 
 /* (the keys he stocks, said: what each opens and where, issues #41, #14, #47) */
@@ -83,8 +82,7 @@ static void dealer_keys(char *hello, size_t n, const DealerTalk *d) {
 		size_t k = strlen(hello);
 		if (stock[i].kind != 1 || k >= n) continue;
 		if (stock[i].id == SUB_UNLOCKER)
-			snprintf(hello + k, n - k, "|Word is,there's purple data locked %s!|An Unlocker opens it. It's on my list!",
-				d->purple ? "on this layer" : "deeper in");
+			snprintf(hello + k, n - k, "|Got an Unlocker for the purple data %s!", d->purple ? "on this layer" : "deeper in");
 		else if (stock[i].id == ITEM_RUSH_FOOD)
 			dealer_rush(hello + k, n - k);
 		else if (stock[i].id == ITEM_WWW_ID)
@@ -120,7 +118,9 @@ ShopWords dealer_words(const DealerTalk *d) {
 	char word[280] = "";
 	int navi = d->navi, nstock = d->nstock;
 	const ShopItem *stock = d->stock;
-	const char *brought = nstock && stock[0].stock == 1 ? "It's my only one. Make it count!" : "I brought two. They go fast!";
+	/* (a box each made seven before his list, session 73: the count rides
+	 * on the pick's box, the greeting is one) */
+	const char *brought = nstock && stock[0].stock == 1 ? " Just the one!" : " I brought two!";
 	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
 	 * a hopping BlastMan two times in three) */
 	const char *lands = nstock && stock[0].kind == 2 && chip_family(stock[0].id) == 50
@@ -144,10 +144,10 @@ ShopWords dealer_words(const DealerTalk *d) {
 		: run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth)
 			/* (the run's last layer has no "from here": a playtester heard it there) */
 			? "The bottom of the Net,MegaMan!|Stock up! My last stop,and yours!"
-			: "Still at it,MegaMan?|Stock up! It only gets tougher from here!", word);
+			: "Still at it,MegaMan? Stock up!", word);
 	/* (met in this act already: the pick, in a line) */
 	if (d->again && d->tells)
-		snprintf(hello, sizeof hello, "Back again,MegaMan!|My pick for %s is first on the list!|%s", guardian(navi)->name, brought);
+		snprintf(hello, sizeof hello, "Back again,MegaMan!|My pick for %s is first on the list!", guardian(navi)->name);
 	dealer_keys(hello, sizeof hello, d);
 	return (ShopWords){ hello, "Back for more? Take a look!", "Sold out,MegaMan!|You bought every chip I had!" };
 }

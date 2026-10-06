@@ -129,8 +129,9 @@ const char *home_errands_words(const char *words, bool requests, bool order, con
 	/* (a playtester heard only the way home in town, and found the
 	 * request board by chance, session 69; then walked round AsterLand
 	 * twice to its door, session 70) */
-	int k = snprintf(buf, sizeof buf, "%s%s%s", words, requests ? "|@M Folks posted requests,Lan!|@M AsterLand's board,the club at school...|"
-		"@M And the man from Dad's lab,out here!" : "", order ? "|@M AsterLand can order us a chip,too!" : "");
+	/* (the three askers in one box: six boxes in all, session 73) */
+	int k = snprintf(buf, sizeof buf, "%s%s%s", words, requests ? "|@M Folks posted requests,Lan!|"
+		"@M AsterLand's board,the club,and the lab man out here!" : "", order ? "|@M AsterLand can order us a chip,too!" : "");
 	if ((requests || order) && aster && k > 0 && (size_t)k < sizeof buf) snprintf(buf + k, sizeof buf - (size_t)k, "|@M AsterLand's door is %s!", aster);
 	return buf;
 }

@@ -13,6 +13,12 @@
 - **The courier's "!!" goes once he is heard,** as a BN6 person's does,
   and he leaves the new requests out when L has named them in the town
   this visit: a playtester heard the same news twice.
+- **Shorter talks.** The Net Dealer's greeting is one box, his pick and
+  how many he brought another, and his word on an Unlocker, the viruses'
+  weakness or a one-panel gap one box shorter: the seven boxes a
+  playtester read before his list are four. L in the town names the
+  three askers in one box, and AsterLand's door only where Lan is not
+  standing at it.
 ## 0.11.1 (2026-10-06)
 
 - **The on-screen buttons answer the statistics' question.** On a phone
