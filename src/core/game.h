@@ -38,6 +38,10 @@ bool launcher_open(void);
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool emu_start_at_home;    /* ... or at home before its first layer's act (--scene home) */
+/* The saved run (peek_run's seed and depth) was saved at home, between
+ * acts: the title's CONTINUE says "Home" (scene_emu.c, by the director's
+ * act note). */
+bool emu_saved_home(uint32_t seed, int depth);
 extern bool title_summary;          /* the title opens on the finished run's summary */
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */

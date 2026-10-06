@@ -57,6 +57,12 @@ static void act_note_save(void) {
 }
 
 /* on CONTINUE, before the layer is built: its dealer's greeting reads it */
+bool director_saved_home(uint32_t seed, int depth) {
+	ActNote an = { 0 };
+	return save_read_blob_upto("run.act", ACT_NOTE_MAGIC, &an, sizeof an) && an.seed == seed && an.act == (depth - 1) / 3 &&
+		(an.where == SAVED_HOME || an.where == SAVED_HOME_HERE);
+}
+
 static void act_note_read(void) {
 	act_note_ok = save_read_blob_upto("run.act", ACT_NOTE_MAGIC, &act_note, sizeof act_note) && act_note.seed == run.seed &&
 		act_note.act == (run.depth - 1) / 3;

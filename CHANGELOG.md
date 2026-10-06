@@ -8,7 +8,8 @@
   into both. From in front of them it now leads straight up past the
   sofa's end first, then on to the stairs, and MegaMan's word on R names
   that way.
-
+- **The title names a run saved at home.** CONTINUE read "Layer 7" for a
+  run saved in AsterLand between acts; it says "Home" now.
 ## 0.11.1 (2026-10-06)
 
 - **The on-screen buttons answer the statistics' question.** On a phone

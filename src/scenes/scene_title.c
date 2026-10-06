@@ -66,6 +66,7 @@ static struct {
 	int t, pressed, menu, leaving, cursor, choice;
 	bool has_save;
 	int saved_depth;      /* the saved run's layer, 0 when unknown */
+	bool saved_home;      /* ... saved at home, between acts */
 	bool summary;         /* the finished run's summary over its area */
 	int next;             /* the cycle's next backdrop */
 	int shown_at;         /* frame the backdrop came in */
@@ -290,6 +291,7 @@ static void enter(void) {
 	S.has_save = save_exists();
 	Run saved = { 0 };
 	if (S.has_save && peek_run(&saved)) S.saved_depth = saved.depth;
+	S.saved_home = S.saved_depth && emu_saved_home(saved.seed, saved.depth);
 	S.cursor = S.has_save ? 1 : 0; /* CONTINUE when there is one */
 	S.summary = title_summary;
 	title_summary = false;
@@ -889,6 +891,15 @@ static void summary_draw(int x0, int y0) {
 	if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);
 }
 
+/* CONTINUE's word on where the saved run goes on: its layer, or home (a
+ * run saved at home said "Layer 7" to a playtester saved in AsterLand,
+ * session 73) */
+static void continue_label(int x, int y) {
+	if (!S.has_save || !S.saved_depth) return;
+	if (S.saved_home) text_draw(x, y, "Home", WHITE, TEXT_LEFT);
+	else text_drawf(x, y, WHITE, TEXT_LEFT, "Layer %d", S.saved_depth);
+}
+
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	int x0 = P.core_x, y0 = P.core_y;
@@ -942,8 +953,7 @@ static void draw(void) {
 			rom_tiles(text + (first + 8) * 32, T.menu_pal, x0 + 120, y, 4, 2, 0);
 			rom_tiles(text + (first + 16) * 32, T.menu_pal, x0 + 152, y, 2, 2, 0);
 		}
-		if (S.has_save && S.saved_depth)
-			text_drawf(x0 + 170, y0 + 130, WHITE, TEXT_LEFT, "Layer %d", S.saved_depth);
+		continue_label(x0 + 170, y0 + 130);
 		/* the arrow cycles three frames, 6 frames each */
 		int f = ((S.t - S.menu) / 6) % 3;
 		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);

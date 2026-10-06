@@ -10,6 +10,9 @@
 
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
 bool director_start_layer(void);
+/* The saved run (seed and depth, peek_run's) was saved at home, in the
+ * town or Lan's HP between acts (its act note): the title says so. */
+bool director_saved_home(uint32_t seed, int depth);
 /* A new run: Lan in the town, the first layer built for the port's jack-in. */
 bool director_start_run(void);
 /* The core's ROM copy as the game's own NEW GAME needs it (before its boot):

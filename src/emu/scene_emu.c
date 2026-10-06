@@ -25,6 +25,8 @@ bool emu_resume_requested;
 bool emu_start_in_town;
 bool emu_start_at_home;
 
+bool emu_saved_home(uint32_t seed, int depth) { return director_saved_home(seed, depth); }
+
 static uint32_t keys_from_buttons(void) {
 	static const struct { int btn; uint32_t key; } map[] = {
 		{ BTN_A, KEY_A }, { BTN_B, KEY_B }, { BTN_SELECT, KEY_SELECT }, { BTN_START, KEY_START },
