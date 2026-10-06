@@ -74,6 +74,8 @@ typedef struct {
 	unsigned home_told;    /* ... the portals MegaMan has named this visit, a bit each */
 	bool town_seen;        /* ... and has got there */
 	int town_frames;       /* frames on the town's map */
+	int tint;              /* the town's hour as its picture is tinted (home_hour), 0 none: on its map alone */
+	bool tint_box;         /* ... a chat box open over it, which keeps its own colours */
 	bool intro_said;       /* Lan and MegaMan have spoken there */
 	char beat[900];        /* what they say on arriving, once the card has gone */
 	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */

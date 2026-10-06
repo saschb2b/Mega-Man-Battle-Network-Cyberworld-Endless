@@ -56,6 +56,8 @@ void second_home_ways(const DirectorWay *ways, int n, char *out, size_t size);
 /* The request held (run.job, jobs.h): who asked, what, and how far along;
  * empty for none; into `out` */
 void second_home_job(char *out, size_t n);
+/* The town's hour (director_town_hour: 0 morning .. 3 night) as a word. */
+const char *second_hour_name(int hour);
 /* A row of the PET's: its name and its value */
 typedef struct { const char *name; char value[24]; } SecondRow;
 /* The profile's record: how many rows of `most` */

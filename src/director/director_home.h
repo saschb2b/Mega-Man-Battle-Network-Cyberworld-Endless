@@ -67,6 +67,8 @@ const char *home_check(void);
 const char *home_way(int *far);
 /* L at home: MegaMan's word on that way. */
 const char *home_status(void);
+/* The town's hour at this visit (director_town_hour). */
+int home_hour(void);
 /* The home's frame: Lan's and MegaMan's words, the portals, and the next
  * layer's arrival; home_entered after the game enters a map (its portals'
  * flags). */

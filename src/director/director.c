@@ -78,6 +78,13 @@ bool director_in_hp(void) { return D.active && home_in_hp(); }
 
 const char *director_place_name(void) { return home_place_name(); }
 
+int director_town_hour(void) { return home_hour(); }
+
+int director_town_tint(bool *box) {
+	*box = D.tint_box;
+	return D.active && D.town ? D.tint : 0;
+}
+
 bool director_on_layer(void) { return D.active && !D.town; }
 
 int director_guardian_battle(void) { return D.active && boss_fighting() ? D.objs.guardian.navi : 0; }

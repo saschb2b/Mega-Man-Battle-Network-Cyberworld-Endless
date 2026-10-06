@@ -226,6 +226,21 @@ static void switch_blocks(uint32_t *px, int t) {
 		}
 }
 
+/* The town's hour on its picture (docs/HOME.md, piece 8): each colour
+ * channel of the map's layers and of the sprites over it times the hour's
+ * (in 256ths: afternoon a touch warm, evening orange, night a dim blue).
+ * mGBA's top byte names a pixel's layer: a background's has 0x08 and its
+ * index at bit 4 (BG0, the chat's text, kept), a sprite's none; with a chat
+ * box open the sprites in its rows (its frame and face) keep theirs too. */
+#define TINT_BOX_TOP 96
+static uint32_t tinted(uint32_t c, int hour, bool box_row) {
+	static const uint16_t by[4][3] = { { 256, 256, 256 }, { 262, 246, 222 }, { 270, 196, 150 }, { 104, 124, 184 } };
+	uint32_t flags = c >> 24;
+	if ((flags & 0x08) ? (flags >> 4 & 3) == 0 : box_row) return c;
+	uint32_t r = (c & 0xFF) * by[hour][0] >> 8, g = (c >> 8 & 0xFF) * by[hour][1] >> 8, b = (c >> 16 & 0xFF) * by[hour][2] >> 8;
+	return (c & 0xFF000000u) | (b > 255 ? 255 : b) << 16 | (g > 255 ? 255 : g) << 8 | (r > 255 ? 255 : r);
+}
+
 static void draw(void) {
 	emu_drawing = true;   /* (until the next update: the second screen's too) */
 	fill_rect(0, 0, P.w, P.h, BLACK);
@@ -249,11 +264,16 @@ static void draw(void) {
 	 * frame, where its opening drew the room its boot left it in) */
 	bool guest = guest_on_screen();
 	const uint32_t *v = guest ? guest_video() : emu_video();
+	bool box = false;
+	int hour = guest ? 0 : director_town_tint(&box);
+	for (int i = 0; i < EMU_W * EMU_H; ++i) {
+		uint32_t c = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
 #ifdef __3DS__
-	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = 0xFF000000u | (v[i] & 0xFF00u) | (v[i] & 0xFFu) << 16 | (v[i] >> 16 & 0xFFu);
+		px[i] = 0xFF000000u | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
 #else
-	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = v[i] | 0xFF000000u;
+		px[i] = c | 0xFF000000u;
 #endif
+	}
 	if (!guest && guest_wait > 0 && guest_wait < GUEST_FLASH) switch_blocks(px, guest_wait);
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
 	int dx = 0, dy = 0;

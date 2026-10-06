@@ -226,6 +226,7 @@ void second_read_home(void) {
 	second_home_setup(S2.home_setup, sizeof S2.home_setup);
 	second_home_clock(S2.home_clock, sizeof S2.home_clock);
 	second_home_job(S2.home_job, sizeof S2.home_job);
+	snprintf(S2.home_hour, sizeof S2.home_hour, "%s", S2.town ? second_hour_name(director_town_hour()) : "");
 	DirectorWay ways[5];
 	int n = S2.town ? director_home_ways(ways, 5) : 0;
 	second_home_ways(ways, n, S2.home_ways, sizeof S2.home_ways);

@@ -38,6 +38,8 @@ void second_home_draw(SDL_Rect b) {
 	int x = b.x + 6, y = b.y + 6, tx = x + SLOT_W + 10, w = b.x + b.w - 6 - tx, bottom = b.y + b.h - 4;
 	second_face(x, y);
 	text_draw_scaled(tx, y, "MegaMan", PET_GOLD, TEXT_LEFT, 2);
+	/* (at home the visit's hour beside his name) */
+	if (S2.home_hour[0]) text_draw(b.x + b.w - 6, y + 4, S2.home_hour, PET_CYAN_HI, TEXT_RIGHT);
 	/* (the most wanted first, as the panel's height lets them: the 3DS's
 	 * is shorter than an Android display's) */
 	y = item("Next", S2.home_next, tx, y + 30, w, bottom);

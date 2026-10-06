@@ -2,10 +2,14 @@
 
 ## Unreleased
 
+- **The town's hour** (issue #90, the epic #84). The day goes on as the run
+  does: morning as it begins, then afternoon, evening and night before the
+  Nest, Central Town's streets and people in the hour's light (chats keep
+  their own colours, and indoors the lights stay on).
 - **The second screen at home** (issue #91, the epic #84). The PET's home
-  panel lists the request you hold and how far along it is, and the ways
-  lit in Lan's HP: the pink pad's area and guardian, the links', and the
-  older portals back to areas won.
+  panel names the visit's hour and lists the request you hold and how far
+  along it is, and the ways lit in Lan's HP: the pink pad's area and
+  guardian, the links', and the older portals back to areas won.
 - **The home shop** (issue #89, the epic #84). AsterLand's clerk (BN6's
   own) runs BN6's Order Service: any chip in your Library, in your
   folder's codes where it comes in them, at twice a Net Dealer's price,

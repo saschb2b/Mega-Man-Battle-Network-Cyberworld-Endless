@@ -49,6 +49,7 @@ typedef struct {
 	char home_clock[48];          /* ... and the Net's clock, empty before a trip back (docs/HOME.md) */
 	char home_ways[160];          /* ... the ways lit at home, a line each (docs/HOME.md, piece 9) */
 	char home_job[96];            /* ... the request held, empty none */
+	char home_hour[16];           /* ... the town's hour at this visit ("Evening"), empty on a layer */
 	/* a shop (issue #78): the entry under its cursor, what the run holds of it */
 	int sh_kind, sh_id, sh_code, sh_currency;
 	int sh_variant;               /* ... a program's: the variant of its colour */

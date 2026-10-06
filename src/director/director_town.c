@@ -173,6 +173,21 @@ static void portal_taken(void) {
 
 /* At home: nothing to watch but the portals and the jack-out, whose
  * arrival on the layer's map starts the act as a layer's warp does. */
+/* The day goes on as the run does: morning as it begins, afternoon after
+ * act 1, evening after act 2, night before the Nest (the short net's 3
+ * acts; the endless net's 6 two acts an hour, and a new morning as its
+ * next cycle begins) */
+int home_hour(void) {
+	int acts = (run.depth - 1) % CYCLE_LAYERS / 3, last = run.mode == RUN_SHORT ? 3 : 6;
+	return acts >= last ? 3 : acts * 3 / last;
+}
+
+/* the town's tint as Lan stands on its map, BN6's own indoors lit as ever */
+static void town_tint(void) {
+	D.tint = on_map() && map_is(town_info()->group, town_info()->number) ? home_hour() : 0;
+	D.tint_box = emu_read8(BN6_CHATBOX) != 0;
+}
+
 void home_update(void) {
 	static bool was_hp;
 	map_label();
@@ -182,6 +197,7 @@ void home_update(void) {
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();
 	home_places_frame(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
+	town_tint();
 	was_hp = hp;
 	if (on_map() && home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) { D.town_seen = true; ++D.town_frames; }
 	talk_update();

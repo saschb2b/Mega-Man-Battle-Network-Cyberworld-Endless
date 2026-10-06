@@ -145,6 +145,11 @@ void second_home_job(char *out, size_t n) {
 	snprintf(out, n, "%s: %s%s", who[j->asker], what, j->state == JOB_DONE ? ". Done: paid at home" : j->state == JOB_FAILED ? ". Broken" : "");
 }
 
+const char *second_hour_name(int hour) {
+	static const char *const names[4] = { "Morning", "Afternoon", "Evening", "Night" };
+	return names[hour < 0 ? 0 : hour > 3 ? 3 : hour];
+}
+
 /* rows' values as numbers */
 static int rows_of(SecondRow *out, int most, const char *const *names, const int *values, int n, int keep) {
 	int k = 0;

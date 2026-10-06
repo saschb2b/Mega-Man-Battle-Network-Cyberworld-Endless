@@ -473,6 +473,22 @@ its towns' palette dim (Green and Sky Town's), its rain, snow and wind,
 then a tint of the town's palettes where BN6 has none. Judged by captures
 at every hour before it ships; docs/FIDELITY.md names it.
 
+As built (issue #90, the owner's look still to come before a release):
+BN6's own dim is a palette animation of Green and Sky Town's (their map
+scripts load it while event `0xA9C` is set), which Central Town has none
+of, so the hour is the engine's. Its picture is tinted as it is drawn
+(`scene_emu.c`; draws change nothing in the game): each colour channel of
+the map's layers and of the sprites over it times the hour's, a touch
+warm in the afternoon, orange in the evening, a dim blue at night. mGBA's
+picture names each pixel's layer (its top byte), so the chat's text
+(BG0) keeps its colours, and with a chat box open so do the sprites in
+its rows (its frame and the speaker's face). Only the town's own map:
+Lan's house, AsterLand, the Academy and Lan's HP keep BN6's light. The
+hour is the run's (`home_hour`): morning at its start, then afternoon,
+evening and night before the Nest (the endless net two acts an hour, a
+new morning with each cycle). BN6's rain, snow and wind are left for
+later.
+
 ### 9. The second screen at home
 
 The PET at home (issue #79) and in Lan's HP lists the portals as MegaMan
@@ -481,7 +497,8 @@ the areas gone back to by name, as he has been there; the clock's notch
 for going back), the job taken and how far along it is, and the visit's
 hour.
 
-As built (issue #91, the hour to come with piece 8): the home panel reads
+As built (issue #91): the home panel names the visit's hour beside
+MegaMan's name, and reads
 Next, the request held ("The club: 3 wins in 10 s each, 1 so far", done
 or broken; on a layer too), the ways ("Pink pad: Sky HP (CircusMan)", a
 link's, "Back:" an older portal's, "???" for a guardian MegaMan has not
@@ -599,4 +616,4 @@ with Lan's room and PC (#94, built); going back and the Net's clock
 (#95, built); a town that remembers (#87, built); AsterLand and the
 Cyber Academy as places (#96, built); jobs (#88, built), at the BBS, from the townsfolk and the
 classmates, with the objects' comps; the home shop at AsterLand's
-counter (#89, built); time of day; the second screen; the captures, docs and notes.
+counter (#89, built); time of day (#90, built, to be judged); the second screen (#91, built); the captures, docs and notes.

@@ -24,6 +24,12 @@ const char *director_place_name(void);
 /* The first older portal open in Lan's HP (docs/HOME.md, going back): its
  * number (lanhp.h), -1 none. */
 int director_older_portal(void);
+/* The town's hour at this visit (docs/HOME.md, piece 8): 0 morning, 1
+ * afternoon, 2 evening, 3 night; and the hour its picture is tinted by
+ * while Lan stands on its map (0 none), `box` whether a chat box is open
+ * over it (the drawing reads them: draws change nothing). */
+int director_town_hour(void);
+int director_town_tint(bool *box);
 /* The ways lit at home (Lan's HP's portals, docs/HOME.md): each one's area,
  * its guardian (0 none: a trip back), and whether it goes back to an area
  * won; at most `most`, how many. */
