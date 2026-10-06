@@ -2318,3 +2318,44 @@ asked to explore the first visit, spent 94 calls there and died on act
 played from a run that reaches it inside the budget (a CONTINUE on an
 act's middle or last layer, or the goals asking to go straight to the
 PC), and the first visit's exploring is capped in the goals.
+
+## Session 70: home after an act (kai 7/10; would keep playing and recommend it, warning of the slow town)
+
+kai CONTINUEd run 12 on act 1's first layer, played Central Area through
+and beat BlastMan without a hit (L's battle data read true; three
+Cannons down his row for two COUNTER HITs), took HP+100 from the
+Guardian Data, and came home: AREA CLEAR over Lan's HP, the homecoming,
+the jack-out, the house, the town at afternoon, L's errands. In
+AsterLand it bought a MiniEnrg from the seller, took the NetBattler's
+vow (two HPMemory now), and again never found the Order Service's clerk;
+the budget ran out there, 56 calls into the visit.
+
+Confirmed: the shopper moved, the seller from three places, L's town
+errands and the house's front door, the vow's two HPMemory, the short
+homecoming, the second screen's home panel (hour, Next, ways, the
+request once taken).
+
+Raised and fixed in the iteration: the clerk still out of reach from a
+step before the counter (the reach widened to where the isometric view
+shows the counter close, measured, and L in AsterLand names the
+counter); the PET's Save at home after an act saying "Saves begin on
+layer 1" and leaving the visit's purchase and request unsaved (it saves
+there now, a save kind CONTINUE resumes at home: the first try resumed
+on the next layer, caught by testing CONTINUE); the town walk to
+AsterLand (L's errands name its door's way); the RushFood rule as a
+riddle; two things "the violet mark" in one briefing.
+
+Open: the exit pad taken by accident, twice in two sessions (issue #101,
+needs design); the town's arrow still the way home after the errands
+are named; the jack-out's "OK! Roger that!" in Lan's face (BN6's own
+lines, unverified); L's 11 boxes on layer 2; Quakers' shockwaves eating
+Thunders (BN6's battles).
+
+Misreads: none new.
+
+Cost: 256 calls; the triage, fixes and checks about an hour and a half.
+
+Loop change: **a save's resume is tested by resuming it.** The PET save
+at home looked right ("Run saved"), and only CONTINUE showed it resumed
+on the next layer: a change to what or where the game saves is checked
+by a stop, a start and a CONTINUE, reading where it lands.
