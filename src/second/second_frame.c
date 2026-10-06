@@ -20,6 +20,11 @@ void second_slot(int x, int y, int w, int h) {
 	fill_rect(x + 1, y + 1, w - 2, h - 2, PET_SLOT);
 }
 
+void second_stripes(int x, int y) {
+	for (int k = 0; k < 3; ++k)
+		for (int r = 0; r < SECOND_STRIPES_H; ++r) fill_rect(x + k * 6 + (SECOND_STRIPES_H - 1 - r) / 2, y + r, 2, 1, PET_LINE);
+}
+
 void second_row(int x, int y, int w, const char *name, const char *value) {
 	second_slot(x, y, w, SECOND_ROW_H - 2);
 	text_draw(x + 5, y + 2, name, PET_GOLD, TEXT_LEFT);
@@ -64,10 +69,7 @@ static SDL_Rect frame(int w, int h, const char *title, int slide, int top) {
 	fill_rect(w - 2, top - 2, 2, h - top + 2, PET_GREEN);
 	fill_rect(2, h - 2, w - 4, 2, PET_GREEN);
 	text_draw(8 - slide, 3, title, PET_WHITE, TEXT_LEFT);
-	/* (BN6's three light stripes after a screen's name, slanting up) */
-	int sx = 8 - slide + text_width(title) + 10;
-	for (int k = 0; k < 3; ++k)
-		for (int y = 0; y < 12; ++y) fill_rect(sx + k * 6 + (11 - y) / 2, 4 + y, 2, 1, PET_LINE);
+	second_stripes(8 - slide + text_width(title) + 10, 4);
 	/* the body's cyan edge, two pixels, lit along its top */
 	SDL_Rect body = { 4, top, w - 8, h - top - 4 };
 	SDL_Rect edge[4] = { { 2, top - 2, w - 4, 2 }, { 2, h - 4, w - 4, 2 }, { 2, top, 2, body.h }, { w - 4, top, 2, body.h } };

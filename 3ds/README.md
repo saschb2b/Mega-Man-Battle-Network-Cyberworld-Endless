@@ -40,15 +40,15 @@ GBA core alone takes longer than a frame there.
   Cross, Beast Out and Full Synchro, and the enemies with their HP. In
   the NaviCustomizer it shows the program under the cursor (its shape,
   whether it fits, whether it turns, what it does) and what RUN would
-  bring as the board stands. In the town and on the PET's menu it is the
-  PET at home: MegaMan's face, the run's next step and its setup;
-  MegaMan's status adds the run's record, the Library the chip under
-  the cursor as a large card (the codes it comes in, the run's copies)
-  and its collection, E-Mail the mail's sender by face and name; in
-  a shop it shows the entry under the cursor with what the run holds of
-  it, at a trader what it takes and gives; on
-  the title, the PET at rest with the profile's record and whether BN5
-  was found.
+  bring as the board stands. In the town it is the PET at home:
+  MegaMan's face, the run's next step and its setup, which the PET's
+  menu, in the town or on the net, dims under ACCESSING; MegaMan's
+  status adds the run's record, the Library the chip under the cursor
+  as a large card (the codes it comes in, the run's copies) and its
+  collection, E-Mail the mail's sender by face and name; in a shop it
+  shows the entry under the cursor with what the run holds of it, at a
+  trader what it takes and gives; on the title, the PET at rest with
+  the profile's record and whether BN5 was found.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad

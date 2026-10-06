@@ -117,8 +117,10 @@ void second_update(void) {
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
-	/* (a new panel at once, its title sliding in over two draws) */
-	if (panel_since < 2) platform_second_screen_soon();
+	/* (a new panel at once, its title sliding in over two draws; the
+	 * PET's home at once too as the PET's menu opens or shuts over it in
+	 * the town, its banner with it) */
+	if (panel_since < 2 || (p == PANEL_HOME && S2.since < 2)) platform_second_screen_soon();
 }
 
 /* The frame's name for the panel: the PET's screen's where the PET at

@@ -211,6 +211,8 @@ int second_mail_rows(SecondRow *out, int most, const char *subject, int unread, 
 
 const char *second_mail_none(void) { return "No mail"; }
 
+const char *second_accessing(void) { return "ACCESSING"; }
+
 void second_layer_next(int guardian_navi, char *out, size_t n) {
 	/* (a super boss unnamed until met, as MegaMan senses him: docs/
 	 * BOSSES.md, Super bosses) */

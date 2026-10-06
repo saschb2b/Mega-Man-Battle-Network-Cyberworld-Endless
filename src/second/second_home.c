@@ -2,7 +2,8 @@
  * their Navi: MegaMan's face from the ROM (drawn as the game runs, never
  * kept in a file), twice as large in a slot; in the town the run's next
  * step and its setup beside it, on the title the profile's record and
- * whether BN5's ROM was found. */
+ * whether BN5's ROM was found. While BN6's PET menu is open on the top
+ * screen, the home lies dimmed under ACCESSING (issue #83). */
 #include "second_home.h"
 
 #include <stdio.h>
@@ -35,6 +36,22 @@ static int item(const char *head, const char *text, int x, int y, int w, int bot
 	return second_wrapped(text, x, y + SECOND_LINE_H, w, fit < 3 ? fit : 3, PET_WHITE) + 6;
 }
 
+/* The PET's menu open on the top screen: the home behind glass under a
+ * band, ACCESSING, as BN5 DS dims its field while its PET menu is open;
+ * the band in the frame's own colours, its word in white and BN6's three
+ * stripes after it, still (no blink, issue #72) */
+static void accessing(SDL_Rect b) {
+	fill_rect(b.x, b.y, b.w, b.h, rgba(0, 20, 28, 168));
+	const char *word = second_accessing();
+	int h = 2 * TEXT_H + 8, y = b.y + (b.h - h) / 2, tw = 2 * text_width(word);
+	int x = b.x + (b.w - tw - 12 - SECOND_STRIPES_W) / 2;
+	fill_rect(b.x, y, b.w, h, PET_DARK);
+	fill_rect(b.x, y, b.w, 1, PET_LINE);
+	fill_rect(b.x, y + h - 1, b.w, 1, PET_LINE);
+	text_draw_scaled(x, y + 4, word, PET_WHITE, TEXT_LEFT, 2);
+	second_stripes(x + tw + 12, y + (h - SECOND_STRIPES_H) / 2);
+}
+
 void second_home_draw(SDL_Rect b) {
 	fill_rect(b.x, b.y, b.w, b.h, PET_NAVY);
 	int x = b.x + 6, y = b.y + 6, tx = x + SLOT_W + 10, w = b.x + b.w - 6 - tx, bottom = b.y + b.h - 4;
@@ -52,6 +69,7 @@ void second_home_draw(SDL_Rect b) {
 	y = item("Ways", S2.home_ways, x, y, b.w - 12, bottom);
 	y = item("The Net's clock", S2.home_clock, x, y, b.w - 12, bottom);
 	item("The run", S2.home_setup, x, y, b.w - 12, bottom);
+	if (S2.context == SECOND_PET) accessing(b);
 }
 
 bool second_title_draw(int w, int h) {

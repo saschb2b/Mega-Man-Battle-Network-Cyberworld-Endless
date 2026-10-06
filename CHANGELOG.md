@@ -7,15 +7,20 @@
   screen's card: its picture twice as large, its element, power and
   text, the codes it comes in (BN6's Library leaves them out), and how
   many copies the run holds in the folder and the Pack. A number never
-  seen stays BN6's "??" with a blank card, and the P.A. Memo keeps the
-  Library's count alone. Beside it, the Library's classes go two to a
+  seen stays BN6's "??" with a blank card, and the P.A. Memo shows the
+  Library's counts alone. Beside it, the Library's classes go two to a
   line under BN6's own tab names (StdChip, MegaChip, GigaChip).
 - **A mail's sender on the second screen** (issue #83). In E-Mail the
   second screen shows the mail under the cursor, or open, by its sender,
   as BN5 DS reads a mail with its sender's face: Dad's face from the ROM
   and his name for the lab's mails and each guardian's (the BBS, a
-  board, by its name alone), the subject, and how many of the list's
-  mails are new, all of them where the top screen shows four.
+  board, by its name alone), the subject, and how many of the whole
+  list's mails are new (the top screen shows four at a time).
+- **ACCESSING while the PET's menu is open** (issue #83). As BN5 DS dims
+  its field while its PET menu is open, the second screen's PET at home
+  lies dimmed under a still band, ACCESSING, in the PET's own green with
+  BN6's three stripes, in the town and on the net alike; as the menu
+  shuts, the home or the net's map is back at once.
 - **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
   place of its own, never at random. The endless net's Nest is the
   Cybeast's den: no copied guardian at its end but Gregar itself, in

@@ -80,6 +80,9 @@ int second_copies(SecondRow *out, int most, int folder, int pack);
 int second_mail_rows(SecondRow *out, int most, const char *subject, int unread, int shown);
 /* E-Mail with an empty list, a line */
 const char *second_mail_none(void);
+/* The banner over the PET's home while the PET's menu is open: BN5 DS's
+ * word for it */
+const char *second_accessing(void);
 /* A layer's next step: the guardian its exit waits on (navi, 0 none) or
  * the exit pad, into `out` */
 void second_layer_next(int guardian, char *out, size_t n);
