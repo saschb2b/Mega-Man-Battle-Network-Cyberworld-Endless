@@ -463,6 +463,9 @@ static void phone_controls(void) {
 #ifdef __ANDROID__
 	game_thread = SDL_ThreadID();
 	SDL_SetEventFilter(turns_here, NULL);
+	/* (setting a filter drops the events waiting: a size that came before
+	 * it, the navigation bar hidden as the game started, read again) */
+	SDL_AtomicSet(&turned, 1);
 	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
 #endif
 #ifdef CW_IOS
