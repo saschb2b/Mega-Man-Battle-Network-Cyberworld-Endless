@@ -31,7 +31,7 @@ would mean changing the game's battles themselves.
 | State | What happens |
 | --- | --- |
 | Wait | The guardian's NPC waits hidden in the arena's middle |
-| Enter | MegaMan steps into the arena: bars slide in, the music stops, MegaMan walks up; the boss prelude starts, the guardian logs in (its animation 25 and sound 0x77) and the screen shakes |
+| Enter | MegaMan steps into the arena: bars slide in, the music stops, MegaMan steps up to his place beside the guardian's and turns to it; the boss prelude starts, the guardian logs in (its animation 25 and sound 0x77) facing him and the screen shakes; the card waits for MegaMan to be there |
 | Title | The title card, while Gregar's own Navis strike their signature pose (animation 24) |
 | Talk | The intro lines; input is A and B only |
 | Fight | The game's navi battle, forced at once (the random battle record is not re-rolled over it) |
@@ -53,6 +53,24 @@ map's theme a frame after the battle anyway, under the guardian's last
 word (the music's status read each frame, `BN6_MUSIC_STATUS`). The hush
 after the battle now runs while a song plays, in the 40 frames before the
 last word.
+
+MegaMan meets the guardian beside him (the owner's call, 6 October 2026):
+BN6's camera follows MegaMan and the chat box fills the picture's lower
+third, so where the arena lay below its way in, a guardian he walked
+straight at stood half behind the box through the talk. Now he steps up
+to a place at the guardian's height on the screen, on the side the
+bridge comes in from, and turns to him (`guardian_stand`: 24 world units
+off on both axes, 48 pixels across the picture, a super boss 28, his
+sprite being wider); the guardian logs in facing him (BlastMan, ElementMan
+and Bass, drawn only towards the camera, turned down-left where he stands
+on their left). The steps are the staging's own, as BN6's cutscenes walk
+MegaMan (`cs_move_player_in_facing_direction`: as if the player walked,
+the pad the cutscene's): the player's pad is held from the step in to
+the battle, as before, and his own walking is BN6's everywhere else. The
+place is worked out from the arena's way in, so it holds whichever side
+a layer brings MegaMan in from; `tests/test_core.c` checks it on every
+generated arena (floor under his feet, the bridge's side). A layer without
+an arena keeps the old meeting, straight at the guardian.
 
 ## Guardians
 
@@ -423,11 +441,9 @@ word, back after Bass and silent after the Cybeast.
 
 Left for later: GBeast SP before Bass BX, as BN6 sets them back to back;
 BN5's Bass and Nebula Grey in BN5's engine, where BN5 dresses the
-Graveyard; the Beast chips. MegaMan walks straight at a super boss, as
-at a guardian, and BN6's camera follows him: where the arena lies below
-its way in, the chat box covers part of the boss through the talk (his
-face speaks in it); walking up beside him would keep them side by side. Where a choice reached past the super bosses,
-the conservative one was taken, each one switch for the owner to turn:
+Graveyard; the Beast chips. Where a choice reached past the super
+bosses, the conservative one was taken, each one switch for the owner to
+turn:
 
 - the Cybeast is the endless Nest's own guardian, not a layer of its own
   below it (no change to the cycle's 19 layers);
@@ -442,3 +458,13 @@ the conservative one was taken, each one switch for the owner to turn:
   Gregar SP at 4000 on every Net after the first, the Net's clock adding
   its tenth a notch as to any guardian. Gregar on every Net, or the
   clock left off him, are the gentler switches.
+
+### The owner's decisions (6 October 2026)
+
+1. The Cybeast stays as built: Gregar on the first Net, Gregar SP on
+   every Net after it, the Net's clock on top as on any guardian.
+2. Silence after every guardian's battle stays (the sequence, above).
+3. The framing: before the talk MegaMan steps up beside the boss, so the
+   chat box no longer covers him wherever the arena is entered from
+   above, a scripted move in the staging as BN6's cutscenes move him,
+   for every guardian (the sequence, above).
