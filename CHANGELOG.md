@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.1 (2026-10-06)
 
 - **The on-screen buttons answer the statistics' question.** On a phone
   or tablet (the browser's player too) the question at the first start
