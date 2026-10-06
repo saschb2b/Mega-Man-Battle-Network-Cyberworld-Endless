@@ -19,6 +19,19 @@
 #define PC_POINT 0x40
 #define JACK_IN_FACE 1       /* +x in Lan's HP: out of the blue pad's alcove, the way on (BN6's faced the camera, session 73) */
 #define HOUSE_DOORS (1u << FRONT_DOOR | 1u << STAIRS_UP)   /* (the bathroom's shut) */
+/* The house's furniture between its front door and the stairs up, in world
+ * units, found by walking into it: the shoe cabinet beside the door (its
+ * front at y 32), the sofa past it (its front along y -24 from x -58 to its
+ * end at x -1). The straight line from the door to the stairs runs into
+ * both (sessions 72 and 73: about 3 calls each). While Lan stands in front
+ * of them, short of the column up to the stairs that clears the sofa's
+ * end, the way leads to a spot past that end first, straight up the screen
+ * from the door (on its line, x + y -8). The spot lies a little beyond the
+ * column, so the arrow holds steady as he reaches it. */
+#define SOFA_FRONT_Y (-24)
+#define SOFA_CLEAR_X 4
+#define PAST_SOFA_X 8
+#define PAST_SOFA_Y (-16)
 
 static struct {
 	bool read;
@@ -74,6 +87,12 @@ bool lan_house_goal(int number, int *x, int *y) {
 	if (number == LAN_ROOM) { *x = L.pc_x; *y = L.pc_y; return true; }
 	if (number == LAN_HOUSE) { *x = L.up_x; *y = L.up_y; return true; }
 	return false;
+}
+
+bool lan_house_way(int number, int px, int py, int *x, int *y) {
+	if (!lan_house_goal(number, x, y)) return false;
+	if (number == LAN_HOUSE && py > SOFA_FRONT_Y && px < SOFA_CLEAR_X) { *x = PAST_SOFA_X; *y = PAST_SOFA_Y; }
+	return true;
 }
 
 bool lan_house_door(int *x, int *y) {

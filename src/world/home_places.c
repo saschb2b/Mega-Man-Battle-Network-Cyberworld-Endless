@@ -7,6 +7,7 @@
 
 #include "academy.h"
 #include "aster_land.h"
+#include "bn6_fields.h"
 #include "indoors.h"
 #include "job_words.h"
 #include "lan_house.h"
@@ -33,7 +34,7 @@ const char *home_places_name(int group, int number) {
 
 bool home_places_way(int group, int number, int *x, int *y) {
 	switch (home_places_at(group, number)) {
-	case HOME_PLACE_ROOM: case HOME_PLACE_HOUSE: return lan_house_goal(number, x, y);
+	case HOME_PLACE_ROOM: case HOME_PLACE_HOUSE: return lan_house_way(number, bn6_player_x(), bn6_player_y(), x, y);
 	case HOME_PLACE_ASTER: return aster_land_door(x, y);
 	case HOME_PLACE_ACADEMY: return academy_way_out(number, x, y);
 	default: return false;

@@ -20,9 +20,13 @@ bool lan_house_map(int group, int number);
 /* Where a run starts: the top of the room's stairs, as BN6 sets Lan down
  * coming up them. */
 void lan_room_start(int *x, int *y, int *face);
-/* The way on in map `number` (the house or the room): the room's PC, the
- * house's stairs up; false for none. */
+/* Where the way on in map `number` (the house or the room) ends: the
+ * room's PC, the house's stairs up; false for none. */
 bool lan_house_goal(int number, int *x, int *y);
+/* The way on from world (px, py) of map `number`: its goal, but in the
+ * house, from in front of the shoe cabinet and the sofa, a spot past the
+ * sofa's end first (the straight line runs into both). */
+bool lan_house_way(int number, int px, int py, int *x, int *y);
 /* Where the house's front door is (the middle of its warp's cells). */
 bool lan_house_door(int *x, int *y);
 /* Whether world (x, y) of the room stands on the PC's jack-in cells. */

@@ -529,7 +529,7 @@ static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t 
 	int number = emu_read8(BN6_MAP_NUMBER);
 	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) {
 		if (number == LAN_ROOM && lan_room_on_pc(px, py)) { *keys = frame % 16 < 2 ? KEY_R : 0; return HOME_KEYS; }
-		return lan_house_goal(number, wx, wy) ? HOME_WALK : AWAY;
+		return lan_house_way(number, px, py, wx, wy) ? HOME_WALK : AWAY;
 	}
 	const TownInfo *ti = town_info();
 	if (town_is_home()) { *wx = ti->port_x; *wy = ti->port_y; return HOME_WALK; }
