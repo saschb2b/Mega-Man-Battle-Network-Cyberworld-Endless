@@ -131,7 +131,7 @@ void director_guest_done(const GuestResult *r) {
 	reward_give(&r->reward);
 	reward_give(&r->find);
 	/* (and in the run log, its reward as the run got it) */
-	runlog_guest_end(r->outcome == GUEST_WON, guest_reward_words(r));
+	runlog_guest_end(r->outcome == GUEST_WON, guest_reward_words(r), r->frames);
 	if (emu_debug_on())
 		fprintf(stderr, "guest: MegaMan back at %d/%d HP, reward %s (folder codes %c%c%c); %d viruses deleted in the run\n", hp, max,
 			r->outcome == GUEST_WON ? guest_reward_words(r) : "none", run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-',
@@ -203,7 +203,7 @@ bool director_guest_guardian(int navi, int version) {
 	int ids[1] = { 0 };
 	uint32_t record = guest_navi_record(XROM_BN5_COLONEL_US, boss.ai, version);
 	guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, (GuestScale){ 0, 0 }, ids, 1);
-	runlog_guest_guardian_start(record, ids[0], boss.hp_cap);
+	runlog_guest_guardian_start(record, navi, ids[0], boss.hp_cap);
 	return true;
 }
 

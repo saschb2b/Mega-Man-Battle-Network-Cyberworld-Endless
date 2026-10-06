@@ -5,7 +5,11 @@
  * which waits under it (main.c). It reads the pads' own buttons
  * (pads_menu_*), never the map it edits, takes taps on its rows, and puts
  * a new map in play only once that map's A was pressed to keep it, so no
- * choice made on it can leave a player unable to work it. */
+ * choice made on it can leave a player unable to work it. Where the build
+ * can send the anonymous statistics (analytics.h), a row turns them on or
+ * off, kept at once; and their question at the first start shows in this
+ * screen's place (analytics_ask.h), its frame, picture, Back and taps
+ * passed on from here. */
 #ifndef CW_CONTROLS_H
 #define CW_CONTROLS_H
 

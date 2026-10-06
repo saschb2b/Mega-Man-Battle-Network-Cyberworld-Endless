@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics.h"
 #include "chip_pool.h"
 #include "net.h"
 #include "pacing.h"
@@ -226,7 +227,11 @@ void meta_run_begun(void) {
 	/* (the Library as the run begins: the summary counts what it adds) */
 	profile.library_start = (uint16_t)meta_library_count(-1);
 	profile.library_run = run.seed;
+	profile.played_run = run.seed;
+	profile.played_frames = 0;
 	profile_save();
+	/* (its setup, for the anonymous statistics where the player said yes) */
+	analytics_run_start();
 }
 
 /* a folder, once its milestone is reached in any run: open, and NEW in

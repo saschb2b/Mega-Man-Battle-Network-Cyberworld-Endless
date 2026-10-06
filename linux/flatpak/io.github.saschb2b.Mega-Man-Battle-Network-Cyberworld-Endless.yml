@@ -13,6 +13,9 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --socket=pulseaudio
+  # the anonymous play statistics alone, sent only once the player said yes
+  # (README.md, Anonymous statistics); without it the game never asks
+  - --share=network
   # game controllers
   - --device=all
   # the ROM, read only, where players keep it: the game finds it by its

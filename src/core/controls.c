@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics.h"
+#include "analytics_ask.h"
+#include "analytics_text.h"
 #include "audio.h"
 #include "buttons.h"
 #include "gfx.h"
@@ -18,17 +21,22 @@
 #define KEYS 0
 #endif
 
-/* The rows: the preset for A and B, the six buttons, then DEFAULTS and
- * DONE side by side. (The D-pad and the stick move, set in pad.ini and
- * keys.ini only: a direction given one button would lose the others.) */
-enum { ROW_PRESET, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROW_DEFAULTS, ROW_DONE };
+/* The rows: the preset for A and B, the six buttons, the anonymous
+ * statistics where the build can send them (issue #104, analytics.h: on
+ * or off, and A their question again, what is sent and Yes or No, kept at
+ * once), then DEFAULTS and DONE side by side. (The D-pad
+ * and the stick move, set in pad.ini and keys.ini only: a direction given
+ * one button would lose the others.) */
+enum { ROW_PRESET, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROW_STATS, ROW_DEFAULTS, ROW_DONE };
 #define LISTEN 300     /* frames "press a button" waits */
 #define CONFIRM 600    /* ... and "press A to keep" */
 #define NOTE 150       /* ... a passing word stays */
-/* where it draws, from the picture's corner */
+/* where it draws, from the picture's corner: with the statistics' row the
+ * rows a pixel closer and DEFAULTS and DONE just under them, so the note
+ * keeps its two lines over the keys' */
 #define ROW_Y 27
-#define ROW_H 12
-#define BOTTOM_Y 112
+#define ROW_H (stats_row() ? 11 : 12)
+#define BOTTOM_Y (stats_row() ? 113 : 112)
 #define LABEL_X 17
 #define PAD_X 74
 #define KEY_X 174
@@ -49,6 +57,9 @@ static KeyMap keys, keys_was;
 
 static int gba_of(int row) { return row - ROW_A + 4; }   /* (A is the GBA's fifth button, buttons.h) */
 static bool button_row(int row) { return row >= ROW_A && row <= ROW_SELECT; }
+static bool stats_row(void) { return analytics_ask_here(); }
+/* the last row of the list: the statistics', where they are here */
+static int last_row(void) { return stats_row() ? ROW_STATS : ROW_SELECT; }
 
 static void say(const char *s) {
 	snprintf(C.said, sizeof C.said, "%s", s);
@@ -73,7 +84,8 @@ void controls_open(void) {
 	touch_release();
 }
 
-bool controls_shown(void) { return C.open; }
+/* (and the statistics' question in its place: analytics_ask.h) */
+bool controls_shown(void) { return C.open || analytics_ask_shown(); }
 
 static void leave(void) {
 	C.open = false;
@@ -103,6 +115,9 @@ static void cycle(int d) {
 static void choose(int row) {
 	C.row = row;
 	if (row == ROW_PRESET) cycle(1);
+	/* (the statistics' question over this screen, the cursor on the answer
+	 * as it stands: what is sent is read before a yes) */
+	else if (row == ROW_STATS) { if (analytics_ask_open()) audio_sfx(SFX_SELECT); }
 	else if (button_row(row)) {
 		C.listen = LISTEN;
 		audio_sfx(SFX_SELECT);
@@ -178,8 +193,8 @@ static void confirm_update(void) {
 	}
 }
 
-static int up_from(int row) { return row == ROW_PRESET ? ROW_DONE : row >= ROW_DEFAULTS ? ROW_SELECT : row - 1; }
-static int down_from(int row) { return row == ROW_SELECT ? ROW_DONE : row >= ROW_DEFAULTS ? ROW_PRESET : row + 1; }
+static int up_from(int row) { return row == ROW_PRESET ? ROW_DONE : row >= ROW_DEFAULTS ? last_row() : row - 1; }
+static int down_from(int row) { return row == last_row() ? ROW_DONE : row >= ROW_DEFAULTS ? ROW_PRESET : row + 1; }
 
 static void nav_update(void) {
 	if (P.menu_pressed & BTN_B) { leave(); return; }
@@ -194,6 +209,7 @@ static void nav_update(void) {
 }
 
 void controls_update(void) {
+	if (analytics_ask_shown()) { analytics_ask_update(); return; }
 	if (!C.open) return;
 	++C.t;
 	if (C.said_t > 0) --C.said_t;
@@ -204,6 +220,7 @@ void controls_update(void) {
 }
 
 bool controls_back(void) {
+	if (analytics_ask_shown()) return analytics_ask_back();
 	if (!C.open) return false;
 	if (C.listen) {
 		C.listen = 0;
@@ -221,7 +238,7 @@ bool controls_back(void) {
 static int row_at(int x, int y) {
 	if (x < 6 || x >= CORE_W - 6) return -1;
 	if (y >= BOTTOM_Y - 2 && y < BOTTOM_Y + ROW_H) return x < CORE_W / 2 ? ROW_DEFAULTS : ROW_DONE;
-	for (int r = ROW_PRESET; r <= ROW_SELECT; ++r)
+	for (int r = ROW_PRESET; r <= last_row(); ++r)
 		if (y >= ROW_Y + r * ROW_H - 1 && y < ROW_Y + (r + 1) * ROW_H - 1) return r;
 	return -1;
 }
@@ -240,13 +257,15 @@ static void tap(int x, int y) {
 }
 
 void controls_finger(uint32_t type, SDL_FingerID id, int x, int y) {
-	if (!C.open) return;
+	bool ask = analytics_ask_shown();
+	if (!C.open && !ask) return;
 	if (type == SDL_FINGERDOWN) {
 		C.finger = id;
 		C.finger_down = true;
 	} else if (type == SDL_FINGERUP && C.finger_down && id == C.finger) {
 		C.finger_down = false;
-		tap(x - P.core_x, y - P.core_y);
+		if (ask) analytics_ask_tap(x - P.core_x, y - P.core_y);
+		else tap(x - P.core_x, y - P.core_y);
 	}
 }
 
@@ -330,6 +349,8 @@ static void row_note(char *s, size_t n) {
 		snprintf(s, n, "%s", C.said);
 	} else if (C.row == ROW_PRESET) {
 		snprintf(s, n, "%s", padmap_preset_about(C.family, C.style, padmap_preset_of(&C.pads, C.family)));
+	} else if (C.row == ROW_STATS) {
+		snprintf(s, n, "%s", analytics_word(AW_ROW_NOTE));
 	} else if (button_row(C.row)) {
 		snprintf(s, n, "%s: give %s its button%s", nav_word(false), padmap_gba_name(gba_of(C.row)), KEYS ? " or key" : "");
 	} else {
@@ -379,10 +400,14 @@ static void button_draw(int x0, int y, int row) {
 
 static void rows_draw(int x0, int y0) {
 	static const char *const names[] = { "A and B", "A", "B", "L", "R", "START", "SELECT" };
-	for (int r = ROW_PRESET; r <= ROW_SELECT; ++r) {
+	for (int r = ROW_PRESET; r <= last_row(); ++r) {
 		int y = y0 + ROW_Y + r * ROW_H;
-		text_draw(x0 + LABEL_X, y, names[r], C.row == r ? GOLD : WHITE, TEXT_LEFT);
+		const char *label = r == ROW_STATS ? analytics_word(AW_ROW) : names[r];
+		text_draw(x0 + LABEL_X, y, label, C.row == r ? GOLD : WHITE, TEXT_LEFT);
 		if (r == ROW_PRESET) preset_draw(x0, y);
+		/* (the statistics' answer after its name: no controller's or key's column) */
+		else if (r == ROW_STATS)
+			text_draw(x0 + LABEL_X + text_width(label) + 8, y, analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF), WHITE, TEXT_LEFT);
 		else button_draw(x0, y, r);
 		if (C.row == r && !C.confirm) arrow(x0 + 9, y);
 	}
@@ -423,6 +448,7 @@ static void note_draw(int cx, int y, const char *s) {
 }
 
 void controls_draw(void) {
+	if (analytics_ask_shown()) { analytics_ask_draw(); return; }
 	if (!C.open) return;
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
 	/* the paused game dimmed under the PET's panel */

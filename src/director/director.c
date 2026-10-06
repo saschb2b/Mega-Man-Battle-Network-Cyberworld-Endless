@@ -234,7 +234,7 @@ void end_run(void) {
 	profile.last_won = 0;
 	/* (a request held: its asker's word at the next run, job_words.c) */
 	profile.last_job = run.job.kind != JOB_NONE ? (uint8_t)(run.job.asker + 1) : 0;
-	runlog_run_end();
+	runlog_run_end(false);
 	library_from_game();
 	programs_from_game();
 	meta_run_over(false);
@@ -257,7 +257,7 @@ static void win_run(void) {
 	profile.last_lost_to = 0;
 	profile.last_won = 1;
 	profile.last_job = 0;
-	runlog_run_end();
+	runlog_run_end(true);
 	library_from_game();
 	programs_from_game();
 	meta_run_over(true);   /* (before the clear counts: it names what the win opened) */
@@ -400,7 +400,10 @@ static void battle_update(void) {
 		bool guardian = boss_fighting();
 		D.record_known = guardian;
 		if (!guardian && !D.challenge) ++D.battles;
-		if (guardian) runlog_battle_start(NULL, "guardian");
+		/* (the one fought: an older net's guardian whose engine could not
+		 * fight him leaves the area's own, boss.c) */
+		int navi = D.objs.guardian.navi;
+		if (guardian) runlog_guardian_start(guardian_older(navi) ? run.boss_order[run.biome] : navi);
 		home_jobs_battle_start();
 	}
 	D.in_battle = true;
@@ -420,7 +423,7 @@ static void battle_update(void) {
 		if (s != -2) {
 			D.record_known = true;
 			loot_battle_fought(&D.next);
-			runlog_battle_start(&D.next, D.challenge ? "challenge" : "battle");
+			runlog_battle_start(&D.next, D.duel ? "duel" : D.challenge ? "challenge" : "battle");
 		}
 		if (emu_debug_on() && s != -2) fprintf(stderr, "battle from record %d: field %02x player %02x foes %d\n", s, D.next.field, D.next.player, D.foes);
 	}
@@ -444,7 +447,7 @@ static void after_battle(void) {
 	D.placed_told = false;
 	D.battle_record = 0;
 	bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
-	runlog_battle_end(won);
+	runlog_battle_end(won, (int)emu_read32(BN6_BATTLE_TIMER));
 	/* (a request's battles: a guardian's counts for none) */
 	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
 	/* the PET's battle data on the viruses just fought */
