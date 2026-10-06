@@ -9,6 +9,7 @@
 #include "npc.h"
 #include "pet.h"
 #include "pet_text.h"
+#include "protoman_cross.h"
 #include "scripts.h"
 
 void game_hooks_install(void) {
@@ -22,5 +23,6 @@ void game_hooks_install(void) {
 
 void game_hooks_after_boot(void) {
 	emu_encounters_install();
+	protoman_cross_install();
 	events_install();
 }

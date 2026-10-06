@@ -159,6 +159,12 @@ In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
 given the act's guardian band at most as he spawns, where his own 1800 is
 above it: a hook lowers the value BN6's spawn sets both from.
 
+In any of BN6's battles, ProtoMan landing from his cross gets his
+collision region (his collision data's `+0x01`) back on his own panel
+where the cross left it cleared, as BN6 does for a cross cut short but
+not for one that ends, which left him untouchable (docs/FIDELITY.md,
+issue #55): a hook at `0x080FDFA0`.
+
 The engine also takes over Central Town (`0x01:0`) or ACDC Town (`0x00:0`)
 for the town (its tile map, coordinate data, NPC list, map scripts,
 objects, sprite list, warp list, jack-in table, check table
@@ -432,6 +438,7 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x0800B79A` | a chip's after-effects as it runs (bn6f `sub_800B79A`) | answer, posting an event where a DarkChip's dark power ran for MegaMan (its id 0x11E-0x122 reaches it only then): its price after the battle | once a chip used |
 | `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
 | `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
+| `0x080FDFA0` | ProtoMan's cross landing back on his panel (bn6f `sub_80FCC4C`, `src/emu/protoman_cross.c`) | answer: his collision region given his own panel back where the cross left it cleared (issue #55; `CYBERWORLD_EMU_DEBUG` says each) | once a cross |
 | `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
 | `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) and a request's at home (`0x1460`-`0x1462`, `0x146A`) | about once a frame on the map |
 | `0x0803CD6C` | GiveItem | event: a key item given (a ScrtData, the run's Spin) | once an item |

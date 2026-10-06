@@ -7,6 +7,7 @@
 #include "bn6_fields.h"
 #include "emu.h"
 #include "game.h"
+#include "protoman_cross.h"
 #include "run.h"
 
 bool emu_debug_on(void) { return getenv("CYBERWORLD_EMU_DEBUG") != NULL; }
@@ -99,6 +100,13 @@ void emu_debug_frame(void) {
 		dropped = hook_dropped;
 		strays = hook_strays;
 		fprintf(stderr, "hooks: %u events dropped, %u strays\n", (unsigned)dropped, (unsigned)strays);
+	}
+	/* (ProtoMan's cross ended with nothing able to touch him, mended:
+	 * protoman_cross.h) */
+	static uint32_t mended;
+	if (protoman_cross_mended != mended) {
+		mended = protoman_cross_mended;
+		fprintf(stderr, "protoman: t%d his cross left him untouchable, his panel given back (%u so far)\n", t, (unsigned)mended);
 	}
 	if (t % 60 == 0)
 		fprintf(stderr, "music t%d song %08x status %08x\n", t, emu_read32(BN6_MUSIC_PLAYER), emu_read32(BN6_MUSIC_STATUS));

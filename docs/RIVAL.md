@@ -190,7 +190,10 @@ himself. Beat him, and my full clearance is yours.").
 - A hit: BN6's object_subtractHP taking HP from MegaMan's battle object,
   seen by a hook while the duel's battle runs (docs/EMULATION.md, Hooks).
 - Chaud's face (the chat's `@C`), ProtoMan's overworld sprite (`0x3B`)
-  and his navi (`11`, for the netbattle).
+  and his navi (`11`, for the netbattle): his AI and attacks BN6's, but
+  for his cross, which in BN6 can leave him untouchable for the rest of
+  the fight and here gives him his panel back as he lands (docs/
+  FIDELITY.md, issue #55).
 
 ## Phases
 
