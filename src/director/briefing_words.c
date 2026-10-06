@@ -65,8 +65,11 @@ static int guardian_words(char *buf, int k, int size) {
 		if (tip) ADD("@M We've got battle data on him!|@M %s|", tip);
 		else ADD("@M Watch the yellow panels! Attacks land there!|");
 	} else {
-		/* (what a Navi on the net said, as hearsay) */
-		if (guardian_heard()) ADD("|@M Word is,%s waits at the end!|@M We've got no battle data on him,Lan.|", guardian(navi)->name);
+		/* (what a Navi on the net said, as hearsay; a super boss sensed,
+		 * docs/BOSSES.md, Super bosses) */
+		if (navi == SUPER_CYBEAST) ADD("|@M Something huge waits at the end...|@M It's growling,Lan. Like the beast in me.|");
+		else if (navi == SUPER_BASS) ADD("|@M A dark signal waits at the end...|@M It doesn't feel like a copy,Lan.|");
+		else if (guardian_heard()) ADD("|@M Word is,%s waits at the end!|@M We've got no battle data on him,Lan.|", guardian(navi)->name);
 		else ADD("|@M A strong Navi's signal waits at the end...|@M We've got no battle data on it,Lan.|");
 		ADD("@M Watch the yellow panels! Attacks land there!|");
 	}
@@ -562,6 +565,19 @@ static const char *service_where(int wx, int wy, char *buf, size_t n) {
 }
 
 #define NO_RUNNING "Once we're in,there's no running!"
+
+/* The last stop's first box: whose arena is just ahead (a super boss's
+ * sensed until they have met: docs/BOSSES.md, Super bosses); its length */
+static int arena_ahead(char *buf, size_t n) {
+	int navi = D.objs.guardian.navi;
+	bool known = guardian_known(navi);
+	if (navi == SUPER_CYBEAST)
+		return snprintf(buf, n, "%s", known ? "@M The Cybeast's den is just ahead,Lan!|@M " : "@M The growling's coming from just ahead!|@M ");
+	if (navi == SUPER_BASS) return snprintf(buf, n, "%s", known ? "@M Bass is just ahead,Lan!|@M " : "@M That dark signal's just ahead,Lan!|@M ");
+	if (known || guardian_heard()) return snprintf(buf, n, "@M %s's arena is just ahead,Lan!|@M ", guardian(navi)->name);
+	return snprintf(buf, n, "@M The guardian's arena is just ahead,Lan!|@M ");
+}
+
 void last_stop(int cx, int cy) {
 	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
 	const Room *a = &layer.rooms[layer.ante];
@@ -580,9 +596,7 @@ void last_stop(int cx, int cy) {
 	}
 	if (!dealer && !heal) return;
 	static char buf[400];
-	int k = guardian_known(D.objs.guardian.navi) || guardian_heard()
-		? snprintf(buf, sizeof buf, "@M %s's arena is just ahead,Lan!|@M ", guardian(D.objs.guardian.navi)->name)
-		: snprintf(buf, sizeof buf, "@M The guardian's arena is just ahead,Lan!|@M ");
+	int k = arena_ahead(buf, sizeof buf);
 	/* (and no running once in, as from BN6's story bosses: a playtester
 	 * at 1 HP tried L and R, which only BN6's random battles answer) */
 	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.|@M %s", dealer, heal, NO_RUNNING);

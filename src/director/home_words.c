@@ -66,9 +66,13 @@ static const char *area_feel(int biome) {
 
 const char *home_port_words(int biome, int navi, bool dark, bool sealed) {
 	static char words[240];
-	if (navi && !guardian_known(navi)) navi = 0;
+	/* (the Cybeast below the endless Nest: a growl, never a Navi's signal;
+	 * docs/BOSSES.md, Super bosses) */
+	bool beast = navi == SUPER_CYBEAST, known = navi && guardian_known(navi);
+	if (!known) navi = 0;
 	char signal[64];
-	if (navi) snprintf(signal, sizeof signal, "@M That signal... It's %s!", guardian(navi)->name);
+	if (beast) snprintf(signal, sizeof signal, "%s", known ? "@M The Cybeast's down there,Lan. Waiting." : "@M Something's growling down there...|@M Like the beast in me.");
+	else if (navi) snprintf(signal, sizeof signal, "@M That signal... It's %s!", guardian(navi)->name);
 	else snprintf(signal, sizeof signal, "@M And a strong Navi's signal...");
 	if (sealed)
 		snprintf(words, sizeof words, "@M A dark way leads down here...|@M It's sealed. Clearing the Secret Area would open it.");

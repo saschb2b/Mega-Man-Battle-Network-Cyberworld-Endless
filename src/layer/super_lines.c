@@ -79,6 +79,10 @@ const char *super_tip(int navi) {
 	return NULL;
 }
 
+const char *super_rumor(int navi) {
+	return navi == SUPER_CYBEAST ? "Did you hear?|The floor down here keeps shaking...|Something huge is waking up!" : NULL;
+}
+
 const char *super_reward_head(int navi) {
 	return navi == SUPER_BASS ? "MegaMan picked up the data Bass dropped!" : "MegaMan downloaded the Cybeast's data!";
 }

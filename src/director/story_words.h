@@ -9,5 +9,6 @@ void clear_card(void);
 const char *final_words(void);
 const char *mail_words(int navi);
 const char *secret_call_words(void);
+const char *den_call_words(void);
 
 #endif

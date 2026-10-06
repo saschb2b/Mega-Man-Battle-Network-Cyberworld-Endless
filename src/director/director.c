@@ -561,8 +561,8 @@ static void arrival_update(void) {
 	talk_update();
 	if (!D.area_card && !cinema_busy() && !boss_cinematic() && !boss_fighting() && !talk_busy()) {
 		if (D.beat[0] && talk_start(D.beat, FACE_MEGAMAN)) beat_said();
-		else if (D.secret_call && boss_done() && talk_start(secret_call_words(), FACE_MEGAMAN)) {
-			D.secret_call = false;
+		else if (D.after_call && boss_done() && talk_start(D.objs.guardian.navi == SUPER_CYBEAST ? den_call_words() : secret_call_words(), FACE_MEGAMAN)) {
+			D.after_call = false;
 		}
 	}
 }

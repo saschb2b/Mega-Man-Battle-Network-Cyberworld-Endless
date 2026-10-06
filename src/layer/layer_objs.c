@@ -457,9 +457,12 @@ static bool skull_here(void) {
 static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	int navi = run_layer_guardian();
 	/* (a list-6 navi's face has its sprite's number) */
-	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || !guardian_rumor(navi) ||
-		out->nchoices >= LAYER_MAX_CHOICES)
+	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 0 || !navi || guardian_known(navi) || out->nchoices >= LAYER_MAX_CHOICES)
 		return -1;
+	/* (a super boss's: what the net feels of him, and nothing heard, as he
+	 * goes unnamed till met: docs/BOSSES.md, Super bosses) */
+	if (super_boss(navi)) return rumor_words(navi) ? ta_say(text, face, rumor_words(navi)) : -1;
+	if (!guardian_rumor(navi)) return -1;
 	/* (heard, MegaMan names him for the rest of the act: the director
 	 * watches the flag as a choice) */
 	int flag = LAYER_FLAG_BASE + out->nchoices;
@@ -677,8 +680,9 @@ static void install_dealer(Install *in, Talker *tk) {
 	/* (the net's word comes back from an act's second layer: its
 	 * first keeps the mystery of a guardian never battled, but for
 	 * a bystander's rumor, sought out; a playtester's dealer named
-	 * one two minutes into the act) */
-	bool tells = navi > 0 && (guardian_known(navi) || layer_in_act(run.depth) > 0);
+	 * one two minutes into the act. A super boss has no word on the
+	 * net till met: docs/BOSSES.md, Super bosses) */
+	bool tells = navi > 0 && (guardian_known(navi) || (layer_in_act(run.depth) > 0 && !super_boss(navi)));
 	layer_objs_dealer_named = tells;
 	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
 	ShopWords w = dealer_words(&talk);

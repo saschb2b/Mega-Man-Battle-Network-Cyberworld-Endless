@@ -196,7 +196,11 @@ int second_library(SecondRow *out, int most) {
 const char *second_library_line(void) { return "Every chip MegaMan held in any run stays in the Library, and each run begins with it"; }
 
 void second_layer_next(int guardian_navi, char *out, size_t n) {
-	if (guardian_navi) snprintf(out, n, "The exit opens once %s is deleted", guardian(guardian_navi)->name);
+	/* (a super boss unnamed until met, as MegaMan senses him: docs/
+	 * BOSSES.md, Super bosses) */
+	if (super_boss(guardian_navi) && !guardian_known(guardian_navi))
+		snprintf(out, n, "%s waits at the end", guardian_navi == SUPER_BASS ? "A dark signal" : "Something huge");
+	else if (guardian_navi) snprintf(out, n, "The exit opens once %s is deleted", guardian(guardian_navi)->name);
 	else snprintf(out, n, "Find the exit pad");
 }
 

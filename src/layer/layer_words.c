@@ -13,6 +13,7 @@
 #include "netmap.h"
 #include "pacing.h"
 #include "save.h"
+#include "super_lines.h"
 #include "xguardian.h"
 
 /* ProtoMan's words where his netbattle waits for a later act: where, as
@@ -126,7 +127,12 @@ ShopWords dealer_words(const DealerTalk *d) {
 		? "|Its needles drop a moment late.|So fire when he stops!" : "";
 	/* (nor does he deny the bystanders' rumor: a playtester heard it
 	 * two platforms before his "No word yet") */
-	if (navi > 0 && !d->tells)
+	/* (a super boss never met: no word on the net, only its fear; docs/
+	 * BOSSES.md, Super bosses) */
+	if (super_boss(navi) && !d->tells)
+		snprintf(word, sizeof word, "|Something's waiting at the end of %s...|Even I don't go near it!",
+			guardian_area_in_text(run.biome, run.side_kind));
+	else if (navi > 0 && !d->tells)
 		snprintf(word, sizeof word, "|Nobody's come back from the end of %s!|There's talk on the Net... "
 			"But I don't sell talk!|Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
 	else if (navi > 0)
@@ -180,6 +186,8 @@ void duel_terms(char *terms, size_t n, int met, int foes, int frames, int rung) 
  * and a rumor */
 const char *rumor_words(int navi) {
 	static char rumor[200];
+	/* (a super boss's: what the net feels of him, never his name) */
+	if (super_boss(navi)) return super_rumor(navi);
 	snprintf(rumor, sizeof rumor, "Did you hear?|A copy of %s guards the end of %s!|Word is,%s", guardian(navi)->name,
 		guardian_area_in_text(run.biome, LAYER_NORMAL), guardian_rumor(navi));
 	return rumor;

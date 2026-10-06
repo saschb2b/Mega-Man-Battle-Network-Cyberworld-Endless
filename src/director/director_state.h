@@ -79,7 +79,7 @@ typedef struct {
 	bool tint_box;         /* ... a chat box open over it, which keeps its own colours */
 	bool intro_said;       /* Lan and MegaMan have spoken there */
 	char beat[900];        /* what they say on arriving, once the card has gone */
-	bool secret_call;      /* Chaud's call after the Secret Area's guardian is due */
+	bool after_call;       /* a call after the layer's guardian is due: Chaud's after the Secret Area's, Dad's after the Cybeast */
 	bool act_resumed;      /* the act was continued from a checkpoint: no clear stats */
 	bool l_held, r_held, a_held;   /* L, R and A were down last frame */
 	bool chat_was_open;            /* the game's chat box was open last frame */

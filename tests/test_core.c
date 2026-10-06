@@ -36,6 +36,7 @@
 #include "rivals.h"
 #include "save.h"
 #include "save_blob.h"
+#include "super_lines.h"
 #include "flags.h"
 #include "mapslot.h"
 #include "text.h"
@@ -2908,11 +2909,63 @@ static void super_places(void) {
 	printf("  super bosses' arenas: %d of %d layers at %d panels a side, the rest a guardian's\n", big, n, SUPER_ARENA_SIZE);
 }
 
+/* ... and every line of theirs and of the run's foreshadowing within BN6's
+ * box, none naming them before they have met */
+static void super_words(void) {
+	char what[96];
+	static const Rival records[] = {
+		{ 0, 0, 0, RIVAL_NONE }, { 1, 0, 0, RIVAL_NONE }, { 1, 0, 1, RIVAL_NAVI_WON }, { 2, 1, 0, RIVAL_MEGAMAN_WON },
+		{ 3, 2, 0, RIVAL_MEGAMAN_WON }, { 4, 3, 0, RIVAL_MEGAMAN_WON }, { 5, 3, 1, RIVAL_NAVI_WON },
+	};
+	static const int forms[2][3] = { { SUPER_BASS_V1, SUPER_BASS_SP, SUPER_BASS_BX }, { SUPER_CYBEAST_V1, SUPER_CYBEAST_SP, SUPER_CYBEAST_SP } };
+	memset(&profile, 0, sizeof profile);
+	rivals_load();   /* (no saves here: every record blank, the talk's test's gone) */
+	for (int k = 0; k < 2; ++k) {
+		int navi = k ? SUPER_CYBEAST : SUPER_BASS;
+		for (unsigned r = 0; r < sizeof records / sizeof *records; ++r)
+			for (int f = 0; f < 3; ++f) {
+				snprintf(what, sizeof what, "super_intro(%d, %d) record %u", navi, forms[k][f], r);
+				check_talk(what, super_intro(navi, forms[k][f], &records[r]));
+			}
+		for (int f = 0; f < 3; ++f) {
+			snprintf(what, sizeof what, "super_defeat(%d, %d)", navi, forms[k][f]);
+			check_talk(what, super_defeat(navi, forms[k][f]));
+			for (int first = 0; first < 2; ++first) {
+				snprintf(what, sizeof what, "super_reward_words(%d, %d, %d)", navi, forms[k][f], first);
+				check_talk(what, super_reward_words(navi, forms[k][f], first));
+			}
+			/* (the card's lines, as long as a guardian's at most) */
+			const char *top, *sub;
+			super_card(navi, forms[k][f], k ? 3 * CYCLE_LAYERS : 8, &top, &sub);
+			CHECK(strlen(top) < 28 && strlen(sub) < 28, "super: the card's lines \"%s\" \"%s\" are long", top, sub);
+		}
+		snprintf(what, sizeof what, "super_tip(%d)", navi);
+		check_talk(what, super_tip(navi));
+		CHECK(super_tip(navi) && guardian_tip(navi) == super_tip(navi), "super: %d's tip", navi);
+		CHECK(strlen(super_reward_head(navi)) < 48, "super: %d's data's head is long", navi);
+		/* (the net's word on him, and the Nest's port at home, before they
+		 * have met: never his name) */
+		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false);
+		snprintf(what, sizeof what, "super_rumor(%d)", navi);
+		check_talk(what, rumor);
+		snprintf(what, sizeof what, "the Nest's port with %d unmet", navi);
+		check_talk(what, port);
+		static const char *const names[] = { "Bass", "Gregar" };
+		for (int i = 0; i < 2; ++i)
+			CHECK((!rumor || !strstr(rumor, names[i])) && !strstr(port, names[i]), "super: %s named before they met: \"%s\" \"%s\"", names[i],
+				rumor ? rumor : "", port);
+	}
+	rival_met(SUPER_CYBEAST);
+	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON);
+	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false));
+}
+
 static void test_super_bosses(void) {
 	Profile profile_was = profile;
 	Run run_was = run;
 	super_records();
 	super_places();
+	super_words();
 	profile = profile_was;
 	run = run_was;
 }

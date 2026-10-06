@@ -377,7 +377,7 @@ static bool build_layer(void) {
 	official_sync(false);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
-	D.secret_call = run.side_kind == LAYER_SECRET;
+	D.after_call = run.side_kind == LAYER_SECRET || D.objs.guardian.navi == SUPER_CYBEAST;
 	talk_reset();
 	return true;
 }

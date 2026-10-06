@@ -381,6 +381,9 @@ static int bbs_posts(Post *out) {
 	if (profile.spins) POST(FACE_TECH, "SpinCollector", "Found a Spin in a blue Mystery Data. Now my programs turn!");
 	if (profile.duel_won) POST(0x19, "ChaudFan", "Beat ProtoMan's time,and Chaud shows you TagChips. Worth it!");
 	if (profile.best_depth >= 10 || profile.nest_clears) POST(FACE_NAVI, "DeepDiver", "I reached the Nest. Something down there copies everything... Spooky.");
+	/* (Bass waits in the Secret Area once it has been cleared: docs/BOSSES.md,
+	 * Super bosses) */
+	if (profile.marks & MARK_SECRET) POST(FACE_HEEL, "Lurker", "A cloaked Navi in the Secret Area! It deleted a copy in one blow... then went still as stone.");
 	#undef POST
 	return n;
 }
