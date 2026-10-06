@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **A thank-you after a download** (issue #103). On the site's download
+  page, the first download of a visit (any release file, or the iPhone's
+  Add to SideStore) opens a mail from Saschb2b in a PET window beside it:
+  thanks, a Buy me a coffee button, and on GitHub a star for the
+  repository, a follow and the issues for bugs and ideas. The download
+  starts as it always did. Esc, Close or a click outside closes it and
+  hands the keyboard back to the link; its links open a new tab, so the
+  page's install steps stay. The site's analytics count its opening and
+  its links as they count the others, never who clicked.
 - **BeastOut from the start, once the endless net is beaten** (issue #99).
   When the endless net's own Nest has fallen in any run (the milestone of
   Bass's mark on the title), the JACK-IN SETUP's Help row shows a fifth

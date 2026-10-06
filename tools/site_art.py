@@ -323,6 +323,62 @@ kwwwksskwwwk
 kwwwwkkwwwwk
 kwwwwwwwwwwk
 kkkkkkkkkkkk""",
+    # a star: the repository's star on GitHub
+    'star': """
+.....kk.....
+....kyyk....
+....kyyk....
+...kyyyyk...
+kkkkyyyykkkk
+kyyyyyyyyyok
+.kyyyyyyyok.
+..kyyyyyok..
+..kyyyyyok..
+.kyyokkyyok.
+.kyok..kyok.
+.kkk....kkk.""",
+    # a person and a plus: follow on GitHub
+    'follow': """
+...kkkk.....
+..kwwwwk..y.
+..kwwwwk.yyy
+..kwwwwk..y.
+...kkkk.....
+..kkkkkk....
+.kcccccck...
+kcccccccck..
+kcccccccck..
+kcccccccck..
+kkkkkkkkkk..
+............""",
+    # a beetle: a bug to report
+    'bug': """
+..s......s..
+...s....s...
+....kkkk....
+...knnnnk...
+s.kkkkkkkk.s
+.krrrkkrrrk.
+skrwrkkrrrks
+.krrrkkrwrk.
+skrrrkkrrrks
+.krrrkkrrrk.
+s.krrkkrrk.s
+...kkkkkk...""",
+    # a cup and its steam: a coffee for the project
+    'coffee': """
+...c..c.....
+..c..c......
+...c..c.....
+............
+kkkkkkkkk...
+kwwwwwwwkkk.
+kwwwwwwwk.k.
+kwwwwwwwk.k.
+kwwwwwwwkkk.
+.kwwwwwk....
+kkkkkkkkkkk.
+.kkkkkkkkk..""",
 }
 
 
