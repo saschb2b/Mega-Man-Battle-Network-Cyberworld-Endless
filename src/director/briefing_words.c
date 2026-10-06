@@ -189,9 +189,10 @@ static int off_board_note(char *buf, int k, int size) {
 	} else if (off && *off && off_board_explained(offv)) {
 		if (fits_as_it_stands(offv)) ADD("@M Lan,%s is still off our board!|", off);
 	} else if (off && *off) {
-		ADD("@M Lan,%s isn't on our NaviCust board yet!|@M In the PET,go to MegaMan,then NaviCust!|@M %s|", off, navicust_turn_words(offv));
+		const char *turns = navicust_turn_words(offv);
+		ADD("@M Lan,%s isn't on our NaviCust board yet!|%s%s%s", off, *turns ? "@M " : "", turns, *turns ? "|" : "");
 		off_board_explain(offv);
-	} else if (off) ADD("@M Lan,a program isn't on our NaviCust board yet!|@M In the PET,go to MegaMan,then NaviCust!|");
+	} else if (off) ADD("@M Lan,a program isn't on our NaviCust board yet!|");
 	if (k > k0) D.off_told = true;
 	#undef ADD
 	return k;
@@ -578,6 +579,13 @@ static int arena_ahead(char *buf, size_t n) {
 	return snprintf(buf, n, "@M The guardian's arena is just ahead,Lan!|@M ");
 }
 
+/* Whether the last stop names heal `o`: one not yet told of while MegaMan
+ * is hurt, and not under a vow: L had just said "No Mr.Prog patch-ups this
+ * time!", and MegaMan named the Mr.Prog at the arena's door (session 72) */
+static bool heal_to_name(const NetObj *o, int hp, int max) {
+	return o->type == OBJ_HEAL && !flag_get(LAYER_HEAL_TOLD_FLAG) && !heal_spent() && hp < max;
+}
+
 void last_stop(int cx, int cy) {
 	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
 	const Room *a = &layer.rooms[layer.ante];
@@ -592,7 +600,7 @@ void last_stop(int cx, int cy) {
 		int wx, wy;
 		netmap_world((int)o->x, (int)o->y, &wx, &wy);
 		if (o->type == OBJ_SHOP && !dealer && !flag_get(LAYER_DEALER_TOLD_FLAG)) dealer = service_where(wx, wy, dway, sizeof dway);
-		if (o->type == OBJ_HEAL && !heal && !flag_get(LAYER_HEAL_TOLD_FLAG) && hp < max) heal = service_where(wx, wy, hway, sizeof hway);
+		if (!heal && heal_to_name(o, hp, max)) heal = service_where(wx, wy, hway, sizeof hway);
 	}
 	if (!dealer && !heal) return;
 	static char buf[400];
