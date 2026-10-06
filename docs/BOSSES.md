@@ -18,7 +18,7 @@ bosses](#super-bosses-6-october-2026-issue-100), below.
 | The boss's name and epithet on its health bar | A title card: the area it guards, its name large (with EX or SP for stronger versions), its epithet; the game's own battle shows its name too |
 | No question before the fight | The battle starts after the last line |
 | A defeat line, a flash, the boss leaves | A last word, a white flash, and the guardian logs out, fading away |
-| A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (its Cross or BeastOut with MegaMan's and Dad's words, five HPMemory, its own Navi chip at the version fought, a full heal); taking it makes the exit pad appear |
+| A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (its Cross with MegaMan's words, at the first Graveyard the beast stirring in him, five HPMemory, its own Navi chip at the version fought, a full heal); taking it makes the exit pad appear |
 | Stairs into the next region, its name on screen | An area-clear card (guardian, viruses, time) over the jack-out, then the next area's title card |
 | Bosses remember runs | `rivals.sav` counts meetings and who won each battle, per Navi |
 | The Codex fills as you meet things | MegaMan briefs a guardian's moves, and when a hit lands, only once they have fought that copy in any run (its `rivals.sav` record); a first meeting says they have no battle data, and to watch the yellow panels (docs/META.md, what MegaMan knows) |
@@ -164,7 +164,7 @@ sets him in:
 Nebula Area keeps BN6's guardians: BN5 lists none of the six there, its
 act is the last before the Nest (a Soul won there would serve no BN5
 battle in the cycle), and the Graveyard's guardian is the one whose fall
-wakes the Cybeast in MegaMan for the Nest.
+stirs the Cybeast in MegaMan before the Nest.
 
 **How often**: on the guardian layer of an act whose area
 BN5 dresses, in half the runs (a coin of the run's seed for each area, of
@@ -270,8 +270,9 @@ critique smells, the transitions budget.
   Challenge and narrative, and a record of mastery.
 - **The dialectic** is the run's, prepare or press on, at its two
   extremes. The Cybeast is where the endless net leads: everything
-  prepared (the folder, the Crosses, the BeastOut the Graveyard wakes, the
-  Net's clock paid for trips back) is tested at the bottom. Bass is
+  prepared (the folder, the Crosses, the Net's clock paid for trips back)
+  is tested at the bottom, and beaten, it pays its own power, BeastOut,
+  for the Nets after (issue #109). Bass is
   pressing on in its purest form: a fight beyond the act behind a gate the
   player chooses to open, for a Giga chip and a record.
 - **The loop layers**: the Cybeast feeds the progression and run loops,
@@ -311,7 +312,9 @@ critique smells, the transitions budget.
    Net, as the Nest's guardian's did, and earns the title's Bass mark
    ("the endless net's own Nest cleared") as before, and with it the
    BeastOut helper for the runs after (issue #99): MegaMan downloaded the
-   Cybeast's data. The short net keeps
+   Cybeast's data. In the run itself it gives BeastOut from layer 20 on:
+   Dad's call after it unlocks the PET's CybeastButton, where the run did
+   not bring it (issue #109). The short net keeps
    its Nest guardian: its last words already say something deeper is
    still awake, and the endless net, which its win opens, pays that off.
 2. **Bass, in the Secret Area, once it has been cleared.** BN6 sets
@@ -338,9 +341,10 @@ The Cybeast, from the first run on:
 
 - the short net's Nest growls as MegaMan arrives, and its last words say
   something deeper is still awake, the Nest only its den (as before);
-- the endless net's Graveyard wakes the beast in MegaMan (BeastOut, as
-  before: "The Nest is calling to the Cybeast in me!"), or Dad unlocks it
-  as a run with the BeastOut helper begins;
+- the endless net's Graveyard stirs the beast in MegaMan ("The Nest is
+  calling to the Cybeast in me!"), unlocking nothing: BeastOut comes with
+  the Cybeast's fall (issue #109), or as a run with the BeastOut helper
+  begins;
 - in Lan's HP, the Nest's portal: MegaMan reads something growling far
   down, like the beast in him;
 - the endless Nest's arrival: the growl from below, and MegaMan feels the
@@ -377,7 +381,7 @@ Bass, once the Secret Area is his:
 | Title card | A band, the area, the name, the epithet | A darkened picture, a taller band with double edges in its colour, the name larger and heavier, its form or the Net beneath, held longer |
 | Words | The guardian's line, MegaMan's answer, the battle call | Bass speaks (his face, BN6's), by his record; the Cybeast roars (its face) while MegaMan, Lan and Dad speak; once fought in any run, MegaMan's battle data on their moves, watched in god mode (Bass's cape takes no damage and comes off as he attacks; every attack of the Cybeast's lights its panels first) |
 | Fight | BN6's boss theme, the area's background | BN6's own record: Bass's boss theme (`0x16`), the Cybeast's final battle theme (`0x17`), the background of the map it stands on as BN6's records ask (`0xFF`), no running |
-| After | Silence, last word, a flash, the log-out | Silence; Bass's last word, a white fade with BN6's `0xD7` as he goes, his stone's pieces fading with him; the Cybeast's last growl, a long white fade with the floor shaking, then the Net stays silent through Dad's call |
+| After | Silence, last word, a flash, the log-out | Silence; Bass's last word, a white fade with BN6's `0xD7` as he goes, his stone's pieces fading with him; the Cybeast's last growl, a long white fade with the floor shaking, then the Net stays silent through Dad's call (the CybeastButton unlocked, where the fall gave the run BeastOut) |
 
 ### What they pay
 
@@ -388,7 +392,8 @@ other version's Bass Giga), Bass SP the Bass Giga (BN6 Gregar's for Bass
 SP), Bass BX ColForce (Gregar's for Bass BX), the Cybeast BugRSwrd
 (Gregar's own version Giga; the Cybeast was born of bugs). The Cybeast's
 data on a normal layer also brings the NaviCust's draft, as the Nest's
-guardian's did, and its fall opens the BeastOut helper (issue #99). The
+guardian's did; its fall gives the run BeastOut for the Nets after
+(issue #109) and opens the BeastOut helper (issue #99). The
 Beast chips (Gregar, Falzar, DblBeast) are left out: the Japanese Beast
 Link Gate's, unverified in the US version.
 

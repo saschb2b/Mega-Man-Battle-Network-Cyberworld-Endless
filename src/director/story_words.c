@@ -15,6 +15,7 @@
 #include "guardians.h"
 #include "guest_words.h"
 #include "meta.h"
+#include "powers.h"
 #include "rivals.h"
 #include "save.h"
 
@@ -201,10 +202,15 @@ const char *secret_call_words(void) {
 }
 
 /* Dad's call once the Cybeast's data is taken: it is deleted, and the Net
- * rebuilds itself (docs/BOSSES.md, Super bosses) */
+ * rebuilds itself (docs/BOSSES.md, Super bosses); where its fall gave the
+ * run BeastOut, the CybeastButton unlocked (powers_den_text, issue #109) */
 const char *den_call_words(void) {
-	return rival(SUPER_CYBEAST)->megaman_won == 1
+	static char words[640];
+	const char *call = rival(SUPER_CYBEAST)->megaman_won == 1
 		? "@D Lan,MegaMan! You did it!|@D It's deleted... But the Net!|@D It's rebuilding itself!|@M It copied our battle too,Lan.|"
 		  "@M Next time,it'll be stronger.|@L Then so will we!"
 		: "@D Well done,you two!|@D The Net's rebuilding again...|@L We'll be ready for it!";
+	const char *beast = powers_den_text(run.depth);
+	snprintf(words, sizeof words, "%s%s%s", call, beast ? "|" : "", beast ? beast : "");
+	return words;
 }

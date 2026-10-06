@@ -41,8 +41,9 @@ around it, one layer at a time, and keeps the run going.
   card names the guardian, the Net Dealer stocks a chip that answers it, and
   MegaMan warns you how it fights.
 - **A run that grows.** A gift to start, Guardian Data (HP, the Navi's chip
-  and its Cross), BeastOut from the Graveyard (from the first battle, once
-  you have beaten the endless net), and rarer chips the deeper you go.
+  and its Cross), BeastOut once you beat the Cybeast (from the first
+  battle, once you have beaten it in any run), and rarer chips the deeper
+  you go.
 - **Deeper, harder, around again.** From the surface areas through the
   story's comps, the Undernet and the Graveyard to the Underground, then
   around again, harder.
@@ -654,9 +655,10 @@ it pays one of BN6's GigaChips.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.
-- **BeastOut.** The Graveyard's guardian wakes the Cybeast, and BeastOut
-  joins the Custom screen. Once the Cybeast at the endless net's own Nest
-  has fallen in any run, the setup's Help row can bring it from the first
+- **BeastOut.** Beat the Cybeast at the endless net's own Nest, and
+  BeastOut joins the Custom screen for the rest of the run; the
+  Graveyard's guardian only stirs the beast. Once the Cybeast has fallen
+  in any run, the setup's Help row can bring BeastOut from the first
   battle instead, in either net.
 - **Chips.** Mystery Data, shops and traders draw from the whole chip
   library by rarity: Megas deeper down and, rarely, a Giga. Green Mystery

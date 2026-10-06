@@ -133,9 +133,9 @@ static const char *const green_checks[16] = {
 };
 
 /* A run that brought BeastOut (issue #99): Dad's word that the PET's
- * CybeastButton is unlocked from the start, as the Graveyard's guardian
- * would have had him unlock it, all of it the first time (`called`: Dad
- * on the line already), MegaMan's reminder after */
+ * CybeastButton is unlocked from the start, as the Cybeast's fall would
+ * have had him unlock it (issue #109), all of it the first time
+ * (`called`: Dad on the line already), MegaMan's reminder after */
 static const char *beast_words(bool taught, bool called) {
 	static char words[240];
 	if (taught) return "|@M And the CybeastButton's unlocked!|@L Our trump card. Alright!";

@@ -78,8 +78,15 @@ uint32_t rng_state(void) { return rng_s; }
 void rng_restore(uint32_t s) { rng_s = s ? s : 0x9E3779B9u; }
 uint32_t rng_next(void) { uint32_t x = rng_s; x ^= x << 13; x ^= x >> 17; x ^= x << 5; return rng_s = x; }
 int rng_range(int lo, int hi) { return hi <= lo ? lo : lo + (int)(rng_next() % (uint32_t)(hi - lo + 1)); }
-/* (the talk's pieces need no saves or game flags here) */
-void flag_set(int flag) { (void)flag; }
+/* (the talk's pieces need no saves or game flags here; the flags set are
+ * noted, for the powers a battle gives: test_beast) */
+static int flags_set[16], nflags_set;
+void flag_set(int flag) { if (nflags_set < 16) flags_set[nflags_set++] = flag; }
+static bool flag_was_set(int flag) {
+	for (int i = 0; i < nflags_set; ++i)
+		if (flags_set[i] == flag) return true;
+	return false;
+}
 bool flag_get(int flag) { (void)flag; return false; }
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { (void)name; (void)magic; (void)data; (void)n; return false; }
@@ -2697,10 +2704,11 @@ static void test_all_star(void) {
 /* The BeastOut helper (issue #99, docs/META.md): shut until the endless
  * net's own Nest has fallen, a short net's Nest opening none; announced
  * once, on the summary of the run that opened it and NEW on the setup's
- * Help row, NEW too where a run given up for a NEW GAME opened it; and
- * the words of a run that brought it: Dad's at its start, all of it until
- * the profile has heard them, and the Graveyard's call with nothing left
- * to unlock. */
+ * Help row, NEW too where a run given up for a NEW GAME opened it; in a
+ * run, BeastOut from the Cybeast's fall, Dad's CybeastButton after it,
+ * and the Graveyard's call unlocking nothing (issue #109); and the words
+ * of a run that brought it: Dad's at its start, all of it until the
+ * profile has heard them. */
 static void test_beast(void) {
 	Profile profile_was = profile;
 	Run run_was = run;
@@ -2734,16 +2742,43 @@ static void test_beast(void) {
 			profile.setup_new & SETUP_NEW_HELP ? "yes" : "no");
 	}
 	CHECK(profile.marks & MARK_NEST, "beast: no Bass's mark with it");
+	/* the Graveyard's call stirs the beast and unlocks nothing, in a run
+	 * with the helper or without (issue #109) */
+	for (int helped = 0; helped < 2; ++helped) {
+		run.helpers = helped ? HELP_BEAST : 0;
+		for (int navi = 1; navi < 19; ++navi) {
+			const char *words = powers_reward_text(navi, BIOME_GRAVEYARD, 15);
+			char what[80];
+			snprintf(what, sizeof what, "the Graveyard's call to a run %s BeastOut, navi %d", helped ? "with" : "without", navi);
+			check_talk(what, words);
+			CHECK(words && strstr(words, "calling to the Cybeast") && !strstr(words, "CybeastButton") && !strstr(words, "can now BeastOut"),
+				"%s: \"%s\"", what, words ? words : "(none)");
+		}
+	}
+	/* BeastOut from the Cybeast's fall, not the Graveyard's guardian's;
+	 * Dad's word on it after the first Net's, unless the run brought it;
+	 * and a headless start past the first Nest holding it */
+	run.helpers = 0;
+	nflags_set = 0;
+	for (int navi = 1; navi < 19; ++navi) powers_after_boss(navi);
+	CHECK(!flag_was_set(BN6_FLAG_BEAST_OUT), "beast: a guardian gave BeastOut");
+	powers_after_boss(SUPER_CYBEAST);
+	CHECK(flag_was_set(BN6_FLAG_BEAST_OUT), "beast: the Cybeast's fall gave no BeastOut");
+	const char *den = powers_den_text(CYCLE_LAYERS);
+	check_talk("Dad's CybeastButton after the Cybeast", den);
+	CHECK(den && strstr(den, "CybeastButton") && strstr(den, "can now BeastOut"), "beast: no CybeastButton after the first Net's Cybeast");
+	CHECK(!powers_den_text(2 * CYCLE_LAYERS), "beast: the CybeastButton unlocked again on the second Net");
+	run.helpers = HELP_BEAST;
+	CHECK(!powers_den_text(CYCLE_LAYERS), "beast: the CybeastButton unlocked in a run that brought it");
+	run.helpers = 0;
+	for (int depth = 1; depth <= CYCLE_LAYERS + 1; depth += CYCLE_LAYERS) {
+		run.depth = depth;
+		nflags_set = 0;
+		powers_bring();
+		CHECK(flag_was_set(BN6_FLAG_BEAST_OUT) == (depth > CYCLE_LAYERS), "beast: a start on layer %d %s it", depth, depth > CYCLE_LAYERS ? "without" : "with");
+	}
 	/* the words of a run that brought it */
 	run.helpers = HELP_BEAST;
-	for (int navi = 1; navi < 19; ++navi) {
-		const char *words = powers_reward_text(navi, BIOME_GRAVEYARD, 15);
-		char what[64];
-		snprintf(what, sizeof what, "the Graveyard's call to a run with BeastOut, navi %d", navi);
-		check_talk(what, words);
-		CHECK(words && strstr(words, "calling to the Cybeast") && !strstr(words, "unlocking") && !strstr(words, "can now BeastOut"),
-			"%s: \"%s\"", what, words ? words : "(none)");
-	}
 	profile.seen_intro = true;
 	profile.runs = 5;
 	for (int k = 0; k < 4; ++k) {

@@ -11,6 +11,7 @@
 #include "run.h"
 #include "save.h"
 #include "souls.h"
+#include "super_boss.h"
 
 /* Gregar's Crosses by navi index: HeatMan 1 .. ChargeMan 5 (what MegaMan
  * feels of each: powers_words.c), the attacks that hit it twice as hard and what it gives
@@ -73,24 +74,33 @@ void powers_bring(void) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == run.cross) flag_set(crosses[i].flag);
 	/* (BN6's own BeastOut: the emblem under OK, its three turns a battle,
-	 * as the Graveyard's guardian gives it, docs/ROM_DATA.md) */
-	if (run_beast_start()) flag_set(BN6_FLAG_BEAST_OUT);
+	 * as the Cybeast's fall gives it, docs/ROM_DATA.md; a headless start
+	 * past the first Net's Nest has it too, as a run has it there) */
+	if (run_beast_start() || run.depth > CYCLE_LAYERS) flag_set(BN6_FLAG_BEAST_OUT);
 }
 
 const char *powers_reward_text(int navi, int biome, int depth) {
 	/* (a run that brought a Cross keeps it alone: the choice's cost; the
-	 * Graveyard sits over the Nest: its call wakes the Cybeast in MegaMan,
-	 * and Dad lets him use it, once a run; a run that brought BeastOut
-	 * hears the call, and Lan) */
+	 * Graveyard sits over the Nest: its call stirs the Cybeast in MegaMan,
+	 * once a run, and unlocks nothing, the Cybeast's fall does: issue
+	 * #109) */
 	return powers_reward_words(navi, powers_cross_name(navi) && !beaten_before(navi, depth), biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS);
 }
 
-void powers_after_boss(int navi, int biome) {
+const char *powers_den_text(int depth) {
+	/* (beat the beast, then its power: the first Net's Cybeast, in a run
+	 * that did not bring BeastOut; on the Nets after, the run has it) */
+	return depth <= CYCLE_LAYERS && !run_beast_start() ? powers_beast_words() : NULL;
+}
+
+void powers_after_boss(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
 	/* BN5's guardians their Soul, for the run's BN5 battles (docs/META.md,
 	 * Souls in BN5 territory) */
 	soul_give(navi);
-	/* the Graveyard's guardian wakes the Cybeast */
-	if (biome == BIOME_GRAVEYARD) flag_set(BN6_FLAG_BEAST_OUT);
+	/* the Cybeast's fall gives BeastOut for the rest of the run (issue
+	 * #109: beat the beast, then its power), as Dad says in his call
+	 * (powers_den_text) */
+	if (navi == SUPER_CYBEAST) flag_set(BN6_FLAG_BEAST_OUT);
 }

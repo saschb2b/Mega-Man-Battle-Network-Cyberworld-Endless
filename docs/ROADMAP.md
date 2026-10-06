@@ -10,7 +10,7 @@ autopilot run and, when the Nova is reachable, `tools/device_run.py`.
   PET's Comm and Save are off (`0x1706`), and MegaMan found on another map
   is warped back to the layer.
 - **Progress the game understands.** A beaten Navi's Cross (`0xE2`-`0xE6`)
-  and, in the Graveyard, Beast Out (`0xE0`) switch on through the story's
+  and, at the endless Nest's Cybeast, Beast Out (`0xE0`) switch on through the story's
   own flags, and the game's chat box says so.
 - **One source of truth.** `Run` keeps only the engine's decisions (format
   CWE2, older saves converted); MegaMan himself lives in the game's state.
