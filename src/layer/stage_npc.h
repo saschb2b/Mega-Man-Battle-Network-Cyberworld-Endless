@@ -16,19 +16,23 @@ typedef struct {
 } StageFlags;
 
 /* A guardian's body on the net: a sprite (its list and number), the
- * animation it stands in, mirrored or not, the animation it logs in by and
- * the pose it strikes for the title card (-1 none). */
+ * animation it stands in, mirrored or not, the animation it logs in by,
+ * the pose it strikes for the title card and the animation it logs out
+ * by (-1 none: it shows, or goes, as BN6's beam rises). */
 typedef struct {
 	int list, index, anim;
 	bool mirror;
-	int log_in, pose;
+	int log_in, pose, log_out;
 } NpcBody;
-#define NPC_ANIM_LOG_IN 25   /* every Navi's overworld sprite: materializing */
 
 /* The guardian: body `b` at world (x, y, z); on `appear` it logs in and
- * strikes its pose; on `gone` it fades out and leaves. Nobody can talk to
- * it. */
+ * strikes its pose; on `gone` it logs out and leaves, as BN6's Navis do on
+ * the net, beside the beam (npc_beam). Nobody can talk to it. */
 uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f);
+/* BN6's beam where a Navi logs in or out on the net (map object sprite
+ * list 7's 0: its animation 0 in, 1 out, BN6's sound 0x76 with each), at
+ * world (x, y, z): in on `appear`, out on `gone`. */
+uint32_t npc_beam(int x, int y, int z, const StageFlags *f);
 /* The Guardian Data it leaves: a Mystery Data crystal (animation `anim`)
  * that shows on `reward` and runs text `script` of `archive` when checked,
  * which should set `taken`. */

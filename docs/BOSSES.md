@@ -17,7 +17,7 @@ bosses](#super-bosses-6-october-2026-issue-100), below.
 | Short intro dialogue with portraits, chosen by history (first meeting, who won last) | Lines with the guardian's mugshot for a first meeting (Lan or MegaMan naming the copy first), a rematch, revenge after beating MegaMan, a stronger version, and grudging respect after many losses; MegaMan answers now and then; the Nest's own guardian says what it is; Lan's "Battle routine, set!" and MegaMan's "Execute!" close it |
 | The boss's name and epithet on its health bar | A title card: the area it guards, its name large (with EX or SP for stronger versions), its epithet; the game's own battle shows its name too |
 | No question before the fight | The battle starts after the last line |
-| A defeat line, a flash, the boss leaves | A last word, a white flash, and the guardian logs out, fading away |
+| A defeat line, a flash, the boss leaves | A last word, and the guardian logs out as BN6's Navis do on the net: his sprite's own log-out beside BN6's beam and its sound |
 | A reward to walk up to; the exit opens | Its Guardian Data materializes where it stood (its Cross with MegaMan's words, at the first Graveyard the beast stirring in him, five HPMemory, its own Navi chip at the version fought, a full heal); taking it makes the exit pad appear |
 | Stairs into the next region, its name on screen | An area-clear card (guardian, viruses, time) over the jack-out, then the next area's title card |
 | Bosses remember runs | `rivals.sav` counts meetings and who won each battle, per Navi |
@@ -31,14 +31,14 @@ would mean changing the game's battles themselves.
 | State | What happens |
 | --- | --- |
 | Wait | The guardian's NPC waits hidden in the arena's middle |
-| Enter | MegaMan steps into the arena: bars slide in, the music stops, MegaMan steps up to his place beside the guardian's and turns to it; the boss prelude starts, the guardian logs in (its animation 25 and sound 0x77) facing him and the screen shakes; the card waits for MegaMan to be there |
+| Enter | MegaMan steps into the arena: bars slide in, the music stops, MegaMan steps up to his place beside the guardian's and turns to it; the boss prelude starts, the guardian logs in facing him as BN6's Navis do (BN6's beam rising, its sound 0x76, and his sprite's own log-in, `0x19` + his facing) and the screen shakes; the card waits for MegaMan to be there |
 | Title | The title card, while Gregar's own Navis strike their signature pose (animation 24) |
 | Talk | The intro lines; input is A and B only |
 | Fight | The game's navi battle, forced at once (the random battle record is not re-rolled over it) |
 | After | Back on the map: bars, silence |
 | Last word | Its defeat line |
-| Log out | A flash; the guardian plays the log-out sound (0x76) and fades by its alpha before it is freed |
-| Reward | The Guardian Data shows (sound 0x94); the area's theme returns and MegaMan walks to it |
+| Log out | His sprite's own log-out (`0x21` + his facing: a frame in his lighter colours, then gone) beside BN6's beam and its sound, about a quarter of a second, as BN6's Navis log out on the net; no flash and no fading by alpha, which BN6 never does (the owner saw the old fade as a "blup"); then a beat, 45 frames from its start |
+| Reward | The Guardian Data shows (sound 0x94), BN6's Mystery Data crystal turning (its sprite's animation 0); the area's theme returns and MegaMan walks to it. Taken, it gives in BN6's own "MegaMan got:" boxes, MegaMan's one word on a Cross and on a first meeting's battle data, the heal, and the draft: one box and its menu |
 | Open | Taken: the exit pad appears and its warp works |
 
 Event flags `0x1448`-`0x144C` drive the NPCs: the guardian leaves, logs in,

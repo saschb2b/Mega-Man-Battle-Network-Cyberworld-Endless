@@ -13,8 +13,12 @@
 #include "mapslot.h"
 #include "npc.h"
 
-#define SOUND_LOG_IN   0x77
-#define SOUND_LOG_OUT  0x76
+/* BN6's own on the net: its beam's sound, a Navi's log-in and log-out
+ * alike (bn6f's npcscript_809F86C and byte_809F880; docs/ROM_DATA.md,
+ * Guardians); the beam, map object sprite list 7's 0, rises in 8 frames */
+#define SOUND_BEAM     0x76
+#define BEAM_SPRITE    0x00
+#define BEAM_RISE      8
 #define SOUND_APPEAR   0x94
 #define SOUND_SEAL     0xFE   /* Bass's stone cracking, BN6's own (docs/BOSSES.md, Super bosses) */
 
@@ -66,19 +70,42 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	coords(&s, x, y, z);
 	wait_flag(&s, f->appear, L_SHOW);
 	mark(&s, L_SHOW);
-	/* logs in where it stands, then strikes its pose for the title card */
-	sound(&s, SOUND_LOG_IN);
+	/* logs in where it stands, by its sprite's own log-in beside the beam
+	 * (which sounds), or shown as the beam rises where its sprite has
+	 * none; then strikes its pose for the title card */
 	if (b->log_in >= 0) OP(&s, 0x16, (uint8_t)b->log_in, 0x08, 0x2A, 0xC0);
-	else OP(&s, 0x08);
+	else OP(&s, 0x10, BEAM_RISE, 0x08);
 	if (b->pose >= 0) OP(&s, 0x16, (uint8_t)b->pose, 0x10, 90);
 	OP(&s, 0x16, (uint8_t)b->anim);
 	mark(&s, L_IDLE);
 	wait_flag(&s, f->gone, L_LEAVE);
 	mark(&s, L_LEAVE);
-	/* deleted: logs out, fading away */
-	sound(&s, SOUND_LOG_OUT);
-	for (int a = 0x10; a >= 0x02; a -= 2) OP(&s, 0x31, (uint8_t)a, 0x10, 0x04);
-	OP(&s, 0x09, 0x31, 0x00, 0x03);
+	/* deleted: logs out as BN6's Navis do, by its sprite's own log-out
+	 * beside the beam, or gone as the beam rises; not by its alpha, which
+	 * BN6 never fades a Navi by (bn6f's note on the command: it "doesn't
+	 * actually work"), and the owner saw as a "blup" */
+	if (b->log_out >= 0) OP(&s, 0x2E, (uint8_t)b->log_out, 0x2A, 0xC0);
+	else OP(&s, 0x10, BEAM_RISE);
+	OP(&s, 0x09, 0x03);
+	return commit(&s);
+}
+
+uint32_t npc_beam(int x, int y, int z, const StageFlags *f) {
+	Script s = { .n = 0 };
+	OP(&s, 0x09, 0x25, BEAM_SPRITE, 7 * 4, 0x16, 0x00, 0x0E, 0x1F, 0x13);
+	coords(&s, x, y, z);
+	/* (gone already: a CONTINUE by his data) */
+	jump_if(&s, f->gone, L_END);
+	wait_flag(&s, f->appear, L_SHOW);
+	mark(&s, L_SHOW);
+	sound(&s, SOUND_BEAM);
+	OP(&s, 0x08, 0x2E, 0x00, 0x2A, 0xC0, 0x09);
+	wait_flag(&s, f->gone, L_LEAVE);
+	mark(&s, L_LEAVE);
+	sound(&s, SOUND_BEAM);
+	OP(&s, 0x08, 0x2E, 0x01, 0x2A, 0xC0);
+	mark(&s, L_END);
+	OP(&s, 0x03);
 	return commit(&s);
 }
 

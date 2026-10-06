@@ -31,7 +31,6 @@ int cinema_input_mode(void);
 /* The keys MegaMan walks by this frame, in CINEMA_WALK. */
 void cinema_walk(uint32_t keys);
 void cinema_letterbox(bool on);
-void cinema_flash(int frames);
 void cinema_shake(int frames, int amplitude);
 /* An arrow pointing the way on for `frames` (screen direction 0 right,
  * then clockwise in eighths). */

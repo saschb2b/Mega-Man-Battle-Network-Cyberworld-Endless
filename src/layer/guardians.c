@@ -103,10 +103,28 @@ static int toward_camera(int face) {
  *   battle sprites (list 0, 0x2E + the navi, each uncompressed), which face
  *   left as they fight, mirrored to face right, standing in animation 0
  *   and logging in by BN6's warp-in, their animation 3 (docs/ROM_DATA.md). */
+/* How a Navi's overworld sprite logs in and out on the net, as BN6's
+ * scenes play them beside the beam (docs/ROM_DATA.md, Guardians): its
+ * animation 0x19 and 0x21 plus its facing, in Gregar's own Navis and BN5's;
+ * BlastMan and DiveMan log out by their own and have no log-in, JudgeMan
+ * has his own pair, ElementMan neither (he shows and goes with the beam) */
+static void log_anims(NpcBody *b) {
+	int dir = b->anim & 7;
+	b->log_in = 0x19 + dir;
+	b->log_out = 0x21 + dir;
+	if (b->index == 0x51) { b->log_in = -1; b->log_out = b->anim <= 3 ? 0x1B : 0x1C; }
+	else if (b->index == 0x52) { b->log_in = -1; b->log_out = 0x1C; }
+	else if (b->index == 0x55) { b->log_in = 0x1B; b->log_out = 0x1A; }
+	else if (b->index == 0x56) b->log_in = b->log_out = -1;
+}
+
 NpcBody guardian_body(int navi, int face) {
-	NpcBody b = { 6, guardian_sprite(navi), face, false, NPC_ANIM_LOG_IN, guardian(navi)->pose };
+	NpcBody b = { 6, guardian_sprite(navi), face, false, -1, guardian(navi)->pose, -1 };
 	if (navi == 12 || navi == 16) b.anim = toward_camera(face);
-	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1 };
+	log_anims(&b);
+	/* (Falzar's in their battle sprites: BN6's warp-in, their animation 3,
+	 * and its reverse, 4) */
+	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1, 4 };
 	return b;
 }
 
@@ -118,8 +136,8 @@ NpcBody guardian_body(int navi, int face) {
  * drawn facing left, mirrored to face right. */
 SuperBody super_body(int navi, int face) {
 	if (navi == SUPER_BASS)
-		return (SuperBody){ { 6, guardian_sprite(navi), toward_camera(face), false, -1, 26 }, 16, 25, false };
-	return (SuperBody){ { 6, guardian_sprite(navi), 28, face >= 1 && face <= 3, -1, 29 }, 60, 28, true };
+		return (SuperBody){ { 6, guardian_sprite(navi), toward_camera(face), false, -1, 26, -1 }, 16, 25, false };
+	return (SuperBody){ { 6, guardian_sprite(navi), 28, face >= 1 && face <= 3, -1, 29, -1 }, 60, 28, true };
 }
 
 int guardian_stand(int arena_dir, int gx, int gy, int spread, int *sx, int *sy) {

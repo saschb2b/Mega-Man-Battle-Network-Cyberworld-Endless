@@ -21,6 +21,12 @@
   standing at it.
 - **The second screen lists every way.** Lan's HP's ways back share one
   line on the home panel, which had cut the fourth way off.
+- **A guardian logs in and out as BN6's Navis do.** BN6's beam rises
+  where he stands and his sprite plays its own log-in or log-out, a frame
+  in its lighter colours, with BN6's sound; he had faded out by his alpha
+  after a white flash, which BN6 never does (its own note on the command:
+  it "doesn't actually work"), and the owner saw a "blup". A beat after,
+  his Guardian Data shows.
 - **A guardian's Guardian Data spins,** BN6's own Mystery Data crystal
   turning, where it had stood still (its sprite's animation 1 is one
   frame of it).

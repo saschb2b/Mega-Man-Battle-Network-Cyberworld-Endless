@@ -42,11 +42,14 @@ enum {
 	B_FIGHT,     /* the battle is on */
 	B_AFTER,     /* back on the map, the music hushed */
 	B_LAST_WORD, /* its words, deleted */
-	B_LOGOUT,    /* it fades out */
+	B_LOGOUT,    /* it logs out */
 	B_REWARD,    /* its Guardian Data waits to be taken */
 	B_OPEN,      /* the exit pad appears */
 	B_DONE,
 };
+
+/* A guardian's log-out to his data: BN6's 17 frames, then a beat */
+#define LOGOUT_BEAT 45
 
 static struct {
 	int state, t;
@@ -295,23 +298,22 @@ static void after_update(void) {
 	to(B_LAST_WORD);
 }
 
-/* His last word read: a guardian logs out in a flash (a super boss's fall
- * boss_grand.c's) */
+/* His last word read: a guardian logs out, BN6's beam beside him (a
+ * super boss's fall boss_grand.c's); no flash, which BN6 never gives a
+ * Navi's log-out */
 static void last_word_done(void) {
 	cinema_input(CINEMA_HOLD);
 	cinema_letterbox(true);
-	if (!super_boss(B.g.navi)) {
-		flag_set(LAYER_BOSS_GONE_FLAG);
-		cinema_flash(20);
-	}
+	if (!super_boss(B.g.navi)) flag_set(LAYER_BOSS_GONE_FLAG);
 	to(B_LOGOUT);
 }
 
-/* He fades out; then what he leaves behind shows, and MegaMan goes to take
- * it, the area's theme back (after the Cybeast the Net stays quiet) */
+/* He logs out; a beat after, what he leaves behind shows, and MegaMan goes
+ * to take it, the area's theme back (after the Cybeast the Net stays
+ * quiet) */
 static void logout_update(void) {
 	bool grand = super_boss(B.g.navi);
-	if (grand ? !grand_fall(B.t) : B.t < 60) return;
+	if (grand ? !grand_fall(B.t) : B.t < LOGOUT_BEAT) return;
 	flag_set(LAYER_REWARD_FLAG);
 	cinema_letterbox(false);
 	cinema_input(CINEMA_FREE);

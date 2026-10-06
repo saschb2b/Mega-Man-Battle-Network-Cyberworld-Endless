@@ -22,7 +22,6 @@ static struct {
 	uint32_t walk;
 	bool bars;
 	int bar;                 /* 0 .. BAR_FRAMES */
-	int flash, flash_len;
 	int white_t, white_in, white_hold, white_out;   /* a slow fade to white and back, its frame and its parts */
 	int shake, shake_amp;
 	int card, card_t, card_len;
@@ -46,7 +45,6 @@ void cinema_input(int mode) {
 int cinema_input_mode(void) { return C.input; }
 void cinema_walk(uint32_t keys) { C.walk = keys; }
 void cinema_letterbox(bool on) { C.bars = on; }
-void cinema_flash(int frames) { C.flash = C.flash_len = frames; }
 void cinema_whiteout(int in, int hold, int out) { C.white_t = 0; C.white_in = in; C.white_hold = hold; C.white_out = out; }
 void cinema_shake(int frames, int amplitude) { C.shake = frames; C.shake_amp = amplitude; }
 bool cinema_busy(void) { return C.card != CARD_NONE; }
@@ -108,7 +106,6 @@ uint32_t cinema_keys(uint32_t keys) {
 void cinema_update(void) {
 	if (C.bars && C.bar < BAR_FRAMES) ++C.bar;
 	if (!C.bars && C.bar > 0) --C.bar;
-	if (C.flash > 0) --C.flash;
 	if (C.white_in + C.white_hold + C.white_out > 0 && ++C.white_t >= C.white_in + C.white_hold + C.white_out)
 		C.white_in = C.white_hold = C.white_out = 0;
 	if (C.shake > 0) --C.shake;
@@ -304,6 +301,5 @@ void cinema_draw(void) {
 	if (C.card == CARD_TITLE && !C.off_map) draw_title(x0, y0);
 	if (C.card == CARD_AREA && !C.off_map) draw_area(x0, y0);
 	if (C.card == CARD_GRAND && !C.off_map) draw_grand(x0, y0);
-	if (C.flash > 0) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, 230 * C.flash / C.flash_len));
 	draw_white(x0, y0);
 }

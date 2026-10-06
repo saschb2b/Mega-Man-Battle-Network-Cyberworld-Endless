@@ -231,6 +231,7 @@ void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {
 	}
 	NpcBody body = guardian_body(g->navi, g->face);
 	if (npcs->n < 32) npcs->script[npcs->n++] = npc_guardian(&body, g->x, g->y, g->z, &flags);
+	if (npcs->n < 32) npcs->script[npcs->n++] = npc_beam(g->x, g->y, g->z, &flags);
 	if (npcs->n < 32)
 		npcs->script[npcs->n++] = npc_guardian_data(g->x, g->y, g->z, MD_ANIM_GUARDIAN, archive, g->reward, &flags);
 }
