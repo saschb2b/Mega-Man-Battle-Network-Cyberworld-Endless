@@ -86,5 +86,12 @@
 #define BN6_LIBRARY_LISTS     0x0201DC20u /* the Library's lists, tab 0's first (bn6f unk_201DC20), each tab's BN6_LIBRARY_LIST_SIZE after the one before: 4 bytes an entry, its chip at +0 (u16); StdChip's by number, 0 where never seen ("??"), the others the seen alone */
 #define BN6_LIBRARY_LIST_SIZE 0x800
 #define BN6_LIBRARY_PA        0x140  /* the first id of the P.A. Memo's entries, the Program Advances' records; the chips' tabs list ids 1-0x13F (bn6f sub_81258F8) */
+#define BN6_MAIL_SHOWN        0x1E   /* E-Mail's state (bn6f HandleEmailMenu81279F8, a PET screen's or BN6_MODE_MAIL's): the mails its list holds, u16 */
+#define BN6_MAIL_ROW          0x20   /* E-Mail's state: the cursor's row on the screen (0-3), u16 */
+#define BN6_MAIL_SCROLL       0x24   /* E-Mail's state: the list's scroll, u16: the entry under the cursor is row + scroll (bn6f sub_8128318) */
+#define BN6_MAIL_ENTRIES      0x02027590u /* the mails as E-Mail's list shows them, sorted (bn6f dword_2027590, sub_81283A0): BN6_MAIL_ENTRY bytes an entry, BN6_MAIL_MAX of them */
+#define BN6_MAIL_ENTRY        0x20   /* a mail's entry in BN6_MAIL_ENTRIES: +0x10 its sender's script (2n), +0x14 its subject's (2n + 1), +0x1C its number as shown */
+#define BN6_MAIL_ID           0x18   /* a mail's entry: its mail, u16 */
+#define BN6_MAIL_MAX          128    /* the mails a list holds: BN6_MAIL_LIST's bytes, BN6_MAIL_ENTRIES' entries */
 
 #endif

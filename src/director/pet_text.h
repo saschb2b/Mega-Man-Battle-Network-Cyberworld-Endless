@@ -14,5 +14,9 @@ void pet_text_install(void);
  * guardian MegaMan has battle data on and the list lacks. Returns the navi
  * of a mail delivered now (the last), 0 for none. */
 int pet_text_refresh(void);
+/* The face of mail `m`'s sender, as the run writes its mails: Dad's for
+ * the lab's and the guardians'; FACE_NONE for the BBS's (a board, its
+ * posts in their posters' faces) and BN6's own, which a run never sends. */
+int pet_mail_face(int m);
 
 #endif

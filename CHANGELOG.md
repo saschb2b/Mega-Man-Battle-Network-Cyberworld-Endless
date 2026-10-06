@@ -10,6 +10,12 @@
   seen stays BN6's "??" with a blank card, and the P.A. Memo keeps the
   Library's count alone. Beside it, the Library's classes go two to a
   line under BN6's own tab names (StdChip, MegaChip, GigaChip).
+- **A mail's sender on the second screen** (issue #83). In E-Mail the
+  second screen shows the mail under the cursor, or open, by its sender,
+  as BN5 DS reads a mail with its sender's face: Dad's face from the ROM
+  and his name for the lab's mails and each guardian's (the BBS, a
+  board, by its name alone), the subject, and how many of the list's
+  mails are new, all of them where the top screen shows four.
 - **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
   place of its own, never at random. The endless net's Nest is the
   Cybeast's den: no copied guardian at its end but Gregar itself, in

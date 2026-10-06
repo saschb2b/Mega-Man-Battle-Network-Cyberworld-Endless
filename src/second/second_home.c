@@ -18,11 +18,13 @@
 #define FACE_H 48
 #define SLOT_W SECOND_FACE_W
 
-void second_face(int x, int y) {
-	second_slot(x, y, SLOT_W, FACE_H * 2 + 6);
-	Sprite *s = sprite_get(SPR_MUGSHOT, FACE_MEGAMAN);
+void second_mugshot(int face, int x, int y) {
+	second_slot(x, y, SLOT_W, SECOND_FACE_H);
+	Sprite *s = sprite_get(SPR_MUGSHOT, face);
 	if (s) sprite_draw_into(s, 0, 0, x + 3 + FACE_W, y + 3 + FACE_H, 0, 2);
 }
+
+void second_face(int x, int y) { second_mugshot(FACE_MEGAMAN, x, y); }
 
 /* a heading in gold and its lines in white under it, as many as fit above
  * `bottom` (none: left out): the y under them */

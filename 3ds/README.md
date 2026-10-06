@@ -44,7 +44,7 @@ GBA core alone takes longer than a frame there.
   PET at home: MegaMan's face, the run's next step and its setup;
   MegaMan's status adds the run's record, the Library the chip under
   the cursor as a large card (the codes it comes in, the run's copies)
-  and its collection; in
+  and its collection, E-Mail the mail's sender by face and name; in
   a shop it shows the entry under the cursor with what the run holds of
   it, at a trader what it takes and gives; on
   the title, the PET at rest with the profile's record and whether BN5

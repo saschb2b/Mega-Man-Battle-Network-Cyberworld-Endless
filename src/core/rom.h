@@ -176,6 +176,9 @@ uint8_t *lz77_decompress(const uint8_t *src, size_t avail, size_t *out_len);
 
 /* Decode a text-archive entry into ASCII using the game's character table. */
 void rom_text(uint32_t archive, int index, char *out, size_t outlen);
+/* ... `n` bytes of the game's text, to the first command (0xE5 on): a
+ * script read from the core's memory (an archive the run rebuilt) */
+void rom_text_bytes(const uint8_t *s, size_t n, char *out, size_t outlen);
 /* ... the same in extra ROM `xrom` (rom.h, XR), "" where it is not there */
 void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen);
 /* A description's text (a chip's): script `index` of `archive` past its

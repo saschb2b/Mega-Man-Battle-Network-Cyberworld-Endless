@@ -10,8 +10,11 @@
  * menu's and its screens' without one of their own) */
 void second_home_draw(SDL_Rect b);
 /* MegaMan's face twice as large in its slot from (x, y), SECOND_FACE_W
- * wide: the PET's screens' */
+ * wide (SECOND_FACE_H tall): the PET's screens' */
 #define SECOND_FACE_W 86
+#define SECOND_FACE_H 102
 void second_face(int x, int y);
+/* ... another's, BN6's mugshot `face` (a mail's sender) */
+void second_mugshot(int face, int x, int y);
 
 #endif

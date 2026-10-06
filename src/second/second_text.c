@@ -196,6 +196,21 @@ int second_library(SecondRow *out, int most) {
 
 const char *second_library_line(void) { return "Every chip MegaMan held in any run stays in the Library, and each run begins with it"; }
 
+int second_mail_rows(SecondRow *out, int most, const char *subject, int unread, int shown) {
+	int k = 0;
+	if (k < most && *subject) {
+		out[k].name = "Subject";
+		snprintf(out[k++].value, sizeof out[0].value, "%s", subject);
+	}
+	if (k < most) {
+		out[k].name = "New mail";
+		snprintf(out[k++].value, sizeof out[0].value, "%d of %d", unread, shown);
+	}
+	return k;
+}
+
+const char *second_mail_none(void) { return "No mail"; }
+
 void second_layer_next(int guardian_navi, char *out, size_t n) {
 	/* (a super boss unnamed until met, as MegaMan senses him: docs/
 	 * BOSSES.md, Super bosses) */
