@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **AsterLand and the Cyber Academy open** (issue #96, the epic #84).
+  Central Town's chip shop and Lan's school are places of home now, BN6's
+  own maps as they stand. In AsterLand the clerk stands behind her
+  counter, BN6's own Chip Trader trades from AsterLand's prizes in the
+  folder's codes, the request board opens BN6's Request BBS (empty for
+  now: the jobs will post there) and the shop's checks read as BN6 has
+  them; the Number Trader is out of order, as its public codes would hand
+  every run BN6's prizes. The Academy's gate leads through the foyer and
+  both hallways to Lan's class 6-1, where the NetBattle club meets on a
+  day without class; the other rooms stay shut. L names the way out, and
+  the map's label and the second screen the place. Also: A reads the
+  real world's checks again. The probe it looks along, widened for
+  talking to navis on the Net's platforms, read past every check a cell
+  deep, all of those in Lan's room among them; it is BN6's own off the
+  Net now.
 - **A town that remembers** (issue #87, the epic #84). Central Town's
   plaza Mr.Prog calls the Net's news: at a run's start how the last run
   ended ("BLASTMAN'S COPY DELETED MEGAMAN! ON LAYER 3!"), after each act

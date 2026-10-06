@@ -37,6 +37,6 @@ src/scenes/scene_title.c:setup_draw 36 68
 src/scenes/scene_title.c:setup_update 32 36
 src/scenes/scene_title.c:update 42 73
 src/world/town.c:carry 35 63
-src/world/town.c:plan_once 50 109
+src/world/town.c:plan_once 48 109
 src/world/town.c:town_walk 31 33
 src/world/townsrc.c:townsrc_synth 88 125

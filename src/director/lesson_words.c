@@ -65,6 +65,8 @@ const char *port_words(int how, const char *way) {
 		snprintf(buf, sizeof buf, "@M Your room's %s,Lan!|@M The PC's up there!", way);
 	else if (how == PORT_HOME)
 		snprintf(buf, sizeof buf, "@M Home's %s,Lan!|@M The PC's up in your room!", way);
+	else if (how == PORT_OUT)
+		snprintf(buf, sizeof buf, "@M The way out's %s,Lan!|@M Your PC's back home,remember?", way);
 	else if (town_is_home())
 		snprintf(buf, sizeof buf, "%s", how == PORT_AWAY ? "@M No port here,Lan!|@M I jack in from your PC at home!" :
 			"@M Home's right here,Lan!|@M The PC's up in your room!");

@@ -28,6 +28,7 @@
 #include "net.h"
 #include "pacing.h"
 #include "run.h"
+#include "home_places.h"
 #include "lan_house.h"
 #include "town.h"
 
@@ -146,7 +147,7 @@ static bool home_install(void) {
 	int x, y;
 	lanhp_arrival(&x, &y);
 	return town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) &&
-		lan_house_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
+		home_places_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
 }
 
 bool home_run_start(bool abandoned) {

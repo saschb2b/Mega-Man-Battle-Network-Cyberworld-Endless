@@ -18,6 +18,8 @@ use.
 | The town | Original pieces, arranged per run | Central Town's or ACDC Town's own map cut into pieces and set out again (docs/OVERWORLD.md): their buildings, trees, statues and Chip Trader copied whole, the ground between them stretched with their own tiles. Seaside Town and Green Town are their own maps whole, with their own walls and heights (and Green Town's knight statue, a map object of the game's). The townsfolk are the game's generic NPC sprites, and they and the towns' checks say lines written by the engine; the music is the town's own |
 | Jacking in | Original | The game's jack-in (Lan's line, the transmission, MegaMan's arrival) from Lan's PC in his room, through a jack-in destination of the game's pointed at Lan's HP's blue pad, where BN6's own jack-in from that PC lands; the game's jack-out from there back to the PC |
 | Lan's house and room | Original maps | BN6's own maps as they stand, their furniture, checks, doors and song; its people and story scripts left out, the bathroom's door shut |
+| AsterLand and the Cyber Academy | Original maps, our people | BN6's own maps as they stand (AsterLand; the Academy's foyer, its two hallways and class 6-1), their furniture, checks, doors and songs, BN6's Request BBS (none of its requests) and Chip Trader in AsterLand; their people are the game's generic NPC sprites with lines written by the engine, BN6's own and its story scripts left out; the Academy's other rooms shut and AsterLand's Number Trader off, its check an "Out of order" sign of ours (docs/HOME.md, piece 10) |
+| A's reach | Original | BN6's own facing probes in the real world, where A's checks look along them; widened in the Net, for navis on platforms (docs/ROM_DATA.md, Talking reach) |
 | Lan's HP | Original map, the run's portals | BN6's own homepage whole (its tiles, walls, link markers and song), its people and story scripts left out; the run's ways are its pink pad and link squares, a link lit as BN6 shows an open one (its marker) and the others locked as BN6 locks them (docs/HOME.md) |
 | Going back | Ours | Two of Lan's HP's links go back to areas the run has won: a generated layer of one at its act's tier, its exit home; each trip a notch on the Net's clock, a tenth more HP on the guardians after it (docs/HOME.md) |
 | Net movement, collision, camera, HUD | Original, with help at A | The game's overworld code on generated maps, walked as in BN6: a walkway takes its two directions together, and a single one held into its mouth off its line stops at the corner, as in the originals (a walking assist that lined MegaMan up was removed by the owner's choice: it felt unlike BN6's walking; the walk stays BN6's for good, and where it drags, the generated maps change: docs/LEVEL_DESIGN.md, Navigation). A turns him to a navi or Mystery Data he stands at before the game's own check, or walks him up to one a step or two before him and presses A for him; with two side by side, the others near have no ring while the press goes through, so it reaches the one he means |
@@ -42,8 +44,9 @@ use.
 ## Known gaps
 
 - The town is Central Town, the same every run; its doors lead nowhere
-  but Lan's own front door (a check says why), and most of its people
-  stand still. Lan's house is empty of his family.
+  but Lan's own front door, AsterLand's and the Academy's gate (a check
+  says why), and most of its people stand still. Lan's house is empty of
+  his family.
 
 - The game's map-name label at the bottom right shows where the run is
   ("Layer 12", "Undernet", "ACDC Town") in the game's own font and box.

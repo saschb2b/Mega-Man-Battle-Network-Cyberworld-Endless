@@ -17,7 +17,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "home_words.h"
-#include "lan_house.h"
+#include "home_places.h"
 #include "lesson_words.h"
 #include "lanhp.h"
 #include "mapslot.h"
@@ -32,16 +32,26 @@ static bool map_is(int group, int number) { return emu_read8(BN6_MAP_GROUP) == g
 
 bool home_in_hp(void) { return D.town && map_is(LANHP_GROUP, LANHP_NUMBER); }
 
+/* the map Lan or MegaMan stands on as home_places sees it */
+static int place_here(void) { return home_places_at(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER)); }
+
 const char *home_place_name(void) {
 	if (home_in_hp()) return "Lan's HP";
-	if (map_is(LAN_HOUSE_GROUP, LAN_HOUSE)) return "Lan's House";
-	if (map_is(LAN_HOUSE_GROUP, LAN_ROOM)) return "Lan's Room";
+	const char *name = home_places_name(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
+	if (name) return name;
 	return town_info()->name ? town_info()->name : "Town";
 }
 
 bool home_map(int group, int number) {
-	return (group == town_info()->group && number == town_info()->number) || lan_house_map(group, number) ||
+	return (group == town_info()->group && number == town_info()->number) || home_places_at(group, number) != HOME_PLACE_NONE ||
 		(group == LANHP_GROUP && number == LANHP_NUMBER);
+}
+
+bool home_indoors(void) { return D.town && place_here() != HOME_PLACE_NONE; }
+
+const char *home_check(void) {
+	return D.town ? home_places_check(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), bn6_player_x(), bn6_player_y(),
+		emu_read8(BN6_PLAYER_FACING) & 7) : NULL;
 }
 
 /* In Lan's HP: its open portals on, every frame (BN6's own homepage sets
@@ -55,25 +65,25 @@ void home_entered(void) {
 }
 
 const char *home_way(int *far) {
-	int x, y, number = emu_read8(BN6_MAP_NUMBER);
+	int x, y;
 	if (home_in_hp()) {
 		lanhp_portal_spot(0, &x, &y);
 		return way_to(x, y, far);
 	}
-	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number) && lan_house_goal(number, &x, &y)) return way_to(x, y, far);
+	if (home_places_way(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), &x, &y)) return way_to(x, y, far);
 	return town_way(far);
 }
 
 const char *home_status(void) {
-	int far, number = emu_read8(BN6_MAP_NUMBER);
+	int far, at = place_here();
 	const char *way = home_way(&far);
 	if (home_in_hp()) {
 		const char *words = home_hp_status(way, !D.port_told, run.clock);
 		D.port_told = true;
 		return words;
 	}
-	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) return port_words(number == LAN_ROOM ? PORT_ROOM : PORT_HOUSE, way);
-	return port_words(PORT_HOME, way);
+	if (at == HOME_PLACE_ROOM || at == HOME_PLACE_HOUSE) return port_words(at == HOME_PLACE_ROOM ? PORT_ROOM : PORT_HOUSE, way);
+	return port_words(at == HOME_PLACE_NONE ? PORT_HOME : PORT_OUT, way);
 }
 
 /* home: Lan held while the act's card shows, A ending it early, as on a
@@ -171,7 +181,7 @@ void home_update(void) {
 	bool hp = home_in_hp();
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();
-	lan_house_frame(map_is(LAN_HOUSE_GROUP, LAN_HOUSE) ? LAN_HOUSE : -1);
+	home_places_frame(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
 	was_hp = hp;
 	if (on_map() && home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) { D.town_seen = true; ++D.town_frames; }
 	talk_update();

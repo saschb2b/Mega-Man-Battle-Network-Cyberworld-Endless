@@ -280,7 +280,11 @@ warp entry takes into the house; the rest of its warp list leads back to
 where Lan comes out. Lan's house (`0x01:1`) and room (`0x01:2`) are
 BN6's maps as they stand, their doors BN6's (the house's front door, its
 stairs to the room, the room's stairs down; not the bathroom's), their
-people and story scripts left out. The planned town keeps the first area
+people and story scripts left out. AsterLand (`0x01:4`, the town's warp
+4) and the Cyber Academy (the town's warp 2 into its foyer, then its
+hallways and class 6-1) open the same way, with people of the run's own
+(docs/HOME.md, piece 10); each holds every warp trigger but its own doors
+off, as BN6's story scripts did. The planned town keeps the first area
 and guardian off the last two runs' where it can (`run_new_varied`); the
 town itself is the same each run since it became home.
 

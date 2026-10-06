@@ -13,11 +13,13 @@
 #include "cinema.h"
 #include "director.h"
 #include "director_map.h"
+#include "director_home.h"
 #include "director_see.h"
 #include "director_state.h"
 #include "director_way.h"
 #include "lan_house.h"
 #include "lesson_words.h"
+#include "npc.h"
 #include "talk.h"
 #include "town.h"
 
@@ -271,14 +273,25 @@ static uint32_t house_r(uint32_t keys, int number) {
 	return keys & ~KEY_R;
 }
 
+/* R in AsterLand or the Academy, BN6's PCs there the school's and the
+ * shop's: MegaMan's word on the way out, and the arrow it */
+static uint32_t place_r(uint32_t keys) {
+	int far;
+	talk_start(port_words(PORT_OUT, home_way(&far)), FACE_MEGAMAN);
+	D.arrow_pending = true;
+	cinema_arrow(way_last(), 600);
+	return keys & ~KEY_R;
+}
+
 /* R in the town away from the port (home's: Lan's front door): a step
  * short of a port cell, the step taken; else MegaMan's word on where the
- * port is, and the arrow its way; in Lan's house and room, house_r. The
- * keys as they go on to the game. */
+ * port is, and the arrow its way; in Lan's house and room, house_r, in
+ * home's other places place_r. The keys as they go on to the game. */
 static uint32_t town_r(uint32_t keys) {
 	int px = bn6_player_x(), py = bn6_player_y();
 	int number = emu_read8(BN6_MAP_NUMBER);
 	if (lan_house_map(emu_read8(BN6_MAP_GROUP), number)) return house_r(keys, number);
+	if (home_indoors()) return place_r(keys);
 	int dx = town_info()->port_x - px, dy = town_info()->port_y - py, far, nx = 0, ny = 0;
 	int near = town_port_near(px, py, &nx, &ny);
 	/* (a step short of a jack-in cell: he takes it, and R jacks in; a
@@ -316,8 +329,13 @@ static uint32_t a_keys(uint32_t keys, bool a_pressed) {
 	/* (turned to what A would talk to, the pad left alone for that frame so
 	 * the game does not turn him back; not in the town, where A also reads
 	 * the doors and signs Lan faces) */
+	bool idle = !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping;
+	const char *says;
 	if (D.walk_t > 0) keys = talk_walk(keys);
-	else if (a_pressed && !D.town && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping) {
+	/* (at home, a check the place answers itself: AsterLand's Number
+	 * Trader, which BN6's own would run) */
+	else if (a_pressed && D.town && idle && (says = home_check())) { talk_start(says, FACE_NONE); keys &= ~KEY_A; }
+	else if (a_pressed && !D.town && idle) {
 		int i = talk_target(), k;
 		if (i >= 0 && talk_reach(i, &k)) {
 			if (k != (emu_read8(BN6_PLAYER_FACING) & 7)) { talk_turn(k); keys &= ~PAD_KEYS; }
@@ -370,8 +388,9 @@ static void port_r(void) {
  * where to jack in, the game itself doing nothing there: true then, `keys`
  * as they go on */
 static bool home_r(uint32_t *keys) {
-	bool house = lan_house_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
-	bool on_port = !house && town_on_port(bn6_player_x(), bn6_player_y());
+	/* (indoors no port of the town's: the Academy's own jack-in points
+	 * would take R to BN6's story comps) */
+	bool on_port = !home_indoors() && town_on_port(bn6_player_x(), bn6_player_y());
 	if (on_port) port_r();
 	if (on_port || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || emu_read8(BN6_WARP_PENDING) != 0) return false;
 	*keys = town_r(*keys);
@@ -380,6 +399,9 @@ static bool home_r(uint32_t *keys) {
 
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
+	/* (A's reach: BN6's own in the real world, its checks a cell deep;
+	 * the Net's map groups from 0x80, bn6f INTERNET_MAP_GROUP_START) */
+	if (D.active && on_map()) npc_reach(emu_read8(BN6_MAP_GROUP) >= 0x80);
 	if (D.active) keys = choice_guard(shop_guard(keys));
 	bool l = (keys & KEY_L) != 0, pressed = l && !D.l_held;
 	bool r = (keys & KEY_R) != 0, r_pressed = r && !D.r_held;

@@ -33,7 +33,7 @@
 #include "town_ports.h"
 #include "town_words.h"
 #include "townmath.h"
-#include "lan_house.h"
+#include "indoors.h"
 #include "townsrc.h"
 
 #define TOWN_TILEMAP_AT (EMU_FREE + 0x100000) /* the town's tile map (LZ77) */
@@ -54,8 +54,6 @@
 /* a spawn record's first byte picks the spawner: 5 places a map object */
 #define OBJ_SPAWN_MAP_OBJECT 5
 #define OBJ_TREE 0x7D
-/* OverworldMapObjects: 16-byte entries (category, sprite, animation, ...) per object */
-#define OW_MAP_OBJECTS 0x0A4F24u
 
 enum { P_COPY, P_TILE };
 enum { F_JACK_IN = 1 };
@@ -219,6 +217,8 @@ struct TownStyle {
 	                                     * jack-in point (0x40 + n) or check (0xF0 + n) made one */
 	int door;                           /* the original's warp trigger into Lan's house, home's front door
 	                                     * (docs/HOME.md: Lan jacks in from his PC there); 0 none */
+	unsigned doors;                     /* its other doors kept open, bit n its warp trigger n:
+	                                     * home's AsterLand and Cyber Academy (indoors.c) */
 };
 
 static int env_or(const char *name, int value) {
@@ -341,8 +341,8 @@ static void design_green(void) { copy(-62, -62, 62, 62, 0, 0, F_JACK_IN); }
 
 static const Style styles[] = {
 	{ 0x01, 0x00, 0x03, 0, { 12, -9, 16, -2 }, { 14, -9, 16, -6 }, central_mat, design_central, -40, 266, FACE_SW,
-	  { { -40, 266 }, { 100, -30 }, { -150, -30 }, { 90, -150 }, { 110, 110 }, { -150, -160 } }, false,
-	  "Central Town", "bird statue", "bird statue on the plaza", { 0, 0 }, 1 },
+	  { { -40, 266 }, { 100, -30 }, { -150, -16 }, { 90, -150 }, { 110, 110 }, { -150, -160 } }, false,
+	  "Central Town", "bird statue", "bird statue on the plaza", { 0, 0 }, 1, 1u << 2 | 1u << 4 },
 	{ 0x00, 0x00, 0x24, 1 << 0, { -23, -10, -17, -3 }, { -20, -9, -16, -3 }, acdc_mat, design_acdc, -60, -108, FACE_SW,
 	  { { -60, -108 }, { -190, -30 }, { -190, -120 }, { 110, -120 }, { 260, -60 }, { 60, 120 } }, false,
 	  "ACDC Town", "squirrel statue", "squirrel statue in the park", { 0x41, 0xF7 } },
@@ -493,7 +493,8 @@ static void carry_trigger(const Piece *p, const CoordCell *c, int dx, int dy) {
 	int port = port_of(c->value);
 	bool jack = (port && c->value < CHECK_TRIGGER) || (c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 &&
 		(p->flags & F_JACK_IN) && (T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1));
-	bool check = (c->value >= CHECK_TRIGGER && T.lines->checks[c->value - CHECK_TRIGGER]) || (T.style->door && c->value == T.style->door);
+	bool check = (c->value >= CHECK_TRIGGER && T.lines->checks[c->value - CHECK_TRIGGER]) || (T.style->door && c->value == T.style->door) ||
+		(c->value < 32 && (T.style->doors >> c->value & 1));
 	bool front = front_cell(cx, cy) && townsrc_walk(T.book, cx, cy);
 	if (!(jack || check) || front || !in_source(p, cx, cy) || T.ntrig >= MAX_TRIG) return;
 	CoordCell o = *c;
@@ -883,25 +884,17 @@ static int folk_face(const Folk *f) {
 	return FACE_NONE;
 }
 
-/* Compressed sprites only draw once the map loads them. */
-static void need_sprite(NpcList *npcs, int category, int index) {
-	uint32_t list = emu_read32(0x08000000u + R.layout->sprite_lists + (uint32_t)category * 4);
-	if (!(emu_read32(list + (uint32_t)index * 4) & 0x80000000u)) return;
-	for (int i = 0; i < npcs->nsprites; ++i)
-		if (npcs->sprite_idx[i] == index && npcs->sprite_cat[i] == category * 4) return;
-	if (npcs->nsprites >= MAPSLOT_SPRITES) return;
-	npcs->sprite_cat[npcs->nsprites] = (uint8_t)(category * 4);
-	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
-}
-
-/* The town's warp list: every entry back where Lan starts, but home's front
- * door, BN6's own (lan_house.c, which read BN6's lists before the town took
- * its map over) */
+/* The town's warp list: every entry back where Lan starts, but home's
+ * doors, BN6's own (indoors.c read BN6's list before the town took its map
+ * over) */
 static bool town_warps(int g, int n) {
 	uint32_t list = mapslot_own_warps(g, n, T.info.start_x, T.info.start_y, T.info.start_face);
-	if (list && T.style->door) mapslot_copy_warp(list, T.style->door, lan_house_bn6_warps(0), T.style->door);
+	unsigned doors = T.style->doors | (T.style->door ? 1u << T.style->door : 0);
+	for (int e = 1; e < 16 && list; ++e) if (doors >> e & 1) mapslot_copy_warp(list, e, indoors_bn6_warps(g, n), e);
 	return list != 0;
 }
+
+bool town_moved(int sx, int sy, int *x, int *y) { return moved(sx, sy, x, y); }
 
 /* This visit's townsfolk (town_folk.c: who stands where, town_words.c:
  * what they say) and what Lan and MegaMan say stepping out, in the town's
@@ -928,7 +921,7 @@ static uint32_t install_folk(NpcList *npcs) {
 		if (getenv("CYBERWORLD_TOWN_DEBUG"))
 			fprintf(stderr, "town: this visit %d:%02x at %d,%d%s\n", who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], fv.out[i] ? " (out)" : "");
 		if (T.folk_at[i][0] == 1 << 20 || fv.out[i]) continue;
-		need_sprite(npcs, who->cat, who->sprite);
+		npc_need_sprite(npcs, who->cat, who->sprite);
 		npcs->script[npcs->n++] = f->walk ? npc_walker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], f->face, f->walk, archive, script[i]) :
 			npc_talker(who->cat, who->sprite, T.folk_at[i][0], T.folk_at[i][1], 0, f->face, archive, script[i], -1, false);
 	}
@@ -936,7 +929,7 @@ static uint32_t install_folk(NpcList *npcs) {
 }
 
 bool town_install(int to_group, int to_number, int x, int y) {
-	if (!T.tiles || (T.style->door && !lan_house_bn6_warps(0))) return false;
+	if (!T.tiles || (T.style->door && !indoors_bn6_warps(T.style->group, T.style->number))) return false;
 	uint32_t desc, coord_slot;
 	townsrc_slots(T.book, &desc, &coord_slot);
 	int tw = T.info.tw, th = T.info.th;
@@ -978,15 +971,11 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	if (emu_debug_on()) fprintf(stderr, "town checks hash %08x\n", ta_hash(&words));
 	/* trees and the statue: the game's own objects (20-byte spawn records) */
 	uint8_t objs[(MAX_OBJS + 1) * 20];
-	for (int i = 0; i < T.nobj; ++i) {
-		memcpy(objs + i * 20, T.obj[i], 20);
-		uint32_t id = get32(T.obj[i] + 16) & 0xFFFF;
-		const uint8_t *e = R.data + OW_MAP_OBJECTS + id * 16;
-		need_sprite(&npcs, e[0] / 4, e[1]);
-	}
+	for (int i = 0; i < T.nobj; ++i) memcpy(objs + i * 20, T.obj[i], 20);
 	memset(objs + T.nobj * 20, 0, 4);
 	objs[T.nobj * 20] = 0xFF;
 	npcs.objects = mapslot_alloc(objs, T.nobj * 20 + 4);
+	npc_objects_sprites(&npcs);
 	if (getenv("CYBERWORLD_TOWN_DEBUG")) fprintf(stderr, "town: %d objects at %08x, %d people, %d sprites loaded\n", T.nobj, npcs.objects, npcs.n, npcs.nsprites);
 	int g = T.style->group, n = T.style->number;
 	bool ok = archive && mapslot_install(g, n, &npcs, NULL, 0) &&

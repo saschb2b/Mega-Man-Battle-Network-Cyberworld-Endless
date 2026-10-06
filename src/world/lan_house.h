@@ -4,7 +4,6 @@
 #define CW_LAN_HOUSE_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
 #define LAN_HOUSE_GROUP 0x01   /* Central Town's (bn6f constants/enums/GameAreas.inc) */
 #define LAN_HOUSE       0x01
@@ -16,9 +15,6 @@
  * jack-in to world (x, y) of map (to_group, to_number). False where their
  * doors cannot be read. */
 bool lan_house_install(int to_group, int to_number, int x, int y);
-/* BN6's own warp list of Central Town's map `number` (0 the town, the
- * house, the room), read before the run's first install took them over. */
-uint32_t lan_house_bn6_warps(int number);
 /* Whether map (group, number) is the house or the room. */
 bool lan_house_map(int group, int number);
 /* Where a run starts: the top of the room's stairs, as BN6 sets Lan down
@@ -29,8 +25,8 @@ void lan_room_start(int *x, int *y, int *face);
 bool lan_house_goal(int number, int *x, int *y);
 /* Whether world (x, y) of the room stands on the PC's jack-in cells. */
 bool lan_room_on_pc(int x, int y);
-/* Each frame in the house: the bathroom's door shut (BN6 clears the
- * warp-off flags as it enters a map). */
+/* Each frame in the house or the room (`number`): their doors but BN6's
+ * kept ones shut, the bathroom's among them (indoors_shut). */
 void lan_house_frame(int number);
 
 #endif

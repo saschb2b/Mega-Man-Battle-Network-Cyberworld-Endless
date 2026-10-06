@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "mapslot.h"   /* NpcList */
+
 /* How far back in depth a floor sprite stands (npc.c). */
 #define NPC_FLOOR_BACK 64
 
@@ -31,7 +33,22 @@ uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int an
  * -y) and back, looking about at each end. */
 uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script);
 
-/* Widens MegaMan's reach for talking (the core's ROM copy; once). */
+/* A compressed sprite the people or objects of `npcs` use, which the map
+ * must then load: false where its list has no room left (12 of them,
+ * 0x8800 bytes decompressed, the game's loader), and it must not be
+ * shown. */
+bool npc_need_sprite(NpcList *npcs, int category, int index);
+/* ... and those of the map objects in `npcs->objects` (BN6's own,
+ * OverworldMapObjects: a map taken over keeps its furniture). */
+void npc_objects_sprites(NpcList *npcs);
+
+/* MegaMan's reach for talking widened (`wide`, in the Net) or BN6's own
+ * (the real world, where A's checks look along it too), in the core's ROM
+ * copy; npc_reach_install widens it as the core starts. */
+void npc_reach(bool wide);
 void npc_reach_install(void);
+/* Where BN6's own probe for A looks from the player facing `face` (0-7):
+ * whole world units ahead. */
+void npc_probe(int face, int *dx, int *dy);
 
 #endif

@@ -15,7 +15,7 @@
 #include "director_state.h"
 #include "director_way.h"
 #include "guardians.h"
-#include "lan_house.h"
+#include "home_places.h"
 #include "net_route.h"
 #include "net_shapes.h"
 #include "netmap.h"
@@ -173,11 +173,12 @@ static void battle_describe(FILE *f) {
 	}
 }
 
-/* at home: in the house or the room the way on (the stairs up, the PC),
- * in the town its objects and Lan's front door */
+/* at home: in one of its places the way on (the PC, the stairs up, the
+ * way out), in the town its objects and Lan's front door */
 static void describe_home(FILE *f) {
 	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER), x, y;
-	if (lan_house_map(group, number) && lan_house_goal(number, &x, &y)) fprintf(f, "goal %d %d\n", x, y);
+	fprintf(f, "map %02x:%02x\n", group, number);
+	if (home_places_way(group, number, &x, &y)) fprintf(f, "goal %d %d\n", x, y);
 	else if (director_in_town()) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 }
 

@@ -210,6 +210,11 @@
 080347E0 BN6_NPC_LISTS
 0803483C BN6_OBJ_SPAWNERS
 08034CB6 jack_routine
+08034E60 machines_map_lists
+08034E74 chip_traders_maps
+08034E80 number_trader_maps
+08034E84 chip_table_maps
+08034EDC machines_checks_by_map
 080360E4 BN6_MAP_MUSIC
 0803CD6C BN6_GIVE_ITEM
 0803CFCC BN6_GIVE_ZENNY
@@ -232,6 +237,7 @@
 0804F224 lan_house_room.town_2
 0804F274 lan_house_room.house
 0804F2A4 lan_house_room.room
+0804F2C4 asterland_warp_list
 0804F4B0 central_town_map_loader
 0804F50C lan_house_room.literal
 0804F5D0 central_town
@@ -239,6 +245,12 @@
 0804F864 lan_house_room.town_3
 0804F86C lan_house_room.house_2
 0804F874 lan_room_jack_table
+080530C4 academy_loader_warp_lists_table
+080530F0 class_6_1
+08053170 asterland_cyber_academy.1f_hallway
+080531D0 asterland_cyber_academy.2f_hallway
+08053230 asterland_cyber_academy.foyer
+08053508 academy_loader
 0806CE90 lan_hp_warp_list
 08072410 for_central
 08081EEC RomLayout.battle_bg_refs.1

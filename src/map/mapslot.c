@@ -30,6 +30,8 @@
 #define TOWN_SIZE    0x8000
 #define HP_ARENA     (EMU_FREE + 0x148000) /* Lan's HP's (docs/HOME.md) */
 #define HP_SIZE      0x8000
+#define INDOORS_ARENA (EMU_FREE + 0x320000) /* home's other places: AsterLand, the Cyber Academy */
+#define INDOORS_PART 0x8000                /* ... each its own */
 
 #define RW_GROUPS      7
 #define RW_NPC_LISTS   0x08034638u /* NPCList_maps00 */
@@ -63,6 +65,10 @@ static void use_arena(uint32_t base, uint32_t size) {
 void mapslot_town(bool on) { use_arena(on ? TOWN_ARENA : 0, TOWN_SIZE); }
 void mapslot_hp(bool on) { use_arena(on ? HP_ARENA : 0, HP_SIZE / 2); }
 void mapslot_house(bool on) { use_arena(on ? HP_ARENA + HP_SIZE / 2 : 0, HP_SIZE / 2); }
+void mapslot_indoors(int part) {
+	bool on = part > 0 && part <= MAPSLOT_INDOOR_PARTS;
+	use_arena(on ? INDOORS_ARENA + (uint32_t)(part - 1) * INDOORS_PART : 0, INDOORS_PART);
+}
 
 uint32_t mapslot_alloc(const void *bytes, int len) {
 	uint32_t at = next;
@@ -362,14 +368,23 @@ bool mapslot_install(int group, int number, const NpcList *npcs, const MysteryDa
 }
 
 /* the maps whose songs the lists hold: the town, the layer, and home's
- * (Lan's HP, his house and his room) */
+ * (Lan's HP, his house and his room, AsterLand, the Academy's) */
 enum { SONGS_MAPS = 2 + MAPSLOT_HOME_MAPS };
-static struct { int group, number, song; } songs_of[SONGS_MAPS] = { { -1 }, { -1 }, { -1 }, { -1 }, { -1 } };
+static struct { int group, number, song; } songs_of[SONGS_MAPS];
+
+/* (every slot empty at first) */
+static void songs_begin(void) {
+	static bool begun;
+	if (begun) return;
+	begun = true;
+	for (int i = 0; i < SONGS_MAPS; ++i) songs_of[i].group = -1;
+}
 
 static bool music_list(void);
 
 bool mapslot_music(int group, int number, int song) {
 	if (number < 0 || number >= 16) return false;
+	songs_begin();
 	/* one entry per kind of map, real world and internet */
 	int slot = real_world(group) ? 0 : 1;
 	songs_of[slot].group = group;
@@ -380,6 +395,7 @@ bool mapslot_music(int group, int number, int song) {
 
 bool mapslot_music_home(int k, int group, int number, int song) {
 	if (number < 0 || number >= 16 || k < 0 || k >= MAPSLOT_HOME_MAPS) return false;
+	songs_begin();
 	songs_of[2 + k].group = group;
 	songs_of[2 + k].number = number;
 	songs_of[2 + k].song = song;

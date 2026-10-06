@@ -139,23 +139,6 @@ static void fragment_content(uint8_t out[8]) {
 	for (int i = 0; i < 8; ++i) out[i] = c[i];
 }
 
-/* Compressed sprites only draw once the map loads them: false where the
- * map's list has no room left for one (12 of them, 0x8800 bytes
- * decompressed, the game's loader), which then must not be shown. */
-static bool need_sprite(NpcList *npcs, int category, int index) {
-	uint32_t list = emu_read32(0x08000000u + R.layout->sprite_lists + (uint32_t)category * 4);
-	uint32_t ptr = emu_read32(list + (uint32_t)index * 4);
-	if (!(ptr & 0x80000000u)) return true;
-	for (int i = 0; i < npcs->nsprites; ++i)
-		if (npcs->sprite_idx[i] == index && npcs->sprite_cat[i] == category * 4) return true;
-	uint32_t bytes = emu_read32(ptr & 0x7FFFFFFFu) >> 8;   /* (its LZ77 header) */
-	if (npcs->nsprites >= MAPSLOT_SPRITES || npcs->sprite_bytes + bytes > MAPSLOT_SPRITE_BYTES) return false;
-	npcs->sprite_cat[npcs->nsprites] = (uint8_t)(category * 4);
-	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
-	npcs->sprite_bytes += bytes;
-	return true;
-}
-
 /* The sprite props' map objects (docs/LEVEL_DESIGN.md, Props): the
  * originals' objects by their OverworldMapObjects ids, each at its panel's
  * spot +(14, 18) from the corner, as the originals set theirs, a set
@@ -200,7 +183,7 @@ static uint32_t props_objects(NpcList *npcs) {
 		for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces; ++k)
 			if (prop_pieces[k].look == p->look) {
 				const uint8_t *e = R.data + OW_MAP_OBJECTS + prop_pieces[k].id * 16u;
-				loaded &= need_sprite(npcs, e[0] / 4, e[1]);
+				loaded &= npc_need_sprite(npcs, e[0] / 4, e[1]);
 			}
 		if (emu_debug_on()) fprintf(stderr, "prop look %d at %d,%d%s%s\n", p->look, p->x, p->y, layer.cell[p->y][p->x] ? " (hole)" : "", loaded ? "" : " - no room for its sprite");
 		if (!loaded) continue;
@@ -444,7 +427,7 @@ static void blocker_sprites(NpcList *npcs) {
 	for (int b = 0; b < layer.nblocks; ++b) {
 		int cat, idx;
 		blocker_sprite(b, &cat, &idx);
-		need_sprite(npcs, cat, idx);
+		npc_need_sprite(npcs, cat, idx);
 	}
 }
 
@@ -669,7 +652,7 @@ static void install_exit(Install *in, const NetObj *o, int wx, int wy, int wz) {
 	int pad = o->type == OBJ_EXIT ? SPR_EXIT_PAD : SPR_RETURN_PAD;
 	in->out->exit_x = wx; in->out->exit_y = wy;
 	set_pads(in->group, in->number, wx, wy);
-	need_sprite(&in->npcs, 7, pad);
+	npc_need_sprite(&in->npcs, 7, pad);
 	if (in->npcs.n < 32)
 		in->npcs.script[in->npcs.n++] = layer.boss_layer ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG)
 			: npc_prop(7, pad, wx, wy, wz, 0);
@@ -797,7 +780,7 @@ static void install_gift(Install *in, Talker *tk) {
 static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
 	tk->cat = 6;
 	tk->sprite = guardian_sprite(11);
-	need_sprite(&in->npcs, 6, tk->sprite);
+	npc_need_sprite(&in->npcs, 6, tk->sprite);
 	if (layer_objs_duel_later) tk->script = ta_say(in->text, guardian_face(11), netbattle_later_words());
 	if (emu_debug_on()) fprintf(stderr, "duel: ProtoMan at %d %d, his time %d frames\n", wx, wy, layer_objs_duel_frames);
 	return !layer_objs_duel_later;
@@ -978,7 +961,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	NpcList *npcs = &in.npcs;
 	blocker_sprites(npcs);
 	for (int i = 0; i < in.ntalk; ++i)
-		if (in.talkers[i].cat == 7) need_sprite(npcs, 7, in.talkers[i].sprite);
+		if (in.talkers[i].cat == 7) npc_need_sprite(npcs, 7, in.talkers[i].sprite);
 	npcs->objects = props_objects(npcs);
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");

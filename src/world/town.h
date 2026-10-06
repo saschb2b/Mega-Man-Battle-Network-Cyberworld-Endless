@@ -53,6 +53,10 @@ bool town_on_port(int x, int y);
 /* The middle of the jack-in cell nearest (x, y), in world units; its
  * squared distance, -1 with none. */
 int town_port_near(int x, int y, int *px, int *py);
+/* Where world (sx, sy) of the original town lies in the planned one (a
+ * door out of one of home's places: indoors.c); false where it was left
+ * out. */
+bool town_moved(int sx, int sy, int *x, int *y);
 /* The town's map objects (id) and people (id -1), in world units. */
 void town_objects(void (*fn)(int id, int x, int y, void *ctx), void *ctx);
 

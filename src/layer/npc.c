@@ -26,6 +26,7 @@
 #include "bytes.h"
 #include "emu.h"
 #include "mapslot.h"
+#include "rom.h"
 
 /* A navi's radius (the game's is 4 units; a panel is 32), for talking and
  * collision both: with MegaMan's facing probes widened (npc_reach_install)
@@ -74,25 +75,37 @@ uint32_t npc_prop(int category, int index, int x, int y, int z, int anim) {
 	return mapslot_alloc(s, n);
 }
 
-void npc_reach_install(void) {
+void npc_reach(bool wide) {
 	/* MegaMan's facing probes: 8 units ahead with a radius of 8 in the
 	 * game, which with the platforms' edges left navis standing at an
 	 * edge out of reach; 24 ahead and 20 wide reach a navi he seems to
 	 * touch in the isometric view (sprites overlap well before the world
 	 * does, and a short Mr. Prog looks a tile away from 50 units) from
 	 * right before him to about 54 units, and still none behind him (navis
-	 * stand two panels apart) */
-	static bool done;   /* (the ROM copy lives as long as the core) */
-	if (done) return;
-	done = true;
+	 * stand two panels apart). In the real world BN6's own: A's checks
+	 * look along the same probes, and a sign or a shelf is a cell deep
+	 * (24 ahead read past AsterLand's request board and every check in
+	 * Lan's room). Written when they are not as wanted: the ROM copy
+	 * lives as long as the core. */
+	uint32_t off = BN6_TALK_PROBES & 0x1FFFFFF;
+	int32_t x0 = (int32_t)rom_u32(off);
+	if (!x0 || (int32_t)emu_read32(BN6_TALK_PROBES) == (wide ? x0 * 3 : x0)) return;
 	for (int k = 0; k < 8; ++k) {
-		uint32_t at = BN6_TALK_PROBES + (uint32_t)k * 24;
-		int32_t x = (int32_t)emu_read32(at), y = (int32_t)emu_read32(at + 4);
+		uint32_t at = BN6_TALK_PROBES + (uint32_t)k * 24, o = off + (uint32_t)k * 24;
+		int32_t x = (int32_t)rom_u32(o), y = (int32_t)rom_u32(o + 4);
 		if (x == 0 && y == 0) return;   /* (not the table: leave it) */
-		emu_write32(at, (uint32_t)(int32_t)((int64_t)x * 3));
-		emu_write32(at + 4, (uint32_t)(int32_t)((int64_t)y * 3));
-		emu_write8(at + 12, 20);
+		emu_write32(at, (uint32_t)(wide ? x * 3 : x));
+		emu_write32(at + 4, (uint32_t)(wide ? y * 3 : y));
+		emu_write8(at + 12, wide ? 20 : R.data[o + 12]);
 	}
+}
+
+void npc_reach_install(void) { npc_reach(true); }
+
+void npc_probe(int face, int *dx, int *dy) {
+	uint32_t o = (BN6_TALK_PROBES & 0x1FFFFFF) + (uint32_t)(face & 7) * 24;
+	*dx = (int32_t)rom_u32(o) >> 16;
+	*dy = (int32_t)rom_u32(o + 4) >> 16;
 }
 
 /* (behind: a navi behind a counter, drawn under the second layer that
@@ -177,4 +190,32 @@ uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, 
 	put32(s + n - 4, at + (uint32_t)pace);
 	emu_write(at, s, (size_t)n);
 	return at;
+}
+
+bool npc_need_sprite(NpcList *npcs, int category, int index) {
+	uint32_t list = emu_read32(0x08000000u + R.layout->sprite_lists + (uint32_t)category * 4);
+	uint32_t ptr = emu_read32(list + (uint32_t)index * 4);
+	if (!(ptr & 0x80000000u)) return true;
+	for (int i = 0; i < npcs->nsprites; ++i)
+		if (npcs->sprite_idx[i] == index && npcs->sprite_cat[i] == category * 4) return true;
+	uint32_t bytes = emu_read32(ptr & 0x7FFFFFFFu) >> 8;   /* (its LZ77 header) */
+	if (npcs->nsprites >= MAPSLOT_SPRITES || npcs->sprite_bytes + bytes > MAPSLOT_SPRITE_BYTES) return false;
+	npcs->sprite_cat[npcs->nsprites] = (uint8_t)(category * 4);
+	npcs->sprite_idx[npcs->nsprites++] = (uint8_t)index;
+	npcs->sprite_bytes += bytes;
+	return true;
+}
+
+#define OW_MAP_OBJECTS 0x0A4F24u   /* OverworldMapObjects, 16 bytes an id (docs/ROM_DATA.md, Props' map objects) */
+#define OW_MAP_OBJECT_IDS 244
+
+void npc_objects_sprites(NpcList *npcs) {
+	if (!npcs->objects) return;
+	/* (20-byte spawn records, the id at +16, a first byte 0xFF ending them) */
+	for (uint32_t at = npcs->objects, n = 0; n < 64 && emu_read8(at) != 0xFF; at += 20, ++n) {
+		uint32_t id = emu_read32(at + 16) & 0xFFFF;
+		if (id >= OW_MAP_OBJECT_IDS) continue;
+		const uint8_t *e = R.data + OW_MAP_OBJECTS + id * 16;
+		npc_need_sprite(npcs, e[0] / 4, e[1]);
+	}
 }

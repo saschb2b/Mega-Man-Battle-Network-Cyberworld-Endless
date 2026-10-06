@@ -12,7 +12,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "guardians.h"
-#include "lan_house.h"
+#include "home_places.h"
 #include "navicust.h"
 #include "powers.h"
 #include "run.h"
@@ -213,7 +213,8 @@ void second_read_battle(void) {
 static int home_where(void) {
 	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER);
 	if (director_in_hp()) return SECOND_HOME_HP;
-	if (lan_house_map(group, number)) return number == LAN_ROOM ? SECOND_HOME_ROOM : SECOND_HOME_UP;
+	int at = home_places_at(group, number);
+	if (at != HOME_PLACE_NONE) return at == HOME_PLACE_ROOM ? SECOND_HOME_ROOM : SECOND_HOME_UP;
 	return town_is_home() ? SECOND_HOME_UP : SECOND_HOME_PORT;
 }
 

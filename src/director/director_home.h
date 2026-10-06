@@ -50,13 +50,19 @@ bool home_go_back(int k);
  * is in Lan's HP. */
 bool home_map(int group, int number);
 bool home_in_hp(void);
-/* The place's name for the map's label: Lan's HP, his house or room, or
- * the town's. */
+/* The place's name for the map's label: Lan's HP, his house or room,
+ * AsterLand, the Cyber Academy, or the town's. */
 const char *home_place_name(void);
+/* Whether Lan stands in one of home's indoor places (his house and room,
+ * AsterLand, the Cyber Academy). */
+bool home_indoors(void);
+/* What A reads ahead of Lan where home's place answers instead of BN6
+ * (home_places_check); NULL elsewhere. */
+const char *home_check(void);
 /* The way on at home from where Lan or MegaMan stands (way_to's word,
  * way_last its direction, `far` how far): the PC in Lan's room, the room
- * up the house's stairs, home from the town (a town not home: its port),
- * the pink pad in Lan's HP. */
+ * up the house's stairs, the way out of AsterLand and the Academy, home
+ * from the town (a town not home: its port), the pink pad in Lan's HP. */
 const char *home_way(int *far);
 /* L at home: MegaMan's word on that way. */
 const char *home_status(void);

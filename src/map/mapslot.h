@@ -54,8 +54,9 @@ void mapslot_teleport(int entry, int group, int number, int x, int y, int facing
 /* The map's theme: every chapter's map music list plays `song` there. The
  * lists hold one real-world map (the town) and one internet map (the
  * layer) at a time, and home's maps beside them (mapslot_music_home: k 0
- * Lan's HP, 1 his house, 2 his room). */
-#define MAPSLOT_HOME_MAPS 3
+ * Lan's HP, 1 his house, 2 his room, 3 AsterLand, 4-7 the Cyber
+ * Academy's). */
+#define MAPSLOT_HOME_MAPS 8
 bool mapslot_music(int group, int number, int song);
 bool mapslot_music_home(int k, int group, int number, int song);
 void mapslot_music_forget_town(void);
@@ -88,10 +89,16 @@ bool mapslot_checks(int group, int number, const uint8_t script[16], const uint8
 
 /* Allocation from the town's own space (on) or the layers' (off): the
  * layers' halves are reused while the town still runs. Lan's HP has a space
- * of its own as well, and Lan's house and room another. */
+ * of its own as well, Lan's house and room another, and home's other places
+ * a third. */
 void mapslot_town(bool on);
 void mapslot_hp(bool on);
 void mapslot_house(bool on);
+/* ... and home's other places, each a part of its own (`part` 1
+ * AsterLand, 2 the Cyber Academy; 0 the layers' again), begun afresh as it
+ * is switched on */
+#define MAPSLOT_INDOOR_PARTS 2
+void mapslot_indoors(int part);
 
 /* Space in the free ROM for NPC scripts; returns the bus address. A reset
  * starts the next layer in the other half of the space. */

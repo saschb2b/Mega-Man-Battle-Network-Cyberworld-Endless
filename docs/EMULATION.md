@@ -87,6 +87,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x2A0000`-`+0x2E0000` | Other games' battle backgrounds (docs/MULTIROM.md): each one's BGAnimData record, its tiles and map (LZ77 encoded again), palette, animation scripts and the tiles and lists their frames name; then copies of BN6's three background tables (records, animations, scroll entries) with them after BN6's 22, which the loader's literals point at. Copied all at once in the areas' order | `xbackdrop.c` |
 | `+0x2E0000`-`+0x2E1000` | BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue flame of sprite list 7 (`0x3C`, 1612 bytes) copied whole, its palette turned purple as BN5's flame is, and listed at Gregar's list-7 `0x54`, which points at the placeholder in the player's ROM; a place of its own, the same with or without another game's ROM, copied once a core | `xnavi.c` |
 | `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
+| `+0x320000`-`+0x330000` | Home's other places (docs/HOME.md, piece 10), a part each: AsterLand's (`+0x320000`) and the Cyber Academy's four maps' (`+0x328000`): their NPC lists and their people's scripts and words, empty map scripts, their own warp lists (BN6's doors copied in, the doors out pointed where the planned town has them) and the music lists | `mapslot.c`, `indoors.c`, `aster_land.c`, `academy.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): its empty NPC list and map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
@@ -162,7 +163,8 @@ objects, sprite list, warp list, jack-in table, check table
 `0x0803461C`, text archive `0x08040794` and music), clears the check
 flags `0x16C0`-`0x16CF`, rewrites jack-in destination 42 (`0x08099A00` +
 42 x 20) to the first layer, and
-widens MegaMan's facing probes for talking (`0x0809F164`), redraws the
+widens MegaMan's facing probes for talking (`0x0809F164`; in the Net
+only, BN6's own in the real world, where A's checks look along them), redraws the
 chat font's version marks as two letters side by side (`0x086AACAC`,
 widths `0x08043C74`), points the
 map-name label and the PET's at the run's own names, rewrites the stock of
