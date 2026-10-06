@@ -45,6 +45,15 @@ Event flags `0x1448`-`0x144C` drive the NPCs: the guardian leaves, logs in,
 the Guardian Data shows, it was taken, the exit shows. While the exit is
 shut, flag `0x16F1` keeps its warp from starting.
 
+The silence is BN6's own "no song", 0x63, which its `PlayMusic` stops
+every song for, as its scripts hush a scene. Until 6 October 2026 the
+hush played song 0xFF, which stopped nothing: the area's theme played on
+as MegaMan stepped in, and after the battle, where the game starts the
+map's theme a frame after the battle anyway, under the guardian's last
+word (the music's status read each frame, `BN6_MUSIC_STATUS`). The hush
+after the battle now runs while a song plays, in the 40 frames before the
+last word.
+
 ## Guardians
 
 Mugshots share their index with the Navi's overworld sprite in list 6:
@@ -74,9 +83,13 @@ the net in his own shape (`guardian_body`):
 A guardian's navi index is its ai in the enemy table: HeatMan 1 .. ElementMan
 16, and Colonel 18. BN5's take 24-29 (Colonel, ShadowMan, NumberMan,
 TomahawkMan, KnightMan, ToadMan: their AI index in BN5's table, 7-12, plus
-17), each with a rival record of his own. Index 17 (and 0, 22) is an unnamed navi with 4000 HP at
-V1, which the Graveyard's SP battle uses; runs saved before Colonel moved
-to 18 have their 17 changed on loading, and his rival record follows.
+17), each with a rival record of his own. Bass is 19 and the Cybeast
+Gregar 20 ([Super bosses](#super-bosses-6-october-2026-issue-100)).
+Index 17 (and 0, 22) is an unnamed navi with 4000 HP at V1, drawn as
+MegaMan: the place of a Navi the US version cut (What the ROMs hold,
+below), whose SP record a Server's challenge in the Graveyard could roll
+until the super bosses held it back; runs saved before Colonel moved to 18
+have their 17 changed on loading, and his rival record follows.
 
 Which guardian an area gets depends on its act (docs/PROGRESSION.md): from
 the area's pool the Navis whose HP at the act's version lies in the act's
@@ -262,7 +275,9 @@ critique smells, the transitions budget.
   BX, GBeast and the cut Count rolled as Server challenges in the
   Graveyard and the Nest; they no longer do); power creep (what they pay
   is the run's, Gigas and HPMemory, and the Library's collection; across
-  runs only the record and the knowledge); a hollow loop (the Cybeast's
+  runs only the record and the knowledge, and the BeastOut helper the
+  endless Nest's fall already opened, issue #99, a helper chosen each
+  run); a hollow loop (the Cybeast's
   fall opens the next Net, Bass's defeat his next form); a lying
   telegraph (a rematch's form is said at the gate, before the choice);
   complexity (two super bosses, one place each, a sentence each).
@@ -276,7 +291,9 @@ critique smells, the transitions budget.
    (`0x85`), which BN6 keeps for a player with six of its marks: the Net
    copied the last battle and came back stronger. Its fall rebuilds the
    Net, as the Nest's guardian's did, and earns the title's Bass mark
-   ("the endless net's own Nest cleared") as before. The short net keeps
+   ("the endless net's own Nest cleared") as before, and with it the
+   BeastOut helper for the runs after (issue #99): MegaMan downloaded the
+   Cybeast's data. The short net keeps
    its Nest guardian: its last words already say something deeper is
    still awake, and the endless net, which its win opens, pays that off.
 2. **Bass, in the Secret Area, once it has been cleared.** BN6 sets
@@ -289,8 +306,9 @@ critique smells, the transitions budget.
    is: he came to hunt its strongest copies. His form follows his record
    in any run, as BN6's chain does: Bass (1800) until MegaMan beats him,
    then Bass SP (2700), and once he has fallen twice and the Cybeast once
-   (the title's Bass mark), Bass BX (3400): he took the beast's data.
-   The gate says which before it opens; the fight is a choice.
+   (their records, `rivals.sav`), Bass BX (3400): he took the beast's
+   data. The gate says which before it opens, and its question starts on
+   No; the fight is a choice.
 
 Neither comes at random: BN6's own records of Bass BX, GBeast SP and the
 cut Count are taken out of the Servers' SP Navis, which keep the story's
@@ -303,11 +321,17 @@ The Cybeast, from the first run on:
 - the short net's Nest growls as MegaMan arrives, and its last words say
   something deeper is still awake, the Nest only its den (as before);
 - the endless net's Graveyard wakes the beast in MegaMan (BeastOut, as
-  before: "The Nest is calling to the Cybeast in me!");
+  before: "The Nest is calling to the Cybeast in me!"), or Dad unlocks it
+  as a run with the BeastOut helper begins;
 - in Lan's HP, the Nest's portal: MegaMan reads something growling far
   down, like the beast in him;
 - the endless Nest's arrival: the growl from below, and MegaMan feels the
-  beast in him answer; L in the Nest: something huge waits at its end;
+  beast in him answer; a bystander there: the floor keeps shaking,
+  something huge is waking up; L in the Nest: something huge waits at its
+  end, growling like the beast in MegaMan; the PET's next step on the
+  second screen, "Something huge waits at the end";
+- in the room before the arena, MegaMan: the growling comes from just
+  ahead;
 - as MegaMan nears the arena, the music fades as BN6's own scenes fade
   it, and the floor shakes with BN6's rumble.
 
@@ -319,20 +343,23 @@ Bass, once the Secret Area is his:
 - at the golden gate: MegaMan senses a dark signal behind it, unnamed
   until they have met (docs/META.md, what MegaMan knows); after that,
   "Bass is in there", and his form;
-- the Secret Area's arrival, and its arena: BN6's dormant stone stands
-  where a guardian would, its screen flickering.
+- the Secret Area's arrival, L's word and the room before the arena: a
+  dark signal at the end that does not feel like a copy; the second
+  screen, "A dark signal waits at the end";
+- its arena: BN6's dormant stone stands where a guardian would, its
+  screen flickering.
 
 ### The presentation, above a guardian's
 
 | | A guardian | A super boss |
 | --- | --- | --- |
-| Arena | 5 x 5 panels at the end of a bridge | 7 x 7, an octagon, where the layer has room |
+| Arena | 5 x 5 panels at the end of a bridge | 7 x 7, an octagon, where the layer has room: four more tries at the layout, at its smallest from the third, and a guardian's 5 x 5 in the last five (the Nest's crosses and slabs at their size seldom had room; so, nearly nine layers in ten) |
 | Approach | The arena silences the area's theme | The theme fades out as MegaMan steps into the room before the arena, as BN6's own scenes fade it; before the Cybeast, the floor shakes now and then with BN6's rumble (sound `0xE3`); before Bass, his stone stands in the arena |
-| Entrance | Bars, the prelude, a log-in with a shake, about 1.3 s | Bars and silence; the rumble every 32 frames, harder each time (BN6's own cadence); Bass's stone shakes and cracks (`0xFE`); the screen fades to white with sound `0x100` and holds; in the white the stone lies broken and the super boss stands; the prelude starts after the white, as in BN6; Bass throws his cloak open, the Cybeast rears with a roar and a heavy shake. About 4 s, 2.5 s at a rematch |
+| Entrance | Bars, the prelude, a log-in with a shake, about 1.3 s | Bars and silence; the rumble every 32 frames, harder each time (BN6's own cadence); Bass's stone shakes and cracks (`0xFE`); the screen fades to white with sound `0x100` and holds; in the white the stone lies broken and the super boss stands; the prelude starts as the white lifts, as in BN6; once it has, Bass throws his cloak open, the Cybeast rears with a roar and a heavy shake, and the card follows. About 4.6 s, 3.3 s at a rematch, which skips the first two rumbles |
 | Title card | A band, the area, the name, the epithet | A darkened picture, a taller band with double edges in its colour, the name larger and heavier, its form or the Net beneath, held longer |
-| Words | The guardian's line, MegaMan's answer, the battle call | Bass speaks (his face, BN6's), by his record; the Cybeast roars (its face) while MegaMan, Lan and Dad speak |
+| Words | The guardian's line, MegaMan's answer, the battle call | Bass speaks (his face, BN6's), by his record; the Cybeast roars (its face) while MegaMan, Lan and Dad speak; once fought in any run, MegaMan's battle data on their moves, watched in god mode (Bass's cape takes no damage and comes off as he attacks; every attack of the Cybeast's lights its panels first) |
 | Fight | BN6's boss theme, the area's background | BN6's own record: Bass's boss theme (`0x16`), the Cybeast's final battle theme (`0x17`), the background of the map it stands on as BN6's records ask (`0xFF`), no running |
-| After | Last word, a flash, the log-out | Bass's last word, a white fade with BN6's `0xD7` as he goes; the Cybeast's last roar, a long white fade with the floor shaking, then silence, and Dad's call |
+| After | Silence, last word, a flash, the log-out | Silence; Bass's last word, a white fade with BN6's `0xD7` as he goes, his stone's pieces fading with him; the Cybeast's last growl, a long white fade with the floor shaking, then the Net stays silent through Dad's call |
 
 ### What they pay
 
@@ -343,14 +370,63 @@ other version's Bass Giga), Bass SP the Bass Giga (BN6 Gregar's for Bass
 SP), Bass BX ColForce (Gregar's for Bass BX), the Cybeast BugRSwrd
 (Gregar's own version Giga; the Cybeast was born of bugs). The Cybeast's
 data on a normal layer also brings the NaviCust's draft, as the Nest's
-guardian's did. The Beast chips (Gregar, Falzar, DblBeast) are left out:
-the Japanese Beast Link Gate's, unverified in the US version.
+guardian's did, and its fall opens the BeastOut helper (issue #99). The
+Beast chips (Gregar, Falzar, DblBeast) are left out: the Japanese Beast
+Link Gate's, unverified in the US version.
+
+### As built
+
+- `src/core/super_boss.c`: who they are (navi 19 and 20, their AI index
+  in BN6's table), where each waits (`run_new` sets the endless Nest's
+  master and, with the title's S, the Secret Area's), each form by record
+  and Net, their records' music, names and Gigas, and the AIs no
+  Server's challenge holds (`loot.c`, `navi_challenge`).
+- `make_boss` gives a super boss his form, his record's music and the
+  map's own background (`encounter.c`, `0xFF`, the record's background
+  as BN6's story records have it).
+- `src/net/net_gen.c`: his arena, 7 x 7 where the layer has room
+  (`build_layout`); `LAYER_MAKE` 88.
+- `src/layer/stage_npc.c`: `npc_super` (hidden until the white, his pose
+  on flag `0x1454`, then what he stands in after it; a slow fade for the
+  beast) and `npc_seal`, Bass's stone (BN6's own sprite, list 7 `0x9B`:
+  standing, shaking with its crack on flag `0x1452`, in pieces once he
+  stands, fading with him; nothing walks into it). `guardians.c` gives
+  their bodies (`super_body`), `guardian_objs.c` their scripts: BN6's
+  sounds (`0xE3`, `0x100`, `0xD7`) and the music's fade (`ts_sound_fade_out`
+  on its slot, `0x1F`, eight sixteen-frame steps, as BN6's scenes fade it).
+- `src/director/boss_grand.c`: the staging in boss.c's place, frame by
+  frame; `cinema.c` its whiteout and the grand title card.
+- Their words: `src/layer/super_lines.c` (meetings, last words, tips,
+  data, card), with the foreshadowing in the words files beside each
+  (`story_words.c`: arrival, Chaud's and Dad's calls; `briefing_words.c`:
+  L's word, the room before the arena; `home_words.c`: the Nest's port;
+  `service_words.c`: the gate; `layer_words.c`: the bystander;
+  `pet_text.c`: the BBS; `second_text.c`: the PET's next step).
+- For tests: `--dev side=2` starts the run in the Secret Area (`side=1`
+  the Undernet, its gate), `--dev bass=N,beast=N` sets their records,
+  `--talk scrtdata:FRAME` gives the three ScrtData a gate wants (docs/
+  DEVTOOLS.md). `tests/test_core.c` (`test_super_bosses`): their forms,
+  records, places and arenas (58 of 60 test layers at 7 x 7, each reached
+  from the start), every line of theirs within BN6's box, none naming
+  them before they have met.
+
+Checked by headless captures with BN6's ROM alone, the autopilot fighting
+(god mode, MegaMan at 800 HP): the Cybeast at seed 7's layer 19, Bass at
+depth 8 in the Secret Area with the S held, each from the approach
+through the entrance, card, talk, battle, fall and data to the exit, and
+the endless Nest's to Dad's call and the next Net; Bass BX's rematch
+(`bass=2,beast=1`); the gate unmet and met; the music's state each second
+(`CYBERWORLD_EMU_DEBUG`): faded on the approach, stopped through the last
+word, back after Bass and silent after the Cybeast.
 
 ### Not built, and the owner's calls
 
 Left for later: GBeast SP before Bass BX, as BN6 sets them back to back;
 BN5's Bass and Nebula Grey in BN5's engine, where BN5 dresses the
-Graveyard; the Beast chips. Where a choice reached past the super bosses,
+Graveyard; the Beast chips. MegaMan walks straight at a super boss, as
+at a guardian, and BN6's camera follows him: where the arena lies below
+its way in, the chat box covers part of the boss through the talk (his
+face speaks in it); walking up beside him would keep them side by side. Where a choice reached past the super bosses,
 the conservative one was taken, each one switch for the owner to turn:
 
 - the Cybeast is the endless Nest's own guardian, not a layer of its own
@@ -360,4 +436,9 @@ the conservative one was taken, each one switch for the owner to turn:
 - Bass takes the Secret Area after its first clear, not from the first
   visit;
 - the title's Bass mark stays the endless Nest's (BN6 gives it for Bass
-  SP).
+  SP);
+- the endless Nest's master is BN6's own: Gregar at 2500 HP where the
+  Nest's SP guardians stood at 1500 to 2000 (`build.py pacing`), and
+  Gregar SP at 4000 on every Net after the first, the Net's clock adding
+  its tenth a notch as to any guardian. Gregar on every Net, or the
+  clock left off him, are the gentler switches.

@@ -421,11 +421,31 @@ last run ended before the first guardian, he gives an HPMemory first
   band one version up, at the layer's own depth (not three layers deeper).
   A win pays a chip from the best Mystery Data's roll on top of the game's
   own reward. From act 4 it may hold the area's SP Navi, who keeps his own
-  HP.
+  HP: never Bass BX, MegaMan's beast or the place of the Navi the US
+  version cut, whose records the Graveyard's and the Nest's tables hold
+  beside the story's SP Navis (`navi_challenge`, `super_reserved_ai`): the
+  super bosses come at their own places (docs/BOSSES.md, Super bosses).
 - The dark flame into the Undernet stays a side route with tougher viruses
   and better Mystery Data.
 - Busting Level stays the game's: a clean, fast battle already earns better
   drops.
+- Bass, once the Secret Area has been cleared in any run, waits behind its
+  golden gate, and says so before it opens: Bass 1800 HP, Bass SP 2700
+  once beaten, Bass BX 3400 once beaten twice with the Cybeast fallen,
+  BN6's own records, above every act's band.
+
+### The Cybeast at the bottom of each Net (issue #100)
+
+The endless net's Nest is the Cybeast's den: BN6's own final battle,
+Gregar at 2500 HP on the first Net and Gregar SP at 4000 on every Net
+after it, where the Nest's SP guardians stood at 1500 to 2000 (SlashMan
+SP half the runs, EraseMan SP and ProtoMan SP a quarter each). It stands
+above the bands by design, the capstone the Net was built down to, met
+with everything the run has gathered: the Graveyard's BeastOut, every
+Cross and GigaChip, five HPMemory a guardian. The Net's clock adds its
+tenth a notch to it as to any guardian. The short net's Nest keeps its
+guardian, paced as a fourth act. `build.py pacing` shows them beside act
+6's band.
 
 ### Later cycles
 
@@ -484,7 +504,9 @@ Fixed on the way:
 - `python3 build.py pacing` rolls every area's battles in every act and
   draws 500 runs' guardians, and marks anything past its band
   (docs/DEVTOOLS.md). It reports 0 now. Median battle HP by act: about
-  140, 200, 270, 340, 400 and 500, and 510 in the Nest.
+  140, 200, 270, 340, 400 and 500, and 510 in the Nest. The super bosses'
+  forms are listed after the guardians, unflagged: their battles are
+  BN6's own.
 - `tests/test_core.c` checks the acts, bands, versions, area tiers, guardian
   choice and heals without a ROM.
 - `runlog.txt` in the data folder records every battle (area, foes, their
@@ -496,6 +518,7 @@ Fixed on the way:
 | --- | --- |
 | Acts, bands, versions, area tiers, guardian bands, heals | `src/core/pacing.c` |
 | Area order, guardian pools | `src/core/run.c` (`run_new`) |
+| The super bosses' places, forms and records | `src/core/super_boss.c` (docs/BOSSES.md) |
 | Act and guardian layers | `src/net/net_gen.c` (`biome_for_depth`, `is_boss_depth`) |
 | Formation pick, versions inside the band | `src/core/loot.c` (`make_encounter`) |
 | BN5's records inside the band, their viruses' versions | `src/emu/guest.c` (`guest_pool`), `src/director/director_guest.c` (`guest_pick`) |

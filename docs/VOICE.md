@@ -252,6 +252,25 @@ role, not from a measured script: BN5's isn't read here.
 
 A Navi's tic goes in about every other box, not every one.
 
+### The super bosses
+
+Bass and the Cybeast are no copies (docs/BOSSES.md, Super bosses), and
+talk like no guardian.
+
+- **Bass**: BN6's legend, cold and short. "...Hmph." more than any
+  exclamation, MegaMan by his name, the strong his prey, never a joke or
+  a tic; beaten, a vow, not a groan. Two boxes at most before the battle
+  call.
+
+  > ...Hmph. You again.
+  > Copy or not... I delete the strong.
+
+- **The Cybeast** never speaks: it roars with its own face ("GRRRAAAAH!!"),
+  and MegaMan, Lan and Dad say what it is. MegaMan feels it as the beast
+  inside him, and senses either of them before he has met them, never
+  naming what he has not met: "Something huge waits at the end...", "A
+  dark signal".
+
 ## Our recurring lines
 
 How each kind of line in this game should go. The facts stay; the voice
@@ -309,6 +328,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | A Cross won, one the run can't carry, the Cybeast's call | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |
 | The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls | `src/layer/guardian_lines.c` |
+| The super bosses: Bass's and the Cybeast's meetings by their record, last words, tips, their data's words and title cards | `src/layer/super_lines.c` |
 | The Net Dealer, the NaviCust vendor, ProtoMan's terms, a rumor, the invisible path's hint, a ScrtData, a Spin | `src/layer/layer_words.c` |
 | Services' chats: Mr.Prog's heal, shops, a Server, flames of darkness, the duel, dark warps, the golden gate | `src/layer/service_words.c` |
 | Rewards' chats: Guardian Data and its draft, a Navi gate, a vault, an official gate, the gift | `src/layer/reward_words.c` |

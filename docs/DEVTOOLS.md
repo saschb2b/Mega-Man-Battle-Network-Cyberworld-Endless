@@ -333,6 +333,22 @@ notches (docs/HOME.md, going back): the guardians spawn with its HP, a
 tenth more a notch. `CYBERWORLD_AUTOPILOT_BACK=N` has the autopilot take
 N trips back from Lan's HP, through its older portals, before a way.
 
+The super bosses (docs/BOSSES.md, Super bosses) have three: `side=N`
+starts the run on a side layer at `--run-depth`, 1 the Undernet (its
+golden gate) or 2 the Secret Area, Bass's once the title's S is held
+(`--marks 08`); `bass=N` and `beast=N` make MegaMan's wins over Bass and
+over the Cybeast N, their forms and words by that record (`bass=1` Bass
+SP, `bass=2,beast=1` Bass BX). `--talk scrtdata:FRAME` gives the three
+ScrtData a golden gate wants. With the debug output on, the music's
+state every second shows the approach's fade and the silence after the
+battle:
+
+```bash
+CYBERWORLD_AUTOPILOT=1 CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu --run-depth 8 --seed 7 --marks 08 \
+    --dev god,quiet,hp=800,side=2 --frames 4000 --shot-range 1700:4000:/src/.build/bass/f
+CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --run-depth 19 --seed 7 --dev god,quiet,hp=800 --frames 4000
+```
+
 Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
 same in a battle on the guest core: on BN5's battle objects, laid out as
 BN6's (`src/emu/bn5.h`), after each of its frames.
