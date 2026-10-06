@@ -87,6 +87,7 @@ typedef struct {
 	uint8_t last_won;
 	uint8_t hp_taught;        /* MegaMan has said what Lan's HP is, at a run's first jack-in (said short after) */
 	uint8_t last_job;         /* the asker whose request the last run ended holding, plus one (0 none): their word at the next run's start */
+	uint8_t exit_taught;      /* MegaMan has named a layer's exit pad, near one the first time (issue #101) */
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

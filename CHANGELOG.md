@@ -141,9 +141,14 @@
   design: next, going back through older portals priced by the Net's
   clock, the townsfolk's jobs, a shop at home, and a town that
   remembers.
-- **Clearer words.** The Net Dealer says why Rush needs a RushFood for
-  each panel of a gap ("He eats just one!"), and L names a second violet
-  mark on the map as another one.
+- **Clearer words.** The Net Dealer and MegaMan say why Rush needs a
+  RushFood for each panel of a gap ("He eats just one!"), and L names a
+  second violet mark on the map as another one.
+- **The exit pad named** (issue #101). The first time MegaMan comes near
+  an open exit pad he says what it is ("See that ring,Lan? It's the exit
+  pad!") and that there's no coming back, once a profile. Exit pads
+  still warp at once, as BN6's do (the owner's call): a playtester took
+  one for a decoration twice and left a layer's services behind.
 - **The older Net's chips that sit out are named once a run.** After the
   first battle there, MegaMan no longer names again the chips his arrival
   words had named (a playtester heard them twice, as if new).

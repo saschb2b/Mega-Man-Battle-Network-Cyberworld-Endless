@@ -512,7 +512,7 @@ its towns' palette dim (Green and Sky Town's), its rain, snow and wind,
 then a tint of the town's palettes where BN6 has none. Judged by captures
 at every hour before it ships; docs/FIDELITY.md names it.
 
-As built (issue #90, the owner's look still to come before a release):
+As built (issue #90; the owner looked at the captures of every hour and approved them as they are, 6 October 2026):
 BN6's own dim is a palette animation of Green and Sky Town's (their map
 scripts load it while event `0xA9C` is set), which Central Town has none
 of, so the hour is the engine's. Its picture is tinted as it is drawn
