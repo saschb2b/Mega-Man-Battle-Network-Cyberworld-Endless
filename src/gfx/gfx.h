@@ -37,6 +37,9 @@ enum {
 
 bool gfx_init(void);
 Sprite *sprite_get(int category, int index);
+/* ... another game's (its ROM's bytes, its sprite list table: rom.h's
+ * XRomLayout), read the same way: the launcher's BN5 cartridge */
+Sprite *sprite_get_rom(const uint8_t *rom, uint32_t lists, int category, int index);
 int sprite_anim_count(const Sprite *s);
 int sprite_frame_count(const Sprite *s, int anim);
 

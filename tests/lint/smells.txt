@@ -9,7 +9,7 @@
 duplicate src/core/save_legacy.c 17
 duplicate src/gfx/gfx.c src/layer/text.c 21
 duplicate src/map/tiles.c 11
-includes src/core/main.c 22
+includes src/core/main.c 21
 includes src/director/director.c 36
 includes src/director/director_layer.c 33
 includes src/layer/layer_objs.c 25
@@ -49,5 +49,4 @@ params src/scenes/scene_title.c:stamp 10
 params src/world/town.c:tile 8
 params src/world/townmath.h:town_move_tile 10
 params src/world/townsrc.c:townsrc_synth 9
-size src/core/platform.c 1072
 size src/emu/guest.c 1182

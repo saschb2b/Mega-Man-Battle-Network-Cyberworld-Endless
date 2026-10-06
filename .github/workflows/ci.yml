@@ -208,8 +208,8 @@ jobs:
             echo "links a library macOS does not have"; exit 1
           fi
           codesign --verify --deep --strict "$app"
-          "$bin" --headless --scene norom --data-dir "$RUNNER_TEMP/data" --frames 30 --shot "20:$RUNNER_TEMP/norom.bmp"
-          test -s "$RUNNER_TEMP/norom.bmp"
+          "$bin" --headless --scene launcher --data-dir "$RUNNER_TEMP/data" --frames 30 --shot "20:$RUNNER_TEMP/launcher.bmp"
+          test -s "$RUNNER_TEMP/launcher.bmp"
           hdiutil verify build/release/cyberworld-endless-macos.dmg
       - uses: actions/upload-artifact@v4
         with:
@@ -242,7 +242,7 @@ jobs:
           unzip -l build/release/cyberworld-endless.ipa | tee /dev/stderr | grep -q 'Payload/CyberworldEndless.app/cyberworld-endless$'
       - name: The Simulator's app
         run: python3 build.py ios --simulator
-      - name: It starts in the iOS Simulator, on the screen that asks for the ROM
+      - name: It starts in the iOS Simulator, on the ROMs screen
         run: |
           udid=$(xcrun simctl list devices available -j | python3 -c 'import json, sys
           d = json.load(sys.stdin)["devices"]
@@ -253,7 +253,7 @@ jobs:
           xcrun simctl launch --stdout="$RUNNER_TEMP/ios.out" --stderr="$RUNNER_TEMP/ios.err" "$udid" io.github.saschb2b.cyberworldendless
           sleep 20
           mkdir -p build/ios-shots
-          xcrun simctl io "$udid" screenshot build/ios-shots/norom.png
+          xcrun simctl io "$udid" screenshot build/ios-shots/launcher.png
           cat "$RUNNER_TEMP/ios.out" "$RUNNER_TEMP/ios.err"
           grep -q '^display ' "$RUNNER_TEMP/ios.out"
           xcrun simctl spawn "$udid" launchctl list | grep -q cyberworldendless

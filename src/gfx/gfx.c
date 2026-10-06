@@ -42,22 +42,25 @@ static Sprite *sprite_table[10][256];
 
 static inline uint32_t le32(const uint8_t *p) { return p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24; }
 
-Sprite *sprite_get(int cat, int idx) {
-	if (cat < 0 || cat >= 10 || idx < 0 || idx >= 256) return NULL;
-	if (sprite_table[cat][idx]) return sprite_table[cat][idx];
-	uint32_t list = rom_off(rom_u32(R.layout->sprite_lists + cat * 4));
-	uint32_t ptr = rom_u32(list + idx * 4);
+/* Sprite `idx` of list `cat` in ROM `rom`, whose list table is at `lists` */
+static Sprite *sprite_load(const uint8_t *rom, uint32_t lists, int cat, int idx) {
+	uint32_t at = lists + (uint32_t)cat * 4;
+	if (!rom || at + 4 > ROM_SIZE || !rom_is_ptr(le32(rom + at))) return NULL;
+	uint32_t list = rom_off(le32(rom + at)) + (uint32_t)idx * 4;
+	if (list + 4 > ROM_SIZE) return NULL;
+	uint32_t ptr = le32(rom + list);
 	Sprite *s = calloc(1, sizeof *s);
-	if (ptr & 0x80000000u) {
+	if (!s) return NULL;
+	if (ptr & 0x80000000u && rom_is_ptr(ptr & 0x7FFFFFFFu)) {
 		uint32_t off = rom_off(ptr & 0x7FFFFFFFu);
 		size_t n;
-		uint8_t *d = lz77_decompress(R.data + off, ROM_SIZE - off, &n);
+		uint8_t *d = lz77_decompress(rom + off, ROM_SIZE - off, &n);
 		if (!d || n < 12) { free(d); free(s); return NULL; }
 		s->owned = d;
 		s->base = d + 8; /* 4-byte size prefix + 4-byte header */
 		s->size = n - 8;
 	} else if (rom_is_ptr(ptr)) {
-		s->base = R.data + rom_off(ptr) + 4;
+		s->base = rom + rom_off(ptr) + 4;
 		s->size = ROM_SIZE - rom_off(ptr) - 4;
 	} else {
 		free(s);
@@ -65,8 +68,31 @@ Sprite *sprite_get(int cat, int idx) {
 	}
 	s->anims = (int)(le32(s->base) / 4);
 	if (s->anims <= 0 || s->anims > 256) s->anims = 0;
-	sprite_table[cat][idx] = s;
 	return s;
+}
+
+Sprite *sprite_get(int cat, int idx) {
+	if (cat < 0 || cat >= 10 || idx < 0 || idx >= 256 || !R.layout) return NULL;
+	if (!sprite_table[cat][idx]) sprite_table[cat][idx] = sprite_load(R.data, R.layout->sprite_lists, cat, idx);
+	return sprite_table[cat][idx];
+}
+
+Sprite *sprite_get_rom(const uint8_t *rom, uint32_t lists, int cat, int idx) {
+	/* (a few, kept: the launcher's cartridges' faces) */
+	static struct { const uint8_t *rom; int cat, idx; Sprite *s; } kept[8];
+	if (!rom || cat < 0 || cat >= 10 || idx < 0 || idx >= 256) return NULL;
+	if (rom == R.data) return sprite_get(cat, idx);
+	for (int i = 0; i < 8; ++i)
+		if (kept[i].s && kept[i].rom == rom && kept[i].cat == cat && kept[i].idx == idx) return kept[i].s;
+	for (int i = 0; i < 8; ++i)
+		if (!kept[i].s) {
+			kept[i].s = sprite_load(rom, lists, cat, idx);
+			kept[i].rom = rom;
+			kept[i].cat = cat;
+			kept[i].idx = idx;
+			return kept[i].s;
+		}
+	return NULL;
 }
 
 int sprite_anim_count(const Sprite *s) { return s ? s->anims : 0; }
@@ -699,6 +725,7 @@ void fill_rects(const SDL_Rect *r, int n, SDL_Color c) {
 }
 
 bool gfx_init(void) {
-	build_font();
+	/* (once: the launcher reads it as BN6 goes in, the game's start again) */
+	if (!font_tex) build_font();
 	return true;
 }

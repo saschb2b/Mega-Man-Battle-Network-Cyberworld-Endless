@@ -64,9 +64,60 @@ body.touch-play #canvas {
 #gate .drop { font-size: 0.95rem; color: #9ce0f4; }
 
 .actions { display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap; }
-label.plate { position: relative; }
-label.plate input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+label.plate, label.pill { position: relative; cursor: pointer; }
+label.plate input, label.pill input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 label.plate:focus-within { border-image-source: url(../assets/ui/plate-on.png); }
+#gate p.about { font-size: 1rem; color: #9ce0f4; }
+
+/* the two cartridges, as the game's launcher draws them (src/launcher/):
+ * an open spot until the ROM is in, then the cartridge, its label in its
+ * game's colours with the game's face, drawn from the ROM by app.js (never
+ * a file of the site's); one game pixel --k of the page's: three, two on
+ * a phone's narrow page */
+.carts { --k: 3px; display: flex; gap: 12px 33px; justify-content: center; flex-wrap: wrap; }
+@media (max-width: 480px) { .carts { --k: 2px; } #gate { padding: 18px 6px; } }
+.cart {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 6px;
+	border: 0;
+	background: none;
+	color: var(--white);
+	font: inherit;
+	cursor: pointer;
+}
+.cart .spot, .cart .shell { position: relative; width: calc(92 * var(--k)); height: calc(58 * var(--k)); background: 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
+.cart .spot {
+	display: grid;
+	place-content: center;
+	justify-items: center;
+	gap: calc(2 * var(--k));
+	background-image: url(../assets/ui/cart-spot.png);
+}
+.cart:hover .spot, .cart:focus-visible .spot { background-image: url(../assets/ui/cart-spot-on.png); }
+.cart .spot b { font: 700 calc(11 * var(--k))/0.8 var(--caps); color: #6bdeff; }
+.cart .spot .big { font: 700 calc(13 * var(--k))/1 var(--caps); color: #6bdeff; text-shadow: var(--k) var(--k) 0 #00314a; }
+.cart .spot .need { font: 700 calc(4.5 * var(--k))/1 var(--caps); color: #6b9cad; text-transform: uppercase; }
+#cart-bn6 .spot .need { color: var(--orange); }
+.cart:hover .spot b, .cart:focus-visible .spot b, .cart:hover .spot .need, .cart:focus-visible .spot .need { color: var(--gold); }
+.cart .shell { display: none; background-image: url(../assets/ui/cart-bn6.png); }
+#cart-bn5 .shell { background-image: url(../assets/ui/cart-bn5.png); }
+.cart.in .spot { display: none; }
+.cart.in .shell { display: block; }
+.cart:focus-visible { outline: none; }
+.cart.in:focus-visible .shell, .cart.in:hover .shell { outline: var(--k) solid var(--gold); outline-offset: calc(2 * var(--k)); }
+/* the face's window on the label (34 x 34 of the mugshot's 40 x 48, its shoulders cut) */
+.cart .face { position: absolute; left: calc(8 * var(--k)); top: calc(11 * var(--k)); width: calc(34 * var(--k)); height: calc(34 * var(--k)); overflow: hidden; }
+.cart .face canvas { position: absolute; left: calc(-3 * var(--k)); top: calc(-5 * var(--k)); width: calc(40 * var(--k)); height: calc(48 * var(--k)); image-rendering: pixelated; }
+.cart .game, .cart .sub { position: absolute; left: calc(45 * var(--k)); width: calc(39 * var(--k)); text-align: center; color: var(--white); text-shadow: var(--k) var(--k) 0 #00314a; }
+.cart .game { top: calc(11 * var(--k)); font: 700 calc(13 * var(--k))/1 var(--caps); }
+.cart .sub { top: calc(32 * var(--k)); font: 700 calc(5 * var(--k))/1 var(--caps); text-transform: uppercase; }
+.cart .ready { position: absolute; right: calc(3 * var(--k)); bottom: var(--k); padding: calc(1.3 * var(--k)) calc(2 * var(--k)) calc(0.7 * var(--k)); background: #108c52; font: 700 calc(4.3 * var(--k))/1 var(--caps); text-transform: uppercase; }
+.cart .ready::before { content: "\2713\00a0"; }
+.cart .caption { font: 700 calc(4.8 * var(--k))/1.2 var(--caps); color: #6b9cad; }
+.cart.in .caption { color: var(--white); }
 
 .bar { display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; padding: 12px 0 0; }
 .bar .pill { cursor: pointer; background: none; }

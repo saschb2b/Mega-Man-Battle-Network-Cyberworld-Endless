@@ -22,6 +22,19 @@ extern const Scene scene_title;
 extern const Scene scene_intro;   /* the start: the boot screen and the GitHub notice, then the title */
 extern const Scene scene_gallery;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
+extern const Scene scene_launcher; /* the ROMs before the game: two cartridges, PLAY (src/launcher/) */
+
+/* The launcher: at a start, shown where it is wanted (LAUNCHER_AUTO: no
+ * BN6, the first start, BN5 gone since the last), always (LAUNCHER_OPEN) or
+ * never; true when it shows, `begin` starting the game at its PLAY.
+ * `rom_dir` where copies are kept (NULL: the data folder's rom/) */
+enum { LAUNCHER_OFF, LAUNCHER_AUTO, LAUNCHER_OPEN };
+bool launcher_start(int mode, const char *rom_dir, void (*begin)(void));
+/* ... whether this build has it: the desktops and the phones, not the 3DS,
+ * a PortMaster handheld or the browser (whose page chooses the ROMs) */
+bool launcher_here(void);
+/* ... over the title, to add BN5 or see the ROMs (its R); false where there is none */
+bool launcher_open(void);
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool emu_start_at_home;    /* ... or at home before its first layer's act (--scene home) */

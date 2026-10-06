@@ -1,8 +1,11 @@
 /* ROM-free checks: hashing, decompression and map generation. */
 #include <math.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "darkchips.h"
 #include "data.h"
@@ -19,7 +22,10 @@
 #include "rom.h"
 #include "run.h"
 #include "area_src.h"
+#include "backup.h"
 #include "guardians.h"
+#include "launcher_roms.h"
+#include "launcher_text.h"
 #include "home_words.h"
 #include "jobs.h"
 #include "loot.h"
@@ -2618,6 +2624,137 @@ static void test_qr(void) {
 	CHECK(qr_make(longer, m) == 0, "299 bytes fit no version up to 10");
 }
 
+/* a save blob as save.c writes one: magic, size, FNV-1a checksum, bytes */
+static void blob_file(const char *path, uint32_t magic, const void *data, uint32_t n) {
+	const uint8_t *b = data;
+	uint32_t sum = 2166136261u;
+	for (uint32_t i = 0; i < n; ++i) sum = (sum ^ b[i]) * 16777619u;
+	FILE *f = fopen(path, "wb");
+	if (!f) return;
+	uint32_t hdr[3] = { magic, n, sum };
+	fwrite(hdr, sizeof hdr, 1, f);
+	fwrite(data, n, 1, f);
+	fclose(f);
+}
+
+/* a folder and all in it gone */
+static void remove_tree(const char *dir) {
+	DIR *d = opendir(dir);
+	if (!d) return;
+	for (struct dirent *e; (e = readdir(d));) {
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")) continue;
+		char path[512];
+		struct stat st;
+		snprintf(path, sizeof path, "%s/%s", dir, e->d_name);
+		if (!stat(path, &st) && S_ISDIR(st.st_mode)) remove_tree(path);
+		else remove(path);
+	}
+	closedir(d);
+	rmdir(dir);
+}
+
+static bool same_file(const char *a, const char *b) {
+	size_t na = 0, nb = 0;
+	uint8_t *x = backup_read_file(a, &na), *y = backup_read_file(b, &nb);
+	bool same = x && y && na == nb && !memcmp(x, y, na);
+	free(x);
+	free(y);
+	return same;
+}
+
+/* The saves in one file (backup.c, issue #97): what a phone keeps beside its
+ * ROMs and the browser's page exports */
+static void test_backup(void) {
+	/* (a folder of this run's own, emptied first: an earlier run's saves
+	 * are no part of it, and Docker's pids come again) */
+	char base[64], from[96], to[96], path[256], other[256];
+	snprintf(base, sizeof base, "build/host/test-backup-%d", (int)getpid());
+	remove_tree(base);
+	snprintf(from, sizeof from, "%s/from", base);
+	snprintf(to, sizeof to, "%s/to", base);
+	mkdir(base, 0755);
+	mkdir(from, 0755);
+	mkdir(to, 0755);
+	snprintf(path, sizeof path, "%s/savedata", from);
+	mkdir(path, 0755);
+	snprintf(path, sizeof path, "%s/savedata", to);
+	mkdir(path, 0755);
+	size_t n = 0;
+	uint8_t *none = backup_pack(from, 1, &n);
+	CHECK(!none, "backup: no profile, nothing to keep");
+	free(none);
+	int prof[16] = { 12, 9 };   /* (runs, best: the profile's first two) */
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", from);
+	blob_file(path, 0x43575032u, prof, sizeof prof);
+	int runbuf[25] = { 1, 7, 4 };   /* (active, seed, layer: a run's first three) */
+	snprintf(path, sizeof path, "%s/savedata/run.sav", from);
+	blob_file(path, 0x43574538u, runbuf, sizeof runbuf);
+	snprintf(path, sizeof path, "%s/keys.ini", from);
+	FILE *f = fopen(path, "w");
+	if (f) { fputs("A = J\n", f); fclose(f); }
+	snprintf(path, sizeof path, "%s/savedata/run.sav.tmp", from);
+	f = fopen(path, "w");
+	if (f) { fputs("half", f); fclose(f); }
+	uint8_t *b = backup_pack(from, 1700000000u, &n), *c = NULL;
+	BackupInfo info, again;
+	CHECK(b && backup_info(b, n, &info), "backup: packed and read back");
+	if (!b) return;
+	CHECK(info.runs == 12 && info.best == 9 && info.run_depth == 4, "backup: runs %d, best %d, a run on layer %d", info.runs, info.best, info.run_depth);
+	CHECK(info.files == 3 && info.stamp == 1700000000u, "backup: %d files (a .tmp left out), stamp %llu", info.files, (unsigned long long)info.stamp);
+	size_t m = 0;
+	c = backup_pack(from, 1800000000u, &m);
+	CHECK(c && backup_info(c, m, &again) && again.hash == info.hash, "backup: the same saves hash the same, made at another time");
+	free(c);
+	b[n / 2] ^= 1;
+	CHECK(!backup_info(b, n, &again) && !backup_unpack(to, b, n), "backup: a damaged one refused");
+	b[n / 2] ^= 1;
+	CHECK(!backup_info(b, n - 1, &again), "backup: a cut one refused");
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", to);
+	f = fopen(path, "w");
+	if (f) { fputs("older", f); fclose(f); }
+	CHECK(backup_unpack(to, b, n), "backup: unpacked");
+	snprintf(path, sizeof path, "%s/savedata/run.sav", from);
+	snprintf(other, sizeof other, "%s/savedata/run.sav", to);
+	CHECK(same_file(path, other), "backup: run.sav comes back as it was");
+	snprintf(path, sizeof path, "%s/keys.ini", from);
+	snprintf(other, sizeof other, "%s/keys.ini", to);
+	CHECK(same_file(path, other), "backup: keys.ini comes back as it was");
+	snprintf(other, sizeof other, "%s/savedata.old/profile.sav", to);
+	f = fopen(other, "r");
+	CHECK(f != NULL, "backup: the saves it replaced kept aside in savedata.old");
+	if (f) fclose(f);
+	CHECK(backup_local_info(to, &again) && again.hash == info.hash, "backup: the saves unpacked are the saves packed");
+	free(b);
+	remove_tree(base);
+}
+
+/* The launcher (src/launcher/, issue #97): when it shows at a start, and
+ * what it says of the saves */
+static void test_launcher(void) {
+	RomRecord none = { 0 }, both = { true, true, true }, six = { true, true, false };
+	CHECK(roms_launcher_wanted(false, true, false, none), "launcher: shown at a first start");
+	CHECK(roms_launcher_wanted(false, false, false, both), "launcher: shown without BN6");
+	CHECK(roms_launcher_wanted(false, true, false, both), "launcher: shown where BN5 has gone");
+	CHECK(!roms_launcher_wanted(false, true, true, six), "launcher: not shown for BN5 come since (the title says so)");
+	CHECK(!roms_launcher_wanted(false, true, false, six) && !roms_launcher_wanted(false, true, true, both), "launcher: not shown where nothing changed");
+	CHECK(roms_launcher_wanted(true, true, true, both), "launcher: shown when asked for");
+	/* the saves told as the title tells them: the best the deeper of the
+	 * profile's and the saved run's, one run "1 run", none not counted */
+	char said[400];
+	BackupInfo one = { .runs = 1, .best = 6, .run_depth = 2 }, run_only = { .run_depth = 1 }, empty = { 0 };
+	ask_saves("ROMs", &one, NULL, said, sizeof said);
+	CHECK(!strcmp(said, "In ROMs: 1 run, best Layer 6, a run on Layer 2.\nBring them back?"), "launcher: saves found told (%s)", said);
+	ask_saves("ROMs", &run_only, &empty, said, sizeof said);
+	CHECK(!strcmp(said, "In ROMs: a run on Layer 1.\nOn this device: no runs yet.\nUse the folder's saves?"), "launcher: a run alone, and none, told (%s)", said);
+	note_restored(&run_only, said, sizeof said);
+	CHECK(!strcmp(said, "Saves brought back: a run on Layer 1."), "launcher: saves brought back told (%s)", said);
+	/* a phone's saves' line: two lines, a long folder's name cut */
+	saves_line_phone("Mega Man Battle Network ROMs", false, said, sizeof said);
+	CHECK(!strcmp(said, "Saves: on this device\nA copy in Mega Man Bat..., for a reinstall"), "launcher: a long folder cut in the saves' line (%s)", said);
+	saves_line_phone("ROMs", true, said, sizeof said);
+	CHECK(!strcmp(said, "Saves: on this device only\nNo copy in ROMs: choose it again"), "launcher: a copy refused said (%s)", said);
+}
+
 static void test_rom_pages(void) {
 	const uint8_t arch[] = {
 		4, 0, 6, 0,                                      /* two scripts, at 4 and 6 */
@@ -2719,6 +2856,8 @@ int main(void) {
 	test_padmap();
 	test_xsong();
 	test_qr();
+	test_backup();
+	test_launcher();
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();

@@ -134,6 +134,7 @@ typedef struct {
 	uint32_t battle_bgs, battle_bg_anims, battle_bg_scroll;   /* its battle backgrounds' tables, as BN6's */
 	uint32_t map_enters, map_anims;         /* its internet map groups' EnterMapGroup and LoadGFXAnims routines, as BN6's */
 	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
+	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/ROM_DATA.md) */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;
@@ -143,6 +144,11 @@ typedef struct {
 extern XRom XR[XROM_COUNT];
 /* Reads the extra ROMs in dir (any *.gba of theirs); how many are read now. */
 int xrom_find(const char *dir);
+/* ... the one in `path`, where it is one of them, unchanged, and not read
+ * yet: true once it is read */
+bool xrom_load(const char *path);
+/* The extra ROM a cartridge header's game code (4 characters) names, -1 for none */
+int xrom_of_code(const char *code);
 /* ... in the folder BN6's ROM was found in. */
 int xrom_find_beside(void);
 /* The net areas: BN6's (0 to NET_AREAS - 1), then the other games' (from

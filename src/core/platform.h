@@ -47,6 +47,7 @@ typedef struct {
 	int quit_prompt;    /* frames left of "Esc again to quit" after one Escape */
 	bool quit_pad;      /* ... opened by a controller's SELECT+START, held */
 	bool background;    /* the app sent to the background (SDL_APP_*): on iOS the loop draws nothing then (main.c) */
+	int textures_lost;  /* the renderer's resets (SDL_RENDER_DEVICE_RESET): a texture made before the last is gone */
 	/* Full-screen effects, set by the scene each frame while drawing and
 	 * applied to the canvas before it is shown (the GBA's MOSAIC register and
 	 * palette fades). fade is 0..16 toward fade_color. */
@@ -112,11 +113,26 @@ void platform_present_now(void);
 void platform_draw_over(void);
 /* --dpi: the screen's density taken as given (tests of the touch controls). */
 void platform_set_dpi(float dpi);
-/* iOS: a screen that takes the fingers itself (the one that asks for the
- * ROM): the touch controls put away while it does, and each tap's canvas
- * pixel kept for platform_tap, which hands out the last one once. */
+/* A screen that takes the pointer itself (the launcher, src/launcher/): the
+ * touch controls put away while it does (and back as they were after),
+ * each finger's lift and each left click kept at its canvas pixel for
+ * platform_tap, which hands out the last one once, and the canvas laid out
+ * as a menu's: the largest whole scale that leaves it 240 x 160 or more, or
+ * 160 x 240 on a screen held upright. */
 void platform_own_taps(bool on);
 bool platform_tap(int *x, int *y);
+/* ... where the mouse is over it, or a finger on it: its canvas pixel;
+ * false where neither is */
+bool platform_pointer(int *x, int *y);
+/* ... a file dropped on the window since the last call (a desktop's): its
+ * path, once */
+bool platform_dropped(char *path, size_t n);
+/* Escape or Android's Back asks `back` first while it is set (true: it
+ * took the press); NULL for none */
+void platform_on_back(bool (*back)(void));
+/* What an iPhone's notch, rounded corners and home bar cover of the
+ * canvas's edges, in its pixels; 0 elsewhere. */
+void platform_safe_edges(int *top, int *left, int *bottom, int *right);
 /* The next frame shown saved whole as the player sees it, the touch
  * controls on it (--screen-shot), where the canvas's shots have the game
  * alone. */

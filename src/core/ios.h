@@ -5,6 +5,7 @@
 #ifndef CW_IOS_H
 #define CW_IOS_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 /* The ROMs ios.m looks for: BN6's (needed) and BN5's (optional), as bits
@@ -31,6 +32,15 @@ int ios_pick_result(char *msg, size_t msglen);
  * be opened any more (`msg` says so then). `msg` is left alone when the
  * look has nothing new to say. */
 int ios_rom_folder_look(const char *dir, unsigned want, char *msg, size_t msglen);
+/* Whether the folder the last pick chose held the saves' copy (backup.h's
+ * BACKUP_NAME, a reinstall's): copied to found.cwsave beside `dir` for the
+ * launcher to offer back */
+bool ios_pick_saves(void);
+/* The folder picked earlier: its name; false where none is kept */
+bool ios_rom_folder_name(char *out, size_t n);
+/* The saves file `from` written into that folder as BACKUP_NAME (mirror.h),
+ * whole or not at all; false where none is kept or it refused */
+bool ios_saves_put(const char *from);
 /* A note a look left (a Battle Network ROM refused beside BN6's), shown
  * for a few seconds over the game once its window is up; nothing without one. */
 void ios_rom_note(void *window);

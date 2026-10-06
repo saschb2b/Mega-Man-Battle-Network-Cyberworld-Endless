@@ -15,7 +15,10 @@
 #include "audio.h"
 #include "controls.h"
 #include "emu.h"
+#include "frame_log.h"
 #include "gfx.h"
+#include "keymap.h"
+#include "mirror.h"
 #include "pads.h"
 #include "touch.h"
 #ifdef CW_IOS
@@ -32,7 +35,6 @@ Platform P;
 
 static uint32_t injected;
 static uint32_t key_bits;
-static void keys_default(void);
 static uint32_t key_tapped;   /* pressed since the last poll: a tap released in the same frame still counts */
 
 bool platform_pad_present(void) { return pads_present(); }
@@ -141,11 +143,21 @@ static int safe_top(void) {
 #endif
 }
 
-static void layout_canvas(void) {
+/* A screen of its own (platform_own_taps): its taps and the mouse's, files
+ * dropped on the window, and its own back */
+static bool own_taps;
+static int tap_x = -1, tap_y = -1, point_x = -1, point_y = -1;
+static char dropped[1024];
+#ifndef __EMSCRIPTEN__
+static bool (*back_hook)(void);   /* (a browser's page keeps Escape) */
+#endif
+
+/* The game's canvas: the picture at the largest whole scale, or filling
+ * the screen (fill_scale), the touch controls round it */
+static void game_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
-	P.dp = density();
 	if (touch_shown()) P.scale = touch_fit_scale(P.screen_w, P.screen_h, P.dp, P.scale);
 	P.fill = fill_scale();
 	P.w = P.fill > 0 ? (int)((float)P.screen_w / P.fill) : P.screen_w / P.scale;
@@ -165,6 +177,27 @@ static void layout_canvas(void) {
 		int y = (int)(((float)top - oy) / k + 0.999f);
 		if (y >= 0 && y + CORE_H <= P.h) P.core_y = y;
 	}
+}
+
+/* ... and a screen of its own's, a menu's: whole scales alone, the
+ * largest that leaves it 240 x 160 or more, or 160 x 240 on a screen held
+ * upright, where the picture's 240 across made a phone's letters small */
+static void menu_canvas(void) {
+	bool upright = P.screen_h > P.screen_w;
+	int sx = P.screen_w / (upright ? CORE_H : CORE_W), sy = P.screen_h / (upright ? CORE_W : CORE_H);
+	P.scale = sx < sy ? sx : sy;
+	if (P.scale < 1) P.scale = 1;
+	P.fill = 0;
+	P.w = P.screen_w / P.scale;
+	P.h = P.screen_h / P.scale;
+	P.core_x = (P.w - CORE_W) / 2;
+	P.core_y = (P.h - CORE_H) / 2;
+}
+
+static void layout_canvas(void) {
+	P.dp = density();
+	if (own_taps) menu_canvas();
+	else game_canvas();
 	touch_relayout();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
 	if (P.fx_copy) SDL_DestroyTexture(P.fx_copy);
@@ -240,13 +273,21 @@ static void canvas_point(float sx, float sy, int *x, int *y) {
 	*y = (int)((sy - oy) / k);
 }
 
-#ifdef CW_IOS
-static bool own_taps;
-static int tap_x = -1, tap_y = -1;
-
 void platform_own_taps(bool on) {
+	static bool touch_was;
+	if (on == own_taps) return;
+	if (on) touch_was = touch_shown();
 	own_taps = on;
-	if (touch_show(!on)) layout_canvas();
+	tap_x = tap_y = point_x = point_y = -1;
+	dropped[0] = 0;
+	/* (the touch controls away, and back as they were; the mouse's cursor
+	 * shown over it, a fullscreen game's too) */
+	touch_show(on ? false : touch_was);
+	layout_canvas();
+#ifdef CW_DESKTOP
+	if (!P.headless) SDL_ShowCursor(on || !P.fullscreen ? SDL_ENABLE : SDL_DISABLE);
+	SDL_EventState(SDL_DROPFILE, on ? SDL_ENABLE : SDL_DISABLE);
+#endif
 }
 
 bool platform_tap(int *x, int *y) {
@@ -256,16 +297,76 @@ bool platform_tap(int *x, int *y) {
 	tap_x = tap_y = -1;
 	return true;
 }
+
+bool platform_pointer(int *x, int *y) {
+	*x = point_x;
+	*y = point_y;
+	return point_x >= 0;
+}
+
+bool platform_dropped(char *path, size_t n) {
+	if (!dropped[0]) return false;
+	snprintf(path, n, "%s", dropped);
+	dropped[0] = 0;
+	return true;
+}
+
+void platform_on_back(bool (*back)(void)) {
+#ifndef __EMSCRIPTEN__
+	back_hook = back;
+#else
+	(void)back;
 #endif
+}
+
+void platform_safe_edges(int *top, int *left, int *bottom, int *right) {
+	*top = *left = *bottom = *right = 0;
+#ifdef CW_IOS
+	float t, l, b, r, k = P.fill > 0 ? P.fill : (float)P.scale;
+	int ww = 0, wh = 0;
+	ios_safe_insets(P.window, &t, &l, &b, &r);
+	SDL_GetWindowSize(P.window, &ww, &wh);
+	if (ww <= 0 || wh <= 0) return;
+	/* (the window's points as the screen's pixels, then the canvas's, past
+	 * its border on each side) */
+	float px = (float)P.screen_w / (float)ww, py = (float)P.screen_h / (float)wh;
+	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
+	*top = t > 0 ? (int)((t * py - oy) / k + 0.999f) : 0;
+	*bottom = b > 0 ? (int)((b * py - oy) / k + 0.999f) : 0;
+	*left = l > 0 ? (int)((l * px - ox) / k + 0.999f) : 0;
+	*right = r > 0 ? (int)((r * px - ox) / k + 0.999f) : 0;
+	if (*top < 0) *top = 0;
+	if (*bottom < 0) *bottom = 0;
+	if (*left < 0) *left = 0;
+	if (*right < 0) *right = 0;
+#endif
+}
+
+/* The mouse over a screen of its own (a finger's own mouse aside): where
+ * it is, and where its left button let go */
+static void mouse(const SDL_Event *e) {
+	if (!own_taps) return;
+	bool motion = e->type == SDL_MOUSEMOTION;
+	if ((motion ? e->motion.which : e->button.which) == SDL_TOUCH_MOUSEID) return;
+	if (!motion && e->button.button != SDL_BUTTON_LEFT) return;
+	int ww = 0, wh = 0;
+	SDL_GetWindowSize(P.window, &ww, &wh);
+	/* (the window's points as the renderer's pixels: a high-DPI window's differ) */
+	float kx = ww > 0 ? (float)P.screen_w / (float)ww : 1, ky = wh > 0 ? (float)P.screen_h / (float)wh : 1;
+	if (motion) canvas_point((float)e->motion.x * kx, (float)e->motion.y * ky, &point_x, &point_y);
+	else canvas_point((float)e->button.x * kx, (float)e->button.y * ky, &tap_x, &tap_y);
+}
 
 void platform_finger(uint32_t type, SDL_FingerID id, float x, float y) {
-#ifdef CW_IOS
-	/* (a screen that takes its own taps: where on the canvas a finger lifted) */
+	/* (a screen that takes its own taps: where on the canvas a finger is,
+	 * and where it lifted) */
 	if (own_taps) {
-		if (type == SDL_FINGERUP) canvas_point(x, y, &tap_x, &tap_y);
+		if (type == SDL_FINGERUP) {
+			canvas_point(x, y, &tap_x, &tap_y);
+			point_x = point_y = -1;
+		} else canvas_point(x, y, &point_x, &point_y);
 		return;
 	}
-#endif
 	/* (the controls screen takes the fingers while it is open) */
 	if (controls_shown()) {
 		int cx, cy;
@@ -362,6 +463,9 @@ static void phone_controls(void) {
 #ifdef __ANDROID__
 	game_thread = SDL_ThreadID();
 	SDL_SetEventFilter(turns_here, NULL);
+	/* (setting a filter drops the events waiting: a size that came before
+	 * it, the navigation bar hidden as the game started, read again) */
+	SDL_AtomicSet(&turned, 1);
 	SDL_Log("screen %dx%d, canvas %dx%d at %s, touch controls %s", P.screen_w, P.screen_h, P.w, P.h, scale_words(), touch_shown() ? "shown" : "hidden");
 #endif
 #ifdef CW_IOS
@@ -374,7 +478,7 @@ static void phone_controls(void) {
 
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
-	keys_default();
+	keymap_default();
 	if (headless) {
 		/* (the variables, not their hints: SDL before 2.0.22, as on older
 		 * handhelds, has no hints for them) */
@@ -460,6 +564,8 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 }
 
 void platform_shutdown(void) {
+	/* (the saves as the game ends them, copied before it goes: mirror.h) */
+	mirror_flush();
 	pads_close();
 	blend_reset();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);
@@ -473,128 +579,6 @@ void platform_shutdown(void) {
 	SDL_Quit();
 }
 
-/* The keyboard, after Capcom's own PC layout for Battle Network (the Legacy
- * Collection): WASD moves, J and K are A and B, Q and E are L and R, Enter
- * is Start and R is Select. The arrows with X and Z also work, as on most
- * GBA emulators. Keys are positions (scancodes), not letters, so an AZERTY
- * keyboard moves with ZQSD. keys.ini in the data folder changes them. */
-static const struct { const char *name; uint32_t bit; const char *keys; } key_defaults[] = {
-	{ "UP", BTN_UP, "W, Up" },
-	{ "DOWN", BTN_DOWN, "S, Down" },
-	{ "LEFT", BTN_LEFT, "A, Left" },
-	{ "RIGHT", BTN_RIGHT, "D, Right" },
-	{ "A", BTN_A, "J, X" },
-	{ "B", BTN_B, "K, Z" },
-	{ "L", BTN_L, "Q" },
-	{ "R", BTN_R, "E" },
-	{ "START", BTN_START, "Return, Keypad Enter" },
-	{ "SELECT", BTN_SELECT, "R, Backspace" },
-};
-static uint32_t key_map[SDL_NUM_SCANCODES];
-static char keys_path[600];
-
-/* "J, X" -> the button on each key; false and a message for an unknown name */
-static bool bind_keys(uint32_t *map, uint32_t bit, const char *list, const char *where) {
-	char buf[256];
-	snprintf(buf, sizeof buf, "%s", list);
-	bool ok = true;
-	char *save = NULL;
-	for (char *t = strtok_r(buf, ",", &save); t; t = strtok_r(NULL, ",", &save)) {
-		while (*t == ' ' || *t == '\t') ++t;
-		char *e = t + strlen(t);
-		while (e > t && (e[-1] == ' ' || e[-1] == '\t' || e[-1] == '\r' || e[-1] == '\n')) *--e = 0;
-		if (!*t) continue;
-		SDL_Scancode sc = SDL_GetScancodeFromName(t);
-		if (sc == SDL_SCANCODE_UNKNOWN || sc == SDL_SCANCODE_ESCAPE || sc == SDL_SCANCODE_F11) {
-			fprintf(stderr, "%s: no key called \"%s\"%s\n", where, t,
-				sc == SDL_SCANCODE_UNKNOWN ? "" : " (Escape and F11 are taken)");
-			ok = false;
-			continue;
-		}
-		map[sc] |= bit;
-	}
-	return ok;
-}
-
-static void defaults_into(uint32_t *map) {
-	memset(map, 0, sizeof key_map);
-	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
-		bind_keys(map, key_defaults[i].bit, key_defaults[i].keys, "defaults");
-}
-
-static void keys_default(void) { defaults_into(key_map); }
-
-void platform_keys_get(KeyMap *k) { memcpy(k->bits, key_map, sizeof key_map); }
-void platform_keys_default(KeyMap *k) { defaults_into(k->bits); }
-
-bool platform_key_free(int sc) {
-	if (sc <= SDL_SCANCODE_UNKNOWN || sc >= SDL_NUM_SCANCODES || sc == SDL_SCANCODE_ESCAPE || sc == SDL_SCANCODE_F11 || sc == SDL_SCANCODE_AC_BACK) return false;
-	/* (a name keys.ini can say back: "Keypad ," would split its list) */
-	const char *name = SDL_GetScancodeName((SDL_Scancode)sc);
-	return name[0] && !strchr(name, ',');
-}
-
-void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n) {
-	const uint32_t *map = k ? k->bits : key_map;
-	out[0] = 0;
-	for (int sc = 0; sc < SDL_NUM_SCANCODES && gba >= 0 && gba < 10; ++sc) {
-		const char *name = SDL_GetScancodeName((SDL_Scancode)sc);
-		if (!(map[sc] >> gba & 1) || !name[0]) continue;
-		size_t m = strlen(out);
-		snprintf(out + m, n - m, "%s%s", m ? ", " : "", name);
-	}
-}
-
-void platform_keys_bind(KeyMap *k, int gba, int sc) {
-	if (gba < 0 || gba >= 10 || !platform_key_free(sc)) return;
-	static bool had[SDL_NUM_SCANCODES];   /* (the keys `gba` had) */
-	uint32_t bit = 1u << gba, others = k->bits[sc] & ~bit;
-	for (int s = 0; s < SDL_NUM_SCANCODES; ++s) {
-		had[s] = k->bits[s] & bit;
-		k->bits[s] &= ~bit;
-	}
-	k->bits[sc] = bit;
-	/* (a button the key was taken from, left with none, takes them: the two swap) */
-	for (int g = 0; g < 10; ++g) {
-		bool any = false;
-		if (!(others >> g & 1)) continue;
-		for (int s = 0; s < SDL_NUM_SCANCODES && !any; ++s) any = k->bits[s] >> g & 1;
-		for (int s = 0; s < SDL_NUM_SCANCODES && !any; ++s)
-			if (had[s] && s != sc) k->bits[s] |= 1u << g;
-	}
-}
-
-static const char keys_header[] =
-	"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
-	"# button its keys, separated by commas. Keys are named as on a US\n"
-	"# keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return, Backspace, Tab,\n"
-	"# Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad Enter...) and mean\n"
-	"# that position: on an AZERTY keyboard W is the key marked Z. Escape (quit)\n"
-	"# and F11 (fullscreen) are taken. The controls screen (SELECT on the title\n"
-	"# screen) sets A, B, L, R, START and SELECT too. Delete this file for the\n"
-	"# defaults.\n\n";
-
-/* keys.ini as the map in play has them */
-static void keys_write(void) {
-	if (!keys_path[0]) return;
-	FILE *f = fopen(keys_path, "w");
-	if (!f) return;
-	fputs(keys_header, f);
-	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i) {
-		char list[256];
-		platform_keys_label(NULL, (int)i, list, sizeof list);
-		fprintf(f, "%-6s = %s\n", key_defaults[i].name, list);
-	}
-	fclose(f);
-	platform_persist();
-}
-
-void platform_keys_set(const KeyMap *k) {
-	memcpy(key_map, k->bits, sizeof key_map);
-	keys_write();
-}
-
-bool platform_frame_log;
 #ifdef __3DS__
 /* (settings.ini's screen: fill, the picture at the top screen's height, or
  * whole, at 1x in its middle) */
@@ -654,41 +638,6 @@ void platform_load_settings(const char *path) {
 	}
 }
 
-void platform_load_keys(const char *path) {
-	keys_default();
-	snprintf(keys_path, sizeof keys_path, "%s", path);
-	FILE *f = fopen(path, "r");
-	if (!f) {
-		keys_write();
-		return;
-	}
-	char line[256];
-	int n = 0;
-	while (fgets(line, sizeof line, f)) {
-		++n;
-		char *eq = strchr(line, '=');
-		char *hash = strchr(line, '#');
-		if (hash && (!eq || hash < eq)) continue;
-		if (!eq) continue;
-		*eq = 0;
-		char name[16] = "";
-		sscanf(line, " %15s", name);
-		size_t i = 0;
-		while (i < sizeof key_defaults / sizeof *key_defaults && SDL_strcasecmp(name, key_defaults[i].name)) ++i;
-		char where[600];
-		snprintf(where, sizeof where, "%s:%d", path, n);
-		if (i == sizeof key_defaults / sizeof *key_defaults) { fprintf(stderr, "%s: no button called \"%s\"\n", where, name); continue; }
-		/* the file's keys replace the defaults for this button */
-		for (int sc = 0; sc < SDL_NUM_SCANCODES; ++sc) key_map[sc] &= ~key_defaults[i].bit;
-		bind_keys(key_map, key_defaults[i].bit, eq + 1, where);
-	}
-	fclose(f);
-}
-
-static uint32_t key_button(SDL_Scancode sc) {
-	return (unsigned)sc < SDL_NUM_SCANCODES ? key_map[sc] : 0;
-}
-
 void platform_inject(uint32_t buttons) { injected = buttons; }
 
 /* The screen's size followed before a frame's events: a page's canvas
@@ -714,7 +663,7 @@ int platform_keys_pressed(int *out, int most) {
 /* Escape, or Android's Back: the touch controls' menu and the controls
  * screen close first; the first asks, the second within two seconds quits */
 static void escape(void) {
-	if (touch_back() || controls_back()) return;
+	if (touch_back() || controls_back() || (back_hook && back_hook())) return;
 	if (P.quit_prompt > 0) P.quit = true;
 	else { P.quit_prompt = 120; P.quit_pad = false; }
 }
@@ -722,7 +671,7 @@ static void escape(void) {
 
 static void key_down(const SDL_KeyboardEvent *k) {
 	if (k->repeat) return;
-	uint32_t b = key_button(k->keysym.scancode);
+	uint32_t b = keymap_button(k->keysym.scancode);
 	/* Alt+Enter is fullscreen, not Start */
 	if (k->keysym.mod & KMOD_ALT) b &= ~BTN_START;
 	key_bits |= b;
@@ -762,15 +711,25 @@ static void poll_event(const SDL_Event *e) {
 		break;
 	case SDL_KEYDOWN: key_down(&e->key); break;
 	case SDL_KEYUP:
-		key_bits &= ~key_button(e->key.keysym.scancode);
+		key_bits &= ~keymap_button(e->key.keysym.scancode);
+		break;
+	case SDL_MOUSEMOTION:
+	case SDL_MOUSEBUTTONUP: mouse(e); break;
+	/* (a file dropped on the window: a screen of its own's) */
+	case SDL_DROPFILE:
+	case SDL_DROPTEXT:
+		if (own_taps && e->type == SDL_DROPFILE && e->drop.file) snprintf(dropped, sizeof dropped, "%s", e->drop.file);
+		SDL_free(e->drop.file);
 		break;
 	case SDL_WINDOWEVENT:
 		if (e->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) resized();
 		if (e->window.event == SDL_WINDOWEVENT_FOCUS_LOST) let_go();
+		if (e->window.event == SDL_WINDOWEVENT_LEAVE) point_x = point_y = -1;
 		break;
-	case SDL_APP_WILLENTERBACKGROUND: let_go(); break;
+	/* (and the saves' copy made: the app may be ended there unasked) */
+	case SDL_APP_WILLENTERBACKGROUND: let_go(); mirror_flush(); break;
 	/* (the renderer's textures lost: the controls' art is made again) */
-	case SDL_RENDER_DEVICE_RESET: touch_reset_art(); break;
+	case SDL_RENDER_DEVICE_RESET: touch_reset_art(); ++P.textures_lost; break;
 	default:
 		/* a controller's: one coming or going, a button (a press puts the
 		 * touch controls away) */
@@ -820,6 +779,8 @@ void platform_poll(void) {
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) poll_event(&e);
 	pads_poll();
+	/* (iOS's loop in the background saves the run, then polls: its copy) */
+	if (P.background) mirror_flush();
 	if (P.quit_prompt > 0) --P.quit_prompt;
 	quit_chord();
 	uint32_t touched = touch_taken() | touch_held(), keys = key_bits | key_tapped | injected;
@@ -861,70 +822,6 @@ void platform_apply_effects(void) {
 		SDL_SetRenderDrawBlendMode(P.renderer, SDL_BLENDMODE_BLEND);
 		SDL_SetRenderDrawColor(P.renderer, P.fx_fade_color.r, P.fx_fade_color.g, P.fx_fade_color.b, (Uint8)a);
 		SDL_RenderFillRect(P.renderer, NULL);
-	}
-}
-
-/* CYBERWORLD_FRAME_LOG: a line a second of how the frames reached the
- * display (shown, played, the gaps between shown ones), for a player's
- * pacing or lag */
-/* (the frame log's split: the game's update and its drawing, summed over
- * the frames played, and the present, over those shown) */
-static uint64_t part_update, part_draw, part_present;
-static uint64_t part_longest;   /* (the longest frame's update and drawing together: a hitch the means hide) */
-static int part_played;
-
-void platform_frame_parts(uint64_t update, uint64_t draw) {
-	part_update += update;
-	part_draw += draw;
-	if (update + draw > part_longest) part_longest = update + draw;
-	++part_played;
-}
-
-static void log_present(void) {
-	static int log_on = -1;
-	if (log_on < 0) log_on = platform_frame_log || getenv("CYBERWORLD_FRAME_LOG") != NULL;
-	if (!log_on) return;
-	static uint64_t last, second;
-	static int shown, lo = 1 << 30, hi, gaps[4];
-	uint64_t now = SDL_GetPerformanceCounter(), hz = SDL_GetPerformanceFrequency();
-	if (last) {
-		int us = (int)((now - last) * 1000000 / hz);
-		if (us < lo) lo = us;
-		if (us > hi) hi = us;
-		++gaps[us < 12500 ? 0 : us < 20000 ? 1 : us < 30000 ? 2 : 3];
-	}
-	last = now;
-	++shown;
-	if (!second) second = now;
-	if (now - second >= hz) {
-		double ms = 1000.0 / (double)hz, played = part_played ? part_played : 1;
-		extern uint64_t emu_core_ticks, emu_core_unshown_ticks;
-		extern int emu_core_unshown;
-		int drawn = part_played - emu_core_unshown;
-		char bottom[160] = "";
-		uint64_t second_ticks;
-		int seconds = platform_second_parts(&second_ticks);
-		if (seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's picture %.1f ms of it, %d times)", second_ticks * ms / seconds, seconds);
-		/* (and reads of the game that waited, drawing, for the next frame) */
-		if (emu_draw_waits) {
-			size_t k = strlen(bottom);
-			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing", emu_draw_waits);
-			emu_draw_waits = 0;
-		}
-		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
-			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"
-			" the longest update and drawing %.1f ms%s\n",
-			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",
-			part_update * ms / played, drawn > 0 ? (emu_core_ticks - emu_core_unshown_ticks) * ms / drawn : 0.0,
-			emu_core_unshown ? emu_core_unshown_ticks * ms / emu_core_unshown : 0.0, emu_core_unshown,
-			part_draw * ms / played, part_present * ms / shown, part_longest * ms, bottom);
-		emu_core_ticks = emu_core_unshown_ticks = 0;
-		emu_core_unshown = 0;
-		fflush(stdout);
-		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
-		part_update = part_draw = part_present = part_longest = 0;
-		part_played = 0;
-		second = now;
 	}
 }
 
@@ -1015,7 +912,7 @@ void platform_present_blend(double w) {
 #else
 	SDL_RenderPresent(P.renderer);
 #endif
-	log_present();
+	frame_log_present(0);
 }
 
 /* The canvas on the display, at its scale. */
@@ -1036,6 +933,7 @@ void platform_present_now(void) {
 void platform_draw_over(void) { SDL_SetRenderTarget(P.renderer, P.canvas); }
 
 void platform_end_frame(void) {
+	mirror_tick();
 	/* (smooth motion keeps each frame whole for the mix at the refreshes) */
 	if (P.blend && !P.headless) blend_keep();
 	/* (a frame the loop plays to catch up, or one smooth motion mixes: not
@@ -1047,8 +945,7 @@ void platform_end_frame(void) {
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	present_canvas();
-	part_present += SDL_GetPerformanceCounter() - t0;
-	log_present();
+	frame_log_present(SDL_GetPerformanceCounter() - t0);
 	++P.frame;
 	audio_log_frame = P.frame;
 }
@@ -1057,6 +954,9 @@ void platform_persist(void) {
 #ifdef __EMSCRIPTEN__
 	/* the browser's files live in memory until they are synced to IndexedDB */
 	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
+#else
+	/* (a phone's saves copied to the ROM folder a moment later: mirror.h) */
+	mirror_note();
 #endif
 }
 

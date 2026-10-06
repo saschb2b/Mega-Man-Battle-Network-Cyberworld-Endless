@@ -13,9 +13,12 @@
 #include "game.h"
 #include "pads.h"
 #include "platform.h"
+#include "pick.h"
 #include "rom.h"
-#include "scene_norom.h"
 #include "touch.h"
+#ifdef CW_IOS
+#include "ios.h"
+#endif
 
 /* mkdir -p */
 static void make_dirs(const char *path) {
@@ -112,12 +115,65 @@ void data_dir_setup(bool given) {
 	}
 }
 
+#ifdef CW_IOS
+/* iOS's ROMs at the start: the copies in the app's rom/ (where a pick
+ * lands) or at the top of its folder (where Files puts a file dropped on
+ * it), BN5 read with BN6 from either; then the folder picked looked in for
+ * what they lack (BN5 put there since, or BN6 where none is kept) */
+static bool ios_rom_here(const char *dir, char *msg, size_t msglen) {
+	char first[512];
+	bool found = rom_find(dir, msg, msglen);
+	snprintf(first, sizeof first, "%s", msg);
+	if (!found) found = rom_find(g_data_dir, msg, msglen);
+	if (found) {
+		xrom_find(dir);
+		xrom_find(g_data_dir);
+		return true;
+	}
+	/* (a .gba that is not the right one says so; else where to put it) */
+	if (strncmp(first, "Put your", 8)) snprintf(msg, msglen, "%s", first);
+	return false;
+}
+
+static bool ios_rom_start(char *msg, size_t msglen) {
+	char dir[600], said[1024];
+	snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
+	bool found = ios_rom_here(dir, msg, msglen);
+	unsigned want = (found ? 0 : IOS_ROM_BN6) | (XR[XROM_BN5_COLONEL_US].data ? 0 : IOS_ROM_BN5);
+	if (want && ios_rom_folder_look(dir, want, said, sizeof said) > 0) {
+		if (!found) found = ios_rom_here(dir, msg, msglen);
+		else xrom_find(dir);
+	}
+	return found;
+}
+#endif
+
+#ifdef __ANDROID__
+/* Android's ROMs at the start: the copies in the app's ROM folder; the
+ * folder the player chose in the launcher looked in again for what they
+ * lack (a quick look: only a .gba not seen before is opened), so BN5 put
+ * there since comes in by itself */
+static bool android_rom_start(const char *rom_dir, char *msg, size_t msglen) {
+	bool found = rom_find(rom_dir, msg, msglen);
+	if (found && XR[XROM_BN5_COLONEL_US].data) return true;
+	char said[1024];
+	if (pick_look(said, sizeof said) > 0) {
+		if (!found) found = rom_find(rom_dir, msg, msglen);
+		else xrom_find(rom_dir);
+	}
+	return found;
+}
+#endif
+
 #ifndef __3DS__
 /* The ROM at the start (the 3DS has its own places, main): --rom-dir's,
  * else the desktop's, iOS's app folder, or ./rom on a handheld. */
 bool start_rom(const char *rom_dir, char *msg, size_t msglen) {
 #ifdef CW_IOS
 	if (!rom_dir) return ios_rom_start(msg, msglen);
+#endif
+#ifdef __ANDROID__
+	if (rom_dir) return android_rom_start(rom_dir, msg, msglen);
 #endif
 	return rom_dir || !DESKTOP ? rom_find(rom_dir ? rom_dir : "rom", msg, msglen) : desktop_rom(msg, msglen);
 }

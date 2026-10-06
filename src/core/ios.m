@@ -11,6 +11,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+#include "backup.h"
 #include "ios.h"
 #include "rom.h"
 
@@ -262,6 +263,25 @@ static NSString *words(CWLook *l, BOOL sent) {
 static char pick_msg[1024];   /* (ios_pick_result) */
 static char note[256];        /* (ios_rom_note) */
 static BOOL fetching;         /* a pick sent for its folder's files in iCloud */
+static BOOL picked_saves;     /* (ios_pick_saves) */
+
+/* What a look that took BN6 says: the ROMs copied in, and from where */
+static NSString *took_words(CWLook *l) {
+	NSString *what = (l.kept & IOS_ROM_BN5) ? [NSString stringWithFormat:@"%s and %s", known[0].tag, known[1].tag] : @(known[0].tag);
+	return l.where ? [NSString stringWithFormat:@"Took %@ from %@.", what, l.where] : [NSString stringWithFormat:@"Took %@.", what];
+}
+
+/* The saves' copy in the folder (a reinstall's), copied to `to`: whether there was one */
+static BOOL fetch_saves(NSURL *folder, NSString *to) {
+	__block BOOL ok = NO;
+	NSURL *saves = [folder URLByAppendingPathComponent:@BACKUP_NAME];
+	if (![NSFileManager.defaultManager fileExistsAtPath:saves.path]) return NO;
+	coordinated(saves, ^(NSURL *at) {
+		NSData *data = [NSData dataWithContentsOfURL:at];
+		if (data.length && data.length <= BACKUP_MAX) ok = [data writeToFile:to atomically:YES];
+	});
+	return ok;
+}
 
 static void to_c(NSString *s, char *out, size_t n) {
 	if (n) snprintf(out, n, "%s", s.UTF8String ?: "");
@@ -334,6 +354,8 @@ static int picked;   /* (ios_pick_result) */
 				[prefs setObject:where forKey:kFolderName];
 			}
 			l = look_in(folder, where, want, self.dir, NO);
+			/* (the saves a reinstall left there, for the launcher to offer back) */
+			picked_saves = fetch_saves(folder, [[self.dir stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"found.cwsave"]);
 			/* (a ROM folder's files still in iCloud are sent for; a library's are not) */
 			if (l.cloud.count && (NSUInteger)l.gba + l.cloud.count <= CLOUD_FETCH) {
 				for (NSURL *u in l.cloud) [NSFileManager.defaultManager startDownloadingUbiquitousItemAtURL:u error:nil];
@@ -353,7 +375,7 @@ static int picked;   /* (ios_pick_result) */
 			}
 			NSLog(@"ROM look at %d files picked: kept %u, refused %@", l.files, l.kept, l.refused);
 		}
-		to_c(l.kept & IOS_ROM_BN6 ? @"" : words(l, fetching), pick_msg, sizeof pick_msg);
+		to_c(l.kept & IOS_ROM_BN6 ? took_words(l) : words(l, fetching), pick_msg, sizeof pick_msg);
 		leave_note(l, l.kept & IOS_ROM_BN6);
 		picked = 1;
 	}
@@ -388,6 +410,7 @@ void ios_pick_roms(void *window, const char *dir, int what) {
 	files.delegate = picker_delegate;
 	files.allowsMultipleSelection = what == IOS_PICK_FILES;
 	picked = 0;
+	picked_saves = NO;
 	pick_msg[0] = 0;
 	[top presentViewController:files animated:YES completion:nil];
 }
@@ -397,6 +420,35 @@ int ios_pick_result(char *msg, size_t msglen) {
 	picked = 0;
 	if (r && msglen) snprintf(msg, msglen, "%s", r > 0 ? pick_msg : "");
 	return r;
+}
+
+bool ios_pick_saves(void) { return picked_saves; }
+
+bool ios_rom_folder_name(char *out, size_t n) {
+	NSUserDefaults *prefs = NSUserDefaults.standardUserDefaults;
+	if (![prefs dataForKey:kFolder]) return false;
+	to_c([prefs stringForKey:kFolderName] ?: @"your ROM folder", out, n);
+	return true;
+}
+
+bool ios_saves_put(const char *from) {
+	@autoreleasepool {
+		NSData *mark = [NSUserDefaults.standardUserDefaults dataForKey:kFolder];
+		NSData *data = [NSData dataWithContentsOfFile:@(from)];
+		if (!mark || !data.length) return false;
+		BOOL stale = NO;
+		NSURL *folder = [NSURL URLByResolvingBookmarkData:mark options:0 relativeToURL:nil bookmarkDataIsStale:&stale error:nil];
+		if (!folder) return false;
+		BOOL scoped = [folder startAccessingSecurityScopedResource];
+		__block BOOL ok = NO;
+		NSError *err = nil;
+		/* (written as Files' providers want it: coordinated, whole) */
+		[[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:[folder URLByAppendingPathComponent:@BACKUP_NAME]
+			options:NSFileCoordinatorWritingForReplacing error:&err byAccessor:^(NSURL *at) { ok = [data writeToURL:at atomically:YES]; }];
+		if (scoped) [folder stopAccessingSecurityScopedResource];
+		if (!ok) NSLog(@"saves: the copy in the ROM folder could not be written: %@", err.localizedDescription);
+		return ok;
+	}
 }
 
 void ios_rom_note(void *window) {

@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- **A ROMs screen before the game, and saves that outlast a reinstall**
+  (issue #97). On a PC, a Mac, Android, an iPhone or an iPad the game
+  first opens on its ROMs screen, in the second screen's PET frame: two
+  cartridge slots, BN6 Cybeast Gregar (needed) and BN5 Team Colonel
+  (optional), each an open spot until its ROM is in. A slot opens the
+  system's own chooser (Windows' file dialog, `zenity` or `kdialog` on
+  Linux, the Mac's open panel; a phone's folder picker), or a file is
+  dropped on the window, and one that is not right is named with the
+  reason ("BN6 Cybeast Falzar, not Gregar"). A cartridge in shows its
+  game's face, drawn from the player's own ROM; PLAY starts as soon as BN6
+  is in, and later starts go straight to the game. R on the title opens
+  the screen again to add BN5: on Android that took a hidden icon shortcut
+  before, or a folder chosen once. On a phone or tablet the app keeps a
+  copy of the saves in the ROM folder (`cyberworld-endless.cwsave`),
+  renewed a few seconds after each save, and after a reinstall, choosing
+  that folder again offers them back (in Android's emulator: uninstalled,
+  installed again, BRING BACK, and every save file as it was, byte for
+  byte). Android's own backup keeps the saves and settings now, never the
+  ROMs: it took the ROM too, and a reinstall could bring BN6 back with
+  older saves and never show the page that adds BN5. The browser's player
+  has the same two cartridges, their faces drawn from its ROMs, **Play**
+  (was **Jack in**), and **Save a backup** and **Load a backup**, in the
+  same file. Its layout takes three ideas from game launchers on
+  Dribbble: the empty slot as a card with a plus and its one action, one
+  accent colour for the cursor and PLAY alone, and the chosen cartridge
+  lit round its edge with a status chip (docs/FIDELITY.md). Also: the
+  title's line of keys, which a saved run's CONTINUE row hid, stands
+  between the logo and the menu then; and the Android game reads its
+  screen's size again as it starts, where a size that came just before
+  (the navigation bar hidden) was lost, leaving a black band and taps a
+  little off.
 - **The town's hour** (issue #90, the epic #84). The day goes on as the run
   does: morning as it begins, then afternoon, evening and night before the
   Nest, Central Town's streets and people in the hour's light (chats keep
