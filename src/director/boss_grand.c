@@ -42,6 +42,7 @@ static struct {
 	GuardianStage g;
 	uint32_t archive;
 	bool rematch;      /* battled in any run before: the entrance cut short */
+	int k;             /* the entrance's frame, at the first meeting's (enum above) */
 	bool faded;        /* the theme faded on the approach */
 	int quake;         /* frames to the next tremor */
 } G;
@@ -87,8 +88,12 @@ static void grand_card(void) {
 	cinema_title_grand(top, name, sub, gd->epithet, rgba(gd->r, gd->g, gd->b, 255), CARD_FRAMES);
 }
 
-bool grand_enter(int t) {
-	int k = t + (G.rematch ? REMATCH_SKIP : 0);
+bool grand_enter(int t, bool there) {
+	/* (a rematch skips the first rumbles; the white waits for MegaMan to
+	 * have stepped up beside him) */
+	if (t == 1) G.k = G.rematch ? REMATCH_SKIP : 0;
+	if (G.k + 1 < T_WHITE || there) ++G.k;
+	int k = G.k;
 	/* the rumble, harder each time */
 	if (k >= T_RUMBLE && k < T_WHITE && (k - T_RUMBLE) % RUMBLE_EVERY == 0) {
 		cinema_shake(16, 1 + (k - T_RUMBLE) / (2 * RUMBLE_EVERY));

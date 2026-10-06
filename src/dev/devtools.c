@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "analytics.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "darkchips.h"
@@ -63,7 +64,8 @@ void devtools_parse(const char *spec) {
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", spec);
 	for (char *t = strtok(buf, ","); t; t = strtok(NULL, ",")) {
-		if (dev_switch(t)) continue;
+		/* (statistics=ask|on|off, statsurl=URL: analytics.h) */
+		if (dev_switch(t) || analytics_dev(t)) continue;
 		if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
 		else if (!strncmp(t, "pieces=", 7)) layer_pieces_forced = (unsigned)strtoul(t + 7, NULL, 0);
 		else if (!strncmp(t, "darkchips=", 10)) dark_dev_mask = (uint16_t)strtoul(t + 10, NULL, 0);

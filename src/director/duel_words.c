@@ -37,10 +37,14 @@ const char *duel_call_words(void) {
 	 * the rung comes after two wins, whose clearance he holds: "every
 	 * official gate" read as if he had none) */
 	static const char *const full = "Beat him,and my full clearance is yours.|@C The official vaults open with it.";
-	if (layer_objs_duel_later)
+	/* (the second act's call opens otherwise: a playtester heard the
+	 * first's "No more races" again word for word, session 71) */
+	if (layer_objs_duel_later && pacing_act(run.depth) == 0)
 		snprintf(call, sizeof call, "@C Lan,it's Chaud. No more races.|@C ProtoMan wants a netbattle with MegaMan himself.|"
-			"@C He'll be waiting past the next %s.|@C %s", pacing_act(run.depth) == 0 ? "two guardians" : "guardian",
-			rival_clearance() < 2 ? full : "Get MegaMan ready.");
+			"@C He'll be waiting past the next two guardians.|@C %s", rival_clearance() < 2 ? full : "Get MegaMan ready.");
+	else if (layer_objs_duel_later)
+		snprintf(call, sizeof call, "@C Lan,Chaud here. Our netbattle's close.|@C ProtoMan will face MegaMan himself.|"
+			"@C He'll be waiting past the next guardian.|@C %s", rival_clearance() < 2 ? full : "Get MegaMan ready.");
 	else if (layer_objs_duel_rung == 2)
 		snprintf(call, sizeof call, "@C Lan,it's Chaud. ProtoMan's on this layer.|@C This time it's no race. He'll face MegaMan himself.|"
 			"@C %s%s", rival_clearance() < 2 ? full : "He hasn't forgotten the last time.",

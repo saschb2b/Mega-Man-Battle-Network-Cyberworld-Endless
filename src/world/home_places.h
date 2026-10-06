@@ -13,6 +13,8 @@ int home_places_at(int group, int number);
 /* All of them installed, Lan's PC jacking in to world (x, y) of map
  * (to_group, to_number). False where one cannot be. */
 bool home_places_install(int to_group, int to_number, int x, int y);
+/* Their shops set again over a CONTINUE's state (aster_land_shops). */
+void home_places_shops(void);
 /* The name the map's label shows ("AsterLand"); NULL for none of them. */
 const char *home_places_name(int group, int number);
 /* The way on in one of them: the PC in Lan's room, the stairs up in his

@@ -22,6 +22,7 @@
 #include "qr.h"
 #include "rom.h"
 #include "run.h"
+#include "analytics.h"
 #include "area_src.h"
 #include "backup.h"
 #include "chip_pool.h"
@@ -180,6 +181,28 @@ static void check_approach(uint32_t seed, int wx, int wy) {
 	CHECK(!arena_approach(a->ax, a->ay), "seed %u: the arena's middle is on its approach", seed);
 }
 
+/* MegaMan's place to meet the guardian (guardian_stand; docs/BOSSES.md, the
+ * sequence): at his height on the screen and turned to him, on the arena's
+ * floor under his feet, on the side the bridge comes in from (nearer the
+ * antechamber than the place across the guardian), whichever way the
+ * arena is entered. */
+static void check_stand(uint32_t seed) {
+	const Room *a = &layer.rooms[layer.arena], *r = &layer.rooms[layer.ante];
+	int spread = super_boss(layer.boss_navi) ? GUARDIAN_STAND_SUPER : GUARDIAN_STAND, sx, sy;
+	int face = guardian_stand(layer.arena_dir, 0, 0, spread, &sx, &sy);
+	CHECK(sx == sy && (sx > 0 ? face == GUARDIAN_FACE_LEFT : face == GUARDIAN_FACE_RIGHT) && (sx > 0 ? sx : -sx) == spread,
+		"seed %u: the place beside the guardian is off his height, or MegaMan is turned away", seed);
+	/* (a panel is 32 world units, grid x world +Y and grid y world -X; the
+	 * panels under his feet, a third of a panel round the point) */
+	double gx = a->ax + sy / 32.0, gy = a->ay - sx / 32.0;
+	for (int py = (int)floor(gy + 0.17); py <= (int)floor(gy + 0.83); ++py)
+		for (int px = (int)floor(gx + 0.17); px <= (int)floor(gx + 0.83); ++px)
+			CHECK(px >= a->x && px < a->x + a->w && py >= a->y && py < a->y + a->h && layer.cell[py][px] == C_PATH,
+				"seed %u: the place beside the guardian is off his arena's floor at %d %d", seed, px, py);
+	double nx = gx - r->ax, ny = gy - r->ay, fx = 2 * a->ax - gx - r->ax, fy = 2 * a->ay - gy - r->ay;
+	CHECK(nx * nx + ny * ny < fx * fx + fy * fy, "seed %u: the place beside the guardian is across him from the bridge", seed);
+}
+
 /* A guardian's arena: one way in, the guardian in its middle, the exit
  * inside it, and nothing else there. */
 static void check_arena(uint32_t seed) {
@@ -201,6 +224,7 @@ static void check_arena(uint32_t seed) {
 		else CHECK(!inside, "seed %u: object type %d in the arena", seed, o->type);
 	}
 	CHECK(layer.ante >= 0 && layer.ante != layer.arena, "seed %u: no antechamber", seed);
+	if (layer.ante >= 0) check_stand(seed);
 }
 
 /* Whether (x, y) is beside a panel-wide stretch of floor: a walkway's
@@ -3034,6 +3058,14 @@ static void super_records(void) {
 	CHECK(super_bass_form(1, true) == SUPER_BASS_SP && super_bass_form(2, false) == SUPER_BASS_SP && super_bass_form(6, false) == SUPER_BASS_SP,
 		"super: Bass SP once beaten");
 	CHECK(super_bass_form(2, true) == SUPER_BASS_BX && super_bass_form(7, true) == SUPER_BASS_BX, "super: Bass BX with the beast's data");
+	/* (turned across the screen to MegaMan beside them, the nearest way
+	 * each sprite shows: Bass's, BlastMan's and ElementMan's only towards
+	 * the camera, the beast's and Falzar's Navis' mirrored to the right) */
+	CHECK(super_body(SUPER_BASS, GUARDIAN_FACE_LEFT).body.anim == 5 && super_body(SUPER_BASS, GUARDIAN_FACE_RIGHT).body.anim == 2 &&
+		super_body(SUPER_CYBEAST, GUARDIAN_FACE_RIGHT).body.mirror && !super_body(SUPER_CYBEAST, GUARDIAN_FACE_LEFT).body.mirror &&
+		guardian_body(12, GUARDIAN_FACE_LEFT).anim == 5 && guardian_body(16, GUARDIAN_FACE_RIGHT).anim == 2 &&
+		guardian_body(1, GUARDIAN_FACE_LEFT).anim == GUARDIAN_FACE_LEFT && guardian_body(7, GUARDIAN_FACE_RIGHT).mirror &&
+		!guardian_body(7, GUARDIAN_FACE_LEFT).mirror, "super: facing across the screen");
 	CHECK(super_cybeast_form(0) == SUPER_CYBEAST_V1 && super_cybeast_form(1) == SUPER_CYBEAST_SP && super_cybeast_form(4) == SUPER_CYBEAST_SP,
 		"super: Gregar SP after the first Net");
 	CHECK(super_song(SUPER_BASS) == 0x16 && super_song(SUPER_CYBEAST) == 0x17, "super: their records' themes");
@@ -3199,6 +3231,170 @@ static void test_jobs(void) {
 	CHECK(j.act == jobs_act(1) && jobs_due(&j, 4) && j.state == JOB_DONE, "--dev at home: one from the act just played, done");
 }
 
+/* ---- the anonymous statistics (issue #104): the answer, the events'
+ * payloads, the queue's cap and the tries, none of it sent ---- */
+
+static char stats_sent[16][ANALYTICS_PAYLOAD];
+static int stats_posts, stats_drops;
+static bool stats_system = true;
+
+static bool stats_post(const char *json) {
+	if (stats_posts < 16) snprintf(stats_sent[stats_posts], sizeof stats_sent[0], "%s", json);
+	++stats_posts;
+	return true;
+}
+static void stats_drop(void) { ++stats_drops; }
+static bool stats_ready(void) { return stats_system; }
+
+/* The settings file's statistics line, "" for none */
+static void stats_line(const char *path, char *out, size_t n) {
+	char line[256];
+	out[0] = 0;
+	FILE *f = fopen(path, "r");
+	if (!f) return;
+	while (fgets(line, sizeof line, f))
+		if (!strncmp(line, "statistics", 10)) { snprintf(out, n, "%s", line); break; }
+	fclose(f);
+}
+
+static void stats_begin(const char *settings, bool plain, const char *version) {
+	AnalyticsStart s = { "linux", version, 1280, 960, settings, plain, stats_ready, stats_post, stats_drop, NULL };
+	stats_posts = stats_drops = 0;
+	analytics_begin(&s);
+}
+
+static void test_analytics(void) {
+	/* the queue: eight wait at most, the ninth is dropped, first in first out */
+	static AnalyticsQueue q;
+	char body[ANALYTICS_PAYLOAD], name[16];
+	for (int i = 0; i < ANALYTICS_QUEUE; ++i) {
+		snprintf(name, sizeof name, "e%d", i);
+		CHECK(analytics_queue_put(&q, name), "statistics: payload %d queued", i);
+	}
+	CHECK(!analytics_queue_put(&q, "e8"), "statistics: a ninth payload is dropped, not queued");
+	CHECK(analytics_queue_take(&q, body, sizeof body) && !strcmp(body, "e0"), "statistics: the first queued goes first (%s)", body);
+	CHECK(analytics_queue_put(&q, "e8"), "statistics: room again once one is taken");
+	analytics_queue_clear(&q);
+	CHECK(!analytics_queue_take(&q, body, sizeof body), "statistics: a cleared queue holds nothing");
+	char big[ANALYTICS_PAYLOAD + 8];
+	memset(big, 'x', sizeof big - 1);
+	big[sizeof big - 1] = 0;
+	CHECK(!analytics_queue_put(&q, big), "statistics: a payload past its size is never queued");
+	/* each tried once; three failures in a row and nothing more */
+	AnalyticsTries t = { 0, false };
+	CHECK(analytics_tried(&t, false) && analytics_tried(&t, true) && analytics_tried(&t, false) && analytics_tried(&t, false),
+		"statistics: a success between failures starts their count again");
+	CHECK(!analytics_tried(&t, false) && t.gave_up, "statistics: the third failure in a row gives up");
+	CHECK(!analytics_tried(&t, true), "statistics: given up, even a success sends nothing more");
+
+	char base[64], settings[128], line[128];
+	snprintf(base, sizeof base, "build/host/test-stats-%d", (int)getpid());
+	mkdir(base, 0755);
+	snprintf(settings, sizeof settings, "%s/settings.ini", base);
+	FILE *f = fopen(settings, "w");
+	if (f) { fputs("# settings\nsmooth_motion = off\n", f); fclose(f); }
+	/* a player's first start: asked, nothing sent before the answer */
+	memset(&run, 0, sizeof run);
+	run.seed = 77;
+	run.depth = 7;
+	run.biome = BIOME_SKY;
+	run.mode = RUN_SHORT;
+	run.threat = 2;
+	run.folder = FOLDER_BLADE;
+	run.cross = 1;
+	run.helpers = HELP_HEALS | HELP_GENTLE;
+	profile.runs = 4;
+	profile.played_run = 77;
+	profile.played_frames = 3600 * 42 + 100;
+	stats_begin(settings, true, "0.10.0");
+	CHECK(analytics_here() && analytics_unasked(), "statistics: a player's first start asks");
+	analytics_run_start();
+	analytics_guardian(1, ANALYTICS_WON, 50, 200, 3000);
+	analytics_run_end(false, "HeatMan");
+	CHECK(stats_posts == 0, "statistics: nothing is sent before the answer (%d sent)", stats_posts);
+	/* yes: kept in settings.ini beside what was there, the start's view sent */
+	analytics_answer(true);
+	stats_line(settings, line, sizeof line);
+	CHECK(!strcmp(line, "statistics = on\n"), "statistics: a yes is settings.ini's \"statistics = on\" (%s)", line);
+	f = fopen(settings, "r");
+	char all[2048] = "";
+	size_t got = f ? fread(all, 1, sizeof all - 1, f) : 0;
+	if (f) fclose(f);
+	all[got] = 0;
+	CHECK(strstr(all, "smooth_motion = off") && strstr(all, "# statistics:"), "statistics: settings.ini keeps its lines, and says what the new one is");
+	CHECK(stats_posts == 1 && !strstr(stats_sent[0], "\"name\"") && strstr(stats_sent[0], "\"url\":\"/linux\"") &&
+		strstr(stats_sent[0], "\"title\":\"Cyberworld Endless 0.10.0\"") && strstr(stats_sent[0], "\"screen\":\"1280x960\"") &&
+		strstr(stats_sent[0], "\"website\":\"" GAME_UMAMI_WEBSITE "\"") && strstr(stats_sent[0], "\"hostname\":\"" GAME_UMAMI_HOSTNAME "\"") &&
+		!strncmp(stats_sent[0], "{\"type\":\"event\",\"payload\":{", 27),
+		"statistics: a yes sends the start's view, Umami's tracker's own payload (%s)", stats_sent[0]);
+	analytics_answer(true);
+	CHECK(stats_posts == 1, "statistics: the start's view once a session");
+	/* the events, as the run tells them */
+	analytics_run_start();
+	CHECK(stats_posts == 2 && strstr(stats_sent[1], "\"name\":\"run-start\",\"data\":{\"net\":\"short\",\"folder\":\"Blade\"") &&
+		strstr(stats_sent[1], "\"threat\":2") && strstr(stats_sent[1], "\"helpers\":\"Heals, Gentle\"") && strstr(stats_sent[1], "\"bn5\":false") &&
+		strstr(stats_sent[1], "\"runs\":4") && strstr(stats_sent[1], "\"cross\":\"") && !strstr(stats_sent[1], "\"cross\":\"none\""),
+		"statistics: run-start names the setup (%s)", stats_sent[1]);
+	analytics_guardian(1, ANALYTICS_WON, 50, 200, 3000);
+	/* (the meetings the rivals' record holds, this one counted as he stepped up) */
+	char attempt[32];
+	snprintf(attempt, sizeof attempt, "\"attempt\":%d}", rival(1)->met > 0 ? rival(1)->met : 1);
+	CHECK(stats_posts == 3 && strstr(stats_sent[2], "\"name\":\"guardian\",\"data\":{\"guardian\":\"HeatMan\",\"result\":\"won\",\"layer\":7") &&
+		strstr(stats_sent[2], "\"hp\":25") && strstr(stats_sent[2], "\"seconds\":50") && strstr(stats_sent[2], attempt),
+		"statistics: guardian names the battle's end (%s)", stats_sent[2]);
+	analytics_guardian(1, ANALYTICS_LOST, 0, 200, 0);
+	CHECK(stats_posts == 4 && strstr(stats_sent[3], "\"result\":\"lost\"") && !strstr(stats_sent[3], "\"hp\"") && !strstr(stats_sent[3], "\"seconds\""),
+		"statistics: a guardian's win over MegaMan, no HP or time (%s)", stats_sent[3]);
+	analytics_run_end(false, "HeatMan");
+	CHECK(stats_posts == 5 && strstr(stats_sent[4], "\"name\":\"run-end\",\"data\":{\"won\":false,\"layer\":7,\"area\":\"") &&
+		strstr(stats_sent[4], "\"by\":\"HeatMan\"") && strstr(stats_sent[4], "\"minutes\":42") && strstr(stats_sent[4], "\"net\":\"short\""),
+		"statistics: run-end names how far, by whom and how long (%s)", stats_sent[4]);
+	analytics_run_end(true, NULL);
+	CHECK(stats_posts == 6 && strstr(stats_sent[5], "\"won\":true") && !strstr(stats_sent[5], "\"by\""), "statistics: a won run names no one (%s)", stats_sent[5]);
+	for (int i = 0; i < 6; ++i) CHECK(strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200, "statistics: payload %d well within its size", i);
+	/* no: kept, what waits dropped, nothing more sent */
+	analytics_answer(false);
+	stats_line(settings, line, sizeof line);
+	CHECK(!strcmp(line, "statistics = off\n") && stats_drops == 1, "statistics: a no is kept (%s) and drops what waits", line);
+	analytics_run_start();
+	CHECK(stats_posts == 6, "statistics: after a no, nothing is sent");
+	/* the next start reads the answer: off asks nothing; on sends its view */
+	stats_begin(settings, true, "0.10.0");
+	CHECK(analytics_here() && !analytics_unasked() && analytics_consent() == ANALYTICS_OFF && stats_posts == 0, "statistics: a no is remembered");
+	analytics_answer(true);
+	stats_begin(settings, true, "1.0\"x\\");
+	CHECK(analytics_consent() == ANALYTICS_ON && stats_posts == 1 && strstr(stats_sent[0], "\"title\":\"Cyberworld Endless 1.0\\\"x\\\\\""),
+		"statistics: a yes is remembered, its start's view sent, its strings escaped (%s)", stats_sent[0]);
+	/* where the system cannot send, or no player started it, nothing asks */
+	stats_system = false;
+	stats_begin(settings, true, "0.10.0");
+	CHECK(!analytics_here() && !analytics_unasked() && stats_posts == 0, "statistics: a system that cannot send never asks");
+	stats_system = true;
+	stats_begin(settings, false, "0.10.0");
+	analytics_run_start();
+	CHECK(!analytics_here() && stats_posts == 0, "statistics: a test's or a developer's start neither asks nor sends");
+	/* a test's switches: asked as a player is, nothing sent but to its own address */
+	CHECK(analytics_dev("statistics=ask") && !analytics_dev("speed=2"), "statistics: --dev statistics= is the statistics'");
+	stats_begin(settings, false, "0.10.0");
+	CHECK(analytics_unasked(), "statistics: --dev statistics=ask asks");
+	analytics_answer(true);
+	analytics_run_start();
+	CHECK(stats_posts == 0 && !strcmp(analytics_url(), GAME_UMAMI_SEND), "statistics: a test's yes sends nothing to Umami");
+	CHECK(analytics_dev("statsurl=http://127.0.0.1:9/api/send") && analytics_dev("statistics=on"), "statistics: --dev statsurl=");
+	stats_begin(settings, false, "0.10.0");
+	analytics_run_start();
+	CHECK(stats_posts == 2 && strstr(stats_sent[1], "\"run-start\"") && !strcmp(analytics_url(), "http://127.0.0.1:9/api/send"),
+		"statistics: statsurl's address takes a test's payloads (%d)", stats_posts);
+	/* the developer's check: one event of its own, whatever the answer */
+	CHECK(analytics_dev("statscheck") && analytics_dev("statistics=off") && analytics_checking(), "statistics: --dev statscheck");
+	stats_begin(settings, false, "0.10.0");
+	analytics_run_start();
+	CHECK(stats_posts == 1 && strstr(stats_sent[0], "\"url\":\"/dev-check\"") && strstr(stats_sent[0], "\"name\":\"game-dev-check\"") &&
+		strstr(stats_sent[0], "\"platform\":\"linux\""), "statistics: statscheck sends its one event, and no other (%s)", stats_sent[0]);
+	remove(settings);
+	rmdir(base);
+}
+
 int main(void) {
 	test_sha1();
 	test_jobs();
@@ -3236,6 +3432,7 @@ int main(void) {
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();
+	test_analytics();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

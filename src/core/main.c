@@ -260,6 +260,9 @@ typedef struct {
 	/* --launcher auto, open or off (LAUNCHER_*): the ROMs' screen before
 	 * the game (src/launcher/); -1 the platform's own way (main) */
 	int launcher;
+	/* a test's or a developer's start (a scene, a seed, --dev, a capture's
+	 * options): no player's, which the anonymous statistics count */
+	bool dev;
 } Options;
 
 /* (the start's options, for the launcher's PLAY: game_begin) */
@@ -327,8 +330,8 @@ static int parse_args(int argc, char **argv, Options *o) {
 #endif
 		int took = start_option(a, v, o);
 		if (!took) took = screen_option(a, v, o);
-		if (!took) took = run_option(a, v, o);
-		if (!took && v && (capture_option(a, v) || tools_option(a, v))) took = 2;
+		if (!took && (took = run_option(a, v, o)) != 0 && strcmp(a, "--launcher")) o->dev = true;
+		if (!took && v && (capture_option(a, v) || tools_option(a, v))) { took = 2; o->dev = true; }
 		if (!took) {
 			fprintf(stderr, "unknown argument %s\n", a);
 			return 2;
@@ -527,7 +530,7 @@ int main(int argc, char **argv) {
 #endif
 	o.launcher = launcher_mode(&o);
 	if (!platform_init(o.force_w, o.force_h, o.headless, o.fullscreen)) return 1;
-	player_files(o.headless, o.smooth_arg);
+	player_files(o.headless, o.smooth_arg, !o.dev);
 	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
 	code = game_start(&o, rom_ok, msg);
 	return code >= 0 ? code : frame_loop(&o);

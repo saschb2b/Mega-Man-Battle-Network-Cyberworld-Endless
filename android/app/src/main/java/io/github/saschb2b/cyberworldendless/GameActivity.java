@@ -14,8 +14,16 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.libsdl.app.SDLActivity;
 
@@ -184,6 +192,57 @@ public class GameActivity extends SDLActivity {
             RomLook.Look l = r.lookFiles(files);
             done(1, false, r.words(l));
         }).start();
+    }
+
+    // ---- the anonymous statistics (src/analytics/analytics_net.c, the game's thread) ----
+
+    /* one request at a time on a thread of their own, eight waiting at most
+     * (more are dropped), none after three failures in a row: each is tried
+     * once, never again */
+    private final ThreadPoolExecutor stats = new ThreadPoolExecutor(1, 1, 30, TimeUnit.SECONDS,
+        new ArrayBlockingQueue<>(8), new ThreadPoolExecutor.DiscardPolicy());
+    private volatile int statsFailed;
+
+    /** A payload posted to `url` as JSON, `agent` its User-Agent, off the
+     *  game's thread: false where it was dropped. */
+    public boolean statsSend(String url, String agent, String body) {
+        if (statsFailed >= 3 || stats.getQueue().remainingCapacity() == 0) return false;
+        stats.execute(() -> statsFailed = statsPost(url, agent, body) ? 0 : statsFailed + 1);
+        return true;
+    }
+
+    /** What waits to be sent dropped (the player said no). */
+    public void statsDrop() {
+        stats.getQueue().clear();
+    }
+
+    private static boolean statsPost(String url, String agent, String body) {
+        HttpURLConnection c = null;
+        try {
+            byte[] data = body.getBytes(StandardCharsets.UTF_8);
+            c = (HttpURLConnection) new URL(url).openConnection();
+            c.setConnectTimeout(5000);
+            c.setReadTimeout(10000);
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            c.setUseCaches(false);
+            c.setRequestProperty("Content-Type", "application/json");
+            c.setRequestProperty("User-Agent", agent);
+            c.setFixedLengthStreamingMode(data.length);
+            try (OutputStream o = c.getOutputStream()) {
+                o.write(data);
+            }
+            int code = c.getResponseCode();
+            /* (its short answer read to its end, so the connection is let go cleanly) */
+            try (InputStream in = code < 400 ? c.getInputStream() : c.getErrorStream()) {
+                if (in != null) while (in.read() >= 0) { }
+            }
+            return code >= 200 && code < 300;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (c != null) c.disconnect();
+        }
     }
 
     // ---- the second screen ----

@@ -6,10 +6,12 @@
      shortcut opens the launcher. Auto Backup keeps the saves and the
      settings, never the ROMs (res/xml/backup_rules.xml, data_extraction_rules.xml).
      Controllers (a handheld's own, Bluetooth, USB) and a touch screen are
-     both optional. -->
+     both optional. The network carries the anonymous statistics alone, and
+     only once the player said yes (src/analytics/, README.md). -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     android:installLocation="auto">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:glEsVersion="0x00020000" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />

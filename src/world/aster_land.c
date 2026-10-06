@@ -45,12 +45,7 @@ bool aster_land_install(void) {
 	mapslot_indoors(0);
 	if (!list) return false;
 	trader_home();
-	/* (home's shops: the SubChip seller's stock for the act ahead, the
-	 * Order Service as a run has it; one order a visit, HOME_ORDER_FLAG,
-	 * cleared as a visit begins) */
-	ShopItem subs[SHOP_MAX_ITEMS];
-	shop_install(SHOP_SUBS_HOME, subs, shop_home_subs(run.depth, subs), true);
-	orders = shop_order_install();
+	aster_land_shops();
 	/* (BN6's Number Trader on no map: its check then reads none, and the
 	 * director says place_lines.c's word there) */
 	emu_write32(NUMBER_TRADER_MAPS, 0xFFFFFFFFu);
@@ -66,6 +61,12 @@ bool aster_land_install(void) {
 	front[1] = ty;
 	front_ok = true;
 	return true;
+}
+
+void aster_land_shops(void) {
+	ShopItem subs[SHOP_MAX_ITEMS];
+	shop_install(SHOP_SUBS_HOME, subs, shop_home_subs(run.depth, subs), true);
+	orders = shop_order_install();
 }
 
 bool aster_land_front(int *x, int *y) {

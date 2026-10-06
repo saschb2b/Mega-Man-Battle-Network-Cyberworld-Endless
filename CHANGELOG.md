@@ -21,6 +21,28 @@
   layer three times: each is entered from another side. The atlas report
   names each layer's arrival. This build makes layers differently, so a
   CONTINUE starts the layer afresh.
+- **Anonymous statistics, asked for once** (issue #104). At its first
+  start the game asks, in the PET's panel over the title, whether it may
+  send anonymous play statistics; the cursor starts on No, B and Escape
+  answer no, and nothing is sent before a yes. A yes sends, to the game's
+  own site on the developer's Umami, the game's start (its system,
+  version and screen size), a run's setup as it begins, each guardian's
+  battle as it ends (who, won, lost or left, the layer, net and threat,
+  MegaMan's HP left and the battle's seconds, the how-manyth meeting) and
+  a run's end (how far, where, by whom, its minutes and setup): no names,
+  IDs, ROMs, paths or saves. The answer is `settings.ini`'s `statistics`
+  line; the controls screen (SELECT on the title) shows it on a Statistics
+  row whose A asks again, and on the 3DS SELECT on the title asks. The
+  requests go out beside the frames with each system's own way: libcurl
+  where Linux and the handhelds have it (loaded, never needed to start),
+  WinHTTP on Windows, NSURLSession on Macs, iPhones and iPads, Android's
+  HttpURLConnection, the browser's fetch, and on the New 3DS devkitPro's
+  libcurl with mbedTLS and Let's Encrypt's roots (the 3DS's own TLS stops
+  at 1.1, which the server refuses). Each is tried once, three failures
+  in a row end them for the session, and a system that cannot send never
+  asks. The Flatpak shares the network for this alone, and Android's app
+  asks for the internet permission. The run log names ProtoMan's duels
+  `duel` and a won run's last line `won`.
 - **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
   place of its own, never at random. The endless net's Nest is the
   Cybeast's den: no copied guardian at its end but Gregar itself, in
@@ -54,6 +76,14 @@
   the battle once the map's theme has started, so the last word comes in
   silence and the theme returns with the Guardian Data, as the staging
   meant (docs/BOSSES.md).
+- **Face to face with a guardian** (issue #100). Before the talk MegaMan
+  steps up beside the guardian, at his height, and turns to him; the
+  guardian logs in facing MegaMan. Where an arena was entered from above,
+  MegaMan used to walk straight at the guardian, who then stood half
+  behind the chat box through the talk; now both stand clear of it
+  whichever side the arena is entered from, Bass and the Cybeast too. The
+  steps are the staging's, as BN6's cutscenes walk MegaMan; his own
+  walking is untouched.
 - **Layers to remember** (issue #98). After several layers the net felt
   the same: its rooms were all of a size, no landmark stood on most of
   them, and an act of Seaside, Sky, Green, the Graveyard or the Nest

@@ -24,6 +24,8 @@ bool home_places_install(int to_group, int to_number, int x, int y) {
 	return lan_house_install(to_group, to_number, x, y) && aster_land_install() && academy_install();
 }
 
+void home_places_shops(void) { aster_land_shops(); }
+
 const char *home_places_name(int group, int number) {
 	static const char *const names[] = { NULL, "Lan's Room", "Lan's House", "AsterLand", "Cyber Academy" };
 	return names[home_places_at(group, number)];
