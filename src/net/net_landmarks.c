@@ -7,6 +7,7 @@
 
 #include "game.h"
 #include "net_gen.h"
+#include "net_signature.h"
 
 /* ---- Props (docs/LEVEL_DESIGN.md, Props) ---- */
 
@@ -55,53 +56,78 @@ bool ng_object_at(int x, int y) {
 	return false;
 }
 
+/* Whether a sprite prop stands in room m or within two panels of it: its
+ * landmark, set before the services (a counter beside it crowded it). */
+static bool room_propped(const Room *m) {
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind == PROP_SPRITE && p->x >= m->x - 2 && p->x < m->x + m->w + 2 && p->y >= m->y - 2 && p->y < m->y + m->h + 2) return true;
+	}
+	return false;
+}
+
+/* A counter's run: `len` panels from u0 along its edge, v0 its back edge's
+ * line, facing `faces`. */
+typedef struct { int faces, len, u0, v0; } CounterRun;
+
+/* Whether the counter fits room m there: for each panel along it the void
+ * behind its aisle (the rim), the aisle and the counter's own panels free
+ * ground floor (into xs, ys: *nb), and the floor before it free to talk
+ * from. */
+static bool counter_fits(const Room *m, const CounterRun *c, int *xs, int *ys, int *nb) {
+	*nb = 0;
+	for (int t = 0; t < c->len; ++t)
+		/* d -1 behind the aisle (void: the rim), 0 the aisle, 1 the counter, 2 before it */
+		for (int d = -1; d <= 2; ++d) {
+			int x = c->faces == FACES_X ? c->v0 + d : c->u0 + t, y = c->faces == FACES_X ? c->u0 + t : c->v0 + d;
+			if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) { if (d != -1) return false; continue; }
+			if (d == -1) { if (layer.cell[y][x] != C_VOID) return false; continue; }
+			if (layer.cell[y][x] != C_PATH || layer.level[y][x] || ng_near_stair(x, y) || ng_object_at(x, y) || (x == m->ax && y == m->ay)) return false;
+			if (d == 2) { if (!ng_cell_free(x, y)) return false; continue; }
+			xs[*nb] = x; ys[(*nb)++] = y;
+		}
+	return !ng_cuts(*nb, xs, ys);
+}
+
+/* The counter set: the aisle walled off, the counter's panels floor under
+ * its own walls, the service in the aisle behind its middle; NULL (nothing
+ * changed) where the map has no room for the object. */
+static NetObj *counter_set(int type, const CounterRun *c, const int *xs, const int *ys, int nb) {
+	for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = (uint8_t)(i % 2 == 0 ? C_SOLID : C_PROPPED);
+	int tm = (c->len - 1) / 2;
+	NetObj *o = ng_add_obj(type, c->faces == FACES_X ? c->v0 : c->u0 + tm, c->faces == FACES_X ? c->u0 + tm : c->v0);
+	if (!o) {
+		for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = C_PATH;
+		return NULL;
+	}
+	layer.props[layer.nprops] = (NetProp){ PROP_COUNTER, c->faces, c->faces == FACES_X ? c->v0 + 1 : c->u0, c->faces == FACES_X ? c->u0 : c->v0 + 1, c->len, 0 };
+	o->prop = layer.nprops++;
+	return o;
+}
+
 /* A counter in room r for a service of `type` to stand behind, as the
  * originals set their Net Dealers' capsules and NetCafe desks: one panel in
  * from a back edge (grid -x or -y, the top of the screen), facing the
  * camera, with the aisle behind it on the platform's rim (the navi's place,
  * walled off), centred along that edge, and the floor before it free to
- * talk from; nothing it closes off may be cut from the rest. The object
- * stands in the aisle behind the counter's middle; NULL where the room has
- * no such place. */
+ * talk from; nothing it closes off may be cut from the rest, and none in
+ * the room of the layer's landmark. The object stands in the aisle behind
+ * the counter's middle; NULL where the room has no such place. */
 NetObj *ng_counter(int r, int type, const LayerKit *kit) {
 	const Room *m = &layer.rooms[r];
-	if (!kit || layer.nprops >= MAX_PROPS || (kit->counter_len[0] <= 0 && kit->counter_len[1] <= 0)) return NULL;
+	if (!kit || layer.nprops >= MAX_PROPS || (kit->counter_len[0] <= 0 && kit->counter_len[1] <= 0) || room_propped(m)) return NULL;
 	int first = rng_range(0, 1);
 	for (int k = 0; k < 2; ++k) {
-		int faces = first ^ k, len = kit->counter_len[faces];
+		CounterRun c = { first ^ k, kit->counter_len[first ^ k], 0, 0 };
 		/* u along the run, v in depth from the back edge: FACES_X runs along y */
-		int span = faces == FACES_X ? m->h : m->w, deep = faces == FACES_X ? m->w : m->h;
-		if (len <= 0 || len > MAX_COUNTER || len > span || deep < 3) continue;
-		int u_base = faces == FACES_X ? m->y : m->x, v0 = faces == FACES_X ? m->x : m->y;
-		int mid = (span - len) / 2;
-		for (int j = 0; j <= span - len; ++j) {
-			int off = mid + ((j & 1) ? (j + 1) / 2 : -(j / 2));   /* from the middle outwards */
-			if (off < 0 || off > span - len) continue;
-			int u0 = u_base + off, xs[2 * MAX_COUNTER], ys[2 * MAX_COUNTER], nb = 0;
-			bool ok = true;
-			for (int t = 0; t < len && ok; ++t)
-				/* d -1 behind the aisle (void: the rim), 0 the aisle, 1 the counter, 2 before it */
-				for (int d = -1; d <= 2 && ok; ++d) {
-					int x = faces == FACES_X ? v0 + d : u0 + t, y = faces == FACES_X ? u0 + t : v0 + d;
-					if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) { ok = d == -1; continue; }
-					if (d == -1) { ok = layer.cell[y][x] == C_VOID; continue; }
-					if (layer.cell[y][x] != C_PATH || layer.level[y][x] || ng_near_stair(x, y) || ng_object_at(x, y) ||
-					    (x == m->ax && y == m->ay)) { ok = false; continue; }
-					if (d == 2) { ok = ng_cell_free(x, y); continue; }
-					xs[nb] = x; ys[nb++] = y;
-				}
-			if (!ok || ng_cuts(nb, xs, ys)) continue;
-			/* the aisle walled off, the counter's panels floor under its own walls */
-			for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = (uint8_t)(i % 2 == 0 ? C_SOLID : C_PROPPED);
-			int tm = (len - 1) / 2;
-			NetObj *o = ng_add_obj(type, faces == FACES_X ? v0 : u0 + tm, faces == FACES_X ? u0 + tm : v0);
-			if (!o) {
-				for (int i = 0; i < nb; ++i) layer.cell[ys[i]][xs[i]] = C_PATH;
-				return NULL;
-			}
-			layer.props[layer.nprops] = (NetProp){ PROP_COUNTER, faces, faces == FACES_X ? v0 + 1 : u0, faces == FACES_X ? u0 : v0 + 1, len, 0 };
-			o->prop = layer.nprops++;
-			return o;
+		int span = c.faces == FACES_X ? m->h : m->w, deep = c.faces == FACES_X ? m->w : m->h;
+		if (c.len <= 0 || c.len > MAX_COUNTER || c.len > span || deep < 3) continue;
+		int u_base = c.faces == FACES_X ? m->y : m->x, mid = (span - c.len) / 2;
+		c.v0 = c.faces == FACES_X ? m->x : m->y;
+		for (int j = 0; j <= span - c.len; ++j) {
+			int off = mid + ((j & 1) ? (j + 1) / 2 : -(j / 2)), xs[2 * MAX_COUNTER], ys[2 * MAX_COUNTER], nb;   /* from the middle outwards */
+			c.u0 = u_base + off;
+			if (off >= 0 && off <= span - c.len && counter_fits(m, &c, xs, ys, &nb)) return counter_set(type, &c, xs, ys, nb);
 		}
 	}
 	return NULL;
@@ -192,22 +218,91 @@ static void wall_off(int x, int y, int n, int dir, int look) {
 	}
 }
 
-/* The layer's landmark (one set piece, at the back of its biggest room off
- * the way): Green's giant cybertree in the floor with an avenue of trees
- * past the rim on both sides of it, mirrored; the Undernet's statue past
- * the rim between two braziers, mirrored; the Graveyard's monument past it.
- * Returns the room it stands in, or -1. */
-int ng_landmark(const LayerKit *kit) {
-	int set = kit->looks & (1u << LOOK_GIANT_TREE) ? LOOK_GIANT_TREE : kit->looks & (1u << LOOK_STATUE) ? LOOK_STATUE
-		: kit->looks & (1u << LOOK_MONUMENT) ? LOOK_MONUMENT : -1;
-	if (set < 0) return -1;
-	int need = set == LOOK_STATUE ? 5 : 3;
-	/* the candidates, best first: big rooms, long rims, far from the way */
-	struct { int r, score; Rim rim; } cand[MAX_ROOMS * 2];
-	int nc = 0;
+/* The landmark's set an area's looks give: Green's giant cybertree, the
+ * Undernet's statue, the Graveyard's monument; where the area has only
+ * cybertrees, an avenue of them framing the layer's signature (as Green Area
+ * 2's frame its giant tree); -1 none. */
+enum { SET_AVENUE = LOOK_COUNT };
+static int landmark_set(const LayerKit *kit) {
+	if (kit->looks & (1u << LOOK_GIANT_TREE)) return LOOK_GIANT_TREE;
+	if (kit->looks & (1u << LOOK_STATUE)) return LOOK_STATUE;
+	if (kit->looks & (1u << LOOK_MONUMENT)) return LOOK_MONUMENT;
+	return kit->looks & (1u << LOOK_TREE) && layer.sig_room >= 0 ? SET_AVENUE : -1;
+}
+
+/* Mirrored pairs of trees past the rim from `mid` out, up to four, where
+ * they keep two panels from the way; how many pairs. */
+static int avenue(const Room *m, const Rim *rim, int mid, int from) {
+	int pairs = 0;
+	for (int k = from; k < from + 4; ++k) {
+		int a = mid - k, b = mid + k, ax, ay, bx, by;
+		if (a < rim->u0 || b >= rim->u0 + rim->len) break;
+		past_cell(m, rim->s, a, 1, &ax, &ay);
+		past_cell(m, rim->s, b, 1, &bx, &by);
+		if (ng_far_from_way(ax, ay) < 2 || ng_far_from_way(bx, by) < 2 || ng_prop_at_cell(ax, ay) || ng_prop_at_cell(bx, by)) break;
+		add_sprite(LOOK_TREE, ax, ay);
+		add_sprite(LOOK_TREE, bx, by);
+		++pairs;
+	}
+	return pairs;
+}
+
+/* The set at `mid` of a room's back rim, where it fits: the giant tree in
+ * the floor one panel in from the rim with its avenue past it; the statue
+ * past the rim between two braziers; the monument past it; an avenue alone
+ * of two pairs or more, a panel's gap in its middle. */
+static bool landmark_at(const LayerKit *kit, int set, const Room *m, const Rim *rim, int mid) {
+	int px, py;
+	past_cell(m, rim->s, mid, 1, &px, &py);
+	if (set == SET_AVENUE) {
+		int ax, ay;
+		past_cell(m, rim->s, mid - 2, 1, &ax, &ay);
+		if (mid - 2 < rim->u0 || mid + 2 >= rim->u0 + rim->len || ng_far_from_way(ax, ay) < 2) return false;
+		return avenue(m, rim, mid, 1) > 0;
+	}
+	if (set == LOOK_GIANT_TREE) {
+		int hx, hy;
+		edge_cell(m, rim->s, mid, &hx, &hy);
+		if (rim->s == 0) ++hx; else ++hy;
+		if (!hole_fits(hx, hy, 1, 0)) return false;
+		wall_off(hx, hy, 1, 0, LOOK_GIANT_TREE);
+		avenue(m, rim, mid, 1);
+		return true;
+	}
+	add_sprite(set, px, py);
+	if (set == LOOK_STATUE && kit->looks & (1u << LOOK_BRAZIER)) {
+		int ax, ay, bx, by;
+		past_cell(m, rim->s, mid - 2, 1, &ax, &ay);
+		past_cell(m, rim->s, mid + 2, 1, &bx, &by);
+		add_sprite(LOOK_BRAZIER, ax, ay);
+		add_sprite(LOOK_BRAZIER, bx, by);
+	}
+	return true;
+}
+
+typedef struct { int r, score; Rim rim; } Spot;
+
+/* Whether the layer's signature holds the set: the giant tree its grove
+ * alone and the statue its court (Green Area 1's fields have no tree, and
+ * the Undernet's crosses keep their shape plain), the monument and the
+ * avenues any. */
+static bool sig_takes(int set) {
+	return layer.sig_room >= 0 && (set == LOOK_GIANT_TREE ? layer.sig == SIG_GROVE : set == LOOK_STATUE ? layer.sig == SIG_COURT : true);
+}
+
+/* The rooms' back rims the set may stand at, best first: the layer's
+ * signature where it holds the set (docs/LEVEL_DESIGN.md, Identity), then
+ * big rooms, long rims, far from the way, but a signature that does not;
+ * an avenue at the signature alone. How many. */
+static int landmark_spots(int set, Spot *cand) {
+	int need = set == LOOK_STATUE || set == SET_AVENUE ? 5 : 3, nc = 0;
 	for (int r = 1; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
-		if (r == layer.exit_room || r == layer.arena || m->kind == ROOM_PAD || m->w * m->h < 12 || !room_bare(m)) continue;
+		bool sig = r == layer.sig_room;
+		/* (the exit's room keeps clear of it, but the signature's: its exit
+		 * stands at its middle, the set at its back) */
+		if ((set == SET_AVENUE && !sig) || (sig && !sig_takes(set)) || (r == layer.exit_room && !sig) || r == layer.arena || m->kind == ROOM_PAD ||
+		    m->w * m->h < 12 || !room_bare(m)) continue;
 		for (int s = 0; s < 2; ++s) {
 			Rim rim = back_rim(m, s);
 			if (rim.len < need) continue;
@@ -217,54 +312,67 @@ int ng_landmark(const LayerKit *kit) {
 			if (away < 1) continue;
 			cand[nc].r = r;
 			cand[nc].rim = rim;
-			cand[nc++].score = m->w * m->h * 4 + rim.len * 8 + (away > 6 ? 6 : away) * 10;
+			cand[nc++].score = sig * 10000 + m->w * m->h * 4 + rim.len * 8 + (away > 6 ? 6 : away) * 10;
 		}
 	}
 	for (int i = 1; i < nc; ++i)
 		for (int j = i; j > 0 && cand[j].score > cand[j - 1].score; --j) {
-			__typeof__(cand[0]) t = cand[j]; cand[j] = cand[j - 1]; cand[j - 1] = t;
+			Spot t = cand[j]; cand[j] = cand[j - 1]; cand[j - 1] = t;
 		}
+	return nc;
+}
+
+/* The statue in the signature's floor where no rim of it holds one: in a
+ * walled hole in its back third, one or two panels in from a back edge,
+ * the braziers in holes two panels to either side where they fit, as most
+ * of BN6's statues stand in holes inside their platforms (docs/
+ * LEVEL_DESIGN.md, Props); a court the catwalks or the lattice run close
+ * round has no rim with the void two deep past it. */
+static bool statue_in_floor(const LayerKit *kit, const Room *m) {
+	for (int s = 0; s < 2; ++s)
+		for (int k = 1; k <= 2; ++k) {
+			int span = s == 0 ? m->h : m->w, base = s == 0 ? m->y : m->x;
+			for (int j = 0; j < span; ++j) {
+				int u = base + span / 2 + ((j & 1) ? (j + 1) / 2 : -(j / 2)), x = s == 0 ? m->x + k : u, y = s == 0 ? u : m->y + k;
+				if (!hole_fits(x, y, 1, 0)) continue;
+				wall_off(x, y, 1, 0, LOOK_STATUE);
+				for (int e = -2; e <= 2 && kit->looks & (1u << LOOK_BRAZIER); e += 4) {
+					int bx = s == 0 ? x : x + e, by = s == 0 ? y + e : y;
+					if (hole_fits(bx, by, 1, 0)) wall_off(bx, by, 1, 0, LOOK_BRAZIER);
+				}
+				return true;
+			}
+		}
+	return false;
+}
+
+/* The layer's landmark (one set piece, at the back of its signature, else
+ * of its biggest room off the way): Green's giant cybertree in the floor
+ * with an avenue of trees past the rim on both sides of it, mirrored; the
+ * Undernet's statue past the rim between two braziers, mirrored (else in
+ * the signature's floor); the Graveyard's monument past it; Central's and
+ * Sky's signature framed by an avenue of trees. Returns the room it stands
+ * in, or -1. */
+int ng_landmark(const LayerKit *kit) {
+	int set = landmark_set(kit);
+	if (set < 0) return -1;
+	Spot cand[MAX_ROOMS * 2];
+	int nc = landmark_spots(set, cand);
 	for (int c = 0; c < nc; ++c) {
 		const Room *m = &layer.rooms[cand[c].r];
-		Rim rim = cand[c].rim;
-		int s = rim.s, mid0 = rim.u0 + rim.len / 2;
+		const Rim *rim = &cand[c].rim;
+		int mid0 = rim->u0 + rim->len / 2, half = set == LOOK_STATUE ? 2 : 1;
+		/* (where the signature has no rim for the statue, its floor before
+		 * another room's rim) */
+		if (set == LOOK_STATUE && cand[c].r != layer.sig_room && sig_takes(set) && statue_in_floor(kit, &layer.rooms[layer.sig_room])) return layer.sig_room;
 		/* the middle of the rim, else the nearest place along it the set fits */
-		for (int j = 0; j < 2 * rim.len; ++j) {
+		for (int j = 0; j < 2 * rim->len; ++j) {
 			int mid = mid0 + ((j & 1) ? (j + 1) / 2 : -(j / 2));
-			int half = set == LOOK_STATUE ? 2 : 1;
-			if (mid - half < rim.u0 || mid + half >= rim.u0 + rim.len) continue;
-			int px, py;
-			past_cell(m, s, mid, 1, &px, &py);
-			if (set == LOOK_GIANT_TREE) {
-				/* in the floor one panel in from the rim, the trees past it */
-				int hx, hy;
-				edge_cell(m, s, mid, &hx, &hy);
-				if (s == 0) ++hx; else ++hy;
-				if (!hole_fits(hx, hy, 1, 0)) continue;
-				wall_off(hx, hy, 1, 0, LOOK_GIANT_TREE);
-				for (int k = 1; k <= 4; ++k) {
-					int a = mid - k, b = mid + k, ax, ay, bx, by;
-					if (a < rim.u0 || b >= rim.u0 + rim.len) break;
-					past_cell(m, s, a, 1, &ax, &ay);
-					past_cell(m, s, b, 1, &bx, &by);
-					if (ng_far_from_way(ax, ay) < 2 || ng_far_from_way(bx, by) < 2) break;
-					add_sprite(LOOK_TREE, ax, ay);
-					add_sprite(LOOK_TREE, bx, by);
-				}
-				return cand[c].r;
-			}
-			add_sprite(set, px, py);
-			if (set == LOOK_STATUE && kit->looks & (1u << LOOK_BRAZIER)) {
-				int ax, ay, bx, by;
-				past_cell(m, s, mid - 2, 1, &ax, &ay);
-				past_cell(m, s, mid + 2, 1, &bx, &by);
-				add_sprite(LOOK_BRAZIER, ax, ay);
-				add_sprite(LOOK_BRAZIER, bx, by);
-			}
-			return cand[c].r;
+			if (mid - half < rim->u0 || mid + half >= rim->u0 + rim->len) continue;
+			if (landmark_at(kit, set, m, rim, mid)) return cand[c].r;
 		}
 	}
-	return -1;
+	return set == LOOK_STATUE && sig_takes(set) && statue_in_floor(kit, &layer.rooms[layer.sig_room]) ? layer.sig_room : -1;
 }
 
 /* Whether void panel (x, y) is a set piece's: a Rush gap's or an
@@ -380,9 +488,12 @@ void ng_signs(const LayerKit *kit, int skip, const int *order, int n) {
 			if (ng_void_cell(cand[k][0], cand[k][1]) && !ng_prop_at_cell(cand[k][0], cand[k][1])) { add_sprite(LOOK_SIGN, cand[k][0], cand[k][1]); break; }
 	}
 	if (!(kit->looks & (1u << LOOK_BBS))) return;
-	for (int i = 0; i < n; ++i) {
-		const Room *m = &layer.rooms[order[i]];
-		if (order[i] == skip || m->w * m->h < 12 || !room_bare(m)) continue;
+	/* (the layer's signature's first, where it has one: Seaside's great
+	 * field with its board) */
+	for (int i = -1; i < n; ++i) {
+		int r = i < 0 ? layer.sig_room : order[i];
+		const Room *m = &layer.rooms[r < 0 ? 0 : r];
+		if (r < 0 || r == skip || (i >= 0 && r == layer.sig_room) || m->w * m->h < 12 || !room_bare(m)) continue;
 		Rim rim = back_rim(m, rng_range(0, 1));
 		if (rim.len < 3) continue;
 		int x, y;

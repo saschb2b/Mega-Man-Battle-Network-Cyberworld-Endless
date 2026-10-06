@@ -455,6 +455,11 @@ void netmap_kit(int area, LayerKit *kit) {
 	if (!na || !learned[area].ok) return;
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
 	kit->looks = na->looks;
+	/* (where every room is drawn as the art's own small hubs, BN5's
+	 * Science Labs and Oran Isle, no signature: a bigger room came out
+	 * flat and in pieces of other surfaces, and one of seven a side drew
+	 * its tiles off on a fifth more of the floor, over 18 layers each) */
+	kit->hub_rooms = na->pad_rooms >= 25;
 	kit->emblem = learned[area].emblem.ok;
 	kit->gem = learned[area].ornament[0].ok;
 	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
@@ -500,14 +505,14 @@ static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
 
 bool netmap_build_layer(int area, uint32_t seed) {
 	/* the pads, in their own look (and where the area's platforms are pads,
-	 * the small platforms and the guardian's arena: the Aquarium's water
-	 * never widens into one) */
+	 * the small platforms, the guardian's arena and the layer's signature:
+	 * the Aquarium's water never widens into one) */
 	static uint8_t pads[MAP_H][MAP_W];
 	memset(pads, 0, sizeof pads);
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
 		int small = net_area_def(area) ? net_area_def(area)->pad_rooms : 0;
-		bool pad = m->kind == ROOM_PAD || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena));
+		bool pad = m->kind == ROOM_PAD || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena || r == layer.sig_room));
 		if (!pad) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;

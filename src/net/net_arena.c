@@ -6,25 +6,8 @@
 
 #include <string.h>
 
+#include "net_gen.h"
 #include "net_shapes.h"
-
-/* Walking distance of every floor cell from room 0's standing cell. */
-static void distances(int16_t dist[MAP_H][MAP_W]) {
-	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
-	memset(dist, -1, sizeof(int16_t) * MAP_W * MAP_H);
-	int h = 0, t = 0;
-	qx[t] = (int16_t)layer.rooms[0].ax; qy[t++] = (int16_t)layer.rooms[0].ay;
-	dist[qy[0]][qx[0]] = 0;
-	while (h < t) {
-		int x = qx[h], y = qy[h++];
-		for (int d = 0; d < 4; ++d) {
-			int nx = x + dir_dx[d], ny = y + dir_dy[d];
-			if (!floor_at(nx, ny) || dist[ny][nx] >= 0) continue;
-			dist[ny][nx] = (int16_t)(dist[y][x] + 1);
-			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
-		}
-	}
-}
 
 /* The arena's box for a bridge of `len` leaving (ex, ey) in direction d:
  * the bridge meets the middle of its near side. */
@@ -46,9 +29,12 @@ static bool bridge_clear(int ex, int ey, int d, int len) {
 	return true;
 }
 
+/* (as far from the arrival as there is room for, past the layer's
+ * signature where it can be: the way to the guardian runs through it,
+ * docs/LEVEL_DESIGN.md, Identity) */
 int arena_attach(int n, ArenaInfo *out) {
 	static int16_t dist[MAP_H][MAP_W];
-	distances(dist);
+	ng_walk_past_signature(dist);
 	int best = -1, best_r = -1, best_d = 0, best_len = 0;
 	for (int r = 1; r < layer.nrooms; ++r)
 		for (int d = 0; d < 4; ++d) {

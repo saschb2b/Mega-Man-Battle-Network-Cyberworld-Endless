@@ -55,7 +55,9 @@ Output in `.build/atlas`:
   or a stair's stamp covers; `off near` and `off edge` are the magenta and
   yellow tiles, `at mouths` the services and navis
   beside a panel-wide stretch of the floor as drawn (the atlas fails on
-  any: they stand in the way on).
+  any: they stand in the way on), and `signature` the room the layer is
+  remembered by (docs/LEVEL_DESIGN.md, Identity; `none` where its layout
+  found it no place).
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. Objects are marked: blue the
@@ -362,6 +364,13 @@ battle's phase, MegaMan's HP, the Custom gauge, the battle's clock, his
 mood) and its end, and with Souls held whether UNITE stood on its first
 Custom screen and each unison; play.py's state says `battle (the older
 net's)` while it runs.
+
+The `sig` step (`--input`'s `0:sig`, play.py's `sig`) puts MegaMan in the
+layer's signature, the room it is remembered by (docs/LEVEL_DESIGN.md,
+Identity), on the free panel nearest its anchor; play.py's state (with
+`CYBERWORLD_STATE_POS`) names the signature and where it lies, in panels
+and in the world. The `identity-*` screenshots and the `identity` clip
+are made with it.
 
 ## Sprite gallery
 

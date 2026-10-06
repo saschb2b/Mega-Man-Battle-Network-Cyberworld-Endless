@@ -3,6 +3,7 @@
 #include "director_dev.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "boss.h"
@@ -48,6 +49,23 @@ void director_dev_place(int x, int y, int face) {
 	emu_write32(BN6_PLAYER_NEXT_X, (uint32_t)x << 16);
 	emu_write32(BN6_PLAYER_NEXT_Y, (uint32_t)y << 16);
 	if (face >= 0 && face < 8) { emu_write8(BN6_PLAYER_FACING, (uint8_t)face); emu_write8(BN6_PLAYER_ANIM, (uint8_t)face); }
+}
+
+bool director_dev_signature(void) {
+	if (!director_on_map() || layer.sig_room < 0) return false;
+	const Room *m = &layer.rooms[layer.sig_room];
+	int bx = m->ax, by = m->ay, best = 1 << 30;
+	for (int y = m->y; y < m->y + m->h; ++y)
+		for (int x = m->x; x < m->x + m->w; ++x) {
+			bool taken = layer.cell[y][x] != C_PATH || layer.level[y][x];
+			for (int i = 0; i < layer.nobj && !taken; ++i) taken = abs((int)layer.obj[i].x - x) + abs((int)layer.obj[i].y - y) <= 1;
+			int d = abs(x - m->ax) + abs(y - m->ay);
+			if (!taken && d < best) { best = d; bx = x; by = y; }
+		}
+	int wx, wy;
+	netmap_world(bx, by, &wx, &wy);
+	director_dev_place(wx, wy, -1);
+	return true;
 }
 
 bool director_dev_warp_cell(int x, int y) {

@@ -97,6 +97,9 @@ bool director_arrived(void);
 void director_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
+/* ... in the layer's signature, on the free panel nearest its anchor (the
+ * "sig" step: docs/LEVEL_DESIGN.md, Identity); false on a layer without. */
+bool director_dev_signature(void);
 /* A test's start at home (--scene home, docs/HOME.md): the next act's
  * layer built behind Lan's HP's portals, MegaMan on its blue pad, as an
  * act's exit takes him. */

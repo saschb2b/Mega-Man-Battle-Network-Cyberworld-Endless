@@ -39,6 +39,11 @@ static void clear(int x, int y) {
 	if (in_map(x, y)) layer.cell[y][x] = C_VOID;
 }
 
+void carve_void(int x, int y, int w, int h) {
+	for (int j = y; j < y + h; ++j)
+		for (int i = x; i < x + w; ++i) clear(i, j);
+}
+
 void carve_shape(int shape, int x, int y, int w, int h) {
 	switch (shape) {
 	case SHAPE_OCTAGON: {

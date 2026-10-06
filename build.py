@@ -1069,6 +1069,10 @@ HOME_PAGED = '40:,' + '4:A,6:,' * 46 + '30:,'
 HOME_OUT = HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:,'
 HOME_ASTER = HOME_OUT + '0:place -156 -40 7,10:,62:UP+LEFT,160:,'
 HOME_COUNTER = '30:UP+RIGHT,124:UP+LEFT,10:UP+LEFT,6:,6:A,56:,6:A,46:,6:A,46:,6:A,46:,6:A,156:,'
+# (issue #98's identity: a layer's arrival words paged, then the sig dev
+# step puts MegaMan in the room the layer is remembered by)
+IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
+SIG_PAGED = '150:,' + '4:A,6:,' * 30 + '0:sig,'
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1115,6 +1119,23 @@ SCREENSHOTS = [
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], [(420, 'undernet')], {}),
     ('graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '18', '--seed', '3', '--dev', 'quiet'], [(420, 'graveyard')], {}),
     ('nest', ['--scene', 'emu', '--net-biome', '7', '--run-depth', '19', '--seed', '3', '--dev', 'quiet'], [(250, 'nest')], {}),
+    # (issue #98: each area's layer in its signature, docs/LEVEL_DESIGN.md,
+    # Identity: Central's crater framed by an avenue of cybertrees, Seaside's
+    # great field round its pool, Sky's ring road round its pad, Green's
+    # grove at its giant cybertree, the Graveyard's slab round its hole below
+    # the monument, the Undernet's court with its statue between braziers;
+    # tools/before_after.py's identity pairs are the same layers' maps)
+    ('identity-central', IDENTITY + ['--net-biome', '0', '--run-depth', '2', '--seed', '1', '--input', SIG_PAGED + '70:'],
+     [(520, 'identity-central')], {}),
+    ('identity-seaside', IDENTITY + ['--net-biome', '1', '--run-depth', '4', '--seed', '2', '--input', SIG_PAGED + '70:'],
+     [(520, 'identity-seaside')], {}),
+    ('identity-sky', IDENTITY + ['--net-biome', '2', '--run-depth', '4', '--seed', '1', '--input', SIG_PAGED + '70:'], [(520, 'identity-sky')], {}),
+    ('identity-green', IDENTITY + ['--net-biome', '3', '--run-depth', '4', '--seed', '3', '--input', SIG_PAGED + '24:UP,46:'],
+     [(520, 'identity-green')], {}),
+    ('identity-graveyard', IDENTITY + ['--net-biome', '4', '--run-depth', '4', '--seed', '5', '--input', SIG_PAGED + '70:'],
+     [(520, 'identity-graveyard')], {}),
+    ('identity-undernet', IDENTITY + ['--net-biome', '5', '--run-depth', '4', '--seed', '1', '--input', SIG_PAGED + '24:UP+LEFT,46:'],
+     [(520, 'identity-undernet')], {}),
     # (the PET's E-Mail on a profile that has met seven guardians: the list,
     # then Dad's Records mail on its second page)
     ('pet', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,veteran', '--input',
@@ -1432,6 +1453,10 @@ CLIPS = [
     # cards on the second screen)
     ('home-visit', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000'], {},
      HOME_OUT + '0:place -156 30 7,20:,122:UP+LEFT,160:,' + HOME_COUNTER + '6:DOWN,30:,6:DOWN,30:,6:DOWN,60:', 856, 1822, '3ds'),
+    # (issue #98: a walk round an Undernet layer's signature, the court of
+    # identity-undernet, past its statue between braziers)
+    ('identity', IDENTITY + ['--net-biome', '5', '--run-depth', '4', '--seed', '1'], {},
+     SIG_PAGED + '20:,70:LEFT,80:DOWN,80:RIGHT,70:UP,100:', 460, 740),
 ]
 
 
@@ -1441,7 +1466,7 @@ CLIPS = [
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
-               'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12)}
+               'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12)}
 
 
 def clips(only=None):

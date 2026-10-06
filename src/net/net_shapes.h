@@ -29,6 +29,8 @@ bool box_free(int x, int y, int w, int h, int margin);
 /* Platform shapes, carved into their box. */
 enum { SHAPE_RECT, SHAPE_OCTAGON, SHAPE_PLUS, SHAPE_RAGGED, SHAPE_HOLED, SHAPE_CRATER };
 void carve_shape(int shape, int x, int y, int w, int h);
+/* The w x h box from (x, y) back to the void. */
+void carve_void(int x, int y, int w, int h);
 
 /* A room for points of interest: its box, a floor cell to stand on, and
  * its kind. Returns its index or -1. */

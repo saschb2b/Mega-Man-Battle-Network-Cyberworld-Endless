@@ -152,6 +152,13 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   rooms, nothing to hold a layer to, and the Graveyard's slabs cross
   eight: those keep the cap between big platforms alone. `test_way_links`
   holds each area to its count on eight ways in ten.
+- **Rungs meet a field square on** (issue #98). A comb's rung back to a
+  ragged field that met its edge on a tab beside a bite was a mouth two
+  panels wide on one side, the field going on past it, where the arrow's
+  way held walked MegaMan over the lane (`test_arrow_mouths`, a Seaside
+  layer); the panels beside a rung's landing are filled, so the edge runs
+  straight past it. Seaside's ways past its count fell from 12 of the
+  test's 60 to 8.
 
 Still apart from the originals: their dead ends. Capcom's maps have about
 twenty-five dead-end panels each (comb teeth on boardwalks, stubs, pads
@@ -168,7 +175,9 @@ start.
 A layer is built from those parts, not from rectangles. Each area has its
 own layouts (`src/net/net_layouts.c`), all made of the same pieces
 (`src/net/net_shapes.c`); an act's three layers take them in a shuffled
-order, so an area does not repeat one while it has others.
+order, so an area does not repeat one while it has others, and each is
+built round its signature, the room it is remembered by (Identity,
+below).
 
 | Layout | Areas (weight) | Built from |
 | --- | --- | --- |
@@ -189,9 +198,11 @@ layout each time, and its share of the area is silently lost. Crosses did
 so everywhere until its lattice was turned to the window.
 
 MegaMan arrives on the pad nearest the top of the screen; the exit is the
-room farthest from it by walking. On a guardian's layer the exit is an
+room farthest from it by walking, past the layer's signature where rooms
+lie beyond it (Identity). On a guardian's layer the exit is an
 arena instead (`src/net/net_arena.c`): a 5x5 platform at the end of a single
-bridge of 3-5 panels, attached where it lies farthest from the arrival,
+bridge of 3-5 panels, attached where it lies farthest from the arrival
+(past the signature too),
 drawn in the area's second floor so it reads apart from the platforms.
 Pads (the 3x3 rooms on spurs) are drawn with tiles learned on the
 original's own pads, where those are square (not the Judge Tree's round
@@ -340,6 +351,206 @@ a third of the approximated tiles; mazes of 1-wide walkways (Central's
 catwalks, the Undernet's webs) have shapes no original has and stay
 approximate.
 
+## Identity (built, issue #98)
+
+The owner, after several layers: random, but it soon feels the same; each
+layer should be one to remember, as Warframe's tilesets are.
+
+### What repeated
+
+Measured over 60 runs' acts per area (three layers each, depths 4-6: 180
+layers an area; a study kept out of the repository) and the tile test's
+layers:
+
+- **No room stood out.** The biggest room of a route, hub, ladder, web,
+  comb, trail or catwalks layer was 18 to 30 panels; only fields, slabs
+  and crosses held one of 49 or more. Nothing on most layers was a place
+  to name.
+- **No landmark.** The areas' set pieces (the giant tree, the statue, the
+  monument) stood on none of Central's, Seaside's, Sky's and the Nest's
+  layers, 3% of the Undernet's, 2% of the Secret Area's and 41% of
+  Green's; only the Graveyard's monument came often (95%).
+- **Acts that repeat.** Where an area has two layouts (Seaside, Sky,
+  Green, the Graveyard, the Nest, Robot Control) every act repeated one,
+  its first and third layers the same kind; the Aquarium's, the Judge
+  Tree's and Mr. Weather's comps have one layout, all three alike.
+- **The same outlines.** A layer's floor on the screen and the most alike
+  other layer of its area covered the same cells to 56-79% (their
+  intersection over their union); every hub 99-100%, crosses 87-91%.
+- **The same walk.** MegaMan arrives at the top of the screen on 87-100%
+  of layers, the exit in the bottom 40% on 83-98%.
+
+The variety was in the wiring (which platform joins which, where a
+walkway bends), which a player does not see. Kate Compton's bowls of
+oatmeal: every one different, none of them memorable.
+
+### What Warframe teaches
+
+Sources: the [Tile Sets](https://wiki.warframe.com/w/Tile_Sets) and
+[Orokin Moon](https://wiki.warframe.com/w/Orokin_Moon) articles of the
+Warframe wiki; Digital Extremes' level designer and layout artist [on the
+Grineer Sealab](https://www.warframe.com/news/let%E2%80%99s-meet-tim-and-erwin)
+and [on the ice planet](https://www.warframe.com/news/building-warframe-ice-planet-1);
+Daniel Brewer's [GDC 2013 talk](https://mcvuk.com/development-news/gdc-13-handling-ai-in-procedural-levels/)
+on its procedural levels; Kate Compton [on generators](https://www.gamedeveloper.com/design/practical-procedural-generation-for-everyone-).
+
+- A tileset is a few dozen built rooms with roles (the start, connectors,
+  big intermediate rooms, the objective, dead ends with loot, the exit)
+  strung on a template: a path that is mostly a line, with branches. A
+  set is told by its big rooms and their features (the Gas City's
+  reactors, the Galleon's rusted halls), which players learn and name;
+  the connectors carry the variety.
+- A set grows from one idea the eye holds: the Sealab from pods built
+  round rock pillars, so that it would not become the Galleon again,
+  hallway after hallway; the ice planet from a crashed ship that is its
+  base and its outline at once.
+- Special rooms recur: the Moon's challenge rooms turn up at random in
+  its missions, now and then two in one, and each is known on sight.
+- What is not built by hand is steered by measures: a map of distances
+  to the objective paced the walk where placing by hand could not.
+- Compton: a million things that differ where nobody looks are worth
+  less than a few that look different; a big thing with smaller ones
+  beside it reads as made.
+
+For the Endless Net, in its own terms:
+
+1. **One room to remember per layer, in its area's language** (Warframe's
+   big rooms; BN6's one landmark per map, above): its *signature*.
+2. **The way runs through it**, so it is seen, and the layer can be told
+   by it: past the statue, round the ring.
+3. **A small pool that recurs**: two signatures or so per area, after
+   its own maps, known on sight from run to run, never twice in an act
+   while the area has another.
+4. **Hierarchy, not more variety**: the signature is the layer's biggest
+   room; the rooms round it stay what they were.
+5. **Measured**: the tests hold the signature, the way through it and
+   the act's variety.
+
+### The design
+
+Through the game-design skill:
+
+- **Dialectic**: the familiar and the fresh. Every layer reads as its
+  area, BN6's own maps; each one reads as this layer, not the last.
+- **Loop layer**: the walk (finding the way by a landmark) and the act
+  (three layers, three places).
+- **Patterns**: the handcrafted-PCG hybrid (shapes after BN6's landmarks,
+  its own props, placed by rules), landmarks for wayfinding (a place seen
+  from the way, no marker), a shuffle bag for an act's signatures, with
+  memory across the act's border.
+- **Smells checked**: no new rule to learn and no screen; no power, so no
+  treadmill; nothing BN6 lacks (each signature is one of its maps'
+  landmarks, its props the originals' objects); MegaMan walks as BN6
+  walks him, the layers stay joined as Capcom's are (Navigation), and a
+  layer is still made from its seed alone.
+- **Left to the owner**: a name for a layer (an epithet MegaMan or L
+  says, a name on its card) is a call of voice and fiction (MegaMan
+  senses; he does not name what he has not seen, docs/VOICE.md); a
+  signature with play of its own (a fight, a reward) changes how the game
+  plays. Neither is built.
+
+### Signatures (built)
+
+`net_signature.c`: each layer has one (`layer.sig`, its room
+`layer.sig_room`), drawn from its area's pool:
+
+| Area | Signatures (weight) | After |
+| --- | --- | --- |
+| Central | crater 50, plaza 50 | Central Area 3's field round a pit; Central Area 1's big field |
+| Seaside | field 50, lagoon 50 | its one great field with ragged edges; the same round a pool of the void, where Seaside Area 2's field holds a field of its arrow panels (Arrow lanes, below) |
+| Sky | ring 50, plaza 50 | Sky Area 3's ring road (round its coloured fields; here round a sunken middle, a pad in it on a bridge); its pods grown to an octagon |
+| Green | grove 60, plaza 40 | Green Area 2's field with the giant cybertree at its back; Green Area 1's grass field with holes in it (seen in its map) |
+| Graveyard | slab 60, ring 40 | its great slab with a line of holes, the monument past its back; a slab round one hole (its loops are holes punched in its slabs) |
+| Undernet | court 60, cross 40 | a square plateau holding the statue between its braziers; a great plus |
+| Secret Area | court | |
+| Nest | cross 50, slab 50 | the Underground's plus round its raised block; its slabs |
+| Comps, homepages | plaza 50, cross 50 (Robot Control 60, 40) | a plaza square, octagonal on the homepages, ragged on the Judge Tree; the Aquarium's a glass pool its pads' size, Mr. Weather's and CopyBot's a plaza alone (a hole or a plus in Mr. Weather's slab its art draws in pieces) |
+
+- **Its size**: 8 to 13 panels a side by the layer's size (a ring 11, a
+  plus 11 or 13, Seaside's fields 10 to 12).
+- **None where the art has no big room**: BN5's Science Labs and Oran
+  Isle draw every room as their small hubs (`LayerKit.hub_rooms`). A
+  signature bigger than those came out flat and in pieces of other
+  surfaces, and one of seven a side drew its tiles off on a fifth more of
+  the floor (over 18 layers each, 59.0 tiles off per 100 panels against
+  47.4 in the Science Labs, 26.0 against 21.0 on Oran Isle) and stood out
+  from nothing: their layers keep none.
+- **Its place, the layout's heart**: a route's middle platform (on a
+  guardian's layer one sooner, the arena past it), the field itself, a
+  field across every plank of a ladder where the way's rungs cross, a
+  hub's centre, one of the slabs, a web's middle plateau, the lattice's
+  middle block, a hole in the catwalks' maze, the plaza at a comb's
+  middle catwalk, a room on a trail's middle leg. The first eight tries
+  at a layer keep its layout until the signature fits it; then any of
+  the area's layouts, with one where it fits.
+- **The way runs through it**: the exit, or a guardian's arena, is the
+  room farthest from the arrival of those every shortest walk reaches
+  only through the signature (`ng_walk_past_signature`).
+- **Its props**: the landmark goes to the signature first (Props, Sets):
+  the giant tree to a grove, the statue to a court (past its back rim,
+  else in a walled hole in its floor, the braziers in holes beside it, as
+  BN6 sets most of its statues, gravestones and boards: 33 of 39 in
+  walled holes, Props), the monument to the Graveyard's. Central
+  and Sky frame their signature with an avenue of cybertrees past its
+  back rim, mirrored with a panel's gap in its middle, as Green Area 2
+  frames its giant tree; Seaside's BBS stands at its field. No counter
+  stands in the landmark's room, and the landmark is set before the
+  services.
+- **Its open floor is no detour's end**: a plaza's corners and a ring
+  road's far side are seen from the way (No long detour left empty).
+- **Drawn**: where an area draws its small platforms and arena as pools
+  (the Aquarium), the signature is one too.
+
+`build.py atlas` names each layer's signature in its report, the dev
+step `sig` (`--input "0:sig"`, play.py's `sig`) puts MegaMan in it, and
+play.py's state says where it lies.
+
+### An act's three layers (built)
+
+`net_plan.c`: an act draws its layers' signatures from the area's pool
+without replacement, by their weights, as it draws its layouts; where an
+act would open in the layout or the signature the act before closed in,
+its draw turns on by one; and where it would close in its first layer's
+layout and signature both (two layouts and two signatures, each drawn in
+turn), its second layer takes the first's signature and the third the
+other, so the guardian's layer differs from the one before it in both
+should its layout not fit and another be built. All of it from the run's
+seed and the depth, as before; side layers (an Undernet detour, the
+Secret Area, a trip back) draw theirs from their own seeds.
+
+### Measured
+
+| | Before | After |
+| --- | --- | --- |
+| A signature (the tests' 40 runs of 18 layers) | | 720 of 720 layers, the way through it on 682, the most floor of the layer's rooms on 708 |
+| The biggest room's box (the study) | 18-30 panels but on fields, slabs and crosses | 49-112 panels, the signature (in the catwalks' mazes 32-49) |
+| A layer's layout and signature twice in an act (the study) | Seaside, Sky, Green, the Nest, Robot Control 1.0 an act, the Graveyard 0.98, the Undernet 0.12 | 0, 0, 0.02; the Judge Tree 2 to 1; the Aquarium and Mr. Weather still 2 (one layout, one signature) |
+| Two layers in a row alike (test runs) | | 4 of 720 (a layout that did not fit, rebuilt as another) |
+| The landmark (the study) | Green 41%, Graveyard 95%, Undernet 3%, Secret 2% | 82%, 100%, 49%, 98%; at the signature on 173 of 188 test layers that hold one |
+| The Undernet's statue (the tests' 30 Undernet layers) | 1 | 16 |
+| Outlines alike (the study) | 0.56-0.79 | 0.57-0.82 |
+| The exit in the bottom 40% (the study) | 83-98% | 79-96% |
+| Tiles (build.py tiles, all areas) | 2.7 off and 82.4 seams per 100 panels | 2.4 and 75.1; Comp B's off 0.7 to 1.5 (a plus's inner corners, which its maps never show, drawn with the nearest) |
+
+The outlines barely moved: identity rides on the signature, not on the
+floor's outline. MegaMan still arrives at the top of the screen, and the
+areas of one layout still repeat it (left for later, below).
+
+Set pieces move with the floor. Over every layer of the study's runs,
+arrow lanes laid 1124 before and 1312 after (the Undernet's 375 to 319),
+Rush's gaps 3407 and 3228 (Sky's 655 to 529), teleport pairs 1067 and
+1562.
+
+### Left for later
+
+- **Where MegaMan arrives**: always the pad nearest the top of the
+  screen, so every layer's walk runs down it. Varying it moves where the
+  camera opens on every layer.
+- **More layouts** for the areas of two (an act still repeats one) and
+  of one (the Aquarium, the Judge Tree, Mr. Weather).
+- **A name per layer**, and signatures with play of their own: the
+  owner's (The design, above).
+
 ## Props
 
 The originals furnish their floors: a Net Dealer behind his capsule counter,
@@ -426,14 +637,16 @@ Data and bystanders, as a map is built before it is filled
 | Area | Landmark | Rows and signs |
 | --- | --- | --- |
 | Green | the giant cybertree in a walled hole one panel in from a room's back rim, cybertrees past the rim on both sides of it, mirrored, up to four pairs | rows of three cybertrees past rims; the WELCOME sign by the counter |
-| Undernet, Secret Area | the statue past a back rim, a brazier two panels to either side, mirrored | |
+| Undernet, Secret Area | the statue past a back rim, a brazier two panels to either side, mirrored; where the court has no such rim, in a walled hole in its floor, the braziers in holes beside it | |
 | Graveyard | the monument past a back rim | rows of three gravestones in one walled hole of three panels in a big slab |
-| Central, Sky | | rows of three cybertrees past rims; the WELCOME sign by the counter |
-| Seaside | | a BBS past a big room's rim; the WELCOME sign by the counter |
+| Central, Sky | an avenue of cybertrees past the signature's back rim, mirrored, a panel's gap in its middle, two to four pairs (as Green Area 2 frames its giant tree) | rows of three cybertrees past rims; the WELCOME sign by the counter |
+| Seaside | | a BBS past the signature's rim, else a big room's; the WELCOME sign by the counter |
 
 The rules, from the originals' numbers above:
 
-- **The landmark** takes the best room for it: not the arrival's, the
+- **The landmark** takes the layer's signature first, where its shape
+  holds the set (Identity): the giant tree a grove, the statue a court,
+  the monument any. Else the best room for it: not the arrival's, the
   exit's or the arena, no pad, twelve panels or more, no counter in or
   beside it, a back rim (grid -x or -y, the top of the screen) of three
   panels (five for the statue's pair) with void two panels deep past it,
@@ -452,8 +665,10 @@ The rules, from the originals' numbers above:
   as the originals set theirs by a NetCafe's way in; a BBS past a big
   room's rim.
 
-Over the tests' 300 layers with every look: 2348 props, 255 of them in
-walled holes, a landmark on 162 layers (the areas' own looks give fewer).
+Over the tests' 300 layers with every look: 2452 props, 270 of them in
+walled holes, a landmark on 153 layers (the areas' own looks give fewer),
+the Undernet's statue on 16 of its 30 (1 before its court, issue #98).
+The landmark is set before the services, so no counter crowds it.
 A map loads at most 12 compressed sprites and 0x8800 bytes of them (the
 game's loader); a prop whose sprite no longer fits is left out whole, not
 shown as noise.
@@ -598,7 +813,11 @@ takes a new one where the map has room. A playtester walked a two-wide
 band to an empty end; over the tests' 300 layers 321 of 1589 such
 detours had been empty, 106 of them wide; 215 and 40 now, the rest where
 the map's sixteen are spent or the end has no free panel. A narrow spur
-to nothing stays, as BN6's maps keep some.
+to nothing stays, as BN6's maps keep some. The signature's open floor is
+no end (issue #98): a plaza's corners and a ring road's far side are seen
+from the way that crosses or rounds them (`layer_detour_open`). Over the
+same layers 586 of 1877 such branches end there; of the other 1291, 122
+are empty, 30 of them wide.
 
 ### The layer's RegUp (built, issue #51)
 
