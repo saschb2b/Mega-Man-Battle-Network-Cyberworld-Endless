@@ -60,9 +60,10 @@ are listed in [Where it is decided](#where-it-is-decided).
   fully.
 - **Growth:** 3 HPMemory (+60 max HP) per guardian, one HPMemory in each Net
   Dealer at `(10 + 2 × depth) × 100` zenny, a Cross from five of the Navis,
-  Beast Out from the Graveyard's guardian (from the first battle with the
-  BeastOut helper, once the endless net's own Nest has fallen: docs/META.md;
-  the acts' bands stay as they are with it). Guardians drop no chip.
+  Beast Out from the Cybeast at the endless net's own Nest, for the rest of
+  the run (issue #109; from the first battle with the BeastOut helper, once
+  that Nest has fallen: docs/META.md; the acts' bands stay as they are with
+  it). Guardians drop no chip.
 - **MegaMan's start:** the game's own new game. 100 HP and the default
   folder of 30 chips: Cannon ×4, AirShot ×2, Vulcan1 ×3, MiniBomb ×4,
   Sword ×4, WideSwrd ×2, CrakShot ×2, AreaGrab, Atk+10 ×2, Recov10 ×4,
@@ -348,9 +349,9 @@ whose viruses are late in BN6 come late in the run. The battle budget above
 keeps any area safe even when a tier runs short.
 
 Acts 5 and 6 changed places: the Undernet's battles are lighter than the
-Graveyard's, and BN6 keeps the Graveyard for after the story. Beast Out now
-comes from the last guardian before the Nest. Runs saved before keep their
-order.
+Graveyard's, and BN6 keeps the Graveyard for after the story. Beast Out then
+came from the last guardian before the Nest (since issue #109, from the
+Cybeast at the Nest itself). Runs saved before keep their order.
 
 ### Choosing guardians
 
@@ -441,8 +442,9 @@ Gregar at 2500 HP on the first Net and Gregar SP at 4000 on every Net
 after it, where the Nest's SP guardians stood at 1500 to 2000 (SlashMan
 SP half the runs, EraseMan SP and ProtoMan SP a quarter each). It stands
 above the bands by design, the capstone the Net was built down to, met
-with everything the run has gathered: the Graveyard's BeastOut, every
-Cross and GigaChip, five HPMemory a guardian. The Net's clock adds its
+with everything the run has gathered: every Cross and GigaChip, five
+HPMemory a guardian; BeastOut is its own fall's, for the Nets after
+(issue #109), but in a run that brought it. The Net's clock adds its
 tenth a notch to it as to any guardian. The short net's Nest keeps its
 guardian, paced as a fourth act. `build.py pacing` shows them beside act
 6's band.

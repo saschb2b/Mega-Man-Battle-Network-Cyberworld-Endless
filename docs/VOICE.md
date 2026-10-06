@@ -325,7 +325,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | MegaMan on DarkChips | `src/director/dark_words.c` |
 | The older net's battles, its codes, the chips that sit out | `src/director/guest_words.c`; its wait screen `src/emu/guest_wait_lines.c` |
 | One-time lessons: the Pack, Rush's bones, a battlefield's Mystery Data, R in the town | `src/director/lesson_words.c` |
-| A Cross won, one the run can't carry, the Cybeast's call | `src/director/powers_words.c` |
+| A Cross won, one the run can't carry, the Graveyard's call to the beast, Dad's CybeastButton after the Cybeast | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |
 | The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls | `src/layer/guardian_lines.c` |
 | The super bosses: Bass's and the Cybeast's meetings by their record, last words, tips, their data's words and title cards | `src/layer/super_lines.c` |

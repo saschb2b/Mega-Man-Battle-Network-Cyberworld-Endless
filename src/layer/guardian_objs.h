@@ -40,5 +40,8 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 /* Its actors, once `archive` holds the scripts: the guardian in his own
  * shape (guardian_body) and the Guardian Data he leaves. */
 void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g);
+/* His sprite into the layer's list, before the props take their share (a
+ * compressed one, Gregar's JudgeMan's, loads only so) */
+void guardian_sprites(NpcList *npcs, const GuardianStage *g);
 
 #endif

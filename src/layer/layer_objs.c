@@ -964,6 +964,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	layer_objs_shops(out, false);
 	NpcList *npcs = &in.npcs;
 	blocker_sprites(npcs);
+	if (out->guardian.navi) guardian_sprites(npcs, &out->guardian);
 	for (int i = 0; i < in.ntalk; ++i)
 		if (in.talkers[i].cat == 7) npc_need_sprite(npcs, 7, in.talkers[i].sprite);
 	npcs->objects = props_objects(npcs);

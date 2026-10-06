@@ -15,6 +15,26 @@
   town), stays away when nothing did, keeps clear of the portals and the
   way to the pad, and speaks only when spoken to; a CONTINUE at home
   finds him as he was.
+- **Beat the beast, then gain its power** (issue #109). BeastOut now comes
+  from the Cybeast: beaten at the endless net's own Nest, it gives BeastOut
+  for the rest of the run, from layer 20 on, and Dad's call after its fall
+  unlocks the PET's CybeastButton ("MegaMan beat the beast. Its power is
+  his now."). The Graveyard's guardian gives nothing now: his data stirs
+  the beast in MegaMan ("The Nest is calling to the Cybeast in me!"), and
+  Lan answers that he has kept it in check, as a run that brought BeastOut
+  already heard there. The same fall opens the BeastOut helper, as it did;
+  a run that brought it is unchanged, and a profile that opened it keeps
+  it. The Cybeast is now fought without BeastOut, but in a run that
+  brought it.
+- **The PET's Library draws every chip again.** A chip held in an earlier
+  run came into the run's Library without the mark BN6 gives a chip it hands
+  out, and wherever one stood on the Library's page BN6 drew no names and
+  counted 0 (a player's Library of 23 hours, in the browser and everywhere).
+  Every Library chip is now marked as a run begins and after every CONTINUE,
+  so runs saved before draw whole too.
+- **JudgeMan stands as himself at his arena.** He stood as a white ball:
+  his overworld sprite is the only guardian's BN6 keeps compressed, and the
+  layer never loaded it.
 - **MegaMan arrives from any side of a layer** (issue #106). He arrived at
   the top of the screen on nearly every layer, facing straight down, so
   every layer was walked top to bottom. BN6's own maps, read from the ROM
@@ -195,7 +215,7 @@
   On, BN6's own BeastOut is in the Custom screen from the run's first
   battle, in the short net too, which never reaches the Graveyard: the
   emblem under OK, its three turns a battle, BeastOver if pressed again
-  while tired. Off, the Graveyard's guardian gives it as before. It is
+  while tired. Off, the Cybeast's fall gives it (issue #109). It is
   remembered with the last setup, named over the summary's title and in
   Dad's dive report as every helper is, and counts for every unlock; the
   run that opens it says "Unlocked: the BeastOut start". In such a run Dad

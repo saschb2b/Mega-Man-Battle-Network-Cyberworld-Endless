@@ -46,8 +46,9 @@ int out_names(char *s, size_t n) {
 void older_net_words(void) {
 	D.beat_cross = encounter_guest && !profile.cross_old_told;
 	/* (and the Cybeast's, where the run holds BeastOut: a run brings it
-	 * from its first act since issue #99, where the older net dresses
-	 * areas, and its emblem would be gone without a word, as a Cross was) */
+	 * from its first act since issue #99, or has it from the first Net's
+	 * Cybeast on (issue #109), where the older net dresses areas, and its
+	 * emblem would be gone without a word, as a Cross was) */
 	D.beat_beast = encounter_guest && flag_get(BN6_FLAG_BEAST_OUT) && !(profile.beast & BEAST_OLD_TOLD);
 	char out[96];
 	int n = out_names(out, sizeof out);
