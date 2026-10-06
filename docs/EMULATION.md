@@ -273,7 +273,9 @@ which sends Lan's HP's courier and his mark off, piece 2; `0x146F` the
 Yes of a link's question in Lan's HP (a trip back's or a way on's), which the director clears
 before it asks and acts on as the talk closes, and `0x1470`-`0x1471`
 set while Lan's HP's link on the left and down front is no way back,
-which sends their way-back marks off, piece 2; `0x146B` that this visit's order was
+which sends their way-back marks off, piece 2; `0x1472` that the
+courier has been heard, which his words set and which sends his burst
+off, piece 2; `0x146B` that this visit's order was
 made at AsterLand's counter, piece 6).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.

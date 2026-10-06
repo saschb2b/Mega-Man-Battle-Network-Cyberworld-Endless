@@ -110,16 +110,17 @@ static bool read_spots(void) {
 	return true;
 }
 
-/* the courier and his mark into `npcs`, both gone while
- * LANHP_COURIER_GONE_FLAG is set; his words' room cleared (an archive of
- * one empty script) */
+/* the courier and his mark into `npcs`, he gone while
+ * LANHP_COURIER_GONE_FLAG is set, his mark while LANHP_COURIER_TOLD_FLAG
+ * is (the director sets it with the first); his words' room cleared (an
+ * archive of one empty script) */
 static void courier(NpcList *npcs) {
 	static const uint8_t empty[COURIER_TEXT] = { 2, 0, 0xE6 };   /* (one script: ts_end) */
 	H.courier_text = mapslot_alloc(empty, sizeof empty);
 	if (!H.courier_text || !npc_need_sprite(npcs, 6, COURIER_SPRITE) || !npc_need_sprite(npcs, 5, MARK_SPRITE)) return;
 	uint32_t prog = npc_talker(6, COURIER_SPRITE, COURIER_X, COURIER_Y, 0, COURIER_FACE, H.courier_text, 0, LANHP_COURIER_GONE_FLAG, false);
 	/* (a step before him in depth, drawn over him where they meet) */
-	uint32_t mark = npc_mark(5, MARK_SPRITE, COURIER_X - 1, COURIER_Y + 1, MARK_Z, 0, LANHP_COURIER_GONE_FLAG);
+	uint32_t mark = npc_mark(5, MARK_SPRITE, COURIER_X - 1, COURIER_Y + 1, MARK_Z, 0, LANHP_COURIER_TOLD_FLAG);
 	if (prog) npcs->script[npcs->n++] = prog;
 	if (prog && mark) npcs->script[npcs->n++] = mark;
 }

@@ -279,7 +279,12 @@ CONTINUE finds him as he was; what still waits follows the askers' flags
 every frame at home (a reward taken, a request taken), which keeps flag
 `0x146C` set while nothing waits: then he and his burst are gone, and his
 words are written again as what waits changes. Nothing waiting, no
-courier. He speaks only when spoken to.
+courier. He speaks only when spoken to. Heard once, his burst goes, as a
+BN6 person's does once heard: his words end by setting flag `0x1472`,
+which sends the burst off and which the director clears as his words
+change. And the requests are left out of them once L has named them in
+the town this visit (a playtester heard the same news from both,
+session 73).
 
 Going on against going back (issue #110, the owner after playing):
 MegaMan arrives on the blue pad facing +x, up the corridor to the pink

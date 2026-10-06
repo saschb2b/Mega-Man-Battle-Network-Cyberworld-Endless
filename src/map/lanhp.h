@@ -13,6 +13,10 @@
 /* Set while the town holds nothing for this visit: the courier stays away
  * (the director keeps it, docs/HOME.md piece 2). */
 #define LANHP_COURIER_GONE_FLAG 0x146C
+/* Set once the player has talked to him: his "!!" goes, as a BN6 person's
+ * does once heard (his words set it; the director clears it as they
+ * change). */
+#define LANHP_COURIER_TOLD_FLAG 0x1472
 
 /* Lan's HP installed: BN6's own tiles, walls and decorations, no map
  * scripts or Mystery Data, its own warp list (every entry back to the

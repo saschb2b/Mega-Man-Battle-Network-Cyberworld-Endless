@@ -10,6 +10,9 @@
   that way.
 - **The title names a run saved at home.** CONTINUE read "Layer 7" for a
   run saved in AsterLand between acts; it says "Home" now.
+- **The courier's "!!" goes once he is heard,** as a BN6 person's does,
+  and he leaves the new requests out when L has named them in the town
+  this visit: a playtester heard the same news twice.
 ## 0.11.1 (2026-10-06)
 
 - **The on-screen buttons answer the statistics' question.** On a phone
