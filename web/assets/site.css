@@ -301,6 +301,10 @@ footer.site a { color: #c6ff8c; }
 .i-mail-open { background-image: url(ui/icon-mail-open.png); }
 .i-sound { background-image: url(ui/icon-sound.png); }
 .i-muted { background-image: url(ui/icon-muted.png); }
+.i-star { background-image: url(ui/icon-star.png); }
+.i-follow { background-image: url(ui/icon-follow.png); }
+.i-bug { background-image: url(ui/icon-bug.png); }
+.i-coffee { background-image: url(ui/icon-coffee.png); }
 
 /* keys: dark caps with a light edge, as the game's button prompts */
 kbd {

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **A thank-you after a download** (issue #103). On the site's download
+  page, the first download of a visit (any release file, or the iPhone's
+  Add to SideStore) opens a mail from Saschb2b in a PET window beside it:
+  thanks, a Buy me a coffee button, and on GitHub a star for the
+  repository, a follow and the issues for bugs and ideas. The download
+  starts as it always did. Esc, Close or a click outside closes it and
+  hands the keyboard back to the link; its links open a new tab, so the
+  page's install steps stay. The site's analytics count its opening and
+  its links as they count the others, never who clicked.
+
 ## 0.10.0 (2026-10-05)
 
 - **The second screen's polish** (issue #81). The NaviCust programs'

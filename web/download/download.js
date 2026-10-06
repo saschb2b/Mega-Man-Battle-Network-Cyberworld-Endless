@@ -149,6 +149,61 @@ document.addEventListener('click', async (e) => {
 	if (modules) for (const code of document.querySelectorAll('.qr .code')) code.replaceChildren(qrSvg(modules, `QR code of the 3DS title's link, ${release.tag_name}`));
 })();
 
+// ---- after a download: a thank-you, once a visit ----
+
+// A download (a link to a release's file, which the list's are once the
+// release is read, or a button adding the AltStore source, the iPhone's way
+// to the app) opens a mail from Saschb2b beside it: thanks, a coffee, the
+// repository and its issues. The download goes on as without it: the dialog
+// opens after the click has done its work, and its own links open a new
+// tab, never over the download's navigation. The 3DS's QR code is scanned
+// by FBI, not clicked here: it has no thanks. Shown once a visit, as the
+// tab's sessionStorage keeps it (where that is blocked, once a page).
+(() => {
+	const dialog = document.getElementById('thanks');
+	if (!dialog || typeof dialog.showModal !== 'function') return;
+	const DOWNLOAD = 'a[href*="/releases/download/"], a[href*="/releases/latest/download/"], a[data-needs]:not([aria-disabled="true"])';
+	const KEY = 'cw-thanks';
+	let shown = false;
+	let from = null;
+	let pressedOutside = false;
+	try { shown = sessionStorage.getItem(KEY) === '1'; } catch (e) { /* not kept: once a page */ }
+
+	document.addEventListener('click', (e) => {
+		const link = e.target.closest(DOWNLOAD);
+		if (!link || shown) return;
+		shown = true;
+		try { sessionStorage.setItem(KEY, '1'); } catch (err) { /* not kept: once a page */ }
+		from = link;
+		setTimeout(() => {
+			dialog.showModal();
+			track('thanks-open', { platform: link.dataset.umamiEventPlatform || 'website' });
+		});
+	});
+	dialog.querySelector('.close').addEventListener('click', () => dialog.close());
+	// (Tab goes round the window, from its last link to Close and back)
+	dialog.addEventListener('keydown', (e) => {
+		if (e.key !== 'Tab') return;
+		const stops = dialog.querySelectorAll('a[href], button');
+		const first = stops[0], last = stops[stops.length - 1];
+		if (document.activeElement !== (e.shiftKey ? first : last)) return;
+		e.preventDefault();
+		(e.shiftKey ? last : first).focus();
+	});
+	// (a click on the dialog itself is outside its window; a press that began
+	// in the window, text selected and let go outside, is not one)
+	dialog.addEventListener('pointerdown', (e) => { pressedOutside = e.target === dialog; });
+	dialog.addEventListener('click', (e) => {
+		if (e.target === dialog && pressedOutside) dialog.close();
+		pressedOutside = false;
+	});
+	// (back to the link the download came from, as the keyboard left it)
+	dialog.addEventListener('close', () => {
+		if (from && from.isConnected) from.focus({ preventScroll: true });
+		from = null;
+	});
+})();
+
 // A QR code's modules as an SVG, dark on white with its quiet zone.
 function qrSvg(modules, label) {
 	const ns = 'http://www.w3.org/2000/svg', n = modules.length + 8;
