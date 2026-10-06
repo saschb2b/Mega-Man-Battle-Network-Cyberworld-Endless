@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "guardians.h"
+#include "jobs.h"
 #include "net.h"
 #include "run.h"
 
@@ -114,6 +115,8 @@ const char *home_back_portal_words(int biome, bool taught, int clock) {
 	return words;
 }
 
+const char *home_back_question(void) { return "Go back,Lan?\n"; }
+
 const char *home_back_words(int clock) {
 	if (clock >= 4) return "@M Home again,Lan...|@M The Net's copying fast now.|@L Then no more stalling! Let's dive!";
 	return "@M Home again,Lan!|@M The Net kept copying while we were away...|@L Then we'd better get moving!";
@@ -148,4 +151,40 @@ const char *home_door_words(const char *words, const char *door) {
 const char *home_hp_words(bool taught) {
 	if (taught) return "@M Our HP,Lan! The pink pad's waiting!";
 	return "@M Our HP,Lan! Home sweet home!|@M The Endless Net's linked in here now...|@M The pink pad leads into it!";
+}
+
+/* "A,B AND C" of `n` names into `w` from `k`; the new length */
+static size_t name_list(char *w, size_t size, size_t k, const char *const *names, int n) {
+	for (int i = 0; i < n && k < size; ++i)
+		k += (size_t)snprintf(w + k, size - k, "%s%s", !i ? "" : i == n - 1 ? " AND " : ",", names[i]);
+	return k < size ? k : size - 1;
+}
+
+const char *home_courier_words(int reward, unsigned posted, int unlockers, bool rush_food, bool www_id) {
+	/* (a homepage's helper relaying the town's posts and AsterLand's stock:
+	 * where each waits, never what the Net ahead holds) */
+	static const char *const paid_by[JOB_ASKERS] = { "THE NETBATTLER,\nASTERLAND!", "THE NETBATTLE CLUB,\nTHE ACADEMY!",
+		"THE MAN FROM THE LAB\nOUT IN TOWN!" };
+	static const char *const places[JOB_ASKERS] = { "ASTERLAND", "THE ACADEMY", "TOWN" };
+	static char w[320];
+	const char *names[JOB_ASKERS];
+	size_t k = 0;
+	int n = 0;
+	w[0] = 0;
+	if (reward >= 0 && reward < JOB_ASKERS) k = (size_t)snprintf(w, sizeof w, "REWARD WAITING!\n%s", paid_by[reward]);
+	else if (posted) {
+		for (int a = 0; a < JOB_ASKERS; ++a) if (posted >> a & 1) names[n++] = places[a];
+		k = (size_t)snprintf(w, sizeof w, "%s", n > 1 ? "NEW REQUESTS POSTED!\n" : "NEW REQUEST POSTED!\nAT ");
+		k = name_list(w, sizeof w, k, names, n);
+		k += (size_t)snprintf(w + k, sizeof w - k, "!");
+	}
+	n = 0;
+	if (unlockers) names[n++] = unlockers > 1 ? "UNLOCKERS" : "AN UNLOCKER";
+	if (rush_food) names[n++] = "RUSHFOOD";
+	if (www_id) names[n++] = "A WWW-ID";
+	if (!n || k + 2 >= sizeof w) return w;
+	k += (size_t)snprintf(w + k, sizeof w - k, "%sASTERLAND HAS ", k ? "|" : "");
+	k = name_list(w, sizeof w, k, names, n);
+	snprintf(w + k, sizeof w - k, "!");
+	return w;
 }

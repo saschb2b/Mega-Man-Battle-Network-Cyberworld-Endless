@@ -15,7 +15,9 @@
 #include "bn6.h"
 #include "emu.h"
 #include "flags.h"
+#include "gamecall.h"
 #include "mapslot.h"
+#include "npc.h"
 
 #define SONG 0x13          /* BN6's for every homepage, Lan's too */
 #define ARRIVAL_ENTRY 1    /* the blue pad */
@@ -30,6 +32,31 @@
  * then the floor's link squares, nearest the pink pad's side first */
 static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 
+/* The courier (docs/HOME.md, piece 2): a Mr.Prog (sprite list 6's 60) on
+ * the floor below the way from the blue pad to the corridor (y -14), 50
+ * units and more from every link square, facing the blue pad (-x), BN6's
+ * "!!" burst (list 5's 0x07, the counter's sign in AsterLand) over his
+ * head; his words an archive of their own, which the director writes */
+#define COURIER_X (-84)
+#define COURIER_Y 38
+#define COURIER_FACE 5
+#define COURIER_SPRITE 60
+#define MARK_SPRITE 0x07
+#define MARK_Z 46
+#define COURIER_TEXT 768   /* the bytes his words may take */
+
+/* A way back's look (issue #110): BN6's own link marker (list 7's 0x88),
+ * whose map objects 0xCB-0xCE show each link square its town's emblem
+ * (animations 1-4), in its plain animation 0 instead, a ring on a cyan
+ * square; a mark of ours on each link square the older portals use
+ * (portals FIRST_BACK on), there while the flag of its portal is clear.
+ * The link itself stays locked by BN6's own rule, its story flag clear:
+ * its marker hidden, and its warp turned off every frame, until
+ * lanhp_take. */
+#define LINK_MARKER 0x88
+#define FIRST_BACK 3        /* home's HOME_WAYS: the older portals after the ways */
+#define BACK_DARK_FLAG 0x1470   /* + k - FIRST_BACK: set while portal k is no way back */
+
 static struct {
 	bool read;
 	int x[ENTRIES + 1], y[ENTRIES + 1];   /* each entry's spot: its cells' middle */
@@ -37,6 +64,7 @@ static struct {
 	int arrive_x, arrive_y;
 	uint32_t warps;                       /* the HP's own warp list */
 	uint8_t jack_out[16];                 /* BN6's blue pad's entry: its jack-out */
+	uint32_t courier_text;                /* the courier's words' room, 0 none */
 } H;
 
 static bool read_spots(void) {
@@ -73,19 +101,53 @@ static bool read_spots(void) {
 	return true;
 }
 
+/* the courier and his mark into `npcs`, both gone while
+ * LANHP_COURIER_GONE_FLAG is set; his words' room cleared (an archive of
+ * one empty script) */
+static void courier(NpcList *npcs) {
+	static const uint8_t empty[COURIER_TEXT] = { 2, 0, 0xE6 };   /* (one script: ts_end) */
+	H.courier_text = mapslot_alloc(empty, sizeof empty);
+	if (!H.courier_text || !npc_need_sprite(npcs, 6, COURIER_SPRITE) || !npc_need_sprite(npcs, 5, MARK_SPRITE)) return;
+	uint32_t prog = npc_talker(6, COURIER_SPRITE, COURIER_X, COURIER_Y, 0, COURIER_FACE, H.courier_text, 0, LANHP_COURIER_GONE_FLAG, false);
+	/* (a step before him in depth, drawn over him where they meet) */
+	uint32_t mark = npc_mark(5, MARK_SPRITE, COURIER_X - 1, COURIER_Y + 1, MARK_Z, 0, LANHP_COURIER_GONE_FLAG);
+	if (prog) npcs->script[npcs->n++] = prog;
+	if (prog && mark) npcs->script[npcs->n++] = mark;
+}
+
+/* the ways back's marks into `npcs` */
+static void back_marks(NpcList *npcs) {
+	if (!npc_need_sprite(npcs, 7, LINK_MARKER)) return;
+	for (int k = FIRST_BACK; k < LANHP_PORTALS && npcs->n < 32; ++k) {
+		int e = portal_entry[k];
+		uint32_t at = npc_floor_mark(7, LINK_MARKER, H.x[e], H.y[e], 0, BACK_DARK_FLAG + k - FIRST_BACK);
+		if (at) npcs->script[npcs->n++] = at;
+	}
+}
+
 bool lanhp_install(void) {
 	if (!read_spots()) return false;
 	NpcList npcs;
 	memset(&npcs, 0, sizeof npcs);
-	/* (its own decorations, BN6's four objects under the floor) */
+	/* (its own decorations, BN6's four objects under the floor, their
+	 * sprite asked for: else BN6 draws its placeholder, a white ball) */
 	npcs.objects = mapslot_objects(LANHP_GROUP, LANHP_NUMBER);
+	npc_objects_sprites(&npcs);
 	mapslot_hp(true);
+	courier(&npcs);
+	back_marks(&npcs);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
 		mapslot_music_home(0, LANHP_GROUP, LANHP_NUMBER, SONG);
 	mapslot_hp(false);
 	if (ok) emu_write(H.warps + 16u * (ARRIVAL_ENTRY - 1), H.jack_out, sizeof H.jack_out);
 	return ok;
+}
+
+bool lanhp_courier_say(const uint8_t *archive, int n) {
+	if (!H.courier_text || n <= 0 || n > COURIER_TEXT) return false;
+	emu_write(H.courier_text, archive, (size_t)n);
+	return true;
 }
 
 void lanhp_arrival(int *x, int *y) {
@@ -104,16 +166,36 @@ int lanhp_portal_of(int entry) {
 	return -1;
 }
 
-void lanhp_lit(unsigned lit) {
+void lanhp_lit(unsigned lit, unsigned back) {
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
 		int e = portal_entry[k];
-		bool on = lit >> k & 1;
+		bool mark = (back >> k & 1) != 0, on = (lit >> k & 1) && !mark;
 		if (on) flag_clear(BN6_FLAG_WARP_OFF + e);
 		else flag_set(BN6_FLAG_WARP_OFF + e);
+		if (k >= FIRST_BACK) {
+			if (mark) flag_clear(BACK_DARK_FLAG + k - FIRST_BACK);
+			else flag_set(BACK_DARK_FLAG + k - FIRST_BACK);
+		}
 		if (e < FIRST_LINK) continue;
 		if (on) flag_set(LINK_OPEN + e - FIRST_LINK);
 		else flag_clear(LINK_OPEN + e - FIRST_LINK);
 	}
+}
+
+int lanhp_portal_ahead(int x, int y, int face) {
+	/* (BN6's own probe for A, then two and three times as far: a link
+	 * square is flat, and MegaMan checks it from its edge) */
+	int dx, dy;
+	npc_probe(face, &dx, &dy);
+	for (int m = 1; m <= 3; ++m) {
+		int k = lanhp_portal_near(x + dx * m, y + dy * m, 2);
+		if (k >= 0) return k;
+	}
+	return -1;
+}
+
+void lanhp_take(int k) {
+	if (k >= 0 && k < LANHP_PORTALS) emu_warp_link(portal_entry[k]);
 }
 
 void lanhp_portal_spot(int k, int *x, int *y) {

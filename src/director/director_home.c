@@ -34,7 +34,7 @@
 #include "town.h"
 
 #define HOME_WAYS 3   /* run_ways's most: the act's own, the other way, the dark way; the older portals after them */
-#define ARRIVE_FACE 4
+#define ARRIVE_FACE 1   /* +x: up the corridor to the pink pad, the way on (issue #110) */
 
 /* The next act's ways (run_ways), worked out from the run's seed at home
  * and again on a CONTINUE there; the one whose first layer is built; and
@@ -63,6 +63,8 @@ unsigned home_lit(void) {
 	for (int j = 0; j < nolder; ++j) if (!(run.back_spent >> j & 1)) lit |= 1u << (HOME_WAYS + j);
 	return lit;
 }
+
+unsigned home_lit_back(void) { return home_lit() & ~((1u << HOME_WAYS) - 1); }
 
 int home_older(int k) {
 	int j = k - HOME_WAYS;
@@ -104,7 +106,9 @@ int director_home_ways(DirectorWay *out, int most) {
 		out[n].navi = ways[k].navi;
 		out[n].back = false;
 	}
-	for (int k = 0; k < nolder && n < most; ++k)
+	/* (by their portals, HOME_WAYS on: the list asked for portals 0 to
+	 * nolder - 1, the ways', and left every way back out) */
+	for (int k = HOME_WAYS; k < HOME_WAYS + nolder && n < most; ++k)
 		if (home_older(k) >= 0) { out[n].biome = home_older(k); out[n].navi = 0; out[n++].back = true; }
 	return n;
 }
@@ -164,7 +168,10 @@ static bool home_install(void) {
 	home_jobs_visit();
 	bool ok = town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) &&
 		home_places_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
-	if (ok) home_jobs_flags();
+	if (ok) {
+		home_jobs_flags();
+		home_courier_visit();
+	}
 	return ok;
 }
 

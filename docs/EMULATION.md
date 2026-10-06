@@ -90,7 +90,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x320000`-`+0x330000` | Home's other places (docs/HOME.md, piece 10), a part each: AsterLand's (`+0x320000`) and the Cyber Academy's four maps' (`+0x328000`): their NPC lists and their people's scripts and words, empty map scripts, their own warp lists (BN6's doors copied in, the doors out pointed where the planned town has them) and the music lists | `mapslot.c`, `indoors.c`, `aster_land.c`, `academy.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
-| `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): its empty NPC list and map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
+| `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
 | `+0x14C000`-`+0x150000` | Lan's house's and room's: their empty NPC lists and map scripts, their own warp lists (BN6's doors copied in), the room's jack-in table and the music list | `mapslot.c`, `lan_house.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
 | `+0x152000`-`+0x153000` | The map-name label's archive: a copy of the game's with its 244 names pointed at where the run is ("Layer 12", "ACDC Town"); its other scripts (the PET's HP, zenny and BugFrags, 0xF0-0xF2) kept | `director_layer.c` |
@@ -267,7 +267,13 @@ that sit out of the older net's battles were named on its first such
 layer; at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
 that one is held and `0x146A` that the held one was settled, which the
 askers' scripts set and the director keeps as each visit's places are
-installed, docs/HOME.md piece 5; `0x146B` that this visit's order was
+installed, docs/HOME.md piece 5; `0x146C` that the town holds nothing
+more for this visit, which the director keeps every frame at home and
+which sends Lan's HP's courier and his mark off, piece 2; `0x146F` the
+Yes of a trip back's question in Lan's HP, which the director clears
+before it asks and acts on as the talk closes, and `0x1470`-`0x1471`
+set while Lan's HP's link on the left and down front is no way back,
+which sends their way-back marks off, piece 2; `0x146B` that this visit's order was
 made at AsterLand's counter, piece 6).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.

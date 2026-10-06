@@ -10,7 +10,7 @@
 
 enum {
 	CINEMA_FREE,   /* the player plays */
-	CINEMA_TALK,   /* only A and B, to read a conversation */
+	CINEMA_TALK,   /* only A and B, to read a conversation, and left and right for its questions */
 	CINEMA_HOLD,   /* MegaMan holds still */
 	CINEMA_WALK,   /* MegaMan walks where the staging leads him (cinema_walk) */
 };

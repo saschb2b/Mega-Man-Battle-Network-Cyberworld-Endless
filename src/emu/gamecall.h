@@ -24,5 +24,7 @@ void emu_warp(int group, int number, int x, int y, int facing);
 /* Starts the game's warp to entry 1 of the current map's warp list with its
  * departure: MegaMan jacks out, and in at the entry's place. */
 void emu_warp_out(void);
+/* ... to entry `entry` of it, as its trigger cells would. */
+void emu_warp_link(int entry);
 
 #endif

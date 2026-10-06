@@ -19,6 +19,13 @@ uint32_t npc_mystery(int index);
  * overworld objects), index its sprite. */
 uint32_t npc_prop(int category, int index, int x, int y, int z, int anim);
 
+/* A sprite standing at world (x, y, z) playing `anim`, nothing to walk
+ * into or talk to (a mark over someone's head: z his height), gone once
+ * event flag `gone_flag` is set (-1: never). */
+uint32_t npc_mark(int category, int index, int x, int y, int z, int anim, int gone_flag);
+/* ... drawn on the floor at world (x, y), as npc_prop's pads. */
+uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gone_flag);
+
 /* A standing NPC that talks with `script` of the text archive at `archive`,
  * and leaves once event flag `gone_flag` is set (-1: never); a `floor` one
  * (a pad) is drawn under MegaMan. */

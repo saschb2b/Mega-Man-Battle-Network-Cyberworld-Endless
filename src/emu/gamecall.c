@@ -96,11 +96,13 @@ void emu_warp(int group, int number, int x, int y, int facing) {
 	game_call(BN6_ENTER_MAP_ON_WARP, 0, 0);
 }
 
-void emu_warp_out(void) {
+void emu_warp_link(int entry) {
 	restart_music();
-	/* as the warp pad's trigger leaves it: under way, index 1, same group kind */
+	/* as the warp pad's trigger leaves it: under way, its index, same group kind */
 	emu_write8(BN6_WARP_PENDING, 1);
-	emu_write8(BN6_WARP_INDEX, 1);
+	emu_write8(BN6_WARP_INDEX, (uint8_t)entry);
 	emu_write8(BN6_WARP_GROUP_KIND, 0);
 	game_call(BN6_WARP_DEPART_JACK_OUT, 0, 0);
 }
+
+void emu_warp_out(void) { emu_warp_link(1); }

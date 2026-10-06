@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- **Lan's HP tells going on from going back, and talks only when asked**
+  (issue #110). Warped in, MegaMan now faces up the corridor to the pink
+  pad, the way on, instead of straight down. He no longer stops the player
+  beside every other portal on the way: his words on a portal (its data,
+  a Navi's signal, a trip back's price) come when the player checks it,
+  A facing it. Lit links show BN6's own link markers instead of white
+  balls (their sprite was never loaded); a way on keeps its town emblem,
+  a way back shows the marker's plain orange pad. A trip back, stepped on
+  or checked, asks first, the cursor on No; Yes takes the link. The second
+  screen lists each way as On or Back, the ways back too.
+- **A Mr.Prog courier in Lan's HP says what the town holds** (issue
+  #108). Playtests jacked out to the town only when told to, though it
+  holds a request's pay, new requests and keys for the act ahead. Now,
+  while it holds something for the visit, a Mr.Prog stands on the HP's
+  floor below the way to the pink pad, BN6's "!!" burst over his head.
+  Talked to, he names what waits and where, the most valuable first: a
+  finished request's pay ("REWARD WAITING! THE NETBATTLE CLUB,THE
+  ACADEMY!"), else the new requests posted while none is held, by place,
+  then what AsterLand's SubChip seller has in stock ("ASTERLAND HAS
+  UNLOCKERS!"). He goes once nothing waits (a reward or a request taken in
+  town), stays away when nothing did, keeps clear of the portals and the
+  way to the pad, and speaks only when spoken to; a CONTINUE at home
+  finds him as he was.
 - **Beat the beast, then gain its power** (issue #109). BeastOut now comes
   from the Cybeast: beaten at the endless net's own Nest, it gives BeastOut
   for the rest of the run, from layer 20 on, and Dad's call after its fall

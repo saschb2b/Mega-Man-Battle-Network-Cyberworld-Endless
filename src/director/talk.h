@@ -9,6 +9,9 @@
 /* Runs `boxes` (ta_talk's, speaker marks and all; `face` for unmarked
  * boxes) now; false while another conversation or chat box is open. */
 bool talk_start(const char *boxes, int face);
+/* ... and then asks `question` (its end a '\n'), the cursor on No; Yes
+ * sets event flag `yes_flag`. */
+bool talk_ask(const char *boxes, int face, const char *question, int yes_flag);
 /* Runs script `script` of text archive `archive` the same way. */
 bool talk_script(uint32_t archive, int script);
 /* Each frame: gives the keys back once the conversation has closed. */
