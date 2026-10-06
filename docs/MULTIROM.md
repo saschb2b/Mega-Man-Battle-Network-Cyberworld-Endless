@@ -121,6 +121,16 @@ the layer's random battles are BN5's own, fought in BN5's engine
   shot ten times that); BN5's boot state fired 1 a shot and 10 a charge
   whatever the run's programs. The NaviCust's other programs sit out:
   parity, no power of BN5's own.
+- **Its rolls**: BN5's random numbers are the run's. On the frame BN5
+  begins a battle, both its RNG words are written from the battle's seed
+  (a random battle's from the layer's seed and its battles so far, as its
+  record is picked; a guardian's from the layer's seed), so its first
+  hand, its green Mystery Data and find and its reward differ from run to
+  run as BN6's do, and the same seed fights the battle again as it was
+  (a CONTINUE, or MegaMan walking into it another way). Its core began
+  each session from its boot state, and every run's first battle in its
+  engine had drawn alike, whatever the seed (issue #102; docs/ROM_DATA.md,
+  BN5's random numbers).
 - **The record's copy**: past BN5's 8 MB in the guest's ROM copy, without
   its GAME OVER bit, so a loss ends on the map with BN5's result 2 and the
   run ends as BN6's would (the deletion shown in BN5's battle).
@@ -189,7 +199,8 @@ the layer's random battles are BN5's own, fought in BN5's engine
   the enemies' side of every one, as in BN6's (its find of row 0, 1000
   zenny or a BugFrag; with `onehit` it more often stands to the end: with
   `quiet,gem,onehit` and the battle step, the first guest battle on ACDC
-  Area found "BugFrag 1" on seeds 1-8); `--guardian 24` to `29` puts one of BN5's
+  Area found "BugFrag 1" on seeds 1-8, before its random numbers were the
+  run's); `--guardian 24` to `29` puts one of BN5's
   Navis (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan)
   in every act BN5 dresses (`--net-biome x0 --run-depth 3 --guardian 28`:
   KnightMan at ACDC Area's first act), and `--dev souls=MASK` starts a

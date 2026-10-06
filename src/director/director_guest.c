@@ -194,7 +194,9 @@ bool director_guest_guardian(int navi, int version) {
 	GuestBoss boss = { guardian_older_ai(navi), version, pacing_clock_hp(xguardian_hp_fought(navi, version, run.depth), run.clock),
 		encounter_boss_zenny() };
 	D.map_shown = false;
-	if (!guest_boss_battle(&boss, &mm)) {
+	/* (his battle's random numbers the layer's: a CONTINUE from the arena's
+	 * door fights it again as it began) */
+	if (!guest_boss_battle(&boss, &mm, run.layer_seed ^ 0x47554152u)) {
 		if (emu_debug_on()) fprintf(stderr, "guest: guardian %s could not be fought in its engine\n", guardian(navi)->name);
 		return false;
 	}
@@ -209,8 +211,10 @@ bool director_guest_guardian(int navi, int version) {
 
 /* A battle the roll gave on a layer whose battles are the guest's: one of
  * its own game's records for the map, picked from the layer's seed and
- * its battles so far; the roll found the moment free (no chat, fade or
- * cutscene), so it begins at once (guest.c) */
+ * its battles so far, and its random numbers from the same (its first
+ * hand, its Mystery Data and find, its reward: the run's, the same again
+ * after a CONTINUE; issue #102); the roll found the moment free (no chat,
+ * fade or cutscene), so it begins at once (guest.c) */
 void guest_begin(void) {
 	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
 	uint16_t folder[BN6_FOLDER_ENTRIES];
@@ -228,5 +232,5 @@ void guest_begin(void) {
 	/* (in the run log as BN6's battles are, its viruses by BN5's ids, as
 	 * scaled) */
 	int ids[16] = { 0 }, n = guest_record_foes_scaled(D.guest_xrom, record, sc, ids, 16);
-	if (record && guest_battle(record, sc, &mm)) { runlog_guest_start(record, ids, n, hp); home_jobs_battle_start(); }
+	if (record && guest_battle(record, sc, &mm, h)) { runlog_guest_start(record, ids, n, hp); home_jobs_battle_start(); }
 }

@@ -69,10 +69,13 @@ typedef struct {
 
 /* Begins a battle from BattleSettings record `record`, an address in the
  * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan as
- * `mm` has him: from the next guest frame the guest runs and BN6's core
- * waits (first for the guest's boot, where it still runs:
+ * `mm` has him and its random numbers from `seed` (the run's: as it begins,
+ * its game's RNG words are written from it, so its first hand, its Mystery
+ * Data and find and its reward come of the seed, and the same seed fights
+ * it again as it was): from the next guest frame the guest runs and BN6's
+ * core waits (first for the guest's boot, where it still runs:
  * guest_boot_waiting; a headless run's waits for it at once). */
-bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm);
+bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm, uint32_t seed);
 
 /* A territory's guardian from its game (docs/BOSSES.md, BN5's Navis): Navi
  * `ai` (his ids table's AI index, bn5.h BN5_NAVI_*) at `version` (0 V1 ..
@@ -84,7 +87,7 @@ typedef struct { int ai, version, hp_cap, zenny; } GuestBoss;
 /* Begins his battle as guest_battle begins one, from his game's own record
  * for him at that version (guest_navi_record): no running, its results
  * screen on; false where it cannot be. */
-bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm);
+bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t seed);
 /* Whether battles of game `xrom` can be fought here: the build runs a
  * second core, its ROM is read, and the guest has not failed to boot (one
  * not booted yet counts). */

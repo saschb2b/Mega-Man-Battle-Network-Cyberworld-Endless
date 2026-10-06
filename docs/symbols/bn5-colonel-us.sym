@@ -4,6 +4,8 @@
 ; beside the ROM with its name (game.gba, game.sym), or mGBA's debugger command load-symbols FILE.
 
 02001440 BN5_CHIP_KEYS
+02001C94 BN5_RNG_SECONDARY
+02001D40 BN5_RNG_PRIMARY
 02002338 BN5_METER_KEY
 02002940 BN5_GAMESTATE
 020029F8 bn5_souls
@@ -49,10 +51,20 @@
 0203C8AC BN5_BATTLE_SOUL
 0203CA40 BN5_T3_OBJECTS
 0203E542 BN5_DARK_USED
+08000C32 bn5_random_numbers.at_08000c32
+08001488 bn5_random_numbers.at_08001488
+08001490 bn5_random_numbers.at_08001490
+080014A6 bn5_random_numbers.at_080014a6
+080014C0 bn5_random_numbers.at_080014c0
+080014D6 bn5_random_numbers.at_080014d6
 080043CC map_object_handlers
+08004C98 game_state_routine
 080053FC encounter_check
 080054F6 battle_start
 08006874 mystery_data_set_on_field
+08008D82 folder_shuffle
+080098D8 primary_kept_as_battle_begins
+08009A0A put_back_after_opening
 0800D17C BN5_ENEMY_STATS
 08012704 bn5_souls.emotion
 08012705 bn5_darkchips.emotion
