@@ -27,8 +27,8 @@ nesting src/world/townsrc.c:townsrc_synth 6
 params src/audio/xsong.c:xsong_walk 8
 params src/core/loot.c:weigh 8
 params src/core/touch_art.c:mask_shape_in 8
-params src/emu/guest.c:guest_pool 9
-params src/emu/guest.c:records_fit 8
+params src/emu/guest_records.c:guest_pool 9
+params src/emu/guest_records.c:records_fit 8
 params src/gfx/gfx.c:blit_obj 8
 params src/gfx/gfx.c:blit_tile 8
 params src/gfx/gfx.c:sprite_draw_frame 8
@@ -49,4 +49,3 @@ params src/scenes/scene_title.c:stamp 10
 params src/world/town.c:tile 8
 params src/world/townmath.h:town_move_tile 10
 params src/world/townsrc.c:townsrc_synth 9
-size src/emu/guest.c 1148

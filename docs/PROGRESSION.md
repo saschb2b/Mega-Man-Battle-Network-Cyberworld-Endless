@@ -521,7 +521,7 @@ Fixed on the way:
 | The super bosses' places, forms and records | `src/core/super_boss.c` (docs/BOSSES.md) |
 | Act and guardian layers | `src/net/net_gen.c` (`biome_for_depth`, `is_boss_depth`) |
 | Formation pick, versions inside the band | `src/core/loot.c` (`make_encounter`) |
-| BN5's records inside the band, their viruses' versions | `src/emu/guest.c` (`guest_pool`), `src/director/director_guest.c` (`guest_pick`) |
+| BN5's records inside the band, their viruses' versions | `src/emu/guest_records.c` (`guest_pool`), `src/director/director_guest.c` (`guest_pick`) |
 | Guardian version | `src/core/loot.c` (`make_boss`) |
 | Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |
