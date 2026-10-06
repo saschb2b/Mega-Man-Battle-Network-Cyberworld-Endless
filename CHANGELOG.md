@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.0 (2026-10-06)
 
 - **Lan's HP tells going on from going back, and talks only when asked**
   (issue #110). Warped in, or jacked in from Lan's PC, MegaMan now faces
