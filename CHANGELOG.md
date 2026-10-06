@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **The browser's player is BN6's PET menu.** Under a PET band with the
+  place beside it, the screen keeps the game's own shape, the ROMs on it
+  as compact as the game's own ROMs screen, and beside it SELECT's column
+  of menu plates with the cursor's arrow: Save backup, Load backup,
+  Fullscreen, Smooth motion and Forget all (under the screen on a phone).
+  It had stretched the ROMs over the whole page with a row of five big
+  buttons under it that ran off its edge, in none of the second screen's
+  look. The ROMs' slots choose the files once BN6 is in, as the game's own
+  do; the Add BN5 button that did the same is gone.
+
 ## 0.11.2 (2026-10-06)
 
 - **The arrow in Lan's house leads round the furniture.** In from the

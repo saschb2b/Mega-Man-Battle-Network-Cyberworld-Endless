@@ -288,6 +288,9 @@ footer.site a { color: #c6ff8c; }
 .icon { flex: none; display: inline-block; width: 36px; height: 36px; background: no-repeat 0 0 / 36px 36px; }
 .i-play { background-image: url(ui/icon-play.png); }
 .i-get { background-image: url(ui/icon-get.png); }
+.i-put { background-image: url(ui/icon-put.png); }
+.i-full { background-image: url(ui/icon-full.png); }
+.i-erase { background-image: url(ui/icon-erase.png); }
 .i-layers { background-image: url(ui/icon-layers.png); }
 .i-chip { background-image: url(ui/icon-chip.png); }
 .i-code { background-image: url(ui/icon-code.png); }

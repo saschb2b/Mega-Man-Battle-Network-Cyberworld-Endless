@@ -1,23 +1,91 @@
 /* The player page (site.css holds the PET's pieces). */
 
-main.wrap { padding-top: 28px; }
+main.wrap { padding-top: 24px; }
 
-.player { padding: 6px; }
+/* ---- the player: BN6's PET menu (src/second/second_frame.c's colours, as
+ * the second screen and the game's own ROMs screen draw them): a dark green
+ * band with PET and its three light stripes, the place on a slot at its
+ * right; under it the screen, and beside it SELECT's column of menu plates
+ * with the cursor's arrow (site.css's .menu and .plate) ---- */
+.pet {
+	--pet-green: #08bd73; --pet-line: #4ae773; --pet-dark: #007b4a; --pet-cyan: #42c6e7; --pet-cyan-hi: #6bdeff;
+	--pet-navy: #10526b; --pet-slot: #10636b; --pet-edge: #214a52; --pet-ink: #00314a; --pet-dim: #6b9cad;
+	border: 3px solid var(--pet-green);
+	box-shadow: inset 0 0 0 3px var(--pet-cyan);
+	background: var(--pet-navy);
+	padding: 3px;
+}
+.pet-head { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 12px; background: var(--pet-dark); }
+.pet-head h1 { margin: 0; font: 700 1.1rem/1 var(--caps); color: var(--white); letter-spacing: 0.1em; text-transform: uppercase; }
+.pet-head .stripes { width: 24px; height: 12px; background: repeating-linear-gradient(115deg, var(--pet-line) 0 3px, transparent 3px 8px); }
+/* (the place, as BN6's PET menu names it beside its screen) */
+.place {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-left: auto;
+	padding: 5px 10px 4px;
+	background: var(--pet-slot);
+	border: 3px solid var(--pet-edge);
+	font: 700 0.8rem/1 var(--caps);
+	color: var(--white);
+	white-space: nowrap;
+}
+.place b { color: var(--pet-cyan-hi); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.pet-body { display: grid; grid-template-columns: minmax(0, 1fr) 236px; gap: 12px; padding: 12px; }
+.pet-menu { display: flex; flex-direction: column; gap: 8px; }
+.pet-menu .select { font: 700 0.8rem/1 var(--caps); color: var(--white); text-shadow: var(--edge); letter-spacing: 0.1em; text-transform: uppercase; padding-left: 30px; }
+.pet-menu .plate { width: 100%; min-height: 42px; gap: 8px; font-size: 0.85rem; }
+.pet-menu .icon { width: 24px; height: 24px; background-size: 24px 24px; }
+.pet-menu .plate.warn { color: var(--orange); }
+.pet-menu label.plate { position: relative; }
+.pet-menu label.plate input, label.go input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+label.go { position: relative; }
+/* (a phone's narrow page: the menu under the screen, two plates a row) */
+@media (max-width: 860px) {
+	.pet-body { grid-template-columns: minmax(0, 1fr); }
+	.pet-menu .menu { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 420px) { .pet-menu .menu { grid-template-columns: 1fr; } .pet-body { padding: 8px; } }
+
+/* the one thing to press: PLAY, gold as the game's own (launcher_draw.c) */
+.go {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 9px 22px 8px 18px;
+	background: var(--gold);
+	border: 3px solid var(--pet-ink);
+	box-shadow: 0 0 0 3px var(--white);
+	color: var(--pet-ink);
+	font: 700 1.1rem/1 var(--caps);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+.go::before { content: ""; width: 10px; height: 12px; background: var(--pet-ink); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.go:hover, .go:focus-visible, .go:focus-within { background: #fff27b; outline: none; }
+
 #stage {
 	position: relative;
 	display: grid;
 	place-items: center;
-	min-height: 360px;
+	/* (the game's own shape, the ROMs screen's too: as wide as its column
+	 * lets it, and taller only where a phone's narrow page needs the room) */
+	aspect-ratio: 3 / 2;
 	background: #000;
-	box-shadow: 0 0 0 var(--u) #21738c;
 	overflow: hidden;
+	/* (the PET's screen, set in its body: a dark edge, then the cyan line) */
+	box-shadow: 0 0 0 3px var(--pet-edge), 0 0 0 6px var(--pet-cyan);
 }
-#stage:fullscreen { min-height: 100vh; }
+#stage:has(> #gate:not([hidden])) { overflow: visible; }
+#stage:fullscreen { aspect-ratio: auto; min-height: 100vh; }
 
 /* a phone or tablet: the game fills the screen, its own buttons drawn round
  * the picture (the engine's --touch), clear of notches and rounded corners */
 body.touch-play { overflow: hidden; overscroll-behavior: none; }
-body.touch-play #stage { position: fixed; inset: 0; z-index: 50; min-height: 0; box-shadow: none; }
+body.touch-play #stage { position: fixed; inset: 0; z-index: 50; min-height: 0; aspect-ratio: auto; box-shadow: none; }
 /* (sized outright: a canvas left to the grid takes its height from its own
  * pixels' shape, and those follow the size it is given) */
 body.touch-play #canvas {
@@ -29,8 +97,6 @@ body.touch-play #canvas {
 }
 #stage, #canvas { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 #canvas { touch-action: none; }
-.touch-note { display: none; }
-@media (pointer: coarse) { #gate .drop { display: none; } .touch-note { display: block; } }
 
 /* the picture and the gate share one cell, so the gate's text grows the stage */
 #canvas, #gate { grid-area: 1 / 1; }
@@ -41,7 +107,7 @@ body.touch-play #canvas {
 	outline: none;
 }
 
-/* the ROM gate: the PET's navy screen */
+/* the ROMs screen: the PET's navy body, as compact as the game's own */
 #gate {
 	align-self: stretch;
 	justify-self: stretch;
@@ -49,33 +115,28 @@ body.touch-play #canvas {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	gap: 12px;
-	padding: 24px;
+	gap: 10px;
+	padding: 22px 16px 20px;
 	text-align: center;
 	color: var(--white);
-	background: #10526b;
+	background: var(--pet-navy);
 }
 #gate[hidden], [hidden] { display: none !important; }
-#gate h1 { margin: 0; font-size: 1.8rem; letter-spacing: 0.12em; }
-#gate p { max-width: 560px; margin: 0; font-size: 1.1rem; }
+#gate p { max-width: 520px; margin: 0; }
 #gate code { color: var(--gold); }
-#status { color: var(--gold); min-height: 1.5em; font: 700 1rem/1.5 var(--caps); white-space: pre-line; }
-#gate p.optional { font-size: 1rem; color: #9ce0f4; }
-#gate .drop { font-size: 0.95rem; color: #9ce0f4; }
-
-.actions { display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap; }
-label.plate, label.pill { position: relative; cursor: pointer; }
-label.plate input, label.pill input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-label.plate:focus-within { border-image-source: url(../assets/ui/plate-on.png); }
-#gate p.about { font-size: 1rem; color: #9ce0f4; }
+#status { color: var(--gold); min-height: 1.4em; font: 700 0.85rem/1.4 var(--caps); white-space: pre-line; }
+#gate p.about { font-size: 0.95rem; color: var(--pet-dim); }
+.actions { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.touch-note { display: none; }
+@media (pointer: coarse) { .touch-note { display: block; font-size: 0.9rem; color: var(--pet-dim); } }
 
 /* the two cartridges, as the game's launcher draws them (src/launcher/):
  * an open spot until the ROM is in, then the cartridge, its label in its
  * game's colours with the game's face, drawn from the ROM by app.js (never
- * a file of the site's); one game pixel --k of the page's: three, two on
- * a phone's narrow page */
-.carts { --k: 3px; display: flex; gap: 12px 33px; justify-content: center; flex-wrap: wrap; }
-@media (max-width: 480px) { .carts { --k: 2px; } #gate { padding: 18px 6px; } }
+ * a file of the site's); one game pixel --k of the page's: two, one and a
+ * a phone's narrow page; two, one and a half on a phone's */
+.carts { --k: 2px; display: flex; gap: 8px 24px; justify-content: center; flex-wrap: wrap; }
+@media (max-width: 480px) { .carts { --k: 1.5px; gap: 6px 10px; } #gate { padding: 16px 6px; } }
 .cart {
 	display: flex;
 	flex-direction: column;
@@ -119,10 +180,7 @@ label.plate:focus-within { border-image-source: url(../assets/ui/plate-on.png); 
 .cart .caption { font: 700 calc(4.8 * var(--k))/1.2 var(--caps); color: #6b9cad; }
 .cart.in .caption { color: var(--white); }
 
-.bar { display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; padding: 12px 0 0; }
-.bar .pill { cursor: pointer; background: none; }
-
-.help { padding: 30px 0 0; }
+.help { padding: 28px 0 0; }
 .help .who { margin-top: 0; }
 table { border-collapse: collapse; width: 100%; }
 th, td { padding: 5px 12px 5px 0; text-align: left; vertical-align: middle; }

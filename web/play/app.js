@@ -87,19 +87,20 @@ function kept(id) {
 
 // What is kept, in words
 function keptWords() {
-	if (kept('bn6') && kept('bn5')) return 'BN6 and BN5 are ready in this browser: BN5\'s net joins ours.';
-	if (kept('bn6')) return 'Your ROM is ready in this browser. BN5 can join it: choose it or drop it here.';
-	if (kept('bn5')) return ROMS.bn5.tag + ' is kept, for when BN6 is here. Choose your BN6 ROM to begin.';
-	return 'Choose your ROM to begin.';
+	const add = touchPlay ? 'tap its slot' : 'click its slot or drop it here';
+	if (kept('bn6') && kept('bn5')) return 'Play with BN6 and BN5.';
+	if (kept('bn6')) return 'Play with BN6. BN5 can join: ' + add + '.';
+	if (kept('bn5')) return 'BN5 is kept. Choose BN6 to begin.';
+	return touchPlay ? 'Choose your ROMs to begin.' : 'Choose your ROMs, or drop them here.';
 }
 
 // Play when BN6 is kept, else ask for it; BN5 asked for beside it. `note`,
 // where files were refused, says why in place of what is kept.
 function offer(note) {
-	const six = kept('bn6'), five = kept('bn5');
-	$('pick').hidden = false;
+	const six = kept('bn6');
+	// (once BN6 is in, the cartridges choose the files, as the game's ROMs screen's do)
+	$('pick').hidden = six;
 	$('play').hidden = !six;
-	$('pick-label').textContent = !six ? 'Choose ROM files' : five ? 'Use different ROMs' : 'Add BN5 Team Colonel';
 	for (const id of Object.keys(ROMS)) showCart(id);
 	say(note || keptWords());
 	if (six) $('play').focus();
@@ -192,6 +193,7 @@ function face(rom, where, canvas) {
 function start() {
 	if (!ready || started || !kept('bn6')) return;
 	started = true;
+	$('pet-place').textContent = 'Game';
 	track('game-start', { input: touchPlay ? 'touch' : 'keys', bn5: kept('bn5') ? 'yes' : 'no' });
 	gate.hidden = true;
 	if (touchPlay) {
@@ -404,11 +406,12 @@ $('forget').addEventListener('click', () => {
 // ---- the picture: 240x160 at the largest whole scale in device pixels ----
 
 function fit() {
-	if (touchPlay && started) return;
+	// (before the game, the ROMs screen alone sizes the stage)
+	if (!started || touchPlay) return;
 	const dpr = window.devicePixelRatio || 1;
 	const full = document.fullscreenElement === stage;
-	const w = full ? screen.width : Math.min(stage.parentElement.clientWidth, 240 * 8);
-	const h = full ? screen.height : Math.max(160, window.innerHeight - 180);
+	const w = full ? screen.width : Math.min(stage.clientWidth, 240 * 8);
+	const h = full ? screen.height : stage.clientHeight;
 	const k = Math.max(1, Math.floor(Math.min((w * dpr) / 240, (h * dpr) / 160)));
 	canvas.style.setProperty('width', (240 * k) / dpr + 'px', 'important');
 	canvas.style.setProperty('height', (160 * k) / dpr + 'px', 'important');
@@ -428,7 +431,7 @@ $('fullscreen').addEventListener('click', () => {
 function smoothOn() { try { return localStorage.getItem('cw-smooth') === 'on'; } catch (e) { return false; } }
 function showSmooth() {
 	const on = smoothOn();
-	$('smooth').textContent = 'Smooth motion: ' + (on ? 'on' : 'off');
+	$('smooth-label').textContent = 'Smooth: ' + (on ? 'on' : 'off');
 	$('smooth').setAttribute('aria-pressed', on ? 'true' : 'false');
 }
 $('smooth').addEventListener('click', () => {
@@ -440,7 +443,6 @@ $('smooth').addEventListener('click', () => {
 	canvas.focus();
 });
 showSmooth();
-fit();
 
 // the last writes before the tab goes away
 window.addEventListener('pagehide', () => { if (ready) persist(); });

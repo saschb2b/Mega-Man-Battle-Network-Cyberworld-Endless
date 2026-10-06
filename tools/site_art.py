@@ -141,6 +141,48 @@ kk........kk
 kck......kck
 kcckkkkkkcck
 kkkkkkkkkkkk""",
+    # an arrow out of a tray: a backup brought in (the player's Load)
+    'put': """
+.....kk.....
+....kyyk....
+...kyyyyk...
+..kyyyyyyk..
+..kkkyykkk..
+....kyyk....
+....kyyk....
+....kkkk....
+kk........kk
+kck......kck
+kcckkkkkkcck
+kkkkkkkkkkkk""",
+    # a screen's four corners: fullscreen
+    'full': """
+kkkkk..kkkkk
+kwwwk..kwwwk
+kwkkk..kkkwk
+kwk......kwk
+kkk......kkk
+............
+............
+kkk......kkk
+kwk......kwk
+kwkkk..kkkwk
+kwwwk..kwwwk
+kkkkk..kkkkk""",
+    # a red cross: forget it all
+    'erase': """
+kk........kk
+krk......krk
+.krk....krk.
+..krk..krk..
+...krkkrk...
+....krrk....
+....krrk....
+...krkkrk...
+..krk..krk..
+.krk....krk.
+krk......krk
+kk........kk""",
     # a battle chip
     'chip': """
 .kkkkkkkkkk.

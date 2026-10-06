@@ -50,48 +50,55 @@
 </header>
 
 <main class="wrap">
-	<div class="panel player">
-		<div id="stage">
-			<canvas id="canvas" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
+	<!-- the player as BN6's PET menu: its band, the screen, and a column of
+	     menu plates beside it with the cursor's arrow (src/second/second_frame.c's colours) -->
+	<section class="pet" aria-labelledby="pet-name">
+		<header class="pet-head">
+			<h1 id="pet-name">PET</h1><i class="stripes" aria-hidden="true"></i>
+			<span class="place"><b>Place</b><span id="pet-place">ROMs</span></span>
+		</header>
+		<div class="pet-body">
+			<div id="stage">
+				<canvas id="canvas" width="240" height="160" tabindex="0" aria-label="The game" oncontextmenu="event.preventDefault()"></canvas>
 
-			<section id="gate" aria-live="polite">
-				<h1 class="label">ROMs</h1>
-				<div class="carts">
-					<button id="cart-bn6" class="cart" type="button" data-rom="bn6" aria-describedby="status">
-						<span class="spot" aria-hidden="true"><b>+</b><span class="big">BN6</span><span class="need">Needed</span></span>
-						<span class="shell" aria-hidden="true"><span class="face"><canvas width="40" height="48"></canvas></span><span class="game">BN6</span><span class="sub">Gregar</span><span class="ready">Ready</span></span>
-						<span class="caption">Cybeast Gregar (USA)</span>
-					</button>
-					<button id="cart-bn5" class="cart" type="button" data-rom="bn5" aria-describedby="status">
-						<span class="spot" aria-hidden="true"><b>+</b><span class="big">BN5</span><span class="need">Optional</span></span>
-						<span class="shell" aria-hidden="true"><span class="face"><canvas width="40" height="48"></canvas></span><span class="game">BN5</span><span class="sub">Colonel</span><span class="ready">Ready</span></span>
-						<span class="caption">Team Colonel (USA)</span>
-					</button>
-				</div>
-				<p class="about">Your own unmodified <code>.gba</code> of Mega Man Battle Network 6: Cybeast Gregar (USA); optional beside it,
-					Battle Network 5: Team Colonel (USA), whose net then joins ours. They stay in this browser and are never uploaded.</p>
-				<p id="status">Loading…</p>
-				<div class="actions">
-					<button id="play" class="exit" type="button" hidden>Play</button>
-					<label id="pick" class="plate" hidden>
-						<input id="rom" type="file" accept=".gba,application/octet-stream" multiple>
-						<i class="icon i-chip" aria-hidden="true"></i><span id="pick-label">Choose ROM files</span>
-					</label>
-				</div>
-				<p class="drop">or drop the files on this page</p>
-				<p class="touch-note">On this screen the game draws its own buttons round the picture; a controller or keyboard puts them away.</p>
-			</section>
+				<section id="gate" aria-live="polite" aria-label="ROMs">
+					<div class="carts">
+						<button id="cart-bn6" class="cart" type="button" data-rom="bn6" aria-describedby="status">
+							<span class="spot" aria-hidden="true"><b>+</b><span class="big">BN6</span><span class="need">Needed</span></span>
+							<span class="shell" aria-hidden="true"><span class="face"><canvas width="40" height="48"></canvas></span><span class="game">BN6</span><span class="sub">Gregar</span><span class="ready">Ready</span></span>
+							<span class="caption">Cybeast Gregar (USA)</span>
+						</button>
+						<button id="cart-bn5" class="cart" type="button" data-rom="bn5" aria-describedby="status">
+							<span class="spot" aria-hidden="true"><b>+</b><span class="big">BN5</span><span class="need">Optional</span></span>
+							<span class="shell" aria-hidden="true"><span class="face"><canvas width="40" height="48"></canvas></span><span class="game">BN5</span><span class="sub">Colonel</span><span class="ready">Ready</span></span>
+							<span class="caption">Team Colonel (USA)</span>
+						</button>
+					</div>
+					<p id="status">Loading…</p>
+					<p class="about">Your own unmodified <code>.gba</code> files. They stay in this browser, never uploaded.</p>
+					<div class="actions">
+						<button id="play" class="go" type="button" hidden>Play</button>
+						<label id="pick" class="go" hidden>
+							<input id="rom" type="file" accept=".gba,application/octet-stream" multiple>
+							<span id="pick-label">Choose ROMs</span>
+						</label>
+					</div>
+					<p class="touch-note">The game draws its own buttons round the picture; a controller or keyboard puts them away.</p>
+				</section>
+			</div>
+
+			<nav class="pet-menu" aria-label="The player's menu">
+				<span class="select" aria-hidden="true">Select</span>
+				<ul class="menu">
+					<li><button id="export" class="plate" type="button" title="Your saves as one file, cyberworld-endless.cwsave: the phone apps take it too, from the ROM folder"><i class="icon i-get" aria-hidden="true"></i>Save backup</button></li>
+					<li><label id="import" class="plate" title="Saves from a backup file, this browser's kept aside"><input id="saves-file" type="file" accept=".cwsave,application/octet-stream"><i class="icon i-put" aria-hidden="true"></i>Load backup</label></li>
+					<li><button id="fullscreen" class="plate" type="button" data-umami-event="fullscreen"><i class="icon i-full" aria-hidden="true"></i>Fullscreen</button></li>
+					<li><button id="smooth" class="plate" type="button" aria-pressed="false" title="For 90, 144 or 165 Hz screens: even motion, a little blurred"><i class="icon i-layers" aria-hidden="true"></i><span id="smooth-label">Smooth: off</span></button></li>
+					<li><button id="forget" class="plate warn" type="button" title="Your ROMs and every save, gone from this browser"><i class="icon i-erase" aria-hidden="true"></i>Forget all</button></li>
+				</ul>
+			</nav>
 		</div>
-		<div class="bar">
-			<button id="fullscreen" class="pill" type="button" data-umami-event="fullscreen">Fullscreen</button>
-			<button id="smooth" class="pill" type="button" aria-pressed="false" title="For 90, 144 or 165 Hz screens: even motion, a little blurred">Smooth motion: off</button>
-			<button id="export" class="pill" type="button" title="Your saves as one file, cyberworld-endless.cwsave: the phone apps take it too, from the ROM folder">Save a backup</button>
-			<label id="import" class="pill" title="Saves from a backup file, this browser's kept aside">
-				<input id="saves-file" type="file" accept=".cwsave,application/octet-stream">Load a backup
-			</label>
-			<button id="forget" class="pill gold" type="button">Forget ROMs and saves</button>
-		</div>
-	</div>
+	</section>
 
 	<div class="help grid-2">
 		<div>
@@ -109,17 +116,16 @@
 				</table>
 				<p class="note">The layout of Capcom's PC version. Keys are positions: on AZERTY, Z Q S D move.
 					Select on the title screen opens the controls screen, which sets the keys and the controller's buttons.
-					On a phone or tablet the game draws its own buttons round the picture, a D-pad, A, B, L, R, START and SELECT; they go away while a controller or keyboard is used.
-					Added to the home screen, it opens full screen.</p>
+					On a phone or tablet the game draws its own buttons round the picture; added to the home screen, it opens full screen.</p>
 			</div>
 		</div>
 		<div>
 			<span class="who">Saves</span>
 			<div class="textbox">
-				<p>The run is saved in this browser on every new layer. CONTINUE on the title picks it up.</p>
-				<p><em>Forget ROMs and saves</em>, or clearing this site's data, deletes them all. <em>Save a backup</em> first: it keeps your saves in one
-					file, <code>cyberworld-endless.cwsave</code>, which <em>Load a backup</em> brings back here, and which the Android and iPhone apps
-					take too, put in the folder your ROMs are in.</p>
+				<p>The run is saved in this browser on every new layer; CONTINUE on the title picks it up.</p>
+				<p><em>Save backup</em>, in the PET's menu, keeps your saves in one file, <code>cyberworld-endless.cwsave</code>, which <em>Load
+					backup</em> brings back here or in another browser, and which the Android and iPhone apps take too, put in the folder your ROMs
+					are in. <em>Forget all</em>, or clearing this site's data, deletes your ROMs and saves: back them up first.</p>
 				<p>Also for Windows, macOS, Linux, the Steam Deck, Android, handhelds and the 3DS: <a href="../download/" data-umami-event="go-download" data-umami-event-from="play">the downloads</a>.</p>
 			</div>
 		</div>
