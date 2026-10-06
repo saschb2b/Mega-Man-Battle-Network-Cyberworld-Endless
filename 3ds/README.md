@@ -48,7 +48,8 @@ GBA core alone takes longer than a frame there.
   collection, E-Mail the mail's sender by face and name; in a shop it
   shows the entry under the cursor with what the run holds of it, at a
   trader what it takes and gives; on the title, the PET at rest with
-  the profile's record and whether BN5 was found.
+  the profile's record. BN5's older net does not come to the 3DS: it has
+  no memory for a second game beside BN6, and the PET says so.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad

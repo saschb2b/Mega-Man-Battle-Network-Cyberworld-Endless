@@ -222,7 +222,16 @@ void second_layer_next(int guardian_navi, char *out, size_t n) {
 	else snprintf(out, n, "Find the exit pad");
 }
 
-const char *second_bn5_line(bool found) { return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6"; }
+/* (on the 3DS BN5 is never looked for, its memory holding no second core:
+ * "not found beside BN6" sent a player to check his ROM, issue #107) */
+const char *second_bn5_line(bool found) {
+#ifdef __3DS__
+	(void)found;
+	return "BN5's older net: on PC and phones, not the 3DS";
+#else
+	return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6";
+#endif
+}
 
 /* (where a chip's copies are, a shop's and the Library's) */
 static const char *const copies_in[2] = { "In the folder", "In the pack" };
