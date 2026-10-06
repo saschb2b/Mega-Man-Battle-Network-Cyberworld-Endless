@@ -24,20 +24,30 @@ void second_face(int x, int y) {
 	if (s) sprite_draw_into(s, 0, 0, x + 3 + FACE_W, y + 3 + FACE_H, 0, 2);
 }
 
-/* a heading in gold and its lines in white under it: the y under them */
-static int item(const char *head, const char *text, int x, int y, int w) {
+/* a heading in gold and its lines in white under it, as many as fit above
+ * `bottom` (none: left out): the y under them */
+static int item(const char *head, const char *text, int x, int y, int w, int bottom) {
+	int fit = (bottom - y - SECOND_LINE_H) / SECOND_LINE_H;
+	if (!text[0] || fit < 1) return y;
 	text_draw(x, y, head, PET_GOLD, TEXT_LEFT);
-	return second_wrapped(text, x, y + SECOND_LINE_H, w, 3, PET_WHITE) + 6;
+	return second_wrapped(text, x, y + SECOND_LINE_H, w, fit < 3 ? fit : 3, PET_WHITE) + 6;
 }
 
 void second_home_draw(SDL_Rect b) {
 	fill_rect(b.x, b.y, b.w, b.h, PET_NAVY);
-	int x = b.x + 6, y = b.y + 6, tx = x + SLOT_W + 10, w = b.x + b.w - 6 - tx;
+	int x = b.x + 6, y = b.y + 6, tx = x + SLOT_W + 10, w = b.x + b.w - 6 - tx, bottom = b.y + b.h - 4;
 	second_face(x, y);
 	text_draw_scaled(tx, y, "MegaMan", PET_GOLD, TEXT_LEFT, 2);
-	y = item("Next", S2.home_next, tx, y + 30, w);
-	y = item("The run", S2.home_setup, tx, y, w);
-	if (S2.home_clock[0]) item("The Net's clock", S2.home_clock, tx, y, w);
+	/* (the most wanted first, as the panel's height lets them: the 3DS's
+	 * is shorter than an Android display's) */
+	y = item("Next", S2.home_next, tx, y + 30, w, bottom);
+	y = item("Request", S2.home_job, tx, y, w, bottom);
+	/* (the rest under the face, the panel's whole width) */
+	int below = b.y + 6 + FACE_H * 2 + 12;
+	if (y < below) y = below;
+	y = item("Ways", S2.home_ways, x, y, b.w - 12, bottom);
+	y = item("The Net's clock", S2.home_clock, x, y, b.w - 12, bottom);
+	item("The run", S2.home_setup, x, y, b.w - 12, bottom);
 }
 
 bool second_title_draw(int w, int h) {

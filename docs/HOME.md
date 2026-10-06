@@ -481,6 +481,13 @@ the areas gone back to by name, as he has been there; the clock's notch
 for going back), the job taken and how far along it is, and the visit's
 hour.
 
+As built (issue #91, the hour to come with piece 8): the home panel reads
+Next, the request held ("The club: 3 wins in 10 s each, 1 so far", done
+or broken; on a layer too), the ways ("Pink pad: Sky HP (CircusMan)", a
+link's, "Back:" an older portal's, "???" for a guardian MegaMan has not
+met), the Net's clock and the run's setup, the most wanted first as the
+panel's height lets them (the 3DS's shows the first three).
+
 ### 10. AsterLand and the Cyber Academy
 
 The town's doors to AsterLand (`0x01:04`, the town's warp 4) and the

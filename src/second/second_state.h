@@ -47,6 +47,8 @@ typedef struct {
 	char home_next[96];           /* ... the run's next step there (issue #79) */
 	char home_setup[96];          /* ... and its setup */
 	char home_clock[48];          /* ... and the Net's clock, empty before a trip back (docs/HOME.md) */
+	char home_ways[160];          /* ... the ways lit at home, a line each (docs/HOME.md, piece 9) */
+	char home_job[96];            /* ... the request held, empty none */
 	/* a shop (issue #78): the entry under its cursor, what the run holds of it */
 	int sh_kind, sh_id, sh_code, sh_currency;
 	int sh_variant;               /* ... a program's: the variant of its colour */

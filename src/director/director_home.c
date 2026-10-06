@@ -97,6 +97,18 @@ bool home_go_back(int k) {
 	return true;
 }
 
+int director_home_ways(DirectorWay *out, int most) {
+	int n = 0;
+	for (int k = 0; k < nways && n < most; ++k, ++n) {
+		out[n].biome = ways[k].biome;
+		out[n].navi = ways[k].navi;
+		out[n].back = false;
+	}
+	for (int k = 0; k < nolder && n < most; ++k)
+		if (home_older(k) >= 0) { out[n].biome = home_older(k); out[n].navi = 0; out[n++].back = true; }
+	return n;
+}
+
 const RunWay *home_ways(int *n, bool *dark_sealed) {
 	*n = nways;
 	*dark_sealed = sealed;

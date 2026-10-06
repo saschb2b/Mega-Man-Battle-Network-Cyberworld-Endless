@@ -24,6 +24,11 @@ const char *director_place_name(void);
 /* The first older portal open in Lan's HP (docs/HOME.md, going back): its
  * number (lanhp.h), -1 none. */
 int director_older_portal(void);
+/* The ways lit at home (Lan's HP's portals, docs/HOME.md): each one's area,
+ * its guardian (0 none: a trip back), and whether it goes back to an area
+ * won; at most `most`, how many. */
+typedef struct { int biome, navi; bool back; } DirectorWay;
+int director_home_ways(DirectorWay *out, int most);
 /* A run is under way on the layers (it has been saved). */
 bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any

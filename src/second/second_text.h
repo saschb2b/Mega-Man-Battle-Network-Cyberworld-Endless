@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "director.h"   /* DirectorWay */
 #include "second_state.h"
 
 /* A Cross's card in CROSSSELECT (navi 1-5): what hits him twice as hard,
@@ -48,6 +49,13 @@ void second_home_setup(char *out, size_t n);
 /* The Net's clock (docs/HOME.md, going back): its notches and what they
  * cost, empty before the first trip back; into `out` */
 void second_home_clock(char *out, size_t n);
+/* The ways lit at home (director_home_ways), a line each: the pink pad's
+ * area and guardian, a link's, an older portal's back to an area won (a
+ * guardian named where MegaMan knows him); into `out` */
+void second_home_ways(const DirectorWay *ways, int n, char *out, size_t size);
+/* The request held (run.job, jobs.h): who asked, what, and how far along;
+ * empty for none; into `out` */
+void second_home_job(char *out, size_t n);
 /* A row of the PET's: its name and its value */
 typedef struct { const char *name; char value[24]; } SecondRow;
 /* The profile's record: how many rows of `most` */

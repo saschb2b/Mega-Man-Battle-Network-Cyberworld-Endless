@@ -14,8 +14,10 @@
 #include "bn6.h"
 #include "chip_pool.h"
 #include "guardians.h"
+#include "jobs.h"
 #include "meta.h"
 #include "navicust.h"
+#include "net.h"
 #include "powers.h"
 #include "run.h"
 #include "save.h"
@@ -112,6 +114,35 @@ void second_home_setup(char *out, size_t n) {
 void second_home_clock(char *out, size_t n) {
 	if (!run.clock) { if (n) out[0] = 0; return; }
 	snprintf(out, n, "%d notch%s: guardians' HP +%d%%", run.clock, run.clock == 1 ? "" : "es", run.clock * RUN_CLOCK_PERCENT);
+}
+
+void second_home_ways(const DirectorWay *ways, int n, char *out, size_t size) {
+	size_t k = 0;
+	if (size) out[0] = 0;
+	for (int i = 0; i < n && k + 1 < size; ++i) {
+		const char *area = guardian_area_in_text(ways[i].biome, LAYER_NORMAL);
+		const char *who = ways[i].navi && guardian_known(ways[i].navi) ? guardian(ways[i].navi)->name : "???";
+		int w = ways[i].back ? snprintf(out + k, size - k, "%sBack: %s", k ? "|" : "", area)
+			: snprintf(out + k, size - k, "%s%s: %s (%s)", k ? "|" : "", i ? "Link" : "Pink pad", area, who);
+		if (w < 0 || (size_t)w >= size - k) break;
+		k += (size_t)w;
+	}
+}
+
+void second_home_job(char *out, size_t n) {
+	static const char *const who[JOB_ASKERS] = { "NetBattler", "The club", "The lab" };
+	static const char *const elements[] = { "", "Fire", "Aqua", "Elec", "Wood" };
+	const Job *j = &run.job;
+	if (!j->kind || j->asker >= JOB_ASKERS) { if (n) out[0] = 0; return; }
+	char what[64];
+	switch (j->kind) {
+	case JOB_CLEAN: snprintf(what, sizeof what, "%u wins without damage, %u so far", j->need, j->got); break;
+	case JOB_QUICK: snprintf(what, sizeof what, "%u wins in 10 s each, %u so far", j->need, j->got); break;
+	case JOB_EXPLORE: snprintf(what, sizeof what, "every Mystery Data of a layer"); break;
+	case JOB_BRING: snprintf(what, sizeof what, "%s chip from the Pack", j->need <= 4 ? elements[j->need] : "a"); break;
+	default: snprintf(what, sizeof what, "no Mr.Prog patch-ups"); break;
+	}
+	snprintf(out, n, "%s: %s%s", who[j->asker], what, j->state == JOB_DONE ? ". Done: paid at home" : j->state == JOB_FAILED ? ". Broken" : "");
 }
 
 /* rows' values as numbers */

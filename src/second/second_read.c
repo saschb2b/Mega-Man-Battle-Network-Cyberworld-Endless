@@ -225,6 +225,10 @@ void second_read_home(void) {
 	else second_layer_next(director_guardian_waiting(), S2.home_next, sizeof S2.home_next);
 	second_home_setup(S2.home_setup, sizeof S2.home_setup);
 	second_home_clock(S2.home_clock, sizeof S2.home_clock);
+	second_home_job(S2.home_job, sizeof S2.home_job);
+	DirectorWay ways[5];
+	int n = S2.town ? director_home_ways(ways, 5) : 0;
+	second_home_ways(ways, n, S2.home_ways, sizeof S2.home_ways);
 }
 
 /* MegaMan's status: his max HP and its base (HPMemory counts into it,
