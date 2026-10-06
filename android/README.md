@@ -26,7 +26,14 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   every other `.gba` is named with why it was refused. The folder is kept
   (a persisted grant, read and write) and looked in again at each start
   while BN5 is missing (`romsLook`); a file seen before (its document, size
-  and date) is not opened again. Nothing leaves the device.
+  and date) is not opened again. Nothing of them leaves the device.
+- The anonymous play statistics (README.md, Anonymous statistics), once
+  the player said yes, are posted by `GameActivity.statsSend` with
+  `HttpURLConnection` on an executor of their own (one at a time, eight
+  waiting at most, none after three failures in a row; `statsDrop` drops
+  what waits at a no), called from the game's thread
+  (`src/analytics/analytics_net.c`). They are the one reason the app asks
+  for the `INTERNET` permission.
 - The saves and settings are in `files/data`, which uninstalling deletes.
   So the game keeps a copy in the folder chosen (`src/launcher/mirror.c`):
   `cyberworld-endless.cwsave` (`src/core/backup.h`), packed a few seconds

@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- **Anonymous statistics, asked for once** (issue #104). At its first
+  start the game asks, in the PET's panel over the title, whether it may
+  send anonymous play statistics; the cursor starts on No, B and Escape
+  answer no, and nothing is sent before a yes. A yes sends, to the game's
+  own site on the developer's Umami, the game's start (its system,
+  version and screen size), a run's setup as it begins, each guardian's
+  battle as it ends (who, won, lost or left, the layer, net and threat,
+  MegaMan's HP left and the battle's seconds, the how-manyth meeting) and
+  a run's end (how far, where, by whom, its minutes and setup): no names,
+  IDs, ROMs, paths or saves. The answer is `settings.ini`'s `statistics`
+  line; the controls screen (SELECT on the title) shows it on a Statistics
+  row whose A asks again, and on the 3DS SELECT on the title asks. The
+  requests go out beside the frames with each system's own way: libcurl
+  where Linux and the handhelds have it (loaded, never needed to start),
+  WinHTTP on Windows, NSURLSession on Macs, iPhones and iPads, Android's
+  HttpURLConnection, the browser's fetch, and on the New 3DS devkitPro's
+  libcurl with mbedTLS and Let's Encrypt's roots (the 3DS's own TLS stops
+  at 1.1, which the server refuses). Each is tried once, three failures
+  in a row end them for the session, and a system that cannot send never
+  asks. The Flatpak shares the network for this alone, and Android's app
+  asks for the internet permission. The run log names ProtoMan's duels
+  `duel` and a won run's last line `won`.
 - **BeastOut from the start, once the endless net is beaten** (issue #99).
   When the endless net's own Nest has fallen in any run (the milestone of
   Bass's mark on the title), the JACK-IN SETUP's Help row shows a fifth

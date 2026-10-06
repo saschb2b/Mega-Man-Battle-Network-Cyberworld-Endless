@@ -748,6 +748,42 @@ on the first start), or with the **Smooth motion** button under the
 browser player. A screen at 60 or 120 Hz, or one that follows the game
 (FreeSync, G-Sync), needs neither.
 
+## Anonymous statistics
+
+At its first start the game asks once whether it may send anonymous play
+statistics. Nothing is sent before you say yes: the cursor starts on
+**No**, and B or Escape answers no as well. A yes helps a free game: the
+statistics show which systems it runs on, which setups runs take, how far
+they get and which guardians stop them, so the hard spots are known rather
+than guessed. They go to the game's own site on the developer's
+[Umami](https://umami.is) (`umami.saschb2b.com`), kept apart from the
+project page's:
+
+| When | What is sent |
+| --- | --- |
+| The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, the browser...), the version and the screen's size |
+| A run begins | its setup (net, folder, Cross, threat, helpers), whether BN5 joins, and how many runs you finished before |
+| A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
+| A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, and its setup |
+
+Never sent: names, accounts, an ID of you, your install or your device,
+the ROMs or their hashes, file paths, saves or controls. Umami sets no
+cookies. Its server sees the internet address each request comes from, as
+any website does: it turns it into a country (and a region or city where
+its location database knows one) and counts one player's events together
+by a one-way hash that changes every month, and does not keep the address.
+
+To change your answer, press SELECT on the title (the R key on a keyboard)
+for the controls screen, whose **Statistics** row shows it; A on the row
+asks again. On the 3DS, SELECT on the title asks again. `statistics = on`
+or `off` in `settings.ini` in the data folder sets it too; without the
+line the game asks. Each request goes out once, beside the game's frames,
+never in their way; with no network it is dropped, and after three
+failures in a row nothing more is sent until the next start. A system that
+cannot send never asks: a handheld without libcurl, or the Flatpak with
+its network taken away (`flatpak override --unshare=network`), which it
+has for this alone.
+
 ## Troubleshooting
 
 - **"Put your Mega Man Battle Network 6: Cybeast Gregar (USA) ROM in ..."**:

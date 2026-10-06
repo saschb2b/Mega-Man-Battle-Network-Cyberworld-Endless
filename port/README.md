@@ -15,6 +15,13 @@ checks the contents. Nothing from the game is included in this port.
 
 Saves go to `ports/cyberworld/savedata/`.
 
+Where the firmware has libcurl, the first start asks once whether the game
+may send anonymous play statistics, and sends nothing before a yes. Select
+on the title opens the controls screen, whose Statistics row changes the
+answer, as `statistics = off` in `ports/cyberworld/settings.ini` does
+([what is sent](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless#anonymous-statistics)).
+Without libcurl it never asks.
+
 ## Controls
 
 | Button | Action |

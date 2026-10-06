@@ -88,3 +88,9 @@ request to `flathub/flathub` (docs.flathub.org, "Submission"). Before that:
 
    (A local build's "screenshots not mirrored" errors are Flathub's own
    build's job.)
+
+5. **The network** (`--share=network`) carries the anonymous play
+   statistics alone, which the game asks for at its first start and sends
+   only after a yes (README.md, Anonymous statistics): say so in the
+   submission. Taken away (`flatpak override --unshare=network`), the
+   game sees `/.flatpak-info` without it and never asks.
