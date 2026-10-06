@@ -27,6 +27,9 @@
   after a white flash, which BN6 never does (its own note on the command:
   it "doesn't actually work"), and the owner saw a "blup". A beat after,
   his Guardian Data shows.
+- **Home's welcome after an act is three boxes,** not five: who fell
+  goes unsaid, as the act's card over the way home names him, and the
+  ways open are one box.
 - **A guardian's Guardian Data spins,** BN6's own Mystery Data crystal
   turning, where it had stood still (its sprite's animation 1 is one
   frame of it).

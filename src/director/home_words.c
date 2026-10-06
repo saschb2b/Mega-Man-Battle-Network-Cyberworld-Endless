@@ -20,7 +20,8 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 	else if (run_short_nest(run.depth))
 		snprintf(words, sizeof words, "@M Phew... %s's deleted,Lan.|@M The Nest is next.|@L Then we get ready. Together!", who);
 	else if (act == 1)
-		snprintf(words, sizeof words, "@M Phew! We're home,Lan!|@M %s's deleted!|@L Nice one,MegaMan! Let's catch our breath.", who);
+		/* (who fell unsaid: the act's card over the way home names him) */
+		snprintf(words, sizeof words, "@M Phew! We're home,Lan!|@L Nice one,MegaMan! Let's catch our breath.");
 	else if (act == 2)
 		snprintf(words, sizeof words, "@M Whew... %s was tough.|@L But we won! Home sweet home!", who);
 	else
@@ -28,10 +29,9 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 	/* (the portals and where they are: docs/HOME.md) */
 	size_t k = strlen(words);
 	if (ways == 2)
-		snprintf(words + k, sizeof words - k, "|@M Two ways are open this time!|@M The %s,and the %s!", ports[0], ports[1]);
+		snprintf(words + k, sizeof words - k, "|@M Two ways open this time! The %s and the %s!", ports[0], ports[1]);
 	else if (ways == 3)
-		snprintf(words + k, sizeof words - k, "|@M Three ways are open!|@M The %s,the %s...|@M And something dark at the %s.", ports[0],
-			ports[1], ports[2]);
+		snprintf(words + k, sizeof words - k, "|@M Three ways! The %s,the %s...|@M And something dark at the %s.", ports[0], ports[1], ports[2]);
 	k = strlen(words);
 	if (sealed) snprintf(words + k, sizeof words - k, "|@M Something dark waits at the %s too...", sealed);
 	return words;
