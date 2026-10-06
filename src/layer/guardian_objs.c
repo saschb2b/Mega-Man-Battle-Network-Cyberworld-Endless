@@ -212,6 +212,19 @@ static void super_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g
 		npcs->script[npcs->n++] = npc_guardian_data(g->x, g->y, g->z, MD_ANIM_GUARDIAN, archive, g->reward, &flags);
 }
 
+void guardian_sprites(NpcList *npcs, const GuardianStage *g) {
+	/* (JudgeMan's overworld sprite alone of the guardians' is compressed, and
+	 * no one asked for it: he stood as BN6's white ball, the owner saw on the
+	 * Nova) */
+	if (super_boss(g->navi)) {
+		SuperBody b = super_body(g->navi, g->face);
+		npc_need_sprite(npcs, b.body.list, b.body.index);
+		return;
+	}
+	NpcBody b = guardian_body(g->navi, g->face);
+	if (!npc_need_sprite(npcs, b.list, b.index) && emu_debug_on()) fprintf(stderr, "guardian %d: his sprite finds no room\n", g->navi);
+}
+
 void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {
 	if (super_boss(g->navi)) {
 		super_actors(npcs, archive, g);
