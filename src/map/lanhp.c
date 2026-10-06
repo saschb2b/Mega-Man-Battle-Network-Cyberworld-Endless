@@ -15,6 +15,7 @@
 #include "bn6.h"
 #include "emu.h"
 #include "flags.h"
+#include "gamecall.h"
 #include "mapslot.h"
 #include "npc.h"
 
@@ -43,6 +44,18 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define MARK_SPRITE 0x07
 #define MARK_Z 46
 #define COURIER_TEXT 768   /* the bytes his words may take */
+
+/* A way back's look (issue #110): BN6's own link marker (list 7's 0x88),
+ * whose map objects 0xCB-0xCE show each link square its town's emblem
+ * (animations 1-4), in its plain animation 0 instead, a ring on a cyan
+ * square; a mark of ours on each link square the older portals use
+ * (portals FIRST_BACK on), there while the flag of its portal is clear.
+ * The link itself stays locked by BN6's own rule, its story flag clear:
+ * its marker hidden, and its warp turned off every frame, until
+ * lanhp_take. */
+#define LINK_MARKER 0x88
+#define FIRST_BACK 3        /* home's HOME_WAYS: the older portals after the ways */
+#define BACK_DARK_FLAG 0x1470   /* + k - FIRST_BACK: set while portal k is no way back */
 
 static struct {
 	bool read;
@@ -102,14 +115,27 @@ static void courier(NpcList *npcs) {
 	if (prog && mark) npcs->script[npcs->n++] = mark;
 }
 
+/* the ways back's marks into `npcs` */
+static void back_marks(NpcList *npcs) {
+	if (!npc_need_sprite(npcs, 7, LINK_MARKER)) return;
+	for (int k = FIRST_BACK; k < LANHP_PORTALS && npcs->n < 32; ++k) {
+		int e = portal_entry[k];
+		uint32_t at = npc_floor_mark(7, LINK_MARKER, H.x[e], H.y[e], 0, BACK_DARK_FLAG + k - FIRST_BACK);
+		if (at) npcs->script[npcs->n++] = at;
+	}
+}
+
 bool lanhp_install(void) {
 	if (!read_spots()) return false;
 	NpcList npcs;
 	memset(&npcs, 0, sizeof npcs);
-	/* (its own decorations, BN6's four objects under the floor) */
+	/* (its own decorations, BN6's four objects under the floor, their
+	 * sprite asked for: else BN6 draws its placeholder, a white ball) */
 	npcs.objects = mapslot_objects(LANHP_GROUP, LANHP_NUMBER);
+	npc_objects_sprites(&npcs);
 	mapslot_hp(true);
 	courier(&npcs);
+	back_marks(&npcs);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
 		mapslot_music_home(0, LANHP_GROUP, LANHP_NUMBER, SONG);
@@ -140,16 +166,36 @@ int lanhp_portal_of(int entry) {
 	return -1;
 }
 
-void lanhp_lit(unsigned lit) {
+void lanhp_lit(unsigned lit, unsigned back) {
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
 		int e = portal_entry[k];
-		bool on = lit >> k & 1;
+		bool mark = (back >> k & 1) != 0, on = (lit >> k & 1) && !mark;
 		if (on) flag_clear(BN6_FLAG_WARP_OFF + e);
 		else flag_set(BN6_FLAG_WARP_OFF + e);
+		if (k >= FIRST_BACK) {
+			if (mark) flag_clear(BACK_DARK_FLAG + k - FIRST_BACK);
+			else flag_set(BACK_DARK_FLAG + k - FIRST_BACK);
+		}
 		if (e < FIRST_LINK) continue;
 		if (on) flag_set(LINK_OPEN + e - FIRST_LINK);
 		else flag_clear(LINK_OPEN + e - FIRST_LINK);
 	}
+}
+
+int lanhp_portal_ahead(int x, int y, int face) {
+	/* (BN6's own probe for A, then two and three times as far: a link
+	 * square is flat, and MegaMan checks it from its edge) */
+	int dx, dy;
+	npc_probe(face, &dx, &dy);
+	for (int m = 1; m <= 3; ++m) {
+		int k = lanhp_portal_near(x + dx * m, y + dy * m, 2);
+		if (k >= 0) return k;
+	}
+	return -1;
+}
+
+void lanhp_take(int k) {
+	if (k >= 0 && k < LANHP_PORTALS) emu_warp_link(portal_entry[k]);
 }
 
 void lanhp_portal_spot(int k, int *x, int *y) {

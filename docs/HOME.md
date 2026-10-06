@@ -281,6 +281,31 @@ every frame at home (a reward taken, a request taken), which keeps flag
 words are written again as what waits changes. Nothing waiting, no
 courier. He speaks only when spoken to.
 
+Going on against going back (issue #110, the owner after playing):
+MegaMan arrives on the blue pad facing +x, up the corridor to the pink
+pad, so a step out goes the way on. Nothing is said as he passes a
+portal (he had stopped the player beside each, every visit): his words
+on one come when the player checks it, A facing it from its edge
+(`lanhp_portal_ahead`), as BN6's checks work. Going on and going back
+look different in BN6's own art, nothing drawn over the picture (the
+owner turned down a first build's text tags as unlike BN6): a way on keeps
+BN6's link marker with its town's emblem (list 7's `0x88`, animations
+1-4, the map objects `0xCB`-`0xCE`), a way back the same marker's plain
+animation 0, an orange pad with a red ring, a floor sprite of ours on
+the link square while it is a way back (flags `0x1470`-`0x1471`, set
+while it is not). The marker's sprite is compressed and was never asked
+for, so every lit link showed BN6's placeholder, a white ball: Lan's HP
+now asks for its objects' sprites, and the courier's and the marks' (of the 12 a
+map takes). A way back is locked by BN6's own rule, its story flag clear
+(its emblem hidden, its warp turned off every frame by BN6's object):
+stepped on or checked, MegaMan says where it goes back to and its price,
+then asks "Go back,Lan?", the cursor on No as the vow's patch-up asks
+(flag `0x146F` on Yes, which takes its link by BN6's own warp:
+`lanhp_take`); a talk's question now takes left and right. Its name stays
+in MegaMan's words and on the second screen, whose home panel lists each
+way as On or Back (the ways back were left out of it before: it looked
+them up by the ways' own portals).
+
 ### 3. Going back, and the Net's clock
 
 An older portal goes back to an area the run has won: a layer of it at

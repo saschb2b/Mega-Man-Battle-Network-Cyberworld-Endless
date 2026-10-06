@@ -142,6 +142,18 @@ uint32_t npc_mark(int category, int index, int x, int y, int z, int anim, int go
 	return idle_and_write(s, 17, gone_flag);
 }
 
+uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gone_flag) {
+	uint8_t s[48] = {
+		0x08,
+		0x25, (uint8_t)index, (uint8_t)(category * 4),
+		0x16, (uint8_t)anim,
+		0x0A, 0x00,   /* no collision radius */
+		0x1F,
+		0x0E,         /* nothing to talk to */
+	};
+	return idle_and_write(s, 10 + floor_place(s + 10, x, y, 0), gone_flag);
+}
+
 /* (behind: a navi behind a counter, drawn under the second layer that
  * draws the counter, its talk centre shifted by (sx, sy) towards the
  * counter's front: the originals' 0x1B and 0x0C, collision radius 8) */

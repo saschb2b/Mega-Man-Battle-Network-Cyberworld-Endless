@@ -315,13 +315,15 @@ static uint32_t town_r(uint32_t keys) {
 	return keys & ~KEY_R;
 }
 
-/* A at home that home's place answers itself (true: taken): a keeper
- * across a counter, from anywhere before it in front of them, and a check
- * of its own, AsterLand's Number Trader, which BN6's would run */
+/* A at home that home's place answers itself (true: taken): a portal of
+ * Lan's HP MegaMan faces, a keeper across a counter, from anywhere before
+ * it in front of them, and a check of its own, AsterLand's Number Trader,
+ * which BN6's would run */
 static bool home_a(void) {
 	uint32_t archive;
 	int script;
 	const char *says;
+	if (home_hp_check()) return true;
 	if (home_counter(&archive, &script)) return talk_script(archive, script);
 	if (!(says = home_check())) return false;
 	talk_start(says, FACE_NONE);

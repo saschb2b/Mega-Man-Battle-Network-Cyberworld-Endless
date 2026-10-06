@@ -38,8 +38,15 @@ const RunWay *home_ways(int *n, bool *dark_sealed);
  * visit. */
 bool home_take_way(int k);
 /* The portals lit in Lan's HP (a bit each, lanhp_lit): the ways, and the
- * older portals not yet taken this visit. */
+ * older portals not yet taken this visit; of them the older ones, the ways
+ * back, which look their own and ask first (issue #110). */
 unsigned home_lit(void);
+unsigned home_lit_back(void);
+/* Set by the trip back's Yes (talk_ask). */
+#define HOME_BACK_FLAG 0x146F
+/* A in Lan's HP facing a portal: MegaMan's words on it, or an older one's
+ * question; true where a talk began. */
+bool home_hp_check(void);
 /* The area older portal `k` goes back to (docs/HOME.md, going back), -1
  * where `k` is none, or taken this visit. */
 int home_older(int k);

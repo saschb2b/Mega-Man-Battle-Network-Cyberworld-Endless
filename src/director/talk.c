@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"
+#include "script_kit.h"
 #include "text.h"
 
 #define TALK_AT   (EMU_FREE + 0x150000)   /* one archive, rewritten for each conversation */
@@ -52,6 +53,25 @@ bool talk_start(const char *boxes, int face) {
 	if (n > TALK_SIZE) return false;
 	emu_write(TALK_AT, bytes, (size_t)n);
 	begin(TALK_AT, 0);
+	return true;
+}
+
+bool talk_ask(const char *boxes, int face, const char *question, int yes_flag) {
+	if (K.running || emu_read8(BN6_CHATBOX)) return false;
+	static TextArchive a;
+	static uint8_t bytes[TEXT_ARCHIVE_MAX];
+	ta_begin(&a);
+	int no = ta_closing(&a), i = ta_script(&a);
+	bool first = true;
+	ta_pages(&a, boxes, face, &first);
+	/* (the cursor on No, as a vow's patch-up asks) */
+	ta_ask_in(&a, face, question, no, !first, true);
+	ta_flag_set(&a, yes_flag);
+	ta_end(&a);
+	int n = ta_build(&a, bytes);
+	if (n > TALK_SIZE) return false;
+	emu_write(TALK_AT, bytes, (size_t)n);
+	begin(TALK_AT, i);
 	return true;
 }
 

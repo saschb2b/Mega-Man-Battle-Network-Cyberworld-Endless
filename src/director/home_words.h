@@ -40,6 +40,8 @@ const char *home_hp_status(const char *way, bool first, int clock);
 const char *home_back_portal_words(int biome, bool taught, int clock);
 /* Home again from a trip back, the Net's clock at `clock`. */
 const char *home_back_words(int clock);
+/* MegaMan's question before a trip back (talk_ask's). */
+const char *home_back_question(void);
 /* The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable
  * first, a box each: the pay waiting with asker `reward` (jobs.h, -1
  * none), else the places of the new requests posted (bit k asker k), and

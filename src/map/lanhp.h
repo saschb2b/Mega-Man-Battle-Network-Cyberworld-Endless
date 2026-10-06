@@ -33,9 +33,14 @@ void lanhp_portal(int k, int group, int number, int x, int y, int facing);
 /* The portal a warp entry (BN6_WARP_INDEX) is; -1 the arrival or none. */
 int lanhp_portal_of(int entry);
 /* The portals in `lit` on (bit k portal k), the rest off (BN6's warp-off
- * flags, which entering a map clears: again after each entry). The blue
- * pad stays BN6's jack-out. */
-void lanhp_lit(unsigned lit);
+ * flags, which entering a map clears: again after each entry); those in
+ * `back`, ways back, in a look of their own and locked until lanhp_take
+ * (issue #110). The blue pad stays BN6's jack-out. */
+void lanhp_lit(unsigned lit, unsigned back);
+/* Portal `k` taken: BN6's link warp to where it points, as its cells'. */
+void lanhp_take(int k);
+/* The portal MegaMan at world (x, y) faces (`face` 0-7) for A; -1 none. */
+int lanhp_portal_ahead(int x, int y, int face);
 /* Portal `k`'s spot: the middle of its cells (world units). */
 void lanhp_portal_spot(int k, int *x, int *y);
 /* The portal whose spot holds world (x, y), or lies within `reach` world

@@ -6,6 +6,7 @@
  * arrival. */
 #include "director_home.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "bn6.h"
@@ -27,8 +28,6 @@
 #include "save.h"
 #include "talk.h"
 #include "town.h"
-
-#define PORTAL_REACH 20   /* world units from a portal's cells MegaMan names it from */
 
 static bool map_is(int group, int number) { return emu_read8(BN6_MAP_GROUP) == group && emu_read8(BN6_MAP_NUMBER) == number; }
 
@@ -67,7 +66,7 @@ bool home_counter(uint32_t *archive, int *script) {
  * stopped it) */
 void home_entered(void) {
 	if (!home_in_hp()) return;
-	lanhp_lit(home_lit());
+	lanhp_lit(home_lit(), home_lit_back());
 	flag_clear(BN6_FLAG_NO_JACK);
 }
 
@@ -168,25 +167,51 @@ static void home_talk(void) {
 	if (run_beast_start() && !(profile.beast & BEAST_TAUGHT)) { profile.beast |= BEAST_TAUGHT; profile_save(); }
 }
 
-/* MegaMan beside a portal, once a visit each: what he reads through it
- * (its data's feel, a strong Navi's signal); the dark way's sealed
- * (docs/HOME.md) */
-static void portal_words(void) {
-	if (!home_in_hp() || !settled() || talk_busy() || emu_read8(BN6_CHATBOX)) return;
-	int n = 1, k = lanhp_portal_near(bn6_player_x(), bn6_player_y(), PORTAL_REACH);
+/* Lan's HP's portals (issue #110): MegaMan's words on one only when the
+ * player checks it, A facing it, as BN6's checks work (they stopped him
+ * beside every portal on the way to the pink pad, every visit); an older
+ * portal, locked by BN6's own link rule (lanhp_lit), asks before its trip
+ * back, stepped on or checked, the cursor on No (back_asked: the one
+ * asked, until the answer; back_on: the one MegaMan stands on) */
+static int back_asked = -1, back_on = -1;
+
+/* older portal `k`'s words and its question */
+static bool ask_back(int k) {
+	flag_clear(HOME_BACK_FLAG);
+	if (!talk_ask(home_back_portal_words(home_older(k), profile.back_taught, run.clock), FACE_MEGAMAN, home_back_question(), HOME_BACK_FLAG))
+		return false;
+	back_asked = k;
+	if (!profile.back_taught) { profile.back_taught = 1; profile_save(); }
+	return true;
+}
+
+bool home_hp_check(void) {
+	if (!home_in_hp()) return false;
+	int n = 1, k = lanhp_portal_ahead(bn6_player_x(), bn6_player_y(), emu_read8(BN6_PLAYER_FACING) & 7);
 	bool sealed = false;
 	const RunWay *w = home_ways(&n, &sealed);
-	if (k < 0 || D.home_told >> k & 1) return;
-	/* (an older portal: where it goes back to, and its price) */
-	if (home_older(k) >= 0) {
-		if (!talk_start(home_back_portal_words(home_older(k), profile.back_taught, run.clock), FACE_MEGAMAN)) return;
-		D.home_told |= 1u << k;
-		if (!profile.back_taught) { profile.back_taught = 1; profile_save(); }
+	if (k < 0) return false;
+	if (home_older(k) >= 0) return ask_back(k);
+	if (k >= n && !(k == 2 && sealed)) return false;
+	bool shut = k >= n;
+	return talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut), FACE_MEGAMAN);
+}
+
+/* An older portal stepped on: its question, once each time he steps on
+ * it; the answer, its talk closed: Yes takes its link */
+static void back_portal(void) {
+	if (!home_in_hp()) { back_asked = back_on = -1; return; }
+	bool idle = !talk_busy() && !emu_read8(BN6_CHATBOX);
+	if (back_asked >= 0 && idle) {
+		if (flag_get(HOME_BACK_FLAG)) lanhp_take(back_asked);
+		flag_clear(HOME_BACK_FLAG);
+		back_asked = -1;
 		return;
 	}
-	if (k >= n && !(k == 2 && sealed)) return;
-	bool shut = k >= n;
-	if (talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut), FACE_MEGAMAN)) D.home_told |= 1u << k;
+	int k = lanhp_portal_near(bn6_player_x(), bn6_player_y(), 0);
+	if (k >= 0 && home_older(k) < 0) k = -1;
+	if (k < 0) back_on = -1;
+	else if (k != back_on && idle && settled() && ask_back(k)) back_on = k;
 }
 
 /* MegaMan on a portal: its way's first layer built (another way's than the
@@ -242,7 +267,7 @@ void home_update(void) {
 	home_hold();
 	home_talk();
 	home_saves();
-	portal_words();
+	back_portal();
 	portal_taken();
 	bool arrived = D.town_seen && on_map() && emu_read8(BN6_WARP_PENDING) == 0 &&
 		emu_read8(BN6_MAP_GROUP) == D.group && emu_read8(BN6_MAP_NUMBER) == D.number;

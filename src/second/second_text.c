@@ -122,8 +122,9 @@ void second_home_ways(const DirectorWay *ways, int n, char *out, size_t size) {
 	for (int i = 0; i < n && k + 1 < size; ++i) {
 		const char *area = guardian_area_in_text(ways[i].biome, LAYER_NORMAL);
 		const char *who = ways[i].navi && guardian_known(ways[i].navi) ? guardian(ways[i].navi)->name : "???";
-		int w = ways[i].back ? snprintf(out + k, size - k, "%sBack: %s", k ? "|" : "", area)
-			: snprintf(out + k, size - k, "%s%s: %s (%s)", k ? "|" : "", i ? "Link" : "Pink pad", area, who);
+		/* (on or back, as Lan's HP's tags tell them: issue #110) */
+		int w = ways[i].back ? snprintf(out + k, size - k, "%sBack: %s, a notch", k ? "|" : "", area)
+			: snprintf(out + k, size - k, "%sOn: %s (%s), %s", k ? "|" : "", area, who, i ? "link" : "pink pad");
 		if (w < 0 || (size_t)w >= size - k) break;
 		k += (size_t)w;
 	}
