@@ -5,24 +5,40 @@ handhelds (Android 5 and later; arm64, 32-bit ARM and x86-64): SDL's
 activity (`org.libsdl.app.SDLActivity`, from SDL2's own source) runs the
 game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
 
-- `RomActivity` starts the game when the player's ROM is kept, else asks
-  for the folder the ROMs are in with Android's own folder picker
-  (`ACTION_OPEN_DOCUMENT_TREE`, no storage permission), or the files in one
-  picker (`EXTRA_ALLOW_MULTIPLE`, for Download itself, which Android 11 and
-  later keep from the folder picker). It opens only `.gba` files, tells
-  each by its header's game code, checks BN6 Cybeast Gregar's and BN5 Team
-  Colonel's by their SHA-1 and copies those two alone into the app's files
-  (`files/rom/bn6g.gba`, `bn5c.gba`), where the game finds BN5 beside BN6;
-  every other `.gba` is named with why it was refused. The folder is kept
-  (a persisted, read-only grant) and looked in again at each start while
-  BN5 is missing; a file seen before (its document, size and date) is not
-  opened again. The app icon's **ROMs** shortcut (`res/xml/shortcuts.xml`)
-  opens the page again. Nothing leaves the device; saves are kept beside
-  the ROMs (`files/data`).
+- `RomActivity` is the icon's activity: it starts `GameActivity`, asking
+  for the ROMs screen when it comes from the icon's **ROMs** shortcut
+  (`res/xml/shortcuts.xml`). Up to issue #97 it was a page of its own.
 - `GameActivity` is SDL's activity with the ROM and data folders as its
   arguments; it keeps the screen on. Where a display stands beside the
   game's, such as the AYN Thor's lower screen, `SecondScreen` shows the
   PET beside the game on it ([below](#the-second-screen)).
+- The ROMs screen (`src/launcher/`, which every desktop and phone build
+  shows at its first start: README.md, The ROMs screen) calls into
+  `GameActivity` from the game's thread (`src/launcher/pick_android.c`):
+  `romsPick` opens Android's own folder picker
+  (`ACTION_OPEN_DOCUMENT_TREE`, no storage permission) or its file picker,
+  several at once (`EXTRA_ALLOW_MULTIPLE`, for Download itself, which
+  Android 11 and later keep from the folder picker), and `romsResult`
+  hands back what `RomLook` found there. It opens only `.gba` files, tells
+  each by its header's game code, checks BN6 Cybeast Gregar's and BN5 Team
+  Colonel's by their SHA-1 and copies those two alone into the app's files
+  (`files/rom/bn6g.gba`, `bn5c.gba`), where the game finds BN5 beside BN6;
+  every other `.gba` is named with why it was refused. The folder is kept
+  (a persisted grant, read and write) and looked in again at each start
+  while BN5 is missing (`romsLook`); a file seen before (its document, size
+  and date) is not opened again. Nothing leaves the device.
+- The saves and settings are in `files/data`, which uninstalling deletes.
+  So the game keeps a copy in the folder chosen (`src/launcher/mirror.c`):
+  `cyberworld-endless.cwsave` (`src/core/backup.h`), packed a few seconds
+  after the game last wrote a file and as the app goes to the background,
+  and written into the folder by `savesPut` (written whole as a new file,
+  then put in the old one's place where the folder's provider renames).
+  A folder chosen that holds one has it copied to `files/data/found.cwsave`,
+  and the ROMs screen offers it back. Android's Auto Backup takes the saves
+  and settings, never the ROMs (`res/xml/backup_rules.xml`,
+  `data_extraction_rules.xml`); with no rules it took everything, ROMs
+  too, and a reinstall could bring BN6 back with older saves and never
+  show the page that adds BN5 (issue #97).
 - A controller (a handheld's own controls, Bluetooth or USB) works as on the
   desktop builds. Without one the game draws its touch controls from the
   start; a controller's button puts them away, a touch brings them back.
@@ -97,8 +113,8 @@ time.
 ## Signing
 
 Android installs an update over an app only when both carry the same
-signature, and uninstalling deletes the app's saves, so every release has to
-be signed with one key. `build.py android` signs with it when these are set:
+signature, and uninstalling deletes the app's saves (all but their copy in
+the ROM folder), so every release has to be signed with one key. `build.py android` signs with it when these are set:
 
 | Variable | |
 | --- | --- |
@@ -124,22 +140,29 @@ base64 -w0 release.jks   # the value of ANDROID_KEYSTORE_BASE64
 ```
 
 Keep the keystore and its password safe outside the repository: a lost key
-means players reinstall (and lose their saves) to update.
+means players reinstall to update, their saves coming back only from the
+copy in their ROM folder.
 
 ## Installing
 
 Copy the APK to the device and open it (Android asks once to allow installs
 from the file manager or browser), or with a cable: `adb install -r
-cyberworld-endless.apk`. The first start asks for the folder the ROMs are
-in: Mega Man Battle Network 6: Cybeast Gregar (USA), unmodified, the same
-file every other build takes, and optionally Mega Man Battle Network 5:
-Team Colonel (USA).
+cyberworld-endless.apk`. The first start opens the ROMs screen, whose BN6
+slot asks for the folder the ROMs are in: Mega Man Battle Network 6:
+Cybeast Gregar (USA), unmodified, the same file every other build takes,
+and optionally Mega Man Battle Network 5: Team Colonel (USA).
 
 To try it in the emulator, push copies of the ROMs into its storage, for
 instance `adb push bn6g.gba /sdcard/Download/ROMs/`, then choose
 Download/ROMs; `adb logcat -s Cyberworld SDL/APP` shows each look (`looked in
-ROMs: 2 .gba, kept BN6 Cybeast Gregar (USA), BN5 Team Colonel (USA)`) and
-the game's own line, `BN5 found: ...`.
+ROMs: 3 .gba, kept 3, refused [Falzar.gba: BN6 Cybeast Falzar, not Gregar],
+saves found`) and the game's own line, `BN5 found: ...`. A reinstall's
+saves: play until the game saves, check that
+`/sdcard/Download/ROMs/cyberworld-endless.cwsave` is there, `adb uninstall
+io.github.saschb2b.cyberworldendless`, install the APK again and choose the
+folder: the ROMs screen asks **SAVES FOUND**, and **BRING BACK** puts back
+`files/data/savedata` as it was (the emulator, with `adb root`, can hash
+both).
 
 Joy-Cons can be tried there without the hardware: `tools/jc_uinput.c`
 (built with this image's NDK, the command in its first lines) makes a left

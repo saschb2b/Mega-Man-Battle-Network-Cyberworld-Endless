@@ -90,9 +90,11 @@ on a phone too, and on a New 3DS from its HOME Menu.
   bystanders, their random battles fought in BN5's own engine. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
-  iPhones and iPads (there, choose the folder that holds both ROMs, or
-  put BN5 in it later) and in the browser (choose it on the player's page
-  beside BN6, or add it later); not on the 3DS.
+  iPhones and iPads and in the browser; not on the 3DS. Added later, it
+  is found at the next start beside BN6 (on Android, an iPhone or an
+  iPad, in the folder you chose); on a PC, a Mac, a phone or a tablet, R
+  on the title also opens the [ROMs screen](#the-roms-screen) to add it,
+  and in the browser **Add BN5 Team Colonel** does.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -122,6 +124,39 @@ Releases up to 0.6.0 named the PortMaster port
 `cyberworld.zip`, the Windows installer `cyberworld-endless-setup-x64.exe`
 and the website's files `cyberworld-endless-web.zip`.
 
+### The ROMs screen
+
+On a PC, a Mac, an Android device, an iPhone or an iPad the game first
+opens on its ROMs screen: two cartridge slots, BN6 Cybeast Gregar
+(needed) and BN5 Team Colonel (optional), each an open spot until its
+ROM is in. Choose a slot (a tap, a click, or A) and pick the file in the
+system's own file chooser (on Linux, `zenity` or `kdialog`), or drop it
+on the window; on a phone or tablet, pick the folder your ROMs are in. A
+ROM the game finds by itself (in Downloads, EmuDeck's or RetroDECK's
+folders) is in its slot already. Each file is checked by its SHA-1, and
+one that is not right is named with the reason ("BN6 Cybeast Falzar, not
+Gregar"). Where there is no file chooser (a Steam Deck's Gaming Mode, a
+Linux PC without `zenity` or `kdialog`, such as the Flatpak's sandbox),
+put the file in Downloads: the screen finds it within a few seconds. A
+cartridge in shows its game's face on its label, drawn from
+your ROM as the screen opens; the cartridge around it is the project's
+own drawing. **PLAY** starts the game as soon as BN6 is in.
+
+Later starts go straight to the game: the screen comes back by itself
+only when BN6 is missing or BN5 has gone. To add BN5 later, press R on
+the title (the small line by its menu names the key) and choose it; **DONE**
+goes back to the title.
+
+The screen also says where your saves are kept. On a PC or a Mac that is
+the data folder, which uninstalling leaves alone. On a phone or tablet,
+where uninstalling the app deletes its files, the app keeps a copy of the
+saves in the ROM folder you chose, `cyberworld-endless.cwsave`, renewed a
+few seconds after each save. After a reinstall, choose that folder again:
+the screen finds the copy and offers it back (**BRING BACK** or **START
+FRESH**); where the device has saves of its own, it shows both and asks
+which to keep. ROMs chosen as files leave no folder for the copy: the
+screen says so.
+
 ### On Windows
 
 From the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases), for 64-bit Windows 10 and 11:
@@ -133,10 +168,11 @@ From the [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberwor
   folder: unpack it anywhere and run `cyberworld-endless.exe`.
 
 The game is not signed, so Windows may say "Windows protected your PC" the
-first time: **More info**, then **Run anyway**. The first start looks for
-the ROM in Downloads and asks for the file if it is not there; it keeps a
-copy in `%LOCALAPPDATA%\cyberworld-endless\rom\`, where the saves live
-too (uninstalling leaves them). It opens in a window at the largest whole
+first time: **More info**, then **Run anyway**. The first start opens the
+[ROMs screen](#the-roms-screen): a ROM in Downloads is in already, else
+choose the file in Windows' file dialog or drop it on the window. The game
+keeps a copy in `%LOCALAPPDATA%\cyberworld-endless\rom\`, where the saves
+live too (uninstalling leaves them). It opens in a window at the largest whole
 scale that fits; F11 or Alt+Enter switches to fullscreen. Keyboards and
 controllers (Xbox, PlayStation, Switch) work as on Linux. Steam's own **Add
 a Non-Steam Game** takes `cyberworld-endless.exe`.
@@ -149,8 +185,8 @@ Applications. Apple has not notarized it (that takes a paid developer
 account), so the first start is refused: open **System Settings > Privacy &
 Security**, choose **Open Anyway** beside Cyberworld Endless and confirm (on
 macOS 14 and older, Control-click the app and choose **Open**). The first
-start looks for the ROM in Downloads and asks for the file if it is not
-there; the ROM's copy, the saves and `keys.ini` live in
+start opens the [ROMs screen](#the-roms-screen) (a ROM in Downloads is in
+already); the ROM's copy, the saves and `keys.ini` live in
 `~/Library/Application Support/cyberworld-endless/`.
 
 ### On a Linux PC
@@ -170,9 +206,10 @@ can pin to the dock:
   `cyberworld-endless.flatpak` and open it with your software centre, or
   `flatpak install --user cyberworld-endless.flatpak`.
 
-On the first start without a ROM it looks in Downloads and in EmuDeck's and
-RetroDECK's folders, then asks for the file (a file chooser when `zenity`
-or `kdialog` is installed), and keeps a copy in
+The first start opens the [ROMs screen](#the-roms-screen): a ROM in
+Downloads or in EmuDeck's and RetroDECK's folders is in already; else
+choose the file (a file chooser when `zenity` or `kdialog` is installed)
+or drop it on the window. The game keeps a copy in
 `~/.local/share/cyberworld-endless/rom/` (the Flatpak's in
 `~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/`), where your saves
 also live. It opens in a window at the largest whole scale that fits; F11
@@ -213,8 +250,9 @@ software:
 4. The ROM: with EmuDeck or RetroDECK there is nothing to do. The game looks
    in `Emulation/roms/gba` and `retrodeck/roms/gba`, on the Deck and on its
    SD card, finds the ROM by its contents and keeps a copy of its own.
-   Otherwise put the `.gba` file (unzipped) into Downloads, or choose it on
-   the first start in Desktop Mode.
+   Otherwise put the `.gba` file (unzipped) into Downloads: the ROMs screen
+   finds it within a few seconds, in Gaming Mode too, which has no file
+   chooser. Or choose it there in Desktop Mode.
 
 The AppImage works too: right-click it, **Properties**, **Permissions**,
 **Is executable**, and start it once in Desktop Mode. It offers to add
@@ -238,23 +276,30 @@ SteamOS updates.
 Download `cyberworld-endless.apk` from the
 [releases](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases)
 on the phone, tablet or handheld and open it (Android asks once to allow
-installs from your browser or file manager). The first start asks for the
-folder your ROMs are in, with Android's own folder picker: the app opens
-only the `.gba` files there and keeps copies of BN6's and, if it is there,
-BN5's in its own storage, beside your saves. It names any `.gba` it refuses,
+installs from your browser or file manager). The first start opens the
+[ROMs screen](#the-roms-screen): tap BN6's slot and choose the folder your
+ROMs are in, with Android's own folder picker. The app opens only the
+`.gba` files there and keeps copies of BN6's and, if it is there, BN5's
+in its own storage, beside your saves. It names any `.gba` it refuses,
 and why ("BN6 Cybeast Falzar, not Gregar"). Android 11 and later keep apps
 out of Download itself: put the ROMs in a folder in it, such as
-Download/ROMs, or tap **Choose the files instead** and pick BN6 and BN5
-together (hold one to select both). The folder is looked in again at each
-start, so BN5 put there later comes in by itself; after choosing the
-files, hold the app's icon and tap **ROMs** (Android 7.1 and later) to add
-BN5. A handheld's own controls, a Bluetooth or USB
+Download/ROMs, or tap **FILES INSTEAD** and pick BN6 and BN5 together
+(hold one to select both). The folder is looked in again at each start,
+so BN5 put there later comes in by itself; R on the title, or holding the
+app's icon and tapping **ROMs** (Android 7.1 and later), opens the ROMs
+screen again. A handheld's own controls, a Bluetooth or USB
 controller (two Joy-Cons as one) and the touch screen all work: the game
 draws touch controls round the picture until a controller's button is
 pressed, and Back asks before it quits. On a handheld with a second
 screen, such as the AYN Thor, the lower one is the PET beside the game, as
 on a 3DS ([android/README.md](android/README.md#the-second-screen)).
-Uninstalling the app deletes its saves.
+
+Uninstalling the app deletes its own files, the saves among them, but
+not the copy of the saves it keeps in your ROM folder
+(`cyberworld-endless.cwsave`, renewed a few seconds after each save):
+after a reinstall, choose the same folder and the ROMs screen offers the
+saves back. Android's own backup, where it is turned on, keeps the saves
+and settings too, never the ROMs.
 
 ### On an iPhone or iPad
 
@@ -276,14 +321,18 @@ marketplaceID").
    has a button that does it on the phone).
 3. Install **Cyberworld Endless** from the source. With a free Apple ID an
    app lasts seven days: SideStore renews it, and offers each new version.
-4. Start it and tap **CHOOSE FOLDER**: pick the folder your ROMs are in,
-   in Files. The app opens only the `.gba` files there, copies BN6's and,
-   if it is there, BN5's in, and looks in the folder again at each start,
-   so BN5 put there later comes in by itself. A file in iCloud Drive that
-   is not on the phone yet is downloaded first (in a big folder, download
-   BN6's in Files yourself). Or tap **CHOOSE FILES** and pick the ROMs, or
-   put them in Files, **On My iPhone › Cyberworld**, where the app keeps
-   your saves too and looks at every start.
+4. Start it: the [ROMs screen](#the-roms-screen) opens. Tap BN6's slot
+   and pick the folder your ROMs are in, in Files. The app opens only the
+   `.gba` files there, copies BN6's and, if it is there, BN5's in, and
+   looks in the folder again at each start, so BN5 put there later comes
+   in by itself. A file in iCloud Drive that is not on the phone yet is
+   downloaded first (in a big folder, download BN6's in Files yourself).
+   Or tap **FILES INSTEAD** and pick the ROMs, or put them in Files, **On
+   My iPhone › Cyberworld**, where the app keeps your saves too and looks
+   at every start. Deleting the app deletes that folder with it, but not
+   the copy of your saves the app keeps in the ROM folder you chose
+   (`cyberworld-endless.cwsave`): after a reinstall, choose that folder
+   again and the ROMs screen offers them back.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
 PlayStation). `cyberworld-endless.ipa` on the releases page is the app
@@ -342,13 +391,17 @@ The older 3DS and 2DS are too slow for it.
 
 ### In a browser
 
-Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)** and choose your ROM file, or drop it on
-the page; Battle Network 5: Team Colonel's beside it if you have it (both
-at once, or BN5 later with **Add BN5 Team Colonel**). The page checks each
-file by its SHA-1, says why it refuses one, and keeps them, with your
-saves, in the browser's own storage (IndexedDB); they are never uploaded.
-Next time **Jack in** starts straight away. **Forget ROMs and saves**
-removes them all. BN5's battles run on a second emulator core in the
+Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)**: its two cartridge slots, BN6 and BN5,
+take your ROM files (tap one to choose them, or drop them on the page);
+Battle Network 5: Team Colonel's beside BN6's if you have it (both at
+once, or BN5 later with **Add BN5 Team Colonel**). The page checks each
+file by its SHA-1, says why it refuses one, shows each game's face on its
+cartridge, and keeps them, with your saves, in the browser's own storage
+(IndexedDB); they are never uploaded. Next time **Play** starts straight
+away. **Save a backup** under the game downloads your saves as one file,
+`cyberworld-endless.cwsave`, and **Load a backup** brings it back, in
+this browser or another (the Android and iPhone apps take the same file,
+put in their ROM folder). **Forget ROMs and saves** removes them all. BN5's battles run on a second emulator core in the
 page: the first time, BN5 starts up while the title shows (about 20
 seconds on a recent laptop, a slice of each frame), and a battle in its
 areas that comes before it is done waits behind a short note, once per
@@ -628,8 +681,15 @@ deleted the run is over: the title screen shows how deep you got, how many
 viruses and Navis you deleted, and your best depth. When the short net's
 Nest falls, the run is won.
 
-Saves live in `ports/cyberworld/savedata/`. To give up a run without playing
-it out, delete `savedata/run.sav`; your best depth is kept in `profile.sav`.
+Saves live in `savedata/` in the data folder: `ports/cyberworld/` on a
+PortMaster handheld, `~/.local/share/cyberworld-endless/` on Linux
+(the Flatpak's under `~/.var/app/`), `%LOCALAPPDATA%\cyberworld-endless\`
+on Windows and `~/Library/Application Support/cyberworld-endless/` on a
+Mac, where uninstalling leaves them. A phone or tablet keeps a copy in its
+ROM folder, and the browser's player saves a backup file
+([The ROMs screen](#the-roms-screen), [In a browser](#in-a-browser)). To
+give up a run without playing it out, delete `savedata/run.sav`; your
+best depth is kept in `profile.sav`.
 
 ## Screen
 

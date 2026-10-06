@@ -28,18 +28,19 @@ has notarized: it refuses the source with "missing a marketplaceID"
 2. Install **Cyberworld Endless** from the source. A free Apple ID's apps
    last seven days; SideStore and AltStore renew them, and offer each new
    release the source lists.
-3. Start it. Without a ROM it asks for the folder the ROMs are in:
-   **CHOOSE FOLDER** (or A) opens Files' picker for a folder. The app
+3. Start it: the ROMs screen opens, its two cartridge slots open spots
+   until their ROMs are in (the README's The ROMs screen). BN6's slot (a
+   tap, or A) opens Files' picker for the folder the ROMs are in. The app
    opens only its `.gba` files (and those of the folders directly in
    it), copies Mega Man Battle Network 6: Cybeast Gregar (USA) and, if
    it is there, Mega Man Battle Network 5: Team Colonel (USA) in, each checked by
    its SHA-1, and names every other `.gba` with why it was refused. The
    folder is kept (a bookmark) and looked in again at each start, so BN5
-   put there later comes in by itself. **CHOOSE FILES** (down, then A)
-   picks the files instead, more than one at once. Or put the ROMs in
-   Files, **On My iPhone › Cyberworld** (the app's Documents folder),
-   any file name; the app looks there, and in the folder chosen, every
-   three seconds.
+   put there later comes in by itself; R on the title opens the ROMs
+   screen again. **FILES INSTEAD** picks the files instead, more than one
+   at once. Or put the ROMs in Files, **On My iPhone › Cyberworld** (the
+   app's Documents folder), any file name; the app looks there, and in
+   the folder chosen, every three seconds.
 
 `cyberworld-endless.ipa` on the releases page is the app alone, for
 another installer (it is signed ad hoc: the installer signs it again).
@@ -50,7 +51,14 @@ The app's Documents folder, which Files shows as **On My iPhone ›
 Cyberworld**, holds the ROMs' copies (`rom/bn6g.gba`, `rom/bn5c.gba`),
 the saves and `settings.ini`,
 `keys.ini` and `touch.ini`, as a desktop's data folder does; a player can
-copy the saves off there. Uninstalling the app deletes it.
+copy the saves off there. Uninstalling the app deletes it. So the app
+keeps a copy of the saves in the ROM folder chosen,
+`cyberworld-endless.cwsave` (`src/core/backup.h`, the format the Android
+app and the browser's backups share), written a few seconds after the
+game last saved and as the app goes to the background, through the
+folder's bookmark as a coordinated write that replaces the old copy
+whole. A folder chosen that holds one has it copied to `found.cwsave`,
+and the ROMs screen offers it back after a reinstall.
 
 ## Building (on a Mac)
 
@@ -64,7 +72,7 @@ the GBA core as static arm64 libraries for the SDK (`iphoneos`, or
 `iphonesimulator` for an Apple silicon Mac's Simulator) into
 `.build/ios-deps/`. `make TARGET=ios` builds the game's C and
 `src/core/ios.m` (the Files pickers and the ROM folder's looks, the
-haptics, the safe area, and the
+saves' copy in that folder, the haptics, the safe area, and the
 `main` that hands SDL's to UIKit); `build.py` makes the bundle from
 `ios/Info.plist` and the icons in `ios/icons/` (`tools/app_icon.py`), signs
 it ad hoc and zips `Payload/` into the IPA.
@@ -86,7 +94,7 @@ kept 3, ...` (bit 1 BN6's, bit 2 BN5's) and the game's `BN5 found: ...`.
 
 CI's `ios` job builds both, checks the IPA (arm64, iOS 14, only iOS's own
 frameworks, the bundle signed) and starts the Simulator's app, which must
-reach its no-ROM screen; its screenshot is in the job's artifact.
+reach its ROMs screen; its screenshot is in the job's artifact.
 
 ## The AltStore source
 

@@ -73,9 +73,11 @@ ROM in memory, and shows its battle screens.
    with the ROMs present, so nothing is saved: a run continued without
    the other ROM goes on in the BN6 area's tiles.
 6. **Platforms**: desktop first. Phones keep copies: Android's
-   `RomActivity` and iOS's ROM screen (`src/core/ios.m`) copy BN5's ROM
-   beside BN6's from the folder the player chose, and look in it again at
-   each start, so BN5 put there later comes in (issue #66). The browser's
+   `RomLook` and iOS's `src/core/ios.m`, behind the ROMs screen's
+   pickers (`src/launcher/`), copy BN5's ROM beside BN6's from the folder
+   the player chose, and look in it again at each start, so BN5 put there
+   later comes in (issue #66). On the desktops, Android and iOS, R on the
+   title opens the ROMs screen again to add BN5 (issue #97). The browser's
    play page (`web/play/app.js`) takes BN5's file beside BN6's, either
    told by its header's game code and checked by its SHA-1, and keeps it
    in IndexedDB beside BN6's (`rom/bn5c.gba`), where `xrom_find_beside`
