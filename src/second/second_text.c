@@ -180,7 +180,8 @@ int second_status(SecondRow *out, int most, int max_hp, int base_hp) {
 }
 
 int second_library(SecondRow *out, int most) {
-	static const char *const cls[] = { "Standard chips", "Mega chips", "Giga chips" };
+	/* (BN6's own tabs' names: two to a line beside the Library's card) */
+	static const char *const cls[] = { "StdChip", "MegaChip", "GigaChip" };
 	int k = 0;
 	for (int c = 0; c < 3 && k < most; ++c) {
 		out[k].name = cls[c];
@@ -206,8 +207,16 @@ void second_layer_next(int guardian_navi, char *out, size_t n) {
 
 const char *second_bn5_line(bool found) { return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6"; }
 
+/* (where a chip's copies are, a shop's and the Library's) */
+static const char *const copies_in[2] = { "In the folder", "In the pack" };
+
+int second_copies(SecondRow *out, int most, int folder, int pack) {
+	const int values[2] = { folder, pack };
+	return rows_of(out, most, copies_in, values, 2, 2);
+}
+
 void second_held_lines(const SecondState *s, char *out, size_t n) {
-	if (s->sh_kind == BN6_SHOP_KIND_CHIP) snprintf(out, n, "In the folder: %d|In the pack: %d", s->sh_folder, s->sh_pack);
+	if (s->sh_kind == BN6_SHOP_KIND_CHIP) snprintf(out, n, "%s: %d|%s: %d", copies_in[0], s->sh_folder, copies_in[1], s->sh_pack);
 	else if (s->sh_kind == BN6_SHOP_KIND_PROGRAM) snprintf(out, n, "Held: %d|On the board: %d", s->sh_held, s->sh_placed);
 	else if (s->sh_kind == BN6_SHOP_KIND_ITEM) snprintf(out, n, "Held: %d", s->sh_held);
 	else if (n) *out = 0;

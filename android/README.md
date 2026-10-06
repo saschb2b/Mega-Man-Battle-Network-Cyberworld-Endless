@@ -53,8 +53,9 @@ Zenny and BugFrags, on the net the layer's map, always open (the floor
 MegaMan has seen, the way on, what he has come near or senses), in the
 folder editor the whole folder, in a battle the Custom screen's chip and
 the fight, in the NaviCustomizer the program under the cursor and what
-RUN would bring, in a shop the entry under the cursor, and in the town
-and on the title the PET at home with MegaMan's face. A phone without a second display plays as before.
+RUN would bring, in the Library the chip under the cursor, in a shop the
+entry under the cursor, and in the town and on the title the PET at home
+with MegaMan's face. A phone without a second display plays as before.
 
 - **The display:** one of Android's presentation displays, in the order
   the system lists them (wireless, cabled, overlay, virtual, then

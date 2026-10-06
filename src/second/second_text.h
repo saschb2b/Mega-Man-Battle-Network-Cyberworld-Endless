@@ -72,6 +72,9 @@ int second_status(SecondRow *out, int most, int max_hp, int base_hp);
 int second_library(SecondRow *out, int most);
 /* What the Library is to a run, a line */
 const char *second_library_line(void);
+/* What the run holds of a chip in any code, the Library's card's: its
+ * copies in the folder and in the pack, as rows; how many of `most` */
+int second_copies(SecondRow *out, int most, int folder, int pack);
 /* A layer's next step: the guardian its exit waits on (navi, 0 none) or
  * the exit pad, into `out` */
 void second_layer_next(int guardian, char *out, size_t n);

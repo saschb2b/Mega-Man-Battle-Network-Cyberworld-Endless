@@ -56,6 +56,7 @@
 #define BN6_SUBMENU_SAVE      0x1C   /* ... Save */
 #define BN6_SUBMENU_EDIT      0x20   /* ... the folder editor (bn6f sub_8133200) */
 #define BN6_SUBMENU_NAVICUST  0x24   /* ... the NaviCustomizer (bn6f sub_81356D4) */
+#define BN6_SUBMENU_STATE     0x01   /* the PET screen's state: its course, 0 while it is set up, then 4 open and 8 closing (the Library's and E-Mail's jump tables) */
 #define BN6_EDIT_SIDE         0x03   /* the folder editor's state: the side, BN6_EDIT_PACK the pack's, 0 the folder's */
 #define BN6_EDIT_PACK         0x04
 #define BN6_EDIT_ROW          0x20   /* ... the cursor's row on the screen (0-6) */
@@ -76,5 +77,14 @@
 #define BN6_NCMENU_Y          0x2E   /* ... its row, u16 */
 #define BN6_NCMENU_ENTRIES    0x0201DA80u /* the NaviCustomizer's list, 4 bytes an entry (bn6f word_201DA80): +0 its key item, BN6_PROGRAM_ITEMS + variant, or BN6_NCMENU_RUN; +2 the copies left to place */
 #define BN6_NCMENU_RUN        0x14C  /* BN6_NCMENU_ENTRIES' item: RUN, the list's last */
+#define BN6_LIBRARY_TAB       0x0D   /* the Library's state (bn6f HandleLibraryMenu8124B3C): the tab shown, 0 StdChip, 1 MegaChip, 2 GigaChip, 3 the other version's Navi chips (Falzar's in Gregar), 4 the P.A. Memo */
+#define BN6_LIBRARY_TABS      5      /* the Library's tabs, BN6_LIBRARY_TAB 0-4 */
+#define BN6_LIBRARY_COUNT     0x12   /* the Library's state: tab 0's entries, u16; each tab's block of five u16 BN6_LIBRARY_TAB_SIZE after the one before (bn6f sub_8125820) */
+#define BN6_LIBRARY_ROW       0x14   /* the Library's state: tab 0's cursor row on the screen (0-6), u16 */
+#define BN6_LIBRARY_SCROLL    0x18   /* the Library's state: tab 0's scroll, u16: the entry under the cursor is row + scroll */
+#define BN6_LIBRARY_TAB_SIZE  0x0A   /* a tab's block in the Library's state: its count, its row, the row drawn, its scroll, the scroll drawn */
+#define BN6_LIBRARY_LISTS     0x0201DC20u /* the Library's lists, tab 0's first (bn6f unk_201DC20), each tab's BN6_LIBRARY_LIST_SIZE after the one before: 4 bytes an entry, its chip at +0 (u16); StdChip's by number, 0 where never seen ("??"), the others the seen alone */
+#define BN6_LIBRARY_LIST_SIZE 0x800
+#define BN6_LIBRARY_PA        0x140  /* the first id of the P.A. Memo's entries, the Program Advances' records; the chips' tabs list ids 1-0x13F (bn6f sub_81258F8) */
 
 #endif

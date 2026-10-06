@@ -107,6 +107,7 @@ void second_update(void) {
 	if (p == PANEL_NAVICUST) second_read_navicust();
 	if (p == PANEL_HOME) second_read_home();
 	if (p == PANEL_STATUS) second_read_status();
+	if (p == PANEL_LIBRARY) second_read_library();
 	if (p == PANEL_SHOP) second_read_shop();
 	if (p == PANEL_TRADER) second_read_trader();
 	if (p != panel) panel_since = 0;

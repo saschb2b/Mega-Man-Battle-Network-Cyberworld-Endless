@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The Library's card on the second screen** (issue #83). In the PET's
+  Library the second screen shows the chip under the cursor as the Custom
+  screen's card: its picture twice as large, its element, power and
+  text, the codes it comes in (BN6's Library leaves them out), and how
+  many copies the run holds in the folder and the Pack. A number never
+  seen stays BN6's "??" with a blank card, and the P.A. Memo keeps the
+  Library's count alone. Beside it, the Library's classes go two to a
+  line under BN6's own tab names (StdChip, MegaChip, GigaChip).
 - **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
   place of its own, never at random. The endless net's Nest is the
   Cybeast's den: no copied guardian at its end but Gregar itself, in

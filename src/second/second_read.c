@@ -252,6 +252,47 @@ void second_read_status(void) {
 	}
 }
 
+/* The PET screen's state, and whether it is set up: on the way from the
+ * menu (half a second, its fade) it is zeroes but for its screen */
+static uint32_t pet_screen(void) {
+	uint32_t m = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU);
+	S2.pet_ready = emu_read8(m + BN6_SUBMENU_STATE) != 0;
+	return m;
+}
+
+/* the Pack's copies of `chip` in any code, from the pack as it was read
+ * last; `fresh` reads it again (314 chips' counts) */
+static int pack_copies(int chip, bool fresh) {
+	static uint16_t pack[400];
+	static uint8_t count[400];
+	static int n;
+	if (fresh) n = pack_now(pack, count, 400, false);
+	int copies = 0;
+	for (int i = 0; i < n; ++i) copies += (pack[i] & 0x1FF) == chip ? count[i] : 0;
+	return copies;
+}
+
+/* The Library: the chip under its cursor in the tab shown (none in the
+ * P.A. Memo, whose entries are Program Advances), or a StdChip number
+ * never seen; and the chip's copies in the folder and the pack, in any
+ * code (the pack read as the Library opens: it does not change there) */
+void second_read_library(void) {
+	uint32_t m = pet_screen();
+	int tab = emu_read8(m + BN6_LIBRARY_TAB);
+	uint32_t t = m + (uint32_t)tab * BN6_LIBRARY_TAB_SIZE;
+	int at = emu_read16(t + BN6_LIBRARY_ROW) + emu_read16(t + BN6_LIBRARY_SCROLL);
+	bool listed = S2.pet_ready && tab < BN6_LIBRARY_TABS && at < emu_read16(t + BN6_LIBRARY_COUNT);
+	int chip = listed ? emu_read16(BN6_LIBRARY_LISTS + (uint32_t)tab * BN6_LIBRARY_LIST_SIZE + 4u * (uint32_t)at) : 0;
+	S2.lib_chip = chip < BN6_LIBRARY_PA ? chip : 0;
+	S2.lib_unseen = listed && tab == 0 && !chip;
+	S2.lib_pack = pack_copies(S2.lib_chip, S2.since < 2);
+	S2.lib_folder = 0;
+	if (!S2.lib_chip) return;
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	director_folder_now(folder);
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) S2.lib_folder += (folder[i] & 0x1FF) == S2.lib_chip;
+}
+
 /* a key item's count, as the PET holds it */
 static int key_count(int id) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
