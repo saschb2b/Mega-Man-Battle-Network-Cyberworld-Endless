@@ -32,29 +32,54 @@
  * back with a code ours has. MegaMan names each the first time, with the
  * chip (a quirk said in the world's terms, as the owner asked). */
 static void guest_recode_note(const GuestResult *r) {
+	/* (a chip its results screen gave, the busting level's or a Mystery
+	 * Data's find, that came back in another code) */
+	const GuestReward *w = r->reward.chip && r->reward.from >= 0 ? &r->reward : r->find.chip && r->find.from >= 0 ? &r->find : NULL;
 	if (r->recoded && !(profile.recode_taught & 1) && !D.recode_due) {
 		D.recode_due = 1;
 		D.recode_chip = r->recode_chip; D.recode_from = r->recode_from; D.recode_to = r->recode_to;
-	} else if (r->chip && r->reward_from >= 0 && !(profile.recode_taught & 2) && !D.recode_due) {
+	} else if (w && !(profile.recode_taught & 2) && !D.recode_due) {
 		D.recode_due = 2;
-		D.recode_chip = r->chip; D.recode_from = r->code; D.recode_to = r->reward_from;
+		D.recode_chip = w->chip; D.recode_from = w->code; D.recode_to = w->from;
 	}
 }
 
 char code_letter(int code) { return code == 26 ? '*' : (char)('A' + (code >= 0 && code < 26 ? code : 0)); }
 
 /* What a guest battle's results screen gave, as the run got it ("Cannon
- * A", "200 zenny", "HP+50", "none") */
-static const char *guest_reward_words(const GuestResult *r) {
-	static char s[40];
+ * A", "200 zenny", "HP+50", "1 BugFrag", "none"; its second, a green
+ * Mystery Data's, after "find") */
+static int reward_words(char *s, size_t n, const GuestReward *w) {
 	ChipInfo ci;
-	if (r->chip) {
-		chip_info(r->chip, &ci);
-		snprintf(s, sizeof s, "%s %c", ci.name, code_letter(r->code));
-	} else if (r->zenny) snprintf(s, sizeof s, "%d zenny", r->zenny);
-	else if (r->heal) snprintf(s, sizeof s, "HP+%d", r->heal);
-	else snprintf(s, sizeof s, "none");
+	if (w->chip) {
+		chip_info(w->chip, &ci);
+		return snprintf(s, n, "%s %c", ci.name, code_letter(w->code));
+	}
+	if (w->zenny) return snprintf(s, n, "%d zenny", w->zenny);
+	if (w->bugfrags) return snprintf(s, n, "%d BugFrag%s", w->bugfrags, w->bugfrags == 1 ? "" : "s");
+	if (w->heal) return snprintf(s, n, "HP+%d", w->heal);
+	return snprintf(s, n, "none");
+}
+
+static const char *guest_reward_words(const GuestResult *r) {
+	static char s[80];
+	int k = reward_words(s, sizeof s, &r->reward);
+	bool found = r->find.chip || r->find.zenny || r->find.bugfrags || r->find.heal;
+	if (found && k > 0 && k + 6 < (int)sizeof s) {
+		memcpy(s + k, " find ", 6);
+		reward_words(s + k + 6, sizeof s - (size_t)k - 6, &r->find);
+	}
 	return s;
+}
+
+/* A reward of its results screen into BN6, through BN6's own routines:
+ * BN6's chip of the same name to the Pack, zenny, BugFrags (HP+N is in
+ * the HP already) */
+static void reward_give(const GuestReward *w) {
+	uint32_t out[2];
+	if (w->chip) game_call_ret(BN6_GIVE_CHIPS, (uint32_t)w->chip, (uint32_t)w->code, 1, out);
+	if (w->zenny) game_call(BN6_GIVE_ZENNY, (uint32_t)w->zenny, 0);
+	if (w->bugfrags) game_call(BN6_GIVE_BUGFRAGS, (uint32_t)w->bugfrags, 0);
 }
 
 /* BN6's encounter walk cleared, as BN6 clears it entering the map a
@@ -94,18 +119,17 @@ void director_guest_done(const GuestResult *r) {
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
 	if (r->outcome == GUEST_WON && !guardian_navi) run.viruses_deleted += D.guest_foes;
 	/* (a request's battles: MegaMan's HP before its results screen's HP+) */
-	if (!guardian_navi) home_jobs_battle_end(r->outcome == GUEST_WON, r->hp - r->heal, r->frames);
+	if (!guardian_navi) home_jobs_battle_end(r->outcome == GUEST_WON, r->hp - r->reward.heal - r->find.heal, r->frames);
 	steps_cleared();
 	if (!profile.guest_taught) D.guest_due = 1 + out_names(D.guest_out, sizeof D.guest_out);
 	guest_recode_note(r);
 	dark_set_counts(r->dark);
 	if (r->dark_used) dark_price(false);
 	if (r->dark_rose) dark_rose_said();
-	/* (what its results screen gave: BN6's chip of the same name to the
-	 * Pack, or zenny) */
-	uint32_t out[2];
-	if (r->chip) game_call_ret(BN6_GIVE_CHIPS, (uint32_t)r->chip, (uint32_t)r->code, 1, out);
-	if (r->zenny) game_call(BN6_GIVE_ZENNY, (uint32_t)r->zenny, 0);
+	/* (what its results screen gave: the busting level's reward, and the
+	 * find of a green Mystery Data left on the field) */
+	reward_give(&r->reward);
+	reward_give(&r->find);
 	/* (and in the run log, its reward as the run got it) */
 	runlog_guest_end(r->outcome == GUEST_WON, guest_reward_words(r));
 	if (emu_debug_on())

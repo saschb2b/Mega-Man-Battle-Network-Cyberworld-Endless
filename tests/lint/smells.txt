@@ -49,4 +49,4 @@ params src/scenes/scene_title.c:stamp 10
 params src/world/town.c:tile 8
 params src/world/townmath.h:town_move_tile 10
 params src/world/townsrc.c:townsrc_synth 9
-size src/emu/guest.c 1182
+size src/emu/guest.c 1148

@@ -19,8 +19,15 @@
 #define BN5_NAVI_MAX_HP   (BN5_NAVI_STATS + 0x42)
 #define BN5_BATTLE_RESULT 0x0200AEE8u /* +1 how the last battle ended: 1 won, 2 lost, 4 escaped (BN6's 0x0200A008) */
 #define BN5_REWARD        (BN5_BATTLE_RESULT + 4) /* u16: what the results screen gave, as BN6's rewards are (bits 14-15: 0 a chip, its id and code << 9; 1 zenny; */
-#define BN5_REWARD_HP     2           /* ... 2 HP restored on the results screen, into BattleState +0x34 too: "HP+50") */
+#define BN5_REWARD_HP     2           /* ... 2 HP restored on the results screen, into BattleState +0x34 too: "HP+50"; */
+#define BN5_REWARD_BUGFRAGS 3         /* ... 3 BugFrags; 0 and 0xFFFF none), given as the screen ends (0x08028E48: its GiveChips 0x0801DF56, GiveZenny 0x0803C2FC, GiveBugfrags 0x0803C384) */
+#define BN5_REWARD_ZENNY  1           /* BN5_REWARD: its kind (bits 14-15) for zenny */
+#define BN5_REWARD_FIND   (BN5_BATTLE_RESULT + 6) /* u16: the screen's second reward, the find of a green Mystery Data still on the field as the battle is won
+                                       * (BN5_FIND_ROWS; its BattleState +0x36, 0x080DB616), set as the first is (0x08028690) and given after it (0x08028E5A) */
 #define BN5_REWARD_ROWS   0x081100D4u /* the reward rows: 20 u16 per enemy id, 0x28 apart, as BN6's are (its chooser 0x0810FB18 matches BN6's 0x080AC150) */
+#define BN5_FIND_ROWS     0x0801D62Cu /* the battlefield Mystery Data's finds: a row of eight u16 per its entity's byte 2 >> 4, one drawn by RNG & 0xE as it appears (0x080DB692) */
+#define BN5_FIND_ROW_COUNT 6          /* ... the rows its records name: 1000-3000 zenny, 1-3 BugFrags, from row 1 a chip or two */
+#define BN5_ENTITY_FIND   2           /* a BattleSettings entity's kind (byte 0 >> 4): a green Mystery Data, there where its byte 2 beats RNG % 15 (0x08006874) */
 #define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
 #define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
 #define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */

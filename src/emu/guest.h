@@ -128,20 +128,27 @@ void guest_frame_quiet(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
 const uint32_t *guest_video(void);
 
+/* What its results screen gave, as the run gets it (guest_reward.c) */
+typedef struct {
+	int chip;      /* BN6's chip of its name, and its code (A=0, *=26); 0 none */
+	int code;
+	int from;      /* ... the code it had there, where it came back with another; -1 none */
+	int zenny;     /* ... or zenny */
+	int bugfrags;  /* ... or BugFrags */
+	int heal;      /* ... or the HP restored there (HP+50: the result's hp counts it already) */
+} GuestReward;
+
 typedef struct {
 	int outcome;   /* GUEST_WON, GUEST_LOST (MegaMan deleted) or GUEST_ESCAPED */
 	int frames;    /* how long it ran */
 	int hp;        /* MegaMan's HP at its end */
-	int chip;      /* (won) the reward: BN6's chip of its name, and its code (A=0, *=26); 0 none */
-	int code;
-	int zenny;     /* ... or zenny */
-	int heal;      /* ... or the HP its results screen restored (HP+50: hp counts it already) */
+	GuestReward reward;   /* (won) its results screen's reward, of the busting level */
+	GuestReward find;     /* ... and its second: the find of a green Mystery Data still on the field at the end */
 	bool dark_used;   /* a DarkChip was used in it */
 	bool dark_rose;   /* ... and MegaMan fell in it and rose again (BN5's own: at 1 HP, the darkness fighting with his body a while) */
 	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
 	int recoded;      /* the folder's chips that fought with another code (its game's chip lacked theirs) */
 	int recode_chip, recode_from, recode_to;   /* the first of them: its BN6 id, its code, the code it fought with */
-	int reward_from;  /* the code the reward chip had there, where it came back with another; -1 none */
 } GuestResult;
 /* Once a battle has ended (guest_active false again): its result, once. */
 bool guest_take_result(GuestResult *out);
@@ -155,6 +162,10 @@ extern int guest_backdrop;
 /* (dev: MegaMan worried through every guest battle, for captures of a
  * DarkChip offered: --dev worried) */
 extern bool guest_dev_worried;
+/* (dev: a green Mystery Data on the enemies' side in every guest battle,
+ * as --dev gem puts one in BN6's: its find, row 0 of BN5_FIND_ROWS where
+ * the record sets none) */
+extern bool guest_dev_gem;
 
 /* DarkChip `k`'s name in BN5 (0-11, ids 187-198), "" without BN5 */
 const char *guest_dark_name(int k);

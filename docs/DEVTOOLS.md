@@ -207,7 +207,9 @@ family.version, the foes' HP together, and MegaMan's HP after (or
 and BN5's enemy id, and after MegaMan's HP at its end the reward as the
 run got it: `... battle hp 300/300 guest 08121188 x1 x1 x1 foehp 120 ->
 won hp 260 reward 30 zenny` (a chip as BN6's of its name, `reward Wind *`;
-`reward HP+50`, which the HP after counts; `left` for an escape). A last
+`reward HP+50`, which the HP after counts; `left` for an escape), and
+after it a green Mystery Data's find where one stood on the field to the
+end (`reward 200 zenny find 1 BugFrag`, `find Tornado L`). A last
 line gives where the run ended. Past 512 KB the log moves to
 `runlog.old`. Collected from real runs, it shows where runs are lost.
 
@@ -290,7 +292,7 @@ Eight more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: `tools/trailer.py` plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
-check it and its reward), `veteran` (a profile that has met seven
+check it and its reward; BN5's battles too, with BN5's own find), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his
