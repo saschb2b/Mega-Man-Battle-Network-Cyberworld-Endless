@@ -45,6 +45,8 @@ void home_places_frame(int group, int number) {
 	else if (at == HOME_PLACE_ACADEMY) academy_frame(number);
 }
 
+bool home_places_aster_front(int *x, int *y) { return aster_land_front(x, y); }
+
 bool home_places_door(int group, int number, int *x, int *y) {
 	return home_places_at(group, number) == HOME_PLACE_HOUSE && lan_house_door(x, y);
 }

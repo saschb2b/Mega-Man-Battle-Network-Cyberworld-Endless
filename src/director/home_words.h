@@ -22,8 +22,9 @@ const char *home_portal_name(int k);
 const char *home_hp_words(bool taught);
 /* L's words at home `words`, then once a visit what it holds besides the
  * way on: `requests` posted (none held), an order `order` AsterLand can
- * still make that the zenny held pays for. */
-const char *home_errands_words(const char *words, bool requests, bool order);
+ * still make that the zenny held pays for, and which way AsterLand is
+ * (`aster`, way_to's word; NULL unsaid). */
+const char *home_errands_words(const char *words, bool requests, bool order, const char *aster);
 /* L's words in AsterLand: where its counter takes orders and sells
  * SubChips, then `words`. */
 const char *home_aster_words(const char *words);

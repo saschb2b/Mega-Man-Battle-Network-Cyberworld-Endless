@@ -29,6 +29,8 @@
 #define NUMBER_TRADER 0xF9 /* its check */
 #define NUMBER_TRADER_MAPS 0x08034E80u /* the map ids (u16, 0xFFFF ending) whose check 0xF9 BN6's Number Trader is: AsterLand's (bn6f dword_8034E80) */
 
+static int front[2];       /* where Lan comes out in the town, before its door */
+static bool front_ok;
 static int numbers[4];     /* the Number Trader's check cells' bounds: x0, y0, x1, y1 */
 static int board[4];       /* ... and the request board's */
 static int orders = -1;    /* the Order Service's copies to order as the visit began */
@@ -59,6 +61,17 @@ bool aster_land_install(void) {
 	int ox, oy, tx, ty;
 	indoors_dest(indoors_bn6_warps(ASTER_GROUP, ASTER_LAND), DOOR_OUT, &ox, &oy, &face);
 	if (town_is_home() && town_moved(ox, oy, &tx, &ty)) indoors_door_to(list, DOOR_OUT, tx, ty);
+	else { tx = ox; ty = oy; }
+	front[0] = tx;
+	front[1] = ty;
+	front_ok = true;
+	return true;
+}
+
+bool aster_land_front(int *x, int *y) {
+	if (!front_ok) return false;
+	*x = front[0];
+	*y = front[1];
 	return true;
 }
 

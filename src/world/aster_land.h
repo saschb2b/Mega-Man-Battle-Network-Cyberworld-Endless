@@ -17,6 +17,9 @@ bool aster_land_install(void);
 bool aster_land_map(int group, int number);
 /* Its door out: the middle of its cells (world units); false none. */
 bool aster_land_door(int *x, int *y);
+/* Where Lan comes out of it in the town, before its door (the town's world
+ * units); false before it is installed. */
+bool aster_land_front(int *x, int *y);
 /* Whether world (x, y) is on the Number Trader's check (0xF9: what A
  * reads there, place_lines.c, for the one BN6 has). */
 bool aster_land_number_trader(int x, int y);

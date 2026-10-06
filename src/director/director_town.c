@@ -115,7 +115,8 @@ const char *home_status(void) {
 	/* (in the town, once a visit: the requests posted, AsterLand's order) */
 	if (at == HOME_PLACE_NONE && !D.errands_told) {
 		D.errands_told = true;
-		words = home_errands_words(words, run.job.kind == JOB_NONE, home_order_open());
+		int ax, ay;
+		words = home_errands_words(words, run.job.kind == JOB_NONE, home_order_open(), home_places_aster_front(&ax, &ay) ? lies_at(ax, ay) : NULL);
 	}
 	return home_jobs_status(words);
 }

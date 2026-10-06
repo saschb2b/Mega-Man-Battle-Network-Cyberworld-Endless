@@ -64,7 +64,8 @@
   one who asked pays at the next visit: zenny, BugFrags, a chip a tier up
   in your folder's codes, or two HPMemory for a kept vow. L at home says
   where a reward waits, and L in the town names, once a visit, the
-  requests posted and an order AsterLand can still make. A vow is posted
+  requests posted, an order AsterLand can still make, and which way its
+  door is. A vow is posted
   from the second visit on (taken blind at a run's start, one cost a
   playtester his run on layer 1), and while one holds, L and the arrow
   no longer lead to the Recovery Mr.Prog: L says the vow and where the

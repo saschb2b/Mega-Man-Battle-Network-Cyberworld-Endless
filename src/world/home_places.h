@@ -18,6 +18,9 @@ const char *home_places_name(int group, int number);
 /* The way on in one of them: the PC in Lan's room, the stairs up in his
  * house, elsewhere the way out (world units); false for none. */
 bool home_places_way(int group, int number, int *x, int *y);
+/* Where AsterLand's door is in the town, as Lan comes out of it (the
+ * town's world units); false before it is installed. */
+bool home_places_aster_front(int *x, int *y);
 /* Where Lan's house's front door is, in the house (world units); false
  * elsewhere. */
 bool home_places_door(int group, int number, int *x, int *y);

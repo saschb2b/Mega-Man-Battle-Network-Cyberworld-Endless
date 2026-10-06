@@ -432,7 +432,9 @@ Mr.Prog's patch asks first ("Patch up anyway?", on No). A vow's reminder
 waits for the act's card and arrival words, which it had ended unseen.
 When a run ends holding a request, its asker says so at the next run's
 first visit (the profile's `last_job`), and L in the town names, once a
-visit, the requests posted and an order AsterLand can still make. Home
+visit, the requests posted and an order AsterLand can still make, and
+which way AsterLand's door is (a playtester walked round it twice,
+session 70). Home
 after an act, the PET's Save saves where Lan stands, as the HP's arrival
 does, and CONTINUE goes on from there (a playtester's purchase and
 request in the town were left unsaved, under "Saves begin on layer 1",
