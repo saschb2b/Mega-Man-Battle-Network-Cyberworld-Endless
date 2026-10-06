@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "director_courier.h"   /* (Lan's HP's courier, another part) */
 #include "director_jobs.h"   /* (jobs at home, its other part) */
 #include "run.h"
 

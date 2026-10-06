@@ -4,16 +4,26 @@
 #define CW_LANHP_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define LANHP_GROUP  0x88   /* bn6f HOMEPAGES */
 #define LANHP_NUMBER 0x00   /* ... LAN_HP */
 #define LANHP_PORTALS 5     /* its warp spots but the arrival pad */
 
-/* Lan's HP installed: BN6's own tiles, walls and decorations, no people,
- * map scripts or Mystery Data, its own warp list (every entry back to the
- * arrival until a portal is pointed) and its song. False where the map's
- * warp spots cannot be read. */
+/* Set while the town holds nothing for this visit: the courier stays away
+ * (the director keeps it, docs/HOME.md piece 2). */
+#define LANHP_COURIER_GONE_FLAG 0x146C
+
+/* Lan's HP installed: BN6's own tiles, walls and decorations, no map
+ * scripts or Mystery Data, its own warp list (every entry back to the
+ * arrival until a portal is pointed) and its song; of people, the courier,
+ * a Mr.Prog with BN6's "!!" over his head, who is there while
+ * LANHP_COURIER_GONE_FLAG is clear, and says nothing until
+ * lanhp_courier_say. False where the map's warp spots cannot be read. */
 bool lanhp_install(void);
+/* The courier's words: a text archive's bytes (ta_build, his talk its
+ * script 0), written over his last; false where they do not fit. */
+bool lanhp_courier_say(const uint8_t *archive, int n);
 /* Where BN6's jack-in to Lan's HP sets MegaMan down (world units): on its
  * blue pad, the arrival. */
 void lanhp_arrival(int *x, int *y);

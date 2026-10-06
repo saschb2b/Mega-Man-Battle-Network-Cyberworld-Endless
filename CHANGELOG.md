@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **A Mr.Prog courier in Lan's HP says what the town holds** (issue
+  #108). Playtests jacked out to the town only when told to, though it
+  holds a request's pay, new requests and keys for the act ahead. Now,
+  while it holds something for the visit, a Mr.Prog stands on the HP's
+  floor below the way to the pink pad, BN6's "!!" burst over his head.
+  Talked to, he names what waits and where, the most valuable first: a
+  finished request's pay ("REWARD WAITING! THE NETBATTLE CLUB,THE
+  ACADEMY!"), else the new requests posted while none is held, by place,
+  then what AsterLand's SubChip seller has in stock ("ASTERLAND HAS
+  UNLOCKERS!"). He goes once nothing waits (a reward or a request taken in
+  town), stays away when nothing did, keeps clear of the portals and the
+  way to the pad, and speaks only when spoken to; a CONTINUE at home
+  finds him as he was.
 - **MegaMan arrives from any side of a layer** (issue #106). He arrived at
   the top of the screen on nearly every layer, facing straight down, so
   every layer was walked top to bottom. BN6's own maps, read from the ROM

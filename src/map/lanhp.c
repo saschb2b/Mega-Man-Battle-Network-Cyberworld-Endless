@@ -16,6 +16,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "mapslot.h"
+#include "npc.h"
 
 #define SONG 0x13          /* BN6's for every homepage, Lan's too */
 #define ARRIVAL_ENTRY 1    /* the blue pad */
@@ -30,6 +31,19 @@
  * then the floor's link squares, nearest the pink pad's side first */
 static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 
+/* The courier (docs/HOME.md, piece 2): a Mr.Prog (sprite list 6's 60) on
+ * the floor below the way from the blue pad to the corridor (y -14), 50
+ * units and more from every link square, facing the blue pad (-x), BN6's
+ * "!!" burst (list 5's 0x07, the counter's sign in AsterLand) over his
+ * head; his words an archive of their own, which the director writes */
+#define COURIER_X (-84)
+#define COURIER_Y 38
+#define COURIER_FACE 5
+#define COURIER_SPRITE 60
+#define MARK_SPRITE 0x07
+#define MARK_Z 46
+#define COURIER_TEXT 768   /* the bytes his words may take */
+
 static struct {
 	bool read;
 	int x[ENTRIES + 1], y[ENTRIES + 1];   /* each entry's spot: its cells' middle */
@@ -37,6 +51,7 @@ static struct {
 	int arrive_x, arrive_y;
 	uint32_t warps;                       /* the HP's own warp list */
 	uint8_t jack_out[16];                 /* BN6's blue pad's entry: its jack-out */
+	uint32_t courier_text;                /* the courier's words' room, 0 none */
 } H;
 
 static bool read_spots(void) {
@@ -73,6 +88,20 @@ static bool read_spots(void) {
 	return true;
 }
 
+/* the courier and his mark into `npcs`, both gone while
+ * LANHP_COURIER_GONE_FLAG is set; his words' room cleared (an archive of
+ * one empty script) */
+static void courier(NpcList *npcs) {
+	static const uint8_t empty[COURIER_TEXT] = { 2, 0, 0xE6 };   /* (one script: ts_end) */
+	H.courier_text = mapslot_alloc(empty, sizeof empty);
+	if (!H.courier_text || !npc_need_sprite(npcs, 6, COURIER_SPRITE) || !npc_need_sprite(npcs, 5, MARK_SPRITE)) return;
+	uint32_t prog = npc_talker(6, COURIER_SPRITE, COURIER_X, COURIER_Y, 0, COURIER_FACE, H.courier_text, 0, LANHP_COURIER_GONE_FLAG, false);
+	/* (a step before him in depth, drawn over him where they meet) */
+	uint32_t mark = npc_mark(5, MARK_SPRITE, COURIER_X - 1, COURIER_Y + 1, MARK_Z, 0, LANHP_COURIER_GONE_FLAG);
+	if (prog) npcs->script[npcs->n++] = prog;
+	if (prog && mark) npcs->script[npcs->n++] = mark;
+}
+
 bool lanhp_install(void) {
 	if (!read_spots()) return false;
 	NpcList npcs;
@@ -80,12 +109,19 @@ bool lanhp_install(void) {
 	/* (its own decorations, BN6's four objects under the floor) */
 	npcs.objects = mapslot_objects(LANHP_GROUP, LANHP_NUMBER);
 	mapslot_hp(true);
+	courier(&npcs);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
 		mapslot_music_home(0, LANHP_GROUP, LANHP_NUMBER, SONG);
 	mapslot_hp(false);
 	if (ok) emu_write(H.warps + 16u * (ARRIVAL_ENTRY - 1), H.jack_out, sizeof H.jack_out);
 	return ok;
+}
+
+bool lanhp_courier_say(const uint8_t *archive, int n) {
+	if (!H.courier_text || n <= 0 || n > COURIER_TEXT) return false;
+	emu_write(H.courier_text, archive, (size_t)n);
+	return true;
 }
 
 void lanhp_arrival(int *x, int *y) {

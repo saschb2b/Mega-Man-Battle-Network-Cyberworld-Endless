@@ -164,7 +164,10 @@ static bool home_install(void) {
 	home_jobs_visit();
 	bool ok = town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) &&
 		home_places_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
-	if (ok) home_jobs_flags();
+	if (ok) {
+		home_jobs_flags();
+		home_courier_visit();
+	}
 	return ok;
 }
 

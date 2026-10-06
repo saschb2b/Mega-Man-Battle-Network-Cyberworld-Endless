@@ -233,6 +233,7 @@ void home_update(void) {
 	bool hp = home_in_hp();
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();
+	home_courier_frame();
 	home_places_frame(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
 	town_tint();
 	was_hp = hp;

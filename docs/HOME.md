@@ -259,6 +259,28 @@ through the wall (session 69). L still says where the pad lies, and the
 arrow leads onto the corridor's line first; at home too, pushing a while
 where the pad goes nowhere brings the arrow, as on a layer.
 
+The courier (issue #108): playtests jacked out only when told to, and the
+owner wanted no more "take time to explore" talk, so the choice is shown
+where it is made. While the town holds something for the visit a Mr.Prog
+stands in Lan's HP (`lanhp.c`, `director_courier.c`), on the floor below
+the way from the blue pad to the corridor (world -84, 38: 52 units off the
+way's line and from the nearest link square), facing the blue pad, with
+BN6's "!!" burst over his head (sprite list 5's `0x07`, the burst AsterLand
+paints beside its counter; there it is the map's own tiles, so the HP
+shows BN6's sprite of it). Talked to, he names what waits and where in a
+Mr.Prog's capitals, the most valuable first, a box each (`home_words.c`):
+a finished request's pay with its asker ("REWARD WAITING! THE NETBATTLE
+CLUB,THE ACADEMY!"), else the new requests posted while none is held, by
+place ("NEW REQUESTS POSTED! ASTERLAND,THE ACADEMY AND TOWN!"), then the
+keys AsterLand's SubChip seller stocked ("ASTERLAND HAS UNLOCKERS!"). He
+relays the town's posts and the shop's stock, never the Net ahead. What
+the visit holds is fixed as it begins, from the run's state, so a
+CONTINUE finds him as he was; what still waits follows the askers' flags
+every frame at home (a reward taken, a request taken), which keeps flag
+`0x146C` set while nothing waits: then he and his burst are gone, and his
+words are written again as what waits changes. Nothing waiting, no
+courier. He speaks only when spoken to.
+
 ### 3. Going back, and the Net's clock
 
 An older portal goes back to an area the run has won: a layer of it at
