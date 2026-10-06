@@ -51,6 +51,11 @@ GBA core alone takes longer than a frame there.
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
   or the Circle Pad. HOME pauses as for any game.
+- The first start asks whether the game may send anonymous play
+  statistics (README.md, Anonymous statistics); SELECT on the title asks
+  again. A yes sends them over the 3DS's Wi-Fi with devkitPro's libcurl
+  and mbedTLS, which carry Let's Encrypt's roots: the 3DS's own SSL
+  module stops at TLS 1.1, which the server refuses.
 
 It runs at full speed, 60 frames a second, every one shown. A new run's
 first layer takes about 20 seconds to make ("Building the net..."), as

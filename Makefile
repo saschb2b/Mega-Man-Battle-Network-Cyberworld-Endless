@@ -71,6 +71,9 @@ MGBA := $(MACOS_DEPS)
 MGBA_LICENSE := $(MACOS_DEPS)/share/licenses/mGBA.txt
 MAC_ARCH := -arch arm64 -arch x86_64 -mmacosx-version-min=11.0
 CFLAGS += $(MAC_ARCH) $(patsubst -I%,-isystem %,$(shell $(MACOS_DEPS)/bin/sdl2-config --cflags))
+# (the anonymous statistics' requests through NSURLSession: Foundation,
+# which SDL2's Cocoa brings)
+OBJS += $(OUT)/obj/analytics/analytics_apple.o
 endif
 # iOS (build.py ios, on a Mac with Xcode): SDL2 and mGBA from ios/deps.sh for
 # IOS_SDK, static, arm64, iOS 14 on; ios.m is UIKit's (the ROM picker, the
@@ -82,7 +85,7 @@ MGBA_LICENSE := $(IOS_DEPS)/share/licenses/mGBA.txt
 IOS_FLAGS := -arch arm64 -isysroot $(shell xcrun --sdk $(IOS_SDK) --show-sdk-path) \
              $(if $(filter iphonesimulator,$(IOS_SDK)),-mios-simulator-version-min=14.0,-miphoneos-version-min=14.0)
 CFLAGS += $(IOS_FLAGS) -DCW_IOS $(patsubst -I%,-isystem %,$(shell $(IOS_DEPS)/bin/sdl2-config --cflags))
-OBJS += $(OUT)/obj/core/ios.o
+OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/analytics/analytics_apple.o
 endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
@@ -130,9 +133,16 @@ endif
 # plays the trailer's opening hits
 ifeq ($(TARGET),3ds)
 ARCH_3DS := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+# the anonymous statistics' requests (src/analytics/): devkitPro's libcurl
+# with mbedTLS, as its image has them (the 3DS's own SSL module stops at
+# TLS 1.1); without them the build sends nothing and never asks
+PORTLIBS_3DS := /opt/devkitpro/portlibs/3ds
+CURL_3DS := $(wildcard $(PORTLIBS_3DS)/lib/libcurl.a)
+NET_3DS := $(if $(CURL_3DS),-L$(PORTLIBS_3DS)/lib -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lz)
 # (-Wno-format: uint32_t is an unsigned long there, which %u prints alike)
-CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_3DS) -mword-relocations -ffunction-sections -D__3DS__ -isystem /opt/devkitpro/libctru/include -Wno-format
-LDLIBS := $(MGBA)/lib/libmgba.a -L/opt/sdl2/lib -lSDL2main -lSDL2 -L/opt/devkitpro/libctru/lib -lcitro2d -lcitro3d -lctru -lm \
+CFLAGS := $(filter-out -g,$(CFLAGS)) $(ARCH_3DS) -mword-relocations -ffunction-sections -D__3DS__ -isystem /opt/devkitpro/libctru/include -Wno-format \
+          $(if $(CURL_3DS),-DCW_3DS_CURL -isystem $(PORTLIBS_3DS)/include)
+LDLIBS := $(MGBA)/lib/libmgba.a -L/opt/sdl2/lib -lSDL2main -lSDL2 $(NET_3DS) -L/opt/devkitpro/libctru/lib -lcitro2d -lcitro3d -lctru -lm \
           -specs=3dsx.specs $(ARCH_3DS) -Wl,--gc-sections
 all: $(OUT)/cyberworld-endless.3dsx $(OUT)/cyberworld-endless.cia
 $(OUT)/cyberworld-endless.smdh: 3ds/icon.png
@@ -202,7 +212,8 @@ TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.
 	src/audio/xsong.c src/layer/xnavi.c \
 	src/core/data.c src/core/xchips.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
 	src/core/backup.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
-	src/core/super_boss.c src/layer/super_lines.c
+	src/core/super_boss.c src/layer/super_lines.c \
+	src/analytics/analytics.c src/analytics/analytics_text.c
 build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "analytics_net.h"
 #include "capture.h"
 #include "compat.h"
 #include "desktop.h"
@@ -179,7 +180,7 @@ bool start_rom(const char *rom_dir, char *msg, size_t msglen) {
 }
 #endif
 
-void player_files(bool headless, int smooth_arg) {
+void player_files(bool headless, int smooth_arg, bool plain) {
 	char path[600];
 	const char *pad_kind = capture_pad_kind();
 	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
@@ -187,12 +188,16 @@ void player_files(bool headless, int smooth_arg) {
 		snprintf(path, sizeof path, "%s/pad.ini", g_data_dir);
 		pads_load(path);
 	}
-	if (headless) return;
-	snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
-	platform_load_keys(path);
-	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
-	platform_load_settings(path);
-	snprintf(path, sizeof path, "%s/touch.ini", g_data_dir);
-	touch_load(path);
-	if (smooth_arg >= 0) P.blend = smooth_arg;
+	if (!headless) {
+		snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
+		platform_load_keys(path);
+		snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+		platform_load_settings(path);
+		snprintf(path, sizeof path, "%s/touch.ini", g_data_dir);
+		touch_load(path);
+		if (smooth_arg >= 0) P.blend = smooth_arg;
+	}
+	/* (the anonymous statistics' answer, in settings.ini, and the start's
+	 * view where it is yes: analytics.h) */
+	analytics_net_start(headless, plain);
 }

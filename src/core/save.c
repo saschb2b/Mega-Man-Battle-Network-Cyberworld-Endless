@@ -142,6 +142,16 @@ void save_delete(void) {
 
 void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }
 
+void profile_played_frame(void) {
+	if (!run.active) return;
+	/* (a run from before the count began starts it where it is) */
+	if (profile.played_run != run.seed) {
+		profile.played_run = run.seed;
+		profile.played_frames = 0;
+	}
+	++profile.played_frames;
+}
+
 bool profile_family_fought(int fam) { return fam >= 0 && fam < 64 && (profile.families_fought[fam >> 5] >> (fam & 31) & 1); }
 void profile_family_note(int fam) { if (fam >= 0 && fam < 64) profile.families_fought[fam >> 5] |= 1u << (fam & 31); }
 

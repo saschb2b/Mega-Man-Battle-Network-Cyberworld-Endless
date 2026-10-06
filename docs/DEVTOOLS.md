@@ -202,7 +202,8 @@ should stay 0.
 
 Every battle and every finished run is appended to `runlog.txt` in the data
 folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
-area, what kind of battle, MegaMan's HP and max HP before, each foe as
+area, what kind of battle (`battle`, `challenge`, `duel` for ProtoMan's,
+`guardian`), MegaMan's HP and max HP before, each foe as
 family.version, the foes' HP together, and MegaMan's HP after (or
 "deleted"). A battle in BN5's engine (docs/MULTIROM.md, Guest battles) has
 `guest` and its record in BN5's ROM after MegaMan's HP, its viruses as `x`
@@ -212,8 +213,34 @@ won hp 260 reward 30 zenny` (a chip as BN6's of its name, `reward Wind *`;
 `reward HP+50`, which the HP after counts; `left` for an escape), and
 after it a green Mystery Data's find where one stood on the field to the
 end (`reward 200 zenny find 1 BugFrag`, `find Tornado L`). A last
-line gives where the run ended. Past 512 KB the log moves to
-`runlog.old`. Collected from real runs, it shows where runs are lost.
+line gives where the run ended (`run over`, or `run won`). Past 512 KB
+the log moves to `runlog.old`. Collected from real runs, it shows where
+runs are lost. The same moments give the anonymous statistics their
+guardian and run-end events (src/analytics/, README.md's Anonymous
+statistics), where the player said yes.
+
+## Statistics: asked, sent and checked
+
+A plain start (no `--scene`, `--seed`, `--dev` or a capture's option, not
+headless) is a player's: it asks once and sends where the answer is yes.
+Any other start neither asks nor sends, but for these switches:
+
+```bash
+# the question, as a first start asks it (a fresh --data-dir: the answer is written there)
+python3 build.py shot --data-dir /src/.build/ask --dev statistics=ask --frames 120 --shot 100:/src/.build/ask.bmp
+# the controls screen's row (SELECT on the title), the answer held
+python3 build.py shot --dev statistics=on --input "30:,4:START,70:,4:SELECT,60:" --shot 150:/src/.build/row.bmp
+```
+
+`statistics=ask|on|off` holds the session's answer; such a session sends
+nothing but to `statsurl=URL`, a local stand-in for Umami's `/api/send`
+(any server that logs what it is posted). `statscheck` sends one event,
+`game-dev-check` at `/dev-check` (its system as its data), to Umami itself
+whatever the answer, and nothing else: on the systems that send from a
+thread of the game's (Linux, the handhelds, Windows, the 3DS) the output
+says `statistics: taken (2xx) by ...` or `not taken by ...`. It is the
+one way a test reaches the real Umami; keep it to a check of a system's
+way there.
 
 ## Frame log: pacing on a player's machine
 

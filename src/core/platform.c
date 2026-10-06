@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "app_icon.h"
 #endif
+#include "analytics_net.h"
 #include "audio.h"
 #include "controls.h"
 #include "emu.h"
@@ -564,8 +565,10 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 }
 
 void platform_shutdown(void) {
-	/* (the saves as the game ends them, copied before it goes: mirror.h) */
+	/* (the saves as the game ends them, copied before it goes: mirror.h;
+	 * a statistics' request under way given up) */
 	mirror_flush();
+	analytics_net_quit();
 	pads_close();
 	blend_reset();
 	if (P.canvas) SDL_DestroyTexture(P.canvas);

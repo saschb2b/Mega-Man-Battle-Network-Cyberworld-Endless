@@ -13,6 +13,7 @@
 
 #include "title_lines.h"
 #include "touch.h"
+#include "analytics_ask.h"
 #include "audio.h"
 #include "controls.h"
 #include "backdrop.h"
@@ -24,7 +25,6 @@
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
-#include "guardians.h"
 #include "meta.h"
 #include "powers.h"
 #include "save.h"
@@ -308,15 +308,20 @@ static void enter(void) {
 		S.menu = 1;
 		setup_open();
 	}
+	/* (the anonymous statistics' question, once: the first start where the
+	 * build can send, after the start's screens, issue #104) */
+	if (entries == 1) analytics_ask_offer();
 }
 
 static void jack_in(void);
 
-/* SELECT, on the title and its menu: the controls screen (issue #37; the
- * 3DS's buttons are the console's own); with L held, the developer's
- * sprite gallery, which SELECT alone opened before. R: the ROMs' screen,
- * the launcher, to add BN5 after the first start (issue #97), where the
- * build has one. True when it took the press. */
+/* SELECT, on the title and its menu: the controls screen (issue #37); on
+ * the 3DS, whose buttons are the console's own, the anonymous statistics'
+ * question, its one setting (issue #104), where the build can send; with
+ * L held, the developer's sprite gallery, which SELECT alone opened
+ * before. R: the ROMs' screen, the launcher, to add BN5 after the first
+ * start (issue #97), where the build has one. True when it took the
+ * press. */
 static bool select_pressed(void) {
 	if (btn_pressed(BTN_R) && launcher_open()) {
 		audio_sfx(SFX_SELECT);
@@ -326,6 +331,11 @@ static bool select_pressed(void) {
 #ifndef __3DS__
 	if (!btn_held(BTN_L)) {
 		controls_open();
+		audio_sfx(SFX_SELECT);
+		return true;
+	}
+#else
+	if (!btn_held(BTN_L) && analytics_ask_open()) {
 		audio_sfx(SFX_SELECT);
 		return true;
 	}
@@ -775,11 +785,14 @@ static void found_draw(int x0, int y0) {
  * a PC player had no word of which key it is) ENTER before the menu, and
  * with the menu where the controls are set, on the player's own SELECT
  * (controls_word: "R", "Minus", "SELECT"), and the ROMs, on R, where the
- * launcher is (issue #97: no way to add BN5 had been found) */
+ * launcher is (issue #97: no way to add BN5 had been found); on the 3DS
+ * its SELECT's statistics, where the build can send them */
 static void hint_draw(int x0, int y0) {
 	SDL_Color grey = rgba(150, 160, 190, 255);
 	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
-#ifndef __3DS__
+#ifdef __3DS__
+	if (S.menu && !S.confirm && analytics_ask_here()) minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), "SELECT: Statistics", grey, 1);
+#else
 	if (!S.menu || S.confirm) return;
 	char hint[64];
 	snprintf(hint, sizeof hint, "%s: Controls", controls_word(BTN_SELECT));

@@ -91,6 +91,11 @@ typedef struct {
 	 * on it said in full at a run's start, the older net's lack of it said
 	 * (BEAST_*) */
 	uint8_t beast;
+	/* the frames the run `played_run` (its seed) has been played, in every
+	 * session, as the profile was last saved: its minutes for the
+	 * anonymous statistics' run's end (analytics.h) */
+	uint32_t played_run;
+	uint32_t played_frames;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
@@ -126,6 +131,9 @@ void save_delete(void);
 /* Where the run's checkpoint keeps the game's state. */
 void save_state_path(char *out, size_t n);
 void profile_save(void);
+/* A frame of the run played (scene_emu.c): counted in the profile, which
+ * keeps it with its next save */
+void profile_played_frame(void);
 /* A new run from the title: the seed's, or the next seed's where its act 1
  * guardian is the last run's (BlastMan six runs running). */
 void run_new_varied(uint32_t seed);

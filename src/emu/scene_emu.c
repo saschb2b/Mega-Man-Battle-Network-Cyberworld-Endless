@@ -16,6 +16,7 @@
 #include "gfx.h"
 #include "platform.h"
 #include "rom.h"
+#include "save.h"
 #include "second.h"
 #include "tour.h"
 
@@ -177,6 +178,9 @@ static bool guest_update(void) {
 
 static void update(void) {
 	emu_drawing = false;
+	/* (the run's time, its battles in the older net's engine too: the
+	 * statistics' minutes, save.h) */
+	profile_played_frame();
 	/* (an older net's battle: BN6's frame waits, the second screen still
 	 * follows) */
 	if (guest_update()) {
