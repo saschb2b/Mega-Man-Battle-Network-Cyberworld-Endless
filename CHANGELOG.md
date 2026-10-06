@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.2 (2026-10-06)
 
 - **The arrow in Lan's house leads round the furniture.** In from the
   front door, it pointed straight at the stairs up to his room, a line
