@@ -250,7 +250,14 @@ as the link plays. R asks BN6's "MegaMan, jack out?", and its yes (or the
 blue pad) takes Lan to where he last jacked in, his PC since issue #94;
 the PC takes him back to the blue pad. A run's start goes the same way:
 Lan's room, his PC, Lan's HP with one portal ("Our HP,Lan! Home sweet
-home!"), the first layer. The second screen shows the PET at home there.
+home!", once a profile, then a word), the first layer. The second screen
+shows the PET at home there. The way from the blue pad to the pink pad
+runs up a corridor whose mouth (x 119, open from y -24 to -4) a walk
+straight from the blue pad meets a few units off its line; a playtester
+pushed at its lip for sixteen calls, the arrow pointing at the pad
+through the wall (session 69). L still says where the pad lies, and the
+arrow leads onto the corridor's line first; at home too, pushing a while
+where the pad goes nowhere brings the arrow, as on a layer.
 
 ### 3. Going back, and the Net's clock
 
@@ -383,8 +390,9 @@ MegaMan.
 As built (issue #88; `jobs.c`, `job_words.c`, `director_jobs.c`): at each
 visit three people post a request for the act ahead. The NetBattler at
 AsterLand's request board asks for a chip of an element from the Pack
-(paid with a chip a tier up, in the folder's codes) or a vow, no
-Mr.Prog's patch until the act's guardian falls (an HPMemory); the
+(paid with a chip a tier up, in the folder's codes) or, from the second
+visit on, a vow, no Mr.Prog's patch until the act's guardian falls (two
+HPMemory); the
 NetBattle club's member in class 6-1 three wins in ten seconds each
 (BugFrags) or clean wins, no HP lost (zenny); the man from the lab in
 town every Mystery Data of one layer, three or more, or clean wins
@@ -406,7 +414,25 @@ which leaves out the Folder's copies), or a word where it was not done;
 until then L at home says where the reward waits, and no other request
 can be taken. The run's save holds the request (`RUN_MAGIC` "CWE9"; an
 older save continues with none). Not yet: the objects' comps as a busting
-errand; the second screen's line on it (piece 9).
+errand.
+
+After the first playtest of home (session 69, 5 October 2026), through
+the game-design lens: the vow is press on against prepare, a bonus with
+its drawback, and the playtester's bet broke both its terms. It was
+blind: taken at a run's first visit, before Lan's HP showed the act's
+ways, it met an act in the older net that took his Cross, and MegaMan
+was deleted on layer 1. It was dishonest: L and the green arrow led to
+the heal it forbade. And it paid one HPMemory, less than a Net Dealer's
+800 zenny for one, for an act's patches, two or three halves of max HP
+and the run with them. So the board posts no vow at a run's first visit;
+a kept vow pays two HPMemory, +40 max HP for the rest of the run; while
+one holds, the heal is no heal for L, the arrow or the room before the
+arena (L names the vow and the dealer's MiniEnrg), and a Recovery
+Mr.Prog's patch asks first ("Patch up anyway?", on No). A vow's reminder
+waits for the act's card and arrival words, which it had ended unseen.
+When a run ends holding a request, its asker says so at the next run's
+first visit (the profile's `last_job`), and L in the town names, once a
+visit, the requests posted and an order AsterLand can still make.
 
 ### 6. The home shop
 
@@ -423,7 +449,11 @@ and Mega, each once a run as BN6 has it; the run sets each one's code to
 the folder's where the chip comes in it, and its price to twice a Net
 Dealer's (a common chip 1000 zenny, a Mega 8000: `build.py pacing`), and
 marks the Library's chips owned as BN6 marks a chip it gives (the order
-checks the mark). One order a visit: after it the clerk says so until the
+checks the mark). A at the counter's front reaches the keeper behind it
+from 14 units either side of him (BN6's own reach answered from 4, and a
+playtester faced the counter from four places and got the showcase's
+text, session 69; `indoors_counter`), and the shopper stands at the NEW
+case, out of the SubChip seller's way. One order a visit: after it the clerk says so until the
 next visit. The SubChip seller (BN6's, the white-coated man of its SubChip
 shops' window) stands beside him with BN6's Central Town shop (`0x0F`)
 restocked for the run: the keys the act ahead's locks want (Unlockers,

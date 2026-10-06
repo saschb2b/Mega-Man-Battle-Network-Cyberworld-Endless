@@ -168,6 +168,8 @@ static bool home_install(void) {
 	return ok;
 }
 
+bool home_order_open(void) { return !flag_get(HOME_ORDER_FLAG) && emu_read32(BN6_ZENNY) >= ORDER_LEAST; }
+
 bool home_run_start(bool abandoned) {
 	town_after_abandon = abandoned;
 	work_out_ways();
@@ -189,6 +191,7 @@ bool home_run_start(bool abandoned) {
 	D.town_frames = 0;
 	D.intro_said = false;
 	D.port_told = false;
+	D.errands_told = false;
 	D.free_x = x;
 	D.free_y = y;
 	return true;
@@ -211,6 +214,7 @@ static bool home_arrive(const char *beaten, bool back) {
 	D.town_seen = false;
 	D.town_frames = 0;
 	D.intro_said = false;
+	D.errands_told = false;
 	D.home_beaten = beaten;
 	D.home_back = back;
 	D.home_saved = false;

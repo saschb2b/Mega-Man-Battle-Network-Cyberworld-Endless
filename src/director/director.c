@@ -232,6 +232,8 @@ void end_run(void) {
 	title_won = false;
 	profile.last_lost_to = (uint8_t)D.lost_to;
 	profile.last_won = 0;
+	/* (a request held: its asker's word at the next run, job_words.c) */
+	profile.last_job = run.job.kind != JOB_NONE ? (uint8_t)(run.job.asker + 1) : 0;
 	runlog_run_end();
 	library_from_game();
 	programs_from_game();
@@ -254,6 +256,7 @@ static void win_run(void) {
 	title_won = true;
 	profile.last_lost_to = 0;
 	profile.last_won = 1;
+	profile.last_job = 0;
 	runlog_run_end();
 	library_from_game();
 	programs_from_game();

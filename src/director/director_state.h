@@ -94,6 +94,7 @@ typedef struct {
 	int wedged;            /* frames he has pushed, unmoving, against an NPC he stands inside */
 	int last_x, last_y;    /* where he stood the frame before */
 	bool port_told;        /* MegaMan has said where the way on is at home (the town's port, Lan's HP's pink pad) and how to jack in or out */
+	bool errands_told;     /* ... and, this visit, what the town holds besides: requests posted, AsterLand's order */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
 	bool more_told;        /* ... and, at a second L, what else the layer holds */
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */

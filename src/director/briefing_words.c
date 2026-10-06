@@ -521,6 +521,8 @@ const char *status_words(void) {
 		flag_set(LAYER_TOLD_FLAG);
 	}
 	bool hurt = hurt_now();
+	/* (a vow held: no patch for us, the dealer's MiniEnrg instead) */
+	if (hurt && jobs_vow_holds(&run.job, run_reached())) ADD("@M No patch-ups,Lan. We made a vow!|");
 	if (hurt && (h.heal || h.shop)) k = heal_note(buf, k, (int)sizeof buf, h.heal);
 	/* (and after that, where ProtoMan waits, while he does) */
 	const char *rival = told && !more ? rival_where() : NULL;

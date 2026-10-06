@@ -901,7 +901,7 @@ static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i, char *
 	switch (o->type) {
 	case OBJ_MYSTERY: mystery_or_flame(in, tk, i); return false;
 	case OBJ_NPC: bystander(in, tk, i); return false;
-	case OBJ_HEAL: tk->script = ta_heal(in->text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, heal_amount()); return false;
+	case OBJ_HEAL: tk->script = ta_heal(in->text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, heal_amount(), jobs_vow_holds(&run.job, run.depth)); return false;
 	case OBJ_TRADER:
 	case OBJ_BUGTRADER: install_trader(in, o, tk); return false;
 	case OBJ_SHOP: install_dealer(in, tk); return false;

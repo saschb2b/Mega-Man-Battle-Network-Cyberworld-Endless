@@ -4,6 +4,7 @@
 #define CW_DIRECTOR_HOME_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "director_jobs.h"   /* (jobs at home, its other part) */
 #include "run.h"
@@ -60,6 +61,13 @@ bool home_indoors(void);
 /* What A reads ahead of Lan where home's place answers instead of BN6
  * (home_places_check); NULL elsewhere. */
 const char *home_check(void);
+/* Whether A ahead of Lan talks to a keeper across a counter (AsterLand's
+ * clerk and SubChip seller, home_places_counter): their talk's archive and
+ * script. */
+bool home_counter(uint32_t *archive, int *script);
+/* Whether AsterLand's order of this visit is still to make, and the zenny
+ * held pays for one. */
+bool home_order_open(void);
 /* The way on at home from where Lan or MegaMan stands (way_to's word,
  * way_last its direction, `far` how far): the PC in Lan's room, the room
  * up the house's stairs, the way out of AsterLand and the Academy, home

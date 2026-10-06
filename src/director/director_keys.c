@@ -315,6 +315,19 @@ static uint32_t town_r(uint32_t keys) {
 	return keys & ~KEY_R;
 }
 
+/* A at home that home's place answers itself (true: taken): a keeper
+ * across a counter, from anywhere before it in front of them, and a check
+ * of its own, AsterLand's Number Trader, which BN6's would run */
+static bool home_a(void) {
+	uint32_t archive;
+	int script;
+	const char *says;
+	if (home_counter(&archive, &script)) return talk_script(archive, script);
+	if (!(says = home_check())) return false;
+	talk_start(says, FACE_NONE);
+	return true;
+}
+
 /* A on the map: let go a fifth of a second after a chat closes, else
  * turned to what it would talk to, or walked up to it; the keys as they go
  * on to the game */
@@ -330,11 +343,8 @@ static uint32_t a_keys(uint32_t keys, bool a_pressed) {
 	 * the game does not turn him back; not in the town, where A also reads
 	 * the doors and signs Lan faces) */
 	bool idle = !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && !D.warping;
-	const char *says;
 	if (D.walk_t > 0) keys = talk_walk(keys);
-	/* (at home, a check the place answers itself: AsterLand's Number
-	 * Trader, which BN6's own would run) */
-	else if (a_pressed && D.town && idle && (says = home_check())) { talk_start(says, FACE_NONE); keys &= ~KEY_A; }
+	else if (a_pressed && D.town && idle && home_a()) keys &= ~KEY_A;
 	else if (a_pressed && !D.town && idle) {
 		int i = talk_target(), k;
 		if (i >= 0 && talk_reach(i, &k)) {

@@ -1301,7 +1301,10 @@ static void test_talk(void) {
 static void test_home_words(void) {
 	const char *ports[3] = { home_portal_name(0), home_portal_name(2), home_portal_name(4) };
 	for (int k = 0; k < 5; ++k) CHECK(home_portal_name(k)[0], "portal %d has a name", k);
-	check_talk("Lan's HP's first time", home_hp_words());
+	check_talk("Lan's HP's first time", home_hp_words(false));
+	check_talk("Lan's HP, a profile told", home_hp_words(true));
+	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true));
+	check_talk("the house's front door", home_door_words("@M Your room's to the upper left,Lan!|@M The PC's up there!", "to the lower left"));
 	/* (going back, docs/HOME.md: the older portals, the way home, L there) */
 	for (int clock = 0; clock <= 6; ++clock) {
 		char what[80];
@@ -2793,6 +2796,8 @@ static void test_jobs(void) {
 				for (int i = 0; i < k; ++i) CHECK(a[i].kind != a[k].kind, "seed %u depth %d: kind %d twice", seed, depth, a[k].kind);
 				CHECK(a[k].state == 0 && a[k].act == jobs_act(depth), "an offer, for its act");
 			}
+			/* (no vow at a run's first visit: the act's ways unseen yet) */
+			CHECK(depth > 1 || a[JOB_BOARD].kind == JOB_BRING, "seed %u: the run's first visit posts no vow", seed);
 		}
 	/* pay and terms by the act */
 	Job j;
@@ -2804,7 +2809,8 @@ static void test_jobs(void) {
 	jobs_dev(&j, 7, 1, false, JOB_QUICK, 0);
 	CHECK(j.pay_kind == PAY_BUGFRAGS && j.pay == 5 && j.need == 3, "act 1's quick wins: 3 for 5 BugFrags");
 	jobs_dev(&j, 7, 1, false, JOB_VOW, 0);
-	CHECK(j.pay_kind == PAY_HPMEMORY && j.pay == 1, "a vow: an HPMemory");
+	CHECK(j.pay_kind == PAY_HPMEMORY && j.pay == 2, "a vow: two HPMemory");
+	CHECK(jobs_vow_holds(&j, 1) && jobs_vow_holds(&j, 3) && !jobs_vow_holds(&j, 4), "a vow holds through its act, not past it");
 	/* their course */
 	jobs_dev(&j, 7, 1, false, JOB_CLEAN, 0);
 	CHECK(!jobs_battle(&j, true, 10, 100) && j.got == 0, "a win that cost HP is no clean win");
@@ -2822,6 +2828,7 @@ static void test_jobs(void) {
 	CHECK(jobs_layer_left(&j, 4, 4) && j.state == JOB_DONE, "every one of four opened: done");
 	jobs_dev(&j, 7, 1, false, JOB_VOW, 0);
 	CHECK(jobs_heal(&j) && j.state == JOB_FAILED && !jobs_guardian(&j), "a patch breaks the vow, and the guardian's fall then pays nothing");
+	CHECK(!jobs_vow_holds(&j, 1), "a broken vow holds no more");
 	jobs_dev(&j, 7, 1, false, JOB_VOW, 0);
 	CHECK(jobs_guardian(&j) && j.state == JOB_DONE && !jobs_heal(&j), "the guardian fallen first: done, and a patch after costs nothing");
 	/* due at the visit after its act, not before */

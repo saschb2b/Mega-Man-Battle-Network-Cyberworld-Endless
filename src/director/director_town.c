@@ -6,6 +6,8 @@
  * arrival. */
 #include "director_home.h"
 
+#include <stdlib.h>
+
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "cinema.h"
@@ -54,6 +56,11 @@ const char *home_check(void) {
 		emu_read8(BN6_PLAYER_FACING) & 7) : NULL;
 }
 
+bool home_counter(uint32_t *archive, int *script) {
+	return D.town && home_places_counter(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), bn6_player_x(), bn6_player_y(),
+		emu_read8(BN6_PLAYER_FACING) & 7, archive, script);
+}
+
 /* In Lan's HP: its open portals on, every frame (BN6's own homepage sets
  * the warp-off flags of the links its story has not opened, after the
  * game enters it), and R asks BN6's "jack out?" (the run's lock had
@@ -64,12 +71,29 @@ void home_entered(void) {
 	flag_clear(BN6_FLAG_NO_JACK);
 }
 
+/* Lan's HP's corridor to its pink pad, BN6's own map: its mouth at x 119,
+ * open from y -24 to -4, which a walk straight from the blue pad (-198, 6)
+ * meets a few units off its line, at its lip (session 69: sixteen calls
+ * pushing there, the arrow pointing at the pad through the wall). L names
+ * where the pad lies; the arrow leads onto the corridor's line first,
+ * across once MegaMan is near it. */
+#define HP_MOUTH_X 119
+#define HP_MOUTH_Y (-14)
+#define HP_MOUTH_HALF 8      /* the line's half-width the arrow wants */
+#define HP_MOUTH_NEAR 64     /* how near in x it turns onto the line */
+
+static const char *hp_way(int *far) {
+	int x, y, px = bn6_player_x(), py = bn6_player_y(), f;
+	lanhp_portal_spot(0, &x, &y);
+	const char *lies = way_to(x, y, far);
+	if (px < HP_MOUTH_X && abs(py - HP_MOUTH_Y) > HP_MOUTH_HALF)
+		way_to(px < HP_MOUTH_X - HP_MOUTH_NEAR ? HP_MOUTH_X : px, HP_MOUTH_Y, &f);
+	return lies;
+}
+
 const char *home_way(int *far) {
 	int x, y;
-	if (home_in_hp()) {
-		lanhp_portal_spot(0, &x, &y);
-		return way_to(x, y, far);
-	}
+	if (home_in_hp()) return hp_way(far);
 	if (home_places_way(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), &x, &y)) return way_to(x, y, far);
 	return town_way(far);
 }
@@ -82,8 +106,17 @@ const char *home_status(void) {
 		D.port_told = true;
 		return home_jobs_status(words);
 	}
+	int dx, dy;
+	if (at == HOME_PLACE_HOUSE && home_places_door(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), &dx, &dy))
+		return home_jobs_status(home_door_words(port_words(PORT_HOUSE, way), lies_at(dx, dy)));
 	if (at == HOME_PLACE_ROOM || at == HOME_PLACE_HOUSE) return home_jobs_status(port_words(at == HOME_PLACE_ROOM ? PORT_ROOM : PORT_HOUSE, way));
-	return home_jobs_status(port_words(at == HOME_PLACE_NONE ? PORT_HOME : PORT_OUT, way));
+	const char *words = port_words(at == HOME_PLACE_NONE ? PORT_HOME : PORT_OUT, way);
+	/* (in the town, once a visit: the requests posted, AsterLand's order) */
+	if (at == HOME_PLACE_NONE && !D.errands_told) {
+		D.errands_told = true;
+		words = home_errands_words(words, run.job.kind == JOB_NONE, home_order_open());
+	}
+	return home_jobs_status(words);
 }
 
 /* home: Lan held while the act's card shows, A ending it early, as on a
@@ -118,9 +151,12 @@ static void home_talk(void) {
 	if (!settled()) return;
 	if (home_in_hp()) {
 		if (D.home ? D.intro_said : D.hp_said) return;
-		if (!talk_start(D.home ? arrival_words() : home_hp_words(), FACE_MEGAMAN)) return;
+		if (!talk_start(D.home ? arrival_words() : home_hp_words(profile.hp_taught), FACE_MEGAMAN)) return;
 		if (D.home) D.intro_said = true;
 		else D.hp_said = true;
+		/* (three boxes at every run's first jack-in were one too many for a
+		 * returning player, session 69) */
+		if (!D.home && !profile.hp_taught) { profile.hp_taught = 1; profile_save(); }
 		return;
 	}
 	if (D.home || D.intro_said || !talk_script(town_info()->talk_archive, town_info()->intro)) return;
@@ -196,7 +232,9 @@ void home_update(void) {
 	static bool was_hp;
 	map_label();
 	arrow_update();
-	if (on_map()) unwedge();
+	/* (and the way-on arrow after pushing a while where the pad goes
+	 * nowhere, as on a layer: at the HP's corridor lip, session 69) */
+	if (on_map()) { unwedge(); push_arrow(); }
 	bool hp = home_in_hp();
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();

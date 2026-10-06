@@ -92,8 +92,11 @@ void guest_words(void) {
 		int out = D.guest_due - 1;
 		k = snprintf(words, sizeof words, "@M Lan,that battle ran on an older Net's system!|@L The Nest copied that Net too!?|"
 			"@M Battles and all. Its viruses fight the old way.|@M And our chips work the way it knew them.");
-		if (out > 0) k += snprintf(words + k, sizeof words - (size_t)k, "|@M %s didn't exist back then...|@M So %s had to sit out.", D.guest_out,
-			out == 1 ? "it" : "they");
+		/* (unless the arrival's words named them on this run: said twice,
+		 * as new, session 69) */
+		if (out > 0 && !flag_get(RUN_OUT_NAMED_FLAG))
+			k += snprintf(words + k, sizeof words - (size_t)k, "|@M %s didn't exist back then...|@M So %s had to sit out.", D.guest_out,
+				out == 1 ? "it" : "they");
 	}
 	if (D.recode_due) {
 		if (k) k += snprintf(words + k, sizeof words - (size_t)k, "|");

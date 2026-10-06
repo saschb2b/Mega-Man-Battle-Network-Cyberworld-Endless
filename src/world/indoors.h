@@ -20,6 +20,11 @@ void indoors_dest(uint32_t list, int entry, int *x, int *y, int *face);
  * `keep` copied (bit e: its warp entry e), and its song in home's music
  * slot `song_k`. The list's bus address, 0 none. */
 uint32_t indoors_take_over(int group, int number, int x, int y, unsigned keep, int song_k, int song);
+/* A keeper behind a counter (place_lines.c) whose talk A at world (x, y)
+ * reaches, the point MegaMan's facing probe looks at: before the counter
+ * in front of them; their talk as script `script` of text archive
+ * `archive`. */
+bool indoors_counter(int group, int number, int x, int y, uint32_t *archive, int *script);
 /* Kept door `entry` of `list` leading instead to world (x, y) of its map:
  * a door out to the planned town, which moves BN6's places. */
 void indoors_door_to(uint32_t list, int entry, int x, int y);

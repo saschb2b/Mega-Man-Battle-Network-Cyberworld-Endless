@@ -25,6 +25,7 @@ static struct {
 	int pc_x, pc_y;           /* the middle of the PC's jack-in cells */
 	int pc_box[4];            /* ... and their bounds: x0, y0, x1, y1 */
 	int up_x, up_y;           /* ... of the house's stairs up */
+	int door_x, door_y;       /* ... of its front door */
 } L;
 
 static bool read_spots(void) {
@@ -34,7 +35,8 @@ static bool read_spots(void) {
 	for (int n = 0; n < 3; ++n)
 		if (!(L.warps[n] = indoors_bn6_warps(LAN_HOUSE_GROUP, n))) return false;
 	if (!indoors_spot(LAN_HOUSE_GROUP, LAN_ROOM, PC_POINT, &L.pc_x, &L.pc_y, L.pc_box) ||
-		!indoors_spot(LAN_HOUSE_GROUP, LAN_HOUSE, STAIRS_UP, &L.up_x, &L.up_y, NULL)) return false;
+		!indoors_spot(LAN_HOUSE_GROUP, LAN_HOUSE, STAIRS_UP, &L.up_x, &L.up_y, NULL) ||
+		!indoors_spot(LAN_HOUSE_GROUP, LAN_HOUSE, FRONT_DOOR, &L.door_x, &L.door_y, NULL)) return false;
 	L.read = true;
 	return true;
 }
@@ -71,6 +73,13 @@ bool lan_house_goal(int number, int *x, int *y) {
 	if (number == LAN_ROOM) { *x = L.pc_x; *y = L.pc_y; return true; }
 	if (number == LAN_HOUSE) { *x = L.up_x; *y = L.up_y; return true; }
 	return false;
+}
+
+bool lan_house_door(int *x, int *y) {
+	if (!read_spots()) return false;
+	*x = L.door_x;
+	*y = L.door_y;
+	return true;
 }
 
 bool lan_room_on_pc(int x, int y) {

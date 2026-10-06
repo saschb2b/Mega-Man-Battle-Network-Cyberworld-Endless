@@ -295,10 +295,11 @@ static void jobs_report(FILE *out) {
 			memset(&j, 0, sizeof j);
 			jobs_dev(&j, 1, act * 3 + 1, false, kind, 0);
 			if (kind <= JOB_QUICK) fprintf(out, " %s x%d", kinds[kind], j.need);
-			else fprintf(out, " %s", kinds[kind]);
+			else fprintf(out, " %s%s", kinds[kind], kind == JOB_VOW && act == 0 ? " (not at a run's first visit)" : "");
 			if (j.pay_kind == PAY_ZENNY) fprintf(out, " -> %u zenny;", j.pay);
 			else if (j.pay_kind == PAY_BUGFRAGS) fprintf(out, " -> %u BugFrags;", j.pay);
-			else fprintf(out, " -> %s;", j.pay_kind == PAY_CHIP ? "a chip a tier up" : "HPMemory");
+			else if (j.pay_kind == PAY_CHIP) fprintf(out, " -> a chip a tier up;");
+			else fprintf(out, " -> %u HPMemory;", j.pay);
 		}
 		fprintf(out, " guardian %d, HPMemory %d\n", 100 * (6 + 3 * act), 100 * (8 + 4 * act));
 	}

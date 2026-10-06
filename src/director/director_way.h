@@ -12,6 +12,7 @@ const char *town_way(int *far);
 void route_floor(void);
 const char *route_to(int tx, int ty, int *far);
 const char *lie_and_walk(int wx, int wy, int *far, bool *winds);
+const char *lies_at(int wx, int wy);
 bool hurt_now(void);
 bool heal_spent(void);
 void goal_way(void);

@@ -47,7 +47,10 @@
   one order a visit. The SubChip seller beside him stocks the keys the act
   ahead needs (Unlockers, RushFood, a WWW-ID) and MiniEnrg, FullEnrg,
   SneakRun and Untrap. On the second screen, a shop's panel now names the
-  entry under the cursor as the list shows it.
+  entry under the cursor as the list shows it. A at the counter reaches
+  the clerk or the seller from anywhere in front of him (a playtester
+  faced the counter from four places and got the showcase's text), and
+  the shopper stands at the NEW case, out of the seller's way.
 - **Requests at home** (issue #88, the epic #84). At each visit three
   people post a request for the act ahead: the NetBattler at AsterLand's
   request board (a chip of an element from your Pack, or a vow: no
@@ -57,8 +60,17 @@
   wins). Take one or none: one at a time, as BN6's Request BBS has it.
   MegaMan says when it is done, or when a patch broke the vow, and the
   one who asked pays at the next visit: zenny, BugFrags, a chip a tier up
-  in your folder's codes, or an HPMemory for a kept vow. L at home says
-  where a reward waits. A run saved before continues with no request.
+  in your folder's codes, or two HPMemory for a kept vow. L at home says
+  where a reward waits, and L in the town names, once a visit, the
+  requests posted and an order AsterLand can still make. A vow is posted
+  from the second visit on (taken blind at a run's start, one cost a
+  playtester his run on layer 1), and while one holds, L and the arrow
+  no longer lead to the Recovery Mr.Prog: L says the vow and where the
+  dealer's MiniEnrg is, and the Mr.Prog's patch asks first, on No. Its
+  reminder waits for the act's card and words, which it had ended
+  unseen. A run that ends holding a request hears about it from the one
+  who asked at the next run's start. A run saved before continues with
+  no request.
 - **AsterLand and the Cyber Academy open** (issue #96, the epic #84).
   Central Town's chip shop and Lan's school are places of home now, BN6's
   own maps as they stand. In AsterLand the clerk stands behind his
@@ -111,15 +123,22 @@
   MegaMan can't know where a link leads before taking it, so beside one
   he says what he reads through it ("Whoa,salty data! Like the sea!")
   and the strong Navi's signal, naming it only where he has battled him.
-  R asks BN6's "MegaMan, jack out?" and takes Lan back to his PC. Home
+  R asks BN6's "MegaMan, jack out?" and takes Lan back to his PC. The
+  arrow leads onto the corridor up to the pink pad, whose lip a walk
+  straight from the blue pad meets (a playtester pushed at it for
+  sixteen calls), and shows after a push there, as on a layer; MegaMan
+  says what Lan's HP is once, then a word. Home
   is Central Town, the same every run: a run begins in Lan's room (BN6's
   own, his house too), and R at his PC jacks MegaMan in ("Jack in!
-  MegaMan, Execute!!"); down the stairs and out of the front door is the
-  town, its townsfolk and shops as before, no longer with a jack-in of
+  MegaMan, Execute!!"); down the stairs and out of the front door (L in
+  the house names it) is the town, its townsfolk and shops as before, no longer with a jack-in of
   its own. The other towns are no longer a run's. docs/HOME.md has the
   design: next, going back through older portals priced by the Net's
   clock, the townsfolk's jobs, a shop at home, and a town that
   remembers.
+- **The older Net's chips that sit out are named once a run.** After the
+  first battle there, MegaMan no longer names again the chips his arrival
+  words had named (a playtester heard them twice, as if new).
 - **Townsfolk who walk stay drawn as they walk.** Seaside's and Green
   Town's walker vanished the moment he set off and came back when he
   stopped: his sprite's walks are empty in BN6's data. Both walk as

@@ -115,6 +115,23 @@ const char *home_back_words(int clock) {
 	return "@M Home again,Lan!|@M The Net kept copying while we were away...|@L Then we'd better get moving!";
 }
 
-const char *home_hp_words(void) {
+const char *home_errands_words(const char *words, bool requests, bool order) {
+	static char buf[480];
+	/* (a playtester heard only the way home in town, and found the
+	 * request board by chance, session 69) */
+	snprintf(buf, sizeof buf, "%s%s%s", words, requests ? "|@M Folks posted requests,Lan!|@M AsterLand's board,the club at school...|"
+		"@M And the man from Dad's lab,out here!" : "", order ? "|@M AsterLand can order us a chip,too!" : "");
+	return buf;
+}
+
+const char *home_door_words(const char *words, const char *door) {
+	static char buf[320];
+	/* (seven calls looking for it, session 69) */
+	snprintf(buf, sizeof buf, "%s|@M The front door's %s,if we head out!", words, door);
+	return buf;
+}
+
+const char *home_hp_words(bool taught) {
+	if (taught) return "@M Our HP,Lan! The pink pad's waiting!";
 	return "@M Our HP,Lan! Home sweet home!|@M The Endless Net's linked in here now...|@M The pink pad leads into it!";
 }

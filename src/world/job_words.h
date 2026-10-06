@@ -28,6 +28,8 @@ typedef struct {
 	/* a request for a chip: those of its element MegaMan holds (Pack or
 	 * Folder, the script checking the Pack as Lan talks) */
 	int nbring, bring_chip[JOB_BRING_MAX], bring_code[JOB_BRING_MAX];
+	/* the last run ended holding their request: their word on it first */
+	bool lost;
 } JobTalk;
 extern JobTalk job_talk[JOB_ASKERS];
 

@@ -24,6 +24,7 @@ typedef struct {
 /* An order made at AsterLand's counter this visit: one a visit (docs/
  * HOME.md, piece 6), its keeper's script checks it. */
 #define HOME_ORDER_FLAG 0x146B
+#define ORDER_LEAST 1000   /* the Order Service's least price: a 500-zenny chip at twice a Net Dealer's (shop_order_install) */
 
 /* SubChips (item ids, per the initial shops' prices: MiniEnrg 100 zenny,
  * FullEnrg 1000, SneakRun 500, Untrap 800, LocEnemy 7000, Unlocker 4000) */

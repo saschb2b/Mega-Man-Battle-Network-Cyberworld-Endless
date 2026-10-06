@@ -10,6 +10,7 @@
 
 #include "bn6.h"
 #include "boss.h"
+#include "cinema.h"
 #include "data.h"
 #include "debug.h"
 #include "director.h"
@@ -21,6 +22,7 @@
 #include "layer_objs.h"
 #include "mapslot.h"
 #include "run.h"
+#include "save.h"
 #include "talk.h"
 
 static struct {
@@ -71,7 +73,9 @@ void home_jobs_visit(void) {
 		jt->mode = theirs ? (due ? JOB_TALK_SETTLE : JOB_TALK_WAIT) : JOB_TALK_OFFER;
 		jt->job = theirs ? run.job : offers[k];
 		if (theirs && due && run.job.kind == JOB_BRING) bring_chips(jt, run.job.need);
+		jt->lost = jt->mode == JOB_TALK_OFFER && run.depth <= 1 && profile.last_job == k + 1;
 	}
+	if (run.depth <= 1 && profile.last_job) { profile.last_job = 0; profile_save(); }
 	J.vow_told = false;
 	for (int c = 0; emu_debug_on() && c < job_talk[JOB_BOARD].nbring; ++c) {
 		uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
@@ -147,8 +151,10 @@ void home_jobs_watch(void) {
 }
 
 void home_jobs_words(void) {
-	if (J.words && !D.town && !talk_busy() && !emu_read8(BN6_CHATBOX) && on_map() && !boss_fighting() && talk_start(J.words, FACE_MEGAMAN))
-		J.words = NULL;
+	/* (after the arrival's card and words: a vow's reminder said over an
+	 * act's card ended it unseen, session 69) */
+	if (!J.words || D.town || D.area_card || D.beat[0] || cinema_busy()) return;
+	if (!talk_busy() && !emu_read8(BN6_CHATBOX) && on_map() && !boss_fighting() && talk_start(J.words, FACE_MEGAMAN)) J.words = NULL;
 }
 
 const char *home_jobs_status(const char *words) {

@@ -46,6 +46,10 @@ void jobs_offers(uint32_t seed, int depth, Job out[JOB_ASKERS]);
 /* Whether job `j`, taken, is up for settling at a visit before layer
  * `depth`: its act was played. */
 bool jobs_due(const Job *j, int depth);
+/* Whether `j` is a vow under way on layer `depth`: taken, its act not
+ * played out. No Mr.Prog's patch while it holds, as L and the arrow keep
+ * to it. */
+bool jobs_vow_holds(const Job *j, int depth);
 
 /* A taken job's progress; each returns whether it just came done (or, for
  * a heal, broke its vow). A battle: won or not, the HP MegaMan lost in it

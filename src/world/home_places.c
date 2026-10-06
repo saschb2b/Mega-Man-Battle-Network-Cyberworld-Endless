@@ -7,6 +7,7 @@
 
 #include "academy.h"
 #include "aster_land.h"
+#include "indoors.h"
 #include "job_words.h"
 #include "lan_house.h"
 #include "npc.h"
@@ -42,6 +43,16 @@ void home_places_frame(int group, int number) {
 	if (at == HOME_PLACE_HOUSE || at == HOME_PLACE_ROOM) lan_house_frame(number);
 	else if (at == HOME_PLACE_ASTER) aster_land_frame();
 	else if (at == HOME_PLACE_ACADEMY) academy_frame(number);
+}
+
+bool home_places_door(int group, int number, int *x, int *y) {
+	return home_places_at(group, number) == HOME_PLACE_HOUSE && lan_house_door(x, y);
+}
+
+bool home_places_counter(int group, int number, int x, int y, int face, uint32_t *archive, int *script) {
+	int dx, dy;
+	npc_probe(face, &dx, &dy);
+	return home_places_at(group, number) == HOME_PLACE_ASTER && indoors_counter(group, number, x + dx, y + dy, archive, script);
 }
 
 const char *home_places_check(int group, int number, int x, int y, int face) {

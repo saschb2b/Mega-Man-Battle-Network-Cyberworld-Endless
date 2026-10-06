@@ -23,7 +23,9 @@ const PlaceFolk place_folk[] = {
 	{ ASTER_GROUP, ASTER_LAND, { -4, -70, FACE_SE, 5, 0x30, "SubChips! Energy and keys!|Take a look!" }, 10, 0, SHOP_SUBS_HOME + 1 },
 	{ ASTER_GROUP, ASTER_LAND, { -92, -40, FACE_SE, 5, 0x35,
 		"Hmm... The request board's empty.|Doesn't anybody need a NetBattler?" }, 0, JOB_BOARD + 1 },
-	{ ASTER_GROUP, ASTER_LAND, { -20, -34, FACE_NW, 5, 0x40,
+	/* (at the NEW case beside the Chip Trader: before the counter she
+	 * stood in the SubChip seller's way, session 69) */
+	{ ASTER_GROUP, ASTER_LAND, { 60, -20, FACE_NW, 5, 0x40,
 		"Ooh... Look at these rare chips!|...And look at these prices! *gulp*" }, 0 },
 	{ ACADEMY_GROUP, ACADEMY_CLASS_6_1, { -148, 2, FACE_NE, 5, 0x3B,
 		"Lan! Welcome to the club!|Tip of the day! Match your codes!|Same code,and you can send more chips!" }, 0, JOB_CLUB + 1 },

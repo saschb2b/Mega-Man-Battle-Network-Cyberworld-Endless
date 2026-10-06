@@ -4,6 +4,7 @@
 #define CW_HOME_PLACES_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Which of them map (group, number) is */
 enum { HOME_PLACE_NONE, HOME_PLACE_ROOM, HOME_PLACE_HOUSE, HOME_PLACE_ASTER, HOME_PLACE_ACADEMY };
@@ -17,11 +18,18 @@ const char *home_places_name(int group, int number);
 /* The way on in one of them: the PC in Lan's room, the stairs up in his
  * house, elsewhere the way out (world units); false for none. */
 bool home_places_way(int group, int number, int *x, int *y);
+/* Where Lan's house's front door is, in the house (world units); false
+ * elsewhere. */
+bool home_places_door(int group, int number, int *x, int *y);
 /* Each frame in one of them: the doors it keeps shut. */
 void home_places_frame(int group, int number);
 /* What A reads from world (x, y) facing `face` (0-7) in one of them where
  * the place answers instead of BN6 (AsterLand's Number Trader, and its
  * request board's post); NULL elsewhere. */
 const char *home_places_check(int group, int number, int x, int y, int face);
+/* Whether A from world (x, y) facing `face` talks to a keeper across a
+ * counter in one of them (AsterLand's clerk and SubChip seller), whose
+ * talk is script `script` of text archive `archive`. */
+bool home_places_counter(int group, int number, int x, int y, int face, uint32_t *archive, int *script);
 
 #endif

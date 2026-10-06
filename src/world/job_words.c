@@ -30,7 +30,7 @@ static const char *an_element(int e) {
 	return w;
 }
 
-/* the pay as a thing: "600 Zenny", "7 BugFrags", "Cannon A", "HPMemory" */
+/* the pay as a thing: "600 Zenny", "7 BugFrags", "Cannon A", "2 HPMemory" */
 static const char *pay_name(const Job *j) {
 	static char w[32];
 	ChipInfo ci;
@@ -41,7 +41,10 @@ static const char *pay_name(const Job *j) {
 		chip_info(j->pay, &ci);
 		snprintf(w, sizeof w, "%s %c", ci.name, j->code == 26 ? '*' : 'A' + j->code);
 		break;
-	default: snprintf(w, sizeof w, "HPMemory"); break;
+	default:
+		if (j->pay > 1) snprintf(w, sizeof w, "%u HPMemory", j->pay);
+		else snprintf(w, sizeof w, "HPMemory");
+		break;
 	}
 	return w;
 }
@@ -57,7 +60,7 @@ static const char *offer_words(const Job *j) {
 		break;
 	case JOB_VOW:
 		snprintf(w, sizeof w, "Heard about the guardians down there?|Bet you can't beat the next one|without a Mr.Prog's patch-up!|"
-			"Do it,and my HPMemory's yours!");
+			"Do it,and %s are yours!", pay_name(j));
 		break;
 	case JOB_QUICK:
 		snprintf(w, sizeof w, "Lan! Club challenge!|Win %u battles,ten seconds each!|Do it,and %s are yours!", j->need, pay_name(j));
@@ -105,7 +108,7 @@ static const char *failed_words(const Job *j) {
 
 const char *job_done_words(int asker) {
 	switch (asker) {
-	case JOB_BOARD: return "@M We did it without a patch-up!|@M That HPMemory's ours,Lan!";
+	case JOB_BOARD: return "@M We did it without a patch-up!|@M The NetBattler owes us,Lan!";
 	case JOB_CLUB: return "@M Lan! That's the club's challenge done!|@M Let's tell them next time we're home!";
 	default: return "@M That's the lab's readings,Lan!|@M Let's tell him next time we're home!";
 	}
@@ -132,7 +135,8 @@ const char *job_board_words(void) {
 	const JobTalk *jt = &job_talk[JOB_BOARD];
 	if (jt->mode != JOB_TALK_OFFER || flag_get(JOB_HELD_FLAG)) return "The request board.|Nothing new posted.";
 	if (jt->job.kind == JOB_VOW)
-		snprintf(w, sizeof w, "A request on the board!|\"A challenge! Beat the next guardian|without a Mr.Prog's patch-up.\"|\"Reward: HPMemory.\"");
+		snprintf(w, sizeof w, "A request on the board!|\"A challenge! Beat the next guardian|without a Mr.Prog's patch-up.\"|\"Reward: %s.\"",
+			pay_name(&jt->job));
 	else snprintf(w, sizeof w, "A request on the board!|\"Wanted: %s chip.\"|\"Reward: %s.\"", an_element(jt->job.need), pay_name(&jt->job));
 	return w;
 }
@@ -177,7 +181,18 @@ static void give_pay(TextArchive *t, const Job *j, bool *first) {
 	}
 }
 
-static int offer_script(TextArchive *t, int face, const Job *j) {
+/* the asker whose request the last run ended holding, at the next run's
+ * first visit (a playtester's bet went with his run without a word,
+ * session 69) */
+static const char *lost_words(int asker) {
+	switch (asker) {
+	case JOB_BOARD: return "Heard about your last dive,kid.|Forget our deal. Fresh start!";
+	case JOB_CLUB: return "Lan! We heard about your dive...|Forget that challenge. Here's a new one!";
+	default: return "Your readings stopped last time,Lan...|Never mind my request. Here's another.";
+	}
+}
+
+static int offer_script(TextArchive *t, int face, const Job *j, bool lost) {
 	int k = j->asker;
 	int again = ta_say(t, face, says[k][SAY_AGAIN]);
 	int busy = ta_say(t, face, says[k][SAY_BUSY]);
@@ -186,6 +201,7 @@ static int offer_script(TextArchive *t, int face, const Job *j) {
 	if_flag(t, JOB_TAKE_FLAG + k, again);
 	if_flag(t, JOB_HELD_FLAG, busy);
 	bool first = true;
+	if (lost) ta_pages(t, lost_words(k), face, &first);
 	ta_pages(t, offer_words(j), face, &first);
 	/* (a vow costs a run its heals: it starts on No) */
 	ta_ask_in(t, face, "Will you take it?\n", no, true, j->kind == JOB_VOW);
@@ -260,7 +276,7 @@ static int settle_script(TextArchive *t, int face, const JobTalk *jt) {
 int job_script(TextArchive *t, int asker, int face, const char *plain) {
 	const JobTalk *jt = asker >= 0 && asker < JOB_ASKERS ? &job_talk[asker] : NULL;
 	switch (jt ? jt->mode : JOB_TALK_NONE) {
-	case JOB_TALK_OFFER: return offer_script(t, face, &jt->job);
+	case JOB_TALK_OFFER: return offer_script(t, face, &jt->job, jt->lost);
 	case JOB_TALK_WAIT: return ta_say(t, face, says[asker][SAY_WAIT]);
 	case JOB_TALK_SETTLE: return settle_script(t, face, jt);
 	default: return ta_talk(t, plain, face);

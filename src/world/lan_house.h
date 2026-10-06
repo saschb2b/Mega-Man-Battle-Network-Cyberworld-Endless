@@ -23,6 +23,8 @@ void lan_room_start(int *x, int *y, int *face);
 /* The way on in map `number` (the house or the room): the room's PC, the
  * house's stairs up; false for none. */
 bool lan_house_goal(int number, int *x, int *y);
+/* Where the house's front door is (the middle of its warp's cells). */
+bool lan_house_door(int *x, int *y);
 /* Whether world (x, y) of the room stands on the PC's jack-in cells. */
 bool lan_room_on_pc(int x, int y);
 /* Each frame in the house or the room (`number`): their doors but BN6's

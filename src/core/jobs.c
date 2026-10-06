@@ -4,7 +4,7 @@
  * Data of a layer, or clean wins), and each kind pays by what it costs
  * (docs/HOME.md, piece 5): the effort of a busting style or a layer
  * searched through, zenny or BugFrags about half a layer's worth; a chip
- * given up, a chip a tier up in the folder's codes; a vow's risk, an
+ * given up, a chip a tier up in the folder's codes; a vow's risk, two
  * HPMemory. */
 #include "jobs.h"
 
@@ -53,8 +53,11 @@ static void terms(Job *j, int a, int depth) {
 		break;
 	}
 	case JOB_VOW:
+		/* (two: a kept vow forgoes the act's patches, two or three halves
+		 * of MegaMan's HP, and one HPMemory, below a dealer's 800 zenny for
+		 * one, read as no reward for the risk, session 69) */
 		j->pay_kind = PAY_HPMEMORY;
-		j->pay = 1;
+		j->pay = 2;
 		break;
 	default:
 		break;
@@ -70,6 +73,10 @@ void jobs_offers(uint32_t seed, int depth, Job out[JOB_ASKERS]) {
 		Job *j = &out[k];
 		j->asker = (uint8_t)k;
 		j->kind = kinds_of[k][rng_range(0, 1)];
+		/* (a vow from the second visit on: at a run's first, Lan's HP and
+		 * the act's ways are still unseen, and a playtester bet act 1's
+		 * patches on a net whose battles took his Cross, session 69) */
+		if (j->kind == JOB_VOW && depth <= 1) j->kind = JOB_BRING;
 		/* (none twice: the club's and the lab's clean wins) */
 		for (int i = 0; i < k; ++i)
 			if (out[i].kind == j->kind) j->kind = kinds_of[k][kinds_of[k][0] == j->kind];
@@ -81,6 +88,8 @@ void jobs_offers(uint32_t seed, int depth, Job out[JOB_ASKERS]) {
 }
 
 bool jobs_due(const Job *j, int depth) { return j->kind != JOB_NONE && j->state && jobs_act(depth) > j->act; }
+
+bool jobs_vow_holds(const Job *j, int depth) { return j->kind == JOB_VOW && j->state == JOB_TAKEN && !jobs_due(j, depth); }
 
 bool jobs_battle(Job *j, bool won, int hp_lost, int frames) {
 	if (j->state != JOB_TAKEN || !won) return false;

@@ -11,7 +11,7 @@
 #include "rom.h"
 #include "script_kit.h"
 
-int ta_heal(TextArchive *t, int variant, int told_flag, int amount) {
+int ta_heal(TextArchive *t, int variant, int told_flag, int amount, bool vow) {
 	static const char *const hello[] = {
 		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
 		"DR.HIKARI SENT ME!\nHOLD STILL,NOW!",
@@ -28,10 +28,18 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int amount) {
 		ta_page(t, FACE_PROG, "ALL PATCHED UP! COME BACK ANYTIME!", true);
 	} else ta_page(t, FACE_PROG, "OH NO,MY PATCH IS\nUSED UP HERE!\nTHE NET DEALER SELLS\nMINIENRG!", true);
 	ta_end(t);
+	/* (a vow held, a request's (jobs.h): MegaMan names it, and the patch
+	 * is on Yes, which starts on No; a playtester under one walked past a
+	 * heal he could not tell what it would do to it, session 69) */
+	int keep = vow ? ta_say(t, FACE_MEGAMAN, "Right! We keep our vow!") : -1;
 	int i = ta_script(t);
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, check, sizeof check);
-	ta_page(t, FACE_PROG, hello[(unsigned)variant % 3], true);
+	if (vow) {
+		ta_page(t, FACE_MEGAMAN, "Lan... A patch-up breaks our vow!", true);
+		ta_ask_in(t, FACE_MEGAMAN, "Patch up anyway?\n", keep, true, true);
+	}
+	ta_page(t, FACE_PROG, hello[(unsigned)variant % 3], !vow);
 	if (amount > 0) {
 		/* (half of max HP, away from the arena: ts_start_heal, BN6's own,
 		 * no higher than his max) */

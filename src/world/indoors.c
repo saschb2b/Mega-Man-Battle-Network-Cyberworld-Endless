@@ -72,6 +72,29 @@ static int person_script(TextArchive *t, const PlaceFolk *p) {
 	return job_script(t, p->asker - 1, face, p->folk.words);
 }
 
+/* the keepers behind counters as installed, whose talk A at the counter's
+ * front runs (indoors_counter) */
+#define KEEPERS 4
+static struct { int group, number, x, y, front, script; uint32_t archive; } keeper[KEEPERS];
+static int nkeepers;
+
+static void keeper_note(int group, int number, const PlaceFolk *p, uint32_t archive, int script) {
+	for (int i = 0; i < nkeepers; ++i)
+		if (keeper[i].group == group && keeper[i].number == number && keeper[i].x == p->folk.x && keeper[i].y == p->folk.y) {
+			keeper[i].archive = archive;
+			keeper[i].script = script;
+			return;
+		}
+	if (nkeepers >= KEEPERS) return;
+	keeper[nkeepers].group = group;
+	keeper[nkeepers].number = number;
+	keeper[nkeepers].x = p->folk.x;
+	keeper[nkeepers].y = p->folk.y;
+	keeper[nkeepers].front = p->counter;
+	keeper[nkeepers].archive = archive;
+	keeper[nkeepers++].script = script;
+}
+
 /* the people of map (group, number) (place_lines.c) into `npcs`, their
  * words in a text archive of their own, written where allocation is */
 static void people(int group, int number, NpcList *npcs) {
@@ -91,7 +114,26 @@ static void people(int group, int number, NpcList *npcs) {
 		if (!npc_need_sprite(npcs, f->cat, f->sprite)) continue;
 		npcs->script[npcs->n++] = p->counter ? npc_counter_talker(f->cat, f->sprite, f->x, f->y, 0, f->face, words, script[k], 0, p->counter)
 			: npc_talker(f->cat, f->sprite, f->x, f->y, 0, f->face, words, script[k], -1, false);
+		if (p->counter) keeper_note(group, number, p, words, script[k]);
 	}
+}
+
+/* (how far along the counter, either way, and how far before its front A
+ * still reaches a keeper: BN6's own reach answered AsterLand's clerk from
+ * 8 units of its 60, and a playtester faced the counter from four places
+ * and got the showcase's text, session 69) */
+#define COUNTER_REACH 14
+#define COUNTER_DEEP 16
+
+bool indoors_counter(int group, int number, int x, int y, uint32_t *archive, int *script) {
+	for (int i = 0; i < nkeepers; ++i) {
+		if (keeper[i].group != group || keeper[i].number != number || !keeper[i].archive) continue;
+		if (abs(x - keeper[i].x) > COUNTER_REACH || y <= keeper[i].y || y > keeper[i].y + keeper[i].front + COUNTER_DEEP) continue;
+		*archive = keeper[i].archive;
+		*script = keeper[i].script;
+		return true;
+	}
+	return false;
 }
 
 uint32_t indoors_take_over(int group, int number, int x, int y, unsigned keep, int song_k, int song) {

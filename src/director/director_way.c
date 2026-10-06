@@ -11,6 +11,7 @@
 #include "director_folder.h"
 #include "director_home.h"
 #include "director_state.h"
+#include "jobs.h"
 #include "net_route.h"
 #include "netmap.h"
 #include "save.h"
@@ -121,13 +122,25 @@ const char *lie_and_walk(int wx, int wy, int *far, bool *winds) {
 	return lies;
 }
 
+/* Where world (wx, wy) lies from MegaMan as the crow flies, way_dir left
+ * as it was: a place's second thing to name (the house's front door). */
+const char *lies_at(int wx, int wy) {
+	int keep = way_dir, far;
+	const char *lies = way_to(wx, wy, &far);
+	way_dir = keep;
+	return lies;
+}
+
 /* MegaMan below three quarters of his HP (at 220 of 240 the heal led L's
  * words before the way on) */
 bool hurt_now(void) { return emu_read16(BN6_NAVI_HP) * 4 < emu_read16(BN6_NAVI_MAX_HP) * 3; }
 
 /* (his one patch given on this layer, issue #71; the Heals helper's heals
- * as often as asked) */
-bool heal_spent(void) { return !(run.helpers & HELP_HEALS) && flag_get(LAYER_HEAL_TOLD_FLAG); }
+ * as often as asked; none for a vow held, which L and the arrow had led to
+ * the heal it forbade, session 69) */
+bool heal_spent(void) {
+	return jobs_vow_holds(&run.job, run_reached()) || (!(run.helpers & HELP_HEALS) && flag_get(LAYER_HEAL_TOLD_FLAG));
+}
 
 /* Where the layer's Recovery Mr. Prog stands, in the world; false for
  * none. */

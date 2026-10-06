@@ -17,8 +17,16 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
 const char *home_port_words(int biome, int navi, bool dark, bool sealed);
 /* Lan's HP's portal `k` (lanhp.h) as MegaMan names it, after "the". */
 const char *home_portal_name(int k);
-/* MegaMan in Lan's HP the run's first time there. */
-const char *home_hp_words(void);
+/* MegaMan in Lan's HP the run's first time there: what it is, or, to a
+ * profile `taught` that, a word. */
+const char *home_hp_words(bool taught);
+/* L's words at home `words`, then once a visit what it holds besides the
+ * way on: `requests` posted (none held), an order `order` AsterLand can
+ * still make that the zenny held pays for. */
+const char *home_errands_words(const char *words, bool requests, bool order);
+/* L's words in Lan's house `words`, then where its front door is (`door`
+ * from Lan, way_to's word). */
+const char *home_door_words(const char *words, const char *door);
 /* L in Lan's HP: the pink pad `way` from MegaMan, the first time how to
  * jack out, and how far the Net's clock has run (`clock` its notches). */
 const char *home_hp_status(const char *way, bool first, int clock);
