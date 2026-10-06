@@ -813,7 +813,7 @@ static void catwalks(int biome, int size, int sig) {
 	static bool seen[NMAX][NMAX];
 	for (int j = 0; j < m.n; ++j)
 		for (int i = 0; i < m.n; ++i) seen[j][i] = !win_in(NODE_X(&m, i), NODE_Y(&m, j));
-	int box[3];
+	int box[3] = { 0, 0, 0 };
 	bool hole = sig && maze_hole(&m, sig, biome, size, seen, box);
 	maze_grow(&m, seen);
 	maze_loops(&m, size);
