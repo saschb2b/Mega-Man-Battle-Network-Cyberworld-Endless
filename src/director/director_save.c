@@ -239,6 +239,7 @@ static bool resume_home(void) {
 	spins_sync();
 	run.fragments = key_item(SCRIPTS_SECRET_DATA);
 	own_folder_chips();
+	own_library_chips();
 	star_folder_pack();
 	official_sync(true);
 	home_resume();
@@ -276,6 +277,7 @@ bool director_resume(void) {
 		 * restocked both shops); another build's layer, afresh */
 		layer_objs_shops(&D.objs, same);
 		own_folder_chips();   /* (a run saved with the folder's chips unmarked) */
+		own_library_chips();   /* (... and its Library's: the PET drew it broken) */
 		star_folder_pack();
 		official_sync(true);
 		/* L starts over, its first words and then the rest at a second L:

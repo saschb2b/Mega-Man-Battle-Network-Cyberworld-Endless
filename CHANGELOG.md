@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The PET's Library draws every chip again.** A chip held in an earlier
+  run came into the run's Library without the mark BN6 gives a chip it hands
+  out, and wherever one stood on the Library's page BN6 drew no names and
+  counted 0 (a player's Library of 23 hours, in the browser and everywhere).
+  Every Library chip is now marked as a run begins and after every CONTINUE,
+  so runs saved before draw whole too.
 - **JudgeMan stands as himself at his arena.** He stood as a white ball:
   his overworld sprite is the only guardian's BN6 keeps compressed, and the
   layer never loaded it.

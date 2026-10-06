@@ -199,6 +199,20 @@ void star_folder_pack(void) {
 void library_to_game(void) {
 	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
 		if (meta_library_has(id)) flag_set(BN6_FLAG_LIBRARY + id);
+	own_library_chips();
+}
+
+/* The Library's chips owned as BN6 marks one it gives (own_folder_chips):
+ * BN6's PET Library drew no names and counted 0 wherever an unmarked chip
+ * stood on its page, and every chip of an earlier run came into a run
+ * unmarked (a player's Library of 23 hours: "visually broken"; one
+ * HiCannon of an earlier run did it). At a run's start and after every
+ * CONTINUE, so a run saved before has them too. */
+void own_library_chips(void) {
+	uint32_t marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
+	if (marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
+	for (uint32_t id = 1; id < 8 * sizeof profile.library; ++id)
+		if (flag_get(BN6_FLAG_LIBRARY + (int)id)) emu_write8(marks + id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + id) ^ BN6_CHIP_KEY_XOR));
 }
 
 /* ... and back: the chips the run's game has put in its Library since. */

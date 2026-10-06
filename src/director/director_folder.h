@@ -12,6 +12,7 @@ void folder_made_save(void);
 void folder_made_load(void);
 void note_folder_codes(void);
 void own_folder_chips(void);
+void own_library_chips(void);
 void dev_folder(void);
 
 /* The chips a folder holds, the standard, mega and giga ones, the ones a
