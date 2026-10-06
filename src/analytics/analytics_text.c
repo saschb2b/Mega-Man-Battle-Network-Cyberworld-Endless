@@ -16,7 +16,7 @@ static const char *const words[] = {
 	"On",   /* AW_ON */
 	"Off",   /* AW_OFF */
 	"A: what is sent, and Yes or No",   /* AW_ROW_NOTE */
-	"Tap Yes or No",   /* AW_TAP */
+	"D-pad and A, or tap Yes or No",   /* AW_TAP */
 };
 _Static_assert(sizeof words / sizeof *words == AW_COUNT, "a word for each AnalyticsWord");
 

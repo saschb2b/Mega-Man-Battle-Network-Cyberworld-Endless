@@ -21,6 +21,9 @@
   standing at it.
 - **The second screen lists every way.** Lan's HP's ways back share one
   line on the home panel, which had cut the fourth way off.
+- **The statistics' question names the buttons:** "D-pad and A, or tap
+  Yes or No" under its Yes and No on a phone.
+
 ## 0.11.1 (2026-10-06)
 
 - **The on-screen buttons answer the statistics' question.** On a phone
