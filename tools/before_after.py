@@ -35,10 +35,12 @@ WEAK = {'CYBERWORLD_AUTOPILOT': 'weak'}
 WALK = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
 # (an act's first layer: its card and MegaMan's words paged, then the map held from frame 730)
 MAP_HELD = '250:' + ',6:A,24:' * 14 + ',60:,40:SELECT'
+# (an act's middle layer: Chaud's call paged too, the map held from frame 820)
+MAP_CALLED = '250:' + ',6:A,24:' * 17 + ',60:,40:SELECT'
 SEASIDE_4 = ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '2']
 # (a layer's arrival words paged, MegaMan still where he arrived by frame 530)
 ARRIVED = '150:,' + '4:A,6:,' * 30 + '80:'
-# name, game options, environment, frame
+# name, game options, environment, frame (or OLD's and NEW's, where they differ)
 SCENES = [
     # (BlastMan's arena in the Robot Control Comp, as the autopilot walks in)
     ('robot-arena', build.RUN_7, WEAK, 1300),
@@ -72,7 +74,7 @@ SCENES = [
     # (issue #98's identity: the same layer's map whole before and after,
     # its signature the big room the way runs through; build.py's
     # identity-* screenshots are these layers in the game)
-    ('identity-central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('identity-central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_CALLED], {}, 845),
     ('identity-seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '4', '--seed', '2', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
     ('identity-sky', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
     ('identity-green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
@@ -91,6 +93,10 @@ SCENES = [
     ('phone-upright', ['--scene', 'emu', '--run-depth', '4', '--net-biome', '1', '--seed', '3', '--dev', 'quiet', '--touch',
                        '--size', '1080x2400', '--dpi', '420', '--input', '60:,' + '4:A,6:,' * 20 + '40:',
                        '--taps', '330:315,1881>435,2001'], {}, 348, 3),
+    # (0.11.0's: JudgeMan at his arena, the white ball he stood as, then
+    # himself; the arrivals moved the layer's layout, so the autopilot
+    # reaches the arena at a frame of each build's own, OLD's first)
+    ('judgeman', ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--guardian', '15'], WEAK, (1285, 915)),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -173,7 +179,8 @@ def main():
         if a.names and name not in a.names:
             continue
         path = os.path.join(out, f'compare-{name}.png')
-        pair(frame(old, args, env, at, name, *whole), frame(new, args, env, at, name, *whole), a.old_label or a.old.lstrip('v'),
+        old_at, new_at = at if isinstance(at, tuple) else (at, at)
+        pair(frame(old, args, env, old_at, name, *whole), frame(new, args, env, new_at, name, *whole), a.old_label or a.old.lstrip('v'),
              a.new).save(path, optimize=True)
         print('compared', name)
 

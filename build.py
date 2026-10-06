@@ -1323,6 +1323,23 @@ SCREENSHOTS = [
     ('program-fit', ['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--dev', 'quiet', '--talk', 'reward:2950',
                      '--input', (FIT_GIFT + FIT_INSTALL + FIT_NEXT + FIT_PAGES).rstrip(',')],
      [(7375, 'program-fit-now')], {}),
+    # 0.11.0's notes. (an ordinary guardian's meeting, issue #100: MegaMan
+    # stepped up beside BlastMan, facing him, the chat box below them both)
+    ('guardian-meet', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
+     [(1730, 'guardian-meet')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (Dad's call after the Cybeast's first fall at seed 7's endless Nest,
+    # issue #109: its power is MegaMan's now; one-hit enemies end the
+    # battle at once, the autopilot paging the words)
+    ('cybeast-den', ['--scene', 'emu', '--run-depth', '19', '--seed', '7', '--dev', 'god,onehit,quiet,hp=800'],
+     [(3464, 'cybeast-den')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (the setup on a profile whose endless Nest fell, issue #99: BeastOut
+    # the fifth helper, NEW, turned on)
+    ('setup-beast', ['--scene', 'setup', '--marks', '100', '--input', '60:,6:A,60:'], [(150, 'setup-beast')], {}),
+    # (the ROMs screen, issue #97, BN6 and BN5 both ready: a desktop's
+    # 1280 x 720 window, halved, and a phone held upright, at a third;
+    # screenshots() gives it both ROMs and a Linux player's saves folder)
+    ('launcher-desktop', ['--scene', 'launcher', '--size', '1280x720'], [(90, 'launcher-desktop')], {}, 2),
+    ('launcher-phone', ['--scene', 'launcher', '--size', '1080x2400', '--dpi', '420'], [(90, 'launcher-phone')], {}, 3),
 ]
 
 
@@ -1359,9 +1376,14 @@ def screenshots(only=None):
         second = ['--second-shot', ','.join(f'{f}:/src/.build/screenshots/{n}-second.bmp' for f, n in frames)] if dual or alone else []
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
-        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/screenshots/data',
+        # (the ROMs screen: both ROMs, and the saves where a Linux player's
+        # are, which it shows as ~/.local/share/cyberworld-endless/savedata)
+        rom_screen = name.startswith('launcher')
+        home = '/src/.build/screenshots/home'
+        data = home + '/.local/share/cyberworld-endless' if rom_screen else '/src/.build/screenshots/data'
+        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
                       *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
-                      mounts=docs_rom_mounts(bn5='bn5' in name))
+                      mounts=docs_rom_mounts(bn5='bn5' in name or rom_screen), env=[('HOME', home)] if rom_screen else ())
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -1457,6 +1479,14 @@ CLIPS = [
     # identity-undernet, past its statue between braziers)
     ('identity', IDENTITY + ['--net-biome', '5', '--run-depth', '4', '--seed', '1'], {},
      SIG_PAGED + '20:,70:LEFT,80:DOWN,80:RIGHT,70:UP,100:', 460, 740),
+    # (0.11.0's: the super bosses' entrances, issue #100, the autopilot in
+    # god mode at 800 HP: Bass in the Secret Area with the title's S held,
+    # from the bridge into his arena, his stone, the white and his card;
+    # the Cybeast at seed 7's endless Nest, the shaking, the white, its card)
+    ('bass-arrival', ['--scene', 'emu', '--run-depth', '8', '--seed', '7', '--marks', '08', '--dev', 'god,quiet,hp=800,side=2'],
+     {'CYBERWORLD_AUTOPILOT': '1'}, None, 1090, 1630),
+    ('cybeast-arrival', ['--scene', 'emu', '--run-depth', '19', '--seed', '7', '--dev', 'god,quiet,hp=800'],
+     {'CYBERWORLD_AUTOPILOT': '1'}, None, 1150, 1690),
 ]
 
 
@@ -1466,7 +1496,8 @@ CLIPS = [
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
-               'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12)}
+               'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
+               'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12)}
 
 
 def clips(only=None):
