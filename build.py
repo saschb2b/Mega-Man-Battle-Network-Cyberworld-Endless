@@ -1711,13 +1711,19 @@ def lint_files():
     return not bad
 
 
+# bn6.h and the header it includes for the PET's addresses (src/emu/)
+BN6_HEADERS = ('bn6.h', 'bn6_pet.h')
+
+
 def lint_rom_data(update):
-    """Every address of src/emu/bn6.h and every RomLayout field named in docs/ROM_DATA.md."""
+    """Every address of src/emu/bn6.h (and bn6_pet.h) and every RomLayout field named in docs/ROM_DATA.md."""
     from collections import Counter
     with open(os.path.join(ROOT, 'docs', 'ROM_DATA.md')) as f:
         doc = f.read().lower()
-    with open(os.path.join(ROOT, 'src', 'emu', 'bn6.h')) as f:
-        bn6 = f.read()
+    bn6 = ''
+    for name in BN6_HEADERS:
+        with open(os.path.join(ROOT, 'src', 'emu', name)) as f:
+            bn6 += f.read()
     with open(os.path.join(ROOT, 'src', 'core', 'rom.h')) as f:
         rom = f.read()
     missing = []
@@ -1863,13 +1869,13 @@ def lint_dead(update):
 
 
 def lint_offsets(update):
-    """No field of the game's structures as a bare offset outside bn6.h (issue #34): BN6_PLAYER + 0x1C is
-    BN6_PLAYER_X there. Event flags (BN6_FLAG_ + n) and indexes (+ n * size) are numbers, not fields."""
+    """No field of the game's structures as a bare offset outside bn6.h (and bn6_pet.h, issue #34): BN6_PLAYER
+    + 0x1C is BN6_PLAYER_X there. Event flags (BN6_FLAG_ + n) and indexes (+ n * size) are numbers, not fields."""
     import glob
     from collections import Counter
     found = []
     for path in sorted(glob.glob(os.path.join(ROOT, 'src', '*', '*.[ch]'))):
-        if os.path.basename(path) == 'bn6.h':
+        if os.path.basename(path) in BN6_HEADERS:
             continue
         with open(path) as f:
             for n, line in enumerate(f, 1):

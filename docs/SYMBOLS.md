@@ -274,13 +274,14 @@ starts and in which instruction set.
 
 ## Where our own symbols come from, and how each is verified
 
-- `src/emu/bn6.h` and `src/emu/bn5.h`: every name the engine uses for the
-  game, with its comment as its description. A field defined as
-  `(BASE + offset)` is a field of BASE; one named by its offset alone
-  belongs to its family's structure (`tools/symbols.py`, `FAMILIES`); a
-  define whose comment opens with another's name and a colon is a value of
-  that one (`BN6_PANEL_HOLE`: `BN6_PANEL_TYPE: a hole`); event flags are
-  the `_FLAG_` names.
+- `src/emu/bn6.h` (with `bn6_pet.h`, the PET's, which it includes) and
+  `src/emu/bn5.h`: every name the engine uses for the game, with its
+  comment as its description. A field defined as `(BASE + offset)` is a
+  field of BASE; one named by its offset alone belongs to its family's
+  structure (`tools/symbols.py`, `FAMILIES`); a define whose comment opens
+  with another's name and a colon is a value of that one
+  (`BN6_PANEL_HOLE`: `BN6_PANEL_TYPE: a hole`); event flags are the
+  `_FLAG_` names.
 - `src/core/rom.c`: the ROM offsets of `RomLayout` (BN6) and `XRomLayout`
   (BN5), described by `src/core/rom.h`'s comments.
 - `docs/ROM_DATA.md`: the addresses its rows give that the headers and the
