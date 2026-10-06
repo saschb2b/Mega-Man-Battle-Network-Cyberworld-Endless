@@ -25,7 +25,10 @@
 #include "xguardian.h"
 
 #define SONG_BOSS_PRELUDE 0x1C
-#define SONG_STOP         0xFF
+/* BN6's no song: its PlayMusic stops every song for it (bn6f PlayMusic,
+ * sound_8000630), as its own scripts hush a scene; 0xFF, which this
+ * played before, stopped nothing (BN6_MUSIC_STATUS read each frame) */
+#define SONG_STOP         0x63
 #define MD_ANIM_GUARDIAN  1     /* the Mystery Data sprite's blue crystal */
 /* a super boss's sounds, BN6's own scenes' (docs/BOSSES.md, Super bosses):
  * the rumble and the roar, the white's, Bass's going; and the theme's fade

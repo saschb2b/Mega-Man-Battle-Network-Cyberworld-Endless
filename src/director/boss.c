@@ -238,6 +238,27 @@ static void enter_update(void) {
 	if (B.t == 80) { title_card(); to(B_TITLE); }
 }
 
+/* Back on the map after the battle: bars and silence, then his last word.
+ * The game starts the map's theme a frame after the battle, over a hush
+ * run before it: the hush runs while a song plays (BN6_MUSIC_STATUS read
+ * each frame after a guardian's battle). */
+static bool music_on(void) { return !(emu_read32(BN6_MUSIC_STATUS) & BN6_MUSIC_STOPPED); }
+
+static void after_update(void) {
+	if (B.t == 1) {
+		cinema_input(CINEMA_HOLD);
+		cinema_letterbox(true);
+	}
+	if (B.t < 40) {
+		if (music_on()) run_script(B.g.hush);
+		return;
+	}
+	cinema_letterbox(false);
+	cinema_input(CINEMA_TALK);
+	run_script(B.g.defeat);
+	to(B_LAST_WORD);
+}
+
 /* His last word read: a guardian logs out in a flash (a super boss's fall
  * boss_grand.c's) */
 static void last_word_done(void) {
@@ -290,14 +311,7 @@ void boss_update(void) {
 	case B_NONE:
 	case B_DONE:
 		break;
-	case B_AFTER:
-		if (B.t == 1) { cinema_input(CINEMA_HOLD); cinema_letterbox(true); run_script(B.g.hush); }
-		if (B.t < 40) break;
-		cinema_letterbox(false);
-		cinema_input(CINEMA_TALK);
-		run_script(B.g.defeat);
-		to(B_LAST_WORD);
-		break;
+	case B_AFTER: after_update(); break;
 	case B_LAST_WORD:
 		if (chat_done()) last_word_done();
 		break;

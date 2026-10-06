@@ -50,8 +50,8 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi);
 int ta_undernet(TextArchive *t, int flag, bool deeper);
 int ta_secret_gate(TextArchive *t, int flag);
-/* Plays song `song` (0xFF stops the music, SCRIPTS_AREA_MUSIC the map's
- * own) without opening the chat box. */
+/* Plays song `song` (0x63, BN6's no song, stops the music;
+ * SCRIPTS_AREA_MUSIC the map's own) without opening the chat box. */
 #define SCRIPTS_AREA_MUSIC -1
 int ta_music(TextArchive *t, int song);
 /* Plays sound `sound` (BN6's ts_sound_play00), and fades the music out

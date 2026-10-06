@@ -294,7 +294,7 @@ int ta_secret_gate(TextArchive *t, int flag) {
 
 int ta_music(TextArchive *t, int song) {
 	int i = ta_script(t);
-	uint8_t play[] = { 0xFD, 0x01, (uint8_t)song, (uint8_t)(song >> 8) };   /* ts_sound_play_bgm; 0xFF stops */
+	uint8_t play[] = { 0xFD, 0x01, (uint8_t)song, (uint8_t)(song >> 8) };   /* ts_sound_play_bgm (bn6f's PlayMusic; 0x63 stops) */
 	static const uint8_t area[] = { 0xFD, 0x0A };                            /* ts_sound_play_area_bgm */
 	if (song == SCRIPTS_AREA_MUSIC) ta_bytes(t, area, sizeof area);
 	else ta_bytes(t, play, sizeof play);
