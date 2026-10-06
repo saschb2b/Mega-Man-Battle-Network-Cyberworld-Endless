@@ -30,8 +30,10 @@ extern int layout_forced;
  * repeat one while the area has others. */
 int layout_in_act(int biome, uint32_t act_seed, int index);
 /* Builds `layout` into the (cleared) layer; room 0 is where MegaMan
- * arrives. `size` 0-2 grows with depth. */
-void layout_build(int layout, int biome, int size);
+ * arrives. `size` 0-2 grows with depth; `sig` the layer's signature
+ * (SIG_*, net_signature.h), set at the layout's heart, its room in
+ * layer.sig_room (-1 where it found no place). */
+void layout_build(int layout, int biome, int size, int sig);
 
 extern const char *const layout_names[LAYOUT_COUNT];
 

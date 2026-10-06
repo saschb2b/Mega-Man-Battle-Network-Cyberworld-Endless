@@ -17,6 +17,22 @@ int16_t ng_detour[MAP_H][MAP_W];
 static int16_t branch[MAP_H][MAP_W];
 #define DETOUR_EMPTY 5   /* (a detour this long is never left empty: fill_empty_detours) */
 
+/* Whether (x, y) lies on the open floor of the layer's signature, out of
+ * every other room: a plaza's corners and a ring road's far side, which the
+ * way crosses or runs round, are seen from it and no ends (issue #98); the
+ * pad in a ring's middle, a room of its own, is one. */
+static bool in_room(int r, int x, int y) {
+	const Room *m = &layer.rooms[r];
+	return x >= m->x && y >= m->y && x < m->x + m->w && y < m->y + m->h;
+}
+
+bool layer_detour_open(int x, int y) {
+	if (layer.sig_room < 0 || !in_room(layer.sig_room, x, y)) return false;
+	for (int i = 0; i < layer.nrooms; ++i)
+		if (i != layer.sig_room && in_room(i, x, y)) return false;
+	return true;
+}
+
 /* (the guardian's arena is no detour: the way ends at him, in its middle) */
 bool ng_in_arena(int x, int y) {
 	if (layer.arena < 0) return false;
@@ -108,13 +124,14 @@ static int loose_green(const int16_t *far) {
 }
 
 /* A branch's cells and how wide it runs: wide[b] where two by two of its
- * panels are floor (a band that reads as the way, not a spur) */
-static void branch_shape(int16_t *far, uint8_t *wide) {
+ * panels are floor (a band that reads as the way, not a spur); open[b]
+ * where its far end lies on the signature's open floor (no end) */
+static void branch_shape(int16_t *far, uint8_t *wide, uint8_t *open) {
 	int b;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if ((b = off_way_branch(x, y)) < 0) continue;
-			if (ng_detour[y][x] > far[b]) far[b] = ng_detour[y][x];
+			if (ng_detour[y][x] > far[b]) { far[b] = ng_detour[y][x]; open[b] = layer_detour_open(x, y); }
 			if (off_way_branch(x + 1, y) == b && off_way_branch(x, y + 1) == b && off_way_branch(x + 1, y + 1) == b) wide[b] = 1;
 		}
 }
@@ -125,20 +142,23 @@ static void branch_shape(int16_t *far, uint8_t *wide) {
  * to an empty end, session 59; half the layers held one, 321 of 1589
  * such detours); moved, not added. A wide one still empty takes a new
  * one where the map has room: a band reads as the way, a spur to nothing
- * as BN6's own. */
+ * as BN6's own. The signature's open floor is no end (issue #98: a ring
+ * road's far side, a plaza's corners, seen from the way). */
 void ng_fill_empty_detours(void) {
-	static uint8_t holds[MAP_W * MAP_H], wide[MAP_W * MAP_H];
+	static uint8_t holds[MAP_W * MAP_H], wide[MAP_W * MAP_H], open[MAP_W * MAP_H];
 	static int16_t far[MAP_W * MAP_H], keep_detour[MAP_H][MAP_W], keep_branch[MAP_H][MAP_W];
 	memset(holds, 0, sizeof holds);
 	memset(far, 0, sizeof far);
 	memset(wide, 0, sizeof wide);
+	memset(open, 0, sizeof open);
 	/* (the layer's detours as its data were placed stay its own: an arrow
 	 * lane, carved since, is measured from them) */
 	memcpy(keep_detour, ng_detour, sizeof ng_detour);
 	memcpy(keep_branch, branch, sizeof branch);
 	ng_measure_detours();
-	branch_shape(far, wide);
+	branch_shape(far, wide, open);
 	int b;
+	for (b = 0; b < MAP_W * MAP_H; ++b) holds[b] = open[b];
 	for (int i = 0; i < layer.nobj; ++i)
 		if ((b = off_way_branch((int)layer.obj[i].x, (int)layer.obj[i].y)) >= 0) holds[b] = 1;
 	for (int i = 0; i < layer.ngaps; ++i) if ((b = off_way_branch(layer.gap[i].x, layer.gap[i].y)) >= 0) holds[b] = 1;

@@ -17,6 +17,10 @@ bool ng_beside_narrow(int x, int y);
 bool ng_behind_gap(int x, int y);
 bool ng_by_walkway(int x, int y);
 extern uint8_t ng_way_band[MAP_H][MAP_W];
+/* (net_way.c) */
+void ng_mark_way(int sx, int sy, int gx, int gy);
+#define SIG_PAST 10000
+void ng_walk_past_signature(int16_t d[MAP_H][MAP_W]);
 bool ng_near_talker(int x, int y);
 bool ng_navi_near(int x, int y);
 void ng_hush(int x, int y);

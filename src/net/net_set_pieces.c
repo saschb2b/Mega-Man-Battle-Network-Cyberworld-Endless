@@ -302,30 +302,21 @@ static bool pocket_mouth(int x, int y, int d) {
 	return (ng_floor_cell(bx + sx, by + sy) || ng_floor_cell(bx - sx, by - sy)) && ng_cell_free(bx, by) && !ng_navi_near(x, y);
 }
 
-void ng_plan_obstacle(int kind) {
-	int best = -1, bx = 0, by = 0, bd = 0;
-	for (int y = 1; y < MAP_H - 1; ++y)
-		for (int x = 1; x < MAP_W - 1; ++x)
-			for (int d = 0; d < 4; ++d) {
-				if (!pocket_mouth(x, y, d)) continue;
-				int n = pocket_of(x, y);
-				if (n < 6 || n > 40) continue;
-				/* (seen from the way: its mouth near it; a pad in it) */
-				int score = 20 - (ng_detour[y][x] < 20 ? ng_detour[y][x] : 20) + (n >= 9 && n <= 20 ? 5 : 0);
-				if (score > best) { best = score; bx = x; by = y; bd = d; }
-			}
-	if (best < 0 || layer.nblocks >= MAX_BLOCKS) return;
-	pocket_of(bx, by);
-	/* its one thing where it ends: the farthest panel from the mouth */
+/* The one thing of the pocket pocket_of marked from mouth (bx, by), where it
+ * ends: its farthest panel from the mouth free to stand on, cutting nothing
+ * off past it (not before a counter, nor beside what is solid: the services
+ * stand first, and a pocket's data had come down on a Net Dealer's front and
+ * beside his navi); false where it has none. */
+static bool pocket_end(int bx, int by, int *rx, int *ry) {
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
 	static int16_t dist[MAP_H][MAP_W];
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) dist[y][x] = -1;
-	int h = 0, t = 0, rx = bx, ry = by;
+	int h = 0, t = 0, far = -1;
 	dist[by][bx] = 0;
 	qx[t] = (int16_t)bx; qy[t++] = (int16_t)by;
 	while (h < t) {
 		int x = qx[h], y = qy[h++];
-		if (dist[y][x] > dist[ry][rx]) { rx = x; ry = y; }
+		if (dist[y][x] > far && pocket[y][x] && ng_cell_free(x, y) && !ng_cuts_way(x, y)) { far = dist[y][x]; *rx = x; *ry = y; }
 		for (int k = 0; k < 4; ++k) {
 			int nx = x + dir_dx[k], ny = y + dir_dy[k];
 			if (!ng_floor_cell(nx, ny) || dist[ny][nx] >= 0 || !pocket[ny][nx]) continue;
@@ -333,7 +324,36 @@ void ng_plan_obstacle(int kind) {
 			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
 		}
 	}
-	ng_pad_middle(&rx, &ry);
+	if (far < 0) return false;
+	ng_pad_middle(rx, ry);
+	return true;
+}
+
+void ng_plan_obstacle(int kind) {
+	enum { MOUTHS = 256 };
+	static struct { int16_t x, y, d, score; } cand[MOUTHS];
+	int nc = 0, rx = 0, ry = 0;
+	if (layer.nblocks >= MAX_BLOCKS) return;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x)
+			for (int d = 0; d < 4 && nc < MOUTHS; ++d) {
+				if (!pocket_mouth(x, y, d)) continue;
+				int n = pocket_of(x, y);
+				if (n < 6 || n > 40) continue;
+				/* (seen from the way: its mouth near it; a pad in it) */
+				int score = 20 - (ng_detour[y][x] < 20 ? ng_detour[y][x] : 20) + (n >= 9 && n <= 20 ? 5 : 0);
+				int k = nc++;
+				for (; k > 0 && cand[k - 1].score < score; --k) cand[k] = cand[k - 1];
+				cand[k].x = (int16_t)x; cand[k].y = (int16_t)y; cand[k].d = (int16_t)d; cand[k].score = (int16_t)score;
+			}
+	/* the best pocket whose end has a place for its one thing */
+	int c = 0;
+	for (; c < nc; ++c) {
+		pocket_of(cand[c].x, cand[c].y);
+		if (pocket_end(cand[c].x, cand[c].y, &rx, &ry)) break;
+	}
+	if (c == nc) return;
+	int bx = cand[c].x, by = cand[c].y, bd = cand[c].d;
 	layer.block[layer.nblocks++] = (NetBlock){ bx, by, bd, kind, rx, ry };
 	/* (nothing else in the pocket, its mouth or the floor before it) */
 	for (int y = 0; y < MAP_H; ++y)

@@ -3,14 +3,137 @@
  * one the way from the arrival to the goal crosses costs a lining up.
  * Capcom's net maps carry their way across over wide floor, their one-wide
  * walkways mostly spurs off it; past the area's cap, the walkways on the
- * way are widened to two panels, which draw in its platforms' floor. */
+ * way are widened to two panels, which draw in its platforms' floor. And
+ * the way marked once its ends stand, for what stands to keep off it. */
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "net.h"
+#include "net_gen.h"
 #include "net_shapes.h"
 #include "run.h"
+
+/* ---- The way marked ---- */
+
+/* The way from the arrival to the exit or guardian, the shortest walk over
+ * the floor (2), and the panels beside it, corner to corner too (1): a
+ * navi's radius reaches half a panel past its own, and a Recovery Mr. Prog
+ * beside the way's turn stopped MegaMan walking it, three calls to get
+ * round. */
+uint8_t ng_way_band[MAP_H][MAP_W];
+
+bool layer_by_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x]; }
+bool layer_on_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x] == 2; }
+
+void ng_mark_way(int sx, int sy, int gx, int gy) {
+	static int16_t from[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	memset(ng_way_band, 0, sizeof ng_way_band);
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) from[y][x] = -1;
+	int head = 0, tail = 0;
+	from[sy][sx] = (int16_t)(sy * MAP_W + sx);
+	qx[tail] = (int16_t)sx; qy[tail++] = (int16_t)sy;
+	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	while (head < tail && from[gy][gx] < 0) {
+		int x = qx[head], y = qy[head++];
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d4[k][0], ny = y + d4[k][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || layer.cell[ny][nx] != C_PATH || from[ny][nx] >= 0) continue;
+			from[ny][nx] = (int16_t)(y * MAP_W + x);
+			qx[tail] = (int16_t)nx; qy[tail++] = (int16_t)ny;
+		}
+	}
+	if (from[gy][gx] < 0) return;
+	for (int x = gx, y = gy;;) {
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx)
+				if (x + dx >= 0 && y + dy >= 0 && x + dx < MAP_W && y + dy < MAP_H && !ng_way_band[y + dy][x + dx]) ng_way_band[y + dy][x + dx] = 1;
+		ng_way_band[y][x] = 2;
+		if (x == sx && y == sy) break;
+		int f = from[y][x];
+		x = f % MAP_W; y = f / MAP_W;
+	}
+}
+
+static int16_t rdist[MAP_H][MAP_W];   /* cells from the way between the warps */
+
+/* A walk over the floor from (sx, sy): every cell's steps into d (-1 where
+ * it is not reached). */
+static void walk_from(int sx, int sy, int16_t d[MAP_H][MAP_W]) {
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) d[y][x] = -1;
+	if (sx < 0) return;
+	int h = 0, t = 0;
+	d[sy][sx] = 0;
+	qx[t] = (int16_t)sx; qy[t++] = (int16_t)sy;
+	while (h < t) {
+		int cx = qx[h], cy = qy[h++];
+		for (int j = 0; j < 4; ++j) {
+			int nx = cx + dir_dx[j], ny = cy + dir_dy[j];
+			if (!ng_floor_cell(nx, ny) || d[ny][nx] >= 0) continue;
+			d[ny][nx] = (int16_t)(d[cy][cx] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+/* The cells on a shortest way from the arrival to the exit (or the
+ * guardian), and every cell's distance from them, void too: decoration
+ * keeps off the way players walk. */
+void ng_route_distances(void) {
+	static int16_t da[MAP_H][MAP_W], db[MAP_H][MAP_W];
+	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
+	int gx = -1, gy = -1;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (layer.obj[i].type == OBJ_EXIT || layer.obj[i].type == OBJ_RETURN || layer.obj[i].type == OBJ_BOSS) { gx = (int)layer.obj[i].x; gy = (int)layer.obj[i].y; }
+	walk_from((int)layer.obj[0].x, (int)layer.obj[0].y, da);
+	walk_from(gx, gy, db);
+	int h = 0, t = 0, whole = gx >= 0 ? da[gy][gx] : -1;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			rdist[y][x] = -1;
+			if (whole >= 0 && da[y][x] >= 0 && db[y][x] >= 0 && da[y][x] + db[y][x] == whole) {
+				rdist[y][x] = 0;
+				qx[t] = (int16_t)x; qy[t++] = (int16_t)y;
+			}
+		}
+	while (h < t) {
+		int cx = qx[h], cy = qy[h++];
+		for (int j = 0; j < 4; ++j) {
+			int nx = cx + dir_dx[j], ny = cy + dir_dy[j];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || rdist[ny][nx] >= 0) continue;
+			rdist[ny][nx] = (int16_t)(rdist[cy][cx] + 1);
+			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
+		}
+	}
+}
+
+int ng_far_from_way(int x, int y) { return rdist[y][x] < 0 ? 99 : rdist[y][x]; }
+
+/* Each floor cell's walk from room 0's anchor, -1 where none reaches it,
+ * plus SIG_PAST where every shortest walk there runs through the
+ * signature's room (docs/LEVEL_DESIGN.md, Identity): where the way's goal
+ * is chosen, the farthest of those first, so the way runs through it. */
+void ng_walk_past_signature(int16_t d[MAP_H][MAP_W]) {
+	static int16_t from_sig[MAP_H][MAP_W];
+	walk_from(layer.rooms[0].ax, layer.rooms[0].ay, d);
+	if (layer.sig_room < 0) return;
+	/* (the cells a shortest walk reaches only through the signature: the
+	 * walk with the signature's room walled off is longer, or none) */
+	const Room *m = &layer.rooms[layer.sig_room];
+	static uint8_t keep[MAP_H][MAP_W];
+	for (int y = m->y; y < m->y + m->h; ++y)
+		for (int x = m->x; x < m->x + m->w; ++x) { keep[y][x] = layer.cell[y][x]; if (layer.cell[y][x] == C_PATH) layer.cell[y][x] = C_VOID; }
+	bool start_in = layer.rooms[0].ax >= m->x && layer.rooms[0].ax < m->x + m->w && layer.rooms[0].ay >= m->y && layer.rooms[0].ay < m->y + m->h;
+	walk_from(start_in ? -1 : layer.rooms[0].ax, layer.rooms[0].ay, from_sig);
+	for (int y = m->y; y < m->y + m->h; ++y)
+		for (int x = m->x; x < m->x + m->w; ++x) layer.cell[y][x] = keep[y][x];
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (d[y][x] >= 0 && (from_sig[y][x] < 0 || from_sig[y][x] > d[y][x] || (x >= m->x && x < m->x + m->w && y >= m->y && y < m->y + m->h)))
+				d[y][x] = (int16_t)(d[y][x] + SIG_PAST);
+}
 
 /* The one-wide walkways the way may cross between big platforms, per
  * area, as its originals' do (BN6's net maps: none in Central 2, the

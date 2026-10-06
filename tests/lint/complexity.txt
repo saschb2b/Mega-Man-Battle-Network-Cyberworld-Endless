@@ -26,10 +26,6 @@ src/map/props.c:props_learn_pad 52 70
 src/map/tilemap.c:pick_all 27 53
 src/map/tiles_pick.c:best 56 72
 src/net/net_gen.c:ng_room_spot_in 33 17
-src/net/net_gen.c:ng_route_distances 27 44
-src/net/net_landmarks.c:ng_counter 46 40
-src/net/net_landmarks.c:ng_landmark 35 66
-src/net/net_layouts.c:catwalks 27 40
 src/net/net_layouts.c:link 34 42
 src/net/net_shapes.c:carve_shape 27 51
 src/scenes/scene_title.c:draw 34 66

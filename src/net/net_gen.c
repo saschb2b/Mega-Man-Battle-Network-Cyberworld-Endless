@@ -16,7 +16,9 @@
 #include "net_detours.h"
 #include "net_landmarks.h"
 #include "net_layouts.h"
+#include "net_plan.h"
 #include "net_set_pieces.h"
+#include "net_signature.h"
 #include "pacing.h"
 #include "run.h"
 
@@ -208,46 +210,6 @@ static bool in_way_line(int x, int y) {
 	return false;
 }
 
-/* The way from the arrival to the exit or guardian, the shortest walk over
- * the floor (2), and the panels beside it, corner to corner too (1): a
- * navi's radius reaches half a panel past its own, and a Recovery Mr. Prog
- * beside the way's turn stopped MegaMan walking it, three calls to get
- * round. */
-uint8_t ng_way_band[MAP_H][MAP_W];
-
-bool layer_by_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x]; }
-bool layer_on_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x] == 2; }
-
-static void mark_way(int sx, int sy, int gx, int gy) {
-	static int16_t from[MAP_H][MAP_W];
-	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
-	memset(ng_way_band, 0, sizeof ng_way_band);
-	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) from[y][x] = -1;
-	int head = 0, tail = 0;
-	from[sy][sx] = (int16_t)(sy * MAP_W + sx);
-	qx[tail] = (int16_t)sx; qy[tail++] = (int16_t)sy;
-	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-	while (head < tail && from[gy][gx] < 0) {
-		int x = qx[head], y = qy[head++];
-		for (int k = 0; k < 4; ++k) {
-			int nx = x + d4[k][0], ny = y + d4[k][1];
-			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || layer.cell[ny][nx] != C_PATH || from[ny][nx] >= 0) continue;
-			from[ny][nx] = (int16_t)(y * MAP_W + x);
-			qx[tail] = (int16_t)nx; qy[tail++] = (int16_t)ny;
-		}
-	}
-	if (from[gy][gx] < 0) return;
-	for (int x = gx, y = gy;;) {
-		for (int dy = -1; dy <= 1; ++dy)
-			for (int dx = -1; dx <= 1; ++dx)
-				if (x + dx >= 0 && y + dy >= 0 && x + dx < MAP_W && y + dy < MAP_H && !ng_way_band[y + dy][x + dx]) ng_way_band[y + dy][x + dx] = 1;
-		ng_way_band[y][x] = 2;
-		if (x == sx && y == sy) break;
-		int f = from[y][x];
-		x = f % MAP_W; y = f / MAP_W;
-	}
-}
-
 /* Whether something solid at (x, y) would leave a panel's gap on the way
  * with a solid object two panels off: with both radii that gap is shut (a
  * playtester wedged between a Server and a Recovery Mr. Prog, the way on
@@ -344,11 +306,13 @@ static void flood_from(int from, int16_t dist[MAP_H][MAP_W]) {
 	}
 }
 
-static int bfs_far(int from) {
-	/* Room graph distance by flood fill over cells; returns farthest room. */
+/* The room farthest from the arrival by walking, of those the walk reaches
+ * only past the layer's signature where there are any (docs/LEVEL_DESIGN.md,
+ * Identity: the way runs through it). */
+static int exit_far(void) {
 	static int16_t dist[MAP_H][MAP_W];
-	flood_from(from, dist);
-	int best = from, bd = -1;
+	ng_walk_past_signature(dist);
+	int best = 0, bd = -1;
 	for (int i = 0; i < layer.nrooms; ++i) {
 		int d = dist[layer.rooms[i].ay][layer.rooms[i].ax];
 		if (d > bd) { bd = d; best = i; }
@@ -450,65 +414,12 @@ static void choose_arrival(void) {
 	Room t = layer.rooms[0];
 	layer.rooms[0] = layer.rooms[best];
 	layer.rooms[best] = t;
+	if (layer.sig_room == best) layer.sig_room = 0;
+	else if (layer.sig_room == 0) layer.sig_room = best;
 }
-
-/* ---- Sprite props: sets as the originals compose them (docs/LEVEL_DESIGN.md,
- * Props) ---- */
-
-static int16_t rdist[MAP_H][MAP_W];   /* cells from the way between the warps */
 
 bool ng_floor_cell(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_PATH; }
 bool ng_void_cell(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] == C_VOID; }
-
-/* The cells on a shortest way from the arrival to the exit (or the
- * guardian), and every cell's distance from them, void too: decoration
- * keeps off the way players walk. */
-void ng_route_distances(void) {
-	static int16_t da[MAP_H][MAP_W], db[MAP_H][MAP_W];
-	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
-	static const int d4[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-	int gx = -1, gy = -1;
-	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].type == OBJ_EXIT || layer.obj[i].type == OBJ_RETURN || layer.obj[i].type == OBJ_BOSS) { gx = (int)layer.obj[i].x; gy = (int)layer.obj[i].y; }
-	int16_t (*d[2])[MAP_W] = { da, db };
-	int sx[2] = { (int)layer.obj[0].x, gx }, sy[2] = { (int)layer.obj[0].y, gy };
-	for (int k = 0; k < 2; ++k) {
-		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) d[k][y][x] = -1;
-		if (sx[k] < 0) continue;
-		int h = 0, t = 0;
-		d[k][sy[k]][sx[k]] = 0;
-		qx[t] = (int16_t)sx[k]; qy[t++] = (int16_t)sy[k];
-		while (h < t) {
-			int cx = qx[h], cy = qy[h++];
-			for (int j = 0; j < 4; ++j) {
-				int nx = cx + d4[j][0], ny = cy + d4[j][1];
-				if (!ng_floor_cell(nx, ny) || d[k][ny][nx] >= 0) continue;
-				d[k][ny][nx] = (int16_t)(d[k][cy][cx] + 1);
-				qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
-			}
-		}
-	}
-	int h = 0, t = 0, whole = gx >= 0 ? da[gy][gx] : -1;
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x) {
-			rdist[y][x] = -1;
-			if (whole >= 0 && da[y][x] >= 0 && db[y][x] >= 0 && da[y][x] + db[y][x] == whole) {
-				rdist[y][x] = 0;
-				qx[t] = (int16_t)x; qy[t++] = (int16_t)y;
-			}
-		}
-	while (h < t) {
-		int cx = qx[h], cy = qy[h++];
-		for (int j = 0; j < 4; ++j) {
-			int nx = cx + d4[j][0], ny = cy + d4[j][1];
-			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || rdist[ny][nx] >= 0) continue;
-			rdist[ny][nx] = (int16_t)(rdist[cy][cx] + 1);
-			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
-		}
-	}
-}
-
-int ng_far_from_way(int x, int y) { return rdist[y][x] < 0 ? 99 : rdist[y][x]; }
 
 /* The next room of `order`; once each has had one, one of the big ones
  * (fields and platforms of 16 cells or more); -1 for none. */
@@ -559,9 +470,15 @@ static void last_stop(int kind, const LayerKit *kit) {
 	 * way back from SpoutMan's arena, where the rooms by it were full, and
 	 * one layer in a hundred had none) */
 	int close[3], nc = nearest_rooms(layer.ante, close, 3, HEAL_REACH);
+	static int16_t walk[MAP_H][MAP_W];
+	flood_from(layer.ante, walk);
 	for (int i = -1; i < nc; ++i) {
 		const Room *r = &layer.rooms[i < 0 ? layer.ante : close[i]];
-		if (room_spot(r, &x, &y) && !ng_near_talker(x, y)) { ng_add_obj(OBJ_HEAL, x, y); return; }
+		/* (a short walk from the room's anchor too: the layer's signature
+		 * before an arena is a room eleven a side, a ring road's pad in its
+		 * middle a walk round) */
+		for (int tries = 0; tries < 4; ++tries)
+			if (room_spot(r, &x, &y) && !ng_near_talker(x, y) && walk[y][x] >= 0 && walk[y][x] <= HEAL_REACH) { ng_add_obj(OBJ_HEAL, x, y); return; }
 	}
 	if (floor_near(layer.ante, HEAL_REACH, &x, &y) || room_spot(&layer.rooms[layer.ante], &x, &y)) ng_add_obj(OBJ_HEAL, x, y);
 }
@@ -570,16 +487,17 @@ static void last_stop(int kind, const LayerKit *kit) {
  * widened past the area's cap (net_way.c, the guardian's own bridge left
  * as his gate), the raised rooms. */
 static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
-	layer.exit_room = layer.arena >= 0 ? layer.arena : bfs_far(0);
+	layer.exit_room = layer.arena >= 0 ? layer.arena : exit_far();
 	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
 	layer_widen_way(layer.biome, goal->ax, goal->ay);
 	layer_raise_rooms(seed, stair_dirs, rise);
 }
 
 /* The layout: the planned one, then any of the area's, last the plainest
- * at its smallest; on a guardian's layer an arena of its own at the far
- * end. */
-static void build_layout(int planned, int biome, int size, int rise, ArenaInfo *arena) {
+ * at its smallest; its signature at its heart, which the first tries keep
+ * on until it has room for it; on a guardian's layer an arena of its own at
+ * the far end. */
+static void build_layout(int planned, int sig, int biome, int size, int rise, ArenaInfo *arena) {
 	for (int attempt = 0; attempt < 12; ++attempt) {
 		memset(layer.cell, 0, sizeof layer.cell);
 		layer.nrooms = 0;
@@ -587,8 +505,8 @@ static void build_layout(int planned, int biome, int size, int rise, ArenaInfo *
 		/* the planned layout, then any of the area's, last the plainest at its smallest */
 		bool last = attempt == 11;
 		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
-		layout_build(layer.layout, biome, last ? 0 : size);
-		if (layer.nrooms < 3) continue;
+		layout_build(layer.layout, biome, last ? 0 : size, sig);
+		if (layer.nrooms < 3 || (layer.sig && layer.sig_room < 0 && attempt < 8)) continue;
 		choose_arrival();
 		connect_all();
 		if (floor_cells() < MIN_FLOOR || !ng_fits(rise)) continue;
@@ -602,6 +520,7 @@ static void build_layout(int planned, int biome, int size, int rise, ArenaInfo *
 		layer.ante = arena->ante;
 		layer.arena_dir = arena->dir;
 	}
+	if (layer.sig_room < 0) layer.sig = SIG_NONE;
 }
 
 /* The layer's ends: where MegaMan arrives, the exit and on a guardian's
@@ -630,9 +549,9 @@ static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 			layer.boss_navi = kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
 			b->param = layer.boss_navi;
 		}
-		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);
+		ng_mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);
 	} else {
-		mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
+		ng_mark_way(layer.rooms[0].ax, layer.rooms[0].ay, cx, cy);
 	}
 }
 
@@ -768,15 +687,18 @@ static int room_holding(int x, int y) {
 /* The official gate the duel opens, by ProtoMan: in his room, two panels
  * from him or more, else in a room a short walk from his (a playtester
  * found the gate alone across the layer, and his session ran out looking
- * for the rival). */
+ * for the rival), else in the near side of any room; eight panels from him
+ * at most (a layer's signature is a room eleven a side: one at its far
+ * corner was a walk away, and its middle more than a short walk). */
 static NetObj *gate_by_rival(const NetObj *rival) {
 	int x, y, home = room_holding(rival->x, rival->y);
 	int near[4], nn = home >= 0 ? nearest_rooms(home, near, 4, 12) : 0;
-	for (int i = -1; i < nn && home >= 0; ++i) {
-		int room = i < 0 ? home : near[i];
+	for (int i = -1; i < nn + layer.nrooms && home >= 0; ++i) {
+		int room = i < 0 ? home : i < nn ? near[i] : i - nn;
 		if (room == layer.exit_room) continue;
-		for (int tries = 0; tries < 12; ++tries)
-			if (room_spot(&layer.rooms[room], &x, &y) && !ng_near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2)) {
+		for (int tries = 0; tries < 40; ++tries)
+			if (room_spot(&layer.rooms[room], &x, &y) && !ng_near_talker(x, y) && (abs(x - (int)rival->x) >= 2 || abs(y - (int)rival->y) >= 2) &&
+			    abs(x - (int)rival->x) + abs(y - (int)rival->y) <= 8) {
 				NetObj *g = ng_add_obj(OBJ_OFFICIAL, x, y);
 				if (g) return g;
 			}
@@ -925,25 +847,30 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	/* bigger layouts deeper into a cycle */
 	int p = (depth - 1) % CYCLE_LAYERS;
 	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
-	/* an act's three layers each in another of the area's layouts */
-	int planned = kind == LAYER_NORMAL
-		? layout_in_act(biome, run.seed ^ (uint32_t)((depth - 1) / CYCLE_LAYERS * 7 + p / 3 + 1) * 0x9E3779B9u, layer_in_act(depth))
-		: layout_pick(biome);
-	build_layout(planned, biome, size, rise, &arena);
+	/* an act's three layers each in another of the area's layouts and
+	 * signatures (docs/LEVEL_DESIGN.md, Identity) */
+	int planned, sig;
+	layer_plan(seed, depth, biome, kind, kit, &planned, &sig);
+	build_layout(planned, sig, biome, size, rise, &arena);
 	finish_rooms(seed, stair_dirs, rise);
 	place_ends(kind, biome, &arena);
 
+	/* the landmark first, at the back of the layer's signature: its room
+	 * bare of counters still (docs/LEVEL_DESIGN.md, Identity) */
+	int land = -1;
+	if (kit && kit->looks) {
+		ng_route_distances();
+		land = ng_landmark(kit);
+	}
 	Services s;
 	roll_services(&s, depth, biome, kind);
 	roll_gates(&s, seed, depth, kind);
 	int order[MAX_ROOMS], n = room_order(order), next = 0;
 	place_services(&s, depth, kind, kit, order, n, &next);
-	/* the area's props, set as the originals set theirs, before the loose
-	 * Mystery Data and bystanders fill the rooms: a landmark, rows and the
-	 * signs (docs/LEVEL_DESIGN.md, Props) */
+	/* the area's other props, set as the originals set theirs, before the
+	 * loose Mystery Data and bystanders fill the rooms: rows and the signs
+	 * (docs/LEVEL_DESIGN.md, Props) */
 	if (kit && kit->looks) {
-		ng_route_distances();
-		int land = ng_landmark(kit);
 		ng_rows(kit, land, order, n);
 		ng_signs(kit, land, order, n);
 	}

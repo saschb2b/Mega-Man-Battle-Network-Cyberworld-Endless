@@ -15,6 +15,7 @@
 #include "net_layouts.h"
 #include "net_route.h"
 #include "net_shapes.h"
+#include "net_signature.h"
 #include "layer_make.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -123,6 +124,10 @@ static void test_lz77(void) {
 	for (size_t cut = 0; cut < sizeof src; ++cut) free(lz77_decompress(src, cut, &n));
 }
 
+/* Whether a teleport's two pads count as joined, as its warp joins them
+ * (gaps_bridge's, where the layer's far pad is an island of its own). */
+static bool teleport_joined;
+
 static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
 	memset(seen, 0, MAP_W * MAP_H);
@@ -133,10 +138,12 @@ static int reachable_cells(int sx, int sy, uint8_t seen[MAP_H][MAP_W]) {
 		int x = qx[h], y = qy[h++];
 		n += layer.cell[y][x] == C_PATH;
 		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-		for (int k = 0; k < 4; ++k) {
-			int nx = x + d[k][0], ny = y + d[k][1];
-			/* (4: a teleport's way, gaps_bridge) */
-			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || seen[ny][nx] || (layer.cell[ny][nx] != C_PATH && layer.cell[ny][nx] != 4)) continue;
+		for (int k = 0; k < 5; ++k) {
+			int nx = k < 4 ? x + d[k][0] : -1, ny = k < 4 ? y + d[k][1] : -1;
+			/* (and from one teleport pad to the other) */
+			for (int p = 0; k == 4 && teleport_joined && p < 2; ++p)
+				if (x == layer.teleport_x[p] && y == layer.teleport_y[p]) { nx = layer.teleport_x[!p]; ny = layer.teleport_y[!p]; }
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || seen[ny][nx] || layer.cell[ny][nx] != C_PATH) continue;
 			seen[ny][nx] = 1;
 			qx[t] = (int16_t)nx; qy[t++] = (int16_t)ny;
 		}
@@ -272,16 +279,10 @@ static void gaps_bridge(bool on) {
 	for (int g = 0; g < layer.npaths; ++g)
 		for (int k = 1; k <= layer.path[g].len; ++k)
 			layer.cell[layer.path[g].y + dir_dy[layer.path[g].dir] * k][layer.path[g].x + dir_dx[layer.path[g].dir] * k] = on ? C_PATH : C_VOID;
-	if (!layer.teleport_island) return;
-	int x = layer.teleport_x[1], y = layer.teleport_y[1], tx = layer.teleport_x[0], ty = layer.teleport_y[0];
-	while (x != tx || y != ty) {
-		if (x != tx) x += x < tx ? 1 : -1; else y += y < ty ? 1 : -1;
-		if (on && layer.cell[y][x] == C_VOID) layer.cell[y][x] = 4;
-		else if (!on && layer.cell[y][x] == 4) layer.cell[y][x] = C_VOID;
-	}
-	for (int j = 0; j < MAP_H; ++j)
-		for (int i = 0; i < MAP_W; ++i)
-			if (layer.cell[j][i] == 4) layer.cell[j][i] = on ? 4 : C_VOID;
+	/* (a teleport island's pad reached by the warp from the other: a way
+	 * laid over the void between them, straight then across, had run
+	 * through a Mr.Prog by the near pad, and the island counted as cut) */
+	teleport_joined = on && layer.teleport_island;
 }
 
 /* Whether room r is a Rush gap's island, or a teleport's. */
@@ -494,16 +495,18 @@ static void paths_check(uint32_t seed, const NetObj *start, uint8_t seen[MAP_H][
 
 /* Branches off the way five panels or more, and those that end in
  * nothing: no object, no set piece's stand (session 59: a two-wide band
- * led to an empty end); wide where two by two of its panels are floor. */
+ * led to an empty end); wide where two by two of its panels are floor. A
+ * branch whose far end lies on the signature's open floor, a ring road's
+ * far side or a plaza's corner seen from the way, has no end (issue #98). */
 static void empty_ends(int *branches, int *empty, int *empty_wide) {
 	static int16_t far[MAP_W * MAP_H];
-	static uint8_t holds[MAP_W * MAP_H], wide[MAP_W * MAP_H];
-	memset(far, 0, sizeof far); memset(holds, 0, sizeof holds); memset(wide, 0, sizeof wide);
+	static uint8_t holds[MAP_W * MAP_H], wide[MAP_W * MAP_H], open[MAP_W * MAP_H];
+	memset(far, 0, sizeof far); memset(holds, 0, sizeof holds); memset(wide, 0, sizeof wide); memset(open, 0, sizeof open);
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			int d = layer_detour(x, y), b = layer_branch(x, y);
 			if (d <= 0 || b < 0) continue;
-			if (d > far[b]) far[b] = (int16_t)d;
+			if (d > far[b]) { far[b] = (int16_t)d; open[b] = layer_detour_open(x, y); }
 			if (layer_branch(x + 1, y) == b && layer_branch(x, y + 1) == b && layer_branch(x + 1, y + 1) == b && layer_detour(x + 1, y + 1) > 0) wide[b] = 1;
 		}
 	#define HOLDS(x, y) do { int bb = layer_detour((x), (y)) > 0 ? layer_branch((x), (y)) : -1; if (bb >= 0) holds[bb] = 1; } while (0)
@@ -515,7 +518,7 @@ static void empty_ends(int *branches, int *empty, int *empty_wide) {
 	for (int i = 0; i < 2 * (layer.nteleports > 0); ++i) HOLDS(layer.teleport_x[i], layer.teleport_y[i]);
 	#undef HOLDS
 	for (int b = 0; b < MAP_W * MAP_H; ++b) {
-		if (far[b] < 5) continue;
+		if (far[b] < 5 || open[b]) continue;
 		++*branches;
 		if (!holds[b]) { ++*empty; *empty_wide += wide[b]; }
 	}
@@ -902,6 +905,7 @@ static void test_layer_make(void) {
 		}
 		h = mix(mix(mix(mix(mix(h, layer.biome), layer.kind), layer.boss_layer), layer.boss_navi), layer.exit_room);
 		h = mix(mix(mix(mix(h, layer.arena), layer.ante), layer.arena_dir), layer.layout);
+		h = mix(mix(h, layer.sig), layer.sig_room);
 		h = mix(h, layer.nprops);
 		for (int i = 0; i < layer.nprops; ++i) {
 			const NetProp *p = &layer.props[i];
@@ -2079,6 +2083,101 @@ static void test_layouts_build(void) {
 		}
 }
 
+/* An area's looks as its maps give them (src/core/rom.c): a layer's
+ * landmark is the set its area's looks name. */
+static LayerKit area_kit(int b) {
+	LayerKit k = kit;
+	static const unsigned looks[BIOME_COUNT] = {
+		[BIOME_CENTRAL] = 1u << LOOK_TREE | 1u << LOOK_SIGN, [BIOME_SEASIDE] = 1u << LOOK_BBS | 1u << LOOK_SIGN,
+		[BIOME_SKY] = 1u << LOOK_TREE | 1u << LOOK_SIGN, [BIOME_GREEN] = 1u << LOOK_TREE | 1u << LOOK_GIANT_TREE | 1u << LOOK_SIGN,
+		[BIOME_GRAVEYARD] = 1u << LOOK_MONUMENT | 1u << LOOK_GRAVE, [BIOME_UNDERNET] = 1u << LOOK_STATUE | 1u << LOOK_BRAZIER,
+		[BIOME_SECRET] = 1u << LOOK_STATUE | 1u << LOOK_BRAZIER,
+	};
+	k.looks = looks[b];
+	return k;
+}
+
+/* Whether a sprite prop stands in room r's box or two panels round it. */
+static bool room_has_prop(int r) {
+	const Room *m = &layer.rooms[r];
+	for (int i = 0; i < layer.nprops; ++i) {
+		const NetProp *p = &layer.props[i];
+		if (p->kind == PROP_SPRITE && p->x >= m->x - 2 && p->x < m->x + m->w + 2 && p->y >= m->y - 2 && p->y < m->y + m->h + 2) return true;
+	}
+	return false;
+}
+
+/* The floor in room r's box, and whether the way runs through it. */
+static int room_floor(int r, bool *way) {
+	const Room *m = &layer.rooms[r];
+	int n = 0;
+	*way = false;
+	for (int y = m->y; y < m->y + m->h; ++y)
+		for (int x = m->x; x < m->x + m->w; ++x) {
+			n += layer.cell[y][x] != C_VOID;
+			*way |= layer_on_way(x, y);
+		}
+	return n;
+}
+
+/* Identity (docs/LEVEL_DESIGN.md, issue #98): each of a run's layers is
+ * built round its signature, the room with the most floor, the way through
+ * it; never two layers in a row in one layout and one signature both, where
+ * the area has another of either, nor an act's first and third where it
+ * has three such pairs, and an act opening in another layout than the act
+ * before closed in, where its area has two; the area's
+ * landmark at the signature that holds it (the giant tree at a grove, the
+ * statue at a court, the monument, Central's and Sky's avenues). */
+static void test_identity(void) {
+	Run kept = run;
+	int layers = 0, sigs = 0, through = 0, most = 0, twins = 0, bounds = 0, same_open = 0, holders = 0, held = 0, acts = 0, act_twins = 0;
+	for (uint32_t r = 1; r <= 40; ++r) {
+		memset(&run, 0, sizeof run);
+		run.seed = r * 2654435761u + 99u;
+		for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 5);
+		/* (every area in turn, six to a run) */
+		for (int a = 0; a < 6; ++a) run.biome_order[a] = (uint8_t)((r * 6 + (uint32_t)a) % BIOME_COUNT);
+		int prev_layout = -1, prev_sig = -1, open_layout = -1, open_sig = -1;
+		for (int d = 1; d <= 18; ++d) {
+			int b = biome_for_depth(d);
+			LayerKit k = area_kit(b);
+			layer_generate(run.seed ^ (uint32_t)(d * 2654435761u), d, b, LAYER_NORMAL, &k);
+			++layers;
+			int layouts = 0;
+			for (int l = 0; l < LAYOUT_COUNT; ++l) layouts += layout_weight(b, l) > 0;
+			if (layer.sig_room >= 0) {
+				++sigs;
+				bool way, other_way;
+				int floor = room_floor(layer.sig_room, &way), top = 0;
+				for (int i = 0; i < layer.nrooms; ++i)
+					if (i != layer.sig_room) { int f = room_floor(i, &other_way); top = f > top ? f : top; }
+				through += way;
+				most += floor >= top;
+				bool takes = b == BIOME_CENTRAL || b == BIOME_SKY || b == BIOME_GRAVEYARD || (b == BIOME_GREEN && layer.sig == SIG_GROVE) ||
+					((b == BIOME_UNDERNET || b == BIOME_SECRET) && layer.sig == SIG_COURT);
+				holders += takes;
+				held += takes && room_has_prop(layer.sig_room);
+			}
+			twins += layer.layout == prev_layout && layer.sig == prev_sig && (layouts > 1 || sig_pool_size(b) > 1);
+			if (layer_in_act(d) == 0 && d > 1 && layouts > 1) { ++bounds; same_open += layer.layout == prev_layout; }
+			if (layer_in_act(d) == 0) { open_layout = layer.layout; open_sig = layer.sig; }
+			if (layer_in_act(d) == 2 && layouts * sig_pool_size(b) >= 3) { ++acts; act_twins += layer.layout == open_layout && layer.sig == open_sig; }
+			prev_layout = layer.layout;
+			prev_sig = layer.sig;
+		}
+	}
+	CHECK(sigs * 100 >= layers * 97, "a signature on %d of %d layers", sigs, layers);
+	CHECK(through * 100 >= sigs * 90, "the way through the signature on %d of %d layers", through, sigs);
+	CHECK(most * 100 >= sigs * 95, "the signature the most floor of the layer's rooms on %d of %d", most, sigs);
+	CHECK(twins * 100 <= layers, "%d of %d layers in the layout and signature of the one before", twins, layers);
+	CHECK(act_twins * 20 <= acts, "%d of %d acts close in their first layer's layout and signature", act_twins, acts);
+	CHECK(same_open * 20 <= bounds, "%d of %d acts open in the layout the act before closed in", same_open, bounds);
+	CHECK(held * 100 >= holders * 85, "the landmark at the signature on %d of %d layers", held, holders);
+	printf("  identity: a signature on %d of %d layers, the way through it on %d, the most floor on %d; %d twins in a row, %d of %d acts closing as they opened; "
+		"%d of %d acts open as the last closed; the landmark at %d of %d\n", sigs, layers, through, most, twins, act_twins, acts, same_open, bounds, held, holders);
+	run = kept;
+}
+
 /* The touch controls: on the screen, clear of the picture and of each
  * other where there is room, thumb sized, and what a finger holds. */
 static bool boxes_meet(const TouchBox *a, const TouchBox *b) {
@@ -2846,6 +2945,7 @@ int main(void) {
 	test_generation();
 	test_layer_make();
 	test_layouts_build();
+	test_identity();
 	test_stairs();
 	test_arrow();
 	test_kept_walk();

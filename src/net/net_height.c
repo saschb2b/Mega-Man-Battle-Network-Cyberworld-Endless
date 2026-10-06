@@ -74,7 +74,8 @@ void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise) {
 	int shift = rise / 32;
 	if (!dirs || shift < 1) return;
 	for (int i = 1; i < layer.nrooms && layer.nstairs < MAX_STAIRS; ++i) {
-		if (i == layer.exit_room || layer.rooms[i].kind == ROOM_LEG) continue;
+		/* (nor the signature: the way runs through it) */
+		if (i == layer.exit_room || i == layer.sig_room || layer.rooms[i].kind == ROOM_LEG) continue;
 		const Room *r = &layer.rooms[i];
 		for (int side = 0; side < 2; ++side) {
 			/* side 0 climbs towards -x, side 1 towards -y */

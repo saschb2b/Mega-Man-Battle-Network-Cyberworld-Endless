@@ -158,6 +158,8 @@ typedef struct {
 	int npaths;
 	int hinter;        /* the navi who hints at an invisible path: its object + 1, 0 none */
 	int braziers;      /* the braziers its props hold: a number door's answer (issue #47) */
+	int sig;           /* its signature (SIG_*, net_signature.h: the room it is remembered by, issue #98) */
+	int sig_room;      /* ... that room, -1 where the layout found it no place */
 } Layer;
 
 extern Layer layer;
@@ -174,6 +176,7 @@ typedef struct {
 	bool emblem;      /* its maps set an emblem in their floors */
 	bool gem;         /* its maps mark their teleport pads with BN6's gem (issue #44) */
 	unsigned arrows;  /* the ways its maps draw an arrow panel (bit per DIR_*, issue #43) */
+	bool hub_rooms;   /* its art draws every room as its small hubs: no signature, one more of them (issue #98) */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */
@@ -209,6 +212,9 @@ bool layer_on_way(int x, int y);
 /* How many panels a walk from the way to (x, y) takes, -1 off the floor
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);
+/* Whether (x, y) lies on the open floor of the layer's signature, out of
+ * every other room: seen from the way that crosses it, no detour's end. */
+bool layer_detour_open(int x, int y);
 /* The void panel past the back rim of the layer's best room for a
  * landmark, as the Graveyard's monument stands, on the layer as built:
  * read only, for a prop the map side adds to the layer (another game's,
