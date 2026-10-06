@@ -24,6 +24,7 @@
 #include "loot.h"
 #include "net_arena.h"
 #include "netmap.h"
+#include "platform.h"
 #include "powers.h"
 #include "rivals.h"
 #include "save.h"
@@ -59,7 +60,7 @@ static struct {
 } B;
 
 static void to(int state) {
-	if (emu_debug_on()) fprintf(stderr, "guardian %d state %d -> %d\n", B.g.navi, B.state, state);
+	if (emu_debug_on()) fprintf(stderr, "guardian %d state %d -> %d at frame %u\n", B.g.navi, B.state, state, (unsigned)P.frame);
 	B.state = state;
 	B.t = 0;
 	B.chat_seen = false;

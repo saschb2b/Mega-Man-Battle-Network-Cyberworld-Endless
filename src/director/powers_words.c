@@ -1,6 +1,6 @@
 /* What MegaMan says of the Crosses and the Cybeast (docs/META.md,
- * docs/VOICE.md): a Cross won from a guardian, how it feels and its
- * weakness; one the run cannot carry; the Graveyard's call; Dad's
+ * docs/VOICE.md): a Cross won from a guardian and how it feels; one the
+ * run cannot carry; the Graveyard's call; Dad's
  * CybeastButton after the Cybeast's fall. The Crosses themselves,
  * powers.c. */
 #include <stdio.h>
@@ -29,8 +29,8 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 	#define ADD(...) (k += snprintf(text + k, k < (int)sizeof text ? sizeof text - (size_t)k : 0, __VA_ARGS__))
 	const char *brought = powers_cross_name(run.cross);
 	if (cross) {
-		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s|@M But in it,%s attacks hit me twice as hard!", k ? "|" : "", powers_cross_name(navi), cross_feel(navi),
-			powers_cross_weakness(navi));
+		/* (its weakness unsaid: BN6's own Cross rule, its players know it) */
+		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", powers_cross_name(navi), cross_feel(navi));
 		else if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
 		 * the game's word in MegaMan's mouth; a first win opens its start
@@ -39,8 +39,8 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 		 * the brought one kept: "It won't fit beside our SlashCross" read
 		 * to a playtester as an offer to swap, which never came, session
 		 * 64) */
-		else ADD("%s@M %s's Cross data...|@M We can only carry one Cross down here.|@M So we keep our %s,Lan.%s", k ? "|" : "",
-			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive,we can start with his Cross!");
+		else ADD("%s@M %s's Cross data... We carry just one,Lan.|@M So we keep our %s.%s", k ? "|" : "",
+			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M Next dive,we can start with his Cross!");
 	}
 	/* (the Nest's call, and Lan's word, no unlocking: the beast stirs
 	 * here, and its power comes once MegaMan has beaten it at the Nest,

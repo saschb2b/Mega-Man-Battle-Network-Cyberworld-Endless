@@ -376,7 +376,7 @@ const char *guardian_defeat(int navi) {
  * next briefing reads it; after `power`, what else it gave (or NULL) */
 const char *guardian_data_words(const char *power) {
 	static char with_data[640];
-	snprintf(with_data, sizeof with_data, "%s%s@M And his battle data,Lan!|@M Next time,we'll know how he fights!", power ? power : "", power ? "|" : "");
+	snprintf(with_data, sizeof with_data, "%s%s@M And his battle data! Next time,we'll know his moves!", power ? power : "", power ? "|" : "");
 	return with_data;
 }
 
@@ -396,16 +396,14 @@ const char *guardian_soul_words(int navi, int kind, bool held, const char *chip,
 		return s;
 	}
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
+	/* (where it wakes, and the run's chips that unite with it: the run's
+	 * own; how a Soul Unison goes is BN5's, its players know it) */
 	if (profile.soul_taught)
-		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan!|@M Our %s chips unite us in the older Net's battles.|@M Pick one,then UNITE on the Custom screen!",
-			kinds[kind]);
+		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan! It wakes in the older Net's battles.");
 	else {
-		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It only wakes in the older Net's battles.|@M There,pick one of our %s "
-			"chips%s%s.|@M Then UNITE on the Custom screen!|@M I'll fight with his Soul for a few turns.|@M Once a battle,and only while I'm calm.", name,
+		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It wakes in the older Net's battles.|@M Our %s chips unite us there%s%s!", name,
 			kinds[kind], chip[0] ? ",like " : "", chip);
-		if (dark && k < (int)sizeof s)
-			snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...|@M Darker. That's Chaos Unison.|@M Out here in our Net,his Soul sleeps.",
-				dark);
+		if (dark && k < (int)sizeof s) snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...", dark);
 	}
 	return s;
 }

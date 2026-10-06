@@ -29,7 +29,7 @@
  * sound_8000630), as its own scripts hush a scene; 0xFF, which this
  * played before, stopped nothing (BN6_MUSIC_STATUS read each frame) */
 #define SONG_STOP         0x63
-#define MD_ANIM_GUARDIAN  1     /* the Mystery Data sprite's blue crystal */
+#define MD_ANIM_GUARDIAN  0     /* the Mystery Data sprite's crystal, spinning (its animation 1 is one still frame: the owner saw it static) */
 /* a super boss's sounds, BN6's own scenes' (docs/BOSSES.md, Super bosses):
  * the rumble and the roar, the white's, Bass's going; and the theme's fade
  * as those scenes begin, in sixteen-frame steps */
@@ -148,7 +148,6 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 		int c = pick[k].color ? pick[k].color : navicust_color(pick[k].program);
 		draft->program[k] = (uint8_t)(pick[k].program * 4);
 		draft->color[k] = (uint8_t)c;
-		draft->about[k] = navicust_about(pick[k].program);
 		colored = c > 0;
 	}
 	if (colored) {
@@ -157,9 +156,9 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 		/* (the player's first draft ever: a run from an older build met
 		 * its first past act 1's, without it) */
 		draft->teach = !profile.navicust_taught;
-		/* (and whether each fits the board as it stands, said before the
-		 * pick: two playtesters took a program MegaMan then said would not
-		 * fit, session 63) */
+		/* (and whether each fits the board as it stands: two playtesters
+		 * took a program MegaMan then said would not fit, session 63; he says
+		 * now, after the pick, that one moves first) */
 		draft->fit_flag = LAYER_DRAFT_FIT_FLAG;
 		for (int k = 0; k < NAVICUST_DRAFT && k < n; ++k) g->draft[k] = draft->program[k];
 	}

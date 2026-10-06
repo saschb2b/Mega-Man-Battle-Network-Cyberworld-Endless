@@ -59,14 +59,12 @@ int ta_music(TextArchive *t, int song);
 int ta_sound(TextArchive *t, int sound);
 int ta_music_fade(TextArchive *t, int sixteenths);
 /* What a Guardian Data adds for the NaviCust (docs/NAVICUST.md): an
- * ExpMemry, then a draft of `n` programs (give ids and colours, with
- * MegaMan's words for each) or none for `skip_frags` BugFrags; `teach` adds
- * a word on the board's rules (the run's first draft). */
+ * ExpMemry, then a draft of `n` programs (give ids and colours) or none
+ * for `skip_frags` BugFrags; `teach` marks the run's first draft. */
 typedef struct {
 	int expmemry;         /* the board it grows to: 0 none, 1 5x4, 2 5x5 */
 	int n;
 	uint8_t program[3], color[3];
-	const char *about[3];
 	int skip_frags;
 	bool teach;
 	int fit_flag;   /* event flag + k set where program k fits the board's free space as it stands; 0 none */

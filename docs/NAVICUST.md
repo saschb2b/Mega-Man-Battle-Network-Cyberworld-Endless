@@ -277,8 +277,12 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   named once a board size ("won't fit ... until the board grows"), not on
   every layer.
 - The guardian's draft on every normal layer's guardian: three programs
-  of three builds, or B for BugFrags (10, and 5 more an act); the run's
-  first draft says how the board works.
+  of three builds, or B for BugFrags (10, and 5 more an act), in one box
+  and the menu, each program's colour beside its name (6 October 2026:
+  a box a program said what BN6's programs do, which its players know,
+  and the owner found the reward's words far too many). A program that
+  fits only once one moves says so after its pick ("We'll move one to
+  make room,Lan!").
 - ExpMemry at the act 2 and act 4 guardians: the board grows to 5x4, then
   5x5 (checked on the NaviCust screen).
 - The bug note: at the RUN itself, the PET still open, a red note over the

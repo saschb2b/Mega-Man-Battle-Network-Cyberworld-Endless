@@ -21,6 +21,17 @@
   standing at it.
 - **The second screen lists every way.** Lan's HP's ways back share one
   line on the home panel, which had cut the fourth way off.
+- **A guardian's Guardian Data spins,** BN6's own Mystery Data crystal
+  turning, where it had stood still (its sprite's animation 1 is one
+  frame of it).
+- **The Guardian Data says less.** Its gets come in BN6's own "MegaMan
+  got:" boxes, and what BN6's players know goes unsaid: a Cross's
+  weakness, the Pack, the board ExpMemry grows, what each program does.
+  The draft is one box and its menu, each program's colour beside its
+  name; MegaMan says one must move first only after a pick that needs
+  it. Act 2's guardian read about eighteen boxes from his data to the
+  program; it is ten. A BN5 guardian's Soul says where it wakes and which
+  of the run's chips unite with it, in three boxes where it took eight.
 - **The statistics' question names the buttons:** "D-pad and A, or tap
   Yes or No" under its Yes and No on a phone.
 

@@ -12,8 +12,26 @@
 static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const char *open, const char *verb, const char *empty_words, const char *leave_words);
 
 /* the draft's branches: a program given, or BugFrags for none; each sets
- * `taken_flag` and ends, or goes on to the way on (`next`) */
-static int draft_take(TextArchive *t, int program, int color, bool teach, int taken_flag, int next) {
+ * `taken_flag` and ends, or goes on to the way on (`next`). A program
+ * that fits the board as it stands (its `fit_flag` set) is installed as
+ * it comes; else MegaMan says one moves first (the draft offers only
+ * programs that fit once they move): said after the pick, a plan, where
+ * three boxes before the menu said it of each (the owner, 6 October
+ * 2026: the reward's words were far too many) */
+static int draft_take(TextArchive *t, int program, int color, int fit_flag, int taken_flag, int next) {
+	/* (every time: a returning playtester, told once runs before, left
+	 * one off the board for two acts; and whether L and R turn it, which
+	 * a playtester looked for here) */
+	char install[200];
+	const char *turns = navicust_color_turns(color);
+	snprintf(install, sizeof install, "Let's install it!%s%s", *turns ? "\n" : "", turns);
+	int fits = -1;
+	if (fit_flag) {
+		fits = ta_script(t);
+		ta_page(t, FACE_MEGAMAN, install, false);
+		ta_flag_set(t, taken_flag);
+		ta_end_or(t, next);
+	}
 	int s = ta_script(t);
 	uint8_t give[] = { 0xEF, 0x1B, (uint8_t)program, 1, (uint8_t)color };   /* ts_item_give_navi_cust_program */
 	ta_bytes(t, give, sizeof give);
@@ -24,41 +42,27 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	ta_program_name(t, program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
-	/* (every time: a returning playtester, told once runs before, left
-	 * one off the board for two acts; and whether L and R turn it, which
-	 * a playtester looked for here) */
-	char install[200];
-	const char *turns = navicust_color_turns(color);
-	snprintf(install, sizeof install, "Let's install it!%s%s", *turns ? "\n" : "", turns);
+	if (fit_flag) {
+		uint8_t check[] = { 0xEF, 0x00, (uint8_t)fit_flag, (uint8_t)(fit_flag >> 8), (uint8_t)fits, 0xFF };  /* ts_check_flag */
+		ta_bytes(t, check, sizeof check);
+		ta_page(t, FACE_MEGAMAN, "We'll move one\nto make room,Lan!", false);
+	}
 	ta_page(t, FACE_MEGAMAN, install, false);
-	(void)teach;
 	ta_flag_set(t, taken_flag);
 	ta_end_or(t, next);
 	return s;
 }
 
-/* A drafted program's line with its colour after its name ("HP+100
- * (pink): ..."): a program comes in more than one, and a playtester read
- * the draft's pink HP+100 and the vendor's blue one as a contradiction;
- * and `fit` beside it where said ("fits now") */
-static void draft_about(TextArchive *t, const char *about, int color, const char *fit) {
-	if (!about) return;
-	const char *colon = strchr(about, ':');
-	char line[180];
-	if (colon && *navicust_color_name(color))
-		snprintf(line, sizeof line, "%.*s (%s%s%s)%s", (int)(colon - about), about, navicust_color_name(color), *fit ? "," : "", fit, colon);
-	else snprintf(line, sizeof line, "%s", about);
-	ta_page(t, FACE_MEGAMAN, line, false);
-}
-
-/* The draft's end: its rules the first time, B's BugFrags, then the
- * programs in a column (ts_option: its number and those above and below
- * it), each to its branch (`take`), B to `skip`. Its script. */
+/* The draft: one box, the BugFrags of none in it, then the programs in a
+ * column with their colours (ts_option: its number and those above and
+ * below it), each to its branch (`take`), B to `skip`. Its script. A box
+ * each said what BN6's programs do: seventeen boxes from the data to the
+ * pick, which the owner found far too many (6 October 2026). */
 static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip) {
 	int s = ta_script(t), n = draft->n;
-	char none[96];
-	snprintf(none, sizeof none, "Or B takes none,and\nwe get %d BugFrags!", draft->skip_frags);
-	ta_page(t, FACE_MEGAMAN, none, false);
+	char lead[96];
+	snprintf(lead, sizeof lead, "Program data,too!\nPick one! Or B for\n%d BugFrags,Lan!", draft->skip_frags);
+	ta_page(t, FACE_MEGAMAN, lead, false);
 	ta_mugshot(t, FACE_MEGAMAN);
 	ta_clear(t);
 	static const uint8_t around[3][3] = { { 0x00 }, { 0x11, 0x00 }, { 0x21, 0x02, 0x10 } };
@@ -68,46 +72,15 @@ static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take
 		ta_bytes(t, opt, sizeof opt);
 		ta_bytes(t, space, sizeof space);
 		ta_program_name(t, draft->program[k]);
+		/* (its colour beside it: a program comes in more than one, and a
+		 * playtester read the draft's pink HP+100 and the vendor's blue one
+		 * as a contradiction) */
+		const char *c = navicust_color_name(draft->color[k]);
+		if (*c) { ta_text(t, " ("); ta_text(t, c); ta_text(t, ")"); }
 		if (k + 1 < n) ta_text(t, "\n");
 	}
 	ta_choose(t, take, n, skip);
 	return s;
-}
-
-/* Program k's line, then on to `next`: where the draft says whether each
- * fits (its fit_flag), "fits now" where its flag is set (a script of its
- * own, `fits`), else that a program must move first (the draft offers
- * only programs that fit beside the board's once they move). */
-static void draft_line(TextArchive *t, const ScriptsDraft *draft, int k, int fits, int next) {
-	if (draft->fit_flag) {
-		int flag = draft->fit_flag + k;
-		uint8_t check[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)fits, 0xFF };  /* ts_check_flag */
-		ta_bytes(t, check, sizeof check);
-	}
-	draft_about(t, draft->about[k], draft->color[k], draft->fit_flag ? "fits if we move one" : "");
-	ta_jump(t, next);
-}
-
-/* The draft's lines from program 1 on, the menu last (scripts made from
- * the end, as each jumps on to the next); the script after program 0's
- * line, and `fits0` the script of its "fits now" line. Two playtesters
- * took a program MegaMan then said would not fit as their board stood
- * (session 63). */
-static int draft_lines(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip, int *fits0) {
-	int next = draft_menu(t, draft, take, skip);
-	for (int k = draft->n - 1; k >= 0; --k) {
-		int fits = -1;
-		if (draft->fit_flag) {
-			fits = ta_script(t);
-			draft_about(t, draft->about[k], draft->color[k], "fits now");
-			ta_jump(t, next);
-		}
-		if (!k) { *fits0 = fits; break; }
-		int line = ta_script(t);
-		draft_line(t, draft, k, fits, next);
-		next = line;
-	}
-	return next;
 }
 
 static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
@@ -122,12 +95,14 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 	return s;
 }
 
-/* A guardian's HPMemory, his chip and the heal: in two boxes where all
- * three come (a playtester counted fourteen calls from a guardian's last
- * words to the way on, and asked for these in one, session 63). The run's
- * last gives only his chip: no HP or heal for a walk to its exit (a
- * playtester given five HPMemory and a program after the final fight). */
+/* A guardian's HPMemory, his chip and the heal, in BN6's own boxes: what
+ * was given, and the heal; nothing of the Pack and the Folder, BN6's own
+ * (a playtester counted fourteen calls from a guardian's last words to
+ * the way on, session 63). The run's last gives only his chip: no HP or
+ * heal for a walk to its exit (a playtester given five HPMemory and a
+ * program after the final fight), and it stays in the Library. */
 static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
+	static const char healed[] = "MegaMan's HP was\nfully restored!";
 	if (!r->last && r->chip > 0) {
 		ta_give_hp_memory(t, r->hp_memories);
 		ta_give_chip(t, r->chip, r->code, 1);
@@ -137,7 +112,7 @@ static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
 		snprintf(line, sizeof line, "MegaMan got:\n\"%sHPMemory\" and\n\"%s %c\"!!", hp, r->chip_name, r->code == 26 ? '*' : 'A' + r->code);
 		ta_page(t, FACE_NONE, line, *first);
 		*first = false;
-		ta_page(t, FACE_MEGAMAN, "Our HP's full again!\nAnd the chip's in\nour Pack,Lan!", false);
+		ta_page(t, FACE_NONE, healed, false);
 		return;
 	}
 	if (!r->last) {
@@ -148,11 +123,11 @@ static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {
 		/* the navi's own chip, as Battle Network gives it (to the Pack) */
 		ta_give_chip(t, r->chip, r->code, 1);
 		ta_got_chip(t, r->chip_name, r->code, first);
-		ta_page(t, FACE_MEGAMAN, r->last ? "It's in our Library\nfor good,Lan!" : "Got it! It's in\nour Pack,Lan.\nLet's add it to the\nFolder in the PET!", false);
+		if (r->last) ta_page(t, FACE_MEGAMAN, "It's in our Library\nfor good,Lan!", false);
 	}
 	if (!r->last) {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
-		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+		ta_page(t, FACE_NONE, healed, false);
 	}
 }
 
@@ -160,19 +135,19 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 	/* (the way on, then the draft's branches first: the choices jump to
 	 * them) */
 	int next = -1;
-	int take[3] = { 0 }, skip = 0, n = r->draft ? r->draft->n : 0, lines = -1, fits0 = -1;
-	for (int k = 0; k < n; ++k) take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->draft->teach, r->taken_flag, next);
-	if (n) {
-		skip = draft_skip(t, r->draft->skip_frags, r->taken_flag, next);
-		lines = draft_lines(t, r->draft, take, skip, &fits0);
-	}
+	int take[3] = { 0 }, n = r->draft ? r->draft->n : 0, menu = -1;
+	for (int k = 0; k < n; ++k)
+		take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->draft->fit_flag ? r->draft->fit_flag + k : 0, r->taken_flag, next);
+	if (n) menu = draft_menu(t, r->draft, take, draft_skip(t, r->draft->skip_frags, r->taken_flag, next));
 	int i = ta_script(t);
-	char head[64];
 	bool first = true;
-	if (r->head) snprintf(head, sizeof head, "%s", r->head);
-	else snprintf(head, sizeof head, "MegaMan downloaded %s's Guardian Data!", r->name);
-	ta_page(t, FACE_NONE, head, first);
-	first = false;
+	/* (BN6's own "MegaMan got:" boxes lead, and its own rules go unsaid:
+	 * the Cross's weakness, the Pack, ExpMemry's board, what a program
+	 * does; a super boss's data has its own first line) */
+	if (r->head) {
+		ta_page(t, FACE_NONE, r->head, first);
+		first = false;
+	}
 	if (r->power) ta_pages(t, r->power, FACE_NONE, &first);
 	reward_items(t, r, &first);
 	if (r->draft && r->draft->expmemry) {
@@ -181,18 +156,13 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 		uint8_t give[] = { 0xF4, 0x00, SCRIPTS_EXP_MEMORY, 1 };   /* ts_item_give */
 		ta_bytes(t, give, sizeof give);
 		ta_got(t, "ExpMemry", &first);
-		/* (the board it grows to is the game's count, not the act's: a run
-		 * that passed act 2 on an older build gets its first here) */
-		ta_page(t, FACE_MEGAMAN, "Whoa! Our NaviCust\nboard grew,Lan!\nMore room for\nprograms!", false);
 	}
 	if (!n) {
 		ta_flag_set(t, r->taken_flag);
 		ta_end_or(t, next);
 		return i;
 	}
-	/* the draft: what each program does, then the choice (B: none) */
-	ta_page(t, FACE_MEGAMAN, "Program data,too!\nLet's pick one for\nour NaviCust!", false);
-	draft_line(t, r->draft, 0, fits0, lines);
+	ta_jump(t, menu);
 	return i;
 }
 
