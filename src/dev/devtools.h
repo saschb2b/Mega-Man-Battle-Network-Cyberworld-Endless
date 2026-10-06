@@ -28,6 +28,9 @@ typedef struct {
 	int job;        /* job=K: the run holding a request of kind K (jobs.h), taken; at --scene home one from the act before */
 	int job_state;  /* jobstate=S: ... in state S (2 done, 3 failed) */
 	int zenny;      /* zenny=N: N zenny given as the run starts (BN6's GiveZenny: home's shops, docs/HOME.md piece 6) */
+	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/BOSSES.md) */
+	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
+	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
 } DevFlags;
 
 extern DevFlags dev;

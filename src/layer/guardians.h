@@ -9,6 +9,7 @@
 
 #include "bn5.h"
 #include "stage_npc.h"
+#include "super_boss.h"
 
 #define GUARDIAN_NO_MUGSHOT -1
 
@@ -20,7 +21,8 @@ typedef struct {
 	unsigned char r, g, b;  /* the title card's accent */
 } Guardian;
 
-/* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel) */
+/* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel;
+ * the super bosses 19 Bass and 20 the Cybeast Gregar, super_boss.h) */
 const Guardian *guardian(int navi);
 /* Another game's Navis as a territory's guardians (docs/BOSSES.md, BN5's
  * Navis): BN5's Team Colonel by their AI index there (bn5.h BN5_NAVI_*,

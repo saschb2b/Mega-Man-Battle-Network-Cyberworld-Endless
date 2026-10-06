@@ -26,6 +26,8 @@ typedef struct {
 	int biome;
 	bool boss;
 	bool held;       /* no running from it: a guardian's, as BN6's story bosses */
+	int song;        /* its music where BN6's own record names one (a super boss's), 0 the battle's or boss's theme */
+	bool map_backdrop;   /* the background of the map it is fought on, as BN6's story records ask (0xFF), not its area's roll */
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 	int player;      /* MegaMan's panel on it (row << 4 | column, from 1); 0 column 2 row 2 */
 	/* its objects as the area's battle has them: the entity's kind byte,

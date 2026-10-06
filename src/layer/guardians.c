@@ -31,6 +31,11 @@ static const Guardian guardians[] = {
 	[15] = { "JudgeMan", "Voice of Verdict", 0x55, -1, 88, 104, 216 },
 	[16] = { "ElementMan", "Lord of Elements", 0x56, -1, 176, 136, 232 },
 	[18] = { "Colonel", "The Iron Strategist", 0x53, -1, 120, 168, 136 },
+	/* the super bosses (docs/BOSSES.md, Super bosses): Bass, his own face
+	 * and cloaked sprite, and the Cybeast, its face and its beast on the
+	 * map; their poses super_body's */
+	[19] = { "Bass", "The Strongest Navi", 0x5B, -1, 232, 176, 40 },
+	[20] = { "Gregar", "It copies everything", 0x58, -1, 248, 128, 40 },
 	/* BN5's (docs/BOSSES.md, BN5's Navis): their faces and sprites copied in
 	 * from its ROM as they are met (guardian_set_face), their pose its own
 	 * animation 24, as Gregar's Navis' */
@@ -64,6 +69,7 @@ int guardian_sprite(int navi) {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
 		{ 11, 0x3B }, { 12, 0x51 }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 }, /* Proto, Blast, Dive, Circus, Judge */
 		{ 16, 0x56 }, { 18, 0x53 },                                          /* Element, Colonel */
+		{ 19, 0x5B }, { 20, 0x58 },                                          /* Bass, the Cybeast's beast */
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;

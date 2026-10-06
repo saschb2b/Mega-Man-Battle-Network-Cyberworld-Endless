@@ -1,7 +1,7 @@
 # functions past CCN 25 or 120 lines of code (lizard): "file:function CCN NLOC";
 # none may join and none may grow: split one, then build.py lint --update
 src/audio/audio.c:track_tick 55 76
-src/core/loot.c:from_formations 59 79
+src/core/loot.c:from_formations 54 67
 src/core/platform.c:platform_init 28 63
 src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
