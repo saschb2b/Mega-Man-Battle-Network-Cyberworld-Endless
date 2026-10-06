@@ -24,6 +24,8 @@
 #include "area_src.h"
 #include "backup.h"
 #include "guardians.h"
+#include "launcher_roms.h"
+#include "launcher_text.h"
 #include "home_words.h"
 #include "npc_lines.h"
 #include "powers.h"
@@ -2720,6 +2722,32 @@ static void test_backup(void) {
 	remove_tree(base);
 }
 
+/* The launcher (src/launcher/, issue #97): when it shows at a start, and
+ * what it says of the saves */
+static void test_launcher(void) {
+	RomRecord none = { 0 }, both = { true, true, true }, six = { true, true, false };
+	CHECK(roms_launcher_wanted(false, true, false, none), "launcher: shown at a first start");
+	CHECK(roms_launcher_wanted(false, false, false, both), "launcher: shown without BN6");
+	CHECK(roms_launcher_wanted(false, true, false, both), "launcher: shown where BN5 has gone");
+	CHECK(!roms_launcher_wanted(false, true, true, six), "launcher: not shown for BN5 come since (the title says so)");
+	CHECK(!roms_launcher_wanted(false, true, false, six) && !roms_launcher_wanted(false, true, true, both), "launcher: not shown where nothing changed");
+	CHECK(roms_launcher_wanted(true, true, true, both), "launcher: shown when asked for");
+	/* the saves told as the title tells them: the best the deeper of the
+	 * profile's and the saved run's, one run "1 run", none not counted */
+	char said[400];
+	BackupInfo one = { .runs = 1, .best = 6, .run_depth = 2 }, run_only = { .run_depth = 1 }, empty = { 0 };
+	ask_saves("ROMs", &one, NULL, said, sizeof said);
+	CHECK(!strcmp(said, "In ROMs: 1 run, best Layer 6, a run on Layer 2.\nBring them back?"), "launcher: saves found told (%s)", said);
+	ask_saves("ROMs", &run_only, &empty, said, sizeof said);
+	CHECK(!strcmp(said, "In ROMs: a run on Layer 1.\nOn this device: no runs yet.\nUse the folder's saves?"), "launcher: a run alone, and none, told (%s)", said);
+	note_restored(&run_only, said, sizeof said);
+	CHECK(!strcmp(said, "Saves brought back: a run on Layer 1."), "launcher: saves brought back told (%s)", said);
+	/* a phone's saves' line: two lines, a long folder's name cut */
+	saves_line_phone("Mega Man Battle Network ROMs", false, said, sizeof said);
+	CHECK(!strcmp(said, "Saves: on this device\nA copy in Mega Man Bat..., for a reinstall"), "launcher: a long folder cut in the saves' line (%s)", said);
+	saves_line_phone("ROMs", true, said, sizeof said);
+	CHECK(!strcmp(said, "Saves: on this device only\nNo copy in ROMs: choose it again"), "launcher: a copy refused said (%s)", said);
+}
 
 static void test_rom_pages(void) {
 	const uint8_t arch[] = {
@@ -2766,6 +2794,7 @@ int main(void) {
 	test_xsong();
 	test_qr();
 	test_backup();
+	test_launcher();
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();

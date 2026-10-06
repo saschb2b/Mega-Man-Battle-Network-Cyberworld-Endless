@@ -300,7 +300,7 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 	/* (tables found by their structure beside BN6's own, docs/ROM_DATA.md) */
 	[XROM_BN5_COLONEL_US] = { "Mega Man Battle Network 5: Team Colonel (USA)", "5f472f78d8de2df01d5039e045c043cb40969a39", "BRKE",
 		0x0331B4u, 0x0331CCu, 0x033FACu, 0x033FC4u, 6, 21, bn5_areas, (int)(sizeof bn5_areas / sizeof *bn5_areas), 0x155BF4u,
-		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, 0x031414u, 0x031468u, "BN5" },
+		0x03272Cu, { 0x15, 0x16 }, 0x08C5E8u, 0x08C9DCu, 0x08C39Cu, 0x031414u, 0x031468u, "BN5", 0x45 },
 };
 
 const NetAreaDef *net_area_def(int area) {
@@ -316,9 +316,9 @@ const NetAreaDef *net_area_def(int area) {
 
 XRom XR[XROM_COUNT];
 
-static void xrom_load(const char *path) {
+bool xrom_load(const char *path) {
 	FILE *f = fopen(path, "rb");
-	if (!f) return;
+	if (!f) return false;
 	char code[5] = "";
 	int id = -1;
 	if (fseek(f, 0, SEEK_END) == 0 && ftell(f) == ROM_SIZE && fseek(f, 0xAC, SEEK_SET) == 0 && fread(code, 1, 4, f) == 4)
@@ -329,9 +329,16 @@ static void xrom_load(const char *path) {
 	fclose(f);
 	char hex[41] = "";
 	if (ok) sha1_hex(data, ROM_SIZE, hex);
-	if (!ok || strcmp(hex, xlayouts[id].sha1)) { free(data); return; }
+	if (!ok || strcmp(hex, xlayouts[id].sha1)) { free(data); return false; }
 	XR[id] = (XRom){ data, &xlayouts[id], "" };
 	snprintf(XR[id].path, sizeof XR[id].path, "%s", path);
+	return true;
+}
+
+int xrom_of_code(const char *code) {
+	for (int i = 0; i < XROM_COUNT; ++i)
+		if (!memcmp(code, xlayouts[i].code, 4)) return i;
+	return -1;
 }
 
 int xrom_find(const char *dir) {

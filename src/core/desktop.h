@@ -1,6 +1,7 @@
-/* The desktop builds' dialogs: the ROM on the first start, and the
- * AppImage's entry in the application menu. They use the desktop's own
- * dialogs (zenity or kdialog, else SDL's) and are called before the game's
+/* The desktop builds' own: the file chooser the launcher opens for a ROM,
+ * the ROM looked for where front ends and downloads keep theirs, and the
+ * AppImage's entry in the application menu and Steam's, asked in the
+ * desktop's own dialogs (zenity or kdialog, else SDL's) before the game's
  * window is made. */
 #ifndef DESKTOP_H
 #define DESKTOP_H
@@ -8,12 +9,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-/* No usable ROM was found in rom_dir (msg says why). Asks the player for
- * one: a file chooser (zenity or kdialog) or, without one, the folder
- * opened in the file manager; then a new look. 1 once a ROM is loaded, 0
- * if they quit, -1 when no dialog could be shown (the game's own window
- * then asks). scan looks again and fills msg. */
-int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen);
+/* Whether there is a file chooser: zenity or kdialog on Linux (none in
+ * the Flatpak's sandbox), macOS's open panel, Windows' own */
+bool desktop_can_choose(void);
+/* The file chooser for ROM `slot` (0 BN6, 1 BN5, as its title says): the
+ * file's path; false where none was chosen. It waits for the player: the
+ * launcher runs it on a thread of its own (pick_desktop.c) */
+bool desktop_choose_rom(int slot, char *path, size_t n);
 
 /* Run as an AppImage: offers to add it to the application menu (until it
  * is added or the player says not to ask again), and keeps an entry it

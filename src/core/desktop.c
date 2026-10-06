@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "compat.h"
+#include "launcher_roms.h"
 #include "platform.h"
 #include "rom.h"
 
@@ -212,82 +213,41 @@ static int ask(const char *text, const char *const *labels, int n) {
 	return hit < 0 ? n - 1 : hit;
 }
 
-/* ---- the ROM ---- */
+/* ---- the ROM: the launcher's file chooser (pick_desktop.c, on a thread
+ * of its own) ---- */
 
-static bool choose_file(char *path, size_t n) {
+bool desktop_can_choose(void) {
+#ifdef __APPLE__
+	return true;
+#else
+	return on_path("zenity") || on_path("kdialog");
+#endif
+}
+
+bool desktop_choose_rom(int slot, char *path, size_t n) {
+	const char *title = slot == 1 ? "Choose your Mega Man Battle Network 5 ROM" : "Choose your Mega Man Battle Network 6 ROM";
+	path[0] = 0;
 #ifdef __APPLE__
 	/* (macOS: its own open panel, through AppleScript) */
-	const char *argv[] = { "osascript", "-e", "POSIX path of (choose file with prompt \"Choose your Mega Man Battle Network 6 ROM\")", NULL };
+	char script[200];
+	snprintf(script, sizeof script, "POSIX path of (choose file with prompt \"%s\")", title);
+	const char *argv[] = { "osascript", "-e", script, NULL };
 	return run(argv, path, n) && path[0];
 #else
+	char titlearg[120];
+	snprintf(titlearg, sizeof titlearg, "--title=%s", title);
 	if (on_path("zenity")) {
-		const char *argv[] = { "zenity", "--file-selection", "--title=Choose your Mega Man Battle Network 6 ROM",
-			"--file-filter=GBA ROM | *.gba *.GBA", "--file-filter=All files | *", NULL };
+		const char *argv[] = { "zenity", "--file-selection", titlearg, "--file-filter=GBA ROM | *.gba *.GBA",
+			"--file-filter=All files | *", NULL };
 		return run(argv, path, n) && path[0];
 	}
 	if (on_path("kdialog")) {
 		const char *home = getenv("HOME");
-		const char *argv[] = { "kdialog", "--title", "Choose your Mega Man Battle Network 6 ROM", "--getopenfilename",
-			home ? home : "/", "*.gba *.GBA|GBA ROM", NULL };
+		const char *argv[] = { "kdialog", "--title", title, "--getopenfilename", home ? home : "/", "*.gba *.GBA|GBA ROM", NULL };
 		return run(argv, path, n) && path[0];
 	}
 	return false;
 #endif
-}
-
-/* a copy where the next start looks first */
-static void keep_copy(const char *path, const char *rom_dir) {
-	const char *base = strrchr(path, '/');
-	char to[1400];
-	snprintf(to, sizeof to, "%s/%s", rom_dir, base ? base + 1 : path);
-	if (strcmp(to, path) && access(to, F_OK) != 0 && !copy_file(path, to))
-		fprintf(stderr, "could not copy the ROM to %s; it is used from %s\n", to, path);
-}
-
-/* ... and of the other games' ROMs read beside it (docs/MULTIROM.md): the
- * next start finds them beside the copy, or not at all */
-static void keep_copies(const char *path, const char *rom_dir) {
-	keep_copy(path, rom_dir);
-	for (int i = 0; i < XROM_COUNT; ++i)
-		if (XR[i].data) keep_copy(XR[i].path, rom_dir);
-}
-
-int desktop_rom_dialog(const char *rom_dir, bool (*scan)(char *msg, size_t msglen), char *msg, size_t msglen) {
-	/* with a file chooser: choose it; without, open the folder to put it in */
-#ifdef __APPLE__
-	bool picker = true;
-#else
-	bool picker = on_path("zenity") || on_path("kdialog");
-#endif
-	for (;;) {
-		/* the reason, unless it is only that the folder holds no ROM */
-		char text[1800], why[700] = "";
-		if (strncmp(msg, "Put your", 8)) snprintf(why, sizeof why, "%s\n\n", msg);
-		snprintf(text, sizeof text,
-			"%sCyberworld Endless runs on your own copy of Mega Man Battle Network 6: Cybeast Gregar (USA), "
-			"an unmodified .gba file.\n\nChoose the file, or put it into\n%s\nor your Downloads folder, and look again.",
-			why, rom_dir);
-		const char *labels[] = { picker ? "Choose ROM..." : "Open folder", "Look again", "Quit" };
-		int hit = ask(text, labels, 3);
-		if (hit < 0) return -1;
-		if (hit == 2) return 0;
-		if (hit == 0 && picker) {
-			char path[1024] = "";
-			if (!choose_file(path, sizeof path)) continue;
-			if (!rom_load_file(path, msg, msglen)) continue;
-			keep_copies(path, rom_dir);
-			return 1;
-		}
-		if (hit == 0) {
-#ifdef __APPLE__
-			const char *argv[] = { "open", rom_dir, NULL };
-#else
-			const char *argv[] = { "xdg-open", rom_dir, NULL };
-#endif
-			run(argv, NULL, 0);
-		}
-		if (scan(msg, msglen)) return 1;
-	}
 }
 
 /* ---- the ROM where front ends keep it ---- */
@@ -340,7 +300,7 @@ bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen) {
 	if (!found) return false;
 	fprintf(stderr, "found the ROM at %s\n", R.path);
 	/* (a copy where the next start looks first: the SD card may be out then) */
-	keep_copies(R.path, rom_dir);
+	roms_keep_copies(rom_dir);
 	return true;
 }
 

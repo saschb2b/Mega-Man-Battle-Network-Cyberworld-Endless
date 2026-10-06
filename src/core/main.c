@@ -26,7 +26,6 @@
 #include "rom.h"
 #include "run.h"
 #include "save.h"
-#include "scene_norom.h"
 #include "start_3ds.h"
 #include "startup.h"
 #include "tools.h"
@@ -42,6 +41,7 @@ const Scene *scene_current(void) { return current; }
 void scene_set(const Scene *s) { pending = s; }
 
 static const Scene *scene_by_name(const char *n) {
+	/* (the launcher is a start's own: --scene launcher opens it, then the title) */
 	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
@@ -257,7 +257,13 @@ typedef struct {
 	int force_w, force_h;
 	uint64_t max_frames;
 	uint32_t seed;
+	/* --launcher auto, open or off (LAUNCHER_*): the ROMs' screen before
+	 * the game (src/launcher/); -1 the platform's own way (main) */
+	int launcher;
 } Options;
+
+/* (the start's options, for the launcher's PLAY: game_begin) */
+static Options opts;
 
 /* Each group of the command line's options takes argument `a` (its value
  * `v`, NULL after the last) where it is one of its own: the arguments it
@@ -303,6 +309,7 @@ static int run_option(const char *a, const char *v, Options *o) {
 	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	else if (!strcmp(a, "--dev")) devtools_parse(v);
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
+	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;
 	else return 0;
 	return 2;
 }
@@ -343,9 +350,9 @@ static bool rom_at_start(const Options *o, char *msg, size_t n) {
 #ifdef CW_DESKTOP
 /* A desktop's start, before its window: the big screen filled, the menu
  * entry and Steam's offered, and the ROM looked for where front ends and
- * downloads keep theirs, then asked for; -1 to go on, else the exit code
- * (the dialog closed) */
-static int desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
+ * downloads keep theirs (a copy kept); where there is none, the launcher
+ * asks for it in the game's own window */
+static void desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
 	bool big = !o->headless && desktop_big_screen();
 	if (!o->screen_given && big) o->fullscreen = true;
 	/* the desktop's dialogs come before the window, which would be marked
@@ -356,22 +363,10 @@ static int desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
 	if (!*rom_ok && !o->headless && !o->rom_dir) {
 		char dir[600];
 		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-		/* first where a Steam Deck keeps its ROMs: its Gaming Mode shows no
-		 * file chooser a pad can work */
+		/* (where a Steam Deck keeps its ROMs: its Gaming Mode shows no file
+		 * chooser a pad can work) */
 		*rom_ok = desktop_rom_elsewhere(dir, msg, n);
 	}
-	/* the desktop's own dialog; none on the big screen, where a pad cannot
-	 * answer one, and none in a Flatpak on Wayland: the game's window asks
-	 * then (norom_show) */
-	if (!*rom_ok && !o->headless && !o->rom_dir && !big) {
-		char dir[600];
-		snprintf(dir, sizeof dir, "%s/rom", g_data_dir);
-		fprintf(stderr, "%s\n", msg);
-		int asked = desktop_rom_dialog(dir, desktop_rom_anywhere, msg, n);
-		if (asked == 0) return 1;
-		*rom_ok = asked > 0;
-	}
-	return -1;
 }
 #endif
 
@@ -432,28 +427,38 @@ static void start_scene(const Options *o) {
 	scene_set(first_scene(s, o->headless));
 }
 
-/* The game on the ROM found (`rom_ok`, else `msg` says why): the no-ROM
- * screen, the error, a dev tool, or the first scene; -1 to go on, else
- * the exit code of a tool that ran */
-static int game_start(const Options *o, bool rom_ok, bool norom_scene, const char *msg) {
-	if (!rom_ok) {
-		fprintf(stderr, "%s\n", msg);
-#ifdef CW_DESKTOP
-		/* (a ROM given by --rom-dir that is not one keeps the plain error) */
-		if ((!o->headless && !o->rom_dir) || norom_scene) norom_show();
-		else
-#endif
-		rom_missing(o->rom_dir, norom_scene, msg);
-		return -1;
-	}
+/* The game from the ROM read: its font, the saves, the dev tools' veteran
+ * and marks; false where it cannot be decoded (the error says so) */
+static bool game_ready(const Options *o) {
 	if (!gfx_init()) {
 		error_show("The ROM could not be decoded.");
-		return -1;
+		return false;
 	}
 	say_roms();
 	save_init();
 	devtools_veteran();
 	if (o->marks_spec >= 0) profile.marks = (uint16_t)o->marks_spec;
+	return true;
+}
+
+/* PLAY on the launcher at the start: the game, as a start with its ROM
+ * goes on (no dev tool: the launcher shows at a plain start alone) */
+static void game_begin(void) {
+	if (game_ready(&opts)) start_scene(&opts);
+}
+
+/* The game on the ROM found (`rom_ok`, else `msg` says why): the launcher
+ * where it is wanted (src/launcher/), the error, a dev tool, or the first
+ * scene; -1 to go on, else the exit code of a tool that ran */
+static int game_start(const Options *o, bool rom_ok, const char *msg) {
+	opts = *o;
+	if (launcher_start(o->launcher, o->rom_dir, game_begin)) return -1;
+	if (!rom_ok) {
+		fprintf(stderr, "%s\n", msg);
+		error_show(msg);
+		return -1;
+	}
+	if (!game_ready(o)) return -1;
 	int r = tools_run();
 	if (r >= 0) {
 		platform_shutdown();
@@ -494,11 +499,18 @@ static int frame_loop(const Options *o) {
 	return 0;
 }
 
+/* The launcher at a start where none was asked for: a desktop's and an
+ * iPhone's own ROM places (not a --rom-dir's: the browser's page, a
+ * PortMaster handheld's launcher), never headless; Android's app asks with
+ * --launcher. "--scene launcher" opens it (a capture). */
+static int launcher_mode(const Options *o) {
+	if (o->start_scene && !strcmp(o->start_scene, "launcher")) return LAUNCHER_OPEN;
+	if (o->launcher >= 0) return o->headless ? LAUNCHER_OFF : o->launcher;
+	return (DESKTOP || IOS) && !o->rom_dir && !o->headless ? LAUNCHER_AUTO : LAUNCHER_OFF;
+}
+
 int main(int argc, char **argv) {
-#ifdef CW_DESKTOP
-	g_argv = argv;
-#endif
-	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .marks_spec = -1 };
+	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .marks_spec = -1, .launcher = -1 };
 	int code = parse_args(argc, argv, &o);
 	if (code >= 0) return code;
 	setvbuf(stdout, NULL, _IOLBF, 0);
@@ -509,17 +521,13 @@ int main(int argc, char **argv) {
 	data_dir_setup(o.data_dir_given);
 	char msg[512];
 	bool rom_ok = rom_at_start(&o, msg, sizeof msg);
-	/* ("--scene norom": the screen a desktop without its ROM shows, for a
-	 * capture) */
-	bool norom_scene = o.start_scene && !strcmp(o.start_scene, "norom");
-	if (norom_scene) rom_ok = false;
 #ifdef CW_DESKTOP
-	code = desktop_start(&o, &rom_ok, msg, sizeof msg);
-	if (code >= 0) return code;
+	desktop_start(&o, &rom_ok, msg, sizeof msg);
 #endif
+	o.launcher = launcher_mode(&o);
 	if (!platform_init(o.force_w, o.force_h, o.headless, o.fullscreen)) return 1;
 	player_files(o.headless, o.smooth_arg);
 	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
-	code = game_start(&o, rom_ok, norom_scene, msg);
+	code = game_start(&o, rom_ok, msg);
 	return code >= 0 ? code : frame_loop(&o);
 }

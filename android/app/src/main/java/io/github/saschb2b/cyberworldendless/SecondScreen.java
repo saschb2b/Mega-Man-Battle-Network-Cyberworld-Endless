@@ -38,7 +38,7 @@ import java.util.List;
  * does nothing, as on the 3DS, whose map has no use for one.
  */
 final class SecondScreen {
-    private static final String TAG = RomActivity.TAG;
+    private static final String TAG = RomLook.TAG;
 
     private final Activity activity;
     private final DisplayManager displays;

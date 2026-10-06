@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The app icon's shortcut (hold the icon: ROMs, Android 7.1 and later):
-     RomActivity's page again, with the ROMs kept, both choices and Play.
-     A player who chose the files, not a folder, adds BN5 here later. -->
+     the game with its launcher open (src/launcher/): the ROMs kept, the
+     folder and the files to choose BN5 from, and PLAY. -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
         android:shortcutId="roms"
