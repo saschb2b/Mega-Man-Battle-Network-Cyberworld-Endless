@@ -339,7 +339,6 @@ static void words_due(void) {
 static void gate_and_rush_words(void) {
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
 	rush_hint();
-	exit_hint();
 }
 
 /* MegaMan deleted: the game plays its GAME OVER, then the run ends; true

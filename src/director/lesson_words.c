@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "bn6_fields.h"
-#include "boss.h"
 #include "cinema.h"
 #include "director_folder.h"
 #include "director_state.h"
@@ -36,25 +35,6 @@ void rush_hint(void) {
 		snprintf(words, sizeof words, "@M Bone panels,Lan! Rush could bridge this gap!|@M He comes when we hold a RushFood a panel,%d here.|"
 			"@M He eats just one. A Net Dealer might have some.", layer.gap[0].len);
 	if (talk_start(words, FACE_MEGAMAN)) flag_set(LAYER_RUSH_TOLD_FLAG);
-}
-
-/* The exit pad, named the first time MegaMan comes near an open one (once
- * a profile): a run's exits warp at once, as BN6's pads do (the owner's
- * call, issue #101), and a playtester took one for a decoration twice,
- * leaving a layer's services behind (sessions 69 and 70) */
-#define EXIT_NEAR 96   /* three panels */
-void exit_hint(void) {
-	if (profile.exit_taught || !on_map() || cinema_busy() || talk_busy() || emu_read8(BN6_CHATBOX) || D.beat[0] || !boss_exit_open()) return;
-	for (int i = 0; i < layer.nobj; ++i) {
-		if (layer.obj[i].type != OBJ_EXIT) continue;
-		int ex, ey;
-		netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, &ex, &ey);
-		if (abs(bn6_player_x() - ex) > EXIT_NEAR || abs(bn6_player_y() - ey) > EXIT_NEAR) return;
-		if (!talk_start("@M See that ring,Lan? It's the exit pad!|@M Step on it,and we go deeper.|@M No coming back,so look around first!", FACE_MEGAMAN)) return;
-		profile.exit_taught = 1;
-		profile_save();
-		return;
-	}
 }
 
 /* where a chip come to the pack went, the first time (pack_due) */

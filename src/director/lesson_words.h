@@ -3,7 +3,6 @@
 #define CW_LESSON_WORDS_H
 
 void rush_hint(void);
-void exit_hint(void);
 void pack_words(void);
 const char *gem_words(void);
 /* how near the port R was pressed (port_words); home's port is Lan's PC
