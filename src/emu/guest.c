@@ -272,6 +272,7 @@ const char *guest_dark_name(int k) {
 
 #include "compat.h"
 #include "game.h"
+#include "guest_reward.h"
 #include "platform.h"
 #include "xchips.h"
 
@@ -582,60 +583,10 @@ static int boot_main(void *arg) {
 }
 #endif
 
-/* `record` copied past BN5's ROM without its GAME OVER: a loss ends the
- * battle on the map with the result 2, and the run's own GAME OVER follows
- * (BN6's); its copy's address. Its entities stay the original's. */
-/* The zenny a reward row's chip pays where BN6 has none of its name: the
- * results screen shows what the run gets (docs/MULTIROM.md, Guest
- * battles) */
-#define REWARD_ZENNY 200
-
-/* The reward rows of the enemies in `record` rewritten where a chip has no
- * BN6 chip of its name: zenny instead (its game's own encoding, as BN6's
- * rewards are); with All * the others in * (its results screen shows the
- * chip as the run gets it), else as its ROM has them. Its entities follow
- * the record's pointer at +0xC, four bytes each (0x11 an enemy, its id in
- * the last two), 0xF0 ending them. */
-static uint8_t fit_codes[3];   /* the folder's codes for this battle's rewards (GuestMegaMan.codes) */
-
-/* Chip entry v of a reward row in one of the folder's codes where both
- * BN5's chip and BN6's of its name have it, on every other row (xchips_fit,
- * issue #63), so BN5's own results screen shows it as the run gets it. */
-static uint16_t row_coded(uint16_t v, uint32_t row) {
-	int x = v & 0x1FF;
-	if (starred || !from_bn5[x]) return v;
-	uint8_t other[4], bn6[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
-	for (uint32_t i = 0; i < 4; ++i) other[i] = rd8(0x08000000u + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x + i);
-	ChipInfo ci;
-	chip_info(from_bn5[x], &ci);
-	for (int i = 0; i < ci.ncodes && i < 4; ++i) bn6[i] = ci.codes[i] == '*' ? 26 : (uint8_t)(ci.codes[i] - 'A');
-	return (uint16_t)(x | xchips_fit(other, bn6, fit_codes, v >> 9 & 0x1F, (int)row) << 9);
-}
-
 /* A guardian's battle under way (guest_boss_battle): his id, and the zenny
  * his reward rows' chips pay (BN6's guardians' battles pay so where their
  * row holds their chip, which their Guardian Data gives) */
 static int boss_id, boss_zenny;
-
-static void rows_fit(const int *ids, int n) {
-	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
-	for (int k = 0; k < n; ++k) {
-		/* (its enemies read a byte at a time, guest_record_foes: a list can
-		 * start at an odd address, and a halfword read there takes the even
-		 * one below; CanGard's MrkCan1 S showed on a playtester's results
-		 * screen, came back as zenny, session 66; scaled as the battle is) */
-		int id = ids[k];
-		if (emu_debug_on()) fprintf(stderr, "guest: the reward rows of enemy %#x fitted\n", id);
-		if (id <= 0 || id >= 0x200) continue;
-		for (uint32_t i = 0; i < 20; ++i) {
-			uint32_t a = BN5_REWARD_ROWS + (uint32_t)id * 0x28 + 2 * i, o = a - 0x08000000u;
-			uint16_t v = (uint16_t)(d[o] | d[o + 1] << 8);
-			if (v == 0xFFFF || v >> 14 || (int)(v & 0x1FF) >= BN5_CHIPS) continue;
-			if (id == boss_id && boss_zenny > 0) wr16(a, (uint16_t)(1u << 14 | (boss_zenny > 0x3FFF ? 0x3FFF : boss_zenny)));
-			else wr16(a, !from_bn5[v & 0x1FF] ? (uint16_t)(1u << 14 | REWARD_ZENNY) : starred ? chip_entry_star(v) : row_coded(v, i));
-		}
-	}
-}
 
 /* A guardian's HP held to his act's band, the Net's clock's on it: his
  * stats row's HP written in the ROM copy before his battle, as he spawns
@@ -659,10 +610,15 @@ static void boss_cap(const GuestBoss *b) {
 	wr16(capped_at, (uint16_t)((w & 0xF000) | (b->hp_cap & 0xFFF)));
 }
 
-/* (and its background the dressed area's where it leaves it to the map:
+/* `record` copied past BN5's ROM without its GAME OVER: a loss ends the
+ * battle on the map with the result 2, and the run's own GAME OVER follows
+ * (BN6's); its copy's address. Its entities follow the record's pointer at
+ * +0xC, four bytes each (0x11 an enemy, its id in the last two), 0xF0
+ * ending them: the original's, or copied where its viruses are scaled.
+ * (And its background the dressed area's where it leaves it to the map:
  * every guest battle stood in front of the room its boot state stands in,
- * yellow rings for each area) */
-#define ENTITIES_AT (BN5_FREE + 0x20)   /* a scaled record's entity list, 16 entries and the 0xF0 at most */
+ * yellow rings for each area.) */
+#define ENTITIES_AT (BN5_FREE + 0x20)   /* a copied record's entity list, 16 entries and the 0xF0 at most */
 
 static uint32_t record_copy(uint32_t record, GuestScale sc) {
 	for (uint32_t i = 0; i < 16; i += 2) {
@@ -703,15 +659,6 @@ static int bn5_code(int x, int code) {
 	/* (its record as its ROM copy has it: in * alone with All *) */
 	uint8_t rec[4];
 	for (uint32_t i = 0; i < 4; ++i) rec[i] = rd8(0x08000000u + BN5_CHIP_RECORDS + 0x2Cu * (uint32_t)x + i);
-	return xchips_code(rec, code);
-}
-
-/* ... and a chip won there as BN6's chip of its name has it, the same way */
-static int bn6_code(int id, int code) {
-	ChipInfo ci;
-	chip_info(id, &ci);
-	uint8_t rec[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
-	for (int i = 0; i < ci.ncodes && i < 4; ++i) rec[i] = ci.codes[i] == '*' ? 26 : (uint8_t)(ci.codes[i] - 'A');
 	return xchips_code(rec, code);
 }
 
@@ -834,7 +781,6 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	if (boss) boss_cap(boss);
 	souls_in(mm->souls);
 	star_records(mm->star);
-	memcpy(fit_codes, mm->codes, sizeof fit_codes);
 	/* MegaMan as the run has him: his HP (BN5 copies it back after a battle
 	 * whose options carry 0x40, as its random battles' do) */
 	int hp = mm->hp, max_hp = mm->max_hp;
@@ -854,7 +800,10 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	const uint16_t *folder = mm->folder;
 	int in = folder ? folder_in(folder) : 0;
 	int ids[16], n = guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, sc, ids, 16);
-	rows_fit(ids, n);
+	/* (its results screen's rows as the run gets them: guest_reward.c) */
+	GuestRowsFit how = { mm->star, { mm->codes[0], mm->codes[1], mm->codes[2] }, boss_id, boss_zenny };
+	guest_rows_fit(ids, n, &how);
+	guest_finds_fit(&how);
 	if (emu_debug_on()) {
 		fprintf(stderr, "guest: battle %08X, HP %d/%d, mood %#x, %d of the folder's 30 in, buster Attack %d, Speed %d, Charge %d\n", record, hp, max_hp,
 			start_mood, in,
@@ -885,7 +834,7 @@ static void boot_over(bool ok) {
 	active = false;
 	phase = PH_IDLE;
 	if (ready && battle_begin(pend_record, pend_sc, &pend_mm, pend_boss.ai ? &pend_boss : NULL)) return;
-	result = (GuestResult){ .outcome = GUEST_ESCAPED, .hp = pend_mm.hp, .reward_from = -1 };
+	result = (GuestResult){ .outcome = GUEST_ESCAPED, .hp = pend_mm.hp, .reward = guest_reward_of(0), .find = guest_reward_of(0) };
 	memcpy(result.dark, pend_mm.dark, sizeof result.dark);
 	result_due = true;
 }
@@ -1050,21 +999,18 @@ bool guest_fight_hp(int *hp, int *max) {
 
 static void finish(int outcome) {
 	result = (GuestResult){ .outcome = outcome, .frames = frames, .hp = phase == PH_BATTLE ? rd16(BN5_BATTLE_HP) : rd16(BN5_NAVI_HP), .recoded = recoded,
-		.recode_chip = recode_ex[0], .recode_from = recode_ex[1], .recode_to = recode_ex[2], .reward_from = -1 };
+		.recode_chip = recode_ex[0], .recode_from = recode_ex[1], .recode_to = recode_ex[2] };
 	memcpy(result.dark, dark_in, sizeof result.dark);   /* (BN5 keeps a DarkChip once used: the run's stay) */
 	result.dark_used = dark_used;
 	result.dark_rose = fell && outcome != GUEST_LOST;
-	/* (what its results screen gave, as the run's: a chip by its name, or
-	 * zenny; HP+N it gave there, in the HP above) */
-	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0;
-	if (v && v >> 14 == 1) result.zenny = v & 0x3FFF;
-	else if (v && v >> 14 == BN5_REWARD_HP) result.heal = v & 0x3FFF;
-	else if (v && v >> 14 == 0 && (v & 0x1FF) < BN5_CHIPS) {
-		result.chip = from_bn5[v & 0x1FF];
-		result.code = result.chip ? bn6_code(result.chip, v >> 9 & 0x1F) : 0;
-		if (result.chip && result.code != (v >> 9 & 0x1F)) result.reward_from = v >> 9 & 0x1F;
-		if (!result.chip) result.zenny = REWARD_ZENNY;
-	}
+	/* (what its results screen gave, as the run gets it, HP+N in the HP
+	 * above; and its second, the find of a green Mystery Data left on the
+	 * field, which BN5 gives as it gives the first: a playtester's screen
+	 * said "BugFrag 1" and the run kept none, session 69) */
+	uint16_t v = outcome == GUEST_WON ? rd16(BN5_REWARD) : 0, f = outcome == GUEST_WON ? rd16(BN5_REWARD_FIND) : 0;
+	result.reward = guest_reward_of(v);
+	result.find = guest_reward_of(f);
+	if (emu_debug_on()) fprintf(stderr, "guest: its results screen gave %04X and %04X\n", v, f);
 	result_due = true;
 	patch_roll(0);
 	boss_uncap();
@@ -1118,6 +1064,7 @@ static void step(uint32_t keys, bool quiet) {
 		core->rawWrite32(core, BN5_ROLL + 8, -1, 0);   /* (one battle: the roll answers none again) */
 		core->rawWrite8(core, BN5_BATTLE_RESULT + 1, -1, 0);
 		wr16(BN5_REWARD, 0);
+		wr16(BN5_REWARD_FIND, 0);
 	} else if (phase == PH_ASKED && frames > 600) finish(GUEST_ESCAPED);   /* (never began: nothing happened) */
 	/* (a DarkChip used: latched while its battle is fought, as leaving it
 	 * wipes the flag; not in the battle's first frames, which hold the last

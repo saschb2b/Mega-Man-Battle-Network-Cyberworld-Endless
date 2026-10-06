@@ -207,7 +207,9 @@ family.version, the foes' HP together, and MegaMan's HP after (or
 and BN5's enemy id, and after MegaMan's HP at its end the reward as the
 run got it: `... battle hp 300/300 guest 08121188 x1 x1 x1 foehp 120 ->
 won hp 260 reward 30 zenny` (a chip as BN6's of its name, `reward Wind *`;
-`reward HP+50`, which the HP after counts; `left` for an escape). A last
+`reward HP+50`, which the HP after counts; `left` for an escape), and
+after it a green Mystery Data's find where one stood on the field to the
+end (`reward 200 zenny find 1 BugFrag`, `find Tornado L`). A last
 line gives where the run ended. Past 512 KB the log moves to
 `runlog.old`. Collected from real runs, it shows where runs are lost.
 

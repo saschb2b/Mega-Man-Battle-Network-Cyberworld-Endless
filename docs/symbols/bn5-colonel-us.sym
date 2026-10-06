@@ -25,6 +25,7 @@
 0200A4D4 BN5_TOOLKIT_METER_CHECK
 0200AEE8 BN5_BATTLE_RESULT
 0200AEEC BN5_REWARD
+0200AEEE BN5_REWARD_FIND
 02034A90 BN5_BATTLE_STATE
 02034A91 BN5_BATTLE_PHASE
 02034A9D BN5_BATTLE_SIDE
@@ -51,11 +52,13 @@
 080043CC map_object_handlers
 080053FC encounter_check
 080054F6 battle_start
+08006874 mystery_data_set_on_field
 0800D17C BN5_ENEMY_STATS
 08012704 bn5_souls.emotion
 08012705 bn5_darkchips.emotion
 08014C8C BN5_ENEMY_IDS
 0801C968 BN5_BATTLE_TABLES
+0801D62C BN5_FIND_ROWS
 0801E210 BN5_CHIP_RECORDS
 0801E216 BN5_CHIP_KIND
 08023C8C unite_rule
@@ -64,6 +67,11 @@
 08024BF4 BN5_SOUL_FLAGS
 080250EA BN5_COMPACT
 080252B2 BN5_PA_STAR_LIMIT
+0802865A results_screen_setup
+08028858 reward_word_read
+08028C06 battle_results_summed_up
+08028E48 results_screen_end_giving_both
+08028E6C results_reward_given
 08031414 XRomLayout.map_enters
 08031468 XRomLayout.map_anims
 0803272C XRomLayout.sprite_lists
@@ -75,6 +83,7 @@
 08034F64 bn5_map_objects.checks
 08035060 internet_groups_spawners
 080361C8 map_music_lists
+0803C384 bugfrags_given_to_save
 0803F360 bn5_map_objects.real_world_2
 0803F364 map_text_archives
 0808C39C XRomLayout.battle_bg_scroll
@@ -82,6 +91,7 @@
 0808C9DC XRomLayout.battle_bg_anims
 080AD930 map_object_table
 080AE2FC handler_3_records
+080DB608 find_kept_as_battle_is_won
 080F2488 navis_stats
 0810F6B4 BN5_ROLL
 081100D4 BN5_REWARD_ROWS

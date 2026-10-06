@@ -127,17 +127,29 @@ the layer's random battles are BN5's own, fought in BN5's engine
 - **The end**: BN5's result (won, lost, escaped) and the HP the battle
   left (its BattleState's copy, as BN5 copies it back to its NaviStats
   only on its own maps' terms) go back into the run. The results screen's
-  reward goes into BN6: a chip as BN6's chip of the same name, to the Pack
-  (GiveChips), zenny as zenny (GiveZenny). Before each battle, its
-  enemies' reward rows are rewritten where a chip has no BN6 chip of its
-  name: 200 zenny instead, so the screen never shows a chip the run won't
-  get; and on every other row (a reward's row comes of the busting level)
-  a chip both games have is put in the first of the folder's codes both
-  games' records of it have (`xchips_fit`), so about half the chips come
-  in the folder's codes, as BN6's rewards lean to them. An HP+N its screen gives (a row's kind 2, as BN6's) is in the HP
-  that comes back. `runlog.txt` has a line for each, as for BN6's battles,
-  with its record, its viruses by BN5's ids and the reward as the run got
-  it (docs/DEVTOOLS.md).
+  rewards go into BN6, both as BN5 gives them to its own save
+  (docs/ROM_DATA.md, BN5's results screen): the busting level's, and
+  where a green Mystery Data stood on the enemies' side unbroken as the
+  battle was won, its find (BN5's own battlefield Mystery Data: some of
+  its records set one, there in about a third of ACDC Area's battles that
+  name one and in every one of the other areas', and any hit breaks it;
+  its find is 1000 to 3000 zenny, 1 to 3 BugFrags or, outside ACDC Area,
+  now and then a chip, as BN5's rows have them). A chip goes in as BN6's chip of
+  the same name, to the Pack (GiveChips), zenny as zenny (GiveZenny),
+  BugFrags as BugFrags (GiveBugfrags): a playtester's screen said "50 z",
+  then "BugFrag 1", and the run had kept the zenny alone (session 69).
+  Before each battle, its enemies' reward rows and the Mystery Data's
+  finds are rewritten where a chip has no BN6 chip of its name: 200 zenny
+  instead, so the screen never shows a chip the run won't get (of the
+  finds' chips, AirHoc S alone); with All * the others are in *; and on
+  every other row of an enemy's (a reward's row comes of the busting
+  level) a chip both games have is put in the first of the folder's codes
+  both games' records of it have (`xchips_fit`), so about half the chips
+  come in the folder's codes, as BN6's rewards lean to them. An HP+N its
+  screen gives (a row's kind 2, as BN6's) is in the HP that comes back.
+  `runlog.txt` has a line for each, as for BN6's battles, with its
+  record, its viruses by BN5's ids and the reward as the run got it, a
+  find after it (docs/DEVTOOLS.md).
 - **The world's reason**: the Nest's copy of the old net reads our data
   as it knew it, one rule for every seam of the translation. Chips it
   never had sit out; a chip whose code its chip of that name lacks fights

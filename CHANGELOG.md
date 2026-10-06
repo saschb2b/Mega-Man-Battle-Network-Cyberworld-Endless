@@ -145,6 +145,15 @@
   stopped: his sprite's walks are empty in BN6's data. Both walk as
   other people now, and Central Town's late Academy kid, who glided on
   her way back (one still frame facing south), walks both ways.
+- **A BN5 battle's BugFrag and green Mystery Data reach the run.** BN5's
+  results screen gives two rewards at most: the busting level's, then
+  the find of a green Mystery Data still standing on the enemies' side as
+  the battle is won (1000 to 3000 zenny, 1 to 3 BugFrags, or a chip).
+  Only the first reached the run: a playtester's screen said "50 z",
+  then "BugFrag 1", and his BugFrags stayed at 0. Both go into the run
+  now, BugFrags to your count, and the run log names the find (`reward
+  200 zenny find 1 BugFrag`). A find's chip with no namesake in BN6
+  (AirHoc) shows as 200 zenny, as a busting reward's does.
 
 ## 0.10.0 (2026-10-05)
 
