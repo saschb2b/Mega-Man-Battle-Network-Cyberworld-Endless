@@ -87,6 +87,7 @@ static uint32_t frame_keys(void) {
 static void after_frame(void) {
 	director_see();
 	director_update();
+	director_hold_watch();
 	pet_update();
 	devtools_update();
 	tour_update();

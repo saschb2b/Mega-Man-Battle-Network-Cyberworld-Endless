@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **CONTINUE no longer comes back with MegaMan stuck** (issue #23). Runs
+  continued from their saves came back on the map with MegaMan unable to
+  walk or open the PET, while L, the map and the dev menu still worked: the
+  state had been written while BN6 itself held him (a fade's mark, its
+  conveyor flag, a cutscene's walk, a chat's flag), and the CONTINUE's way
+  back into the map does not undo those. Every save now waits until BN6
+  lets MegaMan walk and open the PET (the layer's checkpoint, the arena
+  door's, home's, the PET's Save and the quit's). A save already written so
+  is freed as it continues: held for two seconds with nothing under way, or
+  the pad pushed with no step taken, BN6's holds are let go and the map is
+  entered again; a continue that would have stayed black, its map waiting on
+  a fade, goes on too.
 - **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
   place of its own, never at random. The endless net's Nest is the
   Cybeast's den: no copied guardian at its end but Gregar itself, in

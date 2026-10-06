@@ -72,6 +72,7 @@ typedef struct {
 	const char *home_beaten;   /* ... the guardian deleted on the way */
 	bool home_back;        /* ... home from a trip back (docs/HOME.md, going back), not an act */
 	bool home_saved;       /* ... and the run saved there */
+	bool home_save_due;    /* the PET's Save at home, waiting for MegaMan (or Lan) free */
 	unsigned home_told;    /* ... the portals MegaMan has named this visit, a bit each */
 	bool town_seen;        /* ... and has got there */
 	int town_frames;       /* frames on the town's map */

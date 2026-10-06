@@ -11,6 +11,7 @@
 #include "cinema.h"
 #include "director.h"
 #include "director_folder.h"
+#include "director_hold.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "director_way.h"
@@ -195,6 +196,8 @@ static void describe_pos(FILE *f) {
 		bn6_player_y(), bn6_player_z(), emu_read8(BN6_PLAYER_LOCKED),
 		emu_read8(BN6_PLAYER_STATE), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 		flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
+	/* (what of BN6 holds him, issue #23) */
+	fprintf(f, "held %s\n", held_names(bn6_held()));
 	if (D.town) describe_home(f);
 	else {
 		int ns = 0, nf = 0;

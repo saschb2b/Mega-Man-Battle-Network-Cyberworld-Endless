@@ -220,7 +220,18 @@ the blue pad's warp) sets Lan down there.
 Yes), battles won (viruses counted, bosses beaten), the game's GAME OVER
 (the run ends), MegaMan on any other map for 90 frames (warped back to
 the layer's start), and a checkpoint shortly after each arrival (`run.sav` plus
-the core's `run.state`), once MegaMan is free to move. Quitting (Escape
+the core's `run.state`), once MegaMan is free to move: free as BN6 tests it
+before the pad and START (`src/director/director_hold.c`: no fade, cutscene,
+chat, lock, scripted walk, conveyor, NPC chat, warp, PET or pause), as every
+save waits (the arena door's, home's, the PET's Save's, the quit's; issue
+#23: a state written while BN6 held him came back held). A CONTINUE is
+watched until MegaMan first walks: held from its load on with nothing of the
+director's under way for two seconds, or the pad pushed three seconds with
+no step taken (the player object's `BN6_PLAYER_PAD`), BN6's holds are let go
+as its own routines let go of them and the map is entered again (then the
+layer's start); a map's entry waiting on a fade's mark no fade runs is let
+go too. The dev step `stuck NAME` (play.py, `--input "0:stuck conveyor"`) saves
+the run held so, to test it. Quitting (Escape
 twice, SIGTERM or SIGINT from a launcher) saves the run once more where he
 stands if he is free on the layer's map with nothing of the guardian under
 way; loading it restores the guardian's state from its flags. The shops'

@@ -86,6 +86,9 @@ bool director_suspend(void);
 /* The PET's Save: a checkpoint where MegaMan stands, once he is free to
  * move on the map ("Run saved"). */
 void director_save_here(void);
+/* After a CONTINUE, once a frame: MegaMan held by BN6 with nothing under way
+ * is let go (director_hold.c, issue #23) */
+void director_hold_watch(void);
 /* A Navi on the net has named the act's guardian this session. */
 bool director_guardian_heard(void);
 /* Where the run was last saved on this layer, for the quit prompt: its
@@ -111,6 +114,9 @@ void director_dev_hush_home(void);
  * moment MegaMan is free on its map; the guest's on a layer whose battles
  * are an older net's. */
 void director_dev_battle(void);
+/* The run saved with BN6 holding MegaMan by the mask's holds (director_hold.h's
+ * HELD_*), which no save of the run writes: a CONTINUE's recovery tested */
+void director_dev_hold(unsigned mask);
 /* A dev step's: every panel of the layer seen, for the map (--dev mapall). */
 void director_dev_reveal(void);
 /* The pad's keys on their way to the game: on the map L is MegaMan's

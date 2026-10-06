@@ -15,6 +15,7 @@
 
 #include "debug.h"
 #include "director.h"
+#include "director_hold.h"
 #include "flags.h"
 #include "game.h"
 #include "padmap.h"
@@ -24,7 +25,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160]; int place[3], flags[3]; bool placed, flagged, battle, sig; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160]; int place[3], flags[3]; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -65,8 +66,9 @@ static void parse_script(const char *spec) {
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
 		else if (colon && !strcmp(colon + 1, "sig")) s->sig = true;
+		else if (colon && !strncmp(colon + 1, "stuck ", 6)) s->held = (s->hold = held_parse(colon + 7)) != 0;
 		else if (colon) parse_buttons(colon + 1, s);
-		if ((s->placed || s->flagged || s->battle || s->sig) && s->frames > 0 && script_len + 1 < 512) {
+		if ((s->placed || s->flagged || s->battle || s->sig || s->held) && s->frames > 0 && script_len + 1 < 512) {
 			script[script_len + 1] = *s;
 			script[script_len + 1].frames = 0;
 			*s = (InputStep){ .frames = s->frames };
@@ -146,6 +148,8 @@ static void script_actions(void) {
 		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
 		if (s->battle && scene_current() == &scene_emu) director_dev_battle();
 		if (s->sig && scene_current() == &scene_emu) director_dev_signature();
+		/* (the run saved with MegaMan held: a CONTINUE's recovery, issue #23) */
+		if (s->held && scene_current() == &scene_emu) director_dev_hold(s->hold);
 		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
 		if (s->flagged && scene_current() == &scene_emu) {
 			static bool was[FLAG_COUNT];
@@ -180,7 +184,8 @@ static bool remote_open(const char *dir) {
  * (the second screen's picture), "state PATH",
  * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
  * "battle" (the layer's next random battle, director_dev_battle), "sig"
- * (MegaMan in the layer's signature, director_dev_signature), "quit";
+ * (MegaMan in the layer's signature, director_dev_signature), "stuck MASK"
+ * (the run saved with BN6 holding MegaMan so, director_dev_hold), "quit";
  * items apart by ';'. */
 static void remote_parse(char *line) {
 	script_len = script_pos = 0;
@@ -196,6 +201,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (!strcmp(tok, "battle")) s->battle = true;
 		else if (!strcmp(tok, "sig")) s->sig = true;
+		else if (!strncmp(tok, "stuck ", 6)) s->held = (s->hold = held_parse(tok + 6)) != 0;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
 		else {
 			char buttons[128] = "";
