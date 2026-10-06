@@ -11,9 +11,12 @@
 #ifdef _WIN32
 #include <direct.h>
 #define cw_mkdir(path) _mkdir(path)
+#define cw_rmdir(path) _rmdir(path)
 #else
 #include <sys/stat.h>
+#include <unistd.h>
 #define cw_mkdir(path) mkdir(path, 0755)
+#define cw_rmdir(path) rmdir(path)
 #endif
 
 /* The running program's path; false when it cannot be told. */
