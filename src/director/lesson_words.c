@@ -1,5 +1,6 @@
-/* MegaMan's lessons, each said once a profile (docs/VOICE.md): where a
- * chip come to the Pack went, and Rush's bone panels. */
+/* MegaMan's lessons (docs/VOICE.md): what the run adds, never BN6's own
+ * (the game is for its players: the owner's, 6 October 2026): Rush's bone
+ * panels. */
 #include "lesson_words.h"
 
 #include <stdio.h>
@@ -35,23 +36,6 @@ void rush_hint(void) {
 		snprintf(words, sizeof words, "@M Bone panels,Lan! Rush could bridge this gap!|@M He comes when we hold a RushFood a panel,%d here.|"
 			"@M He eats just one. A Net Dealer might have some.", layer.gap[0].len);
 	if (talk_start(words, FACE_MEGAMAN)) flag_set(LAYER_RUSH_TOLD_FLAG);
-}
-
-/* where a chip come to the pack went, the first time (pack_due) */
-void pack_words(void) {
-	if (!D.pack_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
-	if (talk_start("@M That chip went to our Pack,Lan!|@M To fight with it,add it to our Folder.|@M In the PET,go to Folder,then EDIT!", FACE_MEGAMAN)) {
-		D.pack_due = false;
-		profile.pack_taught = 1;
-		profile_save();
-	}
-}
-
-/* What the Mystery Data on a battlefield was, said the first time, after
- * it was met, kept or broken, not before */
-const char *gem_words(void) {
-	return "@M Lan! Mystery Data on the battlefield!|@M Any hit breaks it,theirs or ours.|"
-		"@M If it's still there when we win,it's ours!";
 }
 
 /* MegaMan's word on R pressed in the town away from the port: almost at a

@@ -129,8 +129,7 @@ static int draft_skip(TextArchive *t, int frags, int taken_flag, int next) {
 
 /* A guardian's HPMemory, his chip and the heal: in two boxes where all
  * three come (a playtester counted fourteen calls from a guardian's last
- * words to the way on, and asked for these in one, session 63), the
- * Pack's lesson left to MegaMan's own word on it (pack_watch). The run's
+ * words to the way on, and asked for these in one, session 63). The run's
  * last gives only his chip: no HP or heal for a walk to its exit (a
  * playtester given five HPMemory and a program after the final fight). */
 static void reward_items(TextArchive *t, const ScriptsReward *r, bool *first) {

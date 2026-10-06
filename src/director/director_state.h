@@ -100,8 +100,6 @@ typedef struct {
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named, 0 none (kept across a CONTINUE: act_note) */
-	bool gem_due;          /* a battle with a Mystery Data on its field is over: MegaMan says what it is (once) */
-	bool pack_due;         /* a chip came to the pack (bought, traded, found or won): MegaMan says where it went (once) */
 	int guest_due;         /* 1 + the chips that sat out of an older net's first battle, its words due (once a profile) */
 	char guest_out[96];    /* ... those chips, named (out_names) */
 	int recode_due;        /* ... it read a chip's code its own way: 1 going in, 2 the reward coming back (once a profile each) */

@@ -80,7 +80,7 @@ void dark_flame_watch(void) {
 	if (dark_count(D.dark_kind)) return;
 	dark_give(D.dark_kind);
 	D.dark_pack_due = true;
-	if (layer_objs_dark6) { profile.dark6_taught |= DARK6_FLAME_TAUGHT; profile.pack_taught = 1; }
+	if (layer_objs_dark6) profile.dark6_taught |= DARK6_FLAME_TAUGHT;
 	else profile.dark_taught = 1;
 	profile_save();
 }

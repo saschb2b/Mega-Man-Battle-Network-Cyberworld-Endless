@@ -141,6 +141,11 @@
   design: next, going back through older portals priced by the Net's
   clock, the townsfolk's jobs, a shop at home, and a town that
   remembers.
+- **No lessons on BN6's own mechanics.** The game is for Battle Network
+  players: MegaMan no longer explains the Pack and the Folder after the
+  first chip comes in, nor a battlefield's Mystery Data after the first
+  battle with one, nor the exit pad. What the run adds (Rush's gaps,
+  vows, the Net's clock, the older Net) is still said.
 - **Clearer words.** The Net Dealer and MegaMan say why Rush needs a
   RushFood for each panel of a gap ("He eats just one!"), and L names a
   second violet mark on the map as another one.

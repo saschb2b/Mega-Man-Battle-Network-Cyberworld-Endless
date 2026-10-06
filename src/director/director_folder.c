@@ -253,37 +253,6 @@ int director_pack_now(uint16_t *entry, uint8_t *count, int most) {
 	return n;
 }
 
-/* Every chip's copies in the pack, summed (a chip bought adds one to its
- * code's count, the record's first four bytes); -1 where the pack is out of
- * reach. The standard, mega and giga chips only (PACK_CHIPS). */
-static int pack_total(void) {
-	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
-	if (pack < BN6_EWRAM || pack + 12u * PACK_CHIPS >= BN6_EWRAM_END) return -1;
-	int n = 0;
-	for (uint32_t id = 1; id < PACK_CHIPS; ++id)
-		for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + 12u * id + k);
-	return n;
-}
-
-/* A chip come to the pack, as BN6 gives every chip but the folder's own,
- * where a full folder never sees it (a playtester's chip bought for the
- * guardian sat there unknown, session 61; another swapped six found chips
- * in by himself before a purchase taught it, session 62): the pack's count
- * as MegaMan stands on the map, risen by a Mystery Data, a battle, a shop
- * or a trader. The PET's EDIT moves chips in and out, so the count is
- * taken afresh as it closes. */
-void pack_watch(void) {
-	static int count = -1;
-	static bool in_pet;
-	if (profile.pack_taught) return;
-	if (main_mode() == PET_MODE) in_pet = true;
-	if (!on_map()) return;
-	int n = pack_total();
-	if (n > count && count >= 0 && !in_pet) D.pack_due = true;
-	count = n;
-	in_pet = false;
-}
-
 /* A BugFrag Trader's trade (issue #12). After Yes, BN6's script holds
  * (ts_wait_hold) for the trader machine on the Undernet's map, which rolls
  * the prize, gives it, takes the ten BugFrags, saves and runs the script

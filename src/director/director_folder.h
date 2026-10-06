@@ -26,7 +26,6 @@ void star_folder_pack(void);
 void library_to_game(void);
 void library_from_game(void);
 void programs_from_game(void);
-void pack_watch(void);
 void bugfrag_trade(void);
 
 #endif

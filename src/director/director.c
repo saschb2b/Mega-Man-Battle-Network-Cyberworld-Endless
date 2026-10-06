@@ -321,8 +321,6 @@ void drop_events(void) {
 
 static void words_due(void) {
 	gate_and_rush_words();
-	pack_watch();
-	pack_words();
 	guest_words();
 	dark_flame_watch();
 	/* (BN6's own DarkChips: in the Pack, their power as the BugFrags held
@@ -454,9 +452,6 @@ static void after_battle(void) {
 		for (int i = 0; i < D.next.nfoes; ++i)
 			if (D.next.foes[i].kind == FOE_VIRUS) profile_family_note(D.next.foes[i].family);
 		profile_save();
-		/* (and, the first time, what the Mystery Data on its field
-		 * was: said after it was met, kept or broken, not before) */
-		for (int i = 0; i < D.next.nobj; ++i) D.gem_due |= D.next.obj[i].kind >> 4 == FIELD_GEM && !profile.gem_taught;
 	}
 	if (emu_debug_on() && won) {
 		int r = emu_read16(BN6_BATTLE_REWARD);
@@ -504,7 +499,7 @@ static void mail_update(void) {
 	}
 	/* (after the arrival's card and words: said over the jack-in, it was
 	 * lost under them) */
-	if (D.mail_due && !D.reward_due && !D.gem_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
+	if (D.mail_due && !D.reward_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic()) {
 		if (talk_start(mail_words(D.mail_due), FACE_MEGAMAN)) D.mail_due = 0;
 	}
@@ -517,7 +512,7 @@ static void rival_update(void) {
 	if (D.duel_verdict_due && on_map() && !cinema_busy() && !talk_busy() && !emu_read8(BN6_CHATBOX) &&
 		talk_start(D.duel_verdict, FACE_CHAUD))
 		D.duel_verdict_due = false;
-	if (D.duel_call_due && !D.reward_due && !D.gem_due && !D.mail_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
+	if (D.duel_call_due && !D.reward_due && !D.mail_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
 		!emu_read8(BN6_CHATBOX) && !boss_cinematic() && D.frame > 60) {
 		const char *call = duel_call_words();
 		if (talk_start(call, FACE_CHAUD)) {
@@ -528,8 +523,7 @@ static void rival_update(void) {
 }
 
 /* What waits for its moment on the map: the Server's prize, the PET's words
- * and Dad's mail, Chaud's verdict and call, the battlefield's Mystery
- * Data, the lessons, a ScrtData's */
+ * and Dad's mail, Chaud's verdict and call, the lessons, a ScrtData's */
 static void talks_due(void) {
 	/* (as a talk, MegaMan held: run straight off, the A paging its first
 	 * box talked to the Server he faced, whose own words took the box, and
@@ -537,11 +531,6 @@ static void talks_due(void) {
 	if (D.reward_due && talk_script(D.objs.archive, D.objs.challenge_reward)) D.reward_due = false;
 	mail_update();
 	rival_update();
-	if (D.gem_due && !D.reward_due && talk_start(gem_words(), FACE_MEGAMAN)) {
-		D.gem_due = false;
-		profile.gem_taught = 1;
-		profile_save();
-	}
 	words_due();
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
 		D.fragment_due = false;

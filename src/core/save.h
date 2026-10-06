@@ -46,7 +46,7 @@ typedef struct {
 	 * PET's battle data on them, which his warnings read (a guardian's is
 	 * its rivals.sav record) */
 	uint32_t families_fought[2];
-	uint8_t gem_taught;       /* MegaMan has said what a Mystery Data on the battlefield is */
+	uint8_t gem_taught;       /* (unused: the battlefield's Mystery Data is BN6's own, unexplained for its players; kept for the profile's layout) */
 	/* the NaviCust's Spins found in the net, a bit per colour 1-6 (bit
 	 * c - 1: docs/META.md), and the run that found one (its seed) with that
 	 * colour, so that a run finds at most one */
@@ -72,7 +72,7 @@ typedef struct {
 	 * what the TagChip system Chaud's first clearance brings does (issue #51) */
 	uint8_t reg_taught, tag_taught;
 	uint8_t bbs_seen;         /* the Endless Net BBS's posts when its mail was last marked NEW (rumors) */
-	uint8_t pack_taught;      /* MegaMan has said a chip bought or traded goes to the Pack */
+	uint8_t pack_taught;      /* (unused: the Pack is BN6's own, unexplained for its players; kept for the profile's layout) */
 	uint8_t guest_taught;     /* ... and what an older net's battle is (docs/MULTIROM.md, Guest battles) */
 	uint8_t dark_taught;      /* ... and all of a DarkChip's price, at the first flame of darkness (docs/META.md) */
 	uint8_t recode_taught;    /* ... and that the older net reads chip codes its own way: 1 going in, 2 coming back */
