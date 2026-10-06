@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- **Layers to remember** (issue #98). After several layers the net felt
+  the same: its rooms were all of a size, no landmark stood on most of
+  them, and an act of Seaside, Sky, Green, the Graveyard or the Nest
+  always built two of its three layers alike. Each layer is now built
+  round one room it is remembered by, its signature, after its area's
+  own landmarks: Central's crater or big field, framed by an avenue of
+  cybertrees; Seaside's great field, or one round a pool; Sky's ring road
+  round a pad, or its pods grown to a plaza; Green's grove under the
+  giant cybertree, or its grass with holes in it; the Graveyard's great
+  slab or a slab round one hole, below its monument; the Undernet's court
+  with its statue between braziers, or a great plus; the Nest's plus or
+  slabs; a plaza or a plus in the comps and on the homepages. It is the
+  layer's biggest room, the way to the exit or the guardian runs through
+  it, and the area's landmark stands at it: over the study's layers
+  Green's giant tree stands on 82% of its layers (41% before) and the
+  Undernet's statue on half (3%). An act's three layers are three
+  places, never two in one layout and one signature where the area has
+  others, and an act no longer opens as the last one closed. The tile
+  test draws the new layers cleaner (2.4 tiles off and 75.1 seams per
+  100 panels, from 2.7 and 82.4). A comb's rung meets its field square
+  on, so holding the arrow's way no longer walks MegaMan past a lane
+  there. BN5's Science Labs and Oran Isle, whose art draws every room as
+  its small hubs, keep their layers without one. The design, what
+  Warframe's tilesets taught and the numbers are in docs/LEVEL_DESIGN.md
+  (Identity); `build.py atlas` names each layer's signature, the dev step
+  `sig` puts MegaMan in it, and `build.py screenshots identity-central`
+  (and -seaside, -sky, -green, -graveyard, -undernet), `build.py clips
+  identity` and `tools/before_after.py` with the same names show it. This
+  build makes layers differently, so a CONTINUE starts the layer afresh.
+
 - **A ROMs screen before the game, and saves that outlast a reinstall**
   (issue #97). On a PC, a Mac, Android, an iPhone or an iPad the game
   first opens on its ROMs screen, drawn in the look of the second
