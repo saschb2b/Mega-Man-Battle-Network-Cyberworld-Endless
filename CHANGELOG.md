@@ -334,7 +334,9 @@
 - **No lessons on BN6's own mechanics.** The game is for Battle Network
   players: MegaMan no longer explains the Pack and the Folder after the
   first chip comes in, nor a battlefield's Mystery Data after the first
-  battle with one, nor the exit pad. What the run adds (Rush's gaps,
+  battle with one, nor the exit pad, nor the NaviCust's rules (the command
+  line, bugs), the way into it in the PET, or that L and R turn a program
+  only with its Spin (a held Spin is still named). What the run adds (Rush's gaps,
   vows, the Net's clock, the older Net) is still said.
 - **Clearer words.** The Net Dealer and MegaMan say why Rush needs a
   RushFood for each panel of a gap ("He eats just one!"), and L names a

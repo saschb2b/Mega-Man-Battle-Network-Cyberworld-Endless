@@ -2090,8 +2090,8 @@ static void test_navicust(void) {
 	check_talk("navicust_bug_words", navicust_bug_words(bugs, true, NULL));
 	/* which programs turn: those whose colour's Spin is held */
 	navicust_set_spins(0);
-	CHECK(strstr(navicust_turn_words(0), "None yet") != NULL, "no Spin: %s", navicust_turn_words(0));
-	check_talk("navicust_turn_words none", navicust_turn_words(0));
+	/* (none held: nothing said, BN6's own rule unexplained to its players) */
+	CHECK(!*navicust_turn_words(0), "no Spin, no word: %s", navicust_turn_words(0));
 	navicust_set_spins(1u << 2);
 	CHECK(strstr(navicust_turn_words(0), "turn pink programs") && strstr(navicust_turn_words(0), "That's the Spin"), "the pink Spin: %s", navicust_turn_words(0));
 	navicust_set_spins(0x3F & ~(1u << 5));

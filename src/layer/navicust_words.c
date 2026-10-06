@@ -54,7 +54,7 @@ const char *navicust_color_turns(int c) {
 	static char buf[120];
 	if (c < 1 || c > 6) return "";
 	if (navicust_spins() >> (c - 1) & 1) snprintf(buf, sizeof buf, "Our %s Spin lets L and R turn it!", navicust_color_name(c));
-	else snprintf(buf, sizeof buf, "No %s Spin,so L and R won't turn it.", navicust_color_name(c));
+	else buf[0] = '\0';   /* (none held: BN6's own rule, unexplained to its players) */
 	return buf;
 }
 
@@ -65,7 +65,7 @@ const char *navicust_turn_words(int variant) {
 		c = R.data[R.layout->navicust_programs + (uint32_t)variant * 16 + 3];
 	if (c >= 1 && c <= 6) return navicust_color_turns(c);
 	for (int k = 1; k <= 6; ++k) held += navicust_spins() >> (k - 1) & 1;
-	if (!held) return "L and R turn programs whose Spin we hold. None yet!";
+	if (!held) return "";
 	if (held == 6) return "L and R turn any program as we place it!";
 	int k = snprintf(buf, sizeof buf, "L and R turn "), n = 0;
 	for (int i = 1; i <= 6; ++i)

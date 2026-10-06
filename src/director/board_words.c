@@ -46,9 +46,10 @@ const char *off_board_words(void) {
 	 * SuperArmor with no Spin, and nothing said why; and whether it takes
 	 * moving others first, or its code) */
 	bool stands = fits_as_it_stands(offv);
-	snprintf(words, sizeof words, "@M Lan,%s isn't on our board!|@M It does nothing till it's placed.|@M In the PET,go to MegaMan,then NaviCust!|@M %s%s%s",
-		off, stands ? "" : "There's no room for it as the board stands.|@M We'll have to move a program or two.|@M ", navicust_turn_words(offv),
-		stands ? "" : code_words(offv, true));
+	const char *turns = navicust_turn_words(offv);
+	snprintf(words, sizeof words, "@M Lan,%s isn't on our board!%s%s%s%s",
+		off, stands ? "" : "|@M There's no room for it as the board stands.|@M We'll have to move a program or two.",
+		*turns ? "|@M " : "", turns, stands ? "" : code_words(offv, true));
 	return words;
 }
 

@@ -28,7 +28,8 @@ static int draft_take(TextArchive *t, int program, int color, bool teach, int ta
 	 * one off the board for two acts; and whether L and R turn it, which
 	 * a playtester looked for here) */
 	char install[200];
-	snprintf(install, sizeof install, "Let's install it! In\nthe PET,MegaMan,then\nNaviCust!\n%s", navicust_color_turns(color));
+	const char *turns = navicust_color_turns(color);
+	snprintf(install, sizeof install, "Let's install it!%s%s", *turns ? "\n" : "", turns);
 	ta_page(t, FACE_MEGAMAN, install, false);
 	(void)teach;
 	ta_flag_set(t, taken_flag);
@@ -55,12 +56,6 @@ static void draft_about(TextArchive *t, const char *about, int color, const char
  * it), each to its branch (`take`), B to `skip`. Its script. */
 static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip) {
 	int s = ta_script(t), n = draft->n;
-	if (draft->teach) {
-		char rules[300];
-		snprintf(rules, sizeof rules, "A program needs a\nblock on the command\nline!\nPlus parts go\nanywhere but the\ncommand line.\n"
-			"Same colors touching\nmake a bug. So does\ngoing off the edge!\n%s", navicust_turn_words(0));
-		ta_page(t, FACE_MEGAMAN, rules, false);
-	}
 	char none[96];
 	snprintf(none, sizeof none, "Or B takes none,and\nwe get %d BugFrags!", draft->skip_frags);
 	ta_page(t, FACE_MEGAMAN, none, false);
