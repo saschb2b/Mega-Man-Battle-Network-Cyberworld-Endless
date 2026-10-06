@@ -13,6 +13,13 @@
  * Trader off, its door out to where the planned town has it. False where
  * its door cannot be read. */
 bool aster_land_install(void);
+/* Home's shops in the game's shop data: the SubChip seller's stock for the
+ * act ahead, and the Order Service as a run has it (one order a visit,
+ * HOME_ORDER_FLAG, cleared as a visit begins). Again after a CONTINUE's
+ * state, over its lists in RAM: BN6's screen shows only the entries that
+ * match the ROM copy's, and a save whose act ahead wanted other keys came
+ * back with an empty seller (session 71). */
+void aster_land_shops(void);
 /* Whether map (group, number) is AsterLand. */
 bool aster_land_map(int group, int number);
 /* Its door out: the middle of its cells (world units); false none. */

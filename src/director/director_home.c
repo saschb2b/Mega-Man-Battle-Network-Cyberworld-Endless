@@ -234,6 +234,9 @@ bool home_rebuild(void) {
 }
 
 void home_resume(void) {
+	/* (the shops' lists in RAM are the state's: set again to match the ROM
+	 * copy's, as a layer's are after its CONTINUE) */
+	home_places_shops();
 	/* (the game reloads the map's people and tiles from its tables, which a
 	 * state does not hold: Lan's HP, or the town where Lan stood) */
 	emu_warp(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), (int)emu_read32(BN6_PLAYER_X) >> 16, (int)emu_read32(BN6_PLAYER_Y) >> 16,
