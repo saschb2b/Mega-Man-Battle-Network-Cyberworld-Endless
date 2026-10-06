@@ -1,93 +1,61 @@
-/* The player page (site.css holds the PET's pieces). */
+/* The browser player (web/play/): Nintendo's way for a classic game, in
+ * BN6's PET (src/second/second_frame.c's colours). The game alone at its
+ * largest whole scale on a dark PET grid (app.js sizes it, --sw), a slim
+ * PET band over it with the place and MENU, the ROMs put in on the screen
+ * itself, every tool in one PET menu over the paused game. */
 
-main.wrap { padding-top: 24px; }
-
-/* ---- the player: BN6's PET menu (src/second/second_frame.c's colours, as
- * the second screen and the game's own ROMs screen draw them): a dark green
- * band with PET and its three light stripes, the place on a slot at its
- * right; under it the screen, and beside it SELECT's column of menu plates
- * with the cursor's arrow (site.css's .menu and .plate) ---- */
-.pet {
+body.play {
 	--pet-green: #08bd73; --pet-line: #4ae773; --pet-dark: #007b4a; --pet-cyan: #42c6e7; --pet-cyan-hi: #6bdeff;
 	--pet-navy: #10526b; --pet-slot: #10636b; --pet-edge: #214a52; --pet-ink: #00314a; --pet-dim: #6b9cad;
-	border: 3px solid var(--pet-green);
-	box-shadow: inset 0 0 0 3px var(--pet-cyan);
-	background: var(--pet-navy);
-	padding: 3px;
+	background-color: #0b2532;
+	background-image: linear-gradient(rgba(66, 198, 231, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(66, 198, 231, 0.07) 1px, transparent 1px);
+	background-size: 24px 24px;
 }
-.pet-head { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 12px; background: var(--pet-dark); }
-.pet-head h1 { margin: 0; font: 700 1.1rem/1 var(--caps); color: var(--white); letter-spacing: 0.1em; text-transform: uppercase; }
-.pet-head .stripes { width: 24px; height: 12px; background: repeating-linear-gradient(115deg, var(--pet-line) 0 3px, transparent 3px 8px); }
-/* (the place, as BN6's PET menu names it beside its screen) */
-.place {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin-left: auto;
-	padding: 5px 10px 4px;
-	background: var(--pet-slot);
-	border: 3px solid var(--pet-edge);
-	font: 700 0.8rem/1 var(--caps);
-	color: var(--white);
-	white-space: nowrap;
-}
-.place b { color: var(--pet-cyan-hi); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+/* (playing: the game the page's one thing, the site's bar and the rest away) */
+body.play.playing .pet-bar, body.play.playing .help, body.play.playing footer.site { display: none; }
 
-.pet-body { display: grid; grid-template-columns: minmax(0, 1fr) 236px; gap: 12px; padding: 12px; }
-.pet-menu { display: flex; flex-direction: column; gap: 8px; }
-.pet-menu .select { font: 700 0.8rem/1 var(--caps); color: var(--white); text-shadow: var(--edge); letter-spacing: 0.1em; text-transform: uppercase; padding-left: 30px; }
-.pet-menu .plate { width: 100%; min-height: 42px; gap: 8px; font-size: 0.85rem; }
-.pet-menu .icon { width: 24px; height: 24px; background-size: 24px 24px; }
-.pet-menu .plate.warn { color: var(--orange); }
-.pet-menu label.plate { position: relative; }
-.pet-menu label.plate input, label.go input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-label.go { position: relative; }
-/* (a phone's narrow page: the menu under the screen, two plates a row) */
-@media (max-width: 860px) {
-	.pet-body { grid-template-columns: minmax(0, 1fr); }
-	.pet-menu .menu { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 420px) { .pet-menu .menu { grid-template-columns: 1fr; } .pet-body { padding: 8px; } }
+.console { display: flex; flex-direction: column; align-items: center; padding: 21px 15px 28px; }
+.screen-wrap { width: var(--sw, 720px); max-width: 100%; }
 
-/* the one thing to press: PLAY, gold as the game's own (launcher_draw.c) */
-.go {
-	display: inline-flex;
-	align-items: center;
-	gap: 10px;
-	padding: 9px 22px 8px 18px;
-	background: var(--gold);
-	border: 3px solid var(--pet-ink);
-	box-shadow: 0 0 0 3px var(--white);
-	color: var(--pet-ink);
-	font: 700 1.1rem/1 var(--caps);
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
-	cursor: pointer;
-}
-.go::before { content: ""; width: 10px; height: 12px; background: var(--pet-ink); clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.go:hover, .go:focus-visible, .go:focus-within { background: #fff27b; outline: none; }
+/* ---- the PET's band: its name and three stripes, the place on a slot ---- */
+.pet-band { display: flex; align-items: center; gap: 12px; min-height: 36px; padding: 3px 3px 3px 12px; background: var(--pet-dark); }
+/* (the band and the screen framed in the PET's green, outside their boxes: the screen's inside is the game's exact size) */
+.screen-wrap > .pet-band, #stage { box-shadow: 0 0 0 3px var(--pet-green); }
+.screen-wrap > .pet-band { margin-bottom: 3px; }
+.pet-name { margin: 0; font: 700 1rem/1 var(--caps); color: var(--white); letter-spacing: 0.1em; text-transform: uppercase; }
+.pet-band .stripes { width: 24px; height: 12px; background: repeating-linear-gradient(115deg, var(--pet-line) 0 3px, transparent 3px 8px); }
+.place { display: flex; align-items: center; gap: 8px; margin-left: auto; padding: 4px 10px 3px; background: var(--pet-slot); border: 3px solid var(--pet-edge); font: 700 0.75rem/1 var(--caps); color: var(--white); white-space: nowrap; }
+.place b { color: var(--pet-cyan-hi); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.menu-btn { display: flex; align-items: center; gap: 8px; padding: 4px 10px 3px; background: var(--gold); border: 3px solid var(--pet-ink); color: var(--pet-ink); font: 700 0.8rem/1 var(--caps); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.menu-btn:hover, .menu-btn:focus-visible { background: #fff27b; outline: none; }
+.menu-btn kbd, .menu-foot kbd, .hints kbd { display: inline-block; min-width: 1.6em; padding: 2px 4px 1px; border: 2px solid currentColor; font: 700 0.65rem/1 var(--caps); text-align: center; }
 
+/* ---- the screen: black round the game, framed in the PET's green ---- */
 #stage {
 	position: relative;
 	display: grid;
 	place-items: center;
-	/* (the game's own shape, the ROMs screen's too: as wide as its column
-	 * lets it, and taller only where a phone's narrow page needs the room) */
+	width: 100%;
 	aspect-ratio: 3 / 2;
 	background: #000;
 	overflow: hidden;
-	/* (the PET's screen, set in its body: a dark edge, then the cyan line) */
-	box-shadow: 0 0 0 3px var(--pet-edge), 0 0 0 6px var(--pet-cyan);
 }
-#stage:has(> #gate:not([hidden])) { overflow: visible; }
-#stage:fullscreen { aspect-ratio: auto; min-height: 100vh; }
+#canvas, #gate { grid-area: 1 / 1; }
+#canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; outline: none; }
+#stage, #canvas { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+#canvas { touch-action: none; }
+/* (a phone's narrow screen: the ROMs need more room than its 3:2) */
+@media (max-width: 600px) { #stage:has(> #gate:not([hidden])) { aspect-ratio: auto; min-height: 66vw; } }
+
+/* the screen on its own, fullscreen: the game and nothing else */
+#app:fullscreen { width: 100vw; height: 100vh; display: grid; place-items: center; background: #000; }
+#app:fullscreen .pet-band, #app:fullscreen .hints { display: none; }
+#app:fullscreen #stage { width: var(--fw, 100vw); box-shadow: none; }
 
 /* a phone or tablet: the game fills the screen, its own buttons drawn round
  * the picture (the engine's --touch), clear of notches and rounded corners */
 body.touch-play { overflow: hidden; overscroll-behavior: none; }
-body.touch-play #stage { position: fixed; inset: 0; z-index: 50; min-height: 0; aspect-ratio: auto; box-shadow: none; }
-/* (sized outright: a canvas left to the grid takes its height from its own
- * pixels' shape, and those follow the size it is given) */
+body.touch-play #stage { position: fixed; inset: 0; z-index: 50; width: auto; aspect-ratio: auto; box-shadow: none; }
 body.touch-play #canvas {
 	position: absolute;
 	left: env(safe-area-inset-left);
@@ -95,19 +63,8 @@ body.touch-play #canvas {
 	width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
 	height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
-#stage, #canvas { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-#canvas { touch-action: none; }
 
-/* the picture and the gate share one cell, so the gate's text grows the stage */
-#canvas, #gate { grid-area: 1 / 1; }
-#canvas {
-	display: block;
-	image-rendering: pixelated;
-	image-rendering: crisp-edges;
-	outline: none;
-}
-
-/* the ROMs screen: the PET's navy body, as compact as the game's own */
+/* ---- the ROMs, put in on the screen: as the game's own ROMs screen ---- */
 #gate {
 	align-self: stretch;
 	justify-self: stretch;
@@ -115,28 +72,57 @@ body.touch-play #canvas {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	gap: 10px;
-	padding: 22px 16px 20px;
+	/* (sized in the game's own pixels, --px, as its ROMs screen draws itself at the picture's scale) */
+	gap: calc(4 * var(--px, 3px));
+	padding: calc(6 * var(--px, 3px)) 16px;
 	text-align: center;
 	color: var(--white);
 	background: var(--pet-navy);
 }
 #gate[hidden], [hidden] { display: none !important; }
-#gate p { max-width: 520px; margin: 0; }
+#gate p { max-width: 560px; margin: 0; }
 #gate code { color: var(--gold); }
-#status { color: var(--gold); min-height: 1.4em; font: 700 0.85rem/1.4 var(--caps); white-space: pre-line; }
-#gate p.about { font-size: 0.95rem; color: var(--pet-dim); }
-.actions { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 4px; }
-.touch-note { display: none; }
-@media (pointer: coarse) { .touch-note { display: block; font-size: 0.9rem; color: var(--pet-dim); } }
+.insert { font: 700 max(15px, calc(5.5 * var(--px, 3px)))/1.2 var(--caps); color: var(--white); letter-spacing: 0.06em; text-transform: uppercase; text-shadow: var(--edge); }
+#status { min-height: 1.3em; font: 700 max(12px, calc(4 * var(--px, 3px)))/1.4 var(--caps); color: var(--gold); white-space: pre-line; }
+#status.refused { padding: 6px 10px 5px; background: var(--pet-slot); border: 3px solid var(--pet-edge); color: var(--white); }
+.fine { font-size: max(12px, calc(3.6 * var(--px, 3px))); color: var(--pet-dim); }
+.actions { display: flex; gap: 12px; justify-content: center; }
+
+/* PLAY: the one thing to press, gold as the game's own */
+.go {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: calc(3 * var(--px, 3px)) calc(8 * var(--px, 3px)) calc(2.6 * var(--px, 3px)) calc(6 * var(--px, 3px));
+	background: var(--gold);
+	border: 3px solid var(--pet-ink);
+	box-shadow: 0 0 0 3px var(--white);
+	color: var(--pet-ink);
+	font: 700 max(16px, calc(5.5 * var(--px, 3px)))/1 var(--caps);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+.go::before { content: ""; width: 10px; height: 12px; background: var(--pet-ink); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.go:hover, .go:focus-visible, .go:focus-within { background: #fff27b; outline: none; }
+.go input, .plate input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+/* ---- the keys under the screen, one line ---- */
+.hints { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin: 10px 0 0; font: 700 0.7rem/1.4 var(--caps); color: var(--pet-dim); text-transform: uppercase; }
+.hints span { display: inline-flex; align-items: center; gap: 5px; }
+@media (pointer: coarse) { .hints, .menu-btn kbd, .menu-foot { display: none; } }
 
 /* the two cartridges, as the game's launcher draws them (src/launcher/):
  * an open spot until the ROM is in, then the cartridge, its label in its
  * game's colours with the game's face, drawn from the ROM by app.js (never
  * a file of the site's); one game pixel --k of the page's: two, one and a
  * a phone's narrow page; two, one and a half on a phone's */
-.carts { --k: 2px; display: flex; gap: 8px 24px; justify-content: center; flex-wrap: wrap; }
-@media (max-width: 480px) { .carts { --k: 1.5px; gap: 6px 10px; } #gate { padding: 16px 6px; } }
+.carts { display: flex; gap: 10px 28px; justify-content: center; align-items: flex-end; flex-wrap: wrap; }
+/* (BN6's a game pixel a pixel of the picture's, BN5's, the optional one, three quarters of it) */
+.cart.main { --k: max(1.5px, calc(0.95 * var(--px, 3px))); }
+.cart.extra { --k: max(1.2px, calc(0.7 * var(--px, 3px))); }
+.carts { gap: calc(3 * var(--px, 3px)) calc(9 * var(--px, 3px)); }
 .cart {
 	display: flex;
 	flex-direction: column;
@@ -180,11 +166,59 @@ body.touch-play #canvas {
 .cart .caption { font: 700 calc(4.8 * var(--k))/1.2 var(--caps); color: #6b9cad; }
 .cart.in .caption { color: var(--white); }
 
-.help { padding: 28px 0 0; }
-.help .who { margin-top: 0; }
-table { border-collapse: collapse; width: 100%; }
-th, td { padding: 5px 12px 5px 0; text-align: left; vertical-align: middle; }
-th { font: 700 0.8rem/1 var(--caps); color: #6bdeff; text-transform: uppercase; }
-td:first-child { font: 700 0.9rem/1 var(--caps); text-shadow: var(--edge); }
+/* ---- the PET menu over the paused game ---- */
+#menu { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 12px; background: rgba(0, 18, 28, 0.74); backdrop-filter: blur(2px); }
+.menu-panel { width: min(680px, 100%); max-height: calc(100vh - 24px); overflow-y: auto; background: var(--pet-navy); border: 3px solid var(--pet-cyan); box-shadow: 0 0 0 3px var(--pet-green); }
+.menu-body { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 16px; padding: 16px 16px 8px; }
+.menu-body .menu { gap: 4px; }
+.menu-body .plate { width: 100%; min-height: 40px; gap: 8px; font-size: 0.85rem; }
+.menu-body .icon { width: 24px; height: 24px; background-size: 24px 24px; }
+.plate.warn { color: var(--orange); }
+/* (one cursor, BN6's: where the keys or the pointer last were, app.js's .cursor; not one for each) */
+#menu .menu li::before { content: none !important; }
+#menu .plate:hover, #menu .plate:focus-visible { border-image-source: url(../assets/ui/plate.png); }
+#menu .menu li.cursor .plate { border-image-source: url(../assets/ui/plate-on.png); }
+#menu .menu li.cursor::before {
+	content: "" !important;
+	position: absolute;
+	left: -27px;
+	top: 50%;
+	width: 18px;
+	height: 24px;
+	translate: 0 -50%;
+	background: var(--orange);
+	clip-path: polygon(0 0, 100% 50%, 0 100%);
+	animation: nudge 0.5s steps(2) infinite;
+}
+.kept { align-self: start; padding: 10px 12px; background: var(--pet-slot); border: 3px solid var(--pet-edge); color: var(--white); }
+.kept .who { margin: 0 0 8px; }
+.kept dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; margin: 0; font-size: 0.85rem; }
+.kept dt { font: 700 0.7rem/1.5 var(--caps); color: var(--pet-cyan-hi); text-transform: uppercase; }
+.kept dd { margin: 0; }
+.kept .note { margin: 10px 0 0; font-size: 0.85rem; color: var(--gold); }
+.controls-view { grid-template-columns: 1fr; }
+/* (the keys as a card the eye reads in rows: the GBA's button in gold, each
+ * key a light keycap, a line between rows; the owner found it hard to read) */
+.controls-view table { border-collapse: collapse; width: 100%; background: var(--pet-slot); border: 3px solid var(--pet-edge); }
+.controls-view tr + tr { border-top: 2px solid var(--pet-edge); }
+.controls-view th, .controls-view td { padding: 9px 12px; text-align: left; vertical-align: middle; }
+.controls-view th { font: 700 0.75rem/1 var(--caps); color: var(--pet-cyan-hi); text-transform: uppercase; letter-spacing: 0.08em; background: var(--pet-edge); }
+.controls-view td { font-size: 1rem; color: var(--white); }
+.controls-view td:first-child { width: 22%; font: 700 1rem/1 var(--caps); color: var(--gold); text-transform: uppercase; }
+.controls-view td kbd { display: inline-block; min-width: 1.9em; margin: 2px 4px 2px 0; padding: 5px 6px 4px; background: var(--white); border: 0; box-shadow: 0 3px 0 #9fb7bf; color: var(--pet-ink); font: 700 0.85rem/1 var(--caps); text-align: center; }
+.controls-view .note { margin: 6px 0 0; font-size: 0.95rem; line-height: 1.5; color: #d6f4ff; }
+.menu-foot { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin: 0; padding: 6px 16px 10px; font: 700 0.7rem/1 var(--caps); color: var(--pet-dim); text-transform: uppercase; }
+@media (max-width: 560px) {
+	.menu-body { grid-template-columns: 1fr; }
+	/* (a phone's width: the card's three columns tighter, so they fit it) */
+	#menu { padding: 6px; }
+	.controls-view { padding: 10px 10px 6px; }
+	.controls-view th, .controls-view td { padding: 8px 6px; }
+	.controls-view td, .controls-view td:first-child { font-size: 0.85rem; }
+	.controls-view td:first-child { width: auto; }
+}
 
-.help .note { margin: 10px 0 0; font-size: 0.95rem; color: #d6f4ff; }
+/* ---- below the screen: what the player is, folded ---- */
+.help { width: var(--sw, 720px); max-width: 100%; margin-top: 22px; }
+.help summary { cursor: pointer; font: 700 0.8rem/1 var(--caps); color: var(--pet-cyan-hi); text-transform: uppercase; letter-spacing: 0.08em; }
+.help .textbox { margin-top: 10px; }

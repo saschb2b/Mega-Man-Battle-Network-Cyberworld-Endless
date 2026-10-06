@@ -595,6 +595,13 @@ static bool fill_3ds = true;
 /* The page's Smooth motion button, while the game runs (web/play/app.js). */
 void cw_set_smooth(int on);
 EMSCRIPTEN_KEEPALIVE void cw_set_smooth(int on) { P.blend = on != 0; }
+/* The page's menu over the game (web/play/app.js): the game waits, silent,
+ * its last picture held, as Nintendo's classic apps pause under theirs. */
+void cw_set_paused(int on);
+EMSCRIPTEN_KEEPALIVE void cw_set_paused(int on) {
+	P.paused = on != 0;
+	audio_pause(P.paused);
+}
 #endif
 
 void platform_load_settings(const char *path) {

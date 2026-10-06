@@ -2,15 +2,18 @@
 
 ## Unreleased
 
-- **The browser's player is BN6's PET menu.** Under a PET band with the
-  place beside it, the screen keeps the game's own shape, the ROMs on it
-  as compact as the game's own ROMs screen, and beside it SELECT's column
-  of menu plates with the cursor's arrow: Save backup, Load backup,
-  Fullscreen, Smooth motion and Forget all (under the screen on a phone).
-  It had stretched the ROMs over the whole page with a row of five big
-  buttons under it that ran off its edge, in none of the second screen's
-  look. The ROMs' slots choose the files once BN6 is in, as the game's own
-  do; the Add BN5 button that did the same is gone.
+- **The browser's player is the game alone on its screen:** the picture
+  at the largest whole scale the window holds, framed in the PET's green
+  on its dark grid, the site's bar gone while it plays and the page's
+  help folded under it. The ROMs go in on the screen itself, drawn as
+  the game's own ROMs screen draws them, and a return visit is one gold
+  PLAY. Every tool is in one PET menu, MENU or F1, over the game, which
+  waits under it, silent: Continue, Fullscreen, Smooth motion, the
+  controls on a card of their own, Save backup, Load backup and Forget
+  all, beside what the browser keeps. One line of keys sits under the
+  screen. The page had stretched the ROMs over its whole width, with a
+  row of five big buttons under them that ran off its edge, in none of
+  the second screen's look.
 
 ## 0.11.2 (2026-10-06)
 

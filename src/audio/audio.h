@@ -36,6 +36,10 @@ void audio_sfx(Sfx s);
 void audio_chime(void);
 void audio_music(Music m);
 void audio_set_volume(int music, int sfx); /* 0-10 */
+#ifdef __EMSCRIPTEN__
+/* The device held silent (true) or playing again: the browser page's menu. */
+void audio_pause(bool on);
+#endif
 /* Play a song-table entry directly (music replaces, effects mix). */
 void audio_play_song(int id, bool music);
 void audio_music_id(int id);

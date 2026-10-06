@@ -36,14 +36,19 @@ const OTHERS = {
 const OTHER_GAME = 'not BN6 Gregar or BN5 Team Colonel';
 
 const $ = (id) => document.getElementById(id);
-const canvas = $('canvas'), stage = $('stage'), gate = $('gate'), statusLine = $('status');
+const canvas = $('canvas'), stage = $('stage'), gate = $('gate'), statusLine = $('status'), app = $('app'), menu = $('menu');
 let ready = false, started = false;
 // a phone or tablet: the game takes the whole screen and draws its own buttons
 // (?touch=1 or ?touch=0 decides it for a screen that tells it wrong)
 const touchParam = new URLSearchParams(location.search).get('touch');
 const touchPlay = touchParam ? touchParam === '1' : window.matchMedia('(pointer: coarse)').matches;
 
-function say(text) { statusLine.textContent = text; }
+// the screen's line, and the menu's while it is open (refused files stand out)
+function say(text, refused) {
+	statusLine.textContent = text;
+	statusLine.classList.toggle('refused', !!refused);
+	$('menu-note').textContent = menu.hidden ? '' : text;
+}
 
 // ---- the engine ----
 
@@ -85,13 +90,25 @@ function kept(id) {
 	try { return Module.FS.stat(ROM_DIR + '/' + ROMS[id].file).size === ROM_SIZE; } catch (e) { return false; }
 }
 
+// When `path` was last written, as Nintendo's apps date a save: today's by
+// its hour, an older one by its day; null where there is none
+function writtenAt(path) {
+	let t;
+	try { t = Module.FS.stat(path).mtime; } catch (e) { return null; }
+	return when(t instanceof Date ? t : new Date(t));
+}
+function when(d) {
+	if (!d || isNaN(d)) return null;
+	const today = new Date().toDateString() === d.toDateString();
+	return today ? 'Today ' + d.toTimeString().slice(0, 5) : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
+
 // What is kept, in words
 function keptWords() {
-	const add = touchPlay ? 'tap its slot' : 'click its slot or drop it here';
-	if (kept('bn6') && kept('bn5')) return 'Play with BN6 and BN5.';
-	if (kept('bn6')) return 'Play with BN6. BN5 can join: ' + add + '.';
-	if (kept('bn5')) return 'BN5 is kept. Choose BN6 to begin.';
-	return touchPlay ? 'Choose your ROMs to begin.' : 'Choose your ROMs, or drop them here.';
+	const add = touchPlay ? 'tap its slot' : 'click its slot or drop it here', run = writtenAt(DATA + '/savedata/run.sav');
+	if (kept('bn6')) return (run ? 'Run saved ' + run + '.' : 'Ready.') + (kept('bn5') ? '' : '\nBN5 can join: ' + add + '.');
+	if (kept('bn5')) return 'BN5 is in. Now BN6.';
+	return touchPlay ? 'Choose your ROM files.' : 'Drop your ROM files here, or choose them.';
 }
 
 // Play when BN6 is kept, else ask for it; BN5 asked for beside it. `note`,
@@ -99,10 +116,11 @@ function keptWords() {
 function offer(note) {
 	const six = kept('bn6');
 	// (once BN6 is in, the cartridges choose the files, as the game's ROMs screen's do)
+	$('insert').hidden = six;
 	$('pick').hidden = six;
 	$('play').hidden = !six;
 	for (const id of Object.keys(ROMS)) showCart(id);
-	say(note || keptWords());
+	say(note || keptWords(), !!note);
 	if (six) $('play').focus();
 }
 
@@ -193,7 +211,8 @@ function face(rom, where, canvas) {
 function start() {
 	if (!ready || started || !kept('bn6')) return;
 	started = true;
-	$('pet-place').textContent = 'Game';
+	$('pet-place').textContent = $('menu-place').textContent = 'Game';
+	document.body.classList.add('playing');
 	track('game-start', { input: touchPlay ? 'touch' : 'keys', bn5: kept('bn5') ? 'yes' : 'no' });
 	gate.hidden = true;
 	if (touchPlay) {
@@ -207,6 +226,7 @@ function start() {
 		return;
 	}
 	fit();
+	window.scrollTo(0, 0);
 	canvas.focus();
 	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off']);
 }
@@ -375,6 +395,9 @@ $('export').addEventListener('click', () => {
 	a.click();
 	a.remove();
 	setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+	try { localStorage.setItem('cw-backup-at', String(Date.now())); } catch (e) { /* not kept */ }
+	if (!menu.hidden) showKept();
+	say('Backup saved: ' + SAVES_FILE + '.');
 	track('saves-export');
 });
 
@@ -403,27 +426,113 @@ $('forget').addEventListener('click', () => {
 	req.onsuccess = req.onerror = req.onblocked = () => location.reload();
 });
 
-// ---- the picture: 240x160 at the largest whole scale in device pixels ----
+// ---- the screen: 240x160 at the largest whole scale in device pixels that
+// the window leaves it (the site's bar away while the game plays), the
+// ROMs on it at the same size; a phone's narrow page its whole width ----
 
 function fit() {
-	// (before the game, the ROMs screen alone sizes the stage)
-	if (!started || touchPlay) return;
-	const dpr = window.devicePixelRatio || 1;
-	const full = document.fullscreenElement === stage;
-	const w = full ? screen.width : Math.min(stage.clientWidth, 240 * 8);
-	const h = full ? screen.height : stage.clientHeight;
-	const k = Math.max(1, Math.floor(Math.min((w * dpr) / 240, (h * dpr) / 160)));
-	canvas.style.setProperty('width', (240 * k) / dpr + 'px', 'important');
-	canvas.style.setProperty('height', (160 * k) / dpr + 'px', 'important');
+	if (touchPlay && started) return;
+	const dpr = window.devicePixelRatio || 1, root = document.documentElement;
+	if (document.fullscreenElement === app) {
+		const k = Math.max(1, Math.floor(Math.min((screen.width * dpr) / 240, (screen.height * dpr) / 160)));
+		app.style.setProperty('--fw', (240 * k) / dpr + 'px');
+		return;
+	}
+	const bar = document.querySelector('.pet-bar'), band = app.querySelector('.pet-band'), hints = $('hints');
+	const room = window.innerHeight - (started ? 0 : bar.offsetHeight) - band.offsetHeight - (hints.offsetHeight + 10) - 52;
+	const width = app.parentElement.clientWidth - 30;
+	// (a phone's or tablet's: the page's width, as the game takes the whole
+	// screen once it starts; elsewhere the largest whole scale)
+	const k = Math.max(1, Math.floor(Math.min((width * dpr) / 240, (room * dpr) / 160)));
+	root.style.setProperty('--sw', touchPlay ? '100%' : (240 * k) / dpr + 'px');
+	// (one of the game's pixels on the page: the ROMs screen's unit)
+	root.style.setProperty('--px', (touchPlay ? Math.max(1.25, width / 240) : k / dpr) + 'px');
 }
 
 window.addEventListener('resize', fit);
 document.addEventListener('fullscreenchange', fit);
 $('fullscreen').addEventListener('click', () => {
+	closeMenu();
 	if (document.fullscreenElement) document.exitFullscreen();
-	else stage.requestFullscreen().catch(() => {});
-	canvas.focus();
+	else app.requestFullscreen().catch(() => {});
 });
+
+// ---- the PET menu: over the game, which waits under it (cw_set_paused) ----
+
+function plates() { return Array.from(menu.querySelectorAll('.menu-body:not([hidden]) .plate')); }
+
+// the cursor: on the plate the keys or the pointer last chose, one only
+function cursorTo(plate) {
+	for (const li of menu.querySelectorAll('.menu li.cursor')) li.classList.remove('cursor');
+	if (plate) plate.parentElement.classList.add('cursor');
+}
+menu.addEventListener('focusin', (e) => { if (e.target.classList.contains('plate')) cursorTo(e.target); });
+menu.addEventListener('mouseover', (e) => {
+	const plate = e.target.closest('.plate');
+	if (plate && document.activeElement !== plate) plate.focus({ preventScroll: true });
+});
+
+function showKept() {
+	$('kept-bn6').textContent = kept('bn6') ? 'In' : 'Not yet';
+	$('kept-bn5').textContent = kept('bn5') ? 'In' : 'Not in (optional)';
+	$('kept-run').textContent = writtenAt(DATA + '/savedata/run.sav') || 'None yet';
+	let at = null;
+	try { at = localStorage.getItem('cw-backup-at'); } catch (e) { /* not kept */ }
+	$('kept-backup').textContent = at ? when(new Date(Number(at))) : 'Never';
+}
+
+function openMenu() {
+	if (!menu.hidden) return;
+	if (started) Module.ccall('cw_set_paused', null, ['number'], [1]);
+	if (ready) showKept();
+	$('menu-note').textContent = '';
+	$('menu-main').hidden = false;
+	$('menu-controls').hidden = true;
+	menu.hidden = false;
+	$('continue').focus();
+	track('menu-open');
+}
+
+function closeMenu() {
+	if (menu.hidden) return;
+	menu.hidden = true;
+	if (started) { Module.ccall('cw_set_paused', null, ['number'], [0]); canvas.focus(); }
+}
+
+$('menu-open').addEventListener('click', openMenu);
+$('continue').addEventListener('click', closeMenu);
+menu.addEventListener('click', (e) => { if (e.target === menu) closeMenu(); });
+$('show-controls').addEventListener('click', () => { $('menu-main').hidden = true; $('menu-controls').hidden = false; $('hide-controls').focus(); });
+$('hide-controls').addEventListener('click', () => { $('menu-controls').hidden = true; $('menu-main').hidden = false; $('show-controls').focus(); });
+// (the label's own file picker, by the keys too)
+$('import').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('saves-file').click(); } });
+// F1 opens and closes it, Esc closes it, the arrows walk its plates
+document.addEventListener('keydown', (e) => {
+	if (e.key === 'F1') { e.preventDefault(); e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); return; }
+	if (menu.hidden) return;
+	if (e.key === 'Escape') { e.preventDefault(); closeMenu(); return; }
+	if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+		e.preventDefault();
+		const list = plates(), i = list.indexOf(document.activeElement);
+		list[(i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length].focus();
+	}
+	// (none of it reaches the game, which waits)
+	e.stopPropagation();
+}, true);
+
+// ---- the keys under the screen: the keyboard's, or a controller's once one is used ----
+
+function showHints() {
+	const pad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(Boolean);
+	const keys = pad
+		? [['A', 'A'], ['B', 'B'], ['L R', 'L R'], ['Start', 'Start'], ['Back', 'Select'], ['F1', 'Menu']]
+		: [['WASD', 'Move'], ['J', 'A'], ['K', 'B'], ['Q E', 'L R'], ['Enter', 'Start'], ['Bksp', 'Select'], ['F1', 'Menu']];
+	$('hints').innerHTML = keys.map(([k, what]) => '<span>' + k.split(' ').map((c) => '<kbd>' + c + '</kbd>').join('') + what + '</span>').join('');
+	fit();
+}
+window.addEventListener('gamepadconnected', showHints);
+window.addEventListener('gamepaddisconnected', showHints);
+showHints();
 
 // Smooth motion: the game's 60 frames mixed at each refresh of a 90, 144 or
 // 165 Hz screen, which shows them unevenly otherwise (remembered here, and
@@ -431,7 +540,7 @@ $('fullscreen').addEventListener('click', () => {
 function smoothOn() { try { return localStorage.getItem('cw-smooth') === 'on'; } catch (e) { return false; } }
 function showSmooth() {
 	const on = smoothOn();
-	$('smooth-label').textContent = 'Smooth: ' + (on ? 'on' : 'off');
+	$('smooth-label').textContent = 'Smooth motion: ' + (on ? 'on' : 'off');
 	$('smooth').setAttribute('aria-pressed', on ? 'true' : 'false');
 }
 $('smooth').addEventListener('click', () => {
@@ -440,7 +549,6 @@ $('smooth').addEventListener('click', () => {
 	showSmooth();
 	track('smooth-motion', { state: on ? 'on' : 'off' });
 	if (started) Module.ccall('cw_set_smooth', null, ['number'], [on ? 1 : 0]);
-	canvas.focus();
 });
 showSmooth();
 

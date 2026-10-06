@@ -119,7 +119,7 @@ CFLAGS := $(filter-out -g,$(CFLAGS)) -sUSE_SDL=2 -DDISABLE_THREADING
 LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js \
           -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sFORCE_FILESYSTEM=1 -sENVIRONMENT=web \
           -sEXPORTED_RUNTIME_METHODS=callMain,ccall,FS,IDBFS,addRunDependency,removeRunDependency -sEXPORT_NAME=Module \
-          -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth
+          -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_paused
 endif
 # the Linux release: built on an older glibc (docker/Dockerfile.linux), SDL2
 # carried in lib/ beside the binary

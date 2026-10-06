@@ -44,6 +44,7 @@ typedef struct {
 	bool keyboard_last; /* last input came from the keyboard */
 	bool skip_present;  /* this frame is played, not shown: the loop catching up (main.c) */
 	bool blend;         /* smooth motion (settings.ini): each refresh a mix of the last two frames */
+	bool paused;        /* the browser page's menu open over the game: no frames, no sound (cw_set_paused) */
 	int quit_prompt;    /* frames left of "Esc again to quit" after one Escape */
 	bool quit_pad;      /* ... opened by a controller's SELECT+START, held */
 	bool background;    /* the app sent to the background (SDL_APP_*): on iOS the loop draws nothing then (main.c) */

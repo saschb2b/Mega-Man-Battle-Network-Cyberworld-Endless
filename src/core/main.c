@@ -213,6 +213,8 @@ static bool step(void) {
  * 1/60 s steps have passed, at most two, so the game keeps the GBA's pace. */
 static void web_frame(void) {
 	loop.acc += elapsed();
+	/* (the page's menu open: nothing runs, and the time it held is not caught up) */
+	if (P.paused) { loop.acc = 0; return; }
 	if (P.blend) {
 		if (!blend_frames() || P.quit) { emscripten_cancel_main_loop(); platform_shutdown(); }
 		return;

@@ -650,6 +650,12 @@ void audio_music(Music m) {
 	audio_music_id(music_ids[m]);
 }
 
+#ifdef __EMSCRIPTEN__
+void audio_pause(bool on) {
+	if (dev) SDL_PauseAudioDevice(dev, on ? 1 : 0);
+}
+#endif
+
 void audio_set_volume(int music, int sfx) {
 	music_volume = music;
 	sfx_volume = sfx;

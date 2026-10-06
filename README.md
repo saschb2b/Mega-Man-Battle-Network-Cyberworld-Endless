@@ -103,7 +103,7 @@ on a phone too, and on a New 3DS from its HOME Menu.
   is found at the next start beside BN6 (on Android, an iPhone or an
   iPad, in the folder you chose); on a PC, a Mac, a phone or a tablet, R
   on the title also opens the [ROMs screen](#the-roms-screen) to add it,
-  and in the browser **Add BN5 Team Colonel** does.
+  and in the browser its slot on the player's screen does.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -401,17 +401,20 @@ The older 3DS and 2DS are too slow for it.
 
 ### In a browser
 
-Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)**: its two cartridge slots, BN6 and BN5,
-take your ROM files (tap one to choose them, or drop them on the page);
-Battle Network 5: Team Colonel's beside BN6's if you have it (both at
-once, or BN5 later with **Add BN5 Team Colonel**). The page checks each
-file by its SHA-1, says why it refuses one, shows each game's face on its
+Open **[the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/)**: the two cartridge slots on its screen,
+BN6 and BN5, take your ROM files (tap one to choose them, or drop them on
+the page); Battle Network 5: Team Colonel's beside BN6's if you have it
+(both at once, or BN5 later in its slot). The page checks each file by
+its SHA-1, says why it refuses one, shows each game's face on its
 cartridge, and keeps them, with your saves, in the browser's own storage
 (IndexedDB); they are never uploaded. Next time **Play** starts straight
-away. **Save a backup** under the game downloads your saves as one file,
-`cyberworld-endless.cwsave`, and **Load a backup** brings it back, in
-this browser or another (the Android and iPhone apps take the same file,
-put in their ROM folder). **Forget ROMs and saves** removes them all. BN5's battles run on a second emulator core in the
+away, the game at the largest whole scale the window holds. **Menu** over
+the screen (or F1) pauses the game and holds the rest: Fullscreen, Smooth
+motion, the controls, **Save backup**, which downloads your saves as one
+file, `cyberworld-endless.cwsave`, **Load backup**, which brings it back,
+in this browser or another (the Android and iPhone apps take the same
+file, put in their ROM folder), and **Forget all**, which removes the
+ROMs and saves. BN5's battles run on a second emulator core in the
 page: the first time, BN5 starts up while the title shows (about 20
 seconds on a recent laptop, a slice of each frame), and a battle in its
 areas that comes before it is done waits behind a short note, once per
@@ -761,9 +764,8 @@ many PC monitors) shows them for one refresh or two in turn, which reads as
 a slight judder. **Smooth motion** mixes the two latest frames at each
 refresh instead: motion is even, a little blurred, and a frame later. Turn
 it on with `smooth_motion = on` in `settings.ini` in the data folder (made
-on the first start), or with the **Smooth motion** button under the
-browser player. A screen at 60 or 120 Hz, or one that follows the game
-(FreeSync, G-Sync), needs neither.
+on the first start), or in the browser player's menu. A screen at 60 or
+120 Hz, or one that follows the game (FreeSync, G-Sync), needs neither.
 
 ## Anonymous statistics
 
