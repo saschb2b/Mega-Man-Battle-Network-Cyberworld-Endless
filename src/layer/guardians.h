@@ -79,6 +79,22 @@ NpcBody guardian_body(int navi, int face);
 /* ... and a super boss's (Bass, the Cybeast's beast; docs/BOSSES.md, Super
  * bosses), with his pose and what he stands in after it */
 SuperBody super_body(int navi, int face);
+/* The eighths that face across the screen */
+enum { GUARDIAN_FACE_RIGHT = 2, GUARDIAN_FACE_LEFT = 6 };
+/* How far MegaMan stands off a guardian, world units on both axes (twice as
+ * many pixels across the screen: a world unit is a pixel across and half
+ * of one up or down); a super boss's sprite is wider */
+#define GUARDIAN_STAND       24
+#define GUARDIAN_STAND_SUPER 28
+/* Where MegaMan meets a guardian in his arena (docs/BOSSES.md, the
+ * sequence): beside him on the screen and at his height, `spread` world
+ * units off on both axes (GUARDIAN_STAND), on the side the arena's bridge
+ * comes in from (`arena_dir`, the grid direction from the antechamber in,
+ * net_shapes.h), so the chat box under them covers neither, whichever way
+ * the arena is entered: into (*sx, *sy) from the guardian's world
+ * (gx, gy). Returns the eighth MegaMan faces there, toward him; the
+ * guardian faces back, (face + 4) & 7. */
+int guardian_stand(int arena_dir, int gx, int gy, int spread, int *sx, int *sy);
 /* The face a guardian speaks with: his mugshot, or the one set for him
  * (Falzar's Navis, whose faces Gregar lacks: a portrait, portrait.c), else
  * none. */

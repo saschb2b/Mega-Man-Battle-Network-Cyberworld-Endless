@@ -84,21 +84,28 @@ int guardian_older_sprite(int navi) {
 	return guardian_older(navi) ? numbers[navi - GUARDIAN_OLDER_FIRST] : 0;
 }
 
+/* (BlastMan's, ElementMan's and Bass's sprites, drawn only towards the
+ * camera, 2 to 5: an eighth turned the nearest way they show) */
+static int toward_camera(int face) {
+	static const int8_t drawn[8] = { 3, 3, 2, 3, 4, 5, 5, 5 };
+	return drawn[face & 7];
+}
+
 /* Every guardian in his own shape (they had stood in a HeelNavi's body,
  * seven of seventeen, the copies "that didn't come out right"; the owner
  * asked for their personality back):
  *   Gregar's own overworld sprite where it has one, which faces every way;
  *   BlastMan's and ElementMan's, which Gregar draws only facing right
  *   through down-left (its story never turns them away from the camera):
- *   turned down-right or down-left where the arena would face them into
- *   the screen, as they stood invisible there;
+ *   turned down-right or down-left where they would face into the screen
+ *   (as they stood invisible there) or to the left (toward_camera);
  *   Falzar's Navis, whom Gregar has no overworld sprite of, in their
  *   battle sprites (list 0, 0x2E + the navi, each uncompressed), which face
  *   left as they fight, mirrored to face right, standing in animation 0
  *   and logging in by BN6's warp-in, their animation 3 (docs/ROM_DATA.md). */
 NpcBody guardian_body(int navi, int face) {
 	NpcBody b = { 6, guardian_sprite(navi), face, false, NPC_ANIM_LOG_IN, guardian(navi)->pose };
-	if (navi == 12 || navi == 16) b.anim = face == 1 ? 3 : face == 7 ? 5 : face;
+	if (navi == 12 || navi == 16) b.anim = toward_camera(face);
 	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1 };
 	return b;
 }
@@ -111,8 +118,18 @@ NpcBody guardian_body(int navi, int face) {
  * drawn facing left, mirrored to face right. */
 SuperBody super_body(int navi, int face) {
 	if (navi == SUPER_BASS)
-		return (SuperBody){ { 6, guardian_sprite(navi), face == 1 ? 3 : face == 7 ? 5 : face, false, -1, 26 }, 16, 25, false };
+		return (SuperBody){ { 6, guardian_sprite(navi), toward_camera(face), false, -1, 26 }, 16, 25, false };
 	return (SuperBody){ { 6, guardian_sprite(navi), 28, face >= 1 && face <= 3, -1, 29 }, 60, 28, true };
+}
+
+int guardian_stand(int arena_dir, int gx, int gy, int spread, int *sx, int *sy) {
+	/* (screen right is world +X +Y: grid x runs down-right as world +Y, grid
+	 * y down-left as world -X; a bridge along grid +y or -x comes in from
+	 * the guardian's right, one along +x or -y from his left) */
+	bool right = (arena_dir & 3) == 1 || (arena_dir & 3) == 2;
+	*sx = gx + (right ? spread : -spread);
+	*sy = gy + (right ? spread : -spread);
+	return right ? GUARDIAN_FACE_LEFT : GUARDIAN_FACE_RIGHT;
 }
 
 void guardian_set_face(int navi, int face) {
