@@ -1069,6 +1069,16 @@ HOME_PAGED = '40:,' + '4:A,6:,' * 46 + '30:,'
 HOME_OUT = HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:,'
 HOME_ASTER = HOME_OUT + '0:place -156 -40 7,10:,62:UP+LEFT,160:,'
 HOME_COUNTER = '30:UP+RIGHT,124:UP+LEFT,10:UP+LEFT,6:,6:A,56:,6:A,46:,6:A,46:,6:A,46:,6:A,156:,'
+# (... or through the Cyber Academy's gate, the foyer's turnstile, the 1F
+# hallway's stairs and the 2F hallway's door into class 6-1, by frame 1484)
+HOME_ACADEMY = HOME_OUT + ''.join(f'0:place {p},10:,{n}:UP+LEFT,120:,' for p, n in
+                                  (('92 -232 7', 40), ('24 16 7', 30), ('280 -40 7', 30), ('-208 -40 7', 30)))
+# (... or out of the front door to the plaza's fountain, by frame 874)
+TOWN_PLAZA = HOME_OUT + '0:place 160 -120 4,40:'
+# (Lan's HP after act 2, seed 3: the arrival's words paged, MegaMan free
+# from frame 1200)
+HP_7 = ['--scene', 'home', '--run-depth', '7', '--seed', '3']
+HP_PAGED = '600:,' + '6:A,94:,' * 6
 # (issue #98's identity: a layer's arrival words paged, then the sig dev
 # step puts MegaMan in the room the layer is remembered by)
 IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
@@ -1080,6 +1090,8 @@ SCREENSHOTS = [
     # Secret Area, the top threat rung)
     ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
     ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
+    # (issue #104: the statistics' question at a first start, the data folder fresh)
+    ('stats-ask', ['--dev', 'statistics=ask'], [(100, 'stats-ask')], {}),
     # (seed 7's layer 3 walks straight to BlastMan's arena, then the first
     # random battle, on layer 5 since 0.9.0's shorter words)
     ('run', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
@@ -1092,13 +1104,22 @@ SCREENSHOTS = [
      [(840, 'rival')], {}),
     # (home, docs/HOME.md: a run's start in Lan's room, Dad's call; his PC's
     # jack-in; down the stairs and out of the front door into Central Town;
-    # Lan's HP after an act, MegaMan beside the lit link up top)
+    # the plaza's fountain as the run begins and at night before the Nest
+    # (the short net's layer 10); Lan's HP after act 2 (issues #108, #110):
+    # MegaMan up the corridor from the blue pad, the link up top lit, two
+    # ways back's orange pads and the courier's "!!"; the courier's word on
+    # a finished request; a way back checked, its question on No)
     ('home-room', ['--scene', 'town', '--seed', '2'], [(280, 'home-room')], {}),
     ('home-pc', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '0:place -40 -8 7,10:,6:R,100:'], [(616, 'home-pc')], {}),
     ('town-central', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:'],
      [(830, 'town-central')], {}),
-    ('home-hp', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--input', '600:,' + '6:A,94:,' * 8 + '0:place 68 -40 5,10:,6:UP,90:'],
-     [(1500, 'home-hp')], {}),
+    ('town-morning', ['--scene', 'town', '--seed', '2', '--input', TOWN_PLAZA], [(870, 'town-morning')], {}),
+    ('town-night', ['--scene', 'town', '--seed', '2', '--run-depth', '10', '--input', TOWN_PLAZA], [(870, 'town-night')], {}),
+    ('home-hp', HP_7 + ['--input', HP_PAGED + '0:place 0 -20 1,30:'], [(1229, 'home-hp')], {}),
+    ('home-courier', HP_7 + ['--dev', 'job=2,jobstate=2', '--input', HP_PAGED + '0:place -84 60 7,10:,6:A,124:'],
+     [(1330, 'home-courier')], {}),
+    ('home-back', HP_7 + ['--input', HP_PAGED + '0:place -28 -54 7,10:,' + '6:A,100:,' * 3 + '6:A,130:,6:A,100:'],
+     [(1760, 'home-back')], {}),
     # (home after act 2, issue #92: the plaza's Mr.Prog calls the Net's
     # news at evening; in AsterLand the request board's offer, and the
     # clerk's Order Service with the second screen's card; Lan's HP with
@@ -1111,6 +1132,9 @@ SCREENSHOTS = [
      [(1680, 'home-order')], {}, '3ds'),
     ('home-panel', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--setup', 'short,0,0,0', '--dev', 'job=2,jobstate=1', '--input', '600:,' + '6:A,94:,' * 8],
      [(1395, 'home-panel')], {}, '3ds'),
+    # (issue #96: Lan's class 6-1, the NetBattle club's member and her challenge)
+    ('home-academy', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--input', HOME_ACADEMY + '0:place -148 22 7,10:,6:A,130:'],
+     [(1620, 'home-academy')], {}),
     # (the areas on their acts' third layers: ProtoMan's duel, and Chaud's
     # call with it, waits on the second)
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '3', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
@@ -1308,6 +1332,12 @@ SCREENSHOTS = [
      [(1912, 'second-status')], {}, '3ds'),
     ('second-library', SECOND_7 + ['--input', PAGED_7 + '60:,6:START,40:,6:DOWN,8:,6:DOWN,8:,6:A,90:'],
      [(1925, 'second-library')], {}, '3ds'),
+    # (issue #83: Dad's Dive report open in E-Mail, his face beside it; the
+    # PET's menu over the home panel in Lan's HP, ACCESSING)
+    ('second-mail', SECOND_7 + ['--input', PAGED_7 + '60:,6:START,40:,' + '6:DOWN,8:,' * 4 + '6:A,90:,6:A,90:'],
+     [(2050, 'second-mail')], {}, '3ds'),
+    ('second-accessing', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--setup', 'short,0,0,0', '--dev', 'job=2,jobstate=1',
+                          '--input', '600:,' + '6:A,94:,' * 8 + '6:START,60:'], [(1460, 'second-accessing')], {}, '3ds'),
     ('second-shop', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet', '--talk', 'shop:430',
                      '--input', '500:' + ',4:A,96:' * 8 + ',4:A,56:' * 6 + ',6:DOWN,24:' * 2 + ',60:'], [(1740, 'second-shop')], {}, '3ds'),
     ('second-thor', SECOND_7 + ['--second-size', '413x360', '--input', PAGED_7 + '60:,0:battle,400:'], [(2230, 'second-thor')], {}, 'second'),
