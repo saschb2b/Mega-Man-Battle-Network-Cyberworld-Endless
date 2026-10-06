@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **JudgeMan stands as himself at his arena.** He stood as a white ball:
+  his overworld sprite is the only guardian's BN6 keeps compressed, and the
+  layer never loaded it.
 - **MegaMan arrives from any side of a layer** (issue #106). He arrived at
   the top of the screen on nearly every layer, facing straight down, so
   every layer was walked top to bottom. BN6's own maps, read from the ROM
