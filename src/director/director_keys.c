@@ -266,7 +266,7 @@ static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
  * MegaMan says where the PC is */
 static uint32_t house_r(uint32_t keys, int number) {
 	int px = bn6_player_x(), py = bn6_player_y(), gx, gy, far;
-	if ((number == LAN_ROOM && lan_room_on_pc(px, py)) || !lan_house_goal(number, &gx, &gy)) return keys;
+	if ((number == LAN_ROOM && lan_room_on_pc(px, py)) || !lan_house_way(number, px, py, &gx, &gy)) return keys;
 	talk_start(port_words(number == LAN_ROOM ? PORT_ROOM : PORT_HOUSE, way_to(gx, gy, &far)), FACE_MEGAMAN);
 	D.arrow_pending = true;
 	cinema_arrow(way_last(), 600);

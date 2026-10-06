@@ -17,8 +17,10 @@ bool home_places_install(int to_group, int to_number, int x, int y);
 void home_places_shops(void);
 /* The name the map's label shows ("AsterLand"); NULL for none of them. */
 const char *home_places_name(int group, int number);
-/* The way on in one of them: the PC in Lan's room, the stairs up in his
- * house, elsewhere the way out (world units); false for none. */
+/* The way on in one of them from where Lan stands: the PC in Lan's room,
+ * the stairs up in his house (past the sofa's end first from in front of
+ * it, lan_house_way), elsewhere the way out (world units); false for
+ * none. */
 bool home_places_way(int group, int number, int *x, int *y);
 /* Where AsterLand's door is in the town, as Lan comes out of it (the
  * town's world units); false before it is installed. */

@@ -422,7 +422,10 @@ with his house) is its door home (AsterLand's and the Academy's open
 too, piece 10); it has no jack-in of its own. R in the
 town, the house, or the room off the PC has MegaMan say where the PC is
 ("Home's right here,Lan! The PC's up in your room!"). BN6's jack-out from
-Lan's HP sets Lan down at his PC.
+Lan's HP sets Lan down at his PC. In the house the arrow leads from the
+front door straight up past the sofa's end before it turns to the
+stairs: the straight line runs into the shoe cabinet and the sofa
+(sessions 72 and 73, `lan_house_way`).
 
 ### 5. Jobs (the Request BBS)
 
