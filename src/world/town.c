@@ -667,6 +667,18 @@ static int port_trigger(void) { return T.style->door ? T.style->door : JACK_IN_T
 
 bool town_is_home(void) { return T.style && T.style->door; }
 
+/* Whether a townsperson may stand at world (x, y), cell (cx, cy): on walkable ground, off the triggers, clear of Lan's
+ * arrival, the statue's approach (`port`) and every door's (one stood on AsterLand's door line, sessions 71 and 72) */
+static bool folk_spot_ok(int cx, int cy, int x, int y, bool port) {
+	int px = x - T.info.port_x, py = y - T.info.port_y;
+	if (!walkable(cx, cy) || on_trigger(cx, cy) || abs(x - T.info.start_x) + abs(y - T.info.start_y) < 24 || (port && px * px + py * py < 36 * 36)) return false;
+	for (int i = 0; i < T.ntrig; ++i) {
+		int v = T.trig[i].value, dx = x - (T.trig[i].x + 4), dy = y - (T.trig[i].y + 4);
+		if (v < 32 && (T.style->doors >> v & 1) && dx * dx + dy * dy < 40 * 40) return false;
+	}
+	return true;
+}
+
 static int plan_once(uint32_t seed) {
 	T.rng = seed * 2246822519u + 0x165667B1u;
 	T.seed = seed;
@@ -759,13 +771,7 @@ static int plan_once(uint32_t seed) {
 			for (int dy = -r; dy <= r && T.folk_at[i][0] == 1 << 20; ++dy)
 				for (int dx = -r; dx <= r; ++dx) {
 					int cx = fdiv(fx, 8) + dx, cy = fdiv(fy, 8) + dy;
-					/* (off the triggers, clear of where Lan arrives, and off the
-					 * statue's approach: a kid on the squirrel's front corner
-					 * stood where the arrow pointed) */
-					int px = fx + dx * 8 - T.info.port_x, py = fy + dy * 8 - T.info.port_y;
-					if ((abs(dx) != r && abs(dy) != r) || !walkable(cx, cy) || on_trigger(cx, cy) ||
-						abs(fx + dx * 8 - T.info.start_x) + abs(fy + dy * 8 - T.info.start_y) < 24 ||
-						(nj && px * px + py * py < 36 * 36)) continue;
+					if ((abs(dx) != r && abs(dy) != r) || !folk_spot_ok(cx, cy, fx + dx * 8, fy + dy * 8, nj > 0)) continue;
 					T.folk_at[i][0] = fx + dx * 8;
 					T.folk_at[i][1] = fy + dy * 8;
 					break;

@@ -7,7 +7,7 @@ src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
 src/core/touch_layout.c:touch_prefs_parse 38 29
 src/dev/atlas.c:one 56 95
-src/director/briefing_words.c:last_stop 28 24
+src/director/briefing_words.c:last_stop 26 24
 src/emu/autopilot.c:autopilot_keys 29 55
 src/gfx/gfx.c:text_code 30 30
 src/layer/shop.c:answer 30 25
@@ -30,6 +30,6 @@ src/scenes/scene_title.c:draw 34 66
 src/scenes/scene_title.c:setup_update 32 36
 src/scenes/scene_title.c:update 42 73
 src/world/town.c:carry 35 63
-src/world/town.c:plan_once 48 109
+src/world/town.c:plan_once 44 106
 src/world/town.c:town_walk 31 33
 src/world/townsrc.c:townsrc_synth 88 125
