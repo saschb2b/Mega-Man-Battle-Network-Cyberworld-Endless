@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "jobs.h"
+
 /* The areas a run visits (RomLayout.net_area has one per area). Areas added
  * later come after the Cybeast Nest; saves keep their numbers. */
 enum {
@@ -48,6 +50,9 @@ typedef struct {
 	uint8_t clock;
 	uint8_t back_spent;      /* the older portals taken on this visit home, a bit each (pacing_older_acts) */
 	uint16_t home_depth;     /* on a trip back, the run's own layer it comes home to (depth then the older act's), else 0 */
+	/* (new since the "CWE8" save) the request taken at home (docs/HOME.md,
+	 * piece 5: jobs.h), JOB_NONE for none */
+	Job job;
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */

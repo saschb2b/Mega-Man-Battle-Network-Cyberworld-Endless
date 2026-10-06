@@ -14,6 +14,7 @@
 #include "director.h"
 #include "director_dark.h"
 #include "director_folder.h"
+#include "director_jobs.h"
 #include "director_state.h"
 #include "emu.h"
 #include "encounter.h"
@@ -92,6 +93,8 @@ void director_guest_done(const GuestResult *r) {
 	uint16_t hp = (uint16_t)(r->hp < 1 ? 1 : r->hp > max ? max : r->hp);
 	emu_write(BN6_NAVI_HP, &hp, sizeof hp);
 	if (r->outcome == GUEST_WON && !guardian_navi) run.viruses_deleted += D.guest_foes;
+	/* (a request's battles: MegaMan's HP before its results screen's HP+) */
+	if (!guardian_navi) home_jobs_battle_end(r->outcome == GUEST_WON, r->hp - r->heal, r->frames);
 	steps_cleared();
 	if (!profile.guest_taught) D.guest_due = 1 + out_names(D.guest_out, sizeof D.guest_out);
 	guest_recode_note(r);
@@ -201,5 +204,5 @@ void guest_begin(void) {
 	/* (in the run log as BN6's battles are, its viruses by BN5's ids, as
 	 * scaled) */
 	int ids[16] = { 0 }, n = guest_record_foes_scaled(D.guest_xrom, record, sc, ids, 16);
-	if (record && guest_battle(record, sc, &mm)) runlog_guest_start(record, ids, n, hp);
+	if (record && guest_battle(record, sc, &mm)) { runlog_guest_start(record, ids, n, hp); home_jobs_battle_start(); }
 }

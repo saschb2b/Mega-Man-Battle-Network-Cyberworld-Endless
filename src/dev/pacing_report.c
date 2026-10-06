@@ -15,6 +15,7 @@
 #include "loot.h"
 #include "net.h"
 #include "navicust.h"
+#include "jobs.h"
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
@@ -281,6 +282,28 @@ static void clock_report(FILE *out) {
 	}
 }
 
+/* Requests at home (docs/HOME.md, piece 5): each kind's terms and pay by
+ * act, beside the act's guardian's zenny and the Net Dealer's HPMemory
+ * price (shop.c), the prices they are measured by */
+static void jobs_report(FILE *out) {
+	static const char *const kinds[JOB_KINDS] = { "", "clean wins", "quick wins", "every Mystery Data", "a chip handed over", "a vow" };
+	fprintf(out, "\nRequests at home: what each kind asks and pays by act; the act's guardian's zenny and HPMemory price beside.\n");
+	for (int act = 0; act < 7; ++act) {
+		fprintf(out, "act %d:", act + 1);
+		for (int kind = JOB_CLEAN; kind < JOB_KINDS; ++kind) {
+			Job j;
+			memset(&j, 0, sizeof j);
+			jobs_dev(&j, 1, act * 3 + 1, false, kind, 0);
+			if (kind <= JOB_QUICK) fprintf(out, " %s x%d", kinds[kind], j.need);
+			else fprintf(out, " %s", kinds[kind]);
+			if (j.pay_kind == PAY_ZENNY) fprintf(out, " -> %u zenny;", j.pay);
+			else if (j.pay_kind == PAY_BUGFRAGS) fprintf(out, " -> %u BugFrags;", j.pay);
+			else fprintf(out, " -> %s;", j.pay_kind == PAY_CHIP ? "a chip a tier up" : "HPMemory");
+		}
+		fprintf(out, " guardian %d, HPMemory %d\n", 100 * (6 + 3 * act), 100 * (8 + 4 * act));
+	}
+}
+
 /* The acts (a bit each, 0-based) BN6 area `biome` can come in on the first
  * cycle: the four of the surface by their pools (pacing_area_pool), the
  * Undernet's and the Graveyard's */
@@ -352,6 +375,7 @@ int pacing_report_run(const char *path) {
 
 	flagged += first_cycle_guardians(out) + older_guardians(out);
 	clock_report(out);
+	jobs_report(out);
 	elements_report(out);
 	/* what the Net Dealers answer each act with, per element (every one a
 	 * straight hit; a "+" is over the act's cap, the lightest found) */

@@ -20,6 +20,8 @@ bool aster_land_door(int *x, int *y);
 /* Whether world (x, y) is on the Number Trader's check (0xF9: what A
  * reads there, place_lines.c, for the one BN6 has). */
 bool aster_land_number_trader(int x, int y);
+/* ... and on the request board's (0xF6: its post, the run's request). */
+bool aster_land_board(int x, int y);
 /* Each frame in AsterLand: its door the only one (indoors_shut). */
 void aster_land_frame(void);
 

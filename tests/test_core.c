@@ -21,6 +21,8 @@
 #include "area_src.h"
 #include "guardians.h"
 #include "home_words.h"
+#include "jobs.h"
+#include "loot.h"
 #include "npc_lines.h"
 #include "powers.h"
 #include "rivals.h"
@@ -60,6 +62,7 @@ void rng_seed(uint32_t s) {
 	rng_s = s ? s : 0x9E3779B9u;
 }
 uint32_t rng_state(void) { return rng_s; }
+void rng_restore(uint32_t s) { rng_s = s ? s : 0x9E3779B9u; }
 uint32_t rng_next(void) { uint32_t x = rng_s; x ^= x << 13; x ^= x >> 17; x ^= x << 5; return rng_s = x; }
 int rng_range(int lo, int hi) { return hi <= lo ? lo : lo + (int)(rng_next() % (uint32_t)(hi - lo + 1)); }
 /* (the talk's pieces need no saves or game flags here) */
@@ -73,6 +76,9 @@ uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; ret
 void emu_write(uint32_t addr, const void *data, size_t len) { (void)addr; (void)data; (void)len; }
 uint32_t emu_read32(uint32_t addr) { (void)addr; return 0; }
 bool emu_debug_on(void) { return false; }
+/* (a request's chip: no ROM's pools here) */
+int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
+char loot_fit_code(int id, char code, bool always) { (void)id; (void)always; return code; }
 void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
 
 static void test_sha1(void) {
@@ -2632,8 +2638,65 @@ static void test_rom_pages(void) {
 	CHECK(!ta_rom_pages(face, (int)sizeof face, 1, out, (int)sizeof out), "rom pages: a command it does not know refused");
 }
 
+/* Requests at home (jobs.c, docs/HOME.md piece 5): the visit's three, a
+ * kind each asker posts and none twice, the same at a CONTINUE; pay by
+ * the act; each kind's course, and when one is due. */
+static void test_jobs(void) {
+	static const int posts[JOB_ASKERS][2] = { { JOB_BRING, JOB_VOW }, { JOB_QUICK, JOB_CLEAN }, { JOB_EXPLORE, JOB_CLEAN } };
+	for (uint32_t seed = 1; seed <= 300; ++seed)
+		for (int depth = 1; depth <= 19; depth += 3) {
+			Job a[JOB_ASKERS], b[JOB_ASKERS];
+			uint32_t before = rng_state();
+			jobs_offers(seed, depth, a);
+			CHECK(rng_state() == before, "jobs_offers keeps the game's random numbers as they were");
+			jobs_offers(seed, depth, b);
+			CHECK(!memcmp(a, b, sizeof a), "seed %u depth %d: the same offers twice", seed, depth);
+			for (int k = 0; k < JOB_ASKERS; ++k) {
+				CHECK(a[k].asker == k && (a[k].kind == posts[k][0] || a[k].kind == posts[k][1]), "seed %u: asker %d posts kind %d", seed, k, a[k].kind);
+				for (int i = 0; i < k; ++i) CHECK(a[i].kind != a[k].kind, "seed %u depth %d: kind %d twice", seed, depth, a[k].kind);
+				CHECK(a[k].state == 0 && a[k].act == jobs_act(depth), "an offer, for its act");
+			}
+		}
+	/* pay and terms by the act */
+	Job j;
+	memset(&j, 0, sizeof j);
+	jobs_dev(&j, 7, 1, false, JOB_CLEAN, 0);
+	CHECK(j.state == JOB_TAKEN && j.need == 2 && j.pay_kind == PAY_ZENNY && j.pay == 500, "act 1's clean wins: 2 for 500 Zenny (%d, %u)", j.need, j.pay);
+	jobs_dev(&j, 7, 7, false, JOB_CLEAN, 0);
+	CHECK(j.need == 3 && j.pay == 1000, "act 3's: 3 for 1000 Zenny (%d, %u)", j.need, j.pay);
+	jobs_dev(&j, 7, 1, false, JOB_QUICK, 0);
+	CHECK(j.pay_kind == PAY_BUGFRAGS && j.pay == 5 && j.need == 3, "act 1's quick wins: 3 for 5 BugFrags");
+	jobs_dev(&j, 7, 1, false, JOB_VOW, 0);
+	CHECK(j.pay_kind == PAY_HPMEMORY && j.pay == 1, "a vow: an HPMemory");
+	/* their course */
+	jobs_dev(&j, 7, 1, false, JOB_CLEAN, 0);
+	CHECK(!jobs_battle(&j, true, 10, 100) && j.got == 0, "a win that cost HP is no clean win");
+	CHECK(!jobs_battle(&j, false, 0, 100) && j.got == 0, "a battle left is none");
+	CHECK(!jobs_battle(&j, true, 0, 900) && j.got == 1, "a clean win counts, however long");
+	CHECK(jobs_battle(&j, true, 0, 900) && j.state == JOB_DONE, "the second: done");
+	CHECK(!jobs_battle(&j, true, 0, 900) && j.got == 2, "done, it counts no more");
+	jobs_dev(&j, 7, 1, false, JOB_QUICK, 0);
+	CHECK(!jobs_battle(&j, true, 50, JOB_QUICK_FRAMES + 1) && j.got == 0, "a win past ten seconds is no quick win");
+	jobs_battle(&j, true, 50, JOB_QUICK_FRAMES);
+	CHECK(j.got == 1, "ten seconds to the frame counts");
+	jobs_dev(&j, 7, 1, false, JOB_EXPLORE, 0);
+	CHECK(!jobs_layer_left(&j, 2, 2) && j.state == JOB_TAKEN, "a layer of two Mystery Data is too few");
+	CHECK(!jobs_layer_left(&j, 4, 3) && j.state == JOB_TAKEN, "one left unopened");
+	CHECK(jobs_layer_left(&j, 4, 4) && j.state == JOB_DONE, "every one of four opened: done");
+	jobs_dev(&j, 7, 1, false, JOB_VOW, 0);
+	CHECK(jobs_heal(&j) && j.state == JOB_FAILED && !jobs_guardian(&j), "a patch breaks the vow, and the guardian's fall then pays nothing");
+	jobs_dev(&j, 7, 1, false, JOB_VOW, 0);
+	CHECK(jobs_guardian(&j) && j.state == JOB_DONE && !jobs_heal(&j), "the guardian fallen first: done, and a patch after costs nothing");
+	/* due at the visit after its act, not before */
+	jobs_dev(&j, 7, 1, false, JOB_EXPLORE, 0);
+	CHECK(!jobs_due(&j, 1) && !jobs_due(&j, 3) && jobs_due(&j, 4), "taken before layer 1: due before layer 4");
+	jobs_dev(&j, 7, 4, true, JOB_EXPLORE, JOB_DONE);
+	CHECK(j.act == jobs_act(1) && jobs_due(&j, 4) && j.state == JOB_DONE, "--dev at home: one from the act just played, done");
+}
+
 int main(void) {
 	test_sha1();
+	test_jobs();
 	test_home_words();
 	test_lz77();
 	test_generation();

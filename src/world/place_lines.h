@@ -7,12 +7,14 @@
 
 /* Someone in AsterLand or the Cyber Academy: the map they stand on (its
  * group and number), where, which way, who and what they say (Folk, in the
- * map's own world units), and for one behind a counter how far towards +y
- * the counter's front is, where they are spoken to (0 none). */
+ * map's own world units), for one behind a counter how far towards +y the
+ * counter's front is, where they are spoken to (0 none), and for one who
+ * posts requests (jobs.h) which asker, plus one (0 none). */
 typedef struct {
 	int group, number;
 	Folk folk;
 	int counter;
+	int asker;
 } PlaceFolk;
 extern const PlaceFolk place_folk[];
 extern const int place_nfolk;

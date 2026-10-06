@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 
+#include "director_jobs.h"   /* (jobs at home, its other part) */
 #include "run.h"
 
 /* Whether the exit MegaMan steps on now leads home: an act's guardian

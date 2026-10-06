@@ -83,13 +83,16 @@ void own_folder_chips(void) {
 
 /* --dev pack=N: a copy of each of the first N chips in the pack, in its
  * first code (one more: outside the folder editor the counts hold the
- * folder's copies too) */
+ * folder's copies too), each owned as BN6 marks one it gives
+ * (own_folder_chips: BN6's count of a chip unmarked reads 0, and a
+ * request's hand-over found none) */
 static void dev_pack(void) {
-	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
+	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	if (dev.pack <= 0 || pack < BN6_EWRAM || pack + CHIP_PACK_ENTRY * PACK_CHIPS >= BN6_EWRAM_END) return;
 	for (uint32_t id = 1; (int)id <= dev.pack && id < PACK_CHIPS; ++id) {
 		int c = emu_read8(pack + CHIP_PACK_ENTRY * id);
 		if (c < 99) emu_write8(pack + CHIP_PACK_ENTRY * id, (uint8_t)(c + 1));
+		if (marks >= BN6_EWRAM && marks < BN6_EWRAM_END) emu_write8(marks + id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + id) ^ BN6_CHIP_KEY_XOR));
 	}
 }
 

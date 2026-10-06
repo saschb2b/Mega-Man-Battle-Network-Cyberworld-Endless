@@ -317,6 +317,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The towns' folk, their checks, the start's words | `src/world/town_lines.c` |
 | Central Town's people on the run and the runs: the news, Lan's classmate, the neighbor, the lab, the gossip | `src/world/town_words.c` |
 | The people of AsterLand and the Cyber Academy (the clerk, the NetBattle club), and the Number Trader's sign | `src/world/place_lines.c` |
+| Requests at home: the askers' offers, waits and pay, the board's post, MegaMan on a request in the Net and at home | `src/world/job_words.c` |
 | MegaMan and Lan coming home to Lan's HP after an act; MegaMan at its portals | `src/director/home_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
 

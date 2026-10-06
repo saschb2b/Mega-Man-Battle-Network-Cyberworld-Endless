@@ -380,6 +380,34 @@ the run's only; a job remembered across runs is a line, not a bonus.
 Without a job an object's jack-in point is shut, with a word from
 MegaMan.
 
+As built (issue #88; `jobs.c`, `job_words.c`, `director_jobs.c`): at each
+visit three people post a request for the act ahead. The NetBattler at
+AsterLand's request board asks for a chip of an element from the Pack
+(paid with a chip a tier up, in the folder's codes) or a vow, no
+Mr.Prog's patch until the act's guardian falls (an HPMemory); the
+NetBattle club's member in class 6-1 three wins in ten seconds each
+(BugFrags) or clean wins, no HP lost (zenny); the man from the lab in
+town every Mystery Data of one layer, three or more, or clean wins
+(zenny). Each kind's price is what it bends: a busting style, a layer
+searched through, a chip given up, a guardian fought without the heal
+before him; a skip costs nothing. The kinds come from the run's seed and
+the act, none twice at a visit; the pay grows by the act and stays under
+what the act's own sources give (`build.py pacing` lists it: act 1's 500
+zenny against its guardian's 600 and an HPMemory's 800). Lan takes one
+with Yes; the others then say one at a time is enough (BN6's Request
+BBS's rule), and the board reads its post until it is taken. In the Net
+the request counts its own act's battles (BN6's and the older net's; a
+guardian's counts for none), each layer's Mystery Data as MegaMan leaves
+it, a Mr.Prog's patch and the guardian's fall; MegaMan says when one is
+done or a patch broke the vow, and reminds of a vow as the act begins.
+At the next visit the asker settles it: the reward in BN6's own words
+("MegaMan got: ..."), a chip handed over from the Pack (BN6's own count,
+which leaves out the Folder's copies), or a word where it was not done;
+until then L at home says where the reward waits, and no other request
+can be taken. The run's save holds the request (`RUN_MAGIC` "CWE9"; an
+older save continues with none). Not yet: the objects' comps as a busting
+errand; the second screen's line on it (piece 9).
+
 ### 6. The home shop
 
 AsterLand's counter in Central Town. Its **Order Service** is BN6's: a
@@ -544,6 +572,6 @@ ports in town (#86, built, moved); Lan's HP as the warp zone, the act's
 exit there and the town optional (#93, built); Central Town as home,
 with Lan's room and PC (#94, built); going back and the Net's clock
 (#95, built); a town that remembers (#87, built); AsterLand and the
-Cyber Academy as places (#96, built); jobs, at the BBS, from the townsfolk and the
+Cyber Academy as places (#96, built); jobs (#88, built), at the BBS, from the townsfolk and the
 classmates, with the objects' comps; the home shop at AsterLand's
 counter; time of day; the second screen; the captures, docs and notes.

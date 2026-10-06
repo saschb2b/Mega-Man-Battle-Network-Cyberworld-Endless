@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Requests at home** (issue #88, the epic #84). At each visit three
+  people post a request for the act ahead: the NetBattler at AsterLand's
+  request board (a chip of an element from your Pack, or a vow: no
+  Mr.Prog patch-ups until the act's guardian falls), the NetBattle club's
+  member in class 6-1 (quick wins, or wins without a scratch) and the man
+  from the lab in town (open every Mystery Data on a layer, or clean
+  wins). Take one or none: one at a time, as BN6's Request BBS has it.
+  MegaMan says when it is done, or when a patch broke the vow, and the
+  one who asked pays at the next visit: zenny, BugFrags, a chip a tier up
+  in your folder's codes, or an HPMemory for a kept vow. L at home says
+  where a reward waits. A run saved before continues with no request.
 - **AsterLand and the Cyber Academy open** (issue #96, the epic #84).
   Central Town's chip shop and Lan's school are places of home now, BN6's
   own maps as they stand. In AsterLand the clerk stands behind her

@@ -7,6 +7,7 @@
 
 #include "academy.h"
 #include "aster_land.h"
+#include "job_words.h"
 #include "lan_house.h"
 #include "npc.h"
 #include "place_lines.h"
@@ -46,5 +47,7 @@ void home_places_frame(int group, int number) {
 const char *home_places_check(int group, int number, int x, int y, int face) {
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
-	return aster_land_map(group, number) && aster_land_number_trader(x + dx, y + dy) ? place_number_trader : NULL;
+	if (!aster_land_map(group, number)) return NULL;
+	if (aster_land_number_trader(x + dx, y + dy)) return place_number_trader;
+	return aster_land_board(x + dx, y + dy) ? job_board_words() : NULL;
 }

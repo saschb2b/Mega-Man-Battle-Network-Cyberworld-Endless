@@ -146,8 +146,13 @@ static void set_down_place(void) {
 static bool home_install(void) {
 	int x, y;
 	lanhp_arrival(&x, &y);
-	return town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) &&
+	/* (what the askers say at this visit, before their scripts are made,
+	 * and their flags as the run's job has them after) */
+	home_jobs_visit();
+	bool ok = town_plan(town_seed(run.seed)) && town_install(LANHP_GROUP, LANHP_NUMBER, x, y) &&
 		home_places_install(LANHP_GROUP, LANHP_NUMBER, x, y) && hp_ready();
+	if (ok) home_jobs_flags();
+	return ok;
 }
 
 bool home_run_start(bool abandoned) {

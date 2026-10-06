@@ -296,6 +296,7 @@ static void take_events(void) {
 			break;
 		case EV_ITEM_GIVEN: if (on_layer) item_given((int)ev[i].r[0]); break;
 		case EV_GUEST_BATTLE: if (on_layer) guest_begin(); break;
+		case EV_JOB: home_jobs_flag((int)ev[i].r[0]); break;
 		}
 }
 
@@ -321,6 +322,7 @@ static void words_due(void) {
 	dark6_after_battle();
 	if (D.dark_words[0] && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && talk_start(D.dark_words, FACE_MEGAMAN))
 		D.dark_words[0] = 0;
+	home_jobs_words();
 }
 
 /* The Navi gate's SP chip, given; Rush's gap, named. */
@@ -391,8 +393,10 @@ static void battle_update(void) {
 		D.record_known = guardian;
 		if (!guardian && !D.challenge) ++D.battles;
 		if (guardian) runlog_battle_start(NULL, "guardian");
+		home_jobs_battle_start();
 	}
 	D.in_battle = true;
+	if (sub == BN6_SUB_BATTLE) home_jobs_battle_frame();
 	/* the duel's time: the results screen's DeleteTime (its hits
 	 * come as events: docs/RIVAL.md) */
 	if (D.duel && sub == BN6_SUB_BATTLE) {
@@ -433,6 +437,8 @@ static void after_battle(void) {
 	D.battle_record = 0;
 	bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 	runlog_battle_end(won);
+	/* (a request's battles: a guardian's counts for none) */
+	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
 	/* the PET's battle data on the viruses just fought */
 	if (!boss_fighting()) {
 		for (int i = 0; i < D.next.nfoes; ++i)
@@ -613,7 +619,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); }
+	if (on_map()) { unwedge(); push_arrow(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); home_jobs_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();

@@ -3,8 +3,8 @@
  * fields carry over, since the game's state holds MegaMan. The second
  * ("CWE2") had guardians for eight areas, the third ("CWE3") for sixteen;
  * the areas added since get theirs drawn from the run's seed. The fifth,
- * sixth and seventh ("CWE5" to "CWE7") are the current run without the
- * fields added at its end since. */
+ * sixth, seventh and eighth ("CWE5" to "CWE8") are the current run
+ * without the fields added at its end since. */
 #include <stdio.h>
 
 #include "compat.h"
@@ -20,6 +20,7 @@
 #define RUN_MAGIC_V5 0x43574535u /* "CWE5" */
 #define RUN_MAGIC_V6 0x43574536u /* "CWE6" */
 #define RUN_MAGIC_V7 0x43574537u /* "CWE7" */
+#define RUN_MAGIC_V8 0x43574538u /* "CWE8" */
 
 typedef struct {
 	bool active;
@@ -90,6 +91,7 @@ static bool load_v5(void) {
 	memset(v.programs, 0, sizeof v.programs);
 	v.clock = v.back_spent = 0;
 	v.home_depth = 0;
+	memset(&v.job, 0, sizeof v.job);
 	run = v;
 	return true;
 }
@@ -100,6 +102,7 @@ static bool load_v6(void) {
 	memset(v.programs, 0, sizeof v.programs);
 	v.clock = v.back_spent = 0;
 	v.home_depth = 0;
+	memset(&v.job, 0, sizeof v.job);
 	run = v;
 	return true;
 }
@@ -110,6 +113,16 @@ static bool load_v7(void) {
 	if (!save_read_blob_upto("run.sav", RUN_MAGIC_V7, &v, sizeof v) || !v.active) return false;
 	v.clock = v.back_spent = 0;
 	v.home_depth = 0;
+	memset(&v.job, 0, sizeof v.job);
+	run = v;
+	return true;
+}
+
+/* (no request taken) */
+static bool load_v8(void) {
+	Run v;
+	if (!save_read_blob_upto("run.sav", RUN_MAGIC_V8, &v, sizeof v) || !v.active) return false;
+	memset(&v.job, 0, sizeof v.job);
 	run = v;
 	return true;
 }
@@ -153,7 +166,7 @@ static bool load_v2(void) {
 }
 
 bool legacy_load_run(void) {
-	if (load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
+	if (load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
 	memset(&run, 0, sizeof run);

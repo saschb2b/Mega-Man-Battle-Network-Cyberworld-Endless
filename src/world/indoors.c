@@ -13,6 +13,7 @@
 #include "bn6.h"
 #include "emu.h"
 #include "flags.h"
+#include "job_words.h"
 #include "npc.h"
 #include "place_lines.h"
 #include "text.h"
@@ -65,20 +66,21 @@ static void debug_triggers(int group, int number) {
 static void people(int group, int number, NpcList *npcs) {
 	static TextArchive text;
 	ta_begin(&text);
-	int who[MAX_FOLK], n = 0;
-	/* (the game's people of list 5 have their sprite's face less 0x20) */
+	int who[MAX_FOLK], script[MAX_FOLK], n = 0;
+	/* (the game's people of list 5 have their sprite's face less 0x20; an
+	 * asker's talk is several scripts, job_words.c) */
 	for (int i = 0; i < place_nfolk && n < MAX_FOLK; ++i)
 		if (place_folk[i].group == group && place_folk[i].number == number) {
-			who[n++] = i;
-			ta_talk(&text, place_folk[i].folk.words, place_folk[i].folk.sprite - 0x20);
+			who[n] = i;
+			script[n++] = job_script(&text, place_folk[i].asker - 1, place_folk[i].folk.sprite - 0x20, place_folk[i].folk.words);
 		}
 	uint32_t words = n ? ta_commit(&text) : 0;
 	for (int k = 0; k < n && words && npcs->n < 16; ++k) {
 		const PlaceFolk *p = &place_folk[who[k]];
 		const Folk *f = &p->folk;
 		if (!npc_need_sprite(npcs, f->cat, f->sprite)) continue;
-		npcs->script[npcs->n++] = p->counter ? npc_counter_talker(f->cat, f->sprite, f->x, f->y, 0, f->face, words, k, 0, p->counter)
-			: npc_talker(f->cat, f->sprite, f->x, f->y, 0, f->face, words, k, -1, false);
+		npcs->script[npcs->n++] = p->counter ? npc_counter_talker(f->cat, f->sprite, f->x, f->y, 0, f->face, words, script[k], 0, p->counter)
+			: npc_talker(f->cat, f->sprite, f->x, f->y, 0, f->face, words, script[k], -1, false);
 	}
 }
 

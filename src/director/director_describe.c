@@ -16,6 +16,7 @@
 #include "director_way.h"
 #include "guardians.h"
 #include "home_places.h"
+#include "job_words.h"
 #include "net_route.h"
 #include "net_shapes.h"
 #include "netmap.h"
@@ -178,6 +179,9 @@ static void battle_describe(FILE *f) {
 static void describe_home(FILE *f) {
 	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER), x, y;
 	fprintf(f, "map %02x:%02x\n", group, number);
+	/* (the jobs' flags, job_words.h: taken 0-2, held, settled; the run's job) */
+	fprintf(f, "jobs %d%d%d held %d settled %d job %d from %d state %d got %d\n", flag_get(JOB_TAKE_FLAG), flag_get(JOB_TAKE_FLAG + 1),
+		flag_get(JOB_TAKE_FLAG + 2), flag_get(JOB_HELD_FLAG), flag_get(JOB_SETTLED_FLAG), run.job.kind, run.job.asker, run.job.state, run.job.got);
 	if (home_places_way(group, number, &x, &y)) fprintf(f, "goal %d %d\n", x, y);
 	else if (director_in_town()) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
 }

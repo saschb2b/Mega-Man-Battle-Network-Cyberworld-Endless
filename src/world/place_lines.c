@@ -4,21 +4,23 @@
  * a shopper at the rare chips; the Academy's NetBattle club in
  * class 6-1, where BN6 stands Lan's classmates, and a first grader on the
  * first floor. Of the game's people in sprite list 5 none of Central
- * Town's own (town_lines.c), who are out in the town. */
+ * Town's own (town_lines.c), who are out in the town. The NetBattler and
+ * the club's member post requests (jobs.h, job_words.c). */
 #include "place_lines.h"
 
 #include "academy.h"
 #include "aster_land.h"
+#include "jobs.h"
 
 const PlaceFolk place_folk[] = {
 	{ ASTER_GROUP, ASTER_LAND, { 28, -70, FACE_SE, 5, 0x33,
 		"Welcome to AsterLand!|Got chips you don't need?|Three in the Chip Trader,one new one out!" }, 10 },
 	{ ASTER_GROUP, ASTER_LAND, { -92, -40, FACE_SE, 5, 0x35,
-		"Hmm... The request board's empty.|Doesn't anybody need a NetBattler?" }, 0 },
+		"Hmm... The request board's empty.|Doesn't anybody need a NetBattler?" }, 0, JOB_BOARD + 1 },
 	{ ASTER_GROUP, ASTER_LAND, { -20, -34, FACE_NW, 5, 0x40,
 		"Ooh... Look at these rare chips!|...And look at these prices! *gulp*" }, 0 },
 	{ ACADEMY_GROUP, ACADEMY_CLASS_6_1, { -148, 2, FACE_NE, 5, 0x3B,
-		"Lan! Welcome to the club!|Tip of the day! Match your codes!|Same code,and you can send more chips!" }, 0 },
+		"Lan! Welcome to the club!|Tip of the day! Match your codes!|Same code,and you can send more chips!" }, 0, JOB_CLUB + 1 },
 	{ ACADEMY_GROUP, ACADEMY_CLASS_6_1, { -130, -2, FACE_SW, 5, 0x42,
 		"My Navi lost to a Mettaur again...|*sigh* Don't tell anyone,OK?" }, 0 },
 	{ ACADEMY_GROUP, ACADEMY_HALL_1F, { -150, -42, FACE_SE, 5, 0x37,

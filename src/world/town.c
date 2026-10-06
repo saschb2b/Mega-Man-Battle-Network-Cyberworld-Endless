@@ -34,6 +34,7 @@
 #include "town_words.h"
 #include "townmath.h"
 #include "indoors.h"
+#include "job_words.h"
 #include "townsrc.h"
 
 #define TOWN_TILEMAP_AT (EMU_FREE + 0x100000) /* the town's tile map (LZ77) */
@@ -54,6 +55,7 @@
 /* a spawn record's first byte picks the spawner: 5 places a map object */
 #define OBJ_SPAWN_MAP_OBJECT 5
 #define OBJ_TREE 0x7D
+#define LAB_SPRITE 0x2D   /* the man from the lab, of list 5 */
 
 enum { P_COPY, P_TILE };
 enum { F_JACK_IN = 1 };
@@ -909,7 +911,10 @@ static uint32_t install_folk(NpcList *npcs) {
 	int script[MAX_FOLK];
 	for (int i = 0; i < T.lines->nfolk; ++i) {
 		const Folk *who = &T.lines->folk[fv.who[i]];
-		script[i] = ta_talk(&text, town_folk_words(who->cat, who->sprite, T.lines->folk[i].words), folk_face(who));
+		/* (the man from the lab posts requests at home, and is never out) */
+		bool asks = town_is_home() && who->cat == 5 && who->sprite == LAB_SPRITE;
+		if (asks) fv.out[i] = false;
+		script[i] = job_script(&text, asks ? JOB_LAB : -1, folk_face(who), town_folk_words(who->cat, who->sprite, T.lines->folk[i].words));
 	}
 	/* what Lan and MegaMan say when they step out (the director runs it) */
 	T.info.intro = ta_talk(&text, town_intro(T.lines->arrival), FACE_MEGAMAN);

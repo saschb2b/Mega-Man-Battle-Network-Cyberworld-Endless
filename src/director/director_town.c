@@ -80,10 +80,10 @@ const char *home_status(void) {
 	if (home_in_hp()) {
 		const char *words = home_hp_status(way, !D.port_told, run.clock);
 		D.port_told = true;
-		return words;
+		return home_jobs_status(words);
 	}
-	if (at == HOME_PLACE_ROOM || at == HOME_PLACE_HOUSE) return port_words(at == HOME_PLACE_ROOM ? PORT_ROOM : PORT_HOUSE, way);
-	return port_words(at == HOME_PLACE_NONE ? PORT_HOME : PORT_OUT, way);
+	if (at == HOME_PLACE_ROOM || at == HOME_PLACE_HOUSE) return home_jobs_status(port_words(at == HOME_PLACE_ROOM ? PORT_ROOM : PORT_HOUSE, way));
+	return home_jobs_status(port_words(at == HOME_PLACE_NONE ? PORT_HOME : PORT_OUT, way));
 }
 
 /* home: Lan held while the act's card shows, A ending it early, as on a

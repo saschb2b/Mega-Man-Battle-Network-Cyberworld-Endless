@@ -243,7 +243,10 @@ layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
 docs/RIVAL.md; `0x146E`, never cleared by a layer, that the run's chips
 that sit out of the older net's battles were named on its first such
-layer).
+layer; at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
+that one is held and `0x146A` that the held one was settled, which the
+askers' scripts set and the director keeps as each visit's places are
+installed, docs/HOME.md piece 5).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 
@@ -425,7 +428,7 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
 | `0x08007740` | the enemy spawn (bn6f `sub_800768C`), HP and MaxHP set | answer: the netbattle's ProtoMan held to the act's band | in the rival's netbattle only |
 | `0x08005152` | EnterMap past its wait for the fade (`src/director/events.c`) | event: a map entered, after a warp or a battle | once a map |
-| `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) | about once a frame on the map |
+| `0x0802F114` | SetEventFlag | answer, posting an event for a layer's choice flag (`0x1440`-`0x1447`) and a request's at home (`0x1460`-`0x1462`, `0x146A`) | about once a frame on the map |
 | `0x0803CD6C` | GiveItem | event: a key item given (a ScrtData, the run's Spin) | once an item |
 | `0x080050EC` | cbGameState, the game mode's state update (`src/emu/gamecall.c`) | answer: a queued game call jumps to its routine in the update's place, its return to `EMU_FREE` + `0x100` | once a frame of the game mode |
 | `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |

@@ -384,7 +384,7 @@ static bool build_layer(void) {
 
 /* build_layer timed (build_ms), named first where MegaMan leaves a layer */
 bool new_layer(bool leaving) {
-	if (leaving) building_word();
+	if (leaving) { building_word(); home_jobs_layer_left(); }
 	/* (no battle watched: a duel's, left by a battle never finished) */
 	emu_battle_unwatch();
 	/* (the chip records as the run's helpers have them, in the ROM copy,

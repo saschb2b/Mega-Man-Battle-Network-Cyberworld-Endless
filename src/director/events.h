@@ -13,6 +13,7 @@ enum {
 	EV_GUEST_BATTLE,       /* the encounter roll gave a battle on a layer whose battles are the guest's (encounter_guest) */
 	EV_DARK_RAN,           /* a DarkChip's dark power ran for MegaMan, a BugFrag paid (darkbn6.h): r0 the chip */
 	EV_DARK_BASE,          /* ... or, with no BugFrag, its base chip ran: r0 its DarkChipID */
+	EV_JOB,                /* SetEventFlag on one of the jobs' flags at home (job_words.h): r0 the flag */
 };
 
 /* The hooks for the map, flag and key item events, once the core is up
