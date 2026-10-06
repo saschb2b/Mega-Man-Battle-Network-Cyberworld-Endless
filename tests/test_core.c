@@ -23,12 +23,14 @@
 #include "run.h"
 #include "area_src.h"
 #include "backup.h"
+#include "chip_pool.h"
 #include "guardians.h"
 #include "launcher_roms.h"
 #include "launcher_text.h"
 #include "home_words.h"
 #include "jobs.h"
 #include "loot.h"
+#include "meta.h"
 #include "npc_lines.h"
 #include "powers.h"
 #include "rivals.h"
@@ -37,6 +39,8 @@
 #include "flags.h"
 #include "mapslot.h"
 #include "text.h"
+#include "town.h"
+#include "town_lines.h"
 #include "townmath.h"
 #include "touch_layout.h"
 #include "padmap.h"
@@ -86,6 +90,11 @@ bool emu_debug_on(void) { return false; }
 int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
 char loot_fit_code(int id, char code, bool always) { (void)id; (void)always; return code; }
 void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
+/* (the meta layer and a run's start words: no saves, chip pools or town) */
+void profile_save(void) {}
+int chip_pool_class(int rom_id) { (void)rom_id; return -1; }
+int chip_pool_class_count(int cls) { (void)cls; return 0; }
+bool town_after_abandon;
 
 static void test_sha1(void) {
 	char hex[41];
@@ -2491,6 +2500,74 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
+/* The BeastOut helper (issue #99, docs/META.md): shut until the endless
+ * net's own Nest has fallen, a short net's Nest opening none; announced
+ * once, on the summary of the run that opened it and NEW on the setup's
+ * Help row, NEW too where a run given up for a NEW GAME opened it; and
+ * the words of a run that brought it: Dad's at its start, all of it until
+ * the profile has heard them, and the Graveyard's call with nothing left
+ * to unlock. */
+static void test_beast(void) {
+	Profile profile_was = profile;
+	Run run_was = run;
+	memset(&profile, 0, sizeof profile);
+	memset(&run, 0, sizeof run);
+	CHECK(!meta_beast_open() && meta_helpers_shown() == HELPER_BEAST, "beast: open on a new profile");
+	profile.nest_clears = profile.short_wins = 1;
+	CHECK(!meta_beast_open(), "beast: open after a short net's win alone");
+	profile.nest_clears = 2;
+	CHECK(meta_beast_open() && meta_helpers_shown() == HELPERS, "beast: shut after the endless Nest's fall");
+	meta_unlocks_unsaid();
+	CHECK((profile.beast & BEAST_OPEN) && (profile.setup_new & SETUP_NEW_HELP), "beast: a run given up opened it, not NEW");
+	memset(&profile, 0, sizeof profile);
+	profile.marks = MARK_NEST;
+	CHECK(meta_beast_open(), "beast: shut with Bass's mark");
+	/* (the run that opened it: the endless Nest cleared, then deleted
+	 * deeper) */
+	memset(&profile, 0, sizeof profile);
+	profile.nest_clears = 1;
+	run.mode = RUN_ENDLESS;
+	run.depth = CYCLE_LAYERS + 4;
+	for (int pass = 0; pass < 2; ++pass) {
+		profile.setup_new = 0;
+		meta_run_over(false);
+		const char *said[6];
+		int n = meta_unlocked(said, 6);
+		bool beast = false;
+		for (int i = 0; i < n; ++i) beast |= !strcmp(said[i], "the BeastOut start");
+		bool fresh = (profile.setup_new & SETUP_NEW_HELP) != 0;
+		CHECK(beast == !pass && fresh == !pass, "beast: summary %d says it %s, NEW %s", pass, beast ? "yes" : "no",
+			profile.setup_new & SETUP_NEW_HELP ? "yes" : "no");
+	}
+	CHECK(profile.marks & MARK_NEST, "beast: no Bass's mark with it");
+	/* the words of a run that brought it */
+	run.helpers = HELP_BEAST;
+	for (int navi = 1; navi < 19; ++navi) {
+		const char *words = powers_reward_text(navi, BIOME_GRAVEYARD, 15);
+		char what[64];
+		snprintf(what, sizeof what, "the Graveyard's call to a run with BeastOut, navi %d", navi);
+		check_talk(what, words);
+		CHECK(words && strstr(words, "calling to the Cybeast") && !strstr(words, "unlocking") && !strstr(words, "can now BeastOut"),
+			"%s: \"%s\"", what, words ? words : "(none)");
+	}
+	profile.seen_intro = true;
+	profile.runs = 5;
+	for (int k = 0; k < 4; ++k) {
+		profile.beast = k & 1 ? BEAST_TAUGHT : 0;
+		profile.nest_clears = k & 2 ? 1 : 0;   /* (Dad's call about the Nest first, on an odd run) */
+		const char *words = town_intro(NULL);
+		char what[64];
+		snprintf(what, sizeof what, "a run's start with BeastOut, %s, %s", k & 1 ? "taught" : "first", k & 2 ? "Dad's call before" : "alone");
+		check_talk(what, words);
+		CHECK(strstr(words, "CybeastButton") != NULL, "%s: no word of it: \"%s\"", what, words);
+		CHECK(!!strstr(words, "@D Lan,it's Dad. I've unlocked") == (k == 0), "%s: Dad's call: \"%s\"", what, words);
+	}
+	run.helpers = 0;
+	CHECK(!strstr(town_intro(NULL), "CybeastButton"), "beast: a run's start without it names the CybeastButton");
+	profile = profile_was;
+	run = run_was;
+}
+
 /* Another game's chips as BN6's (src/core/xchips.c; docs/MULTIROM.md,
  * Guest battles), on made-up tables: paired by name each way (a name the
  * other game gives two chips comes back from either; a chip it lacks, or
@@ -2869,6 +2946,7 @@ int main(void) {
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();
+	test_beast();
 	test_xchips();
 	test_darkchips();
 	test_rom_pages();

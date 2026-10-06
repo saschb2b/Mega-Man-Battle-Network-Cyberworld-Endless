@@ -27,6 +27,7 @@ void beat_said(void) {
 	D.guardian_named = D.beat_guardian;
 	D.beat[0] = 0;
 	if (D.beat_cross) { profile.cross_old_told = 1; profile_save(); }
+	if (D.beat_beast) { profile.beast |= BEAST_OLD_TOLD; profile_save(); }
 	if (D.beat_cross || D.beat_out) flag_set(RUN_OUT_NAMED_FLAG);
 }
 

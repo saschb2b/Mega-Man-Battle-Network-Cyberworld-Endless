@@ -56,6 +56,7 @@ typedef struct {
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
 	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
 	bool beat_out;         /* ... or, to a profile told that, the chips that sit out, once a run */
+	bool beat_beast;       /* ... and that the Cybeast can't come in, the first time a profile arrives holding BeastOut */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */

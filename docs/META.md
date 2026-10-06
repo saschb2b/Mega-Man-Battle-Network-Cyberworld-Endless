@@ -68,7 +68,10 @@ gap and makes runs blur together.
 
 The one exception is chosen, not earned: **helpers**, toggled per run, off
 by default, named on the summary (Dungeons of Infinity's head starts,
-Hades' God Mode). They are an accessibility dial, not progression.
+Hades' God Mode). They are an accessibility dial, not progression. One
+helper is earned all the same, by the owner's call: BeastOut from the
+first battle, once the endless net's own Nest has fallen ("BeastOut from
+the start, a fifth helper", below).
 
 ## The pieces
 
@@ -104,7 +107,9 @@ counter (HeatCross and ChargeCross to Aqua, ElecCross to Wood, SlashCross
 to Breaker, EraseCross to Wind, as BN6's own Cross tutorials say), which
 the setup's Cross row names, as MegaMan does when a guardian's Cross is
 won. The Cross still comes from its guardian mid-run as today; a Cross
-start only moves when. BeastOut stays the Graveyard's.
+start only moves when. BeastOut stays the Graveyard's until the endless
+net's own Nest falls; then a helper brings it from the first battle
+("BeastOut from the start, a fifth helper", below).
 
 ### 3. The threat staircase (Ascension, Heat, Stakes)
 
@@ -131,7 +136,9 @@ Per run, off by default: two HPMemory at the start, a heal on every layer,
 the act 1 dealer's pick as the start gift, slower virus versions. The
 summary names a helped run. Whether a helped run counts for unlocks is a
 decision below. A fourth, All * (every chip in *), came with issue #18:
-"All *, a fourth helper", below.
+"All *, a fourth helper", below; a fifth, BeastOut from the first battle,
+the only one a profile earns, with issue #99: "BeastOut from the start, a
+fifth helper", below.
 
 ### 5. The Library (the collection)
 
@@ -293,8 +300,8 @@ Built as planned, with these particulars:
   and gentle battles (the lower half of the band all run); since issue
   #18 a fourth, All *, every chip in * (below).
 - `--setup NET,FOLDER,THREAT,HELPERS` sets a headless run's (HELPERS a bit
-  each: 1 HP+, 2 Heals, 4 Gentle, 8 All *); the weak autopilot wins a
-  short net (layers 1-10).
+  each: 1 HP+, 2 Heals, 4 Gentle, 8 All *, 16 BeastOut); the weak
+  autopilot wins a short net (layers 1-10).
 
 ## Phase two, reasoned (29 September 2026)
 
@@ -332,7 +339,8 @@ against what you find**; each piece restates it.
    Crosses: the brought Cross is the only one, and guardians' Cross data
    does not fit beside it. Bring (one element, committed from act 1) or
    find (up to three Crosses, matched to the guardians met, later). BeastOut
-   stays the Graveyard's.
+   stays the Graveyard's (until the endless net's own Nest falls: issue
+   #99's helper, below).
 3. **The Library** (collection as meta, never power). Every chip MegaMan
    holds enters the profile's Library, BN6's own (its flags `0x1E20` + chip
    id), which each new run's game is given: the PET's Library shows the
@@ -687,6 +695,123 @@ the other way.
   players who would have enjoyed the codes (it is named, and the threat
   rungs still climb); and a profile's very first jack-in has no setup, as
   before, so a player who wants All * meets it on their second.
+
+## BeastOut from the start, a fifth helper (6 October 2026, issue #99)
+
+The owner: "BeastOut should be a toggle in the main menu after you beat V1
+endless net." Read as the endless net's first cycle cleared at its own
+Nest, layer 19 (the milestone of Bass's mark), and the main menu as the
+JACK-IN SETUP after NEW GAME. Until then BeastOut came only from the
+Graveyard's guardian on layer 18, the endless net's last before its Nest:
+in a first cycle for the Nest alone, then for the cycles after, and never
+in the short net. Reasoned with the game-design skill; the owner's ask
+decides the what, the reasoning where it sits.
+
+**BN6's BeastOut, as this design leans on it.** Verified: event flag
+`0xE0` puts BeastOut's emblem under OK on the Custom screen (found by
+setting flags, docs/ROM_DATA.md; seen again here in a run's first battle,
+on layer 1: the emblem and the counter's 3, which a run without the
+helper does not show); MegaMan's EmotionCounter is 3 as a battle begins,
+one less each Beast Out turn, the tired face at 0 (seen, docs/ROM_DATA.md,
+the second screen's battle); BeastOut taken in a Cross is that Cross's
+Beast Out (seen). From BN6's own tutorial, Dad's (bn6f
+`TextScriptDadCybeastTut`, read; Falzar's script, whose buster is the
+FalzarBuster): elementless attack chips that don't dim the screen take
+Attack+30, chips that don't dim the screen rush MegaMan to where they hit,
+B taps a rapid-fire buster, and an elementless chip "powered up" as a
+Cybeast sets off a special move; pressed again while tired, the
+CybeastButton sends him into BeastOver, "completely wild", very tired
+after. Assumed, not tried here: what BeastOver does in a battle, and how
+long. BN6 itself gives BeastOut by its story.
+
+- **What it is.** A fifth helper on the Help row, BeastOut: hidden until
+  the endless net's own Nest has fallen in any run, then shown on a line
+  of its own under the four (they fill the row), NEW beside it the first
+  time, its note "BeastOut from the first battle". Off by default, chosen
+  per run, remembered with the last setup, kept as a bit of `Run.helpers`
+  (16: no change to the save). With it, the flag is set as the run begins,
+  as a brought Cross's is, and BeastOut stands in the Custom screen from
+  the first battle, in either net; without it, the Graveyard's guardian
+  gives it as before.
+- **The experience.** The endless net's first cycle is the longest climb
+  the game has, about two hours; clearing it leaves its own new way to
+  play: every act as BN6's Cybeast, the short net's too, which never
+  reaches the Graveyard.
+- **The dialectic** is the meta layer's, what you bring against what you
+  find: BeastOut is found late, and once it has been carried through the
+  Nest it can be brought. Inside a battle it restates the run's own
+  tension at the moment's scale, as BN6 has it: the Cybeast now, for
+  three turns, or kept for the fight that needs it (BN6's Lan calls it
+  his trump card, in Dad's tutorial), and a second release once tired
+  goes wild.
+- **The loop layers:** the moment (the emblem in every battle's Custom
+  screen, its three turns, then tired), the session (an act's battles and
+  its guardian with BeastOut in hand), the run (the short net with
+  BeastOut at all; the Graveyard's call that unlocks nothing), the meta
+  (an unlock farther out than the threat rungs, for a profile that has
+  done the most the net asks).
+- **The patterns:** late-introduced mechanics brought forward once
+  learned (BeastOut comes one layer from the first cycle's end, the Nest
+  its only place to learn it before the cycles after; a player who has
+  carried it through the Nest gets the whole net to play it in); an
+  assist in Celeste's sense, opt-in, per run, named, no penalty; BN6's
+  own bonus with a drawback inside each battle (the counter, tired,
+  BeastOver).
+- **Where it sits: the Help row.** BeastOut from the start is power, and
+  uncosted across the run: a Cross start pays with the run's other
+  Crosses, BeastOut pays nothing that BN6 does not ask in each battle. The
+  stance lets power across runs in at one door only, the helpers: chosen
+  each run, off by default, named on the summary, counting for unlocks.
+  So it goes through that door, the same exception, not a second kind.
+  It bends the stance once: the helpers were open from the start, and
+  this one a profile earns. It keeps what the stance protects: a
+  profile's runs still start alike unless the player turns it on, and a
+  helped run says so.
+- **Not chosen:** a row of its own beside the Cross, MegaMan's axis
+  (BeastOut as a brought power outside the helpers, uncosted where the
+  Cross start is costed, and a row for one switch); BeastOut as a choice
+  on the Cross row, a Cross or the Beast (an opportunity cost, but BN6's
+  Cross Beast is its signature, and the owner asked for a toggle); a cost
+  of our own (fewer HPMemory, a threat rung, out of the unlocks: a helper
+  that shut its player out would be the judging mode Celeste renamed
+  Assist to avoid); the short net left without it; a telegraph of the
+  unlock on the setup (the issue asks for it hidden, and an unexpected
+  unlock pays more than a scheduled one, the overjustification guardrail
+  above).
+- **How it opens.** The milestone, not the mark: the profile counts each
+  Nest cleared (the endless net's as the checkpoint after its guardian
+  saves, a short net's at its win), and `short_wins` counts the short
+  nets' apart, so a Nest count past the short wins is the endless one's;
+  Bass's mark, which a run's summary gives, opens it too. A run given up
+  for a NEW GAME after the endless Nest opens it as the folders' and the
+  Crosses' milestones do: NEW on the setup, said on no summary.
+- **Where it is said.** The summary of the run that opened it: "Unlocked:
+  the BeastOut start", before the folders, the Spin and the Crosses (an
+  endless run's summary has room for three; Bass's mark comes after).
+  A run with it: "Help: BeastOut" over its summary's title, and Dad's dive
+  report names it with the helpers. It counts for everything, as every
+  helper does (decision 3); no threat rung or mark follows from it.
+- **The fiction.** In a run without it, Dad unlocks the PET's
+  CybeastButton at the Graveyard, as before. In a run with it, Dad calls
+  as the run begins, in Lan's room: he has unlocked it, MegaMan tamed the
+  beast at the Nest before (the milestone, said as the run's world knows
+  it), just don't let it take over; all of it the first time a profile
+  brings it (`profile.beast`), MegaMan's "And the CybeastButton's
+  unlocked!" and Lan's "Our trump card. Alright!" after. At the Graveyard
+  the Nest still calls to the Cybeast in him, and Lan answers that he has
+  kept it in check all along: nothing is unlocked. Where an area's battles
+  are the older Net's (BN5's), BeastOut cannot come in, as a Cross
+  cannot: said once a profile, the first time it arrives there holding
+  BeastOut, in the Cross's words where both are new ("Or the Cybeast!"),
+  else on its own ("No CybeastButton back then,huh?").
+- **What it costs the game.** The early acts' battles get easier with
+  BeastOut in every one of them, and the short net, never paced for it,
+  most. Accepted: a dial the player turns, named; the threat rungs still
+  climb, and BN6's own BeastOver still punishes greed.
+- **What could go wrong:** a veteran turning it on every run and the
+  early acts losing their teeth (it is named; the threat rungs climb);
+  the setup crowded by a sixth line (the rows close to 12 pixels while it
+  shows, and the notes keep their three lines over JACK IN!).
 
 ## DarkChips in BN5 territory (3 October 2026)
 
@@ -1169,8 +1294,11 @@ a death to something new leaves something for the next run.
 BN6 draws marks over its title for what a save has done: its ending, its
 Library, its Program Advances, two of its events. Here the same sprites, at
 BN6's places, mark a profile's milestones. They are trophies, never keys:
-nothing needs one. The summary names a mark the run earned where it has
-room, and the new mark blinks in on the title after it, with a chime.
+nothing needs one. (Bass's milestone, the endless net's own Nest, also
+opens the BeastOut helper: the milestone does, which a run given up for a
+NEW GAME reaches too, where the mark waits for a summary; issue #99.) The
+summary names a mark the run earned where it has room, and the new mark
+blinks in on the title after it, with a chime.
 
 | Mark | BN6 | Here |
 | --- | --- | --- |

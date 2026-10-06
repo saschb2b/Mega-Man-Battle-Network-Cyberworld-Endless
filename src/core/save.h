@@ -87,9 +87,14 @@ typedef struct {
 	uint8_t last_won;
 	uint8_t hp_taught;        /* MegaMan has said what Lan's HP is, at a run's first jack-in (said short after) */
 	uint8_t last_job;         /* the asker whose request the last run ended holding, plus one (0 none): their word at the next run's start */
+	/* the BeastOut helper (issue #99, docs/META.md): announced, Dad's words
+	 * on it said in full at a run's start, the older net's lack of it said
+	 * (BEAST_*) */
+	uint8_t beast;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
+enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 };
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };
 

@@ -113,15 +113,29 @@ const char *meta_threat_rule(int rung) {
 const HelperInfo *meta_helper(int h) {
 	/* (All *: every chip in *, the wildcard, so a hand takes any chips
 	 * together and a Program Advance only its chips in their order,
-	 * docs/META.md; issue #18, a player put off by hunting codes) */
+	 * docs/META.md; issue #18, a player put off by hunting codes.
+	 * BeastOut: BN6's own, from the first battle, once the endless Nest
+	 * has fallen; issue #99) */
 	static const HelperInfo helpers[HELPERS] = {
 		{ "HP+", "Two more HPMemory at start", NULL },
 		{ "Heals", "A heal Prog on every layer", NULL },
 		{ "Gentle", "Gentler battles all along", NULL },
 		{ "All *", "Every chip in *: any five go in a hand", "P.A.s from their chips in order" },
+		{ "BeastOut", "BeastOut from the first battle", NULL },
 	};
 	return &helpers[h >= 0 && h < HELPERS ? h : 0];
 }
+
+/* (the endless net's own Nest cleared in any run: the profile counts each
+ * Nest cleared as its checkpoint saves, a short net's win among them,
+ * which short_wins counts apart; Bass's mark comes with the summary of a
+ * run that went past one. A run given up for a NEW GAME counts too, as
+ * the folders' and Crosses' milestones do) */
+static bool beast_earned(void) { return (profile.marks & MARK_NEST) || profile.nest_clears > (int)profile.short_wins; }
+
+bool meta_beast_open(void) { return (profile.beast & BEAST_OPEN) || beast_earned(); }
+
+int meta_helpers_shown(void) { return meta_beast_open() ? HELPERS : HELPER_BEAST; }
 
 
 static const char *said[6];
@@ -208,6 +222,7 @@ void meta_run_begun(void) {
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
 	for (int n = 1; n <= 5; ++n)
 		if (cross_earned(n)) profile.crosses_open |= (uint8_t)(1u << n);
+	if (beast_earned()) profile.beast |= BEAST_OPEN;
 	/* (the Library as the run begins: the summary counts what it adds) */
 	profile.library_start = (uint16_t)meta_library_count(-1);
 	profile.library_run = run.seed;
@@ -235,13 +250,23 @@ static void open_crosses(bool tell) {
 	}
 }
 
+/* the BeastOut helper, once the endless net's Nest falls: open, and NEW
+ * on the setup's Help row */
+static void open_beast(bool tell) {
+	if ((profile.beast & BEAST_OPEN) || !beast_earned()) return;
+	profile.beast |= BEAST_OPEN;
+	if (tell) say("%s", "the BeastOut start");
+	profile.setup_new |= SETUP_NEW_HELP;
+}
+
 void meta_unlocks_unsaid(void) {
 	open_folders(false);
 	open_crosses(false);
+	open_beast(false);
 }
 
 bool meta_setup_has_choice(void) {
-	if (meta_endless_open() || meta_threat_open() > 0) return true;
+	if (meta_endless_open() || meta_threat_open() > 0 || meta_beast_open()) return true;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f)
 		if (meta_folder_open(f)) return true;
 	for (int n = 1; n <= 5; ++n)
@@ -249,30 +274,10 @@ bool meta_setup_has_choice(void) {
 	return false;
 }
 
-void meta_run_over(bool won) {
-	nsaid = 0;
-	marks_new = 0;
-	/* the endless net, once a short one is won */
-	if (won && run.mode == RUN_SHORT && !meta_endless_open()) { say("%s", "the endless net"); profile.setup_new |= SETUP_NEW_NET; }
-	if (won) profile.short_wins += run.mode == RUN_SHORT;
-	/* the next threat rung, once the Nest falls on this one */
-	if (won && run.threat >= meta_threat_open() && run.threat < THREAT_MAX) {
-		profile.threat_open = (uint8_t)(run.threat + 1);
-		static char rung[24];
-		snprintf(rung, sizeof rung, "threat %d", run.threat + 1);
-		say("%s", rung);
-		profile.setup_new |= SETUP_NEW_THREAT;
-	}
-	open_folders(true);
-	/* the Spin this run found (the NaviCust's, for good) */
-	if (profile.spin_run == run.seed && profile.spin_colour >= 1 && profile.spin_colour <= 6) {
-		static char spin[24];
-		snprintf(spin, sizeof spin, "the %s Spin", meta_spin_name(profile.spin_colour));
-		say("%s", spin);
-	}
-	open_crosses(true);
-	/* the title's marks (meta.h; the summary's line "Unlocked: Gregar's mark"),
-	 * said last: the setup's new options matter more to the next run */
+/* the title's marks the run over earned (meta.h; the summary's line
+ * "Unlocked: Gregar's mark"), said after the setup's new options, which
+ * matter more to the next run */
+static void earn_marks(bool won) {
 	static const struct { int bit; const char *what; } marks[] = {
 		{ MARK_WIN, "Gregar's mark" }, { MARK_NEST, "Bass's mark" }, { MARK_SECRET, "the S mark" }, { MARK_THREAT, "the disc mark" },
 		{ MARK_STD, "the STD COMP mark" }, { MARK_MEGA, "the MEGA COMP mark" }, { MARK_GIGA, "the GIGA COMP mark" },
@@ -292,6 +297,34 @@ void meta_run_over(bool won) {
 		marks_new |= (uint16_t)b;
 		say("%s", marks[i].what);
 	}
+}
+
+void meta_run_over(bool won) {
+	nsaid = 0;
+	marks_new = 0;
+	/* the endless net, once a short one is won */
+	if (won && run.mode == RUN_SHORT && !meta_endless_open()) { say("%s", "the endless net"); profile.setup_new |= SETUP_NEW_NET; }
+	if (won) profile.short_wins += run.mode == RUN_SHORT;
+	/* the next threat rung, once the Nest falls on this one */
+	if (won && run.threat >= meta_threat_open() && run.threat < THREAT_MAX) {
+		profile.threat_open = (uint8_t)(run.threat + 1);
+		static char rung[24];
+		snprintf(rung, sizeof rung, "threat %d", run.threat + 1);
+		say("%s", rung);
+		profile.setup_new |= SETUP_NEW_THREAT;
+	}
+	/* (BeastOut before the rest: the endless Nest's, said where a summary
+	 * has room for three) */
+	open_beast(true);
+	open_folders(true);
+	/* the Spin this run found (the NaviCust's, for good) */
+	if (profile.spin_run == run.seed && profile.spin_colour >= 1 && profile.spin_colour <= 6) {
+		static char spin[24];
+		snprintf(spin, sizeof spin, "the %s Spin", meta_spin_name(profile.spin_colour));
+		say("%s", spin);
+	}
+	open_crosses(true);
+	earn_marks(won);
 	profile_save();
 }
 

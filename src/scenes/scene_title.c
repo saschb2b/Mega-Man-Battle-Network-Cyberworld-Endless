@@ -374,11 +374,12 @@ static void marks_draw(int x0, int y0) {
  * to start from ---- */
 
 enum { ROW_NET, ROW_FOLDER, ROW_CROSS, ROW_THREAT, ROW_HELPERS, ROW_GO, ROWS };
+#define HELP_LINE 12   /* BeastOut's line under the Help row's */
 
 /* the rows the last summary's unlocks are on (profile.setup_new) */
 static int row_new(int row) {
 	int bit = row == ROW_NET ? SETUP_NEW_NET : row == ROW_FOLDER ? SETUP_NEW_FOLDER : row == ROW_CROSS ? SETUP_NEW_CROSS
-		: row == ROW_THREAT ? SETUP_NEW_THREAT : 0;
+		: row == ROW_THREAT ? SETUP_NEW_THREAT : row == ROW_HELPERS ? SETUP_NEW_HELP : 0;
 	return profile.setup_new & bit;
 }
 
@@ -395,8 +396,10 @@ static void setup_open(void) {
 	S.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
 	S.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
 	S.threat = profile.last_threat <= meta_threat_open() ? profile.last_threat : meta_threat_open();
-	S.helpers = profile.last_helpers & ((1 << HELPERS) - 1);
-	S.helper = 0;
+	S.helpers = profile.last_helpers & ((1 << meta_helpers_shown()) - 1);
+	/* (on BeastOut where it is the news: the Help row's only kind, the
+	 * helper a profile earns, issue #99) */
+	S.helper = row_new(ROW_HELPERS) && meta_beast_open() ? HELPER_BEAST : 0;
 }
 
 static void setup_update(void) {
@@ -418,7 +421,7 @@ static void setup_update(void) {
 				if (!c || meta_cross_open(c)) { S.cross = c; break; }
 			}
 		if (S.row == ROW_THREAT) S.threat = (S.threat + d + meta_threat_open() + 1) % (meta_threat_open() + 1);
-		if (S.row == ROW_HELPERS) S.helper = (S.helper + d + HELPERS) % HELPERS;
+		if (S.row == ROW_HELPERS) S.helper = (S.helper + d + meta_helpers_shown()) % meta_helpers_shown();
 		int now = S.row == ROW_NET ? S.net : S.row == ROW_FOLDER ? S.folder : S.row == ROW_CROSS ? S.cross : S.row == ROW_THREAT ? S.threat : S.helper;
 		if (now != was) audio_sfx(SFX_CURSOR);
 	}
@@ -472,23 +475,83 @@ static void choice_draw(int x, int y, const char *s, SDL_Color c, bool changes) 
 	}
 }
 
+#define NOTE_MORE 48   /* a dim line under the note, with its end */
+
 /* under the note: what is still shut, and how, dim */
-static void note_more(int cx, int y, char lines[][48], int n) {
+static void note_more(int cx, int y, char lines[][NOTE_MORE], int n) {
 	for (int i = 0; i < n; ++i, y += 12) text_draw(cx, y, lines[i], rgba(120, 140, 170, 255), TEXT_CENTER);
 }
 
 /* the helpers, each on or off (green or dim) along the Help row, the one
- * the cursor is on underlined while the row is chosen */
+ * the cursor is on underlined while the row is chosen; BeastOut, once
+ * open, on a line of its own under the first, NEW beside it while it is
+ * the news */
 static void helpers_draw(int x0, int y, bool chosen) {
 	SDL_Color on = rgba(120, 255, 140, 255), dim = rgba(120, 140, 170, 255), orange = rgba(255, 170, 40, 255);
 	/* (each name's middle: four in the row from "Help" to the frame's edge,
-	 * All * beside Gentle, 8 pixels apart and 10 after "Help") */
-	static const int hxs[HELPERS] = { 78, 117, 167, 214 };
+	 * All * beside Gentle, 8 pixels apart and 10 after "Help"; a fifth
+	 * would run past the frame) */
+	static const int hxs[HELPER_BEAST] = { 78, 117, 167, 214 };
 	text_draw(x0 + 26, y, "Help", WHITE, TEXT_LEFT);
-	for (int h = 0; h < HELPERS; ++h) {
+	for (int h = 0; h < HELPER_BEAST; ++h) {
 		int hx = x0 + hxs[h];
 		text_draw(hx, y, meta_helper(h)->name, S.helpers >> h & 1 ? on : dim, TEXT_CENTER);
 		if (chosen && S.helper == h) fill_rect(hx - 16, y + 11, 32, 1, orange);
+	}
+	if (meta_helpers_shown() <= HELPER_BEAST) return;
+	const char *name = meta_helper(HELPER_BEAST)->name;
+	int bx = x0 + hxs[0] - text_width(meta_helper(0)->name) / 2, by = y + HELP_LINE, w = text_width(name);
+	text_draw(bx, by, name, S.helpers >> HELPER_BEAST & 1 ? on : dim, TEXT_LEFT);
+	if (chosen && S.helper == HELPER_BEAST) fill_rect(bx, by + 11, w, 1, orange);
+	if (row_new(ROW_HELPERS)) text_draw(bx + w + 6, by, "NEW", rgba(255, 230, 90, 255), TEXT_LEFT);
+}
+
+/* the Crosses a run may bring: the Cross row's arrows and its note */
+static int crosses_open(void) {
+	int n = 0;
+	for (int c = 1; c <= 5; ++c) n += meta_cross_open(c);
+	return n;
+}
+
+/* the Cross row's note, made into `buf` where it is: the Cross's strength
+ * and its costs (BN6's own weakness, which a playtester was told wrong; and
+ * "break it": a playtester knew it from BN6, a newer player would not), or
+ * how Crosses open; the ones still shut and how, or that no other Cross
+ * comes, into `locked` */
+static const char *cross_note(char *buf, size_t n, char locked[][NOTE_MORE], int *nlocked) {
+	const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL, *strong = S.cross ? powers_cross_strength(S.cross) : NULL;
+	int open = crosses_open();
+	if (weak && strong) snprintf(buf, n, "%s.\n%s hits do 2x and break it", strong, weak);
+	else if (weak) snprintf(buf, n, "From the first battle. %s hits do 2x and break it", weak);
+	if (S.cross) snprintf(locked[(*nlocked)++], NOTE_MORE, "%s", "No other Cross this run");
+	else if (open && open < 5) snprintf(locked[(*nlocked)++], NOTE_MORE, "%s", "Start in more: delete Navis");
+	return weak ? buf : S.cross ? "From the first battle" : open ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
+}
+
+/* what the chosen row means, a line or two (made into `buf` where it is
+ * made), and under it, dim, what is still shut and how, or what else to
+ * know (into `locked`) */
+static const char *row_note(char *buf, size_t n, char locked[][NOTE_MORE], int *nlocked) {
+	switch (S.row) {
+	case ROW_NET:
+		return S.net == RUN_ENDLESS ? "The net repeats, harder each time" : meta_endless_open() ? "Three acts, then the Nest" :
+			"Three acts, then the Nest. Win it for the endless net";
+	case ROW_FOLDER:
+		/* (every folder still to open, and how: the telegraph comes first) */
+		for (int f = 1; f < FOLDER_COUNT; ++f)
+			if (!meta_folder_open(f) && meta_folder(f)->opens)
+				snprintf(locked[(*nlocked)++], NOTE_MORE, "%s: %s", meta_folder(f)->name, meta_folder(f)->opens);
+		return meta_folder(S.folder)->about;
+	case ROW_CROSS: return cross_note(buf, n, locked, nlocked);
+	case ROW_THREAT:
+		if (S.threat) return meta_threat_rule(S.threat);
+		return meta_threat_open() ? "The net as it comes" : "The net as it comes. Win it for threat 1";
+	case ROW_HELPERS:
+		/* (and what else it changes: All *'s Program Advances) */
+		if (meta_helper(S.helper)->more) snprintf(locked[(*nlocked)++], NOTE_MORE, "%s", meta_helper(S.helper)->more);
+		snprintf(buf, n, "%s. A: on or off", meta_helper(S.helper)->about);
+		return buf;
+	default: return "A: jack in. B: back";
 	}
 }
 
@@ -501,7 +564,12 @@ static void setup_draw(int x0, int y0) {
 	int cx = x0 + CORE_W / 2, lx = x0 + 26, vx = x0 + 150;
 	text_draw(cx, y0 + 12, "JACK-IN SETUP", gold, TEXT_CENTER);
 	char v[48];
-	static const int ry[ROWS] = { 30, 43, 56, 69, 82, 139 };
+	/* (the rows 13 pixels apart; with BeastOut's line under the Help row,
+	 * 12, as the note's lines are, so the note keeps three lines above
+	 * JACK IN!) */
+	static const int rows4[ROWS] = { 30, 43, 56, 69, 82, 139 }, rows5[ROWS] = { 28, 40, 52, 64, 76, 139 };
+	bool five = meta_helpers_shown() > HELPER_BEAST;
+	const int *ry = five ? rows5 : rows4;
 	/* the net */
 	text_draw(lx, y0 + ry[ROW_NET], "Net", WHITE, TEXT_LEFT);
 	choice_draw(vx, y0 + ry[ROW_NET], S.net == RUN_ENDLESS ? "Endless" : "Short", WHITE, meta_endless_open());
@@ -512,9 +580,7 @@ static void setup_draw(int x0, int y0) {
 	choice_draw(vx, y0 + ry[ROW_FOLDER], meta_folder(S.folder)->name, WHITE, open_folders > 1);
 	/* the Cross brought */
 	text_draw(lx, y0 + ry[ROW_CROSS], "Cross", WHITE, TEXT_LEFT);
-	int open_crosses = 0;
-	for (int c = 1; c <= 5; ++c) open_crosses += meta_cross_open(c);
-	choice_draw(vx, y0 + ry[ROW_CROSS], S.cross ? powers_cross_name(S.cross) : "None", S.cross ? orange : WHITE, open_crosses > 0);
+	choice_draw(vx, y0 + ry[ROW_CROSS], S.cross ? powers_cross_name(S.cross) : "None", S.cross ? orange : WHITE, crosses_open() > 0);
 	/* the threat */
 	text_draw(lx, y0 + ry[ROW_THREAT], "Threat", WHITE, TEXT_LEFT);
 	snprintf(v, sizeof v, "%d", S.threat);
@@ -533,48 +599,13 @@ static void setup_draw(int x0, int y0) {
 	int ax = S.row == ROW_GO ? cx - 44 : lx - 12;
 	for (int i = 0; i < 4; ++i) fill_rect(ax + i, ay + i, 1, 8 - 2 * i, orange);
 	/* what the chosen row means */
-	const char *note = "";
-	char buf[128], locked[FOLDER_COUNT][48];
+	char buf[128], locked[FOLDER_COUNT][NOTE_MORE];
 	int nlocked = 0;
-	switch (S.row) {
-	case ROW_NET:
-		note = S.net == RUN_ENDLESS ? "The net repeats, harder each time" : meta_endless_open() ? "Three acts, then the Nest" :
-			"Three acts, then the Nest. Win it for the endless net";
-		break;
-	case ROW_FOLDER:
-		note = meta_folder(S.folder)->about;
-		/* (every folder still to open, and how: the telegraph comes first) */
-		for (int f = 1; f < FOLDER_COUNT; ++f)
-			if (!meta_folder_open(f) && meta_folder(f)->opens)
-				snprintf(locked[nlocked++], sizeof locked[0], "%s: %s", meta_folder(f)->name, meta_folder(f)->opens);
-		break;
-	case ROW_CROSS: {
-		/* (and its costs: BN6's own weakness, which a playtester was told
-		 * wrong, and no other Cross) */
-		const char *weak = S.cross ? powers_cross_weakness(S.cross) : NULL, *strong = S.cross ? powers_cross_strength(S.cross) : NULL;
-		/* (and break it: a playtester knew from BN6, a newer player would not) */
-		if (weak && strong) snprintf(buf, sizeof buf, "%s.\n%s hits do 2x and break it", strong, weak);
-		else if (weak) snprintf(buf, sizeof buf, "From the first battle. %s hits do 2x and break it", weak);
-		note = weak ? buf : S.cross ? "From the first battle"
-			: open_crosses ? "Crosses from the guardians we delete" : "Delete a Cross Navi to start in his Cross";
-		/* (the ones still shut, and how) */
-		if (S.cross) snprintf(locked[nlocked++], sizeof locked[0], "%s", "No other Cross this run");
-		else if (open_crosses && open_crosses < 5) snprintf(locked[nlocked++], sizeof locked[0], "%s", "Start in more: delete Navis");
-		break;
-	}
-	case ROW_THREAT:
-		if (!S.threat) note = meta_threat_open() ? "The net as it comes" : "The net as it comes. Win it for threat 1";
-		else note = meta_threat_rule(S.threat);
-		break;
-	case ROW_HELPERS:
-		snprintf(buf, sizeof buf, "%s. A: on or off", meta_helper(S.helper)->about);
-		note = buf;
-		/* (and what else it changes: All *'s Program Advances) */
-		if (meta_helper(S.helper)->more) snprintf(locked[nlocked++], sizeof locked[0], "%s", meta_helper(S.helper)->more);
-		break;
-	default: note = "A: jack in. B: back"; break;
-	}
-	note_more(cx, y0 + 99 + note_line(cx, y0 + 97, note, sky) * 12, locked, nlocked);
+	const char *note = row_note(buf, sizeof buf, locked, &nlocked);
+	/* (under BeastOut's line the note's last line comes 2 pixels closer: a
+	 * Cross's two lines and "No other Cross this run" stood on JACK IN!) */
+	int ny = five ? ry[ROW_HELPERS] + HELP_LINE + 14 : 97;
+	note_more(cx, y0 + ny + (five ? 0 : 2) + note_line(cx, y0 + ny, note, sky) * 12, locked, nlocked);
 }
 
 static void update(void) {

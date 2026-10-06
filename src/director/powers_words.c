@@ -41,7 +41,12 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 		else ADD("%s@M %s's Cross data...|@M We can only carry one Cross down here.|@M So we keep our %s,Lan.%s", k ? "|" : "",
 			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M But next dive,we can start with his Cross!");
 	}
-	if (beast)
+	/* (a run that brought BeastOut has had the CybeastButton from its
+	 * start: the Nest's call, and Lan's word, no unlocking) */
+	if (beast && run_beast_start())
+		ADD("%s@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|"
+			"@L Easy,MegaMan! You've kept it in check all along!|@M ...Right. I won't let it take over,Lan.", k ? "|" : "");
+	else if (beast)
 		ADD("%s@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|"
 			"@D Lan,it's Dad! I'm unlocking your PET's CybeastButton.|"
 			"@D BeastOut is powerful...|@D But don't let the beast take over,OK?|@N MegaMan can now BeastOut!", k ? "|" : "");

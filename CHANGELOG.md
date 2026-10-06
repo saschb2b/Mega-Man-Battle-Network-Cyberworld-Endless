@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **BeastOut from the start, once the endless net is beaten** (issue #99).
+  When the endless net's own Nest has fallen in any run (the milestone of
+  Bass's mark on the title), the JACK-IN SETUP's Help row shows a fifth
+  helper, BeastOut, on a line under the other four, NEW the first time.
+  On, BN6's own BeastOut is in the Custom screen from the run's first
+  battle, in the short net too, which never reaches the Graveyard: the
+  emblem under OK, its three turns a battle, BeastOver if pressed again
+  while tired. Off, the Graveyard's guardian gives it as before. It is
+  remembered with the last setup, named over the summary's title and in
+  Dad's dive report as every helper is, and counts for every unlock; the
+  run that opens it says "Unlocked: the BeastOut start". In such a run Dad
+  calls as it begins to say he has unlocked the PET's CybeastButton
+  (MegaMan tamed the beast at the Nest before), the Graveyard's guardian
+  stirs the Cybeast without unlocking anything, and where the older Net's
+  battles run, MegaMan says the Cybeast can't come in, as he says of a
+  Cross. The setup's rows draw a pixel closer while the fifth helper
+  shows, so its notes keep their three lines over JACK IN!.
 - **A ROMs screen before the game, and saves that outlast a reinstall**
   (issue #97). On a PC, a Mac, Android, an iPhone or an iPad the game
   first opens on its ROMs screen, drawn in the look of the second
