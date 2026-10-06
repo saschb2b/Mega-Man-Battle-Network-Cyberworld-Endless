@@ -270,7 +270,7 @@ askers' scripts set and the director keeps as each visit's places are
 installed, docs/HOME.md piece 5; `0x146C` that the town holds nothing
 more for this visit, which the director keeps every frame at home and
 which sends Lan's HP's courier and his mark off, piece 2; `0x146F` the
-Yes of a trip back's question in Lan's HP, which the director clears
+Yes of a link's question in Lan's HP (a trip back's or a way on's), which the director clears
 before it asks and acts on as the talk closes, and `0x1470`-`0x1471`
 set while Lan's HP's link on the left and down front is no way back,
 which sends their way-back marks off, piece 2; `0x146B` that this visit's order was

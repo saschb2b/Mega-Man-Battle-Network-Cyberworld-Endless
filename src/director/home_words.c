@@ -117,6 +117,8 @@ const char *home_back_portal_words(int biome, bool taught, int clock) {
 
 const char *home_back_question(void) { return "Go back,Lan?\n"; }
 
+const char *home_on_question(void) { return "Go this way,Lan?\n"; }
+
 const char *home_back_words(int clock) {
 	if (clock >= 4) return "@M Home again,Lan...|@M The Net's copying fast now.|@L Then no more stalling! Let's dive!";
 	return "@M Home again,Lan!|@M The Net kept copying while we were away...|@L Then we'd better get moving!";

@@ -42,9 +42,9 @@ bool home_take_way(int k);
  * back, which look their own and ask first (issue #110). */
 unsigned home_lit(void);
 unsigned home_lit_back(void);
-/* Set by the trip back's Yes (talk_ask). */
-#define HOME_BACK_FLAG 0x146F
-/* A in Lan's HP facing a portal: MegaMan's words on it, or an older one's
+/* Set by a link's Yes (talk_ask): a trip back's, or a way on's. */
+#define HOME_LINK_FLAG 0x146F
+/* A in Lan's HP facing a portal: MegaMan's words on it, or a lit link's
  * question; true where a talk began. */
 bool home_hp_check(void);
 /* The area older portal `k` goes back to (docs/HOME.md, going back), -1

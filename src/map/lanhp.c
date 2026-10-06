@@ -57,6 +57,15 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define FIRST_BACK 3        /* home's HOME_WAYS: the older portals after the ways */
 #define BACK_DARK_FLAG 0x1470   /* + k - FIRST_BACK: set while portal k is no way back */
 
+/* A link square's marker draws in front of its trigger cells, BN6's own
+ * and ours alike: MegaMan seen on a marker's middle stood 14 units short
+ * of its cells' middle in x and 12 past it in y, outside them, and A from
+ * the marker's front corner reached none of them (session 73). A link's
+ * zone for the checks and the questions takes in its marker: its cells,
+ * stretched as far towards the screen's front (-x, +y). */
+#define LINK_FRONT_X 14
+#define LINK_FRONT_Y 12
+
 static struct {
 	bool read;
 	int x[ENTRIES + 1], y[ENTRIES + 1];   /* each entry's spot: its cells' middle */
@@ -170,7 +179,9 @@ void lanhp_lit(unsigned lit, unsigned back) {
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
 		int e = portal_entry[k];
 		bool mark = (back >> k & 1) != 0, on = (lit >> k & 1) && !mark;
-		if (on) flag_clear(BN6_FLAG_WARP_OFF + e);
+		/* (a link's own warp stays off, a way on's too: a link asks first,
+		 * and its yes takes it, lanhp_take; the pink pad warps as BN6's) */
+		if (on && e < FIRST_LINK) flag_clear(BN6_FLAG_WARP_OFF + e);
 		else flag_set(BN6_FLAG_WARP_OFF + e);
 		if (k >= FIRST_BACK) {
 			if (mark) flag_clear(BACK_DARK_FLAG + k - FIRST_BACK);
@@ -207,8 +218,8 @@ void lanhp_portal_spot(int k, int *x, int *y) {
 int lanhp_portal_near(int x, int y, int reach) {
 	if (!read_spots()) return -1;
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
-		int e = portal_entry[k];
-		if (x >= H.x0[e] - reach && y >= H.y0[e] - reach && x < H.x1[e] + 8 + reach && y < H.y1[e] + 8 + reach) return k;
+		int e = portal_entry[k], fx = e >= FIRST_LINK ? LINK_FRONT_X : 0, fy = e >= FIRST_LINK ? LINK_FRONT_Y : 0;
+		if (x >= H.x0[e] - reach - fx && y >= H.y0[e] - reach && x < H.x1[e] + 8 + reach && y < H.y1[e] + 8 + reach + fy) return k;
 	}
 	return -1;
 }

@@ -17,6 +17,7 @@
 #define STAIRS_UP 3          /* the house's */
 #define STAIRS_DOWN 1        /* the room's */
 #define PC_POINT 0x40
+#define JACK_IN_FACE 1       /* +x in Lan's HP: out of the blue pad's alcove, the way on (BN6's faced the camera, session 73) */
 #define HOUSE_DOORS (1u << FRONT_DOOR | 1u << STAIRS_UP)   /* (the bathroom's shut) */
 
 static struct {
@@ -52,7 +53,7 @@ bool lan_house_install(int to_group, int to_number, int x, int y) {
 	 * "Lan,let's check out the town first!") */
 	uint32_t house = indoors_take_over(LAN_HOUSE_GROUP, LAN_HOUSE, hx, hy, HOUSE_DOORS, 1, HOME_SONG);
 	bool ok = house && indoors_take_over(LAN_HOUSE_GROUP, LAN_ROOM, rx, ry, 1u << STAIRS_DOWN, 2, HOME_SONG) &&
-		mapslot_jack_in(LAN_HOUSE_GROUP, LAN_ROOM, to_group, to_number, x, y, 4);
+		mapslot_jack_in(LAN_HOUSE_GROUP, LAN_ROOM, to_group, to_number, x, y, JACK_IN_FACE);
 	mapslot_house(false);
 	/* (out of the front door where the planned town has it: BN6's place is
 	 * the original's) */

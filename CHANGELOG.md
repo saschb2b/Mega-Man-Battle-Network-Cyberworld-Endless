@@ -3,15 +3,21 @@
 ## Unreleased
 
 - **Lan's HP tells going on from going back, and talks only when asked**
-  (issue #110). Warped in, MegaMan now faces up the corridor to the pink
-  pad, the way on, instead of straight down. He no longer stops the player
-  beside every other portal on the way: his words on a portal (its data,
-  a Navi's signal, a trip back's price) come when the player checks it,
-  A facing it. Lit links show BN6's own link markers instead of white
-  balls (their sprite was never loaded); a way on keeps its town emblem,
-  a way back shows the marker's plain orange pad. A trip back, stepped on
-  or checked, asks first, the cursor on No; Yes takes the link. The second
-  screen lists each way as On or Back, the ways back too.
+  (issue #110). Warped in, or jacked in from Lan's PC, MegaMan now faces
+  up the corridor to the pink pad, the way on, instead of straight down.
+  He no longer stops the player beside every other portal on the way: his
+  words on a portal (its data, a Navi's signal, a trip back's price) come
+  when the player checks it, A facing it. Lit links show BN6's own link
+  markers instead of white balls (their sprite was never loaded); a way on
+  keeps its town emblem, a way back shows the marker's plain orange pad.
+  A link, stepped on or checked, asks before it takes MegaMan anywhere,
+  the cursor on No: a trip back ("Go back,Lan?") and a way on ("Go this
+  way,Lan?": a playtester's stray step on his way to the pink pad chose
+  his act); Yes takes the link, and the pink pad goes as BN6's does. A
+  link's check and question take in its whole marker, which BN6 draws in
+  front of the link's own trigger (standing on a marker's middle, or A
+  from its front, reached nothing). The second screen lists each way as
+  On or Back, the ways back too.
 - **A Mr.Prog courier in Lan's HP says what the town holds** (issue
   #108). Playtests jacked out to the town only when told to, though it
   holds a request's pay, new requests and keys for the act ahead. Now,

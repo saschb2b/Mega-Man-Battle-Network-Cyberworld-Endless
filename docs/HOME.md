@@ -283,7 +283,8 @@ courier. He speaks only when spoken to.
 
 Going on against going back (issue #110, the owner after playing):
 MegaMan arrives on the blue pad facing +x, up the corridor to the pink
-pad, so a step out goes the way on. Nothing is said as he passes a
+pad, so a step out goes the way on, from a layer and from Lan's PC alike
+(the PC's jack-in faced the camera, session 73). Nothing is said as he passes a
 portal (he had stopped the player beside each, every visit): his words
 on one come when the player checks it, A facing it from its edge
 (`lanhp_portal_ahead`), as BN6's checks work. Going on and going back
@@ -301,7 +302,17 @@ map takes). A way back is locked by BN6's own rule, its story flag clear
 stepped on or checked, MegaMan says where it goes back to and its price,
 then asks "Go back,Lan?", the cursor on No as the vow's patch-up asks
 (flag `0x146F` on Yes, which takes its link by BN6's own warp:
-`lanhp_take`); a talk's question now takes left and right. Its name stays
+`lanhp_take`); a talk's question now takes left and right. A way on
+through a link asks too, "Go this way,Lan?" after what MegaMan reads
+through it, its warp held off as a way back's (`lanhp_lit`): a
+playtester leaving a way back's pad stepped onto the link beside it on
+his way to the pink pad, and it chose his act unasked (session 73). The
+pink pad, the act's own way at the corridor's end, warps as BN6's does.
+A link marker draws in front of its link's trigger cells, BN6's own as
+ours (MegaMan seen on a marker's middle stood 14 units short of the
+cells' middle in x and 12 past it in y, outside them), so a link's zone
+for the checks and the questions is its cells stretched as far towards
+the screen's front (`lanhp_portal_near`). Its name stays
 in MegaMan's words and on the second screen, whose home panel lists each
 way as On or Back (the ways back were left out of it before: it looked
 them up by the ways' own portals).
