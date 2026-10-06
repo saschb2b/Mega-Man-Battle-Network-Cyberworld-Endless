@@ -85,6 +85,22 @@ static const char *reward_power(int navi) {
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
 
+/* Where MegaMan meets guardian `g` (docs/BOSSES.md, the sequence): in his
+ * arena beside him (guardian_stand), a super boss's wider sprite further
+ * off, the guardian turned to him; where the layer has no arena, or one
+ * too small, MegaMan walks straight at him and the guardian looks back
+ * down the way he comes */
+static void meeting(GuardianStage *g) {
+	g->stand_face = -1;
+	g->face = facing(layer.arena >= 0 ? (layer.arena_dir + 2) & 3 : 1);
+	if (layer.arena < 0) return;
+	const Room *a = &layer.rooms[layer.arena];
+	int spread = super_boss(g->navi) ? GUARDIAN_STAND_SUPER : GUARDIAN_STAND, k = (spread + 16) / 32;
+	if (a->w < 2 * k + 1 || a->h < 2 * k + 1) return;
+	g->stand_face = guardian_stand(layer.arena_dir, g->x, g->y, spread, &g->stand_x, &g->stand_y);
+	g->face = (g->stand_face + 4) & 7;
+}
+
 /* What guardian `g`'s data says as it is taken: a Cross's words or BN5's
  * Soul's, then his battle data the first time; a super boss's own
  * (super_lines.c) */
@@ -155,8 +171,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* (BN5's at the version his act's band takes: xguardian.c) */
 	g->version = guardian_older(g->navi) ? xguardian_version(g->navi, run.depth) : make_boss(run.depth, run.biome, o->param).foes[0].version;
 	g->x = wx; g->y = wy; g->z = wz;
-	/* the guardian looks back down the bridge MegaMan comes by */
-	g->face = facing(layer.arena >= 0 ? (layer.arena_dir + 2) & 3 : 1);
+	meeting(g);
 	g->intro = ta_talk(text, guardian_intro(g->navi, g->version, layer.biome), guardian_face(g->navi));
 	g->defeat = ta_talk(text, super_boss(g->navi) ? super_defeat(g->navi, g->version) : guardian_defeat(g->navi), guardian_face(g->navi));
 	int code, chip = guardian_chip(g, &code);

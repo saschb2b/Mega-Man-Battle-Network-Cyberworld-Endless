@@ -28,7 +28,9 @@
 #include "rivals.h"
 #include "save.h"
 
-#define WALK_NEAR 52   /* world units from the guardian MegaMan walks up to */
+#define WALK_NEAR   52   /* world units from the guardian MegaMan walks up to, where he has no place beside him */
+#define WALK_FRAMES 100  /* his steps up to a guardian, at most */
+#define STAND_NEAR  4    /* world units from his place beside the guardian he stops at */
 
 enum {
 	B_NONE,      /* no guardian on this layer */
@@ -50,6 +52,7 @@ static struct {
 	bool chat_seen;
 	bool checkpoint;      /* the guardian fell: the run wants saving past it */
 	bool door, door_taken;   /* MegaMan stepped in: the run wants saving at the arena's door (once an approach) */
+	bool there;              /* ... and has stepped up to the guardian */
 	uint32_t archive;
 	GuardianStage g;
 } B;
@@ -156,19 +159,41 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 	B.g = *g;
 	/* (a super boss's staging: boss_grand.c) */
 	if (super_boss(g->navi)) grand_begin(archive, g);
+	if (emu_debug_on() && g->navi)
+		fprintf(stderr, "guardian %d at %d %d, arena entered along %d, MegaMan meets him at %d %d facing %d\n", g->navi, g->x, g->y,
+			layer.arena_dir, g->stand_x, g->stand_y, g->stand_face);
 	B.door = B.door_taken = false;
 	to(g->navi ? B_WAIT : B_NONE);
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
 }
 
-/* MegaMan's walk to the arena's middle, `frames` long and to `near`
- * units of the guardian, with no random battle from its steps: one rolled
- * as a player ran in, and it was fought under the staging's bars (issue
- * #24); the game lifts the flag as it enters the next map. */
-static void enter_walk(int frames, int near) {
+/* MegaMan turned to face eighth `face`, as BN6's cutscenes turn him (his
+ * facing and the animation he stands in) */
+static void face_to(int face) {
+	emu_write8(BN6_PLAYER_FACING, (uint8_t)face);
+	emu_write8(BN6_PLAYER_ANIM, (uint8_t)face);
+}
+
+/* MegaMan's steps up to the guardian, the staging's own as BN6's
+ * cutscenes walk him (cs_move_player_in_facing_direction: as if the
+ * player walked him, the pad the staging's while his is held): to his
+ * place beside the guardian (guardian_stand), where the chat box under
+ * them covers neither, then a turn to face him; straight at him to `near`
+ * units where the layer gives no place. Whether he is there, at the
+ * latest after `frames`. No random battle from its steps: one rolled as a
+ * player ran in was fought under the staging's bars (issue #24); the
+ * game lifts the flag as it enters the next map. */
+static bool enter_walk(int frames, int near) {
 	flag_set(BN6_FLAG_NO_ENCOUNTERS);
-	cinema_walk(B.t < frames ? walk_toward(B.g.x, B.g.y, near) : 0);
+	if (B.there) return true;
+	bool beside = B.g.stand_face >= 0;
+	uint32_t keys = B.t > frames ? 0 : beside ? walk_toward(B.g.stand_x, B.g.stand_y, STAND_NEAR) : walk_toward(B.g.x, B.g.y, near);
+	cinema_walk(keys);
+	if (keys) return false;
+	B.there = true;
+	if (beside) face_to(B.g.stand_face);
+	return true;
 }
 
 /* The guardian waits: MegaMan steps in, the run is saved at the arena's
@@ -186,11 +211,12 @@ static void wait_update(void) {
 	 * free (the owner's: bigger RPGs save before a boss), so a quit in the
 	 * fight goes on from here, not from the layer's start */
 	if (!B.door_taken) { B.door = B.door_taken = true; return; }
-	/* the arena closes around MegaMan, who steps up to its middle */
+	/* the arena closes around MegaMan, who steps up to the guardian */
 	cinema_input(CINEMA_WALK);
 	cinema_letterbox(true);
 	run_script(B.g.hush);
 	rival_met(B.g.navi);
+	B.there = false;
 	to(B_ENTER);
 }
 
@@ -222,20 +248,20 @@ static void fight_begin(void) {
 	emu_battle_force(&e);
 }
 
-/* The entrance: MegaMan walks up, the prelude, the guardian's log-in with
- * a shake, his card; a super boss's is boss_grand.c's, longer */
+/* The entrance: MegaMan steps up beside the guardian, the prelude, the
+ * guardian's log-in with a shake, his card once MegaMan is there; a super
+ * boss's is boss_grand.c's, longer */
 static void enter_update(void) {
-	if (super_boss(B.g.navi)) {
-		enter_walk(GRAND_WALK_FRAMES, GRAND_WALK_NEAR);
-		if (B.t == GRAND_WALK_FRAMES) cinema_input(CINEMA_HOLD);
-		if (grand_enter(B.t)) to(B_TITLE);
+	bool grand = super_boss(B.g.navi);
+	bool there = enter_walk(grand ? GRAND_WALK_FRAMES : WALK_FRAMES, grand ? GRAND_WALK_NEAR : WALK_NEAR);
+	if (there && cinema_input_mode() == CINEMA_WALK) cinema_input(CINEMA_HOLD);
+	if (grand) {
+		if (grand_enter(B.t, there)) to(B_TITLE);
 		return;
 	}
-	enter_walk(60, WALK_NEAR);
-	if (B.t == 60) cinema_input(CINEMA_HOLD);
 	if (B.t == 30) run_script(B.g.prelude);
 	if (B.t == 50) { flag_set(LAYER_BOSS_APPEAR_FLAG); cinema_shake(16, 3); }
-	if (B.t == 80) { title_card(); to(B_TITLE); }
+	if (B.t >= 80 && there) { title_card(); to(B_TITLE); }
 }
 
 /* Back on the map after the battle: bars and silence, then his last word.

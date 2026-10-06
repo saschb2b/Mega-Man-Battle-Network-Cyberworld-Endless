@@ -180,6 +180,28 @@ static void check_approach(uint32_t seed, int wx, int wy) {
 	CHECK(!arena_approach(a->ax, a->ay), "seed %u: the arena's middle is on its approach", seed);
 }
 
+/* MegaMan's place to meet the guardian (guardian_stand; docs/BOSSES.md, the
+ * sequence): at his height on the screen and turned to him, on the arena's
+ * floor under his feet, on the side the bridge comes in from (nearer the
+ * antechamber than the place across the guardian), whichever way the
+ * arena is entered. */
+static void check_stand(uint32_t seed) {
+	const Room *a = &layer.rooms[layer.arena], *r = &layer.rooms[layer.ante];
+	int spread = super_boss(layer.boss_navi) ? GUARDIAN_STAND_SUPER : GUARDIAN_STAND, sx, sy;
+	int face = guardian_stand(layer.arena_dir, 0, 0, spread, &sx, &sy);
+	CHECK(sx == sy && (sx > 0 ? face == GUARDIAN_FACE_LEFT : face == GUARDIAN_FACE_RIGHT) && (sx > 0 ? sx : -sx) == spread,
+		"seed %u: the place beside the guardian is off his height, or MegaMan is turned away", seed);
+	/* (a panel is 32 world units, grid x world +Y and grid y world -X; the
+	 * panels under his feet, a third of a panel round the point) */
+	double gx = a->ax + sy / 32.0, gy = a->ay - sx / 32.0;
+	for (int py = (int)floor(gy + 0.17); py <= (int)floor(gy + 0.83); ++py)
+		for (int px = (int)floor(gx + 0.17); px <= (int)floor(gx + 0.83); ++px)
+			CHECK(px >= a->x && px < a->x + a->w && py >= a->y && py < a->y + a->h && layer.cell[py][px] == C_PATH,
+				"seed %u: the place beside the guardian is off his arena's floor at %d %d", seed, px, py);
+	double nx = gx - r->ax, ny = gy - r->ay, fx = 2 * a->ax - gx - r->ax, fy = 2 * a->ay - gy - r->ay;
+	CHECK(nx * nx + ny * ny < fx * fx + fy * fy, "seed %u: the place beside the guardian is across him from the bridge", seed);
+}
+
 /* A guardian's arena: one way in, the guardian in its middle, the exit
  * inside it, and nothing else there. */
 static void check_arena(uint32_t seed) {
@@ -201,6 +223,7 @@ static void check_arena(uint32_t seed) {
 		else CHECK(!inside, "seed %u: object type %d in the arena", seed, o->type);
 	}
 	CHECK(layer.ante >= 0 && layer.ante != layer.arena, "seed %u: no antechamber", seed);
+	if (layer.ante >= 0) check_stand(seed);
 }
 
 /* Whether (x, y) is beside a panel-wide stretch of floor: a walkway's
@@ -2964,6 +2987,14 @@ static void super_records(void) {
 	CHECK(super_bass_form(1, true) == SUPER_BASS_SP && super_bass_form(2, false) == SUPER_BASS_SP && super_bass_form(6, false) == SUPER_BASS_SP,
 		"super: Bass SP once beaten");
 	CHECK(super_bass_form(2, true) == SUPER_BASS_BX && super_bass_form(7, true) == SUPER_BASS_BX, "super: Bass BX with the beast's data");
+	/* (turned across the screen to MegaMan beside them, the nearest way
+	 * each sprite shows: Bass's, BlastMan's and ElementMan's only towards
+	 * the camera, the beast's and Falzar's Navis' mirrored to the right) */
+	CHECK(super_body(SUPER_BASS, GUARDIAN_FACE_LEFT).body.anim == 5 && super_body(SUPER_BASS, GUARDIAN_FACE_RIGHT).body.anim == 2 &&
+		super_body(SUPER_CYBEAST, GUARDIAN_FACE_RIGHT).body.mirror && !super_body(SUPER_CYBEAST, GUARDIAN_FACE_LEFT).body.mirror &&
+		guardian_body(12, GUARDIAN_FACE_LEFT).anim == 5 && guardian_body(16, GUARDIAN_FACE_RIGHT).anim == 2 &&
+		guardian_body(1, GUARDIAN_FACE_LEFT).anim == GUARDIAN_FACE_LEFT && guardian_body(7, GUARDIAN_FACE_RIGHT).mirror &&
+		!guardian_body(7, GUARDIAN_FACE_LEFT).mirror, "super: facing across the screen");
 	CHECK(super_cybeast_form(0) == SUPER_CYBEAST_V1 && super_cybeast_form(1) == SUPER_CYBEAST_SP && super_cybeast_form(4) == SUPER_CYBEAST_SP,
 		"super: Gregar SP after the first Net");
 	CHECK(super_song(SUPER_BASS) == 0x16 && super_song(SUPER_CYBEAST) == 0x17, "super: their records' themes");

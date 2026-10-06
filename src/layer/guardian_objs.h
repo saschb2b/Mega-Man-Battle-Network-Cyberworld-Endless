@@ -22,6 +22,10 @@ typedef struct {
 	int navi;                  /* 0: the layer has no guardian */
 	int version;               /* 0-2, as make_boss sets it (a super boss's: BN6's version index, super_boss.h) */
 	int x, y, z, face;         /* where it stands (world) and its animation */
+	/* where MegaMan steps up to meet him, beside him (guardian_stand), and
+	 * the eighth he faces there; stand_face -1 where the layer has no arena,
+	 * and he walks straight at him */
+	int stand_x, stand_y, stand_face;
 	int intro, defeat, reward; /* its scripts in the layer's archive */
 	int prelude, hush, theme;  /* music: the boss prelude, silence, the area's */
 	/* a super boss's too (docs/BOSSES.md, Super bosses; -1 for a guardian):

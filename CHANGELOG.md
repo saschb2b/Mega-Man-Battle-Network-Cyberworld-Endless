@@ -35,6 +35,14 @@
   the battle once the map's theme has started, so the last word comes in
   silence and the theme returns with the Guardian Data, as the staging
   meant (docs/BOSSES.md).
+- **Face to face with a guardian** (issue #100). Before the talk MegaMan
+  steps up beside the guardian, at his height, and turns to him; the
+  guardian logs in facing MegaMan. Where an arena was entered from above,
+  MegaMan used to walk straight at the guardian, who then stood half
+  behind the chat box through the talk; now both stand clear of it
+  whichever side the arena is entered from, Bass and the Cybeast too. The
+  steps are the staging's, as BN6's cutscenes walk MegaMan; his own
+  walking is untouched.
 - **Layers to remember** (issue #98). After several layers the net felt
   the same: its rooms were all of a size, no landmark stood on most of
   them, and an act of Seaside, Sky, Green, the Graveyard or the Nest
