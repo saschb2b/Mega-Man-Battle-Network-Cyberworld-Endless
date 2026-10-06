@@ -368,8 +368,11 @@ void platform_finger(uint32_t type, SDL_FingerID id, float x, float y) {
 		} else canvas_point(x, y, &point_x, &point_y);
 		return;
 	}
-	/* (the controls screen takes the fingers while it is open) */
-	if (controls_shown()) {
+	/* (the controls screen takes the fingers while it is open; the
+	 * statistics' question leaves the touch controls' buttons theirs, the
+	 * D-pad, A and B answering it as keys do: a phone's player pressed them
+	 * and nothing came) */
+	if (controls_shown() && !(controls_takes_buttons() && touch_takes(type, id, x, y))) {
 		int cx, cy;
 		canvas_point(x, y, &cx, &cy);
 		controls_finger(type, id, cx, cy);

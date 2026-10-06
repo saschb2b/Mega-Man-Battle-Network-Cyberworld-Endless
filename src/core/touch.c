@@ -263,6 +263,16 @@ bool touch_finger(uint32_t type, SDL_FingerID id, float x, float y) {
 	return false;
 }
 
+bool touch_takes(uint32_t type, SDL_FingerID id, float x, float y) {
+	if (!shown || page) return false;
+	if (type != SDL_FINGERDOWN) {
+		for (int k = 0; k < FINGERS; ++k) if (fingers[k].on && fingers[k].id == id) return true;
+		return false;
+	}
+	int c = touch_control_at(&lay, x, y, -1);
+	return c >= 0 && c != TOUCH_MENU;
+}
+
 uint32_t touch_held(void) {
 	uint32_t bits = 0;
 	if (page) return 0;

@@ -27,6 +27,9 @@ void controls_draw(void);
 bool controls_back(void);
 /* A finger while it is open (SDL_FINGERDOWN or UP), at canvas pixel (x, y). */
 void controls_finger(uint32_t type, SDL_FingerID id, int x, int y);
+/* It answers the touch controls' buttons too (the statistics' question,
+ * as it answers keys): their fingers go to them (touch_takes). */
+bool controls_takes_buttons(void);
 /* The words for the button a GBA button (BTN_*) is on, on the device used
  * last: "R" on a keyboard, "Minus" on a Nintendo pad, "SELECT" by touch. */
 const char *controls_word(uint32_t bit);

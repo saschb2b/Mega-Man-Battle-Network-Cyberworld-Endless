@@ -87,6 +87,8 @@ void controls_open(void) {
 /* (and the statistics' question in its place: analytics_ask.h) */
 bool controls_shown(void) { return C.open || analytics_ask_shown(); }
 
+bool controls_takes_buttons(void) { return !C.open && analytics_ask_shown(); }
+
 static void leave(void) {
 	C.open = false;
 	audio_sfx(SFX_CANCEL);

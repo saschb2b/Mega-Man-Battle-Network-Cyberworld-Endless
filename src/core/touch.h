@@ -28,6 +28,9 @@ void touch_release(void);
  * platform_poll (platform_finger) or --taps in tests; true when it showed
  * the controls (the first touch only shows them). */
 bool touch_finger(uint32_t type, SDL_FingerID id, float x, float y);
+/* While a screen over the game shares them (controls_takes_buttons): a
+ * finger coming down on one of them, MENU aside, or one they hold. */
+bool touch_takes(uint32_t type, SDL_FingerID id, float x, float y);
 /* The buttons fingers hold now, and those pressed since the last call
  * (a tap shorter than a frame counts). */
 uint32_t touch_held(void);

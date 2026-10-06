@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **The on-screen buttons answer the statistics' question.** On a phone
+  or tablet (the browser's player too) the question at the first start
+  took only a tap on its Yes or No: the D-pad, A and B round the picture
+  did nothing, and a player pressing them was stuck there. They answer it
+  now as keys do (the D-pad moves the cursor, A or START chooses, B says
+  no); a tap on Yes or No still answers, and MENU waits until it is
+  answered.
+
 ## 0.11.0 (2026-10-06)
 
 - **Lan's HP tells going on from going back, and talks only when asked**
