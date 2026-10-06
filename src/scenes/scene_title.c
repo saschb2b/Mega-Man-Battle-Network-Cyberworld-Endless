@@ -756,7 +756,9 @@ static void hint_draw(int x0, int y0) {
 		size_t m = strlen(hint);
 		snprintf(hint + m, sizeof hint - m, "   %s: ROMs", controls_word(BTN_R));
 	}
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, hint, grey, 1);
+	/* (under NEW GAME; with CONTINUE under it, in the rows between the
+	 * logo and the menu, where CONTINUE's row had hidden it) */
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
 #endif
 }
 
