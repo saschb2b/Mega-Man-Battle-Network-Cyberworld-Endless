@@ -2400,3 +2400,55 @@ Cost: 117 calls; the triage, replays and two fixes about an hour.
 Loop change: **a junction is walked, never run.** The arrow turns a panel
 before a junction, 8 frames at a run: persona.md's harness note now says to
 let go of B two panels before any junction the arrow or the map shows.
+
+## Session 72: act 2's guardian under the vow, home in the evening (kai 7/10; would keep playing and recommend it, warning of the walking in town)
+
+kai finished act 2 under the NetBattler's vow: HeatMan deleted with the
+guardian's battle data, the folder and the vow all landing ("the best
+stretch in several sessions"), home in the evening, two HPMemory paid for
+the kept vow (540 HP), two MiniEnrg bought, saved in AsterLand. About 20
+calls went to furniture and a shop door.
+
+Raised and fixed in the iteration: a townsman on AsterLand's door line
+(30bb236: townsfolk keep 40 units off every door's approach); MegaMan
+naming a Recovery Mr.Prog at the arena's door while a vow held (16c5610);
+MegaMan explaining BN6's own NaviCust (aa75ca7).
+
+Unverified then, reached in session 73: Lan's HP's portals and links back,
+act 3's first layer.
+
+## Session 73: the last check before 0.11.0: CONTINUE in AsterLand, the PET's Library, Lan's HP from the PC, act 3's first Sky HP layer (kai 6/10; would keep playing, recommend with a warning about home's portals, ship "narrowly")
+
+A boxed session (95 calls, about 26 minutes) on the release candidate.
+kai CONTINUEd run 12 in AsterLand, paged the whole Library, installed
+Charge+1, walked home and jacked in from Lan's PC, met the courier, tried
+a way back (A, its middle, its question, No), then stepped onto a link on
+the way to the pink pad and played layer 7 in Sky HP.
+
+Confirmed: the Library draws every page (109/200, 13 Megas); the way back's
+question on No; a layer's arrival facing into it; the courier's "!!" and
+words; AsterLand's door clear; the home save's CONTINUE.
+
+Raised and fixed in the iteration (fe42fd7): a stray step onto the link
+beside a way back took the act's way unasked (a way on through a link now
+asks, "Go this way,Lan?", the pink pad still BN6's); A at a way back's pad
+from its front, and its middle, reached nothing (BN6 draws a link marker in
+front of its trigger cells: replayed, MegaMan on the marker's middle stood
+outside them; a link's zone now takes in its marker); the PC's jack-in
+facing the camera (now the way on).
+
+Open, after the release: the title's CONTINUE reads "Layer 7" for a save
+in AsterLand; the courier's news repeats what L said in town; L's "door is
+to the right" said at AsterLand's door; the house's arrow across the shoe
+cabinet and sofa; the dealer's seven boxes before his list; the second
+screen's home panel fits three ways, so the fourth (a second way back) is
+cut. Not BN6 bugs to touch: AreaGrab's freeze eating an A, an A lost in
+hit-stun, a FighterPlane's HP drawn a row below it (a misread).
+
+Cost: 95 calls; the triage, two replays and the fixes about an hour.
+
+Loop change: **a change that turns talk into checks is swept for what the
+talk used to guard.** #110 moved the portals' words to A, and the stray
+step onto a link that the proximity words had warned of went unasked: when
+a warning is taken away, look for the mistake it prevented and guard it
+another way (here a question on the irreversible step).
