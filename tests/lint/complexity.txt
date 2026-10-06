@@ -2,7 +2,6 @@
 # none may join and none may grow: split one, then build.py lint --update
 src/audio/audio.c:track_tick 55 76
 src/core/loot.c:from_formations 59 79
-src/core/meta.c:meta_run_over 32 39
 src/core/platform.c:platform_init 28 63
 src/core/touch.c:menu_finger 40 69
 src/core/touch_art.c:rasterize 33 61
@@ -33,7 +32,6 @@ src/net/net_layouts.c:catwalks 27 40
 src/net/net_layouts.c:link 34 42
 src/net/net_shapes.c:carve_shape 27 51
 src/scenes/scene_title.c:draw 34 66
-src/scenes/scene_title.c:setup_draw 36 68
 src/scenes/scene_title.c:setup_update 32 36
 src/scenes/scene_title.c:update 42 73
 src/world/town.c:carry 35 63

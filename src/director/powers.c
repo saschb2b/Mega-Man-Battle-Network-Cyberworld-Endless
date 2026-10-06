@@ -69,15 +69,19 @@ bool powers_cross_owned(int navi) {
 	return false;
 }
 
-void powers_bring(int navi) {
+void powers_bring(void) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == navi) flag_set(crosses[i].flag);
+		if (crosses[i].navi == run.cross) flag_set(crosses[i].flag);
+	/* (BN6's own BeastOut: the emblem under OK, its three turns a battle,
+	 * as the Graveyard's guardian gives it, docs/ROM_DATA.md) */
+	if (run_beast_start()) flag_set(BN6_FLAG_BEAST_OUT);
 }
 
 const char *powers_reward_text(int navi, int biome, int depth) {
 	/* (a run that brought a Cross keeps it alone: the choice's cost; the
 	 * Graveyard sits over the Nest: its call wakes the Cybeast in MegaMan,
-	 * and Dad lets him use it, once a run) */
+	 * and Dad lets him use it, once a run; a run that brought BeastOut
+	 * hears the call, and Lan) */
 	return powers_reward_words(navi, powers_cross_name(navi) && !beaten_before(navi, depth), biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS);
 }
 

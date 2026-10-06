@@ -421,7 +421,7 @@ bool director_start_run(void) {
 	}
 	set_start_folder();
 	library_to_game();
-	powers_bring(run.cross);
+	powers_bring();
 	dev_folder();
 	dev_programs();
 	star_folder_pack();
@@ -449,8 +449,8 @@ bool director_start_layer(void) {
 	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); dark_new_run(run.seed); souls_new_run(run.seed); }
 	else { dark_begin(run.seed); souls_begin(run.seed); }
 	/* (and the Cross it brought at any depth, as a run has it there, and
-	 * its chips in * with the All * helper) */
-	powers_bring(run.cross);
+	 * BeastOut, and its chips in * with the All * helper) */
+	powers_bring();
 	dev_folder();
 	dev_programs();
 	star_folder_pack();

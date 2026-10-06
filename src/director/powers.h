@@ -17,9 +17,10 @@ const char *powers_cross_strength(int navi);
 const char *powers_cross_on_navis(int navi);
 /* Whether MegaMan has `navi`'s Cross: its CROSSSELECT entry on. */
 bool powers_cross_owned(int navi);
-/* A run's start with `navi`'s Cross brought (run.cross, docs/META.md): it is
- * in the Custom screen from the first battle. */
-void powers_bring(int navi);
+/* A run's start: what it brought of MegaMan's powers (docs/META.md), in
+ * the Custom screen from the first battle: the Cross of run.cross, and
+ * BeastOut with the BeastOut helper (issue #99). */
+void powers_bring(void);
 /* What the player is told after that battle at `depth` (ta_talk's boxes:
  * a Cross MegaMan did not have yet, BeastOut in the first Graveyard), or
  * NULL. */
@@ -27,7 +28,7 @@ const char *powers_reward_text(int navi, int biome, int depth);
 
 /* (powers_words.c) MegaMan's words after guardian `navi`'s battle: his
  * Cross, where it is new to the run (`cross`), and the Cybeast's waking
- * (`beast`); NULL for none */
+ * (`beast`), its call where the run brought BeastOut; NULL for none */
 const char *powers_reward_words(int navi, bool cross, bool beast);
 
 #endif

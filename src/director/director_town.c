@@ -164,6 +164,8 @@ static void home_talk(void) {
 	if (D.home || D.intro_said || !talk_script(town_info()->talk_archive, town_info()->intro)) return;
 	D.intro_said = true;
 	if (!profile.seen_intro) { profile.seen_intro = true; profile_save(); }
+	/* (Dad's word on the CybeastButton, all of it once: town_intro) */
+	if (run_beast_start() && !(profile.beast & BEAST_TAUGHT)) { profile.beast |= BEAST_TAUGHT; profile_save(); }
 }
 
 /* home's checkpoint in Lan's HP, once its words are said and MegaMan is

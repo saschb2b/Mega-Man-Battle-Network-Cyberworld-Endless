@@ -32,7 +32,9 @@ extern const TownLines town_lines[TOWN_LINES];
 
 /* What Lan and MegaMan say as a run begins, in Lan's room: on the first
  * dive ever, Dad's call about the Endless Net; after that, a word about
- * the last one; and the jack-in from Lan's PC, after the town's `arrival` */
+ * the last one; and the jack-in from Lan's PC, after the town's `arrival`;
+ * with BeastOut brought, Dad's word that the CybeastButton is unlocked
+ * (all of it until the profile's BEAST_TAUGHT) */
 const char *town_intro(const char *arrival);
 
 #endif

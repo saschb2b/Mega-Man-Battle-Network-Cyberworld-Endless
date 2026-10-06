@@ -62,15 +62,21 @@ enum { RUN_ENDLESS, RUN_SHORT };
 #define SHORT_LAYERS 10
 #define THREAT_MAX 10
 /* The helpers (docs/META.md), a bit each in run.helpers: two more
- * HPMemory, a heal on every layer, gentler battles, every chip in * */
-enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4, HELP_ALL_STAR = 8 };
-#define HELPERS 4
+ * HPMemory, a heal on every layer, gentler battles, every chip in *, and
+ * BeastOut from the first battle (the one a profile earns: the endless
+ * net's own Nest cleared, meta_beast_open; issue #99) */
+enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4, HELP_ALL_STAR = 8, HELP_BEAST = 16 };
+#define HELPERS 5
+#define HELPER_BEAST 4   /* (its index: the last, shown once open) */
 
 extern Run run;
 
 /* Whether every chip of the run comes in * alone (the All * helper): in
  * the game, whose chip records then hold * alone, and in chip_info. */
 static inline bool run_all_star(void) { return (run.helpers & HELP_ALL_STAR) != 0; }
+/* Whether the run brought BeastOut (the BeastOut helper): BN6's own,
+ * in the Custom screen from the first battle (powers_bring). */
+static inline bool run_beast_start(void) { return (run.helpers & HELP_BEAST) != 0; }
 
 void run_new(uint32_t seed);
 /* The net area that draws BN6 area `biome` in this run: its own, or

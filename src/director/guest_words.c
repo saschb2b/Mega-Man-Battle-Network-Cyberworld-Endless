@@ -41,9 +41,14 @@ int out_names(char *s, size_t n) {
  * before one (owner's call, 4 October 2026: a playtester's HeatCross
  * vanished in BN5's battle without a word, session 65; a Soul of BN5's
  * may stand in later, issue #69), and which of the folder's chips it never
- * had (they sit out). After the arrival's own words. */
+ * had (they sit out); the first time a profile does holding BeastOut,
+ * that the Cybeast can't come in either. After the arrival's own words. */
 void older_net_words(void) {
 	D.beat_cross = encounter_guest && !profile.cross_old_told;
+	/* (and the Cybeast's, where the run holds BeastOut: a run brings it
+	 * from its first act since issue #99, where the older net dresses
+	 * areas, and its emblem would be gone without a word, as a Cross was) */
+	D.beat_beast = encounter_guest && flag_get(BN6_FLAG_BEAST_OUT) && !(profile.beast & BEAST_OLD_TOLD);
 	char out[96];
 	int n = out_names(out, sizeof out);
 	size_t k = strlen(D.beat);
@@ -51,6 +56,15 @@ void older_net_words(void) {
 	 * its first such layer, as its folder is its own; a playtester's new
 	 * run's CrakShot and Atk+10 went unnamed, session 68) */
 	D.beat_out = encounter_guest && !D.beat_cross && n > 0 && !flag_get(RUN_OUT_NAMED_FLAG);
+	if (D.beat_beast && !D.beat_cross) {
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older Net's battles,Lan...|@M The Cybeast can't come in there.|"
+			"@L No CybeastButton back then,huh?", k ? "|" : "");
+		if (k >= sizeof D.beat) return;
+		if (D.beat_out)
+			snprintf(D.beat + k, sizeof D.beat - k, "|@M Right. And %s didn't exist either.|@L Then %s out. Got it!", out, n == 1 ? "it sits" : "they sit");
+		else snprintf(D.beat + k, sizeof D.beat - k, "|@M Right. We'll manage without it!");
+		return;
+	}
 	if (D.beat_out) {
 		snprintf(D.beat + k, sizeof D.beat - k, "%s@M The older Net's battles again,Lan.|@M %s didn't exist back then.|@L Then %s out. Got it!",
 			k ? "|" : "", out, n == 1 ? "it sits" : "they sit");
@@ -60,7 +74,8 @@ void older_net_words(void) {
 	/* (a guardian of ours keeps his fight ours; one of the older net's own
 	 * Navis fights the old way: docs/BOSSES.md, BN5's Navis) */
 	k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This Net's a copy of an older one!|@M Its battles run the old way.|"
-		"@L The old way? There were no Crosses then!|@M Right. So our Cross can't come in...|@M Except against a guardian from our Net!", k ? "|" : "");
+		"@L The old way? There were no Crosses then!|@M Right. So our Cross can't come in...%s|@M Except against a guardian from our Net!", k ? "|" : "",
+		D.beat_beast ? "|@M Or the Cybeast!" : "");
 	if (n > 0 && k < sizeof D.beat)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "|@M %s didn't exist then either.|@M So %s'll sit out.", out, n == 1 ? "it" : "they");
 	if (k < sizeof D.beat)

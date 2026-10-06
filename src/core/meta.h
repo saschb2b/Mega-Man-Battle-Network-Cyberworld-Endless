@@ -35,8 +35,16 @@ typedef struct {
 } HelperInfo;
 
 /* Helper `h` (0 .. HELPERS-1: the bit 1 << h of run.helpers). The helpers
- * are open from the start, off by default: an accessibility dial. */
+ * are off by default, named on the summary: an accessibility dial, open
+ * from the start, but for BeastOut (HELPER_BEAST), which a profile earns. */
 const HelperInfo *meta_helper(int h);
+/* Whether a run may bring BeastOut from its first battle (issue #99):
+ * open once the endless net's own Nest has fallen, in any run (the
+ * milestone of Bass's mark). */
+bool meta_beast_open(void);
+/* How many helpers the setup's Help row shows: BeastOut, the last, once
+ * open. */
+int meta_helpers_shown(void);
 
 /* The title's marks, BN6's own (its GetTitleScreenIconCount bits, drawn
  * with its sprites): each for a milestone here, never power. */
@@ -82,12 +90,12 @@ int meta_vault_need(int depth);
 
 /* The setup's rows with news since the last summary (profile.setup_new):
  * the setup opens on the first, marked NEW, until the next jack-in. */
-enum { SETUP_NEW_NET = 1, SETUP_NEW_FOLDER = 2, SETUP_NEW_CROSS = 4, SETUP_NEW_THREAT = 8 };
+enum { SETUP_NEW_NET = 1, SETUP_NEW_FOLDER = 2, SETUP_NEW_CROSS = 4, SETUP_NEW_THREAT = 8, SETUP_NEW_HELP = 16 };
 /* What a run opened that no summary announced (a run given up for a NEW
  * GAME): open, and NEW in the setup. */
 void meta_unlocks_unsaid(void);
 /* Whether the setup has a choice to offer: a folder, a Cross, a threat
- * rung or the endless net open. */
+ * rung, the endless net or BeastOut open. */
 bool meta_setup_has_choice(void);
 
 /* A new run's start: what earlier runs opened is no news on its summary

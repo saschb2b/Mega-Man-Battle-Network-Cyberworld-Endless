@@ -132,8 +132,21 @@ static const char *const green_checks[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
+/* A run that brought BeastOut (issue #99): Dad's word that the PET's
+ * CybeastButton is unlocked from the start, as the Graveyard's guardian
+ * would have had him unlock it, all of it the first time (`called`: Dad
+ * on the line already), MegaMan's reminder after */
+static const char *beast_words(bool taught, bool called) {
+	static char words[240];
+	if (taught) return "|@M And the CybeastButton's unlocked!|@L Our trump card. Alright!";
+	snprintf(words, sizeof words, "|@D %s I've unlocked your CybeastButton.|@D MegaMan tamed the beast at the Nest before.|"
+		"@D Just don't let it take over,OK?|@M Leave it to me,Dad!", called ? "One more thing." : "Lan,it's Dad.");
+	return words;
+}
+
 /* What Lan and MegaMan say as a run begins: on the first dive ever, Dad's
- * call about the Endless Net; after that, a word about the last one. */
+ * call about the Endless Net; after that, a word about the last one; and
+ * with BeastOut brought, Dad's word on it. */
 const char *town_intro(const char *arrival) {
 	static char buf[900];
 	int k = 0;
@@ -143,6 +156,7 @@ const char *town_intro(const char *arrival) {
 	 * "The Endless Net again" read odd to a playtester who chose Short) */
 	const char *again = run.mode == RUN_SHORT ? "@L Down to the Nest again... I wonder what's new?"
 		: "@L The Endless Net again... I wonder what's new?";
+	bool called = !profile.seen_intro || (profile.nest_clears > 0 && profile.runs % 2);
 	if (!profile.seen_intro) {
 		ADD("@D Lan,it's Dad. Got a minute?|"
 			"@D A new Net just opened up under town.|"
@@ -185,6 +199,7 @@ const char *town_intro(const char *arrival) {
 		default: ADD("%s|@M Let's find out,Lan!|@M To the PC!", again); break;
 		}
 	}
+	if (run_beast_start()) ADD("%s", beast_words(profile.beast & BEAST_TAUGHT, called) + (k ? 0 : 1));
 	#undef ADD
 	return buf;
 }
