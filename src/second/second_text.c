@@ -118,16 +118,19 @@ void second_home_clock(char *out, size_t n) {
 
 void second_home_ways(const DirectorWay *ways, int n, char *out, size_t size) {
 	size_t k = 0;
+	int backs = 0;
 	if (size) out[0] = 0;
 	for (int i = 0; i < n && k + 1 < size; ++i) {
 		const char *area = guardian_area_in_text(ways[i].biome, LAYER_NORMAL);
 		const char *who = ways[i].navi && guardian_known(ways[i].navi) ? guardian(ways[i].navi)->name : "???";
-		/* (on or back, as Lan's HP's tags tell them: issue #110) */
-		int w = ways[i].back ? snprintf(out + k, size - k, "%sBack: %s, a notch", k ? "|" : "", area)
-			: snprintf(out + k, size - k, "%sOn: %s (%s), %s", k ? "|" : "", area, who, i ? "link" : "pink pad");
+		/* (on or back, as Lan's HP's tags tell them: issue #110; the ways
+		 * back on one line, which the panel cut as a fourth, session 73) */
+		int w = !ways[i].back ? snprintf(out + k, size - k, "%sOn: %s (%s), %s", k ? "|" : "", area, who, i ? "link" : "pink pad")
+			: backs++ ? snprintf(out + k, size - k, ", %s", area) : snprintf(out + k, size - k, "%sBack: %s", k ? "|" : "", area);
 		if (w < 0 || (size_t)w >= size - k) break;
 		k += (size_t)w;
 	}
+	if (backs && k + 1 < size) snprintf(out + k, size - k, ", a notch%s", backs > 1 ? " each" : "");
 }
 
 void second_home_job(char *out, size_t n) {

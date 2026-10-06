@@ -27,14 +27,16 @@ void second_mugshot(int face, int x, int y) {
 
 void second_face(int x, int y) { second_mugshot(FACE_MEGAMAN, x, y); }
 
-/* a heading in gold and its lines in white under it, as many as fit above
- * `bottom` (none: left out): the y under them */
-static int item(const char *head, const char *text, int x, int y, int w, int bottom) {
+/* a heading in gold and its lines in white under it, `most` at most and
+ * as many as fit above `bottom` (none: left out): the y under them */
+static int item_of(const char *head, const char *text, int x, int y, int w, int bottom, int most) {
 	int fit = (bottom - y - SECOND_LINE_H) / SECOND_LINE_H;
 	if (!text[0] || fit < 1) return y;
 	text_draw(x, y, head, PET_GOLD, TEXT_LEFT);
-	return second_wrapped(text, x, y + SECOND_LINE_H, w, fit < 3 ? fit : 3, PET_WHITE) + 6;
+	return second_wrapped(text, x, y + SECOND_LINE_H, w, fit < most ? fit : most, PET_WHITE) + 6;
 }
+
+static int item(const char *head, const char *text, int x, int y, int w, int bottom) { return item_of(head, text, x, y, w, bottom, 3); }
 
 /* The PET's menu open on the top screen: the home behind glass under a
  * band, ACCESSING, as BN5 DS dims its field while its PET menu is open;
@@ -66,7 +68,8 @@ void second_home_draw(SDL_Rect b) {
 	/* (the rest under the face, the panel's whole width) */
 	int below = b.y + 6 + FACE_H * 2 + 12;
 	if (y < below) y = below;
-	y = item("Ways", S2.home_ways, x, y, b.w - 12, bottom);
+	/* (three ways on and the ways back: four lines) */
+	y = item_of("Ways", S2.home_ways, x, y, b.w - 12, bottom, 4);
 	y = item("The Net's clock", S2.home_clock, x, y, b.w - 12, bottom);
 	item("The run", S2.home_setup, x, y, b.w - 12, bottom);
 	if (S2.context == SECOND_PET) accessing(b);

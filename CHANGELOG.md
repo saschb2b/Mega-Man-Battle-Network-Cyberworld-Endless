@@ -19,6 +19,8 @@
   playtester read before his list are four. L in the town names the
   three askers in one box, and AsterLand's door only where Lan is not
   standing at it.
+- **The second screen lists every way.** Lan's HP's ways back share one
+  line on the home panel, which had cut the fourth way off.
 ## 0.11.1 (2026-10-06)
 
 - **The on-screen buttons answer the statistics' question.** On a phone
