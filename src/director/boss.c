@@ -395,6 +395,8 @@ bool boss_beaten(void) { return B.state >= B_AFTER; }
 
 bool boss_cinematic(void) { return B.state >= B_ENTER && B.state <= B_LOGOUT && B.state != B_FIGHT; }
 
+bool boss_reward_waiting(void) { return B.state == B_REWARD; }
+
 bool boss_done(void) { return B.state >= B_OPEN; }
 
 bool boss_idle(void) { return B.state == B_NONE || B.state == B_WAIT || B.state >= B_OPEN; }

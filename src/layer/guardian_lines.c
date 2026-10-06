@@ -372,14 +372,6 @@ const char *guardian_defeat(int navi) {
 	return navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
 }
 
-/* A first battle's Guardian Data: its battle data comes with it, and the
- * next briefing reads it; after `power`, what else it gave (or NULL) */
-const char *guardian_data_words(const char *power) {
-	static char with_data[640];
-	snprintf(with_data, sizeof with_data, "%s%s@M And his battle data! Next time,we'll know his moves!", power ? power : "", power ? "|" : "");
-	return with_data;
-}
-
 /* MegaMan on an older net guardian's Soul (docs/META.md, Souls in BN5
  * territory), won from `navi`, of chip kind `kind` (BN5_CHIP_KIND, 0-11):
  * one held already (`held`); else what it does, the whole of it the first

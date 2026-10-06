@@ -27,6 +27,10 @@
   after a white flash, which BN6 never does (its own note on the command:
   it "doesn't actually work"), and the owner saw a "blup". A beat after,
   his Guardian Data shows.
+- **Dad's mail waits for the Guardian Data.** His mail with a new
+  guardian's battle data was said as the data showed, stopping MegaMan
+  short of it; it comes once the data is taken now, in one box, and the
+  data no longer says the battle data too.
 - **Home's welcome after an act is three boxes,** not five: who fell
   goes unsaid, as the act's card over the way home names him, and the
   ways open are one box.

@@ -115,9 +115,7 @@ const char *guardian_area_short(int biome);
 /* A line under an area's name on its title card. */
 const char *guardian_area_motto(int biome);
 
-/* (guardian_lines.c) A first battle's Guardian Data with his battle data,
- * after `power` (or NULL); and MegaMan on an older net guardian's Soul */
-const char *guardian_data_words(const char *power);
+/* (guardian_lines.c) MegaMan on an older net guardian's Soul */
 const char *guardian_soul_words(int navi, int kind, bool held, const char *chip, const char *dark);
 
 #endif

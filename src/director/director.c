@@ -500,9 +500,10 @@ static void mail_update(void) {
 		D.mail_quiet = true;
 	}
 	/* (after the arrival's card and words: said over the jack-in, it was
-	 * lost under them) */
+	 * lost under them; and after a guardian's data is taken, which it had
+	 * stopped MegaMan short of) */
 	if (D.mail_due && !D.reward_due && !D.area_card && !D.beat[0] && !cinema_busy() && !talk_busy() &&
-		!emu_read8(BN6_CHATBOX) && !boss_cinematic()) {
+		!emu_read8(BN6_CHATBOX) && !boss_cinematic() && !boss_reward_waiting()) {
 		if (talk_start(mail_words(D.mail_due), FACE_MEGAMAN)) D.mail_due = 0;
 	}
 }

@@ -177,11 +177,11 @@ const char *final_words(void) {
 }
 
 /* Dad's mail with guardian `navi`'s battle data, said once the arrival's
- * card and words are done */
+ * card and words are done, or a guardian's data taken: one box, E-Mail
+ * BN6's own */
 const char *mail_words(int navi) {
 	static char words[160];
-	snprintf(words, sizeof words, "@M Lan,you've got mail from Dad!|@M Our battle data on %s! It's in the PET's E-Mail.",
-		guardian(navi)->name);
+	snprintf(words, sizeof words, "@M Lan,mail from Dad! Our battle data on %s!", guardian(navi)->name);
 	return words;
 }
 

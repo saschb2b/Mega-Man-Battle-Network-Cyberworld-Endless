@@ -22,6 +22,8 @@ bool boss_exit_open(void);
 bool boss_beaten(void);
 /* The guardian's scene holds the stage (from its entrance to its logout). */
 bool boss_cinematic(void);
+/* Its Guardian Data shows, not yet taken. */
+bool boss_reward_waiting(void);
 /* Its Guardian Data has been taken. */
 bool boss_done(void);
 /* Nothing of the guardian under way: not met yet, or all done (a run can

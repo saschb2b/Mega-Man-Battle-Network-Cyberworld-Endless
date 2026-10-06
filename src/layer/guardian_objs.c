@@ -102,13 +102,12 @@ static void meeting(GuardianStage *g) {
 }
 
 /* What guardian `g`'s data says as it is taken: a Cross's words or BN5's
- * Soul's, then his battle data the first time; a super boss's own
- * (super_lines.c) */
+ * Soul's; a super boss's own (super_lines.c). His battle data, the first
+ * time, is Dad's mail's, said once the data is taken (mail_words: the two
+ * said it twice, the owner found the reward's words far too many) */
 static const char *data_says(const GuardianStage *g) {
-	bool first = !guardian_known(g->navi);
-	if (super_boss(g->navi)) return super_reward_words(g->navi, g->version, first);
-	const char *power = reward_power(g->navi);
-	return first ? guardian_data_words(power) : power;
+	if (super_boss(g->navi)) return super_reward_words(g->navi, g->version, !guardian_known(g->navi));
+	return reward_power(g->navi);
 }
 
 /* A super boss's staging (docs/BOSSES.md, Super bosses; boss_grand.c):

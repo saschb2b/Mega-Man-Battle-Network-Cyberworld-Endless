@@ -1517,6 +1517,10 @@ CLIPS = [
      {'CYBERWORLD_AUTOPILOT': '1'}, None, 1090, 1630),
     ('cybeast-arrival', ['--scene', 'emu', '--run-depth', '19', '--seed', '7', '--dev', 'god,quiet,hp=800'],
      {'CYBERWORLD_AUTOPILOT': '1'}, None, 1150, 1690),
+    # (0.11.2: BlastMan's last word, his log-out by BN6's beam, his Guardian
+    # Data turning where he stood, seed 7's layer 3)
+    ('guardian-logout', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12', '--dev', 'god,onehit'],
+     {'CYBERWORLD_AUTOPILOT': '1'}, None, 2640, 2840),
 ]
 
 
@@ -1527,7 +1531,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
-               'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12)}
+               'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15)}
 
 
 def clips(only=None):
