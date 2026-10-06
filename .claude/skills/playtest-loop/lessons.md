@@ -2267,3 +2267,54 @@ only the build.** A once-a-profile line (save.h's `profile.*_told`,
 `*_taught`) cannot be promised to a profile that has heard it: read the
 flags in the profile's save before writing a note, and say "once a
 profile" where it is.
+
+## Session 69: home's first visit (kai 5/10; would keep playing and recommend it, with a warning)
+
+kai, back after four sessions away, began a short-net run from Lan's room
+as asked and spent 94 calls on the first visit: the plaza Mr.Prog's news
+("MEGAMAN DOVE TO LAYER 12 LAST TIME!"), the town, AsterLand, and the
+request board, where it took the NetBattler's vow (no Mr.Prog's patch
+until act 1's guardian falls). Act 1 was BN5's End Area: its Cross and
+three chips sat out, L and the green arrow led to the heal the vow
+forbade, and MegaMan was deleted on layer 1 with 1090 zenny. Run 12
+started at once and stuck 16 calls at the corridor up to Lan's HP's pink
+pad. No visit after an act was reached.
+
+Confirmed: the run's start in Lan's room, R at the PC (one call), Lan's
+HP as the hub and MegaMan's reading at the pad, the town's news, the
+request board and its Yes/No, the vow's reminder, BN5's battles and
+their codes, the pity gift, Dad's dive report.
+
+Raised and fixed in the iteration: the corridor's lip in Lan's HP (the
+arrow onto its line first, the push arrow at home); AsterLand's clerk
+reachable from 4 units of the counter only, the shopper in the seller's
+way (14 units, measured, and she moved); the vow blind, dishonest and
+underpaid (none at a run's first visit, two HPMemory, the heal off L, the
+arrow and the last stop, the Mr.Prog asking first on No); the vow's
+reminder ending the act card unseen; the request gone with the run
+without a word (its asker says so next run); L naming only the way home
+(once a visit: the requests and AsterLand's order; the house's front
+door); Lan's HP's three boxes every run (once a profile); BN5's sit-out
+chips named twice.
+
+Open: the pink pad fires only from its pink centre (BN6's own trigger;
+MegaMan's reading stops him on the ring); the BN5 battle's BugFrag the
+results showed and the run never got (a task of its own); the arrow
+flipping on End Area's lattice; townsfolk who did not answer (the old
+man, the girl in pink) not yet replayed; Lan's face on "OK! Roger that!"
+at the jack-out, BN6's own lines, not yet checked; B paging Dad's long
+report.
+
+Misreads: the dealer's "Are you sure?" on Yes is the owner's call, BN6's
+default (session 65's patch notes), not a regression.
+
+Cost: 253 calls of one persona; the triage, fixes and checks about two
+hours.
+
+Loop change: **a session whose headline waits after an act starts where
+it is reachable.** s69's goal was home between acts, and the persona,
+asked to explore the first visit, spent 94 calls there and died on act
+1's first layer: the headline never came. A between-acts feature is
+played from a run that reaches it inside the budget (a CONTINUE on an
+act's middle or last layer, or the goals asking to go straight to the
+PC), and the first visit's exploring is capped in the goals.

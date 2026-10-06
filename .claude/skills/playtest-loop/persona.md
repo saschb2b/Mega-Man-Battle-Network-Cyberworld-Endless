@@ -39,12 +39,13 @@ Run everything from /home/saschabecker/Documents/GitHub/Mega-Man-Battle-Network-
   - `wait N`
   - `mash BTN N`: press every 10 frames.
   - `shot`: an extra picture mid-batch.
+  - `second`: a picture of the second screen too (the PET beside the game, as a New 3DS's bottom screen or a handheld's second display shows it; the state prints its path).
 - Buttons are A B L R START SELECT UP DOWN LEFT RIGHT. Combine them with +. 60 frames = 1 s.
 - `--every N` gives a sheet of pictures, one every N frames (at most 24 per sheet), for battles and animations.
 - GBA controls:
   - A: talk, confirm, use a chip.
   - B: cancel, or the buster (hold to charge). Hold B while walking to run. Hold B in a chat to fast-forward it.
-  - L/R: open the Custom screen when its gauge fills (a press up to two and a half seconds early is kept, and pressed again if a hit or a shot swallowed it). The screen slides in about 10–20 frames after the gauge fills: after an early press, wait 30 frames past the full gauge before judging that it didn't open. On the map, L asks MegaMan for directions, and R jacks in at the town's statue. On the Custom screen, L asks "Lan, should we run?" (BN6's own; Yes tries to run from a battle, which doesn't always work).
+  - L/R: open the Custom screen when its gauge fills (a press up to two and a half seconds early is kept, and pressed again if a hit or a shot swallowed it). The screen slides in about 10–20 frames after the gauge fills: after an early press, wait 30 frames past the full gauge before judging that it didn't open. On the map, L asks MegaMan for directions (at home, Lan's way on), and R jacks in at Lan's PC in his room; in Lan's HP, R asks to jack out home. On the Custom screen, L asks "Lan, should we run?" (BN6's own; Yes tries to run from a battle, which doesn't always work).
   - SELECT (hold) on a layer: the map.
   - START: the PET menu on the map; pause in battle.
 - On the isometric map the d-pad moves diagonally on screen: a single direction goes straight across the screen, and two together (like DOWN+LEFT) go along a walkway's line. MegaMan walks as in BN6, with no help lining him up: along a walkway, hold its two directions together (`hold DOWN+LEFT 40`); a single direction held into a walkway's mouth off its line stops him at the corner, as BN6 does, so switch to the two directions there. The camera follows MegaMan, so he stays in the middle of the screen: judge whether he moved by the floor and landmarks, not by his place on screen.
