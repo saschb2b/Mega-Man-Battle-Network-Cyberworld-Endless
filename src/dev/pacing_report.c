@@ -233,29 +233,49 @@ static void elements_report(FILE *out) {
 	fprintf(out, "\n");
 }
 
+/* The version the guardian of a first cycle's act `act` (6 the Nest) is
+ * fought at; a super boss's his own form (super_boss.h) */
+static int cycle_version(int navi, int act, bool nest) {
+	return super_boss(navi) ? super_form(navi, CYCLE_LAYERS) : pacing_guardian_version(navi, act, 0, nest, navi_hp);
+}
+
 /* The guardians a first cycle draws, over many runs (BN6's: run_new's
- * picks); how many outside their act's band */
+ * picks, the endless net's); how many outside their act's band */
 static int first_cycle_guardians(FILE *out) {
 	int flagged = 0;
 	fprintf(out, "\nGuardians of the first cycle over 500 runs: navi, version and HP, how often.\n");
 	for (int act = 0; act < 7; ++act) {
-		int lo, hi, seen[32][3] = { { 0 } }, outside = 0;
+		int lo, hi, seen[32][6] = { { 0 } }, outside = 0;
 		pacing_guardian_band(act, &lo, &hi);
 		for (uint32_t seed = 1; seed <= 500; ++seed) {
 			run_new(seed * 2654435761u);
 			int b = act < 6 ? run.biome_order[act] : BIOME_NEST, navi = run.boss_order[b];
-			int v = pacing_guardian_version(navi, act, 0, b == BIOME_NEST, navi_hp), hp = navi_hp(navi, v);
-			if (navi >= 0 && navi < 32) seen[navi][v]++;
+			int v = cycle_version(navi, act, b == BIOME_NEST), hp = navi_hp(navi, v);
+			if (navi >= 0 && navi < 32 && v >= 0 && v < 6) seen[navi][v]++;
 			if (act < 6 && (hp < lo || hp > hi)) ++outside;
 		}
 		fprintf(out, "act %d (band %d-%d):", act + 1, lo, act < 6 ? hi : 0);
 		for (int n = 0; n < 32; ++n)
-			for (int v = 0; v < 3; ++v)
-				if (seen[n][v]) fprintf(out, " %s%s %d (%d)", guardian(n)->name, v == 1 ? "EX" : v == 2 ? "SP" : "", navi_hp(n, v), seen[n][v]);
+			for (int v = 0; v < 6; ++v)
+				if (seen[n][v]) fprintf(out, " %s%s %d (%d)", guardian(n)->name, super_boss(n) ? super_suffix(n, v) : v == 1 ? "EX" : v == 2 ? "SP" : "",
+					navi_hp(n, v), seen[n][v]);
 		fprintf(out, "%s\n", outside ? "  OUTSIDE" : "");
 		flagged += outside;
 	}
 	return flagged;
+}
+
+/* The super bosses (docs/BOSSES.md, Super bosses): BN6's own battles,
+ * above the bands by design, each form's HP where it stands, the last
+ * act's band beside */
+static void super_report(FILE *out) {
+	int lo, hi;
+	pacing_guardian_band(5, &lo, &hi);
+	fprintf(out, "\nSuper bosses, BN6's own battles above the bands (act 6's %d-%d): where, each form's HP.\n", lo, hi);
+	fprintf(out, "  the endless net's Nest: Gregar %d on the first Net, Gregar SP %d after\n", navi_hp(SUPER_CYBEAST, super_cybeast_form(0)),
+		navi_hp(SUPER_CYBEAST, super_cybeast_form(1)));
+	fprintf(out, "  the Secret Area once cleared: Bass %d, Bass SP %d once beaten, Bass BX %d twice beaten with the Cybeast\n",
+		navi_hp(SUPER_BASS, super_bass_form(0, false)), navi_hp(SUPER_BASS, super_bass_form(1, false)), navi_hp(SUPER_BASS, super_bass_form(2, true)));
 }
 
 /* The Net's clock (docs/HOME.md, going back): each act's guardians as the
@@ -270,7 +290,7 @@ static void clock_report(FILE *out) {
 		for (uint32_t seed = 1; seed <= 500; ++seed) {
 			run_new(seed * 2654435761u);
 			int b = act < 6 ? run.biome_order[act] : BIOME_NEST, navi = run.boss_order[b];
-			hps[seed - 1] = navi_hp(navi, pacing_guardian_version(navi, act, 0, b == BIOME_NEST, navi_hp));
+			hps[seed - 1] = navi_hp(navi, cycle_version(navi, act, b == BIOME_NEST));
 		}
 		qsort(hps, 500, sizeof *hps, cmp_int);
 		fprintf(out, "act %d:", act + 1);
@@ -393,6 +413,7 @@ int pacing_report_run(const char *path) {
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
 	flagged += first_cycle_guardians(out) + older_guardians(out);
+	super_report(out);
 	clock_report(out);
 	jobs_report(out);
 	home_shop_report(out);

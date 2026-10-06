@@ -201,7 +201,8 @@ TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c \
 	src/core/data.c src/core/xchips.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
-	src/core/backup.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c
+	src/core/backup.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
+	src/core/super_boss.c src/layer/super_lines.c
 build/host/test_core: $(TEST_SRCS) src/*/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm

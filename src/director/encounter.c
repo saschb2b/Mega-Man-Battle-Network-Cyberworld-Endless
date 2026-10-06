@@ -29,6 +29,7 @@ int encounter_backdrop = -1;
  * another's MegaMan panel and field). */
 #define RECORDS     (EMU_FREE + 0x200)
 #define RECORD_SIZE 0x80
+#define BG_MAP_OWN  0xFF   /* a record's background (+4): the map's own, as BN6's story records name it (Bass's, the Cybeast's) */
 static int slot;
 static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE; }
 
@@ -145,7 +146,11 @@ void emu_encounter_set(const Encounter *e) {
 	 * battlefield, the area's background and the virus or boss theme */
 	int bg = biome_bg(e->biome);   /* (rolled either way) */
 	if (encounter_backdrop >= 0) bg = encounter_backdrop;
-	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)encounter_song[e->boss], 0x00, (uint8_t)bg, 0x00, 0x38, 0x00 };
+	/* (a super boss's: the map's own background and BN6's music for him,
+	 * as his story record has them, docs/BOSSES.md) */
+	if (e->map_backdrop) bg = BG_MAP_OWN;
+	int song = e->song ? e->song : encounter_song[e->boss];
+	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)song, 0x00, (uint8_t)bg, 0x00, 0x38, 0x00 };
 	/* (bit 0x20 of the options lets MegaMan run, bn6f 0x08026EC8: the
 	 * story's bosses clear it, the random battles and BN6's roaming SP
 	 * Navis set it; docs/ROM_DATA.md) */

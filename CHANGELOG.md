@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- **Super bosses: the Cybeast and Bass** (issue #100). Each waits at a
+  place of its own, never at random. The endless net's Nest is the
+  Cybeast's den: no copied guardian at its end but Gregar itself, in
+  BN6's own final battle with its final battle theme, and Gregar SP on
+  every Net after the first (the Net copied the last battle). Once the
+  Secret Area has been cleared in any run, Bass waits there in every run
+  after, in BN6's dormant stone, his form following his record with
+  MegaMan as BN6's chain does: Bass, Bass SP once beaten, Bass BX once he
+  has fallen twice and the Cybeast once. The run foreshadows them: a
+  growl from below at the Nest, a bystander's word that the floor keeps
+  shaking, L's and MegaMan's words before the arena, Chaud's call after
+  the Secret Area's first clear (another signal down there, no copy's), a
+  BBS post about a cloaked Navi, and at the golden gate MegaMan sensing a
+  dark signal (Bass by name once they have met, and his form), the
+  question starting on No; neither is named on the PET before they meet.
+  Their entrance is BN6's own staging: the music fades as MegaMan nears
+  the bigger arena (7 x 7 where the layer has room), the floor rumbles,
+  Bass's stone cracks, the screen fades to white and he stands there out
+  of it, throwing his cloak open, or the Cybeast rears and roars; then a
+  grander title card. Their battles are BN6's records, on the map's own
+  background, with no running. They pay a GigaChip of BN6's (BassAnly,
+  Bass, ColForce; BugRSwrd), five HPMemory and a full heal; Bass leaves
+  in a white fade with BN6's sound, the Cybeast in a long one, the Net
+  silent after it, and Dad calls. BN6's own random records of Bass BX,
+  MegaMan's beast and the Navi the US version cut no longer turn up as a
+  Server's challenge. Once fought, MegaMan briefs their moves.
+- **Silence after a guardian's battle** (issue #100). The staging's hush
+  played song 0xFF, which stops nothing in BN6: the area's theme played on
+  as MegaMan stepped into an arena and, after the battle, under the
+  guardian's last word. It plays BN6's own "no song" now, 0x63, and after
+  the battle once the map's theme has started, so the last word comes in
+  silence and the theme returns with the Guardian Data, as the staging
+  meant (docs/BOSSES.md).
 - **Layers to remember** (issue #98). After several layers the net felt
   the same: its rooms were all of a size, no landmark stood on most of
   them, and an act of Seaside, Sky, Green, the Graveyard or the Nest

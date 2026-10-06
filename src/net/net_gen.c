@@ -21,6 +21,7 @@
 #include "net_signature.h"
 #include "pacing.h"
 #include "run.h"
+#include "super_boss.h"
 
 /* Layer generation: a layout after the area's own maps (net_layouts.c),
  * then points of interest (docs/LEVEL_DESIGN.md). */
@@ -493,26 +494,40 @@ static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
 	layer_raise_rooms(seed, stair_dirs, rise);
 }
 
+/* A guardian's arena, `arena_n` panels a side, on the layout just built,
+ * a guardian's size instead where `fallback` and his finds no room. */
+static bool arena_fits(int arena_n, bool fallback, int rise, ArenaInfo *arena) {
+	int got = arena_attach(arena_n, arena);
+	if (got < 0 && fallback) got = arena_attach(ARENA_SIZE, arena);
+	return got >= 0 && ng_fits(rise);
+}
+
 /* The layout: the planned one, then any of the area's, last the plainest
  * at its smallest; its signature at its heart, which the first tries keep
  * on until it has room for it; on a guardian's layer an arena of its own at
- * the far end. */
-static void build_layout(int planned, int sig, int biome, int size, int rise, ArenaInfo *arena) {
-	for (int attempt = 0; attempt < 12; ++attempt) {
+ * the far end, `arena_n` panels a side. A super boss's bigger one wants
+ * room: four more tries, the layout at its smallest from the third, and a
+ * guardian's size in the last five where his finds none (the Nest's
+ * crosses and slabs at their size seldom left room for his; so, nearly nine
+ * layers in ten hold it, tests/test_core.c). */
+static void build_layout(int planned, int sig, int biome, int size, int rise, int arena_n, ArenaInfo *arena) {
+	bool big = arena_n > ARENA_SIZE;
+	int tries = big ? 16 : 12;
+	for (int attempt = 0; attempt < tries; ++attempt) {
 		memset(layer.cell, 0, sizeof layer.cell);
 		layer.nrooms = 0;
 		arena->room = -1;
 		/* the planned layout, then any of the area's, last the plainest at its smallest */
-		bool last = attempt == 11;
+		bool last = attempt == tries - 1;
 		layer.layout = last ? LAYOUT_ROUTE : attempt < 6 ? planned : layout_pick(biome);
-		layout_build(layer.layout, biome, last ? 0 : size, sig);
+		layout_build(layer.layout, biome, last || (big && attempt >= 2) ? 0 : size, sig);
 		if (layer.nrooms < 3 || (layer.sig && layer.sig_room < 0 && attempt < 8)) continue;
 		choose_arrival();
 		connect_all();
 		if (floor_cells() < MIN_FLOOR || !ng_fits(rise)) continue;
 		/* a guardian waits in an arena of its own at the far end */
 		if (!layer.boss_layer || last) break;
-		if (arena_attach(ARENA_SIZE, arena) >= 0 && ng_fits(rise)) break;
+		if (arena_fits(arena_n, big && attempt >= tries - 6, rise, arena)) break;
 	}
 
 	if (layer.arena < 0 && layer.boss_layer && arena->room >= 0 && arena->room < layer.nrooms) {
@@ -521,6 +536,13 @@ static void build_layout(int planned, int sig, int biome, int size, int rise, Ar
 		layer.arena_dir = arena->dir;
 	}
 	if (layer.sig_room < 0) layer.sig = SIG_NONE;
+}
+
+/* The guardian of a layer of `kind` in `biome` (on a guardian's layer):
+ * an act's (BN5's own Navi where his game dresses the area and guards it,
+ * run_guardian), a side layer's the run's pick */
+static int layer_guardian_of(int biome, int kind) {
+	return kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
 }
 
 /* The layer's ends: where MegaMan arrives, the exit and on a guardian's
@@ -544,9 +566,7 @@ static void place_ends(int kind, int biome, const ArenaInfo *arena) {
 		}
 		NetObj *b = ng_add_obj(OBJ_BOSS, bx, by);
 		if (b) {
-			/* (an act's: BN5's own Navi where his game dresses the area and
-			 * guards it, run_guardian; a side layer's the run's pick) */
-			layer.boss_navi = kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
+			layer.boss_navi = layer_guardian_of(biome, kind);
 			b->param = layer.boss_navi;
 		}
 		ng_mark_way(layer.rooms[0].ax, layer.rooms[0].ay, bx, by);
@@ -724,7 +744,10 @@ static void place_duel_gate(int level, const int *order, int n, int *next) {
 
 int layer_npcs(void) {
 	int n = 0;
-	for (int i = 0; i < layer.nobj; ++i) n += layer.obj[i].type == OBJ_WARP_IN ? 0 : layer.obj[i].type == OBJ_BOSS ? 2 : 1;
+	/* (a guardian two, himself and his data; Bass three, his stone too:
+	 * docs/BOSSES.md, Super bosses) */
+	for (int i = 0; i < layer.nobj; ++i)
+		n += layer.obj[i].type == OBJ_WARP_IN ? 0 : layer.obj[i].type != OBJ_BOSS ? 1 : layer.obj[i].param == SUPER_BASS ? 3 : 2;
 	return n;
 }
 
@@ -851,7 +874,9 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	 * signatures (docs/LEVEL_DESIGN.md, Identity) */
 	int planned, sig;
 	layer_plan(seed, depth, biome, kind, kit, &planned, &sig);
-	build_layout(planned, sig, biome, size, rise, &arena);
+	/* (a super boss's arena is bigger: docs/BOSSES.md, Super bosses) */
+	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
+	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
 	finish_rooms(seed, stair_dirs, rise);
 	place_ends(kind, biome, &arena);
 

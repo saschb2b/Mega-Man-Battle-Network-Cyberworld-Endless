@@ -377,7 +377,7 @@ static bool build_layer(void) {
 	official_sync(false);
 	D.arrow_pending = false;
 	cinema_arrow(0, 0);
-	D.secret_call = run.side_kind == LAYER_SECRET;
+	D.after_call = run.side_kind == LAYER_SECRET || D.objs.guardian.navi == SUPER_CYBEAST;
 	talk_reset();
 	return true;
 }
@@ -444,6 +444,9 @@ bool director_start_layer(void) {
 	off_board_forget();
 	forget_heard();
 	D.town = false;
+	/* (--dev side=N: a test's start on a side layer, once) */
+	if (dev.side == LAYER_UNDERNET || dev.side == LAYER_SECRET) run.side_kind = dev.side;
+	dev.side = 0;
 	/* (a headless run starting in the net: its folder as the town would
 	 * have set it, and no DarkChips but the dev flag's) */
 	if (run.depth == 1 && run.side_kind == LAYER_NORMAL) { set_start_folder(); library_to_game(); dark_new_run(run.seed); souls_new_run(run.seed); }

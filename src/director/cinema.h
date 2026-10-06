@@ -49,6 +49,15 @@ void cinema_arrow_heal(bool heal);
 int cinema_arrow_age(void);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */
 void cinema_title(const char *top, const char *name, const char *epithet, SDL_Color accent, int frames);
+/* A super boss's title card (docs/BOSSES.md, Super bosses): the picture
+ * darkened, a taller band with double edges in his colour, `top` over his
+ * name, larger and heavier, `sub` under it (his form, the Net's bottom)
+ * and `epithet`; held longer than a guardian's. */
+void cinema_title_grand(const char *top, const char *name, const char *sub, const char *epithet, SDL_Color accent, int frames);
+/* The picture fading to white over `in` frames, held white `hold`, and
+ * back over `out` (a super boss's reveal, as BN6's own scenes fade): no
+ * flashing, one slow fade. */
+void cinema_whiteout(int in, int hold, int out);
 /* A card between areas: `small` over `big`, then up to two lines. */
 void cinema_card(const char *small, const char *big, const char *line1, const char *line2, SDL_Color accent, int frames);
 /* A short note in the picture's top right corner for `frames` on the

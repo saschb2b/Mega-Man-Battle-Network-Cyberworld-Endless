@@ -10,6 +10,8 @@
 #include "guardians.h"
 #include "guest.h"
 #include "net.h"
+#include "save.h"
+#include "super_boss.h"
 
 Run run;
 
@@ -117,6 +119,12 @@ void run_new(uint32_t seed) {
 		}
 		run.boss_order[b] = (uint8_t)g;
 	}
+	/* the super bosses' places (docs/BOSSES.md, Super bosses): the endless
+	 * net's Nest is the Cybeast's den (a short net's setup picks its own
+	 * Nest's guardian, run_setup), and the Secret Area is Bass's once it
+	 * has been cleared in any run (the title's S) */
+	run.boss_order[BIOME_NEST] = (uint8_t)super_nest_master();
+	run.boss_order[BIOME_SECRET] = (uint8_t)super_secret_master(profile.marks, run.boss_order[BIOME_SECRET]);
 }
 
 /* Whether guardian `g` is another act's (the four of the surface), or the

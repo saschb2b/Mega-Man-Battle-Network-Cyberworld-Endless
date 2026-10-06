@@ -9,6 +9,7 @@
 #include "pacing.h"
 #include "run.h"
 #include "rom.h"
+#include "super_boss.h"
 #include "xguardian.h"
 
 #define NAVI_CHALLENGE 40   /* % of challenges from the fourth act on against one of the area's SP navis */
@@ -379,6 +380,34 @@ static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
 	return from_formations(depth, biome, kind, e);
 }
 
+/* Whether formation `f` is one of BN6's own random battles a Server never
+ * holds: a super boss's (Bass BX, the beast's copy; docs/BOSSES.md: they
+ * come at their places, never at random) or the place of the Navi the US
+ * version cut, drawn as MegaMan */
+static bool navi_reserved(const Formation *f) {
+	for (int k = 0; k < f->n; ++k) {
+		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		if (row[1] == 1 && super_reserved_ai(row[2])) return true;
+	}
+	return false;
+}
+
+/* One of the area's SP navis for a challenge, who keeps his own strength,
+ * never one navi_reserved holds; whether there was one, into `e` */
+static bool navi_challenge(const Formation *list, int n, int depth, int target, Encounter *e) {
+	int total = 0;
+	for (int i = 0; i < n; ++i) total += list[i].navi && !navi_reserved(&list[i]) ? list[i].weight : 0;
+	if (!total) return false;
+	int roll = rng_range(0, total - 1), pick = 0, hp, dmg;
+	for (int i = 0; i < n; ++i) {
+		if (!list[i].navi || navi_reserved(&list[i])) continue;
+		if (roll < list[i].weight) { pick = i; break; }
+		roll -= list[i].weight;
+	}
+	build_foes(&list[pick], depth, target, false, e, &hp, &dmg);
+	return e->nfoes > 0;
+}
+
 static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	const Formation *list;
 	int n = formations_of(biome, &list);
@@ -390,20 +419,8 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	/* from the fourth act a challenge may meet one of the area's SP navis,
 	 * who keeps his own strength */
 	/* (threat 5, docs/META.md: from the first act) */
-	if (challenge && (pacing_act(depth) >= 3 || run.threat >= 5) && rng_range(0, 99) < NAVI_CHALLENGE) {
-		int total = 0;
-		for (int i = 0; i < n; ++i) total += list[i].navi ? list[i].weight : 0;
-		if (total) {
-			int roll = rng_range(0, total - 1), pick = 0, hp, dmg;
-			for (int i = 0; i < n; ++i) {
-				if (!list[i].navi) continue;
-				if (roll < list[i].weight) { pick = i; break; }
-				roll -= list[i].weight;
-			}
-			build_foes(&list[pick], depth, target, false, e, &hp, &dmg);
-			return e->nfoes > 0;
-		}
-	}
+	if (challenge && (pacing_act(depth) >= 3 || run.threat >= 5) && rng_range(0, 99) < NAVI_CHALLENGE && navi_challenge(list, n, depth, target, e))
+		return true;
 	static int8_t fit[MAX_FIT];
 	PacingBand band = pacing_band(depth, challenge, easy);
 	int total = 0;
@@ -540,13 +557,22 @@ Encounter make_boss(int depth, int biome, int navi) {
 	e.foes[0].id = -1;
 	e.foes[0].kind = FOE_NAVI;
 	e.foes[0].family = navi;
+	e.foes[0].col = 4;
+	e.foes[0].row = 1;
+	/* a super boss in his form (docs/BOSSES.md, Super bosses), in BN6's own
+	 * record's music and on the background of the map he stands on, as
+	 * BN6's records give his battles */
+	if (super_boss(navi)) {
+		e.foes[0].version = super_form(navi, depth);
+		e.song = super_song(navi);
+		e.map_backdrop = true;
+		return e;
+	}
 	/* the version whose HP suits the act (docs/PROGRESSION.md) */
 	e.foes[0].version = pacing_guardian_version(navi, pacing_act(depth), pacing_loop(depth),
 		(biome == BIOME_NEST && !run_short_nest(depth)) || biome == BIOME_SECRET, navi_hp);
 	/* (threat 4, docs/META.md: EX from act 2) */
 	if (run.threat >= 4 && pacing_act(depth) >= 1 && e.foes[0].version < 1) e.foes[0].version = 1;
-	e.foes[0].col = 4;
-	e.foes[0].row = 1;
 	return e;
 }
 

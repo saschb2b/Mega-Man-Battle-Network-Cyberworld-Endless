@@ -31,6 +31,11 @@ static const Guardian guardians[] = {
 	[15] = { "JudgeMan", "Voice of Verdict", 0x55, -1, 88, 104, 216 },
 	[16] = { "ElementMan", "Lord of Elements", 0x56, -1, 176, 136, 232 },
 	[18] = { "Colonel", "The Iron Strategist", 0x53, -1, 120, 168, 136 },
+	/* the super bosses (docs/BOSSES.md, Super bosses): Bass, his own face
+	 * and cloaked sprite, and the Cybeast, its face and its beast on the
+	 * map; their poses super_body's */
+	[19] = { "Bass", "The Strongest Navi", 0x5B, -1, 232, 176, 40 },
+	[20] = { "Gregar", "It copies everything", 0x58, -1, 248, 128, 40 },
 	/* BN5's (docs/BOSSES.md, BN5's Navis): their faces and sprites copied in
 	 * from its ROM as they are met (guardian_set_face), their pose its own
 	 * animation 24, as Gregar's Navis' */
@@ -64,6 +69,7 @@ int guardian_sprite(int navi) {
 		{ 1, 0x47 }, { 2, 0x49 }, { 3, 0x4B }, { 4, 0x50 }, { 5, 0x4F },   /* Heat, Elec, Slash, Erase, Charge */
 		{ 11, 0x3B }, { 12, 0x51 }, { 13, 0x52 }, { 14, 0x54 }, { 15, 0x55 }, /* Proto, Blast, Dive, Circus, Judge */
 		{ 16, 0x56 }, { 18, 0x53 },                                          /* Element, Colonel */
+		{ 19, 0x5B }, { 20, 0x58 },                                          /* Bass, the Cybeast's beast */
 	};
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
@@ -95,6 +101,18 @@ NpcBody guardian_body(int navi, int face) {
 	if (navi == 12 || navi == 16) b.anim = face == 1 ? 3 : face == 7 ? 5 : face;
 	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1 };
 	return b;
+}
+
+/* The super bosses as they stand on the net (docs/BOSSES.md, Super
+ * bosses), in BN6's own sprites and animations as its scenes use them:
+ * Bass cloaked, drawn only towards the camera as BlastMan is (2 to 5),
+ * throwing his cloak open (26) to stand without it (25), as he fights;
+ * the Cybeast's beast crouching (28), rearing with a roar (29), its sprite
+ * drawn facing left, mirrored to face right. */
+SuperBody super_body(int navi, int face) {
+	if (navi == SUPER_BASS)
+		return (SuperBody){ { 6, guardian_sprite(navi), face == 1 ? 3 : face == 7 ? 5 : face, false, -1, 26 }, 16, 25, false };
+	return (SuperBody){ { 6, guardian_sprite(navi), 28, face >= 1 && face <= 3, -1, 29 }, 60, 28, true };
 }
 
 void guardian_set_face(int navi, int face) {

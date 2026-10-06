@@ -46,6 +46,10 @@ around it, one layer at a time, and keeps the run going.
 - **Deeper, harder, around again.** From the surface areas through the
   story's comps, the Undernet and the Graveyard to the Underground, then
   around again, harder.
+- **Super bosses.** The Cybeast Gregar waits at the bottom of the endless
+  net, in BN6's own final battle, and Bass in the Secret Area once you
+  have cleared it, stronger each time he falls. Each comes at its own
+  place, never at random, and makes an entrance no guardian does.
 - **Home between acts.** After every act MegaMan comes home to Lan's HP,
   and Lan to Central Town: the day goes on with the run, its people
   remember it, AsterLand orders any chip the Library holds, and three of
@@ -608,7 +612,17 @@ computers and the Aquarium, ACDC, Green and Sky homepages. The order is
 random, but the gentler areas come first (Central or a home computer) and
 the hardest last (Sky, Mr. Weather,
 ACDC HP, CopyBot's comp). Then come the Undernet and the Graveyard, and
-layer 19 is the Underground. After that the cycle starts again, harder.
+layer 19 is the Underground, the Cybeast's den: no copied guardian waits
+at its end but Gregar itself, in BN6's own final battle, and Gregar SP
+at the bottom of every Net after the first. After that the cycle starts
+again, harder.
+
+Once the Secret Area has been cleared in any run, Bass waits there in
+every run after: BN6's dormant stone in its arena, then Bass himself, in
+the form his record with you has made him (Bass, Bass SP once beaten,
+Bass BX once he has fallen twice and the Cybeast once). MegaMan senses
+him at the golden gate before it opens, so the fight is yours to choose;
+it pays one of BN6's GigaChips.
 
 ### Getting stronger
 
@@ -640,9 +654,9 @@ layer 19 is the Underground. After that the cycle starts again, harder.
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.
 - **BeastOut.** The Graveyard's guardian wakes the Cybeast, and BeastOut
-  joins the Custom screen. Once the endless net's own Nest has fallen in
-  any run, the setup's Help row can bring it from the first battle
-  instead, in either net.
+  joins the Custom screen. Once the Cybeast at the endless net's own Nest
+  has fallen in any run, the setup's Help row can bring it from the first
+  battle instead, in either net.
 - **Chips.** Mystery Data, shops and traders draw from the whole chip
   library by rarity: Megas deeper down and, rarely, a Giga. Green Mystery
   Data holds chips, zenny and BugFrags; in deep layers a blue one may hold
@@ -659,7 +673,7 @@ layer 19 is the Underground. After that the cycle starts again, harder.
 | Recovery Mr. Prog | Restores HP |
 | Server | A strong virus signal: an optional harder battle that pays a better chip. From the fourth act it may hold an SP Navi. Never on the first layer |
 | Dark flame | Enters the Undernet: tougher viruses, and an exit one layer deeper |
-| Golden gate | Three ScrtData open the Secret Area in Undernet Zero |
+| Golden gate | Three ScrtData open the Secret Area in Undernet Zero; once it has been cleared, Bass waits behind it |
 | Sealed gate | From the third act: sealed with a Navi's code, which deleting him twice as a guardian earns, in any runs. Once earned, every such gate opens to his SP, whose chip is the prize |
 | Collector's vault | From the second act: its lock opens for a Library of 30 chips (60 in act 3, 90 later), and it holds three rare chips, one to take |
 

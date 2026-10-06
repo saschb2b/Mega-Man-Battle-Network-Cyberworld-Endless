@@ -8,7 +8,9 @@
 
 #include "bn6.h"
 #include "darkchips.h"
+#include "guardians.h"
 #include "rom.h"
+#include "run.h"
 #include "script_kit.h"
 
 int ta_heal(TextArchive *t, int variant, int told_flag, int amount, bool vow) {
@@ -251,6 +253,17 @@ int ta_undernet(TextArchive *t, int flag, bool deeper) {
 	return i;
 }
 
+/* What MegaMan senses behind the golden gate where Bass waits (docs/
+ * BOSSES.md, Super bosses): a dark signal, unnamed until they have met,
+ * then Bass and his form; NULL for ProtoMan's copy */
+static const char *gate_beyond(void) {
+	if (run.boss_order[BIOME_SECRET] != SUPER_BASS) return NULL;
+	if (!guardian_known(SUPER_BASS)) return "Lan... Something's behind this gate.|Its signal is so dark...";
+	int form = super_form(SUPER_BASS, run.depth);
+	return form == SUPER_BASS_BX ? "Bass is in there,Lan...|And the Cybeast's power is with him!"
+		: form == SUPER_BASS_SP ? "Bass is in there,Lan.|He's even stronger than last time..." : "Bass is in there,Lan. I can feel him.";
+}
+
 int ta_secret_gate(TextArchive *t, int flag) {
 	/* how many ScrtData MegaMan holds, said at a closed gate */
 	int none = ta_say(t, FACE_MEGAMAN, "It's sealed tight,Lan.|Maybe ScrtData could open it...");
@@ -268,7 +281,12 @@ int ta_secret_gate(TextArchive *t, int flag) {
 	int i = ta_script(t);
 	uint8_t has3[] = { 0xEF, 0x07, SCRIPTS_SECRET_DATA, 3, 0xFF, 0xFF, (uint8_t)fewer };
 	ta_bytes(t, has3, sizeof has3);
-	ta_ask(t, FACE_MEGAMAN, "The ScrtData glows!\nOpen the gate?\n", no);
+	/* (Bass behind it: said first, and the question starts on No, as a
+	 * risky choice's does) */
+	const char *beyond = gate_beyond();
+	bool first = true;
+	if (beyond) ta_pages(t, beyond, FACE_MEGAMAN, &first);
+	ta_ask_in(t, FACE_MEGAMAN, "The ScrtData glows!\nOpen the gate?\n", no, beyond != NULL, beyond != NULL);
 	ta_flag_set(t, flag);
 	ta_end(t);
 	return i;
@@ -276,7 +294,7 @@ int ta_secret_gate(TextArchive *t, int flag) {
 
 int ta_music(TextArchive *t, int song) {
 	int i = ta_script(t);
-	uint8_t play[] = { 0xFD, 0x01, (uint8_t)song, (uint8_t)(song >> 8) };   /* ts_sound_play_bgm; 0xFF stops */
+	uint8_t play[] = { 0xFD, 0x01, (uint8_t)song, (uint8_t)(song >> 8) };   /* ts_sound_play_bgm (bn6f's PlayMusic; 0x63 stops) */
 	static const uint8_t area[] = { 0xFD, 0x0A };                            /* ts_sound_play_area_bgm */
 	if (song == SCRIPTS_AREA_MUSIC) ta_bytes(t, area, sizeof area);
 	else ta_bytes(t, play, sizeof play);

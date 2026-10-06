@@ -9,6 +9,7 @@
 
 #include "bn5.h"
 #include "stage_npc.h"
+#include "super_boss.h"
 
 #define GUARDIAN_NO_MUGSHOT -1
 
@@ -20,7 +21,8 @@ typedef struct {
 	unsigned char r, g, b;  /* the title card's accent */
 } Guardian;
 
-/* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel) */
+/* navi index as in the battle's enemy table (1 HeatMan .. 16 ElementMan, 18 Colonel;
+ * the super bosses 19 Bass and 20 the Cybeast Gregar, super_boss.h) */
 const Guardian *guardian(int navi);
 /* Another game's Navis as a territory's guardians (docs/BOSSES.md, BN5's
  * Navis): BN5's Team Colonel by their AI index there (bn5.h BN5_NAVI_*,
@@ -74,6 +76,9 @@ int guardian_sprite(int navi);
 /* How guardian `navi` stands on the net facing `face` (the overworld's
  * eighths: 1 up-right, 3 down-right, 5 down-left, 7 up-left). */
 NpcBody guardian_body(int navi, int face);
+/* ... and a super boss's (Bass, the Cybeast's beast; docs/BOSSES.md, Super
+ * bosses), with his pose and what he stands in after it */
+SuperBody super_body(int navi, int face);
 /* The face a guardian speaks with: his mugshot, or the one set for him
  * (Falzar's Navis, whose faces Gregar lacks: a portrait, portrait.c), else
  * none. */

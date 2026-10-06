@@ -50,10 +50,14 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi);
 int ta_undernet(TextArchive *t, int flag, bool deeper);
 int ta_secret_gate(TextArchive *t, int flag);
-/* Plays song `song` (0xFF stops the music, SCRIPTS_AREA_MUSIC the map's
- * own) without opening the chat box. */
+/* Plays song `song` (0x63, BN6's no song, stops the music;
+ * SCRIPTS_AREA_MUSIC the map's own) without opening the chat box. */
 #define SCRIPTS_AREA_MUSIC -1
 int ta_music(TextArchive *t, int song);
+/* Plays sound `sound` (BN6's ts_sound_play00), and fades the music out
+ * over `sixteenths` sixteen-frame steps, without opening the chat box. */
+int ta_sound(TextArchive *t, int sound);
+int ta_music_fade(TextArchive *t, int sixteenths);
 /* What a Guardian Data adds for the NaviCust (docs/NAVICUST.md): an
  * ExpMemry, then a draft of `n` programs (give ids and colours, with
  * MegaMan's words for each) or none for `skip_frags` BugFrags; `teach` adds
@@ -78,6 +82,7 @@ typedef struct {
 	int taken_flag;          /* event flag set on every branch of the draft */
 	int hp_memories;         /* HPMemory through the game's own item, +20 max HP each */
 	const ScriptsDraft *draft;   /* the NaviCust's draft, NULL for none */
+	const char *head;        /* its first line, NULL for "MegaMan downloaded NAME's Guardian Data!" (a super boss's own) */
 } ScriptsReward;
 
 /* A guardian's Guardian Data, checked: his power, then the HPMemory, his

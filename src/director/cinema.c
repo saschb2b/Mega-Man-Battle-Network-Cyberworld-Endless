@@ -13,7 +13,7 @@
 #define EASE_IN    16   /* frames a card's parts take to slide in */
 #define FADE_OUT   14
 
-enum { CARD_NONE, CARD_TITLE, CARD_AREA };
+enum { CARD_NONE, CARD_TITLE, CARD_AREA, CARD_GRAND };
 
 static struct {
 	bool off_map;
@@ -23,6 +23,7 @@ static struct {
 	bool bars;
 	int bar;                 /* 0 .. BAR_FRAMES */
 	int flash, flash_len;
+	int white_t, white_in, white_hold, white_out;   /* a slow fade to white and back, its frame and its parts */
 	int shake, shake_amp;
 	int card, card_t, card_len;
 	char top[48], name[48], line1[48], line2[48];
@@ -46,6 +47,7 @@ int cinema_input_mode(void) { return C.input; }
 void cinema_walk(uint32_t keys) { C.walk = keys; }
 void cinema_letterbox(bool on) { C.bars = on; }
 void cinema_flash(int frames) { C.flash = C.flash_len = frames; }
+void cinema_whiteout(int in, int hold, int out) { C.white_t = 0; C.white_in = in; C.white_hold = hold; C.white_out = out; }
 void cinema_shake(int frames, int amplitude) { C.shake = frames; C.shake_amp = amplitude; }
 bool cinema_busy(void) { return C.card != CARD_NONE; }
 void cinema_arrow(int dir, int frames) { C.arrow_dir = dir & 7; C.arrow_t = 0; C.arrow_len = frames; }
@@ -78,6 +80,10 @@ void cinema_card(const char *small, const char *big, const char *line1, const ch
 	card(CARD_AREA, small, big, line1, line2, accent, frames);
 }
 
+void cinema_title_grand(const char *top, const char *name, const char *sub, const char *epithet, SDL_Color accent, int frames) {
+	card(CARD_GRAND, top, name, epithet, sub, accent, frames);
+}
+
 void cinema_on_map(bool on_map) { C.off_map = !on_map; }
 
 void cinema_card_yield(void) {
@@ -101,6 +107,8 @@ void cinema_update(void) {
 	if (C.bars && C.bar < BAR_FRAMES) ++C.bar;
 	if (!C.bars && C.bar > 0) --C.bar;
 	if (C.flash > 0) --C.flash;
+	if (C.white_in + C.white_hold + C.white_out > 0 && ++C.white_t >= C.white_in + C.white_hold + C.white_out)
+		C.white_in = C.white_hold = C.white_out = 0;
 	if (C.shake > 0) --C.shake;
 	/* (a card waits out a shop, the PET or a battle, unseen) */
 	if (C.card && !C.off_map && ++C.card_t >= C.card_len) C.card = CARD_NONE;
@@ -161,6 +169,38 @@ static void draw_title(int x0, int y0) {
 	int ep = ease(C.card_t, 16);
 	int ex = x0 + CORE_W / 2 - (255 - ep) * 90 / 255;
 	text_draw(ex, mid + 14, C.line1, with_alpha(C.accent, a * ep / 255), TEXT_CENTER);
+}
+
+/* A super boss's card: the picture veiled, a band of 92 opening from the
+ * middle, edged twice in his colour (the inner edges pulsing), his name
+ * twice the size where it fits, heavier, sliding in from the right, the
+ * line under it and his epithet after it. */
+static void draw_grand(int x0, int y0) {
+	int a = card_alpha();
+	int open = ease(C.card_t, 0);
+	fill_rect(x0, y0, CORE_W, CORE_H, rgba(0, 0, 0, 120 * a / 255));
+	int band = 92 * open / 255, mid = y0 + 76;
+	fill_rect(x0, mid - band / 2, CORE_W, band, rgba(8, 0, 16, 215 * a / 255));
+	int line = CORE_W * ease(C.card_t, 4) / 255, inner = (CORE_W - 24) * ease(C.card_t, 8) / 255;
+	int pulse = 150 + (int)(105.0f * sinf((float)C.card_t * 0.12f));
+	for (int edge = -1; edge <= 1; edge += 2) {
+		int y = mid + edge * (band / 2) - (edge > 0);
+		fill_rect(x0 + (CORE_W - line) / 2, y, line, 1, with_alpha(C.accent, a));
+		fill_rect(x0 + (CORE_W - inner) / 2, y - edge * 3, inner, 1, with_alpha(C.accent, a * pulse / 255));
+	}
+	if (band < 88) return;
+	text_draw(x0 + CORE_W / 2, mid - 38, C.top, with_alpha(C.accent, a * ease(C.card_t, 8) / 255), TEXT_CENTER);
+	int in = ease(C.card_t, 12);
+	int nx = x0 + CORE_W / 2 + (255 - in) * 120 / 255;
+	int sc = name_scale(C.name), ny = mid - 20 + (2 - sc) * TEXT_H / 2;
+	SDL_Color deep = rgba(C.accent.r / 3, C.accent.g / 3, C.accent.b / 3, 255);
+	for (int k = 0; k < 4; ++k)
+		text_draw_scaled(nx + (k & 1 ? 2 : -2) * sc / 2, ny + (k & 2 ? 2 : -2) * sc / 2, C.name, with_alpha(deep, a * in / 255), TEXT_CENTER, sc);
+	text_draw_scaled(nx + 1, ny + 2, C.name, with_alpha(C.accent, a * in / 255), TEXT_CENTER, sc);
+	text_draw_scaled(nx, ny, C.name, with_alpha(WHITE, a * in / 255), TEXT_CENTER, sc);
+	int ep = ease(C.card_t, 22);
+	text_draw(x0 + CORE_W / 2, mid + 10, C.line2, with_alpha(C.accent, a * ep / 255), TEXT_CENTER);
+	text_draw(x0 + CORE_W / 2 - (255 - ep) * 90 / 255, mid + 24, C.line1, with_alpha(rgba(224, 224, 240, 255), a * ep / 255), TEXT_CENTER);
 }
 
 static void draw_area(int x0, int y0) {
@@ -240,6 +280,14 @@ static void draw_note(int x0, int y0) {
 	cinema_note_box(x0, y0, C.note, C.note_t, C.note_len);
 }
 
+/* The slow white: up over its `in`, held, down over its `out` */
+static void draw_white(int x0, int y0) {
+	int in = C.white_in, hold = C.white_hold, out = C.white_out, t = C.white_t;
+	if (in + hold + out <= 0) return;
+	int a = t < in ? 255 * t / (in ? in : 1) : t < in + hold ? 255 : 255 * (in + hold + out - t) / (out ? out : 1);
+	fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, a < 0 ? 0 : a > 255 ? 255 : a));
+}
+
 void cinema_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
 	/* (the bars stage the map: a battle that began under them, issue #24,
@@ -253,5 +301,7 @@ void cinema_draw(void) {
 	draw_note(x0, y0);
 	if (C.card == CARD_TITLE && !C.off_map) draw_title(x0, y0);
 	if (C.card == CARD_AREA && !C.off_map) draw_area(x0, y0);
+	if (C.card == CARD_GRAND && !C.off_map) draw_grand(x0, y0);
 	if (C.flash > 0) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, 230 * C.flash / C.flash_len));
+	draw_white(x0, y0);
 }

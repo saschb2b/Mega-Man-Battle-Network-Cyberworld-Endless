@@ -1264,6 +1264,14 @@ the PET's battle data on a copy exists once they have fought it.
   keeps it, as the dealer's having spoken). From the first battle on, in
   any run, he is known everywhere: named, and briefed from "battle data
   from before", his moves and when a hit lands.
+- **Super bosses** (docs/BOSSES.md, Super bosses). Bass and the Cybeast
+  are no copies, and nobody on the net has a name for them: no bystander
+  passes one on, and the Net Dealer only fears what waits at the end.
+  Until their first battle MegaMan senses them, in his words and on the
+  PET: something huge growling at the Nest's end, like the beast in him;
+  a dark signal behind the golden gate that does not feel like a copy.
+  Their title card is the reveal; from their first battle on they are
+  named everywhere, Bass's form said at the gate before it opens.
 - **Virus families.** The area's warnings for the viruses BN6 never
   explains (ScarCrows healed by Elec, DarkMechs warping in to slash) come
   once the family has been battled in any run (the profile's

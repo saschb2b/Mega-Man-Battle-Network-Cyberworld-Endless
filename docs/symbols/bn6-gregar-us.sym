@@ -290,6 +290,7 @@
 080ABD30 encounter_roll
 080AC180 BN6_REWARD_PICK
 080AC718 BN6_DROP_ROWS
+080B06E0 story_battle_records
 080EA908 time_freeze_object
 080EAAC4 time_freeze_dark_invis
 080EBFA0 attack_families_routines

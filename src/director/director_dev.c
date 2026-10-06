@@ -121,6 +121,8 @@ static bool dev_gift(const char *name) {
 	else if (!strcmp(name, "rushfood")) game_call(BN6_GIVE_ITEM | 1u, ITEM_RUSH_FOOD, 3);
 	else if (!strcmp(name, "wwwid")) game_call(BN6_GIVE_ITEM | 1u, ITEM_WWW_ID, 1);
 	else if (!strcmp(name, "regup")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_REG_UP1 + 2, 1);
+	/* (the three a golden gate wants: docs/BOSSES.md, Super bosses) */
+	else if (!strcmp(name, "scrtdata")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_SECRET_DATA, 3);
 	/* (a battle in the older net's own engine at once, on a layer whose
 	 * battles are its: docs/MULTIROM.md, Guest battles) */
 	else if (!strcmp(name, "guest") && encounter_guest) guest_begin();

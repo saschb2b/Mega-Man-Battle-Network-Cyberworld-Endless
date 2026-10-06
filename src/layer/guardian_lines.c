@@ -9,9 +9,12 @@
 #include "guardians.h"
 #include "rivals.h"
 #include "save.h"
+#include "super_lines.h"
 #include "text.h"
 
 const char *guardian_tip(int navi) {
+	/* (the super bosses' own: super_lines.c) */
+	if (super_boss(navi)) return super_tip(navi);
 	switch (navi) {
 	/* (the last box, "|@M ", for when a sword lands, where a guardian's
 	 * warps made swords miss:
@@ -342,6 +345,7 @@ static const char *strike_when(int navi) {
 const char *guardian_intro(int navi, int version, int biome) {
 	static char buf[800];
 	const Rival *r = rival(navi);
+	if (super_boss(navi)) return super_intro(navi, version, r);
 	const char *name = guardian(navi)->name;
 	int k = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))

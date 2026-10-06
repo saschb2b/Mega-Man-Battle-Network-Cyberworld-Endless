@@ -16,6 +16,7 @@
 #define SOUND_LOG_IN   0x77
 #define SOUND_LOG_OUT  0x76
 #define SOUND_APPEAR   0x94
+#define SOUND_SEAL     0xFE   /* Bass's stone cracking, BN6's own (docs/BOSSES.md, Super bosses) */
 
 /* A script under construction, with jumps to labels resolved once its
  * address is known. */
@@ -56,7 +57,7 @@ static uint32_t commit(Script *s) {
 	return at;
 }
 
-enum { L_SHOW, L_IDLE, L_LEAVE };
+enum { L_SHOW, L_IDLE, L_LEAVE, L_POSE, L_END };
 
 uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f) {
 	Script s = { .n = 0 };
@@ -95,6 +96,56 @@ uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int 
 	wait_flag(&s, f->taken, L_LEAVE);
 	mark(&s, L_LEAVE);
 	OP(&s, 0x03);
+	return commit(&s);
+}
+
+uint32_t npc_super(const SuperBody *b, int x, int y, int z, const StageFlags *f) {
+	Script s = { .n = 0 };
+	const NpcBody *n = &b->body;
+	OP(&s, 0x09, 0x25, (uint8_t)n->index, (uint8_t)(n->list * 4), 0x16, (uint8_t)n->anim, 0x0E, 0x13);
+	if (n->mirror) OP(&s, 0x26);
+	coords(&s, x, y, z);
+	/* (gone already: a CONTINUE by his data) */
+	jump_if(&s, f->gone, L_END);
+	wait_flag(&s, f->appear, L_SHOW);
+	mark(&s, L_SHOW);
+	/* out of the white at once, as BN6 shows its own: no log-in */
+	OP(&s, 0x08);
+	wait_flag(&s, f->pose, L_POSE);
+	mark(&s, L_POSE);
+	OP(&s, 0x16, (uint8_t)n->pose, 0x10, (uint8_t)b->pose_frames, 0x16, (uint8_t)b->after);
+	mark(&s, L_IDLE);
+	wait_flag(&s, f->gone, L_LEAVE);
+	mark(&s, L_LEAVE);
+	for (int a = 0x10; a >= 0x02; a -= 2) OP(&s, 0x31, (uint8_t)a, 0x10, b->slow ? 0x0A : 0x04);
+	mark(&s, L_END);
+	OP(&s, 0x09, 0x31, 0x00, 0x03);
+	return commit(&s);
+}
+
+uint32_t npc_seal(int x, int y, int z, const StageFlags *f) {
+	Script s = { .n = 0 };
+	/* (its screen flickering, its first animation's four frames; its
+	 * shaking the third, its pieces the second: BN6's own scene in
+	 * Undernet Zero) */
+	/* (never in the way: MegaMan walks up to Bass over it, and takes his
+	 * data where it stood) */
+	OP(&s, 0x08, 0x25, SEAL_SPRITE, 7 * 4, 0x16, 0x00, 0x0E, 0x13, 0x1F);
+	coords(&s, x, y, z);
+	/* (broken already: a CONTINUE after Bass woke) */
+	jump_if(&s, f->appear, L_IDLE);
+	wait_flag(&s, f->seal, L_SHOW);
+	mark(&s, L_SHOW);
+	sound(&s, SOUND_SEAL);
+	OP(&s, 0x16, 0x03);
+	wait_flag(&s, f->appear, L_IDLE);
+	mark(&s, L_IDLE);
+	OP(&s, 0x16, 0x02);
+	/* (its pieces fade as Bass goes) */
+	wait_flag(&s, f->gone, L_LEAVE);
+	mark(&s, L_LEAVE);
+	for (int a = 0x10; a >= 0x02; a -= 2) OP(&s, 0x31, (uint8_t)a, 0x10, 0x04);
+	OP(&s, 0x09, 0x31, 0x00, 0x03);
 	return commit(&s);
 }
 

@@ -21,14 +21,25 @@
 #include "save.h"
 #include "scripts.h"
 #include "stage_npc.h"
+#include "super_lines.h"
 #include "xguardian.h"
 
 #define SONG_BOSS_PRELUDE 0x1C
-#define SONG_STOP         0xFF
+/* BN6's no song: its PlayMusic stops every song for it (bn6f PlayMusic,
+ * sound_8000630), as its own scripts hush a scene; 0xFF, which this
+ * played before, stopped nothing (BN6_MUSIC_STATUS read each frame) */
+#define SONG_STOP         0x63
 #define MD_ANIM_GUARDIAN  1     /* the Mystery Data sprite's blue crystal */
+/* a super boss's sounds, BN6's own scenes' (docs/BOSSES.md, Super bosses):
+ * the rumble and the roar, the white's, Bass's going; and the theme's fade
+ * as those scenes begin, in sixteen-frame steps */
+#define SOUND_RUMBLE      0xE3
+#define SOUND_REVEAL      0x100
+#define SOUND_DEPART      0xD7
+#define FADE_STEPS        8
 
 static const StageFlags flags = {
-	LAYER_BOSS_APPEAR_FLAG, LAYER_BOSS_GONE_FLAG, LAYER_REWARD_FLAG, LAYER_REWARD_TAKEN_FLAG,
+	LAYER_BOSS_APPEAR_FLAG, LAYER_BOSS_GONE_FLAG, LAYER_REWARD_FLAG, LAYER_REWARD_TAKEN_FLAG, LAYER_SUPER_POSE_FLAG, LAYER_SUPER_SEAL_FLAG,
 };
 
 /* The overworld animation facing grid direction d (DIR_*, net_shapes.h). */
@@ -51,7 +62,8 @@ static const Guardian *guardian_faced(int navi) {
 static int guardian_chip(const GuardianStage *g, int *code) {
 	*code = 26;
 	if (guardian_older(g->navi)) return xguardian_chip(g->navi, run.layer_seed * 2654435761u >> 8, code);
-	int chip = navi_chip(g->navi, g->version);
+	/* (a super boss's GigaChip, in its one code: super_boss.h) */
+	int chip = super_boss(g->navi) ? super_chip(g->navi, g->version) : navi_chip(g->navi, g->version);
 	if (chip <= 0) return chip;
 	ChipInfo ci;
 	chip_info(chip, &ci);
@@ -71,6 +83,27 @@ static int guardian_chip(const GuardianStage *g, int *code) {
  * (docs/META.md, Souls in BN5 territory) */
 static const char *reward_power(int navi) {
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
+}
+
+/* What guardian `g`'s data says as it is taken: a Cross's words or BN5's
+ * Soul's, then his battle data the first time; a super boss's own
+ * (super_lines.c) */
+static const char *data_says(const GuardianStage *g) {
+	bool first = !guardian_known(g->navi);
+	if (super_boss(g->navi)) return super_reward_words(g->navi, g->version, first);
+	const char *power = reward_power(g->navi);
+	return first ? guardian_data_words(power) : power;
+}
+
+/* A super boss's staging (docs/BOSSES.md, Super bosses; boss_grand.c):
+ * the theme's fade, BN6's rumble, the white's sound, Bass's going; -1 for
+ * a guardian */
+static void grand_scripts(TextArchive *text, GuardianStage *g) {
+	bool grand = super_boss(g->navi);
+	g->fade = grand ? ta_music_fade(text, FADE_STEPS) : -1;
+	g->rumble = grand ? ta_sound(text, SOUND_RUMBLE) : -1;
+	g->reveal = grand ? ta_sound(text, SOUND_REVEAL) : -1;
+	g->depart = grand ? ta_sound(text, SOUND_DEPART) : -1;
 }
 
 /* The NaviCust's draft after a normal layer's guardian (docs/NAVICUST.md):
@@ -125,7 +158,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* the guardian looks back down the bridge MegaMan comes by */
 	g->face = facing(layer.arena >= 0 ? (layer.arena_dir + 2) & 3 : 1);
 	g->intro = ta_talk(text, guardian_intro(g->navi, g->version, layer.biome), guardian_face(g->navi));
-	g->defeat = ta_talk(text, guardian_defeat(g->navi), guardian_face(g->navi));
+	g->defeat = ta_talk(text, super_boss(g->navi) ? super_defeat(g->navi, g->version) : guardian_defeat(g->navi), guardian_face(g->navi));
 	int code, chip = guardian_chip(g, &code);
 	ChipInfo ci = { 0 };
 	if (chip > 0) chip_info(chip, &ci);
@@ -138,19 +171,37 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	if (run.side_kind == LAYER_NORMAL && !last) draft_make(&draft, g);
 	/* (a first battle with this Navi, in any run: its battle data comes
 	 * with the Guardian Data, and the next briefing reads it) */
-	const char *power = reward_power(g->navi);
-	if (!guardian_known(g->navi)) power = guardian_data_words(power);
-	ScriptsReward reward = { .name = gd->name, .power = power, .chip = chip, .code = code, .chip_name = ci.name, .last = last,
+	ScriptsReward reward = { .name = gd->name, .power = data_says(g), .chip = chip, .code = code, .chip_name = ci.name, .last = last,
 		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
-		.draft = &draft };
+		.draft = &draft, .head = super_boss(g->navi) ? super_reward_head(g->navi) : NULL };
 	g->reward = ta_guardian_reward(text, &reward);
 	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
+	grand_scripts(text, g);
 	for (int f = LAYER_BOSS_GONE_FLAG; f <= LAYER_EXIT_OPEN_FLAG; ++f) flag_clear(f);
+	flag_clear(LAYER_SUPER_SEAL_FLAG);
+	flag_clear(LAYER_SUPER_POSE_FLAG);
+}
+
+/* A super boss's actors (docs/BOSSES.md, Super bosses): Bass's dormant
+ * stone where he stands, then himself, hidden until the white; the
+ * Cybeast's beast; and the data either leaves */
+static void super_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {
+	SuperBody body = super_body(g->navi, g->face);
+	npc_need_sprite(npcs, body.body.list, body.body.index);
+	if (g->navi == SUPER_BASS && npcs->n < 32 && npc_need_sprite(npcs, 7, SEAL_SPRITE))
+		npcs->script[npcs->n++] = npc_seal(g->x, g->y, g->z, &flags);
+	if (npcs->n < 32) npcs->script[npcs->n++] = npc_super(&body, g->x, g->y, g->z, &flags);
+	if (npcs->n < 32)
+		npcs->script[npcs->n++] = npc_guardian_data(g->x, g->y, g->z, MD_ANIM_GUARDIAN, archive, g->reward, &flags);
 }
 
 void guardian_actors(NpcList *npcs, uint32_t archive, const GuardianStage *g) {
+	if (super_boss(g->navi)) {
+		super_actors(npcs, archive, g);
+		return;
+	}
 	NpcBody body = guardian_body(g->navi, g->face);
 	if (npcs->n < 32) npcs->script[npcs->n++] = npc_guardian(&body, g->x, g->y, g->z, &flags);
 	if (npcs->n < 32)

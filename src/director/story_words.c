@@ -14,6 +14,8 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "guest_words.h"
+#include "meta.h"
+#include "rivals.h"
 #include "save.h"
 
 /* The net's version: the Nest rebuilds it, one stronger, each time its
@@ -31,15 +33,44 @@ void beat_said(void) {
 	if (D.beat_cross || D.beat_out) flag_set(RUN_OUT_NAMED_FLAG);
 }
 
+/* Arriving where super boss `navi` waits (docs/BOSSES.md, Super bosses),
+ * in his `version`: before a first battle MegaMan senses him, never names
+ * him (docs/META.md, what MegaMan knows); the Cybeast a growl the beast in
+ * him answers, Bass a dark signal he has felt somewhere before */
+static const char *super_arrival(int navi, int version, bool known) {
+	if (navi == SUPER_CYBEAST)
+		return known ? "@M The bottom again,Lan...|@B GRRRRR...|@M The Cybeast's back. I can feel it.|@L Then we beat it again!"
+			: "@M Lan... This is the bottom of the Net.|@B Grrrr...|@M That growl... The beast in me is answering!|"
+			  "@L Whatever's down here,we're ready!";
+	if (!known)
+		return "@M Whoa... So this is the Secret Area.|@M There's a signal in here... Pure darkness.|@M I've felt it before... But where?|"
+			"@L *gulp* Stay sharp,MegaMan!";
+	if (version == SUPER_BASS_BX) return "@M Bass is here,Lan...|@M But his signal... It's like the Cybeast's!|@L What!? How!?";
+	return "@M He's here,Lan. Bass.|@M I can feel him waiting.|@L Then let's show him how strong we got!";
+}
+
+/* The super boss waiting on this layer where one does (docs/BOSSES.md,
+ * Super bosses): the endless Nest's Cybeast, the Secret Area's Bass; 0 for
+ * none */
+static int super_here(void) {
+	int navi = run.side_kind == LAYER_SECRET && layer.boss_layer ? run.boss_order[BIOME_SECRET]
+		: run.side_kind == LAYER_NORMAL && run.biome == BIOME_NEST && !run_short_nest(run.depth) ? run_guardian(BIOME_NEST) : 0;
+	return super_boss(navi) ? navi : 0;
+}
+
 /* What MegaMan and Lan (and Dad) say on arriving somewhere new: the first
  * layer, a new cycle, the Undernet, the Graveyard, the Nest, the side
- * layers. Empty for the rest. */
+ * layers; where a super boss waits, what MegaMan senses of him. Empty for
+ * the rest. */
 void arrival_words(void) {
 	const char *area = guardian_area_in_text(run.biome, LAYER_NORMAL);
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
+	int super = super_here();
 	D.beat[0] = 0;
 	D.beat_guardian = D.guardian_named = false;
-	if (run.side_kind == LAYER_UNDERNET)
+	if (super)
+		snprintf(D.beat, sizeof D.beat, "%s", super_arrival(super, super_form(super, run.depth), guardian_known(super)));
+	else if (run.side_kind == LAYER_UNDERNET)
 		snprintf(D.beat, sizeof D.beat, "@M A copy of the Undernet...|@M The viruses in here are no joke,Lan.|@L Stay sharp! The exit pad leads back,right?|"
 			"@M Right. Back to the main path!");
 	else if (run.side_kind == LAYER_SECRET)
@@ -153,8 +184,27 @@ const char *mail_words(int navi) {
 	return words;
 }
 
-/* Chaud's call once the Secret Area's guardian is done */
+/* Chaud's call once the Secret Area's guardian is done: after ProtoMan's
+ * copy (and at its first clear, the signal that brings Bass there); after
+ * Bass, who he is (docs/BOSSES.md, Super bosses) */
 const char *secret_call_words(void) {
+	if (run.boss_order[BIOME_SECRET] == SUPER_BASS)
+		return rival(SUPER_BASS)->megaman_won == 1
+			? "@C Lan,it's Chaud.|@C That was Bass. The real one.|@C Officials have chased him for years.|"
+			  "@M He's hunting the Net's strongest copies...|@L Then we'll be the ones to stop him!"
+			: "@C Bass again,Lan?|@C ...Hmph. Not bad.|@C Stay on your guard.";
+	if (profile.marks & MARK_SECRET)
+		return "@C Lan,it's Chaud.|@C That wasn't ProtoMan. He's been in my PET all day.|@C You beat a copy. Watch yourself.|"
+			"@M The Nest can even copy ProtoMan...|@L Then we'd better stay on guard!";
 	return "@C Lan,it's Chaud.|@C That wasn't ProtoMan. He's been in my PET all day.|@C You beat a copy. Watch yourself.|"
-		"@M The Nest can even copy ProtoMan...|@L Then we'd better stay on guard!";
+		"@C And Lan... Officials picked up another signal down there.|@C Not a copy's. Something real.|@M Something... real?";
+}
+
+/* Dad's call once the Cybeast's data is taken: it is deleted, and the Net
+ * rebuilds itself (docs/BOSSES.md, Super bosses) */
+const char *den_call_words(void) {
+	return rival(SUPER_CYBEAST)->megaman_won == 1
+		? "@D Lan,MegaMan! You did it!|@D It's deleted... But the Net!|@D It's rebuilding itself!|@M It copied our battle too,Lan.|"
+		  "@M Next time,it'll be stronger.|@L Then so will we!"
+		: "@D Well done,you two!|@D The Net's rebuilding again...|@L We'll be ready for it!";
 }
