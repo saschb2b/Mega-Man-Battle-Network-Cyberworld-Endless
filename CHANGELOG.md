@@ -30,12 +30,11 @@
   where a reward waits. A run saved before continues with no request.
 - **AsterLand and the Cyber Academy open** (issue #96, the epic #84).
   Central Town's chip shop and Lan's school are places of home now, BN6's
-  own maps as they stand. In AsterLand the clerk stands behind her
+  own maps as they stand. In AsterLand the clerk stands behind his
   counter, BN6's own Chip Trader trades from AsterLand's prizes in the
-  folder's codes, the request board opens BN6's Request BBS (empty for
-  now: the jobs will post there) and the shop's checks read as BN6 has
-  them; the Number Trader is out of order, as its public codes would hand
-  every run BN6's prizes. The Academy's gate leads through the foyer and
+  folder's codes, the request board shows the visit's post, and the
+  shop's checks read as BN6 has them; the Number Trader is out of order,
+  as its public codes would hand every run BN6's prizes. The Academy's gate leads through the foyer and
   both hallways to Lan's class 6-1, where the NetBattle club meets on a
   day without class; the other rooms stay shut. L names the way out, and
   the map's label and the second screen the place. Also: A reads the

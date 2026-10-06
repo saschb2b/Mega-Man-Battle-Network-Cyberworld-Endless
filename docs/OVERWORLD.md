@@ -1,11 +1,16 @@
 # The overworld
 
 How BN6's real world is stored, and how the engine builds the town where
-a run begins (`src/world/`): Central Town or ACDC Town, cut into pieces
-and set out again, or Seaside Town or Green Town as they stand. Lan walks
-to the town's landmark (the blue bird statue, the squirrel statue, the
-mermaid fountain, the knight statue) and jacks MegaMan in; the game's own
-jack-in takes him to the run's first layer.
+a run begins (`src/world/`). Every run's home is Central Town at its
+original width (docs/HOME.md): a run begins in Lan's room, his PC jacks
+MegaMan in to Lan's HP, and after every act Lan comes home to the town,
+its hour on, its people remembering, AsterLand and the Cyber Academy
+open. The planner can also cut Central Town or ACDC Town into pieces and
+set them out again, or take Seaside Town or Green Town as they stand,
+where Lan walks to the town's landmark (the blue bird statue, the
+squirrel statue, the mermaid fountain, the knight statue) and jacks
+MegaMan in: those plans stay for tests (`CYBERWORLD_TOWN_STYLE`, below)
+and later uses.
 
 ## BN6's real world
 
@@ -113,7 +118,10 @@ out, one in four, and the others stand at one another's places
 (`town_folk.c`, from the run's depth, so a CONTINUE finds them where they
 were); the plaza's Mr. Prog calls the Net's news, and Lan's classmate,
 the neighbor, the man from the lab and the gossip by the statue speak of
-the run and the runs (`town_words.c`), the rest of the place. A few
+the run and the runs (`town_words.c`), the rest of the place. The town's
+hour goes on with the run, morning to night (docs/HOME.md, piece 8): a
+tint of its map's picture as it is drawn, kept through its doors' fades,
+the chat's text and box in BN6's colours, the indoors lit as ever. A few
 pace a sidewalk up and back as the game's own walkers do (NPC command
 `0x38` sets a direction, speed and number of steps, `0x39` walks on or
 back; a walker's sprite needs all four of its walks, animations 9-15,

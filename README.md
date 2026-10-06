@@ -46,6 +46,10 @@ around it, one layer at a time, and keeps the run going.
 - **Deeper, harder, around again.** From the surface areas through the
   story's comps, the Undernet and the Graveyard to the Underground, then
   around again, harder.
+- **Home between acts.** After every act MegaMan comes home to Lan's HP,
+  and Lan to Central Town: the day goes on with the run, its people
+  remember it, AsterLand orders any chip the Library holds, and three of
+  them post a request for the act ahead.
 
 <p align="center">
 <img src="docs/clips/guardian.gif" width="480" alt="MegaMan steps into a guardian's arena in Robot Control Comp; the card reads Guardian of Robot Control Comp, BlastMan, The Living Blast">
@@ -466,12 +470,37 @@ old area to stock up in, each once a visit. But while MegaMan goes back,
 the Net keeps copying: every trip moves the Net's clock a notch, and each
 guardian after it has a tenth more HP. R there asks to jack out, back to
 Lan's PC; down the stairs and out of the front door is Central Town,
-Capcom's own, with shops, houses, townsfolk to talk to and signs to read.
+Capcom's own, home between the acts. The day goes on with the run:
+morning as it begins, afternoon after the first act, evening after the
+second, night before the Nest. The town remembers: the plaza's Mr.Prog
+calls the Net's news (the guardian MegaMan just deleted, or how the last
+run ended), Lan's classmate, the neighbor and the man from the lab speak
+of the run, and the crowd stands somewhere new at each visit. AsterLand
+and the Cyber Academy are open. At AsterLand's counter the Order Service
+sells any chip the Library holds, in your folder's codes, one order a
+visit; beside it the SubChip seller stocks the keys the act ahead asks
+for, and its Chip Trader trades as in BN6.
+
+At each visit three people post a request for the act ahead: the
+NetBattler at AsterLand's request board, the NetBattle club in class 6-1
+and the man from the lab in the town. Win battles without a scratch or
+in ten seconds each, search every Mystery Data of a layer, hand over a
+chip of an element from the Pack, or vow to take no Mr.Prog's patch
+until the guardian falls. Lan takes one or none, as BN6's Request BBS
+has it, and the one who asked pays at the next visit. On a second
+screen, the PET at home names the hour, the request held and how far
+along it is, and the ways on.
 
 <p align="center">
 <img src="docs/screenshots/home-pc.png" width="240" alt="Lan at his PC in his room: Jack in! MegaMan, Execute!!">
 <img src="docs/screenshots/home-hp.png" width="240" alt="MegaMan in Lan's HP beside a lit link: Hmm... Humming machines over there.">
 <img src="docs/screenshots/town-central.png" width="240" alt="Lan out of his front door in Central Town, his house's blue roof behind him">
+</p>
+
+<p align="center">
+<img src="docs/screenshots/home-news.png" width="240" alt="Central Town at evening, after act 2: the plaza's Mr.Prog calls the news, HEATMAN'S COPY IS DELETED!">
+<img src="docs/screenshots/home-request.png" width="240" alt="In AsterLand, the NetBattler at the request board: I need a Fire chip. Big NetBattle!">
+<img src="docs/clips/home-visit.gif" width="195" alt="As a New 3DS shows it: Lan crosses Central Town at evening into AsterLand and orders a chip at its counter, each chip's card on the bottom screen">
 </p>
 
 <p align="center">

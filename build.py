@@ -1063,6 +1063,12 @@ SECOND_HERO = (PAGED_7 + '30:,40:UP,0:battle,215:,6:A,24:,6:RIGHT,24:,6:RIGHT,24
                '6:DOWN,12:,6:A,70:')
 # (a run's opening words paged in Lan's room, Lan free by frame 530)
 HOME_PAGED = '40:,' + '4:A,6:,' * 46 + '30:,'
+# (... then down the stairs and out of the front door, by frame 834; into
+# AsterLand, by frame 1066; up to its counter and into the Order Service,
+# 550 frames more)
+HOME_OUT = HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:,'
+HOME_ASTER = HOME_OUT + '0:place -156 -40 7,10:,62:UP+LEFT,160:,'
+HOME_COUNTER = '30:UP+RIGHT,124:UP+LEFT,10:UP+LEFT,6:,6:A,56:,6:A,46:,6:A,46:,6:A,46:,6:A,156:,'
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1089,6 +1095,18 @@ SCREENSHOTS = [
      [(830, 'town-central')], {}),
     ('home-hp', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--input', '600:,' + '6:A,94:,' * 8 + '0:place 68 -40 5,10:,6:UP,90:'],
      [(1500, 'home-hp')], {}),
+    # (home after act 2, issue #92: the plaza's Mr.Prog calls the Net's
+    # news at evening; in AsterLand the request board's offer, and the
+    # clerk's Order Service with the second screen's card; Lan's HP with
+    # the home panel, a request held)
+    ('home-news', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--input', HOME_OUT + '0:place 60 -138 7,10:,4:UP+LEFT,10:,6:A,66:,6:A,66:'],
+     [(1000, 'home-news')], {}),
+    ('home-request', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--input', HOME_ASTER + '0:place -92 -14 7,10:,8:UP+LEFT,20:,' + '6:A,66:,' * 2],
+     [(1262, 'home-request')], {}),
+    ('home-order', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000', '--input', HOME_ASTER + HOME_COUNTER + '6:DOWN,20:,6:DOWN,40:'],
+     [(1680, 'home-order')], {}, '3ds'),
+    ('home-panel', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--setup', 'short,0,0,0', '--dev', 'job=2,jobstate=1', '--input', '600:,' + '6:A,94:,' * 8],
+     [(1395, 'home-panel')], {}, '3ds'),
     # (the areas on their acts' third layers: ProtoMan's duel, and Chaud's
     # call with it, waits on the second)
     ('central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '3', '--seed', '3', '--dev', 'quiet'], [(420, 'central')], {}),
@@ -1409,6 +1427,11 @@ CLIPS = [
     ('intro', ['--scene', 'intro'], {}, None, 1, 380),
     # (0.10.0's: the second screen following the game, as a New 3DS shows it)
     ('two-screens', SECOND_7, {}, SECOND_HERO, 1735, 2410, '3ds'),
+    # (home after act 2, issue #92: Lan crosses Central Town at evening into
+    # AsterLand, up to its counter and into the Order Service, its chips'
+    # cards on the second screen)
+    ('home-visit', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000'], {},
+     HOME_OUT + '0:place -156 30 7,20:,122:UP+LEFT,160:,' + HOME_COUNTER + '6:DOWN,30:,6:DOWN,30:,6:DOWN,60:', 856, 1822, '3ds'),
 ]
 
 
@@ -1418,7 +1441,7 @@ CLIPS = [
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
-               'intro': (None, 15), 'two-screens': (None, 12)}
+               'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12)}
 
 
 def clips(only=None):
