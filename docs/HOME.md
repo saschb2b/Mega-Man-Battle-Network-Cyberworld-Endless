@@ -482,8 +482,10 @@ the map's layers and of the sprites over it times the hour's, a touch
 warm in the afternoon, orange in the evening, a dim blue at night. mGBA's
 picture names each pixel's layer (its top byte), so the chat's text
 (BG0) keeps its colours, and with a chat box open so do the sprites in
-its rows (its frame and the speaker's face). Only the town's own map:
-Lan's house, AsterLand, the Academy and Lan's HP keep BN6's light. The
+its rows (its frame and the speaker's face). Only the town's own map,
+through its doors' fades too (the game is off the map while one fades,
+and a door first flashed daylight), not under the PET's menu: Lan's
+house, AsterLand, the Academy and Lan's HP keep BN6's light. The
 hour is the run's (`home_hour`): morning at its start, then afternoon,
 evening and night before the Nest (the endless net two acts an hour, a
 new morning with each cycle). BN6's rain, snow and wind are left for

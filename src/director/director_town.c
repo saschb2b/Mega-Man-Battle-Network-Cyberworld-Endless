@@ -182,9 +182,13 @@ int home_hour(void) {
 	return acts >= last ? 3 : acts * 3 / last;
 }
 
-/* the town's tint as Lan stands on its map, BN6's own indoors lit as ever */
+/* the town's tint as Lan stands on its map, BN6's own indoors lit as ever:
+ * through a door's fade too, where the game is off the map (a flash of
+ * daylight as Lan stepped into AsterLand, issue #92), but not over the
+ * PET's menu */
 static void town_tint(void) {
-	D.tint = on_map() && map_is(town_info()->group, town_info()->number) ? home_hour() : 0;
+	D.tint = main_mode() == BN6_MODE_GAME && emu_read8(BN6_GAMESTATE) != BN6_SUB_PET && map_is(town_info()->group, town_info()->number) ?
+		home_hour() : 0;
 	D.tint_box = emu_read8(BN6_CHATBOX) != 0;
 }
 
