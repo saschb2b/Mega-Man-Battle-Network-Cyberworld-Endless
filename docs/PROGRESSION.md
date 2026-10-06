@@ -60,7 +60,9 @@ are listed in [Where it is decided](#where-it-is-decided).
   fully.
 - **Growth:** 3 HPMemory (+60 max HP) per guardian, one HPMemory in each Net
   Dealer at `(10 + 2 × depth) × 100` zenny, a Cross from five of the Navis,
-  Beast Out from the Graveyard's guardian. Guardians drop no chip.
+  Beast Out from the Graveyard's guardian (from the first battle with the
+  BeastOut helper, once the endless net's own Nest has fallen: docs/META.md;
+  the acts' bands stay as they are with it). Guardians drop no chip.
 - **MegaMan's start:** the game's own new game. 100 HP and the default
   folder of 30 chips: Cannon ×4, AirShot ×2, Vulcan1 ×3, MiniBomb ×4,
   Sword ×4, WideSwrd ×2, CrakShot ×2, AreaGrab, Atk+10 ×2, Recov10 ×4,

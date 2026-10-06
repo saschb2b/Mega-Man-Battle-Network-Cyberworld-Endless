@@ -41,8 +41,8 @@ around it, one layer at a time, and keeps the run going.
   card names the guardian, the Net Dealer stocks a chip that answers it, and
   MegaMan warns you how it fights.
 - **A run that grows.** A gift to start, Guardian Data (HP, the Navi's chip
-  and its Cross), BeastOut from the Graveyard, and rarer chips the deeper
-  you go.
+  and its Cross), BeastOut from the Graveyard (from the first battle, once
+  you have beaten the endless net), and rarer chips the deeper you go.
 - **Deeper, harder, around again.** From the surface areas through the
   story's comps, the Undernet and the Graveyard to the Underground, then
   around again, harder.
@@ -640,7 +640,9 @@ layer 19 is the Underground. After that the cycle starts again, harder.
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
   screen as in BN6.
 - **BeastOut.** The Graveyard's guardian wakes the Cybeast, and BeastOut
-  joins the Custom screen.
+  joins the Custom screen. Once the endless net's own Nest has fallen in
+  any run, the setup's Help row can bring it from the first battle
+  instead, in either net.
 - **Chips.** Mystery Data, shops and traders draw from the whole chip
   library by rarity: Megas deeper down and, rarely, a Giga. Green Mystery
   Data holds chips, zenny and BugFrags; in deep layers a blue one may hold
@@ -683,7 +685,8 @@ behind is options. From the second run, NEW GAME opens a setup:
 - **Help:** two more HPMemory at the start, a heal on every layer, gentler
   battles, and All *: every chip of the run in *, the wildcard, so any five
   go in a hand and every Program Advance forms from its chips in order.
-  Helped runs count for everything.
+  Once the endless net's own Nest has fallen, a fifth: BeastOut from the
+  first battle. Helped runs count for everything.
 
 Every chip MegaMan holds joins the Library, BN6's own, which every run's
 PET shows whole: a Chip Trader's prize is new to it first, and the summary
