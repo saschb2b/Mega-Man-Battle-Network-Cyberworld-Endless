@@ -84,6 +84,21 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 	return i;
 }
 
+int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int closed_flag, const char *closed) {
+	uint8_t open[] = { 0xEE, 0x00, 24, 0, 0xFB, 0x05, (uint8_t)shop };   /* ts_wait, ts_start_shop */
+	int shut = closed_flag >= 0 && closed ? ta_say(t, face, closed) : -1;
+	int i = ta_script(t);
+	if (shut >= 0) {
+		uint8_t check[] = { 0xEF, 0x00, (uint8_t)closed_flag, (uint8_t)(closed_flag >> 8), (uint8_t)shut, 0xFF };  /* ts_check_flag */
+		ta_bytes(t, check, sizeof check);
+	}
+	bool first = true;
+	ta_pages(t, greeting, face, &first);
+	ta_bytes(t, open, sizeof open);
+	ta_end(t);
+	return i;
+}
+
 int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) {
 	int quiet = ta_say(t, FACE_MEGAMAN, "The signal's quiet now,Lan.");
 	int no = ta_closing(t);

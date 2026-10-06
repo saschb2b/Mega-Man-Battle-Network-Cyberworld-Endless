@@ -49,7 +49,7 @@ static bool dev_switch(const char *t) {
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "clock=", &dev.clock },
-		{ "slowboot=", &guest_dev_slowboot }, { "job=", &dev.job }, { "jobstate=", &dev.job_state },
+		{ "slowboot=", &guest_dev_slowboot }, { "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
 		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }

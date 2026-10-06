@@ -16,6 +16,8 @@
 #include "job_words.h"
 #include "npc.h"
 #include "place_lines.h"
+#include "scripts.h"
+#include "shop.h"
 #include "text.h"
 
 /* BN6's lists, as read before the maps were taken over */
@@ -61,18 +63,26 @@ static void debug_triggers(int group, int number) {
 	area_src_free(&a);
 }
 
+/* one's talk: a shop's keeper's greeting and screen (one order a visit at
+ * the Order Service), an asker's request, or their words (the game's
+ * people of list 5 have their sprite's face less 0x20) */
+static int person_script(TextArchive *t, const PlaceFolk *p) {
+	int face = p->folk.sprite - 0x20, shop = p->shop - 1;
+	if (p->shop) return ta_counter(t, shop, face, p->folk.words, shop == SHOP_ORDER ? HOME_ORDER_FLAG : -1, place_order_closed);
+	return job_script(t, p->asker - 1, face, p->folk.words);
+}
+
 /* the people of map (group, number) (place_lines.c) into `npcs`, their
  * words in a text archive of their own, written where allocation is */
 static void people(int group, int number, NpcList *npcs) {
 	static TextArchive text;
 	ta_begin(&text);
 	int who[MAX_FOLK], script[MAX_FOLK], n = 0;
-	/* (the game's people of list 5 have their sprite's face less 0x20; an
-	 * asker's talk is several scripts, job_words.c) */
+	/* (an asker's talk is several scripts, job_words.c) */
 	for (int i = 0; i < place_nfolk && n < MAX_FOLK; ++i)
 		if (place_folk[i].group == group && place_folk[i].number == number) {
 			who[n] = i;
-			script[n++] = job_script(&text, place_folk[i].asker - 1, place_folk[i].folk.sprite - 0x20, place_folk[i].folk.words);
+			script[n++] = person_script(&text, &place_folk[i]);
 		}
 	uint32_t words = n ? ta_commit(&text) : 0;
 	for (int k = 0; k < n && words && npcs->n < 16; ++k) {

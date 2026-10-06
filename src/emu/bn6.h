@@ -354,6 +354,7 @@
 #define BN6_SHOP_SCROLL       (BN6_SHOP_STATE + 0x18) /* ... the list's scroll, u16: the entry under the cursor is their sum */
 #define BN6_SHOP_DESC         (BN6_SHOP_STATE + 0x1C) /* ... its shop's entry in BN6_SHOP_DESCS, u32: +0 the currency, +8 its stock's offset in the shop data, +12 its entries */
 #define BN6_SHOP_ENTRY        8      /* a stock entry: +0 its kind (BN6_SHOP_KIND_*), +1 the stock, +2 its id u16, +4 a chip's code or a program's colour, +6 the price u16 */
+#define BN6_SHOP_LIST         0x02019A00u /* the screen's list of entries as shown (bn6f sub_8047B88): sorted, the hidden left out */
 #define BN6_SHOP_KIND_ITEM    1      /* BN6_SHOP_ENTRY's kind: a key item (HPMemory 0x70) */
 #define BN6_SHOP_KIND_CHIP    2      /* ... a chip in its code */
 #define BN6_SHOP_KIND_PROGRAM 3      /* ... a NaviCust program, its id program * 4 */
@@ -396,5 +397,4 @@
 #define BN6_SUB_PET           0x18   /* BN6_GAMESTATE: the PET's menu, opened by START on the map (bn6f sub_8005AF4) */
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
-
 #endif

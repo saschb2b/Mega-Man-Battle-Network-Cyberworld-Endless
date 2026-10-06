@@ -246,7 +246,8 @@ that sit out of the older net's battles were named on its first such
 layer; at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
 that one is held and `0x146A` that the held one was settled, which the
 askers' scripts set and the director keeps as each visit's places are
-installed, docs/HOME.md piece 5).
+installed, docs/HOME.md piece 5; `0x146B` that this visit's order was
+made at AsterLand's counter, piece 6).
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 

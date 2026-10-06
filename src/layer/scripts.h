@@ -38,6 +38,10 @@ int ta_duel(TextArchive *t, int flag, int face, const char *terms);
  * (the flag set) and `again` after; `sold_out` instead of both, and no
  * screen, once nothing is left to buy. */
 int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char *again, const char *sold_out, int told_flag);
+/* A counter: `greeting`, then shop `shop`'s screen; while event flag
+ * `closed_flag` is set (-1 never), `closed` instead and no screen (home's
+ * one order a visit). */
+int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int closed_flag, const char *closed);
 
 /* Choices: Yes sets event flag `flag`, which the director acts on. A
  * challenge answers only once; the gate first wants three ScrtData. */

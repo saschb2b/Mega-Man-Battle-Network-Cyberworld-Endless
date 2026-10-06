@@ -27,6 +27,7 @@ typedef struct {
 	int clock;      /* clock=N: the Net's clock at N notches from the run's start (docs/HOME.md: its guardians' HP) */
 	int job;        /* job=K: the run holding a request of kind K (jobs.h), taken; at --scene home one from the act before */
 	int job_state;  /* jobstate=S: ... in state S (2 done, 3 failed) */
+	int zenny;      /* zenny=N: N zenny given as the run starts (BN6's GiveZenny: home's shops, docs/HOME.md piece 6) */
 } DevFlags;
 
 extern DevFlags dev;

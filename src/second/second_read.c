@@ -297,14 +297,16 @@ static void shop_program(int program, int color) {
 }
 
 /* A shop: the entry under its cursor (its kind, id, code, the shop's
- * currency) and what the run holds of it */
+ * currency) and what the run holds of it, from the list as the screen
+ * shows it (BN6_SHOP_LIST: the Order Service's is sorted, and every shop's
+ * leaves out what is not shown) */
 void second_read_shop(void) {
-	uint32_t desc = emu_read32(BN6_SHOP_DESC), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
+	uint32_t desc = emu_read32(BN6_SHOP_DESC);
 	int at = emu_read16(BN6_SHOP_SCROLL) + emu_read16(BN6_SHOP_ROW);
 	S2.sh_kind = 0;
 	*S2.sh_name = 0;
-	if (desc >> 24 != 0x08 || data < BN6_EWRAM || data >= BN6_EWRAM_END || at >= (int)emu_read32(desc + 12)) return;
-	uint32_t e = data + emu_read32(desc + 8) + BN6_SHOP_ENTRY * (uint32_t)at;
+	if (desc >> 24 != 0x08 || at >= (int)emu_read32(desc + 12)) return;
+	uint32_t e = BN6_SHOP_LIST + BN6_SHOP_ENTRY * (uint32_t)at;
 	S2.sh_kind = emu_read8(e);
 	S2.sh_id = emu_read16(e + 2);
 	S2.sh_code = emu_read8(e + 4);

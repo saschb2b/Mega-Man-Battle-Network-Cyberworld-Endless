@@ -28,6 +28,7 @@
 #include "net.h"
 #include "pacing.h"
 #include "run.h"
+#include "shop.h"
 #include "home_places.h"
 #include "lan_house.h"
 #include "town.h"
@@ -160,6 +161,7 @@ bool home_run_start(bool abandoned) {
 	work_out_ways();
 	town_ways(1);   /* (the town's ports are no ways: docs/HOME.md) */
 	if (!home_install()) return false;
+	flag_clear(HOME_ORDER_FLAG);
 	/* R jacks in at his PC; the PET's own Save stays off */
 	flag_clear(BN6_FLAG_NO_JACK);
 	flag_set(BN6_FLAG_NO_PET_SAVE);
@@ -185,6 +187,7 @@ bool home_run_start(bool abandoned) {
 static bool home_arrive(const char *beaten, bool back) {
 	work_out_ways();
 	if (!home_install()) return false;
+	flag_clear(HOME_ORDER_FLAG);   /* (a visit's order: a new visit, a new one; a CONTINUE's rebuild keeps it) */
 	set_down_place();
 	/* the exit's warp (BN6's link departure, as every exit pad plays it)
 	 * to Lan's HP's arrival */

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The home shop** (issue #89, the epic #84). AsterLand's clerk (BN6's
+  own) runs BN6's Order Service: any chip in your Library, in your
+  folder's codes where it comes in them, at twice a Net Dealer's price,
+  one order a visit. The SubChip seller beside him stocks the keys the act
+  ahead needs (Unlockers, RushFood, a WWW-ID) and MiniEnrg, FullEnrg,
+  SneakRun and Untrap. On the second screen, a shop's panel now names the
+  entry under the cursor as the list shows it.
 - **Requests at home** (issue #88, the epic #84). At each visit three
   people post a request for the act ahead: the NetBattler at AsterLand's
   request board (a chip of an element from your Pack, or a vow: no

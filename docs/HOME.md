@@ -416,6 +416,24 @@ once; one order a visit, priced above the net's dealers, so the net's
 stock stays the gamble and home the sure thing. The town's **SubChip
 seller** stands beside it, as BN6 has one in each town.
 
+As built (issue #89): BN6's own clerk (its sprite and face, list 6's
+`0x33`) stands at AsterLand's register and opens BN6's Order Service
+(shop `0x12`): every chip of BN6's order list the Library holds, Standard
+and Mega, each once a run as BN6 has it; the run sets each one's code to
+the folder's where the chip comes in it, and its price to twice a Net
+Dealer's (a common chip 1000 zenny, a Mega 8000: `build.py pacing`), and
+marks the Library's chips owned as BN6 marks a chip it gives (the order
+checks the mark). One order a visit: after it the clerk says so until the
+next visit. The SubChip seller (BN6's, the white-coated man of its SubChip
+shops' window) stands beside him with BN6's Central Town shop (`0x0F`)
+restocked for the run: the keys the act ahead's locks want (Unlockers,
+RushFood, a WWW-ID), then MiniEnrg, FullEnrg, SneakRun and Untrap at BN6's
+prices (its LocEnemy is no use in a run). BN6's In-Stock Chips (shop 4)
+stays out: the Net Dealers are the run's stock. The second screen's shop
+panel reads the list as the screen shows it (sorted, sold-out ones kept
+as BN6 keeps them), so the order's chip under the cursor is the one it
+names.
+
 ### 7. A town that remembers
 
 - **The run**: people speak of the last guardian deleted, the act,
@@ -574,4 +592,4 @@ with Lan's room and PC (#94, built); going back and the Net's clock
 (#95, built); a town that remembers (#87, built); AsterLand and the
 Cyber Academy as places (#96, built); jobs (#88, built), at the BBS, from the townsfolk and the
 classmates, with the objects' comps; the home shop at AsterLand's
-counter; time of day; the second screen; the captures, docs and notes.
+counter (#89, built); time of day; the second screen; the captures, docs and notes.

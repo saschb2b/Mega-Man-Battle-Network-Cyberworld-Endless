@@ -1,6 +1,7 @@
 /* place_lines.h. Who is in home's indoor places on a day without class
- * (docs/HOME.md, piece 10; docs/VOICE.md): AsterLand's clerk behind the
- * counter where BN6 stands its own, a NetBattler at the request board and
+ * (docs/HOME.md, pieces 6 and 10; docs/VOICE.md): AsterLand's clerk,
+ * BN6's own, behind the counter where BN6 stands him, the Order Service's,
+ * and the SubChip seller beside him, a NetBattler at the request board and
  * a shopper at the rare chips; the Academy's NetBattle club in
  * class 6-1, where BN6 stands Lan's classmates, and a first grader on the
  * first floor. Of the game's people in sprite list 5 none of Central
@@ -11,10 +12,15 @@
 #include "academy.h"
 #include "aster_land.h"
 #include "jobs.h"
+#include "shop.h"
 
 const PlaceFolk place_folk[] = {
-	{ ASTER_GROUP, ASTER_LAND, { 28, -70, FACE_SE, 5, 0x33,
-		"Welcome to AsterLand!|Got chips you don't need?|Three in the Chip Trader,one new one out!" }, 10 },
+	/* (BN6's own clerk, its list 6 0x33, list 5 0x53 here: the Order
+	 * Service's window has his face; its SubChip sellers' the man in the
+	 * white coat's, list 5 0x30) */
+	{ ASTER_GROUP, ASTER_LAND, { 28, -70, FACE_SE, 5, 0x53,
+		"Welcome to AsterLand!|Any chip you've had,I can order!|One order a visit,OK?" }, 10, 0, SHOP_ORDER + 1 },
+	{ ASTER_GROUP, ASTER_LAND, { -4, -70, FACE_SE, 5, 0x30, "SubChips! Energy and keys!|Take a look!" }, 10, 0, SHOP_SUBS_HOME + 1 },
 	{ ASTER_GROUP, ASTER_LAND, { -92, -40, FACE_SE, 5, 0x35,
 		"Hmm... The request board's empty.|Doesn't anybody need a NetBattler?" }, 0, JOB_BOARD + 1 },
 	{ ASTER_GROUP, ASTER_LAND, { -20, -34, FACE_NW, 5, 0x40,
@@ -29,3 +35,5 @@ const PlaceFolk place_folk[] = {
 const int place_nfolk = (int)(sizeof place_folk / sizeof *place_folk);
 
 const char *const place_number_trader = "The Number Trader...|There's an \"Out of order\" sign on it.";
+
+const char *const place_order_closed = "That's your order for today!|Come back next time,Lan!";

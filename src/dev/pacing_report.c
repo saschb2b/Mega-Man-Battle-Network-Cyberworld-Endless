@@ -304,6 +304,24 @@ static void jobs_report(FILE *out) {
 	}
 }
 
+/* Home's shops (docs/HOME.md, piece 6): the SubChip seller's stock by act
+ * (the act ahead's keys first), and the Order Service's price beside a
+ * Net Dealer's, by the chips' tiers */
+static void home_shop_report(FILE *out) {
+	static const char *const tiers[] = { "common", "uncommon", "rare", "mega", "legendary" };
+	fprintf(out, "\nHome's shops: the SubChip seller's keys for the act ahead (id x stock at price; beside them BN6's MiniEnrg, FullEnrg, "
+		"SneakRun and Untrap at its prices) by act; an order at twice a Net Dealer's price, one a visit:");
+	for (int t = 0; t < 5; ++t) fprintf(out, " %s %d", tiers[t], 2 * 100 * (5 << t));
+	fprintf(out, "\n");
+	for (int act = 0; act < 7; ++act) {
+		ShopItem items[SHOP_MAX_ITEMS];
+		int n = shop_home_subs(act * 3 + 1, items);
+		fprintf(out, "act %d:", act + 1);
+		for (int i = 0; i < n; ++i) fprintf(out, " %02x x%d at %d", items[i].id, items[i].stock, items[i].price * 100);
+		fprintf(out, "\n");
+	}
+}
+
 /* The acts (a bit each, 0-based) BN6 area `biome` can come in on the first
  * cycle: the four of the surface by their pools (pacing_area_pool), the
  * Undernet's and the Graveyard's */
@@ -376,6 +394,7 @@ int pacing_report_run(const char *path) {
 	flagged += first_cycle_guardians(out) + older_guardians(out);
 	clock_report(out);
 	jobs_report(out);
+	home_shop_report(out);
 	elements_report(out);
 	/* what the Net Dealers answer each act with, per element (every one a
 	 * straight hit; a "+" is over the act's cap, the lightest found) */

@@ -101,6 +101,7 @@ static void dev_pack(void) {
  * folder=ID/N its first N entries; pack=N, dev_pack) */
 void dev_folder(void) {
 	dev_pack();
+	if (dev.zenny > 0) game_call(BN6_GIVE_ZENNY, (uint32_t)dev.zenny, 0);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (dev.folder <= 0 || dev.folder >= 0x200 || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
 	uint8_t e[2] = { (uint8_t)dev.folder, (uint8_t)(dev.folder >> 8 | CHIP_CODE_STAR << 1) };

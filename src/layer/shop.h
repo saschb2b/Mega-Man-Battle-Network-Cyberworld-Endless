@@ -18,7 +18,12 @@ typedef struct {
 
 #define SHOP_DEALER   0   /* shops the layers take over */
 #define SHOP_PROGRAMS 3   /* (its keeper's face made the vendor's: shop_install) */
+#define SHOP_SUBS_HOME 0x0F   /* home's: Central Town's SubChip seller */
+#define SHOP_ORDER    0x12    /* ... and AsterLand's counter, the Order Service */
 #define SHOP_MAX_ITEMS 8
+/* An order made at AsterLand's counter this visit: one a visit (docs/
+ * HOME.md, piece 6), its keeper's script checks it. */
+#define HOME_ORDER_FLAG 0x146B
 
 /* SubChips (item ids, per the initial shops' prices: MiniEnrg 100 zenny,
  * FullEnrg 1000, SneakRun 500, Untrap 800, LocEnemy 7000, Unlocker 4000) */
@@ -54,5 +59,15 @@ bool shop_program_found(int program);
 /* One of the programs the start gift offers, and what it does (in Mr.
  * Prog's capitals; NULL when it had to take any program). */
 const char *shop_pick_gift_program(ShopItem *out);
+
+/* Home's SubChip seller's stock at the visit before layer `depth`: the
+ * keys the act ahead's locks want, then the useful SubChips. */
+int shop_home_subs(int depth, ShopItem out[SHOP_MAX_ITEMS]);
+/* BN6's Order Service as a run has it (docs/HOME.md, piece 6): each
+ * chip's code the folder's where it comes in one, its price twice the Net
+ * Dealers', the Library's chips owned as BN6 marks a chip it gives; and
+ * the copies left to order, -1 before the game has set up its data. */
+int shop_order_install(void);
+int shop_order_left(void);
 
 #endif

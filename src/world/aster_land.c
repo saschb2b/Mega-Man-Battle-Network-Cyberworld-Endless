@@ -3,7 +3,9 @@
  * the wall (its post the run's request, job_words.c: BN6's own Request
  * BBS holds none of its requests in a run), its checks, and
  * BN6's Chip Trader, whose trade screen holds AsterLand's own prizes
- * (docs/ROM_DATA.md, Chip Traders); in from the town's warp 4. Its Number
+ * (docs/ROM_DATA.md, Chip Traders), and home's shops (docs/HOME.md, piece
+ * 6): the counter's Order Service and the SubChip seller beside it; in
+ * from the town's warp 4. Its Number
  * Trader is off: its codes are no secret, and every run would take BN6's
  * prizes from it (docs/HOME.md, piece 10). */
 #include "aster_land.h"
@@ -12,7 +14,10 @@
 
 #include "emu.h"
 #include "indoors.h"
+#include "flags.h"
 #include "mapslot.h"
+#include "run.h"
+#include "shop.h"
 #include "town.h"
 #include "trader.h"
 
@@ -26,6 +31,7 @@
 
 static int numbers[4];     /* the Number Trader's check cells' bounds: x0, y0, x1, y1 */
 static int board[4];       /* ... and the request board's */
+static int orders = -1;    /* the Order Service's copies to order as the visit began */
 
 bool aster_land_install(void) {
 	uint32_t town = indoors_bn6_warps(ASTER_GROUP, 0);
@@ -37,6 +43,12 @@ bool aster_land_install(void) {
 	mapslot_indoors(0);
 	if (!list) return false;
 	trader_home();
+	/* (home's shops: the SubChip seller's stock for the act ahead, the
+	 * Order Service as a run has it; one order a visit, HOME_ORDER_FLAG,
+	 * cleared as a visit begins) */
+	ShopItem subs[SHOP_MAX_ITEMS];
+	shop_install(SHOP_SUBS_HOME, subs, shop_home_subs(run.depth, subs), true);
+	orders = shop_order_install();
 	/* (BN6's Number Trader on no map: its check then reads none, and the
 	 * director says place_lines.c's word there) */
 	emu_write32(NUMBER_TRADER_MAPS, 0xFFFFFFFFu);
@@ -60,4 +72,12 @@ bool aster_land_number_trader(int x, int y) { return in(numbers, x, y); }
 
 bool aster_land_board(int x, int y) { return in(board, x, y); }
 
-void aster_land_frame(void) { indoors_shut(1u << DOOR_OUT); }
+void aster_land_frame(void) {
+	indoors_shut(1u << DOOR_OUT);
+	/* (an order made: the counter's word for the rest of the visit; looked
+	 * for a few times a second, the list being long) */
+	static int tick;
+	if (++tick % 8) return;
+	int left = shop_order_left();
+	if (orders >= 0 && left >= 0 && left < orders) flag_set(HOME_ORDER_FLAG);
+}

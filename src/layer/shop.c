@@ -1,4 +1,5 @@
-/* Layer shops (bn6f shop data; addresses in bn6.h and docs/ROM_DATA.md).
+/* Shops, the layers' and home's (bn6f shop data; addresses in bn6.h and
+ * docs/ROM_DATA.md).
  *
  * Each shop has a 16-byte descriptor (currency, keeper's text, offset into
  * the shop data, entries); the shop data itself lives in EWRAM, copied from
@@ -9,6 +10,7 @@
 
 #include "bn6.h"
 #include "emu.h"
+#include "flags.h"
 #include "game.h"
 #include "data.h"
 #include "loot.h"
@@ -20,7 +22,7 @@
 #include "run.h"
 #include "text.h"
 
-#define ORDER_SHOP 18   /* the Chip Order list: one entry per chip */
+#define ORDER_SHOP SHOP_ORDER   /* the Chip Order list: one entry per chip */
 
 static uint32_t desc(int shop) { return BN6_SHOP_DESCS + (uint32_t)shop * 16; }
 
@@ -414,4 +416,59 @@ int shop_program_stock(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
 		out[n++] = offer[i];
 	}
 	return n;
+}
+
+/* ---- home's (docs/HOME.md, piece 6) ---- */
+
+int shop_home_subs(int depth, ShopItem out[SHOP_MAX_ITEMS]) {
+	/* the keys the act ahead's locks want, then the energy and the rest of
+	 * the useful SubChips, at BN6's prices (LocEnemy, of BN6's own seller
+	 * here, is no use in a run) */
+	static const uint16_t subs[] = { SUB_MINI_ENERGY, SUB_FULL_ENERGY, SUB_SNEAK_RUN, SUB_UNTRAP };
+	int n = add_keys(out, 0, depth);
+	for (size_t k = 0; k < sizeof subs / sizeof *subs && n < SHOP_MAX_ITEMS; ++k)
+		if (find_item(1, subs[k], &out[n])) ++n;
+	return n;
+}
+
+/* the Chip Order list's entry `i`: in the shop data, and in the core's ROM
+ * copy that a CONTINUE copies its codes and prices from again */
+static uint32_t order_entry(int i, bool rom) {
+	uint32_t at = emu_read32(desc(ORDER_SHOP) + 8) + 8u * (uint32_t)i;
+	return rom ? BN6_SHOP_INIT + at : emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA) + at;
+}
+
+int shop_order_install(void) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return -1;
+	int slots = (int)emu_read32(desc(ORDER_SHOP) + 12);
+	for (int i = 0; i < slots; ++i) {
+		ShopItem it;
+		read_item(order_entry(i, true), &it);
+		uint32_t ram = order_entry(i, false);
+		if (it.kind != 2 || !it.stock || emu_read8(ram) != 2 || emu_read16(ram + 2) != it.id) continue;
+		/* in the folder's codes where the chip comes in them, at twice the
+		 * Net Dealers' price: the sure thing, dearer than the gamble */
+		char c = loot_fit_code(it.id, it.code == 26 ? '*' : (char)('A' + it.code), true);
+		uint8_t code = (uint8_t)(c == '*' ? 26 : c - 'A');
+		uint16_t price = (uint16_t)(chip_price(it.id) * 2 / 100);
+		uint8_t e[4] = { code, 0, (uint8_t)price, (uint8_t)(price >> 8) };
+		emu_write(ram + 4, e, sizeof e);
+		emu_write(order_entry(i, true) + 4, e, sizeof e);
+		/* (a chip the Library holds owned as BN6 marks one it gives: the
+		 * order checks the mark, and an unmarked chip's emptied the list) */
+		if (flag_get(BN6_FLAG_LIBRARY + it.id)) emu_write8(marks + it.id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + it.id) ^ BN6_CHIP_KEY_XOR));
+	}
+	return shop_order_left();
+}
+
+int shop_order_left(void) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;
+	int slots = (int)emu_read32(desc(ORDER_SHOP) + 12), left = 0;
+	for (int i = 0; i < slots; ++i) {
+		uint32_t ram = order_entry(i, false);
+		if (emu_read8(ram) == 2) left += emu_read8(ram + 1);
+	}
+	return left;
 }
