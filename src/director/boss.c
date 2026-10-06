@@ -53,6 +53,7 @@ static struct {
 	bool checkpoint;      /* the guardian fell: the run wants saving past it */
 	bool door, door_taken;   /* MegaMan stepped in: the run wants saving at the arena's door (once an approach) */
 	bool there;              /* ... and has stepped up to the guardian */
+	int leg;                 /* ... the eighth his steps' leg keeps (walk_toward), -1 none yet */
 	uint32_t archive;
 	GuardianStage g;
 } B;
@@ -126,21 +127,28 @@ static bool steps_in(void) {
 }
 
 /* The pad keys that walk MegaMan towards world (x, y), 0 once he is within
- * `near` units: UP moves him +X -Y, RIGHT +X +Y, DOWN -X +Y, LEFT -X -Y. */
+ * `near` units: UP moves him +X -Y, RIGHT +X +Y, DOWN -X +Y, LEFT -X -Y. In
+ * straight legs, as BN6's cutscenes walk him: a leg keeps its eighth while
+ * (x, y) still lies ahead along it, and only then turns, and one ended
+ * within twice `near` is there (an eighth picked afresh each frame swung
+ * him between two neighbours, left and right quickly: the owner, on the
+ * Nova). */
 static uint32_t walk_toward(int x, int y, int near) {
 	static const struct { int x, y; uint32_t k; } dirs[8] = {
 		{ 7, -7, KEY_UP }, { 10, 0, KEY_UP | KEY_RIGHT }, { 7, 7, KEY_RIGHT }, { 0, 10, KEY_DOWN | KEY_RIGHT },
 		{ -7, 7, KEY_DOWN }, { -10, 0, KEY_DOWN | KEY_LEFT }, { -7, -7, KEY_LEFT }, { 0, -10, KEY_UP | KEY_LEFT },
 	};
 	int dx = x - (bn6_player_x()), dy = y - (bn6_player_y());
-	if (dx * dx + dy * dy <= near * near) return 0;
-	uint32_t k = 0;
+	long left = (long)dx * dx + (long)dy * dy;
+	if (left <= (long)near * near) return 0;
+	if (B.leg >= 0 && (long)dirs[B.leg].x * dx + (long)dirs[B.leg].y * dy > 0) return dirs[B.leg].k;
+	if (B.leg >= 0 && left <= 4L * near * near) return 0;
 	long best = -1000000;
 	for (int i = 0; i < 8; ++i) {
 		long d = (long)dirs[i].x * dx + (long)dirs[i].y * dy;
-		if (d > best) { best = d; k = dirs[i].k; }
+		if (d > best) { best = d; B.leg = i; }
 	}
-	return k;
+	return dirs[B.leg].k;
 }
 
 static void title_card(void) {
@@ -217,6 +225,7 @@ static void wait_update(void) {
 	run_script(B.g.hush);
 	rival_met(B.g.navi);
 	B.there = false;
+	B.leg = -1;
 	to(B_ENTER);
 }
 
