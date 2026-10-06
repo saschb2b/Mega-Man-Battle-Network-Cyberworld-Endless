@@ -251,7 +251,7 @@ uint32_t guest_navi_record(int xrom, int ai, int version) {
 	return 0;
 }
 
-bool guest_dev_worried;
+bool guest_dev_worried, guest_dev_gem;
 int guest_dev_slowboot;
 int guest_backdrop = -1;
 
@@ -620,6 +620,21 @@ static void boss_cap(const GuestBoss *b) {
  * yellow rings for each area.) */
 #define ENTITIES_AT (BN5_FREE + 0x20)   /* a copied record's entity list, 16 entries and the 0xF0 at most */
 
+/* (dev: a green Mystery Data where the record sets none, its byte 2 0x0F:
+ * there every battle, its find of row 0, on the first panel of the enemies'
+ * side none of its entities takes, `taken` bit y * 8 + x; --dev gem, as
+ * loot_add_gem puts one in BN6's battles) */
+static uint32_t gem_put(uint32_t at, uint32_t taken) {
+	static const uint8_t panels[] = { 0x16, 0x36, 0x26, 0x15, 0x35, 0x25 };
+	for (unsigned p = 0; p < sizeof panels; ++p) {
+		if (taken >> ((panels[p] >> 4) * 8 + (panels[p] & 7)) & 1) continue;
+		const uint8_t e[4] = { BN5_ENTITY_FIND << 4, panels[p], 0x0F, 0 };
+		for (uint32_t j = 0; j < 4; ++j) core->rawWrite8(core, at + j, -1, e[j]);
+		return 1;
+	}
+	return 0;
+}
+
 static uint32_t record_copy(uint32_t record, GuestScale sc) {
 	for (uint32_t i = 0; i < 16; i += 2) {
 		uint16_t v = rd16(record + i);
@@ -631,16 +646,20 @@ static uint32_t record_copy(uint32_t record, GuestScale sc) {
 		wr16(BN5_FREE + i, v);
 	}
 	/* (and its entities, a byte at a time, each virus at its scaled version:
-	 * the copy pointed at them) */
-	if (sc.up <= 0) return BN5_FREE;
+	 * the copy pointed at them; dev: its Mystery Data there every battle) */
+	if (sc.up <= 0 && !guest_dev_gem) return BN5_FREE;
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
-	uint32_t from = rd32(record + 0xC), k = 0;
+	uint32_t from = rd32(record + 0xC), k = 0, taken = 0;
+	bool gem = false;
 	for (; k < 16 && from - 0x08000000u + 4u * k + 4 <= ROM_SIZE && d[from - 0x08000000u + 4u * k] != 0xF0; ++k) {
 		const uint8_t *e = d + (from - 0x08000000u) + 4u * k;
 		int id = e[0] == 0x11 ? version_up(d, e[2] | e[3] << 8, sc) : e[2] | e[3] << 8;
+		if (guest_dev_gem && e[0] >> 4 == BN5_ENTITY_FIND) { id |= 0x0F; gem = true; }
+		taken |= 1u << ((e[1] >> 4 & 3) * 8 + (e[1] & 7));
 		const uint8_t to[4] = { e[0], e[1], (uint8_t)id, (uint8_t)(id >> 8) };
 		for (uint32_t j = 0; j < 4; ++j) core->rawWrite8(core, ENTITIES_AT + 4u * k + j, -1, to[j]);
 	}
+	if (guest_dev_gem && !gem && k < 16) k += gem_put(ENTITIES_AT + 4u * k, taken);
 	core->rawWrite8(core, ENTITIES_AT + 4u * k, -1, 0xF0);
 	core->rawWrite32(core, BN5_FREE + 0xC, -1, ENTITIES_AT);
 	return BN5_FREE;

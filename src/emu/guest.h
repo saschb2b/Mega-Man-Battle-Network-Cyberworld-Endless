@@ -162,6 +162,10 @@ extern int guest_backdrop;
 /* (dev: MegaMan worried through every guest battle, for captures of a
  * DarkChip offered: --dev worried) */
 extern bool guest_dev_worried;
+/* (dev: a green Mystery Data on the enemies' side in every guest battle,
+ * as --dev gem puts one in BN6's: its find, row 0 of BN5_FIND_ROWS where
+ * the record sets none) */
+extern bool guest_dev_gem;
 
 /* DarkChip `k`'s name in BN5 (0-11, ids 187-198), "" without BN5 */
 const char *guest_dark_name(int k);

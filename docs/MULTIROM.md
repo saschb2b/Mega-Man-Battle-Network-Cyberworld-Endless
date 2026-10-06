@@ -184,8 +184,12 @@ the layer's random battles are BN5's own, fought in BN5's engine
   the arrival's words: open from frame 370, the battle at about 640);
   `--talk dark:FRAME` opens the flame of darkness's talk (a middle
   layer: `--run-depth 2`), `--dev darkchips=MASK` starts a run holding
-  DarkChips (bit k BN5's id 187 + k) and `--dev worried` keeps MegaMan
-  worried in guest battles; `--guardian 24` to `29` puts one of BN5's
+  DarkChips (bit k BN5's id 187 + k), `--dev worried` keeps MegaMan
+  worried in guest battles and `--dev gem` sets a green Mystery Data on
+  the enemies' side of every one, as in BN6's (its find of row 0, 1000
+  zenny or a BugFrag; with `onehit` it more often stands to the end: with
+  `quiet,gem,onehit` and the battle step, the first guest battle on ACDC
+  Area found "BugFrag 1" on seeds 1-8); `--guardian 24` to `29` puts one of BN5's
   Navis (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan)
   in every act BN5 dresses (`--net-biome x0 --run-depth 3 --guardian 28`:
   KnightMan at ACDC Area's first act), and `--dev souls=MASK` starts a

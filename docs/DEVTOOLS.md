@@ -292,7 +292,7 @@ Eight more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: `tools/trailer.py` plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
-check it and its reward), `veteran` (a profile that has met seven
+check it and its reward; BN5's battles too, with BN5's own find), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his

@@ -153,7 +153,8 @@
   then "BugFrag 1", and his BugFrags stayed at 0. Both go into the run
   now, BugFrags to your count, and the run log names the find (`reward
   200 zenny find 1 BugFrag`). A find's chip with no namesake in BN6
-  (AirHoc) shows as 200 zenny, as a busting reward's does.
+  (AirHoc) shows as 200 zenny, as a busting reward's does, and `--dev
+  gem` sets a Mystery Data in BN5's battles too.
 
 ## 0.10.0 (2026-10-05)
 

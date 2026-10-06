@@ -100,8 +100,9 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 
 The guest core's ROM copy (BN5's, docs/MULTIROM.md, Guest battles) is
 padded the same way; past BN5's 8 MB, from `0x08800000` (`BN5_FREE`): the
-battle's record copy (`+0x00`), a scaled record's entity list (`+0x20`) and
-the deck's shelf (`+0x100`, the DarkChips'). In BN5's own data it writes the
+battle's record copy (`+0x00`), a copied record's entity list (`+0x20`: its
+viruses scaled, or `--dev gem`'s Mystery Data set in) and the deck's
+shelf (`+0x100`, the DarkChips'). In BN5's own data it writes the
 encounter roll (its answer), the deck's compaction (a jump to the shelf),
 its chips' records, reward rows and battlefield Mystery Data's finds
 (`0x0801D62C`: All *, the rewards' codes and zenny), and for a guardian

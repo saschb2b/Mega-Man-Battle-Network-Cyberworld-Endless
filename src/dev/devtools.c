@@ -73,6 +73,7 @@ void devtools_parse(const char *spec) {
 		}
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
 	}
+	guest_dev_gem = dev.gem;   /* (BN5's battles too: guest.c) */
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
 }
