@@ -67,6 +67,15 @@ SCENES = [
     # (the Net Dealer's word on TenguMan before his arena, its third page)
     ('dealer', ['--scene', 'emu', '--run-depth', '9', '--seed', '1', '--guardian', '8', '--talk', 'shop:430', '--dev', 'quiet',
                 '--input', '500:,4:A,100:,4:A,100:,4:A,160:'], {}, 860),
+    # (issue #98's identity: the same layer's map whole before and after,
+    # its signature the big room the way runs through; build.py's
+    # identity-* screenshots are these layers in the game)
+    ('identity-central', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '2', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('identity-seaside', ['--scene', 'emu', '--net-biome', '1', '--run-depth', '4', '--seed', '2', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('identity-sky', ['--scene', 'emu', '--net-biome', '2', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('identity-green', ['--scene', 'emu', '--net-biome', '3', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('identity-graveyard', ['--scene', 'emu', '--net-biome', '4', '--run-depth', '4', '--seed', '5', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
+    ('identity-undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '4', '--seed', '1', '--dev', 'quiet,mapall', '--input', MAP_HELD], {}, 755),
     # (0.9.0's: a phone held upright, the whole screen at a third of its
     # pixels, a thumb on the D-pad: the picture 960 wide between black bars,
     # then filling the width; the entry's last number shrinks the screen)

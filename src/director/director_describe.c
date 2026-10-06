@@ -19,6 +19,7 @@
 #include "job_words.h"
 #include "net_route.h"
 #include "net_shapes.h"
+#include "net_signature.h"
 #include "netmap.h"
 #include "save.h"
 #include "talk.h"
@@ -201,6 +202,13 @@ static void describe_pos(FILE *f) {
 		fprintf(f, "seen %d floor %d\n", ns, nf);
 		fprintf(f, "exit %d %d\nscripts shop %d heal %d gift %d programs %d\n", D.objs.exit_x, D.objs.exit_y, D.objs.script_of[OBJ_SHOP],
 			D.objs.script_of[OBJ_HEAL], D.objs.script_of[OBJ_GIFT], D.objs.script_of[OBJ_PROGRAMS]);
+		/* (the room the layer is remembered by, its anchor: docs/LEVEL_DESIGN.md, Identity) */
+		if (layer.sig_room >= 0 && layer.sig > SIG_NONE && layer.sig < SIG_COUNT) {
+			const Room *r = &layer.rooms[layer.sig_room];
+			int sx, sy;
+			netmap_world(r->ax, r->ay, &sx, &sy);
+			fprintf(f, "signature %s at panel %d %d (world %d %d), %d x %d\n", sig_names[layer.sig], r->ax, r->ay, sx, sy, r->w, r->h);
+		}
 		/* the floor around him, panels (x across, y down; @ he, # floor) */
 		int px = bn6_player_x(), py = bn6_player_y(), cx, cy;
 		if (netmap_panel(px, py, &cx, &cy)) {

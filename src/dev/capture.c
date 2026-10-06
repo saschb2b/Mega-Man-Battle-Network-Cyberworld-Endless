@@ -24,7 +24,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160]; int place[3], flags[3]; bool placed, flagged, battle; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160]; int place[3], flags[3]; bool placed, flagged, battle, sig; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -57,14 +57,16 @@ static void parse_script(const char *spec) {
 		InputStep *s = &script[script_len];
 		s->frames = atoi(tok);
 		/* (remote play's dev steps too, as "0:place X Y FACE", "0:flags
-		 * FROM TO 1|0" and "0:battle": a scripted capture of a set piece puts
-		 * MegaMan at it, of a battle starts the layer's next; "300:battle"
-		 * waits its 300 frames first) */
+		 * FROM TO 1|0", "0:battle" and "0:sig": a scripted capture of a set
+		 * piece puts MegaMan at it, of a battle starts the layer's next, of
+		 * a layer's signature puts him in it; "300:battle" waits its 300
+		 * frames first) */
 		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
+		else if (colon && !strcmp(colon + 1, "sig")) s->sig = true;
 		else if (colon) parse_buttons(colon + 1, s);
-		if ((s->placed || s->flagged || s->battle) && s->frames > 0 && script_len + 1 < 512) {
+		if ((s->placed || s->flagged || s->battle || s->sig) && s->frames > 0 && script_len + 1 < 512) {
 			script[script_len + 1] = *s;
 			script[script_len + 1].frames = 0;
 			*s = (InputStep){ .frames = s->frames };
@@ -143,6 +145,7 @@ static void script_actions(void) {
 		if (s->dump[0]) emu_debug_dump(s->dump);
 		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
 		if (s->battle && scene_current() == &scene_emu) director_dev_battle();
+		if (s->sig && scene_current() == &scene_emu) director_dev_signature();
 		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
 		if (s->flagged && scene_current() == &scene_emu) {
 			static bool was[FLAG_COUNT];
@@ -176,7 +179,8 @@ static bool remote_open(const char *dir) {
 /* One line: "N BUTTONS" holds them N frames, "shot PATH", "second PATH"
  * (the second screen's picture), "state PATH",
  * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
- * "battle" (the layer's next random battle, director_dev_battle), "quit";
+ * "battle" (the layer's next random battle, director_dev_battle), "sig"
+ * (MegaMan in the layer's signature, director_dev_signature), "quit";
  * items apart by ';'. */
 static void remote_parse(char *line) {
 	script_len = script_pos = 0;
@@ -191,6 +195,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (!strcmp(tok, "battle")) s->battle = true;
+		else if (!strcmp(tok, "sig")) s->sig = true;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
 		else {
 			char buttons[128] = "";

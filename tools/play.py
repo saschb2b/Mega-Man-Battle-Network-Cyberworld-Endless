@@ -25,7 +25,9 @@ Commands, apart by ';':
 Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
 flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map: on a layer whose battles
-are an older net's, a guest battle), dump NAME (the video memory into
+are an older net's, a guest battle), sig (MegaMan in the layer's
+signature, the room it is remembered by: docs/LEVEL_DESIGN.md,
+Identity), dump NAME (the video memory into
 NAME/NAMEv.bin, p, i and o.bin in the session's folder, for
 tools/romlab/labtrace.py). NAME/bin.pin keeps the session's
 build across starts.
@@ -55,7 +57,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'dump', 'second')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'sig', 'dump', 'second')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -99,10 +101,12 @@ def steps(commands):
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
             elif op == 'battle':
                 out.append(('battle',))
+            elif op == 'sig':
+                out.append(('sig',))
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, sig, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -276,8 +280,8 @@ def cmd_do(name, rest):
             items.append(f'place {s[1]} {s[2]} {s[3]}')
         elif s[0] == 'flags':
             items.append(f'flags {s[1]} {s[2]} {s[3]}')
-        elif s[0] == 'battle':
-            items.append('battle')
+        elif s[0] in ('battle', 'sig'):
+            items.append(s[0])
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
             items.append(f'second {seconds[-1]}')

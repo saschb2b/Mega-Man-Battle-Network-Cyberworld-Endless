@@ -242,7 +242,7 @@ start (as on a phone; with `--size` a phone's screen and `--dpi N` its density),
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,
 undernet, gate, navigate for a Navi gate, vault, duel for ProtoMan's terms, official for an official gate, trader and bugtrader for a Chip or BugFrag Trader; intro, defeat, reward for the guardian; status for L; rumor for the layer's whisper (rumor_lines.c); dark for a flame of darkness (docs/META.md);
 fragment for MegaMan's words at a ScrtData; bugfrags gives 50 BugFrags, keys an Unlocker, rushfood three RushFood, wwwid a WWW-ID, zenny 10000 zenny, regup a RegUP3; guest a battle in BN5's engine at once on its territory, docs/MULTIROM.md). `--input "FRAMES:BUTTONS,..."` scripts the
-buttons (`UP+RIGHT`, `A`; play.py's dev steps too, `0:place X Y FACE`, `0:flags FROM TO 1` and `0:battle`, the layer's next random battle as soon as MegaMan is free on its map, BN5's on its territory; `300:battle` waits its 300 frames first), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
+buttons (`UP+RIGHT`, `A`; play.py's dev steps too, `0:place X Y FACE`, `0:flags FROM TO 1`, `0:sig` (MegaMan in the layer's signature, docs/LEVEL_DESIGN.md, Identity) and `0:battle`, the layer's next random battle as soon as MegaMan is free on its map, BN5's on its territory; `300:battle` waits its 300 frames first), `--taps "FRAME:X,Y[>X2,Y2];..."` fingers at screen pixels (a tap, or a drag over 20 frames: the touch controls, their menu and editor), `--shot FRAME:PATH,...` and `--shot-range A:B:PREFIX`
 save frames (the canvas; `--screen-shot FRAME:PATH,...` the whole screen, the touch controls on it; `--second-shot FRAME:PATH,...` the second screen, the 3DS's bottom one with its panel, at `--second-size WxH` an Android display's, and `--second-shot-range A:B:PREFIX` its frames as `--shot-range` the picture's), and `--sheet CAT:IDX:ANIM[:PAL]:PATH` or `--sheet
 @CAT:FIRST:COUNT:PATH` draw sprites. Environment variables reach the image
 only when `build.py` lists them (`CYBERWORLD_EMU_DEBUG`, `CYBERWORLD_AUTOPILOT`
@@ -259,7 +259,8 @@ player's: `place X Y FACING` puts MegaMan somewhere, `flags FROM TO 1`
 sets a block of event flags and `flags FROM TO 0` puts them back,
 `battle` starts the layer's next random battle once he is free on its
 map (a guest battle on BN5 territory; the state then says `battle (the
-older net's)`), `second` saves the second screen's picture beside the
+older net's)`), `sig` puts MegaMan in the layer's signature (the state
+names it and where it lies), `second` saves the second screen's picture beside the
 top one's, and `dump NAME` the video memory in romlab's format for
 `tools/romlab/labtrace.py`.
 
