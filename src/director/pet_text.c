@@ -486,6 +486,11 @@ static void install_mails(void) {
 	if (emu_read32(BN6_MAIL_BODY_PTR) == BN6_MAIL_BODY_BUF) emu_write32(BN6_MAIL_BODY_PTR, BODIES_AT);
 }
 
+int pet_mail_face(int m) {
+	if (m == MAIL_BBS) return FACE_NONE;
+	return (m >= MAIL_REPORT && m <= MAIL_CODES) || mail_of(m) ? FACE_DAD : FACE_NONE;
+}
+
 /* The game's own giving of mail `m` (bn6f addMail_802f238), done here:
  * received and unread, first in the list of 128, the count one more. */
 static bool mail_deliver(int m) {

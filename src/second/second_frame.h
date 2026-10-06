@@ -31,6 +31,11 @@ void second_row(int x, int y, int w, const char *name, const char *value);
 #define SECOND_ROW_H 18
 /* A dark slot, BN6's for a value, w x h from (x, y) */
 void second_slot(int x, int y, int w, int h);
+/* BN6's three light stripes after a screen's name, slanting up, from
+ * (x, y): SECOND_STRIPES_W wide, SECOND_STRIPES_H tall */
+#define SECOND_STRIPES_W 19
+#define SECOND_STRIPES_H 12
+void second_stripes(int x, int y);
 /* The frame in w x h: the header with `title` on its left (`slide` pixels
  * short of its place, as it slides in) and the place on its right, the
  * strip of HP, Zenny and BugFrags under it; the body left for the panel */

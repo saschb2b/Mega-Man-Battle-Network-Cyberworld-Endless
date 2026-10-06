@@ -12,6 +12,9 @@
  * and power beside it, its text under them; `e` chip | code << 9 */
 #define SECOND_CARD_H (48 * 2 + 4)
 void second_chip_card(uint16_t e, int x, int y, int w);
+/* ... the Library's: chip `chip` with the codes it comes in (its record's),
+ * or for 0 a number never seen, BN6's "??" and a blank card */
+void second_library_card(int chip, int x, int y, int w);
 /* A program's shape on its own 7 x 7 grid in its colour, from (x, y),
  * SECOND_SHAPE_W square */
 #define SECOND_SHAPE_CELL 8

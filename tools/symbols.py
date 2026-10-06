@@ -6,8 +6,9 @@ that mGBA's and no$gba's debuggers load, and the same symbols as JSON and
 CSV.
 
 Read from what the engine already keeps, so the files follow it:
-src/emu/bn6.h and bn5.h (RAM and code addresses, the fields of the game's
-structures, event flags and values, each with its comment), the ROM
+src/emu/bn6.h (with the PET's bn6_pet.h, which it includes) and bn5.h
+(RAM and code addresses, the fields of the game's structures, event
+flags and values, each with its comment), the ROM
 offsets of RomLayout and XRomLayout in src/core/rom.c (rom.h's comments
 say what each is) and docs/ROM_DATA.md (each table: where, how it was
 found, how to verify it). Needs no ROM.
@@ -108,7 +109,8 @@ def hx(v, digits=8):
 def header_items(path):
     """bn6.h's or bn5.h's defines and enumerators, in order: name, value text,
     its own comment (None), its line, the block comment over its run of
-    defines (a run ends at a blank line), and the run before it."""
+    defines (a run ends at a blank line), and the run before it; those of
+    a header of the game's it includes where it does (bn6.h's bn6_pet.h)."""
     lines = read(path).split('\n')
     items, run, block = [], [], None
     i = 0
@@ -116,6 +118,9 @@ def header_items(path):
         line = lines[i].strip()
         no = i + 1
         if not line:
+            run, block = [], None
+        elif re.match(r'#include "bn[56]_\w+\.h"', line):
+            items += header_items(os.path.join(os.path.dirname(path), line.split('"')[1]))
             run, block = [], None
         elif line.startswith('/*'):
             text = line

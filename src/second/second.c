@@ -2,8 +2,9 @@
  * (docs/ROM_DATA.md, the second screen's contexts), and the panel drawn
  * for it in the PET's frame (issue #72): the map on a layer, as Operate
  * Shooting Star keeps it up, the folder, the battle, the NaviCustomizer,
- * MegaMan's status, the Library, and the PET at home in the town and on
- * the PET's other screens; second_read.c reads each one's facts. */
+ * MegaMan's status, the Library, a mail's sender, and the PET at home in
+ * the town and on the PET's other screens; second_read.c reads each one's
+ * facts. */
 #include "second.h"
 
 #include <stdio.h>
@@ -20,6 +21,7 @@
 #include "second_folder.h"
 #include "second_frame.h"
 #include "second_home.h"
+#include "second_mail.h"
 #include "second_navicust.h"
 #include "second_pet.h"
 #include "second_read.h"
@@ -29,7 +31,7 @@
 SecondState S2;
 
 /* What the second screen draws: a panel, which several screens may share */
-typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY, PANEL_SHOP, PANEL_TRADER } Panel;
+typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY, PANEL_MAIL, PANEL_SHOP, PANEL_TRADER } Panel;
 static Panel panel;
 static int panel_since;
 
@@ -79,9 +81,10 @@ static Panel panel_for(SecondContext c) {
 	case SECOND_NAVICUST: return PANEL_NAVICUST;
 	case SECOND_STATUS: return PANEL_STATUS;
 	case SECOND_LIBRARY: return PANEL_LIBRARY;
+	case SECOND_MAIL: return PANEL_MAIL;
 	case SECOND_SHOP: return PANEL_SHOP;
 	case SECOND_TRADER: return PANEL_TRADER;
-	case SECOND_PET: case SECOND_MAIL: case SECOND_KEYITEM: case SECOND_SUBCHIP: case SECOND_COMM: case SECOND_SAVE: return PANEL_HOME;
+	case SECOND_PET: case SECOND_KEYITEM: case SECOND_SUBCHIP: case SECOND_COMM: case SECOND_SAVE: return PANEL_HOME;
 	case SECOND_DARK: return PANEL_DARK;
 	/* (an older net's battle runs in BN5's memory: the map then) */
 	case SECOND_BATTLE: if (!guest_active()) return PANEL_BATTLE; break;
@@ -107,20 +110,24 @@ void second_update(void) {
 	if (p == PANEL_NAVICUST) second_read_navicust();
 	if (p == PANEL_HOME) second_read_home();
 	if (p == PANEL_STATUS) second_read_status();
+	if (p == PANEL_LIBRARY) second_read_library();
+	if (p == PANEL_MAIL) second_read_mail();
 	if (p == PANEL_SHOP) second_read_shop();
 	if (p == PANEL_TRADER) second_read_trader();
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
-	/* (a new panel at once, its title sliding in over two draws) */
-	if (panel_since < 2) platform_second_screen_soon();
+	/* (a new panel at once, its title sliding in over two draws; the
+	 * PET's home at once too as the PET's menu opens or shuts over it in
+	 * the town, its banner with it) */
+	if (panel_since < 2 || (p == PANEL_HOME && S2.since < 2)) platform_second_screen_soon();
 }
 
 /* The frame's name for the panel: the PET's screen's where the PET at
  * home stands in for it */
 static const char *panel_title(void) {
 	static const char *const title[] = { [PANEL_MAP] = "NET", [PANEL_FOLDER] = "FOLDER", [PANEL_BATTLE] = "BATTLE", [PANEL_NAVICUST] = "NAVICUST",
-		[PANEL_HOME] = "PET", [PANEL_STATUS] = "MEGAMAN", [PANEL_LIBRARY] = "LIBRARY", [PANEL_SHOP] = "SHOP", [PANEL_TRADER] = "TRADER" };
+		[PANEL_HOME] = "PET", [PANEL_STATUS] = "MEGAMAN", [PANEL_LIBRARY] = "LIBRARY", [PANEL_MAIL] = "E-MAIL", [PANEL_SHOP] = "SHOP", [PANEL_TRADER] = "TRADER" };
 	switch (S2.context) {
 	case SECOND_EDIT: return "FOLDER EDIT";
 	case SECOND_MAIL: return "E-MAIL";
@@ -178,6 +185,7 @@ bool second_draw(int w, int h) {
 	else if (panel == PANEL_HOME) second_home_draw(body);
 	else if (panel == PANEL_STATUS) second_status_draw(body);
 	else if (panel == PANEL_LIBRARY) second_library_draw(body);
+	else if (panel == PANEL_MAIL) second_mail_draw(body);
 	else if (panel == PANEL_SHOP) second_shop_draw(body);
 	else if (panel == PANEL_TRADER) second_trader_draw(body);
 	else director_draw_layer_map(body.x, body.y, body.w, body.h);

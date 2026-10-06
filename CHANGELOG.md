@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **The Library's card on the second screen** (issue #83). In the PET's
+  Library the second screen shows the chip under the cursor as the Custom
+  screen's card: its picture twice as large, its element, power and
+  text, the codes it comes in (BN6's Library leaves them out), and how
+  many copies the run holds in the folder and the Pack. A number never
+  seen stays BN6's "??" with a blank card, and the P.A. Memo shows the
+  Library's counts alone. Beside it, the Library's classes go two to a
+  line under BN6's own tab names (StdChip, MegaChip, GigaChip).
+- **A mail's sender on the second screen** (issue #83). In E-Mail the
+  second screen shows the mail under the cursor, or open, by its sender,
+  as BN5 DS reads a mail with its sender's face: Dad's face from the ROM
+  and his name for the lab's mails and each guardian's (the BBS, a
+  board, by its name alone), the subject, and how many of the whole
+  list's mails are new (the top screen shows four at a time).
+- **ACCESSING while the PET's menu is open** (issue #83). As BN5 DS dims
+  its field while its PET menu is open, the second screen's PET at home
+  lies dimmed under a still band, ACCESSING, in the PET's own green with
+  BN6's three stripes, in the town and on the net alike; as the menu
+  shuts, the home or the net's map is back at once.
 - **Anonymous statistics, asked for once** (issue #104). At its first
   start the game asks, in the PET's panel over the title, whether it may
   send anonymous play statistics; the cursor starts on No, B and Escape

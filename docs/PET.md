@@ -58,6 +58,11 @@ lives in the game's memory: a new run is given every guardian's at its
 first layer, without a word; a guardian battled for the first time mails
 his on the next layer, and MegaMan says so ("Mail from Dad, Lan!").
 
+On a second screen (the 3DS's bottom one, an Android handheld's second
+display) the mail under the cursor, or open, shows by its sender as BN5
+DS reads a mail: Dad's face and name, the BBS by its name alone, with
+the subject and how many of the list's mails are new (issue #83).
+
 ## KeyItem: what the profile holds
 
 BN6's list shows the run's items (ScrtData, with a description of our own:

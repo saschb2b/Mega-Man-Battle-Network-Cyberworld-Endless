@@ -82,26 +82,26 @@ how to verify it.
 | Code (routines, hooks, instructions) | 29 | 2 |
 | ROM data (tables, text, literals) | 93 | 22 |
 | ROM, code or data not told | 89 | 27 |
-| RAM (variables, structures) | 54 | 21 |
+| RAM (variables, structures) | 56 | 21 |
 | I/O registers | 3 | 0 |
 | Fields of structures | 105 | 27 |
 | Event flags | 22 | 3 |
 | Values of fields | 40 | 13 |
-| Constants, sizes and counts | 64 | 25 |
-| All | 499 | 140 |
+| Constants, sizes and counts | 79 | 25 |
+| All | 516 | 140 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| PET, mail and key items | 40 | 1 |
+| PET, mail and key items | 47 | 1 |
 | Shops and traders | 31 | 0 |
 | NaviCust | 17 | 0 |
-| Chips and folders | 69 | 12 |
+| Chips and folders | 78 | 12 |
 | Battle | 102 | 91 |
 | Text and fonts | 26 | 1 |
 | Sound | 8 | 2 |
 | Maps and the overworld | 111 | 15 |
 | Events and progress | 25 | 8 |
-| Engine core | 70 | 10 |
+| Engine core | 71 | 10 |
 
 <!-- end of what tools/symbols.py writes -->
 
@@ -274,13 +274,14 @@ starts and in which instruction set.
 
 ## Where our own symbols come from, and how each is verified
 
-- `src/emu/bn6.h` and `src/emu/bn5.h`: every name the engine uses for the
-  game, with its comment as its description. A field defined as
-  `(BASE + offset)` is a field of BASE; one named by its offset alone
-  belongs to its family's structure (`tools/symbols.py`, `FAMILIES`); a
-  define whose comment opens with another's name and a colon is a value of
-  that one (`BN6_PANEL_HOLE`: `BN6_PANEL_TYPE: a hole`); event flags are
-  the `_FLAG_` names.
+- `src/emu/bn6.h` (with `bn6_pet.h`, the PET's, which it includes) and
+  `src/emu/bn5.h`: every name the engine uses for the game, with its
+  comment as its description. A field defined as `(BASE + offset)` is a
+  field of BASE; one named by its offset alone belongs to its family's
+  structure (`tools/symbols.py`, `FAMILIES`); a define whose comment opens
+  with another's name and a colon is a value of that one
+  (`BN6_PANEL_HOLE`: `BN6_PANEL_TYPE: a hole`); event flags are the
+  `_FLAG_` names.
 - `src/core/rom.c`: the ROM offsets of `RomLayout` (BN6) and `XRomLayout`
   (BN5), described by `src/core/rom.h`'s comments.
 - `docs/ROM_DATA.md`: the addresses its rows give that the headers and the

@@ -159,20 +159,20 @@ static const char *glyph(uint8_t c) {
 	return "";
 }
 
+void rom_text_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) {
+	size_t o = 0;
+	for (size_t i = 0; i < n && s[i] < 0xE5; ++i)
+		for (const char *g = glyph(s[i]); *g && o + 1 < outlen; ++g) out[o++] = *g;
+	if (outlen) out[o] = 0;
+}
+
 /* Entry `index` of the text archive at offset `archive` of ROM `data`
  * (ROM_SIZE bytes), in ASCII: BN5 spells its text as BN6 does. */
 static void text_of(const uint8_t *data, uint32_t archive, int index, char *out, size_t outlen) {
-	size_t o = 0;
-	uint32_t at = archive + 2u * (uint32_t)index;
-	if (at + 2 <= ROM_SIZE) {
-		uint32_t p = archive + (uint32_t)(data[at] | data[at + 1] << 8);
-		for (uint32_t i = 0; i < 64 && p + i < ROM_SIZE; ++i) {
-			uint8_t c = data[p + i];
-			if (c >= 0xE5) break;
-			for (const char *g = glyph(c); *g && o + 1 < outlen; ++g) out[o++] = *g;
-		}
-	}
-	out[o] = 0;
+	uint32_t at = archive + 2u * (uint32_t)index, p = ROM_SIZE;
+	if (at + 2 <= ROM_SIZE) p = archive + (uint32_t)(data[at] | data[at + 1] << 8);
+	size_t n = p < ROM_SIZE ? ROM_SIZE - p : 0;
+	rom_text_bytes(data + (p < ROM_SIZE ? p : 0), n < 64 ? n : 64, out, outlen);
 }
 
 void rom_text(uint32_t archive, int index, char *out, size_t outlen) { text_of(R.data, archive, index, out, outlen); }

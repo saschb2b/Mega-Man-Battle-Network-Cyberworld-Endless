@@ -14,10 +14,13 @@
 #include "guardians.h"
 #include "home_places.h"
 #include "navicust.h"
+#include "pet_text.h"
 #include "powers.h"
+#include "rom.h"
 #include "run.h"
 #include "second_state.h"
 #include "second_text.h"
+#include "text.h"
 #include "town.h"
 
 /* The Pack's chips (chip | code << 9) and their copies, up to `most`:
@@ -250,6 +253,84 @@ void second_read_status(void) {
 		p += k;
 		left -= (size_t)k;
 	}
+}
+
+/* The PET screen's state, and whether it is set up: on the way from the
+ * menu (half a second, its fade) it is zeroes but for its screen */
+static uint32_t pet_screen(void) {
+	uint32_t m = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU);
+	S2.pet_ready = emu_read8(m + BN6_SUBMENU_STATE) != 0;
+	return m;
+}
+
+/* the Pack's copies of `chip` in any code, from the pack as it was read
+ * last; `fresh` reads it again (314 chips' counts) */
+static int pack_copies(int chip, bool fresh) {
+	static uint16_t pack[400];
+	static uint8_t count[400];
+	static int n;
+	if (fresh) n = pack_now(pack, count, 400, false);
+	int copies = 0;
+	for (int i = 0; i < n; ++i) copies += (pack[i] & 0x1FF) == chip ? count[i] : 0;
+	return copies;
+}
+
+/* The Library: the chip under its cursor in the tab shown (none in the
+ * P.A. Memo, whose entries are Program Advances), or a StdChip number
+ * never seen; and the chip's copies in the folder and the pack, in any
+ * code (the pack read as the Library opens: it does not change there) */
+void second_read_library(void) {
+	uint32_t m = pet_screen();
+	int tab = emu_read8(m + BN6_LIBRARY_TAB);
+	uint32_t t = m + (uint32_t)tab * BN6_LIBRARY_TAB_SIZE;
+	int at = emu_read16(t + BN6_LIBRARY_ROW) + emu_read16(t + BN6_LIBRARY_SCROLL);
+	bool listed = S2.pet_ready && tab < BN6_LIBRARY_TABS && at < emu_read16(t + BN6_LIBRARY_COUNT);
+	int chip = listed ? emu_read16(BN6_LIBRARY_LISTS + (uint32_t)tab * BN6_LIBRARY_LIST_SIZE + 4u * (uint32_t)at) : 0;
+	S2.lib_chip = chip < BN6_LIBRARY_PA ? chip : 0;
+	S2.lib_unseen = listed && tab == 0 && !chip;
+	S2.lib_pack = pack_copies(S2.lib_chip, S2.since < 2);
+	S2.lib_folder = 0;
+	if (!S2.lib_chip) return;
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	director_folder_now(folder);
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) S2.lib_folder += (folder[i] & 0x1FF) == S2.lib_chip;
+}
+
+/* Script `i` of the text archive at bus address `a` (u16 offsets, then
+ * the scripts) in ASCII, "" past its scripts: E-Mail's, the run's in the
+ * free space or BN6's unpacked into memory */
+static void bus_text(uint32_t a, int i, char *out, size_t n) {
+	uint8_t s[24];
+	*out = 0;
+	bool mapped = (a >= BN6_EWRAM && a < BN6_EWRAM_END) || a >> 24 == 0x08;
+	if (!mapped || i < 0 || i >= emu_read16(a) / 2) return;
+	uint32_t p = a + emu_read16(a + 2u * (uint32_t)i);
+	for (size_t k = 0; k < sizeof s; ++k) s[k] = emu_read8(p + (uint32_t)k);
+	rom_text_bytes(s, sizeof s, out, n);
+}
+
+/* the mail of E-Mail's list's entry `i` */
+static int mail_at(int i) { return emu_read16(BN6_MAIL_ENTRIES + BN6_MAIL_ENTRY * (uint32_t)i + BN6_MAIL_ID); }
+
+/* E-Mail: the mail under the cursor (or open: the cursor stays on it), its
+ * sender and subject as the list writes them (scripts 2n and 2n + 1 of
+ * the archive it reads), its sender's face; and how many of the list's
+ * mails are unread (BN6 reads a mail as its box shuts) */
+void second_read_mail(void) {
+	uint32_t m = pet_screen();
+	int shown = S2.pet_ready ? emu_read16(m + BN6_MAIL_SHOWN) : 0;
+	int at = emu_read16(m + BN6_MAIL_ROW) + emu_read16(m + BN6_MAIL_SCROLL);
+	S2.mail_shown = shown <= BN6_MAIL_MAX ? shown : 0;
+	S2.mail_unread = 0;
+	for (int i = 0; i < S2.mail_shown; ++i) S2.mail_unread += flag_get(BN6_FLAG_MAIL_NEW + mail_at(i));
+	S2.mail_id = at < S2.mail_shown ? mail_at(at) : -1;
+	*S2.mail_from = *S2.mail_subject = 0;
+	S2.mail_face = FACE_NONE;
+	if (S2.mail_id < 0) return;
+	uint32_t a = emu_read32(BN6_MAIL_TEXT_PTR);
+	bus_text(a, 2 * S2.mail_id, S2.mail_from, sizeof S2.mail_from);
+	bus_text(a, 2 * S2.mail_id + 1, S2.mail_subject, sizeof S2.mail_subject);
+	S2.mail_face = pet_mail_face(S2.mail_id);
 }
 
 /* a key item's count, as the PET holds it */

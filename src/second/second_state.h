@@ -62,6 +62,22 @@ typedef struct {
 	/* MegaMan's status (issue #77): his max HP and its base, the programs on the board */
 	int st_max_hp, st_base_hp;
 	char st_programs[128];
+	/* the PET screen set up (BN6_SUBMENU_STATE): the Library's and E-Mail's
+	 * panels draw from its state once it is, their body empty before */
+	bool pet_ready;
+	/* the Library (issue #83): the chip under its cursor, 0 none (a P.A.,
+	 * or a tab with none); a StdChip number never seen ("??"); the chip's
+	 * copies in the folder and the pack, in any code */
+	int lib_chip;
+	bool lib_unseen;
+	int lib_folder, lib_pack;
+	/* E-Mail (issue #83): the mail under the cursor, or open (-1 none): its
+	 * sender and subject as the list writes them, its sender's face
+	 * (FACE_NONE none); the list's mails and those unread */
+	int mail_id;
+	char mail_from[16], mail_subject[24];
+	int mail_face;
+	int mail_shown, mail_unread;
 	int hp, max_hp;
 	unsigned zenny, bugfrags;
 	int depth;                    /* the run's layer */
