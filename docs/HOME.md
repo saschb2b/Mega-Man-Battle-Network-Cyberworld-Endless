@@ -432,7 +432,11 @@ Mr.Prog's patch asks first ("Patch up anyway?", on No). A vow's reminder
 waits for the act's card and arrival words, which it had ended unseen.
 When a run ends holding a request, its asker says so at the next run's
 first visit (the profile's `last_job`), and L in the town names, once a
-visit, the requests posted and an order AsterLand can still make.
+visit, the requests posted and an order AsterLand can still make. Home
+after an act, the PET's Save saves where Lan stands, as the HP's arrival
+does, and CONTINUE goes on from there (a playtester's purchase and
+request in the town were left unsaved, under "Saves begin on layer 1",
+session 70).
 
 ### 6. The home shop
 
@@ -449,11 +453,14 @@ and Mega, each once a run as BN6 has it; the run sets each one's code to
 the folder's where the chip comes in it, and its price to twice a Net
 Dealer's (a common chip 1000 zenny, a Mega 8000: `build.py pacing`), and
 marks the Library's chips owned as BN6 marks a chip it gives (the order
-checks the mark). A at the counter's front reaches the keeper behind it
-from 14 units either side of him (BN6's own reach answered from 4, and a
-playtester faced the counter from four places and got the showcase's
-text, session 69; `indoors_counter`), and the shopper stands at the NEW
-case, out of the SubChip seller's way. One order a visit: after it the clerk says so until the
+checks the mark). A facing the counter reaches the keeper behind it from
+16 units either side of him and from a step before its front, where the
+isometric view shows the counter close (BN6's own reach answered from 4:
+a playtester faced the counter from four places and got the showcase's
+text, session 69, and from a step before it nothing, session 70;
+`indoors_counter`), L in AsterLand says where orders and SubChips are,
+and the shopper stands at the NEW case, out of the SubChip seller's way.
+One order a visit: after it the clerk says so until the
 next visit. The SubChip seller (BN6's, the white-coated man of its SubChip
 shops' window) stands beside him with BN6's Central Town shop (`0x0F`)
 restocked for the run: the keys the act ahead's locks want (Unlockers,

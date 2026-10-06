@@ -317,6 +317,14 @@ static const char *prize_where(int k, int *lock) {
 	return NULL;
 }
 
+/* The map's violet marks named in L's words being built: the second is
+ * "another" (the flame's and a cube's were each "the violet mark on the
+ * map" in one briefing, session 70) */
+static int violet_named;
+static const char *violet_mark(void) {
+	return violet_named++ ? "@M Another violet mark on the map.|" : "@M It's the violet mark on the map.|";
+}
+
 /* Where lock `lock` stands while it is shut, for L's words after the data
  * he senses behind it, as his words on ProtoMan and the heal point (a
  * playtester heard "behind the security cube", was told its P-Code by a
@@ -329,8 +337,8 @@ static int lock_words(char *buf, int k, int size, int lock) {
 	char where[96];
 	int wx, wy;
 	netmap_world(b->x, b->y, &wx, &wy);
-	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The %s's %s!|@M It's the violet mark on the map.|", what,
-		spot_where(wx, wy, where, sizeof where));
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The %s's %s!|%s", what, spot_where(wx, wy, where, sizeof where),
+		violet_mark());
 }
 
 /* The data MegaMan senses but has not seen, said where it lies (two at
@@ -370,8 +378,8 @@ static int flame_words(char *buf, int k, int size) {
 	bool winds;
 	netmap_world((int)o->x, (int)o->y, &wx, &wy);
 	const char *lies = lie_and_walk(wx, wy, &far, &winds);
-	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame's %s,%s%s!|@M It's the violet mark on the map.|",
-		lies, near_far[far], winds ? WINDS : "");
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M The flame's %s,%s%s!|%s", lies, near_far[far], winds ? WINDS : "",
+		violet_mark());
 }
 
 static void here_scan(Here *h) {
@@ -491,6 +499,7 @@ static int more_words(char *buf, int k, int size, const Here *h) {
 const char *status_words(void) {
 	static char buf[1400];
 	int k = 0;
+	violet_named = 0;
 	#define ADD(...) (k += snprintf(buf + k, k < (int)sizeof buf ? sizeof buf - (size_t)k : 0, __VA_ARGS__))
 	/* (home's own way on, docs/HOME.md: no landmark's port there) */
 	if (D.town && town_is_home()) return home_status();

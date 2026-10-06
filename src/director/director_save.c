@@ -41,7 +41,7 @@
  * (A note from before `heard` reads it as 0.) */
 #define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
 typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where; } ActNote;
-enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
+enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME, SAVED_HOME_HERE };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
 static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
 static ActNote act_note;
 static bool act_note_ok;
@@ -49,7 +49,7 @@ static bool act_note_ok;
 static void act_note_save(void) {
 	/* (an act already continued without one has no whole count to keep) */
 	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed, D.heard_act,
-		suspending ? SAVED_LEFT : D.town ? SAVED_HOME : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE :
+		suspending ? SAVED_LEFT : D.town ? (D.checkpoint_here ? SAVED_HOME_HERE : SAVED_HOME) : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE :
 		D.checkpoint_data ? SAVED_DATA : SAVED_START };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
@@ -69,12 +69,12 @@ static void act_note_read(void) {
  * (session 63) */
 static void resume_note(bool restarted) {
 	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off",
-		"From the arena's door", "From Lan's HP" };
+		"From the arena's door", "From Lan's HP", "From where you saved" };
 	/* (a layer made otherwise, by this build or without the ROM that drew
 	 * it, starts again: "From where you left off" over the layer's start
 	 * misled a playtester, session 67) */
 	if (restarted) cinema_note(from[SAVED_START], 240);
-	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_HOME) cinema_note(from[act_note.where], 240);
+	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_HOME_HERE) cinema_note(from[act_note.where], 240);
 }
 
 /* ... and after it, where building it began the act afresh */
@@ -116,8 +116,17 @@ const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run s
 
 void director_save_here(void) {
 	/* (the PET's Save: in the town, before the run's first layer, there is
-	 * no run to save yet) */
+	 * no run to save yet; home after an act saves where Lan stands, as the
+	 * HP's arrival saved: a playtester's purchase and request in town were
+	 * not saved, and "Saves begin on layer 1" told him so wrongly, session
+	 * 70) */
 	if (!D.active) return;
+	if (D.town && D.home) {
+		D.checkpoint_here = true;
+		home_save();
+		D.checkpoint_here = false;
+		return;
+	}
 	if (D.town) { cinema_note("Saves begin on layer 1", 150); return; }
 	D.checkpoint = true;
 	D.checkpoint_here = true;
@@ -200,7 +209,7 @@ bool director_resume(void) {
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
 	/* (saved at home: the town's too, the layer behind its port) */
-	bool home = act_note_ok && act_note.where == SAVED_HOME && home_rebuild();
+	bool home = act_note_ok && (act_note.where == SAVED_HOME || act_note.where == SAVED_HOME_HERE) && home_rebuild();
 	char path[600];
 	save_state_path(path, sizeof path);
 	bool same = same_layer();

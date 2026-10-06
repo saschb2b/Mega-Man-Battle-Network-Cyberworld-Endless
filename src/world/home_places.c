@@ -52,7 +52,8 @@ bool home_places_door(int group, int number, int *x, int *y) {
 bool home_places_counter(int group, int number, int x, int y, int face, uint32_t *archive, int *script) {
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
-	return home_places_at(group, number) == HOME_PLACE_ASTER && indoors_counter(group, number, x + dx, y + dy, archive, script);
+	/* (facing the counter, its front towards +y: not along it) */
+	return dy < 0 && home_places_at(group, number) == HOME_PLACE_ASTER && indoors_counter(group, number, x + dx, y + dy, archive, script);
 }
 
 const char *home_places_check(int group, int number, int x, int y, int face) {

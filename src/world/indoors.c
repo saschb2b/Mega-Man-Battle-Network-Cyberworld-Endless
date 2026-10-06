@@ -119,21 +119,25 @@ static void people(int group, int number, NpcList *npcs) {
 }
 
 /* (how far along the counter, either way, and how far before its front A
- * still reaches a keeper: BN6's own reach answered AsterLand's clerk from
- * 8 units of its 60, and a playtester faced the counter from four places
- * and got the showcase's text, session 69) */
-#define COUNTER_REACH 14
-#define COUNTER_DEEP 16
+ * still reaches a keeper, the nearest where two reach: BN6's own reach
+ * answered AsterLand's clerk from 8 units of its 60, and a playtester faced
+ * the counter from four places and got the showcase's text, session 69;
+ * at 14 and 16, from a step before it, where the counter looks close in the
+ * isometric view, he got nothing again, session 70) */
+#define COUNTER_REACH 16
+#define COUNTER_DEEP 32
 
 bool indoors_counter(int group, int number, int x, int y, uint32_t *archive, int *script) {
+	int best = -1;
 	for (int i = 0; i < nkeepers; ++i) {
 		if (keeper[i].group != group || keeper[i].number != number || !keeper[i].archive) continue;
 		if (abs(x - keeper[i].x) > COUNTER_REACH || y <= keeper[i].y || y > keeper[i].y + keeper[i].front + COUNTER_DEEP) continue;
-		*archive = keeper[i].archive;
-		*script = keeper[i].script;
-		return true;
+		if (best < 0 || abs(x - keeper[i].x) < abs(x - keeper[best].x)) best = i;
 	}
-	return false;
+	if (best < 0) return false;
+	*archive = keeper[best].archive;
+	*script = keeper[best].script;
+	return true;
 }
 
 uint32_t indoors_take_over(int group, int number, int x, int y, unsigned keep, int song_k, int song) {

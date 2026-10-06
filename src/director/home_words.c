@@ -124,6 +124,14 @@ const char *home_errands_words(const char *words, bool requests, bool order) {
 	return buf;
 }
 
+const char *home_aster_words(const char *words) {
+	static char buf[320];
+	/* (a playtester never found the Order Service's clerk on two visits,
+	 * and L named only the way out, session 70) */
+	snprintf(buf, sizeof buf, "@M Chips to order at the counter's right,Lan!|@M SubChips at its left!|%s", words);
+	return buf;
+}
+
 const char *home_door_words(const char *words, const char *door) {
 	static char buf[320];
 	/* (seven calls looking for it, session 69) */

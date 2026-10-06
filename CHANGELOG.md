@@ -48,10 +48,11 @@
   one order a visit. The SubChip seller beside him stocks the keys the act
   ahead needs (Unlockers, RushFood, a WWW-ID) and MiniEnrg, FullEnrg,
   SneakRun and Untrap. On the second screen, a shop's panel now names the
-  entry under the cursor as the list shows it. A at the counter reaches
-  the clerk or the seller from anywhere in front of him (a playtester
-  faced the counter from four places and got the showcase's text), and
-  the shopper stands at the NEW case, out of the seller's way.
+  entry under the cursor as the list shows it. A facing the counter
+  reaches the clerk or the seller from anywhere in front of him, a step
+  away too (a playtester faced it from four places and got the
+  showcase's text), L in AsterLand says where orders and SubChips are,
+  and the shopper stands at the NEW case, out of the seller's way.
 - **Requests at home** (issue #88, the epic #84). At each visit three
   people post a request for the act ahead: the NetBattler at AsterLand's
   request board (a chip of an element from your Pack, or a vow: no
@@ -70,8 +71,10 @@
   dealer's MiniEnrg is, and the Mr.Prog's patch asks first, on No. Its
   reminder waits for the act's card and words, which it had ended
   unseen. A run that ends holding a request hears about it from the one
-  who asked at the next run's start. A run saved before continues with
-  no request.
+  who asked at the next run's start. Home after an act, the PET's Save
+  saves where Lan stands, and CONTINUE goes on from there (it said
+  "Saves begin on layer 1"). A run saved before continues with no
+  request.
 - **AsterLand and the Cyber Academy open** (issue #96, the epic #84).
   Central Town's chip shop and Lan's school are places of home now, BN6's
   own maps as they stand. In AsterLand the clerk stands behind his
@@ -137,6 +140,9 @@
   design: next, going back through older portals priced by the Net's
   clock, the townsfolk's jobs, a shop at home, and a town that
   remembers.
+- **Clearer words.** The Net Dealer says why Rush needs a RushFood for
+  each panel of a gap ("He eats just one!"), and L names a second violet
+  mark on the map as another one.
 - **The older Net's chips that sit out are named once a run.** After the
   first battle there, MegaMan no longer names again the chips his arrival
   words had named (a playtester heard them twice, as if new).

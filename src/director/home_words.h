@@ -24,6 +24,9 @@ const char *home_hp_words(bool taught);
  * way on: `requests` posted (none held), an order `order` AsterLand can
  * still make that the zenny held pays for. */
 const char *home_errands_words(const char *words, bool requests, bool order);
+/* L's words in AsterLand: where its counter takes orders and sells
+ * SubChips, then `words`. */
+const char *home_aster_words(const char *words);
 /* L's words in Lan's house `words`, then where its front door is (`door`
  * from Lan, way_to's word). */
 const char *home_door_words(const char *words, const char *door);

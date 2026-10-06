@@ -111,6 +111,7 @@ const char *home_status(void) {
 		return home_jobs_status(home_door_words(port_words(PORT_HOUSE, way), lies_at(dx, dy)));
 	if (at == HOME_PLACE_ROOM || at == HOME_PLACE_HOUSE) return home_jobs_status(port_words(at == HOME_PLACE_ROOM ? PORT_ROOM : PORT_HOUSE, way));
 	const char *words = port_words(at == HOME_PLACE_NONE ? PORT_HOME : PORT_OUT, way);
+	if (at == HOME_PLACE_ASTER) words = home_aster_words(words);
 	/* (in the town, once a visit: the requests posted, AsterLand's order) */
 	if (at == HOME_PLACE_NONE && !D.errands_told) {
 		D.errands_told = true;

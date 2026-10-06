@@ -66,9 +66,11 @@ static void dealer_word(char *word, size_t n, const DealerTalk *d, const char *b
 static void dealer_rush(char *s, size_t n) {
 	int hold = layer.ngaps ? layer.gap[0].len : shop_rush_need(run.depth);
 	const char *where = layer.ngaps ? "on this layer" : "deeper in";
+	/* (why as many as its panels, said: "He comes when you hold 2 RushFood.
+	 * He eats one." read as a riddle, session 70) */
 	if (hold > 1)
-		snprintf(s, n, "|And there's a gap %s!|Rush can bridge it.|He comes when you hold %d RushFood.|He eats one. It's on my "
-			"list,too!", where, hold);
+		snprintf(s, n, "|And there's a gap %s,%d panels wide!|Rush comes when you hold a RushFood|for each panel. He eats just one!|"
+			"It's on my list,too!", where, hold);
 	else snprintf(s, n, "|And there's a gap %s!|Rush bridges it for one RushFood.|It's on my list,too!", where);
 }
 

@@ -1304,6 +1304,7 @@ static void test_home_words(void) {
 	check_talk("Lan's HP's first time", home_hp_words(false));
 	check_talk("Lan's HP, a profile told", home_hp_words(true));
 	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true));
+	check_talk("AsterLand's counter", home_aster_words("@M The way out's to the lower right,Lan!|@M Your PC's back home,remember?"));
 	check_talk("the house's front door", home_door_words("@M Your room's to the upper left,Lan!|@M The PC's up there!", "to the lower left"));
 	/* (going back, docs/HOME.md: the older portals, the way home, L there) */
 	for (int clock = 0; clock <= 6; ++clock) {
