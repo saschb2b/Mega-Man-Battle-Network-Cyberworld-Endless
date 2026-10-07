@@ -1002,7 +1002,11 @@ a layer gives it what its own maps do.
 - **The map** (`netmap.c`, `coords.c`): for the walls the gap is a
   walkway, walled along its sides; across its mouths the floor's edges
   stand again with the flag byte 0xFF (the second gap's 0xFE), which Rush
-  lying there switches off. Its trigger strip is the lane's floor 24 units
+  lying there switches off. Both mouths: a mouth's row is centred on the
+  panels' edge, and the one on a gap's far edge (from its stand towards
+  -X or -Y, the near one) had counted as the next panel's and stood
+  unwalled, so MegaMan walked onto the island without Rush and the
+  island's edge held him there (issue #111). Its trigger strip is the lane's floor 24 units
   in from the near mouth, where the engine's A probe lands (BN6's strip is
   the mouth's row alone, its probe 8 ahead). Its tiles stay void.
 - **The objects** (`rush.c`): per panel Rush (handler 0x25, shown once
@@ -1072,7 +1076,11 @@ of Gregar's Link Navis clear each. A layer sets one the same way:
 - **Its pocket** (`ng_plan_obstacle` in `net_set_pieces.c`): a walkway's first panel
   off a wider floor, off the way, whose closing cuts off 6 to 40 panels and
   nothing the way, a service or the guardian needs; seen from the way
-  (its mouth near it). Nothing else is placed in it; its one thing, a blue
+  (its mouth near it). The pocket lies ahead of the mouth, the floor
+  before it the arrival's: BN6's walls hold MegaMan back from that floor
+  alone, and a pocket measured behind its mouth (8 of 37 obstacles and
+  cubes over the tests' layers) let him walk in and never out (issue
+  #111). Nothing else is placed in it; its one thing, a blue
   data of the best quality, lies where it ends.
 - **The map** (`blockers.c`, `netmap.c`): BN6's own obstacle (handler 3)
   where BN6 sets one in a walkway's mouth, a line of wall cells across the

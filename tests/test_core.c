@@ -375,7 +375,7 @@ static int walk_between(int sx, int sy, int tx, int ty) {
 	return -1;
 }
 
-static int pieces_crowded, teller_walk_min = 1 << 20, tellers_near;
+static int pieces_crowded, teller_walk_min = 1 << 20, tellers_near, blocks_backwards;
 
 static void blocks_check(uint32_t seed, int depth, const NetObj *start, uint8_t seen[MAP_H][MAP_W]) {
 	if (!layer.nblocks) return;
@@ -399,6 +399,11 @@ static void blocks_check(uint32_t seed, int depth, const NetObj *start, uint8_t 
 		layer.cell[k->y][k->x] = C_VOID;
 		reachable_cells((int)start->x, (int)start->y, seen);
 		layer.cell[k->y][k->x] = C_PATH;
+		/* (its pocket ahead of it, the floor before it the arrival's: the
+		 * walls BN6 lays for a cube or an obstacle hold MegaMan back from
+		 * the floor before them alone, and one facing out let him walk in
+		 * and never out, issue #111) */
+		blocks_backwards += !seen[k->y - dir_dy[k->dir]][k->x - dir_dx[k->dir]] || seen[k->y + dir_dy[k->dir]][k->x + dir_dx[k->dir]];
 		int held = 0;
 		for (int i = 0; i < layer.nobj; ++i) {
 			const NetObj *o = &layer.obj[i];
@@ -874,6 +879,7 @@ static void test_generation(void) {
 	printf("  Link Navi obstacles and cubes on %d layers: water %d, tree %d, flames %d, cyclone %d, cloud %d; P-Code cubes %d (%d told), tolls %d\n",
 		block_layers, block_kinds[0], block_kinds[1], block_kinds[2], block_kinds[3], block_kinds[4], block_kinds[BLOCK_PCODE], tellers, block_kinds[BLOCK_TOLL]);
 	printf("  the Undernet's doors: %d skull doors, %d number doors\n", block_kinds[BLOCK_SKULL], block_kinds[BLOCK_NUMBER]);
+	CHECK(blocks_backwards == 0, "%d obstacles and cubes face out of their pockets", blocks_backwards);
 	CHECK(tellers == block_kinds[BLOCK_PCODE], "%d P-Code cubes, %d navis to tell their codes", block_kinds[BLOCK_PCODE], tellers);
 	printf("  P-Code tellers a walk of %d at least from their cubes\n", teller_walk_min);
 	printf("  invisible paths on %d layers\n", path_layers);

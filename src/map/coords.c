@@ -138,17 +138,21 @@ static void debug_print(const Cell *w, int n) {
  * each gap shut, within the gap's panels, flagged 0xFF less the gap's
  * index so the wall is off while its event (0x1640 + flag & 0x7F) is set,
  * which Rush lying in the gap sets each frame (bn6f's wall test, Gregar
- * 0x08030BD0). */
-static int gap_mouths(Cell *w, int cap, int rise) {
+ * 0x08030BD0). A cell walled with the gap open too, at a mouth's corner,
+ * keeps that wall alone: of two in one cell the game takes either. */
+static int gap_mouths(Cell *w, int cap, int rise, const Cell *open, int nopen) {
 	enum { SHUT_MAX = 16384 };
 	static Cell shut[SHUT_MAX];
+	static uint8_t walled[254 * 254];
 	if (!netmap_gap_any()) return 0;
+	memset(walled, 0, sizeof walled);
+	for (int i = 0; i < nopen; ++i) walled[open[i].key] = 1;
 	netmap_gaps_shut(true);
 	int ns = walls(shut, SHUT_MAX, 0, 0, rise), n = 0;
 	netmap_gaps_shut(false);
 	for (int i = 0; i < ns && n < cap; ++i) {
 		int cx = (int)(shut[i].key % 254) - 127, cy = (int)(shut[i].key / 254) - 127, g = netmap_gap_at(cx, cy);
-		if (!g) continue;
+		if (!g || walled[shut[i].key]) continue;
 		w[n] = shut[i];
 		w[n++].shape[1] = (uint8_t)(0x100 - g);
 	}
@@ -184,7 +188,7 @@ static bool write_at(uint32_t at_bus, uint32_t slot, const CoordPad *pads, int n
 	int n[4] = { 0 };
 	int rise = town_floor || raw_only ? 0 : netmap_rise();
 	if (!raw_only) n[0] = walls(sec[0], WALLS_MAX, 0, 0, rise);
-	if (!town_floor && !raw_only) n[0] += gap_mouths(sec[0] + n[0], WALLS_MAX - n[0], rise);
+	if (!town_floor && !raw_only) n[0] += gap_mouths(sec[0] + n[0], WALLS_MAX - n[0], rise, sec[0], n[0]);
 	if (rise) n[0] += walls(sec[0] + n[0], WALLS_MAX - n[0], 1, rise, rise);
 	/* a prop's walls in place of the floor's own at their cells */
 	if (extra && extra->nover) {

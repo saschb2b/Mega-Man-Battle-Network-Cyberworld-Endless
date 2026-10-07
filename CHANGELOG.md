@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Security cubes, Link Navi obstacles and Rush's gaps hold MegaMan
+  until they open (issue #111).** BN6's walls hold him back from one side
+  alone, and some stood the wrong way round: about one cube or obstacle
+  in five faced out of its pocket, and a gap running from its stand
+  towards the screen's left had no wall at its near mouth. MegaMan walked
+  past them without a P-Code, a Cross or RushFood, and then could not
+  walk back. Each now faces into its pocket, and a gap's mouths are
+  walled on both sides until Rush lies there. A run saved on a layer by
+  an older build starts that layer again, so a MegaMan stuck behind one
+  is free.
+
 - **The browser's player is the game alone on its screen:** the picture
   at the largest whole scale the window holds, framed in the PET's green
   on its dark grid, the site's bar gone while it plays and the page's

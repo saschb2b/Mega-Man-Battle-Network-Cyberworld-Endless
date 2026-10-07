@@ -339,7 +339,11 @@ void ng_plan_obstacle(int kind) {
 			for (int d = 0; d < 4 && nc < MOUTHS; ++d) {
 				if (!pocket_mouth(x, y, d)) continue;
 				int n = pocket_of(x, y);
-				if (n < 6 || n > 40) continue;
+				/* (the pocket ahead of the mouth, never behind it: BN6's
+				 * walls hold MegaMan back from the floor before them alone,
+				 * and a pocket behind them let him walk in and never out,
+				 * issue #111) */
+				if (n < 6 || n > 40 || pocket[y - dir_dy[d]][x - dir_dx[d]]) continue;
 				/* (seen from the way: its mouth near it; a pad in it) */
 				int score = 20 - (ng_detour[y][x] < 20 ? ng_detour[y][x] : 20) + (n >= 9 && n <= 20 ? 5 : 0);
 				int k = nc++;

@@ -32,7 +32,16 @@ bool netmap_gap_any(void) { return ngap_panels > 0; }
 
 int netmap_gap_at(int cx, int cy) {
 	if (!ngap_panels) return 0;
-	return gap_panel(nm_floordiv(cx * 8 + 4 - nm_place.ex, 32), nm_floordiv(cy * 8 + 4 - nm_place.ey, 32)) + 1;
+	/* (a cell centred on a panel's edge lies on both panels: the mouth on
+	 * a gap's far edge, from its stand towards -X or -Y its near one, was
+	 * the next panel's alone and had no wall, issue #111) */
+	int X = cx * 8 + 4 - nm_place.ex, Y = cy * 8 + 4 - nm_place.ey, A = nm_floordiv(X, 32), B = nm_floordiv(Y, 32);
+	for (int i = 0; i <= ((X & 31) == 0); ++i)
+		for (int j = 0; j <= ((Y & 31) == 0); ++j) {
+			int g = gap_panel(A - i, B - j);
+			if (g >= 0) return g + 1;
+		}
+	return 0;
 }
 
 /* Whether panel (A, B) is an invisible path's (issue #46): void as drawn,
