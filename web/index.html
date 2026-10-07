@@ -141,88 +141,148 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 
 	<section id="game" aria-labelledby="game-title">
 		<div class="wrap">
-			<h2 class="vh" id="game-title">The game</h2>
-			<div class="grid-3 clips">
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/net.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of Robot Control Comp"><source src="clips/net.webm" type="video/webm"><source src="clips/net.mp4" type="video/mp4"></video>
-					<figcaption class="pill">A new net every run</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/battle.png" width="240" height="160"
-						aria-label="A battle from BATTLE START to the RESULT window"><source src="clips/battle.webm" type="video/webm"><source src="clips/battle.mp4" type="video/mp4"></video>
-					<figcaption class="pill">BN6's own battles</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/guardian.png" width="240" height="160"
-						aria-label="MegaMan steps into BlastMan's arena, and the guardian's title card comes up"><source src="clips/guardian.webm" type="video/webm"><source src="clips/guardian.mp4" type="video/mp4"></video>
-					<figcaption class="pill gold">A Navi ends each act</figcaption>
-				</figure>
-			</div>
-			<div class="areas">
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/central.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of Central Area: its blue framed pad, then its green fields"><source src="clips/central.webm" type="video/webm"><source src="clips/central.mp4" type="video/mp4"></video>
-					<figcaption class="pill">Central Area</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/seaside.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of Seaside Area: its yellow boardwalks and blue fields"><source src="clips/seaside.webm" type="video/webm"><source src="clips/seaside.mp4" type="video/mp4"></video>
-					<figcaption class="pill">Seaside Area</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/green.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of Green Area: its grass fields and orange planks"><source src="clips/green.webm" type="video/webm"><source src="clips/green.mp4" type="video/mp4"></video>
-					<figcaption class="pill">Green Area</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/undernet.png" width="240" height="160"
-						aria-label="MegaMan walking a layer of the Undernet"><source src="clips/undernet.webm" type="video/webm"><source src="clips/undernet.mp4" type="video/mp4"></video>
-					<figcaption class="pill gold">Undernet</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/graveyard.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of the Graveyard: its slabs and their holes"><source src="clips/graveyard.webm" type="video/webm"><source src="clips/graveyard.mp4" type="video/mp4"></video>
-					<figcaption class="pill gold">Graveyard</figcaption>
-				</figure>
-				<figure class="frame"><img src="shots/nest.png" width="240" height="160" loading="lazy" alt="The Cybeast Nest's card: the bottom of the net, lair of the Cybeasts, its guardian not known yet"><figcaption class="pill gold">Cybeast Nest</figcaption></figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/sky.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of Sky Area: a cyan glass catwalk onto its fields of framed squares"><source src="clips/sky.webm" type="video/webm"><source src="clips/sky.mp4" type="video/mp4"></video>
-					<figcaption class="pill">Sky Area</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/weather.png" width="240" height="160"
-						aria-label="MegaMan walking a generated layer of Mr. Weather Comp: its solar panels with their lights, its conveyors"><source src="clips/weather.webm" type="video/webm"><source src="clips/weather.mp4" type="video/mp4"></video>
-					<figcaption class="pill">Mr. Weather Comp</figcaption>
-				</figure>
-				<figure class="frame">
-					<video class="clip" muted loop playsinline preload="none" poster="clips/acdc-bn5.png" width="240" height="160"
-						aria-label="With Battle Network 5's ROM beside BN6's: MegaMan walking a layer of BN5's ACDC Area, its cyan platforms and green walkways"><source src="clips/acdc-bn5.webm" type="video/webm"><source src="clips/acdc-bn5.mp4" type="video/mp4"></video>
-					<figcaption class="pill gold">BN5: ACDC Area</figcaption>
-				</figure>
-			</div>
-			<div class="grid-3 more">
-				<figure class="frame"><img src="shots/home-pc.png" width="240" height="160" loading="lazy" alt="Lan at his PC in his room: Jack in! MegaMan, Execute!!"><figcaption class="pill">A run starts at home</figcaption></figure>
-				<figure class="frame"><img src="shots/setup.png" width="240" height="160" loading="lazy" alt="The jack-in setup: net, folder, Cross, threat and help, with the closed folders and how they open"><figcaption class="pill">Every run opens more</figcaption></figure>
-				<figure class="frame"><img src="shots/pet-records.png" width="240" height="160" loading="lazy" alt="The PET's E-Mail: Dad's Records mail, HeatMan 2-1 with his code, SlashMan 1-0, EraseMan 0-1"><figcaption class="pill gold">Dad keeps your record</figcaption></figure>
+			<div class="band"><h2 id="game-title">One run</h2><span class="hint">About <b>an hour</b>, ten layers down</span></div>
+			<!-- the run as one picture: MegaMan's dive down the net's spine, what
+			     happens on the way on either side of it (docs/GUIDE.md, A run) -->
+			<ol class="dive">
+				<li class="stop home">
+					<span class="depth pill">Lan's room</span>
+					<figure class="frame">
+						<img src="shots/home-pc.png" width="240" height="160" loading="lazy" alt="Lan at his PC in his room: Jack in! MegaMan, Execute!!">
+					</figure>
+					<div class="note textbox">
+						<h3>Jack in</h3>
+						<p>A run begins at home. Lan's PC jacks MegaMan in to the Endless Net, whose paths change every time.</p>
+					</div>
+				</li>
+				<li class="stop">
+					<span class="depth pill">Layer 1</span>
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/central.png" width="240" height="160"
+							aria-label="MegaMan walking a generated layer of Central Area: its blue framed pad, then its green fields"><source src="clips/central.webm" type="video/webm"><source src="clips/central.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>A new net every run</h3>
+						<p>Three layers an act, each in the style of one of BN6's areas: its viruses, Mystery Data, Net Dealers and Mr.Progs.</p>
+					</div>
+				</li>
+				<li class="stop">
+					<span class="depth pill">Every layer</span>
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/battle.png" width="240" height="160"
+							aria-label="A battle from BATTLE START to the RESULT window"><source src="clips/battle.webm" type="video/webm"><source src="clips/battle.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>BN6's own battles</h3>
+						<p>Its random battles, chips and Custom screen, run by the game itself. They grow with the depth, not the area.</p>
+					</div>
+				</li>
+				<li class="stop">
+					<span class="depth pill">Off the way</span>
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/rush.png" width="240" height="160"
+							aria-label="At a gap with bones over it, MegaMan throws two RushFood: two Rushes lie across the gap, and MegaMan runs over them to an island holding a blue Mystery Data"><source src="clips/rush.webm" type="video/webm"><source src="clips/rush.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>BN6's set pieces</h3>
+						<p>Rush's gaps, Link Navi obstacles a Cross clears, security cubes and teleports, each guarding data.</p>
+					</div>
+				</li>
+				<li class="stop gold">
+					<span class="depth pill gold">Layer 3</span>
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/guardian.png" width="240" height="160"
+							aria-label="MegaMan steps into BlastMan's arena, and the guardian's title card comes up"><source src="clips/guardian.webm" type="video/webm"><source src="clips/guardian.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>A guardian ends each act</h3>
+						<p>A copied Navi in his arena; the Net Dealer stocks a chip that answers him. His data: HP, his chip, his Cross.</p>
+					</div>
+				</li>
+				<li class="stop home tall">
+					<span class="depth pill">Between acts</span>
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/home-visit.png" width="416" height="512"
+							aria-label="As a New 3DS shows it: Lan crosses Central Town at evening into AsterLand and orders a chip at its counter, each chip's card on the bottom screen"><source src="clips/home-visit.webm" type="video/webm"><source src="clips/home-visit.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>Home between acts</h3>
+						<p>Central Town remembers the run. AsterLand orders any chip the Library holds, and three people post a request.</p>
+					</div>
+				</li>
+				<li class="stop gold">
+					<span class="depth pill gold">Layer 10</span>
+					<figure class="frame">
+						<img src="shots/nest.png" width="240" height="160" loading="lazy" alt="The Cybeast Nest's card: the bottom of the net, lair of the Cybeasts, its guardian not known yet">
+					</figure>
+					<div class="note textbox">
+						<h3>The Nest</h3>
+						<p>After three acts, the Cybeast Nest. Its guardian's fall wins the run.</p>
+					</div>
+				</li>
+			</ol>
+			<p class="won"><b>The run is won.</b> And it opens what lies below.</p>
+
+			<div class="beyond">
+				<article class="panel">
+					<h3 class="label">The endless net</h3>
+					<div class="pair">
+						<figure class="frame">
+							<video class="clip" muted loop playsinline preload="none" poster="clips/cybeast-arrival.png" width="240" height="160"
+							aria-label="MegaMan steps into the endless Nest's last room, the floor shakes, and Gregar rears up under its card: The bottom of the Net"><source src="clips/cybeast-arrival.webm" type="video/webm"><source src="clips/cybeast-arrival.mp4" type="video/mp4"></video>
+						</figure>
+						<figure class="frame">
+							<video class="clip" muted loop playsinline preload="none" poster="clips/bass-arrival.png" width="240" height="160"
+							aria-label="MegaMan steps into the Secret Area's arena; Bass's dormant stone shakes, the screen goes white, and Bass stands there under his card"><source src="clips/bass-arrival.webm" type="video/webm"><source src="clips/bass-arrival.mp4" type="video/mp4"></video>
+						</figure>
+					</div>
+					<p>Nineteen layers through the Undernet and the Graveyard to the Cybeast's den, then around again, harder. Bass waits in the Secret Area.</p>
+				</article>
+				<article class="panel">
+					<h3 class="label">Battle Network 5, too</h3>
+					<div class="pair">
+						<figure class="frame">
+							<video class="clip" muted loop playsinline preload="none" poster="clips/acdc-bn5.png" width="240" height="160"
+							aria-label="With Battle Network 5's ROM beside BN6's: MegaMan walking a layer of BN5's ACDC Area, its cyan platforms and green walkways"><source src="clips/acdc-bn5.webm" type="video/webm"><source src="clips/acdc-bn5.mp4" type="video/mp4"></video>
+						</figure>
+						<figure class="frame">
+							<video class="clip" muted loop playsinline preload="none" poster="clips/bn5-battle.png" width="240" height="160"
+							aria-label="MegaMan walks BN5's ACDC Area until a battle breaks out, and fights a Mettaur and a CanGard in BN5's own battle screen"><source src="clips/bn5-battle.webm" type="video/webm"><source src="clips/bn5-battle.mp4" type="video/mp4"></video>
+						</figure>
+					</div>
+					<p>Put <i>Team Colonel (USA)</i> beside BN6, and BN5's areas turn up in runs, their battles fought in BN5's own engine.</p>
+				</article>
+				<article class="panel">
+					<h3 class="label">Runs leave options</h3>
+					<div class="pair">
+						<figure class="frame"><img src="shots/setup.png" width="240" height="160" loading="lazy" alt="The jack-in setup: net, folder, Cross, threat and help, with the closed folders and how they open"></figure>
+						<figure class="frame"><img src="shots/pet-records.png" width="240" height="160" loading="lazy" alt="The PET's E-Mail: Dad's Records mail, HeatMan 2-1 with his code, SlashMan 1-0, EraseMan 0-1"></figure>
+					</div>
+					<p>Not power: every run starts as strong as the first. A folder, a Cross, ten threat rungs, and Dad keeps your record.</p>
+				</article>
 			</div>
 		</div>
 	</section>
 
 	<section id="get">
 		<div class="wrap">
-			<div class="band"><h2>Get it</h2></div>
+			<div class="band"><h2>Get it</h2><span class="hint">Free</span></div>
 			<div class="panel get">
-				<p class="rom">Free. Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>,
-					SHA-1 <code>89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6</code>. None contains game data.</p>
 				<div class="ways">
 					<a class="exit" href="play/" data-umami-event="go-play" data-umami-event-from="get">Play in the browser</a>
 					<a class="plate" href="download/" data-umami-event="go-download" data-umami-event-from="get"><i class="icon i-get" aria-hidden="true"></i>Download</a>
 				</div>
-				<p class="tip">For Windows, macOS, Linux, the Steam Deck, Android, iPhone and iPad, handhelds with PortMaster and the New 3DS:
-					<a href="download/" data-umami-event="go-download" data-umami-event-from="get-list">every download</a>.
-					Questions: the <a href="faq/">FAQ</a>.</p>
+				<ul class="systems" aria-label="Where it plays">
+					<li><i class="icon i-web" aria-hidden="true"></i>Browser</li>
+					<li><i class="icon i-pc" aria-hidden="true"></i>Windows, macOS, Linux</li>
+					<li><i class="icon i-wide" aria-hidden="true"></i>Steam Deck</li>
+					<li><i class="icon i-phone" aria-hidden="true"></i>Android, iPhone</li>
+					<li><i class="icon i-handheld" aria-hidden="true"></i>PortMaster</li>
+					<li><i class="icon i-3ds" aria-hidden="true"></i>New 3DS</li>
+				</ul>
+				<p class="rom">Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>. None contains game data.
+					<a href="download/" data-umami-event="go-download" data-umami-event-from="get-list">Every download</a> · <a href="faq/">FAQ</a> ·
+					<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md" data-umami-event="outbound" data-umami-event-to="guide">Player's guide</a></p>
 			</div>
 		</div>
 	</section>

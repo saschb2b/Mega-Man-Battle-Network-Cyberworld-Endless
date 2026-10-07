@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The project page draws one run as one picture.** Below the trailer,
+  the net's spine runs down from Lan's room to the Nest on layer 10, and
+  what happens on the way branches off it, left and right in turn: the
+  jack-in, a new net, BN6's battles, its set pieces, a guardian, home
+  between acts, the Nest, each a screen or clip and one line in BN6's
+  text box. Three panels follow (the endless net, Battle Network 5, what
+  runs leave behind) and the way in, with where it plays. It had been a
+  wall of fifteen clips of the same size.
+
 - **The README is one page:** the trailer, a run in six pictures from
   Lan's room to the Nest, the set pieces, the endgame, BN5's areas, what
   carries over, and where to play, each a picture or a clip with a line
