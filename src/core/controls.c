@@ -21,22 +21,25 @@
 #define KEYS 0
 #endif
 
-/* The rows: the preset for A and B, the six buttons, the anonymous
- * statistics where the build can send them (issue #104, analytics.h: on
- * or off, and A their question again, what is sent and Yes or No, kept at
- * once), then DEFAULTS and DONE side by side. (The D-pad
- * and the stick move, set in pad.ini and keys.ini only: a direction given
- * one button would lose the others.) */
-enum { ROW_PRESET, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROW_STATS, ROW_DEFAULTS, ROW_DONE };
+/* The rows: the preset for A and B, the six buttons, the D-pad (its four
+ * directions asked in turn, each added to what moves already: the D-pad
+ * and a stick both move, issue #112), the anonymous statistics where the
+ * build can send them (issue #104, analytics.h: on or off, and A their
+ * question again, what is sent and Yes or No, kept at once), then
+ * DEFAULTS and DONE side by side. */
+enum { ROW_PRESET, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROW_DPAD, ROW_STATS, ROW_DEFAULTS, ROW_DONE };
 #define LISTEN 300     /* frames "press a button" waits */
 #define CONFIRM 600    /* ... and "press A to keep" */
 #define NOTE 150       /* ... a passing word stays */
-/* where it draws, from the picture's corner: with the statistics' row the
- * rows a pixel closer and DEFAULTS and DONE just under them, so the note
- * keeps its two lines over the keys' */
-#define ROW_Y 27
-#define ROW_H (stats_row() ? 11 : 12)
-#define BOTTOM_Y (stats_row() ? 113 : 112)
+#define SETTLE 8       /* frames the D-pad's way is let go before the next is asked */
+/* where it draws, from the picture's corner: the screen's name on the
+ * columns' line, the rows under it, DEFAULTS and DONE just under them,
+ * the note under those, two lines over the keys' */
+#define HEAD_Y 8
+#define ROW_Y 17
+#define ROW_H 11
+#define BOTTOM_Y (ROW_Y + (last_row() + 1) * ROW_H)
+#define NOTE_Y (BOTTOM_Y + 11)
 #define LABEL_X 17
 #define PAD_X 74
 #define KEY_X 174
@@ -50,16 +53,18 @@ static struct {
 	PadMap pads, pads_was;
 	char said[64];
 	int said_t;
+	int dpad, settle;      /* the D-pad's direction asked (1 UP ... 4 RIGHT), 0 none; frames let go */
+	PadMap pads_before;    /* (the D-pad's as it was, for a cancel) */
 	SDL_FingerID finger;   /* (a finger that went down on it: only its lift taps) */
 	bool finger_down;
 } C;
-static KeyMap keys, keys_was;
+static KeyMap keys, keys_was, keys_before;
 
 static int gba_of(int row) { return row - ROW_A + 4; }   /* (A is the GBA's fifth button, buttons.h) */
 static bool button_row(int row) { return row >= ROW_A && row <= ROW_SELECT; }
 static bool stats_row(void) { return analytics_ask_here(); }
 /* the last row of the list: the statistics', where they are here */
-static int last_row(void) { return stats_row() ? ROW_STATS : ROW_SELECT; }
+static int last_row(void) { return stats_row() ? ROW_STATS : ROW_DPAD; }
 
 static void say(const char *s) {
 	snprintf(C.said, sizeof C.said, "%s", s);
@@ -114,9 +119,29 @@ static void cycle(int d) {
 	audio_sfx(SFX_CURSOR);
 }
 
+/* The D-pad's four directions asked in turn */
+static void dpad_start(void) {
+	C.pads_before = C.pads;
+	keys_before = keys;
+	C.dpad = 1;
+	C.settle = SETTLE;
+	C.listen = LISTEN;
+	audio_sfx(SFX_SELECT);
+}
+
+static void dpad_cancel(const char *why) {
+	C.pads = C.pads_before;
+	keys = keys_before;
+	C.dpad = 0;
+	C.listen = 0;
+	say(why);
+	audio_sfx(SFX_CANCEL);
+}
+
 static void choose(int row) {
 	C.row = row;
 	if (row == ROW_PRESET) cycle(1);
+	else if (row == ROW_DPAD) dpad_start();
 	/* (the statistics' question over this screen, the cursor on the answer
 	 * as it stands: what is sent is read before a yes) */
 	else if (row == ROW_STATS) { if (analytics_ask_open()) audio_sfx(SFX_SELECT); }
@@ -160,6 +185,56 @@ static bool listen_take(void) {
 		}
 #endif
 	return false;
+}
+
+/* A press for the D-pad's direction asked, once the last is let go: a pad's
+ * (its D-pad, a stick, a button) or a key, added to it */
+static bool dpad_take(void) {
+	int dir = C.dpad - 1;
+	bool held = pads_any_held();
+#if KEYS
+	int nkeys = 0;
+	const Uint8 *ks = SDL_GetKeyboardState(&nkeys);
+	for (int sc = 1; sc < nkeys && !held; ++sc) held = ks[sc] != 0;
+#endif
+	if (C.settle > 0) {
+		/* (the last direction's input let go first: one press, one way) */
+		if (!held) --C.settle;
+		return false;
+	}
+	PadPress p[8];
+	int n = pads_presses(p, 8);
+	for (int i = 0; i < n; ++i)
+		if (!(p[i].family != PAD_FAMILY_RAW && p[i].input == PAD_GUIDE)) {
+			padmap_add(&C.pads, p[i].family, dir, p[i].input);
+			return true;
+		}
+#if KEYS
+	int k[8];
+	n = platform_keys_pressed(k, 8);
+	for (int i = 0; i < n; ++i)
+		if (platform_key_free(k[i])) {
+			platform_keys_add(&keys, dir, k[i]);
+			return true;
+		}
+#endif
+	return false;
+}
+
+static void dpad_update(void) {
+	if (dpad_take()) {
+		audio_sfx(SFX_CURSOR);
+		C.settle = SETTLE;
+		C.listen = LISTEN;
+		if (++C.dpad > 4) {
+			C.dpad = 0;
+			C.listen = 0;
+			say("D-pad set: DONE keeps it");
+			audio_sfx(SFX_CONFIRM);
+		}
+	} else if (--C.listen == 0) {
+		dpad_cancel("Nothing pressed: the D-pad as it was");
+	}
 }
 
 static void listen_update(void) {
@@ -217,6 +292,7 @@ void controls_update(void) {
 	if (C.said_t > 0) --C.said_t;
 	refresh_pad();
 	if (C.confirm) confirm_update();
+	else if (C.dpad) dpad_update();
 	else if (C.listen) listen_update();
 	else nav_update();
 }
@@ -224,7 +300,9 @@ void controls_update(void) {
 bool controls_back(void) {
 	if (analytics_ask_shown()) return analytics_ask_back();
 	if (!C.open) return false;
-	if (C.listen) {
+	if (C.dpad) {
+		dpad_cancel("Not set: the D-pad as it was");
+	} else if (C.listen) {
 		C.listen = 0;
 		audio_sfx(SFX_CANCEL);
 	} else if (C.confirm) {
@@ -247,7 +325,9 @@ static int row_at(int x, int y) {
 
 static void tap(int x, int y) {
 	int row = row_at(x, y);
-	if (C.listen) {
+	if (C.dpad) {
+		dpad_cancel("Not set: the D-pad as it was");
+	} else if (C.listen) {
 		C.listen = 0;
 		say("Nothing set");
 		audio_sfx(SFX_CANCEL);
@@ -291,7 +371,7 @@ static void pad_words(int gba, char *out, size_t n, int w) {
 	const uint8_t *in = C.pads.in[C.family][gba];
 	for (int i = 0; i < PAD_PER && in[i] != PAD_NONE; ++i) {
 		size_t m = strlen(out);
-		snprintf(out + m, n - m, "%s%s", i ? ", " : "", padmap_label(C.style, in[i]));
+		snprintf(out + m, n - m, "%s%s", i ? ", " : "", padmap_label_of(C.family, C.style, in[i]));
 	}
 	if (!out[0]) snprintf(out, n, "-");
 	fit(out, w);
@@ -310,7 +390,8 @@ static const char *nav_word(bool back) {
 		if (comma) *comma = 0;
 		return s;
 	}
-	return padmap_label(C.style, back ? PAD_B : PAD_A);
+	/* (a raw joystick's fixed ones: its first two buttons) */
+	return padmap_label_of(C.family, C.style, back ? 1 : 0);
 }
 
 const char *controls_word(uint32_t bit) {
@@ -321,7 +402,7 @@ const char *controls_word(uint32_t bit) {
 	if (touch_shown()) return padmap_gba_name(gba);
 	if (!P.keyboard_last && pads_last(&family, &style, &name)) {
 		int in = pads_map()->in[family][gba][0];
-		return in == PAD_NONE ? padmap_gba_name(gba) : padmap_label(style, in);
+		return in == PAD_NONE ? padmap_gba_name(gba) : padmap_label_of(family, style, in);
 	}
 	if (!KEYS) return padmap_gba_name(gba);
 	platform_keys_label(NULL, gba, s, sizeof s);
@@ -341,10 +422,14 @@ static void new_a_word(char *s, size_t n) {
 
 /* What the row the cursor is on does, or what it waits for */
 static void row_note(char *s, size_t n) {
+	static const char *const ways[4] = { "UP", "DOWN", "LEFT", "RIGHT" };
 	if (C.confirm) {
 		char a[40];
 		new_a_word(a, sizeof a);
 		snprintf(s, n, "Press %s to keep them\nBack to the old ones in %d", a, (C.confirm + 59) / 60);
+	} else if (C.dpad) {
+		snprintf(s, n, KEYS ? "Press %s on the D-pad or a key (%d of 4). Wait to cancel" : "Press %s on the D-pad (%d of 4). Wait to cancel",
+			ways[C.dpad - 1], C.dpad);
 	} else if (C.listen) {
 		snprintf(s, n, KEYS ? "Press the button or key for %s. Wait to cancel" : "Press the button for %s. Wait to cancel", padmap_gba_name(gba_of(C.row)));
 	} else if (C.said_t > 0) {
@@ -355,6 +440,8 @@ static void row_note(char *s, size_t n) {
 		snprintf(s, n, "%s", analytics_word(AW_ROW_NOTE));
 	} else if (button_row(C.row)) {
 		snprintf(s, n, "%s: give %s its button%s", nav_word(false), padmap_gba_name(gba_of(C.row)), KEYS ? " or key" : "");
+	} else if (C.row == ROW_DPAD) {
+		snprintf(s, n, "%s: give UP, DOWN, LEFT and RIGHT a button%s each", nav_word(false), KEYS ? " or key" : "");
 	} else {
 		snprintf(s, n, "%s", C.row == ROW_DEFAULTS ? "Every button as it came" : "Keep these: it asks you to press the new A first");
 	}
@@ -400,8 +487,67 @@ static void button_draw(int x0, int y, int row) {
 #endif
 }
 
+/* What moves, from UP's inputs, their way left out: "D-pad, L stick",
+ * "Hat, Axis 2" */
+static void dpad_words(char *out, size_t n, int w) {
+	out[0] = 0;
+	const uint8_t *in = C.pads.in[C.family][0];
+	for (int i = 0; i < PAD_PER && in[i] != PAD_NONE; ++i) {
+		char word[24];
+		snprintf(word, sizeof word, "%s", padmap_label_of(C.family, C.style, in[i]));
+		char *sp = strrchr(word, ' ');
+		size_t len = strlen(word);
+		if (sp && !strcmp(sp, " up")) *sp = 0;
+		else if (!strncmp(word, "Axis", 4) && len > 1 && (word[len - 1] == '-' || word[len - 1] == '+')) word[len - 1] = 0;
+		size_t m = strlen(out);
+		snprintf(out + m, n - m, "%s%s", m ? ", " : "", word);
+	}
+	if (!out[0]) snprintf(out, n, "-");
+	fit(out, w);
+}
+
+/* The keys that move: "WASD, arrows" (up, left, down, right, as WASD
+ * reads), else UP's own */
+static void dpad_keys(char *out, size_t n) {
+	static const int arrows[4] = { SDL_SCANCODE_UP, SDL_SCANCODE_DOWN, SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT };
+	static const int order[4] = { 0, 2, 1, 3 };
+	bool arrow = true, all = true;
+	char letters[8] = "";
+	for (int d = 0; d < 4; ++d) arrow &= (keys.bits[arrows[d]] >> d & 1) != 0;
+	for (int k = 0; k < 4 && all; ++k) {
+		int d = order[k], found = -1;
+		for (int sc = 0; sc < SDL_NUM_SCANCODES && found < 0; ++sc)
+			if ((keys.bits[sc] >> d & 1) && sc != arrows[d]) found = sc;
+		const char *name = found >= 0 ? SDL_GetScancodeName((SDL_Scancode)found) : "";
+		all = strlen(name) == 1;
+		letters[k] = name[0];
+	}
+	if (all) snprintf(out, n, "%s%s", letters, arrow ? ", arrows" : "");
+	else platform_keys_label(&keys, 0, out, n);
+}
+
+static void dpad_draw(int x0, int y) {
+	char s[64];
+	if (C.dpad) {
+		static const char *const ways[4] = { "UP", "DOWN", "LEFT", "RIGHT" };
+		if ((C.t / 16) % 2 == 0) {
+			snprintf(s, sizeof s, "Press %s", ways[C.dpad - 1]);
+			text_draw(x0 + PAD_X, y, s, GOLD, TEXT_LEFT);
+			if (KEYS) text_draw(x0 + KEY_X, y, "or a key", GOLD, TEXT_LEFT);
+		}
+		return;
+	}
+	dpad_words(s, sizeof s, KEYS ? KEY_X - PAD_X - 6 : CORE_W - PAD_X - 10);
+	text_draw(x0 + PAD_X, y, s, C.has_pad ? WHITE : DIM, TEXT_LEFT);
+#if KEYS
+	dpad_keys(s, sizeof s);
+	fit(s, CORE_W - KEY_X - 8);
+	text_draw(x0 + KEY_X, y, s[0] ? s : "-", WHITE, TEXT_LEFT);
+#endif
+}
+
 static void rows_draw(int x0, int y0) {
-	static const char *const names[] = { "A and B", "A", "B", "L", "R", "START", "SELECT" };
+	static const char *const names[] = { "A and B", "A", "B", "L", "R", "START", "SELECT", "D-PAD" };
 	for (int r = ROW_PRESET; r <= last_row(); ++r) {
 		int y = y0 + ROW_Y + r * ROW_H;
 		const char *label = r == ROW_STATS ? analytics_word(AW_ROW) : names[r];
@@ -410,6 +556,7 @@ static void rows_draw(int x0, int y0) {
 		/* (the statistics' answer after its name: no controller's or key's column) */
 		else if (r == ROW_STATS)
 			text_draw(x0 + LABEL_X + text_width(label) + 8, y, analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF), WHITE, TEXT_LEFT);
+		else if (r == ROW_DPAD) dpad_draw(x0, y);
 		else button_draw(x0, y, r);
 		if (C.row == r && !C.confirm) arrow(x0 + 9, y);
 	}
@@ -428,8 +575,8 @@ static void bottom_draw(int x0, int y0) {
 }
 
 /* The note in two lines at most: broken where it says (\n), else after
- * the most words that fit */
-static void note_draw(int cx, int y, const char *s) {
+ * the most words that fit; whether it took two */
+static bool note_draw(int cx, int y, const char *s) {
 	char a[128], *second;
 	snprintf(a, sizeof a, "%s", s);
 	second = strchr(a, '\n');
@@ -447,6 +594,7 @@ static void note_draw(int cx, int y, const char *s) {
 	}
 	text_draw(cx, y, a, SKY, TEXT_CENTER);
 	if (second) text_draw(cx, y + 11, second, SKY, TEXT_CENTER);
+	return second != NULL;
 }
 
 void controls_draw(void) {
@@ -457,20 +605,24 @@ void controls_draw(void) {
 	fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 110));
 	fill_rect(x0 + 4, y0 + 4, CORE_W - 8, CORE_H - 8, rgba(66, 198, 231, 255));
 	fill_rect(x0 + 6, y0 + 6, CORE_W - 12, CORE_H - 12, rgba(16, 60, 90, 250));
-	text_draw(cx, y0 + 7, "CONTROLS", GOLD, TEXT_CENTER);
-	/* (the pad's name as far as its column reaches) */
+	/* (its name over the rows' names, the pad's and the keyboard's over
+	 * their columns: one line, room for the D-pad's row and the
+	 * statistics') */
+	minifont_draw(x0 + LABEL_X, y0 + HEAD_Y, "Controls", GOLD, 1);
 	char name[40];
 	snprintf(name, sizeof name, "%s", C.has_pad ? C.name : "No controller");
 	for (size_t n = strlen(name); n > 1 && minifont_width(name, 1) > (KEYS ? KEY_X - PAD_X - 6 : CORE_W - PAD_X - 10); ) name[--n] = 0;
-	minifont_draw(x0 + PAD_X, y0 + 21, name, C.has_pad ? SKY : DIM, 1);
-	if (KEYS) minifont_draw(x0 + KEY_X, y0 + 21, "Keyboard", SKY, 1);
+	minifont_draw(x0 + PAD_X, y0 + HEAD_Y, name, C.has_pad ? SKY : DIM, 1);
+	if (KEYS) minifont_draw(x0 + KEY_X, y0 + HEAD_Y, "Keyboard", SKY, 1);
 	rows_draw(x0, y0);
 	bottom_draw(x0, y0);
 	char note[128];
 	row_note(note, sizeof note);
-	note_draw(cx, y0 + 124, note);
+	bool two = note_draw(cx, y0 + NOTE_Y, note);
 	char nav[64];
 	if (touch_shown() && !C.has_pad) snprintf(nav, sizeof nav, "Tap a row to choose it");
 	else snprintf(nav, sizeof nav, "%s: choose   %s: back", nav_word(false), nav_word(true));
-	if (!C.listen && !C.confirm) minifont_draw_centered(cx, y0 + 149, nav, DIM, 1);
+	/* (under a note of two lines with every row there, its second line
+	 * takes the keys' place: the note says what A does) */
+	if (!C.listen && !C.confirm && !(two && NOTE_Y + 11 + TEXT_H > 149)) minifont_draw_centered(cx, y0 + 149, nav, DIM, 1);
 }

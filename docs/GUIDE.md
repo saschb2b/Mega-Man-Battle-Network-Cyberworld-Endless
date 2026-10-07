@@ -405,17 +405,29 @@ A as on the GBA (Square on a PlayStation pad; a Nintendo pad has its B
 there already); and A and B swapped, for a pad that reads them the other
 way round. Choose A, B, L, R, Start or Select and press the button (or, on
 a PC or in a browser, the key) you want for it; one that this leaves with
-no button takes the old one in exchange. **Defaults** brings them all back, and
+no button takes the old one in exchange. **D-pad** asks for UP, DOWN, LEFT
+and RIGHT in turn, each a button, a stick, a hat or a key, added to what
+moves already. **Defaults** brings them all back, and
 **Done** asks you to press the new
 A to keep them: if you do not within ten seconds, the old ones stay. The
 screen itself always takes the controller's own A, B and D-pad, the
 keyboard and taps, whatever the buttons are set to. Nintendo's pads keep
 their buttons apart from the others', as their A sits where the others'
-B does. The screen writes `pad.ini` and `keys.ini` in the save folder
+B does.
+
+A controller SDL has no layout for (an 8BitDo Micro on a PC, or a pad a
+browser does not know) is read as it is: its hat and first stick move,
+its first two buttons are A and B, and the screen names its buttons by
+number (**Btn 1**), so each can be given its GBA button there. Its D-pad,
+whatever it sends, is set with **D-pad**.
+
+The screen writes `pad.ini` and `keys.ini` in the save folder
 (`~/.local/share/cyberworld-endless/` on Linux, `savedata/` on the
 handheld), made with these defaults on the first start; by hand they set
-the D-pad and the sticks too (`pad.ini` names a controller's buttons as
-SDL does: `a`, `leftshoulder`, `lefttrigger`, `-lefty`).
+the sticks too. `pad.ini` names a controller's buttons as SDL does (`a`,
+`leftshoulder`, `lefttrigger`, `-lefty`), and those of one read as it is
+under `[joystick]` as SDL's mappings name a joystick's: `b0`, `h0.1` (its
+hat up), `-a1` (its second axis one way).
 
 A touch screen shows the buttons on it from its first touch (a Steam
 Deck's too), until a key or a controller is used again. The D-pad takes

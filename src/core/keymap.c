@@ -100,6 +100,11 @@ void platform_keys_bind(KeyMap *k, int gba, int sc) {
 	}
 }
 
+void platform_keys_add(KeyMap *k, int gba, int sc) {
+	if (gba < 0 || gba >= 10 || !platform_key_free(sc)) return;
+	k->bits[sc] = 1u << gba;
+}
+
 static const char keys_header[] =
 	"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
 	"# button its keys, separated by commas. Keys are named as on a US\n"

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Controllers SDL does not know work (issue #112).** An 8BitDo Micro,
+  and any pad without a layout in SDL, went unread: the game opened only
+  pads SDL calls controllers. They are read as they are now, their hat
+  and first stick moving and their buttons named by number on the
+  controls screen. In a browser, a pad the browser does not know had its
+  D-pad nowhere (SDL takes every browser pad as the standard one, its
+  D-pad on buttons 12-15): it is read the same way, Chrome's hat on one
+  axis too. And the controls screen sets the D-pad: **D-pad** asks for
+  UP, DOWN, LEFT and RIGHT in turn, each a button, a stick, a hat or a
+  key, added to what moves already, for a pad in keyboard mode as well.
+
 - **The project page draws one run as one picture.** Below the trailer,
   the net's spine runs down from Lan's room to the Nest on layer 10, and
   what happens on the way branches off it, left and right in turn: the

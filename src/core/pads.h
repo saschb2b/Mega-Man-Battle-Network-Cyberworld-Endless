@@ -1,7 +1,9 @@
 /* The controllers (issue #37): opened through SDL's game controller API,
- * read through the player's map (padmap.c, pad.ini in the data folder),
- * and what the controls screen (controls.c) asks of them. platform.c hands
- * them SDL's events and reads them once a frame in platform_poll. */
+ * or, one SDL makes no controller of (or a browser's pad the browser does
+ * not know), as a joystick read raw (issue #112); read through the
+ * player's map (padmap.c, pad.ini in the data folder), and what the
+ * controls screen (controls.c) asks of them. platform.c hands them SDL's
+ * events and reads them once a frame in platform_poll. */
 #ifndef CW_PADS_H
 #define CW_PADS_H
 
@@ -38,6 +40,8 @@ uint32_t pads_menu_taken(void);
 /* Back and start held on one pad: the way out no map takes away. */
 bool pads_quit_held(void);
 bool pads_present(void);
+/* Any pad's input held (the controls screen waits for its D-pad's let go). */
+bool pads_any_held(void);
 /* The pad used last (else the first): its family, style and name; false
  * for none. */
 bool pads_last(int *family, int *style, const char **name);

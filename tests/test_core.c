@@ -2532,6 +2532,43 @@ static void test_padmap(void) {
 	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_A && padmap_bits(&m, PAD_FAMILY_NINTENDO, PAD_B) == BTN_B, "binding one family's B moved another's");
 	padmap_bind(&m, PAD_FAMILY_XBOX, 4, PAD_X);
 	CHECK(padmap_bits(&m, PAD_FAMILY_XBOX, PAD_X) == BTN_A && padmap_bits(&m, PAD_FAMILY_XBOX, PAD_A) == BTN_B, "A taking B's x left B without A's a");
+	/* a raw joystick's (issue #112): its names both ways, either case; its
+	 * defaults (the hat and the first axes move, 8BitDo's buttons and a
+	 * pad's common ones); a direction added keeps the rest */
+	PadMap r;
+	padmap_default(&r);
+	for (int i = 0; i < PAD_RAW_INPUTS; ++i)
+		CHECK(padmap_input_of(PAD_FAMILY_RAW, padmap_name_of(PAD_FAMILY_RAW, i)) == i, "%s does not name raw input %d", padmap_name_of(PAD_FAMILY_RAW, i), i);
+	CHECK(padmap_input_of(PAD_FAMILY_RAW, "H0.4") == PAD_RAW_HAT + 2 && padmap_input_of(PAD_FAMILY_RAW, "+A7") == PAD_RAW_AXIS(7, true), "a raw name in capitals refused");
+	CHECK(padmap_input_of(PAD_FAMILY_RAW, "b32") == PAD_NONE && padmap_input_of(PAD_FAMILY_RAW, "h0.3") == PAD_NONE && padmap_input_of(PAD_FAMILY_RAW, "a1") == PAD_NONE &&
+		padmap_input_of(PAD_FAMILY_RAW, "b1x") == PAD_NONE && padmap_input_of(PAD_FAMILY_RAW, "-a8") == PAD_NONE && padmap_input_of(PAD_FAMILY_RAW, "start") == PAD_NONE,
+		"a raw name that names nothing taken");
+	CHECK(padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_HAT + 0) == BTN_UP && padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_HAT + 3) == BTN_LEFT &&
+		padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_AXIS(1, true)) == BTN_DOWN && padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_AXIS(0, true)) == BTN_RIGHT,
+		"a raw joystick's hat or first axes do not move");
+	CHECK(padmap_bits(&r, PAD_FAMILY_RAW, 0) == BTN_A && padmap_bits(&r, PAD_FAMILY_RAW, 1) == BTN_B && padmap_bits(&r, PAD_FAMILY_RAW, 6) == BTN_L &&
+		padmap_bits(&r, PAD_FAMILY_RAW, 7) == BTN_R && padmap_bits(&r, PAD_FAMILY_RAW, 11) == BTN_START && padmap_bits(&r, PAD_FAMILY_RAW, 10) == BTN_SELECT,
+		"8BitDo's A, B, L, R, START or SELECT is not");
+	CHECK(padmap_bits(&r, PAD_FAMILY_RAW, 9) == BTN_START && padmap_bits(&r, PAD_FAMILY_RAW, 8) == BTN_SELECT && padmap_bits(&r, PAD_FAMILY_RAW, 4) == BTN_L,
+		"a common pad's START, SELECT or L is not");
+	padmap_add(&r, PAD_FAMILY_RAW, 0, PAD_RAW_AXIS(6, false));
+	CHECK(r.in[PAD_FAMILY_RAW][0][0] == PAD_RAW_AXIS(6, false) && padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_HAT + 0) == BTN_UP &&
+		padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_AXIS(1, false)) == BTN_UP, "an added up lost the hat or the axis");
+	padmap_add(&r, PAD_FAMILY_RAW, 1, PAD_RAW_AXIS(6, false));
+	CHECK(padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_AXIS(6, false)) == BTN_DOWN, "an input added to down stayed on up");
+	padmap_add(&r, PAD_FAMILY_RAW, 1, PAD_RAW_AXIS(6, false));
+	CHECK(r.in[PAD_FAMILY_RAW][1][1] == PAD_RAW_HAT + 2, "an input added twice took two places");
+	for (int k = 0; k < 6; ++k) padmap_add(&r, PAD_FAMILY_RAW, 2, 20 + k);
+	CHECK(r.in[PAD_FAMILY_RAW][2][0] == 25 && r.in[PAD_FAMILY_RAW][2][3] == 22, "a full row kept the wrong inputs");
+	padmap_add(&r, PAD_FAMILY_XBOX, 0, PAD_X);
+	CHECK(padmap_bits(&r, PAD_FAMILY_XBOX, PAD_X) == BTN_UP && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_DPUP) == BTN_UP && !padmap_bits(&r, PAD_FAMILY_RAW, 2),
+		"a pad's added up lost its D-pad, or moved the joystick's");
+	CHECK(!strcmp(padmap_label_of(PAD_FAMILY_RAW, PAD_STYLE_GENERIC, 3), "Btn 4") && !strcmp(padmap_label_of(PAD_FAMILY_RAW, 0, PAD_RAW_HAT + 1), "Hat right") &&
+		!strcmp(padmap_label_of(PAD_FAMILY_RAW, 0, PAD_RAW_AXIS(1, false)), "Axis 2-") && !strcmp(padmap_preset_name(PAD_FAMILY_RAW, 0, 1), "A and B swapped"),
+		"a raw joystick's words are off");
+	/* Chrome's hat as one axis */
+	CHECK(padmap_pov_hat(-1.0) == 1 && padmap_pov_hat(-0.7143) == 3 && padmap_pov_hat(-0.4286) == 2 && padmap_pov_hat(0.1429) == 4 &&
+		padmap_pov_hat(0.7143) == 8 && padmap_pov_hat(1.0) == 9 && padmap_pov_hat(1.2857) == 0, "Chrome's hat axis read wrong");
 	/* every GBA button keeps one input whatever is bound */
 	for (int k = 0; k < 200; ++k) padmap_bind(&m, k & 1, 4 + k % 6, (k * 7) % PAD_INPUTS == 29 ? PAD_Y : (k * 7) % PAD_INPUTS);
 	for (int f = 0; f < PAD_FAMILIES; ++f)
@@ -2555,6 +2592,9 @@ static void test_padmap(void) {
 	int n = padmap_format(&m, text, sizeof text);
 	CHECK(n > 0 && n < (int)sizeof text - 1 && strstr(text, "[nintendo]") && strstr(text, "L      = -righty"), "pad.ini written wrong:\n%s", text);
 	CHECK(padmap_parse(text, &back, errors, sizeof errors) == 0 && padmap_same(&m, &back), "pad.ini read back differs: %s", errors);
+	CHECK(strstr(text, "[joystick]") && strstr(text, "UP     = h0.1, -a1"), "pad.ini's joysticks written wrong:\n%s", text);
+	CHECK(padmap_parse("[joystick]\nUP = -a6, h0.1\nA = b2\nB = start\n", &back, errors, sizeof errors) == 1 &&
+		padmap_bits(&back, PAD_FAMILY_RAW, PAD_RAW_AXIS(6, false)) == BTN_UP && padmap_bits(&back, PAD_FAMILY_RAW, 2) == BTN_A, "pad.ini's [joystick] not read: %s", errors);
 	/* a hand-written one: lines without a section are [pad]'s, a button left out keeps its default, mistakes are said */
 	CHECK(padmap_parse("A = x, y\n[nintendo]\nb = y\nZ = a\nSTART = hat\n[snes]\nA = b\n", &back, errors, sizeof errors) == 3, "pad.ini's mistakes not counted: %s", errors);
 	CHECK(padmap_bits(&back, PAD_FAMILY_XBOX, PAD_X) == BTN_A && padmap_bits(&back, PAD_FAMILY_XBOX, PAD_Y) == BTN_A && !padmap_bits(&back, PAD_FAMILY_XBOX, PAD_A), "A = x, y not read");

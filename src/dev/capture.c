@@ -42,6 +42,8 @@ static void parse_buttons(const char *s, InputStep *step) {
 	char *save = NULL;
 	for (char *t = strtok_r(buf, "+", &save); t; t = strtok_r(NULL, "+", &save)) {
 		int in = !SDL_strncasecmp(t, "pad.", 4) ? padmap_input(t + 4) : PAD_NONE;
+		/* (a raw joystick's: --pad raw, "pad.b9", "pad.h0.1") */
+		if (in == PAD_NONE && !SDL_strncasecmp(t, "pad.", 4)) in = padmap_input_of(PAD_FAMILY_RAW, t + 4);
 		if (in != PAD_NONE) step->pad |= (uint64_t)1 << in;
 		if (!SDL_strncasecmp(t, "key.", 4)) step->key = SDL_GetScancodeFromName(t + 4);
 		for (size_t i = 0; i < sizeof names / sizeof *names; ++i)

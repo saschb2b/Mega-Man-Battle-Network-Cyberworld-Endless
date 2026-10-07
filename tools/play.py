@@ -35,7 +35,8 @@ tools/romlab/labtrace.py). NAME/bin.pin keeps the session's
 build across starts.
 BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT);
 pad.NAME holds a virtual controller's input by SDL's name (pad.x, pad.-lefty;
-start with -- --pad xbox|playstation|nintendo|generic), key.NAME a key
+start with -- --pad xbox|playstation|nintendo|generic|raw; a raw joystick's
+pad.b9, pad.h0.1, pad.-a1), key.NAME a key
 (key.J), both through SDL as a player's: the controls screen and pad.ini.
 The keyboard's layout is the handheld's buttons: A talks and confirms, B
 runs (hold) and cancels, START opens the PET, L and R open the Custom

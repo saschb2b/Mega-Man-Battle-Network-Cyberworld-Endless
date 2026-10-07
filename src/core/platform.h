@@ -78,6 +78,9 @@ typedef struct { uint32_t bits[SDL_NUM_SCANCODES]; } KeyMap;
 void platform_keys_get(KeyMap *k);
 void platform_keys_default(KeyMap *k);
 void platform_keys_bind(KeyMap *k, int gba, int scancode);
+/* `scancode` added to GBA button `gba`'s keys (the rest kept: a direction's
+ * WASD and arrows), taken from any other button */
+void platform_keys_add(KeyMap *k, int gba, int scancode);
 void platform_keys_set(const KeyMap *k);
 void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n);
 bool platform_key_free(int scancode);

@@ -1,5 +1,6 @@
 #include "padmap.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -13,7 +14,7 @@ static const char *const input_names[PAD_INPUTS] = {
 	NULL, "lefttrigger", NULL, "righttrigger",
 };
 static const char *const gba_names[PAD_GBA] = { "UP", "DOWN", "LEFT", "RIGHT", "A", "B", "L", "R", "START", "SELECT" };
-static const char *const family_names[PAD_FAMILIES] = { "pad", "nintendo" };
+static const char *const family_names[PAD_FAMILIES] = { "pad", "nintendo", "joystick" };
 
 /* (ASCII, either case: the files are written by hand too) */
 static bool same_word(const char *a, const char *b) {
@@ -31,6 +32,67 @@ int padmap_input(const char *name) {
 	for (int i = 0; i < PAD_INPUTS; ++i)
 		if (input_names[i] && same_word(name, input_names[i])) return i;
 	return PAD_NONE;
+}
+
+/* ---- a raw joystick's inputs (issue #112) ---- */
+
+static const int hat_bits[4] = { 1, 2, 4, 8 };   /* (SDL's hat values: up, right, down, left) */
+static const char *const hat_words[4] = { "up", "right", "down", "left" };
+
+/* its names in pad.ini ("b0", "h0.1", "-a1") and its words on the screen
+ * ("Btn 1", "Hat up", "Axis 2-"), made once */
+static const char *raw_text(int input, bool words) {
+	static char names[PAD_RAW_INPUTS][16], labels[PAD_RAW_INPUTS][20];
+	static bool made;
+	if (input < 0 || input >= PAD_RAW_INPUTS) return NULL;
+	if (!made) {
+		made = true;
+		for (int i = 0; i < PAD_RAW_INPUTS; ++i) {
+			if (i < PAD_RAW_HAT) {
+				snprintf(names[i], sizeof names[i], "b%d", i);
+				snprintf(labels[i], sizeof labels[i], "Btn %d", i + 1);
+			} else if (i < PAD_RAW_AXIS_FIRST) {
+				snprintf(names[i], sizeof names[i], "h0.%d", hat_bits[i - PAD_RAW_HAT]);
+				snprintf(labels[i], sizeof labels[i], "Hat %s", hat_words[i - PAD_RAW_HAT]);
+			} else {
+				int a = (i - PAD_RAW_AXIS_FIRST) / 2;
+				bool plus = (i - PAD_RAW_AXIS_FIRST) & 1;
+				snprintf(names[i], sizeof names[i], "%ca%d", plus ? '+' : '-', a);
+				snprintf(labels[i], sizeof labels[i], "Axis %d%c", a + 1, plus ? '+' : '-');
+			}
+		}
+	}
+	return words ? labels[input] : names[input];
+}
+
+/* "b12", "h0.4", "+a3" (either case) as a raw input, else PAD_NONE */
+static int raw_input(const char *name) {
+	int n = 0;
+	char c = name[0] >= 'A' && name[0] <= 'Z' ? (char)(name[0] - 'A' + 'a') : name[0];
+	if (c == 'b' && sscanf(name + 1, "%d", &n) == 1 && n >= 0 && n < PAD_RAW_BUTTONS) return n;
+	if (c == 'h' && sscanf(name + 1, "0.%d", &n) == 1)
+		for (int k = 0; k < 4; ++k)
+			if (hat_bits[k] == n) return PAD_RAW_HAT + k;
+	char a = name[1] >= 'A' && name[1] <= 'Z' ? (char)(name[1] - 'A' + 'a') : name[1];
+	if ((c == '-' || c == '+') && a == 'a' && sscanf(name + 2, "%d", &n) == 1 && n >= 0 && n < PAD_RAW_AXES) return PAD_RAW_AXIS(n, c == '+');
+	return PAD_NONE;
+}
+
+int padmap_inputs(int family) { return family == PAD_FAMILY_RAW ? PAD_RAW_INPUTS : PAD_INPUTS; }
+
+int padmap_pov_hat(double v) {
+	static const uint8_t ways[8] = { 1, 1 | 2, 2, 2 | 4, 4, 4 | 8, 8, 8 | 1 };
+	if (v > 1.01 || v < -1.01) return 0;
+	return ways[(int)floor((v + 1.0) * 3.5 + 0.5) & 7];
+}
+
+const char *padmap_name_of(int family, int input) { return family == PAD_FAMILY_RAW ? raw_text(input, false) : padmap_name(input); }
+
+int padmap_input_of(int family, const char *name) {
+	if (family != PAD_FAMILY_RAW) return padmap_input(name);
+	int in = raw_input(name);
+	/* (and checked whole: "b1x" names nothing) */
+	return in != PAD_NONE && same_word(name, raw_text(in, false)) ? in : PAD_NONE;
 }
 
 const char *padmap_gba_name(int gba) { return gba >= 0 && gba < PAD_GBA ? gba_names[gba] : NULL; }
@@ -82,6 +144,12 @@ const char *padmap_label(int style, int input) {
 	return words[input][style];
 }
 
+const char *padmap_label_of(int family, int style, int input) {
+	if (family != PAD_FAMILY_RAW) return padmap_label(style, input);
+	const char *s = raw_text(input, true);
+	return s ? s : "?";
+}
+
 /* ---- the map ---- */
 
 static void set_row(uint8_t *row, int a, int b) {
@@ -92,6 +160,19 @@ static void set_row(uint8_t *row, int a, int b) {
 
 void padmap_default_family(PadMap *m, int family) {
 	uint8_t (*r)[PAD_PER] = m->in[family];
+	if (family == PAD_FAMILY_RAW) {
+		set_row(r[0], PAD_RAW_HAT + 0, PAD_RAW_AXIS(1, false));
+		set_row(r[1], PAD_RAW_HAT + 2, PAD_RAW_AXIS(1, true));
+		set_row(r[2], PAD_RAW_HAT + 3, PAD_RAW_AXIS(0, false));
+		set_row(r[3], PAD_RAW_HAT + 1, PAD_RAW_AXIS(0, true));
+		set_row(r[4], 0, PAD_NONE);
+		set_row(r[5], 1, PAD_NONE);
+		set_row(r[6], 4, 6);
+		set_row(r[7], 5, 7);
+		set_row(r[8], 9, 11);
+		set_row(r[9], 8, 10);
+		return;
+	}
 	set_row(r[0], PAD_DPUP, PAD_AXIS(1, false));
 	set_row(r[1], PAD_DPDOWN, PAD_AXIS(1, true));
 	set_row(r[2], PAD_DPLEFT, PAD_AXIS(0, false));
@@ -132,7 +213,7 @@ static bool take_out(uint8_t *row, int input) {
 }
 
 void padmap_bind(PadMap *m, int family, int gba, int input) {
-	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || !padmap_name(input)) return;
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || !padmap_name_of(family, input)) return;
 	uint8_t old[PAD_PER];
 	memcpy(old, m->in[family][gba], PAD_PER);
 	set_row(m->in[family][gba], input, PAD_NONE);
@@ -146,29 +227,42 @@ void padmap_bind(PadMap *m, int family, int gba, int input) {
 	}
 }
 
+void padmap_add(PadMap *m, int family, int gba, int input) {
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || !padmap_name_of(family, input)) return;
+	uint8_t *row = m->in[family][gba];
+	for (int i = 0; i < PAD_PER && row[i] != PAD_NONE; ++i)
+		if (row[i] == input) return;
+	for (int g = 0; g < PAD_GBA; ++g)
+		if (g != gba) take_out(m->in[family][g], input);
+	memmove(row + 1, row, PAD_PER - 1);
+	row[0] = (uint8_t)input;
+}
+
 /* ---- the presets: where A and B go ---- */
 
+/* (a raw joystick's first two buttons: b1 is PAD_B's number too) */
 static const struct { uint8_t a, b; } presets[PAD_FAMILIES][3] = {
 	[PAD_FAMILY_XBOX] = { { PAD_A, PAD_B }, { PAD_A, PAD_X }, { PAD_B, PAD_A } },
 	[PAD_FAMILY_NINTENDO] = { { PAD_A, PAD_B }, { PAD_B, PAD_A } },
+	[PAD_FAMILY_RAW] = { { 0, 1 }, { 1, 0 } },
 };
-static const int preset_count[PAD_FAMILIES] = { 3, 2 };
+static const int preset_count[PAD_FAMILIES] = { 3, 2, 2 };
 
 int padmap_presets(int family) { return family >= 0 && family < PAD_FAMILIES ? preset_count[family] : 0; }
 
 const char *padmap_preset_name(int family, int style, int preset) {
 	static char s[32];
 	if (preset < 0 || preset >= padmap_presets(family)) return "Custom";
-	if (preset == 0) return "As labeled";
+	if (preset == 0) return family == PAD_FAMILY_RAW ? "As it came" : "As labeled";
 	if (presets[family][preset].a == PAD_B) return "A and B swapped";
-	snprintf(s, sizeof s, "B on %s", padmap_label(style, presets[family][preset].b));
+	snprintf(s, sizeof s, "B on %s", padmap_label_of(family, style, presets[family][preset].b));
 	return s;
 }
 
 const char *padmap_preset_about(int family, int style, int preset) {
 	static char s[96];
 	if (preset < 0 || preset >= padmap_presets(family)) return "A and B set by hand";
-	const char *a = padmap_label(style, presets[family][preset].a), *b = padmap_label(style, presets[family][preset].b);
+	const char *a = padmap_label_of(family, style, presets[family][preset].a), *b = padmap_label_of(family, style, presets[family][preset].b);
 	/* (one line under the rows: the preset's own name says which buttons,
 	 * and a PlayStation pad's labels are long) */
 	if (family == PAD_FAMILY_XBOX && preset == 1) snprintf(s, sizeof s, "B left of A, as on a GBA");
@@ -208,7 +302,7 @@ static void say(char *errors, int size, int line, const char *what, const char *
 }
 
 /* "a, -lefty" into a row; false where a name is no input */
-static bool parse_inputs(char *list, uint8_t *row, char *errors, int size, int line) {
+static bool parse_inputs(char *list, uint8_t *row, int family, char *errors, int size, int line) {
 	bool ok = true;
 	int k = 0;
 	memset(row, PAD_NONE, PAD_PER);
@@ -217,7 +311,7 @@ static bool parse_inputs(char *list, uint8_t *row, char *errors, int size, int l
 		if (comma) *comma = 0;
 		char *w = trim(t);
 		if (!*w) continue;
-		int in = padmap_input(w);
+		int in = padmap_input_of(family, w);
 		if (in == PAD_NONE) { say(errors, size, line, "no controller button called", w); ok = false; }
 		else if (k < PAD_PER) row[k++] = (uint8_t)in;
 	}
@@ -244,7 +338,7 @@ static bool parse_line(char *s, PadMap *m, int *family, char *errors, int size, 
 	int gba = padmap_gba(trim(s));
 	if (gba < 0) { say(errors, size, line, "no GBA button called", trim(s)); return false; }
 	/* (the file's inputs replace the defaults for this button) */
-	return *family < 0 || parse_inputs(eq + 1, m->in[*family][gba], errors, size, line);
+	return *family < 0 || parse_inputs(eq + 1, m->in[*family][gba], *family, errors, size, line);
 }
 
 int padmap_parse(const char *text, PadMap *m, char *errors, int size) {
@@ -272,14 +366,16 @@ int padmap_format(const PadMap *m, char *out, int size) {
 		"# triggers lefttrigger righttrigger, and the sticks pushed one way, -leftx\n"
 		"# +leftx -lefty +lefty -rightx +rightx -righty +righty. [pad] is for Xbox,\n"
 		"# PlayStation and other controllers, whose a is the bottom button, [nintendo]\n"
-		"# for Nintendo's, whose a is the button marked A. Delete this file for the\n"
-		"# defaults.\n");
+		"# for Nintendo's, whose a is the button marked A. [joystick] is for a pad SDL\n"
+		"# does not know, read as it is: its buttons b0 b1 b2..., its hat h0.1 (up)\n"
+		"# h0.2 (right) h0.4 (down) h0.8 (left), and its axes pushed one way, -a0\n"
+		"# +a0 -a1 +a1... Delete this file for the defaults.\n");
 	for (int f = 0; f < PAD_FAMILIES && n >= 0 && n < size; ++f) {
 		n += snprintf(out + n, (size_t)(size - n), "\n[%s]\n", family_names[f]);
 		for (int g = 0; g < PAD_GBA && n >= 0 && n < size; ++g) {
 			n += snprintf(out + n, (size_t)(size - n), "%-6s =", gba_names[g]);
 			for (int i = 0; i < PAD_PER && m->in[f][g][i] != PAD_NONE && n >= 0 && n < size; ++i)
-				if (padmap_name(m->in[f][g][i])) n += snprintf(out + n, (size_t)(size - n), "%s %s", i ? "," : "", padmap_name(m->in[f][g][i]));
+				if (padmap_name_of(f, m->in[f][g][i])) n += snprintf(out + n, (size_t)(size - n), "%s %s", i ? "," : "", padmap_name_of(f, m->in[f][g][i]));
 			if (n >= 0 && n < size) n += snprintf(out + n, (size_t)(size - n), "\n");
 		}
 	}
