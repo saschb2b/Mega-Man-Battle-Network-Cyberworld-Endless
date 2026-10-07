@@ -227,15 +227,44 @@ void padmap_bind(PadMap *m, int family, int gba, int input) {
 	}
 }
 
-void padmap_add(PadMap *m, int family, int gba, int input) {
-	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || !padmap_name_of(family, input)) return;
+int padmap_count(const PadMap *m, int family, int gba) {
+	int n = 0;
+	while (n < PAD_PER && m->in[family][gba][n] != PAD_NONE) ++n;
+	return n;
+}
+
+int padmap_set_slot(PadMap *m, int family, int gba, int slot, int input) {
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA || slot < 0 || slot >= PAD_PER || !padmap_name_of(family, input))
+		return PAD_SLOT_REFUSED;
 	uint8_t *row = m->in[family][gba];
-	for (int i = 0; i < PAD_PER && row[i] != PAD_NONE; ++i)
-		if (row[i] == input) return;
+	int n = padmap_count(m, family, gba);
+	for (int i = 0; i < n; ++i)
+		if (row[i] == input) {
+			/* (already the button's: to the slot asked, where it has one) */
+			if (slot < n && slot != i) { row[i] = row[slot]; row[slot] = (uint8_t)input; }
+			return PAD_SLOT_ALONE;
+		}
+	int old = slot < n ? row[slot] : PAD_NONE;
+	/* a button whose only input it is gives it up for the one replaced,
+	 * or, with none replaced, keeps it */
 	for (int g = 0; g < PAD_GBA; ++g)
-		if (g != gba) take_out(m->in[family][g], input);
-	memmove(row + 1, row, PAD_PER - 1);
-	row[0] = (uint8_t)input;
+		if (g != gba && padmap_count(m, family, g) == 1 && m->in[family][g][0] == input && old == PAD_NONE) return PAD_SLOT_REFUSED;
+	int from = PAD_SLOT_ALONE;
+	for (int g = 0; g < PAD_GBA; ++g) {
+		if (g == gba || !take_out(m->in[family][g], input)) continue;
+		from = g;
+		if (m->in[family][g][0] == PAD_NONE) m->in[family][g][0] = (uint8_t)old;
+	}
+	row[slot < n ? slot : n < PAD_PER ? n : PAD_PER - 1] = (uint8_t)input;
+	return from;
+}
+
+bool padmap_clear_slot(PadMap *m, int family, int gba, int slot) {
+	if (family < 0 || family >= PAD_FAMILIES || gba < 0 || gba >= PAD_GBA) return false;
+	int n = padmap_count(m, family, gba);
+	if (slot < 0 || slot >= n || n < 2) return false;
+	take_out(m->in[family][gba], m->in[family][gba][slot]);
+	return true;
 }
 
 /* ---- the presets: where A and B go ---- */

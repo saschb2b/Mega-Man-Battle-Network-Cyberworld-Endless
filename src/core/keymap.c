@@ -26,11 +26,25 @@ static const struct { const char *name; uint32_t bit; const char *keys; } key_de
 	{ "START", BTN_START, "Return, Keypad Enter" },
 	{ "SELECT", BTN_SELECT, "R, Backspace" },
 };
-static uint32_t key_map[SDL_NUM_SCANCODES];
+static KeyMap in_play;                         /* each button's keys in order, the first its MAIN */
+static uint32_t key_map[SDL_NUM_SCANCODES];    /* (per key its buttons, made from in_play) */
 static char keys_path[600];
 
-/* "J, X" -> the button on each key; false and a message for an unknown name */
-static bool bind_keys(uint32_t *map, uint32_t bit, const char *list, const char *where) {
+static void rebuild(void) {
+	memset(key_map, 0, sizeof key_map);
+	for (int g = 0; g < 10; ++g)
+		for (int i = 0; i < KEYS_PER && in_play.slot[g][i]; ++i) key_map[in_play.slot[g][i]] |= 1u << g;
+}
+
+static int count_of(const KeyMap *k, int g) {
+	int n = 0;
+	while (n < KEYS_PER && k->slot[g][n]) ++n;
+	return n;
+}
+
+/* "J, X" -> button g's keys in that order, after those it has; false and
+ * a message for an unknown name */
+static bool bind_keys(KeyMap *k, int g, const char *list, const char *where) {
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", list);
 	bool ok = true;
@@ -47,21 +61,27 @@ static bool bind_keys(uint32_t *map, uint32_t bit, const char *list, const char 
 			ok = false;
 			continue;
 		}
-		map[sc] |= bit;
+		int n = count_of(k, g);
+		bool had = false;
+		for (int i = 0; i < n; ++i) had |= k->slot[g][i] == sc;
+		if (!had && n < KEYS_PER) k->slot[g][n] = (uint16_t)sc;
 	}
 	return ok;
 }
 
-static void defaults_into(uint32_t *map) {
-	memset(map, 0, sizeof key_map);
+static void defaults_into(KeyMap *k) {
+	memset(k, 0, sizeof *k);
 	for (size_t i = 0; i < sizeof key_defaults / sizeof *key_defaults; ++i)
-		bind_keys(map, key_defaults[i].bit, key_defaults[i].keys, "defaults");
+		bind_keys(k, (int)i, key_defaults[i].keys, "defaults");
 }
 
-void keymap_default(void) { defaults_into(key_map); }
+void keymap_default(void) {
+	defaults_into(&in_play);
+	rebuild();
+}
 
-void platform_keys_get(KeyMap *k) { memcpy(k->bits, key_map, sizeof key_map); }
-void platform_keys_default(KeyMap *k) { defaults_into(k->bits); }
+void platform_keys_get(KeyMap *k) { *k = in_play; }
+void platform_keys_default(KeyMap *k) { defaults_into(k); }
 
 bool platform_key_free(int sc) {
 	if (sc <= SDL_SCANCODE_UNKNOWN || sc >= SDL_NUM_SCANCODES || sc == SDL_SCANCODE_ESCAPE || sc == SDL_SCANCODE_F11 || sc == SDL_SCANCODE_AC_BACK) return false;
@@ -70,50 +90,72 @@ bool platform_key_free(int sc) {
 	return name[0] && !strchr(name, ',');
 }
 
+int platform_keys_slot(const KeyMap *k, int gba, int slot) {
+	if (!k) k = &in_play;
+	return gba >= 0 && gba < 10 && slot >= 0 && slot < KEYS_PER ? k->slot[gba][slot] : 0;
+}
+
 void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n) {
-	const uint32_t *map = k ? k->bits : key_map;
+	if (!k) k = &in_play;
 	out[0] = 0;
-	for (int sc = 0; sc < SDL_NUM_SCANCODES && gba >= 0 && gba < 10; ++sc) {
-		const char *name = SDL_GetScancodeName((SDL_Scancode)sc);
-		if (!(map[sc] >> gba & 1) || !name[0]) continue;
+	for (int i = 0; gba >= 0 && gba < 10 && i < KEYS_PER && k->slot[gba][i]; ++i) {
 		size_t m = strlen(out);
-		snprintf(out + m, n - m, "%s%s", m ? ", " : "", name);
+		snprintf(out + m, n - m, "%s%s", m ? ", " : "", SDL_GetScancodeName((SDL_Scancode)k->slot[gba][i]));
 	}
 }
 
-void platform_keys_bind(KeyMap *k, int gba, int sc) {
-	if (gba < 0 || gba >= 10 || !platform_key_free(sc)) return;
-	static bool had[SDL_NUM_SCANCODES];   /* (the keys `gba` had) */
-	uint32_t bit = 1u << gba, others = k->bits[sc] & ~bit;
-	for (int s = 0; s < SDL_NUM_SCANCODES; ++s) {
-		had[s] = k->bits[s] & bit;
-		k->bits[s] &= ~bit;
+/* `sc` out of a row of keys (the rest moved up); whether it was there */
+static bool take_key(uint16_t *row, int sc) {
+	int k = 0;
+	bool was = false;
+	for (int i = 0; i < KEYS_PER; ++i) {
+		if (row[i] == sc) { was = true; continue; }
+		if (row[i]) row[k++] = row[i];
 	}
-	k->bits[sc] = bit;
-	/* (a button the key was taken from, left with none, takes them: the two swap) */
+	while (k < KEYS_PER) row[k++] = 0;
+	return was;
+}
+
+int platform_keys_set_slot(KeyMap *k, int gba, int slot, int sc) {
+	if (gba < 0 || gba >= 10 || slot < 0 || slot >= KEYS_PER || !platform_key_free(sc)) return KEYS_REFUSED;
+	uint16_t *row = k->slot[gba];
+	int n = count_of(k, gba);
+	for (int i = 0; i < n; ++i)
+		if (row[i] == sc) {
+			/* (already the button's: to the slot asked, where it has one) */
+			if (slot < n && slot != i) { row[i] = row[slot]; row[slot] = (uint16_t)sc; }
+			return KEYS_ALONE;
+		}
+	int old = slot < n ? row[slot] : 0;
+	/* a button whose only key it is gives it up for the one replaced, or,
+	 * with none replaced, keeps it */
+	for (int g = 0; g < 10; ++g)
+		if (g != gba && count_of(k, g) == 1 && k->slot[g][0] == sc && !old) return KEYS_REFUSED;
+	int from = KEYS_ALONE;
 	for (int g = 0; g < 10; ++g) {
-		bool any = false;
-		if (!(others >> g & 1)) continue;
-		for (int s = 0; s < SDL_NUM_SCANCODES && !any; ++s) any = k->bits[s] >> g & 1;
-		for (int s = 0; s < SDL_NUM_SCANCODES && !any; ++s)
-			if (had[s] && s != sc) k->bits[s] |= 1u << g;
+		if (g == gba || !take_key(k->slot[g], sc)) continue;
+		from = g;
+		if (!k->slot[g][0]) k->slot[g][0] = (uint16_t)old;
 	}
+	row[slot < n ? slot : n < KEYS_PER ? n : KEYS_PER - 1] = (uint16_t)sc;
+	return from;
 }
 
-void platform_keys_add(KeyMap *k, int gba, int sc) {
-	if (gba < 0 || gba >= 10 || !platform_key_free(sc)) return;
-	k->bits[sc] = 1u << gba;
+bool platform_keys_clear_slot(KeyMap *k, int gba, int slot) {
+	if (gba < 0 || gba >= 10 || slot < 0 || slot >= count_of(k, gba) || count_of(k, gba) < 2) return false;
+	take_key(k->slot[gba], k->slot[gba][slot]);
+	return true;
 }
 
 static const char keys_header[] =
 	"# Cyberworld Endless: the keyboard. Each line gives a Game Boy Advance\n"
-	"# button its keys, separated by commas. Keys are named as on a US\n"
-	"# keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return, Backspace, Tab,\n"
-	"# Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad Enter...) and mean\n"
-	"# that position: on an AZERTY keyboard W is the key marked Z. Escape (quit)\n"
-	"# and F11 (fullscreen) are taken. The controls screen (SELECT on the title\n"
-	"# screen) sets A, B, L, R, START and SELECT too. Delete this file for the\n"
-	"# defaults.\n\n";
+	"# button its keys, separated by commas, the first its main one. Keys are\n"
+	"# named as on a US keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return,\n"
+	"# Backspace, Tab, Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad\n"
+	"# Enter...) and mean that position: on an AZERTY keyboard W is the key\n"
+	"# marked Z. Escape (quit) and F11 (fullscreen) are taken. The controls\n"
+	"# screen (SELECT on the title screen) sets them too. Delete this file for\n"
+	"# the defaults.\n\n";
 
 /* keys.ini as the map in play has them */
 static void keys_write(void) {
@@ -131,7 +173,8 @@ static void keys_write(void) {
 }
 
 void platform_keys_set(const KeyMap *k) {
-	memcpy(key_map, k->bits, sizeof key_map);
+	in_play = *k;
+	rebuild();
 	keys_write();
 }
 
@@ -160,10 +203,11 @@ void platform_load_keys(const char *path) {
 		snprintf(where, sizeof where, "%s:%d", path, n);
 		if (i == sizeof key_defaults / sizeof *key_defaults) { fprintf(stderr, "%s: no button called \"%s\"\n", where, name); continue; }
 		/* the file's keys replace the defaults for this button */
-		for (int sc = 0; sc < SDL_NUM_SCANCODES; ++sc) key_map[sc] &= ~key_defaults[i].bit;
-		bind_keys(key_map, key_defaults[i].bit, eq + 1, where);
+		memset(in_play.slot[i], 0, sizeof in_play.slot[i]);
+		bind_keys(&in_play, (int)i, eq + 1, where);
 	}
 	fclose(f);
+	rebuild();
 }
 
 uint32_t keymap_button(SDL_Scancode sc) {

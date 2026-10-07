@@ -397,29 +397,34 @@ marked so), its shoulders and triggers L and R, Start is Start and Back
 whatever they are set to. Two Joy-Cons are one controller, on a phone too;
 one alone is a small one held sideways.
 
-**The controls screen** sets the buttons. **Select** on the title screen
-opens it (the line under the menu names the button it is on); on a phone
-or tablet with a controller, so does **CONTROLLER** in the touch controls'
-menu, mid-run too. **A and B** has presets: as labeled; **B on X**, left of
-A as on the GBA (Square on a PlayStation pad; a Nintendo pad has its B
-there already); and A and B swapped, for a pad that reads them the other
-way round. Choose A, B, L, R, Start or Select and press the button (or, on
-a PC or in a browser, the key) you want for it; one that this leaves with
-no button takes the old one in exchange. **D-pad** asks for UP, DOWN, LEFT
-and RIGHT in turn, each a button, a stick, a hat or a key, added to what
-moves already. **Defaults** brings them all back, and
-**Done** asks you to press the new
-A to keep them: if you do not within ten seconds, the old ones stay. The
-screen itself always takes the controller's own A, B and D-pad, the
-keyboard and taps, whatever the buttons are set to. Nintendo's pads keep
-their buttons apart from the others', as their A sits where the others'
-B does.
+**The controls screen** sets the buttons, laid out as big games lay theirs.
+**Select** on the title screen opens it (the line under the menu names the
+button it is on); on a phone or tablet with a controller, so does
+**CONTROLLER** in the touch controls' menu, mid-run too. It has a tab for
+the controller and, on a PC or in a browser, one for the keyboard: L and R
+(Tab on a keyboard) switch them. Each GBA button has a row with a **MAIN**
+and an **ALSO** slot: choose a slot and press the button (or key) you want
+there. One another GBA button had moves over, the two swapping where that
+one would be left with none, and the line under the rows says what moved.
+X (Backspace or Delete on a keyboard) clears a slot, though every GBA button
+keeps one. **D-PAD** sets its four directions in turn, each a button, a
+stick, a hat or a key. **A and B** has presets: as labeled; **B on X**, left
+of A as on the GBA (Square on a PlayStation pad; a Nintendo pad has its B
+there already); and A and B swapped. The dot at each row's end lights when
+its button is pressed, so a map can be tried before it is kept. **Set all**
+asks for every button in turn, for a pad laid out its own way (waiting
+skips one). **Defaults** brings the tab's device back as it came, and
+**Done**, or Back after a change, asks you to press the new A to keep them:
+if you do not within ten seconds, the old ones stay. The screen itself
+always takes the controller's own A, B and D-pad, the keyboard and taps,
+whatever the buttons are set to. Nintendo's pads keep their buttons apart
+from the others', as their A sits where the others' B does.
 
 A controller SDL has no layout for (an 8BitDo Micro on a PC, or a pad a
 browser does not know) is read as it is: its hat and first stick move,
 its first two buttons are A and B, and the screen names its buttons by
 number (**Btn 1**), so each can be given its GBA button there. Its D-pad,
-whatever it sends, is set with **D-pad**.
+whatever it sends, is set with **D-PAD**, and **Set all** sets everything.
 
 The screen writes `pad.ini` and `keys.ini` in the save folder
 (`~/.local/share/cyberworld-endless/` on Linux, `savedata/` on the

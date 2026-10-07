@@ -70,10 +70,16 @@ uint32_t padmap_bits(const PadMap *m, int family, int input);
  * up, and one left with none takes the inputs `gba` had (two swap), so
  * every GBA button keeps one. */
 void padmap_bind(PadMap *m, int family, int gba, int input);
-/* `input` added to GBA button `gba`'s first (a direction keeps the rest:
- * the D-pad and a stick both move), given up by any other button that
- * had it; a full row drops its last. */
-void padmap_add(PadMap *m, int family, int gba, int input);
+/* The controls screen's slots (MAIN 0, ALSO 1): how many inputs a GBA
+ * button has; `input` put in a slot (past its last, after it), taken from
+ * any other button: the button it was taken from (one left with none
+ * takes the input replaced, the two swap), PAD_SLOT_ALONE for none,
+ * PAD_SLOT_REFUSED where it was another button's only input and none was
+ * replaced; a slot cleared, false where it is the button's last. */
+enum { PAD_SLOT_ALONE = -1, PAD_SLOT_REFUSED = -2 };
+int padmap_count(const PadMap *m, int family, int gba);
+int padmap_set_slot(PadMap *m, int family, int gba, int slot, int input);
+bool padmap_clear_slot(PadMap *m, int family, int gba, int slot);
 /* SDL's name for an input ("a", "-lefty", "lefttrigger") and back
  * (PAD_NONE for none such); a family's own (a raw joystick's "b3"). */
 const char *padmap_name(int input);

@@ -9,9 +9,21 @@
   controls screen. In a browser, a pad the browser does not know had its
   D-pad nowhere (SDL takes every browser pad as the standard one, its
   D-pad on buttons 12-15): it is read the same way, Chrome's hat on one
-  axis too. And the controls screen sets the D-pad: **D-pad** asks for
-  UP, DOWN, LEFT and RIGHT in turn, each a button, a stick, a hat or a
-  key, added to what moves already, for a pad in keyboard mode as well.
+  axis too.
+- **The controls screen, laid out as big games lay theirs** (The Last
+  of Us Part II, Hades, Elden Ring, RetroArch's Set All). A tab for the
+  controller and one for the keyboard, L and R between them; a row per
+  GBA button with a **MAIN** and an **ALSO** slot, and a dot that lights
+  when its button is pressed, so a map is tried before it is kept; the
+  D-pad one row, its four directions asked in turn, each a button, a
+  stick, a hat or a key (a pad in keyboard mode too). A slot is asked for
+  in a box over the rows; one another button had moves over, and the two
+  swap where that one would be left with none, said in a line ("Swapped:
+  A now on B"). X clears a slot. **Set all** asks for every button in
+  turn, for a pad laid out its own way. Back after a change asks for the
+  new A as DONE does, where it had dropped the change unasked. The screen
+  had been one list of six buttons with a column per device, the D-pad
+  and the sticks set in pad.ini and keys.ini alone.
 
 - **The project page draws one run as one picture.** Below the trailer,
   the net's spine runs down from Lan's room to the Nest on layer 10, and

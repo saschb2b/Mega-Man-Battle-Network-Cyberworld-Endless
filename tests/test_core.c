@@ -2551,18 +2551,23 @@ static void test_padmap(void) {
 		"8BitDo's A, B, L, R, START or SELECT is not");
 	CHECK(padmap_bits(&r, PAD_FAMILY_RAW, 9) == BTN_START && padmap_bits(&r, PAD_FAMILY_RAW, 8) == BTN_SELECT && padmap_bits(&r, PAD_FAMILY_RAW, 4) == BTN_L,
 		"a common pad's START, SELECT or L is not");
-	padmap_add(&r, PAD_FAMILY_RAW, 0, PAD_RAW_AXIS(6, false));
-	CHECK(r.in[PAD_FAMILY_RAW][0][0] == PAD_RAW_AXIS(6, false) && padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_HAT + 0) == BTN_UP &&
-		padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_AXIS(1, false)) == BTN_UP, "an added up lost the hat or the axis");
-	padmap_add(&r, PAD_FAMILY_RAW, 1, PAD_RAW_AXIS(6, false));
-	CHECK(padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_AXIS(6, false)) == BTN_DOWN, "an input added to down stayed on up");
-	padmap_add(&r, PAD_FAMILY_RAW, 1, PAD_RAW_AXIS(6, false));
-	CHECK(r.in[PAD_FAMILY_RAW][1][1] == PAD_RAW_HAT + 2, "an input added twice took two places");
-	for (int k = 0; k < 6; ++k) padmap_add(&r, PAD_FAMILY_RAW, 2, 20 + k);
-	CHECK(r.in[PAD_FAMILY_RAW][2][0] == 25 && r.in[PAD_FAMILY_RAW][2][3] == 22, "a full row kept the wrong inputs");
-	padmap_add(&r, PAD_FAMILY_XBOX, 0, PAD_X);
-	CHECK(padmap_bits(&r, PAD_FAMILY_XBOX, PAD_X) == BTN_UP && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_DPUP) == BTN_UP && !padmap_bits(&r, PAD_FAMILY_RAW, 2),
-		"a pad's added up lost its D-pad, or moved the joystick's");
+	/* the controls screen's slots: MAIN replaced keeps ALSO; ALSO set past
+	 * the last; taken from another button, which keeps one (a swap), or
+	 * refused where it was that one's only input and nothing was replaced */
+	CHECK(padmap_set_slot(&r, PAD_FAMILY_RAW, 0, 0, PAD_RAW_AXIS(6, false)) == PAD_SLOT_ALONE && r.in[PAD_FAMILY_RAW][0][0] == PAD_RAW_AXIS(6, false) &&
+		r.in[PAD_FAMILY_RAW][0][1] == PAD_RAW_AXIS(1, false) && !padmap_bits(&r, PAD_FAMILY_RAW, PAD_RAW_HAT + 0), "UP's MAIN set wrong");
+	CHECK(padmap_set_slot(&r, PAD_FAMILY_XBOX, 4, 1, PAD_X) == PAD_SLOT_ALONE && padmap_count(&r, PAD_FAMILY_XBOX, 4) == 2 &&
+		padmap_bits(&r, PAD_FAMILY_XBOX, PAD_X) == BTN_A && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_A) == BTN_A, "A's ALSO set wrong");
+	CHECK(padmap_set_slot(&r, PAD_FAMILY_XBOX, 5, 1, PAD_A) == 4 && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_A) == BTN_B && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_X) == BTN_A,
+		"a taken from A, which kept x, went wrong");
+	CHECK(padmap_set_slot(&r, PAD_FAMILY_XBOX, 4, 1, PAD_START) == PAD_SLOT_REFUSED && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_START) == BTN_START,
+		"START's only button taken for A's empty slot");
+	CHECK(padmap_set_slot(&r, PAD_FAMILY_XBOX, 9, 0, PAD_START) == 8 && padmap_bits(&r, PAD_FAMILY_XBOX, PAD_BACK) == BTN_START &&
+		padmap_bits(&r, PAD_FAMILY_XBOX, PAD_START) == BTN_SELECT, "START and SELECT did not swap");
+	CHECK(padmap_set_slot(&r, PAD_FAMILY_XBOX, 6, 0, PAD_LEFTTRIGGER) == PAD_SLOT_ALONE && r.in[PAD_FAMILY_XBOX][6][0] == PAD_LEFTTRIGGER &&
+		r.in[PAD_FAMILY_XBOX][6][1] == PAD_LEFTSHOULDER, "L's own ALSO not moved to MAIN");
+	CHECK(padmap_clear_slot(&r, PAD_FAMILY_XBOX, 6, 1) && padmap_count(&r, PAD_FAMILY_XBOX, 6) == 1 && !padmap_clear_slot(&r, PAD_FAMILY_XBOX, 6, 0),
+		"a slot cleared wrong, or a button's last cleared");
 	CHECK(!strcmp(padmap_label_of(PAD_FAMILY_RAW, PAD_STYLE_GENERIC, 3), "Btn 4") && !strcmp(padmap_label_of(PAD_FAMILY_RAW, 0, PAD_RAW_HAT + 1), "Hat right") &&
 		!strcmp(padmap_label_of(PAD_FAMILY_RAW, 0, PAD_RAW_AXIS(1, false)), "Axis 2-") && !strcmp(padmap_preset_name(PAD_FAMILY_RAW, 0, 1), "A and B swapped"),
 		"a raw joystick's words are off");

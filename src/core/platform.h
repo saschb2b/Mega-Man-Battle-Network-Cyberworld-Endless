@@ -69,21 +69,28 @@ void platform_poll(void);
  * (keys.ini in the data folder), which is written with the defaults when
  * it does not exist yet. */
 void platform_load_keys(const char *path);
-/* The keyboard's map for the controls screen: per key (scancode) its GBA
- * buttons (BTN_*). Got, the defaults, a key made a GBA button's only one
- * (padmap_bind's swap: a button left with none takes the keys `gba` had),
- * put in play and written to keys.ini; a GBA button's keys in words ("J,
- * X"; NULL: the map in play). Escape and F11 are no button's. */
-typedef struct { uint32_t bits[SDL_NUM_SCANCODES]; } KeyMap;
+/* The keyboard's map for the controls screen: each GBA button's keys
+ * (scancodes) in order, the first its MAIN, 0 after the last. Got, the
+ * defaults, put in play and written to keys.ini; a button's keys in words
+ * ("J, X"; NULL: the map in play), and its key in a slot (0 none). Escape
+ * and F11 are no button's. */
+#define KEYS_PER 4
+typedef struct { uint16_t slot[10][KEYS_PER]; } KeyMap;
 void platform_keys_get(KeyMap *k);
 void platform_keys_default(KeyMap *k);
-void platform_keys_bind(KeyMap *k, int gba, int scancode);
-/* `scancode` added to GBA button `gba`'s keys (the rest kept: a direction's
- * WASD and arrows), taken from any other button */
-void platform_keys_add(KeyMap *k, int gba, int scancode);
 void platform_keys_set(const KeyMap *k);
 void platform_keys_label(const KeyMap *k, int gba, char *out, size_t n);
+int platform_keys_slot(const KeyMap *k, int gba, int slot);
 bool platform_key_free(int scancode);
+/* `scancode` put in GBA button `gba`'s slot (MAIN 0, ALSO 1; past its
+ * last, after it), taken from any other button: the button it was taken
+ * from (one left with none takes the key replaced, the two swap),
+ * KEYS_ALONE for none, KEYS_REFUSED where it was another button's only
+ * key and none was replaced. A slot cleared, false where it is the
+ * button's last. */
+enum { KEYS_ALONE = -1, KEYS_REFUSED = -2 };
+int platform_keys_set_slot(KeyMap *k, int gba, int slot, int scancode);
+bool platform_keys_clear_slot(KeyMap *k, int gba, int slot);
 /* This frame's keys pressed (scancodes, at most `most`): "press a key"
  * on the controls screen. */
 int platform_keys_pressed(int *out, int most);

@@ -269,20 +269,24 @@ void pads_close(void) {
 /* ---- reading ---- */
 
 /* The fixed buttons the controls screen reads: a controller's D-pad, left
- * stick, a or start, b or back; a raw joystick's hat, first two axes, the
- * first button or a start, the second or a select (its map's directions
- * too, by mapped_menu: its D-pad may be any axis) */
+ * stick, a or start (A), b or back (B), x (clear: SELECT's bit), shoulders
+ * and triggers (L and R: its tabs); a raw joystick's hat, first two axes,
+ * the first button or a start, the second or a select, the third or
+ * fourth, b4 to b7 (its map's directions too, by mapped_menu: its D-pad
+ * may be any axis) */
 static uint32_t menu_of(int family, uint64_t on) {
 	typedef struct { uint8_t input; uint16_t bit; } Fixed;
 	static const Fixed pad[] = {
 		{ PAD_DPUP, BTN_UP }, { PAD_DPDOWN, BTN_DOWN }, { PAD_DPLEFT, BTN_LEFT }, { PAD_DPRIGHT, BTN_RIGHT },
 		{ PAD_AXIS(1, false), BTN_UP }, { PAD_AXIS(1, true), BTN_DOWN }, { PAD_AXIS(0, false), BTN_LEFT }, { PAD_AXIS(0, true), BTN_RIGHT },
-		{ PAD_A, BTN_A }, { PAD_START, BTN_A }, { PAD_B, BTN_B }, { PAD_BACK, BTN_B },
+		{ PAD_A, BTN_A }, { PAD_START, BTN_A }, { PAD_B, BTN_B }, { PAD_BACK, BTN_B }, { PAD_X, BTN_SELECT },
+		{ PAD_LEFTSHOULDER, BTN_L }, { PAD_LEFTTRIGGER, BTN_L }, { PAD_RIGHTSHOULDER, BTN_R }, { PAD_RIGHTTRIGGER, BTN_R },
 	};
 	static const Fixed raw[] = {
 		{ PAD_RAW_HAT + 0, BTN_UP }, { PAD_RAW_HAT + 2, BTN_DOWN }, { PAD_RAW_HAT + 3, BTN_LEFT }, { PAD_RAW_HAT + 1, BTN_RIGHT },
 		{ PAD_RAW_AXIS(1, false), BTN_UP }, { PAD_RAW_AXIS(1, true), BTN_DOWN }, { PAD_RAW_AXIS(0, false), BTN_LEFT }, { PAD_RAW_AXIS(0, true), BTN_RIGHT },
-		{ 0, BTN_A }, { 9, BTN_A }, { 11, BTN_A }, { 1, BTN_B }, { 8, BTN_B }, { 10, BTN_B },
+		{ 0, BTN_A }, { 9, BTN_A }, { 11, BTN_A }, { 1, BTN_B }, { 8, BTN_B }, { 10, BTN_B }, { 2, BTN_SELECT }, { 3, BTN_SELECT },
+		{ 4, BTN_L }, { 6, BTN_L }, { 5, BTN_R }, { 7, BTN_R },
 	};
 	const Fixed *fixed = family == PAD_FAMILY_RAW ? raw : pad;
 	size_t n = family == PAD_FAMILY_RAW ? sizeof raw / sizeof *raw : sizeof pad / sizeof *pad;
