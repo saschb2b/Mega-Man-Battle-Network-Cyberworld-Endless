@@ -302,7 +302,9 @@ static void ask_draw(int x0, int y0) {
 		snprintf(sub, sizeof sub, "%d of %d", C.ask_step + 1, PAD_GBA);
 	}
 	int secs = (C.ask_left + 59) / 60;
-	snprintf(wait, sizeof wait, "%sWait %d to %s", KEYS ? "Esc or " : "", secs, C.ask == ASK_ALL ? "skip it" : "cancel");
+	/* (Set all: waiting skips the one button, Escape stops the rest) */
+	if (C.ask == ASK_ALL) snprintf(wait, sizeof wait, "Wait %d to skip it%s", secs, KEYS ? ", Esc to stop" : "");
+	else snprintf(wait, sizeof wait, "%sWait %d to cancel", KEYS ? "Esc or " : "", secs);
 	fill_rect(x0 + 18, y0 + 40, CORE_W - 36, 62, GOLD);
 	fill_rect(x0 + 19, y0 + 41, CORE_W - 38, 60, DARK);
 	text_draw(x0 + CORE_W / 2, y0 + 48, line, GOLD, TEXT_CENTER);
