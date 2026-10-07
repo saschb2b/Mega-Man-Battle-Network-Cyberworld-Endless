@@ -1,0 +1,146 @@
+/* xvirus_recipe.h: what a recipe says of itself, before any ROM is read. */
+#include "xvirus_recipe.h"
+
+#include <stdarg.h>
+#include <stdio.h>
+
+#include "bn6.h"
+#include "rom.h"
+
+#define BUS     0x08000000u
+#define BN6_END (BUS + ROM_SIZE)
+
+uint32_t xvirus_crc32(const uint8_t *p, uint32_t n) {
+	uint32_t c = 0xFFFFFFFFu;
+	for (uint32_t i = 0; i < n; ++i) {
+		c ^= p[i];
+		for (int k = 0; k < 8; ++k) c = c >> 1 ^ (0xEDB88320u & (0u - (c & 1)));
+	}
+	return ~c;
+}
+
+const XvBlock *xvirus_block_of(const XVirusFamily *f, uint32_t a) {
+	for (int i = 0; i < f->nblocks; ++i)
+		if (a >= f->blocks[i].start && a < f->blocks[i].end) return &f->blocks[i];
+	return NULL;
+}
+
+const XvData *xvirus_data_at(const XVirusFamily *f, uint32_t a) {
+	for (int i = 0; i < f->ndata; ++i)
+		if (a >= f->data[i].start && a < f->data[i].end) return &f->data[i];
+	return NULL;
+}
+
+bool xvirus_is_code(const XVirusFamily *f, uint32_t a) { return xvirus_block_of(f, a) && !xvirus_data_at(f, a); }
+
+static bool no(char *why, size_t n, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
+static bool no(char *why, size_t n, const char *fmt, ...) {
+	if (why && n) {
+		va_list ap;
+		va_start(ap, fmt);
+		vsnprintf(why, n, fmt, ap);
+		va_end(ap);
+	}
+	return false;
+}
+
+static bool bn6_routine(uint32_t a) { return (a & 1) && a >= BUS && a < BN6_END; }
+
+/* a state or a hook: a routine of BN6's, or code of the family's own */
+static bool ref_ok(const XVirusFamily *f, XvRef r) {
+	return r.own ? (r.addr & 1) && xvirus_is_code(f, r.addr & ~1u) : bn6_routine(r.addr);
+}
+
+static bool blocks_ok(const XVirusFamily *f, char *why, size_t n) {
+	if (f->nblocks < 1) return no(why, n, "no blocks");
+	for (int i = 0; i < f->nblocks; ++i) {
+		const XvBlock *b = &f->blocks[i];
+		if (b->start >= b->end || b->start < BUS || (b->start & 1) || (b->end & 1)) return no(why, n, "block %d's range", i);
+		if (b->at < XV_CODE || b->at + (b->end - b->start) > XV_ART || ((b->at ^ b->start) & 3)) return no(why, n, "block %d placed at %08x", i, (unsigned)b->at);
+		for (int k = 0; k < i; ++k) {
+			const XvBlock *o = &f->blocks[k];
+			bool src = b->start < o->end && o->start < b->end;
+			bool dst = b->at < o->at + (o->end - o->start) && o->at < b->at + (b->end - b->start);
+			if (src || dst) return no(why, n, "blocks %d and %d overlap", k, i);
+		}
+	}
+	return true;
+}
+
+static bool data_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->ndata; ++i) {
+		const XvData *d = &f->data[i];
+		const XvBlock *b = xvirus_block_of(f, d->start);
+		if (d->start >= d->end || !b || d->end > b->end) return no(why, n, "data %08x-%08x not within a block", (unsigned)d->start, (unsigned)d->end);
+		if (d->kind < XV_POOL || d->kind > XV_ZERO) return no(why, n, "data %08x's kind", (unsigned)d->start);
+		if ((d->kind == XV_POOL || d->kind == XV_TABLE) && ((d->start | d->end) & 3)) return no(why, n, "words at %08x off a word boundary", (unsigned)d->start);
+		for (int k = 0; k < i; ++k)
+			if (d->start < f->data[k].end && f->data[k].start < d->end) return no(why, n, "data %08x and %08x overlap", (unsigned)f->data[k].start, (unsigned)d->start);
+	}
+	return true;
+}
+
+static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->nstates; ++i)
+		if (!ref_ok(f, f->states[i])) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
+	for (int i = 0; i < XV_HOOKS; ++i)
+		if (!ref_ok(f, f->hooks[i])) return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
+	for (int i = 0; i < f->ncalls; ++i) {
+		const XvPair *c = &f->calls[i];
+		if (xvirus_block_of(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
+		if ((c->to & 1) || !bn6_routine(c->to | 1)) return no(why, n, "call %08x goes to %08x", (unsigned)c->from, (unsigned)c->to);
+		for (int k = 0; k < i; ++k)
+			if (f->calls[k].from == c->from) return no(why, n, "call %08x twice", (unsigned)c->from);
+	}
+	for (int i = 0; i < f->nimms; ++i) {
+		const XvImm *m = &f->imms[i];
+		if ((m->at & 1) || !xvirus_is_code(f, m->at) || (unsigned)m->form >= THUMB_FORMS) return no(why, n, "immediate at %08x", (unsigned)m->at);
+	}
+	return true;
+}
+
+#define SPRITE_LISTS 10   /* (RomLayout.sprite_lists) */
+#define TRAITS_MODES 32   /* (BN6_TRAITS_MODE's table) */
+
+/* its sprites each in its own room past XV_ART, at a number of its own */
+static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->nsprites; ++i) {
+		const XvSprite *s = &f->sprites[i];
+		if (s->list >= SPRITE_LISTS || s->to_list >= SPRITE_LISTS || (s->to_list == BN6_SPRITES_ATTACKS && s->to_index >= XV_LIST_MAX))
+			return no(why, n, "sprite %d's lists", i);
+		if (s->at < XV_ART || (s->at & 3) || !s->room || s->room > XV_END - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		for (int k = 0; k < i; ++k) {
+			const XvSprite *o = &f->sprites[k];
+			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))
+				return no(why, n, "sprites %d and %d in one place", k, i);
+		}
+	}
+	return true;
+}
+
+/* what it draws (its sprites, its effects past BN6's), its attacks' types one each */
+static bool art_ok(const XVirusFamily *f, char *why, size_t n) {
+	if (!sprites_ok(f, why, n)) return false;
+	for (int i = 0; i < f->neffects; ++i) {
+		if (f->effects[i].to < BN6_EFFECT_COUNT || f->effects[i].to >= XV_EFFECTS_MAX) return no(why, n, "effect %#x", f->effects[i].to);
+		for (int k = 0; k < i; ++k)
+			if (f->effects[k].to == f->effects[i].to) return no(why, n, "effect %#x twice", f->effects[i].to);
+	}
+	for (int i = 0; i < f->ntypes; ++i)
+		for (int k = 0; k < i; ++k)
+			if (f->types[k].to == f->types[i].to) return no(why, n, "attack type %#x twice", f->types[i].to);
+	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES || f->traits.mode >= TRAITS_MODES))
+		return no(why, n, "its struct1 laid out with no battle sprite of list 1, or mode %d", f->traits.mode);
+	return true;
+}
+
+bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
+	if (!f->name) return no(why, n, "no name");
+	if (f->ai < BN6_FAMILIES || f->ai >= XV_HELD_AIS) return no(why, n, "AI index %d (BN6's tables end at %d, its 35-word ones at %d)", f->ai, BN6_FAMILIES, XV_HELD_AIS);
+	if (f->first_id < 1 || f->first_id + XV_VERSIONS > 0x100) return no(why, n, "enemy ids from %#x", f->first_id);
+	if (f->nstates < 8 || f->nstates > XV_STATES_MAX) return no(why, n, "%d states", f->nstates);
+	if (f->home < XV_HOMES || f->home + XV_HOME_SIZE > XV_CODE || (f->home - XV_HOMES) % XV_HOME_SIZE) return no(why, n, "home %08x", (unsigned)f->home);
+	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BN6_END))) return no(why, n, "its records");
+	if (f->ice != XV_ICE_OWN && (f->ice < 0 || f->ice > XV_ICE_MAX)) return no(why, n, "an ice block of size %d", f->ice);
+	return blocks_ok(f, why, n) && data_ok(f, why, n) && refs_ok(f, why, n) && art_ok(f, why, n);
+}

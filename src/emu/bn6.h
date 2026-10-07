@@ -129,7 +129,17 @@
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
 #define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
 #define BN6_T1_ELEMENT        0x0E        /* Element */
+#define BN6_T1_COLLISION      0x54        /* CollisionDataPtr: its collision data, in EWRAM (docs/ROM_DATA.md, Statuses as a hit leaves them), its fields BN6_COLL_* */
 #define BN6_COLL_REGION       0x01        /* in its collision data (CollisionDataPtr +0x54, bn6f collision_data_struct), Region: the panels it is struck on and strikes, bn6f PanelOffsetListsPointerTable's index, 0 none (nothing touches it), 1 its own panel */
+#define BN6_COLL_PARALYSIS    0x1C        /* u16 frames left paralysed, one less each frame (0x0800E730, the status step every virus runs) */
+#define BN6_COLL_FREEZE       0x2A        /* u16 frames left frozen in an ice block, the same */
+#define BN6_COLL_BUBBLE       0x2C        /* u16 frames left in a bubble, the same */
+#define BN6_COLL_STRUCK       0x40        /* u32 what the hits of a frame left it, acted on by its next (0x0801B1C4, a virus's every frame), each bit cleared there: */
+#define BN6_STRUCK_PARALYSIS  0x00000008u /* ... paralysed, BN6_COLL_PARALYSIS frames: CurAction 4 */
+#define BN6_STRUCK_SLIDE      0x00000010u /* ... pushed along a panel (it slides; CurAction kept) */
+#define BN6_STRUCK_DRAG       0x00000100u /* ... dragged: CurAction 5 */
+#define BN6_STRUCK_FREEZE     0x00010000u /* ... frozen, BN6_COLL_FREEZE frames, an ice block spawned round it (BN6_ICE_SIZES): CurAction 6 */
+#define BN6_STRUCK_BUBBLE     0x00020000u /* ... bubbled, BN6_COLL_BUBBLE frames: CurAction 7 */
 #define BN6_BATTLE_HAND       0x020349C0u /* MegaMan's hand after OK (bn6f getBattleHandAddr_8010018; the enemies' 0x50 on): */
 #define BN6_HAND_AT           0x00        /* ... the chip up next, an index */
 #define BN6_HAND_CHIPS        0x02        /* ... the chips' ids, u16, six at most, 0xFFFF after them */
@@ -336,5 +346,6 @@
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
+#include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #endif

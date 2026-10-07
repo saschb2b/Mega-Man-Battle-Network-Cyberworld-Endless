@@ -15,6 +15,34 @@
   The player keeps one set of ROMs and saves for both. A test holds the
   two in step: the same ids, pictures and scripts, and every link between
   the pages.
+- **BN5's CanGard fights in BN6's own battles (issue #82).** Where Team
+  Colonel's ROM sits beside BN6's, its CanGard is moved into BN6's battle
+  engine as the game starts: its code and its reticle's copied from the
+  player's BN5 ROM, their 39 calls aimed at BN6's routines, its states
+  laid out BN6's way, its sprite, the reticle's and its muzzle's blast
+  listed where BN6 has room, its six versions' names, HP and damage read
+  from BN5's records. In a battle beside a Mettaur it guards, locks its
+  reticle onto MegaMan's panel and fires, by BN5's own code for it (a
+  frame-by-frame comparison with BN5's battle is still to come); frozen, bubbled,
+  paralysed or dragged it lets its reticle go; each version can be
+  deleted, and BN6's own battles play the same with it installed
+  (`tools/xfamily.py`). Only the dev steps meet it so far (`0:foes
+  BB@52`); which nets and battles it joins is a design question for later.
+- **The groundwork for other games' viruses in BN6's own battles
+  (issue #82).** A virus family's code can be moved into BN6's battle
+  engine: copied from a ROM into the engine's free space, its calls
+  aimed at BN6's routines through veneers, BN6's per-family tables grown
+  to give it an AI index of its own, with its ids, names and records, all
+  or nothing and every old word checked. It is proven on BN6's own
+  Mettaur (`--dev xcontrol`): moved as AI 32, it fights frame for frame
+  as BN6's does, every byte of the game's memory compared
+  (`tools/xcontrol.py`), in a fight to its deletion and through the
+  statuses a hit gives (paralysed, dragged, frozen, bubbled, pushed); the
+  ice block a frozen virus is held in takes its size by AI index too, so
+  that byte table is grown with the others. Dev steps start a battle of
+  chosen foes (`0:foes BB@52`, play.py's `foes`) and give its enemies a
+  status (`0:status freeze 90`, play.py's `status`). No run meets a moved
+  family yet; BN5's CanGard comes next.
 
 ## 0.11.4 (2026-10-08)
 

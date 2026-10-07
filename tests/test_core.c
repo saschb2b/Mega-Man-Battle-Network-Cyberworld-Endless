@@ -53,6 +53,9 @@
 #include "xsong.h"
 #include "debug.h"
 #include "emu.h"
+#include "bytes.h"
+#include "thumb_reloc.h"
+#include "xvirus_families.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -2707,6 +2710,345 @@ static void test_xsong(void) {
 	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
 }
 
+/* Thumb code moved (thumb_reloc.c, issue #82); tests/test_emu.c runs a
+ * moved block in mGBA. A BL's halves both ways, to the ends of its reach
+ * and refused a step past them; an odd address refused. */
+static void test_thumb_bl(void) {
+	uint16_t hi = 0, lo = 0;
+	uint32_t t = 0;
+	/* (test_emu's ROM: 0xD2 to 0xF8) */
+	CHECK(thumb_bl_encode(0x080000D2, 0x080000F8, &hi, &lo) && hi == 0xF000 && lo == 0xF811, "thumb: bl 0xD2 to 0xF8 (%04x %04x)", hi, lo);
+	CHECK(thumb_bl_decode(0x080000D2, 0xF000, 0xF811, &t) && t == 0x080000F8, "thumb: its target (%08x)", t);
+	const uint32_t at = 0x08800000;
+	CHECK(thumb_bl_encode(at, at + 4 + 0x3FFFFE, &hi, &lo) && hi == 0xF3FF && lo == 0xFFFF, "thumb: the furthest on (%04x %04x)", hi, lo);
+	CHECK(thumb_bl_decode(at, hi, lo, &t) && t == at + 4 + 0x3FFFFE, "thumb: the furthest on back (%08x)", t);
+	CHECK(thumb_bl_encode(at, at + 4 - 0x400000, &hi, &lo) && hi == 0xF400 && lo == 0xF800, "thumb: the furthest back (%04x %04x)", hi, lo);
+	CHECK(thumb_bl_decode(at, hi, lo, &t) && t == at + 4 - 0x400000, "thumb: the furthest back, back (%08x)", t);
+	hi = lo = 0x1234;
+	CHECK(!thumb_bl_encode(at, at + 4 + 0x400000, &hi, &lo) && !thumb_bl_encode(at, at + 2 - 0x400000, &hi, &lo), "thumb: a step past either end refused");
+	CHECK(!thumb_bl_encode(at, at + 0x101, &hi, &lo) && !thumb_bl_encode(at + 1, at + 0x100, &hi, &lo), "thumb: an odd target or address refused");
+	CHECK(hi == 0x1234 && lo == 0x1234, "thumb: a refused BL wrote its halves (%04x %04x)", hi, lo);
+	/* every distance, both ways, there and back */
+	int bad = 0;
+	for (int32_t off = -0x400000; off < 0x400000; off += 0x1F2E) {
+		uint32_t to = at + 4 + (uint32_t)off;
+		if (!thumb_bl_encode(at, to, &hi, &lo) || !thumb_is_bl(hi, lo) || !thumb_bl_decode(at, hi, lo, &t) || t != to) ++bad;
+	}
+	CHECK(!bad, "thumb: %d BLs not there and back", bad);
+	CHECK(!thumb_bl_decode(at, 0xF811, 0xF000, &t) && !thumb_bl_decode(at, 0x2005, 0xF811, &t) && !thumb_bl_decode(at, 0xF000, 0x2005, &t),
+		"thumb: halves out of order, or not a BL's, read as one");
+}
+
+/* The BLs of a run of code found, half a BL refused; a block's calls out
+ * aimed again from where it moved, those within it left; all or nothing. */
+static uint32_t thumb_resolve(uint32_t target, void *user) {
+	++*(int *)user;
+	return target == 0x08002000u ? 0x08A00400u : target == 0x08003000u ? 0x08A0040Cu : target == 0x08004000u ? 0x08000200u : 0;
+}
+
+static void test_thumb_block(void) {
+	const uint32_t from = 0x08001000, to = 0x08A00000;
+	uint8_t code[0x20], was[0x20];
+	memset(code, 0, sizeof code);
+	put16(code + 0x00, 0x2007);                     /* movs r0,#7 */
+	thumb_bl_write(code, 0x02, from, from + 0x18);  /* within */
+	thumb_bl_write(code, 0x06, from, 0x08002000);   /* out */
+	put16(code + 0x0A, 0x6EB8);                     /* ldr r0,[r7,#0x68] */
+	thumb_bl_write(code, 0x0C, from, 0x08003000);   /* out */
+	put16(code + 0x10, 0x4770);                     /* bx lr */
+	uint32_t offs[8], one[1] = { 0 }, scratch[8];
+	int n = thumb_bl_scan(code, 0x12, offs, 8);
+	CHECK(n == 3 && offs[0] == 0x02 && offs[1] == 0x06 && offs[2] == 0x0C, "thumb: the run's BLs (%d)", n);
+	CHECK(thumb_bl_scan(code, 0x12, one, 1) == 3 && one[0] == 0x02, "thumb: BLs past max counted, not kept");
+	CHECK(thumb_bl_scan(code, 0x08, scratch, 8) == -1, "thumb: a run ending in half a BL refused");
+	put16(code + 0x12, 0xF800);
+	CHECK(thumb_bl_scan(code, sizeof code, scratch, 8) == -1, "thumb: a lone lo half refused");
+	memcpy(was, code, sizeof code);
+
+	int asked = 0;
+	ThumbBlock b = { code, sizeof code, from, to };
+	uint32_t t = 0;
+	CHECK(thumb_block_rebase(&b, offs, 3, thumb_resolve, &asked) && asked == 2, "thumb: the block moved (asked %d)", asked);
+	CHECK(!memcmp(code + 0x02, was + 0x02, 4) && thumb_bl_read(code, 0x02, to, &t) && t == to + 0x18, "thumb: the call within, as it was (%08x)", t);
+	CHECK(thumb_bl_read(code, 0x06, to, &t) && t == 0x08A00400, "thumb: the first call out (%08x)", t);
+	CHECK(thumb_bl_read(code, 0x0C, to, &t) && t == 0x08A0040C, "thumb: the second call out (%08x)", t);
+	CHECK(!memcmp(code, was, 2) && !memcmp(code + 0x0A, was + 0x0A, 2), "thumb: the rest of the block untouched");
+
+	/* refused, the block as it was: a call out with no answer; one out of
+	 * reach from its new address; a move off the alignment; an offset
+	 * that holds no BL, an odd one, one past the end */
+	memcpy(code, was, sizeof code);
+	thumb_bl_write(code, 0x0C, from, 0x08005000);
+	memcpy(was, code, sizeof code);
+	CHECK(!thumb_block_rebase(&b, offs, 3, thumb_resolve, &asked) && !memcmp(code, was, sizeof code), "thumb: a call with nowhere to go moved");
+	thumb_bl_write(code, 0x0C, from, 0x08004000);
+	memcpy(was, code, sizeof code);
+	CHECK(!thumb_block_rebase(&b, offs, 3, thumb_resolve, &asked) && !memcmp(code, was, sizeof code), "thumb: a call out of reach moved");
+	ThumbBlock off4 = { code, sizeof code, from, to + 2 };
+	CHECK(!thumb_block_rebase(&off4, offs, 2, thumb_resolve, &asked), "thumb: a block moved off its alignment");
+	static const uint32_t no_bl[] = { 0x00 }, odd[] = { 0x03 }, past[] = { 0x1E };
+	CHECK(!thumb_block_rebase(&b, no_bl, 1, thumb_resolve, &asked) && !thumb_block_rebase(&b, odd, 1, thumb_resolve, &asked) &&
+		!thumb_block_rebase(&b, past, 1, thumb_resolve, &asked) && !memcmp(code, was, sizeof code), "thumb: an offset with no BL moved");
+	CHECK(thumb_block_rebase(&b, offs, 0, thumb_resolve, &asked), "thumb: a block without calls refused");
+}
+
+/* Immediates in their instruction: the recipe's four (issue #82's
+ * CanGard: movs r0, adds r4, movs r2, ldr r0,[r7]) patched, every
+ * mismatch refused and the instruction kept; every form there and back. */
+static void test_thumb_imm(void) {
+	static const struct { uint16_t insn; ThumbImm was; uint16_t imm, now; } ok[] = {
+		{ 0x2007, { THUMB_MOVS, 0, 0, 7 }, 9, 0x2009 },
+		{ 0x3457, { THUMB_ADDS, 4, 0, 0x57 }, 0x6C, 0x346C },
+		{ 0x2224, { THUMB_MOVS, 2, 0, 0x24 }, 0x5C, 0x225C },
+		{ 0x6EB8, { THUMB_LDR, 0, 7, 0x68 }, 0x70, 0x6F38 },
+		{ 0x2804, { THUMB_CMP, 0, 0, 4 }, 5, 0x2805 },
+		{ 0x3901, { THUMB_SUBS, 1, 0, 1 }, 2, 0x3902 },
+		{ 0x6048, { THUMB_STR, 0, 1, 4 }, 0x7C, 0x67C8 },
+		{ 0x7030, { THUMB_STRB, 0, 6, 0 }, 31, 0x77F0 },
+		{ 0x7868, { THUMB_LDRB, 0, 5, 1 }, 2, 0x78A8 },
+		{ 0x8CA8, { THUMB_LDRH, 0, 5, 0x24 }, 0x3E, 0x8FE8 },
+		{ 0x8008, { THUMB_STRH, 0, 1, 0 }, 2, 0x8048 },
+		{ 0x4907, { THUMB_LDR_PC, 1, 0, 28 }, 1020, 0x49FF },
+	};
+	for (size_t i = 0; i < sizeof ok / sizeof *ok; ++i) {
+		uint16_t insn = ok[i].insn;
+		ThumbImm got;
+		CHECK(thumb_imm_decode(insn, ok[i].was.form, &got) && got.rd == ok[i].was.rd && got.rn == ok[i].was.rn && got.imm == ok[i].was.imm,
+			"thumb: %04x read as its form", insn);
+		CHECK(thumb_imm_patch(&insn, &ok[i].was, ok[i].imm) && insn == ok[i].now, "thumb: %04x patched to %04x, not %04x", ok[i].insn, insn, ok[i].now);
+	}
+	static const struct { uint16_t insn; ThumbImm was; uint16_t imm; } no[] = {
+		{ 0x2007, { THUMB_ADDS, 0, 0, 7 }, 9 },      /* another form */
+		{ 0x2007, { THUMB_MOVS, 1, 0, 7 }, 9 },      /* another register */
+		{ 0x2007, { THUMB_MOVS, 0, 0, 8 }, 9 },      /* another immediate */
+		{ 0x2007, { THUMB_MOVS, 0, 0, 7 }, 256 },    /* too big */
+		{ 0x6EB8, { THUMB_LDR, 0, 6, 0x68 }, 0x70 }, /* another base */
+		{ 0x6EB8, { THUMB_LDR, 0, 7, 0x68 }, 0x72 }, /* not a word's */
+		{ 0x6EB8, { THUMB_LDR, 0, 7, 0x68 }, 0x80 }, /* too far */
+		{ 0x6EB8, { THUMB_STR, 0, 7, 0x68 }, 0x70 }, /* a store */
+		{ 0x6EB8, { THUMB_LDRB, 0, 7, 0x68 }, 0x70 },
+		{ 0x7868, { THUMB_LDRB, 0, 5, 1 }, 32 },
+		{ 0x8CA8, { THUMB_LDRH, 0, 5, 0x24 }, 0x25 },
+		{ 0x4907, { THUMB_LDR_PC, 1, 0, 28 }, 1024 },
+		{ 0x2007, { THUMB_FORMS, 0, 0, 7 }, 9 },
+	};
+	for (size_t i = 0; i < sizeof no / sizeof *no; ++i) {
+		uint16_t insn = no[i].insn;
+		CHECK(!thumb_imm_patch(&insn, &no[i].was, no[i].imm) && insn == no[i].insn, "thumb: patch %zu of %04x taken (%04x)", i, no[i].insn, insn);
+	}
+	uint16_t insn = 0;
+	static const ThumbImm misfit[] = { { THUMB_MOVS, 8, 0, 1 }, { THUMB_MOVS, 0, 1, 1 }, { THUMB_LDR, 0, 8, 4 } };
+	for (size_t i = 0; i < sizeof misfit / sizeof *misfit; ++i)
+		CHECK(!thumb_imm_encode(&misfit[i], &insn) && insn == 0, "thumb: register %zu that does not fit taken (%04x)", i, insn);
+	int bad = 0;
+	for (int f = 0; f < THUMB_FORMS; ++f)
+		for (unsigned imm = 0; imm < 1024; ++imm)
+			for (uint8_t rd = 0; rd < 8; ++rd)
+				for (uint8_t rn = 0; rn < 8; ++rn) {
+					ThumbImm in = { (ThumbForm)f, rd, rn, (uint16_t)imm }, back;
+					if (!thumb_imm_encode(&in, &insn)) continue;
+					if (!thumb_imm_decode(insn, in.form, &back) || back.rd != rd || back.rn != rn || back.imm != imm) ++bad;
+					for (int g = 0; g < THUMB_FORMS; ++g)
+						if (g != f && thumb_imm_decode(insn, (ThumbForm)g, &back)) ++bad;
+				}
+	CHECK(!bad, "thumb: %d immediates not there and back, or read as another form", bad);
+}
+
+/* Veneers: their bytes, a misaligned one refused, read back; a pool of
+ * them, one per target, full at its room. */
+static void test_thumb_veneers(void) {
+	static const uint8_t want[THUMB_VENEER_SIZE] = { 0x03, 0xB4, 0x01, 0x48, 0x01, 0x90, 0x01, 0xBD, 0x81, 0x63, 0x01, 0x08 };
+	uint8_t v[THUMB_VENEER_SIZE];
+	uint32_t t = 0;
+	CHECK(thumb_veneer(v, 0x08B31000, 0x08016381) && !memcmp(v, want, sizeof v), "thumb: a veneer's bytes");
+	CHECK(thumb_veneer(v, 0x08B31000, 0x08016380) && !memcmp(v, want, sizeof v), "thumb: a veneer's target given without its Thumb bit");
+	CHECK(thumb_veneer_target(v, &t) && t == 0x08016380, "thumb: a veneer's target read back (%08x)", t);
+	CHECK(!thumb_veneer(v, 0x08B31002, 0x08016381), "thumb: a veneer off a word boundary");
+	v[5] = 0x91;
+	CHECK(!thumb_veneer_target(v, &t), "thumb: other bytes read as a veneer");
+
+	uint8_t room[3 * THUMB_VENEER_SIZE];
+	ThumbVeneers pool = { room, 0x08B31000, 3, 0 };
+	uint32_t a = thumb_veneer_get(&pool, 0x08016381), b = thumb_veneer_get(&pool, 0x0801A152), a2 = thumb_veneer_get(&pool, 0x08016380);
+	uint32_t c = thumb_veneer_get(&pool, 0x0801A15C), d = thumb_veneer_get(&pool, 0x0801A166);
+	CHECK(a == 0x08B31000 && b == 0x08B3100C && a2 == a && c == 0x08B31018 && !d && pool.n == 3, "thumb: the pool (%08x %08x %08x %08x %08x, %d made)", a, b, a2,
+		c, d, pool.n);
+	CHECK(thumb_veneer_target(room + THUMB_VENEER_SIZE, &t) && t == 0x0801A152, "thumb: the pool's second veneer (%08x)", t);
+	ThumbVeneers off = { room, 0x08B31002, 3, 0 };
+	CHECK(!thumb_veneer_get(&off, 0x08016381) && off.n == 0, "thumb: a pool off a word boundary");
+}
+
+/* A virus family's recipe (issue #82, xvirus_recipe.h) holds together
+ * before any ROM is read: the control's does, and each way of breaking a
+ * copy of it is caught with its reason; the CRC32 the blocks are checked
+ * by is zlib's. */
+static bool recipe_refused(const XVirusFamily *f, const char *what) {
+	char why[160] = "";
+	bool ok = xvirus_recipe_ok(f, why, sizeof why);
+	CHECK(!ok && why[0], "xvirus: a recipe with %s taken", what);
+	return !ok;
+}
+
+static void test_xvirus_recipe(void) {
+	const uint8_t digits[] = "123456789";
+	CHECK(xvirus_crc32(digits, 9) == 0xCBF43926u && xvirus_crc32(digits, 0) == 0, "xvirus: CRC32 %08x", xvirus_crc32(digits, 9));
+	char why[160] = "";
+	const XVirusFamily *c = &xvirus_control;
+	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: the control's recipe refused: %s", why);
+	CHECK(c->ai == 32 && c->first_id == 0xBB && c->nstates == 13 && c->ncalls == 32 && c->ice == XV_ICE_OWN,
+		"xvirus: the control is AI %d from id %#x", c->ai, c->first_id);
+	/* (its code and data: every halfword of its block code or one range of data) */
+	const XvBlock *b = &c->blocks[0];
+	int code = 0, data = 0;
+	for (uint32_t a = b->start; a < b->end; a += 2) xvirus_is_code(c, a) ? ++code : ++data;
+	CHECK(code * 2 == 1276 && xvirus_block_of(c, b->end) == NULL && xvirus_data_at(c, 0x0810B024) && !xvirus_is_code(c, 0x0810B026),
+		"xvirus: the control's block holds %d bytes of code, %d of data", code * 2, data * 2);
+
+	XVirusFamily f = *c;
+	f.ai = 31;
+	recipe_refused(&f, "one of BN6's own AI indexes");
+	f = *c;
+	f.ai = XV_HELD_AIS;
+	recipe_refused(&f, "an AI index past the 35-word tables");
+	f = *c;
+	f.home = XV_HOMES + 4;
+	recipe_refused(&f, "a home off its slot");
+	f = *c;
+	f.ice = XV_ICE_MAX + 1;
+	recipe_refused(&f, "an ice block past BN6's sizes");
+	f.ice = -2;
+	recipe_refused(&f, "an ice block of no size");
+	XvBlock blocks[2] = { c->blocks[0], c->blocks[0] };
+	f = *c;
+	blocks[0].at = XV_CODE + 2;
+	f.blocks = blocks;
+	recipe_refused(&f, "a block moved off its word alignment");
+	blocks[0] = c->blocks[0];
+	blocks[1].start = b->end - 0x10;
+	blocks[1].end = b->end + 0x10;
+	blocks[1].at = XV_CODE + 0x1000;
+	f.nblocks = 2;
+	recipe_refused(&f, "two blocks over the same code");
+	XvData data_bad[64];
+	memcpy(data_bad, c->data, (size_t)c->ndata * sizeof *data_bad);
+	f = *c;
+	f.data = data_bad;
+	data_bad[0].start = 0x0810B022;
+	recipe_refused(&f, "a literal pool off a word boundary");
+	data_bad[0] = c->data[0];
+	data_bad[c->ndata] = (XvData){ 0x0810B5F0, 0x0810B5F4, XV_RAW };
+	f.ndata = c->ndata + 1;
+	recipe_refused(&f, "data past its block");
+	data_bad[c->ndata] = (XvData){ 0x0810B020, 0x0810B02C, XV_RAW };
+	recipe_refused(&f, "two ranges of data over one another");
+	XvRef states[16];
+	memcpy(states, c->states, (size_t)c->nstates * sizeof *states);
+	f = *c;
+	f.states = states;
+	states[9] = (XvRef){ 0x0810B029, true };
+	recipe_refused(&f, "a state of its own in its data");
+	states[9] = (XvRef){ 0x0810AFEC, true };
+	recipe_refused(&f, "a state of its own without the Thumb bit");
+	states[9] = (XvRef){ 0x09000001, false };
+	recipe_refused(&f, "a state past BN6's ROM");
+	f = *c;
+	f.nstates = 7;
+	recipe_refused(&f, "fewer states than BN6's generic eight");
+	XvPair calls[40];
+	memcpy(calls, c->calls, (size_t)c->ncalls * sizeof *calls);
+	f = *c;
+	f.calls = calls;
+	calls[3].to |= 1;
+	recipe_refused(&f, "a call aimed at a Thumb bit");
+	calls[3] = c->calls[3];
+	calls[4].from = 0x0810B040;
+	recipe_refused(&f, "a call into its own code");
+	calls[4] = calls[5];
+	recipe_refused(&f, "a call named twice");
+	XvImm imm = { 0x0810B026, THUMB_MOVS, 0, 0, 1, 2 };
+	f = *c;
+	f.imms = &imm;
+	f.nimms = 1;
+	recipe_refused(&f, "an immediate in a literal pool");
+}
+
+/* BN5's CanGard's recipe (issue #82): whole before any ROM is read, its
+ * two blocks' code and data as its research found them, its state table
+ * BN6's twelve, its 39 calls; and each way of breaking what it draws
+ * caught: a sprite out of the art's room or over another, an effect among
+ * BN6's own, an attack's type twice, its struct1 laid out with a mode
+ * past BN6's table */
+static void test_xvirus_cangard(void) {
+	char why[160] = "";
+	const XVirusFamily *c = &xvirus_cangard;
+	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: CanGard's recipe refused: %s", why);
+	CHECK(c->game == XROM_BN5_COLONEL_US && c->src_ai == 14 && c->ai == 32 && c->first_id == 0xBB && c->nstates == 12 &&
+		c->ncalls == 39 && c->nimms == 6 && c->nsprites == 3 && c->traits.laid && c->traits.shadow && !c->traits.element,
+		"xvirus: CanGard is AI %d from id %#x, %d states, %d calls", c->ai, c->first_id, c->nstates, c->ncalls);
+	int code[2] = { 0, 0 };
+	for (int i = 0; i < c->nblocks; ++i)
+		for (uint32_t a = c->blocks[i].start; a < c->blocks[i].end; a += 2) code[i] += xvirus_is_code(c, a);
+	/* (CanGard's 812 bytes less 142 of data: its state table's 40, 48 of jump tables, 28 of pools, 26 of numbers and
+	 * padding; the reticle's 620 less 72: 24 of jump tables, 16 of pools, 32 of numbers and padding) */
+	CHECK(code[0] * 2 == 670 && code[1] * 2 == 548, "xvirus: CanGard's blocks hold %d and %d bytes of code",
+		code[0] * 2, code[1] * 2);
+	CHECK(c->states[8].own && c->states[8].addr == 0x08109087 && !c->states[6].own && c->states[6].addr == 0x08016B37,
+		"xvirus: CanGard's decide at 8, BN6's freeze at 6");
+	/* (its BN5 state table is dead in the copy: one range, zeroed) */
+	const XvData *st = xvirus_data_at(c, 0x08109000);
+	CHECK(st && st->kind == XV_ZERO && st->start == 0x08109000 && st->end == 0x08109028, "xvirus: CanGard's BN5 state table zeroed");
+
+	XVirusFamily f = *c;
+	XvSprite sprites[3];
+	memcpy(sprites, c->sprites, sizeof sprites);
+	f.sprites = sprites;
+	sprites[1].at = XV_CODE;
+	recipe_refused(&f, "a sprite among the code");
+	sprites[1] = c->sprites[1];
+	sprites[2].at = sprites[1].at + 0x10;
+	recipe_refused(&f, "two sprites in one room");
+	sprites[2] = c->sprites[2];
+	sprites[2].to_index = sprites[1].to_index;
+	recipe_refused(&f, "two sprites at one number");
+	sprites[2] = c->sprites[2];
+	sprites[0].to_list = 4;
+	recipe_refused(&f, "its battle sprite out of the viruses' list");
+	XvId fx = { 0x57, 0x61 };
+	f = *c;
+	f.effects = &fx;
+	recipe_refused(&f, "an effect among BN6's own");
+	XvId types[2] = { { 0x25, 0xD1 }, { 0x26, 0xD1 } };
+	f = *c;
+	f.types = types;
+	f.ntypes = 2;
+	recipe_refused(&f, "two attacks at one type");
+	f = *c;
+	f.traits.mode = 32;
+	recipe_refused(&f, "a mode past BN6's table");
+}
+
+/* data.c's readers answer for an enemy id a family took (EnemyMoved), not
+ * from the ROM, and from it again once let go */
+static void test_enemy_moved(void) {
+	EnemyMoved e = { { 2, 0, 32 }, { 0x96, 0x10, 2, 8, 0x3C, 0x00 }, { 4, 0x1E, 1, 0, 0x0E, 0, 0x80, 1 }, "CanRaid" };
+	CHECK(enemy_moved_set(0xBD, &e), "data: an enemy id moved");
+	char name[20];
+	enemy_name(0xBD, name, sizeof name);
+	int hp = 0, dmg = 0;
+	CHECK(!strcmp(name, "CanRaid") && enemy_stats(0xBD, &hp, &dmg) && hp == 150 && dmg == 60, "data: the moved id reads %s, %d HP, %d damage",
+		name, hp, dmg);
+	/* (its first wheel's element in the HP word's top: 1 Fire, beaten by Aqua; its second-wheel weakness bit 0x80 Sword unread then) */
+	CHECK(enemy_element(0xBD) == ELEM_FIRE && enemy_weakness(0xBD) == ELEM_AQUA, "data: the moved id's element %d, weakness %d",
+		enemy_element(0xBD), enemy_weakness(0xBD));
+	const uint8_t *t = enemy_triple(0xBD);
+	CHECK(t && t[0] == 2 && t[2] == 32 && enemy_id(0, 32, 2) == 0xBD, "data: the moved id's triple and its id");
+	e.stats[1] = 0;   /* (no first-wheel element: the second wheel's) */
+	enemy_moved_set(0xBD, &e);
+	CHECK(enemy_element(0xBD) == ELEM_NULL && enemy_weakness(0xBD) == ELEM_SWORD, "data: the moved id's second wheel");
+	/* (with no ROM read, nothing then) */
+	CHECK(enemy_moved_set(0xBD, NULL) && (R.data || (!enemy_stats(0xBD, &hp, &dmg) && enemy_triple(0xBD) == NULL)), "data: the moved id let go");
+}
+
 /* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
  * view of a record (chip_info, which every reward, stock and prize takes
  * its code from) holds * alone while the helper is on, and the record's own
@@ -3507,6 +3849,13 @@ int main(void) {
 	test_touch();
 	test_padmap();
 	test_xsong();
+	test_thumb_bl();
+	test_thumb_block();
+	test_thumb_imm();
+	test_thumb_veneers();
+	test_xvirus_recipe();
+	test_xvirus_cangard();
+	test_enemy_moved();
 	test_qr();
 	test_backup();
 	test_launcher();

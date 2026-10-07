@@ -131,4 +131,18 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_SUB_BATTLE_INIT 0x08  /* BN5_GAMESTATE: a battle beginning */
 #define BN5_SUB_BATTLE     0x0C   /* BN5_GAMESTATE: in battle */
 
+/* Its virus families as src/emu/xvirus.c moves them into BN6's engine
+ * (issue #82; docs/MULTIROM.md, Transplanted families): the tables they
+ * are found through, laid out as BN6's (src/emu/bn6_families.h) */
+#define BN5_FAMILY_TABLES 0x081045D4u /* nine per-family tables, BN5_FAMILY_STEP apart, BN5_FAMILIES words each, by AI index: 0 the state
+                                       * tables (generic states 0-5, the family's own from 6), 1 struct1, 2 struct2, 3 each frame, then the
+                                       * hooks 4 spawning, 5 spawned, 6 paralysed, 7 flinching, 8 dragged (BN6's tables 4, 5, 6, 9 and 10) */
+#define BN5_FAMILY_STEP   0x8C        /* ... the bytes from one table to the next */
+#define BN5_FAMILIES      35          /* ... their entries */
+#define BN5_TRAITS_SHADOW 5           /* struct1 +5: a shadow drawn under it (BN6's at BN6_TRAITS_SHADOW, its +5 an element) */
+#define BN5_ENEMY_NAMES   0x0873C0B4u /* its viruses' names, a text archive by enemy id (BN6's RomLayout.enemy_names[0]) */
+#define BN5_T3_TYPES      0x08003B80u /* its attacks' routines by type (BN6_T3_TYPES) */
+#define BN5_EFFECTS       0x080DFD7Cu /* its effects, 4 bytes an id as BN6_EFFECTS', BN5_EFFECT_COUNT of them */
+#define BN5_EFFECT_COUNT  108         /* ... its effect ids, the effects' code after them (0x080DFF2C) */
+
 #endif

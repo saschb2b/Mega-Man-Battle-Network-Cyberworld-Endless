@@ -160,27 +160,30 @@ static void tint(uint8_t *b, uint32_t m) {
 		}
 }
 
-/* Object k's sprite as it is copied (its 4-byte header first, *len bytes:
- * decompressed, a size word before it, where its pointer's bit 31 says
- * LZ77; the walk only to check it), malloc'd; NULL where it cannot be. */
-static uint8_t *object_bytes(int k, uint32_t *len) {
-	const uint8_t *xr = XR[objects[k].xrom].data;
-	uint32_t at = get32(xr + XR[objects[k].xrom].layout->sprite_lists + LIST_OBJECTS * 4) - BUS + objects[k].index * 4u;
-	uint32_t p = at + 4 <= ROM_SIZE ? get32(xr + at) : 0, off = (p & 0x7FFFFFFFu) - BUS;
+/* (the walk only to check a compressed one) */
+uint8_t *xnavi_sprite_bytes(const uint8_t *rom, uint32_t lists, int list, int index, uint32_t *len) {
 	*len = 0;
+	uint32_t base = lists + (uint32_t)list * 4u + 4 <= ROM_SIZE ? get32(rom + lists + (uint32_t)list * 4u) : 0, at = base - BUS + (uint32_t)index * 4u;
+	if (base < BUS || at + 4 > ROM_SIZE) return NULL;
+	uint32_t p = get32(rom + at), off = (p & 0x7FFFFFFFu) - BUS;
 	if ((p & 0x7FFFFFFFu) < BUS || off >= ROM_SIZE) return NULL;
 	if (!(p & 0x80000000u)) {
-		uint32_t n = xnavi_sprite_len(xr + off, ROM_SIZE - off);
+		uint32_t n = xnavi_sprite_len(rom + off, ROM_SIZE - off);
 		uint8_t *d = n ? malloc(n) : NULL;
-		if (d) { memcpy(d, xr + off, n); *len = n; }
+		if (d) { memcpy(d, rom + off, n); *len = n; }
 		return d;
 	}
 	size_t n = 0;
-	uint8_t *d = lz77_decompress(xr + off, ROM_SIZE - off, &n);
+	uint8_t *d = lz77_decompress(rom + off, ROM_SIZE - off, &n);
 	if (!d || n <= 8 || !xnavi_sprite_len(d + 4, (uint32_t)n - 4)) { free(d); return NULL; }
 	memmove(d, d + 4, n - 4);
 	*len = (uint32_t)n - 4;
 	return d;
+}
+
+/* Object k's sprite as it is copied (xnavi_sprite_bytes) */
+static uint8_t *object_bytes(int k, uint32_t *len) {
+	return xnavi_sprite_bytes(XR[objects[k].xrom].data, XR[objects[k].xrom].layout->sprite_lists, LIST_OBJECTS, objects[k].index, len);
 }
 
 /* Object k copied in after what is there and listed at its number (one

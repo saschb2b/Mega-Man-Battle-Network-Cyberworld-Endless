@@ -5,7 +5,9 @@
  * by side, as BN6's and the guest's run (issue #61): BN6's made by
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
  * it, without, on a ROM that also sounds a tone; and the guest's made and
- * run on a thread of its own while BN6's frames run, as its boot is.
+ * run on a thread of its own while BN6's frames run, as its boot is. Last,
+ * a block of Thumb code moved into BN6's copy, its calls out through
+ * veneers (src/emu/thumb_reloc.c, issue #82).
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -36,6 +38,7 @@
 #include "emu.h"
 #include "hook.h"
 #include "platform.h"
+#include "thumb_reloc.h"
 
 /* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
 Platform P;
@@ -330,6 +333,167 @@ static void two_threads(void) {
 	g->deinit(g);
 }
 
+/* ---- a block moved, its calls out through veneers (issue #82) ---- */
+
+/* As a routine of another game's is moved into BN6's free space: a block of
+ * our own bytes, made as if it stood at SRC in that game, calling two of
+ * its routines there (SRC_EXT1, SRC_EXT2), one immediate of it patched,
+ * copied to MOVED in BN6's copy of the ROM (emu_write, as an installer
+ * writes), those calls aimed at two routines of this ROM's (the stubs),
+ * 11 MiB away: so far that a BL reaches them only through a veneer. Each
+ * stub, ARM code, keeps the registers and the flags it met, which must be
+ * the ones the block set before its BL, with lr its way back into the
+ * block. The BLs and the patch are thumb_reloc.c's own, run by the CPU. */
+#define SRC 0x08001000u
+#define SRC_EXT1 0x08001800u
+#define SRC_EXT2 0x08001C00u
+#define STUB1 0x08000200u
+#define STUB2 0x08000240u
+#define MOVED 0x08B34000u
+#define VENEERS 0x08B31000u
+#define LOAD 0x26                /* the block's routine that loads the registers */
+#define PATCHED 0x20             /* its movs r1,#0x11, made #0x5A as it moves */
+#define POOL 0x4C                /* its literal pool: r0-r12's values, then three words of its own */
+#define BLOCK (POOL + 16 * 4)    /* its bytes */
+#define REC1 (IWRAM + 0x100)     /* what each stub met: r0-r12, lr, sp, CPSR */
+#define REC2 (IWRAM + 0x140)
+#define DONE (IWRAM + 0x80)      /* the block's last stores: a word, then the patched byte at +8 */
+#define SP_SEEN (IWRAM + 0x84)   /* its sp, as it began */
+#define DONE_MARK 0x600DF00Du
+
+/* r6 and r7 for the flags: cmp r6,r7 is N and V (0x7FFFFFFF - -1), cmp r6,r6 Z and C */
+static uint32_t reg_value(int i) { return i == 6 ? 0x7FFFFFFFu : i == 7 ? 0xFFFFFFFFu : 0x01010101u * (uint32_t)(i + 1); }
+
+/* ldr rd,[pc,#..] at `at` of the word at `lit` (both in the block) */
+static void ldr_pc(uint8_t *b, uint32_t at, int rd, uint32_t lit) { put16(b, at, (uint16_t)(0x4800 | rd << 8 | (lit - ((at + 4) & ~3u)) / 4)); }
+
+/* The block, its BLs encoded where it stood (at SRC):
+ *   00 mov r0,sp; ldr r1,=SP_SEEN; str r0,[r1]
+ *   06 bl load;   cmp r6,r7;  bl SRC_EXT1 (N V)
+ *   10 bl load;   cmp r6,r6;  bl SRC_EXT2 (Z C)
+ *   1A ldr r0,=DONE; ldr r1,=DONE_MARK; str r1,[r0]
+ *   20 movs r1,#0x11; strb r1,[r0,#8]; b .
+ *   26 load: r8-r12 through r0, then r0-r7, from the pool; bx lr
+ * Its BLs' offsets in bls; how many (-1 where one would not encode). */
+static int make_block(uint8_t *b, uint32_t *bls) {
+	static const struct { uint32_t at, to; } calls[4] = { { 0x06, SRC + LOAD }, { 0x0C, SRC_EXT1 }, { 0x10, SRC + LOAD }, { 0x16, SRC_EXT2 } };
+	memset(b, 0, BLOCK);
+	put16(b, 0x00, 0x4668);   /* mov r0,sp */
+	ldr_pc(b, 0x02, 1, POOL + 13 * 4);
+	put16(b, 0x04, 0x6008);   /* str r0,[r1] */
+	put16(b, 0x0A, 0x42BE);   /* cmp r6,r7 */
+	put16(b, 0x14, 0x42B6);   /* cmp r6,r6 */
+	ldr_pc(b, 0x1A, 0, POOL + 14 * 4);
+	ldr_pc(b, 0x1C, 1, POOL + 15 * 4);
+	put16(b, 0x1E, 0x6001);   /* str r1,[r0] */
+	put16(b, PATCHED, 0x2111);   /* movs r1,#0x11 */
+	put16(b, 0x22, 0x7201);   /* strb r1,[r0,#8] */
+	put16(b, 0x24, 0xE7FE);   /* b . */
+	uint32_t at = LOAD;
+	for (int r = 8; r <= 12; ++r) {
+		ldr_pc(b, at, 0, POOL + 4u * (uint32_t)r);
+		put16(b, at + 2, (uint16_t)(0x4680 | (r - 8)));   /* mov rN,r0 */
+		at += 4;
+	}
+	for (int r = 0; r <= 7; ++r, at += 2) ldr_pc(b, at, r, POOL + 4u * (uint32_t)r);
+	put16(b, at, 0x4770);     /* bx lr */
+	for (int r = 0; r <= 12; ++r) put32(b, POOL + 4u * (uint32_t)r, reg_value(r));
+	put32(b, POOL + 13 * 4, SP_SEEN);
+	put32(b, POOL + 14 * 4, DONE);
+	put32(b, POOL + 15 * 4, DONE_MARK);
+	for (int i = 0; i < 4; ++i) {
+		if (!thumb_bl_write(b, calls[i].at, SRC, calls[i].to)) return -1;
+		bls[i] = calls[i].at;
+	}
+	return 4;
+}
+
+/* A stub at `at`, entered in Thumb: on into ARM, every register and the
+ * CPSR kept at rec (r0 at rec, rN at rec + 4N, lr, sp and the CPSR after),
+ * back by bx lr:
+ *   bx pc; nop
+ *   stmfd sp!,{r0}; ldr r0,=rec+4; stmia r0,{r1-r12,lr}; ldmfd sp!,{r1}
+ *   str r1,[r0,#-4]; str sp,[r0,#0x34]; mrs r1,cpsr; str r1,[r0,#0x38]; bx lr */
+static void stub(uint32_t at, uint32_t rec) {
+	static const uint32_t arm[9] = { 0xE92D0001, 0xE59F0018, 0xE8805FFE, 0xE8BD0002, 0xE5001004, 0xE580D034, 0xE10F1000, 0xE5801038, 0xE12FFF1E };
+	uint8_t s[0x2C];
+	put16(s, 0, 0x4778);
+	put16(s, 2, 0x46C0);
+	for (int i = 0; i < 9; ++i) put32(s, 4 + 4u * (uint32_t)i, arm[i]);
+	put32(s, 0x28, rec + 4);
+	emu_write(at, s, sizeof s);
+}
+
+/* the block's calls out: to the stub that stands for each, through its veneer */
+typedef struct {
+	ThumbVeneers pool;
+	int asked;
+} CallsOut;
+
+static uint32_t to_stub(uint32_t target, void *user) {
+	CallsOut *c = user;
+	++c->asked;
+	uint32_t to = target == SRC_EXT1 ? STUB1 : target == SRC_EXT2 ? STUB2 : 0;
+	return to ? thumb_veneer_get(&c->pool, to) : 0;
+}
+
+/* a record's register, r0-r12, then lr (13), sp (14), the CPSR (15) */
+static uint32_t met(uint32_t rec, int i) { return emu_read32(rec + 4u * (uint32_t)i); }
+
+static void moved_block(void) {
+	static uint8_t block[BLOCK], veneers[4 * THUMB_VENEER_SIZE];
+	uint32_t made[8], found[8];
+	int n = make_block(block, made);
+	int scanned = thumb_bl_scan(block, POOL, found, 8);
+	CHECK(n == 4 && scanned == n && !memcmp(found, made, sizeof *made * (size_t)n), "the block's BLs: %d found, %d made", scanned, n);
+	uint16_t hi, lo;
+	CHECK(!thumb_bl_encode(MOVED + 0x0C, STUB1, &hi, &lo), "a BL from the moved block reaches the stub");
+	/* its movs r1,#0x11 made #0x5A, as a recipe's immediates are */
+	static const ThumbImm was = { THUMB_MOVS, 1, 0, 0x11 };
+	uint16_t insn = (uint16_t)(block[PATCHED] | block[PATCHED + 1] << 8);
+	CHECK(thumb_imm_patch(&insn, &was, 0x5A) && insn == 0x215A, "the block's movs patched: %04x", insn);
+	put16(block, PATCHED, insn);
+	CallsOut calls = { .pool = { .bytes = veneers, .base = VENEERS, .cap = 4 } };
+	ThumbBlock b = { block, BLOCK, SRC, MOVED };
+	bool moved = thumb_block_rebase(&b, found, scanned, to_stub, &calls);
+	CHECK(moved && calls.asked == 2 && calls.pool.n == 2, "the block moved: %d, its calls out asked %d, %d veneers", moved, calls.asked, calls.pool.n);
+	if (!moved) return;
+	emu_write(MOVED, block, BLOCK);
+	emu_write(VENEERS, veneers, (size_t)calls.pool.n * THUMB_VENEER_SIZE);
+	stub(STUB1, REC1);
+	stub(STUB2, REC2);
+	for (uint32_t a = DONE; a < REC2 + 0x40; a += 4) emu_write32(a, 0);
+	/* (the ROM's own start goes on to the moved block, after a reset: the
+	 * core's copy keeps what was written into it) */
+	emu_write32(0x080000C8, MOVED | 1);
+	emu_reset();
+	emu_frame(0);
+	emu_sync();
+	uint32_t sp = emu_read32(SP_SEEN);
+	CHECK(emu_read32(DONE) == DONE_MARK, "the moved block did not run to its end: %08x", emu_read32(DONE));
+	CHECK(sp >> 24 == 0x03, "the block's sp: %08x", sp);
+	CHECK(emu_read8(DONE + 8) == 0x5A, "the patched movs stored %02x, not 5a", emu_read8(DONE + 8));
+	/* each stub as the block called it: every register, lr back into the
+	 * block after its BL, sp, and the flags of its cmp */
+	static const struct { uint32_t rec, back, nzcv; } call[2] = { { REC1, 0x10, 0x9 }, { REC2, 0x1A, 0x6 } };
+	for (int k = 0; k < 2; ++k) {
+		uint32_t rec = call[k].rec;
+		for (int i = 0; i <= 12; ++i) CHECK(met(rec, i) == reg_value(i), "call %d: r%d %08x, not %08x", k + 1, i, met(rec, i), reg_value(i));
+		CHECK(met(rec, 13) == ((MOVED + call[k].back) | 1), "call %d: lr %08x, not %08x", k + 1, met(rec, 13), (MOVED + call[k].back) | 1);
+		CHECK(met(rec, 14) == sp, "call %d: sp %08x, not the block's %08x", k + 1, met(rec, 14), sp);
+		CHECK(met(rec, 15) >> 28 == call[k].nzcv, "call %d: flags %x, not %x", k + 1, met(rec, 15) >> 28, call[k].nzcv);
+	}
+	/* the veneers as the core reads them */
+	uint8_t v[THUMB_VENEER_SIZE];
+	uint32_t t1 = 0, t2 = 0;
+	for (uint32_t i = 0; i < THUMB_VENEER_SIZE; ++i) v[i] = emu_read8(VENEERS + i);
+	bool v1 = thumb_veneer_target(v, &t1);
+	for (uint32_t i = 0; i < THUMB_VENEER_SIZE; ++i) v[i] = emu_read8(VENEERS + THUMB_VENEER_SIZE + i);
+	bool v2 = thumb_veneer_target(v, &t2);
+	CHECK(v1 && v2 && t1 == STUB1 && t2 == STUB2, "the veneers in the ROM: %08x %08x", t1, t2);
+	emu_write32(0x080000C8, 0x080000D1);
+}
+
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	static uint8_t rom[ROM_SIZE];
@@ -418,7 +582,8 @@ int main(void) {
 
 	two_cores();
 	two_threads();
+	moved_block();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart, on one thread and on two\n");
+	printf("all hook checks passed, the two cores kept apart, on one thread and on two, a moved block's calls through veneers\n");
 	return 0;
 }

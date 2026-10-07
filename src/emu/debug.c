@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "battle_trace.h"
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "emu.h"
@@ -80,6 +81,7 @@ FILE *emu_debug_file(const char *name) {
 }
 
 void emu_debug_frame(void) {
+	battle_trace_frame();   /* (CYBERWORLD_BTRACE) */
 	static int t;
 	static int watching = -1;
 	if (watching < 0) watching = getenv("CYBERWORLD_WATCH") != NULL;

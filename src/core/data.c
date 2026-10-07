@@ -163,8 +163,36 @@ void chip_desc(int rom_id, char *out, size_t outlen) {
 	else rom_desc(R.layout->chip_descs[1], rom_id - 256, out, outlen);
 }
 
+/* ---- enemy ids another game's family took (xvirus.c) ---- */
+static struct {
+	int n;
+	struct { int id; EnemyMoved e; } at[ENEMIES_MOVED_MAX];
+} moved;
+
+static const EnemyMoved *moved_of(int id) {
+	for (int i = 0; i < moved.n; ++i)
+		if (moved.at[i].id == id) return &moved.at[i].e;
+	return NULL;
+}
+
+bool enemy_moved_set(int id, const EnemyMoved *e) {
+	for (int i = 0; i < moved.n; ++i)
+		if (moved.at[i].id == id) {
+			if (e) moved.at[i].e = *e;
+			else moved.at[i] = moved.at[--moved.n];
+			return true;
+		}
+	if (!e) return true;
+	if (moved.n >= ENEMIES_MOVED_MAX) return false;
+	moved.at[moved.n].id = id;
+	moved.at[moved.n++].e = *e;
+	return true;
+}
+
 void enemy_name(int name_id, char *out, size_t outlen) {
-	rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
+	const EnemyMoved *m = name_id <= 0xFF ? moved_of(name_id) : NULL;
+	if (m) snprintf(out, outlen, "%s", m->name);
+	else rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
 }
 
 void item_name(int id, char *out, size_t outlen) {
@@ -210,10 +238,20 @@ const VirusDef virus_defs[] = {
 const int virus_def_count = sizeof virus_defs / sizeof *virus_defs;
 
 /* ---- ROM enemy table ---- */
+const uint8_t *enemy_triple(int id) {
+	const EnemyMoved *m = moved_of(id);
+	if (m) return m->triple;
+	return R.data && id >= 0 && id < 0x200 ? R.data + R.layout->enemy_ids + id * 3 : NULL;
+}
+
 int enemy_id(int actor_type, int family, int version) {
+	for (int i = 0; i < moved.n; ++i) {
+		const uint8_t *e = moved.at[i].e.triple;
+		if (e[0] == version && e[1] == actor_type && e[2] == family) return moved.at[i].id;
+	}
 	for (int id = 0; id < 0x200; ++id) {
-		const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
-		if (e[1] > 2) break;
+		const uint8_t *e = enemy_triple(id);
+		if (!e || e[1] > 2) break;
 		if (e[0] == version && e[1] == actor_type && e[2] == family) return id;
 	}
 	return -1;
@@ -226,20 +264,24 @@ int navi_chip(int navi, int version) {
 	return 0;
 }
 
-/* The record of enemy `id`'s stats, 0 when not found: a table per actor
+/* The record of enemy `id`'s stats, NULL when not found: a table per actor
  * type, a pointer per ai, a record per version of u16 element << 12 | HP,
  * version, flags, u16 element << 12 | damage. */
-static uint32_t enemy_record(int id) {
-	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return 0;
+static const uint8_t *enemy_record(int id) {
+	const EnemyMoved *m = moved_of(id);
+	if (m) return m->stats;
+	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return NULL;
 	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
-	if (e[1] > 2) return 0;
+	if (e[1] > 2) return NULL;
 	uint32_t types = rom_u32(R.layout->enemy_stats + (uint32_t)e[1] * 4);
-	if (!rom_is_ptr(types)) return 0;
+	if (!rom_is_ptr(types)) return NULL;
 	uint32_t recs = rom_u32(rom_off(types) + (uint32_t)e[2] * 4);
-	if (!rom_is_ptr(recs)) return 0;
+	if (!rom_is_ptr(recs)) return NULL;
 	uint32_t r = rom_off(recs) + (uint32_t)e[0] * 6;
-	return r + 6 > ROM_SIZE ? 0 : r;
+	return r + 6 > ROM_SIZE ? NULL : R.data + r;
 }
+
+static int u16_at(const uint8_t *p) { return p[0] | p[1] << 8; }
 
 const char *elem_name(int elem) {
 	static const char *const names[ELEM_COUNT] = { "", "Fire", "Aqua", "Elec", "Wood", "Sword", "Wind", "Cursor", "Breaker" };
@@ -251,15 +293,17 @@ const char *elem_name(int elem) {
  * its sprites, then at 5 its element of the second wheel and at 6 the
  * ones that hit it twice as hard, a bit each (0x80 Sword, 0x40 Cursor,
  * 0x20 Wind, 0x10 Breaker) */
-static uint32_t enemy_traits(int id) {
-	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_traits) return 0;
+static const uint8_t *enemy_traits(int id) {
+	const EnemyMoved *m = moved_of(id);
+	if (m) return m->traits;
+	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_traits) return NULL;
 	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
-	if (e[1] > 2) return 0;
+	if (e[1] > 2) return NULL;
 	uint32_t types = rom_u32(R.layout->enemy_traits + (uint32_t)e[1] * 4);
-	if (!rom_is_ptr(types)) return 0;
+	if (!rom_is_ptr(types)) return NULL;
 	uint32_t rec = rom_u32(rom_off(types) + (uint32_t)e[2] * 4);
-	if (!rom_is_ptr(rec)) return 0;
-	return rom_off(rec) + 8 > ROM_SIZE ? 0 : rom_off(rec);
+	if (!rom_is_ptr(rec)) return NULL;
+	return rom_off(rec) + 8 > ROM_SIZE ? NULL : R.data + rom_off(rec);
 }
 
 static int second_wheel(uint8_t bits) {
@@ -267,18 +311,18 @@ static int second_wheel(uint8_t bits) {
 }
 
 int enemy_element(int id) {
-	uint32_t r = enemy_record(id), t = enemy_traits(id);
+	const uint8_t *r = enemy_record(id), *t = enemy_traits(id);
 	if (!r) return -1;
-	int e = rom_u16(r) >> 12;
-	return e > 0 && e <= ELEM_WOOD ? e : t ? second_wheel(R.data[t + 5]) : 0;
+	int e = u16_at(r) >> 12;
+	return e > 0 && e <= ELEM_WOOD ? e : t ? second_wheel(t[5]) : 0;
 }
 
 int enemy_weakness(int id) {
 	static const int beats[ELEM_WOOD + 1] = { 0, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_FIRE };
-	uint32_t r = enemy_record(id), t = enemy_traits(id);
+	const uint8_t *r = enemy_record(id), *t = enemy_traits(id);
 	if (!r) return -1;
-	int e = rom_u16(r) >> 12;
-	return e > 0 && e <= ELEM_WOOD ? beats[e] : t ? second_wheel(R.data[t + 6]) : 0;
+	int e = u16_at(r) >> 12;
+	return e > 0 && e <= ELEM_WOOD ? beats[e] : t ? second_wheel(t[6]) : 0;
 }
 
 int chip_hits_with(int rom_id) {
@@ -296,10 +340,10 @@ int chip_hits_with(int rom_id) {
 }
 
 bool enemy_stats(int id, int *hp, int *damage) {
-	uint32_t r = enemy_record(id);
+	const uint8_t *r = enemy_record(id);
 	if (!r) return false;
-	*hp = rom_u16(r) & 0xFFF;
-	*damage = rom_u16(r + 4) & 0xFFF;
+	*hp = u16_at(r) & 0xFFF;
+	*damage = u16_at(r + 4) & 0xFFF;
 	return true;
 }
 

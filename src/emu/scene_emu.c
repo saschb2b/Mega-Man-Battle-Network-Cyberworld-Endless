@@ -19,6 +19,7 @@
 #include "save.h"
 #include "second.h"
 #include "tour.h"
+#include "xvirus.h"
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
@@ -59,6 +60,9 @@ static void enter(void) {
 	text_draw(P.w / 2, P.h / 2 - 8, "Building the net...", WHITE, TEXT_CENTER);
 	platform_present_now();
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
+	/* (other games' virus families in BN6's battle engine first: the ROM
+	 * copy's patches, the same at every boot; docs/MULTIROM.md) */
+	xvirus_install(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES);
 	game_hooks_install();
 	cinema_reset();
 	if (emu_resume_requested) {

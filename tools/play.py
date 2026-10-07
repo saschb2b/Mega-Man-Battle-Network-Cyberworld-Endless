@@ -27,7 +27,13 @@ flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map: on a layer whose battles
 are an older net's, a guest battle), sig (MegaMan in the layer's
 signature, the room it is remembered by: docs/LEVEL_DESIGN.md,
-Identity), stuck NAME (the run saved with BN6 holding MegaMan so: fade,
+Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
+BB@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
+mm@CR MegaMan's; a family moved into the engine among them, issue #82),
+status KIND [FRAMES [ID]] (the battle's enemies, or those of enemy id ID
+in hex, struck at once with paralysis, freeze, bubble, drag or slide as a
+hit gives it, for FRAMES frames, 60 where none: issue #82),
+stuck NAME (the run saved with BN6 holding MegaMan so: fade,
 chat, lock, script, conveyor, npc, pet, paused or all, apart by commas;
 its CONTINUE lets him go, issue #23), dump NAME (the video memory into
 NAME/NAMEv.bin, p, i and o.bin in the session's folder, for
@@ -60,7 +66,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'status', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -104,6 +110,10 @@ def steps(commands):
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
             elif op == 'battle':
                 out.append(('battle',))
+            elif op == 'foes':
+                out.append(('foes', '/'.join([args[0]] + args[1:])))
+            elif op == 'status':
+                out.append(('status', ' '.join([args[0]] + args[1:3])))
             elif op == 'sig':
                 out.append(('sig',))
             elif op == 'stuck':
@@ -111,7 +121,7 @@ def steps(commands):
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, sig, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, status, sig, stuck, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -289,6 +299,8 @@ def cmd_do(name, rest):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
+        elif s[0] in ('foes', 'status'):
+            items.append(f'{s[0]} {s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
             items.append(f'second {seconds[-1]}')

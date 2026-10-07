@@ -1,5 +1,6 @@
 /* CYBERWORLD_EMU_DEBUG: the game's state on stderr while it runs;
- * CYBERWORLD_WATCH: bytes of its memory, printed as they change. */
+ * CYBERWORLD_WATCH: bytes of its memory, printed as they change;
+ * CYBERWORLD_BTRACE: each frame of a battle, its memory (battle_trace.h). */
 #ifndef CW_DEBUG_H
 #define CW_DEBUG_H
 
@@ -8,7 +9,7 @@
 
 bool emu_debug_on(void);
 /* Once a frame: mode, map, position and music every 30-60 frames; the
- * watched bytes where they changed. */
+ * watched bytes where they changed; a battle's frame traced. */
 void emu_debug_frame(void);
 /* A file in the data directory for dumps ("wb"); NULL when it cannot be made. */
 FILE *emu_debug_file(const char *name);

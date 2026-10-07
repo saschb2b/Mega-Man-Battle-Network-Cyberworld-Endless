@@ -329,7 +329,7 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Eight more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Nine more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: `tools/trailer.py` plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
@@ -349,7 +349,14 @@ Navi obstacle, 16 a security cube, 32 an arrow lane, 64 an invisible
 path; `pieces=32` to look at an area's arrow lane and ride it;
 docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
-`tools/before_after.py` compares two builds' with it). BN5's battles
+`tools/before_after.py` compares two builds' with it), and `xcontrol`
+(the control family installed as the core starts: BN6's own Mettaur
+moved into the engine's free space as AI 32, ids 0xBB-0xC0, for the foes
+step below and `tools/xcontrol.py`; docs/MULTIROM.md, Transplanted
+families; it takes the place of BN5's CanGard, which is installed
+wherever BN5's ROM is read), and `nofamilies` (no family moved into the
+engine, BN5's ROM read or not: BN6's battles as the player's ROM has
+them, which `tools/xfamily.py` compares with CanGard installed). BN5's battles
 have four of their own (docs/MULTIROM.md, Guest battles, For tests):
 `darkchips=MASK`, `worried`, `souls=MASK` (a new run holding BN5's
 Souls, bit k Team Colonel's Soul 7 + k) and `slowboot=N` (BN5's first
@@ -419,6 +426,52 @@ battle's phase, MegaMan's HP, the Custom gauge, the battle's clock, his
 mood) and its end, and with Souls held whether UNITE stood on its first
 Custom screen and each unison; play.py's state says `battle (the older
 net's)` while it runs.
+
+The `foes` step (`--input`'s `0:foes BB@52/01@43`, play.py's `foes
+BB@52 01@43`) starts a battle of the foes it names, at the same first
+free moment: each an enemy id in hex at its panel, column 1-6 then row
+1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without),
+on a plain field with nothing else on it, in BN6's engine whatever the
+layer. It names the families moved into the engine (docs/MULTIROM.md,
+Transplanted families) beside BN6's own: with BN5's ROM read, BN5's
+CanGard is AI 32 with ids 0xBB-0xC0 (its six versions), and `0:foes
+BB@52/01@43` fights CanGard beside a Mettaur; `--dev xcontrol` installs
+the control in its place, BN6's own Mettaur moved as AI 32 with the same
+ids. A layer dressed as BN5's area has longer arrival words, and its
+random battles are BN5's: seed 15's first area is BN6's own.
+
+```bash
+CYBERWORLD_ROM_DIR=$PWD/.build/xcontrol/rom python3 build.py shot --scene emu --net-biome 0 --seed 1 --dev xcontrol \
+  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes BB@52" \
+  --shot 1100:/src/.build/a.bmp
+python3 tools/xcontrol.py --story     # the control against BN6's own Mettaur, frame by frame
+python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1400 \
+  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes BB@52/01@43,260:,4:START,10:,4:A,400:" \
+  --shot 1378:/src/.build/a.bmp   # CanGard's reticle striking MegaMan, its muzzle's blast
+python3 tools/xfamily.py              # CanGard in BN6's battles: fight, statuses, deletions, BN6's own left alone
+```
+
+The `status` step (`--input`'s `0:status freeze 90`, play.py's `status
+freeze 90`) gives the battle's enemies a status at once, as a hit leaves
+it in their collision data for BN6's engine to act on as their next frame
+starts: `paralysis`, `freeze` (an ice block round it), `bubble`, `drag` or
+`slide` (pushed along a panel), for the frames named (60 where none; drag
+and slide take none), and with an enemy id in hex after them only that
+id's (`0:status paralysis 60 BB`). It prints how many it struck, and
+names none outside a battle. It puts a family moved into the engine
+through BN6's generic states, which the fight alone never reaches
+(docs/ROM_DATA.md, Statuses as a hit leaves them).
+
+`tools/xcontrol.py` copies BN6's ROM alone into `.build/xcontrol/rom`
+(a layer of BN5's fights its battles in BN5's engine) and runs its
+specs, `fight` and `status` (`--spec` one of them), three battles each,
+with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing).
+`tools/xfamily.py` copies both ROMs into `.build/xfamily/rom` and runs
+its specs, `fight`, `status`, `delete` and `native` (`--spec` one of
+them), each battle traced and its checks printed, pictures of CanGard's
+first shot and of each status in its folders (docs/EMULATION.md,
+Testing). The status step prints the battle's frame it struck on, which
+the `status` spec reads.
 
 The `sig` step (`--input`'s `0:sig`, play.py's `sig`) puts MegaMan in the
 layer's signature, the room it is remembered by (docs/LEVEL_DESIGN.md,

@@ -13,6 +13,12 @@
  * animations, frames, tiles, palettes and object lists reach, 0 where
  * they reach past `n`. */
 uint32_t xnavi_sprite_len(const uint8_t *hdr, uint32_t n);
+/* Sprite `index` of list `list` of a ROM (`rom`, its sprite lists at ROM
+ * offset `lists`, RomLayout.sprite_lists) as it is copied: its 4-byte
+ * header first, *len bytes (decompressed, the size word before it dropped,
+ * where its pointer's bit 31 says LZ77), malloc'd; NULL where it cannot be
+ * read. */
+uint8_t *xnavi_sprite_bytes(const uint8_t *rom, uint32_t lists, int list, int index, uint32_t *len);
 
 /* Navi `navi` (its number in list 6 of extra ROM `xrom`) in BN6: the
  * list-6 number that shows it, its mugshot the same, or `fallback` where
