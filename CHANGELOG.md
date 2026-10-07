@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.3 (2026-10-07)
 
 - **Security cubes, Link Navi obstacles and Rush's gaps hold MegaMan
   until they open (issue #111).** BN6's walls hold him back from one side
