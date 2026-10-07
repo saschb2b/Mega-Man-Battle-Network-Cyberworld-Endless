@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.4 (2026-10-08)
 
 - **Controllers SDL does not know work (issue #112).** An 8BitDo Micro,
   and any pad without a layout in SDL, went unread: the game opened only
@@ -24,6 +24,8 @@
   new A as DONE does, where it had dropped the change unasked. The screen
   had been one list of six buttons with a column per device, the D-pad
   and the sticks set in pad.ini and keys.ini alone.
+
+  <img src="docs/screenshots/controls-remap.png" width="720" alt="The new controls screen four times: an Xbox controller's tab, B just given the A button and the line Taken from A, which keeps X; the keyboard's tab, WASD and the arrows on the D-pad's row; an 8BitDo Micro on Set all, asking for UP, 1 of 10; the same pad's new map waiting for its new A to be kept">
 
 - **The project page draws one run as one picture.** Below the trailer,
   the net's spine runs down from Lan's room to the Nest on layer 10, and
