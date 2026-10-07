@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **The README is one page:** the trailer, a run in six pictures from
+  Lan's room to the Nest, the set pieces, the endgame, BN5's areas, what
+  carries over, and where to play, each a picture or a clip with a line
+  beside it. It had grown to about 900 lines. Everything it held is in
+  the new [player's guide](docs/GUIDE.md): the install on each system,
+  the controls, a run in full, saving, the screen, the statistics,
+  troubleshooting and building. The site's FAQ and the platforms'
+  READMEs link there.
+
 ## 0.11.3 (2026-10-07)
 
 - **Security cubes, Link Navi obstacles and Rush's gaps hold MegaMan

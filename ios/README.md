@@ -29,7 +29,7 @@ has notarized: it refuses the source with "missing a marketplaceID"
    last seven days; SideStore and AltStore renew them, and offer each new
    release the source lists.
 3. Start it: the ROMs screen opens, its two cartridge slots open spots
-   until their ROMs are in (the README's The ROMs screen). BN6's slot (a
+   until their ROMs are in (the guide's The ROMs screen, docs/GUIDE.md). BN6's slot (a
    tap, or A) opens Files' picker for the folder the ROMs are in. The app
    opens only its `.gba` files (and those of the folders directly in
    it), copies Mega Man Battle Network 6: Cybeast Gregar (USA) and, if

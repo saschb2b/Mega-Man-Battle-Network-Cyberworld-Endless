@@ -1,4 +1,4 @@
-/* The anonymous statistics (issue #104, README.md's Anonymous statistics):
+/* The anonymous statistics (issue #104, docs/GUIDE.md's Anonymous statistics):
  * a few events of the game and its runs, sent to the game's own website on
  * the owner's Umami once the player has said yes. The title asks once, at
  * the first start where the build can send (analytics_ask.c); the answer is

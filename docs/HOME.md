@@ -395,7 +395,7 @@ As built (issue #95):
   of a guardian's HP), a price kept hidden (it is said before the first
   trip, on the card and on the second screen).
 - **The fiction.** The Endless Net copies every battle MegaMan fights, its
-  guardians too (the README's opening): while he goes back, whatever is
+  guardians too (docs/GUIDE.md, A run): while he goes back, whatever is
   at the bottom keeps copying.
 
 For tests, `--dev clock=N` starts a run with the clock at N notches, and

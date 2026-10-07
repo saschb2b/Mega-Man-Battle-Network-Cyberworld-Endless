@@ -1,5 +1,5 @@
 /* analytics_text.h. Menu words, short and plain: what is sent, what for,
- * and what never is, as README.md's Anonymous statistics says it. */
+ * and what never is, as docs/GUIDE.md's Anonymous statistics says it. */
 #include "analytics_text.h"
 
 #include <stdio.h>

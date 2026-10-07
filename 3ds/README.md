@@ -55,7 +55,7 @@ GBA core alone takes longer than a frame there.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
   or the Circle Pad. HOME pauses as for any game.
 - The first start asks whether the game may send anonymous play
-  statistics (README.md, Anonymous statistics); SELECT on the title asks
+  statistics (docs/GUIDE.md, Anonymous statistics); SELECT on the title asks
   again. A yes sends them over the 3DS's Wi-Fi with devkitPro's libcurl
   and mbedTLS, which carry Let's Encrypt's roots: the 3DS's own SSL
   module stops at TLS 1.1, which the server refuses.

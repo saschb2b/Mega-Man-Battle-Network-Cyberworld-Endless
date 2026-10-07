@@ -13,7 +13,7 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   game's, such as the AYN Thor's lower screen, `SecondScreen` shows the
   PET beside the game on it ([below](#the-second-screen)).
 - The ROMs screen (`src/launcher/`, which every desktop and phone build
-  shows at its first start: README.md, The ROMs screen) calls into
+  shows at its first start: docs/GUIDE.md, The ROMs screen) calls into
   `GameActivity` from the game's thread (`src/launcher/pick_android.c`):
   `romsPick` opens Android's own folder picker
   (`ACTION_OPEN_DOCUMENT_TREE`, no storage permission) or its file picker,
@@ -27,7 +27,7 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   (a persisted grant, read and write) and looked in again at each start
   while BN5 is missing (`romsLook`); a file seen before (its document, size
   and date) is not opened again. Nothing of them leaves the device.
-- The anonymous play statistics (README.md, Anonymous statistics), once
+- The anonymous play statistics (docs/GUIDE.md, Anonymous statistics), once
   the player said yes, are posted by `GameActivity.statsSend` with
   `HttpURLConnection` on an executor of their own (one at a time, eight
   waiting at most, none after three failures in a row; `statsDrop` drops

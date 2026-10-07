@@ -228,7 +228,7 @@ end (`reward 200 zenny find 1 BugFrag`, `find Tornado L`). A last
 line gives where the run ended (`run over`, or `run won`). Past 512 KB
 the log moves to `runlog.old`. Collected from real runs, it shows where
 runs are lost. The same moments give the anonymous statistics their
-guardian and run-end events (src/analytics/, README.md's Anonymous
+guardian and run-end events (src/analytics/, docs/GUIDE.md's Anonymous
 statistics), where the player said yes.
 
 ## Statistics: asked, sent and checked
