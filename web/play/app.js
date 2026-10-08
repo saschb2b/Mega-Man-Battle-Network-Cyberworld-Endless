@@ -15,13 +15,26 @@ const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 // BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
 // optional, whose net areas and their battles in BN5's own engine then
 // join runs (docs/MULTIROM.md). The names and words of Android's ROM page.
+const JA = LANG === 'ja';
 const ROMS = {
-	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: 'BN6 Cybeast Gregar (USA)' },
-	bn5: { code: 'BRKE', sha1: '5f472f78d8de2df01d5039e045c043cb40969a39', file: 'bn5c.gba', tag: 'BN5 Team Colonel (USA)' },
+	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: JA ? '北米版 BN6 Cybeast Gregar' : 'BN6 Cybeast Gregar (USA)' },
+	bn5: { code: 'BRKE', sha1: '5f472f78d8de2df01d5039e045c043cb40969a39', file: 'bn5c.gba', tag: JA ? '北米版 BN5 Team Colonel' : 'BN5 Team Colonel (USA)' },
 };
 // Battle Network 6's and 5's other versions, by their game code: a player
-// who has one is told which it is
-const OTHERS = {
+// who has one is told which it is (on the Japanese page in Japanese, the
+// Japanese versions by their own titles)
+const OTHERS = JA ? {
+	BR6E: 'BN6 Cybeast Falzar です。必要なのは Gregar',
+	BR6P: '欧州版の Cybeast Falzar です。必要なのは北米版の Gregar',
+	BR6J: '日本版『ロックマンエグゼ6 電脳獣ファルザー』です。必要なのは北米版の BN6 Cybeast Gregar',
+	BR5P: '欧州版の Cybeast Gregar です。必要なのは北米版',
+	BR5J: '日本版『ロックマンエグゼ6 電脳獣グレイガ』です。必要なのは北米版の BN6 Cybeast Gregar',
+	BRBE: 'BN5 Team ProtoMan です。必要なのは Team Colonel',
+	BRBP: '欧州版の Team ProtoMan です。必要なのは北米版の Team Colonel',
+	BRBJ: '日本版『ロックマンエグゼ5 チーム オブ ブルース』です。BN5 は北米版の Team Colonel のみ',
+	BRKP: '欧州版の Team Colonel です。必要なのは北米版',
+	BRKJ: '日本版『ロックマンエグゼ5 チーム オブ カーネル』です。BN5 は北米版の Team Colonel のみ',
+} : {
 	BR6E: 'BN6 Cybeast Falzar, not Gregar',
 	BR6P: 'BN6 Cybeast Falzar (Europe), not Gregar (USA)',
 	BR6J: 'Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)',
@@ -33,7 +46,58 @@ const OTHERS = {
 	BRKP: 'BN5 Team Colonel (Europe), not the USA version',
 	BRKJ: 'Rockman EXE 5 Team of Colonel (Japan), not the USA version',
 };
-const OTHER_GAME = 'not BN6 Gregar or BN5 Team Colonel';
+const OTHER_GAME = JA ? 'BN6 Gregar でも BN5 Team Colonel でもありません' : 'not BN6 Gregar or BN5 Team Colonel';
+
+// The page's other words, in its language
+const W = JA ? {
+	stopped: (what) => 'エンジンが止まりました：' + what,
+	today: '今日 ',
+	tapSlot: 'スロットをタップ', clickSlot: 'スロットをクリックするか、ここにドロップ',
+	runSaved: (when) => 'ランのセーブ：' + when + '。', ready: '準備OK。', bn5Can: (how) => '\nBN5 も入れられます：' + how + '。',
+	bn5In: 'BN5 が入りました。次は BN6 です。',
+	chooseRoms: 'ROM ファイルを選んでください。', dropRoms: 'ROM ファイルをここにドロップするか、選んでください。',
+	cartReady: '：準備OK', cartNeeded: '：必須、選んでください', cartOptional: '：任意、選んでください',
+	game: 'ゲーム',
+	notGba: 'GBA の ROM ではありません', changed: (tag) => tag + 'ですが、中身が違います（パッチ済み、切り詰め、または吸い出しの不良）',
+	loading: '少々お待ちください。エンジンを読み込んでいます。',
+	checking: (files) => (files.length === 1 ? files[0].name : files.length + ' 個のファイル') + 'を確認中…',
+	unreadable: '読み込めませんでした',
+	zipped: (name) => name + ' は圧縮されています。先に展開してください。', refused: (name, why) => name + '：' + why + '。',
+	more: (n) => 'ほか ' + n + ' 件。',
+	noSaves: 'このブラウザにはまだセーブがありません。', backedUp: (file) => 'バックアップを保存しました：' + file + '。',
+	notBackup: (name) => name + ' はセーブのバックアップではないか、壊れています。',
+	what: (runs, best) => 'ラン ' + runs + ' 回、最深レイヤー ' + best,
+	replace: (here, there) => 'このブラウザのセーブ（' + here + '）を、バックアップのセーブ（' + there + '）に置き換えますか？ 今のセーブは別に残します。',
+	broughtBack: (what) => 'セーブを戻しました：' + what + '。',
+	forget: 'このブラウザから ROM とすべてのセーブを消しますか？',
+	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
+	move: '移動', menu: 'メニュー',
+	smooth: (on) => 'なめらか表示：' + (on ? 'オン' : 'オフ'),
+} : {
+	stopped: (what) => 'The engine stopped: ' + what,
+	today: 'Today ',
+	tapSlot: 'tap its slot', clickSlot: 'click its slot or drop it here',
+	runSaved: (when) => 'Run saved ' + when + '.', ready: 'Ready.', bn5Can: (how) => '\nBN5 can join: ' + how + '.',
+	bn5In: 'BN5 is in. Now BN6.',
+	chooseRoms: 'Choose your ROM files.', dropRoms: 'Drop your ROM files here, or choose them.',
+	cartReady: ': ready', cartNeeded: ': needed, choose it', cartOptional: ': optional, choose it',
+	game: 'Game',
+	notGba: 'not a GBA ROM', changed: (tag) => tag + ', but changed: patched, trimmed or a bad dump',
+	loading: 'One moment: the engine is still loading.',
+	checking: (files) => 'Checking ' + (files.length === 1 ? files[0].name : files.length + ' files') + '…',
+	unreadable: 'could not be read',
+	zipped: (name) => name + ' is zipped: unzip it first.', refused: (name, why) => name + ': ' + why + '.',
+	more: (n) => 'and ' + n + ' more.',
+	noSaves: 'No saves in this browser yet.', backedUp: (file) => 'Backup saved: ' + file + '.',
+	notBackup: (name) => name + ' is no saves backup, or it is damaged.',
+	what: (runs, best) => runs + ' runs, best Layer ' + best,
+	replace: (here, there) => 'Replace this browser\'s saves (' + here + ') with the backup\'s (' + there + ')? This browser\'s are kept aside.',
+	broughtBack: (what) => 'Saves brought back: ' + what + '.',
+	forget: 'Remove your ROMs and all saves from this browser?',
+	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
+	move: 'Move', menu: 'Menu',
+	smooth: (on) => 'Smooth motion: ' + (on ? 'on' : 'off'),
+};
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('canvas'), stage = $('stage'), gate = $('gate'), statusLine = $('status'), app = $('app'), menu = $('menu');
@@ -82,7 +146,7 @@ var Module = {
 		});
 	}],
 	onRuntimeInitialized: () => { ready = true; offer(); },
-	onAbort: (what) => { say('The engine stopped: ' + what); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
+	onAbort: (what) => { say(W.stopped(what)); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
 };
 
 // whether ROM `id` (ROMS) is kept in this browser
@@ -100,15 +164,15 @@ function writtenAt(path) {
 function when(d) {
 	if (!d || isNaN(d)) return null;
 	const today = new Date().toDateString() === d.toDateString();
-	return today ? 'Today ' + d.toTimeString().slice(0, 5) : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+	return today ? W.today + d.toTimeString().slice(0, 5) : d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' });
 }
 
 // What is kept, in words
 function keptWords() {
-	const add = touchPlay ? 'tap its slot' : 'click its slot or drop it here', run = writtenAt(DATA + '/savedata/run.sav');
-	if (kept('bn6')) return (run ? 'Run saved ' + run + '.' : 'Ready.') + (kept('bn5') ? '' : '\nBN5 can join: ' + add + '.');
-	if (kept('bn5')) return 'BN5 is in. Now BN6.';
-	return touchPlay ? 'Choose your ROM files.' : 'Drop your ROM files here, or choose them.';
+	const add = touchPlay ? W.tapSlot : W.clickSlot, run = writtenAt(DATA + '/savedata/run.sav');
+	if (kept('bn6')) return (run ? W.runSaved(run) : W.ready) + (kept('bn5') ? '' : W.bn5Can(add));
+	if (kept('bn5')) return W.bn5In;
+	return touchPlay ? W.chooseRoms : W.dropRoms;
 }
 
 // Play when BN6 is kept, else ask for it; BN5 asked for beside it. `note`,
@@ -135,7 +199,7 @@ const drawn = {};
 function showCart(id) {
 	const cart = $('cart-' + id), here = kept(id);
 	cart.classList.toggle('in', here);
-	cart.setAttribute('aria-label', ROMS[id].tag + (here ? ': ready' : id === 'bn6' ? ': needed, choose it' : ': optional, choose it'));
+	cart.setAttribute('aria-label', ROMS[id].tag + (here ? W.cartReady : id === 'bn6' ? W.cartNeeded : W.cartOptional));
 	if (!here || drawn[id]) return;
 	drawn[id] = true;
 	try {
@@ -211,7 +275,7 @@ function face(rom, where, canvas) {
 function start() {
 	if (!ready || started || !kept('bn6')) return;
 	started = true;
-	$('pet-place').textContent = $('menu-place').textContent = 'Game';
+	$('pet-place').textContent = $('menu-place').textContent = W.game;
 	document.body.classList.add('playing');
 	track('game-start', { input: touchPlay ? 'touch' : 'keys', bn5: kept('bn5') ? 'yes' : 'no' });
 	gate.hidden = true;
@@ -249,11 +313,11 @@ async function sha1(bytes) {
 async function checkRom(file) {
 	if (/\.(zip|7z|rar)$/i.test(file.name)) return { zipped: true, reason: 'zipped' };
 	const head = new Uint8Array(await file.slice(0, 0xB0).arrayBuffer());
-	if (head.length < 0xB0) return { why: 'not a GBA ROM', reason: 'other-game' };
+	if (head.length < 0xB0) return { why: W.notGba, reason: 'other-game' };
 	const code = String.fromCharCode(...head.subarray(0xAC, 0xB0));
 	const id = Object.keys(ROMS).find((k) => ROMS[k].code === code);
 	if (!id) return { why: OTHERS[code] || OTHER_GAME, reason: OTHERS[code] ? 'version' : 'other-game' };
-	const changed = ROMS[id].tag + ', but changed: patched, trimmed or a bad dump';
+	const changed = W.changed(ROMS[id].tag);
 	if (file.size !== ROM_SIZE) return { why: changed, reason: 'size' };
 	const bytes = new Uint8Array(await file.arrayBuffer());
 	if (crypto.subtle && (await sha1(bytes)) !== ROMS[id].sha1) return { why: changed, reason: 'changed' };
@@ -271,26 +335,26 @@ async function checkRom(file) {
 let checking = false;
 async function takeRoms(files) {
 	if (!files.length || started || checking) return;
-	if (!ready) { say('One moment: the engine is still loading.'); return; }
+	if (!ready) { say(W.loading); return; }
 	checking = true;
-	say('Checking ' + (files.length === 1 ? files[0].name : files.length + ' files') + '…');
+	say(W.checking(files));
 	const refused = [];
 	let took = 0;
 	for (const file of files) {
-		const r = await checkRom(file).catch(() => ({ why: 'could not be read', reason: 'unreadable' }));
+		const r = await checkRom(file).catch(() => ({ why: W.unreadable, reason: 'unreadable' }));
 		if (r.id) {
 			++took;
 			track('rom-accepted', { rom: r.id });
 			continue;
 		}
-		refused.push(r.zipped ? file.name + ' is zipped: unzip it first.' : file.name + ': ' + r.why + '.');
+		refused.push(r.zipped ? W.zipped(file.name) : W.refused(file.name, r.why));
 		track('rom-rejected', { reason: r.reason });
 	}
 	checking = false;
 	if (took) persist();
 	if (!refused.length && kept('bn6')) { start(); return; }
 	const lines = refused.slice(0, 4);
-	if (refused.length > 4) lines.push('and ' + (refused.length - 4) + ' more.');
+	if (refused.length > 4) lines.push(W.more(refused.length - 4));
 	offer(lines.concat(keptWords()).join('\n'));
 }
 
@@ -385,9 +449,9 @@ function unpackSaves(saves) {
 }
 
 $('export').addEventListener('click', () => {
-	if (!ready) { say('One moment: the engine is still loading.'); return; }
+	if (!ready) { say(W.loading); return; }
 	const bytes = packSaves();
-	if (!bytes) { say('No saves in this browser yet.'); return; }
+	if (!bytes) { say(W.noSaves); return; }
 	const a = document.createElement('a');
 	a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
 	a.download = SAVES_FILE;
@@ -397,7 +461,7 @@ $('export').addEventListener('click', () => {
 	setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 	try { localStorage.setItem('cw-backup-at', String(Date.now())); } catch (e) { /* not kept */ }
 	if (!menu.hidden) showKept();
-	say('Backup saved: ' + SAVES_FILE + '.');
+	say(W.backedUp(SAVES_FILE));
 	track('saves-export');
 });
 
@@ -405,22 +469,22 @@ $('saves-file').addEventListener('change', async (e) => {
 	const file = e.target.files[0];
 	e.target.value = '';
 	if (!file) return;
-	if (!ready) { say('One moment: the engine is still loading.'); return; }
+	if (!ready) { say(W.loading); return; }
 	const saves = readSaves(new Uint8Array(await file.arrayBuffer()));
-	if (!saves) { say(file.name + ' is no saves backup, or it is damaged.'); return; }
+	if (!saves) { say(W.notBackup(file.name)); return; }
 	const here = packSaves() ? readSaves(packSaves()) : null;
-	const what = saves.runs + ' runs, best Layer ' + saves.best;
-	if (here && !confirm('Replace this browser\'s saves (' + here.runs + ' runs, best Layer ' + here.best + ') with the backup\'s (' + what + ')? This browser\'s are kept aside.')) return;
+	const what = W.what(saves.runs, saves.best);
+	if (here && !confirm(W.replace(W.what(here.runs, here.best), what))) return;
 	unpackSaves(saves);
 	track('saves-import');
 	// (the game reads its saves as it starts: a running one starts again, once they are kept)
 	if (started) { Module.FS.syncfs(false, () => location.reload()); return; }
 	persist();
-	say('Saves brought back: ' + what + '.');
+	say(W.broughtBack(what));
 });
 
 $('forget').addEventListener('click', () => {
-	if (!confirm('Remove your ROMs and all saves from this browser?')) return;
+	if (!confirm(W.forget)) return;
 	track('forget-rom');
 	const req = indexedDB.deleteDatabase(DATA);
 	req.onsuccess = req.onerror = req.onblocked = () => location.reload();
@@ -473,12 +537,12 @@ menu.addEventListener('mouseover', (e) => {
 });
 
 function showKept() {
-	$('kept-bn6').textContent = kept('bn6') ? 'In' : 'Not yet';
-	$('kept-bn5').textContent = kept('bn5') ? 'In' : 'Not in (optional)';
-	$('kept-run').textContent = writtenAt(DATA + '/savedata/run.sav') || 'None yet';
+	$('kept-bn6').textContent = kept('bn6') ? W.keptIn : W.keptNotYet;
+	$('kept-bn5').textContent = kept('bn5') ? W.keptIn : W.keptOptional;
+	$('kept-run').textContent = writtenAt(DATA + '/savedata/run.sav') || W.keptNone;
 	let at = null;
 	try { at = localStorage.getItem('cw-backup-at'); } catch (e) { /* not kept */ }
-	$('kept-backup').textContent = at ? when(new Date(Number(at))) : 'Never';
+	$('kept-backup').textContent = at ? when(new Date(Number(at))) : W.never;
 }
 
 function openMenu() {
@@ -525,8 +589,8 @@ document.addEventListener('keydown', (e) => {
 function showHints() {
 	const pad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(Boolean);
 	const keys = pad
-		? [['A', 'A'], ['B', 'B'], ['L R', 'L R'], ['Start', 'Start'], ['Back', 'Select'], ['F1', 'Menu']]
-		: [['WASD', 'Move'], ['J', 'A'], ['K', 'B'], ['Q E', 'L R'], ['Enter', 'Start'], ['Bksp', 'Select'], ['F1', 'Menu']];
+		? [['A', 'A'], ['B', 'B'], ['L R', 'L R'], ['Start', 'Start'], ['Back', 'Select'], ['F1', W.menu]]
+		: [['WASD', W.move], ['J', 'A'], ['K', 'B'], ['Q E', 'L R'], ['Enter', 'Start'], ['Bksp', 'Select'], ['F1', W.menu]];
 	$('hints').innerHTML = keys.map(([k, what]) => '<span>' + k.split(' ').map((c) => '<kbd>' + c + '</kbd>').join('') + what + '</span>').join('');
 	fit();
 }
@@ -540,7 +604,7 @@ showHints();
 function smoothOn() { try { return localStorage.getItem('cw-smooth') === 'on'; } catch (e) { return false; } }
 function showSmooth() {
 	const on = smoothOn();
-	$('smooth-label').textContent = 'Smooth motion: ' + (on ? 'on' : 'off');
+	$('smooth-label').textContent = W.smooth(on);
 	$('smooth').setAttribute('aria-pressed', on ? 'true' : 'false');
 }
 $('smooth').addEventListener('click', () => {

@@ -8,10 +8,20 @@
 // keep pointing at the releases page). Without script, the list alone shows.
 'use strict';
 
-// whose device the best pick names
-const BEST_FOR = {
+// whose device the best pick names, and the page's other words, in its language
+const BEST_FOR = LANG === 'ja' ? {
+	windows: 'お使いのWindows PCに', macos: 'お使いのMacに', linux: 'Linuxに', deck: 'お使いのSteam Deckに', android: 'お使いのAndroidに',
+	ios: 'お使いのiPhone・iPadに', handheld: 'お使いの携帯ゲーム機に', '3ds': 'お使いのNew 3DSに', browser: 'インストール不要、どの端末でも',
+} : {
 	windows: 'For your Windows PC', macos: 'For your Mac', linux: 'For Linux', deck: 'For your Steam Deck', android: 'For your Android device',
 	ios: 'For your iPhone or iPad', handheld: 'For your handheld', '3ds': 'For your New 3DS', browser: 'No install, any device',
+};
+const WORDS = LANG === 'ja' ? {
+	best: 'おすすめ', none: 'リリースはまだありません', notIn: (tag) => `${tag}にはありません`, copy: 'コピー', copied: 'コピーしました', selected: '選択しました',
+	qr: (tag) => `3DS版のQRコード（${tag}）`,
+} : {
+	best: 'Best pick', none: 'No release yet', notIn: (tag) => `Not in ${tag}`, copy: 'Copy', copied: 'Copied', selected: 'Selected',
+	qr: (tag) => `QR code of the 3DS title's link, ${tag}`,
 };
 
 // A system's entry in the list (data-os: the entries have no ids, so a
@@ -31,7 +41,7 @@ function pickBest(os) {
 	for (const a of copy.querySelectorAll('[data-umami-event]')) a.dataset.umamiEventSlot = 'best';
 	best.querySelector('.slot').replaceChildren(copy);
 	best.dataset.os = os;
-	document.getElementById('best-for').textContent = BEST_FOR[os] || 'Best pick';
+	document.getElementById('best-for').textContent = BEST_FOR[os] || WORDS.best;
 	best.hidden = false;
 }
 
@@ -63,14 +73,14 @@ document.addEventListener('click', async (e) => {
 	if (!button) return;
 	try {
 		await navigator.clipboard.writeText(button.dataset.copy);
-		button.textContent = 'Copied';
+		button.textContent = WORDS.copied;
 	} catch (err) {
 		// (no clipboard: the text selected, to copy by hand)
 		const code = button.parentElement.querySelector('code');
 		if (code) getSelection().selectAllChildren(code);
-		button.textContent = 'Selected';
+		button.textContent = WORDS.selected;
 	}
-	setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+	setTimeout(() => { button.textContent = WORDS.copy; }, 2000);
 });
 
 // ---- the files: the newest GitHub release, an alpha's pre-release too ----
@@ -87,11 +97,11 @@ document.addEventListener('click', async (e) => {
 		release = (await res.json()).find((r) => !r.draft);
 		if (!release) throw new Error('none');
 	} catch (e) {
-		hint.textContent = 'No release yet';
+		hint.textContent = WORDS.none;
 		for (const a of document.querySelectorAll('[data-asset], [data-needs]')) a.setAttribute('aria-disabled', 'true');
 		return;
 	}
-	const date = new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+	const date = new Date(release.published_at).toLocaleDateString(LANG, { year: 'numeric', month: 'short', day: 'numeric' });
 	hint.replaceChildren();
 	const notes = document.createElement('a');
 	notes.href = release.html_url;
@@ -120,7 +130,7 @@ document.addEventListener('click', async (e) => {
 		if (main && entry) {
 			const info = document.createElement('span');
 			info.className = 'version';
-			info.textContent = asset ? `${release.tag_name} · ${(asset.size / 1048576).toFixed(1)} MB` : `Not in ${release.tag_name}`;
+			info.textContent = asset ? `${release.tag_name} · ${(asset.size / 1048576).toFixed(1)} MB` : WORDS.notIn(release.tag_name);
 			entry.querySelector('.what').append(info);
 		}
 	}
@@ -134,7 +144,7 @@ document.addEventListener('click', async (e) => {
 			entry.dataset.missing = '1';
 			const info = document.createElement('span');
 			info.className = 'version';
-			info.textContent = `Not in ${release.tag_name}`;
+			info.textContent = WORDS.notIn(release.tag_name);
 			entry.querySelector('.what').append(info);
 		}
 	}
@@ -146,7 +156,7 @@ document.addEventListener('click', async (e) => {
 	// downloads a CIA and installs it on the HOME Menu
 	const cia = release.assets.find((x) => x.name === 'cyberworld-endless.cia');
 	const modules = cia && typeof qr === 'function' ? qr(cia.browser_download_url) : null;
-	if (modules) for (const code of document.querySelectorAll('.qr .code')) code.replaceChildren(qrSvg(modules, `QR code of the 3DS title's link, ${release.tag_name}`));
+	if (modules) for (const code of document.querySelectorAll('.qr .code')) code.replaceChildren(qrSvg(modules, WORDS.qr(release.tag_name)));
 })();
 
 // ---- after a download: a thank-you, once a visit ----

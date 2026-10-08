@@ -50,7 +50,7 @@
 		if (on) track('trailer-sound');
 		if (on) { v.currentTime = 0; v.play(); }
 		sound.setAttribute('aria-pressed', String(on));
-		sound.querySelector('span').textContent = on ? 'Sound off' : 'Sound on';
+		sound.querySelector('span').textContent = LANG === 'ja' ? (on ? '音を消す' : '音を出す') : on ? 'Sound off' : 'Sound on';
 		sound.querySelector('.icon').className = `icon ${on ? 'i-muted' : 'i-sound'}`;
 	});
 })();
@@ -64,5 +64,5 @@
 	const mine = detectPlatform();
 	if (mine === 'browser') return;
 	const hero = document.querySelector('.hero .actions .plate[href="download/"]');
-	if (hero) hero.lastChild.textContent = `Download for ${PLATFORMS[mine]}`;
+	if (hero) hero.lastChild.textContent = LANG === 'ja' ? `${PLATFORMS[mine]}版をダウンロード` : `Download for ${PLATFORMS[mine]}`;
 })();

@@ -18,7 +18,13 @@ function track(name, data) {
 }
 document.addEventListener('DOMContentLoaded', () => { for (const [name, data] of queued.splice(0)) track(name, data); });
 
-const PLATFORMS = { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'PortMaster', '3ds': 'New 3DS', browser: 'Browser' };
+// the page's language: English, or Japanese on the ja/ pages, whose
+// scripts' words follow it
+const LANG = document.documentElement.lang === 'ja' ? 'ja' : 'en';
+
+const PLATFORMS = LANG === 'ja'
+	? { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone・iPad', handheld: 'PortMaster', '3ds': 'New 3DS', browser: 'ブラウザ' }
+	: { windows: 'Windows', macos: 'Mac', linux: 'Linux', deck: 'Steam Deck', android: 'Android', ios: 'iPhone & iPad', handheld: 'PortMaster', '3ds': 'New 3DS', browser: 'Browser' };
 
 // the visitor's system, as far as the browser says: a New 3DS's says it is
 // like an iPhone, an iPad's like a Mac (but with touch); a Steam Deck's
@@ -36,3 +42,25 @@ function detectPlatform() {
 	if (/linux|x11/i.test(p) || /linux|x11/i.test(ua)) return 'linux';
 	return 'browser';
 }
+
+// A browser that asks for Japanese first, on an English page with a
+// Japanese one (its bar's language link): a line under the bar says so,
+// in Japanese, until its button closes it for good. Not on the player's
+// page, whose screen is sized to the window under the bar.
+(() => {
+	const link = document.querySelector('.pet-bar a.lang[hreflang="ja"]');
+	const first = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+	if (!link || !/^ja\b/i.test(first) || document.body.classList.contains('play')) return;
+	const KEY = 'cw-lang-hint';
+	try { if (localStorage.getItem(KEY) === 'closed') return; } catch (e) { /* asked again next page */ }
+	const hint = document.createElement('div');
+	hint.className = 'lang-hint';
+	hint.lang = 'ja';
+	hint.innerHTML = '<div class="wrap"><a hreflang="ja" data-umami-event="lang" data-umami-event-to="ja" data-umami-event-from="hint">日本語のページがあります</a><button type="button">閉じる</button></div>';
+	hint.querySelector('a').href = link.href;
+	hint.querySelector('button').addEventListener('click', () => {
+		hint.remove();
+		try { localStorage.setItem(KEY, 'closed'); } catch (e) { /* closed for this page */ }
+	});
+	document.querySelector('.pet-bar').after(hint);
+})();

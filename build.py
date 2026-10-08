@@ -578,6 +578,8 @@ def deb():
 
 SITE_URL = 'https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/'
 SITE_PAGES = ('', 'download/', 'play/', 'faq/')
+# (each page's Japanese one: web/ja/, the same pages; tests/test_site.py keeps them in step)
+SITE_JA = 'ja/'
 
 
 def faq_structured(page):
@@ -652,12 +654,19 @@ def site(analytics=True):
     out = os.path.join(ROOT, 'build', 'site')
     shutil.rmtree(out, ignore_errors=True)
     shutil.copytree(os.path.join(ROOT, 'web'), out)
-    faq_structured(os.path.join(out, 'faq', 'index.html'))
+    for faq in ('faq', SITE_JA + 'faq'):
+        faq_structured(os.path.join(out, faq, 'index.html'))
     if analytics:
+        # (each page and its Japanese one, each naming both as their hreflang
+        # links do, the English one the default)
         with open(os.path.join(out, 'sitemap.xml'), 'w') as f:
-            f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
+            f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+                    ' xmlns:xhtml="http://www.w3.org/1999/xhtml">\n')
             for page in SITE_PAGES:
-                f.write(f'  <url><loc>{SITE_URL}{page}</loc></url>\n')
+                alternates = ''.join(f'    <xhtml:link rel="alternate" hreflang="{code}" href="{SITE_URL}{where}{page}"/>\n'
+                                     for code, where in (('en', ''), ('ja', SITE_JA), ('x-default', '')))
+                for where in ('', SITE_JA):
+                    f.write(f'  <url>\n    <loc>{SITE_URL}{where}{page}</loc>\n{alternates}  </url>\n')
             f.write('</urlset>\n')
     if not analytics:
         import glob
@@ -2174,9 +2183,11 @@ def main():
     if a.action == 'test':
         ensure_image()
         code = docker('make', 'test', *(['WERROR=1'] if os.environ.get('CI') else []))
-        # (linux/steam/add-to-steam.py, on the host's Python)
+        # (linux/steam/add-to-steam.py and the site's pages, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
+        if code == 0:
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
         sys.exit(code)
     if a.action == 'lint':
         ensure_image()

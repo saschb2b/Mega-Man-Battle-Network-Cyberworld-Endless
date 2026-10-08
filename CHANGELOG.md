@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- **The site in Japanese:** the home page, the downloads, the FAQ and the
+  browser player under `ja/`, written for Japan's players, who know the
+  game as ロックマンエグゼ6. The ROM they need is said first (the North
+  American one: the Japanese release does not work yet, and the game's
+  text is English), and BN6's names are as Capcom's Japanese releases
+  write them, checked against Capcom's Advanced Collection site and
+  manual (プログラムくん, アスタランド, フォルテ). Each page names the other
+  in its hreflang links and in the sitemap, so a search shows each
+  country its own; the bar links to the other language, and a browser
+  that asks for Japanese gets a line on the English pages pointing there.
+  The player keeps one set of ROMs and saves for both. A test holds the
+  two in step: the same ids, pictures and scripts, and every link between
+  the pages.
+
 ## 0.11.4 (2026-10-08)
 
 - **Controllers SDL does not know work (issue #112).** An 8BitDo Micro,

@@ -48,13 +48,16 @@
 }
 .hero h1 { margin: 0 0 6px; font: 700 clamp(1.15rem, 2.2vw, 1.55rem)/1.25 var(--caps); color: var(--white); text-shadow: var(--edge); letter-spacing: 0.04em; text-wrap: balance; }
 .pitch { margin: 0; max-width: 34em; font-size: 1.2rem; line-height: 1.45; color: #d6f4ff; text-wrap: pretty; }
+/* (the Japanese page's word on the ROM under the pitch: Japan's players
+ * mostly hold Rockman EXE 6, which the game does not read) */
+.hero .need { margin: 10px 0 0; max-width: 34em; font: 400 0.95rem/1.45 var(--pixel); color: var(--gold); text-wrap: pretty; }
 .actions { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
 .actions .exit { justify-content: center; }
 .actions .plate { padding-right: 16px; }
 @media (max-height: 780px) { .hero { padding: 20px 0 22px; } .hero .bar { margin-top: 18px; } }
 @media (max-width: 960px) {
 	.hero .bar { flex-direction: column; text-align: center; }
-	.pitch { margin: 0 auto; }
+	.pitch, .hero .need { margin-inline: auto; }
 	.actions { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; }
 }
 @media (max-width: 760px) {

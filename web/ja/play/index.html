@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cyberworld Endless をブラウザでプレイ｜ロックマンエグゼ6のローグライク</title>
+<meta name="description" content="ロックマンエグゼ6（北米版）のローグライク Cyberworld Endless を、ブラウザで。スマホでも遊べます。ROMはご自身のもので、端末の外には出ません。">
+<link rel="canonical" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/play/">
+<link rel="alternate" hreflang="en" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/">
+<link rel="alternate" hreflang="ja" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/play/">
+<link rel="alternate" hreflang="x-default" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/">
+<meta property="og:site_name" content="Cyberworld Endless">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/play/">
+<meta property="og:title" content="Cyberworld Endless をブラウザでプレイ">
+<meta property="og:description" content="ロックマンエグゼ6のローグライクを、ブラウザで。スマホでも。ROMはご自身のもので、端末の外には出ません。">
+<meta property="og:image" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="Cyberworld Endless：ロックマンエグゼ6のローグライク">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#4a7b42">
+<link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../../assets/icons/180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preload" href="../../assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../play/play.css">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+	{"@type": "ListItem", "position": 1, "name": "Cyberworld Endless", "item": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/"},
+	{"@type": "ListItem", "position": 2, "name": "プレイ", "item": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/play/"}]}
+</script>
+<script defer src="https://umami.saschb2b.com/script.js" data-website-id="3782c2fc-732a-43b0-b570-4e26cfe29dab" data-domains="saschb2b.github.io" data-exclude-hash="true"></script>
+</head>
+<body class="play">
+
+<header class="pet-bar">
+	<div class="wrap">
+		<a class="brand" href="../"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
+		<nav aria-label="サイト">
+			<a class="opt" href="../#game">ゲーム</a>
+			<a href="../download/" data-umami-event="go-download" data-umami-event-from="nav">ダウンロード</a>
+			<a href="./" aria-current="page">プレイ</a>
+			<a href="../faq/">FAQ</a>
+			<a class="opt" href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless" data-umami-event="outbound" data-umami-event-to="github">ソース</a>
+			<a class="lang" href="../../play/" hreflang="en" lang="en" data-umami-event="lang" data-umami-event-to="en" data-umami-event-from="nav"><span class="long">English</span><span class="short" aria-hidden="true">EN</span></a>
+		</nav>
+	</div>
+</header>
+
+<main class="console">
+	<!-- the English page's player (play/index.html) in Japanese: the same ids, which app.js reads, its words from its own table -->
+	<div id="app" class="screen-wrap">
+		<div class="pet-band">
+			<h1 class="pet-name">PET</h1><i class="stripes" aria-hidden="true"></i>
+			<span class="place"><b>場所</b><span id="pet-place">ROM</span></span>
+			<button id="menu-open" class="menu-btn" type="button" aria-haspopup="dialog" aria-controls="menu">メニュー <kbd>F1</kbd></button>
+		</div>
+		<div id="stage">
+			<canvas id="canvas" width="240" height="160" tabindex="0" aria-label="ゲーム画面" oncontextmenu="event.preventDefault()"></canvas>
+
+			<section id="gate" aria-live="polite" aria-label="ROM">
+				<p id="insert" class="insert">北米版 BN6 グレイガをセット</p>
+				<div class="carts">
+					<button id="cart-bn6" class="cart main" type="button" data-rom="bn6" aria-describedby="status">
+						<span class="spot" aria-hidden="true"><b>+</b><span class="big">BN6</span><span class="need">必須</span></span>
+						<span class="shell" aria-hidden="true"><span class="face"><canvas width="40" height="48"></canvas></span><span class="game">BN6</span><span class="sub">Gregar</span><span class="ready">OK</span></span>
+						<span class="caption">Cybeast Gregar（北米版）</span>
+					</button>
+					<button id="cart-bn5" class="cart extra" type="button" data-rom="bn5" aria-describedby="status">
+						<span class="spot" aria-hidden="true"><b>+</b><span class="big">BN5</span><span class="need">任意</span></span>
+						<span class="shell" aria-hidden="true"><span class="face"><canvas width="40" height="48"></canvas></span><span class="game">BN5</span><span class="sub">Colonel</span><span class="ready">OK</span></span>
+						<span class="caption">Team Colonel（北米版）</span>
+					</button>
+				</div>
+				<p id="status">読み込み中…</p>
+				<div class="actions">
+					<button id="play" class="go" type="button" hidden>プレイ</button>
+					<label id="pick" class="go" hidden><input id="rom" type="file" accept=".gba,application/octet-stream" multiple><span>ROMを選ぶ</span></label>
+				</div>
+				<p class="fine">北米版の、改造していない <code>.gba</code> ファイルをご自身で。このブラウザの中だけに保存され、アップロードはされません。</p>
+			</section>
+		</div>
+		<p id="hints" class="hints" aria-hidden="true"></p>
+
+		<!-- the PET menu: over the paused game, BN6's plates and the cursor's arrow, a card of what is kept -->
+		<section id="menu" role="dialog" aria-modal="true" aria-labelledby="menu-name" hidden>
+			<div class="menu-panel">
+				<div class="pet-band"><h2 id="menu-name" class="pet-name">メニュー</h2><i class="stripes" aria-hidden="true"></i>
+					<span class="place"><b>場所</b><span id="menu-place">ROM</span></span></div>
+				<div class="menu-body" id="menu-main">
+					<ul class="menu" id="menu-list">
+						<li><button id="continue" class="plate" type="button"><i class="icon i-play" aria-hidden="true"></i>つづける</button></li>
+						<li><button id="fullscreen" class="plate" type="button" data-umami-event="fullscreen"><i class="icon i-full" aria-hidden="true"></i>全画面</button></li>
+						<li><button id="smooth" class="plate" type="button" aria-pressed="false" title="90・144・165Hzの画面向け：動きが均一になり、少しだけぼやけます"><i class="icon i-layers" aria-hidden="true"></i><span id="smooth-label">なめらか表示：オフ</span></button></li>
+						<li><button id="show-controls" class="plate" type="button"><i class="icon i-code" aria-hidden="true"></i>操作方法</button></li>
+						<li><button id="export" class="plate" type="button"><i class="icon i-get" aria-hidden="true"></i>バックアップを保存</button></li>
+						<li><label id="import" class="plate" tabindex="0"><input id="saves-file" type="file" accept=".cwsave,application/octet-stream" tabindex="-1"><i class="icon i-put" aria-hidden="true"></i>バックアップを読み込む</label></li>
+						<li><button id="forget" class="plate warn" type="button"><i class="icon i-erase" aria-hidden="true"></i>すべて消去</button></li>
+					</ul>
+					<div class="kept">
+						<p class="who">保存中のもの</p>
+						<dl>
+							<dt>BN6</dt><dd id="kept-bn6">—</dd>
+							<dt>BN5</dt><dd id="kept-bn5">—</dd>
+							<dt>ランのセーブ</dt><dd id="kept-run">—</dd>
+							<dt>バックアップ</dt><dd id="kept-backup">まだなし</dd>
+						</dl>
+						<p id="menu-note" class="note" aria-live="polite"></p>
+					</div>
+				</div>
+				<div class="menu-body controls-view" id="menu-controls" hidden>
+					<table>
+						<tr><th>GBA</th><th>キーボード</th><th>コントローラー</th></tr>
+						<tr><td>十字キー</td><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd></td><td>十字キー、左スティック</td></tr>
+						<tr><td>A</td><td><kbd>J</kbd><kbd>X</kbd></td><td>A</td></tr>
+						<tr><td>B</td><td><kbd>K</kbd><kbd>Z</kbd></td><td>B</td></tr>
+						<tr><td>L</td><td><kbd>Q</kbd></td><td>L</td></tr>
+						<tr><td>R</td><td><kbd>E</kbd></td><td>R</td></tr>
+						<tr><td>Start</td><td><kbd>Enter</kbd></td><td>Start</td></tr>
+						<tr><td>Select</td><td><kbd>R</kbd><kbd>Bksp</kbd></td><td>Back</td></tr>
+					</table>
+					<p class="note">カプコンのPC版と同じ配置です。キーは文字ではなく位置で決まります（AZERTY配列ならZ Q S Dで移動）。タイトル画面でSelectを押すと操作設定の画面が開き、キーもボタンも変えられます。</p>
+					<ul class="menu"><li><button id="hide-controls" class="plate" type="button"><i class="icon i-play" aria-hidden="true"></i>もどる</button></li></ul>
+				</div>
+				<p class="menu-foot"><kbd>↑</kbd><kbd>↓</kbd> 選ぶ <kbd>Enter</kbd> 決定 <kbd>Esc</kbd> もどる</p>
+			</div>
+		</section>
+	</div>
+
+	<details class="help">
+		<summary>ブラウザ版について</summary>
+		<div class="textbox">
+			<p>ランは新しいレイヤーに入るたびにこのブラウザに保存され、タイトルのCONTINUEで再開できます。ゲーム内の文章は英語です。メニューの<em>バックアップを保存</em>でセーブを1つのファイル（<code>cyberworld-endless.cwsave</code>）にまとめられ、<em>バックアップを読み込む</em>でこのブラウザにも別のブラウザにも戻せます。AndroidとiPhoneのアプリも、ROMのあるフォルダに置けばこのファイルを読み込みます。このサイトのデータを消すと、ROMとセーブも消えます。</p>
+			<p>スマホやタブレットでは画面いっぱいに表示され、ゲームが自前のボタンを画面のまわりに描きます。ホーム画面に追加すると全画面で開きます。Windows、macOS、Linux、Steam Deck、Android、携帯ゲーム機、3DS向けもあります：<a href="../download/" data-umami-event="go-download" data-umami-event-from="play">ダウンロード</a>。</p>
+		</div>
+	</details>
+</main>
+
+<footer class="site">
+	<div class="wrap">
+		<p>ロックマンエグゼ（Mega Man Battle Network）© CAPCOM。非公式のファンプロジェクトで、カプコンとは関係がなく、承認も受けていません。コードは<a href="../../LICENSE.txt">MITライセンス</a>。<a href="https://mgba.io">mGBA</a>（<a href="../../licenses/mGBA.txt">MPL-2.0</a>）とSDL2（zlib）を組み込んでいます。気に入ったら<a href="https://buymeacoffee.com/qohreuukw" data-umami-event="outbound" data-umami-event-to="coffee">コーヒーをおごる</a>（Buy me a coffee）。</p>
+	</div>
+</footer>
+
+<script src="../../assets/site.js"></script>
+<script src="../../play/app.js"></script>
+<script src="../../play/cyberworld.js" async></script>
+</body>
+</html>

@@ -36,7 +36,7 @@
 </header>
 
 <main class="lost">
-	<div class="wrap">
+	<div class="wrap" lang="en">
 		<div class="band"><h1>Page not found</h1></div>
 		<div class="textbox">
 			<p>MegaMan searched this address and found no data here. The page may have moved: the downloads have their own page now.</p>
@@ -48,7 +48,27 @@
 			<a class="plate" href="faq/">FAQ</a>
 		</div>
 	</div>
+	<!-- (an address under ja/, a Japanese page's: the same in Japanese) -->
+	<div class="wrap" lang="ja" hidden>
+		<div class="band"><h1>ページが見つかりません</h1></div>
+		<div class="textbox">
+			<p>ロックマンがこのアドレスを探しましたが、データは見つかりませんでした。ページが移動したのかもしれません。</p>
+		</div>
+		<div class="ways">
+			<a class="exit" href="ja/play/">ブラウザでプレイ</a>
+			<a class="plate" href="ja/download/"><i class="icon i-get" aria-hidden="true"></i>ダウンロード</a>
+			<a class="plate" href="ja/">ホーム</a>
+			<a class="plate" href="ja/faq/">FAQ</a>
+		</div>
+	</div>
 </main>
+<script>
+if (/\/ja\//.test(location.pathname)) {
+	document.documentElement.lang = 'ja';
+	document.title = 'ページが見つかりません · Cyberworld Endless';
+	for (const w of document.querySelectorAll('main > .wrap')) w.hidden = w.lang !== 'ja';
+}
+</script>
 
 </body>
 </html>
