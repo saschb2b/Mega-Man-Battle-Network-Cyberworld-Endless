@@ -15,6 +15,13 @@ Nothing from the ROM is shipped.
 | Battles, net movement, menus, messages, shops, traders | The game's code |
 | Run structure, layer generation, loot, saves, the title | Cyberworld Endless |
 
+The player's A+B+Select+Start returns to Cyberworld Endless's title
+before the core sees it (`scene_emu.c`, issue #113): BN6's own reset would
+start its title on the map tables the run has taken over. The director
+stops without saving, so CONTINUE takes the run up at its last checkpoint,
+as after a quit in a battle. The four buttons held together are no
+controller's Select+Start quit either.
+
 ## Why an emulator
 
 Ship of Harkinian runs Ocarina of Time with no emulator, and Zelda64Recomp

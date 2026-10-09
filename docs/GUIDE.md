@@ -405,6 +405,10 @@ marked so), its shoulders and triggers L and R, Start is Start and Back
 whatever they are set to. Two Joy-Cons are one controller, on a phone too;
 one alone is a small one held sideways.
 
+**Soft reset:** **A+B+Select+Start** together, as mapped, returns to the
+title, in a battle too. **CONTINUE** takes the run up at its last
+checkpoint; what came after it is lost.
+
 **The controls screen** sets the buttons, laid out as big games lay theirs.
 **Select** on the title screen opens it (the line under the menu names the
 button it is on); on a phone or tablet with a controller, so does

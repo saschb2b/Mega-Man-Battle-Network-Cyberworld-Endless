@@ -112,8 +112,27 @@ static void after_frame(void) {
 	emu_debug_frame();
 }
 
+/* The GBA's reset chord belongs to the run's title (issue #113): checked
+ * on the player's mapped buttons before the PET, the map and the cinema
+ * take keys, and before the core sees them. The last checkpoint stays as
+ * it was, as a quit in a battle leaves it: CONTINUE takes the run up
+ * through the director, where BN6's own title would start on the map
+ * tables the run has taken over. */
+static bool soft_reset(void) {
+	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
+	if ((keys_from_buttons() & chord) != chord) return false;
+	emu_sync();
+	director_stop();
+	cinema_reset();
+	started = false;
+	P.quit_prompt = 0;
+	scene_set(&scene_title);
+	return true;
+}
+
 static void update(void) {
 	emu_drawing = false;
+	if (soft_reset()) return;
 	/* (the run's time: the statistics' minutes, save.h) */
 	profile_played_frame();
 	/* (the second screen first, from what the last update saw: the GBA's

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **A soft reset returns to Cyberworld Endless's title (issue #113, from
+  Mattwj).** A+B+Select+Start reset Gregar to its own title while the run
+  went on underneath, and going back in could put MegaMan elsewhere on the
+  map. The four buttons, as mapped, now return to this game's title before
+  the game sees them, in a battle too, and CONTINUE takes the run up at its
+  last checkpoint. Held on the title, they no longer become the
+  controller's quit.
+
 - **No freeze at a save on the New 3DS.** A checkpoint wrote some ten
   files on the frame that saved, each beside its place and then renamed
   over it, and on the 3DS's SD card each step is a call to its file
