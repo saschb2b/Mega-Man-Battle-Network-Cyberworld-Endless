@@ -8,7 +8,7 @@ building the game yourself.
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
 [What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
-[Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
+[Moving saves between devices](#moving-saves-between-devices) · [Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
 ## What you need
@@ -95,9 +95,8 @@ the data folder, which uninstalling leaves alone. On a phone or tablet,
 where uninstalling the app deletes its files, the app keeps a copy of the
 saves in the ROM folder you chose, `cyberworld-endless.cwsave`, renewed a
 few seconds after each save. After a reinstall, choose that folder again:
-the screen finds the copy and offers it back (**BRING BACK** or **START
-FRESH**); where the device has saves of its own, it shows both and asks
-which to keep. ROMs chosen as files leave no folder for the copy: the
+the screen finds the copy and opens **SAVES**, comparing it with this
+device before you choose **Keep this device** or **Import file**. ROMs chosen as files leave no folder for the copy: the
 screen says so.
 
 ### On Windows
@@ -344,11 +343,11 @@ cartridge, and keeps them, with your saves, in the browser's own storage
 (IndexedDB); they are never uploaded. Next time **Play** starts straight
 away, the game at the largest whole scale the window holds. **Menu** over
 the screen (or F1) pauses the game and holds the rest: Fullscreen, Smooth
-motion, the controls, **Save backup**, which downloads your saves as one
-file, `cyberworld-endless.cwsave`, **Load backup**, which brings it back,
-in this browser or another (the Android and iPhone apps take the same
-file, put in their ROM folder), and **Forget all**, which removes the
-ROMs and saves. BN5's battles run on a second emulator core in the
+motion, the controls, **Save backup** and **Load backup**, both shortcuts
+to the game's **SAVES** screen ([Moving saves between devices](#moving-saves-between-devices)),
+and **Forget all**, which removes the ROMs and saves. SAVES exports one
+`cyberworld-endless.cwsave` file or imports one through the browser's own
+file chooser; the same file works on the other systems. BN5's battles run on a second emulator core in the
 page: the first time, BN5 starts up while the title shows (about 20
 seconds on a recent laptop, a slice of each frame), and a battle in its
 areas that comes before it is done waits behind a short note, once per
@@ -689,10 +688,52 @@ PortMaster handheld, `~/.local/share/cyberworld-endless/` on Linux
 (the Flatpak's under `~/.var/app/`), `%LOCALAPPDATA%\cyberworld-endless\`
 on Windows and `~/Library/Application Support/cyberworld-endless/` on a
 Mac, where uninstalling leaves them. A phone or tablet keeps a copy in its
-ROM folder, and the browser's player saves a backup file
-([The ROMs screen](#the-roms-screen), [In a browser](#in-a-browser)). To
+ROM folder ([The ROMs screen](#the-roms-screen)); **SAVES** on the title
+exports a portable file on every system. To
 give up a run without playing it out, delete `savedata/run.sav`; your
 best depth is kept in `profile.sav`.
+
+### Moving saves between devices
+
+Choose **SAVES** on the title. **Export** makes one
+`cyberworld-endless.cwsave` file with your progress, unlocks, Library,
+guardian records and the current run's checkpoint. It contains no ROM.
+Copy that file to the other device, start the game there with your own
+ROM, choose **SAVES**, then **Import**. In the browser, **Save backup**
+and **Load backup** in the player's menu open this same screen. You can
+also drop one `.cwsave` on the player to import it through the same preview.
+
+Before anything is replaced, SAVES puts **This device** and **File** side
+by side: runs played, deepest layer, the current run's layer, act and area,
+when it was played, the device that wrote it and its game version. The
+device name comes from the system. **Keep this device** is selected first;
+**Import file** replaces the local progress and checkpoint together. Runs
+played separately on two devices are never combined. **Undo last import**
+brings back the local saves that were replaced.
+
+Controls, touch layout, display settings, music and sound volumes, and your
+answer about anonymous statistics stay on each device. Importing an older
+backup also leaves its settings out. Older `.cwsave` files still work,
+although facts they did not record are shown as unknown.
+
+**Auto-export** keeps a fresh `cyberworld-endless.cwsave` in the folder
+shown on the screen a few seconds after each save. It starts on for phone
+apps, which already keep a copy beside your ROMs; on other systems it is
+optional. **Choose folder**, where the system has a folder chooser,
+remembers a different destination. Without a chooser, use the shown
+folder: Downloads on a desktop, or the game's data folder on PortMaster
+and the 3DS. A file found there at startup opens the same comparison
+before an automatic export can replace it.
+
+The browser uses manual **Export** downloads and **Import** uploads;
+automatic exports and a transfer folder are unavailable there. Download a
+copy before clearing the site's storage or moving to another browser.
+
+A damaged file, a save from a newer game version or an incompatible run
+format is refused before your saves change; update the receiving device
+when asked. A checkpoint that needs BN5 is refused until the receiving
+device has **BN5 Team Colonel (USA)**. The 3DS cannot run those checkpoints.
+The preview says why a file cannot be imported.
 
 ## Screen
 

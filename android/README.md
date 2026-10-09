@@ -168,9 +168,13 @@ saves found`) and the game's own line, `BN5 found: ...`. A reinstall's
 saves: play until the game saves, check that
 `/sdcard/Download/ROMs/cyberworld-endless.cwsave` is there, `adb uninstall
 io.github.saschb2b.cyberworldendless`, install the APK again and choose the
-folder: the ROMs screen asks **SAVES FOUND**, and **BRING BACK** puts back
-`files/data/savedata` as it was (the emulator, with `adb root`, can hash
-both).
+folder: the ROMs screen opens **SAVES**, which compares the copy with
+this device. **Import file** puts back the progress and checkpoint in
+`files/data/savedata`, preserving device settings and volumes (the emulator,
+with `adb root`, can hash the portable progress). **Undo last import**
+brings back what was replaced. The same screen is on the title for manual
+exports, imports and the automatic copy's folder; see
+[Moving saves between devices](../docs/GUIDE.md#moving-saves-between-devices).
 
 Joy-Cons can be tried there without the hardware: `tools/jc_uinput.c`
 (built with this image's NDK, the command in its first lines) makes a left

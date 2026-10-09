@@ -7,6 +7,8 @@
  * small canvas is left out in turn: the saves' second line and its first,
  * the keys' line, the note's third and second lines; the large cartridges
  * come where there is room for them. */
+#include "launcher_state.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -14,7 +16,6 @@
 #include "game.h"
 #include "launcher_art.h"
 #include "launcher_roms.h"
-#include "launcher_state.h"
 #include "pick.h"
 #include "pixfont.h"
 #include "platform.h"
@@ -129,14 +130,6 @@ static int place_buttons(LauncherLayout *lay, const Fit *f, int ix, int iw, int 
 	return y + BUTTON_H;
 }
 
-/* the question: a panel over the middle of x0, y0, w x h */
-static void place_question(LauncherLayout *lay, int x0, int y0, int w, int h) {
-	int aw = w - 24 < 220 ? w - 24 : 220, ah = 4 * LINE + BUTTON_H + 30, bw = (aw - 3 * GAP - 8) / 2;
-	lay->ask = (SDL_Rect){ x0 + (w - aw) / 2, y0 + (h - ah) / 2, aw, ah };
-	lay->ask_yes = (SDL_Rect){ lay->ask.x + 4 + GAP, lay->ask.y + ah - BUTTON_H - 6, bw, BUTTON_H };
-	lay->ask_no = (SDL_Rect){ lay->ask_yes.x + bw + GAP, lay->ask_yes.y, bw, BUTTON_H };
-}
-
 void launcher_layout(LauncherLayout *lay) {
 	memset(lay, 0, sizeof *lay);
 	int st, sl, sb, sr;
@@ -160,7 +153,6 @@ void launcher_layout(LauncherLayout *lay) {
 	}
 	y = place_buttons(lay, &f, ix, iw, y + GAP + (spare - spare / 3) / 2);
 	if (f.hint && !f.beside) lay->hint = (SDL_Rect){ ix, y + GAP, iw, LINE };
-	place_question(lay, x0, y0, w, h);
 }
 
 /* ---- the picture ---- */
@@ -200,7 +192,7 @@ static int drop(int slot, int *flash) {
 
 static void cartridge_or_spot(const LauncherLayout *lay, int slot) {
 	SDL_Rect r = lay->cart[slot];
-	bool lit = L.focus == (slot == SLOT_BN6 ? FOCUS_BN6 : FOCUS_BN5) && !L.asking;
+	bool lit = L.focus == (slot == SLOT_BN6 ? FOCUS_BN6 : FOCUS_BN5);
 	if (roms_have(slot)) {
 		int flash, dy = drop(slot, &flash);
 		SDL_Rect at = { r.x, r.y + dy, r.w, r.h };
@@ -256,9 +248,9 @@ static void buttons(const LauncherLayout *lay) {
 	bool bn6 = roms_have(SLOT_BN6);
 	if (lay->alt.w) {
 		LauncherWord w = L.kinds & PICK_FILES ? W_FILES_INSTEAD : W_LOOK_AGAIN;
-		art_button(lay->alt, launcher_word(w), false, L.focus == FOCUS_ALT && !L.asking, false, false);
+		art_button(lay->alt, launcher_word(w), false, L.focus == FOCUS_ALT, false, false);
 	}
-	art_button(lay->play, launcher_word(L.from_title ? W_DONE : W_PLAY), true, L.focus == FOCUS_PLAY && !L.asking, !bn6, !L.from_title);
+	art_button(lay->play, launcher_word(L.from_title ? W_DONE : W_PLAY), true, L.focus == FOCUS_PLAY, !bn6, !L.from_title);
 }
 
 static void lines_under(const LauncherLayout *lay) {
@@ -276,21 +268,6 @@ static void lines_under(const LauncherLayout *lay) {
 	pixfont_draw(lay->hint.x + lay->hint.w / 2, lay->hint.y, hint, PET_DIM, ink_shade(), PIXFONT_CENTER, 1);
 }
 
-static void question(const LauncherLayout *lay) {
-	fill_rect(0, 0, P.w, P.h, rgba(0, 20, 32, 170));
-	SDL_Rect a = lay->ask;
-	fill_rect(a.x - 2, a.y - 2, a.w + 4, a.h + 4, PET_CYAN);
-	fill_rect(a.x, a.y, a.w, a.h, PET_NAVY);
-	fill_rect(a.x, a.y, a.w, 14, PET_DARK);
-	pixfont_draw(a.x + 6, a.y + 4, launcher_word(W_SAVES_FOUND), PET_GOLD, ink_shade(), PIXFONT_LEFT, 1);
-	char lines[5][96];
-	int n = pixfont_wrap(L.ask_text, a.w - 12, 1, lines, 5);
-	for (int i = 0; i < n; ++i) pixfont_draw(a.x + 6, a.y + 19 + i * LINE, lines[i], PET_WHITE, ink_shade(), PIXFONT_LEFT, 1);
-	bool here = L.here_saves;
-	art_button(lay->ask_yes, launcher_word(here ? W_USE_FOLDERS : W_BRING_BACK), true, L.answer == ANSWER_YES, false, false);
-	art_button(lay->ask_no, launcher_word(here ? W_KEEP_THESE : W_START_FRESH), false, L.answer == ANSWER_NO, false, false);
-}
-
 void launcher_draw_all(const LauncherLayout *lay) {
 	frame(lay);
 	for (int s = 0; s < SLOTS; ++s) cartridge_or_spot(lay, s);
@@ -298,7 +275,6 @@ void launcher_draw_all(const LauncherLayout *lay) {
 	note(lay);
 	buttons(lay);
 	lines_under(lay);
-	if (L.asking) question(lay);
 	/* (the quit prompt, where there is no game font to say it in yet) */
 	if (P.quit_prompt > 0 && !R.data) {
 		const char *q = quit_words(P.quit_pad);

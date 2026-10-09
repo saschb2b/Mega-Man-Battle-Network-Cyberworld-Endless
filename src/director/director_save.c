@@ -6,6 +6,7 @@
 #include "director_save.h"
 
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 
 #include "bn6_fields.h"
@@ -43,6 +44,11 @@
  * (A note from before `heard` reads it as 0.) */
 #define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
 typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where; } ActNote;
+_Static_assert(sizeof(ActNote) == 32 && offsetof(ActNote, seed) == 0 && offsetof(ActNote, act) == 4 &&
+	offsetof(ActNote, viruses) == 8 && offsetof(ActNote, frames) == 12 && offsetof(ActNote, dealer) == 16 &&
+	offsetof(ActNote, unknown) == 20 && offsetof(ActNote, heard) == 24 && offsetof(ActNote, where) == 28,
+	"Act save layout changed");
+_Static_assert(sizeof(int) == 4 && sizeof D.layer_tiles == 4 && sizeof D.seen == 4096, "Layer save layout changed");
 enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME, SAVED_HOME_HERE };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
 static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
 static ActNote act_note;

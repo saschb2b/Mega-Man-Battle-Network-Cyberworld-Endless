@@ -2,6 +2,7 @@
 #include "darkchips.h"
 
 #include <string.h>
+#include <stddef.h>
 
 #include "save_blob.h"
 
@@ -9,13 +10,17 @@
 
 /* (it grows at its end, so a run saved before the flame's layer was kept
  * reads with none kept: save_read_blob_upto) */
-static struct {
+typedef struct {
 	uint32_t seed;
 	uint8_t count[DARK_KINDS];
 	uint16_t flame_depth;        /* the layer whose flame is kept, 0 none */
 	uint8_t flame_side;          /* ... its side kind */
 	uint8_t flame_kind;          /* ... the kind it holds + 1 (0: none there), DARK_FLAME_BN6 where it is BN6's */
-} dark;
+} DarkSave;
+static DarkSave dark;
+_Static_assert(sizeof(DarkSave) == 20 && offsetof(DarkSave, seed) == 0 && offsetof(DarkSave, count) == 4 &&
+	offsetof(DarkSave, flame_depth) == 16 && offsetof(DarkSave, flame_side) == 18 && offsetof(DarkSave, flame_kind) == 19,
+	"DarkChip save layout changed");
 #define DARK_FLAME_BN6 0x80
 uint16_t dark_dev_mask;
 

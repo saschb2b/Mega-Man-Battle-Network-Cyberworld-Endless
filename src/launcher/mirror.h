@@ -1,13 +1,12 @@
-/* The saves' copy in the folder the ROMs came from (mirror.c): on a phone,
- * where uninstalling the app deletes its files, a .cwsave (backup.h) beside
- * the ROMs in the folder the player chose, written a few seconds after the
- * game last saved and as the app goes away, so that a reinstall finds it
- * there and the launcher offers it back. Nothing elsewhere: a desktop's
- * saves outlive the program, the browser's page exports its own. */
+/* Auto-export to this device's transfer folder: its own choice, a phone's
+ * ROM folder by default, or the known transfer place without a picker.
+ * After the saves rest, one .cwsave is refreshed there; an incoming file
+ * is held for SAVES to compare first. The browser exports by download. */
 #ifndef CW_MIRROR_H
 #define CW_MIRROR_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Files were written (platform_persist) */
 void mirror_note(void);
@@ -19,10 +18,15 @@ void mirror_flush(void);
 /* A folder newly chosen (or chosen again after a copy was refused): the
  * copy made there at the next frame */
 void mirror_new_folder(void);
-/* While the launcher asks about saves the folder held: no copy over them */
+/* While SAVES asks about an incoming file: no export over it */
 void mirror_hold(bool on);
 /* How the last copy went: 1 made, -1 refused (the folder's access was
  * read-only, or it is gone), 0 none made yet */
 int mirror_last(void);
+/* At the title/start and before each auto-export: stage a different file
+ * from the transfer places and hold exports until the player's decision.
+ * Repeated calls return the pending path; only mirror_hold(false), after
+ * Import or Keep this device, releases it. */
+bool mirror_scan(char *path, size_t n);
 
 #endif

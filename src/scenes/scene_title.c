@@ -620,6 +620,15 @@ static void setup_draw(int x0, int y0) {
 	note_more(cx, y0 + ny + (five ? 0 : 2) + note_line(cx, y0 + ny, note, sky) * 12, locked, nlocked);
 }
 
+static void summary_update(void) {
+	if (S.t <= SUMMARY_MIN || (!btn_pressed(BTN_A) && !btn_pressed(BTN_START))) return;
+	S.summary = false;
+	audio_music(MUS_TITLE);
+	S.t = S.shown_at = 0;
+	S.new_marks = meta_marks_new();
+	if (S.new_marks) audio_sfx(SFX_REVEAL);
+}
+
 static void update(void) {
 	++S.t;
 	if (S.leaving) {
@@ -640,18 +649,7 @@ static void update(void) {
 	}
 	if (S.setup) { setup_update(); return; }
 	if (!S.summary && S.t - S.shown_at >= SHOW_FRAMES) { S.first = false; show_next(); }
-	if (S.summary) {
-		/* then the net comes back for PRESS START */
-		if (S.t > SUMMARY_MIN && (btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
-			S.summary = false;
-			audio_music(MUS_TITLE);
-			S.t = S.shown_at = 0;
-			/* (the summary has room for two unlocks: a mark shows itself) */
-			S.new_marks = meta_marks_new();
-			if (S.new_marks) audio_sfx(SFX_REVEAL);
-		}
-		return;
-	}
+	if (S.summary) { summary_update(); return; }
 	if (!S.pressed) { press_start(); return; }
 	if (!S.menu) {
 		if (S.t - S.pressed >= MENU_AFTER) S.menu = S.t;
@@ -676,9 +674,10 @@ static void update(void) {
 		S.confirm = false;
 	} else {
 		if (select_pressed()) return;
-		int items = S.has_save ? 2 : 1;
-		if (items > 1 && (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN))) { S.cursor ^= 1; audio_sfx(SFX_CURSOR); }
+		int items = S.has_save ? 3 : 2, d = btn_repeat(BTN_UP) ? -1 : btn_repeat(BTN_DOWN) ? 1 : 0;
+		if (d) { S.cursor = (S.cursor + items + d) % items; audio_sfx(SFX_CURSOR); }
 		if (!ok) return;
+		if (S.cursor == items - 1) { saves_open(); return; }
 		if (S.cursor == 0 && S.has_save) {
 			S.confirm = true;
 			S.yes = false;
@@ -793,7 +792,7 @@ static void hint_draw(int x0, int y0) {
 	SDL_Color grey = rgba(150, 160, 190, 255);
 	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
 #ifdef __3DS__
-	if (S.menu && !S.confirm && analytics_ask_here()) minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), "SELECT: Statistics", grey, 1);
+	if (S.menu && !S.confirm && analytics_ask_here()) minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.menu ? 94 : S.has_save ? 107 : 138), "SELECT: Statistics", grey, 1);
 #else
 	if (!S.menu || S.confirm) return;
 	char hint[64];
@@ -804,7 +803,7 @@ static void hint_draw(int x0, int y0) {
 	}
 	/* (under NEW GAME; with CONTINUE under it, in the rows between the
 	 * logo and the menu, where CONTINUE's row had hidden it) */
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.menu ? 94 : S.has_save ? 107 : 138), hint, grey, 1);
 #endif
 }
 
@@ -917,7 +916,7 @@ static void draw(void) {
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
 	if (!S.confirm && !S.summary)   /* (the question takes its place a moment; the summary runs to the bottom) */
-		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
+		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + (S.menu ? 134 : 126), 4, 4, 0);
 	top_draw(x0, y0);
 
 	if (S.summary) { summary_draw(x0, y0); return; }
@@ -927,7 +926,7 @@ static void draw(void) {
 	 * the question's box covers both) */
 	if (!S.confirm) {
 		char v[40];
-		minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
+		if (!S.menu) minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
 		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
 		if (best > 0 && !(S.menu && S.has_save && S.saved_depth)) {
 			snprintf(v, sizeof v, "Best: Layer %d", best);
@@ -948,15 +947,16 @@ static void draw(void) {
 		int n = S.has_save ? 2 : 1;
 		for (int i = 0; i < n; ++i) {
 			uint32_t first = i == 0 ? 35 : 55;
-			int y = y0 + 112 + i * 16;
+			int y = y0 + 104 + i * 16;
 			rom_tiles(text + first * 32, T.menu_pal, x0 + 88, y, 4, 2, 0);
 			rom_tiles(text + (first + 8) * 32, T.menu_pal, x0 + 120, y, 4, 2, 0);
 			rom_tiles(text + (first + 16) * 32, T.menu_pal, x0 + 152, y, 2, 2, 0);
 		}
-		continue_label(x0 + 170, y0 + 130);
+		continue_label(x0 + 170, y0 + 122);
+		text_draw(x0 + 89, y0 + 105 + n * 16, "SAVES", WHITE, TEXT_LEFT);
 		/* the arrow cycles three frames, 6 frames each */
 		int f = ((S.t - S.menu) / 6) % 3;
-		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);
+		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 105 + S.cursor * 16, 2, 2, 0);
 	}
 	if (S.confirm) {
 		/* over the menu, MegaMan asks as in the game's chats: two lines,

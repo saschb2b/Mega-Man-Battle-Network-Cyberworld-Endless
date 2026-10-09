@@ -103,7 +103,7 @@
 						<li><button id="smooth" class="plate" type="button" aria-pressed="false" title="For 90, 144 or 165 Hz screens: even motion, a little blurred"><i class="icon i-layers" aria-hidden="true"></i><span id="smooth-label">Smooth: off</span></button></li>
 						<li><button id="show-controls" class="plate" type="button"><i class="icon i-code" aria-hidden="true"></i>Controls</button></li>
 						<li><button id="export" class="plate" type="button"><i class="icon i-get" aria-hidden="true"></i>Save backup</button></li>
-						<li><label id="import" class="plate" tabindex="0"><input id="saves-file" type="file" accept=".cwsave,application/octet-stream" tabindex="-1"><i class="icon i-put" aria-hidden="true"></i>Load backup</label></li>
+						<li><button id="import" class="plate" type="button"><i class="icon i-put" aria-hidden="true"></i>Load backup</button></li>
 						<li><button id="forget" class="plate warn" type="button"><i class="icon i-erase" aria-hidden="true"></i>Forget all</button></li>
 					</ul>
 					<div class="kept">
@@ -136,12 +136,17 @@
 		</section>
 	</div>
 
+	<input id="saves-file" type="file" accept=".cwsave,application/octet-stream" hidden>
+
 	<details class="help">
 		<summary>About the browser player</summary>
 		<div class="textbox">
-			<p>The run is saved in this browser on every new layer; CONTINUE on the title picks it up. <em>Save backup</em> in the menu keeps your
-				saves in one file, <code>cyberworld-endless.cwsave</code>, which <em>Load backup</em> brings back here or in another browser, and
-				which the Android and iPhone apps take too, put in the folder your ROMs are in. Clearing this site's data deletes your ROMs and saves.</p>
+			<p>The run is saved in this browser on every new layer; CONTINUE on the title picks it up. <em>Save backup</em> and <em>Load backup</em>
+				in the menu open the game's SAVES screen. Export downloads one <code>cyberworld-endless.cwsave</code> file; Import shows this
+				browser's saves and the file side by side before replacing them. You can also drop a <code>.cwsave</code> on the player.
+				The same file works on the other systems, and Undo last import
+				brings back what was replaced. Controls, screen settings, volumes and your statistics answer stay here.
+				Clearing this site's data deletes your ROMs and saves.</p>
 			<p>On a phone or tablet the game fills the screen and draws its own buttons round the picture; added to the home screen, it opens full
 				screen. Also for Windows, macOS, Linux, the Steam Deck, Android, handhelds and the 3DS: <a href="../download/" data-umami-event="go-download" data-umami-event-from="play">the downloads</a>.</p>
 		</div>

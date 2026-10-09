@@ -58,7 +58,12 @@ app and the browser's backups share), written a few seconds after the
 game last saved and as the app goes to the background, through the
 folder's bookmark as a coordinated write that replaces the old copy
 whole. A folder chosen that holds one has it copied to `found.cwsave`,
-and the ROMs screen offers it back after a reinstall.
+and the ROMs screen opens SAVES to compare it with this device after a
+reinstall. SAVES on the title also exports and imports that portable file
+and controls its automatic copy. Imported progress keeps the receiving
+device's controls, display, volumes and statistics answer; Undo last import
+brings back what was replaced. See
+[Moving saves between devices](../docs/GUIDE.md#moving-saves-between-devices).
 
 ## Building (on a Mac)
 

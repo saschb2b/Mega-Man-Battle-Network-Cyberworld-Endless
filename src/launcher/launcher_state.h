@@ -7,13 +7,10 @@
 #include <SDL.h>
 #include <stdbool.h>
 
-#include "backup.h"
 #include "launcher_text.h"
 
-/* What the cursor can be on: the cartridges, the second button, PLAY; and
- * in the question over the saves, its two answers */
+/* What the cursor can be on: the cartridges, the second button, PLAY */
 enum { FOCUS_BN6, FOCUS_BN5, FOCUS_ALT, FOCUS_PLAY, FOCUSES };
-enum { ANSWER_YES, ANSWER_NO };
 
 typedef struct {
 	bool from_title;          /* opened from the title: the game runs, DONE goes back */
@@ -30,14 +27,6 @@ typedef struct {
 	bool had[SLOTS];          /* in at the last look */
 	int looked_at;            /* the frame of the last look for a ROM put in by hand */
 	char saves[200];          /* the saves' line */
-	/* the question over the saves a folder held */
-	bool asking;
-	int answer;               /* ANSWER_*: the cursor's */
-	BackupInfo found, here;
-	bool here_saves;
-	char ask_text[400];
-	char found_path[620];     /* the .cwsave asked about */
-	bool found_copy;          /* ... a copy of the folder's, the launcher's own to remove */
 	char folder[256];         /* the folder kept (a phone's), "" none */
 	int pointed;              /* what the mouse or a finger is over, -1 nothing */
 } Launcher;
@@ -57,7 +46,6 @@ typedef struct {
 	SDL_Rect saves;          /* the saves' line (h 0: no room for it) */
 	SDL_Rect alt, play;      /* the buttons (alt w 0: none) */
 	SDL_Rect hint;           /* the keys' line (h 0: none) */
-	SDL_Rect ask, ask_yes, ask_no;   /* the question's panel and answers */
 } LauncherLayout;
 
 void launcher_layout(LauncherLayout *lay);

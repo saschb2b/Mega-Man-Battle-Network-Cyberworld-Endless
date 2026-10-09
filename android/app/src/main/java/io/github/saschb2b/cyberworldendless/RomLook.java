@@ -83,10 +83,12 @@ final class RomLook {
 
     private final Context ctx;
     private final SharedPreferences prefs;
+    private final SharedPreferences savesPrefs;
 
     RomLook(Context ctx) {
         this.ctx = ctx;
         prefs = ctx.getSharedPreferences("roms", Context.MODE_PRIVATE);
+        savesPrefs = ctx.getSharedPreferences("saves", Context.MODE_PRIVATE);
     }
 
     // ---- the folder kept ----
@@ -97,6 +99,34 @@ final class RomLook {
     }
 
     String folderName() { return prefs.getString("folderName", "your ROM folder"); }
+
+    Uri savesFolder() {
+        String s = savesPrefs.getString("folder", null);
+        return s == null ? folder() : Uri.parse(s);
+    }
+
+    String savesFolderName() {
+        return savesPrefs.contains("folder") ? savesPrefs.getString("folderName", "your transfer folder") : folderName();
+    }
+
+    boolean keepSavesFolder(Uri tree, String name, int flags) {
+        int keep = flags & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        try {
+            ctx.getContentResolver().takePersistableUriPermission(tree, keep != 0 ? keep : Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (SecurityException e) { return false; }
+        String previous = savesPrefs.getString("folder", null);
+        Uri old = previous == null ? null : Uri.parse(previous);
+        if (old != null && !old.equals(tree) && !old.equals(folder())) release(old);
+        savesPrefs.edit().putString("folder", tree.toString()).putString("folderName", name).apply();
+        return true;
+    }
+
+    private void release(Uri tree) {
+        try {
+            ctx.getContentResolver().releasePersistableUriPermission(tree,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        } catch (SecurityException e) { /* (gone already, or held read-only) */ }
+    }
 
     /** The grant kept for the looks at later starts and the saves' copy:
      *  read, and write where the picker gave it (one held before for another
@@ -111,12 +141,8 @@ final class RomLook {
             Log.w(TAG, "the folder's access could not be kept: " + e.getMessage());
             return;
         }
-        if (old != null && !old.equals(tree)) {
-            try {
-                ctx.getContentResolver().releasePersistableUriPermission(old,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            } catch (SecurityException e) { /* (gone already, or held read-only) */ }
-        }
+        String saveTree = savesPrefs.getString("folder", null);
+        if (old != null && !old.equals(tree) && !old.toString().equals(saveTree)) release(old);
         prefs.edit().putString("folder", tree.toString()).putString("folderName", name).apply();
     }
 
@@ -343,10 +369,26 @@ final class RomLook {
      *  found.cwsave (a new one, where a write was cut short before its
      *  rename, as well as none). */
     boolean fetchSaves(Uri tree) {
+        return fetchSaves(tree, new File(dataDir(ctx), "found.cwsave"));
+    }
+
+    boolean fetchSaves(Uri tree, File to) {
         Uri saves = child(tree, SAVES);
         if (saves == null) saves = child(tree, SAVES + ".new");
         if (saves == null) return false;
-        File to = new File(dataDir(ctx), "found.cwsave"), part = new File(dataDir(ctx), "found.cwsave.part");
+        if (copySaves(saves, to)) return true;
+        /* The present file remains untouched and gets the common refusal
+         * screen; auto-export cannot erase an unreadable synced-in file. */
+        try (OutputStream out = new FileOutputStream(to)) {
+            out.write("The incoming saves file could not be read.".getBytes(StandardCharsets.US_ASCII));
+            return true;
+        } catch (Exception e) { return false; }
+    }
+
+    /** Only stages bytes: validation and the comparison stay in C on
+     *  every system. A failed read leaves the old staged file alone. */
+    boolean copySaves(Uri saves, File to) {
+        File part = new File(to.getPath() + ".part");
         dataDir(ctx).mkdirs();
         try (InputStream in = ctx.getContentResolver().openInputStream(saves); OutputStream out = new FileOutputStream(part)) {
             if (in == null) return false;
@@ -361,12 +403,19 @@ final class RomLook {
         return part.renameTo(to);
     }
 
+    String fileName(Uri uri) {
+        try (Cursor c = ctx.getContentResolver().query(uri, new String[] { OpenableColumns.DISPLAY_NAME }, null, null, null)) {
+            if (c != null && c.moveToFirst() && !c.isNull(0)) return c.getString(0);
+        } catch (Exception e) { /* (named generically) */ }
+        return SAVES;
+    }
+
     /** The saves' file `from` written into the folder kept as SAVES: a new
      *  one written whole, then put in the old one's place; where the folder's
      *  provider renames nothing, written over the old one. False where no
      *  folder is kept, its access is read-only, or it fails. */
     boolean putSaves(File from) {
-        Uri tree = folder();
+        Uri tree = savesFolder();
         if (tree == null || !granted(tree, true) || !from.isFile()) return false;
         try {
             Uri parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree));
@@ -382,7 +431,7 @@ final class RomLook {
             if (old != null) DocumentsContract.deleteDocument(ctx.getContentResolver(), old);
             return DocumentsContract.renameDocument(ctx.getContentResolver(), fresh, SAVES) != null;
         } catch (Exception e) {
-            Log.w(TAG, "saves: the copy in " + folderName() + " could not be written: " + e.getMessage());
+            Log.w(TAG, "saves: the copy in " + savesFolderName() + " could not be written: " + e.getMessage());
             return false;
         }
     }
@@ -395,7 +444,7 @@ final class RomLook {
         }
     }
 
-    private boolean write(File from, Uri to) {
+    boolean write(File from, Uri to) {
         try (InputStream in = new FileInputStream(from); OutputStream out = ctx.getContentResolver().openOutputStream(to, "wt")) {
             if (out == null) return false;
             byte[] buf = new byte[1 << 16];

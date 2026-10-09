@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Saves move between every system (issue #114).** SAVES on the title
+  exports one `.cwsave` with your progress and current checkpoint, and
+  imports one through your system's file chooser. Before replacing
+  anything, the screen compares this device and the file: runs, best
+  layer, the current run's layer, act and area, last played, device and
+  game version. Keep this device is selected first; Undo last import
+  brings back what was replaced. Controls, touch layout, screen settings,
+  volumes and the statistics answer stay local. Newer or damaged files,
+  incompatible checkpoints and BN5 runs without BN5's ROM are refused
+  before saves change. The browser's Save backup and Load backup now open
+  this same screen; its page hands files to the core rather than writing
+  a second backup format. Auto-export keeps a fresh copy in the chosen
+  folder after each save on native builds; the browser uses manual
+  downloads and uploads. A copy found at startup goes through the same
+  comparison before anything can overwrite it.
+
 - **The site in Japanese:** the home page, the downloads, the FAQ and the
   browser player under `ja/`, written for Japan's players, who know the
   game as ロックマンエグゼ6. The ROM they need is said first (the North

@@ -11,7 +11,10 @@
 #include <string.h>
 
 #include "game.h"
+#include "backup.h"
 #include "ios.h"
+#include "ios_saves.h"
+#include "pick_saves.h"
 #include "platform.h"
 #include "rom.h"
 
@@ -19,7 +22,10 @@ static bool busy;
 
 static void rom_dir(char *out, size_t n) { snprintf(out, n, "%s/rom", g_data_dir); }
 
-unsigned pick_kinds(void) { return PICK_FOLDER | PICK_FILES; }
+unsigned pick_kinds(void) {
+	backup_set_device(ios_saves_device());
+	return PICK_FOLDER | PICK_FILES;
+}
 
 bool pick_open(int kind, int slot) {
 	(void)slot;
@@ -56,6 +62,36 @@ int pick_look(char *msg, size_t n) {
 bool pick_folder(char *name, size_t n) { return ios_rom_folder_name(name, n); }
 
 bool pick_saves_put(const char *from) { return ios_saves_put(from); }
+
+bool pick_saves_get(const char *to) { return ios_saves_get(to); }
+bool saves_phone_place(char *out, size_t n) { return ios_saves_folder_name(out, n); }
+
+static bool saves_busy;
+static int saves_kind;
+
+static bool saves_dialog_open(int kind, const char *from) {
+	if (busy || saves_busy || !ios_saves_pick(P.window, g_data_dir, kind, from)) return false;
+	saves_kind = kind;
+	saves_busy = true;
+	return true;
+}
+
+bool pick_saves_import(void) { return saves_dialog_open(0, NULL); }
+bool pick_saves_export(const char *from) { return saves_dialog_open(1, from); }
+bool pick_saves_choose_folder(void) { return saves_dialog_open(2, NULL); }
+bool pick_saves_busy(void) { return saves_busy; }
+
+bool pick_saves_done(PickResult *r) {
+	char msg[1024];
+	int status = saves_busy ? ios_saves_result(msg, sizeof msg) : 0;
+	if (!status) return false;
+	saves_busy = false;
+	memset(r, 0, sizeof *r);
+	r->status = status;
+	r->path = saves_kind == 0;
+	snprintf(r->text, sizeof r->text, "%s", msg);
+	return true;
+}
 #else
 typedef int pick_ios_unused;
 #endif

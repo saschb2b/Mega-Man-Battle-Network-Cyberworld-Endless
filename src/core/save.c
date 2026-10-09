@@ -7,18 +7,19 @@
 #include <string.h>
 
 #include "audio.h"
+#include "backup.h"
 #include "game.h"
 #include "loot.h"
 #include "platform.h"
 #include "run.h"
 #include "save_blob.h"
+#include "save_format.h"
+#include "save_layout.h"
 
-#define RUN_MAGIC 0x43574539u /* "CWE9": the request taken at home (docs/HOME.md, piece 5) */
 /* (Run is saved as it lies in memory: a change to it does not compile
  * until someone decides about the saves before it, issue #19) */
 _Static_assert(sizeof(Run) == 112, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
 	"previous one where it can carry over), then set this size");
-#define PROFILE_MAGIC 0x43575032u
 
 Profile profile;
 
@@ -72,6 +73,7 @@ bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n)
 void save_state_path(char *out, size_t n) { save_path(out, n, "run.state"); }
 
 void save_init(void) {
+	backup_recover(g_data_dir);
 	legacy_move_state();
 	if (!save_read_blob_upto("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
 	if (!profile.music_volume) profile.music_volume = 9;

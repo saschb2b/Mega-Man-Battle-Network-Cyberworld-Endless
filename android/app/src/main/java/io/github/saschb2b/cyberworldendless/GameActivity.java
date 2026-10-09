@@ -38,6 +38,7 @@ public class GameActivity extends SDLActivity {
     /** Starts the launcher open (RomActivity's: the icon's ROMs shortcut). */
     static final String EXTRA_LAUNCHER = "launcher";
     static final int PICK_FOLDER = 1, PICK_FILES = 2;
+    static final int SAVES_IMPORT = 3, SAVES_EXPORT = 4, SAVES_FOLDER = 5;
 
     /* the layer's map on a display beside this one, where there is one */
     private SecondScreen second;
@@ -45,6 +46,8 @@ public class GameActivity extends SDLActivity {
     /* a picker's end, for romsResult: "status\nsaves\nwords" */
     private volatile String picked;
     private volatile boolean picking;
+    private volatile String savesPicked;
+    private File savesExport;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -157,6 +160,79 @@ public class GameActivity extends SDLActivity {
         return roms().putSaves(new File(from));
     }
 
+    public String savesDevice() { return Build.MODEL; }
+
+    /** A fresh read before auto-export, so a synced-in file is offered
+     *  before a local save can overwrite it. */
+    public boolean savesGet(String to) {
+        Uri tree = roms().savesFolder();
+        return tree != null && roms().fetchSaves(tree, new File(to));
+    }
+
+    public String savesFolder() {
+        return roms().savesFolder() == null ? null : roms().savesFolderName();
+    }
+
+    /** SAVES' import (0), export (1), or auto-export folder (2). */
+    public boolean savesPick(int kind, String from) {
+        if (picking) return false;
+        picking = true;
+        savesPicked = null;
+        savesExport = from == null ? null : new File(from);
+        runOnUiThread(() -> {
+            Intent i = new Intent(kind == 2 ? Intent.ACTION_OPEN_DOCUMENT_TREE
+                : kind == 1 ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
+            if (kind != 2) {
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType(kind == 1 ? "application/octet-stream" : "*/*");
+                if (kind == 1) i.putExtra(Intent.EXTRA_TITLE, RomLook.SAVES);
+            } else {
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            }
+            Uri folder = roms().savesFolder();
+            if (Build.VERSION.SDK_INT >= 26 && folder != null) i.putExtra(DocumentsContract.EXTRA_INITIAL_URI, folder);
+            try {
+                startActivityForResult(i, kind == 2 ? SAVES_FOLDER : kind == 1 ? SAVES_EXPORT : SAVES_IMPORT);
+            } catch (ActivityNotFoundException e) {
+                savesDone(-2, "This device has no document picker.");
+            }
+        });
+        return true;
+    }
+
+    public String savesResult() {
+        String r = savesPicked;
+        if (r != null) savesPicked = null;
+        return r;
+    }
+
+    private void savesDone(int status, String text) {
+        picking = false;
+        savesPicked = status + "\n" + (text == null ? "" : text);
+    }
+
+    private void savesResult(int request, int result, Intent data) {
+        if (result != RESULT_OK || data == null || data.getData() == null) { savesDone(-1, ""); return; }
+        Uri uri = data.getData();
+        int flags = data.getFlags();
+        File from = savesExport;
+        new Thread(() -> {
+            RomLook r = roms();
+            if (request == SAVES_FOLDER) {
+                String name = r.nameOf(uri);
+                boolean ok = r.keepSavesFolder(uri, name, flags);
+                savesDone(ok ? 1 : -2, ok ? name : "The folder's access could not be kept.");
+            } else if (request == SAVES_IMPORT) {
+                File to = new File(RomLook.dataDir(this), "saves-import.cwsave");
+                boolean ok = r.copySaves(uri, to);
+                savesDone(ok ? 1 : -2, ok ? to.getPath() : "The saves file could not be read.");
+            } else {
+                boolean ok = from != null && r.write(from, uri);
+                savesDone(ok ? 1 : -2, ok ? r.fileName(uri) : "The saves file could not be exported.");
+            }
+        }, "saves-transfer").start();
+    }
+
     private void done(int status, boolean saves, String words) {
         picking = false;
         picked = status + "\n" + (saves ? 1 : 0) + "\n" + (words == null ? "" : words);
@@ -165,6 +241,10 @@ public class GameActivity extends SDLActivity {
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
+        if (request == SAVES_IMPORT || request == SAVES_EXPORT || request == SAVES_FOLDER) {
+            savesResult(request, result, data);
+            return;
+        }
         if (request != PICK_FOLDER && request != PICK_FILES) return;
         if (result != RESULT_OK || data == null) {
             done(0, false, request == PICK_FOLDER && Build.VERSION.SDK_INT >= 30

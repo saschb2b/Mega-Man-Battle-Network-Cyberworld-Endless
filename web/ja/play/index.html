@@ -102,7 +102,7 @@
 						<li><button id="smooth" class="plate" type="button" aria-pressed="false" title="90・144・165Hzの画面向け：動きが均一になり、少しだけぼやけます"><i class="icon i-layers" aria-hidden="true"></i><span id="smooth-label">なめらか表示：オフ</span></button></li>
 						<li><button id="show-controls" class="plate" type="button"><i class="icon i-code" aria-hidden="true"></i>操作方法</button></li>
 						<li><button id="export" class="plate" type="button"><i class="icon i-get" aria-hidden="true"></i>バックアップを保存</button></li>
-						<li><label id="import" class="plate" tabindex="0"><input id="saves-file" type="file" accept=".cwsave,application/octet-stream" tabindex="-1"><i class="icon i-put" aria-hidden="true"></i>バックアップを読み込む</label></li>
+						<li><button id="import" class="plate" type="button"><i class="icon i-put" aria-hidden="true"></i>バックアップを読み込む</button></li>
 						<li><button id="forget" class="plate warn" type="button"><i class="icon i-erase" aria-hidden="true"></i>すべて消去</button></li>
 					</ul>
 					<div class="kept">
@@ -135,10 +135,12 @@
 		</section>
 	</div>
 
+	<input id="saves-file" type="file" accept=".cwsave,application/octet-stream" hidden>
+
 	<details class="help">
 		<summary>ブラウザ版について</summary>
 		<div class="textbox">
-			<p>ランは新しいレイヤーに入るたびにこのブラウザに保存され、タイトルのCONTINUEで再開できます。ゲーム内の文章は英語です。メニューの<em>バックアップを保存</em>でセーブを1つのファイル（<code>cyberworld-endless.cwsave</code>）にまとめられ、<em>バックアップを読み込む</em>でこのブラウザにも別のブラウザにも戻せます。AndroidとiPhoneのアプリも、ROMのあるフォルダに置けばこのファイルを読み込みます。このサイトのデータを消すと、ROMとセーブも消えます。</p>
+			<p>ランは新しいレイヤーに入るたびにこのブラウザに保存され、タイトルのCONTINUEで再開できます。ゲーム内の文章は英語です。メニューの<em>バックアップを保存</em>と<em>バックアップを読み込む</em>は、ゲームのSAVES画面を開きます。Exportで1つのファイル（<code>cyberworld-endless.cwsave</code>）をダウンロードでき、Importではこのブラウザとファイルのセーブを並べて確認してから置き換えます。プレイヤーに<code>.cwsave</code>をドロップしても読み込めます。同じファイルをほかの機種でも使え、Undo last importで置き換える前のセーブに戻せます。操作設定、画面設定、音量、匿名統計への回答は、このブラウザのものが残ります。このサイトのデータを消すと、ROMとセーブも消えます。</p>
 			<p>スマホやタブレットでは画面いっぱいに表示され、ゲームが自前のボタンを画面のまわりに描きます。ホーム画面に追加すると全画面で開きます。Windows、macOS、Linux、Steam Deck、Android、携帯ゲーム機、3DS向けもあります：<a href="../download/" data-umami-event="go-download" data-umami-event-from="play">ダウンロード</a>。</p>
 		</div>
 	</details>

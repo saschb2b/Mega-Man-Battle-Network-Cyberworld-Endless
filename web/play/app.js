@@ -64,11 +64,8 @@ const W = JA ? {
 	unreadable: '読み込めませんでした',
 	zipped: (name) => name + ' は圧縮されています。先に展開してください。', refused: (name, why) => name + '：' + why + '。',
 	more: (n) => 'ほか ' + n + ' 件。',
-	noSaves: 'このブラウザにはまだセーブがありません。', backedUp: (file) => 'バックアップを保存しました：' + file + '。',
-	notBackup: (name) => name + ' はセーブのバックアップではないか、壊れています。',
-	what: (runs, best) => 'ラン ' + runs + ' 回、最深レイヤー ' + best,
-	replace: (here, there) => 'このブラウザのセーブ（' + here + '）を、バックアップのセーブ（' + there + '）に置き換えますか？ 今のセーブは別に残します。',
-	broughtBack: (what) => 'セーブを戻しました：' + what + '。',
+	savesNeedRom: 'SAVES を開くには、先に BN6 の ROM を選んでください。',
+	backedUp: (file) => 'バックアップを保存しました：' + file + '。',
 	forget: 'このブラウザから ROM とすべてのセーブを消しますか？',
 	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
 	move: '移動', menu: 'メニュー',
@@ -88,11 +85,8 @@ const W = JA ? {
 	unreadable: 'could not be read',
 	zipped: (name) => name + ' is zipped: unzip it first.', refused: (name, why) => name + ': ' + why + '.',
 	more: (n) => 'and ' + n + ' more.',
-	noSaves: 'No saves in this browser yet.', backedUp: (file) => 'Backup saved: ' + file + '.',
-	notBackup: (name) => name + ' is no saves backup, or it is damaged.',
-	what: (runs, best) => runs + ' runs, best Layer ' + best,
-	replace: (here, there) => 'Replace this browser\'s saves (' + here + ') with the backup\'s (' + there + ')? This browser\'s are kept aside.',
-	broughtBack: (what) => 'Saves brought back: ' + what + '.',
+	savesNeedRom: 'Choose your BN6 ROM before opening SAVES.',
+	backedUp: (file) => 'Backup saved: ' + file + '.',
 	forget: 'Remove your ROMs and all saves from this browser?',
 	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
 	move: 'Move', menu: 'Menu',
@@ -134,6 +128,8 @@ var Module = {
 	print: (t) => console.log(t),
 	printErr: (t) => console.warn(t),
 	persist,
+	savesPick: pickSaves,
+	savesDownload: downloadSaves,
 	preRun: [() => {
 		const FS = Module.FS;
 		FS.mkdir(DATA);
@@ -365,123 +361,80 @@ for (const id of Object.keys(ROMS)) $('cart-' + id).addEventListener('click', ()
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => {
 	e.preventDefault();
-	takeRoms(Array.from(e.dataTransfer.files));
+	const files = Array.from(e.dataTransfer.files);
+	if (files.length === 1 && /\.cwsave$/i.test(files[0].name)) {
+		if (openSaves()) importSavesFile(files[0]);
+		return;
+	}
+	takeRoms(files);
 });
 
-// ---- the saves in one file: src/core/backup.c's .cwsave, which the phone
-// apps take from the ROM folder too ----
-//   "CWSAVE1\n", u64 stamp, u32 count, then count times (u16 length, its
-//   name under the data folder, u32 size, its bytes), then an FNV-1a of it all
+// ---- the SAVES screen owns the file format, preview and restore ----
+// The page only hands a selected file to the core and downloads the file
+// the core made. Savedata remains in IndexedDB, as every other save does.
 
-const SAVES_FILE = 'cyberworld-endless.cwsave', SETTINGS = ['settings.ini', 'keys.ini', 'pad.ini', 'touch.ini'];
+const SAVES_PICKED = '/tmp/cw-import.cwsave';
 
-function fnv(bytes, end) {
-	let h = 2166136261;
-	for (let i = 0; i < end; ++i) h = Math.imul(h ^ bytes[i], 16777619) >>> 0;
-	return h >>> 0;
+function openSaves() {
+	if (!ready) { say(W.loading); return false; }
+	if (!kept('bn6')) { say(W.savesNeedRom); return false; }
+	if (!started) start();
+	closeMenu();
+	Module.ccall('cw_saves_open', null, [], []);
+	canvas.focus();
+	return true;
 }
 
-function isFile(path) {
-	try { return Module.FS.isFile(Module.FS.stat(path).mode); } catch (e) { return false; }
+function pickSaves() {
+	$('saves-file').value = '';
+	$('saves-file').click();
 }
 
-// This browser's saves as a .cwsave's bytes, null where there are none
-function packSaves() {
-	const FS = Module.FS, names = [];
-	try {
-		for (const n of FS.readdir(DATA + '/savedata').sort())
-			if (!n.startsWith('.') && !n.endsWith('.tmp') && isFile(DATA + '/savedata/' + n)) names.push('savedata/' + n);
-	} catch (e) { /* no saves yet */ }
-	if (!names.includes('savedata/profile.sav')) return null;
-	for (const n of SETTINGS) if (isFile(DATA + '/' + n)) names.push(n);
-	const enc = new TextEncoder(), files = names.map((n) => [enc.encode(n), FS.readFile(DATA + '/' + n)]);
-	const size = 20 + files.reduce((t, [n, d]) => t + 6 + n.length + d.length, 0) + 4;
-	const out = new Uint8Array(size), view = new DataView(out.buffer);
-	out.set(enc.encode('CWSAVE1\n'), 0);
-	view.setBigUint64(8, BigInt(Math.floor(Date.now() / 1000)), true);
-	view.setUint32(16, files.length, true);
-	let at = 20;
-	for (const [n, d] of files) {
-		view.setUint16(at, n.length, true);
-		out.set(n, at + 2);
-		view.setUint32(at + 2 + n.length, d.length, true);
-		out.set(d, at + 6 + n.length);
-		at += 6 + n.length + d.length;
-	}
-	view.setUint32(at, fnv(out, at), true);
-	return out;
+function pickedSaves(path) {
+	Module.ccall('cw_saves_import', null, ['string'], [path]);
+	canvas.focus();
 }
 
-// A .cwsave's files ({ name, data }), its profile's runs and best layer;
-// null for bytes that are none, or damaged
-function readSaves(bytes) {
-	const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), dec = new TextDecoder();
-	if (bytes.length < 24 || dec.decode(bytes.subarray(0, 8)) !== 'CWSAVE1\n' || view.getUint32(bytes.length - 4, true) !== fnv(bytes, bytes.length - 4)) return null;
-	const files = [], count = view.getUint32(16, true);
-	let at = 20, runs = 0, best = 0;
-	for (let i = 0; i < count; ++i) {
-		if (at + 6 > bytes.length - 4) return null;
-		const len = view.getUint16(at, true), name = dec.decode(bytes.subarray(at + 2, at + 2 + len)), size = view.getUint32(at + 2 + len, true);
-		if (!len || at + 6 + len + size > bytes.length - 4) return null;
-		const data = bytes.slice(at + 6 + len, at + 6 + len + size);
-		// (the profile's blob: magic "CWP2", size, checksum, then runs and the best layer)
-		if (name === 'savedata/profile.sav' && size >= 20 && new DataView(data.buffer).getUint32(0, true) === 0x43575032) {
-			runs = new DataView(data.buffer).getInt32(12, true);
-			best = new DataView(data.buffer).getInt32(16, true);
-		}
-		files.push({ name, data });
-		at += 6 + len + size;
-	}
-	return at === bytes.length - 4 ? { files, runs, best } : null;
-}
-
-// ... into this browser: its savedata/ kept aside as savedata.old/ first
-function unpackSaves(saves) {
-	const FS = Module.FS, dir = DATA + '/savedata', old = DATA + '/savedata.old';
-	try { for (const n of FS.readdir(old)) if (isFile(old + '/' + n)) FS.unlink(old + '/' + n); FS.rmdir(old); } catch (e) { /* none */ }
-	try { FS.rename(dir, old); } catch (e) { /* none yet */ }
-	FS.mkdir(dir);
-	for (const f of saves.files) {
-		const bare = f.name.startsWith('savedata/') ? f.name.slice(9) : null;
-		if (bare ? !bare || bare.includes('/') || bare.startsWith('.') : !SETTINGS.includes(f.name)) continue;
-		FS.writeFile(DATA + '/' + f.name, f.data);
-	}
-}
-
-$('export').addEventListener('click', () => {
-	if (!ready) { say(W.loading); return; }
-	const bytes = packSaves();
-	if (!bytes) { say(W.noSaves); return; }
-	const a = document.createElement('a');
-	a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
-	a.download = SAVES_FILE;
-	document.body.appendChild(a);
-	a.click();
-	a.remove();
-	setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-	try { localStorage.setItem('cw-backup-at', String(Date.now())); } catch (e) { /* not kept */ }
-	if (!menu.hidden) showKept();
-	say(W.backedUp(SAVES_FILE));
-	track('saves-export');
-});
-
-$('saves-file').addEventListener('change', async (e) => {
+function takeSaves(e) {
 	const file = e.target.files[0];
 	e.target.value = '';
-	if (!file) return;
-	if (!ready) { say(W.loading); return; }
-	const saves = readSaves(new Uint8Array(await file.arrayBuffer()));
-	if (!saves) { say(W.notBackup(file.name)); return; }
-	const here = packSaves() ? readSaves(packSaves()) : null;
-	const what = W.what(saves.runs, saves.best);
-	if (here && !confirm(W.replace(W.what(here.runs, here.best), what))) return;
-	unpackSaves(saves);
-	track('saves-import');
-	// (the game reads its saves as it starts: a running one starts again, once they are kept)
-	if (started) { Module.FS.syncfs(false, () => location.reload()); return; }
-	persist();
-	say(W.broughtBack(what));
-});
+	if (!file) { pickedSaves(''); return; }
+	return importSavesFile(file);
+}
+
+async function importSavesFile(file) {
+	try {
+		Module.FS.writeFile(SAVES_PICKED, new Uint8Array(await file.arrayBuffer()));
+		pickedSaves(SAVES_PICKED);
+	} catch (err) {
+		say(W.refused(file.name, W.unreadable), true);
+		pickedSaves('');
+	}
+}
+
+function downloadSaves(path, name) {
+	try {
+		const bytes = Module.FS.readFile(path), a = document.createElement('a');
+		a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
+		a.download = name;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+		try { localStorage.setItem('cw-backup-at', String(Date.now())); } catch (e) { /* not kept */ }
+		say(W.backedUp(name));
+		track('saves-export');
+		return true;
+	} catch (err) {
+		console.warn('downloading saves failed', err);
+		return false;
+	}
+}
+
+$('export').addEventListener('click', openSaves);
+$('import').addEventListener('click', openSaves);
+$('saves-file').addEventListener('change', takeSaves);
+$('saves-file').addEventListener('cancel', () => pickedSaves(''));
 
 $('forget').addEventListener('click', () => {
 	if (!confirm(W.forget)) return;
@@ -568,8 +521,6 @@ $('continue').addEventListener('click', closeMenu);
 menu.addEventListener('click', (e) => { if (e.target === menu) closeMenu(); });
 $('show-controls').addEventListener('click', () => { $('menu-main').hidden = true; $('menu-controls').hidden = false; $('hide-controls').focus(); });
 $('hide-controls').addEventListener('click', () => { $('menu-controls').hidden = true; $('menu-main').hidden = false; $('show-controls').focus(); });
-// (the label's own file picker, by the keys too)
-$('import').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('saves-file').click(); } });
 // F1 opens and closes it, Esc closes it, the arrows walk its plates
 document.addEventListener('keydown', (e) => {
 	if (e.key === 'F1') { e.preventDefault(); e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); return; }
