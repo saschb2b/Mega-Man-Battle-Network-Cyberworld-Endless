@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Soft reset returns to Cyberworld Endless (issue #113).** A+B+Select+Start
+  went to Gregar's own title while the director still had a run in progress;
+  going back in could put MegaMan elsewhere on the map. The mapped buttons
+  now return to this game's title before either core gets them, in BN6 and
+  BN5 battles too. CONTINUE restores the last checkpoint, and holding the
+  chord does not become the controller's quit shortcut.
+
 - **The site in Japanese:** the home page, the downloads, the FAQ and the
   browser player under `ja/`, written for Japan's players, who know the
   game as ロックマンエグゼ6. The ROM they need is said first (the North

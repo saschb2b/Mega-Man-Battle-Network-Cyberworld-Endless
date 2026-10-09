@@ -15,6 +15,14 @@ Nothing from the ROM is shipped.
 | Battles, net movement, menus, messages, shops, traders | The game's code |
 | Run structure, layer generation, loot, saves, the title | Cyberworld Endless |
 
+The player's A+B+Select+Start chord returns to Cyberworld Endless's title
+before either core receives it (`scene_emu.c`, issue #113). The director
+stops, an active or pending guest battle is canceled without a result, and
+CONTINUE restores the last checkpoint through the director. It does not
+save the state being reset. BN5's background boot may finish for the next
+battle, but cannot start a canceled battle. The four mapped buttons also
+take precedence over the controller's Select+Start quit shortcut.
+
 ## Why an emulator
 
 Ship of Harkinian runs Ocarina of Time with no emulator, and Zelda64Recomp

@@ -397,6 +397,10 @@ marked so), its shoulders and triggers L and R, Start is Start and Back
 whatever they are set to. Two Joy-Cons are one controller, on a phone too;
 one alone is a small one held sideways.
 
+**Soft reset:** press the mapped **A+B+Select+Start** together to return
+to Cyberworld Endless's title, including during a battle in BN5. **CONTINUE**
+restores the last checkpoint; progress since that save is discarded.
+
 **The controls screen** sets the buttons, laid out as big games lay theirs.
 **Select** on the title screen opens it (the line under the menu names the
 button it is on); on a phone or tablet with a controller, so does

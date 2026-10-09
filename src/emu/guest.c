@@ -820,6 +820,19 @@ bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t s
 	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss, seed);
 }
 
+/* A soft reset leaves the last checkpoint alone: no battle result is
+ * owed to the director. The guest's boot keeps running, but PH_IDLE keeps
+ * its end from beginning a battle that was waiting for it. */
+void guest_cancel(void) {
+	if (active && phase != PH_BOOT) {
+		patch_roll(0);
+		boss_uncap();
+		boss_id = boss_zenny = 0;
+	}
+	active = result_due = false;
+	phase = PH_IDLE;
+}
+
 bool guest_active(void) { return active; }
 
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
@@ -951,6 +964,7 @@ bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t s
 bool guest_possible(int xrom) { (void)xrom; return false; }
 int guest_kind_chips(int kind, uint16_t *out, int max) { (void)kind; (void)out; (void)max; return 0; }
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }
+void guest_cancel(void) {}
 bool guest_active(void) { return false; }
 bool guest_on_screen(void) { return false; }
 bool guest_fight_hp(int *hp, int *max) { (void)hp; (void)max; return false; }
