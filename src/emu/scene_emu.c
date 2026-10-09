@@ -179,8 +179,28 @@ static bool guest_update(void) {
 	return true;
 }
 
+/* The GBA's reset chord belongs to the run's title (issue #113). Check
+ * the player's mapped buttons before the PET, map and cinema take keys,
+ * and before either core sees them. The last checkpoint stays as it was,
+ * as when resetting during a battle: CONTINUE restores it through the
+ * director, rather than BN6's own title starting on stale map tables. */
+static bool soft_reset(void) {
+	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
+	if ((keys_from_buttons() & chord) != chord) return false;
+	emu_sync();
+	guest_cancel();
+	director_stop();
+	cinema_reset();
+	started = false;
+	guest_flash = guest_wait = 0;
+	P.quit_prompt = 0;
+	scene_set(&scene_title);
+	return true;
+}
+
 static void update(void) {
 	emu_drawing = false;
+	if (soft_reset()) return;
 	/* (the run's time, its battles in the older net's engine too: the
 	 * statistics' minutes, save.h) */
 	profile_played_frame();

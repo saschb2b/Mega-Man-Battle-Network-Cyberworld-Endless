@@ -758,16 +758,22 @@ static void poll_event(const SDL_Event *e) {
  * while it asks quits (a handheld's Steam Deck or a pad on the couch has no
  * keyboard; PortMaster's own hotkey is the same pair): the pad's own two,
  * whatever its map, or SELECT and START as mapped */
-static void quit_chord(void) {
+static void quit_chord(uint32_t now) {
 #ifndef __EMSCRIPTEN__
 	static int pair_held;
 	uint32_t both = BTN_SELECT | BTN_START;
+	/* (the reset chord has these two too: held on the title after a
+	 * reset, it must not become a quit; issue #113) */
+	uint32_t reset = both | BTN_A | BTN_B;
+	if ((now & reset) == reset) { pair_held = 0; return; }
 	if (pads_quit_held() || (pads_held() & both) == both) {
 		if (++pair_held == 60) {
 			if (P.quit_prompt > 0 && P.quit_pad) P.quit = true;
 			else { P.quit_prompt = 180; P.quit_pad = true; }
 		}
 	} else pair_held = 0;
+#else
+	(void)now;
 #endif
 }
 
@@ -795,10 +801,10 @@ void platform_poll(void) {
 	/* (iOS's loop in the background saves the run, then polls: its copy) */
 	if (P.background) mirror_flush();
 	if (P.quit_prompt > 0) --P.quit_prompt;
-	quit_chord();
 	uint32_t touched = touch_taken() | touch_held(), keys = key_bits | key_tapped | injected;
 	key_tapped = 0;
 	uint32_t now = keys | touched | pads_held() | pads_taken();
+	quit_chord(now);
 	P.released = P.held & ~now;
 	press_state(now, &P.held, &P.pressed, &P.repeat, P.repeat_timer);
 	press_state(keys | touched | pads_menu_held() | pads_menu_taken(), &P.menu_held, &P.menu_pressed, &P.menu_repeat, P.menu_timer);

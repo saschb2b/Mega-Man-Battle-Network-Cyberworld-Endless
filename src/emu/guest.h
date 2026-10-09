@@ -104,6 +104,10 @@ int guest_kind_chips(int kind, uint16_t *out, int max);
  * (its boot may still run). */
 int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max);
 
+/* Cancels a battle or its wait for the guest's boot, without a result;
+ * the boot keeps running for a later battle. Used when a soft reset goes
+ * back to the title and leaves the last checkpoint alone. */
+void guest_cancel(void);
 /* A guest battle runs: the scene shows and steers the guest. */
 bool guest_active(void);
 /* ... and its battle is on the screen: MegaMan's HP and max HP in it (a
