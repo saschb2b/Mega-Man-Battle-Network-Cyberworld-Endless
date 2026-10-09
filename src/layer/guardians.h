@@ -103,6 +103,8 @@ void guardian_set_face(int navi, int face);
 
 /* The area a guardian keeps, for the title card ("Central Area"). */
 const char *guardian_area_name(int biome);
+/* The fixed BN6 area name, independent of the currently loaded run's seed. */
+const char *guardian_area_original_name(int biome);
 /* The same in a sentence, with its article ("the Graveyard"), for the
  * layer's kind `side` (LAYER_UNDERNET and LAYER_SECRET name their own). */
 const char *guardian_area_in_text(int biome, int side);

@@ -16,6 +16,11 @@ bool desktop_can_choose(void);
  * file's path; false where none was chosen. It waits for the player: the
  * launcher runs it on a thread of its own (pick_desktop.c) */
 bool desktop_choose_rom(int slot, char *path, size_t n);
+/* SAVES' import (0), export (1) or kept-folder (2) chooser, called on a
+ * worker thread; `start` is the initial path. */
+bool desktop_choose_saves(int kind, const char *start, char *path, size_t n);
+bool desktop_saves_default(char *path, size_t n);
+void desktop_saves_reveal(const char *path);
 
 /* Run as an AppImage: offers to add it to the application menu (until it
  * is added or the player says not to ask again), and keeps an entry it

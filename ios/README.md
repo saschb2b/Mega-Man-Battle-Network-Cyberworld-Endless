@@ -51,14 +51,22 @@ The app's Documents folder, which Files shows as **On My iPhone ›
 Cyberworld**, holds the ROMs' copies (`rom/bn6g.gba`, `rom/bn5c.gba`),
 the saves and `settings.ini`,
 `keys.ini` and `touch.ini`, as a desktop's data folder does; a player can
-copy the saves off there. Uninstalling the app deletes it. So the app
-keeps a copy of the saves in the ROM folder chosen,
+copy the saves off there. Uninstalling the app deletes it. With
+**Auto-export** on, the app keeps a copy in the transfer folder shown in
+**SAVES**, using the ROM folder by default; **Choose folder** can select
+another destination. The copy is
 `cyberworld-endless.cwsave` (`src/core/backup.h`, the format the Android
 app and the browser's backups share), written a few seconds after the
 game last saved and as the app goes to the background, through the
 folder's bookmark as a coordinated write that replaces the old copy
-whole. A folder chosen that holds one has it copied to `found.cwsave`,
-and the ROMs screen offers it back after a reinstall.
+whole. After a reinstall, select the ROMs again and use **SAVES → Import**
+to choose that file. A ROM folder chosen that holds one also has it
+copied to `found.cwsave`, and the ROMs screen opens SAVES to compare it
+with this device. SAVES on the title also exports and imports that portable file
+and controls its automatic copy. Imported progress keeps the receiving
+device's controls, display, volumes and statistics answer; Undo last import
+brings back what was replaced. See
+[Moving saves between devices](../docs/GUIDE.md#moving-saves-between-devices).
 
 ## Building (on a Mac)
 

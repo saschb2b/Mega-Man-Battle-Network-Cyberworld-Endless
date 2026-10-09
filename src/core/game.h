@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "saves.h"
 
 typedef struct {
 	const char *name;
@@ -23,6 +24,7 @@ extern const Scene scene_intro;   /* the start: the boot screen and the GitHub n
 extern const Scene scene_gallery;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern const Scene scene_launcher; /* the ROMs before the game: two cartridges, PLAY (src/launcher/) */
+extern const Scene scene_saves;    /* portable progress, comparison, export/import and undo */
 
 /* The launcher: at a start, shown where it is wanted (LAUNCHER_AUTO: no
  * BN6, the first start, BN5 gone since the last), always (LAUNCHER_OPEN) or

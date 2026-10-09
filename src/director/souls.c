@@ -2,13 +2,17 @@
 #include "souls.h"
 
 #include <string.h>
+#include <stddef.h>
 
 #include "guardians.h"
 #include "save_blob.h"
 
 #define SOULS_MAGIC 0x534F5531u   /* "SOU1" */
 
-static struct { uint32_t seed; uint8_t held; } souls;
+typedef struct { uint32_t seed; uint8_t held; } SoulSave;
+static SoulSave souls;
+_Static_assert(sizeof(SoulSave) == 8 && offsetof(SoulSave, seed) == 0 && offsetof(SoulSave, held) == 4,
+	"Soul save layout changed");
 uint8_t souls_dev_mask;
 
 void souls_new_run(uint32_t seed) {

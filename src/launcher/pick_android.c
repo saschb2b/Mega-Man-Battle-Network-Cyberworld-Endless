@@ -16,6 +16,9 @@
 
 #include <SDL.h>
 
+#include "backup.h"
+#include "pick_saves.h"
+
 /* a call into GameActivity: its environment, the activity and the method */
 typedef struct {
 	JNIEnv *env;
@@ -81,7 +84,12 @@ static bool call_bool_string(const char *name, const char *arg) {
 
 static bool busy;
 
-unsigned pick_kinds(void) { return PICK_FOLDER | PICK_FILES; }
+unsigned pick_kinds(void) {
+	static bool named;
+	char name[128];
+	if (!named && call_string("savesDevice", name, sizeof name)) { backup_set_device(name); named = true; }
+	return PICK_FOLDER | PICK_FILES;
+}
 
 bool pick_open(int kind, int slot) {
 	(void)slot;
@@ -117,6 +125,41 @@ int pick_look(char *msg, size_t n) {
 bool pick_folder(char *name, size_t n) { return call_string("romsFolder", name, n) && name[0]; }
 
 bool pick_saves_put(const char *from) { return call_bool_string("savesPut", from); }
+
+bool pick_saves_get(const char *to) { return call_bool_string("savesGet", to); }
+bool saves_phone_place(char *out, size_t n) { return call_string("savesFolder", out, n) && out[0]; }
+bool saves_phone_scope(char *out, size_t n) { return n > 1 && call_string("savesScope", out, n) && out[0] && strlen(out) + 1 < n; }
+
+static bool saves_busy;
+static int saves_kind;
+
+static bool saves_dialog_open(int kind, const char *from) {
+	Call c;
+	if (busy || saves_busy || !call_begin(&c, "savesPick", "(ILjava/lang/String;)Z")) return false;
+	jstring s = from ? (*c.env)->NewStringUTF(c.env, from) : NULL;
+	jboolean v = (*c.env)->CallBooleanMethod(c.env, c.activity, c.m, (jint)kind, s);
+	if (s) (*c.env)->DeleteLocalRef(c.env, s);
+	saves_busy = call_end(&c) && v;
+	saves_kind = kind;
+	return saves_busy;
+}
+
+bool pick_saves_import(void) { return saves_dialog_open(0, NULL); }
+bool pick_saves_export(const char *from) { return saves_dialog_open(1, from); }
+bool pick_saves_choose_folder(void) { return saves_dialog_open(2, NULL); }
+bool pick_saves_busy(void) { return saves_busy; }
+
+bool pick_saves_done(PickResult *r) {
+	char s[1200];
+	if (!saves_busy || !call_string("savesResult", s, sizeof s)) return false;
+	saves_busy = false;
+	memset(r, 0, sizeof *r);
+	r->status = atoi(s);
+	r->path = saves_kind == 0;
+	char *nl = strchr(s, '\n');
+	snprintf(r->text, sizeof r->text, "%s", nl ? nl + 1 : "");
+	return true;
+}
 #else
 typedef int pick_android_unused;
 #endif

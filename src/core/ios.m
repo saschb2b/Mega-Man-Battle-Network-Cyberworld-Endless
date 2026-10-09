@@ -433,7 +433,8 @@ bool ios_rom_folder_name(char *out, size_t n) {
 
 bool ios_saves_put(const char *from) {
 	@autoreleasepool {
-		NSData *mark = [NSUserDefaults.standardUserDefaults dataForKey:kFolder];
+		NSUserDefaults *prefs = NSUserDefaults.standardUserDefaults;
+		NSData *mark = [prefs dataForKey:@"savesFolder"] ?: [prefs dataForKey:kFolder];
 		NSData *data = [NSData dataWithContentsOfFile:@(from)];
 		if (!mark || !data.length) return false;
 		BOOL stale = NO;

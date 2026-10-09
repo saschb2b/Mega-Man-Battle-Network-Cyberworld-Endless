@@ -42,7 +42,7 @@ void scene_set(const Scene *s) { pending = s; }
 
 static const Scene *scene_by_name(const char *n) {
 	/* (the launcher is a start's own: --scene launcher opens it, then the title) */
-	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu };
+	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu, &scene_saves };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
 	return NULL;
@@ -113,10 +113,11 @@ static bool game_frame(void) {
 	capture_input();
 	platform_poll();
 	capture_taps();
+	saves_tick();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
 	if (controls_shown()) controls_update();
-	else if (current && current->update && !touch_paused()) current->update();
+	else if (!pending && current && current->update && !touch_paused()) current->update();
 	/* (BN5's boot begun as the game starts, at its boot screen or title,
 	 * as early as it can be: guest.h) */
 	if (current != &scene_emu) guest_warm();
@@ -458,6 +459,7 @@ static void game_begin(void) {
  * scene; -1 to go on, else the exit code of a tool that ran */
 static int game_start(const Options *o, bool rom_ok, const char *msg) {
 	opts = *o;
+	saves_init();
 	if (launcher_start(o->launcher, o->rom_dir, game_begin)) return -1;
 	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);

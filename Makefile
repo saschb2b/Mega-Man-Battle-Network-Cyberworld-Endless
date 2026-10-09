@@ -85,7 +85,7 @@ MGBA_LICENSE := $(IOS_DEPS)/share/licenses/mGBA.txt
 IOS_FLAGS := -arch arm64 -isysroot $(shell xcrun --sdk $(IOS_SDK) --show-sdk-path) \
              $(if $(filter iphonesimulator,$(IOS_SDK)),-mios-simulator-version-min=14.0,-miphoneos-version-min=14.0)
 CFLAGS += $(IOS_FLAGS) -DCW_IOS $(patsubst -I%,-isystem %,$(shell $(IOS_DEPS)/bin/sdl2-config --cflags))
-OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/analytics/analytics_apple.o
+OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o
 endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
@@ -119,7 +119,7 @@ CFLAGS := $(filter-out -g,$(CFLAGS)) -sUSE_SDL=2 -DDISABLE_THREADING
 LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js \
           -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sFORCE_FILESYSTEM=1 -sENVIRONMENT=web \
           -sEXPORTED_RUNTIME_METHODS=callMain,ccall,FS,IDBFS,addRunDependency,removeRunDependency -sEXPORT_NAME=Module \
-          -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_paused
+          -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_paused,_cw_saves_open,_cw_saves_import
 endif
 # the Linux release: built on an older glibc (docker/Dockerfile.linux), SDL2
 # carried in lib/ beside the binary
@@ -207,16 +207,16 @@ clean:
 # ROM-free unit tests (host only), with the address and undefined-behaviour
 # sanitizers
 TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
-TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c \
+TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c \
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c \
 	src/core/data.c src/core/xchips.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
-	src/core/backup.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
+	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c
-build/host/test_core: $(TEST_SRCS) src/*/*.h
+build/host/test_core: $(TEST_SRCS) tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -Wl,--wrap=backup_read_file -lm
 
 # the hooks on mGBA itself (tests/test_emu.c: a ROM of the test's own bytes),
 # and two cores side by side, BN6's through emu.c (its sound's ring)
@@ -227,19 +227,48 @@ build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
 
-test: build/host/test_core build/host/test_emu
+TEST_TRANSFER_SRCS := tests/test_transfer.c src/launcher/mirror.c src/launcher/pick_saves.c src/launcher/pick_none.c \
+	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c
+build/host/test_transfer: $(TEST_TRANSFER_SRCS) tests/backup_fixture.h src/*/*.h | $(GEN)/version.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_TRANSFER_SRCS) -lm
+
+TEST_DISCOVERY_SRCS := tests/test_discovery.c $(filter-out tests/test_transfer.c src/launcher/pick_none.c,$(TEST_TRANSFER_SRCS))
+build/host/test_discovery: $(TEST_DISCOVERY_SRCS) tests/backup_fixture.h src/*/*.h | $(GEN)/version.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE -DCW_DESKTOP $(if $(WERROR),-Werror) \
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) -lm
+
+TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
+	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c
+# Font measurement uses the same optimization as the game; the scene and
+# portable-save modules use the ordinary sanitizer-test flags below.
+build/host/test_saves_pixfont.o: src/gfx/pixfont.c src/gfx/pixfont.h src/core/platform.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O2 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -c -o $@ $<
+build/host/test_saves: $(TEST_SAVES_SRCS) build/host/test_saves_pixfont.o src/*/*.h | $(GEN)/version.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) build/host/test_saves_pixfont.o -Wl,--wrap=pixfont_draw $(shell pkg-config --libs sdl2) -lm
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves
 	build/host/test_core
 	build/host/test_emu
+	build/host/test_transfer
+	build/host/test_discovery
+	build/host/test_saves
 .PHONY: test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)
 LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))
 LINT_TEST_EMU_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_EMU_SRCS))
-build/lint/test/%.o: %.c
+build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
-	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -Wl,--wrap=backup_read_file -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm

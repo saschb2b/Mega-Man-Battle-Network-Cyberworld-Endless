@@ -1,13 +1,26 @@
-/* The saves' copy in the folder the ROMs came from (mirror.c): on a phone,
- * where uninstalling the app deletes its files, a .cwsave (backup.h) beside
- * the ROMs in the folder the player chose, written a few seconds after the
- * game last saved and as the app goes away, so that a reinstall finds it
- * there and the launcher offers it back. Nothing elsewhere: a desktop's
- * saves outlive the program, the browser's page exports its own. */
+/* Auto-export to this device's transfer folder: its own choice, a phone's
+ * ROM folder by default, or the known transfer place without a picker.
+ * After the saves rest, one .cwsave is refreshed there; an incoming file
+ * is held for SAVES to compare first. The browser exports by download. */
 #ifndef CW_MIRROR_H
 #define CW_MIRROR_H
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+typedef enum { MIRROR_IDLE, MIRROR_PENDING, MIRROR_COPIED, MIRROR_FAILED, MIRROR_INCOMING } MirrorState;
+typedef struct {
+	MirrorState state;
+	uint64_t copied_at;       /* successful folder copy, seconds since 1970; 0 unknown */
+	char destination[1024];  /* current device-local transfer destination */
+} MirrorStatus;
+
+/* Read-only status from the receipt initialized by mirror_tick, plus any
+ * pending/failure state. This is a local receipt, never a cloud-sync claim. */
+void mirror_status(MirrorStatus *out);
+/* Re-arm a failed/pending auto copy; retain incoming-file protection. */
+void mirror_retry(void);
 
 /* Files were written (platform_persist) */
 void mirror_note(void);
@@ -19,10 +32,15 @@ void mirror_flush(void);
 /* A folder newly chosen (or chosen again after a copy was refused): the
  * copy made there at the next frame */
 void mirror_new_folder(void);
-/* While the launcher asks about saves the folder held: no copy over them */
+/* While SAVES asks about an incoming file: no export over it */
 void mirror_hold(bool on);
 /* How the last copy went: 1 made, -1 refused (the folder's access was
  * read-only, or it is gone), 0 none made yet */
 int mirror_last(void);
+/* At the title/start and before each auto-export: stage a different file
+ * from the transfer places and hold exports until the player's decision.
+ * Repeated calls return the pending path; only mirror_hold(false), after
+ * Import or Keep this device, releases it. */
+bool mirror_scan(char *path, size_t n);
 
 #endif

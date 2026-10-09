@@ -34,6 +34,7 @@ void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]) {
  * its copies of each chip beside the checkpoint ("run.folder"), so a
  * CONTINUE makes the same stock before the game's memory is back. */
 static uint16_t folder_made[BN6_FOLDER_ENTRIES];
+_Static_assert(sizeof folder_made == 60, "Folder save layout changed");
 #define FOLDER_MADE_MAGIC 0x43464C44u   /* "CFLD" */
 
 /* ... saved beside the checkpoint, and back on CONTINUE (none for a run

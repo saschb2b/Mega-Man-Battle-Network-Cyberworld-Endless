@@ -21,18 +21,9 @@ static const char *const words[] = {
 	"PLAY",   /* W_PLAY */
 	"DONE",   /* W_DONE */
 	"FILES INSTEAD",   /* W_FILES_INSTEAD */
-	"SAVES FOUND",   /* W_SAVES_FOUND */
-	"BRING BACK",   /* W_BRING_BACK */
-	"START FRESH",   /* W_START_FRESH */
-	"USE THE FOLDER'S",   /* W_USE_FOLDERS */
-	"KEEP THESE",   /* W_KEEP_THESE */
 	"BN6 first: the game runs on it.",   /* W_PLAY_LOCKED */
 	"Its net joins ours: BN5's areas in runs, their battles in its own engine.",   /* W_FIVE_ADDS */
 	"Nothing chosen.",   /* W_CANCELLED */
-	"This device's saves stay, and replace the folder's copy.",   /* W_SAVES_KEPT */
-	"Starting fresh: the folder's copy is replaced once the game saves.",   /* W_FRESH */
-	"The saves file in the folder is damaged: left as it is.",   /* W_SAVES_DAMAGED */
-	"Those saves could not be written here: this device's are as they were.",   /* W_NO_SAVES_BACK */
 };
 _Static_assert(sizeof words / sizeof *words == W_COUNT, "a word for each LauncherWord");
 
@@ -138,45 +129,15 @@ void note_no_picker(const char *where, char *out, size_t n) {
 
 void saves_line_desktop(const char *where, char *out, size_t n) { snprintf(out, n, "Saves: %s", where); }
 
-void saves_line_phone(const char *folder, bool refused, char *out, size_t n) {
+void saves_line_phone(const char *folder, bool automatic, bool refused, char *out, size_t n) {
 	char f[20];
 	/* (a long name cut, so that the line stays one) */
 	if (folder && strlen(folder) > 14) snprintf(f, sizeof f, "%.12s...", folder);
 	else snprintf(f, sizeof f, "%s", folder ? folder : "");
-	if (!f[0]) snprintf(out, n, "Saves: on this device only\nChoose a folder to keep a copy");
+	if (!automatic) snprintf(out, n, "Saves: on this device\nAuto-export is off");
+	else if (!f[0]) snprintf(out, n, "Saves: on this device only\nChoose a Saves folder to keep a copy");
 	else if (refused) snprintf(out, n, "Saves: on this device only\nNo copy in %s: choose it again", f);
 	else snprintf(out, n, "Saves: on this device\nA copy in %s, for a reinstall", f);
-}
-
-/* What saves hold, as the title says it: "3 runs, best Layer 9, a run on
- * Layer 4" (the best the deeper of the profile's and the run's), "a run on
- * Layer 1", or "no runs yet" */
-static void saves_said(const BackupInfo *b, char *out, size_t n) {
-	int best = b->best > b->run_depth ? b->best : b->run_depth;
-	out[0] = 0;
-	if (b->runs > 0) snprintf(out, n, "%d run%s, best Layer %d", b->runs, b->runs == 1 ? "" : "s", best);
-	else if (b->run_depth <= 0 && best > 0) snprintf(out, n, "best Layer %d", best);
-	if (b->run_depth > 0) {
-		size_t m = strlen(out);
-		snprintf(out + m, n - m, "%sa run on Layer %d", m ? ", " : "", b->run_depth);
-	}
-	if (!out[0]) snprintf(out, n, "no runs yet");
-}
-
-void ask_saves(const char *folder, const BackupInfo *found, const BackupInfo *here, char *out, size_t n) {
-	char f[80], h[80];
-	saves_said(found, f, sizeof f);
-	if (here) {
-		saves_said(here, h, sizeof h);
-		snprintf(out, n, "In %s: %s.\nOn this device: %s.\nUse the folder's saves?", folder, f, h);
-	} else
-		snprintf(out, n, "In %s: %s.\nBring them back?", folder, f);
-}
-
-void note_restored(const BackupInfo *b, char *out, size_t n) {
-	char f[80];
-	saves_said(b, f, sizeof f);
-	snprintf(out, n, "Saves brought back: %s.", f);
 }
 
 const char *quit_words(bool pad) {
