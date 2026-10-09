@@ -240,11 +240,25 @@ build/host/test_discovery: $(TEST_DISCOVERY_SRCS) tests/backup_fixture.h src/*/*
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE -DCW_DESKTOP $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) -lm
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery
+TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
+	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c
+# Font measurement uses the same optimization as the game; the scene and
+# portable-save modules use the ordinary sanitizer-test flags below.
+build/host/test_saves_pixfont.o: src/gfx/pixfont.c src/gfx/pixfont.h src/core/platform.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O2 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -c -o $@ $<
+build/host/test_saves: $(TEST_SAVES_SRCS) build/host/test_saves_pixfont.o src/*/*.h | $(GEN)/version.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) build/host/test_saves_pixfont.o -Wl,--wrap=pixfont_draw $(shell pkg-config --libs sdl2) -lm
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
 	build/host/test_discovery
+	build/host/test_saves
 .PHONY: test
 
 # the tests' link as build.py lint reads it: which of the game's functions

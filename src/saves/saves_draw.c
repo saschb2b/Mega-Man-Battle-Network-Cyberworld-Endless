@@ -3,18 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "controls.h"
 #include "gfx.h"
 #include "pick.h"
 #include "pixfont.h"
+#include "saves_layout.h"
 #include "saves_text.h"
 #include "second_frame.h"
-
-typedef struct {
-	SDL_Rect here, file, buttons[SAVES_ACTIONS], note, back;
-	bool columns;
-	int count;
-} Layout;
 
 static SDL_Color shade(void) { return rgba(0, 49, 74, 255); }
 
@@ -33,114 +27,157 @@ static void clipped(int x, int y, const char *s, int width, SDL_Color c) {
 	words(x, y, line, c);
 }
 
-static Layout layout(void) {
-	Layout l = { 0 };
-	l.columns = P.w >= 230;
-	l.back = (SDL_Rect){ P.w - 48, 2, 44, 16 };
-	int panel_h = SV.comparing ? 73 : l.columns ? 48 : 81;
-	l.here = (SDL_Rect){ 6, 25, P.w - 12, panel_h };
-	l.count = SV.comparing ? 2 : SAVES_ACTIONS;
-	if (SV.comparing) {
-		if (l.columns) {
-			l.here.w = (P.w - 16) / 2;
-			l.file = (SDL_Rect){ l.here.x + l.here.w + 4, 25, l.here.w, panel_h };
-		} else l.file = (SDL_Rect){ 6, 25 + panel_h + 3, P.w - 12, panel_h };
+/* Unlike a fixed array of wrapped lines, this keeps every path character. */
+static bool next_line(const char **cursor, int width, char line[96]) {
+	const char *start = *cursor;
+	while (*start == ' ') ++start;
+	if (!*start) return false;
+	int n = 0, space = -1;
+	while (start[n] && start[n] != '\n' && n < 95) {
+		line[n] = start[n];
+		line[n + 1] = 0;
+		if (pixfont_width(line, 1) > width && n) break;
+		if (start[n] == ' ') space = n;
+		++n;
 	}
-	int bottom = SV.comparing && !l.columns ? l.file.y + l.file.h : l.here.y + l.here.h;
-	int columns = l.columns ? 2 : 1;
-	int button_y = SV.comparing ? P.h - (l.columns ? 30 : 48) : bottom + 5;
-	int bw = l.columns ? (P.w - 16) / 2 : P.w - 12;
-	for (int i = 0; i < l.count; ++i)
-		l.buttons[i] = (SDL_Rect){ 6 + (i % columns) * (bw + 4), button_y + (i / columns) * 18, bw, 16 };
-	if (SV.comparing) l.note = (SDL_Rect){ 8, bottom + 3, P.w - 16, button_y - bottom - 5 };
-	else {
-		int actions_h = ((SAVES_ACTIONS + columns - 1) / columns) * 18;
-		l.note = (SDL_Rect){ 8, button_y + actions_h, P.w - 16, P.h - button_y - actions_h - 3 };
-	}
-	return l;
+	if (start[n] && start[n] != '\n' && space > 0) n = space;
+	line[n] = 0;
+	*cursor = start + n;
+	if (**cursor == '\n' || **cursor == ' ') ++*cursor;
+	return true;
 }
 
-static void button(SDL_Rect r, const char *label, bool focus, bool disabled) {
-	fill_rect(r.x, r.y, r.w, r.h, focus ? PET_GOLD : PET_SLOT_EDGE);
+static int rows(SDL_Rect r) { return (r.h + PIXFONT_LINE - PIXFONT_H) / PIXFONT_LINE; }
+
+static void note(SDL_Rect r, const char *text, SDL_Color color) {
+	const char *cursor = text;
+	char line[96];
+	for (int i = 0; i < rows(r) && next_line(&cursor, r.w, line); ++i)
+		words(r.x, r.y + i * PIXFONT_LINE, line, color);
+}
+
+static void button(SavesButton b) {
+	SDL_Rect r = b.rect;
+	bool focus = SV.focus == b.action;
+	bool disabled = saves_disabled(b.action);
+	fill_rect(r.x, r.y, r.w, r.h, focus ? PET_GOLD : PET_LINE);
 	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 2, focus ? PET_NAVY : PET_SLOT);
-	clipped(r.x + 5, r.y + 4, label, r.w - 10, disabled ? PET_DIM : PET_WHITE);
+	char label[64];
+	snprintf(label, sizeof label, "%s%s", saves_label(b.action),
+		b.action == SAVES_AUTO ? pick_saves_auto_enabled() ? ": on" : ": off" : "");
+	clipped(r.x + 5, r.y + (r.h - PIXFONT_H) / 2, label, r.w - 10,
+		disabled ? PET_CYAN_HI : PET_WHITE);
 }
 
-static bool newer(const BackupInfo *a, const BackupInfo *b) {
-	if (a->save_id[0] && !strcmp(a->save_id, b->save_id)) return a->revision > b->revision;
-	return a->stamp && b->stamp && a->stamp > b->stamp;
-}
-
-static void summary(SDL_Rect r, const BackupInfo *info, const char *label, bool is_newer, bool compact) {
+static void summary(SDL_Rect r, const BackupInfo *info, const char *title, bool compact) {
 	fill_rect(r.x, r.y, r.w, r.h, PET_NAVY);
-	char heading[64];
-	snprintf(heading, sizeof heading, "%s%s", label, is_newer ? " (newer)" : "");
-	clipped(r.x + 4, r.y + 3, heading, r.w - 8, PET_GOLD);
-	for (int i = 0; i < 6; ++i) {
+	clipped(r.x + 4, r.y + 3, title, r.w - 8, PET_GOLD);
+	static const int home_rows[] = { 1, 2, 0 };
+	static const int compare_rows[] = { 1, 2, 0, 6 };
+	const int *order = compact ? compare_rows : home_rows;
+	bool stacked = compact && P.w < 230;
+	int count = compact && !stacked ? 4 : 3;
+	for (int i = 0; i < count; ++i) {
 		char text[128];
-		saves_summary(info, i, text, sizeof text);
-		int col = compact && i >= 3 ? 1 : 0;
-		int width = compact ? (r.w - 12) / 2 : r.w - 8;
-		int x = r.x + 4 + col * (width + 4), y = r.y + 15 + (compact ? i % 3 : i) * (compact ? 11 : 9);
-		clipped(x, y, text, width, PET_WHITE);
+		saves_summary(info, order[i], text, sizeof text);
+		clipped(r.x + 4, r.y + 14 + i * (stacked ? PIXFONT_H : PIXFONT_LINE), text, r.w - 8, i ? PET_WHITE : PET_GOLD);
 	}
 }
 
-/* Wrap long file paths as well as prose, so every part can be read. */
-static void note(SDL_Rect r, const char *s, SDL_Color color) {
-	char lines[12][96];
-	int most = r.h / PIXFONT_LINE;
-	if (most > 12) most = 12;
-	if (most <= 0) return;
-	int n = pixfont_wrap(s, r.w, 1, lines, most);
-	for (int i = 0; i < n; ++i) clipped(r.x, r.y + i * PIXFONT_LINE, lines[i], r.w, color);
+static SavesLayout current_layout(void) {
+	bool resume = SV.view == SAVES_RESULT ? SV.result_resume : SV.resume;
+	return saves_layout(P.w, P.h, SV.view, resume, SV.result_undo);
 }
 
-static void message(void) {
-	fill_rect(4, 25, P.w - 8, P.h - 29, PET_NAVY);
-	note((SDL_Rect){ 10, 31, P.w - 20, P.h - 65 }, SV.note, PET_WHITE);
-	button((SDL_Rect){ 8, P.h - 28, P.w - 16, 18 }, "OK", true, false);
+int saves_details_pages(void) {
+	char text[4096], line[96];
+	saves_details_text(text, sizeof text);
+	const char *cursor = text;
+	SDL_Rect r = current_layout().content;
+	if (r.h <= 0) r = saves_layout(P.w, P.h, SAVES_DETAIL, false, false).content;
+	int count = 0, per_page = rows(r);
+	while (next_line(&cursor, r.w, line)) ++count;
+	return per_page > 0 && count ? (count + per_page - 1) / per_page : 1;
+}
+
+static void details(SavesLayout l) {
+	char text[4096], line[96], title[64];
+	saves_details_text(text, sizeof text);
+	saves_page_label(SV.details_page, saves_details_pages(), title, sizeof title);
+	clipped(8, 25, title, P.w - 16, PET_GOLD);
+	fill_rect(6, l.content.y - 2, P.w - 12, l.content.h + 4, PET_NAVY);
+	const char *cursor = text;
+	int per_page = rows(l.content), first = SV.details_page * per_page;
+	for (int i = 0; next_line(&cursor, l.content.w, line); ++i) {
+		if (i < first) continue;
+		if (i >= first + per_page) break;
+		words(l.content.x, l.content.y + (i - first) * PIXFONT_LINE, line, PET_WHITE);
+	}
+}
+
+static void status(SDL_Rect r) {
+	char text[1000];
+	saves_transfer_status(text, sizeof text);
+	fill_rect(r.x, r.y, r.w, r.h, PET_NAVY);
+	char *second = strchr(text, '\n');
+	if (second) *second++ = 0;
+	clipped(r.x + 4, r.y + 3, text, r.w - 8, PET_WHITE);
+	if (second) clipped(r.x + 4, r.y + 3 + PIXFONT_LINE, second, r.w - 8, PET_WHITE);
+}
+
+static void hint(SDL_Rect r) {
+	if (r.h <= 0) return;
+	char text[300];
+	if (SV.feedback[0] && SDL_GetTicks() < SV.feedback_until) snprintf(text, sizeof text, "%s", SV.feedback);
+	else saves_action_hint(SV.focus, text, sizeof text);
+	note(r, text, PET_WHITE);
 }
 
 void saves_draw(void) {
 	fill_rect(0, 0, P.w, P.h, PET_GREEN);
 	fill_rect(0, 0, P.w, 20, PET_DARK);
 	fill_rect(0, 20, P.w, 1, PET_LINE);
-	words(8, 5, "SAVES", PET_WHITE);
-	second_stripes(49, 4);
-	Layout l = layout();
-	button(l.back, "Back", false, SV.busy);
-	if (!SV.comparing && SV.note[0]) { message(); return; }
-	summary(l.here, &SV.here, "This device", SV.comparing && newer(&SV.here, &SV.file), !SV.comparing && l.columns);
-	if (SV.comparing) {
-		summary(l.file, &SV.file, "The file", newer(&SV.file, &SV.here), false);
+	const char *title = saves_view_title();
+	words(8, 5, title, PET_WHITE);
+	second_stripes(14 + pixfont_width(title, 1), 4);
+	SavesLayout l = current_layout();
+	fill_rect(l.back.x, l.back.y, l.back.w, l.back.h, PET_SLOT_EDGE);
+	fill_rect(l.back.x + 1, l.back.y + 1, l.back.w - 2, l.back.h - 2, PET_SLOT);
+	words(l.back.x + 5, l.back.y + 4, "Back", SV.busy ? PET_CYAN_HI : PET_WHITE);
+	if (SV.view == SAVES_HOME) {
+		summary(l.hero, &SV.here, saves_panel_title(false), false);
+		status(l.status);
+	} else if (SV.view == SAVES_TRANSFER) status(l.status);
+	else if (SV.view == SAVES_COMPARE) {
+		summary(l.hero, &SV.here, saves_panel_title(false), true);
+		summary(l.file, &SV.file, saves_panel_title(true), true);
 		note(l.note, SV.note, SV.status == BACKUP_OK ? PET_WHITE : PET_GOLD);
-		button(l.buttons[SAVES_KEEP], "Keep this device", SV.focus == SAVES_KEEP, false);
-		button(l.buttons[SAVES_TAKE], "Import the file", SV.focus == SAVES_TAKE, SV.status != BACKUP_OK);
-	} else {
-		for (int i = 0; i < SAVES_ACTIONS; ++i) {
-			char label[40];
-			snprintf(label, sizeof label, "%s%s", saves_label(i), i == SAVES_AUTO ? pick_saves_auto_enabled() ? ": on" : ": off" : "");
-			bool disabled = SV.busy || (i == SAVES_UNDO && !SV.undo) ||
-				(i == SAVES_AUTO && !(pick_saves_capabilities() & SAVES_CAN_AUTO)) || (i == SAVES_FOLDER && !(pick_saves_capabilities() & SAVES_CAN_FOLDER));
-			button(l.buttons[i], label, SV.focus == i, disabled);
-		}
-		note(l.note, SV.busy ? "Waiting for the file picker..." : saves_hint(SV.focus), PET_WHITE);
+	} else if (SV.view == SAVES_DETAIL) details(l);
+	else {
+		fill_rect(6, 24, P.w - 12, l.note.h + 8, PET_NAVY);
+		note(l.note, SV.note, PET_WHITE);
 	}
+	for (int i = 0; i < l.count; ++i) button(l.buttons[i]);
+	hint(l.hint);
+}
+
+void saves_move_focus(int dx, int dy) {
+	SavesLayout l = current_layout();
+	int focus = saves_layout_move(&l, SV.focus, dx, dy);
+	if (focus != SV.focus) SV.feedback[0] = 0;
+	SV.focus = focus;
 }
 
 bool saves_pointer(void) {
 	int x, y;
 	if (!platform_tap(&x, &y)) return false;
 	SDL_Point p = { x, y };
-	Layout l = layout();
-	if (!SV.comparing && SV.note[0]) { SV.note[0] = 0; return true; }
+	SavesLayout l = current_layout();
 	if (SDL_PointInRect(&p, &l.back)) { saves_back(); return true; }
 	for (int i = 0; i < l.count; ++i) {
-		if (!SDL_PointInRect(&p, &l.buttons[i])) continue;
-		SV.focus = i;
-		if (SV.comparing) saves_answer(i == SAVES_TAKE);
-		else saves_activate(i);
+		if (!SDL_PointInRect(&p, &l.buttons[i].rect)) continue;
+		SV.focus = l.buttons[i].action;
+		saves_activate(SV.focus);
 		return true;
 	}
 	return true;

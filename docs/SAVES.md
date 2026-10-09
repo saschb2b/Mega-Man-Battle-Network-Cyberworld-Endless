@@ -12,6 +12,21 @@ follow the player, while replacing a checkpoint remains a deliberate
 choice. The comparison shows both copies, focuses Keep this device and
 names the run that Import would replace. Undo supplies the recovery path.
 
+The first screen leads with the current run's layer, act and area, then
+the profile's runs and record and the transfer folder's copy status.
+Export and Import are followed by Undo, Details and Options. Options
+holds automatic copying, folder selection and Retry copy. Routine changes
+give inline feedback. Controller directions follow the actual button
+positions; portrait menus stack the same actions. Back and result buttons
+respond to their visible hit areas.
+
+The comparison shows progress and recorded times without ranking divergent
+runs by revision or device clock. Keep is the safe first choice. The screen
+also says that Keep can refresh the folder copy when Auto-export is on.
+Each copy's Details pages preserve its full device name, build and path,
+and Back returns to the same comparison. Import results name the installed
+run, offer Continue where its checkpoint is available, and retain Undo.
+
 The screen's course, drawing and words live in `src/saves/`. Every entry
 into an import uses the same core preflight: a system picker, a dropped
 file or a copy found at startup. The browser's menu opens that screen
@@ -97,6 +112,10 @@ Undo swaps the complete current and previous folders. The next successful
 import replaces the previous undo copy. The player can therefore bring
 back the progress and checkpoint that the last import replaced, including
 a different local run.
+Before Restore, `backup_undo_info` reads the actual previous folder without
+rewriting its manifest or changing its files. An empty previous folder is
+shown as empty progress. The core checks compatibility and reads it again
+before swapping; a changed or unreadable copy is refused.
 An unreadable existing profile refuses import or Undo before the folders
 change; an empty profile is synthesized only when the previous profile
 is confirmed absent.
@@ -110,8 +129,14 @@ optional elsewhere. The browser offers manual downloads and uploads; its
 automatic-copy and folder actions are unavailable. The pickers do not
 decide which progress wins. `src/launcher/mirror.c` maintains the chosen automatic
 copy and finds a copy at startup before writing over it.
-Its device-local `saves-export.hash` remembers the exact carrier
-fingerprint last exported successfully. Revision numbers alone do not
+Its device-local, checksummed `saves-export.receipt` remembers the exact
+carrier fingerprint, successful automatic-copy time and destination;
+the older `saves-export.hash` remains a discovery fallback. The receipt is
+scoped to the full native path, Android document-tree URI or resolved
+iOS folder bookmark, so identically named provider folders do not share
+copy status. Failed copies retain the last successful time; Retry checks
+for incoming saves before writing again. A folder copy does not confirm
+that a cloud provider has synced it. Revision numbers alone do not
 identify that output: two devices can independently make different
 revision 2s from revision 1. A divergent copy, including one at a local
 parent revision, stays held for the comparison screen.
@@ -134,6 +159,7 @@ settings continue to live in IndexedDB.
 | --- | --- |
 | Carrier and restore tests | ROM-free tests cover the carrier, legacy files, metadata, local settings and the transactional installer. |
 | Failure and legacy regressions | Injected unreadable profiles preserve both current and Undo folders; the pre-emulator run format imports without a state while modern runs without one are refused. Busy ROM/saves pickers protect incoming files, and failed exports report failure. |
+| SAVES interface regressions | Production scene input, spatial focus, touch hit areas, import and Undo transactions, result actions, full Details paging and copy failure/retry are tested under sanitizers with synthetic progress. |
 | Android provider errors | Production `RomLook` runs against JVM provider doubles for absent files, null/error listings, broken cursors, unreadable files and recovery; failed old/stale lookups perform no writes or deletes. This does not establish physical-provider behavior. |
 | Linux native import and Undo | A layer 2 checkpoint replaced a local layer 5 run; Undo brought layer 5 back. The local settings file stayed unchanged. |
 | Native to browser | An isolated layer 2, seed 7 checkpoint imported through the real Chrome player's file input. CONTINUE showed layer 2 and loaded that map, with its 430,144-byte emulator state present. Settings stayed byte identical and both volume values stayed at 9. |
@@ -142,7 +168,7 @@ settings continue to live in IndexedDB.
 | Browser to native | The browser-produced file replaced the native test device's layer 5 checkpoint. CONTINUE resumed the same layer 2 map and Lan/Chaud dialogue. |
 | Browser to Android to native | In an isolated Android emulator, the native document picker imported the browser export and CONTINUE resumed layer 2. Choosing a separate Saves folder kept the ROMs folder unchanged. The native export picker returned a byte-identical carrier, which imported and resumed on Linux. Android's statistics answer and Linux's settings stayed local. |
 | Native file drops | Injected SDL file-drop events at the title and ROMs screen opened the comparison with Keep selected, including a simultaneous START press. Both local layer 5 checkpoints stayed unchanged. |
-| Portrait touch | The comparison fit a 360×640 display with full action labels. A scripted tap on Import installed layer 2 and kept the receiving settings unchanged. |
+| Portrait touch | The comparison fit a 360×640 display with full action labels. A scripted tap on Use file installed layer 2 and kept the receiving settings unchanged. |
 | Cross builds | The Windows, Android, browser and New 3DS targets built with warnings treated as errors. |
 
 These checks use local Linux builds, headless Chrome, an isolated Android

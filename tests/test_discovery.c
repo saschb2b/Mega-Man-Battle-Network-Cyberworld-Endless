@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <SDL.h>
@@ -21,9 +23,11 @@
 char g_data_dir[512];
 static char downloads[600];
 static Uint32 ticks = 5000;
-static bool rom_picker, saves_picker;
+static bool rom_picker, saves_picker, fail_put;
+static time_t copy_time = 1700000000;
 
 Uint32 SDL_GetTicks(void) { return ticks; }
+time_t time(time_t *out) { if (out) *out = copy_time; return copy_time; }
 void platform_persist(void) { mirror_note(); }
 bool desktop_big_screen(void) { return false; }
 bool desktop_can_choose(void) { return true; }
@@ -31,7 +35,7 @@ bool pick_busy(void) { return rom_picker; }
 bool pick_saves_busy(void) { return saves_picker; }
 bool desktop_saves_default(char *path, size_t n) {
 	snprintf(path, n, "%s", downloads);
-	return true;
+	return downloads[0] != 0;
 }
 
 static bool place_file(char *path, size_t n) {
@@ -48,7 +52,7 @@ bool pick_saves_get(const char *to) {
 
 bool pick_saves_put(const char *from) {
 	char path[1100];
-	return place_file(path, sizeof path) && saves_copy(from, path);
+	return !fail_put && place_file(path, sizeof path) && saves_copy(from, path);
 }
 
 static void progress(const char *dir, unsigned runs) {
@@ -96,7 +100,125 @@ static void picker_protection(const char *folder, const uint8_t *incoming, size_
 	}
 }
 
-int main(void) {
+static int receipt_check(const char *dir, const char *stamp, const char *destination) {
+	snprintf(g_data_dir, sizeof g_data_dir, "%s", dir);
+	MirrorStatus status;
+	mirror_status(&status);
+	assert(!status.copied_at && status.state == MIRROR_IDLE);
+	mirror_tick();
+	mirror_status(&status);
+	uint64_t expected = strtoull(stamp, NULL, 10);
+	assert(status.copied_at == expected && !strcmp(status.destination, destination));
+	assert(status.state == (expected ? MIRROR_COPIED : MIRROR_IDLE));
+	return 0;
+}
+
+static void receipt_restart(uint64_t stamp, const char *destination) {
+	char expected[32];
+	snprintf(expected, sizeof expected, "%llu", (unsigned long long)stamp);
+	pid_t child = fork();
+	assert(child >= 0);
+	if (!child) {
+		execl("/proc/self/exe", "test_discovery", "--receipt-check", g_data_dir, expected, destination, (char *)NULL);
+		_exit(127);
+	}
+	int status;
+	assert(waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
+}
+
+static void receipt_status(void) {
+	char base[] = "build/host/test-receipt-XXXXXX", first[600], next[600], path[1100], receipt_path[600];
+	assert(mkdtemp(base));
+	snprintf(g_data_dir, sizeof g_data_dir, "%s/local", base);
+	snprintf(first, sizeof first, "%s/first", base);
+	snprintf(next, sizeof next, "%s/next", base);
+	snprintf(downloads, sizeof downloads, "%s/downloads", base);
+	assert(!cw_mkdir(g_data_dir) && !cw_mkdir(first) && !cw_mkdir(next) && !cw_mkdir(downloads));
+	assert(backup_restore(g_data_dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK);
+	assert(saves_folder_keep(first));
+	pick_saves_auto(true);
+	mirror_new_folder();
+	mirror_flush();
+	MirrorStatus status;
+	mirror_status(&status);
+	assert(status.state == MIRROR_COPIED && status.copied_at == (uint64_t)copy_time && !strcmp(status.destination, first));
+	char initial[sizeof g_data_dir], other[600];
+	memcpy(initial, g_data_dir, sizeof initial);
+	snprintf(other, sizeof other, "%s/other", base);
+	assert(!cw_mkdir(other));
+	snprintf(g_data_dir, sizeof g_data_dir, "%s/other", base);
+	assert(saves_folder_keep(first));
+	mirror_status(&status);
+	assert(!status.copied_at && status.state == MIRROR_IDLE);
+	memcpy(g_data_dir, initial, sizeof g_data_dir);
+	mirror_status(&status);
+	receipt_restart(status.copied_at, first);
+	snprintf(receipt_path, sizeof receipt_path, "%s/saves-export.receipt", g_data_dir);
+	size_t receipt_n = 0;
+	uint8_t *receipt_bytes = backup_read_file(receipt_path, &receipt_n);
+	assert(receipt_bytes);
+	uint64_t previous = status.copied_at;
+	progress(g_data_dir, 4);
+	mirror_note();
+	mirror_status(&status);
+	assert(status.state == MIRROR_PENDING && status.copied_at == previous);
+	fail_put = true;
+	ticks += 4000;
+	mirror_tick();
+	mirror_status(&status);
+	assert(status.state == MIRROR_FAILED && status.copied_at == previous && !strcmp(status.destination, first));
+	same_bytes(receipt_path, receipt_bytes, receipt_n);
+	/* Retry copies the current progress and updates its receipt only after
+	 * the adapter succeeds, even after a cold restart retained the old time. */
+	receipt_restart(previous, first);
+	fail_put = false;
+	copy_time += 60;
+	mirror_retry();
+	mirror_status(&status);
+	assert(status.state == MIRROR_PENDING && status.copied_at == previous);
+	mirror_tick();
+	mirror_status(&status);
+	assert(status.state == MIRROR_COPIED && status.copied_at == (uint64_t)copy_time);
+	previous = status.copied_at;
+	snprintf(path, sizeof path, "%s/%s", first, BACKUP_NAME);
+	assert(backup_write_file(path, backup_fixture, sizeof backup_fixture));
+	mirror_note();
+	ticks += 4000;
+	mirror_tick();
+	mirror_status(&status);
+	assert(status.state == MIRROR_INCOMING && status.copied_at == previous);
+	mirror_retry();
+	mirror_flush();
+	same_bytes(path, backup_fixture, sizeof backup_fixture);
+	mirror_hold(false);
+	mirror_flush();
+	/* Selecting a folder elsewhere in the launcher can change the scope
+	 * without mirror_new_folder. The same progress still needs a new copy. */
+	assert(saves_folder_keep(next));
+	mirror_status(&status);
+	assert(!status.copied_at && status.state == MIRROR_PENDING && !strcmp(status.destination, next));
+	copy_time += 60;
+	mirror_flush();
+	mirror_status(&status);
+	assert(status.state == MIRROR_COPIED && status.copied_at == (uint64_t)copy_time && !strcmp(status.destination, next));
+	snprintf(path, sizeof path, "%s/%s", next, BACKUP_NAME);
+	size_t n = 0;
+	uint8_t *copied = backup_read_file(path, &n);
+	BackupInfo info;
+	assert(copied && backup_info(copied, n, &info) && info.runs == 4);
+	free(copied);
+	receipt_restart(status.copied_at, next);
+	assert(backup_write_file(receipt_path, (const uint8_t *)"damaged", 7));
+	receipt_restart(0, next);
+	assert(saves_folder_keep(""));
+	downloads[0] = 0;
+	mirror_status(&status);
+	assert(!status.copied_at && status.state != MIRROR_COPIED && !status.destination[0]);
+	free(receipt_bytes);
+}
+
+int main(int argc, char **argv) {
+	if (argc == 5 && !strcmp(argv[1], "--receipt-check")) return receipt_check(argv[2], argv[3], argv[4]);
 	char base[] = "build/host/test-discovery-XXXXXX", kept[600], remote[600];
 	char own[700], downloaded[700], data_file[600], staged[600], manual[600];
 	assert(mkdtemp(base));
@@ -154,6 +276,7 @@ int main(void) {
 	free(own_bytes);
 	free(first);
 	free(second);
-	puts("discovery: known places and manual import retained; both picker workers protect incoming files");
+	receipt_status();
+	puts("discovery: fallback, picker protection and scoped copy receipts/retry passed");
 	return 0;
 }

@@ -13,5 +13,6 @@ bool saves_stage(const char *from, const char *to);
 /* Phones keep a transfer folder separately, with the ROM folder as the
  * initial default. Choosing one never changes where ROMs are looked for. */
 bool saves_phone_place(char *out, size_t n);
+bool saves_phone_scope(char *out, size_t n);
 
 #endif

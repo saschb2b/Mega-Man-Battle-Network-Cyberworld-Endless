@@ -56,6 +56,9 @@ bool pick_saves_busy(void);
 bool pick_saves_done(PickResult *r);
 /* The kept transfer folder, else this system's known transfer place. */
 bool pick_saves_place(char *name, size_t n);
+/* Stable destination identity for device-local copy receipts; never exported.
+ * Provider folders with the same display name must have different identities. */
+bool pick_saves_scope(char *out, size_t n);
 /* Read the kept place's existing file into `to`, without changing it. */
 bool pick_saves_get(const char *to);
 /* Stage a different file from the known places (kept folder, Downloads,

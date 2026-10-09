@@ -128,6 +128,7 @@ bool pick_saves_put(const char *from) { return call_bool_string("savesPut", from
 
 bool pick_saves_get(const char *to) { return call_bool_string("savesGet", to); }
 bool saves_phone_place(char *out, size_t n) { return call_string("savesFolder", out, n) && out[0]; }
+bool saves_phone_scope(char *out, size_t n) { return n > 1 && call_string("savesScope", out, n) && out[0] && strlen(out) + 1 < n; }
 
 static bool saves_busy;
 static int saves_kind;

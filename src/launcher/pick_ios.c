@@ -65,6 +65,7 @@ bool pick_saves_put(const char *from) { return ios_saves_put(from); }
 
 bool pick_saves_get(const char *to) { return ios_saves_get(to); }
 bool saves_phone_place(char *out, size_t n) { return ios_saves_folder_name(out, n); }
+bool saves_phone_scope(char *out, size_t n) { return ios_saves_folder_scope(out, n); }
 
 static bool saves_busy;
 static int saves_kind;

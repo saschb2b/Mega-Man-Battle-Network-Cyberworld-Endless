@@ -173,6 +173,11 @@ public class GameActivity extends SDLActivity {
         return roms().savesFolder() == null ? null : roms().savesFolderName();
     }
 
+    public String savesScope() {
+        Uri folder = roms().savesFolder();
+        return folder == null ? null : folder.toString();
+    }
+
     /** SAVES' import (0), export (1), or auto-export folder (2). */
     public boolean savesPick(int kind, String from) {
         if (picking) return false;

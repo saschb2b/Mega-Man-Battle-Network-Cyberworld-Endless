@@ -95,14 +95,14 @@ the data folder, which uninstalling leaves alone. On a phone or tablet,
 where uninstalling the app deletes its files, **Auto-export** keeps a
 `cyberworld-endless.cwsave` in the transfer folder shown in **SAVES**, a
 few seconds after each save. It is on by default, using the ROM folder
-you chose; **Choose folder** in SAVES can select a different destination.
+you chose; **Options → Choose folder** in SAVES can select a different destination.
 ROMs chosen as files leave no default folder for the copy, so choose a
 Saves folder to keep one.
 
-After a reinstall, select your ROMs again, then use **SAVES → Import** to
+After a reinstall, select your ROMs again, then use **SAVES → Import a file** to
 choose the exported file. If the copy is in your ROM folder, choosing
 that folder also finds it and opens the comparison before you choose
-**Keep this device** or **Import the file**.
+**Keep this device** or **Use file**.
 
 ### On Windows
 
@@ -245,7 +245,7 @@ Uninstalling the app deletes its own files, the saves among them, but
 leaves files exported to an outside folder. **Auto-export** is on by
 default and keeps `cyberworld-endless.cwsave` in the folder shown in
 **SAVES**, using your ROM folder until you choose another. After a
-reinstall, select your ROMs again and use **SAVES → Import** to choose
+reinstall, select your ROMs again and use **SAVES → Import a file** to choose
 that file; a copy in the ROM folder is also found when you choose the
 folder again. Android's own backup, where it is turned on, keeps the
 saves and settings too, never the ROMs.
@@ -282,7 +282,7 @@ marketplaceID").
    leaves files exported to an outside folder. **Auto-export** is on by
    default and keeps `cyberworld-endless.cwsave` in the folder shown in
    **SAVES**, using your ROM folder until you choose another. After a
-   reinstall, select your ROMs again and use **SAVES → Import** to choose
+   reinstall, select your ROMs again and use **SAVES → Import a file** to choose
    that file; a copy in the ROM folder is also found when you choose the
    folder again.
 
@@ -705,37 +705,57 @@ best depth is kept in `profile.sav`.
 
 ### Moving saves between devices
 
-Choose **SAVES** on the title. **Export** makes one
+Choose **SAVES** on the title. Its first screen shows the current run's
+layer, act and area, your runs played and best depth, and the automatic
+copy's status. **Export a copy** makes one
 `cyberworld-endless.cwsave` file with your progress, unlocks, Library,
 guardian records and the current run's checkpoint. It contains no ROM.
 Copy that file to the other device, start the game there with your own
-ROM, choose **SAVES**, then **Import**. In the browser, **Save backup**
+ROM, choose **SAVES**, then **Import a file**. In the browser, **Save backup**
 and **Load backup** in the player's menu open this same screen. You can
 also drop one `.cwsave` on the player to import it through the same preview.
 
-Before anything is replaced, SAVES puts **This device** and **The file** side
-by side: runs played, deepest layer, the current run's layer, act and area,
-when it was played, the device that wrote it and its game version. The
-device name comes from the system. **Keep this device** is selected first;
-**Import the file** replaces the local progress and checkpoint together. Runs
-played separately on two devices are never combined. **Undo last import**
-brings back the local saves that were replaced.
+Before anything is replaced, SAVES compares **This device** and **The file**:
+runs played, deepest layer, and the current run's layer, act and area.
+**Local details** and **File details** show when each copy was last played,
+its full device name, game version and file or transfer-folder path,
+with **Previous** and **Next** pages where needed. Back returns to the
+comparison. The device name comes from the system. **Keep this device**
+is selected first; **Use file** replaces the local progress and checkpoint
+together. Runs played separately on two devices are never combined.
+
+**Undo last import** previews the previous local saves beside the current
+ones. **Keep this device** remains the first choice; **Restore** brings
+back the previewed copy. After a successful import or restore,
+**Continue** resumes its checkpoint when the run and its ROM are available.
+**Done** returns to SAVES after an export or an error, and after an import
+without a run to resume. Back leaves the result. **Details** on a result
+shows its complete message and export path; on the first screen it shows
+this device's full save information without opening a comparison.
 
 Controls, touch layout, display settings, music and sound volumes, and your
 answer about anonymous statistics stay on each device. Importing an older
 backup also leaves its settings out. Older `.cwsave` files still work,
 although facts they did not record are shown as unknown.
 
-**Auto-export** keeps a fresh `cyberworld-endless.cwsave` in the folder
-shown on the screen a few seconds after each save. It starts on for phone
+**Options → Auto-export** keeps a fresh `cyberworld-endless.cwsave` in the
+folder shown on the screen a few seconds after each save. It starts on for phone
 apps, which already keep a copy beside your ROMs; on other systems it is
-optional. **Choose folder**, where the system has a folder chooser,
+optional. **Choose folder** in Options, where the system has a folder chooser,
 remembers a different destination. Without a chooser, use the shown
 folder: Downloads on a desktop, or the game's data folder on PortMaster
 and the 3DS. A file found there at startup opens the same comparison
 before an automatic export can replace it.
 
-The browser uses manual **Export** downloads and **Import** uploads;
+The status distinguishes a pending copy, a successful copy with its time,
+a failed copy and incoming saves waiting for comparison. **Options →
+Retry copy** checks for incoming saves before trying a failed copy again.
+**Details** shows the full transfer folder and last successful copy.
+Making a folder copy does not confirm that a cloud service has synced it.
+With Auto-export on, choosing **Keep this device** allows the local
+saves to refresh that folder's copy.
+
+The browser uses manual **Export a copy** downloads and **Import a file** uploads;
 automatic exports and a transfer folder are unavailable there. Download a
 copy before clearing the site's storage or moving to another browser.
 

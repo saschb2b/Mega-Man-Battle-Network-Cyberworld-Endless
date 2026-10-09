@@ -52,6 +52,9 @@ BackupStatus backup_restore(const char *data_dir, const uint8_t *bytes, size_t n
 bool backup_unpack(const char *data_dir, const uint8_t *bytes, size_t n);
 /* Undo the last successful import; swaps the two complete savedata folders. */
 bool backup_can_undo(const char *data_dir);
+/* Read the prior folder without changing it or its manifest. Empty prior
+ * progress is a valid zero summary; false reports damaged/unreadable data. */
+bool backup_undo_info(const char *data_dir, BackupInfo *info);
 bool backup_undo(const char *data_dir);
 /* Recover an import interrupted between folder renames before reading saves. */
 bool backup_recover(const char *data_dir);

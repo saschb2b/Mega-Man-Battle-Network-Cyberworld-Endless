@@ -7,6 +7,20 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+
+typedef enum { MIRROR_IDLE, MIRROR_PENDING, MIRROR_COPIED, MIRROR_FAILED, MIRROR_INCOMING } MirrorState;
+typedef struct {
+	MirrorState state;
+	uint64_t copied_at;       /* successful folder copy, seconds since 1970; 0 unknown */
+	char destination[1024];  /* current device-local transfer destination */
+} MirrorStatus;
+
+/* Read-only status from the receipt initialized by mirror_tick, plus any
+ * pending/failure state. This is a local receipt, never a cloud-sync claim. */
+void mirror_status(MirrorStatus *out);
+/* Re-arm a failed/pending auto copy; retain incoming-file protection. */
+void mirror_retry(void);
 
 /* Files were written (platform_persist) */
 void mirror_note(void);

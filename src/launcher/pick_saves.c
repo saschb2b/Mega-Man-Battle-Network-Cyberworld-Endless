@@ -117,6 +117,17 @@ bool pick_saves_place(char *name, size_t n) {
 #endif
 }
 
+bool pick_saves_scope(char *out, size_t n) {
+#if defined(__ANDROID__) || defined(CW_IOS)
+	return saves_phone_scope(out, n);
+#elif defined(__EMSCRIPTEN__)
+	if (n) out[0] = 0;
+	return false;
+#else
+	return pick_saves_place(out, n);
+#endif
+}
+
 /* Keep the first damaged candidate too: the screen can explain the
  * refusal, and an automatic export must not erase it on the way there. */
 #ifndef __EMSCRIPTEN__

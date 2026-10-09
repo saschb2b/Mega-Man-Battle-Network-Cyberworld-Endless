@@ -5,6 +5,7 @@
 #include "backup.h"
 
 #include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -117,9 +118,9 @@ static void add_bytes(Pack *p, const char *name, const uint8_t *data, size_t siz
 	++p->count;
 }
 
-static void add_file(Pack *p, const char *data_dir, const char *name) {
-	char path[1100];
-	snprintf(path, sizeof path, "%s/%.199s", data_dir, name);
+static void add_file(Pack *p, const char *dir, const char *name) {
+	char path[1400];
+	snprintf(path, sizeof path, "%s/%.190s", dir, name + 9);
 	size_t size = 0;
 	uint8_t *data = backup_read_file(path, &size);
 	if (!data) { p->ok = false; return; }
@@ -132,9 +133,8 @@ static void add_file(Pack *p, const char *data_dir, const char *name) {
 
 static int by_name(const void *a, const void *b) { return strcmp(a, b); }
 
-static bool add_progress(Pack *p, const char *data_dir) {
-	char dir[1100], names[BACKUP_FILES_MAX][200];
-	snprintf(dir, sizeof dir, "%s/savedata", data_dir);
+static bool add_progress(Pack *p, const char *dir) {
+	char names[BACKUP_FILES_MAX][200];
 	DIR *d = opendir(dir);
 	if (!d) return false;
 	int k = 0;
@@ -147,7 +147,7 @@ static bool add_progress(Pack *p, const char *data_dir) {
 	}
 	closedir(d);
 	qsort(names, (size_t)k, sizeof names[0], by_name);
-	for (int i = 0; i < k; ++i) add_file(p, data_dir, names[i]);
+	for (int i = 0; i < k; ++i) add_file(p, dir, names[i]);
 	return p->ok;
 }
 
@@ -165,8 +165,9 @@ uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n) {
 	memcpy(p.buf, MAGIC, 8);
 	p.n = BACKUP_HEAD;
 	BackupInfo info;
-	char manifest[BACKUP_MANIFEST_MAX];
-	bool ok = add_progress(&p, data_dir) && finish(&p, stamp) && backup_info(p.buf, p.n + 4, &info) &&
+	char manifest[BACKUP_MANIFEST_MAX], dir[1100];
+	snprintf(dir, sizeof dir, "%s/savedata", data_dir);
+	bool ok = add_progress(&p, dir) && finish(&p, stamp) && backup_info(p.buf, p.n + 4, &info) &&
 		info.has_profile && info.status == BACKUP_OK && backup_manifest_update(data_dir, stamp ? stamp : p.latest, &info, manifest, sizeof manifest);
 	if (ok) {
 		add_bytes(&p, BACKUP_MANIFEST, (const uint8_t *)manifest, strlen(manifest));
@@ -175,6 +176,47 @@ uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n) {
 	if (!ok) { free(p.buf); return NULL; }
 	*n = p.n + 4;
 	return p.buf;
+}
+
+bool backup_undo_info(const char *data_dir, BackupInfo *info) {
+	memset(info, 0, sizeof *info);
+	info->status = BACKUP_IO;
+	Pack p = { .ok = true };
+	if (!grow(&p, BACKUP_HEAD)) return false;
+	memcpy(p.buf, MAGIC, 8);
+	p.n = BACKUP_HEAD;
+	char dir[1100], path[1200];
+	snprintf(dir, sizeof dir, "%s/savedata.old", data_dir);
+	snprintf(path, sizeof path, "%s/transfer.manifest", dir);
+	bool ok = false;
+	size_t n = 0;
+	uint8_t *manifest = NULL;
+	BackupInfo recorded;
+	if (!add_progress(&p, dir)) goto done;
+	manifest = backup_read_file(path, &n);
+	if (!manifest) {
+		struct stat st;
+		if (stat(path, &st) == 0 || errno != ENOENT) goto done;
+	} else if (!backup_manifest_read(manifest, n, &recorded)) { info->status = BACKUP_DAMAGED; goto done; }
+	if (!p.count) {
+		info->format = 1;
+		info->status = manifest ? BACKUP_DAMAGED : BACKUP_OK;
+		ok = !manifest;
+		goto done;
+	}
+	if (!finish(&p, p.latest) || !backup_info(p.buf, p.n + 4, info)) goto done;
+	/* A valid older manifest can lag behind later local saves. Only reuse
+	 * its source metadata when it describes these exact progress bytes. */
+	if (manifest && recorded.hash == info->hash) {
+		add_bytes(&p, BACKUP_MANIFEST, manifest, n);
+		if (!finish(&p, recorded.stamp) || !backup_info(p.buf, p.n + 4, info)) goto done;
+	}
+	ok = true;
+done:
+	if (!ok && info->status == BACKUP_OK) info->status = BACKUP_IO;
+	free(manifest);
+	free(p.buf);
+	return ok;
 }
 
 bool backup_local_info(const char *data_dir, BackupInfo *info) {

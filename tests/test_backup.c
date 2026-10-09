@@ -366,6 +366,11 @@ static void test_undo_empty(void) {
 	mkdir(dir, 0755);
 	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK && backup_can_undo(dir),
 		"backup: a first import into a fresh device can be undone");
+	BackupInfo empty;
+	CHECK(backup_undo_info(dir, &empty) && !empty.has_profile && !empty.runs && !empty.has_run &&
+		backup_check(&empty, false) == BACKUP_OK, "backup: the empty prior folder previews as valid zero progress");
+	snprintf(path, sizeof path, "%s/savedata.old/transfer.manifest", dir);
+	CHECK(access(path, F_OK) != 0, "backup: an empty Undo preview never creates a manifest");
 	Profile p = { .runs = 4, .music_volume = 3, .sfx_volume = 4 };
 	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
 	blob_file(path, PROFILE_MAGIC, &p, sizeof p);
@@ -384,6 +389,78 @@ static bool read_matches(const char *path, const uint8_t *expected, size_t n) {
 	bool same = b && expected && got == n && !memcmp(b, expected, n);
 	free(b);
 	return same;
+}
+
+static void preview_read_failure(const char *dir, const char *path) {
+	char kept[220];
+	snprintf(kept, sizeof kept, "%s.kept", path);
+	CHECK(rename(path, kept) == 0 && mkdir(path, 0755) == 0, "backup: present unreadable preview path is set up");
+	BackupInfo info;
+	CHECK(!backup_undo_info(dir, &info) && info.status == BACKUP_IO,
+		"backup: present unreadable progress or metadata refuses Undo preview");
+	CHECK(rmdir(path) == 0 && rename(kept, path) == 0, "backup: unreadable preview fixture resets without changing bytes");
+}
+
+static void test_undo_info(void) {
+	char dir[80], path[180], old_profile[180], old_manifest[180];
+	snprintf(dir, sizeof dir, "build/host/test-undo-preview-%d", (int)getpid());
+	remove_tree(dir);
+	mkdir(dir, 0755);
+	BackupInfo info, prior = { 0 };
+	CHECK(!backup_undo_info(dir, &info) && info.status == BACKUP_IO,
+		"backup: a missing prior folder cannot preview or create progress");
+	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "backup: Undo preview fixture restores");
+	Profile profile_before = { .runs = 11, .best_depth = 7, .music_volume = 4, .sfx_volume = 5 };
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
+	blob_file(path, PROFILE_MAGIC, &profile_before, sizeof profile_before);
+	Run run_before = { .active = true, .seed = 7, .depth = 4 };
+	snprintf(path, sizeof path, "%s/savedata/run.sav", dir);
+	blob_file(path, RUN_MAGIC, &run_before, sizeof run_before);
+	snprintf(path, sizeof path, "%s/savedata/run.state", dir);
+	backup_write_file(path, (const uint8_t *)"synthetic checkpoint", 20);
+	int area = NET_AREAS;
+	snprintf(path, sizeof path, "%s/savedata/run.area", dir);
+	blob_file(path, 0x43415231u, &area, sizeof area);
+	size_t n = 0;
+	uint8_t *packed = backup_pack(dir, 1700000000u, &n);
+	CHECK(packed && backup_info(packed, n, &prior), "backup: prior profile and BN5 checkpoint are captured");
+	free(packed);
+	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "backup: another import retains that prior folder");
+	snprintf(old_profile, sizeof old_profile, "%s/savedata.old/profile.sav", dir);
+	snprintf(old_manifest, sizeof old_manifest, "%s/savedata.old/transfer.manifest", dir);
+	size_t profile_n = 0, manifest_n = 0;
+	uint8_t *profile_bytes = backup_read_file(old_profile, &profile_n), *manifest_bytes = backup_read_file(old_manifest, &manifest_n);
+	CHECK(backup_undo_info(dir, &info) && info.runs == 11 && info.best == 7 && info.run_depth == 4 && info.run_act == 2 &&
+		info.run_area == NET_AREAS && info.stamp == prior.stamp && !strcmp(info.save_id, prior.save_id) &&
+		backup_check(&info, false) == BACKUP_NEEDS_BN5, "backup: Undo preview describes the exact prior progress, metadata and ROM requirement");
+	CHECK(read_matches(old_profile, profile_bytes, profile_n) && read_matches(old_manifest, manifest_bytes, manifest_n),
+		"backup: Undo preview never normalizes local volumes or rewrites the prior manifest");
+	preview_read_failure(dir, old_profile);
+	preview_read_failure(dir, old_manifest);
+	CHECK(read_matches(old_profile, profile_bytes, profile_n) && read_matches(old_manifest, manifest_bytes, manifest_n),
+		"backup: refused Undo previews leave both prior progress and metadata unchanged");
+	profile_before.runs = 12;
+	blob_file(old_profile, PROFILE_MAGIC, &profile_before, sizeof profile_before);
+	CHECK(backup_undo_info(dir, &info) && info.runs == 12 && !info.version[0] &&
+		read_matches(old_manifest, manifest_bytes, manifest_n), "backup: later valid progress gets an accurate preview without refreshing stale source metadata");
+	CHECK(backup_write_file(old_profile, profile_bytes, profile_n), "backup: prior profile fixture resets");
+	if (manifest_bytes) {
+		manifest_bytes[7] = '3';
+		CHECK(backup_write_file(old_manifest, manifest_bytes, manifest_n) && backup_undo_info(dir, &info) &&
+			backup_check(&info, true) == BACKUP_NEWER_FORMAT, "backup: future prior format remains readable for preflight refusal");
+		manifest_bytes[7] = '2';
+		CHECK(backup_write_file(old_manifest, (const uint8_t *)"broken", 6) && !backup_undo_info(dir, &info) && info.status == BACKUP_DAMAGED,
+			"backup: damaged present metadata refuses Undo preview");
+		backup_write_file(old_manifest, manifest_bytes, manifest_n);
+	}
+	if (profile_bytes) {
+		profile_bytes[12] ^= 1;
+		CHECK(backup_write_file(old_profile, profile_bytes, profile_n) && !backup_undo_info(dir, &info) && info.status == BACKUP_DAMAGED,
+			"backup: damaged present progress refuses Undo preview");
+	}
+	free(profile_bytes);
+	free(manifest_bytes);
+	remove_tree(dir);
 }
 
 static void test_profile_read_failure(void) {
@@ -429,6 +506,7 @@ int test_backup(void) {
 	test_run_preflight();
 	test_undo_recovery();
 	test_undo_empty();
+	test_undo_info();
 	test_profile_read_failure();
 	return failures;
 }

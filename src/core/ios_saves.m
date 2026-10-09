@@ -66,6 +66,19 @@ bool ios_saves_folder_name(char *out, size_t n) {
 	return true;
 }
 
+bool ios_saves_folder_scope(char *out, size_t n) {
+	@autoreleasepool {
+		NSUserDefaults *prefs = NSUserDefaults.standardUserDefaults;
+		NSData *mark = [prefs dataForKey:folder_key] ?: [prefs dataForKey:@"romFolder"];
+		if (!mark || !n) return false;
+		BOOL stale = NO;
+		NSURL *folder = [NSURL URLByResolvingBookmarkData:mark options:0 relativeToURL:nil bookmarkDataIsStale:&stale error:nil];
+		if (!folder) return false;
+		int length = snprintf(out, n, "%s", folder.absoluteString.UTF8String);
+		return length > 0 && (size_t)length < n;
+	}
+}
+
 @interface CWSavesPicker : NSObject <UIDocumentPickerDelegate>
 @property (nonatomic) int kind;
 @property (nonatomic, copy) NSString *dir;

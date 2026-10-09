@@ -6,9 +6,13 @@
   exports one `.cwsave` with your progress and current checkpoint, and
   imports one through your system's file chooser. Before replacing
   anything, the screen compares this device and the file: runs, best
-  layer, the current run's layer, act and area, last played, device and
-  game version. Keep this device is selected first; Undo last import
-  brings back what was replaced. Controls, touch layout, screen settings,
+  layer, and the current run's layer, act and area. Details pages show
+  last played and keep full device names, game versions and paths readable.
+  Keep this device is selected first; Undo last import previews what was
+  replaced before Restore brings it back. The first screen leads with
+  the run and the folder copy's status; Options holds automatic copies,
+  the transfer folder and Retry copy. Successful imports can Continue
+  their checkpoint directly. Controls, touch layout, screen settings,
   volumes and the statistics answer stay local. Newer or damaged files,
   incompatible checkpoints and BN5 runs without BN5's ROM are refused
   before saves change. The browser's Save backup and Load backup now open
