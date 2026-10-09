@@ -205,10 +205,11 @@ const Scene scene_saves = { "saves", enter, update, saves_draw, leave };
 void saves_tick(void) {
 	const Scene *scene = scene_current();
 	if (scene != &scene_title && scene != &scene_intro && scene != &scene_saves) return;
+	if (SV.busy || pick_busy() || pick_saves_busy()) return;
 	char path[1100];
 	if (platform_dropped(path, sizeof path)) {
 		size_t n = strlen(path);
-		if (n > 7 && !strcmp(path + n - 7, ".cwsave")) saves_import(path);
+		if (n > 7 && !SDL_strcasecmp(path + n - 7, ".cwsave")) saves_import(path);
 	}
 	if (SV.comparing || SV.busy) return;
 	if (mirror_scan(path, sizeof path)) saves_import(path);

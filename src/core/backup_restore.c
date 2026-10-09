@@ -3,6 +3,7 @@
 #include "backup_internal.h"
 
 #include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +16,11 @@
 static bool is_dir(const char *path) {
 	struct stat st;
 	return !stat(path, &st) && S_ISDIR(st.st_mode);
+}
+
+static bool missing_profile(const char *path) {
+	struct stat st;
+	return stat(path, &st) != 0 && errno == ENOENT;
 }
 
 void backup_remove_dir(const char *dir) {
@@ -111,9 +117,10 @@ BackupStatus backup_restore(const char *data_dir, const uint8_t *bytes, size_t n
 	char stage[1100], profile_path[1100];
 	snprintf(stage, sizeof stage, "%s/savedata.import", data_dir);
 	snprintf(profile_path, sizeof profile_path, "%s/savedata/profile.sav", data_dir);
-	if (cw_mkdir(stage) != 0) return BACKUP_IO;
 	Unpack u = { .stage = stage, .ok = true };
 	u.profile = backup_read_file(profile_path, &u.profile_n);
+	if (!u.profile && !missing_profile(profile_path)) return BACKUP_IO;
+	if (cw_mkdir(stage) != 0) { free(u.profile); return BACKUP_IO; }
 	backup_walk(bytes, n, stage_file, &u);
 	free(u.profile);
 	bool ok = u.ok && install(data_dir, stage);
@@ -135,6 +142,11 @@ static bool keep_volumes(const char *dir, const char *old) {
 	snprintf(to, sizeof to, "%s/profile.sav", old);
 	size_t a_n = 0, b_n = 0;
 	uint8_t *a = backup_read_file(from, &a_n), *b = backup_read_file(to, &b_n);
+	if ((!a && !missing_profile(from)) || (!b && !missing_profile(to))) {
+		free(a);
+		free(b);
+		return false;
+	}
 	bool ok = true;
 	if (!b) {
 		b_n = 12 + sizeof(Profile);
@@ -167,7 +179,7 @@ bool backup_undo(const char *data_dir) {
 	snprintf(dir, sizeof dir, "%s/savedata", data_dir);
 	snprintf(old, sizeof old, "%s/savedata.old", data_dir);
 	snprintf(swap, sizeof swap, "%s/savedata.swap", data_dir);
-	if (!is_dir(old) || is_dir(swap)) return false;
+	if (!is_dir(dir) || !is_dir(old) || is_dir(swap)) return false;
 	if (!keep_volumes(dir, old)) return false;
 	if (!cw_rename(dir, swap)) return false;
 	if (!cw_rename(old, dir)) { cw_rename(swap, dir); return false; }

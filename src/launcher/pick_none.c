@@ -89,12 +89,13 @@ bool pick_saves_export(const char *from) {
 	saves_result.status = pick_saves_put(from) ? 1 : -2;
 	snprintf(saves_result.text, sizeof saves_result.text, "%s/%s", g_data_dir, BACKUP_NAME);
 #endif
+	if (saves_result.status < 0) snprintf(saves_result.text, sizeof saves_result.text, "The saves file could not be exported. Check that your destination is writable and has enough space.");
 	saves_done = true;
 	return true;
 }
 
 bool pick_saves_choose_folder(void) { return false; }
-bool pick_saves_busy(void) { return false; }
+bool pick_saves_busy(void) { return saves_done; }
 
 bool pick_saves_done(PickResult *r) {
 	if (!saves_done) return false;

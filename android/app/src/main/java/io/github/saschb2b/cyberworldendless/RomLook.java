@@ -354,14 +354,16 @@ final class RomLook {
 
     // ---- the saves' copy in the folder (src/launcher/mirror.h) ----
 
-    /** The child document of the folder named `name`, null for none. */
-    private Uri child(Uri tree, String name) {
+    /** Null means the folder was listed successfully and has no such
+     *  child. A provider failure must never authorize replacing saves. */
+    private Uri child(Uri tree, String name) throws FileNotFoundException {
         String doc = DocumentsContract.getTreeDocumentId(tree);
         try (Cursor c = ctx.getContentResolver().query(DocumentsContract.buildChildDocumentsUriUsingTree(tree, doc),
                 new String[] { Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME }, null, null, null)) {
-            while (c != null && c.moveToNext())
+            if (c == null) throw new FileNotFoundException("the folder's files could not be listed");
+            while (c.moveToNext())
                 if (name.equals(c.getString(1))) return DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0));
-        } catch (Exception e) { /* (none to be read) */ }
+        }
         return null;
     }
 
@@ -373,12 +375,16 @@ final class RomLook {
     }
 
     boolean fetchSaves(Uri tree, File to) {
-        Uri saves = child(tree, SAVES);
-        if (saves == null) saves = child(tree, SAVES + ".new");
-        if (saves == null) return false;
-        if (copySaves(saves, to)) return true;
-        /* The present file remains untouched and gets the common refusal
-         * screen; auto-export cannot erase an unreadable synced-in file. */
+        try {
+            Uri saves = child(tree, SAVES);
+            if (saves == null) saves = child(tree, SAVES + ".new");
+            if (saves == null) return false;
+            if (copySaves(saves, to)) return true;
+        } catch (Exception e) {
+            Log.w(TAG, "saves: the transfer folder could not be inspected: " + e.getMessage());
+        }
+        /* An unreadable file or listing gets the common refusal screen.
+         * The automatic copy stays held until the player's decision. */
         try (OutputStream out = new FileOutputStream(to)) {
             out.write("The incoming saves file could not be read.".getBytes(StandardCharsets.US_ASCII));
             return true;

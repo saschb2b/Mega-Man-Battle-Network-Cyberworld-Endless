@@ -84,6 +84,7 @@ static void remember_export(uint32_t hash) {
 }
 
 static void scan(void) {
+	if (pick_busy() || pick_saves_busy()) return;
 	scanned = true;
 	scan_at = SDL_GetTicks();
 	if (held || pending) return;
@@ -102,7 +103,7 @@ bool mirror_scan(char *path, size_t n) {
 
 static void put(void) {
 	char folder[1024];
-	if (!dirty || held || !pick_saves_auto_enabled() || !pick_saves_place(folder, sizeof folder)) return;
+	if (!dirty || held || pick_busy() || pick_saves_busy() || !pick_saves_auto_enabled() || !pick_saves_place(folder, sizeof folder)) return;
 	/* A provider may have received another device's file since the title.
 	 * Read it before writing ours, even when this frame is backgrounding. */
 	scan();

@@ -169,6 +169,28 @@ static int restart_check(const char *dir) {
 	return 0;
 }
 
+static void export_results(const char *path, const uint8_t *bytes, size_t n) {
+	char from[600];
+	snprintf(from, sizeof from, "%s/export.cwsave", g_data_dir);
+	assert(backup_write_file(from, bytes, n));
+	assert(pick_saves_export(from) && pick_saves_busy());
+	PickResult result;
+	assert(pick_saves_done(&result) && result.status == 1 && !result.path);
+	assert(!pick_saves_busy() && !pick_saves_done(&result));
+	same_bytes(path, bytes, n);
+	/* A directory at the destination forces the atomic write to fail.
+	 * Completion must report failure, never leave a success or bare path. */
+	assert(remove(path) == 0 && cw_mkdir(path) == 0);
+	assert(pick_saves_export(from) && pick_saves_busy());
+	assert(pick_saves_done(&result) && result.status == -2 && !result.path);
+	assert(strstr(result.text, "could not be exported") && !pick_saves_busy());
+	assert(!pick_saves_done(&result));
+	struct stat st;
+	assert(stat(path, &st) == 0 && S_ISDIR(st.st_mode));
+	same_bytes(from, bytes, n);
+	assert(rmdir(path) == 0);
+}
+
 int main(int argc, char **argv) {
 	if (argc == 3 && !strcmp(argv[1], "--restart-check")) return restart_check(argv[2]);
 	char base[] = "build/host/test-transfer-XXXXXX", remote[600], path[600], staged[600];
@@ -251,6 +273,7 @@ int main(int argc, char **argv) {
 	same_bytes(picked.text, incoming, incoming_n);
 	BackupInfo here;
 	assert(backup_local_info(g_data_dir, &here) && here.runs == 1);
+	export_results(path, incoming, incoming_n);
 	free(incoming);
 	parent_fork();
 	puts("transfer: auto-export, divergent-parent and damaged-file protection, known-place import passed");

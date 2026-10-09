@@ -129,12 +129,13 @@ void note_no_picker(const char *where, char *out, size_t n) {
 
 void saves_line_desktop(const char *where, char *out, size_t n) { snprintf(out, n, "Saves: %s", where); }
 
-void saves_line_phone(const char *folder, bool refused, char *out, size_t n) {
+void saves_line_phone(const char *folder, bool automatic, bool refused, char *out, size_t n) {
 	char f[20];
 	/* (a long name cut, so that the line stays one) */
 	if (folder && strlen(folder) > 14) snprintf(f, sizeof f, "%.12s...", folder);
 	else snprintf(f, sizeof f, "%s", folder ? folder : "");
-	if (!f[0]) snprintf(out, n, "Saves: on this device only\nChoose a folder to keep a copy");
+	if (!automatic) snprintf(out, n, "Saves: on this device\nAuto-export is off");
+	else if (!f[0]) snprintf(out, n, "Saves: on this device only\nChoose a Saves folder to keep a copy");
 	else if (refused) snprintf(out, n, "Saves: on this device only\nNo copy in %s: choose it again", f);
 	else snprintf(out, n, "Saves: on this device\nA copy in %s, for a reinstall", f);
 }

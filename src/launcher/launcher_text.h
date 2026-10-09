@@ -55,10 +55,10 @@ void note_no_picker(const char *where, char *out, size_t n);
 
 /* The saves' line: where they are kept. A phone's is two lines, the first
  * one standing alone where there is room for no more: its folder's name
- * (NULL or "": none chosen), `refused` where the last copy could not be
- * written there */
+ * (NULL or "": none chosen), whether automatic copies are enabled, and
+ * `refused` where the last copy could not be written there */
 void saves_line_desktop(const char *where, char *out, size_t n);
-void saves_line_phone(const char *folder, bool refused, char *out, size_t n);
+void saves_line_phone(const char *folder, bool automatic, bool refused, char *out, size_t n);
 
 /* "Press Esc again to quit", as main.c says it where there is a ROM */
 const char *quit_words(bool pad);

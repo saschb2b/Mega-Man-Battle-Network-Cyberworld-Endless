@@ -214,9 +214,9 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c
-build/host/test_core: $(TEST_SRCS) src/*/*.h | $(GEN)/version.h
+build/host/test_core: $(TEST_SRCS) tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -Wl,--wrap=backup_read_file -lm
 
 # the hooks on mGBA itself (tests/test_emu.c: a ROM of the test's own bytes),
 # and two cores side by side, BN6's through emu.c (its sound's ring)
@@ -255,6 +255,6 @@ build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
-	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -Wl,--wrap=backup_read_file -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm

@@ -35,13 +35,17 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   (`src/analytics/analytics_net.c`). They are the one reason the app asks
   for the `INTERNET` permission.
 - The saves and settings are in `files/data`, which uninstalling deletes.
-  So the game keeps a copy in the folder chosen (`src/launcher/mirror.c`):
+  With **Auto-export** on, the game keeps a copy in the transfer folder
+  shown in **SAVES** (`src/launcher/mirror.c`), using the ROM folder by
+  default; **Choose folder** can select another destination:
   `cyberworld-endless.cwsave` (`src/core/backup.h`), packed a few seconds
   after the game last wrote a file and as the app goes to the background,
   and written into the folder by `savesPut` (written whole as a new file,
   then put in the old one's place where the folder's provider renames).
-  A folder chosen that holds one has it copied to `files/data/found.cwsave`,
-  and the ROMs screen offers it back. Android's Auto Backup takes the saves
+  After a reinstall, select the ROMs again and use **SAVES → Import** to
+  choose that file. A ROM folder chosen that holds one also has it copied
+  to `files/data/found.cwsave`, and the ROMs screen opens SAVES to compare
+  it with this device. Android's Auto Backup takes the saves
   and settings, never the ROMs (`res/xml/backup_rules.xml`,
   `data_extraction_rules.xml`); with no rules it took everything, ROMs
   too, and a reinstall could bring BN6 back with older saves and never
@@ -121,8 +125,8 @@ time.
 ## Signing
 
 Android installs an update over an app only when both carry the same
-signature, and uninstalling deletes the app's saves (all but their copy in
-the ROM folder), so every release has to be signed with one key. `build.py android` signs with it when these are set:
+signature, and uninstalling deletes the app's saves (external exports
+survive), so every release has to be signed with one key. `build.py android` signs with it when these are set:
 
 | Variable | |
 | --- | --- |
@@ -148,8 +152,8 @@ base64 -w0 release.jks   # the value of ANDROID_KEYSTORE_BASE64
 ```
 
 Keep the keystore and its password safe outside the repository: a lost key
-means players reinstall to update, their saves coming back only from the
-copy in their ROM folder.
+means players reinstall to update and need an exported copy to bring
+their saves back.
 
 ## Installing
 
@@ -169,7 +173,7 @@ saves: play until the game saves, check that
 `/sdcard/Download/ROMs/cyberworld-endless.cwsave` is there, `adb uninstall
 io.github.saschb2b.cyberworldendless`, install the APK again and choose the
 folder: the ROMs screen opens **SAVES**, which compares the copy with
-this device. **Import file** puts back the progress and checkpoint in
+this device. **Import the file** puts back the progress and checkpoint in
 `files/data/savedata`, preserving device settings and volumes (the emulator,
 with `adb root`, can hash the portable progress). **Undo last import**
 brings back what was replaced. The same screen is on the title for manual

@@ -21,11 +21,14 @@
 char g_data_dir[512];
 static char downloads[600];
 static Uint32 ticks = 5000;
+static bool rom_picker, saves_picker;
 
 Uint32 SDL_GetTicks(void) { return ticks; }
 void platform_persist(void) { mirror_note(); }
 bool desktop_big_screen(void) { return false; }
 bool desktop_can_choose(void) { return true; }
+bool pick_busy(void) { return rom_picker; }
+bool pick_saves_busy(void) { return saves_picker; }
 bool desktop_saves_default(char *path, size_t n) {
 	snprintf(path, n, "%s", downloads);
 	return true;
@@ -65,6 +68,32 @@ static void same_bytes(const char *path, const uint8_t *expected, size_t length)
 	uint8_t *b = backup_read_file(path, &n);
 	assert(b && n == length && !memcmp(b, expected, n));
 	free(b);
+}
+
+static void picker_protection(const char *folder, const uint8_t *incoming, size_t n) {
+	char path[1100], staged[600];
+	snprintf(path, sizeof path, "%s/%s", folder, BACKUP_NAME);
+	assert(backup_write_file(path, incoming, n));
+	pick_saves_auto(true);
+	for (int kind = 0; kind < 2; ++kind) {
+		bool *busy = kind ? &saves_picker : &rom_picker;
+		*busy = true;
+		/* A picker worker retains its new destination before handing its
+		 * result to the frame loop. Neither discovery nor writes may race it. */
+		assert(saves_folder_keep(folder));
+		mirror_new_folder();
+		ticks += 4000;
+		mirror_tick();
+		assert(!mirror_scan(staged, sizeof staged));
+		mirror_flush();
+		same_bytes(path, incoming, n);
+		*busy = false;
+		assert(mirror_scan(staged, sizeof staged));
+		same_bytes(staged, incoming, n);
+		mirror_flush();
+		same_bytes(path, incoming, n);
+		mirror_hold(false);
+	}
 }
 
 int main(void) {
@@ -120,9 +149,11 @@ int main(void) {
 	same_bytes(data_file, second, second_n);
 	BackupInfo local;
 	assert(backup_local_info(g_data_dir, &local) && local.runs == 3);
+	mirror_hold(false);
+	picker_protection(remote, second, second_n);
 	free(own_bytes);
 	free(first);
 	free(second);
-	puts("discovery: recognized and dismissed files do not mask later places; manual import retained");
+	puts("discovery: known places and manual import retained; both picker workers protect incoming files");
 	return 0;
 }

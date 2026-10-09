@@ -2998,10 +2998,12 @@ static void test_launcher(void) {
 	CHECK(roms_launcher_wanted(true, true, true, both), "launcher: shown when asked for");
 	char said[400];
 	/* a phone's saves' line: two lines, a long folder's name cut */
-	saves_line_phone("Mega Man Battle Network ROMs", false, said, sizeof said);
+	saves_line_phone("Mega Man Battle Network ROMs", true, false, said, sizeof said);
 	CHECK(!strcmp(said, "Saves: on this device\nA copy in Mega Man Bat..., for a reinstall"), "launcher: a long folder cut in the saves' line (%s)", said);
-	saves_line_phone("ROMs", true, said, sizeof said);
+	saves_line_phone("ROMs", true, true, said, sizeof said);
 	CHECK(!strcmp(said, "Saves: on this device only\nNo copy in ROMs: choose it again"), "launcher: a copy refused said (%s)", said);
+	saves_line_phone("Saves", false, false, said, sizeof said);
+	CHECK(!strcmp(said, "Saves: on this device\nAuto-export is off"), "launcher: no automatic copy promised when disabled (%s)", said);
 }
 
 static void test_rom_pages(void) {

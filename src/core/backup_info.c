@@ -105,7 +105,8 @@ bool backup_info(const uint8_t *bytes, size_t n, BackupInfo *info) {
 	memset(info, 0, sizeof *info);
 	info->status = BACKUP_DAMAGED;
 	if (!backup_walk(bytes, n, NULL, NULL) || !backup_walk(bytes, n, read_file, &r) || !r.ok || !r.info.has_profile) return false;
-	if (r.info.has_run && !r.info.has_state) return false;
+	/* CWE1 predates the emulator: CONTINUE rebuilds its layer fresh. */
+	if (r.info.has_run && !r.info.has_state && r.info.run_magic != 0x43574531u) return false;
 	if (r.info.has_run && r.have_area) {
 		r.info.run_area = r.area;
 		r.info.needs_bn5 = r.area >= NET_AREAS;

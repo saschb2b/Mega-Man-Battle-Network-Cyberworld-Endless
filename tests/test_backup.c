@@ -20,7 +20,13 @@
 #include "version.h"
 
 static int failures;
+static const char *unreadable_profile;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
+
+uint8_t *__wrap_backup_read_file(const char *path, size_t *n) {
+	if (unreadable_profile && !strcmp(path, unreadable_profile)) { *n = 0; return NULL; }
+	return __real_backup_read_file(path, n);
+}
 
 /* a save blob as save.c writes one: magic, size, FNV-1a checksum, bytes */
 static void blob_file(const char *path, uint32_t magic, const void *data, uint32_t n) {
@@ -155,6 +161,54 @@ static uint8_t *member(uint8_t *b, size_t n, const char *name) {
 }
 
 static void rechecksum(uint8_t *b, size_t n) { backup_put32(b + n - 4, backup_fnv(b, n - 4, 2166136261u)); }
+
+/* Add a known run blob to the fixed v1 carrier, without the exporter. */
+static uint8_t *run_carrier(uint32_t magic, const uint8_t *run_bytes, uint32_t size, size_t *n) {
+	const char *name = "savedata/run.sav";
+	size_t len = strlen(name), at = sizeof backup_fixture - 4;
+	*n = sizeof backup_fixture + 6 + len + 12 + size;
+	uint8_t *b = malloc(*n);
+	if (!b) return NULL;
+	memcpy(b, backup_fixture, at);
+	backup_put32(b + 16, 2);
+	b[at] = (uint8_t)len;
+	b[at + 1] = 0;
+	memcpy(b + at + 2, name, len);
+	backup_put32(b + at + 2 + len, size + 12);
+	uint8_t *blob = b + at + 6 + len;
+	backup_put32(blob, magic);
+	backup_put32(blob + 4, size);
+	backup_put32(blob + 8, backup_fnv(run_bytes, size, 2166136261u));
+	memcpy(blob + 12, run_bytes, size);
+	rechecksum(b, *n);
+	return b;
+}
+
+static void test_pre_emulator_run(void) {
+	char dir[80];
+	snprintf(dir, sizeof dir, "build/host/test-pre-emu-%d", (int)getpid());
+	remove_tree(dir);
+	mkdir(dir, 0755);
+	uint8_t legacy[248] = { 1 };  /* CWE1: seed at 4, depth/biome at 172/176 */
+	backup_put32(legacy + 4, 7);
+	backup_put32(legacy + 172, 4);
+	size_t n = 0;
+	uint8_t *b = run_carrier(0x43574531u, legacy, sizeof legacy, &n);
+	BackupInfo info, before = { 0 }, after;
+	CHECK(b && backup_info(b, n, &info) && info.format == 1 && info.has_run && !info.has_state && info.run_depth == 4 &&
+		backup_check(&info, true) == BACKUP_OK, "backup: pre-emulator CWE1 needs no state to resume its layer fresh");
+	CHECK(b && backup_restore(dir, b, n, true) == BACKUP_OK && backup_local_info(dir, &before),
+		"backup: a synthetic pre-emulator v1 carrier restores and exports again");
+	free(b);
+	Run modern = { .active = true, .seed = 7, .depth = 4 };
+	b = run_carrier(RUN_MAGIC, (const uint8_t *)&modern, sizeof modern, &n);
+	CHECK(b && !backup_info(b, n, &info) && backup_restore(dir, b, n, true) == BACKUP_DAMAGED,
+		"backup: a modern active run still requires its emulator checkpoint");
+	CHECK(backup_local_info(dir, &after) && after.hash == before.hash,
+		"backup: refusing a modern run without state keeps the previous imported progress");
+	free(b);
+	remove_tree(dir);
+}
 
 static void test_golden(void) {
 	BackupInfo info;
@@ -324,13 +378,57 @@ static void test_undo_empty(void) {
 	remove_tree(dir);
 }
 
+static bool read_matches(const char *path, const uint8_t *expected, size_t n) {
+	size_t got = 0;
+	uint8_t *b = backup_read_file(path, &got);
+	bool same = b && expected && got == n && !memcmp(b, expected, n);
+	free(b);
+	return same;
+}
+
+static void test_profile_read_failure(void) {
+	char dir[80], current[160], old[160], swap[160], stage[160];
+	snprintf(dir, sizeof dir, "build/host/test-undo-io-%d", (int)getpid());
+	remove_tree(dir);
+	mkdir(dir, 0755);
+	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "backup: undo I/O fixture restores");
+	snprintf(current, sizeof current, "%s/savedata/profile.sav", dir);
+	snprintf(old, sizeof old, "%s/savedata.old/profile.sav", dir);
+	snprintf(swap, sizeof swap, "%s/savedata.swap", dir);
+	snprintf(stage, sizeof stage, "%s/savedata.import", dir);
+	Profile now = { .runs = 1, .music_volume = 2, .sfx_volume = 3 };
+	Profile prior = { .runs = 42, .music_volume = 7, .sfx_volume = 8 };
+	blob_file(current, PROFILE_MAGIC, &now, sizeof now);
+	blob_file(old, PROFILE_MAGIC, &prior, sizeof prior);
+	size_t current_n = 0, old_n = 0;
+	uint8_t *current_bytes = backup_read_file(current, &current_n), *old_bytes = backup_read_file(old, &old_n);
+	unreadable_profile = old;
+	CHECK(!backup_undo(dir), "backup: a present but unreadable Undo profile is never synthesized as empty progress");
+	unreadable_profile = NULL;
+	CHECK(read_matches(current, current_bytes, current_n) && read_matches(old, old_bytes, old_n) && access(swap, F_OK) != 0,
+		"backup: an Undo-profile read failure keeps both complete folders and volumes byte-for-byte");
+	unreadable_profile = current;
+	CHECK(!backup_undo(dir), "backup: an unreadable current profile refuses Undo rather than resetting its local volumes");
+	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_IO,
+		"backup: an unreadable current profile refuses Import rather than resetting its local volumes");
+	unreadable_profile = NULL;
+	CHECK(read_matches(current, current_bytes, current_n) && read_matches(old, old_bytes, old_n) &&
+		access(swap, F_OK) != 0 && access(stage, F_OK) != 0,
+		"backup: a current-profile read failure keeps both folders and volumes untouched without staging an Import");
+	free(current_bytes);
+	free(old_bytes);
+	remove_tree(dir);
+}
+
 int test_backup(void) {
 	failures = 0;
 	test_roundtrip();
 	test_golden();
+	test_pre_emulator_run();
 	test_manifest();
 	test_run_preflight();
 	test_undo_recovery();
 	test_undo_empty();
+	test_profile_read_failure();
 	return failures;
 }

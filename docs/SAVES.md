@@ -83,6 +83,9 @@ unsupported run structure. A BN5 checkpoint also requires the receiving
 build to have BN5's ROM available. The source build is shown with the
 refusal so the player knows when to update. No refusal changes the local
 progress or checkpoint.
+The pre-emulator `CWE1` run format remains readable without a `run.state`;
+CONTINUE rebuilds its layer fresh, as the existing legacy loader does.
+Modern active runs still require their emulator checkpoint.
 
 `backup_restore` stages all accepted files in `savedata.import/` and
 checks every write before renaming anything. It then keeps the previous
@@ -94,6 +97,9 @@ Undo swaps the complete current and previous folders. The next successful
 import replaces the previous undo copy. The player can therefore bring
 back the progress and checkpoint that the last import replaced, including
 a different local run.
+An unreadable existing profile refuses import or Undo before the folders
+change; an empty profile is synthesized only when the previous profile
+is confirmed absent.
 
 ## Platform boundary
 
@@ -109,6 +115,10 @@ fingerprint last exported successfully. Revision numbers alone do not
 identify that output: two devices can independently make different
 revision 2s from revision 1. A divergent copy, including one at a local
 parent revision, stays held for the comparison screen.
+Discovery and automatic writes wait until native ROM and saves pickers
+finish, including their background work retaining a new destination.
+Android folder-listing failures stage a refusal rather than claiming an
+incoming file is absent, and failed listings cannot authorize writes.
 
 In the browser, `Module.savesPick()` opens the hidden file input. The
 page stages its bytes as `/tmp/cw-import.cwsave` and calls
@@ -123,6 +133,8 @@ settings continue to live in IndexedDB.
 | Check | Verified locally |
 | --- | --- |
 | Carrier and restore tests | ROM-free tests cover the carrier, legacy files, metadata, local settings and the transactional installer. |
+| Failure and legacy regressions | Injected unreadable profiles preserve both current and Undo folders; the pre-emulator run format imports without a state while modern runs without one are refused. Busy ROM/saves pickers protect incoming files, and failed exports report failure. |
+| Android provider errors | Production `RomLook` runs against JVM provider doubles for absent files, null/error listings, broken cursors, unreadable files and recovery; failed old/stale lookups perform no writes or deletes. This does not establish physical-provider behavior. |
 | Linux native import and Undo | A layer 2 checkpoint replaced a local layer 5 run; Undo brought layer 5 back. The local settings file stayed unchanged. |
 | Native to browser | An isolated layer 2, seed 7 checkpoint imported through the real Chrome player's file input. CONTINUE showed layer 2 and loaded that map, with its 430,144-byte emulator state present. Settings stayed byte identical and both volume values stayed at 9. |
 | Browser persistence and Undo | IndexedDB reload kept the imported layer and ROM. Undo restored the browser's complete pre-import profile, preserving the imported run in the previous folder. Picker cancellation returned to the title without changing the run. A dropped `.cwsave` reached the same core check and left the local run unchanged. |
@@ -135,8 +147,8 @@ settings continue to live in IndexedDB.
 
 These checks use local Linux builds, headless Chrome, an isolated Android
 emulator and test saves. They do not establish hardware behavior on a ROCKNIX handheld, a
-physical New 3DS or phone, or the Steam Deck's Gaming Mode. Apple builds
-and their pickers need an Apple SDK and device or Simulator verification;
-they have not been exercised in this Linux environment. No ROM or
+physical New 3DS or phone, or the Steam Deck's Gaming Mode. macOS and iOS
+builds, signing and iOS Simulator startup passed in CI. Apple picker
+behavior has not been exercised. No ROM or
 game-derived save, state or transfer file is published; committed test
 fixtures contain only synthetic bytes.

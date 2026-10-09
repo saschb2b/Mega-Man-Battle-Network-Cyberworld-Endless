@@ -9,6 +9,8 @@
  * the folder chosen may hold the saves a reinstall left there (mirror.h),
  * and the launcher offers them back. Its layout and picture are
  * launcher_draw.c's, its words launcher_text.c's. */
+#include "launcher_state.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +20,6 @@
 #include "game.h"
 #include "gfx.h"
 #include "launcher_roms.h"
-#include "launcher_state.h"
 #include "mirror.h"
 #include "pick.h"
 #include "platform.h"
@@ -69,7 +70,8 @@ static void shown_path(const char *path, char *out, size_t n) {
 static void saves_line(void) {
 	char path[700];
 	if (L.kinds & PICK_FOLDER) {
-		saves_line_phone(L.folder, mirror_last() < 0, L.saves, sizeof L.saves);
+		if (!pick_saves_place(path, sizeof path)) path[0] = 0;
+		saves_line_phone(path, pick_saves_auto_enabled(), mirror_last() < 0, L.saves, sizeof L.saves);
 		return;
 	}
 	snprintf(path, sizeof path, "%s/savedata", g_data_dir);
@@ -173,9 +175,10 @@ static bool picked(void) {
 /* a file dropped on the window: a ROM, or a .cwsave's saves */
 static bool dropped(void) {
 	char path[1024];
+	if (pick_busy() || pick_saves_busy()) return false;
 	if (!platform_dropped(path, sizeof path)) return false;
 	size_t n = strlen(path);
-	if (n > 7 && !strcmp(path + n - 7, ".cwsave")) {
+	if (n > 7 && !SDL_strcasecmp(path + n - 7, ".cwsave")) {
 		ask_about(path);
 		return true;
 	}

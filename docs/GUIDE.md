@@ -92,12 +92,17 @@ goes back to the title.
 
 The screen also says where your saves are kept. On a PC or a Mac that is
 the data folder, which uninstalling leaves alone. On a phone or tablet,
-where uninstalling the app deletes its files, the app keeps a copy of the
-saves in the ROM folder you chose, `cyberworld-endless.cwsave`, renewed a
-few seconds after each save. After a reinstall, choose that folder again:
-the screen finds the copy and opens **SAVES**, comparing it with this
-device before you choose **Keep this device** or **Import file**. ROMs chosen as files leave no folder for the copy: the
-screen says so.
+where uninstalling the app deletes its files, **Auto-export** keeps a
+`cyberworld-endless.cwsave` in the transfer folder shown in **SAVES**, a
+few seconds after each save. It is on by default, using the ROM folder
+you chose; **Choose folder** in SAVES can select a different destination.
+ROMs chosen as files leave no default folder for the copy, so choose a
+Saves folder to keep one.
+
+After a reinstall, select your ROMs again, then use **SAVES → Import** to
+choose the exported file. If the copy is in your ROM folder, choosing
+that folder also finds it and opens the comparison before you choose
+**Keep this device** or **Import the file**.
 
 ### On Windows
 
@@ -237,11 +242,13 @@ screen, such as the AYN Thor, the lower one is the PET beside the game, as
 on a 3DS ([android/README.md](../android/README.md#the-second-screen)).
 
 Uninstalling the app deletes its own files, the saves among them, but
-not the copy of the saves it keeps in your ROM folder
-(`cyberworld-endless.cwsave`, renewed a few seconds after each save):
-after a reinstall, choose the same folder and the ROMs screen offers the
-saves back. Android's own backup, where it is turned on, keeps the saves
-and settings too, never the ROMs.
+leaves files exported to an outside folder. **Auto-export** is on by
+default and keeps `cyberworld-endless.cwsave` in the folder shown in
+**SAVES**, using your ROM folder until you choose another. After a
+reinstall, select your ROMs again and use **SAVES → Import** to choose
+that file; a copy in the ROM folder is also found when you choose the
+folder again. Android's own backup, where it is turned on, keeps the
+saves and settings too, never the ROMs.
 
 ### On an iPhone or iPad
 
@@ -271,10 +278,13 @@ marketplaceID").
    downloaded first (in a big folder, download BN6's in Files yourself).
    Or tap **FILES INSTEAD** and pick the ROMs, or put them in Files, **On
    My iPhone › Cyberworld**, where the app keeps your saves too and looks
-   at every start. Deleting the app deletes that folder with it, but not
-   the copy of your saves the app keeps in the ROM folder you chose
-   (`cyberworld-endless.cwsave`): after a reinstall, choose that folder
-   again and the ROMs screen offers them back.
+   at every start. Deleting the app deletes that folder with it, but
+   leaves files exported to an outside folder. **Auto-export** is on by
+   default and keeps `cyberworld-endless.cwsave` in the folder shown in
+   **SAVES**, using your ROM folder until you choose another. After a
+   reinstall, select your ROMs again and use **SAVES → Import** to choose
+   that file; a copy in the ROM folder is also found when you choose the
+   folder again.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
 PlayStation). `cyberworld-endless.ipa` on the releases page is the app
@@ -703,11 +713,11 @@ ROM, choose **SAVES**, then **Import**. In the browser, **Save backup**
 and **Load backup** in the player's menu open this same screen. You can
 also drop one `.cwsave` on the player to import it through the same preview.
 
-Before anything is replaced, SAVES puts **This device** and **File** side
+Before anything is replaced, SAVES puts **This device** and **The file** side
 by side: runs played, deepest layer, the current run's layer, act and area,
 when it was played, the device that wrote it and its game version. The
 device name comes from the system. **Keep this device** is selected first;
-**Import file** replaces the local progress and checkpoint together. Runs
+**Import the file** replaces the local progress and checkpoint together. Runs
 played separately on two devices are never combined. **Undo last import**
 brings back the local saves that were replaced.
 
