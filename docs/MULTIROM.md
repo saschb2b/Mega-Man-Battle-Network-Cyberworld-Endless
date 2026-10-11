@@ -375,6 +375,89 @@ the layer's random battles are BN5's own, fought in BN5's engine
 - **Still to come**: the NaviCust's other programs in (those both games
   have, as BN5's battle reads them), BN5's chips registered in BN6.
 
+## One net: the design (issue #82)
+
+What a run meets once BN5's viruses, Navis, chips, Souls and DarkChips
+all run in BN6's own engine (Transplanted families, below). Reasoned with
+the game-design skill and decided on the owner's delegation (12 October
+2026: "finish it completely, then come back"); each call stands until the
+owner overturns it. It replaces #57's "territories, no wild mixing",
+which two engines forced.
+
+- **The experience:** one Battle Network. The older net's areas keep
+  their own viruses and Navis, everything the run carries (its folder,
+  its Cross, its Souls, its DarkChips) works in every battle, and where
+  the nets meet their viruses fight side by side.
+- **The dialectic** stays the meta layer's, what you bring against what
+  you find (docs/META.md): one engine lets everything brought work
+  everywhere (no chip sits out, no Cross waits at the older net's door),
+  and the nets' meeting widens what is found.
+- **The loop layers:** the moment (a battle of both nets' viruses, UNITE
+  beside CROSS), the session (a layer's battles, some with a visitor), the
+  run (Souls and DarkChips carried into every act). The meta loop is
+  unchanged: variety, not power.
+- **The patterns:** an honest telegraph (each area keeps its identity,
+  and a seam is announced), the hand-made units of a procedural run (a
+  formation stays its game's own record; a visitor takes one place in
+  it), a bonus with a drawback (a Soul costs a chip, darkness costs max
+  HP), meta as variety.
+
+The calls:
+
+1. **One engine for every battle.** The older net's areas fight in BN6's
+   engine: their battles are BN5's own records, their ids translated,
+   scaled to the act's band as now (docs/PROGRESSION.md, BN5's battles).
+   The guest core leaves runs: no engine switch, no older net's wait, no
+   chip sitting out, no code read as another. It stays as the reference
+   the differential compares with (`build.py xdiff`).
+2. **Territories keep their identity; the nets meet at their seams.**
+   - *Visitors:* from act 2 on, where BN5's ROM is read, one battle in four
+     takes one virus of the other net in place of one of its own: on its
+     panel, a family whose version keeps the battle in its band, standing
+     where the one it replaces stood (the front three columns or the back),
+     never a family that battle already holds. BN6's areas meet BN5's
+     viruses, BN5's areas BN6's. The run's first battles and the first
+     layer after a guardian stay their own net's (the easing rule).
+   - *The deep converges:* the Undernet's and the Graveyard's acts and
+     the Nest draw their formations from both nets' late areas alike.
+   - *The telegraph:* the act card says where the nets meet; MegaMan names
+     the first visitor a profile meets, once.
+   - *Not chosen:* free mixing everywhere (areas lose their identity and
+     the telegraph its truth); territories alone (one engine and nothing
+     the player could see of it).
+3. **Guardians:** BN5's Navis fight in BN6's engine. Where they stand
+   stays (half the runs on the acts BN5 dresses, where BN5 sets them
+   roaming); in the deep acts both nets' Navis share one pool by band.
+4. **Chips:** every BN5 chip is a chip of the run, registered in BN6's
+   tables; a chip both games have by name is one chip, BN6's. They come
+   into the pack, the folder, the PET's Library (after BN6's, numbered
+   on), the shops and traders of the older net's areas (half their stock),
+   and BN5's viruses drop their own rewards. The starting folders stay
+   BN6's. A run continued without BN5's ROM keeps its BN5 chips: they sit
+   out of battles until the ROM is back, and MegaMan says so.
+5. **Souls serve every battle**, not the older net's alone: UNITE on
+   BN6's Custom screen, by BN5's rule (the last chip picked, of the Soul's
+   kind, given up), once a battle each, for the turns BN5 gives it. One
+   form at a time: uniting ends a Cross for the Soul's turns, no unison
+   while beasted out and no Beast Out while united. Chaos Unison as BN5
+   has it, unpriced (the owner's call of 4 October 2026).
+6. **DarkChips: one price, each net's own rule on top.** Every battle a
+   DarkChip's dark power ran in costs 20 max HP, in every battle (the
+   owner's call B, unchanged). BN6's own burn a BugFrag a use and fall
+   back to their base chip without one; BN5's come into the hand only
+   while MegaMan is down to a quarter of his HP (BN5's worry, which BN6's
+   engine has not, read from his HP as the guest battles already open
+   it). One of each kind, three in a folder (BN6's rule). The flames:
+   BN5's on its acts, offering its kinds; BN6's on its own, offering its
+   four.
+7. **Nothing reaches the meta loop:** variety, not power, as before.
+
+What to watch, and measure (docs/META.md, Measuring it): a visitor whose
+pairing the band does not see (two that pin a row between them); the
+strongest Soul for a folder taken every battle now that it serves every
+battle (each still costs a chip and comes once); a Soul and a Cross read
+as one thing; DarkChips' uses and the max HP they took, per net.
+
 ## Transplanted families
 
 Issue #82: BN5's virus families moved into BN6's own battle engine, so a
