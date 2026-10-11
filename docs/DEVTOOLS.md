@@ -480,6 +480,142 @@ Identity), on the free panel nearest its anchor; play.py's state (with
 and in the world. The `identity-*` screenshots and the `identity` clip
 are made with it.
 
+## The differential: a moved family against its own game
+
+```bash
+python3 build.py xdiff                       # every spec in tests/xdiff: PASS, FAIL or INCONCLUSIVE each
+python3 build.py xdiff cangard_v1 --story    # one spec, the battle as each game fought it
+python3 build.py xdiff cangard_v1_keys --survey   # every difference of every frame, counted, masked or not
+python3 build.py xdiff --mutations           # the comparator's own test: each break must FAIL its spec
+python3 build.py shot --data-dir /src/.build/xdiff/data \
+  --xdiff "foes=4F@62;mm=22;hp=100;frames=1200;out=/src/.build/xdiff/runs/s1"   # the traces alone
+```
+
+Issue #82 moves BN5's virus families into BN6's battle engine by their own
+code (docs/MULTIROM.md, Transplanted families). The differential proves a
+moved family behaves as it does in BN5's own engine, frame by frame. Local
+only: it needs both ROMs (CI runs the unit tests of its parts).
+
+`--xdiff SPEC` (`src/dev/xdiff.c`, a tool run in the game's place, as
+`--pacing` is) fights one battle twice and traces both:
+
+- **The reference**: BN5's battle on the guest core, as BN5 has it
+  (`guest_dev_battle`, guest.c): BN5's random battles' record with the
+  foes named (BN5's ids at their panels), MegaMan at the spec's HP,
+  everything else BN5's own: none of what the run's guest battles change
+  (the versions scaled to the act, the GAME OVER option and backdrop,
+  Souls, DarkChips, the buster, the mood, the run's folder), and BN5's
+  own deck compaction, the shelf's jump undone (put back before a run's
+  next guest battle).
+- **The subject**: BN6's battle with the families installed, the same
+  foes by BN6's ids (BN5's 0x4F-0x54 are 0xBB-0xC0), forced as the foes
+  step forces one (`emu_battle_force`), from BN6's boot state, with only
+  the encounters' hooks and the install's (none of the run's director).
+- **Alignment**: each battle's timer (`BN5_BATTLE_TIMER`,
+  `BN6_BATTLE_TIMER`), never the cores' frames (BN5's Custom screen
+  opens about 56 frames later). Each core runs to its fight's first frame,
+  then a frame of each in turn. The Custom screen is passed the same way
+  in both: once its window reads open, START 4 frames, nothing 8, A 4 (OK,
+  no chip). The fight's keys go by the timer read before the frame
+  (`keys=T:BUTTONS:N`, held for timer values T to T+N-1).
+- **Seeding**: both RNG words written in both cores after the fight's
+  first frame (`seed=P:S`); seeding as the battle begins does not work
+  (BN5's opening draws 84 more). With `rng=follow`, BN6's words are
+  written from BN5's after each frame both traced: BN5's buster draws one
+  more number a shot than BN6's, so without it everything that draws
+  later (a hit's spark) would part.
+- **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c): a record
+  each time the timer moves while the battle fights: the objects of the
+  first, third and fourth kinds in play (each from its list node on, its
+  AI's data and its collision data), the 40 panels, the order the objects
+  ran in, the songs the music players began, both RNG words.
+- **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
+  the install (an address of BN5's in a moved block is written to its
+  copy) and `call=F:T` aims the family's veneer to BN6's routine F at T.
+
+`tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
+binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
+panel and HP, the frames, the seed, the keys, `rng`, `natives` with
+their `native_attacks` and `native_effects`, and what BN5's battle is
+known to do) and compares the two traces (`tools/xdiff_snap.py` the
+snapshot and its differences, `tools/xdiff_masks.py` whose each is and
+the masks):
+
+- **By role, never by slot**: the first kind's objects by their enemy id,
+  the third and fourth by their type (an effect object, the fourth kind's
+  type 0, by its effect id in BN6's numbers too, so one spawned with the
+  wrong id is a role the other game lacks), each by the order it appeared.
+- **In BN6's numbers** (`tests/xdiff/legit.json`, maps, each with why):
+  the enemy ids, MegaMan's NameID (0x180 against 0x1A0), CurAction (BN5's
+  0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), the
+  attack's type (0x25 against 0xD1), the muzzle's effect (0x57 against
+  0x6C), the AI index (14 against 32), a sound by its song (the player it
+  plays on is each song table's own). The engine's own numbers too, the
+  way an enemy id is read: a collision data's alliance words (+0x30 and
+  +0x34, set from a table by alliance and region, each game its own) as
+  the BN6 entry at the BN5 word's place in BN5's table, and a hit's or a
+  touch's word (+0x70, +0x6C: the other's +0x30 ORed in) as the OR of
+  those entries, where every way of making it of the table's words gives
+  the same (`alliance`); the renderer's tile place and palette slot of a
+  family object as their rank among those the family's objects drawn that
+  frame take (`renderer`: the renderer counts them over everything drawn
+  before, so what else is drawn is no part of the family's; one not drawn
+  keeps the rank of its last place); an object's slot (+3) counted from
+  its own (`slot`). A difference prints BN5's value as read so.
+- **Pointers by what they name**: an object by its role and part (its
+  node, its AI's data, its collision data), a panel, ROM that was moved by
+  where it came from, a pointer into each game's own ROM by the data there
+  (32 bytes the same), a sprite's frames from its sprite's own data.
+- **Each structure through its own layout** (legit.json, layouts): the
+  collision data (0xA0 bytes in BN5, 0xA8 in BN6, laid out otherwise from
+  +0x14) and the panels (0x24 and 0x20), each segment with the paired
+  routines that show it. Where BN5 keeps in two places what BN6 keeps in
+  one, BN5's parts are held to their rule (`bn5_or`: a hit's result by the
+  hitter's side, +0x6C and +0x70, ORed into +0x68; its modifier, +0x18 and
+  +0x19, into +0x0F), the word itself compared with BN6's. Any other byte
+  outside the segments must be 0 in both (BN6's own +0x74-0x7B, the
+  multiplier and elements of a hit, among them). The flag words are
+  compared as bytes, never read as addresses.
+- **Every difference explained** (legit.json, masks): an engine difference
+  that is not the family's code, with why and the evidence (both games'
+  routines by address), or it fails the spec at the first frame it shows.
+  A mask names its place and may pin it further: its values (`cells`), a
+  bit with its direction (`direction`: BN6 has it, BN5 not), a condition
+  (`when`), whose records (`whose`). No mask applies to the family's own
+  records (its objects, what they own, its attacks and effects): there
+  every difference that is left after the maps fails the spec. The tool
+  prints the masks it applied, none of them on the family's.
+- **Whose a difference is**, from both traces: the family's where the
+  reference (BN5) says the object is the family's, where the two traces
+  disagree, or where only the subject has it and calls it the engine's
+  (the subject's numbers are the transplant's own: a wrong id must not be
+  its alibi). An object owned by another (+0x4C) is its owner's.
+- **The stop rule**: where the first unexplained difference is MegaMan's
+  own state (his object, or one he owns: his shots, his buster's flash,
+  their sparks) or an effect of the engine's, the spec is INCONCLUSIVE from
+  there, not failed: the battle is no longer the same battle for the
+  family. A native enemy's own differences (a spec's `natives`, their
+  attacks and effects: each game runs its own code for them) do not stop
+  it: the family is compared on while its world (MegaMan, the RNG, the
+  songs, the run order, the panels) stays the same, and the spec stops at
+  the first difference there. After a stop the family's objects are still
+  compared, and the tool says how far they stayed the same.
+- **What BN5's battle is known to do** (a spec's `expect`): CanGard's
+  CurActions at given frames, its reticle's appearances, path and damage,
+  the sound as it fires, MegaMan's HP lost when, the virus hit only in its
+  firing state, holding its guard while MegaMan is out of its row;
+  checked on both traces.
+
+`--story` prints each game's battle, `--survey` every difference over
+every frame by whose and where, `--no-run` compares the last traces,
+`--poke` and `--call` break the subject for one run, and `--mutations`
+runs `tests/xdiff/mutations.json`, the breaks a transplant bug would make
+(an immediate, a state number and an offset left as BN5's, a call aimed at
+nothing or at the wrong twin, a table's entry, a number in its data, an
+effect id left as BN5's alone and beside a native, a strike's effect id,
+a collision region), each of which must FAIL its spec. docs/MULTIROM.md, Transplanted families, has
+what they showed.
+
 ## Sprite gallery
 
 L and SELECT together on the title screen (SELECT alone opens the

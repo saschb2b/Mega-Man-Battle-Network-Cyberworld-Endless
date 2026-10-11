@@ -1,0 +1,471 @@
+{
+  "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/MULTIROM.md, Transplanted families; docs/DEVTOOLS.md, The differential). No game code here: addresses and numbers only.",
+  "maps": {
+    "name_id": {
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's spare ids 0xBB-0xC0 (src/emu/xvirus_families.c, .first_id); MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "bn5_to_bn6": {
+        "0x4F": "0xBB",
+        "0x50": "0xBC",
+        "0x51": "0xBD",
+        "0x52": "0xBE",
+        "0x53": "0xBF",
+        "0x54": "0xC0",
+        "0x180": "0x1A0"
+      },
+      "megaman": {
+        "0x180": "0x1A0"
+      }
+    },
+    "ai_index": {
+      "why": "AIData +1, the AI index the engine finds a family's tables by: CanGard's 14 in BN5, 32 in BN6's grown tables (xvirus_cangard .src_ai, .ai).",
+      "bn5_to_bn6": {
+        "14": "32"
+      }
+    },
+    "t3_type": {
+      "why": "An attack's type (+1): CanGard's reticle is BN5's type 0x25, given BN6's empty 0xD1 (the immediate at BN5 0x080C975C; BN6_T3_FREE).",
+      "bn5_to_bn6": {
+        "0x25": "0xD1"
+      }
+    },
+    "effect": {
+      "why": "An effect object's id (+4 of the fourth kind's type 0): CanGard's muzzle blast is BN5's 0x57, copied as BN6's 0x6C (the immediate at BN5 0x08108FB6).",
+      "bn5_to_bn6": {
+        "0x57": "0x6C"
+      }
+    },
+    "alliance": {
+      "why": "A collision data's +0x30 (what it is) and +0x34 (what it strikes) are words the engine's setup takes from a table by the object's alliance and a region its caller names, two words a region, and ORs the time stop's bit 0x10000 into +0x30 while time is stopped; each game has its own table (layouts, collision, alliance_masks), whose entries mostly differ by BN6's bit 0x80. So a BN5 word is read as the BN6 entry at its place in BN5's table (with the time stop's bit as it is): over the 160 entries each BN5 word gives one BN6 word (a word two entries would give otherwise would be left as it is; none does). A hit and a touch OR the other object's +0x30 into what hit or touched it (BN6's +0x70 and +0x6C, BN5's +0x68 and +0x64): such a word is read as the OR of the BN6 words of the table's words it is made of, where every way of making it gives the same (else it is compared as it is). Not the family's code: the setup and the hit pass are the engine's, and the family's region and alliance are compared through them (a family object set up with another region reads as another BN6 word).",
+      "evidence": [
+        "the setup: BN5 0x08016760-0x080167AE / BN6 0x08019FB4-0x0801A00C, the same steps: +0x30 from the table's reader (BN5 0x08016BBC / BN6 0x0801A0BA: alliance x 4 + region x 8) for the region in r1, stored at BN5 0x0801678A / BN6 0x08019FE8; 0x10000 ORed in where the time stop's test (BN5 0x08008A78 / BN6 0x0800A098, bit 2 of the battle's flags) is set (BN5 0x08016792-0x0801679C / BN6 0x08019FF0-0x08019FFA); +0x34 for the region in r2 (BN5 0x080167A6 / BN6 0x0801A004)",
+        "the tables (layouts, collision, alliance_masks): BN5 0x08016364 reads 0x08410000, 0x04210000, 0x80000000, 0x40000000 (entries 2, 3, 8, 9) where BN6 0x08019C7C reads 0x08410080, 0x04210080, 0x80000080, 0x40000080; entries 4-7, 10, 11 alike in both; of BN5's 160 words 128 have their BN6 entry with the bit, 30 the same word, region 61's two (BN5 0x80000080, 0x40000080) BN6's 0x80",
+        "the hit pass ORs the hitter's +0x30 into what hit it: BN5 0x080169E8-0x080169F2, 0x08016A28-0x08016A34 (its +0x6C/+0x70, then +0x68) / BN6 0x081D7800-0x081D7804, 0x081D783A-0x081D7840 (+0x70); the second pass into what touched it: BN5 0x080174AA-0x080174B0 (+0x64) / BN6 0x081D7BD2-0x081D7BD8 (+0x6C)",
+        "BN6's use of its bit: its second pass lets an object whose +0x3C has 0x20 touch only one whose +0x30 has 0x80 (0x081D7BAE-0x081D7BD0); BN5's twin 0x0801748C has no such test",
+        "in the traces of every spec each +0x30 and +0x34, and each hit and touch word on the frames compared, reads as its BN6 word: MegaMan's 0x08410000, CanGard's and the Mettaur's 0x04210000, the reticle's 0x40000000, MegaMan's shots' 0x80000000, each with 0x80 in BN6; a reticle's hit word 0x08410000 (MegaMan's) as 0x08410080"
+      ]
+    },
+    "renderer": {
+      "why": "Each frame the sprite renderer hands each object it draws a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and a palette slot (+0x15's high nibble) from the slots taken before it; a frame or palette already loaded this frame is given its place or slot again. The code is the same in both games, but what each draws (MegaMan's own sprite, his flash and sparks, BN6's own effects, a native) differs, so the numbers do. A family object's place and slot are read as their rank among those the family's objects drawn that frame take: the family's own draw order and sharing, compared; what else is drawn among them is no part of the family's. One not drawn (its +0x00 bit 0x02 clear) keeps the place it was last drawn at, so it keeps that rank; one never drawn, or whose place moved undrawn, is compared as it is. Slot 15 (none taken) stays. The frames the family draws are compared from its sprite's own data (+0x1C, +0x20) and its cache (+0x24), so its tile counts are. The same places of what is not the family's are masked (the renderer's slots, the renderer's palette slot).",
+      "evidence": [
+        "the renderer: BN5 0x081C7F26-0x081C804C and BN6 0x081D64BE-0x081D65E4 (the IWRAM renderer's ROM copies), the same code but for their literal pools",
+        "the tile place: BN5 0x081C7FF4-0x081C7FFC / BN6 0x081D658C-0x081D6594, the running count's value stored and the frame's tiles added to it (BN6 0x081D6562-0x081D6566, 0x081D6590-0x081D6594); a frame already copied this frame is given its place again (found at BN6 0x081D66A8-0x081D66C6, stored at 0x081D65B8); a sprite not drawn keeps its old place, its cache cleared (BN6 0x081D653A-0x081D6544)",
+        "the palette slot: BN5 0x081C803A-0x081C8048 / BN6 0x081D65D2-0x081D65E0, the slot's number shifted into +0x15's high nibble, none where it reads 0xF (BN6 0x081D65BE-0x081D65C8); the slot found or taken: BN6 0x081D6640-0x081D666A",
+        "in every spec the family's ranks are the same in both games on every frame a family object is drawn in both (cangard_v1: 2084 tile places, 2084 palette slots; cangard_v1_keys: 1813 and 1798), with no family object drawn in one game alone"
+      ]
+    },
+    "slot": {
+      "why": "An object's header +3 is its slot in its kind's array, which the engine hands out to the first free one. Objects are matched by role (what they are, in the order they appeared), never by slot, so +3 is read as counted from the object's own slot: 0 where it is its own, as the engine writes it, so a slot taken in one game and not the other (an effect living a frame longer) is no difference of the object's.",
+      "evidence": [
+        "the slot is the first free bit of the kind's bitmap: BN5 0x080030B4-0x080030C2 / BN6 0x08003294-0x080032A2 (the same code); the spawn clears the object from +4 on (BN5 0x080030CC-0x080030D2 / BN6 0x080032AC-0x080032B2) and writes +0 and +1, leaving +3 as the slot holds it",
+        "in both traces of cangard_v1_keys every object's +3 equals its slot (5856 objects in BN5's, 5822 in BN6's)"
+      ]
+    },
+    "action": {
+      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces).",
+      "megaman": {
+        "6": "8"
+      }
+    },
+    "sound": {
+      "why": "A sound is compared by its song number: the music player it plays on is its song table entry's, each game's own (song 0x6A, MegaMan's buster's, is BN5's player 22 and BN6's player 0; the reticle's 0xAE player 4 in both).",
+      "evidence": [
+        "the song tables: BN5 0x08155BF4, BN6 0x08159F48 (RomLayout.song_table), 8 bytes a song: its header, its player"
+      ]
+    },
+    "family_effects": {
+      "why": "Effects (the fourth kind's type 0) name no object that spawned them; those of the effect ids the family's code spawns are the family's, compared as such: its muzzle's blast (BN5's 0x57, BN6's 0x6C: BN5 0x08108FB6) and its reticle's strike (0x0E: BN5 0x080C9660-0x080C9662). Any other effect is the engine's or another enemy's (in the smoke spec the Mettaur's 0x14), which stops a spec as MegaMan's own state does.",
+      "bn6": [
+        "0x6C",
+        "0x0E"
+      ]
+    }
+  },
+  "layouts": {
+    "collision": {
+      "why": "A collision data is 0xA0 bytes in BN5 and 0xA8 in BN6, laid out otherwise from +0x14: each segment is (BN5's offset, BN6's, bytes), found by pairing the two games' routines (the symbol map's pairs whose instructions agree but for an offset on a register loaded from an object's +0x54) and checked against both traces. Where one game keeps in two bytes or words what the other keeps in one, BN5's parts are checked by their rule (bn5_or: the word BN5 ORs them into, which is compared with BN6's); a byte of either outside the segments and the rules must be zero in both. The flag words (flag_words, BN6's offsets) hold bits, never addresses, so they are compared as bytes even where they look like a ROM address.",
+      "evidence": [
+        "+0x00-0x13 the same: the paired routines' accesses at +1, +2, +6, +9, +0xA, +0xB, +0xC, +0xD, +0xE, +0xF, +0x10, +0x11 agree (e.g. BN5 0x08016B64 / BN6 0x0801A050, the collision panels' update); the setup BN5 0x08016760 / BN6 0x08019FB4 writes +1, +2, +4, +7, +0xA, +0xE alike",
+        "BN5 +0x14 is BN6 +0x64: BN5 0x080C4BC4 / BN6 0x080C6A08, the same attack's routine storing a word from its table; the hit pass adds the hitter's word there into BN5 +0x98 / BN6 +0xA0 (0x08016AE2 / 0x081D7922)",
+        "BN5 +0x1A is BN6 +0x16: BN5 0x080EAB64 / BN6 0x080EB550, a u16 read after the barrier (+6)",
+        "BN5 +0x26, +0x28, +0x2A are BN6 +0x24, +0x26, +0x28: the flash timer (BN5 0x0800E180 / BN6 0x08010478, the blink BN5 0x080137AA / BN6 0x08016956), BN5 0x0800DF30 / BN6 0x080101B2, the invulnerable time (BN5 0x0800CD88 / BN6 0x0800EAFE)",
+        "+0x2E, +0x30, +0x34, +0x38 (its object), +0x3C, +0x40 and +0x44 (its flags) and +0x48 the same: the setup writes +0x2E, +0x30, +0x34, +0x38 alike (BN5 0x08016780-0x080167A6 / BN6 0x08019FDE-0x0801A004); the routines that set an object's flags read +0x3C and +0x40 (BN5 0x08016C44, 0x08016C5E / BN6 0x0801A154, 0x0801A16E); the pool's start writes 0x80000000 to each one's +0x44 (BN5 0x08016118, its stride 0xA0 / BN6 0x08019884, its stride 0xA8); BN5 0x080173B4 / BN6 0x0801A5E6 +0x48",
+        "what a hit leaves starts at BN5 +0x60 / BN6 +0x68: the present step clears 0x40 bytes from there (BN5 0x08016B4E-0x08016B54 / BN6 0x0801A038-0x0801A03E). BN5 +0x60-0x6B is BN6 +0x68-0x73: the pair's flags (+0x60 / +0x68, each one's +0x44 ORed into the other's, BN5 0x0801687E-0x08016890 / BN6 0x081D7B1E-0x081D7B30), what touched it (+0x64 / +0x6C, the second pass BN5 0x080174AA-0x080174B0 / BN6 0x081D7BD2-0x081D7BD8), what hit it (+0x68 / +0x70, in ten paired routines, e.g. BN5 0x0800CE28 / BN6 0x0800EBA8)",
+        "BN5 +0x74-0x9F is BN6 +0x7C-0xA7: the hitter's +0x44 ORed into +0x74 / +0x7C (BN5 0x08016A20-0x08016A26 / BN6 0x081D7832-0x081D7838), the damage by element +0x7A / +0x82 (BN5 0x08016AC6-0x08016AD0 / BN6 0x081D7906-0x081D7910, the final damage BN5 +0x78 / BN6 +0x80), the hit counts +0x86, +0x88, +0x8A / +0x8E, +0x90, +0x92 (BN5 0x08016A78-0x08016A9C / BN6 0x081D788C-0x081D78B0), the hitter's +0x12 into +0x9C / +0xA4 (BN5 0x08016AB4 / BN6 0x081D78C4); the reticle's bytes at BN5 +0x63, +0x66, +0x67, +0x6A, +0x6B, +0x77 sit at BN6 +0x6B, +0x6E, +0x6F, +0x72, +0x73, +0x7F in the traces",
+        "BN5 +0x6C and +0x70 are BN5's own: what hit it, by the side of the hitter (+0x6C + 4 x the hitter's +5: BN5 0x080169C0-0x080169CA, 0x080169E8-0x080169F2, 0x08016A28-0x08016A34), ORed into +0x68 after each pair (BN5 0x080168C6-0x080168D4: the rule bn5_or); BN6's hit pass ORs into +0x70 itself (0x081D77DE-0x081D77E2, 0x081D7800-0x081D7804, 0x081D783A-0x081D7840)",
+        "BN5 +0x18 and +0x19 are BN5's own: the hitter's +0x0E ORed into +0x18 + the hitter's +5 (BN5 0x08016A9E-0x08016AA8), both ORed into +0x0F after each pair (BN5 0x080168D6-0x080168E4: the rule bn5_or); BN6's hit pass ORs the hitter's +0x0E into +0x0F itself (0x081D78B2-0x081D78B8)",
+        "BN6 +0x74-0x7B and +0x18, +0x19 are BN6's own, zero unless an element is in play: the hit's multiplier less one at +0x74 and +0x75 (0x081D78C8-0x081D78F4), the hitter's +0x19 ORed into +0x76 and +0x77 (0x081D7844-0x081D784C, 0x081D7BDA-0x081D7BE2), element 3's damage at +0x78 (0x081D78F6-0x081D7904); +0x19 is the high nibble of the object's element byte (the setup, 0x08019FC4-0x08019FC8), +0x18 read against it (0x081D78D4)"
+      ],
+      "segments": [
+        [
+          0,
+          0,
+          20
+        ],
+        [
+          20,
+          100,
+          4
+        ],
+        [
+          26,
+          22,
+          2
+        ],
+        [
+          38,
+          36,
+          6
+        ],
+        [
+          46,
+          46,
+          2
+        ],
+        [
+          48,
+          48,
+          28
+        ],
+        [
+          96,
+          104,
+          12
+        ],
+        [
+          116,
+          124,
+          44
+        ]
+      ],
+      "flash_timer": [
+        38,
+        36
+      ],
+      "bn5_or": [
+        {
+          "word": "0x68",
+          "of": [
+            "0x6C",
+            "0x70"
+          ],
+          "size": 4
+        },
+        {
+          "word": "0x0F",
+          "of": [
+            "0x18",
+            "0x19"
+          ],
+          "size": 1
+        }
+      ],
+      "flag_words": [
+        "0x30",
+        "0x34",
+        "0x3C",
+        "0x40",
+        "0x44",
+        "0x68",
+        "0x6C",
+        "0x70",
+        "0x7C"
+      ],
+      "alliance_masks": {
+        "why": "The words the setup stores at +0x30 and +0x34 come from this table, by the object's alliance and its region (two words a region): BN5's 160 words (80 regions; BN5_COLL_MASKS, BN5_COLL_MASK_WORDS) against the first 160 of BN6's 178 (89 regions; BN6_COLL_MASKS, BN6_COLL_MASK_WORDS). Each BN6 word is its BN5 twin with bit 0x80 or as it is, but region 61's (entries 122 and 123: BN5 0x80000080 and 0x40000080, BN6 0x80 and 0x80); tools/xdiff_snap.py checks this as it reads them. table_words are the collision data's words set from the table (with the time stop's bit), or_words those ORed of other objects' table words (a hit's, a touch's), at BN6's offsets: each read as BN6's (maps, alliance).",
+        "bn5": "0x08016364",
+        "bn6": "0x08019C7C",
+        "words": 160,
+        "unpaired": [
+          122,
+          123
+        ],
+        "time_stop": "0x10000",
+        "table_words": [
+          "0x30",
+          "0x34"
+        ],
+        "or_words": [
+          "0x6C",
+          "0x70"
+        ],
+        "evidence": [
+          "the readers: BN5 0x08016BBC / BN6 0x0801A0BA (alliance x 4 + region x 8 into the table, its one literal at BN5 0x08016C00 / BN6 0x0801A0D0); the setup's stores BN5 0x0801678A, 0x080167A6 / BN6 0x08019FE8, 0x0801A004",
+          "the tables' ends: code follows at BN5 0x080165E4 and BN6 0x08019F44 (the same routine in both, push {r4,r6,r7,lr})"
+        ]
+      }
+    },
+    "panel": {
+      "why": "A panel is 0x24 bytes in BN5 and 0x20 in BN6: +0x00-0x0F the same (type +2, alliance +3, the state the panel's update keeps at +0x0E), BN5's alliance timer +0x12 BN6's +0x10 (the alliance's setter, BN5 0x0800B2D6 / BN6 0x0800CC14: strh at +0x12 / +0x10), the flags BN5 +0x18 / BN6 +0x14 (BN5_PANEL_FLAGS, BN6_PANEL_FLAGS; the panel's parameters read there, BN5 0x0800AFB0 / BN6 0x0800C8F8), +0x1C / +0x18, and the object holding it BN5 +0x20 / BN6 +0x1C (the panel's reservation, BN5 0x08018654 / BN6 0x0801BB1C)",
+      "segments": [
+        [
+          0,
+          0,
+          16
+        ],
+        [
+          18,
+          16,
+          2
+        ],
+        [
+          24,
+          20,
+          4
+        ],
+        [
+          28,
+          24,
+          4
+        ],
+        [
+          32,
+          28,
+          4
+        ]
+      ]
+    }
+  },
+  "masks": [
+    {
+      "name": "BN5's panel restore timers",
+      "part": "panel bn5 only",
+      "cells": [
+        [
+          "0x10",
+          "0xC0",
+          null
+        ],
+        [
+          "0x11",
+          "0x03",
+          null
+        ],
+        [
+          "0x14",
+          "0xC0",
+          null
+        ],
+        [
+          "0x15",
+          "0x03",
+          null
+        ]
+      ],
+      "why": "BN5's panel update writes a plain panel's two restore timers every frame, 0x3C0 at +0x10 and +0x14, bytes BN6's panel has no place for (BN6 keeps one timer, at its +0x12). Exact: those bytes, that value. The family's code reads and writes no panel (its own routines touch only its object, its AI's data and its attack's variables; the reticle reaches the panels only through the engine's collision routines).",
+      "evidence": [
+        "BN5's update of a plain panel: 0x0800A9DE-0x0800A9E8 writes 0x258 to +0x0E, 0x3C0 to +0x10 and +0x14"
+      ]
+    },
+    {
+      "name": "BN6's panel restore timer",
+      "part": "panel",
+      "cells": [
+        [
+          "0x12",
+          null,
+          "0x08"
+        ],
+        [
+          "0x13",
+          null,
+          "0x07"
+        ]
+      ],
+      "why": "BN6's panel update writes a plain panel's restore timer every frame, 0x708 at +0x12, a place BN5's panel layout has no twin for (BN5's +0x12 is BN6's +0x10, the alliance timer, compared). Exact: those two bytes, that value; the alliance timer (+0x10) and the panel's flags (+0x14) stay compared.",
+      "evidence": [
+        "BN6's update of a plain panel: 0x0800C3C8-0x0800C3D0 writes 0x708 to +0x12 (and +0x0E at 0x0800C488)",
+        "the alliance timer's setter: BN5 0x0800B2D6 (strh at +0x12) / BN6 0x0800CC14 (strh at +0x10)"
+      ]
+    },
+    {
+      "name": "the blink",
+      "part": "obj",
+      "offsets": [
+        "0x00"
+      ],
+      "bits": "0x02",
+      "when": "flashing",
+      "why": "An object flashing after a hit (its collision data's flash timer counting down, the same in both) is hidden on every other pair of frames by its header's visible bit; BN6 hides it on the pairs BN5 shows it. The family's code never touches the bit: it is the engine's step every object runs.",
+      "evidence": [
+        "BN5 0x080137AA-0x080137B6: the timer (+0x26) shifted right twice, the bit cleared unless the carry is set (bhs past the bics)",
+        "BN6 0x08016956-0x08016962: the timer (+0x24) the same, the bit cleared unless the carry is clear (blo past the bics)"
+      ]
+    },
+    {
+      "name": "the renderer's slots",
+      "part": "obj",
+      "sprite_offsets": [
+        "0x08-0x09",
+        "0x24-0x27"
+      ],
+      "why": "Each frame the sprite renderer gives each object drawn a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and keeps the frame it last copied there (+0x24), cleared when the place moves. The code is the same in both, but what each game draws (MegaMan's own sprite, the HUD, BN6's own effects) differs, so the places do. Drawing resources, not anyone's logic: an object's animation is compared by its sprite state's animation (+0x00) and the pointers to its current frame (+0x1C, +0x20, relative to its sprite's data). This mask is for what is not the family's (MegaMan's side, a native's, the engine's); the family's places are read as their rank among the family's own (maps, renderer) and its cache (+0x24) is compared.",
+      "evidence": [
+        "the tile place: BN5 0x081C7FF4-0x081C7FFC / BN6 0x081D658C-0x081D6594 (the IWRAM renderer's ROM copies), the frame copied to 0x06010000 + place x 32 (BN5 0x081C800E / BN6 0x081D65A6), its cache cleared where the place moved (BN5 0x081C7FD4 / BN6 0x081D656C)",
+        "a sprite's data pointer +0x18 is its data's start + 4 (the sprite's set-up stores it so), so +0x1C-0x24 are compared from it"
+      ],
+      "whose": [
+        "megaman",
+        "megaman's",
+        "native",
+        "native's",
+        "engine"
+      ]
+    },
+    {
+      "name": "the renderer's palette slot",
+      "part": "obj",
+      "sprite_offsets": [
+        "0x15"
+      ],
+      "bits": "0xF0",
+      "why": "The same renderer gives each object drawn a palette slot, the high nibble of its sprite state's +0x15, from the slots taken before it this frame: the same code in both, other things drawn before it. For what is not the family's; the family's slots are read as their rank among the family's own (maps, renderer).",
+      "evidence": [
+        "BN5 0x081C803A-0x081C8048 / BN6 0x081D65D2-0x081D65E0: the slot's number shifted into +0x15's high nibble"
+      ],
+      "whose": [
+        "megaman",
+        "megaman's",
+        "native",
+        "native's",
+        "engine"
+      ]
+    },
+    {
+      "name": "MegaMan's own sprite",
+      "part": "obj",
+      "whose": [
+        "megaman",
+        "megaman's"
+      ],
+      "sprite_offsets": [
+        "0x01-0x07",
+        "0x0A-0x14",
+        "0x16-0x37"
+      ],
+      "why": "MegaMan is drawn from each game's own sprite (BN5's at 0x081C9800, BN6's at 0x081D8000, his sprite state's +0x18 less 4 in each trace), whose frames, their order and their durations differ; the same for what he owns (his buster's charge glow, sprite list 5's 8 in each game). The animation his code picks (+0x00) is compared; what his sprite makes of it is not his logic nor the family's.",
+      "evidence": [
+        "his sprite state's data pointer: BN5 0x081C9804, BN6 0x081D8004 at t1; his frame (+0x01) runs 1 against 4 from t101 in spec cangard_v1",
+        "the charge glow's sprite: BN5's list 5 entry at 0x08032B2C, BN6's at 0x08032134 (each naming its own data)"
+      ]
+    },
+    {
+      "name": "MegaMan's charge glow's place",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "types": [
+        "0x08"
+      ],
+      "offsets": [
+        "0x34-0x3F"
+      ],
+      "why": "MegaMan's buster charge glow (the fourth kind's type 8, spawned for him) follows him at his buster arm, an offset each game takes from its own table by his NameID: BN6's puts it 2 pixels further right. His presentation, not the family's code.",
+      "evidence": [
+        "its place from the arm's: BN5 0x080E0F22-0x080E0F3A calls 0x08015140 / BN6 0x080E2218-0x080E2230 calls 0x08018810, each by the object's +0x28 (MegaMan's 0x180, 0x1A0)",
+        "its spawn: BN5 0x080E0F64 / BN6 0x080E2242 (type 8)"
+      ]
+    },
+    {
+      "name": "the player's AI data +0x0F",
+      "part": "ai",
+      "whose": [
+        "megaman"
+      ],
+      "offsets": [
+        "0x0F"
+      ],
+      "why": "As the Custom screen closes BN6 sets each side's player's AI data +0x0F to 1; BN5 sets none. The player's own data, which the family never reads (its code reads MegaMan through his object: his panel and coordinates).",
+      "evidence": [
+        "BN6 0x08009338 (the Custom screen's end): 0x08009360-0x0800937E finds each side's player (0x080103BC) and writes 1 to its AIData +0x0F before the fight's phase",
+        "BN5's twin 0x0800879A (the same calls: 0x080091C8, 0x08022C58, 0x08022D6C, 0x080092BC) goes on to the fight's phase at 0x080087C2 with no such write"
+      ]
+    },
+    {
+      "name": "BN6's panel reservation flag",
+      "part": "obj",
+      "offsets": [
+        "0x00"
+      ],
+      "bits": "0x20",
+      "why": "Reserving a panel (an object stepping onto it) marks the panel in both games; BN6 also sets bit 0x20 of the reserving object's flags, BN5 does not (from his first step MegaMan's flags read 0x35 in BN6 where 0x15 in BN5). Exact: the bit, BN6 having it and BN5 not.",
+      "evidence": [
+        "BN6 0x0801BB1C: the panel's reserver (+0x1C) and flag 0x80 (+0x14) set, then 0x0801BB36-0x0801BB3A ORs 0x20 into the object's +0",
+        "BN5 0x08018654: the panel's reserver (+0x20) and flag 0x80 (+0x18) set, then 0x0801866E returns 1, the object untouched"
+      ],
+      "direction": "bn6"
+    },
+    {
+      "name": "BN5's buster draw",
+      "part": "rng",
+      "when": "buster draw",
+      "why": "BN5's buster draws one more random number as a shot begins than BN6's (whether it takes the NaviStats' byte 0x4D), so on the frame MegaMan's CurAction turns to his buster's (0x11) BN5's first RNG word is one step further than BN6's, the second the same. The spec runs with rng=follow (BN6's words written from BN5's after each frame), so they agree again from the next frame and nothing that draws later (a hit's spark) is moved by it. The family draws none (issue #82's research: no path from its code to the RNG but the reticle's collision spark, gated off by its hit effect 0xFF); were it to, its behaviour would differ and show as such.",
+      "evidence": [
+        "BN5 0x0800F560: the shot's setup draws a positive random number (BN5 0x080014A6) and tests bit 3 of it (0x0800F564)",
+        "BN6's buster damage 0x0801265C-0x08012698 (Attack, the table at 0x080126A4, the Cross's bonus at 0x080126B0) draws none",
+        "the mask holds only where BN5's first word is BN6's stepped once (x rotl 1 + 1, XOR 0x873CA9E5) and the second the same"
+      ]
+    },
+    {
+      "name": "MegaMan's buster flash",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T1"
+      ],
+      "types": [
+        "0x00"
+      ],
+      "offsets": [
+        "0x04"
+      ],
+      "why": "As his buster fires the engine spawns two flashes for MegaMan (objects of the first kind, type 5, his object at their +0x4C), by its spawner of such effects with the number of the one wanted in its own list: BN5's numbers them 0x23 and 0x0D, BN6's 6 and 5, each drawn from its own sprite (the mask 'MegaMan's own sprite'). His presentation.",
+      "evidence": [
+        "the spawner of the first kind's type 5: BN5 0x080B9CAE / BN6 0x080BA6A0 (the first kind's spawner, BN5 0x08003140 / BN6 0x08003320, with r0 5), its number in +4",
+        "their sprites: BN5 0x082F261C (named at 0x08032864), BN6 0x082F6444 (named at 0x08031E0C)"
+      ]
+    },
+    {
+      "name": "the hit spark's life",
+      "part": [
+        "in play",
+        "obj"
+      ],
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "types": [
+        "0x04"
+      ],
+      "offsets": [
+        "0x00",
+        "0x08"
+      ],
+      "why": "Where MegaMan's shot strikes, the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) and its first frames are compared.",
+      "evidence": [
+        "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128), their frames' pointers apart (its sprite state's +0x20: 18420 bytes into BN5's, 17840 into BN6's)",
+        "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's"
+      ]
+    },
+    {
+      "name": "BN6's buster sound on a busy player",
+      "part": "sounds",
+      "songs": [
+        "0x6A"
+      ],
+      "why": "MegaMan's buster sound (song 0x6A) plays on BN6's music player 0, which a hit's sound (0x8F, priority 192 against its 128) shares and holds: a shot fired while 0x8F still plays starts no sound in BN6; BN5 plays 0x6A on its player 22, free. A song missing from BN6's frame alone, 0x6A alone. The song tables and the sound engine's start, not the family's code (its reticle's 0xAE is compared).",
+      "evidence": [
+        "the song tables' entries for 0x6A: BN5 0x08155F44 (player 22), BN6 0x0815A298 (player 0); for 0x8F: player 0 in both, priority 192 (its header's +2)",
+        "the start of a song: BN6 0x08150C90-0x08150C98 (the sound engine's start of a song, 0x08150C54) keeps a playing song of higher priority (its info +9) and starts none"
+      ]
+    }
+  ]
+}

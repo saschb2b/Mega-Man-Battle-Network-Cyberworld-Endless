@@ -102,8 +102,11 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 The guest core's ROM copy (BN5's, docs/MULTIROM.md, Guest battles) is
 padded the same way; past BN5's 8 MB, from `0x08800000` (`BN5_FREE`): the
 battle's record copy (`+0x00`), a copied record's entity list (`+0x20`: its
-viruses scaled, or `--dev gem`'s Mystery Data set in) and the deck's
-shelf (`+0x100`, the DarkChips'). In BN5's own data it writes the
+viruses scaled, or `--dev gem`'s Mystery Data set in), the deck's
+shelf (`+0x100`, the DarkChips') and the differential's record (`+0x200`,
+its entities from `+0x210`: `guest_dev_battle`, docs/DEVTOOLS.md, The
+differential, which also puts BN5's own deck compaction back; the shelf
+goes in again before the run's next guest battle). In BN5's own data it writes the
 encounter roll (its answer), the deck's compaction (a jump to the shelf),
 its chips' records, reward rows and battlefield Mystery Data's finds
 (`0x0801D62C`: All *, the rewards' codes and zenny), and for a guardian
@@ -628,5 +631,17 @@ pointer. Beside it, the autopilot (`CYBERWORLD_AUTOPILOT=1`) with both
 ROMs, CanGard installed and not: seed 1's 15000 frames the same run log
 and last frame, seed 15's 40000 (`--dev god`, two of BN6's battles won)
 the same run log and its checkpoint's `run.state` the same byte for byte,
-so a state saved on a map carries nothing of the install. Not checked: CanGard against BN5's own frame for frame, a real
+so a state saved on a map carries nothing of the install. Not checked there: a real
 chip's hit on it, its guard against each kind of chip.
+`tools/xdiff.py` (`build.py xdiff`; docs/DEVTOOLS.md, The differential)
+checks CanGard against BN5's own CanGard, frame by frame: one battle fought
+in BN5's engine on the guest core (`--xdiff`'s reference, BN5's battle as
+BN5 has it) and in BN6's with the family installed, aligned by each
+battle's timer, compared by role through each game's numbers and layouts,
+each difference either an engine difference explained with both games'
+routines in `tests/xdiff/legit.json` (never on the family's own
+records, where the engine's numbers are read as BN6's) or a failure,
+MegaMan's own state stopping a spec as
+inconclusive. Its specs and what they showed are in docs/MULTIROM.md,
+Transplanted families; `--mutations` breaks the install eleven ways a
+transplant bug would and each break fails its spec.

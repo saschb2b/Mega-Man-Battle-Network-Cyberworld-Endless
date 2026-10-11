@@ -130,6 +130,11 @@
 #define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
 #define BN6_T1_ELEMENT        0x0E        /* Element */
 #define BN6_T1_COLLISION      0x54        /* CollisionDataPtr: its collision data, in EWRAM (docs/ROM_DATA.md, Statuses as a hit leaves them), its fields BN6_COLL_* */
+#define BN6_T1_AI_DATA        0x58        /* AIDataPtr: its AI's data in EWRAM, BN6_AI_DATA_SIZE bytes: +1 its AI index, +0x80 its state, +0xA0 its attack's variables */
+#define BN6_AI_DATA_SIZE      0x100       /* an AI's data (BN6_T1_AI_DATA), the same in BN5 */
+#define BN6_COLL_SIZE         0xA8        /* a collision data's bytes (BN5_COLL_SIZE: BN5's are 8 fewer) */
+#define BN6_COLL_MASKS        0x08019C7Cu /* the words a collision data's +0x30 and +0x34 are set from, by alliance and region (two a region), BN6_COLL_MASK_WORDS of them; */
+#define BN6_COLL_MASK_WORDS   178         /* ... BN5_COLL_MASKS' first 160 with bit 0x80 or as they are, but region 61's (tests/xdiff/legit.json) */
 #define BN6_COLL_REGION       0x01        /* in its collision data (CollisionDataPtr +0x54, bn6f collision_data_struct), Region: the panels it is struck on and strikes, bn6f PanelOffsetListsPointerTable's index, 0 none (nothing touches it), 1 its own panel */
 #define BN6_COLL_PARALYSIS    0x1C        /* u16 frames left paralysed, one less each frame (0x0800E730, the status step every virus runs) */
 #define BN6_COLL_FREEZE       0x2A        /* u16 frames left frozen in an ice block, the same */
@@ -157,6 +162,18 @@
 #define BN6_FORM_BEAST_OVER   23          /* BN6_BATTLE_FORM: BeastOver, the Cybeast's power out of hand */
 #define BN6_T3_OBJECTS        0x0203CFE0u /* eT3BattleObject0: the battle's attacks and effects, BN6_T1_SIZE each, its fields as T1's */
 #define BN6_T3_COUNT          0x20        /* 32 of them */
+#define BN6_T4_OBJECTS        0x02036870u /* the battle's fourth kind of object (effects: a muzzle's blast, an ice block; the kind's record at 0x08003310), */
+#define BN6_T4_SIZE           0xC8        /* ... each this long, its fields as T1's to +0x5C, */
+#define BN6_T4_COUNT          0x20        /* ... 32 of them */
+#define BN6_OBJECT_NODE       0x10        /* the list node before each battle object (+4 the next node; its kinds' sizes count it) */
+#define BN6_OBJECT_LIST       0x02009380u /* the battle's objects in the order they run each frame: a head whose +4 is the first node, a node the 16 bytes before */
+#define BN6_OBJECT_LIST_END   0x02009AB0u /* ... its object (+4 the next), to this one, the list's end */
+#define BN6_RNG_PRIMARY       0x020013F0u /* u32, the random numbers' first word (BN5_RNG_PRIMARY's): its step at 0x0800151C, run once a frame (0x080050FC) */
+#define BN6_RNG_SECONDARY     0x02001120u /* u32, the second (BN5_RNG_SECONDARY's): its step at 0x0800154C, run twice a frame (0x08005100, 0x0800031C) */
+#define BN6_PHASE_FIGHT       0x0C        /* BN6_BATTLE_PHASE: fighting (from BATTLE START! on, the pause too) */
+#define BN6_WINDOW_OPEN       0x78        /* BN6_CUSTOM_WINDOW: open */
+#define BN6_MPLAYS            0x08159DC8u /* the sound's music players (MP2K), BN6_MPLAY_COUNT of 12 bytes: +0 its MusicPlayerInfo in EWRAM (+0 the song's */
+#define BN6_MPLAY_COUNT       32          /* ... header, +0xC its clock, 0 as a song starts); a song table entry names its player (RomLayout.song_table) */
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's (NaviStats) */
 #define BN6_NAVI_HP           (BN6_NAVI_STATS + 0x40) /* CurHP and MaxHP, u16 */
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)

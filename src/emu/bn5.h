@@ -85,6 +85,13 @@
 #define BN5_T1_COUNT      0x10        /* ... 16 of them where BN6 keeps 32 (its list's descriptor at 0x080032E4) */
 #define BN5_T3_OBJECTS    0x0203CA40u /* its attacks and effects (BN6_T3_OBJECTS), BN6_T1_SIZE each, */
 #define BN5_T3_COUNT      0x20        /* 32 of them */
+#define BN5_T4_OBJECTS    0x02036F00u /* its effects (BN6_T4_OBJECTS), BN6_T4_SIZE each, 32 of them (the kind's record at 0x08003130) */
+#define BN5_OBJECT_LIST   0x0200A410u /* its battle's objects in the order they run (BN6_OBJECT_LIST), */
+#define BN5_OBJECT_LIST_END 0x0200ABA0u /* ... to this node */
+#define BN5_COLL_SIZE     0xA0        /* a collision data's bytes (BN6_COLL_SIZE, 8 more): laid out otherwise from +0x14 (tests/xdiff/legit.json's layout) */
+#define BN5_COLL_MASKS    0x08016364u /* its collision data's mask words by alliance and region (BN6_COLL_MASKS), */
+#define BN5_COLL_MASK_WORDS 160        /* ... 80 regions, BN6's 89 */
+#define BN5_MPLAYS        0x08155A74u /* its music players (BN6_MPLAYS) */
 #define BN5_MEGAMAN_READY 0x06        /* MegaMan's action (BN6_T1_ACTION) when he can act, BN6's 0x08 (0x10 a step, 0x14 a chip, 0x03 hit); his chip (BN6_T1_CHIP) is 0xFFFF as its use begins */
 #define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
 #define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */

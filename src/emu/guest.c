@@ -47,6 +47,7 @@ const char *guest_dark_name(int k) {
 #include <mgba/core/serialize.h>
 #include <mgba-util/vfs.h>
 
+#include "battle_rng.h"
 #include "compat.h"
 #include "game.h"
 #include "guest_reward.h"
@@ -568,28 +569,7 @@ static void buster_tell(void) {
 /* ---- its random numbers, the run's (docs/ROM_DATA.md, BN5's random
  * numbers): its core began each session from its boot state, and every
  * run's first battle in its engine drew alike, whatever the run's seed
- * (issue #102) ---- */
-
-/* Its RNG's step (GetRNG 0x08001490, BN6's own) */
-static uint32_t rng_step(uint32_t x) { return ((x << 1 | x >> 31) + 1u) ^ BN5_RNG_XOR; }
-
-/* A state of an RNG word from seed s: s mixed (murmur3's finaliser), and
- * off the step's shortest cycles, where every roll would come out alike.
- * The step parts the 2^32 states into 21 cycles: two of one state and one
- * of nine, the next shortest of 983, SeedRNG's own of 2,794,329,874. Those
- * eleven states, their lowest bit flipped, lie on cycles of 170 million
- * states or more. */
-static uint32_t rng_word(uint32_t s) {
-	s ^= s >> 16;
-	s *= 0x85EBCA6Bu;
-	s ^= s >> 13;
-	s *= 0xC2B2AE35u;
-	s ^= s >> 16;
-	uint32_t x = s;
-	for (int k = 0; k < 9; ++k)
-		if ((x = rng_step(x)) == s) return s ^ 1u;
-	return s;
-}
+ * (issue #102); each word a state of the seed's, battle_rng_word ---- */
 
 /* The battle's seed (battle_ask), and both RNG words written from it as
  * BN5 begins the battle (step), whatever frames its map took before: its
@@ -600,7 +580,7 @@ static uint32_t rng_word(uint32_t s) {
 static uint32_t battle_seed;
 
 static void rng_in(void) {
-	uint32_t first = rng_word(battle_seed), second = rng_word(battle_seed ^ 0x5EC0DA27u);
+	uint32_t first = battle_rng_word(battle_seed), second = battle_rng_word(battle_seed ^ 0x5EC0DA27u);
 	core->rawWrite32(core, BN5_RNG_PRIMARY, -1, first);
 	core->rawWrite32(core, BN5_RNG_SECONDARY, -1, second);
 	if (emu_debug_on()) fprintf(stderr, "guest: its random numbers from seed %08X: %08X and %08X\n", battle_seed, first, second);
@@ -820,6 +800,34 @@ bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t s
 	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss, seed);
 }
 
+/* (dev) its game's battle as its game has it: the record at DEV_RECORD,
+ * past the copies and the shelf; BN5's own deck compaction put back */
+#define DEV_RECORD (BN5_FREE + 0x200)
+
+bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed) {
+	if (active || len < 0x11 || len > 0x80 || hp < 1) return false;
+#ifndef __EMSCRIPTEN__
+	boot_join(false);
+#endif
+	if (!ready || (!on_map() && !load_boot())) return false;
+	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
+	for (uint32_t i = 0; i < 10; ++i) core->rawWrite8(core, BN5_COMPACT + i, -1, d[BN5_COMPACT - 0x08000000u + i]);
+	patched = false;   /* (a run's battle after it puts the shelf in again) */
+	for (uint32_t i = 0; i < len; ++i) core->rawWrite8(core, DEV_RECORD + i, -1, record[i]);
+	core->rawWrite32(core, DEV_RECORD + 0xC, -1, DEV_RECORD + 0x10);
+	const uint32_t at[3] = { BN5_NAVI_BASE_MAX_HP, BN5_NAVI_MAX_HP, BN5_NAVI_HP };
+	for (int i = 0; i < 3; ++i) wr16(at[i], (uint16_t)hp);
+	battle_seed = seed;
+	start_mood = 0xFF;   /* (its mood as its opening sets it) */
+	patch_roll(DEV_RECORD);
+	active = true;
+	phase = PH_ASKED;
+	frames = 0;
+	return true;
+}
+
+void guest_write32(uint32_t a, uint32_t v) { if (ready) core->rawWrite32(core, a, -1, v); }
+
 bool guest_active(void) { return active; }
 
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
@@ -963,6 +971,8 @@ uint8_t guest_read8(uint32_t a) { (void)a; return 0; }
 uint16_t guest_read16(uint32_t a) { (void)a; return 0; }
 uint32_t guest_read32(uint32_t a) { (void)a; return 0; }
 void guest_write16(uint32_t a, uint16_t v) { (void)a; (void)v; }
+void guest_write32(uint32_t a, uint32_t v) { (void)a; (void)v; }
+bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed) { (void)record; (void)len; (void)hp; (void)seed; return false; }
 int guest_chip_bn6(int id) { (void)id; return 0; }
 
 #endif

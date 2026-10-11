@@ -55,6 +55,7 @@
 #include "emu.h"
 #include "bytes.h"
 #include "thumb_reloc.h"
+#include "battle_rng.h"
 #include "xvirus_families.h"
 
 static int failures;
@@ -2710,6 +2711,23 @@ static void test_xsong(void) {
 	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
 }
 
+/* Both games' RNG step and a seed's word (battle_rng.c): the guest's
+ * battles' words as docs/ROM_DATA.md has them for seed 1 (BN5's random
+ * numbers), a fixed point of the step, and one step of the differential's
+ * (BN5's word on the frame its buster draws once more: tests/xdiff) */
+static void test_battle_rng(void) {
+	CHECK(battle_rng_word(0x85EBCA77u) == 0x9BB31115u && battle_rng_word(0x85EBCA77u ^ 0x5EC0DA27u) == 0xDCB010DDu,
+		"battle_rng: seed 1's words %08x %08x", (unsigned)battle_rng_word(0x85EBCA77u), (unsigned)battle_rng_word(0x85EBCA77u ^ 0x5EC0DA27u));
+	CHECK(battle_rng_step(0x7D14675Cu) == 0x7D14675Cu && battle_rng_step(0x82EB98A1u) == 0x82EB98A1u, "battle_rng: the step's two fixed points");
+	CHECK(battle_rng_step(0xEC0BC510u) == 0x5F2B23C7u, "battle_rng: a step (%08x)", (unsigned)battle_rng_step(0xEC0BC510u));
+	int on = 0;
+	for (uint32_t s = 1; s < 200000; s += 7) {
+		uint32_t w = battle_rng_word(s), x = w;
+		for (int k = 0; k < 9; ++k) on += (x = battle_rng_step(x)) == w;
+	}
+	CHECK(!on, "battle_rng: %d seeds' words on the step's shortest cycles", on);
+}
+
 /* Thumb code moved (thumb_reloc.c, issue #82); tests/test_emu.c runs a
  * moved block in mGBA. A BL's halves both ways, to the ends of its reach
  * and refused a step past them; an odd address refused. */
@@ -3851,6 +3869,7 @@ int main(void) {
 	test_xsong();
 	test_thumb_bl();
 	test_thumb_block();
+	test_battle_rng();
 	test_thumb_imm();
 	test_thumb_veneers();
 	test_xvirus_recipe();

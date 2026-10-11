@@ -120,6 +120,16 @@ uint8_t guest_read8(uint32_t addr);
 uint16_t guest_read16(uint32_t addr);
 uint32_t guest_read32(uint32_t addr);
 void guest_write16(uint32_t addr, uint16_t v);
+void guest_write32(uint32_t addr, uint32_t v);
+
+/* (dev: the differential's reference, src/dev/xdiff.c) A battle of its
+ * game's as its game has it, none of what the run's change: `record` a
+ * BattleSettings of `len` bytes, its entities from +0x10 (its pointer at
+ * +0xC set to them), MegaMan at `hp` HP and max HP, its own buster,
+ * folder, mood and dark meter, its own deck compaction (the shelf left
+ * out), its RNG words from `seed` as it begins (guest_battle's). Its boot
+ * waited for first (begun by guest_start). False where it cannot be. */
+bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed);
 /* BN6's chip of the same name as its game's chip `id`, 0 for none (its
  * DarkChips) */
 int guest_chip_bn6(int id);

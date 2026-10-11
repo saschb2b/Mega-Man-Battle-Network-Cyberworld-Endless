@@ -15,6 +15,22 @@
   The player keeps one set of ROMs and saves for both. A test holds the
   two in step: the same ids, pictures and scripts, and every link between
   the pages.
+- **BN5's CanGard checked against BN5's own, frame by frame (issue
+  #82).** The same battle is fought in BN5's engine and in BN6's with
+  CanGard moved in, and compared every fight frame (`build.py xdiff`):
+  CanGard alone, idle or under 62 of MegaMan's inputs, each of its six
+  versions, behaves the same in both over 1200 frames, its reticle
+  appearing, walking and striking on the same frames for the same damage.
+  Every difference the comparison found was the two engines' own, each
+  written down with both games' routines, none in what was moved; none is
+  let pass on CanGard's own objects, where the engine's own numbers are
+  read as BN6's (the collision tables' words, the order sprites are drawn
+  in, an object's slot). Beside a Mettaur,
+  which each game runs by its own code, CanGard is compared until the
+  Mettaur's shockwave changes MegaMan's panel. Eleven deliberate breaks
+  of the move are each caught, among them an effect spawned with BN5's
+  number.
+
 - **BN5's CanGard fights in BN6's own battles (issue #82).** Where Team
   Colonel's ROM sits beside BN6's, its CanGard is moved into BN6's battle
   engine as the game starts: its code and its reticle's copied from the
@@ -22,8 +38,8 @@
   laid out BN6's way, its sprite, the reticle's and its muzzle's blast
   listed where BN6 has room, its six versions' names, HP and damage read
   from BN5's records. In a battle beside a Mettaur it guards, locks its
-  reticle onto MegaMan's panel and fires, by BN5's own code for it (a
-  frame-by-frame comparison with BN5's battle is still to come); frozen, bubbled,
+  reticle onto MegaMan's panel and fires, by BN5's own code for it;
+  frozen, bubbled,
   paralysed or dragged it lets its reticle go; each version can be
   deleted, and BN6's own battles play the same with it installed
   (`tools/xfamily.py`). Only the dev steps meet it so far (`0:foes

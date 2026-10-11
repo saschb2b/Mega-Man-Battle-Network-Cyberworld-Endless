@@ -484,9 +484,78 @@ and its calls aimed again (`src/emu/xvirus.c`):
   delete counts and its rare versions' byte untouched (BN6's own
   Mettaur, deleted the same way, changes them); and BN6's own Mettaur
   plays the same frame for frame with CanGard installed. What is not
-  checked: CanGard against BN5's own, frame for frame (the differential,
-  next), a real chip's hit on it (the status step sets what a hit
+  checked there: a real chip's hit on it (the status step sets what a hit
   leaves), and its guard against each kind of chip.
+- **The differential** (`--xdiff`, `tools/xdiff.py`, `build.py xdiff`;
+  docs/DEVTOOLS.md, The differential): CanGard in BN6's engine against
+  CanGard in BN5's own, one battle fought in each, frame by frame by each
+  battle's timer, every byte of its objects (and MegaMan's, the panels,
+  the order they run in, the sounds begun, the RNG words) read in BN6's
+  numbers and each structure through its own layout, every difference
+  explained or a failure. Its specs (`tests/xdiff`): `cangard_v1`, V1
+  alone at (6,2) against MegaMan idle at (2,2) with 100 HP: the same over
+  1200 fight frames, and in both what BN5's battle is known to do (its
+  states 8, 9 at t3, 8, 10 at t5, a cycle of 129 frames then 97; its
+  reticle on (6,2) at t17, a panel on at t23 and every 12 frames to (2,2)
+  by t59, sound 0xAE at t76 as it fires; MegaMan 10 HP down at t85, 279,
+  473, 667, 861 and 1055, every other strike, the others while he still
+  flashes). `cangard_v1_keys`, the same with 62 inputs by the timer (41 taps
+  of B, three held to charge, 18 steps between rows and columns) and
+  MegaMan at 2000 HP: the same over 1200 frames, CanGard struck 15 times
+  and only in its firing state (10), holding its guard (9) each time
+  MegaMan stands out of its row. Its five other versions alone, as
+  `cangard_v1` (2000 HP; CanladEX 3000): the same over 1200 frames each,
+  its reticle striking for 40, 70, 100, 150 and 200 (its own table, BN5's
+  `0x0810912E`, not struct2's) and walking a panel in 10 frames, then in
+  5 from V3 (V1's 12). `cangard_mettaur`,
+  the issue's formation (CanGard at (5,2), a Mettaur at (4,3)), a smoke
+  spec: the Mettaur's own AI data differs from t35 (each game runs its own
+  Mettaur, its shockwave and its step's effect: the spec's natives), and
+  CanGard is compared on while its world stays the same: the same to
+  t134, inconclusive at t135, where BN6's shockwave (22 frames a panel
+  against BN5's 25) reaches MegaMan's panel three frames before BN5's;
+  CanGard's objects stay the same after it to t362. No difference found
+  was CanGard's code, its state table, an id, an offset, a call's twin or
+  a table's entry: each was the engine's, each explained in
+  `tests/xdiff/legit.json` by both games' routines. No mask touches
+  CanGard's own records, its reticle's or its effects' in any spec: what
+  the engine writes there in its own numbers is read as BN6's, as an
+  enemy id is: the collision data's alliance words (BN6's entries of the
+  table by alliance and region mostly carry bit 0x80 where BN5's do not,
+  so each BN5 word is read as the BN6 entry at its place, and a hit's word
+  as the OR of those it is made of), the renderer's tile place and palette
+  slot (their rank among the family's own that frame: the counts run over
+  everything drawn, MegaMan's blinking sprite among it), an object's slot
+  (from its own). On what is not CanGard's:
+  each game's panel restore timers (their bytes and values pinned);
+  the blink of an object flashing after a hit, on the other frames;
+  MegaMan's own sprites and the place of his charge glow; the player's AI
+  data +0x0F BN6 sets as the Custom screen closes; BN6's panel
+  reservation flag; BN5's buster's one more random draw; BN6's buster
+  sound on a player a hit's sound holds; the hit spark's frame more of
+  life. BN5's split of a hit's result (by the hitter's side, +0x6C and
+  +0x70) and of its modifier (+0x18, +0x19) is no mask but held to its
+  rule, the OR BN5 makes of them, compared with BN6's one word; BN6's own
+  bytes of a hit (its multiplier and elements, +0x74-0x7B) must be 0,
+  as they are where no element is in play. The comparator can fail: eleven
+  breaks of the install as a transplant bug would make them (an
+  immediate, a state number and an offset left as BN5's, a call aimed at
+  nothing or at its wrong twin, a grown table's entry, a number in its
+  data, the muzzle's effect id left as BN5's, alone and beside the
+  Mettaur, the strike's effect id, the reticle's collision region) each
+  fail their spec, nine of them where every timeline check still holds (`build.py xdiff
+  --mutations`). What it does not reach: CanGard deleted, struck by a
+  chip, or beside BN5's other families; an element in play; BN6's freeze
+  and bubble (BN5 has neither; `tools/xfamily.py` covers them in BN6
+  alone); an extra object the subject spawns that the reference has none
+  of, whose owner (+0x4C) names MegaMan's or a native's (only the spawns'
+  call sites, per-core hooks, would say whose code made it); a family
+  that draws random numbers, which needs each
+  draw replayed by the core it is made in (per-core hooks; CanGard draws
+  none); and a family whose objects flash after a hit or step onto
+  panels, where the engine's own bits differ (the blink's phase, BN6's
+  reservation flag): masked on MegaMan, they fail on a family's records
+  until they too are read as BN6's.
 - **Families after CanGard** (issue #82's survey of BN5's 30, static
   only): 17 more take CanGard's recipe as it is (Handi, Shakey, Trumpy,
   NinJoy, WindBox, BomBoy, Catack, Drixol, Batty, Marina, Flashy, Eleogre,
@@ -496,8 +565,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
   Appley need what BN5's dispatcher does for their ids, Cactikil and
   WuNote their attacks' objects of the first kind. Every routine a new
   family calls has its body compared with BN6's before it is paired.
-- **Not yet**: CanGard against BN5's own frame for frame, the families
-  after it, their drop rows, their place in formations (a game-design
+- **Not yet**: the families after CanGard, their drop rows, their place in formations (a game-design
   pass), and BN6's three 35-word per-AI tables, which a fourth family
   would need moved. The New 3DS keeps no BN5 ROM: no family is installed
   there. A state saved while a moved family is in battle needs the same

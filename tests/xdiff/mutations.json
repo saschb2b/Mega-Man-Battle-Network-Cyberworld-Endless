@@ -1,0 +1,93 @@
+{
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would, and the spec named must FAIL on it. BN5 addresses are written to their copy; nothing of the ROMs here.",
+ "mutations": [
+  {
+   "name": "an immediate",
+   "spec": "cangard_v1",
+   "poke": [
+    "08108F12:0540"
+   ],
+   "what": "the fire state's flag (lsls r0,r0,#0x16: 0x400000) shifted one less (0x200000): the wrong flag set as it fires"
+  },
+  {
+   "name": "a state number not moved",
+   "spec": "cangard_v1",
+   "poke": [
+    "081090C6:2007"
+   ],
+   "what": "the guard's CurAction left at BN5's 7 (BN6's frozen state) where the recipe makes it 9"
+  },
+  {
+   "name": "an offset not moved",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C9636:6EB8"
+   ],
+   "what": "the reticle's read of a hit's flags left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "a call aimed at a routine of nothing",
+   "spec": "cangard_v1",
+   "call": [
+    "0800E9DC:0810A953"
+   ],
+   "what": "the veneer to BN6's counter time aimed at the families' empty hook"
+  },
+  {
+   "name": "a call aimed at the wrong twin",
+   "spec": "cangard_v1",
+   "call": [
+    "0801A152:0801A15C"
+   ],
+   "what": "the veneer to BN6's routine that sets an object's flag (0x0801A152) aimed at its neighbour that clears it (0x0801A15C)"
+  },
+  {
+   "name": "a table entry",
+   "spec": "cangard_v1_keys",
+   "poke": [
+    "08B30380:0810A953:4"
+   ],
+   "what": "AI 32's entry of the grown per-frame table (table 3) the empty hook: the reticle no longer let go as MegaMan leaves the row"
+  },
+  {
+   "name": "a number in its data",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C9624:0A0B"
+   ],
+   "what": "the reticle's frames a panel for V1 11 where BN5 has 12"
+  },
+  {
+   "name": "an effect id not moved",
+   "spec": "cangard_v1",
+   "poke": [
+    "08108FB6:3457"
+   ],
+   "what": "the muzzle blast spawned with BN5's effect id 0x57 (adds r4,#0x57) where the recipe gives BN6's 0x6C: in BN6's numbers another effect, which only the reference can say is the family's"
+  },
+  {
+   "name": "an effect id not moved, beside a native",
+   "spec": "cangard_mettaur",
+   "poke": [
+    "08108FB6:3457"
+   ],
+   "what": "the same break in the smoke spec: the family's world is still the same at its first blast (the Mettaur's own differences compared on), so it must fail there"
+  },
+  {
+   "name": "the strike's effect id",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C9660:240F"
+   ],
+   "what": "the reticle's strike spawning effect 0x0F where BN5's spawns 0x0E (movs r4,#0xe)"
+  },
+  {
+   "name": "a region number",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C95DE:2106"
+   ],
+   "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "about": "CanGard V1 at (5,2) beside a Mettaur V1 at (4,3), the issue's formation, MegaMan idle at (2,2) with 2000 HP: a smoke spec. The Mettaur is each game's own code (a native): its own differences are compared on while the family's world (MegaMan, the RNG, the songs, the run order, the panels) stays the same, and the spec is inconclusive where that world first differs",
+ "kind": "smoke",
+ "foes": "4F@52,01@43",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "natives": [
+  "0x01"
+ ],
+ "native_attacks": [
+  "0x16"
+ ],
+ "native_effects": [
+  "0x14"
+ ],
+ "natives_why": "Enemy 0x01, the Mettaur, in both games; its shockwave is the third kind's type 0x16 in both (each spawned by the Mettaur or the shockwave before it: their +0x4C); its step spawns effect 0x14 in both (BN5 0x0810514E-0x08105150 / BN6 0x0810B072-0x0810B074: movs r4,#0x14 and the effect spawner, BN5 0x080DFFD2 / BN6 0x080E1932), and no spec without the Mettaur shows that effect",
+ "expect": {
+  "reticle_type": "0xD1",
+  "reticle_damage": 10
+ }
+}
