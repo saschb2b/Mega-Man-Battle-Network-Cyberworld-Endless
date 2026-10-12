@@ -47,7 +47,7 @@
 #define BN6_CHIP_GATE         0x1E        /* ChipGateUsageLimit: the BattleChip Gate's (Japan's physical reader) */
 #define BN6_CHIP_IN_LIBRARY   0x40        /* BN6_CHIP_EFFECT_FLAGS: listed on the PET's Library screen, by its library number */
 #define BN6_CHIP_SHOWS_POWER  0x02        /* BN6_CHIP_EFFECT_FLAGS: its power shown (the pack's sort by power, the Custom screen) */
-#define BN6_CHIP_COMPUTED_POWER 0x80      /* BN6_CHIP_EFFECT_FLAGS: its power one BN6 computes (BN6_CHIP_ATTACK_POWER 1001 and up: bn6f sub_8010C76's table) */
+#define BN6_CHIP_COMPUTED_POWER 0x80      /* BN6_CHIP_EFFECT_FLAGS: its power one BN6 computes (BN6_CHIP_ATTACK_POWER 1000 and up: BN6_CHIP_POWERS) */
 #define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
 #define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
 #define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f
@@ -75,6 +75,9 @@
 #define BN6_EXIT_ATTACK       0x08011714u /* object_exitAttackState: the attack ended (AttackVars +0x1B, AIData +0x44's bits, CurAction 8) */
 #define BN6_CHIP_ROUTINES     0x0802CCB4u /* the support family's routines by subfamily (0x00-0x29, BN6_CHIP_ROUTINE_COUNT), the Navi chips' after them: */
 #define BN6_CHIP_ROUTINE_COUNT 0x2A
+#define BN6_CHIP_POWERS       0x080109DCu /* the computed powers' routines (a chip's power of 1000 and up: the routine by power - 1000, r0 the */
+#define BN6_CHIP_POWERS_COUNT 45          /* ... chip, r1 its side; bn6f 0x080109A4's table), 45 of them, code after */
+#define BN6_CHIP_POWERS_REF   0x080109D4u /* ... the one word naming the table (0x080109C2: ldr r2, then by the power's index) */
 #define BN6_NAVI_ROUTINES     0x0802CD5Cu /* ... from entry 0x2A, by the Navi chip's subfamily (BN6_NAVI_ROUTINE_COUNT) */
 #define BN6_NAVI_ROUTINE_COUNT 29
 #define BN6_CHIP_ROUTINES_REF 0x080ED138u /* the support family's literal naming BN6_CHIP_ROUTINES (0x080ED0EE: ldr r3, then by AttackVars +3) */

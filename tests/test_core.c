@@ -3234,6 +3234,7 @@ static void test_free_space(void) {
 	const Region code[] = {
 		{ "the attack families", FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END }, { "the support routines", XC_SUPPORT, XC_SUPPORT + 4u * XC_ROUTINES },
 		{ "the Navi routines", XC_NAVI, XC_NAVI + 4u * XC_ROUTINES }, { "their stubs", XC_STUBS, XC_STUBS_END },
+		{ "the helpers' code", XC_HELPERS, XC_POWERS }, { "the computed powers", XC_POWERS, XC_POWERS + 4u * 256u },
 		{ "the units' homes", XC_HOMES, XC_HOMES + XC_HOME_SIZE * XC_UNITS }, { "the units' code", XC_CODE, XC_ART }, { "what they draw", XC_ART, XC_END },
 	};
 	regions_apart("the chips' code", code, (int)(sizeof code / sizeof *code), FREE_CHIP_CODE, FREE_TAIL);
@@ -3242,6 +3243,8 @@ static void test_free_space(void) {
 	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
 		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= 0x100,
 		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls' apart");
+	CHECK(XC_POWER_FIRST >= BN6_CHIP_POWERS_COUNT && XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT <= 256 && XC_POWERS + 4u * 256u <= XC_HOMES,
+		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
 	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
 		"free space: the units' routines past BN6's own, its Navi chips' right after its support chips'");
 	/* (BN6's RAM: persistent, then per battle) */
@@ -3736,7 +3739,7 @@ static void test_xtext(void) {
  * order; the moved chips (src/core/xchips_moved.c) each a registry row of
  * XREG_MOVED playing a unit's number, and every such row one of them. */
 static void test_chip_code(void) {
-	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_HOMES }, helpers = { XC_HELPERS, XC_HOMES, XC_ART, XC_END, XC_STUBS, XC_HOMES };
+	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_POWERS }, helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
 	char why[160] = "";
 	CHECK(xchips_bn5_count >= 4 && xchips_bn5_count <= XC_UNITS, "chips' code: %d units", xchips_bn5_count);
 	bool units = false;
@@ -3766,7 +3769,9 @@ static void test_chip_code(void) {
 			unit = u->kind == XCHIP_ATTACK ? m->family == u->number
 			                               : m->family == (u->kind == XCHIP_SUPPORT ? BN6_CHIP_SUPPORT_FAMILY : BN6_CHIP_NAVI_FAMILY) && m->sub == u->number;
 		}
-		CHECK(r && r->how == XREG_MOVED && unit && xchips_moved_of(m->bn6) == m, "chips' code: moved chip %d a moved row playing a unit", m->bn6);
+		CHECK(r && (r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK) && unit && xchips_moved_of(m->bn6) == m,
+			"chips' code: moved chip %d a moved row, or a Program Advance's or a DarkChip's waiting for its rule, playing a unit", m->bn6);
+		moved += r && r->how != XREG_MOVED;
 	}
 	for (int i = 0; i < xreg_count; ++i)
 		if (xreg_rows[i].how == XREG_MOVED) {
@@ -3781,7 +3786,8 @@ static void test_chip_code(void) {
 		for (int k = 0; k < xchips_bn5[i].nsongs; ++k) {
 			const XcSong *x = &xchips_bn5[i].songs[k];
 			++songs;
-			CHECK(x->slot >= 0x26 && x->slot <= 0x62, "chips' code: %s's sound %#x at slot %#x, one of BN6's empty ones", xchips_bn5[i].code.name, x->song, x->slot);
+			CHECK(x->slot >= 0x40 && x->slot <= 0x62, "chips' code: %s's sound %#x at slot %#x, one of BN6's empty ones the sounds take", xchips_bn5[i].code.name,
+				x->song, x->slot);
 			for (int j = 0; j <= i; ++j)
 				for (int q = 0; q < xchips_bn5[j].nsongs && (j < i || q < k); ++q) {
 					const XcSong *y = &xchips_bn5[j].songs[q];
@@ -3868,6 +3874,22 @@ static void test_chip_records(void) {
 	xrec_from_bn5(&in, out);
 	CHECK(out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && out[BN6_CHIP_SUBFAMILY] == XREC_INERT_SUB && !out[BN6_CHIP_LOCK_ON] && !out[BN6_CHIP_PARAMS] &&
 		!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: one whose code BN6 lacks inert, its computed power (BN5's) none");
+	in.twin = twin;
+	xrec_from_bn5(&in, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + 0xAD && out[BN6_CHIP_EFFECT_FLAGS] == 0x9A && out[BN6_CHIP_FAMILY] == 0x30,
+		"records: a twin's computed power (CustSwrd's 1045) at BN6's grown entry, still computed and shown (%d, %02x)", get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
+	in.twin = NULL;
+	const XChipMoved moved = { 474, 0x77, 0 };
+	in.moved = &moved;
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1073);
+	xrec_from_bn5(&in, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + 0xC9 && out[BN6_CHIP_EFFECT_FLAGS] == 0x9A && out[BN6_CHIP_FAMILY] == 0x77,
+		"records: a moved chip's computed power (CusVolt1's 1073) at BN6's grown entry (%d, %02x)", get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1048);
+	xrec_from_bn5(&in, out);
+	CHECK(!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: a computed power no helper moved: none");
+	for (int i = 0; i < xchips_powers_count; ++i)
+		CHECK(xchips_powers[i].bn6 >= 0x80 && xchips_powers[i].bn6 == 0x80 + xchips_powers[i].bn5, "records: BN5's computed power %d at BN6's entry 0x80 + its own", 1000 + xchips_powers[i].bn5);
 	const uint32_t blank[3] = { 0x087237D0u, 0x086F3AF0u, 0x086F3AF0u };
 	XChipReg dark = { 187, 214, XREG_DARK, 142, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 0, 99 };
 	xrec_placeholder(&dark, 33, blank, out);

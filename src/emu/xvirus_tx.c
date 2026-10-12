@@ -11,8 +11,9 @@
 #include "emu.h"
 #include "xvirus.h"
 
-#define TX_BYTES  0x40000   /* a step's bytes at most: the engine's room grown (its reward rows 40 KB), or a family with its sprites */
-#define TX_WRITES 256
+#define TX_BYTES  0x80000   /* a step's bytes at most: the engine's room grown (its reward rows 40 KB), a family with its sprites,
+                               or the chips' units with theirs (past 245 KB with ElemRage's), held while the step lasts */
+#define TX_WRITES 512       /* (the chips' units' writes past 256 with CusVolt's: each unit's blocks, veneers, entry, sounds and art) */
 
 static struct {
 	uint8_t *bytes;
@@ -54,7 +55,8 @@ uint32_t xv_used(void) { return tx.used; }
 
 uint8_t *xv_put(uint32_t at, uint32_t len, bool fresh) {
 	if (tx.failed) return NULL;
-	if (tx.n >= TX_WRITES || len > TX_BYTES - tx.used) { xv_fail("more to write than %u bytes", (unsigned)TX_BYTES); return NULL; }
+	if (tx.n >= TX_WRITES) { xv_fail("more writes than %d", TX_WRITES); return NULL; }
+	if (len > TX_BYTES - tx.used) { xv_fail("more to write than %u bytes", (unsigned)TX_BYTES); return NULL; }
 	if (fresh)
 		for (uint32_t i = 0; i < len; ++i)
 			if (emu_read8(at + i) != 0xFF) { xv_fail("%08x is not free", (unsigned)(at + i)); return NULL; }

@@ -19,6 +19,7 @@ src/emu/xattack_grow.h), or an entry of the grown support or Navi routines' tabl
 
 Local only: both ROMs. Nothing of either is written: the C files hold addresses, counts and CRC32s."""
 import argparse
+import json
 import os
 import sys
 import zlib
@@ -27,6 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xrecipe as X  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
 from xrecipe_family import BN5, BN6, Deriver, Family, kind_name  # noqa: E402
+import xrecipe_family as F  # noqa: E402
 from xrecipe_pairs import Pairs  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,6 +51,10 @@ BN5_SET_ATTACK = 0x0800F200                                     # setAttack0-6 (
 # its virus code shared by families, and the engine's helpers the units call that BN6 has no twin of (each its why)
 COPY_RANGES = ((0x080B0000, 0x08104AC0), (0x080E0000, 0x080F2000))
 COPY_HELPERS = {
+    0x08016634: "an object's element set (r0: its +0x0E and its collision data's +2, both the same place in BN6's layouts: "
+                "legit.json's collision layout's first 0x14 bytes alike); BN6 has no routine of its body",
+    0x080127E0: "MegaMan's mood raised (r0 his side, r1 the amount; RedFrut's 0x32): his NaviStats +0xE (BN6's the same place, "
+                "bn5_twins' audit of 0x08010D18) plus the amount, at most 0xFE, where not 0; BN6 has no routine of its body",
     0x08012530: "the swords' reach (Z Saver's, CustSwrd's, MoonBld's, Katana's): the first panel ahead with a foe on it, each panel "
                 "tested by its flags against the side's mask (0x080125B8, through 0x0800AFB0) and 0x0800B348's object test along "
                 "the rows of 0x080125C0; BN6 has no routine of its body (none found by the pairs' search), its calls BN6's twins",
@@ -56,13 +62,30 @@ COPY_HELPERS = {
 # Routines copied though BN6 has a twin of the same body, and object types moved though BN6's runs the same code: where the
 # data they read is BN6's own and another (each found by the chips' differential, tests/xdiff)
 FORCE_COPY = {
+    0x080D32FE: "the moon blade's sweep (MoonBld's): BN6's twin 0x080D750A the same code, its hit's stat effect 0x18 by BN6's rule "
+                "(HIT_STATS: a virus struck by it bugged, chip_moonbld1's CanladEX losing 1 HP at t78), BN5's to be given BN6's terms",
+    0x080D3340: "the moon blade's hit (MoonBld's): BN6's twin 0x080D754C, the same, called from the sweep",
+    0x080CA454: "the shield's spawner (Guard's, CrsShld's): BN6's twin 0x080CB050 spawns BN6's type 0x2B",
+    0x080CA33C: "the shield's first state: BN6's twin 0x080CAF38 the same code, reading its own table of kinds (0x080CAED4), "
+                "BN5's (0x080CA2D8) another sprite at CrsShld3's row",
     0x080093A2: "the Anti chips' trap sprung: BN5's own (its effect 0x2B where the trap was, and sound 0xA5); BN6's twin "
                 "(0x0800ABC6) spawns its own effect 0x46 lower down",
     0x080C7614: "the shockwave's spawner (Guard's, the reflected wave): BN6's twin 0x080C8554 spawns BN6's type 0x16",
+    0x080E3898: "the Anti chips' counter's second state (its actions by +9, 0x080E38AC): BN6's twin 0x080E4904 the same code, "
+                "copied to reach its strike (0x080E38BC)",
+    0x080E38BC: "the Anti chips' counter's strike (its actions' third, 0x080E38AC's): BN6's twin 0x080E4928 the same code, "
+                "its strike (BN5 0x080E3900, BN6 0x080E4970) spawning the explosion through each game's own spawner (BN5 "
+                "0x080E32EC, BN6 0x080E4328), not the same to its depth (FORCE_MOVED's (4, 0x2B))",
 }
 FORCE_MOVED = {
+    (3, 0x2B): "the shield: BN6's type 0x2B runs the same code but reads its kinds' sprites from its own table (BN6 0x080CAEEC), "
+               "BN5's (0x080CA2F0) another at its last row (list 3 0x1B in BN5, 0 in BN6: CrsShld3's); chip_crsshld1_reflect read "
+               "the two tables' places apart",
     (3, 0x16): "the shockwave: BN6's type 0x16 runs the same code but reads its kinds from its own table (BN6 0x080C8370), BN5's "
                "(0x080C7448) another: speed and reach by kind (chip_guard1_reflect: BN6's wave a panel ahead from its first)",
+    (4, 0x2B): "the Anti chips' counter: BN6's type 0x2B runs the same code but spawns its explosion through its own spawner "
+               "(BN6 0x080E4328, its hit by 0x080E4378), BN5's (0x080E32EC, by 0x080F625A) another below (chip_antifire: the "
+               "explosion's spawn BN5's moved code's in BN5, BN6's own in BN6)",
 }
 # BN5's routines a unit calls whose work no battle a run fights does, aimed at the chips' stubs (src/emu/xchips_code.h,
 # XC_STUBS) instead of copied: a panel claim's two spawners (AqWhirl's, DrilArm's and Guard's wave's). Each spawns the
@@ -76,7 +99,7 @@ FORCE_MOVED = {
 # Beast Link Gate). No run's battle is one (no link, the director sets neither); BN5 sets its own bit in one place too,
 # 0x0802D594 (from 0x08006D2A), where the battle's type is not 1 and MegaMan's +0x2A is 1 or more (docs/MULTIROM.md,
 # The chips' code)
-STUB_ZERO = 0                             # (XC_STUBS + 0: movs r0,#0; bx lr)
+STUB_ZERO = 0                             # (XC_STUBS + 0: movs r0,#0; mov pc,lr)
 STUBS = {
     0x080EA08C: (STUB_ZERO, "a panel claim's spawner: its gate (0x080090E8, the battle's bit 0x40) clear in every battle a run "
                             "fights, r0 0 as BN5 answers then"),
@@ -86,20 +109,63 @@ STUBS = {
 # installed once, before the units, from XC_HELPERS; a unit's call to its routine aimed at its copy. (BN5's routine, the
 # project's name, why)
 HELPERS = (
-    (0x080B9CAE, 'MuzzleFlash', "the muzzle flash's spawner (r4 its number in the flash's table and the words it keeps, r7 "
+    ((0x080B9CAE,), 'MuzzleFlash', "the muzzle flash's spawner (r4 its number in the flash's table and the words it keeps, r7 "
                                 "where it puts the flash): the first kind's 0x05, which BN6 runs other code for (its forms' "
                                 "and Beast Out's own tests, its own table's numbers), moved once for every unit"),
-    (0x080EBB96, 'BusterArm', "MegaMan's arm for a buster-like chip (0x080EBB96 and the routine it calls, 0x080EBBA6: SideBub's, "
+    ((0x080EBB96,), 'BusterArm', "MegaMan's arm for a buster-like chip (0x080EBB96 and the routine it calls, 0x080EBBA6: SideBub's, "
                               "SpShake's, Pulsar's, WoodNos's, CactBal's, BN5's plain buster's too): its muzzle flash by his "
                               "form, through MuzzleFlash; one copy, so that BN5's own buster's calls are no unit's"),
+    ((0x080D3286,), 'Shake', "the shake's spawner (the third kind's 0x68: SpShake's, and the misc family's ShakPar's), the shake's "
+                             "code with it: the dispatch moves a type once, so one copy for both units"),
+    # (the computed powers, POWERS: each a routine BN5's table of computed powers names, 0x0800E728 by the record's power - 1000)
+    ((0x0800EA18,), 'PowerCustSwrd', "CustSwrd's power (1045): by the Custom gauge (BN5 0x0801A8D0)"),
+    ((0x0800EB06, 0x0800EB0C, 0x0800EB12), 'PowerCusVolt', "CusVolt1-3's powers (1073-1075): by the Custom gauge, from 10, 30, 50"),
+    ((0x0800E8D6,), 'PowerSP', "a Navi chip SP's power (1002-1021): by BN5's best deletion times (0x0203E560), which BN6 keeps none of "
+                               "for BN5's Navis: a link battle's fixed power taken (UNIT_STUBS, docs/MULTIROM.md)"),
+    ((0x0800E9A8,), 'PowerDS', "a Navi chip DS's power (1023-1044): by the side's battle counter 3 (BN5 0x0800931C, BN6 0x0800AB3A)"),
 )
+# BN6's table of computed powers (a chip's power of 1000 and up: the routine by power - 1000, BN6 0x080109A4 with 45 of its
+# own at 0x080109DC) grown to 256 at XC_POWERS: BN5's entry i at BN6's POWER_FIRST + i, its routine one of the helpers'
+BN5_POWERS, BN5_POWER_COUNT = 0x0800E728, 76
+POWER_FIRST = 0x80
+# Tables of routines a family runs by its subfamily, by the unit's label: BN5's table: (its entries, why). An entry no
+# subfamily of the unit's chips names (the registry's rows of its family moved, or waiting as a DarkChip or a Program
+# Advance) is aimed at the Navi stub (XC_STUBS + 4: mov pc,lr) and not walked: BN6's own chips of the family (XREG_SAME)
+# run BN6's own code, so those subfamilies never run from the copy (a call to one from the unit's code a decision)
+SUB_TABLES = {
+    'Bombs': {0x080EBD4C: (15, "the bombs' spawners by subfamily (0x080EBCF2: AttackVars +3)")},
+    'Misc': {0x080EC818: (27, "the misc family's routines by subfamily (0x080EC7E4: AttackVars +3)")},
+}
+SUB_STUB = 4
+# Calls aimed at the chips' stubs in one unit alone (by its label): the SP power's gate (0x080090E8, the battle's link bit)
+# answering 1, so BN5's fixed powers of a link battle are taken (0x0800E95C) where BN5 reads its own deletion times
+UNIT_STUBS = {
+    'PowerSP': {0x080090E8: (8, "the link bit asked: 1, BN5's fixed power taken (BN6 keeps no deletion time of BN5's Navis)")},
+    # (ElemRage's flame's place: BN5's point 0x14 of MegaMan's sprite, (-1, 26) in every one of his rows, BN6's 0x14 another,
+    # (20, 25), and none of BN6's (1, 26): the call answered with BN5's numbers, POINTS)
+    'ElemRage': {0x08015164: (0x10, "MegaMan's point 0x14, (-1, 26) in each of BN5's rows (0x080151C4 on): BN5's numbers")},
+}
 # The object types a helper moves, for every unit (the units spawn them through the dispatch, the helper's copy run)
-HELPER_TYPES = {(1, 0x05): 'MuzzleFlash'}
+HELPER_TYPES = {(1, 0x05): 'MuzzleFlash', (3, 0x68): 'Shake'}
 # Raw data whose extent no walk tells (a table read by a number made elsewhere): its bytes
+# Routines a unit hands a table of routines to, in a register (its number): the table's every entry walked and moved or
+# aimed at its twin, as a jump table's (the family deriver stops a table at its first entry far from it)
+TABLE_ARGS = {
+    0x08017FCC: 0,   # an obstacle's states (BN6 0x0801B394): r0 its actions' routines by CurAction (BoyBomb's bomb, 0x080CD024)
+}
 # Code in a block no walk reaches, no word, call or branch of the ROM naming any of its halfwords (searched): copied as it is,
 # never run (the walk's 'unreached' decision taken)
 DEAD_CODE = {
     0x080DA27C: "AqWhirl's: between 0x080DA27A's branch past it and its target 0x080DA28E",
+    0x080CD346: "BoyBomb's bomb's: after 0x080CD344's branch past it to 0x080CD380 (its own loop's branches its only)",
+}
+# ROM data a unit's literal names that BN6 keeps none of, copied with the unit (moved as its block's): its bytes
+DATA_COPY = {
+    0x0801D27A: (0x120, "the Navi chips' SP and DS powers by time and by counter (13 rows of 11 u16), BN5's alone"),
+}
+# Literal words a unit's code holds that no BN6 run reads (their path a stub makes dead): kept as they are, by the unit
+UNREAD_WORDS = {
+    ('PowerSP', 0x0203E560): "BN5's best deletion times, read only past the link bit's test, which UNIT_STUBS answers 1",
 }
 # Sprite loads by a table a helper's art sets (helper_art): BN5's load site, its table
 TABLE_LOADS = {0x080B9BB2: 0x080B9A5C}
@@ -111,12 +177,17 @@ TABLE_SPRITES = {
     0x080C5EEC: (0x080C5DF4, 16, 5, 6, 12, None),   # the bubbles' kinds (SideBub's): 12 rows to the code at 0x080C5EB4
     0x080C49B0: (0x080C4800, 12, 5, 6, 31, None),   # the third kind's 0x00's kinds (Guard's): 31 rows to the code at 0x080C4974
     0x080C74D2: (0x080C7448, 4, None, 0, 15, 4),    # the shockwave's kinds (Guard's reflected wave): 15 rows, list 4's
+    0x080CA350: (0x080CA2D8, 6, 0, 1, 10, None),
+    0x080CDAB6: (0x080CDA78, 2, 0, 1, 1, None),   # the geyser's (the bombs' 0x5), its one kind: list 3's 2
+    0x080D0C6C: (0x080D0C0C, 6, None, 0, 6, 3),   # the misc family's third kind at 0x080D0C30, by kind: list 3's 0x31 each    # the shield's kinds (Guard's, CrsShld's): 10 rows to its code at 0x080CA314
 }
 # Sprite loads of MegaMan's own sprite, whatever it is (0x0800DA6A's list and number: his body's), each game's own: BN5's
 # load site: why
 MEGAMAN_LOADS = {
     0x080E3648: "the swords' afterimage (the fourth kind's 0x28): MegaMan's own sprite, its list and number 0x0800DA6A's, BN6's "
                 "own in BN6 (his body's look, the mask 'MegaMan's own sprite')",
+    0x080BA850: "BN5's family 0x49's afterimage (the first kind's 0x0A, at 0x080BA944): MegaMan's own sprite, its list and "
+                "number 0x0800DA32's by his NaviStats +0x2C and +0x29, BN6's own in BN6",
 }
 # Effect ids a unit's code reads from a byte table of its own: BN5's spawn site: (the table, a row's size, the id's offset,
 # its rows); each row's id BN6's twin of it or the chips' own (effect_of), set in its byte (u.bytes)
@@ -125,17 +196,44 @@ TABLE_EFFECTS = {
     0x080EC016: (0x080EC110, 1, 0, 8),   # CustSwrd's slash by its kind, 0x16-0x1C and 0x28
     0x080EFC72: (0x080EFCC8, 1, 0, 2),   # Katana's two slashes, 0x17 and 0x16 (its +0x12 less one)
     0x080DAE4E: (0x080DAE74, 3, 2, 4),   # ElcReel's four sparks' rows (x, y, effect: 0x64, 0x65)
+    0x080CEF66: (0x080CEEBC, 1, 0, 4),   # the seeds' splash by kind (0x080CEE70: r2, on as r4 at 0x080CEF5E): 0x29, 0x29, 0x54, 0x55
+    0x080CEFA0: (0x080CEEBC, 1, 0, 4),   # ... the same, its second spawn (0x080CEF7A)
+    0x080C9454: (0x080C94D0, 1, 0, 4),   # the crack bombs' cracks by kind (+4 & 3), handed to 0x08018838 (EFFECT_CALLS): 0x50-0x53
+    0x080C6DD6: (0x080C6C08, 6, 2, 20),  # the spread shot's burst by kind (its +0x60's row, byte 2; 20 rows to its code)
+    0x080C6DBE: (0x080C6C08, 6, 2, 20),  # ... the same, handed to 0x08018838 (EFFECT_CALLS) where it bursts in a pattern
 }
 # Panel types an object sets from a table of its own (setPanelType's r2 a row's byte): BN5's call site: (the table, a row's
 # size, the type's offset, its rows); a row of BN5's lava, sea or holy given BN6's number (u.bytes), 0xFF none
 TABLE_PANELS = {
     0x080C4AAA: (0x080C4800, 12, 8, 31),   # the third kind's 0x00's kinds: rows 20 (sea) and 26 (lava)
+    0x080CEEE0: (0x080CEEB8, 1, 0, 4),     # the seeds' panels by kind (0x080CEE8A: r2, on as r5): ice, sea, grass, lava
+    0x080E2CBC: (0x080E2A34, 20, 0, 20),   # the panel changer's kinds (the fourth kind's 0x1F, by its +4): ElemRage's 0xB plain
+}
+# BN5's panel types BN6 has none of: its 5 the magnet panel (MagPanl's, its flags 0x10210: docs/ROM_DATA.md, Battlefields;
+# ElemRage's Elec), which xpanels.c brings in no more than BN6 has it. A table's row of it left as BN5's where no moved unit
+# reads that row (TABLE_PANELS: the panel changer's kind 4, MagPanl's alone), or given ABSENT_PANEL where a moved unit
+# compares a panel's type with it (PANEL_LOOKUPS)
+PANELS_ABSENT = {0x5: "the magnet panel"}
+ABSENT_PANEL = 0xFE   # (a type no panel has, short of the 0xFF that ends a lookup)
+# Rows a moved unit reads of TABLE_PANELS' tables, where rows of a type BN6 lacks stand among them: BN5's site: the rows
+TABLE_PANEL_ROWS = {0x080E2CBC: {0xB: "ElemRage's (0x080EFE02: movs r4,#0xB)"}}
+# Tables of panel types a unit compares a panel's with (BN5's table: a row's size, the type's offset, its rows, why): each
+# row's BN5's lava, sea or holy given BN6's number, a type BN6 lacks ABSENT_PANEL, 0xFF (the end) kept
+# Panel types set from a value no table holds, each its case: BN5's site: why it sets none BN6 numbers otherwise
+PANEL_SITES = {
+    0x080D9BA2: "ElemRage's flame (the third kind's 0x98): the type its +7's high nibble, the attack's AttackVars +0xF "
+                "(0x080EFE22: its record's AttackParam4, 0, ORed with 4 at 0x080EFDF2): 0, so it sets none (0x080D9B9C)",
+}
+PANEL_LOOKUPS = {
+    0x080EFECC: (4, 0, 6, "ElemRage's element by MegaMan's panel (0x080EFEA2: its type against each row's till 0xFF)"),
 }
 DATA_SIZES = {
     0x080C5DF4: 12 * 16,  # the bubbles' kinds (TABLE_SPRITES)
     0x080C4800: 31 * 12,  # the third kind's 0x00's kinds (TABLE_SPRITES, TABLE_PANELS)
     0x080C7448: 15 * 4,   # the shockwave's kinds (TABLE_SPRITES)
+    0x080CA2D8: 10 * 6,   # the shield's kinds (TABLE_SPRITES)
     0x080B9A5C: 58 * 5,   # the muzzle flash's table: 58 entries of 5 bytes (its sprite's list x 4 and number, ...), code at 0x080B9B80
+    0x080E2A34: 20 * 20,  # the panel changer's kinds (TABLE_PANELS): 20 rows of 20 bytes, its code at 0x080E2BC4
 }
 # The muzzle flash's numbers a call makes otherwise than by one instruction (the number its r4's low byte), each read from
 # the code: BN5's call site: (the numbers, how)
@@ -149,6 +247,8 @@ FLASH_NUMBERS = {
     0x080ED4E4: ((0x03, 0x0A, 0x32), "Slasher's: r4's low byte 0x080EC16A()'s, as Z Saver's"),
     0x080EF4C8: ((0x2C, 0x2D, 0x2E), "MrkCan's: r4 0x080EF548()'s number << 8, + 0x2C + its subfamily (AttackVars +3: 0, 1, 2 for "
                                      "MrkCan1-3)"),
+    0x080EBCD0: ((0x04, 0x1A, 0x28, 0x2A), "the bombs': r4 its halfword table's (0x080EBD88) by subfamily, the low byte the flash: "
+                                           "the played subfamilies' 4, 5, 0xA, 0xB (4), CannBall's 0x1A, SeaSeed's 0x28, LavaSeed's 0x2A"),
 }
 
 # Object types BN6's own serves though its code is not BN5's to its depth: the engine's objects every attack of both games
@@ -170,7 +270,8 @@ EMU_FREE = 0x08800000
 FREE_CHIP_CODE = EMU_FREE + 0x600000
 XC_AT = FREE_CHIP_CODE + 0x400            # FREE_CHIP_MOVED
 XC_STUBS = XC_AT + 0x800                  # the stubs (STUBS), then
-XC_HELPERS = XC_STUBS + 0x10              # ... the helpers' code (HELPERS), to
+XC_HELPERS = XC_STUBS + 0x20              # ... the helpers' code (HELPERS), to
+XC_POWERS = XC_AT + 0x1C00                # BN6's computed powers grown (256 words), then
 XC_HOMES = XC_AT + 0x2000                 # a unit's veneers, XC_HOME_SIZE each
 XC_HOME_SIZE, XC_UNITS = 0x400, 64
 XC_CODE = XC_HOMES + XC_HOME_SIZE * XC_UNITS
@@ -211,14 +312,31 @@ UNITS = (
     ('attack', 0x34, 'ZSaver'),
     ('attack', 0x54, 'Katana'),
     ('attack', 0x23, 'ElcReel'),
+    ('support', 0x3A, 'BoyBomb'),
+    ('attack', 0x1F, 'Guard'),
+    ('attack', 0x53, 'MoonBld'),
+    ('attack', 0x27, 'CusVolt'),
+    ('attack', 0x13, 'CustSwrd'),
+    ('support', 0x0C, 'Anti'),
+    ('attack', 0x49, 'Reaction49'),
+    ('attack', 0x29, 'Slasher'),
+    ('attack', 0x56, 'ElemRage'),
+    ('attack', 0x12, 'Bombs'),
+    ('attack', 0x1A, 'Misc'),
+    ('attack', 0x19, 'Vulcan'),
+    ('attack', 0x25, 'Spreads'),
+    ('support', 0x2A, 'DarkCirc'),
+    ('support', 0x1B, 'DrkSonic'),
+    ('navi', 0x00, 'NumbrMan'),
+    ('navi', 0x05, 'KnightMan'),
+    ('navi', 0x0A, 'Colonel'),
+    ('navi', 0x0B, 'ShadowMan'),
+    ('navi', 0x0C, 'TomahawkMan'),
+    ('navi', 0x0D, 'ToadMan'),
 )
 # The next units, derived for the report alone (--report) until what each needs is in: its decisions there, and the
 # chips' differential's finding where a spec ran it (docs/MULTIROM.md, The chips' code: what remains)
 CANDIDATES = (
-    ('attack', 0x1F, 'Guard'),
-    ('attack', 0x53, 'MoonBld'),
-    ('support', 0x3A, 'BoyBomb'),
-    ('attack', 0x27, 'CusVolt'),
     ('support', 0x20, 'BlakWing'),
     ('support', 0x23, 'HolyDrem'),
 )
@@ -248,7 +366,7 @@ class Unit:
 
 def entry_of(b5, kind, n):
     if kind == 'helper':
-        return n
+        return n[0] if isinstance(n, tuple) else n
     if kind == 'attack':
         return b5.u32(BN5_FAMILY_TABLE + 4 * (n - 0x10)) & ~1
     table = BN5_SUPPORT_TABLE if kind == 'support' else BN5_NAVI_TABLE
@@ -261,12 +379,19 @@ class ChipDeriver(Deriver):
 
     helper_at = {}   # (BN5's helper routines and their copies, once the helpers are derived)
 
+    unplayed = {}   # (SUB_TABLES' entries of subfamilies the unit plays none of: BN5's routine, why)
+
     def kind_of(self, f, t):
         t &= ~1
         if t in f.own:
             return 'own', None
+        if t in self.unplayed:
+            return 'engine', (XC_STUBS + SUB_STUB, 'a stub', 'STUB', self.unplayed[t])
         if t in self.helper_at:
             return 'engine', (self.helper_at[t], 'a helper', 'HELPER', 'its copy, installed once for every unit')
+        if t in UNIT_STUBS.get(f.name, {}):
+            off, why = UNIT_STUBS[f.name][t]
+            return 'engine', (XC_STUBS + off, 'a stub', 'STUB', why)
         if t in STUBS:
             return 'engine', (XC_STUBS + STUBS[t][0], 'a stub', 'STUB', STUBS[t][1])
         if t in FORCE_COPY:
@@ -295,6 +420,20 @@ class ChipDeriver(Deriver):
         """the family deriver's, and the aligned words of raw data that point into the unit's blocks (a table of pointers to
         byte lists: CrakOut's crack patterns, 0x080C7900) a pool's, moved with the code"""
         data = super().classify(f, blocks)
+        # (a table of routines whose next word is a routine too: cut short where its entries lie far from it, the rest
+        # copied as BN5's addresses or not at all, which BN6's engine would jump to: BoyBomb's bomb's actions were)
+        for w in f.walks.values():
+            for tab, ents in w.tables.items():
+                nxt = self.b5.u32(tab + 4 * len(ents))
+                if T.is_code_ptr(nxt, self.b5) and nxt < 0x08110000:
+                    f.decide('table', f'{tab:08X}: a table of {len(ents)} routines, its next word {nxt:08X} a routine too (TABLE_ARGS)')
+        # (unreached code in a gap between a load and its pool, copied raw: other routines' no walk of this unit reaches,
+        # their bytes moved along and never run from here, a helper's shared pool's neighbours)
+        for k in [k for k in f.decisions if k[0] == 'unreached']:
+            lo, hi = int(k[1][:8], 16), int(k[1][9:17], 16)
+            if any(glo <= lo and hi <= ghi for glo, ghi in getattr(self, 'gaps', ())):
+                f.decisions.remove(k)
+                f.notes.append(f'{k[1][:17]}: in a gap copied raw (other routines\', never run from this copy)')
         for k in [k for k in f.decisions if k[0] == 'unreached' and int(k[1][:8], 16) in DEAD_CODE]:
             f.decisions.remove(k)
             f.notes.append(f'{k[1][:17]}: dead code ({DEAD_CODE[int(k[1][:8], 16)]})')
@@ -320,9 +459,11 @@ class ChipDeriver(Deriver):
         stands among other families' routines, not after its records, so a table runs 0x80 bytes at most to the next push
         {..., lr} or the next word its code reads"""
         cov = super().covered(f)
-        for lo, hi in getattr(self, 'gaps', ()):
-            for a in range(lo, hi):
-                cov.setdefault(a, 'RAW')
+        for w in f.walks.values():
+            for v in w.lits.values():
+                if v in DATA_COPY:
+                    for a in range(v, v + DATA_COPY[v][0]):
+                        cov.setdefault(a, 'RAW')
         # (a table DATA_SIZES knows: its bytes all, where the walk took its start for raw data)
         for v, n in DATA_SIZES.items():
             if cov.get(v) == 'RAW':
@@ -339,7 +480,21 @@ class ChipDeriver(Deriver):
                 while cov.get(k) == 'RAW':
                     del cov[k]
                     k += 1
+        # (a gap between a load and its pool whole, other routines' code in it too: a helper's shared pool past them)
+        for lo, hi in getattr(self, 'gaps', ()):
+            for a in range(lo, hi):
+                cov.setdefault(a, 'RAW')
         return cov
+
+    def scan_words(self, f, blocks):
+        """the family deriver's, and the words UNREAD_WORDS names kept as they are"""
+        super().scan_words(f, blocks)
+        for k in [k for k in f.decisions if k[0] == 'literal']:
+            v = int(k[1][:8], 16)
+            if (f.name, v) in UNREAD_WORDS:
+                f.decisions.remove(k)
+                f.notes.append(f'{v:08X} kept: {UNREAD_WORDS[(f.name, v)]}')
+                f.words[v] = (v, UNREAD_WORDS[(f.name, v)], None)   # (named as it is: the installer's word, BN5's)
 
     def spawns_moved(self, a, forced=True, depth=6, seen=None):
         """whether the BN5 routine at `a`, a twin's, spawns (itself, or through the routines it calls and the objects it
@@ -368,10 +523,16 @@ class ChipDeriver(Deriver):
         """the family deriver's, and tables whose entries lie anywhere in the ROM: a chip family's table of routines by its
         subfamily (BN5's misc family 0x1A's at 0x080EC818) names routines of objects' code far from it; a literal is such a
         table where it holds two code pointers or more one after another and the routine loads a word from it by a register
-        it then calls or jumps to"""
+        it then calls or jumps to, or hands it to a routine that does (TABLE_ARGS: an obstacle's actions)"""
         out = super().find_tables(f, w)
+        handed = set()
+        for site, t in w.bls.items():
+            if t in TABLE_ARGS:
+                v, chain = T.back_value(w, site, TABLE_ARGS[t])
+                if v is not None and chain and chain[-1][1] == 'ldr_lit':
+                    handed.add(v)
         for lit, v in w.lits.items():
-            if v is None or v & 3 or not self.b5.has(v, 8) or not used_as_table(w, lit):
+            if v is None or v & 3 or not self.b5.has(v, 8) or not (used_as_table(w, lit) or v in handed):
                 continue
             ents = []
             for k in range(64):
@@ -398,7 +559,7 @@ class ChipDeriver(Deriver):
     def type_twin(self, kind, t5):
         """plain_twin's, and moved where BN6's twin, the same code, would spawn BN6's own of a type whose code is not
         BN5's (MetaGel's thrower and its gel: the gel's sprite another in BN6); a type a helper moves, none of the unit's"""
-        if (kind, t5) in HELPER_TYPES and self.helper_at:
+        if (kind, t5) in HELPER_TYPES and self.helper_at and HELPER_TYPES[(kind, t5)] != getattr(self, 'label', None):
             return dict(bn6=None, routine=None, helper=HELPER_TYPES[(kind, t5)], why=f'moved by the helper {HELPER_TYPES[(kind, t5)]}')
         out = self.plain_twin(kind, t5)
         if out['bn6'] is not None and out['routine'] and self.spawns_moved(out['routine'], forced=False):
@@ -418,6 +579,8 @@ class ChipDeriver(Deriver):
             return False
         l5, l6 = sprite_loads(w5, 5), sprite_loads(w6, 6)
         if len(l5) != len(l6) or not all(same_sprite(self.b5, self.b6, x, y) for x, y in zip(l5, l6)):
+            return False
+        if not same_data(self.b5, self.b6, w5, w6):
             return False
         if depth <= 0:
             return True
@@ -448,6 +611,28 @@ class ChipDeriver(Deriver):
         self.walk_family(f, extra=roots)
 
 
+DATA_BYTES = 16   # (the bytes of a table a routine's literal names that its twin's must share: same_data)
+
+
+def same_data(b5, b6, w5, w6):
+    """the data the two routines' literals name, in their order, the same bytes where it is plain data in each game's ROM
+    (no word of it a pointer, which each game's own places tell apart): DrkSonic's sonic's times by kind, BN5 0x080D5498
+    (60, 60, 60, 60, 120), its twin's 0x080D5B38 another table, the same code reading it (0x080D547E, 0x080D5B20)"""
+    def data(rom, v):
+        if v is None or v & 3 or not 0x08000000 <= v < 0x0A000000 or not rom.has(v, DATA_BYTES):
+            return None
+        b = rom.bytes(v, DATA_BYTES)
+        words = [int.from_bytes(b[k:k + 4], 'little') for k in range(0, DATA_BYTES, 4)]
+        return None if any(0x02000000 <= x < 0x0A000000 for x in words) else b
+    v5 = [w5.lits[k] for k in sorted(w5.lits)]
+    v6 = [w6.lits[k] for k in sorted(w6.lits)]
+    for x, y in zip(v5, v6):
+        dx, dy = data(b5, x), data(b6, y)
+        if dx is not None and dy is not None and dx != dy:
+            return False
+    return True
+
+
 def used_as_table(w, lit):
     """the literal's register indexed by a word load (ldr rd,[rX,rY] or [rY,rX]) within the next few instructions"""
     addrs = sorted(w.insns)
@@ -471,16 +656,54 @@ def chip_family(f):
     return f
 
 
+# The DarkChips whose attacks the moved code plays (BN5's ids), their rules S7's: those BN6's twin family cannot (the rest
+# play over their twin's, the registry's XREG_DARK rows)
+DARK_MOVED = {
+    187: "DarkCirc: its own support routine (BN5's 0x2A), which no BN6 chip's runs",
+    192: "DarkWide: its graphics BN5's (the spread family's subfamily 2)",
+    195: "DarkMetr: its meteors' controller (the misc family's subfamily 0x11, Astroid's)",
+    198: "DrkSonic: its own support routine (BN5's 0x1B)",
+}
+
+
+def played_subs(b5, n):
+    """the subfamilies of BN5's attack family `n` the registry's rows play by its moved code (moved, or still waiting for
+    it, a Program Advance's waiting for its rule, or a DarkChip of DARK_MOVED)"""
+    return {record(b5, BN5_RECORDS, bn5)[0x0C] for bn5, _, how in registry_rows()
+            if (how in ('MOVED', 'PENDING', 'PA') or (how == 'DARK' and bn5 in DARK_MOVED))
+            and record(b5, BN5_RECORDS, bn5)[0x0B] == n}
+
+
+def unplayed_of(b5, kind, n, label):
+    """SUB_TABLES' entries of the unit's subfamilies none of whose rows it plays: BN5's routine: why"""
+    out, keep = {}, set()
+    subs = played_subs(b5, n) if kind == 'attack' else set()
+    for table, (rows, why) in SUB_TABLES.get(label, {}).items():
+        for k in range(rows):
+            x = b5.u32(table + 4 * k) & ~1
+            if k in subs:
+                keep.add(x)
+            else:
+                out[x] = f'{why}: subfamily {k:#x}, which no chip it plays has (BN6\'s own chips run BN6\'s code)'
+    return {x: why for x, why in out.items() if x not in keep}
+
+
 def derive(b5, b6, pairs, kind, n, label, alloc, number, helper_at=None):
     d = ChipDeriver(b5, b6, pairs)
     d.helper_at = dict(helper_at or {})
+    d.unplayed = unplayed_of(b5, kind, n, label)
+    d.label = label
     f = chip_family(Family(-1))
     f.name = label
     entry = entry_of(b5, kind, n)
-    roots = [entry]
+    roots = [entry] + (list(n[1:]) if kind == 'helper' and isinstance(n, tuple) else [])
     d.walk_unit(f, roots)
+    for w in f.walks.values():
+        for site, t in w.bls.items():
+            if t in d.unplayed:
+                f.decide('subfamily', f'{site:08X} calls {t:08X}, an unplayed subfamily\'s routine (SUB_TABLES)')
     blocks = d.blocks_of(f)
-    for _ in range(4):
+    for _ in range(4 if kind != 'helper' else 0):   # (a helper's gaps copied raw, none walked: gap_spans below)
         more = gap_roots(b5, f, blocks)
         if not more:
             break
@@ -514,8 +737,8 @@ def derive(b5, b6, pairs, kind, n, label, alloc, number, helper_at=None):
         u.blocks.append((lo, hi, at, zlib.crc32(b5.bytes(lo, hi - lo)) & 0xFFFFFFFF))
         at += hi - lo
     alloc[where] = at
-    if kind == 'helper' and at > XC_HOMES:
-        f.decide('room', f'the helpers\' code runs to {at:08X}, past XC_HOMES')
+    if kind == 'helper' and at > XC_POWERS:
+        f.decide('room', f'the helpers\' code runs to {at:08X}, past XC_POWERS')
     u.data = f.data
     X.calls_of(u, d, blocks)
     u.clones = []
@@ -523,9 +746,13 @@ def derive(b5, b6, pairs, kind, n, label, alloc, number, helper_at=None):
     u.more_imms = []
     chip_actions(u, d)
     u.sprites, u.effects, u.bytes = [], [], []
+    chip_effect_calls(u)
     art_of(u, b5, b6, alloc)
     numbered_calls(u)
     chip_panels(u)
+    chip_hit_stats(u)
+    chip_points(u, b5, b6)
+    chip_coll_sums(u)
     for key in [k for k, v in f.types.items() if v.get('helper')]:
         f.notes.append(f'spawns the {kind_name(key[0])} kind\'s {key[1]:#x}: {f.types.pop(key)["why"]}')
     X.types_of(u)
@@ -537,33 +764,41 @@ def derive(b5, b6, pairs, kind, n, label, alloc, number, helper_at=None):
     return u
 
 
+def far_of(i):
+    """where an instruction reaches that its block must hold: a load's pool, a branch's target (the installer moves a block
+    whole, its loads reading their own block's pools and its branches staying in it)"""
+    if i.form == 'ldr_lit':
+        return i.lit
+    return i.target if i.form in ('b', 'bcc') else None
+
+
 def gap_spans(f, blocks):
-    """the gaps between a load and the pool it reads where they still fall in two blocks"""
+    """the gaps between a load and the pool it reads, or a branch and its target, where they still fall in two blocks"""
     def block(a):
         return next((k for k, (lo, hi) in enumerate(blocks) if lo <= a < hi), None)
     out = set()
     for w in f.walks.values():
         for a, i in w.insns.items():
-            if i.form != 'ldr_lit' or i.lit is None:
+            if far_of(i) is None:
                 continue
-            ka, kl = block(a), block(i.lit)
+            ka, kl = block(a), block(far_of(i))
             if ka is not None and kl is not None and ka != kl:
                 out.add(tuple(sorted((blocks[ka][1], blocks[kl][0]))))
     return sorted(out)
 
 
 def gap_roots(b5, f, blocks):
-    """the routines between a load and the pool it reads where they fall in two blocks (BN5 put HotBody's pool past a
-    routine of its own that no walk reaches, 0x080DA57E): walked as the unit's too, so one block holds them (the
-    installer moves a block whole, its loads reading their own block's pools)"""
+    """the routines between a load and the pool it reads, or a branch and its target, where they fall in two blocks (BN5
+    put HotBody's pool past a routine of its own that no walk reaches, 0x080DA57E; CustSwrd's 0x080EC1D6 branches past
+    0x080EC208 to its pop): walked as the unit's too, so one block holds them (far_of)"""
     def block(a):
         return next((k for k, (lo, hi) in enumerate(blocks) if lo <= a < hi), None)
     out = set()
     for w in f.walks.values():
         for a, i in w.insns.items():
-            if i.form != 'ldr_lit' or i.lit is None:
+            if far_of(i) is None:
                 continue
-            ka, kl = block(a), block(i.lit)
+            ka, kl = block(a), block(far_of(i))
             if ka is None or kl is None or ka == kl:
                 continue
             lo, hi = sorted((blocks[ka][1], blocks[kl][0]))
@@ -573,9 +808,11 @@ def gap_roots(b5, f, blocks):
 
 def chip_actions(u, d):
     """the CurActions a chip's code writes or compares (scan's virus rules are not a chip's): MegaMan's ready state, BN5's 6,
-    is BN6's 8 (legit.json, maps, action); a family's number is its BN6 number where the unit moves it; anything else a
+    is BN6's 8 (legit.json, maps, action); a family's number is its BN6 number where the unit moves it (a chip that starts
+    another of BN5's families, one a unit of UNITS moves: Slasher's 0x49, its number given BN6's for it); anything else a
     decision"""
     f = u.f
+    moved = {n for k, n, _ in UNITS if k == 'attack'}
     for e, w in f.walks.items():
         if 'virus' not in f.ctx.get(e, ()) or 'object' in f.ctx.get(e, ()):
             continue   # (an object's own routine, an entry of its states' table too: its CurAction its own phase, numbered alike)
@@ -583,8 +820,13 @@ def chip_actions(u, d):
             i = w.insns[a]
             if i.form == 'bl' and BN5_SET_ATTACK <= i.target < BN5_SET_ATTACK + 7 * 4 and not (i.target - BN5_SET_ATTACK) & 3:
                 v, chain = T.back_value(w, a, 0)
-                f.decide('curaction', f'{a:08X}: setAttack{(i.target - BN5_SET_ATTACK) // 4} with {v if v is None else hex(v)}: a chip '
-                                      f'that starts another attack')
+                n = (i.target - BN5_SET_ATTACK) // 4
+                if v in moved and len(chain) == 1 and chain[0][1] == 'movs':
+                    f.decisions = [k for k in f.decisions if k != ('curaction', f'{a:08X}: setAttack{n} with the chip action {v:#x}')]
+                    u.more_imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=0, rn=0, was=v, now=v + 0x50,
+                                            why=f'setAttack{n} with BN5\'s family {v:#x}: its unit\'s BN6 number {v + 0x50:#x}'))
+                    continue
+                f.decide('curaction', f'{a:08X}: setAttack{n} with {v if v is None else hex(v)}: a chip that starts another attack')
             if i.form == 'strb' and i.f[1:] == (5, 9):
                 v, chain = T.back_value(w, a, i.f[0])
                 if v == 6 and len(chain) == 1 and chain[0][1] == 'movs':
@@ -595,24 +837,66 @@ def chip_actions(u, d):
 
 
 # The song slots BN5's sounds take in BN6 where BN6 has another song at their number (issue #82's shared allocations: one
-# BN5 sound one slot, whichever track copies it, the slot taken only where it still holds BN6's empty header; the fixed
-# ones the plan's, the chips' others from 0x52 down, each in the report): src/audio/xsong.c's xsong_install_at copies the
-# song there as the units install, and the units' immediates name the slot
+# BN5 sound one slot, whichever track copies it, the slot taken only where it still holds BN6's empty header; the
+# sounds' slots 0x40-0x62, the fixed ones the plan's and its amendments', the chips' others from 0x52 down, each in the
+# report): src/audio/xsong.c's xsong_install_at copies the song there as the units install, the immediates name the slot
 SOUND_SLOTS = {
     0xBC: 0x55, 0xB7: 0x61, 0x6F: 0x54, 0xE4: 0x53, 0x70: 0x5F, 0xBA: 0x60, 0xC0: 0x62,   # (the plan's)
-    0x105: 0x52, 0xA6: 0x51, 0xC6: 0x50, 0xBD: 0x4F, 0x10E: 0x4E,                          # (the chips' own, from 0x52 down)
+    0x105: 0x59, 0x115: 0x5A, 0x117: 0x5E, 0x119: 0x4D, 0x8E: 0x4C,                        # (its second amendment's)
+    0xA6: 0x51, 0xC6: 0x50, 0xBD: 0x4F, 0x10E: 0x4E, 0x12E: 0x52, 0xE1: 0x4B,              # (the chips' own, down: 0x4A next)
 }
+
+
+# Sounds a unit's code reads from a table of its own: BN5's call site: (the table, a row's size, the sound's offset, its
+# rows, its width: 1 a byte, 2 a halfword); each row's sound BN6's own where the same song, else its slot (SOUND_SLOTS) set
+# in its bytes, 0 none
+TABLE_SOUNDS = {
+    0x080E395A: (0x080E39E8, 2, 0, 5, 2),   # the Anti chips' counter's, by its kind (+0xE): none, 0x10F, 0x11D, 0x12E, 0xFF
+    0x080CEE9A: (0x080CEEB0, 2, 0, 4, 2),   # the seeds' (the bombs' 0x9, 0xC-0xE), by kind: 0x118, 0xE1, 0x11B, 0x11C
+    0x080C93B4: (0x080C9414, 1, 0, 4, 1),   # the crack bombs' bursts (0xA), by kind (+4 & 3): 0x70, 0x97, 0x90, 0x90
+    0x080C6DE2: (0x080C6C08, 6, 4, 20, 2),  # the spread shot's burst by kind (its row's halfword at +4): 0xAF, 0x11D, 0x10F
+    0x080D542A: (0x080D5474, 2, 0, 5, 2),   # DrkSonic's sonic by kind (+4): 0xA8, 0xA9, 0xAA, 0xAB, 0x14A
+}
+
+
+def table_sounds(u, b5, b6, site):
+    """TABLE_SOUNDS' rows at `site`: each its sound in BN6's terms (u.bytes), its song copied where BN6's differs"""
+    table, size, off, rows, width = TABLE_SOUNDS[site]
+    for k in range(rows):
+        at = table + size * k + off
+        v = b5.u16(at) if width == 2 else b5.u8(at)
+        if any(x[0] == at for x in u.bytes):
+            continue   # (a table two sites read, its rows given once)
+        if not v:
+            continue
+        same = X.song_sig(b5, BN5['songs'], v) == X.song_sig(b6, BN6['songs'], v)
+        u.sounds.append((v, same))
+        if same:
+            continue
+        slot = SOUND_SLOTS.get(v)
+        if slot is None:
+            u.f.decide('sound', f'{table:08X}\'s row {k}: its sound {v:#x} is another song in BN6 and has no slot (SOUND_SLOTS)')
+            continue
+        u.songs.append((v, slot))
+        why = f'{table:08X}\'s row {k}: its sound {v:#x}, BN5\'s copied to BN6\'s slot {slot:#x}'
+        u.bytes.append((at, v & 0xFF, slot, why))
+        if v >> 8:
+            u.bytes.append((at + 1, v >> 8, 0, why + ' (its high byte)'))
 
 
 def chip_sounds(u, b5, b6):
     """the sounds its code starts: BN6's own where its song of the number is BN5's, else BN5's copied to its slot
     (SOUND_SLOTS), the immediates that name it given the slot (movs r,#n; or movs r,#n-0xFF and adds r,#0xFF: then the slot
-    and 0)"""
+    and 0); a table's (TABLE_SOUNDS) in its bytes"""
     f = u.f
     u.sounds, u.songs = [], []
     for v, sites in sorted(f.sounds.items(), key=lambda x: str(x[0])):
         if v is None:
-            f.decide('sound', f'a sound made otherwise at {", ".join(f"{s:08X}" for s, _ in sites)}')
+            for s, _ in sites:
+                if s in TABLE_SOUNDS:
+                    table_sounds(u, b5, b6, s)
+            if any(s not in TABLE_SOUNDS for s, _ in sites):
+                f.decide('sound', f'a sound made otherwise at {", ".join(f"{s:08X}" for s, _ in sites if s not in TABLE_SOUNDS)}')
             continue
         same = X.song_sig(b5, BN5['songs'], v) == X.song_sig(b6, BN6['songs'], v)
         u.sounds.append((v, same))
@@ -658,10 +942,24 @@ def bn5_twins_same_panels():
     return bn5_twins.SAME_PANEL_TYPES
 
 
+def panel_to6(off):
+    """BN5's offset in a panel as BN6's (tests/xdiff/legit.json, layouts, panel: BN5's, BN6's, bytes), None where BN6 has none"""
+    with open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'), encoding='utf-8') as fh:
+        for a, b, n in json.load(fh)['layouts']['panel']['segments']:
+            if a <= off < a + n:
+                return b + off - a
+    return None
+
+
+PANEL_FORMS = {'ldr': 'THUMB_LDR', 'str': 'THUMB_STR', 'ldrb': 'THUMB_LDRB', 'strb': 'THUMB_STRB', 'ldrh': 'THUMB_LDRH',
+               'strh': 'THUMB_STRH'}
+
+
 def chip_panels(u):
     """the panel types its code sets (setPanelType's r2) or compares with a panel's (its +2, after the getter): BN6's
     numbers for BN5's lava, sea and holy; and what it reads of a panel the getter gives: within its first 0x10 bytes (the
-    getter's audit), else a decision"""
+    getter's audit) as it is, past them at BN6's place (legit.json's panel layout: the flags BN5 +0x18, BN6 +0x14), else
+    a decision"""
     f = u.f
     for w in f.walks.values():
         addrs = sorted(w.insns)
@@ -678,8 +976,13 @@ def chip_panels(u):
             regs = {0}
             for n, b in enumerate(addrs[k + 1:k + 12]):
                 j = w.insns[b]
-                if j.form in ('ldrb', 'ldrh', 'ldr', 'strb', 'strh', 'str') and len(j.f) == 3 and j.f[1] in regs and j.f[2] >= PANEL_SAME:
-                    f.decide('panel', f'{b:08X}: a panel\'s +{j.f[2]:#x} read or written (BN5\'s layout past +0x10 another)')
+                if j.form in PANEL_FORMS and len(j.f) == 3 and j.f[1] in regs and j.f[2] >= PANEL_SAME:
+                    to = panel_to6(j.f[2])
+                    if to is None:
+                        f.decide('panel', f'{b:08X}: a panel\'s +{j.f[2]:#x} read or written, which BN6 has no place for')
+                    else:
+                        u.more_imms.append(dict(at=b, form=PANEL_FORMS[j.form], rd=j.f[0], rn=j.f[1], was=j.f[2], now=to,
+                                                why=f'a panel\'s +{j.f[2]:#x} in BN5, +{to:#x} in BN6 (legit.json, layouts, panel)'))
                 if j.form == 'ldrb' and j.f[1:] == (0, 2):
                     for c in addrs[k + 2 + n:k + 5 + n]:
                         x = w.insns[c]
@@ -698,14 +1001,154 @@ def chip_panels(u):
             v = X_u8(u, at)
             if v in PANEL_TYPES:
                 u.bytes.append((at, v, PANEL_TYPES[v], f'{table:08X}\'s row {k}: a panel set to BN5\'s type {v:#x}: BN6\'s {PANEL_TYPES[v]:#x}'))
+            elif v in PANELS_ABSENT and site in TABLE_PANEL_ROWS and k not in TABLE_PANEL_ROWS[site]:
+                f.notes.append(f'{table:08X}\'s row {k}: {PANELS_ABSENT[v]} (BN5\'s {v:#x}, which BN6 lacks), a row no moved unit reads')
             elif v != 0xFF and v not in bn5_twins_same_panels():
                 u.f.decide('panel', f'{table:08X}\'s row {k}: a panel set to type {v:#x}, numbered otherwise in BN6')
-    f.panel_types = [(a, v) for a, v in f.panel_types if v not in PANEL_TYPES and not (v is None and a in TABLE_PANELS)]
+    covers = lambda a: any(lo <= a < hi for lo, hi, *_ in u.blocks)
+    for table, (size, off, rows, why) in sorted(PANEL_LOOKUPS.items()):
+        if not covers(table):
+            continue
+        for k in range(rows):
+            at = table + size * k + off
+            v = X_u8(u, at)
+            now = PANEL_TYPES.get(v, ABSENT_PANEL if v in PANELS_ABSENT else None)
+            if now is not None:
+                u.bytes.append((at, v, now, f'{why}: row {k}, BN5\'s type {v:#x} ' +
+                                (f'BN6\'s {now:#x}' if v in PANEL_TYPES else f'({PANELS_ABSENT[v]}), which BN6 lacks: none')))
+            elif v != 0xFF and v not in bn5_twins_same_panels():
+                f.decide('panel', f'{table:08X}\'s row {k}: a panel compared with type {v:#x}, numbered otherwise in BN6')
+    for a, v in f.panel_types:
+        if v is None and a in PANEL_SITES:
+            f.notes.append(f'{a:08X}: {PANEL_SITES[a]}')
+    f.panel_types = [(a, v) for a, v in f.panel_types if v not in PANEL_TYPES and not (v is None and (a in TABLE_PANELS or a in PANEL_SITES))]
+
+
+# The engine's hit area's spawners (r7: its hit's words, a byte each: +0x60, +0x64, +0x68 the hit's effect, +0x6C its
+# parameter, the effect and parameter set into the hit's collision data +0x12, +0x13 by 0x080172CE, BN6 0x0801A4D0)
+HIT_SPAWNERS = (0x080C4E72, 0x080C4EAE)
+# The hit effects that change a stat of the struck, each game its own rule (docs/ROM_DATA.md): 0x18 and 0x19, BN5's
+# 0x08011036 (a Navi's NaviStats +0x18 and +0x19, its bugs: the parameter's low nibble added where its 0x10 is set,
+# taken away where its 0x20 is, else raised to where lower) and nothing for a virus; BN6's 0x080139F6 (the Navi's stat
+# plus the parameter, at most 7) and 0x08013B20 (0x18 on a virus: its AI data +0x12 plus the parameter, at most 7, from
+# its pre-step 0x0801AB40)
+HIT_STATS = (0x18, 0x19)
+
+
+def chip_hit_stats(u):
+    """the hit words a unit's code gives the hit area: a stat effect's parameter in BN6's terms (BN5's add as the amount;
+    its raise-to as 0, a virus untouched as BN5 leaves it, a Navi's stat no longer raised: docs/MULTIROM.md; its subtract a
+    decision)"""
+    f = u.f
+    for w in f.walks.values():
+        for site, t in w.bls.items():
+            if t not in HIT_SPAWNERS:
+                continue
+            # (each literal r7 is loaded from before the call, a branch's other value of it beside: the moon blade's)
+            before = sorted((a for a in w.insns if site - 0x20 <= a < site), reverse=True)
+            lits = [a for a in before if w.insns[a].form == 'ldr_lit' and w.insns[a].f[0] == 7]
+            if not lits:
+                continue
+            lit = w.insns[lits[0]].lit
+            v = w.lits.get(lit)
+            if v is None:
+                continue
+            effect, p = (v >> 16) & 0xFF, v >> 24
+            if effect not in HIT_STATS or not p:
+                continue
+            if p & 0x20:
+                f.decide('hit', f'{site:08X}: its hit takes {p & 0xF} from stat {effect:#x} (BN5\'s 0x20), which BN6\'s rule cannot')
+                continue
+            now = (v & 0x00FFFFFF) | ((p & 0xF) << 24 if p & 0x10 else 0)
+            f.numbers[lit] = (v, now, f'its hit\'s stat effect {effect:#x}, parameter {p:#x} by BN5\'s rule, {now >> 24:#x} by BN6\'s')
+
+
+# The points of an object's sprite (BN5 0x08015140, BN6's twin 0x08018810: r0 its NameID, r1 the point's number, back (x, y)
+# from each game's own rows, BN5's 30 points a row at 0x080151C4 on, BN6's 34 at 0x080188C0, MegaMan's first): a point a
+# unit asks for is BN6's of the same number where MegaMan's rows give the same, else POINTS names BN6's (each checked)
+POINT_OF = 0x08015140
+POINT_ROW = 0x08015164   # (its inner part, called direct too: r0 and r1 the row's category and number, r2 the point)
+POINT_ROWS = {'bn5': (0x080151C4, 0x3C), 'bn6': (0x080188C0, 0x44)}
+POINTS = {
+    0x1A: (0x1B, "CusVolt's volt's place (0x080DD58E, at his centre, 18 up, 40 pixels ahead): BN5's 0x1A (0, 18) on every row "
+                 "of his; BN6's 0x1A another (28, 25), no BN6 code asking for it, its 0x1B the centre (2, 18), as every point of "
+                 "his BN6 put 2 pixels further right (0x00 (2, 0) against (0, 0))"),
+}
+
+
+# Offsets into an object's collision data a unit's code adds as a number, the pointer made by adding the data's address
+# (the object's +0x54) after: BN5's instruction: why; the number BN6's place for it (xrecipe_family's coll_to6, the
+# layout legit.json pairs: BN5 +0x74-0x9F is BN6 +0x7C-0xA7), checked to be added to the +0x54 load within four
+COLL_SUMS = {
+    0x080CF6CC: "the Anti chips' trap (the third kind's 0x4D): the struck's damage by element, a halfword each from Fire on, "
+                "BN5's +0x7C + 2 x its kind (0x080CF6C8-0x080CF6D2), BN6's from +0x84 (its own trap's 0x080CF844, from Fire)",
+}
+
+
+def chip_coll_sums(u):
+    """COLL_SUMS: each instruction's number given BN6's place, where it is the unit's and adds to a +0x54 load"""
+    f = u.f
+    for w in f.walks.values():
+        for a in sorted(set(w.insns) & set(COLL_SUMS)):
+            i = w.insns[a]
+            nxt = [w.insns[b] for b in sorted(w.insns) if a < b <= a + 8]
+            coll = {j.f[0] for j in nxt if j.form == 'ldr' and j.f[2] == 0x54}
+            to = F.coll_to6(i.f[1]) if i.form == 'adds8' else None
+            if to is None or not any(j.form == 'adds' and i.f[0] in j.f[1:] and set(j.f[1:]) & coll for j in nxt):
+                f.decide('collision', f'{a:08X}: a collision data\'s offset added (COLL_SUMS), not as expected ({i.text})')
+                continue
+            u.more_imms.append(dict(at=a, form='THUMB_ADDS', rd=i.f[0], rn=0, was=i.f[1], now=to,
+                                    why=f'collision data +{i.f[1]:#x} in BN5, +{to:#x} in BN6: {COLL_SUMS[a]}'))
+
+
+def chip_points(u, b5, b6):
+    """the points of MegaMan's sprite its code asks for (POINT_OF's r1): BN6's own where its first row gives the same, BN6's
+    of POINTS where it names one (its row checked), else a decision"""
+    f = u.f
+    def point(rom, game, k):
+        row, size = POINT_ROWS[game]
+        x, y = rom.u8(row + 2 * k), rom.u8(row + 2 * k + 1)
+        return (x - 256 if x > 127 else x, y - 256 if y > 127 else y)
+    for w in f.walks.values():
+        for site, t in sorted(w.bls.items()):
+            if t not in (POINT_OF, POINT_ROW) or t in UNIT_STUBS.get(f.name, {}):
+                continue   # (a call the unit's stub answers: its numbers BN5's, UNIT_STUBS)
+            reg = 1 if t == POINT_OF else 2
+            v, chain = T.back_value(w, site, reg)
+            if v is None:
+                continue   # (a number read from a table: the muzzle flash's, its entry's byte 4; legit.json's mask)
+            if v in POINTS:
+                now, why = POINTS[v]
+                if abs(point(b6, 'bn6', now)[0] - point(b5, 'bn5', v)[0]) > 2 or point(b6, 'bn6', now)[1] != point(b5, 'bn5', v)[1]:
+                    f.decide('point', f'{site:08X}: point {v:#x} {point(b5, "bn5", v)} as BN6\'s {now:#x} {point(b6, "bn6", now)}')
+                X.imm_for(u, chain, reg, v, now, f'MegaMan\'s point {v:#x}: {why}')
+            elif point(b5, 'bn5', v) != point(b6, 'bn6', v):
+                f.decide('point', f'{site:08X}: MegaMan\'s point {v:#x}, BN5\'s {point(b5, "bn5", v)}, BN6\'s {point(b6, "bn6", v)} (POINTS)')
 
 
 # Routines whose argument is a number of a table a helper moves with it (BN5's numbers, BN5's table): the muzzle flash's
 # spawner, its number r4's low byte, its table's entries each its sprite's list x 4 and number first
 NUMBERED = {0x080B9CAE: ('a muzzle flash', 0x080B9A5C, 5, 4)}
+
+
+def other_movs(w, at, reg):
+    """the numbers a register is given before `at` that a branch around it may leave (movs r4,#0x11, then movs r4,#0x37
+    where the subfamily is 2: the spread family's flash at 0x080ED0BE-0x080ED0C6): each movs of it the walk meets going
+    back from `at` past compares and branches, up to its last call or other write of it"""
+    out = set()
+    for a in sorted((x for x in w.insns if x < at), reverse=True)[:8]:
+        i = w.insns[a]
+        if i.form == 'bl' or is_return(i):
+            break
+        if i.form == 'movs' and i.f[0] == reg:
+            out.add(i.f[1] & 0xFF)
+        elif T.writes(i, reg):
+            break
+    return out
+
+
+def is_return(i):
+    return i.form == 'pop' and 'pc' in i.text or i.form == 'bx'
 
 
 def numbered_calls(u):
@@ -723,6 +1166,7 @@ def numbered_calls(u):
                 u.flash |= set(FLASH_NUMBERS[site][0])
             elif v is not None and len(chain) == 1:
                 u.flash.add(v & 0xFF)
+                u.flash |= other_movs(w, chain[0][0], reg)
             elif len(chain) >= 2 and chain[0][1] == 'adds8' and chain[1][1] == 'lsls' and (chain[1][2] or 0) >= 8:
                 u.flash.add(chain[0][2])   # (its low byte an immediate added to a value shifted past it: ElcReel's 0x35)
             else:
@@ -862,6 +1306,45 @@ def effect_of(u, b5, b6, alloc, e):
     return e6
 
 
+# Effect ids a unit's code makes as one immediate plus the object's kind (base + kind, its kinds `count`): BN5's spawn
+# site: (the immediate's instruction, the form, count, why); BN6's ids for base..base+count-1 one run of the same entries
+# (BN6's own where it has them in a row, else the chips' own, taken as a run), the immediate given the run's first
+EFFECT_RANGES = {
+    0x080BA538: (0x080BA526, 'THUMB_ADDS', 3, "Colonel's soldiers' bursts: 0x48 + its +5 (0x080BA524-0x080BA528), list 4's "
+                                              "0x1F, its animations 0-2"),
+    0x080BC15E: (0x080BC144, 'THUMB_MOVS', 1, "TomahawkMan's swing's: 0x45 (0x080BC144-0x080BC146, added to the side's high "
+                                              "bytes)"),
+}
+
+
+def effect_range(u, b5, b6, alloc, site):
+    """EFFECT_RANGES' run at `site` in BN6's ids, its immediate given the run's first"""
+    at, form, count, why = EFFECT_RANGES[site]
+    base = b5.u16(at) & 0xFF
+    rows = [b5.bytes(BN5['effects'] + 4 * (base + k), 4) for k in range(count)]
+    same = lambda e6, k: (b6.bytes(BN6['effects'] + 4 * e6, 4) == rows[k]
+                          and same_sprite(b5, b6, (rows[k][0], rows[k][1]), (rows[k][0], rows[k][1])))
+    run = next((e6 for e6 in range(BN6['neffects'] - count + 1) if all(same(e6 + k, k) for k in range(count))), None)
+    if run is None:
+        if alloc['effect_next'] - count + 1 < CHIP_EFFECT_BOTTOM:
+            u.f.decide('effect', f'{site:08X}: a run of {count} effects, the chips\' effect ids all taken')
+            return
+        run = alloc['effect_next'] - count + 1
+        alloc['effect_next'] -= count
+        for k in range(count):
+            lst, v = rows[k][0] // 4, rows[k][1]
+            if lst not in CHIP_LISTS:
+                u.f.decide('effect', f'its effect {base + k:#x} draws sprite {lst}:{v:#x}, a list not grown')
+                return
+            alloc['effects'][base + k] = run + k
+            place_sprite(u, b5, alloc, lst, v)
+            alloc['owner'][(lst, v)].effects.append((base + k, run + k))
+    if run != base:
+        rd = (b5.u16(at) >> 8) & 7
+        u.more_imms.append(dict(at=at, form=form, rd=rd, rn=0, was=base, now=run,
+                                why=f'its effects {base:#x}-{base + count - 1:#x} in BN5, {run:#x}-{run + count - 1:#x} in BN6: {why}'))
+
+
 def effect_imm(u, b5, chain, was, now):
     """the immediate the effect id's chain sets (movs, or adds8 of a byte), given BN6's id"""
     why = f'its effect: {was:#x} in BN5, {now:#x} in BN6'
@@ -909,6 +1392,44 @@ def place_sprite(u, b5, alloc, lst, v):
     return to
 
 
+# The engine's routines that spawn an effect whose id they are handed (BN5's routine: the register): each call's id in
+# BN6's terms as an effect spawn's (its immediate, or TABLE_EFFECTS by the call's site)
+EFFECT_CALLS = {
+    0x08018838: 2,   # effects over a pattern of panels (BN6's twin 0x0801BD3C): r2 the effect, r3 the pattern, r4 the side
+}
+
+
+def chip_effect_calls(u):
+    """each call of EFFECT_CALLS' routines an effect site of the unit's (f.effects), its id the register's"""
+    f = u.f
+    for w in f.walks.values():
+        for site, t in sorted(w.bls.items()):
+            if t in EFFECT_CALLS:
+                v, chain = T.back_value(w, site, EFFECT_CALLS[t])
+                f.effects.setdefault(None if v is None else v & 0xFF, []).append((site, chain))
+
+
+def shifted_effects(f):
+    """an effect id made by a number added to a value shifted past its byte (r4 = x << 8 + n: Slasher's 0x16 at
+    0x080ED536-0x080ED538, its high byte the side's): its id the number, its chain the immediate's (effect_imm's)"""
+    insns = {a: i for w in f.walks.values() for a, i in w.insns.items()}
+    for site, chain in list(f.effects.get(None, [])):
+        last = insns.get(chain[-1][0]) if chain else None
+        adds = [x for x in chain[:-1] if x[1] == 'adds8']
+        if (last is None or last.form != 'lsls' or len(last.f) < 3 or last.f[2] < 8 or not adds
+                or any(x[1] != 'adds8' for x in chain[:-1]) or sum(x[2] for x in adds) > 0xFF):
+            continue
+        f.effects[None].remove((site, chain))
+        f.effects.setdefault(sum(x[2] for x in adds), []).append((site, chain[:-1]))
+    if None in f.effects and not f.effects[None]:
+        del f.effects[None]
+
+
+# The Navi chips' sprites wait for the Navi track's (issue #82's allocations: its Navis' sprites in list 2's 0x20-0x2F, to
+# merge first): their units' code installed, their sprite loads left as BN5's numbers and their rows waiting (XREG_PENDING)
+NAVI_SPRITES_WAIT = True
+
+
 def art_of(u, b5, b6, alloc):
     """what a unit draws: the sprites its code loads by number, each BN6's own where its list holds the same bytes at that
     number, else BN5's copied at a number of the chips' in its grown list (CHIP_LISTS, from the top down), its loads set
@@ -916,6 +1437,10 @@ def art_of(u, b5, b6, alloc):
     f = u.f
     packed_loads(f)
     for (l, v), sites in sorted(f.loads.items(), key=lambda x: str(x[0])):
+        if u.kind == 'navi' and NAVI_SPRITES_WAIT:
+            f.notes.append(f'its sprite {l if l is None else l // 4}:{v if v is None else hex(v)} at '
+                           f'{", ".join(f"{s:08X}" for s, _ in sites)} waits for the Navi track\'s (NAVI_SPRITES_WAIT)')
+            continue
         if (l is None or v is None) and all(s in MEGAMAN_LOADS for s, _ in sites):
             f.notes.append(f'MegaMan\'s own sprite at {", ".join(f"{s:08X}" for s, _ in sites)}: {MEGAMAN_LOADS[sites[0][0]]}')
             continue
@@ -942,13 +1467,20 @@ def art_of(u, b5, b6, alloc):
         to = place_sprite(u, b5, alloc, lst, v)
         for site, chain in sites:
             load_rewrite(u, site, chain, v, to, f'its sprite: list {lst} {v:#x} in BN5, {to:#x} in BN6 (BN5\'s copied there)')
+    shifted_effects(f)
     for e, sites in sorted(f.effects.items(), key=lambda x: str(x[0])):
+        if e is None and all(s in EFFECT_RANGES for s, _ in sites):
+            for site in sorted({s for s, _ in sites}):
+                effect_range(u, b5, b6, alloc, site)
+            continue
         if e is None and all(s in TABLE_EFFECTS for s, _ in sites):
             for site in sorted({s for s, _ in sites}):
                 table, size, off, rows = TABLE_EFFECTS[site]
                 for k in range(rows):
                     at = table + size * k + off
                     e5 = b5.u8(at)
+                    if any(x[0] == at for x in u.bytes):
+                        continue   # (a table two sites read, its rows given once)
                     r5, r6 = b5.bytes(BN5['effects'] + 4 * e5, 4), b6.bytes(BN6['effects'] + 4 * e5, 4) if e5 < BN6['neffects'] else b''
                     if r5 == r6:
                         continue
@@ -1071,7 +1603,8 @@ def c_file(units):
 HEADER_MOVED = '''/* xchips_moved.c: the chips whose code moved from BN5's (src/emu/xchips_bn5.c, issue #82's C3), written by
  * tools/xchiprecipe.py from the two ROMs and the registry (src/core/xchips_registry.c): each its id in BN6's tables and the
  * family and subfamily its record takes in BN6's engine (a moved attack family's number, BN5's subfamily under it; or the
- * support or Navi family with the moved routine's entry). Do not edit: write it again. Numbers alone. */
+ * support or Navi family with the moved routine's entry); and the computed powers whose routines moved (BN5's table's
+ * entry, BN6's grown table's). Do not edit: write it again. Numbers alone. */
 #include "xchips_moved.h"
 
 #include <stddef.h>
@@ -1080,32 +1613,57 @@ const XChipMoved xchips_moved[] = {
 '''
 
 
-def moved_file(rows):
+def moved_file(rows, powers):
     body = '\n'.join(f'\t{{ {bn6}, 0x{fam:02X}, 0x{sub:02X} }},   /* {name} */' for bn6, fam, sub, name in rows)
+    pw = '\n'.join(f'\t{{ {i}, 0x{POWER_FIRST + i:02X} }},   /* {why} */' for i, why in powers)
     return (HEADER_MOVED + body + '\n};\nconst int xchips_moved_count = (int)(sizeof xchips_moved / sizeof *xchips_moved);\n\n'
             'const XChipMoved *xchips_moved_of(int bn6) {\n\tfor (int i = 0; i < xchips_moved_count; ++i)\n'
-            '\t\tif (xchips_moved[i].bn6 == bn6) return &xchips_moved[i];\n\treturn NULL;\n}\n')
+            '\t\tif (xchips_moved[i].bn6 == bn6) return &xchips_moved[i];\n\treturn NULL;\n}\n\n'
+            'const XChipPower xchips_powers[] = {\n' + pw + '\n};\n'
+            'const int xchips_powers_count = (int)(sizeof xchips_powers / sizeof *xchips_powers);\n\n'
+            'int xchips_power_of(int bn5_power) {\n\tfor (int i = 0; i < xchips_powers_count; ++i)\n'
+            '\t\tif (1000 + xchips_powers[i].bn5 == bn5_power) return 1000 + xchips_powers[i].bn6;\n\treturn 0;\n}\n')
+
+
+def powers_of(b5):
+    """BN5's computed powers the registry's chips have whose routines a helper moves (POWERS): (BN5's entry, why)"""
+    roots = {r: label for rs, label, _ in HELPERS for r in rs}
+    used = {}
+    for bn5, bn6, how in registry_rows():
+        power = b5.u16(BN5_RECORDS + 0x2C * bn5 + 0x1A)
+        if power >= 1000 and power - 1000 < BN5_POWER_COUNT:
+            routine = b5.u32(BN5_POWERS + 4 * (power - 1000)) & ~1
+            if routine in roots:
+                used.setdefault(power - 1000, f'{roots[routine]}: BN5 {routine:08X}')
+    return sorted(used.items())
 
 
 def moved_rows(units, b5):
     """the registry's chips each unit plays: BN5's records of that family (an attack unit's: every subfamily, BN5's kept), or
-    of the support or Navi family with that subfamily; each a chip the registry gives an id of its own (XREG_MOVED)"""
+    of the support or Navi family with that subfamily; each a chip the registry gives an id of its own, moved (XREG_MOVED),
+    or a Program Advance (XREG_PA) or a DarkChip of DARK_MOVED whose code moved, waiting for its rule to play"""
     names = X.chip_names(b5, BN5['chip_names'], 424)
     rows = []
     reg = registry_rows()
     for u in units:
         if u.kind == 'helper':
             continue
+        played = played_subs(b5, u.n5) if u.kind == 'attack' else None
         for bn5, bn6, how in reg:
             rec = record(b5, BN5_RECORDS, bn5)
             fam, sub = rec[0x0B], rec[0x0C]
             if u.kind == 'attack' and fam == u.n5:
-                rows.append((bn6, u.number, sub, names.get(bn5, '?'), how))
+                rows.append((bn5, bn6, u.number, sub, names.get(bn5, '?'), how, sub in played))
             elif u.kind != 'attack' and fam == (BN5_SUPPORT_FAMILY if u.kind == 'support' else BN5_NAVI_FAMILY) and sub == u.n5:
-                rows.append((bn6, BN6_SUPPORT_FAMILY if u.kind == 'support' else BN6_NAVI_FAMILY, u.number, names.get(bn5, '?'), how))
-    # (BN6's own chips by name run BN6's code; a DarkChip or a Program Advance waits for its own milestone)
-    bad = [f'{name} ({bn6}, {how})' for bn6, _, _, name, how in rows if how in ('PENDING', 'RECORD')]
-    return sorted((bn6, fam, sub, name) for bn6, fam, sub, name, how in rows if how == 'MOVED'), bad
+                rows.append((bn5, bn6, BN6_SUPPORT_FAMILY if u.kind == 'support' else BN6_NAVI_FAMILY, u.number, names.get(bn5, '?'),
+                             how, True))
+    # (BN6's own chips by name run BN6's code, a record of a subfamily the unit plays none of its twin's; a DarkChip outside
+    # DARK_MOVED plays over its twin's)
+    waits = {u.number for u in units if u.kind == 'navi' and NAVI_SPRITES_WAIT}
+    bad = [f'{name} ({bn6}, {how})' for _, bn6, fam, sub, name, how, played in rows
+           if (how == 'PENDING' and not (fam == BN6_NAVI_FAMILY and sub in waits)) or (how == 'RECORD' and played)]
+    keep = lambda bn5, how: how in ('MOVED', 'PA') or (how == 'DARK' and bn5 in DARK_MOVED)
+    return sorted((bn6, fam, sub, name) for bn5, bn6, fam, sub, name, how, _ in rows if keep(bn5, how)), bad
 
 
 # ---- the report ----
@@ -1166,8 +1724,8 @@ def main():
                  effects={}, effect_next=CHIP_EFFECT_TOP)
     # (the helpers first, their copies' places for the units' calls; their art after the units', by what the units use)
     helpers, helper_at = [], {}
-    for root, label, _ in HELPERS:
-        h = derive(b5, b6, pairs, 'helper', root, label, alloc, 0, helper_at)
+    for roots, label, _ in HELPERS:
+        h = derive(b5, b6, pairs, 'helper', roots, label, alloc, 0, helper_at)
         helpers.append(h)
         # (every routine of its, for the units' calls: its root and those it calls)
         for e in h.f.walks:
@@ -1198,7 +1756,7 @@ def main():
     rows, bad = moved_rows(whole, b5)
     if bad:
         sys.exit('xchiprecipe: the registry does not give these chips XREG_MOVED: ' + ', '.join(bad))
-    out = {OUT_C: c_file(whole), OUT_MOVED: moved_file(rows)}
+    out = {OUT_C: c_file(whole), OUT_MOVED: moved_file(rows, powers_of(b5))}
     if a.check:
         same = all(open(p, encoding='utf-8').read() == t if os.path.exists(p) else False for p, t in out.items())
         print(f'xchiprecipe: the two files {"are" if same else "are NOT"} what the generator writes')

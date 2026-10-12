@@ -8,6 +8,9 @@ from xdiff_events import engine_draw, spawned_by, spawns_of
 from xdiff_snap import DRAW
 
 SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
+# The engine's hit area's routine (the third kind's 0x03: BN5 0x080C4DB8, BN6 0x080C6B20), its states run from there: a
+# spawn whose outermost caller returns into it is the hit area's
+HIT_AREA = {5: (0x080C4DB8, 0x080C4DC6), 6: (0x080C6B20, 0x080C6B2E)}
 
 
 # ---- masks: engine differences, each explained (legit.json) ----
@@ -51,6 +54,13 @@ def whose(f, role, canon, known, depth=0):
     # spawned it, which is the actor's own step: MegaMan's on lava would make it his)
     if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and len(p) == 3 and p[1] == 'obj' and p[0].startswith('T1:'):
         return 'panels'
+    # (a spark where an attack struck, spawned by the engine's hit area, the third kind's 0x03 (BN6's own, audited:
+    # tools/xchiprecipe.py, TYPE_AUDITS; often gone by the next frame): the engine's, whose attack it marks)
+    if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK:
+        e = f.trace.get('spawns', {}).get(role, (None, None))[0]
+        lo, hi = HIT_AREA[f.game]
+        if e is not None and lo <= (e.outer & ~1) < hi:
+            return 'engine'
     # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
     by = spawned_by(f.trace, role)
     if by == 'family':
@@ -323,8 +333,14 @@ def support_lag(d, fa, fb, prev):
     return (fa.canon.action(5, True, v) if d.off == OBJ_ACTION else v) == d.b
 
 
+def spawned_now(d, prev):
+    """the difference's object new this frame: its role in neither game's frame before"""
+    return not prev or not any(o.role == d.role for f in prev for o in f.fr['objs'])
+
+
 WHEN = {
     'support lag': support_lag,
+    'spawned now': lambda d, fa, fb, prev: spawned_now(d, prev),
     'icon flag': lambda d, fa, fb, prev: his_icon_flag(d, fb),
     'hand of ten': lambda d, fa, fb, prev: hand_of_ten(d, fa),
     'his panel': lambda d, fa, fb, prev: his_panel(d, fa, fb),

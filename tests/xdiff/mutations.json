@@ -325,7 +325,7 @@
    "poke5": [
     "080CE170:2053"
    ],
-   "what": "MetaGel's sound 0x105 (BN5's song copied to BN6's slot 0x52, movs r0,#0x52 at BN5's 0x080CE170, written at its copy) played from slot 0x53, BN6's empty one: a song missing"
+   "what": "MetaGel's sound 0x105 (BN5's song copied to BN6's slot 0x59, movs r0,#0x59 at BN5's 0x080CE170, written at its copy) played from slot 0x53, BN6's empty one (0xE4's, which no chip copies): a song missing"
   },
   {
    "name": "a moved chip's effect's id",
@@ -350,6 +350,46 @@
     "080E5794:00001024:4"
    ],
    "what": "MrkCan's mark's packed sprite word (its literal at BN5's 0x080E5794, given the number of the chips' where BN5's list 4 0x24 was copied, for the second packed setup 0x08018926) left at 0x1024: BN6's list 4 0x24 drawn, another picture"
+  },
+  {
+   "name": "a computed power's routine",
+   "spec": "chip_cusvolt1",
+   "poke": [
+    "08E02324:08E00C01:4"
+   ],
+   "what": "BN6's grown table of computed powers' entry 0xC9 (CusVolt1's 1073 as 1201, XC_POWERS + 4 x 0xC9) aimed at the stub (power 0, returning by mov pc, lr as the reader's mov lr, pc needs) where the install gives it the PowerCusVolt helper's copy: its damage 0"
+  },
+  {
+   "name": "a point of MegaMan's sprite",
+   "spec": "chip_cusvolt1",
+   "poke5": [
+    "080DD588:211A"
+   ],
+   "what": "CusVolt's volt placed by BN6's point 0x1A (movs r1,#0x1A at BN5's 0x080DD588, written at its copy) where the install gives it 0x1B (POINTS): the volt a panel ahead"
+  },
+  {
+   "name": "a collision data's offset added",
+   "spec": "chip_antifire",
+   "poke5": [
+    "080CF6CC:307C"
+   ],
+   "what": "the Anti trap's damage by element read at BN5's +0x7C (adds r0,#0x7C at BN5's 0x080CF6CC, written at its copy) where the install gives it BN6's +0x84 (COLL_SUMS): the trap never springs"
+  },
+  {
+   "name": "a table's effect id",
+   "spec": "chip_crakbom",
+   "poke5": [
+    "080C94D1:51:1"
+   ],
+   "what": "CrakBom's crack effect (its kind's row of the crack bombs' table, BN5's 0x080C94D1, given an id of the chips') left at 0x51: BN6's own effect 0x51, another picture"
+  },
+  {
+   "name": "a hit's stat parameter",
+   "spec": "chip_moonbld1",
+   "poke5": [
+    "080D33B4:01180003:4"
+   ],
+   "what": "MoonBld's hit words (its literal at BN5's 0x080D33B4, the stat effect 0x18's parameter given by BN6's rule, HIT_STATS) left as BN5's: BN6's rule bugs the foe's AI data"
   }
  ]
 }

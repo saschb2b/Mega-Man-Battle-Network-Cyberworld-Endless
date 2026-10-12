@@ -61,40 +61,40 @@ const XChipReg xreg_rows[] = {
 	{  32,  15, XREG_SAME },   /* GunDelS1 */
 	{  33,  16, XREG_SAME },   /* GunDelS2 */
 	{  34,  17, XREG_SAME },   /* GunDelS3 */
-	{  35, 420, XREG_PENDING,   0, 0xFF, { 0x00, 0x0A, 0x0F, 0xFF }, 0, 10 },   /* Quake1 */
-	{  36, 421, XREG_PENDING,   0, 0xFF, { 0x01, 0x0B, 0x18, 0xFF }, 0, 25 },   /* Quake2 */
-	{  37, 422, XREG_PENDING,   0, 0xFF, { 0x05, 0x07, 0x0D, 0xFF }, 0, 40 },   /* Quake3 */
-	{  38, 423, XREG_PENDING,   0, 0xFF, { 0x02, 0x11, 0x15, 0x1A }, 0, 18 },   /* CrakBom */
-	{  39, 424, XREG_PENDING,   0, 0xFF, { 0x07, 0x0D, 0x0F, 0xFF }, 0, 34 },   /* ParaBom */
-	{  40, 425, XREG_PENDING,   0, 0xFF, { 0x03, 0x08, 0x0E, 0xFF }, 0, 50 },   /* ResetBom */
+	{  35, 420, XREG_MOVED,     0, 0xFF, { 0x00, 0x0A, 0x0F, 0xFF }, 0, 10 },   /* Quake1 */
+	{  36, 421, XREG_MOVED,     0, 0xFF, { 0x01, 0x0B, 0x18, 0xFF }, 0, 25 },   /* Quake2 */
+	{  37, 422, XREG_MOVED,     0, 0xFF, { 0x05, 0x07, 0x0D, 0xFF }, 0, 40 },   /* Quake3 */
+	{  38, 423, XREG_MOVED,     0, 0xFF, { 0x02, 0x11, 0x15, 0x1A }, 0, 18 },   /* CrakBom */
+	{  39, 424, XREG_MOVED,     0, 0xFF, { 0x07, 0x0D, 0x0F, 0xFF }, 0, 34 },   /* ParaBom */
+	{  40, 425, XREG_MOVED,     0, 0xFF, { 0x03, 0x08, 0x0E, 0xFF }, 0, 50 },   /* ResetBom */
 	{  41,  67, XREG_SAME },   /* BugBomb */
 	{  42,  68, XREG_SAME },   /* GrasSeed */
-	{  43, 426, XREG_PENDING,   0, 0xFF, { 0x07, 0x0A, 0x0F, 0xFF }, 0, 60 },   /* LavaSeed */
-	{  44, 427, XREG_PENDING,   0, 0xFF, { 0x02, 0x13, 0x19, 0x1A }, 0, 30 },   /* CannBall */
-	{  45, 428, XREG_PENDING,   0, 0xFF, { 0x06, 0x0C, 0x12, 0xFF }, 0, 38 },   /* Geyser */
+	{  43, 426, XREG_MOVED,     0, 0xFF, { 0x07, 0x0A, 0x0F, 0xFF }, 0, 60 },   /* LavaSeed */
+	{  44, 427, XREG_MOVED,     0, 0xFF, { 0x02, 0x13, 0x19, 0x1A }, 0, 30 },   /* CannBall */
+	{  45, 428, XREG_MOVED,     0, 0xFF, { 0x06, 0x0C, 0x12, 0xFF }, 0, 38 },   /* Geyser */
 	{  46,  60, XREG_SAME },   /* BlkBomb */
-	{  47, 429, XREG_PENDING,   0, 0xFF, { 0x03, 0x09, 0x0C, 0x1A }, 0, 28 },   /* SeaSeed */
+	{  47, 429, XREG_MOVED,     0, 0xFF, { 0x03, 0x09, 0x0C, 0x1A }, 0, 28 },   /* SeaSeed */
 	{  48,  71, XREG_SAME },   /* Sword */
 	{  49,  72, XREG_SAME },   /* WideSwrd */
 	{  50,  73, XREG_SAME },   /* LongSwrd */
 	{  51,  74, XREG_SAME },   /* WideBlde */
 	{  52,  75, XREG_SAME },   /* LongBlde */
 	{  53,  80, XREG_SAME },   /* WindRack */
-	{  54, 430, XREG_PENDING,   0, 0xFF, { 0x04, 0x0B, 0x11, 0xFF }, 0, 20 },   /* CustSwrd */
+	{  54, 430, XREG_MOVED,     0, 0xFF, { 0x04, 0x0B, 0x11, 0xFF }, 0, 20 },   /* CustSwrd */
 	{  55,  82, XREG_SAME },   /* VarSwrd */
-	{  56, 431, XREG_PENDING,   0, 0xFF, { 0x01, 0x08, 0x11, 0xFF }, 0, 18 },   /* Slasher */
-	{  57, 432, XREG_PENDING,   0, 0xFF, { 0x04, 0x0D, 0x19, 0xFF }, 0, 23 },   /* MoonBld1 */
-	{  58, 433, XREG_PENDING,   0, 0xFF, { 0x06, 0x0E, 0x15, 0xFF }, 0, 36 },   /* MoonBld2 */
-	{  59, 434, XREG_PENDING,   0, 0xFF, { 0x02, 0x0B, 0x13, 0xFF }, 0, 49 },   /* MoonBld3 */
+	{  56, 431, XREG_MOVED,     0, 0xFF, { 0x01, 0x08, 0x11, 0xFF }, 0, 18 },   /* Slasher */
+	{  57, 432, XREG_MOVED,     0, 0xFF, { 0x04, 0x0D, 0x19, 0xFF }, 0, 23 },   /* MoonBld1 */
+	{  58, 433, XREG_MOVED,     0, 0xFF, { 0x06, 0x0E, 0x15, 0xFF }, 0, 36 },   /* MoonBld2 */
+	{  59, 434, XREG_MOVED,     0, 0xFF, { 0x02, 0x0B, 0x13, 0xFF }, 0, 49 },   /* MoonBld3 */
 	{  60, 435, XREG_MOVED,     0, 0xFF, { 0x03, 0x07, 0x12, 0xFF }, 0, 25 },   /* Katana1 */
 	{  61, 436, XREG_MOVED,     0, 0xFF, { 0x01, 0x11, 0x16, 0xFF }, 0, 37 },   /* Katana2 */
 	{  62, 437, XREG_MOVED,     0, 0xFF, { 0x00, 0x09, 0x19, 0xFF }, 0, 49 },   /* Katana3 */
 	{  63,  12, XREG_SAME },   /* TankCan1 */
 	{  64,  13, XREG_SAME },   /* TankCan2 */
 	{  65,  14, XREG_SAME },   /* TankCan3 */
-	{  66, 438, XREG_PENDING,   0, 0xFF, { 0x04, 0x0A, 0x19, 0xFF }, 0, 24 },   /* RedFrut1 */
-	{  67, 439, XREG_PENDING,   0, 0xFF, { 0x05, 0x13, 0x16, 0xFF }, 0, 48 },   /* RedFrut2 */
-	{  68, 440, XREG_PENDING,   0, 0xFF, { 0x07, 0x0E, 0x14, 0xFF }, 0, 62 },   /* RedFrut3 */
+	{  66, 438, XREG_MOVED,     0, 0xFF, { 0x04, 0x0A, 0x19, 0xFF }, 0, 24 },   /* RedFrut1 */
+	{  67, 439, XREG_MOVED,     0, 0xFF, { 0x05, 0x13, 0x16, 0xFF }, 0, 48 },   /* RedFrut2 */
+	{  68, 440, XREG_MOVED,     0, 0xFF, { 0x07, 0x0E, 0x14, 0xFF }, 0, 62 },   /* RedFrut3 */
 	{  69, 441, XREG_MOVED,     0, 0xFF, { 0x02, 0x0A, 0x12, 0xFF }, 0, 34 },   /* Skully1 */
 	{  70, 442, XREG_MOVED,     0, 0xFF, { 0x00, 0x07, 0x15, 0xFF }, 0, 50 },   /* Skully2 */
 	{  71, 443, XREG_MOVED,     0, 0xFF, { 0x06, 0x0D, 0x14, 0xFF }, 0, 76 },   /* Skully3 */
@@ -104,19 +104,19 @@ const XChipReg xreg_rows[] = {
 	{  75, 144, XREG_SAME },   /* TimeBom1 */
 	{  76, 200, XREG_SAME },   /* TimeBom2 */
 	{  77, 201, XREG_SAME },   /* TimeBom3 */
-	{  78, 444, XREG_PENDING,   0, 0xFF, { 0x0A, 0x0E, 0x18, 0xFF }, 0, 30 },   /* Voltz1 */
-	{  79, 445, XREG_PENDING,   0, 0xFF, { 0x09, 0x14, 0x19, 0xFF }, 0, 48 },   /* Voltz2 */
-	{  80, 446, XREG_PENDING,   0, 0xFF, { 0x00, 0x07, 0x15, 0xFF }, 0, 66 },   /* Voltz3 */
+	{  78, 444, XREG_MOVED,     0, 0xFF, { 0x0A, 0x0E, 0x18, 0xFF }, 0, 30 },   /* Voltz1 */
+	{  79, 445, XREG_MOVED,     0, 0xFF, { 0x09, 0x14, 0x19, 0xFF }, 0, 48 },   /* Voltz2 */
+	{  80, 446, XREG_MOVED,     0, 0xFF, { 0x00, 0x07, 0x15, 0xFF }, 0, 66 },   /* Voltz3 */
 	{  81, 119, XREG_SAME },   /* Lance */
 	{  82,  19, XREG_SAME },   /* YoYo */
 	{  83, 129, XREG_SAME },   /* Wind */
 	{  84, 130, XREG_SAME },   /* Fan */
-	{  85, 447, XREG_PENDING,   0, 0xFF, { 0x02, 0x05, 0x12, 0xFF }, 0, 30 },   /* BoyBomb1 */
-	{  86, 448, XREG_PENDING,   0, 0xFF, { 0x07, 0x0F, 0x16, 0xFF }, 0, 40 },   /* BoyBomb2 */
-	{  87, 449, XREG_PENDING,   0, 0xFF, { 0x01, 0x10, 0x18, 0xFF }, 0, 50 },   /* BoyBomb3 */
-	{  88, 295, XREG_PENDING,   0, 0xFF, { 0x00, 0x03, 0x0A, 0x1A }, 0,  4 },   /* Guard1 */
-	{  89, 296, XREG_PENDING,   0, 0xFF, { 0x01, 0x0B, 0x10, 0x1A }, 0, 10 },   /* Guard2 */
-	{  90, 297, XREG_PENDING,   0, 0xFF, { 0x02, 0x0C, 0x12, 0x1A }, 0, 16 },   /* Guard3 */
+	{  85, 447, XREG_MOVED,     0, 0xFF, { 0x02, 0x05, 0x12, 0xFF }, 0, 30 },   /* BoyBomb1 */
+	{  86, 448, XREG_MOVED,     0, 0xFF, { 0x07, 0x0F, 0x16, 0xFF }, 0, 40 },   /* BoyBomb2 */
+	{  87, 449, XREG_MOVED,     0, 0xFF, { 0x01, 0x10, 0x18, 0xFF }, 0, 50 },   /* BoyBomb3 */
+	{  88, 295, XREG_MOVED,     0, 0xFF, { 0x00, 0x03, 0x0A, 0x1A }, 0,  4 },   /* Guard1 */
+	{  89, 296, XREG_MOVED,     0, 0xFF, { 0x01, 0x0B, 0x10, 0x1A }, 0, 10 },   /* Guard2 */
+	{  90, 297, XREG_MOVED,     0, 0xFF, { 0x02, 0x0C, 0x12, 0x1A }, 0, 16 },   /* Guard3 */
 	{  91, 298, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  4 },   /* CrakOut */
 	{  92, 299, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  7 },   /* DublCrak */
 	{  93, 300, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 10 },   /* TripCrak */
@@ -130,9 +130,9 @@ const XChipReg xreg_rows[] = {
 	{ 101, 147, XREG_SAME },   /* Discord */
 	{ 102, 148, XREG_SAME },   /* Timpani */
 	{ 103, 150, XREG_SAME },   /* VDoll */
-	{ 104, 451, XREG_PENDING,   0, 0xFF, { 0x00, 0x10, 0x13, 0xFF }, 0, 26 },   /* Astroid1 */
-	{ 105, 452, XREG_PENDING,   0, 0xFF, { 0x04, 0x0C, 0x14, 0xFF }, 0, 42 },   /* Astroid2 */
-	{ 106, 453, XREG_PENDING,   0, 0xFF, { 0x02, 0x0F, 0x18, 0xFF }, 0, 56 },   /* Astroid3 */
+	{ 104, 451, XREG_MOVED,     0, 0xFF, { 0x00, 0x10, 0x13, 0xFF }, 0, 26 },   /* Astroid1 */
+	{ 105, 452, XREG_MOVED,     0, 0xFF, { 0x04, 0x0C, 0x14, 0xFF }, 0, 42 },   /* Astroid2 */
+	{ 106, 453, XREG_MOVED,     0, 0xFF, { 0x02, 0x0F, 0x18, 0xFF }, 0, 56 },   /* Astroid3 */
 	{ 107, 154, XREG_SAME },   /* Recov10 */
 	{ 108, 155, XREG_SAME },   /* Recov30 */
 	{ 109, 156, XREG_SAME },   /* Recov50 */
@@ -154,7 +154,7 @@ const XChipReg xreg_rows[] = {
 	{ 125, 213, XREG_RECORD, 167, 0xFF, { 0x00, 0x0E, 0x15, 0xFF }, 0, 62 },   /* Geddon3 */
 	{ 126, 454, XREG_MOVED,     0, 0xFF, { 0x01, 0x06, 0x0B, 0xFF }, 0, 47 },   /* RainyDay */
 	{ 127, 194, XREG_SAME },   /* ColorPt */
-	{ 128, 455, XREG_PENDING,   0, 0xFF, { 0x04, 0x0A, 0x16, 0xFF }, 0, 39 },   /* ElemRage */
+	{ 128, 455, XREG_MOVED,     0, 0xFF, { 0x04, 0x0A, 0x16, 0xFF }, 0, 39 },   /* ElemRage */
 	{ 129, 456, XREG_MOVED,     0, 0xFF, { 0x00, 0x03, 0x07, 0x1A }, 0,  9 },   /* Blinder */
 	{ 130, 126, XREG_SAME },   /* AirSpin1 */
 	{ 131, 127, XREG_SAME },   /* AirSpin2 */
@@ -166,10 +166,10 @@ const XChipReg xreg_rows[] = {
 	{ 137, 180, XREG_SAME },   /* Barr200 */
 	{ 138, 457, XREG_MOVED,     0, 0xFF, { 0x03, 0x10, 0x15, 0x1A }, 0, 33 },   /* NrthWind */
 	{ 139, 168, XREG_SAME },   /* HolyPanl */
-	{ 140, 458, XREG_PENDING,   0, 0xFF, { 0x04, 0x0A, 0x13, 0x1A }, 0, 58 },   /* AntiFire */
-	{ 141, 459, XREG_PENDING,   0, 0xFF, { 0x03, 0x06, 0x10, 0x1A }, 0, 54 },   /* AntiWatr */
-	{ 142, 460, XREG_PENDING,   0, 0xFF, { 0x00, 0x0D, 0x18, 0x1A }, 0, 59 },   /* AntiElec */
-	{ 143, 461, XREG_PENDING,   0, 0xFF, { 0x0C, 0x12, 0x19, 0x1A }, 0, 55 },   /* AntiWood */
+	{ 140, 458, XREG_MOVED,     0, 0xFF, { 0x04, 0x0A, 0x13, 0x1A }, 0, 58 },   /* AntiFire */
+	{ 141, 459, XREG_MOVED,     0, 0xFF, { 0x03, 0x06, 0x10, 0x1A }, 0, 54 },   /* AntiWatr */
+	{ 142, 460, XREG_MOVED,     0, 0xFF, { 0x00, 0x0D, 0x18, 0x1A }, 0, 59 },   /* AntiElec */
+	{ 143, 461, XREG_MOVED,     0, 0xFF, { 0x0C, 0x12, 0x19, 0x1A }, 0, 55 },   /* AntiWood */
 	{ 144, 186, XREG_SAME },   /* AntiNavi */
 	{ 145, 187, XREG_SAME },   /* AntiDmg */
 	{ 146, 188, XREG_SAME },   /* AntiSwrd */
@@ -192,15 +192,15 @@ const XChipReg xreg_rows[] = {
 	{ 163, 471, XREG_MOVED,     0, 0xFF, { 0x02, 0x15, 0x19, 0xFF }, 0, 32 },   /* ElcReel1 */
 	{ 164, 472, XREG_MOVED,     0, 0xFF, { 0x01, 0x10, 0x18, 0xFF }, 0, 46 },   /* ElcReel2 */
 	{ 165, 473, XREG_MOVED,     0, 0xFF, { 0x04, 0x0B, 0x11, 0xFF }, 0, 60 },   /* ElcReel3 */
-	{ 166, 474, XREG_PENDING,   0, 0xFF, { 0x00, 0x15, 0x18, 0x1A }, 0, 40 },   /* CusVolt1 */
-	{ 167, 475, XREG_PENDING,   0, 0xFF, { 0x02, 0x04, 0x06, 0xFF }, 0, 55 },   /* CusVolt2 */
-	{ 168, 476, XREG_PENDING,   0, 0xFF, { 0x06, 0x0C, 0x0F, 0xFF }, 0, 70 },   /* CusVolt3 */
-	{ 169, 477, XREG_PENDING,   0, 0xFF, { 0x01, 0x05, 0x15, 0xFF }, 0, 28 },   /* CrsShld1 */
-	{ 170, 478, XREG_PENDING,   0, 0xFF, { 0x02, 0x0C, 0x11, 0xFF }, 0, 30 },   /* CrsShld2 */
-	{ 171, 479, XREG_PENDING,   0, 0xFF, { 0x03, 0x0E, 0x19, 0xFF }, 0, 52 },   /* CrsShld3 */
-	{ 172, 480, XREG_PENDING,   0, 0xFF, { 0x01, 0x04, 0x19, 0xFF }, 0, 42 },   /* WavePit */
-	{ 173, 481, XREG_PENDING,   0, 0xFF, { 0x00, 0x05, 0x07, 0xFF }, 0, 48 },   /* RedWave */
-	{ 174, 482, XREG_PENDING,   0, 0xFF, { 0x03, 0x0D, 0x16, 0xFF }, 0, 54 },   /* MudWave */
+	{ 166, 474, XREG_MOVED,     0, 0xFF, { 0x00, 0x15, 0x18, 0x1A }, 0, 40 },   /* CusVolt1 */
+	{ 167, 475, XREG_MOVED,     0, 0xFF, { 0x02, 0x04, 0x06, 0xFF }, 0, 55 },   /* CusVolt2 */
+	{ 168, 476, XREG_MOVED,     0, 0xFF, { 0x06, 0x0C, 0x0F, 0xFF }, 0, 70 },   /* CusVolt3 */
+	{ 169, 477, XREG_MOVED,     0, 0xFF, { 0x01, 0x05, 0x15, 0xFF }, 0, 28 },   /* CrsShld1 */
+	{ 170, 478, XREG_MOVED,     0, 0xFF, { 0x02, 0x0C, 0x11, 0xFF }, 0, 30 },   /* CrsShld2 */
+	{ 171, 479, XREG_MOVED,     0, 0xFF, { 0x03, 0x0E, 0x19, 0xFF }, 0, 52 },   /* CrsShld3 */
+	{ 172, 480, XREG_MOVED,     0, 0xFF, { 0x01, 0x04, 0x19, 0xFF }, 0, 42 },   /* WavePit */
+	{ 173, 481, XREG_MOVED,     0, 0xFF, { 0x00, 0x05, 0x07, 0xFF }, 0, 48 },   /* RedWave */
+	{ 174, 482, XREG_MOVED,     0, 0xFF, { 0x03, 0x0D, 0x16, 0xFF }, 0, 54 },   /* MudWave */
 	{ 175, 483, XREG_MOVED,     0, 0xFF, { 0x07, 0x08, 0x09, 0xFF }, 0, 10 },   /* CactBal1 */
 	{ 176, 484, XREG_MOVED,     0, 0xFF, { 0x10, 0x11, 0x12, 0xFF }, 0, 30 },   /* CactBal2 */
 	{ 177, 485, XREG_MOVED,     0, 0xFF, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 50 },   /* CactBal3 */

@@ -211,7 +211,7 @@ static void records_make(const uint32_t blank[3]) {
 		}
 		if (!M.rom5) { xrec_placeholder(r, 0, blank, out); continue; }
 		XRecordFrom in = { M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, r->twin ? table + XREC_SIZE * r->twin : NULL, r, 0, { 0 },
-			r->how == XREG_MOVED ? xchips_moved_of(id) : NULL };
+			r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK ? xchips_moved_of(id) : NULL };
 		memcpy(in.art, M.art[id], sizeof in.art);
 		xrec_from_bn5(&in, out);
 	}

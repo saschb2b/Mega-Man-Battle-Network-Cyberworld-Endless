@@ -20,7 +20,9 @@
 #include "emu.h"
 #include "guest.h"
 #include "hook.h"
+#include "xchips_bn5.h"
 #include "xchips_code.h"
+#include "xchips_moved.h"
 #include "xsong.h"
 #include "xvirus.h"
 #include "xvirus_dispatch.h"
@@ -30,7 +32,8 @@
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  64      /* the families' blocks of code, and the chips' moved code's */
+#define FAMILY_MAX  XV_MOVED_MAX   /* the families' blocks of code, and the chips' moved code's (every one: past 64 with
+                                     * the chips' later units, whose events went unattributed) */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -329,6 +332,41 @@ static HookAct on_mood(HookRegs *r, void *user) {
 
 /* ---- the logs ---- */
 
+/* The chips' units a spec's folder plays (src/core/xchips_moved.c: its chips' families, by number): their code alone the
+ * family's. Another unit's copy of BN5's code, which BN5's own code calls too (BoyBomb's explosion spawner, which a
+ * Handi's bomb calls in BN5), is BN5's own there and BN6's twin's in BN6, so it is no family's in either. */
+static bool unit_used[XC_UNITS];
+
+void xd_log_units(const uint16_t *folder, int n) {
+	memset(unit_used, 0, sizeof unit_used);
+	for (int i = 0; i < n; ++i) {
+		const XChipMoved *m = xchips_moved_of(folder[i] & 0x1FF);
+		for (int u = 0; m && u < xchips_bn5_count && u < XC_UNITS; ++u) {
+			const XChipUnit *x = &xchips_bn5[u];
+			if ((x->kind == XCHIP_ATTACK && x->number == m->family) ||
+			    (x->kind == XCHIP_SUPPORT && m->family == BN6_CHIP_SUPPORT_FAMILY && x->number == m->sub) ||
+			    (x->kind == XCHIP_NAVI && m->family == BN6_CHIP_NAVI_FAMILY && x->number == m->sub))
+				unit_used[u] = true;
+		}
+	}
+}
+
+/* whether BN6's copy at `to` is a used unit's */
+static bool chip_used(uint32_t to);
+
+bool xd_moved_kept(uint32_t to) {
+	return !(to >= FREE_CHIP_MOVED && to < FREE_TAIL) || (to >= XC_HELPERS && to < XC_HOMES) || chip_used(to);
+}
+
+static bool chip_used(uint32_t to) {
+	for (int u = 0; u < xchips_bn5_count && u < XC_UNITS; ++u)
+		for (int k = 0; unit_used[u] && k < xchips_bn5[u].code.nblocks; ++k) {
+			const XvBlock *b = &xchips_bn5[u].code.blocks[k];
+			if (to >= b->at && to < b->at + (b->end - b->start)) return true;
+		}
+	return false;
+}
+
 static XdLog *log_make(int game, bool alone) {
 	XdLog *log = log_of(game);
 	if (!log) return NULL;
@@ -337,10 +375,12 @@ static XdLog *log_make(int game, bool alone) {
 	log->g = &games[game == 6];
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
-	/* (the families' code, and the chips' moved code: its draws keyed by BN5's own places as a family's are; not the chips'
-	 * helpers', BN5's code every chip and MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
+	/* (the families' code, and the moved code of the chips the spec plays (xd_log_units): its draws keyed by BN5's own
+	 * places as a family's are; not the chips' helpers', BN5's code every chip and MegaMan's own arm share, which BN6's own
+	 * chips do not run: the muzzle flash) */
 	for (int i = 0; i < n && log->nfam < FAMILY_MAX; ++i)
-		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES)))
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) ||
+		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to)))
 			log->fam[log->nfam++] = m[i];
 	/* (the control's code where BN6 has it: its own Mettaur's, which the moved copy's places are keyed as) */
 	for (int i = 0; alone && i < xvirus_control.nblocks && log->nfam < FAMILY_MAX; ++i) {

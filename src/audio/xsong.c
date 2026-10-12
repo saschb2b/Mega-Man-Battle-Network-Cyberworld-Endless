@@ -16,8 +16,10 @@
 
 #define XSONG_AT    FREE_SONGS              /* (docs/EMULATION.md) */
 #define XSONG_END   FREE_XNAVIS
-#define SLOT_FIRST  0x26    /* BN6's empty song slots, 0x26-0x62: a shared header of no tracks (docs/ROM_DATA.md) */
-#define SLOT_LAST   0x62
+#define SLOT_FIRST  0x26    /* BN6's empty song slots, 0x26-0x62: a shared header of no tracks (docs/ROM_DATA.md); the per-run */
+#define SLOT_LAST   0x3F    /* ... themes' 0x26-0x3F, the areas' songs and their games' battle themes in turn, */
+#define SOUND_FIRST 0x40    /* ... the copied sounds' 0x40-0x62, one slot each fixed for every track (issue #82's shared */
+#define SOUND_LAST  0x62    /* ... allocations: xsong_install_at) */
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */
 #define TRACKS_MAX  8
 #define SEQ_MAX     0x8000  /* a song's sequence: its tracks and header */
@@ -72,7 +74,7 @@ static struct {
 	bool ready;
 	uint32_t next;
 	int nsongs;
-	struct { int rom, song, slot; uint32_t header; } song[SLOT_LAST - SLOT_FIRST + 1];
+	struct { int rom, song, slot; uint32_t header; } song[SOUND_LAST - SLOT_FIRST + 1];
 	int nmoved;
 	struct { int rom; uint32_t from, to; } moved[PTRS_MAX];
 } X;
@@ -212,12 +214,13 @@ static uint32_t copy_song(uint32_t header) {
 }
 
 /* Song `song` of extra ROM `xrom` copied in after those before it, and
- * entered in slot `slot`, played by BN6's music player, or (`own`) by
- * the players its game's entry names (a sound, as BN6's and BN5's players
- * are the same 32); false where it cannot be (the slot then stays BN6's
- * empty one). */
+ * entered in slot `slot`, played by BN6's music player (a theme, in the
+ * themes' slots), or (`own`) by the players its game's entry names (a
+ * sound, as BN6's and BN5's players are the same 32, in the sounds'
+ * slots); false where it cannot be (the slot then stays BN6's empty one). */
 static bool copy_in(int xrom, int song, bool own, int slot) {
-	if (slot < SLOT_FIRST || slot > SLOT_LAST || X.nsongs >= SLOT_LAST - SLOT_FIRST + 1 || xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->song_table || song < 0 ||
+	bool in_slots = own ? slot >= SOUND_FIRST && slot <= SOUND_LAST : slot >= SLOT_FIRST && slot <= SLOT_LAST;
+	if (!in_slots || X.nsongs >= SOUND_LAST - SLOT_FIRST + 1 || xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->song_table || song < 0 ||
 		(uint32_t)song * 8 + 8 > ROM_SIZE - XR[xrom].layout->song_table)
 		return false;
 	xr = XR[xrom].data;
@@ -286,7 +289,7 @@ static bool slot_taken(int slot) {
 
 int xsong_install_at(int xrom, int song, int slot) {
 	xsong_install(xrom, -1, -1);
-	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || slot < SLOT_FIRST || slot > SLOT_LAST) return -1;
+	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || slot < SOUND_FIRST || slot > SOUND_LAST) return -1;
 	/* (copied before: at its slot alone, one BN5 sound one slot whichever track copies it) */
 	int at = slot_of(xrom, song);
 	if (at >= 0) return at == slot ? slot : -1;

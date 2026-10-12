@@ -28,7 +28,7 @@
       }
     },
     "chip_id": {
-      "why": "A chip id: BN5's by the chip registry's rows (src/core/xchips_registry.c: a chip both games name alike BN6's id, BN5's other chips the ids of their own), read from the source the game is built from, as BN6's engine has them in its tables (docs/MULTIROM.md, The chip registry). Translated where an object keeps one: a battle object's chip (+0x2A, BN6_T1_CHIP, the chip it uses next, u16, 0xFFFF none: written as the hand deals it to MegaMan and as a virus picks its own), and the AI data's places below (its AttackVars +0x14, the chip used, written by the chip's use, BN5 0x0800FF68 / BN6 0x08012824: strh r0,[r7,#0x14], r7 the AI data + 0xA0). And where a support chip's routine keeps it: its object's +0x30 (r7 as the support family calls the routine: the chip used, its AttackVars +6 above it; BN5 0x080EC416 / BN6 0x080ED0F8), by the object's type (t4: the fourth kind's). The support chips' objects keep it so: each spawned by its support routine with r7 the chip (and AttackVars +6 above it), stored at +0x30 (MetaGel's 0x21, Blinder's 0x23, Jealousy's 0x36, NrthWind's 0x39, BoyBomb's 0x67, RainyDay's 0x75, BlakWing's 0x54, HolyDrem's 0x59, HotBody's 0x57: their routines BN5 0x080E2F84, 0x080E3228, 0x080E4628, 0x080E493C, 0x080E816E, 0x080E91EE, 0x080E6AB4, 0x080E6F60 and HotBody's family 0x080F0222, each str r7,[r0,#0x30]).",
+      "why": "A chip id: BN5's by the chip registry's rows (src/core/xchips_registry.c: a chip both games name alike BN6's id, BN5's other chips the ids of their own), read from the source the game is built from, as BN6's engine has them in its tables (docs/MULTIROM.md, The chip registry). Translated where an object keeps one: a battle object's chip (+0x2A, BN6_T1_CHIP, the chip it uses next, u16, 0xFFFF none: written as the hand deals it to MegaMan and as a virus picks its own), and the AI data's places below (its AttackVars +0x14, the chip used, written by the chip's use, BN5 0x0800FF68 / BN6 0x08012824: strh r0,[r7,#0x14], r7 the AI data + 0xA0). And where a support chip's routine keeps it: its object's +0x30 (r7 as the support family calls the routine: the chip used, its AttackVars +6 above it; BN5 0x080EC416 / BN6 0x080ED0F8), by the object's type (t4: the fourth kind's). The support chips' objects keep it so: each spawned by its support routine with r7 the chip (and AttackVars +6 above it), stored at +0x30 (MetaGel's 0x21, Blinder's 0x23, Jealousy's 0x36, NrthWind's 0x39, BoyBomb's 0x67, RainyDay's 0x75, BlakWing's 0x54, HolyDrem's 0x59, HotBody's 0x57, the Anti chips' setter 0x2A and its counter 0x2B (spawned by BN5 0x080E38E2 as its trap springs), DarkCirc's 0x5E and DrkSonic's 0x4A (chip_darkcirc, chip_drksonic: 0xBB and 0xC6 there in BN5's, BN6's ids 0xD6 and 0xDC): their routines BN5 0x080E2F84, 0x080E3228, 0x080E4628, 0x080E493C, 0x080E816E, 0x080E91EE, 0x080E6AB4, 0x080E6F60 HotBody's family 0x080F0222 and the Anti chips' 0x080E380A (0x080E3828), each str r7,[r0,#0x30]); and the third kind's: the Anti chips' trap 0x4D, its setter's chip passed on (BN5 0x080CF7F4: str r7,[r0,#0x30]).",
       "registry": "src/core/xchips_registry.c",
       "places": {
         "ai": [
@@ -66,6 +66,23 @@
             "0x30"
           ],
           "0x57": [
+            "0x30"
+          ],
+          "0x2A": [
+            "0x30"
+          ],
+          "0x2B": [
+            "0x30"
+          ],
+          "0x5E": [
+            "0x30"
+          ],
+          "0x4A": [
+            "0x30"
+          ]
+        },
+        "t3": {
+          "0x4D": [
             "0x30"
           ]
         }
@@ -935,13 +952,60 @@
       ]
     },
     {
+      "name": "a chip's object at MegaMan's centre",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T3"
+      ],
+      "types": [
+        "0xB8"
+      ],
+      "offsets": [
+        "0x34-0x37"
+      ],
+      "why": "CusVolt's volt (the third kind's 0xB8, BN5's code in both) stands each frame 40 pixels ahead of MegaMan at his centre, the point of his sprite BN5 numbers 0x1A and BN6 0x1B (tools/xchiprecipe.py, POINTS: BN6's 0x1A another): an offset each game takes from its own rows by his NameID (BN5 0x08015140, BN6 0x08018810), BN6's 2 pixels further right, as every point of his (the mask 'MegaMan's charge glow's place'). Its height (+0x38-0x3F) and its panel (+0x12, +0x13), which its strike reads, stay compared.",
+      "evidence": [
+        "its place: BN5 0x080DD56A-0x080DD5A0 (MegaMan's +0x34-0x3F, 40 pixels ahead, then point 0x1A's offset by his +0x28 added to x and z)",
+        "MegaMan's first row: BN5 0x080151C4 point 0x1A (0, 18), BN6 0x080188C0 point 0x1B (2, 18), point 0x00 (0, 0) against (2, 0)",
+        "chip_cusvolt1: the volt's x -20 in BN5's, -18 in BN6's from t38, its panel 3 in both"
+      ]
+    },
+    {
+      "name": "a spawn's leftover registers",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T3"
+      ],
+      "types": [
+        "0x69"
+      ],
+      "offsets": [
+        "0x10-0x13",
+        "0x3C-0x3F"
+      ],
+      "when": "spawned now",
+      "why": "MoonBld's blade (the third kind's 0x69, BN5's code in both) is spawned by 0x080D3398 through the common spawn, which keeps its caller's r1-r4 as the object's words (r1 at +0x10, r3 at +0x3C): MoonBld's attack sets neither (0x080EF9C2-0x080EF9DC), so the blade takes what the attack's own calls left: r1's top byte a byte of a return address into MoonBld's code (BN5's own, BN6's copy's: apart where the copy stands), r3 the attack's own caller's, BN5's RunAIAttack (0x0801857A) MegaMan's AI data, BN6's (0x0801B9E6) the battle state. Its first sweep (0x080D332C) writes its panel over +0x10-+0x13 and MegaMan's place over +0x34-+0x3F, so the words live their first frame alone, read by nothing.",
+      "evidence": [
+        "chip_moonbld1: the blade's +0x3C MegaMan's AI data in BN5's, 0x02034880 in BN6's at t38, its first frame; equal from t39",
+        "chip_moonbld1: its +0x13 0x67 in BN5's, 0x97 in BN6's at t38 (+0x34 the same return address in both, BN5's 0x080EF967 and its copy), +0x12 and +0x13 its panel, (3, 2), in both from t39",
+        "BN5 0x080D3398: push {r0,r1,r2,r5}; movs r0,#0x69; bl 0x08003178 (the third kind's spawn, r1-r4 its words)"
+      ]
+    },
+    {
       "name": "the hit spark's life",
       "part": [
         "in play",
         "obj"
       ],
       "whose": [
-        "megaman's"
+        "megaman's",
+        "engine"
       ],
       "kinds": [
         "T4"
@@ -953,11 +1017,12 @@
         "0x00",
         "0x08"
       ],
-      "why": "Where MegaMan's shot strikes, the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) is compared, what its sprite makes of its frames is not (as the lava's spark's).",
+      "why": "Where MegaMan's shot strikes, or a chip's attack through the engine's hit area (the third kind's 0x03, the spark at its +0x4C: the engine's, tools/xdiff_masks.py), the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) is compared, what its sprite makes of its frames is not (as the lava's spark's).",
       "evidence": [
         "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128), their frames' pointers apart (its sprite state's +0x20: 18420 bytes into BN5's, 17840 into BN6's)",
         "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's",
-        "chip_mrkcan1: a spark of MrkCan's shot a frame apart in its sprite (its sprite state's +1, 2 against 1) at t92"
+        "chip_mrkcan1: a spark of MrkCan's shot a frame apart in its sprite (its sprite state's +1, 2 against 1) at t92",
+        "chip_geyser: the spark of Geyser's hit (the hit area BN6's own, spawned by the moved geyser) a frame apart, its sprite state's +1 3 against 2, at t82"
       ],
       "sprite_offsets": [
         "0x01-0x07",
@@ -1386,6 +1451,32 @@
         "the sprites: BN5 0x0830105C, BN6 0x0830E6BC (list 3's 0x14), their animation 2's frames 4, 3, 3, 2 and 4, 3, 3",
         "chip_sword: the slash in play from t44 in both, to t54 in BN6's and t56 in BN5's, its flags and frame apart at t54",
         "chip_katana1: Katana's second slash (effect 0x16, list 3's 0x14's animation 0, both tables 0C 14 00 00) ended in BN6's at t57 while BN5's is still drawn"
+      ]
+    },
+    {
+      "name": "the spark effect's last frames",
+      "part": [
+        "in play",
+        "obj"
+      ],
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "effects": [
+        "0x11"
+      ],
+      "offsets": [
+        "0x00",
+        "0x08"
+      ],
+      "why": "Effect 0x11 (the fourth kind's type 0) draws the hit spark's sprite, list 5's 5, its animation 1 (both games' effect tables alike), each game its own sprite: BN5's animation 1 has five frames of 2, BN6's four, so BN5's effect is still drawn (in play, its state 4) the two frames after BN6's ends (its state 8, then gone), as the hit spark's own life ('the hit spark's life'). Its place and first frames are compared.",
+      "evidence": [
+        "the effects' tables: BN5 0x080DFD7C + 0x11 x 4, BN6 0x080E16D4 + 0x11 x 4: 14 05 01 00 in both",
+        "the sprites: BN5 0x0837D994, BN6 0x083A0320 (list 5's 5), their animation 1's frames 2, 2, 2, 2, 2 and 2, 2, 2, 2",
+        "chip_cannball: CannBall's burst (effect 0x11, from its moved code) ended in BN6's at t100 (its state 8) while BN5's is still drawn"
       ]
     },
     {

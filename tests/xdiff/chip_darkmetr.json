@@ -1,0 +1,86 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkMetr F in both games, BN5's chip 195 by BN5's own code and the registry's 217 by the same code moved (BN5's misc family 0x1A as BN6's 0x6A, subfamily 0x11 (Astroid's controller, its kind the DarkChip's); a DarkChip of the registry's, dealt straight into the battle deck, as its rule (S7) is to come), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 95,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0AC3"
+ ],
+ "folder6": [
+  "0AD9"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "0AC3"
+ ],
+ "deck6": [
+  "0AD9"
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 32,
+  "why": "BN5's dark rule, S7's to bring (docs/MULTIROM.md): the DarkChip used, BN5's battle drops MegaMan's mood to 0 (his NaviStats +0x0E, the player block's), takes its price (the player block's +0x19: 2), marks his object (+0x94: 3) and draws random numbers for it (BN5 0x080197B1), none of which BN6's battle does yet; DarkMetr's own code moved plays as BN5's (the misc family's subfamily 0x11, Astroid's controller, the fourth kind's 0x46, and its meteors, the third kind's 0x56); --survey: nothing else differs, unmasked"
+ }
+}

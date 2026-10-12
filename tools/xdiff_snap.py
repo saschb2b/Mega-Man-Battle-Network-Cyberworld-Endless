@@ -20,6 +20,7 @@ RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RN
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
 XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
 XC_ART = 0x08EA0000                                # ... their copies of BN5's sprites from here (src/emu/xchips_code.h, XC_ART)
+XC_HELPERS = (0x08E00C20, 0x08E02000)             # ... the helpers' code, BN5's routines every unit shares (XC_HELPERS to XC_POWERS)
 MEGAMAN_BUSTER = 0x11                             # MegaMan's CurAction as his buster fires, in both
 TWIN = 32                                         # the bytes two ROM pointers' data must share to be the same data
 NODE = 0x10                                       # the list node before an object (BN6_OBJECT_NODE)
@@ -390,6 +391,9 @@ def chip_effects():
     for body in re.findall(r'static const XvId \w+_effects\[\] = \{(.*?)\};', text):
         for a, b in re.findall(r'\{ (0x[0-9A-F]+), (0x[0-9A-F]+) \}', body):
             out[int(a, 16)] = int(b, 16)
+    # (and those a unit's immediate or table byte names by BN6's own id of the same sprite: its comment's pair)
+    for a, b in re.findall(r'its effect:? (0x[0-9a-f]+) in BN5, (0x[0-9a-f]+) in BN6', text):
+        out.setdefault(int(a, 16), int(b, 16))
     return out
 
 
@@ -604,14 +608,21 @@ def alliance_map(canon):
 def alliance_or(w5):
     """a word ORed from other objects' +0x30 (what hit or touched an object, legit.json, maps, alliance) as BN6's:
     the OR of the BN6 words of the BN5 words it is made of, where every way of making it of the table's words gives
-    the same; None where none does or two give otherwise (then the word is compared as it is)"""
+    the same, and the bits no table word has as they are (the hit's own: Guard's reflected strike ORs 1 with MegaMan's
+    word, chip_guard1_reflect); None where none does or two give otherwise (then the word is compared as it is)"""
     parts = [k for k in ALLIANCE if k and k & ~w5 == 0]
     if len(parts) > 16:
+        return None
+    # (bits no table word has, ORed in by the hit itself, the same in both games: kept as they are; BN6's 0x80 never one)
+    rest = w5
+    for k in parts:
+        rest &= ~k
+    if rest & 0x80:
         return None
     made = {(0, 0)}
     for k in parts:
         made |= {(a | k, b | ALLIANCE[k]) for a, b in made}
-    got = {b for a, b in made if a == w5}
+    got = {b | rest for a, b in made if a | rest == w5}
     return got.pop() if len(got) == 1 else None
 
 
@@ -672,6 +683,12 @@ def word_view(fa, fb, wa, wb, sprite_rel):
     return None
 
 
+def helper_spawned(f, o):
+    """whether the hooks saw object `o` spawned by the chips' helpers' code (its spawner's copy, XC_HELPERS)"""
+    e = f.trace.get('spawns', {}).get(o.role, (None, None))[0]
+    return e is not None and XC_HELPERS[0] <= (e.caller & ~1) < XC_HELPERS[1]
+
+
 def obj_cells(fa, fb, oa, ob):
     """(part, offset as BN6 has it, BN5's value, BN6's) for each place they differ, their numbers BN6's"""
     out = []
@@ -728,7 +745,8 @@ def obj_cells(fa, fb, oa, ob):
             elif off == OBJ_EFFECT and kind == 'T4' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.fx(5, a)
             elif off == OBJ_EFFECT and kind == 'T1' and oa.o8(OBJ_TYPE) == FLASH and not oa.o16(OBJ_NAME_ID):
-                a = canon.flash.get(a, a)
+                # (BN6's own flash by BN6's numbers; one the chips' helper spawned, its copy of BN5's table, BN5's)
+                a = a if helper_spawned(fb, ob) else canon.flash.get(a, a)
             elif kind in ('T3', 'T4') and (off - 1 in canon.chip_object(kind, oa.o8(OBJ_TYPE)) or off in canon.chip_object(kind, oa.o8(OBJ_TYPE))):
                 at = off - 1 if off - 1 in canon.chip_object(kind, oa.o8(OBJ_TYPE)) else off
                 ca, cb = canon.chip(5, oa.o16(at)), ob.o16(at)

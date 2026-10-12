@@ -267,7 +267,7 @@
 0800E276 BN6_PANEL_COORDS
 0800E2D8 BN6_SUBTRACT_HP
 0800E3BE hit_damage_summed
-0800E728 bn5_chips_code.routines_tables
+0800E728 routines_tables
 0800E908 bn5_chips_code.blindness_counted_down_2
 0800E9DC object_counter_time
 0800EC56 BN6_NAME_OF
@@ -290,8 +290,9 @@
 08010488 plus_chip_used_alone
 080108B8 BN6_FORM_ELEMENTS
 080108D0 BN6_FORM_WEAKNESSES
-080109A4 chip_damage
-080109DC bn5_chips_code.routines_tables_2
+080109A4 bn5_chips_code.reader
+080109D4 BN6_CHIP_POWERS_REF
+080109DC BN6_CHIP_POWERS
 08010D58 BN6_DARK_CHECK
 08010D84 base_chips
 08010D98 BN6_DARK_BASES
@@ -333,6 +334,9 @@
 080182C0 BN6_ENEMY_IDS_REF
 080182C4 BN6_OBJECT_IDS
 08018810 arm_point_record
+08018842 bn5_chips_code.0x08018810
+080188A0 bn5_chips_code.rows
+080188C0 bn5_chips_code.rows_2
 08019892 collision_data_made
 08019B78 panel_patterns_twin
 08019C7C BN6_COLL_MASKS

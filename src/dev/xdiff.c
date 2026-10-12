@@ -405,9 +405,11 @@ static void header_out(Side *g) {
 	w32(g, g->v.coll_size);
 	w32(g, g->v.panel_size);
 	static XvMoved m[XV_MOVED_MAX];
-	int n = g->v.game == 6 ? xvirus_moved(m, XV_MOVED_MAX) : 0;
-	w32(g, (uint32_t)n);
-	for (int i = 0; i < n; ++i) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
+	int n = g->v.game == 6 ? xvirus_moved(m, XV_MOVED_MAX) : 0, kept = 0;
+	for (int i = 0; i < n; ++i)
+		if (xd_moved_kept(m[i].to)) m[kept++] = m[i];
+	w32(g, (uint32_t)kept);
+	for (int i = 0; i < kept; ++i) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
 	w32(g, PLAYER_SIZE);
 }
 
@@ -922,6 +924,7 @@ int xdiff_run(const char *text) {
 		fprintf(stderr, "xdiff: BN5 Team Colonel's ROM is not beside BN6's\n");
 		return 2;
 	}
+	xd_log_units(s.folder[1], s.nfolder[1]);
 	bool ra = s.bn5 && reference(&a, &s), rb = s.bn6 && subject(&b, &s);
 	if ((s.bn5 && !ra) || (s.bn6 && !rb)) {
 		fprintf(stderr, "xdiff: a battle could not be begun\n");

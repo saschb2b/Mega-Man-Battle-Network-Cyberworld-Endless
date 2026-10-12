@@ -4,12 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn5.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
 #include "xattack_grow.h"
 #include "xchips_bn5.h"
+#include "xchips_moved.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
 #include "xsong.h"
@@ -36,10 +38,19 @@ static const Routines tables[2] = {
 static void stubs_stage(void) {
 	uint8_t *p = xv_put(XC_STUBS, XC_STUBS_END - XC_STUBS, true);
 	if (!p) return;
-	put16(p, 0x2000);
-	put16(p + 2, 0x4770);
-	put16(p + 4, 0x4770);
+	put16(p, 0x2000);        /* (movs r0,#0; mov pc,lr) */
+	put16(p + 2, 0x46F7);
+	put16(p + 4, 0x46F7);    /* (mov pc,lr) */
 	put16(p + 6, 0x46C0);
+	put16(p + 8, 0x2001);    /* (movs r0,#1; mov pc,lr) */
+	put16(p + 10, 0x46F7);
+	put16(p + 12, 0x46C0);
+	put16(p + 14, 0x46C0);
+	put16(p + 16, 0x2000);   /* (movs r0,#0; subs r0,#1; movs r1,#26; mov pc,lr: BN5's point 0x14 of MegaMan's, BN5 0x08015164's answer) */
+	put16(p + 18, 0x3801);
+	put16(p + 20, 0x211A);
+	put16(p + 22, 0x46F7);
+	for (int k = 24; k < 32; k += 2) put16(p + k, 0x46C0);
 }
 
 /* a table copied, BN6's entries as the player's ROM has them (the core's copy the same), the rest its stub; its words
@@ -58,16 +69,16 @@ static void routines_stage(const Routines *t) {
 
 /* ---- a unit ---- */
 
-/* (a unit's code past the homes, a helper's before them; the calls of either to the stubs or the helpers' code, each into a
- * helper before it: helper_calls_check) */
-static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_HOMES };
-static const XvRegion helpers = { XC_HELPERS, XC_HOMES, XC_ART, XC_END, XC_STUBS, XC_HOMES };
+/* (a unit's code past the homes, a helper's before the computed powers; the calls of either to the stubs or the helpers'
+ * code, each into a helper before it: helper_calls_check) */
+static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_POWERS };
+static const XvRegion helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
 
 /* each call of a unit's into the helpers' code: to code of a helper installed before it (its copy of a BN5 routine) */
 static void helper_calls_check(const XChipUnit *u, int at) {
 	for (int i = 0; i < u->code.ncalls && !xv_failed(); ++i) {
 		uint32_t to = u->code.calls[i].to;
-		if (to < XC_HELPERS || to >= XC_HOMES) continue;
+		if (to < XC_HELPERS || to >= XC_POWERS) continue;
 		bool ok = false;
 		for (int k = 0; k < at && !ok; ++k) {
 			const XChipUnit *h = &xchips_bn5[k];
@@ -110,6 +121,24 @@ static void songs_in(const XChipUnit *u) {
 	for (int i = 0; i < u->nsongs && !xv_failed(); ++i)
 		if (xsong_install_at(u->code.game, u->songs[i].song, u->songs[i].slot) != u->songs[i].slot)
 			xv_fail("its sound %#x not copied to slot %#x", u->songs[i].song, u->songs[i].slot);
+}
+
+/* BN6's computed powers grown (XC_POWERS): BN6's own entries as the player's ROM has them, BN5's routines the helpers moved at
+ * their entries of the chips' (xchips_powers: XC_POWER_FIRST + BN5's), the rest the stub; its word pointed at the copy */
+static void powers_stage(void) {
+	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
+	uint8_t *p = xv_put(XC_POWERS, 4u * 256u, true);
+	if (!p) return;
+	for (uint32_t i = 0; i < 256u; ++i) put32(p + 4 * i, i < BN6_CHIP_POWERS_COUNT ? rom_u32(BN6_CHIP_POWERS - BUS + 4 * i) : XC_STUBS | 1u);
+	for (int k = 0; k < xchips_powers_count && !xv_failed(); ++k) {
+		const XChipPower *w = &xchips_powers[k];
+		uint32_t routine = w->bn5 < BN5_CHIP_POWERS_COUNT ? get32(rom5 + (BN5_CHIP_POWERS - BUS) + 4u * w->bn5) : 0, to = 0;
+		for (int i = 0; i < xchips_bn5_count && !to; ++i)
+			if (xchips_bn5[i].kind == XCHIP_HELPER && xvirus_is_code(&xchips_bn5[i].code, routine & ~1u)) to = xvirus_code_at(&xchips_bn5[i].code, routine | 1u);
+		if (!to || w->bn6 < XC_POWER_FIRST) xv_fail("BN5's computed power %d (%08x) moved by no helper", 1000 + w->bn5, (unsigned)routine);
+		else put32(p + 4u * w->bn6, to);
+	}
+	if (!xv_failed()) xv_word(BN6_CHIP_POWERS_REF, BN6_CHIP_POWERS, XC_POWERS);
 }
 
 /* ---- the step's writes, each part under its own claims ---- */
@@ -156,6 +185,10 @@ bool xchips_code_install(void) {
 			songs_in(u);
 			if (!xv_failed() && xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u);
 		}
+	}
+	if (!xv_failed()) {
+		at = "BN6's computed powers";
+		powers_stage();
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN5's chips' code not installed (%s): %s\n", at, xv_why());

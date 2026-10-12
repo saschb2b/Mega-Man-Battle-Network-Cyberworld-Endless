@@ -117,7 +117,15 @@
 0800D010 chip_object_uses
 0800D17C BN5_ENEMY_STATS
 0800E190 plus_chip_used_alone
-0800E6F0 computed_powers_bn5
+0800E6F0 bn5_chips_code.reader
+0800E720 bn5_chips_code.word
+0800E728 BN5_CHIP_POWERS
+0800E8D6 sp_navi_chips
+0800E9A8 ds_ones
+0800EA18 bn5_chips_code.custswrd
+0800EB06 bn5_chips_code
+0800EB0C bn5_chips_code_2
+0800EB12 cusvolt1_3
 0800F198 object_sprite_collision_set_up_from
 0800F200 attack_first_kind_set
 0800F21C BN5_SET_ATTACK
@@ -145,6 +153,9 @@
 08014600 ai_chip_use_word_for_navi
 08014C8C BN5_ENEMY_IDS
 08015140 arm_point_record
+08015164 point_object_sprite_by_nameid
+080151B8 point_object_sprite_by_nameid_rows
+080151C4 megaman_first
 08016126 collision_data_made
 0801629C panel_patterns_by_region
 08016364 BN5_COLL_MASKS
@@ -165,6 +176,7 @@
 08018926 sprite_set_up_from_packed_word
 0801A5BC object_put_four_slot_table
 0801C968 BN5_BATTLE_TABLES
+0801D27A powers_by_time_counter
 0801D62C BN5_FIND_ROWS
 0801E210 BN5_CHIP_RECORDS
 0801E216 BN5_CHIP_KIND
@@ -222,6 +234,7 @@
 080CEFCC kinds_bn5
 080CF118 state_table_bn5
 080CF37E spawner_bn5
+080CF6CC anti_trap_sum_into_collision_data
 080DB608 find_kept_as_battle_is_won
 080DFD7C BN5_EFFECTS
 080DFFD2 BN5_SPAWN_EFFECT

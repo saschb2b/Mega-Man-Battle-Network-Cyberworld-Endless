@@ -46,11 +46,15 @@ void xrec_from_bn5(const XRecordFrom *in, uint8_t out[XREC_SIZE]) {
 	memcpy(out, in->bn5, XREC_SIZE);
 	out[BN6_CHIP_ELEMENT] = (uint8_t)xrec_icon_element(in->bn5[BN6_CHIP_ELEMENT]);
 	uint8_t fx = in->bn5[BN6_CHIP_EFFECT_FLAGS] & (uint8_t)~BN6_CHIP_IN_LIBRARY;
-	/* (a power of 1001 and up is an index into the game's own table of
-	 * computed powers, BN5's not BN6's: none shown) */
-	if (get16(in->bn5 + BN6_CHIP_ATTACK_POWER) > 1000) {
-		put16(out + BN6_CHIP_ATTACK_POWER, 0);
-		fx &= (uint8_t)~(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER);
+	/* (a power of 1000 and up is an index into the game's own table of
+	 * computed powers, BN5's not BN6's: a playing chip's where a helper
+	 * moved its routine into BN6's grown table, xchips_power_of; else
+	 * none shown) */
+	int power = get16(in->bn5 + BN6_CHIP_ATTACK_POWER);
+	if (power >= 1000) {
+		int to = in->moved || in->twin ? xchips_power_of(power) : 0;
+		put16(out + BN6_CHIP_ATTACK_POWER, (uint16_t)to);
+		if (!to) fx &= (uint8_t)~(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER);
 	}
 	out[BN6_CHIP_EFFECT_FLAGS] = fx;
 	behaviour(in, out);

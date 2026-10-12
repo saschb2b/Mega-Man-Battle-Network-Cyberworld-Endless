@@ -1,6 +1,6 @@
 {
- "about": "A chip of BN5's whose code is to move into BN6's engine (issue #82's C3), BN5's battle alone until it does: BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of CusVolt1 A in both games, BN5's chip 166 by BN5's own code and the registry's 474 by the same code moved (BN5's family 0x27 as BN6's 0x77), the first Custom screen's chip picked and OK, used at t30: what BN5's battle does, for the differential once its unit moves (docs/MULTIROM.md, The chips' code). Not moved yet: its damage is computed (its record's power 1073-1075, an index into BN5's table of computed powers, 0x0800E728, whose entries 73-75 BN6's shorter table has not; the first run: its attack's damage 0 in BN6's), wanting BN6's table grown with BN5's routines.",
- "kind": "reference",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of CusVolt1 A in both games, BN5's chip 166 by BN5's own code and the registry's 474 by the same code moved (BN5's family 0x27 as BN6's 0x77), its power computed (1073, BN5's table of computed powers' entry 73, 0x0800E728) by BN5's routine moved into BN6's grown table (entry 0xC9: 1201), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
  "mm": "22",

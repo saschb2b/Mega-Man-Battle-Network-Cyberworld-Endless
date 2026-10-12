@@ -67,6 +67,13 @@ typedef struct XdLog XdLog;
  * BN6's), emptied, its hooks placed on its core: NULL where one could not
  * be. The families' code is xvirus_moved's (BN6's copy, BN5's own). */
 XdLog *xd_log_start(int game);
+/* The chips' units whose moved code is the family's in the logs started after: those BN6's folder `folder` (its `n`
+ * chips, as the spec gives them: code << 9 | id) plays */
+void xd_log_units(const uint16_t *folder, int n);
+/* Whether the trace names BN6's moved range at `to` (its header's, which the comparator reads pointers by): every
+ * family's and helper's, a chip unit's where the spec plays it (xd_log_units: another unit's copy of BN5's data, which
+ * BN6's own code has a twin of, read as BN5's own in BN5 and BN6's twin's in BN6) */
+bool xd_moved_kept(uint32_t to);
 /* The subject's draws replayed from the reference's: each keyed by the
  * family's own code that led to it (its BN5 address), else by its caller
  * (a BN6 routine's through its twin), the k-th of its key in a frame the

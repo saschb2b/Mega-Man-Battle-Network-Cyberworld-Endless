@@ -1,6 +1,6 @@
 {
- "about": "A chip of BN5's whose code is to move into BN6's engine (issue #82's C3), BN5's battle alone until it does: BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of BoyBomb1 C in both games, BN5's chip 85 by BN5's own code and the registry's 447 by the same code moved (BN5's support routine 0x3A as BN6's 0x64), the first Custom screen's chip picked and OK, used at t30: what BN5's battle does, for the differential once its unit moves (docs/MULTIROM.md, The chips' code). Not moved yet: its unit derives whole, but moved, BN6's battle stands still once its thrower's time stop ends (t446 of the core's frames in BN6's run: the battle's state unchanged from then on, its bomb, BN5's obstacle of NameID 0xD4, the one object left running): to be found first.",
- "kind": "reference",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of BoyBomb1 C in both games, BN5's chip 85 by BN5's own code and the registry's 447 by the same code moved (BN5's support routine 0x3A as BN6's 0x64), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
  "mm": "22",

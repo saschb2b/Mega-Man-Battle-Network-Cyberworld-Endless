@@ -866,16 +866,29 @@ the masks):
   state, its battle's phase, Custom screen, frames"). A moved chip's
   copies are read as BN5's: a sprite BN6 draws from a unit's copy as the
   BN5 sprite it copies (`src/emu/xchips_bn5.c`'s `XvSprite` rows), an
-  effect id of the chips' as BN5's (its `XvId` rows), a song BN6 plays
-  from a copy in one of its slots as BN5's number (`xsong_copy_of`);
-  an object's state word saved at +0x5C as a flinch or a status
-  interrupts it has its action read as +0x09's. The chips' helpers'
-  code (the muzzle flash, the buster arm) is no unit's: BN5's own buster
-  runs it too, so its calls are compared as the engine's. A spec whose
+  effect id as BN5's (its `XvId` rows, and the BN6 ids its immediates'
+  and table rows' comments name), a song BN6 plays from a copy in one of
+  its slots as BN5's number (`xsong_copy_of`), a muzzle flash the
+  helper's copy spawned by BN5's numbers (legit.json's `flash` pairs are
+  BN6's own flashes'); an object's state word saved at +0x5C as a flinch
+  or a status interrupts it has its action read as +0x09's. The chips'
+  helpers' code (the muzzle flash, the buster arm, the shake, the
+  computed powers) is no unit's: BN5's own buster runs it too, so its
+  calls are compared as the engine's. Only the units of the chips BN6's
+  folder plays are the family's code (`xd_log_units`): another unit's
+  copy of BN5's code, which BN5's own code calls too (BoyBomb's explosion
+  spawner, which a Handi's bomb calls in BN5), is BN5's own in BN5 and
+  its twin in BN6, so it is no family's in either, and the trace names
+  only those units' ranges (`xd_moved_kept`); the hits' spark (the
+  fourth kind's 4) the engine's hit area spawns is the engine's. A
+  Program Advance or a DarkChip waiting for its rule is dealt straight
+  into the deck (`deck5`, `deck6`: a code it has, else BN5's custom
+  screen deals a blank). A spec whose
   target's own rule meets the chip (`hold: 0` where a flinching hit ends
   a paralysis in BN5's hit pass and not in BN6's: DrilArm's) says why in
   its `about`; one held to a recorded FAIL (`verdict`: Blinder's and
-  Skully's status marks over a moved foe) has its `--survey` named there.
+  Skully's status marks over a moved foe, the DarkChips' BN5 dark rule)
+  has its `--survey` named there.
 - **A Soul's life** (the Souls track's S2; docs/MULTIROM.md, Transplanted
   Souls): with the Souls installed in BN6's engine (`souls6=`), a Soul
   stands behind the proxy form, 8, where BN5's form byte names the Soul:
@@ -1025,9 +1038,16 @@ routines' 0x1D + S; homes and code in `UNITS`' order, a new unit after
 the last. `UNITS` are the ones written, each whole and its chips' specs
 passing; `CANDIDATES` are derived for the report alone, each with what
 it still needs. `src/core/xchips_moved.c` takes the registry's
-`XREG_MOVED` rows of the written units: a unit's chips must be
-`XREG_MOVED` (the generator refuses to write otherwise), and a chip whose
-unit is not written stays `XREG_PENDING`, sitting out.
+`XREG_MOVED` rows of the written units, and the Program Advances and
+the DarkChips of `DARK_MOVED` whose code moved (their records take the
+moved family; they sit out until their rules come): a unit's chips must
+be `XREG_MOVED` (the generator refuses to write otherwise; a record of a
+subfamily the unit plays none of, and the Navi chips while their sprites
+wait, excepted), and a chip whose unit is not written stays
+`XREG_PENDING`, sitting out. A twin is also held to read the same data:
+the tables its literals name, where they are plain bytes in both ROMs,
+must be the same (`same_data`: DrkSonic's sonic's times by kind its BN6
+twin keeps otherwise).
 
 What else a unit is given, each a table of the generator's with its why:
 `HELPERS`, BN5's code several units call whose object one copy alone may
@@ -1049,7 +1069,20 @@ from 0x52 down), its immediates set to it and `src/audio/xsong.c`'s
 `xsong_install_at` copying the song as the units install; effects whose
 entry differs take BN6's of the same sprite, animation and palette or an
 id of the chips' (0xD0-0xFF, from the top down); BN5's lava, sea and holy
-set or compared are BN6's 13, 14 and 5. Every object type a written unit
+set or compared are BN6's 13, 14 and 5. `HELPERS` holds the computed
+powers' routines too (BN5's table of them `0x0800E728`: BN6's grown at
+`XC_POWERS`, BN5's entry i at 0x80 + i), `UNIT_STUBS` calls one unit
+aims at a stub (the SP powers' link bit answered 1; ElemRage's point
+0x14 answered with BN5's numbers), `TABLE_ARGS` the routines a unit
+hands a table of routines to (an obstacle's actions: walked whole),
+`TABLE_SOUNDS` and `EFFECT_CALLS`, `EFFECT_RANGES`, `PANEL_LOOKUPS`,
+`COLL_SUMS` and `POINTS` the numbers a unit gives by a table's row, an
+engine routine's register, a run by kind, a lookup, a collision data's
+offset and a point of MegaMan's sprite (docs/MULTIROM.md, The chips'
+code, has each), `SUB_TABLES` a family's routines by subfamily (the
+subfamilies no moved row plays aimed at a stub, not walked),
+`NAVI_SPRITES_WAIT` the Navi chips' sprite loads left for the Navi track.
+Every object type a written unit
 spawns through the dispatch must have its decision, MOVED or TWIN, in
 `tools/bn5_twins.py`'s `DISPATCH` (one for every track): the generator
 refuses to write where one is missing or another.
