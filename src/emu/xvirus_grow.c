@@ -20,7 +20,7 @@
 #define BUS          0x08000000u
 #define TEXT_END     0xE6   /* a text archive's entry ends with it */
 #define NAME_MAX     32     /* a name's bytes at most, its end among them */
-#define ENTRY_MAX    (2u * ENEMY_DROPS)   /* the largest entry, a reward row's */
+#define ENTRY_MAX    BN6_ARM_VIRUS_SIZE   /* the largest entry, an arm points' record's (a reward row's 2 x ENEMY_DROPS) */
 #define ID_HIGH_BITS 4      /* the bits of an id's high byte the spawn reads (0x080073F4), its preload made to read as many */
 
 /* One of BN6's tables as it grows: what it is (for the log), the one word
@@ -36,6 +36,7 @@ typedef struct {
 } Grow;
 
 static Grow G[XG_TABLES];
+_Static_assert(ENTRY_MAX >= 2u * ENEMY_DROPS, "a reward row within an entry's most");
 
 /* the table above, from the player's ROM's layout (the two per-family
  * tables RomLayout names, the sprite lists' words) */
@@ -65,7 +66,11 @@ static void specs(void) {
 	G[XG_T3] = (Grow){ "the third kind's types", BN6_T3_TYPES_REF, BN6_TYPES_T3_COUNT, 4, XV_TYPES + XV_STEP, XV_TYPES_MAX, -1, 0, 3 };
 	G[XG_T4] = (Grow){ "the fourth kind's types", BN6_T4_TYPES_REF, BN6_TYPES_T4_COUNT, 4, XV_TYPES + 2 * XV_STEP, XV_TYPES_MAX, -1, 0, 4 };
 	G[XG_IDS] = (Grow){ "the enemy ids", BN6_ENEMY_IDS_REF, BN6_ENEMY_IDS_COUNT, 3, XV_IDS_AT, XV_IDS, BN6_FILLER_ID, 0 };
-	G[XG_ROWS] = (Grow){ "the reward rows", BN6_DROP_ROWS_REF, BN6_DROP_ROW_COUNT, ENTRY_MAX, XV_ROWS, XV_IDS, BN6_FILLER_ID, 0 };
+	G[XG_ROWS] = (Grow){ "the reward rows", BN6_DROP_ROWS_REF, BN6_DROP_ROW_COUNT, 2u * ENEMY_DROPS, XV_ROWS, XV_IDS, BN6_FILLER_ID, 0 };
+	/* (the arm points' records of every number of list 1: BN6's bytes for each number its list holds, as it reads them, its 31
+	 * records and for its 32nd the Navis' first, which lies after them; record 0's for the numbers past; a family's at its
+	 * battle sprite's number, xvirus.c) */
+	G[XG_ARMS] = (Grow){ "the viruses' arm points", BN6_ARM_VIRUSES_REF, BN6_SPRITES_VIRUSES_COUNT, BN6_ARM_VIRUS_SIZE, XV_ARMS, XV_LIST_MAX, 0, 0 };
 }
 
 static bool in_rom(uint32_t a, uint32_t n) { return a >= BUS && a - BUS <= ROM_SIZE && n <= ROM_SIZE - (a - BUS); }
@@ -158,6 +163,8 @@ bool xg_grow(void) {
 	for (int t = 0; t < XG_TABLES && !xv_failed(); ++t) grow_one(&G[t]);
 	if (!xv_failed()) names_make();
 	if (!xv_failed()) dispatch_make();
+	/* (the families' pre-steps by AI index, none until a family's install names its own: xvirus_shim.h) */
+	if (!xv_failed()) xv_put(XV_PRESTEP, 4u * XV_AIS, true);
 	/* (the preload as the spawn reads an id: lsls #0x1C, lsrs #0x14) */
 	xv_insn(BN6_PRELOAD_ID_LSL, THUMB_LSLS, 2, 2, 0x1F, 32 - ID_HIGH_BITS);
 	xv_insn(BN6_PRELOAD_ID_LSR, THUMB_LSRS, 2, 2, 0x17, 32 - 8 - ID_HIGH_BITS);
@@ -184,26 +191,40 @@ uint32_t xvirus_drop_row(int id) {
 
 /* ---- a family's entries ---- */
 
-void xg_set(int t, uint32_t i, const uint8_t *entry) {
-	if (t < 0 || t >= XG_TABLES || !grown || i >= G[t].cap || G[t].size > ENTRY_MAX) { xv_fail("entry %#x of grown table %d", (unsigned)i, t); return; }
-	const Grow *g = &G[t];
-	uint32_t size = g->size;
+/* entry i of a grown table still BN6's own entry where it has one, else the fill: BN6's entry fill_of, each as the
+ * player's ROM has it, whatever a family set over a placeholder of BN6's since */
+static bool entry_free(const Grow *g, uint32_t i) {
 	uint8_t fill[ENTRY_MAX] = { 0 };
-	if (g->fill_of >= 0)
-		for (uint32_t b = 0; b < size; ++b) fill[b] = emu_read8(g->to + (uint32_t)g->fill_of * size + b);
+	uint32_t size = g->size, table = get32(R.data + (g->ref - BUS)), own = table + (i < g->count ? i : (uint32_t)g->fill_of) * size;
+	if ((i < g->count || g->fill_of >= 0) && in_rom(own, size)) memcpy(fill, R.data + (own - BUS), size);
 	else put32(fill, g->fill);
-	uint32_t at = g->to + i * size;
 	for (uint32_t b = 0; b < size; ++b)
-		if (emu_read8(at + b) != fill[b]) { xv_fail("%s's entry %#x is taken (%08x)", g->name, (unsigned)i, (unsigned)at); return; }
-	uint8_t *p = xv_put(at, size, false);
-	if (p) memcpy(p, entry, size);
+		if (emu_read8(g->to + i * size + b) != fill[b]) return false;
+	return true;
+}
+
+/* entry i of grown table t given n bytes, its entry's size */
+static void entry_set(int t, uint32_t i, const uint8_t *entry, uint32_t n) {
+	if (t < 0 || t >= XG_TABLES || !grown || i >= G[t].cap || G[t].size != n || n > ENTRY_MAX) {
+		xv_fail("entry %#x of grown table %d", (unsigned)i, t);
+		return;
+	}
+	const Grow *g = &G[t];
+	uint32_t at = g->to + i * n;
+	if (!entry_free(g, i)) { xv_fail("%s's entry %#x is taken (%08x)", g->name, (unsigned)i, (unsigned)at); return; }
+	uint8_t *p = xv_put(at, n, false);
+	if (p) memcpy(p, entry, n);
+}
+
+void xg_set(int t, uint32_t i, const uint8_t *entry) {
+	entry_set(t, i, entry, t >= 0 && t < XG_TABLES ? G[t].size : 0);
 }
 
 void xg_set_word(int t, uint32_t i, uint32_t v) {
-	uint8_t w[ENTRY_MAX] = { 0 };
+	uint8_t w[4];
 	put32(w, v);
 	if (t >= 0 && t < XG_TABLES && G[t].size != 4) { xv_fail("grown table %d is no table of words", t); return; }
-	xg_set(t, i, w);
+	entry_set(t, i, w, sizeof w);
 }
 
 void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine) {

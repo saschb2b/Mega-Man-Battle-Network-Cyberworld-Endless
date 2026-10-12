@@ -152,6 +152,8 @@
 #define BN6_COLL_MASK_WORDS   178         /* ... BN5_COLL_MASKS' first 160 with bit 0x80 or as they are, but region 61's (tests/xdiff/legit.json) */
 #define BN6_COLL_REGION       0x01        /* in its collision data (CollisionDataPtr +0x54, bn6f collision_data_struct), Region: the panels it is struck on and strikes, bn6f PanelOffsetListsPointerTable's index, 0 none (nothing touches it), 1 its own panel */
 #define BN6_COLL_PARALYSIS    0x1C        /* u16 frames left paralysed, one less each frame (0x0800E730, the status step every virus runs) */
+#define BN6_COLL_CONFUSE      0x1E        /* u16 frames left confused, the same (its mark over it, the fourth kind's 6 of kind 0, at +0x48) */
+#define BN6_COLL_BLIND        0x20        /* u16 frames left blinded, the same (its mark, kind 1, at +0x4C) */
 #define BN6_COLL_FLASH        0x24        /* u16 frames left flashing after a hit (BN5_COLL_FLASH): the blink step reads its bit 1 (BN6_BLINK_FLASHING) */
 #define BN6_COLL_FREEZE       0x2A        /* u16 frames left frozen in an ice block, the same */
 #define BN6_COLL_BUBBLE       0x2C        /* u16 frames left in a bubble, the same */
@@ -161,6 +163,9 @@
 #define BN6_COLL_STRUCK       0x40        /* u32 what the hits of a frame left it, acted on by its next (0x0801B1C4, a virus's every frame), each bit cleared there: */
 #define BN6_STRUCK_PARALYSIS  0x00000008u /* ... paralysed, BN6_COLL_PARALYSIS frames: CurAction 4 */
 #define BN6_STRUCK_SLIDE      0x00000010u /* ... pushed along a panel (it slides; CurAction kept) */
+#define BN6_STRUCK_BLIND      0x00000020u /* ... blinded, BN6_COLL_BLIND frames, its mark spawned over it at its arm point 5 (0x0800E920-0x0800E93E) */
+#define BN6_STRUCK_CONFUSE    0x00000080u /* ... confused, BN6_COLL_CONFUSE frames, its other statuses' timers cleared, its mark over it
+                                             (0x0800E8B0-0x0800E8DE) */
 #define BN6_STRUCK_DRAG       0x00000100u /* ... dragged: CurAction 5 */
 #define BN6_STRUCK_FREEZE     0x00010000u /* ... frozen, BN6_COLL_FREEZE frames, an ice block spawned round it (BN6_ICE_SIZES): CurAction 6 */
 #define BN6_STRUCK_BUBBLE     0x00020000u /* ... bubbled, BN6_COLL_BUBBLE frames: CurAction 7 */

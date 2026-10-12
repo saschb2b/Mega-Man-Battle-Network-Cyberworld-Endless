@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- **Every virus family of BN5's that BN6 lacks, in BN6's own battles
+  (issue #82).** After CanGard and Handi, 23 more are moved into BN6's
+  battle engine by their own code wherever BN5's ROM is read: Powie,
+  Bugtank, Dominerd, MetFire, Shakey, NinJoy, Lark, BomBoy, Zomon,
+  Drixol, Batty, Skarab, Draggin, Whirly, Marina, Flashy, Eleogre,
+  Cactikil, WuNote, Appley, BigBrute, TinHawk and Bladia, each with its
+  six versions (AI 34-56, ids 0x20C-0x295). Their recipes are made by
+  the generator from the two ROMs, numbers only, and nothing of either
+  game is in the project: the code, records, sprites, names and sounds
+  are copied from the player's ROMs as the game starts. What a family
+  asked of BN6's engine that BN6 never did for its own is made for it:
+  its held chips are the chip registry's (BN6's own chip of a name, else
+  the registry's id for it), its tests of a chip's id and its lookups by
+  a range of enemy ids go through a few instructions of the project's
+  own, Dominerd's and Appley's step before their state (which BN5's
+  engine took for their ids alone) runs from a hook on BN6's, the ids in
+  their tables of data take BN6's numbers, and a sound BN6 has no song of
+  is copied once into the song slot every track uses for it. Each family
+  is fought in BN5's own engine and in BN6's and compared frame by
+  frame, seven battles a family, every version, their pictures compared
+  by their bytes: the same in all but Zomon's, whose AreaGrab is BN6's
+  own chip run by BN6's own code, which ends its time freeze a frame
+  later than BN5's (the same up to there). The comparator learned the
+  engine's own presentation where a family's attack lands (each game's
+  spark and explosion art), chip ids in each game's numbers, and BN6's
+  fixes of BN5's bugs that a family can see: BN5's own routine is copied
+  where BN6's would change what the family does. A confused or blinded
+  family wears its mark where BN5 puts it: each brings its own arm points. Their place in a run's
+  battles is a later step.
 - **BN5's chips in BN6's own chip tables (issue #82).** BN6's chip
   records are grown from 411 to 512 in the game's free space, its chips'
   names and descriptions to id 511, and the 257 of Team Colonel's chips a

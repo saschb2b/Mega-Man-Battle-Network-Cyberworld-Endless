@@ -1,0 +1,1222 @@
+{
+ "about": "The moved families' numbers in both games as tools/xdiff.py reads a spec's, written by tools/xrecipe.py with src/emu/xvirus_bn5.c (numbers only: never by hand): each family's enemy ids, AI index, effects its code spawns, sounds it plays copied or by another number, the engine's routines its code names as callbacks and their twins (each pair's bodies compared), the object types it moved, BN5's and BN6's, where its struct1 and struct2 are in BN5 (its battle sprite's arm points and its versions' HP, tools/xfamily.py), how many states its table holds in BN6 and the sprites it copied (BN6's list word: BN5's list and number)",
+ "families": [
+  {
+   "name": "CanGard",
+   "ai5": 14,
+   "ai6": 32,
+   "ids5": [
+    "0x4f",
+    "0x50",
+    "0x51",
+    "0x52",
+    "0x53",
+    "0x54"
+   ],
+   "ids6": [
+    "0x200",
+    "0x201",
+    "0x202",
+    "0x203",
+    "0x204",
+    "0x205"
+   ],
+   "effects": {
+    "0xe": "0xe",
+    "0x57": "0x6c"
+   },
+   "sounds": {},
+   "code_twins": {},
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x25"
+   ],
+   "struct1": "0x8108d28",
+   "struct2": "0x8108d30",
+   "states": 12,
+   "art": {
+    "0x8b80000": [
+     1,
+     "0xe"
+    ],
+    "0x8b83000": [
+     4,
+     "0x24"
+    ],
+    "0x8b83800": [
+     4,
+     "0x3d"
+    ]
+   }
+  },
+  {
+   "name": "Handi",
+   "ai5": 4,
+   "ai6": 33,
+   "ids5": [
+    "0x13",
+    "0x14",
+    "0x15",
+    "0x16",
+    "0x17",
+    "0x18"
+   ],
+   "ids6": [
+    "0x206",
+    "0x207",
+    "0x208",
+    "0x209",
+    "0x20a",
+    "0x20b"
+   ],
+   "effects": {},
+   "sounds": {},
+   "code_twins": {
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b"
+   },
+   "effect_bytes": [],
+   "t3_actions": [
+    "0x4b"
+   ],
+   "moved_types": [],
+   "struct1": "0x81060e8",
+   "struct2": "0x81060f0",
+   "states": 11,
+   "art": {
+    "0x8b84800": [
+     1,
+     "0x4"
+    ]
+   }
+  },
+  {
+   "name": "Powie",
+   "ai5": 2,
+   "ai6": 34,
+   "ids5": [
+    "0x7",
+    "0x8",
+    "0x9",
+    "0xa",
+    "0xb",
+    "0xc"
+   ],
+   "ids6": [
+    "0x20c",
+    "0x20d",
+    "0x20e",
+    "0x20f",
+    "0x210",
+    "0x211"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {
+    "0xc0": "0x62"
+   },
+   "code_twins": {
+    "0x8012a6d": "0x8015c95"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x81056a4",
+   "struct2": "0x81056ac",
+   "states": 12,
+   "art": {
+    "0x8b87800": [
+     1,
+     "0x2"
+    ],
+    "0x8b89800": [
+     5,
+     "0xd"
+    ]
+   }
+  },
+  {
+   "name": "Bugtank",
+   "ai5": 3,
+   "ai6": 35,
+   "ids5": [
+    "0xd",
+    "0xe",
+    "0xf",
+    "0x10",
+    "0x11",
+    "0x12"
+   ],
+   "ids6": [
+    "0x212",
+    "0x213",
+    "0x214",
+    "0x215",
+    "0x216",
+    "0x217"
+   ],
+   "effects": {},
+   "sounds": {},
+   "code_twins": {
+    "0x80138eb": "0x8016c8b",
+    "0x80c92f3": "0x80ca103"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x24"
+   ],
+   "struct1": "0x8105cfc",
+   "struct2": "0x8105d04",
+   "states": 12,
+   "art": {
+    "0x8b8c000": [
+     1,
+     "0x3"
+    ],
+    "0x8b8f000": [
+     3,
+     "0x2"
+    ]
+   }
+  },
+  {
+   "name": "Dominerd",
+   "ai5": 5,
+   "ai6": 36,
+   "ids5": [
+    "0x19",
+    "0x1a",
+    "0x1b",
+    "0x1c",
+    "0x1d",
+    "0x1e"
+   ],
+   "ids6": [
+    "0x218",
+    "0x219",
+    "0x21a",
+    "0x21b",
+    "0x21c",
+    "0x21d"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x8104bfd": "0x810ae95"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x81063e0",
+   "struct2": "0x81063e8",
+   "states": 13,
+   "art": {
+    "0x8b91000": [
+     1,
+     "0x5"
+    ]
+   }
+  },
+  {
+   "name": "MetFire",
+   "ai5": 6,
+   "ai6": 37,
+   "ids5": [
+    "0x1f",
+    "0x20",
+    "0x21",
+    "0x22",
+    "0x23",
+    "0x24"
+   ],
+   "ids6": [
+    "0x21e",
+    "0x21f",
+    "0x220",
+    "0x221",
+    "0x222",
+    "0x223"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80138eb": "0x8016c8b",
+    "0x80d0d21": "0x80d0cf9",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x56"
+   ],
+   "struct1": "0x8106a08",
+   "struct2": "0x8106a10",
+   "states": 12,
+   "art": {
+    "0x8b93000": [
+     1,
+     "0x6"
+    ],
+    "0x8b96000": [
+     3,
+     "0x31"
+    ]
+   }
+  },
+  {
+   "name": "Shakey",
+   "ai5": 7,
+   "ai6": 38,
+   "ids5": [
+    "0x25",
+    "0x26",
+    "0x27",
+    "0x28",
+    "0x29",
+    "0x2a"
+   ],
+   "ids6": [
+    "0x224",
+    "0x225",
+    "0x226",
+    "0x227",
+    "0x228",
+    "0x229"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {},
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x8106dd4",
+   "struct2": "0x8106ddc",
+   "states": 11,
+   "art": {
+    "0x8b96800": [
+     1,
+     "0x7"
+    ]
+   }
+  },
+  {
+   "name": "NinJoy",
+   "ai5": 9,
+   "ai6": 39,
+   "ids5": [
+    "0x31",
+    "0x32",
+    "0x33",
+    "0x34",
+    "0x35",
+    "0x36"
+   ],
+   "ids6": [
+    "0x22a",
+    "0x22b",
+    "0x22c",
+    "0x22d",
+    "0x22e",
+    "0x22f"
+   ],
+   "effects": {
+    "0x15": "0x6e",
+    "0x4e": "0x6f",
+    "0x4f": "0x43"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x81077f0",
+   "struct2": "0x81077f8",
+   "states": 11,
+   "art": {
+    "0x8b97800": [
+     1,
+     "0x9"
+    ],
+    "0x8b99800": [
+     4,
+     "0x37"
+    ]
+   }
+  },
+  {
+   "name": "Lark",
+   "ai5": 11,
+   "ai6": 40,
+   "ids5": [
+    "0x3d",
+    "0x3e",
+    "0x3f",
+    "0x40",
+    "0x41",
+    "0x42"
+   ],
+   "ids6": [
+    "0x230",
+    "0x231",
+    "0x232",
+    "0x233",
+    "0x234",
+    "0x235"
+   ],
+   "effects": {},
+   "sounds": {},
+   "code_twins": {
+    "0x8104bfd": "0x810ae95"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x8107ea0",
+   "struct2": "0x8107ea8",
+   "states": 12,
+   "art": {
+    "0x8b9a800": [
+     1,
+     "0xb"
+    ]
+   }
+  },
+  {
+   "name": "BomBoy",
+   "ai5": 12,
+   "ai6": 41,
+   "ids5": [
+    "0x43",
+    "0x44",
+    "0x45",
+    "0x46",
+    "0x47",
+    "0x48"
+   ],
+   "ids6": [
+    "0x236",
+    "0x237",
+    "0x238",
+    "0x239",
+    "0x23a",
+    "0x23b"
+   ],
+   "effects": {
+    "0x6": "0x6",
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80ccefd": "0x80cd3d5",
+    "0x80ccfd1": "0x80cd4a9",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [
+    "0x3e"
+   ],
+   "moved_types": [
+    "3:0x3e"
+   ],
+   "struct1": "0x8108254",
+   "struct2": "0x810825c",
+   "states": 13,
+   "art": {
+    "0x8b9d800": [
+     1,
+     "0xc"
+    ],
+    "0x8b9f800": [
+     4,
+     "0x36"
+    ]
+   }
+  },
+  {
+   "name": "Zomon",
+   "ai5": 13,
+   "ai6": 42,
+   "ids5": [
+    "0x49",
+    "0x4a",
+    "0x4b",
+    "0x4c",
+    "0x4d",
+    "0x4e"
+   ],
+   "ids6": [
+    "0x23c",
+    "0x23d",
+    "0x23e",
+    "0x23f",
+    "0x240",
+    "0x241"
+   ],
+   "effects": {
+    "0x16": "0x71",
+    "0x17": "0x70"
+   },
+   "sounds": {},
+   "code_twins": {},
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x81086ec",
+   "struct2": "0x81086f4",
+   "states": 13,
+   "art": {
+    "0x8ba0000": [
+     1,
+     "0xd"
+    ],
+    "0x8ba4000": [
+     3,
+     "0x14"
+    ]
+   }
+  },
+  {
+   "name": "Drixol",
+   "ai5": 16,
+   "ai6": 43,
+   "ids5": [
+    "0x5b",
+    "0x5c",
+    "0x5d",
+    "0x5e",
+    "0x5f",
+    "0x60"
+   ],
+   "ids6": [
+    "0x242",
+    "0x243",
+    "0x244",
+    "0x245",
+    "0x246",
+    "0x247"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x800325d": "0x8003459",
+    "0x8104bfd": "0x810ae95"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "4:0x78"
+   ],
+   "struct1": "0x8109630",
+   "struct2": "0x8109638",
+   "states": 12,
+   "art": {
+    "0x8ba6800": [
+     1,
+     "0x10"
+    ],
+    "0x8ba9800": [
+     4,
+     "0x3f"
+    ]
+   }
+  },
+  {
+   "name": "Batty",
+   "ai5": 17,
+   "ai6": 44,
+   "ids5": [
+    "0x61",
+    "0x62",
+    "0x63",
+    "0x64",
+    "0x65",
+    "0x66"
+   ],
+   "ids6": [
+    "0x248",
+    "0x249",
+    "0x24a",
+    "0x24b",
+    "0x24c",
+    "0x24d"
+   ],
+   "effects": {
+    "0x56": "0x72"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80138eb": "0x8016c8b",
+    "0x8104bfd": "0x810ae95"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x6a"
+   ],
+   "struct1": "0x8109bf8",
+   "struct2": "0x8109c00",
+   "states": 11,
+   "art": {
+    "0x8baa800": [
+     1,
+     "0x11"
+    ],
+    "0x8bac800": [
+     4,
+     "0x3a"
+    ],
+    "0x8bad000": [
+     4,
+     "0x3b"
+    ]
+   }
+  },
+  {
+   "name": "Skarab",
+   "ai5": 18,
+   "ai6": 45,
+   "ids5": [
+    "0x67",
+    "0x68",
+    "0x69",
+    "0x6a",
+    "0x6b",
+    "0x6c"
+   ],
+   "ids6": [
+    "0x24e",
+    "0x24f",
+    "0x250",
+    "0x251",
+    "0x252",
+    "0x253"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {
+    "0xb7": "0x61"
+   },
+   "code_twins": {
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0xc1"
+   ],
+   "struct1": "0x810a088",
+   "struct2": "0x810a090",
+   "states": 13,
+   "art": {
+    "0x8bae000": [
+     1,
+     "0x12"
+    ],
+    "0x8bb1000": [
+     4,
+     "0x50"
+    ]
+   }
+  },
+  {
+   "name": "Draggin",
+   "ai5": 20,
+   "ai6": 46,
+   "ids5": [
+    "0x73",
+    "0x74",
+    "0x75",
+    "0x76",
+    "0x77",
+    "0x78"
+   ],
+   "ids6": [
+    "0x254",
+    "0x255",
+    "0x256",
+    "0x257",
+    "0x258",
+    "0x259"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80138eb": "0x8016c8b",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x87"
+   ],
+   "struct1": "0x810abf4",
+   "struct2": "0x810abfc",
+   "states": 12,
+   "art": {
+    "0x8bb2000": [
+     1,
+     "0x14"
+    ],
+    "0x8bb4000": [
+     4,
+     "0x40"
+    ]
+   }
+  },
+  {
+   "name": "Whirly",
+   "ai5": 21,
+   "ai6": 47,
+   "ids5": [
+    "0x79",
+    "0x7a",
+    "0x7b",
+    "0x7c",
+    "0x7d",
+    "0x7e"
+   ],
+   "ids6": [
+    "0x25a",
+    "0x25b",
+    "0x25c",
+    "0x25d",
+    "0x25e",
+    "0x25f"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {},
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x810b080",
+   "struct2": "0x810b088",
+   "states": 12,
+   "art": {
+    "0x8bb6000": [
+     1,
+     "0x15"
+    ],
+    "0x8bb8000": [
+     4,
+     "0x8"
+    ]
+   }
+  },
+  {
+   "name": "Marina",
+   "ai5": 22,
+   "ai6": 48,
+   "ids5": [
+    "0x7f",
+    "0x80",
+    "0x81",
+    "0x82",
+    "0x83",
+    "0x84"
+   ],
+   "ids6": [
+    "0x260",
+    "0x261",
+    "0x262",
+    "0x263",
+    "0x264",
+    "0x265"
+   ],
+   "effects": {
+    "0x5d": "0x73"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80138eb": "0x8016c8b"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0xb",
+    "3:0x8f"
+   ],
+   "struct1": "0x810b824",
+   "struct2": "0x810b82c",
+   "states": 12,
+   "art": {
+    "0x8bb9000": [
+     1,
+     "0x16"
+    ],
+    "0x8bba000": [
+     4,
+     "0x41"
+    ],
+    "0x8bbb000": [
+     5,
+     "0x1e"
+    ]
+   }
+  },
+  {
+   "name": "Flashy",
+   "ai5": 23,
+   "ai6": 49,
+   "ids5": [
+    "0x85",
+    "0x86",
+    "0x87",
+    "0x88",
+    "0x89",
+    "0x8a"
+   ],
+   "ids6": [
+    "0x266",
+    "0x267",
+    "0x268",
+    "0x269",
+    "0x26a",
+    "0x26b"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {
+    "0xba": "0x60"
+   },
+   "code_twins": {
+    "0x8012a21": "0x8015c49",
+    "0x80138eb": "0x8016c8b",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x6f"
+   ],
+   "struct1": "0x810bc5c",
+   "struct2": "0x810bc64",
+   "states": 12,
+   "art": {
+    "0x8bbc000": [
+     1,
+     "0x17"
+    ],
+    "0x8bbd000": [
+     4,
+     "0x3e"
+    ]
+   }
+  },
+  {
+   "name": "Eleogre",
+   "ai5": 24,
+   "ai6": 50,
+   "ids5": [
+    "0x8b",
+    "0x8c",
+    "0x8d",
+    "0x8e",
+    "0x8f",
+    "0x90"
+   ],
+   "ids6": [
+    "0x26c",
+    "0x26d",
+    "0x26e",
+    "0x26f",
+    "0x270",
+    "0x271"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {
+    "0xba": "0x60"
+   },
+   "code_twins": {
+    "0x8104bfd": "0x810ae95"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x6f"
+   ],
+   "struct1": "0x810c1c4",
+   "struct2": "0x810c1cc",
+   "states": 12,
+   "art": {
+    "0x8bbe800": [
+     1,
+     "0x18"
+    ]
+   }
+  },
+  {
+   "name": "Cactikil",
+   "ai5": 25,
+   "ai6": 51,
+   "ids5": [
+    "0x91",
+    "0x92",
+    "0x93",
+    "0x94",
+    "0x95",
+    "0x96"
+   ],
+   "ids6": [
+    "0x272",
+    "0x273",
+    "0x274",
+    "0x275",
+    "0x276",
+    "0x277"
+   ],
+   "effects": {
+    "0x14": "0x6d"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80138af": "0x8016c4f"
+   },
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [
+    "1:0x11"
+   ],
+   "struct1": "0x810c780",
+   "struct2": "0x810c788",
+   "states": 10,
+   "art": {
+    "0x8bc0800": [
+     1,
+     "0x19"
+    ],
+    "0x8bc1800": [
+     4,
+     "0x30"
+    ]
+   }
+  },
+  {
+   "name": "WuNote",
+   "ai5": 26,
+   "ai6": 52,
+   "ids5": [
+    "0x97",
+    "0x98",
+    "0x99",
+    "0x9a",
+    "0x9b",
+    "0x9c"
+   ],
+   "ids6": [
+    "0x278",
+    "0x279",
+    "0x27a",
+    "0x27b",
+    "0x27c",
+    "0x27d"
+   ],
+   "effects": {
+    "0x14": "0x6d",
+    "0x15": "0x6e"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x800325d": "0x8003459",
+    "0x80138af": "0x8016c4f",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "1:0x5",
+    "1:0x16",
+    "3:0x84"
+   ],
+   "struct1": "0x810cc8c",
+   "struct2": "0x810cc94",
+   "states": 13,
+   "art": {
+    "0x8bc3000": [
+     1,
+     "0x1a"
+    ],
+    "0x8bc5000": [
+     4,
+     "0x21"
+    ]
+   }
+  },
+  {
+   "name": "Appley",
+   "ai5": 27,
+   "ai6": 53,
+   "ids5": [
+    "0x9d",
+    "0x9e",
+    "0x9f",
+    "0xa0",
+    "0xa1",
+    "0xa2"
+   ],
+   "ids6": [
+    "0x27e",
+    "0x27f",
+    "0x280",
+    "0x281",
+    "0x282",
+    "0x283"
+   ],
+   "effects": {
+    "0x6": "0x6",
+    "0x14": "0x6d",
+    "0x15": "0x6e",
+    "0x26": "0x74"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x800325d": "0x8003459",
+    "0x8009fb3": "0x800b917",
+    "0x800a327": "0x800bd35",
+    "0x80138eb": "0x8016c8b",
+    "0x80dbc39": "0x80df409",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "1:0x2f",
+    "3:0xac",
+    "4:0x90"
+   ],
+   "struct1": "0x810d290",
+   "struct2": "0x810d298",
+   "states": 12,
+   "art": {
+    "0x8bc5800": [
+     1,
+     "0x1b"
+    ],
+    "0x8bc7800": [
+     4,
+     "0x39"
+    ],
+    "0x8bc8000": [
+     4,
+     "0x17"
+    ]
+   }
+  },
+  {
+   "name": "BigBrute",
+   "ai5": 28,
+   "ai6": 54,
+   "ids5": [
+    "0xa3",
+    "0xa4",
+    "0xa5",
+    "0xa6",
+    "0xa7",
+    "0xa8"
+   ],
+   "ids6": [
+    "0x284",
+    "0x285",
+    "0x286",
+    "0x287",
+    "0x288",
+    "0x289"
+   ],
+   "effects": {
+    "0x12": "0x75",
+    "0x13": "0x76"
+   },
+   "sounds": {},
+   "code_twins": {
+    "0x80138eb": "0x8016c8b",
+    "0x8104bfd": "0x810ae95",
+    "0x8104da9": "0x810acc9",
+    "0x8104deb": "0x810ad0b",
+    "0x8104e61": "0x810ad81"
+   },
+   "effect_bytes": [
+    "0xac",
+    "0xad"
+   ],
+   "t3_actions": [],
+   "moved_types": [
+    "3:0x61"
+   ],
+   "struct1": "0x810d874",
+   "struct2": "0x810d87c",
+   "states": 12,
+   "art": {
+    "0x8bc8800": [
+     1,
+     "0x1c"
+    ]
+   }
+  },
+  {
+   "name": "TinHawk",
+   "ai5": 29,
+   "ai6": 55,
+   "ids5": [
+    "0xa9",
+    "0xaa",
+    "0xab",
+    "0xac",
+    "0xad",
+    "0xae"
+   ],
+   "ids6": [
+    "0x28a",
+    "0x28b",
+    "0x28c",
+    "0x28d",
+    "0x28e",
+    "0x28f"
+   ],
+   "effects": {
+    "0x12": "0x75",
+    "0x13": "0x76",
+    "0x62": "0x77"
+   },
+   "sounds": {},
+   "code_twins": {},
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x810dd70",
+   "struct2": "0x810dd78",
+   "states": 12,
+   "art": {
+    "0x8bcf800": [
+     1,
+     "0x1d"
+    ],
+    "0x8bd4800": [
+     5,
+     "0xe"
+    ]
+   }
+  },
+  {
+   "name": "Bladia",
+   "ai5": 30,
+   "ai6": 56,
+   "ids5": [
+    "0xaf",
+    "0xb0",
+    "0xb1",
+    "0xb2",
+    "0xb3",
+    "0xb4"
+   ],
+   "ids6": [
+    "0x290",
+    "0x291",
+    "0x292",
+    "0x293",
+    "0x294",
+    "0x295"
+   ],
+   "effects": {
+    "0x12": "0x75",
+    "0x13": "0x76",
+    "0x60": "0x78"
+   },
+   "sounds": {},
+   "code_twins": {},
+   "effect_bytes": [],
+   "t3_actions": [],
+   "moved_types": [],
+   "struct1": "0x810e710",
+   "struct2": "0x810e718",
+   "states": 14,
+   "art": {
+    "0x8bd5800": [
+     1,
+     "0x1e"
+    ],
+    "0x8bd9800": [
+     4,
+     "0x48"
+    ]
+   }
+  }
+ ]
+}

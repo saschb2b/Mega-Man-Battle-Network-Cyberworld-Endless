@@ -39,6 +39,11 @@ TWINS = (
     (0x080142DC, 0x080178B6, 'navis'), (0x0800F208, 0x08011688, 'navis'), (0x08013D1C, 0x080170C4, 'navis'),
     (0x08013E02, 0x080171A6, 'navis'), (0x08000BC6, 0x08000CA6, 'navis'), (0x08017666, 0x0801A9A4, 'navis'),
     (0x0801766C, 0x0801A9AA, 'navis'),
+    # issue #82's A2b: the collision data's tail its setup and its update end on (BN5 0x08016760 and 0x08016B96 / BN6
+    # 0x08019FB4 and 0x0801A082 call it last)
+    (0x080165E4, 0x08019F44, 'families'),
+    # the element a collision data takes from its object (BN5 0x080D0CDA's call, the fire column's set-up)
+    (0x08016C3A, 0x0801A146, 'families'),
 )
 
 # The BN5 rows of tools/bn6f_match.py's search that a twin above corrects: its search placed a bn6f function of another
@@ -49,7 +54,8 @@ WRONG_ROWS = (0x080131A0, 0x080142D0, 0x0801412A, 0x080141EC, 0x080142DC)
 # conditions hold (each a check tools/xrecipe.py makes on the family's code: 'no_flip' it writes no object's +0x17,
 # 'flags_free' the object flags it sets are none of 0x10000 and 0x80000000, 'no_attack6' it calls no setAttack6,
 # 'panel_types' the panel types it sets are numbered alike in both games, 'held_bn6' its held chips are BN6's ids);
-# 'no': a moved family's code must not be aimed at it
+# 'no': a moved family's code must not be aimed at it; 'copy': BN6's differs where the family's code can see it, so BN5's
+# own body is copied with the family's code (its own calls through their twins), as a routine of BN5's shared code is
 AUDITS = {
     # CanGard's (its recipe's, compared since frame by frame with BN5's own)
     (0x0800F29E, 0x08011714): ('ok', "the attack ended: BN6's also clears AttackVars +0x1B, clears AIData +0x44's bits 0x1000003F where "
@@ -73,8 +79,18 @@ AUDITS = {
                                      "player's attack bonus on MegaMan's path alone", ('held_bn6',)),
     (0x0800FE6A, 0x080126E4): ('ok', "a chip's numbers written for its attack: BN6 ORs its chip record's icon element's hit flag in "
                                      "(0x080129E4): right for a BN6 chip id, which the family's held chips are", ('held_bn6',)),
-    (0x08016B96, 0x0801A082): ('ok', "object_updateCollisionData: BN6's stores its second word through the collision data (BN5's through "
-                                     "r4, a bug) and ORs in the time stop's bit as BN6's setup does", ()),
+    (0x080165E4, 0x08019F44): ('ok', "the collision data's tail (its damage word's top bits, +0x2E, as statuses): BN6's sets +0x0E 1 "
+                                     "where BN5's 0 for bit 14, and hands bits 13 and 12 to 0x0801A4D0 where BN5's sets +0x10 0x20 "
+                                     "and 0x30, and has no bit 11 (BN5's +0x12 and +0x13): as BN6's object_setupCollisionData ends "
+                                     "on it (0x08019FB4's twin, audited above), which every family's setup already runs", ()),
+    (0x08016C3A, 0x0801A146): ('ok', "an object's element (+0x0E) into its collision data's +9: BN6's keeps its low four bits (and "
+                                     "#0xF), the same for every element of BN5's (0-6)", ()),
+    # ('copy': BN5's own body served, copied with the family's code: issue #82's A2b, where the family's code changes its
+    # region and BN6's twin's fix shows; marina_v1_keys)
+    (0x08016B96, 0x0801A082): ('copy', "object_updateCollisionData: BN6's stores its second word through the collision data (BN5's "
+                                       "through r4, the region number its caller passed: into the BIOS's ROM, where a write does "
+                                       "nothing, so BN5's object keeps the target word its setup gave it) and ORs in the time stop's "
+                                       "bit as BN6's setup does: BN5's own body copied, its two calls through their twins", ()),
     (0x080133C4, 0x080165B8): ('ok', "on to the decide state: CurAction 8 where BN5's 6, BN6's two status states first", ()),
     (0x0801A5BC, 0x0801DC7C): ('ok', "an object put in a four-slot table (BN5 0x0203E5C0, BN6 0x0203EB50, each its own): BN6 marks its "
                                      "own ids 0x49-0x4E and 0xEB otherwise (0x1B); every other id the same (3)", ()),
@@ -90,6 +106,15 @@ AUDITS = {
     (0x0800F2A6, 0x0801171C): ('ok', "the attack ended (the wait's form): as 0x0800F29E's twin", ('no_attack6',)),
     (0x0800B2A6, 0x0800CC0A): ('ok', "object_setPanelType: BN6's (in IWRAM) times its conveyors 9-12 where BN5 times its lava 8 and sea "
                                      "10; types 0-4, 6 and 7 are the same panels in both", ('panel_types',)),
+    # (issue #82's A2b: the arm's position by an object's NameID, which BN5's temp attack object asks for its owner's)
+    (0x08015140, 0x08018810): ('ok', "an object's arm position by its NameID (r0): BN6 answers (0, 7) at once for its obstacles' ids "
+                                     "0xCD-0xFF (0x08018812-0x08018818), then as BN5's; the families' ids are past 0x200 and MegaMan's "
+                                     "0x1A0", ()),
+    # (issue #82's A2b: a jump table's entry of Cactikil's and WuNote's objects of the first kind)
+    (0x080138AE, 0x08016C4E): ('ok', "an object's end (its memory, collision data and place in its table let go, once): BN6's lets its "
+                                     "panel reservation go first (0x0801BB78) as its object_genericDestroy does, and sets its AI data's "
+                                     "+0x0E to 0xFF without BN5's call 0x08053BF4, which writes the object's HP into a Liberation "
+                                     "Mission's record and only in that game mode (0x020022F0 +8 = 2), which no battle of BN6's is", ()),
 }
 
 # panel types both games number alike (docs/ROM_DATA.md, Battlefields and their panels' types)
@@ -103,3 +128,138 @@ DATA_TWINS = (
     (0x08005CD0, 0x80, 0x080065E0, 'a sine table (its 0x80 bytes the same)'),
     (0x08005D50, 0x80, 0x08006660, 'a cosine table (its 0x80 bytes the same)'),
 )
+
+# Tables of numbers a family's code reads ids from, each read by hand (issue #82's A2b; docs/ROM_DATA.md, The recipe
+# generator's reads of BN5): its address in BN5, its bytes, its entry's size, the entries its family's code reads (the rest
+# dead in the copy: no code of the family reaches them), the fields of an entry that are ids (offset, kind: 'effect' an
+# effect id, 'list' a sprite list's byte offset as struct1's, 'sprite' the number in that list), the calls whose id comes
+# from it (the effect's spawner, a sprite's load), and why. The table is copied whole as raw data; each live entry's ids
+# are given BN6's numbers as byte fix-ups (XvByte)
+ID_TABLES = (
+    dict(at=0x08108900, size=2, step=1, live=(0, 1), fields=((0, 'effect'),), sites=(0x081088C8,),
+         why="Zomon's two effects (its index the word at sp, 0 or 1: BN5 0x081088B2-0x081088B6), spawned at 0x081088C8"),
+    dict(at=0x0810B588, size=4, step=2, live=(0, 1), fields=((0, 'list'), (1, 'sprite')), sites=(0x0810B558,),
+         why="Whirly's two sprites by r0 (0 its own battle sprite, 1 list 4's 0x08: its loader 0x0810B54A, called with r0 0 at "
+             "0x0810B4CC and 1 at 0x0810B27E), each a list's byte offset then a number, as sprite_load takes them (0x0810B558)"),
+    dict(at=0x080B9A5C, size=0x122, step=5, live=(0x30,), fields=((0, 'list'), (1, 'sprite')), sites=(0x080B9BB2,),
+         kinds_of=(1, 0x05), spawner=0x080B9CAE, kind_reg=4,
+         why="the kinds of BN5's temp attack object, the image object (the first kind's type 5: its +4 the kind, its record at "
+             "the table + 5 x it, 0x080B9CE0-0x080B9CEA; a sprite list's byte offset and number first, read at 0x080B9BB2), "
+             "0x3A kinds, moved with the type whole (issue #82's shared allocations: one module for every track, the Navis' "
+             "installing it too). `live` are the kinds fixed here: those the families spawn, WuNote's 0x30 alone (BN5 "
+             "0x0810CFC4-0x0810CFC6, r4's low byte, its palette in the high one), its art copied into the families' lists; "
+             "every other kind keeps BN5's list and number bytes (the Navis' track fixes its own: kind 3 and those with a "
+             "BN6 twin), and a family spawning a kind not fixed here is refused (`kinds_of`: the type whose spawn's "
+             "`kind_reg` low byte names the kind, at a call to its `spawner`)"),
+    dict(at=0x080D0C0C, size=0x24, step=6, live=(0,), fields=((0, 'sprite'),), list=3, sites=(0x080D0C6C,),
+         why="the kinds of BN5's fire column (the third kind's type 0x56: its +0x60 the table + 6 x its +4, 0x080D0C5A-"
+             "0x080D0C64; +0 its sprite in list 3, the list its code's immediate, loaded at 0x080D0C6C), six kinds; MetFire "
+             "spawns kind 0 alone (its spawner 0x080D0E2C with r4 0, BN5 0x08106B42-0x08106B48), the type moved with it "
+             "(TYPES: BN6's draws another sprite)"),
+    dict(at=0x080C5DF4, size=0xC0, step=0x10, live=(7, 8, 9, 10), fields=((5, 'list'), (6, 'sprite')), sites=(0x080C5EEC,),
+         why="the records of BN5's third kind's type 0x0B, 16 bytes a kind (+4 the object's kind: its record at the table + 16 "
+             "x it, 0x080C5EDA-0x080C5EE2; +5 and +6 the sprite it loads at 0x080C5EEC), 12 kinds; Marina's water objects (its "
+             "third kind's 0x8F) spawn it with kinds 7-10 (by their version: the bytes at 0x080D879C, read at 0x080D8778-"
+             "0x080D877C), and no other code of the family spawns one, so kinds 0-6 and 11 are dead in the copy"),
+)
+
+# Object types whose twin in BN6 runs the same code but reads a table by the object's kind (its +4, the spawn's r4) that
+# BN6 laid out otherwise, so a family's kind names another object there: never a twin, so a family that spawns one moves
+# BN5's code and table with it (through the second-level dispatch; the table's live entries in ID_TABLES)
+MOVE_TYPES = {
+    (1, 0x05): "the temp attack object: BN5's kinds at 0x080B9A5C, BN6's at 0x080BA444, 5 bytes a kind (its sprite's list and "
+               "number first), read by 0x080B9CE0 / 0x080BA6D2 (the same code); the two agree on kinds 0-4 alone (BN5's 0x3A "
+               "kinds, BN6's 0x34, reordered)",
+}
+
+# Numbers its code keeps as they are, read by hand in BN6 bit by bit (the generator's kept literals: a mask a word is tested
+# with, the words a spawn's parameters are made of). A number the generator keeps that is not here is a decision
+ALLIANCE_BITS = ("a collision data's words (+0x30, +0x34, and what hit it, BN5's +0x68, BN6's +0x70) and a panel's flags carry "
+                 "one set of bits in both games: 0x00800000 a neutral support object, 0x01000000 an enemy's, 0x02000000 an ally's, "
+                 "0x04000000 the enemy's alliance, 0x08000000 the ally's (bn6f's PanelData flags); the alliance tables the setup "
+                 "reads them from are the same words in both but for bit 0x80 (BN5 0x08016364, BN6 0x08019C7C: tests/xdiff/"
+                 "legit.json's alliance), and BN6's own code tests these masks the same way")
+SPAWN_WORDS = ("the fourth word of a collision region's spawn (r4 of BN5 0x080C4E72, BN6 0x080C6BDA, a routine of the same body: "
+               "its bytes the hit's parameters, read alike), which BN6's own code passes the same")
+KEPT = {
+    0x08000000: ALLIANCE_BITS + ": the ally's alliance (BN6's twin of BN5's shared 0x08104BBC, 0x0810A9F2, tests 0x0C000000, "
+                                "the enemy's beside it: a BN5 virus is struck by the ally's side alone, so the two agree on its hits)",
+    0x03800000: ALLIANCE_BITS + ": the three support objects (BN6 passes it to checkPanelParameters' twin 0x0800CC86 at "
+                                "0x0800F546 and 0x080F57CE, and tests a panel's flags with it at 0x080C7386, 0x080F1F26)",
+    0x06800000: ALLIANCE_BITS + ": a neutral and an ally's support object and the enemy's alliance (BN6 passes it to "
+                                "checkPanelParameters' twin at 0x080CD72C and 0x080CD7AE as BN5 does)",
+    0x0A800000: ALLIANCE_BITS + ": a neutral and an ally's support object and the ally's alliance (no code of BN6's names "
+                                "this mask; its bits each as above)",
+    0x0405FF00: SPAWN_WORDS + " (BN6 makes one of it at 0x080BEAC8, adding a number into its low byte as BN5's Powie ORs one)",
+    0x0405FF10: SPAWN_WORDS + " (BN6's own three: 0x080C68E8, 0x080D922C, 0x0810F9A8)",
+    0x04050101: SPAWN_WORDS + " (BN6's own, 0x080CC928, 0x080D1636 among them)",
+    0x04050401: SPAWN_WORDS + " (none of BN6's: its bytes as 0x04050101's, its third byte 4)",
+    0x0705FF01: SPAWN_WORDS + " (BN6's own, 0x080D757A, 0x080F0284 among them)",
+    0x06050A01: SPAWN_WORDS + " (BN6's own, 0x080BD392, 0x080DC8F8 among them)",
+}
+
+# BN5's virus dispatcher's pre-step (BN5 0x08104550, BN6's twin 0x0810A29C: issue #82's A2b): before a virus's state each
+# frame BN5 acts for two families' NameIDs, which BN6's dispatcher does for its own ids alone. Each case by its first
+# instruction past the range test, as the installer ports it (src/emu/xvirus_shim.c: BN5's instructions, the collision
+# data's offsets BN6's, the routine each calls BN5's own body likewise, no BN6 twin of it doing the same: BN6's role twins
+# 0x0800EA22 and 0x0800EA4E clear its freeze and bubble bits and keep the slide's (0x300EE where BN5 0xFE) and write its
+# collision data's +0 too)
+PRESTEP = {
+    0x0810455C: ('appley', 0x0800CD1E, "Appley's (ids 0x9D-0xA2): while its +0x60 and its collision data's +0x7C are 0, "
+                                       "its pending hit's damage (+0x78) taken by BN5 0x0800CD1E (the statuses it leaves "
+                                       "cleared, flags 0xFE), sound 0x6E where there is one"),
+    0x08104588: ('dominerd', 0x0800CD44, "Dominerd's (ids 0x19-0x1E): while its +0x68 is 0 and a hit is pending (+0x78), "
+                                         "taken by BN5 0x0800CD44 (flags 0x1FE, at least 1 left) unless the hit's flags "
+                                         "(+0x68) hold 2; its +0x64 set"),
+}
+
+# Each object type of BN5's the installed families' objects come to be, and the decision for it (issue #82's A2b, binding
+# for every track: one decision a type, a moved one wins at a merge): 'moved' (its code copied with a family's, run through
+# the second-level dispatch as BN5's number) unless BN6's type of the same number runs the same code (Pairs.deep_same) and
+# draws the same sprites by their bytes (type_sprites, art_same): then 'twin', BN6's number. tools/xrecipe.py derives each
+# and fails a family whose type is recorded otherwise or not at all. (kind, BN5's type): (decision, BN6's type, why)
+TYPES = {
+    # (moved: what a family's code spawns through the second-level dispatch; no BN6 type of the number runs the same code
+    # and draws the same sprites)
+    (1, 0x05): ('moved', None, "the image object (WuNote's, the Navis' kinds 3 and 0x25): BN6 laid its kinds' table out "
+                               "otherwise (MOVE_TYPES), its table moved whole (ID_TABLES)"),
+    (1, 0x11): ('moved', None, "Cactikil's: BN6's 0x11 another object's code"),
+    (1, 0x16): ('moved', None, "WuNote's: BN6's 0x16 another object's code"),
+    (1, 0x2F): ('moved', None, "Appley's: BN6's 0x2F another object's code"),
+    (3, 0x0B): ('moved', None, "Marina's water's records (ID_TABLES): BN6's 0x0B another object's code"),
+    (3, 0x24): ('moved', None, "Bugtank's thrown bomb: BN6's 0x24 another object's code"),
+    (3, 0x25): ('moved', None, "CanGard's reticle: BN6's 0x25 another object's code"),
+    (3, 0x3E): ('moved', None, "BomBoy's bomb: BN6's 0x3E another object's code"),
+    (3, 0x56): ('moved', None, "the fire column (MetFire's): BN6's 0x56 another sprite (list 3's 0x31, not the same bytes), its "
+                               "kinds 2 and 4 otherwise and only three kinds; moved with its table (ID_TABLES)"),
+    (3, 0x61): ('moved', None, "BigBrute's: BN6's 0x61 another object's code"),
+    (3, 0x6A): ('moved', None, "Batty's: BN6's 0x6A another object's code"),
+    (3, 0x6F): ('moved', None, "Flashy's and Eleogre's flash: BN6's 0x6F another object's code (Flashy's copy runs for both)"),
+    (3, 0x84): ('moved', None, "WuNote's: BN6's 0x84 another object's code"),
+    (3, 0x87): ('moved', None, "Draggin's: BN6's 0x87 another object's code"),
+    (3, 0x8F): ('moved', None, "Marina's water: BN6's 0x8F another object's code"),
+    (3, 0xAC): ('moved', None, "Appley's: BN6's 0xAC another object's code"),
+    (3, 0xC1): ('moved', None, "Skarab's: BN6's 0xC1 another object's code"),
+    (4, 0x78): ('moved', None, "Drixol's: BN6's 0x78 another object's code"),
+    (4, 0x90): ('moved', None, "Appley's: BN6's 0x90 another object's code"),
+    # (twin: spawned by a routine of BN5's engine whose BN6 twin spawns BN6's own of the number, the same code but for each
+    # game's layouts and numbers, the same sprites by their bytes)
+    (3, 0x03): ('twin', 0x03, "the collision region (BN5 0x080C4E72's, BN6 0x080C6BDA's): its routines the same but for the "
+                              "collision data's flags at +0x70 where +0x68 and the audited object's end; no sprite"),
+    (3, 0x3B): ('twin', 0x3B, "Lark's (BN5 0x080CCA62's): its routines the same but for its sprite's number (list 4's 0x1D in BN5, "
+                              "0x37 in BN6, the same bytes) and the collision data's layout"),
+    (3, 0x4B): ('twin', 0x4B, "Handi's bomb (its spawner BN5 0x080CF37E / BN6 0x080CF4EC): its code BN6's with BN6's state "
+                              "numbering (its own two on, legit.json's t3_types), BN5's clearing of a battle state entry where "
+                              "no collision data is left to make aside; its sprite list 3's 0x23 the same bytes; the "
+                              "differential's handi specs the same frame for frame"),
+    (4, 0x00): ('twin', 0x00, "the effect object (BN5 0x080DFFD2's, BN6 0x080E1932's): the same code but for each game's sprite "
+                              "routines; its sprite by its effect id's row, each game's art for an id (a family's own effects "
+                              "copied under ids of their own where BN5's differ: effect_to)"),
+    (4, 0x11): ('twin', 0x11, "Cactikil's (BN5 0x080E1BFE's): its routines the same bodies; no sprite"),
+    (4, 0x35): ('twin', 0x35, "the fire column's spark of flame (BN5 0x080E450E's, BN6 0x080E5736's): its routines the same "
+                              "bodies (code and type deep the same); no sprite of its own (it draws through the effect object)"),
+    # (unreachable: spawned only behind BattleState+0x32 bit 0x40, which BN5's 0x0802D594 alone sets and BN6's engine never
+    # does: issue #82's shared allocations, BN5's panel claims stubbed everywhere)
+    (4, 0x83): ('unreachable', None, "the panel claim the fire column's spark asks for (BN5 0x080EA08C, behind 0x080090E8's "
+                                     "test of BattleState+0x32 bit 0x40): BN6's twin 0x080E5736 left to it"),
+}

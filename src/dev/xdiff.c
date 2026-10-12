@@ -50,6 +50,7 @@
 #include "xdiff_events.h"
 #include "xfields.h"
 #include "xvirus.h"
+#include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 
@@ -362,9 +363,10 @@ static void players_init(Side *g) {
 	g->nbegun = 0;
 }
 
+/* (the song table as the core has it: a moved family's sound copied into an empty slot is the core's, not the ROM file's) */
 static int song_of(const View *v, uint32_t header) {
 	for (uint32_t n = 0; n < SONGS; ++n)
-		if (get32(v->rom + v->songs + 8 * n) == header) return (int)n;
+		if (v->rd32(0x08000000u + v->songs + 8 * n) == header) return (int)n;
 	return -1;
 }
 
@@ -822,8 +824,19 @@ static bool reference(Side *g, const Spec *s) {
 /* Each core's hooks, once both battles are made (BN5's code is the families' as xvirus_moved has it), and the
  * subject's draws replayed from the reference's where the spec says so; false where they cannot be */
 static bool logs_start(Side *a, Side *b, const Spec *s) {
-	a->log = a->out ? xd_log_start(5) : NULL;
-	b->log = b->out ? xd_log_start(6) : NULL;
+	/* (the spec's families: those its foes are versions of; their code alone is the families' in its traces) */
+	const XVirusFamily *fams[MAX_FOES];
+	int n = 0;
+	for (int i = 0; i < s->nfoes; ++i)
+		for (int k = 0; k < xvirus_bn5_count; ++k) {
+			const XVirusFamily *f = xvirus_bn5[k];
+			bool mine = false, had = false;
+			for (int v = 0; v < XV_VERSIONS; ++v) mine = mine || f->names[v] == s->foes[i].id;
+			for (int j = 0; j < n; ++j) had = had || fams[j] == f;
+			if (mine && !had) fams[n++] = f;
+		}
+	a->log = a->out ? xd_log_start(5, fams, n) : NULL;
+	b->log = b->out ? xd_log_start(6, fams, n) : NULL;
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);

@@ -129,4 +129,27 @@
                                              0x0203FFFF (0x080071F2), and nothing of BN6's reads or writes 0x0203FB50 on */
 #define BN6_DISPATCH_SIDE_STEP 0x20       /* ... from one kind's table to the next */
 
+/* What a moved family's code asks of BN6's engine that BN6's own families
+ * never do (issue #82's A2b; docs/ROM_DATA.md, The families' shims and
+ * pre-steps) */
+#define BN6_BY_NAME_RANGE     0x0800EBD4u /* object_getEnemyByNameRange: r0 a list it fills, r1 and r2 the NameIDs' bounds (each in), r3 the
+                                             alliance; back r0 how many (BN5's twin 0x0800CE54, BN5_BY_NAME_RANGE) */
+#define BN6_COUNT_BY_NAME     0x0810A960u /* the shared virus code's count of the enemies of a NameID range (r1, r2) whose word at r0 is not
+                                             0: back r0 the count, r1 their sum (r1 left as BN6_BY_NAME_RANGE left it where there is none) */
+#define BN6_VIRUS_NAMEID_CASES 0x0810A2A6u /* the virus dispatcher (0x0810A29C, each virus each frame) as it reads the virus's NameID (ldrh
+                                             r0,[r5,#0x28]) for the cases it runs before the state (its own ids 0x49, 0xA3-0xA8, 0x61-0x66,
+                                             0x43-0x48): the families' pre-step hook (xvirus_shim.h) */
+#define BN6_VIRUS_STATE_STEP  0x0810A348u /* ... past those cases, the state's step (ldr r0,[r5,#0x58]: the AI index, its state table,
+                                             0x0801B1C4), where a family's pre-step goes on (r5 the virus, nothing else live) */
+#define BN6_AI_INDEX          1           /* an AI's data's (BN6_T1_AI_DATA) +1: its AI index, the third byte of its enemy id's triple */
+#define BN6_CLEAR_FLAG2       0x0801A176u /* object_clearFlag2: r0 the bits cleared from its collision data's BN6_COLL_STRUCK (+0x40) */
+#define BN6_SONGS_EMPTY_FIRST 0x26        /* BN6's empty song slots (RomLayout.song_table), each a shared header of no tracks: from, */
+#define BN6_SONGS_EMPTY_LAST  0x62        /* ... to (other games' songs, src/audio/xsong.c; the families' sounds, XV_SONG_SLOTS from the last) */
+/* An object's arm points: 0x08018810 finds its record by its struct1's list and number (0x0800F26C), in a table of records
+ * by list offset (the words at 0x080188A0: MegaMan's, the viruses', the Navis'), a point's x and y signed bytes */
+#define BN6_ARM_VIRUSES_REF   0x080188A4u /* the viruses' records' word (sprite list 1's numbers: 0x0801898C, the one word naming it) */
+#define BN6_ARM_VIRUSES_COUNT 31          /* ... BN6's records, the Navis' table after them (0x080191C8) */
+#define BN6_ARM_VIRUS_SIZE    0x44        /* ... a record: 34 points, BN5's 30 first (30-33 BN6's own: the fourth kind's 0x3C reads 30,
+                                             the third's 0x95 31, 0x08010820 32, a freeze's ice block 33) */
+
 #endif

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
@@ -16,8 +17,9 @@
 
 #define XSONG_AT    FREE_SONGS              /* (docs/EMULATION.md) */
 #define XSONG_END   FREE_XNAVIS
-#define SLOT_FIRST  0x26    /* BN6's empty song slots, 0x26-0x62: a shared header of no tracks (docs/ROM_DATA.md) */
-#define SLOT_LAST   0x62
+#define SLOT_FIRST  BN6_SONGS_EMPTY_FIRST   /* BN6's empty song slots: a shared header of no tracks (docs/ROM_DATA.md), */
+#define SLOT_LAST   0x3F    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, the moved
+                               families' at XV_SONG_SLOT_FIRST on, xvirus.c's XvSong) */
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */
 #define TRACKS_MAX  8
 #define SEQ_MAX     0x8000  /* a song's sequence: its tracks and header */
@@ -71,6 +73,9 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
 static struct {
 	bool ready;
 	uint32_t next;
+	uint8_t *buf;          /* (xsong_pack: what is put goes here, as it would stand from buf_at, room bytes, not into the core) */
+	uint32_t buf_at, room;
+	bool full;
 	int nsongs;
 	struct { int rom, song, slot; uint32_t header; } song[SLOT_LAST - SLOT_FIRST + 1];
 	int nmoved;
@@ -83,6 +88,12 @@ static int xr_id;
 /* `len` bytes into the free space, at a word; 0 where it is full. */
 static uint32_t put(const uint8_t *src, uint32_t len) {
 	uint32_t at = X.next;
+	if (X.buf) {
+		if (!len || at < X.buf_at || at - X.buf_at > X.room || len > X.room - (at - X.buf_at)) { X.full = true; return 0; }
+		memcpy(X.buf + (at - X.buf_at), src, len);
+		X.next = (at + len + 3) & ~3u;
+		return at;
+	}
 	if (!len || at + len > XSONG_END) return 0;
 	emu_write(at, src, len);
 	X.next = (at + len + 3) & ~3u;
@@ -265,4 +276,29 @@ int xsong_install(int xrom, int song, int fallback) {
 	}
 	int slot = slot_of(xrom, song);
 	return slot < 0 ? fallback : slot;
+}
+
+uint32_t xsong_pack(int xrom, int song, uint32_t at, uint8_t *out, uint32_t room) {
+	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout || !XR[xrom].layout->song_table || song < 0 || (at & 3) ||
+		(uint32_t)song * 8 + 8 > ROM_SIZE - XR[xrom].layout->song_table)
+		return 0;
+	/* (the music's copies and what they share kept aside: a pack shares nothing with them) */
+	static __typeof__(X) kept;
+	const uint8_t *kept_xr = xr;
+	int kept_id = xr_id;
+	kept = X;
+	memset(&X, 0, sizeof X);
+	X.next = at;
+	X.buf = out;
+	X.buf_at = at;
+	X.room = room;
+	memset(out, 0, room);
+	xr = XR[xrom].data;
+	xr_id = xrom;
+	uint32_t header = copy_song(get32(xr + XR[xrom].layout->song_table + (uint32_t)song * 8));
+	bool fit = !X.full;
+	X = kept;
+	xr = kept_xr;
+	xr_id = kept_id;
+	return fit ? header : 0;
 }

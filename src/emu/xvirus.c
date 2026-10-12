@@ -13,13 +13,17 @@
 #include "bytes.h"
 #include "claims.h"
 #include "data.h"
+#include "hook.h"
 #include "rom.h"
 #include "xchips.h"
 #include "xfields.h"
 #include "xnavi.h"
+#include "xsong.h"
+#include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 #include "xvirus_grow.h"
+#include "xvirus_shim.h"
 #include "xvirus_tx.h"
 
 #define BUS        0x08000000u
@@ -76,6 +80,7 @@ typedef struct {
 	uint8_t veneers[XV_HOME_SIZE - XV_HOME_VENEERS];
 	uint32_t missing;   /* a call the recipe does not name */
 	const XvClone *clone;   /* the clone being moved: its call aimed otherwise */
+	uint32_t shims;     /* the next free byte of its home's shims (XV_HOME_SHIMS on) */
 } Ctx;
 
 /* where an address of a copied block is in BN6 (its Thumb bit kept); 0 for none */
@@ -84,18 +89,20 @@ static uint32_t moved_to(const XVirusFamily *f, uint32_t a) {
 	return b ? a - b->start + b->at : 0;
 }
 
-/* a pointer into the blocks, moved: a Thumb one must name code, any
- * other the start of a range of data */
+/* a pointer into the blocks, moved: a Thumb one names code, any other
+ * the start of a range of data or a byte of raw data (a byte table's
+ * place, odd as well as even) */
 static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
-	if (v & 1) return xvirus_is_code(f, v & ~1u);
-	const XvData *d = xvirus_data_at(f, v);
-	return d && d->start == v;
+	if ((v & 1) && xvirus_is_code(f, v & ~1u)) return true;
+	const XvData *d = xvirus_data_at(f, v & ~1u);
+	return d && (d->kind == XV_RAW || d->start == v);
 }
 
 static uint32_t resolve(uint32_t target, void *user) {
 	Ctx *c = user;
 	if (c->clone && target == c->clone->call) return in_rom(c->clone->to, 2) ? thumb_veneer_get(&c->pool, c->clone->to) : 0;
-	if (xvirus_block_of(c->f, target)) return xvirus_is_code(c->f, target) ? moved_to(c->f, target) : 0;
+	/* (its own code; a routine of its game's whose bytes a block holds as dead data goes to its twin as any other) */
+	if (xvirus_is_code(c->f, target)) return moved_to(c->f, target);
 	for (int i = 0; i < c->f->ncalls; ++i)
 		if (c->f->calls[i].from == target) {
 			uint32_t to = c->f->calls[i].to & ~1u;
@@ -231,6 +238,104 @@ static void imms_patch(const XVirusFamily *f, const XvBlock *b, uint8_t *code) {
 
 #define BLS_MAX 256
 
+/* ---- its shims (xvirus_shim.h), in its home after its held chips ---- */
+
+/* room for n bytes of shim in its home, word-aligned: the address, 0 where its shims are full */
+static uint32_t shim_room(Ctx *c, uint32_t n) {
+	uint32_t at = c->f->home + XV_HOME_SHIMS + c->shims;
+	if (c->shims + n > XV_HOME_VENEERS - XV_HOME_SHIMS) { xv_fail("no room in its home for its shims"); return 0; }
+	c->shims += (n + 3) & ~3u;
+	return at;
+}
+
+/* A call to look enemies up by a NameID range (XvRange): its game's to object_getEnemyByNameRange or to the shared virus
+ * code's count by one, aimed at a shim that loads BN6's bounds and goes on to BN6's twin through the family's veneer for it,
+ * the call's own target after the rebase */
+static void range_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvRange *r) {
+	uint32_t t = 0, was = 0, at = 0;
+	const uint8_t *orig = c->rom + (r->at - BUS);
+	if (!thumb_bl_decode(r->at, get16(orig), get16(orig + 2), &was) || (was != BN5_BY_NAME_RANGE && was != BN5_COUNT_BY_NAME) ||
+		!thumb_bl_read(code, r->at - b->start, b->at, &t) || t != thumb_veneer_get(&c->pool, was == BN5_BY_NAME_RANGE ? BN6_BY_NAME_RANGE : BN6_COUNT_BY_NAME)) {
+		xv_fail("its NameID range's call at %08x", (unsigned)r->at);
+		return;
+	}
+	uint8_t shim[XV_SHIM_RANGE_SIZE];
+	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_range(shim, at, r->lo, r->hi, t)) { xv_fail("its NameID range's shim for %08x", (unsigned)r->at); return; }
+	uint8_t *p = xv_put(at, sizeof shim, true);
+	if (p) memcpy(p, shim, sizeof shim);
+	if (!thumb_bl_write(code, r->at - b->start, b->at, at)) xv_fail("its call at %08x aimed at its shim", (unsigned)r->at);
+}
+
+/* A held chip's compare past an immediate (XvCmp): `cmp rN,#was; beq/bne L` made a call to a shim that compares with BN6's
+ * id and goes on to L's copy where the branch would */
+static void cmp_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvCmp *k) {
+	uint32_t off = k->at - b->start;
+	uint16_t op = get16(code + off), br = get16(code + off + 2);
+	uint32_t to = k->at + 2 + 4 + (uint32_t)((int32_t)(int8_t)(br & 0xFF) * 2), at = 0;
+	if (op != (0x2800 | k->reg << 8 | k->was) || (br & 0xFE00) != 0xD000 || !xvirus_is_code(c->f, to) || xvirus_block_of(c->f, to) != b) {
+		xv_fail("its chip compare at %08x is not the one expected", (unsigned)k->at);
+		return;
+	}
+	uint8_t shim[XV_SHIM_CMP_SIZE];
+	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_cmp(shim, at, k->reg, k->now, (br & 0x0100) == 0, moved_to(c->f, to))) {
+		xv_fail("its chip compare's shim for %08x", (unsigned)k->at);
+		return;
+	}
+	uint8_t *p = xv_put(at, sizeof shim, true);
+	if (p) memcpy(p, shim, sizeof shim);
+	if (!thumb_bl_write(code, off, b->at, at)) xv_fail("its compare at %08x made a call to its shim", (unsigned)k->at);
+}
+
+static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
+	for (int i = 0; i < c->f->nranges && !xv_failed(); ++i)
+		if (xvirus_block_of(c->f, c->f->ranges[i].at) == b) range_set(c, b, code, &c->f->ranges[i]);
+	for (int i = 0; i < c->f->ncmps && !xv_failed(); ++i)
+		if (xvirus_block_of(c->f, c->f->cmps[i].at) == b) cmp_set(c, b, code, &c->f->cmps[i]);
+}
+
+/* Its pre-step (xvirus_shim.h): the port of its game's dispatcher's case, whose source (BN5's dispatcher and the routines
+ * it calls) is checked by its CRC32s first, in its home; its entry in the pre-steps by AI index */
+static void prestep_set(Ctx *c) {
+	const XVirusFamily *f = c->f;
+	if (!f->prestep) return;
+	if (f->game != XROM_BN5_COLONEL_US || xvirus_crc32(c->rom + (BN5_VIRUS_DISPATCH - BUS), BN5_VIRUS_DISPATCH_END - BN5_VIRUS_DISPATCH) != BN5_VIRUS_DISPATCH_CRC ||
+		xvirus_crc32(c->rom + (BN5_PRESTEP_TAKE - BUS), BN5_PRESTEP_TAKE_END - BN5_PRESTEP_TAKE) != BN5_PRESTEP_TAKE_CRC) {
+		xv_fail("its pre-step's source in its game is not the one ported");
+		return;
+	}
+	uint32_t clear = thumb_veneer_get(&c->pool, BN6_CLEAR_FLAG2), sound = thumb_veneer_get(&c->pool, BN6_PLAY_SOUND);
+	uint8_t code[XV_SHIM_PRESTEP_MAX];
+	uint32_t at = c->f->home + XV_HOME_SHIMS + c->shims;
+	int n = clear && sound ? xvirus_shim_prestep(code, sizeof code, at, f->prestep, clear, sound) : 0;
+	if (!n || !shim_room(c, (uint32_t)n)) { xv_fail("its pre-step %08x", (unsigned)f->prestep); return; }
+	uint8_t *p = xv_put(at, (uint32_t)n, true);
+	if (p) memcpy(p, code, (size_t)n);
+	xv_word(XV_PRESTEP + 4u * (uint32_t)f->ai, 0, at | 1);
+}
+
+/* A call within the block to bytes it holds as dead (a routine of its game's
+ * whose twin BN6 has, zeroed in the copy between code that shares a pool):
+ * aimed at the twin here, as thumb_block_rebase leaves a call within alone.
+ * The block's other calls are left in offs for it; their count, -1 where one
+ * cannot be made. */
+static int dead_calls(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t *offs, int n) {
+	int kept = 0;
+	for (int i = 0; i < n; ++i) {
+		uint32_t t = 0;
+		if (!thumb_bl_read(code, offs[i], b->start, &t) || t < b->start || t >= b->end || xvirus_is_code(c->f, t)) {
+			offs[kept++] = offs[i];
+			continue;
+		}
+		c->missing = 0;
+		uint32_t to = resolve(t, c);
+		if (!to || !thumb_bl_write(code, offs[i], b->at, to)) {
+			xv_fail("the call at %08x into its dead bytes (%08x) has no twin to go to", (unsigned)(b->start + offs[i]), (unsigned)t);
+			return -1;
+		}
+	}
+	return kept;
+}
+
 static void block_move(Ctx *c, const XvBlock *b) {
 	const XVirusFamily *f = c->f;
 	uint32_t len = b->end - b->start;
@@ -245,12 +350,15 @@ static void block_move(Ctx *c, const XvBlock *b) {
 	data_fix(f, b, code);
 	imms_patch(f, b, code);
 	if (xv_failed()) return;
+	n = dead_calls(c, b, code, offs, n);
+	if (n < 0) return;
 	ThumbBlock tb = { code, len, b->start, b->at };
 	c->missing = 0;
 	if (!thumb_block_rebase(&tb, offs, n, resolve, c)) {
 		if (c->missing) xv_fail("a call to %08x the recipe does not name", (unsigned)c->missing);
 		else xv_fail("a call out of %08x-%08x cannot be made (veneers full, or out of reach)", (unsigned)b->start, (unsigned)b->end);
 	}
+	if (!xv_failed()) shims_set(c, b, code);
 }
 
 /* A clone of a routine of its code (XvClone): copied once more, its call to `call` aimed at `to` and its immediate
@@ -385,15 +493,47 @@ static void sprites_set(const XVirusFamily *f, const Game *g) {
 	}
 }
 
+/* Its arm points' record (BN6 finds an object's by its struct1's list and number, list 1's grown: XG_ARMS) at its battle
+ * sprite's number: its game's record's 30 points, then BN6's four more as its viruses' first record has them (BN5 has
+ * none of 30-33, which the fourth kind's 0x3C, the third's 0x95, 0x08010820 and a freeze's ice block read). A status's
+ * mark and a deletion's flash and explosions stand where its game's would. */
+static void arms_set(const XVirusFamily *f, const Game *g) {
+	if (!g->bn5 || !f->traits.laid || !f->nsprites) return;
+	const XvSprite *s = &f->sprites[0];
+	uint32_t five = rom32(g->rom, BN5_ARM_VIRUSES_REF) + (uint32_t)s->index * BN5_ARM_VIRUS_SIZE;
+	uint32_t six = get32(R.data + (BN6_ARM_VIRUSES_REF - BUS));
+	if (s->list != 1 || s->to_list != 1 || s->index >= BN5_ARM_VIRUSES_COUNT || !in_rom(five, BN5_ARM_VIRUS_SIZE) ||
+		!in_rom(six, BN6_ARM_VIRUS_SIZE)) {
+		xv_fail("its arm points (its battle sprite %d:%#x)", s->list, s->index);
+		return;
+	}
+	uint8_t rec[BN6_ARM_VIRUS_SIZE];
+	memcpy(rec, g->rom + (five - BUS), BN5_ARM_VIRUS_SIZE);
+	memcpy(rec + BN5_ARM_VIRUS_SIZE, R.data + (six - BUS) + BN5_ARM_VIRUS_SIZE, BN6_ARM_VIRUS_SIZE - BN5_ARM_VIRUS_SIZE);
+	xg_set(XG_ARMS, s->to_index, rec);
+}
+
+static const XVirusFamily *installed[XV_FAMILIES];
+static int ninstalled;
+
+/* the sprite of its game's (list, number) as one of the recipe's, or a family's installed before it of the same game's,
+ * lists it */
+static const XvSprite *sprite_of(const XVirusFamily *f, uint8_t list, uint8_t index) {
+	for (int k = 0; k < f->nsprites; ++k)
+		if (f->sprites[k].list == list && f->sprites[k].index == index) return &f->sprites[k];
+	for (int i = 0; i < ninstalled; ++i)
+		for (int k = 0; installed[i]->game == f->game && k < installed[i]->nsprites; ++k)
+			if (installed[i]->sprites[k].list == list && installed[i]->sprites[k].index == index) return &installed[i]->sprites[k];
+	return NULL;
+}
+
 /* Its effects in the grown effects' table: its game's entry with its
- * sprite as BN6 lists it (one of the recipe's) */
+ * sprite as BN6 lists it (one of the recipe's, or of a family's before it) */
 static void effects_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->neffects && !xv_failed(); ++i) {
 		const XvId *e = &f->effects[i];
 		const uint8_t *src = e->from < g->neffects ? g->rom + (g->effects - BUS) + 4u * e->from : NULL;
-		const XvSprite *s = NULL;
-		for (int k = 0; src && k < f->nsprites; ++k)
-			if (4u * f->sprites[k].list == src[0] && f->sprites[k].index == src[1]) s = &f->sprites[k];
+		const XvSprite *s = src && !(src[0] & 3) ? sprite_of(f, (uint8_t)(src[0] / 4), src[1]) : NULL;
 		if (!s) { xv_fail("its effect %#x draws none of its sprites", e->from); return; }
 		xg_set_word(XG_EFFECTS, e->to, (uint32_t)(4u * s->to_list) | (uint32_t)s->to_index << 8 | (uint32_t)src[2] << 16 | (uint32_t)src[3] << 24);
 	}
@@ -407,6 +547,13 @@ static void types_set(const XVirusFamily *f, const Game *g) {
 		const XvType *t = &f->types[i];
 		int k = xvirus_dispatch_slot(t->kind);
 		uint32_t routine = 0;
+		if (t->to == XV_TYPE_SHARED) {
+			/* (moved by a family installed before it: its MOVED entry must name that family's copy, its TWIN entry moved) */
+			uint32_t moved = xvirus_dispatch_moved_at(t->kind, t->from), twin = xvirus_dispatch_twin_at(t->kind, t->from);
+			if (!moved || emu_read32(moved) == (XV_STUB_NONE | 1) || emu_read8(twin) != XV_TYPE_MOVED)
+				xv_fail("its object %d:%#x is moved by no family installed before it", t->kind, t->from);
+			continue;
+		}
 		if (k >= 0 && t->to == XV_TYPE_MOVED) {
 			uint32_t own = t->from < g->ntypes[k] ? rom32(g->rom, g->types[k] + 4u * t->from) : 0;
 			routine = (own & 1) && xvirus_is_code(f, own & ~1u) ? moved_to(f, own) : 0;
@@ -484,6 +631,41 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 	xg_set_word(XG_HELD, (uint32_t)f->ai, held);
 }
 
+/* ---- its sounds BN6 has none of: each song copied whole (xsong.h) into the art's room the recipe gives it, and listed at
+ * one of BN6's empty song slots, on the player BN6's own song of its number plays on ---- */
+
+/* whether the song header at bus address `at` in the core's copy is BN5's song `song`'s (its tracks, blocks, priority and
+ * reverb), as another install of the shared allocations' slot copied it */
+static bool song_there(int game, int song, uint32_t at) {
+	const XRom *x = game >= 0 && game < XROM_COUNT ? &XR[game] : NULL;
+	if (!x || !x->data || !x->layout || !x->layout->song_table || !in_rom(at, 4) || (uint32_t)song * 8 + 8 > ROM_SIZE - x->layout->song_table)
+		return false;
+	uint32_t h = get32(x->data + x->layout->song_table + 8u * (uint32_t)song);
+	return in_rom(h, 4) && emu_read32(at) == get32(x->data + (h - BUS)) && emu_read8(at) != 0;
+}
+
+static void songs_set(const XVirusFamily *f) {
+	for (int i = 0; i < f->nsongs && !xv_failed(); ++i) {
+		const XvSong *s = &f->songs[i];
+		uint32_t table = R.layout->song_table, slot = table + 8u * s->slot, own = table + 8u * s->from;
+		/* (the slot BN6's empty song, a header of no tracks, in the player's ROM: copied where the core's copy still
+		 * holds it; where another install of the shared slot (docs/MULTIROM.md) copied BN5's same song there first,
+		 * found there) */
+		uint32_t empty = table && own + 8 <= ROM_SIZE && slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0;
+		if (!in_rom(empty, 1) || R.data[empty - BUS] != 0) { xv_fail("its song's slot %#x", s->slot); return; }
+		uint32_t now = emu_read32(BUS + slot);
+		if (now != empty) {
+			if (!song_there(f->game, s->from, now)) xv_fail("its song's slot %#x holds another song", s->slot);
+			continue;
+		}
+		uint8_t *p = xv_put(s->at, s->room, true);
+		uint32_t header = p ? xsong_pack(f->game, s->from, s->at, p, s->room) : 0;
+		if (!header) { xv_fail("its sound %#x (%u bytes of room)", s->from, (unsigned)s->room); return; }
+		xv_word(BUS + slot, empty, header);
+		xv_word(BUS + slot + 4, get32(R.data + slot + 4), get32(R.data + own + 4));
+	}
+}
+
 /* ---- its rewards: its game's reward rows for its versions' ids, in the
  * rows of its ids (another game's entries as BN6's: xchips.h) ---- */
 
@@ -515,13 +697,31 @@ static void enemies_tell(const XVirusFamily *f) {
 	}
 }
 
+/* ---- the pre-steps' hook: BN6's dispatcher, as it reads a virus's NameID for its own cases, goes on to a family's pre-step
+ * by its AI index (XV_PRESTEP) where it has one (xvirus_shim.h); every other virus as before ---- */
+
+static HookAct prestep_run(HookRegs *r, void *user) {
+	(void)user;
+	uint32_t ai = hook_read8(hook_read32(r->r[5] + BN6_T1_AI_DATA) + BN6_AI_INDEX);
+	uint32_t to = ai >= BN6_FAMILIES && ai < XV_AIS ? hook_read32(XV_PRESTEP + 4u * ai) : 0;
+	if (!to) return HOOK_CONTINUE;
+	r->r[12] = to;
+	return HOOK_JUMP;
+}
+
+static void prestep_hook(void) {
+	static bool set;
+	if (set) return;
+	set = emu_hook(BN6_VIRUS_NAMEID_CASES, prestep_run, NULL);
+	if (!set) fprintf(stderr, "xvirus: no hook at %08x: the families' pre-steps do not run\n", (unsigned)BN6_VIRUS_NAMEID_CASES);
+}
+
 #define INSTALLED_MAX XV_FAMILIES
-static const XVirusFamily *installed[INSTALLED_MAX];
-static int ninstalled;
 
 /* its parts staged, each step only where all before it held */
 static void family_stage(Ctx *c, const Game *g) {
 	const XVirusFamily *f = c->f;
+	if (f->prestep) prestep_set(c);
 	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(c, &f->blocks[i]);
 	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(c, &f->clones[i]);
 	uint32_t entry[XV_TABLES] = { 0 };
@@ -533,8 +733,10 @@ static void family_stage(Ctx *c, const Game *g) {
 	if (!xv_failed()) ids_set(f);
 	if (!xv_failed()) names_set(f, g);
 	if (!xv_failed()) sprites_set(f, g);
+	if (!xv_failed()) arms_set(f, g);
 	if (!xv_failed()) effects_set(f, g);
 	if (!xv_failed()) types_set(f, g);
+	if (!xv_failed()) songs_set(f);
 	if (!xv_failed()) drops_set(f, g);
 }
 
@@ -572,6 +774,7 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	xv_moved_add(rom32(g.rom, g.tables + 4u * (uint32_t)f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);
 	for (int v = 0; v < XV_VERSIONS; ++v) xv_moved_add(names.moved[v].from, names.moved[v].to, names.moved[v].len);
 	installed[ninstalled++] = f;
+	if (f->prestep) prestep_hook();
 	enemies_tell(f);
 	printf("xvirus: %s as AI %d, enemy ids %#x-%#x: %u bytes written, %d veneers\n", f->name, f->ai, f->first_id,
 		f->first_id + XV_VERSIONS - 1, (unsigned)used, c.pool.n);

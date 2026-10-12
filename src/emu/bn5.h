@@ -76,6 +76,10 @@
 #define BN5_CHIP_DESCS_HIGH 0x739744u /* ... and 256 on */
 #define BN5_CHIP_ICON_PAL 0x74BDBCu   /* (ROM offset) the chips' icons' palette, 16 colours: 0-8 BN6's, 9 its icons' grey outline (BN6's teal) */
 #define BN5_CHIPS         424         /* its chip ids */
+#define BN5_ARM_VIRUSES_REF   0x080151BCu /* an object's arm points (0x08015140, BN6's 0x08018810: its tables by struct1's list offset at
+                                             0x080151B8): the viruses' records' word (sprite list 1's numbers: 0x080154D0) */
+#define BN5_ARM_VIRUSES_COUNT 31          /* ... its records, the Navis' table after them (0x08015C14) */
+#define BN5_ARM_VIRUS_SIZE    0x3C        /* ... a record: 30 points, x and y signed bytes */
 #define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
 #define BN5_PA_STAR_LIMIT 0x080252B2u /* a Program Advance of one chip in codes in a row: cmp r2, #1, one * of its three at most, as BN6's (BN6_PA_STAR_LIMIT) */
 /* its DarkChips (docs/ROM_DATA.md, BN5 guest battles; .build research):
@@ -238,5 +242,25 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_SPAWN_4       0x080031CCu /* the fourth kind's, after the object running (BN6_SPAWN_4); BN5 has no other of the kind */
 #define BN5_EFFECTS       0x080DFD7Cu /* its effects, 4 bytes an id as BN6_EFFECTS', BN5_EFFECT_COUNT of them */
 #define BN5_EFFECT_COUNT  108         /* ... its effect ids, the effects' code after them (0x080DFF2C) */
+/* What its families' code asks of the engine that BN6's families' never does (issue #82's A2b; docs/ROM_DATA.md, The
+ * families' shims and pre-steps) */
+#define BN5_BY_NAME_RANGE 0x0800CE54u /* object_getEnemyByNameRange (BN6_BY_NAME_RANGE: the same arguments, BN5's NameIDs) */
+#define BN5_COUNT_BY_NAME 0x08104B1Cu /* the shared virus code's count of the enemies of a NameID range (r1, r2, handed on to
+                                         BN5_BY_NAME_RANGE) whose word at r0 is not 0, back r0 the count and r1 their sum (BN6's twin
+                                         0x0810A960, BN6_COUNT_BY_NAME, the same code) */
+#define BN5_VIRUS_DISPATCH 0x08104550u /* the virus dispatcher (BN6's 0x0810A29C), each virus each frame: before the state, cases by
+                                          NameID for two families, which the installer ports as their pre-steps (xvirus_shim.h): */
+#define BN5_VIRUS_DISPATCH_END 0x081045CCu /* ... its code's end (its literals after), */
+#define BN5_VIRUS_DISPATCH_CRC 0x025440F5u /* ... the CRC32 of its code, the port's source */
+#define BN5_PRESTEP_APPLEY 0x0810455Cu  /* ... its case for Appley's ids (0x9D-0xA2): while the virus's +0x60 and its collision data's
+                                          +0x7C are 0, its pending hit taken by BN5_PRESTEP_TAKE (sound 0x6E where there is one) */
+#define BN5_PRESTEP_DOMINERD 0x08104588u /* ... for Dominerd's (0x19-0x1E): while its +0x68 is 0 and a hit is pending (+0x78), the hit
+                                          taken by BN5_PRESTEP_TAKE_MIN unless the hit's flags (+0x68) hold 2; its +0x64 set */
+#define BN5_PRESTEP_TAKE  0x0800CD1Eu /* a pending hit taken: its statuses (flags2 0xFE) cleared, its damage less the hit's five parts
+                                          (+0x7A-+0x82, cleared, and +0x84) left at +0x78 */
+#define BN5_PRESTEP_TAKE_MIN 0x0800CD44u /* ... the same with flags2 0x1FE and +0x86 cleared, at least 1 left (+0x78 and +0x7A 1 where
+                                          none is) */
+#define BN5_PRESTEP_TAKE_END 0x0800CD80u /* ... their code's end, */
+#define BN5_PRESTEP_TAKE_CRC 0x0D9E4CF8u /* ... its CRC32, the port's source */
 
 #endif

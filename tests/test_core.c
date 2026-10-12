@@ -69,6 +69,7 @@
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
+#include "xvirus_shim.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -3120,20 +3121,51 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 				(f->sprites[i].to_list == g->sprites[k].to_list && f->sprites[i].to_index == g->sprites[k].to_index);
 	for (int i = 0; i < f->neffects; ++i)
 		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
-	/* (a type both move: two routines for one entry; or both name, with another twin) */
+	/* (a type both move: two routines for one entry; or both name, with another twin; one moved by a family before the
+	 * other, g, and shared by f, is one routine) */
 	for (int i = 0; i < f->ntypes; ++i)
-		for (int k = 0; k < g->ntypes; ++k)
-			bad += f->types[i].kind == g->types[k].kind && f->types[i].from == g->types[k].from &&
-				(f->types[i].to == XV_TYPE_MOVED || f->types[i].to != g->types[k].to);
+		for (int k = 0; k < g->ntypes; ++k) {
+			const XvType *a = &f->types[i], *b = &g->types[k];
+			if (a->kind != b->kind || a->from != b->from) continue;
+			bool shared = (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_MOVED) || (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_SHARED);
+			bad += !shared && (a->to == XV_TYPE_MOVED || a->to != b->to);
+		}
+	/* (a song slot, or a song's bytes over the other's art) */
+	for (int i = 0; i < f->nsongs; ++i) {
+		for (int k = 0; k < g->nsongs; ++k)
+			bad += f->songs[i].slot == g->songs[k].slot || spans_meet(f->songs[i].at, f->songs[i].room, g->songs[k].at, g->songs[k].room);
+		for (int k = 0; k < g->nsprites; ++k) bad += spans_meet(f->songs[i].at, f->songs[i].room, g->sprites[k].at, g->sprites[k].room);
+	}
+	for (int i = 0; i < g->nsongs; ++i)
+		for (int k = 0; k < f->nsprites; ++k) bad += spans_meet(g->songs[i].at, g->songs[i].room, f->sprites[k].at, f->sprites[k].room);
 	return bad;
+}
+
+/* a type each family shares (XV_TYPE_SHARED) is one a family before it in the install order moved */
+static bool shared_moved_before(int i) {
+	const XVirusFamily *f = xvirus_bn5[i];
+	for (int t = 0; t < f->ntypes; ++t) {
+		if (f->types[t].to != XV_TYPE_SHARED) continue;
+		bool found = false;
+		for (int k = 0; k < i && !found; ++k)
+			for (int u = 0; u < xvirus_bn5[k]->ntypes; ++u)
+				found |= xvirus_bn5[k]->types[u].kind == f->types[t].kind && xvirus_bn5[k]->types[u].from == f->types[t].from &&
+					xvirus_bn5[k]->types[u].to == XV_TYPE_MOVED;
+		if (!found) return false;
+	}
+	return true;
 }
 
 static void test_xvirus_static(void) {
 	char why[160] = "";
-	CHECK(xvirus_bn5_count >= 1 && xvirus_bn5[0] == &xvirus_cangard, "xvirus: BN5's families listed (%d)", xvirus_bn5_count);
+	/* (BN5's 25 families not BN6's by name, CanGard and Handi first: the static model's slots, issue #82's A2b) */
+	CHECK(xvirus_bn5_count == 25 && xvirus_bn5[0]->src_ai == 14 && xvirus_bn5[1]->src_ai == 4, "xvirus: BN5's families listed (%d)", xvirus_bn5_count);
 	for (int i = 0; i < xvirus_bn5_count; ++i) {
 		const XVirusFamily *f = xvirus_bn5[i];
 		CHECK(xvirus_recipe_ok(f, why, sizeof why) && f->game == XROM_BN5_COLONEL_US, "xvirus: %s refused: %s", f->name, why);
+		CHECK(f->ai == BN6_FAMILIES + i && f->first_id == XV_FIRST_ID + XV_VERSIONS * i && f->home == XV_HOMES + XV_HOME_SIZE * (uint32_t)i,
+			"xvirus: %s off its slot %d", f->name, i);
+		CHECK(shared_moved_before(i), "xvirus: %s shares a type no family before it moved", f->name);
 		for (int k = 0; k < i; ++k)
 			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
 	}
@@ -3202,7 +3234,8 @@ static void test_free_space(void) {
 	CHECK(XV_AT == FREE_VIRUS_ROOM, "free space: the families' room at %08x", (unsigned)XV_AT);
 	regions_apart("the families' room", room, (int)(sizeof room / sizeof *room), FREE_VIRUS_ROOM, FREE_FAMILIES);
 	const Region fam[] = {
-		{ "the homes", XV_HOMES, XV_HOMES + XV_FAMILIES * XV_HOME_SIZE }, { "the code", XV_CODE, XV_ART }, { "the art", XV_ART, XV_END },
+		{ "the homes", XV_HOMES, XV_HOMES + XV_FAMILIES * XV_HOME_SIZE }, { "the code", XV_CODE, XV_ART }, { "the art", XV_ART, XV_ART_END },
+		{ "the arm points", XV_ARMS, XV_ARMS + XV_LIST_MAX * BN6_ARM_VIRUS_SIZE },
 	};
 	regions_apart("the families", fam, (int)(sizeof fam / sizeof *fam), FREE_FAMILIES, FREE_CHIPS);
 	const Region chips[] = {
@@ -3398,25 +3431,30 @@ static const char *recipe_differs(const XVirusFamily *g, const XVirusFamily *h) 
 	if (g->nclones != h->nclones) return "its clones";
 	for (int i = 0; i < g->nclones; ++i)
 		if (memcmp(&g->clones[i], &h->clones[i], sizeof *g->clones)) return "its clones";
+	if (g->nranges != h->nranges || g->ncmps != h->ncmps || g->nsongs != h->nsongs || g->prestep != h->prestep) return "its shims or songs";
+	for (int i = 0; i < g->nranges; ++i)
+		if (memcmp(&g->ranges[i], &h->ranges[i], sizeof *g->ranges)) return "its NameID ranges";
+	for (int i = 0; i < g->ncmps; ++i)
+		if (memcmp(&g->cmps[i], &h->cmps[i], sizeof *g->cmps)) return "its chip compares";
+	for (int i = 0; i < g->nsongs; ++i)
+		if (memcmp(&g->songs[i], &h->songs[i], sizeof *g->songs)) return "its songs";
 	return NULL;
 }
 
 static void test_xvirus_generated(void) {
-	char why[160] = "";
-	CHECK(xvirus_bn5_generated_count >= 2, "xrecipe: %d recipes generated", xvirus_bn5_generated_count);
+	static const XVirusFamily *const by_hand[] = { &xvirus_cangard, &xvirus_handi };
 	int compared = 0;
-	for (int i = 0; i < xvirus_bn5_generated_count; ++i) {
-		const XVirusFamily *g = xvirus_bn5_generated[i];
-		CHECK(xvirus_recipe_ok(g, why, sizeof why), "xrecipe: %s refused: %s", g->name, why);
-		for (int k = 0; k < xvirus_bn5_count; ++k) {
-			const XVirusFamily *h = xvirus_bn5[k];
+	for (int i = 0; i < xvirus_bn5_count; ++i) {
+		const XVirusFamily *g = xvirus_bn5[i];
+		for (int k = 0; k < (int)(sizeof by_hand / sizeof *by_hand); ++k) {
+			const XVirusFamily *h = by_hand[k];
 			if (h->src_ai != g->src_ai) continue;
 			const char *d = recipe_differs(g, h);
-			CHECK(!d, "xrecipe: the generated %s is not the one installed: %s", g->name, d ? d : "");
+			CHECK(!d, "xrecipe: the generated %s is not the one made by hand: %s", g->name, d ? d : "");
 			++compared;
 		}
 	}
-	CHECK(compared == xvirus_bn5_count, "xrecipe: %d of the %d families installed generated", compared, xvirus_bn5_count);
+	CHECK(compared == 2, "xrecipe: %d of the 2 families made by hand generated", compared);
 	/* (the comparison sees a difference: CanGard's recipe with one call's twin otherwise) */
 	XVirusFamily other = xvirus_cangard;
 	XvPair calls[64];
@@ -3427,6 +3465,53 @@ static void test_xvirus_generated(void) {
 	other = xvirus_cangard;
 	other.nimms -= 1;
 	CHECK(recipe_differs(&other, &xvirus_cangard) != NULL, "xrecipe: an immediate missing not seen");
+}
+
+/* The families' shims (issue #82's A2b, xvirus_shim.h): a NameID range's
+ * loads of BN6's bounds and its branch on to the routine's veneer; a chip
+ * compare's stacked scratch register, its compare and the way on where the
+ * branch is taken; the two pre-steps ported from BN5's dispatcher, each
+ * ending on to BN6's state step; and each refused where it cannot be */
+static uint32_t shim_lit(const uint8_t *code, uint32_t off) {
+	uint16_t op = get16(code + off);
+	return (op & 0xF800) == 0x4800 ? get32(code + ((off + 4) & ~3u) + 4u * (op & 0xFFu)) : 0xFFFFFFFFu;
+}
+
+static void test_xvirus_shims(void) {
+	uint8_t r[XV_SHIM_RANGE_SIZE];
+	const uint32_t home = XV_HOMES + XV_HOME_SHIMS, veneer = XV_HOMES + XV_HOME_VENEERS + 3 * THUMB_VENEER_SIZE;
+	CHECK(xvirus_shim_range(r, home, 0x23C, 0x241, veneer), "shims: a NameID range refused");
+	CHECK((get16(r) & 0xFF00) == 0x4900 && shim_lit(r, 0) == 0x23C && (get16(r + 2) & 0xFF00) == 0x4A00 && shim_lit(r, 2) == 0x241,
+		"shims: a NameID range's bounds %#x %#x", shim_lit(r, 0), shim_lit(r, 2));
+	CHECK((get16(r + 4) & 0xF800) == 0xE000 && home + 8 + 2 * ((get16(r + 4) & 0x7FFu)) == veneer, "shims: a NameID range's branch %04x",
+		get16(r + 4));
+	CHECK(!xvirus_shim_range(r, home + 2, 0, 1, veneer) && !xvirus_shim_range(r, home, 0, 1, home + 0x1000),
+		"shims: a NameID range off its word, or its veneer out of a branch's reach, taken");
+	uint8_t k[XV_SHIM_CMP_SIZE];
+	const uint32_t to = XV_CODE + 0x1234;
+	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");
+	CHECK(get16(k) == 0xB401 && shim_lit(k, 2) == 0x1C8 && get16(k + 4) == 0x4284 && get16(k + 6) == 0xBC01 && get16(k + 8) == 0xD103,
+		"shims: a chip compare's compare (%04x %04x %04x %04x)", get16(k), get16(k + 4), get16(k + 6), get16(k + 8));
+	CHECK(get16(k + 10) == 0xB401 && shim_lit(k, 12) == (to | 1) && get16(k + 14) == 0x4686 && get16(k + 16) == 0xBC01 &&
+		get16(k + 18) == 0x4770, "shims: a chip compare's way on to %08x", shim_lit(k, 12));
+	/* (a compare of r0 keeps r1 aside; bne's taken where the compare is not equal) */
+	CHECK(xvirus_shim_cmp(k, home, 0, 0x100, false, to) && get16(k) == 0xB402 && get16(k + 4) == 0x4288 && get16(k + 8) == 0xD003,
+		"shims: a compare of r0, or a bne's, made otherwise");
+	CHECK(!xvirus_shim_cmp(k, home, 8, 0x100, true, to) && !xvirus_shim_cmp(k, home, 1, 0x100, true, to | 1),
+		"shims: a high register, or a way on with its Thumb bit, taken");
+	uint8_t p[XV_SHIM_PRESTEP_MAX];
+	const uint32_t whiches[2] = { BN5_PRESTEP_APPLEY, BN5_PRESTEP_DOMINERD };
+	for (int i = 0; i < 2; ++i) {
+		int n = xvirus_shim_prestep(p, sizeof p, home, whiches[i], veneer, veneer + THUMB_VENEER_SIZE);
+		CHECK(n > 8 && get32(p + n - 8) == (BN6_VIRUS_STATE_STEP | 1) && get32(p + n - 4) == 0x1FE, "shims: pre-step %08x (%d bytes)",
+			(unsigned)whiches[i], n);
+		int bx = n - 10;
+		while (bx > 0 && get16(p + bx) != 0x4700) bx -= 2;
+		CHECK(bx > 0 && shim_lit(p, (uint32_t)bx - 2) == (BN6_VIRUS_STATE_STEP | 1), "shims: pre-step %08x not on to BN6's state step",
+			(unsigned)whiches[i]);
+	}
+	CHECK(!xvirus_shim_prestep(p, sizeof p, home, 0x08104550u, veneer, veneer) && !xvirus_shim_prestep(p, 16, home, BN5_PRESTEP_DOMINERD, veneer, veneer),
+		"shims: a pre-step no port makes, or too little room, taken");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not
@@ -4493,6 +4578,7 @@ int main(void) {
 	test_claims();
 	test_xvirus_dispatch();
 	test_xvirus_generated();
+	test_xvirus_shims();
 	test_enemy_moved();
 	test_qr();
 	test_backup();

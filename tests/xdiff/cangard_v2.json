@@ -11,5 +11,6 @@
   "reticle_damage": 70,
   "megaman_hit_damage": 70,
   "megaman_hit_at_least": 3
- }
+ },
+ "sprites": "bytes"
 }

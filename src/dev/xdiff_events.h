@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "xvirus.h"
+
 /* An event's kind */
 enum {
 	XD_DRAW = 1,   /* a random number drawn: sub the routine (0 GetRNG, 1 its positive, 2 the second word's, 3 its positive) */
@@ -65,8 +67,13 @@ typedef struct XdLog XdLog;
 
 /* The log of game 5 (the reference, the guest's core) or 6 (the subject,
  * BN6's), emptied, its hooks placed on its core: NULL where one could not
- * be. The families' code is xvirus_moved's (BN6's copy, BN5's own). */
-XdLog *xd_log_start(int game);
+ * be. The families' code is xvirus_moved's (BN6's copy, BN5's own): the
+ * blocks of `fams` (the spec's families: n of them) and of any family that
+ * moved a type one of them runs as shared (XV_TYPE_SHARED), every family's
+ * where n is 0. BN5's own code in another family's blocks (a routine of its
+ * engine that family copied: a helper, an object type's) is its engine's
+ * for the spec, as BN6 runs its twin for the spec's family. */
+XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n);
 /* The subject's draws replayed from the reference's: each keyed by the
  * family's own code that led to it (its BN5 address), else by its caller
  * (a BN6 routine's through its twin), the k-th of its key in a frame the

@@ -327,5 +327,6 @@
   "virus_hits_at_least": 1,
   "out_of_row_holds": 9
  },
- "rng": "follow"
+ "rng": "follow",
+ "sprites": "bytes"
 }

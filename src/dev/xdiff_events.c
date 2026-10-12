@@ -21,6 +21,7 @@
 #include "guest.h"
 #include "hook.h"
 #include "xvirus.h"
+#include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 
@@ -28,7 +29,7 @@
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  16      /* the families' blocks of code */
+#define FAMILY_MAX  256     /* the families' blocks of code (BN5's 25 families' 80 or so, and their clones) */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -324,16 +325,39 @@ static HookAct on_mood(HookRegs *r, void *user) {
 
 /* ---- the logs ---- */
 
-static XdLog *log_make(int game, bool alone) {
+/* a family that moved a type `of` runs as shared (XV_TYPE_SHARED): its copy is the one `of` runs */
+static bool moved_for(const XVirusFamily *f, const XVirusFamily *of) {
+	for (int i = 0; i < of->ntypes; ++i)
+		for (int j = 0; of->types[i].to == XV_TYPE_SHARED && j < f->ntypes; ++j)
+			if (f->types[j].to == XV_TYPE_MOVED && f->types[j].kind == of->types[i].kind && f->types[j].from == of->types[i].from) return true;
+	return false;
+}
+
+/* whether a moved range is a block or clone of the spec's families (or of one that moved a type they share); all where none */
+static bool spec_code(const XvMoved *m, const XVirusFamily *const *fams, int nfams) {
+	if (!nfams) return true;
+	for (int k = 0; k < xvirus_bn5_count; ++k) {
+		const XVirusFamily *f = xvirus_bn5[k];
+		bool mine = false;
+		for (int i = 0; i < nfams && !mine; ++i) mine = fams[i] == f || moved_for(f, fams[i]);
+		for (int i = 0; mine && i < f->nblocks; ++i)
+			if (f->blocks[i].start == m->from && f->blocks[i].at == m->to) return true;
+		for (int i = 0; mine && i < f->nclones; ++i)
+			if (f->clones[i].start == m->from && f->clones[i].at == m->to) return true;
+	}
+	return false;
+}
+
+static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams) {
 	XdLog *log = log_of(game);
 	if (!log) return NULL;
 	log->game = game;
 	log->alone = alone;
 	log->g = &games[game == 6];
-	XvMoved m[64];
-	int n = xvirus_moved(m, 64);
+	static XvMoved m[XV_MOVED_MAX];
+	int n = xvirus_moved(m, XV_MOVED_MAX);
 	for (int i = 0; i < n && log->nfam < FAMILY_MAX; ++i)
-		if (m[i].to >= XV_CODE && m[i].to < XV_ART) log->fam[log->nfam++] = m[i];
+		if (m[i].to >= XV_CODE && m[i].to < XV_ART && spec_code(&m[i], fams, nfams)) log->fam[log->nfam++] = m[i];
 	/* (the control's code where BN6 has it: its own Mettaur's, which the moved copy's places are keyed as) */
 	for (int i = 0; alone && i < xvirus_control.nblocks && log->nfam < FAMILY_MAX; ++i) {
 		const XvBlock *b = &xvirus_control.blocks[i];
@@ -342,8 +366,8 @@ static XdLog *log_make(int game, bool alone) {
 	return log;
 }
 
-XdLog *xd_log_start(int game) {
-	XdLog *log = log_make(game, false);
+XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n) {
+	XdLog *log = log_make(game, false, fams, n);
 	if (!log) return NULL;
 	bool (*put)(uint32_t, EmuHook, void *) = game == 6 ? emu_hook : guest_hook;
 	const Game *g = log->g;
@@ -389,7 +413,7 @@ void xd_counts(const XdLog *log, int out[XD_COUNTS]) {
 /* ---- the control's runs: BN6's draws kept, or replayed from a run that kept them ---- */
 
 static bool control_start(const char *how, XdLog **log, FILE **out) {
-	*log = log_make(6, true);
+	*log = log_make(6, true, NULL, 0);
 	if (!*log) return false;
 	const Game *g = (*log)->g;
 	bool ok = true;

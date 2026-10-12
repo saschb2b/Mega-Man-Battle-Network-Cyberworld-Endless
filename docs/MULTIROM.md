@@ -716,8 +716,9 @@ and its calls aimed again (`src/emu/xvirus.c`):
   battle (seen together by eye only).
 - **The status step** (`--input "0:status freeze 90"`, play.py's
   `status freeze 90`): the battle's enemies (or one enemy id's) given
-  paralysis, freeze, bubble, drag or slide as a hit leaves it, for the
-  frames named; BN6's engine acts on it on their next frame.
+  paralysis, freeze, bubble, drag, slide, confusion or blindness as a hit
+  leaves it, for the frames named; BN6's engine acts on it on their next
+  frame.
 - **The foes step** (`--input "0:foes 200@52/01@43"`, play.py's `foes`): a
   battle at once in BN6's engine with the enemies named by id at their
   panels, the moved families among them.
@@ -902,42 +903,169 @@ and its calls aimed again (`src/emu/xvirus.c`):
   wrapper's), its types for the dispatch (`XvType`) and its held chips. A
   family is whole where no decision is open, and only a whole one is
   written; `build.py test` holds the generated CanGard and Handi to the
-  installed recipes field for field (they are the same). Of BN5's 35 AI
-  indexes, 15 are whole now: CanGard, Handi, Bugtank, MetFire, Shakey,
-  NinJoy, WindBox, BomBoy, Catack, Batty, Cactikil and WuNote (their
-  attacks' objects of the first kind through the dispatch), BigBrute,
-  TinHawk and Bladia. Open for the others (`.build/xrecipe/report.md`):
-  held chips BN6 has no chip of (Blinder, Geddon1, MetaGel, AntiElec,
-  AntiWatr: TestVirs, Mettaur, Powie, Lark, Skarab, Champy, Draggin,
-  Whirly, Tuby and the unnamed AI 31-33) until BN5's chips are BN6's too,
-  and with them the two chip routines that serve only a BN6 chip id; a
-  battle sprite another family already lists (Mettaur's and AI 31-33's,
-  Tuby's) or that BN6 has as its own (Trumpy's, Tuby's); a sound that is
-  another song in BN6 (Powie's 0xC0, Skarab's 0xB7, Flashy's and
-  Eleogre's 0xBA) or made otherwise (Trumpy, Tuby); NameID bounds in
-  instructions, not pools (Dominerd, Trumpy, Zomon, Drixol, Whirly); an
-  effect or a sprite number made otherwise (Zomon; Whirly, Marina); and
-  what BN5's virus dispatcher does for Dominerd's and Appley's ids before
-  their states each frame, which BN6's does for no family (a pre-step
-  table from a hook on BN6's dispatcher, the next step). None of them is
-  installed yet.
+  installed recipes field for field (they are the same). Since issue
+  #82's A2b every family BN5 has and BN6 lacks is whole and installed
+  (BN5's families, all of them, below), what each derives in
+  `.build/xrecipe/report.md`. Tuby and the unnamed AI 31-33 are left
+  out: no battle record of BN5's names them (all 386 of its enemy lists
+  read, none with an id from 0xB5 on; AI 31 and 32 have no ids at all).
+- **BN5's families, all of them** (issue #82's A2b): the 23 after CanGard
+  and Handi, installed after them in BN5's AI order wherever BN5's ROM is
+  read, each by its generated recipe and nothing written by hand: AI
+  34-56, six ids each from 0x20C to 0x295, their homes, code and art one
+  after another (docs/EMULATION.md, the families' room). Per family
+  (`.build/xrecipe/report.md` has the rest): its blocks and their bytes,
+  its calls to the engine (each through a veneer to BN6's twin), its
+  immediates and pool words given BN6's numbers, the object types it
+  moved through the second-level dispatch (`shared`: run by the copy of a
+  family before it), what it draws (its sprites copied and the effects
+  given ids of their own, where BN6 has none of the same bytes), its
+  sounds BN6 has no song of (each at its fixed slot), its held chips as
+  BN6's ids, and what was made for it of the project's own Thumb:
+
+| Family | BN5 AI | BN6 AI, ids | Code: blocks, bytes | Calls | Immediates | Moved types | Art: sprites, effects | Sounds | Held chips (BN6 ids) | Shims and pre-step |
+|---|---|---|---|---|---|---|---|---|---|---|
+| CanGard | 14 | 32, 0x200-0x205 | 2, 1432 | 38 | 5 | 3:0x25 | 3, 1 | - | - | - |
+| Handi | 4 | 33, 0x206-0x20b | 1, 524 | 11 | 2 | - | 1, 0 | - | - | 1 NameID range |
+| Powie | 2 | 34, 0x20c-0x211 | 3, 1464 | 36 | 9 | - | 2, 2 | 0xC0, slot 0x62 | 211 | 1 NameID range |
+| Bugtank | 3 | 35, 0x212-0x217 | 3, 898 | 26 | 9 | 3:0x24 | 2, 0 | - | 157, 158, 163 | - |
+| Dominerd | 5 | 36, 0x218-0x21d | 3, 1416 | 35 | 8 | - | 1, 0 | - | - | 4 NameID ranges, the pre-step, 2 clones |
+| MetFire | 6 | 37, 0x21e-0x223 | 5, 1122 | 35 | 5 | 3:0x56 | 2, 0 | - | 143, 163 | 1 NameID range, 1 id in its data |
+| Shakey | 7 | 38, 0x224-0x229 | 4, 1242 | 25 | 5 | - | 1, 0 | - | - | - |
+| NinJoy | 9 | 39, 0x22a-0x22f | 3, 1200 | 28 | 6 | - | 2, 1 | - | - | - |
+| Lark | 11 | 40, 0x230-0x235 | 2, 824 | 18 | 2 | - | 1, 0 | - | 211, 450, 456, 460 | 1 NameID range, 2 chip compares |
+| BomBoy | 12 | 41, 0x236-0x23b | 6, 1562 | 40 | 7 | 3:0x3E | 2, 0 | - | - | - |
+| Zomon | 13 | 42, 0x23c-0x241 | 2, 1388 | 23 | 7 | - | 2, 2 | - | 163 | 1 NameID range, 2 ids in its data |
+| Drixol | 16 | 43, 0x242-0x247 | 5, 1572 | 37 | 7 | 4:0x78 | 2, 0 | - | - | 1 NameID range |
+| Batty | 17 | 44, 0x248-0x24d | 2, 1372 | 43 | 5 | 3:0x6A | 3, 1 | - | - | - |
+| Skarab | 18 | 45, 0x24e-0x253 | 2, 1612 | 47 | 11 | 3:0xC1 | 2, 0 | 0xB7, slot 0x61 | 163, 456 | - |
+| Draggin | 20 | 46, 0x254-0x259 | 3, 1226 | 40 | 7 | 3:0x87 | 2, 0 | - | 156, 459 | 1 NameID range |
+| Whirly | 21 | 47, 0x25a-0x25f | 3, 1822 | 43 | 7 | - | 2, 0 | - | 450 | 1 NameID range, 2 ids in its data |
+| Marina | 22 | 48, 0x260-0x265 | 6, 2122 | 52 | 9 | 3:0x0B, 3:0x8F | 3, 1 | - | - | 1 NameID range, 4 ids in its data |
+| Flashy | 23 | 49, 0x266-0x26b | 4, 1628 | 45 | 13 | 3:0x6F | 2, 0 | 0xBA, slot 0x60 | - | 1 NameID range |
+| Eleogre | 24 | 50, 0x26c-0x271 | 3, 1300 | 25 | 7 | 3:0x6F shared | 1, 0 | - | - | 1 NameID range |
+| Cactikil | 25 | 51, 0x272-0x277 | 5, 1698 | 57 | 5 | 1:0x11 | 2, 0 | - | - | - |
+| WuNote | 26 | 52, 0x278-0x27d | 7, 3032 | 67 | 11 | 1:0x05, 1:0x16, 3:0x84 | 2, 0 | - | - | 1 id in its data |
+| Appley | 27 | 53, 0x27e-0x283 | 6, 2218 | 59 | 10 | 1:0x2F, 3:0xAC, 4:0x90 | 3, 1 | - | - | the pre-step |
+| BigBrute | 28 | 54, 0x284-0x289 | 3, 1338 | 35 | 7 | 3:0x61 | 1, 2 | - | - | - |
+| TinHawk | 29 | 55, 0x28a-0x28f | 4, 2384 | 37 | 11 | - | 2, 1 | - | - | - |
+| Bladia | 30 | 56, 0x290-0x295 | 4, 1186 | 29 | 6 | - | 2, 1 | - | - | - |
+
+- **What they asked of BN6's engine, and how it is given** (docs/ROM_DATA.md,
+  The recipe generator's reads of BN5, their shims and pre-steps, their
+  sounds): a held chip is the chip registry's, BN6's own chip of the
+  name or, for a chip BN6 lacks, the registry's id of its own (MetaGel
+  450, Lark's and Whirly's; Blinder 456, Lark's and Skarab's; AntiWatr
+  459, Draggin's; AntiElec 460, Lark's), written into the six lists of its home, which BN6's
+  table of held chips by AI index names; a chip id the code compares past
+  an immediate's 255 (Lark's) goes through a shim (`XvCmp`), and one the
+  code gives its object by hand (Zomon's AreaGrab, `movs r0,#117` before
+  `strh r0,[r5,#0x2A]`) is BN6's in the immediate. A held chip whose code
+  is not moved yet still works as a held chip: BN6's engine picks it from
+  the list as any virus's, the family's code compares it by its id and
+  hands it to the chip writer (BN6's twin, audited: `held_bn6`), which
+  writes its numbers from the registry's record, whose family is the
+  inert 0x1C and subfamily 3 until the chips track moves its code; the
+  virus's setAttack0 then runs BN6's family 0x1C (`0x080ED6DC`), whose
+  subfamily 3 (`0x08010488`) spawns an effect in front of a virus
+  (AttackVars +0x1B 0), plays sound 0x90 and ends the attack: the virus
+  uses it with a puff and goes on with its states (no spec's battle gives
+  one: in every spec only Zomon's object holds a chip, its own AreaGrab).
+  A family's lookups by a range of NameIDs make their bounds in
+  instructions, past an immediate's 255 for BN6's ids: a shim loads them
+  (`XvRange`, 12 families). BN5's virus dispatcher steps Dominerd and
+  Appley before their state each frame, BN6's for no family's id: a hook
+  on BN6's dispatcher runs BN5's step, ported (`XV_PRESTEP`). Dominerd wraps
+  a generic state in a routine of its own, which is copied once more for
+  each of BN6's two status states (frozen and bubbled), its call aimed at
+  BN6's (`XvClone`). The ids in a table of a family's
+  data are byte fix-ups (`ID_TABLES`: Zomon's effects, Whirly's sprites,
+  Marina's water's records, the fire column's kinds, the image object's
+  kinds). A sound BN6 has no song of is copied once, at the slot issue
+  #82's tracks share for it (Powie's 0xC0 at 0x62, Skarab's 0xB7 at 0x61,
+  Flashy's and Eleogre's 0xBA at 0x60). A sprite is BN6's own where BN6
+  has the same bytes, else copied, decompressed, at the families' numbers
+  (lists 1, 4 and 5 upward from BN6's end, list 1's placeholders 0x1E and
+  0x00 first; list 2 from 0x30; a sprite of list 3, where it is not
+  grown, in list 4), and an effect of other art takes an id from 0x6C. Every object type a family's
+  code spawns is decided once for every track (`bn5_twins.TYPES`): moved
+  through the dispatch unless BN6's type of the number runs the same code
+  and draws the same sprites by their bytes (19 moved, 6 twins, the
+  fourth kind's 0x83 unreachable: BN5's panel claims, which BN6's engine
+  never asks for, go to the dispatch's stray). Flashy's and Eleogre's
+  flash is one type, Flashy's copy run for both. BN5's image object (the
+  first kind's 0x05, which WuNote spawns with kind 0x30) is moved whole
+  with its 58 kinds, the same module the Navis' track installs: only the
+  kinds a family spawns are fixed (WuNote's 0x30, its art copied into the
+  families' list 4), the others keep BN5's bytes, and a family spawning a
+  kind not fixed is refused. A family's numbers its code keeps as they
+  are (an alliance's bits, a collision region's spawn words) are read by
+  hand in BN6 first (`KEPT`). BN6 finds a virus's arm points (where a
+  status's mark stands over it) by its battle sprite's number in list 1,
+  past BN6's records for every family: list 1's records are grown and
+  each family's install writes its own, BN5's 30 points and BN6's four
+  after them (docs/ROM_DATA.md, their arm points; the chips track found
+  CanladEX's marks 10 pixels to one side). The rare versions (4 and 5) reach BN6's
+  rare path only behind its flag, as BN6's own do, and their deletes
+  leave its byte alone (`tools/xfamily.py`). Their reward rows are BN5's,
+  each chip as BN6's of its name (else 200 zenny, until BN5's chips are
+  BN6's too).
+- **Each fought in both engines**: seven specs a family (`tests/xdiff`:
+  V1 alone where BN5's own records set it against MegaMan idle, V1
+  against cangard_v1_keys' 62 inputs, and each other version alone), all
+  with `rng=replay` and `"sprites": "bytes"`: 168 of the 175 the same
+  over every fight frame, among them every one of CanGard's and Handi's
+  as before; Zomon's seven fail, below. What the families showed the
+  comparator of the engine's own, each in `tests/xdiff/legit.json` with
+  both games' routines: the hit spark a family's attack strikes with and
+  the effect a twin routine of the engine's spawns are each game's art
+  (their kind, place, owner and id compared, their frames not), MegaMan's
+  status effect is BN5's 2 pixels higher and drawn from each game's own
+  confusion picture, BN6's Elec damage of a hit, a status's saved
+  CurAction (+0x5D), and one routine of BN6's that fixes a bug of BN5's a
+  family can see, BN5's own copied in its place (the collision data's
+  update, Marina's). Their breaks (`--mutations`): for each of the 23 an
+  immediate (the CurAction it gives setAttack0 or compares, left as
+  BN5's) and a rebased call (its veneer to setAttack0 aimed at the
+  families' empty hook), each failing its V1 spec. `tools/xfamily.py
+  --spec families` holds each one's V1 to its record and states, its
+  four statuses taken and let go with what it held, its confusion's and
+  blindness's marks over it at BN5's arm point, and each of its six
+  versions deleted with BN6's delete counts and the rare path's byte
+  untouched.
+- **Zomon** fails all seven from the frame after its first AreaGrab
+  (V1 t391, EX t363, V1's keys t410, V2 t344, V2EX t325, V3 t307, V3EX
+  t280), every byte the same before it. Its set-up gives its object
+  AreaGrab by hand, BN6's own chip of the name (the registry's 117 as
+  163), which BN6's own chip code runs: both games spawn the time freeze
+  at the same frame, take MegaMan's front column and play its sounds at
+  the next, but BN6's family of time-freeze chips (0x15, `0x080ED0DC`)
+  ends its user's attack a frame later than BN5's (`0x080EC400`, which
+  spawns and ends in one frame: `bl 0x0800F29E` at `0x080EC448`; BN6's
+  marks its AttackVars +1 at `0x080ED12A`-`0x080ED12C` and ends at the
+  next frame's `0x080ED130`), so Zomon's own states run a frame behind
+  from there and its later draws part. An engine difference, not its
+  code's: installed, its AreaGrab as BN6 runs its own.
+
 - **Its rewards**: its reward rows are its game's own for its versions,
   each entry as BN6's (a chip as BN6's of its name, else 200 zenny until
   BN5's chips are BN6's too), written into the rows of its ids in the
   grown copy, which the battle's results then lean as BN6's
   (docs/ROM_DATA.md, BN5's records in BN6's engine).
-- **Not yet**: the families after CanGard and Handi (the generator's
-  whole ones installed, the open ones decided) and their place in
-  formations (a game-design pass). Handi is installed wherever BN5's ROM
-  is read, as CanGard is, and BN5's records that name it are fought in
-  BN6's engine as CanGard's are (`build.py xrecords`). The New 3DS keeps
-  no BN5 ROM: no family is installed there. A state saved while a moved
-  family is in battle needs the same families installed to load (they
-  are, at every boot with the same ROMs and switches); one saved on a map
-  is the same byte for byte with the room made and the families installed
-  or not (a checkpoint's after two of BN6's battles, docs/EMULATION.md,
-  Testing): the install stands in the way of no run continued with BN5's
-  ROM taken away or put in.
+- **Not yet**: the families' place in formations and a run's battles (a
+  game-design pass). The held chips whose code is BN5's alone (MetaGel,
+  Blinder, AntiWatr, AntiElec) wait for the chips track to move it; until
+  then a virus uses one with a puff. Zomon's AreaGrab is BN6's own, a
+  frame longer than BN5's. Every family is installed wherever BN5's ROM is
+  read, and BN5's records that name one are fought in BN6's engine
+  (`build.py xrecords`). The New 3DS keeps no BN5 ROM: no family is
+  installed there. A state saved while a moved family is in battle needs
+  the same families installed to load (they are, at every boot with the
+  same ROMs and switches); one saved on a map is the same byte for byte
+  with the room made and the families installed or not (a checkpoint's
+  after two of BN6's battles, docs/EMULATION.md, Testing): the install
+  stands in the way of no run continued with BN5's ROM taken away or put
+  in.
 
 ## The chip registry
 

@@ -2,12 +2,15 @@
 each role attributed from both traces (the family's, MegaMan's, a native's, the engine's), the renderer's places
 of the family's objects read in the family's own order, and each mask of tests/xdiff/legit.json applied by its
 place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
-from xdiff_snap import (NODE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
+from xdiff_snap import (NODE, SIZE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
                         PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16)
-from xdiff_events import engine_draw, spawned_by, spawns_of
+from xdiff_events import engine_chose, engine_draw, spawned_by, spawns_of
 from xdiff_snap import DRAW
 
 SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
+# the engine's spark spawner in each game (BN5 0x080E09B4, BN6_SPAWN_SPARK: the same 24 bytes but the allocator's call),
+# which object_spawnCollisionEffect (BN5 0x08016C04, BN6 0x0801A0D4) calls where an attack struck: its spawn's caller
+SPARK_SPAWNER = {5: (0x080E09B4, 0x18), 6: (0x080E1C00, 0x18)}
 
 
 # ---- masks: engine differences, each explained (legit.json) ----
@@ -26,6 +29,13 @@ def flashing(f, role):
     return u16(o.coll, off) != 0
 
 
+def spark_spawned(trace, role):
+    """the object was spawned by the engine's spark spawner (SPARK_SPAWNER: its spawn's caller there)"""
+    e = trace.get('spawns', {}).get(role, (None, None))[0]
+    at, size = SPARK_SPAWNER[trace['game']]
+    return e is not None and at <= e.caller & ~1 < at + size
+
+
 def whose(f, role, canon, known, depth=0):
     """'megaman' (his object), "megaman's" (what he owns: an object whose +0x4C names his or one of his, or an
     attack of his side with no object over it: his buster's shots), 'native' (an enemy both games have, each
@@ -33,8 +43,24 @@ def whose(f, role, canon, known, depth=0):
     that no object owns), 'engine' (an attack or effect no object owns, of a type the family's code does not
     spawn), 'panels' (the engine's spark over an actor, which BN5's lava spawns as it cools under it, and BN6's as
     src/emu/xpanels.c brings lava in: the code under test as the family's is, its presentation each game's own),
-    or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another is its
-    owner's, as the owner's own first frame had it (known)."""
+    'spark' (the engine's spark where the family's attack struck: spawned by the engine's spark spawner, which
+    object_spawnCollisionEffect calls with the attack's hit effect, run by the engine's own code, the fourth kind's
+    type 4 the install never moves, and drawn from each game's own sprite: its kind, place and owner the family's,
+    compared, its sprite each game's), 'effect' (an effect object, the fourth kind's type 0, the engine's code gave its
+    id where the family's attack acted: a routine of its game's BN6 runs as its twin, the same bytes, called the effect
+    spawner; its id, place and owner compared, its sprite each game's), or None (the family's: its enemy, what it owns,
+    its attacks and the effects its own code gives). An object owned by another is its owner's, as the owner's own first
+    frame had it (known)."""
+    w, o = whose_of(f, role, canon, known, depth), f.by_role.get(role)
+    if w is None and o is not None and o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and spark_spawned(f.trace, role):
+        return 'spark'
+    if w is None and o is not None and o.kind == 'T4' and o.o8(OBJ_TYPE) == 0 and engine_chose(f.trace, role):
+        return 'effect'
+    return w
+
+
+def whose_of(f, role, canon, known, depth):
+    """whose() but for the engine's spark the family's attack struck with"""
     if role_name(role).startswith(tuple(f'T1:{v:#x}#' for v in canon.megaman.values())):
         return 'megaman'
     if role[0] == 'T1' and role[1] in canon.natives:
@@ -45,8 +71,12 @@ def whose(f, role, canon, known, depth=0):
     if o.kind == 'T1' and o.o16(OBJ_NAME_ID):
         return None
     p = f.ptr(o.o32(0x4C))
-    # (a spark over an actor, not where an attack struck: the lava's spark, legit.json's masks; before whose code
-    # spawned it, which is the actor's own step: MegaMan's on lava would make it his)
+    # (the spark of a hit the family's code led to, its body's as its attacks': whose() names it the spark)
+    if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and spawned_by(f.trace, role) == 'family' and spark_spawned(f.trace, role):
+        return None
+    # (a spark over an actor, not where an attack struck: the lava's spark, legit.json's masks, spawned by the actors'
+    # pre-step, no family code on its way; before whose code spawned it, which is the actor's own step: MegaMan's on
+    # lava would make it his)
     if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and len(p) == 3 and p[1] == 'obj' and p[0].startswith('T1:'):
         return 'panels'
     # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
@@ -139,20 +169,38 @@ def places(o):
 
 
 NO_PALETTE = 15     # the palette slot the renderer leaves where it takes none
+NO_PLACE = 0x7FFF   # a family object's tile place before the renderer first draws it (none)
 
 
 def renderer_ranks(fa, fb, last):
     """the family's renderer places read as the family's own (legit.json, maps, renderer): the renderer hands each
     object it draws its tile place and palette slot in the order it draws, from running counts over everything drawn
     before it, so a family object drawn this frame has each read as its rank among those the family's objects drawn
-    take (two sharing one, as a frame or palette already loaded, share its rank; slot 15, none taken, stays). One not
-    drawn keeps the place it was last drawn at, and the rank it had there (last: each game's role's last); one never
-    drawn, or whose place moved undrawn, keeps its place as it is, marked (0x8000) so it never equals a rank."""
+    take, in the order they ran (two sharing one, as a frame or palette already loaded, share its rank; slot 15, none
+    taken, stays). One not
+    drawn keeps the place it was last drawn at, and the rank it had there (last: each game's role's last); one whose
+    place moved undrawn keeps its place as it is, marked (0x8000) so it never equals a rank; one never drawn has no place
+    the renderer gave it (what its sprite state holds is its slot's last occupant's or its set-up's): none in both
+    (NO_PLACE, NO_PALETTE). Drawn is the renderer's own test: the object shown (its +0x00 bit 0x02) and its sprite's state
+    shown (its +0x03 bit 0x02, BN5 0x081C7F9A-0x081C7FA6 / BN6 0x081D6532-0x081D653E), as an object can hide its sprite
+    alone."""
     for f in (fa, fb):
         fam = [o for o in f.fr['objs'] if whose_role(o.role, fa, fb) == 'family']
-        drawn = [o for o in fam if o.o8(0) & 2]
+        drawn = [o for o in fam if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2]
+        # (in the order the objects ran, the same in both games: each place or slot ranked by the first of the family's to
+        # take it, so one given again to a family object, as a frame or palette already loaded by another drawn before it,
+        # shares that one's rank, whatever else of each game's own drew between them)
+        run = {}
+        for n, a in enumerate(f.fr['order']):
+            for o in drawn:
+                if o.addr - NODE <= a < o.addr - NODE + SIZE[o.kind]:
+                    run.setdefault(o.role, n)
+        drawn.sort(key=lambda o: (run.get(o.role, len(f.fr['order'])), o.kind, o.slot))
         for k in (0, 1):
-            taken = sorted({places(o)[k] for o in drawn} - ({NO_PALETTE} if k else set()))
+            taken = []
+            for o in drawn:
+                if places(o)[k] not in taken and not (k and places(o)[k] == NO_PALETTE):
+                    taken.append(places(o)[k])
             for o in fam:
                 raw, key, rank = places(o)[k], (f.game, o.role, k), None
                 if k and raw == NO_PALETTE:
@@ -162,11 +210,13 @@ def renderer_ranks(fa, fb, last):
                     last[key] = (raw, rank)
                 elif key in last and last[key][0] == raw:
                     rank = last[key][1]
+                elif key not in last:
+                    raw = NO_PALETTE if k else NO_PLACE
                 sp = SPRITE[o.kind] + NODE
                 if k:
                     o.over[sp + 0x15] = (rank if rank is not None else raw) << 4 | o.rec[sp + 0x15] & 0xF
                 else:
-                    v = rank if rank is not None else 0x8000 | raw
+                    v = rank if rank is not None else raw if raw == NO_PLACE else 0x8000 | raw
                     o.over[sp + 8], o.over[sp + 9] = v & 0xFF, v >> 8
 
 
@@ -305,7 +355,9 @@ def mask_applies(m, d, fa, fb, prev):
         return False
     if 'kinds' in m and (not isinstance(d.role, tuple) or d.role[0] not in m['kinds']):
         return False
-    if 'types' in m and (not isinstance(d.role, tuple) or d.role[1] not in [int(x, 0) for x in m['types']]):
+    # (an effect object's role is its type 0 with its effect id: identity())
+    if 'types' in m and (not isinstance(d.role, tuple) or
+                         (d.role[1][0] if isinstance(d.role[1], tuple) else d.role[1]) not in [int(x, 0) for x in m['types']]):
         return False
     if 'whose' in m and who(d, fb, fa.canon, fa) not in m['whose']:
         return False

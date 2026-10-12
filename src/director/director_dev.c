@@ -233,6 +233,7 @@ typedef struct { const char *name; uint32_t struck; int timer; } DevStatus;
 static const DevStatus dev_statuses[] = {
 	{ "paralysis", BN6_STRUCK_PARALYSIS, BN6_COLL_PARALYSIS }, { "freeze", BN6_STRUCK_FREEZE, BN6_COLL_FREEZE },
 	{ "bubble", BN6_STRUCK_BUBBLE, BN6_COLL_BUBBLE }, { "drag", BN6_STRUCK_DRAG, -1 }, { "slide", BN6_STRUCK_SLIDE, -1 },
+	{ "confuse", BN6_STRUCK_CONFUSE, BN6_COLL_CONFUSE }, { "blind", BN6_STRUCK_BLIND, BN6_COLL_BLIND },
 };
 
 int director_dev_status(const char *spec) {
@@ -244,7 +245,7 @@ int director_dev_status(const char *spec) {
 		for (size_t i = 0; i < sizeof dev_statuses / sizeof *dev_statuses; ++i)
 			if (!strcmp(kind, dev_statuses[i].name)) s = &dev_statuses[i];
 	if (!s || frames < 1 || frames > 0xFFFF || !D.in_battle) {
-		printf("status: %s is none (paralysis, freeze, bubble, drag or slide, then frames and an enemy id), or no battle is on\n", spec);
+		printf("status: %s is none (paralysis, freeze, bubble, drag, slide, confuse or blind, then frames and an enemy id), or no battle is on\n", spec);
 		return 0;
 	}
 	int n = 0;

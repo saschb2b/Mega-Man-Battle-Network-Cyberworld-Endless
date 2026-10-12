@@ -354,5 +354,6 @@
    ]
   ],
   "virus_hits_at_least": 9
- }
+ },
+ "sprites": "bytes"
 }

@@ -7,7 +7,6 @@ RomLayout copy_pal
 RomLayout copy_tiles
 RomLayout menu_pal
 RomLayout navicust_programs
-RomLayout song_table
 RomLayout text_pal
 RomLayout text_tiles
 bn6.h BN6_BATTLE_RESULT

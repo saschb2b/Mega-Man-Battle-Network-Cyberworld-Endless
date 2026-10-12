@@ -31,8 +31,8 @@ Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
 200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
 mm@CR MegaMan's; a family moved into the engine among them, issue #82),
 status KIND [FRAMES [ID]] (the battle's enemies, or those of enemy id ID
-in hex, struck at once with paralysis, freeze, bubble, drag or slide as a
-hit gives it, for FRAMES frames, 60 where none: issue #82), xrecord ADDR
+in hex, struck at once with paralysis, freeze, bubble, drag, slide,
+confuse or blind as a hit gives it, for FRAMES frames, 60 where none: issue #82), xrecord ADDR
 [UP] (one of BN5's battle records, its address in BN5's ROM in hex, as
 build.py xrecords lists them, fought at once in BN6's engine, its viruses
 UP versions up: issue #82), chip ID CODE [N] (chip ID, 1-511, in code

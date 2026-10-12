@@ -89,12 +89,31 @@ class Translations:
 
 # ---- the family's calls by their call sites ----
 
+def ran_for(fr, e):
+    """the role of the object an event's code ran for: the running object (a spawn's, a draw's, a sound's, an effect's,
+    setAttack's), the object acted on (a reservation's, a sprite's); None where none in play"""
+    return object_role(fr, e.b if e.kind in (SPAWN, ATTACK) else e.object) if (e.b if e.kind in (SPAWN, ATTACK) else e.object) else None
+
+
+def foreign(trace, role):
+    """the object is one the trace attributed as not the family's (MegaMan's, a native's, the engine's): BN5's code a family
+    moved (an object type of its engine's, a helper) runs for its own objects as well, where BN6 runs the family's copy for
+    the family's objects alone"""
+    return role is not None and role in trace.get('whose', {}) and trace['whose'][role] is not None
+
+
+def own(f, e):
+    """the event is the family's: its code led to it, for an object of the family's (or none)"""
+    return bool(e.family) and not foreign(f.trace, ran_for(f.fr, e))
+
+
 def family_calls(f):
-    """The calls the family's code made in a frame (its events whose call chain passes through its code), in the order
-    made, in BN6's numbers: (what, its kind or N, its number, the family's call site as BN5 has it)"""
+    """The calls the family's code made in a frame (its events whose call chain passes through its code, for its own
+    objects: own()), in the order made, in BN6's numbers: (what, its kind or N, its number, the family's call site as BN5
+    has it)"""
     canon, game, out = f.canon, f.game, []
     for e in f.fr['events']:
-        if not e.family or e.kind == BLINK:
+        if not own(f, e) or e.kind == BLINK:
             continue
         at = site(f.trace, e.family)
         if e.kind == SPAWN:
@@ -102,9 +121,12 @@ def family_calls(f):
         elif e.kind == EFFECT:
             what = canon.fx(game, e.a)
         elif e.kind == ATTACK:
-            what = canon.action(game, False, e.a)
+            # (a chip's family, the chip writer's for setAttack0, as BN6's of its chip: xdiff_snap's chip_action)
+            o = next((x for x in f.fr['objs'] if x.addr == e.b), None) if game == 5 else None
+            fam = canon.chip_action(o.ai, e.a) if o is not None else None
+            what = fam if fam is not None else canon.action(game, False, e.a)
         elif e.kind == SOUND:
-            what = e.a
+            what = canon.snd(game, e.a)
         else:
             what = 0
         out.append((NAMES[e.kind], e.sub if e.kind in (SPAWN, ATTACK, DRAW) else 0, what, f'{at:#x}'))
@@ -136,10 +158,10 @@ def draw_diffs(fa, fb, matched):
     t, out = fa.fr['t'], []
     for e in fa.fr['events']:
         if e.kind == DRAW and e.flags & KEPT and e.ref not in matched:
-            out.append(Diff(t, 'family' if e.family else 'battle', 'draw', e.sub, ('BN5', e.caller, site(fa.trace, e.family)), None))
+            out.append(Diff(t, 'family' if own(fa, e) else 'battle', 'draw', e.sub, ('BN5', e.caller, site(fa.trace, e.family)), None))
     for e in fb.fr['events']:
         if e.kind == DRAW and e.flags & (UNMATCHED | UNMAPPED):
-            out.append(Diff(t, 'family' if e.family else 'battle', 'draw', e.sub, None, ('BN6', e.caller, site(fb.trace, e.family))))
+            out.append(Diff(t, 'family' if own(fb, e) else 'battle', 'draw', e.sub, None, ('BN6', e.caller, site(fb.trace, e.family))))
     return out
 
 
@@ -154,21 +176,36 @@ def engine_draw(d, legit):
 
 def spawns_of(trace):
     """each role's spawn, where the trace logged it: {role: (its event, the role of the object running as it was
-    spawned, or None)}"""
-    out = {}
+    spawned, or None)}; and into trace['effect_calls'] each effect object's call of the effect spawner (the effect event
+    its spawn came of: its caller, the effect's id)"""
+    out, trace['effect_calls'] = {}, {}
     for fr in trace['frames']:
+        last = None
         for e in fr['events']:
-            if e.kind == SPAWN and e.object:
+            if e.kind == EFFECT:
+                last = e
+            elif e.kind == SPAWN and e.object:
                 role = object_role(fr, e.object)
                 if role is not None and role not in out:
                     out[role] = (e, object_role(fr, e.b) if e.b else None)
+                    if last is not None and e.sub == 4:
+                        trace['effect_calls'][role] = last
+                last = None
     return out
 
 
+def engine_chose(trace, role):
+    """the effect object's id was the engine's code's to give: the effect spawner's caller (BN5_SPAWN_EFFECT's,
+    BN6_SPAWN_EFFECT's) not the family's code, but a routine of its game's engine (one BN6 runs as its twin)"""
+    e = trace.get('effect_calls', {}).get(role)
+    return e is not None and (e.caller & ~1) != (e.family & ~1)
+
+
 def spawned_by(trace, role):
-    """whose code spawned an object: 'family' where the family's code led to its spawn, else the role of the object
-    that ran as it was spawned; None where neither is known (in play before the hooks, or spawned outside the runner)"""
+    """whose code spawned an object: 'family' where the family's code led to its spawn for an object of the family's (or
+    none: foreign()), else the role of the object that ran as it was spawned; None where neither is known (in play before
+    the hooks, or spawned outside the runner)"""
     e, running = trace.get('spawns', {}).get(role, (None, None))
     if e is None:
         return None
-    return 'family' if e.family else running
+    return 'family' if e.family and not foreign(trace, running) else running

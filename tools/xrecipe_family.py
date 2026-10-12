@@ -33,15 +33,19 @@ BN5 = dict(
     sprite_load=0x08002650,                          # BN5_SPRITE_LOAD: r1 the list's offset, r2 the number
     set_attack=0x0800F200,                           # setAttack0-6 (BN5_SET_ATTACK - 0x1C): 4 bytes apart, r0 the CurAction
     set_flag=0x08016C42,                             # object_setFlag (BN6 0x0801A152): r0 the flags
-    byname=0x0800CE54,                               # an enemy by its NameID range (r1, r2)
+    byname=(0x0800CE54, 0x08104B1C),                 # an enemy by its NameID range (r1, r2), and the shared virus code's count of
+                                                     # those with a word nonzero (r0 its offset), which hands r1 and r2 on to it
     rng=(0x08001490, 0x080014A6, 0x080014C0, 0x080014D6),   # BN5_RNG_DRAW*
     chip_writer=(0x0800FE6A, 0x0800FE70, 0x0800FE76),       # a chip's numbers written for an attack (BN6 0x080126E4)
+    chip_query=0x0800D010,                           # the chip an object uses: r0 a virus's held chip (its +0x2A), r3 its +0x1A
+    obj_chip=0x2A,                                   # an object's chip it uses next (u16; BN6_T1_CHIP the same place)
     set_panel=0x0800B2A6,                            # object_setPanelType: r2 the type
+    obstacle_states=0x08017FCC,                      # an obstacle's state run from its state table (r0; BN6 0x0801B394)
     chip_names=(0x08736084, 0x08736AB8),             # BN5_CHIP_NAMES_LOW, _HIGH
     shared=(0x08104AC0, 0x08104E88), objects=(0x080B0000, 0x08104AC0), families=(0x08104E88, 0x08114000),
 )
 BN6 = dict(
-    sprites=0x08031CC4, songs=0x08159F48, effects=0x080E16D4, neffects=108,
+    sprites=0x08031CC4, songs=0x08159F48, effects=0x080E16D4, neffects=108, sprite_load=0x080026E4,
     types={1: (0x08003C9C, 95), 3: (0x08003EC4, 213), 4: (0x080042C8, 146)},
     nullsub=0x0810A953, chip_names=(0x086E88D0, 0x086E92D8),
 )
@@ -81,6 +85,10 @@ class Family:
         self.imms, self.numbers, self.bytes_ = [], {}, []
         self.sounds, self.effects, self.loads = {}, {}, {}
         self.rng, self.chips, self.nameranges, self.flags_set, self.flip, self.attack6, self.panel_types = [], [], [], [], [], [], []
+        self.chip_cmps = []   # (the compare's address, its register, BN5's chip id, the routine's entry) of a held chip's id
+        self.chip_stores = []   # (the movs's address, its register, BN5's chip id) of a chip id its code gives its object (+0x2A)
+        self.effect_bytes = set()   # its AI data's bytes that hold an effect id (the shared teleport's)
+        self.helper_types = {}      # (kind, type) -> the engine routine whose twin spawns it as BN6's own (its call aimed there)
         self.last = False
 
     def decide(self, kind, detail):
@@ -89,25 +97,50 @@ class Family:
 
 
 class Deriver:
-    def __init__(self, b5, b6, pairs):
+    def __init__(self, b5, b6, pairs, moved_before=None, art_same=None):
         self.b5, self.b6, self.pairs = b5, b6, pairs
         self.s1s = sorted(set(self.table(ai, 1) for ai in range(BN5['nfam'])))
+        # (a type of its game a family before it in install order moved: (kind, type) -> that family's name; its routine is
+        # that family's copy, which the dispatch's MOVED entry names, so this one spawns it and copies none of it)
+        self.moved_before = moved_before if moved_before is not None else {}
+        self._spawns = {}
+        # (whether BN5's sprite (list offset, number) and BN6's draw the same: xrecipe.py's, by their bytes or what they draw)
+        self.art_same = art_same
 
     def table(self, ai, k):
         return self.b5.u32(BN5['fam'] + BN5['step'] * k + 4 * ai)
 
     # ---- what a target is ----
 
-    def kind_of(self, f, t):
+    def kind_of(self, f, t, pointer=False):
         """a call's or pointer's target: ('own',), ('engine', twin), ('foreign', twin) (copied: no twin, in BN5's shared
-        virus code, its attacks' or another family's), ('missing', twin)"""
+        virus code, its attacks' or another family's), ('missing', twin). A pointer (a jump table's entry, a callback) to a
+        routine whose twin's body differs and no audit takes is copied too, where it can be: what it names is run by the
+        engine as it stands, never checked against what the family's code asks of it as a call's twin is"""
         t &= ~1
         if f.region[0] <= t < f.region[1]:
             return 'own', None
         tw = self.pairs.twin(t)
+        copyable = any(lo <= t < hi for lo, hi in (BN5['shared'], BN5['objects'], BN5['families']))
+        audit = self.pairs.audit(t, tw[0]) if tw[0] else None
+        if audit and audit[0] == 'copy':
+            # (a twin whose fix or change the family's code shows: BN5's own body served, copied with its code)
+            f.notes.append(f'copies {t:08X}: its audit serves BN5\'s own body ({audit[1]})')
+            return 'foreign', tw
+        if tw[0] and pointer and tw[2] == 'DIFF' and self.pairs.audit(t, tw[0]) is None and copyable:
+            f.notes.append(f'copies {t:08X}, which a pointer of its code names: BN6\'s twin {tw[0]:08X} differs ({tw[3]}) and no audit takes it')
+            return 'foreign', tw
+        bad = self.spawns_other(t) if tw[0] else None
+        if bad and copyable:
+            f.notes.append(f'copies {t:08X}: BN6\'s twin {tw[0]:08X} spawns the {kind_name(bad[0])} kind\'s {bad[1]:#x}, which BN6 runs otherwise '
+                           f'(its code or what it draws): BN5\'s spawns it through the dispatch')
+            return 'foreign', tw
         if tw[0]:
+            # (the types its twin spawns as BN6's own, each a decision of bn5_twins.TYPES: twin)
+            for key in self.spawned_types(t):
+                f.helper_types.setdefault(key, t)
             return 'engine', tw
-        if any(lo <= t < hi for lo, hi in (BN5['shared'], BN5['objects'], BN5['families'])):
+        if copyable:
             return 'foreign', tw
         return 'missing', tw
 
@@ -124,12 +157,175 @@ class Deriver:
             ents = []
             for k in range(48):
                 x = self.b5.u32(v + 4 * k)
-                if not T.is_code_ptr(x, self.b5) or abs((x & ~1) - v) > 0x4000:
+                # (an entry near the table, or one of the family's own, BN5's shared virus code's or an engine routine BN6 has a
+                # twin of: a jump table of virus code names no other)
+                if not T.is_code_ptr(x, self.b5) or (abs((x & ~1) - v) > 0x4000 and not self.known_code(f, x)):
                     break
                 ents.append(x)
             if ents:
                 out[v] = ents
         return out
+
+    def type_same(self, kind, v5, v6, code=True):
+        """BN6's type v6 of the kind runs what BN5's v5 does: the same code (Pairs.deep_same; `code` false: an engine
+        routine's spawn, whose twin's code was compared as the routine's), not a type whose table by its kind BN6 laid out
+        otherwise (bn5_twins.MOVE_TYPES), and the same art (type_sprites)"""
+        tab5, n5 = BN5['types'][kind]
+        tab6, n6 = BN6['types'][kind]
+        r5 = self.b5.u32(tab5 + 4 * v5) if v5 < n5 else 0
+        r6 = self.b6.u32(tab6 + 4 * v6) if v6 < n6 else 0
+        if not (r6 and T.is_code_ptr(r5, self.b5) and T.is_code_ptr(r6, self.b6)):
+            return False
+        if code and not self.pairs.deep_same(r5 & ~1, r6 & ~1):
+            return False
+        if (kind, v5) in bn5_twins.MOVE_TYPES:
+            return False
+        if not self.art_same:
+            return True
+        s5 = self.type_sprites(self.b5, r5 & ~1, BN5['sprite_load'])
+        s6 = self.type_sprites(self.b6, r6 & ~1, BN6['sprite_load'])
+        return len(s5) == len(s6) and all(self.art_same(a, b) for a, b in zip(s5, s6))
+
+    def type_sprites(self, rom, routine, load, depth=2):
+        """the sprites an object type's code loads by constant numbers (list, number), in its walk's order, its jump
+        tables' routines after it (to `depth`)"""
+        w = T.walk(rom, routine)
+        out = []
+        for site, s in sorted(w.bls.items()):
+            if s == load:
+                l, _ = T.back_value(w, site, 1)
+                v, _ = T.back_value(w, site, 2)
+                out.append((l, v))
+        if depth:
+            for lit, v in sorted(w.lits.items()):
+                if v is None or v & 3 or not rom.has(v, 4):
+                    continue
+                for k in range(16):
+                    x = rom.u32(v + 4 * k)
+                    if not T.is_code_ptr(x, rom) or abs((x & ~1) - v) > 0x4000:
+                        break
+                    out += self.type_sprites(rom, x & ~1, load, depth - 1)
+        return out
+
+    def spawned_by(self, t):
+        """an engine routine's own spawn of a constant type: (kind, type), else (None, None)"""
+        if not self.b5.has(t, 2):
+            return None, None
+        w = T.walk(self.b5, t)
+        for site, s in sorted(w.bls.items()):
+            if s in BN5['spawners']:
+                v, _ = T.back_value(w, site, 0)
+                if v is not None and v <= 0xFF:
+                    return BN5['spawners'][s], v
+        return None, None
+
+    def runs_states(self, kind, t5):
+        """an object type of BN5's whose code runs a state table by the engine's obstacle runner (BN5 0x08017FCC, BN6's
+        0x0801B394): its +9 a state numbered as a virus's (BN6's two status states before its own)"""
+        tab5, n5 = BN5['types'][kind]
+        r5 = self.b5.u32(tab5 + 4 * t5) if t5 < n5 else 0
+        if not T.is_code_ptr(r5, self.b5):
+            return False
+        todo, seen = [(r5 & ~1, 3)], set()
+        while todo:
+            a, depth = todo.pop()
+            if a in seen:
+                continue
+            seen.add(a)
+            w = T.walk(self.b5, a)
+            if BN5['obstacle_states'] in w.bls.values():
+                return True
+            if depth:
+                todo += [(t, depth - 1) for t in w.bls.values() if self.b5.has(t, 2) and t >= BN5['objects'][0]]
+                for v in w.lits.values():
+                    if v is not None and not v & 3 and self.b5.has(v, 4):
+                        for k in range(16):
+                            x = self.b5.u32(v + 4 * k)
+                            if not T.is_code_ptr(x, self.b5) or abs((x & ~1) - v) > 0x4000:
+                                break
+                            todo.append((x & ~1, depth - 1))
+        return False
+
+    def spawns_other(self, t):
+        """an engine routine of BN5's that spawns an object of a type (a constant, by one of its spawners) whose BN6 type of
+        that number draws other sprites (its code's constant sprite numbers, each pair's art: Deriver.art_same): (kind,
+        type) of the first, else None. Its twin in BN6 spawns BN6's own of that number, as a family's call to it would"""
+        if t in self._spawns:
+            return self._spawns[t]
+        self._spawns[t] = None
+        w = T.walk(self.b5, t)
+        for site, s in sorted(w.bls.items()):
+            if s not in BN5['spawners']:
+                continue
+            kind = BN5['spawners'][s]
+            v, _ = T.back_value(w, site, 0)
+            if v is None or v > 0xFF:
+                continue
+            rec = bn5_twins.TYPES.get((kind, v))
+            if rec is not None and rec[0] == 'unreachable':
+                continue   # (a spawn no battle of BN6's reaches: BN6's twin left to it)
+            if not self.type_same(kind, v, v, code=False) or (rec is not None and rec[0] == 'moved'):
+                self._spawns[t] = (kind, v)
+                break
+        return self._spawns[t]
+
+    def spawned_types(self, t):
+        """the types (kind, type) an engine routine of BN5's spawns by a constant through one of its spawners"""
+        w = T.walk(self.b5, t)
+        out = []
+        for site, s in sorted(w.bls.items()):
+            if s in BN5['spawners']:
+                v, _ = T.back_value(w, site, 0)
+                if v is not None and v <= 0xFF:
+                    out.append((BN5['spawners'][s], v))
+        return out
+
+    def type_decisions(self, f):
+        """each type its objects come to be against its decision in bn5_twins.TYPES (moved, else BN6's twin of the same number:
+        the same code and the same sprites by their bytes): one not recorded, or recorded otherwise, is a decision"""
+        got = {}
+        for key, v in f.types.items():
+            got[key] = ('moved', None) if v['bn6'] is None else ('twin', v['bn6'])
+        for key, t in f.helper_types.items():
+            rec = bn5_twins.TYPES.get(key)
+            got.setdefault(key, ('unreachable', None) if rec is not None and rec[0] == 'unreachable' else ('twin', key[1]))
+        for (kind, t5), (how, t6) in sorted(got.items()):
+            rec = bn5_twins.TYPES.get((kind, t5))
+            if rec is None or rec[0] != how or (how == 'twin' and rec[1] != t6):
+                f.decide('type', f'the {kind_name(kind)} kind\'s {t5:#x}: derived {how}{f" as {t6:#x}" if t6 is not None else ""}, '
+                                 f'recorded {rec[:2] if rec else "nowhere"} (bn5_twins.TYPES)')
+
+    def kind_decisions(self, f):
+        """each kind of a table's type its code spawns (bn5_twins.ID_TABLES' `kinds_of`), named by the register of a call
+        to the type's spawner, is one the table fixes (its `live`): another keeps BN5's sprite bytes, and is refused"""
+        for t in bn5_twins.ID_TABLES:
+            if 'kinds_of' not in t:
+                continue
+            for w in f.walks.values():
+                for site, target in w.bls.items():
+                    if target != t['spawner']:
+                        continue
+                    k, chain = T.back_value(w, site, t['kind_reg'])
+                    if k is None and chain and chain[-1][1] == 'lsls':
+                        # (lsls rK, rX, #8 or more, then adds: the low byte the adds' alone, the high byte another's)
+                        a = chain[-1][0]
+                        if w.insns[a].f[2] >= 8:
+                            k = sum(x[2] for x in chain if x[1] == 'adds8')
+                    if k is None or (k & 0xFF) not in t['live']:
+                        f.decide('kind', f'{site:08X}: the {kind_name(t["kinds_of"][0])} kind\'s {t["kinds_of"][1]:#x} of '
+                                         f'kind {"made otherwise" if k is None else hex(k & 0xFF)} ({chain}), not one its '
+                                         f'table {t["at"]:08X} fixes (bn5_twins.ID_TABLES)')
+
+    def pointer_twin_ok(self, f, x, tw):
+        """a pointer's twin of a body that differs serves only where an audit takes it (else it would have been copied)"""
+        if tw[2] == 'DIFF' and self.pairs.audit(x & ~1, tw[0]) is None:
+            f.decide('pair', f'{x & ~1:08X} -> {tw[0]:08X} ({tw[1]}): a pointer\'s twin whose body differs ({tw[3]}), which no audit '
+                             f'takes and which cannot be copied')
+
+    def known_code(self, f, x):
+        """a Thumb pointer to the family's own code, BN5's shared virus code or an engine routine BN6 has a twin of"""
+        a = x & ~1
+        return f.region[0] <= a < f.region[1] or BN5['shared'][0] <= a < BN5['shared'][1] or bool(self.pairs.twin(a)[0])
 
     def walk_family(self, f, extra=()):
         todo = [(e, 'virus') for e in extra]
@@ -160,16 +356,18 @@ class Deriver:
             w.tables = self.find_tables(f, w)
             for tab, ents in w.tables.items():
                 for x in ents:
-                    kind, tw = self.kind_of(f, x)
+                    kind, tw = self.kind_of(f, x, pointer=True)
                     if kind == 'engine':
+                        self.pointer_twin_ok(f, x, tw)
                         f.words[x] = (tw[0] | 1, 'a jump table entry', tw)
                     else:
                         todo.append((x & ~1, ctx))
             for lit, v in w.lits.items():
                 if v is None or v in w.tables or not T.is_code_ptr(v, self.b5):
                     continue
-                kind, tw = self.kind_of(f, v)
+                kind, tw = self.kind_of(f, v, pointer=True)
                 if kind == 'engine':
+                    self.pointer_twin_ok(f, v, tw)
                     f.words[v] = (tw[0] | 1, 'a callback', tw)
                 else:
                     todo.append((v & ~1, ctx))
@@ -207,8 +405,18 @@ class Deriver:
             f.decide('spawn', f'{site:08X}: an object of the {kind_name(kind)} kind whose type is made otherwise ({chain})')
             return
         key = (kind, v)
+        rec = bn5_twins.TYPES.get(key)
+        if rec is not None and rec[0] == 'unreachable':
+            # (a spawn no battle of BN6's reaches: through the dispatch, whose MOVED entry for a type no family names is the
+            # stray's, which lets the object go as it first runs)
+            f.notes.append(f'{site:08X}: the {kind_name(kind)} kind\'s {v:#x}, unreachable in BN6\'s engine (bn5_twins.TYPES): the '
+                           f'dispatch\'s stray')
+            return
         if key not in f.types:
             f.types[key] = self.type_twin(kind, v)
+            if f.types[key]['bn6'] is None and key in self.moved_before:
+                f.types[key] = dict(bn6=None, routine=None, shared=self.moved_before[key],
+                                    why=f'moved by {self.moved_before[key]} before it: its copy run for this one too')
         if f.types[key]['bn6'] is None and f.types[key]['routine']:
             todo.append((f.types[key]['routine'], 'object'))
 
@@ -219,12 +427,10 @@ class Deriver:
         r5 = self.b5.u32(tab5 + 4 * t5)
         tab6, n6 = BN6['types'][kind]
         for t6 in [t5] + [t for t in range(n6) if t != t5]:
-            if t6 >= n6:
-                continue
-            r6 = self.b6.u32(tab6 + 4 * t6)
-            if r6 and T.is_code_ptr(r5, self.b5) and T.is_code_ptr(r6, self.b6) and self.pairs.deep_same(r5 & ~1, r6 & ~1):
-                return dict(bn6=t6, routine=r5 & ~1, why=f'BN6\'s type {t6:#x} runs the same code')
-        return dict(bn6=None, routine=r5 & ~1 if T.is_code_ptr(r5, self.b5) else None, why='moved: no BN6 type runs the same code')
+            if t6 < n6 and self.type_same(kind, t5, t6):
+                return dict(bn6=t6, routine=r5 & ~1, why=f'BN6\'s type {t6:#x} runs the same code on the same data and art')
+        return dict(bn6=None, routine=r5 & ~1 if T.is_code_ptr(r5, self.b5) else None,
+                    why='moved: no BN6 type runs the same code on the same data and art')
 
     # ---- blocks ----
 
@@ -242,11 +448,12 @@ class Deriver:
             for tab, ents in w.tables.items():
                 for k in range(4 * len(ents)):
                     cov[tab + k] = 'TABLE'
+        tables = {t["at"]: t["size"] for t in bn5_twins.ID_TABLES}
         for v in sorted(targets):
             if v in cov:
                 continue
-            for k in range(0x80):
-                if k and v + k in cov:
+            for k in range(tables.get(v, 0x80)):
+                if k and v + k in cov and v not in tables:
                     break
                 cov[v + k] = 'RAW'
         return cov
@@ -264,17 +471,39 @@ class Deriver:
                 f.decide('block', f'code at {min(inside):08X} before its records end ({lo:08X})')
                 lo = min(inside) & ~1
             blocks.append((lo, hi))
-        run = None
+        run, runs = None, []
         for a in sorted(a for a in cov if not f.region[0] <= a < f.region[1]):
             if run and a <= run[1] + 4:
                 run[1] = a + 1
             else:
                 if run:
-                    blocks.append((run[0], (run[1] + 1) & ~1))
+                    runs.append([run[0], (run[1] + 1) & ~1])
                 run = [a, a + 1]
         if run:
-            blocks.append((run[0], (run[1] + 1) & ~1))
-        return blocks
+            runs.append([run[0], (run[1] + 1) & ~1])
+        # (a routine whose literal pool lies past other code of its game, which no walk reached: one block from its code to
+        # its pool, the bytes between dead in the copy, zeroed)
+        f.gaps = getattr(f, 'gaps', [])
+        merged = True
+        while merged:
+            merged = False
+            for w in f.walks.values():
+                for lit in w.lits:
+                    at = next((k for k, r in enumerate(runs) if r[0] <= lit < r[1]), None)
+                    for a in w.insns:
+                        k = next((k for k, r in enumerate(runs) if r[0] <= a < r[1]), None)
+                        if at is not None and k is not None and k != at:
+                            lo, hi = sorted((k, at))
+                            if runs[hi][0] - runs[lo][1] <= 0x400:
+                                f.gaps.append((runs[lo][1], runs[hi][0]))
+                                runs[lo:hi + 1] = [[runs[lo][0], runs[hi][1]]]
+                                merged = True
+                                break
+                    if merged:
+                        break
+                if merged:
+                    break
+        return blocks + [tuple(r) for r in runs]
 
     def dead_roots(self, f, blocks):
         """routines in its main block nothing names (push {..., lr}), walked as if live so their calls and pools hold"""
@@ -309,6 +538,23 @@ class Deriver:
             ptrs |= w.adrs
             tables.update(w.tables)
         st = (f.st, f.st + 4 * len(f.states5))
+        # (a word of raw data that points into a block is a pointer kept in a table of its own, never read by a literal load:
+        # a data pointer moved with its block as a pool's is (its target the start of a range), a Thumb one to its code as a
+        # jump table's entry is)
+        in_blocks = lambda v: any(lo <= v < hi for lo, hi in blocks)
+        for lo, hi in blocks:
+            for a in range((lo + 3) & ~3, hi - 3, 4):
+                if a in code or a in pools or any(t <= a < t + 4 * len(e) for t, e in tables.items()) or st[0] <= a < st[1]:
+                    continue
+                v = self.b5.u32(a)
+                if v & 1 and in_blocks(v & ~1) and (v & ~1) in code:
+                    tables[a] = [v]
+                elif in_blocks(v & ~1) and (v & ~1) not in code and v != a:
+                    # (a byte table's place may be odd: a pointer to raw data, not to code)
+                    pools.add(a)
+                    if not v & 1:
+                        ptrs.add(v)
+                    f.notes.append(f'{a:08X}: a pointer to its data ({v:08X}) in a table of its own: moved with it')
         data = []
         for lo, hi in blocks:
             kinds = {}
@@ -324,11 +570,15 @@ class Deriver:
                         kinds[t + 4 * k] = kinds[t + 4 * k + 2] = 'TABLE'
             for a in range(max(lo, st[0]), min(hi, st[1]), 2):
                 kinds[a] = 'ZERO'
+            for g0, g1 in getattr(f, 'gaps', []):
+                for a in range(max(lo, g0), min(hi, g1), 2):
+                    if a not in kinds:
+                        kinds[a] = 'ZERO'
             a = lo
             while a < hi:
                 k = kinds.get(a, 'RAW')
                 b = a + 2
-                while b < hi and kinds.get(b, 'RAW') == k and not (k == 'RAW' and b in ptrs) and not (k == 'TABLE' and b in tables):
+                while b < hi and kinds.get(b, 'RAW') == k and not (k in ('RAW', 'POOL') and b in ptrs) and not (k == 'TABLE' and b in tables):
                     b += 2
                 if k != 'code':
                     data.append((a, b, k))
@@ -350,6 +600,8 @@ class Deriver:
                 i = w.insns[a]
                 if i.form == 'bl':
                     self.scan_call(f, w, a, i.target, virus)
+                    if i.target == BN5['chip_query']:
+                        self.chip_compares(f, e, w, addrs[k + 1:])
                 if virus and i.form == 'strb' and i.f[1:] == (5, 9):
                     v, chain = T.back_value(w, a, i.f[0])
                     if v is not None and 6 <= v <= 0xF and chain and chain[-1][1] == 'movs' and len(chain) == 1:
@@ -357,18 +609,89 @@ class Deriver:
                     elif v is None or v >= 6:
                         f.decide('curaction', f'{a:08X}: CurAction written from {chain}')
                 if virus and i.form == 'ldrb' and i.f[1:] == (5, 9):
-                    for b in addrs[k + 1:k + 4]:
+                    # (each compare of the CurAction read while its register holds it, past the conditional branches
+                    # between them: cmp #2; beq; cmp #9; beq compares two)
+                    for b in addrs[k + 1:k + 9]:
                         j = w.insns[b]
                         if j.form == 'cmp' and j.f[0] == i.f[0]:
-                            if 6 <= j.f[1] <= 0xF:
+                            if '#' in j.text and 6 <= j.f[1] <= 0xF:   # (an immediate's, not cmp rd, rs)
                                 f.imms.append(dict(at=b, form='THUMB_CMP', rd=j.f[0], rn=0, was=j.f[1], now=j.f[1] + 2,
                                                    why=f'CurAction {j.f[1]} compared'))
+                        elif j.form in ('b', 'bx', 'bl', 'hi_mov') or T.is_return(j) or T.writes(j, i.f[0]):
                             break
                 if i.form in ('strb', 'strh', 'str') and i.f[1] == 5 and i.f[2] == 0x17:
                     f.flip.append(a)
+                if i.form == 'strh' and i.f[1] == 5 and i.f[2] == BN5['obj_chip']:
+                    self.chip_store(f, w, a, i.f[0])
+                if virus and i.form == 'strb' and i.f[1] == 7 and i.f[2] == 3:
+                    self.teleport_effects(f, w, addrs, k)
                 if i.form == 'ldrb' and i.f[1] == 5 and i.f[2] == 1:
                     f.decide('type read', f'{a:08X}: its object\'s type read (ldrb r{i.f[0]},[r5,#1]), which the dispatch keeps apart')
             self.scan_collision(f, w)
+
+    def chip_store(self, f, w, a, reg):
+        """a chip id its code gives its object (+0x2A, the chip it uses next: BN5's engine sets it from the held chips as
+        the object spawns, and Zomon's set-up writes its AreaGrab there by hand, BN5 0x08108932-0x08108934): a constant's
+        movs, for BN6's id in its place (chip_ids); none (0xFFFF, movs #0 then subs #1: Appley's) kept"""
+        v, chain = T.back_value(w, a, reg)
+        if v is not None and len(chain) == 1 and chain[0][1] == 'movs':
+            f.chip_stores.append((chain[0][0], reg, v))
+            return
+        writes = [w.insns[x] for x in sorted((x for x in w.insns if x < a), reverse=True)[:6] if T.writes(w.insns[x], reg)][:2]
+        if [(x.form, x.f) for x in writes] == [('subs8', (reg, 1)), ('movs', (reg, 0))]:
+            return
+        f.decide('chip', f'{a:08X}: a chip id given its object from {chain}')
+
+    def teleport_effects(self, f, w, addrs, k):
+        """the effects BN5's shared teleport spawns (0x08104DEA: its attack's variables +0x0C where it leaves, read at
+        0x08104E2C, +0x0D where it lands, at 0x08104E0A, where their +3 holds bit 2): a constant store to +3 with that bit,
+        then constant stores to +0x0C and +0x0D close after, each an effect id its code names"""
+        v3, _ = T.back_value(w, addrs[k], w.insns[addrs[k]].f[0])
+        if v3 is None or not v3 & 2:
+            return
+        for b in addrs[k + 1:k + 13]:
+            j = w.insns[b]
+            if j.form == 'strb' and j.f[1] == 7 and j.f[2] in (0x0C, 0x0D):
+                v, chain = T.back_value(w, b, j.f[0])
+                if v is not None and v < BN5['neffects'] and len(chain) == 1 and chain[0][1] == 'movs':
+                    f.effects.setdefault(v, []).append((b, chain, j.f[0]))
+                    f.effect_bytes.add(0xA0 + j.f[2])   # (its AI data's byte: the attack's variables are its +0xA0)
+
+    def chip_compares(self, f, entry, w, after):
+        """a held chip's id (the query's r0, its low 9 bits by lsls #0x17 then lsrs #0x17) compared with a number before
+        the chip writer takes it: each compare (its address, register, BN5's id), for BN6's id in its place"""
+        held, shifted, ids = {0}, set(), set()
+        for b in after[:32]:
+            i = w.insns[b]
+            if i.form == 'bl':
+                if i.target in BN5['chip_writer']:
+                    break
+                held -= {0, 1, 2, 3}
+                ids -= {0, 1, 2, 3}
+                shifted -= {0, 1, 2, 3}
+                continue
+            if i.form in ('b', 'bx') or T.is_return(i):
+                break
+            if i.form == 'lsls' and i.f[2] == 0x17 and i.f[1] in held | ids:
+                shifted.add(i.f[0])
+                ids.discard(i.f[0])
+                held.discard(i.f[0])
+                continue
+            if i.form == 'lsrs' and i.f[2] == 0x17 and i.f[1] in shifted and i.f[0] == i.f[1]:
+                shifted.discard(i.f[0])
+                ids.add(i.f[0])
+                continue
+            if i.form == 'adds3' and i.f[2] == 0 and i.f[1] in ids:   # (mov rd,rs as adds rd,rs,#0)
+                ids.add(i.f[0])
+                continue
+            if i.form == 'cmp' and i.f[0] in ids:
+                f.chip_cmps.append((b, i.f[0], i.f[1], entry))
+                continue
+            for r in range(8):
+                if T.writes(i, r):
+                    held.discard(r)
+                    ids.discard(r)
+                    shifted.discard(r)
 
     def scan_call(self, f, w, a, t, virus):
         sa = BN5['set_attack']
@@ -405,7 +728,7 @@ class Deriver:
             l, _ = T.back_value(w, a, 1)
             v, chain = T.back_value(w, a, 2)
             f.loads.setdefault((l, v), []).append((a, chain))
-        elif t == BN5['byname']:
+        elif t in BN5['byname']:
             lo, _ = T.back_value(w, a, 1)
             hi, _ = T.back_value(w, a, 2)
             f.nameranges.append((a, lo, hi))
@@ -452,7 +775,11 @@ class Deriver:
                     continue
                 use = literal_use(w, lit)
                 if use == 'number':
-                    f.numbers[lit] = (v, v, 'a number (tested, masked, ORed or a spawn\'s parameters): kept')
+                    if v not in bn5_twins.KEPT:
+                        f.decide('number', f'{v:08X} at {lit:08X}: a number its code keeps (tested, masked, ORed or a spawn\'s '
+                                           f'parameters) that no audit reads in BN6 (bn5_twins.KEPT)')
+                    f.numbers[lit] = (v, v, 'a number (tested, masked, ORed or a spawn\'s parameters): kept, ' +
+                                      bn5_twins.KEPT.get(v, 'not audited'))
                     continue
                 kind = 'RAM' if v < 0x04000000 else 'I/O' if v < 0x05000000 else 'video' if v < BUS else 'ROM'
                 to = None

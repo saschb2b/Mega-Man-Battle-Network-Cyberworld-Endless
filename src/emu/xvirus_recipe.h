@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "bn6.h"
 #include "emu.h"
 #include "thumb_reloc.h"
 
@@ -53,11 +54,24 @@ typedef struct { uint8_t from, to; } XvId;                  /* an id of its game
  * runs its game's routine for `from` copied with the family's code */
 typedef struct { uint8_t kind, from, to; } XvType;
 #define XV_TYPE_MOVED 0xFF
+#define XV_TYPE_SHARED 0xFE   /* moved by a family installed before it: its MOVED entry that family's copy, run for this one too */
 /* A word of a block's literal pool that is a number, not an address (a mask, a spawn's words, an enemy id's bound): its
  * game's `was`, BN6's `now` (the same where it is kept), each checked first */
 typedef struct { uint32_t at, was, now; } XvNumber;
 /* A byte of a block's raw data (a table of ids its code reads: effects, sprites) given BN6's number, checked first */
 typedef struct { uint32_t at; uint8_t was, now; } XvByte;
+/* A call of its code to look an enemy up by a range of NameIDs (its game's BN5_BY_NAME_RANGE) whose bounds an instruction
+ * makes, where BN6's ids are past an immediate's 255: the call aimed at a shim of its home (XV_HOME_SHIMS) that loads
+ * BN6's bounds into r1 and r2 and goes on to BN6's routine (xvirus_shim.h) */
+typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
+/* A compare of a held chip's id with a number (cmp rN,#was, then beq or bne) where the chip registry gives that chip an id
+ * past an immediate's 255: the two instructions made a call to a shim of its home that compares rN with `now` and goes
+ * on where the branch would (lr is on its routine's stack there: the generator checks the routine pushes it) */
+typedef struct { uint32_t at; uint8_t reg; uint16_t was, now; } XvCmp;
+/* A sound of its game's that BN6 has no song of (by how it sounds): its song copied to `at` (`room` bytes at most: its
+ * sequence, voice group and samples, xsong.h's xsong_pack) and listed at BN6's empty song slot `slot` (XV_SONG_SLOT_FIRST
+ * on), on the music player BN6's own song of its number plays on */
+typedef struct { uint16_t from; uint8_t slot; uint32_t at, room; } XvSong;
 /* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
  * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
  * (imm.at 0: none): a status wrapper of its own given for BN6's states BN5 has no twin of (frozen, bubbled) */
@@ -122,6 +136,14 @@ typedef struct {
 	int nbytes;
 	const XvClone *clones;     /* its routines copied once more, a call aimed otherwise (its states and hooks may name them) */
 	int nclones;
+	const XvRange *ranges;     /* its look-ups by a range of NameIDs given BN6's bounds through a shim */
+	int nranges;
+	const XvCmp *cmps;         /* its compares of a held chip's id with BN6's id past an immediate, through a shim */
+	int ncmps;
+	const XvSong *songs;       /* its sounds BN6 has none of, copied into BN6's empty song slots */
+	int nsongs;
+	uint32_t prestep;          /* its game's virus dispatcher's case for its ids, which a port runs before its state each frame
+	                              (xvirus_shim.h, its pre-step: the case's address in its game, 0 none) */
 	const uint16_t *held_chips; /* its viruses' held chips as BN6's ids, six lists of 16 (0xFFFF ending one), written into its home
 	                              (`held` 0); a chip of its game's BN6 has none of left out (the generator's hold-outs) */
 } XVirusFamily;
@@ -148,6 +170,8 @@ typedef struct {
 #define XV_ICE      (XV_AT + 0x2C00u)      /* the ice blocks' sizes (BN6_ICE_SIZES) grown to XV_AIS bytes */
 #define XV_PER_AI   (XV_AT + 0x2D00u)      /* the three 35-word tables by AI index grown to XV_AIS words, XV_STEP apart: BN6_AI_HOOKS,
                                               BN6_AI_HOOKS2, BN6_HELD_CHIPS */
+#define XV_PRESTEP  (XV_AT + 0x3900u)      /* the families' pre-steps by AI index, XV_AIS words (0 none): the hook on BN6's dispatcher
+                                              (BN6_VIRUS_NAMEID_CASES) runs one before the family's state each frame (xvirus_shim.h) */
 #define XV_LISTS    (XV_AT + 0x4000u)      /* sprite lists 1, 2, 4 and 5 grown to XV_LIST_MAX numbers, XV_STEP apart */
 #define XV_EFFECTS  (XV_AT + 0x5000u)      /* the effects (BN6_EFFECTS) grown to XV_EFFECTS_MAX ids */
 #define XV_TYPES    (XV_AT + 0x5400u)      /* the first, third and fourth kinds' types grown to XV_TYPES_MAX, XV_STEP apart */
@@ -177,7 +201,11 @@ typedef struct {
 /* then the families' own */
 #define XV_HOMES    FREE_FAMILIES          /* the families' homes, XV_HOME_SIZE each, XV_FAMILIES of them */
 #define XV_CODE     (XV_AT + 0x38000u)     /* their code, block by block */
-#define XV_ART      (XV_AT + 0x50000u)     /* what they draw: their sprites */
+#define XV_ART      (XV_AT + 0x50000u)     /* what they draw: their sprites and sounds, to: */
+#define XV_ART_END  XV_ARMS
+#define XV_ARMS     (XV_END - XV_LIST_MAX * BN6_ARM_VIRUS_SIZE)   /* the viruses' arm points' records grown to every number of sprite
+                                              list 1 (BN6_ARM_VIRUSES_REF pointed here: BN6's bytes for each number, a family's record
+                                              at its battle sprite's), to: */
 #define XV_END      FREE_CHIPS
 #define XV_AIS      256                    /* AI indexes in the grown tables (AIData +1, a byte) */
 #define XV_LIST_MAX 256                    /* a grown sprite list's numbers (struct1's and sprite_load's, a byte) */
@@ -186,12 +214,17 @@ typedef struct {
 #define XV_FIRST_ID 0x200                  /* the families' enemy ids: from here, six one after another a family, */
 #define XV_IDS      0x400                  /* ... to here (the battle's own read of an id takes 12 bits, its preload's patched to as many) */
 #define XV_FAMILIES 64                     /* the families' homes */
+#define XV_SONG_SLOTS 3                    /* BN6's empty song slots the families' sounds take, the last three (issue #82's shared
+                                              allocations: one slot a BN5 sound whatever track copies it; the other tracks'
+                                              below them, xsong.c's per-run themes in 0x26-0x3F): */
+#define XV_SONG_SLOT_FIRST (BN6_SONGS_EMPTY_LAST - XV_SONG_SLOTS + 1)
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */
 #define XV_HOME_STRUCT1 0x040
 #define XV_HOME_STRUCT2 0x048
 #define XV_HOME_HELD    0x070   /* six empty held-chip lists (0x20 bytes each, 0xFFFF), where it holds none */
+#define XV_HOME_SHIMS   0x130   /* its shims, the project's own Thumb (xvirus_shim.h): its pre-step, its NameID ranges, its chip compares */
 #define XV_HOME_VENEERS 0x200   /* its veneers, to the end of its home */
 #define XV_HOME_SIZE    0x800
 #define XV_STATES_MAX   16

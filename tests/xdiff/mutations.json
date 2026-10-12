@@ -114,6 +114,374 @@
    "what": "its draws (GetPositiveSignedRNG, BN6 0x08001532) shifted onto the second word (GetPositiveSignedRNGSecondary, 0x08001562): the replay finds no draw of the reference's to give them, and they draw what they find"
   },
   {
+   "name": "an immediate, Powie's",
+   "spec": "powie_v1",
+   "poke": [
+    "08105BB8:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Powie's",
+   "spec": "powie_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Bugtank's",
+   "spec": "bugtank_v1",
+   "poke": [
+    "08105F12:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Bugtank's",
+   "spec": "bugtank_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Dominerd's",
+   "spec": "dominerd_v1",
+   "poke": [
+    "08106824:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Dominerd's",
+   "spec": "dominerd_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, MetFire's",
+   "spec": "metfire_v1",
+   "poke": [
+    "08106C74:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, MetFire's",
+   "spec": "metfire_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Shakey's",
+   "spec": "shakey_v1",
+   "poke": [
+    "08107242:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Shakey's",
+   "spec": "shakey_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, NinJoy's",
+   "spec": "ninjoy_v1",
+   "poke": [
+    "08107C98:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, NinJoy's",
+   "spec": "ninjoy_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Lark's",
+   "spec": "lark_v1",
+   "poke": [
+    "0810818C:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Lark's",
+   "spec": "lark_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, BomBoy's",
+   "spec": "bomboy_v1",
+   "poke": [
+    "081085CC:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, BomBoy's",
+   "spec": "bomboy_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Zomon's",
+   "spec": "zomon_v1",
+   "poke": [
+    "08108A96:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Zomon's",
+   "spec": "zomon_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Drixol's",
+   "spec": "drixol_v1",
+   "poke": [
+    "08109AF4:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Drixol's",
+   "spec": "drixol_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Batty's",
+   "spec": "batty_v1",
+   "poke": [
+    "08109F7C:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Batty's",
+   "spec": "batty_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Skarab's",
+   "spec": "skarab_v1",
+   "poke": [
+    "0810A35E:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Skarab's",
+   "spec": "skarab_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Draggin's",
+   "spec": "draggin_v1",
+   "poke": [
+    "0810AF98:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Draggin's",
+   "spec": "draggin_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Whirly's",
+   "spec": "whirly_v1",
+   "poke": [
+    "0810B76E:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Whirly's",
+   "spec": "whirly_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Marina's",
+   "spec": "marina_v1",
+   "poke": [
+    "0810BA80:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Marina's",
+   "spec": "marina_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Flashy's",
+   "spec": "flashy_v1",
+   "poke": [
+    "0810C09E:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Flashy's",
+   "spec": "flashy_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Eleogre's",
+   "spec": "eleogre_v1",
+   "poke": [
+    "0810C5EE:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Eleogre's",
+   "spec": "eleogre_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Cactikil's",
+   "spec": "cactikil_v1",
+   "poke": [
+    "0810CC3E:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Cactikil's",
+   "spec": "cactikil_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, WuNote's",
+   "spec": "wunote_v1",
+   "poke": [
+    "0810D146:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, WuNote's",
+   "spec": "wunote_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Appley's",
+   "spec": "appley_v1",
+   "poke": [
+    "0810D5AC:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Appley's",
+   "spec": "appley_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, BigBrute's",
+   "spec": "bigbrute_v1",
+   "poke": [
+    "0810DAE6:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, BigBrute's",
+   "spec": "bigbrute_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, TinHawk's",
+   "spec": "tinhawk_v1",
+   "poke": [
+    "0810E3C8:2809"
+   ],
+   "what": "a CurAction its code compares left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, TinHawk's",
+   "spec": "tinhawk_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Bladia's",
+   "spec": "bladia_v1",
+   "poke": [
+    "0810EAEA:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Bladia's",
+   "spec": "bladia_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
    "name": "a wrong MOVED entry",
    "spec": "cangard_v1",
    "poke": [

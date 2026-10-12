@@ -4,9 +4,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "bn5.h"
 #include "bn6.h"
 #include "rom.h"
 #include "xvirus_dispatch.h"
+#include "xvirus_shim.h"
 
 #define BUS     0x08000000u
 #define BN6_END (BUS + ROM_SIZE)
@@ -133,7 +135,7 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 		if (!ref_ok(f, f->hooks[i])) return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
-		if (xvirus_block_of(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
+		if (xvirus_is_code(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
 		/* (one of BN6's routines, or the second-level dispatch's spawner where it calls one of its game's: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		if ((c->to & 1) || (spawner ? c->to != spawner : !bn6_routine(c->to | 1)))
@@ -162,7 +164,7 @@ static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
 		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
-		if (s->at < XV_ART || (s->at & 3) || !s->room || s->room > XV_END - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		if (s->at < XV_ART || (s->at & 3) || !s->room || s->room > XV_ART_END - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
 			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))
@@ -172,7 +174,39 @@ static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
 	return true;
 }
 
-/* what it draws (its sprites, its effects past BN6's), its attacks' types one each */
+/* its shims' sites (each in its code) and room in its home, its pre-step one of the ports */
+static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->nranges; ++i) {
+		const XvRange *r = &f->ranges[i];
+		if ((r->at & 1) || !xvirus_is_code(f, r->at) || r->lo > r->hi || r->hi >= XV_IDS) return no(why, n, "NameID range %d at %08x", i, (unsigned)r->at);
+	}
+	for (int i = 0; i < f->ncmps; ++i) {
+		const XvCmp *k = &f->cmps[i];
+		if ((k->at & 1) || !xvirus_is_code(f, k->at) || !xvirus_is_code(f, k->at + 2) || k->reg > 7 || k->was > 0xFF || k->now <= 0xFF)
+			return no(why, n, "chip compare %d at %08x", i, (unsigned)k->at);
+	}
+	if (f->prestep && (f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
+		return no(why, n, "a pre-step %08x no port makes", (unsigned)f->prestep);
+	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE;
+	if (room > XV_HOME_VENEERS - XV_HOME_SHIMS) return no(why, n, "its shims past their room in its home (%u bytes)", (unsigned)room);
+	return true;
+}
+
+/* its songs in BN6's empty slots the families take and in the art's room, apart from its sprites and each other */
+static bool songs_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->nsongs; ++i) {
+		const XvSong *g = &f->songs[i];
+		if (g->slot < XV_SONG_SLOT_FIRST || g->slot > BN6_SONGS_EMPTY_LAST || g->at < XV_ART || (g->at & 3) || !g->room || g->room > XV_ART_END - g->at)
+			return no(why, n, "song %d (slot %#x at %08x)", i, g->slot, (unsigned)g->at);
+		for (int k = 0; k < f->nsprites; ++k)
+			if (spans_meet(g->at, g->room, f->sprites[k].at, f->sprites[k].room)) return no(why, n, "song %d over sprite %d", i, k);
+		for (int k = 0; k < i; ++k)
+			if (spans_meet(g->at, g->room, f->songs[k].at, f->songs[k].room) || g->slot == f->songs[k].slot) return no(why, n, "songs %d and %d in one place", k, i);
+	}
+	return true;
+}
+
+/* what it draws (its sprites, its effects past BN6's, its songs in the same room), its attacks' types one each */
 static bool art_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (!sprites_ok(f, why, n)) return false;
 	for (int i = 0; i < f->neffects; ++i) {
@@ -183,13 +217,13 @@ static bool art_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->ntypes; ++i) {
 		const XvType *t = &f->types[i];
 		if (xvirus_dispatch_slot(t->kind) < 0) return no(why, n, "object type %#x of kind %d, which the dispatch has none of", t->from, t->kind);
-		if (t->to == xvirus_dispatch_type(t->kind)) return no(why, n, "object type %#x as the dispatch's own", t->from);
+		if (t->to == xvirus_dispatch_type(t->kind) && t->to != XV_TYPE_SHARED) return no(why, n, "object type %#x as the dispatch's own", t->from);
 		for (int k = 0; k < i; ++k)
 			if (f->types[k].kind == t->kind && f->types[k].from == t->from) return no(why, n, "object type %d:%#x twice", t->kind, t->from);
 	}
 	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES))
 		return no(why, n, "its struct1 laid out with no battle sprite of list 1");
-	return true;
+	return songs_ok(f, why, n);
 }
 
 bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
@@ -202,5 +236,5 @@ bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BN6_END))) return no(why, n, "its records");
 	if (f->ice != XV_ICE_OWN && (f->ice < 0 || f->ice > XV_ICE_MAX)) return no(why, n, "an ice block of size %d", f->ice);
 	return blocks_ok(f, why, n) && data_ok(f, why, n) && clones_ok(f, why, n) && fixes_ok(f, why, n) && refs_ok(f, why, n) &&
-		art_ok(f, why, n);
+		art_ok(f, why, n) && shims_ok(f, why, n);
 }

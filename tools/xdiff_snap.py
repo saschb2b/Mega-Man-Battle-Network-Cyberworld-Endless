@@ -4,6 +4,7 @@ tables' words, an object's slot), objects matched by role, pointers named by wha
 differences of the two games' frames through each game's layouts (tests/xdiff/legit.json; docs/DEVTOOLS.md,
 The differential)."""
 import functools
+import json
 import os
 import struct
 import sys
@@ -13,8 +14,10 @@ WORK = os.path.join(ROOT, '.build', 'xdiff')
 
 # Each game's battle as the trace was read (src/emu/bn5.h, bn6.h)
 GAMES = {
-    5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16),
-    6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32),
+    5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16,
+            battle=0x02034A90),
+    6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32,
+            battle=0x02034880),
 }
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
@@ -24,6 +27,7 @@ NODE = 0x10                                       # the list node before an obje
 SIZE = {'T1': 0xD8, 'T3': 0xD8, 'T4': 0xC8}       # an object's record, from its node
 SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (object offsets)
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
+DISPATCH_COPY = 0x3C                               # a virus's AI data's u16 BN6's dispatcher copies its object's +0x3E into
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
 TRACE_VERSION = 5   # (src/dev/xdiff.c's: the player block and the dispatch's types; version 2 traces, with neither, still read)
 # MegaMan's side's player block (src/dev/xdiff.c, trace version 5): his battle NaviStats, the word of what was used this
@@ -34,6 +38,8 @@ PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
 SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
+OBJ_CHIP = 0x2A   # the chip a battle object uses next (BN6_T1_CHIP, u16; 0xFFFF none)
+SAVED_ACTION = 0x5D   # the first kind's +0x5C: its state word saved as a status takes it, its CurAction here (legit.json, maps, action)
 DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
 AI_INDEX = 0x01
 
@@ -177,6 +183,7 @@ class Canon:
         self.layouts = legit['layouts']
         self.legit = legit
         self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', [])}
+        self._legit_t3_actions, self.effect_bytes = set(self.t3_actions), set()
         self.tables = [dict(t, bn5=int(t['bn5'], 0), bn6=int(t['bn6'], 0)) for t in m.get('rom_tables', {}).get('tables', [])]
         self.natives = set()   # (a spec's: enemies both games have, by BN6's id; their attacks' types, their effects)
         self.native_attacks, self.native_effects = set(), set()
@@ -187,9 +194,55 @@ class Canon:
         self.form_base = int(forms.get('base', '0'), 0)
         self.form_names = {self.form_base + f for f in range(1, int(forms.get('forms', '0'), 0) + 1)}
         self.souls = m.get('souls', {})
+        # (BN5's chip ids as BN6's: the registry's rows, legit.json's maps, chip_id; the places they are kept)
+        self.chip_id = registry_ids(m['chip_id']['registry']) if 'chip_id' in m else {}
+        places = m['chip_id'].get('places', {}) if 'chip_id' in m else {}
+        self.chip_places = {'ai': tuple(int(x, 0) for x in places.get('ai', []))}
         self.power_attack = num(m['power_attack']['bn5_to_bn6']) if 'power_attack' in m else {}
         self.sprite_pairs = m['sprites'] if 'sprites' in m else None
         self._sprites = None
+        self.sprite_bytes = False   # (a spec's "sprites": "bytes": a sprite of no pair compared by its bytes, both games' in their ROMs)
+        self._sprite_sha = {5: None, 6: None}
+        self.art = {}               # (the spec's families' copied sprites: BN6's list word -> BN5's list and number, select())
+        self.sound, self.code_twins = {}, {}
+        # (the moved families' numbers, tools/xrecipe.py's: every family's ids and AI index, the spec's families' effects and
+        # sounds, select() below)
+        self.families, self._legit_effects, self._legit_family = [], dict(self.effect), set(self.family_effects)
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'xdiff', 'families.json')
+        if os.path.exists(path):
+            with open(path) as f:
+                self.families = json.load(f)['families']
+        for fam in self.families:
+            for a, b in zip(fam['ids5'], fam['ids6']):
+                self.name_id.setdefault(int(a, 0), int(b, 0))
+            self.ai_index.setdefault(fam['ai5'], fam['ai6'])
+
+    def select(self, foes5):
+        """the maps of a spec whose foes are these BN5 ids: its families' effects (BN5's ids as BN6's, and BN6's the family's
+        own) and its families' sounds copied or by another number, beside legit.json's"""
+        self.effect, self.family_effects, self.sound, self.code_twins = dict(self._legit_effects), set(self._legit_family), {}, {}
+        self.effect_bytes, self.t3_actions = set(), set(self._legit_t3_actions)
+        self.art = {}
+        for fam in self.families:
+            if not {int(x, 0) for x in fam['ids5']} & set(foes5):
+                continue
+            for a, b in fam['effects'].items():
+                self.effect[int(a, 0)] = int(b, 0)
+                self.family_effects.add(int(b, 0))
+            for a, b in fam['sounds'].items():
+                self.sound[int(a, 0)] = int(b, 0)
+            for a, b in fam.get('code_twins', {}).items():
+                self.code_twins[int(a, 0)] = int(b, 0)
+            self.effect_bytes |= {int(x, 0) for x in fam.get('effect_bytes', [])}
+            self.t3_actions |= {int(x, 0) for x in fam.get('t3_actions', [])}
+        for fam in self.families:
+            # (every family's copies, a spec's or not: a type one moved draws them for all)
+            for a, (lst, idx) in fam.get('art', {}).items():
+                self.art[int(a, 0)] = (int(lst), int(idx, 0))
+
+    def snd(self, game, v):
+        """a song as BN6 numbers it: a family's sound BN6 has under another number, or copied into a slot of its own"""
+        return self.sound.get(v, v) if game == 5 else v
 
     def sprite_name(self, game, base):
         """the registry's name of a sprite (its data's start) in this game, or None (maps, sprites: each pair a list and entry of
@@ -205,6 +258,56 @@ class Canon:
                     entry = u32(rom(g), u32(rom(g), lists - ROM[0] + 4 * lst) - ROM[0] + 4 * idx) & 0x7FFFFFFF
                     self._sprites[g][entry] = pair[4]
         return self._sprites[game].get(base)
+
+    def sprite_sha(self, game, base):
+        """a sprite by its bytes (its list word `base`): one of either game's lists in its ROM, uncompressed, or one a family
+        copied into BN6's (families.json's art: BN5's sprite as the installer copies it, decompressed); the first 12 hex
+        digits of their SHA-1 as tools/xrecipe.py's sprite() reads them (its twins' test), else None (compressed in its
+        game, read from RAM: compared as before, its frames from its own data). Two games' sprites read the same here
+        where they are the same picture, whatever their numbers (the chips' track's, with the families' copies)"""
+        import hashlib
+        import xrecipe as X
+        if self._sprite_sha[game] is None:
+            data, lists = rom(game), int(self.sprite_pairs['bn5_lists' if game == 5 else 'bn6_lists'], 0) if self.sprite_pairs else 0
+            words, out = {}, {}
+            for lst in range(8 if lists else 0):
+                at = u32(data, lists - ROM[0] + 4 * lst)
+                for k in range(512):
+                    p = u32(data, at - ROM[0] + 4 * k) if ROM[0] <= at + 4 * k < ROM[0] + len(data) - 4 else 0
+                    if not ROM[0] <= p & 0x7FFFFFFF < ROM[0] + len(data):
+                        break
+                    if not p & 0x80000000:
+                        words.setdefault(p, None)
+            for p in words:
+                o = p - ROM[0]
+                n = X.sprite_len(data[o:o + 0x40000], min(0x40000, len(data) - o))
+                if n:
+                    out[p] = hashlib.sha1(data[o:o + n]).hexdigest()[:12]
+            self._sprite_sha[game] = out
+        if game == 6 and base in self.art:
+            lst, idx = self.art[base]
+            r5 = X.T.Rom(rom(5), 'BN5')
+            _, b = X.sprite(r5, int(self.sprite_pairs['bn5_lists'], 0), lst, idx)
+            return hashlib.sha1(b).hexdigest()[:12] if b else None
+        return self._sprite_sha[game].get(base)
+
+    def chip_action(self, ai5, v):
+        """a virus's CurAction v (BN5's) as BN6's where it is the family of the chip it uses (its AttackVars +0x14, the chip
+        writer's, BN5 0x0800FE7C / BN6 0x080126F6, which returns the chip record's +0x0B for setAttack0): BN6's family of
+        BN6's chip by its record (a registry id of its own, no record in BN6's ROM: the inert family 0x1C of its pending
+        code); else None (its own state, by the map)"""
+        if ai5 is None or v < 0x10 or not self.chip_id:
+            return None
+        chip5 = u16(ai5, 0xB4)
+        rec5 = chip_record(5, chip5)
+        if rec5 is None or rec5[0x0B] != v:
+            return None
+        rec6 = chip_record(6, self.chip(5, chip5))
+        return rec6[0x0B] if rec6 is not None else 0x1C
+
+    def chip(self, game, v):
+        """a chip id as BN6 numbers it: BN5's by the registry (legit.json, maps, chip_id), 0xFFFF (none) as it is"""
+        return self.chip_id.get(v, v) if game == 5 and v != 0xFFFF else v
 
     def nid(self, game, v):
         return self.name_id.get(v, v) if game == 5 else v
@@ -239,6 +342,34 @@ class Canon:
 
     def fx(self, game, v):
         return self.effect.get(v, v) if game == 5 else v
+
+
+CHIP_RECORDS = {5: 0x0801E210, 6: 0x08021DA8}   # each game's chip records, 0x2C bytes a chip (BN5_CHIP_RECORDS, RomLayout.chip_data)
+
+
+def chip_record(game, chip):
+    """a chip's record as its game's ROM has it, or None (an id past the ROM's, one of the registry's own made at runtime)"""
+    if not 0 < chip < (424 if game == 5 else 0x140):
+        return None
+    at = CHIP_RECORDS[game] - ROM[0] + 0x2C * chip
+    return rom(game)[at:at + 0x2C]
+
+
+def registry_rows(rel):
+    """the registry's rows (src/core/xchips_registry.c: BN5's id, BN6's, how it comes in, its twin and subfamily where it has
+    them, numbers alone), read from the source the game is built from: {BN5's id: (BN6's id, how, twin, sub)}"""
+    import re
+    with open(os.path.join(ROOT, rel), encoding='utf-8') as f:
+        text = f.read()
+    rows = {}
+    for a, b, how, twin, sub in re.findall(r'^\s*\{\s*(\d+),\s*(\d+),\s*XREG_(\w+)(?:,\s*(\d+),\s*(0x[0-9A-Fa-f]+))?', text, re.M):
+        rows[int(a)] = (int(b), how, int(twin) if twin else 0, int(sub, 16) if sub else 0xFF)
+    return rows
+
+
+def registry_ids(rel):
+    """BN5's chip ids as BN6's: the registry's rows"""
+    return {a: r[0] for a, r in registry_rows(rel).items()}
 
 
 # ---- roles ----
@@ -312,6 +443,7 @@ class Frame:
         # (an object let go this frame, its slot named: its pointers still point there)
         self.slots = [(kind, g[kind.lower()] - NODE, SIZE[kind], n) for kind, n in (('T1', g['n1']), ('T3', 32), ('T4', 32))]
         self.list, self.list_end = g['list'], g['list_end']
+        self.battle = g['battle']   # (BattleState, BN5_BATTLE_STATE / BN6_BATTLE_STATE: a pointer to it as such)
         self.by_role = {o.role: o for o in fr['objs']}
         self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ()) if XV_CODE[0] <= m[1] < XV_CODE[1]]
 
@@ -321,6 +453,11 @@ class Frame:
             return ('list head',)
         if v == self.list_end:
             return ('list end',)
+        if v == self.battle:
+            # (the battle's state: BN6's 0x0800AE44 leaves it in r1, the toolkit's +0x18, and the generic delete's spawn of
+            # its object after it, the fourth kind's 0x11, BN6 0x0801665C-0x08016666, keeps r1 at +0x34 and +0x3C: BN5's
+            # 0x02034A90 and BN6's 0x02034880 there, each its own BattleState)
+            return ('battle state',)
         for lo, hi, role, part, base in self.spans:
             if lo <= v < hi:
                 off = v - lo + base
@@ -413,14 +550,21 @@ def alliance_map(canon):
             for s in (0, stop):
                 pairs.setdefault(w5 | s, set()).add(w6 | s)
         ALLIANCE.update({w5: w6s.pop() for w5, w6s in pairs.items() if len(w6s) == 1})
+        for w5 in pairs:
+            TABLE_BITS[0] |= w5
     return ALLIANCE
+
+
+TABLE_BITS = [0]   # every bit some BN5 table word has (with the time stop's): the others in a word ORed of them are the hit pass's own
 
 
 @functools.lru_cache(maxsize=None)
 def alliance_or(w5):
     """a word ORed from other objects' +0x30 (what hit or touched an object, legit.json, maps, alliance) as BN6's:
     the OR of the BN6 words of the BN5 words it is made of, where every way of making it of the table's words gives
-    the same; None where none does or two give otherwise (then the word is compared as it is)"""
+    the same, and the bits no table word has as they are (the hit pass's own flags, 0x1, 0x40 and 0x20000, the same in
+    both: alliance_masks' flag_bits); None where none does or two give otherwise (then the word is compared as it is)"""
+    own, w5 = w5 & ~TABLE_BITS[0], w5 & TABLE_BITS[0]
     parts = [k for k in ALLIANCE if k and k & ~w5 == 0]
     if len(parts) > 16:
         return None
@@ -428,7 +572,7 @@ def alliance_or(w5):
     for k in parts:
         made |= {(a | k, b | ALLIANCE[k]) for a, b in made}
     got = {b for a, b in made if a == w5}
-    return got.pop() if len(got) == 1 else None
+    return got.pop() | own if len(got) == 1 else None
 
 
 def alliance_words(canon, ca):
@@ -472,6 +616,10 @@ def word_view(fa, fb, wa, wb, sprite_rel):
     if sprite_rel is not None:
         return sprite_rel
     if is_ptr(wa) or is_ptr(wb):
+        # (a routine of BN5's engine a family's code names as a callback, and its twin in BN6, each recipe's pair: legit.json,
+        # maps, code_twins)
+        if fa.canon.code_twins.get(wa) == wb and wb:
+            return ('engine routine', wa), ('engine routine', wa)
         va, vb = fa.ptr(wa), fb.ptr(wb)
         if va[0] == 'raw' and vb[0] == 'raw' and table_view(fa.canon, wa, wb):
             return table_view(fa.canon, wa, wb)
@@ -506,6 +654,12 @@ def obj_cells(fa, fb, oa, ob):
             na, nb = canon.sprite_name(5, base_a - 4), canon.sprite_name(6, base_b - 4)
             if w - sp == 0x18 and (na or nb):
                 rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', nb or f'{base_b - 4:#x}')
+            elif w - sp == 0x18 and canon.sprite_bytes and not (kind == 'T4' and oa.o8(OBJ_TYPE) == 0):
+                # (a sprite of no pair, both games' in their ROMs or a family's copy: the same picture where the same bytes;
+                # not an effect object's, the fourth kind's 0, whose picture is its effect id's, compared as the id)
+                ha, hb = canon.sprite_sha(5, base_a - 4), canon.sprite_sha(6, base_b - 4)
+                if ha and hb:
+                    rel = ('sprite', f'bytes {ha}'), ('sprite', f'bytes {hb}')
         view = word_view(fa, fb, wa, wb, rel)
         if view is not None:
             if view[0] != view[1]:
@@ -514,12 +668,18 @@ def obj_cells(fa, fb, oa, ob):
         for k in range(4):
             off = w + k - NODE
             a, b = ra[w + k], rb[w + k]
-            if off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+            if off == OBJ_ACTION and kind == 'T1' and not mm and canon.chip_action(oa.ai, a) is not None:
+                a = canon.chip_action(oa.ai, a)
+            elif (off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions) or
+                    off == SAVED_ACTION and kind == 'T1'):
                 a = canon.action(5, mm, a)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)
             elif off == OBJ_EFFECT and kind == 'T4' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.fx(5, a)
+            elif off in (OBJ_CHIP, OBJ_CHIP + 1) and kind == 'T1':
+                ca, cb = canon.chip(5, oa.o16(OBJ_CHIP)), ob.o16(OBJ_CHIP)
+                a, b = (ca & 0xFF, cb & 0xFF) if off == OBJ_CHIP else (ca >> 8, cb >> 8)
             elif off in (OBJ_NAME_ID, OBJ_NAME_ID + 1) and kind == 'T1':
                 na, nb = canon.nid(5, oa.o16(OBJ_NAME_ID)), ob.o16(OBJ_NAME_ID)
                 if mm and fa.fr.get('player'):   # (his NameID by his form, BN5's read as BN6 writes it in that form)
@@ -541,9 +701,27 @@ def ai_cells(fa, fb, oa, ob):
         return out
     megaman = oa.kind == 'T1' and fa.canon.is_megaman(5, oa.o16(OBJ_NAME_ID))
     ai5 = soul_ai_read(fa.canon, oa.ai) if megaman else oa.ai
+    if oa.kind == 'T1' and not megaman and u16(ai5, DISPATCH_COPY) == 0:
+        # (BN6's virus dispatcher writes the object's +0x3E into its AI's data +0x3C after its state each frame, but while it
+        # is bubbled, BN6 0x0810A362-0x0810A36C; BN5's, 0x08104550-0x081045CA, writes none: BN5's record read as BN6's
+        # writes it, where BN5's own code wrote nothing there: legit.json, maps, dispatch_copy)
+        ai5 = bytes(ai5[:DISPATCH_COPY]) + bytes(oa.rec[NODE + 0x3E:NODE + 0x40]) + bytes(ai5[DISPATCH_COPY + 2:])
+    # (an effect id its code keeps for the engine's teleport, legit.json's maps, effect_bytes: read as BN6's, and its word
+    # compared as bytes, never as a pointer, which a pair of such bytes beside two others can look like)
+    if fa.canon.chip_places.get('ai'):
+        # (the chip ids its AttackVars keep, legit.json's maps, chip_id, places: BN5's read as BN6's)
+        ai5 = bytearray(ai5)
+        for off in fa.canon.chip_places['ai']:
+            struct.pack_into('<H', ai5, off, fa.canon.chip(5, u16(ai5, off)))
+        ai5 = bytes(ai5)
+    fx_bytes = [k for k in fa.canon.effect_bytes if ai5[k] != ob.ai[k] and fa.canon.fx(5, ai5[k]) == ob.ai[k]]
+    if fx_bytes:
+        ai5 = bytearray(ai5)
+        for k in fx_bytes:
+            ai5[k] = ob.ai[k]
     for w in range(0, AI_SIZE, 4):
         wa, wb = u32(ai5, w), u32(ob.ai, w)
-        view = word_view(fa, fb, wa, wb, None)
+        view = None if any(w <= k < w + 4 for k in fa.canon.effect_bytes) else word_view(fa, fb, wa, wb, None)
         if view is not None:
             if view[0] != view[1]:
                 out.append(('ai', w, view[0], view[1]))
@@ -768,7 +946,7 @@ def frame_diffs(fa, fb):
     if fa.fr['rng'] != fb.fr['rng']:
         out.append(Diff(t, 'battle', 'rng', 0, fa.fr['rng'], fb.fr['rng']))
     # (a song by its number: the music player it plays on is its song table entry's, each game's own: legit.json, maps)
-    sa, sb = sorted(s for _, s in fa.fr['sounds']), sorted(s for _, s in fb.fr['sounds'])
+    sa, sb = sorted(fa.canon.snd(fa.game, s) for _, s in fa.fr['sounds']), sorted(fb.canon.snd(fb.game, s) for _, s in fb.fr['sounds'])
     if sa != sb:
         out.append(Diff(t, 'battle', 'sounds', 0, sa, sb))
     # (the order the objects run in, of those in play in both: one in play in one alone is its own difference)

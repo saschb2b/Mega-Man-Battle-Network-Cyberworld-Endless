@@ -24,4 +24,13 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
  * core's ROM copy was made anew. */
 int xsong_install(int xrom, int song, int fallback);
 
+/* Song `song` of extra ROM `xrom` laid out in `out` (`room` bytes, zeroed
+ * first) as it would stand from bus address `at` (word-aligned): its
+ * sequence, its voice group and what the voices it selects point at, every
+ * pointer in them moved there (a moved family's sound, xvirus.c's XvSong).
+ * Its header's address, 0 where it cannot be read or does not fit. Nothing
+ * is written into the core, and the songs xsong_install copies are left as
+ * they are. */
+uint32_t xsong_pack(int xrom, int song, uint32_t at, uint8_t *out, uint32_t room);
+
 #endif

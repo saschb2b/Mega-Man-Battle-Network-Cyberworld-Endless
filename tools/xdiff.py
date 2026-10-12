@@ -53,7 +53,11 @@ fight frame it shows. Whose a difference is comes from both traces: the
 reference's word that a role is the family's, or the two traces
 disagreeing, makes it the family's; the engine's spark over an actor,
 lava's as it cools under it, is the panels' (BN6's engine's port of
-BN5's lava and sea, src/emu/xpanels.c, under test as the family is). The
+BN5's lava and sea, src/emu/xpanels.c, under test as the family is);
+the engine's spark where the family's attack struck (spawned by the
+engine's spark spawner, which its hit's object_spawnCollisionEffect
+calls) is the spark's: its kind, place and owner the family's, failing
+the spec where they differ, its sprite each game's own (legit.json). The
 stop rule: where the first unexplained difference is MegaMan's own state
 (his object and what he owns: his shots, his buster's flash, their
 sparks) or an effect of the engine's, and nothing of the family's, the
@@ -385,7 +389,7 @@ def check_expect(name, game, trace, canon, expect):
             bad.append(f'{game}: the first reticle at t{t} on {got}, not {panel}')
     if 'reticle_damage' in expect and any(d != expect['reticle_damage'] for v in seen.values() for _, _, d in v):
         bad.append(f'{game}: a reticle\'s damage not {expect["reticle_damage"]}')
-    sounds = [[r['t'], s] for r in tl for p, s in r['sounds'] if s == int(expect.get('sound', '-1'), 0)]
+    sounds = [[r['t'], s] for r in tl for p, s in r['sounds'] if canon.snd(trace['game'], s) == int(expect.get('sound', '-1'), 0)]
     if 'sound_at' in expect and [t for t, _ in sounds][:len(expect['sound_at'])] != expect['sound_at']:
         bad.append(f'{game}: sound {expect["sound"]} at t{[t for t, _ in sounds]}, not {expect["sound_at"]}')
     lost, was = [], None
@@ -452,13 +456,16 @@ SOFT = ('native', "native's")               # whose leave the family's world the
 def first_unexplained(t, open_, by, natives_at, show, subject='family'):
     """the verdict a frame's unexplained differences give (None: compare on), and the lines saying so. In a MegaMan
     spec (subject megaman) MegaMan's own state, what he owns and the engine's effects are the subject: they fail it"""
-    fam, bat = by.get('family', []) + by.get('panels', []), by.get('battle', [])
+    fam, bat = by.get('family', []) + by.get('panels', []) + by.get('spark', []) + by.get('effect', []), by.get('battle', [])
     hard = [d for w in HARD for d in by.get(w, [])]
     if subject == 'megaman' and hard:
         fam, hard = fam + hard, []
     if fam:
         verdict, why = 'FAIL', ("MegaMan's, the spec's subject (his object, what he owns, the engine's effects), or the family's"
-                                if subject != 'family' else "the family's" if by.get('family') else "the lava's, BN6's engine's port of it")
+                                if subject != 'family' else "the family's" if by.get('family') else
+                                "the spark the family's attack struck with" if by.get('spark') else
+                                "an effect the engine's code gave for the family's attack" if by.get('effect') else
+                                "the lava's, BN6's engine's port of it")
     elif hard or bat and natives_at is not None:
         verdict, why = 'INCONCLUSIVE', ("MegaMan's own state, what he owns or an effect of the engine's" if hard else
                                         "the battle's, after the natives' own code differed") + ': the stop rule'
@@ -564,7 +571,9 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     with open(os.path.join(SPECS, f'{name}.json')) as f:
         spec = json.load(f)
     spec.update(extra or {})
+    canon.select([int(x.split('@')[0], 16) for x in spec['foes'].split('/') if x])
     canon.natives = {int(x, 0) for x in spec.get('natives', [])}
+    canon.sprite_bytes = spec.get('sprites') == 'bytes'
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
     if spec.get('kind') == 'reference':
@@ -636,7 +645,7 @@ def main():
             print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
         print(f'{caught} of {len(muts)} mutations caught')
         sys.exit(0 if caught == len(muts) else 1)
-    names = a.specs or sorted(n[:-5] for n in os.listdir(SPECS) if n.endswith('.json') and n not in ('legit.json', 'mutations.json'))
+    names = a.specs or sorted(n[:-5] for n in os.listdir(SPECS) if n.endswith('.json') and n not in ('legit.json', 'mutations.json', 'families.json'))
     results = {}
     for name in names:
         with open(os.path.join(SPECS, f'{name}.json')) as f:

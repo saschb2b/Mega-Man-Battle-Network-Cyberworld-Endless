@@ -454,6 +454,7 @@ python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1400 \
   --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes 200@52/01@43,260:,4:START,10:,4:A,400:" \
   --shot 1378:/src/.build/a.bmp   # CanGard's reticle striking MegaMan, its muzzle's blast
 python3 tools/xfamily.py              # CanGard in BN6's battles: fight, statuses, deletions, BN6's own left alone
+python3 tools/xfamily.py --spec families --family zomon   # every family's (or some): its record, statuses, deletions
 ```
 
 The `xrecord` step (`--input`'s `0:xrecord 811DE10`, play.py's `xrecord
@@ -481,9 +482,10 @@ python3 build.py xrecords          # every territory record: fightable in BN6's 
 The `status` step (`--input`'s `0:status freeze 90`, play.py's `status
 freeze 90`) gives the battle's enemies a status at once, as a hit leaves
 it in their collision data for BN6's engine to act on as their next frame
-starts: `paralysis`, `freeze` (an ice block round it), `bubble`, `drag` or
-`slide` (pushed along a panel), for the frames named (60 where none; drag
-and slide take none), and with an enemy id in hex after them only that
+starts: `paralysis`, `freeze` (an ice block round it), `bubble`, `drag`,
+`slide` (pushed along a panel), `confuse` or `blind` (a mark over it at
+its arm point), for the frames named (60 where none; drag and slide take
+none), and with an enemy id in hex after them only that
 id's (`0:status paralysis 60 BB`). It prints how many it struck, and
 names none outside a battle. It puts a family moved into the engine
 through BN6's generic states, which the fight alone never reaches
@@ -494,11 +496,34 @@ through BN6's generic states, which the fight alone never reaches
 specs, `fight` and `status` (`--spec` one of them), three battles each,
 with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing).
 `tools/xfamily.py` copies both ROMs into `.build/xfamily/rom` and runs
-its specs, `fight`, `status`, `delete` and `native` (`--spec` one of
-them), each battle traced and its checks printed, pictures of CanGard's
-first shot and of each status in its folders (docs/EMULATION.md,
+its specs, `fight`, `status`, `delete`, `native` and `families` (`--spec`
+one of them), each battle traced and its checks printed, pictures of
+CanGard's first shot and of each status in its folders (docs/EMULATION.md,
 Testing). The status step prints the battle's frame it struck on, which
-the `status` spec reads.
+the `status` spec reads. `families` runs CanGard's checks for every family
+installed (`--family NAME ...` some of them; four runs at once, each in a
+container of its own): its V1 alone with MegaMan idle (`--dev god`), its
+AI index and V1's HP (BN5's struct2, read from the player's ROM where
+`tests/xdiff/families.json` names it) and its CurActions within its state
+table; each of paralysis, drag, freeze and bubble given where the plain
+run first showed it holding an object (its AttackVars naming one in play,
+or one naming it its owner) while it runs a state of its own (not a
+chip's family, CurAction 0x10 on: Zomon's AreaGrab freezes time, which
+holds every status until it ends), each taken the frame after (CurAction 4, 5,
+6, 7), what it held let go and forgotten (no AttackVars word left naming
+an object let go), back in its own states and acting again, the battle on
+to its end; confusion and blindness given in its first state of its own
+(CurAction 8), each one's mark (the fourth kind's 6) over it every frame
+after at its arm point 5 as BN5's record has it (docs/ROM_DATA.md, their
+arm points; Appley wears no blindness mark, as in BN5: its pre-step takes
+the hit's status bits before the status step reads them); and each version
+alone at (5,2), MegaMan shooting along his
+row and the rows beside it, then along the middle row alone (two steps
+up and one down first, wherever a hit left him; TinHawk, as in BN5, is
+hit only as it dives along his row), `--dev onehit,god,hp=9999`
+(a later version's hit takes more than his 100 HP at once), the rare
+path's gate set: its MaxHP its struct2 row's, deleted, the results, BN6's
+delete counts and the rare path's byte untouched through every frame.
 
 The `sig` step (`--input`'s `0:sig`, play.py's `sig`) puts MegaMan in the
 layer's signature, the room it is remembered by (docs/LEVEL_DESIGN.md,
@@ -566,8 +591,12 @@ python3 build.py shot --data-dir /src/.build/xdiff/data \
 
 Issue #82 moves BN5's virus families into BN6's battle engine by their own
 code (docs/MULTIROM.md, Transplanted families: CanGard, then Handi, the
-first that draws random numbers and moves). The differential proves a
-moved family behaves as it does in BN5's own engine, frame by frame. Local
+first that draws random numbers and moves, then every family of BN5's that
+BN6 lacks, 25 in all). The differential proves a moved family behaves as
+it does in BN5's own engine, frame by frame: seven specs a family (V1
+alone against MegaMan idle, V1 against `cangard_v1_keys`' 62 inputs, and
+each other version alone: `NAME_v1`, `NAME_v1_keys`, `NAME_ex` to
+`NAME_v3ex`). Local
 only: it needs both ROMs (CI runs the unit tests of its parts).
 
 `--xdiff SPEC` (`src/dev/xdiff.c`, a tool run in the game's place, as
@@ -701,8 +730,10 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
 `tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
 binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
 panel and HP, the frames, the seed, the keys, `rng`, `natives` with
-their `native_attacks` and `native_effects`, and what BN5's battle is
-known to do) and compares the two traces (`tools/xdiff_snap.py` the
+their `native_attacks` and `native_effects`, `"sprites": "bytes"` (every
+moved family's spec: a sprite no pair of the registry names compared by
+its bytes, as the generator's twins are), and what BN5's battle is known
+to do) and compares the two traces (`tools/xdiff_snap.py` the
 snapshot and its differences, `tools/xdiff_masks.py` whose each is and
 the masks):
 
@@ -713,7 +744,14 @@ the masks):
   An object is the family's where its spawn's call chain passed through
   the family's code, or the object that ran as it was spawned is the
   family's (the hooks' spawn events): so an extra object the subject's
-  family code spawns fails, whatever its +0x4C names.
+  family code spawns fails, whatever its +0x4C names. The family's code
+  is the spec's families' own blocks (those its foes are versions of, and
+  a family's whose moved type one of them runs as shared), in both traces:
+  BN5's code another family copied (a helper of BN5's shared virus code, an
+  object type's) is BN5's engine there, as BN6 runs its twin; and an event
+  is the family's only where the object it ran for is the family's or
+  none's (BN5's temp attack object, which WuNote moves, is MegaMan's
+  buster's in BN5's own engine).
 - **In BN6's numbers** (`tests/xdiff/legit.json`, maps, each with why):
   the enemy ids, MegaMan's NameID (0x180 against 0x1A0), CurAction (BN5's
   0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), an
@@ -730,21 +768,44 @@ the masks):
   those entries, where every way of making it of the table's words gives
   the same (`alliance`); the renderer's tile place and palette slot of a
   family object as their rank among those the family's objects drawn that
-  frame take (`renderer`: the renderer counts them over everything drawn
-  before, so what else is drawn is no part of the family's; one not drawn
-  keeps the rank of its last place); an object's slot (+3) counted from
+  frame take, in the order they ran (`renderer`: the renderer counts them
+  over everything drawn before, so what else is drawn is no part of the
+  family's; drawn is the renderer's own test, the object and its sprite's
+  state shown; one not drawn keeps the rank of its last place, one never
+  drawn has none); an object's slot (+3) counted from
   its own (`slot`); an attack of the third kind that runs a virus's states
   (`action`, `t3_types`: Handi's bomb) its CurAction as a virus's; a
   pointer into a table both games hold whose end the 32 bytes would run
-  past (`rom_tables`: Handi's bomb's kinds) by its place there, the entry
-  the same; a panel's type, the type it is drawn as and its flags' low
-  nibble (`panel_type`: BN5's lava 8 and sea 0xA BN6's 13 and 14, its
-  holy 9 BN6's 5). A difference prints BN5's value as read so.
+  past (`rom_tables`: Handi's bomb's kinds, the status effect's) by its
+  place there, the entry the same; a chip id (`chip_id`: an object's
+  chip, +0x2A, and its AttackVars +0x14, BN5's by the chip registry's
+  rows), and a virus's CurAction that is its chip's family as the chip
+  writer returned it, BN6's family of BN6's chip; a panel's type, the
+  type it is drawn as and its flags' low nibble (`panel_type`: BN5's lava
+  8 and sea 0xA BN6's 13 and 14, its holy 9 BN6's 5); a status's saved
+  state word (+0x5C, its CurAction at +0x5D: `action`). The spec's
+  families' own numbers come from `tests/xdiff/families.json`, which
+  `tools/xrecipe.py` writes with the recipes: their ids and AI indexes,
+  the effects their code spawns, their sounds copied or played by another
+  number, the engine's routines their code keeps as callbacks and their
+  twins (`code_twins`), the effect ids their code keeps in their AI data
+  for the engine's teleport (`effect_bytes`: read as BN6's, and their word
+  compared as bytes, never as a pointer), their attacks that run a
+  virus's states (`t3_actions`) and the sprites they copied (`art`: BN6's
+  list word, BN5's list and number). A word ORed of the alliance table's
+  words keeps the hit pass's own bits as they are (bits 0x1, 0x40 and
+  0x20000, none a table word's). A difference prints BN5's value as read
+  so.
 - **Pointers by what they name**: an object by its role and part (its
   node, its AI's data, its collision data), a panel, ROM that was moved by
   where it came from (BN5's into a family's code where it is: a callback
   kept in an AI's data), a pointer into each game's own ROM by the data
-  there (32 bytes the same), a sprite's frames from its sprite's own data.
+  there (32 bytes the same), a sprite's frames from its sprite's own data,
+  a sprite itself by the registry's pair (`sprites`: MegaMan, his flashes,
+  the sparks, the charge glow, a status's effect) or, in a spec with
+  `"sprites": "bytes"`, by its bytes where both games' are in their ROMs
+  or the one is a family's copy (`families.json`'s `art`): a type of
+  BN6's drawing other art than BN5's is a difference.
 - **Read in BN6's terms** (`tools/xdiff_events.py`, from BN5's own
   events): an object that has reserved a panel reads BN6's bit `0x20` of
   its +0 (BN6 sets it at the first reservation and never clears it while
@@ -791,7 +852,15 @@ the masks):
   its alibi). An object owned by another (+0x4C) is its owner's, but the
   engine's spark over an actor, lava's as it cools under it, is the
   panels' (BN6's engine's port of BN5's lava, under test as a family is:
-  its differences fail the spec, but for its sprite's, each game's own).
+  its differences fail the spec, but for its sprite's, each game's own);
+  the spark where the family's attack or body struck (spawned by the
+  engine's spark spawner, which the hit's object_spawnCollisionEffect
+  calls with the attack's hit effect) is the spark's, and an effect object
+  whose id the engine's code gave (the effect spawner's caller a routine
+  of the engine's BN6 runs as its twin, or a type of BN6's own the
+  family's code spawns as its twin) the effect's: their id, place and
+  owner the family's and failing the spec where they differ, their
+  sprite each game's own art (legit.json's masks).
 - **The stop rule**: where the first unexplained difference is MegaMan's
   own state (his object, or one he owns: his shots, his buster's flash,
   their sparks) or an effect of the engine's, the spec is INCONCLUSIVE from
@@ -889,7 +958,9 @@ its data, an effect id left as BN5's alone and beside a native, a
 strike's effect id, a collision region; Handi's: an immediate, a call
 rebased to its neighbour, its draws shifted onto the other word; the
 dispatch's: a MOVED entry left the stray's, a TWIN entry made BN6's own
-number, a spawn aimed at BN6's spawner as before the dispatch; the lava's
+number, a spawn aimed at BN6's spawner as before the dispatch; each of
+the 23 other families': an immediate left as BN5's and a call rebased;
+the lava's
 and the sea's: lava's flags, their hooks taken off, the panel lava's
 cooling leaves, the random number its spark draws, the element hit's
 test that lets Aqua cool it; MegaMan's: his buster's flash, a chip's
@@ -937,6 +1008,34 @@ fill). A family is whole where no decision is left open; the report
 says what each derives and what is left, and `--check` runs in no build
 (it needs the ROMs): `build.py test` holds the generated CanGard and
 Handi to the installed recipes, field for field.
+
+Since issue #82's A2b it derives all 25 of the families BN6 lacks (the
+`FAMILIES` list), each whole, and writes `tests/xdiff/families.json`
+beside the C file, the numbers the differential reads a spec's families
+by (their ids, AI indexes, effects, sounds, callbacks' twins, effect bytes,
+attacks with a virus's states, moved types, struct2's place and their
+states' count). What it has gained for them, each from the two ROMs or
+read by hand in `tools/bn5_twins.py`: the held chips as the chip
+registry's ids (a chip BN6 has as BN6's, one it lacks as the registry's own
+id past 255), and a compare of a held chip's id with such an id made a
+shim's call (`XvCmp`); a NameID range whose bounds its code makes in
+instructions made a shim's call that loads BN6's bounds (`XvRange`); BN5's
+virus dispatcher's case for Dominerd's and Appley's ids made their
+pre-step (`PRESTEP`, ported by `src/emu/xvirus_shim.c`); a sound BN6 has
+no song of copied into an empty slot (`XvSong`, by the songs' tracks and
+voices, BN6's own number where one is the same); ids kept in tables of
+its data given BN6's numbers byte by byte (`ID_TABLES`, `XvByte`); an
+object type whose twin reads a table by the object's kind that BN6 laid
+out otherwise moved with its code (`MOVE_TYPES`), and a type a family
+before it moved run as that family's copy (`XV_TYPE_SHARED`); a number its
+code keeps as it is only where it was read in BN6 bit by bit (`KEPT`); an
+audit may serve BN5's own body (`copy`: object_updateCollisionData, whose
+BN6 twin writes the second word BN5's stores into the BIOS); each compare
+of a CurAction read given BN6's number; a sprite of a list BN6 has not
+grown placed in list 4; and a call into the dead bytes of its block (a
+routine of its game's BN6 has a twin of, zeroed in the copy) goes to the
+twin (`src/emu/xvirus.c`, dead_calls). Tuby and the unnamed AI 31-33 are
+left out: no battle record of BN5's names them.
 
 ## The proxy form: where a Soul stands
 

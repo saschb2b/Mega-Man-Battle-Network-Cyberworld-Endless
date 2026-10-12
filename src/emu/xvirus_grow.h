@@ -33,6 +33,7 @@ enum {
 	XG_T4,
 	XG_IDS,                        /* the enemy ids' triples, 3 bytes an id */
 	XG_ROWS,                       /* the reward rows, 2 x ENEMY_DROPS bytes an id */
+	XG_ARMS,                       /* the viruses' arm points' records, BN6_ARM_VIRUS_SIZE bytes a number of sprite list 1 */
 	XG_TABLES
 };
 
@@ -51,7 +52,8 @@ enum {
 bool xg_grow(void);
 /* Entry i of grown table t (XG_*) given a family's bytes (the table's
  * entry size), staged (xvirus_tx.h): the core's copy must still hold the
- * table's fill there, no other family's. */
+ * table's fill there, or BN6's own entry where BN6 has one (a placeholder
+ * of a sprite list's, a record of the arm points'), no other family's. */
 void xg_set(int t, uint32_t i, const uint8_t *entry);
 void xg_set_word(int t, uint32_t i, uint32_t v);
 /* A family's object type for the second-level dispatch (xvirus_dispatch.h),

@@ -1,4 +1,4 @@
-/* xvirus_families.h: the recipes, numbers alone (docs/ROM_DATA.md,
+/* xvirus_families.h: the recipes made by hand, numbers alone (docs/ROM_DATA.md,
  * Transplanted virus families, says how each was found and how to check
  * it). The code and records they name are copied from the player's ROMs as
  * the core starts. */
@@ -239,6 +239,11 @@ static const XvImm handi_imms[] = {
 	{ 0x08106362, THUMB_MOVS, 0, 0, 8, 10 },   /* its attack's: 8, 10 */
 };
 
+/* its count of the Handis of the battle whose word at a place is set (the shared virus code's count by a NameID range,
+ * BN5 0x08104B1C, its twin BN6's 0x0810A960): its own ids, 0x13-0x18 in BN5, BN6's 0x206-0x20B, through a shim
+ * (xvirus_shim.h; issue #82's A2b found it passed BN5's) */
+static const XvRange handi_ranges[] = { { 0x081063A0, 0x206, 0x20B } };
+
 /* its states BN6's way: BN6's generic 0-7, its own decision (8), the engine's wait (9), its attack (10) */
 static const XvRef handi_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF),
@@ -263,6 +268,7 @@ const XVirusFamily xvirus_handi = {
 	.words = handi_words, .nwords = (int)(sizeof handi_words / sizeof *handi_words),
 	.imms = handi_imms, .nimms = (int)(sizeof handi_imms / sizeof *handi_imms),
 	.states = handi_states, .nstates = (int)(sizeof handi_states / sizeof *handi_states),
+	.ranges = handi_ranges, .nranges = (int)(sizeof handi_ranges / sizeof *handi_ranges),
 	/* (none: BN5's tables give it the empty hook in all six) */
 	.hooks = {
 		BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB),
@@ -276,5 +282,3 @@ const XVirusFamily xvirus_handi = {
 	.sprites = handi_sprites, .nsprites = (int)(sizeof handi_sprites / sizeof *handi_sprites),
 };
 
-const XVirusFamily *const xvirus_bn5[] = { &xvirus_cangard, &xvirus_handi };
-const int xvirus_bn5_count = (int)(sizeof xvirus_bn5 / sizeof *xvirus_bn5);
