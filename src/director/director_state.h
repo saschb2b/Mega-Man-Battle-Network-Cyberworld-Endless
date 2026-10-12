@@ -107,6 +107,7 @@ typedef struct {
 	char guest_out[96];    /* ... those chips, named (out_names) */
 	int recode_due;        /* ... it read a chip's code its own way: 1 going in, 2 the reward coming back (once a profile each) */
 	int recode_chip, recode_from, recode_to;   /* the chip, and its codes out here and in there */
+	bool old_chips_due;    /* a CONTINUE without BN5's ROM found its chips in the folder: MegaMan's word that they sit out is due */
 	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
 	bool dark_given;       /* ... and the run holds it */
 	bool dark_pack_due;    /* BN6's chips of the run's DarkChips are looked for in its Pack and folder, given where missing (dark_pack) */

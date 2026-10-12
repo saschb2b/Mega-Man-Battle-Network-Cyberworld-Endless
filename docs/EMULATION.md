@@ -89,6 +89,7 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
 | `+0x320000`-`+0x330000` | Home's other places (docs/HOME.md, piece 10), a part each: AsterLand's (`+0x320000`) and the Cyber Academy's four maps' (`+0x328000`): their NPC lists and their people's scripts and words, empty map scripts, their own warp lists (BN6's doors copied in, the doors out pointed where the planned town has them) and the music lists | `mapslot.c`, `indoors.c`, `aster_land.c`, `academy.c` |
 | `+0x330000`-`+0x350000` | Virus families moved into BN6's battle engine (issue #82; docs/MULTIROM.md, Transplanted families), written once a core as it starts, at fixed addresses (a state's pointers into them stay good; the ROM copy is not in a state, so every boot writes them the same): `+0x330000` BN6's eleven per-family tables grown from 32 AI indexes to 64, `0x100` apart (BN6's 32 entries, then AI 0's, then the families'), their literals pointed at them; `+0x330B00` the ice blocks' sizes (`BN6_ICE_SIZES`) grown the same way to 64 bytes, the triple's virus word pointed at them (`+0x330B40`-`+0x330C00` free); `+0x330C00` sprite list 4 (`BN6_SPRITES_ATTACKS`) grown from 92 numbers to 128 (the placeholder sprite in the rest), the sprite lists' word for it pointed at it; `+0x330E00` the effects (`BN6_EFFECTS`) grown from 108 to 128 (effect 0's row in the rest), their literal pointed at them; `+0x331000` the viruses' names, BN6's archive rebuilt with the families' after its own (its two literals pointed at it); `+0x332000` the families' homes, `0x800` each: the state table (BN6's layout, 16 entries at most), struct1 (`+0x40`), struct2 (`+0x48`), six empty held-chip lists (`+0x70`, where it holds none) and its veneers (`+0x200`, 12 bytes each: `push {r0,r1}; ldr r0,[pc,#4]; str r0,[sp,#4]; pop {r0,pc}` and the target); `+0x338000`-`+0x340000` their code, block by block, each the same distance from a word boundary as in its game; `+0x340000` what they draw, each sprite in a room of its own (an LZ77 one decompressed). BN5's CanGard, installed wherever BN5's ROM is read, has the first home, its code at `+0x338000` and its reticle's at `+0x338400`, its sprite at `+0x340000` (listed at list 1's `0x1E`, a placeholder in the player's ROM), the reticle's at `+0x343000` (list 4's `0x5C`) and its muzzle's blast at `+0x343800` (list 4's `0x5D`, effect `0x6C`); its attack takes BN6's empty type `0xD1` (`BN6_T3_FREE`) in BN6's own table. The control (`--dev xcontrol`: BN6's own Mettaur moved as AI 32) takes the first home and the first block in CanGard's place; BN6-side only, the guest core's BN5 copy untouched | `xvirus.c`, `xvirus_families.c` |
+| `+0x400000`-`+0x480000` | BN6's chip tables, grown and moved (issue #82; docs/MULTIROM.md, The chip registry), written as the core starts, the same at every boot with the same ROMs (a state holds none of it; a saved folder, pack or Library names the same chip with BN5's ROM or without it): `+0x400000` the 512 chip records (0x2C each: BN6's 411, the registry's chips of BN5's at their ids, a blank record at each id past them), `getChip`'s one literal (`0x08021AB0`) pointed at them; `+0x406000` and `+0x407000` the names' text archives, ids 0-255 and 256-511 (0x1000 each), `+0x408000` and `+0x40C000` the descriptions' (0x4000 each), their 23 words pointed at them; `+0x410000` the engine's own Thumb routines (0x88 bytes: the pack's split, its totals' count, its clear, the pseudo-chips' test; below); from `+0x411000` BN5's icons (0x80 each, in BN6's icons' palette), pictures (0x540) and their palettes (0x20), a picture or palette two chips share once. Without BN5's ROM each of its chips is a placeholder (its codes, type and MB the registry's, BN6's blank art and an inert behaviour) and nothing past `+0x411000` is written | `chips.c`, `xchips_install.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
@@ -146,8 +147,8 @@ reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md);
 with the All * helper every chip entry in *.
 
 While a run has the All * helper (docs/META.md, issue #18), every chip
-record of ids 1-313 holds * alone (its four codes at `0x021DA8` + id x
-0x2C written `1A FF FF FF`), and the Program Advance check's `cmp r2, #1`
+record of ids 1-511 holds * alone (its four codes at the chip records'
+place, `EMU_FREE` + `0x400000` + id x 0x2C, written `1A FF FF FF`), and the Program Advance check's `cmp r2, #1`
 at `0x08029606` is `cmp r2, #3`; each new layer writes them as the run's
 helpers have them, and the ROM's own back before the game's own NEW GAME
 boots (the folder it gives is counted in the pack by the records). As
@@ -169,6 +170,24 @@ Their attack power is written as the BugFrags held say, on the map and as
 a battle begins: their own with one or more, their base chip's with none,
 and the base chip's for the rest of a battle whose last BugFrag a
 DarkChip spent. DarkPlus's record is left as it is, out of the pack.
+
+BN6's chip tables (issue #82; docs/MULTIROM.md, The chip registry;
+`src/emu/xchips_install.c`), as the core starts: besides the records,
+archives and art past `EMU_FREE` (above), BN6's pack routines are split
+so ids 320-511 count in an extension of the pack, 12 bytes an id from
+`0x02010CE0` to `0x020115E0` (EWRAM BN6 leaves alone: only its power-on
+clear writes it, as it writes the pack; a state saves it with the rest):
+getOffsetToQuantityOfChipCode's tail (`0x08021C9A`) and GetTotalChipCount's
+(`0x08021BE4`) jump to the engine's routines, the pack totals' count
+(`0x08021CD6`) calls one and its loop runs to 511 (`0x08021D04`), the
+pack's list runs to 511 (`0x08121D2C`, 0x13A before), and its clear
+(`0x08021C70`, a NEW GAME's and the folder editor's as it writes the pack
+again) clears the extension too. The support and Navi chips' routines
+test a pseudo-chip by its id through the engine's routine, 0x170-0x19A
+(`0x080ED11C`, `0x080ED6C4`, their literals `0x080ED13C`, `0x080ED6D8`):
+BN6's id test was every id from 0x170, which would take a chip of the
+registry's from 411 for one. Each halfword and word is read first and
+must be BN6's own, the free space `0xFF`; then all are written.
 
 After a battle in BN5's core, BN6's encounter walk (eToolkit `+0x40`,
 bn6f S2001c04: `+0x12` the distance walked since the last battle, `+0x14`
@@ -474,6 +493,7 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x08005A98`, `0x08005AE2` | checkThenStartBattle: its first test, the branch after the roll | answer: a forced battle, the engine's record (issue #29) | once a frame on the map |
 | `0x08005BC8` | StartBattle | event: the record the battle starts from | once a battle |
 | `0x080AC180` | the reward pick (bn6f `sub_80AA910`) | answer: its enemies' reward rows rewritten first | once a battle, as it ends |
+| `0x0800A4D2` | the battle's deck dealt from the folder (bn6f `sub_800A3E4` at its end, `src/emu/xchips_install.c`) | answer: the chips that sit out (a chip of BN5's whose code BN6 lacks, a DarkChip of BN5's, every one of BN5's without its ROM: docs/MULTIROM.md) taken out of the deck, the rest in their order, `0xFFFF` after them; the Regular chip's and the TagChips' marks (BattleState `+0x17`, `+0x44`) cleared where theirs sat out | once a battle |
 | `0x08010D58` | every chip use's DarkChip check (bn6f `sub_8010D58`, `src/director/darkbn6.c`) | answer, posting an event (`hook_post`) where a DarkChip of MegaMan's runs as its base chip, no BugFrag in the battle's count | once a chip used |
 | `0x0800B79A` | a chip's after-effects as it runs (bn6f `sub_800B79A`) | answer, posting an event where a DarkChip's dark power ran for MegaMan (its id 0x11E-0x122 reaches it only then): its price after the battle | once a chip used |
 | `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |

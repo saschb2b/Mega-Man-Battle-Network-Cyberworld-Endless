@@ -226,11 +226,40 @@ void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen) 
 	rom_text_bytes(bn6, xrom_text_bn6(xrom, s, n, bn6, sizeof bn6), out, outlen);
 }
 
-void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {
-	uint32_t p = archive + rom_u16(archive + 2 * index);
+/* the arguments a script command of a description takes (a byte past it):
+ * E8 three, F1 two, E7 one; E9 and E6 none; -1 one it does not know */
+static int command_args(uint8_t c) {
+	switch (c) {
+	case 0xE8: return 3;
+	case 0xF1: return 2;
+	case 0xE7: return 1;
+	case 0xE9: case 0xE6: return 0;
+	default: return -1;
+	}
+}
+
+size_t xrom_script_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max) {
+	size_t k = 0;
+	for (size_t i = 0; i < n && k < max;) {
+		if (src[i] < 0xE5) {
+			size_t run = i;
+			while (run < n && src[run] < 0xE5) ++run;
+			k += xrom_text_bn6(xrom, src + i, run - i, dst + k, max - k);
+			i = run;
+			continue;
+		}
+		int args = command_args(src[i]);
+		if (args < 0) { ++i; continue; }
+		for (int j = 0; j <= args && i < n && k < max; ++j) dst[k++] = src[i++];
+		if (dst[k - 1] == 0xE6 && !args) break;
+	}
+	return k;
+}
+
+void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) {
 	size_t o = 0;
-	for (int i = 0; i < 96 && o + 1 < outlen;) {
-		uint8_t c = R.data[p + i];
+	for (size_t i = 0; i < n && o + 1 < outlen;) {
+		uint8_t c = s[i];
 		if (c == 0xE8) { i += 4; continue; }   /* ts_msg_open_quick_ext */
 		if (c == 0xF1) { i += 3; continue; }   /* ts_text_speed */
 		if (c == 0xE9) { out[o++] = ' '; ++i; continue; }   /* a new line */
@@ -238,7 +267,7 @@ void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {
 		for (const char *g = glyph(c); *g && o + 1 < outlen; ++g) out[o++] = *g;
 		++i;
 	}
-	out[o] = 0;
+	if (outlen) out[o] = 0;
 }
 
 /* ---- Discovery ---- */

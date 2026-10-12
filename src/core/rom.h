@@ -191,9 +191,14 @@ void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen);
  * How many were written. Every BN5 string read as text or copied into
  * BN6's archives goes through it. */
 size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max);
-/* A description's text (a chip's): script `index` of `archive` past its
- * box commands, its lines joined by spaces. */
-void rom_desc(uint32_t archive, int index, char *out, size_t outlen);
+/* ... a script of extra ROM `xrom`'s (a chip's description) in BN6's
+ * codes: its text as xrom_text_bn6's, its commands kept with their
+ * arguments (E8 three, F1 two, E7 one; E9, the next line; others left
+ * out), up to its end (E6), which is written; how many bytes were. */
+size_t xrom_script_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max);
+/* A description's text (a chip's): the script at `s` (`n` bytes at most)
+ * past its box commands, its lines joined by spaces. */
+void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen);
 
 void sha1_hex(const uint8_t *data, size_t len, char out[41]);
 

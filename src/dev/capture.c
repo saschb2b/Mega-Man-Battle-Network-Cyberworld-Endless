@@ -25,7 +25,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32]; int place[3], flags[3]; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3]; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -52,18 +52,20 @@ static void parse_buttons(const char *s, InputStep *step) {
 }
 
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
- * "xrecord ADDR"), into its step; false where `tok` is none */
+ * "xrecord ADDR", "chip ID CODE [N]"), into its step; false where `tok` is
+ * none */
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
 	else if (!strncmp(tok, "status ", 7)) snprintf(s->status, sizeof s->status, "%s", tok + 7);
 	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
+	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
 	else return false;
 	return true;
 }
 
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
-	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->sig || s->held;
+	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->sig || s->held;
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -165,6 +167,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->foes[0]) director_dev_foes(s->foes);
 	if (s->xrecord[0]) director_dev_xrecord(s->xrecord);
 	if (s->status[0]) director_dev_status(s->status);
+	if (s->chip[0]) director_dev_chip(s->chip);
 	if (s->sig) director_dev_signature();
 	if (s->held) director_dev_hold(s->hold);
 }
@@ -215,7 +218,9 @@ static bool remote_open(const char *dir) {
  * "battle" (the layer's next random battle, director_dev_battle), "foes
  * SPEC" (a battle of these foes, director_dev_foes), "xrecord ADDR" (a
  * record of BN5's in BN6's engine, director_dev_xrecord), "status SPEC" (the
- * battle's enemies given a status, director_dev_status), "sig"
+ * battle's enemies given a status, director_dev_status), "chip ID CODE
+ * [N]" (a chip in the folder's first entries and the pack,
+ * director_dev_chip), "sig"
  * (MegaMan in the layer's signature, director_dev_signature), "stuck MASK"
  * (the run saved with BN6 holding MegaMan so, director_dev_hold), "quit";
  * items apart by ';'. */

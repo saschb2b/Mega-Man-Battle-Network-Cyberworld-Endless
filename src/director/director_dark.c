@@ -130,10 +130,10 @@ void dark6_after_battle(void) {
 
 /* A chip's copies in the Pack and the folder, -1 where they cannot be read */
 static int chip_held(int id) {
-	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
-	if (pack < BN6_EWRAM || pack + 12u * PACK_CHIPS >= BN6_EWRAM_END || data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;
+	uint32_t pack = pack_entry(id), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (!pack || data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;
 	int n = 0;
-	for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + 12u * (uint32_t)id + k);
+	for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + k);
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) n += (emu_read16(data + 2 * i) & 0x1FF) == (uint32_t)id;
 	return n;
 }

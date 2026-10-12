@@ -53,6 +53,9 @@
 #define BN5_CHIP_KEY_XOR  0x81        /* the marks' XOR (BN6's 0x17) */
 #define BN5_CHIP_NAMES_LOW  0x736084u /* (ROM offsets) the chip names' text archives: ids 0-255, */
 #define BN5_CHIP_NAMES_HIGH 0x736AB8u /* ... and 256 on */
+#define BN5_CHIP_DESCS_LOW  0x737018u /* (ROM offsets) the chips' descriptions' archives, ids 0-255 (as BN6's: E8 06 01 01, F1 00 00, three lines by E9, E7 01, E6), */
+#define BN5_CHIP_DESCS_HIGH 0x739744u /* ... and 256 on */
+#define BN5_CHIP_ICON_PAL 0x74BDBCu   /* (ROM offset) the chips' icons' palette, 16 colours: 0-8 BN6's, 9 its icons' grey outline (BN6's teal) */
 #define BN5_CHIPS         424         /* its chip ids */
 #define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
 #define BN5_PA_STAR_LIMIT 0x080252B2u /* a Program Advance of one chip in codes in a row: cmp r2, #1, one * of its three at most, as BN6's (BN6_PA_STAR_LIMIT) */

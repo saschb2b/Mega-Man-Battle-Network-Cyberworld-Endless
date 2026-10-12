@@ -316,11 +316,25 @@
  * id; bn6f ChipData), the routines every chip use runs, the battle's
  * BugFrags (Gregar's as Falzar's) */
 #define BN6_CHIP_RECORD_SIZE  0x2C
-#define BN6_CHIP_ELEMENT      0x06        /* ChipElement: its icon's element (0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Plus, 5 Sword, 6 Cursor, 7 Break, 8 Wind, 9 Obstacle, 10 Null) */
+#define BN6_CHIP_CODES        0x00        /* Codes: four, 0-25 A-Z, 26 *, 0xFF none (the pack counts a chip per code of these) */
+#define BN6_CHIP_ATTACK_ELEMENT 0x04      /* AttackElement: 0 Null, 1 Fire, 2 Aqua, 3 Elec, 4 Wood */
+#define BN6_CHIP_RARITY       0x05        /* Rarity: 0-4 */
+#define BN6_CHIP_ELEMENT      0x06        /* ChipElement: its icon's element (0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Plus, 5 Sword, 6 Cursor, 7 Obstacle, 8 Wind, 9 Break, 10 Null,
+                                             11 a Program Advance; Gregar's records give DrilArm and AirHocky 9), which a hit ORs a second-wheel element by (0x080129E4) */
 #define BN6_CHIP_LIBRARY_TYPE 0x07        /* LibraryType: 0 standard, 1 Mega, 2 Giga, 3 secret, 4 a Program Advance */
+#define BN6_CHIP_MB           0x08        /* MB: its memory (a Regular chip's at most the Reg memory) */
 #define BN6_CHIP_EFFECT_FLAGS 0x09        /* EffectFlags: BN6_CHIP_DARK_CLASS makes a DarkChip (the folder's three, MegaMan's NAVIGATOR line, the purple card) */
+#define BN6_CHIP_FAMILY       0x0B        /* AttackFamily: its routine (0x080EBFA0, by family - 0x10), CurAction through object_setAttack2 */
 #define BN6_CHIP_SUBFAMILY    0x0C        /* AttackSubFamily: a recovery chip's amount (BN6_RECOVERY_AMOUNTS), a sword's area */
+#define BN6_CHIP_LOCK_ON      0x0F        /* LockOnEnable: 1 a chip that strikes an enemy outright */
+#define BN6_CHIP_PARAMS       0x10        /* AttackParam1-4, a byte each, then LockoutFrames at +0x14 */
+#define BN6_CHIP_LIBRARY_NUMBER 0x15      /* LibraryNum: its number in the PET's Library tab (a byte; 0 none) */
 #define BN6_CHIP_LIBRARY_FLAGS 0x16       /* LibraryFlags: BN6_CHIP_UNLISTED keeps a chip out of the pack's list (bn6f sub_811FE7C) */
+#define BN6_CHIP_LOCK_ON_TYPE 0x17        /* LockOnType: how it locks on (BN6's alone: BN5's byte here means otherwise) */
+#define BN6_CHIP_GATE         0x1E        /* ChipGateUsageLimit: the BattleChip Gate's (Japan's physical reader) */
+#define BN6_CHIP_IN_LIBRARY   0x40        /* BN6_CHIP_EFFECT_FLAGS: listed on the PET's Library screen, by its library number */
+#define BN6_CHIP_SHOWS_POWER  0x02        /* BN6_CHIP_EFFECT_FLAGS: its power shown (the pack's sort by power, the Custom screen) */
+#define BN6_CHIP_COMPUTED_POWER 0x80      /* BN6_CHIP_EFFECT_FLAGS: its power one BN6 computes (BN6_CHIP_ATTACK_POWER 1001 and up: bn6f sub_8010C76's table) */
 #define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
 #define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
 #define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f
@@ -340,6 +354,7 @@
                                              0x1E, Recov10 0x9A, Invisibl 0xB1, Atk+10 0xC0) */
 #define BN6_DARK_BASE_STEP    10          /* the bytes from one base chip's routine to the next in BN6_DARK_BASES */
 #define BN6_BATTLE_BUGFRAGS   0x0203F7E0u /* the battle's BugFrags, u32 a side (+ alliance x 4), the save's copied as it begins (bn6f dword_203F7E0) */
+
 #define BN6_RECOVERY_AMOUNTS  0x080EDBB0u /* u16 by a recovery chip's subfamily: 10, 30 .. 300, 1000 (DrkRecov's, the ninth) */
 #define BN6_BBS_ARCHIVES      0x0813FE2Cu /* the BBS's text archives (bn6f off_813E04C), 12 words; the fourth, LZ77 (Falzar's CompText87E9578), */
 #define BN6_BBS_DARK_ARCHIVE  3           /* the fourth of BN6_BBS_ARCHIVES, the DarkChip post's */
@@ -372,6 +387,7 @@
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
+#include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82) */
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #endif

@@ -5,6 +5,8 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "bn6.h"
+#include "chips.h"
 #include "data.h"
 #include "guardians.h"
 #include "guest.h"
@@ -52,6 +54,12 @@ int guardian_weakness(int navi) {
 /* (the chip kind his Soul unites with in his game, BN5_CHIP_KIND; -1 none) */
 static int xguardian_kind(int navi) { return guardian_older(navi) ? xrecords_soul_kind(XROM, guardian_older_ai(navi)) : -1; }
 
+/* (BN6's chip `id`'s rarity, 0-4) */
+static int rarity(int id) {
+	const uint8_t *rec = chips_record(id);
+	return rec ? rec[BN6_CHIP_RARITY] : 4;
+}
+
 int xguardian_chip(int navi, uint32_t seed, int *code) {
 	*code = 26;
 	uint16_t ids[64];
@@ -59,10 +67,10 @@ int xguardian_chip(int navi, uint32_t seed, int *code) {
 	if (!n) return 0;
 	/* (the rarest, BN6's rarity 4, only where there is nothing else: a
 	 * Guardian or an Anubis is a deep find, not an act's key) */
-	for (int i = 0; i < n; ++i) common += R.data[R.layout->chip_data + ids[i] * 0x2Cu + 5] < 4;
+	for (int i = 0; i < n; ++i) common += rarity(ids[i]) < 4;
 	int pick = (int)(seed % (uint32_t)(common ? common : n)), id = 0;
 	for (int i = 0, k = 0; i < n && !id; ++i)
-		if (!common || R.data[R.layout->chip_data + ids[i] * 0x2Cu + 5] < 4) {
+		if (!common || rarity(ids[i]) < 4) {
 			if (k++ == pick) id = ids[i];
 		}
 	/* (its letter where the folder holds it, else its *, else its first: a

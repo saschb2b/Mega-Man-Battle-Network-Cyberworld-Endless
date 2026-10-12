@@ -6,8 +6,11 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "bn6.h"
+#include "chips.h"
 #include "data.h"
 #include "rom.h"
+#include "xchips_registry.h"
 
 static bool same(const char *a, const char *b) { return a[0] && !strncmp(a, b, XCHIP_NAME); }
 
@@ -65,11 +68,15 @@ int xchips_fit(const uint8_t other[4], const uint8_t bn6[4], const uint8_t folde
 
 /* ---- the run's chips and BN5's, paired at run time ---- */
 
-static uint16_t to_bn5[XCHIPS_BN6], from_bn5[BN5_CHIPS];
+static uint16_t to_bn5[XREG_IDS], from_bn5[BN5_CHIPS];
 static int paired;   /* BN6's chips paired by name (on the main thread: the director's words read them) */
 
 /* (once, where both ROMs are read; BN5's names in BN6's text codes first:
- * its "M-Cannon" spells the dash otherwise, rom.h's xrom_text_bn6) */
+ * its "M-Cannon" spells the dash otherwise, rom.h's xrom_text_bn6). BN6's
+ * own chips by name; the registry's chips of BN5's in BN6's tables
+ * (xchips_registry.h) BN5's chips they are, but none of BN5's comes back
+ * as one of them yet (a reward of one is the stand-in's zenny, until
+ * issue #82's run systems bring BN5's chips into runs) */
 static void pair(void) {
 	if (paired || !XR[XROM_BN5_COLONEL_US].data || !R.data) return;
 	static char names5[BN5_CHIPS][XCHIP_NAME], names6[XCHIPS_BN6][XCHIP_NAME];
@@ -78,9 +85,11 @@ static void pair(void) {
 	for (int id = 1; id < XCHIPS_BN6; ++id) {
 		ChipInfo ci;
 		chip_info(id, &ci);
-		snprintf(names6[id], sizeof names6[id], "%s", ci.name);
+		snprintf(names6[id], sizeof names6[id], "%s", xreg_at(id) ? "" : ci.name);
 	}
 	paired = xchips_pair((const char (*)[XCHIP_NAME])names6, XCHIPS_BN6, (const char (*)[XCHIP_NAME])names5, BN5_CHIPS, to_bn5, from_bn5);
+	for (int i = 0; i < xreg_count; ++i)
+		if (xreg_own(&xreg_rows[i])) to_bn5[xreg_rows[i].bn6] = xreg_rows[i].bn5;
 }
 
 int xchips_paired(void) {
@@ -90,7 +99,7 @@ int xchips_paired(void) {
 
 int xchips_to_bn5(int id) {
 	pair();
-	return paired && id > 0 && id < XCHIPS_BN6 ? to_bn5[id] : 0;
+	return paired && id > 0 && id < XREG_IDS ? to_bn5[id] : 0;
 }
 
 int xchips_bn6_of(int x) {
@@ -108,14 +117,15 @@ int xchips_kind(int kind, uint16_t *out, int max) {
 }
 
 int xchips_sitting_out(const uint16_t *folder, uint16_t *out, int max) {
-	return xchips_paired() ? xchips_out(folder, 30, to_bn5, XCHIPS_BN6, out, max) : 0;
+	return xchips_paired() ? xchips_out(folder, 30, to_bn5, XREG_IDS, out, max) : 0;
 }
 
-/* BN6's chip `id`'s four codes as the player's ROM holds them (0-25 A-Z,
- * 26 *, 0xFF none: the All * helper's aside, which the battle's results
- * apply as they lean, encounter.c) */
+/* BN6's chip `id`'s four codes as its record holds them (0-25 A-Z, 26 *,
+ * 0xFF none: the All * helper's aside, which the battle's results apply
+ * as they lean, encounter.c) */
 static void codes_of(int id, uint8_t out[4]) {
-	for (uint32_t i = 0; i < 4; ++i) out[i] = R.data[R.layout->chip_data + 0x2Cu * (uint32_t)id + i];
+	const uint8_t *rec = chips_record(id);
+	for (uint32_t i = 0; i < 4; ++i) out[i] = rec ? rec[BN6_CHIP_CODES + i] : 0xFF;
 }
 
 uint16_t xchips_reward_bn6(uint16_t v) {

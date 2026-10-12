@@ -141,6 +141,13 @@ bool director_dev_xrecord(const char *spec);
  * the frames it lasts (60 where none) for the three that last. The
  * enemies struck, how many; 0 where it names none or no battle is on. */
 int director_dev_status(const char *spec);
+/* Dev (the chip step, issue #82): chip ID in code CODE (a letter or *) in
+ * the folder's first N entries (one where none), owned as BN6 marks a chip
+ * it gives, and given to the pack N + 1 times (BN6's GiveChips, which puts
+ * it in the Library too; the pack's counts hold the folder's copies, so one
+ * is the pack's own): "203 L", "0x1C0 * 3". The entries written, 0 where it
+ * names none or the game's folder is not there yet. */
+int director_dev_chip(const char *spec);
 /* The run saved with BN6 holding MegaMan by the mask's holds (director_hold.h's
  * HELD_*), which no save of the run writes: a CONTINUE's recovery tested */
 void director_dev_hold(unsigned mask);
